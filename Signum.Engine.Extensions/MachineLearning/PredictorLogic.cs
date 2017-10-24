@@ -117,34 +117,39 @@ namespace Signum.Engine.MachineLearning
                     ToStates = { PredictorState.Training },
                     AllowsNew = true,
                     Lite = false,
-                    Execute = (e, _) => {
-                        var state = Trainings.TryGetC(e.ToLite());
-
-                        if (state != null)
-                            throw new InvalidOperationException(PredictorMessage._0IsAlreadyBeingTrained.NiceToString(e));
-
+                    Execute = (p, _) => 
+                    {
                         var cancellationSource = new CancellationTokenSource();
 
                         var state = new PredictorTrainingState
                         {
                             CancellationTokenSource = cancellationSource,
-                            Context = new PredictorTrainingContext(e, cancellationSource.Token)
+                            Context = new PredictorTrainingContext(p, cancellationSource.Token)
                         };
 
-                        Task.Run(() =>
+                        if (!Trainings.TryAdd(p.ToLite(), state))
+                            throw new InvalidOperationException(PredictorMessage._0IsAlreadyBeingTrained.NiceToString(p));
+                        
+                        Task.Factory.StartNew(() =>
                         {
-                            var rows = PredictorLogicQuery.RetrieveData(e, out var columns);
+                            try
+                            {
+                                PredictorLogicQuery.RetrieveData(state.Context);
+                            }
+                            catch(OperationCanceledException e)
+                            {
 
-                            var output =  
-
-
-
-                            
-
-                        });
-
-                        Trainings.TryAdd(state);
-
+                            }
+                            catch (Exception ex)
+                            {
+                                ex.Data["entity"] = p;
+                                ex.LogException();
+                            }
+                            finally
+                            {
+                                Trainings.TryRemove(p.ToLite(), out var _);
+                            }
+                        }, TaskCreationOptions.LongRunning);
 
                         state.CancellationTokenSource.Cancel();
                     },
@@ -167,8 +172,14 @@ namespace Signum.Engine.MachineLearning
                     ToStates = { PredictorState.Draft },
                     AllowsNew = true,
                     Lite = false,
-                    Execute = (e, _) => {
-                        
+                    Execute = (e, _) =>
+                    {
+                        if (Trainings.TryGetValue(e.ToLite(), out var state))
+                        {
+                            state.CancellationTokenSource.Cancel();
+                        }
+
+                        CleanTrained(e);
                     },
                 }.Register();
 
@@ -183,7 +194,7 @@ namespace Signum.Engine.MachineLearning
                     },
                 }.Register();
 
-                new ConstructFrom<PredictorEntity>(PredictorOperation.Clone)
+                new Graph<PredictorEntity>.ConstructFrom<PredictorEntity>(PredictorOperation.Clone)
                 {
                     Construct = (e, _) => new PredictorEntity
                     {
@@ -206,18 +217,11 @@ namespace Signum.Engine.MachineLearning
                 {
                     fp.DeleteFileOnCommit();
                 }
-                e.Files.RemoveAll();
+                e.Files.Clear();
                 e.Codifications().UnsafeDelete();
             }
         }
 
-        public static void TrainPredictor(PredictorEntity predictor)
-        {
-            var design = PredictorLogicQuery.RetrieveData(predictor, out List<PredictorResultColumn> columnDescriptions);
-
-            predictor.Codifications().UnsafeDelete();
-            CreatePredictorCodifications(predictor, columnDescriptions);
-        }
 
         private static void CreatePredictorCodifications(PredictorEntity predictor, List<PredictorResultColumn> columnDescriptions)
         {
@@ -253,19 +257,23 @@ namespace Signum.Engine.MachineLearning
 
         public static byte[] GetTsvMetadata(this PredictorEntity predictor)
         {
-            return new byte[0];
+            var ctx = new PredictorTrainingContext(predictor, CancellationToken.None);
+            PredictorLogicQuery.RetrieveData(ctx);
+            return Tsv.ToTsvBytes(ctx.Rows.Take(1).ToArray());
         }
 
         public static byte[] GetTsv(this PredictorEntity predictor)
         {
-            List<PredictorResultColumn> columnDescriptions;
-            return Tsv.ToTsvBytes(PredictorLogicQuery.RetrieveData(predictor, out columnDescriptions));
+            var ctx = new PredictorTrainingContext(predictor, CancellationToken.None);
+            PredictorLogicQuery.RetrieveData(ctx);
+            return Tsv.ToTsvBytes(ctx.Rows);
         }
 
         public static byte[] GetCsv(this PredictorEntity predictor)
         {
-            List<PredictorResultColumn> columnDescriptions;
-            return Csv.ToCsvBytes(PredictorLogicQuery.RetrieveData(predictor, out columnDescriptions));
+            var ctx = new PredictorTrainingContext(predictor, CancellationToken.None);
+            PredictorLogicQuery.RetrieveData(ctx);
+            return Csv.ToCsvBytes(ctx.Rows);
         }
 
         static void PredictorEntity_Retrieved(PredictorEntity predictor)

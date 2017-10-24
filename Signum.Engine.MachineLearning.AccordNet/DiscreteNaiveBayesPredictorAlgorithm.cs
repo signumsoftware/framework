@@ -32,46 +32,44 @@ namespace Signum.Engine.MachineLearning.AccordNet
             return base.ValidatePredictor(predictor);
         }
 
-        public override void Train(PredictorEntity predictor, PredictorResultColumn[] columns, object[][] input, object[][] output)
+        public override void Train(PredictorTrainingContext ctx)
         {
             var bayes = new NaiveBayes(
-               classes: columns.Single(c => c.PredictorColumn.Usage == PredictorColumnUsage.Output).ValuesToIndex.Count(),
-               symbols: columns.Where(c => c.PredictorColumn.Usage == PredictorColumnUsage.Input).Select(col => col.ValuesToIndex.Count).ToArray()
+               classes: ctx.OutputColumns.SingleEx().ValuesToIndex.Count(),
+               symbols: ctx.InputColumns.Select(col => col.ValuesToIndex.Count).ToArray()
             );
 
-            int[][] inputs = input.Select(a => a.Cast<int>().ToArray()).ToArray();
-            int[] outputs = output.Select(a => (int)a.SingleEx()).ToArray();
+            int[][] inputs = ctx.Input.Select(a => a.Cast<int>().ToArray()).ToArray();
+            int[] outputs = ctx.Output.Select(a => (int)a.SingleEx()).ToArray();
 
             var trainedClassifier = new NaiveBayesLearning
             {
                 Empirical = true,
                 Model = bayes
-            }.Learn(inputs , outputs);
+            }.Learn(inputs, outputs);
 
+            var predictor = ctx.Predictor;
             predictor.Files.ForEach(f => f.DeleteFileOnCommit());
             predictor.Files.Clear();
-            predictor.Files.Add(new Entities.Files.FilePathEmbedded
-            {
-                FileName = $"{typeof(NaiveBayes).FullName}.bin",
-                BinaryFile =   AccordExtensions.SerializeToBytes(trainedClassifier)
-            });
+            predictor.Files.Add(new Entities.Files.FilePathEmbedded(PredictorFileType.PredictorFile,
+                fileName: $"{typeof(NaiveBayes).FullName}.bin",
+                fileData: AccordExtensions.SerializeToBytes(trainedClassifier)));
             predictor.Save();
         }
 
-
-        public override EvaluateResult Evaluate(PredictorEntity predictor, PredictorResultColumn[] columns, object[][] input, object[][] output)
+        public override EvaluateResult Evaluate(PredictorTrainingContext ctx)
         {
             var bayes = new NaiveBayes(
-             classes: columns.Single(c => c.PredictorColumn.Usage == PredictorColumnUsage.Output).ValuesToIndex.Count(),
-             symbols: columns.Where(c => c.PredictorColumn.Usage == PredictorColumnUsage.Input).Select(col => col.ValuesToIndex.Count).ToArray()
-            );
+                classes: ctx.OutputColumns.SingleEx().ValuesToIndex.Count(),
+                symbols: ctx.InputColumns.Select(col => col.ValuesToIndex.Count).ToArray()
+             );
 
-            int[][] inputs = input.Select(a => a.Cast<int>().ToArray()).ToArray();
-            int[] outputs = output.Select(a => (int)a.SingleEx()).ToArray();
+            int[][] inputs = ctx.Input.Select(a => a.Cast<int>().ToArray()).ToArray();
+            int[] outputs = ctx.Output.Select(a => (int)a.SingleEx()).ToArray();
             
             var crossValidation = new CrossValidation<NaiveBayes, int[], int>
             {
-                K = predictor.Settings.CrossValidationFolds,
+                K = ctx.Predictor.Settings.CrossValidationFolds,
                 
                 Learner = (s) => new NaiveBayesLearning
                 {

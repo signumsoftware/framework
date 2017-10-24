@@ -11,6 +11,7 @@ using Signum.Entities.MachineLearning;
 using Signum.Engine.MachineLearning;
 using Signum.Engine;
 using Signum.Utilities;
+using Signum.Entities;
 
 namespace Signum.React.MachineLearning
 {
@@ -46,9 +47,15 @@ namespace Signum.React.MachineLearning
         [Route("api/predictor/trainingState/{id}"), HttpGet]
         public TrainingState GetState(int id)
         {
-            PredictorLogic.
+            var state = PredictorLogic.Trainings.TryGetC(Lite.Create<PredictorEntity>(id));
+
+            if (state == null)
+                return null;
+            return new TrainingState
+            {
+                Message = state.Context.Message,
+                Progress = state.Context.Progress
+            };
         }
     }
-
-   
 }

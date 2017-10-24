@@ -11,7 +11,7 @@ namespace Signum.Engine.MachineLearning
     public class TrainingState
     {
         public string Message;
-        public decimal Progress;
+        public decimal? Progress;
     }
 
     public class PredictorTrainingContext
@@ -79,8 +79,8 @@ namespace Signum.Engine.MachineLearning
     public abstract class PredictorAlgorithm
     {
         public virtual string ValidatePredictor(PredictorEntity predictor) => null;
-        public abstract void Train(PredictorEntity predictor, PredictorResultColumn[] columns, object[][] input, object[][] output, TrainingState state);
-        public abstract EvaluateResult Evaluate(PredictorEntity predictor, PredictorResultColumn[] columns, object[][] input, object[][] output);
+        public abstract void Train(PredictorTrainingContext ctx);
+        public abstract EvaluateResult Evaluate(PredictorTrainingContext ctx);
         public abstract object[] Predict(PredictorEntity predictor, PredictorResultColumn[] columns, object[] input);
     }
 

@@ -18,7 +18,7 @@ namespace Signum.Engine.MachineLearning
         public static void RetrieveData(PredictorTrainingContext ctx)
         {
 
-            var totalSteps = 1 + ctx.Predictor.MultiColumns.Count + 1;
+            var totalSteps = 1 /*Main*/ + ctx.Predictor.MultiColumns.Count + 1 /*Columns*/+ 1;
             int step = 0;
             ctx.ReportProgress($"Executing MainQuery for {ctx.Predictor}", step++ / totalSteps);
             QueryRequest mainQuery = GetMainQueryRequest(ctx.Predictor);

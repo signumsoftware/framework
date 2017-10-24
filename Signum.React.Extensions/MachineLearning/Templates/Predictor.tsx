@@ -5,7 +5,7 @@ import { FormGroup, FormControlStatic, ValueLine, ValueLineType, EntityLine, Ent
 import { SearchControl } from '../../../../Framework/Signum.React/Scripts/Search'
 import { TypeContext, FormGroupStyle, ButtonsContext } from '../../../../Framework/Signum.React/Scripts/TypeContext'
 import FileLine from '../../../../Extensions/Signum.React.Extensions/Files/FileLine'
-import { PredictorEntity, PredictorColumnEmbedded, PredictorMessage, PredictorMultiColumnEntity, PredictorGroupKeyEmbedded, PredictorFileType } from '../Signum.Entities.MachineLearning'
+import { PredictorEntity, PredictorColumnEmbedded, PredictorMessage, PredictorMultiColumnEntity, PredictorGroupKeyEmbedded, PredictorFileType, PredictorCodificationEntity } from '../Signum.Entities.MachineLearning'
 import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
 import { getQueryNiceName } from '../../../../Framework/Signum.React/Scripts/Reflection'
 import QueryTokenEntityBuilder from '../../UserAssets/Templates/QueryTokenEntityBuilder'
@@ -129,21 +129,20 @@ export default class Predictor extends React.Component<{ ctx: TypeContext<Predic
                         {ctxxs.value.algorithm && <EntityDetail ctx={ctxxs.subCtx(f => f.algorithmSettings)} remove={false} />}
                         <EntityDetail ctx={ctxxs.subCtx(f => f.settings)} remove={false} />
                     </Tab>
-                    <Tab eventKey="result" title={ctxxs.niceName(a => a.files)}>
-                        
-                    </Tab>
+                    {
+                        ctx.value.state != "Draft" && <Tab eventKey="codifications" title={PredictorCodificationEntity.nicePluralName()}>
+                            <SearchControl findOptions={{ queryName: PredictorCodificationEntity, parentColumn: "Predictor", parentValue: ctx.value }} />
+                        </Tab>
+                    }
+                    {
+                        ctx.value.state != "Draft" && <Tab eventKey="files" title={ctxxs.niceName(a => a.files)}>
+                            <EntityRepeater ctx={ctxxs.subCtx(f => f.files)} getComponent={ec => 
+                                    <FileLine ctx={ec.subCtx({ formGroupStyle: "SrOnly" })} remove={false} fileType={PredictorFileType.PredictorFile} />
+                            } />
+                        </Tab>
+                    }
                 </Tabs>
             </div>
         );
     }
-
-    renderFile = (ec: TypeContext<FilePathEmbedded>) => {
-        const sc = ec.subCtx({ formGroupStyle: "SrOnly" });
-        return (
-            <div>
-                <FileLine ctx={ec.subCtx(a => a.file)} remove={false}
-                    fileType={Predictor.Attachment} />
-            </div>
-        );
-    };
 }
