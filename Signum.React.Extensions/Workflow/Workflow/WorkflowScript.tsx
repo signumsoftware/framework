@@ -2,9 +2,9 @@
 import { ValueLine, EntityLine, EntityDetail, TypeContext, FormGroup, ValueLineType } from '../../../../Framework/Signum.React/Scripts/Lines'
 import { PropertyRoute, Binding } from '../../../../Framework/Signum.React/Scripts/Reflection'
 import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
-import CSharpCodeMirror from '../../../../Extensions/Signum.React.Extensions/Codemirror/CSharpCodeMirror'
+import CSharpCodeMirror from '../../Codemirror/CSharpCodeMirror'
 import { WorkflowScriptEntity, WorkflowScriptPartEmbedded } from '../Signum.Entities.Workflow'
-import TypeHelpComponent from '../../Dynamic/Help/TypeHelpComponent'
+import TypeHelpComponent from '../../TypeHelp/TypeHelpComponent'
 import ValueLineModal from '../../../../Framework/Signum.React/Scripts/ValueLineModal'
 import { API } from '../WorkflowClient'
 

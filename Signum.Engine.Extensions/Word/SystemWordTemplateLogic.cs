@@ -256,15 +256,16 @@ namespace Signum.Engine.Word
             var candidates = templates.Where(isAllowed).Where(t => t.IsApplicable(entity));
             return GetTemplate(candidates, systemWordTemplate, CultureInfo.CurrentCulture) ??
                 GetTemplate(candidates, systemWordTemplate, CultureInfo.CurrentCulture.Parent) ??
-                candidates.Only() ??
-                throw new InvalidProgramException($"No active template found for {systemWordReports} in {CultureInfo.CurrentCulture} or {CultureInfo.CurrentCulture.Parent}");
+                candidates.SingleEx(
+                    () => $"No active WordTemplate for {systemWordReports} in {CultureInfo.CurrentCulture} or {CultureInfo.CurrentCulture.Parent}",
+                    () => $"More than one active WordTemplate for {systemWordReports} in {CultureInfo.CurrentCulture} or {CultureInfo.CurrentCulture.Parent}");
         }
 
         private static WordTemplateEntity GetTemplate(IEnumerable<WordTemplateEntity> candidates, SystemWordTemplateEntity systemWordTemplate, CultureInfo culture)
         {
             return candidates
                 .Where(a => a.Culture.Name == culture.Name)
-                .SingleOrDefaultEx(() => $"Active WordTemplates for SystemWordTemplate {systemWordTemplate} in {culture.Name}");
+                .SingleOrDefaultEx(() => $"More than one active WordTemplate for SystemWordTemplate {systemWordTemplate} in {culture.Name} found");
         }
 
         static SqlPreCommand Schema_Generating()

@@ -23,7 +23,7 @@ import { toHtmlAttributes, HtmlAttributesExpression, withClassName } from './Htm
 import { toStyleOptions, StyleOptionsExpression, subCtx } from './StyleOptionsExpression'
 import { HtmlAttributesLine } from './HtmlAttributesComponent'
 import { StyleOptionsLine } from './StyleOptionsComponent'
-import TypeHelpComponent from '../Help/TypeHelpComponent'
+import TypeHelpComponent from '../../TypeHelp/TypeHelpComponent'
 import { registeredCustomContexts } from '../DynamicViewClient'
 
 

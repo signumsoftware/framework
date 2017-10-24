@@ -3,8 +3,8 @@ import { Tabs, Tab } from 'react-bootstrap'
 import { JoyrideStepEntity } from '../Signum.Entities.Joyride'
 import { ValueLine, EntityLine, EntityCombo, EntityList, EntityDetail, EntityStrip, EntityRepeater, TypeContext, RenderEntity } from '../../../../Framework/Signum.React/Scripts/Lines'
 import { SearchControl } from "../../../../Framework/Signum.React/Scripts/Search";
-import { TranslatedInstanceEntity } from "../../../../Extensions/Signum.React.Extensions/Translation/Signum.Entities.Translation";
-import HtmlCodemirror from "../../../../Extensions/Signum.React.Extensions/Codemirror/HtmlCodemirror";
+import { TranslatedInstanceEntity } from "../../Translation/Signum.Entities.Translation";
+import HtmlCodemirror from "../../Codemirror/HtmlCodemirror";
 
 export default class JoyrideStep extends React.Component<{ ctx: TypeContext<JoyrideStepEntity> }> {
 
