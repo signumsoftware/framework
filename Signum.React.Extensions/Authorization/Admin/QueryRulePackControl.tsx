@@ -38,6 +38,17 @@ export default class QueryRulesPackControl extends React.Component<{ ctx: TypeCo
         ];
     }
 
+    handleHeaderClick(e: React.MouseEvent<HTMLAnchorElement>, hc: QueryAllowed) {
+
+        this.props.ctx.value.rules.forEach(mle => {
+            if (!mle.element.coercedValues!.contains(hc)) {
+                mle.element.allowed = hc;
+                mle.element.modified = true;
+            }
+        });
+
+        this.forceUpdate();
+    }
 
     render() {
 
@@ -57,16 +68,16 @@ export default class QueryRulesPackControl extends React.Component<{ ctx: TypeCo
                                 { QueryEntity.niceName() }
                             </th>
                             <th style={{ textAlign: "center" }}>
-                                {QueryAllowed.niceName("Allow")}
+                                <a onClick={e => this.handleHeaderClick(e, "Allow")}>{QueryAllowed.niceName("Allow")}</a>
                             </th>
                             <th style={{ textAlign: "center" }}>
-                                {QueryAllowed.niceName("EmbeddedOnly")}
+                                <a onClick={e => this.handleHeaderClick(e, "EmbeddedOnly")}>{QueryAllowed.niceName("EmbeddedOnly")}</a>
                             </th>
                             <th style={{ textAlign: "center" }}>
-                                {QueryAllowed.niceName("None")}
+                                <a onClick={e => this.handleHeaderClick(e, "None")}>{QueryAllowed.niceName("None")}</a>
                             </th>
                             <th style={{ textAlign: "center" }}>
-                                {AuthAdminMessage.Overriden.niceToString() }
+                                    {AuthAdminMessage.Overriden.niceToString() }
                             </th>
                         </tr>
                     </thead>

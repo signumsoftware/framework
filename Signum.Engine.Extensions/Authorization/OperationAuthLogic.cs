@@ -234,7 +234,9 @@ namespace Signum.Engine.Authorization
                     OperationAllowed.None;
             };
 
-            var operation = OperationLogic.FindOperation(operationType.type, operationType.operation);
+
+
+            var operation = OperationLogic.FindOperation(operationType.type ?? /*Temp*/  OperationLogic.FindTypes(operationType.operation).First(), operationType.operation);
 
             Type resultType = operation.OperationType == OperationType.ConstructorFrom ||
                 operation.OperationType == OperationType.ConstructorFromMany ? operation.ReturnType : operation.OverridenType;
