@@ -208,7 +208,8 @@ namespace Signum.Utilities
             int? result = null;
             try
             {
-                int left  = Console.CursorLeft;
+                int left = Console.CursorLeft;
+              
                
                 DateTime dt = DateTime.Now;
 
@@ -216,10 +217,11 @@ namespace Signum.Utilities
                 {
                     while (result == null)
                     {
-                        Console.SetCursorPosition(left, Console.CursorTop);
+                        var str = " (" + (DateTime.Now - dt).NiceToString(DateTimePrecision.Seconds) + ")";
+                        Console.SetCursorPosition(Math.Max(0,Math.Min(left, Console.WindowWidth - str.Length - 1)), Console.CursorTop);
 
                         lock (SafeConsole.SyncKey)
-                            SafeConsole.WriteColor(ConsoleColor.DarkGray, " (" + (DateTime.Now - dt).NiceToString(DateTimePrecision.Seconds) + ")");
+                            SafeConsole.WriteColor(ConsoleColor.DarkGray,str);
 
                         Thread.Sleep(1000);
                     }
