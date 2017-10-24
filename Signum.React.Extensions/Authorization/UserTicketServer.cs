@@ -46,13 +46,7 @@ namespace Signum.React.Authorization
                 catch
                 {
                     //Remove cookie
-                    HttpCookie cookie = new HttpCookie(CookieName)
-                    {
-                        Expires = DateTime.UtcNow.AddDays(-10), // or any other time in the past
-                        HttpOnly = true,
-                        Domain = System.Web.HttpContext.Current.Request.Url.Host
-                    };
-                    System.Web.HttpContext.Current.Response.Cookies.Set(cookie);
+                    RemoveCookie();
 
                     return false;
                 }
@@ -61,11 +55,13 @@ namespace Signum.React.Authorization
 
         public static void RemoveCookie()
         {
-            var httpContext = System.Web.HttpContext.Current;
-
-            var authCookie = httpContext.Request.Cookies[CookieName];
-            if (authCookie != null && authCookie.Value.HasText())
-                httpContext.Response.Cookies[CookieName].Expires = DateTime.UtcNow.AddDays(-10);
+            HttpCookie cookie = new HttpCookie(CookieName)
+            {
+                Expires = DateTime.UtcNow.AddDays(-10), // or any other time in the past
+                HttpOnly = true,
+                Domain = System.Web.HttpContext.Current.Request.Url.Host
+            };
+            System.Web.HttpContext.Current.Response.Cookies.Set(cookie);
         }
 
         public static void SaveCookie()

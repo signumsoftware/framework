@@ -25,7 +25,7 @@ namespace Signum.Engine.Dynamic
     public static class DynamicTypeLogic
     {
         public static ResetLazy<HashSet<Type>> AvailableEmbeddedEntities;
- 
+
         public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
@@ -93,8 +93,8 @@ namespace Signum.Engine.Dynamic
                             var pairs = newDef.Properties
                                 .Join(oldDef.Properties, n => n.UID, o => o.UID, (n, o) => new { n, o })
                                 .Where(a => a.n.Type == a.o.Type);
-                            
-                            foreach (var a in pairs.Where(a =>  a.n.Name != a.o.Name))
+
+                            foreach (var a in pairs.Where(a => a.n.Name != a.o.Name))
                             {
                                 DynamicSqlMigrationLogic.AddDynamicRename(Replacements.KeyColumnsForTable(old.TypeName),
                                     a.o.Name, a.n.Name);
@@ -144,11 +144,13 @@ namespace Signum.Engine.Dynamic
         }
 
         public static Func<Dictionary<string, Dictionary<string, string>>> GetAlreadyTranslatedExpressions;
+        public static Func<Dictionary<string, Dictionary<string, Tuple<string, string>>>> GetFormattedExpressions;
 
         public static List<CodeFile> GetCodeFiles()
         {
             List<DynamicTypeEntity> types = GetTypes();
             var alreadyTranslatedExpressions = GetAlreadyTranslatedExpressions?.Invoke();
+            var formattedExpressions = GetFormattedExpressions?.Invoke();
 
             var result = new List<CodeFile>();
 
@@ -174,6 +176,7 @@ namespace Signum.Engine.Dynamic
                 var dlg = new DynamicTypeLogicGenerator(DynamicCode.CodeGenEntitiesNamespace, dt.TypeName, dt.BaseType, def, DynamicCode.Namespaces)
                 {
                     AlreadyTranslated = alreadyTranslatedExpressions?.TryGetC(dt.TypeName + "Entity"),
+                    Formatted = formattedExpressions?.TryGetC(dt.TypeName + "Entity"),
                 };
 
                 var content = dlg.GetFileCode();
@@ -587,6 +590,7 @@ namespace Signum.Engine.Dynamic
         public DynamicTypeDefinition Def { get; private set; }
 
         public Dictionary<string, string> AlreadyTranslated { get; set; }
+        public Dictionary<string, Tuple<string, string>> Formatted { get; set; }
 
         public DynamicTypeLogicGenerator(string @namespace, string typeName, DynamicBaseType baseType, DynamicTypeDefinition def, HashSet<string> usings)
         {
@@ -715,6 +719,15 @@ namespace Signum.Engine.Dynamic
 { lines.ToString(",\r\n").Indent(8)}
     }})
 {complexQueryFields.Select(f => $".ColumnDisplayName(a => a.{f}, {this.AlreadyTranslated?.TryGetC(f) ?? $"CodeGenQuery{this.TypeName}Message.{f}"})").ToString("\r\n").Indent(4)}
+{complexQueryFields.Where(f => this.Formatted?.TryGetC(f) != null).Select(f =>
+            {
+                (string format, string unit) = this.Formatted?.TryGetC(f);
+
+                var formatText = format.HasText() ? $"c.Format = \"{format}\";" : "";
+                var unitText = unit.HasText() ? $"c.Unit = \"{unit}\";" : "";
+
+                return $".Column(a => a.{f}, c => {{ {formatText} {unitText} }})";
+            }).ToString("\r\n").Indent(4)}
     );");
 
             sb.AppendLine();

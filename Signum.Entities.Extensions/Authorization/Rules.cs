@@ -6,12 +6,12 @@ using Signum.Utilities;
 using Signum.Entities.Basics;
 using System.Text.RegularExpressions;
 using System.Reflection;
+using Signum.Entities;
 
 namespace Signum.Entities.Authorization
 {
     [Serializable, EntityKind(EntityKind.System, EntityData.Master)]
     public abstract class RuleEntity<R, A> : Entity
-        where R : Entity
     {
         [NotNullValidator]
         public Lite<RoleEntity> Role { get; set; }
@@ -40,7 +40,25 @@ namespace Signum.Entities.Authorization
     public class RulePermissionEntity : RuleEntity<PermissionSymbol, bool> { }
 
     [Serializable]
-    public class RuleOperationEntity : RuleEntity<OperationSymbol, OperationAllowed> { }
+    public class RuleOperationEntity : RuleEntity<OperationTypeEmbedded, OperationAllowed> { }
+
+
+    [Serializable, InTypeScript(Undefined = false)]
+    public class OperationTypeEmbedded : EmbeddedEntity
+    {
+        [NotNullable]
+        [NotNullValidator]
+        public OperationSymbol Operation { get; set; }
+
+        //[NotNullable] While transition
+        [NotNullValidator]
+        public TypeEntity Type { get; set; }
+
+        public override string ToString()
+        {
+            return $"{Operation}/{Type}";
+        }
+    }
 
     [Serializable]
     public class RulePropertyEntity : RuleEntity<PropertyRouteEntity, PropertyAllowed> { }

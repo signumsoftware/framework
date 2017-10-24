@@ -32,9 +32,13 @@ namespace Signum.Engine.Authorization
                 AuthLogic.AssertStarted(sb);
                 PropertyRouteLogic.Start(sb);
 
+                sb.Include<RulePropertyEntity>()
+                 .WithUniqueIndex(rt => new { rt.Resource, rt.Role });
+
                 cache = new AuthCache<RulePropertyEntity, PropertyAllowedRule, PropertyRouteEntity, PropertyRoute, PropertyAllowed>(sb,
-                    PropertyRouteEntity.ToPropertyRouteFunc,
-                    PropertyRouteLogic.ToPropertyRouteEntity,
+                    toKey: PropertyRouteEntity.ToPropertyRouteFunc,
+                    toEntity: PropertyRouteLogic.ToPropertyRouteEntity,
+                    isEquals: (p1, p2) => p1 == p2,
                     merger: new PropertyMerger(),
                     invalidateWithTypes: true,
                     coercer: PropertyCoercer.Instance);
@@ -93,7 +97,14 @@ namespace Signum.Engine.Authorization
 
                     }, EnumExtensions.ToEnum<PropertyAllowed>);
                 };
+
+                sb.Schema.Table<PropertyRouteEntity>().PreDeleteSqlSync += new Func<Entity, SqlPreCommand>(AuthCache_PreDeleteSqlSync);
             }
+        }
+
+        static SqlPreCommand AuthCache_PreDeleteSqlSync(Entity arg)
+        {
+            return Administrator.DeleteWhereScript((RulePropertyEntity rt) => rt.Resource, (PropertyRouteEntity)arg);
         }
 
         private static string AuthPropertiesReplacementKey(Type type)

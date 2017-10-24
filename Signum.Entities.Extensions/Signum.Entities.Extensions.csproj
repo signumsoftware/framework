@@ -155,7 +155,6 @@
     <Compile Include="Help\EntityHelp.cs" />
     <Compile Include="Help\HelpMessage.cs" />
     <Compile Include="Help\HelpModuleOmniboxResult.cs" />
-    <Compile Include="Help\OperationHelp.cs" />
     <Compile Include="Help\QueryHelp.cs" />
     <Compile Include="Isolation\IIsolationServer.cs" />
     <Compile Include="Isolation\IsolationEntity.cs" />

@@ -81,7 +81,7 @@ export function start(options: { routes: JSX.Element[], types: boolean; properti
     }
 
     if (options.operations) {
-        Operations.isOperationAllowedEvent.push(isOperationAuthorized);
+        Operations.isOperationInfoAllowedEvent.push(isOperationInfoAllowed);
 
         Navigator.addSettings(new EntitySettings(OperationRulePack, e => import('./Admin/OperationRulePackControl')));
     }
@@ -114,13 +114,9 @@ export function queryIsFindable(queryKey: string, fullScreen: boolean) {
     return allowed == "Allow" || allowed == "EmbeddedOnly" && !fullScreen;
 }
 
-export function isOperationAuthorized(operation: OperationInfo | OperationSymbol | string): boolean {
-    var key = (operation as OperationInfo | OperationSymbol).key || operation as string;
-    const member = getTypeInfo(key.before(".")).members[key.after(".")];
-    if (member == null)
-        throw new Error(`Operation ${key} not found, consider Synchronize`);
 
-    return  member.operationAllowed;
+export function isOperationInfoAllowed(oi: OperationInfo) {
+    return oi.operationAllowed;
 }
 
 export function taskAuthorizeProperties(lineBase: LineBase<LineBaseProps, LineBaseProps>, state: LineBaseProps) {
@@ -447,8 +443,11 @@ declare module '../../../Framework/Signum.React/Scripts/Reflection' {
     export interface MemberInfo {
         propertyAllowed: PropertyAllowed;
         queryAllowed: QueryAllowed;
-        operationAllowed: boolean;
         permissionAllowed: boolean;
+    }
+
+    export interface OperationInfo {
+        operationAllowed: boolean;
     }
 }
 

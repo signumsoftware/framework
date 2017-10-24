@@ -29,7 +29,7 @@ export interface EntityHelpEntity extends Entities.Entity {
     culture?: Basics.CultureInfoEntity | null;
     description?: string | null;
     properties: Entities.MList<PropertyRouteHelpEmbedded>;
-    operations: Entities.MList<OperationHelpEntity>;
+    operations: Entities.MList<OperationHelpEmbedded>;
     queries: Entities.MList<QueryHelpEntity>;
     isEmpty?: boolean;
 }
@@ -145,16 +145,11 @@ export module NamespaceHelpOperation {
     export const Save : Entities.ExecuteSymbol<NamespaceHelpEntity> = registerSymbol("Operation", "NamespaceHelpOperation.Save");
 }
 
-export const OperationHelpEntity = new Type<OperationHelpEntity>("OperationHelp");
-export interface OperationHelpEntity extends Entities.Entity {
-    Type: "OperationHelp";
+export const OperationHelpEmbedded = new Type<OperationHelpEmbedded>("OperationHelpEmbedded");
+export interface OperationHelpEmbedded extends Entities.EmbeddedEntity {
+    Type: "OperationHelpEmbedded";
     operation?: Entities.OperationSymbol | null;
-    culture?: Basics.CultureInfoEntity | null;
     description?: string | null;
-}
-
-export module OperationHelpOperation {
-    export const Save : Entities.ExecuteSymbol<OperationHelpEntity> = registerSymbol("Operation", "OperationHelpOperation.Save");
 }
 
 export const PropertyRouteHelpEmbedded = new Type<PropertyRouteHelpEmbedded>("PropertyRouteHelpEmbedded");

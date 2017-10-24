@@ -36,11 +36,15 @@ namespace Signum.Engine.Authorization
 
                 dqm.AllowQuery += new Func<object, bool, bool>(dqm_AllowQuery);
 
+                sb.Include<RuleQueryEntity>()
+                    .WithUniqueIndex(rt => new { rt.Resource, rt.Role });
+
                 cache = new AuthCache<RuleQueryEntity, QueryAllowedRule, QueryEntity, object, QueryAllowed>(sb,
-                    qn => QueryLogic.ToQueryName(qn.Key),
-                    QueryLogic.GetQueryEntity,
-                    merger: new QueryMerger(), 
-                    invalidateWithTypes : true,
+                    toKey: qn => QueryLogic.ToQueryName(qn.Key),
+                    toEntity: QueryLogic.GetQueryEntity,
+                    isEquals: (q1, q2) => q1 == q2,
+                    merger: new QueryMerger(),
+                    invalidateWithTypes: true,
                     coercer: QueryCoercer.Instance);
 
                 AuthLogic.ExportToXml += exportAll => cache.ExportXml("Queries", "Query", QueryUtils.GetKey, b => b.ToString(), 
@@ -72,7 +76,14 @@ namespace Signum.Engine.Authorization
 
                     });
                 };
+
+                sb.Schema.Table<QueryEntity>().PreDeleteSqlSync += new Func<Entity, SqlPreCommand>(AuthCache_PreDeleteSqlSync);
             }
+        }
+
+        static SqlPreCommand AuthCache_PreDeleteSqlSync(Entity arg)
+        {
+            return Administrator.DeleteWhereScript((RuleQueryEntity rt) => rt.Resource, (QueryEntity)arg);
         }
 
         static bool dqm_AllowQuery(object queryName, bool fullScreen)

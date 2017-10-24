@@ -40,49 +40,34 @@ namespace Signum.Entities.Authorization
     class AuthCache<RT, AR, R, K, A> : IManualAuth<K, A>
         where RT : RuleEntity<R, A>, new()
         where AR : AllowedRule<R, A>, new()
-        where R : Entity
     {
         readonly ResetLazy<Dictionary<Lite<RoleEntity>, RoleAllowedCache>> runtimeRules;
 
         Func<R, K> ToKey;
         Func<K, R> ToEntity;
+        Expression<Func<R, R, bool>> IsEquals; 
         IMerger<K, A> merger;
         Coercer<A, K> coercer;
 
-        public AuthCache(SchemaBuilder sb, Func<R, K> toKey, Func<K, R> toEntity, IMerger<K, A> merger, bool invalidateWithTypes, Coercer<A, K> coercer = null)
+        public AuthCache(SchemaBuilder sb, Func<R, K> toKey, Func<K, R> toEntity, Expression<Func<R, R, bool>> isEquals, IMerger<K, A> merger, bool invalidateWithTypes, Coercer<A, K> coercer = null)
         {
             this.ToKey = toKey;
             this.ToEntity = toEntity;
             this.merger = merger;
+            this.IsEquals = isEquals;
             this.coercer = coercer ?? Coercer<A, K>.None;
-
-            sb.Include<RT>();
 
             runtimeRules = sb.GlobalLazy(this.NewCache,
                 invalidateWithTypes ?
                 new InvalidateWith(typeof(RT), typeof(RoleEntity), typeof(RuleTypeEntity)) :
                 new InvalidateWith(typeof(RT), typeof(RoleEntity)), AuthLogic.NotifyRulesChanged);
-
-            sb.AddUniqueIndex<RT>(rt => new { rt.Resource, rt.Role });
-
-            sb.Schema.Table<R>().PreDeleteSqlSync += new Func<Entity, SqlPreCommand>(AuthCache_PreDeleteSqlSync);
-        }
-
-        SqlPreCommand AuthCache_PreDeleteSqlSync(Entity arg)
-        {
-            var t = Schema.Current.Table<RT>();
-            var f = (FieldReference)Schema.Current.Field((RT r) => r.Resource);
-
-            var param = Connector.Current.ParameterBuilder.CreateReferenceParameter("@id", arg.Id, t.PrimaryKey);
-
-            return new SqlPreCommandSimple("DELETE FROM {0} WHERE {1} = {2}".FormatWith(t.Name, f.Name.SqlEscape(), param.ParameterName), new List<DbParameter> { param });
         }
 
         A IManualAuth<K, A>.GetAllowed(Lite<RoleEntity> role, K key)
         {
             R resource = ToEntity(key);
 
-            ManualResourceCache miniCache = new ManualResourceCache(key, resource, merger, coercer.GetCoerceValueManual(key));
+            ManualResourceCache miniCache = new ManualResourceCache(key, resource, IsEquals, merger, coercer.GetCoerceValueManual(key));
 
             return miniCache.GetAllowed(role);
         }
@@ -93,14 +78,14 @@ namespace Signum.Entities.Authorization
 
             var keyCoercer = coercer.GetCoerceValueManual(key);
 
-            ManualResourceCache miniCache = new ManualResourceCache(key, resource, merger, keyCoercer);
+            ManualResourceCache miniCache = new ManualResourceCache(key, resource, IsEquals, merger, keyCoercer);
 
             allowed = keyCoercer(role, allowed);
 
             if (miniCache.GetAllowed(role).Equals(allowed))
                 return;
 
-            IQueryable<RT> query = Database.Query<RT>().Where(a => a.Resource == resource && a.Role == role);
+            IQueryable<RT> query = Database.Query<RT>().Where(a => IsEquals.Evaluate(a.Resource, resource) && a.Role == role);
             if (miniCache.GetAllowedBase(role).Equals(allowed))
             {
                 if (query.UnsafeDelete() == 0)
@@ -128,12 +113,12 @@ namespace Signum.Entities.Authorization
 
             readonly K key;
 
-            public ManualResourceCache(K key, R resource, IMerger<K, A> merger, Func<Lite<RoleEntity>, A, A> coercer)
+            public ManualResourceCache(K key, R resource, Expression<Func<R, R, bool>> isEquals,  IMerger<K, A> merger, Func<Lite<RoleEntity>, A, A> coercer)
             {
                 this.key = key;
 
                 var list = (from r in Database.Query<RT>()
-                            where r.Resource == resource
+                            where isEquals.Evaluate(r.Resource, resource)
                             select new { r.Role, r.Allowed }).ToList();
 
                 specificRules = list.ToDictionary(a => a.Role, a => a.Allowed);
@@ -332,8 +317,6 @@ namespace Signum.Entities.Authorization
 
             Table table = Schema.Current.Table(typeof(RT));
 
-
-
             return Synchronizer.SynchronizeScript(Spacing.Double, should, current, 
                 createNew: (role, x) =>
                 {
@@ -357,24 +340,26 @@ namespace Signum.Entities.Authorization
                 {
                     var def = list.SingleOrDefaultEx(a => a.Resource == null);
 
-                    var dic = (from xr in x.Elements(elementName)
+                    var shouldResources = (from xr in x.Elements(elementName)
                                let r = toResource(xr.Attribute("Resource").Value)
                                where r != null
-                               select KVP.Create(r, xr))
+                               select KVP.Create(ToKey(r), xr))
                                .ToDictionaryEx("{0} rules for {1}".FormatWith(typeof(R).NiceName(), role));
 
-                    SqlPreCommand restSql = Synchronizer.SynchronizeScript(Spacing.Simple, dic, list.Where(a => a.Resource != null).ToDictionary(a => a.Resource),
+                    var currentResources = list.Where(a => a.Resource != null).ToDictionary(a => ToKey(a.Resource));
+
+                    SqlPreCommand restSql = Synchronizer.SynchronizeScript(Spacing.Simple, shouldResources, currentResources,
                         (r, xr) =>
                         {
                             var a = parseAllowed(xr.Attribute("Allowed").Value);
-                            return table.InsertSqlSync(new RT { Resource = r, Role = role, Allowed = a }, comment: Comment(role, r, a));
+                            return table.InsertSqlSync(new RT { Resource = ToEntity(r), Role = role, Allowed = a }, comment: Comment(role, ToEntity(r), a));
                         },
-                        (r, rt) => table.DeleteSqlSync(rt, Comment(role, r, rt.Allowed)),
+                        (r, rt) => table.DeleteSqlSync(rt, Comment(role, ToEntity(r), rt.Allowed)),
                         (r, xr, rt) =>
                         {
                             var oldA = rt.Allowed;
                             rt.Allowed = parseAllowed(xr.Attribute("Allowed").Value);
-                            return table.UpdateSqlSync(rt, comment: Comment(role, r, oldA, rt.Allowed));
+                            return table.UpdateSqlSync(rt, comment: Comment(role, ToEntity(r), oldA, rt.Allowed));
                         })?.Do(p => p.GoBefore = true);
 
                     return restSql;
@@ -391,6 +376,11 @@ namespace Signum.Entities.Authorization
         {
             return "{0} {1} for {2} ({3} -> {4})".FormatWith(typeof(R).NiceName(), resource.ToString(), role, from, to);
         }
+    }
+
+    public static class AuthCacheTools
+    {
+
     }
 
 

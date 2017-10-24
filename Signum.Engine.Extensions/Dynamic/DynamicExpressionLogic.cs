@@ -58,7 +58,6 @@ namespace Signum.Engine.Dynamic
 
                 DynamicTypeLogic.GetAlreadyTranslatedExpressions = () =>
                 {
-
                     CacheLogic.GloballyDisabled = true;
                     try
                     {
@@ -74,9 +73,27 @@ namespace Signum.Engine.Dynamic
                     {
                         CacheLogic.GloballyDisabled = false;
                     }
-
-                   
                 };
+
+                DynamicTypeLogic.GetFormattedExpressions = () =>
+                {
+                    CacheLogic.GloballyDisabled = true;
+                    try
+                    {
+                        if (!Administrator.ExistsTable<DynamicExpressionEntity>())
+                            return new Dictionary<string, Dictionary<string, Tuple<string, string>>>();
+
+                        using (ExecutionMode.Global())
+                            return Database.Query<DynamicExpressionEntity>()
+                            .Where(a => a.Format != null || a.Unit != null)
+                            .AgGroupToDictionary(a => a.FromType, gr => gr.ToDictionary(a => a.Name, a => new Tuple<string, string>(a.Format, a.Unit)));
+                    }
+                    finally
+                    {
+                        CacheLogic.GloballyDisabled = false;
+                    }
+                };
+
                 sb.Schema.Table<TypeEntity>().PreDeleteSqlSync += type => Administrator.UnsafeDeletePreCommand(Database.Query<DynamicExpressionEntity>().Where(de => de.FromType == ((TypeEntity)type).ClassName));
             }
         }
@@ -175,26 +192,30 @@ namespace Signum.Engine.Dynamic
 
             foreach (var kvp in fieldNames)
             {
-                sb.AppendLine($"    static Expression<Func<{kvp.Value.FromType}, {kvp.Value.ReturnType}>> {kvp.Key} =");
+                var expressionName = $"{kvp.Value.Name}From{kvp.Value.FromType.BeforeLast("Entity")}Expression".FirstUpper();
+                sb.AppendLine($"    static Expression<Func<{kvp.Value.FromType}, {kvp.Value.ReturnType}>> {expressionName} = ");
                 sb.AppendLine($"        e => {kvp.Value.Body};");
-                sb.AppendLine($"    [ExpressionField(\"{kvp.Key}\")]");
+                sb.AppendLine($"    [ExpressionField(\"{expressionName}\")]");
                 sb.AppendLine($"    public static {kvp.Value.ReturnType} {kvp.Value.Name}(this {kvp.Value.FromType} e)");
                 sb.AppendLine($"    {{");
-                sb.AppendLine($"        return {kvp.Key}.Evaluate(e);");
+                sb.AppendLine($"        return {expressionName}.Evaluate(e);");
                 sb.AppendLine($"    }}");
                 sb.AppendLine("");
             }
 
             sb.AppendLine("    public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)");
             sb.AppendLine("    {");
-            foreach(var kvp in fieldNames)
-            {
-                sb.AppendLine($"        var ei = dqm.RegisterExpression(({kvp.Value.FromType} e) => e.{kvp.Value.Name}(){GetNiceNameCode(kvp.Value)});");
-                if(kvp.Value.Format.HasText())
-                    sb.AppendLine($"        ei.ForceFormat = {CSharpRenderer.Value(kvp.Value.Format, typeof(string), new string[0])};");
-                if (kvp.Value.Unit.HasText())
-                    sb.AppendLine($"        ei.ForceUnit = {CSharpRenderer.Value(kvp.Value.Unit, typeof(string), new string[0])};");
 
+            foreach (var kvp in fieldNames)
+            {
+                var entity = kvp.Value;
+                var varName = $"{entity.Name}{entity.FromType.BeforeLast("Entity")}".FirstLower();
+
+                sb.AppendLine($"        var {varName} = dqm.RegisterExpression(({entity.FromType} e) => e.{entity.Name}(){GetNiceNameCode(entity)});");
+                if(entity.Format.HasText()) 
+                    sb.AppendLine($"        {varName}.ForceFormat = {CSharpRenderer.Value(entity.Format, typeof(string), new string[0])};");
+                if (entity.Unit.HasText())  
+                    sb.AppendLine($"        {varName}.ForceUnit = {CSharpRenderer.Value(entity.Unit, typeof(string), new string[0])};");
             }
             sb.AppendLine("    }");
             sb.AppendLine("}");

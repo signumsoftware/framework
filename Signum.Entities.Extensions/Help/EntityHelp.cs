@@ -30,8 +30,9 @@ namespace Signum.Entities.Help
         [NotNullValidator, NoRepeatValidator]
         public MList<PropertyRouteHelpEmbedded> Properties { get; set; } = new MList<PropertyRouteHelpEmbedded>();
 
-        [Ignore]
-        public MList<OperationHelpEntity> Operations { get; set; } = new MList<OperationHelpEntity>();
+        [NotNullable]
+        [NotNullValidator, NoRepeatValidator]
+        public MList<OperationHelpEmbedded> Operations { get; set; } = new MList<OperationHelpEmbedded>();
 
         [Ignore]
         public MList<QueryHelpEntity> Queries { get; set; } = new MList<QueryHelpEntity>();
@@ -80,5 +81,21 @@ namespace Signum.Entities.Help
         }
     }
 
+    [Serializable]
+    public class OperationHelpEmbedded : EmbeddedEntity
+    {
+        [NotNullable]
+        [NotNullValidator]
+        public OperationSymbol Operation { get; set; }
+
+        [NotNullable, SqlDbType(Size = int.MaxValue)]
+        [StringLengthValidator(AllowNulls = false, Min = 3, MultiLine = true)]
+        public string Description { get; set; }
+
+        public override string ToString()
+        {
+            return this.Operation?.ToString();
+        }
+    }
 
 }
