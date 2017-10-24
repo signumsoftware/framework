@@ -152,7 +152,7 @@ export class RenderEntity extends React.Component<RenderEntityProps, RenderEntit
         const pr = !ti ? ctx.propertyRoute : PropertyRoute.root(ti);
         
 
-        const frame: EntityFrame<ModifiableEntity> = {
+        const frame: EntityFrame = {
             frameComponent: this,
             entityComponent: this.entityComponent,
             revalidate: () => this.props.ctx.frame && this.props.ctx.frame.revalidate(),

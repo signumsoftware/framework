@@ -130,14 +130,17 @@ export default class FramePage extends React.Component<FramePageProps, FramePage
 
         const entity = this.state.pack.entity;
 
-        const frame: EntityFrame<Entity> = {
+        const frame: EntityFrame = {
             frameComponent: this,
             entityComponent: this.entityComponent,
             onReload: pack => {
-                if (pack.entity.id != null && entity.id == null)
-                    Navigator.history.push(Navigator.navigateRoute(pack.entity));
+
+                var packEntity = pack as EntityPack<Entity>;
+
+                if (packEntity.entity.id != null && entity.id == null)
+                    Navigator.history.push(Navigator.navigateRoute(packEntity.entity));
                 else
-                    this.setState({ pack });
+                    this.setState({ pack: packEntity });
             },
             onClose: () => this.onClose(),
             revalidate: () => this.validationErrors && this.validationErrors.forceUpdate(),

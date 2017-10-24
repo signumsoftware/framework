@@ -152,7 +152,7 @@ export class ContextualOperationContext<T extends Entity> {
     onContextualSuccess?: (pack: API.ErrorReport) => void;
     onConstructFromSuccess?: (pack: EntityPack<Entity>) => void;
     defaultContextualClick(...args: any[]) {
-        defaultContextualClick(this, ...args);
+        defaultContextualClick(this as ConstructorOperationContext<any>, ...args);
     }
 }
 
@@ -171,7 +171,7 @@ export class EntityOperationContext<T extends Entity> {
         return result;
     }
 
-    frame: EntityFrame<T>;
+    frame: EntityFrame;
     tag?: string;
     entity: T;
     operationInfo: OperationInfo;

@@ -19,7 +19,7 @@ interface FilterBuilderProps extends React.Props<FilterBuilder> {
     filterOptions: FilterOptionParsed[];
     subTokensOptions: SubTokensOptions;
     queryDescription: QueryDescription;
-    onTokenChanged?: (token: QueryToken) => void;
+    onTokenChanged?: (token: QueryToken | undefined) => void;
     lastToken?: QueryToken;
     onFiltersChanged?: (filters: FilterOptionParsed[]) => void;
     onHeightChanged?: () => void;
