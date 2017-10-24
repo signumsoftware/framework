@@ -1,7 +1,7 @@
 ﻿import * as React from 'react'
 import { ValueLine, EntityLine, TypeContext, FormGroup, EntityStrip, EntityDetail, EntityCombo} from '../../../../Framework/Signum.React/Scripts/Lines'
 import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
-import { ScheduledTaskEntity } from '../../../../Extensions/Signum.React.Extensions/Scheduler/Signum.Entities.Scheduler'
+import { ScheduledTaskEntity } from '../../Scheduler/Signum.Entities.Scheduler'
 import { WorkflowEventTaskEntity, WorkflowEventEntity, WorkflowEventTaskActionEval, WorkflowEventType, TriggeredOn, WorkflowEventTaskConditionEval, WorkflowEventTaskModel } from '../Signum.Entities.Workflow'
 import WorkflowEventTaskConditionComponent from './WorkflowEventTaskConditionComponent'
 import WorkflowEventTaskActionComponent from './WorkflowEventTaskActionComponent'

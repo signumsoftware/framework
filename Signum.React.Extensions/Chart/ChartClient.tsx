@@ -15,7 +15,7 @@ import { PseudoType, QueryKey, getQueryKey } from '../../../Framework/Signum.Rea
 import {
     FindOptions, FilterOption, FilterOptionParsed, FilterOperation, OrderOption, OrderOptionParsed, ColumnOption,
     FilterRequest, QueryRequest, Pagination, QueryTokenType, QueryToken, FilterType, SubTokensOptions, ResultTable, OrderRequest } from '../../../Framework/Signum.React/Scripts/FindOptions'
-import * as AuthClient  from '../../../Extensions/Signum.React.Extensions/Authorization/AuthClient'
+import * as AuthClient  from '../Authorization/AuthClient'
 import { QueryFilterEmbedded, QueryColumnEmbedded, QueryOrderEmbedded } from '../UserQueries/Signum.Entities.UserQueries'
 
 import {

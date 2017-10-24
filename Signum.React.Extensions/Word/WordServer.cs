@@ -23,6 +23,7 @@ using Signum.Engine.Maps;
 using Signum.Entities.Templating;
 using Signum.Entities.Word;
 using Signum.Engine.Word;
+using Signum.React.TypeHelp;
 
 namespace Signum.React.Word
 {
@@ -30,6 +31,7 @@ namespace Signum.React.Word
     {
         public static void Start(HttpConfiguration config)
         {
+            TypeHelpServer.Start(config);
             SignumControllerFactory.RegisterArea(MethodInfo.GetCurrentMethod());
 
             ReflectionServer.RegisterLike(typeof(TemplateTokenMessage));

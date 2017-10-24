@@ -11,7 +11,7 @@ import * as EntityOperations from '../../../Framework/Signum.React/Scripts/Opera
 
 import { Type } from '../../../Framework/Signum.React/Scripts/Reflection'
 import { getMixin, Lite, isLite } from '../../../Framework/Signum.React/Scripts/Signum.Entities'
-import { UserEntity } from '../../../Extensions/Signum.React.Extensions/Authorization/Signum.Entities.Authorization'
+import { UserEntity } from '../Authorization/Signum.Entities.Authorization'
 
 import { ValueLine, EntityLine, EntityCombo, EntityList, EntityDetail, EntityStrip, EntityRepeater } from '../../../Framework/Signum.React/Scripts/Lines'
 import { SearchMessage, JavascriptMessage, ExecuteSymbol, ConstructSymbol_From, ConstructSymbol_Simple, DeleteSymbol } from '../../../Framework/Signum.React/Scripts/Signum.Entities'
@@ -21,7 +21,7 @@ import { FilterRequest, FilterOption, FilterOptionParsed } from "../../../Framew
 import { ImportRoute } from "../../../Framework/Signum.React/Scripts/AsyncImport";
 import { getAllTypes, getTypeInfo } from "../../../Framework/Signum.React/Scripts/Reflection";
 import { TypeInfo } from "../../../Framework/Signum.React/Scripts/Reflection";
-import * as AuthClient from '../../../Extensions/Signum.React.Extensions/Authorization/AuthClient'
+import * as AuthClient from '../Authorization/AuthClient'
 import TreeButton from './TreeButton'
 import { toLite } from "../../../Framework/Signum.React/Scripts/Signum.Entities";
 import { SearchControlLoaded } from "../../../Framework/Signum.React/Scripts/Search";

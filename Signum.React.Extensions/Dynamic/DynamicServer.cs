@@ -4,6 +4,7 @@ using Signum.Entities;
 using Signum.Entities.Basics;
 using Signum.React;
 using Signum.React.Json;
+using Signum.React.TypeHelp;
 using Signum.Utilities;
 using System;
 using System.Collections.Generic;
@@ -18,6 +19,7 @@ namespace Signum.React.Dynamic
     {
         public static void Start(HttpConfiguration config)
         {
+            TypeHelpServer.Start(config);
             SignumControllerFactory.RegisterArea(MethodInfo.GetCurrentMethod());
 
             EntityJsonConverter.AfterDeserilization.Register((PropertyRouteEntity wc) =>

@@ -18,10 +18,11 @@ import SelectorModal from '../../../../Framework/Signum.React/Scripts/SelectorMo
 import MessageModal from '../../../../Framework/Signum.React/Scripts/Modals/MessageModal'
 import * as DynamicTypeClient from '../DynamicTypeClient';
 import * as DynamicClient from '../DynamicClient';
+import * as TypeHelpClient from '../../TypeHelp/TypeHelpClient';
 import { DynamicTypeMessage, DynamicTypeEntity, DynamicMixinConnectionEntity } from '../Signum.Entities.Dynamic';
 import { Validators, DynamicTypeDefinition, DynamicProperty } from '../DynamicTypeClient';
 import ValueComponent from './ValueComponent';
-import TypeHelpComponent from '../Help/TypeHelpComponent'
+import TypeHelpComponent from '../../TypeHelp/TypeHelpComponent'
 import CSharpCodeMirror from '../../Codemirror/CSharpCodeMirror';
 import ContextMenu from '../../../../Framework/Signum.React/Scripts/SearchControl/ContextMenu'
 import { ContextMenuPosition } from '../../../../Framework/Signum.React/Scripts/SearchControl/ContextMenu'
@@ -952,7 +953,7 @@ export class TypeCombo extends React.Component<{ dc: DynamicTypeDesignContext; b
     }
 
     handleGetItems = (query: string) => {
-        return DynamicClient.API.autocompleteType({
+        return TypeHelpClient.API.autocompleteType({
             query: query,
             limit: 5,
             includeBasicTypes: true,

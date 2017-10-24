@@ -3,7 +3,7 @@ import { classes } from '../../../../Framework/Signum.React/Scripts/Globals'
 import { FormGroup, FormControlStatic, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityList, EntityRepeater } from '../../../../Framework/Signum.React/Scripts/Lines'
 import {SearchControl }  from '../../../../Framework/Signum.React/Scripts/Search'
 import { TypeContext, FormGroupStyle } from '../../../../Framework/Signum.React/Scripts/TypeContext'
-import FileLine from '../../../../Extensions/Signum.React.Extensions/Files/FileLine'
+import FileLine from '../../Files/FileLine'
 import { ExcelReportEntity} from '../Signum.Entities.Excel'
 
 export default class ExcelReport extends React.Component<{ ctx: TypeContext<ExcelReportEntity> }> {

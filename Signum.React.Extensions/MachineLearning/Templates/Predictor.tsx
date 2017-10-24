@@ -4,7 +4,7 @@ import { classes } from '../../../../Framework/Signum.React/Scripts/Globals'
 import { FormGroup, FormControlStatic, ValueLine, ValueLineType, EntityLine, EntityDetail, EntityCombo, EntityList, EntityRepeater, EntityTable, IRenderButtons, EntityTabRepeater } from '../../../../Framework/Signum.React/Scripts/Lines'
 import { SearchControl } from '../../../../Framework/Signum.React/Scripts/Search'
 import { TypeContext, FormGroupStyle, ButtonsContext } from '../../../../Framework/Signum.React/Scripts/TypeContext'
-import FileLine from '../../../../Extensions/Signum.React.Extensions/Files/FileLine'
+import FileLine from '../../Files/FileLine'
 import { PredictorEntity, PredictorColumnEmbedded, PredictorMessage, PredictorMultiColumnEntity, PredictorGroupKeyEmbedded, PredictorFileType, PredictorCodificationEntity } from '../Signum.Entities.MachineLearning'
 import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
 import { getQueryNiceName } from '../../../../Framework/Signum.React/Scripts/Reflection'
@@ -98,23 +98,23 @@ export default class Predictor extends React.Component<{ ctx: TypeContext<Predic
                 <Tabs>
                     <Tab eventKey="query" title={ctxxs.niceName(a => a.query)}>
                         <EntityLine ctx={ctxxs.subCtx(f => f.query)} remove={ctx.value.isNew} onChange={this.handleQueryChange} />
-                        {queryKey && <div>
+                {queryKey && <div>
 
                             <FilterBuilderEmbedded ctx={ctxxs.subCtx(a => a.filters)}
                                 queryKey={queryKey}
                                 subTokenOptions={SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement} />
                             <EntityTable ctx={ctxxs.subCtx(e => e.simpleColumns)} columns={EntityTable.typedColumns<PredictorColumnEmbedded>([
-                                { property: a => a.usage },
-                                {
-                                    property: a => a.token,
+                        { property: a => a.usage },
+                        {
+                            property: a => a.token,
                                     template: ctx => <QueryTokenEntityBuilder
-                                        ctx={ctx.subCtx(a => a.token)}
-                                        queryKey={this.props.ctx.value.query!.key}
+                                    ctx={ctx.subCtx(a => a.token)}
+                                    queryKey={this.props.ctx.value.query!.key}
                                         subTokenOptions={SubTokensOptions.CanElement} />,
-                                    headerHtmlAttributes: { style: { width: "40%" } },
-                                },
+                            headerHtmlAttributes: { style: { width: "40%" } },
+                        },
                                 { property: a => a.encoding },
-                            ])} />
+                    ])} />
                             <EntityTabRepeater ctx={ctxxs.subCtx(e => e.multiColumns)} onCreate={this.handleCreate}
                                 getTitle={(mctx: TypeContext<PredictorMultiColumnEntity>) => mctx.value.name || PredictorMultiColumnEntity.niceName()}
                                 getComponent={(mctx: TypeContext<PredictorMultiColumnEntity>) =>
@@ -122,7 +122,7 @@ export default class Predictor extends React.Component<{ ctx: TypeContext<Predic
                                         {!this.state.queryDescription ? undefined : <PredictorMultiColumn ctx={mctx} targetType={this.state.queryDescription.columns["Entity"].type} />}
                                     </div>
                                 } />
-                        </div>}
+                </div>}
                     </Tab>
                     <Tab eventKey="algorithm" title={ctxxs.niceName(a => a.algorithmSettings)}>
                         <EntityCombo ctx={ctxxs.subCtx(f => f.algorithm)} onChange={this.handleAlgorithmChange} />
