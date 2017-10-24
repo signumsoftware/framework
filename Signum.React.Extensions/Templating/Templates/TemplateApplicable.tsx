@@ -6,8 +6,8 @@ import { Entity } from '../../../../Framework/Signum.React/Scripts/Signum.Entiti
 import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
 import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
 import CSharpCodeMirror from '../../Codemirror/CSharpCodeMirror'
-import TypeHelpComponent from '../../Dynamic/Help/TypeHelpComponent'
-import TypeHelpButtonBarComponent from '../../Dynamic/Help/TypeHelpButtonBarComponent'
+import TypeHelpComponent from '../../TypeHelp/TypeHelpComponent'
+import TypeHelpButtonBarComponent from '../../TypeHelp/TypeHelpButtonBarComponent'
 import ValueLineModal from '../../../../Framework/Signum.React/Scripts/ValueLineModal'
 import { ContextMenuPosition } from '../../../../Framework/Signum.React/Scripts/SearchControl/ContextMenu'
 import PropertyRouteCombo from "../../Basics/Templates/PropertyRouteCombo";
