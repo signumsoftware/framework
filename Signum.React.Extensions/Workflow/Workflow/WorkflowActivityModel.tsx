@@ -4,16 +4,16 @@ import {
     WorkflowJumpEmbedded, WorkflowTimeoutEmbedded, IWorkflowNodeEntity, SubWorkflowEmbedded, SubEntitiesEval, WorkflowScriptEntity, WorkflowScriptPartEmbedded, WorkflowScriptEval, WorkflowEntity
 } from '../Signum.Entities.Workflow'
 import * as WorkflowClient from '../WorkflowClient'
-import * as DynamicViewClient from '../../../../Extensions/Signum.React.Extensions/Dynamic/DynamicViewClient'
+import * as DynamicViewClient from '../../Dynamic/DynamicViewClient'
 import { TypeContext, ValueLine, ValueLineType, EntityLine, EntityTable, EntityDetail, FormGroup, LiteAutocompleteConfig, RenderEntity } from '../../../../Framework/Signum.React/Scripts/Lines'
 import { is, JavascriptMessage, Lite } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
 import { TypeEntity } from '../../../../Framework/Signum.React/Scripts/Signum.Entities.Basics'
-import { DynamicValidationEntity } from '../../../../Extensions/Signum.React.Extensions/Dynamic/Signum.Entities.Dynamic'
+import { DynamicValidationEntity } from '../../Dynamic/Signum.Entities.Dynamic'
 import { Dic } from '../../../../Framework/Signum.React/Scripts/Globals';
 import { Binding } from '../../../../Framework/Signum.React/Scripts/Reflection';
-import CSharpCodeMirror from '../../../../Extensions/Signum.React.Extensions/Codemirror/CSharpCodeMirror'
-import TypeHelpComponent from '../../Dynamic/Help/TypeHelpComponent'
-import HtmlEditor from '../../../../Extensions/Signum.React.Extensions/HtmlEditor/HtmlEditor'
+import CSharpCodeMirror from '../../Codemirror/CSharpCodeMirror'
+import TypeHelpComponent from "../../TypeHelp/TypeHelpComponent";
+import HtmlEditor from '../../HtmlEditor/HtmlEditor'
 import Typeahead from '../../../../Framework/Signum.React/Scripts/Lines/Typeahead'
 import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
 import { API } from '../WorkflowClient'

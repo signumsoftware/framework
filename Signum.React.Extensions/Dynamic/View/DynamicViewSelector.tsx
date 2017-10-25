@@ -8,7 +8,7 @@ import { getTypeInfo, Binding, PropertyRoute } from '../../../../Framework/Signu
 import JavascriptCodeMirror from '../../Codemirror/JavascriptCodeMirror'
 import * as DynamicViewClient from '../DynamicViewClient'
 import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
-import TypeHelpComponent from '../Help/TypeHelpComponent'
+import TypeHelpComponent from '../../TypeHelp/TypeHelpComponent'
 import ValueLineModal from '../../../../Framework/Signum.React/Scripts/ValueLineModal'
 import MessageModal from '../../../../Framework/Signum.React/Scripts/Modals/MessageModal'
 

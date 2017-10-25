@@ -2,10 +2,10 @@
 import { ValueLine, EntityLine, TypeContext, FormGroup, EntityStrip, EntityDetail } from '../../../../Framework/Signum.React/Scripts/Lines'
 import { PropertyRoute, Binding } from '../../../../Framework/Signum.React/Scripts/Reflection'
 import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
-import CSharpCodeMirror from '../../../../Extensions/Signum.React.Extensions/Codemirror/CSharpCodeMirror'
+import CSharpCodeMirror from '../../Codemirror/CSharpCodeMirror'
 import { WorkflowLaneModel, WorkflowLaneActorsEval, ICaseMainEntity, WorkflowMessage } from '../Signum.Entities.Workflow'
 import { WorkflowConditionTestResponse, API, DecisionResultValues } from '../WorkflowClient'
-import TypeHelpComponent from '../../Dynamic/Help/TypeHelpComponent'
+import TypeHelpComponent from '../../TypeHelp/TypeHelpComponent'
 
 
 interface WorkflowLaneModelComponentProps {

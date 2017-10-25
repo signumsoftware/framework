@@ -11,7 +11,7 @@ import * as Constructor from '../../../Framework/Signum.React/Scripts/Constructo
 import * as Operations from '../../../Framework/Signum.React/Scripts/Operations'
 import * as QuickLinks from '../../../Framework/Signum.React/Scripts/QuickLinks'
 import { FindOptions, FilterOption, FilterOperation, OrderOption, ColumnOption, FilterRequest, QueryRequest, Pagination } from '../../../Framework/Signum.React/Scripts/FindOptions'
-import * as AuthClient  from '../../../Extensions/Signum.React.Extensions/Authorization/AuthClient'
+import * as AuthClient  from '../Authorization/AuthClient'
 import { IUserAssetEntity, UserAssetMessage, UserAssetPreviewModel, UserAssetPermission }  from './Signum.Entities.UserAssets'
 import * as OmniboxClient from '../Omnibox/OmniboxClient'
 import { ImportRoute } from "../../../Framework/Signum.React/Scripts/AsyncImport";

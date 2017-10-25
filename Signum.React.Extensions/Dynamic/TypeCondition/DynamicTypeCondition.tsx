@@ -2,11 +2,11 @@
 import { ValueLine, EntityLine, TypeContext, FormGroup, ValueLineType } from '../../../../Framework/Signum.React/Scripts/Lines'
 import { PropertyRoute, Binding } from '../../../../Framework/Signum.React/Scripts/Reflection'
 import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
-import CSharpCodeMirror from '../../../../Extensions/Signum.React.Extensions/Codemirror/CSharpCodeMirror'
+import CSharpCodeMirror from '../../Codemirror/CSharpCodeMirror'
 import { Entity } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
 import { DynamicTypeConditionEntity } from '../Signum.Entities.Dynamic'
 import { DynamicTypeConditionTestResponse, API } from '../DynamicTypeConditionClient'
-import TypeHelpComponent from '../Help/TypeHelpComponent'
+import TypeHelpComponent from '../../TypeHelp/TypeHelpComponent'
 import ValueLineModal from '../../../../Framework/Signum.React/Scripts/ValueLineModal'
 
 interface DynamicTypeConditionComponentProps {

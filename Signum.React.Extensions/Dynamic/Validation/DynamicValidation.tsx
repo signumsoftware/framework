@@ -7,8 +7,8 @@ import { Entity } from '../../../../Framework/Signum.React/Scripts/Signum.Entiti
 import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
 import { API, DynamicValidationTestResponse } from '../DynamicValidationClient'
 import CSharpCodeMirror from '../../Codemirror/CSharpCodeMirror'
-import TypeHelpComponent from '../Help/TypeHelpComponent'
-import TypeHelpButtonBarComponent from '../Help/TypeHelpButtonBarComponent'
+import TypeHelpComponent from '../../TypeHelp/TypeHelpComponent'
+import TypeHelpButtonBarComponent from '../../TypeHelp/TypeHelpButtonBarComponent'
 import ValueLineModal from '../../../../Framework/Signum.React/Scripts/ValueLineModal'
 import { ContextMenuPosition } from '../../../../Framework/Signum.React/Scripts/SearchControl/ContextMenu'
 import PropertyRouteCombo from "../../Basics/Templates/PropertyRouteCombo";

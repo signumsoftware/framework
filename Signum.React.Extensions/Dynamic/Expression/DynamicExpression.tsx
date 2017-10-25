@@ -2,13 +2,13 @@
 import { ValueLine, EntityLine, TypeContext, FormGroup, ValueLineType } from '../../../../Framework/Signum.React/Scripts/Lines'
 import { PropertyRoute, Binding, isTypeEntity } from '../../../../Framework/Signum.React/Scripts/Reflection'
 import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
-import CSharpCodeMirror from '../../../../Extensions/Signum.React.Extensions/Codemirror/CSharpCodeMirror'
+import CSharpCodeMirror from '../../Codemirror/CSharpCodeMirror'
 import { Entity } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
 import Typeahead from '../../../../Framework/Signum.React/Scripts/Lines/Typeahead'
 import { DynamicExpressionEntity } from '../Signum.Entities.Dynamic'
 import { DynamicExpressionTestResponse, API } from '../DynamicExpressionClient'
-import * as DynamicClient from '../DynamicClient';
-import TypeHelpComponent from '../Help/TypeHelpComponent'
+import * as TypeHelpClient from '../../TypeHelp/TypeHelpClient';
+import TypeHelpComponent from '../../TypeHelp/TypeHelpComponent'
 import ValueLineModal from '../../../../Framework/Signum.React/Scripts/ValueLineModal'
 
 interface DynamicExpressionComponentProps {
@@ -92,7 +92,7 @@ export default class DynamicExpressionComponent extends React.Component<DynamicE
     }
 
     handleGetItems = (query: string) => {
-        return DynamicClient.API.autocompleteType({ query: query, limit: 5, includeBasicTypes: true, includeEntities: true, includeQueriable: true });
+        return TypeHelpClient.API.autocompleteType({ query: query, limit: 5, includeBasicTypes: true, includeEntities: true, includeQueriable: true });
     }
 
     renderTypeAutocomplete(ctx: TypeContext<string | null | undefined>) {

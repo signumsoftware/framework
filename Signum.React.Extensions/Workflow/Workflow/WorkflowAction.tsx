@@ -2,10 +2,10 @@
 import { ValueLine, EntityLine, TypeContext, FormGroup, ValueLineType, LiteAutocompleteConfig } from '../../../../Framework/Signum.React/Scripts/Lines'
 import { PropertyRoute, Binding } from '../../../../Framework/Signum.React/Scripts/Reflection'
 import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
-import CSharpCodeMirror from '../../../../Extensions/Signum.React.Extensions/Codemirror/CSharpCodeMirror'
+import CSharpCodeMirror from '../../Codemirror/CSharpCodeMirror'
 import { WorkflowActionEntity } from '../Signum.Entities.Workflow'
 import { WorkflowConditionTestResponse, API, DecisionResultValues, showWorkflowTransitionContextCodeHelp } from '../WorkflowClient'
-import TypeHelpComponent from '../../Dynamic/Help/TypeHelpComponent'
+import TypeHelpComponent from "../../TypeHelp/TypeHelpComponent";
 import ValueLineModal from '../../../../Framework/Signum.React/Scripts/ValueLineModal'
 
 interface WorkflowConditionComponentProps {
