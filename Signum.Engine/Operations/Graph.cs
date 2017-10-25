@@ -220,7 +220,7 @@ namespace Signum.Engine.Operations
             {
                 using (HeavyProfiler.Log("ConstructFrom", () => operationSymbol.Key))
                 {
-                    OperationLogic.AssertOperationAllowed(operationSymbol, typeof(F), inUserInterface: false);
+                    OperationLogic.AssertOperationAllowed(operationSymbol, origin.GetType(), inUserInterface: false);
 
                     string error = OnCanConstruct(origin);
                     if (error != null)
@@ -360,7 +360,7 @@ namespace Signum.Engine.Operations
             {
                 using (HeavyProfiler.Log("ConstructFromMany", () => operationSymbol.Key))
                 {
-                    OperationLogic.AssertOperationAllowed(operationSymbol, typeof(F), inUserInterface: false);
+                    OperationLogic.AssertOperationAllowed(operationSymbol, lites.First().GetType(), inUserInterface: false);
 
                     OperationLogEntity log = new OperationLogEntity
                     {
@@ -505,7 +505,7 @@ namespace Signum.Engine.Operations
             {
                 using (HeavyProfiler.Log("Execute", () => Symbol.Symbol.Key))
                 {
-                    OperationLogic.AssertOperationAllowed(Symbol.Symbol, typeof(T), inUserInterface: false);
+                    OperationLogic.AssertOperationAllowed(Symbol.Symbol, entity.GetType(), inUserInterface: false);
 
                     string error = OnCanExecute((T)entity);
                     if (error != null)
@@ -644,7 +644,7 @@ namespace Signum.Engine.Operations
             {
                 using (HeavyProfiler.Log("Delete", () => Symbol.Symbol.Key))
                 {
-                    OperationLogic.AssertOperationAllowed(Symbol.Symbol, typeof(T), inUserInterface: false);
+                    OperationLogic.AssertOperationAllowed(Symbol.Symbol, entity.GetType(), inUserInterface: false);
 
                     string error = OnCanDelete((T)entity);
                     if (error != null)
