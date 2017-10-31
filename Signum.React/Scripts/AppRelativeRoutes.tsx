@@ -44,8 +44,8 @@ export function useAppRelativeSwitch(SwitchClass: typeof Switch) {
 
         let match: match<any> | undefined;
         let child: React.ReactElement<any> | undefined;
-        React.Children.forEach(children, (child) => {
-            let element = child as React.ReactElement<RouteProps & { from?: string }>;
+        React.Children.forEach(children, (c) => {
+            let element = c as React.ReactElement<RouteProps & { from?: string }>;
 
             if (!React.isValidElement(element))
                 return;
