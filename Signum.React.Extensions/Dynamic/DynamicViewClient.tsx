@@ -89,11 +89,11 @@ interface CustomContextSettings {
 
 export class DynamicViewViewDispatcher implements Navigator.ViewDispatcher {
 
-    hasDefaultView(typeName: string) {
+    hasDefaultView(typeName: string): boolean {
         return true;
     }
 
-    getViewNames(typeName: string) {
+    getViewNames(typeName: string): Promise<string[]>{
         const es = Navigator.getSettings(typeName);
         var staticViewNames = es && es.namedViews && Dic.getKeys(es.namedViews) || [];
 
@@ -107,7 +107,7 @@ export class DynamicViewViewDispatcher implements Navigator.ViewDispatcher {
     }
 
 
-    getViewOverrides(typeName: string, viewName?: string) {
+    getViewOverrides(typeName: string, viewName?: string): Promise<Navigator.ViewOverride<ModifiableEntity>[]>{
         const es = Navigator.getSettings(typeName);
         var staticViewOverrides = es && es.viewOverrides && es.viewOverrides.filter(a => a.viewName == viewName) || [];
 
@@ -116,11 +116,14 @@ export class DynamicViewViewDispatcher implements Navigator.ViewDispatcher {
 
         return getDynamicViewOverrides(typeName).then(dvos => [
             ...staticViewOverrides,
-            ...dvos.filter(dvo => dvo.entity.viewName == viewName)
+            ...dvos.filter(dvo => dvo.entity.viewName == viewName).map(dvo => ({
+                override: dvo.override,
+                viewName: dvo.entity.viewName
+            } as Navigator.ViewOverride<ModifiableEntity>))
         ])
     }
 
-    getViewPromise(entity: ModifiableEntity, viewName?: string) {
+    getViewPromise(entity: ModifiableEntity, viewName?: string): ViewPromise<ModifiableEntity>{
 
         if (!isTypeEntity(entity.Type) || viewName != undefined)
             return this.fallback(entity, viewName);
@@ -398,7 +401,7 @@ export function getDynamicViewEntity(typeName: string, viewName: string): ViewPr
     );
 }
 
-export function dynamicViewComponent(dynamicView: DynamicViewEntity): ViewPromise < ModifiableEntity > {
+export function dynamicViewComponent(dynamicView: DynamicViewEntity): ViewPromise<ModifiableEntity> {
     return new ViewPromise(import('./View/DynamicViewComponent'))
         .withProps({ initialDynamicView: dynamicView });
 }

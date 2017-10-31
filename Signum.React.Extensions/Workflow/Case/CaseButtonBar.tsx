@@ -18,7 +18,7 @@ import { DynamicViewMessage } from '../../Dynamic/Signum.Entities.Dynamic'
 import HtmlEditor from '../../../../Extensions/Signum.React.Extensions/HtmlEditor/HtmlEditor'
 
 interface CaseButtonBarProps {
-    frame: EntityFrame<CaseActivityEntity>;
+    frame: EntityFrame;
     pack: EntityPack<CaseActivityEntity>;
 }
 

@@ -23,8 +23,8 @@ import "./TypeHelpComponent.css"
 interface TypeHelpComponentProps {
     initialType?: string;
     mode: DynamicClient.TypeHelpMode;
-    onMemberClick?: (pr?: PropertyRoute) => void;
-    renderContextMenu?: (pr?: PropertyRoute) => React.ReactElement<any>;
+    onMemberClick?: (pr: PropertyRoute) => void;
+    renderContextMenu?: (pr: PropertyRoute) => React.ReactElement<any>;
 }
 
 interface TypeHelpComponentState {

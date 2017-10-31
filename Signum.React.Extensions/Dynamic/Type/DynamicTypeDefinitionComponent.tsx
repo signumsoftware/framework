@@ -1259,7 +1259,7 @@ export interface ValidatorOptions<T extends Validators.DynamicValidator> {
 export const registeredValidators: { [name: string]: ValidatorOptions<Validators.DynamicValidator> } = {};
 
 export function registerValidator<T extends Validators.DynamicValidator>(options: ValidatorOptions<T>) {
-    registeredValidators[options.name] = options;
+    registeredValidators[options.name] = options as ValidatorOptions<Validators.DynamicValidator>;
 }
 
 registerValidator<Validators.DynamicValidator>({ name: "NotNull", allowed: p => p.isMList != null || !isString(p.type) && (p.isNullable == "No" && isReferenceType(p.type) || p.isNullable == "OnlyInMemory") });
