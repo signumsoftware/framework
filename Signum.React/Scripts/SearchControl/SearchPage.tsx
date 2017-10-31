@@ -106,7 +106,7 @@ export default class SearchPage extends React.Component<SearchPageProps, SearchP
                         <span className="glyphicon glyphicon-new-window"></span>
                     </a>
                 </h2>
-                <SearchControl ref={(e: SearchControl) => this.searchControl = e}
+                <SearchControl ref={e => this.searchControl = e!}
                     findOptions={fo}
                     tag="SearchPage"
 

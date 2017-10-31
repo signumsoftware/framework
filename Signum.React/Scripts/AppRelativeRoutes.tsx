@@ -17,17 +17,6 @@ function fixBaseName<T>(baseFunction: (location: H.LocationDescriptorObject | st
     };
 }
 
-function fixBaseNameSimple<T>(baseFunction: (location: H.LocationDescriptorObject | string, state?: any) => T): (location: H.LocationDescriptorObject | string, state?: any) => T {
-    return (location, state) => {
-        if (typeof location === "string") {
-            return baseFunction(Navigator.toAbsoluteUrl(location), state);
-        } else {
-            location!.pathname = Navigator.toAbsoluteUrl(location!.pathname!);
-            return baseFunction(location, state);
-        }
-    };
-}
-
 export function useAppRelativeBasename(history: H.History) {
     history.push = fixBaseName(history.push as any) as any;
     history.replace = fixBaseName(history.replace as any) as any;

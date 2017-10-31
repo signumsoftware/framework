@@ -404,7 +404,7 @@ function numericTextBox(vl: ValueLine, validateKey: React.KeyboardEventHandler<a
             </FormGroup>
         );
 
-    const handleOnChange = (newValue: number) => {
+    const handleOnChange = (newValue: number | null) => {
         vl.setValue(newValue);
     };
 
@@ -500,7 +500,7 @@ ValueLine.renderers["DateTime" as ValueLineType] = (vl) => {
             </FormGroup>
         );
 
-    const handleDatePickerOnChange = (date: Date, str: string) => {
+    const handleDatePickerOnChange = (date?: Date, str?: string) => {
 
         const m = moment(date);
         vl.setValue(m.isValid() ? m.format() : null);
@@ -513,45 +513,13 @@ ValueLine.renderers["DateTime" as ValueLineType] = (vl) => {
     return (
         <FormGroup ctx={s.ctx} labelText={s.labelText} helpBlock={s.helpBlock} htmlAttributes={{ ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
             {ValueLine.withItemGroup(vl,
-                <DateTimePickerHotFix value={m && m.toDate()} onChange={handleDatePickerOnChange} format={momentFormat} time={showTime} defaultCurrentDate={currentDate.toDate()} />
+                <DateTimePicker value={m && m.toDate()} onChange={handleDatePickerOnChange}
+                    format={momentFormat} time={showTime} defaultCurrentDate={currentDate.toDate()} />
             )}
         </FormGroup>
     );
 }
 
-
-
-interface DateTimePickerHotFixProps {
-    value?: Date;
-    onChange?: (date?: Date, dateStr?: string) => void;
-    format?: string;
-    time?: boolean;
-    defaultCurrentDate?: Date;
-}
-
-interface DateTimePickerHotFixState {
-    currentDate?: Date;
-}
-//https://github.com/jquense/react-widgets/issues/593
-export default class DateTimePickerHotFix extends React.Component<DateTimePickerHotFixProps, DateTimePickerHotFixState> {
-
-    constructor(props: DateTimePickerHotFixProps) {
-        super(props);
-        this.state = { currentDate: props.defaultCurrentDate };
-    }
-
-    componentWillReceiveProps(newProps: DateTimePickerHotFixProps) {
-        if (newProps.defaultCurrentDate != this.props.defaultCurrentDate)
-            this.setState({ currentDate: this.props.defaultCurrentDate });
-    }
-    
-    render() {
-        const p = this.props;
-        return (
-            <DateTimePicker value={p.value} onChange={p.onChange} format={p.format} time={p.time} currentDate={this.state.currentDate} onCurrentDateChange={d => this.setState({ currentDate: d })} />
-        );
-    }
-}
 
 ValueLine.renderers["TimeSpan" as ValueLineType] = (vl) => {
     return durationTextBox(vl, ValueLine.isDuration);
@@ -576,8 +544,8 @@ function durationTextBox(vl: ValueLine, validateKey: React.KeyboardEventHandler<
         );
     }
 
-    const handleOnChange = (newValue: number) => {
-        const d = moment.duration(newValue);
+    const handleOnChange = (newValue: number | null) => {
+        const d = newValue == null ? null : moment.duration(newValue);
 
         vl.setValue(moment.isDuration(d) ? (d.asMilliseconds() * ticksPerMillisecond) : null);
     };
@@ -590,7 +558,9 @@ function durationTextBox(vl: ValueLine, validateKey: React.KeyboardEventHandler<
     return (
         <FormGroup ctx={s.ctx} labelText={s.labelText} helpBlock={s.helpBlock} htmlAttributes={{ ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
             {ValueLine.withItemGroup(vl,
-                <DurationTextBox htmlAttributes={htmlAttributes} value={s.ctx.value} onChange={handleOnChange} validateKey={validateKey} format={durationFormat} />
+                <DurationTextBox htmlAttributes={htmlAttributes} value={s.ctx.value}
+                    onChange={handleOnChange} validateKey={validateKey}
+                    format={durationFormat} />
             )}
         </FormGroup>
     );
