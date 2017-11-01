@@ -377,7 +377,7 @@ export function getColorInterpolation(interpolationName: string): ((value: numbe
     return undefined;
 }
 
-export function getColorScheme(schemeName: string): string[] | undefined {
+export function getColorScheme(schemeName: string): ReadonlyArray<string> | undefined {
     switch (schemeName) {
         case "category10": return d3.schemeCategory10;
         case "category20": return d3.schemeCategory20;

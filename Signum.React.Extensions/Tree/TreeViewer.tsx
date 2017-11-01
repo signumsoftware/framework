@@ -246,8 +246,8 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
 
         var menuItems = [
             Navigator.isNavigable(type, undefined, true) && <DropdownItem onClick={this.handleNavigate} className="btn-danger"><i className="fa fa-arrow-right" aria-hidden="true"></i>&nbsp;{EntityControlMessage.View.niceToString()}</DropdownItem >,
-            Operations.isOperationAllowed(TreeOperation.CreateChild) && <DropdownItem onClick={this.handleAddChildren}><i className="fa fa-caret-square-o-right" aria-hidden="true"></i>&nbsp;{TreeViewerMessage.AddChild.niceToString()}</DropdownItem>,
-            Operations.isOperationAllowed(TreeOperation.CreateNextSibling) && <DropdownItem onClick={this.handleAddSibling}><i className="fa fa-caret-square-o-down" aria-hidden="true"></i>&nbsp;{TreeViewerMessage.AddSibling.niceToString()}</DropdownItem>,
+            Operations.isOperationAllowed(TreeOperation.CreateChild, type) && <DropdownItem onClick={this.handleAddChildren}><i className="fa fa-caret-square-o-right" aria-hidden="true"></i>&nbsp;{TreeViewerMessage.AddChild.niceToString()}</DropdownItem>,
+            Operations.isOperationAllowed(TreeOperation.CreateNextSibling, type) && <DropdownItem onClick={this.handleAddSibling}><i className="fa fa-caret-square-o-down" aria-hidden="true"></i>&nbsp;{TreeViewerMessage.AddSibling.niceToString()}</DropdownItem>,
         ].filter(a => a != false) as React.ReactElement<any>[];
 
         if (this.state.currentMenuItems == undefined) {

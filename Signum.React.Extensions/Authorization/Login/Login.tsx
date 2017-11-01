@@ -20,8 +20,8 @@ export default class Login extends React.Component<{}, { modelState?: ModelState
         e.preventDefault();
 
         const request: AuthClient.API.LoginRequest = {
-            userName: this.userName.value,
-            password: this.password.value,
+            userName: this.userName!.value,
+            password: this.password!.value,
             rememberMe: this.rememberMe ? this.rememberMe.checked : undefined,
         };
 
@@ -38,9 +38,9 @@ export default class Login extends React.Component<{}, { modelState?: ModelState
             .done();
     }
 
-    userName: HTMLInputElement;
-    password: HTMLInputElement;
-    rememberMe: HTMLInputElement;
+    userName?: HTMLInputElement | null;
+    password?: HTMLInputElement | null;
+    rememberMe?: HTMLInputElement | null;
 
 
     error(field: string) {
@@ -72,11 +72,9 @@ export default class Login extends React.Component<{}, { modelState?: ModelState
                             </div>
                         </div>
                         <div className="col-md-3">
-                            <div className="form-control-feedback">
-                                <span className="text-danger align-middle">
-                                    <i className="fa fa-close"></i> Example error message
-                        </span>
-                            </div>
+                            {this.error("userName") && <div className="form-control-feedback">
+                                <span className="text-danger align-middle"><i className="fa fa-close"></i> {this.error("userName")}</span>
+                            </div>}
                         </div>
                     </div>
                     <div className="row">
@@ -86,26 +84,22 @@ export default class Login extends React.Component<{}, { modelState?: ModelState
                                 <label className="sr-only" htmlFor="password">Password</label>
                                 <div className="input-group mb-2 mr-sm-2 mb-sm-0">
                                     <div className="input-group-addon" style={{ width: "2.6rem" }}><i className="fa fa-key"></i></div>
-                                    <input type="password" name="password" className="form-control" id="password"
-                                        placeholder="Password" required />
+                                    <input ref={r => this.password = r} type="password" name="password" className="form-control" id="password" placeholder="Password" required />
                                 </div>
                             </div>
                         </div>
                         <div className="col-md-3">
-                            <div className="form-control-feedback">
-                                <span className="text-danger align-middle">
-                                </span>
-                            </div>
+                            {this.error("password") && <div className="form-control-feedback">
+                                <span className="text-danger align-middle"><i className="fa fa-close"></i> {this.error("password")}</span>
+                            </div>}
                         </div>
                     </div>
                     <div className="row">
                         <div className="col-md-3"></div>
                         <div className="col-md-6" style={{ paddingTop: ".35rem" }}>
                             <div className="form-check mb-2 mr-sm-2 mb-sm-0">
-                                <label className="form-check-label">
-                                    <input className="form-check-input" name="remember"
-                                        type="checkbox" />
-                                    <span style={{ paddingBottom: ".15rem" }}>Remember me</span>
+                                <label>
+                                    <input ref={r => this.rememberMe = r} name="remember" type="checkbox" /> {AuthMessage.RememberMe.niceToString()}
                                 </label>
                             </div>
                         </div>
@@ -113,8 +107,8 @@ export default class Login extends React.Component<{}, { modelState?: ModelState
                     <div className="row" style={{ paddingTop: "1rem" }}>
                         <div className="col-md-3"></div>
                         <div className="col-md-6">
-                            <button type="submit" className="btn btn-success"><i className="fa fa-sign-in"></i> Login</button>
-                            <a className="btn btn-link" href="/password/reset">Forgot Your Password?</a>
+                            <button type="submit" className="btn btn-success"><i className="fa fa-sign-in"></i> {AuthMessage.Login.niceToString()}</button>
+                            <a className="btn btn-link" href="/password/reset">{AuthMessage.IHaveForgottenMyPassword.niceToString()}</a>
                         </div>
                     </div>
                 </form>

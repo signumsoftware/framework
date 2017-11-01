@@ -30,7 +30,8 @@ export default class AccordionPanel extends React.Component<AccordionProps, Acco
         return (
             <div>
                 {
-                    React.Children.map(this.props.children, (p: React.ReactElement<CollapsableCardProps>) => {
+                    React.Children.map(this.props.children, e => {
+                        let p = e as React.ReactElement<CollapsableCardProps>;
                         if (p.type != CollapsableCard)
                             throw new Error("Childrens of AccordionPanel should be CollapsableCard");
 
