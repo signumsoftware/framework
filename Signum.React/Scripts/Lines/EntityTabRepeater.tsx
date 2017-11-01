@@ -11,7 +11,7 @@ import { ModifiableEntity, Lite, Entity, MList, MListElement, EntityControlMessa
 import Typeahead from '../Lines/Typeahead'
 import { EntityListBase, EntityListBaseProps } from './EntityListBase'
 import { RenderEntity } from './RenderEntity'
-import { Tab, UncontrolledTabs } from '../Tabs';
+import { Tab, UncontrolledTabs, Tabs } from '../Tabs';
 import { newMListElement } from '../Signum.Entities';
 import { isLite } from '../Signum.Entities';
 
@@ -82,7 +82,7 @@ export class EntityTabRepeater extends EntityListBase<EntityTabRepeaterProps, En
         const readOnly = ctx.readOnly;
 
         return (
-            <Tabs id={ctx.compose("tabs")} animation={false} activeKey={this.state.selectedIndex || 0} onSelect={(activeKey: any) => this.setState({ selectedIndex: activeKey })}>
+            <Tabs activeEventKey={this.state.selectedIndex || 0} toggle={(activeKey: any) => this.setState({ selectedIndex: activeKey })}>
                 {
                     mlistItemContext(ctx).map((mlec, i) => {
                         const drag = this.canMove(mlec.value) && !readOnly ? this.getDragConfig(i, "h") : undefined;
