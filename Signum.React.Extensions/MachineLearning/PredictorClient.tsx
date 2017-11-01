@@ -18,7 +18,7 @@ import * as AuthClient from '../Authorization/AuthClient'
 import * as ChartClient from '../Chart/ChartClient'
 import { ChartPermission } from '../Chart/Signum.Entities.Chart'
 import * as QuickLinks from '../../../Framework/Signum.React/Scripts/QuickLinks'
-import { ChartRequest  } from '../../../Extensions/Signum.React.Extensions/Chart/Signum.Entities.Chart'
+import { ChartRequest  } from '../Chart/Signum.Entities.Chart'
 
 export function start(options: { routes: JSX.Element[] }) {
 

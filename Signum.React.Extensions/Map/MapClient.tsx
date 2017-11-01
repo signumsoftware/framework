@@ -16,7 +16,7 @@ import { TypeContext } from '../../../Framework/Signum.React/Scripts/TypeContext
 import { WidgetContext, onEmbeddedWidgets, EmbeddedWidgetPosition } from '../../../Framework/Signum.React/Scripts/Frames/Widgets'
 import { FindOptions, FilterOption, FilterOperation, OrderOption, ColumnOption,
     FilterRequest, QueryRequest, Pagination, QueryTokenType, QueryToken, FilterType, SubTokensOptions, ResultTable, OrderRequest } from '../../../Framework/Signum.React/Scripts/FindOptions'
-import * as AuthClient  from '../../../Extensions/Signum.React.Extensions/Authorization/AuthClient'
+import * as AuthClient  from '../Authorization/AuthClient'
 import { SchemaMapInfo, ClientColorProvider } from './Schema/SchemaMap'
 import { OperationMapInfo } from './Operation/OperationMap'
 

@@ -22,7 +22,7 @@ import { toHtmlAttributes, HtmlAttributesExpression, withClassName } from './Htm
 import { toStyleOptions, StyleOptionsExpression, subCtx } from './StyleOptionsExpression'
 import { HtmlAttributesLine } from './HtmlAttributesComponent'
 import { StyleOptionsLine } from './StyleOptionsComponent'
-import TypeHelpComponent from '../Help/TypeHelpComponent'
+import TypeHelpComponent from '../../TypeHelp/TypeHelpComponent'
 import { registeredCustomContexts } from '../DynamicViewClient'
 
 
@@ -233,8 +233,8 @@ export class DesignerNode<N extends BaseNode> {
         return res;
     }
 
-    createChild(node: BaseNode) {
-        var res = new DesignerNode();
+    createChild<T extends BaseNode>(node: T): DesignerNode<T> {
+        var res = new DesignerNode<T>();
         res.parent = this;
         res.context = this.context;
         res.node = node;
@@ -246,11 +246,11 @@ export class DesignerNode<N extends BaseNode> {
         return res;
     }
 
-    reCreateNode() {
+    reCreateNode(): DesignerNode<N> {
         if (this.parent == undefined)
             return this;
 
-        return this.parent.createChild(this.node);
+        return this.parent.createChild<N>(this.node);
     }
 
     fixRoute(): PropertyRoute | undefined {
@@ -294,7 +294,7 @@ export class DesignerNode<N extends BaseNode> {
 export const registeredNodes: { [nodeType: string]: NodeOptions<BaseNode> } = {};
 
 export function register<T extends BaseNode>(options: NodeOptions<T>) {
-    registeredNodes[options.kind] = options;
+    registeredNodes[options.kind] = options as NodeOptions<BaseNode>;
 }
 
 export function treeNodeKind(dn: DesignerNode<BaseNode>) {
@@ -649,7 +649,7 @@ export function getEntityBaseProps(dn: DesignerNode<EntityBaseNode>, parentCtx: 
     };
 
     if (options.showAutoComplete)
-        (result as any).autoComplete = evaluateAndValidate(parentCtx, dn.node, (n: EntityLineNode) => n.autoComplete, isBooleanOrNull) == false ? null : undefined;
+        (result as any).autoComplete = evaluateAndValidate(parentCtx, dn.node, n => (n as EntityLineNode).autoComplete, isBooleanOrNull) == false ? null : undefined;
 
     if (options.showMove)
         (result as any).move = evaluateAndValidate(parentCtx, dn.node, (n: EntityListBaseNode) => n.move, isBooleanOrFunctionOrNull);
@@ -691,7 +691,7 @@ export function designEntityBase(dn: DesignerNode<EntityBaseNode>, options: { is
             <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.onView)} type={null} defaultValue={null} exampleExpression={"e => modules.Navigator.view(e)"}/>
             <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.viewOnCreate)} type="boolean" defaultValue={null} />
             {options.showMove && <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, (n: EntityListBaseNode) => n.move)} type="boolean" defaultValue={null} />}
-            {options.showAutoComplete && <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, (n: EntityLineNode) => n.autoComplete)} type="boolean" defaultValue={null} />}
+            {options.showAutoComplete && <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => (n as EntityLineNode).autoComplete)} type="boolean" defaultValue={null} />}
             <FindOptionsLine dn={dn} binding={Binding.create(dn.node, n => n.findOptions)} avoidSuggestion={true} />
             <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.onChange)} type={null} defaultValue={null} />
         </div>

@@ -242,8 +242,10 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
 
     renderMenuItems(): React.ReactElement<any>[] {
 
+        let type = this.props.typeName;
+
         var menuItems = [
-            Navigator.isNavigable(this.props.typeName, undefined, true) && <DropdownItem onClick={this.handleNavigate} className="btn-danger"><i className="fa fa-arrow-right" aria-hidden="true"></i>&nbsp;{EntityControlMessage.View.niceToString()}</DropdownItem >,
+            Navigator.isNavigable(type, undefined, true) && <DropdownItem onClick={this.handleNavigate} className="btn-danger"><i className="fa fa-arrow-right" aria-hidden="true"></i>&nbsp;{EntityControlMessage.View.niceToString()}</DropdownItem >,
             Operations.isOperationAllowed(TreeOperation.CreateChild) && <DropdownItem onClick={this.handleAddChildren}><i className="fa fa-caret-square-o-right" aria-hidden="true"></i>&nbsp;{TreeViewerMessage.AddChild.niceToString()}</DropdownItem>,
             Operations.isOperationAllowed(TreeOperation.CreateNextSibling) && <DropdownItem onClick={this.handleAddSibling}><i className="fa fa-caret-square-o-down" aria-hidden="true"></i>&nbsp;{TreeViewerMessage.AddSibling.niceToString()}</DropdownItem>,
         ].filter(a => a != false) as React.ReactElement<any>[];
@@ -397,7 +399,7 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
                     onClick={this.handleToggleFilters}
                     title={s.showFilters ? JavascriptMessage.hideFilters.niceToString() : JavascriptMessage.showFilters.niceToString()}><span className="fa fa-filter"></span></a>
                 <button className="btn btn-primary" onClick={this.handleSearchSubmit}>{JavascriptMessage.search.niceToString()}</button>
-                {Operations.isOperationAllowed(TreeOperation.CreateRoot) && <button className= "btn btn-default" onClick= { this.handleAddRoot } disabled= { s.treeNodes == null } > <i className="fa fa-star" aria-hidden="true"></i>&nbsp;{TreeViewerMessage.AddRoot.niceToString()}</button>}
+                {Operations.isOperationAllowed(TreeOperation.CreateRoot, this.props.typeName) && <button className="btn btn-default" onClick={this.handleAddRoot} disabled={s.treeNodes == null} > <i className="fa fa-star" aria-hidden="true"></i>&nbsp;{TreeViewerMessage.AddRoot.niceToString()}</button>}
                 <ButtonDropdown id="selectedButton"
                     className="sf-query-button sf-tm-selected"
                     title={`${JavascriptMessage.Selected.niceToString()} (${selected && selected.lite.toStr || TreeViewerMessage.AddRoot.niceToString()})`}

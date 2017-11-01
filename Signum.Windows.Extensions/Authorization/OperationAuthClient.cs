@@ -14,7 +14,7 @@ namespace Signum.Windows.Authorization
 {
     public static class OperationAuthClient
     {
-        static Dictionary<OperationSymbol, OperationAllowed> authorizedOperations;
+        static Dictionary<(OperationSymbol operation, Type type), OperationAllowed> authorizedOperations;
 
         public static bool Started { get; private set; }
 
@@ -30,9 +30,9 @@ namespace Signum.Windows.Authorization
             authorizedOperations = Server.Return((IOperationAuthServer s) => s.AllowedOperations());
         }
 
-        public static bool GetAllowed(OperationSymbol operationSymbol, bool inUserInterface)
+        public static bool GetAllowed(OperationSymbol operationSymbol, Type type, bool inUserInterface)
         {
-            var allowed = authorizedOperations.GetOrThrow(operationSymbol);
+            var allowed = authorizedOperations.GetOrThrow((operationSymbol, type));
 
             return allowed == OperationAllowed.Allow || allowed == OperationAllowed.DBOnly && !inUserInterface;
         }
@@ -44,15 +44,18 @@ namespace Signum.Windows.Authorization
     {
         public bool InUserInterface { get; set; }
 
-        OperationSymbol operationKey;
-        public OperationAllowedExtension(object value)
+        OperationSymbol operationSymbol;
+        Type type;
+
+        public OperationAllowedExtension(object value, Type type)
         {
-            this.operationKey = (OperationSymbol)value;
+            this.operationSymbol = (value is IOperationSymbolContainer) ? ((IOperationSymbolContainer)value).Symbol : (OperationSymbol)value;
+            this.type = type;
         }
 
         public override object ProvideValue(IServiceProvider serviceProvider)
         {
-            return OperationAuthClient.GetAllowed(operationKey, InUserInterface);
+            return OperationAuthClient.GetAllowed(operationSymbol, type, InUserInterface);
         }
     }
 
@@ -61,15 +64,18 @@ namespace Signum.Windows.Authorization
     {
         public bool InUserInterface { get; set; }
 
-        OperationSymbol operationKey;
-        public OperationVisiblityExtension(object value)
+        OperationSymbol operationSymbol;
+        Type type;
+
+        public OperationVisiblityExtension(object value, Type type)
         {
-            this.operationKey = (value is IOperationSymbolContainer) ? ((IOperationSymbolContainer)value).Symbol : (OperationSymbol)value;
+            this.operationSymbol = (value is IOperationSymbolContainer) ? ((IOperationSymbolContainer)value).Symbol : (OperationSymbol)value;
+
         }
 
         public override object ProvideValue(IServiceProvider serviceProvider)
         {
-            return OperationAuthClient.GetAllowed(operationKey, InUserInterface) ? Visibility.Visible : Visibility.Collapsed;
+            return OperationAuthClient.GetAllowed(operationSymbol, type, InUserInterface) ? Visibility.Visible : Visibility.Collapsed;
         }
     }
 }

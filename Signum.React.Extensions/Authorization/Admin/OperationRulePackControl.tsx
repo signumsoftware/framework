@@ -10,7 +10,7 @@ import { EntityLine, ValueLine } from '../../../../Framework/Signum.React/Script
 
 import { QueryDescription, SubTokensOptions } from '../../../../Framework/Signum.React/Scripts/FindOptions'
 import { getQueryNiceName, PropertyRoute, getTypeInfos } from '../../../../Framework/Signum.React/Scripts/Reflection'
-import { ModifiableEntity, EntityControlMessage, Entity, parseLite, getToString, JavascriptMessage } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
+import { ModifiableEntity, EntityControlMessage, Entity, parseLite, getToString, JavascriptMessage, OperationSymbol } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
 import { API } from '../AuthClient'
 import { OperationRulePack, OperationAllowed, OperationAllowedRule, AuthAdminMessage, PermissionSymbol, AuthMessage } from '../Signum.Entities.Authorization'
 import { ColorRadio, GrayCheckbox } from './ColoredRadios'
@@ -37,6 +37,17 @@ export default class OperationRulePackControl extends React.Component<{ ctx: Typ
         ];
     }
 
+    handleHeaderClick(e: React.MouseEvent<HTMLAnchorElement>, hc: OperationAllowed) {
+
+        this.props.ctx.value.rules.forEach(mle => {
+            if (!mle.element.coercedValues!.contains(hc)) {
+                mle.element.allowed = hc;
+                mle.element.modified = true;
+            }
+        });
+
+        this.forceUpdate();
+    }
 
     render() {
 
@@ -53,16 +64,16 @@ export default class OperationRulePackControl extends React.Component<{ ctx: Typ
                     <thead>
                         <tr>
                             <th>
-                                { PermissionSymbol.niceName() }
+                                { OperationSymbol.niceName() }
                             </th>
                             <th style={{ textAlign: "center" }}>
-                                { OperationAllowed.niceName("Allow") }
+                                <a onClick={e => this.handleHeaderClick(e, "Allow")}>{OperationAllowed.niceName("Allow")}</a>
                             </th>
                             <th style={{ textAlign: "center" }}>
-                                { OperationAllowed.niceName("DBOnly") }
+                                <a onClick={e => this.handleHeaderClick(e, "DBOnly")}>{ OperationAllowed.niceName("DBOnly") }</a>
                             </th>
                             <th style={{ textAlign: "center" }}>
-                                { OperationAllowed.niceName("None") }
+                                <a onClick={e => this.handleHeaderClick(e, "None")}>{ OperationAllowed.niceName("None") }</a>
                             </th>
                             <th style={{ textAlign: "center" }}>
                                 {AuthAdminMessage.Overriden.niceToString() }
@@ -73,7 +84,7 @@ export default class OperationRulePackControl extends React.Component<{ ctx: Typ
                         { ctx.mlistItemCtxs(a => a.rules).map((c, i) =>
                             <tr key={i}>
                                 <td>
-                                    {c.value.resource!.toStr}
+                                    {c.value.resource!.operation!.toStr}
                                 </td>
                                 <td style={{ textAlign: "center" }}>
                                     {this.renderRadio(c.value, "Allow", "green") }

@@ -3,6 +3,7 @@ import { Button } from 'reactstrap'
 import * as numbro from 'numbro'
 import { classes } from '../../../../Framework/Signum.React/Scripts/Globals'
 import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
+import { QueryEntity } from '../../../../Framework/Signum.React/Scripts/Signum.Entities.Basics';
 import { notifySuccess }from '../../../../Framework/Signum.React/Scripts/Operations/EntityOperations'
 import EntityLink from '../../../../Framework/Signum.React/Scripts/SearchControl/EntityLink'
 import { TypeContext, ButtonsContext, IRenderButtons } from '../../../../Framework/Signum.React/Scripts/TypeContext'
@@ -37,6 +38,17 @@ export default class QueryRulesPackControl extends React.Component<{ ctx: TypeCo
         ];
     }
 
+    handleHeaderClick(e: React.MouseEvent<HTMLAnchorElement>, hc: QueryAllowed) {
+
+        this.props.ctx.value.rules.forEach(mle => {
+            if (!mle.element.coercedValues!.contains(hc)) {
+                mle.element.allowed = hc;
+                mle.element.modified = true;
+            }
+        });
+
+        this.forceUpdate();
+    }
 
     render() {
 
@@ -53,19 +65,19 @@ export default class QueryRulesPackControl extends React.Component<{ ctx: TypeCo
                     <thead>
                         <tr>
                             <th>
-                                { PermissionSymbol.niceName() }
+                                { QueryEntity.niceName() }
                             </th>
                             <th style={{ textAlign: "center" }}>
-                                {QueryAllowed.niceName("Allow")}
+                                <a onClick={e => this.handleHeaderClick(e, "Allow")}>{QueryAllowed.niceName("Allow")}</a>
                             </th>
                             <th style={{ textAlign: "center" }}>
-                                {QueryAllowed.niceName("EmbeddedOnly")}
+                                <a onClick={e => this.handleHeaderClick(e, "EmbeddedOnly")}>{QueryAllowed.niceName("EmbeddedOnly")}</a>
                             </th>
                             <th style={{ textAlign: "center" }}>
-                                {QueryAllowed.niceName("None")}
+                                <a onClick={e => this.handleHeaderClick(e, "None")}>{QueryAllowed.niceName("None")}</a>
                             </th>
                             <th style={{ textAlign: "center" }}>
-                                {AuthAdminMessage.Overriden.niceToString() }
+                                    {AuthAdminMessage.Overriden.niceToString() }
                             </th>
                         </tr>
                     </thead>

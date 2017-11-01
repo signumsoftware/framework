@@ -32,7 +32,7 @@ export class CaseFlowRenderer extends CustomRenderer {
             path.style.setProperty('stroke', "lightgray");
         else {
             const pathGroup = (path.parentNode as SVGGElement).parentNode as SVGGElement;
-            const title = Array.toArray(pathGroup.childNodes).filter((a: SVGElement) => a.nodeName == "title").firstOrNull() || pathGroup.appendChild(document.createElementNS("http://www.w3.org/2000/svg", "title"));
+            const title = (Array.toArray(pathGroup.childNodes) as SVGElement[]).filter(a => a.nodeName == "title").firstOrNull() || pathGroup.appendChild(document.createElementNS("http://www.w3.org/2000/svg", "title"));
             title.textContent = stats.map(con => `${DoneType.niceName(con.DoneType)} (${con.DoneBy.toStr} ${moment(con.DoneDate).fromNow()})`).join("\n");
         }
 
@@ -90,13 +90,13 @@ export class CaseFlowRenderer extends CustomRenderer {
                 }
 
                 const gParent = ((result.parentNode as SVGGElement).parentNode as SVGGElement);
-                const title = Array.toArray(gParent.childNodes).filter((a: SVGElement) => a.nodeName == "title").firstOrNull() || gParent.appendChild(document.createElementNS("http://www.w3.org/2000/svg", "title"));
+                const title = (Array.toArray(gParent.childNodes) as SVGElement[]).filter(a => a.nodeName == "title").firstOrNull() || gParent.appendChild(document.createElementNS("http://www.w3.org/2000/svg", "title"));
                 title.textContent = stats.map((a, i) => i == 0 || i == stats.length - 1 ? getTitle(a) :
                     i == 1 ? `(…${CaseActivityEntity.niceCount(stats.length - 2)})` : "").filter(a => a).join("\n\n");
 
                 const ggParent = gParent.parentNode as SVGGElement;
 
-                const pathGroups = Array.toArray(ggParent.childNodes).filter((a: SVGElement) => a.nodeName == "g" && a.className== "jump-group") as SVGPathElement[];
+                const pathGroups = (Array.toArray(ggParent.childNodes) as SVGPathElement[]).filter(a => a.nodeName == "g" && a.className== "jump-group");
                 const jumps = this.caseFlow.Jumps.filter(j => j.FromBpmnElementId == element.id);
                 
                 const toCenteredRectangle = (bounds: BPMN.BoundsElement) => ({
@@ -153,7 +153,8 @@ export class CaseFlowRenderer extends CustomRenderer {
                         path.style.setProperty("stroke-dasharray", "5 5");
                         path.style.setProperty("marker-end", "url(#sequenceflow-end-white-black)");
 
-                        const title = Array.toArray(pathGroup.childNodes).filter((a: SVGElement) => a.nodeName == "title").firstOrNull() || pathGroup.appendChild(document.createElementNS("http://www.w3.org/2000/svg", "title"));
+                        const title = (Array.toArray(pathGroup.childNodes) as SVGElement[]).filter(a => a.nodeName == "title").firstOrNull() ||
+                            pathGroup.appendChild(document.createElementNS("http://www.w3.org/2000/svg", "title"));
 
                         title.textContent = `${DoneType.niceName(jump.DoneType)} (${jump.DoneBy.toStr} ${moment(jump.DoneDate).fromNow()})`;
                     });

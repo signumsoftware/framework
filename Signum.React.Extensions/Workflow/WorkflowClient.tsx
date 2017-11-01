@@ -20,11 +20,11 @@ import { confirmInNecessary, notifySuccess } from '../../../Framework/Signum.Rea
 import * as EntityOperations from '../../../Framework/Signum.React/Scripts/Operations/EntityOperations'
 import * as ContextualOperations from '../../../Framework/Signum.React/Scripts/Operations/ContextualOperations'
 
-import { UserEntity } from '../../../Extensions/Signum.React.Extensions/Authorization/Signum.Entities.Authorization'
-import * as DynamicViewClient from '../../../Extensions/Signum.React.Extensions/Dynamic/DynamicViewClient'
-import { CodeContext } from '../../../Extensions/Signum.React.Extensions/Dynamic/View/NodeUtils'
-import { TimeSpanEmbedded } from '../../../Extensions/Signum.React.Extensions/Basics/Signum.Entities.Basics'
-import TypeHelpButtonBarComponent from '../../../Extensions/Signum.React.Extensions/Dynamic/Help/TypeHelpButtonBarComponent'
+import { UserEntity } from '../Authorization/Signum.Entities.Authorization'
+import * as DynamicViewClient from '../Dynamic/DynamicViewClient'
+import { CodeContext } from '../Dynamic/View/NodeUtils'
+import { TimeSpanEmbedded } from '../Basics/Signum.Entities.Basics'
+import TypeHelpButtonBarComponent from '../TypeHelp/TypeHelpButtonBarComponent'
 
 import { ValueLine, EntityLine, EntityCombo, EntityList, EntityDetail, EntityStrip, EntityRepeater } from '../../../Framework/Signum.React/Scripts/Lines'
 import { WorkflowConditionEval, WorkflowActionEval, WorkflowJumpEmbedded, DecisionResult } from './Signum.Entities.Workflow'
@@ -180,7 +180,7 @@ function registerCustomContexts() {
     function addActx(cc: CodeContext) {
         if (!cc.assignments["actx"]) {
             cc.assignments["actx"] = "getCaseActivityContext(ctx)";
-            cc.imports.push("import { getCaseActivityContext } as WorkflowClient from '../../../../Extensions/Signum.React.Extensions/Workflow/WorkflowClient'");
+            cc.imports.push("import { getCaseActivityContext } as WorkflowClient from '../../Workflow/WorkflowClient'");
         }
     }
 

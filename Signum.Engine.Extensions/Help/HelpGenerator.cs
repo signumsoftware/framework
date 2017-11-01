@@ -177,10 +177,8 @@ namespace Signum.Engine.Help
             return type.Name;
         }
 
-        public static string GetOperationHelp(OperationSymbol symbol)
+        public static string GetOperationHelp(Type type, OperationSymbol symbol)
         {
-            var type = OperationLogic.FindTypes(symbol).First();
-
             var operationInfo = OperationLogic.GetOperationInfo(type, symbol);
 
             switch (operationInfo.OperationType)

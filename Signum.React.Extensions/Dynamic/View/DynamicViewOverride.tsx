@@ -8,14 +8,14 @@ import { Entity, JavascriptMessage, NormalWindowMessage, is } from '../../../../
 import { getTypeInfo, Binding, PropertyRoute, ReadonlyBinding, getTypeInfos } from '../../../../Framework/Signum.React/Scripts/Reflection'
 import JavascriptCodeMirror from '../../Codemirror/JavascriptCodeMirror'
 import * as DynamicViewClient from '../DynamicViewClient'
-import * as DynamicClient from '../DynamicClient'
 import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
 import { ViewReplacer } from '../../../../Framework/Signum.React/Scripts/Frames/ReactVisitor';
-import TypeHelpComponent from '../Help/TypeHelpComponent'
-import TypeHelpButtonBarComponent from '../Help/TypeHelpButtonBarComponent'
+import * as TypeHelpClient from '../../TypeHelp/TypeHelpClient'
+import TypeHelpComponent from '../../TypeHelp/TypeHelpComponent'
+import TypeHelpButtonBarComponent from '../../TypeHelp/TypeHelpButtonBarComponent'
 import ValueLineModal from '../../../../Framework/Signum.React/Scripts/ValueLineModal'
 import MessageModal from '../../../../Framework/Signum.React/Scripts/Modals/MessageModal'
-import * as Nodes from '../../../../Extensions/Signum.React.Extensions/Dynamic/View/Nodes';
+import * as Nodes from '../../Dynamic/View/Nodes';
 
 
 interface DynamicViewOverrideComponentProps {
@@ -29,7 +29,7 @@ interface DynamicViewOverrideComponentState {
     viewOverride?: (vr: ViewReplacer<Entity>) => void;
     scriptChanged?: boolean;
     viewNames?: string[];
-    typeHelp?: DynamicClient.TypeHelp;
+    typeHelp?: TypeHelpClient.TypeHelp;
 }
 
 export default class DynamicViewOverrideComponent extends React.Component<DynamicViewOverrideComponentProps, DynamicViewOverrideComponentState> {
@@ -67,7 +67,7 @@ export default class DynamicViewOverrideComponent extends React.Component<Dynami
     updateTypeHelp(props: DynamicViewOverrideComponentProps) {
         this.setState({ typeHelp: undefined });
         if (props.ctx.value.entityType)
-            DynamicClient.API.typeHelp(props.ctx.value.entityType!.cleanName, "CSharp")
+            TypeHelpClient.API.typeHelp(props.ctx.value.entityType!.cleanName, "CSharp")
                 .then(th => this.setState({ typeHelp: th }))
                 .done();
     }
@@ -305,7 +305,7 @@ export default class DynamicViewOverrideComponent extends React.Component<Dynami
         return typeHelp.members.filter(m => m.name && m.isExpression == true);
     }
 
-    handleExpressionClick = (member: DynamicClient.TypeMemberHelp) => {
+    handleExpressionClick = (member: TypeHelpClient.TypeMemberHelp) => {
         var paramValue = member.cleanTypeName ? `queryName : "${member.cleanTypeName}Entity"` : `valueToken: "Entity.${member.name}"`;
         this.showPropmt("Expression", `React.createElement(ValueSearchControlLine, {ctx: vr.ctx, ${paramValue}})`);
     }

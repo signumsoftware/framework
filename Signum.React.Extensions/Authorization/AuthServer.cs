@@ -53,6 +53,18 @@ namespace Signum.React.Authorization
                     if (typeof(Entity).IsAssignableFrom(t))
                         ti.Extension.Add("typeAllowed", UserEntity.Current == null ? TypeAllowedBasic.None : TypeAuthLogic.GetAllowed(t).MaxUI());
                 };
+
+
+                EntityPackTS.AddExtension += ep =>
+                {
+                    var typeAllowed =
+                    UserEntity.Current == null ? TypeAllowedBasic.None :
+                    TypeAuthLogic.IsAllowedFor(ep.entity, TypeAllowedBasic.Modify, true) ? TypeAllowedBasic.Modify :
+                    TypeAuthLogic.IsAllowedFor(ep.entity, TypeAllowedBasic.Read, true) ? TypeAllowedBasic.Read :
+                    TypeAllowedBasic.None;
+
+                    ep.Extension.Add("typeAllowed", typeAllowed);
+                };
             }
 
             if (QueryAuthLogic.IsStarted)
@@ -82,15 +94,11 @@ namespace Signum.React.Authorization
 
             if (OperationAuthLogic.IsStarted)
             {
-                ReflectionServer.AddFieldInfoExtension += (mi, fi) =>
+                ReflectionServer.AddOperationExtension += (oits, oi, type) =>
                 {
-                    if (fi.DeclaringType.Name.EndsWith("Operation"))
-                    {
-                        if (fi.GetValue(null) is IOperationSymbolContainer container)
-                            mi.Extension.Add("operationAllowed",
-                                UserEntity.Current == null ? false
-                                    : OperationAuthLogic.GetOperationAllowed(container.Symbol, inUserInterface: true));
-                    }
+                    oits.Extension.Add("operationAllowed",
+                               UserEntity.Current == null ? false :
+                               OperationAuthLogic.GetOperationAllowed(oi.OperationSymbol, type, inUserInterface: true));
                 };
                 
             }
@@ -101,9 +109,8 @@ namespace Signum.React.Authorization
                 {
                     if (fi.FieldType == typeof(PermissionSymbol))
                         mi.Extension.Add("permissionAllowed",
-                            UserEntity.Current == null
-                                ? false
-                                : PermissionAuthLogic.IsAuthorized((PermissionSymbol) fi.GetValue(null)));
+                            UserEntity.Current == null ? false : 
+                            PermissionAuthLogic.IsAuthorized((PermissionSymbol) fi.GetValue(null)));
                 };
                 
             }

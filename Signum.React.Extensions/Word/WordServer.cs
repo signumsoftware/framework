@@ -23,6 +23,7 @@ using Signum.Engine.Maps;
 using Signum.Entities.Templating;
 using Signum.Entities.Word;
 using Signum.Engine.Word;
+using Signum.React.TypeHelp;
 
 namespace Signum.React.Word
 {
@@ -30,6 +31,7 @@ namespace Signum.React.Word
     {
         public static void Start(HttpConfiguration config)
         {
+            TypeHelpServer.Start(config);
             SignumControllerFactory.RegisterArea(MethodInfo.GetCurrentMethod());
 
             ReflectionServer.RegisterLike(typeof(TemplateTokenMessage));
@@ -53,10 +55,13 @@ namespace Signum.React.Word
             QueryDescriptionTS.AddExtension += qd =>
             {
                 object type = QueryLogic.ToQueryName(qd.queryKey);
-                var templates = WordTemplateLogic.GetApplicableWordTemplates(type, null, WordTemplateVisibleOn.Query);
+                if (Schema.Current.IsAllowed(typeof(WordTemplateEntity), true) == null)
+                {
+                    var templates = WordTemplateLogic.GetApplicableWordTemplates(type, null, WordTemplateVisibleOn.Query);
 
-                if (templates.HasItems())
-                    qd.Extension.Add("wordTemplates", templates);
+                    if (templates.HasItems())
+                        qd.Extension.Add("wordTemplates", templates);
+                }
             };
         }
 

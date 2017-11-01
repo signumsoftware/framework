@@ -97,6 +97,6 @@ namespace Signum.Services
         void SetOperationRules(OperationRulePack rules);
 
         [OperationContract, NetDataContract]
-        Dictionary<OperationSymbol, OperationAllowed> AllowedOperations();
+        Dictionary<(OperationSymbol operation, Type type), OperationAllowed> AllowedOperations();
     }
 }

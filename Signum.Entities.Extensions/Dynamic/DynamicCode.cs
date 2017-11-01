@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Reflection;
 
 namespace Signum.Entities.Dynamic
 {
@@ -89,10 +90,10 @@ namespace Signum.Entities.Dynamic
         public static IEnumerable<string> GetAssemblies()
         {
             return DynamicCode.Assemblies
-                        .Select(ass => Path.Combine(DynamicCode.AssemblyDirectory, ass))
-                        .And(DynamicCode.CodeGenAssemblyPath)
-                        .NotNull()
-                        .EmptyIfNull();
+                .Select(ass => Path.Combine(DynamicCode.AssemblyDirectory, ass))
+                .And(DynamicCode.CodeGenAssemblyPath)
+                .NotNull()
+                .EmptyIfNull();
         }
 
         public static string GetUsingNamespaces()
@@ -103,7 +104,8 @@ namespace Signum.Entities.Dynamic
         public static IEnumerable<string> GetNamespaces()
         {
             return DynamicCode.Namespaces
-                            .And(DynamicCode.CodeGenEntitiesNamespace).NotNull();
+                .And(DynamicCode.CodeGenAssemblyPath == null ? null : DynamicCode.CodeGenEntitiesNamespace)
+                .NotNull();
         }
 
         public static string CreateUsings(IEnumerable<string> namespaces)
@@ -113,5 +115,10 @@ namespace Signum.Entities.Dynamic
 
         public static Func<string, List<CompilerError>> GetCustomErrors;
 
+        public static void AddFullAssembly(Assembly assembly)
+        {
+            Namespaces.AddRange(assembly.ExportedTypes.Select(a => a.Namespace));
+            Assemblies.Add(Path.GetFileName(assembly.Location));
+        }
     }
 }

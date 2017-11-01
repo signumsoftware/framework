@@ -24,6 +24,7 @@ export interface RestApiKeyEntity extends Entities.Entity {
 
 export module RestApiKeyOperation {
     export const Save : Entities.ExecuteSymbol<RestApiKeyEntity> = registerSymbol("Operation", "RestApiKeyOperation.Save");
+    export const Delete : Entities.DeleteSymbol<RestApiKeyEntity> = registerSymbol("Operation", "RestApiKeyOperation.Delete");
 }
 
 export const RestLogEntity = new Type<RestLogEntity>("RestLog");

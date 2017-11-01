@@ -1,36 +1,35 @@
 ﻿import * as React from 'react'
 import { Route } from 'react-router'
-import { classes } from '../../../../Framework/Signum.React/Scripts/Globals'
-import { ajaxPost, ajaxGet } from '../../../../Framework/Signum.React/Scripts/Services';
-import { EntitySettings, ViewPromise } from '../../../../Framework/Signum.React/Scripts/Navigator'
-import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
-import { EntityData, EntityKind, isTypeEnum, PropertyRoute } from '../../../../Framework/Signum.React/Scripts/Reflection'
-import { EntityOperationSettings } from '../../../../Framework/Signum.React/Scripts/Operations'
-import * as Operations from '../../../../Framework/Signum.React/Scripts/Operations'
-import { Entity } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
-import * as Constructor from '../../../../Framework/Signum.React/Scripts/Constructor'
-import { StyleContext } from '../../../../Framework/Signum.React/Scripts/TypeContext'
+import { classes } from '../../../Framework/Signum.React/Scripts/Globals'
+import { ajaxPost, ajaxGet } from '../../../Framework/Signum.React/Scripts/Services';
+import { EntitySettings, ViewPromise } from '../../../Framework/Signum.React/Scripts/Navigator'
+import * as Navigator from '../../../Framework/Signum.React/Scripts/Navigator'
+import { EntityData, EntityKind, isTypeEnum, PropertyRoute } from '../../../Framework/Signum.React/Scripts/Reflection'
+import { EntityOperationSettings } from '../../../Framework/Signum.React/Scripts/Operations'
+import * as Operations from '../../../Framework/Signum.React/Scripts/Operations'
+import { Entity } from '../../../Framework/Signum.React/Scripts/Signum.Entities'
+import * as Constructor from '../../../Framework/Signum.React/Scripts/Constructor'
+import { StyleContext } from '../../../Framework/Signum.React/Scripts/TypeContext'
 
-import Typeahead from '../../../../Framework/Signum.React/Scripts/Lines/Typeahead'
-import { ValueLine, EntityLine, EntityCombo, EntityList, EntityDetail, EntityStrip, EntityRepeater } from '../../../../Framework/Signum.React/Scripts/Lines'
-import { DynamicTypeEntity, DynamicTypeOperation, DynamicPanelPermission, DynamicSqlMigrationEntity } from '../Signum.Entities.Dynamic'
-import * as DynamicClient from '../DynamicClient'
-import ContextMenu from '../../../../Framework/Signum.React/Scripts/SearchControl/ContextMenu'
-import { ContextMenuPosition } from '../../../../Framework/Signum.React/Scripts/SearchControl/ContextMenu'
+import Typeahead from '../../../Framework/Signum.React/Scripts/Lines/Typeahead'
+import { ValueLine, EntityLine, EntityCombo, EntityList, EntityDetail, EntityStrip, EntityRepeater } from '../../../Framework/Signum.React/Scripts/Lines'
+import * as TypeHelpClient from './TypeHelpClient'
+import ContextMenu from '../../../Framework/Signum.React/Scripts/SearchControl/ContextMenu'
+import { ContextMenuPosition } from '../../../Framework/Signum.React/Scripts/SearchControl/ContextMenu'
 
 import "./TypeHelpComponent.css"
 
 interface TypeHelpComponentProps {
     initialType?: string;
-    mode: DynamicClient.TypeHelpMode;
-    onMemberClick?: (pr?: PropertyRoute) => void;
-    renderContextMenu?: (pr?: PropertyRoute) => React.ReactElement<any>;
+    mode: TypeHelpClient.TypeHelpMode;
+    onMemberClick?: (pr: PropertyRoute) => void;
+    renderContextMenu?: (pr: PropertyRoute) => React.ReactElement<any>;
 }
 
 interface TypeHelpComponentState {
     history: string[];
     historyIndex: number;
-    help?: DynamicClient.TypeHelp | false;
+    help?: TypeHelpClient.TypeHelp | false;
     tempQuery?: string;
 
     selected?: PropertyRoute;
@@ -46,7 +45,7 @@ export default class TypeHelpComponent extends React.Component<TypeHelpComponent
         this.state = { history: [], historyIndex: -1 };
     }
 
-    static getExpression(initial: string, pr: PropertyRoute | string, mode: DynamicClient.TypeHelpMode, options?: { stronglyTypedMixinTS?: boolean }): string {
+    static getExpression(initial: string, pr: PropertyRoute | string, mode: TypeHelpClient.TypeHelpMode, options?: { stronglyTypedMixinTS?: boolean }): string {
 
         if (pr instanceof PropertyRoute)
             pr = pr.propertyPath();
@@ -92,7 +91,7 @@ export default class TypeHelpComponent extends React.Component<TypeHelpComponent
 
     loadMembers(typeName: string) {
         this.setState({ help: undefined });
-        DynamicClient.API.typeHelp(typeName, this.props.mode)
+        TypeHelpClient.API.typeHelp(typeName, this.props.mode)
             .then(th => {
                 if (!th)
                     this.setState({ help: false });
@@ -112,7 +111,7 @@ export default class TypeHelpComponent extends React.Component<TypeHelpComponent
 
     render() {
         return (
-            <div className="sf-dynamic-type-help" ref={(th) => this.typeHelpContainer = th!}>
+            <div className="sf-type-help" ref={(th) => this.typeHelpContainer = th!}>
                 {this.renderHeader()}
                 {this.state.help == undefined ? <h4>Loading {this.currentType()}…</h4> : 
                     this.state.help == false ? <h4>Not found {this.currentType()}</h4> :
@@ -141,7 +140,7 @@ export default class TypeHelpComponent extends React.Component<TypeHelpComponent
 
 
     handleGetItems = (query: string) => {
-        return DynamicClient.API.autocompleteEntityCleanType({
+        return TypeHelpClient.API.autocompleteEntityCleanType({
             query: query,
             limit: 5,
         });
@@ -167,7 +166,7 @@ export default class TypeHelpComponent extends React.Component<TypeHelpComponent
 
     renderHeader() {
         return (
-            <div className="form-sm sf-dynamic-type-help-bar">
+            <div className="form-sm sf-type-help-bar">
                 <div className="input-group">
                     <span className="input-group-btn">
                         <button className="btn btn-default" disabled={!this.canBack()}
@@ -195,33 +194,33 @@ export default class TypeHelpComponent extends React.Component<TypeHelpComponent
 
     typeHelpContainer: HTMLElement;
 
-    renderHelp(h: DynamicClient.TypeHelp) {
+    renderHelp(h: TypeHelpClient.TypeHelp) {
         return (
             <div>
                 <h4>{h.type}</h4>
              
-                <ul className="sf-dynamic-members" style={{ paddingLeft: "0px" }}>
+                <ul className="sf-members" style={{ paddingLeft: "0px" }}>
                     {h.members.map((m, i) => this.renderMember(h, m, i))}
                 </ul>
             </div>
         );
     }
 
-    handleOnMemberClick = (m: DynamicClient.TypeMemberHelp) => {
+    handleOnMemberClick = (m: TypeHelpClient.TypeMemberHelp) => {
         if (this.props.onMemberClick && m.propertyString) {
-            var pr = PropertyRoute.parse((this.state.help as DynamicClient.TypeHelp).cleanTypeName, m.propertyString);
+            var pr = PropertyRoute.parse((this.state.help as TypeHelpClient.TypeHelp).cleanTypeName, m.propertyString);
             this.props.onMemberClick(pr);
         }
     }
 
-    handleOnContextMenuClick = (m: DynamicClient.TypeMemberHelp, e: React.MouseEvent<any>) => {
+    handleOnContextMenuClick = (m: TypeHelpClient.TypeMemberHelp, e: React.MouseEvent<any>) => {
 
         if (!m.propertyString)
             return;
 
         e.preventDefault();
         e.stopPropagation();
-        var pr = PropertyRoute.parse((this.state.help as DynamicClient.TypeHelp).cleanTypeName, m.propertyString);
+        var pr = PropertyRoute.parse((this.state.help as TypeHelpClient.TypeHelp).cleanTypeName, m.propertyString);
 
         this.setState({
             selected: pr,
@@ -231,12 +230,12 @@ export default class TypeHelpComponent extends React.Component<TypeHelpComponent
         });
     }
 
-    renderMember(h: DynamicClient.TypeHelp, m: DynamicClient.TypeMemberHelp, index: number): React.ReactChild {
+    renderMember(h: TypeHelpClient.TypeHelp, m: TypeHelpClient.TypeMemberHelp, index: number): React.ReactChild {
 
-        var className = "sf-dynamic-member-name";
+        var className = "sf-member-name";
         var onClick: React.MouseEventHandler<any> | undefined;
         if (this.props.onMemberClick) {
-            className = classes(className, "sf-dynamic-member-click");
+            className = classes(className, "sf-member-click");
             onClick = () => this.handleOnMemberClick(m);
         }
 
@@ -260,7 +259,7 @@ export default class TypeHelpComponent extends React.Component<TypeHelpComponent
                             </span>}
 
                         {m.subMembers.length > 0 &&
-                            <ul className="sf-dynamic-members">
+                            <ul className="sf-members">
                                 {m.subMembers.map((sm, i) => this.renderMember(h, sm, i))}
                             </ul>}
                     </div>}
@@ -289,7 +288,7 @@ export default class TypeHelpComponent extends React.Component<TypeHelpComponent
                 <span>
                     {this.renderType(type.substr(0, type.length - 1), cleanType)}
                     {this.props.mode == "TypeScript"? " | " : "?"}
-                    {this.props.mode == "TypeScript" && <span className="sf-dynamic-member-primitive">null</span> }
+                    {this.props.mode == "TypeScript" && <span className="sf-member-primitive">null</span> }
                 </span>
             );
         }
@@ -297,7 +296,7 @@ export default class TypeHelpComponent extends React.Component<TypeHelpComponent
         if (cleanType != null)
             return (
                 <span>
-                    <a href="" className={"sf-dynamic-member-" + (isTypeEnum(type) ? "enum" : "class")}
+                    <a href="" className={"sf-member-" + (isTypeEnum(type) ? "enum" : "class")}
                         onClick={(e) => { e.preventDefault(); this.goTo(cleanType); } }>
                         {type}
                     </a>
@@ -310,6 +309,6 @@ export default class TypeHelpComponent extends React.Component<TypeHelpComponent
                     type == "IEnumerable" || type == "IQueryable" || type == "List" || type == "MList" ? "collection" :
                         isTypeEnum(type) ? "enum" : "others";
 
-        return <span className={"sf-dynamic-member-" + kind} title={kind}>{type}</span>;
+        return <span className={"sf-member-" + kind} title={kind}>{type}</span>;
     }
 }

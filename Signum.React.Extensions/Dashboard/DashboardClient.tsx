@@ -15,10 +15,10 @@ import { TypeContext } from '../../../Framework/Signum.React/Scripts/TypeContext
 import { WidgetContext, onEmbeddedWidgets, EmbeddedWidgetPosition } from '../../../Framework/Signum.React/Scripts/Frames/Widgets'
 import { FindOptions, FilterOption, FilterOperation, OrderOption, ColumnOption,
     FilterRequest, QueryRequest, Pagination, QueryTokenType, QueryToken, FilterType, SubTokensOptions, ResultTable, OrderRequest } from '../../../Framework/Signum.React/Scripts/FindOptions'
-import * as AuthClient  from '../../../Extensions/Signum.React.Extensions/Authorization/AuthClient'
-import * as ChartClient from '../../../Extensions/Signum.React.Extensions/Chart/ChartClient'
-import * as UserChartClient from '../../../Extensions/Signum.React.Extensions/Chart/UserChart/UserChartClient'
-import * as UserQueryClient from '../../../Extensions/Signum.React.Extensions/UserQueries/UserQueryClient'
+import * as AuthClient  from '../Authorization/AuthClient'
+import * as ChartClient from '../Chart/ChartClient'
+import * as UserChartClient from '../Chart/UserChart/UserChartClient'
+import * as UserQueryClient from '../UserQueries/UserQueryClient'
 import { QueryFilterEmbedded, QueryColumnEmbedded, QueryOrderEmbedded } from '../UserQueries/Signum.Entities.UserQueries'
 
 import { DashboardPermission, DashboardEntity, ValueUserQueryListPartEntity, LinkListPartEntity, UserChartPartEntity, UserQueryPartEntity, IPartEntity, DashboardMessage, DashboardEmbedededInEntity } from './Signum.Entities.Dashboard'
@@ -152,8 +152,8 @@ export function dashboardUrl(lite: Lite<DashboardEntity>, entity?: Lite<Entity>)
     return "~/dashboard/" + lite.id + (!entity ? "" : "?entity=" + liteKey(entity)); 
 }
 
-export function registerRenderer<T extends IPartEntity>(type: Type<T>, renderer : PartRenderer<T>){
-    partRenderers[type.typeName] = renderer;    
+export function registerRenderer<T extends IPartEntity>(type: Type<T>, renderer: PartRenderer<T>) {
+    partRenderers[type.typeName] = renderer as PartRenderer<any> as PartRenderer<IPartEntity>;
 } 
 
 export module API {

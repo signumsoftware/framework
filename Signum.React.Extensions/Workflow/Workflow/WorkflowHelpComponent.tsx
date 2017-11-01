@@ -5,15 +5,13 @@ import { StyleContext } from '../../../../Framework/Signum.React/Scripts/TypeCon
 import { WorkflowEntity, WorkflowActivityEntity, WorkflowActivityMessage } from '../Signum.Entities.Workflow';
 import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
 import * as WorkflowClient from '../WorkflowClient'
-import { TypeHelpMode } from '../../Dynamic/DynamicClient'
+import { TypeHelpMode } from '../../TypeHelp/TypeHelpClient'
 import ValueLineModal from '../../../../Framework/Signum.React/Scripts/ValueLineModal';
-
 
 interface WorkflowHelpComponentProps {
     typeName: string;
     mode: TypeHelpMode;
 }
-
 
 export default class WorkflowHelpComponent extends React.Component<WorkflowHelpComponentProps> {
 

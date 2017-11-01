@@ -11,7 +11,7 @@ import * as Constructor from '../../../../Framework/Signum.React/Scripts/Constru
 import * as Operations from '../../../../Framework/Signum.React/Scripts/Operations'
 import * as QuickLinks from '../../../../Framework/Signum.React/Scripts/QuickLinks'
 import { FindOptions, QueryToken, FilterOption, FilterOptionParsed, FilterOperation, OrderOption, OrderOptionParsed, ColumnOption, FilterRequest, QueryRequest, Pagination, SubTokensOptions } from '../../../../Framework/Signum.React/Scripts/FindOptions'
-import * as AuthClient from '../../../../Extensions/Signum.React.Extensions/Authorization/AuthClient'
+import * as AuthClient from '../../Authorization/AuthClient'
 import { UserChartEntity, ChartPermission, ChartMessage, ChartRequest, ChartParameterEmbedded, ChartColumnEmbedded } from '../Signum.Entities.Chart'
 import { QueryFilterEmbedded, QueryOrderEmbedded } from '../../UserQueries/Signum.Entities.UserQueries'
 import { QueryTokenEmbedded } from '../../UserAssets/Signum.Entities.UserAssets'

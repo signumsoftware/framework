@@ -15,10 +15,10 @@ import ButtonBar from '../../../../Framework/Signum.React/Scripts/Frames/ButtonB
 import { CaseActivityEntity, WorkflowEntity, ICaseMainEntity, CaseActivityOperation, CaseActivityMessage, WorkflowActivityEntity, WorkflowActivityMessage } from '../Signum.Entities.Workflow'
 import * as WorkflowClient from '../WorkflowClient'
 import { DynamicViewMessage } from '../../Dynamic/Signum.Entities.Dynamic'
-import HtmlEditor from '../../../../Extensions/Signum.React.Extensions/HtmlEditor/HtmlEditor'
+import HtmlEditor from '../../HtmlEditor/HtmlEditor'
 
 interface CaseButtonBarProps {
-    frame: EntityFrame<CaseActivityEntity>;
+    frame: EntityFrame;
     pack: EntityPack<CaseActivityEntity>;
 }
 

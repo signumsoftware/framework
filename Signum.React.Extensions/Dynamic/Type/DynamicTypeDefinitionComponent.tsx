@@ -18,10 +18,11 @@ import SelectorModal from '../../../../Framework/Signum.React/Scripts/SelectorMo
 import MessageModal from '../../../../Framework/Signum.React/Scripts/Modals/MessageModal'
 import * as DynamicTypeClient from '../DynamicTypeClient';
 import * as DynamicClient from '../DynamicClient';
+import * as TypeHelpClient from '../../TypeHelp/TypeHelpClient';
 import { DynamicTypeMessage, DynamicTypeEntity, DynamicMixinConnectionEntity } from '../Signum.Entities.Dynamic';
 import { Validators, DynamicTypeDefinition, DynamicProperty } from '../DynamicTypeClient';
 import ValueComponent from './ValueComponent';
-import TypeHelpComponent from '../Help/TypeHelpComponent'
+import TypeHelpComponent from '../../TypeHelp/TypeHelpComponent'
 import CSharpCodeMirror from '../../Codemirror/CSharpCodeMirror';
 import ContextMenu from '../../../../Framework/Signum.React/Scripts/SearchControl/ContextMenu'
 import { ContextMenuPosition } from '../../../../Framework/Signum.React/Scripts/SearchControl/ContextMenu'
@@ -954,7 +955,7 @@ export class TypeCombo extends React.Component<{ dc: DynamicTypeDesignContext; b
     }
 
     handleGetItems = (query: string) => {
-        return DynamicClient.API.autocompleteType({
+        return TypeHelpClient.API.autocompleteType({
             query: query,
             limit: 5,
             includeBasicTypes: true,
@@ -1262,7 +1263,7 @@ export interface ValidatorOptions<T extends Validators.DynamicValidator> {
 export const registeredValidators: { [name: string]: ValidatorOptions<Validators.DynamicValidator> } = {};
 
 export function registerValidator<T extends Validators.DynamicValidator>(options: ValidatorOptions<T>) {
-    registeredValidators[options.name] = options;
+    registeredValidators[options.name] = options as ValidatorOptions<Validators.DynamicValidator>;
 }
 
 registerValidator<Validators.DynamicValidator>({ name: "NotNull", allowed: p => p.isMList != null || !isString(p.type) && (p.isNullable == "No" && isReferenceType(p.type) || p.isNullable == "OnlyInMemory") });

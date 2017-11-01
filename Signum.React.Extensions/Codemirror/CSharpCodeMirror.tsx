@@ -1,5 +1,5 @@
 ﻿import * as React from 'react'
-import CodeMirrorComponent from '../../../Extensions/Signum.React.Extensions/Codemirror/CodeMirrorComponent'
+import CodeMirrorComponent from '../Codemirror/CodeMirrorComponent'
 import * as CodeMirror from 'codemirror'
 
 import "codemirror/lib/codemirror.css"

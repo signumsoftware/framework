@@ -23,6 +23,7 @@ using Signum.Engine.Maps;
 using Signum.Entities.Mailing;
 using Signum.Entities.Templating;
 using Signum.Engine.Mailing;
+using Signum.React.TypeHelp;
 
 namespace Signum.React.Mailing
 {
@@ -30,6 +31,7 @@ namespace Signum.React.Mailing
     {
         public static void Start(HttpConfiguration config)
         {
+            TypeHelpServer.Start(config);
             SignumControllerFactory.RegisterArea(MethodInfo.GetCurrentMethod());
 
             ReflectionServer.RegisterLike(typeof(TemplateTokenMessage));
@@ -46,10 +48,13 @@ namespace Signum.React.Mailing
             QueryDescriptionTS.AddExtension += qd =>
             {
                 object type = QueryLogic.ToQueryName(qd.queryKey);
-                var templates = EmailTemplateLogic.GetApplicableEmailTemplates(type, null,  EmailTemplateVisibleOn.Query);
+                if (Schema.Current.IsAllowed(typeof(EmailTemplateEntity), true) == null)
+                {
+                    var templates = EmailTemplateLogic.GetApplicableEmailTemplates(type, null, EmailTemplateVisibleOn.Query);
 
-                if (templates.HasItems())
-                    qd.Extension.Add("emailTemplates", templates);
+                    if (templates.HasItems())
+                        qd.Extension.Add("emailTemplates", templates);
+                }
             };
         }
     }

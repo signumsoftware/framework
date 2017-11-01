@@ -180,11 +180,11 @@ export default class CaseFrameModal extends React.Component<CaseFrameModalProps,
     renderBody() {
         var pack = this.state.pack!;
 
-        var activityFrame: EntityFrame<CaseActivityEntity> = {
+        var activityFrame: EntityFrame = {
             frameComponent: this,
             entityComponent: this.entityComponent,
             onReload: newPack => {
-                pack.activity = newPack.entity;
+                pack.activity = newPack.entity as CaseActivityEntity;
                 pack.canExecuteActivity = newPack.canExecute;
                 this.forceUpdate();
             },
@@ -220,11 +220,11 @@ export default class CaseFrameModal extends React.Component<CaseFrameModalProps,
 
         var pack = this.state.pack!;
         var mainEntity = pack.activity.case.mainEntity;
-        const mainFrame: EntityFrame<ICaseMainEntity> = {
+        const mainFrame: EntityFrame = {
             frameComponent: this,
             entityComponent: this.entityComponent,
             onReload: newPack => {
-                pack.activity.case.mainEntity = newPack.entity;
+                pack.activity.case.mainEntity = newPack.entity as CaseActivityEntity;
                 pack.canExecuteMainEntity = newPack.canExecute;
                 this.forceUpdate();
             },

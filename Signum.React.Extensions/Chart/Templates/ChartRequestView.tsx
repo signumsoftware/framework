@@ -42,7 +42,7 @@ interface ChartRequestViewState {
 
 export default class ChartRequestView extends React.Component<ChartRequestViewProps, ChartRequestViewState> {
 
-    lastToken: QueryToken;
+    lastToken: QueryToken | undefined;
 
     constructor(props: ChartRequestViewProps) {
         super(props);

@@ -122,14 +122,15 @@ export default class CaseFramePage extends React.Component<CaseFramePageProps, C
 
         var pack = this.state.pack;
         
-        const activityFrame: EntityFrame<CaseActivityEntity> = {
+        const activityFrame: EntityFrame = {
             frameComponent: this,
             entityComponent: this.entityComponent,
             onReload: newPack => {
-                if (pack.activity.isNew && !newPack.entity.isNew)
-                    Navigator.history.push("~/workflow/activity/" + newPack.entity.id);
+                let newActivity = newPack.entity as CaseActivityEntity;
+                if (pack.activity.isNew && !newActivity.isNew)
+                    Navigator.history.push("~/workflow/activity/" + newActivity.id);
                 else {
-                    pack.activity = newPack.entity;
+                    pack.activity = newActivity;
                     pack.canExecuteActivity = newPack.canExecute;
                     this.forceUpdate();
                 }
@@ -186,11 +187,11 @@ export default class CaseFramePage extends React.Component<CaseFramePageProps, C
 
         var pack = this.state.pack!;
         var mainEntity = pack.activity.case.mainEntity;
-        const mainFrame: EntityFrame<ICaseMainEntity> = {
+        const mainFrame: EntityFrame = {
             frameComponent: this,
             entityComponent: this.entityComponent,
             onReload: newPack => {
-                pack.activity.case.mainEntity = newPack.entity;
+                pack.activity.case.mainEntity = newPack.entity as ICaseMainEntity;
                 pack.canExecuteMainEntity = newPack.canExecute;
                 this.forceUpdate();
             },

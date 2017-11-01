@@ -12,6 +12,7 @@ import { ModifiableEntity, Lite, Entity, MList, MListElement, EntityControlMessa
 import Typeahead from '../../../../Framework/Signum.React/Scripts/Lines/Typeahead'
 import { EntityListBase, EntityListBaseProps } from '../../../../Framework/Signum.React/Scripts/Lines/EntityListBase'
 import { RenderEntity } from '../../../../Framework/Signum.React/Scripts/Lines/RenderEntity'
+import { isModifiableEntity } from '../../../../Framework/Signum.React/Scripts/Signum.Entities';
 
 interface IGridEntity {
     row: number;
@@ -20,7 +21,7 @@ interface IGridEntity {
 }
 
 export interface EntityGridRepeaterProps extends EntityListBaseProps {
-    getComponent?: (ctx: TypeContext<ModifiableEntity>) => React.ReactElement<any>;
+    getComponent?: (ctx: TypeContext<any /*T*/>) => React.ReactElement<any>;
     createAsLink?: boolean;
     move?: boolean;
     resize?: boolean;
@@ -165,21 +166,23 @@ export class EntityGridRepeater extends EntityListBase<EntityGridRepeaterProps, 
             return;
 
         promise
-            .then((e: ModifiableEntity & IGridEntity) => {
+            .then(e => {
 
                 if (!e)
                     return;
-
-                if (!e.Type)
+                
+                if (!isModifiableEntity(e))
                     throw new Error("Should be an entity");
+                
+                let ge = e as ModifiableEntity & IGridEntity;
 
                 const list = this.props.ctx.value!;
-                if (e.row == undefined)
-                    e.row = list.length == 0 ? 0 : list.map(a => (a.element as any as IGridEntity).row).max() + 1;
-                if (e.startColumn == undefined)
-                    e.startColumn = 0;
-                if (e.columns == undefined)
-                    e.columns = 12;
+                if (ge.row == undefined)
+                    ge.row = list.length == 0 ? 0 : list.map(a => (a.element as IGridEntity).row).max() + 1;
+                if (ge.startColumn == undefined)
+                    ge.startColumn = 0;
+                if (ge.columns == undefined)
+                    ge.columns = 12;
 
                 list.push({ rowId: null, element: e });
                 this.setValue(list);

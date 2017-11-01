@@ -26,5 +26,6 @@ namespace Signum.Entities.Rest
     public static class RestApiKeyOperation
     {
         public static ExecuteSymbol<RestApiKeyEntity> Save;
+        public static DeleteSymbol<RestApiKeyEntity> Delete;
     }
 }

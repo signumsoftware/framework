@@ -28,7 +28,7 @@
     <UseGlobalApplicationHostFile />
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
-    <TypeScriptToolsVersion>2.5</TypeScriptToolsVersion>
+    <TypeScriptToolsVersion>2.6</TypeScriptToolsVersion>
     <Use64BitIISExpress />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
@@ -166,6 +166,8 @@
     <Compile Include="Dynamic\DynamicTypeController.cs" />
     <Compile Include="Dynamic\DynamicViewController.cs" />
     <Compile Include="Dynamic\DynamicServer.cs" />
+    <TypeScriptCompile Include="TypeHelp\TypeHelpClient.tsx" />
+    <TypeScriptCompile Include="TypeHelp\TypeHelpButtonBarComponent.tsx" />
     <Compile Include="Excel\ExcelController.cs" />
     <Compile Include="Excel\ExcelServer.cs" />
     <Compile Include="Files\FilesController.cs" />
@@ -196,6 +198,8 @@
     <Compile Include="Toolbar\ToolbarServer.cs" />
     <Compile Include="Tree\TreeController.cs" />
     <Compile Include="Tree\TreeServer.cs" />
+    <Compile Include="TypeHelp\TypeHelpServer.cs" />
+    <Compile Include="TypeHelp\TypeHelpController.cs" />
     <Compile Include="Workflow\WorkflowServer.cs" />
     <Compile Include="Workflow\WorkflowController.cs" />
     <TypeScriptCompile Include="Alerts\AlertsClient.tsx" />
@@ -219,7 +223,7 @@
     <TypeScriptCompile Include="Dynamic\Signum.Entities.Dynamic.ts">
       <DependentUpon>Signum.Entities.Dynamic.t4s</DependentUpon>
     </TypeScriptCompile>
-    <TypeScriptCompile Include="Dynamic\Help\TypeHelpComponent.tsx" />
+    <TypeScriptCompile Include="TypeHelp\TypeHelpComponent.tsx" />
     <TypeScriptCompile Include="Dynamic\TypeCondition\DynamicTypeCondition.tsx" />
     <TypeScriptCompile Include="Dynamic\Type\DynamicSqlMigration.tsx" />
     <TypeScriptCompile Include="Dynamic\Type\DynamicMixinConnection.tsx" />
@@ -367,7 +371,7 @@
     <Content Include="Chart\Chart.css" />
     <Content Include="Dashboard\Dashboard.css" />
     <Content Include="DiffLog\Templates\DiffLog.css" />
-    <Content Include="Dynamic\Help\TypeHelpComponent.css" />
+    <Content Include="TypeHelp\TypeHelpComponent.css" />
     <Content Include="Dynamic\DynamicPanelPage.css" />
     <Content Include="Dynamic\Type\DynamicType.css" />
     <Content Include="Dynamic\View\DynamicView.css" />
