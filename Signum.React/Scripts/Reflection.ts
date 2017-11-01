@@ -585,7 +585,12 @@ export class MListElementBinding<T> implements IBinding<T>{
     }
 
     getValue() {
-        return this.mListBinding.getValue()[this.index].element;
+        var mlist = this.mListBinding.getValue();
+
+        if (mlist.length <= this.index) //Some animations?
+            return undefined as any as T;
+
+        return mlist[this.index].element;
     }
     setValue(val: T) {
         var mlist = this.mListBinding.getValue()
@@ -1259,11 +1264,12 @@ export class GraphExplorer {
             return false;
 
         if (obj instanceof Array) {
+            let result = false;
             for (let i = 0; i < obj.length; i++) {
                 if (this.isModified(obj[i], modelStatePrefix + "[" + i + "]"))
-                    return true;
+                    result = true;
             }
-            return false;
+            return result;
         }
 
         const mle = obj as MListElement<any>;

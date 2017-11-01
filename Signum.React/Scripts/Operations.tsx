@@ -44,21 +44,41 @@ export function getSettings(operation: OperationSymbol | string): OperationSetti
     return operationSettings[operationKey];
 }
 
-export const isOperationAllowedEvent: Array<(oi: OperationInfo | OperationSymbol | string) => boolean> = [];
-
-export function isOperationAllowed(oi: OperationInfo | OperationSymbol | string) {
-    return isOperationAllowedEvent.every(a => a(oi));
+export const isOperationInfoAllowedEvent: Array<(oi: OperationInfo | OperationSymbol | string) => boolean> = [];
+export function isOperationInfoAllowed(oi: OperationInfo) {
+    return isOperationInfoAllowedEvent.every(a => a(oi));
 }
 
-export function assertOperationAllowed(operation: OperationInfo | OperationSymbol | string) {
-    var key = (operation as OperationInfo | OperationSymbol).key || operation as string;
-    if (!isOperationAllowed(key))
-        throw new Error(`Operation ${key} is denied`);
+export function isOperationAllowed(operation: OperationSymbol | string, type: PseudoType): boolean {
+    return isOperationInfoAllowed(getOperationInfo(operation, type));
 }
 
+export function getOperationInfo(operation: OperationSymbol | string, type: PseudoType): OperationInfo {
+    let operationKey = typeof operation == "string" ? operation : operation.key;
+    
+    let ti = getTypeInfo(type);
+
+    let oi = ti && ti.operations && ti.operations[operationKey];
+
+    if (oi == undefined)
+        throw new Error(`Operation ${operationKey} not defined for ${ti.name}`);
+
+    return oi;
+}
+
+export function assertOperationInfoAllowed(operation: OperationInfo) {
+    if (!isOperationInfoAllowed(operation))
+        throw new Error(`Operation ${operation.key} is denied`);
+}
+
+export function assertOperationAllowed(operation: OperationSymbol | string, type: PseudoType) {
+    var oi = getOperationInfo(operation, type);
+    if (!isOperationInfoAllowed(oi))
+        throw new Error(`Operation ${oi.key} is denied for ${getTypeInfo(type).name}`);
+}
 
 export function operationInfos(ti: TypeInfo) {
-    return Dic.getValues(ti.operations!).filter(isOperationAllowed);
+    return Dic.getValues(ti.operations!).filter(isOperationInfoAllowed);
 }
 
 /**
@@ -188,7 +208,7 @@ export class EntityOperationContext<T extends Entity> {
     }
 
     isAllowed() {
-        return isOperationAllowed(this.operationInfo);
+        return isOperationInfoAllowed(this.operationInfo);
     }
 }
 

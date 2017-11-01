@@ -474,5 +474,25 @@ namespace Signum.Engine
             entity.Ticks = entity.InDBEntity(e => e.Ticks);
             return entity;
         }
+
+        public static SqlPreCommand DeleteWhereScript(Table table, IColumn column, PrimaryKey id)
+        {
+            if (table.TablesMList().Any())
+                throw new InvalidOperationException($"DeleteWhereScript can not be used for {table.Type.Name} because contains MLists");
+            
+            var param = Connector.Current.ParameterBuilder.CreateReferenceParameter("@id", id, column);
+
+            return new SqlPreCommandSimple("DELETE FROM {0} WHERE {1} = {2}".FormatWith(table.Name, column.Name, param.ParameterName), new List<DbParameter> { param });
+        }
+
+
+        public static SqlPreCommand DeleteWhereScript<T, R>(Expression<Func<T, R>> field, R value)
+            where T : Entity
+            where R : Entity
+        {
+            var table = Schema.Current.Table<T>();
+            var column = (IColumn)Schema.Current.Field(field);
+            return DeleteWhereScript(table, column, value.Id);
+        }
     }
 }

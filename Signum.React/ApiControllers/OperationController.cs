@@ -23,9 +23,9 @@ namespace Signum.React.ApiControllers
         [Route("api/operation/construct"), HttpPost, ValidateModelFilter, ProfilerActionSplitter]
         public EntityPackTS Construct(ConstructOperationRequest request)
         {
-            var type = TypeLogic.GetType(request.type);
+            var entityType = TypeLogic.GetType(request.type);
 
-            var entity = OperationLogic.ServiceConstruct(type, request.operarionSymbol, request.args);
+            var entity = OperationLogic.ServiceConstruct(entityType, request.GetOperationSymbol(entityType), request.args);
 
             return entity == null ? null : SignumServer.GetEntityPack(entity);
         }
@@ -33,7 +33,7 @@ namespace Signum.React.ApiControllers
         [Route("api/operation/constructFromEntity"), HttpPost, ValidateModelFilter, ProfilerActionSplitter]
         public EntityPackTS ConstructFromEntity(EntityOperationRequest request)
         {
-            var entity = OperationLogic.ServiceConstructFrom(request.entity, request.operarionSymbol, request.args);
+            var entity = OperationLogic.ServiceConstructFrom(request.entity, request.GetOperationSymbol(request.entity.GetType()), request.args);
 
             return entity == null ? null: SignumServer.GetEntityPack(entity);
         }
@@ -41,7 +41,7 @@ namespace Signum.React.ApiControllers
         [Route("api/operation/constructFromLite"), HttpPost, ValidateModelFilter, ProfilerActionSplitter]
         public EntityPackTS ConstructFromLite(LiteOperationRequest request)
         {
-            var entity = OperationLogic.ServiceConstructFromLite(request.lite, request.operarionSymbol, request.args);
+            var entity = OperationLogic.ServiceConstructFromLite(request.lite, request.GetOperationSymbol(request.lite.EntityType), request.args);
             return entity == null ? null: SignumServer.GetEntityPack(entity);
         }
 
@@ -52,7 +52,7 @@ namespace Signum.React.ApiControllers
             Entity entity;
             try
             {
-                entity = OperationLogic.ServiceExecute(request.entity, request.operarionSymbol, request.args);
+                entity = OperationLogic.ServiceExecute(request.entity, request.GetOperationSymbol(request.entity.GetType()), request.args);
             }
             catch (IntegrityCheckException ex)
             {
@@ -68,7 +68,7 @@ namespace Signum.React.ApiControllers
         [Route("api/operation/executeLite"), HttpPost, ValidateModelFilter, ProfilerActionSplitter]
         public EntityPackTS ExecuteLite(LiteOperationRequest request)
         {
-            var entity = OperationLogic.ServiceExecuteLite(request.lite, request.operarionSymbol, request.args);
+            var entity = OperationLogic.ServiceExecuteLite(request.lite, request.GetOperationSymbol(request.lite.EntityType), request.args);
 
             return SignumServer.GetEntityPack(entity);
         }
@@ -76,18 +76,15 @@ namespace Signum.React.ApiControllers
         [Route("api/operation/deleteEntity"), HttpPost, ValidateModelFilter, ProfilerActionSplitter]
         public void DeleteEntity(EntityOperationRequest request)
         {
-
-            OperationLogic.ServiceDelete(request.entity, request.operarionSymbol, request.args);
-
+            OperationLogic.ServiceDelete(request.entity, request.GetOperationSymbol(request.entity.GetType()), request.args);
         }
 
         [Route("api/operation/deleteLite"), HttpPost, ValidateModelFilter, ProfilerActionSplitter]
         public void DeleteLite(LiteOperationRequest request)
         {
-            OperationLogic.ServiceDelete(request.lite, request.operarionSymbol, request.args);
+            OperationLogic.ServiceDelete(request.lite, request.GetOperationSymbol(request.lite.EntityType), request.args);
         }
-
-
+        
 
         [JsonConverter(typeof(ArgsJsonConverter))]
         public class ConstructOperationRequest : BaseOperationRequest
@@ -117,12 +114,12 @@ namespace Signum.React.ApiControllers
 
             public object[] args { get; set; }
 
-            public OperationSymbol operarionSymbol => ParseOperationAssert(this.operationKey);
-            public static OperationSymbol ParseOperationAssert(string operationKey)
+            public OperationSymbol GetOperationSymbol(Type entityType) => ParseOperationAssert(this.operationKey, entityType);
+            public static OperationSymbol ParseOperationAssert(string operationKey, Type entityType)
             {
                 var symbol = SymbolLogic<OperationSymbol>.ToSymbol(operationKey);
 
-                OperationLogic.AssertOperationAllowed(symbol, inUserInterface: true);
+                OperationLogic.AssertOperationAllowed(symbol, entityType, inUserInterface: true);
 
                 return symbol;
             }
@@ -135,7 +132,7 @@ namespace Signum.React.ApiControllers
         {
             var type = request.type == null ? null : TypeLogic.GetType(request.type);
 
-            var entity = OperationLogic.ServiceConstructFromMany(request.lites, type, request.operarionSymbol, request.args);
+            var entity = OperationLogic.ServiceConstructFromMany(request.lites, type, request.GetOperationSymbol(type), request.args);
 
             return SignumServer.GetEntityPack(entity);
         }
@@ -144,7 +141,7 @@ namespace Signum.React.ApiControllers
         public MultiOperationResponse ConstructFromMultiple(MultiOperationRequest request)
         {
             var errors = ForeachMultiple(request.lites, lite =>
-                OperationLogic.ServiceConstructFromLite(lite, request.operarionSymbol, request.args));
+                OperationLogic.ServiceConstructFromLite(lite, request.GetOperationSymbol(lite.EntityType), request.args));
 
             return new MultiOperationResponse { errors = errors };
         }
@@ -154,7 +151,7 @@ namespace Signum.React.ApiControllers
         public MultiOperationResponse ExecuteMultiple(MultiOperationRequest request)
         {
             var errors = ForeachMultiple(request.lites, lite =>
-                        OperationLogic.ServiceExecuteLite(lite, request.operarionSymbol, request.args));
+                        OperationLogic.ServiceExecuteLite(lite, request.GetOperationSymbol(lite.EntityType), request.args));
 
             return new MultiOperationResponse { errors = errors };
         }
@@ -163,7 +160,7 @@ namespace Signum.React.ApiControllers
         public MultiOperationResponse DeleteMultiple(MultiOperationRequest request)
         {
             var errors = ForeachMultiple(request.lites, lite =>
-                    OperationLogic.ServiceDelete(lite, request.operarionSymbol, request.args));
+                    OperationLogic.ServiceDelete(lite, request.GetOperationSymbol(lite.EntityType), request.args));
 
             return new MultiOperationResponse { errors = errors };
         }
@@ -204,7 +201,13 @@ namespace Signum.React.ApiControllers
         [Route("api/operation/stateCanExecutes"), HttpPost, ValidateModelFilter]
         public StateCanExecuteResponse StateCanExecutes(StateCanExecuteRequest request)
         {
-            var result = OperationLogic.GetContextualCanExecute(request.lites, request.operationKeys.Select(BaseOperationRequest.ParseOperationAssert).ToList());
+            var types = request.lites.Select(a => a.EntityType).ToHashSet();
+
+            var operationSymbols = request.operationKeys
+                .Select(operationKey => types.Select(t => BaseOperationRequest.ParseOperationAssert(operationKey, t)).Distinct().SingleEx())
+                .ToList();
+
+            var result = OperationLogic.GetContextualCanExecute(request.lites, operationSymbols);
 
             return new StateCanExecuteResponse { canExecutes = result.SelectDictionary(a => a.Key, v => v) };
         }

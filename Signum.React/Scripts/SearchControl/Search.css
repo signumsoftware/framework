@@ -255,6 +255,7 @@ span.sf-search-entity-error {
 
 .count-search {
     margin-right: 4px;
+    margin-left: 4px;
 }
 
 ul.sf-context-menu li a:not([disabled]) {

@@ -153,7 +153,7 @@ export default class FramePage extends React.Component<FramePageProps, FramePage
         const ti = this.getTypeInfo();
 
         const styleOptions: StyleOptions = {
-            readOnly: Navigator.isReadOnly(ti),
+            readOnly: Navigator.isReadOnly(this.state.pack),
             frame: frame
         };
 
