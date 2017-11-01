@@ -59,7 +59,7 @@ export default class ChartRenderer extends React.Component<{ data: ChartClient.C
 
     redraw() {
 
-        const node = ReactDOM.findDOMNode(this);
+        const node = ReactDOM.findDOMNode(this) as SVGElement;
         while (node.firstChild) {
             node.removeChild(node.firstChild);
         }

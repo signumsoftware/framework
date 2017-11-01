@@ -10,6 +10,8 @@ import { DynamicExpressionTestResponse, API } from '../DynamicExpressionClient'
 import * as TypeHelpClient from '../../TypeHelp/TypeHelpClient';
 import TypeHelpComponent from '../../TypeHelp/TypeHelpComponent'
 import ValueLineModal from '../../../../Framework/Signum.React/Scripts/ValueLineModal'
+import { ModifiableEntity } from '../../../../Framework/Signum.React/Scripts/Signum.Entities';
+import { Lite } from '../../../../Framework/Signum.React/Scripts/Signum.Entities';
 
 interface DynamicExpressionComponentProps {
     ctx: TypeContext<DynamicExpressionEntity>;
@@ -160,7 +162,7 @@ export default class DynamicExpressionComponent extends React.Component<DynamicE
         );
     }
 
-    handleOnView = (exampleEntity: Entity) => {
+    handleOnView = (exampleEntity: ModifiableEntity | Lite<Entity>) => {
         return Navigator.view(exampleEntity, { requiresSaveOperation: false });
     }
 

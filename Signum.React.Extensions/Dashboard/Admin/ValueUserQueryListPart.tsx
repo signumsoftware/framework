@@ -11,7 +11,6 @@ import QueryTokenEntityBuilder from '../../UserAssets/Templates/QueryTokenEntity
 import FileLine, { FileTypeSymbol } from '../../Files/FileLine'
 import { ValueUserQueryListPartEntity, ValueUserQueryElementEmbedded } from '../Signum.Entities.Dashboard'
 
-
 export default class ValueUserQueryListPart extends React.Component<{ ctx: TypeContext<ValueUserQueryListPartEntity> }> {
 
     render() {
@@ -19,7 +18,7 @@ export default class ValueUserQueryListPart extends React.Component<{ ctx: TypeC
         
         return (
             <div className="form-inline repeater-inline">
-                <EntityRepeater ctx={ctx.subCtx(p => p.userQueries) } getComponent={this.renderUserQuery}/>
+                <EntityRepeater ctx={ctx.subCtx(p => p.userQueries)} getComponent={ctx => this.renderUserQuery(ctx as TypeContext<ValueUserQueryElementEmbedded>)} />
             </div>
         );
     }
