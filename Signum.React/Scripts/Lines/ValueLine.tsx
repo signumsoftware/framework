@@ -411,7 +411,7 @@ function numericTextBox(vl: ValueLine, validateKey: React.KeyboardEventHandler<a
     const htmlAttributes = {
         placeholder: s.ctx.placeholderLabels ? asString(s.labelText) : undefined,
         ...vl.props.valueHtmlAttributes
-    } as React.HTMLAttributes<HTMLInputElement>;
+    } as React.AllHTMLAttributes<any>;
 
     return (
         <FormGroup ctx={s.ctx} labelText={s.labelText} helpBlock={s.helpBlock} htmlAttributes={{ ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
@@ -553,7 +553,7 @@ function durationTextBox(vl: ValueLine, validateKey: React.KeyboardEventHandler<
     const htmlAttributes = {
         placeholder: s.ctx.placeholderLabels ? asString(s.labelText) : undefined,
         ...vl.props.valueHtmlAttributes
-    } as React.HTMLAttributes<HTMLInputElement>;
+    } as React.AllHTMLAttributes<any>;
 
     return (
         <FormGroup ctx={s.ctx} labelText={s.labelText} helpBlock={s.helpBlock} htmlAttributes={{ ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
