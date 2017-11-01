@@ -234,7 +234,7 @@ export namespace MenuItemConstructor { //To allow monkey patching
 }
 
 
-export function defaultContextualClick(coc: ContextualOperationContext<Entity>,...args: any[]) {
+export function defaultContextualClick(coc: ContextualOperationContext<any>,...args: any[]) {
 
     coc.event!.persist();
 

@@ -220,7 +220,7 @@ export default class FrameModal extends React.Component<FrameModalProps, FrameMo
 
     renderBody() {
 
-        const frame: EntityFrame<Entity> = {
+        const frame: EntityFrame = {
             frameComponent: this,
             entityComponent: this.entityComponent,
             onReload: pack => this.setPack(pack),

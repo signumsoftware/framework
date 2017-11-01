@@ -171,7 +171,7 @@ export class EntityOperationContext<T extends Entity> {
         return result;
     }
 
-    frame: EntityFrame<T>;
+    frame: EntityFrame;
     tag?: string;
     entity: T;
     operationInfo: OperationInfo;

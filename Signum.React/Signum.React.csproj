@@ -28,7 +28,7 @@
     <UseGlobalApplicationHostFile />
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
-    <TypeScriptToolsVersion>2.5</TypeScriptToolsVersion>
+    <TypeScriptToolsVersion>2.6</TypeScriptToolsVersion>
     <Use64BitIISExpress />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
@@ -201,7 +201,7 @@
     <Content Include="Scripts\Signum.Entities.Basics.t4s" />
     <Content Include="Scripts\Signum.Entities.DynamicQuery.t4s" />
     <Content Include="Scripts\Signum.Entities.Patterns.t4s" />
-    <Content Include="package.json" />
+    <None Include="package.disabled.json" />
     <None Include="Scripts\Signum.Entities.t4s" />
     <Content Include="tsconfig.json" />
     <TypeScriptCompile Include="Scripts\AppRelativeRoutes.tsx" />

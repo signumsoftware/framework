@@ -65,8 +65,8 @@ export interface ModelState {
 }
 
 export interface EntityPack<T extends ModifiableEntity> {
-    entity: T
-    canExecute: { [key: string]: string };
+    readonly entity: T
+    readonly canExecute: { [key: string]: string };
 }
 
 //The interfaces add no real members, they are there just to force TS structural typing
@@ -79,10 +79,9 @@ export interface ConstructSymbol_FromMany<T extends Entity, F extends Entity> ex
 
 export const toStringDictionary: { [name: string]: ((entity: ModifiableEntity) => string) | null } = {};
 
-export function registerToString<T extends ModifiableEntity>(type: Type<T>, toStringFunc: (e: T) => string) {
-    toStringDictionary[type.typeName] = toStringFunc;
+export function registerToString<T extends ModifiableEntity>(type: Type<T>, toStringFunc: ((e: T) => string) | null) {
+    toStringDictionary[type.typeName] = toStringFunc as ((e: ModifiableEntity) => string) | null;
 }
-
 
 import * as Reflection from './Reflection' 
 

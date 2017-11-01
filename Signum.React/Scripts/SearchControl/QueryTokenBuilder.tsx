@@ -18,7 +18,7 @@ import "./QueryTokenBuilder.css"
 
 interface QueryTokenBuilderProps extends React.Props<QueryTokenBuilder> {
     queryToken: QueryToken | undefined | null;
-    onTokenChange: (newToken: QueryToken | undefined | null) => void;
+    onTokenChange: (newToken: QueryToken | undefined) => void;
     queryKey: string;
     subTokenOptions: SubTokensOptions;
     readOnly: boolean;

@@ -33,12 +33,12 @@ export interface EntityTableColumn<T, RS> {
 
 export class EntityTable extends EntityListBase<EntityTableProps, EntityTableProps> {
 
-    static typedColumns<T extends ModifiableEntity>(columns: (EntityTableColumn<T, any> | null | undefined)[]): EntityTableColumn<T, any>[] {
-        return columns.filter(a => a != null).map(a => a!);
+    static typedColumns<T extends ModifiableEntity>(columns: (EntityTableColumn<T, any> | null | undefined)[]): EntityTableColumn<ModifiableEntity, any>[] {
+        return columns.filter(a => a != null).map(a => a!) as EntityTableColumn<ModifiableEntity, any>[];
     }
 
-    static typedColumnsWithRowState<T extends ModifiableEntity, RS>(columns: (EntityTableColumn<T, RS> | null | undefined)[]): EntityTableColumn<T, RS>[]{
-        return columns.filter(a => a != null).map(a => a!);
+    static typedColumnsWithRowState<T extends ModifiableEntity, RS>(columns: (EntityTableColumn<T, RS> | null | undefined)[]): EntityTableColumn<ModifiableEntity, RS>[]{
+        return columns.filter(a => a != null).map(a => a!) as EntityTableColumn<ModifiableEntity, RS>[];
     }
 
     calculateDefaultState(state: EntityTableProps) {
