@@ -15,9 +15,8 @@ export interface EntityListProps extends EntityListBaseProps {
     size?: number;
 }
 
-export interface EntityListState extends EntityListBaseProps {
+export interface EntityListState extends EntityListProps {
     selectedIndex?: number;
-    size?: number;
 }
 
 

@@ -29,7 +29,7 @@ export function registerGlobalQuickLink(quickLinkGenerator: (ctx: QuickLinkConte
     onGlobalQuickLinks.push(quickLinkGenerator);
 }
 
-export const onQuickLinks: { [typeName: string]: Array<(ctx: QuickLinkContext<Entity>) => Seq<QuickLink> | Promise<Seq<QuickLink>>> } = {};
+export const onQuickLinks: { [typeName: string]: Array<(ctx: QuickLinkContext<any>) => Seq<QuickLink> | Promise<Seq<QuickLink>>> } = {};
 export function registerQuickLink<T extends Entity>(type: Type<T>, quickLinkGenerator: (ctx: QuickLinkContext<T>) => Seq<QuickLink> | Promise<Seq<QuickLink>>) {
     const typeName = getTypeName(type);
 

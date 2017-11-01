@@ -15,14 +15,15 @@ import QueryTokenBuilder from './QueryTokenBuilder'
 
 import "./FilterBuilder.css"
 
-interface FilterBuilderProps extends React.Props<FilterBuilder> {
+interface FilterBuilderProps {
     filterOptions: FilterOptionParsed[];
     subTokensOptions: SubTokensOptions;
     queryDescription: QueryDescription;
-    onTokenChanged?: (token: QueryToken) => void;
+    onTokenChanged?: (token: QueryToken | undefined) => void;
     lastToken?: QueryToken;
     onFiltersChanged?: (filters: FilterOptionParsed[]) => void;
     onHeightChanged?: () => void;
+    title?: React.ReactNode;
 }
 
 export default class FilterBuilder extends React.Component<FilterBuilderProps>{
@@ -64,9 +65,9 @@ export default class FilterBuilder extends React.Component<FilterBuilderProps>{
 
 
         return (
-            <div className="panel panel-default sf-filters form-xs">
-                <div className="panel-body sf-filters-list table-responsive" style={{ overflowX: "visible" }}>
-                    {
+            <fieldset className="form-xs">
+                {this.props.title && <legend>{this.props.title}</legend>}
+                <div className="sf-filters-list table-responsive" style={{ overflowX: "visible" }}>
                         <table className="table table-condensed sf-filter-table">
                             <thead>
                                 <tr>
@@ -95,10 +96,8 @@ export default class FilterBuilder extends React.Component<FilterBuilderProps>{
                                 </tr>
                             </tbody>
                         </table>
-                    }
                 </div>
-
-            </div>
+            </fieldset>
         );
     }
 }
@@ -109,8 +108,9 @@ export interface FilterComponentProps extends React.Props<FilterComponent> {
     onDeleteFilter: (fo: FilterOptionParsed) => void;
     queryDescription: QueryDescription;
     subTokenOptions: SubTokensOptions;
-    onTokenChanged?: (token: QueryToken) => void;
+    onTokenChanged?: (token: QueryToken | undefined) => void;
     onFilterChanged: (filter: FilterOptionParsed) => void;
+
 }
 
 export class FilterComponent extends React.Component<FilterComponentProps>{
@@ -119,7 +119,7 @@ export class FilterComponent extends React.Component<FilterComponentProps>{
         this.props.onDeleteFilter(this.props.filter);
     }
 
-    handleTokenChanged = (newToken: QueryToken) => {
+    handleTokenChanged = (newToken: QueryToken | null | undefined) => {
 
         const f = this.props.filter;
 
@@ -137,10 +137,10 @@ export class FilterComponent extends React.Component<FilterComponentProps>{
                 f.value = f.value && this.trimDateToFormat(f.value, toMomentFormat(newToken.format));
             }
         }
-        f.token = newToken;
+        f.token = newToken || undefined;
 
         if (this.props.onTokenChanged)
-            this.props.onTokenChanged(newToken);
+            this.props.onTokenChanged(newToken || undefined);
 
         this.props.onFilterChanged(this.props.filter);
 
@@ -184,7 +184,7 @@ export class FilterComponent extends React.Component<FilterComponentProps>{
                 </td>
                 <td>
                     <QueryTokenBuilder
-                        queryToken={f.token!}
+                        queryToken={f.token}
                         onTokenChange={this.handleTokenChanged}
                         queryKey={ this.props.queryDescription.queryKey }
                         subTokenOptions={this.props.subTokenOptions}
@@ -306,7 +306,6 @@ export class MultiValue extends React.Component<MultiValueProps> {
                     </tr>
                 </tbody>
             </table>
-
         );
 
     }

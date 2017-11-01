@@ -168,8 +168,8 @@ export default class SearchControl extends React.Component<SearchControlProps, S
         const qd = this.state.queryDescription!;
 
         const tis = getTypeInfos(qd.columns["Entity"].type);
-
-        return <SearchControlLoaded ref={(lo: SearchControlLoaded) => this.searchControlLoaded = lo}
+        
+        return <SearchControlLoaded ref={lo => this.searchControlLoaded = lo!}
             findOptions={fo}
             queryDescription={qd}
             querySettings={qs}

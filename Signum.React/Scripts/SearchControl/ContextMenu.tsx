@@ -6,6 +6,7 @@ export interface ContextMenuPosition {
     left: number;
     top: number;
     width: number; //Necessary for RTL
+    children: React.ReactElement<any>[]
 }
 
 export interface ContextMenuProps extends React.Props<ContextMenu>, React.HTMLAttributes<HTMLUListElement> {
@@ -43,7 +44,10 @@ export default class ContextMenu extends React.Component<ContextMenuProps> {
             style.left = position.left + "px";
 
         const childrens = React.Children.map(this.props.children,
-            (c: React.ReactElement<any>) => c && React.cloneElement(c, { "onSelect": combineFunction(c.props.onSelect, onHide) }));
+            (rc) => {
+                let c = rc as React.ReactElement<any>;
+                return c && React.cloneElement(c, { "onSelect": combineFunction(c.props.onSelect, onHide) });
+            });
 
         const ul = (
             <ul {...props as any} className={classes(props.className, "dropdown-menu sf-context-menu") } style={style}>

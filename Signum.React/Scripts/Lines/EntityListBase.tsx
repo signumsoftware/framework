@@ -16,7 +16,7 @@ export interface EntityListBaseProps extends EntityBaseProps {
     move?: boolean | ((item: ModifiableEntity | Lite<Entity>) => boolean);
     onFindMany?: () => Promise<(ModifiableEntity | Lite<Entity>)[] | undefined>;
 
-    ctx: TypeContext<MList<Lite<Entity> | ModifiableEntity>>;
+    ctx: TypeContext<MList<any /*Lite<Entity> | ModifiableEntity*/>>;
 }
 
 export interface EntityListBaseState extends EntityListBaseProps{
@@ -80,6 +80,7 @@ export abstract class EntityListBase<T extends EntityListBaseProps, S extends En
     handleCreateClick = (event: React.SyntheticEvent<any>) => {
 
         event.preventDefault();
+        event.stopPropagation();
 
         const promise = this.props.onCreate ?
             this.props.onCreate() : this.defaultCreate();
@@ -162,10 +163,16 @@ export abstract class EntityListBase<T extends EntityListBaseProps, S extends En
                 if (result == false)
                     return;
 
-                list.remove(mle);
-                this.setValue(list);
+                this.removeElement(mle)
             }).done();
     };
+
+    removeElement(mle: MListElement<ModifiableEntity | Lite<Entity>>)
+    {
+        const list = this.props.ctx.value!;
+        list.remove(mle);
+        this.setValue(list);
+    }
 
     canMove(item: ModifiableEntity | Lite<Entity>): boolean | undefined {
 

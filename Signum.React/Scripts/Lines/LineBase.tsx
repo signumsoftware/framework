@@ -43,7 +43,7 @@ export class FormGroup extends React.Component<FormGroupProps> {
         let pr = tCtx.propertyRoute;
         const label = (
             <label htmlFor={this.props.controlId} {...this.props.labelHtmlAttributes } className={addClass(this.props.labelHtmlAttributes, labelClasses)} >
-                {this.props.labelText || pr && pr.member && pr.member.niceName}
+                {this.props.labelText || (pr && pr.member && pr.member.niceName)}
             </label>
         );
 

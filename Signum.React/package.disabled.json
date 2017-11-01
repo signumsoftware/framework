@@ -1,0 +1,41 @@
+{
+  "name": "signum-react",
+  "version": "1.0.0",
+  "description": "Base React components for Signum Framework",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/signumsoftware/framework.git"
+  },
+  "keywords": [
+    "Signum",
+    "Framework",
+    "React",
+    "LINQ",
+    "Bootstrap",
+    "D3"
+  ],
+  "author": "Signum Software",
+  "license": "LGPL-3.0",
+  "bugs": {
+    "url": "https://github.com/signumsoftware/framework/issues"
+  },
+  "homepage": "https://github.com/signumsoftware/framework#readme",
+  "dependencies": {
+    "@types/d3": "^4.9.0",
+    "@types/d3-scale-chromatic": "^1.0.2",
+    "@types/history": "^4.6.0",
+    "@types/prop-types": "^15.5.1",
+    "@types/query-string": "^5.0.0",
+    "@types/react": "^16.0.19",
+    "@types/react-dom": "^15.5.1",
+    "@types/react-router": "^4.0.14",
+    "@types/react-router-dom": "^4.0.6",
+    "@types/react-transition-group": "^2.0.5",
+    "@types/react-widgets": "^3.2.30",
+    "@types/reactstrap": "^4.3.9",
+    "moment": "^2.18.1",
+    "numbro": "^1.11.0",
+    "popper.js": "^1.12.5",
+    "react-popper": "^0.7.3"
+  }
+}

@@ -270,7 +270,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
     }
 
 
-    handleColumnChanged = (token: QueryToken) => {
+    handleColumnChanged = (token: QueryToken | undefined) => {
         this.setState({ lastToken: token });
     }
 
@@ -278,7 +278,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
         this.setState({ editingColumn: undefined }, () => this.handleHeightChanged());
     }
 
-    handleFilterTokenChanged = (token: QueryToken) => {
+    handleFilterTokenChanged = (token: QueryToken | undefined) => {
         this.setState({ lastToken: token });
     }
 

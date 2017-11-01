@@ -22,9 +22,9 @@ interface ColumnEditorProps extends React.Props<ColumnEditor> {
 
 export default class ColumnEditor extends React.Component<ColumnEditorProps>{
 
-    handleTokenChanged = (newToken: QueryToken) => {
+    handleTokenChanged = (newToken: QueryToken | undefined) => {
         this.props.columnOption.token = newToken;
-        this.props.columnOption.displayName = newToken.niceName;
+        this.props.columnOption.displayName = newToken && newToken.niceName;
         this.props.onChange(newToken);
 
     }

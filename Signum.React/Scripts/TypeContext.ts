@@ -88,7 +88,7 @@ export class StyleContext {
         this.styleOptions.readOnly = value;
     }
 
-    get frame(): EntityFrame<ModifiableEntity> | undefined {
+    get frame(): EntityFrame | undefined {
         if (this.styleOptions.frame)
             return this.styleOptions.frame;
 
@@ -130,7 +130,7 @@ export interface StyleOptions {
     labelColumns?: BsColumns | number;
     valueColumns?: BsColumns | number;
     readOnly?: boolean;
-    frame?: EntityFrame<ModifiableEntity>;
+    frame?: EntityFrame;
 }
 
 
@@ -184,7 +184,6 @@ export class TypeContext<T> extends StyleContext {
         this.binding = binding;
         
         this.prefix = compose(parent && (parent as TypeContext<any>).prefix, binding.suffix);
-
     }
   
     subCtx(styleOptions: StyleOptions): TypeContext<T>     
@@ -316,7 +315,7 @@ export class TypeContext<T> extends StyleContext {
 
 export interface ButtonsContext {
     pack: EntityPack<ModifiableEntity>;
-    frame: EntityFrame<ModifiableEntity>;
+    frame: EntityFrame;
     isOperationVisible?: (eoc: EntityOperationContext<Entity>) => boolean;
     tag?: string;
 }
@@ -333,10 +332,10 @@ export interface IHasChanges {
     componentHasChanges?: ()=> boolean;
 }
 
-export interface EntityFrame<T extends ModifiableEntity> {
+export interface EntityFrame {
     frameComponent: React.Component<any, any>;
     entityComponent: React.Component<any, any>;
-    onReload: (pack: EntityPack<T>) => void;
+    onReload: (pack: EntityPack<ModifiableEntity>) => void;
     setError: (modelState: ModelState, initialPrefix?: string) => void;
     revalidate: () => void;
     onClose: (ok?: boolean) => void;
