@@ -126,6 +126,27 @@ namespace Signum.Utilities
                 yield return newList;
         }
 
+        public static IEnumerable<ValueTuple<int,List<T>>> GroupsOfWithIndex<T>(this IEnumerable<T> collection, int groupSize)
+        {
+            int i = 0;
+            List<T> newList = new List<T>(groupSize);
+            foreach (var item in collection)
+            {
+                newList.Add(item);
+                if (newList.Count == groupSize)
+                {
+                    i++;
+                    yield return ValueTuple.Create(i,newList);
+                    newList = new List<T>(groupSize);
+                }
+            }
+
+            if (newList.Count != 0)
+                yield return ValueTuple.Create(i,newList);
+        }
+
+
+
         public static IEnumerable<List<T>> GroupsOf<T>(this IEnumerable<T> collection, Func<T, int> elementSize, int groupSize)
         {
             List<T> newList = new List<T>();
