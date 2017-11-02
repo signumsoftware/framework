@@ -14,21 +14,21 @@ import { TypeEntity } from "../Signum.Entities.Basics";
 
 
 export interface EntityBaseProps extends LineBaseProps {
-    view?: boolean | ((item: ModifiableEntity | Lite<Entity>) => boolean);
+    view?: boolean | ((item: any/*T*/) => boolean);
     viewOnCreate?: boolean;
     navigate?: boolean;
     create?: boolean;
     find?: boolean;
-    remove?: boolean | ((item: ModifiableEntity | Lite<Entity>) => boolean);
+    remove?: boolean | ((item: any /*T*/) => boolean);
 
-    onView?: (entity: ModifiableEntity | Lite<Entity>, pr: PropertyRoute) => Promise<ModifiableEntity | undefined> | undefined;
+    onView?: (entity: any /*T*/, pr: PropertyRoute) => Promise<ModifiableEntity | undefined> | undefined;
     onCreate?: () => Promise<ModifiableEntity | Lite<Entity> | undefined> | undefined;
     onFind?: () => Promise<ModifiableEntity | Lite<Entity> | undefined> | undefined;
-    onRemove?: (entity: ModifiableEntity | Lite<Entity>) => Promise<boolean>;
+    onRemove?: (entity: any /*T*/) => Promise<boolean>;
     findOptions?: FindOptions;
 
-    getComponent?: (ctx: TypeContext<ModifiableEntity>) => React.ReactElement<any>;
-    getViewPromise?: (entity: ModifiableEntity) => undefined | string | Navigator.ViewPromise<ModifiableEntity>;
+    getComponent?: (ctx: TypeContext<any /*T*/>) => React.ReactElement<any>;
+    getViewPromise?: (entity: any /*T*/) => undefined | string | Navigator.ViewPromise<ModifiableEntity>;
 }
 
 export abstract class EntityBase<T extends EntityBaseProps, S extends EntityBaseProps> extends LineBase<T, S>

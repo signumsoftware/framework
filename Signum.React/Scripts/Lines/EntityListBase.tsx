@@ -16,7 +16,7 @@ export interface EntityListBaseProps extends EntityBaseProps {
     move?: boolean | ((item: ModifiableEntity | Lite<Entity>) => boolean);
     onFindMany?: () => Promise<(ModifiableEntity | Lite<Entity>)[] | undefined>;
 
-    ctx: TypeContext<MList<Lite<Entity> | ModifiableEntity>>;
+    ctx: TypeContext<MList<any /*Lite<Entity> | ModifiableEntity*/>>;
 }
 
 export interface EntityListBaseState extends EntityListBaseProps{

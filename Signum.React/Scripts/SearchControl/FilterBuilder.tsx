@@ -19,7 +19,7 @@ interface FilterBuilderProps {
     filterOptions: FilterOptionParsed[];
     subTokensOptions: SubTokensOptions;
     queryDescription: QueryDescription;
-    onTokenChanged?: (token: QueryToken) => void;
+    onTokenChanged?: (token: QueryToken | undefined) => void;
     lastToken?: QueryToken;
     onFiltersChanged?: (filters: FilterOptionParsed[]) => void;
     onHeightChanged?: () => void;
@@ -108,7 +108,7 @@ export interface FilterComponentProps extends React.Props<FilterComponent> {
     onDeleteFilter: (fo: FilterOptionParsed) => void;
     queryDescription: QueryDescription;
     subTokenOptions: SubTokensOptions;
-    onTokenChanged?: (token: QueryToken) => void;
+    onTokenChanged?: (token: QueryToken | undefined) => void;
     onFilterChanged: (filter: FilterOptionParsed) => void;
 
 }
@@ -119,7 +119,7 @@ export class FilterComponent extends React.Component<FilterComponentProps>{
         this.props.onDeleteFilter(this.props.filter);
     }
 
-    handleTokenChanged = (newToken: QueryToken) => {
+    handleTokenChanged = (newToken: QueryToken | null | undefined) => {
 
         const f = this.props.filter;
 
@@ -137,10 +137,10 @@ export class FilterComponent extends React.Component<FilterComponentProps>{
                 f.value = f.value && this.trimDateToFormat(f.value, toMomentFormat(newToken.format));
             }
         }
-        f.token = newToken;
+        f.token = newToken || undefined;
 
         if (this.props.onTokenChanged)
-            this.props.onTokenChanged(newToken);
+            this.props.onTokenChanged(newToken || undefined);
 
         this.props.onFilterChanged(this.props.filter);
 
@@ -184,7 +184,7 @@ export class FilterComponent extends React.Component<FilterComponentProps>{
                 </td>
                 <td>
                     <QueryTokenBuilder
-                        queryToken={f.token!}
+                        queryToken={f.token}
                         onTokenChange={this.handleTokenChanged}
                         queryKey={this.props.queryDescription.queryKey}
                         subTokenOptions={this.props.subTokenOptions}

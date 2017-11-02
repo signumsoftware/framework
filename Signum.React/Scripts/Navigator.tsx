@@ -832,7 +832,7 @@ export class NamedViewSettings<T extends ModifiableEntity> {
     }
 }
 
-export type ViewModule<T extends ModifiableEntity> = { default: React.ComponentClass<{ ctx: TypeContext<T> }> };
+export type ViewModule<T extends ModifiableEntity> = { default: React.ComponentClass<any /* { ctx: TypeContext<T> }*/> };
 
 export class ViewPromise<T extends ModifiableEntity> {
     promise: Promise<(ctx: TypeContext<T>) => React.ReactElement<any>>;
@@ -846,7 +846,7 @@ export class ViewPromise<T extends ModifiableEntity> {
     }
 
     static resolve<T extends ModifiableEntity>(getComponent: (ctx: TypeContext<T>) => React.ReactElement<any>) {
-        var result = new ViewPromise();
+        var result = new ViewPromise<T>();
         result.promise = Promise.resolve(getComponent);
         return result;
     }
