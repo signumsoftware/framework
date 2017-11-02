@@ -212,9 +212,6 @@ namespace Signum.Engine.Authorization
             if (!AuthLogic.IsEnabled)
                 return true;
 
-            if (entity.IsNew)
-                throw new InvalidOperationException("The entity {0} is new".FormatWith(entity));
-
             var tac = GetAllowed(entity.GetType());
 
             var min = inUserInterface ? tac.MinUI() : tac.MinDB();

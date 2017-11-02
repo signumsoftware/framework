@@ -440,7 +440,59 @@ namespace Signum.Engine.Processes
                 }
             }
         }
+
+        public static void WriteLineColor(this ExecutingProcess ep, ConsoleColor color, string s)
+        {
+            if (ep != null)
+            {
+                ep.WriteMessage(s);
+            }
+
+            else
+            {
+                if (!Console.IsOutputRedirected)
+                {
+                    SafeConsole.WriteColor(color, s);
+                }
+            }
+
+        }
+
+
+        public static void SynchronizeProgressForeach<K, N, O>(this ExecutingProcess ep,
+            Dictionary<K, N> newDictionary,
+            Dictionary<K, O> oldDictionary,
+            Action<K, N> createNew,
+            Action<K, O> removeOld,
+            Action<K, N, O> merge)
+            where O : class
+            where N : class
+        {
+            HashSet<K> keys = new HashSet<K>();
+            keys.UnionWith(oldDictionary.Keys);
+            keys.UnionWith(newDictionary.Keys);
+            keys.ProgressForeach(key => key.ToString(), key =>
+            {
+                var oldVal = oldDictionary.TryGetC(key);
+                var newVal = newDictionary.TryGetC(key);
+
+                if (oldVal == null)
+                {
+                    createNew?.Invoke(key, newVal);
+                }
+                else if (newVal == null)
+                {
+                    removeOld?.Invoke(key, oldVal);
+                }
+                else
+                {
+                    merge?.Invoke(key, newVal, oldVal);
+                }
+            });
+        }
     }
+
+
 
     public interface IProcessAlgorithm
     {
