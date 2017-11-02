@@ -17,9 +17,9 @@ import { RenderEntity } from './RenderEntity'
 export interface EntityTableProps extends EntityListBaseProps {
     createAsLink?: boolean | ((er: EntityTable) => React.ReactElement<any>);
     /**Consider using EntityTable.typedColumns to get Autocompletion**/
-    columns?: EntityTableColumn<ModifiableEntity, any>[],
-    fetchRowState?: (ctx: TypeContext<ModifiableEntity>, row: EntityTableRow) => Promise<any>;
-    onRowHtmlAttributes?: (ctx: TypeContext<ModifiableEntity>, row: EntityTableRow, rowState: any) => React.HTMLAttributes<any> | null | undefined;
+    columns?: EntityTableColumn<any /*T*/, any>[],
+    fetchRowState?: (ctx: TypeContext<any /*T*/>, row: EntityTableRow) => Promise<any>;
+    onRowHtmlAttributes?: (ctx: TypeContext<any /*T*/>, row: EntityTableRow, rowState: any) => React.HTMLAttributes<any> | null | undefined;
     avoidFieldSet?: boolean;
     avoidEmptyTable?: boolean;
 }
