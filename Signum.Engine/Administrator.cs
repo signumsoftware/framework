@@ -384,28 +384,26 @@ namespace Signum.Engine
         }
 
 
-        public static void MoveAllForeignKeys<T>(Lite<T> fromEntity, Lite<T> toEntity)
+        public static void MoveAllForeignKeys<T>(Lite<T> fromEntity, Lite<T> toEntity, Func<ITable, IColumn, bool> shouldMove = null)
         where T : Entity
         {
             using (Transaction tr = new Transaction())
             {
-                MoveAllForeignKeysPrivate<T>(fromEntity, toEntity).Select(a => a.UpdateScript).Combine(Spacing.Double).ExecuteLeaves();
+                MoveAllForeignKeysPrivate<T>(fromEntity, toEntity, shouldMove).Select(a => a.UpdateScript).Combine(Spacing.Double).ExecuteLeaves();
                 tr.Commit();
             }
-
         }
 
-        public static SqlPreCommand MoveAllForeignKeysScript<T>(Lite<T> fromEntity, Lite<T> toEntity)
+        public static SqlPreCommand MoveAllForeignKeysScript<T>(Lite<T> fromEntity, Lite<T> toEntity, Func<ITable, IColumn, bool> shouldMove = null)
         where T : Entity
         {
-            return MoveAllForeignKeysPrivate<T>(fromEntity, toEntity).Select(a => a.UpdateScript).Combine(Spacing.Double);
+            return MoveAllForeignKeysPrivate<T>(fromEntity, toEntity, shouldMove).Select(a => a.UpdateScript).Combine(Spacing.Double);
         }
 
-        public static void MoveAllForeignKeysConsole<T>(Lite<T> fromEntity, Lite<T> toEntity)
+        public static void MoveAllForeignKeysConsole<T>(Lite<T> fromEntity, Lite<T> toEntity, Func<ITable, IColumn, bool> shouldMove = null)
             where T : Entity
         {
-            var tuples = MoveAllForeignKeysPrivate<T>(fromEntity, toEntity);
-
+            var tuples = MoveAllForeignKeysPrivate<T>(fromEntity, toEntity, shouldMove);
             foreach (var t in tuples)
             {
                 SafeConsole.WaitRows("{0}.{1}".FormatWith(t.ColumnTable.Table.Name.Name, t.ColumnTable.Column.Name), () => t.UpdateScript.ExecuteNonQuery());
@@ -418,7 +416,7 @@ namespace Signum.Engine
             public SqlPreCommandSimple UpdateScript;
         }
 
-        static List<ColumnTableScript> MoveAllForeignKeysPrivate<T>(Lite<T> fromEntity, Lite<T> toEntity)
+        static List<ColumnTableScript> MoveAllForeignKeysPrivate<T>(Lite<T> fromEntity, Lite<T> toEntity, Func<ITable, IColumn, bool> shouldMove)  
         where T : Entity
         {
             if (fromEntity.GetType() != toEntity.GetType())
@@ -432,9 +430,10 @@ namespace Signum.Engine
             Table refTable = s.Table(typeof(T));
 
             List<ColumnTable> columns = GetColumnTables(s, refTable);
+            if (shouldMove != null)
+                columns = columns.Where(p => shouldMove(p.Table, p.Column)).ToList();
 
             var pb = Connector.Current.ParameterBuilder;
-
             return columns.Select(ct => new ColumnTableScript
             {
                 ColumnTable = ct,
