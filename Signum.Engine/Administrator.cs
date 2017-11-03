@@ -242,7 +242,7 @@ namespace Signum.Engine
             if (!query.Any())
                 return;
 
-            query.Select(a => a.Id).IntervalsOf(100).ProgressForeach(inter => inter.ToString(), null, (interva, writer) =>
+            query.Select(a => a.Id).IntervalsOf(100).ProgressForeach(inter => inter.ToString(), (interva) =>
             {
                 var list = query.Where(a => interva.Contains(a.Id)).ToList();
 
