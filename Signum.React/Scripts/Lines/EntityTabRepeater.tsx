@@ -19,7 +19,7 @@ export interface EntityTabRepeaterProps extends EntityListBaseProps {
     createAsLink?: boolean;
     avoidFieldSet?: boolean;
     selectedIndex?: number;
-    getTitle?: (mlec: TypeContext<ModifiableEntity | Lite<Entity>>) => React.ReactChild;
+    getTitle?: (mlec: TypeContext<any /*T*/>) => React.ReactChild;
     
 }
 
