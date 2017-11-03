@@ -12,6 +12,8 @@ import TypeHelpButtonBarComponent from '../../TypeHelp/TypeHelpButtonBarComponen
 import ValueLineModal from '../../../../Framework/Signum.React/Scripts/ValueLineModal'
 import { ContextMenuPosition } from '../../../../Framework/Signum.React/Scripts/SearchControl/ContextMenu'
 import PropertyRouteCombo from "../../Basics/Templates/PropertyRouteCombo";
+import { ModifiableEntity } from '../../../../Framework/Signum.React/Scripts/Signum.Entities';
+import { Lite } from '../../../../Framework/Signum.React/Scripts/Signum.Entities';
 
 interface DynamicValidationProps {
     ctx: TypeContext<DynamicValidationEntity>;
@@ -166,7 +168,7 @@ export default class DynamicValidation extends React.Component<DynamicValidation
         );
     }
 
-    handleOnView = (exampleEntity: Entity) => {
+    handleOnView = (exampleEntity: Lite<Entity> | ModifiableEntity) => {
         return Navigator.view(exampleEntity, { requiresSaveOperation: false });
     }
 

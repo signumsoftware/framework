@@ -13,7 +13,7 @@ import QueryTokenEntityBuilder from '../../UserAssets/Templates/QueryTokenEntity
 import * as UserQueryClient from '../../UserQueries/UserQueryClient'
 import { ValueUserQueryListPartEntity, ValueUserQueryElementEmbedded } from '../Signum.Entities.Dashboard'
 
-export default class ValueUserQueryListPart extends React.Component<{ part: ValueUserQueryListPartEntity; entity: Lite<Entity>}> {
+export default class ValueUserQueryListPart extends React.Component<{ part: ValueUserQueryListPartEntity; entity?: Lite<Entity> }> {
     
     render() {
 

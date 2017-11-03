@@ -152,8 +152,8 @@ export function dashboardUrl(lite: Lite<DashboardEntity>, entity?: Lite<Entity>)
     return "~/dashboard/" + lite.id + (!entity ? "" : "?entity=" + liteKey(entity)); 
 }
 
-export function registerRenderer<T extends IPartEntity>(type: Type<T>, renderer : PartRenderer<T>){
-    partRenderers[type.typeName] = renderer;    
+export function registerRenderer<T extends IPartEntity>(type: Type<T>, renderer: PartRenderer<T>) {
+    partRenderers[type.typeName] = renderer as PartRenderer<any> as PartRenderer<IPartEntity>;
 } 
 
 export module API {

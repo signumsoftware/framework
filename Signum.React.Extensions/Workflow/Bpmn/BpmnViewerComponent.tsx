@@ -74,7 +74,7 @@ export default class BpmnViewerComponent extends React.Component<BpmnViewerCompo
         });
         this.configureModules();
         if (this.props.diagramXML && this.props.diagramXML.trim() != "") {
-            this.viewer.on('element.dblclick', 1500, this.handleElementDoubleClick);
+            this.viewer.on('element.dblclick', 1500, this.handleElementDoubleClick as (obj: BPMN.Event) => void);
             this.viewer.importXML(this.props.diagramXML, this.handleOnModelError);
         }
     }

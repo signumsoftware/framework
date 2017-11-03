@@ -16,6 +16,7 @@ import { EntityBase, EntityBaseProps} from '../../../Framework/Signum.React/Scri
 import * as QueryString from 'query-string'
 
 import "./Files.css"
+import { Type } from '../../../Framework/Signum.React/Scripts/Reflection';
 
 
 export type DownloadBehaviour = "SaveAs" | "View" | "None";
@@ -30,6 +31,10 @@ export interface FileDownloaderProps {
 export default class FileDownloader extends React.Component<FileDownloaderProps> {
 
     static configurtions: { [typeName: string]: FileDownloaderConfiguration<IFile> } = {};
+
+    static registerConfiguration<T extends IFile & ModifiableEntity>(type: Type<T>, configuration: FileDownloaderConfiguration<T>) {
+        FileDownloader.configurtions[type.typeName] = configuration as FileDownloaderConfiguration<IFile>;
+    }
 
 
     static defaultProps = {
@@ -82,24 +87,23 @@ export interface FileDownloaderConfiguration<T extends IFile> {
     downloadClick: (event: React.MouseEvent<any>, file: T) => void;
 }
 
-FileDownloader.configurtions[FileEntity.typeName] = {
+FileDownloader.registerConfiguration(FileEntity, {
     downloadClick: (event, file) => downloadUrl(event, Navigator.toAbsoluteUrl("~/api/files/downloadFile/" + file.id.toString()))
-} as FileDownloaderConfiguration<FileEntity>;
+});
 
-FileDownloader.configurtions[FilePathEntity.typeName] = {
+FileDownloader.registerConfiguration(FilePathEntity, {
     downloadClick: (event, file) => downloadUrl(event, Navigator.toAbsoluteUrl("~/api/files/downloadFilePath/" + file.id.toString()))
-} as FileDownloaderConfiguration<FilePathEntity>;
+});
 
-FileDownloader.configurtions[FileEmbedded.typeName] = {
+FileDownloader.registerConfiguration(FileEmbedded, {
     downloadClick: (event, file) => downloadBase64(event, file.binaryFile!, file.fileName!)
-} as FileDownloaderConfiguration<FileEmbedded>;
+});
 
-FileDownloader.configurtions[FilePathEmbedded.typeName] = {
+FileDownloader.registerConfiguration(FilePathEmbedded, {
     downloadClick: (event, file) => downloadUrl(event,
         Navigator.toAbsoluteUrl(`~/api/files/downloadEmbeddedFilePath/${file.fileType!.key}?` + 
             QueryString.stringify({ suffix: file.suffix, fileName: file.fileName })))
-} as FileDownloaderConfiguration<FilePathEmbedded>;
-
+});
 
 function downloadUrl(e: React.MouseEvent<any>, url: string) {
     

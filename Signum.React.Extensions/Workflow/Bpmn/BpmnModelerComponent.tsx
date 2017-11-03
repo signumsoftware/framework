@@ -190,10 +190,10 @@ export default class BpmnModelerComponent extends React.Component<BpmnModelerCom
         this.configureModules();
         this.elementRegistry = this.modeler.get<BPMN.ElementRegistry>('elementRegistry');
         this.bpmnFactory = this.modeler.get<BPMN.BpmnFactory>('bpmnFactory');
-        this.modeler.on('element.dblclick', 1500, this.handleElementDoubleClick);
-        this.modeler.on('element.paste', 1500, this.handleElementPaste);
-        this.modeler.on('shape.add', 1500, this.handleAddShapeOrConnection);
-        this.modeler.on('connection.add', 1500, this.handleAddShapeOrConnection);
+        this.modeler.on('element.dblclick', 1500, this.handleElementDoubleClick as (obj: BPMN.Event) => void);
+        this.modeler.on('element.paste', 1500, this.handleElementPaste as (obj: BPMN.Event) => void);
+        this.modeler.on('shape.add', 1500, this.handleAddShapeOrConnection as (obj: BPMN.Event) => void);
+        this.modeler.on('connection.add', 1500, this.handleAddShapeOrConnection as (obj: BPMN.Event) => void);
         this.modeler.on('label.add', 1500, () => this.lastPasted = undefined);
         this.modeler.importXML(this.props.diagramXML, this.handleOnModelError)
     }
@@ -317,7 +317,7 @@ export default class BpmnModelerComponent extends React.Component<BpmnModelerCom
 
     setDiv = (div: HTMLDivElement) => {
         if (this.divArea)
-            this.divArea.removeEventListener("click", this.clickConnectionIconEvent);
+            this.divArea.removeEventListener("click", this.clickConnectionIconEvent as EventListener);
 
         this.divArea = div;
 
