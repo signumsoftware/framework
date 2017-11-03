@@ -368,7 +368,20 @@ namespace Signum.Engine.Processes
             }
         }
 
-        public static void ForEach<T>(this ExecutingProcess executingProcess, List<T> collection, Func<T, string> elementInfo, Action<T> action)
+        public static void ForEach<T>(this ExecutingProcess executingProcess, List<T> collection,
+            Func<T, string> elementInfo, Action<T> action)
+        {
+            executingProcess.ForEachNonTransactional(collection, elementInfo, item => {
+                using (Transaction tr = Transaction.ForceNew())
+                {
+                    action(item);
+                    tr.Commit();
+                }
+            });
+        }
+
+
+        public static void ForEachNonTransactional<T>(this ExecutingProcess executingProcess, List<T> collection, Func<T, string> elementInfo, Action<T> action)
         {
             var totalCount = collection.Count;
             int j = 0;
@@ -379,11 +392,8 @@ namespace Signum.Engine.Processes
                 {
                     try
                     {
-                        using (Transaction tr = Transaction.ForceNew())
-                        {
-                            action(item);
-                            tr.Commit();
-                        }
+                        action(item);
+                   
                     }
                     catch (Exception e)
                     {
@@ -475,6 +485,45 @@ namespace Signum.Engine.Processes
                 keys.UnionWith(oldDictionary.Keys);
                 keys.UnionWith(newDictionary.Keys);
                 ep.ForEach(keys.ToList(), key => key.ToString(), key =>
+                {
+                    var oldVal = oldDictionary.TryGetC(key);
+                    var newVal = newDictionary.TryGetC(key);
+
+                    if (oldVal == null)
+                    {
+                        createNew?.Invoke(key, newVal);
+                    }
+                    else if (newVal == null)
+                    {
+                        removeOld?.Invoke(key, oldVal);
+                    }
+                    else
+                    {
+                        merge?.Invoke(key, newVal, oldVal);
+                    }
+                });
+            }
+        }
+
+
+        public static void SynchronizeProgressForeachNonTransactional<K, N, O>(this ExecutingProcess ep,
+            Dictionary<K, N> newDictionary,
+            Dictionary<K, O> oldDictionary,
+            Action<K, N> createNew,
+            Action<K, O> removeOld,
+            Action<K, N, O> merge)
+            where O : class
+            where N : class
+        {
+
+            if (ep == null)
+                Synchronizer.SynchronizeProgressForeach(newDictionary, oldDictionary, createNew, removeOld, merge);
+            else
+            {
+                HashSet<K> keys = new HashSet<K>();
+                keys.UnionWith(oldDictionary.Keys);
+                keys.UnionWith(newDictionary.Keys);
+                ep.ForEachNonTransactional(keys.ToList(), key => key.ToString(), key =>
                 {
                     var oldVal = oldDictionary.TryGetC(key);
                     var newVal = newDictionary.TryGetC(key);
