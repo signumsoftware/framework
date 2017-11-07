@@ -919,9 +919,14 @@ export function getCellFormatter(qs: QuerySettings, co: ColumnOptionParsed): Cel
     if (result)
         return result;
 
-    const prRoute = registeredPropertyFormatters[co.token.propertyRoute!];
-    if (prRoute)
-        return prRoute;
+    let prKey = co.token.propertyRoute ? co.token.propertyRoute :
+        co.token.fullKey.indexOf("Entity") == 0 ? co.token.fullKey.replace("Entity","(" + co.token.parent!.niceTypeName + ")") : undefined;
+    
+    if (prKey) {
+        const prRoute = registeredPropertyFormatters[prKey];
+        if (prRoute)
+            return prRoute;
+    }
 
     const rule = formatRules.filter(a => a.isApplicable(co)).last("FormatRules");
 
