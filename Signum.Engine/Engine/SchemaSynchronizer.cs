@@ -405,6 +405,7 @@ FROM {oldTable.Name}");
                 defaultValue = SqlBuilder.IsNumber(column.SqlDbType) ? "0" :
                     SqlBuilder.IsString(column.SqlDbType) ? "''" :
                     SqlBuilder.IsDate(column.SqlDbType) ? "GetDate()" :
+                    column.SqlDbType == SqlDbType.UniqueIdentifier ? "NEWID()" :
                     "?";
 
             return defaultValue;
