@@ -94,23 +94,27 @@ export default class Login extends React.Component<{}, { modelState?: ModelState
                             </div>}
                         </div>
                     </div>
-                    <div className="row">
-                        <div className="col-md-3"></div>
-                        <div className="col-md-6" style={{ paddingTop: ".35rem" }}>
-                            <div className="form-check mb-2 mr-sm-2 mb-sm-0">
-                                <label>
-                                    <input ref={r => this.rememberMe = r} name="remember" type="checkbox" /> {AuthMessage.RememberMe.niceToString()}
-                                </label>
+                    {AuthClient.userTicket &&
+                        <div className="row">
+                            <div className="col-md-3"></div>
+                            <div className="col-md-6" style={{ paddingTop: ".35rem" }}>
+                                <div className="form-check mb-2 mr-sm-2 mb-sm-0">
+                                    <label>
+                                        <input ref={r => this.rememberMe = r} name="remember" type="checkbox" /> {AuthMessage.RememberMe.niceToString()}
+                                    </label>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                    <div className="row" style={{ paddingTop: "1rem" }}>
-                        <div className="col-md-3"></div>
-                        <div className="col-md-6">
-                            <button type="submit" className="btn btn-success"><i className="fa fa-sign-in"></i> {AuthMessage.Login.niceToString()}</button>
-                            <a className="btn btn-link" href="/password/reset">{AuthMessage.IHaveForgottenMyPassword.niceToString()}</a>
+                    }
+                    {AuthClient.resetPassword &&
+                        <div className="row" style={{ paddingTop: "1rem" }}>
+                            <div className="col-md-3"></div>
+                            <div className="col-md-6">
+                                <button type="submit" className="btn btn-success"><i className="fa fa-sign-in"></i> {AuthMessage.Login.niceToString()}</button>
+                                <Link to="~/auth/resetPassword">{AuthMessage.IHaveForgottenMyPassword.niceToString()}</Link>
+                            </div>
                         </div>
-                    </div>
+                    }
                 </form>
             </div>
         );
