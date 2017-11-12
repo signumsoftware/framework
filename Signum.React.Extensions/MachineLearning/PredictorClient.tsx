@@ -13,7 +13,10 @@ import { EntityOperationSettings } from '../../../Framework/Signum.React/Scripts
 import { PseudoType, QueryKey, GraphExplorer, OperationType, Type, getTypeName  } from '../../../Framework/Signum.React/Scripts/Reflection'
 import * as Operations from '../../../Framework/Signum.React/Scripts/Operations'
 import * as ContextualOperations from '../../../Framework/Signum.React/Scripts/Operations/ContextualOperations'
-import { PredictorEntity, PredictorMultiColumnEntity, PredictorMessage, PredictorAlgorithmSymbol, AccordPredictorAlgorithm, NaiveBayesSettingsEntity, PredictorSettingsEmbedded } from './Signum.Entities.MachineLearning'
+import {
+    PredictorEntity, PredictorMultiColumnEntity, PredictorMessage, PredictorAlgorithmSymbol, AccordPredictorAlgorithm, CNTKPredictorAlgorithm,
+    NaiveBayesSettingsEntity, NeuralNetworkSettingsEntity, PredictorSettingsEmbedded, PredictorState, PredictorStatsEmbedded
+} from './Signum.Entities.MachineLearning'
 import * as OmniboxClient from '../Omnibox/OmniboxClient'
 import * as AuthClient from '../Authorization/AuthClient'
 import * as ChartClient from '../Chart/ChartClient'
@@ -25,6 +28,7 @@ export function start(options: { routes: JSX.Element[] }) {
 
     Navigator.addSettings(new EntitySettings(PredictorEntity, e => import('./Templates/Predictor')));
     Navigator.addSettings(new EntitySettings(PredictorMultiColumnEntity, e => import('./Templates/PredictorMultiColumn')));
+    Navigator.addSettings(new EntitySettings(PredictorStatsEmbedded, e => import('./Templates/PredictorStats')));
 
     QuickLinks.registerQuickLink(PredictorEntity, ctx => new QuickLinks.QuickLinkAction(
         PredictorMessage.DownloadCsv.niceToString(),
@@ -45,14 +49,13 @@ export function start(options: { routes: JSX.Element[] }) {
         PredictorMessage.OpenTensorflowProjector.niceToString(),
         PredictorMessage.OpenTensorflowProjector.niceToString(),
         e => window.open("http://projector.tensorflow.org/", "_blank")));
-
     
-
     Constructor.registerConstructor(PredictorEntity, () => PredictorEntity.New({
         settings: PredictorSettingsEmbedded.New()
     }));
 
     registerInitializer(AccordPredictorAlgorithm.DiscreteNaiveBayes, a => a.algorithmSettings = NaiveBayesSettingsEntity.New());
+    registerInitializer(CNTKPredictorAlgorithm.NeuralNetwork, a => a.algorithmSettings = NeuralNetworkSettingsEntity.New());
 }
 
 
@@ -83,4 +86,13 @@ export namespace API {
             .done();
     }
 
+    export function getTrainingState(lite: Lite<PredictorEntity>): Promise<TrainingProgress> {
+        return ajaxGet<TrainingProgress>({ url: `~/api/predictor/trainingProgress/${lite.id}` });
+    }
+}
+
+export interface TrainingProgress {
+    State: PredictorState;
+    Message?: string;
+    Progress?: number;
 }

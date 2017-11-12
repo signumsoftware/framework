@@ -12,6 +12,7 @@ using System.Threading.Tasks;
 using Signum.Entities.DynamicQuery;
 using System.Reflection;
 using Signum.Entities.Files;
+using Signum.Entities.Authorization;
 
 namespace Signum.Entities.MachineLearning
 {
@@ -34,8 +35,13 @@ namespace Signum.Entities.MachineLearning
 
         [NotNullable, NotNullValidator]
         public PredictorAlgorithmSymbol Algorithm { get; set; }
+        
+        public Lite<ExceptionEntity> TrainingException { get; set; }
 
-        [ImplementedBy(typeof(NeuronalNetworkSettingsEntity), typeof(NaiveBayesSettingsEntity))]
+        [ImplementedBy(typeof(UserEntity))]
+        public Lite<IUserEntity> User { get; set; }
+
+        [ImplementedBy(typeof(NeuralNetworkSettingsEntity), typeof(NaiveBayesSettingsEntity))]
         public IPredictorAlgorithmSettings AlgorithmSettings { get; set; }
 
         public PredictorState State { get; set; }
@@ -50,6 +56,9 @@ namespace Signum.Entities.MachineLearning
         [Ignore] //virtual Mlist
         public MList<PredictorMultiColumnEntity> MultiColumns { get; set; } = new MList<PredictorMultiColumnEntity>();
 
+        public PredictorStatsEmbedded TrainingStats { get; set; }
+        public PredictorStatsEmbedded TestStats { get; set; }
+        
         [Ignore]
         public object Model;
 
@@ -70,10 +79,20 @@ namespace Signum.Entities.MachineLearning
     }
 
     [Serializable]
+    public class PredictorStatsEmbedded : EmbeddedEntity
+    {
+        public int TotalCount { get; set; }
+        public int? ErrorCount { get; set; }
+        public double? Mean { get; set; }
+        public double? Variance { get; set; }
+        public double? StandartDeviation { get; set; }
+    }
+
+    [Serializable]
     public class PredictorSettingsEmbedded : EmbeddedEntity
     {
-        //K
-        public int CrossValidationFolds { get; set; }
+        [Format("p")]
+        public double TestPercentage { get; set; } = 0.2;
 
         internal PredictorSettingsEmbedded Clone()
         {
@@ -171,6 +190,7 @@ namespace Signum.Entities.MachineLearning
         Draft,
         Training, 
         Trained,
+        Error,
     }
 
     public enum PredictorColumnUsage
@@ -292,5 +312,11 @@ namespace Signum.Entities.MachineLearning
     public static class AccordPredictorAlgorithm
     {
         public static PredictorAlgorithmSymbol DiscreteNaiveBayes;
+    }
+
+    [AutoInit]
+    public static class CNTKPredictorAlgorithm
+    {
+        public static PredictorAlgorithmSymbol NeuralNetwork;
     }
 }

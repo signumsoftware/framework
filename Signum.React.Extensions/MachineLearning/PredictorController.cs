@@ -44,17 +44,16 @@ namespace Signum.React.MachineLearning
             return FilesController.GetHttpReponseMessage(new MemoryStream(content), $"{predictor.Name}.metadata.tsv");
         }
 
-        [Route("api/predictor/trainingState/{id}"), HttpGet]
-        public TrainingState GetState(int id)
+        [Route("api/predictor/trainingProgress/{id}"), HttpGet]
+        public TrainingProgress GetTrainingState(int id)
         {
             var state = PredictorLogic.Trainings.TryGetC(Lite.Create<PredictorEntity>(id));
-
-            if (state == null)
-                return null;
-            return new TrainingState
+            
+            return new TrainingProgress
             {
-                Message = state.Context.Message,
-                Progress = state.Context.Progress
+                State = state?.Context.Predictor.State ?? Database.Query<PredictorEntity>().Where(a => a.Id == id).Select(a => a.State).SingleEx(),
+                Message = state?.Context.Message,
+                Progress = state?.Context.Progress
             };
         }
     }

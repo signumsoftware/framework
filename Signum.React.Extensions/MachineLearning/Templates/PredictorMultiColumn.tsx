@@ -52,7 +52,8 @@ export default class PredictorMultiColumn extends React.Component<{ ctx: TypeCon
                             },
                         ])} />
 
-                        <EntityTable ctx={ctxxs.subCtx(e => e.aggregates)} columns={EntityTable.typedColumns<PredictorColumnEmbedded>([
+                    <EntityTable ctx={ctxxs.subCtx(e => e.aggregates)} columns={EntityTable.typedColumns<PredictorColumnEmbedded>([
+                            { property: a => a.usage },
                             {
                                 property: a => a.token,
                                 template: cctx => <QueryTokenEntityBuilder

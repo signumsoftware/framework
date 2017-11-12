@@ -5,6 +5,7 @@ using Signum.Engine.Files;
 using Signum.Engine.Maps;
 using Signum.Engine.Operations;
 using Signum.Entities;
+using Signum.Entities.Basics;
 using Signum.Entities.DynamicQuery;
 using Signum.Entities.MachineLearning;
 using Signum.Entities.UserAssets;
@@ -57,8 +58,9 @@ namespace Signum.Engine.MachineLearning
                         e.Id,
                         e.Name,
                         e.Query,
-                        InputCount = e.Filters.Count,
-                        OutputCount = e.Filters.Count,
+                        e.Algorithm,
+                        e.State,
+                        e.TrainingException,
                     });
 
                 PredictorGraph.Register();
@@ -96,6 +98,175 @@ namespace Signum.Engine.MachineLearning
             }
         }
 
+        public static void TrainSync(this PredictorEntity p, bool autoReset = true)
+        {
+            if(autoReset)
+            {
+                if (p.State == PredictorState.Trained || p.State == PredictorState.Error)
+                    p.Execute(PredictorOperation.Untrain);
+                else if(p.State == PredictorState.Training)
+                    p.Execute(PredictorOperation.CancelTraining);
+            }
+
+            p.User = UserHolder.Current.ToLite();
+            p.State = PredictorState.Training;
+            p.Save();
+
+            var cancellationSource = new CancellationTokenSource();
+            var ctx = new PredictorTrainingContext(p, cancellationSource.Token);
+            ctx.OnReportProgres += (message, progress) => Console.WriteLine((progress.HasValue ? $"{progress:P} - " : "") + message);
+            DoTraining(ctx);
+        }
+
+        static void StartTrainingAsync(PredictorEntity p)
+        {
+            var cancellationSource = new CancellationTokenSource();
+
+            var ctx = new PredictorTrainingContext(p, cancellationSource.Token);
+
+            var state = new PredictorTrainingState
+            {
+                CancellationTokenSource = cancellationSource,
+                Context = ctx
+            };
+
+            if (!Trainings.TryAdd(p.ToLite(), state))
+                throw new InvalidOperationException(PredictorMessage._0IsAlreadyBeingTrained.NiceToString(p));
+
+            using (ExecutionContext.SuppressFlow())
+            {
+                Task.Run(() =>
+                {
+                    var user = ExecutionMode.Global().Using(_ => p.User.Retrieve());
+                    using (UserHolder.UserSession(user))
+                    {
+                        try
+                        {
+                            DoTraining(ctx);
+                        }
+                        finally
+                        {
+                            Trainings.TryRemove(p.ToLite(), out var _);
+                        }
+                    }
+                });
+            }
+        }
+
+        static void DoTraining(PredictorTrainingContext ctx)
+        {
+            try
+            {
+                PredictorLogicQuery.RetrieveData(ctx);
+                CreatePredictorCodifications(ctx);
+                var algorithm = Algorithms.GetOrThrow(ctx.Predictor.Algorithm);
+                algorithm.Train(ctx);
+                ctx.Predictor.State = PredictorState.Trained;
+            }
+            catch (OperationCanceledException e)
+            {
+
+            }
+            catch (Exception ex)
+            {
+                ex.Data["entity"] = ctx.Predictor;
+                var e = ex.LogException();
+                ctx.Predictor.InDB().UnsafeUpdate()
+                .Set(a => a.State, a => PredictorState.Error)
+                .Set(a => a.TrainingException, a => e.ToLite())
+                .Execute();
+            }
+        }
+
+        static void CleanTrained(PredictorEntity e)
+        {
+            e.TrainingException = null;
+            foreach (var fp in e.Files)
+            {
+                fp.DeleteFileOnCommit();
+            }
+            e.TestStats = null;
+            e.TrainingStats = null;
+            e.Files.Clear();
+            e.Codifications().UnsafeDelete();
+        }
+
+        static void CreatePredictorCodifications(PredictorTrainingContext ctx)
+        {
+            ctx.ReportProgress($"Saving Codifications", 0.5m);
+            ctx.Columns.Select((a, i) =>
+            {
+                string ToStringKey(QueryToken token, object obj)
+                {
+                    if (token == null || obj == null)
+                        return null;
+
+                    return FilterValueConverter.ToString(obj, token.Type, allowSmart: false);
+                }
+
+                string GetGroupKey(int index)
+                {
+                    var token = a.MultiColumn?.Aggregates.ElementAtOrDefault(index)?.Token;
+                    var obj = a.Keys?.ElementAtOrDefault(index);
+                    return ToStringKey(token?.Token, obj);
+                }
+
+                return new PredictorCodificationEntity
+                {
+                    Predictor = ctx.Predictor.ToLite(),
+                    ColumnIndex = i,
+                    OriginalMultiColumnIndex = a.MultiColumn == null ? (int?)null : ctx.Predictor.MultiColumns.IndexOf(a.MultiColumn),
+                    OriginalColumnIndex = a.MultiColumn == null ?
+                        ctx.Predictor.SimpleColumns.IndexOf(a.PredictorColumn) :
+                        a.MultiColumn.Aggregates.IndexOf(a.PredictorColumn),
+                    GroupKey0 = GetGroupKey(0),
+                    GroupKey1 = GetGroupKey(1),
+                    GroupKey2 = GetGroupKey(2),
+                    IsValue = ToStringKey(a.PredictorColumn.Token.Token, a.IsValue),
+                    CodedValues = a.Values.EmptyIfNull().Select(v => ToStringKey(a.PredictorColumn.Token.Token, v)).ToMList()
+                };
+
+            }).BulkInsertQueryIds(a => a.ColumnIndex, a => a.Predictor == ctx.Predictor.ToLite());
+        }
+
+        public static byte[] GetTsvMetadata(this PredictorEntity predictor)
+        {
+            var ctx = new PredictorTrainingContext(predictor, CancellationToken.None);
+            PredictorLogicQuery.RetrieveData(ctx);
+            return Tsv.ToTsvBytes(ctx.AllRows.Rows.Take(1).ToArray());
+        }
+
+        public static byte[] GetTsv(this PredictorEntity predictor)
+        {
+            var ctx = new PredictorTrainingContext(predictor, CancellationToken.None);
+            PredictorLogicQuery.RetrieveData(ctx);
+            return Tsv.ToTsvBytes(ctx.AllRows.Rows);
+        }
+
+        public static byte[] GetCsv(this PredictorEntity predictor)
+        {
+            var ctx = new PredictorTrainingContext(predictor, CancellationToken.None);
+            PredictorLogicQuery.RetrieveData(ctx);
+            return Csv.ToCsvBytes(ctx.AllRows.Rows);
+        }
+
+        static void PredictorEntity_Retrieved(PredictorEntity predictor)
+        {
+            object queryName = QueryLogic.ToQueryName(predictor.Query.Key);
+            QueryDescription description = DynamicQueryManager.Current.QueryDescription(queryName);
+
+            predictor.ParseData(description);
+        }
+
+        static void PredictorMultiColumnEntity_Retrieved(PredictorMultiColumnEntity mc)
+        {
+            object queryName = QueryLogic.ToQueryName(mc.Query.Key);
+            QueryDescription description = DynamicQueryManager.Current.QueryDescription(queryName);
+
+            mc.ParseData(description);
+        }
+
+
         public class PredictorGraph : Graph<PredictorEntity, PredictorState>
         {
             public static void Register()
@@ -110,54 +281,26 @@ namespace Signum.Engine.MachineLearning
                     Lite = false,
                     Execute = (e, _) => { },
                 }.Register();
-                
+
                 new Execute(PredictorOperation.Train)
                 {
                     FromStates = { PredictorState.Draft },
                     ToStates = { PredictorState.Training },
                     AllowsNew = true,
                     Lite = false,
-                    Execute = (p, _) => 
+                    Execute = (p, _) =>
                     {
-                        var cancellationSource = new CancellationTokenSource();
+                        p.User = UserHolder.Current.ToLite();
+                        p.State = PredictorState.Training;
+                        p.Save();
 
-                        var state = new PredictorTrainingState
-                        {
-                            CancellationTokenSource = cancellationSource,
-                            Context = new PredictorTrainingContext(p, cancellationSource.Token)
-                        };
-
-                        if (!Trainings.TryAdd(p.ToLite(), state))
-                            throw new InvalidOperationException(PredictorMessage._0IsAlreadyBeingTrained.NiceToString(p));
-                        
-                        Task.Factory.StartNew(() =>
-                        {
-                            try
-                            {
-                                PredictorLogicQuery.RetrieveData(state.Context);
-                            }
-                            catch(OperationCanceledException e)
-                            {
-
-                            }
-                            catch (Exception ex)
-                            {
-                                ex.Data["entity"] = p;
-                                ex.LogException();
-                            }
-                            finally
-                            {
-                                Trainings.TryRemove(p.ToLite(), out var _);
-                            }
-                        }, TaskCreationOptions.LongRunning);
-
-                        state.CancellationTokenSource.Cancel();
+                        StartTrainingAsync(p);
                     },
                 }.Register();
 
                 new Execute(PredictorOperation.Untrain)
                 {
-                    FromStates = { PredictorState.Trained },
+                    FromStates = { PredictorState.Trained, PredictorState.Error },
                     ToStates = { PredictorState.Draft },
                     Execute = (e, _) =>
                     {
@@ -180,6 +323,7 @@ namespace Signum.Engine.MachineLearning
                         }
 
                         CleanTrained(e);
+                        e.State = PredictorState.Draft;
                     },
                 }.Register();
 
@@ -210,99 +354,8 @@ namespace Signum.Engine.MachineLearning
                     },
                 }.Register();
             }
-
-            private static void CleanTrained(PredictorEntity e)
-            {
-                foreach (var fp in e.Files)
-                {
-                    fp.DeleteFileOnCommit();
-                }
-                e.Files.Clear();
-                e.Codifications().UnsafeDelete();
-            }
-        }
-
-
-        private static void CreatePredictorCodifications(PredictorEntity predictor, List<PredictorResultColumn> columnDescriptions)
-        {
-            columnDescriptions.Select((a, i) =>
-            {
-                string GetGroupKey(int index)
-                {
-                    var token = a.MultiColumn?.Aggregates.ElementAtOrDefault(index)?.Token;
-                    if (token == null)
-                        return null;
-
-                    var obj = a.Keys.ElementAtOrDefault(index);
-
-                    if (obj == null)
-                        return null;
-
-                    return FilterValueConverter.ToString(obj, token.Token.Type, allowSmart: false);
-                }
-
-                return new PredictorCodificationEntity
-                {
-                    Predictor = predictor.ToLite(),
-                    ColumnIndex = i,
-                    OriginalMultiColumnIndex = a.MultiColumn == null ? (int?)null : predictor.MultiColumns.IndexOf(a.MultiColumn),
-                    OriginalColumnIndex = a.MultiColumn == null ? predictor.SimpleColumns.IndexOf(a.PredictorColumn) : a.MultiColumn.Aggregates.IndexOf(a.PredictorColumn),
-                    GroupKey0 = GetGroupKey(0),
-                    GroupKey1 = GetGroupKey(1),
-                    GroupKey2 = GetGroupKey(2),
-                    IsValue = GetGroupKey(2),
-                };
-            }).BulkInsert();
-        }
-
-        public static byte[] GetTsvMetadata(this PredictorEntity predictor)
-        {
-            var ctx = new PredictorTrainingContext(predictor, CancellationToken.None);
-            PredictorLogicQuery.RetrieveData(ctx);
-            return Tsv.ToTsvBytes(ctx.Rows.Take(1).ToArray());
-        }
-
-        public static byte[] GetTsv(this PredictorEntity predictor)
-        {
-            var ctx = new PredictorTrainingContext(predictor, CancellationToken.None);
-            PredictorLogicQuery.RetrieveData(ctx);
-            return Tsv.ToTsvBytes(ctx.Rows);
-        }
-
-        public static byte[] GetCsv(this PredictorEntity predictor)
-        {
-            var ctx = new PredictorTrainingContext(predictor, CancellationToken.None);
-            PredictorLogicQuery.RetrieveData(ctx);
-            return Csv.ToCsvBytes(ctx.Rows);
-        }
-
-        static void PredictorEntity_Retrieved(PredictorEntity predictor)
-        {
-            object queryName = QueryLogic.ToQueryName(predictor.Query.Key);
-            QueryDescription description = DynamicQueryManager.Current.QueryDescription(queryName);
-
-            predictor.ParseData(description);
-        }
-
-        static void PredictorMultiColumnEntity_Retrieved(PredictorMultiColumnEntity mc)
-        {
-            object queryName = QueryLogic.ToQueryName(mc.Query.Key);
-            QueryDescription description = DynamicQueryManager.Current.QueryDescription(queryName);
-
-            mc.ParseData(description);
         }
     }
-
-
 }
 
 
-class MultiColumnQuery
-{
-    public PredictorMultiColumnEntity MultiColumn;
-    public QueryGroupRequest QueryGroupRequest;
-    public ResultTable ResultTable;
-    public Dictionary<Lite<Entity>, Dictionary<object[], object[]>> GroupedValues;
-
-    public ResultColumn[] Aggregates { get; internal set; }
-}

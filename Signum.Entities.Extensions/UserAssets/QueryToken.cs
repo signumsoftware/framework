@@ -32,8 +32,8 @@ namespace Signum.Entities.UserAssets
         }
 
         [NotNullable]
-        [StringLengthValidator(AllowNulls = false, Min = 1)]
-        public string TokenString { get; private set; }
+        [StringLengthValidator(AllowNulls = false, Min = 1), InTypeScript(Undefined = false, Null = false)]
+        public string TokenString { get; set; }
 
         [Ignore]
         QueryToken token;

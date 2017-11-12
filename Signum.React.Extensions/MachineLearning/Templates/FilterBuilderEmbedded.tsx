@@ -86,6 +86,7 @@ export default class FilterBuilderEmbedded extends React.Component<FilterBuilder
                         queryDescription={this.state.queryDescription}
                         filterOptions={this.state.filterOptions || []}
                         subTokensOptions={this.props.subTokenOptions}
+                        readOnly={this.props.ctx.readOnly}
                         onFiltersChanged={this.handleFiltersChanged} />
                 }
             </div>

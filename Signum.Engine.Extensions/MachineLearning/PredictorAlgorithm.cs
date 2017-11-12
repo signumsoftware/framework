@@ -8,25 +8,29 @@ using System.Threading;
 
 namespace Signum.Engine.MachineLearning
 {
-    public class TrainingState
+    public class TrainingProgress
     {
         public string Message;
         public decimal? Progress;
-    }
 
+        public PredictorState State { get; set; }
+    }
+     
     public class PredictorTrainingContext
     {
         public PredictorEntity Predictor { get; }
         public CancellationToken CancellationToken { get; }
+
         public string Message { get; set; }
         public decimal? Progress { get; set; }
 
-        public object[][] Rows { get; private set; }
-        public object[][] Input { get; private set; }
-        public object[][] Output { get; private set; }
-        public PredictorResultColumn[] Columns { get; private set; }
-        public PredictorResultColumn[] InputColumns { get; private set; }
-        public PredictorResultColumn[] OutputColumns { get; private set; }
+        public RowSelection AllRows { get; set; }
+        public RowSelection TrainigRows { get; set; }
+        public RowSelection TestRows { get; set; }
+
+        public List<PredictorResultColumn> Columns { get; private set; }
+        public List<PredictorResultColumn> InputColumns { get; private set; }
+        public List<PredictorResultColumn> OutputColumns { get; private set; }
                         
         public PredictorTrainingContext(PredictorEntity predictor, CancellationToken cancellationToken)
         {
@@ -34,28 +38,68 @@ namespace Signum.Engine.MachineLearning
             this.CancellationToken = cancellationToken;
         }
 
+        public event Action<string, decimal?> OnReportProgres;
+
         public void ReportProgress(string message, decimal? progress)
         {
             this.Message = message;
             this.Progress = progress;
+            this.OnReportProgres?.Invoke(message, progress);
         }
 
 
         public void SetColums(PredictorResultColumn[] columns)
         {
-            this.Columns = columns.ToArray();
-            this.InputColumns = columns.Where(a => a.PredictorColumn.Usage == PredictorColumnUsage.Input).ToArray();
-            this.OutputColumns = columns.Where(a => a.PredictorColumn.Usage == PredictorColumnUsage.Output).ToArray();
+            this.Columns = columns.ToList();
+            this.InputColumns = columns.Where(a => a.PredictorColumn.Usage == PredictorColumnUsage.Input).ToList();
+            this.OutputColumns = columns.Where(a => a.PredictorColumn.Usage == PredictorColumnUsage.Output).ToList();
         }
 
         public void SetRows(object[][] rows)
         {
-            this.Rows = rows;
-            this.Input = FilteredTable(rows, InputColumns);
-            this.Output = FilteredTable(rows, OutputColumns);
+            double testPercentage = Predictor.Settings.TestPercentage;
+
+            List<object[]> training = new List<object[]>();
+            List<object[]> test = new List<object[]>();
+
+            Random rand = new Random();
+            foreach (var row in rows)
+            {
+                if (rand.NextDouble() < testPercentage)
+                    test.Add(row);
+                else
+                    training.Add(row);
+            }
+
+            this.AllRows = CreateRowSelection(rows);
+            this.TrainigRows = CreateRowSelection(training.ToArray());
+            this.TestRows = CreateRowSelection(test.ToArray());
         }
 
-        static object[][] FilteredTable(object[][] rows, PredictorResultColumn[] cols)
+        RowSelection CreateRowSelection(object[][] rows)
+        {
+            return new RowSelection(
+                rows: rows,
+                inputRows: RowSelection.FilteredTable(rows, this.InputColumns),
+                outputRows: RowSelection.FilteredTable(rows, this.OutputColumns)
+            );
+        }
+    }
+
+    public class RowSelection
+    {
+        public RowSelection(object[][] rows, object[][] inputRows, object[][] outputRows)
+        {
+            Rows = rows;
+            Input = inputRows;
+            Output = outputRows;
+        }
+
+        public object[][] Rows { get; private set; }
+        public object[][] Input { get; private set; }
+        public object[][] Output { get; private set; }
+
+        public static object[][] FilteredTable(object[][] rows, List<PredictorResultColumn> cols)
         {
             object[][] newTable = new object[rows.Length][];
             for (int i = 0; i < rows.Length; i++)
@@ -65,10 +109,10 @@ namespace Signum.Engine.MachineLearning
             return newTable;
         }
 
-        static object[] FilteredRow(object[] row, PredictorResultColumn[] cols)
+        static object[] FilteredRow(object[] row, List<PredictorResultColumn> cols)
         {
-            object[] newRow = new object[cols.Length];
-            for (int j = 0; j < cols.Length; j++)
+            object[] newRow = new object[cols.Count];
+            for (int j = 0; j < cols.Count; j++)
             {
                 newRow[j] = row[cols[j].Index];
             }
@@ -80,7 +124,6 @@ namespace Signum.Engine.MachineLearning
     {
         public virtual string ValidatePredictor(PredictorEntity predictor) => null;
         public abstract void Train(PredictorTrainingContext ctx);
-        public abstract EvaluateResult Evaluate(PredictorTrainingContext ctx);
         public abstract object[] Predict(PredictorEntity predictor, PredictorResultColumn[] columns, object[] input);
     }
 
@@ -94,19 +137,6 @@ namespace Signum.Engine.MachineLearning
 
         public abstract object PredictDecide(PredictorEntity predictor, PredictorResultColumn[] columns, object[] input);
         public abstract Dictionary<object, double> PredictProbabilities(PredictorEntity predictor, PredictorResultColumn[] columns, object[] input);
-    }
-
-    public class EvaluateResult
-    {
-        public EvaluateStats Training;
-        public EvaluateStats Validation;
-    }
-
-    public class EvaluateStats
-    {
-        public double Mean;
-        public double Variance;
-        public double StandartDeviation; 
     }
 
     public static class PredictorAlgorithmValidation

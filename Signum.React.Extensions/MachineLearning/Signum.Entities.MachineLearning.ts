@@ -14,12 +14,9 @@ export module AccordPredictorAlgorithm {
     export const DiscreteNaiveBayes : PredictorAlgorithmSymbol = registerSymbol("PredictorAlgorithm", "AccordPredictorAlgorithm.DiscreteNaiveBayes");
 }
 
-export const ActivationFunction = new EnumType<ActivationFunction>("ActivationFunction");
-export type ActivationFunction =
-    "ReLU" |
-    "Tanh" |
-    "Sigmoid" |
-    "Linear";
+export module CNTKPredictorAlgorithm {
+    export const NeuralNetwork : PredictorAlgorithmSymbol = registerSymbol("PredictorAlgorithm", "CNTKPredictorAlgorithm.NeuralNetwork");
+}
 
 export interface IPredictorAlgorithmSettings extends Entities.Entity {
 }
@@ -30,16 +27,10 @@ export interface NaiveBayesSettingsEntity extends Entities.Entity, IPredictorAlg
     empirical?: boolean;
 }
 
-export const NeuronalNetworkSettingsEntity = new Type<NeuronalNetworkSettingsEntity>("NeuronalNetworkSettings");
-export interface NeuronalNetworkSettingsEntity extends Entities.Entity, IPredictorAlgorithmSettings {
-    Type: "NeuronalNetworkSettings";
-    learningRate?: number;
-    activationFunction?: ActivationFunction;
-    regularization?: Regularization;
-    regularizationRate?: number;
-    trainingRatio?: number;
-    backSize?: number;
-    neuronalNetworkDescription?: string | null;
+export const NeuralNetworkSettingsEntity = new Type<NeuralNetworkSettingsEntity>("NeuralNetworkSettings");
+export interface NeuralNetworkSettingsEntity extends Entities.Entity, IPredictorAlgorithmSettings {
+    Type: "NeuralNetworkSettings";
+    minibatchSize?: number;
 }
 
 export const PredictorAlgorithmSymbol = new Type<PredictorAlgorithmSymbol>("PredictorAlgorithm");
@@ -87,11 +78,15 @@ export interface PredictorEntity extends Entities.Entity {
     name?: string | null;
     settings?: PredictorSettingsEmbedded | null;
     algorithm?: PredictorAlgorithmSymbol | null;
+    trainingException?: Entities.Lite<Basics.ExceptionEntity> | null;
+    user?: Entities.Lite<Basics.IUserEntity> | null;
     algorithmSettings?: IPredictorAlgorithmSettings | null;
     state?: PredictorState;
     filters: Entities.MList<UserQueries.QueryFilterEmbedded>;
     simpleColumns: Entities.MList<PredictorColumnEmbedded>;
     multiColumns: Entities.MList<PredictorMultiColumnEntity>;
+    trainingStats?: PredictorStatsEmbedded | null;
+    testStats?: PredictorStatsEmbedded | null;
     files: Entities.MList<Files.FilePathEmbedded>;
 }
 
@@ -115,6 +110,7 @@ export module PredictorMessage {
     export const DownloadTsvMetadata = new MessageKey("PredictorMessage", "DownloadTsvMetadata");
     export const OpenTensorflowProjector = new MessageKey("PredictorMessage", "OpenTensorflowProjector");
     export const _0IsAlreadyBeingTrained = new MessageKey("PredictorMessage", "_0IsAlreadyBeingTrained");
+    export const StartingTraining = new MessageKey("PredictorMessage", "StartingTraining");
 }
 
 export const PredictorMultiColumnEntity = new Type<PredictorMultiColumnEntity>("PredictorMultiColumn");
@@ -140,19 +136,24 @@ export module PredictorOperation {
 export const PredictorSettingsEmbedded = new Type<PredictorSettingsEmbedded>("PredictorSettingsEmbedded");
 export interface PredictorSettingsEmbedded extends Entities.EmbeddedEntity {
     Type: "PredictorSettingsEmbedded";
-    crossValidationFolds?: number;
+    testPercentage?: number;
 }
 
 export const PredictorState = new EnumType<PredictorState>("PredictorState");
 export type PredictorState =
     "Draft" |
     "Training" |
-    "Trained";
+    "Trained" |
+    "Error";
 
-export const Regularization = new EnumType<Regularization>("Regularization");
-export type Regularization =
-    "None" |
-    "L1" |
-    "L2";
+export const PredictorStatsEmbedded = new Type<PredictorStatsEmbedded>("PredictorStatsEmbedded");
+export interface PredictorStatsEmbedded extends Entities.EmbeddedEntity {
+    Type: "PredictorStatsEmbedded";
+    totalCount?: number;
+    errorCount?: number | null;
+    mean?: number | null;
+    variance?: number | null;
+    standartDeviation?: number | null;
+}
 
 

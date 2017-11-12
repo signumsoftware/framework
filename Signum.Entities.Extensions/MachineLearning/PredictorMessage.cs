@@ -16,6 +16,7 @@ namespace Signum.Entities.MachineLearning
         DownloadTsv,
         DownloadTsvMetadata,
         OpenTensorflowProjector,
-        _0IsAlreadyBeingTrained
+        _0IsAlreadyBeingTrained,
+        StartingTraining,
     }
 }

@@ -57,8 +57,12 @@ namespace Signum.Engine.MachineLearning
             var dicGroupQuery = mcqs.ToDictionary(a => a.MultiColumn);
             ctx.ReportProgress($"Creating Columns ", step++ / totalSteps);
             var columns = new List<PredictorResultColumn>();
-            columns.AddRange(mainResult.Columns.ZipStrict(ctx.Predictor.SimpleColumns, (rc, pc) => (rc, pc)).SelectMany(t => ExpandColumns(t.rc, t.pc)));
 
+            for (int i = 0; i < mainResult.Columns.Length; i++)
+            {
+                columns.AddRange(ExpandColumns(ctx.Predictor.SimpleColumns[i], i, mainResult.Columns[i]));
+            }
+            
             foreach (var mcq in mcqs)
             {
                 var distinctKeys = mcq.GroupedValues.SelectMany(a => a.Value.Values).Distinct(ObjectArrayComparer.Instance).ToList();
@@ -67,19 +71,17 @@ namespace Signum.Engine.MachineLearning
 
                 foreach (var k in distinctKeys)
                 {
-                    var list = mcq.Aggregates.ZipStrict(mcq.MultiColumn.Aggregates, (rc, pc) => (rc, pc))
-                        .SelectMany(t => ExpandColumns(t.rc, t.pc))
-                        .Select(a=> new PredictorResultColumn
+                    for (int i = 0; i < mcq.Aggregates.Length; i++)
+                    {
+                        var list = ExpandColumns(mcq.MultiColumn.Aggregates[i], i, mcq.Aggregates[i]).ToList();
+                        list.ForEach(a =>
                         {
-                            MultiColumn = mcq.MultiColumn,
-                            Keys = k,
-
-                            PredictorColumn = a.PredictorColumn,
-                            IsValue = a.IsValue,
-                            ValuesToIndex = a.ValuesToIndex,
+                            a.MultiColumn = mcq.MultiColumn;
+                            a.Keys = k;
                         });
 
-                    columns.AddRange(list);
+                        columns.AddRange(list);
+                    }
                 }
             }
 
@@ -140,19 +142,19 @@ namespace Signum.Engine.MachineLearning
             return row;
         }
 
-        private static IEnumerable<PredictorResultColumn> ExpandColumns(ResultColumn rc, PredictorColumnEmbedded pc)
+        private static IEnumerable<PredictorResultColumn> ExpandColumns(PredictorColumnEmbedded pc, int pcIndex, ResultColumn rc)
         {
             switch (pc.Encoding)
             {
                 case PredictorColumnEncoding.None:
-                    return new[] { new PredictorResultColumn { PredictorColumn = pc } };
+                    return new[] { new PredictorResultColumn { PredictorColumn = pc, PredictorColumnIndex = pcIndex } };
                 case PredictorColumnEncoding.OneHot:
-                    return rc.Values.Cast<object>().Distinct().Select(v => new PredictorResultColumn { PredictorColumn = pc, IsValue = v }).ToList();
+                    return rc.Values.Cast<object>().Distinct().Select(v => new PredictorResultColumn { PredictorColumn = pc, IsValue = v, PredictorColumnIndex = pcIndex }).ToList();
                 case PredictorColumnEncoding.Codified:
                     
                     var values = rc.Values.Cast<object>().Distinct().ToArray();
                     var valuesToIndex = values.Select((v, i) => KVP.Create(v, i)).ToDictionary();
-                    return new[] { new PredictorResultColumn { PredictorColumn = pc, ValuesToIndex = valuesToIndex, Values = values} };
+                    return new[] { new PredictorResultColumn { PredictorColumn = pc, ValuesToIndex = valuesToIndex, Values = values, PredictorColumnIndex = pcIndex } };
                 default:
                     throw new InvalidOperationException("Unexcpected Encoding");
             }
@@ -247,16 +249,27 @@ namespace Signum.Engine.MachineLearning
         }
     }
 
+    class MultiColumnQuery
+    {
+        public PredictorMultiColumnEntity MultiColumn;
+        public QueryGroupRequest QueryGroupRequest;
+        public ResultTable ResultTable;
+        public Dictionary<Lite<Entity>, Dictionary<object[], object[]>> GroupedValues;
+
+        public ResultColumn[] Aggregates { get; internal set; }
+    }
+
     public class PredictorResultColumn
     {
+        //Unique index for all the PredictorResultColumn
         public int Index;
-
-        public PredictorMultiColumnEntity MultiColumn;
-
+        
         public PredictorColumnEmbedded PredictorColumn;
+        //Index of PredictorColumn in the SimpleColumns/Aggregates
         public int? PredictorColumnIndex;
 
         //Only for multi columns (values inside of collections)
+        public PredictorMultiColumnEntity MultiColumn;
         public object[] Keys;
         
         //Only for 1-hot encoding in the column (i.e: Neuronal Networks)
