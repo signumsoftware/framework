@@ -1,5 +1,6 @@
 ﻿import * as React from 'react'
 import { classes, Dic } from '../Globals'
+import { Popper, Manager, Target } from 'react-popper';
 
 
 
@@ -17,7 +18,6 @@ export interface TypeaheadProps {
     spanAttrs?: React.HTMLAttributes<HTMLSpanElement>;
     inputAttrs?: React.InputHTMLAttributes<HTMLInputElement>;
     liAttrs?: (item: any) => React.LiHTMLAttributes<HTMLLIElement>;
-    loadingMessage?: string;
     noResultsMessage?: string;
 }
 
@@ -63,7 +63,6 @@ export default class Typeahead extends React.Component<TypeaheadProps, Typeahead
         renderItem: Typeahead.highlightedText,
         onSelect: (elem, event) => elem,
         scrollHeight: 0,
-        loadingMessage: "Loading...",
         noResultsMessage: " - No results -",
     };
 
@@ -104,11 +103,11 @@ export default class Typeahead extends React.Component<TypeaheadProps, Typeahead
         })).done();
     }
 
-    static normalizeString(str: string) : string {
+    static normalizeString(str: string): string {
         return str;
     }
 
-    select(e: React.KeyboardEvent<any> | React.MouseEvent<any>): boolean {        
+    select(e: React.KeyboardEvent<any> | React.MouseEvent<any>): boolean {
         if (this.state.items!.length == 0)
             return false;
 
@@ -141,8 +140,8 @@ export default class Typeahead extends React.Component<TypeaheadProps, Typeahead
     handleBlur = () => {
         this.focused = false;
 
-        if (!this.mouseover && this.state.shown)
-            this.setState({ shown: false });
+        //if (!this.mouseover && this.state.shown)
+        //    this.setState({ shown: false });
 
         if (this.props.onBlur)
             this.props.onBlur();
@@ -243,22 +242,22 @@ export default class Typeahead extends React.Component<TypeaheadProps, Typeahead
 
     input: HTMLInputElement;
 
-    handlePopupLoaded = (elem: HTMLElement | null) => {
-        if (!this.input)
-            return;
+    //handlePopupLoaded = (elem: HTMLElement | null) => {
+    //    if (!this.input)
+    //        return;
 
-        const rec = this.input.getBoundingClientRect();
-        if (elem) {
-            elem.style.top = (rec.height) + "px";
+    //    const rec = this.input.getBoundingClientRect();
+    //    if (elem) {
+    //        elem.style.top = (rec.height) + "px";
 
-            if (getComputedStyle(elem).direction == "rtl")
-                elem.style.right = "0px";
-            else
-                elem.style.left = "0px";
+    //        if (getComputedStyle(elem).direction == "rtl")
+    //            elem.style.right = "0px";
+    //        else
+    //            elem.style.left = "0px";
 
-            elem.style.display = "table";
-        }
-    }
+    //        elem.style.display = "table";
+    //    }
+    //}
 
     handleOnChange = () => {
         if (this.props.onChange)
@@ -268,25 +267,26 @@ export default class Typeahead extends React.Component<TypeaheadProps, Typeahead
     render() {
 
         return (
-            <span {...this.props.spanAttrs} className={classes(this.props.spanAttrs && this.props.spanAttrs.className, "sf-typeahead")}>
-                <input type="text" autoComplete="off" ref={inp => this.input = inp!} {...this.props.inputAttrs}
-                    value={this.props.value}
-                    onFocus={this.handleFocus}
-                    onBlur={this.handleBlur}
-                    onKeyUp={this.handleKeyUp}
-                    onKeyDown={this.handleKeyDown}
-                    onChange={this.handleOnChange}
+            <Manager>
+                <Target component="span" {...this.props.spanAttrs} className={classes(this.props.spanAttrs && this.props.spanAttrs.className, "sf-typeahead")}>
+                    <input type="text" autoComplete="off" ref={inp => this.input = inp!} {...this.props.inputAttrs}
+                        value={this.props.value}
+                        onFocus={this.handleFocus}
+                        onBlur={this.handleBlur}
+                        onKeyUp={this.handleKeyUp}
+                        onKeyDown={this.handleKeyDown}
+                        onChange={this.handleOnChange}
                     />
-                <span>{/*placeholder for rouded borders*/}</span>
-                {
-                    this.state.shown && (this.props.renderList ? this.props.renderList(this) : this.renderDefaultList())
-                }
-            </span>
+                    <span>{/*placeholder for rouded borders*/}</span>
+                </Target>
+                {this.state.shown && <Popper placement="bottom-start">{this.props.renderList ? this.props.renderList(this) : this.renderDefaultList()}</Popper>}
+            </Manager>
+
         );
     }
 
     renderDefaultList() {
-        return (<ul className="typeahead dropdown-menu" ref={this.handlePopupLoaded}>
+        return (<ul className="typeahead dropdown-menu show">
             {
                 !this.state.items!.length ? <li className="no-results"><a><small>{this.props.noResultsMessage}</small></a></li> :
                     this.state.items!.map((item, i) => <li key={i} className={i == this.state.selectedIndex ? "active" : undefined}
