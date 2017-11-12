@@ -31,7 +31,7 @@ export default class TreeModal extends React.Component<TreeModalProps, { show: b
     selectedNode?: TreeNode;
     okPressed: boolean;
 
-    handleSelectedNode = (selected: TreeNode) => {
+    handleSelectedNode = (selected: TreeNode | undefined) => {
         this.selectedNode = selected;
         this.forceUpdate();
     }

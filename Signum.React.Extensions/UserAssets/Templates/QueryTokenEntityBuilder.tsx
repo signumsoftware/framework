@@ -15,13 +15,13 @@ interface QueryTokenEntityBuilderProps {
     ctx: TypeContext<QueryTokenEmbedded | null | undefined>;
     queryKey: string;
     subTokenOptions: SubTokensOptions;
-    onTokenChanged?: (newToken: QueryToken) => void;
+    onTokenChanged?: (newToken: QueryToken | undefined) => void;
     helpBlock?: React.ReactChild;
 }
 
 export default class QueryTokenEntityBuilder extends React.Component<QueryTokenEntityBuilderProps> {
 
-    handleTokenChanged = (newToken: QueryToken) => {
+    handleTokenChanged = (newToken: QueryToken | undefined) => {
         if (newToken == undefined)
             this.props.ctx.value = undefined;
         else

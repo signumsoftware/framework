@@ -200,7 +200,7 @@ interface FindOptionsComponentProps {
 export class FindOptionsComponent extends React.Component<FindOptionsComponentProps> {
 
 
-    handleChangeQueryKey = (queryKey: string) => {
+    handleChangeQueryKey = (queryKey: string | undefined) => {
         const fo = this.props.findOptions;
         fo.queryName = queryKey;
         delete fo.parentColumn;
