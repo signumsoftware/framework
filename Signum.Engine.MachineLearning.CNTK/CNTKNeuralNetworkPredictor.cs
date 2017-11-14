@@ -5,6 +5,8 @@ using System.Text;
 using System.Threading.Tasks;
 using Signum.Entities.MachineLearning;
 using CNTK;
+using Signum.Entities.DynamicQuery;
+using Signum.Utilities;
 
 namespace Signum.Engine.MachineLearning.CNTK
 {
@@ -19,7 +21,10 @@ namespace Signum.Engine.MachineLearning.CNTK
 
         public override void Train(PredictorTrainingContext ctx)
         {
-            var nnSettings = (NeuralNetworkSettingsEntity)ctx.Predictor.AlgorithmSettings;
+            var p = ctx.Predictor;
+
+            var nnSettings = (NeuralNetworkSettingsEntity)p.AlgorithmSettings;
+            var sparse = nnSettings.SparseMatrix ?? HasOneHot(p);
 
             DeviceDescriptor device = DeviceDescriptor.CPUDevice;
             Variable inputVariable = Variable.InputVariable(new[] { ctx.InputColumns.Count }, DataType.Float, "input");
@@ -33,66 +38,113 @@ namespace Signum.Engine.MachineLearning.CNTK
             TrainingParameterScheduleDouble learningRatePerSample = new TrainingParameterScheduleDouble(0.02, 1);
             IList<Learner> parameterLearners = new List<Learner>() { Learner.SGDLearner(calculatedOutpus.Parameters(), learningRatePerSample) };
             var trainer = Trainer.CreateTrainer(calculatedOutpus, loss, evalError, parameterLearners);
+            
+            var (train, test) = ctx.SplitTrainTest();
 
-            var batches = (int)Math.Ceiling(ctx.TrainigRows.Rows.Length / (float)nnSettings.MinibatchSize);
+            var batches = (int)Math.Ceiling(train.Count / (float)nnSettings.MinibatchSize);
 
             for (int i = 0; i < batches; i++)
             {
                 ctx.ReportProgress("Training Minibatches", i / (decimal)batches);
-                trainer.TrainMinibatch(new Dictionary<Variable, Value>()
+                var trainSlice = Slice(train, i * nnSettings.MinibatchSize, nnSettings.MinibatchSize);
+                using (Value inputValue = CreateValue(ctx, trainSlice, ctx.InputColumns, device))
+                using (Value outputValue = CreateValue(ctx, trainSlice, ctx.OutputColumns, device))
                 {
-                    { inputVariable, CreateValue(Slice(ctx.TrainigRows.Input, i * nnSettings.MinibatchSize, nnSettings.MinibatchSize), ctx.InputColumns, device) },
-                    { outputVariable, CreateValue(Slice(ctx.TrainigRows.Output, i * nnSettings.MinibatchSize, nnSettings.MinibatchSize), ctx.OutputColumns, device) },
-                }, device);
+                    trainer.TrainMinibatch(new Dictionary<Variable, Value>()
+                    {
+                        { inputVariable, inputValue },
+                        { outputVariable, outputValue },
+                    }, device);
+                }
             }
-            
-            ctx.Predictor.TestStats = CalculateStats(ctx, ctx.TestRows, inputVariable, calculatedOutpus, device);
-            ctx.Predictor.TrainingStats = CalculateStats(ctx, ctx.TrainigRows, inputVariable, calculatedOutpus, device);
+
+            ctx.Predictor.TestStats = CalculateStats(ctx, test, inputVariable, calculatedOutpus, device);
+            ctx.Predictor.TrainingStats = CalculateStats(ctx, test, inputVariable, calculatedOutpus, device);
         }
 
-        private static PredictorStatsEmbedded CalculateStats(PredictorTrainingContext ctx, RowSelection rowSelection, Variable inputVariable, Function calculatedOutpus, DeviceDescriptor device)
+ 
+        private static bool HasOneHot(PredictorEntity p)
         {
-            var inputs = new Dictionary<Variable, Value> { { inputVariable, CreateValue(rowSelection.Input, ctx.InputColumns, device) } };
-            var outputs = new Dictionary<Variable, Value> { { calculatedOutpus.Output, null } };
-            calculatedOutpus.Evaluate(inputs, outputs, device);
+            return p.SimpleColumns.Any(a => a.Encoding == PredictorColumnEncoding.OneHot) ||
+                p.MultiColumns.Any(mc => mc.Aggregates.Any(a => a.Encoding == PredictorColumnEncoding.OneHot));
+        }
 
-            Value outputValue = outputs[calculatedOutpus.Output];
-            IList<IList<float>> actualLabelSoftMax = outputValue.GetDenseData<float>(calculatedOutpus.Output);
-            List<int> actualLabels = actualLabelSoftMax.Select((IList<float> l) => l.IndexOf(l.Max())).ToList();
-
-            Value expectedValue = CreateValue(rowSelection.Output, ctx.OutputColumns, device);
-            IList<IList<float>> expectedOneHot = expectedValue.GetDenseData<float>(calculatedOutpus.Output);
-            List<int> expectedLabels = expectedOneHot.Select(l => l.IndexOf(1.0F)).ToList();
-            int misMatches = actualLabels.Zip(expectedLabels, (a, b) => a.Equals(b) ? 0 : 1).Sum();
-
-            return new PredictorStatsEmbedded
+        private static PredictorClassificationMetricsEmbedded CalculateStats(PredictorTrainingContext ctx, List<ResultRow> rows, Variable inputVariable, Function calculatedOutpus, DeviceDescriptor device)
+        {
+            using (Value inputValue = CreateValue(ctx, rows, ctx.InputColumns, device))
             {
-                TotalCount = rowSelection.Rows.Length,
-                ErrorCount = misMatches,
-            };
+                var inputs = new Dictionary<Variable, Value> { { inputVariable, inputValue } };
+                var outputs = new Dictionary<Variable, Value> { { calculatedOutpus.Output, null } };
+                calculatedOutpus.Evaluate(inputs, outputs, device);
+
+                using (Value outputValue = outputs[calculatedOutpus.Output])
+                {
+                    IList<IList<float>> actualLabelSoftMax = outputValue.GetDenseData<float>(calculatedOutpus.Output);
+                    List<int> actualLabels = actualLabelSoftMax.Select((IList<float> l) => l.IndexOf(l.Max())).ToList();
+
+                    using (Value expectedValue = CreateValue(ctx, rows, ctx.OutputColumns, device))
+                    {
+                        IList<IList<float>> expectedOneHot = expectedValue.GetDenseData<float>(calculatedOutpus.Output);
+                        List<int> expectedLabels = expectedOneHot.Select(l => l.IndexOf(1.0F)).ToList();
+                        int misMatches = actualLabels.Zip(expectedLabels, (a, b) => a.Equals(b) ? 0 : 1).Sum();
+
+                        return new PredictorClassificationMetricsEmbedded
+                        {
+                            TotalCount = rows.Count,
+                            MissCount = misMatches,
+                        };
+                    }
+                }
+            }
         }
 
-        static object[][] Slice(object[][] rows, int startIndex, int length)
+        static List<T> Slice<T>(List<T> rows, int startIndex, int length)
         {
-            var max = Math.Min(startIndex + length, rows.Length);
+            var max = Math.Min(startIndex + length, rows.Count);
             var fixedLength = max - startIndex;
 
-            object[][] result = new object[fixedLength][];
-            for (int i = 0; i < result.Length; i++)
-                result[i] = rows[startIndex + i];
+            List<T> result = new List<T>();
+            for (int i = 0; i < fixedLength; i++)
+                result.Add(rows[startIndex + i]);
 
             return result;
         }
 
-        static Value CreateValue(object[][] rows, List<PredictorResultColumn> columns, DeviceDescriptor device)
+        static Value CreateValue(PredictorTrainingContext ctx, List<ResultRow> rows, List<PredictorResultColumn> columns, DeviceDescriptor device)
         {
-            float[] values = new float[rows.Length * columns.Count];
-            for (int i = 0; i < rows.Length; i++)
+            float[] values = new float[rows.Capacity * columns.Count];
+            for (int i = 0; i < rows.Count; i++)
             {
-                var row = rows[i];
-                for (int j = 0; j < row.Length; j++)
+                var mainRow = rows[i];
+                for (int j = 0; j < columns.Count; j++)
                 {
-                    values[i * columns.Count + j] = Convert.ToSingle(row[j]);
+                    var c = columns[j];
+                    object value;
+                    if (c.MultiColumn == null)
+                        value = mainRow[c.PredictorColumnIndex.Value];
+                    else
+                    {
+                        var dic = ctx.MultiColumnQuery[c.MultiColumn].GroupedValues;
+                        var aggregateValues = dic.TryGetC(mainRow.Entity)?.TryGetC(c.Keys);
+                        value = aggregateValues == null ? null : aggregateValues[c.PredictorColumnIndex.Value];
+                    }
+
+                    ref float box = ref values[i * columns.Count + j];
+
+                    //TODO: Codification
+                    switch (c.PredictorColumn.Encoding)
+                    {
+                        case PredictorColumnEncoding.None:
+                            box = Convert.ToSingle(value);
+                            break;
+                        case PredictorColumnEncoding.OneHot:
+                            box = Object.Equals(value, c.IsValue) ? 1 : 0;
+                            break;
+                        case PredictorColumnEncoding.Codified:
+                            throw new NotImplementedException("Codified is not for Neuronal Networks");
+                        default:
+                            break;
+                    }
                 }
             }
 
