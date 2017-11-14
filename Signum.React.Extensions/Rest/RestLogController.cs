@@ -33,7 +33,7 @@ namespace Signum.React.Rest
             }
             else
             {
-                result.Current = restClient.GetStringAsync(oldRequest.Url).Result
+                result.Current = restClient.GetStringAsync(oldRequest.Url).Result;
             }
                 
 
