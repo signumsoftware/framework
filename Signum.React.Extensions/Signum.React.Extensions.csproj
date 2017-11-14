@@ -181,6 +181,7 @@
     <Compile Include="Mailing\MailingController.cs" />
     <Compile Include="Mailing\MailingServer.cs" />
     <Compile Include="Rest\RestApiKeyController.cs" />
+    <Compile Include="Rest\RestLogController.cs" />
     <Compile Include="Rest\RestLogFilter.cs" />
     <Compile Include="Rest\RestServer.cs" />
     <TypeScriptCompile Include="Basics\Templates\AccordionPanel.tsx" />
