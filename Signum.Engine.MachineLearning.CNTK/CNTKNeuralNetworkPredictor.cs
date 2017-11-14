@@ -38,15 +38,15 @@ namespace Signum.Engine.MachineLearning.CNTK
             TrainingParameterScheduleDouble learningRatePerSample = new TrainingParameterScheduleDouble(0.02, 1);
             IList<Learner> parameterLearners = new List<Learner>() { Learner.SGDLearner(calculatedOutpus.Parameters(), learningRatePerSample) };
             var trainer = Trainer.CreateTrainer(calculatedOutpus, loss, evalError, parameterLearners);
-            
-            var (train, test) = ctx.SplitTrainTest();
 
-            var batches = (int)Math.Ceiling(train.Count / (float)nnSettings.MinibatchSize);
+            var (training, validation) = ctx.SplitTrainValidation();
+
+            var batches = (int)Math.Ceiling(training.Count / (float)nnSettings.MinibatchSize);
 
             for (int i = 0; i < batches; i++)
             {
                 ctx.ReportProgress("Training Minibatches", i / (decimal)batches);
-                var trainSlice = Slice(train, i * nnSettings.MinibatchSize, nnSettings.MinibatchSize);
+                var trainSlice = Slice(training, i * nnSettings.MinibatchSize, nnSettings.MinibatchSize);
                 using (Value inputValue = CreateValue(ctx, trainSlice, ctx.InputColumns, device))
                 using (Value outputValue = CreateValue(ctx, trainSlice, ctx.OutputColumns, device))
                 {
@@ -58,10 +58,9 @@ namespace Signum.Engine.MachineLearning.CNTK
                 }
             }
 
-            ctx.Predictor.TestStats = CalculateStats(ctx, test, inputVariable, calculatedOutpus, device);
-            ctx.Predictor.TrainingStats = CalculateStats(ctx, test, inputVariable, calculatedOutpus, device);
+            ctx.Predictor.ClassificationValidation = ClasificationMetrics(ctx, validation, inputVariable, calculatedOutpus, device);
+            ctx.Predictor.ClassificationTraining = ClasificationMetrics(ctx, training, inputVariable, calculatedOutpus, device);
         }
-
  
         private static bool HasOneHot(PredictorEntity p)
         {
@@ -69,7 +68,7 @@ namespace Signum.Engine.MachineLearning.CNTK
                 p.MultiColumns.Any(mc => mc.Aggregates.Any(a => a.Encoding == PredictorColumnEncoding.OneHot));
         }
 
-        private static PredictorClassificationMetricsEmbedded CalculateStats(PredictorTrainingContext ctx, List<ResultRow> rows, Variable inputVariable, Function calculatedOutpus, DeviceDescriptor device)
+        private static PredictorClassificationMetricsEmbedded ClasificationMetrics(PredictorTrainingContext ctx, List<ResultRow> rows, Variable inputVariable, Function calculatedOutpus, DeviceDescriptor device)
         {
             using (Value inputValue = CreateValue(ctx, rows, ctx.InputColumns, device))
             {

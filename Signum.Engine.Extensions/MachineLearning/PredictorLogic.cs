@@ -206,9 +206,9 @@ namespace Signum.Engine.MachineLearning
                 fp.DeleteFileOnCommit();
             }
             e.ClassificationTraining = null;
-            e.ClassificationTest = null;
+            e.ClassificationValidation = null;
             e.RegressionTraining = null;
-            e.RegressionTest = null;
+            e.RegressionValidation = null;
             e.Files.Clear();
             e.Codifications().UnsafeDelete();
             e.Progresses().UnsafeDelete();

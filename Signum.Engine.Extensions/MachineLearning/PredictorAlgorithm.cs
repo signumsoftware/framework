@@ -57,7 +57,7 @@ namespace Signum.Engine.MachineLearning
             this.OutputColumns = columns.Where(a => a.PredictorColumn.Usage == PredictorColumnUsage.Output).ToList();
         }
 
-        public (List<ResultRow> training, List<ResultRow> test) SplitTrainTest()
+        public (List<ResultRow> training, List<ResultRow> test) SplitTrainValidation()
         {
             Random r = Predictor.Settings.Seed == null ? null : new Random(Predictor.Settings.Seed.Value);
             List<ResultRow> training = new List<ResultRow>();

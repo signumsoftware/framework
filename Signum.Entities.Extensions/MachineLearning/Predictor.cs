@@ -64,9 +64,9 @@ namespace Signum.Entities.MachineLearning
         public MList<FilePathEmbedded> Files { get; set; } = new MList<FilePathEmbedded>();
 
         public PredictorClassificationMetricsEmbedded ClassificationTraining { get; set; }
-        public PredictorClassificationMetricsEmbedded ClassificationTest { get; set; }
+        public PredictorClassificationMetricsEmbedded ClassificationValidation { get; set; }
         public PredictorRegressionMetricsEmbedded RegressionTraining { get; set; }
-        public PredictorRegressionMetricsEmbedded RegressionTest { get; set; }
+        public PredictorRegressionMetricsEmbedded RegressionValidation { get; set; }
 
         internal void ParseData(QueryDescription qd)
         {
