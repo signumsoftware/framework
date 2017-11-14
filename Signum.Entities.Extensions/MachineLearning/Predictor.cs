@@ -41,7 +41,7 @@ namespace Signum.Entities.MachineLearning
         [ImplementedBy(typeof(UserEntity))]
         public Lite<IUserEntity> User { get; set; }
 
-        [ImplementedBy(typeof(NeuralNetworkSettingsEntity), typeof(NaiveBayesSettingsEntity))]
+        [ImplementedBy(typeof(NeuralNetworkSettingsEntity))]
         public IPredictorAlgorithmSettings AlgorithmSettings { get; set; }
 
         public PredictorState State { get; set; }
@@ -296,6 +296,26 @@ namespace Signum.Entities.MachineLearning
         public MList<string> CodedValues { get; set; } = new MList<string>();
     }
 
+    [Serializable, EntityKind(EntityKind.System, EntityData.Transactional)]
+    public class PredictorProgressEntity : Entity
+    {
+        [NotNullable]
+        [NotNullValidator]
+        public Lite<PredictorEntity> Predictor { get; set; }
+
+        public DateTime CreationDate { get; private set; } = TimeZoneManager.Now;
+
+        public int MiniBatchIndex { get; set; }
+
+        public int TrainingSet { get; set; }
+        public int? TrainingMisses { get; set; }
+        public double TrainingError { get; set; }
+
+
+        public int TestSet { get; set; }
+        public int? TestMisses { get; set; }
+        public double TestError { get; set; }
+    }
 
     [Serializable]
     public class PredictorAlgorithmSymbol : Symbol

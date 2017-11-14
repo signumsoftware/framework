@@ -133,6 +133,20 @@ export module PredictorOperation {
     export const Clone : Entities.ConstructSymbol_From<PredictorEntity, PredictorEntity> = registerSymbol("Operation", "PredictorOperation.Clone");
 }
 
+export const PredictorProgressEntity = new Type<PredictorProgressEntity>("PredictorProgress");
+export interface PredictorProgressEntity extends Entities.Entity {
+    Type: "PredictorProgress";
+    predictor?: Entities.Lite<PredictorEntity> | null;
+    creationDate?: string;
+    miniBatchIndex?: number;
+    trainingSet?: number;
+    trainingMisses?: number | null;
+    trainingError?: number;
+    testSet?: number;
+    testMisses?: number | null;
+    testError?: number;
+}
+
 export const PredictorSettingsEmbedded = new Type<PredictorSettingsEmbedded>("PredictorSettingsEmbedded");
 export interface PredictorSettingsEmbedded extends Entities.EmbeddedEntity {
     Type: "PredictorSettingsEmbedded";

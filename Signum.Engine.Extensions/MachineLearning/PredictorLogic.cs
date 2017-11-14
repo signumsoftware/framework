@@ -91,6 +91,18 @@ namespace Signum.Engine.MachineLearning
                         e.IsValue,
                     });
 
+                sb.Include<PredictorProgressEntity>()
+                    .WithQuery(dqm, () => e => new
+                    {
+                        Entity = e,
+                        e.Id,
+                        e.MiniBatchIndex,
+                        e.TrainingError,
+                        e.TestError,
+                        TrainingMissesPercentage = e.TrainingMisses / e.TrainingSet,
+                        TestMissesPercentage = e.TestMisses / e.TestSet,
+                    });
+
                 SymbolLogic<PredictorAlgorithmSymbol>.Start(sb, dqm, () => Algorithms.Keys);
 
                 sb.Schema.EntityEvents<PredictorEntity>().Retrieved += PredictorEntity_Retrieved;
