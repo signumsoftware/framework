@@ -17,19 +17,4 @@ namespace Signum.Entities.MachineLearning
 
         };
     }
-
-    public enum ActivationFunction
-    {
-        ReLU,
-        Tanh,
-        Sigmoid,
-        Linear,
-    }
-
-    public enum Regularization
-    {
-        None,
-        L1,
-        L2,
-    }
 }
