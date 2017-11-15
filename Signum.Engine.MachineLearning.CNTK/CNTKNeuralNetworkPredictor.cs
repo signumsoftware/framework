@@ -19,6 +19,7 @@ namespace Signum.Engine.MachineLearning.CNTK
             throw new NotImplementedException();
         }
 
+        //Errors with CNTK: https://github.com/Microsoft/CNTK/issues/2614
         public override void Train(PredictorTrainingContext ctx)
         {
             var p = ctx.Predictor;
@@ -45,7 +46,7 @@ namespace Signum.Engine.MachineLearning.CNTK
 
             for (int i = 0; i < batches; i++)
             {
-                ctx.ReportProgress("Training Minibatches", i / (decimal)batches);
+                ctx.ReportProgress("Training Minibatches", (i + 1) / (decimal)batches);
                 var trainSlice = Slice(training, i * nnSettings.MinibatchSize, nnSettings.MinibatchSize);
                 using (Value inputValue = CreateValue(ctx, trainSlice, ctx.InputColumns, device))
                 using (Value outputValue = CreateValue(ctx, trainSlice, ctx.OutputColumns, device))
@@ -58,14 +59,22 @@ namespace Signum.Engine.MachineLearning.CNTK
                 }
             }
 
-            ctx.Predictor.ClassificationValidation = ClasificationMetrics(ctx, validation, inputVariable, calculatedOutpus, device);
-            ctx.Predictor.ClassificationTraining = ClasificationMetrics(ctx, training, inputVariable, calculatedOutpus, device);
+
+            ctx.ReportProgress("Evaluating");
+            ctx.Predictor.ClassificationValidation = nnSettings.PredictionType == PredictionType.Classification ? null :
+                ClasificationMetrics(ctx, validation, inputVariable, calculatedOutpus, device);
+
+            ctx.Predictor.ClassificationTraining = nnSettings.PredictionType == PredictionType.Classification ? null :
+                ClasificationMetrics(ctx, training, inputVariable, calculatedOutpus, device);
+
+            ctx.Predictor.RegressionValidation = null;
+            ctx.Predictor.ClassificationTraining = null;
         }
  
         private static bool HasOneHot(PredictorEntity p)
         {
-            return p.SimpleColumns.Any(a => a.Encoding == PredictorColumnEncoding.OneHot) ||
-                p.MultiColumns.Any(mc => mc.Aggregates.Any(a => a.Encoding == PredictorColumnEncoding.OneHot));
+            return p.MainQuery.Columns.Any(a => a.Encoding == PredictorColumnEncoding.OneHot) ||
+                p.SubQueries.Any(mc => mc.Aggregates.Any(a => a.Encoding == PredictorColumnEncoding.OneHot));
         }
 
         private static PredictorClassificationMetricsEmbedded ClasificationMetrics(PredictorTrainingContext ctx, List<ResultRow> rows, Variable inputVariable, Function calculatedOutpus, DeviceDescriptor device)
@@ -123,7 +132,7 @@ namespace Signum.Engine.MachineLearning.CNTK
                         value = mainRow[c.PredictorColumnIndex.Value];
                     else
                     {
-                        var dic = ctx.MultiColumnQuery[c.MultiColumn].GroupedValues;
+                        var dic = ctx.SubQueries[c.MultiColumn].GroupedValues;
                         var aggregateValues = dic.TryGetC(mainRow.Entity)?.TryGetC(c.Keys);
                         value = aggregateValues == null ? null : aggregateValues[c.PredictorColumnIndex.Value];
                     }

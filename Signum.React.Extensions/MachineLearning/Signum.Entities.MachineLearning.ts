@@ -5,8 +5,8 @@
 import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from '../../../Framework/Signum.React/Scripts/Reflection'
 import * as Entities from '../../../Framework/Signum.React/Scripts/Signum.Entities'
 import * as Basics from '../../../Framework/Signum.React/Scripts/Signum.Entities.Basics'
-import * as UserQueries from '../UserQueries/Signum.Entities.UserQueries'
 import * as Files from '../Files/Signum.Entities.Files'
+import * as UserQueries from '../UserQueries/Signum.Entities.UserQueries'
 import * as UserAssets from '../UserAssets/Signum.Entities.UserAssets'
 
 
@@ -89,7 +89,6 @@ export type PredictorColumnUsage =
 export const PredictorEntity = new Type<PredictorEntity>("Predictor");
 export interface PredictorEntity extends Entities.Entity {
     Type: "Predictor";
-    query?: Basics.QueryEntity | null;
     name?: string | null;
     settings?: PredictorSettingsEmbedded | null;
     algorithm?: PredictorAlgorithmSymbol | null;
@@ -97,9 +96,8 @@ export interface PredictorEntity extends Entities.Entity {
     user?: Entities.Lite<Basics.IUserEntity> | null;
     algorithmSettings?: IPredictorAlgorithmSettings | null;
     state?: PredictorState;
-    filters: Entities.MList<UserQueries.QueryFilterEmbedded>;
-    simpleColumns: Entities.MList<PredictorColumnEmbedded>;
-    multiColumns: Entities.MList<PredictorMultiColumnEntity>;
+    mainQuery: PredictorMainQueryEmbedded;
+    subQueries: Entities.MList<PredictorSubQueryEntity>;
     files: Entities.MList<Files.FilePathEmbedded>;
     classificationTraining?: PredictorClassificationMetricsEmbedded | null;
     classificationValidation?: PredictorClassificationMetricsEmbedded | null;
@@ -117,6 +115,14 @@ export interface PredictorGroupKeyEmbedded extends Entities.EmbeddedEntity {
     token?: UserAssets.QueryTokenEmbedded | null;
 }
 
+export const PredictorMainQueryEmbedded = new Type<PredictorMainQueryEmbedded>("PredictorMainQueryEmbedded");
+export interface PredictorMainQueryEmbedded extends Entities.EmbeddedEntity {
+    Type: "PredictorMainQueryEmbedded";
+    query?: Basics.QueryEntity | null;
+    filters: Entities.MList<UserQueries.QueryFilterEmbedded>;
+    columns: Entities.MList<PredictorColumnEmbedded>;
+}
+
 export module PredictorMessage {
     export const Csv = new MessageKey("PredictorMessage", "Csv");
     export const Tsv = new MessageKey("PredictorMessage", "Tsv");
@@ -128,17 +134,6 @@ export module PredictorMessage {
     export const OpenTensorflowProjector = new MessageKey("PredictorMessage", "OpenTensorflowProjector");
     export const _0IsAlreadyBeingTrained = new MessageKey("PredictorMessage", "_0IsAlreadyBeingTrained");
     export const StartingTraining = new MessageKey("PredictorMessage", "StartingTraining");
-}
-
-export const PredictorMultiColumnEntity = new Type<PredictorMultiColumnEntity>("PredictorMultiColumn");
-export interface PredictorMultiColumnEntity extends Entities.Entity {
-    Type: "PredictorMultiColumn";
-    predictor?: Entities.Lite<PredictorEntity> | null;
-    name?: string | null;
-    query?: Basics.QueryEntity | null;
-    additionalFilters: Entities.MList<UserQueries.QueryFilterEmbedded>;
-    groupKeys: Entities.MList<PredictorGroupKeyEmbedded>;
-    aggregates: Entities.MList<PredictorColumnEmbedded>;
 }
 
 export module PredictorOperation {
@@ -155,7 +150,7 @@ export interface PredictorProgressEntity extends Entities.Entity {
     Type: "PredictorProgress";
     predictor?: Entities.Lite<PredictorEntity> | null;
     creationDate?: string;
-    miniBachIndex?: number;
+    miniBatchIndex?: number;
     lossTraining?: number;
     lossTest?: number;
 }
@@ -184,5 +179,16 @@ export type PredictorState =
     "Training" |
     "Trained" |
     "Error";
+
+export const PredictorSubQueryEntity = new Type<PredictorSubQueryEntity>("PredictorSubQuery");
+export interface PredictorSubQueryEntity extends Entities.Entity {
+    Type: "PredictorSubQuery";
+    predictor?: Entities.Lite<PredictorEntity> | null;
+    name?: string | null;
+    query?: Basics.QueryEntity | null;
+    additionalFilters: Entities.MList<UserQueries.QueryFilterEmbedded>;
+    groupKeys: Entities.MList<PredictorGroupKeyEmbedded>;
+    aggregates: Entities.MList<PredictorColumnEmbedded>;
+}
 
 

@@ -30,7 +30,7 @@ namespace Signum.Engine.MachineLearning
         public List<PredictorResultColumn> OutputColumns { get; private set; }
 
         public MainQuery MainQuery { get; internal set; }
-        public Dictionary<PredictorMultiColumnEntity, MultiColumnQuery> MultiColumnQuery { get; internal set; }
+        public Dictionary<PredictorSubQueryEntity, SubQuery> SubQueries { get; internal set; }
 
         public PredictorTrainingContext(PredictorEntity predictor, CancellationToken cancellationToken)
         {
@@ -40,7 +40,7 @@ namespace Signum.Engine.MachineLearning
 
         public event Action<string, decimal?> OnReportProgres;
 
-        public void ReportProgress(string message, decimal? progress)
+        public void ReportProgress(string message, decimal? progress = null)
         {
             this.CancellationToken.ThrowIfCancellationRequested();
 
@@ -59,7 +59,10 @@ namespace Signum.Engine.MachineLearning
 
         public (List<ResultRow> training, List<ResultRow> test) SplitTrainValidation()
         {
-            Random r = Predictor.Settings.Seed == null ? null : new Random(Predictor.Settings.Seed.Value);
+            Random r = Predictor.Settings.Seed == null ? 
+                new Random() : 
+                new Random(Predictor.Settings.Seed.Value);
+
             List<ResultRow> training = new List<ResultRow>();
             List<ResultRow> test = new List<ResultRow>();
 
@@ -81,9 +84,9 @@ namespace Signum.Engine.MachineLearning
         public ResultTable ResultTable { get; internal set; }
     }
 
-    public class MultiColumnQuery
+    public class SubQuery
     {
-        public PredictorMultiColumnEntity MultiColumn;
+        public PredictorSubQueryEntity MultiColumn;
         public QueryGroupRequest QueryGroupRequest;
         public ResultTable ResultTable;
         public Dictionary<Lite<Entity>, Dictionary<object[], object[]>> GroupedValues;
@@ -114,7 +117,7 @@ namespace Signum.Engine.MachineLearning
     {
         public static IEnumerable<PredictorColumnEmbedded> GetAllPredictorColumnEmbeddeds(this PredictorEntity predictor)
         {
-            return predictor.SimpleColumns.Concat(predictor.MultiColumns.SelectMany(a => a.Aggregates));
+            return predictor.MainQuery.Columns.Concat(predictor.SubQueries.SelectMany(a => a.Aggregates));
         }
     }
 }

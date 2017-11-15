@@ -4,7 +4,7 @@ import { FormGroup, FormControlStatic, ValueLine, ValueLineType, EntityLine, Ent
 import { SearchControl, FilterOptionParsed } from '../../../../Framework/Signum.React/Scripts/Search'
 import { TypeContext, FormGroupStyle, ButtonsContext } from '../../../../Framework/Signum.React/Scripts/TypeContext'
 import FileLine from '../../../../Extensions/Signum.React.Extensions/Files/FileLine'
-import { PredictorEntity, PredictorColumnEmbedded, PredictorMessage, PredictorMultiColumnEntity } from '../Signum.Entities.MachineLearning'
+import { PredictorEntity, PredictorColumnEmbedded, PredictorMessage, PredictorSubQueryEntity } from '../Signum.Entities.MachineLearning'
 import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
 import { getQueryNiceName } from '../../../../Framework/Signum.React/Scripts/Reflection'
 import QueryTokenEntityBuilder from '../../UserAssets/Templates/QueryTokenEntityBuilder'

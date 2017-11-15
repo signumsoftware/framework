@@ -27,7 +27,7 @@ namespace Signum.React.MachineLearning
 
             SignumControllerFactory.RegisterArea(MethodInfo.GetCurrentMethod());
 
-            EntityJsonConverter.AfterDeserilization.Register((PredictorEntity p) =>
+            EntityJsonConverter.AfterDeserilization.Register((PredictorMainQueryEmbedded p) =>
             {
                 if (p.Query != null)
                 {
@@ -36,7 +36,7 @@ namespace Signum.React.MachineLearning
                 }
             });
 
-            EntityJsonConverter.AfterDeserilization.Register((PredictorMultiColumnEntity mc) =>
+            EntityJsonConverter.AfterDeserilization.Register((PredictorSubQueryEntity mc) =>
             {
                 if (mc.Query != null)
                 {

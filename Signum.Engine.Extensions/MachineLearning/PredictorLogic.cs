@@ -60,13 +60,13 @@ namespace Signum.Engine.MachineLearning
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
                 sb.Include<PredictorEntity>()
-                    .WithVirtualMList(p => p.MultiColumns, mc => mc.Predictor)
+                    .WithVirtualMList(p => p.SubQueries, mc => mc.Predictor)
                     .WithQuery(dqm, () => e => new
                     {
                         Entity = e,
                         e.Id,
                         e.Name,
-                        e.Query,
+                        e.MainQuery.Query,
                         e.Algorithm,
                         e.State,
                         e.TrainingException,
@@ -74,7 +74,7 @@ namespace Signum.Engine.MachineLearning
 
                 PredictorGraph.Register();
 
-                sb.Include<PredictorMultiColumnEntity>()
+                sb.Include<PredictorSubQueryEntity>()
                     .WithQuery(dqm, () => e => new
                     {
                         Entity = e,
@@ -114,7 +114,7 @@ namespace Signum.Engine.MachineLearning
                 SymbolLogic<PredictorAlgorithmSymbol>.Start(sb, dqm, () => Algorithms.Keys);
 
                 sb.Schema.EntityEvents<PredictorEntity>().Retrieved += PredictorEntity_Retrieved;
-                sb.Schema.EntityEvents<PredictorMultiColumnEntity>().Retrieved += PredictorMultiColumnEntity_Retrieved;
+                sb.Schema.EntityEvents<PredictorSubQueryEntity>().Retrieved += PredictorMultiColumnEntity_Retrieved;
             }
         }
 
@@ -216,7 +216,7 @@ namespace Signum.Engine.MachineLearning
 
         static void CreatePredictorCodifications(PredictorTrainingContext ctx)
         {
-            ctx.ReportProgress($"Saving Codifications", 0.5m);
+            ctx.ReportProgress($"Saving Codifications");
             ctx.Columns.Select((a, i) =>
             {
                 string ToStringKey(QueryToken token, object obj)
@@ -238,9 +238,9 @@ namespace Signum.Engine.MachineLearning
                 {
                     Predictor = ctx.Predictor.ToLite(),
                     ColumnIndex = i,
-                    OriginalMultiColumnIndex = a.MultiColumn == null ? (int?)null : ctx.Predictor.MultiColumns.IndexOf(a.MultiColumn),
+                    OriginalMultiColumnIndex = a.MultiColumn == null ? (int?)null : ctx.Predictor.SubQueries.IndexOf(a.MultiColumn),
                     OriginalColumnIndex = a.MultiColumn == null ?
-                        ctx.Predictor.SimpleColumns.IndexOf(a.PredictorColumn) :
+                        ctx.Predictor.MainQuery.Columns.IndexOf(a.PredictorColumn) :
                         a.MultiColumn.Aggregates.IndexOf(a.PredictorColumn),
                     GroupKey0 = GetGroupKey(0),
                     GroupKey1 = GetGroupKey(1),
@@ -278,13 +278,12 @@ namespace Signum.Engine.MachineLearning
 
         static void PredictorEntity_Retrieved(PredictorEntity predictor)
         {
-            object queryName = QueryLogic.ToQueryName(predictor.Query.Key);
+            object queryName = QueryLogic.ToQueryName(predictor.MainQuery.Query.Key);
             QueryDescription description = DynamicQueryManager.Current.QueryDescription(queryName);
-
-            predictor.ParseData(description);
+            predictor.MainQuery.ParseData(description);
         }
 
-        static void PredictorMultiColumnEntity_Retrieved(PredictorMultiColumnEntity mc)
+        static void PredictorMultiColumnEntity_Retrieved(PredictorSubQueryEntity mc)
         {
             object queryName = QueryLogic.ToQueryName(mc.Query.Key);
             QueryDescription description = DynamicQueryManager.Current.QueryDescription(queryName);
@@ -370,13 +369,11 @@ namespace Signum.Engine.MachineLearning
                     {
                         Name = e.Name.HasText() ? (e.Name + " (2)") : "",
                         State = e.State,
-                        Query = e.Query,
+                        MainQuery = e.MainQuery.Clone(),
+                        SubQueries = e.SubQueries.Select(a => a.Clone()).ToMList(),
                         Algorithm = e.Algorithm,
                         AlgorithmSettings = e.AlgorithmSettings?.Clone(),
                         Settings = e.Settings?.Clone(),
-                        Filters = e.Filters.Select(f => f.Clone()).ToMList(),
-                        SimpleColumns = e.SimpleColumns.Select(a => a.Clone()).ToMList(),
-                        MultiColumns = e.MultiColumns.Select(a => a.Clone()).ToMList()
                     },
                 }.Register();
             }
