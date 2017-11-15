@@ -11,16 +11,16 @@ using Signum.Entities;
 using Signum.Entities.Rest;
 using Signum.Utilities;
 
-namespace Signum.React.Rest
+namespace Signum.React.RestLog
 {
     public class RestLogController : ApiController
     {
         [Route("api/restLog/{id}"), HttpGet]
-        public async Task<RestDiffResult> GetRestDiffLog(string id)
+        public RestDiffResult GetRestDiffLog(string id)
         {
             var oldRequest = Database.Retrieve<RestLogEntity>(PrimaryKey.Parse(id, typeof(RestLogEntity)));
 
-            var result = new RestDiffResult {Current = oldRequest.ResponseBody};
+            var result = new RestDiffResult {Previous = oldRequest.ResponseBody};
 
             //create the new Request
             var restClient = new HttpClient();
@@ -29,14 +29,16 @@ namespace Signum.React.Rest
             if (!string.IsNullOrWhiteSpace(oldRequest.RequestBody))
             {
                 var newRequest = restClient.PostAsJsonAsync("", oldRequest.RequestBody);
-                result.Current = await newRequest.Result.Content.ReadAsStringAsync();
+                result.Current = newRequest.Result.Content.ReadAsStringAsync().Result;
             }
             else
             {
                 result.Current = restClient.GetStringAsync(oldRequest.Url).Result;
             }
-                
 
+            StringDistance sd = new StringDistance();
+            var diff = sd.DiffText(result.Previous, result.Current);
+            result.diff = diff;
             return result;
         }
     }
