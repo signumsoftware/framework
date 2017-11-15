@@ -4,7 +4,7 @@ import { FormGroup, FormControlStatic, ValueLine, ValueLineType, EntityLine, Ent
 import { SearchControl } from '../../../../Framework/Signum.React/Scripts/Search'
 import { TypeContext, FormGroupStyle } from '../../../../Framework/Signum.React/Scripts/TypeContext'
 import FileLine from '../../Files/FileLine'
-import { PredictorStatsEmbedded } from '../Signum.Entities.MachineLearning'
+import { PredictorClassificationMetricsEmbedded } from '../Signum.Entities.MachineLearning'
 import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
 import { getQueryNiceName } from '../../../../Framework/Signum.React/Scripts/Reflection'
 import QueryTokenEntityBuilder from '../../UserAssets/Templates/QueryTokenEntityBuilder'
@@ -15,19 +15,29 @@ import { API } from '../PredictorClient';
 import FilterBuilderEmbedded from './FilterBuilderEmbedded';
 import { TypeReference } from '../../../../Framework/Signum.React/Scripts/Reflection';
 
-export default class PredictorStats extends React.Component<{ ctx: TypeContext<PredictorStatsEmbedded> }> {
-    
+export default class PredictorClassificationMetrics extends React.Component<{ ctx: TypeContext<PredictorClassificationMetricsEmbedded> }> {
+
     render() {
         const ctx = this.props.ctx.subCtx({ formGroupStyle: "Basic" });
 
 
         return (
             <div className="form-vertical">
-                <ValueLine ctx={ctx.subCtx(a => a.mean)} />
-                <ValueLine ctx={ctx.subCtx(a => a.standartDeviation)} />
-                <ValueLine ctx={ctx.subCtx(a => a.variance)} />
-                <ValueLine ctx={ctx.subCtx(a => a.errorCount)} />
-                <ValueLine ctx={ctx.subCtx(a => a.totalCount)} />
+                <div className="col-sm-2">
+
+                    <ValueLine ctx={ctx.subCtx(a => a.missCount)} />
+                </div>
+
+                <div className="col-sm-2">
+
+                    <ValueLine ctx={ctx.subCtx(a => a.totalCount)} />
+                </div>
+
+                <div className="col-sm-2">
+
+                    <ValueLine ctx={ctx.subCtx(a => a.missRate)} />
+                </div>
+
             </div>
         );
     }

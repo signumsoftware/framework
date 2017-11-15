@@ -15,7 +15,7 @@ import * as Operations from '../../../Framework/Signum.React/Scripts/Operations'
 import * as ContextualOperations from '../../../Framework/Signum.React/Scripts/Operations/ContextualOperations'
 import {
     PredictorEntity, PredictorMultiColumnEntity, PredictorMessage, PredictorAlgorithmSymbol, AccordPredictorAlgorithm, CNTKPredictorAlgorithm,
-    NaiveBayesSettingsEntity, NeuralNetworkSettingsEntity, PredictorSettingsEmbedded, PredictorState, PredictorStatsEmbedded
+    NaiveBayesSettingsEntity, NeuralNetworkSettingsEntity, PredictorSettingsEmbedded, PredictorState, PredictorRegressionMetricsEmbedded, PredictorClassificationMetricsEmbedded
 } from './Signum.Entities.MachineLearning'
 import * as OmniboxClient from '../Omnibox/OmniboxClient'
 import * as AuthClient from '../Authorization/AuthClient'
@@ -28,7 +28,8 @@ export function start(options: { routes: JSX.Element[] }) {
 
     Navigator.addSettings(new EntitySettings(PredictorEntity, e => import('./Templates/Predictor')));
     Navigator.addSettings(new EntitySettings(PredictorMultiColumnEntity, e => import('./Templates/PredictorMultiColumn')));
-    Navigator.addSettings(new EntitySettings(PredictorStatsEmbedded, e => import('./Templates/PredictorStats')));
+    Navigator.addSettings(new EntitySettings(PredictorRegressionMetricsEmbedded, e => import('./Templates/PredictorRegressionMetrics')));
+    Navigator.addSettings(new EntitySettings(PredictorClassificationMetricsEmbedded, e => import('./Templates/PredictorClassificationMetrics')));
 
     QuickLinks.registerQuickLink(PredictorEntity, ctx => new QuickLinks.QuickLinkAction(
         PredictorMessage.DownloadCsv.niceToString(),

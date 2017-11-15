@@ -17,17 +17,21 @@ namespace Signum.Engine.MachineLearning
     {
         public static void RetrieveData(PredictorTrainingContext ctx)
         {
-
-            var totalSteps = 1 /*Main*/ + ctx.Predictor.MultiColumns.Count + 1 /*Columns*/+ 1;
+            var totalSteps = 1 /*Main*/ + ctx.Predictor.MultiColumns.Count + 1;
             int step = 0;
             ctx.ReportProgress($"Executing MainQuery for {ctx.Predictor}", step++ / totalSteps);
-            QueryRequest mainQuery = GetMainQueryRequest(ctx.Predictor);
-            ResultTable mainResult = DynamicQueryManager.Current.ExecuteQuery(mainQuery);
+            QueryRequest mainQueryRequest = GetMainQueryRequest(ctx.Predictor);
+            ResultTable mainResult = DynamicQueryManager.Current.ExecuteQuery(mainQueryRequest);
+
+            ctx.MainQuery = new MainQuery
+            {
+                QueryRequest = mainQueryRequest,
+                ResultTable = mainResult,
+            };
 
             Implementations mainQueryImplementations = DynamicQueryManager.Current.GetEntityImplementations(ctx.Predictor.Query.ToQueryName());
 
-            List<MultiColumnQuery> mcqs = new List<MultiColumnQuery>();
-            
+            ctx.MultiColumnQuery = new Dictionary<PredictorMultiColumnEntity, MultiColumnQuery>();
             foreach (var mc in ctx.Predictor.MultiColumns)
             {
                 ctx.ReportProgress($"Executing SubQuery {mc}",  step++ / totalSteps);
@@ -44,7 +48,7 @@ namespace Signum.Engine.MachineLearning
                         row => row.GetValues(aggregates),
                         ObjectArrayComparer.Instance));
 
-                mcqs.Add(new MultiColumnQuery
+                ctx.MultiColumnQuery.Add(mc, new MultiColumnQuery
                 {
                     MultiColumn = mc,
                     QueryGroupRequest = multiColumnQuery,
@@ -53,8 +57,7 @@ namespace Signum.Engine.MachineLearning
                     Aggregates = aggregates,
                 });
             }
-
-            var dicGroupQuery = mcqs.ToDictionary(a => a.MultiColumn);
+            
             ctx.ReportProgress($"Creating Columns ", step++ / totalSteps);
             var columns = new List<PredictorResultColumn>();
 
@@ -63,7 +66,7 @@ namespace Signum.Engine.MachineLearning
                 columns.AddRange(ExpandColumns(ctx.Predictor.SimpleColumns[i], i, mainResult.Columns[i]));
             }
             
-            foreach (var mcq in mcqs)
+            foreach (var mcq in ctx.MultiColumnQuery.Values)
             {
                 var distinctKeys = mcq.GroupedValues.SelectMany(a => a.Value.Values).Distinct(ObjectArrayComparer.Instance).ToList();
 
@@ -91,55 +94,6 @@ namespace Signum.Engine.MachineLearning
             }
 
             ctx.SetColums(columns.ToArray());
-
-            ctx.ReportProgress("Creating Rows", step++ / totalSteps);
-            object[][] rows = new object[mainResult.Rows.Length][];
-
-            for (int i = 0; i < rows.Length; i++)
-            {
-                var mainRow = mainResult.Rows[i];
-
-                object[] row = CreateRow(columns, dicGroupQuery, mainRow);
-                rows[i] = row;
-            }
-
-            ctx.ReportProgress("Splitting Rows", step++ / totalSteps);
-            ctx.SetRows(rows);
-        }
-
-        private static object[] CreateRow(List<PredictorResultColumn> columns, Dictionary<PredictorMultiColumnEntity, MultiColumnQuery> dicGroupQuery, ResultRow mainRow)
-        {
-            var row = new object[columns.Count];
-            for (int j = 0; j < columns.Count; j++)
-            {
-                var c = columns[j];
-                object value;
-                if (c.MultiColumn == null)
-                    value = mainRow[c.PredictorColumnIndex.Value];
-                else
-                {
-                    var dic = dicGroupQuery[c.MultiColumn].GroupedValues;
-                    var aggregateValues = dic.TryGetC(mainRow.Entity)?.TryGetC(c.Keys);
-                    value = aggregateValues == null ? null : aggregateValues[c.PredictorColumnIndex.Value];
-                }
-                //TODO: Codification
-                switch (c.PredictorColumn.Encoding)
-                {
-                    case PredictorColumnEncoding.None:
-                        row[j] = value;
-                        break;
-                    case PredictorColumnEncoding.OneHot:
-                        row[j] = Object.Equals(value, c.IsValue) ? 1 : 0;
-                        break;
-                    case PredictorColumnEncoding.Codified:
-                        row[j] = c.ValuesToIndex.GetOrThrow(value);
-                        break;
-                    default:
-                        break;
-                }
-            }
-
-            return row;
         }
 
         private static IEnumerable<PredictorResultColumn> ExpandColumns(PredictorColumnEmbedded pc, int pcIndex, ResultColumn rc)
@@ -247,16 +201,6 @@ namespace Signum.Engine.MachineLearning
 
             return multiImplementations.Value.Types.SingleEx().Equals(mainQueryImplementations.Types.SingleEx());
         }
-    }
-
-    class MultiColumnQuery
-    {
-        public PredictorMultiColumnEntity MultiColumn;
-        public QueryGroupRequest QueryGroupRequest;
-        public ResultTable ResultTable;
-        public Dictionary<Lite<Entity>, Dictionary<object[], object[]>> GroupedValues;
-
-        public ResultColumn[] Aggregates { get; internal set; }
     }
 
     public class PredictorResultColumn

@@ -154,14 +154,16 @@ export default class Predictor extends React.Component<{ ctx: TypeContext<Predic
                         ctx.value.state != "Draft" && <Tab eventKey="codifications" title={PredictorCodificationEntity.nicePluralName()}>
                             <SearchControl findOptions={{ queryName: PredictorCodificationEntity, parentColumn: "Predictor", parentValue: ctx.value }} />
                         </Tab>
-                    }                   
+                    }
                     {
                         ctx.value.state != "Draft" && <Tab eventKey="files" title={ctxxs.niceName(a => a.files)}>
                             <EntityRepeater ctx={ctxxs.subCtx(f => f.files)} getComponent={ec =>
                                 <FileLine ctx={ec.subCtx({ formGroupStyle: "SrOnly" })} remove={false} fileType={PredictorFileType.PredictorFile} />
                             } />
-                            <EntityDetail ctx={ctxxs.subCtx(f => f.trainingStats)} />
-                            <EntityDetail ctx={ctxxs.subCtx(f => f.testStats)} />
+                            <EntityDetail ctx={ctxxs.subCtx(f => f.classificationTraining)} />
+                            <EntityDetail ctx={ctxxs.subCtx(f => f.classificationValidation)} />
+                            <EntityDetail ctx={ctxxs.subCtx(f => f.regressionTraining)} />
+                            <EntityDetail ctx={ctxxs.subCtx(f => f.regressionValidation)} />
                         </Tab>
                     }
                 </Tabs>
@@ -233,7 +235,7 @@ export class TrainingProgressComponent extends React.Component<TrainingProgressC
         return (
             <div className={classes("progress", progressContainerClass)}>
                 <div className={classes("progress-bar", progressClass)} role="progressbar" id="progressBar" aria-valuenow="@val" aria-valuemin="0" aria-valuemax="100" style={{ width: val + "%" }}>
-                    <span>{message}</span>
+                    <span style={{ color: "black" }}>{message}</span>
                 </div>
             </div>
         );

@@ -38,6 +38,15 @@ namespace Signum.Engine.MachineLearning
             return CodificationsExpression.Evaluate(e);
         }
 
+
+        static Expression<Func<PredictorEntity, IQueryable<PredictorProgressEntity>>> ProgressesExpression =
+        e => Database.Query<PredictorProgressEntity>().Where(a => a.Predictor.RefersTo(e));
+        [ExpressionField]
+        public static IQueryable<PredictorProgressEntity> Progresses(this PredictorEntity e)
+        {
+            return ProgressesExpression.Evaluate(e);
+        }
+
         public static Dictionary<PredictorAlgorithmSymbol, PredictorAlgorithm> Algorithms = new Dictionary<PredictorAlgorithmSymbol, PredictorAlgorithm>();
         public static void RegisterAlgorithm(PredictorAlgorithmSymbol symbol, PredictorAlgorithm algorithm)
         {
@@ -92,15 +101,14 @@ namespace Signum.Engine.MachineLearning
                     });
 
                 sb.Include<PredictorProgressEntity>()
+                    .WithExpressionFrom(dqm, (PredictorEntity e) => e.Progresses())
                     .WithQuery(dqm, () => e => new
                     {
                         Entity = e,
                         e.Id,
-                        e.MiniBatchIndex,
-                        e.TrainingError,
-                        e.TestError,
-                        TrainingMissesPercentage = e.TrainingMisses / e.TrainingSet,
-                        TestMissesPercentage = e.TestMisses / e.TestSet,
+                        e.CreationDate,
+                        e.LossTest,
+                        e.LossTraining
                     });
 
                 SymbolLogic<PredictorAlgorithmSymbol>.Start(sb, dqm, () => Algorithms.Keys);
@@ -197,10 +205,13 @@ namespace Signum.Engine.MachineLearning
             {
                 fp.DeleteFileOnCommit();
             }
-            e.TestStats = null;
-            e.TrainingStats = null;
+            e.ClassificationTraining = null;
+            e.ClassificationValidation = null;
+            e.RegressionTraining = null;
+            e.RegressionValidation = null;
             e.Files.Clear();
             e.Codifications().UnsafeDelete();
+            e.Progresses().UnsafeDelete();
         }
 
         static void CreatePredictorCodifications(PredictorTrainingContext ctx)
@@ -243,23 +254,26 @@ namespace Signum.Engine.MachineLearning
 
         public static byte[] GetTsvMetadata(this PredictorEntity predictor)
         {
-            var ctx = new PredictorTrainingContext(predictor, CancellationToken.None);
-            PredictorLogicQuery.RetrieveData(ctx);
-            return Tsv.ToTsvBytes(ctx.AllRows.Rows.Take(1).ToArray());
+            return null;
+            //var ctx = new PredictorTrainingContext(predictor, CancellationToken.None);
+            //PredictorLogicQuery.RetrieveData(ctx);
+            //return Tsv.ToTsvBytes(ctx.AllRows.Rows.Take(1).ToArray());
         }
 
         public static byte[] GetTsv(this PredictorEntity predictor)
         {
-            var ctx = new PredictorTrainingContext(predictor, CancellationToken.None);
-            PredictorLogicQuery.RetrieveData(ctx);
-            return Tsv.ToTsvBytes(ctx.AllRows.Rows);
+            return null;
+            //var ctx = new PredictorTrainingContext(predictor, CancellationToken.None);
+            //PredictorLogicQuery.RetrieveData(ctx);
+            //return Tsv.ToTsvBytes(ctx.AllRows.Rows);
         }
 
         public static byte[] GetCsv(this PredictorEntity predictor)
         {
-            var ctx = new PredictorTrainingContext(predictor, CancellationToken.None);
-            PredictorLogicQuery.RetrieveData(ctx);
-            return Csv.ToCsvBytes(ctx.AllRows.Rows);
+            return null;
+            //var ctx = new PredictorTrainingContext(predictor, CancellationToken.None);
+            //PredictorLogicQuery.RetrieveData(ctx);
+            //return Csv.ToCsvBytes(ctx.AllRows.Rows);
         }
 
         static void PredictorEntity_Retrieved(PredictorEntity predictor)

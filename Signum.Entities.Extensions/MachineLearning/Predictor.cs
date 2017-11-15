@@ -55,9 +55,6 @@ namespace Signum.Entities.MachineLearning
 
         [Ignore] //virtual Mlist
         public MList<PredictorMultiColumnEntity> MultiColumns { get; set; } = new MList<PredictorMultiColumnEntity>();
-
-        public PredictorStatsEmbedded TrainingStats { get; set; }
-        public PredictorStatsEmbedded TestStats { get; set; }
         
         [Ignore]
         public object Model;
@@ -65,6 +62,11 @@ namespace Signum.Entities.MachineLearning
         [NotNullable, PreserveOrder]
         [NotNullValidator, NoRepeatValidator]
         public MList<FilePathEmbedded> Files { get; set; } = new MList<FilePathEmbedded>();
+
+        public PredictorClassificationMetricsEmbedded ClassificationTraining { get; set; }
+        public PredictorClassificationMetricsEmbedded ClassificationValidation { get; set; }
+        public PredictorRegressionMetricsEmbedded RegressionTraining { get; set; }
+        public PredictorRegressionMetricsEmbedded RegressionValidation { get; set; }
 
         internal void ParseData(QueryDescription qd)
         {
@@ -79,13 +81,34 @@ namespace Signum.Entities.MachineLearning
     }
 
     [Serializable]
-    public class PredictorStatsEmbedded : EmbeddedEntity
+    public class PredictorClassificationMetricsEmbedded : EmbeddedEntity
     {
         public int TotalCount { get; set; }
-        public int? ErrorCount { get; set; }
-        public double? Mean { get; set; }
-        public double? Variance { get; set; }
-        public double? StandartDeviation { get; set; }
+        public int MissCount { get; set; }
+        [Format("p")]
+        public float MissRate { get; set; }
+    }
+
+    [Serializable]
+    public class PredictorRegressionMetricsEmbedded : EmbeddedEntity
+    {
+        public decimal Signed { get; set; }
+
+        [Unit("±")]
+        public decimal Absolute { get; set; }
+
+        [Unit("±")]
+        public decimal Deviation { get; set; }
+
+        [Format("p")]
+        public decimal PercentageSigned { get; set; }
+
+        [Format("p"), Unit("±")]
+        public decimal PercentageAbsolute { get; set; }
+
+        [Format("p"), Unit("±")]
+        public decimal PercentageDeviation { get; set; }
+
     }
 
     [Serializable]
@@ -93,6 +116,8 @@ namespace Signum.Entities.MachineLearning
     {
         [Format("p")]
         public double TestPercentage { get; set; } = 0.2;
+
+        public int? Seed { get; set; }
 
         internal PredictorSettingsEmbedded Clone()
         {
@@ -307,14 +332,8 @@ namespace Signum.Entities.MachineLearning
 
         public int MiniBatchIndex { get; set; }
 
-        public int TrainingSet { get; set; }
-        public int? TrainingMisses { get; set; }
-        public double TrainingError { get; set; }
-
-
-        public int TestSet { get; set; }
-        public int? TestMisses { get; set; }
-        public double TestError { get; set; }
+        public float LossTraining { get; set; }
+        public float LossTest { get; set; }
     }
 
     [Serializable]

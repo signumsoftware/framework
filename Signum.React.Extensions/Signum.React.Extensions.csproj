@@ -167,7 +167,8 @@
     <Compile Include="Dynamic\DynamicViewController.cs" />
     <Compile Include="Dynamic\DynamicServer.cs" />
     <TypeScriptCompile Include="DiffLog\Templates\DiffDocument.tsx" />
-    <TypeScriptCompile Include="MachineLearning\Templates\PredictorStats.tsx" />
+    <TypeScriptCompile Include="MachineLearning\Templates\PredictorRegressionMetrics.tsx" />
+    <TypeScriptCompile Include="MachineLearning\Templates\PredictorClassificationMetrics.tsx" />
     <TypeScriptCompile Include="TypeHelp\TypeHelpClient.tsx" />
     <TypeScriptCompile Include="TypeHelp\TypeHelpButtonBarComponent.tsx" />
     <Compile Include="Excel\ExcelController.cs" />
