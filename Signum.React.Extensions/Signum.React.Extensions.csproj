@@ -181,6 +181,7 @@
     <Compile Include="MachineLearning\PredictorController.cs" />
     <Compile Include="Mailing\MailingController.cs" />
     <Compile Include="Mailing\MailingServer.cs" />
+    <Compile Include="Rest\RestLogServer.cs" />
     <Compile Include="Rest\RestApiKeyController.cs" />
     <Compile Include="Rest\RestLogController.cs" />
     <Compile Include="Rest\RestLogFilter.cs" />
