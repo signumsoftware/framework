@@ -330,7 +330,7 @@ namespace Signum.Entities.MachineLearning
 
         public DateTime CreationDate { get; private set; } = TimeZoneManager.Now;
 
-        public int MiniBachIndex { get; set; }
+        public int MiniBatchIndex { get; set; }
 
         public float LossTraining { get; set; }
         public float LossTest { get; set; }
