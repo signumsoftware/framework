@@ -17,10 +17,8 @@ namespace Signum.Engine.MachineLearning
     {
         public static void RetrieveData(PredictorTrainingContext ctx)
         {
-            var totalSteps = 1 /*Main*/ + ctx.Predictor.MultiColumns.Count + 1;
-            int step = 0;
-            ctx.ReportProgress($"Executing MainQuery for {ctx.Predictor}", step++ / totalSteps);
-            QueryRequest mainQueryRequest = GetMainQueryRequest(ctx.Predictor);
+            ctx.ReportProgress($"Executing MainQuery for {ctx.Predictor}");
+            QueryRequest mainQueryRequest = GetMainQueryRequest(ctx.Predictor.MainQuery);
             ResultTable mainResult = DynamicQueryManager.Current.ExecuteQuery(mainQueryRequest);
 
             ctx.MainQuery = new MainQuery
@@ -29,13 +27,13 @@ namespace Signum.Engine.MachineLearning
                 ResultTable = mainResult,
             };
 
-            Implementations mainQueryImplementations = DynamicQueryManager.Current.GetEntityImplementations(ctx.Predictor.Query.ToQueryName());
+            Implementations mainQueryImplementations = DynamicQueryManager.Current.GetEntityImplementations(mainQueryRequest.QueryName);
 
-            ctx.MultiColumnQuery = new Dictionary<PredictorMultiColumnEntity, MultiColumnQuery>();
-            foreach (var mc in ctx.Predictor.MultiColumns)
+            ctx.SubQueries = new Dictionary<PredictorSubQueryEntity, SubQuery>();
+            foreach (var mc in ctx.Predictor.SubQueries)
             {
-                ctx.ReportProgress($"Executing SubQuery {mc}",  step++ / totalSteps);
-                QueryGroupRequest multiColumnQuery = ToMultiColumnQuery(ctx.Predictor.Query, ctx.Predictor.Filters.ToList(), mainQueryImplementations, mc);
+                ctx.ReportProgress($"Executing SubQuery {mc}");
+                QueryGroupRequest multiColumnQuery = ToMultiColumnQuery(ctx.Predictor.MainQuery, mainQueryImplementations, mc);
                 ResultTable multiColumnResult = DynamicQueryManager.Current.ExecuteGroupQuery(multiColumnQuery);
 
                 var entityGroupKey = multiColumnResult.Columns.FirstEx();
@@ -48,7 +46,7 @@ namespace Signum.Engine.MachineLearning
                         row => row.GetValues(aggregates),
                         ObjectArrayComparer.Instance));
 
-                ctx.MultiColumnQuery.Add(mc, new MultiColumnQuery
+                ctx.SubQueries.Add(mc, new SubQuery
                 {
                     MultiColumn = mc,
                     QueryGroupRequest = multiColumnQuery,
@@ -57,16 +55,16 @@ namespace Signum.Engine.MachineLearning
                     Aggregates = aggregates,
                 });
             }
-            
-            ctx.ReportProgress($"Creating Columns ", step++ / totalSteps);
+
+            ctx.ReportProgress($"Creating Columns");
             var columns = new List<PredictorResultColumn>();
 
             for (int i = 0; i < mainResult.Columns.Length; i++)
             {
-                columns.AddRange(ExpandColumns(ctx.Predictor.SimpleColumns[i], i, mainResult.Columns[i]));
+                columns.AddRange(ExpandColumns(ctx.Predictor.MainQuery.Columns[i], i, mainResult.Columns[i]));
             }
             
-            foreach (var mcq in ctx.MultiColumnQuery.Values)
+            foreach (var mcq in ctx.SubQueries.Values)
             {
                 var distinctKeys = mcq.GroupedValues.SelectMany(a => a.Value.Values).Distinct(ObjectArrayComparer.Instance).ToList();
 
@@ -114,29 +112,29 @@ namespace Signum.Engine.MachineLearning
             }
         }
 
-        static QueryRequest GetMainQueryRequest(PredictorEntity predictor)
+        static QueryRequest GetMainQueryRequest(PredictorMainQueryEmbedded mainQuery)
         {
             return new QueryRequest
             {
-                QueryName = predictor.Query.ToQueryName(),
+                QueryName = mainQuery.Query.ToQueryName(),
 
-                Filters = predictor.Filters.Select(f => ToFilter(f)).ToList(),
+                Filters = mainQuery.Filters.Select(f => ToFilter(f)).ToList(),
 
-                Columns = predictor.SimpleColumns.Select(c => new Column(c.Token.Token, null)).ToList(),
+                Columns = mainQuery.Columns.Select(c => new Column(c.Token.Token, null)).ToList(),
 
                 Pagination = new Pagination.All(),
                 Orders = Enumerable.Empty<Order>().ToList(),
             };
         }
 
-        static QueryGroupRequest ToMultiColumnQuery(QueryEntity query, List<QueryFilterEmbedded> filters, Implementations mainQueryImplementations, PredictorMultiColumnEntity mc)
+        static QueryGroupRequest ToMultiColumnQuery(PredictorMainQueryEmbedded mainQuery, Implementations mainQueryImplementations, PredictorSubQueryEntity mc)
         {
             var mainQueryKey = mc.GroupKeys.FirstEx();
 
             if (!Compatible(mainQueryKey.Token.Token.GetImplementations(), mainQueryImplementations))
                 throw new InvalidOperationException($"{mainQueryKey.Token} of {mc.Query} should be of type {mainQueryImplementations}");
 
-            var mainFilters = filters.Select(f => query.Is(mc.Query) ? ToFilter(f) : ToFilterAppend(f, mainQueryKey.Token.Token));
+            var mainFilters = mainQuery.Filters.Select(f => mainQuery.Query.Is(mc.Query) ? ToFilter(f) : ToFilterAppend(f, mainQueryKey.Token.Token));
             var additionalFilters = mc.AdditionalFilters.Select(f => ToFilter(f)).ToList();
 
             var groupKeys = mc.GroupKeys.Select(c => new Column(c.Token.Token, null)).ToList();
@@ -213,7 +211,7 @@ namespace Signum.Engine.MachineLearning
         public int? PredictorColumnIndex;
 
         //Only for multi columns (values inside of collections)
-        public PredictorMultiColumnEntity MultiColumn;
+        public PredictorSubQueryEntity MultiColumn;
         public object[] Keys;
         
         //Only for 1-hot encoding in the column (i.e: Neuronal Networks)

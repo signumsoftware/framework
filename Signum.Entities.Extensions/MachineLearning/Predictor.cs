@@ -19,12 +19,7 @@ namespace Signum.Entities.MachineLearning
     [Serializable, EntityKind(EntityKind.Main, EntityData.Transactional)]
     public class PredictorEntity : Entity
     {
-        [Ignore]
-        internal object queryName;
-
-        [NotNullValidator]
-        public QueryEntity Query { get; set; }
-
+       
         [SqlDbType(Size = 100),]
         [StringLengthValidator(AllowNulls = true, Min = 3, Max = 100)]
         public string Name { get; set; }
@@ -46,15 +41,12 @@ namespace Signum.Entities.MachineLearning
 
         public PredictorState State { get; set; }
 
-        [NotNullable, PreserveOrder]
-        public MList<QueryFilterEmbedded> Filters { get; set; } = new MList<QueryFilterEmbedded>();
-
-        [NotNullable, PreserveOrder]
-        [NotNullValidator, NoRepeatValidator]
-        public MList<PredictorColumnEmbedded> SimpleColumns { get; set; } = new MList<PredictorColumnEmbedded>();
+        [NotNullable]
+        [NotNullValidator, InTypeScript(Undefined = false, Null = false)]
+        public PredictorMainQueryEmbedded MainQuery { get; set; }
 
         [Ignore] //virtual Mlist
-        public MList<PredictorMultiColumnEntity> MultiColumns { get; set; } = new MList<PredictorMultiColumnEntity>();
+        public MList<PredictorSubQueryEntity> SubQueries { get; set; } = new MList<PredictorSubQueryEntity>();
         
         [Ignore]
         public object Model;
@@ -67,6 +59,23 @@ namespace Signum.Entities.MachineLearning
         public PredictorClassificationMetricsEmbedded ClassificationValidation { get; set; }
         public PredictorRegressionMetricsEmbedded RegressionTraining { get; set; }
         public PredictorRegressionMetricsEmbedded RegressionValidation { get; set; }
+    }
+
+    [Serializable]
+    public class PredictorMainQueryEmbedded : EmbeddedEntity
+    {
+        [Ignore]
+        internal object queryName;
+
+        [NotNullValidator]
+        public QueryEntity Query { get; set; }
+
+        [NotNullable, PreserveOrder]
+        public MList<QueryFilterEmbedded> Filters { get; set; } = new MList<QueryFilterEmbedded>();
+
+        [NotNullable, PreserveOrder]
+        [NotNullValidator, NoRepeatValidator]
+        public MList<PredictorColumnEmbedded> Columns { get; set; } = new MList<PredictorColumnEmbedded>();
 
         internal void ParseData(QueryDescription qd)
         {
@@ -74,10 +83,17 @@ namespace Signum.Entities.MachineLearning
                 foreach (var f in Filters)
                     f.ParseData(this, qd, SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement);
 
-            if (SimpleColumns != null)
-                foreach (var c in SimpleColumns)
+            if (Columns != null)
+                foreach (var c in Columns)
                     c.ParseData(this, qd, SubTokensOptions.CanElement);
         }
+
+        internal PredictorMainQueryEmbedded Clone() => new PredictorMainQueryEmbedded
+        {
+            Query = Query,
+            Filters = Filters.Select(f => f.Clone()).ToMList(),
+            Columns = Columns.Select(a => a.Clone()).ToMList(),
+        };
     }
 
     [Serializable]
@@ -183,7 +199,7 @@ namespace Signum.Entities.MachineLearning
 
         public PredictorColumnEncoding Encoding { get; set; }
 
-        public void ParseData(Entity context, QueryDescription description, SubTokensOptions options)
+        public void ParseData(ModifiableEntity context, QueryDescription description, SubTokensOptions options)
         {
             if (Token != null)
                 Token.ParseData(context, description, options);
@@ -226,7 +242,7 @@ namespace Signum.Entities.MachineLearning
 
 
     [Serializable, EntityKind(EntityKind.Part, EntityData.Transactional)]
-    public class PredictorMultiColumnEntity : Entity
+    public class PredictorSubQueryEntity : Entity
     {
         [NotNullable]
         public Lite<PredictorEntity> Predictor { get; set; }
@@ -264,7 +280,7 @@ namespace Signum.Entities.MachineLearning
                     a.ParseData(this, description, SubTokensOptions.CanElement | SubTokensOptions.CanAggregate);
         }
 
-        public PredictorMultiColumnEntity Clone() => new PredictorMultiColumnEntity
+        public PredictorSubQueryEntity Clone() => new PredictorSubQueryEntity
         {
             Query = Query,
             Name = Name,
@@ -274,7 +290,7 @@ namespace Signum.Entities.MachineLearning
         };
 
 
-        static Expression<Func<PredictorMultiColumnEntity, string>> ToStringExpression = @this => @this.Name;
+        static Expression<Func<PredictorSubQueryEntity, string>> ToStringExpression = @this => @this.Name;
         [ExpressionField]
         public override string ToString()
         {

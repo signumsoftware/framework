@@ -4,7 +4,7 @@ import { FormGroup, FormControlStatic, ValueLine, ValueLineType, EntityLine, Ent
 import { SearchControl } from '../../../../Framework/Signum.React/Scripts/Search'
 import { TypeContext, FormGroupStyle } from '../../../../Framework/Signum.React/Scripts/TypeContext'
 import FileLine from '../../Files/FileLine'
-import { PredictorMultiColumnEntity, PredictorColumnEmbedded, PredictorGroupKeyEmbedded, PredictorEntity } from '../Signum.Entities.MachineLearning'
+import { PredictorSubQueryEntity, PredictorColumnEmbedded, PredictorGroupKeyEmbedded, PredictorEntity } from '../Signum.Entities.MachineLearning'
 import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
 import { getQueryNiceName } from '../../../../Framework/Signum.React/Scripts/Reflection'
 import QueryTokenEntityBuilder from '../../UserAssets/Templates/QueryTokenEntityBuilder'
@@ -15,7 +15,7 @@ import { API } from '../PredictorClient';
 import FilterBuilderEmbedded from './FilterBuilderEmbedded';
 import { TypeReference } from '../../../../Framework/Signum.React/Scripts/Reflection';
 
-export default class PredictorMultiColumn extends React.Component<{ ctx: TypeContext<PredictorMultiColumnEntity>, targetType: TypeReference }> {
+export default class PredictorSubQuery extends React.Component<{ ctx: TypeContext<PredictorSubQueryEntity>, targetType: TypeReference }> {
 
     handleOnChange = () => {
         const e = this.props.ctx.value;

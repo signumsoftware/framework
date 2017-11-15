@@ -197,7 +197,7 @@
     <TypeScriptCompile Include="Joyride\Templates\JoyrideStepStyle.tsx" />
     <TypeScriptCompile Include="Joyride\Templates\JoyrideStep.tsx" />
     <TypeScriptCompile Include="MachineLearning\Templates\FilterBuilderEmbedded.tsx" />
-    <TypeScriptCompile Include="MachineLearning\Templates\PredictorMultiColumn.tsx" />
+    <TypeScriptCompile Include="MachineLearning\Templates\PredictorSubQuery.tsx" />
     <TypeScriptCompile Include="Templating\Templates\TemplateApplicable.tsx" />
     <TypeScriptCompile Include="Toolbar\SidebarContainer.tsx" />
     <Compile Include="Toolbar\ToolbarController.cs" />

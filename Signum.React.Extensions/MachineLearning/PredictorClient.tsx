@@ -14,8 +14,9 @@ import { PseudoType, QueryKey, GraphExplorer, OperationType, Type, getTypeName  
 import * as Operations from '../../../Framework/Signum.React/Scripts/Operations'
 import * as ContextualOperations from '../../../Framework/Signum.React/Scripts/Operations/ContextualOperations'
 import {
-    PredictorEntity, PredictorMultiColumnEntity, PredictorMessage, PredictorAlgorithmSymbol, AccordPredictorAlgorithm, CNTKPredictorAlgorithm,
-    NaiveBayesSettingsEntity, NeuralNetworkSettingsEntity, PredictorSettingsEmbedded, PredictorState, PredictorRegressionMetricsEmbedded, PredictorClassificationMetricsEmbedded
+    PredictorEntity, PredictorSubQueryEntity, PredictorMessage, PredictorAlgorithmSymbol, AccordPredictorAlgorithm, CNTKPredictorAlgorithm,
+    NaiveBayesSettingsEntity, NeuralNetworkSettingsEntity, PredictorSettingsEmbedded, PredictorState, PredictorRegressionMetricsEmbedded,
+    PredictorClassificationMetricsEmbedded, PredictorMainQueryEmbedded
 } from './Signum.Entities.MachineLearning'
 import * as OmniboxClient from '../Omnibox/OmniboxClient'
 import * as AuthClient from '../Authorization/AuthClient'
@@ -27,7 +28,7 @@ import { ChartRequest  } from '../Chart/Signum.Entities.Chart'
 export function start(options: { routes: JSX.Element[] }) {
 
     Navigator.addSettings(new EntitySettings(PredictorEntity, e => import('./Templates/Predictor')));
-    Navigator.addSettings(new EntitySettings(PredictorMultiColumnEntity, e => import('./Templates/PredictorMultiColumn')));
+    Navigator.addSettings(new EntitySettings(PredictorSubQueryEntity, e => import('./Templates/PredictorSubQuery')));
     Navigator.addSettings(new EntitySettings(PredictorRegressionMetricsEmbedded, e => import('./Templates/PredictorRegressionMetrics')));
     Navigator.addSettings(new EntitySettings(PredictorClassificationMetricsEmbedded, e => import('./Templates/PredictorClassificationMetrics')));
 
@@ -52,7 +53,8 @@ export function start(options: { routes: JSX.Element[] }) {
         e => window.open("http://projector.tensorflow.org/", "_blank")));
     
     Constructor.registerConstructor(PredictorEntity, () => PredictorEntity.New({
-        settings: PredictorSettingsEmbedded.New()
+        mainQuery: PredictorMainQueryEmbedded.New(),
+        settings: PredictorSettingsEmbedded.New(),
     }));
 
     registerInitializer(AccordPredictorAlgorithm.DiscreteNaiveBayes, a => a.algorithmSettings = NaiveBayesSettingsEntity.New());

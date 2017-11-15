@@ -303,7 +303,7 @@ namespace Signum.Entities.UserQueries
         [StringLengthValidator(AllowNulls = true, Max = 300)]
         public string ValueString { get; set; }
 
-        public void ParseData(Entity context, QueryDescription description, SubTokensOptions options)
+        public void ParseData(ModifiableEntity context, QueryDescription description, SubTokensOptions options)
         {
             token.ParseData(context, description, options);
         }
