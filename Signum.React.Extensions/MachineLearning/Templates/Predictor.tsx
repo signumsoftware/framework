@@ -6,7 +6,7 @@ import { FormGroup, FormControlStatic, ValueLine, ValueLineType, EntityLine, Ent
 import { SearchControl, FilterOption, ColumnOption } from '../../../../Framework/Signum.React/Scripts/Search'
 import { TypeContext, FormGroupStyle, ButtonsContext } from '../../../../Framework/Signum.React/Scripts/TypeContext'
 import FileLine from '../../Files/FileLine'
-import { PredictorEntity, PredictorColumnEmbedded, PredictorMessage, PredictorSubQueryEntity, PredictorGroupKeyEmbedded, PredictorFileType, PredictorCodificationEntity } from '../Signum.Entities.MachineLearning'
+import { PredictorEntity, PredictorColumnEmbedded, PredictorMessage, PredictorSubQueryEntity, PredictorGroupKeyEmbedded, PredictorFileType, PredictorCodificationEntity, PredictorProgressEntity } from '../Signum.Entities.MachineLearning'
 import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
 import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
 import { getQueryNiceName } from '../../../../Framework/Signum.React/Scripts/Reflection'
@@ -133,6 +133,7 @@ export default class Predictor extends React.Component<{ ctx: TypeContext<Predic
         return (
             <div>
                 <ValueLine ctx={ctxxs.subCtx(e => e.name)} />
+                <EntityCombo ctx={ctxxs.subCtx(f => f.algorithm)} onChange={this.handleAlgorithmChange} />
                 <ValueLine ctx={ctxxs.subCtx(e => e.state, { readOnly: true })} />
                 <EntityLine ctx={ctxxs.subCtx(e => e.trainingException, { readOnly: true })} hideIfNull={true} />
                 {ctx.value.state == "Training" && <TrainingProgressComponent ctx={ctx} onStateChanged={this.handleOnFinished} />}
@@ -173,18 +174,22 @@ export default class Predictor extends React.Component<{ ctx: TypeContext<Predic
                             </div>
                         }
                     </Tab>
-                    <Tab eventKey="algorithm" title={ctxxs.niceName(a => a.algorithmSettings)}>
-                        <EntityCombo ctx={ctxxs.subCtx(f => f.algorithm)} onChange={this.handleAlgorithmChange} />
+                    <Tab eventKey="settings" title={ctxxs.niceName(a => a.settings)}>
                         {ctxxs.value.algorithm && <EntityDetail ctx={ctxxs.subCtx(f => f.algorithmSettings)} remove={false} />}
                         <EntityDetail ctx={ctxxs.subCtx(f => f.settings)} remove={false} />
                     </Tab>
                     {
-                        ctx.value.state != "Draft" && <Tab eventKey="codifications" title={PredictorCodificationEntity.nicePluralName()}>
+                        ctx.value.state != "Draft" && <Tab eventKey="codifications" title={PredictorMessage.Codifications.niceToString()}>
                             <SearchControl findOptions={{ queryName: PredictorCodificationEntity, parentColumn: "Predictor", parentValue: ctx.value }} />
                         </Tab>
                     }
                     {
-                        ctx.value.state != "Draft" && <Tab eventKey="files" title={ctxxs.niceName(a => a.files)}>
+                        ctx.value.state != "Draft" && <Tab eventKey="progress" title={PredictorMessage.Progress.niceToString()}>
+                            <SearchControl findOptions={{ queryName: PredictorProgressEntity, parentColumn: "Predictor", parentValue: ctx.value }} />
+                        </Tab>
+                    }
+                    {
+                        ctx.value.state == "Trained" && <Tab eventKey="files" title={PredictorMessage.Results.niceToString()}>
                             <EntityRepeater ctx={ctxxs.subCtx(f => f.files)} getComponent={ec =>
                                 <FileLine ctx={ec.subCtx({ formGroupStyle: "SrOnly" })} remove={false} fileType={PredictorFileType.PredictorFile} />
                             } />

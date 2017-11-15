@@ -136,6 +136,11 @@ export module PredictorMessage {
     export const _0IsAlreadyBeingTrained = new MessageKey("PredictorMessage", "_0IsAlreadyBeingTrained");
     export const StartingTraining = new MessageKey("PredictorMessage", "StartingTraining");
     export const Preview = new MessageKey("PredictorMessage", "Preview");
+    export const Codifications = new MessageKey("PredictorMessage", "Codifications");
+    export const Progress = new MessageKey("PredictorMessage", "Progress");
+    export const Results = new MessageKey("PredictorMessage", "Results");
+    export const _0NotSuportedFor1 = new MessageKey("PredictorMessage", "_0NotSuportedFor1");
+    export const _0IsRequiredFor1 = new MessageKey("PredictorMessage", "_0IsRequiredFor1");
 }
 
 export module PredictorOperation {

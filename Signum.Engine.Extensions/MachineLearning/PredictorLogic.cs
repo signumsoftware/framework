@@ -105,6 +105,7 @@ namespace Signum.Engine.MachineLearning
                     .WithQuery(dqm, () => e => new
                     {
                         Entity = e,
+                        e.Predictor,
                         e.Id,
                         e.CreationDate,
                         e.LossTest,
@@ -115,7 +116,31 @@ namespace Signum.Engine.MachineLearning
 
                 sb.Schema.EntityEvents<PredictorEntity>().Retrieved += PredictorEntity_Retrieved;
                 sb.Schema.EntityEvents<PredictorSubQueryEntity>().Retrieved += PredictorMultiColumnEntity_Retrieved;
+
+                Validator.PropertyValidator((PredictorColumnEmbedded c) => c.Token).StaticPropertyValidation += Column_StaticPropertyValidation;
+                Validator.PropertyValidator((PredictorColumnEmbedded c) => c.Usage).StaticPropertyValidation += Column_StaticPropertyValidation;
+                Validator.PropertyValidator((PredictorColumnEmbedded c) => c.Encoding).StaticPropertyValidation += Column_StaticPropertyValidation;
             }
+        }
+
+        static string Column_StaticPropertyValidation(PredictorColumnEmbedded column, PropertyInfo pi)
+        {
+            var parent = column.GetParentEntity();
+
+            if (parent is PredictorMainQueryEmbedded mq)
+            {
+                var p = (PredictorEntity)mq.GetParentEntity();
+                var algorithm = Algorithms.GetOrThrow(p.Algorithm);
+                return algorithm.ValidateColumnProperty(p, null, column, pi);
+            }
+            else if (parent is PredictorSubQueryEntity sq)
+            {
+                var p = (PredictorEntity)sq.GetParentEntity();
+                var algorithm = Algorithms.GetOrThrow(p.Algorithm);
+                return algorithm.ValidateColumnProperty(p, sq, column, pi);
+            }
+            else
+                throw new InvalidOperationException("Parent not Expected");
         }
 
         public static void TrainSync(this PredictorEntity p, bool autoReset = true)
@@ -182,6 +207,8 @@ namespace Signum.Engine.MachineLearning
                 var algorithm = Algorithms.GetOrThrow(ctx.Predictor.Algorithm);
                 algorithm.Train(ctx);
                 ctx.Predictor.State = PredictorState.Trained;
+                using (OperationLogic.AllowSave<PredictorEntity>())
+                    ctx.Predictor.Save();
             }
             catch (OperationCanceledException e)
             {

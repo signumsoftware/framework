@@ -96,7 +96,7 @@ namespace Signum.Engine.MachineLearning
 
     public abstract class PredictorAlgorithm
     {
-        public virtual string ValidatePredictor(PredictorEntity predictor) => null;
+        public virtual string ValidateColumnProperty(PredictorEntity predictor, PredictorSubQueryEntity subQuery, PredictorColumnEmbedded column, PropertyInfo pi) => null;
         public abstract void Train(PredictorTrainingContext ctx);
         public abstract object[] Predict(PredictorEntity predictor, PredictorResultColumn[] columns, object[] input);
     }

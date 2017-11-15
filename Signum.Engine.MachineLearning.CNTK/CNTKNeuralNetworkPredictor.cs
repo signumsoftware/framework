@@ -8,12 +8,42 @@ using CNTK;
 using Signum.Entities.DynamicQuery;
 using Signum.Utilities;
 using Signum.Entities;
+using Signum.Utilities.Reflection;
+using System.Reflection;
 
 namespace Signum.Engine.MachineLearning.CNTK
 {
     public class CNTKNeuralNetworkPredictorAlgorithm : PredictorAlgorithm
     {
-        private Value labels;
+        public override string ValidateColumnProperty(PredictorEntity predictor, PredictorSubQueryEntity subQuery, PredictorColumnEmbedded column, PropertyInfo pi)
+        {
+            if(pi.Name == nameof(column.Encoding))
+            {
+                var nn = (NeuralNetworkSettingsEntity)predictor.AlgorithmSettings; 
+                switch (column.Encoding)
+                {
+                    case PredictorColumnEncoding.None:
+                        if (!ReflectionTools.IsNumber(column.Token.Token.Type))
+                            return PredictorMessage._0IsRequiredFor1.NiceToString(PredictorColumnEncoding.OneHot.NiceToString(), column.Token.Token.NiceTypeName);
+
+                        if (column.Usage == PredictorColumnUsage.Output && nn.PredictionType == PredictionType.Classification)
+                            return PredictorMessage._0NotSuportedFor1.NiceToString(column.Encoding.NiceToString(), nn.PredictionType.NiceToString());
+
+                        break;
+                    case PredictorColumnEncoding.OneHot:
+                        if (ReflectionTools.IsDecimalNumber(column.Token.Token.Type))
+                            return PredictorMessage._0NotSuportedFor1.NiceToString(column.Encoding.NiceToString(), predictor.Algorithm.NiceToString());
+
+                        if (column.Usage == PredictorColumnUsage.Output && nn.PredictionType == PredictionType.Regression)
+                            return PredictorMessage._0NotSuportedFor1.NiceToString(column.Encoding.NiceToString(), nn.PredictionType.NiceToString());
+                        break;
+                    case PredictorColumnEncoding.Codified:
+                        return PredictorMessage._0NotSuportedFor1.NiceToString(column.Encoding.NiceToString(), predictor.Algorithm.NiceToString());
+                }
+            }
+
+            return base.ValidateColumnProperty(predictor, subQuery, column, pi);
+        }
 
         public override object[] Predict(PredictorEntity predictor, PredictorResultColumn[] columns, object[] input)
         {
@@ -44,7 +74,7 @@ namespace Signum.Engine.MachineLearning.CNTK
             var (training, validation) = ctx.SplitTrainValidation();
 
             var batches = (int)Math.Ceiling(training.Count / (float)nnSettings.MinibatchSize);
-            
+
             for (int i = 0; i < batches; i++)
             {
                 ctx.ReportProgress("Training Minibatches", (i + 1) / (decimal)batches);
@@ -68,17 +98,21 @@ namespace Signum.Engine.MachineLearning.CNTK
                 }
             }
 
+            CTTKMinibatchEvaluator evaluator = new CTTKMinibatchEvaluator(ctx, inputVariable, calculatedOutpus, device);
 
-            ctx.ReportProgress("Evaluating");
-            ctx.Predictor.ClassificationValidation = nnSettings.PredictionType == PredictionType.Classification ? null :
-                ClasificationMetrics(ctx, validation, inputVariable, calculatedOutpus, device);
-
-            ctx.Predictor.ClassificationTraining = nnSettings.PredictionType == PredictionType.Classification ? null :
-                ClasificationMetrics(ctx, training, inputVariable, calculatedOutpus, device);
-
-            ctx.Predictor.RegressionValidation = null;
-            ctx.Predictor.ClassificationTraining = null;
+            if (nnSettings.PredictionType == PredictionType.Classification)
+            {  
+                ctx.Predictor.ClassificationValidation = evaluator.ClasificationMetrics(validation, nameof(ctx.Predictor.ClassificationValidation));
+                ctx.Predictor.ClassificationTraining = evaluator.ClasificationMetrics(training, nameof(ctx.Predictor.ClassificationTraining));
+            }
+            else
+            {
+                ctx.Predictor.RegressionValidation =null;
+                ctx.Predictor.ClassificationTraining = null;
+            }
         }
+
+        
  
         private static bool HasOneHot(PredictorEntity p)
         {
@@ -86,35 +120,9 @@ namespace Signum.Engine.MachineLearning.CNTK
                 p.SubQueries.Any(mc => mc.Aggregates.Any(a => a.Encoding == PredictorColumnEncoding.OneHot));
         }
 
-        private static PredictorClassificationMetricsEmbedded ClasificationMetrics(PredictorTrainingContext ctx, List<ResultRow> rows, Variable inputVariable, Function calculatedOutpus, DeviceDescriptor device)
-        {
-            using (Value inputValue = CreateValue(ctx, rows, ctx.InputColumns, device))
-            {
-                var inputs = new Dictionary<Variable, Value> { { inputVariable, inputValue } };
-                var outputs = new Dictionary<Variable, Value> { { calculatedOutpus.Output, null } };
-                calculatedOutpus.Evaluate(inputs, outputs, device);
 
-                using (Value outputValue = outputs[calculatedOutpus.Output])
-                {
-                    IList<IList<float>> actualLabelSoftMax = outputValue.GetDenseData<float>(calculatedOutpus.Output);
-                    List<int> actualLabels = actualLabelSoftMax.Select((IList<float> l) => l.IndexOf(l.Max())).ToList();
-
-                    using (Value expectedValue = CreateValue(ctx, rows, ctx.OutputColumns, device))
-                    {
-                        IList<IList<float>> expectedOneHot = expectedValue.GetDenseData<float>(calculatedOutpus.Output);
-                        List<int> expectedLabels = expectedOneHot.Select(l => l.IndexOf(1.0F)).ToList();
-                        int misMatches = actualLabels.Zip(expectedLabels, (a, b) => a.Equals(b) ? 0 : 1).Sum();
-
-                        return new PredictorClassificationMetricsEmbedded
-                        {
-                            TotalCount = rows.Count,
-                            MissCount = misMatches,
-                        };
-                    }
-                }
-            }
-        }
-
+       
+        
         static List<T> Slice<T>(List<T> rows, int startIndex, int length)
         {
             var max = Math.Min(startIndex + length, rows.Count);
@@ -176,5 +184,78 @@ namespace Signum.Engine.MachineLearning.CNTK
 
             return CNTKLib.Times(weightParam, input) + biasParam;
         }
+
+        class CTTKMinibatchEvaluator
+        {
+            public PredictorTrainingContext ctx;
+            public Variable inputVariable;
+            public Function calculatedOutpus;
+            public DeviceDescriptor device;
+
+            public CTTKMinibatchEvaluator(PredictorTrainingContext ctx, Variable inputVariable, Function calculatedOutpus, DeviceDescriptor device)
+            {
+                this.ctx = ctx;
+                this.inputVariable = inputVariable;
+                this.calculatedOutpus = calculatedOutpus;
+                this.device = device;
+            }
+
+            List<T> EvaluateByMiniBatch<T>(List<ResultRow> rows, string name, Func<(List<ResultRow> sclice, Value outputValue, Value expectedValue), T> selector)
+            {
+                List<T> results = new List<T>();
+
+                var nnSettings = (NeuralNetworkSettingsEntity)ctx.Predictor.AlgorithmSettings;
+                var batches = (int)Math.Ceiling(rows.Count / (float)nnSettings.MinibatchSize);
+
+                for (int i = 0; i < batches; i++)
+                {
+                    ctx.ReportProgress("Evaluating " + name, (i + 1) / (decimal)batches);
+                    var slice = Slice(rows, i * nnSettings.MinibatchSize, nnSettings.MinibatchSize);
+
+
+                    using (Value inputValue = CreateValue(ctx, slice, ctx.InputColumns, device))
+                    {
+                        var inputs = new Dictionary<Variable, Value> { { inputVariable, inputValue } };
+                        var outputs = new Dictionary<Variable, Value> { { calculatedOutpus.Output, null } };
+                        calculatedOutpus.Evaluate(inputs, outputs, device);
+
+                        using (Value outputValue = outputs[calculatedOutpus.Output])
+                        {
+                            using (Value expectedValue = CreateValue(ctx, slice, ctx.OutputColumns, device))
+                            {
+                                results.Add(selector((sclice: slice, outputValue: outputValue, expectedValue: expectedValue)));
+                            }
+                        }
+                    }
+                }
+
+                return results;
+            }
+
+            public PredictorClassificationMetricsEmbedded ClasificationMetrics(List<ResultRow> rows, string name)
+            {
+                var missCount = EvaluateByMiniBatch(rows, name, tuple =>
+                {
+                    IList<IList<float>> actualLabelSoftMax = tuple.outputValue.GetDenseData<float>(calculatedOutpus.Output);
+                    List<int> actualLabels = actualLabelSoftMax.Select((IList<float> l) => l.IndexOf(l.Max())).ToList();
+
+
+                    IList<IList<float>> expectedOneHot = tuple.expectedValue.GetDenseData<float>(calculatedOutpus.Output);
+                    List<int> expectedLabels = expectedOneHot.Select(l => l.IndexOf(1.0F)).ToList();
+                    int misMatches = actualLabels.Zip(expectedLabels, (a, b) => a.Equals(b) ? 0 : 1).Sum();
+
+                    return misMatches;
+                }).Sum();
+
+                return new PredictorClassificationMetricsEmbedded
+                {
+                    MissCount = missCount,
+                    TotalCount = rows.Count
+                };
+            }
+
+        }
     }
+
+    
 }

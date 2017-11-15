@@ -19,7 +19,11 @@ namespace Signum.Entities.MachineLearning
     [Serializable, EntityKind(EntityKind.Main, EntityData.Transactional)]
     public class PredictorEntity : Entity
     {
-       
+        public PredictorEntity()
+        {
+            RebindEvents();
+        }
+
         [SqlDbType(Size = 100),]
         [StringLengthValidator(AllowNulls = true, Min = 3, Max = 100)]
         public string Name { get; set; }
@@ -42,10 +46,10 @@ namespace Signum.Entities.MachineLearning
         public PredictorState State { get; set; }
 
         [NotNullable]
-        [NotNullValidator, InTypeScript(Undefined = false, Null = false)]
+        [NotNullValidator, InTypeScript(Undefined = false, Null = false), NotifyChildProperty]
         public PredictorMainQueryEmbedded MainQuery { get; set; }
 
-        [Ignore] //virtual Mlist
+        [Ignore, NotifyChildProperty] //virtual Mlist
         public MList<PredictorSubQueryEntity> SubQueries { get; set; } = new MList<PredictorSubQueryEntity>();
         
         [Ignore]
@@ -64,6 +68,11 @@ namespace Signum.Entities.MachineLearning
     [Serializable]
     public class PredictorMainQueryEmbedded : EmbeddedEntity
     {
+        public PredictorMainQueryEmbedded()
+        {
+            RebindEvents();
+        }
+
         [Ignore]
         internal object queryName;
 
@@ -74,7 +83,7 @@ namespace Signum.Entities.MachineLearning
         public MList<QueryFilterEmbedded> Filters { get; set; } = new MList<QueryFilterEmbedded>();
 
         [NotNullable, PreserveOrder]
-        [NotNullValidator, NoRepeatValidator]
+        [NotNullValidator, NoRepeatValidator, NotifyChildProperty]
         public MList<PredictorColumnEmbedded> Columns { get; set; } = new MList<PredictorColumnEmbedded>();
 
         internal void ParseData(QueryDescription qd)
@@ -103,6 +112,13 @@ namespace Signum.Entities.MachineLearning
         public int MissCount { get; set; }
         [Format("p")]
         public float MissRate { get; set; }
+
+        protected override void PreSaving(ref bool graphModified)
+        {
+            MissRate = MissCount / (float)TotalCount;
+
+            base.PreSaving(ref graphModified);
+        }
     }
 
     [Serializable]
@@ -244,6 +260,11 @@ namespace Signum.Entities.MachineLearning
     [Serializable, EntityKind(EntityKind.Part, EntityData.Transactional)]
     public class PredictorSubQueryEntity : Entity
     {
+        public PredictorSubQueryEntity()
+        {
+            RebindEvents();
+        }
+
         [NotNullable]
         public Lite<PredictorEntity> Predictor { get; set; }
 
@@ -262,7 +283,7 @@ namespace Signum.Entities.MachineLearning
         public MList<PredictorGroupKeyEmbedded> GroupKeys { get; set; } = new MList<PredictorGroupKeyEmbedded>();
 
         [NotNullable, PreserveOrder]
-        [NotNullValidator, NoRepeatValidator]
+        [NotNullValidator, NoRepeatValidator, NotifyChildProperty]
         public MList<PredictorColumnEmbedded> Aggregates { get; set; } = new MList<PredictorColumnEmbedded>();
 
         public void ParseData(QueryDescription description)
