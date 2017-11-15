@@ -16,10 +16,8 @@ export function start(options: { routes: JSX.Element[] }) {
     Navigator.addSettings(new EntitySettings(RestLogEntity, e => import('./Templates/RestLog')));
     Navigator.addSettings(new EntitySettings(RestApiKeyEntity, e => import('./Templates/RestApiKey')));
 
-    QuickLink.registerQuickLink(RestLogEntity, ctx => new QuickLink.QuickLinkAction("replayRestLog", "Replay this Log", me =>{
-        me.persist();
-        API.replayRestLog(ctx.lite.id!)
-    }))
+  
+  
 }
 
 export function loginFromApiKey(): Promise<AuthClient.AuthenticatedUser | undefined> {
@@ -41,8 +39,8 @@ export module API {
         return ajaxGet<AuthClient.API.LoginResponse>({ url: "~/api/auth/loginFromApiKey?apiKey=" + apiKey, avoidAuthToken: true });
     }
 
-    export function replayRestLog(restLogID: string | number){
-        return ajaxGet<RestLogDiff>({url: "~/api/restLog/"+ restLogID});
+    export function replayRestLog(restLogID: string | number, host:string){
+        return ajaxGet<RestLogDiff>({url: "~/api/restLog?id="+restLogID + "&host="+host});
         
     }
 }

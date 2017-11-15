@@ -16,27 +16,29 @@ namespace Signum.React.RestLog
 {
     public class RestLogController : ApiController
     {
-        [Route("api/restLog/{id}"), HttpGet]
-        public RestDiffResult GetRestDiffLog(string id)
+        [Route("api/restLog/"), HttpGet]
+        public async Task<RestDiffResult> GetRestDiffLog(string id, string host)
         {
             var oldRequest = Database.Retrieve<RestLogEntity>(PrimaryKey.Parse(id, typeof(RestLogEntity)));
             var oldCredentials = Database.Query<RestApiKeyEntity>().Single(r => r.User.Is(oldRequest.User));
 
             var result = new RestDiffResult {previous = oldRequest.ResponseBody};
-
+            var url = host + oldRequest.Url.After("api");
             //create the new Request
-            var restClient = new HttpClient {BaseAddress = new Uri(oldRequest.Url)};
-            var request = new HttpRequestMessage(string.IsNullOrWhiteSpace(oldRequest.RequestBody) ? HttpMethod.Get : HttpMethod.Post, oldRequest.Url);
-            request.Headers.Add("X-ApiKey", oldCredentials.ApiKey);
+            var restClient = new HttpClient {BaseAddress = new Uri(url)};
+            restClient.DefaultRequestHeaders.Add("X-ApiKey", oldCredentials.ApiKey);
+            var request = new HttpRequestMessage(string.IsNullOrWhiteSpace(oldRequest.RequestBody) ? HttpMethod.Get : HttpMethod.Post, url);
+            
             if (!string.IsNullOrWhiteSpace(oldRequest.RequestBody))
             {
-                request.Content = new StringContent(oldRequest.RequestBody);
-                var newRequest = restClient.SendAsync(request);
-                result.current = newRequest.Result.Content.ReadAsStringAsync().Result;
+
+
+                result.current = await restClient.PostAsJsonAsync("", oldRequest.RequestBody).Result.Content
+                    .ReadAsStringAsync();
             }
             else
             {
-                result.current = restClient.SendAsync(request).Result.Content.ReadAsStringAsync().Result;
+                result.current = await restClient.SendAsync(request).Result.Content.ReadAsStringAsync();
             }
 
             StringDistance sd = new StringDistance();
