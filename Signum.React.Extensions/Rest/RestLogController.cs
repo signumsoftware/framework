@@ -22,7 +22,7 @@ namespace Signum.React.RestLog
             var oldRequest = Database.Retrieve<RestLogEntity>(PrimaryKey.Parse(id, typeof(RestLogEntity)));
             var oldCredentials = Database.Query<RestApiKeyEntity>().Single(r => r.User.Is(oldRequest.User));
 
-            var result = new RestDiffResult {Previous = oldRequest.ResponseBody};
+            var result = new RestDiffResult {previous = oldRequest.ResponseBody};
 
             //create the new Request
             var restClient = new HttpClient {BaseAddress = new Uri(oldRequest.Url)};
@@ -32,15 +32,15 @@ namespace Signum.React.RestLog
             {
                 request.Content = new StringContent(oldRequest.RequestBody);
                 var newRequest = restClient.SendAsync(request);
-                result.Current = newRequest.Result.Content.ReadAsStringAsync().Result;
+                result.current = newRequest.Result.Content.ReadAsStringAsync().Result;
             }
             else
             {
-                result.Current = restClient.SendAsync(request).Result.Content.ReadAsStringAsync().Result;
+                result.current = restClient.SendAsync(request).Result.Content.ReadAsStringAsync().Result;
             }
 
             StringDistance sd = new StringDistance();
-            var diff = sd.DiffText(result.Previous, result.Current);
+            var diff = sd.DiffText(result.previous, result.current);
             result.diff = diff;
             return result;
         }
@@ -50,8 +50,8 @@ namespace Signum.React.RestLog
 
     public class RestDiffResult
     {
-        public string Previous { get; set; }
-        public string Current { get; set; }
+        public string previous { get; set; }
+        public string current { get; set; }
         public List<StringDistance.DiffPair<List<StringDistance.DiffPair<string>>>> diff { get; set; }
     }
 }

@@ -40,22 +40,31 @@ export default class RestLog extends React.Component<{ ctx: TypeContext<RestLogE
                 <EntityRepeater ctx={ctx.subCtx(f => f.queryString)}/>
                 <Button bsStyle="info" onClick={() =>{ API.replayRestLog(ctx.value.id).then(d => this.setState({diff: d})).done()}}>Replay</Button>
                 {this.renderCode(ctx.subCtx(f => f.requestBody))}
-                {this.renderCode(ctx.subCtx(f => f.responseBody))}
-                {this.state.diff && this.renderDiff()}
-                
-            </div>
+
+                <fieldset>
+                <legend>{ctx.subCtx(f => f.responseBody).niceName()}</legend>
+                <Tabs id="restTabs" defaultActiveKey="prev">
+                    <Tab title="prev" eventKey="prev" className="linkTab">{this.renderPre(ctx.subCtx(f => f.responseBody).value!)}</Tab>
+                    {this.state.diff && <Tab title="diff" eventKey="diff" className="linkTab">{ this.renderDiff()}</Tab>}
+                    {this.state.diff && this.state.diff.current && <Tab title="curr" eventKey="curr" className="linkTab">{this.renderPre(this.state.diff.current)}</Tab>}
+                </Tabs>
+                </fieldset>
+            </div> 
         );
     }
     renderCode(ctx: TypeContext<string | null>) {
         return (
             <fieldset>
                 <legend>{ctx.niceName()}</legend>
-                <pre><code>{ctx.value}</code></pre>
+                {this.renderPre(ctx.value!)}
             </fieldset>
         );
 
     }
-
+    renderPre(text:string )
+    {
+        return <pre><code>{text}</code></pre>
+    }
     renderDiff(): any {
         return <DiffDocument diff={this.state.diff!.diff}/>
     }
