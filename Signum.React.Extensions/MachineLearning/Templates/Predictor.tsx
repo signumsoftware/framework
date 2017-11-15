@@ -160,8 +160,10 @@ export default class Predictor extends React.Component<{ ctx: TypeContext<Predic
                             <EntityRepeater ctx={ctxxs.subCtx(f => f.files)} getComponent={ec =>
                                 <FileLine ctx={ec.subCtx({ formGroupStyle: "SrOnly" })} remove={false} fileType={PredictorFileType.PredictorFile} />
                             } />
-                            <EntityDetail ctx={ctxxs.subCtx(f => f.trainingStats)} />
-                            <EntityDetail ctx={ctxxs.subCtx(f => f.testStats)} />
+                            <EntityDetail ctx={ctxxs.subCtx(f => f.classificationTraining)} />
+                            <EntityDetail ctx={ctxxs.subCtx(f => f.classificationValidation)} />
+                            <EntityDetail ctx={ctxxs.subCtx(f => f.regressionTraining)} />
+                            <EntityDetail ctx={ctxxs.subCtx(f => f.regressionValidation)} />
                         </Tab>
                     }
                 </Tabs>

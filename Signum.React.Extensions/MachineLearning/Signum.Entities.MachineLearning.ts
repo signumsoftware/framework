@@ -30,12 +30,27 @@ export interface NaiveBayesSettingsEntity extends Entities.Entity, IPredictorAlg
 export const NeuralNetworkSettingsEntity = new Type<NeuralNetworkSettingsEntity>("NeuralNetworkSettings");
 export interface NeuralNetworkSettingsEntity extends Entities.Entity, IPredictorAlgorithmSettings {
     Type: "NeuralNetworkSettings";
+    predictionType?: PredictionType;
     minibatchSize?: number;
+    sparseMatrix?: boolean | null;
 }
+
+export const PredictionType = new EnumType<PredictionType>("PredictionType");
+export type PredictionType =
+    "Regression" |
+    "Classification";
 
 export const PredictorAlgorithmSymbol = new Type<PredictorAlgorithmSymbol>("PredictorAlgorithm");
 export interface PredictorAlgorithmSymbol extends Entities.Symbol {
     Type: "PredictorAlgorithm";
+}
+
+export const PredictorClassificationMetricsEmbedded = new Type<PredictorClassificationMetricsEmbedded>("PredictorClassificationMetricsEmbedded");
+export interface PredictorClassificationMetricsEmbedded extends Entities.EmbeddedEntity {
+    Type: "PredictorClassificationMetricsEmbedded";
+    totalCount?: number;
+    missCount?: number;
+    missRate?: number;
 }
 
 export const PredictorCodificationEntity = new Type<PredictorCodificationEntity>("PredictorCodification");
@@ -85,9 +100,11 @@ export interface PredictorEntity extends Entities.Entity {
     filters: Entities.MList<UserQueries.QueryFilterEmbedded>;
     simpleColumns: Entities.MList<PredictorColumnEmbedded>;
     multiColumns: Entities.MList<PredictorMultiColumnEntity>;
-    trainingStats?: PredictorStatsEmbedded | null;
-    testStats?: PredictorStatsEmbedded | null;
     files: Entities.MList<Files.FilePathEmbedded>;
+    classificationTraining?: PredictorClassificationMetricsEmbedded | null;
+    classificationValidation?: PredictorClassificationMetricsEmbedded | null;
+    regressionTraining?: PredictorRegressionMetricsEmbedded | null;
+    regressionValidation?: PredictorRegressionMetricsEmbedded | null;
 }
 
 export module PredictorFileType {
@@ -138,19 +155,27 @@ export interface PredictorProgressEntity extends Entities.Entity {
     Type: "PredictorProgress";
     predictor?: Entities.Lite<PredictorEntity> | null;
     creationDate?: string;
-    miniBatchIndex?: number;
-    trainingSet?: number;
-    trainingMisses?: number | null;
-    trainingError?: number;
-    testSet?: number;
-    testMisses?: number | null;
-    testError?: number;
+    miniBachIndex?: number;
+    lossTraining?: number;
+    lossTest?: number;
+}
+
+export const PredictorRegressionMetricsEmbedded = new Type<PredictorRegressionMetricsEmbedded>("PredictorRegressionMetricsEmbedded");
+export interface PredictorRegressionMetricsEmbedded extends Entities.EmbeddedEntity {
+    Type: "PredictorRegressionMetricsEmbedded";
+    signed?: number;
+    absolute?: number;
+    deviation?: number;
+    percentageSigned?: number;
+    percentageAbsolute?: number;
+    percentageDeviation?: number;
 }
 
 export const PredictorSettingsEmbedded = new Type<PredictorSettingsEmbedded>("PredictorSettingsEmbedded");
 export interface PredictorSettingsEmbedded extends Entities.EmbeddedEntity {
     Type: "PredictorSettingsEmbedded";
     testPercentage?: number;
+    seed?: number | null;
 }
 
 export const PredictorState = new EnumType<PredictorState>("PredictorState");
@@ -159,15 +184,5 @@ export type PredictorState =
     "Training" |
     "Trained" |
     "Error";
-
-export const PredictorStatsEmbedded = new Type<PredictorStatsEmbedded>("PredictorStatsEmbedded");
-export interface PredictorStatsEmbedded extends Entities.EmbeddedEntity {
-    Type: "PredictorStatsEmbedded";
-    totalCount?: number;
-    errorCount?: number | null;
-    mean?: number | null;
-    variance?: number | null;
-    standartDeviation?: number | null;
-}
 
 
