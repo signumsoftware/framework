@@ -348,8 +348,8 @@ namespace Signum.Entities.MachineLearning
 
         public int MiniBatchIndex { get; set; }
 
-        public float LossTraining { get; set; }
-        public float LossTest { get; set; }
+        public double LossTraining { get; set; }
+        public double LossTest { get; set; }
     }
 
     [Serializable]

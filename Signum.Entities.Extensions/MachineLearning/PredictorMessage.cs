@@ -18,5 +18,6 @@ namespace Signum.Entities.MachineLearning
         OpenTensorflowProjector,
         _0IsAlreadyBeingTrained,
         StartingTraining,
+        Preview,
     }
 }

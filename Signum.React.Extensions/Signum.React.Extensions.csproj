@@ -169,6 +169,7 @@
     <TypeScriptCompile Include="DiffLog\Templates\DiffDocument.tsx" />
     <TypeScriptCompile Include="MachineLearning\Templates\PredictorRegressionMetrics.tsx" />
     <TypeScriptCompile Include="MachineLearning\Templates\PredictorClassificationMetrics.tsx" />
+    <TypeScriptCompile Include="MachineLearning\Templates\ProgressBar.tsx" />
     <TypeScriptCompile Include="TypeHelp\TypeHelpClient.tsx" />
     <TypeScriptCompile Include="TypeHelp\TypeHelpButtonBarComponent.tsx" />
     <Compile Include="Excel\ExcelController.cs" />

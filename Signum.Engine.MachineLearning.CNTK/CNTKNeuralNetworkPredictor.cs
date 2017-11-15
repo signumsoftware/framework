@@ -7,6 +7,7 @@ using Signum.Entities.MachineLearning;
 using CNTK;
 using Signum.Entities.DynamicQuery;
 using Signum.Utilities;
+using Signum.Entities;
 
 namespace Signum.Engine.MachineLearning.CNTK
 {
@@ -43,7 +44,7 @@ namespace Signum.Engine.MachineLearning.CNTK
             var (training, validation) = ctx.SplitTrainValidation();
 
             var batches = (int)Math.Ceiling(training.Count / (float)nnSettings.MinibatchSize);
-
+            
             for (int i = 0; i < batches; i++)
             {
                 ctx.ReportProgress("Training Minibatches", (i + 1) / (decimal)batches);
@@ -56,6 +57,14 @@ namespace Signum.Engine.MachineLearning.CNTK
                         { inputVariable, inputValue },
                         { outputVariable, outputValue },
                     }, device);
+
+                    if (i == batches - 1 || (i % nnSettings.SaveProgressEvery) == 0)
+                        new PredictorProgressEntity
+                        {
+                            Predictor = p.ToLite(),
+                            MiniBatchIndex = i,
+                            LossTraining = trainer.PreviousMinibatchLossAverage(),
+                        }.Save();
                 }
             }
 

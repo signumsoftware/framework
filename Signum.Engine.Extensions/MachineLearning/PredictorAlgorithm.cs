@@ -68,7 +68,7 @@ namespace Signum.Engine.MachineLearning
 
             foreach (var item in this.MainQuery.ResultTable.Rows)
             {
-                if (r.Next() < Predictor.Settings.TestPercentage)
+                if (r.NextDouble() < Predictor.Settings.TestPercentage)
                     test.Add(item);
                 else
                     training.Add(item);
