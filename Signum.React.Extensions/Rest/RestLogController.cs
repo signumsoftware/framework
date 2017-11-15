@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using System.Web;
 using System.Web.Http;
@@ -19,21 +20,23 @@ namespace Signum.React.RestLog
         public RestDiffResult GetRestDiffLog(string id)
         {
             var oldRequest = Database.Retrieve<RestLogEntity>(PrimaryKey.Parse(id, typeof(RestLogEntity)));
+            var oldCredentials = Database.Query<RestApiKeyEntity>().Single(r => r.User.Is(oldRequest.User));
 
             var result = new RestDiffResult {Previous = oldRequest.ResponseBody};
 
             //create the new Request
-            var restClient = new HttpClient();
-            restClient.BaseAddress = new Uri(oldRequest.Url);
-
+            var restClient = new HttpClient {BaseAddress = new Uri(oldRequest.Url)};
+            var request = new HttpRequestMessage(string.IsNullOrWhiteSpace(oldRequest.RequestBody) ? HttpMethod.Get : HttpMethod.Post, oldRequest.Url);
+            request.Headers.Add("X-ApiKey", oldCredentials.ApiKey);
             if (!string.IsNullOrWhiteSpace(oldRequest.RequestBody))
             {
-                var newRequest = restClient.PostAsJsonAsync("", oldRequest.RequestBody);
+                request.Content = new StringContent(oldRequest.RequestBody);
+                var newRequest = restClient.SendAsync(request);
                 result.Current = newRequest.Result.Content.ReadAsStringAsync().Result;
             }
             else
             {
-                result.Current = restClient.GetStringAsync(oldRequest.Url).Result;
+                result.Current = restClient.SendAsync(request).Result.Content.ReadAsStringAsync().Result;
             }
 
             StringDistance sd = new StringDistance();

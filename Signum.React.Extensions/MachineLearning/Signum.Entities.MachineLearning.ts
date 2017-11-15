@@ -155,7 +155,7 @@ export interface PredictorProgressEntity extends Entities.Entity {
     Type: "PredictorProgress";
     predictor?: Entities.Lite<PredictorEntity> | null;
     creationDate?: string;
-    miniBachIndex?: number;
+    miniBatchIndex?: number;
     lossTraining?: number;
     lossTest?: number;
 }

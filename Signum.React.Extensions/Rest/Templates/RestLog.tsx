@@ -1,11 +1,24 @@
 ﻿import * as React from 'react'
 import * as moment from 'moment'
-import { Tabs, Tab } from 'react-bootstrap'
+import { Tabs, Tab, Button } from 'react-bootstrap'
 import { RestLogEntity } from '../Signum.Entities.Rest'
 import { TypeContext, ValueLine, ValueLineType, EntityLine, EntityRepeater } from "../../../../Framework/Signum.React/Scripts/Lines";
 import { } from "../../../../Framework/Signum.React/Scripts/ConfigureReactWidgets";
+import {RestLogDiff, API }from '../RestClient'
+import { DiffDocument } from '../../DiffLog/Templates/DiffDocument';
 
-export default class RestLog extends React.Component<{ ctx: TypeContext<RestLogEntity> }> {
+export interface RestLogState  
+{
+    diff? : RestLogDiff
+}
+
+export default class RestLog extends React.Component<{ ctx: TypeContext<RestLogEntity> },RestLogState> {
+ 
+    constructor(){
+        super();
+        this.state = {}
+    }
+    
     render() {
         const ctx = this.props.ctx;
         return (
@@ -25,8 +38,10 @@ export default class RestLog extends React.Component<{ ctx: TypeContext<RestLogE
                 <EntityLine ctx={ctx.subCtx(f => f.exception)}/>
 
                 <EntityRepeater ctx={ctx.subCtx(f => f.queryString)}/>
+                <Button bsStyle="info" onClick={() =>{ API.replayRestLog(ctx.value.id).then(d => this.state.diff = d).then().done(); debugger;}}>Replay</Button>
                 {this.renderCode(ctx.subCtx(f => f.requestBody))}
                 {this.renderCode(ctx.subCtx(f => f.responseBody))}
+                {this.state.diff && this.renderDiff()}
                 
             </div>
         );
@@ -39,6 +54,10 @@ export default class RestLog extends React.Component<{ ctx: TypeContext<RestLogE
             </fieldset>
         );
 
+    }
+
+    renderDiff(): any {
+        return <DiffDocument diff={this.state.diff!.diff}/>
     }
 }
 
