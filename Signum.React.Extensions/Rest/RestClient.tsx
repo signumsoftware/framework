@@ -40,7 +40,7 @@ export module API {
     }
 
     export function replayRestLog(restLogID: string | number, host:string){
-        return ajaxGet<RestLogDiff>({url: "~/api/restLog?id="+restLogID + "&host="+host});
+        return ajaxGet<RestLogDiff>({url: "~/api/restLog?id="+restLogID + "&url="+host});
         
     }
 }
