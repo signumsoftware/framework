@@ -74,6 +74,7 @@ namespace Signum.Engine.MachineLearning.CNTK
 
             var (training, validation) = ctx.SplitTrainValidation();
 
+            var totalMinibatches = (int)Math.Ceiling(training.Count / (float)nnSettings.MinibatchSize);
             var minibachtSize = nnSettings.MinibatchSize;
             var numMinibatches = nnSettings.NumMinibatches;
             
@@ -84,7 +85,7 @@ namespace Signum.Engine.MachineLearning.CNTK
             for (int i = 0; i < numMinibatches && !ctx.StopTraining; i++)
             {
                 ctx.ReportProgress("Training Minibatches", (i + 1) / (decimal)numMinibatches);
-                var trainSlice = Slice(training, i * minibachtSize, minibachtSize);
+                var trainSlice = Slice(training, (i % totalMinibatches) * minibachtSize, minibachtSize);
                 using (Value inputValue = CreateValue(ctx, trainSlice, ctx.InputColumns, device))
                 using (Value outputValue = CreateValue(ctx, trainSlice, ctx.OutputColumns, device))
                 {
@@ -120,8 +121,6 @@ namespace Signum.Engine.MachineLearning.CNTK
                     }
                 }
             }
-
-            ctx.Progresses.BulkInsert();
 
             CTTKMinibatchEvaluator evaluator = new CTTKMinibatchEvaluator(ctx, inputVariable, calculatedOutpus, device);
 

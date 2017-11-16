@@ -48,13 +48,29 @@ namespace Signum.React.MachineLearning
         public TrainingProgress GetTrainingState(int id)
         {
             var state = PredictorLogic.Trainings.TryGetC(Lite.Create<PredictorEntity>(id));
-            
+
             return new TrainingProgress
             {
                 State = state?.Context.Predictor.State ?? Database.Query<PredictorEntity>().Where(a => a.Id == id).Select(a => a.State).SingleEx(),
                 Message = state?.Context.Message,
-                Progress = state?.Context.Progress
+                Progress = state?.Context.Progress,
+                EpochProgresses = state?.Context.Progresses,
             };
+        }
+
+        [Route("api/predictor/epochProgress/{id}"), HttpGet]
+        public List<EpockProgress> GetProgressLosses(int id)
+        {
+            return Database.Query<PredictorEpochProgressEntity>().Where(a => a.Predictor.Id == id).Select(p => new EpockProgress
+            {
+                Ellapsed = p.Ellapsed,
+                Epoch = p.Epoch,
+                TrainingExamples = p.TrainingExamples,
+                EvaluationTraining = p.EvaluationTraining,
+                EvaluationValidation = p.EvaluationValidation,
+                LossTraining = p.LossTraining,
+                LossValidation = p.LossValidation,
+            }).ToList();
         }
     }
 }

@@ -39,10 +39,10 @@ namespace Signum.Engine.MachineLearning
         }
 
 
-        static Expression<Func<PredictorEntity, IQueryable<PredictorProgressEntity>>> ProgressesExpression =
-        e => Database.Query<PredictorProgressEntity>().Where(a => a.Predictor.RefersTo(e));
+        static Expression<Func<PredictorEntity, IQueryable<PredictorEpochProgressEntity>>> ProgressesExpression =
+        e => Database.Query<PredictorEpochProgressEntity>().Where(a => a.Predictor.RefersTo(e));
         [ExpressionField]
-        public static IQueryable<PredictorProgressEntity> Progresses(this PredictorEntity e)
+        public static IQueryable<PredictorEpochProgressEntity> EpochProgresses(this PredictorEntity e)
         {
             return ProgressesExpression.Evaluate(e);
         }
@@ -100,8 +100,8 @@ namespace Signum.Engine.MachineLearning
                         e.IsValue,
                     });
 
-                sb.Include<PredictorProgressEntity>()
-                    .WithExpressionFrom(dqm, (PredictorEntity e) => e.Progresses())
+                sb.Include<PredictorEpochProgressEntity>()
+                    .WithExpressionFrom(dqm, (PredictorEntity e) => e.EpochProgresses())
                     .WithQuery(dqm, () => e => new
                     {
                         Entity = e,
@@ -240,7 +240,7 @@ namespace Signum.Engine.MachineLearning
             e.RegressionValidation = null;
             e.Files.Clear();
             e.Codifications().UnsafeDelete();
-            e.Progresses().UnsafeDelete();
+            e.EpochProgresses().UnsafeDelete();
         }
 
         static void CreatePredictorCodifications(PredictorTrainingContext ctx)

@@ -95,7 +95,19 @@ export namespace API {
 }
 
 export interface TrainingProgress {
-    State: PredictorState;
     Message?: string;
     Progress?: number;
+    State: PredictorState;
+
+    EpochProgresses: EpockProgress[];
+}
+
+export interface EpockProgress {
+    Ellapsed: number;
+    TrainingExamples: number;
+    Epoch: number;
+    LossTraining: number;
+    EvaluationTraining: number;
+    LossValidation?: number;
+    EvaluationValidation?: number;
 }

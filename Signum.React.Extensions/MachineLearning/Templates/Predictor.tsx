@@ -24,6 +24,7 @@ import { QueryEntity } from '../../../../Framework/Signum.React/Scripts/Signum.E
 import { FilePathEmbedded } from '../../Files/Signum.Entities.Files';
 import { is } from '../../../../Framework/Signum.React/Scripts/Signum.Entities';
 import ProgressBar from './ProgressBar'
+import LineChart from './LineChart/LineChart'
 
 export default class Predictor extends React.Component<{ ctx: TypeContext<PredictorEntity> }, { queryDescription?: QueryDescription }> {
 
@@ -145,7 +146,7 @@ export default class Predictor extends React.Component<{ ctx: TypeContext<Predic
                                 <fieldset>
                                     <legend>{ctxmq.niceName()}</legend>
                                     <div>
-                                    <FilterBuilderEmbedded ctx={ctxmq.subCtx(a => a.filters)}
+                                        <FilterBuilderEmbedded ctx={ctxmq.subCtx(a => a.filters)}
                                             queryKey={queryKey}
                                             subTokenOptions={SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement} />
                                         <EntityTable ctx={ctxmq.subCtx(e => e.columns)} columns={EntityTable.typedColumns<PredictorColumnEmbedded>([
@@ -159,9 +160,9 @@ export default class Predictor extends React.Component<{ ctx: TypeContext<Predic
                                                 headerHtmlAttributes: { style: { width: "40%" } },
                                             },
                                             { property: a => a.encoding },
-                                    ])} />
-                                    {ctxmq.value.query && <a href="#" onClick={this.handlePreviewMainQuery}>{PredictorMessage.Preview.niceToString()}</a>}
-                                </div>
+                                        ])} />
+                                        {ctxmq.value.query && <a href="#" onClick={this.handlePreviewMainQuery}>{PredictorMessage.Preview.niceToString()}</a>}
+                                    </div>
 
                                 </fieldset>
                                 <EntityTabRepeater ctx={ctxxs.subCtx(e => e.subQueries)} onCreate={this.handleCreate}
@@ -170,7 +171,7 @@ export default class Predictor extends React.Component<{ ctx: TypeContext<Predic
                                         <div>
                                             {!this.state.queryDescription ? undefined : <PredictorSubQuery ctx={mctx} mainQuery={ctxmq.value} targetType={this.state.queryDescription.columns["Entity"].type} />}
                                         </div>
-                                } />
+                                    } />
                             </div>
                         }
                     </Tab>
@@ -257,12 +258,26 @@ export class TrainingProgressComponent extends React.Component<TrainingProgressC
 
         const tp = this.state.trainingProgress;
 
+
+
         return (
-            <ProgressBar color={tp == null ? "info" : "default"}
-                value={tp && tp.Progress}
-                message={tp == null ? PredictorMessage.StartingTraining.niceToString() : tp.Message}
-            />
+            <div>
+                {tp && <LineChart height={200} width={600} series={[{
+                    color: "rgb(0,0,0)",
+                    name: "data",
+                    values: tp.EpochProgresses.map(ep => ({ x: ep.TrainingExamples, y: ep.LossTraining }))
+                },]} />}
+                <ProgressBar color={tp == null ? "info" : "default"}
+                    value={tp && tp.Progress}
+                    message={tp == null ? PredictorMessage.StartingTraining.niceToString() : tp.Message}
+                />
+            </div>
         );
     }
 
 }
+
+
+
+
+

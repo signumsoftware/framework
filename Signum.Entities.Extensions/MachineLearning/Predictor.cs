@@ -360,7 +360,7 @@ namespace Signum.Entities.MachineLearning
     }
 
     [Serializable, EntityKind(EntityKind.System, EntityData.Transactional)]
-    public class PredictorProgressEntity : Entity
+    public class PredictorEpochProgressEntity : Entity
     {
         [NotNullable]
         [NotNullValidator]
@@ -372,7 +372,7 @@ namespace Signum.Entities.MachineLearning
 
         public int TrainingExamples { get; set; }
 
-        public int MiniBatchIndex { get; set; }
+        public int Epoch { get; set; }
 
         public double LossTraining { get; set; }
         public double EvaluationTraining { get; set; }

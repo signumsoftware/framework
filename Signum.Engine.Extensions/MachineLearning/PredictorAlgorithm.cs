@@ -16,6 +16,19 @@ namespace Signum.Engine.MachineLearning
         public decimal? Progress;
 
         public PredictorState State { get; set; }
+
+        public List<EpockProgress> EpochProgresses { get; set; }
+    }
+
+    public class EpockProgress
+    {
+        public long Ellapsed;
+        public int TrainingExamples;
+        public int Epoch;
+        public double LossTraining;
+        public double EvaluationTraining;
+        public double? LossValidation;
+        public double? EvaluationValidation;
     }
 
     public class PredictorTrainingContext
@@ -34,7 +47,7 @@ namespace Signum.Engine.MachineLearning
         public MainQuery MainQuery { get; internal set; }
         public Dictionary<PredictorSubQueryEntity, SubQuery> SubQueries { get; internal set; }
 
-        public List<PredictorProgressEntity> Progresses = new List<PredictorProgressEntity>();
+        public List<EpockProgress> Progresses = new List<EpockProgress>();
 
         public PredictorTrainingContext(PredictorEntity predictor, CancellationToken cancellationToken)
         {
@@ -83,11 +96,22 @@ namespace Signum.Engine.MachineLearning
 
         public void AddPredictorProgress(int i, int examples, Stopwatch sw, double lossTraining, double evaluationTraining, double? lossValidation, double? evaluationValidation)
         {
-            this.Progresses.Add(new PredictorProgressEntity
+            new PredictorEpochProgressEntity
             {
                 Predictor = this.Predictor.ToLite(),
                 Ellapsed = sw.ElapsedMilliseconds,
-                MiniBatchIndex = i,
+                Epoch = i,
+                TrainingExamples = examples,
+                LossTraining = lossTraining,
+                EvaluationTraining = evaluationTraining,
+                LossValidation = lossValidation,
+                EvaluationValidation = evaluationValidation,
+            }.Save();
+
+            this.Progresses.Add(new EpockProgress
+            {
+                Ellapsed = sw.ElapsedMilliseconds,
+                Epoch = i,
                 TrainingExamples = examples,
                 LossTraining = lossTraining,
                 EvaluationTraining = evaluationTraining,
