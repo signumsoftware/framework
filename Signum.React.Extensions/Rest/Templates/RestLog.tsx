@@ -22,7 +22,7 @@ export default class RestLog extends React.Component<{ ctx: TypeContext<RestLogE
         var suffix = props.ctx.subCtx(f => f.url).value.after("/api");
         this.state = {
             
-            newURL: location.protocol + "//" +location.hostname + prefix 
+            newURL: location.protocol + "//" +location.hostname + prefix  + suffix
         }
     }
     

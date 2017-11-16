@@ -18,13 +18,13 @@ namespace Signum.React.RestLog
     public class RestLogController : ApiController
     {
         [Route("api/restLog/"), HttpGet]
-        public async Task<RestDiffResult> GetRestDiffLog(string id, string host)
+        public async Task<RestDiffResult> GetRestDiffLog(string id, string url)
         {
             var oldRequest = Database.Retrieve<RestLogEntity>(PrimaryKey.Parse(id, typeof(RestLogEntity)));
             var oldCredentials = Database.Query<RestApiKeyEntity>().Single(r => r.User.Is(oldRequest.User));
 
             var result = new RestDiffResult {previous = oldRequest.ResponseBody};
-            var url = host + oldRequest.Url.After("api");
+            
             //create the new Request
             var restClient = new HttpClient {BaseAddress = new Uri(url)};
             restClient.DefaultRequestHeaders.Add("X-ApiKey", oldCredentials.ApiKey);
