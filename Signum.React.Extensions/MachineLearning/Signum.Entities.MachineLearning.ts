@@ -32,8 +32,10 @@ export interface NeuralNetworkSettingsEntity extends Entities.Entity, IPredictor
     Type: "NeuralNetworkSettings";
     predictionType?: PredictionType;
     minibatchSize?: number;
+    numMinibatches?: number;
     sparseMatrix?: boolean | null;
     saveProgressEvery?: number;
+    saveValidationProgressEvery?: number;
 }
 
 export const PredictionType = new EnumType<PredictionType>("PredictionType");
@@ -141,12 +143,14 @@ export module PredictorMessage {
     export const Results = new MessageKey("PredictorMessage", "Results");
     export const _0NotSuportedFor1 = new MessageKey("PredictorMessage", "_0NotSuportedFor1");
     export const _0IsRequiredFor1 = new MessageKey("PredictorMessage", "_0IsRequiredFor1");
+    export const _0ShouldBeDivisibleBy12 = new MessageKey("PredictorMessage", "_0ShouldBeDivisibleBy12");
 }
 
 export module PredictorOperation {
     export const Save : Entities.ExecuteSymbol<PredictorEntity> = registerSymbol("Operation", "PredictorOperation.Save");
     export const Train : Entities.ExecuteSymbol<PredictorEntity> = registerSymbol("Operation", "PredictorOperation.Train");
     export const CancelTraining : Entities.ExecuteSymbol<PredictorEntity> = registerSymbol("Operation", "PredictorOperation.CancelTraining");
+    export const StopTraining : Entities.ExecuteSymbol<PredictorEntity> = registerSymbol("Operation", "PredictorOperation.StopTraining");
     export const Untrain : Entities.ExecuteSymbol<PredictorEntity> = registerSymbol("Operation", "PredictorOperation.Untrain");
     export const Delete : Entities.DeleteSymbol<PredictorEntity> = registerSymbol("Operation", "PredictorOperation.Delete");
     export const Clone : Entities.ConstructSymbol_From<PredictorEntity, PredictorEntity> = registerSymbol("Operation", "PredictorOperation.Clone");
@@ -157,10 +161,13 @@ export interface PredictorProgressEntity extends Entities.Entity {
     Type: "PredictorProgress";
     predictor?: Entities.Lite<PredictorEntity> | null;
     creationDate?: string;
+    ellapsed?: number;
     trainingExamples?: number;
     miniBatchIndex?: number;
     lossTraining?: number;
-    lossTest?: number;
+    evaluationTraining?: number;
+    lossValidation?: number | null;
+    evaluationValidation?: number | null;
 }
 
 export const PredictorRegressionMetricsEmbedded = new Type<PredictorRegressionMetricsEmbedded>("PredictorRegressionMetricsEmbedded");

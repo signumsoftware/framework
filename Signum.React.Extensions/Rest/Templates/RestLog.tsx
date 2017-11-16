@@ -1,22 +1,29 @@
 ﻿import * as React from 'react'
 import * as moment from 'moment'
-import { Tabs, Tab, Button } from 'react-bootstrap'
+import { Tabs, Tab, Button, Form, FormControl } from 'react-bootstrap'
 import { RestLogEntity } from '../Signum.Entities.Rest'
 import { TypeContext, ValueLine, ValueLineType, EntityLine, EntityRepeater } from "../../../../Framework/Signum.React/Scripts/Lines";
 import { } from "../../../../Framework/Signum.React/Scripts/ConfigureReactWidgets";
 import {RestLogDiff, API }from '../RestClient'
 import { DiffDocument } from '../../DiffLog/Templates/DiffDocument';
+import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
 
 export interface RestLogState  
 {
-    diff? : RestLogDiff
+    diff? : RestLogDiff,
+    newURL : string
 }
 
 export default class RestLog extends React.Component<{ ctx: TypeContext<RestLogEntity> },RestLogState> {
  
-    constructor(){
-        super();
-        this.state = {}
+    constructor(props:{ ctx: TypeContext<RestLogEntity> }){
+        super(props);
+        var prefix = Navigator.toAbsoluteUrl("~/api");
+        var suffix = props.ctx.subCtx(f => f.url).value.after("/api");
+        this.state = {
+            
+            newURL: location.protocol + "//" +location.hostname + prefix  + suffix
+        }
     }
     
     render() {
@@ -38,9 +45,12 @@ export default class RestLog extends React.Component<{ ctx: TypeContext<RestLogE
                 <EntityLine ctx={ctx.subCtx(f => f.exception)}/>
 
                 <EntityRepeater ctx={ctx.subCtx(f => f.queryString)}/>
-                <Button bsStyle="info" onClick={() =>{ API.replayRestLog(ctx.value.id).then(d => this.setState({diff: d})).done()}}>Replay</Button>
+                <Form>
+                    <Button bsStyle="info" onClick={() =>{ API.replayRestLog(ctx.value.id, this.state.newURL).then(d => this.setState({diff: d})).done()}}>Replay</Button>
+                    <FormControl type="text" value={this.state.newURL}/>
+                </Form>
                 {this.renderCode(ctx.subCtx(f => f.requestBody))}
-
+                
                 <fieldset>
                 <legend>{ctx.subCtx(f => f.responseBody).niceName()}</legend>
                 <Tabs id="restTabs" defaultActiveKey="prev">
@@ -52,6 +62,7 @@ export default class RestLog extends React.Component<{ ctx: TypeContext<RestLogE
             </div> 
         );
     }
+
     renderCode(ctx: TypeContext<string | null>) {
         return (
             <fieldset>
