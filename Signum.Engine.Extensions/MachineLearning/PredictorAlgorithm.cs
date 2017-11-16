@@ -32,6 +32,8 @@ namespace Signum.Engine.MachineLearning
         public MainQuery MainQuery { get; internal set; }
         public Dictionary<PredictorSubQueryEntity, SubQuery> SubQueries { get; internal set; }
 
+        public List<PredictorProgressEntity> Progresses = new List<PredictorProgressEntity>();
+
         public PredictorTrainingContext(PredictorEntity predictor, CancellationToken cancellationToken)
         {
             this.Predictor = predictor;
@@ -75,6 +77,17 @@ namespace Signum.Engine.MachineLearning
             }
 
             return (training, test);
+        }
+
+        public void AddPredictorProgress(int i, int examples, double lossTraining, double? testTraining)
+        {
+            this.Progresses.Add(new PredictorProgressEntity
+            {
+                Predictor = this.Predictor.ToLite(),
+                MiniBatchIndex = i,
+                TrainingExamples = examples,
+                LossTraining = lossTraining,
+            });
         }
     }
 

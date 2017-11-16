@@ -27,5 +27,6 @@ namespace Signum.Entities.MachineLearning
         _0NotSuportedFor1,
         [Description("{0} is required for {1}")]
         _0IsRequiredFor1,
+        _0ShouldBeDivisibleBy12,
     }
 }

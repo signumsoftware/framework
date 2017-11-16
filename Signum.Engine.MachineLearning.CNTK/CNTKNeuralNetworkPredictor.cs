@@ -75,6 +75,8 @@ namespace Signum.Engine.MachineLearning.CNTK
 
             var batches = (int)Math.Ceiling(training.Count / (float)nnSettings.MinibatchSize);
 
+            int examples = 0;
+
             for (int i = 0; i < batches; i++)
             {
                 ctx.ReportProgress("Training Minibatches", (i + 1) / (decimal)batches);
@@ -88,15 +90,20 @@ namespace Signum.Engine.MachineLearning.CNTK
                         { outputVariable, outputValue },
                     }, device);
 
+                    examples += trainSlice.Count;
+
+                    var isLast = i == batches - 1;
                     if (i == batches - 1 || (i % nnSettings.SaveProgressEvery) == 0)
-                        new PredictorProgressEntity
-                        {
-                            Predictor = p.ToLite(),
-                            MiniBatchIndex = i,
-                            LossTraining = trainer.PreviousMinibatchLossAverage(),
-                        }.Save();
+                    {
+                        var lossValidation = (i % nnSettings.SaveValidationProgressEvery) == 0;
+                        
+                        ctx.AddPredictorProgress(i, examples, trainer.PreviousMinibatchEvaluationAverage(), null);
+
+                    }
                 }
             }
+
+            ctx.Progresses.BulkInsert();
 
             CTTKMinibatchEvaluator evaluator = new CTTKMinibatchEvaluator(ctx, inputVariable, calculatedOutpus, device);
 
