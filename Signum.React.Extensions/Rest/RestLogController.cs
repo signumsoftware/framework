@@ -4,6 +4,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Text;
 using System.Threading.Tasks;
 using System.Web;
 using System.Web.Http;
@@ -33,8 +34,8 @@ namespace Signum.React.RestLog
             {
 
 
-                result.current = await restClient.PostAsJsonAsync("", oldRequest.RequestBody).Result.Content
-                    .ReadAsStringAsync();
+                var response = await restClient.PostAsync("",new StringContent(oldRequest.RequestBody, Encoding.UTF8, "application/json"));
+                result.current = await  response.Content.ReadAsStringAsync();
             }
             else
             {
