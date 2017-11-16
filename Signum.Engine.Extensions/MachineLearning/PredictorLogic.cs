@@ -108,8 +108,10 @@ namespace Signum.Engine.MachineLearning
                         e.Predictor,
                         e.Id,
                         e.CreationDate,
-                        e.LossTest,
-                        e.LossTraining
+                        e.LossTraining,
+                        e.LossValidation,
+                        e.ErrorTraining,
+                        e.ErrorValidation,
                     });
 
                 SymbolLogic<PredictorAlgorithmSymbol>.Start(sb, dqm, () => Algorithms.Keys);
@@ -376,6 +378,21 @@ namespace Signum.Engine.MachineLearning
 
                         CleanTrained(e);
                         e.State = PredictorState.Draft;
+                    },
+                }.Register();
+
+                new Execute(PredictorOperation.StopTraining)
+                {
+                    FromStates = { PredictorState.Training },
+                    ToStates = { PredictorState.Trained },
+                    AllowsNew = true,
+                    Lite = false,
+                    Execute = (e, _) =>
+                    {
+                        if (Trainings.TryGetValue(e.ToLite(), out var state))
+                        {
+                            state.Context.StopTraining = true;
+                        }
                     },
                 }.Register();
 

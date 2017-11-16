@@ -14,6 +14,8 @@ namespace Signum.Entities.MachineLearning
     {
         public PredictionType PredictionType { get; set; }
         public int MinibatchSize { get; set; } = 1000;
+        public int NumMinibatches { get; set; } = 100;
+
         public bool? SparseMatrix { get; set; }
         [Unit("Minibaches")]
         public int SaveProgressEvery { get; set; } = 5;

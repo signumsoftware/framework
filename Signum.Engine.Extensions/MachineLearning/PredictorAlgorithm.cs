@@ -3,6 +3,7 @@ using Signum.Entities.DynamicQuery;
 using Signum.Entities.MachineLearning;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
@@ -21,6 +22,7 @@ namespace Signum.Engine.MachineLearning
     {
         public PredictorEntity Predictor { get; }
         public CancellationToken CancellationToken { get; }
+        public bool StopTraining { get; set; }
 
         public string Message { get; set; }
         public decimal? Progress { get; set; }
@@ -79,14 +81,18 @@ namespace Signum.Engine.MachineLearning
             return (training, test);
         }
 
-        public void AddPredictorProgress(int i, int examples, double lossTraining, double? testTraining)
+        public void AddPredictorProgress(int i, int examples, Stopwatch sw, double lossTraining, double errorTraining, double? lossValidation, double? errorValidation)
         {
             this.Progresses.Add(new PredictorProgressEntity
             {
                 Predictor = this.Predictor.ToLite(),
+                Ellapsed = sw.ElapsedMilliseconds,
                 MiniBatchIndex = i,
                 TrainingExamples = examples,
                 LossTraining = lossTraining,
+                ErrorTraining = errorTraining,
+                LossValidation = lossValidation,
+                ErrorValidation = errorValidation,
             });
         }
     }

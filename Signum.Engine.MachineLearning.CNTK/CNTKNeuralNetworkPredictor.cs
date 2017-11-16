@@ -10,6 +10,7 @@ using Signum.Utilities;
 using Signum.Entities;
 using Signum.Utilities.Reflection;
 using System.Reflection;
+using System.Diagnostics;
 
 namespace Signum.Engine.MachineLearning.CNTK
 {
@@ -73,14 +74,17 @@ namespace Signum.Engine.MachineLearning.CNTK
 
             var (training, validation) = ctx.SplitTrainValidation();
 
-            var batches = (int)Math.Ceiling(training.Count / (float)nnSettings.MinibatchSize);
-
+            var minibachtSize = nnSettings.MinibatchSize;
+            var numMinibatches = nnSettings.NumMinibatches;
+            
             int examples = 0;
 
-            for (int i = 0; i < batches; i++)
+            Stopwatch sw = Stopwatch.StartNew();
+
+            for (int i = 0; i < numMinibatches && !ctx.StopTraining; i++)
             {
-                ctx.ReportProgress("Training Minibatches", (i + 1) / (decimal)batches);
-                var trainSlice = Slice(training, i * nnSettings.MinibatchSize, nnSettings.MinibatchSize);
+                ctx.ReportProgress("Training Minibatches", (i + 1) / (decimal)numMinibatches);
+                var trainSlice = Slice(training, i * minibachtSize, minibachtSize);
                 using (Value inputValue = CreateValue(ctx, trainSlice, ctx.InputColumns, device))
                 using (Value outputValue = CreateValue(ctx, trainSlice, ctx.OutputColumns, device))
                 {
@@ -92,13 +96,22 @@ namespace Signum.Engine.MachineLearning.CNTK
 
                     examples += trainSlice.Count;
 
-                    var isLast = i == batches - 1;
-                    if (i == batches - 1 || (i % nnSettings.SaveProgressEvery) == 0)
+                    var isLast = i == numMinibatches - 1;
+                    if (i == numMinibatches - 1 || (i % nnSettings.SaveProgressEvery) == 0)
                     {
-                        var lossValidation = (i % nnSettings.SaveValidationProgressEvery) == 0;
-                        
-                        ctx.AddPredictorProgress(i, examples, trainer.PreviousMinibatchEvaluationAverage(), null);
+                        if((i % nnSettings.SaveValidationProgressEvery) == 0)
+                        {
 
+                        }
+
+                        ctx.AddPredictorProgress(i,
+                            examples,
+                            sw,
+                            lossTraining: trainer.PreviousMinibatchEvaluationAverage(),
+                            errorTraining: trainer.PreviousMinibatchEvaluationAverage(),
+                            errorValidation: null,
+                            lossValidation: null
+                        );
                     }
                 }
             }
@@ -207,7 +220,7 @@ namespace Signum.Engine.MachineLearning.CNTK
                 this.device = device;
             }
 
-            List<T> EvaluateByMiniBatch<T>(List<ResultRow> rows, string name, Func<(List<ResultRow> sclice, Value outputValue, Value expectedValue), T> selector)
+            List<T> EvaluateByMiniBatch<T>(List<ResultRow> rows, string name, Func<(List<ResultRow> slice, Value outputValue, Value expectedValue), T> selector)
             {
                 List<T> results = new List<T>();
 
@@ -219,7 +232,6 @@ namespace Signum.Engine.MachineLearning.CNTK
                     ctx.ReportProgress("Evaluating " + name, (i + 1) / (decimal)batches);
                     var slice = Slice(rows, i * nnSettings.MinibatchSize, nnSettings.MinibatchSize);
 
-
                     using (Value inputValue = CreateValue(ctx, slice, ctx.InputColumns, device))
                     {
                         var inputs = new Dictionary<Variable, Value> { { inputVariable, inputValue } };
@@ -230,7 +242,7 @@ namespace Signum.Engine.MachineLearning.CNTK
                         {
                             using (Value expectedValue = CreateValue(ctx, slice, ctx.OutputColumns, device))
                             {
-                                results.Add(selector((sclice: slice, outputValue: outputValue, expectedValue: expectedValue)));
+                                results.Add(selector((slice: slice, outputValue: outputValue, expectedValue: expectedValue)));
                             }
                         }
                     }
@@ -245,8 +257,7 @@ namespace Signum.Engine.MachineLearning.CNTK
                 {
                     IList<IList<float>> actualLabelSoftMax = tuple.outputValue.GetDenseData<float>(calculatedOutpus.Output);
                     List<int> actualLabels = actualLabelSoftMax.Select((IList<float> l) => l.IndexOf(l.Max())).ToList();
-
-
+                    
                     IList<IList<float>> expectedOneHot = tuple.expectedValue.GetDenseData<float>(calculatedOutpus.Output);
                     List<int> expectedLabels = expectedOneHot.Select(l => l.IndexOf(1.0F)).ToList();
                     int misMatches = actualLabels.Zip(expectedLabels, (a, b) => a.Equals(b) ? 0 : 1).Sum();

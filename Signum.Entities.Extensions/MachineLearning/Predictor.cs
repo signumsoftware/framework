@@ -175,6 +175,7 @@ namespace Signum.Entities.MachineLearning
         public static readonly ExecuteSymbol<PredictorEntity> Save;
         public static readonly ExecuteSymbol<PredictorEntity> Train;
         public static readonly ExecuteSymbol<PredictorEntity> CancelTraining;
+        public static readonly ExecuteSymbol<PredictorEntity> StopTraining;
         public static readonly ExecuteSymbol<PredictorEntity> Untrain;
         public static readonly DeleteSymbol<PredictorEntity> Delete;
         public static readonly ConstructSymbol<PredictorEntity>.From<PredictorEntity> Clone;
@@ -366,13 +367,17 @@ namespace Signum.Entities.MachineLearning
         public Lite<PredictorEntity> Predictor { get; set; }
 
         public DateTime CreationDate { get; private set; } = TimeZoneManager.Now;
+        [Unit("ms")]
+        public long Ellapsed { get; internal set; }
 
         public int TrainingExamples { get; set; }
 
         public int MiniBatchIndex { get; set; }
 
         public double LossTraining { get; set; }
-        public double LossTest { get; set; }
+        public double ErrorTraining { get; set; }
+        public double? LossValidation { get; internal set; }
+        public double? ErrorValidation { get; internal set; }
     }
 
     [Serializable]
