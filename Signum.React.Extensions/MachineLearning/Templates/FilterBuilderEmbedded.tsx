@@ -55,16 +55,22 @@ export default class FilterBuilderEmbedded extends React.Component<FilterBuilder
 
         var qd = await Finder.getQueryDescription(this.props.queryKey);
 
-        const completer = new TokenCompleter(this.state.queryDescription!);
+        var filterOptions = await FilterBuilderEmbedded.toFilterOptionParsed(qd, this.props.ctx.value, this.props.subTokenOptions);
 
-        props.ctx.value.forEach(mle => {
+        this.setState({ queryDescription: qd, filterOptions: filterOptions });
+    }
+
+    static async toFilterOptionParsed(qd: QueryDescription, filters: MList<QueryFilterEmbedded>, subTokenOptions: SubTokensOptions): Promise<FilterOptionParsed[]> {
+        const completer = new TokenCompleter(qd);
+
+        filters.forEach(mle => {
             if (mle.element.token != null && mle.element.token.token == null)
-                completer.request(mle.element.token.tokenString, this.props.subTokenOptions);
+                completer.request(mle.element.token.tokenString, subTokenOptions);
         });
-        
+
         await completer.finished();
 
-        const filterOptions = props.ctx.value.map(mle =>
+        const filterOptions = filters.map(mle =>
         ({
             token: mle.element.token && (mle.element.token.token || completer.get(mle.element.token.tokenString)),
             operation: mle.element.operation,
@@ -73,7 +79,7 @@ export default class FilterBuilderEmbedded extends React.Component<FilterBuilder
 
         await Finder.parseFilterValues(filterOptions);
 
-        this.setState({ queryDescription: qd, filterOptions: filterOptions });
+        return filterOptions;
     }
 
     render() {

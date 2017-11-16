@@ -33,6 +33,7 @@ export interface NeuralNetworkSettingsEntity extends Entities.Entity, IPredictor
     predictionType?: PredictionType;
     minibatchSize?: number;
     sparseMatrix?: boolean | null;
+    saveProgressEvery?: number;
 }
 
 export const PredictionType = new EnumType<PredictionType>("PredictionType");
@@ -134,6 +135,12 @@ export module PredictorMessage {
     export const OpenTensorflowProjector = new MessageKey("PredictorMessage", "OpenTensorflowProjector");
     export const _0IsAlreadyBeingTrained = new MessageKey("PredictorMessage", "_0IsAlreadyBeingTrained");
     export const StartingTraining = new MessageKey("PredictorMessage", "StartingTraining");
+    export const Preview = new MessageKey("PredictorMessage", "Preview");
+    export const Codifications = new MessageKey("PredictorMessage", "Codifications");
+    export const Progress = new MessageKey("PredictorMessage", "Progress");
+    export const Results = new MessageKey("PredictorMessage", "Results");
+    export const _0NotSuportedFor1 = new MessageKey("PredictorMessage", "_0NotSuportedFor1");
+    export const _0IsRequiredFor1 = new MessageKey("PredictorMessage", "_0IsRequiredFor1");
 }
 
 export module PredictorOperation {
@@ -150,6 +157,7 @@ export interface PredictorProgressEntity extends Entities.Entity {
     Type: "PredictorProgress";
     predictor?: Entities.Lite<PredictorEntity> | null;
     creationDate?: string;
+    trainingExamples?: number;
     miniBatchIndex?: number;
     lossTraining?: number;
     lossTest?: number;

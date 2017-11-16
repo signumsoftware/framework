@@ -3,10 +3,10 @@ import { Tabs, Tab } from 'react-bootstrap';
 import * as numbro from 'numbro';
 import { classes } from '../../../../Framework/Signum.React/Scripts/Globals'
 import { FormGroup, FormControlStatic, ValueLine, ValueLineType, EntityLine, EntityDetail, EntityCombo, EntityList, EntityRepeater, EntityTable, IRenderButtons, EntityTabRepeater } from '../../../../Framework/Signum.React/Scripts/Lines'
-import { SearchControl } from '../../../../Framework/Signum.React/Scripts/Search'
+import { SearchControl, FilterOption, ColumnOption } from '../../../../Framework/Signum.React/Scripts/Search'
 import { TypeContext, FormGroupStyle, ButtonsContext } from '../../../../Framework/Signum.React/Scripts/TypeContext'
 import FileLine from '../../Files/FileLine'
-import { PredictorEntity, PredictorColumnEmbedded, PredictorMessage, PredictorSubQueryEntity, PredictorGroupKeyEmbedded, PredictorFileType, PredictorCodificationEntity } from '../Signum.Entities.MachineLearning'
+import { PredictorEntity, PredictorColumnEmbedded, PredictorMessage, PredictorSubQueryEntity, PredictorGroupKeyEmbedded, PredictorFileType, PredictorCodificationEntity, PredictorProgressEntity } from '../Signum.Entities.MachineLearning'
 import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
 import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
 import { getQueryNiceName } from '../../../../Framework/Signum.React/Scripts/Reflection'
@@ -23,7 +23,7 @@ import { QueryTokenEmbedded } from '../../UserAssets/Signum.Entities.UserAssets'
 import { QueryEntity } from '../../../../Framework/Signum.React/Scripts/Signum.Entities.Basics';
 import { FilePathEmbedded } from '../../Files/Signum.Entities.Files';
 import { is } from '../../../../Framework/Signum.React/Scripts/Signum.Entities';
-import { BsStyle } from '../../../../Framework/Signum.React/Scripts/Operations';
+import ProgressBar from './ProgressBar'
 
 export default class Predictor extends React.Component<{ ctx: TypeContext<PredictorEntity> }, { queryDescription?: QueryDescription }> {
 
@@ -101,6 +101,24 @@ export default class Predictor extends React.Component<{ ctx: TypeContext<Predic
             .done();
     }
 
+    handlePreviewMainQuery = () => {
+        var mq = this.props.ctx.value.mainQuery;
+
+        FilterBuilderEmbedded.toFilterOptionParsed(this.state.queryDescription!, mq.filters, SubTokensOptions.CanElement | SubTokensOptions.CanAnyAll)
+            .then(filters => Finder.explore({
+                queryName: mq.query!.key,
+                filterOptions: filters.map(f => ({
+                    columnName: f.token!.fullKey,
+                    operation: f.operation,
+                    value: f.value
+                }) as FilterOption),
+                columnOptions: mq.columns.orderBy(mle => mle.element.usage == "Input" ? 0 : 1).map(mle => ({
+                    columnName: mle.element.token && mle.element.token.tokenString,
+                } as ColumnOption)),
+                columnOptionsMode: "Replace",
+            })).done();
+    }
+
     render() {
         let ctx = this.props.ctx;
 
@@ -115,6 +133,7 @@ export default class Predictor extends React.Component<{ ctx: TypeContext<Predic
         return (
             <div>
                 <ValueLine ctx={ctxxs.subCtx(e => e.name)} />
+                <EntityCombo ctx={ctxxs.subCtx(f => f.algorithm)} onChange={this.handleAlgorithmChange} />
                 <ValueLine ctx={ctxxs.subCtx(e => e.state, { readOnly: true })} />
                 <EntityLine ctx={ctxxs.subCtx(e => e.trainingException, { readOnly: true })} hideIfNull={true} />
                 {ctx.value.state == "Training" && <TrainingProgressComponent ctx={ctx} onStateChanged={this.handleOnFinished} />}
@@ -126,7 +145,7 @@ export default class Predictor extends React.Component<{ ctx: TypeContext<Predic
                                 <fieldset>
                                     <legend>{ctxmq.niceName()}</legend>
                                     <div>
-                                        <FilterBuilderEmbedded ctx={ctxmq.subCtx(a => a.filters)}
+                                    <FilterBuilderEmbedded ctx={ctxmq.subCtx(a => a.filters)}
                                             queryKey={queryKey}
                                             subTokenOptions={SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement} />
                                         <EntityTable ctx={ctxmq.subCtx(e => e.columns)} columns={EntityTable.typedColumns<PredictorColumnEmbedded>([
@@ -140,31 +159,37 @@ export default class Predictor extends React.Component<{ ctx: TypeContext<Predic
                                                 headerHtmlAttributes: { style: { width: "40%" } },
                                             },
                                             { property: a => a.encoding },
-                                        ])} />
-                                    </div>
+                                    ])} />
+                                    {ctxmq.value.query && <a href="#" onClick={this.handlePreviewMainQuery}>{PredictorMessage.Preview.niceToString()}</a>}
+                                </div>
+
                                 </fieldset>
                                 <EntityTabRepeater ctx={ctxxs.subCtx(e => e.subQueries)} onCreate={this.handleCreate}
                                     getTitle={(mctx: TypeContext<PredictorSubQueryEntity>) => mctx.value.name || PredictorSubQueryEntity.niceName()}
                                     getComponent={(mctx: TypeContext<PredictorSubQueryEntity>) =>
                                         <div>
-                                            {!this.state.queryDescription ? undefined : <PredictorSubQuery ctx={mctx} targetType={this.state.queryDescription.columns["Entity"].type} />}
+                                            {!this.state.queryDescription ? undefined : <PredictorSubQuery ctx={mctx} mainQuery={ctxmq.value} targetType={this.state.queryDescription.columns["Entity"].type} />}
                                         </div>
-                                    } />
+                                } />
                             </div>
                         }
                     </Tab>
-                    <Tab eventKey="algorithm" title={ctxxs.niceName(a => a.algorithmSettings)}>
-                        <EntityCombo ctx={ctxxs.subCtx(f => f.algorithm)} onChange={this.handleAlgorithmChange} />
+                    <Tab eventKey="settings" title={ctxxs.niceName(a => a.settings)}>
                         {ctxxs.value.algorithm && <EntityDetail ctx={ctxxs.subCtx(f => f.algorithmSettings)} remove={false} />}
                         <EntityDetail ctx={ctxxs.subCtx(f => f.settings)} remove={false} />
                     </Tab>
                     {
-                        ctx.value.state != "Draft" && <Tab eventKey="codifications" title={PredictorCodificationEntity.nicePluralName()}>
+                        ctx.value.state != "Draft" && <Tab eventKey="codifications" title={PredictorMessage.Codifications.niceToString()}>
                             <SearchControl findOptions={{ queryName: PredictorCodificationEntity, parentColumn: "Predictor", parentValue: ctx.value }} />
                         </Tab>
                     }
                     {
-                        ctx.value.state != "Draft" && <Tab eventKey="files" title={ctxxs.niceName(a => a.files)}>
+                        ctx.value.state != "Draft" && <Tab eventKey="progress" title={PredictorMessage.Progress.niceToString()}>
+                            <SearchControl findOptions={{ queryName: PredictorProgressEntity, parentColumn: "Predictor", parentValue: ctx.value }} />
+                        </Tab>
+                    }
+                    {
+                        ctx.value.state == "Trained" && <Tab eventKey="files" title={PredictorMessage.Results.niceToString()}>
                             <EntityRepeater ctx={ctxxs.subCtx(f => f.files)} getComponent={ec =>
                                 <FileLine ctx={ec.subCtx({ formGroupStyle: "SrOnly" })} remove={false} fileType={PredictorFileType.PredictorFile} />
                             } />
@@ -240,40 +265,4 @@ export class TrainingProgressComponent extends React.Component<TrainingProgressC
         );
     }
 
-}
-
-
-interface ProgressBarProps {
-    value?: number | null; /*0...1*/
-    showPercentageInMessage?: boolean | null;
-    message?: string | null;
-    color?: BsStyle | null;
-}
-
-export class ProgressBar extends React.Component<ProgressBarProps> {
-    render() {
-
-        const { value, showPercentageInMessage, message, color } = this.props;
-
-        const progressContainerClass = value == null ? "progress-bar-striped active" : "";
-
-        const progressStyle = color == null ? "progress-bar-" + color : "";
-
-        const fullMessage = [
-            (value == null || showPercentageInMessage === false ? undefined : `${numbro(value).format("0.00")}%`),
-            (message ? message : undefined)
-        ].filter(a => a != null).join(" - ");
-
-        return (
-            <div className={classes("progress")}>
-                <div className={classes("progress-bar", progressStyle, progressContainerClass)} role="progressbar" id="progressBar"
-                    aria-valuenow={value == null ? undefined : value * 100}
-                    aria-valuemin={value == null ? undefined : 0}
-                    aria-valuemax={value == null ? undefined : 100}
-                    style={{ width: value == null ? "100%" : (value * 100) + "%" }}>
-                    <span style={{ color: (value != null && value < 0.5) ? "black" : undefined }}>{fullMessage}</span>
-                </div>
-            </div>
-        );
-    }
 }

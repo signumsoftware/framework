@@ -3,6 +3,7 @@ using Signum.Entities.DynamicQuery;
 using Signum.Entities.MachineLearning;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
@@ -21,6 +22,7 @@ namespace Signum.Engine.MachineLearning
     {
         public PredictorEntity Predictor { get; }
         public CancellationToken CancellationToken { get; }
+        public bool StopTraining { get; set; }
 
         public string Message { get; set; }
         public decimal? Progress { get; set; }
@@ -31,6 +33,8 @@ namespace Signum.Engine.MachineLearning
 
         public MainQuery MainQuery { get; internal set; }
         public Dictionary<PredictorSubQueryEntity, SubQuery> SubQueries { get; internal set; }
+
+        public List<PredictorProgressEntity> Progresses = new List<PredictorProgressEntity>();
 
         public PredictorTrainingContext(PredictorEntity predictor, CancellationToken cancellationToken)
         {
@@ -68,13 +72,28 @@ namespace Signum.Engine.MachineLearning
 
             foreach (var item in this.MainQuery.ResultTable.Rows)
             {
-                if (r.Next() < Predictor.Settings.TestPercentage)
+                if (r.NextDouble() < Predictor.Settings.TestPercentage)
                     test.Add(item);
                 else
                     training.Add(item);
             }
 
             return (training, test);
+        }
+
+        public void AddPredictorProgress(int i, int examples, Stopwatch sw, double lossTraining, double evaluationTraining, double? lossValidation, double? evaluationValidation)
+        {
+            this.Progresses.Add(new PredictorProgressEntity
+            {
+                Predictor = this.Predictor.ToLite(),
+                Ellapsed = sw.ElapsedMilliseconds,
+                MiniBatchIndex = i,
+                TrainingExamples = examples,
+                LossTraining = lossTraining,
+                EvaluationTraining = evaluationTraining,
+                LossValidation = lossValidation,
+                EvaluationValidation = evaluationValidation,
+            });
         }
     }
 
@@ -96,7 +115,7 @@ namespace Signum.Engine.MachineLearning
 
     public abstract class PredictorAlgorithm
     {
-        public virtual string ValidatePredictor(PredictorEntity predictor) => null;
+        public virtual string ValidateColumnProperty(PredictorEntity predictor, PredictorSubQueryEntity subQuery, PredictorColumnEmbedded column, PropertyInfo pi) => null;
         public abstract void Train(PredictorTrainingContext ctx);
         public abstract object[] Predict(PredictorEntity predictor, PredictorResultColumn[] columns, object[] input);
     }
