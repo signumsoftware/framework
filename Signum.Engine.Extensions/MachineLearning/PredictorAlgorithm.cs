@@ -81,7 +81,7 @@ namespace Signum.Engine.MachineLearning
             return (training, test);
         }
 
-        public void AddPredictorProgress(int i, int examples, Stopwatch sw, double lossTraining, double errorTraining, double? lossValidation, double? errorValidation)
+        public void AddPredictorProgress(int i, int examples, Stopwatch sw, double lossTraining, double evaluationTraining, double? lossValidation, double? evaluationValidation)
         {
             this.Progresses.Add(new PredictorProgressEntity
             {
@@ -90,9 +90,9 @@ namespace Signum.Engine.MachineLearning
                 MiniBatchIndex = i,
                 TrainingExamples = examples,
                 LossTraining = lossTraining,
-                ErrorTraining = errorTraining,
+                EvaluationTraining = evaluationTraining,
                 LossValidation = lossValidation,
-                ErrorValidation = errorValidation,
+                EvaluationValidation = evaluationValidation,
             });
         }
     }

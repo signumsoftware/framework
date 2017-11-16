@@ -110,8 +110,8 @@ namespace Signum.Engine.MachineLearning
                         e.CreationDate,
                         e.LossTraining,
                         e.LossValidation,
-                        e.ErrorTraining,
-                        e.ErrorValidation,
+                        e.EvaluationTraining,
+                        e.EvaluationValidation,
                     });
 
                 SymbolLogic<PredictorAlgorithmSymbol>.Start(sb, dqm, () => Algorithms.Keys);

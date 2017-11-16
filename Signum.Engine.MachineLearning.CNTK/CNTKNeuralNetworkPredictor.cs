@@ -104,13 +104,18 @@ namespace Signum.Engine.MachineLearning.CNTK
 
                         }
 
+                        if(examples != trainer.TotalNumberOfSamplesSeen())
+                        {
+
+                        }
+
                         ctx.AddPredictorProgress(i,
                             examples,
                             sw,
-                            lossTraining: trainer.PreviousMinibatchEvaluationAverage(),
-                            errorTraining: trainer.PreviousMinibatchEvaluationAverage(),
-                            errorValidation: null,
-                            lossValidation: null
+                            lossTraining: trainer.PreviousMinibatchLossAverage(),
+                            evaluationTraining: trainer.PreviousMinibatchEvaluationAverage(),
+                            lossValidation: null,
+                            evaluationValidation: null
                         );
                     }
                 }
