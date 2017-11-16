@@ -13,6 +13,7 @@ using Signum.Entities.DynamicQuery;
 using System.Reflection;
 using Signum.Entities.Files;
 using Signum.Entities.Authorization;
+using System.Xml.Linq;
 
 namespace Signum.Entities.MachineLearning
 {
@@ -49,7 +50,7 @@ namespace Signum.Entities.MachineLearning
         [NotNullValidator, InTypeScript(Undefined = false, Null = false), NotifyChildProperty]
         public PredictorMainQueryEmbedded MainQuery { get; set; }
 
-        [Ignore, NotifyChildProperty] //virtual Mlist
+        [Ignore, NotifyChildProperty, NotifyCollectionChanged] //virtual Mlist
         public MList<PredictorSubQueryEntity> SubQueries { get; set; } = new MList<PredictorSubQueryEntity>();
         
         [Ignore]
@@ -83,7 +84,7 @@ namespace Signum.Entities.MachineLearning
         public MList<QueryFilterEmbedded> Filters { get; set; } = new MList<QueryFilterEmbedded>();
 
         [NotNullable, PreserveOrder]
-        [NotNullValidator, NoRepeatValidator, NotifyChildProperty]
+        [NotNullValidator, NoRepeatValidator, NotifyChildProperty, NotifyCollectionChanged]
         public MList<PredictorColumnEmbedded> Columns { get; set; } = new MList<PredictorColumnEmbedded>();
 
         internal void ParseData(QueryDescription qd)
@@ -280,11 +281,11 @@ namespace Signum.Entities.MachineLearning
         public MList<QueryFilterEmbedded> AdditionalFilters { get; set; } = new MList<QueryFilterEmbedded>();
 
         [NotNullable, PreserveOrder]
-        [NotNullValidator, NoRepeatValidator]
+        [NotNullValidator, NoRepeatValidator, NotifyChildProperty, NotifyCollectionChanged]
         public MList<PredictorGroupKeyEmbedded> GroupKeys { get; set; } = new MList<PredictorGroupKeyEmbedded>();
 
         [NotNullable, PreserveOrder]
-        [NotNullValidator, NoRepeatValidator, NotifyChildProperty]
+        [NotNullValidator, NoRepeatValidator, NotifyChildProperty, NotifyCollectionChanged]
         public MList<PredictorColumnEmbedded> Aggregates { get; set; } = new MList<PredictorColumnEmbedded>();
 
         public void ParseData(QueryDescription description)

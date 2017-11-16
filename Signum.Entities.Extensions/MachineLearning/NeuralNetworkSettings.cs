@@ -29,7 +29,7 @@ namespace Signum.Entities.MachineLearning
             {
                 if(SaveValidationProgressEvery % SaveProgressEvery != 0)
                 {
-                    return PredictorMessage._0ShouldBeDivisibleBy12.NiceToString(pi.NiceName(), ReflectionTools.GetPropertyInfo(() => SaveProgressEvery).NiceName());
+                    return PredictorMessage._0ShouldBeDivisibleBy12.NiceToString(pi.NiceName(), ReflectionTools.GetPropertyInfo(() => SaveProgressEvery).NiceName(), SaveProgressEvery);
                 }
 
             }

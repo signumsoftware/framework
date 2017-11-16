@@ -27,6 +27,9 @@ namespace Signum.Entities.MachineLearning
         _0NotSuportedFor1,
         [Description("{0} is required for {1}")]
         _0IsRequiredFor1,
+        [Description("{0} should be divisible by {1} ({2})")]
         _0ShouldBeDivisibleBy12,
+        [Description("The first group key of {0} should be of type {1} (instead of {2})")]
+        TheFirstGroupKeyOf0ShouldBeOfType1InsteadOf2,
     }
 }

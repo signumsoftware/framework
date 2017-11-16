@@ -119,25 +119,45 @@ namespace Signum.Engine.MachineLearning
                 sb.Schema.EntityEvents<PredictorEntity>().Retrieved += PredictorEntity_Retrieved;
                 sb.Schema.EntityEvents<PredictorSubQueryEntity>().Retrieved += PredictorMultiColumnEntity_Retrieved;
 
+                Validator.PropertyValidator((PredictorGroupKeyEmbedded c) => c.Token).StaticPropertyValidation += GroupKey_StaticPropertyValidation;
                 Validator.PropertyValidator((PredictorColumnEmbedded c) => c.Token).StaticPropertyValidation += Column_StaticPropertyValidation;
                 Validator.PropertyValidator((PredictorColumnEmbedded c) => c.Usage).StaticPropertyValidation += Column_StaticPropertyValidation;
                 Validator.PropertyValidator((PredictorColumnEmbedded c) => c.Encoding).StaticPropertyValidation += Column_StaticPropertyValidation;
             }
         }
 
+        static string GroupKey_StaticPropertyValidation(PredictorGroupKeyEmbedded column, PropertyInfo pi)
+        {
+            var sq = (PredictorSubQueryEntity)column.GetParentEntity();
+            var p = (PredictorEntity)sq.GetParentEntity();
+            if(column.Token == null || sq.GroupKeys.IndexOf(column) == 0)
+            {
+                Implementations mainQueryImplementations = DynamicQueryManager.Current.GetEntityImplementations(p.MainQuery.Query.ToQueryName());
+                var token = column.Token.Token;
+                if (!PredictorLogicQuery.Compatible(token.GetImplementations(), mainQueryImplementations))
+                    return PredictorMessage.TheFirstGroupKeyOf0ShouldBeOfType1InsteadOf2.NiceToString(sq, mainQueryImplementations, token.GetImplementations()?.ToString() ?? token.NiceTypeName);
+            }
+
+            return null;
+        }
+
         static string Column_StaticPropertyValidation(PredictorColumnEmbedded column, PropertyInfo pi)
         {
             var parent = column.GetParentEntity();
-
             if (parent is PredictorMainQueryEmbedded mq)
             {
                 var p = (PredictorEntity)mq.GetParentEntity();
+                if (p.Algorithm == null)
+                    return null;
+                
                 var algorithm = Algorithms.GetOrThrow(p.Algorithm);
                 return algorithm.ValidateColumnProperty(p, null, column, pi);
             }
             else if (parent is PredictorSubQueryEntity sq)
             {
                 var p = (PredictorEntity)sq.GetParentEntity();
+                if (p.Algorithm == null)
+                    return null;
                 var algorithm = Algorithms.GetOrThrow(p.Algorithm);
                 return algorithm.ValidateColumnProperty(p, sq, column, pi);
             }
@@ -214,16 +234,18 @@ namespace Signum.Engine.MachineLearning
             }
             catch (OperationCanceledException e)
             {
-
+                CleanTrained(ctx.Predictor);
+                ctx.Predictor.State = PredictorState.Draft;
+                using (OperationLogic.AllowSave<PredictorEntity>())
+                    ctx.Predictor.Save();
             }
             catch (Exception ex)
             {
                 ex.Data["entity"] = ctx.Predictor;
                 var e = ex.LogException();
-                ctx.Predictor.InDB().UnsafeUpdate()
-                .Set(a => a.State, a => PredictorState.Error)
-                .Set(a => a.TrainingException, a => e.ToLite())
-                .Execute();
+                ctx.Predictor.State = PredictorState.Error;
+                using (OperationLogic.AllowSave<PredictorEntity>())
+                    ctx.Predictor.Save();
             }
         }
 
@@ -258,7 +280,7 @@ namespace Signum.Engine.MachineLearning
 
                 string GetGroupKey(int index)
                 {
-                    var token = a.MultiColumn?.Aggregates.ElementAtOrDefault(index)?.Token;
+                    var token = a.SubQuery?.GroupKeys.ElementAtOrDefault(index + 1)?.Token;
                     var obj = a.Keys?.ElementAtOrDefault(index);
                     return ToStringKey(token?.Token, obj);
                 }
@@ -267,10 +289,10 @@ namespace Signum.Engine.MachineLearning
                 {
                     Predictor = ctx.Predictor.ToLite(),
                     ColumnIndex = i,
-                    OriginalMultiColumnIndex = a.MultiColumn == null ? (int?)null : ctx.Predictor.SubQueries.IndexOf(a.MultiColumn),
-                    OriginalColumnIndex = a.MultiColumn == null ?
+                    OriginalMultiColumnIndex = a.SubQuery == null ? (int?)null : ctx.Predictor.SubQueries.IndexOf(a.SubQuery),
+                    OriginalColumnIndex = a.SubQuery == null ?
                         ctx.Predictor.MainQuery.Columns.IndexOf(a.PredictorColumn) :
-                        a.MultiColumn.Aggregates.IndexOf(a.PredictorColumn),
+                        a.SubQuery.Aggregates.IndexOf(a.PredictorColumn),
                     GroupKey0 = GetGroupKey(0),
                     GroupKey1 = GetGroupKey(1),
                     GroupKey2 = GetGroupKey(2),
@@ -366,7 +388,7 @@ namespace Signum.Engine.MachineLearning
                 new Execute(PredictorOperation.CancelTraining)
                 {
                     FromStates = { PredictorState.Training },
-                    ToStates = { PredictorState.Draft },
+                    ToStates = { PredictorState.Training, PredictorState.Draft },
                     AllowsNew = true,
                     Lite = false,
                     Execute = (e, _) =>
@@ -375,16 +397,19 @@ namespace Signum.Engine.MachineLearning
                         {
                             state.CancellationTokenSource.Cancel();
                         }
-
-                        CleanTrained(e);
-                        e.State = PredictorState.Draft;
+                        else
+                        {
+                            CleanTrained(e);
+                            e.State = PredictorState.Draft;
+                            e.Save();
+                        }
                     },
                 }.Register();
 
                 new Execute(PredictorOperation.StopTraining)
                 {
                     FromStates = { PredictorState.Training },
-                    ToStates = { PredictorState.Trained },
+                    ToStates = { PredictorState.Training },
                     AllowsNew = true,
                     Lite = false,
                     Execute = (e, _) =>

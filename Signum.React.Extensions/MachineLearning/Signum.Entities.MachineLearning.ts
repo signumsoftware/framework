@@ -158,6 +158,7 @@ export module PredictorMessage {
     export const _0NotSuportedFor1 = new MessageKey("PredictorMessage", "_0NotSuportedFor1");
     export const _0IsRequiredFor1 = new MessageKey("PredictorMessage", "_0IsRequiredFor1");
     export const _0ShouldBeDivisibleBy12 = new MessageKey("PredictorMessage", "_0ShouldBeDivisibleBy12");
+    export const TheFirstGroupKeyOf0ShouldBeOfType1InsteadOf2 = new MessageKey("PredictorMessage", "TheFirstGroupKeyOf0ShouldBeOfType1InsteadOf2");
 }
 
 export module PredictorOperation {

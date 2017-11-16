@@ -102,7 +102,8 @@ export default class Predictor extends React.Component<{ ctx: TypeContext<Predic
             .done();
     }
 
-    handlePreviewMainQuery = () => {
+    handlePreviewMainQuery = (e: React.MouseEvent<any>) => {
+        e.preventDefault();
         var mq = this.props.ctx.value.mainQuery;
 
         FilterBuilderEmbedded.toFilterOptionParsed(this.state.queryDescription!, mq.filters, SubTokensOptions.CanElement | SubTokensOptions.CanAnyAll)
@@ -138,7 +139,7 @@ export default class Predictor extends React.Component<{ ctx: TypeContext<Predic
                 <ValueLine ctx={ctxxs.subCtx(e => e.state, { readOnly: true })} />
                 <EntityLine ctx={ctxxs.subCtx(e => e.trainingException, { readOnly: true })} hideIfNull={true} />
                 {ctx.value.state == "Training" && <TrainingProgressComponent ctx={ctx} onStateChanged={this.handleOnFinished} />}
-                <Tabs id={ctx.prefix + "tabs"}>
+                <Tabs id={ctx.prefix + "tabs"} unmountOnExit={true}>
                     <Tab eventKey="query" title={ctxmq.niceName(a => a.query)}>
                         <EntityLine ctx={ctxmq.subCtx(f => f.query)} remove={ctx.value.isNew} onChange={this.handleQueryChange} />
                         {queryKey &&
@@ -186,6 +187,7 @@ export default class Predictor extends React.Component<{ ctx: TypeContext<Predic
                     }
                     {
                         ctx.value.state != "Draft" && <Tab eventKey="progress" title={PredictorMessage.Progress.niceToString()}>
+                            {ctx.value.state == "Trained" && <EpochProgressComponent ctx={ctx} />}
                             <SearchControl findOptions={{ queryName: PredictorEpochProgressEntity, parentColumn: "Predictor", parentValue: ctx.value }} />
                         </Tab>
                     }
@@ -258,11 +260,9 @@ export class TrainingProgressComponent extends React.Component<TrainingProgressC
 
         const tp = this.state.trainingProgress;
 
-
-
         return (
             <div>
-                {tp && <LineChart height={200} width={600} series={[{
+                {tp && tp.EpochProgresses && <LineChart height={200} series={[{
                     color: "rgb(0,0,0)",
                     name: "data",
                     values: tp.EpochProgresses.map(ep => ({ x: ep.TrainingExamples, y: ep.LossTraining }))
@@ -278,6 +278,53 @@ export class TrainingProgressComponent extends React.Component<TrainingProgressC
 }
 
 
+interface EpochProgressComponentProps {
+    ctx: TypeContext<PredictorEntity>;
+}
 
+interface EpochProgressComponentState {
+    epochProgress?: PredictorClient.EpockProgress[] | null;
+}
 
+export class EpochProgressComponent extends React.Component<EpochProgressComponentProps, EpochProgressComponentState> {
+
+    constructor(props: EpochProgressComponentProps) {
+        super(props);
+        this.state = {};
+    }
+
+    componentWillMount() {
+        this.loadData(this.props);
+    }
+
+    componentWillReceiveProps(newProps: EpochProgressComponentProps) {
+        if (!is(newProps.ctx.value, this.props.ctx.value))
+            this.loadData(newProps);
+    }
+
+    loadData(props: EpochProgressComponentProps) {
+        PredictorClient.API.getEpochLosses(toLite(props.ctx.value))
+            .then(p => {
+                var prev = this.state.epochProgress;
+                this.setState({ epochProgress: p });
+            })
+            .done();
+    }
+
+    render() {
+
+        const eps = this.state.epochProgress;
+        
+        return (
+            <div>
+                {eps && <LineChart height={200} series={[{
+                    color: "rgb(0,0,0)",
+                    name: "data",
+                    values: eps.map(ep => ({ x: ep.TrainingExamples, y: ep.LossTraining }))
+                },]} />}
+            </div>
+        );
+    }
+
+}
 

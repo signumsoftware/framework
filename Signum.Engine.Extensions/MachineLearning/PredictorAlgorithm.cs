@@ -129,7 +129,7 @@ namespace Signum.Engine.MachineLearning
 
     public class SubQuery
     {
-        public PredictorSubQueryEntity MultiColumn;
+        public PredictorSubQueryEntity SubQueryEntity;
         public QueryGroupRequest QueryGroupRequest;
         public ResultTable ResultTable;
         public Dictionary<Lite<Entity>, Dictionary<object[], object[]>> GroupedValues;

@@ -92,6 +92,10 @@ export namespace API {
     export function getTrainingState(lite: Lite<PredictorEntity>): Promise<TrainingProgress> {
         return ajaxGet<TrainingProgress>({ url: `~/api/predictor/trainingProgress/${lite.id}` });
     }
+
+    export function getEpochLosses(lite: Lite<PredictorEntity>): Promise<Array<EpockProgress>> {
+        return ajaxGet<Array<EpockProgress>>({ url: `~/api/predictor/epochProgress/${lite.id}` });
+    }
 }
 
 export interface TrainingProgress {

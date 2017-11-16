@@ -24,17 +24,14 @@ export default class PredictorClassificationMetrics extends React.Component<{ ct
         return (
             <div className="form-vertical">
                 <div className="col-sm-2">
-
-                    <ValueLine ctx={ctx.subCtx(a => a.missCount)} />
-                </div>
-
-                <div className="col-sm-2">
-
                     <ValueLine ctx={ctx.subCtx(a => a.totalCount)} />
                 </div>
 
                 <div className="col-sm-2">
+                    <ValueLine ctx={ctx.subCtx(a => a.missCount)} />
+                </div>
 
+                <div className="col-sm-2">
                     <ValueLine ctx={ctx.subCtx(a => a.missRate)} />
                 </div>
 

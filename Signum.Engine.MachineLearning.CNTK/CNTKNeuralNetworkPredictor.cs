@@ -169,11 +169,11 @@ namespace Signum.Engine.MachineLearning.CNTK
                 {
                     var c = columns[j];
                     object value;
-                    if (c.MultiColumn == null)
+                    if (c.SubQuery == null)
                         value = mainRow[c.PredictorColumnIndex.Value];
                     else
                     {
-                        var dic = ctx.SubQueries[c.MultiColumn].GroupedValues;
+                        var dic = ctx.SubQueries[c.SubQuery].GroupedValues;
                         var aggregateValues = dic.TryGetC(mainRow.Entity)?.TryGetC(c.Keys);
                         value = aggregateValues == null ? null : aggregateValues[c.PredictorColumnIndex.Value];
                     }

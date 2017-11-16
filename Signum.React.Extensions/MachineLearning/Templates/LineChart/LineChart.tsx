@@ -1,7 +1,6 @@
 ﻿import * as React from 'react';
 import * as d3 from "d3";
 
-
 interface Point {
     x: number;
     y: number;
@@ -15,24 +14,55 @@ interface LineChartSerie {
 
 interface LineChartProps {
     series: LineChartSerie[];
-    width: number;
+    width?: number;
     height: number;
 }
 
-export default class LineChart extends React.Component<LineChartProps> {
-    render() {
-        const { width, height, series } = this.props;
+export default class LineChart extends React.Component<LineChartProps, { width?: number }> {
 
+    constructor(p: LineChartProps) {
+        super(p);
+        this.state = { width: undefined };
+    }
+
+    divRef?: HTMLDivElement | null;
+    handleSetRef = (d: HTMLDivElement | null) => {
+        if (this.divRef == null && d != null && this.props.width == null) {
+            this.divRef = d;
+            setTimeout(() => {
+                this.setState({ width: d.getBoundingClientRect().width })
+            }, 100);
+            
+        }
+    }
+
+    render() {
+        let width = this.props.width;
+
+        if (width == null)
+            width = this.state.width;
+        
+        return (
+            <div ref={d => this.handleSetRef(d)} style={{ width: this.props.width == null ? "100%" : this.props.width }}>
+                {width != null && this.renderSvg(width)}
+            </div>
+        );
+    }
+
+    renderSvg(width: number) {
+
+        let { height, series } = this.props;
+        
         var allValues = series.flatMap(s => s.values);
 
         var scaleX = d3.scaleLinear()
             .domain([allValues.min(a => a.x), allValues.max(a => a.x)])
-            .range([0, width]);
+            .range([2, width - 4]);
 
 
         var scaleY = d3.scaleLinear()
             .domain([allValues.min(a => a.y), allValues.max(a => a.y)])
-            .range([0, height]);
+            .range([height - 4, 2]);
 
         var line = d3.line<Point>()
             .curve(d3.curveCardinal)
@@ -40,13 +70,11 @@ export default class LineChart extends React.Component<LineChartProps> {
             .y(p => scaleY(p.y));
 
         return (
-            <div>
-                <svg width={width} height={height}>
-                    <g transform="translate(2,2)">
-                        {series.map((s, i) => <path className="line" d={line(s.values) || undefined} stroke={s.color} strokeWidth={"1.5px"} />)}
-                    </g>
-                </svg>
-            </div>
+            <svg width={width} height={height}>
+                <g>
+                    {series.map((s, i) => <path className="line" fill="none" d={line(s.values) || undefined} stroke={s.color} strokeWidth={"1.5px"} />)}
+                </g>
+            </svg>
         );
     }
 }

@@ -60,7 +60,7 @@ export default class PredictorSubQuery extends React.Component<{ ctx: TypeContex
                                     ctx={cctx.subCtx(a => a.token)}
                                     queryKey={this.props.ctx.value.query!.key}
                                     subTokenOptions={SubTokensOptions.CanElement | SubTokensOptions.CanAggregate} />,
-                                headerHtmlAttributes: { style: { width: "100%" } },
+                                headerHtmlAttributes: { style: { width: "60%" } },
                             },
                             { property: a => a.encoding },
                         ])} />
