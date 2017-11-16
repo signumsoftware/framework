@@ -108,6 +108,20 @@ export interface PredictorEntity extends Entities.Entity {
     regressionValidation?: PredictorRegressionMetricsEmbedded | null;
 }
 
+export const PredictorEpochProgressEntity = new Type<PredictorEpochProgressEntity>("PredictorEpochProgress");
+export interface PredictorEpochProgressEntity extends Entities.Entity {
+    Type: "PredictorEpochProgress";
+    predictor?: Entities.Lite<PredictorEntity> | null;
+    creationDate?: string;
+    ellapsed?: number;
+    trainingExamples?: number;
+    epoch?: number;
+    lossTraining?: number;
+    evaluationTraining?: number;
+    lossValidation?: number | null;
+    evaluationValidation?: number | null;
+}
+
 export module PredictorFileType {
     export const PredictorFile : Files.FileTypeSymbol = registerSymbol("FileType", "PredictorFileType.PredictorFile");
 }
@@ -154,20 +168,6 @@ export module PredictorOperation {
     export const Untrain : Entities.ExecuteSymbol<PredictorEntity> = registerSymbol("Operation", "PredictorOperation.Untrain");
     export const Delete : Entities.DeleteSymbol<PredictorEntity> = registerSymbol("Operation", "PredictorOperation.Delete");
     export const Clone : Entities.ConstructSymbol_From<PredictorEntity, PredictorEntity> = registerSymbol("Operation", "PredictorOperation.Clone");
-}
-
-export const PredictorProgressEntity = new Type<PredictorProgressEntity>("PredictorProgress");
-export interface PredictorProgressEntity extends Entities.Entity {
-    Type: "PredictorProgress";
-    predictor?: Entities.Lite<PredictorEntity> | null;
-    creationDate?: string;
-    ellapsed?: number;
-    trainingExamples?: number;
-    miniBatchIndex?: number;
-    lossTraining?: number;
-    evaluationTraining?: number;
-    lossValidation?: number | null;
-    evaluationValidation?: number | null;
 }
 
 export const PredictorRegressionMetricsEmbedded = new Type<PredictorRegressionMetricsEmbedded>("PredictorRegressionMetricsEmbedded");
