@@ -231,7 +231,7 @@ Array.prototype.max = function (this: any[], selector?: (element: any, index: nu
 Array.prototype.min = function (this: any[], selector?: (element: any, index: number, array: any[]) => any) {
 
     if (selector)
-        return Math.max.apply(undefined, this.map(selector));
+        return Math.min.apply(undefined, this.map(selector));
 
     return Math.min.apply(undefined, this);
 };

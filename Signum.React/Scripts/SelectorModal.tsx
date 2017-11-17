@@ -68,7 +68,7 @@ export default class SelectorModal extends React.Component<SelectorModalProps, {
 
     static chooseElement<T>(options: T[], config?: SelectorConfig<T>): Promise<T | undefined> {
 
-        const { buttonDisplay, buttonName, title, message, size, dialogClassName } = config!;
+        const { buttonDisplay, buttonName, title, message, size, dialogClassName } = config || {} as SelectorConfig<T>;
 
         if (!config || !config.forceShow) {
             if (options.length == 1)
