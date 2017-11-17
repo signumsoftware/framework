@@ -11,6 +11,7 @@ using Signum.Entities;
 using Signum.Utilities.Reflection;
 using System.Reflection;
 using System.Diagnostics;
+using Signum.Engine.Files;
 
 namespace Signum.Engine.MachineLearning.CNTK
 {
@@ -57,7 +58,6 @@ namespace Signum.Engine.MachineLearning.CNTK
             var p = ctx.Predictor;
 
             var nnSettings = (NeuralNetworkSettingsEntity)p.AlgorithmSettings;
-            var sparse = nnSettings.SparseMatrix ?? HasOneHot(p);
 
             DeviceDescriptor device = DeviceDescriptor.CPUDevice;
             Variable inputVariable = Variable.InputVariable(new[] { ctx.InputColumns.Count }, DataType.Float, "input");
@@ -121,7 +121,7 @@ namespace Signum.Engine.MachineLearning.CNTK
                     }
                 }
             }
-
+            
             CTTKMinibatchEvaluator evaluator = new CTTKMinibatchEvaluator(ctx, inputVariable, calculatedOutpus, device);
 
             if (nnSettings.PredictionType == PredictionType.Classification)
@@ -134,10 +134,16 @@ namespace Signum.Engine.MachineLearning.CNTK
                 ctx.Predictor.RegressionValidation =null;
                 ctx.Predictor.ClassificationTraining = null;
             }
+
+            var fp = new Entities.Files.FilePathEmbedded(PredictorFileType.PredictorFile, "Model.cntk", new byte[0]);
+
+            p.Files.Add(fp);
+
+            p.Save();
+
+            calculatedOutpus.Save(fp.FullPhysicalPath());
         }
 
-        
- 
         private static bool HasOneHot(PredictorEntity p)
         {
             return p.MainQuery.Columns.Any(a => a.Encoding == PredictorColumnEncoding.OneHot) ||
