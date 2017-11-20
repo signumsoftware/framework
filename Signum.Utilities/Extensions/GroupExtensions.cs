@@ -93,11 +93,11 @@ namespace Signum.Utilities
                 .ToDictionaryEx(g => g.Key, aggregateSelector);
         }
 
-        public static Dictionary<K, V> AgGroupToDictionary<T, K, V>(this IEnumerable<T> collection, IEnumerable<K> keys, Func<T, K> keySelector, Func<IGrouping<K, T>, V> aggregateSelector)
+        public static Dictionary<K, V> AgGroupToDictionary<T, K, V>(this IEnumerable<T> collection, Func<T, K> keySelector, Func<IGrouping<K, T>, V> aggregateSelector, IEqualityComparer<K> comparer)
         {
-            return keys
-                .GroupJoin(collection, k => k, keySelector, (k, col) => (IGrouping<K, T>)new Grouping<K, T>(k, col))
-                .ToDictionaryEx(g => g.Key, aggregateSelector);
+            return collection
+                .GroupBy(t => keySelector(t), comparer)
+                .ToDictionaryEx(g => g.Key, aggregateSelector, comparer);
         }
 
         public static Dictionary<K, V> AgGroupToDictionaryDescending<T, K, V>(this IEnumerable<T> collection, Func<T, K> keySelector, Func<IGrouping<K, T>, V> aggregateSelector)
