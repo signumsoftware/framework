@@ -33,10 +33,13 @@ export default class UserQuery extends React.Component<{ ctx: TypeContext<UserQu
                     (<div>
                         <EntityLine ctx={ctx.subCtx(e => e.entityType)} onChange={() => this.forceUpdate()} />
                         {
-                            this.props.ctx.value.entityType &&
-                            <p className="messageEntity col-sm-offset-2">
-                                {UserQueryMessage.Use0ToFilterCurrentEntity.niceToString(CurrentEntityKey)}
-                            </p>
+                        this.props.ctx.value.entityType &&
+                            <div>
+                                <ValueLine ctx={ctx.subCtx(e => e.hideQuickLink)} />
+                                <p className="messageEntity col-sm-offset-2">
+                                    {UserQueryMessage.Use0ToFilterCurrentEntity.niceToString(CurrentEntityKey)}
+                                </p>
+                            </div>
                         }
                         <ValueLine ctx={ctx.subCtx(e => e.withoutFilters)} />
                         <div>

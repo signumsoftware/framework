@@ -23,6 +23,7 @@ namespace Signum.Engine.UserQueries
     {
         public static ResetLazy<Dictionary<Lite<UserQueryEntity>, UserQueryEntity>> UserQueries;
         public static ResetLazy<Dictionary<Type, List<Lite<UserQueryEntity>>>> UserQueriesByType;
+        public static ResetLazy<Dictionary<Type, List<Lite<UserQueryEntity>>>> UserQueriesByTypeForQuickLinks;
         public static ResetLazy<Dictionary<object, List<Lite<UserQueryEntity>>>> UserQueriesByQuery;
 
         public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
@@ -60,6 +61,9 @@ namespace Signum.Engine.UserQueries
                     new InvalidateWith(typeof(UserQueryEntity)));
 
                 UserQueriesByType = sb.GlobalLazy(() => UserQueries.Value.Values.Where(a => a.EntityType != null).GroupToDictionary(a => TypeLogic.IdToType.GetOrThrow(a.EntityType.Id), a => a.ToLite()),
+                    new InvalidateWith(typeof(UserQueryEntity)));
+
+                UserQueriesByTypeForQuickLinks = sb.GlobalLazy(() => UserQueries.Value.Values.Where(a => a.EntityType != null && !a.HideQuickLink).GroupToDictionary(a => TypeLogic.IdToType.GetOrThrow(a.EntityType.Id), a => a.ToLite()),
                     new InvalidateWith(typeof(UserQueryEntity)));
             }
         }
@@ -137,11 +141,11 @@ namespace Signum.Engine.UserQueries
                 .Where(e => isAllowed(UserQueries.Value.GetOrThrow(e))).ToList();
         }
 
-        public static List<Lite<UserQueryEntity>> GetUserQueriesEntity(Type entityType)
+        public static List<Lite<UserQueryEntity>> GetUserQueriesEntity(Type entityType, bool forQuickLink = false)
         {
             var isAllowed = Schema.Current.GetInMemoryFilter<UserQueryEntity>(userInterface: true);
 
-            return UserQueriesByType.Value.TryGetC(entityType).EmptyIfNull()
+            return (forQuickLink ? UserQueriesByTypeForQuickLinks : UserQueriesByType).Value.TryGetC(entityType).EmptyIfNull()
                 .Where(e => isAllowed(UserQueries.Value.GetOrThrow(e))).ToList();
         }
 

@@ -23,6 +23,7 @@ namespace Signum.Engine.Chart
     {
         public static ResetLazy<Dictionary<Lite<UserChartEntity>, UserChartEntity>> UserCharts;
         public static ResetLazy<Dictionary<Type, List<Lite<UserChartEntity>>>> UserChartsByType;
+        public static ResetLazy<Dictionary<Type, List<Lite<UserChartEntity>>>> UserChartsByTypeForQuickLinks;
         public static ResetLazy<Dictionary<object, List<Lite<UserChartEntity>>>> UserChartsByQuery;
 
         public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
@@ -60,6 +61,9 @@ namespace Signum.Engine.Chart
                     new InvalidateWith(typeof(UserChartEntity)));
 
                 UserChartsByType = sb.GlobalLazy(() => UserCharts.Value.Values.Where(a => a.EntityType != null).GroupToDictionary(a => TypeLogic.IdToType.GetOrThrow(a.EntityType.Id), a => a.ToLite()),
+                    new InvalidateWith(typeof(UserChartEntity)));
+
+                UserChartsByTypeForQuickLinks = sb.GlobalLazy(() => UserCharts.Value.Values.Where(a => a.EntityType != null && !a.HideQuickLink).GroupToDictionary(a => TypeLogic.IdToType.GetOrThrow(a.EntityType.Id), a => a.ToLite()),
                     new InvalidateWith(typeof(UserChartEntity)));
             }
         }
@@ -100,11 +104,11 @@ namespace Signum.Engine.Chart
                 .Where(e => isAllowed(UserCharts.Value.GetOrThrow(e))).ToList();
         }
 
-        public static List<Lite<UserChartEntity>> GetUserChartsEntity(Type entityType)
+        public static List<Lite<UserChartEntity>> GetUserChartsEntity(Type entityType, bool forQuickLink = false)
         {
             var isAllowed = Schema.Current.GetInMemoryFilter<UserChartEntity>(userInterface: true);
 
-            return UserChartsByType.Value.TryGetC(entityType).EmptyIfNull()
+            return (forQuickLink ? UserChartsByTypeForQuickLinks : UserChartsByType).Value.TryGetC(entityType).EmptyIfNull()
                 .Where(e => isAllowed(UserCharts.Value.GetOrThrow(e))).ToList();
         }
 

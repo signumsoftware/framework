@@ -11,6 +11,7 @@ using System.Xml.Linq;
 using Signum.Entities.UserAssets;
 using System.Reflection;
 using Signum.Utilities.ExpressionTrees;
+using Signum.Entities;
 
 namespace Signum.Entities.Chart
 {
@@ -43,6 +44,8 @@ namespace Signum.Entities.Chart
         public QueryEntity Query { get; set; }
 
         public Lite<TypeEntity> EntityType { get; set; }
+
+        public bool HideQuickLink { get; set; }
 
         public Lite<Entity> Owner { get; set; }
 

@@ -1,4 +1,5 @@
-﻿using Signum.Entities.Authorization;
+﻿using Signum.Entities;
+using Signum.Entities.Authorization;
 using Signum.Entities.Basics;
 using Signum.Entities.DynamicQuery;
 using Signum.Entities.UserAssets;
@@ -30,6 +31,8 @@ namespace Signum.Entities.UserQueries
         public QueryEntity Query { get; set; }
 
         public Lite<TypeEntity> EntityType { get; set; }
+
+        public bool HideQuickLink { get; set; }
 
         public Lite<Entity> Owner { get; set; }
 
