@@ -55,7 +55,6 @@ namespace Signum.Engine.MachineLearning
 
         public static ConcurrentDictionary<Lite<PredictorEntity>, PredictorTrainingState> Trainings = new ConcurrentDictionary<Lite<PredictorEntity>, PredictorTrainingState>();
 
-        public static RecentDictionary<Lite<PredictorEntity>, PredictorPredictContext> TrainedPredictorCache = new RecentDictionary<Lite<PredictorEntity>, PredictorPredictContext>();
 
         public static void Start(SchemaBuilder sb, DynamicQueryManager dqm, IFileTypeAlgorithm predictorFileAlgorithm)
         {
@@ -171,22 +170,6 @@ namespace Signum.Engine.MachineLearning
                 throw new InvalidOperationException("Parent not Expected");
         }
 
-        public static PredictorPredictContext GetPredictContext(Lite<PredictorEntity> predictor)
-        {
-            TrainedPredictorCache.GetOrCreate(predictor, () =>
-            {
-                using (ExecutionMode.Global())
-                using (var t = Transaction.ForceNew())
-                {
-                    var p = predictor.Retrieve();
-
-                    var ppc = new PredictorPredictContext(p, Algorithms.GetOrThrow(p.Algorithm), PredictorResultColumn)
-
-
-                    t.Commit();
-                }
-            });
-        }
 
         public static void TrainSync(this PredictorEntity p, bool autoReset = true)
         {
@@ -248,7 +231,7 @@ namespace Signum.Engine.MachineLearning
             try
             {
                 PredictorLogicQuery.RetrieveData(ctx);
-                CreatePredictorCodifications(ctx);
+                PredictorCodificationLogic.CreatePredictorCodifications(ctx);
                 var algorithm = Algorithms.GetOrThrow(ctx.Predictor.Algorithm);
                 algorithm.Train(ctx);
                 ctx.Predictor.State = PredictorState.Trained;
@@ -288,59 +271,7 @@ namespace Signum.Engine.MachineLearning
             e.EpochProgresses().UnsafeDelete();
         }
 
-        static void CreatePredictorCodifications(PredictorTrainingContext ctx)
-        {
-            ctx.ReportProgress($"Saving Codifications");
-            ctx.Columns.Select(a =>
-            {
-                string ToStringKey(QueryToken token, object obj)
-                {
-                    if (token == null || obj == null)
-                        return null;
-
-                    return FilterValueConverter.ToString(obj, token.Type, allowSmart: false);
-                }
-
-                string GetGroupKey(int index)
-                {
-                    var token = a.SubQuery?.GroupKeys.ElementAtOrDefault(index + 1)?.Token;
-                    var obj = a.Keys?.ElementAtOrDefault(index);
-                    return ToStringKey(token?.Token, obj);
-                }
-
-                return new PredictorCodificationEntity
-                {
-                    Predictor = ctx.Predictor.ToLite(),
-                    Index = a.Index,
-                    Usage = a.Usage,
-                    SubQueryIndex = a.SubQuery == null ? (int?)null : ctx.Predictor.SubQueries.IndexOf(a.SubQuery),
-                    OriginalColumnIndex = a.SubQuery == null ?
-                        ctx.Predictor.MainQuery.Columns.IndexOf(a.PredictorColumn) :
-                        a.SubQuery.Aggregates.IndexOf(a.PredictorColumn),
-                    GroupKey0 = GetGroupKey(0),
-                    GroupKey1 = GetGroupKey(1),
-                    GroupKey2 = GetGroupKey(2),
-                    IsValue = ToStringKey(a.PredictorColumn.Token.Token, a.IsValue),
-                    CodedValues = a.Values.EmptyIfNull().Select(v => ToStringKey(a.PredictorColumn.Token.Token, v)).ToMList()
-                };
-
-            }).BulkInsertQueryIds(a => new { a.Index, a.Usage }, a => a.Predictor == ctx.Predictor.ToLite());
-        }
-
-        public List<PredictorCodification> RetrievePredictorCodifications(PredictorEntity predictor)
-        {
-            var list = predictor.Codifications().ToList();
-
-            QueryToken GetToken(PredictorCodificationEntity cod)
-            {
-                if(cod.SubQueryIndex != null)
-                {
-                    var agg = predictor.SubQueries[cod.SubQuery].Aggregates[cod.PredictorColumnIndex];
-                    return agg.Token.Token;
-                }
-
-            }
-        }
+       
 
         public static byte[] GetTsvMetadata(this PredictorEntity predictor)
         {

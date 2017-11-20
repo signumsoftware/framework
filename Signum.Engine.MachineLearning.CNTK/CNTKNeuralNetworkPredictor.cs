@@ -288,7 +288,7 @@ namespace Signum.Engine.MachineLearning.CNTK
 
         }
 
-        public PredictionDictionary Predict(PredictorPredictContext ctx, PredictionDictionary input)
+        public PredictorDictionary Predict(PredictorPredictContext ctx, PredictorDictionary input)
         {
             var nnSettings = (NeuralNetworkSettingsEntity)ctx.Predictor.AlgorithmSettings;
             Function calculatedOutputs = (Function)ctx.Model;
@@ -310,9 +310,9 @@ namespace Signum.Engine.MachineLearning.CNTK
             return result;
         }
 
-        private PredictionDictionary GetPredictionDictionary(float[] values, PredictorPredictContext ctx)
+        private PredictorDictionary GetPredictionDictionary(float[] values, PredictorPredictContext ctx)
         {
-            return new PredictionDictionary
+            return new PredictorDictionary
             {
                 MainQueryValues = ctx.MainQueryOutputColumn.SelectDictionary(col => col.Token.Token, (col, list) => FloatToValue(col, list, values)),
                 SubQueries = ctx.SubQueryOutputColumn.SelectDictionary(subQuery => subQuery, sqCtx => new PredictorSubQueryDictionary
@@ -338,7 +338,7 @@ namespace Signum.Engine.MachineLearning.CNTK
             }
         }
 
-        private Value GetValue(PredictorPredictContext ctx, PredictionDictionary input, DeviceDescriptor device)
+        private Value GetValue(PredictorPredictContext ctx, PredictorDictionary input, DeviceDescriptor device)
         {
             if (input.SubQueries.Values.Any(a => a.SubQueryGroups.Comparer != ObjectArrayComparer.Instance))
                 throw new Exception("Unexpected dictionary comparer");
@@ -353,7 +353,7 @@ namespace Signum.Engine.MachineLearning.CNTK
             return Value.CreateBatch<float>(new int[] { ctx.InputColumns.Count }, values, device);
         }
 
-        private float GetFloat(PredictorPredictContext ctx, PredictionDictionary input, PredictorCodification c)
+        private float GetFloat(PredictorPredictContext ctx, PredictorDictionary input, PredictorCodification c)
         {
             object value;
             if (c.SubQuery != null)

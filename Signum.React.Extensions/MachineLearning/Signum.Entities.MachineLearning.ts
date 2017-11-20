@@ -59,8 +59,9 @@ export const PredictorCodificationEntity = new Type<PredictorCodificationEntity>
 export interface PredictorCodificationEntity extends Entities.Entity {
     Type: "PredictorCodification";
     predictor?: Entities.Lite<PredictorEntity> | null;
-    columnIndex?: number;
-    originalMultiColumnIndex?: number | null;
+    usage?: PredictorColumnUsage;
+    index?: number | null;
+    subQueryIndex?: number | null;
     originalColumnIndex?: number;
     groupKey0?: string | null;
     groupKey1?: string | null;

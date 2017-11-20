@@ -339,7 +339,7 @@ namespace Signum.Entities.MachineLearning
 
         public PredictorColumnUsage Usage { get; set; }
 
-        public int? Index { get; set; }
+        public int Index { get; set; }
 
         public int? SubQueryIndex{ get; set; }
 
