@@ -10,6 +10,7 @@ using Signum.Entities.DynamicQuery;
 using Signum.Entities.MachineLearning;
 using Signum.Entities.UserAssets;
 using Signum.Utilities;
+using Signum.Utilities.DataStructures;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -37,8 +38,7 @@ namespace Signum.Engine.MachineLearning
         {
             return CodificationsExpression.Evaluate(e);
         }
-
-
+        
         static Expression<Func<PredictorEntity, IQueryable<PredictorEpochProgressEntity>>> ProgressesExpression =
         e => Database.Query<PredictorEpochProgressEntity>().Where(a => a.Predictor.RefersTo(e));
         [ExpressionField]
@@ -47,15 +47,17 @@ namespace Signum.Engine.MachineLearning
             return ProgressesExpression.Evaluate(e);
         }
 
-        public static Dictionary<PredictorAlgorithmSymbol, PredictorAlgorithm> Algorithms = new Dictionary<PredictorAlgorithmSymbol, PredictorAlgorithm>();
-        public static void RegisterAlgorithm(PredictorAlgorithmSymbol symbol, PredictorAlgorithm algorithm)
+        public static Dictionary<PredictorAlgorithmSymbol, IPredictorAlgorithm> Algorithms = new Dictionary<PredictorAlgorithmSymbol, IPredictorAlgorithm>();
+        public static void RegisterAlgorithm(PredictorAlgorithmSymbol symbol, IPredictorAlgorithm algorithm)
         {
             Algorithms.Add(symbol, algorithm);
         }
 
         public static ConcurrentDictionary<Lite<PredictorEntity>, PredictorTrainingState> Trainings = new ConcurrentDictionary<Lite<PredictorEntity>, PredictorTrainingState>();
 
-        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
+        public static RecentDictionary<Lite<PredictorEntity>, PredictorPredictContext> TrainedPredictorCache = new RecentDictionary<Lite<PredictorEntity>, PredictorPredictContext>();
+
+        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm, IFileTypeAlgorithm predictorFileAlgorithm)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
@@ -85,14 +87,16 @@ namespace Signum.Engine.MachineLearning
                     });
 
                 sb.Include<PredictorCodificationEntity>()
-                    .WithUniqueIndex(pc => new { pc.Predictor, pc.ColumnIndex })
+                    .WithUniqueIndex(pc => new { pc.Predictor, pc.Index, pc.Usage })
                     .WithExpressionFrom(dqm, (PredictorEntity e) => e.Codifications())
                     .WithQuery(dqm, () => e => new
                     {
                         Entity = e,
                         e.Id,
                         e.Predictor,
-                        e.ColumnIndex,
+                        e.Index,
+                        e.Usage,
+                        e.SubQueryIndex,
                         e.OriginalColumnIndex,
                         e.GroupKey0,
                         e.GroupKey1,
@@ -113,6 +117,8 @@ namespace Signum.Engine.MachineLearning
                         e.EvaluationTraining,
                         e.EvaluationValidation,
                     });
+
+                FileTypeLogic.Register(PredictorFileType.PredictorFile, predictorFileAlgorithm);
 
                 SymbolLogic<PredictorAlgorithmSymbol>.Start(sb, dqm, () => Algorithms.Keys);
 
@@ -163,6 +169,23 @@ namespace Signum.Engine.MachineLearning
             }
             else
                 throw new InvalidOperationException("Parent not Expected");
+        }
+
+        public static PredictorPredictContext GetPredictContext(Lite<PredictorEntity> predictor)
+        {
+            TrainedPredictorCache.GetOrCreate(predictor, () =>
+            {
+                using (ExecutionMode.Global())
+                using (var t = Transaction.ForceNew())
+                {
+                    var p = predictor.Retrieve();
+
+                    var ppc = new PredictorPredictContext(p, Algorithms.GetOrThrow(p.Algorithm), PredictorResultColumn)
+
+
+                    t.Commit();
+                }
+            });
         }
 
         public static void TrainSync(this PredictorEntity p, bool autoReset = true)
@@ -268,7 +291,7 @@ namespace Signum.Engine.MachineLearning
         static void CreatePredictorCodifications(PredictorTrainingContext ctx)
         {
             ctx.ReportProgress($"Saving Codifications");
-            ctx.Columns.Select((a, i) =>
+            ctx.Columns.Select(a =>
             {
                 string ToStringKey(QueryToken token, object obj)
                 {
@@ -288,8 +311,9 @@ namespace Signum.Engine.MachineLearning
                 return new PredictorCodificationEntity
                 {
                     Predictor = ctx.Predictor.ToLite(),
-                    ColumnIndex = i,
-                    OriginalMultiColumnIndex = a.SubQuery == null ? (int?)null : ctx.Predictor.SubQueries.IndexOf(a.SubQuery),
+                    Index = a.Index,
+                    Usage = a.Usage,
+                    SubQueryIndex = a.SubQuery == null ? (int?)null : ctx.Predictor.SubQueries.IndexOf(a.SubQuery),
                     OriginalColumnIndex = a.SubQuery == null ?
                         ctx.Predictor.MainQuery.Columns.IndexOf(a.PredictorColumn) :
                         a.SubQuery.Aggregates.IndexOf(a.PredictorColumn),
@@ -300,7 +324,22 @@ namespace Signum.Engine.MachineLearning
                     CodedValues = a.Values.EmptyIfNull().Select(v => ToStringKey(a.PredictorColumn.Token.Token, v)).ToMList()
                 };
 
-            }).BulkInsertQueryIds(a => a.ColumnIndex, a => a.Predictor == ctx.Predictor.ToLite());
+            }).BulkInsertQueryIds(a => new { a.Index, a.Usage }, a => a.Predictor == ctx.Predictor.ToLite());
+        }
+
+        public List<PredictorCodification> RetrievePredictorCodifications(PredictorEntity predictor)
+        {
+            var list = predictor.Codifications().ToList();
+
+            QueryToken GetToken(PredictorCodificationEntity cod)
+            {
+                if(cod.SubQueryIndex != null)
+                {
+                    var agg = predictor.SubQueries[cod.SubQuery].Aggregates[cod.PredictorColumnIndex];
+                    return agg.Token.Token;
+                }
+
+            }
         }
 
         public static byte[] GetTsvMetadata(this PredictorEntity predictor)
@@ -427,6 +466,11 @@ namespace Signum.Engine.MachineLearning
                     FromStates = { PredictorState.Draft, PredictorState.Trained },
                     Delete = (e, _) =>
                     {
+                        foreach (var fp in e.Files)
+                        {
+                            fp.DeleteFileOnCommit();
+                        }
+                        e.EpochProgresses().UnsafeDelete();
                         e.Codifications().UnsafeDelete();
                         e.Delete();
                     },

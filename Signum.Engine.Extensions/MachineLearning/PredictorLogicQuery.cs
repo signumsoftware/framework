@@ -57,7 +57,7 @@ namespace Signum.Engine.MachineLearning
             }
 
             ctx.ReportProgress($"Creating Columns");
-            var columns = new List<PredictorResultColumn>();
+            var columns = new List<PredictorCodification>();
 
             for (int i = 0; i < mainResult.Columns.Length; i++)
             {
@@ -85,28 +85,23 @@ namespace Signum.Engine.MachineLearning
                     }
                 }
             }
-
-            for (int i = 0; i < columns.Count; i++)
-            {
-                columns[i].Index = i;
-            }
-
+            
             ctx.SetColums(columns.ToArray());
         }
 
-        private static IEnumerable<PredictorResultColumn> ExpandColumns(PredictorColumnEmbedded pc, int pcIndex, ResultColumn rc)
+        private static IEnumerable<PredictorCodification> ExpandColumns(PredictorColumnEmbedded pc, int pcIndex, ResultColumn rc)
         {
             switch (pc.Encoding)
             {
                 case PredictorColumnEncoding.None:
-                    return new[] { new PredictorResultColumn { PredictorColumn = pc, PredictorColumnIndex = pcIndex } };
+                    return new[] { new PredictorCodification { PredictorColumn = pc, PredictorColumnIndex = pcIndex } };
                 case PredictorColumnEncoding.OneHot:
-                    return rc.Values.Cast<object>().Distinct().Select(v => new PredictorResultColumn { PredictorColumn = pc, IsValue = v, PredictorColumnIndex = pcIndex }).ToList();
+                    return rc.Values.Cast<object>().Distinct().Select(v => new PredictorCodification { PredictorColumn = pc, IsValue = v, PredictorColumnIndex = pcIndex }).ToList();
                 case PredictorColumnEncoding.Codified:
                     
                     var values = rc.Values.Cast<object>().Distinct().ToArray();
                     var valuesToIndex = values.Select((v, i) => KVP.Create(v, i)).ToDictionary();
-                    return new[] { new PredictorResultColumn { PredictorColumn = pc, ValuesToIndex = valuesToIndex, Values = values, PredictorColumnIndex = pcIndex } };
+                    return new[] { new PredictorCodification { PredictorColumn = pc, ValuesToIndex = valuesToIndex, Values = values, PredictorColumnIndex = pcIndex } };
                 default:
                     throw new InvalidOperationException("Unexcpected Encoding");
             }
@@ -201,10 +196,11 @@ namespace Signum.Engine.MachineLearning
         }
     }
 
-    public class PredictorResultColumn
+    public class PredictorCodification
     {
-        //Unique index for all the PredictorResultColumn
         public int Index;
+
+        public PredictorColumnUsage Usage;
         
         public PredictorColumnEmbedded PredictorColumn;
         //Index of PredictorColumn in the SimpleColumns/Aggregates

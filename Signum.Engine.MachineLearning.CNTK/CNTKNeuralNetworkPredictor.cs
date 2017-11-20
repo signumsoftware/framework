@@ -12,12 +12,13 @@ using Signum.Utilities.Reflection;
 using System.Reflection;
 using System.Diagnostics;
 using Signum.Engine.Files;
+using Signum.Engine.Operations;
 
 namespace Signum.Engine.MachineLearning.CNTK
 {
-    public class CNTKNeuralNetworkPredictorAlgorithm : PredictorAlgorithm
+    public class CNTKNeuralNetworkPredictorAlgorithm : IPredictorAlgorithm
     {
-        public override string ValidateColumnProperty(PredictorEntity predictor, PredictorSubQueryEntity subQuery, PredictorColumnEmbedded column, PropertyInfo pi)
+        public string ValidateColumnProperty(PredictorEntity predictor, PredictorSubQueryEntity subQuery, PredictorColumnEmbedded column, PropertyInfo pi)
         {
             if(pi.Name == nameof(column.Encoding))
             {
@@ -44,25 +45,21 @@ namespace Signum.Engine.MachineLearning.CNTK
                 }
             }
 
-            return base.ValidateColumnProperty(predictor, subQuery, column, pi);
-        }
-
-        public override object[] Predict(PredictorEntity predictor, PredictorResultColumn[] columns, object[] input)
-        {
-            throw new NotImplementedException();
+            return null;
         }
 
         //Errors with CNTK: https://github.com/Microsoft/CNTK/issues/2614
-        public override void Train(PredictorTrainingContext ctx)
+        public void Train(PredictorTrainingContext ctx)
         {
             var p = ctx.Predictor;
 
             var nnSettings = (NeuralNetworkSettingsEntity)p.AlgorithmSettings;
 
-            DeviceDescriptor device = DeviceDescriptor.CPUDevice;
+            DeviceDescriptor device = GetDevice(nnSettings);
             Variable inputVariable = Variable.InputVariable(new[] { ctx.InputColumns.Count }, DataType.Float, "input");
             Variable outputVariable = Variable.InputVariable(new[] { ctx.OutputColumns.Count }, DataType.Float, "output");
             Function calculatedOutpus = CreateLinearModel(inputVariable, ctx.OutputColumns.Count, device);
+            
 
             Function loss = CNTKLib.CrossEntropyWithSoftmax(calculatedOutpus, outputVariable);
             Function evalError = CNTKLib.ClassificationError(calculatedOutpus, outputVariable);
@@ -139,9 +136,15 @@ namespace Signum.Engine.MachineLearning.CNTK
 
             p.Files.Add(fp);
 
-            p.Save();
+            using (OperationLogic.AllowSave<PredictorEntity>())
+                p.Save();
 
             calculatedOutpus.Save(fp.FullPhysicalPath());
+        }
+
+        private DeviceDescriptor GetDevice(NeuralNetworkSettingsEntity nnSettings)
+        {
+            return DeviceDescriptor.CPUDevice;
         }
 
         private static bool HasOneHot(PredictorEntity p)
@@ -165,7 +168,7 @@ namespace Signum.Engine.MachineLearning.CNTK
             return result;
         }
 
-        static Value CreateValue(PredictorTrainingContext ctx, List<ResultRow> rows, List<PredictorResultColumn> columns, DeviceDescriptor device)
+        static Value CreateValue(PredictorTrainingContext ctx, List<ResultRow> rows, List<PredictorCodification> columns, DeviceDescriptor device)
         {
             float[] values = new float[rows.Capacity * columns.Count];
             for (int i = 0; i < rows.Count; i++)
@@ -198,7 +201,8 @@ namespace Signum.Engine.MachineLearning.CNTK
                         case PredictorColumnEncoding.Codified:
                             throw new NotImplementedException("Codified is not for Neuronal Networks");
                         default:
-                            break;
+                            throw new NotImplementedException("Unexpected encoding ");
+
                     }
                 }
             }
@@ -283,7 +287,126 @@ namespace Signum.Engine.MachineLearning.CNTK
             }
 
         }
-    }
 
-    
+        public PredictionDictionary Predict(PredictorPredictContext ctx, PredictionDictionary input)
+        {
+            var nnSettings = (NeuralNetworkSettingsEntity)ctx.Predictor.AlgorithmSettings;
+            Function calculatedOutputs = (Function)ctx.Model;
+
+            var device = GetDevice(nnSettings);
+
+            Value inputValue = GetValue(ctx, input, device);
+
+            var inputVar = calculatedOutputs.FindByName("input");
+            var inputDic = new Dictionary<Variable, Value> { { inputVar, inputValue } };
+            var outputDic = new Dictionary<Variable, Value> { { calculatedOutputs, null } };
+            calculatedOutputs.Evaluate(inputDic, outputDic, device);
+
+            Value output = outputDic[calculatedOutputs];
+            float[] values = output.GetDenseData<float>(calculatedOutputs).SingleEx().ToArray();
+
+            var result = GetPredictionDictionary(values, ctx);
+
+            return result;
+        }
+
+        private PredictionDictionary GetPredictionDictionary(float[] values, PredictorPredictContext ctx)
+        {
+            return new PredictionDictionary
+            {
+                MainQueryValues = ctx.MainQueryOutputColumn.SelectDictionary(col => col.Token.Token, (col, list) => FloatToValue(col, list, values)),
+                SubQueries = ctx.SubQueryOutputColumn.SelectDictionary(subQuery => subQuery, sqCtx => new PredictorSubQueryDictionary
+                {
+                    SubQuery = sqCtx.SubQuery,
+                    SubQueryGroups = sqCtx.Groups.SelectDictionary(grKey => grKey, dic => dic.ToDictionary(a => a.Key.Token.Token, a => FloatToValue(a.Key, a.Value, values)))
+                })
+            };
+        }
+
+        private object FloatToValue(PredictorColumnEmbedded key, List<PredictorCodification> cols, float[] values)
+        {
+            switch (key.Encoding)
+            {
+                case PredictorColumnEncoding.None:
+                    return Convert.ChangeType(values[cols.SingleEx().Index], key.Token.Token.Type);
+                case PredictorColumnEncoding.OneHot:
+                    return cols.WithMax(a => values[cols.SingleEx().Index]).IsValue;
+                case PredictorColumnEncoding.Codified:
+                    throw new InvalidOperationException("Codified");
+                default:
+                    throw new InvalidOperationException("Unexpected encoding");
+            }
+        }
+
+        private Value GetValue(PredictorPredictContext ctx, PredictionDictionary input, DeviceDescriptor device)
+        {
+            if (input.SubQueries.Values.Any(a => a.SubQueryGroups.Comparer != ObjectArrayComparer.Instance))
+                throw new Exception("Unexpected dictionary comparer");
+
+            float[] values = new float[ctx.InputColumns.Count];
+            for (int i = 0; i < ctx.InputColumns.Count; i++)
+            {
+                values[i] = GetFloat(ctx, input, ctx.InputColumns[i]);
+            }
+
+
+            return Value.CreateBatch<float>(new int[] { ctx.InputColumns.Count }, values, device);
+        }
+
+        private float GetFloat(PredictorPredictContext ctx, PredictionDictionary input, PredictorCodification c)
+        {
+            object value;
+            if (c.SubQuery != null)
+            {
+                var sq = input.SubQueries.GetOrThrow(c.SubQuery);
+
+                var dic = sq.SubQueryGroups.TryGetC(c.Keys);
+
+                value = dic == null ? null : dic.GetOrThrow(c.PredictorColumn.Token.Token);
+            }
+            else
+            {
+                value = input.MainQueryValues.GetOrThrow(c.PredictorColumn.Token.Token);
+            }
+
+            if(value == null)
+            {
+                switch (c.PredictorColumn.NullHandling)
+                {
+                    case PredictorColumnNullHandling.Error:
+                        throw new Exception($"Null found on {c.PredictorColumn.Token} of {c.SubQuery?.ToString() ?? "MainQuery"}");
+                    case PredictorColumnNullHandling.Zero:
+                        return 0;
+                    case PredictorColumnNullHandling.MinValue:
+                        return (float)c.Values[0];
+                    case PredictorColumnNullHandling.AvgValue:
+                        return (float)c.Values[1];
+                    case PredictorColumnNullHandling.MaxValue:
+                        return (float)c.Values[2];
+                    default:
+                        throw new NotImplementedException("Unexpected Null handling");
+                }
+            }
+
+            switch (c.PredictorColumn.Encoding)
+            {
+                case PredictorColumnEncoding.None:
+                    return Convert.ToSingle(value);
+                case PredictorColumnEncoding.OneHot:
+                    return value.Equals(c.IsValue) ? 1 : 0;
+                case PredictorColumnEncoding.Codified:
+                    throw new NotImplementedException("Codified is not for Neuronal Networks");
+                default:
+                    throw new NotImplementedException("Unexpected encoding ");
+
+            }
+        }
+
+        public void LoadModel(PredictorPredictContext ctx)
+        {
+            var nnSettings = (NeuralNetworkSettingsEntity)ctx.Predictor.AlgorithmSettings;
+
+            ctx.Model = Function.Load(ctx.Predictor.Files.SingleEx().FullPhysicalPath(), GetDevice(nnSettings));
+        }
+    }
 }

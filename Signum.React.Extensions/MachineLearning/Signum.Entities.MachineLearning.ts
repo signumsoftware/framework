@@ -33,7 +33,6 @@ export interface NeuralNetworkSettingsEntity extends Entities.Entity, IPredictor
     predictionType?: PredictionType;
     minibatchSize?: number;
     numMinibatches?: number;
-    sparseMatrix?: boolean | null;
     saveProgressEvery?: number;
     saveValidationProgressEvery?: number;
 }
@@ -76,6 +75,7 @@ export interface PredictorColumnEmbedded extends Entities.EmbeddedEntity {
     usage?: PredictorColumnUsage;
     token?: UserAssets.QueryTokenEmbedded | null;
     encoding?: PredictorColumnEncoding;
+    nullHandling?: PredictorColumnNullHandling;
 }
 
 export const PredictorColumnEncoding = new EnumType<PredictorColumnEncoding>("PredictorColumnEncoding");
@@ -83,6 +83,14 @@ export type PredictorColumnEncoding =
     "None" |
     "OneHot" |
     "Codified";
+
+export const PredictorColumnNullHandling = new EnumType<PredictorColumnNullHandling>("PredictorColumnNullHandling");
+export type PredictorColumnNullHandling =
+    "Error" |
+    "Zero" |
+    "MinValue" |
+    "AvgValue" |
+    "MaxValue";
 
 export const PredictorColumnUsage = new EnumType<PredictorColumnUsage>("PredictorColumnUsage");
 export type PredictorColumnUsage =

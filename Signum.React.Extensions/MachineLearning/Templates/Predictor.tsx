@@ -3,7 +3,7 @@ import { Tabs, Tab } from 'react-bootstrap';
 import * as numbro from 'numbro';
 import { classes } from '../../../../Framework/Signum.React/Scripts/Globals'
 import { FormGroup, FormControlStatic, ValueLine, ValueLineType, EntityLine, EntityDetail, EntityCombo, EntityList, EntityRepeater, EntityTable, IRenderButtons, EntityTabRepeater } from '../../../../Framework/Signum.React/Scripts/Lines'
-import { SearchControl, FilterOption, ColumnOption } from '../../../../Framework/Signum.React/Scripts/Search'
+import { SearchControl, FilterOption, ColumnOption, FindOptions } from '../../../../Framework/Signum.React/Scripts/Search'
 import { TypeContext, FormGroupStyle, ButtonsContext } from '../../../../Framework/Signum.React/Scripts/TypeContext'
 import FileLine from '../../Files/FileLine'
 import { PredictorEntity, PredictorColumnEmbedded, PredictorMessage, PredictorSubQueryEntity, PredictorGroupKeyEmbedded, PredictorFileType, PredictorCodificationEntity, PredictorEpochProgressEntity } from '../Signum.Entities.MachineLearning'
@@ -104,21 +104,27 @@ export default class Predictor extends React.Component<{ ctx: TypeContext<Predic
 
     handlePreviewMainQuery = (e: React.MouseEvent<any>) => {
         e.preventDefault();
+        e.persist();
         var mq = this.props.ctx.value.mainQuery;
 
         FilterBuilderEmbedded.toFilterOptionParsed(this.state.queryDescription!, mq.filters, SubTokensOptions.CanElement | SubTokensOptions.CanAnyAll)
-            .then(filters => Finder.explore({
-                queryName: mq.query!.key,
-                filterOptions: filters.map(f => ({
-                    columnName: f.token!.fullKey,
-                    operation: f.operation,
-                    value: f.value
-                }) as FilterOption),
-                columnOptions: mq.columns.orderBy(mle => mle.element.usage == "Input" ? 0 : 1).map(mle => ({
-                    columnName: mle.element.token && mle.element.token.tokenString,
-                } as ColumnOption)),
-                columnOptionsMode: "Replace",
-            })).done();
+            .then(filters => {
+                var fo: FindOptions = {
+                    queryName: mq.query!.key,
+                    filterOptions: filters.map(f => ({
+                        columnName: f.token!.fullKey,
+                        operation: f.operation,
+                        value: f.value
+                    }) as FilterOption),
+                    columnOptions: mq.columns.orderBy(mle => mle.element.usage == "Input" ? 0 : 1).map(mle => ({
+                        columnName: mle.element.token && mle.element.token.tokenString,
+                    } as ColumnOption)),
+                    columnOptionsMode: "Replace",
+                };
+
+                Finder.exploreWindowsOpen(fo, e);
+            })
+            .done();
     }
 
     render() {
@@ -193,9 +199,12 @@ export default class Predictor extends React.Component<{ ctx: TypeContext<Predic
                     }
                     {
                         ctx.value.state == "Trained" && <Tab eventKey="files" title={PredictorMessage.Results.niceToString()}>
-                            <EntityRepeater ctx={ctxxs.subCtx(f => f.files)} getComponent={ec =>
-                                <FileLine ctx={ec.subCtx({ formGroupStyle: "SrOnly" })} remove={false} fileType={PredictorFileType.PredictorFile} />
-                            } />
+                            <div className="form-vertical">
+                                <EntityRepeater ctx={ctxxs.subCtx(f => f.files)} getComponent={ec =>
+                                    <FileLine ctx={ec.subCtx({ formGroupStyle: "SrOnly" })} remove={false} fileType={PredictorFileType.PredictorFile} />
+                                } />
+                            </div>
+
                             <EntityDetail ctx={ctxxs.subCtx(f => f.classificationTraining)} />
                             <EntityDetail ctx={ctxxs.subCtx(f => f.classificationValidation)} />
                             <EntityDetail ctx={ctxxs.subCtx(f => f.regressionTraining)} />
@@ -262,10 +271,10 @@ export class TrainingProgressComponent extends React.Component<TrainingProgressC
 
         return (
             <div>
-                {tp && tp.EpochProgresses && <LineChart height={200} series={[{
+                {tp && tp.EpochProgressesParsed && <LineChart height={200} series={[{
                     color: "rgb(0,0,0)",
                     name: "data",
-                    values: tp.EpochProgresses.map(ep => ({ x: ep.TrainingExamples, y: ep.LossTraining }))
+                    values: tp.EpochProgressesParsed.map(ep => ({ x: ep.TrainingExamples, y: ep.LossTraining }))
                 },]} />}
                 <ProgressBar color={tp == null ? "info" : "default"}
                     value={tp && tp.Progress}
@@ -283,7 +292,7 @@ interface EpochProgressComponentProps {
 }
 
 interface EpochProgressComponentState {
-    epochProgress?: PredictorClient.EpockProgress[] | null;
+    epochProgress?: PredictorClient.EpochProgress[] | null;
 }
 
 export class EpochProgressComponent extends React.Component<EpochProgressComponentProps, EpochProgressComponentState> {
@@ -314,7 +323,7 @@ export class EpochProgressComponent extends React.Component<EpochProgressCompone
     render() {
 
         const eps = this.state.epochProgress;
-        
+
         return (
             <div>
                 {eps && <LineChart height={200} series={[{

@@ -90,11 +90,15 @@ export namespace API {
     }
 
     export function getTrainingState(lite: Lite<PredictorEntity>): Promise<TrainingProgress> {
-        return ajaxGet<TrainingProgress>({ url: `~/api/predictor/trainingProgress/${lite.id}` });
+        return ajaxGet<TrainingProgress>({ url: `~/api/predictor/trainingProgress/${lite.id}` }).then(tp => {
+            if (tp.EpochProgresses)
+                tp.EpochProgressesParsed = tp.EpochProgresses.map(p => fromObjectArray(p));
+            return tp;
+        });
     }
 
-    export function getEpochLosses(lite: Lite<PredictorEntity>): Promise<Array<EpockProgress>> {
-        return ajaxGet<Array<EpockProgress>>({ url: `~/api/predictor/epochProgress/${lite.id}` });
+    export function getEpochLosses(lite: Lite<PredictorEntity>): Promise<Array<EpochProgress>> {
+        return ajaxGet<Array<(number | undefined)[]>>({ url: `~/api/predictor/epochProgress/${lite.id}` }).then(ps => ps.map(p => fromObjectArray(p)));
     }
 }
 
@@ -103,10 +107,11 @@ export interface TrainingProgress {
     Progress?: number;
     State: PredictorState;
 
-    EpochProgresses: EpockProgress[];
+    EpochProgresses?: Array<(number | undefined)[]>;
+    EpochProgressesParsed?: Array<EpochProgress>;
 }
 
-export interface EpockProgress {
+export interface EpochProgress {
     Ellapsed: number;
     TrainingExamples: number;
     Epoch: number;
@@ -114,4 +119,18 @@ export interface EpockProgress {
     EvaluationTraining: number;
     LossValidation?: number;
     EvaluationValidation?: number;
+}
+
+function fromObjectArray(array: (number | undefined)[]): EpochProgress {
+    return {
+        Ellapsed: array[0]!,
+        TrainingExamples: array[1]!,
+        Epoch: array[2]!,
+        LossTraining: array[3]!,
+        EvaluationTraining: array[4]!,
+        LossValidation: array[5],
+        EvaluationValidation: array[6],
+
+
+    }
 }

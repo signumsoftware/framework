@@ -54,14 +54,14 @@ namespace Signum.React.MachineLearning
                 State = state?.Context.Predictor.State ?? Database.Query<PredictorEntity>().Where(a => a.Id == id).Select(a => a.State).SingleEx(),
                 Message = state?.Context.Message,
                 Progress = state?.Context.Progress,
-                EpochProgresses = state?.Context.Progresses,
+                EpochProgresses = state?.Context.Progresses.Select(a=>a.ToObjectArray()).ToList(),
             };
         }
 
         [Route("api/predictor/epochProgress/{id}"), HttpGet]
-        public List<EpockProgress> GetProgressLosses(int id)
+        public List<object[]> GetProgressLosses(int id)
         {
-            return Database.Query<PredictorEpochProgressEntity>().Where(a => a.Predictor.Id == id).Select(p => new EpockProgress
+            return Database.Query<PredictorEpochProgressEntity>().Where(a => a.Predictor.Id == id).Select(p => new EpochProgress
             {
                 Ellapsed = p.Ellapsed,
                 Epoch = p.Epoch,
@@ -70,7 +70,9 @@ namespace Signum.React.MachineLearning
                 EvaluationValidation = p.EvaluationValidation,
                 LossTraining = p.LossTraining,
                 LossValidation = p.LossValidation,
-            }).ToList();
+            })
+            .Select(a => a.ToObjectArray())
+            .ToList();
         }
     }
 }

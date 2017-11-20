@@ -53,9 +53,6 @@ namespace Signum.Entities.MachineLearning
         [Ignore, NotifyChildProperty, NotifyCollectionChanged] //virtual Mlist
         public MList<PredictorSubQueryEntity> SubQueries { get; set; } = new MList<PredictorSubQueryEntity>();
         
-        [Ignore]
-        public object Model;
-
         [NotNullable, PreserveOrder]
         [NotNullValidator, NoRepeatValidator]
         public MList<FilePathEmbedded> Files { get; set; } = new MList<FilePathEmbedded>();
@@ -217,6 +214,8 @@ namespace Signum.Entities.MachineLearning
 
         public PredictorColumnEncoding Encoding { get; set; }
 
+        public PredictorColumnNullHandling NullHandling { get; set; }
+
         public void ParseData(ModifiableEntity context, QueryDescription description, SubTokensOptions options)
         {
             if (Token != null)
@@ -235,6 +234,15 @@ namespace Signum.Entities.MachineLearning
             Token = Token.Clone(),
         
         };
+    }
+
+    public enum PredictorColumnNullHandling
+    {
+        Error,
+        Zero,
+        MinValue,
+        AvgValue,
+        MaxValue,
     }
 
     public enum PredictorColumnEncoding
@@ -329,13 +337,13 @@ namespace Signum.Entities.MachineLearning
         [NotNullable]
         public Lite<PredictorEntity> Predictor { get; set; }
 
-        public int ColumnIndex { get; set; }
+        public PredictorColumnUsage Usage { get; set; }
 
+        public int? Index { get; set; }
 
-        public int? OriginalMultiColumnIndex{ get; set; }
+        public int? SubQueryIndex{ get; set; }
 
         public int OriginalColumnIndex { get; set; }
-
         
 
         //For flatting collections
