@@ -33,7 +33,6 @@ export interface NeuralNetworkSettingsEntity extends Entities.Entity, IPredictor
     predictionType?: PredictionType;
     minibatchSize?: number;
     numMinibatches?: number;
-    sparseMatrix?: boolean | null;
     saveProgressEvery?: number;
     saveValidationProgressEvery?: number;
 }
