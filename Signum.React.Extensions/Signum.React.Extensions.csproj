@@ -167,6 +167,8 @@
     <Compile Include="Dynamic\DynamicViewController.cs" />
     <Compile Include="Dynamic\DynamicServer.cs" />
     <TypeScriptCompile Include="DiffLog\Templates\DiffDocument.tsx" />
+    <TypeScriptCompile Include="MachineLearning\Templates\LineChart.tsx" />
+    <TypeScriptCompile Include="MachineLearning\Templates\PredictModal.tsx" />
     <TypeScriptCompile Include="MachineLearning\Templates\PredictorRegressionMetrics.tsx" />
     <TypeScriptCompile Include="MachineLearning\Templates\PredictorClassificationMetrics.tsx" />
     <TypeScriptCompile Include="MachineLearning\Templates\ProgressBar.tsx" />
@@ -177,7 +179,6 @@
     <Compile Include="Files\FilesController.cs" />
     <Compile Include="Files\FilesServer.cs" />
     <Compile Include="Isolation\IsolationServer.cs" />
-    <Compile Include="MachineLearning\PredictController.cs" />
     <Compile Include="MachineLearning\PredictorServer.cs" />
     <Compile Include="Printing\PrintController.cs" />
     <Compile Include="Printing\PrintServer.cs" />
@@ -731,6 +732,7 @@
     <TypeScriptSourceMap>True</TypeScriptSourceMap>
     <TypeScriptMapRoot />
     <TypeScriptSourceRoot />
+    <LangVersion>latest</LangVersion>
   </PropertyGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\TypeScript\Microsoft.TypeScript.targets" Condition="Exists('$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\TypeScript\Microsoft.TypeScript.targets')" />
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v12.0\WebApplications\Microsoft.WebApplication.targets" Condition="false" />

@@ -16,7 +16,7 @@ import * as ContextualOperations from '../../../Framework/Signum.React/Scripts/O
 import {
     PredictorEntity, PredictorSubQueryEntity, PredictorMessage, PredictorAlgorithmSymbol, AccordPredictorAlgorithm, CNTKPredictorAlgorithm,
     NaiveBayesSettingsEntity, NeuralNetworkSettingsEntity, PredictorSettingsEmbedded, PredictorState, PredictorRegressionMetricsEmbedded,
-    PredictorClassificationMetricsEmbedded, PredictorMainQueryEmbedded
+    PredictorClassificationMetricsEmbedded, PredictorMainQueryEmbedded, PredictorColumnUsage
 } from './Signum.Entities.MachineLearning'
 import * as OmniboxClient from '../Omnibox/OmniboxClient'
 import * as AuthClient from '../Authorization/AuthClient'
@@ -24,6 +24,7 @@ import * as ChartClient from '../Chart/ChartClient'
 import { ChartPermission } from '../Chart/Signum.Entities.Chart'
 import * as QuickLinks from '../../../Framework/Signum.React/Scripts/QuickLinks'
 import { ChartRequest  } from '../Chart/Signum.Entities.Chart'
+import { QueryToken } from '../../../Framework/Signum.React/Scripts/FindOptions';
 
 export function start(options: { routes: JSX.Element[] }) {
 
@@ -100,6 +101,10 @@ export namespace API {
     export function getEpochLosses(lite: Lite<PredictorEntity>): Promise<Array<EpochProgress>> {
         return ajaxGet<Array<(number | undefined)[]>>({ url: `~/api/predictor/epochProgress/${lite.id}` }).then(ps => ps.map(p => fromObjectArray(p)));
     }
+
+    export function getPredict(predictor: Lite<PredictorEntity>, entity: Lite<Entity>): Promise<PredictRequest> {
+        return ajaxPost<PredictRequest>({ url: `~/api/predictor/predict/${predictor.id}` }, entity);
+    }
 }
 
 export interface TrainingProgress {
@@ -130,7 +135,35 @@ function fromObjectArray(array: (number | undefined)[]): EpochProgress {
         EvaluationTraining: array[4]!,
         LossValidation: array[5],
         EvaluationValidation: array[6],
-
-
     }
 }
+
+export interface PredictRequest {
+    hasOriginal : boolean;
+    columns: PredictColumn[] 
+    subQuery: PredictSubQueryTable[]
+}
+
+export interface PredictColumn {
+    token: QueryToken;
+    usage: PredictorColumnUsage;
+    value: object;
+}
+
+export interface PredictSubQueryTable {
+    name: string;
+    columnHeaders: PredictSubQueryHeader[];
+    rows: Array<object[]>;
+}
+
+export interface PredictOutputTuple {
+    original: any;
+    predicted: any;
+}
+
+export interface PredictSubQueryHeader {
+    token: QueryToken;
+    headerType: PredictorHeaderType 
+}
+
+export type PredictorHeaderType = "Key" | "Input" | "Output";

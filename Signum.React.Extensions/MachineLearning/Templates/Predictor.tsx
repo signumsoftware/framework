@@ -24,7 +24,7 @@ import { QueryEntity } from '../../../../Framework/Signum.React/Scripts/Signum.E
 import { FilePathEmbedded } from '../../Files/Signum.Entities.Files';
 import { is } from '../../../../Framework/Signum.React/Scripts/Signum.Entities';
 import ProgressBar from './ProgressBar'
-import LineChart from './LineChart/LineChart'
+import LineChart from './LineChart'
 
 export default class Predictor extends React.Component<{ ctx: TypeContext<PredictorEntity> }, { queryDescription?: QueryDescription }> {
 

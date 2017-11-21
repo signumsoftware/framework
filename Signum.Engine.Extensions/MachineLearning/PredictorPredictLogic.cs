@@ -33,12 +33,12 @@ namespace Signum.Engine.MachineLearning
             });
         }
         
-        public static PredictorDictionary FromEntity(Lite<PredictorEntity> predictor, Lite<Entity> entity)
+        public static PredictDictionary FromEntity(Lite<PredictorEntity> predictor, Lite<Entity> entity)
         {
             return FromEntities(predictor, new List<Lite<Entity>> { entity }).SingleEx().Value;
         }
 
-        public static Dictionary<Lite<Entity>, PredictorDictionary> FromEntities(Lite<PredictorEntity> predictor, List<Lite<Entity>> entities)
+        public static Dictionary<Lite<Entity>, PredictDictionary> FromEntities(Lite<PredictorEntity> predictor, List<Lite<Entity>> entities)
         {
             var ctx = GetPredictContext(predictor);
 
@@ -59,7 +59,6 @@ namespace Signum.Engine.MachineLearning
             };
 
             var rt = DynamicQueryManager.Current.ExecuteQuery(qr);
-
 
             var subQueryResults = ctx.Predictor.SubQueries.ToDictionaryEx(sq => sq, sqe =>
             {
@@ -94,10 +93,10 @@ namespace Signum.Engine.MachineLearning
 
             });
 
-            var result = rt.Rows.ToDictionaryEx(row => row.Entity, row => new PredictorDictionary
+            var result = rt.Rows.ToDictionaryEx(row => row.Entity, row => new PredictDictionary
             {
                 MainQueryValues = ctx.Predictor.MainQuery.Columns.Select((c, i) => KVP.Create(c.Token.Token, row[i])).ToDictionaryEx(),
-                SubQueries = ctx.Predictor.SubQueries.ToDictionary(sq => sq, sq => new PredictorSubQueryDictionary
+                SubQueries = ctx.Predictor.SubQueries.ToDictionary(sq => sq, sq => new PredictSubQueryDictionary
                 {
                     SubQuery = sq,
                     SubQueryGroups = (subQueryResults.TryGetC(sq)?.TryGetC(row.Entity))
@@ -107,21 +106,21 @@ namespace Signum.Engine.MachineLearning
             return result;
         }
 
-        public static PredictorDictionary PredictBasic(this Lite<PredictorEntity> predictor, PredictorDictionary input)
+        public static PredictDictionary PredictBasic(this Lite<PredictorEntity> predictor, PredictDictionary input)
         {
             var pctx = GetPredictContext(predictor);
 
             return pctx.Algorithm.Predict(pctx, input);
         }
 
-        public static PredictorDictionary PredictEntity(this Lite<PredictorEntity> predictor, PredictorDictionary input)
+        public static PredictDictionary PredictEntity(this Lite<PredictorEntity> predictor, PredictDictionary input)
         {
             var pctx = GetPredictContext(predictor);
 
             return pctx.Algorithm.Predict(pctx, input);
         }
 
-        public static PredictorDictionary PredictModel(this Lite<PredictorEntity> predictor, PredictorDictionary input)
+        public static PredictDictionary PredictModel(this Lite<PredictorEntity> predictor, PredictDictionary input)
         {
             var pctx = GetPredictContext(predictor);
 

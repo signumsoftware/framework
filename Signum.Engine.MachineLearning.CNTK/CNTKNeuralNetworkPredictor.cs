@@ -288,7 +288,7 @@ namespace Signum.Engine.MachineLearning.CNTK
 
         }
 
-        public PredictorDictionary Predict(PredictorPredictContext ctx, PredictorDictionary input)
+        public PredictDictionary Predict(PredictorPredictContext ctx, PredictDictionary input)
         {
             var nnSettings = (NeuralNetworkSettingsEntity)ctx.Predictor.AlgorithmSettings;
             Function calculatedOutputs = (Function)ctx.Model;
@@ -310,12 +310,12 @@ namespace Signum.Engine.MachineLearning.CNTK
             return result;
         }
 
-        private PredictorDictionary GetPredictionDictionary(float[] values, PredictorPredictContext ctx)
+        private PredictDictionary GetPredictionDictionary(float[] values, PredictorPredictContext ctx)
         {
-            return new PredictorDictionary
+            return new PredictDictionary
             {
                 MainQueryValues = ctx.MainQueryOutputColumn.SelectDictionary(col => col.Token.Token, (col, list) => FloatToValue(col, list, values)),
-                SubQueries = ctx.SubQueryOutputColumn.SelectDictionary(subQuery => subQuery, sqCtx => new PredictorSubQueryDictionary
+                SubQueries = ctx.SubQueryOutputColumn.SelectDictionary(subQuery => subQuery, sqCtx => new PredictSubQueryDictionary
                 {
                     SubQuery = sqCtx.SubQuery,
                     SubQueryGroups = sqCtx.Groups.SelectDictionary(grKey => grKey, dic => dic.ToDictionary(a => a.Key.Token.Token, a => FloatToValue(a.Key, a.Value, values)))
@@ -338,7 +338,7 @@ namespace Signum.Engine.MachineLearning.CNTK
             }
         }
 
-        private Value GetValue(PredictorPredictContext ctx, PredictorDictionary input, DeviceDescriptor device)
+        private Value GetValue(PredictorPredictContext ctx, PredictDictionary input, DeviceDescriptor device)
         {
             if (input.SubQueries.Values.Any(a => a.SubQueryGroups.Comparer != ObjectArrayComparer.Instance))
                 throw new Exception("Unexpected dictionary comparer");
@@ -353,7 +353,7 @@ namespace Signum.Engine.MachineLearning.CNTK
             return Value.CreateBatch<float>(new int[] { ctx.InputColumns.Count }, values, device);
         }
 
-        private float GetFloat(PredictorPredictContext ctx, PredictorDictionary input, PredictorCodification c)
+        private float GetFloat(PredictorPredictContext ctx, PredictDictionary input, PredictorCodification c)
         {
             object value;
             if (c.SubQuery != null)

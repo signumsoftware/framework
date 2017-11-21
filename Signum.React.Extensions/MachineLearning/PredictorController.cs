@@ -13,6 +13,11 @@ using Signum.Engine;
 using Signum.Utilities;
 using Signum.Entities;
 using Signum.React.ApiControllers;
+using Newtonsoft.Json.Linq;
+using Signum.Entities.DynamicQuery;
+using Newtonsoft.Json;
+using Signum.Entities.Reflection;
+using Signum.Utilities.Reflection;
 
 namespace Signum.React.MachineLearning
 {
@@ -76,64 +81,240 @@ namespace Signum.React.MachineLearning
             .ToList();
         }
 
-        [Route("api/predictor/predict/{predictorId}"), HttpGet]
-        public PredictModelTS GetPredictModel(PrimaryKey predictorId, Lite<Entity> entity)
+        [Route("api/predict/get/{predictorId}"), HttpGet]
+        public PredictRequestTS GetPredict(PrimaryKey predictorId, Lite<Entity> entity)
         {
             var p = Lite.Create<PredictorEntity>(predictorId);
 
-            var pctx = PredictorPredictLogic.GetPredictContext(p);
+            PredictorPredictContext pctx = PredictorPredictLogic.GetPredictContext(p);
 
-            var pmodel = GetPredictModel(pctx, entity != null);
+            PredictDictionary dic = entity != null ? PredictorPredictLogic.FromEntity(p, entity) : null;
 
-            if(entity != null)
-            {
-                var dic = PredictorPredictLogic.FromEntity(p, entity);
-                FillModel(pctx, dic);
-            }
+            PredictDictionary predictedOutputs = dic != null ? PredictorPredictLogic.PredictBasic(p, dic) : null;
+
+            PredictRequestTS pmodel = ToPredictModel(pctx, dic, dic, predictedOutputs);
             
             return pmodel;
         }
 
-        private void FillModel(PredictorPredictContext pctx, PredictorDictionary dic)
-        {
+        [Route("api/predict/update"), HttpGet]
+        public PredictRequestTS GetPredict(PredictRequestTS request)
+        {   
+            PredictorPredictContext pctx = PredictorPredictLogic.GetPredictContext(request.predictor);
 
+            ParseValues(request, pctx);
+
+            PredictDictionary inputs = GetInputs(request, pctx);
+
+            PredictDictionary predictedOutputs = inputs != null ? PredictorPredictLogic.PredictBasic(request.predictor, inputs) : null;
+            
+            SetOutput(request, pctx, predictedOutputs);
+
+            return request;
         }
 
-        private PredictModelTS GetPredictModel(PredictorPredictContext pctx)
+        PredictDictionary GetInputs(PredictRequestTS request, PredictorPredictContext pctx)
         {
-            return new PredictModelTS
+            return new PredictDictionary
             {
-                Columns = pctx.su
+                MainQueryValues = pctx.Predictor.MainQuery.Columns
+                .Select((col, i) => new { col, request.columns[i].value })
+                .Where(a => a.col.Usage == PredictorColumnUsage.Input)
+                .Select(a => KVP.Create(a.col.Token.Token, a.value))
+                .ToDictionaryEx(),
+                
+                SubQueries = pctx.Predictor.SubQueries.Select(sq =>
+                {
+                    var sqt = request.subQueries.Single(a => a.subQuery.RefersTo(sq));
+
+                    return new PredictSubQueryDictionary
+                    {
+                        SubQuery = sq,
+                        SubQueryGroups = sqt.rows.Select(array => KVP.Create(array.Slice(0, sq.GroupKeys.Count - 1),
+                            sq.Aggregates.Select((a, i) => KVP.Create(a.Token.Token, array[i])).ToDictionary()
+                        )).ToDictionary()
+                    };
+                }).ToDictionaryEx(a => a.SubQuery)
+            };
+        }
+
+        void SetOutput(PredictRequestTS request, PredictorPredictContext pctx, PredictDictionary predicted)
+        {
+            var predictedMainCols = predicted.MainQueryValues.SelectDictionary(a => a.FullKey(), a => a);
+
+            foreach (var c in request.columns.Where(a=>a.usage == PredictorColumnUsage.Output))
+            {
+                var value = predictedMainCols[c.token.fullKey];
+                if (request.hasOriginal)
+                    ((PredictOutputTuple)c.value).predicted = value;
+                else
+                    c.value = value;
             }
+
+            foreach (var sq in request.subQueries)
+            {
+                foreach (var r in sq.rows)
+                {
+                    foreach (var c in sq.columnHeaders)
+                    {
+                        
+                    }
+                }
+
+
+            }
+        }
+
+        private PredictRequestTS ToPredictModel(PredictorPredictContext pctx, PredictDictionary inputs, PredictDictionary originalOutputs, PredictDictionary predictedOutputs)
+        {
+            return new PredictRequestTS
+            {
+                predictor = pctx.Predictor.ToLite(),
+
+                hasOriginal = originalOutputs != null,
+
+                columns = pctx.Predictor.MainQuery.Columns.Select(c => new PredictColumnTS
+                {
+                    token = new QueryTokenTS(c.Token.Token, true),
+                    usage = c.Usage,
+                    value = c.Usage == PredictorColumnUsage.Input ? inputs.MainQueryValues.GetOrThrow(c.Token.Token) :
+                    originalOutputs == null ? predictedOutputs?.MainQueryValues.GetOrThrow(c.Token.Token) :
+                    new PredictOutputTuple
+                    {
+                        original = originalOutputs?.MainQueryValues.GetOrThrow(c.Token.Token),
+                        predicted = predictedOutputs?.MainQueryValues.GetOrThrow(c.Token.Token),
+                    }
+                }).ToList(),
+
+                subQueries = pctx.Predictor.SubQueries.Select(sq => 
+                {
+                    var inputsSQ = inputs?.SubQueries.GetOrThrow(sq); 
+                    var originalOutputsSQ = originalOutputs?.SubQueries.GetOrThrow(sq);
+                    var predictedOutputsSQ = predictedOutputs?.SubQueries.GetOrThrow(sq);
+
+                    var columnHeaders = sq.GroupKeys.Select(gk => new PredictSubQueryHeaderTS { token = new QueryTokenTS(gk.Token.Token, true), headerType = PredictorHeaderType.Key })
+                        .Concat(sq.Aggregates.Select(agg => new PredictSubQueryHeaderTS { token = new QueryTokenTS(agg.Token.Token, true), headerType = agg.Usage == PredictorColumnUsage.Input ? PredictorHeaderType.Input : PredictorHeaderType.Output }))
+                        .ToList();
+
+                    return new PredictSubQueryTableTS
+                    {
+                        subQuery = sq.ToLite(),
+                        columnHeaders = columnHeaders,
+                        rows = pctx.SubQueryOutputColumn[sq].Groups.Select(kvp => CreateRow(sq, kvp.Key, inputsSQ, originalOutputsSQ, predictedOutputsSQ)).ToList()
+                    };
+                }).ToList()
+            };
+        }
+
+        private object[] CreateRow(PredictorSubQueryEntity sq, object[] key, PredictSubQueryDictionary inputs, PredictSubQueryDictionary originalOutputs, PredictSubQueryDictionary predictedOutputs)
+        {
+            var row = new object[sq.GroupKeys.Count - 1 + sq.Aggregates.Count];
+
+            var inputsGR = inputs?.SubQueryGroups.GetOrThrow(key);
+            var originalOutputsGR = originalOutputs?.SubQueryGroups.GetOrThrow(key);
+            var predictedOutputsGR = predictedOutputs?.SubQueryGroups.GetOrThrow(key);
+
+            for (int i = 0; i < sq.GroupKeys.Count - 1; i++)
+            {
+                row[i] = key[i];
+            }
+
+            for (int i = 0; i < sq.Aggregates.Count; i++)
+            {
+                var a = sq.Aggregates[i];
+                row[i + key.Length] = a.Usage == PredictorColumnUsage.Input ? inputsGR.GetOrThrow(a.Token.Token) :
+                    originalOutputs == null ? predictedOutputsGR.GetOrThrow(a.Token.Token) :
+                    new PredictOutputTuple
+                    {
+                        original = originalOutputsGR.GetOrThrow(a.Token.Token),
+                        predicted = predictedOutputsGR.GetOrThrow(a.Token.Token),
+                    };
+            }
+
+            return row;
+        }
+
+        public void ParseValues(PredictRequestTS predict, PredictorPredictContext ctx)
+        {
+            var serializer = JsonSerializer.Create(GlobalConfiguration.Configuration.Formatters.JsonFormatter.SerializerSettings);
+
+            for (int i = 0; i < ctx.Predictor.MainQuery.Columns.Count; i++)
+            {
+                predict.columns[i].value = FixValue(predict.columns[i].value, ctx.Predictor.MainQuery.Columns[i].Token.Token, serializer);
+            }
+
+            foreach (var tuple in ctx.SubQueryOutputColumn.Values.ZipStrict(predict.subQueries, (sqCtx, table) => (sqCtx, table)))
+            {
+                var sq = tuple.sqCtx.SubQuery;
+
+                foreach (var r in tuple.table.rows)
+                {   
+                    for (int i = 0; i < sq.GroupKeys.Count - 1; i++)
+                    {
+                        r[i] = FixValue(r[i], sq.GroupKeys[i + 1].Token.Token, serializer);
+                    }
+
+                    for (int i = 0; i < sq.Aggregates.Count - 1; i++)
+                    {
+                        r[i + sq.GroupKeys.Count - 1] = FixValue(r[i + sq.GroupKeys.Count - 1], sq.Aggregates[i].Token.Token, serializer);
+                    }
+                }
+            }
+        }
+
+        private object FixValue(object value, QueryToken token, JsonSerializer serializer)
+        {
+            if (!(value is JToken jt))
+                return ReflectionTools.ChangeType(value, token.Type);
+
+            if (jt is JObject jo &&
+                jo.Property(nameof(PredictOutputTuple.original)) != null &&
+                jo.Property(nameof(PredictOutputTuple.predicted)) != null)
+            {
+                return new PredictOutputTuple
+                {
+                    original = FixValue(jo[nameof(PredictOutputTuple.original)], token, serializer),
+                    predicted = FixValue(jo[nameof(PredictOutputTuple.predicted)], token, serializer),
+                };
+            }
+
+            return jt.ToObject(token.Type, serializer);
         }
     }
 }
 
-public class PredictModelTS
+public class PredictRequestTS
 {
-    public List<PredictColumnTS> Columns { get; set; }
-    public List<PredictSubQueryTableTS> SubQuery { get; set; }
+    public bool hasOriginal { get; set; }
+    public Lite<PredictorEntity> predictor { get; set; }
+    public List<PredictColumnTS> columns { get; set; }
+    public List<PredictSubQueryTableTS> subQueries { get; set; }
 }
 
 public class PredictColumnTS
 {
-    public QueryTokenTS Token { get; private set; }
-    public PredictorColumnUsage Usage { get; private set; }
-    public object value { get; private set; }
-    public object originalValue { get; private set; }
+    public QueryTokenTS token { get; set; }
+    public PredictorColumnUsage usage { get; set; }
+    public object value { get; set; }
 }
 
 public class PredictSubQueryTableTS
 {
-    public string Name { get; set; }
-    public List<PredictSubQueryHeaderTS> Headers { get; set; }
-    public List<List<object>> Rows { get; set; }
+    public Lite<PredictorSubQueryEntity> subQuery { get; set; }
+    public List<PredictSubQueryHeaderTS> columnHeaders { get; set; }
+    public List<object[]> rows { get; set; }
+}
+
+public class PredictOutputTuple
+{
+    public object original;
+    public object predicted;
 }
 
 public class PredictSubQueryHeaderTS
 {
-    public QueryTokenTS Token { get; private set; }
-    public PredictorHeaderType HeaderType { get; private set; }
+    public QueryTokenTS token { get; set; }
+    public PredictorHeaderType headerType { get; set; }
 }
 
 public enum PredictorHeaderType
@@ -141,5 +322,4 @@ public enum PredictorHeaderType
     Key,
     Input,
     Output,
-    OutputRef
 }

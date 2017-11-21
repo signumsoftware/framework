@@ -202,16 +202,16 @@ namespace Signum.Engine.MachineLearning
         string ValidateColumnProperty(PredictorEntity predictor, PredictorSubQueryEntity subQuery, PredictorColumnEmbedded column, PropertyInfo pi);
         void Train(PredictorTrainingContext ctx);
         void LoadModel(PredictorPredictContext predictor);
-        PredictorDictionary Predict(PredictorPredictContext ctx, PredictorDictionary input);
+        PredictDictionary Predict(PredictorPredictContext ctx, PredictDictionary input);
     }
 
-    public class PredictorDictionary
+    public class PredictDictionary
     {
         public Dictionary<QueryToken, object> MainQueryValues { get; set; }
-        public Dictionary<PredictorSubQueryEntity, PredictorSubQueryDictionary> SubQueries { get; set; }
+        public Dictionary<PredictorSubQueryEntity, PredictSubQueryDictionary> SubQueries { get; set; }
     }
 
-    public class PredictorSubQueryDictionary
+    public class PredictSubQueryDictionary
     {
         public PredictorSubQueryEntity SubQuery { get; set; }
         public Dictionary<object[], Dictionary<QueryToken, object>> SubQueryGroups { get; set; }
