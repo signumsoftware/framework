@@ -18,6 +18,8 @@ namespace Signum.Utilities
             return !string.IsNullOrEmpty(str);
         }
 
+        static readonly Expression<Func<string, string, string>> DefaultTextExpression = (a, b) => ((a ?? "").Length > 0) ? a : b;
+        [ExpressionField("DefaultTextExpression")]
         public static string DefaultText(this string str, string defaultText)
         {
             if (str.HasText())
