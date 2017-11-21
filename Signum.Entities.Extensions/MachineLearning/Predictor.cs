@@ -329,66 +329,6 @@ namespace Signum.Entities.MachineLearning
         }
     }
 
-   
-
-    [Serializable, EntityKind(EntityKind.System, EntityData.Transactional)]
-    public class PredictorCodificationEntity : Entity
-    {
-        [NotNullable]
-        public Lite<PredictorEntity> Predictor { get; set; }
-
-        public PredictorColumnUsage Usage { get; set; }
-
-        public int Index { get; set; }
-
-        public int? SubQueryIndex{ get; set; }
-
-        public int OriginalColumnIndex { get; set; }
-        
-
-        //For flatting collections
-        [SqlDbType(Size = 100)]
-        public string GroupKey0 { get; set; }
-
-        [SqlDbType(Size = 100)]
-        public string GroupKey1 { get; set; }
-
-        [SqlDbType(Size = 100)]
-        public string GroupKey2 { get; set; }
-
-
-        //For 1-hot encoding
-        [SqlDbType(Size = 100)]
-        public string IsValue { get; set; }
-
-
-        //For encoding values
-        [NotNullable, PreserveOrder]
-        [NotNullValidator, NoRepeatValidator]
-        public MList<string> CodedValues { get; set; } = new MList<string>();
-    }
-
-    [Serializable, EntityKind(EntityKind.System, EntityData.Transactional)]
-    public class PredictorEpochProgressEntity : Entity
-    {
-        [NotNullable]
-        [NotNullValidator]
-        public Lite<PredictorEntity> Predictor { get; set; }
-
-        public DateTime CreationDate { get; private set; } = TimeZoneManager.Now;
-        [Unit("ms")]
-        public long Ellapsed { get; internal set; }
-
-        public int TrainingExamples { get; set; }
-
-        public int Epoch { get; set; }
-
-        public double LossTraining { get; set; }
-        public double EvaluationTraining { get; set; }
-        public double? LossValidation { get; internal set; }
-        public double? EvaluationValidation { get; internal set; }
-    }
-
     [Serializable]
     public class PredictorAlgorithmSymbol : Symbol
     {

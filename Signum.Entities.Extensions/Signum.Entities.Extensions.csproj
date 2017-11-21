@@ -129,6 +129,8 @@
     <Compile Include="Joyride\JoyrideStep.cs" />
     <Compile Include="MachineLearning\NaiveBayesSettings.cs" />
     <Compile Include="MachineLearning\NeuralNetworkSettings.cs" />
+    <Compile Include="MachineLearning\PredictorCodification.cs" />
+    <Compile Include="MachineLearning\PredictorEpochProgress.cs" />
     <Compile Include="MachineLearning\PredictorMessage.cs" />
     <Compile Include="Mailing\ImageAttachmentEntity.cs" />
     <Compile Include="Migrations\ExecutedLoadProcess.cs" />

@@ -139,11 +139,27 @@ namespace Signum.Engine.MachineLearning
             {
                 Implementations mainQueryImplementations = DynamicQueryManager.Current.GetEntityImplementations(p.MainQuery.Query.ToQueryName());
                 var token = column.Token.Token;
-                if (!PredictorLogicQuery.Compatible(token.GetImplementations(), mainQueryImplementations))
+                if (!Compatible(token.GetImplementations(), mainQueryImplementations))
                     return PredictorMessage.TheFirstGroupKeyOf0ShouldBeOfType1InsteadOf2.NiceToString(sq, mainQueryImplementations, token.GetImplementations()?.ToString() ?? token.NiceTypeName);
             }
 
             return null;
+        }
+
+        public static bool Compatible(Implementations? firstGroupKey, Implementations mainQuery)
+        {
+            if (firstGroupKey == null)
+                return false;
+
+            if (firstGroupKey.Value.IsByAll ||
+                mainQuery.IsByAll)
+                return false;
+
+            if (firstGroupKey.Value.Types.Count() != 1 ||
+                mainQuery.Types.Count() != 1)
+                return false;
+
+            return firstGroupKey.Value.Types.SingleEx().Equals(mainQuery.Types.SingleEx());
         }
 
         static string Column_StaticPropertyValidation(PredictorColumnEmbedded column, PropertyInfo pi)

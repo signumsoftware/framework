@@ -60,7 +60,7 @@ export interface PredictorCodificationEntity extends Entities.Entity {
     Type: "PredictorCodification";
     predictor?: Entities.Lite<PredictorEntity> | null;
     usage?: PredictorColumnUsage;
-    index?: number | null;
+    index?: number;
     subQueryIndex?: number | null;
     originalColumnIndex?: number;
     groupKey0?: string | null;

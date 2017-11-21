@@ -12,6 +12,7 @@ using Signum.Engine.MachineLearning;
 using Signum.Engine;
 using Signum.Utilities;
 using Signum.Entities;
+using Signum.React.ApiControllers;
 
 namespace Signum.React.MachineLearning
 {
@@ -74,5 +75,71 @@ namespace Signum.React.MachineLearning
             .Select(a => a.ToObjectArray())
             .ToList();
         }
+
+        [Route("api/predictor/predict/{predictorId}"), HttpGet]
+        public PredictModelTS GetPredictModel(PrimaryKey predictorId, Lite<Entity> entity)
+        {
+            var p = Lite.Create<PredictorEntity>(predictorId);
+
+            var pctx = PredictorPredictLogic.GetPredictContext(p);
+
+            var pmodel = GetPredictModel(pctx, entity != null);
+
+            if(entity != null)
+            {
+                var dic = PredictorPredictLogic.FromEntity(p, entity);
+                FillModel(pctx, dic);
+            }
+            
+            return pmodel;
+        }
+
+        private void FillModel(PredictorPredictContext pctx, PredictorDictionary dic)
+        {
+
+        }
+
+        private PredictModelTS GetPredictModel(PredictorPredictContext pctx)
+        {
+            return new PredictModelTS
+            {
+                Columns = pctx.su
+            }
+        }
     }
+}
+
+public class PredictModelTS
+{
+    public List<PredictColumnTS> Columns { get; set; }
+    public List<PredictSubQueryTableTS> SubQuery { get; set; }
+}
+
+public class PredictColumnTS
+{
+    public QueryTokenTS Token { get; private set; }
+    public PredictorColumnUsage Usage { get; private set; }
+    public object value { get; private set; }
+    public object originalValue { get; private set; }
+}
+
+public class PredictSubQueryTableTS
+{
+    public string Name { get; set; }
+    public List<PredictSubQueryHeaderTS> Headers { get; set; }
+    public List<List<object>> Rows { get; set; }
+}
+
+public class PredictSubQueryHeaderTS
+{
+    public QueryTokenTS Token { get; private set; }
+    public PredictorHeaderType HeaderType { get; private set; }
+}
+
+public enum PredictorHeaderType
+{
+    Key,
+    Input,
+    Output,
+    OutputRef
 }

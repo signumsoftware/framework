@@ -49,7 +49,7 @@ namespace Signum.Engine.MachineLearning
 
     public class PredictorPredictContext
     {
-        IPredictorAlgorithm Algorithm { get; }
+        public IPredictorAlgorithm Algorithm { get; }
         
         public PredictorEntity Predictor { get; }
 

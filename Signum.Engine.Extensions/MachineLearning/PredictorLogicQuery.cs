@@ -26,14 +26,12 @@ namespace Signum.Engine.MachineLearning
                 QueryRequest = mainQueryRequest,
                 ResultTable = mainResult,
             };
-
-            Implementations mainQueryImplementations = DynamicQueryManager.Current.GetEntityImplementations(mainQueryRequest.QueryName);
-
+            
             ctx.SubQueries = new Dictionary<PredictorSubQueryEntity, SubQuery>();
             foreach (var sqe in ctx.Predictor.SubQueries)
             {
                 ctx.ReportProgress($"Executing SubQuery {sqe}");
-                QueryGroupRequest queryGroupRequest = ToMultiColumnQuery(ctx.Predictor.MainQuery, mainQueryImplementations, sqe);
+                QueryGroupRequest queryGroupRequest = ToMultiColumnQuery(ctx.Predictor.MainQuery, sqe);
                 ResultTable groupResult = DynamicQueryManager.Current.ExecuteGroupQuery(queryGroupRequest);
 
                 var entityGroupKey = groupResult.Columns.FirstEx();
@@ -122,14 +120,13 @@ namespace Signum.Engine.MachineLearning
             };
         }
 
-        static QueryGroupRequest ToMultiColumnQuery(PredictorMainQueryEmbedded mainQuery, Implementations mainQueryImplementations, PredictorSubQueryEntity sq)
+        public static QueryGroupRequest ToMultiColumnQuery(PredictorMainQueryEmbedded mainQuery, PredictorSubQueryEntity sq)
         {
             var firstGroupKey = sq.GroupKeys.FirstEx();
 
-            if (!Compatible(firstGroupKey.Token.Token.GetImplementations(), mainQueryImplementations))
-                throw new InvalidOperationException($"{firstGroupKey.Token} of {sq.Query} should be of type {mainQueryImplementations}");
-
-            var mainFilters = mainQuery.Filters.Select(f => mainQuery.Query.Is(sq.Query) ? ToFilter(f) : ToFilterAppend(f, firstGroupKey.Token.Token));
+            var mainFilters = mainQuery.Query.Is(sq.Query) ?
+                    mainQuery.Filters.Select(f => ToFilter(f)) :
+                    mainQuery.Filters.Select(f => ToFilterAppend(f, firstGroupKey.Token.Token));
             var additionalFilters = sq.AdditionalFilters.Select(f => ToFilter(f)).ToList();
 
             var groupKeys = sq.GroupKeys.Select(c => new Column(c.Token.Token, null)).ToList();
@@ -144,7 +141,7 @@ namespace Signum.Engine.MachineLearning
             };
         }
 
-        static Filter ToFilter(QueryFilterEmbedded f)
+        internal static Filter ToFilter(QueryFilterEmbedded f)
         {
             return new Filter(f.Token.Token, f.Operation,
                 FilterValueConverter.Parse(f.ValueString, f.Token.Token.Type,  f.Operation.IsList(), allowSmart: false));
@@ -178,22 +175,6 @@ namespace Signum.Engine.MachineLearning
             return token;
         }
 
-
-        public static bool Compatible(Implementations? firstGroupKey, Implementations mainQuery)
-        {
-            if (firstGroupKey == null)
-                return false;
-
-            if (firstGroupKey.Value.IsByAll ||
-                mainQuery.IsByAll)
-                return false;
-
-            if (firstGroupKey.Value.Types.Count() != 1 ||
-                mainQuery.Types.Count() != 1)
-                return false;
-
-            return firstGroupKey.Value.Types.SingleEx().Equals(mainQuery.Types.SingleEx());
-        }
     }
 
     public class PredictorCodification
