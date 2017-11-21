@@ -77,6 +77,7 @@
     <Member Name="Create" Description="Erstellen" />
     <Member Name="Detail" Description="Detail" />
     <Member Name="Find" Description="Finden" />
+    <Member Name="Move" Description="Bewegen" />
     <Member Name="MoveDown" Description="Nach unten" />
     <Member Name="MoveUp" Description="Nach oben" />
     <Member Name="Navigate" Description="Navigieren" />
@@ -210,6 +211,7 @@
     <Member Name="Loading0" Description="{0} läd gerade..." />
     <Member Name="LoseChanges" Description="Es gibt Änderungen, die noch nicht gespeichert wurden. &#xD;&#xA;Sollen diese Änderungen verloren gehen?" />
     <Member Name="Message" Description="Nachricht" />
+    <Member Name="New0_G" Description="Neue {0}" />
     <Member Name="NoDirectErrors" Description="Keine direkten Fehler" />
     <Member Name="Ok" Description="Ok" />
     <Member Name="Reload" Description="Neu laden" />
@@ -217,6 +219,7 @@
     <Member Name="ThereAreChanges" Description="Es gibt Änderungen" />
     <Member Name="ThereAreChangesContinue" Description="Es gibt neue Änderungen, die verloren gehen.&#xD;&#xA;&#xD;&#xA;Trotzdem weiter?" />
     <Member Name="ThereAreErrors" Description="Es gibt Fehler" />
+    <Member Name="Type0Id1" Description="{0} {1}" />
   </Type>
   <Type Name="OperationLogEntity" Description="Operationen Protokoll" PluralDescription="Operationen Protokolle">
     <Member Name="Duration" Description="Dauer" />
@@ -398,6 +401,9 @@
     <Member Name="_0ShouldBe12" Description="{0} sollte {1} {2}" />
     <Member Name="_0ShouldBeADateInThePast" Description="{0} sollte ein Datum in der Vergangenheit sein" />
     <Member Name="_0ShouldBeGreaterThan1" Description="{0} sollte größer sein als {1}" />
+    <Member Name="_0ShouldBeGreaterThanOrEqual1" Description="{0} sollte größer oder gleich {1}" />
+    <Member Name="_0ShouldBeLessThan1" Description="{0} sollte kleiner als {1}" />
+    <Member Name="_0ShouldBeLessThanOrEqual1" Description="{0} sollte kleiner oder gleich {1}" />
     <Member Name="_0ShouldBeNull" Description="{0} sollte leer sein" />
     <Member Name="_0ShouldBeNullWhen1IsNotSet" Description="{0} sollte leer sein, wenn {1} nicht festgesetzt ist" />
     <Member Name="_0ShouldBeNullWhen1IsSet" Description="{0} sollte leer sein, wenn {1} festgesetzt ist" />

@@ -28,6 +28,8 @@
     <Member Name="_0Months" Description="{0} Monate" />
     <Member Name="_0Second" Description="{0} Sekunde" />
     <Member Name="_0Seconds" Description="{0} Sekunden" />
+    <Member Name="_0Week" Description="{0} Woche" />
+    <Member Name="_0Weeks" Description="{0} Wochen" />
     <Member Name="_0Year" Description="{0} Jahr" />
     <Member Name="_0Years" Description="{0} Jahre" />
     <Member Name="In0" Description="In {0}" />
