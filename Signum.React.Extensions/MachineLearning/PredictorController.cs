@@ -98,7 +98,7 @@ namespace Signum.React.MachineLearning
         }
 
         [Route("api/predict/update"), HttpGet]
-        public PredictRequestTS GetPredict(PredictRequestTS request)
+        public PredictRequestTS UpdatePredict(PredictRequestTS request)
         {   
             PredictorPredictContext pctx = PredictorPredictLogic.GetPredictContext(request.predictor);
 
@@ -140,28 +140,47 @@ namespace Signum.React.MachineLearning
 
         void SetOutput(PredictRequestTS request, PredictorPredictContext pctx, PredictDictionary predicted)
         {
-            var predictedMainCols = predicted.MainQueryValues.SelectDictionary(a => a.FullKey(), a => a);
+            var predictedMainCols = predicted.MainQueryValues.SelectDictionary(qt => qt.FullKey(), v => v);
 
             foreach (var c in request.columns.Where(a=>a.usage == PredictorColumnUsage.Output))
             {
-                var value = predictedMainCols[c.token.fullKey];
+                var pValue = predictedMainCols.GetOrThrow(c.token.fullKey);
                 if (request.hasOriginal)
-                    ((PredictOutputTuple)c.value).predicted = value;
+                    ((PredictOutputTuple)c.value).predicted = pValue;
                 else
-                    c.value = value;
+                    c.value = pValue;
             }
 
             foreach (var sq in request.subQueries)
             {
+                var psq = predicted.SubQueries.Values.Single(a => sq.subQuery.RefersTo(a.SubQuery));
+
+                var fullKeyToToken = psq.SubQuery.Aggregates.Select(a => a.Token.Token).ToDictionary(a => a.FullKey());
+
                 foreach (var r in sq.rows)
                 {
-                    foreach (var c in sq.columnHeaders)
+                    var key = r.Slice(0, psq.SubQuery.GroupKeys.Count - 1);
+                    var dic = psq.SubQueryGroups.GetOrThrow(key);
+
+                    for (int i = 0; i < psq.SubQuery.Aggregates.Count; i++)
                     {
-                        
+                        var c = sq.columnHeaders[psq.SubQuery.GroupKeys.Count - 1 + i];
+
+                        if(c.headerType == PredictorHeaderType.Output)
+                        {
+                            ref var box = ref r[psq.SubQuery.GroupKeys.Count - 1 + i];
+
+                            var token = fullKeyToToken.GetOrThrow(c.token.fullKey);
+
+                            var pValue = dic.GetOrThrow(token);
+                            if (request.hasOriginal)
+                                ((PredictOutputTuple)box).predicted = pValue;
+                            else
+                                box = pValue;
+
+                        }
                     }
                 }
-
-
             }
         }
 
@@ -301,6 +320,7 @@ public class PredictColumnTS
 public class PredictSubQueryTableTS
 {
     public Lite<PredictorSubQueryEntity> subQuery { get; set; }
+    //Key* (Input|Output)*
     public List<PredictSubQueryHeaderTS> columnHeaders { get; set; }
     public List<object[]> rows { get; set; }
 }

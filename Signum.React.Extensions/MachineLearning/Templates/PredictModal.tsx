@@ -1,15 +1,17 @@
 ﻿import { PredictorEntity } from "MachineLearning/Signum.Entities.MachineLearning";
 import { Modal } from "react-bootstrap";
 import * as React from "react";
+import * as Navigator from "../../../../Framework/Signum.React/Scripts/Navigator";
 import { IModalProps, openModal } from "../../../../Framework/Signum.React/Scripts/Modals";
 import { Lite } from "../../../../Framework/Signum.React/Scripts/Signum.Entities";
-import { Predict } from "MachineLearning/PredictorClient";
+import { PredictRequest } from "MachineLearning/PredictorClient";
 import { Entity } from "../../../../Framework/Signum.React/Scripts/Signum.Entities";
+import { NormalControlMessage } from "../../../../Framework/Signum.React/Scripts/Signum.Entities";
+import { EntityControlMessage } from "../../../../Framework/Signum.React/Scripts/Signum.Entities";
 
 
 interface PredictModalProps extends IModalProps {
-    predictor: Lite<PredictorEntity>;
-    predict: Predict;
+    predict: PredictRequest;
     entity?: Lite<Entity>;
 }
 
@@ -24,12 +26,6 @@ class PredictModal extends React.Component<PredictModalProps, PredictModalState>
         this.state = { show: true };
     }
 
-    answer?: boolean;
-    handleButtonClicked = (val: boolean) => {
-        this.answer = val;
-        this.setState({ show: false });
-    }
-
     handleClosedClicked = () => {
         this.setState({ show: false });
     }
@@ -38,17 +34,23 @@ class PredictModal extends React.Component<PredictModalProps, PredictModalState>
         this.props.onExited!(undefined);
     }
 
+
+
     render() {
+
+        const p = this.props.predict;
+
         return (
-            <Modal onHide={this.handleClosedClicked}
+            <Modal onHide={this.handleClosedClicked} onExited={this.handleOnExited}
                 show={this.state.show} className="message-modal">
                 <Modal.Header closeButton={true}>
                     <h4 className={"modal-title"}>
-                        Important Question
+                        {p.predictor.toStr}
+                        <small>{PredictorEntity.niceName()}&nbsp;{p.predictor.id} (<a href={Navigator.navigateRoute(p.predictor)}>{EntityControlMessage.View.niceToString()}</a>)</small>
                     </h4>
                 </Modal.Header>
                 <Modal.Body>
-                    {this.props.question}
+                    
                 </Modal.Body>
                 <Modal.Footer>
                     <div>
@@ -56,13 +58,7 @@ class PredictModal extends React.Component<PredictModalProps, PredictModalState>
                             className="btn btn-primary sf-close-button sf-ok-button"
                             onClick={() => this.handleButtonClicked(true)}
                             name="accept">
-                            Yes
-                        </button>
-                        <button
-                            className="btn btn-default sf-close-button sf-button"
-                            onClick={() => this.handleButtonClicked(false)}
-                            name="cancel">
-                            No
+                            Predict
                         </button>
                     </div>
                 </Modal.Footer>
@@ -70,7 +66,7 @@ class PredictModal extends React.Component<PredictModalProps, PredictModalState>
         );
     }
 
-    static show(predictor: Lite<PredictorEntity>, predict: Predict, entity?: Lite<Entity>): Promise<void> {
+    static show(predictor: Lite<PredictorEntity>, predict: predictor: Lite<PredictorEntity>): Promise<void> {
         return openModal<boolean | undefined>(<PredictModal predictor={predictor} predict={predict} entity={entity} />);
     }
 }

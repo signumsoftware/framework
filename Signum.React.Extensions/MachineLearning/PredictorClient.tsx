@@ -102,8 +102,12 @@ export namespace API {
         return ajaxGet<Array<(number | undefined)[]>>({ url: `~/api/predictor/epochProgress/${lite.id}` }).then(ps => ps.map(p => fromObjectArray(p)));
     }
 
-    export function getPredict(predictor: Lite<PredictorEntity>, entity: Lite<Entity>): Promise<PredictRequest> {
-        return ajaxPost<PredictRequest>({ url: `~/api/predictor/predict/${predictor.id}` }, entity);
+    export function getPredict(predictor: Lite<PredictorEntity>, entity?: Lite<Entity>): Promise<PredictRequest> {
+        return ajaxPost<PredictRequest>({ url: `~/api/predict/get/${predictor.id}` }, entity);
+    }
+
+    export function updatePredict(predict: PredictRequest): Promise<PredictRequest> {
+        return ajaxPost<PredictRequest>({ url: `~/api/predict/update/` }, predict);
     }
 }
 
@@ -139,7 +143,8 @@ function fromObjectArray(array: (number | undefined)[]): EpochProgress {
 }
 
 export interface PredictRequest {
-    hasOriginal : boolean;
+    hasOriginal: boolean;
+    predictor: Lite<PredictorEntity>;
     columns: PredictColumn[] 
     subQuery: PredictSubQueryTable[]
 }
@@ -151,7 +156,7 @@ export interface PredictColumn {
 }
 
 export interface PredictSubQueryTable {
-    name: string;
+    subQuery: Lite<PredictorSubQueryEntity>;
     columnHeaders: PredictSubQueryHeader[];
     rows: Array<object[]>;
 }
