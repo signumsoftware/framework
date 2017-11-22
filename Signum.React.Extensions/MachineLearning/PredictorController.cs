@@ -57,10 +57,11 @@ namespace Signum.React.MachineLearning
 
             return new TrainingProgress
             {
+                Running = state != null,
                 State = state?.Context.Predictor.State ?? Database.Query<PredictorEntity>().Where(a => a.Id == id).Select(a => a.State).SingleEx(),
                 Message = state?.Context.Message,
                 Progress = state?.Context.Progress,
-                EpochProgresses = state?.Context.Progresses.Select(a=>a.ToObjectArray()).ToList(),
+                EpochProgresses = state?.Context.GetProgessArray(),
             };
         }
 
@@ -81,10 +82,10 @@ namespace Signum.React.MachineLearning
             .ToList();
         }
 
-        [Route("api/predict/get/{predictorId}"), HttpGet]
-        public PredictRequestTS GetPredict(PrimaryKey predictorId, Lite<Entity> entity)
+        [Route("api/predict/get/{predictorId}"), HttpPost]
+        public PredictRequestTS GetPredict(string predictorId, Lite<Entity> entity)
         {
-            var p = Lite.Create<PredictorEntity>(predictorId);
+            var p = Lite.ParsePrimaryKey<PredictorEntity>(predictorId);
 
             PredictorPredictContext pctx = PredictorPredictLogic.GetPredictContext(p);
 
@@ -97,7 +98,7 @@ namespace Signum.React.MachineLearning
             return pmodel;
         }
 
-        [Route("api/predict/update"), HttpGet]
+        [Route("api/predict/update"), HttpPost]
         public PredictRequestTS UpdatePredict(PredictRequestTS request)
         {   
             PredictorPredictContext pctx = PredictorPredictLogic.GetPredictContext(request.predictor);

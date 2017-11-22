@@ -31,5 +31,6 @@ namespace Signum.Entities.MachineLearning
         _0ShouldBeDivisibleBy12,
         [Description("The first group key of {0} should be of type {1} (instead of {2})")]
         TheFirstGroupKeyOf0ShouldBeOfType1InsteadOf2,
+        Predict,
     }
 }

@@ -1,4 +1,5 @@
-﻿using Signum.Entities;
+﻿using Signum.Engine.Maps;
+using Signum.Entities;
 using Signum.Entities.DynamicQuery;
 using Signum.Entities.MachineLearning;
 using Signum.Entities.UserAssets;
@@ -15,38 +16,47 @@ namespace Signum.Engine.MachineLearning
     {
         public static void CreatePredictorCodifications(PredictorTrainingContext ctx)
         {
+            var isValueSize = ((FieldValue)Schema.Current.Field((PredictorCodificationEntity e) => e.IsValue)).Size.Value;
+            var valueSize = ((FieldValue)Schema.Current.Field((PredictorCodificationEntity e) => e.CodedValues[0])).Size.Value;
+            var groupKey0Size = ((FieldValue)Schema.Current.Field((PredictorCodificationEntity e) => e.GroupKey0)).Size.Value;
+            var groupKey1Size = ((FieldValue)Schema.Current.Field((PredictorCodificationEntity e) => e.GroupKey1)).Size.Value;
+            var groupKey2Size = ((FieldValue)Schema.Current.Field((PredictorCodificationEntity e) => e.GroupKey2)).Size.Value;
+
             ctx.ReportProgress($"Saving Codifications");
             ctx.Columns.Select(a =>
             {
-                string ToStringKey(QueryToken token, object obj)
+                string ToStringValue(QueryToken token, object obj, int limit)
                 {
                     if (token == null || obj == null)
                         return null;
 
-                    return FilterValueConverter.ToString(obj, token.Type, allowSmart: false);
+                    if (obj is Lite<Entity> lite)
+                        return lite.KeyLong().TryStart(limit);
+
+                    return FilterValueConverter.ToString(obj, token.Type, allowSmart: false).TryStart(limit);
                 }
 
-                string GetGroupKey(int index)
+                string GetGroupKey(int index, int limit)
                 {
                     var token = a.SubQuery?.GroupKeys.ElementAtOrDefault(index + 1)?.Token;
                     var obj = a.Keys?.ElementAtOrDefault(index);
-                    return ToStringKey(token?.Token, obj);
+                    return ToStringValue(token?.Token, obj, limit);
                 }
 
                 return new PredictorCodificationEntity
                 {
                     Predictor = ctx.Predictor.ToLite(),
                     Index = a.Index,
-                    Usage = a.Usage,
+                    Usage = a.PredictorColumn.Usage,
                     SubQueryIndex = a.SubQuery == null ? (int?)null : ctx.Predictor.SubQueries.IndexOf(a.SubQuery),
                     OriginalColumnIndex = a.SubQuery == null ?
                         ctx.Predictor.MainQuery.Columns.IndexOf(a.PredictorColumn) :
                         a.SubQuery.Aggregates.IndexOf(a.PredictorColumn),
-                    GroupKey0 = GetGroupKey(0),
-                    GroupKey1 = GetGroupKey(1),
-                    GroupKey2 = GetGroupKey(2),
-                    IsValue = ToStringKey(a.PredictorColumn.Token.Token, a.IsValue),
-                    CodedValues = a.Values.EmptyIfNull().Select(v => ToStringKey(a.PredictorColumn.Token.Token, v)).ToMList()
+                    GroupKey0 = GetGroupKey(0, groupKey0Size),
+                    GroupKey1 = GetGroupKey(1, groupKey1Size),
+                    GroupKey2 = GetGroupKey(2, groupKey2Size),
+                    IsValue = ToStringValue(a.PredictorColumn.Token.Token, a.IsValue, valueSize),
+                    CodedValues = a.Values.EmptyIfNull().Select(v => ToStringValue(a.PredictorColumn.Token.Token, v, valueSize)).ToMList()
                 };
 
             }).BulkInsertQueryIds(a => new { a.Index, a.Usage }, a => a.Predictor == ctx.Predictor.ToLite());
@@ -67,10 +77,8 @@ namespace Signum.Engine.MachineLearning
                 return FilterValueConverter.Parse(str, key.Token.Token.Type, isList: false, allowSmart: false);
             }
 
-            object[] GetKeys(PredictorCodificationEntity cod)
+            object[] GetKeys(PredictorCodificationEntity cod, PredictorSubQueryEntity sq)
             {
-                var sq = predictor.SubQueries[cod.SubQueryIndex.Value];
-
                 switch (sq.GroupKeys.Count)
                 {
                     case 0: return new object[0];
@@ -95,18 +103,17 @@ namespace Signum.Engine.MachineLearning
             }
 
             return (from cod in list
-                    let se = cod.SubQueryIndex != null ? predictor.SubQueries[cod.SubQueryIndex.Value] : null
-                    let pce = se != null ? se.Aggregates[cod.OriginalColumnIndex] : predictor.MainQuery.Columns[cod.OriginalColumnIndex]
+                    let sq = cod.SubQueryIndex != null ? predictor.SubQueries[cod.SubQueryIndex.Value] : null
+                    let pce = sq != null ? sq.Aggregates[cod.OriginalColumnIndex] : predictor.MainQuery.Columns[cod.OriginalColumnIndex]
                     select new PredictorCodification
                     {
                         Index = cod.Index,
                         PredictorColumn = pce,
                         PredictorColumnIndex = cod.Index,
-                        SubQuery = se,
-                        Usage = pce.Usage,
-                        Keys = GetKeys(cod),
-                        IsValue = ParseValue(cod.IsValue, pce),
-                        Values = cod.CodedValues.Select(a => ParseValue(a, pce)).ToArray()
+                        SubQuery = sq,
+                        Keys = sq == null ? null : GetKeys(cod, sq),
+                        IsValue = pce.Encoding == PredictorColumnEncoding.OneHot ? ParseValue(cod.IsValue, pce) : null,
+                        Values = pce.Encoding == PredictorColumnEncoding.Codified ? cod.CodedValues.Select(a => ParseValue(a, pce)).ToArray() : null
                     }).ToList();
         }
 

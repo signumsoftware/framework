@@ -35,7 +35,7 @@ namespace Signum.Entities.MachineLearning
 
         //For encoding values
         [NotNullable, PreserveOrder]
-        [NotNullValidator, NoRepeatValidator]
+        [NotNullValidator, NoRepeatValidator, SqlDbType(Size = 100)]
         public MList<string> CodedValues { get; set; } = new MList<string>();
     }
 }

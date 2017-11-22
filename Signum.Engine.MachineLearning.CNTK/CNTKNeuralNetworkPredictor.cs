@@ -58,16 +58,16 @@ namespace Signum.Engine.MachineLearning.CNTK
             DeviceDescriptor device = GetDevice(nnSettings);
             Variable inputVariable = Variable.InputVariable(new[] { ctx.InputColumns.Count }, DataType.Float, "input");
             Variable outputVariable = Variable.InputVariable(new[] { ctx.OutputColumns.Count }, DataType.Float, "output");
-            Function calculatedOutpus = CreateLinearModel(inputVariable, ctx.OutputColumns.Count, device);
+            Function calculatedOutputs = CreateLinearModel(inputVariable, ctx.OutputColumns.Count, device);
             
 
-            Function loss = CNTKLib.CrossEntropyWithSoftmax(calculatedOutpus, outputVariable);
-            Function evalError = CNTKLib.ClassificationError(calculatedOutpus, outputVariable);
+            Function loss = CNTKLib.CrossEntropyWithSoftmax(calculatedOutputs, outputVariable);
+            Function evalError = CNTKLib.ClassificationError(calculatedOutputs, outputVariable);
 
             // prepare for training
             TrainingParameterScheduleDouble learningRatePerSample = new TrainingParameterScheduleDouble(0.02, 1);
-            IList<Learner> parameterLearners = new List<Learner>() { Learner.SGDLearner(calculatedOutpus.Parameters(), learningRatePerSample) };
-            var trainer = Trainer.CreateTrainer(calculatedOutpus, loss, evalError, parameterLearners);
+            IList<Learner> parameterLearners = new List<Learner>() { Learner.SGDLearner(calculatedOutputs.Parameters(), learningRatePerSample) };
+            var trainer = Trainer.CreateTrainer(calculatedOutputs, loss, evalError, parameterLearners);
 
             var (training, validation) = ctx.SplitTrainValidation();
 
@@ -119,7 +119,7 @@ namespace Signum.Engine.MachineLearning.CNTK
                 }
             }
             
-            CTTKMinibatchEvaluator evaluator = new CTTKMinibatchEvaluator(ctx, inputVariable, calculatedOutpus, device);
+            CTTKMinibatchEvaluator evaluator = new CTTKMinibatchEvaluator(ctx, inputVariable, calculatedOutputs, device);
 
             if (nnSettings.PredictionType == PredictionType.Classification)
             {  
@@ -139,7 +139,7 @@ namespace Signum.Engine.MachineLearning.CNTK
             using (OperationLogic.AllowSave<PredictorEntity>())
                 p.Save();
 
-            calculatedOutpus.Save(fp.FullPhysicalPath());
+            calculatedOutputs.Save(fp.FullPhysicalPath());
         }
 
         private DeviceDescriptor GetDevice(NeuralNetworkSettingsEntity nnSettings)
@@ -297,7 +297,7 @@ namespace Signum.Engine.MachineLearning.CNTK
 
             Value inputValue = GetValue(ctx, input, device);
 
-            var inputVar = calculatedOutputs.FindByName("input");
+            var inputVar = calculatedOutputs.Inputs.SingleEx(i => i.Name == "input");
             var inputDic = new Dictionary<Variable, Value> { { inputVar, inputValue } };
             var outputDic = new Dictionary<Variable, Value> { { calculatedOutputs, null } };
             calculatedOutputs.Evaluate(inputDic, outputDic, device);
@@ -330,7 +330,7 @@ namespace Signum.Engine.MachineLearning.CNTK
                 case PredictorColumnEncoding.None:
                     return Convert.ChangeType(values[cols.SingleEx().Index], key.Token.Token.Type);
                 case PredictorColumnEncoding.OneHot:
-                    return cols.WithMax(a => values[cols.SingleEx().Index]).IsValue;
+                    return cols.WithMax(c => values[c.Index]).IsValue;
                 case PredictorColumnEncoding.Codified:
                     throw new InvalidOperationException("Codified");
                 default:

@@ -180,8 +180,6 @@ namespace Signum.Engine.MachineLearning
     public class PredictorCodification
     {
         public int Index;
-
-        public PredictorColumnUsage Usage;
         
         public PredictorColumnEmbedded PredictorColumn;
         //Index of PredictorColumn in the SimpleColumns/Aggregates
@@ -198,6 +196,19 @@ namespace Signum.Engine.MachineLearning
         public Dictionary<object, int> ValuesToIndex;
 
         public object[] Values;
+
+        public override string ToString()
+        {
+            return new[]
+            {
+                PredictorColumn.Usage.ToString(),
+                Index.ToString(),
+                PredictorColumn.Token.ToString(),
+                Keys == null ? null : $"(Key={Keys.ToString(", ")})",
+                IsValue == null ? null : $"(IsValue={IsValue})",
+                Values == null ? null : $"(Values={Values.Length})",
+            }.NotNull().ToString(" ");
+        }
     }
 
     public class ObjectArrayComparer : IEqualityComparer<object[]>, IComparer<object[]>

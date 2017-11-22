@@ -9,7 +9,9 @@ interface Point {
 interface LineChartSerie {
     color: string; 
     name: string;
-    values: Point[] 
+    values: Point[];
+    minValue?: number;
+    maxValue?: number;
 }
 
 interface LineChartProps {
@@ -54,27 +56,33 @@ export default class LineChart extends React.Component<LineChartProps, { width?:
         let { height, series } = this.props;
         
         var allValues = series.flatMap(s => s.values);
+        
+        return (
+            <svg width={width} height={height}>
+                {series.map((s, i) => this.renderSerie(width, height, s, i))}
+            </svg>
+        );
+    }
 
+    renderSerie(width: number, height: number, s: LineChartSerie, index: number) {
         var scaleX = d3.scaleLinear()
-            .domain([allValues.min(a => a.x), allValues.max(a => a.x)])
+            .domain([s.values.min(a => a.x), s.values.max(a => a.x)])
             .range([2, width - 4]);
 
 
         var scaleY = d3.scaleLinear()
-            .domain([allValues.min(a => a.y), allValues.max(a => a.y)])
+            .domain([s.minValue != null ? s.minValue : s.values.min(a => a.y), s.maxValue != null ? s.maxValue : s.values.max(a => a.y)])
             .range([height - 4, 2]);
 
         var line = d3.line<Point>()
-            .curve(d3.curveCardinal)
+            .curve(d3.curveLinear)
             .x(p => scaleX(p.x))
             .y(p => scaleY(p.y));
 
         return (
-            <svg width={width} height={height}>
-                <g>
-                    {series.map((s, i) => <path className="line" fill="none" d={line(s.values) || undefined} stroke={s.color} strokeWidth={"1.5px"} />)}
-                </g>
-            </svg>
+            <g key={index}>
+                <path className="line" fill="none" d={line(s.values) || undefined} style={{ stroke: s.color, strokeWidth: "1.5px" }} />
+            </g>
         );
     }
 }

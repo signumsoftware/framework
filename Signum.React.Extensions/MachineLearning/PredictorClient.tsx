@@ -62,13 +62,12 @@ export function start(options: { routes: JSX.Element[] }) {
     registerInitializer(CNTKPredictorAlgorithm.NeuralNetwork, a => a.algorithmSettings = NeuralNetworkSettingsEntity.New());
 }
 
-export async function predict(predictor: Lite<PredictorEntity>, entity: Lite<Entity>): Promise<void> {
+export async function predict(predictor: Lite<PredictorEntity>, entity: Lite<Entity> | undefined): Promise<void> {
     var predictRequest = await API.getPredict(predictor, entity);
 
     var modal = await import("./Templates/PredictModal");
 
-    return modal.PredictModal.show(predictor, predictRequest);
-
+    return modal.PredictModal.show(predictRequest, entity);
 }
 
 export function registerInitializer(symbol: PredictorAlgorithmSymbol, initialize: (predictor: PredictorEntity) => void) {
@@ -122,6 +121,7 @@ export interface TrainingProgress {
     Message?: string;
     Progress?: number;
     State: PredictorState;
+    Running: boolean;
 
     EpochProgresses?: Array<(number | undefined)[]>;
     EpochProgressesParsed?: Array<EpochProgress>;

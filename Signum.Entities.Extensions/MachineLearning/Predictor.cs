@@ -238,8 +238,8 @@ namespace Signum.Entities.MachineLearning
 
     public enum PredictorColumnNullHandling
     {
-        Error,
         Zero,
+        Error,
         MinValue,
         AvgValue,
         MaxValue,

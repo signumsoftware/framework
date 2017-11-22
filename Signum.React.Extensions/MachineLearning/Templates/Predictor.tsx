@@ -1,6 +1,7 @@
 ﻿import * as React from 'react'
 import { Tabs, Tab } from 'react-bootstrap';
 import * as numbro from 'numbro';
+import * as OrderUtils from '../../../../Framework/Signum.React/Scripts/Frames/OrderUtils'
 import { classes } from '../../../../Framework/Signum.React/Scripts/Globals'
 import { FormGroup, FormControlStatic, ValueLine, ValueLineType, EntityLine, EntityDetail, EntityCombo, EntityList, EntityRepeater, EntityTable, IRenderButtons, EntityTabRepeater } from '../../../../Framework/Signum.React/Scripts/Lines'
 import { SearchControl, FilterOption, ColumnOption, FindOptions } from '../../../../Framework/Signum.React/Scripts/Search'
@@ -26,7 +27,22 @@ import { is } from '../../../../Framework/Signum.React/Scripts/Signum.Entities';
 import ProgressBar from './ProgressBar'
 import LineChart from './LineChart'
 
-export default class Predictor extends React.Component<{ ctx: TypeContext<PredictorEntity> }, { queryDescription?: QueryDescription }> {
+export default class Predictor extends React.Component<{ ctx: TypeContext<PredictorEntity> }, { queryDescription?: QueryDescription }> implements IRenderButtons {
+
+    handleClick = () => {
+        Finder.find({ queryName: this.state.queryDescription!.queryKey })
+            .then(lite => PredictorClient.predict(toLite(this.props.ctx.value), lite))
+            .done();
+    }
+
+    renderButtons(ctx: ButtonsContext): (React.ReactElement<any> | undefined)[] {
+        debugger;
+        if ((ctx.pack.entity as PredictorEntity).state == "Trained") {
+            return [OrderUtils.setOrder(10000, <button className="btn btn-info" onClick={this.handleClick}><i className="fa fa-lightbulb-o"></i>&nbsp;{PredictorMessage.Predict.niceToString()}</button >)];
+        } else {
+            return [];
+        }
+    }
 
     constructor(props: any) {
         super(props);
@@ -272,11 +288,17 @@ export class TrainingProgressComponent extends React.Component<TrainingProgressC
         return (
             <div>
                 {tp && tp.EpochProgressesParsed && <LineChart height={200} series={[{
-                    color: "rgb(0,0,0)",
-                    name: "data",
-                    values: tp.EpochProgressesParsed.map(ep => ({ x: ep.TrainingExamples, y: ep.LossTraining }))
-                },]} />}
-                <ProgressBar color={tp == null ? "info" : "default"}
+                    color: "black",
+                    name: PredictorEpochProgressEntity.nicePropertyName(a => a.lossTraining),
+                    values: tp.EpochProgressesParsed.map(ep => ({ x: ep.TrainingExamples, y: ep.LossTraining })),
+                }, {
+                    color: "darkgray",
+                    name: PredictorEpochProgressEntity.nicePropertyName(a => a.evaluationTraining),
+                    values: tp.EpochProgressesParsed.map(ep => ({ x: ep.TrainingExamples, y: ep.EvaluationTraining })),
+                    minValue: 0,
+                    maxValue: 1,
+                    }]} />}
+                <ProgressBar color={tp == null || tp.Running == false ? "info" : "default"}
                     value={tp && tp.Progress}
                     message={tp == null ? PredictorMessage.StartingTraining.niceToString() : tp.Message}
                 />
@@ -327,10 +349,16 @@ export class EpochProgressComponent extends React.Component<EpochProgressCompone
         return (
             <div>
                 {eps && <LineChart height={200} series={[{
-                    color: "rgb(0,0,0)",
-                    name: "data",
+                    color: "black",
+                    name: PredictorEpochProgressEntity.nicePropertyName(a => a.lossTraining),
                     values: eps.map(ep => ({ x: ep.TrainingExamples, y: ep.LossTraining }))
-                },]} />}
+                }, {
+                    color: "darkgray",
+                    name: PredictorEpochProgressEntity.nicePropertyName(a => a.evaluationTraining),
+                    values: eps.map(ep => ({ x: ep.TrainingExamples, y: ep.EvaluationTraining })),
+                    minValue: 0,
+                    maxValue: 1,
+                }]} />}
             </div>
         );
     }

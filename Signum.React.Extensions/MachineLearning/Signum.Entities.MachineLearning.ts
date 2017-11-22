@@ -87,8 +87,8 @@ export type PredictorColumnEncoding =
 
 export const PredictorColumnNullHandling = new EnumType<PredictorColumnNullHandling>("PredictorColumnNullHandling");
 export type PredictorColumnNullHandling =
-    "Error" |
     "Zero" |
+    "Error" |
     "MinValue" |
     "AvgValue" |
     "MaxValue";
@@ -168,6 +168,7 @@ export module PredictorMessage {
     export const _0IsRequiredFor1 = new MessageKey("PredictorMessage", "_0IsRequiredFor1");
     export const _0ShouldBeDivisibleBy12 = new MessageKey("PredictorMessage", "_0ShouldBeDivisibleBy12");
     export const TheFirstGroupKeyOf0ShouldBeOfType1InsteadOf2 = new MessageKey("PredictorMessage", "TheFirstGroupKeyOf0ShouldBeOfType1InsteadOf2");
+    export const Predict = new MessageKey("PredictorMessage", "Predict");
 }
 
 export module PredictorOperation {

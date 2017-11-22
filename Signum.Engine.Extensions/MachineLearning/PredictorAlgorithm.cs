@@ -15,6 +15,7 @@ namespace Signum.Engine.MachineLearning
     {
         public string Message;
         public decimal? Progress;
+        public bool Running;
 
         public PredictorState State { get; set; }
 
@@ -178,6 +179,16 @@ namespace Signum.Engine.MachineLearning
                 LossValidation = lossValidation,
                 EvaluationValidation = evaluationValidation,
             });
+        }
+
+        public List<object[]> GetProgessArray()
+        {
+            var list = new List<object[]>(Progresses.Count);
+            for (int i = 0; i < Progresses.Count; i++) //Using a for to avoid collection modified protection
+            {
+                list.Add(Progresses[i].ToObjectArray());
+            }
+            return list;
         }
     }
 
