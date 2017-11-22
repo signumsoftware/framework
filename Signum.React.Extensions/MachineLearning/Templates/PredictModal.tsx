@@ -60,25 +60,19 @@ export class PredictModal extends React.Component<PredictModalProps, PredictModa
                 <Modal.Header closeButton={true}>
                     <h4 className={"modal-title"}>
                         {e && (<a href={Navigator.navigateRoute(e)} target="_blank" style={{ float: "right", marginRight: "20px" }}>{e.toStr}</a>)}
-                        {p.predictor.toStr}<br/>
+                        {p.predictor.toStr}<br />
                         <small>{PredictorEntity.niceName()}&nbsp;{p.predictor.id} (<a href={Navigator.navigateRoute(p.predictor)} target="_blank">{EntityControlMessage.View.niceToString()}</a>)</small>
                     </h4>
                 </Modal.Header>
                 <Modal.Body>
                     <div className="form-horizontal">
-                        {p.columns.map((c, i) => <PredictLine key={i} sctx={sctx} hasOriginal={p.hasOriginal} column={c} />)}
+                        {p.columns.filter(c => c.usage == "Input").map((c, i) => <PredictLine key={i} sctx={sctx} hasOriginal={p.hasOriginal} column={c} onChange={this.handlePredictClick} />)}
+                    </div>
+                    {p.subQueries.map((c, i) => <PredictTable key={i} sctx={sctx} table={c} onChange={this.handlePredictClick}/>)}
+                    <div className="form-horizontal">
+                        {p.columns.filter(c => c.usage == "Output").map((c, i) => <PredictLine key={i} sctx={sctx} hasOriginal={p.hasOriginal} column={c} onChange={this.handlePredictClick} />)}
                     </div>
                 </Modal.Body>
-                <Modal.Footer>
-                    <div>
-                        <button
-                            className="btn btn-info sf-close-button sf-ok-button"
-                            onClick={() => this.handlePredictClick()}
-                            name="accept">
-                            <i className="fa fa-lightbulb-o"/>&nbsp;Predict
-                        </button>
-                    </div>
-                </Modal.Footer>
             </Modal>
         );
     }
@@ -92,6 +86,7 @@ interface PredictLineProps {
     column: PredictColumn;
     sctx: StyleContext;
     hasOriginal: boolean;
+    onChange: () => void;
 }
 
 export default class PredictLine extends React.Component<PredictLineProps> {
@@ -116,12 +111,54 @@ export default class PredictLine extends React.Component<PredictLineProps> {
             const ctx = new TypeContext<any>(this.props.sctx, { readOnly: column.usage == "Output" }, undefined as any, Binding.create(column, a => a.value));
             return (
                 <FormGroup ctx={ctx} labelText={column.token.niceName} labelHtmlAttributes={{ title: fullNiceName(column.token) }}>
-                    <PredictValue token={column.token} ctx={ctx} label={column.usage == "Output" ? <i className="fa fa-lightbulb-o"></i> : undefined} />
+                    <PredictValue token={column.token} ctx={ctx} label={column.usage == "Output" ? <i className="fa fa-lightbulb-o"></i> : undefined} onChange={this.props.onChange} />
                 </FormGroup>
             );
         }
     }
 }
+
+
+interface PredictTableProps {
+    sctx: StyleContext;
+    table: PredictSubQueryTable;
+    onChange: () => void;
+}
+
+export class PredictTable extends React.Component<PredictTableProps> {
+    render() {
+        var { subQuery, columnHeaders, rows } = this.props.table;
+        return (
+            <div>
+                <h4>{subQuery.toStr}</h4>
+                <div style={{ maxHeight: "500px", overflowY: "scroll", marginBottom: "10px" }}>
+                    <table className="table table-condensed">
+                        <thead>
+                            <tr>
+                                {columnHeaders.map((he, i) => <th key={i} className={"header-" + he.headerType.toLowerCase()}>
+                                    {he.headerType == "Key" && <i className="fa fa-key" style={{ marginRight: "10px" }}></i>}
+                                    {he.token.niceName}
+                                </th>)}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {
+                                rows.map((row, j) => <tr key={j}>
+                                    {row.map((v, i) => {
+                                        var ch = columnHeaders[i];
+                                        const ctx = new TypeContext<any>(this.props.sctx, { readOnly: ch.headerType == "Key" || ch.headerType == "Output" }, undefined as any, new Binding(row, i));
+                                        return <td><PredictValue ctx={ctx} token={ch.token} onChange={this.props.onChange} /></td>;
+                                    })}
+                                </tr>)
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        );
+    }
+}
+
 
 function fullNiceName(token: QueryToken): string {
 
@@ -133,15 +170,15 @@ function fullNiceName(token: QueryToken): string {
 interface PredictValueProps {
     token: QueryToken;
     ctx: TypeContext<any>;
-    onValueChanged?: () => void;
+    onChange?: () => void;
     label?: React.ReactElement<any>;
 }
 
 export class PredictValue extends React.Component<PredictValueProps> {
 
     handleValueChange = () => {
-        if (this.props.onValueChanged)
-            this.props.onValueChanged();
+        if (this.props.onChange)
+            this.props.onChange();
     }
 
     render() {

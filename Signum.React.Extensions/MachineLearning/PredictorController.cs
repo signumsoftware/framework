@@ -197,7 +197,7 @@ namespace Signum.React.MachineLearning
                 {
                     token = new QueryTokenTS(c.Token.Token, true),
                     usage = c.Usage,
-                    value = c.Usage == PredictorColumnUsage.Input ? inputs.MainQueryValues.GetOrThrow(c.Token.Token) :
+                    value = c.Usage == PredictorColumnUsage.Input ? inputs?.MainQueryValues.GetOrThrow(c.Token.Token) :
                     originalOutputs == null ? predictedOutputs?.MainQueryValues.GetOrThrow(c.Token.Token) :
                     new PredictOutputTuple
                     {
@@ -212,7 +212,7 @@ namespace Signum.React.MachineLearning
                     var originalOutputsSQ = originalOutputs?.SubQueries.GetOrThrow(sq);
                     var predictedOutputsSQ = predictedOutputs?.SubQueries.GetOrThrow(sq);
 
-                    var columnHeaders = sq.GroupKeys.Select(gk => new PredictSubQueryHeaderTS { token = new QueryTokenTS(gk.Token.Token, true), headerType = PredictorHeaderType.Key })
+                    var columnHeaders = sq.GroupKeys.Skip(1).Select(gk => new PredictSubQueryHeaderTS { token = new QueryTokenTS(gk.Token.Token, true), headerType = PredictorHeaderType.Key })
                         .Concat(sq.Aggregates.Select(agg => new PredictSubQueryHeaderTS { token = new QueryTokenTS(agg.Token.Token, true), headerType = agg.Usage == PredictorColumnUsage.Input ? PredictorHeaderType.Input : PredictorHeaderType.Output }))
                         .ToList();
 
@@ -230,8 +230,8 @@ namespace Signum.React.MachineLearning
         {
             var row = new object[sq.GroupKeys.Count - 1 + sq.Aggregates.Count];
 
-            var inputsGR = inputs?.SubQueryGroups.GetOrThrow(key);
-            var originalOutputsGR = originalOutputs?.SubQueryGroups.GetOrThrow(key);
+            var inputsGR = inputs?.SubQueryGroups.TryGetC(key);
+            var originalOutputsGR = originalOutputs?.SubQueryGroups.TryGetC(key);
             var predictedOutputsGR = predictedOutputs?.SubQueryGroups.GetOrThrow(key);
 
             for (int i = 0; i < sq.GroupKeys.Count - 1; i++)
@@ -242,12 +242,12 @@ namespace Signum.React.MachineLearning
             for (int i = 0; i < sq.Aggregates.Count; i++)
             {
                 var a = sq.Aggregates[i];
-                row[i + key.Length] = a.Usage == PredictorColumnUsage.Input ? inputsGR.GetOrThrow(a.Token.Token) :
+                row[i + key.Length] = a.Usage == PredictorColumnUsage.Input ? inputsGR?.GetOrThrow(a.Token.Token) :
                     originalOutputs == null ? predictedOutputsGR.GetOrThrow(a.Token.Token) :
                     new PredictOutputTuple
                     {
-                        original = originalOutputsGR.GetOrThrow(a.Token.Token),
                         predicted = predictedOutputsGR.GetOrThrow(a.Token.Token),
+                        original = originalOutputsGR?.GetOrThrow(a.Token.Token),
                     };
             }
 
@@ -328,8 +328,8 @@ public class PredictSubQueryTableTS
 
 public class PredictOutputTuple
 {
-    public object original;
     public object predicted;
+    public object original;
 }
 
 public class PredictSubQueryHeaderTS

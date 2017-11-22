@@ -25,6 +25,9 @@ namespace Signum.Engine.MachineLearning
                 using (var t = Transaction.ForceNew())
                 {
                     var p = predictor.Retrieve();
+                    if (p.State != PredictorState.Trained)
+                        throw new InvalidOperationException($"Predictor '{p.Name}' not trained");
+
                     var codifications = p.RetrievePredictorCodifications();
                     var ppc = new PredictorPredictContext(p,  PredictorLogic.Algorithms.GetOrThrow(p.Algorithm), codifications);
                     ppc.Algorithm.LoadModel(ppc);

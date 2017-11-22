@@ -53,27 +53,52 @@ namespace Signum.Engine.MachineLearning.CNTK
         {
             var p = ctx.Predictor;
 
-            var nnSettings = (NeuralNetworkSettingsEntity)p.AlgorithmSettings;
+            var nn = (NeuralNetworkSettingsEntity)p.AlgorithmSettings;
 
-            DeviceDescriptor device = GetDevice(nnSettings);
+            DeviceDescriptor device = GetDevice(nn);
             Variable inputVariable = Variable.InputVariable(new[] { ctx.InputColumns.Count }, DataType.Float, "input");
             Variable outputVariable = Variable.InputVariable(new[] { ctx.OutputColumns.Count }, DataType.Float, "output");
-            Function calculatedOutputs = CreateLinearModel(inputVariable, ctx.OutputColumns.Count, device);
             
+            Variable currentVar = inputVariable;
+            nn.HiddenLayers.ForEach((layer, i) =>
+            {
+                currentVar = NetworkBuilder.DenseLayer(currentVar, layer.Size, device, layer.Activation, p.Settings.Seed ?? 0, "hidden" + i);
+            });
+            Function calculatedOutputs = NetworkBuilder.DenseLayer(currentVar, ctx.OutputColumns.Count, device, nn.OutputActivation, p.Settings.Seed ?? 0, "output");
 
-            Function loss = CNTKLib.CrossEntropyWithSoftmax(calculatedOutputs, outputVariable);
-            Function evalError = CNTKLib.ClassificationError(calculatedOutputs, outputVariable);
+            Function loss;
+            Function evalError; 
+            if (nn.PredictionType == PredictionType.Regression)
+            {
+                loss = CNTKLib.SquaredError(calculatedOutputs, outputVariable);
+                evalError = CNTKLib.SquaredError(calculatedOutputs, outputVariable);
+            }
+            else if (nn.PredictionType == PredictionType.Classification)
+            {
+                loss = CNTKLib.CrossEntropyWithSoftmax(calculatedOutputs, outputVariable);
+                evalError = CNTKLib.ClassificationError(calculatedOutputs, outputVariable);
+            }
+            else
+            {
+                throw new InvalidOperationException("Unexpected " + nn.PredictionType);
+            }
 
             // prepare for training
-            TrainingParameterScheduleDouble learningRatePerSample = new TrainingParameterScheduleDouble(0.02, 1);
-            IList<Learner> parameterLearners = new List<Learner>() { Learner.SGDLearner(calculatedOutputs.Parameters(), learningRatePerSample) };
-            var trainer = Trainer.CreateTrainer(calculatedOutputs, loss, evalError, parameterLearners);
+            Learner learner = nn.LearningMomentum == null ?
+                (Learner)Learner.SGDLearner(calculatedOutputs.Parameters(),
+                new TrainingParameterScheduleDouble(nn.LearningRate, (uint)nn.MinibatchSize)) :
+
+                (Learner)Learner.MomentumSGDLearner(calculatedOutputs.Parameters(),
+                new TrainingParameterScheduleDouble(nn.LearningRate, (uint)nn.MinibatchSize),
+                new TrainingParameterScheduleDouble(nn.LearningMomentum.Value, (uint)nn.MinibatchSize), false);
+
+            Trainer trainer = Trainer.CreateTrainer(calculatedOutputs, loss, evalError, new List<Learner>() { learner });
 
             var (training, validation) = ctx.SplitTrainValidation();
 
-            var totalMinibatches = (int)Math.Ceiling(training.Count / (float)nnSettings.MinibatchSize);
-            var minibachtSize = nnSettings.MinibatchSize;
-            var numMinibatches = nnSettings.NumMinibatches;
+            var totalMinibatches = (int)Math.Ceiling(training.Count / (float)nn.MinibatchSize);
+            var minibachtSize = nn.MinibatchSize;
+            var numMinibatches = nn.NumMinibatches;
             
             int examples = 0;
 
@@ -94,12 +119,24 @@ namespace Signum.Engine.MachineLearning.CNTK
 
                     examples += trainSlice.Count;
 
-                    var isLast = i == numMinibatches - 1;
-                    if (i == numMinibatches - 1 || (i % nnSettings.SaveProgressEvery) == 0)
+                    var epoch = new EpochProgress
                     {
-                        if((i % nnSettings.SaveValidationProgressEvery) == 0)
-                        {
+                        Ellapsed = sw.ElapsedMilliseconds,
+                        Epoch = i,
+                        TrainingExamples = examples,
+                        LossTraining = trainer.PreviousMinibatchLossAverage(),
+                        EvaluationTraining = trainer.PreviousMinibatchEvaluationAverage(),
+                        LossValidation = null,
+                        EvaluationValidation = null,
+                    };
 
+                    ctx.Progresses.Add(epoch);
+
+                    var isLast = i == numMinibatches - 1;
+                    if (i == numMinibatches - 1 || (i % nn.SaveProgressEvery) == 0)
+                    {
+                        if((i % nn.SaveValidationProgressEvery) == 0)
+                        {
                         }
 
                         if(examples != trainer.TotalNumberOfSamplesSeen())
@@ -107,29 +144,24 @@ namespace Signum.Engine.MachineLearning.CNTK
 
                         }
 
-                        ctx.AddPredictorProgress(i,
-                            examples,
-                            sw,
-                            lossTraining: trainer.PreviousMinibatchLossAverage(),
-                            evaluationTraining: trainer.PreviousMinibatchEvaluationAverage(),
-                            lossValidation: null,
-                            evaluationValidation: null
-                        );
+                        epoch.SaveEntity(ctx.Predictor);
                     }
                 }
             }
+
+            p = ctx.Predictor = ctx.Predictor.ToLite().Retrieve();
             
             CTTKMinibatchEvaluator evaluator = new CTTKMinibatchEvaluator(ctx, inputVariable, calculatedOutputs, device);
 
-            if (nnSettings.PredictionType == PredictionType.Classification)
+            if (nn.PredictionType == PredictionType.Classification)
             {  
-                ctx.Predictor.ClassificationValidation = evaluator.ClasificationMetrics(validation, nameof(ctx.Predictor.ClassificationValidation));
-                ctx.Predictor.ClassificationTraining = evaluator.ClasificationMetrics(training, nameof(ctx.Predictor.ClassificationTraining));
+                p.ClassificationValidation = evaluator.ClasificationMetrics(validation, nameof(p.ClassificationValidation));
+                p.ClassificationTraining = evaluator.ClasificationMetrics(training, nameof(p.ClassificationTraining));
             }
             else
             {
-                ctx.Predictor.RegressionValidation =null;
-                ctx.Predictor.ClassificationTraining = null;
+                p.RegressionValidation =null;
+                p.ClassificationTraining = null;
             }
 
             var fp = new Entities.Files.FilePathEmbedded(PredictorFileType.PredictorFile, "Model.cntk", new byte[0]);
@@ -141,20 +173,11 @@ namespace Signum.Engine.MachineLearning.CNTK
 
             calculatedOutputs.Save(fp.FullPhysicalPath());
         }
-
+        
         private DeviceDescriptor GetDevice(NeuralNetworkSettingsEntity nnSettings)
         {
             return DeviceDescriptor.CPUDevice;
         }
-
-        private static bool HasOneHot(PredictorEntity p)
-        {
-            return p.MainQuery.Columns.Any(a => a.Encoding == PredictorColumnEncoding.OneHot) ||
-                p.SubQueries.Any(mc => mc.Aggregates.Any(a => a.Encoding == PredictorColumnEncoding.OneHot));
-        }
-
-
-       
         
         static List<T> Slice<T>(List<T> rows, int startIndex, int length)
         {
@@ -210,14 +233,6 @@ namespace Signum.Engine.MachineLearning.CNTK
             return Value.CreateBatch<float>(new int[] { columns.Count }, values, device);
         }
 
-        static Function CreateLinearModel(Variable input, int outputDim, DeviceDescriptor device)
-        {
-            int inputDim = input.Shape[0];
-            var weightParam = new Parameter(new int[] { outputDim, inputDim }, DataType.Float, 1, device, "W");
-            var biasParam = new Parameter(new int[] { outputDim }, DataType.Float, 0, device, "b");
-
-            return CNTKLib.Times(weightParam, input) + biasParam;
-        }
 
         class CTTKMinibatchEvaluator
         {
@@ -310,27 +325,30 @@ namespace Signum.Engine.MachineLearning.CNTK
             return result;
         }
 
-        private PredictDictionary GetPredictionDictionary(float[] values, PredictorPredictContext ctx)
+        private PredictDictionary GetPredictionDictionary(float[] outputValues, PredictorPredictContext ctx)
         {
             return new PredictDictionary
             {
-                MainQueryValues = ctx.MainQueryOutputColumn.SelectDictionary(col => col.Token.Token, (col, list) => FloatToValue(col, list, values)),
-                SubQueries = ctx.SubQueryOutputColumn.SelectDictionary(subQuery => subQuery, sqCtx => new PredictSubQueryDictionary
+                MainQueryValues = ctx.MainQueryOutputColumn.SelectDictionary(col => col.Token.Token, (col, list) => FloatToValue(col, list, outputValues)),
+                SubQueries = ctx.Predictor.SubQueries.ToDictionary(sq => sq, sq => new PredictSubQueryDictionary
                 {
-                    SubQuery = sqCtx.SubQuery,
-                    SubQueryGroups = sqCtx.Groups.SelectDictionary(grKey => grKey, dic => dic.ToDictionary(a => a.Key.Token.Token, a => FloatToValue(a.Key, a.Value, values)))
+                    SubQuery = sq,
+                    SubQueryGroups = ctx.SubQueryOutputColumn.TryGetC(sq)?.Groups.SelectDictionary(grKey => grKey, dic => dic
+                    .Where(a => a.Key.Usage == PredictorColumnUsage.Output)
+                    .ToDictionary(a => a.Key.Token.Token, a => FloatToValue(a.Key, a.Value, outputValues))
+                    )
                 })
             };
         }
 
-        private object FloatToValue(PredictorColumnEmbedded key, List<PredictorCodification> cols, float[] values)
+        private object FloatToValue(PredictorColumnEmbedded key, List<PredictorCodification> cols, float[] outputValues)
         {
             switch (key.Encoding)
             {
                 case PredictorColumnEncoding.None:
-                    return Convert.ChangeType(values[cols.SingleEx().Index], key.Token.Token.Type);
+                    return ReflectionTools.ChangeType(outputValues[cols.SingleEx().Index], key.Token.Token.Type);
                 case PredictorColumnEncoding.OneHot:
-                    return cols.WithMax(c => values[c.Index]).IsValue;
+                    return cols.WithMax(c => outputValues[c.Index]).IsValue;
                 case PredictorColumnEncoding.Codified:
                     throw new InvalidOperationException("Codified");
                 default:

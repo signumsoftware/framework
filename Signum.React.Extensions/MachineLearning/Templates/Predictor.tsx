@@ -36,7 +36,6 @@ export default class Predictor extends React.Component<{ ctx: TypeContext<Predic
     }
 
     renderButtons(ctx: ButtonsContext): (React.ReactElement<any> | undefined)[] {
-        debugger;
         if ((ctx.pack.entity as PredictorEntity).state == "Trained") {
             return [OrderUtils.setOrder(10000, <button className="btn btn-info" onClick={this.handleClick}><i className="fa fa-lightbulb-o"></i>&nbsp;{PredictorMessage.Predict.niceToString()}</button >)];
         } else {

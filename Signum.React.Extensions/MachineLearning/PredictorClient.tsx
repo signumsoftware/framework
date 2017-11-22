@@ -32,6 +32,7 @@ export function start(options: { routes: JSX.Element[] }) {
     Navigator.addSettings(new EntitySettings(PredictorSubQueryEntity, e => import('./Templates/PredictorSubQuery')));
     Navigator.addSettings(new EntitySettings(PredictorRegressionMetricsEmbedded, e => import('./Templates/PredictorRegressionMetrics')));
     Navigator.addSettings(new EntitySettings(PredictorClassificationMetricsEmbedded, e => import('./Templates/PredictorClassificationMetrics')));
+    Navigator.addSettings(new EntitySettings(NeuralNetworkSettingsEntity, e => import('./Templates/NeuralNetworkSettings')));
 
     QuickLinks.registerQuickLink(PredictorEntity, ctx => new QuickLinks.QuickLinkAction(
         PredictorMessage.DownloadCsv.niceToString(),
@@ -59,7 +60,18 @@ export function start(options: { routes: JSX.Element[] }) {
     }));
 
     registerInitializer(AccordPredictorAlgorithm.DiscreteNaiveBayes, a => a.algorithmSettings = NaiveBayesSettingsEntity.New());
-    registerInitializer(CNTKPredictorAlgorithm.NeuralNetwork, a => a.algorithmSettings = NeuralNetworkSettingsEntity.New());
+    registerInitializer(CNTKPredictorAlgorithm.NeuralNetwork, a => a.algorithmSettings = NeuralNetworkSettingsEntity.New({
+        predictionType: "Regression",
+
+        learningRate: 0.2,
+        learningMomentum: null,
+
+        minibatchSize: 1000,
+        numMinibatches: 100,
+
+        saveProgressEvery: 5,
+        saveValidationProgressEvery: 10,
+    }));
 }
 
 export async function predict(predictor: Lite<PredictorEntity>, entity: Lite<Entity> | undefined): Promise<void> {
@@ -153,7 +165,7 @@ export interface PredictRequest {
     hasOriginal: boolean;
     predictor: Lite<PredictorEntity>;
     columns: PredictColumn[] 
-    subQuery: PredictSubQueryTable[]
+    subQueries: PredictSubQueryTable[]
 }
 
 export interface PredictColumn {
@@ -169,8 +181,8 @@ export interface PredictSubQueryTable {
 }
 
 export interface PredictOutputTuple {
-    original: any;
     predicted: any;
+    original: any;
 }
 
 export interface PredictSubQueryHeader {
