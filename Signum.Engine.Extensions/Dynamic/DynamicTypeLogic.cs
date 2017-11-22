@@ -206,6 +206,7 @@ namespace Signum.Engine.Dynamic
         public string TypeName { get; private set; }
         public DynamicBaseType BaseType { get; private set; }
         public DynamicTypeDefinition Def { get; private set; }
+        public bool IsTreeEntity { get; private set; }
 
         public DynamicTypeCodeGenerator(string @namespace, string typeName, DynamicBaseType baseType, DynamicTypeDefinition def, HashSet<string> usings)
         {
@@ -214,6 +215,7 @@ namespace Signum.Engine.Dynamic
             this.TypeName = typeName;
             this.BaseType = baseType;
             this.Def = def;
+            this.IsTreeEntity = def != null && def.CustomInheritance != null && def.CustomInheritance.Code.Contains("TreeEntity");
         }
 
         public string GetFileCode()
@@ -287,6 +289,9 @@ namespace Signum.Engine.Dynamic
 
         public string GetEntityOperation()
         {
+            if (this.IsTreeEntity)
+                return null;
+
             if (this.Def.OperationCreate == null &&
                  this.Def.OperationSave == null &&
                  this.Def.OperationDelete == null)
@@ -588,6 +593,7 @@ namespace Signum.Engine.Dynamic
         public string TypeName { get; private set; }
         public DynamicBaseType BaseType { get; private set; }
         public DynamicTypeDefinition Def { get; private set; }
+        public bool IsTreeEntity { get; private set; }
 
         public Dictionary<string, string> AlreadyTranslated { get; set; }
         public Dictionary<string, Tuple<string, string>> Formatted { get; set; }
@@ -599,6 +605,7 @@ namespace Signum.Engine.Dynamic
             this.TypeName = typeName;
             this.BaseType = baseType;
             this.Def = def;
+            this.IsTreeEntity = def != null && def.CustomInheritance != null && def.CustomInheritance.Code.Contains("TreeEntity");
         }
 
         public string GetFileCode()
@@ -622,7 +629,6 @@ namespace Signum.Engine.Dynamic
                 sb.AppendLine($"    }}");
             }
 
-
             sb.AppendLine($"    public static class {this.TypeName}Logic");
             sb.AppendLine($"    {{");
             sb.AppendLine($"        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)");
@@ -633,17 +639,20 @@ namespace Signum.Engine.Dynamic
             if (this.BaseType == DynamicBaseType.Entity)
             {
                 sb.AppendLine(GetInclude().Indent(16));
+            }
 
-                if (complexFields != null)
+            if (this.Def.CustomStartCode != null)
+                sb.AppendLine(this.Def.CustomStartCode.Code.Indent(16));
+
+            if (this.BaseType == DynamicBaseType.Entity)
+            {
+                if (complexFields.HasItems())
                     sb.AppendLine(RegisterComplexQuery(complexFields).Indent(16));
 
                 var complexOperations = RegisterComplexOperations();
                 if (complexOperations != null)
                     sb.AppendLine(complexOperations.Indent(16));
             }
-
-            if (this.Def.CustomStartCode != null)
-                sb.AppendLine(this.Def.CustomStartCode.Code.Indent(16));
 
             sb.AppendLine($"            }}");
             sb.AppendLine($"        }}");
@@ -662,11 +671,14 @@ namespace Signum.Engine.Dynamic
             StringBuilder sb = new StringBuilder();
             sb.AppendLine($"var fi = sb.Include<{this.TypeName}Entity>()");
 
-            if (this.Def.OperationSave != null && string.IsNullOrWhiteSpace(this.Def.OperationSave.Execute.Trim()))
-                sb.AppendLine($"    .WithSave({this.TypeName}Operation.Save)");
+            if (!this.IsTreeEntity)
+            {
+                if (this.Def.OperationSave != null && string.IsNullOrWhiteSpace(this.Def.OperationSave.Execute.Trim()))
+                    sb.AppendLine($"    .WithSave({this.TypeName}Operation.Save)");
 
-            if (this.Def.OperationDelete != null && string.IsNullOrWhiteSpace(this.Def.OperationDelete.Delete.Trim()))
-                sb.AppendLine($"    .WithDelete({this.TypeName}Operation.Delete)");
+                if (this.Def.OperationDelete != null && string.IsNullOrWhiteSpace(this.Def.OperationDelete.Delete.Trim()))
+                    sb.AppendLine($"    .WithDelete({this.TypeName}Operation.Delete)");
+            }
 
             var mcui = this.Def.MultiColumnUniqueIndex;
             if (mcui != null)
@@ -741,10 +753,20 @@ namespace Signum.Engine.Dynamic
             if (!string.IsNullOrWhiteSpace(operationConstruct))
             {
                 sb.AppendLine();
-                sb.AppendLine("new Graph<{0}Entity>.Construct({0}Operation.Create)".FormatWith(this.TypeName));
-                sb.AppendLine("{");
-                sb.AppendLine("    Construct = (args) => {\r\n" + operationConstruct.Indent(8) + "\r\n}");
-                sb.AppendLine("}.Register();");
+
+                if (this.IsTreeEntity)
+                {
+                    sb.AppendLine("Graph<{0}Entity>.Construct.Untyped(TreeOperation.CreateRoot).Do(g => ".FormatWith(this.TypeName));
+                    sb.AppendLine("    g.Construct = (args) => {\r\n" + operationConstruct.Indent(8) + "\r\n}");
+                    sb.AppendLine(").Register(replace: true);");
+                }
+                else
+                {
+                    sb.AppendLine("new Graph<{0}Entity>.Construct({0}Operation.Create)".FormatWith(this.TypeName));
+                    sb.AppendLine("{");
+                    sb.AppendLine("    Construct = (args) => {\r\n" + operationConstruct.Indent(8) + "\r\n}");
+                    sb.AppendLine("}.Register();");
+                }
             }
 
             var operationExecute = this.Def.OperationSave?.Execute.Trim();
@@ -752,7 +774,7 @@ namespace Signum.Engine.Dynamic
             if (!string.IsNullOrWhiteSpace(operationExecute) || !string.IsNullOrWhiteSpace(operationCanExecute))
             {
                 sb.AppendLine();
-                sb.AppendLine("new Graph<{0}Entity>.Execute({0}Operation.Save)".FormatWith(this.TypeName));
+                sb.AppendLine("new Graph<{0}Entity>.Execute({1}Operation.Save)".FormatWith(this.TypeName, (this.IsTreeEntity ? "Tree" : this.TypeName)));
                 sb.AppendLine("{");
 
                 if (!string.IsNullOrWhiteSpace(operationCanExecute))
@@ -761,7 +783,7 @@ namespace Signum.Engine.Dynamic
                 sb.AppendLine("    AllowsNew = true,");
                 sb.AppendLine("    Lite = false,");
                 sb.AppendLine("    Execute = (e, args) => {\r\n" + operationExecute?.Indent(8) + "\r\n}");
-                sb.AppendLine("}.Register();");
+                sb.AppendLine("}." + (this.IsTreeEntity ? "Register(replace: true)" : "Register()") + ";");
             }
 
             var operationDelete = this.Def.OperationDelete?.Delete.Trim();
@@ -769,14 +791,14 @@ namespace Signum.Engine.Dynamic
             if (!string.IsNullOrWhiteSpace(operationDelete) || !string.IsNullOrEmpty(operationCanDelete))
             {
                 sb.AppendLine();
-                sb.AppendLine("new Graph<{0}Entity>.Delete({0}Operation.Delete)".FormatWith(this.TypeName));
+                sb.AppendLine("new Graph<{0}Entity>.Delete({1}Operation.Delete)".FormatWith(this.TypeName, (this.IsTreeEntity ? "Tree" : this.TypeName)));
                 sb.AppendLine("{");
 
                 if (!string.IsNullOrWhiteSpace(operationCanDelete))
                     sb.AppendLine($"    CanDelete = e => {operationCanDelete},");
 
                 sb.AppendLine("    Delete = (e, args) => {\r\n" + (operationDelete.DefaultText("e.Delete();")).Indent(8) + "\r\n}");
-                sb.AppendLine("}.Register();");
+                sb.AppendLine("}." + (this.IsTreeEntity ? "Register(replace: true)" : "Register()") + ";");
             }
 
             return sb.ToString();
