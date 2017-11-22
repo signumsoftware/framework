@@ -412,7 +412,7 @@ function numericTextBox(vl: ValueLine, validateKey: React.KeyboardEventHandler<a
         placeholder: s.ctx.placeholderLabels ? asString(s.labelText) : undefined,
         ...vl.props.valueHtmlAttributes
     } as React.HTMLAttributes<HTMLInputElement>;
-
+    
     return (
         <FormGroup ctx={s.ctx} labelText={s.labelText} helpBlock={s.helpBlock} htmlAttributes={{ ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
             {ValueLine.withItemGroup(vl,
@@ -460,7 +460,7 @@ export class NumericTextBox extends React.Component<NumericTextBoxProps, { text?
     handleOnBlur = (e: React.SyntheticEvent<any>) => {
         const input = e.currentTarget as HTMLInputElement;
 
-        let value = input.value;
+        let value = ValueLine.autoFixString(input.value, false);
 
         if (this.props.format && this.props.format.endsWith("%"))
         {
