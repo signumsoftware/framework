@@ -62,7 +62,14 @@ export function start(options: { routes: JSX.Element[] }) {
     registerInitializer(CNTKPredictorAlgorithm.NeuralNetwork, a => a.algorithmSettings = NeuralNetworkSettingsEntity.New());
 }
 
+export async function predict(predictor: Lite<PredictorEntity>, entity: Lite<Entity>): Promise<void> {
+    var predictRequest = await API.getPredict(predictor, entity);
 
+    var modal = await import("./Templates/PredictModal");
+
+    return modal.PredictModal.show(predictor, predictRequest);
+
+}
 
 export function registerInitializer(symbol: PredictorAlgorithmSymbol, initialize: (predictor: PredictorEntity) => void) {
     initializers[symbol.key] = initialize;
