@@ -82,3 +82,13 @@ div.row-control-panel {
 .sf-show-hover:not(:hover) .sf-hide {
     color: #aaa;
 }
+
+.huge {
+    font-size: xx-large;
+    font-weight: bold;
+}
+
+.large {
+    font-size: large;
+    font-weight: bold;
+}
