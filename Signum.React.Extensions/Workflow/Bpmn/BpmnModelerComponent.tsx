@@ -165,7 +165,8 @@ export default class BpmnModelerComponent extends React.Component<BpmnModelerCom
         if (BpmnUtils.isTaskAnyKind(elementType))
             return WorkflowActivityModel.New({
                 name: elementName,
-                type: "Task"
+                type: "Task",
+                workflow: this.props.workflow,
             });
 
         if (BpmnUtils.isConnection(elementType))
