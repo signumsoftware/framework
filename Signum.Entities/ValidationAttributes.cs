@@ -581,7 +581,7 @@ namespace Signum.Entities
                 .Where(a => a.Count > 1)
                 .ToString(e => "{0} x {1}".FormatWith(e.Key, e.Count), ", ");
 
-            return errors;
+            return errors.DefaultText(null);
         }
     }
 

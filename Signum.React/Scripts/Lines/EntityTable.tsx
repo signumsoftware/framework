@@ -17,10 +17,11 @@ import { RenderEntity } from './RenderEntity'
 export interface EntityTableProps extends EntityListBaseProps {
     createAsLink?: boolean | ((er: EntityTable) => React.ReactElement<any>);
     /**Consider using EntityTable.typedColumns to get Autocompletion**/
-    columns?: EntityTableColumn<ModifiableEntity, any>[],
-    fetchRowState?: (ctx: TypeContext<ModifiableEntity>, row: EntityTableRow) => Promise<any>;
-    onRowHtmlAttributes?: (ctx: TypeContext<ModifiableEntity>, row: EntityTableRow, rowState: any) => React.HTMLAttributes<any> | null | undefined;
+    columns?: EntityTableColumn<any /*T*/, any>[],
+    fetchRowState?: (ctx: TypeContext<any /*T*/>, row: EntityTableRow) => Promise<any>;
+    onRowHtmlAttributes?: (ctx: TypeContext<any /*T*/>, row: EntityTableRow, rowState: any) => React.HTMLAttributes<any> | null | undefined;
     avoidFieldSet?: boolean;
+    avoidEmptyTable?: boolean;
 }
 
 export interface EntityTableColumn<T, RS> {
@@ -33,12 +34,12 @@ export interface EntityTableColumn<T, RS> {
 
 export class EntityTable extends EntityListBase<EntityTableProps, EntityTableProps> {
 
-    static typedColumns<T extends ModifiableEntity>(columns: (EntityTableColumn<T, any> | null | undefined)[]): EntityTableColumn<T, any>[] {
-        return columns.filter(a => a != null).map(a => a!);
+    static typedColumns<T extends ModifiableEntity>(columns: (EntityTableColumn<T, any> | null | undefined)[]): EntityTableColumn<ModifiableEntity, any>[] {
+        return columns.filter(a => a != null).map(a => a!) as EntityTableColumn<ModifiableEntity, any>[];
     }
 
-    static typedColumnsWithRowState<T extends ModifiableEntity, RS>(columns: (EntityTableColumn<T, RS> | null | undefined)[]): EntityTableColumn<T, RS>[]{
-        return columns.filter(a => a != null).map(a => a!);
+    static typedColumnsWithRowState<T extends ModifiableEntity, RS>(columns: (EntityTableColumn<T, RS> | null | undefined)[]): EntityTableColumn<ModifiableEntity, RS>[]{
+        return columns.filter(a => a != null).map(a => a!) as EntityTableColumn<ModifiableEntity, RS>[];
     }
 
     calculateDefaultState(state: EntityTableProps) {
@@ -49,7 +50,7 @@ export class EntityTable extends EntityListBase<EntityTableProps, EntityTablePro
 
     overrideProps(state: EntityTableProps, overridenProps: EntityTableProps) {
         super.overrideProps(state, overridenProps);
-        
+
         if (!state.columns) {
             var elementPr = state.ctx.propertyRoute.add(a => a[0].element);
 
@@ -98,7 +99,7 @@ export class EntityTable extends EntityListBase<EntityTableProps, EntityTablePro
             </span>
         );
 
-        return ( EntityBase.hasChildrens(buttons) ? buttons : undefined );
+        return (EntityBase.hasChildrens(buttons) ? buttons : undefined);
     }
 
     renderTable(ctx: TypeContext<MList<ModifiableEntity>>) {
@@ -108,20 +109,23 @@ export class EntityTable extends EntityListBase<EntityTableProps, EntityTablePro
 
         return (
             <table className="table table-condensed form-vertical sf-table">
-                <thead>
-                    <tr>
-                        <th></th>
-                        {
-                            this.state.columns!.map((c, i) => <th key={i} {...c.headerHtmlAttributes}>
-                                {c.header === undefined && c.property ? elementPr.add(c.property).member!.niceName : c.header}
-                            </th>)
-                        }
-                    </tr>
-                </thead>
+                {
+                    (!this.props.avoidEmptyTable || ctx.value.length > 0) && <thead>
+                        <tr>
+                            <th></th>
+                            {
+                                this.state.columns!.map((c, i) => <th key={i} {...c.headerHtmlAttributes}>
+                                    {c.header === undefined && c.property ? elementPr.add(c.property).member!.niceName : c.header}
+                                </th>)
+                            }
+                        </tr>
+                    </thead>
+                }
                 <tbody>
                     {
                         mlistItemContext(ctx).map((mlec, i) =>
                             (<EntityTableRow key={i}
+                                index={i}
                                 onRowHtmlAttributes={this.props.onRowHtmlAttributes}
                                 fetchRowState={this.props.fetchRowState}
                                 onRemove={this.canRemove(mlec.value) && !readOnly ? e => this.handleRemoveElementClick(e, i) : undefined}
@@ -150,6 +154,7 @@ export class EntityTable extends EntityListBase<EntityTableProps, EntityTablePro
 
 export interface EntityTableRowProps {
     ctx: TypeContext<ModifiableEntity>;
+    index: number;
     columns: EntityTableColumn<ModifiableEntity, any>[],
     onRemove?: (event: React.MouseEvent<any>) => void;
     draggable?: DragConfig;
@@ -162,7 +167,7 @@ export class EntityTableRow extends React.Component<EntityTableRowProps, { rowSt
     constructor(props: EntityTableRowProps) {
         super(props);
 
-        this.state = {}; 
+        this.state = {};
 
         if (props.fetchRowState)
             props.fetchRowState(this.props.ctx, this)
@@ -185,7 +190,7 @@ export class EntityTableRow extends React.Component<EntityTableRowProps, { rowSt
                         {this.props.onRemove && <a className={classes("sf-line-button", "sf-remove")}
                             onClick={this.props.onRemove}
                             title={EntityControlMessage.Remove.niceToString()}>
-                            <span className="glyphicon glyphicon-remove"/>
+                            <span className="glyphicon glyphicon-remove" />
                         </a>}
                         &nbsp;
                         {drag && <a className={classes("sf-line-button", "sf-move")}
@@ -193,7 +198,7 @@ export class EntityTableRow extends React.Component<EntityTableRowProps, { rowSt
                             onDragStart={drag.onDragStart}
                             onDragEnd={drag.onDragEnd}
                             title={EntityControlMessage.Move.niceToString()}>
-                            <span className="glyphicon glyphicon-menu-hamburger"/>
+                            <span className="glyphicon glyphicon-menu-hamburger" />
                         </a>}
                     </div>
                 </td>

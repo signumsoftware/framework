@@ -18,7 +18,7 @@ import "./QueryTokenBuilder.css"
 
 interface QueryTokenBuilderProps extends React.Props<QueryTokenBuilder> {
     queryToken: QueryToken | undefined | null;
-    onTokenChange: (newToken: QueryToken | undefined | null) => void;
+    onTokenChange: (newToken: QueryToken | undefined) => void;
     queryKey: string;
     subTokenOptions: SubTokensOptions;
     readOnly: boolean;
@@ -99,7 +99,8 @@ export class QueryTokenPart extends React.Component<QueryTokenPartProps, { subTo
     }
 
     componentWillReceiveProps(newProps: QueryTokenPartProps) {
-        if (!newProps.readOnly && (!areEqual(this.props.parentToken, newProps.parentToken, a => a.fullKey) || this.props.subTokenOptions != newProps.subTokenOptions)) {
+        if ((newProps.readOnly == false && this.props.readOnly == true) ||
+            !newProps.readOnly && (!areEqual(this.props.parentToken, newProps.parentToken, a => a.fullKey) || this.props.subTokenOptions != newProps.subTokenOptions)) {
             this.setState({ subTokens: undefined });
             this.requestSubTokens(newProps);
         }

@@ -220,7 +220,7 @@ export default class FrameModal extends React.Component<FrameModalProps, FrameMo
 
     renderBody() {
 
-        const frame: EntityFrame<Entity> = {
+        const frame: EntityFrame = {
             frameComponent: this,
             entityComponent: this.entityComponent,
             onReload: pack => this.setPack(pack),
@@ -232,12 +232,12 @@ export default class FrameModal extends React.Component<FrameModalProps, FrameMo
             },
         };
 
+        const pack = this.state.pack!;
+
         const styleOptions: StyleOptions = {
-            readOnly: this.props.readOnly != undefined ? this.props.readOnly : Navigator.isReadOnly(this.getTypeName()),
+            readOnly: this.props.readOnly != undefined ? this.props.readOnly : Navigator.isReadOnly(pack),
             frame: frame,
         };
-
-        const pack = this.state.pack!;
 
         const ctx = new TypeContext(undefined, styleOptions, this.state.propertyRoute!, new ReadonlyBinding(pack.entity, this.prefix!));
 

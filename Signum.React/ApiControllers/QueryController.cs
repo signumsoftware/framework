@@ -406,7 +406,7 @@ namespace Signum.React.ApiControllers
         [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore)]
         public bool hasOrderAdapter;
         public QueryTokenTS parent;
-        private string propertyRoute;
+        public string propertyRoute;
     }
 
     public enum QueryTokenType

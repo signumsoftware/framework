@@ -222,7 +222,7 @@ export class OperationButton extends React.Component<OperationButtonProps> {
 
 
 
-export function defaultOnClick(eoc: EntityOperationContext<Entity>, ... args:any[])
+export function defaultOnClick<T extends Entity>(eoc: EntityOperationContext<T>, ...args: any[])
 {
     if (eoc.operationInfo.lite) {
         switch (eoc.operationInfo.operationType) {
@@ -245,7 +245,7 @@ export function notifySuccess() {
     Notify.singletone.notifyTimeout({ text: JavascriptMessage.executed.niceToString(), type: "success" });
 }
 
-export function defaultConstructFromEntity(eoc: EntityOperationContext<Entity>, ...args: any[]) {
+export function defaultConstructFromEntity<T extends Entity>(eoc: EntityOperationContext<T>, ...args: any[]) {
 
     confirmInNecessary(eoc).then(conf => {
         if (!conf)
@@ -261,7 +261,7 @@ export function defaultConstructFromEntity(eoc: EntityOperationContext<Entity>, 
     }).done();
 }
 
-export function defaultConstructFromLite(eoc: EntityOperationContext<Entity>, ...args: any[]) {
+export function defaultConstructFromLite<T extends Entity>(eoc: EntityOperationContext<T>, ...args: any[]) {
 
     confirmInNecessary(eoc).then(conf => {
         if (!conf)
@@ -278,7 +278,7 @@ export function defaultConstructFromLite(eoc: EntityOperationContext<Entity>, ..
 }
 
 
-export function defaultExecuteEntity(eoc: EntityOperationContext<Entity>, ...args: any[]) {
+export function defaultExecuteEntity<T extends Entity>(eoc: EntityOperationContext<T>, ...args: any[]) {
 
     confirmInNecessary(eoc).then(conf => {
         if (!conf)
@@ -296,7 +296,7 @@ export function defaultExecuteEntity(eoc: EntityOperationContext<Entity>, ...arg
     }).done();
 }
 
-export function defaultExecuteLite(eoc: EntityOperationContext<Entity>, ...args: any[]) {
+export function defaultExecuteLite<T extends Entity>(eoc: EntityOperationContext<T>, ...args: any[]) {
 
     confirmInNecessary(eoc).then(conf => {
         if (!conf)
@@ -314,7 +314,7 @@ export function defaultExecuteLite(eoc: EntityOperationContext<Entity>, ...args:
     }).done();
 }
 
-export function defaultDeleteEntity(eoc: EntityOperationContext<Entity>, ...args: any[]) {
+export function defaultDeleteEntity<T extends Entity>(eoc: EntityOperationContext<T>, ...args: any[]) {
 
     confirmInNecessary(eoc).then(conf => {
         if (!conf)
@@ -330,7 +330,7 @@ export function defaultDeleteEntity(eoc: EntityOperationContext<Entity>, ...args
     }).done();
 }
 
-export function defaultDeleteLite(eoc: EntityOperationContext<Entity>, ...args: any[]) {
+export function defaultDeleteLite<T extends Entity>(eoc: EntityOperationContext<T>, ...args: any[]) {
 
     confirmInNecessary(eoc).then(conf => {
         if (!conf)
@@ -347,7 +347,7 @@ export function defaultDeleteLite(eoc: EntityOperationContext<Entity>, ...args: 
 }
 
 
-export function confirmInNecessary(eoc: EntityOperationContext<Entity>, checkLite = true): Promise<boolean> {
+export function confirmInNecessary<T extends Entity>(eoc: EntityOperationContext<T>, checkLite = true): Promise<boolean> {
 
     if (eoc.operationInfo.lite) {
         GraphExplorer.propagateAll(eoc.entity);
@@ -370,7 +370,7 @@ export function confirmInNecessary(eoc: EntityOperationContext<Entity>, checkLit
     }).then(result => { return result == "yes"; });
 }
 
-function getConfirmMessage(eoc: EntityOperationContext<Entity>) {
+function getConfirmMessage<T extends Entity>(eoc: EntityOperationContext<T>) {
     if (eoc.settings && eoc.settings.confirmMessage === null)
         return undefined;
 

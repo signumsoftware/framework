@@ -14,7 +14,7 @@ export interface AjaxOptions {
     
     headers?: { [index: string]: string };
     mode?: string;
-    credentials?: string;
+    credentials?: RequestCredentials;
     cache?: string;
     abortController?: FetchAbortController;
 }
@@ -41,7 +41,7 @@ export function ajaxGetRaw(options: AjaxOptions) : Promise<Response> {
             headers: {
                 'Accept': 'application/json',
                 ...options.headers
-            },
+            } as any,
             mode: options.mode,
             credentials: options.credentials || "same-origin",
             cache: options.cache,
@@ -68,7 +68,7 @@ export function ajaxPostRaw(options: AjaxOptions, data: any): Promise<Response> 
                 'Accept': 'application/json',
                 'Content-Type': 'application/json',
                  ...options.headers
-            },
+            } as any,
             mode: options.mode,
             cache: options.cache,
             body: JSON.stringify(data),

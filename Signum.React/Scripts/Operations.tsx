@@ -44,7 +44,7 @@ export function getSettings(operation: OperationSymbol | string): OperationSetti
     return operationSettings[operationKey];
 }
 
-export const isOperationInfoAllowedEvent: Array<(oi: OperationInfo | OperationSymbol | string) => boolean> = [];
+export const isOperationInfoAllowedEvent: Array<(oi: OperationInfo) => boolean> = [];
 export function isOperationInfoAllowed(oi: OperationInfo) {
     return isOperationInfoAllowedEvent.every(a => a(oi));
 }
@@ -191,7 +191,7 @@ export class EntityOperationContext<T extends Entity> {
         return result;
     }
 
-    frame: EntityFrame<T>;
+    frame: EntityFrame;
     tag?: string;
     entity: T;
     operationInfo: OperationInfo;

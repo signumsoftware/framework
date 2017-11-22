@@ -302,16 +302,22 @@ namespace Signum.Engine.Linq
 
             expression = expression.RemoveUnNullify();
 
-            BinaryExpression be = expression as BinaryExpression;
+            if(expression is BinaryExpression be && be.NodeType == ExpressionType.Subtract)
+                return TrySqlDifference(sqlEnums, type, be.Left, be.Right);
 
-            if (be == null || be.NodeType != ExpressionType.Subtract)
-                return null;
+            if (expression is MethodCallExpression mc && mc.Method.Name == nameof(DateTime.Subtract))
+                return TrySqlDifference(sqlEnums, type, mc.Object, mc.Arguments.SingleEx());
 
-            Expression left = Visit(be.Left);
+            return null;
+        }
+
+        private SqlFunctionExpression TrySqlDifference(SqlEnums sqlEnums, Type type, Expression leftSide, Expression rightSide)
+        {
+            Expression left = Visit(leftSide);
             if (!Has(left.RemoveNullify()))
                 return null;
 
-            Expression right = Visit(be.Right);
+            Expression right = Visit(rightSide);
             if (!Has(right.RemoveNullify()))
                 return null;
 
@@ -391,7 +397,7 @@ namespace Signum.Engine.Linq
         }
 
 
-        private Expression TryAddSubstractDateTime(Expression date, Expression time, bool add)
+        private Expression TryAddSubtractDateTimeTimeSpan(Expression date, Expression time, bool add)
         {
             Expression exprDate = Visit(date);
             Expression exprTime = Visit(time);
@@ -512,7 +518,7 @@ namespace Signum.Engine.Linq
                 {
                     if ((b.NodeType == ExpressionType.Add || b.NodeType == ExpressionType.Subtract) && b.Left.Type.UnNullify() == typeof(DateTime) && b.Right.Type.UnNullify() == typeof(TimeSpan))
                     {
-                        result = TryAddSubstractDateTime(b.Left, b.Right, b.NodeType == ExpressionType.Add) ?? result;
+                        result = TryAddSubtractDateTimeTimeSpan(b.Left, b.Right, b.NodeType == ExpressionType.Add) ?? result;
                     }
                     else if (b.NodeType == ExpressionType.Add)
                     {
@@ -1039,6 +1045,15 @@ namespace Signum.Engine.Linq
                 case "DateTime.TimeOfDay": return TrySqlTime(m.Expression);
                 case "DateTime.DayOfWeek": return TrySqlDayOftheWeek(m.Expression);
 
+                case "TimeSpan.Days":
+                {
+                    var diff = TrySqlDifference(SqlEnums.day, m.Type, m.Expression);
+                    if (diff == null)
+                        return null;
+
+                    return Add(new SqlCastExpression(typeof(int?),
+                        TrySqlFunction(null, SqlFunction.FLOOR, typeof(double?), diff)));
+                }
                 case "TimeSpan.Hours": return TrySqlFunction(null, SqlFunction.DATEPART, m.Type, new SqlEnumExpression(SqlEnums.hour), m.Expression);
                 case "TimeSpan.Minutes": return TrySqlFunction(null, SqlFunction.DATEPART, m.Type, new SqlEnumExpression(SqlEnums.minute), m.Expression);
                 case "TimeSpan.Seconds": return TrySqlFunction(null, SqlFunction.DATEPART, m.Type, new SqlEnumExpression(SqlEnums.second), m.Expression);
@@ -1143,13 +1158,13 @@ namespace Signum.Engine.Linq
                     return TryEtc(m.GetArgument("str"), m.GetArgument("max"), m.TryGetArgument("etcString"));
 
                 case "DateTime.Add":
-                case "DateTime.Substract":
+                case "DateTime.Subtract":
                     {
                         var val = m.GetArgument("value");
                         if (val.Type.UnNullify() != typeof(TimeSpan))
                             return null;
 
-                        return TryAddSubstractDateTime(m.Object, val, m.Method.Name == "Add");
+                        return TryAddSubtractDateTimeTimeSpan(m.Object, val, m.Method.Name == "Add");
                     }
                 case "DateTime.AddDays": return TrySqlFunction(null, SqlFunction.DATEADD, m.Type, new SqlEnumExpression(SqlEnums.day), m.GetArgument("value"), m.Object);
                 case "DateTime.AddHours": return TrySqlFunction(null, SqlFunction.DATEADD, m.Type, new SqlEnumExpression(SqlEnums.hour), m.GetArgument("value"), m.Object);
