@@ -350,6 +350,7 @@ namespace Signum.React.ApiControllers
     
     public class QueryTokenTS
     {
+        public QueryTokenTS() { }
         public QueryTokenTS(QueryToken qt, bool recursive)
         {
             this.toString = qt.ToString();
