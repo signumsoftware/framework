@@ -57,6 +57,7 @@ namespace Signum.Entities.MachineLearning
     public enum PredictionType
     {
         Regression,
+        MultiRegression,
         Classification,
         MultiClassification,
     }

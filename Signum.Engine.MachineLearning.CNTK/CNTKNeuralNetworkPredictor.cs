@@ -29,7 +29,7 @@ namespace Signum.Engine.MachineLearning.CNTK
                         if (!ReflectionTools.IsNumber(column.Token.Token.Type))
                             return PredictorMessage._0IsRequiredFor1.NiceToString(PredictorColumnEncoding.OneHot.NiceToString(), column.Token.Token.NiceTypeName);
 
-                        if (column.Usage == PredictorColumnUsage.Output && nn.PredictionType == PredictionType.Classification)
+                        if (column.Usage == PredictorColumnUsage.Output && (nn.PredictionType == PredictionType.Classification || nn.PredictionType == PredictionType.MultiClassification))
                             return PredictorMessage._0NotSuportedFor1.NiceToString(column.Encoding.NiceToString(), nn.PredictionType.NiceToString());
 
                         break;
@@ -37,7 +37,7 @@ namespace Signum.Engine.MachineLearning.CNTK
                         if (ReflectionTools.IsDecimalNumber(column.Token.Token.Type))
                             return PredictorMessage._0NotSuportedFor1.NiceToString(column.Encoding.NiceToString(), predictor.Algorithm.NiceToString());
 
-                        if (column.Usage == PredictorColumnUsage.Output && nn.PredictionType == PredictionType.Regression)
+                        if (column.Usage == PredictorColumnUsage.Output && (nn.PredictionType == PredictionType.Regression || nn.PredictionType == PredictionType.MultiRegression))
                             return PredictorMessage._0NotSuportedFor1.NiceToString(column.Encoding.NiceToString(), nn.PredictionType.NiceToString());
                         break;
                     case PredictorColumnEncoding.Codified:
@@ -160,8 +160,8 @@ namespace Signum.Engine.MachineLearning.CNTK
             }
             else
             {
-                p.RegressionValidation = evaluator.RegressionMetrics(validation, nameof(p.RegressionValidation));
-                p.RegressionTraining = evaluator.RegressionMetrics(validation, nameof(p.RegressionValidation));
+                p.RegressionValidation = evaluator.RegressionMetrics(validation, nameof(p.RegressionValidation), nn.PredictionType == PredictionType.MultiRegression);
+                p.RegressionTraining = evaluator.RegressionMetrics(validation, nameof(p.RegressionValidation), nn.PredictionType == PredictionType.MultiRegression);
             }
 
             var fp = new Entities.Files.FilePathEmbedded(PredictorFileType.PredictorFile, "Model.cntk", new byte[0]);
@@ -301,20 +301,38 @@ namespace Signum.Engine.MachineLearning.CNTK
                 };
             }
 
-            internal PredictorRegressionMetricsEmbedded RegressionMetrics(List<ResultRow> rows, string name)
+            internal PredictorRegressionMetricsEmbedded RegressionMetrics(List<ResultRow> rows, string name, bool multiRegression)
             {
-                var missCount = EvaluateByMiniBatch(rows, name, tuple =>
+                List<(float predicted, float expeted)> result = new List<(float predicted, float expeted)>();
+
+                EvaluateByMiniBatch(rows, name, tuple =>
                 {
                     IList<IList<float>> predictedOutput = tuple.outputValue.GetDenseData<float>(calculatedOutpus.Output);
                     IList<IList<float>> expectedOutput = tuple.expectedValue.GetDenseData<float>(calculatedOutpus.Output);
-                    
+                    var jCount = predictedOutput.Count == expectedOutput.Count ? predictedOutput.Count : throw new InvalidOperationException("Count missmatch");
+                    for (int j = 0; j < jCount; j++)
+                    {
+                        var po = predictedOutput[j];
+                        var eo = expectedOutput[j];
+                        var iCount = po.Count == eo.Count ? po.Count : throw new InvalidOperationException("Count missmatch");
 
-                    return predictedOutput.Zip(expectedOutput, (p, e) => p.Zip(e));
-                }).SelectMany(a => a).ToList();
+                        if (multiRegression)
+                        {
+                            result.Add((predicted: po.Sum(), expeted: eo.Sum()));
+                        }
+                        else {
+                            for (int i = 0; i < iCount; i++)
+                            {
+                                result.Add((predicted: po[i], expeted: eo[i]));
+                            }
+                        }
+                    }
+
+                    return 0;
+                });
 
                 return new PredictorRegressionMetricsEmbedded
                 {
-
                 };
             }
         }

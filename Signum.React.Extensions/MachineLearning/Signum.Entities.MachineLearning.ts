@@ -58,6 +58,7 @@ export interface NeuralNetworkSettingsEntity extends Entities.Entity, IPredictor
 export const PredictionType = new EnumType<PredictionType>("PredictionType");
 export type PredictionType =
     "Regression" |
+    "MultiRegression" |
     "Classification" |
     "MultiClassification";
 
