@@ -39,6 +39,14 @@ namespace Signum.React.RestLog
             }
             else
             {
+                var requestUriAbsoluteUri = request.RequestUri.AbsoluteUri;
+                if (requestUriAbsoluteUri.Contains("apiKey"))
+                {
+                    request.RequestUri = requestUriAbsoluteUri.After("apiKey=").Contains("&") ? 
+                        new Uri(requestUriAbsoluteUri.Before("apiKey=") + requestUriAbsoluteUri.After("apiKey=").After('&')) : 
+                        new Uri(requestUriAbsoluteUri.Before("apiKey="));
+                }
+                
                 result.current = await restClient.SendAsync(request).Result.Content.ReadAsStringAsync();
             }
 
