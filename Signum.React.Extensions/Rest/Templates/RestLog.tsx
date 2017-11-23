@@ -46,8 +46,8 @@ export default class RestLog extends React.Component<{ ctx: TypeContext<RestLogE
 
                 <EntityRepeater ctx={ctx.subCtx(f => f.queryString)}/>
                 <Form>
-                    <Button bsStyle="info" onClick={() =>{ API.replayRestLog(ctx.value.id, this.state.newURL).then(d => this.setState({diff: d})).done()}}>Replay</Button>
-                    <FormControl type="text" value={this.state.newURL}/>
+                    <Button bsStyle="info" onClick={() =>{ API.replayRestLog(ctx.value.id, encodeURIComponent(this.state.newURL)).then(d => this.setState({diff: d})).done()}}>Replay</Button>
+                    <FormControl type="text" defaultValue={this.state.newURL}/>
                 </Form>
                 {this.renderCode(ctx.subCtx(f => f.requestBody))}
                 
