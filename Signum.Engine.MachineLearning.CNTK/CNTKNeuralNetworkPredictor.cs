@@ -160,8 +160,8 @@ namespace Signum.Engine.MachineLearning.CNTK
             }
             else
             {
-                p.RegressionValidation =null;
-                p.ClassificationTraining = null;
+                p.RegressionValidation = evaluator.RegressionMetrics(validation, nameof(p.RegressionValidation));
+                p.RegressionTraining = evaluator.RegressionMetrics(validation, nameof(p.RegressionValidation));
             }
 
             var fp = new Entities.Files.FilePathEmbedded(PredictorFileType.PredictorFile, "Model.cntk", new byte[0]);
@@ -301,6 +301,22 @@ namespace Signum.Engine.MachineLearning.CNTK
                 };
             }
 
+            internal PredictorRegressionMetricsEmbedded RegressionMetrics(List<ResultRow> rows, string name)
+            {
+                var missCount = EvaluateByMiniBatch(rows, name, tuple =>
+                {
+                    IList<IList<float>> predictedOutput = tuple.outputValue.GetDenseData<float>(calculatedOutpus.Output);
+                    IList<IList<float>> expectedOutput = tuple.expectedValue.GetDenseData<float>(calculatedOutpus.Output);
+                    
+
+                    return predictedOutput.Zip(expectedOutput, (p, e) => p.Zip(e));
+                }).SelectMany(a => a).ToList();
+
+                return new PredictorRegressionMetricsEmbedded
+                {
+
+                };
+            }
         }
 
         public PredictDictionary Predict(PredictorPredictContext ctx, PredictDictionary input)
