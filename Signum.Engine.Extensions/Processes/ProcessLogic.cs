@@ -371,52 +371,70 @@ namespace Signum.Engine.Processes
         public static void ForEach<T>(this ExecutingProcess executingProcess, List<T> collection,
             Func<T, string> elementInfo, Action<T> action)
         {
-            executingProcess.ForEachNonTransactional(collection, elementInfo, item => {
-                using (Transaction tr = Transaction.ForceNew())
-                {
-                    action(item);
-                    tr.Commit();
-                }
-            });
+            if (executingProcess == null)
+            {
+                collection.ProgressForeach(elementInfo, action);
+            }
+            else
+            {
+                executingProcess.ForEachNonTransactional(collection, elementInfo, item => {
+                    using (Transaction tr = Transaction.ForceNew())
+                    {
+                        action(item);
+                        tr.Commit();
+                    }
+                });
+
+            }
         }
 
 
-        public static void ForEachNonTransactional<T>(this ExecutingProcess executingProcess, List<T> collection, Func<T, string> elementInfo, Action<T> action)
+        public static void ForEachNonTransactional<T>(this ExecutingProcess executingProcess, List<T> collection,
+            Func<T, string> elementInfo, Action<T> action)
         {
-            var totalCount = collection.Count;
-            int j = 0;
-            foreach (var item in collection)
+            if (executingProcess == null)
             {
-                executingProcess.CancellationToken.ThrowIfCancellationRequested();
-                using (HeavyProfiler.Log("ProgressForeach", () => elementInfo(item)))
+                collection.ProgressForeach(elementInfo, action, transactional: false);
+            }
+            else
+            {
+
+                var totalCount = collection.Count;
+                int j = 0;
+                foreach (var item in collection)
                 {
-                    try
+                    executingProcess.CancellationToken.ThrowIfCancellationRequested();
+                    using (HeavyProfiler.Log("ProgressForeach", () => elementInfo(item)))
                     {
-                        action(item);
-                   
-                    }
-                    catch (Exception e)
-                    {
-                        if (Transaction.InTestTransaction)
-                            throw;
-
-                        var exLog = e.LogException();
-
-                        Transaction.ForceNew().EndUsing(tr =>
+                        try
                         {
-                            new ProcessExceptionLineEntity
+                            action(item);
+
+                        }
+                        catch (Exception e)
+                        {
+                            if (Transaction.InTestTransaction)
+                                throw;
+
+                            var exLog = e.LogException();
+
+                            Transaction.ForceNew().EndUsing(tr =>
                             {
-                                Exception = exLog.ToLite(),
-                                ElementInfo = elementInfo(item),
-                                Process = executingProcess.CurrentProcess.ToLite()
-                            }.Save();
+                                new ProcessExceptionLineEntity
+                                {
+                                    Exception = exLog.ToLite(),
+                                    ElementInfo = elementInfo(item),
+                                    Process = executingProcess.CurrentProcess.ToLite()
+                                }.Save();
 
-                            tr.Commit();
-                        });
+                                tr.Commit();
+                            });
+                        }
+
+                        executingProcess.ProgressChanged(j++, totalCount);
                     }
-
-                    executingProcess.ProgressChanged(j++, totalCount);
                 }
+
             }
         }
 
