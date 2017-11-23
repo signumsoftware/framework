@@ -25,7 +25,7 @@ import { QueryEntity } from '../../../../Framework/Signum.React/Scripts/Signum.E
 import { FilePathEmbedded } from '../../Files/Signum.Entities.Files';
 import { is } from '../../../../Framework/Signum.React/Scripts/Signum.Entities';
 import ProgressBar from './ProgressBar'
-import LineChart from './LineChart'
+import LineChart, { LineChartSerie } from './LineChart'
 
 export default class Predictor extends React.Component<{ ctx: TypeContext<PredictorEntity> }, { queryDescription?: QueryDescription }> implements IRenderButtons {
 
@@ -182,6 +182,7 @@ export default class Predictor extends React.Component<{ ctx: TypeContext<Predic
                                                 headerHtmlAttributes: { style: { width: "40%" } },
                                             },
                                             { property: a => a.encoding },
+                                            { property: a => a.nullHandling },
                                         ])} />
                                         {ctxmq.value.query && <a href="#" onClick={this.handlePreviewMainQuery}>{PredictorMessage.Preview.niceToString()}</a>}
                                     </div>
@@ -220,10 +221,10 @@ export default class Predictor extends React.Component<{ ctx: TypeContext<Predic
                                 } />
                             </div>
 
-                            <EntityDetail ctx={ctxxs.subCtx(f => f.classificationTraining)} />
-                            <EntityDetail ctx={ctxxs.subCtx(f => f.classificationValidation)} />
-                            <EntityDetail ctx={ctxxs.subCtx(f => f.regressionTraining)} />
-                            <EntityDetail ctx={ctxxs.subCtx(f => f.regressionValidation)} />
+                            <EntityDetail ctx={ctxxs.subCtx(f => f.classificationTraining)} hideIfNull={true} />
+                            <EntityDetail ctx={ctxxs.subCtx(f => f.classificationValidation)} hideIfNull={true} />
+                            <EntityDetail ctx={ctxxs.subCtx(f => f.regressionTraining)} hideIfNull={true} />
+                            <EntityDetail ctx={ctxxs.subCtx(f => f.regressionValidation)} hideIfNull={true} />
                         </Tab>
                     }
                 </Tabs>
@@ -286,17 +287,7 @@ export class TrainingProgressComponent extends React.Component<TrainingProgressC
 
         return (
             <div>
-                {tp && tp.EpochProgressesParsed && <LineChart height={200} series={[{
-                    color: "black",
-                    name: PredictorEpochProgressEntity.nicePropertyName(a => a.lossTraining),
-                    values: tp.EpochProgressesParsed.map(ep => ({ x: ep.TrainingExamples, y: ep.LossTraining })),
-                }, {
-                    color: "darkgray",
-                    name: PredictorEpochProgressEntity.nicePropertyName(a => a.evaluationTraining),
-                    values: tp.EpochProgressesParsed.map(ep => ({ x: ep.TrainingExamples, y: ep.EvaluationTraining })),
-                    minValue: 0,
-                    maxValue: 1,
-                    }]} />}
+                {tp && tp.EpochProgressesParsed && <LineChart height={200} series={getSeries(tp.EpochProgressesParsed)} />}
                 <ProgressBar color={tp == null || tp.Running == false ? "info" : "default"}
                     value={tp && tp.Progress}
                     message={tp == null ? PredictorMessage.StartingTraining.niceToString() : tp.Message}
@@ -347,20 +338,40 @@ export class EpochProgressComponent extends React.Component<EpochProgressCompone
 
         return (
             <div>
-                {eps && <LineChart height={200} series={[{
-                    color: "black",
-                    name: PredictorEpochProgressEntity.nicePropertyName(a => a.lossTraining),
-                    values: eps.map(ep => ({ x: ep.TrainingExamples, y: ep.LossTraining }))
-                }, {
-                    color: "darkgray",
-                    name: PredictorEpochProgressEntity.nicePropertyName(a => a.evaluationTraining),
-                    values: eps.map(ep => ({ x: ep.TrainingExamples, y: ep.EvaluationTraining })),
-                    minValue: 0,
-                    maxValue: 1,
-                }]} />}
+                {eps && <LineChart height={200} series={getSeries(eps)} />}
             </div>
         );
     }
 
+}
+
+function getSeries(eps: Array<PredictorClient.EpochProgress>): LineChartSerie[] {
+
+    return [
+        {
+            color: "black",
+            name: PredictorEpochProgressEntity.nicePropertyName(a => a.lossTraining),
+            values: eps.filter(a => a.LossTraining != null).map(ep => ({ x: ep.TrainingExamples, y: ep.LossTraining }))
+        },
+        {
+            color: "darkgray",
+            name: PredictorEpochProgressEntity.nicePropertyName(a => a.evaluationTraining),
+            values: eps.filter(a => a.EvaluationTraining != null).map(ep => ({ x: ep.TrainingExamples, y: ep.EvaluationTraining })),
+            minValue: 0,
+            maxValue: 1,
+        },
+        {
+            color: "red",
+            name: PredictorEpochProgressEntity.nicePropertyName(a => a.lossValidation),
+            values: eps.filter(a => a.LossValidation != null).map(ep => ({ x: ep.TrainingExamples, y: ep.LossValidation! }))
+        },
+        {
+            color: "pink",
+            name: PredictorEpochProgressEntity.nicePropertyName(a => a.evaluationValidation),
+            values: eps.filter(a => a.EvaluationValidation != null).map(ep => ({ x: ep.TrainingExamples, y: ep.EvaluationValidation! })),
+            minValue: 0,
+            maxValue: 1,
+        }
+    ];
 }
 

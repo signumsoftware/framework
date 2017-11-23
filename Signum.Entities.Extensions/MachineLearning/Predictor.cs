@@ -109,11 +109,11 @@ namespace Signum.Entities.MachineLearning
         public int TotalCount { get; set; }
         public int MissCount { get; set; }
         [Format("p")]
-        public float MissRate { get; set; }
+        public decimal? MissRate { get; set; }
 
         protected override void PreSaving(ref bool graphModified)
         {
-            MissRate = MissCount / (float)TotalCount;
+            MissRate = TotalCount == 0 ? (decimal?)null : Math.Round(MissCount / (decimal)TotalCount, 2);
 
             base.PreSaving(ref graphModified);
         }
@@ -122,22 +122,22 @@ namespace Signum.Entities.MachineLearning
     [Serializable]
     public class PredictorRegressionMetricsEmbedded : EmbeddedEntity
     {
-        public decimal Signed { get; set; }
+        public double? Signed { get; set; }
 
         [Unit("±")]
-        public decimal Absolute { get; set; }
+        public double? Absolute { get; set; }
 
         [Unit("±")]
-        public decimal Deviation { get; set; }
+        public double? Deviation { get; set; }
 
         [Format("p")]
-        public decimal PercentageSigned { get; set; }
+        public double? PercentageSigned { get; set; }
 
         [Format("p"), Unit("±")]
-        public decimal PercentageAbsolute { get; set; }
+        public double? PercentageAbsolute { get; set; }
 
         [Format("p"), Unit("±")]
-        public decimal PercentageDeviation { get; set; }
+        public double? PercentageDeviation { get; set; }
 
     }
 

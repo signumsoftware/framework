@@ -117,5 +117,12 @@ namespace Signum.Engine.MachineLearning
                     }).ToList();
         }
 
+        public static double? CleanDouble(this double val)
+        {
+            if (double.IsInfinity(val) || double.IsNaN(val))
+                return null;
+
+            return val;
+        }
     }
 }

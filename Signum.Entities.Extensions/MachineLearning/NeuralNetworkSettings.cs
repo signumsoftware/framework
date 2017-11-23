@@ -20,6 +20,7 @@ namespace Signum.Entities.MachineLearning
         public MList<NeuralNetworkHidenLayerEmbedded> HiddenLayers { get; set; } = new MList<NeuralNetworkHidenLayerEmbedded>();
 
         public NeuralNetworkActivation OutputActivation { get; set; }
+        public NeuralNetworkInitializer OutputInitializer { get; set; }
 
         public double LearningRate { get; set; } = 0.2;
         public double? LearningMomentum { get; set; } = null;
@@ -69,6 +70,8 @@ namespace Signum.Entities.MachineLearning
         public int Size { get; set; }
 
         public NeuralNetworkActivation Activation { get; set; }
+
+        public NeuralNetworkInitializer Initializer { get; set; }
     }
 
     public enum NeuralNetworkActivation
@@ -77,5 +80,18 @@ namespace Signum.Entities.MachineLearning
         ReLU,
         Sigmoid,
         Tanh
+    }
+
+    public enum NeuralNetworkInitializer
+    {
+        Zero,
+        GlorotNormal,
+        GlorotUniform,
+        HeNormal,
+        HeUniform,
+        Normal,
+        TruncateNormal,
+        Uniform,
+        Xavier,
     }
 }

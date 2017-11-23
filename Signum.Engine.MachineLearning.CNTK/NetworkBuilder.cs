@@ -8,9 +8,9 @@ using System.Threading.Tasks;
 
 namespace Signum.Engine.MachineLearning.CNTK
 {
-    public class NetworkBuilder
+    public static class NetworkBuilder
     {
-        public static Function DenseLayer(Variable input, int outputDim, DeviceDescriptor device, NeuralNetworkActivation activation, int seed, string name)
+        public static Function DenseLayer(Variable input, int outputDim, DeviceDescriptor device, NeuralNetworkActivation activation, NeuralNetworkInitializer initializer, int seed, string name)
         {
             if (input.Shape.Rank != 1)
             {
@@ -18,7 +18,7 @@ namespace Signum.Engine.MachineLearning.CNTK
                 input = CNTKLib.Reshape(input, new int[] { newDim });
             }
 
-            Function fullyConnected = FullyConnectedLinearLayer(input, outputDim, device);
+            Function fullyConnected = FullyConnectedLinearLayer(input, outputDim, initializer, seed,  device);
             fullyConnected.SetName(name);
             switch (activation)
             {
@@ -30,21 +30,51 @@ namespace Signum.Engine.MachineLearning.CNTK
             }
         }
 
-        public static Function FullyConnectedLinearLayer(Variable input, int outputDim,  DeviceDescriptor device)
+        public static Function FullyConnectedLinearLayer(Variable input, int outputDim, NeuralNetworkInitializer initializer, int seed, DeviceDescriptor device)
         {
             System.Diagnostics.Debug.Assert(input.Shape.Rank == 1);
             int inputDim = input.Shape[0];
-
-            var W = new Parameter(new int[] { outputDim, inputDim }, DataType.Float,
-                CNTKLib.GlorotUniformInitializer(
-                    scale: CNTKLib.DefaultParamInitScale,
-                    outputRank: CNTKLib.SentinelValueForInferParamInitRank,
-                    filterRank: CNTKLib.SentinelValueForInferParamInitRank, 
-                    seed: 1),
-                device, "W");
+            
+            var W = new Parameter(new int[] { outputDim, inputDim }, DataType.Float, GetInitializer(initializer, (uint)seed), device, "W");
 
             var b = new Parameter(new int[] { outputDim }, 0.0f, device, "b");
-            return b + CNTKLib.Times(W, input);
+            return b + W * input;
+        }
+
+        private static CNTKDictionary GetInitializer(NeuralNetworkInitializer initializer, uint seed)
+        {
+            var scale = CNTKLib.DefaultParamInitScale;
+            var rank = CNTKLib.SentinelValueForInferParamInitRank;
+            switch (initializer)
+            {
+                case NeuralNetworkInitializer.Zero: return CNTKLib.ConstantInitializer(0.0f);
+                case NeuralNetworkInitializer.GlorotNormal: return CNTKLib.GlorotNormalInitializer(scale, rank, rank, seed);
+                case NeuralNetworkInitializer.GlorotUniform: return CNTKLib.GlorotUniformInitializer(scale, rank, rank, seed);
+                case NeuralNetworkInitializer.HeNormal:return CNTKLib.HeNormalInitializer(scale, rank, rank, seed);
+                case NeuralNetworkInitializer.HeUniform: return CNTKLib.HeUniformInitializer(scale, rank, rank, seed);
+                case NeuralNetworkInitializer.Normal:return CNTKLib.NormalInitializer(scale, rank, rank, seed);
+                case NeuralNetworkInitializer.TruncateNormal: return CNTKLib.TruncatedNormalInitializer(scale, seed);
+                case NeuralNetworkInitializer.Uniform: return CNTKLib.UniformInitializer(scale, seed);
+                case NeuralNetworkInitializer.Xavier:return CNTKLib.XavierInitializer(scale, rank, rank, seed);
+                default:
+                    throw new InvalidOperationException("");
+            }
+        }
+
+        public static float EvaluateAvg(this Function func, Dictionary<Variable, Value> inputs, DeviceDescriptor device)
+        {
+            if (func.Output.Shape.TotalSize != 1 && func.Output.Shape.TotalSize != func.Output.Shape[0])
+                throw new InvalidOperationException("func should return a vector");
+
+            var outputs = new Dictionary<Variable, Value>()
+            {
+                { func.Output, null},
+            };
+
+            func.Evaluate(inputs, outputs, device);
+
+            var value = outputs[func.Output].GetDenseData<float>(func.Output).Average(a => a[0]);
+            return value;
         }
     }
 }

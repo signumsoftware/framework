@@ -27,8 +27,8 @@ namespace Signum.Engine.MachineLearning
         public long Ellapsed;
         public int TrainingExamples;
         public int Epoch;
-        public double LossTraining;
-        public double EvaluationTraining;
+        public double? LossTraining;
+        public double? EvaluationTraining;
         public double? LossValidation;
         public double? EvaluationValidation;
 
@@ -55,12 +55,14 @@ namespace Signum.Engine.MachineLearning
                 Ellapsed = Ellapsed,
                 Epoch = Epoch,
                 TrainingExamples = TrainingExamples,
-                LossTraining = LossTraining,
-                EvaluationTraining = EvaluationTraining,
-                LossValidation = LossValidation,
-                EvaluationValidation = EvaluationValidation,
+                LossTraining = LossTraining?.CleanDouble(),
+                EvaluationTraining = EvaluationTraining?.CleanDouble(),
+                LossValidation = LossValidation?.CleanDouble(),
+                EvaluationValidation = EvaluationValidation?.CleanDouble(),
             }.Save();
         }
+
+        
     }
 
     public class PredictorPredictContext
@@ -150,12 +152,8 @@ namespace Signum.Engine.MachineLearning
             }
         }
 
-        public (List<ResultRow> training, List<ResultRow> test) SplitTrainValidation()
+        public (List<ResultRow> training, List<ResultRow> test) SplitTrainValidation(Random r)
         {
-            Random r = Predictor.Settings.Seed == null ? 
-                new Random() : 
-                new Random(Predictor.Settings.Seed.Value);
-
             List<ResultRow> training = new List<ResultRow>();
             List<ResultRow> test = new List<ResultRow>();
 
@@ -168,26 +166,6 @@ namespace Signum.Engine.MachineLearning
             }
 
             return (training, test);
-        }
-
-        public EpochProgress AddPredictorProgress(int i, int examples, Stopwatch sw, double lossTraining, double evaluationTraining, double? lossValidation, double? evaluationValidation)
-        {
-            var ellapsed = sw.ElapsedMilliseconds;
-            
-            var epoch = new EpochProgress
-            {
-                Ellapsed = ellapsed,
-                Epoch = i,
-                TrainingExamples = examples,
-                LossTraining = lossTraining,
-                EvaluationTraining = evaluationTraining,
-                LossValidation = lossValidation,
-                EvaluationValidation = evaluationValidation,
-            };
-
-            this.Progresses.Add(epoch);
-
-            return epoch;
         }
 
         public List<object[]> GetProgessArray()

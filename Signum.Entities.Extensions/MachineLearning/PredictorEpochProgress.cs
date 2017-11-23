@@ -17,8 +17,8 @@ namespace Signum.Entities.MachineLearning
 
         public int Epoch { get; set; }
 
-        public double LossTraining { get; set; }
-        public double EvaluationTraining { get; set; }
+        public double? LossTraining { get; set; }
+        public double? EvaluationTraining { get; set; }
         public double? LossValidation { get; internal set; }
         public double? EvaluationValidation { get; internal set; }
     }

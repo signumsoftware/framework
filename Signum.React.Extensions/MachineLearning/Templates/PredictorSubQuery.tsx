@@ -52,7 +52,7 @@ export default class PredictorSubQuery extends React.Component<{ ctx: TypeContex
                             },
                         ])} />
 
-                    <EntityTable ctx={ctxxs.subCtx(e => e.aggregates)} columns={EntityTable.typedColumns<PredictorColumnEmbedded>([
+                        <EntityTable ctx={ctxxs.subCtx(e => e.aggregates)} columns={EntityTable.typedColumns<PredictorColumnEmbedded>([
                             { property: a => a.usage },
                             {
                                 property: a => a.token,
@@ -63,6 +63,7 @@ export default class PredictorSubQuery extends React.Component<{ ctx: TypeContex
                                 headerHtmlAttributes: { style: { width: "60%" } },
                             },
                             { property: a => a.encoding },
+                            { property: a => a.nullHandling },
                         ])} />
 
                     </div>}
