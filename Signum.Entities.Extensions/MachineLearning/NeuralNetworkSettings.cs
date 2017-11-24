@@ -22,7 +22,10 @@ namespace Signum.Entities.MachineLearning
         public NeuralNetworkActivation OutputActivation { get; set; }
         public NeuralNetworkInitializer OutputInitializer { get; set; }
 
+        [SqlDbType(Scale = 5), DecimalsValidator(5)]
         public double LearningRate { get; set; } = 0.2;
+
+        [SqlDbType(Scale = 5), DecimalsValidator(5)]
         public double? LearningMomentum { get; set; } = null;
 
         public int MinibatchSize { get; set; } = 1000;
@@ -50,8 +53,16 @@ namespace Signum.Entities.MachineLearning
 
         public IPredictorAlgorithmSettings Clone() => new NeuralNetworkSettingsEntity
         {
+            PredictionType = PredictionType,
+            HiddenLayers = HiddenLayers.Select(hl => hl.Clone()).ToMList(),
+            OutputActivation = OutputActivation,
+            OutputInitializer = OutputInitializer,
+            LearningRate = LearningRate,
+            LearningMomentum = LearningMomentum,
             MinibatchSize = MinibatchSize,
-
+            NumMinibatches = NumMinibatches,
+            SaveProgressEvery = SaveProgressEvery,
+            SaveValidationProgressEvery = SaveValidationProgressEvery,
         };
     }
 
@@ -72,6 +83,13 @@ namespace Signum.Entities.MachineLearning
         public NeuralNetworkActivation Activation { get; set; }
 
         public NeuralNetworkInitializer Initializer { get; set; }
+
+        internal NeuralNetworkHidenLayerEmbedded Clone() => new NeuralNetworkHidenLayerEmbedded
+        {
+            Size = Size,
+            Activation = Activation,
+            Initializer = Initializer
+        };
     }
 
     public enum NeuralNetworkActivation

@@ -65,7 +65,14 @@ namespace Signum.Engine.MachineLearning.CNTK
         {
             if (func.Output.Shape.TotalSize != 1 && func.Output.Shape.TotalSize != func.Output.Shape[0])
                 throw new InvalidOperationException("func should return a vector");
+            
+            var value = func.Evaluate(inputs, device);
+            var result = value.Average(a => a[0]);
+            return result;
+        }
 
+        public static IList<IList<float>> Evaluate(this Function func, Dictionary<Variable, Value> inputs, DeviceDescriptor device)
+        {
             var outputs = new Dictionary<Variable, Value>()
             {
                 { func.Output, null},
@@ -73,8 +80,7 @@ namespace Signum.Engine.MachineLearning.CNTK
 
             func.Evaluate(inputs, outputs, device);
 
-            var value = outputs[func.Output].GetDenseData<float>(func.Output).Average(a => a[0]);
-            return value;
+            return outputs[func.Output].GetDenseData<float>(func.Output);
         }
     }
 }

@@ -82,7 +82,7 @@ namespace Signum.Engine.MachineLearning.CNTK
             {
                 throw new InvalidOperationException("Unexpected " + nn.PredictionType);
             }
-
+            
             // prepare for training
             Learner learner = nn.LearningMomentum == null ?
                 (Learner)Learner.SGDLearner(calculatedOutputs.Parameters(),
@@ -182,14 +182,10 @@ namespace Signum.Engine.MachineLearning.CNTK
             calculatedOutputs.Save(fp.FullPhysicalPath());
         }
 
-      
-
         private DeviceDescriptor GetDevice(NeuralNetworkSettingsEntity nnSettings)
         {
             return DeviceDescriptor.CPUDevice;
         }
-        
-
 
         static Value CreateValue(PredictorTrainingContext ctx, List<ResultRow> rows, List<PredictorCodification> columns, DeviceDescriptor device)
         {
@@ -210,29 +206,39 @@ namespace Signum.Engine.MachineLearning.CNTK
                         value = aggregateValues == null ? null : aggregateValues[c.PredictorColumnIndex.Value];
                     }
 
-                    ref float box = ref values[i * columns.Count + j];
-
-                    //TODO: Codification
-                    switch (c.PredictorColumn.Encoding)
-                    {
-                        case PredictorColumnEncoding.None:
-                            box = Convert.ToSingle(value);
-                            break;
-                        case PredictorColumnEncoding.OneHot:
-                            box = Object.Equals(value, c.IsValue) ? 1 : 0;
-                            break;
-                        case PredictorColumnEncoding.Codified:
-                            throw new NotImplementedException("Codified is not for Neuronal Networks");
-                        default:
-                            throw new NotImplementedException("Unexpected encoding ");
-
-                    }
+                    values[i * columns.Count + j] = GetFloat(value, c);
                 }
             }
 
             return Value.CreateBatch<float>(new int[] { columns.Count }, values, device);
         }
 
+        private static float GetFloat(object value, PredictorCodification c)
+        {
+            if (value == null)
+            {
+                switch (c.PredictorColumn.NullHandling)
+                {
+                    case PredictorColumnNullHandling.Zero: return 0;
+                    case PredictorColumnNullHandling.Error: throw new Exception($"Null found on {c.PredictorColumn.Token} of {c.SubQuery?.ToString() ?? "MainQuery"}");
+                    case PredictorColumnNullHandling.MinValue: return (float)(c.MinValue ?? 0);
+                    case PredictorColumnNullHandling.AvgValue: return (float)(c.AvgValue ?? 0);
+                    case PredictorColumnNullHandling.MaxValue: return (float)(c.MaxValue ?? 0);
+                }
+            }
+
+            //TODO: Codification
+            switch (c.PredictorColumn.Encoding)
+            {
+                case PredictorColumnEncoding.None: return Convert.ToSingle(value);
+                case PredictorColumnEncoding.OneHot: return Object.Equals(value, c.IsValue) ? 1 : 0;
+                case PredictorColumnEncoding.Codified: throw new NotImplementedException("Codified is not for Neuronal Networks");
+                case PredictorColumnEncoding.MinMax: return (c.MinValue ?? 0) + ((c.MaxValue ?? 0) - (c.MinValue ?? 0)) * Convert.ToSingle(value);
+                default:
+                    throw new NotImplementedException("Unexpected encoding ");
+
+            }
+        }
 
         class CTTKMinibatchEvaluator
         {
@@ -402,12 +408,9 @@ namespace Signum.Engine.MachineLearning.CNTK
         {
             switch (key.Encoding)
             {
-                case PredictorColumnEncoding.None:
-                    return ReflectionTools.ChangeType(outputValues[cols.SingleEx().Index], key.Token.Token.Type);
-                case PredictorColumnEncoding.OneHot:
-                    return cols.WithMax(c => outputValues[c.Index]).IsValue;
-                case PredictorColumnEncoding.Codified:
-                    throw new InvalidOperationException("Codified");
+                case PredictorColumnEncoding.None: return ReflectionTools.ChangeType(outputValues[cols.SingleEx().Index], key.Token.Token.Type);
+                case PredictorColumnEncoding.OneHot:return cols.WithMax(c => outputValues[c.Index]).IsValue;
+                case PredictorColumnEncoding.Codified: throw new InvalidOperationException("Codified");
                 default:
                     throw new InvalidOperationException("Unexpected encoding");
             }
@@ -421,60 +424,26 @@ namespace Signum.Engine.MachineLearning.CNTK
             float[] values = new float[ctx.InputColumns.Count];
             for (int i = 0; i < ctx.InputColumns.Count; i++)
             {
-                values[i] = GetFloat(ctx, input, ctx.InputColumns[i]);
+                var c = ctx.InputColumns[i];
+                object value;
+                if (c.SubQuery != null)
+                {
+                    var sq = input.SubQueries.GetOrThrow(c.SubQuery);
+
+                    var dic = sq.SubQueryGroups.TryGetC(c.Keys);
+
+                    value = dic == null ? null : dic.GetOrThrow(c.PredictorColumn.Token.Token);
+                }
+                else
+                {
+                    value = input.MainQueryValues.GetOrThrow(c.PredictorColumn.Token.Token);
+                }
+
+                values[i] = GetFloat(value, c);
             }
 
 
             return Value.CreateBatch<float>(new int[] { ctx.InputColumns.Count }, values, device);
-        }
-
-        private float GetFloat(PredictorPredictContext ctx, PredictDictionary input, PredictorCodification c)
-        {
-            object value;
-            if (c.SubQuery != null)
-            {
-                var sq = input.SubQueries.GetOrThrow(c.SubQuery);
-
-                var dic = sq.SubQueryGroups.TryGetC(c.Keys);
-
-                value = dic == null ? null : dic.GetOrThrow(c.PredictorColumn.Token.Token);
-            }
-            else
-            {
-                value = input.MainQueryValues.GetOrThrow(c.PredictorColumn.Token.Token);
-            }
-
-            if(value == null)
-            {
-                switch (c.PredictorColumn.NullHandling)
-                {
-                    case PredictorColumnNullHandling.Error:
-                        throw new Exception($"Null found on {c.PredictorColumn.Token} of {c.SubQuery?.ToString() ?? "MainQuery"}");
-                    case PredictorColumnNullHandling.Zero:
-                        return 0;
-                    case PredictorColumnNullHandling.MinValue:
-                        return (float)c.Values[0];
-                    case PredictorColumnNullHandling.AvgValue:
-                        return (float)c.Values[1];
-                    case PredictorColumnNullHandling.MaxValue:
-                        return (float)c.Values[2];
-                    default:
-                        throw new NotImplementedException("Unexpected Null handling");
-                }
-            }
-
-            switch (c.PredictorColumn.Encoding)
-            {
-                case PredictorColumnEncoding.None:
-                    return Convert.ToSingle(value);
-                case PredictorColumnEncoding.OneHot:
-                    return value.Equals(c.IsValue) ? 1 : 0;
-                case PredictorColumnEncoding.Codified:
-                    throw new NotImplementedException("Codified is not for Neuronal Networks");
-                default:
-                    throw new NotImplementedException("Unexpected encoding ");
-
-            }
         }
 
         public void LoadModel(PredictorPredictContext ctx)

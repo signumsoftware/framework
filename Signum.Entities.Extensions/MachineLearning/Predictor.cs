@@ -108,7 +108,7 @@ namespace Signum.Entities.MachineLearning
     {
         public int TotalCount { get; set; }
         public int MissCount { get; set; }
-        [Format("p")]
+        [Format("p"), SqlDbType(Scale = 5)]
         public decimal? MissRate { get; set; }
 
         protected override void PreSaving(ref bool graphModified)
@@ -122,21 +122,22 @@ namespace Signum.Entities.MachineLearning
     [Serializable]
     public class PredictorRegressionMetricsEmbedded : EmbeddedEntity
     {
+        [SqlDbType(Scale = 5)]
         public double? Signed { get; set; }
 
-        [Unit("±")]
+        [Unit("±"), SqlDbType(Scale = 5)]
         public double? Absolute { get; set; }
 
-        [Unit("±")]
+        [Unit("±"), SqlDbType(Scale = 5)]
         public double? Deviation { get; set; }
 
-        [Format("p")]
+        [Format("p"), SqlDbType(Scale = 5)]
         public double? PercentageSigned { get; set; }
 
-        [Format("p"), Unit("±")]
+        [Format("p"), Unit("±"), SqlDbType(Scale = 5)]
         public double? PercentageAbsolute { get; set; }
 
-        [Format("p"), Unit("±")]
+        [Format("p"), Unit("±"), SqlDbType(Scale = 5)]
         public double? PercentageDeviation { get; set; }
 
     }
@@ -149,10 +150,11 @@ namespace Signum.Entities.MachineLearning
 
         public int? Seed { get; set; }
 
-        internal PredictorSettingsEmbedded Clone()
+        internal PredictorSettingsEmbedded Clone() => new PredictorSettingsEmbedded
         {
-            throw new NotImplementedException();
-        }
+            TestPercentage = TestPercentage,
+            Seed = Seed
+        };
     }
 
     [AutoInit]
@@ -232,7 +234,8 @@ namespace Signum.Entities.MachineLearning
         
             Usage = Usage, 
             Token = Token.Clone(),
-        
+            Encoding = Encoding,
+            NullHandling = NullHandling
         };
     }
 
@@ -249,7 +252,8 @@ namespace Signum.Entities.MachineLearning
     {
         None,
         OneHot,
-        Codified
+        Codified,
+        MinMax,
     }
 
     public enum PredictorState
@@ -313,8 +317,8 @@ namespace Signum.Entities.MachineLearning
 
         public PredictorSubQueryEntity Clone() => new PredictorSubQueryEntity
         {
-            Query = Query,
             Name = Name,
+            Query = Query,
             AdditionalFilters = AdditionalFilters.Select(f => f.Clone()).ToMList(),
             GroupKeys = GroupKeys.Select(f => f.Clone()).ToMList(),
             Aggregates = Aggregates.Select(f => f.Clone()).ToMList(),

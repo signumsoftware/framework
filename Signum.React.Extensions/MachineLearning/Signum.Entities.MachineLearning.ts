@@ -102,6 +102,9 @@ export interface PredictorCodificationEntity extends Entities.Entity {
     groupKey2?: string | null;
     isValue?: string | null;
     codedValues: Entities.MList<string>;
+    minValue?: number | null;
+    avgValue?: number | null;
+    maxValue?: number | null;
 }
 
 export const PredictorColumnEmbedded = new Type<PredictorColumnEmbedded>("PredictorColumnEmbedded");
@@ -117,7 +120,8 @@ export const PredictorColumnEncoding = new EnumType<PredictorColumnEncoding>("Pr
 export type PredictorColumnEncoding =
     "None" |
     "OneHot" |
-    "Codified";
+    "Codified" |
+    "MinMax";
 
 export const PredictorColumnNullHandling = new EnumType<PredictorColumnNullHandling>("PredictorColumnNullHandling");
 export type PredictorColumnNullHandling =

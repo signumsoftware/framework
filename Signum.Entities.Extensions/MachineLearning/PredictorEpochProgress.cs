@@ -17,9 +17,13 @@ namespace Signum.Entities.MachineLearning
 
         public int Epoch { get; set; }
 
+        [SqlDbType(Scale = 5)]
         public double? LossTraining { get; set; }
+        [SqlDbType(Scale = 5)]
         public double? EvaluationTraining { get; set; }
+        [SqlDbType(Scale = 5)]
         public double? LossValidation { get; internal set; }
+        [SqlDbType(Scale = 5)]
         public double? EvaluationValidation { get; internal set; }
     }
 }

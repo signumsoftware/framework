@@ -92,14 +92,32 @@ namespace Signum.Engine.MachineLearning
             switch (pc.Encoding)
             {
                 case PredictorColumnEncoding.None:
-                    return new[] { new PredictorCodification { PredictorColumn = pc, PredictorColumnIndex = pcIndex } };
+                    return new[] { new PredictorCodification(pc, pcIndex) };
                 case PredictorColumnEncoding.OneHot:
-                    return rc.Values.Cast<object>().Distinct().Select(v => new PredictorCodification { PredictorColumn = pc, IsValue = v, PredictorColumnIndex = pcIndex }).ToList();
+                    return rc.Values.Cast<object>().NotNull().Distinct().Select(v => new PredictorCodification(pc, pcIndex)
+                    {
+                        IsValue = v
+                    }).ToList();
                 case PredictorColumnEncoding.Codified:
-                    
-                    var values = rc.Values.Cast<object>().Distinct().ToArray();
-                    var valuesToIndex = values.Select((v, i) => KVP.Create(v, i)).ToDictionary();
-                    return new[] { new PredictorCodification { PredictorColumn = pc, ValuesToIndex = valuesToIndex, Values = values, PredictorColumnIndex = pcIndex } };
+                    {
+                        var values = rc.Values.Cast<object>().Distinct().ToArray();
+                        var valuesToIndex = values.Select((v, i) => KVP.Create(v, i)).ToDictionary();
+                        return new[] { new PredictorCodification(pc, pcIndex)
+                        {
+                            ValuesToIndex = valuesToIndex,
+                            CodedValues = values
+                        }};
+                    }
+                case PredictorColumnEncoding.MinMax:
+                    {
+                        var values = rc.Values.Cast<object>().NotNull().Select(a => Convert.ToSingle(a)).ToList();
+                        return new[] { new PredictorCodification(pc, pcIndex)
+                        {
+                            MinValue = values.Min(),
+                            AvgValue = values.Average(),
+                            MaxValue = values.Max(),
+                        }};
+                    }
                 default:
                     throw new InvalidOperationException("Unexcpected Encoding");
             }
@@ -195,7 +213,17 @@ namespace Signum.Engine.MachineLearning
         //Serves as Codification (i.e: Bayes)
         public Dictionary<object, int> ValuesToIndex;
 
-        public object[] Values;
+        public float? MinValue;
+        public float? AvgValue;
+        public float? MaxValue;
+
+        public object[] CodedValues;
+
+        public PredictorCodification(PredictorColumnEmbedded predictorColumn, int? predictorColumnIndex)
+        {
+            PredictorColumn = predictorColumn;
+            PredictorColumnIndex = predictorColumnIndex;
+        }
 
         public override string ToString()
         {
@@ -206,7 +234,7 @@ namespace Signum.Engine.MachineLearning
                 PredictorColumn.Token.ToString(),
                 Keys == null ? null : $"(Key={Keys.ToString(", ")})",
                 IsValue == null ? null : $"(IsValue={IsValue})",
-                Values == null ? null : $"(Values={Values.Length})",
+                CodedValues == null ? null : $"(Values={CodedValues.Length})",
             }.NotNull().ToString(" ");
         }
     }
