@@ -528,7 +528,7 @@ namespace Signum.TSGenerator
                 nsReference = new NamespaceTSReference
                 {
                     Namespace = type.Namespace,
-                    Path = FindDeclarationsFile(assemblyReference, type.Namespace),
+                    Path = FindDeclarationsFile(assemblyReference, type.Namespace, type),
                     VariableName = GetVariableName(options, type.Namespace.Split('.'))
                 };
 
@@ -553,7 +553,7 @@ namespace Signum.TSGenerator
             }
         }
 
-        private static string FindDeclarationsFile(AssemblyReference assemblyReference, string @namespace)
+        private static string FindDeclarationsFile(AssemblyReference assemblyReference, string @namespace, Type typeForError)
         {
             var fileTS = @namespace + ".ts";
 
@@ -563,7 +563,7 @@ namespace Signum.TSGenerator
                 return result.Single();
 
             if (result.Count > 1)
-                throw new InvalidOperationException($"Multiple '{fileTS}' found in '{assemblyReference.AssemblyName}':\r\n{string.Join("\r\n", result.Select(a => "    " + a).ToArray())}");
+                throw new InvalidOperationException($"importing '{typeForError}' required but multiple '{fileTS}' were found inside '{assemblyReference.ReactDirectory}':\r\n{string.Join("\r\n", result.Select(a => "    " + a).ToArray())}");
 
             var fileT4S = @namespace + ".t4s";
 
@@ -573,9 +573,9 @@ namespace Signum.TSGenerator
                 return result.Single().RemoveSuffix(".t4s") + ".ts";
 
             if (result.Count > 1)
-                throw new InvalidOperationException($"Multiple '{fileT4S}' found in '{assemblyReference.AssemblyName}':\r\n{string.Join("\r\n", result.Select(a => "    " + a).ToArray())}");
+                throw new InvalidOperationException($"importing '{typeForError}' required but multiple '{fileT4S}' were found inside '{assemblyReference.ReactDirectory}':\r\n{string.Join("\r\n", result.Select(a => "    " + a).ToArray())}");
 
-            throw new InvalidOperationException($"No '{fileTS}' or '{fileT4S}' found in '{assemblyReference.AssemblyName}'");
+            throw new InvalidOperationException($"importing '{typeForError}' required but no '{fileTS}' or '{fileT4S}' found inside '{assemblyReference.ReactDirectory}'");
         }
 
         private static string BaseTypeScriptName(Type type)
