@@ -27,10 +27,28 @@ export interface NaiveBayesSettingsEntity extends Entities.Entity, IPredictorAlg
     empirical?: boolean;
 }
 
+export const NeuralNetworkActivation = new EnumType<NeuralNetworkActivation>("NeuralNetworkActivation");
+export type NeuralNetworkActivation =
+    "None" |
+    "ReLU" |
+    "Sigmoid" |
+    "Tanh";
+
+export const NeuralNetworkHidenLayerEmbedded = new Type<NeuralNetworkHidenLayerEmbedded>("NeuralNetworkHidenLayerEmbedded");
+export interface NeuralNetworkHidenLayerEmbedded extends Entities.EmbeddedEntity {
+    Type: "NeuralNetworkHidenLayerEmbedded";
+    size?: number;
+    activation?: NeuralNetworkActivation;
+}
+
 export const NeuralNetworkSettingsEntity = new Type<NeuralNetworkSettingsEntity>("NeuralNetworkSettings");
 export interface NeuralNetworkSettingsEntity extends Entities.Entity, IPredictorAlgorithmSettings {
     Type: "NeuralNetworkSettings";
     predictionType?: PredictionType;
+    hiddenLayers: Entities.MList<NeuralNetworkHidenLayerEmbedded>;
+    outputActivation?: NeuralNetworkActivation;
+    learningRate?: number;
+    learningMomentum?: number | null;
     minibatchSize?: number;
     numMinibatches?: number;
     saveProgressEvery?: number;
@@ -40,7 +58,9 @@ export interface NeuralNetworkSettingsEntity extends Entities.Entity, IPredictor
 export const PredictionType = new EnumType<PredictionType>("PredictionType");
 export type PredictionType =
     "Regression" |
-    "Classification";
+    "MultiRegression" |
+    "Classification" |
+    "MultiClassification";
 
 export const PredictorAlgorithmSymbol = new Type<PredictorAlgorithmSymbol>("PredictorAlgorithm");
 export interface PredictorAlgorithmSymbol extends Entities.Symbol {

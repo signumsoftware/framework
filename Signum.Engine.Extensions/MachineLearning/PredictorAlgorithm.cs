@@ -46,6 +46,21 @@ namespace Signum.Engine.MachineLearning
                 EvaluationValidation,
             });
         }
+
+        public void SaveEntity(PredictorEntity predictor)
+        {
+            new PredictorEpochProgressEntity
+            {
+                Predictor = predictor.ToLite(),
+                Ellapsed = Ellapsed,
+                Epoch = Epoch,
+                TrainingExamples = TrainingExamples,
+                LossTraining = LossTraining,
+                EvaluationTraining = EvaluationTraining,
+                LossValidation = LossValidation,
+                EvaluationValidation = EvaluationValidation,
+            }.Save();
+        }
     }
 
     public class PredictorPredictContext
@@ -68,7 +83,7 @@ namespace Signum.Engine.MachineLearning
             Columns = columns;
             InputColumns = columns.Where(a => a.PredictorColumn.Usage == PredictorColumnUsage.Input).ToList();
             MainQueryOutputColumn = columns.Where(a => a.PredictorColumn.Usage == PredictorColumnUsage.Output && a.SubQuery == null).GroupToDictionary(a => a.PredictorColumn);
-            SubQueryOutputColumn = columns.Where(a => a.PredictorColumn.Usage == PredictorColumnUsage.Output && a.SubQuery != null).AgGroupToDictionary(a => a.SubQuery, gr => new PredictorPredictSubQueryContext
+            SubQueryOutputColumn = columns.Where(a => a.SubQuery != null).AgGroupToDictionary(a => a.SubQuery, gr => new PredictorPredictSubQueryContext
             {
                 SubQuery = gr.Key,
                 Groups = gr.AgGroupToDictionary(a => a.Keys, gr2 => gr.GroupToDictionary(a => a.PredictorColumn), ObjectArrayComparer.Instance)
@@ -84,7 +99,7 @@ namespace Signum.Engine.MachineLearning
 
     public class PredictorTrainingContext
     {
-        public PredictorEntity Predictor { get; }
+        public PredictorEntity Predictor { get; set; }
         public CancellationToken CancellationToken { get; }
         public bool StopTraining { get; set; }
 
@@ -155,30 +170,24 @@ namespace Signum.Engine.MachineLearning
             return (training, test);
         }
 
-        public void AddPredictorProgress(int i, int examples, Stopwatch sw, double lossTraining, double evaluationTraining, double? lossValidation, double? evaluationValidation)
+        public EpochProgress AddPredictorProgress(int i, int examples, Stopwatch sw, double lossTraining, double evaluationTraining, double? lossValidation, double? evaluationValidation)
         {
-            new PredictorEpochProgressEntity
+            var ellapsed = sw.ElapsedMilliseconds;
+            
+            var epoch = new EpochProgress
             {
-                Predictor = this.Predictor.ToLite(),
-                Ellapsed = sw.ElapsedMilliseconds,
+                Ellapsed = ellapsed,
                 Epoch = i,
                 TrainingExamples = examples,
                 LossTraining = lossTraining,
                 EvaluationTraining = evaluationTraining,
                 LossValidation = lossValidation,
                 EvaluationValidation = evaluationValidation,
-            }.Save();
+            };
 
-            this.Progresses.Add(new EpochProgress
-            {
-                Ellapsed = sw.ElapsedMilliseconds,
-                Epoch = i,
-                TrainingExamples = examples,
-                LossTraining = lossTraining,
-                EvaluationTraining = evaluationTraining,
-                LossValidation = lossValidation,
-                EvaluationValidation = evaluationValidation,
-            });
+            this.Progresses.Add(epoch);
+
+            return epoch;
         }
 
         public List<object[]> GetProgessArray()

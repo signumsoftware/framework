@@ -1,4 +1,5 @@
-﻿using Signum.Utilities;
+﻿using Signum.Entities;
+using Signum.Utilities;
 using Signum.Utilities.Reflection;
 using System;
 using System.Collections.Generic;
@@ -13,6 +14,15 @@ namespace Signum.Entities.MachineLearning
     public class NeuralNetworkSettingsEntity : Entity, IPredictorAlgorithmSettings
     {
         public PredictionType PredictionType { get; set; }
+        
+        [NotNullable, PreserveOrder]
+        [NotNullValidator, NoRepeatValidator]
+        public MList<NeuralNetworkHidenLayerEmbedded> HiddenLayers { get; set; } = new MList<NeuralNetworkHidenLayerEmbedded>();
+
+        public NeuralNetworkActivation OutputActivation { get; set; }
+
+        public double LearningRate { get; set; } = 0.2;
+        public double? LearningMomentum { get; set; } = null;
 
         public int MinibatchSize { get; set; } = 1000;
         public int NumMinibatches { get; set; } = 100;
@@ -47,6 +57,25 @@ namespace Signum.Entities.MachineLearning
     public enum PredictionType
     {
         Regression,
+        MultiRegression,
         Classification,
+        MultiClassification,
+    }
+
+    [Serializable]
+    public class NeuralNetworkHidenLayerEmbedded : EmbeddedEntity
+    {
+        [Unit("Neurons")]
+        public int Size { get; set; }
+
+        public NeuralNetworkActivation Activation { get; set; }
+    }
+
+    public enum NeuralNetworkActivation
+    {
+        None, 
+        ReLU,
+        Sigmoid,
+        Tanh
     }
 }

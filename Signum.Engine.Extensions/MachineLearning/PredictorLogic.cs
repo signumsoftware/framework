@@ -256,23 +256,27 @@ namespace Signum.Engine.MachineLearning
             }
             catch (OperationCanceledException e)
             {
-                CleanTrained(ctx.Predictor);
-                ctx.Predictor.State = PredictorState.Draft;
+                var p = ctx.Predictor.ToLite().RetrieveAndForget();
+                CleanTrained(p);
+                p.State = PredictorState.Draft;
                 using (OperationLogic.AllowSave<PredictorEntity>())
-                    ctx.Predictor.Save();
+                    p.Save();
             }
             catch (Exception ex)
             {
                 ex.Data["entity"] = ctx.Predictor;
                 var e = ex.LogException();
-                ctx.Predictor.State = PredictorState.Error;
+                var p = ctx.Predictor.ToLite().RetrieveAndForget();
+                p.State = PredictorState.Error;
+                p.TrainingException = e.ToLite();
                 using (OperationLogic.AllowSave<PredictorEntity>())
-                    ctx.Predictor.Save();
+                    p.Save();
             }
         }
 
         static void CleanTrained(PredictorEntity e)
         {
+            PredictorPredictLogic.TrainedPredictorCache.Remove(e.ToLite());
             e.TrainingException = null;
             foreach (var fp in e.Files)
             {

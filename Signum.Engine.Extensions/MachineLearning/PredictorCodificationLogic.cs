@@ -79,7 +79,7 @@ namespace Signum.Engine.MachineLearning
 
             object[] GetKeys(PredictorCodificationEntity cod, PredictorSubQueryEntity sq)
             {
-                switch (sq.GroupKeys.Count)
+                switch (sq.GroupKeys.Count - 1)
                 {
                     case 0: return new object[0];
                     case 1:
@@ -98,7 +98,7 @@ namespace Signum.Engine.MachineLearning
                             ParseKey(cod.GroupKey2, sq.GroupKeys[2]),
                         };
                     default:
-                        throw new InvalidOperationException("Unexcpected Group count");
+                        throw new InvalidOperationException("Unexpected Group count");
                 }
             }
 
