@@ -30,40 +30,34 @@ export default class NeuralNetworkSettings extends React.Component<{ ctx: TypeCo
                 <ValueLine ctx={ctx.subCtx(a => a.predictionType)} />
                 {this.renderCount(ctx, p, "Input")}
                 <EntityTable ctx={ctx.subCtx(a => a.hiddenLayers)} columns={EntityTable.typedColumns<NeuralNetworkHidenLayerEmbedded>([
-                    { property: a => a.size, headerHtmlAttributes: { style: { width: "50%" } } },
-                    { property: a => a.activation, headerHtmlAttributes: { style: { width: "50%" } } },
+                    { property: a => a.size, headerHtmlAttributes: { style: { width: "33%" } } },
+                    { property: a => a.activation, headerHtmlAttributes: { style: { width: "33%" } } },
+                    { property: a => a.initializer, headerHtmlAttributes: { style: { width: "33%" } } },
                 ])} />
                 <div className="form-vertical">
                     <div className="row">
-                        <div className="col-sm-6">
+                        <div className="col-sm-4">
                             {this.renderCount(ctx2, p, "Output")}
                         </div>
-                        <div className="col-sm-6">
+                        <div className="col-sm-4">
                             <ValueLine ctx={ctx2.subCtx(a => a.outputActivation)} />
+                        </div>
+                        <div className="col-sm-4">
+                            <ValueLine ctx={ctx2.subCtx(a => a.outputInitializer)} />
                         </div>
                     </div>
                     <hr />
                     <div className="row">
-                        <div className="col-sm-6">
+                        <div className="col-sm-4">
                             <ValueLine ctx={ctx2.subCtx(a => a.learningRate)} />
+                            <ValueLine ctx={ctx2.subCtx(a => a.learningMomentum)} helpBlock="Set to use MomentumSGDLearner" />
                         </div>
-                        <div className="col-sm-6">
-                            <ValueLine ctx={ctx2.subCtx(a => a.learningMomentum)} />
-                        </div>
-                    </div>
-                    <div className="row">
-                        <div className="col-sm-6">
+                        <div className="col-sm-4">
                             <ValueLine ctx={ctx2.subCtx(a => a.minibatchSize)} />
-                        </div>
-                        <div className="col-sm-6">
                             <ValueLine ctx={ctx2.subCtx(a => a.numMinibatches)} />
                         </div>
-                    </div>
-                    <div className="row">
-                        <div className="col-sm-6">
+                        <div className="col-sm-4">
                             <ValueLine ctx={ctx2.subCtx(a => a.saveProgressEvery)} />
-                        </div>
-                        <div className="col-sm-6">
                             <ValueLine ctx={ctx2.subCtx(a => a.saveValidationProgressEvery)} />
                         </div>
                     </div>

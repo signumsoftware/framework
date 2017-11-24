@@ -23,7 +23,7 @@ namespace Signum.Engine.MachineLearning
             var groupKey2Size = ((FieldValue)Schema.Current.Field((PredictorCodificationEntity e) => e.GroupKey2)).Size.Value;
 
             ctx.ReportProgress($"Saving Codifications");
-            ctx.Columns.Select(a =>
+            ctx.Columns.Select(pc =>
             {
                 string ToStringValue(QueryToken token, object obj, int limit)
                 {
@@ -38,25 +38,28 @@ namespace Signum.Engine.MachineLearning
 
                 string GetGroupKey(int index, int limit)
                 {
-                    var token = a.SubQuery?.GroupKeys.ElementAtOrDefault(index + 1)?.Token;
-                    var obj = a.Keys?.ElementAtOrDefault(index);
+                    var token = pc.SubQuery?.GroupKeys.ElementAtOrDefault(index + 1)?.Token;
+                    var obj = pc.Keys?.ElementAtOrDefault(index);
                     return ToStringValue(token?.Token, obj, limit);
                 }
 
                 return new PredictorCodificationEntity
                 {
                     Predictor = ctx.Predictor.ToLite(),
-                    Index = a.Index,
-                    Usage = a.PredictorColumn.Usage,
-                    SubQueryIndex = a.SubQuery == null ? (int?)null : ctx.Predictor.SubQueries.IndexOf(a.SubQuery),
-                    OriginalColumnIndex = a.SubQuery == null ?
-                        ctx.Predictor.MainQuery.Columns.IndexOf(a.PredictorColumn) :
-                        a.SubQuery.Aggregates.IndexOf(a.PredictorColumn),
+                    Index = pc.Index,
+                    Usage = pc.PredictorColumn.Usage,
+                    SubQueryIndex = pc.SubQuery == null ? (int?)null : ctx.Predictor.SubQueries.IndexOf(pc.SubQuery),
+                    OriginalColumnIndex = pc.SubQuery == null ?
+                        ctx.Predictor.MainQuery.Columns.IndexOf(pc.PredictorColumn) :
+                        pc.SubQuery.Aggregates.IndexOf(pc.PredictorColumn),
                     GroupKey0 = GetGroupKey(0, groupKey0Size),
                     GroupKey1 = GetGroupKey(1, groupKey1Size),
                     GroupKey2 = GetGroupKey(2, groupKey2Size),
-                    IsValue = ToStringValue(a.PredictorColumn.Token.Token, a.IsValue, valueSize),
-                    CodedValues = a.Values.EmptyIfNull().Select(v => ToStringValue(a.PredictorColumn.Token.Token, v, valueSize)).ToMList()
+                    IsValue = ToStringValue(pc.PredictorColumn.Token.Token, pc.IsValue, valueSize),
+                    CodedValues = pc.CodedValues.EmptyIfNull().Select(v => ToStringValue(pc.PredictorColumn.Token.Token, v, valueSize)).ToMList(),
+                    MinValue = pc.MinValue,
+                    AvgValue= pc.AvgValue,
+                    MaxValue = pc.MaxValue,
                 };
 
             }).BulkInsertQueryIds(a => new { a.Index, a.Usage }, a => a.Predictor == ctx.Predictor.ToLite());
@@ -105,17 +108,25 @@ namespace Signum.Engine.MachineLearning
             return (from cod in list
                     let sq = cod.SubQueryIndex != null ? predictor.SubQueries[cod.SubQueryIndex.Value] : null
                     let pce = sq != null ? sq.Aggregates[cod.OriginalColumnIndex] : predictor.MainQuery.Columns[cod.OriginalColumnIndex]
-                    select new PredictorCodification
+                    select new PredictorCodification(pce, cod.OriginalColumnIndex)
                     {
                         Index = cod.Index,
-                        PredictorColumn = pce,
-                        PredictorColumnIndex = cod.Index,
                         SubQuery = sq,
                         Keys = sq == null ? null : GetKeys(cod, sq),
                         IsValue = pce.Encoding == PredictorColumnEncoding.OneHot ? ParseValue(cod.IsValue, pce) : null,
-                        Values = pce.Encoding == PredictorColumnEncoding.Codified ? cod.CodedValues.Select(a => ParseValue(a, pce)).ToArray() : null
+                        CodedValues = pce.Encoding == PredictorColumnEncoding.Codified ? cod.CodedValues.Select(a => ParseValue(a, pce)).ToArray() : null,
+                        MinValue = pce.Encoding == PredictorColumnEncoding.MinMax ? cod.MinValue : null,
+                        AvgValue = pce.Encoding == PredictorColumnEncoding.MinMax ? cod.AvgValue : null,
+                        MaxValue = pce.Encoding == PredictorColumnEncoding.MinMax ? cod.MaxValue : null,
                     }).ToList();
         }
 
+        public static double? CleanDouble(this double val)
+        {
+            if (double.IsInfinity(val) || double.IsNaN(val))
+                return null;
+
+            return val;
+        }
     }
 }

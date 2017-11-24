@@ -39,7 +39,20 @@ export interface NeuralNetworkHidenLayerEmbedded extends Entities.EmbeddedEntity
     Type: "NeuralNetworkHidenLayerEmbedded";
     size?: number;
     activation?: NeuralNetworkActivation;
+    initializer?: NeuralNetworkInitializer;
 }
+
+export const NeuralNetworkInitializer = new EnumType<NeuralNetworkInitializer>("NeuralNetworkInitializer");
+export type NeuralNetworkInitializer =
+    "Zero" |
+    "GlorotNormal" |
+    "GlorotUniform" |
+    "HeNormal" |
+    "HeUniform" |
+    "Normal" |
+    "TruncateNormal" |
+    "Uniform" |
+    "Xavier";
 
 export const NeuralNetworkSettingsEntity = new Type<NeuralNetworkSettingsEntity>("NeuralNetworkSettings");
 export interface NeuralNetworkSettingsEntity extends Entities.Entity, IPredictorAlgorithmSettings {
@@ -47,6 +60,7 @@ export interface NeuralNetworkSettingsEntity extends Entities.Entity, IPredictor
     predictionType?: PredictionType;
     hiddenLayers: Entities.MList<NeuralNetworkHidenLayerEmbedded>;
     outputActivation?: NeuralNetworkActivation;
+    outputInitializer?: NeuralNetworkInitializer;
     learningRate?: number;
     learningMomentum?: number | null;
     minibatchSize?: number;
@@ -72,7 +86,7 @@ export interface PredictorClassificationMetricsEmbedded extends Entities.Embedde
     Type: "PredictorClassificationMetricsEmbedded";
     totalCount?: number;
     missCount?: number;
-    missRate?: number;
+    missRate?: number | null;
 }
 
 export const PredictorCodificationEntity = new Type<PredictorCodificationEntity>("PredictorCodification");
@@ -88,6 +102,9 @@ export interface PredictorCodificationEntity extends Entities.Entity {
     groupKey2?: string | null;
     isValue?: string | null;
     codedValues: Entities.MList<string>;
+    minValue?: number | null;
+    avgValue?: number | null;
+    maxValue?: number | null;
 }
 
 export const PredictorColumnEmbedded = new Type<PredictorColumnEmbedded>("PredictorColumnEmbedded");
@@ -103,7 +120,8 @@ export const PredictorColumnEncoding = new EnumType<PredictorColumnEncoding>("Pr
 export type PredictorColumnEncoding =
     "None" |
     "OneHot" |
-    "Codified";
+    "Codified" |
+    "MinMax";
 
 export const PredictorColumnNullHandling = new EnumType<PredictorColumnNullHandling>("PredictorColumnNullHandling");
 export type PredictorColumnNullHandling =
@@ -145,8 +163,8 @@ export interface PredictorEpochProgressEntity extends Entities.Entity {
     ellapsed?: number;
     trainingExamples?: number;
     epoch?: number;
-    lossTraining?: number;
-    evaluationTraining?: number;
+    lossTraining?: number | null;
+    evaluationTraining?: number | null;
     lossValidation?: number | null;
     evaluationValidation?: number | null;
 }
@@ -204,12 +222,12 @@ export module PredictorOperation {
 export const PredictorRegressionMetricsEmbedded = new Type<PredictorRegressionMetricsEmbedded>("PredictorRegressionMetricsEmbedded");
 export interface PredictorRegressionMetricsEmbedded extends Entities.EmbeddedEntity {
     Type: "PredictorRegressionMetricsEmbedded";
-    signed?: number;
-    absolute?: number;
-    deviation?: number;
-    percentageSigned?: number;
-    percentageAbsolute?: number;
-    percentageDeviation?: number;
+    signed?: number | null;
+    absolute?: number | null;
+    deviation?: number | null;
+    percentageSigned?: number | null;
+    percentageAbsolute?: number | null;
+    percentageDeviation?: number | null;
 }
 
 export const PredictorSettingsEmbedded = new Type<PredictorSettingsEmbedded>("PredictorSettingsEmbedded");

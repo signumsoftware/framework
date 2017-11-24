@@ -108,12 +108,12 @@ namespace Signum.Entities.MachineLearning
     {
         public int TotalCount { get; set; }
         public int MissCount { get; set; }
-        [Format("p")]
-        public float MissRate { get; set; }
+        [Format("p"), SqlDbType(Scale = 5)]
+        public decimal? MissRate { get; set; }
 
         protected override void PreSaving(ref bool graphModified)
         {
-            MissRate = MissCount / (float)TotalCount;
+            MissRate = TotalCount == 0 ? (decimal?)null : Math.Round(MissCount / (decimal)TotalCount, 2);
 
             base.PreSaving(ref graphModified);
         }
@@ -122,22 +122,23 @@ namespace Signum.Entities.MachineLearning
     [Serializable]
     public class PredictorRegressionMetricsEmbedded : EmbeddedEntity
     {
-        public decimal Signed { get; set; }
+        [SqlDbType(Scale = 5)]
+        public double? Signed { get; set; }
 
-        [Unit("±")]
-        public decimal Absolute { get; set; }
+        [Unit("±"), SqlDbType(Scale = 5)]
+        public double? Absolute { get; set; }
 
-        [Unit("±")]
-        public decimal Deviation { get; set; }
+        [Unit("±"), SqlDbType(Scale = 5)]
+        public double? Deviation { get; set; }
 
-        [Format("p")]
-        public decimal PercentageSigned { get; set; }
+        [Format("p"), SqlDbType(Scale = 5)]
+        public double? PercentageSigned { get; set; }
 
-        [Format("p"), Unit("±")]
-        public decimal PercentageAbsolute { get; set; }
+        [Format("p"), Unit("±"), SqlDbType(Scale = 5)]
+        public double? PercentageAbsolute { get; set; }
 
-        [Format("p"), Unit("±")]
-        public decimal PercentageDeviation { get; set; }
+        [Format("p"), Unit("±"), SqlDbType(Scale = 5)]
+        public double? PercentageDeviation { get; set; }
 
     }
 
@@ -149,10 +150,11 @@ namespace Signum.Entities.MachineLearning
 
         public int? Seed { get; set; }
 
-        internal PredictorSettingsEmbedded Clone()
+        internal PredictorSettingsEmbedded Clone() => new PredictorSettingsEmbedded
         {
-            throw new NotImplementedException();
-        }
+            TestPercentage = TestPercentage,
+            Seed = Seed
+        };
     }
 
     [AutoInit]
@@ -232,7 +234,8 @@ namespace Signum.Entities.MachineLearning
         
             Usage = Usage, 
             Token = Token.Clone(),
-        
+            Encoding = Encoding,
+            NullHandling = NullHandling
         };
     }
 
@@ -249,7 +252,8 @@ namespace Signum.Entities.MachineLearning
     {
         None,
         OneHot,
-        Codified
+        Codified,
+        MinMax,
     }
 
     public enum PredictorState
@@ -313,8 +317,8 @@ namespace Signum.Entities.MachineLearning
 
         public PredictorSubQueryEntity Clone() => new PredictorSubQueryEntity
         {
-            Query = Query,
             Name = Name,
+            Query = Query,
             AdditionalFilters = AdditionalFilters.Select(f => f.Clone()).ToMList(),
             GroupKeys = GroupKeys.Select(f => f.Clone()).ToMList(),
             Aggregates = Aggregates.Select(f => f.Clone()).ToMList(),

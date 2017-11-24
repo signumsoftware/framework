@@ -1,12 +1,12 @@
 ﻿import * as React from 'react';
 import * as d3 from "d3";
 
-interface Point {
+export interface Point {
     x: number;
     y: number;
 }
 
-interface LineChartSerie {
+export interface LineChartSerie {
     color: string; 
     name: string;
     values: Point[];
@@ -56,20 +56,20 @@ export default class LineChart extends React.Component<LineChartProps, { width?:
         let { height, series } = this.props;
         
         var allValues = series.flatMap(s => s.values);
+
+        var scaleX = d3.scaleLinear()
+            .domain([allValues.min(a => a.x), allValues.max(a => a.x)])
+            .range([2, width - 4]);
         
         return (
             <svg width={width} height={height}>
-                {series.map((s, i) => this.renderSerie(width, height, s, i))}
+                {series.map((s, i) => this.renderSerie(scaleX, height, s, i))}
             </svg>
         );
     }
 
-    renderSerie(width: number, height: number, s: LineChartSerie, index: number) {
-        var scaleX = d3.scaleLinear()
-            .domain([s.values.min(a => a.x), s.values.max(a => a.x)])
-            .range([2, width - 4]);
-
-
+    renderSerie(scaleX: d3.ScaleLinear<number, number>, height: number, s: LineChartSerie, index: number) {
+       
         var scaleY = d3.scaleLinear()
             .domain([s.minValue != null ? s.minValue : s.values.min(a => a.y), s.maxValue != null ? s.maxValue : s.values.max(a => a.y)])
             .range([height - 4, 2]);

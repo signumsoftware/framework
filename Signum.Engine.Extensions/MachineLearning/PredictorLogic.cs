@@ -101,6 +101,9 @@ namespace Signum.Engine.MachineLearning
                         e.GroupKey1,
                         e.GroupKey2,
                         e.IsValue,
+                        e.MinValue,
+                        e.AvgValue, 
+                        e.MaxValue,
                     });
 
                 sb.Include<PredictorEpochProgressEntity>()
