@@ -50,13 +50,15 @@ namespace Signum.Entities.Rest
 
         public DateTime EndDate { get; set; }
 
+        public RestLogReplayState? ReplayState { get; set; }
+
+        public double? ChangedPercentage { get; set; }
+
         static Expression<Func<RestLogEntity, double?>> DurationExpression =
           log => (double?)(log.EndDate - log.StartDate).TotalMilliseconds;
+
         [Unit("ms"), ExpressionField("DurationExpression")]
-        public double? Duration
-        {
-            get { return DurationExpression.Evaluate(this); }
-        }
+        public double? Duration => DurationExpression.Evaluate(this);
     }
 
     [Serializable]
@@ -69,6 +71,20 @@ namespace Signum.Entities.Rest
         public string Value { get; set; }
 
 
+    }
+
+    public enum RestLogReplayState
+    {
+        NoChanges,
+        WithChanges
+
+    }
+
+    public class RestDiffResult
+    {
+        public string previous { get; set; }
+        public string current { get; set; }
+        public List<StringDistance.DiffPair<List<StringDistance.DiffPair<string>>>> diff { get; set; }
     }
 
 }
