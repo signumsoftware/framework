@@ -95,15 +95,14 @@ namespace Signum.Engine.MachineLearning
                         e.Predictor,
                         e.Index,
                         e.Usage,
-                        e.SubQueryIndex,
                         e.OriginalColumnIndex,
+                        e.SubQueryIndex,
                         e.GroupKey0,
                         e.GroupKey1,
                         e.GroupKey2,
                         e.IsValue,
-                        e.MinValue,
-                        e.AvgValue, 
-                        e.MaxValue,
+                        e.Mean,
+                        e.StdDev, 
                     });
 
                 sb.Include<PredictorEpochProgressEntity>()

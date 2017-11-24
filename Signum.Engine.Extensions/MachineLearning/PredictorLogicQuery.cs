@@ -108,14 +108,13 @@ namespace Signum.Engine.MachineLearning
                             CodedValues = values
                         }};
                     }
-                case PredictorColumnEncoding.MinMax:
+                case PredictorColumnEncoding.NormalizeZScore:
                     {
                         var values = rc.Values.Cast<object>().NotNull().Select(a => Convert.ToSingle(a)).ToList();
                         return new[] { new PredictorCodification(pc, pcIndex)
                         {
-                            MinValue = values.Min(),
-                            AvgValue = values.Average(),
-                            MaxValue = values.Max(),
+                            Mean = values.Count == 0 ? 0: values.Average(),
+                            StdDev = values.Count == 0 ? 1: values.StdDev(),
                         }};
                     }
                 default:
@@ -213,9 +212,8 @@ namespace Signum.Engine.MachineLearning
         //Serves as Codification (i.e: Bayes)
         public Dictionary<object, int> ValuesToIndex;
 
-        public float? MinValue;
-        public float? AvgValue;
-        public float? MaxValue;
+        public float? Mean;
+        public float? StdDev;
 
         public object[] CodedValues;
 
@@ -236,6 +234,11 @@ namespace Signum.Engine.MachineLearning
                 IsValue == null ? null : $"(IsValue={IsValue})",
                 CodedValues == null ? null : $"(Values={CodedValues.Length})",
             }.NotNull().ToString(" ");
+        }
+
+        public float Denormalize(float value)
+        {
+            return Mean.Value + (StdDev.Value * value);
         }
     }
 

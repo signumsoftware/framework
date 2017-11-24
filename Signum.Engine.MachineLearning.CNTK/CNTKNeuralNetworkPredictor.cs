@@ -215,28 +215,27 @@ namespace Signum.Engine.MachineLearning.CNTK
 
         private static float GetFloat(object value, PredictorCodification c)
         {
-            if (value == null)
-            {
-                switch (c.PredictorColumn.NullHandling)
-                {
-                    case PredictorColumnNullHandling.Zero: return 0;
-                    case PredictorColumnNullHandling.Error: throw new Exception($"Null found on {c.PredictorColumn.Token} of {c.SubQuery?.ToString() ?? "MainQuery"}");
-                    case PredictorColumnNullHandling.MinValue: return (float)(c.MinValue ?? 0);
-                    case PredictorColumnNullHandling.AvgValue: return (float)(c.AvgValue ?? 0);
-                    case PredictorColumnNullHandling.MaxValue: return (float)(c.MaxValue ?? 0);
-                }
-            }
+            var valueDefault = value ?? GetDefaultValue(c);
 
             //TODO: Codification
             switch (c.PredictorColumn.Encoding)
             {
-                case PredictorColumnEncoding.None: return Convert.ToSingle(value);
-                case PredictorColumnEncoding.OneHot: return Object.Equals(value, c.IsValue) ? 1 : 0;
+                case PredictorColumnEncoding.None: return Convert.ToSingle(valueDefault);
+                case PredictorColumnEncoding.OneHot: return Object.Equals(valueDefault, c.IsValue) ? 1 : 0;
                 case PredictorColumnEncoding.Codified: throw new NotImplementedException("Codified is not for Neuronal Networks");
-                case PredictorColumnEncoding.MinMax: return (c.MinValue ?? 0) + ((c.MaxValue ?? 0) - (c.MinValue ?? 0)) * Convert.ToSingle(value);
-                default:
-                    throw new NotImplementedException("Unexpected encoding ");
+                case PredictorColumnEncoding.NormalizeZScore: return (Convert.ToSingle(valueDefault) - c.Mean.Value) / c.StdDev.Value;
+                default: throw new NotImplementedException("Unexpected encoding " + c.PredictorColumn.Encoding);
+            }
+        }
 
+        private static object GetDefaultValue(PredictorCodification c)
+        {
+            switch (c.PredictorColumn.NullHandling)
+            {
+                case PredictorColumnNullHandling.Zero: return 0;
+                case PredictorColumnNullHandling.Error: throw new Exception($"Null found on {c.PredictorColumn.Token} of {c.SubQuery?.ToString() ?? "MainQuery"}");
+                case PredictorColumnNullHandling.Mean: return c.Mean;
+                default: throw new NotImplementedException("Unexpected NullHanndling " + c.PredictorColumn.NullHandling);
             }
         }
 
@@ -332,6 +331,22 @@ namespace Signum.Engine.MachineLearning.CNTK
                     {
                         var po = predictedOutput[j];
                         var eo = expectedOutput[j];
+
+                        foreach (var c in this.ctx.OutputColumns)
+                        {
+                            switch (c.PredictorColumn.Encoding)
+                            {
+                                case PredictorColumnEncoding.None:
+                                    break;
+                                case PredictorColumnEncoding.NormalizeZScore:
+                                    po[c.Index] = c.Denormalize(po[c.Index]);
+                                    eo[c.Index] = c.Denormalize(eo[c.Index]);
+                                    break;
+                                default:
+                                    break;
+                            }
+                        }
+
                         var iCount = po.Count == eo.Count ? po.Count : throw new InvalidOperationException("Count missmatch");
 
                         if (multiRegression)
@@ -356,7 +371,7 @@ namespace Signum.Engine.MachineLearning.CNTK
                     Deviation = Math.Sqrt(pairs.Average(p => Error(p) * Error(p))).CleanDouble(),
                     PercentageSigned = pairs.Average(p => Error(p) / p.expected).CleanDouble(),
                     PercentageAbsolute = pairs.Average(p => Math.Abs(Error(p)) / p.expected).CleanDouble(),
-                    PercentageDeviation = Math.Sqrt(pairs.Average(p => Error(p) * Error(p) / (p.expected * p.expected))).CleanDouble()
+                    PercentageDeviation = Math.Sqrt(pairs.Average(p => (Error(p) * Error(p)) / (p.expected * p.expected))).CleanDouble()
                 };
             }
 
@@ -392,13 +407,14 @@ namespace Signum.Engine.MachineLearning.CNTK
         {
             return new PredictDictionary
             {
-                MainQueryValues = ctx.MainQueryOutputColumn.SelectDictionary(col => col.Token.Token, (col, list) => FloatToValue(col, list, outputValues)),
+                Predictor = ctx.Predictor,
+                MainQueryValues = ctx.MainQueryOutputColumn.SelectDictionary(col => col, (col, list) => FloatToValue(col, list, outputValues)),
                 SubQueries = ctx.Predictor.SubQueries.ToDictionary(sq => sq, sq => new PredictSubQueryDictionary
                 {
                     SubQuery = sq,
                     SubQueryGroups = ctx.SubQueryOutputColumn.TryGetC(sq)?.Groups.SelectDictionary(grKey => grKey, dic => dic
                     .Where(a => a.Key.Usage == PredictorColumnUsage.Output)
-                    .ToDictionary(a => a.Key.Token.Token, a => FloatToValue(a.Key, a.Value, outputValues))
+                    .ToDictionary(a => a.Key, a => FloatToValue(a.Key, a.Value, outputValues))
                     )
                 })
             };
@@ -408,8 +424,19 @@ namespace Signum.Engine.MachineLearning.CNTK
         {
             switch (key.Encoding)
             {
-                case PredictorColumnEncoding.None: return ReflectionTools.ChangeType(outputValues[cols.SingleEx().Index], key.Token.Token.Type);
+                case PredictorColumnEncoding.None:
+                    {
+                        var c = cols.SingleEx();
+                        return ReflectionTools.ChangeType(outputValues[c.Index], key.Token.Token.Type);
+                    }
                 case PredictorColumnEncoding.OneHot:return cols.WithMax(c => outputValues[c.Index]).IsValue;
+                case PredictorColumnEncoding.NormalizeZScore:
+                    {
+                        var c = cols.SingleEx();
+                        var value = outputValues[c.Index];
+                        var newValue = c.Denormalize(value);
+                        return ReflectionTools.ChangeType(newValue, key.Token.Token.Type);
+                    }
                 case PredictorColumnEncoding.Codified: throw new InvalidOperationException("Codified");
                 default:
                     throw new InvalidOperationException("Unexpected encoding");
@@ -432,11 +459,11 @@ namespace Signum.Engine.MachineLearning.CNTK
 
                     var dic = sq.SubQueryGroups.TryGetC(c.Keys);
 
-                    value = dic == null ? null : dic.GetOrThrow(c.PredictorColumn.Token.Token);
+                    value = dic == null ? null : dic.GetOrThrow(c.PredictorColumn);
                 }
                 else
                 {
-                    value = input.MainQueryValues.GetOrThrow(c.PredictorColumn.Token.Token);
+                    value = input.MainQueryValues.GetOrThrow(c.PredictorColumn);
                 }
 
                 values[i] = GetFloat(value, c);

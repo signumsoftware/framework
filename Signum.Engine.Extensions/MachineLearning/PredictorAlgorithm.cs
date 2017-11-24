@@ -205,13 +205,14 @@ namespace Signum.Engine.MachineLearning
 
     public class PredictDictionary
     {
-        public Dictionary<QueryToken, object> MainQueryValues { get; set; }
+        public PredictorEntity Predictor { get; set; }
+        public Dictionary<PredictorColumnEmbedded, object> MainQueryValues { get; set; }
         public Dictionary<PredictorSubQueryEntity, PredictSubQueryDictionary> SubQueries { get; set; }
     }
 
     public class PredictSubQueryDictionary
     {
         public PredictorSubQueryEntity SubQuery { get; set; }
-        public Dictionary<object[], Dictionary<QueryToken, object>> SubQueryGroups { get; set; }
+        public Dictionary<object[], Dictionary<PredictorColumnEmbedded, object>> SubQueryGroups { get; set; }
     }
 }

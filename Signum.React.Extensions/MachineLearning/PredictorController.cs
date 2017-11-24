@@ -121,7 +121,7 @@ namespace Signum.React.MachineLearning
                 MainQueryValues = pctx.Predictor.MainQuery.Columns
                 .Select((col, i) => new { col, request.columns[i].value })
                 .Where(a => a.col.Usage == PredictorColumnUsage.Input)
-                .Select(a => KVP.Create(a.col.Token.Token, a.value))
+                .Select(a => KVP.Create(a.col, a.value))
                 .ToDictionaryEx(),
                 
                 SubQueries = pctx.Predictor.SubQueries.Select(sq =>
@@ -132,7 +132,7 @@ namespace Signum.React.MachineLearning
                     {
                         SubQuery = sq,
                         SubQueryGroups = sqt.rows.Select(array => KVP.Create(array.Slice(0, sq.GroupKeys.Count - 1),
-                            sq.Aggregates.Select((a, i) => KVP.Create(a.Token.Token, array[i])).ToDictionary()
+                            sq.Aggregates.Select((a, i) => KVP.Create(a, array[i])).ToDictionary()
                         )).ToDictionary()
                     };
                 }).ToDictionaryEx(a => a.SubQuery)
@@ -141,7 +141,7 @@ namespace Signum.React.MachineLearning
 
         void SetOutput(PredictRequestTS request, PredictorPredictContext pctx, PredictDictionary predicted)
         {
-            var predictedMainCols = predicted.MainQueryValues.SelectDictionary(qt => qt.FullKey(), v => v);
+            var predictedMainCols = predicted.MainQueryValues.SelectDictionary(qt => qt.Token.Token.FullKey(), v => v);
 
             foreach (var c in request.columns.Where(a=>a.usage == PredictorColumnUsage.Output))
             {
@@ -156,7 +156,7 @@ namespace Signum.React.MachineLearning
             {
                 var psq = predicted.SubQueries.Values.Single(a => sq.subQuery.RefersTo(a.SubQuery));
 
-                var fullKeyToToken = psq.SubQuery.Aggregates.Select(a => a.Token.Token).ToDictionary(a => a.FullKey());
+                var fullKeyToToken = psq.SubQuery.Aggregates.ToDictionary(a => a.Token.Token.FullKey());
 
                 foreach (var r in sq.rows)
                 {
@@ -197,12 +197,12 @@ namespace Signum.React.MachineLearning
                 {
                     token = new QueryTokenTS(c.Token.Token, true),
                     usage = c.Usage,
-                    value = c.Usage == PredictorColumnUsage.Input ? inputs?.MainQueryValues.GetOrThrow(c.Token.Token) :
-                    originalOutputs == null ? predictedOutputs?.MainQueryValues.GetOrThrow(c.Token.Token) :
+                    value = c.Usage == PredictorColumnUsage.Input ? inputs?.MainQueryValues.GetOrThrow(c) :
+                    originalOutputs == null ? predictedOutputs?.MainQueryValues.GetOrThrow(c) :
                     new PredictOutputTuple
                     {
-                        original = originalOutputs?.MainQueryValues.GetOrThrow(c.Token.Token),
-                        predicted = predictedOutputs?.MainQueryValues.GetOrThrow(c.Token.Token),
+                        original = originalOutputs?.MainQueryValues.GetOrThrow(c),
+                        predicted = predictedOutputs?.MainQueryValues.GetOrThrow(c),
                     }
                 }).ToList(),
 
@@ -242,12 +242,12 @@ namespace Signum.React.MachineLearning
             for (int i = 0; i < sq.Aggregates.Count; i++)
             {
                 var a = sq.Aggregates[i];
-                row[i + key.Length] = a.Usage == PredictorColumnUsage.Input ? inputsGR?.GetOrThrow(a.Token.Token) :
-                    originalOutputs == null ? predictedOutputsGR.GetOrThrow(a.Token.Token) :
+                row[i + key.Length] = a.Usage == PredictorColumnUsage.Input ? inputsGR?.GetOrThrow(a) :
+                    originalOutputs == null ? predictedOutputsGR.GetOrThrow(a) :
                     new PredictOutputTuple
                     {
-                        predicted = predictedOutputsGR.GetOrThrow(a.Token.Token),
-                        original = originalOutputsGR?.GetOrThrow(a.Token.Token),
+                        predicted = predictedOutputsGR.GetOrThrow(a),
+                        original = originalOutputsGR?.GetOrThrow(a),
                     };
             }
 

@@ -12,6 +12,7 @@ export interface LineChartSerie {
     values: Point[];
     minValue?: number;
     maxValue?: number;
+    strokeWidth?: string;
 }
 
 interface LineChartProps {
@@ -81,7 +82,9 @@ export default class LineChart extends React.Component<LineChartProps, { width?:
 
         return (
             <g key={index}>
-                <path className="line" fill="none" d={line(s.values) || undefined} style={{ stroke: s.color, strokeWidth: "1.5px" }} />
+                <path className="line" fill="none" d={line(s.values) || undefined} style={{
+                    stroke: s.color, strokeWidth: s.strokeWidth
+                }} />
             </g>
         );
     }

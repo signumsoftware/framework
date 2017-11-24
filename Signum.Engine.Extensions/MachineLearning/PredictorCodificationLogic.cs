@@ -57,9 +57,8 @@ namespace Signum.Engine.MachineLearning
                     GroupKey2 = GetGroupKey(2, groupKey2Size),
                     IsValue = ToStringValue(pc.PredictorColumn.Token.Token, pc.IsValue, valueSize),
                     CodedValues = pc.CodedValues.EmptyIfNull().Select(v => ToStringValue(pc.PredictorColumn.Token.Token, v, valueSize)).ToMList(),
-                    MinValue = pc.MinValue,
-                    AvgValue= pc.AvgValue,
-                    MaxValue = pc.MaxValue,
+                    StdDev = pc.StdDev,
+                    Mean = pc.Mean,
                 };
 
             }).BulkInsertQueryIds(a => new { a.Index, a.Usage }, a => a.Predictor == ctx.Predictor.ToLite());
@@ -115,9 +114,8 @@ namespace Signum.Engine.MachineLearning
                         Keys = sq == null ? null : GetKeys(cod, sq),
                         IsValue = pce.Encoding == PredictorColumnEncoding.OneHot ? ParseValue(cod.IsValue, pce) : null,
                         CodedValues = pce.Encoding == PredictorColumnEncoding.Codified ? cod.CodedValues.Select(a => ParseValue(a, pce)).ToArray() : null,
-                        MinValue = pce.Encoding == PredictorColumnEncoding.MinMax ? cod.MinValue : null,
-                        AvgValue = pce.Encoding == PredictorColumnEncoding.MinMax ? cod.AvgValue : null,
-                        MaxValue = pce.Encoding == PredictorColumnEncoding.MinMax ? cod.MaxValue : null,
+                        Mean = cod.Mean,
+                        StdDev = cod.StdDev,
                     }).ToList();
         }
 

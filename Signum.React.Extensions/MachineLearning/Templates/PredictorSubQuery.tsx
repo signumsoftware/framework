@@ -14,6 +14,7 @@ import { QueryDescription, SubTokensOptions } from '../../../../Framework/Signum
 import { API } from '../PredictorClient';
 import FilterBuilderEmbedded from './FilterBuilderEmbedded';
 import { TypeReference } from '../../../../Framework/Signum.React/Scripts/Reflection';
+import { initializeColumn } from './Predictor';
 
 export default class PredictorSubQuery extends React.Component<{ ctx: TypeContext<PredictorSubQueryEntity>, targetType: TypeReference, mainQuery: PredictorMainQueryEmbedded }> {
 
@@ -31,9 +32,11 @@ export default class PredictorSubQuery extends React.Component<{ ctx: TypeContex
         const entity = ctx.value;
         const queryKey = entity.query && entity.query.key;
 
+        var parentCtx = ctx.findParentCtx(PredictorEntity);
+
         return (
             <div>
-                <ValueLine ctx={ctx.subCtx(f => f.name)} onTextboxBlur={() => ctx.findParentCtx(PredictorEntity).frame!.entityComponent.forceUpdate()} />
+                <ValueLine ctx={ctx.subCtx(f => f.name)} onTextboxBlur={() => parentCtx.frame!.entityComponent.forceUpdate()} />
                 <EntityLine ctx={ctx.subCtx(f => f.query)} remove={ctx.value.isNew} onChange={this.handleOnChange} />
                 {queryKey &&
                     <div>
@@ -56,10 +59,11 @@ export default class PredictorSubQuery extends React.Component<{ ctx: TypeContex
                             { property: a => a.usage },
                             {
                                 property: a => a.token,
-                                template: cctx => <QueryTokenEntityBuilder
+                                template: (cctx, row) => <QueryTokenEntityBuilder
                                     ctx={cctx.subCtx(a => a.token)}
                                     queryKey={this.props.ctx.value.query!.key}
-                                    subTokenOptions={SubTokensOptions.CanElement | SubTokensOptions.CanAggregate} />,
+                                    subTokenOptions={SubTokensOptions.CanElement | SubTokensOptions.CanAggregate}
+                                    onTokenChanged={qt => { initializeColumn(parentCtx.value, qt, cctx.value); row.forceUpdate() }}/>,
                                 headerHtmlAttributes: { style: { width: "60%" } },
                             },
                             { property: a => a.encoding },

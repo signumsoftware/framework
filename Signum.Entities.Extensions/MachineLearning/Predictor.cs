@@ -14,6 +14,7 @@ using System.Reflection;
 using Signum.Entities.Files;
 using Signum.Entities.Authorization;
 using System.Xml.Linq;
+using System.ComponentModel;
 
 namespace Signum.Entities.MachineLearning
 {
@@ -231,7 +232,6 @@ namespace Signum.Entities.MachineLearning
         
         internal PredictorColumnEmbedded Clone() => new PredictorColumnEmbedded
         {
-        
             Usage = Usage, 
             Token = Token.Clone(),
             Encoding = Encoding,
@@ -243,9 +243,7 @@ namespace Signum.Entities.MachineLearning
     {
         Zero,
         Error,
-        MinValue,
-        AvgValue,
-        MaxValue,
+        Mean,
     }
 
     public enum PredictorColumnEncoding
@@ -253,7 +251,7 @@ namespace Signum.Entities.MachineLearning
         None,
         OneHot,
         Codified,
-        MinMax,
+        NormalizeZScore,
     }
 
     public enum PredictorState

@@ -91,14 +91,14 @@ namespace Signum.Engine.MachineLearning
                 return groupResult.Rows.AgGroupToDictionary(row => (Lite<Entity>)row[entityGroupKey], gr =>
                     gr.ToDictionaryEx(
                         row => row.GetValues(remainingKeys),
-                        row => aggregates.Select((a, i)=>KVP.Create(a.Column.Token, row[aggregates[i]])).ToDictionaryEx(),
+                        row => sqe.Aggregates.Select((ac, i)=>KVP.Create(ac, row[aggregates[i]])).ToDictionaryEx(),
                         ObjectArrayComparer.Instance));
 
             });
 
             var result = rt.Rows.ToDictionaryEx(row => row.Entity, row => new PredictDictionary
             {
-                MainQueryValues = ctx.Predictor.MainQuery.Columns.Select((c, i) => KVP.Create(c.Token.Token, row[i])).ToDictionaryEx(),
+                MainQueryValues = ctx.Predictor.MainQuery.Columns.Select((c, i) => KVP.Create(c, row[i])).ToDictionaryEx(),
                 SubQueries = ctx.Predictor.SubQueries.ToDictionary(sq => sq, sq => new PredictSubQueryDictionary
                 {
                     SubQuery = sq,

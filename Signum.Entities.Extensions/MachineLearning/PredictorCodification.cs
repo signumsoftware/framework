@@ -38,8 +38,7 @@ namespace Signum.Entities.MachineLearning
         [NotNullValidator, NoRepeatValidator, SqlDbType(Size = 100)]
         public MList<string> CodedValues { get; set; } = new MList<string>();
 
-        public float? MinValue { get; set; }
-        public float? AvgValue { get; set; }
-        public float? MaxValue { get; set; }
+        public float? Mean { get; set; }
+        public float? StdDev { get; set; }
     }
 }

@@ -7,7 +7,7 @@ import { FormGroup, FormControlStatic, ValueLine, ValueLineType, EntityLine, Ent
 import { SearchControl, FilterOption, ColumnOption, FindOptions } from '../../../../Framework/Signum.React/Scripts/Search'
 import { TypeContext, FormGroupStyle, ButtonsContext } from '../../../../Framework/Signum.React/Scripts/TypeContext'
 import FileLine from '../../Files/FileLine'
-import { PredictorEntity, PredictorColumnEmbedded, PredictorMessage, PredictorSubQueryEntity, PredictorGroupKeyEmbedded, PredictorFileType, PredictorCodificationEntity, PredictorEpochProgressEntity } from '../Signum.Entities.MachineLearning'
+import { PredictorEntity, PredictorColumnEmbedded, PredictorMessage, PredictorSubQueryEntity, PredictorGroupKeyEmbedded, PredictorFileType, PredictorCodificationEntity, PredictorEpochProgressEntity, NeuralNetworkSettingsEntity } from '../Signum.Entities.MachineLearning'
 import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
 import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
 import { getQueryNiceName } from '../../../../Framework/Signum.React/Scripts/Reflection'
@@ -26,6 +26,7 @@ import { FilePathEmbedded } from '../../Files/Signum.Entities.Files';
 import { is } from '../../../../Framework/Signum.React/Scripts/Signum.Entities';
 import ProgressBar from './ProgressBar'
 import LineChart, { LineChartSerie } from './LineChart'
+import { QueryToken } from '../../../../Framework/Signum.React/Scripts/FindOptions';
 
 export default class Predictor extends React.Component<{ ctx: TypeContext<PredictorEntity> }, { queryDescription?: QueryDescription }> implements IRenderButtons {
 
@@ -175,10 +176,11 @@ export default class Predictor extends React.Component<{ ctx: TypeContext<Predic
                                             { property: a => a.usage },
                                             {
                                                 property: a => a.token,
-                                                template: ctx => <QueryTokenEntityBuilder
-                                                    ctx={ctx.subCtx(a => a.token)}
+                                                template: (cctx, row) => <QueryTokenEntityBuilder
+                                                    ctx={cctx.subCtx(a => a.token)}
                                                     queryKey={this.props.ctx.value.mainQuery.query!.key}
-                                                    subTokenOptions={SubTokensOptions.CanElement} />,
+                                                    subTokenOptions={SubTokensOptions.CanElement}
+                                                    onTokenChanged={qt => { initializeColumn(ctx.value, qt, cctx.value); row.forceUpdate() }} />,
                                                 headerHtmlAttributes: { style: { width: "40%" } },
                                             },
                                             { property: a => a.encoding },
@@ -230,6 +232,14 @@ export default class Predictor extends React.Component<{ ctx: TypeContext<Predic
                 </Tabs>
             </div>
         );
+    }
+}
+
+export function initializeColumn(p: PredictorEntity, queryToken: QueryToken | undefined, pc: PredictorColumnEmbedded) {
+    if (queryToken) {
+        pc.encoding = queryToken.type.name == "number" || queryToken.type.name == "decimal" ? "NormalizeZScore" :
+            NeuralNetworkSettingsEntity.isInstance(p.algorithmSettings) ? "OneHot" : "Codified";
+        pc.nullHandling = "Zero";
     }
 }
 
@@ -287,7 +297,7 @@ export class TrainingProgressComponent extends React.Component<TrainingProgressC
 
         return (
             <div>
-                {tp && tp.EpochProgressesParsed && <LineChart height={200} series={getSeries(tp.EpochProgressesParsed)} />}
+                {tp && tp.EpochProgressesParsed && <LineChart height={200} series={getSeries(tp.EpochProgressesParsed, this.props.ctx.value)} />}
                 <ProgressBar color={tp == null || tp.Running == false ? "info" : "default"}
                     value={tp && tp.Progress}
                     message={tp == null ? PredictorMessage.StartingTraining.niceToString() : tp.Message}
@@ -333,44 +343,57 @@ export class EpochProgressComponent extends React.Component<EpochProgressCompone
     }
 
     render() {
-
         const eps = this.state.epochProgress;
-
+        
         return (
             <div>
-                {eps && <LineChart height={200} series={getSeries(eps)} />}
+                {eps && <LineChart height={200} series={getSeries(eps, this.props.ctx.value)} />}
             </div>
         );
     }
 
 }
 
-function getSeries(eps: Array<PredictorClient.EpochProgress>): LineChartSerie[] {
+function getSeries(eps: Array<PredictorClient.EpochProgress>, predictor: PredictorEntity): LineChartSerie[] {
+
+    const algSet = predictor.algorithmSettings;
+
+    const isClassification = NeuralNetworkSettingsEntity.isInstance(algSet) && algSet.predictionType == "Classification"; 
+
+    var totalMax = isClassification ? undefined : eps.flatMap(a => [a.LossTraining, a.LossValidation]).filter(a => a != null).max();
 
     return [
         {
             color: "black",
             name: PredictorEpochProgressEntity.nicePropertyName(a => a.lossTraining),
-            values: eps.filter(a => a.LossTraining != null).map(ep => ({ x: ep.TrainingExamples, y: ep.LossTraining }))
+            values: eps.filter(a => a.LossTraining != null).map(ep => ({ x: ep.TrainingExamples, y: ep.LossTraining })),
+            minValue: 0,
+            maxValue: totalMax,
+            strokeWidth: "2px",
         },
         {
             color: "darkgray",
             name: PredictorEpochProgressEntity.nicePropertyName(a => a.evaluationTraining),
             values: eps.filter(a => a.EvaluationTraining != null).map(ep => ({ x: ep.TrainingExamples, y: ep.EvaluationTraining })),
             minValue: 0,
-            maxValue: 1,
+            maxValue: isClassification ? 1 : totalMax,
+            strokeWidth: "1px",
         },
         {
             color: "red",
             name: PredictorEpochProgressEntity.nicePropertyName(a => a.lossValidation),
-            values: eps.filter(a => a.LossValidation != null).map(ep => ({ x: ep.TrainingExamples, y: ep.LossValidation! }))
+            values: eps.filter(a => a.LossValidation != null).map(ep => ({ x: ep.TrainingExamples, y: ep.LossValidation! })),
+            minValue: 0,
+            maxValue: totalMax,
+            strokeWidth: "2px",
         },
         {
             color: "pink",
             name: PredictorEpochProgressEntity.nicePropertyName(a => a.evaluationValidation),
             values: eps.filter(a => a.EvaluationValidation != null).map(ep => ({ x: ep.TrainingExamples, y: ep.EvaluationValidation! })),
             minValue: 0,
-            maxValue: 1,
+            maxValue: isClassification ? 1 : totalMax,
+            strokeWidth: "1px",
         }
     ];
 }
