@@ -36,7 +36,7 @@ namespace Signum.React
         public static void RegisterArea(Type type)
         {
             AllowedControllers.AddRange(type.Assembly.ExportedTypes
-                .Where(c => c.Namespace.StartsWith(type.Namespace) && typeof(ApiController).IsAssignableFrom(c)));
+                .Where(c => (c.Namespace ?? "").StartsWith(type.Namespace) && typeof(ApiController).IsAssignableFrom(c)));
         }
 
         public override IDictionary<string, HttpControllerDescriptor> GetControllerMapping()
