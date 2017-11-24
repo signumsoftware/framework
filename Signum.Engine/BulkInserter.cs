@@ -182,10 +182,10 @@ namespace Signum.Engine
         {
             foreach (var e in entities)
             {
-                var ic = e.IntegrityCheck();
+                var ic = e.FullIntegrityCheck();
 
                 if (ic != null)
-                    throw new IntegrityCheckException(new Dictionary<Guid, IntegrityCheck> { { e.temporalId, ic } });
+                    throw new IntegrityCheckException(ic);
             }
         }
 
