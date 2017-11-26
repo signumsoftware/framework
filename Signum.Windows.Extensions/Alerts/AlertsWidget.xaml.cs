@@ -104,8 +104,10 @@ namespace Signum.Windows.Alerts
         {
             var func = CustomFilter.TryGetValue(DataContext.GetType());
 
-            DynamicQueryServer.QueryGroupBatch(new QueryGroupOptions(typeof(AlertEntity))
+            DynamicQueryServer.QueryBatch(new QueryOptions
             {
+                QueryName = typeof(AlertEntity),
+                GroupResults = true,
                 FilterOptions = new List<FilterOption>
                 {
                      func != null ?  func((Entity)DataContext) : new FilterOption("Target", DataContext) { Frozen = true },

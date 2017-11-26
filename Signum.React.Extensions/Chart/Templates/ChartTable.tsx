@@ -96,14 +96,12 @@ export default class ChartTable extends React.Component<{ resultTable: ResultTab
 
         if (cr.groupResults == false) {
             
-            window.open(Navigator.navigateRoute(row.entity));
+            window.open(Navigator.navigateRoute(row.entity!));
 
         } else {
             
             const filters = cr.filterOptions.filter(a => !hasAggregate(a.token));
             const columns: ColumnOption[] = [];
-
-
 
             cr.columns.map((a, i) => {
 

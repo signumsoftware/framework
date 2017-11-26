@@ -74,15 +74,17 @@ namespace Signum.Engine.MachineLearning
                 var groupKeyColumns = sqe.GroupKeys.Select(c => new Column(c.Token.Token, null)).ToList();
                 var aggregateColumns = sqe.Aggregates.Select(c => new Column(c.Token.Token, null)).ToList();
 
-                var qgr = new QueryGroupRequest
+                var qgr = new QueryRequest
                 {
                     QueryName = sqe.Query.ToQueryName(),
+                    GroupResults = true,
                     Filters = new[] { mainFilter }.Concat(additionalFilters).ToList(),
                     Columns = groupKeyColumns.Concat(aggregateColumns).ToList(),
-                    Orders = new List<Order>()
+                    Orders = new List<Order>(),
+                    Pagination = new Pagination.All(),
                 };
 
-                var groupResult = DynamicQueryManager.Current.ExecuteGroupQuery(qgr);
+                var groupResult = DynamicQueryManager.Current.ExecuteQuery(qgr);
 
                 var entityGroupKey = groupResult.Columns.FirstEx();
                 var remainingKeys = groupResult.Columns.Take(sqe.GroupKeys.Count).Skip(1).ToArray();

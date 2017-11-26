@@ -188,7 +188,7 @@ namespace Signum.Engine.MachineLearning
     public class SubQuery
     {
         public PredictorSubQueryEntity SubQueryEntity;
-        public QueryGroupRequest QueryGroupRequest;
+        public QueryRequest QueryGroupRequest;
         public ResultTable ResultTable;
         public Dictionary<Lite<Entity>, Dictionary<object[], object[]>> GroupedValues;
 

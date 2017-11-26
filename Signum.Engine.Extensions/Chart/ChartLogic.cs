@@ -55,27 +55,15 @@ namespace Signum.Engine.Chart
             var multiplications = request.Multiplications;;
             using (ExecutionMode.UserInterface())
             {
-                if (!request.GroupResults)
+                return await dq.ExecuteQueryAsync(new QueryRequest
                 {
-                    return await dq.ExecuteQueryAsync(new QueryRequest
-                    {
-                        QueryName = request.QueryName,
-                        Columns = columns,
-                        Filters = request.Filters,
-                        Orders = request.Orders,
-                        Pagination = new Pagination.All(),
-                    }, token);
-                }
-                else
-                {
-                    return await dq.ExecuteQueryGroupAsync(new QueryGroupRequest
-                    {
-                        QueryName = request.QueryName,
-                        Columns = columns,
-                        Filters = request.Filters,
-                        Orders = request.Orders
-                    }, token);
-                }
+                    GroupResults = request.GroupResults,
+                    QueryName = request.QueryName,
+                    Columns = columns,
+                    Filters = request.Filters,
+                    Orders = request.Orders,
+                    Pagination = new Pagination.All(),
+                }, token);
             }
         }
 
@@ -95,27 +83,15 @@ namespace Signum.Engine.Chart
             var multiplications = request.Multiplications; ;
             using (ExecutionMode.UserInterface())
             {
-                if (!request.GroupResults)
+                return dq.ExecuteQuery(new QueryRequest
                 {
-                    return dq.ExecuteQuery(new QueryRequest
-                    {
-                        QueryName = request.QueryName,
-                        Columns = columns,
-                        Filters = request.Filters,
-                        Orders = request.Orders,
-                        Pagination = new Pagination.All(),
-                    });
-                }
-                else
-                {
-                    return dq.ExecuteQueryGroup(new QueryGroupRequest
-                    {
-                        QueryName = request.QueryName,
-                        Columns = columns,
-                        Filters = request.Filters,
-                        Orders = request.Orders
-                    });
-                }
+                    GroupResults = request.GroupResults,
+                    QueryName = request.QueryName,
+                    Columns = columns,
+                    Filters = request.Filters,
+                    Orders = request.Orders,
+                    Pagination = new Pagination.All(),
+                });
             }
         }
     }

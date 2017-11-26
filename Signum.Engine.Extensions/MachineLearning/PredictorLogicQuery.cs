@@ -31,8 +31,8 @@ namespace Signum.Engine.MachineLearning
             foreach (var sqe in ctx.Predictor.SubQueries)
             {
                 ctx.ReportProgress($"Executing SubQuery {sqe}");
-                QueryGroupRequest queryGroupRequest = ToMultiColumnQuery(ctx.Predictor.MainQuery, sqe);
-                ResultTable groupResult = DynamicQueryManager.Current.ExecuteGroupQuery(queryGroupRequest);
+                QueryRequest queryGroupRequest = ToMultiColumnQuery(ctx.Predictor.MainQuery, sqe);
+                ResultTable groupResult = DynamicQueryManager.Current.ExecuteQuery(queryGroupRequest);
 
                 var entityGroupKey = groupResult.Columns.FirstEx();
                 var remainingKeys = groupResult.Columns.Take(sqe.GroupKeys.Count).Skip(1).ToArray();
@@ -137,7 +137,7 @@ namespace Signum.Engine.MachineLearning
             };
         }
 
-        public static QueryGroupRequest ToMultiColumnQuery(PredictorMainQueryEmbedded mainQuery, PredictorSubQueryEntity sq)
+        public static QueryRequest ToMultiColumnQuery(PredictorMainQueryEmbedded mainQuery, PredictorSubQueryEntity sq)
         {
             var firstGroupKey = sq.GroupKeys.FirstEx();
 
@@ -149,8 +149,9 @@ namespace Signum.Engine.MachineLearning
             var groupKeys = sq.GroupKeys.Select(c => new Column(c.Token.Token, null)).ToList();
             var aggregates = sq.Aggregates.Select(c => new Column(c.Token.Token, null)).ToList();
 
-            return new QueryGroupRequest
+            return new QueryRequest
             {
+                GroupResults = true,
                 QueryName = sq.Query.ToQueryName(),
                 Filters = mainFilters.Concat(additionalFilters).ToList(),
                 Columns = groupKeys.Concat(aggregates).ToList(),
