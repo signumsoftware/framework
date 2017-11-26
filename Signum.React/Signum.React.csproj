@@ -236,6 +236,7 @@
     <TypeScriptCompile Include="Scripts\Operations\ContextualOperations.tsx" />
     <TypeScriptCompile Include="Scripts\QuickLinks.tsx" />
     <TypeScriptCompile Include="Scripts\SearchControl\ContextMenu.tsx" />
+    <TypeScriptCompile Include="Scripts\SearchControl\GroupByMessage.tsx" />
     <TypeScriptCompile Include="Scripts\SearchControl\ValueSearchControlLine.tsx" />
     <TypeScriptCompile Include="Scripts\SearchControl\EntityLink.tsx" />
     <TypeScriptCompile Include="Scripts\Lines\EntityList.tsx" />

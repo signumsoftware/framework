@@ -285,6 +285,9 @@ export module JavascriptMessage {
     export const error = new MessageKey("JavascriptMessage", "error");
     export const executed = new MessageKey("JavascriptMessage", "executed");
     export const hideFilters = new MessageKey("JavascriptMessage", "hideFilters");
+    export const showFilters = new MessageKey("JavascriptMessage", "showFilters");
+    export const groupResults = new MessageKey("JavascriptMessage", "groupResults");
+    export const ungroupResults = new MessageKey("JavascriptMessage", "ungroupResults");
     export const loading = new MessageKey("JavascriptMessage", "loading");
     export const noActionsFound = new MessageKey("JavascriptMessage", "noActionsFound");
     export const saveChangesBeforeOrPressCancel = new MessageKey("JavascriptMessage", "saveChangesBeforeOrPressCancel");
@@ -302,7 +305,6 @@ export module JavascriptMessage {
     export const search = new MessageKey("JavascriptMessage", "search");
     export const Selected = new MessageKey("JavascriptMessage", "Selected");
     export const selectToken = new MessageKey("JavascriptMessage", "selectToken");
-    export const showFilters = new MessageKey("JavascriptMessage", "showFilters");
     export const find = new MessageKey("JavascriptMessage", "find");
     export const remove = new MessageKey("JavascriptMessage", "remove");
     export const view = new MessageKey("JavascriptMessage", "view");
@@ -492,6 +494,7 @@ export module ValidationMessage {
     export const TheLengthOf0HasToBeGreaterOrEqualTo1 = new MessageKey("ValidationMessage", "TheLengthOf0HasToBeGreaterOrEqualTo1");
     export const TheLengthOf0HasToBeLesserOrEqualTo1 = new MessageKey("ValidationMessage", "TheLengthOf0HasToBeLesserOrEqualTo1");
     export const TheNumberOf0IsBeingMultipliedBy1 = new MessageKey("ValidationMessage", "TheNumberOf0IsBeingMultipliedBy1");
+    export const TheRowsAreBeingGroupedBy0 = new MessageKey("ValidationMessage", "TheRowsAreBeingGroupedBy0");
     export const TheNumberOfElementsOf0HasToBe12 = new MessageKey("ValidationMessage", "TheNumberOfElementsOf0HasToBe12");
     export const Type0NotAllowed = new MessageKey("ValidationMessage", "Type0NotAllowed");
     export const _0IsMandatoryWhen1IsNotSet = new MessageKey("ValidationMessage", "_0IsMandatoryWhen1IsNotSet");

@@ -29,8 +29,8 @@ export default class SearchModal extends React.Component<SearchModalProps, { sho
     selectedEntites: Lite<Entity>[] = [];
     okPressed: boolean;
 
-    handleSelectionChanged = (selected: Lite<Entity>[]) => {
-        this.selectedEntites = selected;
+    handleSelectionChanged = (selected: ResultRow[]) => {
+        this.selectedEntites = selected.filter(a => a.entity != null).map(a => a.entity!);
         this.forceUpdate();
     }
 
@@ -50,9 +50,11 @@ export default class SearchModal extends React.Component<SearchModalProps, { sho
 
     handleDoubleClick = (e: React.MouseEvent<any>, row: ResultRow) => {
         e.preventDefault();
-        this.selectedEntites = [row.entity];
-        this.okPressed = true;
-        this.setState({ show: false });
+        if (row.entity) {
+            this.selectedEntites = [row.entity];
+            this.okPressed = true;
+            this.setState({ show: false });
+        }
     }
 
     searchControl: SearchControl;
