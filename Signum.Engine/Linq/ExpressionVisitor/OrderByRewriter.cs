@@ -73,14 +73,14 @@ namespace Signum.Engine.Linq
                     gatheredKeys = new List<ColumnExpression>();
             }
 
-            List<ColumnExpression> saveKeys = null;
-            if (gatheredKeys != null && (select.IsDistinct || select.GroupBy.HasItems()))
-                saveKeys = gatheredKeys.ToList();
+            List<ColumnExpression> savedKeys = null;
+            if (gatheredKeys != null && (select.IsDistinct || select.GroupBy.HasItems() || select.Columns.All(a=>a.Expression is AggregateExpression)))
+                savedKeys = gatheredKeys.ToList();
 
             select = (SelectExpression)base.VisitSelect(select);
 
-            if (saveKeys != null)
-                gatheredKeys = saveKeys;
+            if (savedKeys != null)
+                gatheredKeys = savedKeys;
 
             List<ColumnDeclaration> newColumns = null;
 
@@ -102,6 +102,14 @@ namespace Signum.Engine.Linq
                             newKeys.Add(cd);
                         else
                             newKeys.Add(cg.NewColumn(ge));
+                    }
+
+                    if (select.Columns.All(a => a.Expression is AggregateExpression))
+                    {
+                        foreach (var cd in select.Columns)
+                        {
+                            newKeys.Add(cd);
+                        }
                     }
 
                     if (cg.Columns.Count() != select.Columns.Count)
