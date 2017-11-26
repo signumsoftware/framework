@@ -136,12 +136,18 @@ namespace Signum.Engine.DynamicQuery
 
         public ResultTable ExecuteQuery(QueryRequest request)
         {
-            return Execute(ExecuteType.ExecuteQuery, request.QueryName, request, dqb => dqb.Core.Value.ExecuteQuery(request));
+            if (!request.GroupResults)
+                return Execute(ExecuteType.ExecuteGroupQuery, request.QueryName, request, dqb => dqb.Core.Value.ExecuteQueryGroup(request));
+            else
+                return Execute(ExecuteType.ExecuteQuery, request.QueryName, request, dqb => dqb.Core.Value.ExecuteQuery(request));
         }
 
         public Task<ResultTable> ExecuteQueryAsync(QueryRequest request, CancellationToken token)
         {
-            return ExecuteAsync(ExecuteType.ExecuteQuery, request.QueryName, request, dqb => dqb.Core.Value.ExecuteQueryAsync(request, token));
+            if (!request.GroupResults)
+                return ExecuteAsync(ExecuteType.ExecuteQuery, request.QueryName, request, dqb => dqb.Core.Value.ExecuteQueryAsync(request, token));
+            else
+                return ExecuteAsync(ExecuteType.ExecuteGroupQuery, request.QueryName, request, dqb => dqb.Core.Value.ExecuteQueryGroupAsync(request, token));
         }
 
         public object ExecuteQueryCount(QueryValueRequest request)
@@ -152,17 +158,7 @@ namespace Signum.Engine.DynamicQuery
         public Task<object> ExecuteQueryCountAsync(QueryValueRequest request, CancellationToken token)
         {
             return ExecuteAsync(ExecuteType.ExecuteQueryCount, request.QueryName, request, dqb => dqb.Core.Value.ExecuteQueryValueAsync(request, token));
-        }
-
-        public ResultTable ExecuteGroupQuery(QueryGroupRequest request)
-        {
-            return Execute(ExecuteType.ExecuteGroupQuery, request.QueryName, request, dqb => dqb.Core.Value.ExecuteQueryGroup(request));
-        }
-
-        public Task<ResultTable> ExecuteGroupQueryAsync(QueryGroupRequest request, CancellationToken token)
-        {
-            return ExecuteAsync(ExecuteType.ExecuteGroupQuery, request.QueryName,request, dqb => dqb.Core.Value.ExecuteQueryGroupAsync(request, token));
-        }
+        }       
 
         public Lite<Entity> ExecuteUniqueEntity(UniqueEntityRequest request)
         {
@@ -323,10 +319,7 @@ namespace Signum.Engine.DynamicQuery
 
                 if (r is UniqueEntityRequest)
                     return ExecuteUniqueEntityAsync((UniqueEntityRequest)r, token).ContinueWith(a => (object)a.Result);
-
-                if (r is QueryGroupRequest)
-                    return ExecuteGroupQueryAsync((QueryGroupRequest)r, token).ContinueWith(a => (object)a.Result);
-
+                
                 throw new InvalidOperationException("Unexpected QueryRequest type"); ;
             })); 
         }

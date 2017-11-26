@@ -714,7 +714,7 @@ namespace Signum.Windows
         {
             var result = GetQueryRequest(updateSimpleFilters);
 
-            string message = CollectionElementToken.MultipliedMessage(result.Multiplications, EntityType);
+            string message = CollectionElementToken.MultipliedMessage(result.Multiplications(), EntityType);
 
             tbMultiplications.Text = message;
             brMultiplications.Visibility = message.HasText() ? Visibility.Visible : Visibility.Collapsed;

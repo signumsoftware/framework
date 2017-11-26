@@ -37,7 +37,38 @@ namespace Signum.Engine.DynamicQuery
 
             return manualResult.ToResultTable(request); 
         }
-        
+
+        public override ResultTable ExecuteQueryGroup(QueryRequest request) => Task.Run(() => ExecuteQueryGroupAsync(request, CancellationToken.None)).Result;
+        public override async Task<ResultTable> ExecuteQueryGroupAsync(QueryRequest request, CancellationToken cancellationToken)
+        {
+            var simpleFilters = request.Filters.Where(f => !(f.Token is AggregateToken)).ToList();
+            var aggregateFilters = request.Filters.Where(f => f.Token is AggregateToken).ToList();
+
+            var keys = request.Columns.Select(t => t.Token).Where(t => !(t is AggregateToken)).ToHashSet();
+
+            var allAggregates = request.AllTokens().OfType<AggregateToken>().ToHashSet();
+
+            var qr = new QueryRequest
+            {
+                Columns = keys.Concat(allAggregates.Select(at => at.Parent).NotNull()).Distinct().Select(t => new Column(t, t.NiceName())).ToList(),
+                Orders = new List<Order>(),
+                Filters = simpleFilters,
+                QueryName = request.QueryName,
+                Pagination = new Pagination.All(),
+            };
+
+            DEnumerableCount<T> plainCollection = await Execute(qr, GetQueryDescription(), cancellationToken);
+
+            var groupCollection = plainCollection
+                     .GroupBy(keys, allAggregates)
+                     .Where(aggregateFilters)
+                     .OrderBy(request.Orders);
+
+            var cols = groupCollection.TryPaginate(request.Pagination);
+
+            return cols.ToResultTable(request);
+        }
+
         public override object ExecuteQueryValue(QueryValueRequest request) => Task.Run(() => ExecuteQueryValueAsync(request, CancellationToken.None));
         public override async Task<object> ExecuteQueryValueAsync(QueryValueRequest request, CancellationToken cancellationToken)
         {
@@ -97,42 +128,7 @@ namespace Signum.Engine.DynamicQuery
             ParameterExpression pe = Expression.Parameter(typeof(object), "p");
             return  Expression.Lambda<Func<object, Lite<IEntity>>>(TupleReflection.TupleChainProperty(pe, 0), pe).Compile();
         }, true);
-
-
-        public override ResultTable ExecuteQueryGroup(QueryGroupRequest request) => Task.Run(() => ExecuteQueryGroupAsync(request, CancellationToken.None)).Result;
-        public override async Task<ResultTable> ExecuteQueryGroupAsync(QueryGroupRequest request, CancellationToken cancellationToken)
-        {
-            var simpleFilters = request.Filters.Where(f => !(f.Token is AggregateToken)).ToList();
-            var aggregateFilters = request.Filters.Where(f => f.Token is AggregateToken).ToList();
-
-            var keys = request.Columns.Select(t => t.Token).Where(t => !(t is AggregateToken)).ToHashSet();
-
-            var allAggregates = request.AllTokens().OfType<AggregateToken>().ToHashSet();
-
-            var qr = new QueryRequest
-            {
-                Columns = keys.Concat(allAggregates.Select(at => at.Parent).NotNull()).Distinct().Select(t => new Column(t, t.NiceName())).ToList(),
-                Orders = new List<Order>(),
-                Filters = simpleFilters,
-                QueryName = request.QueryName,
-                Pagination = new Pagination.All(),
-            };
-
-            DEnumerableCount<T> plainCollection = await Execute(qr, GetQueryDescription(), cancellationToken);
-
-            var groupCollection = plainCollection
-                     .GroupBy(keys, allAggregates)
-                     .Where(aggregateFilters)
-                     .OrderBy(request.Orders);
-
-            var cols = request.Columns
-                .Select(column => (column, Expression.Lambda(column.Token.BuildExpression(groupCollection.Context), groupCollection.Context.Parameter))).ToList();
-
-            var values = groupCollection.Collection.ToArray();
-
-            return values.ToResultTable(cols, values.Length, new Pagination.All());
-        }
-
+        
         public override IQueryable<Lite<Entity>> GetEntities(QueryEntitiesRequest request)
         {
             throw new NotImplementedException();

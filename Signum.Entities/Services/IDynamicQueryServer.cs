@@ -31,9 +31,6 @@ namespace Signum.Services
 
         [OperationContract, NetDataContract]
         List<QueryToken> ExternalQueryToken(QueryToken parent);
-
-        [OperationContract, NetDataContract]
-        ResultTable ExecuteQueryGroup(QueryGroupRequest request);
     }
 
 }

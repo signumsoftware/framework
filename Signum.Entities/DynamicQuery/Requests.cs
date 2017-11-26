@@ -25,23 +25,32 @@ namespace Signum.Entities.DynamicQuery
     [Serializable]
     public class QueryRequest : BaseQueryRequest
     {
+        public bool GroupResults { get; set; }
+
         public List<Column> Columns { get; set; }
         
         public List<Order> Orders { get; set; }
         
         public Pagination Pagination { get; set; }
 
-        public List<CollectionElementToken> Multiplications
+        public List<CollectionElementToken> Multiplications()
         {
-            get
-            {
-                HashSet<QueryToken> allTokens =
-                    Columns.Select(a => a.Token)
-                    .Concat(Filters.Select(a => a.Token))
-                    .Concat(Orders.Select(a => a.Token)).ToHashSet();
+            HashSet<QueryToken> allTokens = this.AllTokens().ToHashSet();
 
-                return CollectionElementToken.GetElements(allTokens);
-            }
+            return CollectionElementToken.GetElements(allTokens);
+        }
+
+        public List<QueryToken> AllTokens()
+        {
+            var allTokens = Columns.Select(a => a.Token).ToList();
+
+            if (Filters != null)
+                allTokens.AddRange(Filters.Select(a => a.Token));
+
+            if (Orders != null)
+                allTokens.AddRange(Orders.Select(a => a.Token));
+
+            return allTokens;
         }
     }
 
@@ -162,50 +171,6 @@ namespace Signum.Entities.DynamicQuery
             {
                 return new Paginate(this.ElementsPerPage, newPage);
             }
-        }
-    }
-
-    [Serializable]
-    public class QueryGroupRequest : BaseQueryRequest
-    {
-        List<Column> columns;
-        public List<Column> Columns
-        {
-            get { return columns; }
-            set { columns = value; }
-        }
-
-        List<Order> orders;
-        public List<Order> Orders
-        {
-            get { return orders; }
-            set { orders = value; }
-        }
-
-        public List<CollectionElementToken> Multiplications
-        {
-            get
-            {
-                HashSet<QueryToken> allTokens =
-                    Columns.Select(a => a.Token)
-                    .Concat(Orders.Select(a => a.Token))
-                    .Concat(Filters.Select(a => a.Token)).ToHashSet();
-
-                return CollectionElementToken.GetElements(allTokens);
-            }
-        }
-
-        public List<QueryToken> AllTokens()
-        {
-            var allTokens = Columns.Select(a => a.Token).ToList();
-
-            if (Filters != null)
-                allTokens.AddRange(Filters.Select(a => a.Token));
-
-            if (Orders != null)
-                allTokens.AddRange(Orders.Select(a => a.Token));
-
-            return allTokens;
         }
     }
 

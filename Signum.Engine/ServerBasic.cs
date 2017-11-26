@@ -197,13 +197,7 @@ namespace Signum.Services
             return Return(MethodInfo.GetCurrentMethod(), request.QueryName.ToString(),
                 () => DynamicQueryManager.Current.ExecuteQuery(request));
         }
-
-        public ResultTable ExecuteQueryGroup(QueryGroupRequest request)
-        {
-            return Return(MethodInfo.GetCurrentMethod(), request.QueryName.ToString(),
-                () => DynamicQueryManager.Current.ExecuteGroupQuery(request));
-        }
-
+        
         public virtual int ExecuteQueryCount(QueryValueRequest request)
         {
             return Return(MethodInfo.GetCurrentMethod(), request.QueryName.ToString(),
