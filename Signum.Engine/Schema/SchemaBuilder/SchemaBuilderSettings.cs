@@ -236,7 +236,13 @@ namespace Signum.Engine.Maps
         internal int? GetSqlScale(SqlDbTypeAttribute att, SqlDbType sqlDbType)
         {
             if (att != null && att.HasScale)
+            {
+                if(sqlDbType != SqlDbType.Decimal)
+                    throw  new InvalidOperationException($"{sqlDbType} can not have Scale");
+
                 return att.Scale;
+
+            }
 
             return defaultScale.TryGetS(sqlDbType);
         }
