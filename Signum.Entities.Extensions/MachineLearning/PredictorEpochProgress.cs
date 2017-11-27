@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Signum.Utilities;
+using System;
 
 namespace Signum.Entities.MachineLearning
 {
@@ -17,13 +18,13 @@ namespace Signum.Entities.MachineLearning
 
         public int Epoch { get; set; }
 
-        [SqlDbType(Scale = 5)]
+        [Format("0.0000")]
         public double? LossTraining { get; set; }
-        [SqlDbType(Scale = 5)]
+        [Format("0.0000")]
         public double? EvaluationTraining { get; set; }
-        [SqlDbType(Scale = 5)]
+        [Format("0.0000")]
         public double? LossValidation { get; internal set; }
-        [SqlDbType(Scale = 5)]
+        [Format("0.0000")]
         public double? EvaluationValidation { get; internal set; }
     }
 }

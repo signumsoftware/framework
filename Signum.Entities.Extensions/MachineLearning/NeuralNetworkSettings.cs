@@ -22,10 +22,10 @@ namespace Signum.Entities.MachineLearning
         public NeuralNetworkActivation OutputActivation { get; set; }
         public NeuralNetworkInitializer OutputInitializer { get; set; }
 
-        [SqlDbType(Scale = 5), DecimalsValidator(5)]
+        [DecimalsValidator(5)]
         public double LearningRate { get; set; } = 0.2;
 
-        [SqlDbType(Scale = 5), DecimalsValidator(5)]
+        [DecimalsValidator(5)]
         public double? LearningMomentum { get; set; } = null;
 
         public int MinibatchSize { get; set; } = 1000;

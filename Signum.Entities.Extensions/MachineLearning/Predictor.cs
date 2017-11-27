@@ -109,12 +109,12 @@ namespace Signum.Entities.MachineLearning
     {
         public int TotalCount { get; set; }
         public int MissCount { get; set; }
-        [Format("p"), SqlDbType(Scale = 5)]
-        public decimal? MissRate { get; set; }
+        [Format("p2")]
+        public double? MissRate { get; set; }
 
         protected override void PreSaving(ref bool graphModified)
         {
-            MissRate = TotalCount == 0 ? (decimal?)null : Math.Round(MissCount / (decimal)TotalCount, 2);
+            MissRate = TotalCount == 0 ? (double?)null : Math.Round(MissCount / (double)TotalCount, 2);
 
             base.PreSaving(ref graphModified);
         }
@@ -123,22 +123,21 @@ namespace Signum.Entities.MachineLearning
     [Serializable]
     public class PredictorRegressionMetricsEmbedded : EmbeddedEntity
     {
-        [SqlDbType(Scale = 5)]
         public double? Signed { get; set; }
 
-        [Unit("±"), SqlDbType(Scale = 5)]
+        [Unit("±")]
         public double? Absolute { get; set; }
 
-        [Unit("±"), SqlDbType(Scale = 5)]
+        [Unit("±")]
         public double? Deviation { get; set; }
 
-        [Format("p"), SqlDbType(Scale = 5)]
+        [Format("p2")]
         public double? PercentageSigned { get; set; }
 
-        [Format("p"), Unit("±"), SqlDbType(Scale = 5)]
+        [Format("p2"), Unit("±")]
         public double? PercentageAbsolute { get; set; }
 
-        [Format("p"), Unit("±"), SqlDbType(Scale = 5)]
+        [Format("p2"), Unit("±")]
         public double? PercentageDeviation { get; set; }
 
     }
