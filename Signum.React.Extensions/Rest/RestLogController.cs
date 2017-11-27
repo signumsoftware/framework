@@ -8,7 +8,6 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Web;
 using System.Web.Http;
-using IntTec.DTOs;
 using Signum.Engine;
 using Signum.Entities;
 using Signum.Entities.Rest;
@@ -48,7 +47,7 @@ namespace Signum.React.RestLog
 
         private static async Task<RestDiffResult> RestDiffResult(string url, string apiKey, string oldRequestBody, string oldResponseBody)
         {
-            var result = new RestDiffResult {previous = oldResponseBody };
+            var result = new RestDiffResult { previous = oldResponseBody };
 
             //create the new Request
             var restClient = new HttpClient {BaseAddress = new Uri(url)};
@@ -79,7 +78,5 @@ namespace Signum.React.RestLog
         }
     }
 
-
-
-    
+   
 }

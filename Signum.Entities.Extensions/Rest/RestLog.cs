@@ -80,6 +80,18 @@ namespace Signum.Entities.Rest
 
     }
 
-   
+    public class RestDiffResult
+    {
+        public string previous { get; set; }
+        public string current { get; set; }
+        public List<StringDistance.DiffPair<List<StringDistance.DiffPair<string>>>> diff { get; set; }
+    }
 
+    public class RestDiffRequest
+    {
+        public string url { get; set; }
+        public string apiKey { get; set; }
+        public string requestBody { get; set; }
+        public string responseBody { get; set; }
+    }
 }
