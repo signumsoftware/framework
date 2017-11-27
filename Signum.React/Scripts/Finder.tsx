@@ -325,7 +325,7 @@ export function toFindOptions(fo: FindOptionsParsed, qd: QueryDescription): Find
         pagination: fo.pagination && !equalsPagination(fo.pagination, defPagination) ? fo.pagination : undefined,
     } as FindOptions;
 
-    if (findOptions.orderOptions && findOptions.orderOptions.length == 1) {
+    if (!findOptions.groupResults && findOptions.orderOptions && findOptions.orderOptions.length == 1) {
         var onlyOrder = findOptions.orderOptions[0]
         var defaultOrder = getDefaultOrder(qd, qs);
 
@@ -369,7 +369,7 @@ export function parseFindOptions(findOptions: FindOptions, qd: QueryDescription)
     const tis = getTypeInfos(qd.columns["Entity"].type);
 
 
-    if (!fo.orderOptions || fo.orderOptions.length == 0) {
+    if (!fo.groupResults && (!fo.orderOptions || fo.orderOptions.length == 0)) {
         var defaultOrder = getDefaultOrder(qd, qs);
 
         if (defaultOrder)

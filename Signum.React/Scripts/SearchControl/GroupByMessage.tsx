@@ -22,12 +22,11 @@ export default class GroupByMessage extends React.Component<{ findOptions: FindO
 
         const tokens = Dic.getValues(tokensObj);
 
-        const message = ValidationMessage.TheRowsAreBeingGroupedBy0.niceToString().formatWith(
-            tokens.map(a=> a.niceName).joinComma(External.CollectionMessage.And.niceToString()))
-
+        const message = ValidationMessage.TheRowsAreBeingGroupedBy0.niceToString().formatHtml(
+            tokens.map(a => <strong>{a.niceName}</strong>).joinCommaHtml(External.CollectionMessage.And.niceToString()));
         return (
             <div className="sf-td-multiply alert alert-info">
-                { "Ʃ\u00A0" + message}
+                {"Ʃ"}&nbsp;{message}
             </div>
         );
     }
