@@ -1,6 +1,7 @@
 ﻿using Signum.Entities;
 using Signum.Entities.DynamicQuery;
 using Signum.Entities.MachineLearning;
+using Signum.Entities.UserAssets;
 using Signum.Utilities;
 using System;
 using System.Collections.Generic;
@@ -88,7 +89,7 @@ namespace Signum.Engine.MachineLearning
             SubQueryOutputColumn = columns.Where(a => a.SubQuery != null).AgGroupToDictionary(a => a.SubQuery, gr => new PredictorPredictSubQueryContext
             {
                 SubQuery = gr.Key,
-                Groups = gr.AgGroupToDictionary(a => a.Keys, gr2 => gr.GroupToDictionary(a => a.PredictorColumn), ObjectArrayComparer.Instance)
+                Groups = gr.AgGroupToDictionary(a => a.Keys, gr2 => gr.GroupToDictionary(a => a.PredictorSubQueryColumn), ObjectArrayComparer.Instance)
             });
         }
     }
@@ -96,7 +97,7 @@ namespace Signum.Engine.MachineLearning
     public class PredictorPredictSubQueryContext
     {
         public PredictorSubQueryEntity SubQuery;
-        public Dictionary<object[], Dictionary<PredictorColumnEmbedded, List<PredictorCodification>>> Groups;
+        public Dictionary<object[], Dictionary<PredictorSubQueryColumnEmbedded, List<PredictorCodification>>> Groups;
     }
 
     public class PredictorTrainingContext
@@ -192,12 +193,13 @@ namespace Signum.Engine.MachineLearning
         public ResultTable ResultTable;
         public Dictionary<Lite<Entity>, Dictionary<object[], object[]>> GroupedValues;
 
-        public ResultColumn[] Aggregates { get; internal set; }
+        public ResultColumn[] SplitBy { get; internal set; }
+        public ResultColumn[] ValueColumns { get; internal set; }
     }
 
     public interface IPredictorAlgorithm
     {
-        string ValidateColumnProperty(PredictorEntity predictor, PredictorSubQueryEntity subQuery, PredictorColumnEmbedded column, PropertyInfo pi);
+        string ValidateEncodingProperty(PredictorEntity predictor, PredictorSubQueryEntity subQuery, PredictorColumnEncoding encoding, PredictorColumnUsage usage, QueryTokenEmbedded token);
         void Train(PredictorTrainingContext ctx);
         void LoadModel(PredictorPredictContext predictor);
         PredictDictionary Predict(PredictorPredictContext ctx, PredictDictionary input);
@@ -205,6 +207,11 @@ namespace Signum.Engine.MachineLearning
 
     public class PredictDictionary
     {
+        public PredictDictionary(PredictorEntity predictor)
+        {
+            Predictor = predictor;
+        }
+
         public PredictorEntity Predictor { get; set; }
         public Dictionary<PredictorColumnEmbedded, object> MainQueryValues { get; set; }
         public Dictionary<PredictorSubQueryEntity, PredictSubQueryDictionary> SubQueries { get; set; }
@@ -212,7 +219,12 @@ namespace Signum.Engine.MachineLearning
 
     public class PredictSubQueryDictionary
     {
+        public PredictSubQueryDictionary(PredictorSubQueryEntity subQuery)
+        {
+            SubQuery = subQuery;
+        }
+
         public PredictorSubQueryEntity SubQuery { get; set; }
-        public Dictionary<object[], Dictionary<PredictorColumnEmbedded, object>> SubQueryGroups { get; set; }
+        public Dictionary<object[], Dictionary<PredictorSubQueryColumnEmbedded, object>> SubQueryGroups { get; set; }
     }
 }
