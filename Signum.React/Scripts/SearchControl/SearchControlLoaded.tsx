@@ -402,7 +402,6 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
     handleToggleGroupBy = () => {
         var fo = this.props.findOptions;
         var qd = this.props.queryDescription;
-        debugger;
         this.resetResults(() => {
             if (fo.groupResults) {
 
@@ -1093,7 +1092,7 @@ function withoutAllAny(qt: QueryToken | undefined): QueryToken | undefined {
 }
 
 function removeAggregates(array: { token?: QueryToken, displayName?: string }[], qd: QueryDescription) {
-    array.filter(a => a.token != null && a.token.queryTokenType == "Aggregate" && a.token.parent != null).forEach(a => {
+    array.filter(a => a.token != null && a.token.queryTokenType == "Aggregate").forEach(a => {
         if (a.token) {
             if (a.token.parent) {
                 a.token = a.token.parent;
