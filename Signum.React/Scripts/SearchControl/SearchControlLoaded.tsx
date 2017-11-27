@@ -411,6 +411,8 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
                 removeAggregates(fo.columnOptions, qd);
                 this.forceUpdate();
 
+                this.doSearchPage1();
+
             } else {
                 fo.groupResults = true;
                 if (this.state.simpleFilterBuilder) {
@@ -428,6 +430,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
                     withAggregates(fo.orderOptions, tc, "get");
                     withAggregates(fo.columnOptions, tc, "get");
                     this.forceUpdate();
+                    this.doSearchPage1();
                 });
             }
         });
