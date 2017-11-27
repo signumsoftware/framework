@@ -194,7 +194,7 @@ export default class Predictor extends React.Component<{ ctx: TypeContext<Predic
                                     getTitle={(mctx: TypeContext<PredictorSubQueryEntity>) => mctx.value.name || PredictorSubQueryEntity.niceName()}
                                     getComponent={(mctx: TypeContext<PredictorSubQueryEntity>) =>
                                         <div>
-                                            {!this.state.queryDescription ? undefined : <PredictorSubQuery ctx={mctx} mainQuery={ctxmq.value} targetType={} />}
+                                            {!this.state.queryDescription ? undefined : <PredictorSubQuery ctx={mctx} mainQuery={ctxmq.value} mainQueryDescription={this.state.queryDescription} />}
                                         </div>
                                     } />
                             </div>

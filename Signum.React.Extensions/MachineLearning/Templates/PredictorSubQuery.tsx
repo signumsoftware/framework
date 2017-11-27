@@ -18,7 +18,7 @@ import { initializeColumn } from './Predictor';
 import { newMListElement } from '../../../../Framework/Signum.React/Scripts/Signum.Entities';
 import { is } from '../../../../Framework/Signum.React/Scripts/Signum.Entities';
 
-export default class PredictorSubQuery extends React.Component<{ ctx: TypeContext<PredictorSubQueryEntity>, targetType: TypeReference, mainQuery: PredictorMainQueryEmbedded, mainQueryDescription: QueryDescription }> {
+export default class PredictorSubQuery extends React.Component<{ ctx: TypeContext<PredictorSubQueryEntity>, mainQuery: PredictorMainQueryEmbedded, mainQueryDescription: QueryDescription }> {
 
     handleOnChange = () => {
         const e = this.props.ctx.value;
@@ -108,7 +108,7 @@ export default class PredictorSubQuery extends React.Component<{ ctx: TypeContex
                                     ctx={qctx.subCtx(a => a.token)}
                                     queryKey={this.props.ctx.value.query!.key}
                                     subTokenOptions={SubTokensOptions.CanElement}
-                                    helpBlock={row.props.index == 0 ? "The first groupKey must be of type " + Finder.getTypeNiceName(this.props.targetType) : undefined}
+                                    helpBlock={row.props.index == 0 ? "The first groupKey must be of type " + Finder.getTypeNiceName(targetType) : undefined}
                                 />,
                                 headerHtmlAttributes: { style: { width: "100%" } },
                             },
