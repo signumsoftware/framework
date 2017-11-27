@@ -114,12 +114,22 @@ namespace Signum.React.ApiControllers
 
             public object[] args { get; set; }
 
-            public OperationSymbol GetOperationSymbol(Type entityType) => ParseOperationAssert(this.operationKey, entityType);
-            public static OperationSymbol ParseOperationAssert(string operationKey, Type entityType)
+            public OperationSymbol GetOperationSymbol(Type entityType) => ParseOperationAssert(this.operationKey, entityType, this.args); 
+        
+            public static OperationSymbol ParseOperationAssert(string operationKey, Type entityType, object[] args = null)
             {
                 var symbol = SymbolLogic<OperationSymbol>.ToSymbol(operationKey);
 
-                OperationLogic.AssertOperationAllowed(symbol, entityType, inUserInterface: true);
+                if (entityType != null)
+                    OperationLogic.AssertOperationAllowed(symbol, entityType, inUserInterface: true);
+                else
+                {
+                    var types = args.Select(o => o.GetType().CleanType()).Distinct();
+                    foreach (var type in types)
+                    {
+                        OperationLogic.AssertOperationAllowed(symbol, type, inUserInterface: true);
+                    }
+                }
 
                 return symbol;
             }

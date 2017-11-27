@@ -485,7 +485,7 @@ Consider the following options:
 
         public static IOperation TryFindOperation(Type type, OperationSymbol operationSymbol)
         {
-            return operations.TryGetValue(type)?.TryGetC(operationSymbol);
+            return operations.TryGetValue(type.CleanType())?.TryGetC(operationSymbol);
         }
 
         public static Graph<T>.Construct FindConstruct<T>(ConstructSymbol<T>.Simple symbol) 
