@@ -89,11 +89,13 @@ namespace Signum.React.MachineLearning
 
             PredictorPredictContext pctx = PredictorPredictLogic.GetPredictContext(p);
 
-            PredictDictionary dic = entity != null ? PredictorPredictLogic.FromEntity(p, entity) : null;
+            PredictDictionary fromEntity = entity != null ? PredictorPredictLogic.FromEntity(p, entity) : null;
+            PredictDictionary inputs = fromEntity ?? PredictorPredictLogic.Empty(p);
+            PredictDictionary originalOutputs = fromEntity;
 
-            PredictDictionary predictedOutputs = dic != null ? PredictorPredictLogic.PredictBasic(p, dic) : null;
+            PredictDictionary predictedOutputs = PredictorPredictLogic.PredictBasic(p, inputs);
 
-            PredictRequestTS pmodel = ToPredictModel(pctx, dic, dic, predictedOutputs);
+            PredictRequestTS pmodel = ToPredictModel(pctx, inputs, originalOutputs, predictedOutputs);
             
             return pmodel;
         }
