@@ -89,11 +89,13 @@ namespace Signum.React.MachineLearning
 
             PredictorPredictContext pctx = PredictorPredictLogic.GetPredictContext(p);
 
-            PredictDictionary dic = entity != null ? PredictorPredictLogic.FromEntity(p, entity) : null;
+            PredictDictionary fromEntity = entity != null ? PredictorPredictLogic.FromEntity(p, entity) : null;
+            PredictDictionary inputs = fromEntity ?? PredictorPredictLogic.Empty(p);
+            PredictDictionary originalOutputs = fromEntity;
 
-            PredictDictionary predictedOutputs = dic != null ? PredictorPredictLogic.PredictBasic(p, dic) : null;
+            PredictDictionary predictedOutputs = PredictorPredictLogic.PredictBasic(p, inputs);
 
-            PredictRequestTS pmodel = ToPredictModel(pctx, dic, dic, predictedOutputs);
+            PredictRequestTS pmodel = ToPredictModel(pctx, inputs, originalOutputs, predictedOutputs);
             
             return pmodel;
         }
@@ -116,7 +118,7 @@ namespace Signum.React.MachineLearning
 
         PredictDictionary GetInputs(PredictRequestTS request, PredictorPredictContext pctx)
         {
-            return new PredictDictionary
+            return new PredictDictionary(pctx.Predictor)
             {
                 MainQueryValues = pctx.Predictor.MainQuery.Columns
                 .Select((col, i) => new { col, request.columns[i].value })
@@ -127,16 +129,24 @@ namespace Signum.React.MachineLearning
                 SubQueries = pctx.Predictor.SubQueries.Select(sq =>
                 {
                     var sqt = request.subQueries.Single(a => a.subQuery.RefersTo(sq));
+                    SplitColumns(sq, out var splitKeys, out var values);
 
-                    return new PredictSubQueryDictionary
+                    return new PredictSubQueryDictionary(sq)
                     {
-                        SubQuery = sq,
-                        SubQueryGroups = sqt.rows.Select(array => KVP.Create(array.Slice(0, sq.GroupKeys.Count - 1),
-                            sq.Aggregates.Select((a, i) => KVP.Create(a, array[i])).ToDictionary()
+                        SubQueryGroups = sqt.rows.Select(array => KVP.Create(array.Slice(0, splitKeys.Count),
+                            values.Select((a, i) => KVP.Create(a, array[splitKeys.Count + i])).ToDictionary()
                         )).ToDictionary()
                     };
                 }).ToDictionaryEx(a => a.SubQuery)
             };
+        }
+
+        private static void SplitColumns(PredictorSubQueryEntity sq, out List<PredictorSubQueryColumnEmbedded> splitKeys, out List<PredictorSubQueryColumnEmbedded> values)
+        {
+            var columns = sq.Columns.ToList();
+            var parentKey = columns.Extract(a => a.Usage == PredictorSubQueryColumnUsage.ParentKey);
+            splitKeys = columns.Extract(a => a.Usage == PredictorSubQueryColumnUsage.SplitBy).ToList();
+            values = columns.Extract(a => a.Usage == PredictorSubQueryColumnUsage.Input).ToList();
         }
 
         void SetOutput(PredictRequestTS request, PredictorPredictContext pctx, PredictDictionary predicted)
@@ -154,26 +164,28 @@ namespace Signum.React.MachineLearning
 
             foreach (var sq in request.subQueries)
             {
-                var psq = predicted.SubQueries.Values.Single(a => sq.subQuery.RefersTo(a.SubQuery));
-
-                var fullKeyToToken = psq.SubQuery.Aggregates.ToDictionary(a => a.Token.Token.FullKey());
+                PredictSubQueryDictionary psq = predicted.SubQueries.Values.Single(a => sq.subQuery.RefersTo(a.SubQuery));
+                
+                SplitColumns(psq.SubQuery, out var splitKeys, out var values);
+                
+                Dictionary<string, PredictorSubQueryColumnEmbedded> fullKeyToToken = psq.SubQuery.Columns.ToDictionary(a => a.Token.Token.FullKey());
 
                 foreach (var r in sq.rows)
                 {
-                    var key = r.Slice(0, psq.SubQuery.GroupKeys.Count - 1);
-                    var dic = psq.SubQueryGroups.GetOrThrow(key);
+                    var key = r.Slice(0, splitKeys.Count);
+                    var dic = psq.SubQueryGroups.TryGetC(key);
 
-                    for (int i = 0; i < psq.SubQuery.Aggregates.Count; i++)
+                    for (int i = 0; i < values.Count; i++)
                     {
-                        var c = sq.columnHeaders[psq.SubQuery.GroupKeys.Count - 1 + i];
+                        var c = sq.columnHeaders[splitKeys.Count + i];
 
                         if(c.headerType == PredictorHeaderType.Output)
                         {
-                            ref var box = ref r[psq.SubQuery.GroupKeys.Count - 1 + i];
+                            ref var box = ref r[splitKeys.Count + i];
 
                             var token = fullKeyToToken.GetOrThrow(c.token.fullKey);
 
-                            var pValue = dic.GetOrThrow(token);
+                            var pValue = dic?.GetOrThrow(token);
                             if (request.hasOriginal)
                                 ((PredictOutputTuple)box).predicted = pValue;
                             else
@@ -212,42 +224,45 @@ namespace Signum.React.MachineLearning
                     var originalOutputsSQ = originalOutputs?.SubQueries.GetOrThrow(sq);
                     var predictedOutputsSQ = predictedOutputs?.SubQueries.GetOrThrow(sq);
 
-                    var columnHeaders = sq.GroupKeys.Skip(1).Select(gk => new PredictSubQueryHeaderTS { token = new QueryTokenTS(gk.Token.Token, true), headerType = PredictorHeaderType.Key })
-                        .Concat(sq.Aggregates.Select(agg => new PredictSubQueryHeaderTS { token = new QueryTokenTS(agg.Token.Token, true), headerType = agg.Usage == PredictorColumnUsage.Input ? PredictorHeaderType.Input : PredictorHeaderType.Output }))
+                    SplitColumns(sq, out var splitKeys, out var values);
+
+                    var columnHeaders =
+                        splitKeys.Select(gk => new PredictSubQueryHeaderTS { token = new QueryTokenTS(gk.Token.Token, true), headerType = PredictorHeaderType.Key }).Concat(
+                        values.Select(agg => new PredictSubQueryHeaderTS { token = new QueryTokenTS(agg.Token.Token, true), headerType = agg.Usage == PredictorSubQueryColumnUsage.Input ? PredictorHeaderType.Input : PredictorHeaderType.Output }))
                         .ToList();
 
                     return new PredictSubQueryTableTS
                     {
                         subQuery = sq.ToLite(),
                         columnHeaders = columnHeaders,
-                        rows = pctx.SubQueryOutputColumn[sq].Groups.Select(kvp => CreateRow(sq, kvp.Key, inputsSQ, originalOutputsSQ, predictedOutputsSQ)).ToList()
+                        rows = pctx.SubQueryOutputColumn[sq].Groups.Select(kvp => CreateRow(splitKeys, values, kvp.Key, inputsSQ, originalOutputsSQ, predictedOutputsSQ)).ToList()
                     };
                 }).ToList()
             };
         }
 
-        private object[] CreateRow(PredictorSubQueryEntity sq, object[] key, PredictSubQueryDictionary inputs, PredictSubQueryDictionary originalOutputs, PredictSubQueryDictionary predictedOutputs)
+        private object[] CreateRow(List<PredictorSubQueryColumnEmbedded> groupKeys, List<PredictorSubQueryColumnEmbedded> values, object[] key, PredictSubQueryDictionary inputs, PredictSubQueryDictionary originalOutputs, PredictSubQueryDictionary predictedOutputs)
         {
-            var row = new object[sq.GroupKeys.Count - 1 + sq.Aggregates.Count];
+            var row = new object[groupKeys.Count + values.Count];
 
             var inputsGR = inputs?.SubQueryGroups.TryGetC(key);
             var originalOutputsGR = originalOutputs?.SubQueryGroups.TryGetC(key);
             var predictedOutputsGR = predictedOutputs?.SubQueryGroups.GetOrThrow(key);
 
-            for (int i = 0; i < sq.GroupKeys.Count - 1; i++)
+            for (int i = 0; i < groupKeys.Count - 1; i++)
             {
                 row[i] = key[i];
             }
 
-            for (int i = 0; i < sq.Aggregates.Count; i++)
+            for (int i = 0; i < values.Count; i++)
             {
-                var a = sq.Aggregates[i];
-                row[i + key.Length] = a.Usage == PredictorColumnUsage.Input ? inputsGR?.GetOrThrow(a) :
-                    originalOutputs == null ? predictedOutputsGR.GetOrThrow(a) :
+                var v = values[i];
+                row[i + key.Length] = v.Usage == PredictorSubQueryColumnUsage.Input ? inputsGR?.GetOrThrow(v) :
+                    originalOutputs == null ? predictedOutputsGR.GetOrThrow(v) :
                     new PredictOutputTuple
                     {
-                        predicted = predictedOutputsGR.GetOrThrow(a),
-                        original = originalOutputsGR?.GetOrThrow(a),
+                        predicted = predictedOutputsGR.GetOrThrow(v),
+                        original = originalOutputsGR?.GetOrThrow(v),
                     };
             }
 
@@ -267,16 +282,18 @@ namespace Signum.React.MachineLearning
             {
                 var sq = tuple.sqCtx.SubQuery;
 
+                SplitColumns(sq, out var splitKeys, out var values);
+
                 foreach (var r in tuple.table.rows)
                 {   
-                    for (int i = 0; i < sq.GroupKeys.Count - 1; i++)
+                    for (int i = 0; i < splitKeys.Count - 1; i++)
                     {
-                        r[i] = FixValue(r[i], sq.GroupKeys[i + 1].Token.Token, serializer);
+                        r[i] = FixValue(r[i], splitKeys[i].Token.Token, serializer);
                     }
 
-                    for (int i = 0; i < sq.Aggregates.Count - 1; i++)
+                    for (int i = 0; i < values.Count - 1; i++)
                     {
-                        r[i + sq.GroupKeys.Count - 1] = FixValue(r[i + sq.GroupKeys.Count - 1], sq.Aggregates[i].Token.Token, serializer);
+                        r[i + splitKeys.Count] = FixValue(r[i + splitKeys.Count], sq.Columns[i].Token.Token, serializer);
                     }
                 }
             }

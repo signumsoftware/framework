@@ -12,6 +12,7 @@ using Signum.Engine;
 using Signum.Entities;
 using Signum.Entities.Rest;
 using Signum.Utilities;
+using Signum.Engine.Rest;
 
 namespace Signum.React.RestLog
 {
@@ -23,7 +24,7 @@ namespace Signum.React.RestLog
             var oldRequest = Database.Retrieve<RestLogEntity>(PrimaryKey.Parse(id, typeof(RestLogEntity)));
             var oldCredentials = Database.Query<RestApiKeyEntity>().Single(r => r.User.Is(oldRequest.User));
 
-            var result = await RestDiffResult(url, oldCredentials.ApiKey, oldRequest.RequestBody, oldRequest.ResponseBody);
+            var result = await RestLogLogic.GetRestDiffResult(url, oldCredentials.ApiKey, oldRequest.RequestBody, oldRequest.ResponseBody);
 
             return RestDiffLog(result);
         }
@@ -39,43 +40,13 @@ namespace Signum.React.RestLog
         [Route("api/restLog/"), HttpPost]
         public async Task<RestDiffResult> GetDiff(RestDiffRequest request)
         {
-            var restDiffResult = await RestDiffResult(request.url, request.apiKey, request.requestBody, request.responseBody);
+            var restDiffResult = await RestLogLogic.GetRestDiffResult(request.url, request.apiKey, request.requestBody, request.responseBody);
             
 
             return RestDiffLog(restDiffResult);
         }
 
-        private static async Task<RestDiffResult> RestDiffResult(string url, string apiKey, string oldRequestBody, string oldResponseBody)
-        {
-            var result = new RestDiffResult { previous = oldResponseBody };
-
-            //create the new Request
-            var restClient = new HttpClient {BaseAddress = new Uri(url)};
-            restClient.DefaultRequestHeaders.Add("X-ApiKey", apiKey);
-            var request =
-                new HttpRequestMessage(string.IsNullOrWhiteSpace(oldRequestBody) ? HttpMethod.Get : HttpMethod.Post,
-                    url);
-
-            if (!string.IsNullOrWhiteSpace(oldRequestBody))
-            {
-                var response = await restClient.PostAsync("",
-                    new StringContent(oldResponseBody, Encoding.UTF8, "application/json"));
-                result.current = await response.Content.ReadAsStringAsync();
-            }
-            else
-            {
-                var requestUriAbsoluteUri = request.RequestUri.AbsoluteUri;
-                if (requestUriAbsoluteUri.Contains("apiKey"))
-                {
-                    request.RequestUri = requestUriAbsoluteUri.After("apiKey=").Contains("&")
-                        ? new Uri(requestUriAbsoluteUri.Before("apiKey=") + requestUriAbsoluteUri.After("apiKey=").After('&'))
-                        : new Uri(requestUriAbsoluteUri.Before("apiKey="));
-                }
-
-                result.current = await restClient.SendAsync(request).Result.Content.ReadAsStringAsync();
-            }
-            return result;
-        }
+       
     }
 
    

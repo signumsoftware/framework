@@ -24,13 +24,14 @@ interface PredictModalProps extends IModalProps {
 interface PredictModalState {
     show: boolean;
     predict: PredictRequest;
+    hasChanged: boolean;
 }
 
 export class PredictModal extends React.Component<PredictModalProps, PredictModalState> {
 
     constructor(props: PredictModalProps) {
         super(props);
-        this.state = { show: true, predict: props.initialPredict };
+        this.state = { show: true, predict: props.initialPredict, hasChanged: false };
     }
 
     handleClosedClicked = () => {
@@ -41,7 +42,8 @@ export class PredictModal extends React.Component<PredictModalProps, PredictModa
         this.props.onExited!(undefined);
     }
 
-    handlePredictClick = () => {
+    hangleOnChange = () => {
+        this.setState({ hasChanged: true });
         API.updatePredict(this.state.predict)
             .then(predict => this.setState({ predict: predict }))
             .done();
@@ -51,6 +53,8 @@ export class PredictModal extends React.Component<PredictModalProps, PredictModa
 
         const p = this.state.predict;
         var e = this.props.entity;
+
+        const hasChanged = this.state.hasChanged;
 
         var sctx = new StyleContext(undefined, {});
 
@@ -66,11 +70,13 @@ export class PredictModal extends React.Component<PredictModalProps, PredictModa
                 </Modal.Header>
                 <Modal.Body>
                     <div className="form-horizontal">
-                        {p.columns.filter(c => c.usage == "Input").map((c, i) => <PredictLine key={i} sctx={sctx} hasOriginal={p.hasOriginal} column={c} onChange={this.handlePredictClick} />)}
+                        {p.columns.filter(c => c.usage == "Input").map((col, i) =>
+                            <PredictLine key={i} sctx={sctx} hasOriginal={p.hasOriginal} hasChanged={hasChanged} binding={Binding.create(col, c => c.value)} usage={col.usage} token={col.token} onChange={this.hangleOnChange} />)}
                     </div>
-                    {p.subQueries.map((c, i) => <PredictTable key={i} sctx={sctx} table={c} onChange={this.handlePredictClick}/>)}
+                    {p.subQueries.map((c, i) => <PredictTable key={i} sctx={sctx} table={c} onChange={this.hangleOnChange} hasChanged={hasChanged} hasOriginal={p.hasOriginal} />)}
                     <div className="form-horizontal">
-                        {p.columns.filter(c => c.usage == "Output").map((c, i) => <PredictLine key={i} sctx={sctx} hasOriginal={p.hasOriginal} column={c} onChange={this.handlePredictClick} />)}
+                        {p.columns.filter(c => c.usage == "Output").map((col, i) =>
+                            <PredictLine key={i} sctx={sctx} hasOriginal={p.hasOriginal} hasChanged={hasChanged} binding={Binding.create(col, c => c.value)} usage={col.usage} token={col.token} onChange={this.hangleOnChange} />)}
                     </div>
                 </Modal.Body>
             </Modal>
@@ -83,18 +89,21 @@ export class PredictModal extends React.Component<PredictModalProps, PredictModa
 }
 
 interface PredictLineProps {
-    column: PredictColumn;
+    binding: Binding<any>;
+    token: QueryToken;
+    usage: "Key" | "Input" | "Output"
     sctx: StyleContext;
     hasOriginal: boolean;
+    hasChanged: boolean;
     onChange: () => void;
 }
 
 export default class PredictLine extends React.Component<PredictLineProps> {
     render() {
-        const column = this.props.column;
-        if (column.usage == "Output" && this.props.hasOriginal) {
+        const p = this.props;
+        if (p.usage == "Output" && this.props.hasOriginal) {
 
-            var tuple = this.props.column.value as PredictOutputTuple;
+            var tuple = p.binding.getValue() as PredictOutputTuple;
 
             const pctx = new TypeContext<any>(this.props.sctx, { readOnly: true }, undefined as any, Binding.create(tuple, a => a.predicted));
             const octx = new TypeContext<any>(this.props.sctx, { readOnly: true }, undefined as any, Binding.create(tuple, a => a.original));
@@ -102,16 +111,18 @@ export default class PredictLine extends React.Component<PredictLineProps> {
             var color = pctx.value == octx.value || isLite(pctx.value) && isLite(octx.value) && is(pctx.value, octx.value) ? "green" : "red";
 
             return (
-                <FormGroup ctx={this.props.sctx} labelText={column.token.niceName} labelHtmlAttributes={{ title: fullNiceName(column.token) }}>
-                    <PredictValue token={column.token} ctx={pctx} label={<i className="fa fa-lightbulb-o" style={{ color }}></i>} />
-                    <PredictValue token={column.token} ctx={octx} label={<i className="fa fa-bullseye" style={{ color }}></i>} />
+                <FormGroup ctx={this.props.sctx} labelText={p.token.niceName} labelHtmlAttributes={{ title: fullNiceName(p.token) }}>
+                    <PredictValue token={p.token} ctx={pctx} label={<i className="fa fa-lightbulb-o" style={{ color }}></i>} />
+                    <div style={{ opacity: this.props.hasChanged ? 0.5 : 1 }}>
+                        <PredictValue token={p.token} ctx={octx} label={<i className="fa fa-bullseye" style={{ color }}></i>} />
+                    </div>
                 </FormGroup>
             );
         } else {
-            const ctx = new TypeContext<any>(this.props.sctx, { readOnly: column.usage == "Output" }, undefined as any, Binding.create(column, a => a.value));
+            const ctx = new TypeContext<any>(this.props.sctx, { readOnly: p.usage == "Output" }, undefined as any, Binding.create(p, a => a.binding));
             return (
-                <FormGroup ctx={ctx} labelText={column.token.niceName} labelHtmlAttributes={{ title: fullNiceName(column.token) }}>
-                    <PredictValue token={column.token} ctx={ctx} label={column.usage == "Output" ? <i className="fa fa-lightbulb-o"></i> : undefined} onChange={this.props.onChange} />
+                <FormGroup ctx={ctx} labelText={p.token.niceName} labelHtmlAttributes={{ title: fullNiceName(p.token) }}>
+                    <PredictValue token={p.token} ctx={ctx} label={p.usage == "Output" ? <i className="fa fa-lightbulb-o"></i> : undefined} onChange={this.props.onChange} />
                 </FormGroup>
             );
         }
@@ -122,11 +133,14 @@ export default class PredictLine extends React.Component<PredictLineProps> {
 interface PredictTableProps {
     sctx: StyleContext;
     table: PredictSubQueryTable;
+    hasChanged: boolean;
+    hasOriginal: boolean;
     onChange: () => void;
 }
 
 export class PredictTable extends React.Component<PredictTableProps> {
     render() {
+        var p = this.props;
         var { subQuery, columnHeaders, rows } = this.props.table;
         return (
             <div>
@@ -134,21 +148,25 @@ export class PredictTable extends React.Component<PredictTableProps> {
                 <div style={{ maxHeight: "500px", overflowY: "scroll", marginBottom: "10px" }}>
                     <table className="table table-condensed">
                         <thead>
-                            <tr>
-                                {columnHeaders.map((he, i) => <th key={i} className={"header-" + he.headerType.toLowerCase()}>
-                                    {he.headerType == "Key" && <i className="fa fa-key" style={{ marginRight: "10px" }}></i>}
-                                    {he.token.niceName}
-                                </th>)}
+                            <tr >
+                                {
+                                    columnHeaders.map((he, i) => <th key={i} className={"header-" + he.headerType.toLowerCase()} title={fullNiceName(he.token)}>
+                                        {he.headerType == "Key" && <i className="fa fa-key" style={{ marginRight: "10px" }}></i>}
+                                        {he.token.niceName}
+                                    </th>)
+                                }
                             </tr>
                         </thead>
                         <tbody>
                             {
                                 rows.map((row, j) => <tr key={j}>
-                                    {row.map((v, i) => {
-                                        var ch = columnHeaders[i];
-                                        const ctx = new TypeContext<any>(this.props.sctx, { readOnly: ch.headerType == "Key" || ch.headerType == "Output" }, undefined as any, new Binding(row, i));
-                                        return <td><PredictValue ctx={ctx} token={ch.token} onChange={this.props.onChange} /></td>;
-                                    })}
+                                    {
+                                        row.map((v, i) => {
+                                            var ch = columnHeaders[i];
+                                            return <td><PredictLine sctx={this.props.sctx} token={ch.token} binding={new Binding(row, i)}
+                                                usage={ch.headerType} hasChanged={p.hasChanged} hasOriginal={p.hasOriginal} onChange={this.props.onChange} /></td>;
+                                        })
+                                    }
                                 </tr>)
                             }
                         </tbody>
