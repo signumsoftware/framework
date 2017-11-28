@@ -55,6 +55,33 @@ namespace Signum.Test.LinqProvider
             var skipArtist = Database.Query<ArtistEntity>().Skip(2).ToList();
         }
 
+
+        [TestMethod]
+        public void SkipAllAggregates()
+        {
+            var allAggregates = Database.Query<ArtistEntity>().GroupBy(a => new { }).Select(gr => new { Count = gr.Count(), MaxId = gr.Max(a=>a.Id) }).Skip(2).ToList();
+
+        }
+
+        [TestMethod]
+        public void AllAggregatesOrderByAndByKeys()
+        {
+            var allAggregates = Database.Query<ArtistEntity>().GroupBy(a => new { }).Select(gr => new { Count = gr.Count(), MaxId = gr.Max(a => a.Id) }).OrderBy(a => a.Count).OrderAlsoByKeys().ToList();
+        }
+
+        [TestMethod]
+        public void SkipAllAggregatesOrderBy()
+        {
+            var allAggregates = Database.Query<ArtistEntity>().GroupBy(a => new { }).Select(gr => new { Count = gr.Count(), MaxId = gr.Max(a => a.Id) }).OrderBy(a=>a.Count).Skip(2).ToList();
+        }
+
+        [TestMethod]
+        public void AllAggregatesCount()
+        {
+            var count = Database.Query<ArtistEntity>().GroupBy(a => new { }).Select(gr => new { Count = gr.Count(), MaxId = gr.Max(a => a.Id) }).OrderBy(a => a.Count).Count();
+            Assert.AreEqual(1, count);
+        }
+
         [TestMethod]
         public void SkipOrder()
         {
