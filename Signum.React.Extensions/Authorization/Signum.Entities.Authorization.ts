@@ -115,7 +115,7 @@ export module AuthMessage {
     export const ResetPasswordSuccess = new MessageKey("AuthMessage", "ResetPasswordSuccess");
     export const Save = new MessageKey("AuthMessage", "Save");
     export const TheConfirmationCodeThatYouHaveJustSentIsInvalid = new MessageKey("AuthMessage", "TheConfirmationCodeThatYouHaveJustSentIsInvalid");
-    export const ThePasswordMustHaveBetween7And15CharactersEachOfThemBeingANumber09OrALetter = new MessageKey("AuthMessage", "ThePasswordMustHaveBetween7And15CharactersEachOfThemBeingANumber09OrALetter");
+    export const ThePasswordMustHaveAtLeast5Characters = new MessageKey("AuthMessage", "ThePasswordMustHaveAtLeast5Characters");
     export const ThereHasBeenAnErrorWithYourRequestToResetYourPasswordPleaseEnterYourLogin = new MessageKey("AuthMessage", "ThereHasBeenAnErrorWithYourRequestToResetYourPasswordPleaseEnterYourLogin");
     export const ThereSNotARegisteredUserWithThatEmailAddress = new MessageKey("AuthMessage", "ThereSNotARegisteredUserWithThatEmailAddress");
     export const TheSpecifiedPasswordsDontMatch = new MessageKey("AuthMessage", "TheSpecifiedPasswordsDontMatch");
