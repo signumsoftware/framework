@@ -62,6 +62,14 @@ namespace Signum.Entities.MachineLearning
         public PredictorClassificationMetricsEmbedded ClassificationValidation { get; set; }
         public PredictorRegressionMetricsEmbedded RegressionTraining { get; set; }
         public PredictorRegressionMetricsEmbedded RegressionValidation { get; set; }
+
+
+        static Expression<Func<PredictorEntity, string>> ToStringExpression = @this => @this.Name;
+        [ExpressionField]
+        public override string ToString()
+        {
+            return ToStringExpression.Evaluate(this);
+        }
     }
 
     [Serializable]
@@ -236,6 +244,8 @@ namespace Signum.Entities.MachineLearning
             Encoding = Encoding,
             NullHandling = NullHandling
         };
+
+        public override string ToString() => $"{Usage} {Token} {Encoding}";
     }
 
     public enum PredictorColumnNullHandling
