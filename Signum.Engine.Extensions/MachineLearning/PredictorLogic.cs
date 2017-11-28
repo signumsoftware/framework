@@ -434,10 +434,10 @@ namespace Signum.Engine.MachineLearning
                     Construct = (e, _) => new PredictorEntity
                     {
                         Name = e.Name.HasText() ? (e.Name + " (2)") : "",
-                        State = e.State,
+                        State = PredictorState.Draft,
+                        Algorithm = e.Algorithm,
                         MainQuery = e.MainQuery.Clone(),
                         SubQueries = e.SubQueries.Select(a => a.Clone()).ToMList(),
-                        Algorithm = e.Algorithm,
                         AlgorithmSettings = e.AlgorithmSettings?.Clone(),
                         Settings = e.Settings?.Clone(),
                     },
