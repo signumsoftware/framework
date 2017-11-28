@@ -163,7 +163,7 @@ namespace Signum.React.MachineLearning
                 foreach (var r in sq.rows)
                 {
                     var key = r.Slice(0, psq.SubQuery.GroupKeys.Count - 1);
-                    var dic = psq.SubQueryGroups.GetOrThrow(key);
+                    var dic = psq.SubQueryGroups.TryGetC(key);
 
                     for (int i = 0; i < psq.SubQuery.Aggregates.Count; i++)
                     {
@@ -175,7 +175,7 @@ namespace Signum.React.MachineLearning
 
                             var token = fullKeyToToken.GetOrThrow(c.token.fullKey);
 
-                            var pValue = dic.GetOrThrow(token);
+                            var pValue = dic?.GetOrThrow(token);
                             if (request.hasOriginal)
                                 ((PredictOutputTuple)box).predicted = pValue;
                             else
