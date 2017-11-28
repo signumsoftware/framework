@@ -19,7 +19,7 @@ namespace Signum.Entities.Rest
 
         public DateTime StartDate { get; set; }
 
-        public DateTime ReplayDate { get; set; }
+        public DateTime? ReplayDate { get; set; }
 
 
         [NotNullable, SqlDbType(Size = MaxValue)]
