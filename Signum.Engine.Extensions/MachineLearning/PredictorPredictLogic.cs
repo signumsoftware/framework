@@ -45,13 +45,12 @@ namespace Signum.Engine.MachineLearning
         {
             var ctx = GetPredictContext(predictor);
 
-            var result = new PredictDictionary
+            var result = new PredictDictionary(ctx.Predictor)
             {
                 MainQueryValues = ctx.Predictor.MainQuery.Columns.Select((c, i) => KVP.Create(c, (object)null)).ToDictionaryEx(),
-                SubQueries = ctx.Predictor.SubQueries.ToDictionary(sq => sq, sq => new PredictSubQueryDictionary
+                SubQueries = ctx.Predictor.SubQueries.ToDictionary(sq => sq, sq => new PredictSubQueryDictionary(sq)
                 {
-                    SubQuery = sq,
-                    SubQueryGroups = new Dictionary<object[], Dictionary<PredictorColumnEmbedded, object>>(ObjectArrayComparer.Instance)
+                    SubQueryGroups = new Dictionary<object[], Dictionary<PredictorSubQueryColumnEmbedded, object>>(ObjectArrayComparer.Instance)
                 })
             };
 
