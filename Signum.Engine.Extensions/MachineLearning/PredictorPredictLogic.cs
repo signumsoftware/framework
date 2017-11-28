@@ -41,6 +41,23 @@ namespace Signum.Engine.MachineLearning
             return FromEntities(predictor, new List<Lite<Entity>> { entity }).SingleEx().Value;
         }
 
+        public static PredictDictionary Empty(Lite<PredictorEntity> predictor)
+        {
+            var ctx = GetPredictContext(predictor);
+
+            var result = new PredictDictionary
+            {
+                MainQueryValues = ctx.Predictor.MainQuery.Columns.Select((c, i) => KVP.Create(c, (object)null)).ToDictionaryEx(),
+                SubQueries = ctx.Predictor.SubQueries.ToDictionary(sq => sq, sq => new PredictSubQueryDictionary
+                {
+                    SubQuery = sq,
+                    SubQueryGroups = new Dictionary<object[], Dictionary<PredictorColumnEmbedded, object>>(ObjectArrayComparer.Instance)
+                })
+            };
+
+            return result;
+        }
+
         public static Dictionary<Lite<Entity>, PredictDictionary> FromEntities(Lite<PredictorEntity> predictor, List<Lite<Entity>> entities)
         {
             var ctx = GetPredictContext(predictor);
@@ -112,20 +129,6 @@ namespace Signum.Engine.MachineLearning
         }
 
         public static PredictDictionary PredictBasic(this Lite<PredictorEntity> predictor, PredictDictionary input)
-        {
-            var pctx = GetPredictContext(predictor);
-
-            return pctx.Algorithm.Predict(pctx, input);
-        }
-
-        public static PredictDictionary PredictEntity(this Lite<PredictorEntity> predictor, PredictDictionary input)
-        {
-            var pctx = GetPredictContext(predictor);
-
-            return pctx.Algorithm.Predict(pctx, input);
-        }
-
-        public static PredictDictionary PredictModel(this Lite<PredictorEntity> predictor, PredictDictionary input)
         {
             var pctx = GetPredictContext(predictor);
 

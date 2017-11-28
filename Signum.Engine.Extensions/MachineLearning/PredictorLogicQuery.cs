@@ -155,7 +155,8 @@ namespace Signum.Engine.MachineLearning
                 QueryName = sq.Query.ToQueryName(),
                 Filters = mainFilters.Concat(additionalFilters).ToList(),
                 Columns = groupKeys.Concat(aggregates).ToList(),
-                Orders = new List<Order>()
+                Orders = new List<Order>(),
+                Pagination = new Pagination.All(),
             };
         }
 
