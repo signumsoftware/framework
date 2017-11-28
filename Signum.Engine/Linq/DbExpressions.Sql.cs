@@ -428,6 +428,8 @@ namespace Signum.Engine.Linq
             }
         }
 
+        public bool IsAllAggregates  => Columns.Any() && Columns.All(a => a.Expression is AggregateExpression);
+
         public override string ToString()
         {
             return "SELECT {0}{1}\r\n{2}\r\nFROM {3}\r\n{4}{5}{6}{7} AS {8}".FormatWith(

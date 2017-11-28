@@ -25,7 +25,7 @@ namespace Signum.React.Facades
         {
             Schema.Current.ApplicationName = System.Web.Hosting.HostingEnvironment.ApplicationHost.GetPhysicalPath();
 
-
+            config.IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always;
             config.Services.Replace(typeof(IHttpControllerSelector), new SignumControllerFactory(config, mainAsembly));
 
             SignumControllerFactory.RegisterArea(typeof(EntitiesController));

@@ -336,6 +336,7 @@ namespace Signum.Test
                     Author = a.Author,
                     Label = a.Label,
                     State = a.State,
+                    Year = a.Year,
                     Songs = a.Songs.Select(s => new SongEmbedded
                     {
                         Name = s.Name,

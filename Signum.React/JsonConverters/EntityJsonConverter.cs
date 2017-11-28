@@ -115,73 +115,76 @@ namespace Signum.React.Json
 
         public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
         {
-            PropertyRoute pr = GetCurrentPropertyRoute(value);
-
-            ModifiableEntity mod = (ModifiableEntity)value;
-
-            writer.WriteStartObject();
-
-            var entity = mod as Entity;
-            if (entity != null)
+            using (HeavyProfiler.LogNoStackTrace("WriteJson", () => value.GetType().Name))
             {
-                writer.WritePropertyName("Type");
-                writer.WriteValue(TypeLogic.TryGetCleanName(mod.GetType()));
+                PropertyRoute pr = GetCurrentPropertyRoute(value);
 
-                writer.WritePropertyName("id");
-                writer.WriteValue(entity.IdOrNull == null ? null : entity.Id.Object);
+                ModifiableEntity mod = (ModifiableEntity)value;
 
-                if (entity.IsNew)
-                {
-                    writer.WritePropertyName("isNew");
-                    writer.WriteValue(true);
-                }
-
-                if (Schema.Current.Table(entity.GetType()).Ticks != null)
-                {
-                    writer.WritePropertyName("ticks");
-                    writer.WriteValue(entity.Ticks.ToString());
-                }
-            }
-            else
-            {
-                writer.WritePropertyName("Type");
-                writer.WriteValue(mod.GetType().Name);
-            }
-
-            if (!(mod is MixinEntity))
-            {
-                writer.WritePropertyName("toStr");
-                writer.WriteValue(mod.ToString());
-            }
-
-            writer.WritePropertyName("modified");
-            writer.WriteValue(mod.Modified == ModifiedState.Modified || mod.Modified == ModifiedState.SelfModified);
-
-            foreach (var kvp in PropertyConverter.GetPropertyConverters(value.GetType()))
-            {
-                WriteJsonProperty(writer, serializer, mod, kvp.Key, kvp.Value, pr);
-            }
-
-            if (entity != null && entity.Mixins.Any())
-            {
-                writer.WritePropertyName("mixins");
                 writer.WriteStartObject();
 
-                foreach (var m in entity.Mixins)
+                var entity = mod as Entity;
+                if (entity != null)
                 {
-                    var prm = pr.Add(m.GetType());
+                    writer.WritePropertyName("Type");
+                    writer.WriteValue(TypeLogic.TryGetCleanName(mod.GetType()));
 
-                    using (JsonSerializerExtensions.SetCurrentPropertyRoute(prm))
+                    writer.WritePropertyName("id");
+                    writer.WriteValue(entity.IdOrNull == null ? null : entity.Id.Object);
+
+                    if (entity.IsNew)
                     {
-                        writer.WritePropertyName(m.GetType().Name);
-                        serializer.Serialize(writer, m);
+                        writer.WritePropertyName("isNew");
+                        writer.WriteValue(true);
                     }
+
+                    if (Schema.Current.Table(entity.GetType()).Ticks != null)
+                    {
+                        writer.WritePropertyName("ticks");
+                        writer.WriteValue(entity.Ticks.ToString());
+                    }
+                }
+                else
+                {
+                    writer.WritePropertyName("Type");
+                    writer.WriteValue(mod.GetType().Name);
+                }
+
+                if (!(mod is MixinEntity))
+                {
+                    writer.WritePropertyName("toStr");
+                    writer.WriteValue(mod.ToString());
+                }
+
+                writer.WritePropertyName("modified");
+                writer.WriteValue(mod.Modified == ModifiedState.Modified || mod.Modified == ModifiedState.SelfModified);
+
+                foreach (var kvp in PropertyConverter.GetPropertyConverters(value.GetType()))
+                {
+                    WriteJsonProperty(writer, serializer, mod, kvp.Key, kvp.Value, pr);
+                }
+
+                if (entity != null && entity.Mixins.Any())
+                {
+                    writer.WritePropertyName("mixins");
+                    writer.WriteStartObject();
+
+                    foreach (var m in entity.Mixins)
+                    {
+                        var prm = pr.Add(m.GetType());
+
+                        using (JsonSerializerExtensions.SetCurrentPropertyRoute(prm))
+                        {
+                            writer.WritePropertyName(m.GetType().Name);
+                            serializer.Serialize(writer, m);
+                        }
+                    }
+
+                    writer.WriteEndObject();
                 }
 
                 writer.WriteEndObject();
             }
-
-            writer.WriteEndObject();
         }
 
         private static PropertyRoute GetCurrentPropertyRoute(object value)
@@ -246,63 +249,64 @@ namespace Signum.React.Json
 
         public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
         {
-            if (reader.TokenType == JsonToken.Null)
-                return null;
-
-            using (EntityCache ec = new EntityCache())
+            using (HeavyProfiler.LogNoStackTrace("ReadJson", () => objectType.Name))
             {
-                reader.Assert(JsonToken.StartObject);
+                if (reader.TokenType == JsonToken.Null)
+                    return null;
 
-                ModifiableEntity mod = GetEntity(reader, objectType, existingValue, serializer, out bool markedAsModified);
-
-                var pr = GetCurrentPropertyRoute(mod);
-
-                var dic = PropertyConverter.GetPropertyConverters(mod.GetType());
-
-                while (reader.TokenType == JsonToken.PropertyName)
+                using (EntityCache ec = new EntityCache())
                 {
-                    if ((string)reader.Value == "mixins")
-                    {
-                        var entity = (Entity)mod;
-                        reader.Read();
-                        reader.Assert(JsonToken.StartObject);
+                    reader.Assert(JsonToken.StartObject);
 
-                        reader.Read();
-                        while (reader.TokenType == JsonToken.PropertyName)
+                    ModifiableEntity mod = GetEntity(reader, objectType, existingValue, serializer, out bool markedAsModified);
+
+                    var pr = GetCurrentPropertyRoute(mod);
+
+                    var dic = PropertyConverter.GetPropertyConverters(mod.GetType());
+
+                    while (reader.TokenType == JsonToken.PropertyName)
+                    {
+                        if ((string)reader.Value == "mixins")
                         {
-                            var mixin = entity[(string)reader.Value];
+                            var entity = (Entity)mod;
+                            reader.Read();
+                            reader.Assert(JsonToken.StartObject);
 
                             reader.Read();
+                            while (reader.TokenType == JsonToken.PropertyName)
+                            {
+                                var mixin = entity[(string)reader.Value];
 
-                            using (JsonSerializerExtensions.SetCurrentPropertyRoute(pr.Add(mixin.GetType())))
-                                serializer.DeserializeValue(reader, mixin.GetType(), mixin);
+                                reader.Read();
+
+                                using (JsonSerializerExtensions.SetCurrentPropertyRoute(pr.Add(mixin.GetType())))
+                                    serializer.DeserializeValue(reader, mixin.GetType(), mixin);
+
+                                reader.Read();
+                            }
+
+                            reader.Assert(JsonToken.EndObject);
+                            reader.Read();
+                        }
+                        else
+                        {
+                            PropertyConverter pc = dic.GetOrThrow((string)reader.Value);
+
+                            reader.Read();
+                            ReadJsonProperty(reader, serializer, mod, pc, pr, markedAsModified);
 
                             reader.Read();
                         }
-
-                        reader.Assert(JsonToken.EndObject);
-                        reader.Read();
                     }
-                    else
-                    {
-                        PropertyConverter pc = dic.GetOrThrow((string)reader.Value);
 
-                        reader.Read();
-                        ReadJsonProperty(reader, serializer, mod, pc, pr, markedAsModified);
+                    reader.Assert(JsonToken.EndObject);
 
-                        reader.Read();
-                    }
+                    AfterDeserilization.Invoke(mod);
+
+                    return mod;
                 }
-
-                reader.Assert(JsonToken.EndObject);
-
-                AfterDeserilization.Invoke(mod);
-
-                return mod;
             }
         }
-
-
 
         public void ReadJsonProperty(JsonReader reader, JsonSerializer serializer, ModifiableEntity entity, PropertyConverter pc, PropertyRoute parentRoute, bool markedAsModified)
         {

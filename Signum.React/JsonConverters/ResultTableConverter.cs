@@ -21,53 +21,56 @@ namespace Signum.React.Json
 
         public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
         {
-            var rt = (ResultTable)value;
-            
-            writer.WriteStartObject();
-
-            writer.WritePropertyName("entityColumn");
-            writer.WriteValue(rt.EntityColumn?.Name);
-
-            writer.WritePropertyName("columns");
-            serializer.Serialize(writer, rt.Columns.Select(c => c.Column.Token.FullKey()).ToList());
-
-            writer.WritePropertyName("pagination");
-            serializer.Serialize(writer, new PaginationTS(rt.Pagination));
-
-            writer.WritePropertyName("totalElements");
-            writer.WriteValue(rt.TotalElements);
-
-
-            writer.WritePropertyName("rows");
-            writer.WriteStartArray();
-            foreach (var row in rt.Rows)
+            using (HeavyProfiler.LogNoStackTrace("ReadJson", () => typeof(ResultTable).Name))
             {
+                var rt = (ResultTable)value;
+
                 writer.WriteStartObject();
-                if (rt.EntityColumn != null)
-                {
-                    writer.WritePropertyName("entity");
-                    serializer.Serialize(writer, row.Entity);
-                }
+
+                writer.WritePropertyName("entityColumn");
+                writer.WriteValue(rt.EntityColumn?.Name);
 
                 writer.WritePropertyName("columns");
+                serializer.Serialize(writer, rt.Columns.Select(c => c.Column.Token.FullKey()).ToList());
+
+                writer.WritePropertyName("pagination");
+                serializer.Serialize(writer, new PaginationTS(rt.Pagination));
+
+                writer.WritePropertyName("totalElements");
+                writer.WriteValue(rt.TotalElements);
+
+
+                writer.WritePropertyName("rows");
                 writer.WriteStartArray();
-                foreach (var column in rt.Columns)
+                foreach (var row in rt.Rows)
                 {
-                    using (JsonSerializerExtensions.SetCurrentPropertyRoute(column.Column.Token.GetPropertyRoute()))
+                    writer.WriteStartObject();
+                    if (rt.EntityColumn != null)
                     {
-                        serializer.Serialize(writer, row[column]);
+                        writer.WritePropertyName("entity");
+                        serializer.Serialize(writer, row.Entity);
                     }
+
+                    writer.WritePropertyName("columns");
+                    writer.WriteStartArray();
+                    foreach (var column in rt.Columns)
+                    {
+                        using (JsonSerializerExtensions.SetCurrentPropertyRoute(column.Column.Token.GetPropertyRoute()))
+                        {
+                            serializer.Serialize(writer, row[column]);
+                        }
+                    }
+                    writer.WriteEndArray();
+
+
+                    writer.WriteEndObject();
+
                 }
                 writer.WriteEndArray();
 
 
                 writer.WriteEndObject();
-
             }
-            writer.WriteEndArray();
-
-
-            writer.WriteEndObject();
         }
 
         public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)

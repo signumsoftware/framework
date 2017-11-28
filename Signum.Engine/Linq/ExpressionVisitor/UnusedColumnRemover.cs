@@ -40,7 +40,7 @@ namespace Signum.Engine.Linq
 
             ReadOnlyCollection<ColumnDeclaration> columns = select.Columns.Select(c =>
             {
-                if (select.IsDistinct ? IsConstant(c.Expression) : !columnsUsed.Contains(c.Name))
+                if (select.IsDistinct || select.IsAllAggregates ? IsConstant(c.Expression) : !columnsUsed.Contains(c.Name))
                     return null;
 
                 var ex = Visit(c.Expression);
