@@ -86,11 +86,11 @@ namespace Signum.Engine.Maps
             }
         }
 
-        internal object[] BulkInsertDataRow(Entity ident)
+        internal object[] BulkInsertDataRow(object/*Entity or IView*/ entity)
         {
             var parameters = IdentityBehaviour ?
-                inserterIdentity.Value.InsertParameters(ident, new Forbidden(), "") :
-                inserterDisableIdentity.Value.InsertParameters(ident, new Forbidden(), "");
+                inserterIdentity.Value.InsertParameters((Entity)entity, new Forbidden(), "") :
+                inserterDisableIdentity.Value.InsertParameters(entity, new Forbidden(), "");
 
             return parameters.Select(a => a.Value).ToArray();
         }
@@ -100,7 +100,7 @@ namespace Signum.Engine.Maps
             internal Table table;
 
             public Func<string, string> SqlInsertPattern;
-            public Func<Entity, Forbidden, string, List<DbParameter>> InsertParameters;
+            public Func<object /*Entity*/, Forbidden, string, List<DbParameter>> InsertParameters;
 
             ConcurrentDictionary<int, Action<List<Entity>, DirectedGraph<Entity>>> insertDisableIdentityCache = 
                 new ConcurrentDictionary<int, Action<List<Entity>, DirectedGraph<Entity>>>();
@@ -181,7 +181,7 @@ namespace Signum.Engine.Maps
 
                     var trios = new List<Table.Trio>();
                     var assigments = new List<Expression>();
-                    var paramIdent = Expression.Parameter(typeof(Entity), "ident");
+                    var paramIdent = Expression.Parameter(typeof(object) /*Entity*/, "ident");
                     var paramForbidden = Expression.Parameter(typeof(Forbidden), "forbidden");
                     var paramSuffix = Expression.Parameter(typeof(string), "suffix");
 
@@ -200,7 +200,7 @@ namespace Signum.Engine.Maps
                         trios.ToString(p => p.SourceColumn.SqlEscape(), ", "),
                         trios.ToString(p => p.ParameterName + suffix, ", "));
 
-                    var expr = Expression.Lambda<Func<Entity, Forbidden, string, List<DbParameter>>>(
+                    var expr = Expression.Lambda<Func<object, Forbidden, string, List<DbParameter>>>(
                         CreateBlock(trios.Select(a => a.ParameterBuilder), assigments), paramIdent, paramForbidden, paramSuffix);
 
                     result.InsertParameters = expr.Compile();

@@ -53,6 +53,33 @@ namespace Signum.Engine
                 new SqlPreCommandSimple(SynchronizerMessage.EndOfSyncScript.NiceToString()));
         }
 
+        public static void CreateTemporaryTable<T>()
+          where T : IView
+        {
+            if (!Transaction.HasTransaction)
+                throw new InvalidOperationException("You need to be inside of a transaction to create a Temporary table");
+
+            var view = Schema.Current.View<T>();
+
+            if (!view.Name.IsTemporal)
+                throw new InvalidOperationException($"Temporary tables should start with # (i.e. #myTable). Consider using {nameof(TableNameAttribute)}");
+
+            SqlBuilder.CreateTableSql(view).ExecuteNonQuery();
+        }
+
+        public static void CreateTemporaryIndex<T>(Expression<Func<T, object>> fields)
+             where T : IView
+        {
+            var view = Schema.Current.View<T>();
+
+            IColumn[] columns = IndexKeyColumns.Split(view, fields);
+
+            var index = new Index(view, columns);
+
+            SqlBuilder.CreateIndex(index).ExecuteLeaves();
+        }
+
+
         internal static readonly ThreadVariable<DatabaseName> sysViewDatabase = Statics.ThreadVariable<DatabaseName>("viewDatabase");
         public static IDisposable OverrideDatabaseInSysViews(DatabaseName database)
         {

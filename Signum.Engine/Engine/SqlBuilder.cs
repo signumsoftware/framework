@@ -37,11 +37,12 @@ namespace Signum.Engine
         #region Create Tables
         public static SqlPreCommandSimple CreateTableSql(ITable t)
         {
-            var primaryKeyConstraint = "CONSTRAINT {0} PRIMARY KEY CLUSTERED ({1} ASC)".FormatWith(PrimaryClusteredIndex.GetPrimaryKeyName(t.Name), t.PrimaryKey.Name.SqlEscape());
+            var primaryKeyConstraint = t.PrimaryKey == null ? null : "CONSTRAINT {0} PRIMARY KEY CLUSTERED ({1} ASC)".FormatWith(PrimaryClusteredIndex.GetPrimaryKeyName(t.Name), t.PrimaryKey.Name.SqlEscape());
 
             return new SqlPreCommandSimple("CREATE TABLE {0}(\r\n{1}\r\n)".FormatWith(
-                t.Name, 
-                t.Columns.Values.Select(c => SqlBuilder.CreateColumn(c)).And(primaryKeyConstraint).ToString(",\r\n").Indent(2)));
+                t.Name,
+                t.Columns.Values.Select(c => SqlBuilder.CreateColumn(c)).And(primaryKeyConstraint).NotNull().ToString(",\r\n").Indent(2))
+            );
         }
 
         public static SqlPreCommand DropTable(ObjectName tableName)
