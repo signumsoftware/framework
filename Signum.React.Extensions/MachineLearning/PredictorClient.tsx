@@ -16,7 +16,7 @@ import * as ContextualOperations from '../../../Framework/Signum.React/Scripts/O
 import {
     PredictorEntity, PredictorSubQueryEntity, PredictorMessage, PredictorAlgorithmSymbol, AccordPredictorAlgorithm, CNTKPredictorAlgorithm,
     NaiveBayesSettingsEntity, NeuralNetworkSettingsEntity, PredictorSettingsEmbedded, PredictorState, PredictorRegressionMetricsEmbedded,
-    PredictorClassificationMetricsEmbedded, PredictorMainQueryEmbedded, PredictorColumnUsage
+    PredictorClassificationMetricsEmbedded, PredictorMainQueryEmbedded, PredictorColumnUsage, PredictorOperation
 } from './Signum.Entities.MachineLearning'
 import * as OmniboxClient from '../Omnibox/OmniboxClient'
 import * as AuthClient from '../Authorization/AuthClient'
@@ -53,7 +53,12 @@ export function start(options: { routes: JSX.Element[] }) {
         PredictorMessage.OpenTensorflowProjector.niceToString(),
         PredictorMessage.OpenTensorflowProjector.niceToString(),
         e => window.open("http://projector.tensorflow.org/", "_blank")));
-    
+
+    Operations.addSettings(new EntityOperationSettings(PredictorOperation.StopTraining, { hideOnCanExecute: true }));
+    Operations.addSettings(new EntityOperationSettings(PredictorOperation.CancelTraining, { hideOnCanExecute: true }));
+    Operations.addSettings(new EntityOperationSettings(PredictorOperation.Train, { hideOnCanExecute: true }));
+    Operations.addSettings(new EntityOperationSettings(PredictorOperation.Untrain, { hideOnCanExecute: true }));
+
     Constructor.registerConstructor(PredictorEntity, () => PredictorEntity.New({
         mainQuery: PredictorMainQueryEmbedded.New(),
         settings: PredictorSettingsEmbedded.New(),

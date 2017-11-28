@@ -19,13 +19,13 @@ namespace Signum.Entities.MachineLearning
 
         //For flatting collections
         [SqlDbType(Size = 100)]
-        public string GroupKey0 { get; set; }
+        public string SplitKey0 { get; set; }
 
         [SqlDbType(Size = 100)]
-        public string GroupKey1 { get; set; }
+        public string SplitKey1 { get; set; }
 
         [SqlDbType(Size = 100)]
-        public string GroupKey2 { get; set; }
+        public string SplitKey2 { get; set; }
 
 
         //For 1-hot encoding

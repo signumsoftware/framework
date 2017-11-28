@@ -41,6 +41,22 @@ namespace Signum.Engine.MachineLearning
             return FromEntities(predictor, new List<Lite<Entity>> { entity }).SingleEx().Value;
         }
 
+        public static PredictDictionary Empty(Lite<PredictorEntity> predictor)
+        {
+            var ctx = GetPredictContext(predictor);
+
+            var result = new PredictDictionary(ctx.Predictor)
+            {
+                MainQueryValues = ctx.Predictor.MainQuery.Columns.Select((c, i) => KVP.Create(c, (object)null)).ToDictionaryEx(),
+                SubQueries = ctx.Predictor.SubQueries.ToDictionary(sq => sq, sq => new PredictSubQueryDictionary(sq)
+                {
+                    SubQueryGroups = new Dictionary<object[], Dictionary<PredictorSubQueryColumnEmbedded, object>>(ObjectArrayComparer.Instance)
+                })
+            };
+
+            return result;
+        }
+
         public static Dictionary<Lite<Entity>, PredictDictionary> FromEntities(Lite<PredictorEntity> predictor, List<Lite<Entity>> entities)
         {
             var ctx = GetPredictContext(predictor);
@@ -65,45 +81,45 @@ namespace Signum.Engine.MachineLearning
 
             var subQueryResults = ctx.Predictor.SubQueries.ToDictionaryEx(sq => sq, sqe =>
             {
-                var firstGroupKey = sqe.GroupKeys.FirstEx().Token.Token;
+                var parentKey = sqe.Columns.SingleEx(a=>a.Usage == PredictorSubQueryColumnUsage.ParentKey).Token.Token;
 
-                var mainFilter = new Filter(firstGroupKey, FilterOperation.IsIn, entities);
+                var mainFilter = new Filter(parentKey, FilterOperation.IsIn, entities);
 
-                var additionalFilters = sqe.AdditionalFilters.Select(f => PredictorLogicQuery.ToFilter(f)).ToList();
+                var additionalFilters = sqe.Filters.Select(f => PredictorLogicQuery.ToFilter(f)).ToList();
 
-                var groupKeyColumns = sqe.GroupKeys.Select(c => new Column(c.Token.Token, null)).ToList();
-                var aggregateColumns = sqe.Aggregates.Select(c => new Column(c.Token.Token, null)).ToList();
+                var allColumns = sqe.Columns.Select(c => new Column(c.Token.Token, null)).ToList();
 
                 var qgr = new QueryRequest
                 {
                     QueryName = sqe.Query.ToQueryName(),
                     GroupResults = true,
                     Filters = new[] { mainFilter }.Concat(additionalFilters).ToList(),
-                    Columns = groupKeyColumns.Concat(aggregateColumns).ToList(),
+                    Columns = allColumns,
                     Orders = new List<Order>(),
                     Pagination = new Pagination.All(),
                 };
 
                 var groupResult = DynamicQueryManager.Current.ExecuteQuery(qgr);
 
-                var entityGroupKey = groupResult.Columns.FirstEx();
-                var remainingKeys = groupResult.Columns.Take(sqe.GroupKeys.Count).Skip(1).ToArray();
-                var aggregates = groupResult.Columns.Skip(sqe.GroupKeys.Count).ToArray();
+                var tuples = sqe.Columns.Zip(groupResult.Columns, (sqc, rc) => (sqc, rc)).ToList();
+
+                var entityGroupKey = tuples.Extract(t => t.sqc.Usage == PredictorSubQueryColumnUsage.ParentKey).SingleEx().rc;
+                var remainingKeys = tuples.Extract(t => t.sqc.Usage == PredictorSubQueryColumnUsage.SplitBy).Select(a => a.rc).ToArray();
+                var values = tuples.Select(a => a.rc).ToList(); 
 
                 return groupResult.Rows.AgGroupToDictionary(row => (Lite<Entity>)row[entityGroupKey], gr =>
                     gr.ToDictionaryEx(
                         row => row.GetValues(remainingKeys),
-                        row => sqe.Aggregates.Select((ac, i)=>KVP.Create(ac, row[aggregates[i]])).ToDictionaryEx(),
+                        row => sqe.Columns.Select((ac, i)=>KVP.Create(ac, row[values[i]])).ToDictionaryEx(),
                         ObjectArrayComparer.Instance));
 
             });
 
-            var result = rt.Rows.ToDictionaryEx(row => row.Entity, row => new PredictDictionary
+            var result = rt.Rows.ToDictionaryEx(row => row.Entity, row => new PredictDictionary(ctx.Predictor)
             {
                 MainQueryValues = ctx.Predictor.MainQuery.Columns.Select((c, i) => KVP.Create(c, row[i])).ToDictionaryEx(),
-                SubQueries = ctx.Predictor.SubQueries.ToDictionary(sq => sq, sq => new PredictSubQueryDictionary
+                SubQueries = ctx.Predictor.SubQueries.ToDictionary(sq => sq, sq => new PredictSubQueryDictionary(sq)
                 {
-                    SubQuery = sq,
                     SubQueryGroups = (subQueryResults.TryGetC(sq)?.TryGetC(row.Entity))
                 })
             });
@@ -112,20 +128,6 @@ namespace Signum.Engine.MachineLearning
         }
 
         public static PredictDictionary PredictBasic(this Lite<PredictorEntity> predictor, PredictDictionary input)
-        {
-            var pctx = GetPredictContext(predictor);
-
-            return pctx.Algorithm.Predict(pctx, input);
-        }
-
-        public static PredictDictionary PredictEntity(this Lite<PredictorEntity> predictor, PredictDictionary input)
-        {
-            var pctx = GetPredictContext(predictor);
-
-            return pctx.Algorithm.Predict(pctx, input);
-        }
-
-        public static PredictDictionary PredictModel(this Lite<PredictorEntity> predictor, PredictDictionary input)
         {
             var pctx = GetPredictContext(predictor);
 

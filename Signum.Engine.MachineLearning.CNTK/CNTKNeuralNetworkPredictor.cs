@@ -13,36 +13,34 @@ using System.Reflection;
 using System.Diagnostics;
 using Signum.Engine.Files;
 using Signum.Engine.Operations;
+using Signum.Entities.UserAssets;
 
 namespace Signum.Engine.MachineLearning.CNTK
 {
     public class CNTKNeuralNetworkPredictorAlgorithm : IPredictorAlgorithm
     {
-        public string ValidateColumnProperty(PredictorEntity predictor, PredictorSubQueryEntity subQuery, PredictorColumnEmbedded column, PropertyInfo pi)
+        public string ValidateEncodingProperty(PredictorEntity predictor, PredictorSubQueryEntity subQuery, PredictorColumnEncoding encoding, PredictorColumnUsage usage, QueryTokenEmbedded token)
         {
-            if(pi.Name == nameof(column.Encoding))
+            var nn = (NeuralNetworkSettingsEntity)predictor.AlgorithmSettings;
+            switch (encoding)
             {
-                var nn = (NeuralNetworkSettingsEntity)predictor.AlgorithmSettings; 
-                switch (column.Encoding)
-                {
-                    case PredictorColumnEncoding.None:
-                        if (!ReflectionTools.IsNumber(column.Token.Token.Type))
-                            return PredictorMessage._0IsRequiredFor1.NiceToString(PredictorColumnEncoding.OneHot.NiceToString(), column.Token.Token.NiceTypeName);
+                case PredictorColumnEncoding.None:
+                    if (!ReflectionTools.IsNumber(token.Token.Type))
+                        return PredictorMessage._0IsRequiredFor1.NiceToString(PredictorColumnEncoding.OneHot.NiceToString(), token.Token.NiceTypeName);
 
-                        if (column.Usage == PredictorColumnUsage.Output && (nn.PredictionType == PredictionType.Classification || nn.PredictionType == PredictionType.MultiClassification))
-                            return PredictorMessage._0NotSuportedFor1.NiceToString(column.Encoding.NiceToString(), nn.PredictionType.NiceToString());
+                    if (usage == PredictorColumnUsage.Output && (nn.PredictionType == PredictionType.Classification || nn.PredictionType == PredictionType.MultiClassification))
+                        return PredictorMessage._0NotSuportedFor1.NiceToString(encoding.NiceToString(), nn.PredictionType.NiceToString());
 
-                        break;
-                    case PredictorColumnEncoding.OneHot:
-                        if (ReflectionTools.IsDecimalNumber(column.Token.Token.Type))
-                            return PredictorMessage._0NotSuportedFor1.NiceToString(column.Encoding.NiceToString(), predictor.Algorithm.NiceToString());
+                    break;
+                case PredictorColumnEncoding.OneHot:
+                    if (ReflectionTools.IsDecimalNumber(token.Token.Type))
+                        return PredictorMessage._0NotSuportedFor1.NiceToString(encoding.NiceToString(), predictor.Algorithm.NiceToString());
 
-                        if (column.Usage == PredictorColumnUsage.Output && (nn.PredictionType == PredictionType.Regression || nn.PredictionType == PredictionType.MultiRegression))
-                            return PredictorMessage._0NotSuportedFor1.NiceToString(column.Encoding.NiceToString(), nn.PredictionType.NiceToString());
-                        break;
-                    case PredictorColumnEncoding.Codified:
-                        return PredictorMessage._0NotSuportedFor1.NiceToString(column.Encoding.NiceToString(), predictor.Algorithm.NiceToString());
-                }
+                    if (usage == PredictorColumnUsage.Output && (nn.PredictionType == PredictionType.Regression || nn.PredictionType == PredictionType.MultiRegression))
+                        return PredictorMessage._0NotSuportedFor1.NiceToString(encoding.NiceToString(), nn.PredictionType.NiceToString());
+                    break;
+                case PredictorColumnEncoding.Codified:
+                    return PredictorMessage._0NotSuportedFor1.NiceToString(encoding.NiceToString(), predictor.Algorithm.NiceToString());
             }
 
             return null;
@@ -363,16 +361,26 @@ namespace Signum.Engine.MachineLearning.CNTK
 
                     return 0;
                 });
-
-                return new PredictorRegressionMetricsEmbedded
+                
+                var result = new PredictorRegressionMetricsEmbedded
                 {
                     Signed = pairs.Average(p => Error(p)).CleanDouble(),
                     Absolute = pairs.Average(p => Math.Abs(Error(p))).CleanDouble(),
                     Deviation = Math.Sqrt(pairs.Average(p => Error(p) * Error(p))).CleanDouble(),
-                    PercentageSigned = pairs.Average(p => Error(p) / p.expected).CleanDouble(),
-                    PercentageAbsolute = pairs.Average(p => Math.Abs(Error(p)) / p.expected).CleanDouble(),
-                    PercentageDeviation = Math.Sqrt(pairs.Average(p => (Error(p) * Error(p)) / (p.expected * p.expected))).CleanDouble()
+                    PercentageSigned = pairs.Average(p => SafeDiv(Error(p), p.expected)).CleanDouble(),
+                    PercentageAbsolute = pairs.Average(p => SafeDiv(Math.Abs(Error(p)), p.expected)).CleanDouble(),
+                    PercentageDeviation = Math.Sqrt(pairs.Average(p => SafeDiv(Error(p) * Error(p), p.expected * p.expected))).CleanDouble()
                 };
+
+                return result;
+            }
+
+            private double SafeDiv(double dividend, double divisor)
+            {
+                if (divisor == 0)
+                    return Math.Abs(dividend - divisor) < 0.0001 ? 0 : 1;
+
+                return dividend / divisor;
             }
 
             private double Error((float predicted, float expected) p)
@@ -405,29 +413,29 @@ namespace Signum.Engine.MachineLearning.CNTK
 
         private PredictDictionary GetPredictionDictionary(float[] outputValues, PredictorPredictContext ctx)
         {
-            return new PredictDictionary
+            return new PredictDictionary(ctx.Predictor)
             {
-                Predictor = ctx.Predictor,
-                MainQueryValues = ctx.MainQueryOutputColumn.SelectDictionary(col => col, (col, list) => FloatToValue(col, list, outputValues)),
-                SubQueries = ctx.Predictor.SubQueries.ToDictionary(sq => sq, sq => new PredictSubQueryDictionary
+                MainQueryValues = ctx.MainQueryOutputColumn.SelectDictionary(col => col, (col, list) => FloatToValue(col.Encoding, col.Token.Token, list, outputValues)),
+                SubQueries = ctx.Predictor.SubQueries.ToDictionary(sq => sq, sq => new PredictSubQueryDictionary(sq)
                 {
-                    SubQuery = sq,
-                    SubQueryGroups = ctx.SubQueryOutputColumn.TryGetC(sq)?.Groups.SelectDictionary(grKey => grKey, dic => dic
-                    .Where(a => a.Key.Usage == PredictorColumnUsage.Output)
-                    .ToDictionary(a => a.Key, a => FloatToValue(a.Key, a.Value, outputValues))
+                    SubQueryGroups = ctx.SubQueryOutputColumn.TryGetC(sq)?.Groups.SelectDictionary(
+                        grKey => grKey, 
+                        dic => dic
+                        .Where(a => a.Key.Usage ==  PredictorSubQueryColumnUsage.Output)
+                        .ToDictionary(a => a.Key, a => FloatToValue(a.Key.Encoding.Value, a.Key.Token.Token, a.Value, outputValues))
                     )
                 })
             };
         }
 
-        private object FloatToValue(PredictorColumnEmbedded key, List<PredictorCodification> cols, float[] outputValues)
+        private object FloatToValue(PredictorColumnEncoding encoding, QueryToken token, List<PredictorCodification> cols, float[] outputValues)
         {
-            switch (key.Encoding)
+            switch (encoding)
             {
                 case PredictorColumnEncoding.None:
                     {
                         var c = cols.SingleEx();
-                        return ReflectionTools.ChangeType(outputValues[c.Index], key.Token.Token.Type);
+                        return ReflectionTools.ChangeType(outputValues[c.Index], token.Type);
                     }
                 case PredictorColumnEncoding.OneHot:return cols.WithMax(c => outputValues[c.Index]).IsValue;
                 case PredictorColumnEncoding.NormalizeZScore:
@@ -435,7 +443,7 @@ namespace Signum.Engine.MachineLearning.CNTK
                         var c = cols.SingleEx();
                         var value = outputValues[c.Index];
                         var newValue = c.Denormalize(value);
-                        return ReflectionTools.ChangeType(newValue, key.Token.Token.Type);
+                        return ReflectionTools.ChangeType(newValue, token.Type);
                     }
                 case PredictorColumnEncoding.Codified: throw new InvalidOperationException("Codified");
                 default:
@@ -459,7 +467,7 @@ namespace Signum.Engine.MachineLearning.CNTK
 
                     var dic = sq.SubQueryGroups.TryGetC(c.Keys);
 
-                    value = dic == null ? null : dic.GetOrThrow(c.PredictorColumn);
+                    value = dic == null ? null : dic.GetOrThrow(c.PredictorSubQueryColumn);
                 }
                 else
                 {
