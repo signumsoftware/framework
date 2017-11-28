@@ -363,16 +363,26 @@ namespace Signum.Engine.MachineLearning.CNTK
 
                     return 0;
                 });
-
-                return new PredictorRegressionMetricsEmbedded
+                
+                var result = new PredictorRegressionMetricsEmbedded
                 {
                     Signed = pairs.Average(p => Error(p)).CleanDouble(),
                     Absolute = pairs.Average(p => Math.Abs(Error(p))).CleanDouble(),
                     Deviation = Math.Sqrt(pairs.Average(p => Error(p) * Error(p))).CleanDouble(),
-                    PercentageSigned = pairs.Average(p => Error(p) / p.expected).CleanDouble(),
-                    PercentageAbsolute = pairs.Average(p => Math.Abs(Error(p)) / p.expected).CleanDouble(),
-                    PercentageDeviation = Math.Sqrt(pairs.Average(p => (Error(p) * Error(p)) / (p.expected * p.expected))).CleanDouble()
+                    PercentageSigned = pairs.Average(p => SafeDiv(Error(p), p.expected)).CleanDouble(),
+                    PercentageAbsolute = pairs.Average(p => SafeDiv(Math.Abs(Error(p)), p.expected)).CleanDouble(),
+                    PercentageDeviation = Math.Sqrt(pairs.Average(p => SafeDiv(Error(p) * Error(p), p.expected * p.expected))).CleanDouble()
                 };
+
+                return result;
+            }
+
+            private double SafeDiv(double dividend, double divisor)
+            {
+                if (divisor == 0)
+                    return Math.Abs(dividend - divisor) < 0.0001 ? 0 : 1;
+
+                return dividend / divisor;
             }
 
             private double Error((float predicted, float expected) p)
