@@ -140,13 +140,18 @@ namespace Signum.Engine.MachineLearning
         {
             this.Columns = columns.ToList();
 
-            this.InputColumns = columns.Where(a => a.PredictorColumn.Usage == PredictorColumnUsage.Input).ToList();
+            this.InputColumns = columns.Where(a =>
+            a.PredictorSubQueryColumn?.Usage == PredictorSubQueryColumnUsage.Input ||
+            a.PredictorColumn?.Usage == PredictorColumnUsage.Input).ToList();
             for (int i = 0; i < this.InputColumns.Count; i++)
             {
                 this.InputColumns[i].Index = i;
             }
 
-            this.OutputColumns = columns.Where(a => a.PredictorColumn.Usage == PredictorColumnUsage.Output).ToList();
+            this.OutputColumns = columns.Where(a =>
+            a.PredictorSubQueryColumn?.Usage == PredictorSubQueryColumnUsage.Output ||
+            a.PredictorColumn?.Usage == PredictorColumnUsage.Output
+            ).ToList();
             for (int i = 0; i < this.OutputColumns.Count; i++)
             {
                 this.OutputColumns[i].Index = i;

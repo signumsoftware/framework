@@ -359,6 +359,16 @@ namespace Signum.Entities.MachineLearning
         Output
     }
 
+    public static class PredictorColumnUsageExtensions
+    {
+        public static PredictorColumnUsage ToPredictorColumnUsage(this PredictorSubQueryColumnUsage usage)
+        {
+            return usage == PredictorSubQueryColumnUsage.Input ? PredictorColumnUsage.Input :
+                usage == PredictorSubQueryColumnUsage.Output ? PredictorColumnUsage.Output :
+                throw new InvalidOperationException("Unexcpected " + nameof(PredictorSubQueryColumnUsage));
+        }
+    }
+
     [Serializable]
     public class PredictorAlgorithmSymbol : Symbol
     {

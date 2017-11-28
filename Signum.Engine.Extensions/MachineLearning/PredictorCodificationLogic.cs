@@ -49,7 +49,7 @@ namespace Signum.Engine.MachineLearning
                 {
                     Predictor = ctx.Predictor.ToLite(),
                     Index = pc.Index,
-                    Usage = pc.PredictorColumn.Usage,
+                    Usage = pc.SubQuery != null ? pc.PredictorSubQueryColumn.Usage.ToPredictorColumnUsage() : pc.PredictorColumn.Usage,
                     SubQueryIndex = pc.SubQuery == null ? (int?)null : ctx.Predictor.SubQueries.IndexOf(pc.SubQuery),
                     OriginalColumnIndex = pc.SubQuery == null ?
                         ctx.Predictor.MainQuery.Columns.IndexOf(pc.PredictorColumn) :

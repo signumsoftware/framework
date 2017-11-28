@@ -33,9 +33,6 @@ export default class PredictorSubQuery extends React.Component<{ ctx: TypeContex
 
         var sq = this.props.ctx.value;
 
-
-
-
         Finder.getQueryDescription(sq.query!.key).then(sqd =>
             FilterBuilderEmbedded.toFilterOptionParsed(sqd!, (this.getMainFilters(sqd) || []).concat(sq.filters), SubTokensOptions.CanElement | SubTokensOptions.CanAggregate)
                 .then(filters => {
@@ -92,6 +89,8 @@ export default class PredictorSubQuery extends React.Component<{ ctx: TypeContex
             col.encoding = null;
             col.nullHandling = null;
         }
+
+        this.forceUpdate();
     }
 
     render() {
