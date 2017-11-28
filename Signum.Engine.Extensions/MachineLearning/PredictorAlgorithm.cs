@@ -85,10 +85,10 @@ namespace Signum.Engine.MachineLearning
             Columns = columns;
             InputColumns = columns.Where(a => a.PredictorColumn.Usage == PredictorColumnUsage.Input).ToList();
             MainQueryOutputColumn = columns.Where(a => a.PredictorColumn.Usage == PredictorColumnUsage.Output && a.SubQuery == null).GroupToDictionary(a => a.PredictorColumn);
-            SubQueryOutputColumn = columns.Where(a => a.SubQuery != null).AgGroupToDictionary(a => a.SubQuery, gr => new PredictorPredictSubQueryContext
+            SubQueryOutputColumn = columns.Where(a => a.SubQuery != null).AgGroupToDictionary(a => a.SubQuery, sqGroup => new PredictorPredictSubQueryContext
             {
-                SubQuery = gr.Key,
-                Groups = gr.AgGroupToDictionary(a => a.Keys, gr2 => gr.GroupToDictionary(a => a.PredictorColumn), ObjectArrayComparer.Instance)
+                SubQuery = sqGroup.Key,
+                Groups = sqGroup.AgGroupToDictionary(a => a.Keys, keysGroup => keysGroup.GroupToDictionary(a => a.PredictorColumn), ObjectArrayComparer.Instance)
             });
         }
     }
