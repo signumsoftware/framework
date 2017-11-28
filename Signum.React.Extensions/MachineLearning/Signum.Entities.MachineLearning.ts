@@ -97,9 +97,9 @@ export interface PredictorCodificationEntity extends Entities.Entity {
     index?: number;
     subQueryIndex?: number | null;
     originalColumnIndex?: number;
-    groupKey0?: string | null;
-    groupKey1?: string | null;
-    groupKey2?: string | null;
+    splitKey0?: string | null;
+    splitKey1?: string | null;
+    splitKey2?: string | null;
     isValue?: string | null;
     codedValues: Entities.MList<string>;
     mean?: number | null;
@@ -170,12 +170,6 @@ export module PredictorFileType {
     export const PredictorFile : Files.FileTypeSymbol = registerSymbol("FileType", "PredictorFileType.PredictorFile");
 }
 
-export const PredictorGroupKeyEmbedded = new Type<PredictorGroupKeyEmbedded>("PredictorGroupKeyEmbedded");
-export interface PredictorGroupKeyEmbedded extends Entities.EmbeddedEntity {
-    Type: "PredictorGroupKeyEmbedded";
-    token?: UserAssets.QueryTokenEmbedded | null;
-}
-
 export const PredictorMainQueryEmbedded = new Type<PredictorMainQueryEmbedded>("PredictorMainQueryEmbedded");
 export interface PredictorMainQueryEmbedded extends Entities.EmbeddedEntity {
     Type: "PredictorMainQueryEmbedded";
@@ -202,7 +196,7 @@ export module PredictorMessage {
     export const _0NotSuportedFor1 = new MessageKey("PredictorMessage", "_0NotSuportedFor1");
     export const _0IsRequiredFor1 = new MessageKey("PredictorMessage", "_0IsRequiredFor1");
     export const _0ShouldBeDivisibleBy12 = new MessageKey("PredictorMessage", "_0ShouldBeDivisibleBy12");
-    export const TheFirstGroupKeyOf0ShouldBeOfType1InsteadOf2 = new MessageKey("PredictorMessage", "TheFirstGroupKeyOf0ShouldBeOfType1InsteadOf2");
+    export const ParentKeyOf0ShouldBeOfType1 = new MessageKey("PredictorMessage", "ParentKeyOf0ShouldBeOfType1");
     export const Predict = new MessageKey("PredictorMessage", "Predict");
 }
 
@@ -241,15 +235,30 @@ export type PredictorState =
     "Trained" |
     "Error";
 
+export const PredictorSubQueryColumnEmbedded = new Type<PredictorSubQueryColumnEmbedded>("PredictorSubQueryColumnEmbedded");
+export interface PredictorSubQueryColumnEmbedded extends Entities.EmbeddedEntity {
+    Type: "PredictorSubQueryColumnEmbedded";
+    usage?: PredictorSubQueryColumnUsage;
+    token?: UserAssets.QueryTokenEmbedded | null;
+    encoding?: PredictorColumnEncoding | null;
+    nullHandling?: PredictorColumnNullHandling | null;
+}
+
+export const PredictorSubQueryColumnUsage = new EnumType<PredictorSubQueryColumnUsage>("PredictorSubQueryColumnUsage");
+export type PredictorSubQueryColumnUsage =
+    "ParentKey" |
+    "SplitBy" |
+    "Input" |
+    "Output";
+
 export const PredictorSubQueryEntity = new Type<PredictorSubQueryEntity>("PredictorSubQuery");
 export interface PredictorSubQueryEntity extends Entities.Entity {
     Type: "PredictorSubQuery";
     predictor?: Entities.Lite<PredictorEntity> | null;
     name?: string | null;
     query?: Basics.QueryEntity | null;
-    additionalFilters: Entities.MList<UserQueries.QueryFilterEmbedded>;
-    groupKeys: Entities.MList<PredictorGroupKeyEmbedded>;
-    aggregates: Entities.MList<PredictorColumnEmbedded>;
+    filters: Entities.MList<UserQueries.QueryFilterEmbedded>;
+    columns: Entities.MList<PredictorSubQueryColumnEmbedded>;
 }
 
 

@@ -4,7 +4,7 @@ import { FormGroup, FormControlStatic, ValueLine, ValueLineType, EntityLine, Ent
 import { SearchControl, FindOptions, FilterOption, ColumnOption } from '../../../../Framework/Signum.React/Scripts/Search'
 import { TypeContext, FormGroupStyle } from '../../../../Framework/Signum.React/Scripts/TypeContext'
 import FileLine from '../../Files/FileLine'
-import { PredictorSubQueryEntity, PredictorColumnEmbedded, PredictorGroupKeyEmbedded, PredictorEntity, PredictorMainQueryEmbedded, PredictorMessage } from '../Signum.Entities.MachineLearning'
+import { PredictorSubQueryEntity, PredictorSubQueryColumnEmbedded, PredictorEntity, PredictorMainQueryEmbedded, PredictorMessage, PredictorSubQueryColumnUsage } from '../Signum.Entities.MachineLearning'
 import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
 import { getQueryNiceName } from '../../../../Framework/Signum.React/Scripts/Reflection'
 import QueryTokenEntityBuilder from '../../UserAssets/Templates/QueryTokenEntityBuilder'
@@ -22,9 +22,8 @@ export default class PredictorSubQuery extends React.Component<{ ctx: TypeContex
 
     handleOnChange = () => {
         const e = this.props.ctx.value;
-        e.additionalFilters = [];
-        e.groupKeys = [];
-        e.aggregates = [];
+        e.filters = [];
+        e.columns = [];
         this.forceUpdate();
     }
 
@@ -35,10 +34,10 @@ export default class PredictorSubQuery extends React.Component<{ ctx: TypeContex
         var sq = this.props.ctx.value;
 
 
-        
+
 
         Finder.getQueryDescription(sq.query!.key).then(sqd =>
-            FilterBuilderEmbedded.toFilterOptionParsed(sqd!, (this.getMainFilters(sqd) || []).concat(sq.additionalFilters), SubTokensOptions.CanElement | SubTokensOptions.CanAggregate)
+            FilterBuilderEmbedded.toFilterOptionParsed(sqd!, (this.getMainFilters(sqd) || []).concat(sq.filters), SubTokensOptions.CanElement | SubTokensOptions.CanAggregate)
                 .then(filters => {
                     var fo: FindOptions = {
                         queryName: sq.query!.key,
@@ -49,8 +48,7 @@ export default class PredictorSubQuery extends React.Component<{ ctx: TypeContex
                             value: f.value
                         }) as FilterOption),
                         columnOptions: [{ columnName: "Count" } as ColumnOption]
-                                .concat(sq.groupKeys.map(mle => ({ columnName: mle.element.token && mle.element.token.tokenString, } as ColumnOption)))
-                                .concat(sq.aggregates.orderBy(mle => mle.element.usage == "Input" ? 0 : 1).map(mle => ({ columnName: mle.element.token && mle.element.token.tokenString, } as ColumnOption))),
+                            .concat(sq.columns.map(mle => ({ columnName: mle.element.token && mle.element.token.tokenString, } as ColumnOption))),
                         columnOptionsMode: "Replace",
                     };
 
@@ -65,23 +63,35 @@ export default class PredictorSubQuery extends React.Component<{ ctx: TypeContex
         if (is(mq.query, this.props.ctx.value.query))
             return mq.filters;
 
+        var parentKey = sq.columns.singleOrNull(a => a.element.usage == "ParentKey");
 
-        if (sq.groupKeys.length == 0)
+        if (parentKey == null)
             return null;
 
-        var firstKey = sq.groupKeys[0].element.token
+        var t = parentKey.element.token;
 
-        var prefix = firstKey && firstKey.token && firstKey.token.fullKey;
+        var prefix = t && t.token && t.token.fullKey;
 
         if (prefix == null)
             return null;
-        
+
         return this.props.mainQuery.filters.map(f => newMListElement(QueryFilterEmbedded.New(
             {
                 token: f.element.token && QueryTokenEmbedded.New({ tokenString: prefix + "." + f.element.token.tokenString }),
-                operation : f.element.operation,
+                operation: f.element.operation,
                 valueString: f.element.valueString,
             })));
+    }
+
+    handleChangeUsage = (ctx: TypeContext<PredictorSubQueryColumnEmbedded>) => {
+
+        var col = ctx.value;
+        if (isInputOutput(ctx.value.usage)) {
+            initializeColumn(this.props.ctx.findParent(PredictorEntity), col);
+        } else {
+            col.encoding = null;
+            col.nullHandling = null;
+        }
     }
 
     render() {
@@ -99,38 +109,34 @@ export default class PredictorSubQuery extends React.Component<{ ctx: TypeContex
                 <EntityLine ctx={ctx.subCtx(f => f.query)} remove={ctx.value.isNew} onChange={this.handleOnChange} />
                 {queryKey &&
                     <div>
-                        <FilterBuilderEmbedded ctx={ctxxs.subCtx(a => a.additionalFilters)} queryKey={queryKey}
+                        <FilterBuilderEmbedded ctx={ctxxs.subCtx(a => a.filters)} queryKey={queryKey}
                             subTokenOptions={SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement | SubTokensOptions.CanAggregate} />
-                        <EntityTable ctx={ctxxs.subCtx(e => e.groupKeys)} columns={EntityTable.typedColumns<PredictorGroupKeyEmbedded>([
+                        <EntityTable ctx={ctxxs.subCtx(e => e.columns)} columns={EntityTable.typedColumns<PredictorSubQueryColumnEmbedded>([
                             {
-                                header: "Token",
-                                template: (qctx, row) => <QueryTokenEntityBuilder
-                                    ctx={qctx.subCtx(a => a.token)}
-                                    queryKey={this.props.ctx.value.query!.key}
-                                    subTokenOptions={SubTokensOptions.CanElement}
-                                    helpBlock={row.props.index == 0 ? "The first groupKey must be of type " + Finder.getTypeNiceName(targetType) : undefined}
-                                />,
-                                headerHtmlAttributes: { style: { width: "100%" } },
+                                property: a => a.usage, template: colCtx => <ValueLine ctx={colCtx.subCtx(a => a.usage)} onChange={() => this.handleChangeUsage(colCtx)} />
                             },
-                        ])} />
-
-                        <EntityTable ctx={ctxxs.subCtx(e => e.aggregates)} columns={EntityTable.typedColumns<PredictorColumnEmbedded>([
-                            { property: a => a.usage },
                             {
                                 property: a => a.token,
-                                template: (cctx, row) => <QueryTokenEntityBuilder
-                                    ctx={cctx.subCtx(a => a.token)}
+                                template: (colCtx, row) => <QueryTokenEntityBuilder
+                                    ctx={colCtx.subCtx(a => a.token)}
                                     queryKey={this.props.ctx.value.query!.key}
-                                    subTokenOptions={SubTokensOptions.CanElement | SubTokensOptions.CanAggregate}
-                                    onTokenChanged={qt => { initializeColumn(parentCtx.value, qt, cctx.value); row.forceUpdate() }}/>,
-                                headerHtmlAttributes: { style: { width: "60%" } },
+                                    subTokenOptions={SubTokensOptions.CanElement}
+                                    onTokenChanged={() => this.handleChangeUsage(colCtx)}
+                                    helpBlock={row.props.index == 0 ? PredictorMessage.ParentKeyOf0ShouldBeOfType1.niceToString(Finder.getTypeNiceName(targetType)) : undefined}
+                                />,
+                                headerHtmlAttributes: { style: { width: "50%" } },
                             },
-                            { property: a => a.encoding },
-                            { property: a => a.nullHandling },
+                            { property: a => a.encoding, template: colCtx => isInputOutput(colCtx.value.usage) && <ValueLine ctx={colCtx.subCtx(a => a.encoding)} /> },
+                            { property: a => a.nullHandling, template: colCtx => isInputOutput(colCtx.value.usage) && <ValueLine ctx={colCtx.subCtx(a => a.nullHandling)} /> },
                         ])} />
+
                         {ctx.value.query && <a href="#" onClick={this.handlePreviewSubQuery}>{PredictorMessage.Preview.niceToString()}</a>}
                     </div>}
             </div>
         );
     }
+}
+
+function isInputOutput(usage: PredictorSubQueryColumnUsage | undefined): boolean {
+    return usage == "Input" || usage == "Output";
 }

@@ -7,7 +7,7 @@ import { FormGroup, FormControlStatic, ValueLine, ValueLineType, EntityLine, Ent
 import { SearchControl, FilterOption, ColumnOption, FindOptions } from '../../../../Framework/Signum.React/Scripts/Search'
 import { TypeContext, FormGroupStyle, ButtonsContext } from '../../../../Framework/Signum.React/Scripts/TypeContext'
 import FileLine from '../../Files/FileLine'
-import { PredictorEntity, PredictorColumnEmbedded, PredictorMessage, PredictorSubQueryEntity, PredictorGroupKeyEmbedded, PredictorFileType, PredictorCodificationEntity, PredictorEpochProgressEntity, NeuralNetworkSettingsEntity } from '../Signum.Entities.MachineLearning'
+import { PredictorEntity, PredictorColumnEmbedded, PredictorMessage, PredictorSubQueryEntity, PredictorFileType, PredictorCodificationEntity, PredictorSubQueryColumnEmbedded, PredictorEpochProgressEntity, NeuralNetworkSettingsEntity } from '../Signum.Entities.MachineLearning'
 import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
 import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
 import { getQueryNiceName } from '../../../../Framework/Signum.React/Scripts/Reflection'
@@ -85,8 +85,9 @@ export default class Predictor extends React.Component<{ ctx: TypeContext<Predic
         return Finder.parseSingleToken(query!.key, "Entity", SubTokensOptions.CanElement)
             .then(qt => PredictorSubQueryEntity.New({
                 query: query,
-                groupKeys: [
-                    newMListElement(PredictorGroupKeyEmbedded.New({
+                columns: [
+                    newMListElement(PredictorSubQueryColumnEmbedded.New({
+                        usage: "ParentKey",
                         token: QueryTokenEmbedded.New({
                             token: qt,
                             tokenString: "Entity",
@@ -180,7 +181,7 @@ export default class Predictor extends React.Component<{ ctx: TypeContext<Predic
                                                     ctx={cctx.subCtx(a => a.token)}
                                                     queryKey={this.props.ctx.value.mainQuery.query!.key}
                                                     subTokenOptions={SubTokensOptions.CanElement}
-                                                    onTokenChanged={qt => { initializeColumn(ctx.value, qt, cctx.value); row.forceUpdate() }} />,
+                                                    onTokenChanged={() => { initializeColumn(ctx.value, cctx.value); row.forceUpdate() }} />,
                                                 headerHtmlAttributes: { style: { width: "40%" } },
                                             },
                                             { property: a => a.encoding },
@@ -235,9 +236,10 @@ export default class Predictor extends React.Component<{ ctx: TypeContext<Predic
     }
 }
 
-export function initializeColumn(p: PredictorEntity, queryToken: QueryToken | undefined, pc: PredictorColumnEmbedded) {
-    if (queryToken) {
-        pc.encoding = queryToken.type.name == "number" || queryToken.type.name == "decimal" ? "NormalizeZScore" :
+export function initializeColumn(p: PredictorEntity, pc: PredictorColumnEmbedded | PredictorSubQueryColumnEmbedded) {
+    var token = pc.token && pc.token.token;
+    if (token) {
+        pc.encoding = token.type.name == "number" || token.type.name == "decimal" ? "NormalizeZScore" :
             NeuralNetworkSettingsEntity.isInstance(p.algorithmSettings) ? "OneHot" : "Codified";
         pc.nullHandling = "Zero";
     }

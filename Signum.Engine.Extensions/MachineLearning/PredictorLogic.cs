@@ -97,9 +97,9 @@ namespace Signum.Engine.MachineLearning
                         e.Usage,
                         e.OriginalColumnIndex,
                         e.SubQueryIndex,
-                        e.GroupKey0,
-                        e.GroupKey1,
-                        e.GroupKey2,
+                        e.SplitKey0,
+                        e.SplitKey1,
+                        e.SplitKey2,
                         e.IsValue,
                         e.Mean,
                         e.StdDev, 
@@ -126,23 +126,21 @@ namespace Signum.Engine.MachineLearning
                 sb.Schema.EntityEvents<PredictorEntity>().Retrieved += PredictorEntity_Retrieved;
                 sb.Schema.EntityEvents<PredictorSubQueryEntity>().Retrieved += PredictorMultiColumnEntity_Retrieved;
 
-                Validator.PropertyValidator((PredictorGroupKeyEmbedded c) => c.Token).StaticPropertyValidation += GroupKey_StaticPropertyValidation;
-                Validator.PropertyValidator((PredictorColumnEmbedded c) => c.Token).StaticPropertyValidation += Column_StaticPropertyValidation;
-                Validator.PropertyValidator((PredictorColumnEmbedded c) => c.Usage).StaticPropertyValidation += Column_StaticPropertyValidation;
                 Validator.PropertyValidator((PredictorColumnEmbedded c) => c.Encoding).StaticPropertyValidation += Column_StaticPropertyValidation;
+                Validator.PropertyValidator((PredictorSubQueryColumnEmbedded c) => c.Token).StaticPropertyValidation += GroupKey_StaticPropertyValidation;
             }
         }
 
-        static string GroupKey_StaticPropertyValidation(PredictorGroupKeyEmbedded column, PropertyInfo pi)
+        static string GroupKey_StaticPropertyValidation(PredictorSubQueryColumnEmbedded column, PropertyInfo pi)
         {
             var sq = (PredictorSubQueryEntity)column.GetParentEntity();
             var p = (PredictorEntity)sq.GetParentEntity();
-            if(column.Token == null || sq.GroupKeys.IndexOf(column) == 0)
+            if(column.Token != null && column.Usage == PredictorSubQueryColumnUsage.ParentKey)
             {
                 Implementations mainQueryImplementations = DynamicQueryManager.Current.GetEntityImplementations(p.MainQuery.Query.ToQueryName());
                 var token = column.Token.Token;
                 if (!Compatible(token.GetImplementations(), mainQueryImplementations))
-                    return PredictorMessage.TheFirstGroupKeyOf0ShouldBeOfType1InsteadOf2.NiceToString(sq, mainQueryImplementations, token.GetImplementations()?.ToString() ?? token.NiceTypeName);
+                    return PredictorMessage.ParentKeyOf0ShouldBeOfType1.NiceToString(sq, mainQueryImplementations, token.GetImplementations()?.ToString() ?? token.NiceTypeName);
             }
 
             return null;
@@ -166,28 +164,25 @@ namespace Signum.Engine.MachineLearning
 
         static string Column_StaticPropertyValidation(PredictorColumnEmbedded column, PropertyInfo pi)
         {
-            var parent = column.GetParentEntity();
-            if (parent is PredictorMainQueryEmbedded mq)
-            {
-                var p = (PredictorEntity)mq.GetParentEntity();
-                if (p.Algorithm == null)
-                    return null;
-                
-                var algorithm = Algorithms.GetOrThrow(p.Algorithm);
-                return algorithm.ValidateColumnProperty(p, null, column, pi);
-            }
-            else if (parent is PredictorSubQueryEntity sq)
-            {
-                var p = (PredictorEntity)sq.GetParentEntity();
-                if (p.Algorithm == null)
-                    return null;
-                var algorithm = Algorithms.GetOrThrow(p.Algorithm);
-                return algorithm.ValidateColumnProperty(p, sq, column, pi);
-            }
-            else
-                throw new InvalidOperationException("Parent not Expected");
+            var mq = (PredictorMainQueryEmbedded)column.GetParentEntity();
+            var p = (PredictorEntity)mq.GetParentEntity();
+            if (p.Algorithm == null)
+                return null;
+
+            var algorithm = Algorithms.GetOrThrow(p.Algorithm);
+            return algorithm.ValidateEncodingProperty(p, null, column.Encoding, column.Usage, column.Token);
         }
 
+        static string Column_StaticPropertyValidation(PredictorSubQueryColumnEmbedded column, PropertyInfo pi)
+        {
+            var sq = (PredictorSubQueryEntity)column.GetParentEntity();
+            var p = (PredictorEntity)sq.GetParentEntity();
+            if (p.Algorithm == null || column.Usage == PredictorSubQueryColumnUsage.ParentKey || column.Usage == PredictorSubQueryColumnUsage.SplitBy)
+                return null;
+            var algorithm = Algorithms.GetOrThrow(p.Algorithm);
+            var usage = column.Usage == PredictorSubQueryColumnUsage.Input ? PredictorColumnUsage.Input : PredictorColumnUsage.Output;
+            return algorithm.ValidateEncodingProperty(p, sq, column.Encoding.Value, usage, column.Token);
+        }
 
         public static void TrainSync(this PredictorEntity p, bool autoReset = true)
         {

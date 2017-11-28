@@ -34,14 +34,16 @@ namespace Signum.Engine.MachineLearning
                 QueryRequest queryGroupRequest = ToMultiColumnQuery(ctx.Predictor.MainQuery, sqe);
                 ResultTable groupResult = DynamicQueryManager.Current.ExecuteQuery(queryGroupRequest);
 
-                var entityGroupKey = groupResult.Columns.FirstEx();
-                var remainingKeys = groupResult.Columns.Take(sqe.GroupKeys.Count).Skip(1).ToArray();
-                var aggregates = groupResult.Columns.Skip(sqe.GroupKeys.Count).ToArray();
+                var pairs = groupResult.Columns.Zip(sqe.Columns, (rc, sqc) => (rc, sqc)).ToList();
 
-                var groupedValues = groupResult.Rows.AgGroupToDictionary(row => (Lite<Entity>)row[entityGroupKey], gr =>
+                var parentKey = pairs.Extract(a => a.sqc.Usage == PredictorSubQueryColumnUsage.ParentKey).SingleEx().rc;
+                var splitKeys = pairs.Extract(a => a.sqc.Usage == PredictorSubQueryColumnUsage.SplitBy).Select(a => a.rc).ToArray();
+                var values = pairs.Select(a=>a.rc).ToArray();
+
+                var groupedValues = groupResult.Rows.AgGroupToDictionary(row => (Lite<Entity>)row[parentKey], gr =>
                     gr.ToDictionaryEx(
-                        row => row.GetValues(remainingKeys),
-                        row => row.GetValues(aggregates),
+                        row => row.GetValues(splitKeys),
+                        row => row.GetValues(values),
                         ObjectArrayComparer.Instance));
 
                 ctx.SubQueries.Add(sqe, new SubQuery
@@ -50,7 +52,8 @@ namespace Signum.Engine.MachineLearning
                     QueryGroupRequest = queryGroupRequest,
                     ResultTable = groupResult,
                     GroupedValues = groupedValues,
-                    Aggregates = aggregates,
+                    SplitBy = splitKeys,
+                    ValueColumns = values,
                 });
             }
 
@@ -59,7 +62,13 @@ namespace Signum.Engine.MachineLearning
 
             for (int i = 0; i < mainResult.Columns.Length; i++)
             {
-                columns.AddRange(ExpandColumns(ctx.Predictor.MainQuery.Columns[i], i, mainResult.Columns[i]));
+                var col = ctx.Predictor.MainQuery.Columns[i];
+                var list = ExpandColumns(col.Encoding, mainResult.Columns[i], () => new PredictorCodification
+                {
+                    PredictorColumnIndex = i,
+                    PredictorColumn = col
+                });
+                columns.AddRange(list);
             }
             
             foreach (var sq in ctx.SubQueries.Values)
@@ -70,15 +79,16 @@ namespace Signum.Engine.MachineLearning
 
                 foreach (var k in distinctKeys)
                 {
-                    for (int i = 0; i < sq.Aggregates.Length; i++)
+                    foreach (var vc in sq.ValueColumns)
                     {
-                        var list = ExpandColumns(sq.SubQueryEntity.Aggregates[i], i, sq.Aggregates[i]).ToList();
-                        list.ForEach(a =>
+                        var col = sq.SubQueryEntity.Columns[vc.Index];
+                        var list = ExpandColumns(col.Encoding.Value, vc, () => new PredictorCodification
                         {
-                            a.SubQuery = sq.SubQueryEntity;
-                            a.Keys = k;
+                            PredictorColumnIndex = vc.Index,
+                            PredictorSubQueryColumn = col,
+                            SubQuery = sq.SubQueryEntity,
+                            Keys = k
                         });
-
                         columns.AddRange(list);
                     }
                 }
@@ -87,35 +97,36 @@ namespace Signum.Engine.MachineLearning
             ctx.SetColums(columns.ToArray());
         }
 
-        private static IEnumerable<PredictorCodification> ExpandColumns(PredictorColumnEmbedded pc, int pcIndex, ResultColumn rc)
+        private static List<PredictorCodification> ExpandColumns(PredictorColumnEncoding encoding, ResultColumn rc, Func<PredictorCodification> factory)
         {
-            switch (pc.Encoding)
+            switch (encoding)
             {
                 case PredictorColumnEncoding.None:
-                    return new[] { new PredictorCodification(pc, pcIndex) };
-                case PredictorColumnEncoding.OneHot:
-                    return rc.Values.Cast<object>().NotNull().Distinct().Select(v => new PredictorCodification(pc, pcIndex)
+                    return new List<PredictorCodification>
                     {
-                        IsValue = v
+                        new PredictorCodification()
+                    };
+                case PredictorColumnEncoding.OneHot:
+                    return rc.Values.Cast<object>().NotNull().Distinct().Select(v =>
+                    {
+                        var pc = factory();
+                        pc.IsValue = v;
+                        return pc;
                     }).ToList();
                 case PredictorColumnEncoding.Codified:
                     {
-                        var values = rc.Values.Cast<object>().Distinct().ToArray();
-                        var valuesToIndex = values.Select((v, i) => KVP.Create(v, i)).ToDictionary();
-                        return new[] { new PredictorCodification(pc, pcIndex)
-                        {
-                            ValuesToIndex = valuesToIndex,
-                            CodedValues = values
-                        }};
+                        var pc = factory();
+                        pc.CodedValues = rc.Values.Cast<object>().Distinct().ToArray();
+                        pc.ValuesToIndex = pc.CodedValues.Select((v, i) => KVP.Create(v, i)).ToDictionary();
+                        return new List<PredictorCodification> { pc };
                     }
                 case PredictorColumnEncoding.NormalizeZScore:
                     {
                         var values = rc.Values.Cast<object>().NotNull().Select(a => Convert.ToSingle(a)).ToList();
-                        return new[] { new PredictorCodification(pc, pcIndex)
-                        {
-                            Mean = values.Count == 0 ? 0: values.Average(),
-                            StdDev = values.Count == 0 ? 1: values.StdDev(),
-                        }};
+                        var pc = factory();
+                        pc.Mean = values.Count == 0 ? 0 : values.Average();
+                        pc.StdDev = values.Count == 0 ? 1 : values.StdDev();
+                        return new List<PredictorCodification> { pc };
                     }
                 default:
                     throw new InvalidOperationException("Unexcpected Encoding");
@@ -139,22 +150,21 @@ namespace Signum.Engine.MachineLearning
 
         public static QueryRequest ToMultiColumnQuery(PredictorMainQueryEmbedded mainQuery, PredictorSubQueryEntity sq)
         {
-            var firstGroupKey = sq.GroupKeys.FirstEx();
+            var parentKey = sq.Columns.SingleEx(a => a.Usage == PredictorSubQueryColumnUsage.ParentKey);
 
             var mainFilters = mainQuery.Query.Is(sq.Query) ?
                     mainQuery.Filters.Select(f => ToFilter(f)) :
-                    mainQuery.Filters.Select(f => ToFilterAppend(f, firstGroupKey.Token.Token));
-            var additionalFilters = sq.AdditionalFilters.Select(f => ToFilter(f)).ToList();
+                    mainQuery.Filters.Select(f => ToFilterAppend(f, parentKey.Token.Token));
+            var additionalFilters = sq.Filters.Select(f => ToFilter(f)).ToList();
 
-            var groupKeys = sq.GroupKeys.Select(c => new Column(c.Token.Token, null)).ToList();
-            var aggregates = sq.Aggregates.Select(c => new Column(c.Token.Token, null)).ToList();
+            var columns = sq.Columns.Select(c => new Column(c.Token.Token, null)).ToList();
 
             return new QueryRequest
             {
                 GroupResults = true,
                 QueryName = sq.Query.ToQueryName(),
                 Filters = mainFilters.Concat(additionalFilters).ToList(),
-                Columns = groupKeys.Concat(aggregates).ToList(),
+                Columns = columns,
                 Orders = new List<Order>(),
                 Pagination = new Pagination.All(),
             };
@@ -196,15 +206,20 @@ namespace Signum.Engine.MachineLearning
 
     }
 
+    
+
     public class PredictorCodification
     {
         public int Index;
-        
-        public PredictorColumnEmbedded PredictorColumn;
-        //Index of PredictorColumn in the SimpleColumns/Aggregates
+
+        //Index of PredictorColumn in the MainQuery/SubQuery
         public int? PredictorColumnIndex;
 
+        //Only for MainQuery
+        public PredictorColumnEmbedded PredictorColumn;
+        
         //Only for sub queries (values inside of collections)
+        public PredictorSubQueryColumnEmbedded PredictorSubQueryColumn;
         public PredictorSubQueryEntity SubQuery;
         public object[] Keys;
         
@@ -218,12 +233,6 @@ namespace Signum.Engine.MachineLearning
         public float? StdDev;
 
         public object[] CodedValues;
-
-        public PredictorCodification(PredictorColumnEmbedded predictorColumn, int? predictorColumnIndex)
-        {
-            PredictorColumn = predictorColumn;
-            PredictorColumnIndex = predictorColumnIndex;
-        }
 
         public override string ToString()
         {

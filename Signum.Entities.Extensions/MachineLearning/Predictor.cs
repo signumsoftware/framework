@@ -190,30 +190,6 @@ namespace Signum.Entities.MachineLearning
     }
 
     [Serializable]
-    public class PredictorGroupKeyEmbedded : EmbeddedEntity
-    {
-        [NotNullable]
-        [NotNullValidator]
-        public QueryTokenEmbedded Token { get; set; }
-        
-        public void ParseData(Entity context, QueryDescription description, SubTokensOptions options)
-        {
-            if (Token != null)
-                Token.ParseData(context, description, options);
-        }
-
-        protected override string PropertyValidation(PropertyInfo pi)
-        {
-            return base.PropertyValidation(pi);
-        }
-        
-        internal PredictorGroupKeyEmbedded Clone() => new PredictorGroupKeyEmbedded
-        {
-            Token = Token.Clone(),
-        };
-    }
-
-    [Serializable]
     public class PredictorColumnEmbedded : EmbeddedEntity
     {
         public PredictorColumnUsage Usage { get; set; }
@@ -297,28 +273,20 @@ namespace Signum.Entities.MachineLearning
         public QueryEntity Query { get; set; }
 
         [NotNullable, PreserveOrder]
-        public MList<QueryFilterEmbedded> AdditionalFilters { get; set; } = new MList<QueryFilterEmbedded>();
-
+        public MList<QueryFilterEmbedded> Filters { get; set; } = new MList<QueryFilterEmbedded>();
+        
         [NotNullable, PreserveOrder]
         [NotNullValidator, NoRepeatValidator, NotifyChildProperty, NotifyCollectionChanged]
-        public MList<PredictorGroupKeyEmbedded> GroupKeys { get; set; } = new MList<PredictorGroupKeyEmbedded>();
-
-        [NotNullable, PreserveOrder]
-        [NotNullValidator, NoRepeatValidator, NotifyChildProperty, NotifyCollectionChanged]
-        public MList<PredictorColumnEmbedded> Aggregates { get; set; } = new MList<PredictorColumnEmbedded>();
+        public MList<PredictorSubQueryColumnEmbedded> Columns { get; set; } = new MList<PredictorSubQueryColumnEmbedded>();
 
         public void ParseData(QueryDescription description)
         {
-            if (AdditionalFilters != null)
-                foreach (var f in AdditionalFilters)
+            if (Filters != null)
+                foreach (var f in Filters)
                     f.ParseData(this, description, SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement | SubTokensOptions.CanAggregate);
-
-            if (GroupKeys != null)
-                foreach (var k in GroupKeys)
-                    k.ParseData(this, description, SubTokensOptions.CanElement);
-
-            if (Aggregates != null)
-                foreach (var a in Aggregates)
+            
+            if (Columns != null)
+                foreach (var a in Columns)
                     a.ParseData(this, description, SubTokensOptions.CanElement | SubTokensOptions.CanAggregate);
         }
 
@@ -326,11 +294,9 @@ namespace Signum.Entities.MachineLearning
         {
             Name = Name,
             Query = Query,
-            AdditionalFilters = AdditionalFilters.Select(f => f.Clone()).ToMList(),
-            GroupKeys = GroupKeys.Select(f => f.Clone()).ToMList(),
-            Aggregates = Aggregates.Select(f => f.Clone()).ToMList(),
+            Filters = Filters.Select(f => f.Clone()).ToMList(),
+            Columns = Columns.Select(f => f.Clone()).ToMList(),
         };
-
 
         static Expression<Func<PredictorSubQueryEntity, string>> ToStringExpression = @this => @this.Name;
         [ExpressionField]
@@ -338,6 +304,59 @@ namespace Signum.Entities.MachineLearning
         {
             return ToStringExpression.Evaluate(this);
         }
+    }
+
+    [Serializable]
+    public class PredictorSubQueryColumnEmbedded : EmbeddedEntity
+    {
+        public PredictorSubQueryColumnUsage Usage { get; set; }
+
+        [NotNullable]
+        [NotNullValidator]
+        public QueryTokenEmbedded Token { get; set; }
+
+        public PredictorColumnEncoding? Encoding { get; set; }
+
+        public PredictorColumnNullHandling? NullHandling { get; set; }
+
+        public void ParseData(ModifiableEntity context, QueryDescription description, SubTokensOptions options)
+        {
+            if (Token != null)
+                Token.ParseData(context, description, options);
+        }
+
+        protected override string PropertyValidation(PropertyInfo pi)
+        {
+            stateValidator.Validate(this, pi);
+
+            return base.PropertyValidation(pi);
+        }
+
+        public static StateValidator<PredictorSubQueryColumnEmbedded, PredictorSubQueryColumnUsage> stateValidator = 
+            new StateValidator<PredictorSubQueryColumnEmbedded, PredictorSubQueryColumnUsage>
+            (a => a.Usage, a => a.Encoding, a => a.NullHandling)
+        {
+            { PredictorSubQueryColumnUsage.Input, true, true },
+            { PredictorSubQueryColumnUsage.Output,true, true },
+            { PredictorSubQueryColumnUsage.SplitBy, false, false},
+            { PredictorSubQueryColumnUsage.ParentKey, false, false },
+        };
+
+        internal PredictorSubQueryColumnEmbedded Clone() => new PredictorSubQueryColumnEmbedded
+        {
+            Usage = Usage,
+            Token = Token.Clone(),
+            Encoding = Encoding,
+            NullHandling = NullHandling
+        };
+    }
+
+    public enum PredictorSubQueryColumnUsage
+    {
+        ParentKey,
+        SplitBy,
+        Input,
+        Output
     }
 
     [Serializable]
