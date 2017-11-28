@@ -29,7 +29,7 @@ export interface EntityTableColumn<T, RS> {
     header?: React.ReactNode | null;
     headerHtmlAttributes?: React.ThHTMLAttributes<any>;
     cellHtmlAttributes?: (ctx: TypeContext<T>, row: EntityTableRow, rowState: RS) => React.TdHTMLAttributes<any> | null | undefined;
-    template?: (ctx: TypeContext<T>, row: EntityTableRow, rowState: RS) => React.ReactChild | null | undefined;
+    template?: (ctx: TypeContext<T>, row: EntityTableRow, rowState: RS) => React.ReactChild | null | undefined | false;
 }
 
 export class EntityTable extends EntityListBase<EntityTableProps, EntityTableProps> {
@@ -208,7 +208,7 @@ export class EntityTableRow extends React.Component<EntityTableRowProps, { rowSt
     }
 
 
-    getTemplate(col: EntityTableColumn<ModifiableEntity, any>): React.ReactChild | undefined | null {
+    getTemplate(col: EntityTableColumn<ModifiableEntity, any>): React.ReactChild | undefined | null | false {
 
         if (col.template === null)
             return null;

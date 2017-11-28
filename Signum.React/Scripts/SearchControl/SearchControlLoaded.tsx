@@ -863,6 +863,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
                         onDragEnter={e => this.handlerHeaderDragOver(e, i)}
                         onDrop={this.handleHeaderDrop}>
                         <span className={"sf-header-sort " + this.orderClassName(co)} />
+                        {this.props.findOptions.groupResults && co.token && co.token.queryTokenType != "Aggregate"  && <span> <i className="fa fa-key" /></span>}
                         <span> {co.displayName}</span></th>
                 )}
             </tr>
