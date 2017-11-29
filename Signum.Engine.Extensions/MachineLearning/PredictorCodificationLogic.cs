@@ -40,6 +40,9 @@ namespace Signum.Engine.MachineLearning
 
                 string GetSplitpKey(int index, int limit)
                 {
+                    if (pc.SubQuery == null)
+                        return null;
+
                     var token = ctx.SubQueries[pc.SubQuery].SplitBy?.ElementAtOrDefault(index)?.Column.Token;
                     var obj = pc.Keys?.ElementAtOrDefault(index);
                     return ToStringValue(token, obj, limit);
