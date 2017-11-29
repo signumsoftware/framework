@@ -386,6 +386,13 @@ namespace Signum.Engine.Maps
 
         private Table View(Type viewType)
         {
+            var tn = this.Settings.TypeAttribute<TableNameAttribute>(viewType);
+
+            if (tn?.SchemaName == "sys")
+            {
+                return ViewBuilder.NewView(viewType);
+            }
+
             return Views.GetOrCreate(viewType, ViewBuilder.NewView(viewType));
         }
 
