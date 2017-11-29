@@ -119,7 +119,7 @@ export default class PredictLine extends React.Component<PredictLineProps> {
                 </FormGroup>
             );
         } else {
-            const ctx = new TypeContext<any>(this.props.sctx, { readOnly: p.usage == "Output" }, undefined as any, Binding.create(p, a => a.binding));
+            const ctx = new TypeContext<any>(this.props.sctx, { readOnly: p.usage == "Output" }, undefined as any, p.binding);
             return (
                 <FormGroup ctx={ctx} labelText={p.token.niceName} labelHtmlAttributes={{ title: fullNiceName(p.token) }}>
                     <PredictValue token={p.token} ctx={ctx} label={p.usage == "Output" ? <i className="fa fa-lightbulb-o"></i> : undefined} onChange={this.props.onChange} />
@@ -163,8 +163,12 @@ export class PredictTable extends React.Component<PredictTableProps> {
                                     {
                                         row.map((v, i) => {
                                             var ch = columnHeaders[i];
-                                            return <td><PredictLine sctx={this.props.sctx} token={ch.token} binding={new Binding(row, i)}
-                                                usage={ch.headerType} hasChanged={p.hasChanged} hasOriginal={p.hasOriginal} onChange={this.props.onChange} /></td>;
+                                            return (
+                                                <td>
+                                                    <PredictLine sctx={this.props.sctx} token={ch.token} binding={new Binding(row, i)}
+                                                        usage={ch.headerType} hasChanged={p.hasChanged} hasOriginal={p.hasOriginal} onChange={this.props.onChange} />
+                                                </td>
+                                            );
                                         })
                                     }
                                 </tr>)
