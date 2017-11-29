@@ -87,15 +87,19 @@ namespace Signum.Entities
 
                 if(t.IsInterface || t.IsAbstract)
                 {
-                    message += @"\r\nConsider writing something like this in your Starter class: 
-sb.Schema.Settings.FieldAttributes(({0} a) => a.{1}).Replace(new ImplementedByAttribute(typeof(YourConcrete{2})));"
-                    .FormatWith(route.RootType.TypeName(), route.PropertyString().Replace("/", ".First()."), t.TypeName());
+                    message += @"\r\n" + ConsiderMessage(route, "typeof(YourConcrete" + t.TypeName() + ")");
                 }
 
                 throw new InvalidOperationException(message);
             }
 
             return imp.Value;
+        }
+
+        internal static string ConsiderMessage(PropertyRoute route, string targetTypes)
+        {
+            return $@"Consider writing something like this in your Starter class: 
+sb.Schema.Settings.FieldAttributes(({route.RootType.TypeName()} a) => a.{route.PropertyString().Replace("/", ".First().")}).Replace(new ImplementedByAttribute({targetTypes}))";
         }
 
         public static Implementations ByAll { get { return new Implementations(); } }

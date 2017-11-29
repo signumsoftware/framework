@@ -360,7 +360,7 @@ namespace Signum.Engine.Operations
             {
                 using (HeavyProfiler.Log("ConstructFromMany", () => operationSymbol.Key))
                 {
-                    foreach (var type in lites.Select(a => a.GetType()).Distinct())
+                    foreach (var type in lites.Select(a => a.EntityType).Distinct())
                     {
                         OperationLogic.AssertOperationAllowed(operationSymbol, type, inUserInterface: false);
                     }
