@@ -179,7 +179,7 @@ namespace Signum.Entities.Mailing
             return new EmailAttachmentEmbedded
             {
                 ContentId = ContentId,
-                File = file,
+                File = file.Clone(),
                 Type = Type,
             };
         }
