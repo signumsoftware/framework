@@ -54,6 +54,7 @@ namespace Signum.Engine.MachineLearning
                     GroupedValues = groupedValues,
                     SplitBy = splitKeys,
                     ValueColumns = values,
+                    ColumnIndexToValueIndex = values.Select((r, i) => KVP.Create(r.Index, i)).ToDictionary()
                 });
             }
 
@@ -213,7 +214,7 @@ namespace Signum.Engine.MachineLearning
         public int Index;
 
         //Index of PredictorColumn in the MainQuery/SubQuery
-        public int? PredictorColumnIndex;
+        public int PredictorColumnIndex;
 
         //Only for MainQuery
         public PredictorColumnEmbedded PredictorColumn;
@@ -234,13 +235,18 @@ namespace Signum.Engine.MachineLearning
 
         public object[] CodedValues;
 
+        public QueryToken Token => PredictorColumn?.Token.Token ?? PredictorSubQueryColumn.Token.Token;
+        public PredictorColumnNullHandling NullHandling => PredictorColumn?.NullHandling ?? PredictorSubQueryColumn.NullHandling.Value; 
+        public PredictorColumnEncoding Encoding => PredictorColumn?.Encoding ?? PredictorSubQueryColumn.Encoding.Value;
+        public PredictorColumnUsage Usage => PredictorColumn?.Usage ?? PredictorSubQueryColumn.Usage.ToPredictorColumnUsage();
+
         public override string ToString()
         {
             return new[]
             {
-                PredictorColumn.Usage.ToString(),
+                Usage.ToString(),
                 Index.ToString(),
-                PredictorColumn.Token.ToString(),
+                Token.ToString(),
                 Keys == null ? null : $"(Key={Keys.ToString(", ")})",
                 IsValue == null ? null : $"(IsValue={IsValue})",
                 CodedValues == null ? null : $"(Values={CodedValues.Length})",

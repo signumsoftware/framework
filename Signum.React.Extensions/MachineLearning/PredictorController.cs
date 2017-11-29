@@ -133,9 +133,10 @@ namespace Signum.React.MachineLearning
 
                     return new PredictSubQueryDictionary(sq)
                     {
-                        SubQueryGroups = sqt.rows.Select(array => KVP.Create(array.Slice(0, splitKeys.Count),
+                        SubQueryGroups = sqt.rows.Select(array => KVP.Create(
+                            array.Slice(0, splitKeys.Count),
                             values.Select((a, i) => KVP.Create(a, array[splitKeys.Count + i])).ToDictionary()
-                        )).ToDictionary()
+                        )).ToDictionary(ObjectArrayComparer.Instance)
                     };
                 }).ToDictionaryEx(a => a.SubQuery)
             };
@@ -146,7 +147,7 @@ namespace Signum.React.MachineLearning
             var columns = sq.Columns.ToList();
             var parentKey = columns.Extract(a => a.Usage == PredictorSubQueryColumnUsage.ParentKey);
             splitKeys = columns.Extract(a => a.Usage == PredictorSubQueryColumnUsage.SplitBy).ToList();
-            values = columns.Extract(a => a.Usage == PredictorSubQueryColumnUsage.Input).ToList();
+            values = columns.ToList();
         }
 
         void SetOutput(PredictRequestTS request, PredictorPredictContext pctx, PredictDictionary predicted)
@@ -165,6 +166,9 @@ namespace Signum.React.MachineLearning
             foreach (var sq in request.subQueries)
             {
                 PredictSubQueryDictionary psq = predicted.SubQueries.Values.Single(a => sq.subQuery.RefersTo(a.SubQuery));
+
+                if (psq.SubQueryGroups.Comparer != ObjectArrayComparer.Instance)
+                    throw new InvalidOperationException("Unexpected comparer");
                 
                 SplitColumns(psq.SubQuery, out var splitKeys, out var values);
                 
@@ -249,7 +253,7 @@ namespace Signum.React.MachineLearning
             var originalOutputsGR = originalOutputs?.SubQueryGroups.TryGetC(key);
             var predictedOutputsGR = predictedOutputs?.SubQueryGroups.GetOrThrow(key);
 
-            for (int i = 0; i < groupKeys.Count - 1; i++)
+            for (int i = 0; i < groupKeys.Count; i++)
             {
                 row[i] = key[i];
             }
@@ -284,16 +288,17 @@ namespace Signum.React.MachineLearning
 
                 SplitColumns(sq, out var splitKeys, out var values);
 
-                foreach (var r in tuple.table.rows)
+                foreach (var row in tuple.table.rows)
                 {   
-                    for (int i = 0; i < splitKeys.Count - 1; i++)
+                    for (int i = 0; i < splitKeys.Count; i++)
                     {
-                        r[i] = FixValue(r[i], splitKeys[i].Token.Token, serializer);
+                        row[i] = FixValue(row[i], splitKeys[i].Token.Token, serializer);
                     }
 
-                    for (int i = 0; i < values.Count - 1; i++)
+                    for (int i = 0; i < values.Count; i++)
                     {
-                        r[i + splitKeys.Count] = FixValue(r[i + splitKeys.Count], sq.Columns[i].Token.Token, serializer);
+                        var colIndex = i + splitKeys.Count;
+                        row[colIndex] = FixValue(row[colIndex], values[i].Token.Token, serializer);
                     }
                 }
             }

@@ -349,6 +349,8 @@ namespace Signum.Entities.MachineLearning
             Encoding = Encoding,
             NullHandling = NullHandling
         };
+
+        public override string ToString() => $"{Usage} {Token} {Encoding}";
     }
 
     public enum PredictorSubQueryColumnUsage

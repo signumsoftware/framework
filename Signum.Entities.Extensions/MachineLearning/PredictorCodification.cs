@@ -15,7 +15,6 @@ namespace Signum.Entities.MachineLearning
         public int? SubQueryIndex{ get; set; }
 
         public int OriginalColumnIndex { get; set; }
-        
 
         //For flatting collections
         [SqlDbType(Size = 100)]

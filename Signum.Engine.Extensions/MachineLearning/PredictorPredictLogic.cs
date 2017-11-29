@@ -81,13 +81,13 @@ namespace Signum.Engine.MachineLearning
 
             var subQueryResults = ctx.Predictor.SubQueries.ToDictionaryEx(sq => sq, sqe =>
             {
-                var parentKey = sqe.Columns.SingleEx(a=>a.Usage == PredictorSubQueryColumnUsage.ParentKey).Token.Token;
+                QueryToken parentKey = sqe.Columns.SingleEx(a => a.Usage == PredictorSubQueryColumnUsage.ParentKey).Token.Token;
 
-                var mainFilter = new Filter(parentKey, FilterOperation.IsIn, entities);
+                Filter mainFilter = new Filter(parentKey, FilterOperation.IsIn, entities);
 
-                var additionalFilters = sqe.Filters.Select(f => PredictorLogicQuery.ToFilter(f)).ToList();
+                List<Filter> additionalFilters = sqe.Filters.Select(f => PredictorLogicQuery.ToFilter(f)).ToList();
 
-                var allColumns = sqe.Columns.Select(c => new Column(c.Token.Token, null)).ToList();
+                List<Column> allColumns = sqe.Columns.Select(c => new Column(c.Token.Token, null)).ToList();
 
                 var qgr = new QueryRequest
                 {
@@ -99,20 +99,21 @@ namespace Signum.Engine.MachineLearning
                     Pagination = new Pagination.All(),
                 };
 
-                var groupResult = DynamicQueryManager.Current.ExecuteQuery(qgr);
+                ResultTable resultTable = DynamicQueryManager.Current.ExecuteQuery(qgr);
 
-                var tuples = sqe.Columns.Zip(groupResult.Columns, (sqc, rc) => (sqc, rc)).ToList();
+                var tuples = sqe.Columns.Zip(resultTable.Columns, (sqc, rc) => (sqc, rc)).ToList();
+                ResultColumn entityGroupKey = tuples.Extract(t => t.sqc.Usage == PredictorSubQueryColumnUsage.ParentKey).SingleEx().rc;
+                ResultColumn[] remainingKeys = tuples.Extract(t => t.sqc.Usage == PredictorSubQueryColumnUsage.SplitBy).Select(a => a.rc).ToArray();
+                var valuesTuples = tuples;
 
-                var entityGroupKey = tuples.Extract(t => t.sqc.Usage == PredictorSubQueryColumnUsage.ParentKey).SingleEx().rc;
-                var remainingKeys = tuples.Extract(t => t.sqc.Usage == PredictorSubQueryColumnUsage.SplitBy).Select(a => a.rc).ToArray();
-                var values = tuples.Select(a => a.rc).ToList(); 
-
-                return groupResult.Rows.AgGroupToDictionary(row => (Lite<Entity>)row[entityGroupKey], gr =>
-                    gr.ToDictionaryEx(
+                return resultTable.Rows.AgGroupToDictionary(
+                    row => (Lite<Entity>)row[entityGroupKey],
+                    gr => gr.ToDictionaryEx(
                         row => row.GetValues(remainingKeys),
-                        row => sqe.Columns.Select((ac, i)=>KVP.Create(ac, row[values[i]])).ToDictionaryEx(),
-                        ObjectArrayComparer.Instance));
-
+                        row => valuesTuples.ToDictionaryEx(t => t.sqc, t => row[t.rc]),
+                        ObjectArrayComparer.Instance
+                    )
+                );
             });
 
             var result = rt.Rows.ToDictionaryEx(row => row.Entity, row => new PredictDictionary(ctx.Predictor)
