@@ -189,7 +189,7 @@ namespace Signum.Engine.Maps
         public bool ImplementedBy<T>(Expression<Func<T, object>> propertyRoute, Type typeToImplement) where T : Entity
         {
             var imp = GetImplementations(propertyRoute);
-            return !imp.IsByAll  && imp.Types.Contains(typeToImplement);
+            return !imp.IsByAll && imp.Types.Contains(typeToImplement);
         }
 
         public void AssertImplementedBy<T>(Expression<Func<T, object>> propertyRoute, Type typeToImplement) where T : Entity
