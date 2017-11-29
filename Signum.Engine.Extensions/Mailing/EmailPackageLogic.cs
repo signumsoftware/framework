@@ -50,6 +50,7 @@ namespace Signum.Engine.Mailing
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
+                sb.Schema.Settings.AssertImplementedBy((ProcessEntity p) => p.Data, typeof(EmailPackageEntity));
                 sb.Include<EmailPackageEntity>()
                     .WithQuery(dqm, () => e => new
                     {
@@ -88,7 +89,8 @@ namespace Signum.Engine.Mailing
                                 Subject = m.Subject,
                                 Template = m.Template,
                                 EditableMessage = m.EditableMessage,
-                                State = EmailMessageState.RecruitedForSending
+                                State = EmailMessageState.RecruitedForSending,
+                                Attachments = m.Attachments.Select(a => a.Clone()).ToMList()
                             }.Save();
                         }
 

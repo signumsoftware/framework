@@ -151,15 +151,10 @@ namespace Signum.Entities.Files
             this.GetPrefixPair();
         }
 
+        public static Func<FilePathEmbedded, FilePathEmbedded> CloneFunc;
         internal FilePathEmbedded Clone()
         {
-            return new FilePathEmbedded()
-            {
-                FileType = FileType,
-                FileName = FileName,
-                BinaryFile = BinaryFile?.ToArray(),
-                Suffix = Suffix,
-            };
+            return CloneFunc(this);
         }
     }
 }
