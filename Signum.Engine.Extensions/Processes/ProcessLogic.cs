@@ -479,7 +479,7 @@ namespace Signum.Engine.Processes
             {
                 if (!Console.IsOutputRedirected)
                 {
-                    SafeConsole.WriteColor(color, s);
+                    SafeConsole.WriteLineColor(color, s);
                 }
             }
         }
