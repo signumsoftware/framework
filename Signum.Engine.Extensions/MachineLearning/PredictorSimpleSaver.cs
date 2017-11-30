@@ -19,13 +19,13 @@ namespace Signum.Engine.MachineLearning
 
         public PredictorColumnEmbedded AssertOnlyOutput(PredictorEntity predictor)
         {
-            var outputs = predictor.MainQuery.Columns.Where(a => a.Usage == PredictorColumnUsage.Input);
+            var outputs = predictor.MainQuery.Columns.Where(a => a.Usage == PredictorColumnUsage.Output);
             if (outputs.Count() != 1)
-                throw new InvalidOperationException($"{PredictorResultSaver.SimpleClassification} requires the predictor to have only one output (instead of {outputs.Count()})");
+                throw new InvalidOperationException($"{PredictorSimpleResultSaver.Classification} requires the predictor to have only one output (instead of {outputs.Count()})");
 
             var outColumn = outputs.SingleEx();
             if (!outColumn.Token.Token.IsGroupable)
-                throw new InvalidOperationException($"{PredictorResultSaver.SimpleClassification} rerqires the only output to be grupable ({outColumn.Token.Token.NiceTypeName} is not)");
+                throw new InvalidOperationException($"{PredictorSimpleResultSaver.Classification} rerqires the only output to be grupable ({outColumn.Token.Token.NiceTypeName} is not)");
 
             return outColumn;
         }
@@ -65,13 +65,13 @@ namespace Signum.Engine.MachineLearning
 
         public PredictorColumnEmbedded AssertOnlyOutput(PredictorEntity predictor)
         {
-            var outputs = predictor.MainQuery.Columns.Where(a => a.Usage == PredictorColumnUsage.Input);
+            var outputs = predictor.MainQuery.Columns.Where(a => a.Usage == PredictorColumnUsage.Output);
             if (outputs.Count() != 1)
-                throw new InvalidOperationException($"{PredictorResultSaver.SimpleRegression} requires the predictor to have only one output (instead of {outputs.Count()})");
+                throw new InvalidOperationException($"{PredictorSimpleResultSaver.Regression} requires the predictor to have only one output (instead of {outputs.Count()})");
 
             var outColumn = outputs.SingleEx();
             if (!ReflectionTools.IsNumber(outColumn.Token.Token.Type))
-                throw new InvalidOperationException($"{PredictorResultSaver.SimpleRegression} rerqires the only output to be numeric ({outColumn.Token.Token.NiceTypeName} is not)");
+                throw new InvalidOperationException($"{PredictorSimpleResultSaver.Regression} rerqires the only output to be numeric ({outColumn.Token.Token.NiceTypeName} is not)");
 
             return outColumn;
         }

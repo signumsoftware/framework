@@ -227,11 +227,6 @@ export interface PredictorRegressionMetricsEmbedded extends Entities.EmbeddedEnt
     percentageDeviation?: number | null;
 }
 
-export module PredictorResultSaver {
-    export const SimpleRegression : PredictorResultSaverSymbol = registerSymbol("PredictorResultSaver", "PredictorResultSaver.SimpleRegression");
-    export const SimpleClassification : PredictorResultSaverSymbol = registerSymbol("PredictorResultSaver", "PredictorResultSaver.SimpleClassification");
-}
-
 export const PredictorResultSaverSymbol = new Type<PredictorResultSaverSymbol>("PredictorResultSaver");
 export interface PredictorResultSaverSymbol extends Entities.Symbol {
     Type: "PredictorResultSaver";
@@ -242,6 +237,11 @@ export interface PredictorSettingsEmbedded extends Entities.EmbeddedEntity {
     Type: "PredictorSettingsEmbedded";
     testPercentage?: number;
     seed?: number | null;
+}
+
+export module PredictorSimpleResultSaver {
+    export const Regression : PredictorResultSaverSymbol = registerSymbol("PredictorResultSaver", "PredictorSimpleResultSaver.Regression");
+    export const Classification : PredictorResultSaverSymbol = registerSymbol("PredictorResultSaver", "PredictorSimpleResultSaver.Classification");
 }
 
 export const PredictorState = new EnumType<PredictorState>("PredictorState");

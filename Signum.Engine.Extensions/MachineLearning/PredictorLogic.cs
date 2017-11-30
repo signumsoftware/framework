@@ -144,7 +144,7 @@ namespace Signum.Engine.MachineLearning
                         e.Target,
                         e.PredictedValue
                     });
-                RegisterResultSaver(PredictorResultSaver.SimpleClassification, new PredictorSimpleClassificationSaver());
+                RegisterResultSaver(PredictorSimpleResultSaver.Classification, new PredictorSimpleClassificationSaver());
                 
                 sb.Include<PredictSimpleRegressionEntity>()
                     .WithQuery(dqm, () => e => new
@@ -154,7 +154,7 @@ namespace Signum.Engine.MachineLearning
                         e.Target,
                         e.PredictedValue
                     });
-                RegisterResultSaver(PredictorResultSaver.SimpleRegression, new PredictorSimpleRegressionSaver());
+                RegisterResultSaver(PredictorSimpleResultSaver.Regression, new PredictorSimpleRegressionSaver());
             }
         }
 

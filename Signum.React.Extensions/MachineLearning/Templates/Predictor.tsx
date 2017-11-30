@@ -159,6 +159,7 @@ export default class Predictor extends React.Component<{ ctx: TypeContext<Predic
             <div>
                 <ValueLine ctx={ctxxs.subCtx(e => e.name)} />
                 <EntityCombo ctx={ctxxs.subCtx(f => f.algorithm)} onChange={this.handleAlgorithmChange} />
+                <EntityCombo ctx={ctxxs.subCtx(f => f.resultSaver)} />
                 <ValueLine ctx={ctxxs.subCtx(e => e.state, { readOnly: true })} />
                 <EntityLine ctx={ctxxs.subCtx(e => e.trainingException, { readOnly: true })} hideIfNull={true} />
                 {ctx.value.state == "Training" && <TrainingProgressComponent ctx={ctx} onStateChanged={this.handleOnFinished} />}

@@ -14,16 +14,15 @@ import { PseudoType, QueryKey, GraphExplorer, OperationType, Type, getTypeName  
 import * as Operations from '../../../Framework/Signum.React/Scripts/Operations'
 import * as ContextualOperations from '../../../Framework/Signum.React/Scripts/Operations/ContextualOperations'
 import {
-    PredictorEntity, PredictorSubQueryEntity, PredictorMessage, PredictorAlgorithmSymbol, AccordPredictorAlgorithm, CNTKPredictorAlgorithm,
+    PredictorEntity, PredictorSubQueryEntity, PredictorMessage,
+    PredictorAlgorithmSymbol, AccordPredictorAlgorithm, CNTKPredictorAlgorithm,
+    PredictorResultSaverSymbol, PredictorSimpleResultSaver, 
     NaiveBayesSettingsEntity, NeuralNetworkSettingsEntity, PredictorSettingsEmbedded, PredictorState, PredictorRegressionMetricsEmbedded,
     PredictorClassificationMetricsEmbedded, PredictorMainQueryEmbedded, PredictorColumnUsage, PredictorOperation
 } from './Signum.Entities.MachineLearning'
 import * as OmniboxClient from '../Omnibox/OmniboxClient'
-import * as AuthClient from '../Authorization/AuthClient'
 import * as ChartClient from '../Chart/ChartClient'
-import { ChartPermission } from '../Chart/Signum.Entities.Chart'
 import * as QuickLinks from '../../../Framework/Signum.React/Scripts/QuickLinks'
-import { ChartRequest  } from '../Chart/Signum.Entities.Chart'
 import { QueryToken } from '../../../Framework/Signum.React/Scripts/FindOptions';
 
 export function start(options: { routes: JSX.Element[] }) {
@@ -77,6 +76,8 @@ export function start(options: { routes: JSX.Element[] }) {
         saveProgressEvery: 5,
         saveValidationProgressEvery: 10,
     }));
+
+    //registerResultRenderer(PredictorSimpleResultSaver.Regression, p => ChartClient.)
 }
 
 export async function predict(predictor: Lite<PredictorEntity>, entity: Lite<Entity> | undefined): Promise<void> {
@@ -87,11 +88,15 @@ export async function predict(predictor: Lite<PredictorEntity>, entity: Lite<Ent
     return modal.PredictModal.show(predictRequest, entity);
 }
 
+export const initializers: { [key: string]: (pred: PredictorEntity) => void } = {};
 export function registerInitializer(symbol: PredictorAlgorithmSymbol, initialize: (predictor: PredictorEntity) => void) {
     initializers[symbol.key] = initialize;
 }
 
-export let initializers: { [key: string]: (pred: PredictorEntity) => void } = {};
+export const resultRenderers: { [key: string]: (pred: PredictorEntity) => React.ReactFragment } = {};
+export function registerResultRenderer(symbol: PredictorResultSaverSymbol, renderer: (predictor: PredictorEntity) => React.ReactFragment) {
+    resultRenderers[symbol.key] = renderer;
+}
 
 export namespace API {
 
