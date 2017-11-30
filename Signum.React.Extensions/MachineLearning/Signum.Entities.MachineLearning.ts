@@ -69,6 +69,11 @@ export interface NeuralNetworkSettingsEntity extends Entities.Entity, IPredictor
     saveValidationProgressEvery?: number;
 }
 
+export const PredictionSet = new EnumType<PredictionSet>("PredictionSet");
+export type PredictionSet =
+    "Evaluation" |
+    "Training";
+
 export const PredictionType = new EnumType<PredictionType>("PredictionType");
 export type PredictionType =
     "Regression" |
@@ -221,6 +226,16 @@ export interface PredictorRegressionMetricsEmbedded extends Entities.EmbeddedEnt
     percentageDeviation?: number | null;
 }
 
+export module PredictorResultSaver {
+    export const SimpleRegression : PredictorResultSaverSymbol = registerSymbol("PredictorResultSaver", "PredictorResultSaver.SimpleRegression");
+    export const SimpleClassification : PredictorResultSaverSymbol = registerSymbol("PredictorResultSaver", "PredictorResultSaver.SimpleClassification");
+}
+
+export const PredictorResultSaverSymbol = new Type<PredictorResultSaverSymbol>("PredictorResultSaver");
+export interface PredictorResultSaverSymbol extends Entities.Symbol {
+    Type: "PredictorResultSaver";
+}
+
 export const PredictorSettingsEmbedded = new Type<PredictorSettingsEmbedded>("PredictorSettingsEmbedded");
 export interface PredictorSettingsEmbedded extends Entities.EmbeddedEntity {
     Type: "PredictorSettingsEmbedded";
@@ -259,6 +274,22 @@ export interface PredictorSubQueryEntity extends Entities.Entity {
     query?: Basics.QueryEntity | null;
     filters: Entities.MList<UserQueries.QueryFilterEmbedded>;
     columns: Entities.MList<PredictorSubQueryColumnEmbedded>;
+}
+
+export const PredictSimpleClassificationEntity = new Type<PredictSimpleClassificationEntity>("PredictSimpleClassification");
+export interface PredictSimpleClassificationEntity extends Entities.Entity {
+    Type: "PredictSimpleClassification";
+    target?: Entities.Lite<Entities.Entity> | null;
+    type?: PredictionSet;
+    predictedValue?: string | null;
+}
+
+export const PredictSimpleRegressionEntity = new Type<PredictSimpleRegressionEntity>("PredictSimpleRegression");
+export interface PredictSimpleRegressionEntity extends Entities.Entity {
+    Type: "PredictSimpleRegression";
+    target?: Entities.Lite<Entities.Entity> | null;
+    type?: PredictionSet;
+    predictedValue?: number | null;
 }
 
 

@@ -181,6 +181,7 @@
     <Compile Include="Files\FilesController.cs" />
     <Compile Include="Files\FilesServer.cs" />
     <Compile Include="Isolation\IsolationServer.cs" />
+    <Compile Include="MachineLearning\PredictRequest.cs" />
     <Compile Include="MachineLearning\PredictorServer.cs" />
     <Compile Include="Printing\PrintController.cs" />
     <Compile Include="Printing\PrintServer.cs" />
