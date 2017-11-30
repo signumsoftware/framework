@@ -40,25 +40,28 @@ namespace Signum.Engine.MachineLearning
 
                 string GetSplitpKey(int index, int limit)
                 {
+                    if (pc.SubQuery == null)
+                        return null;
+
                     var token = ctx.SubQueries[pc.SubQuery].SplitBy?.ElementAtOrDefault(index)?.Column.Token;
                     var obj = pc.Keys?.ElementAtOrDefault(index);
                     return ToStringValue(token, obj, limit);
                 }
 
+                var valueToken = pc.Token;
+
                 return new PredictorCodificationEntity
                 {
                     Predictor = ctx.Predictor.ToLite(),
                     Index = pc.Index,
-                    Usage = pc.SubQuery != null ? pc.PredictorSubQueryColumn.Usage.ToPredictorColumnUsage() : pc.PredictorColumn.Usage,
+                    Usage = pc.Usage,
                     SubQueryIndex = pc.SubQuery == null ? (int?)null : ctx.Predictor.SubQueries.IndexOf(pc.SubQuery),
-                    OriginalColumnIndex = pc.SubQuery == null ?
-                        ctx.Predictor.MainQuery.Columns.IndexOf(pc.PredictorColumn) :
-                        pc.SubQuery.Columns.IndexOf(pc.PredictorSubQueryColumn),
+                    OriginalColumnIndex = pc.PredictorColumnIndex,
                     SplitKey0 = GetSplitpKey(0, groupKey0Size),
                     SplitKey1 = GetSplitpKey(1, groupKey1Size),
                     SplitKey2 = GetSplitpKey(2, groupKey2Size),
-                    IsValue = ToStringValue(pc.PredictorColumn.Token.Token, pc.IsValue, valueSize),
-                    CodedValues = pc.CodedValues.EmptyIfNull().Select(v => ToStringValue(pc.PredictorColumn.Token.Token, v, valueSize)).ToMList(),
+                    IsValue = ToStringValue(valueToken, pc.IsValue, valueSize),
+                    CodedValues = pc.CodedValues.EmptyIfNull().Select(v => ToStringValue(valueToken, v, valueSize)).ToMList(),
                     StdDev = pc.StdDev,
                     Mean = pc.Mean,
                 };

@@ -84,8 +84,8 @@ namespace Signum.Engine.MachineLearning
             Predictor = predictor;
             Algorithm = algorithm;
             Columns = columns;
-            InputColumns = columns.Where(a => a.PredictorColumn.Usage == PredictorColumnUsage.Input).ToList();
-            MainQueryOutputColumn = columns.Where(a => a.PredictorColumn.Usage == PredictorColumnUsage.Output && a.SubQuery == null).GroupToDictionary(a => a.PredictorColumn);
+            InputColumns = columns.Where(a => a.Usage == PredictorColumnUsage.Input).ToList();
+            MainQueryOutputColumn = columns.Where(a => a.SubQuery == null && a.PredictorColumn.Usage == PredictorColumnUsage.Output).GroupToDictionary(a => a.PredictorColumn);
             SubQueryOutputColumn = columns.Where(a => a.SubQuery != null).AgGroupToDictionary(a => a.SubQuery, sqGroup => new PredictorPredictSubQueryContext
             {
                 SubQuery = sqGroup.Key,
@@ -140,18 +140,13 @@ namespace Signum.Engine.MachineLearning
         {
             this.Columns = columns.ToList();
 
-            this.InputColumns = columns.Where(a =>
-            a.PredictorSubQueryColumn?.Usage == PredictorSubQueryColumnUsage.Input ||
-            a.PredictorColumn?.Usage == PredictorColumnUsage.Input).ToList();
+            this.InputColumns = columns.Where(a => a.Usage == PredictorColumnUsage.Input).ToList();
             for (int i = 0; i < this.InputColumns.Count; i++)
             {
                 this.InputColumns[i].Index = i;
             }
 
-            this.OutputColumns = columns.Where(a =>
-            a.PredictorSubQueryColumn?.Usage == PredictorSubQueryColumnUsage.Output ||
-            a.PredictorColumn?.Usage == PredictorColumnUsage.Output
-            ).ToList();
+            this.OutputColumns = columns.Where(a => a.Usage == PredictorColumnUsage.Output).ToList();
             for (int i = 0; i < this.OutputColumns.Count; i++)
             {
                 this.OutputColumns[i].Index = i;
@@ -198,8 +193,11 @@ namespace Signum.Engine.MachineLearning
         public ResultTable ResultTable;
         public Dictionary<Lite<Entity>, Dictionary<object[], object[]>> GroupedValues;
 
+
         public ResultColumn[] SplitBy { get; internal set; }
         public ResultColumn[] ValueColumns { get; internal set; }
+        //From ColumnIndex (i.e: [3->0, 4->1)
+        public Dictionary<int, int> ColumnIndexToValueIndex { get; internal set; }
     }
 
     public interface IPredictorAlgorithm

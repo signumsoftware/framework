@@ -193,15 +193,15 @@ namespace Signum.Engine.MachineLearning.CNTK
                 var mainRow = rows[i];
                 for (int j = 0; j < columns.Count; j++)
                 {
-                    var c = columns[j];
+                    PredictorCodification c = columns[j];
                     object value;
                     if (c.SubQuery == null)
-                        value = mainRow[c.PredictorColumnIndex.Value];
+                        value = mainRow[c.PredictorColumnIndex];
                     else
                     {
-                        var dic = ctx.SubQueries[c.SubQuery].GroupedValues;
-                        var aggregateValues = dic.TryGetC(mainRow.Entity)?.TryGetC(c.Keys);
-                        value = aggregateValues == null ? null : aggregateValues[c.PredictorColumnIndex.Value];
+                        var sq = ctx.SubQueries.GetOrThrow(c.SubQuery);
+                        var rowValues = sq.GroupedValues.TryGetC(mainRow.Entity)?.TryGetC(c.Keys);
+                        value = rowValues == null ? null : rowValues[sq.ColumnIndexToValueIndex[c.PredictorColumnIndex]];
                     }
 
                     values[i * columns.Count + j] = GetFloat(value, c);
@@ -216,24 +216,24 @@ namespace Signum.Engine.MachineLearning.CNTK
             var valueDefault = value ?? GetDefaultValue(c);
 
             //TODO: Codification
-            switch (c.PredictorColumn.Encoding)
+            switch (c.Encoding)
             {
                 case PredictorColumnEncoding.None: return Convert.ToSingle(valueDefault);
                 case PredictorColumnEncoding.OneHot: return Object.Equals(valueDefault, c.IsValue) ? 1 : 0;
-                case PredictorColumnEncoding.Codified: throw new NotImplementedException("Codified is not for Neuronal Networks");
+                case PredictorColumnEncoding.Codified: throw new NotImplementedException("Codified is not usable for Neural Networks");
                 case PredictorColumnEncoding.NormalizeZScore: return (Convert.ToSingle(valueDefault) - c.Mean.Value) / c.StdDev.Value;
-                default: throw new NotImplementedException("Unexpected encoding " + c.PredictorColumn.Encoding);
+                default: throw new NotImplementedException("Unexpected encoding " + c.Encoding);
             }
         }
 
         private static object GetDefaultValue(PredictorCodification c)
         {
-            switch (c.PredictorColumn.NullHandling)
+            switch (c.NullHandling)
             {
                 case PredictorColumnNullHandling.Zero: return 0;
-                case PredictorColumnNullHandling.Error: throw new Exception($"Null found on {c.PredictorColumn.Token} of {c.SubQuery?.ToString() ?? "MainQuery"}");
+                case PredictorColumnNullHandling.Error: throw new Exception($"Null found on {c.Token} of {c.SubQuery?.ToString() ?? "MainQuery"}");
                 case PredictorColumnNullHandling.Mean: return c.Mean;
-                default: throw new NotImplementedException("Unexpected NullHanndling " + c.PredictorColumn.NullHandling);
+                default: throw new NotImplementedException("Unexpected NullHanndling " + c.NullHandling);
             }
         }
 
@@ -332,7 +332,7 @@ namespace Signum.Engine.MachineLearning.CNTK
 
                         foreach (var c in this.ctx.OutputColumns)
                         {
-                            switch (c.PredictorColumn.Encoding)
+                            switch (c.Encoding)
                             {
                                 case PredictorColumnEncoding.None:
                                     break;
@@ -418,11 +418,12 @@ namespace Signum.Engine.MachineLearning.CNTK
                 MainQueryValues = ctx.MainQueryOutputColumn.SelectDictionary(col => col, (col, list) => FloatToValue(col.Encoding, col.Token.Token, list, outputValues)),
                 SubQueries = ctx.Predictor.SubQueries.ToDictionary(sq => sq, sq => new PredictSubQueryDictionary(sq)
                 {
-                    SubQueryGroups = ctx.SubQueryOutputColumn.TryGetC(sq)?.Groups.SelectDictionary(
-                        grKey => grKey, 
-                        dic => dic
+                    SubQueryGroups = ctx.SubQueryOutputColumn.TryGetC(sq)?.Groups.ToDictionary(
+                        kvp => kvp.Key, 
+                        kvp => kvp.Value
                         .Where(a => a.Key.Usage ==  PredictorSubQueryColumnUsage.Output)
-                        .ToDictionary(a => a.Key, a => FloatToValue(a.Key.Encoding.Value, a.Key.Token.Token, a.Value, outputValues))
+                        .ToDictionary(a => a.Key, a => FloatToValue(a.Key.Encoding.Value, a.Key.Token.Token, a.Value, outputValues)), 
+                        ObjectArrayComparer.Instance
                     )
                 })
             };
