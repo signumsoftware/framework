@@ -17,6 +17,7 @@ namespace Signum.Entities.MachineLearning
         DownloadTsv,
         DownloadTsvMetadata,
         OpenTensorflowProjector,
+        [Description("{0} is already being trained")]
         _0IsAlreadyBeingTrained,
         StartingTraining,
         Preview,

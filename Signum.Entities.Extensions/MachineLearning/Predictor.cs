@@ -14,7 +14,6 @@ using System.Reflection;
 using Signum.Entities.Files;
 using Signum.Entities.Authorization;
 using System.Xml.Linq;
-using System.ComponentModel;
 
 namespace Signum.Entities.MachineLearning
 {
@@ -192,7 +191,7 @@ namespace Signum.Entities.MachineLearning
     }
 
     [Serializable]
-    public class PredictorColumnEmbedded : EmbeddedEntity
+    public class PredictorColumnEmbedded : EmbeddedEntity, IEquatable<PredictorColumnEmbedded>
     {
         public PredictorColumnUsage Usage { get; set; }
 
@@ -224,6 +223,18 @@ namespace Signum.Entities.MachineLearning
         };
 
         public override string ToString() => $"{Usage} {Token} {Encoding}";
+
+        public override bool Equals(object obj) => obj is PredictorColumnEmbedded c && Equals(c);
+        public bool Equals(PredictorColumnEmbedded other)
+        {
+            return object.Equals(this.Token, other.Token) && this.Usage == other.Usage;
+        }
+
+        public override int GetHashCode()
+        {
+            return (this.Token?.GetHashCode() ?? 0) ^ this.Usage.GetHashCode();
+        }
+
     }
 
     public enum PredictorColumnNullHandling
@@ -309,7 +320,7 @@ namespace Signum.Entities.MachineLearning
     }
 
     [Serializable]
-    public class PredictorSubQueryColumnEmbedded : EmbeddedEntity
+    public class PredictorSubQueryColumnEmbedded : EmbeddedEntity, IEquatable<PredictorSubQueryColumnEmbedded>
     {
         public PredictorSubQueryColumnUsage Usage { get; set; }
 
@@ -353,6 +364,17 @@ namespace Signum.Entities.MachineLearning
         };
 
         public override string ToString() => $"{Usage} {Token} {Encoding}";
+
+        public override bool Equals(object obj) => obj is PredictorSubQueryColumnEmbedded c && Equals(c);
+        public bool Equals(PredictorSubQueryColumnEmbedded other)
+        {
+            return object.Equals(this.Token, other.Token) && this.Usage == other.Usage;
+        }
+
+        public override int GetHashCode()
+        {
+            return (this.Token?.GetHashCode() ?? 0) ^ this.Usage.GetHashCode();
+        }
     }
 
     public enum PredictorSubQueryColumnUsage

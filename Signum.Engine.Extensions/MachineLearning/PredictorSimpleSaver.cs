@@ -86,8 +86,13 @@ namespace Signum.Engine.MachineLearning
             ctx.ReportProgress($"Creating {typeof(PredictSimpleRegressionEntity).NicePluralName()}");
             var dictionary = ctx.ToPredictDictionaries();
             var toInsert = new List<PredictSimpleRegressionEntity>();
+
+            int i = 0; 
             foreach (var kvp in dictionary)
             {
+                if (i++ % 100 == 0)
+                    ctx.ReportProgress($"Creating {typeof(PredictSimpleRegressionEntity).NicePluralName()}", i / (decimal)dictionary.Count);
+
                 toInsert.Add(new PredictSimpleRegressionEntity
                 {
                     Predictor = p,
