@@ -22,28 +22,25 @@ namespace Signum.React.RestLog
         public async Task<RestDiffResult> GetRestDiffLog(string id, string url)
         {
             var oldRequest = Database.Retrieve<RestLogEntity>(PrimaryKey.Parse(id, typeof(RestLogEntity)));
+            if (!oldRequest.AllowReplay)
+            {
+                throw new InvalidOperationException("Replay not allowed for this RestLog");
+            }
             var oldCredentials = Database.Query<RestApiKeyEntity>().Single(r => r.User.Is(oldRequest.User));
 
             var result = await RestLogLogic.GetRestDiffResult(url, oldCredentials.ApiKey, oldRequest.RequestBody, oldRequest.ResponseBody);
 
-            return RestDiffLog(result);
+            return RestLogLogic.RestDiffLog(result);
         }
 
-        private static RestDiffResult RestDiffLog(RestDiffResult result)
-        {
-            StringDistance sd = new StringDistance();
-            var diff = sd.DiffText(result.previous, result.current);
-            result.diff = diff;
-            return result;
-        }
-
+       
         [Route("api/restLog/"), HttpPost]
         public async Task<RestDiffResult> GetDiff(RestDiffRequest request)
         {
             var restDiffResult = await RestLogLogic.GetRestDiffResult(request.url, request.apiKey, request.requestBody, request.responseBody);
             
 
-            return RestDiffLog(restDiffResult);
+            return RestLogLogic.RestDiffLog(restDiffResult);
         }
 
        

@@ -32,6 +32,8 @@ export default class RestLog extends React.Component<{ ctx: TypeContext<RestLogE
             <div>
                 <ValueLine ctx={ctx.subCtx(f => f.startDate)} unitText={moment(ctx.value.startDate).toUserInterface().fromNow()} />
                 <ValueLine ctx={ctx.subCtx(f => f.endDate)} />
+                <ValueLine ctx={ctx.subCtx(f => f.replayDate)}/>
+                <ValueLine ctx={ctx.subCtx(f => f.changedPercentage)}/>
 
                 <EntityLine ctx={ctx.subCtx(f => f.user)}/>
                 <ValueLine ctx={ctx.subCtx(f => f.url)} />
@@ -45,10 +47,10 @@ export default class RestLog extends React.Component<{ ctx: TypeContext<RestLogE
                 <EntityLine ctx={ctx.subCtx(f => f.exception)}/>
 
                 <EntityRepeater ctx={ctx.subCtx(f => f.queryString)}/>
-                <Form>
+                {ctx.value.allowReplay && <Form>
                     <Button bsStyle="info" onClick={() =>{ API.replayRestLog(ctx.value.id, encodeURIComponent(this.state.newURL)).then(d => this.setState({diff: d})).done()}}>Replay</Button>
                     <FormControl type="text" defaultValue={this.state.newURL}/>
-                </Form>
+                </Form>}
                 {this.renderCode(ctx.subCtx(f => f.requestBody))}
                 
                 <fieldset>

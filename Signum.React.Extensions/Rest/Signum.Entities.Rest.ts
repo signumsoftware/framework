@@ -46,6 +46,7 @@ export interface RestLogEntity extends Entities.Entity {
     endDate: string;
     replayState: RestLogReplayState | null;
     changedPercentage: number | null;
+    allowReplay: boolean;
 }
 
 export const RestLogReplayState = new EnumType<RestLogReplayState>("RestLogReplayState");

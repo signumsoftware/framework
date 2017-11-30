@@ -75,7 +75,23 @@ namespace Signum.Engine.Rest
 
                 result.current = await restClient.SendAsync(request).Result.Content.ReadAsStringAsync();
             }
+            return RestDiffLog(result);
+        }
+
+        public static RestDiffResult RestDiffLog(RestDiffResult result)
+        {
+            StringDistance sd = new StringDistance();
+            long? size = (long?)result.current?.Length * result.previous?.Length;
+            if (size != null && size<=int.MaxValue)
+            {
+                var diff = sd.DiffText(result.previous, result.current);
+                result.diff = diff;
+            }
+
+            
+            
             return result;
         }
+
     }
 }
