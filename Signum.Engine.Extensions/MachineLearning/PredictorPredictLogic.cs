@@ -128,6 +128,39 @@ namespace Signum.Engine.MachineLearning
             return result;
         }
 
+        public static Dictionary<ResultRow, PredictDictionary> ToPredictDictionaries(this PredictorTrainingContext ctx)
+        {   
+            var subQueryResults = ctx.Predictor.SubQueries.ToDictionaryEx(sq => sq, sqe =>
+            {
+                var resultTable = ctx.SubQueries[sqe].ResultTable;
+
+                var tuples = sqe.Columns.Zip(resultTable.Columns, (sqc, rc) => (sqc, rc)).ToList();
+                ResultColumn entityGroupKey = tuples.Extract(t => t.sqc.Usage == PredictorSubQueryColumnUsage.ParentKey).SingleEx().rc;
+                ResultColumn[] remainingKeys = tuples.Extract(t => t.sqc.Usage == PredictorSubQueryColumnUsage.SplitBy).Select(a => a.rc).ToArray();
+                var valuesTuples = tuples;
+
+                return resultTable.Rows.AgGroupToDictionary(
+                    row => (Lite<Entity>)row[entityGroupKey],
+                    gr => gr.ToDictionaryEx(
+                        row => row.GetValues(remainingKeys),
+                        row => valuesTuples.ToDictionaryEx(t => t.sqc, t => row[t.rc]),
+                        ObjectArrayComparer.Instance
+                    )
+                );
+            });
+
+            var result = ctx.MainQuery.ResultTable.Rows.ToDictionaryEx(row => row, row => new PredictDictionary(ctx.Predictor)
+            {
+                MainQueryValues = ctx.Predictor.MainQuery.Columns.Select((c, i) => KVP.Create(c, row[i])).ToDictionaryEx(),
+                SubQueries = ctx.Predictor.SubQueries.ToDictionary(sq => sq, sq => new PredictSubQueryDictionary(sq)
+                {
+                    SubQueryGroups = (subQueryResults.TryGetC(sq)?.TryGetC(row.Entity))
+                })
+            });
+
+            return result;
+        }
+
         public static PredictDictionary PredictBasic(this Lite<PredictorEntity> predictor, PredictDictionary input)
         {
             var pctx = GetPredictContext(predictor);

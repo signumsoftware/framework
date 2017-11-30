@@ -36,7 +36,9 @@ namespace Signum.Entities.MachineLearning
 
         [NotNullable, NotNullValidator]
         public PredictorAlgorithmSymbol Algorithm { get; set; }
-        
+
+        public PredictorResultSaverSymbol ResultSaver { get; set; }
+
         public Lite<ExceptionEntity> TrainingException { get; set; }
 
         [ImplementedBy(typeof(UserEntity))]

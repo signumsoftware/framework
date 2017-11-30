@@ -14,6 +14,10 @@ namespace Signum.Entities.MachineLearning
     {
         [NotNullable]
         [NotNullValidator]
+        public Lite<PredictorEntity> Predictor { get; internal set; }
+
+        [NotNullable]
+        [NotNullValidator, ImplementedByAll]
         public Lite<Entity> Target { get; set; }
 
         public PredictionSet Type { get; set; }
@@ -23,11 +27,15 @@ namespace Signum.Entities.MachineLearning
         public string PredictedValue { get; set; }
     }
 
-    [Serializable, EntityKind(EntityKind.Main, EntityData.Transactional)]
+    [Serializable, EntityKind(EntityKind.System, EntityData.Transactional)]
     public class PredictSimpleRegressionEntity : Entity
     {
         [NotNullable]
         [NotNullValidator]
+        public Lite<PredictorEntity> Predictor { get; internal set; }
+
+        [NotNullable]
+        [NotNullValidator, ImplementedByAll]
         public Lite<Entity> Target { get; set; }
 
         public PredictionSet Type { get; set; }
@@ -37,7 +45,7 @@ namespace Signum.Entities.MachineLearning
 
     public enum PredictionSet
     {
-        Evaluation, 
+        Validation, 
         Training
     }
 }

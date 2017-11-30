@@ -150,6 +150,7 @@
     <Compile Include="MachineLearning\PredictorLogic.cs" />
     <Compile Include="MachineLearning\PredictorLogicQuery.cs" />
     <Compile Include="MachineLearning\PredictorPredictLogic.cs" />
+    <Compile Include="MachineLearning\PredictorSimpleSaver.cs" />
     <Compile Include="Mailing\ImageAttachmentLogic.cs" />
     <Compile Include="Rest\RestApiKeyLogic.cs" />
     <Compile Include="Files\FilePathEmbeddedLogic.cs" />
@@ -262,7 +263,7 @@
       <Name>Signum.Utilities</Name>
     </ProjectReference>
     <ProjectReference Include="..\Signum.Entities.Extensions\Signum.Entities.Extensions.csproj">
-      <Project>{7D851227-5294-4BEB-990E-56B4FBB7A148}</Project>
+      <Project>{7d851227-5294-4beb-990e-56b4fbb7a148}</Project>
       <Name>Signum.Entities.Extensions</Name>
     </ProjectReference>
   </ItemGroup>

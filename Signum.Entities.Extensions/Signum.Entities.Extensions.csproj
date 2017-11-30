@@ -133,7 +133,7 @@
     <Compile Include="MachineLearning\PredictorCodification.cs" />
     <Compile Include="MachineLearning\PredictorEpochProgress.cs" />
     <Compile Include="MachineLearning\PredictorMessage.cs" />
-    <Compile Include="MachineLearning\PredictSimpleClassificationEntity.cs" />
+    <Compile Include="MachineLearning\PredictSimpleResults.cs" />
     <Compile Include="Mailing\ImageAttachmentEntity.cs" />
     <Compile Include="Migrations\ExecutedLoadProcess.cs" />
     <Compile Include="Templating\TemplateApplicable.cs" />

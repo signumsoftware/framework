@@ -113,6 +113,8 @@ namespace Signum.Engine.MachineLearning
         public List<PredictorCodification> InputColumns { get; private set; }
         public List<PredictorCodification> OutputColumns { get; private set; }
 
+        public List<ResultRow> Validation { get; internal set; }
+
         public MainQuery MainQuery { get; internal set; }
         public Dictionary<PredictorSubQueryEntity, SubQuery> SubQueries { get; internal set; }
 
@@ -153,20 +155,22 @@ namespace Signum.Engine.MachineLearning
             }
         }
 
-        public (List<ResultRow> training, List<ResultRow> test) SplitTrainValidation(Random r)
+        public (List<ResultRow> training, List<ResultRow> validation) SplitTrainValidation(Random r)
         {
             List<ResultRow> training = new List<ResultRow>();
-            List<ResultRow> test = new List<ResultRow>();
+            List<ResultRow> validation = new List<ResultRow>();
 
             foreach (var item in this.MainQuery.ResultTable.Rows)
             {
                 if (r.NextDouble() < Predictor.Settings.TestPercentage)
-                    test.Add(item);
+                    validation.Add(item);
                 else
                     training.Add(item);
             }
 
-            return (training, test);
+            this.Validation = validation;
+
+            return (training, validation);
         }
 
         public List<object[]> GetProgessArray()
@@ -210,7 +214,8 @@ namespace Signum.Engine.MachineLearning
 
     public interface IPredictorResultSaver
     {
-        void SavePredictions(PredictorPredictContext ctx, List<Lite<Entity>> isTraining);
+        void AssertValid(PredictorEntity predictor);
+        void SavePredictions(PredictorTrainingContext ctx);
     }
 
     public class PredictDictionary

@@ -62,7 +62,7 @@ namespace Signum.Engine.MachineLearning
         public static ConcurrentDictionary<Lite<PredictorEntity>, PredictorTrainingState> Trainings = new ConcurrentDictionary<Lite<PredictorEntity>, PredictorTrainingState>();
 
 
-        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm, bool simpleRegressionSaver, bool simpleClassificationSaver, IFileTypeAlgorithm predictorFileAlgorithm)
+        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm, IFileTypeAlgorithm predictorFileAlgorithm)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
@@ -108,7 +108,7 @@ namespace Signum.Engine.MachineLearning
                         e.SplitKey2,
                         e.IsValue,
                         e.Mean,
-                        e.StdDev, 
+                        e.StdDev,
                     });
 
                 sb.Include<PredictorEpochProgressEntity>()
@@ -136,33 +136,25 @@ namespace Signum.Engine.MachineLearning
                 Validator.PropertyValidator((PredictorColumnEmbedded c) => c.Encoding).StaticPropertyValidation += Column_StaticPropertyValidation;
                 Validator.PropertyValidator((PredictorSubQueryColumnEmbedded c) => c.Token).StaticPropertyValidation += GroupKey_StaticPropertyValidation;
 
-                if (simpleClassificationSaver)
-                {
-                    sb.Include<PredictSimpleClassificationEntity>()
-                        .WithQuery(dqm, () => e => new
-                        {
-                            Entity = e,
-                            e.Id,
-                            e.Target,
-                            e.PredictedValue
-                        });
-
-                    RegisterResultSaver(PredictorResultSaver.SimpleClassification, null);
-                }
-
-                if (simpleRegressionSaver)
-                {
-                    sb.Include<PredictSimpleRegressionEntity>()
-                        .WithQuery(dqm, () => e => new
-                        {
-                            Entity = e,
-                            e.Id,
-                            e.Target,
-                            e.PredictedValue
-                        });
-
-                    RegisterResultSaver(PredictorResultSaver.SimpleRegression, null);
-                }
+                sb.Include<PredictSimpleClassificationEntity>()
+                    .WithQuery(dqm, () => e => new
+                    {
+                        Entity = e,
+                        e.Id,
+                        e.Target,
+                        e.PredictedValue
+                    });
+                RegisterResultSaver(PredictorResultSaver.SimpleClassification, new PredictorSimpleClassificationSaver());
+                
+                sb.Include<PredictSimpleRegressionEntity>()
+                    .WithQuery(dqm, () => e => new
+                    {
+                        Entity = e,
+                        e.Id,
+                        e.Target,
+                        e.PredictedValue
+                    });
+                RegisterResultSaver(PredictorResultSaver.SimpleRegression, new PredictorSimpleRegressionSaver());
             }
         }
 
@@ -278,6 +270,12 @@ namespace Signum.Engine.MachineLearning
         {
             try
             {
+                if (ctx.Predictor.ResultSaver != null)
+                {
+                    var saver = ResultSavers.GetOrThrow(ctx.Predictor.ResultSaver);
+                    saver.AssertValid(ctx.Predictor);
+                }
+
                 PredictorLogicQuery.RetrieveData(ctx);
                 PredictorCodificationLogic.CreatePredictorCodifications(ctx);
                 var algorithm = Algorithms.GetOrThrow(ctx.Predictor.Algorithm);
@@ -285,6 +283,12 @@ namespace Signum.Engine.MachineLearning
                 ctx.Predictor.State = PredictorState.Trained;
                 using (OperationLogic.AllowSave<PredictorEntity>())
                     ctx.Predictor.Save();
+
+                if(ctx.Predictor.ResultSaver != null)
+                {
+                    var saver = ResultSavers.GetOrThrow(ctx.Predictor.ResultSaver);
+                    saver.SavePredictions(ctx);
+                }
             }
             catch (OperationCanceledException e)
             {
