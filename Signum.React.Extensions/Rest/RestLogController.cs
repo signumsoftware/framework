@@ -22,6 +22,10 @@ namespace Signum.React.RestLog
         public async Task<RestDiffResult> GetRestDiffLog(string id, string url)
         {
             var oldRequest = Database.Retrieve<RestLogEntity>(PrimaryKey.Parse(id, typeof(RestLogEntity)));
+            if (!oldRequest.AllowReplay)
+            {
+                throw new InvalidOperationException("Replay not allowed for this RestLog");
+            }
             var oldCredentials = Database.Query<RestApiKeyEntity>().Single(r => r.User.Is(oldRequest.User));
 
             var result = await RestLogLogic.GetRestDiffResult(url, oldCredentials.ApiKey, oldRequest.RequestBody, oldRequest.ResponseBody);

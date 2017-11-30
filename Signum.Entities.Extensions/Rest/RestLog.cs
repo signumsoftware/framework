@@ -56,6 +56,8 @@ namespace Signum.Entities.Rest
 
         public double? ChangedPercentage { get; set; }
 
+        public bool AllowReplay { get; set; }
+
         static Expression<Func<RestLogEntity, double?>> DurationExpression =
           log => (double?)(log.EndDate - log.StartDate).TotalMilliseconds;
 
