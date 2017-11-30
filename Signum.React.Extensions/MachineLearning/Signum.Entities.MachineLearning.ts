@@ -71,7 +71,7 @@ export interface NeuralNetworkSettingsEntity extends Entities.Entity, IPredictor
 
 export const PredictionSet = new EnumType<PredictionSet>("PredictionSet");
 export type PredictionSet =
-    "Evaluation" |
+    "Validation" |
     "Training";
 
 export const PredictionType = new EnumType<PredictionType>("PredictionType");
@@ -144,6 +144,7 @@ export interface PredictorEntity extends Entities.Entity {
     name?: string | null;
     settings?: PredictorSettingsEmbedded | null;
     algorithm?: PredictorAlgorithmSymbol | null;
+    resultSaver?: PredictorResultSaverSymbol | null;
     trainingException?: Entities.Lite<Basics.ExceptionEntity> | null;
     user?: Entities.Lite<Basics.IUserEntity> | null;
     algorithmSettings?: IPredictorAlgorithmSettings | null;
@@ -279,6 +280,7 @@ export interface PredictorSubQueryEntity extends Entities.Entity {
 export const PredictSimpleClassificationEntity = new Type<PredictSimpleClassificationEntity>("PredictSimpleClassification");
 export interface PredictSimpleClassificationEntity extends Entities.Entity {
     Type: "PredictSimpleClassification";
+    predictor?: Entities.Lite<PredictorEntity> | null;
     target?: Entities.Lite<Entities.Entity> | null;
     type?: PredictionSet;
     predictedValue?: string | null;
@@ -287,6 +289,7 @@ export interface PredictSimpleClassificationEntity extends Entities.Entity {
 export const PredictSimpleRegressionEntity = new Type<PredictSimpleRegressionEntity>("PredictSimpleRegression");
 export interface PredictSimpleRegressionEntity extends Entities.Entity {
     Type: "PredictSimpleRegression";
+    predictor?: Entities.Lite<PredictorEntity> | null;
     target?: Entities.Lite<Entities.Entity> | null;
     type?: PredictionSet;
     predictedValue?: number | null;
