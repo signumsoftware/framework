@@ -32,6 +32,8 @@ export default class RestLog extends React.Component<{ ctx: TypeContext<RestLogE
             <div>
                 <ValueLine ctx={ctx.subCtx(f => f.startDate)} unitText={moment(ctx.value.startDate).toUserInterface().fromNow()} />
                 <ValueLine ctx={ctx.subCtx(f => f.endDate)} />
+                <ValueLine ctx={ctx.subCtx(f => f.replayDate)}/>
+                <ValueLine ctx={ctx.subCtx(f => f.changedPercentage)}/>
 
                 <EntityLine ctx={ctx.subCtx(f => f.user)}/>
                 <ValueLine ctx={ctx.subCtx(f => f.url)} />
