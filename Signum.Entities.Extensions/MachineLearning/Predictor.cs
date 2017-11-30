@@ -382,6 +382,17 @@ namespace Signum.Entities.MachineLearning
         }
     }
 
+    [Serializable]
+    public class PredictorResultSaverSymbol : Symbol
+    {
+        private PredictorResultSaverSymbol() { }
+
+        public PredictorResultSaverSymbol(Type declaringType, string fieldName) :
+            base(declaringType, fieldName)
+        {
+        }
+    }
+
     [AutoInit]
     public static class AccordPredictorAlgorithm
     {
@@ -392,5 +403,12 @@ namespace Signum.Entities.MachineLearning
     public static class CNTKPredictorAlgorithm
     {
         public static PredictorAlgorithmSymbol NeuralNetwork;
+    }
+
+    [AutoInit]
+    public static class PredictorResultSaver
+    {
+        public static PredictorResultSaverSymbol SimpleRegression;
+        public static PredictorResultSaverSymbol SimpleClassification;
     }
 }

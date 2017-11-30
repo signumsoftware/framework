@@ -208,6 +208,11 @@ namespace Signum.Engine.MachineLearning
         PredictDictionary Predict(PredictorPredictContext ctx, PredictDictionary input);
     }
 
+    public interface IPredictorResultSaver
+    {
+        void SavePredictions(PredictorPredictContext ctx, List<Lite<Entity>> isTraining);
+    }
+
     public class PredictDictionary
     {
         public PredictDictionary(PredictorEntity predictor)

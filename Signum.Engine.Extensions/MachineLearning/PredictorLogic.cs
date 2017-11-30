@@ -53,10 +53,16 @@ namespace Signum.Engine.MachineLearning
             Algorithms.Add(symbol, algorithm);
         }
 
+        public static Dictionary<PredictorResultSaverSymbol, IPredictorResultSaver> ResultSavers = new Dictionary<PredictorResultSaverSymbol, IPredictorResultSaver>();
+        public static void RegisterResultSaver(PredictorResultSaverSymbol symbol, IPredictorResultSaver algorithm)
+        {
+            ResultSavers.Add(symbol, algorithm);
+        }
+
         public static ConcurrentDictionary<Lite<PredictorEntity>, PredictorTrainingState> Trainings = new ConcurrentDictionary<Lite<PredictorEntity>, PredictorTrainingState>();
 
 
-        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm, IFileTypeAlgorithm predictorFileAlgorithm)
+        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm, bool simpleRegressionSaver, bool simpleClassificationSaver, IFileTypeAlgorithm predictorFileAlgorithm)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
@@ -122,12 +128,41 @@ namespace Signum.Engine.MachineLearning
                 FileTypeLogic.Register(PredictorFileType.PredictorFile, predictorFileAlgorithm);
 
                 SymbolLogic<PredictorAlgorithmSymbol>.Start(sb, dqm, () => Algorithms.Keys);
+                SymbolLogic<PredictorResultSaverSymbol>.Start(sb, dqm, () => ResultSavers.Keys);
 
                 sb.Schema.EntityEvents<PredictorEntity>().Retrieved += PredictorEntity_Retrieved;
                 sb.Schema.EntityEvents<PredictorSubQueryEntity>().Retrieved += PredictorMultiColumnEntity_Retrieved;
 
                 Validator.PropertyValidator((PredictorColumnEmbedded c) => c.Encoding).StaticPropertyValidation += Column_StaticPropertyValidation;
                 Validator.PropertyValidator((PredictorSubQueryColumnEmbedded c) => c.Token).StaticPropertyValidation += GroupKey_StaticPropertyValidation;
+
+                if (simpleClassificationSaver)
+                {
+                    sb.Include<PredictSimpleClassificationEntity>()
+                        .WithQuery(dqm, () => e => new
+                        {
+                            Entity = e,
+                            e.Id,
+                            e.Target,
+                            e.PredictedValue
+                        });
+
+                    RegisterResultSaver(PredictorResultSaver.SimpleClassification, null);
+                }
+
+                if (simpleRegressionSaver)
+                {
+                    sb.Include<PredictSimpleRegressionEntity>()
+                        .WithQuery(dqm, () => e => new
+                        {
+                            Entity = e,
+                            e.Id,
+                            e.Target,
+                            e.PredictedValue
+                        });
+
+                    RegisterResultSaver(PredictorResultSaver.SimpleRegression, null);
+                }
             }
         }
 
