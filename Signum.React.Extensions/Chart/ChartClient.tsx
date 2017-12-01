@@ -68,6 +68,10 @@ export function getChartScripts(): Promise<ChartScriptEntity[][]> {
     return API.fetchScripts().then(cs => chartScripts = cs);
 }
 
+export function getChartScript(name: string): Promise<ChartScriptEntity> {
+    return getChartScripts().then(cs => cs.flatMap(arr => arr).single(a => a.name == name));
+}
+
 export let colorPalettes: string[];
 export function getColorPalettes(): Promise<string[]> {
     if (colorPalettes)

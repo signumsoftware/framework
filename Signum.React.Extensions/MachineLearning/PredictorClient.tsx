@@ -18,10 +18,11 @@ import {
     PredictorAlgorithmSymbol, AccordPredictorAlgorithm, CNTKPredictorAlgorithm,
     PredictorResultSaverSymbol, PredictorSimpleResultSaver, 
     NaiveBayesSettingsEntity, NeuralNetworkSettingsEntity, PredictorSettingsEmbedded, PredictorState, PredictorRegressionMetricsEmbedded,
-    PredictorClassificationMetricsEmbedded, PredictorMainQueryEmbedded, PredictorColumnUsage, PredictorOperation
+    PredictorClassificationMetricsEmbedded, PredictorMainQueryEmbedded, PredictorColumnUsage, PredictorOperation, PredictSimpleClassificationEntity, PredictSimpleRegressionEntity
 } from './Signum.Entities.MachineLearning'
 import * as OmniboxClient from '../Omnibox/OmniboxClient'
 import * as ChartClient from '../Chart/ChartClient'
+import { ChartRequest } from '../Chart/Signum.Entities.Chart'
 import * as QuickLinks from '../../../Framework/Signum.React/Scripts/QuickLinks'
 import { QueryToken } from '../../../Framework/Signum.React/Scripts/FindOptions';
 
@@ -32,6 +33,8 @@ export function start(options: { routes: JSX.Element[] }) {
     Navigator.addSettings(new EntitySettings(PredictorRegressionMetricsEmbedded, e => import('./Templates/PredictorRegressionMetrics')));
     Navigator.addSettings(new EntitySettings(PredictorClassificationMetricsEmbedded, e => import('./Templates/PredictorClassificationMetrics')));
     Navigator.addSettings(new EntitySettings(NeuralNetworkSettingsEntity, e => import('./Templates/NeuralNetworkSettings')));
+    Navigator.addSettings(new EntitySettings(PredictSimpleClassificationEntity, e => import('./Templates/PredictSimpleClassification')));
+    Navigator.addSettings(new EntitySettings(PredictSimpleRegressionEntity, e => import('./Templates/PredictSimpleRegression')));
 
     QuickLinks.registerQuickLink(PredictorEntity, ctx => new QuickLinks.QuickLinkAction(
         PredictorMessage.DownloadCsv.niceToString(),
@@ -77,7 +80,14 @@ export function start(options: { routes: JSX.Element[] }) {
         saveValidationProgressEvery: 10,
     }));
 
-    //registerResultRenderer(PredictorSimpleResultSaver.Regression, p => ChartClient.)
+    //registerResultRenderer(PredictorSimpleResultSaver.Regression, p =>
+
+
+    //    ChartClient.Encoder.chartRequestPath(ChartRequest.New({
+        
+
+
+    //}));
 }
 
 export async function predict(predictor: Lite<PredictorEntity>, entity: Lite<Entity> | undefined): Promise<void> {
