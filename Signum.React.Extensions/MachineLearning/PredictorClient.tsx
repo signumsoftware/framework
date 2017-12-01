@@ -10,21 +10,22 @@ import * as Finder from '../../../Framework/Signum.React/Scripts/Finder'
 import { QueryRequest } from '../../../Framework/Signum.React/Scripts/FindOptions'
 import { Lite, Entity, EntityPack, ExecuteSymbol, DeleteSymbol, ConstructSymbol_From, registerToString, JavascriptMessage, toLite } from '../../../Framework/Signum.React/Scripts/Signum.Entities'
 import { EntityOperationSettings } from '../../../Framework/Signum.React/Scripts/Operations'
-import { PseudoType, QueryKey, GraphExplorer, OperationType, Type, getTypeName  } from '../../../Framework/Signum.React/Scripts/Reflection'
+import { PseudoType, QueryKey, GraphExplorer, OperationType, Type, getTypeName } from '../../../Framework/Signum.React/Scripts/Reflection'
 import * as Operations from '../../../Framework/Signum.React/Scripts/Operations'
 import * as ContextualOperations from '../../../Framework/Signum.React/Scripts/Operations/ContextualOperations'
 import {
     PredictorEntity, PredictorSubQueryEntity, PredictorMessage,
     PredictorAlgorithmSymbol, AccordPredictorAlgorithm, CNTKPredictorAlgorithm,
-    PredictorResultSaverSymbol, PredictorSimpleResultSaver, 
+    PredictorResultSaverSymbol, PredictorSimpleResultSaver,
     NaiveBayesSettingsEntity, NeuralNetworkSettingsEntity, PredictorSettingsEmbedded, PredictorState, PredictorRegressionMetricsEmbedded,
-    PredictorClassificationMetricsEmbedded, PredictorMainQueryEmbedded, PredictorColumnUsage, PredictorOperation, PredictSimpleClassificationEntity, PredictSimpleRegressionEntity
+    PredictorClassificationMetricsEmbedded, PredictorMainQueryEmbedded, PredictorColumnUsage, PredictorOperation, PredictSimpleResultEntity
 } from './Signum.Entities.MachineLearning'
 import * as OmniboxClient from '../Omnibox/OmniboxClient'
-import * as ChartClient from '../Chart/ChartClient'
-import { ChartRequest } from '../Chart/Signum.Entities.Chart'
+
 import * as QuickLinks from '../../../Framework/Signum.React/Scripts/QuickLinks'
 import { QueryToken } from '../../../Framework/Signum.React/Scripts/FindOptions';
+import { ImportComponent } from '../../../Framework/Signum.React/Scripts/AsyncImport';
+import { TypeContext } from '../../../Framework/Signum.React/Scripts/Lines';
 
 export function start(options: { routes: JSX.Element[] }) {
 
@@ -33,8 +34,7 @@ export function start(options: { routes: JSX.Element[] }) {
     Navigator.addSettings(new EntitySettings(PredictorRegressionMetricsEmbedded, e => import('./Templates/PredictorRegressionMetrics')));
     Navigator.addSettings(new EntitySettings(PredictorClassificationMetricsEmbedded, e => import('./Templates/PredictorClassificationMetrics')));
     Navigator.addSettings(new EntitySettings(NeuralNetworkSettingsEntity, e => import('./Templates/NeuralNetworkSettings')));
-    Navigator.addSettings(new EntitySettings(PredictSimpleClassificationEntity, e => import('./Templates/PredictSimpleClassification')));
-    Navigator.addSettings(new EntitySettings(PredictSimpleRegressionEntity, e => import('./Templates/PredictSimpleRegression')));
+    Navigator.addSettings(new EntitySettings(PredictSimpleResultEntity, e => import('./Templates/PredictSimpleResult')));
 
     QuickLinks.registerQuickLink(PredictorEntity, ctx => new QuickLinks.QuickLinkAction(
         PredictorMessage.DownloadCsv.niceToString(),
@@ -80,14 +80,9 @@ export function start(options: { routes: JSX.Element[] }) {
         saveValidationProgressEvery: 10,
     }));
 
-    //registerResultRenderer(PredictorSimpleResultSaver.Regression, p =>
-
-
-    //    ChartClient.Encoder.chartRequestPath(ChartRequest.New({
-        
-
-
-    //}));
+    registerResultRenderer(PredictorSimpleResultSaver.OneOutput, ctx =>
+        <ImportComponent onImportModule={() => import("./Templates/SimpleResultButton")} componentProps={{ ctx: ctx}} />
+    );
 }
 
 export async function predict(predictor: Lite<PredictorEntity>, entity: Lite<Entity> | undefined): Promise<void> {
@@ -103,9 +98,20 @@ export function registerInitializer(symbol: PredictorAlgorithmSymbol, initialize
     initializers[symbol.key] = initialize;
 }
 
-export const resultRenderers: { [key: string]: (pred: PredictorEntity) => React.ReactFragment } = {};
-export function registerResultRenderer(symbol: PredictorResultSaverSymbol, renderer: (predictor: PredictorEntity) => React.ReactFragment) {
+export const resultRenderers: { [key: string]: (ctx: TypeContext<PredictorEntity>) => React.ReactFragment } = {};
+export function registerResultRenderer(symbol: PredictorResultSaverSymbol, renderer: (ctx: TypeContext<PredictorEntity>) => React.ReactFragment) {
     resultRenderers[symbol.key] = renderer;
+}
+
+export function getResultRendered(ctx: TypeContext<PredictorEntity>): React.ReactNode {
+    if (!ctx.value.resultSaver)
+        return null;
+
+    var rr = resultRenderers[ctx.value.resultSaver.key];
+    if (rr == null)
+        return null;
+
+    return rr(ctx);
 }
 
 export namespace API {
@@ -184,7 +190,7 @@ function fromObjectArray(array: (number | undefined)[]): EpochProgress {
 export interface PredictRequest {
     hasOriginal: boolean;
     predictor: Lite<PredictorEntity>;
-    columns: PredictColumn[] 
+    columns: PredictColumn[]
     subQueries: PredictSubQueryTable[]
 }
 
@@ -207,7 +213,7 @@ export interface PredictOutputTuple {
 
 export interface PredictSubQueryHeader {
     token: QueryToken;
-    headerType: PredictorHeaderType 
+    headerType: PredictorHeaderType
 }
 
 export type PredictorHeaderType = "Key" | "Input" | "Output";

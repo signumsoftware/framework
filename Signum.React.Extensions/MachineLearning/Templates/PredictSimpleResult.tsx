@@ -4,7 +4,7 @@ import { FormGroup, FormControlStatic, ValueLine, ValueLineType, EntityLine, Ent
 import { SearchControl } from '../../../../Framework/Signum.React/Scripts/Search'
 import { TypeContext, FormGroupStyle } from '../../../../Framework/Signum.React/Scripts/TypeContext'
 import FileLine from '../../Files/FileLine'
-import { PredictSimpleRegressionEntity } from '../Signum.Entities.MachineLearning'
+import { PredictSimpleResultEntity } from '../Signum.Entities.MachineLearning'
 import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
 import { getQueryNiceName } from '../../../../Framework/Signum.React/Scripts/Reflection'
 import QueryTokenEntityBuilder from '../../UserAssets/Templates/QueryTokenEntityBuilder'
@@ -15,11 +15,10 @@ import { API } from '../PredictorClient';
 import FilterBuilderEmbedded from './FilterBuilderEmbedded';
 import { TypeReference } from '../../../../Framework/Signum.React/Scripts/Reflection';
 
-export default class PredictSimpleRegression extends React.Component<{ ctx: TypeContext<PredictSimpleRegressionEntity> }> {
+export default class PredictSimpleResult extends React.Component<{ ctx: TypeContext<PredictSimpleResultEntity> }> {
 
     render() {
         const ctx = this.props.ctx.subCtx({ formGroupStyle: "Basic" });
-
 
         return (
             <div className="form-vertical">

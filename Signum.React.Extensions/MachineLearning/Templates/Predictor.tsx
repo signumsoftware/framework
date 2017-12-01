@@ -224,7 +224,7 @@ export default class Predictor extends React.Component<{ ctx: TypeContext<Predic
                                     <FileLine ctx={ec.subCtx({ formGroupStyle: "SrOnly" })} remove={false} fileType={PredictorFileType.PredictorFile} />
                                 } />
                             </div>
-
+                            {ctx.value.resultSaver && PredictorClient.getResultRendered(ctx)}
                             <EntityDetail ctx={ctxxs.subCtx(f => f.classificationTraining)} hideIfNull={true} />
                             <EntityDetail ctx={ctxxs.subCtx(f => f.classificationValidation)} hideIfNull={true} />
                             <EntityDetail ctx={ctxxs.subCtx(f => f.regressionTraining)} hideIfNull={true} />

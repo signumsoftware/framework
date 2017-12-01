@@ -54,6 +54,16 @@ export type NeuralNetworkInitializer =
     "Uniform" |
     "Xavier";
 
+export const NeuralNetworkLearner = new EnumType<NeuralNetworkLearner>("NeuralNetworkLearner");
+export type NeuralNetworkLearner =
+    "Adam" |
+    "AdaDelta" |
+    "AdaGrad" |
+    "FSAdaGrad" |
+    "RMSProp" |
+    "MomentumSGD" |
+    "SGD";
+
 export const NeuralNetworkSettingsEntity = new Type<NeuralNetworkSettingsEntity>("NeuralNetworkSettings");
 export interface NeuralNetworkSettingsEntity extends Entities.Entity, IPredictorAlgorithmSettings {
     Type: "NeuralNetworkSettings";
@@ -61,6 +71,7 @@ export interface NeuralNetworkSettingsEntity extends Entities.Entity, IPredictor
     hiddenLayers: Entities.MList<NeuralNetworkHidenLayerEmbedded>;
     outputActivation?: NeuralNetworkActivation;
     outputInitializer?: NeuralNetworkInitializer;
+    learner?: NeuralNetworkLearner;
     learningRate?: number;
     learningMomentum?: number | null;
     minibatchSize?: number;
@@ -240,8 +251,7 @@ export interface PredictorSettingsEmbedded extends Entities.EmbeddedEntity {
 }
 
 export module PredictorSimpleResultSaver {
-    export const Regression : PredictorResultSaverSymbol = registerSymbol("PredictorResultSaver", "PredictorSimpleResultSaver.Regression");
-    export const Classification : PredictorResultSaverSymbol = registerSymbol("PredictorResultSaver", "PredictorSimpleResultSaver.Classification");
+    export const OneOutput : PredictorResultSaverSymbol = registerSymbol("PredictorResultSaver", "PredictorSimpleResultSaver.OneOutput");
 }
 
 export const PredictorState = new EnumType<PredictorState>("PredictorState");
@@ -277,21 +287,13 @@ export interface PredictorSubQueryEntity extends Entities.Entity {
     columns: Entities.MList<PredictorSubQueryColumnEmbedded>;
 }
 
-export const PredictSimpleClassificationEntity = new Type<PredictSimpleClassificationEntity>("PredictSimpleClassification");
-export interface PredictSimpleClassificationEntity extends Entities.Entity {
-    Type: "PredictSimpleClassification";
+export const PredictSimpleResultEntity = new Type<PredictSimpleResultEntity>("PredictSimpleResult");
+export interface PredictSimpleResultEntity extends Entities.Entity {
+    Type: "PredictSimpleResult";
     predictor?: Entities.Lite<PredictorEntity> | null;
     target?: Entities.Lite<Entities.Entity> | null;
     type?: PredictionSet;
-    predictedValue?: string | null;
-}
-
-export const PredictSimpleRegressionEntity = new Type<PredictSimpleRegressionEntity>("PredictSimpleRegression");
-export interface PredictSimpleRegressionEntity extends Entities.Entity {
-    Type: "PredictSimpleRegression";
-    predictor?: Entities.Lite<PredictorEntity> | null;
-    target?: Entities.Lite<Entities.Entity> | null;
-    type?: PredictionSet;
+    predictedCategory?: string | null;
     predictedValue?: number | null;
 }
 

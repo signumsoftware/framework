@@ -136,25 +136,19 @@ namespace Signum.Engine.MachineLearning
                 Validator.PropertyValidator((PredictorColumnEmbedded c) => c.Encoding).StaticPropertyValidation += Column_StaticPropertyValidation;
                 Validator.PropertyValidator((PredictorSubQueryColumnEmbedded c) => c.Token).StaticPropertyValidation += GroupKey_StaticPropertyValidation;
 
-                sb.Include<PredictSimpleClassificationEntity>()
+                sb.Include<PredictSimpleResultEntity>()
                     .WithQuery(dqm, () => e => new
                     {
                         Entity = e,
                         e.Id,
+                        e.Predictor,
                         e.Target,
-                        e.PredictedValue
+                        e.Type,
+                        e.PredictedValue,
+                        e.PredictedCategory,
                     });
-                RegisterResultSaver(PredictorSimpleResultSaver.Classification, new PredictorSimpleClassificationSaver());
-                
-                sb.Include<PredictSimpleRegressionEntity>()
-                    .WithQuery(dqm, () => e => new
-                    {
-                        Entity = e,
-                        e.Id,
-                        e.Target,
-                        e.PredictedValue
-                    });
-                RegisterResultSaver(PredictorSimpleResultSaver.Regression, new PredictorSimpleRegressionSaver());
+                RegisterResultSaver(PredictorSimpleResultSaver.OneOutput, new PredictorSimpleSaver());
+                sb.Schema.EntityEvents<PredictorEntity>().PreUnsafeDelete += query => Database.Query<PredictSimpleResultEntity>().Where(a => query.Contains(a.Predictor.Entity)).UnsafeDelete();
             }
         }
 
@@ -280,15 +274,16 @@ namespace Signum.Engine.MachineLearning
                 PredictorCodificationLogic.CreatePredictorCodifications(ctx);
                 var algorithm = Algorithms.GetOrThrow(ctx.Predictor.Algorithm);
                 algorithm.Train(ctx);
-                ctx.Predictor.State = PredictorState.Trained;
-                using (OperationLogic.AllowSave<PredictorEntity>())
-                    ctx.Predictor.Save();
 
                 if(ctx.Predictor.ResultSaver != null)
                 {
                     var saver = ResultSavers.GetOrThrow(ctx.Predictor.ResultSaver);
                     saver.SavePredictions(ctx);
                 }
+
+                ctx.Predictor.State = PredictorState.Trained;
+                using (OperationLogic.AllowSave<PredictorEntity>())
+                    ctx.Predictor.Save();
             }
             catch (OperationCanceledException e)
             {

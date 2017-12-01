@@ -1,6 +1,7 @@
 ﻿using CNTK;
 using Signum.Entities.MachineLearning;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -81,6 +82,29 @@ namespace Signum.Engine.MachineLearning.CNTK
             func.Evaluate(inputs, outputs, device);
 
             return outputs[func.Output].GetDenseData<float>(func.Output);
+        }
+
+        internal static Learner GetInitializer(IList<Parameter> parameters, NeuralNetworkSettingsEntity settings)
+        {
+            var vector = new ParameterVector((ICollection)parameters);
+            switch (settings.Learner)
+            {
+                case NeuralNetworkLearner.Adam: return CNTKLib.AdamLearner(vector,
+                    new TrainingParameterScheduleDouble(settings.LearningRate),
+                    new TrainingParameterScheduleDouble(settings.LearningMomentum ?? 0), false);
+                default:
+                case NeuralNetworkLearner.AdaDelta:
+                case NeuralNetworkLearner.AdaGrad:
+                case NeuralNetworkLearner.FSAdaGrad:
+                case NeuralNetworkLearner.RMSProp:
+                    throw new NotImplementedException("Not implemented " + settings.Learner);
+                case NeuralNetworkLearner.MomentumSGD:
+                    return CNTKLib.MomentumSGDLearner(vector, 
+                        new TrainingParameterScheduleDouble(settings.LearningRate), 
+                        new TrainingParameterScheduleDouble(settings.LearningMomentum ?? 0), false);
+                case NeuralNetworkLearner.SGD:
+                    return CNTKLib.SGDLearner(vector, new TrainingParameterScheduleDouble(settings.LearningRate));
+            }
         }
     }
 }

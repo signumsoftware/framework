@@ -173,6 +173,8 @@
     <TypeScriptCompile Include="MachineLearning\Templates\NeuralNetworkSettings.tsx" />
     <TypeScriptCompile Include="MachineLearning\Templates\PredictorRegressionMetrics.tsx" />
     <TypeScriptCompile Include="MachineLearning\Templates\PredictorClassificationMetrics.tsx" />
+    <TypeScriptCompile Include="MachineLearning\Templates\PredictSimpleResult.tsx" />
+    <TypeScriptCompile Include="MachineLearning\Templates\SimpleResultButton.tsx" />
     <TypeScriptCompile Include="MachineLearning\Templates\ProgressBar.tsx" />
     <TypeScriptCompile Include="TypeHelp\TypeHelpClient.tsx" />
     <TypeScriptCompile Include="TypeHelp\TypeHelpButtonBarComponent.tsx" />

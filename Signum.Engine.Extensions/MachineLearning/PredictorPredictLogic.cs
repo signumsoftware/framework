@@ -28,14 +28,20 @@ namespace Signum.Engine.MachineLearning
                     if (p.State != PredictorState.Trained)
                         throw new InvalidOperationException($"Predictor '{p.Name}' not trained");
 
-                    var codifications = p.RetrievePredictorCodifications();
-                    var ppc = new PredictorPredictContext(p,  PredictorLogic.Algorithms.GetOrThrow(p.Algorithm), codifications);
-                    ppc.Algorithm.LoadModel(ppc);
+                    PredictorPredictContext ppc = CreatePredictContext(p);
                     return t.Commit(ppc);
                 }
             });
         }
-        
+
+        public static PredictorPredictContext CreatePredictContext(PredictorEntity p)
+        {
+            var codifications = p.RetrievePredictorCodifications();
+            var ppc = new PredictorPredictContext(p, PredictorLogic.Algorithms.GetOrThrow(p.Algorithm), codifications);
+            ppc.Algorithm.LoadModel(ppc);
+            return ppc;
+        }
+
         public static PredictDictionary FromEntity(Lite<PredictorEntity> predictor, Lite<Entity> entity)
         {
             return FromEntities(predictor, new List<Lite<Entity>> { entity }).SingleEx().Value;
@@ -121,7 +127,7 @@ namespace Signum.Engine.MachineLearning
                 MainQueryValues = ctx.Predictor.MainQuery.Columns.Select((c, i) => KVP.Create(c, row[i])).ToDictionaryEx(),
                 SubQueries = ctx.Predictor.SubQueries.ToDictionary(sq => sq, sq => new PredictSubQueryDictionary(sq)
                 {
-                    SubQueryGroups = (subQueryResults.TryGetC(sq)?.TryGetC(row.Entity))
+                    SubQueryGroups = (subQueryResults.TryGetC(sq)?.TryGetC(row.Entity)) ?? new Dictionary<object[], Dictionary<PredictorSubQueryColumnEmbedded, object>>(ObjectArrayComparer.Instance)
                 })
             });
 
@@ -154,7 +160,7 @@ namespace Signum.Engine.MachineLearning
                 MainQueryValues = ctx.Predictor.MainQuery.Columns.Select((c, i) => KVP.Create(c, row[i])).ToDictionaryEx(),
                 SubQueries = ctx.Predictor.SubQueries.ToDictionary(sq => sq, sq => new PredictSubQueryDictionary(sq)
                 {
-                    SubQueryGroups = (subQueryResults.TryGetC(sq)?.TryGetC(row.Entity))
+                    SubQueryGroups = (subQueryResults.TryGetC(sq)?.TryGetC(row.Entity)) ?? new Dictionary<object[], Dictionary<PredictorSubQueryColumnEmbedded, object>>(ObjectArrayComparer.Instance)
                 })
             });
 

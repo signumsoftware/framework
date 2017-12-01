@@ -119,7 +119,7 @@ export default class PredictorSubQuery extends React.Component<{ ctx: TypeContex
                                 template: (colCtx, row) => <QueryTokenEntityBuilder
                                     ctx={colCtx.subCtx(a => a.token)}
                                     queryKey={this.props.ctx.value.query!.key}
-                                    subTokenOptions={SubTokensOptions.CanElement}
+                                    subTokenOptions={SubTokensOptions.CanElement | SubTokensOptions.CanAggregate}
                                     onTokenChanged={() => this.handleChangeUsage(colCtx)}
                                     helpBlock={row.props.index == 0 ? PredictorMessage.ParentKeyOf0ShouldBeOfType1.niceToString(Finder.getTypeNiceName(targetType)) : undefined}
                                 />,

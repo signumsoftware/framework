@@ -296,36 +296,71 @@ function defaultParameterValue(scriptParameter: ChartScriptParameterEmbedded, re
 }
 
 
+export interface ChartOptions {
+    queryName: any,
+    chartScript?: string,
+    groupResults?: boolean,
+    filterOptions?: FilterOption[];
+    orderOptions?: OrderOption[];
+    columnOptions?: ChartColumnOption[];
+    parameters?: ChartParameterOption[];
+}
+
+export interface ChartColumnOption {
+    columnName?: string;
+    displayName?: string;
+}
+
+export interface ChartParameterOption {
+    name: string;
+    value: string;
+}
+
 export module Encoder {
 
-    export function chartRequestPath(cr: ChartRequest, extra?: any): string {
-        const query = {
-            script: cr.chartScript && cr.chartScript.name,
+    export function toChartOptions(cr: ChartRequest): ChartOptions {
+        return {
+            queryName: cr.queryKey,
+            chartScript: cr.chartScript && cr.chartScript.name || undefined,
             groupResults: cr.groupResults,
+            filterOptions: cr.filterOptions.map(fo => ({ columnName: fo.token!.fullKey, operation: fo.operation, value: fo.value, frozen: fo.frozen } as FilterOption)),
+            orderOptions: cr.orderOptions.map(oo => ({ columnName: oo.token!.fullKey, orderType: oo.orderType } as OrderOption)),
+            columnOptions: cr.columns.map(co => ({ columnName: co.element.token && co.element.token.tokenString, displayName: co.element.displayName }) as ChartColumnOption),
+            parameters: cr.parameters.map(p => ({ name: p.element.name, value: p.element.value }) as ChartParameterOption)
+        };
+    }
+
+    export function chartPath(cr: ChartOptions | ChartRequest, extra?: any): string {
+
+        var co = ChartRequest.isInstance(cr) ? toChartOptions(cr) : cr;
+        
+        const query = {
+            script: co.chartScript,
+            groupResults: co.groupResults,
             ...extra
         };
 
-        Finder.Encoder.encodeFilters(query, cr.filterOptions.map(a => ({ columnName: a.token!.fullKey, operation: a.operation, value: a.value, frozen: a.frozen } as FilterOption)));
-        Finder.Encoder.encodeOrders(query, cr.orderOptions.map(a => ({ columnName: a.token!.fullKey, orderType: a.orderType } as OrderOption)));
-        encodeParameters(query, cr.parameters);
+        Finder.Encoder.encodeFilters(query, co.filterOptions);
+        Finder.Encoder.encodeOrders(query, co.orderOptions);
+        encodeParameters(query, co.parameters);
 
-        encodeColumn(query, cr.columns);
+        encodeColumn(query, co.columnOptions);
 
-        return Navigator.toAbsoluteUrl(`~/chart/${cr.queryKey}?` + QueryString.stringify(query));
+        return Navigator.toAbsoluteUrl(`~/chart/${getQueryKey(co.queryName)}?` + QueryString.stringify(query));
     }
 
     const scapeTilde = Finder.Encoder.scapeTilde;
 
-    export function encodeColumn(query: any, columns: MList<ChartColumnEmbedded>) {
+    export function encodeColumn(query: any, columns: ChartColumnOption[] | undefined) {
         if (columns)
-            columns.forEach((co, i) => query["column" + i] = (co.element.token ? co.element.token.tokenString : "") + (co.element.displayName ? ("~" + scapeTilde(co.element.displayName)) : ""));
+            columns.forEach((co, i) => query["column" + i] = (co.columnName || "") + (co.displayName ? ("~" + scapeTilde(co.displayName)) : ""));
     }
-    export function encodeParameters(query: any, parameters: MList<ChartParameterEmbedded>) {
+
+    export function encodeParameters(query: any, parameters: ChartParameterOption[] | undefined) {
         if (parameters)
-            parameters.map((p, i) => query["param" + i] = scapeTilde(p.element.name!) + "~" + scapeTilde(p.element.value!));
+            parameters.map((p, i) => query["param" + i] = scapeTilde(p.name!) + "~" + scapeTilde(p.value!));
     }
 }
-
 
 export module Decoder {
 

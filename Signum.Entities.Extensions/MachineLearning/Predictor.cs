@@ -432,7 +432,6 @@ namespace Signum.Entities.MachineLearning
     [AutoInit]
     public static class PredictorSimpleResultSaver
     {
-        public static PredictorResultSaverSymbol Regression;
-        public static PredictorResultSaverSymbol Classification;
+        public static PredictorResultSaverSymbol OneOutput;
     }
 }

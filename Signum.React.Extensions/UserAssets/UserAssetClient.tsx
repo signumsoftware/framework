@@ -12,9 +12,10 @@ import * as Operations from '../../../Framework/Signum.React/Scripts/Operations'
 import * as QuickLinks from '../../../Framework/Signum.React/Scripts/QuickLinks'
 import { FindOptions, FilterOption, FilterOperation, OrderOption, ColumnOption, FilterRequest, QueryRequest, Pagination } from '../../../Framework/Signum.React/Scripts/FindOptions'
 import * as AuthClient  from '../Authorization/AuthClient'
-import { IUserAssetEntity, UserAssetMessage, UserAssetPreviewModel, UserAssetPermission }  from './Signum.Entities.UserAssets'
+import { IUserAssetEntity, UserAssetMessage, UserAssetPreviewModel, UserAssetPermission, QueryTokenEmbedded }  from './Signum.Entities.UserAssets'
 import * as OmniboxClient from '../Omnibox/OmniboxClient'
 import { ImportRoute } from "../../../Framework/Signum.React/Scripts/AsyncImport";
+import { QueryToken } from '../../../Framework/Signum.React/Scripts/FindOptions';
 
 
 let started = false;
@@ -42,6 +43,13 @@ export function registerExportAssertLink(type: Type<IUserAssetEntity>) {
         return new QuickLinks.QuickLinkAction(UserAssetMessage.ExportToXml.name, UserAssetMessage.ExportToXml.niceToString(), e => {
             API.exportAsset(ctx.lite);
         });
+    });
+}
+
+export function toQueryTokenEmbedded(token: QueryToken) {
+    return QueryTokenEmbedded.New({
+        token: token,
+        tokenString: token.fullKey,
     });
 }
 

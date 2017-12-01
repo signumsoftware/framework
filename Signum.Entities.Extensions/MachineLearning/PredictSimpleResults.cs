@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 namespace Signum.Entities.MachineLearning
 {
     [Serializable, EntityKind(EntityKind.System, EntityData.Transactional)]
-    public class PredictSimpleClassificationEntity : Entity
+    public class PredictSimpleResultEntity : Entity
     {
         [NotNullable]
         [NotNullValidator]
@@ -22,23 +22,10 @@ namespace Signum.Entities.MachineLearning
 
         public PredictionSet Type { get; set; }
 
-        [NotNullable, SqlDbType(Size = 200)]
-        [StringLengthValidator(AllowNulls = false, Max = 200)]
-        public string PredictedValue { get; set; }
-    }
+        [SqlDbType(Size = 200)]
+        [StringLengthValidator(AllowNulls = true, Max = 200)]
+        public string PredictedCategory { get; set; }
 
-    [Serializable, EntityKind(EntityKind.System, EntityData.Transactional)]
-    public class PredictSimpleRegressionEntity : Entity
-    {
-        [NotNullable]
-        [NotNullValidator]
-        public Lite<PredictorEntity> Predictor { get; internal set; }
-
-        [NotNullable]
-        [NotNullValidator, ImplementedByAll]
-        public Lite<Entity> Target { get; set; }
-
-        public PredictionSet Type { get; set; }
 
         public decimal? PredictedValue { get; set; }
     }

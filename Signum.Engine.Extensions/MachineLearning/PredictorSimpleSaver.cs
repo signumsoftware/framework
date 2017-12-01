@@ -10,7 +10,7 @@ using Signum.Utilities;
 
 namespace Signum.Engine.MachineLearning
 {
-    public class PredictorSimpleClassificationSaver : IPredictorResultSaver
+    public class PredictorSimpleSaver : IPredictorResultSaver
     {
         public void AssertValid(PredictorEntity predictor)
         {
@@ -21,89 +21,51 @@ namespace Signum.Engine.MachineLearning
         {
             var outputs = predictor.MainQuery.Columns.Where(a => a.Usage == PredictorColumnUsage.Output);
             if (outputs.Count() != 1)
-                throw new InvalidOperationException($"{PredictorSimpleResultSaver.Classification} requires the predictor to have only one output (instead of {outputs.Count()})");
+                throw new InvalidOperationException($"{PredictorSimpleResultSaver.OneOutput} requires the predictor to have only one output (instead of {outputs.Count()})");
 
-            var outColumn = outputs.SingleEx();
-            if (!outColumn.Token.Token.IsGroupable)
-                throw new InvalidOperationException($"{PredictorSimpleResultSaver.Classification} rerqires the only output to be grupable ({outColumn.Token.Token.NiceTypeName} is not)");
-
-            return outColumn;
+            return outputs.SingleEx();
         }
 
         public void SavePredictions(PredictorTrainingContext ctx)
         {
             var p = ctx.Predictor.ToLite();
-            var output = AssertOnlyOutput(ctx.Predictor);
-            ctx.ReportProgress($"Deleting old {typeof(PredictSimpleClassificationEntity).NicePluralName()}");
-            Database.Query<PredictSimpleClassificationEntity>().Where(a => a.Predictor == p).UnsafeDelete();
+            var outputColumn = AssertOnlyOutput(ctx.Predictor);
+            var isCategorical = outputColumn.Encoding == PredictorColumnEncoding.OneHot ||outputColumn.Encoding == PredictorColumnEncoding.Codified;
 
-            ctx.ReportProgress($"Creating {typeof(PredictSimpleClassificationEntity).NicePluralName()}");
+            ctx.ReportProgress($"Deleting old {typeof(PredictSimpleResultEntity).NicePluralName()}");
+            Database.Query<PredictSimpleResultEntity>().Where(a => a.Predictor == p).UnsafeDelete();
+
+            ctx.ReportProgress($"Creating {typeof(PredictSimpleResultEntity).NicePluralName()}");
             var dictionary = ctx.ToPredictDictionaries();
-            var toInsert = new List<PredictSimpleClassificationEntity>();
-            foreach (var kvp in dictionary)
-            {
-                toInsert.Add(new PredictSimpleClassificationEntity
-                {
-                    Predictor = p,
-                    Target = kvp.Key.Entity,
-                    Type = ctx.Validation.Contains(kvp.Key) ? PredictionSet.Validation : PredictionSet.Training,
-                    PredictedValue = PredictorPredictLogic.PredictBasic(p, kvp.Value).MainQueryValues.GetOrThrow(output)?.ToString(),
-                });
-            }
+            var toInsert = new List<PredictSimpleResultEntity>();
 
-            ctx.ReportProgress($"Inserting {typeof(PredictSimpleClassificationEntity).NicePluralName()}");
-            toInsert.BulkInsert();
-        }
-    }
-
-    public class PredictorSimpleRegressionSaver : IPredictorResultSaver
-    {
-        public void AssertValid(PredictorEntity predictor)
-        {
-            AssertOnlyOutput(predictor);
-        }
-
-        public PredictorColumnEmbedded AssertOnlyOutput(PredictorEntity predictor)
-        {
-            var outputs = predictor.MainQuery.Columns.Where(a => a.Usage == PredictorColumnUsage.Output);
-            if (outputs.Count() != 1)
-                throw new InvalidOperationException($"{PredictorSimpleResultSaver.Regression} requires the predictor to have only one output (instead of {outputs.Count()})");
-
-            var outColumn = outputs.SingleEx();
-            if (!ReflectionTools.IsNumber(outColumn.Token.Token.Type))
-                throw new InvalidOperationException($"{PredictorSimpleResultSaver.Regression} rerqires the only output to be numeric ({outColumn.Token.Token.NiceTypeName} is not)");
-
-            return outColumn;
-        }
-
-        public void SavePredictions(PredictorTrainingContext ctx)
-        {
-            var p = ctx.Predictor.ToLite();
-            var output = AssertOnlyOutput(ctx.Predictor);
-            ctx.ReportProgress($"Deleting old {typeof(PredictSimpleRegressionEntity).NicePluralName()}");
-            Database.Query<PredictSimpleRegressionEntity>().Where(a => a.Predictor == p).UnsafeDelete();
-
-            ctx.ReportProgress($"Creating {typeof(PredictSimpleRegressionEntity).NicePluralName()}");
-            var dictionary = ctx.ToPredictDictionaries();
-            var toInsert = new List<PredictSimpleRegressionEntity>();
-
-            int i = 0; 
+            var pc = PredictorPredictLogic.CreatePredictContext(ctx.Predictor);
+            int i = 0;
             foreach (var kvp in dictionary)
             {
                 if (i++ % 100 == 0)
-                    ctx.ReportProgress($"Creating {typeof(PredictSimpleRegressionEntity).NicePluralName()}", i / (decimal)dictionary.Count);
+                    ctx.ReportProgress($"Creating {typeof(PredictSimpleResultEntity).NicePluralName()}", i / (decimal)dictionary.Count);
 
-                toInsert.Add(new PredictSimpleRegressionEntity
+                var output = pc.Algorithm.Predict(pc, kvp.Value);
+
+                var value = output.MainQueryValues.GetOrThrow(outputColumn);
+
+                toInsert.Add(new PredictSimpleResultEntity
                 {
                     Predictor = p,
                     Target = kvp.Key.Entity,
                     Type = ctx.Validation.Contains(kvp.Key) ? PredictionSet.Validation : PredictionSet.Training,
-                    PredictedValue = ReflectionTools.ChangeType<decimal?>(PredictorPredictLogic.PredictBasic(p, kvp.Value).MainQueryValues.GetOrThrow(output)),
+                    PredictedValue = isCategorical ? null : ReflectionTools.ChangeType<decimal?>(value),
+                    PredictedCategory = isCategorical ? value?.ToString() : null,
                 });
             }
-
-            ctx.ReportProgress($"Inserting {typeof(PredictSimpleRegressionEntity).NicePluralName()}");
-            toInsert.BulkInsert();
+            
+            var groups = toInsert.GroupsOf(1000).ToList();
+            foreach (var iter in groups.Iterate())
+            {
+                ctx.ReportProgress($"Inserting {typeof(PredictSimpleResultEntity).NicePluralName()}", (iter.Position) / (decimal)groups.Count);
+                iter.Value.BulkInsert();
+            }
         }
     }
 }

@@ -22,6 +22,8 @@ namespace Signum.Entities.MachineLearning
         public NeuralNetworkActivation OutputActivation { get; set; }
         public NeuralNetworkInitializer OutputInitializer { get; set; }
 
+        public NeuralNetworkLearner Learner { get; set; }
+
         [DecimalsValidator(5)]
         public double LearningRate { get; set; } = 0.2;
 
@@ -111,5 +113,16 @@ namespace Signum.Entities.MachineLearning
         TruncateNormal,
         Uniform,
         Xavier,
+    }
+
+    public enum NeuralNetworkLearner
+    {
+        Adam,
+        AdaDelta,
+        AdaGrad,
+        FSAdaGrad,
+        RMSProp,
+        MomentumSGD,
+        SGD,
     }
 }

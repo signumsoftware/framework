@@ -49,8 +49,9 @@ export default class NeuralNetworkSettings extends React.Component<{ ctx: TypeCo
                     <hr />
                     <div className="row">
                         <div className="col-sm-4">
+                            <ValueLine ctx={ctx2.subCtx(a => a.learner)} />
                             <ValueLine ctx={ctx2.subCtx(a => a.learningRate)} />
-                            <ValueLine ctx={ctx2.subCtx(a => a.learningMomentum)} helpBlock="Set to use MomentumSGDLearner" />
+                            <ValueLine ctx={ctx2.subCtx(a => a.learningMomentum)} />
                         </div>
                         <div className="col-sm-4">
                             <ValueLine ctx={ctx2.subCtx(a => a.minibatchSize)} />

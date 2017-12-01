@@ -80,15 +80,9 @@ namespace Signum.Engine.MachineLearning.CNTK
             {
                 throw new InvalidOperationException("Unexpected " + nn.PredictionType);
             }
-            
-            // prepare for training
-            Learner learner = nn.LearningMomentum == null ?
-                (Learner)Learner.SGDLearner(calculatedOutputs.Parameters(),
-                new TrainingParameterScheduleDouble(nn.LearningRate, (uint)nn.MinibatchSize)) :
 
-                (Learner)Learner.MomentumSGDLearner(calculatedOutputs.Parameters(),
-                new TrainingParameterScheduleDouble(nn.LearningRate, (uint)nn.MinibatchSize),
-                new TrainingParameterScheduleDouble(nn.LearningMomentum.Value, (uint)nn.MinibatchSize), false);
+            // prepare for training
+            Learner learner = NetworkBuilder.GetInitializer(calculatedOutputs.Parameters(), nn);
 
             Trainer trainer = Trainer.CreateTrainer(calculatedOutputs, loss, evalError, new List<Learner>() { learner });
 
@@ -424,7 +418,7 @@ namespace Signum.Engine.MachineLearning.CNTK
                         .Where(a => a.Key.Usage ==  PredictorSubQueryColumnUsage.Output)
                         .ToDictionary(a => a.Key, a => FloatToValue(a.Key.Encoding.Value, a.Key.Token.Token, a.Value, outputValues)), 
                         ObjectArrayComparer.Instance
-                    )
+                    ) ?? new Dictionary<object[], Dictionary<PredictorSubQueryColumnEmbedded, object>>(ObjectArrayComparer.Instance),
                 })
             };
         }
