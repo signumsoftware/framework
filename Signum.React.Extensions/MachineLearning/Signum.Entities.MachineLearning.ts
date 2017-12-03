@@ -67,6 +67,7 @@ export type NeuralNetworkLearner =
 export const NeuralNetworkSettingsEntity = new Type<NeuralNetworkSettingsEntity>("NeuralNetworkSettings");
 export interface NeuralNetworkSettingsEntity extends Entities.Entity, IPredictorAlgorithmSettings {
     Type: "NeuralNetworkSettings";
+    device?: string | null;
     predictionType?: PredictionType;
     hiddenLayers: Entities.MList<NeuralNetworkHidenLayerEmbedded>;
     outputActivation?: NeuralNetworkActivation;
@@ -74,6 +75,8 @@ export interface NeuralNetworkSettingsEntity extends Entities.Entity, IPredictor
     learner?: NeuralNetworkLearner;
     learningRate?: number;
     learningMomentum?: number | null;
+    learningUnitGain?: boolean | null;
+    learningVarianceMomentum?: number | null;
     minibatchSize?: number;
     numMinibatches?: number;
     saveProgressEvery?: number;
@@ -230,12 +233,12 @@ export module PredictorOperation {
 export const PredictorRegressionMetricsEmbedded = new Type<PredictorRegressionMetricsEmbedded>("PredictorRegressionMetricsEmbedded");
 export interface PredictorRegressionMetricsEmbedded extends Entities.EmbeddedEntity {
     Type: "PredictorRegressionMetricsEmbedded";
-    signed?: number | null;
-    absolute?: number | null;
-    deviation?: number | null;
-    percentageSigned?: number | null;
-    percentageAbsolute?: number | null;
-    percentageDeviation?: number | null;
+    meanError?: number | null;
+    meanSquaredError?: number | null;
+    meanAbsoluteError?: number | null;
+    rootMeanSquareError?: number | null;
+    meanPercentageError?: number | null;
+    meanPercentageAbsoluteError?: number | null;
 }
 
 export const PredictorResultSaverSymbol = new Type<PredictorResultSaverSymbol>("PredictorResultSaver");

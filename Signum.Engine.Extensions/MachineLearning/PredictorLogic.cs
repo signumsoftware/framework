@@ -8,6 +8,7 @@ using Signum.Entities;
 using Signum.Entities.Basics;
 using Signum.Entities.DynamicQuery;
 using Signum.Entities.MachineLearning;
+using Signum.Entities.Reflection;
 using Signum.Entities.UserAssets;
 using Signum.Utilities;
 using Signum.Utilities.DataStructures;
@@ -31,6 +32,14 @@ namespace Signum.Engine.MachineLearning
 
     public static class PredictorLogic
     {
+        static Expression<Func<PredictorEntity, IQueryable<PredictSimpleResultEntity>>> SimpleResultsExpression =
+           e => Database.Query<PredictSimpleResultEntity>().Where(a => a.Predictor.RefersTo(e));
+        [ExpressionField]
+        public static IQueryable<PredictSimpleResultEntity> SimpleResults(this PredictorEntity e)
+        {
+            return SimpleResultsExpression.Evaluate(e);
+        }
+
         static Expression<Func<PredictorEntity, IQueryable<PredictorCodificationEntity>>> CodificationsExpression =
         e => Database.Query<PredictorCodificationEntity>().Where(a => a.Predictor.RefersTo(e));
         [ExpressionField]
@@ -118,7 +127,8 @@ namespace Signum.Engine.MachineLearning
                         Entity = e,
                         e.Predictor,
                         e.Id,
-                        e.CreationDate,
+                        e.Epoch,
+                        e.Ellapsed,
                         e.LossTraining,
                         e.LossValidation,
                         e.EvaluationTraining,
@@ -205,7 +215,7 @@ namespace Signum.Engine.MachineLearning
             return algorithm.ValidateEncodingProperty(p, sq, column.Encoding.Value, usage, column.Token);
         }
 
-        public static void TrainSync(this PredictorEntity p, bool autoReset = true)
+        public static void TrainSync(this PredictorEntity p, bool autoReset = true, Action<string, decimal?> onReportProgres = null)
         {
             if(autoReset)
             {
@@ -221,7 +231,25 @@ namespace Signum.Engine.MachineLearning
 
             var cancellationSource = new CancellationTokenSource();
             var ctx = new PredictorTrainingContext(p, cancellationSource.Token);
-            ctx.OnReportProgres += (message, progress) => Console.WriteLine((progress.HasValue ? $"{progress:P} - " : "") + message);
+            var lastWithProgress = false;
+
+            if (onReportProgres != null)
+                ctx.OnReportProgres += onReportProgres;
+            else
+                ctx.OnReportProgres += (message, progress) =>
+                {
+                    if (progress == null)
+                    {
+                        if (lastWithProgress)
+                            Console.WriteLine();
+                        Console.WriteLine(message);
+                    }
+                    else
+                    {
+                        SafeConsole.WriteSameLine($"{progress:P} - {message}");
+                        lastWithProgress = true;
+                    }
+                };
             DoTraining(ctx);
         }
 
@@ -372,8 +400,8 @@ namespace Signum.Engine.MachineLearning
 
                 new Execute(PredictorOperation.Save)
                 {
-                    FromStates = { PredictorState.Draft },
-                    ToStates = { PredictorState.Draft },
+                    FromStates = { PredictorState.Draft, PredictorState.Error, PredictorState.Trained },
+                    ToStates = { PredictorState.Draft, PredictorState.Error, PredictorState.Trained },
                     AllowsNew = true,
                     Lite = false,
                     Execute = (e, _) => { },
@@ -439,6 +467,9 @@ namespace Signum.Engine.MachineLearning
                         {
                             state.Context.StopTraining = true;
                         }
+
+                        if (GraphExplorer.IsGraphModified(e))
+                            throw new InvalidOperationException();
                     },
                 }.Register();
 
@@ -465,6 +496,7 @@ namespace Signum.Engine.MachineLearning
                         Name = e.Name.HasText() ? (e.Name + " (2)") : "",
                         State = PredictorState.Draft,
                         Algorithm = e.Algorithm,
+                        ResultSaver = e.ResultSaver,
                         MainQuery = e.MainQuery.Clone(),
                         SubQueries = e.SubQueries.Select(a => a.Clone()).ToMList(),
                         AlgorithmSettings = e.AlgorithmSettings?.Clone(),

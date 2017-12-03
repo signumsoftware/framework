@@ -132,23 +132,22 @@ namespace Signum.Entities.MachineLearning
     [Serializable]
     public class PredictorRegressionMetricsEmbedded : EmbeddedEntity
     {
-        public double? Signed { get; set; }
+        public double? MeanError { get; set; }
 
         [Unit("±")]
-        public double? Absolute { get; set; }
+        public double? MeanSquaredError { get; set; }
 
         [Unit("±")]
-        public double? Deviation { get; set; }
+        public double? MeanAbsoluteError { get; set; }
+
+        [Unit("±")]
+        public double? RootMeanSquareError { get; set; }
 
         [Format("p2")]
-        public double? PercentageSigned { get; set; }
+        public double? MeanPercentageError { get; set; }
 
         [Format("p2"), Unit("±")]
-        public double? PercentageAbsolute { get; set; }
-
-        [Format("p2"), Unit("±")]
-        public double? PercentageDeviation { get; set; }
-
+        public double? MeanPercentageAbsoluteError { get; set; }
     }
 
     [Serializable]

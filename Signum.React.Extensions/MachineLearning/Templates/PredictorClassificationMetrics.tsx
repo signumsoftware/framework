@@ -4,7 +4,7 @@ import { FormGroup, FormControlStatic, ValueLine, ValueLineType, EntityLine, Ent
 import { SearchControl } from '../../../../Framework/Signum.React/Scripts/Search'
 import { TypeContext, FormGroupStyle } from '../../../../Framework/Signum.React/Scripts/TypeContext'
 import FileLine from '../../Files/FileLine'
-import { PredictorClassificationMetricsEmbedded } from '../Signum.Entities.MachineLearning'
+import { PredictorClassificationMetricsEmbedded, PredictorEntity } from '../Signum.Entities.MachineLearning'
 import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
 import { getQueryNiceName } from '../../../../Framework/Signum.React/Scripts/Reflection'
 import QueryTokenEntityBuilder from '../../UserAssets/Templates/QueryTokenEntityBuilder'
@@ -15,27 +15,43 @@ import { API } from '../PredictorClient';
 import FilterBuilderEmbedded from './FilterBuilderEmbedded';
 import { TypeReference } from '../../../../Framework/Signum.React/Scripts/Reflection';
 
-export default class PredictorClassificationMetrics extends React.Component<{ ctx: TypeContext<PredictorClassificationMetricsEmbedded> }> {
+export default class PredictorClassificationMetrics extends React.Component<{ ctx: TypeContext<PredictorEntity> }> {
 
     render() {
-        const ctx = this.props.ctx.subCtx({ formGroupStyle: "Basic" });
+        const ctx = this.props.ctx.subCtx({ formGroupStyle: "SrOnly" });
 
 
         return (
-            <div className="form-vertical">
-                <div className="col-sm-2">
-                    <ValueLine ctx={ctx.subCtx(a => a.totalCount)} />
-                </div>
+            <fieldset>
+                <legend>Classification</legend>
+                <table className="table table-condensed">
+                    <thead>
+                        <tr>
+                            <th></th>
+                            <th>Training</th>
+                            <th>Validation</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {this.renderRow(ctx, a => a.totalCount)}
+                        {this.renderRow(ctx, a => a.missCount)}
+                        {this.renderRow(ctx, a => a.missRate)}
+                    </tbody>
+                </table>
+            </fieldset>
+        );
+    }
 
-                <div className="col-sm-2">
-                    <ValueLine ctx={ctx.subCtx(a => a.missCount)} />
-                </div>
+    renderRow(ctx: TypeContext<PredictorEntity>, property: (val: PredictorClassificationMetricsEmbedded) => number | null | undefined) {
+        const ctxT = ctx.subCtx(a => a.classificationTraining!);
+        const ctxV = ctx.subCtx(a => a.classificationValidation!);
 
-                <div className="col-sm-2">
-                    <ValueLine ctx={ctx.subCtx(a => a.missRate)} />
-                </div>
-
-            </div>
+        return (
+            <tr>
+                <th>{ctxT.niceName(property)}</th>
+                <td><ValueLine ctx={ctxT.subCtx(property)} /></td>
+                <td><ValueLine ctx={ctxV.subCtx(property)} /></td>
+            </tr>
         );
     }
 }

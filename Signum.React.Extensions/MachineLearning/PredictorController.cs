@@ -32,6 +32,15 @@ namespace Signum.React.MachineLearning
             return FilesController.GetHttpReponseMessage(new MemoryStream(content), $"{predictor.Name}.csv");
         }
 
+
+        [Route("api/predictor/availableDevices/{algorithmKey}"), HttpGet]
+        public string[] AvailableDevices(string algorithmKey)
+        {
+            var key = SymbolLogic<PredictorAlgorithmSymbol>.ToSymbol(algorithmKey);
+
+            return PredictorLogic.Algorithms.GetOrThrow(key).GetAvailableDevices();
+        }
+
         [Route("api/predictor/tsv/{id}"), HttpGet]
         public HttpResponseMessage DownloadTsvById(int id)
         {
@@ -115,6 +124,7 @@ namespace Signum.React.MachineLearning
 
             return request;
         }
+
 
     }
 }

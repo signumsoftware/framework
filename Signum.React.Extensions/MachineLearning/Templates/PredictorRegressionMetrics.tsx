@@ -4,7 +4,7 @@ import { FormGroup, FormControlStatic, ValueLine, ValueLineType, EntityLine, Ent
 import { SearchControl } from '../../../../Framework/Signum.React/Scripts/Search'
 import { TypeContext, FormGroupStyle } from '../../../../Framework/Signum.React/Scripts/TypeContext'
 import FileLine from '../../Files/FileLine'
-import { PredictorRegressionMetricsEmbedded } from '../Signum.Entities.MachineLearning'
+import { PredictorRegressionMetricsEmbedded, PredictorEntity } from '../Signum.Entities.MachineLearning'
 import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
 import { getQueryNiceName } from '../../../../Framework/Signum.React/Scripts/Reflection'
 import QueryTokenEntityBuilder from '../../UserAssets/Templates/QueryTokenEntityBuilder'
@@ -15,39 +15,47 @@ import { API } from '../PredictorClient';
 import FilterBuilderEmbedded from './FilterBuilderEmbedded';
 import { TypeReference } from '../../../../Framework/Signum.React/Scripts/Reflection';
 
-export default class PredictorRegressionMetrics extends React.Component<{ ctx: TypeContext<PredictorRegressionMetricsEmbedded> }> {
+export default class PredictorRegressionMetrics extends React.Component<{ ctx: TypeContext<PredictorEntity> }> {
 
     render() {
-        const ctx = this.props.ctx.subCtx({ formGroupStyle: "Basic" });
+        const ctx = this.props.ctx.subCtx({ formGroupStyle: "SrOnly" });
 
 
         return (
-            <div className="form-vertical">
-                <div className="col-sm-2">
-                    <ValueLine ctx={ctx.subCtx(a => a.signed)} />
-                </div>
+            <fieldset>
+                <legend>Regression</legend>
+                <table className="table table-condensed" style={{ width: "initial" }}>
+                    <thead>
+                        <tr>
+                            <th></th>
+                            <th>Training</th>
+                            <th>Validation</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {this.renderRow(ctx, a => a.meanError)}
+                        {this.renderRow(ctx, a => a.meanAbsoluteError)}
+                        {this.renderRow(ctx, a => a.meanSquaredError)}
+                        {this.renderRow(ctx, a => a.rootMeanSquareError)}
+                        {this.renderRow(ctx, a => a.meanPercentageError)}
+                        {this.renderRow(ctx, a => a.meanPercentageAbsoluteError)}
+                    </tbody>
+                </table>
+            </fieldset>
+        );
+    }
 
-                <div className="col-sm-2">
-                    <ValueLine ctx={ctx.subCtx(a => a.absolute)} />
-                </div>
+    renderRow(ctx: TypeContext<PredictorEntity>, property: (val: PredictorRegressionMetricsEmbedded) => number | null | undefined) {
+        const ctxT = ctx.subCtx(a => a.regressionTraining!);
+        const ctxV = ctx.subCtx(a => a.regressionValidation!);
+        var unit = ctxT.subCtx(property).propertyRoute.member!.unit;
 
-                <div className="col-sm-2">
-                    <ValueLine ctx={ctx.subCtx(a => a.deviation)} />
-                </div>
-
-                <div className="col-sm-2">
-                    <ValueLine ctx={ctx.subCtx(a => a.percentageSigned)} />
-                </div>
-
-                <div className="col-sm-2">
-                    <ValueLine ctx={ctx.subCtx(a => a.percentageAbsolute)} />
-                </div>
-
-                <div className="col-sm-2">
-                    <ValueLine ctx={ctx.subCtx(a => a.percentageDeviation)} />
-                </div>
-
-            </div>
+        return (
+            <tr>
+                <th>{ctxT.niceName(property)}{unit && " (" + unit + ")"}</th>
+                <td><ValueLine ctx={ctxT.subCtx(property)} unitText="" /></td>
+                <td><ValueLine ctx={ctxV.subCtx(property)} unitText="" /></td>
+            </tr>
         );
     }
 }

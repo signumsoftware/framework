@@ -27,6 +27,8 @@ import { is } from '../../../../Framework/Signum.React/Scripts/Signum.Entities';
 import ProgressBar from './ProgressBar'
 import LineChart, { LineChartSerie } from './LineChart'
 import { QueryToken } from '../../../../Framework/Signum.React/Scripts/FindOptions';
+import PredictorClassificationMetrics from './PredictorClassificationMetrics';
+import PredictorRegressionMetrics from './PredictorRegressionMetrics';
 
 export default class Predictor extends React.Component<{ ctx: TypeContext<PredictorEntity> }, { queryDescription?: QueryDescription }> implements IRenderButtons {
 
@@ -157,7 +159,7 @@ export default class Predictor extends React.Component<{ ctx: TypeContext<Predic
 
         return (
             <div>
-                <ValueLine ctx={ctxxs.subCtx(e => e.name)} />
+                <ValueLine ctx={ctxxs.subCtx(e => e.name)} readOnly={this.props.ctx.readOnly} />
                 <EntityCombo ctx={ctxxs.subCtx(f => f.algorithm)} onChange={this.handleAlgorithmChange} />
                 <EntityCombo ctx={ctxxs.subCtx(f => f.resultSaver)} />
                 <ValueLine ctx={ctxxs.subCtx(e => e.state, { readOnly: true })} />
@@ -219,16 +221,14 @@ export default class Predictor extends React.Component<{ ctx: TypeContext<Predic
                     }
                     {
                         ctx.value.state == "Trained" && <Tab eventKey="files" title={PredictorMessage.Results.niceToString()}>
+                            {ctx.value.classificationTraining && ctx.value.classificationValidation && <PredictorClassificationMetrics ctx={ctx}/> }
+                            {ctx.value.regressionTraining && ctx.value.regressionTraining && <PredictorRegressionMetrics ctx={ctx} />}
+                            {ctx.value.resultSaver && PredictorClient.getResultRendered(ctx)}
                             <div className="form-vertical">
                                 <EntityRepeater ctx={ctxxs.subCtx(f => f.files)} getComponent={ec =>
                                     <FileLine ctx={ec.subCtx({ formGroupStyle: "SrOnly" })} remove={false} fileType={PredictorFileType.PredictorFile} />
                                 } />
                             </div>
-                            {ctx.value.resultSaver && PredictorClient.getResultRendered(ctx)}
-                            <EntityDetail ctx={ctxxs.subCtx(f => f.classificationTraining)} hideIfNull={true} />
-                            <EntityDetail ctx={ctxxs.subCtx(f => f.classificationValidation)} hideIfNull={true} />
-                            <EntityDetail ctx={ctxxs.subCtx(f => f.regressionTraining)} hideIfNull={true} />
-                            <EntityDetail ctx={ctxxs.subCtx(f => f.regressionValidation)} hideIfNull={true} />
                         </Tab>
                     }
                 </Tabs>

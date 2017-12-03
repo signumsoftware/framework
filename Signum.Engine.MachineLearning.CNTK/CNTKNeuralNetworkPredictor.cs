@@ -45,6 +45,23 @@ namespace Signum.Engine.MachineLearning.CNTK
 
             return null;
         }
+        
+        public string[] GetAvailableDevices()
+        {
+            return DeviceDescriptor.AllDevices().Select(a => a.AsString()).ToArray();
+        }
+
+        private DeviceDescriptor GetDevice(NeuralNetworkSettingsEntity nnSettings)
+        {
+            if (!nnSettings.Device.HasText())
+                return DeviceDescriptor.UseDefaultDevice();
+
+            var dev = DeviceDescriptor.AllDevices().FirstOrDefault(a => a.AsString() == nnSettings.Device);
+            if(dev == null)
+                return DeviceDescriptor.UseDefaultDevice();
+
+            return dev;
+        }
 
         //Errors with CNTK: https://github.com/Microsoft/CNTK/issues/2614
         public void Train(PredictorTrainingContext ctx)
@@ -174,10 +191,7 @@ namespace Signum.Engine.MachineLearning.CNTK
             calculatedOutputs.Save(fp.FullPhysicalPath());
         }
 
-        private DeviceDescriptor GetDevice(NeuralNetworkSettingsEntity nnSettings)
-        {
-            return DeviceDescriptor.CPUDevice;
-        }
+ 
 
         static Value CreateValue(PredictorTrainingContext ctx, List<ResultRow> rows, List<PredictorCodification> columns, DeviceDescriptor device)
         {
@@ -355,15 +369,17 @@ namespace Signum.Engine.MachineLearning.CNTK
 
                     return 0;
                 });
-                
+
+                var mse = pairs.Average(p => Error(p) * Error(p));
+
                 var result = new PredictorRegressionMetricsEmbedded
                 {
-                    Signed = pairs.Average(p => Error(p)).CleanDouble(),
-                    Absolute = pairs.Average(p => Math.Abs(Error(p))).CleanDouble(),
-                    Deviation = Math.Sqrt(pairs.Average(p => Error(p) * Error(p))).CleanDouble(),
-                    PercentageSigned = pairs.Average(p => SafeDiv(Error(p), p.expected)).CleanDouble(),
-                    PercentageAbsolute = pairs.Average(p => SafeDiv(Math.Abs(Error(p)), p.expected)).CleanDouble(),
-                    PercentageDeviation = Math.Sqrt(pairs.Average(p => SafeDiv(Error(p) * Error(p), p.expected * p.expected))).CleanDouble()
+                    MeanError = pairs.Average(p => Error(p)).CleanDouble(),
+                    MeanAbsoluteError = pairs.Average(p => Math.Abs(Error(p))).CleanDouble(),
+                    MeanSquaredError = mse.CleanDouble(),
+                    RootMeanSquareError = Math.Sqrt(mse).CleanDouble(),
+                    MeanPercentageError = pairs.Average(p => SafeDiv(Error(p), p.expected)).CleanDouble(),
+                    MeanPercentageAbsoluteError = pairs.Average(p => Math.Abs(SafeDiv(Error(p), p.expected))).CleanDouble(),
                 };
 
                 return result;

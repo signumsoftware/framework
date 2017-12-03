@@ -55,7 +55,7 @@ namespace Signum.Engine.MachineLearning
                     Predictor = p,
                     Target = kvp.Key.Entity,
                     Type = ctx.Validation.Contains(kvp.Key) ? PredictionSet.Validation : PredictionSet.Training,
-                    PredictedValue = isCategorical ? null : ReflectionTools.ChangeType<decimal?>(value),
+                    PredictedValue = isCategorical ? null : ReflectionTools.ChangeType<double?>(value),
                     PredictedCategory = isCategorical ? value?.ToString() : null,
                 });
             }

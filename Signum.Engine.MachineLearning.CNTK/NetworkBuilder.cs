@@ -84,26 +84,55 @@ namespace Signum.Engine.MachineLearning.CNTK
             return outputs[func.Output].GetDenseData<float>(func.Output);
         }
 
-        internal static Learner GetInitializer(IList<Parameter> parameters, NeuralNetworkSettingsEntity settings)
+        public static TrainingParameterScheduleDouble ToTrainParam(this double value)
+        {
+            return new TrainingParameterScheduleDouble(value);
+        }
+
+        internal static Learner GetInitializer(IList<Parameter> parameters, NeuralNetworkSettingsEntity s)
         {
             var vector = new ParameterVector((ICollection)parameters);
-            switch (settings.Learner)
+            switch (s.Learner)
             {
                 case NeuralNetworkLearner.Adam: return CNTKLib.AdamLearner(vector,
-                    new TrainingParameterScheduleDouble(settings.LearningRate),
-                    new TrainingParameterScheduleDouble(settings.LearningMomentum ?? 0), false);
-                default:
+                     s.LearningRate.ToTrainParam(),
+                     s.LearningMomentum?.ToTrainParam(),
+                     s.LearningUnitGain ?? false,
+                     s.LearningVarianceMomentum?.ToTrainParam());
+
                 case NeuralNetworkLearner.AdaDelta:
+                    return CNTKLib.AdaDeltaLearner(vector,
+                        s.LearningRate.ToTrainParam());
+
                 case NeuralNetworkLearner.AdaGrad:
+                    return CNTKLib.AdaGradLearner(vector, 
+                        s.LearningRate.ToTrainParam());
+
                 case NeuralNetworkLearner.FSAdaGrad:
+                    return CNTKLib.FSAdaGradLearner(vector,
+                        s.LearningRate.ToTrainParam(),
+                        s.LearningMomentum?.ToTrainParam(),
+                        s.LearningUnitGain ?? false,
+                        s.LearningVarianceMomentum?.ToTrainParam());
+
                 case NeuralNetworkLearner.RMSProp:
-                    throw new NotImplementedException("Not implemented " + settings.Learner);
+                    return CNTKLib.FSAdaGradLearner(vector,
+                        s.LearningRate.ToTrainParam(),
+                        s.LearningMomentum?.ToTrainParam(),
+                        s.LearningUnitGain ?? false,
+                        s.LearningVarianceMomentum?.ToTrainParam());
+
                 case NeuralNetworkLearner.MomentumSGD:
-                    return CNTKLib.MomentumSGDLearner(vector, 
-                        new TrainingParameterScheduleDouble(settings.LearningRate), 
-                        new TrainingParameterScheduleDouble(settings.LearningMomentum ?? 0), false);
+                    return CNTKLib.MomentumSGDLearner(vector,
+                        s.LearningRate.ToTrainParam(),
+                        s.LearningMomentum?.ToTrainParam(),
+                        s.LearningUnitGain ?? false);
+
                 case NeuralNetworkLearner.SGD:
-                    return CNTKLib.SGDLearner(vector, new TrainingParameterScheduleDouble(settings.LearningRate));
+                    return CNTKLib.SGDLearner(vector,
+                        s.LearningRate.ToTrainParam());
+                default:
+                    throw new InvalidOperationException("Unexpected Learner");
             }
         }
     }

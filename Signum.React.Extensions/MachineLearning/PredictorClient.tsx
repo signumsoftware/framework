@@ -31,8 +31,6 @@ export function start(options: { routes: JSX.Element[] }) {
 
     Navigator.addSettings(new EntitySettings(PredictorEntity, e => import('./Templates/Predictor')));
     Navigator.addSettings(new EntitySettings(PredictorSubQueryEntity, e => import('./Templates/PredictorSubQuery')));
-    Navigator.addSettings(new EntitySettings(PredictorRegressionMetricsEmbedded, e => import('./Templates/PredictorRegressionMetrics')));
-    Navigator.addSettings(new EntitySettings(PredictorClassificationMetricsEmbedded, e => import('./Templates/PredictorClassificationMetrics')));
     Navigator.addSettings(new EntitySettings(NeuralNetworkSettingsEntity, e => import('./Templates/NeuralNetworkSettings')));
     Navigator.addSettings(new EntitySettings(PredictSimpleResultEntity, e => import('./Templates/PredictSimpleResult')));
 
@@ -70,8 +68,12 @@ export function start(options: { routes: JSX.Element[] }) {
     registerInitializer(CNTKPredictorAlgorithm.NeuralNetwork, a => a.algorithmSettings = NeuralNetworkSettingsEntity.New({
         predictionType: "Regression",
 
-        learningRate: 0.2,
-        learningMomentum: null,
+        learner: "MomentumSGD",
+
+        learningRate: 0.1,
+        learningMomentum: 0.01,
+        learningUnitGain: false,
+        learningVarianceMomentum: 0.001,
 
         minibatchSize: 1000,
         numMinibatches: 100,
@@ -115,6 +117,10 @@ export function getResultRendered(ctx: TypeContext<PredictorEntity>): React.Reac
 }
 
 export namespace API {
+
+    export function availableDevices(algorithm: PredictorAlgorithmSymbol): Promise<string[]> {
+        return ajaxGet<string[]>({ url: `~/api/predictor/availableDevices/${algorithm.key}` });
+    }
 
     export function downloadCsvById(lite: Lite<PredictorEntity>): void {
         ajaxGetRaw({ url: `~/api/predictor/csv/${lite.id}` })

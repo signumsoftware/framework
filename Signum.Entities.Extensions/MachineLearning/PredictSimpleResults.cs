@@ -27,7 +27,7 @@ namespace Signum.Entities.MachineLearning
         public string PredictedCategory { get; set; }
 
 
-        public decimal? PredictedValue { get; set; }
+        public double? PredictedValue { get; set; }
     }
 
     public enum PredictionSet

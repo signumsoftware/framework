@@ -210,6 +210,7 @@ namespace Signum.Engine.MachineLearning
         void Train(PredictorTrainingContext ctx);
         void LoadModel(PredictorPredictContext predictor);
         PredictDictionary Predict(PredictorPredictContext ctx, PredictDictionary input);
+        string[] GetAvailableDevices();
     }
 
     public interface IPredictorResultSaver
