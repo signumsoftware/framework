@@ -42,7 +42,7 @@
     <Member Name="Unattend" Description="Desatender" />
   </Type>
   <Type Name="AlertState" Description="Estado de la alerta">
-    <Member Name="Attended" Description="Atentida" />
+    <Member Name="Attended" Description="Atendida" />
     <Member Name="New" Description="Nuevo" />
     <Member Name="Saved" Description="Guardado" />
   </Type>
@@ -51,8 +51,8 @@
     <Member Name="Save" Description="Guardar" />
   </Type>
   <Type Name="AllowedRule`2">
-    <Member Name="Allowed" Description="Permitió" />
-    <Member Name="AllowedBase" Description="Permitió base" />
+    <Member Name="Allowed" Description="Permitido" />
+    <Member Name="AllowedBase" Description="Permitido base" />
     <Member Name="Overriden" Description="Reemplazar" />
     <Member Name="Resource" Description="Recursos" />
   </Type>
@@ -70,7 +70,7 @@
   </Type>
   <Type Name="ApplicationEventLogEntity" Description="Registro eventos aplicación">
     <Member Name="Date" Description="Fecha" />
-    <Member Name="GlobalEvent" Description="Evento mundial" />
+    <Member Name="GlobalEvent" Description="Evento global" />
     <Member Name="MachineName" Description="Nombre de la máquina" />
   </Type>
   <Type Name="AsyncEmailSenderPermission">
@@ -81,11 +81,11 @@
     <Member Name="Allow" Description="Permitir" />
     <Member Name="Deny" Description="Denegar" />
     <Member Name="Everything" Description="Todo" />
-    <Member Name="NoRoles" Description="Sin papeles" />
+    <Member Name="NoRoles" Description="Sin roles" />
     <Member Name="Nothing" Description="Nada" />
     <Member Name="Overriden" Description="Sobrescrito" />
     <Member Name="PermissionRules" Description="Reglas de permiso" />
-    <Member Name="PleaseSaveChangesFirst" Description="Primero guarda cambios" />
+    <Member Name="PleaseSaveChangesFirst" Description="Por favor, guarda los cambios primero" />
     <Member Name="TypeRules" Description="Reglas de tipo" />
   </Type>
   <Type Name="AuthEmailMessage">
