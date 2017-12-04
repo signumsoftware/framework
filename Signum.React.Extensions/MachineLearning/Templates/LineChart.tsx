@@ -21,11 +21,11 @@ interface LineChartProps {
     height: number;
 }
 
-export default class LineChart extends React.Component<LineChartProps, { width?: number }> {
+export default class LineChart extends React.Component<LineChartProps, { width?: number; logMode: boolean; }> {
 
     constructor(p: LineChartProps) {
         super(p);
-        this.state = { width: undefined };
+        this.state = { width: undefined, logMode: false };
     }
 
     divRef?: HTMLDivElement | null;
@@ -46,7 +46,7 @@ export default class LineChart extends React.Component<LineChartProps, { width?:
             width = this.state.width;
         
         return (
-            <div ref={d => this.handleSetRef(d)} style={{ width: this.props.width == null ? "100%" : this.props.width }}>
+            <div ref={d => this.handleSetRef(d)} style={{ width: this.props.width == null ? "100%" : this.props.width }} onDoubleClick={() => this.setState({ logMode: !this.state.logMode })}>
                 {width != null && this.renderSvg(width)}
             </div>
         );
@@ -70,10 +70,13 @@ export default class LineChart extends React.Component<LineChartProps, { width?:
     }
 
     renderSerie(scaleX: d3.ScaleLinear<number, number>, height: number, s: LineChartSerie, index: number) {
-       
-        var scaleY = d3.scaleLinear()
-            .domain([s.minValue != null ? s.minValue : s.values.min(a => a.y), s.maxValue != null ? s.maxValue : s.values.max(a => a.y)])
-            .range([height - 4, 2]);
+
+        var minValue: number = s.minValue != null ? s.minValue : s.values.min(a => a.y);
+        var maxValue: number = s.maxValue != null ? s.maxValue : s.values.max(a => a.y);
+
+        var scaleY = this.state.logMode ?
+            d3.scaleLog().domain([Math.max(0.0001, minValue), maxValue]).range([height - 4, 2]) :
+            d3.scaleLinear().clamp(true).domain([minValue, maxValue]).range([height - 4, 2]);
 
         var line = d3.line<Point>()
             .curve(d3.curveLinear)
