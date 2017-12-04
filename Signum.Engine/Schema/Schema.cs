@@ -9,6 +9,7 @@ using Signum.Utilities.DataStructures;
 using Signum.Utilities.ExpressionTrees;
 using Signum.Utilities.Reflection;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
@@ -375,6 +376,24 @@ namespace Signum.Engine.Maps
 
                 return command;
             }
+        }
+
+        ConcurrentDictionary<Type, Table> Views = new ConcurrentDictionary<Type, Maps.Table>();
+        public Table View<T>() where T : IView
+        {
+            return View(typeof(T));
+        }
+
+        private Table View(Type viewType)
+        {
+            var tn = this.Settings.TypeAttribute<TableNameAttribute>(viewType);
+
+            if (tn?.SchemaName == "sys")
+            {
+                return ViewBuilder.NewView(viewType);
+            }
+
+            return Views.GetOrCreate(viewType, ViewBuilder.NewView(viewType));
         }
 
         public event Func<SqlPreCommand> Generating;

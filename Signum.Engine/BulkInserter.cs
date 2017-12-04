@@ -156,7 +156,7 @@ namespace Signum.Engine
                 dt.Columns.Add(new DataColumn(c.Name, c.Type.UnNullify()));
 
             if (disableIdentityBehaviour) t.IdentityBehaviour = false;
-            foreach (var e in entities)
+            foreach (var e in list)
             {
                 if (!e.IsNew)
                     throw new InvalidOperationException("Entites should be new");
@@ -261,6 +261,44 @@ namespace Signum.Engine
             using (Transaction tr = copyOptions.HasFlag(SqlBulkCopyOptions.UseInternalTransaction) ? null : new Transaction())
             {
                 Schema.Current.OnPreBulkInsert(typeof(E), inMListTable: true);
+
+                Executor.BulkCopy(dt, t.Name, copyOptions, timeout);
+
+                return tr.Commit(list.Count);
+            }
+        }
+
+        public static int BulkInsertView<T>(this IEnumerable<T> entities,
+          SqlBulkCopyOptions copyOptions = SqlBulkCopyOptions.Default,
+          int? timeout = null,
+          string message = null)
+          where T : IView
+        {
+            if (message != null)
+                return SafeConsole.WaitRows(message == "auto" ? $"BulkInsering {entities.Count()} {typeof(T).TypeName()}" : message,
+                    () => BulkInsertView(entities, copyOptions, timeout, message: null));
+
+            if (copyOptions.HasFlag(SqlBulkCopyOptions.UseInternalTransaction))
+                throw new InvalidOperationException("BulkInsertDisableIdentity not compatible with UseInternalTransaction");
+
+            var t = Schema.Current.View<T>();
+   
+            var list = entities.ToList();
+
+            bool disableIdentityBehaviour = copyOptions.HasFlag(SqlBulkCopyOptions.KeepIdentity);
+
+            DataTable dt = new DataTable();
+            foreach (var c in t.Columns.Values)
+                dt.Columns.Add(new DataColumn(c.Name, c.Type.UnNullify()));
+            
+            foreach (var e in entities)
+            {
+                dt.Rows.Add(t.BulkInsertDataRow(e));
+            }
+
+            using (Transaction tr = new Transaction())
+            {
+                Schema.Current.OnPreBulkInsert(typeof(T), inMListTable: false);
 
                 Executor.BulkCopy(dt, t.Name, copyOptions, timeout);
 
