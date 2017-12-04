@@ -149,6 +149,7 @@
     <Compile Include="MachineLearning\PredictorCodificationLogic.cs" />
     <Compile Include="MachineLearning\PredictorLogic.cs" />
     <Compile Include="MachineLearning\PredictorLogicQuery.cs" />
+    <Compile Include="MachineLearning\PredictorNeuralGeneticAlgorithm.cs" />
     <Compile Include="MachineLearning\PredictorPredictLogic.cs" />
     <Compile Include="MachineLearning\PredictorSimpleSaver.cs" />
     <Compile Include="Mailing\ImageAttachmentLogic.cs" />

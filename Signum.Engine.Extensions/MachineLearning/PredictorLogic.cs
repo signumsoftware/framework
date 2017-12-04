@@ -215,7 +215,7 @@ namespace Signum.Engine.MachineLearning
             return algorithm.ValidateEncodingProperty(p, sq, column.Encoding.Value, usage, column.Token);
         }
 
-        public static void TrainSync(this PredictorEntity p, bool autoReset = true, Action<string, decimal?> onReportProgres = null)
+        public static void TrainSync(this PredictorEntity p, bool autoReset = true, Action<string, decimal?> onReportProgres = null, CancellationToken? cancellationToken = null)
         {
             if(autoReset)
             {
@@ -228,9 +228,8 @@ namespace Signum.Engine.MachineLearning
             p.User = UserHolder.Current.ToLite();
             p.State = PredictorState.Training;
             p.Save();
-
-            var cancellationSource = new CancellationTokenSource();
-            var ctx = new PredictorTrainingContext(p, cancellationSource.Token);
+            
+            var ctx = new PredictorTrainingContext(p, cancellationToken ?? new CancellationTokenSource().Token);
             var lastWithProgress = false;
 
             if (onReportProgres != null)
