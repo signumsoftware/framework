@@ -77,6 +77,7 @@ export interface SearchControlLoadedState {
     simpleFilterBuilder?: React.ReactElement<any>;
     selectedRows?: ResultRow[];
     markedRows?: MarkedRowsDictionary;
+    resultFindOptions?: FindOptionsParsed;
 
     searchCount?: number;
     dragColumnIndex?: number,
@@ -92,7 +93,6 @@ export interface SearchControlLoadedState {
     };
 
     showFilters: boolean;
-
     editingColumn?: ColumnOptionParsed;
     lastToken?: QueryToken;
 }
@@ -172,6 +172,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
     resetResults(continuation: ()=> void) {
         this.setState({
             resultTable: undefined,
+            resultFindOptions: undefined,
             selectedRows: [],
             currentMenuItems: undefined,
             markedRows: undefined,
@@ -186,9 +187,11 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
                 this.props.onSearch(fop);
 
             this.setState({ editingColumn: undefined }, () => this.handleHeightChanged());
+            var resultFindOptions = JSON.parse(JSON.stringify(this.props.findOptions));
             return this.abortableSearch.getData(this.getQueryRequest()).then(rt => {
                 this.setState({
                     resultTable: rt,
+                    resultFindOptions: resultFindOptions,
                     selectedRows: [],
                     currentMenuItems: undefined,
                     markedRows: undefined,
@@ -233,7 +236,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
     handlePagination = (p: Pagination) => {
         this.props.findOptions.pagination = p;
-        this.setState({ resultTable: undefined });
+        this.setState({ resultTable: undefined, resultFindOptions: undefined });
 
         if (this.props.findOptions.pagination.mode != "All")
             this.doSearch().done();
@@ -934,6 +937,25 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
         if ((e.target as HTMLElement).parentElement != e.currentTarget) //directly in the td
             return;
 
+        var resFo = this.state.resultFindOptions;
+        if (resFo && resFo.groupResults) {
+
+            var keyFilters = resFo.columnOptions
+                .map((col, i) => ({ col, value: row.columns[i] }))
+                .filter(a => a.col.token && a.col.token.queryTokenType != "Aggregate")
+                .map(a => ({ columnName: a.col.token!.fullKey, operation: "EqualTo", value: a.value }) as FilterOption);
+
+            var nonAggregateFilters = resFo.filterOptions.filter(fo => fo.token != null && fo.token.queryTokenType != "Aggregate")
+                .map(fo => ({ columnName: fo.token!.fullKey, operation: fo.operation, value: fo.value }) as FilterOption);
+
+            Finder.explore({
+                queryName: resFo.queryKey,
+                filterOptions: nonAggregateFilters.concat(keyFilters)
+            }).done();
+
+            return;
+        }
+
         if (this.props.onDoubleClick) {
             e.preventDefault();
             this.props.onDoubleClick(e, row);
@@ -946,10 +968,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
             qs.onDoubleClick(e, row);
             return;
         }
-
-        if (this.props.findOptions.groupResults)
-            return;
-
+        
         var lite = row.entity!;
 
         if (!Navigator.isNavigable(lite.EntityType, undefined, true))
