@@ -403,6 +403,10 @@ namespace Signum.Entities.DynamicQuery
             }
         }
 
+        public bool ContainsKey(string key)
+        {
+            return this.Key == key || this.Parent != null && this.Parent.ContainsKey(key);
+        }
     }
 
     public class BuildExpressionContext
