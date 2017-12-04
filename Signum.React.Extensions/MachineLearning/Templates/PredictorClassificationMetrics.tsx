@@ -22,7 +22,7 @@ export default class PredictorClassificationMetrics extends React.Component<{ ct
 
 
         return (
-            <fieldset>
+            <fieldset className="form-vertical">
                 <legend>Classification</legend>
                 <table className="table table-condensed">
                     <thead>

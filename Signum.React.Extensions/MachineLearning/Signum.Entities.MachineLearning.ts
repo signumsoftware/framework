@@ -5,6 +5,7 @@
 import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from '../../../Framework/Signum.React/Scripts/Reflection'
 import * as Entities from '../../../Framework/Signum.React/Scripts/Signum.Entities'
 import * as Basics from '../../../Framework/Signum.React/Scripts/Signum.Entities.Basics'
+import * as Processes from '../Processes/Signum.Entities.Processes'
 import * as Files from '../Files/Signum.Entities.Files'
 import * as UserQueries from '../UserQueries/Signum.Entities.UserQueries'
 import * as UserAssets from '../UserAssets/Signum.Entities.UserAssets'
@@ -12,6 +13,25 @@ import * as UserAssets from '../UserAssets/Signum.Entities.UserAssets'
 
 export module AccordPredictorAlgorithm {
     export const DiscreteNaiveBayes : PredictorAlgorithmSymbol = registerSymbol("PredictorAlgorithm", "AccordPredictorAlgorithm.DiscreteNaiveBayes");
+}
+
+export const AutoconfigureNeuralNetworkEntity = new Type<AutoconfigureNeuralNetworkEntity>("AutoconfigureNeuralNetwork");
+export interface AutoconfigureNeuralNetworkEntity extends Entities.Entity, Processes.IProcessDataEntity {
+    Type: "AutoconfigureNeuralNetwork";
+    initialPredictor?: Entities.Lite<PredictorEntity> | null;
+    exploreLearner?: boolean;
+    exploreLearningValues?: boolean;
+    exploreHiddenLayers?: boolean;
+    exploreOutputLayer?: boolean;
+    maxLayers?: number;
+    minNeuronsPerLayer?: number;
+    maxNeuronsPerLayer?: number;
+    oneTrainingDuration?: number | null;
+    generations?: number;
+    population?: number;
+    survivalRate?: number;
+    initialMutationProbability?: number;
+    seed?: number | null;
 }
 
 export module CNTKPredictorAlgorithm {
@@ -166,6 +186,8 @@ export interface PredictorEntity extends Entities.Entity {
     mainQuery: PredictorMainQueryEmbedded;
     subQueries: Entities.MList<PredictorSubQueryEntity>;
     files: Entities.MList<Files.FilePathEmbedded>;
+    resultTraining?: PredictorMetricsEmbedded | null;
+    resultValidation?: PredictorMetricsEmbedded | null;
     classificationTraining?: PredictorClassificationMetricsEmbedded | null;
     classificationValidation?: PredictorClassificationMetricsEmbedded | null;
     regressionTraining?: PredictorRegressionMetricsEmbedded | null;
@@ -220,6 +242,13 @@ export module PredictorMessage {
     export const Predict = new MessageKey("PredictorMessage", "Predict");
 }
 
+export const PredictorMetricsEmbedded = new Type<PredictorMetricsEmbedded>("PredictorMetricsEmbedded");
+export interface PredictorMetricsEmbedded extends Entities.EmbeddedEntity {
+    Type: "PredictorMetricsEmbedded";
+    loss?: number | null;
+    evaluation?: number | null;
+}
+
 export module PredictorOperation {
     export const Save : Entities.ExecuteSymbol<PredictorEntity> = registerSymbol("Operation", "PredictorOperation.Save");
     export const Train : Entities.ExecuteSymbol<PredictorEntity> = registerSymbol("Operation", "PredictorOperation.Train");
@@ -228,6 +257,11 @@ export module PredictorOperation {
     export const Untrain : Entities.ExecuteSymbol<PredictorEntity> = registerSymbol("Operation", "PredictorOperation.Untrain");
     export const Delete : Entities.DeleteSymbol<PredictorEntity> = registerSymbol("Operation", "PredictorOperation.Delete");
     export const Clone : Entities.ConstructSymbol_From<PredictorEntity, PredictorEntity> = registerSymbol("Operation", "PredictorOperation.Clone");
+    export const AutoconfigureNetwork : Entities.ConstructSymbol_From<Processes.ProcessEntity, PredictorEntity> = registerSymbol("Operation", "PredictorOperation.AutoconfigureNetwork");
+}
+
+export module PredictorProcessAlgorithm {
+    export const AutoconfigureNeuralNetwork : Processes.ProcessAlgorithmSymbol = registerSymbol("ProcessAlgorithm", "PredictorProcessAlgorithm.AutoconfigureNeuralNetwork");
 }
 
 export const PredictorRegressionMetricsEmbedded = new Type<PredictorRegressionMetricsEmbedded>("PredictorRegressionMetricsEmbedded");

@@ -126,6 +126,7 @@ export default class NeuralNetworkSettings extends React.Component<{ ctx: TypeCo
             default:
         }
 
+        this.forceUpdate();
     }
 
     renderCount(ctx: StyleContext, p: PredictorEntity, usage: PredictorColumnUsage) {

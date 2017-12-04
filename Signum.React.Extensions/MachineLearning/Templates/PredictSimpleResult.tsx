@@ -25,7 +25,7 @@ export default class PredictSimpleResult extends React.Component<{ ctx: TypeCont
                 <EntityLine ctx={ctx.subCtx(a => a.predictor)} />
                 <ValueLine ctx={ctx.subCtx(a => a.type)} />
                 <ValueLine ctx={ctx.subCtx(a => a.predictedValue)} />
-                <EntityDetail ctx={ctx.subCtx(a => a.target)} />
+                <EntityLine ctx={ctx.subCtx(a => a.target)} />
             </div>
         );
     }

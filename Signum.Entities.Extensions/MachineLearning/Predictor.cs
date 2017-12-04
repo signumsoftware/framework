@@ -14,6 +14,7 @@ using System.Reflection;
 using Signum.Entities.Files;
 using Signum.Entities.Authorization;
 using System.Xml.Linq;
+using Signum.Entities.Processes;
 
 namespace Signum.Entities.MachineLearning
 {
@@ -59,6 +60,8 @@ namespace Signum.Entities.MachineLearning
         [NotNullValidator, NoRepeatValidator]
         public MList<FilePathEmbedded> Files { get; set; } = new MList<FilePathEmbedded>();
 
+        public PredictorMetricsEmbedded ResultTraining { get; set; }
+        public PredictorMetricsEmbedded ResultValidation { get; set; }
         public PredictorClassificationMetricsEmbedded ClassificationTraining { get; set; }
         public PredictorClassificationMetricsEmbedded ClassificationValidation { get; set; }
         public PredictorRegressionMetricsEmbedded RegressionTraining { get; set; }
@@ -132,22 +135,33 @@ namespace Signum.Entities.MachineLearning
     [Serializable]
     public class PredictorRegressionMetricsEmbedded : EmbeddedEntity
     {
+        [Format("F4")]
         public double? MeanError { get; set; }
 
-        [Unit("±")]
+        [Format("F4"), Unit("±")]
         public double? MeanSquaredError { get; set; }
 
-        [Unit("±")]
+        [Format("F4"), Unit("±")]
         public double? MeanAbsoluteError { get; set; }
 
-        [Unit("±")]
+        [Format("F4"), Unit("±")]
         public double? RootMeanSquareError { get; set; }
 
-        [Format("p2")]
+        [Format("P2")]
         public double? MeanPercentageError { get; set; }
 
-        [Format("p2"), Unit("±")]
+        [Format("P2"), Unit("±")]
         public double? MeanPercentageAbsoluteError { get; set; }
+    }
+
+    [Serializable]
+    public class PredictorMetricsEmbedded : EmbeddedEntity
+    {
+        [Format("F4")]
+        public double? Loss { get; set; }
+
+        [Format("F4")]
+        public double? Evaluation { get; set; }
     }
 
     [Serializable]
@@ -187,6 +201,7 @@ namespace Signum.Entities.MachineLearning
         public static readonly ExecuteSymbol<PredictorEntity> Untrain;
         public static readonly DeleteSymbol<PredictorEntity> Delete;
         public static readonly ConstructSymbol<PredictorEntity>.From<PredictorEntity> Clone;
+        public static readonly ConstructSymbol<ProcessEntity>.From<PredictorEntity> AutoconfigureNetwork;
     }
 
     [Serializable]
@@ -414,6 +429,12 @@ namespace Signum.Entities.MachineLearning
             base(declaringType, fieldName)
         {
         }
+    }
+
+    [AutoInit]
+    public static class PredictorProcessAlgorithm
+    {
+        public static ProcessAlgorithmSymbol AutoconfigureNeuralNetwork;
     }
 
     [AutoInit]

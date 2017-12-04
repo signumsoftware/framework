@@ -4,10 +4,12 @@ using Signum.Engine.DynamicQuery;
 using Signum.Engine.Files;
 using Signum.Engine.Maps;
 using Signum.Engine.Operations;
+using Signum.Engine.Processes;
 using Signum.Entities;
 using Signum.Entities.Basics;
 using Signum.Entities.DynamicQuery;
 using Signum.Entities.MachineLearning;
+using Signum.Entities.Processes;
 using Signum.Entities.Reflection;
 using Signum.Entities.UserAssets;
 using Signum.Utilities;
@@ -159,6 +161,24 @@ namespace Signum.Engine.MachineLearning
                     });
                 RegisterResultSaver(PredictorSimpleResultSaver.OneOutput, new PredictorSimpleSaver());
                 sb.Schema.EntityEvents<PredictorEntity>().PreUnsafeDelete += query => Database.Query<PredictSimpleResultEntity>().Where(a => query.Contains(a.Predictor.Entity)).UnsafeDelete();
+
+                sb.Schema.WhenIncluded<ProcessEntity>(() =>
+                {
+                    sb.Schema.Settings.AssertImplementedBy((ProcessEntity p) => p.Data, typeof(AutoconfigureNeuralNetworkEntity));
+                    ProcessLogic.Register(PredictorProcessAlgorithm.AutoconfigureNeuralNetwork, new AutoconfigureNeuralNetworkAlgorithm());
+
+                    new Graph<ProcessEntity>.ConstructFrom<PredictorEntity>(PredictorOperation.AutoconfigureNetwork)
+                    {
+                        CanConstruct = p => p.AlgorithmSettings is NeuralNetworkSettingsEntity ? ValidationMessage._0ShouldBeOfType1.NiceToString(p.NicePropertyName(_ => _.AlgorithmSettings), typeof(NeuralNetworkSettingsEntity).NiceName()) : null,
+                        Construct = (p, _) =>
+                        {
+                            return ProcessLogic.Create(PredictorProcessAlgorithm.AutoconfigureNeuralNetwork, new AutoconfigureNeuralNetworkEntity
+                            {
+                                InitialPredictor = p.ToLite()
+                            });
+                        }
+                    }.Register();
+                });
             }
         }
 

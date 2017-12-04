@@ -27,6 +27,7 @@ import { is } from '../../../../Framework/Signum.React/Scripts/Signum.Entities';
 import ProgressBar from './ProgressBar'
 import LineChart, { LineChartSerie } from './LineChart'
 import { QueryToken } from '../../../../Framework/Signum.React/Scripts/FindOptions';
+import PredictorMetrics from './PredictorMetrics';
 import PredictorClassificationMetrics from './PredictorClassificationMetrics';
 import PredictorRegressionMetrics from './PredictorRegressionMetrics';
 
@@ -221,6 +222,7 @@ export default class Predictor extends React.Component<{ ctx: TypeContext<Predic
                     }
                     {
                         ctx.value.state == "Trained" && <Tab eventKey="files" title={PredictorMessage.Results.niceToString()}>
+                            {ctx.value.resultTraining && ctx.value.resultValidation && <PredictorMetrics ctx={ctx} />}
                             {ctx.value.classificationTraining && ctx.value.classificationValidation && <PredictorClassificationMetrics ctx={ctx}/> }
                             {ctx.value.regressionTraining && ctx.value.regressionTraining && <PredictorRegressionMetrics ctx={ctx} />}
                             {ctx.value.resultSaver && PredictorClient.getResultRendered(ctx)}

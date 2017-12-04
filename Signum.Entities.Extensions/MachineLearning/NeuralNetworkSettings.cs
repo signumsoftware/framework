@@ -16,12 +16,12 @@ namespace Signum.Entities.MachineLearning
     [Serializable, EntityKind(EntityKind.Part, EntityData.Master)]
     public class NeuralNetworkSettingsEntity : Entity, IPredictorAlgorithmSettings
     {
-        [NotNullable, SqlDbType(Size = 100)]
-        [StringLengthValidator(AllowNulls = false, Max = 100)]
+        [SqlDbType(Size = 100)]
+        [StringLengthValidator(AllowNulls = true, Max = 100)]
         public string Device { get; set; }
 
         public PredictionType PredictionType { get; set; }
-        
+
         [NotNullable, PreserveOrder]
         [NotNullValidator, NoRepeatValidator]
         public MList<NeuralNetworkHidenLayerEmbedded> HiddenLayers { get; set; } = new MList<NeuralNetworkHidenLayerEmbedded>();
@@ -53,9 +53,9 @@ namespace Signum.Entities.MachineLearning
 
         protected override string PropertyValidation(PropertyInfo pi)
         {
-            if(pi.Name == nameof(SaveValidationProgressEvery))
+            if (pi.Name == nameof(SaveValidationProgressEvery))
             {
-                if(SaveValidationProgressEvery % SaveProgressEvery != 0)
+                if (SaveValidationProgressEvery % SaveProgressEvery != 0)
                 {
                     return PredictorMessage._0ShouldBeDivisibleBy12.NiceToString(pi.NiceName(), ReflectionTools.GetPropertyInfo(() => SaveProgressEvery).NiceName(), SaveProgressEvery);
                 }
@@ -109,7 +109,7 @@ namespace Signum.Entities.MachineLearning
 
     public enum NeuralNetworkActivation
     {
-        None, 
+        None,
         ReLU,
         Sigmoid,
         Tanh
@@ -138,36 +138,35 @@ namespace Signum.Entities.MachineLearning
         MomentumSGD,
         SGD,
     }
-}
+    
+    [Serializable, EntityKind(EntityKind.Part, EntityData.Transactional)]
+    public class AutoconfigureNeuralNetworkEntity : Entity, IProcessDataEntity
+    {
+        [NotNullable]
+        [NotNullValidator]
+        public Lite<PredictorEntity> InitialPredictor { get; set; }
 
-[Serializable, EntityKind(EntityKind.Part, EntityData.Transactional)]
-public class NeuralNetworkSettingsGeneticOptimizerEntity : Entity, IProcessDataEntity
-{
-    [NotNullable]
-    [NotNullValidator]
-    public Lite<PredictorEntity> StartingFrom { get; set; }
+        public bool ExploreLearner { get; set; }
+        public bool ExploreLearningValues { get; set; }
+        public bool ExploreHiddenLayers { get; set; }
+        public bool ExploreOutputLayer { get; set; }
 
-    public bool ExploreLearner { get; set; }
-    public bool ExploreLearningValues { get; set; }
-    public bool ExploreHiddenLayers { get; set; }
-    public bool ExploreOutputLayer { get; set; }
+        public int MaxLayers { get; set; } = 2;
+        public int MinNeuronsPerLayer { get; set; } = 5;
+        public int MaxNeuronsPerLayer { get; set; } = 20;
 
-    public int MaxLayers { get; set; } = 2;
-    public int MinNeuronsPerLayer { get; set; } = 5;
-    public int MaxNeuronsPerLayer { get; set; } = 20;
+        [Unit("seconds")]
+        public long? OneTrainingDuration { get; set; }
 
-    [Unit("seconds")]
-    public long? OneTrainingDuration { get; set; }
+        public int Generations { get; set; } = 10;
+        public int Population { get; set; } = 10;
 
-    public int Generations { get; set; } = 10;
-    public int Population { get; set; } = 10;
+        [Format("p")]
+        public double SurvivalRate { get; set; } = 0.4;
 
-    [Format("p")]
-    public double SurvivalRate { get; set; } = 0.4;
+        [Format("p")]
+        public double InitialMutationProbability { get; set; } = 0.1;
 
-    [Format("p")]
-    public double InitialMutationProbability { get; set; } = 0.1;
-
-    public int? Seed { get; set; }
-
+        public int? Seed { get; set; }
+    }
 }

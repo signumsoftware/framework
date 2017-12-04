@@ -105,7 +105,7 @@ namespace Signum.Engine.MachineLearning
                 case PredictorColumnEncoding.None:
                     return new List<PredictorCodification>
                     {
-                        new PredictorCodification()
+                        factory()
                     };
                 case PredictorColumnEncoding.OneHot:
                     return rc.Values.Cast<object>().NotNull().Distinct().Select(v =>

@@ -4,7 +4,7 @@ import { FormGroup, FormControlStatic, ValueLine, ValueLineType, EntityLine, Ent
 import { SearchControl } from '../../../../Framework/Signum.React/Scripts/Search'
 import { TypeContext, FormGroupStyle } from '../../../../Framework/Signum.React/Scripts/TypeContext'
 import FileLine from '../../Files/FileLine'
-import { PredictorRegressionMetricsEmbedded, PredictorEntity } from '../Signum.Entities.MachineLearning'
+import { PredictorMetricsEmbedded, PredictorEntity } from '../Signum.Entities.MachineLearning'
 import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
 import { getQueryNiceName } from '../../../../Framework/Signum.React/Scripts/Reflection'
 import QueryTokenEntityBuilder from '../../UserAssets/Templates/QueryTokenEntityBuilder'
@@ -23,7 +23,7 @@ export default class PredictorRegressionMetrics extends React.Component<{ ctx: T
 
         return (
             <fieldset className="form-vertical">
-                <legend>Regression</legend>
+                <legend>Last results</legend>
                 <table className="table table-condensed" style={{ width: "initial" }}>
                     <thead>
                         <tr>
@@ -33,21 +33,17 @@ export default class PredictorRegressionMetrics extends React.Component<{ ctx: T
                         </tr>
                     </thead>
                     <tbody>
-                        {this.renderRow(ctx, a => a.meanError)}
-                        {this.renderRow(ctx, a => a.meanAbsoluteError)}
-                        {this.renderRow(ctx, a => a.meanSquaredError)}
-                        {this.renderRow(ctx, a => a.rootMeanSquareError)}
-                        {this.renderRow(ctx, a => a.meanPercentageError)}
-                        {this.renderRow(ctx, a => a.meanPercentageAbsoluteError)}
+                        {this.renderRow(ctx, a => a.loss)}
+                        {this.renderRow(ctx, a => a.evaluation)}
                     </tbody>
                 </table>
             </fieldset>
         );
     }
 
-    renderRow(ctx: TypeContext<PredictorEntity>, property: (val: PredictorRegressionMetricsEmbedded) => number | null | undefined) {
-        const ctxT = ctx.subCtx(a => a.regressionTraining!);
-        const ctxV = ctx.subCtx(a => a.regressionValidation!);
+    renderRow(ctx: TypeContext<PredictorEntity>, property: (val: PredictorMetricsEmbedded) => number | null | undefined) {
+        const ctxT = ctx.subCtx(a => a.resultTraining!);
+        const ctxV = ctx.subCtx(a => a.resultValidation!);
         var unit = ctxT.subCtx(property).propertyRoute.member!.unit;
 
         return (

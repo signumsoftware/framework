@@ -171,6 +171,7 @@
     <TypeScriptCompile Include="MachineLearning\Templates\LineChart.tsx" />
     <TypeScriptCompile Include="MachineLearning\Templates\PredictModal.tsx" />
     <TypeScriptCompile Include="MachineLearning\Templates\NeuralNetworkSettings.tsx" />
+    <TypeScriptCompile Include="MachineLearning\Templates\PredictorMetrics.tsx" />
     <TypeScriptCompile Include="MachineLearning\Templates\PredictorRegressionMetrics.tsx" />
     <TypeScriptCompile Include="MachineLearning\Templates\PredictorClassificationMetrics.tsx" />
     <TypeScriptCompile Include="MachineLearning\Templates\PredictSimpleResult.tsx" />

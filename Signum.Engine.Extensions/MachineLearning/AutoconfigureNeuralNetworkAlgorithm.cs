@@ -11,32 +11,32 @@ using Signum.Engine.Operations;
 
 namespace Signum.Engine.MachineLearning
 {
-    public class PredictorNeuralGeneticAlgorithm : Processes.IProcessAlgorithm
+    public class AutoconfigureNeuralNetworkAlgorithm : Processes.IProcessAlgorithm
     {
         public void Execute(ExecutingProcess ep)
         {   
-            var opt = (NeuralNetworkSettingsGeneticOptimizerEntity)ep.Data;
+            var conf = (AutoconfigureNeuralNetworkEntity)ep.Data;
 
-            var initial = opt.StartingFrom.Retrieve();
-            Random r = opt.Seed == null ? null : new Random(opt.Seed.Value);
+            var initial = conf.InitialPredictor.Retrieve();
+            Random r = conf.Seed == null ? null : new Random(conf.Seed.Value);
 
-            var mutationProbability = opt.InitialMutationProbability;
+            var mutationProbability = conf.InitialMutationProbability;
 
-            List<PredictorEntity> population = 0.To(opt.Population).Select(p => initial.ConstructFrom(PredictorOperation.Clone)).ToList();
+            List<PredictorEntity> population = 0.To(conf.Population).Select(p => initial.ConstructFrom(PredictorOperation.Clone)).ToList();
 
-            population.ForEach(p => Mutate(p, opt, mutationProbability, r));
+            population.ForEach(p => Mutate(p, conf, mutationProbability, r));
 
-            Dictionary<PredictorEntity, double> evaluatedPopulation = EvaluatePopulation(ep, opt, population, 0);
+            Dictionary<PredictorEntity, double> evaluatedPopulation = EvaluatePopulation(ep, conf, population, 0);
 
-            for (int gen = 1; gen < opt.Generations + 1; gen++)
+            for (int gen = 1; gen < conf.Generations + 1; gen++)
             {
-                population = CrossOverPopulation(evaluatedPopulation, initial, opt, r);
+                population = CrossOverPopulation(evaluatedPopulation, initial, conf, r);
 
-                EvaluatePopulation(ep, opt, population, gen);
+                EvaluatePopulation(ep, conf, population, gen);
             }
         }
         
-        public List<PredictorEntity> CrossOverPopulation(Dictionary<PredictorEntity, double> evaluatedPopulation, PredictorEntity initial, NeuralNetworkSettingsGeneticOptimizerEntity opt, Random r)
+        public List<PredictorEntity> CrossOverPopulation(Dictionary<PredictorEntity, double> evaluatedPopulation, PredictorEntity initial, AutoconfigureNeuralNetworkEntity opt, Random r)
         {
             var positiveSurvivors = evaluatedPopulation.ToDictionary(kvp => kvp.Key, kvp => 1 / (kvp.Value + 0.01));
 
@@ -60,30 +60,30 @@ namespace Signum.Engine.MachineLearning
             return 0.To(opt.Population).Select(i => CrossOver(initial.ConstructFrom(PredictorOperation.Clone), SelectRandomly(), SelectRandomly(), r, opt)).ToList();
         }
 
-        private PredictorEntity CrossOver(PredictorEntity child, PredictorEntity father, PredictorEntity mother, Random r, NeuralNetworkSettingsGeneticOptimizerEntity opt)
+        private PredictorEntity CrossOver(PredictorEntity child, PredictorEntity father, PredictorEntity mother, Random r, AutoconfigureNeuralNetworkEntity conf)
         {
             var nnChild = (NeuralNetworkSettingsEntity)child.AlgorithmSettings;
             var nnFather = (NeuralNetworkSettingsEntity)father.AlgorithmSettings;
             var nnMother = (NeuralNetworkSettingsEntity)mother.AlgorithmSettings;
 
-            if (opt.ExploreLearner)
+            if (conf.ExploreLearner)
             {
                 nnChild.Learner = r.NextBool() ? nnFather.Learner : nnMother.Learner;
             }
 
-            if (opt.ExploreLearningValues)
+            if (conf.ExploreLearningValues)
             {
                 nnChild.LearningRate = r.NextBool() ? nnFather.LearningRate : nnMother.LearningRate;
                 nnChild.LearningMomentum = r.NextBool() ? nnFather.LearningMomentum : nnMother.LearningMomentum;
                 nnChild.LearningVarianceMomentum = r.NextBool() ? nnFather.LearningVarianceMomentum : nnMother.LearningVarianceMomentum;
             }
 
-            if (opt.ExploreHiddenLayers)
+            if (conf.ExploreHiddenLayers)
             {
                 nnChild.HiddenLayers = nnFather.HiddenLayers.ZipOrDefault(nnMother.HiddenLayers, (h1, h2) => r.NextBool() ? h1 : h2).NotNull().ToMList();
             }
 
-            if (opt.ExploreOutputLayer)
+            if (conf.ExploreOutputLayer)
             {
                 nnChild.OutputActivation = r.NextBool() ? nnFather.OutputActivation : nnMother.OutputActivation;
                 nnChild.OutputInitializer = r.NextBool() ? nnFather.OutputInitializer : nnMother.OutputInitializer;
@@ -92,9 +92,9 @@ namespace Signum.Engine.MachineLearning
             return child;
         }
 
-        public Dictionary<PredictorEntity, double> EvaluatePopulation(ExecutingProcess ep, NeuralNetworkSettingsGeneticOptimizerEntity opt, List<PredictorEntity> population,  int gen)
+        public Dictionary<PredictorEntity, double> EvaluatePopulation(ExecutingProcess ep, AutoconfigureNeuralNetworkEntity conf, List<PredictorEntity> population,  int gen)
         {
-            var total = opt.Population * (opt.Generations + 1);
+            var total = conf.Population * (conf.Generations + 1);
             var evaluatedPopulation = new Dictionary<PredictorEntity, double>();
             for (int i = 0; i < population.Count; i++)
             {
@@ -113,16 +113,16 @@ namespace Signum.Engine.MachineLearning
             return evaluatedPopulation;
         }
 
-        private void Mutate(PredictorEntity predictor, NeuralNetworkSettingsGeneticOptimizerEntity opt, double mutationProbability, Random r)
+        private void Mutate(PredictorEntity predictor, AutoconfigureNeuralNetworkEntity conf, double mutationProbability, Random r)
         {
             var nns = (NeuralNetworkSettingsEntity)predictor.AlgorithmSettings;
-            if (opt.ExploreLearner)
+            if (conf.ExploreLearner)
             {
                 if (r.NextDouble() < mutationProbability)
                     nns.Learner = r.NextElement(EnumExtensions.GetValues<NeuralNetworkLearner>());
             }
 
-            if (opt.ExploreLearningValues)
+            if (conf.ExploreLearningValues)
             {
                 double IncrementOrDecrement(double value)
                 {
@@ -141,17 +141,17 @@ namespace Signum.Engine.MachineLearning
                     nns.LearningVarianceMomentum = IncrementOrDecrement(nns.LearningVarianceMomentum ?? 0.01);
             }
 
-            if (opt.ExploreHiddenLayers)
+            if (conf.ExploreHiddenLayers)
             {
                 if (r.NextDouble() < mutationProbability)
                 {
-                    var shouldHidden = Math.Min(0, Math.Max(nns.HiddenLayers.Count + (r.NextBool() ? 1 : -1), opt.MaxLayers));
+                    var shouldHidden = Math.Min(0, Math.Max(nns.HiddenLayers.Count + (r.NextBool() ? 1 : -1), conf.MaxLayers));
 
                     if (shouldHidden > nns.HiddenLayers.Count)
                     {
                         nns.HiddenLayers.Add(new NeuralNetworkHidenLayerEmbedded
                         {
-                            Size = r.Next(opt.MaxNeuronsPerLayer),
+                            Size = r.Next(conf.MaxNeuronsPerLayer),
                             Activation = r.NextElement(EnumExtensions.GetValues<NeuralNetworkActivation>()),
                             Initializer = r.NextElement(EnumExtensions.GetValues<NeuralNetworkInitializer>()),
                         });
@@ -165,7 +165,7 @@ namespace Signum.Engine.MachineLearning
                 foreach (var hl in nns.HiddenLayers)
                 {
                     if (r.NextDouble() < mutationProbability)
-                        hl.Size = (r.Next(opt.MinNeuronsPerLayer, opt.MaxNeuronsPerLayer) + hl.Size) / 2;
+                        hl.Size = (r.Next(conf.MinNeuronsPerLayer, conf.MaxNeuronsPerLayer) + hl.Size) / 2;
 
                     if (r.NextDouble() < mutationProbability)
                         hl.Activation = r.NextElement(EnumExtensions.GetValues<NeuralNetworkActivation>());
@@ -175,7 +175,7 @@ namespace Signum.Engine.MachineLearning
                 }
             }
 
-            if (opt.ExploreOutputLayer)
+            if (conf.ExploreOutputLayer)
             {
                 if (r.NextDouble() < mutationProbability)
                     nns.OutputActivation = r.NextElement(EnumExtensions.GetValues<NeuralNetworkActivation>());

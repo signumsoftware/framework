@@ -170,6 +170,12 @@ namespace Signum.Engine.MachineLearning.CNTK
             
             CTTKMinibatchEvaluator evaluator = new CTTKMinibatchEvaluator(ctx, inputVariable, calculatedOutputs, device);
 
+
+            var last  = p.EpochProgresses().OrderByDescending(a => a.Id).FirstEx();
+
+            p.ResultTraining = new PredictorMetricsEmbedded { Evaluation = last.EvaluationTraining, Loss = last.LossTraining };
+            p.ResultValidation = new PredictorMetricsEmbedded { Evaluation = last.EvaluationValidation, Loss = last.LossValidation };
+
             if (nn.PredictionType == PredictionType.Classification || nn.PredictionType == PredictionType.MultiClassification)
             {  
                 p.ClassificationValidation = evaluator.ClasificationMetrics(validation, nameof(p.ClassificationValidation));
