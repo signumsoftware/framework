@@ -98,11 +98,11 @@ namespace Signum.React.MachineLearning
 
             PredictorPredictContext pctx = PredictorPredictLogic.GetPredictContext(p);
 
-            PredictDictionary fromEntity = entity != null ? PredictorPredictLogic.FromEntity(p, entity) : null;
-            PredictDictionary inputs = fromEntity ?? PredictorPredictLogic.Empty(p);
+            PredictDictionary fromEntity = entity != null ? pctx.GetInputsFromEntity(entity) : null;
+            PredictDictionary inputs = fromEntity ?? pctx.GetInputsEmpty();
             PredictDictionary originalOutputs = fromEntity;
 
-            PredictDictionary predictedOutputs = PredictorPredictLogic.PredictBasic(p, inputs);
+            PredictDictionary predictedOutputs = inputs.PredictBasic();
 
             PredictRequestTS pmodel = pctx.CreatePredictModel(inputs, originalOutputs, predictedOutputs);
 
@@ -114,11 +114,9 @@ namespace Signum.React.MachineLearning
         {
             PredictorPredictContext pctx = PredictorPredictLogic.GetPredictContext(request.predictor);
 
-            request.ParseValues(pctx);
+            PredictDictionary inputs = pctx.GetInputsFromRequest(request);
 
-            PredictDictionary inputs = request.GetInputs(pctx);
-
-            PredictDictionary predictedOutputs = inputs != null ? PredictorPredictLogic.PredictBasic(request.predictor, inputs) : null;
+            PredictDictionary predictedOutputs = inputs != null ? inputs.PredictBasic() : null;
 
             request.SetOutput(pctx, predictedOutputs);
 

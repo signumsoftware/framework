@@ -227,8 +227,8 @@ namespace Signum.Engine.MachineLearning
         }
 
         public PredictorEntity Predictor { get; set; }
-        public Dictionary<PredictorColumnEmbedded, object> MainQueryValues { get; set; }
-        public Dictionary<PredictorSubQueryEntity, PredictSubQueryDictionary> SubQueries { get; set; }
+        public Dictionary<PredictorColumnEmbedded, object> MainQueryValues { get; set; } = new Dictionary<PredictorColumnEmbedded, object>();
+        public Dictionary<PredictorSubQueryEntity, PredictSubQueryDictionary> SubQueries { get; set; } = new Dictionary<PredictorSubQueryEntity, PredictSubQueryDictionary>();
     }
 
     public class PredictSubQueryDictionary
@@ -239,6 +239,6 @@ namespace Signum.Engine.MachineLearning
         }
 
         public PredictorSubQueryEntity SubQuery { get; set; }
-        public Dictionary<object[], Dictionary<PredictorSubQueryColumnEmbedded, object>> SubQueryGroups { get; set; }
+        public Dictionary<object[], Dictionary<PredictorSubQueryColumnEmbedded, object>> SubQueryGroups { get; set; } = new Dictionary<object[], Dictionary<PredictorSubQueryColumnEmbedded, object>>();
     }
 }

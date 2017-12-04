@@ -145,11 +145,11 @@
     <Compile Include="Dynamic\DynamicLogic.cs" />
     <Compile Include="Dynamic\DynamicMixinConnectionLogic.cs" />
     <Compile Include="Joyride\JoyrideLogic.cs" />
+    <Compile Include="MachineLearning\AutoconfigureNeuralNetworkAlgorithm.cs" />
     <Compile Include="MachineLearning\PredictorAlgorithm.cs" />
     <Compile Include="MachineLearning\PredictorCodificationLogic.cs" />
     <Compile Include="MachineLearning\PredictorLogic.cs" />
     <Compile Include="MachineLearning\PredictorLogicQuery.cs" />
-    <Compile Include="MachineLearning\AutoconfigureNeuralNetworkAlgorithm.cs" />
     <Compile Include="MachineLearning\PredictorPredictLogic.cs" />
     <Compile Include="MachineLearning\PredictorSimpleSaver.cs" />
     <Compile Include="Mailing\ImageAttachmentLogic.cs" />

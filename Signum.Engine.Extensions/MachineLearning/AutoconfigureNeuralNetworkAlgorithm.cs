@@ -17,8 +17,10 @@ namespace Signum.Engine.MachineLearning
         {   
             var conf = (AutoconfigureNeuralNetworkEntity)ep.Data;
 
-            var initial = conf.InitialPredictor.Retrieve();
-            Random r = conf.Seed == null ? null : new Random(conf.Seed.Value);
+            var initial = conf.InitialPredictor.RetrieveAndForget();
+            Random r = conf.Seed == null ? 
+                new Random(): 
+                new Random(conf.Seed.Value);
 
             var mutationProbability = conf.InitialMutationProbability;
 
@@ -32,7 +34,9 @@ namespace Signum.Engine.MachineLearning
             {
                 population = CrossOverPopulation(evaluatedPopulation, initial, conf, r);
 
-                EvaluatePopulation(ep, conf, population, gen);
+                population.ForEach(p => Mutate(p, conf, mutationProbability, r));
+
+                evaluatedPopulation = EvaluatePopulation(ep, conf, population, gen);
             }
         }
         
@@ -100,18 +104,48 @@ namespace Signum.Engine.MachineLearning
             {
                 ep.CancellationToken.ThrowIfCancellationRequested();
 
-                var current = gen * population.Count + i;                
+                var current = gen * population.Count + i;
                 ep.ProgressChanged(current / (decimal)total);
                 var p = population[i];
 
-                PredictorLogic.TrainSync(p, onReportProgres: (str, val) => ep.ProgressChanged((current + val ?? 0) / (decimal)total));
-
-                var lastValidation = p.EpochProgresses().OrderByDescending(a => a.Epoch).SingleOrDefaultEx().EvaluationValidation ?? double.MaxValue;
+                double lastValidation = Evaluate(ep, p, onProgress: val => ep.ProgressChanged((current + val ?? 0) / (decimal)total));
 
                 evaluatedPopulation.Add(p, lastValidation);
             }
             return evaluatedPopulation;
         }
+
+        private static double Evaluate(ExecutingProcess ep, PredictorEntity p, Action<decimal?> onProgress)
+        {
+            PredictorLogic.TrainSync(p, onReportProgres: (str, val) => onProgress(val));
+
+            return p.ResultValidation.Loss.Value;
+        }
+
+        //private static double EvaluateMock(ExecutingProcess ep, PredictorEntity p, Action<decimal?> onProgress)
+        //{
+        //    var nns = (NeuralNetworkSettingsEntity)p.AlgorithmSettings; 
+
+        //    var ctx = Lite.Create<PredictorEntity>(1835).GetPredictContext();
+        //    var mq = ctx.Predictor.MainQuery;
+        //    var inputs = new PredictDictionary(ctx.Predictor)
+        //    {
+        //        MainQueryValues = 
+        //        {
+        //            { mq.FindColumn(nameof(nns.Learner)), nns.Learner },
+        //            { mq.FindColumn(nameof(nns.LearningRate)), nns.LearningRate },
+        //            { mq.FindColumn(nameof(nns.LearningMomentum)), nns.LearningMomentum },
+        //            { mq.FindColumn(nameof(nns.LearningVarianceMomentum)), nns.LearningVarianceMomentum },
+        //            { mq.FindColumn(nameof(nns.LearningUnitGain)), nns.LearningUnitGain },
+        //        }
+        //    };
+
+        //    var outputs = inputs.PredictBasic();
+
+        //    var outValue = outputs.MainQueryValues.GetOrThrow(mq.FindColumn(nameof(ctx.Predictor.ResultValidation)));
+
+        //    return Convert.ToDouble(outValue);
+        //}
 
         private void Mutate(PredictorEntity predictor, AutoconfigureNeuralNetworkEntity conf, double mutationProbability, Random r)
         {

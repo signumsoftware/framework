@@ -169,7 +169,7 @@ namespace Signum.Engine.MachineLearning
 
                     new Graph<ProcessEntity>.ConstructFrom<PredictorEntity>(PredictorOperation.AutoconfigureNetwork)
                     {
-                        CanConstruct = p => p.AlgorithmSettings is NeuralNetworkSettingsEntity ? ValidationMessage._0ShouldBeOfType1.NiceToString(p.NicePropertyName(_ => _.AlgorithmSettings), typeof(NeuralNetworkSettingsEntity).NiceName()) : null,
+                        CanConstruct = p => p.AlgorithmSettings is NeuralNetworkSettingsEntity ? null : ValidationMessage._0ShouldBeOfType1.NiceToString(p.NicePropertyName(_ => _.AlgorithmSettings), typeof(NeuralNetworkSettingsEntity).NiceName()),
                         Construct = (p, _) =>
                         {
                             return ProcessLogic.Create(PredictorProcessAlgorithm.AutoconfigureNeuralNetwork, new AutoconfigureNeuralNetworkEntity

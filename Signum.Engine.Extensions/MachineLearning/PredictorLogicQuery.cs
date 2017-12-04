@@ -128,7 +128,12 @@ namespace Signum.Engine.MachineLearning
                         pc.Mean = values.Count == 0 ? 0 : values.Average();
                         pc.StdDev = values.Count == 0 ? 1 : values.StdDev();
                         return new List<PredictorCodification> { pc };
-                    }
+                    };
+                case PredictorColumnEncoding.NormalizeLog:
+                    return new List<PredictorCodification>
+                    {
+                        factory()
+                    };
                 default:
                     throw new InvalidOperationException("Unexcpected Encoding");
             }
@@ -255,7 +260,13 @@ namespace Signum.Engine.MachineLearning
 
         public float Denormalize(float value)
         {
-            return Mean.Value + (StdDev.Value * value);
+            if (Encoding == PredictorColumnEncoding.NormalizeZScore)
+                return Mean.Value + (StdDev.Value * value);
+
+            if (Encoding == PredictorColumnEncoding.NormalizeLog) ;
+                return (float)Math.Exp((double)value);
+
+            throw new InvalidOperationException();
         }
     }
 

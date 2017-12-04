@@ -2,6 +2,7 @@
 using Signum.Entities.MachineLearning;
 using Signum.Entities.Processes;
 using Signum.Utilities;
+using Signum.Utilities.ExpressionTrees;
 using Signum.Utilities.Reflection;
 using System;
 using System.Collections.Generic;
@@ -74,7 +75,7 @@ namespace Signum.Entities.MachineLearning
             OutputInitializer = OutputInitializer,
             LearningRate = LearningRate,
             LearningMomentum = LearningMomentum,
-            MinibatchSize = MinibatchSize,
+            MinibatchSize = MinibatchSize,  
             NumMinibatches = NumMinibatches,
             SaveProgressEvery = SaveProgressEvery,
             SaveValidationProgressEvery = SaveValidationProgressEvery,

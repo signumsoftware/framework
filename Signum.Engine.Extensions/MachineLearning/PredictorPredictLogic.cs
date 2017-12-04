@@ -17,24 +17,25 @@ namespace Signum.Engine.MachineLearning
     {
         public static RecentDictionary<Lite<PredictorEntity>, PredictorPredictContext> TrainedPredictorCache = new RecentDictionary<Lite<PredictorEntity>, PredictorPredictContext>(50);
 
-        public static PredictorPredictContext GetPredictContext(Lite<PredictorEntity> predictor)
+        public static PredictorPredictContext GetPredictContext(this Lite<PredictorEntity> predictor)
         {
-            return TrainedPredictorCache.GetOrCreate(predictor, () =>
-            {
-                using (ExecutionMode.Global())
-                using (var t = Transaction.ForceNew())
+            lock (TrainedPredictorCache)
+                return TrainedPredictorCache.GetOrCreate(predictor, () =>
                 {
-                    var p = predictor.Retrieve();
-                    if (p.State != PredictorState.Trained)
-                        throw new InvalidOperationException($"Predictor '{p.Name}' not trained");
+                    using (ExecutionMode.Global())
+                    using (var t = Transaction.ForceNew())
+                    {
+                        var p = predictor.Retrieve();
+                        if (p.State != PredictorState.Trained)
+                            throw new InvalidOperationException($"Predictor '{p.Name}' not trained");
 
-                    PredictorPredictContext ppc = CreatePredictContext(p);
-                    return t.Commit(ppc);
-                }
-            });
+                        PredictorPredictContext ppc = CreatePredictContext(p);
+                        return t.Commit(ppc);
+                    }
+                });
         }
 
-        public static PredictorPredictContext CreatePredictContext(PredictorEntity p)
+        public static PredictorPredictContext CreatePredictContext(this PredictorEntity p)
         {
             var codifications = p.RetrievePredictorCodifications();
             var ppc = new PredictorPredictContext(p, PredictorLogic.Algorithms.GetOrThrow(p.Algorithm), codifications);
@@ -42,15 +43,13 @@ namespace Signum.Engine.MachineLearning
             return ppc;
         }
 
-        public static PredictDictionary FromEntity(Lite<PredictorEntity> predictor, Lite<Entity> entity)
+        public static PredictDictionary GetInputsFromEntity(this PredictorPredictContext ctx, Lite<Entity> entity)
         {
-            return FromEntities(predictor, new List<Lite<Entity>> { entity }).SingleEx().Value;
+            return ctx.FromEntities(new List<Lite<Entity>> { entity }).SingleEx().Value;
         }
 
-        public static PredictDictionary Empty(Lite<PredictorEntity> predictor)
+        public static PredictDictionary GetInputsEmpty(this PredictorPredictContext ctx)
         {
-            var ctx = GetPredictContext(predictor);
-
             var result = new PredictDictionary(ctx.Predictor)
             {
                 MainQueryValues = ctx.Predictor.MainQuery.Columns.Select((c, i) => KVP.Create(c, (object)null)).ToDictionaryEx(),
@@ -63,10 +62,8 @@ namespace Signum.Engine.MachineLearning
             return result;
         }
 
-        public static Dictionary<Lite<Entity>, PredictDictionary> FromEntities(Lite<PredictorEntity> predictor, List<Lite<Entity>> entities)
+        public static Dictionary<Lite<Entity>, PredictDictionary> FromEntities(this PredictorPredictContext ctx, List<Lite<Entity>> entities)
         {
-            var ctx = GetPredictContext(predictor);
-
             var qd = DynamicQueryManager.Current.QueryDescription(ctx.Predictor.MainQuery.Query.ToQueryName());
 
             var entityToken = QueryUtils.Parse("Entity", qd, SubTokensOptions.CanElement);
@@ -167,9 +164,9 @@ namespace Signum.Engine.MachineLearning
             return result;
         }
 
-        public static PredictDictionary PredictBasic(this Lite<PredictorEntity> predictor, PredictDictionary input)
+        public static PredictDictionary PredictBasic(this PredictDictionary input)
         {
-            var pctx = GetPredictContext(predictor);
+            var pctx = GetPredictContext(input.Predictor.ToLite());
 
             return pctx.Algorithm.Predict(pctx, input);
         }

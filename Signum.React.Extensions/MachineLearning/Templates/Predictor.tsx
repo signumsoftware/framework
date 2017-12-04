@@ -34,9 +34,13 @@ import PredictorRegressionMetrics from './PredictorRegressionMetrics';
 export default class Predictor extends React.Component<{ ctx: TypeContext<PredictorEntity> }, { queryDescription?: QueryDescription }> implements IRenderButtons {
 
     handleClick = () => {
-        Finder.find({ queryName: this.state.queryDescription!.queryKey })
-            .then(lite => PredictorClient.predict(toLite(this.props.ctx.value), lite))
-            .done();
+        Finder.find({
+            queryName: this.state.queryDescription!.queryKey,
+            columnOptionsMode: "Add",
+            columnOptions: this.props.ctx.value.mainQuery.columns.map(mle => ({ columnName: mle.element.token && mle.element.token.token!.fullKey }) as ColumnOption)
+        })
+        .then(lite => PredictorClient.predict(toLite(this.props.ctx.value), lite))
+        .done();
     }
 
     renderButtons(ctx: ButtonsContext): (React.ReactElement<any> | undefined)[] {

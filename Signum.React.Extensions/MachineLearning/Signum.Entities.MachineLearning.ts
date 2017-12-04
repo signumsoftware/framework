@@ -159,7 +159,8 @@ export type PredictorColumnEncoding =
     "None" |
     "OneHot" |
     "Codified" |
-    "NormalizeZScore";
+    "NormalizeZScore" |
+    "NormalizeLog";
 
 export const PredictorColumnNullHandling = new EnumType<PredictorColumnNullHandling>("PredictorColumnNullHandling");
 export type PredictorColumnNullHandling =

@@ -17,8 +17,10 @@ namespace Signum.React.MachineLearning
 {
     public static class PredictRequestExtensions
     {
-        public static PredictDictionary GetInputs(this PredictRequestTS request, PredictorPredictContext pctx)
+        public static PredictDictionary GetInputsFromRequest(this PredictorPredictContext pctx, PredictRequestTS request)
         {
+            ParseValues(request, pctx);
+
             return new PredictDictionary(pctx.Predictor)
             {
                 MainQueryValues = pctx.Predictor.MainQuery.Columns

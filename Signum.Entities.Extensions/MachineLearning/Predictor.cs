@@ -15,6 +15,7 @@ using Signum.Entities.Files;
 using Signum.Entities.Authorization;
 using System.Xml.Linq;
 using Signum.Entities.Processes;
+using System.ComponentModel;
 
 namespace Signum.Entities.MachineLearning
 {
@@ -114,6 +115,12 @@ namespace Signum.Entities.MachineLearning
             Filters = Filters.Select(f => f.Clone()).ToMList(),
             Columns = Columns.Select(a => a.Clone()).ToMList(),
         };
+
+
+        public PredictorColumnEmbedded FindColumn(string part)
+        {
+            return Columns.SingleEx(a => a.Token.Token.ContainsKey(part));
+        }
     }
 
     [Serializable]
@@ -263,7 +270,11 @@ namespace Signum.Entities.MachineLearning
         None,
         OneHot,
         Codified,
+        [Description("Normalize Z-Score")]
         NormalizeZScore,
+
+        [Description("Normalize Log")]
+        NormalizeLog,
     }
 
     public enum PredictorState
@@ -330,6 +341,11 @@ namespace Signum.Entities.MachineLearning
         public override string ToString()
         {
             return ToStringExpression.Evaluate(this);
+        }
+
+        public PredictorSubQueryColumnEmbedded FindColumn(string part)
+        {
+            return Columns.SingleEx(a => a.Token.Token.ContainsKey(part));
         }
     }
 

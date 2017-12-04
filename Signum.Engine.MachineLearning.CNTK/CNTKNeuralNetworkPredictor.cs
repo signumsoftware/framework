@@ -225,6 +225,8 @@ namespace Signum.Engine.MachineLearning.CNTK
             return Value.CreateBatch<float>(new int[] { columns.Count }, values, device);
         }
 
+        public static float minLog = -5;
+
         private static float GetFloat(object value, PredictorCodification c)
         {
             var valueDefault = value ?? GetDefaultValue(c);
@@ -236,6 +238,11 @@ namespace Signum.Engine.MachineLearning.CNTK
                 case PredictorColumnEncoding.OneHot: return Object.Equals(valueDefault, c.IsValue) ? 1 : 0;
                 case PredictorColumnEncoding.Codified: throw new NotImplementedException("Codified is not usable for Neural Networks");
                 case PredictorColumnEncoding.NormalizeZScore: return (Convert.ToSingle(valueDefault) - c.Mean.Value) / c.StdDev.Value;
+                case PredictorColumnEncoding.NormalizeLog:
+                    {
+                        var val = Convert.ToDouble(valueDefault);
+                        return (val <= 0 ? minLog : Math.Max(minLog, (float)Math.Log(val)));
+                    }
                 default: throw new NotImplementedException("Unexpected encoding " + c.Encoding);
             }
         }
@@ -351,6 +358,7 @@ namespace Signum.Engine.MachineLearning.CNTK
                                 case PredictorColumnEncoding.None:
                                     break;
                                 case PredictorColumnEncoding.NormalizeZScore:
+                                case PredictorColumnEncoding.NormalizeLog:
                                     po[c.Index] = c.Denormalize(po[c.Index]);
                                     eo[c.Index] = c.Denormalize(eo[c.Index]);
                                     break;
@@ -456,6 +464,7 @@ namespace Signum.Engine.MachineLearning.CNTK
                     }
                 case PredictorColumnEncoding.OneHot:return cols.WithMax(c => outputValues[c.Index]).IsValue;
                 case PredictorColumnEncoding.NormalizeZScore:
+                case PredictorColumnEncoding.NormalizeLog:
                     {
                         var c = cols.SingleEx();
                         var value = outputValues[c.Index];
