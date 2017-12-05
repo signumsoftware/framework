@@ -25,6 +25,7 @@ import SelectorModal from '../SelectorModal'
 import { ISimpleFilterBuilder } from './SearchControl'
 
 import "./Search.css"
+import { FilterOperation } from '../Signum.Entities.DynamicQuery';
 
 export interface ShowBarExtensionOption {}
 
@@ -622,16 +623,17 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
         const token = fo.columnOptions[cm.columnIndex!].token;
 
-        const fops = token ? filterOperations[token.filterType as any] : undefined;
+        const op: FilterOperation | undefined =
+            token && token.preferEquals || cm.rowIndex != null ? "EqualTo" as FilterOperation | undefined :
+                token ? (filterOperations[token.filterType as any] || []).firstOrNull() as FilterOperation | undefined :
+                    undefined as FilterOperation | undefined;
 
-        const rt = this.state.resultTable!;
-
-        const resultColumnIndex = token == null ? -1 : rt.columns.indexOf(token.fullKey);
+        const rt = this.state.resultTable;        
 
         fo.filterOptions.push({
             token: token,
-            operation: fops && fops.firstOrNull() || undefined,
-            value: cm.rowIndex == undefined || resultColumnIndex == -1 ? undefined : rt.rows[cm.rowIndex].columns[resultColumnIndex],
+            operation: op,
+            value: cm.rowIndex == undefined || rt == null || token == null ? undefined : rt.rows[cm.rowIndex].columns[rt.columns.indexOf(token.fullKey)],
             frozen: false
         });
 

@@ -662,6 +662,30 @@ namespace Signum.Engine.Maps
             return TryFindField(Table(route.RootType), route.Members);
         }
 
+        public bool HasSomeIndex(PropertyRoute route)
+        {
+            var field = TryField(route);
+
+            if (field == null)
+                return false;
+
+            if (field.UniqueIndex != null)
+                return true;
+
+            var cols = field.Columns();
+
+            if (cols.Any(c => c.ReferenceTable != null))
+                return true;
+            
+            var mlistPr = route.GetMListItemsRoute();
+
+            ITable table = mlistPr == null ?
+                (ITable)Table(route.RootType) :
+                (ITable)((FieldMList)Field(mlistPr.Parent)).TableMList;
+
+            return table.MultiColumnIndexes != null && table.MultiColumnIndexes.Any(index => index.Columns.Any(cols.Contains));
+        }
+
         public override string ToString()
         {
             return "Schema ( tables: {0} )".FormatWith(tables.Count);
