@@ -90,23 +90,37 @@ namespace Signum.React.Profiler
 
             var e = HeavyProfiler.Find(fullIndex);
 
-            if (e == null || e.StackTrace == null)
+            if (e == null)
                 return null;
 
+            if (e.ExternalStackTrace != null)
+                return (from est in e.ExternalStackTrace
+                        select new StackTraceTS
+                        {
+                            Method = est.MethodName,
+                            Color = est.Namespace == null ? null : ColorExtensions.ToHtmlColor(est.Namespace.Split('.').Take(2).ToString(".").GetHashCode()),
+                            Type = est.Type,
+                            Namespace = est.Namespace,
+                            FileName = est.FileName,
+                            LineNumber = est.LineNumber ?? 0
+                        }).ToList();
 
-            return (from i in 0.To(e.StackTrace.FrameCount)
-                    let sf = e.StackTrace.GetFrame(i)
-                    let mi = sf.GetMethod()
-                    let t = mi.DeclaringType
-                    select new StackTraceTS
-                    {
-                        Namespace = t?.Namespace,
-                        Type = t?.TypeName(),
-                        Color = t == null ? null : ColorExtensions.ToHtmlColor(t.Assembly.FullName.GetHashCode()),
-                        Method = mi.Name,
-                        FileName = sf.GetFileName(),
-                        LineNumber = sf.GetFileLineNumber(),
-                    }).ToList();
+            if (e.StackTrace != null)
+                return (from i in 0.To(e.StackTrace.FrameCount)
+                        let sf = e.StackTrace.GetFrame(i)
+                        let mi = sf.GetMethod()
+                        let t = mi.DeclaringType
+                        select new StackTraceTS
+                        {
+                            Namespace = t?.Namespace,
+                            Color = t == null ? null : ColorExtensions.ToHtmlColor(t.Assembly.FullName.GetHashCode()),
+                            Type = t?.TypeName(),
+                            Method = mi.Name,
+                            FileName = sf.GetFileName(),
+                            LineNumber = sf.GetFileLineNumber(),
+                        }).ToList();
+
+            return null;
         }
 
         [Route("api/profilerHeavy/download"), HttpGet]
@@ -114,7 +128,7 @@ namespace Signum.React.Profiler
         {
             XDocument doc = indices == null ?
              HeavyProfiler.ExportXml() :
-             HeavyProfiler.Find(indices).ExportXmlDocument();
+             HeavyProfiler.Find(indices).ExportXmlDocument(false);
 
             using (MemoryStream ms = new MemoryStream())
             {
