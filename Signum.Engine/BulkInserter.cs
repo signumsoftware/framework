@@ -74,11 +74,14 @@ namespace Signum.Engine
                 var getKeyFunc = keySelector.Compile();
 
                 list.ForEach(e =>
-                {
+                {                    
                     e.SetId(dictionary.GetOrThrow(getKeyFunc(e)));
+                    e.SetIsNew(false);
                 });
 
                 BulkInsertMLists(list, copyOptions, timeout, message);
+
+                GraphExplorer.CleanModifications(GraphExplorer.FromRoots(list));
 
                 return rowNum;
             }
