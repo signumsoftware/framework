@@ -206,19 +206,17 @@ namespace Signum.Engine
         public static int UnsafeDeleteDuplicates<E, K>(this IQueryable<E> query, Expression<Func<E, K>> key, string message = null)
            where E : Entity
         {
-            return (from f1 in query
-                    join f2 in query on key.Evaluate(f1) equals key.Evaluate(f2)
-                    where f1.Id > f2.Id
-                    select f1).UnsafeDelete(message);
+            return (from e in query
+                    where !query.GroupBy(key).Select(gr => gr.Min(a => a.id)).Contains(e.Id)
+                    select e).UnsafeDelete(message);
         }
 
         public static int UnsafeDeleteMListDuplicates<E, V, K>(this IQueryable<MListElement<E,V>> query, Expression<Func<MListElement<E, V>, K>> key, string message = null)
             where E : Entity
         {
-            return (from f1 in query
-                    join f2 in query on key.Evaluate(f1) equals key.Evaluate(f2)
-                    where f1.RowId > f2.RowId
-                    select f1).UnsafeDeleteMList(message);
+            return (from e in query
+                    where !query.GroupBy(key).Select(gr => gr.Min(a => a.RowId)).Contains(e.RowId)
+                    select e).UnsafeDeleteMList(message);
         }
 
         public static SqlPreCommandSimple QueryPreCommand<T>(IQueryable<T> query)
