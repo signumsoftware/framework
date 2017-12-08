@@ -32,6 +32,7 @@ namespace Signum.Engine.Linq
         SqlFunction,
         SqlTableValuedFunction,
         SqlConstant,
+        SqlVariable,
         SqlEnum,
         SqlCast,
         Case,
@@ -710,6 +711,27 @@ namespace Signum.Engine.Linq
         protected override Expression Accept(DbExpressionVisitor visitor)
         {
             return visitor.VisitSqlConstant(this);
+        }
+    }
+
+    internal class SqlVariableExpression : DbExpression
+    {
+        public readonly string VariableName;
+        
+        public SqlVariableExpression(string variableName, Type type)
+            : base(DbExpressionType.SqlConstant, type)
+        {
+            this.VariableName = variableName;
+        }
+
+        public override string ToString()
+        {
+            return VariableName;
+        }
+
+        protected override Expression Accept(DbExpressionVisitor visitor)
+        {
+            return visitor.VisitSqlVariable(this);
         }
     }
 

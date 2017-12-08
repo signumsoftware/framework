@@ -629,22 +629,38 @@ namespace Signum.Engine.Maps
             return SqlPreCommand.Combine(Spacing.Simple, declareParent, insert, setParent, collections);
         }
 
-        public SqlPreCommand UpdateSqlSync(Entity ident, bool includeCollections = true, string comment = null, string suffix = "")
+        public SqlPreCommand UpdateSqlSync<T>(T entity, Expression<Func<T, bool>> where, bool includeCollections = true, string comment = null, string suffix = "")
+            where T : Entity
         {
-            PrepareEntitySync(ident);
-            
-            if (SetToStrField(ident))
-                ident.SetSelfModified();
+            if (typeof(T) != Type && where != null)
+                throw new InvalidOperationException("Invalid table");
 
-            if (ident.Modified == ModifiedState.Clean || ident.Modified == ModifiedState.Sealed)
+            PrepareEntitySync(entity);
+            
+            if (SetToStrField(entity))
+                entity.SetSelfModified();
+
+            if (entity.Modified == ModifiedState.Clean || entity.Modified == ModifiedState.Sealed)
                 return null;
 
-            //if (ident.Modified == ModifiedState.Modified)
-            //        throw new InvalidOperationException("Some sub-entities of '{0}' are modified but not the entity itself".FormatWith(ident));
-
             var uc = updater.Value;
-            SqlPreCommandSimple update = new SqlPreCommandSimple(uc.SqlUpdatePattern(suffix, false),
-                uc.UpdateParameters(ident, (ident as Entity)?.Ticks ?? -1, new Forbidden(), suffix)).AddComment(comment);
+            var sql = uc.SqlUpdatePattern(suffix, false);
+            var parameters = uc.UpdateParameters(entity, (entity as Entity)?.Ticks ?? -1, new Forbidden(), suffix);
+
+            SqlPreCommand update;
+            if (where != null)
+            {
+                var declare = DeclarePrimaryKeyVariable(entity, where);
+                string originalParameterName = SqlParameterBuilder.GetParameterName("id" + suffix);
+                sql = sql.Replace("WHERE ID = " + originalParameterName, "WHERE ID = " + entity.Id.VariableName); //HACK
+                parameters.Single(a => a.ParameterName == originalParameterName).ParameterName = entity.Id.VariableName;
+
+                update = SqlPreCommand.Combine(Spacing.Simple, declare, new SqlPreCommandSimple(sql, parameters).AddComment(comment));
+            }
+            else
+            {
+                update = new SqlPreCommandSimple(sql, parameters).AddComment(comment);
+            }
 
             if (!includeCollections)
                 return update;
@@ -653,7 +669,7 @@ namespace Signum.Engine.Maps
             if (cc == null)
                 return update;
 
-            SqlPreCommand collections = cc.InsertCollectionsSync((Entity)ident, suffix);
+            SqlPreCommand collections = cc.InsertCollectionsSync((Entity)entity, suffix);
 
             return SqlPreCommand.Combine(Spacing.Simple, update, collections);
         }
