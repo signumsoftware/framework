@@ -305,12 +305,12 @@ namespace Signum.Engine.Word
             using (replacements.WithReplacedDatabaseName())
                 return Synchronizer.SynchronizeScript(Spacing.Double, should, current,
                     createNew: (tn, s) => table.InsertSqlSync(s),
-                    removeOld: (tn, c) => table.DeleteSqlSync(c),
+                    removeOld: (tn, c) => table.DeleteSqlSync(c, swt => swt.FullClassName == c.FullClassName),
                     mergeBoth: (tn, s, c) =>
                     {
                         var oldClassName = c.FullClassName;
                         c.FullClassName = s.FullClassName;
-                        return table.UpdateSqlSync(c, comment: oldClassName);
+                        return table.UpdateSqlSync(c, swt => swt.FullClassName == oldClassName, comment: oldClassName);
                     });
         }
 

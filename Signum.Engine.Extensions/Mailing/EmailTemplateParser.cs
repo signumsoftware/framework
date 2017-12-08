@@ -328,7 +328,7 @@ namespace Signum.Engine.Mailing
                     switch (QueryTokenSynchronizer.FixToken(replacements, ref token, qd, SubTokensOptions.CanElement, " From", allowRemoveToken: false, allowReCreate: et.SystemEmail != null))
                     {
                         case FixTokenResult.Nothing: break;
-                        case FixTokenResult.DeleteEntity: return table.DeleteSqlSync(et);
+                        case FixTokenResult.DeleteEntity: return table.DeleteSqlSync(et, e => e.Name == et.Name);
                         case FixTokenResult.SkipEntity: return null;
                         case FixTokenResult.Fix: et.From.Token = token; break;
                         case FixTokenResult.ReGenerateEntity: return Regenerate(et, replacements, table);
@@ -345,7 +345,7 @@ namespace Signum.Engine.Mailing
                         switch (QueryTokenSynchronizer.FixToken(replacements, ref token, qd, SubTokensOptions.CanElement, " Recipient", allowRemoveToken: false, allowReCreate: et.SystemEmail != null))
                         {
                             case FixTokenResult.Nothing: break;
-                            case FixTokenResult.DeleteEntity: return table.DeleteSqlSync(et);
+                            case FixTokenResult.DeleteEntity: return table.DeleteSqlSync(et, e => e.Name == et.Name);
                             case FixTokenResult.RemoveToken: et.Recipients.Remove(item); break;
                             case FixTokenResult.SkipEntity: return null;
                             case FixTokenResult.Fix: item.Token = token; break;
@@ -374,7 +374,7 @@ namespace Signum.Engine.Mailing
                     }
 
                     using (replacements.WithReplacedDatabaseName())
-                        return table.UpdateSqlSync(et, includeCollections: true, comment: "EmailTemplate: " + et.Name);
+                        return table.UpdateSqlSync(et, e => e.Name == et.Name, includeCollections: true, comment: "EmailTemplate: " + et.Name);
                 }
                 catch (TemplateSyncException ex)
                 {
@@ -382,7 +382,7 @@ namespace Signum.Engine.Mailing
                         return null;
 
                     if (ex.Result == FixTokenResult.DeleteEntity)
-                        return table.DeleteSqlSync(et);
+                        return table.DeleteSqlSync(et, e => e.Name == et.Name);
 
                     if (ex.Result == FixTokenResult.ReGenerateEntity)
                         return Regenerate(et, replacements, table);
@@ -409,7 +409,7 @@ namespace Signum.Engine.Mailing
             newTemplate.Ticks = et.Ticks; 
 
             using (replacements?.WithReplacedDatabaseName())
-                return table.UpdateSqlSync(newTemplate, includeCollections: true, comment: "EmailTemplate Regenerated: " + et.Name);
+                return table.UpdateSqlSync(newTemplate, e=> e.Name == newTemplate.Name, includeCollections: true, comment: "EmailTemplate Regenerated: " + et.Name);
         }
     }
 

@@ -342,7 +342,7 @@ namespace Signum.Engine.Help
 
                 qh.Description = SynchronizeContent(qh.Description, replacements, data);
 
-                return table.UpdateSqlSync(qh);
+                return table.UpdateSqlSync(qh, h => h.Query.Key == qh.Query.Key);
             }).Combine(Spacing.Simple);
         }
 
@@ -381,7 +381,7 @@ namespace Signum.Engine.Help
 
                     eh.Description = SynchronizeContent(eh.Description, replacements, data);
 
-                    return table.UpdateSqlSync(eh);
+                    return table.UpdateSqlSync(eh, e => e.Type.FullClassName == eh.Type.FullClassName);
                 }).Combine(Spacing.Simple);
         }
 
@@ -404,11 +404,11 @@ namespace Signum.Engine.Help
                     e.Name = replacements.TryGetC("namespaces")?.TryGetC(e.Name) ?? e.Name;
 
                     if (!data.Namespaces.Contains(e.Name))
-                        return table.DeleteSqlSync(e);
+                        return table.DeleteSqlSync(e, n => n.Name == e.Name);
 
                     e.Description = SynchronizeContent(e.Description, replacements, data);
 
-                    return table.UpdateSqlSync(e);
+                    return table.UpdateSqlSync(e, n => n.Name == e.Name);
                 }).Combine(Spacing.Simple);
         }
 
@@ -426,12 +426,9 @@ namespace Signum.Engine.Help
                 {
                     e.Description = SynchronizeContent(e.Description, replacements, data);
 
-                    return table.UpdateSqlSync(e);
+                    return table.UpdateSqlSync(e, n => n.UniqueName == e.UniqueName);
                 }).Combine(Spacing.Simple);
         }
-
-
-
 
         static Lazy<XmlSchemaSet> Schemas = new Lazy<XmlSchemaSet>(() =>
         {

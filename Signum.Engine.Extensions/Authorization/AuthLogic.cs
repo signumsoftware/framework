@@ -462,13 +462,13 @@ namespace Signum.Engine.Authorization
                     removeOld: (name, role) => SqlPreCommand.Combine(Spacing.Simple,
                             new SqlPreCommandSimple("DELETE {0} WHERE {1} = {2} --{3}"
                                 .FormatWith(relationalTable.Name, ((IColumn)relationalTable.Field).Name.SqlEscape(), role.Id, role.Name)),
-                            table.DeleteSqlSync(role)),
+                            table.DeleteSqlSync(role, r => r.Name == role.Name)),
                     mergeBoth: (name, xElement, role) =>
                     {
                         var oldName = role.Name;
                         role.Name = name;
                         role.MergeStrategy = xElement.Attribute("MergeStrategy")?.Let(t => t.Value.ToEnum<MergeStrategy>()) ?? MergeStrategy.Union;
-                        return table.UpdateSqlSync(role, includeCollections: false, comment: oldName);
+                        return table.UpdateSqlSync(role, r => r.Name == oldName, includeCollections: false, comment: oldName);
                     });
 
                 if (roleInsertsDeletes != null)
@@ -505,7 +505,7 @@ namespace Signum.Engine.Authorization
 
                      role.Roles = should.Select(rs => rolesDic.GetOrThrow(rs).ToLite()).ToMList();
 
-                     return table.UpdateSqlSync(role);
+                     return table.UpdateSqlSync(role, r => r.Name == role.Name);
                  });
 
                 if (roleRelationships != null)

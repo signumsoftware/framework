@@ -211,7 +211,7 @@ namespace Signum.Engine.Chart
                             switch (QueryTokenSynchronizer.FixToken(replacements, ref token, qd, SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement | canAggregate, "{0} {1}".FormatWith(item.Operation, item.ValueString), allowRemoveToken: true, allowReCreate: false))
                             {
                                 case FixTokenResult.Nothing: break;
-                                case FixTokenResult.DeleteEntity: return table.DeleteSqlSync(uc);
+                                case FixTokenResult.DeleteEntity: return table.DeleteSqlSync(uc, u => u.Guid == uc.Guid);
                                 case FixTokenResult.RemoveToken: uc.Filters.Remove(item); break;
                                 case FixTokenResult.SkipEntity: return null;
                                 case FixTokenResult.Fix: item.Token = token; break;
@@ -232,7 +232,7 @@ namespace Signum.Engine.Chart
                             switch (QueryTokenSynchronizer.FixToken(replacements, ref token, qd, SubTokensOptions.CanElement | canAggregate, item.ScriptColumn.DisplayName, allowRemoveToken: item.ScriptColumn.IsOptional, allowReCreate: false))
                             {
                                 case FixTokenResult.Nothing: break;
-                                case FixTokenResult.DeleteEntity: return table.DeleteSqlSync(uc);
+                                case FixTokenResult.DeleteEntity: return table.DeleteSqlSync(uc, u => u.Guid == uc.Guid);
                                 case FixTokenResult.RemoveToken: item.Token = null; break;
                                 case FixTokenResult.SkipEntity: return null;
                                 case FixTokenResult.Fix: item.Token = token; break;
@@ -250,7 +250,7 @@ namespace Signum.Engine.Chart
                             switch (QueryTokenSynchronizer.FixToken(replacements, ref token, qd, SubTokensOptions.CanElement | canAggregate, item.OrderType.ToString(), allowRemoveToken: true, allowReCreate: false))
                             {
                                 case FixTokenResult.Nothing: break;
-                                case FixTokenResult.DeleteEntity: return table.DeleteSqlSync(uc);
+                                case FixTokenResult.DeleteEntity: return table.DeleteSqlSync(uc, u => u.Guid == uc.Guid);
                                 case FixTokenResult.RemoveToken: uc.Orders.Remove(item); break;
                                 case FixTokenResult.SkipEntity: return null;
                                 case FixTokenResult.Fix: item.Token = token; break;
@@ -266,7 +266,7 @@ namespace Signum.Engine.Chart
                     switch (QueryTokenSynchronizer.FixValue(replacements, item.Token.Token.Type, ref val, allowRemoveToken: true, isList: item.Operation.IsList()))
                     {
                         case FixTokenResult.Nothing: break;
-                        case FixTokenResult.DeleteEntity: return table.DeleteSqlSync(uc);
+                        case FixTokenResult.DeleteEntity: return table.DeleteSqlSync(uc, u => u.Guid == uc.Guid);
                         case FixTokenResult.RemoveToken: uc.Filters.Remove(item); break;
                         case FixTokenResult.SkipEntity: return null;
                         case FixTokenResult.Fix: item.ValueString = val; break;
@@ -285,7 +285,7 @@ namespace Signum.Engine.Chart
                     switch (FixParameter(item, ref val))
                     {
                         case FixTokenResult.Nothing: break;
-                        case FixTokenResult.DeleteEntity: return table.DeleteSqlSync(uc);
+                        case FixTokenResult.DeleteEntity: return table.DeleteSqlSync(uc, u => u.Guid == uc.Guid);
                         case FixTokenResult.RemoveToken: uc.Parameters.Remove(item); break;
                         case FixTokenResult.SkipEntity: return null;
                         case FixTokenResult.Fix: { item.Value = val; goto retry; }
@@ -295,7 +295,7 @@ namespace Signum.Engine.Chart
 
                 try
                 {
-                    return table.UpdateSqlSync(uc, includeCollections: true);
+                    return table.UpdateSqlSync(uc, u => u.Guid == uc.Guid, includeCollections: true);
                 }
                 catch (Exception e)
                 {
@@ -317,7 +317,7 @@ namespace Signum.Engine.Chart
                             return null;
 
                         if (answer == "d")
-                            return table.DeleteSqlSync(uc);
+                            return table.DeleteSqlSync(uc, u => u.Guid == uc.Guid);
                     }
                 }
 
