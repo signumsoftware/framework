@@ -384,7 +384,7 @@ namespace Signum.Engine.Maps
             return View(typeof(T));
         }
 
-        private Table View(Type viewType)
+        public Table View(Type viewType)
         {
             var tn = this.Settings.TypeAttribute<TableNameAttribute>(viewType);
 
