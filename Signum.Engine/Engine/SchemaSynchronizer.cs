@@ -444,7 +444,10 @@ FROM {oldTable.Name}");
                     if (!news.SetEquals(oldIx.Columns))
                         return false;
 
-                    if (newIx.Where != null && !oldIx.IndexName.EndsWith(StringHashEncoder.Codify(newIx.Where)))
+                    var oldWhere = oldIx.IndexName.TryAfter("__");
+                    var newWhere = newIx.Where == null ? null : StringHashEncoder.Codify(newIx.Where);
+
+                    if (oldWhere != newWhere)
                         return false;
 
                     return true;
