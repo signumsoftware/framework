@@ -211,6 +211,11 @@ namespace Signum.Engine.Linq
             return sqlConstant;
         }
 
+        protected internal override Expression VisitSqlVariable(SqlVariableExpression sve)
+        {
+            return Add(sve);
+        }
+
         protected internal override Expression VisitCase(CaseExpression cex)
         {
             var newWhens = Visit(cex.Whens, w => VisitWhen(w));

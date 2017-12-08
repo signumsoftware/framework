@@ -134,11 +134,12 @@ namespace Signum.Engine.Basics
                     should.ToDictionaryEx(a => a.Key, "query in memory"),
                     current.ToDictionaryEx(a => a.Key, "query in database"),
                     createNew: (n, s) => table.InsertSqlSync(s),
-                    removeOld: (n, c) => table.DeleteSqlSync(c),
+                    removeOld: (n, c) => table.DeleteSqlSync(c, q => q.Key == c.Key),
                     mergeBoth: (fn, s, c) =>
                     {
+                        var originalKey = c.Key;
                         c.Key = s.Key;
-                        return table.UpdateSqlSync(c);
+                        return table.UpdateSqlSync(c, q => q.Key == originalKey);
                     });
         }
 

@@ -233,8 +233,8 @@ namespace Signum.Engine
                 return null;
 
             var prov = ((DbQueryProvider)query.Provider);
-
-            return prov.Delete<SqlPreCommandSimple>(query, cm => cm, removeSelectRowCount: true);
+            using (PrimaryKeyExpression.PreferVariableName())
+                return prov.Delete<SqlPreCommandSimple>(query, cm => cm, removeSelectRowCount: true);
         }
 
         public static SqlPreCommandSimple UnsafeDeletePreCommand<E, V>(Expression<Func<E, MList<V>>> mListProperty, IQueryable<MListElement<E, V>> query)
@@ -244,8 +244,8 @@ namespace Signum.Engine
                 return null;
 
             var prov = ((DbQueryProvider)query.Provider);
-
-            return prov.Delete<SqlPreCommandSimple>(query, cm => cm, removeSelectRowCount: true);
+            using (PrimaryKeyExpression.PreferVariableName())
+                return prov.Delete<SqlPreCommandSimple>(query, cm => cm, removeSelectRowCount: true);
         }
 
         public static SqlPreCommandSimple UnsafeUpdatePartPreCommand(IUpdateable update)
@@ -504,8 +504,10 @@ namespace Signum.Engine
             if (table.TablesMList().Any())
                 throw new InvalidOperationException($"DeleteWhereScript can not be used for {table.Type.Name} because contains MLists");
             
+            if(id.VariableName.HasText())
+                return new SqlPreCommandSimple("DELETE FROM {0} WHERE {1} = {2}".FormatWith(table.Name, column.Name, id.VariableName));
+            
             var param = Connector.Current.ParameterBuilder.CreateReferenceParameter("@id", id, column);
-
             return new SqlPreCommandSimple("DELETE FROM {0} WHERE {1} = {2}".FormatWith(table.Name, column.Name, param.ParameterName), new List<DbParameter> { param });
         }
 

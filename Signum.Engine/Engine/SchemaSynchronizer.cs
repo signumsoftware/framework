@@ -671,7 +671,7 @@ JOIN {3} {4} ON {2}.{0} = {4}.Id".FormatWith(tabCol.Name,
         {
             var deletes = Synchronizer.SynchronizeScript(Spacing.Double, should, current,
                        createNew: null,
-                       removeOld: (str, c) => table.DeleteSqlSync(c, comment: c.toStr),
+                       removeOld: (str, c) => table.DeleteSqlSync(c, null, comment: c.toStr),
                        mergeBoth: null);
 
             var moves = Synchronizer.SynchronizeScript(Spacing.Double, should, current,
@@ -680,7 +680,7 @@ JOIN {3} {4} ON {2}.{0} = {4}.Id".FormatWith(tabCol.Name,
                        mergeBoth: (str, s, c) =>
                        {
                            if (s.id == c.id)
-                               return table.UpdateSqlSync(c, comment: c.toStr);
+                               return table.UpdateSqlSync(c, null, comment: c.toStr);
 
                            var insert = table.InsertSqlSync(s);
 
@@ -691,7 +691,7 @@ JOIN {3} {4} ON {2}.{0} = {4}.Id".FormatWith(tabCol.Name,
                                            .FormatWith(t.Name, col.Name, s.Id, c.Id, c.toStr)))
                                         .Combine(Spacing.Simple);
 
-                           var delete = table.DeleteSqlSync(c, comment: c.toStr);
+                           var delete = table.DeleteSqlSync(c, null, comment: c.toStr);
 
                            return SqlPreCommand.Combine(Spacing.Simple, insert, move, delete);
                        });

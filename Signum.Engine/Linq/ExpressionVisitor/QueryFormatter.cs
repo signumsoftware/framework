@@ -387,6 +387,12 @@ namespace Signum.Engine.Linq
             return c;
         }
 
+        protected internal override Expression VisitSqlVariable(SqlVariableExpression sve)
+        {
+            sb.Append(sve.VariableName);
+            return sve;
+        }
+
 
         protected internal override Expression VisitColumn(ColumnExpression column)
         {
