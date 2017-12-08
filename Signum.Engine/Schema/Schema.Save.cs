@@ -1329,7 +1329,7 @@ namespace Signum.Engine.Maps
             trios.Add(new Table.Trio(this, Expression.Call(miUnWrap, this.GetIdFactory(value, forbidden)), suffix));
         }
 
-        static MethodInfo miUnWrap = ReflectionTools.GetMethodInfo(() => PrimaryKey.Unwrap(null));
+        static MethodInfo miUnWrap = ReflectionTools.GetMethodInfo(() => Signum.Entities.PrimaryKey.Unwrap(null));
     }
 
     public partial class FieldEnum

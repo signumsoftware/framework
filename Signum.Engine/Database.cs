@@ -1455,7 +1455,7 @@ namespace Signum.Engine
                 return SafeConsole.WaitRows(message == "auto" ? $"Inserting MList<{ typeof(V).TypeName()}> in { typeof(E).TypeName()}" : message,
                     () => query.UnsafeInsertMList(mListProperty, constructor, message: null));
 
-            using (HeavyProfiler.Log("DBUnsafeInsert", () => typeof(E).TypeName()))
+            using (HeavyProfiler.Log("UnsafeInsertMList", () => typeof(E).TypeName()))
             {
                 if (query == null)
                     throw new ArgumentNullException("query");
@@ -1467,6 +1467,32 @@ namespace Signum.Engine
                 {
                     constructor = (Expression<Func<T, MListElement<E, V>>>)Schema.Current.OnPreUnsafeInsert(typeof(E), query, constructor, query.Select(constructor).Select(c => c.Parent));
                     var table = ((FieldMList)Schema.Current.Field(mListProperty)).TableMList;
+                    int rows = DbQueryProvider.Single.Insert(query, constructor, table, sql => (int)sql.ExecuteScalar());
+
+                    return tr.Commit(rows);
+                }
+            }
+        }
+
+        public static int UnsafeInsertView<T, E>(this IQueryable<T> query, Expression<Func<T, E>> constructor, string message = null)
+            where E : IView
+        {
+            if (message != null)
+                return SafeConsole.WaitRows(message == "auto" ? $"Inserting { typeof(E).TypeName()}" : message,
+                    () => query.UnsafeInsertView(constructor, message: null));
+
+            using (HeavyProfiler.Log("UnsafeInsertView", () => typeof(E).TypeName()))
+            {
+                if (query == null)
+                    throw new ArgumentNullException("query");
+
+                if (constructor == null)
+                    throw new ArgumentNullException("constructor");
+
+                using (Transaction tr = new Transaction())
+                {
+                    constructor = (Expression<Func<T, E>>)Schema.Current.OnPreUnsafeInsert(typeof(E), query, constructor, query.Select(constructor));
+                    var table = Schema.Current.View(typeof(E));
                     int rows = DbQueryProvider.Single.Insert(query, constructor, table, sql => (int)sql.ExecuteScalar());
 
                     return tr.Commit(rows);
