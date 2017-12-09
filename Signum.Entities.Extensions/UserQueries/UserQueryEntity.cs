@@ -136,6 +136,7 @@ namespace Signum.Entities.UserQueries
                 new XAttribute("DisplayName", DisplayName),
                 new XAttribute("Query", Query.Key),
                 EntityType == null ? null : new XAttribute("EntityType", ctx.TypeToName(EntityType)),
+                new XAttribute("HideQuickLink", HideQuickLink),
                 Owner == null ? null : new XAttribute("Owner", Owner.Key()),
                 WithoutFilters == true ? null : new XAttribute("WithoutFilters", true),
                 ElementsPerPage == null ? null : new XAttribute("ElementsPerPage", ElementsPerPage),
@@ -151,6 +152,7 @@ namespace Signum.Entities.UserQueries
             Query = ctx.TryGetQuery(element.Attribute("Query").Value);
             DisplayName = element.Attribute("DisplayName").Value;
             EntityType = element.Attribute("EntityType")?.Let(a => ctx.GetType(a.Value));
+            HideQuickLink = element.Attribute("HideQuickLink")?.Let(a => bool.Parse(a.Value)) ?? false;
             Owner = element.Attribute("Owner")?.Let(a => Lite.Parse(a.Value));
             WithoutFilters = element.Attribute("WithoutFilters")?.Let(a => a.Value == true.ToString()) ?? false;
             ElementsPerPage = element.Attribute("ElementsPerPage")?.Let(a => int.Parse(a.Value));

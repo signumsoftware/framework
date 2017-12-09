@@ -160,6 +160,7 @@ namespace Signum.Entities.Dashboard
                 Owner == null ? null : new XAttribute("Owner", Owner.Key()),
                 DashboardPriority == null ? null : new XAttribute("DashboardPriority", DashboardPriority.Value.ToString()),
                 EmbeddedInEntity == null ? null : new XAttribute("EmbeddedInEntity", EmbeddedInEntity.Value.ToString()),
+                new XAttribute("CombineSimilarRows", CombineSimilarRows),
                 new XElement("Parts", Parts.Select(p => p.ToXml(ctx))));
         }
 
@@ -171,6 +172,7 @@ namespace Signum.Entities.Dashboard
             Owner = element.Attribute("Owner")?.Let(a => Lite.Parse<Entity>(a.Value));
             DashboardPriority = element.Attribute("DashboardPriority")?.Let(a => int.Parse(a.Value));
             EmbeddedInEntity = element.Attribute("EmbeddedInEntity")?.Let(a => a.Value.ToEnum<DashboardEmbedededInEntity>());
+            CombineSimilarRows = element.Attribute("CombineSimilarRows")?.Let(a => bool.Parse(a.Value)) ?? false;
             Parts.Synchronize(element.Element("Parts").Elements().ToList(), (pp, x) => pp.FromXml(x, ctx));
         }
 
