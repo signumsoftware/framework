@@ -13,6 +13,7 @@ import {
 import * as ChartClient from '../ChartClient'
 
 import "../Chart.css"
+import { QueryTokenEmbedded } from '../../UserAssets/Signum.Entities.UserAssets';
 
 declare global {
     interface Error {
@@ -25,7 +26,13 @@ declare global {
     }
 }
 
-export default class ChartRenderer extends React.Component<{ data: ChartClient.ChartTable; chartRequest: ChartRequest; lastChartRequest: ChartRequest }> {
+export interface ChartRendererProps {
+    data: ChartClient.ChartTable;
+    chartRequest: ChartRequest;
+    lastChartRequest: ChartRequest 
+}
+
+export default class ChartRenderer extends React.Component<ChartRendererProps> {
 
     exceptionLine: number | null;
 
@@ -52,13 +59,24 @@ export default class ChartRenderer extends React.Component<{ data: ChartClient.C
     componentDidMount() {
         this.redraw();
     }
+    
+    lastChartRequestPath: string | undefined;
+    shouldComponentUpdate(newProps: ChartRendererProps) {
+        if (this.props.data != newProps.data)
+            return true;
 
+        if (this.lastChartRequestPath != ChartClient.Encoder.chartPath(newProps.chartRequest))
+            return true;
+
+        return false;
+    }
+
+ 
     componentDidUpdate() {
         this.redraw();
     }
 
     redraw() {
-
         const node = ReactDOM.findDOMNode(this) as SVGElement;
         while (node.firstChild) {
             node.removeChild(node.firstChild);
@@ -73,14 +91,14 @@ export default class ChartRenderer extends React.Component<{ data: ChartClient.C
 
         this.props.chartRequest.chartScript.columns.map(a => a.element).map((cc, i) => {
             if (!data.columns["c" + i])
-                data.columns["c" + i] = {};
+                data.columns["c" + i] = { name: "c" + 1 };
         }); 
 
         const chart = D3.select(node)
             .append('svg:svg').attr("direction", "ltr").attr('width', rect.width).attr('height', rect.height);
 
         node.addEventListener("click", this.handleOnClick);
-
+        
         let func: (chart: D3.Selection<any, any, any, any>, data: ChartClient.ChartTable) => void;
         let __baseLineNumber__: number = 0;
         try {
@@ -99,6 +117,8 @@ export default class ChartRenderer extends React.Component<{ data: ChartClient.C
             const rule = ChartUtils.rule;
             const ellipsis = ChartUtils.ellipsis;
             __baseLineNumber__ = new Error().lineNumber;
+            console.log("Redraw");
+            this.lastChartRequestPath = ChartClient.Encoder.chartPath(this.props.chartRequest);
             func = eval("(" + this.props.chartRequest.chartScript.script + ")");
         } catch (e) {
             this.showError(e, __baseLineNumber__, chart);
@@ -214,7 +234,6 @@ export default class ChartRenderer extends React.Component<{ data: ChartClient.C
         );
     }
 }
-
 
 
 

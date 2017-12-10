@@ -528,7 +528,7 @@ export function groupedPivotTable(data: ChartTable,
     colValue: string): PivotTable {
 
     var columns = d3.values(data.rows.toObjectDistinct(cr => cr[colSplit].key as string, cr => ({
-        niceName: cr[colSplit].niceToString(),
+        niceName: cr[colSplit].niceToString!(),
         color: cr[colSplit].color,
         key: cr[colSplit].key,
     }) as PivotColumn));

@@ -39,21 +39,5 @@ namespace Signum.React.Chart
         {
             return ChartColorLogic.Colors.Value.Keys.Select(t => TypeLogic.GetCleanName(t)).ToList();
         }
-
-        [Route("api/chart/execute"), HttpPost, ValidateModelFilter]
-        public async Task<ExecuteChartResult> Execute(ChartRequest request, CancellationToken token)
-        {
-            var resultTable = await ChartLogic.ExecuteChartAsync(request, token);
-
-            var chartTable = ChartUtils.DataJson(request, resultTable);
-
-            return new ExecuteChartResult { resultTable = resultTable, chartTable = chartTable };
-        }
-
-        public class ExecuteChartResult
-        {
-            public ResultTable resultTable;
-            public object chartTable;
-        }
     }
 }

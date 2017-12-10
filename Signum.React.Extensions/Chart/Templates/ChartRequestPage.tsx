@@ -11,16 +11,16 @@ import { PropertyRoute, getQueryNiceName, getTypeInfo, Binding, GraphExplorer } 
 import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
 import {
     ChartColumnEmbedded, ChartScriptColumnEmbedded, ChartScriptParameterEmbedded, ChartRequest, GroupByChart, ChartMessage,
-    ChartColorEntity, ChartScriptEntity, ChartParameterEmbedded, ChartParameterType } from '../Signum.Entities.Chart'
+    ChartColorEntity, ChartScriptEntity, ChartParameterEmbedded, ChartParameterType, UserChartEntity } from '../Signum.Entities.Chart'
 import * as ChartClient from '../ChartClient'
 import ChartRequestView from './ChartRequestView'
 import { RouteComponentProps } from "react-router";
 
-interface ChartRequestPageProps extends RouteComponentProps<{ queryName: string }> {
+interface ChartRequestPageProps extends RouteComponentProps<{ queryName: string; }> {
 
 }
 
-export default class ChartRequestPage extends React.Component<ChartRequestPageProps, { chartRequest?: ChartRequest }> {
+export default class ChartRequestPage extends React.Component<ChartRequestPageProps, { chartRequest?: ChartRequest; userChart?: Lite<UserChartEntity> }> {
 
     constructor(props: ChartRequestPageProps) {
         super(props);
@@ -32,22 +32,34 @@ export default class ChartRequestPage extends React.Component<ChartRequestPagePr
     }
 
     componentWillReceiveProps(nextProps: ChartRequestPageProps) {
-        this.state = {};
-        this.forceUpdate();
         this.load(nextProps);
     }
 
     load(props: ChartRequestPageProps) {
-        ChartClient.Decoder.parseChartRequest(props.match.params.queryName, QueryString.parse(props.location.search)).then(cr => {
-            this.setState({ chartRequest: cr });
-        }).done();
+        
+        var oldPath = this.state.chartRequest && ChartClient.Encoder.chartPath(this.state.chartRequest, this.state.userChart);
+        var newPath = props.location.pathname + props.location.search;
+
+        if (oldPath != newPath) {
+            var query = QueryString.parse(props.location.search);
+            var uc = query.userChart == null ? undefined : (parseLite(query.userChart) as Lite<UserChartEntity>);
+            ChartClient.Decoder.parseChartRequest(props.match.params.queryName, query)
+                .then(cr => this.setState({ chartRequest: cr, userChart: uc }))
+                .done();
+        }
     }
 
+    handleOnChange = (cr: ChartRequest, uc?: Lite<UserChartEntity>) => {
+        var path = ChartClient.Encoder.chartPath(cr, uc);
+
+        Navigator.history.replace(path);
+    }
 
     render() {
         return <ChartRequestView
             chartRequest={this.state.chartRequest!}
-            onChange={cr => this.setState({ chartRequest: cr }) }/>;
+            userChart={this.state.userChart}
+            onChange={(cr, uc) => this.handleOnChange(cr, uc)} />;
     }
 }
 

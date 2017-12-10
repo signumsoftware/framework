@@ -40,7 +40,7 @@ export default class UserChartOmniboxProvider extends OmniboxProvider<UserChartO
 
         return Navigator.API.fetchAndForget(result.UserChart)
             .then(a => UserChartClient.Converter.toChartRequest(a, undefined))
-            .then(cr => ChartClient.Encoder.chartPath(cr, { userChart: liteKey(result.UserChart) }));
+            .then(cr => ChartClient.Encoder.chartPath(cr, result.UserChart));
     }
 
     toString(result: UserChartOmniboxResult) {

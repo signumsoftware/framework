@@ -1,5 +1,7 @@
 import * as React from 'react'
 import { Route } from 'react-router'
+import * as moment from 'moment'
+import * as numbro from 'numbro'
 import * as QueryString from 'query-string'
 import { Dic } from '../../../Framework/Signum.React/Scripts/Globals';
 import { ajaxPost, ajaxGet } from '../../../Framework/Signum.React/Scripts/Services';
@@ -16,7 +18,7 @@ import {
     FindOptions, FilterOption, FilterOptionParsed, FilterOperation, OrderOption, OrderOptionParsed, ColumnOption,
     FilterRequest, QueryRequest, Pagination, QueryTokenType, QueryToken, FilterType, SubTokensOptions, ResultTable, OrderRequest } from '../../../Framework/Signum.React/Scripts/FindOptions'
 import * as AuthClient  from '../Authorization/AuthClient'
-import { QueryFilterEmbedded, QueryColumnEmbedded, QueryOrderEmbedded } from '../UserQueries/Signum.Entities.UserQueries'
+import { QueryFilterEmbedded, QueryColumnEmbedded, QueryOrderEmbedded} from '../UserQueries/Signum.Entities.UserQueries'
 
 import {
     UserChartEntity, ChartPermission, ChartMessage, ChartColumnEmbedded, ChartParameterEmbedded, ChartScriptEntity, ChartScriptParameterEmbedded, ChartRequest,
@@ -26,6 +28,9 @@ import ChartButton from './ChartButton'
 import ChartRequestView from './Templates/ChartRequestView'
 import * as UserChartClient from './UserChart/UserChartClient'
 import { ImportRoute } from "../../../Framework/Signum.React/Scripts/AsyncImport";
+import { ColumnRequest } from '../../../Framework/Signum.React/Scripts/FindOptions';
+import { toMomentFormat } from '../../../Framework/Signum.React/Scripts/Reflection';
+import { toNumbroFormat } from '../../../Framework/Signum.React/Scripts/Reflection';
 
 export function start(options: { routes: JSX.Element[] }) {
 
@@ -330,14 +335,14 @@ export module Encoder {
         };
     }
 
-    export function chartPath(cr: ChartOptions | ChartRequest, extra?: any): string {
+    export function chartPath(cr: ChartOptions | ChartRequest, userChart?: Lite<UserChartEntity>): string {
 
         var co = ChartRequest.isInstance(cr) ? toChartOptions(cr) : cr;
         
         const query = {
             script: co.chartScript,
             groupResults: co.groupResults,
-            ...extra
+            userChart: userChart && liteKey(userChart)
         };
 
         Finder.Encoder.encodeFilters(query, co.filterOptions);
@@ -435,26 +440,157 @@ export module Decoder {
 
 
 export module API {
+    
+    export function getRequest(request: ChartRequest): QueryRequest {
 
-
-
-    export function cleanedChartRequest(request: ChartRequest) {
-        const clone = {...request };
-
-        clone.orders = clone.orderOptions!.map(oo => ({ token: oo.token.fullKey, orderType: oo.orderType }) as OrderRequest);
-        delete clone.orderOptions;
-
-        clone.filters = clone.filterOptions!.filter(a => a.token != null).map(fo => ({ token: fo.token!.fullKey, operation: fo.operation, value: fo.value }) as FilterRequest);
-        delete clone.filterOptions;
-
-        return clone;
+        return {
+            queryKey: request.queryKey,
+            groupResults: request.groupResults,
+            filters: request.filterOptions!.filter(a => a.token != null).map(fo => ({ token: fo.token!.fullKey, operation: fo.operation, value: fo.value }) as FilterRequest),
+            columns: request.columns.map(mle => mle.element).filter(cce => cce.token != null).map(co => ({ token: co.token!.token!.fullKey }) as ColumnRequest),
+            orders: request.orderOptions.map(oo => ({ token: oo.token.fullKey, orderType: oo.orderType }) as OrderRequest),
+            pagination: { mode: "All" }
+        };
     }
 
+    export function toChartColumnType(token: QueryToken): ChartColumnType | null{
+        switch (token.filterType) {
+            case "Lite": return "Lite";
+            case "Boolean":
+            case "Enum": return "Enum";
+            case "String":
+            case "Guid": return "String";
+            case "Integer": return "Integer";
+            case "Decimal": return token.isGroupable ? "RealGroupable" : "Real";
+            case "DateTime": return token.isGroupable ? "Date" : "DateTime";
+            default: return null;
+        }
+    }
+
+    export function getConverter(token: QueryToken | null | undefined): ((val: any) => ChartValue) | null {
+        if (!token)
+            return null;
+
+        if (token.type.isLite)
+            return v => {
+                var lite = v as Lite<Entity> | undefined;
+                return {
+                    key: lite && liteKey(lite),
+                    toStr: lite && lite.toStr || "",
+                    color: lite == null ? "#555" : null,
+                };
+            };
+
+        if (token.filterType == "Enum")
+            return v => {
+                var value = v as string | undefined;
+                return {
+                    key: value,
+                    toStr: value,
+                    color: value == null ? "#555" : null,
+                };
+            };
+
+        if (token.filterType == "DateTime")
+            return v => {
+                var date = v as string | undefined;
+                var format = token.format && toMomentFormat(token.format);
+                return {
+                    key: date,
+                    keyForFilter: date && moment(date).format(),
+                    toStr: date && moment(date).format(format),
+                };
+            };
+        
+        if (token.format && (token.filterType == "Decimal" || token.filterType == "Integer"))
+            return v => {
+                var number = v as number | undefined;
+                var format = token.format && toNumbroFormat(token.format);
+                return {
+                    key: number,
+                    toStr: number == null ? null : numbro(number).format(format),
+                };
+            };
+
+        return v => {
+            return {
+                key: v,
+                toStr: v,
+            };
+        };
+    }
+
+    export function toChartResult(request: ChartRequest, rt: ResultTable): ExecuteChartResult {
+
+        var cols = request.columns.map((mle, i) => {
+            var token = mle.element.token && mle.element.token.token;
+            var scriptCol = request.chartScript.columns[i].element;
+
+            return ({
+                name: "c" + i,
+                displayName: scriptCol.displayName,
+                title: (mle.element.displayName || "") + (token ? ` (${token.unit})` : ""),
+                token: token && token.fullKey,
+                type: token && toChartColumnType(token),
+                isGroupKey: !request.groupResults ? undefined : scriptCol.isGroupKey,
+            }) as ChartColumn;
+        });
+
+        var index = 0;
+        var converters = request.columns.map(mle => {
+            var conv = getConverter(mle.element.token && mle.element.token.token); 
+
+            if (conv == null)
+                return null;
+
+            return {
+                conv,
+                index : index++
+            }
+        });
+
+        if (!request.groupResults)
+            cols.insertAt(0, {
+                name: "entity",
+                displayName: "Entity",
+                title: "",
+                token: "Lite",
+                type: "entity",
+                isGroupKey: true,
+            });
+
+        var params = request.parameters.toObject(a => a.element.name!, a => a.element.value)
+
+        var rows = rt.rows.map(row => request.columns.map((c, i) => {
+            var tuple = converters[i];
+
+            if (tuple == null)
+                return null;
+
+            var val = row.columns[tuple.index];
+
+            return { colName: "c" + i, cValue: tuple.conv!(val) };
+        }).filter(a => a != null).toObject(a => a!.colName, a => a!.cValue) as ChartRow);
+
+
+        var chartTable: ChartTable = {
+            columns: cols.toObjectDistinct(a => a.name),
+            parameters: params,
+            rows: rows
+        };
+
+        return {
+            resultTable: rt,
+            chartTable: chartTable,
+            
+        };
+    } 
+
     export function executeChart(request: ChartRequest, abortController?: FetchAbortController): Promise<ExecuteChartResult> {
+        
+        const queryRequest = getRequest(request);
 
-        const clone = cleanedChartRequest(request);
-
-        return ajaxPost<ExecuteChartResult>({ url: "~/api/chart/execute", abortController }, clone);
+        return Finder.API.executeQuery(queryRequest, abortController).then(rt => toChartResult(request, rt));
 
     }
     export interface ExecuteChartResult {
@@ -477,10 +613,11 @@ export module API {
 
 
 export interface ChartValue {
-    key: string | number | undefined,
-    toStr: string,
-    color: string,
-    niceToString(): string;
+    key: string | number | null | undefined,
+    keyForFilter?: string | number | null,
+    toStr: string | undefined | null,
+    color?: string | null,
+    niceToString?(): string;
 }
 
 export interface ChartTable {
@@ -495,6 +632,7 @@ export interface ChartRow {
 
 
 export interface ChartColumn {
+    name: string;
     title?: string;
     displayName?: string;
     token?: string;
