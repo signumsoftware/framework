@@ -523,13 +523,12 @@ export module API {
     export function toChartResult(request: ChartRequest, rt: ResultTable): ExecuteChartResult {
 
         var cols = request.columns.map((mle, i) => {
-            var token = mle.element.token && mle.element.token.token;
-            var scriptCol = request.chartScript.columns[i].element;
-
+            const token = mle.element.token && mle.element.token.token;
+            const scriptCol = request.chartScript.columns[i].element;
             return ({
                 name: "c" + i,
                 displayName: scriptCol.displayName,
-                title: (mle.element.displayName || "") + (token ? ` (${token.unit})` : ""),
+                title: (mle.element.displayName || token && token.niceName) + (token && token.unit ? ` (${token.unit})` : ""),
                 token: token && token.fullKey,
                 type: token && toChartColumnType(token),
                 isGroupKey: !request.groupResults ? undefined : scriptCol.isGroupKey,

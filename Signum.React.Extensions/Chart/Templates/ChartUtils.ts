@@ -499,10 +499,11 @@ export function toPivotTable(data: ChartTable,
         .map(function (r) {
             return {
                 rowValue: r[col0],
-                values: usedCols.toObject(cn => cn, cn => ({
+                values: usedCols.toObject(cn => cn, (cn): PivotValue => ({
                     rowClick: r,
                     value: r[cn],
-                }) as PivotValue)
+                    valueTitle: `${r[col0].niceToString!()}, ${data.columns[cn].title}: ${r[cn].niceToString!()}`
+                }))
             } as PivotRow;
         });
 
@@ -536,11 +537,16 @@ export function groupedPivotTable(data: ChartTable,
     var rows = data.rows.groupBy(r => "k" + r[col0].key)
         .map(gr => {
 
+            var rowValue = gr.elements[0][col0];
             return {
-                rowValue: gr.elements[0][col0],
+                rowValue: rowValue,
                 values: gr.elements.toObject(
                     r => r[colSplit].key as string,
-                    r => ({ value: r[colValue], rowClick: r }) as PivotValue),
+                    (r) : PivotValue => ({
+                        value: r[colValue],
+                        rowClick: r,
+                        valueTitle: `${rowValue.niceToString!()}, ${r[colSplit].niceToString!()}: ${r[colValue].niceToString!()}`
+                    })),
             } as PivotRow;
         });
 
@@ -574,4 +580,5 @@ interface PivotRow {
 interface PivotValue {
     rowClick: ChartRow;
     value: ChartValue;
+    valueTitle: string;
 }
