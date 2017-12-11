@@ -1502,7 +1502,7 @@ namespace Signum.Engine
 
         #endregion
 
-        public static void Merge<E, A>(string title, IQueryable<E> should, IQueryable<E> current, Expression<Func<E, A>> getKey)
+        public static void Merge<E, A>(string title, IQueryable<E> should, IQueryable<E> current, Expression<Func<E, A>> getKey, List<Expression<Func<E, object>>> toUpdate = null)
             where E : Entity
             where A : class
         {
@@ -1512,6 +1512,20 @@ namespace Signum.Engine
             current.Where(c => !should.Any(s => getKey.Evaluate(c) == getKey.Evaluate(s))).UnsafeDelete(title != null ? "auto" : null);
 
             should.Where(s => !current.Any(c => getKey.Evaluate(c) == getKey.Evaluate(s))).UnsafeInsert(p => p, title != null ? "auto" : null);
+
+            if (toUpdate != null)
+            {
+                var updater = (from c in current
+                              join s in should on getKey.Evaluate(c) equals getKey.Evaluate(s)
+                              select new { c, s }).UnsafeUpdatePart(a => a.c);
+
+                foreach (var prop in toUpdate)
+                {
+                    updater = updater.Set(prop, a => prop.Evaluate(a.s));
+                }
+
+                updater.Execute(title != null ? "auto" : null);
+            }
         }
 
         public static void MergeMList<E, V, A>(string title, IQueryable<MListElement<E, V>> should, IQueryable<MListElement<E, V>> current, Expression<Func<MListElement<E, V>, A>> getKey, Expression<Func<E, MList<V>>> mList)
