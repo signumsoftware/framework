@@ -27,6 +27,10 @@ export function fillAllTokenValueFuntions(data: ChartTable) {
             makeItTokenValue(data.rows[j]['c' + i]);
         }
     }
+
+    for (let j = 0; j < data.rows.length; j++) {
+        makeItTokenValue(data.rows[j]['entity']);
+    }
 }
 
 export function makeItTokenValue(value: ChartValue) {

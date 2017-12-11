@@ -548,7 +548,7 @@ export module API {
             }
         });
 
-        if (!request.groupResults)
+        if (!request.groupResults) {
             cols.insertAt(0, {
                 name: "entity",
                 displayName: "Entity",
@@ -557,20 +557,32 @@ export module API {
                 type: "entity",
                 isGroupKey: true,
             });
+        }
 
         var params = request.parameters.toObject(a => a.element.name!, a => a.element.value)
 
-        var rows = rt.rows.map(row => request.columns.map((c, i) => {
-            var tuple = converters[i];
+        var rows = rt.rows.map(row => {
+            var cr = request.columns.map((c, i) => {
+                var tuple = converters[i];
 
-            if (tuple == null)
-                return null;
+                if (tuple == null)
+                    return null;
 
-            var val = row.columns[tuple.index];
+                var val = row.columns[tuple.index];
 
-            return { colName: "c" + i, cValue: tuple.conv!(val) };
-        }).filter(a => a != null).toObject(a => a!.colName, a => a!.cValue) as ChartRow);
+                return { colName: "c" + i, cValue: tuple.conv!(val) };
+            }).filter(a => a != null).toObject(a => a!.colName, a => a!.cValue) as ChartRow;
 
+            if (!request.groupResults) {
+                cr["entity"] = {
+                    key: liteKey(row.entity!),
+                    toStr: row.entity!.toStr || "",
+                    color: row.entity == null ? "#555" : null,
+                };
+            }
+
+            return cr;
+        });
 
         var chartTable: ChartTable = {
             columns: cols.toObjectDistinct(a => a.name),
@@ -580,8 +592,7 @@ export module API {
 
         return {
             resultTable: rt,
-            chartTable: chartTable,
-            
+            chartTable: chartTable,            
         };
     } 
 
