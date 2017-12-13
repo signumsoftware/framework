@@ -34,13 +34,31 @@ import PredictorRegressionMetrics from './PredictorRegressionMetrics';
 export default class Predictor extends React.Component<{ ctx: TypeContext<PredictorEntity> }, { queryDescription?: QueryDescription }> implements IRenderButtons {
 
     handleClick = () => {
-        Finder.find({
-            queryName: this.state.queryDescription!.queryKey,
-            columnOptionsMode: "Add",
-            columnOptions: this.props.ctx.value.mainQuery.columns.map(mle => ({ columnName: mle.element.token && mle.element.token.token!.fullKey }) as ColumnOption)
-        })
-        .then(lite => PredictorClient.predict(toLite(this.props.ctx.value), lite))
-        .done();
+
+        var p = this.props.ctx.value;
+
+        if (!p.mainQuery.groupResults) {
+
+            Finder.find({
+                queryName: this.state.queryDescription!.queryKey,
+                columnOptionsMode: "Add",
+                columnOptions: p.mainQuery.columns.map(mle => ({ columnName: mle.element.token && mle.element.token.token!.fullKey }) as ColumnOption)
+            })
+                .then(lite => PredictorClient.predict(toLite(p), lite))
+                .done();
+        } else {
+
+            var fullKeys = p.mainQuery.columns.map(mle => mle.element.token!.tokenString!);
+
+            Finder.findRow({
+                queryName: this.state.queryDescription!.queryKey,
+                groupResults: p.mainQuery.groupResults,
+                columnOptionsMode: "Replace",
+                columnOptions: fullKeys.map(fk => ({ columnName: fk }) as ColumnOption)
+            }, { searchControlProps: { allowChangeColumns: false, showGroupButton: false } })
+                .then(row => PredictorClient.predict(toLite(p), row && fullKeys.map((fk, i) => ({ tokenString: fk, value: row!.columns[i] })).toObject(a => a.tokenString, a => a.value)))
+                .done();
+        }
     }
 
     renderButtons(ctx: ButtonsContext): (React.ReactElement<any> | undefined)[] {
@@ -88,20 +106,24 @@ export default class Predictor extends React.Component<{ ctx: TypeContext<Predic
 
     handleCreate = () => {
 
-        var query = this.props.ctx.value.mainQuery.query;
-        return Finder.parseSingleToken(query!.key, "Entity", SubTokensOptions.CanElement)
-            .then(qt => PredictorSubQueryEntity.New({
-                query: query,
-                columns: [
-                    newMListElement(PredictorSubQueryColumnEmbedded.New({
-                        usage: "ParentKey",
-                        token: QueryTokenEmbedded.New({
-                            token: qt,
-                            tokenString: "Entity",
-                        })
-                    }))
-                ]
-            }));
+        var mq = this.props.ctx.value.mainQuery;
+
+        var promise = !mq.groupResults ? Finder.parseSingleToken(mq.query!.key, "Entity", SubTokensOptions.CanElement).then(t => [t]) :
+            Promise.resolve(mq.columns.map(a => a.element.token).filter(t => t != null && t.token != null && t.token.queryTokenType != "Aggregate").map(t => t!.token!));
+
+
+        return promise.then(keys => PredictorSubQueryEntity.New({
+            query: mq.query,
+            columns: keys.map(t =>
+                newMListElement(PredictorSubQueryColumnEmbedded.New({
+                    usage: "ParentKey",
+                    token: QueryTokenEmbedded.New({
+                        token: t,
+                        tokenString: t.fullKey,
+                    })
+                }))
+            )
+        }));
     }
 
     handleAlgorithmChange = () => {
@@ -131,10 +153,13 @@ export default class Predictor extends React.Component<{ ctx: TypeContext<Predic
         e.persist();
         var mq = this.props.ctx.value.mainQuery;
 
-        FilterBuilderEmbedded.toFilterOptionParsed(this.state.queryDescription!, mq.filters, SubTokensOptions.CanElement | SubTokensOptions.CanAnyAll)
+        var canAggregate = mq.groupResults ? SubTokensOptions.CanAggregate : 0;
+
+        FilterBuilderEmbedded.toFilterOptionParsed(this.state.queryDescription!, mq.filters, SubTokensOptions.CanElement | SubTokensOptions.CanAnyAll | canAggregate)
             .then(filters => {
                 var fo: FindOptions = {
                     queryName: mq.query!.key,
+                    groupResults: mq.groupResults,
                     filterOptions: filters.map(f => ({
                         columnName: f.token!.fullKey,
                         operation: f.operation,
@@ -162,6 +187,8 @@ export default class Predictor extends React.Component<{ ctx: TypeContext<Predic
         const entity = ctx.value;
         const queryKey = entity.mainQuery.query && entity.mainQuery.query.key;
 
+        var canAggregate = entity.mainQuery.groupResults ? SubTokensOptions.CanAggregate : 0;
+
         return (
             <div>
                 <ValueLine ctx={ctxxs.subCtx(e => e.name)} readOnly={this.props.ctx.readOnly} />
@@ -172,42 +199,42 @@ export default class Predictor extends React.Component<{ ctx: TypeContext<Predic
                 {ctx.value.state == "Training" && <TrainingProgressComponent ctx={ctx} onStateChanged={this.handleOnFinished} />}
                 <Tabs id={ctx.prefix + "tabs"} unmountOnExit={true}>
                     <Tab eventKey="query" title={ctxmq.niceName(a => a.query)}>
-                        <EntityLine ctx={ctxmq.subCtx(f => f.query)} remove={ctx.value.isNew} onChange={this.handleQueryChange} />
-                        {queryKey &&
-                            <div>
-                                <fieldset>
-                                    <legend>{ctxmq.niceName()}</legend>
-                                    <div>
-                                        <FilterBuilderEmbedded ctx={ctxmq.subCtx(a => a.filters)}
-                                            queryKey={queryKey}
-                                            subTokenOptions={SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement} />
-                                        <EntityTable ctx={ctxmq.subCtx(e => e.columns)} columns={EntityTable.typedColumns<PredictorColumnEmbedded>([
-                                            { property: a => a.usage },
-                                            {
-                                                property: a => a.token,
-                                                template: (cctx, row) => <QueryTokenEntityBuilder
-                                                    ctx={cctx.subCtx(a => a.token)}
-                                                    queryKey={this.props.ctx.value.mainQuery.query!.key}
-                                                    subTokenOptions={SubTokensOptions.CanElement}
-                                                    onTokenChanged={() => { initializeColumn(ctx.value, cctx.value); row.forceUpdate() }} />,
-                                                headerHtmlAttributes: { style: { width: "40%" } },
-                                            },
-                                            { property: a => a.encoding },
-                                            { property: a => a.nullHandling },
-                                        ])} />
-                                        {ctxmq.value.query && <a href="#" onClick={this.handlePreviewMainQuery}>{PredictorMessage.Preview.niceToString()}</a>}
-                                    </div>
+                        <div>
+                            <fieldset>
+                                <legend>{ctxmq.niceName()}</legend>
+                                <EntityLine ctx={ctxmq.subCtx(f => f.query)} remove={ctx.value.isNew} onChange={this.handleQueryChange} />
+                                {queryKey && <div>
+                                    <ValueLine ctx={ctxmq.subCtx(f => f.groupResults)} onChange={this.handleQueryChange} />
 
-                                </fieldset>
-                                <EntityTabRepeater ctx={ctxxs.subCtx(e => e.subQueries)} onCreate={this.handleCreate}
-                                    getTitle={(mctx: TypeContext<PredictorSubQueryEntity>) => mctx.value.name || PredictorSubQueryEntity.niceName()}
-                                    getComponent={(mctx: TypeContext<PredictorSubQueryEntity>) =>
-                                        <div>
-                                            {!this.state.queryDescription ? undefined : <PredictorSubQuery ctx={mctx} mainQuery={ctxmq.value} mainQueryDescription={this.state.queryDescription} />}
-                                        </div>
-                                    } />
-                            </div>
-                        }
+                                    <FilterBuilderEmbedded ctx={ctxmq.subCtx(a => a.filters)}
+                                        queryKey={queryKey}
+                                        subTokenOptions={SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement | canAggregate} />
+                                    <EntityTable ctx={ctxmq.subCtx(e => e.columns)} columns={EntityTable.typedColumns<PredictorColumnEmbedded>([
+                                        { property: a => a.usage },
+                                        {
+                                            property: a => a.token,
+                                            template: (cctx, row) => <QueryTokenEntityBuilder
+                                                ctx={cctx.subCtx(a => a.token)}
+                                                queryKey={this.props.ctx.value.mainQuery.query!.key}
+                                                subTokenOptions={SubTokensOptions.CanElement | canAggregate}
+                                                onTokenChanged={() => { initializeColumn(ctx.value, cctx.value); row.forceUpdate() }} />,
+                                            headerHtmlAttributes: { style: { width: "40%" } },
+                                        },
+                                        { property: a => a.encoding },
+                                        { property: a => a.nullHandling },
+                                    ])} />
+                                    {ctxmq.value.query && <a href="#" onClick={this.handlePreviewMainQuery}>{PredictorMessage.Preview.niceToString()}</a>}
+                                </div>}
+
+                            </fieldset>
+                            {queryKey && <EntityTabRepeater ctx={ctxxs.subCtx(e => e.subQueries)} onCreate={this.handleCreate}
+                                getTitle={(mctx: TypeContext<PredictorSubQueryEntity>) => mctx.value.name || PredictorSubQueryEntity.niceName()}
+                                getComponent={(mctx: TypeContext<PredictorSubQueryEntity>) =>
+                                    <div>
+                                        {!this.state.queryDescription ? undefined : <PredictorSubQuery ctx={mctx} mainQuery={ctxmq.value} mainQueryDescription={this.state.queryDescription} />}
+                                    </div>
+                                } />}
+                        </div>
                     </Tab>
                     <Tab eventKey="settings" title={ctxxs.niceName(a => a.settings)}>
                         {ctxxs.value.algorithm && <EntityDetail ctx={ctxxs.subCtx(f => f.algorithmSettings)} remove={false} />}
@@ -227,7 +254,7 @@ export default class Predictor extends React.Component<{ ctx: TypeContext<Predic
                     {
                         ctx.value.state == "Trained" && <Tab eventKey="files" title={PredictorMessage.Results.niceToString()}>
                             {ctx.value.resultTraining && ctx.value.resultValidation && <PredictorMetrics ctx={ctx} />}
-                            {ctx.value.classificationTraining && ctx.value.classificationValidation && <PredictorClassificationMetrics ctx={ctx}/> }
+                            {ctx.value.classificationTraining && ctx.value.classificationValidation && <PredictorClassificationMetrics ctx={ctx} />}
                             {ctx.value.regressionTraining && ctx.value.regressionTraining && <PredictorRegressionMetrics ctx={ctx} />}
                             {ctx.value.resultSaver && PredictorClient.getResultRendered(ctx)}
                             <div className="form-vertical">
@@ -353,7 +380,7 @@ export class EpochProgressComponent extends React.Component<EpochProgressCompone
 
     render() {
         const eps = this.state.epochProgress;
-        
+
         return (
             <div>
                 {eps && <LineChart height={200} series={getSeries(eps, this.props.ctx.value)} />}
@@ -367,7 +394,7 @@ function getSeries(eps: Array<PredictorClient.EpochProgress>, predictor: Predict
 
     const algSet = predictor.algorithmSettings;
 
-    const isClassification = NeuralNetworkSettingsEntity.isInstance(algSet) && algSet.predictionType == "Classification"; 
+    const isClassification = NeuralNetworkSettingsEntity.isInstance(algSet) && algSet.predictionType == "Classification";
 
     var totalMax = isClassification ? undefined : eps.flatMap(a => [a.LossTraining, a.LossValidation]).filter(a => a != null).max();
 

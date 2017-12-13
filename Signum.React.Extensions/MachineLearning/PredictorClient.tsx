@@ -87,12 +87,12 @@ export function start(options: { routes: JSX.Element[] }) {
     );
 }
 
-export async function predict(predictor: Lite<PredictorEntity>, entity: Lite<Entity> | undefined): Promise<void> {
-    var predictRequest = await API.getPredict(predictor, entity);
+export async function predict(predictor: Lite<PredictorEntity>, mainKeys: { [queryToken: string]: any } | undefined): Promise<void> {
+    var predictRequest = await API.getPredict(predictor, mainKeys);
 
     var modal = await import("./Templates/PredictModal");
 
-    return modal.PredictModal.show(predictRequest, entity);
+    return modal.PredictModal.show(predictRequest, mainKeys && mainKeys["Entity"]);
 }
 
 export const initializers: { [key: string]: (pred: PredictorEntity) => void } = {};
@@ -152,8 +152,8 @@ export namespace API {
         return ajaxGet<Array<(number | undefined)[]>>({ url: `~/api/predictor/epochProgress/${lite.id}` }).then(ps => ps.map(p => fromObjectArray(p)));
     }
 
-    export function getPredict(predictor: Lite<PredictorEntity>, entity?: Lite<Entity>): Promise<PredictRequest> {
-        return ajaxPost<PredictRequest>({ url: `~/api/predict/get/${predictor.id}` }, entity);
+    export function getPredict(predictor: Lite<PredictorEntity>, mainKeys: { [queryToken: string]: any } | undefined): Promise<PredictRequest> {
+        return ajaxPost<PredictRequest>({ url: `~/api/predict/get/${predictor.id}` }, mainKeys);
     }
 
     export function updatePredict(predict: PredictRequest): Promise<PredictRequest> {

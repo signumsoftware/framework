@@ -199,30 +199,32 @@ namespace Signum.Engine.MachineLearning.CNTK
 
  
 
-        static Value CreateValue(PredictorTrainingContext ctx, List<ResultRow> rows, List<PredictorCodification> columns, DeviceDescriptor device)
+        static Value CreateValue(PredictorTrainingContext ctx, List<ResultRow> rows, List<PredictorCodification> codifications, DeviceDescriptor device)
         {
-            float[] values = new float[rows.Count * columns.Count];
+            float[] values = new float[rows.Count * codifications.Count];
             for (int i = 0; i < rows.Count; i++)
             {
                 var mainRow = rows[i];
-                for (int j = 0; j < columns.Count; j++)
+                var mainKey = ctx.MainQuery.GetParentKey(mainRow);
+
+                for (int j = 0; j < codifications.Count; j++)
                 {
-                    PredictorCodification c = columns[j];
+                    PredictorCodification c = codifications[j];
                     object value;
                     if (c.SubQuery == null)
                         value = mainRow[c.PredictorColumnIndex];
                     else
                     {
                         var sq = ctx.SubQueries.GetOrThrow(c.SubQuery);
-                        var rowValues = sq.GroupedValues.TryGetC(mainRow.Entity)?.TryGetC(c.Keys);
+                        var rowValues = sq.GroupedValues.TryGetC(mainKey)?.TryGetC(c.Keys);
                         value = rowValues == null ? null : rowValues[sq.ColumnIndexToValueIndex[c.PredictorColumnIndex]];
                     }
 
-                    values[i * columns.Count + j] = GetFloat(value, c);
+                    values[i * codifications.Count + j] = GetFloat(value, c);
                 }
             }
 
-            return Value.CreateBatch<float>(new int[] { columns.Count }, values, device);
+            return Value.CreateBatch<float>(new int[] { codifications.Count }, values, device);
         }
 
         public static float minLog = -5;

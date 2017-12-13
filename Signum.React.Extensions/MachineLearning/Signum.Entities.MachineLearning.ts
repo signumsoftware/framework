@@ -217,6 +217,7 @@ export const PredictorMainQueryEmbedded = new Type<PredictorMainQueryEmbedded>("
 export interface PredictorMainQueryEmbedded extends Entities.EmbeddedEntity {
     Type: "PredictorMainQueryEmbedded";
     query?: Basics.QueryEntity | null;
+    groupResults?: boolean;
     filters: Entities.MList<UserQueries.QueryFilterEmbedded>;
     columns: Entities.MList<PredictorColumnEmbedded>;
 }
@@ -239,8 +240,11 @@ export module PredictorMessage {
     export const _0NotSuportedFor1 = new MessageKey("PredictorMessage", "_0NotSuportedFor1");
     export const _0IsRequiredFor1 = new MessageKey("PredictorMessage", "_0IsRequiredFor1");
     export const _0ShouldBeDivisibleBy12 = new MessageKey("PredictorMessage", "_0ShouldBeDivisibleBy12");
-    export const ParentKeyOf0ShouldBeOfType1 = new MessageKey("PredictorMessage", "ParentKeyOf0ShouldBeOfType1");
+    export const TheTypeOf01DoesNotMatch23 = new MessageKey("PredictorMessage", "TheTypeOf01DoesNotMatch23");
     export const Predict = new MessageKey("PredictorMessage", "Predict");
+    export const ThereShouldBe0ColumnsWith12Currently3 = new MessageKey("PredictorMessage", "ThereShouldBe0ColumnsWith12Currently3");
+    export const ShouldBeOfType0 = new MessageKey("PredictorMessage", "ShouldBeOfType0");
+    export const TooManyParentKeys = new MessageKey("PredictorMessage", "TooManyParentKeys");
 }
 
 export const PredictorMetricsEmbedded = new Type<PredictorMetricsEmbedded>("PredictorMetricsEmbedded");
@@ -330,6 +334,7 @@ export interface PredictSimpleResultEntity extends Entities.Entity {
     Type: "PredictSimpleResult";
     predictor?: Entities.Lite<PredictorEntity> | null;
     target?: Entities.Lite<Entities.Entity> | null;
+    groupKeys?: string | null;
     type?: PredictionSet;
     predictedCategory?: string | null;
     predictedValue?: number | null;

@@ -188,6 +188,7 @@ namespace Signum.Engine.MachineLearning
     {
         public QueryRequest QueryRequest { get; internal set; }
         public ResultTable ResultTable { get; internal set; }
+        public Func<ResultRow, object[]> GetParentKey { get; internal set; }
     }
 
     public class SubQuery
@@ -195,7 +196,7 @@ namespace Signum.Engine.MachineLearning
         public PredictorSubQueryEntity SubQueryEntity;
         public QueryRequest QueryGroupRequest;
         public ResultTable ResultTable;
-        public Dictionary<Lite<Entity>, Dictionary<object[], object[]>> GroupedValues;
+        public Dictionary<object[], Dictionary<object[], object[]>> GroupedValues;
 
 
         public ResultColumn[] SplitBy { get; internal set; }

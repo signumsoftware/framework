@@ -14,6 +14,7 @@ using Signum.Entities.Reflection;
 using Signum.Entities.UserAssets;
 using Signum.Utilities;
 using Signum.Utilities.DataStructures;
+using Signum.Utilities.Reflection;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -147,6 +148,7 @@ namespace Signum.Engine.MachineLearning
 
                 Validator.PropertyValidator((PredictorColumnEmbedded c) => c.Encoding).StaticPropertyValidation += Column_StaticPropertyValidation;
                 Validator.PropertyValidator((PredictorSubQueryColumnEmbedded c) => c.Token).StaticPropertyValidation += GroupKey_StaticPropertyValidation;
+                Validator.PropertyValidator((PredictorSubQueryEntity c) => c.Columns).StaticPropertyValidation += SubQueryColumns_StaticPropertyValidation;
 
                 sb.Include<PredictSimpleResultEntity>()
                     .WithQuery(dqm, () => e => new
@@ -182,35 +184,70 @@ namespace Signum.Engine.MachineLearning
             }
         }
 
+        static string SubQueryColumns_StaticPropertyValidation(PredictorSubQueryEntity sq, PropertyInfo pi)
+        {
+            var p = (PredictorEntity)sq.GetParentEntity();
+            var tokens = GetParentKeys(p.MainQuery);
+            
+            var current = sq.Columns.Where(a => a.Usage == PredictorSubQueryColumnUsage.ParentKey);
+
+            if (tokens.Count != current.Count())
+                return PredictorMessage.ThereShouldBe0ColumnsWith12Currently3.NiceToString(
+                    tokens.Count,
+                    ReflectionTools.GetPropertyInfo((PredictorSubQueryColumnEmbedded c) => c.Usage),
+                    PredictorSubQueryColumnUsage.ParentKey.NiceToString(),
+                    current.Count());
+
+            return null;
+        }
+
         static string GroupKey_StaticPropertyValidation(PredictorSubQueryColumnEmbedded column, PropertyInfo pi)
         {
             var sq = (PredictorSubQueryEntity)column.GetParentEntity();
             var p = (PredictorEntity)sq.GetParentEntity();
-            if(column.Token != null && column.Usage == PredictorSubQueryColumnUsage.ParentKey)
+            if (column.Token != null && column.Usage == PredictorSubQueryColumnUsage.ParentKey)
             {
-                Implementations mainQueryImplementations = DynamicQueryManager.Current.GetEntityImplementations(p.MainQuery.Query.ToQueryName());
-                var token = column.Token.Token;
-                if (!Compatible(token.GetImplementations(), mainQueryImplementations))
-                    return PredictorMessage.ParentKeyOf0ShouldBeOfType1.NiceToString(sq, mainQueryImplementations, token.GetImplementations()?.ToString() ?? token.NiceTypeName);
+                var index = sq.Columns.Where(a => a.Usage == PredictorSubQueryColumnUsage.ParentKey).IndexOf(column);
+                var tokens = GetParentKeys(p.MainQuery);
+                var token = tokens.ElementAtOrDefault(index);
+
+                if (token == null)
+                    return null;
+
+                if (!Compatible(token, column.Token.Token))
+                    return PredictorMessage.TheTypeOf01DoesNotMatch23.NiceToString(column.Token.Token, column.Token.Token.NiceTypeName, token, token.NiceTypeName);
             }
 
             return null;
         }
 
-        public static bool Compatible(Implementations? firstGroupKey, Implementations mainQuery)
+        static List<QueryToken> GetParentKeys(PredictorMainQueryEmbedded mainQuery)
         {
-            if (firstGroupKey == null)
+            if (mainQuery.GroupResults)
+                return mainQuery.Columns.Select(a => a.Token.Token).Where(t => !(t is AggregateToken)).ToList();
+
+            var qd = DynamicQueryManager.Current.QueryDescription(mainQuery.Query.ToQueryName());
+            return new List<QueryToken> { QueryUtils.Parse("Entity", qd, 0) };
+        }
+
+        public static bool Compatible(QueryToken subQuery, QueryToken mainQuery)
+        {
+            if (subQuery.Type == mainQuery.Type)
+                return true;
+
+            var subQueryImp = subQuery.GetImplementations();
+            var mainQueryImp = mainQuery.GetImplementations();
+
+            if (subQueryImp == null || mainQueryImp == null)
                 return false;
 
-            if (firstGroupKey.Value.IsByAll ||
-                mainQuery.IsByAll)
-                return false;
+            if (subQueryImp.Value.IsByAll || mainQueryImp.Value.IsByAll)
+                return true;
 
-            if (firstGroupKey.Value.Types.Count() != 1 ||
-                mainQuery.Types.Count() != 1)
-                return false;
+            if (subQueryImp.Value.Types.Intersect(mainQueryImp.Value.Types).Any())
+                return true;
 
-            return firstGroupKey.Value.Types.SingleEx().Equals(mainQuery.Types.SingleEx());
+            return false;
         }
 
         static string Column_StaticPropertyValidation(PredictorColumnEmbedded column, PropertyInfo pi)
@@ -224,12 +261,13 @@ namespace Signum.Engine.MachineLearning
             return algorithm.ValidateEncodingProperty(p, null, column.Encoding, column.Usage, column.Token);
         }
 
-        static string Column_StaticPropertyValidation(PredictorSubQueryColumnEmbedded column, PropertyInfo pi)
+        static string SubQueryColumn_StaticPropertyValidation(PredictorSubQueryColumnEmbedded column, PropertyInfo pi)
         {
             var sq = (PredictorSubQueryEntity)column.GetParentEntity();
             var p = (PredictorEntity)sq.GetParentEntity();
             if (p.Algorithm == null || column.Usage == PredictorSubQueryColumnUsage.ParentKey || column.Usage == PredictorSubQueryColumnUsage.SplitBy)
                 return null;
+
             var algorithm = Algorithms.GetOrThrow(p.Algorithm);
             var usage = column.Usage == PredictorSubQueryColumnUsage.Input ? PredictorColumnUsage.Input : PredictorColumnUsage.Output;
             return algorithm.ValidateEncodingProperty(p, sq, column.Encoding.Value, usage, column.Token);

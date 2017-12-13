@@ -100,7 +100,26 @@ export default class PredictorSubQuery extends React.Component<{ ctx: TypeContex
         const queryKey = entity.query && entity.query.key;
         const targetType = this.props.mainQueryDescription.columns["Entity"].type;
 
-        var parentCtx = ctx.findParentCtx(PredictorEntity);
+        const parentCtx = ctx.findParentCtx(PredictorEntity);
+
+        var mq = parentCtx.value.mainQuery;
+
+        var tokens = mq.groupResults ? mq.columns.map(mle => mle.element.token).filter(t => t != null && t.token != null && t.token.queryTokenType != "Aggregate").map(t => t!.token!.niceTypeName) :
+            [this.props.mainQueryDescription.columns["Entity"].niceTypeName];
+
+        var parentKeyColumns = ctx.value.columns.map(mle => mle.element).filter(col => col.usage == "ParentKey");
+
+        var getParentKeyMessage = (col: PredictorSubQueryColumnEmbedded) => {
+            var index = parentKeyColumns.indexOf(col);
+            if (index == -1)
+                return undefined;
+
+            if (index < tokens.length)
+                return PredictorMessage.ShouldBeOfType0.niceToString(tokens[index]);
+
+            return PredictorMessage.TooManyParentKeys.niceToString();
+        };
+
 
         return (
             <div>
@@ -116,12 +135,12 @@ export default class PredictorSubQuery extends React.Component<{ ctx: TypeContex
                             },
                             {
                                 property: a => a.token,
-                                template: (colCtx, row) => <QueryTokenEntityBuilder
+                                template: colCtx => <QueryTokenEntityBuilder
                                     ctx={colCtx.subCtx(a => a.token)}
                                     queryKey={this.props.ctx.value.query!.key}
                                     subTokenOptions={SubTokensOptions.CanElement | SubTokensOptions.CanAggregate}
                                     onTokenChanged={() => this.handleChangeUsage(colCtx)}
-                                    helpBlock={row.props.index == 0 ? PredictorMessage.ParentKeyOf0ShouldBeOfType1.niceToString(Finder.getTypeNiceName(targetType)) : undefined}
+                                    helpBlock={getParentKeyMessage(colCtx.value)}
                                 />,
                                 headerHtmlAttributes: { style: { width: "50%" } },
                             },

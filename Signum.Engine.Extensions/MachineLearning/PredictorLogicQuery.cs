@@ -26,6 +26,17 @@ namespace Signum.Engine.MachineLearning
                 QueryRequest = mainQueryRequest,
                 ResultTable = mainResult,
             };
+
+            if (!mainQueryRequest.GroupResults)
+            {
+                ctx.MainQuery.GetParentKey = (ResultRow row) => new object[] { row.Entity };
+            }
+            else
+            {
+
+                var rcs = mainResult.Columns.Where(a => !(a.Column.Token is AggregateToken)).ToArray();
+                ctx.MainQuery.GetParentKey = (ResultRow row) => row.GetValues(rcs);
+            }
             
             ctx.SubQueries = new Dictionary<PredictorSubQueryEntity, SubQuery>();
             foreach (var sqe in ctx.Predictor.SubQueries)
@@ -36,12 +47,13 @@ namespace Signum.Engine.MachineLearning
 
                 var pairs = groupResult.Columns.Zip(sqe.Columns, (rc, sqc) => (rc, sqc)).ToList();
 
-                var parentKey = pairs.Extract(a => a.sqc.Usage == PredictorSubQueryColumnUsage.ParentKey).SingleEx().rc;
+                var parentKeys = pairs.Extract(a => a.sqc.Usage == PredictorSubQueryColumnUsage.ParentKey).Select(a => a.rc).ToArray();
                 var splitKeys = pairs.Extract(a => a.sqc.Usage == PredictorSubQueryColumnUsage.SplitBy).Select(a => a.rc).ToArray();
                 var values = pairs.Select(a=>a.rc).ToArray();
 
-                var groupedValues = groupResult.Rows.AgGroupToDictionary(row => (Lite<Entity>)row[parentKey], gr =>
-                    gr.ToDictionaryEx(
+                var groupedValues = groupResult.Rows.AgGroupToDictionary(
+                    row => row.GetValues(parentKeys),
+                    gr => gr.ToDictionaryEx(
                         row => row.GetValues(splitKeys),
                         row => row.GetValues(values),
                         ObjectArrayComparer.Instance));
@@ -139,15 +151,17 @@ namespace Signum.Engine.MachineLearning
             }
         }
 
-        static QueryRequest GetMainQueryRequest(PredictorMainQueryEmbedded mainQuery)
+        static QueryRequest GetMainQueryRequest(PredictorMainQueryEmbedded mq)
         {
             return new QueryRequest
             {
-                QueryName = mainQuery.Query.ToQueryName(),
+                QueryName = mq.Query.ToQueryName(),
 
-                Filters = mainQuery.Filters.Select(f => ToFilter(f)).ToList(),
+                GroupResults = mq.GroupResults,
 
-                Columns = mainQuery.Columns.Select(c => new Column(c.Token.Token, null)).ToList(),
+                Filters = mq.Filters.Select(f => ToFilter(f)).ToList(),
+
+                Columns = mq.Columns.Select(c => new Column(c.Token.Token, null)).ToList(),
 
                 Pagination = new Pagination.All(),
                 Orders = Enumerable.Empty<Order>().ToList(),

@@ -18,6 +18,8 @@ using Signum.Entities.DynamicQuery;
 using Newtonsoft.Json;
 using Signum.Entities.Reflection;
 using Signum.Utilities.Reflection;
+using Signum.Engine.DynamicQuery;
+using Signum.Engine.Basics;
 
 namespace Signum.React.MachineLearning
 {
@@ -92,13 +94,13 @@ namespace Signum.React.MachineLearning
         }
 
         [Route("api/predict/get/{predictorId}"), HttpPost]
-        public PredictRequestTS GetPredict(string predictorId, Lite<Entity> entity)
+        public PredictRequestTS GetPredict(string predictorId, Dictionary<string, object> mainKeys)
         {
             var p = Lite.ParsePrimaryKey<PredictorEntity>(predictorId);
 
             PredictorPredictContext pctx = PredictorPredictLogic.GetPredictContext(p);
 
-            PredictDictionary fromEntity = entity != null ? pctx.GetInputsFromEntity(entity) : null;
+            PredictDictionary fromEntity = mainKeys != null ? pctx.GetInputsFromParentKeys(pctx.ParseMainKeys(mainKeys)) : null;
             PredictDictionary inputs = fromEntity ?? pctx.GetInputsEmpty();
             PredictDictionary originalOutputs = fromEntity;
 

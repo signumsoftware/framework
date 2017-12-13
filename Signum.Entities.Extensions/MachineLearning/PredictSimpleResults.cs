@@ -16,9 +16,12 @@ namespace Signum.Entities.MachineLearning
         [NotNullValidator]
         public Lite<PredictorEntity> Predictor { get; internal set; }
 
-        [NotNullable]
-        [NotNullValidator, ImplementedByAll]
+        [ImplementedByAll]
         public Lite<Entity> Target { get; set; }
+
+        [SqlDbType(Size = 400)]
+        [StringLengthValidator(AllowNulls = true, Max = 400, MultiLine = true)]
+        public string GroupKeys { get; set; }
 
         public PredictionSet Type { get; set; }
 

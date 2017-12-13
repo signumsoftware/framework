@@ -1,5 +1,7 @@
 ﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using Signum.Engine.Basics;
+using Signum.Engine.DynamicQuery;
 using Signum.Engine.MachineLearning;
 using Signum.Entities;
 using Signum.Entities.DynamicQuery;
@@ -17,6 +19,24 @@ namespace Signum.React.MachineLearning
 {
     public static class PredictRequestExtensions
     {
+        public static Dictionary<QueryToken, object> ParseMainKeys(this PredictorPredictContext pctx, Dictionary<string, object> mainKeys)
+        {
+            Dictionary<QueryToken, object> filters = new Dictionary<QueryToken, object>();
+
+            var serializer = JsonSerializer.Create(GlobalConfiguration.Configuration.Formatters.JsonFormatter.SerializerSettings);
+            var qd = DynamicQueryManager.Current.QueryDescription(pctx.Predictor.MainQuery.Query.ToQueryName());
+            foreach (var kvp in mainKeys)
+            {
+                var qt = QueryUtils.Parse(kvp.Key, qd, SubTokensOptions.CanElement | SubTokensOptions.CanAggregate);
+
+                var obj = kvp.Value is JToken jt ? jt.ToObject(qt.Type, serializer) : ReflectionTools.ChangeType(kvp.Value, qt.Type);
+
+                filters.Add(qt, obj);
+            }
+
+            return filters;
+        }
+
         public static PredictDictionary GetInputsFromRequest(this PredictorPredictContext pctx, PredictRequestTS request)
         {
             ParseValues(request, pctx);

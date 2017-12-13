@@ -84,12 +84,11 @@ namespace Signum.Entities.MachineLearning
         {
             RebindEvents();
         }
-
-        [Ignore]
-        internal object queryName;
-
+        
         [NotNullValidator]
         public QueryEntity Query { get; set; }
+
+        public bool GroupResults { get; set; }
 
         [NotNullable, PreserveOrder]
         public MList<QueryFilterEmbedded> Filters { get; set; } = new MList<QueryFilterEmbedded>();
@@ -100,13 +99,15 @@ namespace Signum.Entities.MachineLearning
 
         internal void ParseData(QueryDescription qd)
         {
+            var canAggregate = this.GroupResults ? SubTokensOptions.CanAggregate : 0;
+
             if (Filters != null)
                 foreach (var f in Filters)
-                    f.ParseData(this, qd, SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement);
+                    f.ParseData(this, qd, SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement | canAggregate);
 
             if (Columns != null)
                 foreach (var c in Columns)
-                    c.ParseData(this, qd, SubTokensOptions.CanElement);
+                    c.ParseData(this, qd, SubTokensOptions.CanElement | canAggregate);
         }
 
         internal PredictorMainQueryEmbedded Clone() => new PredictorMainQueryEmbedded

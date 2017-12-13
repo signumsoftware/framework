@@ -30,8 +30,13 @@ namespace Signum.Entities.MachineLearning
         _0IsRequiredFor1,
         [Description("{0} should be divisible by {1} ({2})")]
         _0ShouldBeDivisibleBy12,
-        [Description("Parent key of {0} should be of type {1}")]
-        ParentKeyOf0ShouldBeOfType1,
+        [Description("The type of {0} ({1}) does not match {2} ({3})")]
+        TheTypeOf01DoesNotMatch23,
         Predict,
+        [Description("There should be {0} columns with {1} {2} (currently {3})")]
+        ThereShouldBe0ColumnsWith12Currently3,
+        [Description("Should be of type {0}")]
+        ShouldBeOfType0,
+        TooManyParentKeys
     }
 }
