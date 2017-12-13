@@ -939,6 +939,19 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
         if ((e.target as HTMLElement).parentElement != e.currentTarget) //directly in the td
             return;
 
+        if (this.props.onDoubleClick) {
+            e.preventDefault();
+            this.props.onDoubleClick(e, row);
+            return;
+        }
+
+        var qs = this.props.querySettings;
+        if (qs && qs.onDoubleClick) {
+            e.preventDefault();
+            qs.onDoubleClick(e, row);
+            return;
+        }
+
         var resFo = this.state.resultFindOptions;
         if (resFo && resFo.groupResults) {
 
@@ -955,19 +968,6 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
                 filterOptions: nonAggregateFilters.concat(keyFilters)
             }).done();
 
-            return;
-        }
-
-        if (this.props.onDoubleClick) {
-            e.preventDefault();
-            this.props.onDoubleClick(e, row);
-            return;
-        }
-
-        var qs = this.props.querySettings;
-        if (qs && qs.onDoubleClick) {
-            e.preventDefault();
-            qs.onDoubleClick(e, row);
             return;
         }
         

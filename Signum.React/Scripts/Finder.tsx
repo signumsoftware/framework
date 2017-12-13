@@ -65,13 +65,26 @@ export function find(obj: FindOptions | Type<any>, modalOptions?: ModalFindOptio
     const fo = (obj as FindOptions).queryName ? obj as FindOptions :
         { queryName: obj as Type<any> } as FindOptions;
 
+    if (fo.groupResults)
+        throw new Error("Use findRow instead");
+
     var qs = getSettings(fo.queryName);
     if (qs && qs.onFind && !(modalOptions && modalOptions.useDefaultBehaviour))
         return qs.onFind(fo, modalOptions);
 
     return import("./SearchControl/SearchModal")
+        .then(a => a.default.open(fo, modalOptions))
+        .then(rr => rr && rr.entity);
+}
+
+export function findRow(fo: FindOptions, modalOptions?: ModalFindOptions): Promise<ResultRow | undefined> {
+    
+    var qs = getSettings(fo.queryName);
+
+    return import("./SearchControl/SearchModal")
         .then(a => a.default.open(fo, modalOptions));
 }
+
 
 export function findMany<T extends Entity = Entity>(findOptions: FindOptions, modalOptions?: ModalFindOptions): Promise<Lite<T>[] | undefined>;
 export function findMany<T extends Entity>(type: Type<T>, modalOptions?: ModalFindOptions): Promise<Lite<T>[] | undefined>;
@@ -80,10 +93,22 @@ export function findMany(findOptions: FindOptions | Type<any>, modalOptions?: Mo
     const fo = (findOptions as FindOptions).queryName ? findOptions as FindOptions :
         { queryName: findOptions as Type<any> } as FindOptions;
 
+    if (fo.groupResults)
+        throw new Error("Use findManyRows instead");
+
     var qs = getSettings(fo.queryName);
     if (qs && qs.onFindMany && !(modalOptions && modalOptions.useDefaultBehaviour))
         return qs.onFindMany(fo, modalOptions);
 
+    return import("./SearchControl/SearchModal")
+        .then(a => a.default.openMany(fo, modalOptions))
+        .then(rows => rows && rows.map(a => a.entity!));
+}
+
+export function findManyRows(fo: FindOptions, modalOptions?: ModalFindOptions): Promise<ResultRow[] | undefined> {
+    
+    var qs = getSettings(fo.queryName);
+  
     return import("./SearchControl/SearchModal")
         .then(a => a.default.openMany(fo, modalOptions));
 }
