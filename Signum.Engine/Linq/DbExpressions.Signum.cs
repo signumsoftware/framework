@@ -455,6 +455,15 @@ namespace Signum.Engine.Linq
 
     internal class PrimaryKeyExpression : DbExpression
     {
+        static Variable<bool> PreferVariableNameVariable = Statics.ThreadVariable<bool>("preferParameterName");
+
+        public static IDisposable PreferVariableName()
+        {
+            var oldValue = PreferVariableNameVariable.Value;
+            PreferVariableNameVariable.Value = true;
+            return new Disposable(() => PreferVariableNameVariable.Value = oldValue);
+        }
+
         public readonly Expression Value;
 
         public Type ValueType { get { return Value.Type; } }
@@ -464,6 +473,11 @@ namespace Signum.Engine.Linq
         {
             if (value.Type.Nullify() != value.Type)
                 throw new InvalidOperationException("value should be nullable");
+
+            if(value is ConstantExpression ce && ce.Value is PrimaryKey pk && pk.VariableName != null && PreferVariableNameVariable.Value)
+            {
+                this.Value = new SqlVariableExpression(pk.VariableName, value.Type);
+            }
 
             this.Value = value;
         }

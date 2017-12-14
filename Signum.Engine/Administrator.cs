@@ -206,19 +206,17 @@ namespace Signum.Engine
         public static int UnsafeDeleteDuplicates<E, K>(this IQueryable<E> query, Expression<Func<E, K>> key, string message = null)
            where E : Entity
         {
-            return (from f1 in query
-                    join f2 in query on key.Evaluate(f1) equals key.Evaluate(f2)
-                    where f1.Id > f2.Id
-                    select f1).UnsafeDelete(message);
+            return (from e in query
+                    where !query.GroupBy(key).Select(gr => gr.Min(a => a.id)).Contains(e.Id)
+                    select e).UnsafeDelete(message);
         }
 
         public static int UnsafeDeleteMListDuplicates<E, V, K>(this IQueryable<MListElement<E,V>> query, Expression<Func<MListElement<E, V>, K>> key, string message = null)
             where E : Entity
         {
-            return (from f1 in query
-                    join f2 in query on key.Evaluate(f1) equals key.Evaluate(f2)
-                    where f1.RowId > f2.RowId
-                    select f1).UnsafeDeleteMList(message);
+            return (from e in query
+                    where !query.GroupBy(key).Select(gr => gr.Min(a => a.RowId)).Contains(e.RowId)
+                    select e).UnsafeDeleteMList(message);
         }
 
         public static SqlPreCommandSimple QueryPreCommand<T>(IQueryable<T> query)
@@ -235,8 +233,8 @@ namespace Signum.Engine
                 return null;
 
             var prov = ((DbQueryProvider)query.Provider);
-
-            return prov.Delete<SqlPreCommandSimple>(query, cm => cm, removeSelectRowCount: true);
+            using (PrimaryKeyExpression.PreferVariableName())
+                return prov.Delete<SqlPreCommandSimple>(query, cm => cm, removeSelectRowCount: true);
         }
 
         public static SqlPreCommandSimple UnsafeDeletePreCommand<E, V>(Expression<Func<E, MList<V>>> mListProperty, IQueryable<MListElement<E, V>> query)
@@ -246,8 +244,8 @@ namespace Signum.Engine
                 return null;
 
             var prov = ((DbQueryProvider)query.Provider);
-
-            return prov.Delete<SqlPreCommandSimple>(query, cm => cm, removeSelectRowCount: true);
+            using (PrimaryKeyExpression.PreferVariableName())
+                return prov.Delete<SqlPreCommandSimple>(query, cm => cm, removeSelectRowCount: true);
         }
 
         public static SqlPreCommandSimple UnsafeUpdatePartPreCommand(IUpdateable update)
@@ -506,8 +504,10 @@ namespace Signum.Engine
             if (table.TablesMList().Any())
                 throw new InvalidOperationException($"DeleteWhereScript can not be used for {table.Type.Name} because contains MLists");
             
+            if(id.VariableName.HasText())
+                return new SqlPreCommandSimple("DELETE FROM {0} WHERE {1} = {2}".FormatWith(table.Name, column.Name, id.VariableName));
+            
             var param = Connector.Current.ParameterBuilder.CreateReferenceParameter("@id", id, column);
-
             return new SqlPreCommandSimple("DELETE FROM {0} WHERE {1} = {2}".FormatWith(table.Name, column.Name, param.ParameterName), new List<DbParameter> { param });
         }
 

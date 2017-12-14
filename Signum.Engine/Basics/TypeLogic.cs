@@ -122,10 +122,11 @@ namespace Signum.Engine.Basics
                     should,
                     current,
                     createNew: (tn, s) => table.InsertSqlSync(s),
-                    removeOld: (tn, c) => table.DeleteSqlSync(c),
+                    removeOld: (tn, c) => table.DeleteSqlSync(c, t => t.CleanName == c.CleanName),
                     mergeBoth: (tn, s, c) =>
                     {
-                        var originalName = c.FullClassName;
+                        var originalCleanName = c.CleanName;
+                        var originalFullName = c.FullClassName;
 
                         if (c.TableName != s.TableName)
                         {
@@ -141,7 +142,7 @@ namespace Signum.Engine.Basics
                         c.CleanName = s.CleanName;
                         c.Namespace = s.Namespace;
                         c.ClassName = s.ClassName;
-                        return table.UpdateSqlSync(c, comment: originalName);
+                        return table.UpdateSqlSync(c, t => t.CleanName == originalCleanName, comment: originalFullName);
                     });
         }
 

@@ -1455,7 +1455,7 @@ namespace Signum.Engine
                 return SafeConsole.WaitRows(message == "auto" ? $"Inserting MList<{ typeof(V).TypeName()}> in { typeof(E).TypeName()}" : message,
                     () => query.UnsafeInsertMList(mListProperty, constructor, message: null));
 
-            using (HeavyProfiler.Log("DBUnsafeInsert", () => typeof(E).TypeName()))
+            using (HeavyProfiler.Log("UnsafeInsertMList", () => typeof(E).TypeName()))
             {
                 if (query == null)
                     throw new ArgumentNullException("query");
@@ -1474,9 +1474,35 @@ namespace Signum.Engine
             }
         }
 
+        public static int UnsafeInsertView<T, E>(this IQueryable<T> query, Expression<Func<T, E>> constructor, string message = null)
+            where E : IView
+        {
+            if (message != null)
+                return SafeConsole.WaitRows(message == "auto" ? $"Inserting { typeof(E).TypeName()}" : message,
+                    () => query.UnsafeInsertView(constructor, message: null));
+
+            using (HeavyProfiler.Log("UnsafeInsertView", () => typeof(E).TypeName()))
+            {
+                if (query == null)
+                    throw new ArgumentNullException("query");
+
+                if (constructor == null)
+                    throw new ArgumentNullException("constructor");
+
+                using (Transaction tr = new Transaction())
+                {
+                    constructor = (Expression<Func<T, E>>)Schema.Current.OnPreUnsafeInsert(typeof(E), query, constructor, query.Select(constructor));
+                    var table = Schema.Current.View(typeof(E));
+                    int rows = DbQueryProvider.Single.Insert(query, constructor, table, sql => (int)sql.ExecuteScalar());
+
+                    return tr.Commit(rows);
+                }
+            }
+        }
+
         #endregion
 
-        public static void Merge<E, A>(string title, IQueryable<E> should, IQueryable<E> current, Expression<Func<E, A>> getKey)
+        public static void Merge<E, A>(string title, IQueryable<E> should, IQueryable<E> current, Expression<Func<E, A>> getKey, List<Expression<Func<E, object>>> toUpdate = null)
             where E : Entity
             where A : class
         {
@@ -1486,6 +1512,20 @@ namespace Signum.Engine
             current.Where(c => !should.Any(s => getKey.Evaluate(c) == getKey.Evaluate(s))).UnsafeDelete(title != null ? "auto" : null);
 
             should.Where(s => !current.Any(c => getKey.Evaluate(c) == getKey.Evaluate(s))).UnsafeInsert(p => p, title != null ? "auto" : null);
+
+            if (toUpdate != null)
+            {
+                var updater = (from c in current
+                              join s in should on getKey.Evaluate(c) equals getKey.Evaluate(s)
+                              select new { c, s }).UnsafeUpdatePart(a => a.c);
+
+                foreach (var prop in toUpdate)
+                {
+                    updater = updater.Set(prop, a => prop.Evaluate(a.s));
+                }
+
+                updater.Execute(title != null ? "auto" : null);
+            }
         }
 
         public static void MergeMList<E, V, A>(string title, IQueryable<MListElement<E, V>> should, IQueryable<MListElement<E, V>> current, Expression<Func<MListElement<E, V>, A>> getKey, Expression<Func<E, MList<V>>> mList)

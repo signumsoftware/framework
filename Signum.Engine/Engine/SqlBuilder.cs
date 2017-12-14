@@ -130,15 +130,20 @@ namespace Signum.Engine
 
         public static string CreateColumn(IColumn c)
         {
-            string fullType = (c.SqlDbType == SqlDbType.Udt ? c.UserDefinedTypeName : c.SqlDbType.ToString().ToUpper()) + GetSizeScale(c.Size, c.Scale);
-            
+            string fullType = GetColumnType(c);
+
             return $" ".CombineIfNotEmpty(
                 c.Name.SqlEscape(),
                 fullType,
                 c.Identity ? "IDENTITY " : null,
                 c.Collation != null ? ("COLLATE " + c.Collation) : null,
                 c.Nullable ? "NULL" : "NOT NULL",
-                c.Default != null ? "DEFAULT " +  Quote(c.SqlDbType, c.Default) : null);
+                c.Default != null ? "DEFAULT " + Quote(c.SqlDbType, c.Default) : null);
+        }
+
+        public static string GetColumnType(IColumn c)
+        {
+            return (c.SqlDbType == SqlDbType.Udt ? c.UserDefinedTypeName : c.SqlDbType.ToString().ToUpper()) + GetSizeScale(c.Size, c.Scale);
         }
 
         static string Quote(SqlDbType type, string @default)

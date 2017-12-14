@@ -207,10 +207,10 @@ namespace Signum.Utilities
             return result;
         }
 
-        public static XDocument ExportXml()
+        public static XDocument ExportXml(bool includeStackTrace = false)
         {
             return new XDocument(
-                new XElement("Logs", Entries.Select(e => e.ExportXml()))
+                new XElement("Logs", Entries.Select(e => e.ExportXml(includeStackTrace)))
                 );
         }
 
@@ -332,6 +332,7 @@ namespace Signum.Utilities
         public long EndOrNow => End ?? PerfCounter.Ticks;
 
         public StackTrace StackTrace;
+        public List<ExternalStackTrace> ExternalStackTrace;
 
         public TimeSpan Elapsed
         {
@@ -393,17 +394,49 @@ namespace Signum.Utilities
             return "{0} {1}".FormatWith(Elapsed.NiceToString(), Role);
         }
 
-        public XElement ExportXml()
+        public XElement ExportXml(bool includeStackTrace)
         {
             return new XElement("Log",
                 new XAttribute("Index", this.Index),
                 new XAttribute("Role", this.Role),
                 new XAttribute("BeforeStart", this.BeforeStart),
                 new XAttribute("Start", this.Start),
-                new XAttribute("End", this.End),
+                new XAttribute("End", this.End ?? PerfCounter.Ticks),
                 this.AdditionalData == null ? null :
                 new XAttribute("AdditionalData", this.AdditionalData),
-                Entries?.Select(e => e.ExportXml()).ToList());
+                 includeStackTrace && StackTrace != null ? StackTraceToXml(StackTrace) : null,
+                Entries?.Select(e => e.ExportXml(includeStackTrace)).ToList());
+        }
+
+        private XElement StackTraceToXml(StackTrace stackTrace)
+        {
+            var frames = (from i in 0.To(StackTrace.FrameCount)
+                          let sf = StackTrace.GetFrame(i)
+                          let mi = sf.GetMethod()                          
+                          select new XElement("StackFrame",
+                              new XAttribute("Method", mi.DeclaringType?.FullName + "." + mi.Name),
+                              new XAttribute("Line", sf.GetFileName() + ":" + sf.GetFileLineNumber())
+                              )).ToList();
+
+            return new XElement("StackTrace", frames);
+        }
+
+        private static List<ExternalStackTrace> ExternalStackTraceFromXml(XElement st)
+        {
+            return st.Elements("StackFrame").Select(a =>
+            {
+                var parts = a.Attribute("Method").Value.Split('.');
+                var line = a.Attribute("Line").Value;
+
+                return new ExternalStackTrace
+                {
+                    MethodName = parts.LastOrDefault(),
+                    Type = parts.ElementAtOrDefault(parts.Length - 2),
+                    Namespace = parts.Take(parts.Length - 2).ToString("."),
+                    FileName = line.BeforeLast(":"),
+                    LineNumber = line.AfterLast(":").ToInt(),
+                };
+            }).ToList();
         }
 
         public void CleanStackTrace()
@@ -428,18 +461,19 @@ namespace Signum.Utilities
                 Depth = parent == null ? 0 : parent.Depth + 1
             };
 
+            if (xLog.Element("StackTrace") is XElement st)
+                result.ExternalStackTrace = ExternalStackTraceFromXml(st);
+
             if (xLog.Element("Log") != null)
                 result.Entries = xLog.Elements("Log").Select(x => ImportXml(x, result)).ToList();
          
             return result;
         }
 
-
-
-        public XDocument ExportXmlDocument()
+        public XDocument ExportXmlDocument(bool includeStackTrace)
         {
             return new XDocument(
-                 new XElement("Logs", ExportXml())
+                 new XElement("Logs", ExportXml(includeStackTrace))
                  );
         }
 
@@ -459,6 +493,15 @@ namespace Signum.Utilities
             return new Interval<long>(this.BeforeStart, this.EndOrNow)
                 .Overlaps(new Interval<long>(e.BeforeStart, e.EndOrNow));
         }
+    }
+
+    public class ExternalStackTrace
+    {
+        public string Namespace;
+        public string Type;
+        public string MethodName;
+        public string FileName;
+        public int? LineNumber;
     }
 
     public class PerfCounter

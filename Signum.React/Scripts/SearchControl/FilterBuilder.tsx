@@ -133,8 +133,8 @@ export class FilterComponent extends React.Component<FilterComponentProps>{
         }
         else {
 
-            if (!areEqual(f.token, newToken, a => a.filterType)) {
-                f.operation = newToken.filterType && filterOperations[newToken.filterType].first();
+            if (!areEqual(f.token, newToken, a => a.filterType) || !areEqual(f.token, newToken, a => a.preferEquals)) {
+                f.operation = newToken.preferEquals ? "EqualTo": newToken.filterType && filterOperations[newToken.filterType].first();
                 f.value = f.operation && isList(f.operation) ? [undefined] : undefined;
             }
             else if (f.token && f.token.filterType == "DateTime" && newToken.filterType == "DateTime" && newToken.format && f.token.format != newToken.format) {
