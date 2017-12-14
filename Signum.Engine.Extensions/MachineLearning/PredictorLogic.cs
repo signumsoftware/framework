@@ -158,7 +158,9 @@ namespace Signum.Engine.MachineLearning
                         e.Predictor,
                         e.Target,
                         e.Type,
+                        e.OriginalValue,
                         e.PredictedValue,
+                        e.OriginalCategory,
                         e.PredictedCategory,
                     });
                 RegisterResultSaver(PredictorSimpleResultSaver.OneOutput, new PredictorSimpleSaver());

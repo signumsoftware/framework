@@ -334,8 +334,12 @@ export interface PredictSimpleResultEntity extends Entities.Entity {
     Type: "PredictSimpleResult";
     predictor?: Entities.Lite<PredictorEntity> | null;
     target?: Entities.Lite<Entities.Entity> | null;
-    groupKeys?: string | null;
+    key0?: string | null;
+    key1?: string | null;
+    key2?: string | null;
     type?: PredictionSet;
+    originalCategory?: string | null;
+    originalValue?: number | null;
     predictedCategory?: string | null;
     predictedValue?: number | null;
 }

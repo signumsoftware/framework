@@ -51,24 +51,14 @@ export default class SimpleResultButton extends React.Component<SimpleResultButt
         var outToken = outCol.token!.token!;
 
         var qdb = await Finder.getQueryDescription(predictor.mainQuery.query!.key);
-
-        function appendToken(token: QueryToken) {
-            return `Target.(${(qdb.columns["Entity"].type.name)}).` + (token.fullKey.startsWith("Entity.") ? token.fullKey.after("Entity.") : token.fullKey);
-        }
-
-        var filterOptions = predictor.mainQuery.filters.map(fo => ({
-            columnName: appendToken(fo.element.token!.token!),
-            operation: fo.element.operation,
-            value: fo.element.valueString
-        }) as FilterOption);
-
+        
         if (isCategorical(outCol))
             return ChartClient.Encoder.chartPath({
                 queryName: PredictSimpleResultEntity,
-                filterOptions: filterOptions,
+                filterOptions: [{ columnName: "Predictor", value: predictor }],
                 chartScript: "Punchcard",
                 columnOptions: [
-                    { columnName: appendToken(outToken) },
+                    { columnName: "OriginalCategory", displayName: "Original " + outToken.niceName },
                     { columnName: "PredictedCategory", displayName: "Predicted " + outToken.niceName },
                     { columnName: "Count" },
                 ],
@@ -76,11 +66,11 @@ export default class SimpleResultButton extends React.Component<SimpleResultButt
         else
             return ChartClient.Encoder.chartPath({
                 queryName: PredictSimpleResultEntity,
-                filterOptions: filterOptions,
+                filterOptions: [{ columnName: "Predictor", value: predictor }],
                 chartScript: "Scatterplot",
                 columnOptions: [
                     { columnName: "Type" },
-                    { columnName: appendToken(outToken) },
+                    { columnName: "OriginalValue", displayName: "Original " + outToken.niceName },
                     { columnName: "PredictedValue", displayName: "Predicted " + outToken.niceName },
                 ],
             });

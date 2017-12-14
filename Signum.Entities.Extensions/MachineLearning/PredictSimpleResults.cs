@@ -19,11 +19,25 @@ namespace Signum.Entities.MachineLearning
         [ImplementedByAll]
         public Lite<Entity> Target { get; set; }
 
-        [SqlDbType(Size = 400)]
-        [StringLengthValidator(AllowNulls = true, Max = 400, MultiLine = true)]
-        public string GroupKeys { get; set; }
+        [SqlDbType(Size = 100)]
+        [StringLengthValidator(AllowNulls = true, Max = 100)]
+        public string Key0 { get; set; }
+
+        [SqlDbType(Size = 100)]
+        [StringLengthValidator(AllowNulls = true, Max = 100)]
+        public string Key1 { get; set; }
+
+        [SqlDbType(Size = 100)]
+        [StringLengthValidator(AllowNulls = true, Max = 100)]
+        public string Key2 { get; set; }
 
         public PredictionSet Type { get; set; }
+
+        [SqlDbType(Size = 200)]
+        [StringLengthValidator(AllowNulls = true, Max = 200)]
+        public string OriginalCategory { get; set; }
+
+        public double? OriginalValue { get; set; }
 
         [SqlDbType(Size = 200)]
         [StringLengthValidator(AllowNulls = true, Max = 200)]
