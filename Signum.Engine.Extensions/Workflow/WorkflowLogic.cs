@@ -631,7 +631,7 @@ namespace Signum.Engine.Workflow
 
         public static Expression<Func<Lite<Entity>, UserEntity, bool>> IsCurrentUserActor = (actor, user) =>
            actor.RefersTo(user) ||
-           actor.Is(user.Role);
+           (actor is Lite<RoleEntity> && AuthLogic.RolesFromRole(user.Role).Contains((Lite<RoleEntity>)actor));
 
 
         public static List<WorkflowEntity> GetAllowedStarts()
