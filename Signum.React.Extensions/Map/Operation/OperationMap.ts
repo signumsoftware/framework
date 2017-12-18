@@ -87,8 +87,6 @@ export class OperationMapD3 {
             .force("fainInOut", forceFanInOut())
             ;
 
-        const colorStates = colorScale(map.states.map(a => a.count).max());
-        const colorOperations = colorScale(map.operations.map(a => a.count).max());
         
         const svg = d3.select(svgElement)
             .attr("width", width)
