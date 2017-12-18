@@ -435,19 +435,34 @@ namespace Signum.Engine.MachineLearning
             //return Csv.ToCsvBytes(ctx.AllRows.Rows);
         }
 
-        static void PredictorEntity_Retrieved(PredictorEntity predictor)
+        public static PredictorEntity ParseData(this PredictorEntity predictor)
         {
-            object queryName = QueryLogic.ToQueryName(predictor.MainQuery.Query.Key);
-            QueryDescription description = DynamicQueryManager.Current.QueryDescription(queryName);
-            predictor.MainQuery.ParseData(description);
+            predictor.MainQuery.ParseData();
+            predictor.SubQueries.ForEach(sq => sq.ParseData());
+            return predictor;
         }
 
-        static void PredictorMultiColumnEntity_Retrieved(PredictorSubQueryEntity mc)
+        public static void ParseData(this PredictorMainQueryEmbedded mainQuery)
         {
-            object queryName = QueryLogic.ToQueryName(mc.Query.Key);
-            QueryDescription description = DynamicQueryManager.Current.QueryDescription(queryName);
+            QueryDescription description = DynamicQueryManager.Current.QueryDescription(mainQuery.Query.ToQueryName());
+            mainQuery.ParseData(description);
+        }
 
-            mc.ParseData(description);
+        static void PredictorEntity_Retrieved(PredictorEntity predictor)
+        {
+            predictor.MainQuery.ParseData();
+        }
+
+        public static void ParseData(this PredictorSubQueryEntity subQuery)
+        {
+            QueryDescription description = DynamicQueryManager.Current.QueryDescription(subQuery.Query.ToQueryName());
+
+            subQuery.ParseData(description);
+        }
+
+        static void PredictorMultiColumnEntity_Retrieved(PredictorSubQueryEntity subQuery)
+        {
+            subQuery.ParseData();
         }
 
 

@@ -91,9 +91,8 @@ export default class Predictor extends React.Component<{ ctx: TypeContext<Predic
     handleQueryChange = () => {
 
         const p = this.props.ctx.value;
-        p.mainQuery.filters = [];
-        p.mainQuery.columns = [];
-        p.subQueries = [];
+        p.mainQuery.filters.forEach(a => a.element.token = fixTokenEmbedded(a.element.token || null, p.mainQuery.groupResults || false));
+        p.mainQuery.columns.forEach(a => a.element.token = fixTokenEmbedded(a.element.token || null, p.mainQuery.groupResults || false));
         this.forceUpdate();
 
         this.setState({
@@ -434,3 +433,30 @@ function getSeries(eps: Array<PredictorClient.EpochProgress>, predictor: Predict
     ];
 }
 
+function fixTokenEmbedded(token: QueryTokenEmbedded | null, groupResults: boolean): QueryTokenEmbedded | null {
+    if (token == undefined)
+        return null;
+
+    const t = token.token!;
+
+    const ft = fixToken(t, groupResults);
+
+    if (t == ft)
+        return token;
+
+    if (ft == null)
+        return null;
+
+    return QueryTokenEmbedded.New({ token: ft, tokenString: ft.fullKey });
+
+}
+
+function fixToken(token: QueryToken | null, groupResults: boolean): QueryToken | null {
+    if (token == undefined)
+        return null;
+
+    if (groupResults && token.queryTokenType == "Aggregate")
+        return token.parent || null;
+
+    return token;
+}

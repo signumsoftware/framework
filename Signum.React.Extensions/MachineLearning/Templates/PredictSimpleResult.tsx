@@ -18,14 +18,20 @@ import { TypeReference } from '../../../../Framework/Signum.React/Scripts/Reflec
 export default class PredictSimpleResult extends React.Component<{ ctx: TypeContext<PredictSimpleResultEntity> }> {
 
     render() {
-        const ctx = this.props.ctx.subCtx({ formGroupStyle: "Basic" });
+        const ctx = this.props.ctx;
 
         return (
-            <div className="form-vertical">
+            <div>
                 <EntityLine ctx={ctx.subCtx(a => a.predictor)} />
                 <ValueLine ctx={ctx.subCtx(a => a.type)} />
-                <ValueLine ctx={ctx.subCtx(a => a.predictedValue)} />
-                <EntityLine ctx={ctx.subCtx(a => a.target)} />
+                <EntityLine ctx={ctx.subCtx(a => a.target)} hideIfNull={true} />
+                <ValueLine ctx={ctx.subCtx(a => a.key0)} hideIfNull={true}/>
+                <ValueLine ctx={ctx.subCtx(a => a.key1)} hideIfNull={true}/>
+                <ValueLine ctx={ctx.subCtx(a => a.key2)} hideIfNull={true} />
+                <ValueLine ctx={ctx.subCtx(a => a.originalValue)} hideIfNull={true} />
+                <ValueLine ctx={ctx.subCtx(a => a.predictedValue)} hideIfNull={true}/>
+                <ValueLine ctx={ctx.subCtx(a => a.originalCategory)} hideIfNull={true}/>
+                <ValueLine ctx={ctx.subCtx(a => a.predictedCategory)} hideIfNull={true}/>
             </div>
         );
     }

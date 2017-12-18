@@ -70,11 +70,17 @@ namespace Signum.Entities.MachineLearning
         {
             Device = Device,
             PredictionType = PredictionType,
+
             HiddenLayers = HiddenLayers.Select(hl => hl.Clone()).ToMList(),
             OutputActivation = OutputActivation,
             OutputInitializer = OutputInitializer,
+
+            Learner = Learner,
             LearningRate = LearningRate,
             LearningMomentum = LearningMomentum,
+            LearningUnitGain = LearningUnitGain,
+            LearningVarianceMomentum = LearningVarianceMomentum,
+
             MinibatchSize = MinibatchSize,  
             NumMinibatches = NumMinibatches,
             SaveProgressEvery = SaveProgressEvery,

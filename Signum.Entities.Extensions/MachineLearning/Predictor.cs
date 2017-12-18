@@ -97,7 +97,7 @@ namespace Signum.Entities.MachineLearning
         [NotNullValidator, NoRepeatValidator, NotifyChildProperty, NotifyCollectionChanged]
         public MList<PredictorColumnEmbedded> Columns { get; set; } = new MList<PredictorColumnEmbedded>();
 
-        internal void ParseData(QueryDescription qd)
+        public void ParseData(QueryDescription qd)
         {
             var canAggregate = this.GroupResults ? SubTokensOptions.CanAggregate : 0;
 
@@ -113,6 +113,7 @@ namespace Signum.Entities.MachineLearning
         internal PredictorMainQueryEmbedded Clone() => new PredictorMainQueryEmbedded
         {
             Query = Query,
+            GroupResults = GroupResults,
             Filters = Filters.Select(f => f.Clone()).ToMList(),
             Columns = Columns.Select(a => a.Clone()).ToMList(),
         };

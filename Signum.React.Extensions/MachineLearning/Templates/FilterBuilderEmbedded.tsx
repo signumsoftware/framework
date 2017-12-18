@@ -1,4 +1,5 @@
 ﻿import * as React from 'react'
+import * as moment from 'moment'
 import { classes } from '../../../../Framework/Signum.React/Scripts/Globals'
 import { FormGroup, FormControlStatic, ValueLine, ValueLineType, EntityLine, EntityDetail, EntityCombo, EntityList, EntityRepeater, EntityTable, IRenderButtons } from '../../../../Framework/Signum.React/Scripts/Lines'
 import { SearchControl, FilterOptionParsed } from '../../../../Framework/Signum.React/Scripts/Search'
@@ -70,12 +71,19 @@ export default class FilterBuilderEmbedded extends React.Component<FilterBuilder
 
         await completer.finished();
 
-        const filterOptions = filters.map(mle =>
-        ({
-            token: mle.element.token && (mle.element.token.token || completer.get(mle.element.token.tokenString)),
-            operation: mle.element.operation,
-            value: mle.element.valueString
-        }) as FilterOptionParsed);
+
+        const filterOptions = filters.map(mle => {
+
+            const token = mle.element.token && (mle.element.token.token || completer.get(mle.element.token.tokenString))
+
+            const valueString = token && token.filterType == "DateTime" ? moment(mle.element.valueString!, serverFormat).format() : mle.element.valueString;
+
+            return ({
+                token: token,
+                operation: mle.element.operation,
+                value: mle.element.valueString
+            }) as FilterOptionParsed;
+        });
 
         await Finder.parseFilterValues(filterOptions);
 
@@ -105,11 +113,15 @@ export default class FilterBuilderEmbedded extends React.Component<FilterBuilder
 
         ctx.value.clear();
 
-        ctx.value.push(...this.state.filterOptions!.filter(a => a.token != null).map(a => newMListElement(QueryFilterEmbedded.New({
-            token: a.token && QueryTokenEmbedded.New({ token: a.token, tokenString: a.token.fullKey }),
-            operation: a.operation,
-            valueString: Finder.Encoder.stringValue(a.value)
-        }))));
+        ctx.value.push(...this.state.filterOptions!.filter(a => a.token != null).map(a => {
+            const valueString = Finder.Encoder.stringValue(a.token && a.token.filterType == "DateTime" ? moment(a.value).format(serverFormat) : a.value);
+
+            return newMListElement(QueryFilterEmbedded.New({
+                token: a.token && QueryTokenEmbedded.New({ token: a.token, tokenString: a.token.fullKey }),
+                operation: a.operation,
+                valueString: valueString,
+            }));
+        }));
 
         ctx.binding.setValue(ctx.value); //force change 
 
@@ -119,3 +131,5 @@ export default class FilterBuilderEmbedded extends React.Component<FilterBuilder
         this.forceUpdate();
     } 
 }
+
+const serverFormat = "YYYY/MM/DD hh:mm:ss";
