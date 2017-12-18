@@ -14,15 +14,15 @@ namespace Signum.Entities.DynamicQuery
     public class NetPropertyToken : QueryToken
     {
         public PropertyInfo PropertyInfo { get; private set; }
-        public string DisplayName { get; private set; }
+        public Func<string> DisplayName { get; private set; }
 
-        internal NetPropertyToken(QueryToken parent, Expression<Func<object>> pi, string displayName) :
+        internal NetPropertyToken(QueryToken parent, Expression<Func<object>> pi, Func<string> displayName) :
             this(parent, ReflectionTools.GetPropertyInfo(pi), displayName)
         {
 
         }
 
-        internal NetPropertyToken(QueryToken parent, PropertyInfo pi, string displayName)
+        internal NetPropertyToken(QueryToken parent, PropertyInfo pi, Func<string> displayName)
             : base(parent)
         {
             if (parent == null)
@@ -45,7 +45,7 @@ namespace Signum.Entities.DynamicQuery
 
         public override string ToString()
         {
-            return DisplayName;
+            return DisplayName();
         }
 
         public override string Key
@@ -96,7 +96,7 @@ namespace Signum.Entities.DynamicQuery
 
         public override string NiceName()
         {
-            return DisplayName + QueryTokenMessage.Of.NiceToString() + Parent.ToString();
+            return DisplayName() + QueryTokenMessage.Of.NiceToString() + Parent.ToString();
         }
 
         public override QueryToken Clone()

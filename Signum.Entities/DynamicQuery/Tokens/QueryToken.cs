@@ -7,7 +7,7 @@ using System.Linq.Expressions;
 using System.Reflection;
 using Signum.Utilities;
 using Signum.Entities.Reflection;
-using Signum.Utilities.ExpressionTrees; 
+using Signum.Utilities.ExpressionTrees;
 using System.Text.RegularExpressions;
 using System.ComponentModel;
 using System.Collections.Concurrent;
@@ -71,7 +71,7 @@ namespace Signum.Entities.DynamicQuery
         }
 
         protected abstract List<QueryToken> SubTokensOverride(SubTokensOptions options);
-        
+
         public virtual object QueryName
         {
             get { return this.parent.QueryName; }
@@ -87,7 +87,7 @@ namespace Signum.Entities.DynamicQuery
             if (context.Replacemens != null && context.Replacemens.TryGetValue(this, out Expression result))
                 return result;
 
-            return BuildExpressionInternal(context); 
+            return BuildExpressionInternal(context);
         }
 
         protected abstract Expression BuildExpressionInternal(BuildExpressionContext context);
@@ -96,7 +96,7 @@ namespace Signum.Entities.DynamicQuery
 
         internal PropertyRoute AddPropertyRoute(PropertyInfo pi)
         {
-            if(typeof(ModelEntity).IsAssignableFrom(Type))
+            if (typeof(ModelEntity).IsAssignableFrom(Type))
                 return PropertyRoute.Root(Type).Add(pi);
 
             Type type = Lite.Extract(Type); //Because Add doesn't work with lites
@@ -148,8 +148,8 @@ namespace Signum.Entities.DynamicQuery
             return CachedSubTokensOverride(options).Values
                 .Concat(OnEntityExtension(this))
                 .Where(t => t.IsAllowed() == null)
-                .OrderByDescending(a=>a.Priority)
-                .ThenBy(a=>a.ToString())
+                .OrderByDescending(a => a.Priority)
+                .ThenBy(a => a.ToString())
                 .ToList();
         }
 
@@ -207,7 +207,7 @@ namespace Signum.Entities.DynamicQuery
         {
             return new List<QueryToken>
             {
-                new NetPropertyToken(this, ReflectionTools.GetPropertyInfo((string str) => str.Length), QueryTokenMessage.Length.NiceToString())
+                new NetPropertyToken(this, ReflectionTools.GetPropertyInfo((string str) => str.Length), ()=>QueryTokenMessage.Length.NiceToString())
             };
         }
 
@@ -219,8 +219,8 @@ namespace Signum.Entities.DynamicQuery
             return EntityExtensions(parent);
         }
 
-        public static Func<QueryToken, IEnumerable<QueryToken>>  EntityExtensions;
-        
+        public static Func<QueryToken, IEnumerable<QueryToken>> EntityExtensions;
+
 
         public static List<QueryToken> DateTimeProperties(QueryToken parent, DateTimePrecision precission)
         {
@@ -228,18 +228,18 @@ namespace Signum.Entities.DynamicQuery
 
             return new List<QueryToken>
             {
-                new NetPropertyToken(parent, ReflectionTools.GetPropertyInfo((DateTime dt)=>dt.Year), utc + QueryTokenMessage.Year.NiceToString()), 
-                new NetPropertyToken(parent, ReflectionTools.GetPropertyInfo((DateTime dt)=>dt.Month), utc + QueryTokenMessage.Month.NiceToString()), 
-                new MonthStartToken(parent), 
+                new NetPropertyToken(parent, ReflectionTools.GetPropertyInfo((DateTime dt)=>dt.Year), () => utc + QueryTokenMessage.Year.NiceToString()),
+                new NetPropertyToken(parent, ReflectionTools.GetPropertyInfo((DateTime dt)=>dt.Month),() => utc + QueryTokenMessage.Month.NiceToString()),
+                new MonthStartToken(parent),
                 new WeekNumberToken(parent),
-                new NetPropertyToken(parent, ReflectionTools.GetPropertyInfo((DateTime dt)=>dt.Day), utc + QueryTokenMessage.Day.NiceToString()),
-                new DayOfYearToken(parent), 
-                new DayOfWeekToken(parent), 
-                new DateToken(parent), 
-                precission < DateTimePrecision.Hours ? null: new NetPropertyToken(parent, ReflectionTools.GetPropertyInfo((DateTime dt)=>dt.Hour), utc + QueryTokenMessage.Hour.NiceToString()), 
-                precission < DateTimePrecision.Minutes ? null: new NetPropertyToken(parent, ReflectionTools.GetPropertyInfo((DateTime dt)=>dt.Minute), utc + QueryTokenMessage.Minute.NiceToString()), 
-                precission < DateTimePrecision.Seconds ? null: new NetPropertyToken(parent, ReflectionTools.GetPropertyInfo((DateTime dt)=>dt.Second), utc + QueryTokenMessage.Second.NiceToString()), 
-                precission < DateTimePrecision.Milliseconds? null: new NetPropertyToken(parent, ReflectionTools.GetPropertyInfo((DateTime dt)=>dt.Millisecond), utc + QueryTokenMessage.Millisecond.NiceToString()), 
+                new NetPropertyToken(parent, ReflectionTools.GetPropertyInfo((DateTime dt)=>dt.Day), () => utc + QueryTokenMessage.Day.NiceToString()),
+                new DayOfYearToken(parent),
+                new DayOfWeekToken(parent),
+                new DateToken(parent),
+                precission < DateTimePrecision.Hours ? null: new NetPropertyToken(parent, ReflectionTools.GetPropertyInfo((DateTime dt)=>dt.Hour), () => utc + QueryTokenMessage.Hour.NiceToString()),
+                precission < DateTimePrecision.Minutes ? null: new NetPropertyToken(parent, ReflectionTools.GetPropertyInfo((DateTime dt)=>dt.Minute), () => utc + QueryTokenMessage.Minute.NiceToString()),
+                precission < DateTimePrecision.Seconds ? null: new NetPropertyToken(parent, ReflectionTools.GetPropertyInfo((DateTime dt)=>dt.Second), () => utc + QueryTokenMessage.Second.NiceToString()),
+                precission < DateTimePrecision.Milliseconds? null: new NetPropertyToken(parent, ReflectionTools.GetPropertyInfo((DateTime dt)=>dt.Millisecond), () => utc + QueryTokenMessage.Millisecond.NiceToString()),
             }.NotNull().ToList();
         }
 
@@ -277,7 +277,7 @@ namespace Signum.Entities.DynamicQuery
 
         public virtual bool HasAllOrAny()
         {
-            return Parent != null && Parent.HasAllOrAny(); 
+            return Parent != null && Parent.HasAllOrAny();
         }
 
         public virtual bool HasElement()
@@ -337,7 +337,7 @@ namespace Signum.Entities.DynamicQuery
                     case FilterType.Integer:
                     case FilterType.Decimal:
                     case FilterType.String:
-                    case FilterType.Guid: 
+                    case FilterType.Guid:
                     case FilterType.Boolean: return "#000000";
                     case FilterType.DateTime: return "#5100A1";
                     case FilterType.Enum: return "#800046";
@@ -384,20 +384,20 @@ namespace Signum.Entities.DynamicQuery
                 case FilterType.Integer: return QueryTokenMessage.Number.NiceToString();
                 case FilterType.Decimal: return QueryTokenMessage.DecimalNumber.NiceToString();
                 case FilterType.String: return QueryTokenMessage.Text.NiceToString();
-                case FilterType.DateTime:  return QueryTokenMessage.DateTime.NiceToString();
+                case FilterType.DateTime: return QueryTokenMessage.DateTime.NiceToString();
                 case FilterType.Boolean: return QueryTokenMessage.Check.NiceToString();
                 case FilterType.Guid: return QueryTokenMessage.GlobalUniqueIdentifier.NiceToString();
                 case FilterType.Enum: return type.UnNullify().NiceName();
                 case FilterType.Lite:
-                {
-                    var cleanType = type.CleanType();
-                    var imp = implementations.Value;
+                    {
+                        var cleanType = type.CleanType();
+                        var imp = implementations.Value;
 
-                    if (imp.IsByAll)
-                        return QueryTokenMessage.AnyEntity.NiceToString();
+                        if (imp.IsByAll)
+                            return QueryTokenMessage.AnyEntity.NiceToString();
 
-                    return imp.Types.CommaOr(t => t.NiceName());
-                }
+                        return imp.Types.CommaOr(t => t.NiceName());
+                    }
                 case FilterType.Embedded: return QueryTokenMessage.Embedded0.NiceToString().FormatWith(type.NiceName());
                 default: return type.TypeName();
             }
@@ -414,12 +414,12 @@ namespace Signum.Entities.DynamicQuery
         public BuildExpressionContext(Type tupleType, ParameterExpression parameter, Dictionary<QueryToken, Expression> replacemens)
         {
             this.Parameter = parameter;
-            this.Replacemens = replacemens; 
+            this.Replacemens = replacemens;
         }
 
         public readonly Type TupleType;
         public readonly ParameterExpression Parameter;
-        public readonly Dictionary<QueryToken, Expression> Replacemens; 
+        public readonly Dictionary<QueryToken, Expression> Replacemens;
     }
 
 
