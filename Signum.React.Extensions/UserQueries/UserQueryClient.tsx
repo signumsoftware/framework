@@ -80,11 +80,11 @@ export module Converter {
 
         var query = uq.query!;
 
-        var fo = { queryName: query.key } as FindOptions;
+        var fo = { queryName: query.key, groupResults: uq.groupResults } as FindOptions;
 
         const convertedFilters = uq.withoutFilters ? Promise.resolve([] as FilterRequest[]) : UserAssetsClient.API.parseFilters({
             queryKey: query.key,
-            canAggregate: false,
+            canAggregate: uq.groupResults || false,
             entity: entity,
             filters: uq.filters!.map(mle => mle.element).map(f => ({
                 tokenString: f.token!.tokenString,
@@ -137,6 +137,7 @@ export module Converter {
             .then(fop2 => {
                 fop.filterOptions = fop.filterOptions.filter(a => a.frozen);
                 fop.filterOptions.push(...fop2.filterOptions);
+                fop.groupResults = fop.groupResults;
                 fop.orderOptions = fop2.orderOptions;
                 fop.columnOptions = fop2.columnOptions;
                 fop.pagination = fop2.pagination;

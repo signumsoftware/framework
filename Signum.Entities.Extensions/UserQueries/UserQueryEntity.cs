@@ -1,4 +1,5 @@
-﻿using Signum.Entities.Authorization;
+﻿using Signum.Entities;
+using Signum.Entities.Authorization;
 using Signum.Entities.Basics;
 using Signum.Entities.DynamicQuery;
 using Signum.Entities.UserAssets;
@@ -28,6 +29,8 @@ namespace Signum.Entities.UserQueries
 
         [NotNullValidator]
         public QueryEntity Query { get; set; }
+
+        public bool GroupResults { get; set; }
 
         public Lite<TypeEntity> EntityType { get; set; }
 
@@ -330,7 +333,8 @@ namespace Signum.Entities.UserQueries
 
                 if (pi.Name == nameof(ValueString))
                 {
-                    return FilterValueConverter.TryParse(ValueString, Token.Token.Type, out object val, Operation.IsList(), allowSmart: true);
+                    var result = FilterValueConverter.TryParse(ValueString, Token.Token.Type, Operation.IsList(), allowSmart: true);
+                    return result is Result<object>.Error e ? e.ErrorText : null;
                 }
             }
 
@@ -342,7 +346,7 @@ namespace Signum.Entities.UserQueries
             return new XElement("Filter",
                 new XAttribute("Token", Token.Token.FullKey()),
                 new XAttribute("Operation", Operation),
-                new XAttribute("Value", ValueString??""));
+                new XAttribute("Value", ValueString ?? ""));
         }
 
         public void FromXml(XElement element, IFromXmlContext ctx)
@@ -386,6 +390,7 @@ namespace Signum.Entities.UserQueries
                 Query = query,
                 WithoutFilters = withoutFilters,
                 Owner = DefaultOwner(),
+                GroupResults = request.GroupResults,
                 Filters = withoutFilters ? new MList<QueryFilterEmbedded>() : request.Filters.Select(f => new QueryFilterEmbedded
                 {
                     Token = new QueryTokenEmbedded(f.Token),

@@ -16,6 +16,7 @@ using Signum.React.Facades;
 using Signum.Engine.UserQueries;
 using Signum.Engine.Authorization;
 using Signum.Entities.MachineLearning;
+using Signum.Engine.MachineLearning;
 
 namespace Signum.React.MachineLearning
 {
@@ -31,8 +32,7 @@ namespace Signum.React.MachineLearning
             {
                 if (p.Query != null)
                 {
-                    var qd = DynamicQueryManager.Current.QueryDescription(p.Query.ToQueryName());
-                    p.ParseData(qd);
+                    p.ParseData();
                 }
             });
 
