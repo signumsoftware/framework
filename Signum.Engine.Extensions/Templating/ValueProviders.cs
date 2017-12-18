@@ -174,10 +174,10 @@ namespace Signum.Engine.Templating
             if (Type == null)
                 return;
 
-            string error = FilterValueConverter.TryParse(valueString, Type, out object rubish, Operation.Value.IsList(), allowSmart: true);
+            var result = FilterValueConverter.TryParse(valueString, Type, Operation.Value.IsList(), allowSmart: true);
 
-            if (error.HasText())
-                addError(false, "Impossible to convert '{0}' to {1}: {2}".FormatWith(valueString, Type.TypeName(), error));
+            if (result is Result<object>.Error e)
+                addError(false, "Impossible to convert '{0}' to {1}: {2}".FormatWith(valueString, Type.TypeName(), e.ErrorText));
         }
     }
 
