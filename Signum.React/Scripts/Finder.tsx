@@ -645,6 +645,7 @@ function parseValue(token: QueryToken, val: any, needToStr: Array<any>): any {
         case "Boolean": return parseBoolean(val);
         case "Integer": return nanToNull(parseInt(val));
         case "Decimal": return nanToNull(parseFloat(val));
+        case "DateTime": return moment(val).format();
         case "Lite":
             {
                 const lite = convertToLite(val);
@@ -687,7 +688,7 @@ function convertToLite(val: string | Lite<Entity> | Entity | undefined): Lite<En
 }
 
 export function clearQueryDescriptionCache() {
-    queryDescriptionCache = {};
+    queryDescriptionCache = {};    
 }
 
 let queryDescriptionCache: { [queryKey: string]: QueryDescription } = {};
