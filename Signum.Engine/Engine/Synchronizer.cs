@@ -45,28 +45,25 @@ namespace Signum.Engine
           Action<K, N> createNew,
           Action<K, O> removeOld,
           Action<K, N, O> merge)
-            where O : class
-            where N : class
         {
             HashSet<K> keys = new HashSet<K>();
             keys.UnionWith(oldDictionary.Keys);
             keys.UnionWith(newDictionary.Keys);
             keys.ProgressForeach(key => key.ToString(), key =>
             {
-                var oldVal = oldDictionary.TryGetC(key);
-                var newVal = newDictionary.TryGetC(key);
-
-                if (oldVal == null)
+                if (oldDictionary.TryGetValue(key, out var oldVal))
                 {
-                    createNew?.Invoke(key, newVal);
-                }
-                else if (newVal == null)
-                {
-                    removeOld?.Invoke(key, oldVal);
+                    if (newDictionary.TryGetValue(key, out var newVal))
+                        merge?.Invoke(key, newVal, oldVal);
+                    else
+                        removeOld?.Invoke(key, oldVal);
                 }
                 else
                 {
-                    merge?.Invoke(key, newVal, oldVal);
+                    if (newDictionary.TryGetValue(key, out var newVal))
+                        createNew?.Invoke(key, newVal);
+                    else
+                        throw new InvalidOperationException("Unexpected key: " + key);
                 }
             });
         }
@@ -79,8 +76,6 @@ namespace Signum.Engine
           Action<string, N> createNew,
           Action<string, O> removeOld,
           Action<string, N, O> merge)
-            where O : class
-            where N : class
         {
             replacements.AskForReplacements(
                 oldDictionary.Keys.ToHashSet(),
@@ -93,20 +88,19 @@ namespace Signum.Engine
             set.UnionWith(newDictionary.Keys);
             foreach (var key in set)
             {
-                var oldVal = repOldDictionary.TryGetC(key);
-                var newVal = newDictionary.TryGetC(key);
-
-                if (oldVal == null)
+                if (repOldDictionary.TryGetValue(key, out var oldVal))
                 {
-                    createNew?.Invoke(key, newVal);
-                }
-                else if (newVal == null)
-                {
-                    removeOld?.Invoke(key, oldVal);
+                    if (newDictionary.TryGetValue(key, out var newVal))
+                        merge?.Invoke(key, newVal, oldVal);
+                    else
+                        removeOld?.Invoke(key, oldVal);
                 }
                 else
                 {
-                    merge?.Invoke(key, newVal, oldVal);
+                    if (newDictionary.TryGetValue(key, out var newVal))
+                        createNew?.Invoke(key, newVal);
+                    else
+                        throw new InvalidOperationException("Unexpected key: " + key);
                 }
             }
         }
