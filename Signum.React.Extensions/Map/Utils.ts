@@ -11,18 +11,33 @@ export interface Rectangle extends Point {
     height: number;
 }
 
+var colors = [
+    //"#7403D7",
+    //"#1901B9",
+    "#00C7EE",
+    "#007B1E",
+    "#EDF700",
+    "#C82305",
+];
+
 export function colorScale(max: number): d3.ScaleLinear<string, string> {
     return d3.scaleLinear<string>()
-        .domain([0, max / 4, max])
-        .range(["green", "gold", "red"]);
+        .domain(colors.map((c, i, a) => (i / a.length) * max))
+        .range(colors);
 
 }
 
-export function colorScaleSqr(max: number): d3.ScalePower<string, string>{
-    return d3.scaleSqrt<string>()
-        .domain([0, max / 4, max])
-        .range(["green", "gold", "red"]);
+export function colorScaleLog(max: number): d3.ScaleLogarithmic<string, string>{
+    var limit = 500;
+    var sqrScale = d3.scaleLog().domain([0.25, max]).range([0, limit]).base(2);
 
+    var for_inversion = colors.map((c, i, a) => (i / (a.length - 1)) * limit);
+
+    var log_colour_values = for_inversion.map(sqrScale.invert);
+
+    return d3.scaleLog<string>()
+        .domain(log_colour_values)
+        .range(colors).base(2);
 }
 
 

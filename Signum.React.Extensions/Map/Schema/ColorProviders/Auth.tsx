@@ -4,7 +4,7 @@ import * as d3 from 'd3'
 import { ClientColorProvider, SchemaMapInfo  } from '../SchemaMap'
 import { TypeAllowedBasic, BasicPermission } from '../../../Authorization/Signum.Entities.Authorization'
 import { isPermissionAuthorized } from '../../../Authorization/AuthClient'
-import { colorScale, colorScaleSqr  } from '../../Utils'
+import { colorScale, colorScaleLog  } from '../../Utils'
 
 export default function getDefaultProviders(info: SchemaMapInfo): ClientColorProvider[] {   
     
