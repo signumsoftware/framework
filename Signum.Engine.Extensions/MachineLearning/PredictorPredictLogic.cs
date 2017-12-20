@@ -49,18 +49,32 @@ namespace Signum.Engine.MachineLearning
 
             var entityToken = QueryUtils.Parse("Entity", qd, 0);
 
-            return ctx.FromEntities(new List<Filter> { new Filter(entityToken, FilterOperation.EqualTo, entity) }).SingleEx();
+            return ctx.FromFilters(new List<Filter> { new Filter(entityToken, FilterOperation.EqualTo, entity) }).SingleEx();
         }
 
         public static PredictDictionary GetInputsFromParentKeys(this PredictorPredictContext ctx, Dictionary<QueryToken, object> parentKeyValues)
         {
-            var filters = ctx.Predictor.MainQuery.Columns
-                .Select(a => a.Token.Token)
-                .Where(t => !(t is AggregateToken))
-                .Select(t => new Filter(t, FilterOperation.EqualTo, parentKeyValues.GetOrThrow(t)))
-                .ToList();
+            if (!ctx.Predictor.MainQuery.GroupResults)
+            {
+                var kvp = parentKeyValues.SingleEx();
 
-            return ctx.FromEntities(filters).SingleEx();
+                if (kvp.Key.FullKey() != "Entity")
+                    throw new InvalidOperationException("only Entity expected");
+
+                var filters = new List<Filter> { new Filter(kvp.Key, FilterOperation.EqualTo, kvp.Value) };
+
+                return ctx.FromFilters(filters).SingleEx(); ;
+            }
+            else
+            {
+                var filters = ctx.Predictor.MainQuery.Columns
+                    .Select(a => a.Token.Token)
+                    .Where(t => !(t is AggregateToken))
+                    .Select(t => new Filter(t, FilterOperation.EqualTo, parentKeyValues.GetOrThrow(t)))
+                    .ToList();
+
+                return ctx.FromFilters(filters).SingleEx();
+            }
         }
 
         public static PredictDictionary GetInputsEmpty(this PredictorPredictContext ctx)
@@ -77,7 +91,7 @@ namespace Signum.Engine.MachineLearning
             return result;
         }
 
-        public static List<PredictDictionary> FromEntities(this PredictorPredictContext ctx, List<Filter> filters)
+        public static List<PredictDictionary> FromFilters(this PredictorPredictContext ctx, List<Filter> filters)
         {
             var qd = DynamicQueryManager.Current.QueryDescription(ctx.Predictor.MainQuery.Query.ToQueryName());
 

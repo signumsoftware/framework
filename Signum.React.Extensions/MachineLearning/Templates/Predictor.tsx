@@ -44,8 +44,9 @@ export default class Predictor extends React.Component<{ ctx: TypeContext<Predic
                 columnOptionsMode: "Add",
                 columnOptions: p.mainQuery.columns.map(mle => ({ columnName: mle.element.token && mle.element.token.token!.fullKey }) as ColumnOption)
             })
-                .then(lite => PredictorClient.predict(toLite(p), lite))
+                .then(lite => PredictorClient.predict(toLite(p), lite && { "Entity" : lite }))
                 .done();
+
         } else {
 
             var fullKeys = p.mainQuery.columns.map(mle => mle.element.token!.tokenString!);
