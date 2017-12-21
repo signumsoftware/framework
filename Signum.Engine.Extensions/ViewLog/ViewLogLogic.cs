@@ -131,7 +131,9 @@ namespace Signum.Engine.ViewLog
 
         static void ExceptionLogic_DeleteLogs(DeleteLogParametersEmbedded parameters, StringBuilder sb, CancellationToken token)
         {
-            Database.Query<ViewLogEntity>().Where(view => view.StartDate < parameters.DateLimit).UnsafeDeleteChunksLog(parameters, sb, token);
+            var dateLimit = parameters.GetDateLimit(typeof(ViewLogEntity).ToTypeEntity());
+
+            Database.Query<ViewLogEntity>().Where(view => view.StartDate < dateLimit).UnsafeDeleteChunksLog(parameters, sb, token);
         }
 
         public static IDisposable LogView(Lite<IEntity> entity, string viewAction)
