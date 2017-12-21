@@ -213,7 +213,9 @@ namespace Signum.Engine.Scheduler
 
         public static void ExceptionLogic_DeleteLogs(DeleteLogParametersEmbedded parameters, StringBuilder sb, CancellationToken token)
         {
-            Database.Query<ScheduledTaskLogEntity>().Where(a => a.StartTime < parameters.DateLimit).UnsafeDeleteChunksLog(parameters, sb, token);
+            var dateLimit = parameters.GetDateLimit(typeof(ScheduledTaskLogEntity).ToTypeEntity());
+
+            Database.Query<ScheduledTaskLogEntity>().Where(a => a.StartTime < dateLimit).UnsafeDeleteChunksLog(parameters, sb, token);
         }
 
         static void ScheduledTasksLazy_OnReset(object sender, EventArgs e)
