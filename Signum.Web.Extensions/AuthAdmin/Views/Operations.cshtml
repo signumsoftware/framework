@@ -31,7 +31,7 @@
         {
             <tr>
                 <td>
-                    @Html.Span(null, item.Value.Resource.NiceToString())
+                    @Html.Span(null, item.Value.Resource.Operation.NiceToString())
                     @Html.HiddenRuntimeInfo(item, i => i.Resource)
                     @Html.Hidden(item.Compose("AllowedBase"), item.Value.AllowedBase)
                 </td>

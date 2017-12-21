@@ -186,7 +186,7 @@ WriteLiteral("                    ");
 
             
             #line 34 "..\..\AuthAdmin\Views\Operations.cshtml"
-               Write(Html.Span(null, item.Value.Resource.NiceToString()));
+               Write(Html.Span(null, item.Value.Resource.Operation.NiceToString()));
 
             
             #line default

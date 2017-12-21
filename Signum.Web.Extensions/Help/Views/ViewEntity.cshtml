@@ -132,7 +132,7 @@
                         <dl class="dl-horizontal">
                             @foreach (var op in allowedOperations)
                             {
-                                using (TypeElementContext<OperationHelpEntity> ctx = operations.GetOrThrow(op.Key))
+                                using (TypeElementContext<OperationHelpEmbedded> ctx = operations.GetOrThrow(op.Key))
                                 {
                                 <dt id="@HelpUrls.IdOperation(op.Key)">@op.Key.NiceToString()<code class='shortcut'>[o:@op.Key.Key]</code></dt>
                                 <dd>
@@ -140,7 +140,6 @@
                                         @Html.WikiParse(op.Value.Info, HelpWiki.DefaultWikiSettings)
                                     </span>
                                     @Html.HiddenRuntimeInfo(ctx)
-                                    @Html.HiddenRuntimeInfo(ctx, e => e.Culture)
                                     @Html.HiddenRuntimeInfo(ctx, a => a.Operation)
                                     @Html.TextArea(ctx.SubContextPrefix(a => a.Description), op.Value.UserDescription, new { @class = "editable" })
                                     <span class="wiki">

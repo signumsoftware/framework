@@ -82,17 +82,6 @@ namespace Signum.Web.Help
                     query.Execute(QueryHelpOperation.Save);
             }
 
-            foreach (var oper in ctx.Value.Operations)
-            {
-                if (!oper.Description.HasText())
-                {
-                    if (!oper.IsNew)
-                        oper.Delete();
-                }
-                else
-                    oper.Execute(OperationHelpOperation.Save);
-            }
-
             var currentProperties = entity.Properties.Select(p => p.Property).ToHashSet();
 
             entity.Properties.AddRange(oldProperties.Where(p => !currentProperties.Contains(p.Property))); //Hidden properties due to permissions

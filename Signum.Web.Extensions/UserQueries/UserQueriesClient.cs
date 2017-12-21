@@ -210,7 +210,7 @@ namespace Signum.Web.UserQueries
                     Token = qf.Token.Token,
                     ColumnName = qf.Token.TokenString,
                     Operation = qf.Operation,
-                    Value = FilterValueConverter.Parse(qf.ValueString, qf.Token.Token.Type, qf.Operation.IsList()),
+                    Value = FilterValueConverter.Parse(qf.ValueString, qf.Token.Token.Type, qf.Operation.IsList(), allowSmart: true),
                 }));
             }
 

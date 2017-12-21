@@ -71,7 +71,9 @@ namespace Signum.Web.Processes
         {
             var lites = this.ParseLiteKeys<Entity>();
 
-            ProcessEntity process = PackageLogic.CreatePackageOperation(lites, this.GetOperationKeyAssert());
+            var operationSymbol = lites.Select(l => l.EntityType).Distinct().Select(type => this.GetOperationKeyAssert(type)).Distinct().SingleEx();
+
+            ProcessEntity process = PackageLogic.CreatePackageOperation(lites, operationSymbol);
 
             return this.DefaultConstructResult(process);
         }
