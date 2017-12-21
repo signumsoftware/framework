@@ -161,7 +161,7 @@
     <Member Name="ThereHasBeenAnErrorWithYourRequestToResetYourPasswordPleaseEnterYourLogin" Description="Se ha producido un error con tu solicitud de cambio de contraseña. Por favor, introduzca su email." />
     <Member Name="ThereSNotARegisteredUserWithThatEmailAddress" Description="No hay ningún usuario registrado con esa dirección de correo electrónico" />
     <Member Name="TheSpecifiedPasswordsDontMatch" Description="Las contraseñas especificadas no coinciden" />
-    <Member Name="TheUserIsNotLongerInTheDatabase" Description="El usuario no es más largo en la base de datos" />
+    <Member Name="TheUserIsNotLongerInTheDatabase" Description="El usuario ya no existe en la base de datos" />
     <Member Name="TheUserStateMustBeDisabled" Description="El estado del usuario debe ser deshabilitado" />
     <Member Name="User0IsDisabled" Description="El usuario {0} está desactivado" />
     <Member Name="Username" Description="Nombre de usuario" />
