@@ -182,18 +182,18 @@ namespace Signum.Web.Operations
             }
         }
 
-        public static OperationSymbol GetOperationKeyAssert(this ControllerBase controller)
+        public static OperationSymbol GetOperationKeyAssert(this ControllerBase controller, Type entityType)
         {
             var operationFullKey = controller.ControllerContext.RequestContext.HttpContext.Request["operationFullKey"];
 
             var operationSymbol = SymbolLogic<OperationSymbol>.ToSymbol(operationFullKey);
 
-            OperationLogic.AssertOperationAllowed(operationSymbol, inUserInterface: true);
+            OperationLogic.AssertOperationAllowed(operationSymbol, entityType, inUserInterface: true);
 
             return operationSymbol;
         }
 
-        public static OperationSymbol TryGetOperationKeyAsset(this ControllerBase controller)
+        public static OperationSymbol TryGetOperationKeyAsset(this ControllerBase controller, Type entityType)
         {
             var operationFullKey = controller.ControllerContext.RequestContext.HttpContext.Request["operationFullKey"];
 
@@ -202,19 +202,19 @@ namespace Signum.Web.Operations
 
             var operationSymbol = SymbolLogic<OperationSymbol>.ToSymbol(operationFullKey);
 
-            OperationLogic.AssertOperationAllowed(operationSymbol, inUserInterface: true);
+            OperationLogic.AssertOperationAllowed(operationSymbol, entityType, inUserInterface: true);
 
             return operationSymbol;
         }
 
-        public static OperationInfo TryGetOperationInfo(this ControllerBase controllerType, Type type)
+        public static OperationInfo TryGetOperationInfo(this ControllerBase controllerType, Type entityType)
         {
-            OperationSymbol operationSymbol = controllerType.TryGetOperationKeyAsset();
+            OperationSymbol operationSymbol = controllerType.TryGetOperationKeyAsset(entityType);
 
             if (operationSymbol == null)
                 return null;
 
-            return OperationLogic.GetOperationInfo(type, operationSymbol);
+            return OperationLogic.GetOperationInfo(entityType, operationSymbol);
         }
 
         public static bool IsLite(this Controller controller)
@@ -252,7 +252,7 @@ namespace Signum.Web.Operations
         {
             var result = operationInfoCache.GetOrAdd(entityType, OperationLogic.GetAllOperationInfos);
 
-            return result.Where(oi => OperationLogic.OperationAllowed(oi.OperationSymbol, true));
+            return result.Where(oi => OperationLogic.OperationAllowed(oi.OperationSymbol, entityType, true));
         }
 
         #region Execute ToolBarButton
