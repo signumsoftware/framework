@@ -7,6 +7,8 @@ using System.Threading;
 using System.Collections.Specialized;
 using System.Collections;
 using Signum.Entities;
+using System.Linq.Expressions;
+using Signum.Entities.Basics;
 
 namespace Signum.Entities.Basics
 {
@@ -127,12 +129,18 @@ namespace Signum.Entities.Basics
     [Serializable]
     public class DeleteLogParametersEmbedded : EmbeddedEntity
     {
-        [Unit("Days"), NumberIsValidator(ComparisonType.GreaterThan, -1)]
+        [Unit("Days"), NumberIsValidator(ComparisonType.GreaterThanOrEqualTo, 0)]
         public int DeleteLogsWithMoreThan { get; set; } = 30 * 6;
 
-        public DateTime DateLimit
+        [NotNullable, PreserveOrder]
+        [NotNullValidator, NoRepeatValidator]
+        public MList<DeleteLogsTypeOverridesEmbedded> TypeOverrides { get; set; } = new MList<DeleteLogsTypeOverridesEmbedded>();
+
+        public DateTime GetDateLimit(TypeEntity type)
         {
-            get { return DeleteLogsWithMoreThan == 0 ? TimeZoneManager.Now.TrimToHours() : TimeZoneManager.Now.Date.AddDays(-DeleteLogsWithMoreThan); }
+            var moreThan = TypeOverrides.SingleOrDefaultEx(a => a.Type.RefersTo(type))?.DeleteLogsWithMoreThan ?? DeleteLogsWithMoreThan;
+
+            return moreThan == 0 ? TimeZoneManager.Now.TrimToHours() : TimeZoneManager.Now.Date.AddDays(-moreThan);
         }
 
         public int ChunkSize { get; set; } = 1000;
@@ -141,5 +149,17 @@ namespace Signum.Entities.Basics
 
         [Unit("ms")]
         public int? PauseTime { get; set; } = 5000;
+    }
+
+    [Serializable]
+    public class DeleteLogsTypeOverridesEmbedded : EmbeddedEntity
+    {
+        [NotNullable]
+        [NotNullValidator]
+        public Lite<TypeEntity> Type { get; set; }
+
+        [Unit("Days"), NumberIsValidator(ComparisonType.GreaterThanOrEqualTo, 0)]
+        public int DeleteLogsWithMoreThan { get; set; } = 30 * 6;
+
     }
 }
