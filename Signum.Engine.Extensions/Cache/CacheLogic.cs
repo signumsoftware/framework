@@ -667,7 +667,14 @@ namespace Signum.Engine.Cache
             {
                 var controller = controllers[stype];
                 if (controller != null)
+                {
+                    if (controller.CachedTable == null)
+                        throw new InvalidOperationException($@"CacheTable for {stype.Name} is null. 
+This may be because SchemaCompleted is not yet called and you are accesing some ResetLazy in the Start method. 
+Remember that the Start could be called with an empty database!");
+                        
                     controller.CachedTable.LoadAll();
+                }
             }
         }
 
