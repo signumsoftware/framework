@@ -100,7 +100,7 @@ namespace Signum.React.MachineLearning
 
             PredictorPredictContext pctx = PredictorPredictLogic.GetPredictContext(p);
 
-            PredictDictionary fromEntity = mainKeys != null ? pctx.GetInputsFromParentKeys(pctx.ParseMainKeys(mainKeys)) : null;
+            PredictDictionary fromEntity = mainKeys == null ? null : pctx.GetInputsFromParentKeys(pctx.ParseMainKeys(mainKeys));
             PredictDictionary inputs = fromEntity ?? pctx.GetInputsEmpty();
             PredictDictionary originalOutputs = fromEntity;
 
