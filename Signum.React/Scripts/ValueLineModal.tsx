@@ -1,5 +1,5 @@
 ﻿import * as React from 'react'
-import { Modal, ModalProps, ModalClass, ButtonToolbar } from 'react-bootstrap'
+import { Modal, ModalProps, ModalClass, ButtonToolbar, Sizes } from 'react-bootstrap'
 import { openModal, IModalProps } from './Modals';
 import { Dic } from './Globals';
 import { SelectorMessage, JavascriptMessage } from './Signum.Entities'
@@ -60,7 +60,7 @@ export default class ValueLineModal extends React.Component<ValueLineModalProps,
         const disabled = this.props.options.allowEmptyValue == false ? (ctx.value as string).trim() ? false : true : undefined;
         const valueOnChanged = this.props.options.allowEmptyValue == false ? () => this.forceUpdate() : undefined;
 
-        return <Modal bsSize="lg" onHide={this.handleCancelClicked} show={this.state.show} onExited={this.handleOnExited}>
+        return <Modal bsSize={this.props.options.modalSize || "lg"} onHide={this.handleCancelClicked} show={this.state.show} onExited={this.handleOnExited}>
 
             <Modal.Header closeButton={true}>
                 <h4 className="modal-title">
@@ -103,6 +103,7 @@ export interface ValueLineModalOptions {
     initiallyFocused?: boolean;
     valueHtmlAttributes?: React.HTMLAttributes<any>;
     allowEmptyValue?: boolean;
+    modalSize?: Sizes;
 }
 
 
