@@ -84,7 +84,7 @@ namespace Signum.Engine.Maps
                     return null;
 
                 if (field.Field is FieldReference fr)
-                    return new ColumnExpression(this.Type.Nullify(), alias, fr.Name);
+                    return new ColumnExpression(Signum.Entities.PrimaryKey.Type(fr.ReferenceTable.Type).Nullify(), alias, fr.Name);
             }
 
             return field.Field.GetExpression(alias, null, null);

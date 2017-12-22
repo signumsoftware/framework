@@ -154,6 +154,10 @@ namespace Signum.Test.LinqProvider
 
                 Assert.IsTrue(artists.All(a => a.ToString().StartsWith("M")));
 
+                var list1 = Database.View<MyTempView>().ToList();
+                var list2 = Database.Query<ArtistEntity>().Where(a => a.Name.StartsWith("M")).ToList();
+                Assert.AreEqual(list1.Count, list2.Count);
+
                 tr.Commit();
             }
 
