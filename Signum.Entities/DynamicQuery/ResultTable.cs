@@ -210,6 +210,8 @@ namespace Signum.Entities.DynamicQuery
 
             return Lite.Create(type, PrimaryKey.Parse(idStr, type), toStr);
         }
+
+        public override string ToString() => "Col" + this.Index + ": " + this.Column.ToString();
     }
 
     [Serializable]

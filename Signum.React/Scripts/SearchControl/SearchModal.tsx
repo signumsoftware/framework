@@ -26,11 +26,11 @@ export default class SearchModal extends React.Component<SearchModalProps, { sho
         this.state = { show: true };
     }
 
-    selectedEntites: Lite<Entity>[] = [];
+    selectedRows: ResultRow[] = [];
     okPressed: boolean;
 
-    handleSelectionChanged = (selected: Lite<Entity>[]) => {
-        this.selectedEntites = selected;
+    handleSelectionChanged = (selected: ResultRow[]) => {
+        this.selectedRows = selected;
         this.forceUpdate();
     }
 
@@ -45,12 +45,12 @@ export default class SearchModal extends React.Component<SearchModalProps, { sho
     }
 
     handleOnExited = () => {
-        this.props.onExited!(this.okPressed ? this.selectedEntites : undefined);
+        this.props.onExited!(this.okPressed ? this.selectedRows : undefined);
     }
 
     handleDoubleClick = (e: React.MouseEvent<any>, row: ResultRow) => {
         e.preventDefault();
-        this.selectedEntites = [row.entity];
+        this.selectedRows = [row];
         this.okPressed = true;
         this.setState({ show: false });
     }
@@ -59,7 +59,7 @@ export default class SearchModal extends React.Component<SearchModalProps, { sho
 
     render() {
 
-        const okEnabled = this.props.isMany ? this.selectedEntites.length > 0 : this.selectedEntites.length == 1;
+        const okEnabled = this.props.isMany ? this.selectedRows.length > 0 : this.selectedRows.length == 1;
 
         return (
             <Modal size="lg" isOpen={this.state.show} onExit={this.handleOnExited}>
@@ -96,9 +96,9 @@ export default class SearchModal extends React.Component<SearchModalProps, { sho
         );
     }
 
-    static open(findOptions: FindOptions, modalOptions?: ModalFindOptions): Promise<Lite<Entity> | undefined> {
+    static open(findOptions: FindOptions, modalOptions?: ModalFindOptions): Promise<ResultRow | undefined> {
 
-        return openModal<Lite<Entity>[]>(<SearchModal
+        return openModal<ResultRow[]>(<SearchModal
             findOptions={findOptions}
             findMode={"Find"}
             isMany={false}
@@ -108,9 +108,9 @@ export default class SearchModal extends React.Component<SearchModalProps, { sho
             .then(a => a ? a[0] : undefined);
     }
 
-    static openMany(findOptions: FindOptions, modalOptions?: ModalFindOptions): Promise<Lite<Entity>[] | undefined> {
+    static openMany(findOptions: FindOptions, modalOptions?: ModalFindOptions): Promise<ResultRow[] | undefined> {
 
-        return openModal<Lite<Entity>[]>(<SearchModal findOptions={findOptions}
+        return openModal<ResultRow[]>(<SearchModal findOptions={findOptions}
             findMode={"Find"}
             isMany={true}
             title={modalOptions && modalOptions.title || getQueryNiceName(findOptions.queryName)}

@@ -188,6 +188,7 @@ namespace Signum.React.ApiControllers
     public class QueryRequestTS
     {
         public string queryKey;
+        public bool groupResults;
         public List<FilterTS> filters;
         public List<OrderTS> orders;
         public List<ColumnTS> columns;
@@ -201,9 +202,10 @@ namespace Signum.React.ApiControllers
             return new QueryRequest
             {
                 QueryName = qn,
-                Filters = this.filters.EmptyIfNull().Select(f => f.ToFilter(qd, canAggregate: false)).ToList(),
-                Orders = this.orders.EmptyIfNull().Select(f => f.ToOrder(qd, canAggregate: false)).ToList(),
-                Columns = this.columns.EmptyIfNull().Select(f => f.ToColumn(qd)).ToList(),
+                GroupResults = groupResults,
+                Filters = this.filters.EmptyIfNull().Select(f => f.ToFilter(qd, canAggregate: groupResults)).ToList(),
+                Orders = this.orders.EmptyIfNull().Select(f => f.ToOrder(qd, canAggregate: groupResults)).ToList(),
+                Columns = this.columns.EmptyIfNull().Select(f => f.ToColumn(qd, canAggregate: groupResults)).ToList(),
                 Pagination = this.pagination.ToPagination()
             };
         }
@@ -231,6 +233,8 @@ namespace Signum.React.ApiControllers
         {
             return new Order(QueryUtils.Parse(this.token, qd, SubTokensOptions.CanElement | (canAggregate ? SubTokensOptions.CanAggregate : 0)), orderType);
         }
+
+        public override string ToString() => $"{token} {orderType}";
     }
 
     public class FilterTS
@@ -251,6 +255,8 @@ namespace Signum.React.ApiControllers
 
             return new Filter(parsedToken, operation, val);
         }
+
+        public override string ToString() => $"{token} {operation} {value}";
     }
 
     public class ColumnTS
@@ -258,12 +264,15 @@ namespace Signum.React.ApiControllers
         public string token;
         public string displayName;
 
-        internal Column ToColumn(QueryDescription qd)
+        internal Column ToColumn(QueryDescription qd, bool canAggregate)
         {
-            var queryToken = QueryUtils.Parse(token, qd, SubTokensOptions.CanElement);
+            var queryToken = QueryUtils.Parse(token, qd, SubTokensOptions.CanElement | (canAggregate ? SubTokensOptions.CanAggregate : 0));
 
             return new Column(queryToken, displayName ?? queryToken.NiceName());
         }
+
+        public override string ToString() => $"{token} '{displayName}'";
+
     }
 
     public class PaginationTS
@@ -280,6 +289,9 @@ namespace Signum.React.ApiControllers
             this.elementsPerPage = pagination.GetElementsPerPage();
             this.currentPage = (pagination as Pagination.Paginate)?.CurrentPage;
         }
+
+        public override string ToString() => $"{mode} {elementsPerPage} {currentPage}";
+
 
         public Pagination ToPagination()
         {
@@ -328,6 +340,8 @@ namespace Signum.React.ApiControllers
         public bool isGroupable;
         [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore)]
         public bool hasOrderAdapter;
+        [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore)]
+        public bool preferEquals;
         public string propertyRoute;
 
         public ColumnDescriptionTS(ColumnDescription a, object queryName)
@@ -341,6 +355,7 @@ namespace Signum.React.ApiControllers
             this.niceTypeName = token.NiceTypeName;
             this.isGroupable = token.IsGroupable;
             this.hasOrderAdapter = QueryUtils.OrderAdapters.ContainsKey(token.Type);
+            this.preferEquals = token.Type == typeof(string) && token.GetPropertyRoute() is PropertyRoute pr && Schema.Current.HasSomeIndex(pr);
             this.unit = a.Unit;
             this.format = a.Format;
             this.displayName = a.DisplayName;
@@ -350,6 +365,7 @@ namespace Signum.React.ApiControllers
     
     public class QueryTokenTS
     {
+        public QueryTokenTS() { }
         public QueryTokenTS(QueryToken qt, bool recursive)
         {
             this.toString = qt.ToString();
@@ -365,6 +381,7 @@ namespace Signum.React.ApiControllers
             this.queryTokenType = GetQueryTokenType(qt);
             this.isGroupable = qt.IsGroupable;
             this.hasOrderAdapter = QueryUtils.OrderAdapters.ContainsKey(qt.Type);
+            this.preferEquals = qt.Type == typeof(string) && qt.GetPropertyRoute() is PropertyRoute pr && Schema.Current.HasSomeIndex(pr);
             this.propertyRoute = qt.GetPropertyRoute()?.ToString();
             if (recursive && qt.Parent != null)
                 this.parent = new QueryTokenTS(qt.Parent, recursive);
@@ -405,8 +422,10 @@ namespace Signum.React.ApiControllers
         public bool isGroupable;
         [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore)]
         public bool hasOrderAdapter;
+        [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore)]
+        public bool preferEquals;
         public QueryTokenTS parent;
-        private string propertyRoute;
+        public string propertyRoute;
     }
 
     public enum QueryTokenType

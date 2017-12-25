@@ -460,7 +460,7 @@ export class NumericTextBox extends React.Component<NumericTextBoxProps, { text?
     handleOnBlur = (e: React.SyntheticEvent<any>) => {
         const input = e.currentTarget as HTMLInputElement;
 
-        let value = input.value;
+        let value = ValueLine.autoFixString(input.value, false);
 
         if (this.props.format && this.props.format.endsWith("%"))
         {

@@ -433,6 +433,11 @@ namespace Signum.Engine.Linq
             return sce;
         }
 
+        protected internal virtual Expression VisitSqlVariable(SqlVariableExpression sve)
+        {
+            return sve;
+        }
+
         protected internal virtual Expression VisitCase(CaseExpression cex)
         {
             var newWhens = Visit(cex.Whens, w => VisitWhen(w));

@@ -28,13 +28,13 @@ export default class MultipliedMessage extends React.Component<{ findOptions: Fi
         if (tokens.length == 0)
             return null;
 
-        const message = ValidationMessage.TheNumberOf0IsBeingMultipliedBy1.niceToString().formatWith(
-            getTypeInfos(this.props.mainType).map(a=> a.nicePluralName).joinComma(External.CollectionMessage.And.niceToString()),
-            tokens.map(a=> a.parent!.niceName).joinComma(External.CollectionMessage.And.niceToString()))
+        const message = ValidationMessage.TheNumberOf0IsBeingMultipliedBy1.niceToString().formatHtml(
+            getTypeInfos(this.props.mainType).map(a => a.nicePluralName).joinComma(External.CollectionMessage.And.niceToString()),
+            tokens.map(a => <strong>{a.parent!.niceName}</strong>).joinCommaHtml(External.CollectionMessage.And.niceToString()))
 
         return (
             <div className="sf-td-multiply alert alert-warning">
-                <span className="fa fa-exclamation-triangle" />{ "\u00A0" + message}
+                <span className="fa fa-exclamation-triangle" />&nbsp;{message}
             </div>
         );
     }

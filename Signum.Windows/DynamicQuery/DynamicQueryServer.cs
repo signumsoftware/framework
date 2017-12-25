@@ -73,48 +73,6 @@ namespace Signum.Windows
         }
         #endregion
 
-        #region QueryGroup
-        public static ResultTable QueryGroup(this QueryGroupOptions options)
-        {
-            return options.ToRequest().QueryGroup();
-        }
-
-        private static ResultTable QueryGroup(this QueryGroupRequest request)
-        {
-            Finder.Manager.AssertFindable(request.QueryName);
-            return Server.Return((IDynamicQueryServer s) => s.ExecuteQueryGroup(request));
-        }
-
-        public static void QueryGroupBatch(this QueryGroupOptions options, Action<ResultTable> onResult, Action @finally)
-        {
-            options.ToRequest().QueryGroupBatch(onResult, @finally);
-        }
-
-        public static void QueryGroupBatch(this QueryGroupRequest request, Action<ResultTable> onResult, Action @finally)
-        {
-            Finder.Manager.AssertFindable(request.QueryName);
-            Enqueue(request, obj => onResult((ResultTable)obj), @finally);
-        }
-
-        public static QueryGroupRequest ToRequest(this QueryGroupOptions options)
-        {
-            QueryDescription qd = GetQueryDescription(options.QueryName);
-
-            ColumnOption.SetColumnTokens(options.ColumnOptions, qd, canAggregate:true);
-            FilterOption.SetFilterTokens(options.FilterOptions, qd, canAggregate: true);
-            OrderOption.SetOrderTokens(options.OrderOptions, qd, canAggregate: true);
-
-            var request = new QueryGroupRequest
-            {
-                QueryName = options.QueryName,
-                Filters = options.FilterOptions.Select(f => f.ToFilter()).ToList(),
-                Orders = options.OrderOptions.Select(f => f.ToOrder()).ToList(),
-                Columns = options.ColumnOptions.Select(f => f.ToColumn()).ToList(),
-            };
-            return request;
-        }
-        #endregion
-
         #region QueryUnique
         public static Lite<T> QueryUnique<T>(string columnName, object value, UniqueType uniqueType)where T : class, IEntity
         {

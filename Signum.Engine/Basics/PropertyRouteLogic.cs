@@ -60,16 +60,17 @@ namespace Signum.Engine.Basics
                 return Synchronizer.SynchronizeScript(Spacing.Double, should, current,
                     createNew: null,
                     removeOld: null,
-                    mergeBoth: (fullName, dicShould, dicCurr) =>
-                        Synchronizer.SynchronizeScriptReplacing(rep, PropertiesFor.FormatWith(fullName), Spacing.Simple,
+                    mergeBoth: (oldFullName, dicShould, dicCurr) =>
+                        Synchronizer.SynchronizeScriptReplacing(rep, PropertiesFor.FormatWith(oldFullName), Spacing.Simple,
                         dicShould,
                         dicCurr,
                         createNew: null,
-                        removeOld: (path, c) => table.DeleteSqlSync(c),
+                        removeOld: (path, c) => table.DeleteSqlSync(c, p => p.RootType.FullClassName == oldFullName && p.Path == c.Path),
                         mergeBoth: (path, s, c) =>
                         {
+                            var originalPathName = c.Path;
                             c.Path = s.Path;
-                            return table.UpdateSqlSync(c);
+                            return table.UpdateSqlSync(c, p => p.RootType.FullClassName == oldFullName && p.Path == originalPathName);
                         })
                     );
         }

@@ -132,6 +132,9 @@ export function toNumbroFormat(format: string | undefined) {
     if (f.startsWith("D"))
         return "0".repeat(parseInt(f.after("D") || "1"));
 
+    if (f.startsWith("F"))
+        return "0." + "0".repeat(parseInt(f.after("F") || "2"));
+
     if (f.startsWith("E"))
         return "0." + "0".repeat(parseInt(f.after("E") || "2"));
 

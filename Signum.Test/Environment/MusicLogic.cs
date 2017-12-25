@@ -15,6 +15,15 @@ namespace Signum.Test.Environment
 {
     public static class MusicLogic
     {
+
+        static Expression<Func<IAuthorEntity, IQueryable<AlbumEntity>>> AlbumsExpression =
+        e => Database.Query<AlbumEntity>().Where(a => a.Author == e);
+        [ExpressionField]
+        public static IQueryable<AlbumEntity> Albums(this IAuthorEntity e)
+        {
+            return AlbumsExpression.Evaluate(e);
+        }
+
         public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
@@ -26,7 +35,7 @@ namespace Signum.Test.Environment
                 }
 
                 sb.Include<AlbumEntity>()
-                    .WithExpressionFrom(dqm, (IAuthorEntity au) => Database.Query<AlbumEntity>().Where(a => a.Author == au))
+                    .WithExpressionFrom(dqm, (IAuthorEntity au) => au.Albums())
                     .WithQuery(dqm, () => a => new
                     {
                         Entity = a,

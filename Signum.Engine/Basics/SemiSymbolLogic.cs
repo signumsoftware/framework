@@ -110,13 +110,13 @@ namespace Signum.Engine.Extensions.Basics
                     should.ToDictionary(s => s.Key),
                     current.Where(c => c.Key.HasText()).ToDictionary(c => c.Key),
                     createNew: (k, s) => table.InsertSqlSync(s),
-                    removeOld: (k, c) => table.DeleteSqlSync(c),
+                    removeOld: (k, c) => table.DeleteSqlSync(c, s => s.Key == c.Key),
                     mergeBoth: (k, s, c) =>
                     {
-                        var originalName = c.Key;
+                        var originalKey = c.Key;
                         c.Key = s.Key;
                         c.Name = s.Name;
-                        return table.UpdateSqlSync(c, comment: originalName);
+                        return table.UpdateSqlSync(c, ss => ss.Key == originalKey, comment: originalKey);
                     });
         }
 

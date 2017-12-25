@@ -260,6 +260,7 @@ export function cloneFindOptions(fo: FindOptions): FindOptions{
     const pa = fo.pagination;
     return {
         queryName: fo.queryName,
+        groupResults: fo.groupResults,
         parentColumn: fo.parentColumn,
         parentValue: fo.parentValue,
         filterOptions: fo.filterOptions && fo.filterOptions.map(f => ({ columnName: f.columnName, operation: f.operation, value: f.value, frozen: f.frozen } as FilterOption)),

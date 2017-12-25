@@ -33,6 +33,7 @@ namespace Signum.Test.LinqProvider
             var list = Database.Query<ArtistEntity>().GroupBy(a => a.Sex, a => a.Name).ToList();
         }
 
+
         [TestMethod]
         public void GroupStringByEnumSimilar()
         {
@@ -60,9 +61,23 @@ namespace Signum.Test.LinqProvider
                             Avg = g.Average(),
                         };
             sexos.ToList();
+        }
 
-
-
+        [TestMethod]
+        public void GroupMultiAggregateNoKeys()
+        {
+            var sexos = from a in Database.Query<ArtistEntity>()
+                        group a.Name.Length by new { } into g
+                        select new
+                        {
+                            Key = g.Key,
+                            Count = g.Count(),
+                            Sum = g.Sum(),
+                            Min = g.Min(),
+                            Max = g.Max(),
+                            Avg = g.Average(),
+                        };
+            sexos.ToList();
         }
 
 

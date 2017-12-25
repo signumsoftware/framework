@@ -922,6 +922,10 @@ declare global {
     interface String {
         formatHtml(...parameters: any[]): React.ReactElement<any>;
     }
+
+    interface Array<T> {
+        joinCommaHtml(this: Array<T>, lastSeparator: string): React.ReactElement<any>;
+    }
 }
 
 String.prototype.formatHtml = function (this: string) {
@@ -940,6 +944,27 @@ String.prototype.formatHtml = function (this: string) {
 
     return React.createElement("span", undefined, ...result);
 };
+
+Array.prototype.joinCommaHtml = function (this: any[], lastSeparator: string) {
+    const args = arguments;
+
+    const result: (string | React.ReactElement<any>)[] = [];
+    for (let i = 0; i < this.length - 2; i++) {
+        result.push(this[i]);
+        result.push(", ");
+    }
+
+    if (this.length >= 2) {
+        result.push(this[this.length - 2]);
+        result.push(lastSeparator)
+    }
+
+    if (this.length >= 1) {
+        result.push(this[this.length - 1]);
+    }
+
+    return React.createElement("span", undefined, ...result);
+}
 
 export function toAbsoluteUrl(appRelativeUrl: string): string {
     if (appRelativeUrl && appRelativeUrl.startsWith("~/"))

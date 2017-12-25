@@ -86,11 +86,11 @@ namespace Signum.Engine.Maps
             }
         }
 
-        internal object[] BulkInsertDataRow(Entity ident)
+        internal object[] BulkInsertDataRow(object/*Entity or IView*/ entity)
         {
             var parameters = IdentityBehaviour ?
-                inserterIdentity.Value.InsertParameters(ident, new Forbidden(), "") :
-                inserterDisableIdentity.Value.InsertParameters(ident, new Forbidden(), "");
+                inserterIdentity.Value.InsertParameters((Entity)entity, new Forbidden(), "") :
+                inserterDisableIdentity.Value.InsertParameters(entity, new Forbidden(), "");
 
             return parameters.Select(a => a.Value).ToArray();
         }
@@ -100,7 +100,7 @@ namespace Signum.Engine.Maps
             internal Table table;
 
             public Func<string, string> SqlInsertPattern;
-            public Func<Entity, Forbidden, string, List<DbParameter>> InsertParameters;
+            public Func<object /*Entity*/, Forbidden, string, List<DbParameter>> InsertParameters;
 
             ConcurrentDictionary<int, Action<List<Entity>, DirectedGraph<Entity>>> insertDisableIdentityCache = 
                 new ConcurrentDictionary<int, Action<List<Entity>, DirectedGraph<Entity>>>();
@@ -181,7 +181,7 @@ namespace Signum.Engine.Maps
 
                     var trios = new List<Table.Trio>();
                     var assigments = new List<Expression>();
-                    var paramIdent = Expression.Parameter(typeof(Entity), "ident");
+                    var paramIdent = Expression.Parameter(typeof(object) /*Entity*/, "ident");
                     var paramForbidden = Expression.Parameter(typeof(Forbidden), "forbidden");
                     var paramSuffix = Expression.Parameter(typeof(string), "suffix");
 
@@ -200,7 +200,7 @@ namespace Signum.Engine.Maps
                         trios.ToString(p => p.SourceColumn.SqlEscape(), ", "),
                         trios.ToString(p => p.ParameterName + suffix, ", "));
 
-                    var expr = Expression.Lambda<Func<Entity, Forbidden, string, List<DbParameter>>>(
+                    var expr = Expression.Lambda<Func<object, Forbidden, string, List<DbParameter>>>(
                         CreateBlock(trios.Select(a => a.ParameterBuilder), assigments), paramIdent, paramForbidden, paramSuffix);
 
                     result.InsertParameters = expr.Compile();
@@ -629,22 +629,38 @@ namespace Signum.Engine.Maps
             return SqlPreCommand.Combine(Spacing.Simple, declareParent, insert, setParent, collections);
         }
 
-        public SqlPreCommand UpdateSqlSync(Entity ident, bool includeCollections = true, string comment = null, string suffix = "")
+        public SqlPreCommand UpdateSqlSync<T>(T entity, Expression<Func<T, bool>> where, bool includeCollections = true, string comment = null, string suffix = "")
+            where T : Entity
         {
-            PrepareEntitySync(ident);
-            
-            if (SetToStrField(ident))
-                ident.SetSelfModified();
+            if (typeof(T) != Type && where != null)
+                throw new InvalidOperationException("Invalid table");
 
-            if (ident.Modified == ModifiedState.Clean || ident.Modified == ModifiedState.Sealed)
+            PrepareEntitySync(entity);
+            
+            if (SetToStrField(entity))
+                entity.SetSelfModified();
+
+            if (entity.Modified == ModifiedState.Clean || entity.Modified == ModifiedState.Sealed)
                 return null;
 
-            //if (ident.Modified == ModifiedState.Modified)
-            //        throw new InvalidOperationException("Some sub-entities of '{0}' are modified but not the entity itself".FormatWith(ident));
-
             var uc = updater.Value;
-            SqlPreCommandSimple update = new SqlPreCommandSimple(uc.SqlUpdatePattern(suffix, false),
-                uc.UpdateParameters(ident, (ident as Entity)?.Ticks ?? -1, new Forbidden(), suffix)).AddComment(comment);
+            var sql = uc.SqlUpdatePattern(suffix, false);
+            var parameters = uc.UpdateParameters(entity, (entity as Entity)?.Ticks ?? -1, new Forbidden(), suffix);
+
+            SqlPreCommand update;
+            if (where != null)
+            {
+                var declare = DeclarePrimaryKeyVariable(entity, where);
+                string originalParameterName = SqlParameterBuilder.GetParameterName("id" + suffix);
+                sql = sql.Replace("WHERE ID = " + originalParameterName, "WHERE ID = " + entity.Id.VariableName); //HACK
+                parameters.Single(a => a.ParameterName == originalParameterName).ParameterName = entity.Id.VariableName;
+
+                update = SqlPreCommand.Combine(Spacing.Simple, declare, new SqlPreCommandSimple(sql, parameters).AddComment(comment));
+            }
+            else
+            {
+                update = new SqlPreCommandSimple(sql, parameters).AddComment(comment);
+            }
 
             if (!includeCollections)
                 return update;
@@ -653,7 +669,7 @@ namespace Signum.Engine.Maps
             if (cc == null)
                 return update;
 
-            SqlPreCommand collections = cc.InsertCollectionsSync((Entity)ident, suffix);
+            SqlPreCommand collections = cc.InsertCollectionsSync((Entity)entity, suffix);
 
             return SqlPreCommand.Combine(Spacing.Simple, update, collections);
         }
@@ -1313,7 +1329,7 @@ namespace Signum.Engine.Maps
             trios.Add(new Table.Trio(this, Expression.Call(miUnWrap, this.GetIdFactory(value, forbidden)), suffix));
         }
 
-        static MethodInfo miUnWrap = ReflectionTools.GetMethodInfo(() => PrimaryKey.Unwrap(null));
+        static MethodInfo miUnWrap = ReflectionTools.GetMethodInfo(() => Signum.Entities.PrimaryKey.Unwrap(null));
     }
 
     public partial class FieldEnum

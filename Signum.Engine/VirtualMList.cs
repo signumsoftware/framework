@@ -66,6 +66,7 @@ namespace Signum.Engine
                     .Select(line => new MList<L>.RowIdElement(line, line.Id, null));
 
                 ((IMListPrivate<L>)mlist).InnerList.AddRange(rowIdElements);
+                ((IMListPrivate<L>)mlist).InnerListModified(rowIdElements.Select(a => a.Element).ToList(), null);
             };
 
             sb.Schema.EntityEvents<T>().Saving += (T e) =>

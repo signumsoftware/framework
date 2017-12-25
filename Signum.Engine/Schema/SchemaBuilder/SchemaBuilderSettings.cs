@@ -13,6 +13,7 @@ using Microsoft.SqlServer.Types;
 using Microsoft.SqlServer.Server;
 using System.Collections.ObjectModel;
 using System.Collections.Concurrent;
+using Signum.Utilities.ExpressionTrees;
 
 namespace Signum.Engine.Maps
 {
@@ -188,17 +189,19 @@ namespace Signum.Engine.Maps
         public bool ImplementedBy<T>(Expression<Func<T, object>> propertyRoute, Type typeToImplement) where T : Entity
         {
             var imp = GetImplementations(propertyRoute);
-            return !imp.IsByAll  && imp.Types.Contains(typeToImplement);
+            return !imp.IsByAll && imp.Types.Contains(typeToImplement);
         }
 
         public void AssertImplementedBy<T>(Expression<Func<T, object>> propertyRoute, Type typeToImplement) where T : Entity
         {
-            var propRoute = PropertyRoute.Construct(propertyRoute);
+            var route = PropertyRoute.Construct(propertyRoute);
 
-            Implementations imp = GetImplementations(propRoute);
+            Implementations imp = GetImplementations(route);
 
             if (imp.IsByAll || !imp.Types.Contains(typeToImplement))
-                throw new InvalidOperationException("Route {0} is not ImplementedBy {1}".FormatWith(propRoute, typeToImplement.Name));
+                throw new InvalidOperationException("Route {0} is not ImplementedBy {1}".FormatWith(route, typeToImplement.Name) +
+                    "\r\n" + 
+                    Implementations.ConsiderMessage(route, imp.Types.And(typeToImplement).ToString(t => $"typeof({t.TypeName()})", ", ")));
         }
 
         public Implementations GetImplementations<T>(Expression<Func<T, object>> propertyRoute) where T : Entity
@@ -236,7 +239,13 @@ namespace Signum.Engine.Maps
         internal int? GetSqlScale(SqlDbTypeAttribute att, SqlDbType sqlDbType)
         {
             if (att != null && att.HasScale)
+            {
+                if(sqlDbType != SqlDbType.Decimal)
+                    throw  new InvalidOperationException($"{sqlDbType} can not have Scale");
+
                 return att.Scale;
+
+            }
 
             return defaultScale.TryGetS(sqlDbType);
         }

@@ -17,9 +17,9 @@ import { RenderEntity } from './RenderEntity'
 export interface EntityTableProps extends EntityListBaseProps {
     createAsLink?: boolean | ((er: EntityTable) => React.ReactElement<any>);
     /**Consider using EntityTable.typedColumns to get Autocompletion**/
-    columns?: EntityTableColumn<ModifiableEntity, any>[],
-    fetchRowState?: (ctx: TypeContext<ModifiableEntity>, row: EntityTableRow) => Promise<any>;
-    onRowHtmlAttributes?: (ctx: TypeContext<ModifiableEntity>, row: EntityTableRow, rowState: any) => React.HTMLAttributes<any> | null | undefined;
+    columns?: EntityTableColumn<any /*T*/, any>[],
+    fetchRowState?: (ctx: TypeContext<any /*T*/>, row: EntityTableRow) => Promise<any>;
+    onRowHtmlAttributes?: (ctx: TypeContext<any /*T*/>, row: EntityTableRow, rowState: any) => React.HTMLAttributes<any> | null | undefined;
     avoidFieldSet?: boolean;
     avoidEmptyTable?: boolean;
 }
@@ -29,7 +29,7 @@ export interface EntityTableColumn<T, RS> {
     header?: React.ReactNode | null;
     headerHtmlAttributes?: React.ThHTMLAttributes<any>;
     cellHtmlAttributes?: (ctx: TypeContext<T>, row: EntityTableRow, rowState: RS) => React.TdHTMLAttributes<any> | null | undefined;
-    template?: (ctx: TypeContext<T>, row: EntityTableRow, rowState: RS) => React.ReactChild | null | undefined;
+    template?: (ctx: TypeContext<T>, row: EntityTableRow, rowState: RS) => React.ReactChild | null | undefined | false;
 }
 
 export class EntityTable extends EntityListBase<EntityTableProps, EntityTableProps> {
@@ -208,7 +208,7 @@ export class EntityTableRow extends React.Component<EntityTableRowProps, { rowSt
     }
 
 
-    getTemplate(col: EntityTableColumn<ModifiableEntity, any>): React.ReactChild | undefined | null {
+    getTemplate(col: EntityTableColumn<ModifiableEntity, any>): React.ReactChild | undefined | null | false {
 
         if (col.template === null)
             return null;

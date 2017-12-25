@@ -9,6 +9,7 @@ using Signum.Utilities.DataStructures;
 using Signum.Utilities.ExpressionTrees;
 using Signum.Utilities.Reflection;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
@@ -377,6 +378,24 @@ namespace Signum.Engine.Maps
             }
         }
 
+        ConcurrentDictionary<Type, Table> Views = new ConcurrentDictionary<Type, Maps.Table>();
+        public Table View<T>() where T : IView
+        {
+            return View(typeof(T));
+        }
+
+        public Table View(Type viewType)
+        {
+            var tn = this.Settings.TypeAttribute<TableNameAttribute>(viewType);
+
+            if (tn?.SchemaName == "sys")
+            {
+                return ViewBuilder.NewView(viewType);
+            }
+
+            return Views.GetOrCreate(viewType, ViewBuilder.NewView(viewType));
+        }
+
         public event Func<SqlPreCommand> Generating;
         internal SqlPreCommand GenerationScipt()
         {
@@ -641,6 +660,30 @@ namespace Signum.Engine.Maps
         public Field TryField(PropertyRoute route)
         {
             return TryFindField(Table(route.RootType), route.Members);
+        }
+
+        public bool HasSomeIndex(PropertyRoute route)
+        {
+            var field = TryField(route);
+
+            if (field == null)
+                return false;
+
+            if (field.UniqueIndex != null)
+                return true;
+
+            var cols = field.Columns();
+
+            if (cols.Any(c => c.ReferenceTable != null))
+                return true;
+            
+            var mlistPr = route.GetMListItemsRoute();
+
+            ITable table = mlistPr == null ?
+                (ITable)Table(route.RootType) :
+                (ITable)((FieldMList)Field(mlistPr.Parent)).TableMList;
+
+            return table.MultiColumnIndexes != null && table.MultiColumnIndexes.Any(index => index.Columns.Any(cols.Contains));
         }
 
         public override string ToString()

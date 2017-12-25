@@ -17,6 +17,7 @@ import PaginationSelector from './PaginationSelector'
 import FilterBuilder from './FilterBuilder'
 import ColumnEditor from './ColumnEditor'
 import MultipliedMessage from './MultipliedMessage'
+import GroupByMessage from './GroupByMessage'
 import { renderContextualItems, ContextualItemsContext, MarkedRowsDictionary, MarkedRow } from './ContextualItems'
 import ContextMenu from './ContextMenu'
 import { ContextMenuPosition } from './ContextMenu'
@@ -24,6 +25,7 @@ import SelectorModal from '../SelectorModal'
 import { ISimpleFilterBuilder } from './SearchControl'
 
 import "./Search.css"
+import { FilterOperation } from '../Signum.Entities.DynamicQuery';
 
 export interface ShowBarExtensionOption {}
 
@@ -51,6 +53,7 @@ export interface SearchControlLoadedProps {
     showFilters: boolean;
     showSimpleFilterBuilder: boolean;
     showFilterButton: boolean;
+    showGroupButton: boolean;
     showFooter: boolean;
     allowChangeColumns: boolean;
     allowChangeOrder: boolean;
@@ -63,7 +66,7 @@ export interface SearchControlLoadedProps {
     onCreate?: () => void;
     onDoubleClick?: (e: React.MouseEvent<any>, row: ResultRow) => void;
     onNavigated?: (lite: Lite<Entity>) => void;
-    onSelectionChanged?: (entity: Lite<Entity>[]) => void;
+    onSelectionChanged?: (rows: ResultRow[]) => void;
     onFiltersChanged?: (filters: FilterOptionParsed[]) => void;
     onHeighChanged?: () => void;
     onSearch?: (fo: FindOptionsParsed) => void;
@@ -76,6 +79,7 @@ export interface SearchControlLoadedState {
     selectedRows?: ResultRow[];
     markedRows?: MarkedRowsDictionary;
     isSelectOpen: boolean;
+    resultFindOptions?: FindOptionsParsed;
     searchCount?: number;
     dragColumnIndex?: number,
     dropBorderIndex?: number,
@@ -90,7 +94,6 @@ export interface SearchControlLoadedState {
     };
 
     showFilters: boolean;
-
     editingColumn?: ColumnOptionParsed;
     lastToken?: QueryToken;
 }
@@ -112,7 +115,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
         const qs = Finder.getSettings(fo.queryKey);
         const qd = this.props.queryDescription;
 
-        const sfb = this.props.showSimpleFilterBuilder == false ? undefined :
+        const sfb = this.props.showSimpleFilterBuilder == false || fo.groupResults ? undefined :
             qs && qs.simpleFilterBuilder && qs.simpleFilterBuilder(qd, fo.filterOptions);
 
         if (sfb) {
@@ -151,9 +154,10 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
         return {
             queryKey: fo.queryKey,
+            groupResults: fo.groupResults,
             filters: fo.filterOptions.filter(a => a.token != undefined && a.token.filterType != undefined && a.operation != undefined).map(fo => ({ token: fo.token!.fullKey, operation: fo.operation!, value: fo.value })),
             columns: fo.columnOptions.filter(a => a.token != undefined).map(co => ({ token: co.token!.fullKey, displayName: co.displayName! }))
-                .concat((qs && qs.hiddenColumns || []).map(co => ({ token: co.columnName, displayName: "" }))),
+                .concat((!fo.groupResults && qs && qs.hiddenColumns || []).map(co => ({ token: co.columnName, displayName: "" }))),
             orders: fo.orderOptions.filter(a => a.token != undefined).map(oo => ({ token: oo.token.fullKey, orderType: oo.orderType })),
             pagination: fo.pagination,
         };
@@ -169,6 +173,15 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
         this.doSearch(avoidOnSearchEvent).done();
     };
 
+    resetResults(continuation: ()=> void) {
+        this.setState({
+            resultTable: undefined,
+            resultFindOptions: undefined,
+            selectedRows: [],
+            currentMenuItems: undefined,
+            markedRows: undefined,
+        }, continuation);
+    }
 
     abortableSearch = new AbortableRequest((abortController, request: QueryRequest) => Finder.API.executeQuery(request, abortController));
 
@@ -178,9 +191,11 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
                 this.props.onSearch(fop);
 
             this.setState({ editingColumn: undefined }, () => this.handleHeightChanged());
+            var resultFindOptions = JSON.parse(JSON.stringify(this.props.findOptions));
             return this.abortableSearch.getData(this.getQueryRequest()).then(rt => {
                 this.setState({
                     resultTable: rt,
+                    resultFindOptions: resultFindOptions,
                     selectedRows: [],
                     currentMenuItems: undefined,
                     markedRows: undefined,
@@ -196,7 +211,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
     notifySelectedRowsChanged() {
         if (this.props.onSelectionChanged)
-            this.props.onSelectionChanged(this.state.selectedRows!.map(a => a.entity));
+            this.props.onSelectionChanged(this.state.selectedRows!);
     }
 
 
@@ -215,7 +230,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
         var filters = this.simpleFilterBuilderInstance.getFilters();
 
-        return Finder.parseFilterOptions(filters, qd).then(fos => {
+        return Finder.parseFilterOptions(filters, false, qd).then(fos => {
             fo.filterOptions = fos;
 
             return fo;
@@ -225,7 +240,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
     handlePagination = (p: Pagination) => {
         this.props.findOptions.pagination = p;
-        this.setState({ resultTable: undefined });
+        this.setState({ resultTable: undefined, resultFindOptions: undefined });
 
         if (this.props.findOptions.pagination.mode != "All")
             this.doSearch().done();
@@ -321,6 +336,8 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
         const sfb = this.state.simpleFilterBuilder &&
             React.cloneElement(this.state.simpleFilterBuilder, { ref: (e: ISimpleFilterBuilder) => { this.simpleFilterBuilderInstance = e } });
 
+        const canAggregate = (fo.groupResults ? SubTokensOptions.CanAggregate : 0);
+
         return (
             <div className="sf-search-control SF-control-container" ref="container"
                 data-search-count={this.state.searchCount}
@@ -331,8 +348,8 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
                         this.state.showFilters ? <FilterBuilder
                                 queryDescription={qd}
                                 filterOptions={fo.filterOptions}
-                                lastToken={this.state.lastToken}
-                                subTokensOptions={SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement}
+                            lastToken={this.state.lastToken}
+                            subTokensOptions={SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement | canAggregate}
                                 onTokenChanged={this.handleFilterTokenChanged}
                                 onFiltersChanged={this.handleFiltersChanged}
                                 onHeightChanged={this.handleHeightChanged}
@@ -343,11 +360,12 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
                 }
                 {p.showHeader && this.renderToolBar()}
                 {<MultipliedMessage findOptions={fo} mainType={this.entityColumn().type} />}
+                {fo.groupResults && <GroupByMessage findOptions={fo} mainType={this.entityColumn().type} />}
                 {this.state.editingColumn && <ColumnEditor
                     columnOption={this.state.editingColumn}
                     onChange={this.handleColumnChanged}
                     queryDescription={qd}
-                    subTokensOptions={SubTokensOptions.CanElement}
+                    subTokensOptions={SubTokensOptions.CanElement | canAggregate}
                     close={this.handleColumnClose} />}
                 <div ref={d => this.containerDiv = d}
                     className="sf-search-results-container table-responsive"
@@ -369,6 +387,15 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
 
     // TOOLBAR
+   
+
+    handleSearchClick = (ev: React.MouseEvent<any>) => {
+        ev.preventDefault();
+
+        this.doSearchPage1();
+
+    };
+
     handleToggleFilters = () => {
         this.getFindOptionsWithSFB().then(() => {
             this.simpleFilterBuilderInstance = undefined;
@@ -379,13 +406,42 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
         }).done();
     }
 
-    handleSearchClick = (ev: React.MouseEvent<any>) => {
-        ev.preventDefault();
+    handleToggleGroupBy = () => {
+        var fo = this.props.findOptions;
+        var qd = this.props.queryDescription;
+        this.resetResults(() => {
+            if (fo.groupResults) {
 
-        this.doSearchPage1();
+                fo.groupResults = false;
+                removeAggregates(fo.filterOptions, qd);
+                removeAggregates(fo.orderOptions, qd);
+                removeAggregates(fo.columnOptions, qd);
+                this.forceUpdate();
 
-    };
+                this.doSearchPage1();
 
+            } else {
+                fo.groupResults = true;
+                if (this.state.simpleFilterBuilder) {
+                    this.simpleFilterBuilderInstance = undefined;
+                    this.setState({ simpleFilterBuilder: undefined, showFilters: true });
+                }
+
+                var tc = new Finder.TokenCompleter(qd);
+                //addAggregates(fo.filterOptions, qd, "request");
+                withAggregates(fo.orderOptions, tc, "request");
+                withAggregates(fo.columnOptions, tc, "request");
+
+                tc.finished().then(() => {
+                    //addAggregates(fo.filterOptions, qd, "get");
+                    withAggregates(fo.orderOptions, tc, "get");
+                    withAggregates(fo.columnOptions, tc, "get");
+                    this.forceUpdate();
+                    this.doSearchPage1();
+                });
+            }
+        });
+    }
 
     renderToolBar() {
 
@@ -394,10 +450,15 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
         var buttons = [
 
-            p.showFilterButton && OrderUtils.setOrder(-4, <a
+            p.showFilterButton && OrderUtils.setOrder(-5, <a
                 className={"sf-query-button sf-filters-header btn btn-default" + (s.showFilters ? " active" : "")}
                 onClick={this.handleToggleFilters}
                 title={s.showFilters ? JavascriptMessage.hideFilters.niceToString() : JavascriptMessage.showFilters.niceToString()}><span className="fa fa-filter"></span></a >),
+
+            p.showFilterButton && OrderUtils.setOrder(-4, <a
+                className={"sf-query-button btn btn-default" + (p.findOptions.groupResults ? " active" : "")}
+                onClick={this.handleToggleGroupBy}
+                title={p.findOptions.groupResults ? JavascriptMessage.ungroupResults.niceToString() : JavascriptMessage.groupResults.niceToString()}>Ʃ</a >),
 
             OrderUtils.setOrder(-3, <button className={classes("sf-query-button sf-search btn", p.findOptions.pagination.mode == "All" ? "btn-danger" : "btn-primary")} onClick={this.handleSearchClick}>{SearchMessage.Search.niceToString()} </button>),
 
@@ -494,7 +555,11 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
     }
 
     getSelectedEntities(): Lite<Entity>[] {
-        return this.state.selectedRows!.map(a => a.entity);
+
+        if (this.props.findOptions.groupResults)
+            throw new Error("Results are grouped")
+
+        return this.state.selectedRows!.map(a => a.entity!);
     }
 
     // SELECT BUTTON
@@ -507,7 +572,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
     }
 
     loadMenuItems() {
-        if (this.props.showContextMenu == "Basic")
+        if (this.props.showContextMenu == "Basic" || this.props.findOptions.groupResults)
             this.setState({ currentMenuItems: [] });
         else {
             const options: ContextualItemsContext<Entity> = {
@@ -563,16 +628,17 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
         const token = fo.columnOptions[cm.columnIndex!].token;
 
-        const fops = token ? filterOperations[token.filterType as any] : undefined;
+        const op: FilterOperation | undefined =
+            token && token.preferEquals || cm.rowIndex != null ? "EqualTo" as FilterOperation | undefined :
+                token ? (filterOperations[token.filterType as any] || []).firstOrNull() as FilterOperation | undefined :
+                    undefined as FilterOperation | undefined;
 
-        const rt = this.state.resultTable!;
-
-        const resultColumnIndex = token == null ? -1 : rt.columns.indexOf(token.fullKey);
+        const rt = this.state.resultTable;        
 
         fo.filterOptions.push({
             token: token,
-            operation: fops && fops.firstOrNull() || undefined,
-            value: cm.rowIndex == undefined || resultColumnIndex == -1 ? undefined : rt.rows[cm.rowIndex].columns[resultColumnIndex],
+            operation: op,
+            value: cm.rowIndex == undefined || rt == null || token == null ? undefined : rt.rows[cm.rowIndex].columns[rt.columns.indexOf(token.fullKey)],
             frozen: false
         });
 
@@ -615,6 +681,9 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
         const fo = this.props.findOptions;
         const col = fo.columnOptions[cm.columnIndex!];
         fo.columnOptions.removeAt(cm.columnIndex!);
+        if (fo.groupResults && col.token) {
+            fo.orderOptions.extract(a => a.token.fullKey == col.token!.fullKey);
+        }
 
         this.setState({ editingColumn: undefined }, () => this.handleHeightChanged());
     }
@@ -784,7 +853,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
                     <input type="checkbox" id="cbSelectAll" onClick={this.handleToggleAll} checked={this.allSelected()} />
                 </th>
                 }
-                {this.props.navigate && <th className="sf-th-entity" data-column-name="Entity"></th>}
+                {this.props.navigate && !this.props.findOptions.groupResults && <th className="sf-th-entity" data-column-name="Entity"></th>}
                 {this.props.findOptions.columnOptions.map((co, i) =>
                     <th key={i}
                         draggable={true}
@@ -804,6 +873,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
                         onDragEnter={e => this.handlerHeaderDragOver(e, i)}
                         onDrop={this.handleHeaderDrop}>
                         <span className={"sf-header-sort " + this.orderClassName(co)} />
+                        {this.props.findOptions.groupResults && co.token && co.token.queryTokenType != "Aggregate"  && <span> <i className="fa fa-key" /></span>}
                         <span> {co.displayName}</span></th>
                 )}
             </tr>
@@ -887,23 +957,44 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
             return;
         }
 
-        if (!Navigator.isNavigable(row.entity.EntityType, undefined, true))
+        var resFo = this.state.resultFindOptions;
+        if (resFo && resFo.groupResults) {
+
+            var keyFilters = resFo.columnOptions
+                .map((col, i) => ({ col, value: row.columns[i] }))
+                .filter(a => a.col.token && a.col.token.queryTokenType != "Aggregate")
+                .map(a => ({ columnName: a.col.token!.fullKey, operation: "EqualTo", value: a.value }) as FilterOption);
+
+            var nonAggregateFilters = resFo.filterOptions.filter(fo => fo.token != null && fo.token.queryTokenType != "Aggregate")
+                .map(fo => ({ columnName: fo.token!.fullKey, operation: fo.operation, value: fo.value }) as FilterOption);
+
+            Finder.explore({
+                queryName: resFo.queryKey,
+                filterOptions: nonAggregateFilters.concat(keyFilters)
+            }).done();
+
+            return;
+        }
+        
+        var lite = row.entity!;
+
+        if (!Navigator.isNavigable(lite.EntityType, undefined, true))
             return;
 
         e.preventDefault();
 
-        const s = Navigator.getSettings(row.entity.EntityType)
+        const s = Navigator.getSettings(lite.EntityType)
 
         const avoidPopup = s != undefined && s.avoidPopup;
 
         if (avoidPopup || e.ctrlKey || e.button == 1) {
-            window.open(Navigator.navigateRoute(row.entity));
+            window.open(Navigator.navigateRoute(lite));
         }
         else {
-            Navigator.navigate(row.entity)
+            Navigator.navigate(lite)
                 .then(() => {
                     if (this.props.onNavigated)
-                        this.props.onNavigated(row.entity);
+                        this.props.onNavigated(lite);
                 }).done();
         }
 
@@ -942,7 +1033,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
         return this.state.resultTable.rows.map((row, i) => {
 
-            const mark = this.getMarkedRow(row.entity);
+            const mark = row.entity && this.getMarkedRow(row.entity);
 
             var ra = rowAttributes ? rowAttributes(row, resultTable.columns) : undefined;
 
@@ -951,7 +1042,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
             const id = message && "result_row_" + i;
 
             return (
-                <tr key={i} data-row-index={i} data-entity={liteKey(row.entity)}
+                <tr key={i} data-row-index={i} data-entity={row.entity && liteKey(row.entity)}
                     onDoubleClick={e => this.handleDoubleClick(e, row)}
                     id={id}
                     {...ra}
@@ -962,7 +1053,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
                         </td>
                     }
 
-                    {this.props.navigate &&
+                    {this.props.navigate && !this.props.findOptions.groupResults &&
                         <td>
                             {(this.props.entityFormatter || (qs && qs.entityFormatter) || Finder.entityFormatRules.filter(a => a.isApplicable(row)).last("EntityFormatRules").formatter)(row, resultTable.columns, this)}
                         </td>
@@ -1026,4 +1117,50 @@ function withoutAllAny(qt: QueryToken | undefined): QueryToken | undefined {
         return qt;
 
     return par;
+}
+
+function removeAggregates(array: { token?: QueryToken, displayName?: string }[], qd: QueryDescription) {
+    array.filter(a => a.token != null && a.token.queryTokenType == "Aggregate").forEach(a => {
+        if (a.token) {
+            if (a.token.parent) {
+                a.token = a.token.parent;
+            } else {
+                a.token = qd.columns["Id"] ? toQueryToken(qd.columns["Id"]) : undefined;
+            }
+
+            if (a.displayName)
+                a.displayName = a.token!.niceName;
+        }
+    });
+
+    array.extract(a => a.token == null);
+}
+
+function withAggregates(array: { token?: QueryToken, displayName?: string }[], tc: Finder.TokenCompleter, mode: "request" | "get") : void {
+    array.forEach(a => {
+        if (a.token) {
+            if (canHaveMin(a.token.type.name)) {
+
+                var tokenName = a.token.fullKey == "Id" ? "Count" : a.token.fullKey + ".Min";
+
+                if (mode == "request")
+                    tc.request(tokenName, SubTokensOptions.CanAggregate);
+                else {
+                    a.token = tc.get(tokenName);
+                    if (a.displayName)
+                        a.displayName = a.token.niceName;
+                }
+            } else if (a.token.isGroupable) {
+                 //Nothing, will be group key
+            } else {
+                a.token = undefined;
+            } 
+        }
+    });
+
+    array.extract(a => a.token == undefined);
+}
+
+function canHaveMin(typeName: string): boolean {
+    return typeName == "number" || typeName == "decimal" || typeName == "TimeSpan";
 }

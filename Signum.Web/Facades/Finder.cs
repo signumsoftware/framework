@@ -325,7 +325,7 @@ namespace Signum.Web
             controller.ViewData[ViewDataKeys.QueryDescription] = qd;
 
             Type entitiesType = Lite.Extract(qd.Columns.SingleEx(a => a.IsEntity).Type);
-            string message = CollectionElementToken.MultipliedMessage(request.Multiplications, entitiesType);
+            string message = CollectionElementToken.MultipliedMessage(request.Multiplications(), entitiesType);
             if (message.HasText())
                 controller.ViewData[ViewDataKeys.MultipliedMessage] = message;
 

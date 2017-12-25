@@ -131,5 +131,36 @@ namespace Signum.Test.LinqProvider
                               join b in Database.Query<AlbumEntity>().DefaultIfEmpty() on a equals b.Author into g
                               select new { a.Name, Albums = (int?)g.Count() }).ToList();
         }
+
+        [TableName("#MyView")]
+        class MyTempView : IView
+        {
+            [ViewPrimaryKey]
+            public Lite<ArtistEntity> Artist { get; set; }
+        }
+
+        [TestMethod]
+        public void LeftOuterMyView()
+        {
+            using (Transaction tr = new Transaction())
+            {
+                Administrator.CreateTemporaryTable<MyTempView>();
+
+                Database.Query<ArtistEntity>().Where(a => a.Name.StartsWith("M")).UnsafeInsertView(a => new MyTempView { Artist = a.ToLite() });
+                
+                var artists = (from a in Database.Query<ArtistEntity>()
+                             join b in Database.View<MyTempView>() on a.ToLite() equals b.Artist into g
+                             select a.ToLite()).ToList();
+
+                Assert.IsTrue(artists.All(a => a.ToString().StartsWith("M")));
+
+                var list1 = Database.View<MyTempView>().ToList();
+                var list2 = Database.Query<ArtistEntity>().Where(a => a.Name.StartsWith("M")).ToList();
+                Assert.AreEqual(list1.Count, list2.Count);
+
+                tr.Commit();
+            }
+
+        }
     }
 }

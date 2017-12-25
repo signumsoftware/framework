@@ -82,19 +82,19 @@ namespace Signum.Utilities.DataStructures
             return false;
         }
 
-        public void Remove(K key)
+        public bool Remove(K key)
         {
-            LinkedListNode<V> link = keyToLink[key];
+            LinkedListNode<V> link = keyToLink.TryGetC(key);
+
+            if (link == null)
+                return false;
 
             keyToLink.Remove(key);
+            orderList.Remove(link);
+            // Keep a reverse index from the link to the key
+            linkToKey.Remove(link);
 
-            if (link != null)
-            {
-                orderList.Remove(link);
-
-                // Keep a reverse index from the link to the key
-                linkToKey.Remove(link);
-            }
+            return true;
         }
 
         public V this[K key]

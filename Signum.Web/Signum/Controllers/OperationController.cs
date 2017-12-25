@@ -24,13 +24,11 @@ namespace Signum.Web.Controllers
         [HttpPost, ValidateAntiForgeryToken, ActionSplitter("operationFullKey")]
         public ActionResult Execute()
         {
-            OperationSymbol operationSymbol = this.GetOperationKeyAssert();
-
             Entity entity = null;
             if (this.IsLite())
             {
                 Lite<Entity> lite = this.ExtractLite<Entity>();
-                entity = OperationLogic.ServiceExecuteLite(lite, operationSymbol);
+                entity = OperationLogic.ServiceExecuteLite(lite, this.GetOperationKeyAssert(lite.EntityType));
             }
             else
             {
@@ -42,7 +40,7 @@ namespace Signum.Web.Controllers
 
                 try
                 {
-                    entity = OperationLogic.ServiceExecute(entity, operationSymbol);
+                    entity = OperationLogic.ServiceExecute(entity, this.GetOperationKeyAssert(entity.GetType()));
                 }
                 catch (IntegrityCheckException e)
                 {
@@ -57,13 +55,11 @@ namespace Signum.Web.Controllers
         [HttpPost, ValidateAntiForgeryToken, ActionSplitter("operationFullKey")]
         public ActionResult Delete()
         {
-            OperationSymbol operationSymbol = this.GetOperationKeyAssert();
-
             if (this.IsLite())
             {
                 Lite<Entity> lite = this.ExtractLite<Entity>();
 
-                OperationLogic.ServiceDelete(lite, operationSymbol, null);
+                OperationLogic.ServiceDelete(lite, this.GetOperationKeyAssert(lite.EntityType), null);
 
                 return this.DefaultDelete(lite.EntityType);
             }
@@ -75,7 +71,7 @@ namespace Signum.Web.Controllers
 
                 try
                 {
-                    OperationLogic.ServiceDelete(entity, operationSymbol, null);
+                    OperationLogic.ServiceDelete(entity, this.GetOperationKeyAssert(entity.GetType()), null);
                 }
                 catch (IntegrityCheckException e)
                 {
@@ -90,13 +86,12 @@ namespace Signum.Web.Controllers
         [HttpPost, ValidateAntiForgeryToken, ActionSplitter("operationFullKey")]
         public ActionResult ConstructFrom()
         {
-            OperationSymbol operationSymbol = this.GetOperationKeyAssert();
-
+            OperationSymbol operationSymbol;
             Entity entity = null;
             if (this.IsLite())
             {
                 Lite<Entity> lite = this.ExtractLite<Entity>();
-                entity = OperationLogic.ServiceConstructFromLite(lite, operationSymbol);
+                entity = OperationLogic.ServiceConstructFromLite(lite, operationSymbol = this.GetOperationKeyAssert(lite.EntityType));
             }
             else
             {
@@ -109,7 +104,7 @@ namespace Signum.Web.Controllers
 
                 try
                 {
-                    entity = OperationLogic.ServiceConstructFrom(entity, operationSymbol);
+                    entity = OperationLogic.ServiceConstructFrom(entity, operationSymbol = this.GetOperationKeyAssert(entity.GetType()));
                 }
                 catch (IntegrityCheckException e)
                 {
@@ -124,9 +119,9 @@ namespace Signum.Web.Controllers
         [HttpPost, ValidateAntiForgeryToken, ActionSplitter("operationFullKey")]
         public ActionResult ConstructFromMany()
         {
-            OperationSymbol operationSymbol = this.GetOperationKeyAssert();
 
             var lites = this.ParseLiteKeys<Entity>();
+            OperationSymbol operationSymbol = lites.Select(a => a.EntityType).Distinct().Select(type => this.GetOperationKeyAssert(type)).Distinct().SingleEx();
 
             Entity entity = OperationLogic.ServiceConstructFromMany(lites, lites.First().EntityType, operationSymbol);
 
@@ -137,9 +132,9 @@ namespace Signum.Web.Controllers
         [HttpPost, ValidateAntiForgeryToken, ActionSplitter("operationFullKey")]
         public ActionResult ExecuteMultiple()
         {
-            OperationSymbol operationSymbol = this.GetOperationKeyAssert();
-
             var lites = this.ParseLiteKeys<Entity>();
+            OperationSymbol operationSymbol = lites.Select(a => a.EntityType).Distinct().Select(type => this.GetOperationKeyAssert(type)).Distinct().SingleEx();
+            
 
             foreach (var item in lites)
             {
@@ -159,9 +154,9 @@ namespace Signum.Web.Controllers
         [HttpPost, ValidateAntiForgeryToken, ActionSplitter("operationFullKey")]
         public ActionResult DeleteMultiple()
         {
-            OperationSymbol operationSymbol = this.GetOperationKeyAssert();
-
             var lites = this.ParseLiteKeys<Entity>();
+            OperationSymbol operationSymbol = lites.Select(a => a.EntityType).Distinct().Select(type => this.GetOperationKeyAssert(type)).Distinct().SingleEx();
+            
 
             foreach (var item in lites)
             {
@@ -181,9 +176,9 @@ namespace Signum.Web.Controllers
         [HttpPost, ValidateAntiForgeryToken, ActionSplitter("operationFullKey")]
         public ActionResult ConstructFromMultiple()
         {
-            OperationSymbol operationSymbol = this.GetOperationKeyAssert();
-
             var lites = this.ParseLiteKeys<Entity>();
+            OperationSymbol operationSymbol = lites.Select(a => a.EntityType).Distinct().Select(type => this.GetOperationKeyAssert(type)).Distinct().SingleEx();
+
 
             foreach (var item in lites)
             {

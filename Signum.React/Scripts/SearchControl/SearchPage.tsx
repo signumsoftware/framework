@@ -115,6 +115,7 @@ export default class SearchPage extends React.Component<SearchPageProps, SearchP
                     hideFullScreenButton={true}
                     largeToolbarButtons={true}
                     showFilters={true}
+                    showGroupButton={true}
                     avoidChangeUrl={false}
 
                     onHeighChanged={this.onResize}

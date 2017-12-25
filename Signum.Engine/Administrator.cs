@@ -53,6 +53,33 @@ namespace Signum.Engine
                 new SqlPreCommandSimple(SynchronizerMessage.EndOfSyncScript.NiceToString()));
         }
 
+        public static void CreateTemporaryTable<T>()
+          where T : IView
+        {
+            if (!Transaction.HasTransaction)
+                throw new InvalidOperationException("You need to be inside of a transaction to create a Temporary table");
+
+            var view = Schema.Current.View<T>();
+
+            if (!view.Name.IsTemporal)
+                throw new InvalidOperationException($"Temporary tables should start with # (i.e. #myTable). Consider using {nameof(TableNameAttribute)}");
+
+            SqlBuilder.CreateTableSql(view).ExecuteNonQuery();
+        }
+
+        public static void CreateTemporaryIndex<T>(Expression<Func<T, object>> fields)
+             where T : IView
+        {
+            var view = Schema.Current.View<T>();
+
+            IColumn[] columns = IndexKeyColumns.Split(view, fields);
+
+            var index = new Index(view, columns);
+
+            SqlBuilder.CreateIndex(index).ExecuteLeaves();
+        }
+
+
         internal static readonly ThreadVariable<DatabaseName> sysViewDatabase = Statics.ThreadVariable<DatabaseName>("viewDatabase");
         public static IDisposable OverrideDatabaseInSysViews(DatabaseName database)
         {
@@ -179,19 +206,17 @@ namespace Signum.Engine
         public static int UnsafeDeleteDuplicates<E, K>(this IQueryable<E> query, Expression<Func<E, K>> key, string message = null)
            where E : Entity
         {
-            return (from f1 in query
-                    join f2 in query on key.Evaluate(f1) equals key.Evaluate(f2)
-                    where f1.Id > f2.Id
-                    select f1).UnsafeDelete(message);
+            return (from e in query
+                    where !query.GroupBy(key).Select(gr => gr.Min(a => a.id)).Contains(e.Id)
+                    select e).UnsafeDelete(message);
         }
 
         public static int UnsafeDeleteMListDuplicates<E, V, K>(this IQueryable<MListElement<E,V>> query, Expression<Func<MListElement<E, V>, K>> key, string message = null)
             where E : Entity
         {
-            return (from f1 in query
-                    join f2 in query on key.Evaluate(f1) equals key.Evaluate(f2)
-                    where f1.RowId > f2.RowId
-                    select f1).UnsafeDeleteMList(message);
+            return (from e in query
+                    where !query.GroupBy(key).Select(gr => gr.Min(a => a.RowId)).Contains(e.RowId)
+                    select e).UnsafeDeleteMList(message);
         }
 
         public static SqlPreCommandSimple QueryPreCommand<T>(IQueryable<T> query)
@@ -208,8 +233,8 @@ namespace Signum.Engine
                 return null;
 
             var prov = ((DbQueryProvider)query.Provider);
-
-            return prov.Delete<SqlPreCommandSimple>(query, cm => cm, removeSelectRowCount: true);
+            using (PrimaryKeyExpression.PreferVariableName())
+                return prov.Delete<SqlPreCommandSimple>(query, cm => cm, removeSelectRowCount: true);
         }
 
         public static SqlPreCommandSimple UnsafeDeletePreCommand<E, V>(Expression<Func<E, MList<V>>> mListProperty, IQueryable<MListElement<E, V>> query)
@@ -219,8 +244,8 @@ namespace Signum.Engine
                 return null;
 
             var prov = ((DbQueryProvider)query.Provider);
-
-            return prov.Delete<SqlPreCommandSimple>(query, cm => cm, removeSelectRowCount: true);
+            using (PrimaryKeyExpression.PreferVariableName())
+                return prov.Delete<SqlPreCommandSimple>(query, cm => cm, removeSelectRowCount: true);
         }
 
         public static SqlPreCommandSimple UnsafeUpdatePartPreCommand(IUpdateable update)
@@ -242,7 +267,7 @@ namespace Signum.Engine
             if (!query.Any())
                 return;
 
-            query.Select(a => a.Id).IntervalsOf(100).ProgressForeach(inter => inter.ToString(), null, (interva, writer) =>
+            query.Select(a => a.Id).IntervalsOf(100).ProgressForeach(inter => inter.ToString(), (interva) =>
             {
                 var list = query.Where(a => interva.Contains(a.Id)).ToList();
 
@@ -384,28 +409,26 @@ namespace Signum.Engine
         }
 
 
-        public static void MoveAllForeignKeys<T>(Lite<T> fromEntity, Lite<T> toEntity)
+        public static void MoveAllForeignKeys<T>(Lite<T> fromEntity, Lite<T> toEntity, Func<ITable, IColumn, bool> shouldMove = null)
         where T : Entity
         {
             using (Transaction tr = new Transaction())
             {
-                MoveAllForeignKeysPrivate<T>(fromEntity, toEntity).Select(a => a.UpdateScript).Combine(Spacing.Double).ExecuteLeaves();
+                MoveAllForeignKeysPrivate<T>(fromEntity, toEntity, shouldMove).Select(a => a.UpdateScript).Combine(Spacing.Double).ExecuteLeaves();
                 tr.Commit();
             }
-
         }
 
-        public static SqlPreCommand MoveAllForeignKeysScript<T>(Lite<T> fromEntity, Lite<T> toEntity)
+        public static SqlPreCommand MoveAllForeignKeysScript<T>(Lite<T> fromEntity, Lite<T> toEntity, Func<ITable, IColumn, bool> shouldMove = null)
         where T : Entity
         {
-            return MoveAllForeignKeysPrivate<T>(fromEntity, toEntity).Select(a => a.UpdateScript).Combine(Spacing.Double);
+            return MoveAllForeignKeysPrivate<T>(fromEntity, toEntity, shouldMove).Select(a => a.UpdateScript).Combine(Spacing.Double);
         }
 
-        public static void MoveAllForeignKeysConsole<T>(Lite<T> fromEntity, Lite<T> toEntity)
+        public static void MoveAllForeignKeysConsole<T>(Lite<T> fromEntity, Lite<T> toEntity, Func<ITable, IColumn, bool> shouldMove = null)
             where T : Entity
         {
-            var tuples = MoveAllForeignKeysPrivate<T>(fromEntity, toEntity);
-
+            var tuples = MoveAllForeignKeysPrivate<T>(fromEntity, toEntity, shouldMove);
             foreach (var t in tuples)
             {
                 SafeConsole.WaitRows("{0}.{1}".FormatWith(t.ColumnTable.Table.Name.Name, t.ColumnTable.Column.Name), () => t.UpdateScript.ExecuteNonQuery());
@@ -418,7 +441,7 @@ namespace Signum.Engine
             public SqlPreCommandSimple UpdateScript;
         }
 
-        static List<ColumnTableScript> MoveAllForeignKeysPrivate<T>(Lite<T> fromEntity, Lite<T> toEntity)
+        static List<ColumnTableScript> MoveAllForeignKeysPrivate<T>(Lite<T> fromEntity, Lite<T> toEntity, Func<ITable, IColumn, bool> shouldMove)  
         where T : Entity
         {
             if (fromEntity.GetType() != toEntity.GetType())
@@ -432,9 +455,10 @@ namespace Signum.Engine
             Table refTable = s.Table(typeof(T));
 
             List<ColumnTable> columns = GetColumnTables(s, refTable);
+            if (shouldMove != null)
+                columns = columns.Where(p => shouldMove(p.Table, p.Column)).ToList();
 
             var pb = Connector.Current.ParameterBuilder;
-
             return columns.Select(ct => new ColumnTableScript
             {
                 ColumnTable = ct,
@@ -480,8 +504,10 @@ namespace Signum.Engine
             if (table.TablesMList().Any())
                 throw new InvalidOperationException($"DeleteWhereScript can not be used for {table.Type.Name} because contains MLists");
             
+            if(id.VariableName.HasText())
+                return new SqlPreCommandSimple("DELETE FROM {0} WHERE {1} = {2}".FormatWith(table.Name, column.Name, id.VariableName));
+            
             var param = Connector.Current.ParameterBuilder.CreateReferenceParameter("@id", id, column);
-
             return new SqlPreCommandSimple("DELETE FROM {0} WHERE {1} = {2}".FormatWith(table.Name, column.Name, param.ParameterName), new List<DbParameter> { param });
         }
 

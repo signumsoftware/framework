@@ -906,34 +906,20 @@ namespace Signum.Engine.Maps
 
         protected override FieldReference GenerateFieldReference(ITable table, PropertyRoute route, NameSequence name, bool forceNull)
         {
-            return base.GenerateFieldReference(table, route, name, forceNull);
+            var result = base.GenerateFieldReference(table, route, name, forceNull);
+
+            if (Settings.FieldAttribute<ViewPrimaryKeyAttribute>(route) != null)
+                result.PrimaryKey = true;
+
+            return result;
         }
 
-        protected override SchemaBuilder.KindOfField? GetKindOfField(PropertyRoute route)
+        protected override FieldValue GenerateFieldValue(ITable table, PropertyRoute route, NameSequence name, bool forceNull)
         {
-            if (route.FieldInfo != null && route.FieldInfo.GetCustomAttribute<ViewPrimaryKeyAttribute>() != null)
-                return SchemaBuilder.KindOfField.PrimaryKey;
+            var result = base.GenerateFieldValue(table, route, name, forceNull);
 
-            return base.GetKindOfField(route);
-        }
-
-        protected override Field GenerateFieldPrimaryKey(Table table, PropertyRoute route, NameSequence name)
-        {
-            var att = Settings.FieldAttribute<SqlDbTypeAttribute>(route);
-
-            SqlDbTypePair pair = Settings.GetSqlDbType(att, route.Type);
-
-            var result = new FieldValue(route)
-            {
-                PrimaryKey = true,
-                Name = name.ToString(),
-                SqlDbType = pair.SqlDbType,
-                Collation = Settings.GetCollate(att),
-                UserDefinedTypeName = pair.UserDefinedTypeName,
-                Nullable = Settings.IsNullable(route, false),
-                Size = Settings.GetSqlSize(att, pair.SqlDbType),
-                Scale = Settings.GetSqlScale(att, pair.SqlDbType),
-            };
+            if (Settings.FieldAttribute<ViewPrimaryKeyAttribute>(route) != null)
+                result.PrimaryKey = true;
 
             return result;
         }

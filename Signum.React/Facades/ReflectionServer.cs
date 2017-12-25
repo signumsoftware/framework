@@ -413,6 +413,7 @@ namespace Signum.React.Facades
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore, PropertyName = "typeNiceName")]
         public string TypeNiceName { get; set; }
 
+        public TypeReferenceTS() { }
         public TypeReferenceTS(Type type, Implementations? implementations)
         {
             this.IsCollection = type != typeof(string) && type != typeof(byte[]) && type.ElementType() != null;

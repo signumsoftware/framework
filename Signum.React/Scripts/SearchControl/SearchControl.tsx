@@ -48,6 +48,7 @@ export interface SearchControlProps extends React.Props<SearchControl> {
     showFilters?: boolean;
     showSimpleFilterBuilder?: boolean;
     showFilterButton?: boolean;
+    showGroupButton?: boolean;
     showFooter?: boolean;
     allowChangeColumns?: boolean;
     allowChangeOrder?: boolean;
@@ -60,7 +61,7 @@ export interface SearchControlProps extends React.Props<SearchControl> {
 
     onNavigated?: (lite: Lite<Entity>) => void;
     onDoubleClick?: (e: React.MouseEvent<any>, row: ResultRow) => void;
-    onSelectionChanged?: (entity: Lite<Entity>[]) => void;
+    onSelectionChanged?: (entity: ResultRow[]) => void;
     onFiltersChanged?: (filters: FilterOptionParsed[]) => void;
     onHeighChanged?: () => void;
     onResult?: (table: ResultTable) => void;
@@ -186,7 +187,8 @@ export default class SearchControl extends React.Component<SearchControlProps, S
             showHeader={p.showHeader != null ? p.showHeader : true}
             showFilters={p.showFilters != null ? p.showFilters : false}
             showSimpleFilterBuilder={p.showSimpleFilterBuilder != null ? p.showSimpleFilterBuilder : true}
-            showFilterButton={ p.showFilterButton != null ? p.showFilterButton : true}
+            showFilterButton={p.showFilterButton != null ? p.showFilterButton : true}
+            showGroupButton={p.showGroupButton != null ? p.showGroupButton : false}
             showFooter={ p.showFooter != null ? p.showFooter : true}
             allowChangeColumns={p.allowChangeColumns != null ? p.allowChangeColumns : true}
             allowChangeOrder={p.allowChangeOrder != null ? p.allowChangeOrder : true}
