@@ -27,6 +27,10 @@ export function fillAllTokenValueFuntions(data: ChartTable) {
             makeItTokenValue(data.rows[j]['c' + i]);
         }
     }
+
+    for (let j = 0; j < data.rows.length; j++) {
+        makeItTokenValue(data.rows[j]['entity']);
+    }
 }
 
 export function makeItTokenValue(value: ChartValue) {
@@ -499,10 +503,11 @@ export function toPivotTable(data: ChartTable,
         .map(function (r) {
             return {
                 rowValue: r[col0],
-                values: usedCols.toObject(cn => cn, cn => ({
+                values: usedCols.toObject(cn => cn, (cn): PivotValue => ({
                     rowClick: r,
                     value: r[cn],
-                }) as PivotValue)
+                    valueTitle: `${r[col0].niceToString!()}, ${data.columns[cn].title}: ${r[cn].niceToString!()}`
+                }))
             } as PivotRow;
         });
 
@@ -528,7 +533,7 @@ export function groupedPivotTable(data: ChartTable,
     colValue: string): PivotTable {
 
     var columns = d3.values(data.rows.toObjectDistinct(cr => cr[colSplit].key as string, cr => ({
-        niceName: cr[colSplit].niceToString(),
+        niceName: cr[colSplit].niceToString!(),
         color: cr[colSplit].color,
         key: cr[colSplit].key,
     }) as PivotColumn));
@@ -536,11 +541,16 @@ export function groupedPivotTable(data: ChartTable,
     var rows = data.rows.groupBy(r => "k" + r[col0].key)
         .map(gr => {
 
+            var rowValue = gr.elements[0][col0];
             return {
-                rowValue: gr.elements[0][col0],
+                rowValue: rowValue,
                 values: gr.elements.toObject(
                     r => r[colSplit].key as string,
-                    r => ({ value: r[colValue], rowClick: r }) as PivotValue),
+                    (r) : PivotValue => ({
+                        value: r[colValue],
+                        rowClick: r,
+                        valueTitle: `${rowValue.niceToString!()}, ${r[colSplit].niceToString!()}: ${r[colValue].niceToString!()}`
+                    })),
             } as PivotRow;
         });
 
@@ -574,4 +584,5 @@ interface PivotRow {
 interface PivotValue {
     rowClick: ChartRow;
     value: ChartValue;
+    valueTitle: string;
 }

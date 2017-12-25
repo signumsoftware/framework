@@ -42,7 +42,7 @@ namespace Signum.React.UserAssets
                         {
                             token = f.tokenString,
                             operation = f.operation,
-                            value = FilterValueConverter.Parse(f.valueString, QueryUtils.Parse(f.tokenString, qd, options).Type, f.operation.IsList())
+                            value = FilterValueConverter.Parse(f.valueString, QueryUtils.Parse(f.tokenString, qd, options).Type, f.operation.IsList(), allowSmart: true)
                         })
                         .ToList();
 

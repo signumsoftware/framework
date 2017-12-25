@@ -49,19 +49,6 @@ namespace Signum.React.Excel
             return FilesController.GetHttpReponseMessage(new MemoryStream(binaryFile), fileName);            
         }
 
-        [Route("api/excel/plainChart"), HttpPost]
-        public async Task<HttpResponseMessage> ToPlainExcel(ChartRequest request, CancellationToken token)
-        {
-            var resultTable = await ChartLogic.ExecuteChartAsync(request, token);
-
-            byte[] binaryFile = PlainExcelGenerator.WritePlainExcel(resultTable, QueryUtils.GetNiceName(request.QueryName));
-
-            var fileName = request.ChartScript.ToString() + " " + QueryUtils.GetKey(request.QueryName) + TimeZoneManager.Now.ToString("yyyyMMdd-HHmmss") + ".xlsx";
-
-            return FilesController.GetHttpReponseMessage(new MemoryStream(binaryFile), fileName);
-        }
-
-
         [Route("api/excel/reportsFor/{queryKey}"), HttpGet]
         public IEnumerable<Lite<ExcelReportEntity>> GetExcelReports(string queryKey)
         {

@@ -17,7 +17,6 @@ import * as AuthClient from '../Authorization/AuthClient'
 import * as ChartClient from '../Chart/ChartClient'
 import { ChartPermission } from '../Chart/Signum.Entities.Chart'
 import * as QuickLinks from '../../../Framework/Signum.React/Scripts/QuickLinks'
-import { ChartRequest  } from '../Chart/Signum.Entities.Chart'
 import ExcelMenu from './ExcelMenu'
 
 export function start(options: { routes: JSX.Element[], plainExcel: boolean, excelReport: boolean }) {
@@ -42,7 +41,7 @@ export function start(options: { routes: JSX.Element[], plainExcel: boolean, exc
             return (
                 <button
                     className="sf-query-button sf-chart-script-edit btn btn-default"
-                    onClick={() => { API.generateChartExcel(ChartClient.API.cleanedChartRequest(ctx.chartRequest)); } }>
+                    onClick={() => { API.generatePlanExcel(ChartClient.API.getRequest(ctx.chartRequest)); }}>
                     <i className="fa fa-file-excel-o"></i> &nbsp; {ExcelMessage.ExcelReport.niceToString()}
                 </button>
             );
@@ -65,12 +64,6 @@ export namespace API {
 
     export function generateExcelReport(queryRequest: QueryRequest, excelReport: Lite<ExcelReportEntity>): void{
         ajaxPostRaw({ url: "~/api/excel/excelReport" }, { queryRequest, excelReport })
-            .then(response => saveFile(response))
-            .done();
-    }
-
-    export function generateChartExcel(request: ChartRequest): void {
-        ajaxPostRaw({ url: "~/api/excel/plainChart" }, request)
             .then(response => saveFile(response))
             .done();
     }

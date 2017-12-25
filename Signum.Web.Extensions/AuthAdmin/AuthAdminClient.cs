@@ -52,8 +52,12 @@ namespace Signum.Web.AuthAdmin
                 }
 
                 if (properties)
+                {
+                    if (!Navigator.Manager.EntitySettings.ContainsKey(typeof(PropertyRouteEntity)))
+                        Navigator.AddSetting(new EntitySettings<PropertyRouteEntity>());
                     Register<PropertyRulePack, PropertyAllowedRule, PropertyRouteEntity, PropertyAllowed, string>("properties", a => a.Resource.Path,
-                        Mapping.New<PropertyAllowed>(), true);
+                    Mapping.New<PropertyAllowed>(), true);
+                }
 
                 if (queries)
                 {
@@ -64,12 +68,22 @@ namespace Signum.Web.AuthAdmin
                 }
 
                 if (operations)
-                    Register<OperationRulePack, OperationAllowedRule, OperationSymbol, OperationAllowed, OperationSymbol>("operations", a => a.Resource,
+                {
+                    if (!Navigator.Manager.EntitySettings.ContainsKey(typeof(OperationSymbol)))
+                        Navigator.AddSetting(new EntitySettings<OperationSymbol>());
+
+                    Register<OperationRulePack, OperationAllowedRule, OperationTypeEmbedded, OperationAllowed, OperationSymbol>("operations", a => a.Resource.Operation,
                         Mapping.New<OperationAllowed>(), true);
+                }
 
                 if (permissions)
+                {
+                    if (!Navigator.Manager.EntitySettings.ContainsKey(typeof(PermissionSymbol)))
+                        Navigator.AddSetting(new EntitySettings<PermissionSymbol>());
+
                     Register<PermissionRulePack, PermissionAllowedRule, PermissionSymbol, bool, PermissionSymbol>("permissions", a => a.Resource,
                         Mapping.New<bool>(), false);
+                }
 
                 LinksClient.RegisterEntityLinks<RoleEntity>((role, ctx) =>
                      !BasicPermission.AdminRules.IsAuthorized() ? null :
@@ -99,11 +113,7 @@ namespace Signum.Web.AuthAdmin
         static void Register<T, AR, R, A, K>(string partialViewName, Expression<Func<AR, K>> getKey, Mapping<A> allowedMapping, bool embedded)
             where T : BaseRulePack<AR>
             where AR : AllowedRule<R, A>, new()
-            where R : Entity
         {
-            if (!Navigator.Manager.EntitySettings.ContainsKey(typeof(R)))
-                Navigator.AddSetting(new EntitySettings<R>());
-
             string viewPrefix = "~/authAdmin/Views/{0}.cshtml";
             Navigator.AddSetting(new ModelEntitySettings<T>
             {

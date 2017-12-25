@@ -424,7 +424,7 @@ namespace Signum.Engine.Word
                     file.BinaryFile = bytes;
 
                     using (replacements.WithReplacedDatabaseName())
-                        return Schema.Current.Table<FileEntity>().UpdateSqlSync(file, comment: "WordTemplate: " + template.Name);
+                        return Schema.Current.Table<FileEntity>().UpdateSqlSync(file, f => f.Hash == file.Hash, comment: "WordTemplate: " + template.Name);
                 }
                 catch (TemplateSyncException ex)
                 {
@@ -433,8 +433,8 @@ namespace Signum.Engine.Word
 
                     if (ex.Result == FixTokenResult.DeleteEntity)
                         return SqlPreCommandConcat.Combine(Spacing.Simple,
-                            Schema.Current.Table<WordTemplateEntity>().DeleteSqlSync(template),
-                            Schema.Current.Table<FileEntity>().DeleteSqlSync(file));
+                            Schema.Current.Table<WordTemplateEntity>().DeleteSqlSync(template, wt => wt.Name == template.Name),
+                            Schema.Current.Table<FileEntity>().DeleteSqlSync(file, f => f.Hash == file.Hash));
 
                     if (ex.Result == FixTokenResult.ReGenerateEntity)
                         return Regenerate(template, replacements);
@@ -500,7 +500,7 @@ namespace Signum.Engine.Word
                 file.BinaryFile = newTemplate.Template.Entity.BinaryFile;
                 file.FileName = newTemplate.Template.Entity.FileName;
 
-                return Schema.Current.Table<FileEntity>().UpdateSqlSync(file, comment: "WordTemplate Regenerated: " + template.Name);
+                return Schema.Current.Table<FileEntity>().UpdateSqlSync(file, f => f.Hash == file.Hash, comment: "WordTemplate Regenerated: " + template.Name);
             }
         }
 

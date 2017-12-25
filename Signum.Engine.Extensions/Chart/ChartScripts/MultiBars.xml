@@ -134,7 +134,7 @@
       .attr('width', function (r) { return x(r.values[s.key] && r.values[s.key].value); })
       .attr('data-click', function (v) { return getClickKeys(v.values[s.key].rowClick, data.columns); })
       .append('svg:title')
-      .text(function(v) { return v.values[s.key].value; });
+      .text(function(v) { return v.values[s.key].valueTitle; });
       
     
       if (ySubscale.bandwidth() > 15 && data.parameters["NumberOpacity"] > 0)
@@ -152,7 +152,7 @@
         .text(function(v) { return v.values[s.key].value; })
         .attr('data-click', function (v) { return getClickKeys(v.values[s.key].rowClick, data.columns); })
         .append('svg:title')
-      	.text(function(v) { return v.values[s.key].value; });
+      	.text(function(v) { return v.values[s.key].valueTitle; });
       }
 	});
       

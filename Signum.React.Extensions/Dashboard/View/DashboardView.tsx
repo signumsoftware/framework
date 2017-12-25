@@ -38,7 +38,7 @@ export default class DashboardView extends React.Component<{ dashboard: Dashboar
                 {
                     mlistItemContext(ctx.subCtx(a => a.parts))
                         .groupBy(c => c.value.row!.toString())
-                        .orderBy(gr => gr.key)
+                        .orderBy(gr => Number(gr.key))
                         .map(gr =>
                             <div className="row row-control-panel" key={"row" + gr.key}>
                                 {gr.elements.orderBy(ctx => ctx.value.startColumn).map((c, j, list) => {
@@ -66,7 +66,7 @@ export default class DashboardView extends React.Component<{ dashboard: Dashboar
 
         var rows = mlistItemContext(ctx.subCtx(a => a.parts))
             .groupBy(c => c.value.row!.toString())
-            .orderBy(g => g.key)
+            .orderBy(g => Number(g.key))
             .map(g => ({
                 columns: g.elements.orderBy(a => a.value.startColumn).map(p => ({
                     startColumn: p.value.startColumn,

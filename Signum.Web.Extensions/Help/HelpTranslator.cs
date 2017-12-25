@@ -39,21 +39,6 @@ namespace Signum.Web.Help
                     AsignTranslatedQuery(query, fromQuery);
                 }
             }
-
-            var operations = OperationLogic.GetAllOperationInfos(entity.Type.ToType()).Select(o=>o.OperationSymbol).ToList();
-
-            foreach (var oper in operations)
-            {
-                var fromOper = Database.Query<OperationHelpEntity>().SingleOrDefaultEx(e => e.Operation == oper && e.Culture == fromCulture);
-
-                if (fromOper != null)
-                {
-                    var operation = Database.Query<OperationHelpEntity>().SingleOrDefaultEx(e => e.Operation == oper && e.Culture == entity.Culture) ??
-                        new OperationHelpEntity { Culture = entity.Culture, Operation = oper };
-
-                    AsignTranslatedOperation(operation, fromOper);
-                }
-            }
         }
 
         private static Dictionary<string, string> Translate(HashSet<string> toTranslate, string fromCulture, string toCulture)
@@ -144,21 +129,7 @@ namespace Signum.Web.Help
 
             query.Execute(QueryHelpOperation.Save);
         }
-
-        static void AsignTranslatedOperation(OperationHelpEntity operation, OperationHelpEntity fromOperation)
-        {
-            HashSet<string> toTranslate = new HashSet<string>();
-            if (!operation.Description.HasText() && fromOperation.Description.HasText())
-                toTranslate.Add(fromOperation.Description);
-
-            Dictionary<string, string> dic = Translate(toTranslate, fromOperation.Culture.Name, operation.Culture.Name);
-
-            if (!operation.Description.HasText() && fromOperation.Description.HasText())
-                operation.Description = dic.GetOrThrow(fromOperation.Description);
-
-            operation.Execute(OperationHelpOperation.Save);
-        }
-
+        
         public static void AsignTranslatedNamespace(this NamespaceHelpEntity @namespace, CultureInfoEntity fromCulture)
         {
             var fromNamespace = Database.Query<NamespaceHelpEntity>().SingleEx(n => n.Name == @namespace.Name && n.Culture == fromCulture);

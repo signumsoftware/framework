@@ -102,8 +102,8 @@ namespace Signum.Entities.Toolbar
         [ImplementedBy(typeof(ToolbarMenuEntity), typeof(UserQueryEntity), typeof(UserChartEntity), typeof(QueryEntity), typeof(DashboardEntity), typeof(PermissionSymbol))]
         public Lite<Entity> Content { get; set; }
 
-        [SqlDbType(Size = 200)]
-        [StringLengthValidator(AllowNulls = true, Min = 3, Max = 200), URLValidator(absolute: true, aspNetSiteRelative: true)]
+        [SqlDbType(Size = int.MaxValue)]
+        [StringLengthValidator(AllowNulls = true, Min = 3, Max = int.MaxValue), URLValidator(absolute: true, aspNetSiteRelative: true)]
         public string Url { get; set; }
 
         public bool OpenInPopup { get; set; }

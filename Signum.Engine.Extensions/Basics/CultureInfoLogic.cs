@@ -70,7 +70,7 @@ namespace Signum.Engine.Basics
             var table = Schema.Current.Table(typeof(CultureInfoEntity));
 
             using (rep.WithReplacedDatabaseName())
-                return cis.Select(c => table.UpdateSqlSync(c)).Combine(Spacing.Double);
+                return cis.Select(c => table.UpdateSqlSync(c, ci => ci.Name == c.Name)).Combine(Spacing.Double);
         }
 
         public static CultureInfoEntity ToCultureInfoEntity(this CultureInfo ci)

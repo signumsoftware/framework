@@ -1,6 +1,7 @@
 ﻿import * as d3 from 'd3'
+import * as numbro from 'numbro'
 import { ClientColorProvider, SchemaMapInfo  } from '../SchemaMap'
-import { colorScale, colorScaleSqr  } from '../../Utils'
+import { colorScale, colorScaleLog  } from '../../Utils'
 import { EntityData, EntityKind } from '../../../../../Framework/Signum.React/Scripts/Reflection'
 import { MapMessage } from '../../Signum.Entities.Map'
 
@@ -39,28 +40,35 @@ export default function getDefaultProviders(info: SchemaMapInfo): ClientColorPro
         getTooltip: t => t.entityData
     };
 
-    const rowsColor = colorScaleSqr(info.tables.filter(a => a.rows != null).map(a => a.rows!).max());
+    const rowsColor = colorScaleLog(info.tables.filter(a => a.rows != null).map(a => a.rows!).max());
     const rows: ClientColorProvider = {
         name: "rows",
         getFill: t => t.rows == null ? "blue" : <any>rowsColor(t.rows),
-        getTooltip: t => t.rows + " " + MapMessage.Rows.niceToString()
+        getTooltip: t => numbro(t.rows).format("0a") + " " + MapMessage.Rows.niceToString()
     };
 
-    const columnsColor = colorScaleSqr(info.tables.map(a => a.columns).max());
+    const columnsColor = colorScaleLog(info.tables.map(a => a.columns).max());
     const columns: ClientColorProvider = {
         name: "columns",
         getFill: t => <any>columnsColor(t.columns),
         getTooltip: t => t.columns + " " + MapMessage.Columns.niceToString()
     };
 
-    const tableSizeColor = colorScaleSqr(info.tables.filter(a => a.total_size_kb != null).map(a => a.total_size_kb!).max());
+    const tableSizeColor = colorScaleLog(info.tables.filter(a => a.total_size_kb != null).map(a => a.total_size_kb!).max());
     const tableSize: ClientColorProvider = {
         name: "tableSize",
         getFill: t => t.total_size_kb == null ? "blue" : <any>tableSizeColor(t.total_size_kb),
-        getTooltip: t => t.total_size_kb + " KB"
+        getTooltip: t => bytesToSize((t.total_size_kb || 0) * 1024)
     };
 
 
     return [namespace, entityKind, entityData, rows, columns, tableSize];
 }
+
+function bytesToSize(bytes : number) : string {
+    var sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
+    if (bytes == 0) return '0 Bytes';
+    var unit = parseInt(Math.floor(Math.log(bytes) / Math.log(1024)) as any);
+    return Math.round((bytes / Math.pow(1024, unit)) * 100) / 100 + ' ' + sizes[unit];
+};
 

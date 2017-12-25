@@ -1,6 +1,0 @@
-﻿@using Signum.Entities.Translation
-@using (var tc = Html.TypeContext<TranslatorUserEntity>())
-{
-    @Html.EntityLine(tc, t => t.User)
-    @Html.EntityRepeater(tc, t => t.Cultures, er => er.Move = true)
-}

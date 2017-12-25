@@ -150,5 +150,11 @@ namespace Signum.Entities.Files
 
             this.GetPrefixPair();
         }
+
+        public static Func<FilePathEmbedded, FilePathEmbedded> CloneFunc;
+        internal FilePathEmbedded Clone()
+        {
+            return CloneFunc(this);
+        }
     }
 }

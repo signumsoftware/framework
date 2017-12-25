@@ -19,7 +19,6 @@ export interface UserChartMenuProps {
 
 interface UserChartMenuState {
     currentUserChart?: UserChartEntity;
-    userCharts?: Lite<UserChartEntity>[];
     isOpen: boolean;
 }
 
@@ -29,7 +28,6 @@ export default class UserChartMenu extends React.Component<UserChartMenuProps, U
     constructor(props: UserChartMenuProps) {
         super(props);
         this.state = {
-            currentUserChart: props.chartRequestView.props.userChart,
             isOpen: false
         };
     }
@@ -48,23 +46,39 @@ export default class UserChartMenu extends React.Component<UserChartMenuProps, U
             .then(list => this.setState({ userCharts: list }));
     }
 
+    componentWillMount() {
+        this.loadString();
+    }
+
+    componentWillUpdate() {
+        this.loadString();
+    }
+
+    loadString() {
+        var uc = this.props.chartRequestView.props.userChart;
+        if (uc && uc.toStr == null) {
+            Navigator.API.fillToStrings(uc)
+                .then(() => this.forceUpdate())
+                .done();
+        }
+    }
 
     handleSelect = (uc: Lite<UserChartEntity>) => {
 
+        var crv = this.props.chartRequestView;
+
         Navigator.API.fetchAndForget(uc).then(userChart => {
-            const chartRequest = this.props.chartRequestView.props.chartRequest!;
+            const chartRequest = crv.props.chartRequest!;
             UserChartClient.Converter.applyUserChart(chartRequest, userChart, undefined)
-                .then(newChartRequest => {
-                    this.props.chartRequestView.props.onChange(newChartRequest);
-                    this.setState({ currentUserChart: userChart, });
-                })
+                .then(newChartRequest => crv.setState({ chartResult: undefined, lastChartRequest: undefined },
+                    () => crv.props.onChange(newChartRequest, toLite(userChart))))
                 .done();
         }).then();
     }
 
     handleEdit = () => {
-        Navigator.API.fetchAndForget(toLite(this.state.currentUserChart!))
-            .then(userQuery => Navigator.navigate(userQuery))
+        Navigator.API.fetchAndForget(this.props.chartRequestView.props.userChart!)
+            .then(userChart => Navigator.navigate(userChart))
             .then(() => this.reloadList())
             .done();
     }
@@ -72,12 +86,16 @@ export default class UserChartMenu extends React.Component<UserChartMenuProps, U
 
     handleCreate = () => {
 
-        UserChartClient.API.fromChartRequest(this.props.chartRequestView.props.chartRequest!)
-            .then(userQuery => Navigator.view(userQuery))
+        var crView = this.props.chartRequestView;
+
+        var cr = crView.props.chartRequest!;
+
+        UserChartClient.API.fromChartRequest(cr)
+            .then(userChart => Navigator.view(userChart))
             .then(uc => {
                 if (uc && uc.id) {
                     this.reloadList()
-                        .then(() => this.setState({ currentUserChart: uc}))
+                        .then(() => crView.props.onChange(cr, toLite(uc)))
                         .done();
                 }
             }).done();
@@ -86,21 +104,25 @@ export default class UserChartMenu extends React.Component<UserChartMenuProps, U
     render() {
         const label = <span><i className="fa fa-bar-chart"></i> &nbsp; {UserChartEntity.nicePluralName()}</span>;
         const userCharts = this.state.userCharts;
+        const crView = this.props.chartRequestView;
+        const labelText = !crView.props.userChart ? UserChartEntity.nicePluralName() : crView.props.userChart.toStr
+
+        const label = <span><i className="glyphicon glyphicon-stats"></i> &nbsp; {labelText}</span>;
         return (
             <ButtonDropdown title={label as any} id="userQueriesDropDown" className="sf-userquery-dropdown"
                 toggle={this.handleSelectedToggle} isOpen={this.state.isOpen}>
                 {
                     userCharts && userCharts.map((uc, i) =>
                         <DropdownItem key={i}
-                            className={classes("sf-userquery", is(uc, this.state.currentUserChart) && "active") }
+                            className={classes("sf-userquery", is(uc, crView.props.userChart) && "active")}
                             onSelect={() => this.handleSelect(uc) }>
                             { uc.toStr }
                         </DropdownItem>)
                 }
                 { userCharts && userCharts.length > 0 && <DropdownItem divider/> }
-                { this.state.currentUserChart && <DropdownItem onSelect={this.handleEdit} >{ChartMessage.EditUserChart.niceToString() }</DropdownItem> }
+                { crView.props.userChart && <DropdownItem onSelect={this.handleEdit}>{ChartMessage.EditUserChart.niceToString() }</DropdownItem> }
                 <DropdownItem onSelect={this.handleCreate}>{ChartMessage.CreateNew.niceToString() }</DropdownItem>
-            </ButtonDropdown>
+            </DropdownButton>
         );
     }
  

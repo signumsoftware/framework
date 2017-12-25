@@ -32,7 +32,7 @@ namespace Signum.Web.Translation
 
 
         /// <param name="copyTranslationsToRootFolder">avoids Web Application restart when translations change</param>
-        public static void Start(ITranslator translator, bool translatorUser, bool translationReplacement, bool instanceTranslator, bool copyNewTranslationsToRootFolder = true)
+        public static void Start(ITranslator translator, bool translationReplacement, bool instanceTranslator, bool copyNewTranslationsToRootFolder = true)
         {
             if (Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))
             {
@@ -41,15 +41,6 @@ namespace Signum.Web.Translation
                 Translator = translator;
 
                 Navigator.RegisterArea(typeof(TranslationClient));
-
-                if (translatorUser)
-                {
-                    Navigator.AddSettings(new List<EntitySettings>
-                    {
-                        new EntitySettings<TranslatorUserEntity>{ PartialViewName = t=>ViewPrefix.FormatWith("TranslatorUser")},
-                        new EmbeddedEntitySettings<TranslatorUserCultureEmbedded>{ PartialViewName = t=>ViewPrefix.FormatWith("TranslatorUserCulture")},
-                    });
-                }
 
                 if (translationReplacement)
                 {

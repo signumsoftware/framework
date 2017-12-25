@@ -64,14 +64,19 @@ export class ValueUserQueryElement extends React.Component<ValueUserQueryElement
     render(){
 
         const ctx = this.props.ctx;
+        const ctx2 = ctx.subCtx({ formGroupStyle: "SrOnly" });
 
         if (!this.state.fo)
             return <span>{ JavascriptMessage.loading.niceToString() }</span>;
 
         return (
             <div>
-                <span>{ctx.value.label || getQueryNiceName(this.state.fo.queryName)}</span>&nbsp;
-                <ValueSearchControlLine ctx={ctx} findOptions={this.state.fo} />
+                <FormGroup ctx={ctx} labelText={ctx.value.label || getQueryNiceName(this.state.fo.queryName)}>
+                    <span className="form-inline">
+                        <span>{ctx.value.label || getQueryNiceName(this.state.fo.queryName)}</span>&nbsp;
+                        <ValueSearchControlLine ctx={ctx2} findOptions={this.state.fo} />
+                    </span>
+                </FormGroup>
             </div>             
         );
     }   

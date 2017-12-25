@@ -86,6 +86,7 @@
       .attr("width", function(d) { return d.width; })
       .attr("height", function(d) { return d.height;})
       .style("fill", function(d) { return  d.data.folder.color || folderColor(d.data.folder); })    
+      .attr('data-click', function(p) { return getClickKeys({c2: p.data.folder}, data.columns); })
       .append('svg:title')
       .text(function(d) { return  d.data.folder.niceToString();});
   

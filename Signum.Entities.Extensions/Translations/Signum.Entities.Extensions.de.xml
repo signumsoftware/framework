@@ -1,7 +1,15 @@
 ﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <Translations>
-  <Type Name="ActivationFunction" />
-  <Type Name="ActivityWithRemarks" />
+  <Type Name="AccordPredictorAlgorithm" />
+  <Type Name="ActivityWithRemarks" Description="Aktivität mit Bemerkungen">
+    <Member Name="alerts" Description="Warnungen" />
+    <Member Name="case" Description="Vorgang" />
+    <Member Name="caseActivity" Description="Vorgangsaktivität" />
+    <Member Name="notification" Description="Benachrichtigung" />
+    <Member Name="remarks" Description="Bemerkungen" />
+    <Member Name="tags" Description="Tags" />
+    <Member Name="workflowActivity" Description="Workflow-Aktivität" />
+  </Type>
   <Type Name="AlertCurrentState" Description="Aktueller Status der Warnung">
     <Member Name="Alerted" Description="Gewarnte" />
     <Member Name="Attended" Description="Erledigte" />
@@ -19,6 +27,7 @@
     <Member Name="CurrentState" Description="Aktueller Status" />
     <Member Name="Future" Description="Zukünftige" />
     <Member Name="NotAttended" Description="Nicht erledigte" />
+    <Member Name="Recipient" Description="Empfänger" />
     <Member Name="State" Description="Status" />
     <Member Name="Target" Description="Ziel" />
     <Member Name="Text" Description="Text" />
@@ -32,13 +41,17 @@
     <Member Name="Alerts_NotAttended" Description="Nicht erledigte" />
     <Member Name="CheckedAlerts" Description="Erledigte" />
     <Member Name="CreateAlert" Description="Warnung erstellen" />
+    <Member Name="CustomDelay" Description="Benutzerdefinierte Verzögerung" />
+    <Member Name="DelayDuration" Description="Dauer der Verzögerung" />
     <Member Name="FutureAlerts" Description="Zukünftige" />
+    <Member Name="MyActiveAlerts" Description="Meine aktiven Warnungen" />
     <Member Name="NewAlert" Description="Neue Warnung" />
     <Member Name="WarnedAlerts" Description="Gewarnte" />
   </Type>
   <Type Name="AlertOperation">
     <Member Name="Attend" Description="Erledigen" />
     <Member Name="CreateAlertFromEntity" Description="Warnung aus Entität erstellen" />
+    <Member Name="Delay" Description="Verzögerung" />
     <Member Name="Save" Description="Speichern" />
     <Member Name="Unattend" Description="Unerledigt bleiben" />
   </Type>
@@ -73,15 +86,23 @@
     <Member Name="ViewAsyncEmailSenderPanel" Description="E-Mail-Absender Ansichtsbereich async" />
   </Type>
   <Type Name="AuthAdminMessage">
+    <Member Name="_0InDB" Description="{0} (nur in DB)" />
+    <Member Name="_0InUI" Description="{0} (im UI)" />
     <Member Name="_0of1" Description="{0} von {1}" />
     <Member Name="Allow" Description="Erlauben" />
+    <Member Name="CanNotBeModified" Description="Kann nicht geändert werden" />
+    <Member Name="CanNotBeModifiedBecauseIsA0" Description="Kann nicht geändert werden, da es ein {0} ist." />
+    <Member Name="CanNotBeModifiedBecauseIsNotA0" Description="Kann nicht geändert werden, da es kein {0} ist." />
     <Member Name="Deny" Description="Verweigern" />
     <Member Name="Everything" Description="Alles" />
+    <Member Name="Filter" Description="Filter" />
     <Member Name="NoRoles" Description="Keine Rollen" />
     <Member Name="Nothing" Description="Nichts" />
     <Member Name="Overriden" Description="Überschrieben" />
     <Member Name="PermissionRules" Description="Berechtigungsregeln" />
     <Member Name="PleaseSaveChangesFirst" Description="Bitte erst Änderungen speichern" />
+    <Member Name="ResetChanges" Description="Zurücksetzen von Änderungen" />
+    <Member Name="SwitchTo" Description="Wechseln Sie zu" />
     <Member Name="TypeRules" Description="Typregeln" />
   </Type>
   <Type Name="AuthEmailMessage">
@@ -101,12 +122,14 @@
     <Member Name="ChangePasswordAspx_ActualPassword" Description="Aktuelles Passwort" />
     <Member Name="ChangePasswordAspx_ChangePassword" Description="Passwort ändern" />
     <Member Name="ChangePasswordAspx_ConfirmNewPassword" Description="Neues Passwort bestätigen" />
+    <Member Name="ChangePasswordAspx_EnterActualPasswordAndNewOne" Description="Geben Sie Ihr aktuelles, sowie das neue Passwort ein" />
     <Member Name="ChangePasswordAspx_NewPassword" Description="Neues Passwort" />
     <Member Name="ConfirmNewPassword" Description="Passwort bestätigen" />
     <Member Name="Email" Description="E-Mail" />
     <Member Name="EmailMustHaveAValue" Description="Die E-Mail muss einen Wert haben" />
     <Member Name="EmailSent" Description="E-Mail gesendet" />
     <Member Name="EnterTheNewPassword" Description="Geben Sie das neue Passwort ein" />
+    <Member Name="EnterYourUserNameAndPassword" Description="Geben Sie Ihren Benutzernamen und Ihr Passwort ein." />
     <Member Name="EntityGroupsAscx_EntityGroup" Description="Entitätsgruppe" />
     <Member Name="EntityGroupsAscx_Overriden" Description="Überschrieben" />
     <Member Name="ExpectedUserLogged" Description="Es wurde erwartet, dass sich ein Benutzer anmeldet" />
@@ -173,7 +196,10 @@
     <Member Name="Mix" Description="Mix" />
     <Member Name="None" Description="Keine" />
   </Type>
-  <Type Name="AuthTokenConfigurationEmbedded" />
+  <Type Name="AuthTokenConfigurationEmbedded" Description="Auth-token-Konfiguration">
+    <Member Name="RefreshAnyTokenPreviousTo" Description="Aktualisieren Sie alle Token bis zu" />
+    <Member Name="RefreshTokenEvery" Description="Aktualisieren Sie jeden Token" />
+  </Type>
   <Type Name="BaseRulePack`1">
     <Member Name="Role" Description="Rolle" />
     <Member Name="Rules" Description="Regeln" />
@@ -364,6 +390,7 @@
     <Member Name="CreatePalette" Description="Palette erstellen" />
     <Member Name="Data" Description="Daten" />
     <Member Name="DeletePalette" Description="Palette löschen" />
+    <Member Name="DrawChart" Description="Diagramm chart" />
     <Member Name="EditScript" Description="Skript bearbeiten" />
     <Member Name="EditUserChart" Description="Benutzerdiagramm bearbeiten" />
     <Member Name="MyCharts" Description="Meine Charts" />
@@ -430,12 +457,14 @@
     <Member Name="CertFileType" Description="Zertifikationsdateityp" />
     <Member Name="FullFilePath" Description="Vollständiger Pfad" />
   </Type>
+  <Type Name="CNTKPredictorAlgorithm" />
   <Type Name="CSharpMigrationEntity" Description="C-sharp-Migration">
     <Member Name="ExecutionDate" Description="Ausführungsdatum" />
     <Member Name="UniqueName" Description="Einzigartiger Name" />
   </Type>
   <Type Name="CultureInfoEntity" Description="Kulturinfo" PluralDescription="Kulturinfos" Gender="f">
     <Member Name="EnglishName" Description="Englischer Name" />
+    <Member Name="Hidden" Description="Versteckt" />
     <Member Name="Name" Description="Name" />
     <Member Name="NativeName" Description="Nativer Name" />
   </Type>
@@ -449,6 +478,7 @@
   </Type>
   <Type Name="DashboardEntity" Description="Dashboard">
     <Member Name="AutoRefreshPeriod" Description="Autoaktualisierungszeitraum" />
+    <Member Name="CombineSimilarRows" Description="Ähnliche Zeilen kombinieren" />
     <Member Name="DashboardPriority" Description="Dashboard-Priorität" />
     <Member Name="DisplayName" Description="Name" />
     <Member Name="EmbeddedInEntity" Description="Eingebettet in Entität" />
@@ -496,7 +526,15 @@
     <Member Name="End" Description="Ende" />
     <Member Name="Start" Description="Start" />
   </Type>
-  <Type Name="DelayOption" />
+  <Type Name="DelayOption">
+    <Member Name="_15Mins" Description="15 Minuten" />
+    <Member Name="_1Day" Description="1 Tag" />
+    <Member Name="_1Hour" Description="1 Stunde" />
+    <Member Name="_2Hours" Description="2 Stunden" />
+    <Member Name="_30Mins" Description="30 Minuten" />
+    <Member Name="_5Mins" Description="5 Minuten" />
+    <Member Name="Custom" Description="Benutzerdefiniert" />
+  </Type>
   <Type Name="DiffLogMessage">
     <Member Name="CurrentEntity" Description="Aktuelle Entität" />
     <Member Name="DifferenceBetweenFinalStateAndTheCurrentStateOfTheEntity" Description="Unterschied zwischen Endstatus und dem aktuellen Status der Entität" />
@@ -516,9 +554,16 @@
     <Member Name="FinalState" Description="Endstatus" />
     <Member Name="InitialState" Description="Ausgangsstatus" />
   </Type>
-  <Type Name="DisabledMessage" />
-  <Type Name="DisabledMixin" />
-  <Type Name="DisableOperation" />
+  <Type Name="DisabledMessage">
+    <Member Name="ParentIsDisabled" Description="Elternteil ist deaktiviert" />
+  </Type>
+  <Type Name="DisabledMixin">
+    <Member Name="IsDisabled" Description="Ist deaktiviert" />
+  </Type>
+  <Type Name="DisableOperation">
+    <Member Name="Disable" Description="Deaktivieren" />
+    <Member Name="Enabled" Description="Aktiviert" />
+  </Type>
   <Type Name="DisconnectedCreatedMixin">
     <Member Name="DisconnectedCreated" Description="Getrennt erstellt" />
   </Type>
@@ -543,7 +588,11 @@
     <Member Name="Error" Description="Fehler" />
     <Member Name="InProgress" Description="In Bearbeitung" />
   </Type>
-  <Type Name="DisconnectedExportTableEmbedded" />
+  <Type Name="DisconnectedExportTableEmbedded" Description="Getrennte Exporttabelle">
+    <Member Name="CopyTable" Description="Tabelle kopieren" />
+    <Member Name="Errors" Description="Fehler" />
+    <Member Name="Type" Description="Typ" />
+  </Type>
   <Type Name="DisconnectedImportEntity" Description="getrennte Import" PluralDescription="getrennte Importe">
     <Member Name="Copies" Description="Kopien" />
     <Member Name="CreationDate" Description="Erstellungsdatum" />
@@ -611,14 +660,18 @@
     <Member Name="Timeout" Description="Timeout" />
   </Type>
   <Type Name="DynamicBaseType" Description="Dynamische Basistyp">
+    <Member Name="EmbeddedEntity" Description="Eingebettete Entität" />
     <Member Name="Entity" Description="Entität" />
+    <Member Name="MixinEntity" Description="Mixin Entität" />
   </Type>
   <Type Name="DynamicExpressionEntity" Description="Dynamischen Ausdruck" PluralDescription="Dynamischen Ausdrücke">
     <Member Name="Body" Description="Körper" />
+    <Member Name="Format" Description="Format" />
     <Member Name="FromType" Description="Vom Typ" />
     <Member Name="Name" Description="Name" />
     <Member Name="ReturnType" Description="Rückgabetyp" />
     <Member Name="Translation" Description="Übersetzung" />
+    <Member Name="Unit" Description="Einheit" />
   </Type>
   <Type Name="DynamicExpressionOperation">
     <Member Name="Clone" Description="Klonen" />
@@ -691,6 +744,7 @@
     <Member Name="DynamicType0SucessfullySavedGoToDynamicPanelNow" Description="DynamicType &quot;{0}&quot; erfolgreich gespeichert. Zum DynamicPanel wechseln?" />
     <Member Name="RemoveSaveOperation" Description="Speichervorgang entfernen?" />
     <Member Name="ServerRestartedWithErrorsInDynamicCodeFixErrorsAndRestartAgain" Description="Server hat mit Fehlern im dynamischen Code neu gestartet. Beheben Sie die Fehler, und starten Sie nochmals neu." />
+    <Member Name="TheEntityShouldBeSynchronizedToApplyMixins" Description="Um Mixis anwenden zu können sollte die Entität synchronisiert werden." />
   </Type>
   <Type Name="DynamicTypeOperation">
     <Member Name="Clone" Description="Klonen" />
@@ -739,6 +793,7 @@
   <Type Name="DynamicViewOverrideEntity" Description="Dynamische Ansicht überschreiben">
     <Member Name="EntityType" Description="Entitätstyp" />
     <Member Name="Script" Description="Skript" />
+    <Member Name="ViewName" Description="Ansichtsname" />
   </Type>
   <Type Name="DynamicViewOverrideOperation">
     <Member Name="Delete" Description="Löschen" />
@@ -841,6 +896,7 @@
     <Member Name="To" Description="An" />
   </Type>
   <Type Name="EmailMessageOperation">
+    <Member Name="CreateEmailFromTemplate" Description="E-Mail aus Vorlage erstellen" />
     <Member Name="CreateMail" Description="Mail erstellen" />
     <Member Name="Delete" Description="Löschen" />
     <Member Name="ReadyToSend" Description="Zum Senden bereit" />
@@ -873,7 +929,14 @@
   <Type Name="EmailPackageEntity" Description="E-Mail-Paket">
     <Member Name="Name" Description="Name" />
   </Type>
-  <Type Name="EmailReceptionInfoEmbedded" />
+  <Type Name="EmailReceptionInfoEmbedded" Description="E-Mail-Empfangsinfo">
+    <Member Name="DeletionDate" Description="Löschdatum" />
+    <Member Name="RawContent" Description="Rohen Inhalt" />
+    <Member Name="ReceivedDate" Description="Empfangsdatum" />
+    <Member Name="Reception" Description="Empfang" />
+    <Member Name="SentDate" Description="Sendedatum" />
+    <Member Name="UniqueId" Description="Eindeutige id" />
+  </Type>
   <Type Name="EmailReceptionMixin">
     <Member Name="ReceptionInfo" Description="Empfangsinfo" />
   </Type>
@@ -891,6 +954,7 @@
     <Member Name="Token" Description="Token" />
   </Type>
   <Type Name="EmailTemplateEntity" Description="E-Mail-Vorlage">
+    <Member Name="Applicable" Description="Anwendbar" />
     <Member Name="Attachments" Description="Anlagen" />
     <Member Name="DisableAuthorization" Description="Autorisierung deaktivieren" />
     <Member Name="EditableMessage" Description="Bearbeitbare Nachricht" />
@@ -907,6 +971,7 @@
   <Type Name="EmailTemplateMessage">
     <Member Name="EndDateMustBeHigherThanStartDate" Description="Enddatum muss größer als Startdatum sein." />
     <Member Name="HidePreview" Description="Vorschau verstecken" />
+    <Member Name="ImpossibleToAccess0BecauseTheTemplateHAsNo1" Description="Unmöglich auf {0} zuzugreifen, da die Vorlage kein {1} hat" />
     <Member Name="NewCulture" Description="Neue Kultur" />
     <Member Name="ShowPreview" Description="Vorschau anzeigen" />
     <Member Name="ThereAreNoMessagesForTheTemplate" Description="Es gibt keine Nachrichten für die Vorlage" />
@@ -925,6 +990,7 @@
   <Type Name="EmailTemplateOperation">
     <Member Name="Create" Description="Erstellen" />
     <Member Name="CreateEmailTemplateFromSystemEmail" Description="E-Mail-Vorlage von System-E-Mail erstellen" />
+    <Member Name="Delete" Description="Löschen" />
     <Member Name="Save" Description="Speichern" />
   </Type>
   <Type Name="EmailTemplateRecipientEntity" Description="Empfänger E-Mail-Vorlage">
@@ -952,7 +1018,9 @@
   <Type Name="EntityHelpOperation">
     <Member Name="Save" Description="Speichern" />
   </Type>
-  <Type Name="EvalEmbedded`1" />
+  <Type Name="EvalEmbedded`1">
+    <Member Name="Script" Description="Skript" />
+  </Type>
   <Type Name="ExcelAttachmentEntity" Description="Excel-Anlage">
     <Member Name="FileName" Description="Dateiname" />
     <Member Name="Related" Description="In Beziehung mit" />
@@ -1140,7 +1208,12 @@
   <Type Name="IEmailOwnerEntity">
     <Member Name="EmailOwnerData" Description="E-Mailbesitzerdaten" />
   </Type>
-  <Type Name="ImageAttachmentEntity" />
+  <Type Name="ImageAttachmentEntity" Description="Bild-Anhang" PluralDescription="Bild-Anhänge" Gender="m">
+    <Member Name="ContentId" Description="Content-id" />
+    <Member Name="File" Description="Datei" />
+    <Member Name="FileName" Description="Dateiname" />
+    <Member Name="Type" Description="Typ" />
+  </Type>
   <Type Name="InboxFilterModel" Description="Posteingangs-filter">
     <Member Name="FromDate" Description="Vom Datum" />
     <Member Name="Range" Description="Bereich" />
@@ -1150,16 +1223,25 @@
   <Type Name="InboxMessage">
     <Member Name="Activity" Description="Aktivität" />
     <Member Name="Clear" Description="Löschen" />
+    <Member Name="Filters" Description="Filter" />
     <Member Name="Sender" Description="Sender" />
     <Member Name="SenderNote" Description="Sender Notiz" />
   </Type>
-  <Type Name="InsertPlace" />
+  <Type Name="InsertPlace" Description="Platz einfügen">
+    <Member Name="After" Description="Nach" />
+    <Member Name="Before" Description="Vor" />
+    <Member Name="FirstNode" Description="Erster Knoten" />
+    <Member Name="LastNode" Description="Letzter Knoten" />
+  </Type>
   <Type Name="IPartEntity">
     <Member Name="RequiresTitle" Description="Erfordert Titel" />
   </Type>
+  <Type Name="IPredictorAlgorithmSettings" />
   <Type Name="IProcessDataEntity" />
   <Type Name="IProcessLineDataEntity" />
-  <Type Name="IScheduleRuleEntity" />
+  <Type Name="IScheduleRuleEntity">
+    <Member Name="StartingOn" Description="Beginnend am" />
+  </Type>
   <Type Name="IsolationEntity" Description="Isolierung">
     <Member Name="Name" Description="Name" />
   </Type>
@@ -1176,11 +1258,15 @@
   </Type>
   <Type Name="ITaskEntity" />
   <Type Name="ITaskMessage">
+    <Member Name="ExceptionLines" Description="Ausnahmezeilen" />
     <Member Name="Execute" Description="Ausführen" />
     <Member Name="Executions" Description="Ausführungen" />
     <Member Name="LastExecution" Description="Letzte Ausführung" />
   </Type>
-  <Type Name="ITaskOperation" />
+  <Type Name="ITaskOperation">
+    <Member Name="ExecuteAsync" Description="Ausführen von asynchronen" />
+    <Member Name="ExecuteSync" Description="Sync ausführen" />
+  </Type>
   <Type Name="IUserAssetEntity">
     <Member Name="Guid" Description="Guid" />
   </Type>
@@ -1257,9 +1343,6 @@
     <Member Name="Continuous" Description="Kontinuierlich" />
     <Member Name="Single" Description="Einzeln" />
   </Type>
-  <Type Name="LastAuthRulesImportEntity" Description="Letzte Authregeln importieren" Gender="f">
-    <Member Name="Date" Description="Datum" />
-  </Type>
   <Type Name="LinkElementEmbedded" Description="Linkelement">
     <Member Name="Label" Description="Etikett" />
     <Member Name="Link" Description="Link" />
@@ -1268,7 +1351,15 @@
     <Member Name="Links" Description="Links" />
     <Member Name="RequiresTitle" Description="Erfordert Titel" />
   </Type>
-  <Type Name="LoadMethodLogEntity" />
+  <Type Name="LoadMethodLogEntity" Description="Log für Load-Methode" PluralDescription="Logs für Load-Methoden" Gender="n">
+    <Member Name="ClassName" Description="Klassen Name" />
+    <Member Name="Description" Description="Beschreibung" />
+    <Member Name="Duration" Description="Dauer" />
+    <Member Name="End" Description="Ende" />
+    <Member Name="Exception" Description="Ausnahme" />
+    <Member Name="MethodName" Description="Methodenname" />
+    <Member Name="Start" Description="Start" />
+  </Type>
   <Type Name="MapMessage">
     <Member Name="Color" Description="Farbe" />
     <Member Name="Columns" Description="Spalten" />
@@ -1294,14 +1385,21 @@
     <Member Name="NotAllowed" Description="Nicht erlaubt" />
     <Member Name="TextPruning" Description="Text beschneiden" />
   </Type>
-  <Type Name="ModelConverterSymbol" />
-  <Type Name="MoveTreeModel" />
-  <Type Name="MultiEntityModel" />
+  <Type Name="ModelConverterSymbol" Description="Modell-Konverter" Gender="m" />
+  <Type Name="MoveTreeModel" Description="Bewege Baum">
+    <Member Name="InsertPlace" Description="Platz einfügen" />
+    <Member Name="NewParent" Description="Neuer parent" />
+    <Member Name="Sibling" Description="Geschwister" />
+  </Type>
+  <Type Name="MultiEntityModel" Description="Multi-Entität">
+    <Member Name="Entities" Description="Entitäten" />
+  </Type>
   <Type Name="MultipleSMSModel" Description="Mehrere SMS">
     <Member Name="Certified" Description="Zertifiziert" />
     <Member Name="From" Description="Von" />
     <Member Name="Message" Description="Nachricht" />
   </Type>
+  <Type Name="NaiveBayesSettingsEntity" />
   <Type Name="NamespaceHelpEntity" Description="Namespacehilfe" PluralDescription="Namespacehilfen" Gender="f">
     <Member Name="Culture" Description="Kultur" />
     <Member Name="Description" Description="Beschreibung" />
@@ -1311,7 +1409,7 @@
   <Type Name="NamespaceHelpOperation">
     <Member Name="Save" Description="Speichern" />
   </Type>
-  <Type Name="NeuronalNetworkSettingsEntity" />
+  <Type Name="NeuralNetworkSettingsEntity" />
   <Type Name="NewsletterDeliveryEntity" Description="Newsletter-Versand" Gender="m">
     <Member Name="Newsletter" Description="Newsletter" />
     <Member Name="Recipient" Description="Empfänger" />
@@ -1394,15 +1492,15 @@
     <Member Name="None" Description="Keine" />
   </Type>
   <Type Name="OperationAllowedRule" Description="Erlaubte Operationsregel" />
-  <Type Name="OperationHelpEntity" Description="Operationshilfe" PluralDescription="Operationshilfen">
-    <Member Name="Culture" Description="Kultur" />
+  <Type Name="OperationHelpEmbedded" Description="Hilfe zur Operation">
     <Member Name="Description" Description="Beschreibung" />
     <Member Name="Operation" Description="Operation" />
   </Type>
-  <Type Name="OperationHelpOperation">
-    <Member Name="Save" Description="Speichern" />
-  </Type>
   <Type Name="OperationRulePack" Description="Operationsregelpack">
+    <Member Name="Type" Description="Typ" />
+  </Type>
+  <Type Name="OperationTypeEmbedded" Description="Vorgangstyp">
+    <Member Name="Operation" Description="Operation" />
     <Member Name="Type" Description="Typ" />
   </Type>
   <Type Name="PackageEntity" Description="Paket" PluralDescription="Pakete" Gender="n">
@@ -1424,6 +1522,8 @@
   <Type Name="PanelPartEmbedded" Description="Dashboardteil">
     <Member Name="Columns" Description="Spalten" />
     <Member Name="Content" Description="Inhalt" />
+    <Member Name="IconColor" Description="Symbolfarbe" />
+    <Member Name="IconName" Description="Symbolname" />
     <Member Name="Row" Description="Zeile" />
     <Member Name="StartColumn" Description="Spalte Start" />
     <Member Name="Style" Description="Stil" />
@@ -1456,6 +1556,7 @@
     <Member Name="ClientCertificationFiles" Description="Klientzertfikatsdateien" />
     <Member Name="DeleteMessagesAfter" Description="Nachrichten löschen nach" />
     <Member Name="EnableSSL" Description="SSL aktivieren" />
+    <Member Name="FullComparation" Description="Voller vergleich" />
     <Member Name="Host" Description="Host" />
     <Member Name="Password" Description="Passwort" />
     <Member Name="Port" Description="Port" />
@@ -1477,13 +1578,24 @@
     <Member Name="Exception" Description="Ausnahme" />
     <Member Name="Reception" Description="Empfang" />
   </Type>
+  <Type Name="PredictionType" />
+  <Type Name="PredictorAlgorithmSymbol" />
+  <Type Name="PredictorClassificationMetricsEmbedded" />
+  <Type Name="PredictorCodificationEntity" />
   <Type Name="PredictorColumnEmbedded" />
-  <Type Name="PredictorColumnType" />
+  <Type Name="PredictorColumnEncoding" />
   <Type Name="PredictorColumnUsage" />
   <Type Name="PredictorEntity" />
+  <Type Name="PredictorEpochProgressEntity" />
+  <Type Name="PredictorFileType" />
+  <Type Name="PredictorGroupKeyEmbedded" />
+  <Type Name="PredictorMainQueryEmbedded" />
   <Type Name="PredictorMessage" />
-  <Type Name="PredictorMultiColumnEntity" />
   <Type Name="PredictorOperation" />
+  <Type Name="PredictorRegressionMetricsEmbedded" />
+  <Type Name="PredictorSettingsEmbedded" />
+  <Type Name="PredictorState" />
+  <Type Name="PredictorSubQueryEntity" />
   <Type Name="PrintLineEntity" Description="Zeile drucken">
     <Member Name="CreationDate" Description="Erstellungsdatum" />
     <Member Name="File" Description="Datei" />
@@ -1491,16 +1603,22 @@
     <Member Name="PrintedOn" Description="Gedruckt auf" />
     <Member Name="Referred" Description="Verbunden" />
     <Member Name="State" Description="Status" />
+    <Member Name="TestFileType" Description="Testdatei Typ" />
   </Type>
   <Type Name="PrintLineOperation">
     <Member Name="Cancel" Description="Abbrechen" />
+    <Member Name="CreateTest" Description="Test erstellen" />
     <Member Name="Print" Description="Drucken" />
     <Member Name="Retry" Description="Nochmals versuchen" />
+    <Member Name="SaveTest" Description="Test speichern" />
   </Type>
   <Type Name="PrintLineState" Description="Drucklinienstatus">
     <Member Name="Cancelled" Description="Abgebrochen" />
+    <Member Name="Enqueued" Description="Warteschlange" />
     <Member Name="Error" Description="Fehler" />
+    <Member Name="NewTest" Description="Neuer test" />
     <Member Name="Printed" Description="Gedruckt" />
+    <Member Name="PrintedAndDeleted" Description="Ausgedruckt und gelöscht" />
     <Member Name="ReadyToPrint" Description="Bereit zum Drucken" />
   </Type>
   <Type Name="PrintPackageEntity" Description="Druckpaket">
@@ -1512,7 +1630,9 @@
   <Type Name="PrintPermission">
     <Member Name="ViewPrintPanel" Description="Druckerbedienfeld öffnen" />
   </Type>
-  <Type Name="PrintTask" />
+  <Type Name="PrintTask">
+    <Member Name="RemoveOldFiles" Description="Alte Dateien entfernen" />
+  </Type>
   <Type Name="ProcessAlgorithmSymbol" Description="Prozess-Algorithmus" PluralDescription="Prozess-Algorithmen" Gender="m" />
   <Type Name="ProcessEntity" Description="Prozess" PluralDescription="Prozesse" Gender="m">
     <Member Name="Algorithm" Description="Algorithmus" />
@@ -1530,10 +1650,12 @@
     <Member Name="Progress" Description="Fortschritt" />
     <Member Name="QueuedDate" Description="Warteschlangendatum" />
     <Member Name="State" Description="Status" />
+    <Member Name="Status" Description="Status" />
     <Member Name="SuspendDate" Description="Aussetzungsdatum" />
     <Member Name="User" Description="Benutzer" />
   </Type>
   <Type Name="ProcessExceptionLineEntity" Description="Prozessausnahmezeile" PluralDescription="Prozessausnahmezeilen" Gender="f">
+    <Member Name="ElementInfo" Description="Elementinfo" />
     <Member Name="Exception" Description="Ausnahme" />
     <Member Name="Line" Description="Zeile" />
     <Member Name="Process" Description="Prozess" />
@@ -1586,7 +1708,11 @@
   <Type Name="PropertyRulePack" Description="Eigenschaftsregelpack">
     <Member Name="Type" Description="Typ" />
   </Type>
-  <Type Name="QueryAllowed" />
+  <Type Name="QueryAllowed">
+    <Member Name="Allow" Description="Erlauben" />
+    <Member Name="EmbeddedOnly" Description="Nur eingebettet" />
+    <Member Name="None" Description="Keine" />
+  </Type>
   <Type Name="QueryAllowedRule" Description="Erlaubte Abfrageregel" />
   <Type Name="QueryColumnEmbedded" Description="Abfrage-Spalte">
     <Member Name="DisplayName" Description="Angezeigter Name" />
@@ -1611,8 +1737,15 @@
   <Type Name="QueryHelpOperation">
     <Member Name="Save" Description="Speichern" />
   </Type>
-  <Type Name="QueryModel" />
-  <Type Name="QueryModelMessage" />
+  <Type Name="QueryModel" Description="Abfrage">
+    <Member Name="Filters" Description="Filter" />
+    <Member Name="Orders" Description="Reihenfolge" />
+    <Member Name="Pagination" Description="Paginierung" />
+    <Member Name="QueryName" Description="Abfrage-Name" />
+  </Type>
+  <Type Name="QueryModelMessage">
+    <Member Name="ConfigureYourQueryAndPressSearchBeforeOk" Description="Konfigurieren Sie Ihre Abfrage und klicken Sie auf [suchen] vor Sie [Ok] drücken." />
+  </Type>
   <Type Name="QueryOrderEmbedded" Description="Abfragereihenfolge">
     <Member Name="OrderType" Description="Reihenfolgentyp" />
     <Member Name="Token" Description="Token" />
@@ -1620,19 +1753,27 @@
   <Type Name="QueryRulePack" Description="Abfrageregelpack">
     <Member Name="Type" Description="Typ" />
   </Type>
-  <Type Name="QueryStringValueEmbedded" />
+  <Type Name="QueryStringValueEmbedded" Description="Abfrage-String-Wert">
+    <Member Name="Key" Description="Schlüssel" />
+    <Member Name="Value" Description="Wert" />
+  </Type>
   <Type Name="QueryTokenEmbedded" Description="Abfrage Token">
     <Member Name="TokenString" Description="Token string" />
   </Type>
-  <Type Name="Regularization" />
   <Type Name="ResetPasswordRequestEntity" Description="Neues Passwort beantragen">
     <Member Name="Code" Description="Code" />
     <Member Name="Lapsed" Description="Verfallen" />
     <Member Name="RequestDate" Description="Datum der Anfrage" />
     <Member Name="User" Description="Benutzer" />
   </Type>
-  <Type Name="RestApiKeyEntity" />
-  <Type Name="RestApiKeyOperation" />
+  <Type Name="RestApiKeyEntity" Description="Rest-API-Schlüssel" Gender="m">
+    <Member Name="ApiKey" Description="API-Schlüssel" />
+    <Member Name="User" Description="Benutzer" />
+  </Type>
+  <Type Name="RestApiKeyOperation">
+    <Member Name="Delete" Description="Löschen" />
+    <Member Name="Save" Description="Speichern" />
+  </Type>
   <Type Name="RestLogEntity" Description="Rest-Protokoll" PluralDescription="Rest-Protokolle" Gender="n">
     <Member Name="Action" Description="Aktion" />
     <Member Name="Controller" Description="Controller" />
@@ -1640,11 +1781,14 @@
     <Member Name="EndDate" Description="Enddatum" />
     <Member Name="Exception" Description="Ausnahme" />
     <Member Name="QueryString" Description="Query string" />
+    <Member Name="Referrer" Description="Referrer" />
     <Member Name="RequestBody" Description="Request body" />
     <Member Name="ResponseBody" Description="Response body" />
     <Member Name="StartDate" Description="Startdatum" />
     <Member Name="Url" Description="URL" />
     <Member Name="User" Description="Benutzer" />
+    <Member Name="UserHostAddress" Description="Benutzer Hostadresse" />
+    <Member Name="UserHostName" Description="Benutzer Hostname" />
   </Type>
   <Type Name="RoleEntity" Description="Rolle">
     <Member Name="MergeStrategy" Description="Zusammenführstrategie" />
@@ -1667,7 +1811,10 @@
   <Type Name="RulePermissionEntity" Description="Berechtigungsregel" PluralDescription="Berechtigungsregeln" />
   <Type Name="RulePropertyEntity" Description="Eigenschaftsregel" PluralDescription="Eigenschaftsregeln" />
   <Type Name="RuleQueryEntity" Description="Abfrageregel" PluralDescription="Abfrageregeln" />
-  <Type Name="RuleTypeConditionEmbedded" />
+  <Type Name="RuleTypeConditionEmbedded" Description="Regelbedingung Typ">
+    <Member Name="Allowed" Description="Erlaubt" />
+    <Member Name="Condition" Description="Bedingung" />
+  </Type>
   <Type Name="RuleTypeEntity" Description="Typregel" PluralDescription="Typregeln">
     <Member Name="Conditions" Description="Bedingungen" />
   </Type>
@@ -1686,12 +1833,15 @@
     <Member Name="Exception" Description="Ausnahme" />
     <Member Name="MachineName" Description="Computername" />
     <Member Name="ProductEntity" Description="Produktentität" />
+    <Member Name="Remarks" Description="Bemerkungen" />
     <Member Name="ScheduledTask" Description="Geplante Aufgabe" />
     <Member Name="StartTime" Description="Startzeit" />
     <Member Name="Task" Description="Aufgabe" />
     <Member Name="User" Description="Benutzer" />
   </Type>
-  <Type Name="ScheduledTaskLogOperation" />
+  <Type Name="ScheduledTaskLogOperation">
+    <Member Name="CancelRunningTask" Description="Laufende Aufgabe abbrechen" />
+  </Type>
   <Type Name="ScheduledTaskOperation">
     <Member Name="Delete" Description="Löschen" />
     <Member Name="Save" Description="Speichern" />
@@ -1727,14 +1877,20 @@
     <Member Name="ScheduleRuleWeekDaysEntity" Description="Tage der Woche" />
     <Member Name="ScheduleRuleWeeklyDN_DayOfTheWeek" Description="Tag der Woche" />
     <Member Name="ScheduleRuleWeeklyEntity" Description="wöchentlich" />
+    <Member Name="TaskIsNotRunning" Description="Die Aufgabe wird nicht ausgeführt" />
   </Type>
   <Type Name="SchedulerPermission">
     <Member Name="ViewSchedulerPanel" Description="Schedulersteuerung anzeigen" />
   </Type>
-  <Type Name="SchedulerTaskExceptionLineEntity" />
+  <Type Name="SchedulerTaskExceptionLineEntity" Description="Scheduler Aufgabe Ausnahmezeile" PluralDescription="Scheduler Aufgabe Ausnahmezeilen" Gender="f">
+    <Member Name="ElementInfo" Description="Elementinfo" />
+    <Member Name="Exception" Description="Ausnahme" />
+    <Member Name="SchedulerTaskLog" Description="Scheduler Task-Protokoll" />
+  </Type>
   <Type Name="ScheduleRuleMinutelyEntity" Description="Schedule-Regel minütlich" PluralDescription="Schedule-Regeln minütlich" Gender="f">
     <Member Name="EachMinutes" Description="Alle Minuten" />
     <Member Name="IsAligned" Description="Ist ausgerichtet" />
+    <Member Name="StartingOn" Description="Beginnend am" />
   </Type>
   <Type Name="ScheduleRuleMonthsEntity" Description="Regel Monate planen">
     <Member Name="April" Description="April" />
@@ -1770,6 +1926,7 @@
   </Type>
   <Type Name="SendEmailTaskEntity" Description="Sende eine Email Aufgabe" PluralDescription="Sende E-Mail Aufgaben">
     <Member Name="EmailTemplate" Description="E-Mail Vorlage" />
+    <Member Name="ModelConverter" Description="Modell-Konverter" />
     <Member Name="Name" Description="Name" />
     <Member Name="TargetsFromUserQuery" Description="Ziele von Benutzerabfrage" />
     <Member Name="UniqueTarget" Description="Einzigartiges Ziel" />
@@ -1896,6 +2053,7 @@
     <Member Name="Username" Description="Benutzername" />
   </Type>
   <Type Name="SqlMigrationEntity" Description="SQL-Migration">
+    <Member Name="Comment" Description="Kommentar" />
     <Member Name="VersionNumber" Description="Versionsnummer" />
   </Type>
   <Type Name="SubEntitiesEval" />
@@ -1903,11 +2061,17 @@
   <Type Name="SystemEmailEntity" Description="System-E-Mail" PluralDescription="System-E-Mails">
     <Member Name="FullClassName" Description="Vollständiger class name" />
   </Type>
-  <Type Name="SystemEventLogEntity" />
+  <Type Name="SystemEventLogEntity" Description="System-Ereignisprotokoll" PluralDescription="System-Ereignisprotokolle" Gender="n">
+    <Member Name="Date" Description="Datum" />
+    <Member Name="EventType" Description="Ereignistyp" />
+    <Member Name="Exception" Description="Ausnahme" />
+    <Member Name="MachineName" Description="Computername" />
+    <Member Name="User" Description="Benutzer" />
+  </Type>
   <Type Name="SystemWordTemplateEntity" Description="System-Word-Vorlage">
     <Member Name="FullClassName" Description="Vollständiger Klassenname" />
   </Type>
-  <Type Name="TemplateApplicableEval" />
+  <Type Name="TemplateApplicableEval" Description="Vorlage für eval" />
   <Type Name="TemplateTokenMessage">
     <Member Name="Insert" Description="Einfügen" />
     <Member Name="NoColumnSelected" Description="Keine Spalte ausgewählt" />
@@ -1916,8 +2080,22 @@
     <Member Name="YouCanOnlyAddForeachBlocksWithCollectionFields" Description="Sie können nur Foreach-Blöcke mit Collection-Feldern hinzufügen" />
     <Member Name="YouHaveToAddTheElementTokenToUseForeachOnCollectionFields" Description="Sie müssen das Element Token zur Verwendung von Foreach in einem Collection-Feld hinzufügen" />
   </Type>
-  <Type Name="TimeSpanEmbedded" />
-  <Type Name="ToolbarElementEmbedded" />
+  <Type Name="TimeSpanEmbedded" Description="Zeitspanne">
+    <Member Name="Days" Description="Tage" />
+    <Member Name="Hours" Description="Stunden" />
+    <Member Name="Minutes" Description="Minuten" />
+    <Member Name="Seconds" Description="Sekunden" />
+  </Type>
+  <Type Name="ToolbarElementEmbedded" Description="Symbolleiste-element">
+    <Member Name="AutoRefreshPeriod" Description="Autoaktualisierungszeitraum" />
+    <Member Name="Content" Description="Inhalt" />
+    <Member Name="IconColor" Description="Symbolfarbe" />
+    <Member Name="IconName" Description="Symbolname" />
+    <Member Name="Label" Description="Etikett" />
+    <Member Name="OpenInPopup" Description="Im Popup öffnen" />
+    <Member Name="Type" Description="Typ" />
+    <Member Name="Url" Description="URL" />
+  </Type>
   <Type Name="ToolbarElementType" Description="Symbolleiste-Elementtyp">
     <Member Name="Divider" Description="Teiler" />
     <Member Name="Header" Description="Kopfzeile" />
@@ -1927,15 +2105,20 @@
   <Type Name="ToolbarEntity" Description="Symbolleiste">
     <Member Name="Elements" Description="Elemente" />
     <Member Name="Guid" Description="Guid" />
+    <Member Name="Location" Description="Position" />
     <Member Name="Name" Description="Name" />
     <Member Name="Owner" Description="Eigentümer" />
     <Member Name="Priority" Description="Priorität" />
   </Type>
-  <Type Name="ToolbarLocation" />
+  <Type Name="ToolbarLocation" Description="Symbolleisten Position">
+    <Member Name="Side" Description="Seite" />
+    <Member Name="Top" Description="Oben" />
+  </Type>
   <Type Name="ToolbarMenuEntity" Description="Toolbar-Menü">
     <Member Name="Elements" Description="Elemente" />
     <Member Name="Guid" Description="Guid" />
     <Member Name="Name" Description="Name" />
+    <Member Name="Owner" Description="Eigentümer" />
   </Type>
   <Type Name="ToolbarMenuOperation">
     <Member Name="Delete" Description="Löschen" />
@@ -1944,10 +2127,6 @@
   <Type Name="ToolbarOperation">
     <Member Name="Delete" Description="Löschen" />
     <Member Name="Save" Description="Speichern" />
-  </Type>
-  <Type Name="TranslatedCultureAction" Description="Übersetzte Kultur-Aktion">
-    <Member Name="Read" Description="Lesen" />
-    <Member Name="Translate" Description="Übersetzen" />
   </Type>
   <Type Name="TranslatedInstanceEntity" Description="Übersetzte Instanz" PluralDescription="Übersetzen Instanzen" Gender="f">
     <Member Name="Culture" Description="Kultur" />
@@ -1966,11 +2145,15 @@
     <Member Name="_0AlreadySynchronized" Description="{0} bereits synchronisiert" />
     <Member Name="All" Description="Alle" />
     <Member Name="AllLanguages" Description="Alle Sprachen" />
+    <Member Name="BackToTranslationStatus" Description="Zurück zum Übersetzungsstatus" />
     <Member Name="CodeTranslations" Description="Code-Übersetzungen" />
     <Member Name="Edit" Description="bearbeiten" />
     <Member Name="Instance" Description="Instanz" />
     <Member Name="InstanceTranslations" Description="Instanz-Übersetzungen" />
     <Member Name="Member" Description="Mitglied" />
+    <Member Name="Namespace" Description="Namespace" />
+    <Member Name="NewTranslations" Description="Neue Übersetzungen" />
+    <Member Name="NewTypes" Description="Neue Arten" />
     <Member Name="None" Description="keine" />
     <Member Name="NoResultsFound" Description="Keine Ergebnisse gefunden" />
     <Member Name="NothingToTranslate" Description="Nichts zu übersetzen" />
@@ -1999,22 +2182,47 @@
     <Member Name="Delete" Description="Löschen" />
     <Member Name="Save" Description="Speichern" />
   </Type>
-  <Type Name="TranslatorUserCultureEmbedded" Description="Übersetzer Kultur">
-    <Member Name="Action" Description="Aktion" />
-    <Member Name="Culture" Description="Kultur" />
+  <Type Name="TreeEntity" Description="Baum" PluralDescription="Bäume" Gender="m">
+    <Member Name="FullName" Description="Vollständiger name" />
+    <Member Name="IsSibling" Description="Ist Geschwister" />
+    <Member Name="Level" Description="Level" />
+    <Member Name="Name" Description="Name" />
+    <Member Name="ParentOrSibling" Description="Elternteil oder Geschwister" />
+    <Member Name="ParentRoute" Description="Eltern-route" />
+    <Member Name="Route" Description="Route" />
+    <Member Name="RouteToString" Description="Route zum string" />
   </Type>
-  <Type Name="TranslatorUserEntity" Description="Übersetzer">
-    <Member Name="Cultures" Description="Kulturen" />
-    <Member Name="User" Description="Benutzer" />
+  <Type Name="TreeMessage">
+    <Member Name="Ascendants" Description="Verwandte in aufsteigender Linie" />
+    <Member Name="Children" Description="Kinder" />
+    <Member Name="Copy0" Description="Kopiere {0}" />
+    <Member Name="Descendants" Description="Nachkommen" />
+    <Member Name="ImpossibleToMove01Of2" Description="Unmöglich, {0} {1} von {2} zu bewegen" />
+    <Member Name="ImpossibleToMove0InsideOf1" Description="Unmöglich, {0} innerhalb {1} zu bewegen" />
+    <Member Name="Level" Description="Level" />
+    <Member Name="LevelShouldNotBeGreaterThan0" Description="Niveau sollte nicht größer als {0} sein." />
+    <Member Name="Move0" Description="Verschiebe {0}" />
+    <Member Name="Parent" Description="Übergeordnete" />
+    <Member Name="Tree" Description="Baum" />
+    <Member Name="TreeType" Description="Baum-Typ" />
   </Type>
-  <Type Name="TranslatorUserOperation">
+  <Type Name="TreeOperation">
+    <Member Name="Copy" Description="Kopie" />
+    <Member Name="CreateChild" Description="Erstellen Sie untergeordnete" />
+    <Member Name="CreateNextSibling" Description="Nächsten gleichgeordnetes Element erstellen" />
+    <Member Name="CreateRoot" Description="Stamm-erstellen" />
     <Member Name="Delete" Description="Löschen" />
+    <Member Name="Move" Description="Bewegen" />
     <Member Name="Save" Description="Speichern" />
   </Type>
-  <Type Name="TreeEntity" />
-  <Type Name="TreeMessage" />
-  <Type Name="TreeOperation" />
-  <Type Name="TreeViewerMessage" />
+  <Type Name="TreeViewerMessage">
+    <Member Name="AddChild" Description="Kind hinzufügen" />
+    <Member Name="AddRoot" Description="Stammverzeichnis hinzufügen" />
+    <Member Name="AddSibling" Description="Geschwister hinzufügen" />
+    <Member Name="None" Description="Keine" />
+    <Member Name="Remove" Description="Entfernen" />
+    <Member Name="Search" Description="Suche" />
+  </Type>
   <Type Name="TriggeredOn" />
   <Type Name="TypeAllowed">
     <Member Name="Create" Description="Erstellen" />
@@ -2045,7 +2253,10 @@
     <Member Name="Properties" Description="Eigenschaften" />
     <Member Name="Queries" Description="Abfragen" />
   </Type>
-  <Type Name="TypeConditionRuleEmbedded" />
+  <Type Name="TypeConditionRuleEmbedded" Description="Typenregel Zustand">
+    <Member Name="Allowed" Description="Erlaubt" />
+    <Member Name="TypeCondition" Description="Typenzustand" />
+  </Type>
   <Type Name="TypeConditionSymbol" Description="Typbedingung" />
   <Type Name="TypeRulePack" Description="Typregelpack" />
   <Type Name="TypeSearchResult">
@@ -2096,6 +2307,7 @@
     <Member Name="Save" Description="Speichern" />
   </Type>
   <Type Name="UserChartPartEntity" Description="Benutzerdiagrammteil" PluralDescription="Benutzerdiagrammteile" Gender="n">
+    <Member Name="AllowChangeShowData" Description="Änderungsdaten anzeigen lassen" />
     <Member Name="RequiresTitle" Description="Erfordert Titel" />
     <Member Name="ShowData" Description="Daten anzeigen" />
     <Member Name="UserChart" Description="Benutzer-Diagramm" />
@@ -2132,6 +2344,8 @@
     <Member Name="Owner" Description="Eigentümer" />
     <Member Name="PaginationMode" Description="Paginierungsmodus" />
     <Member Name="Query" Description="Abfrage" />
+    <Member Name="SearchOnLoad" Description="Beim laden suchen " />
+    <Member Name="ShowFilterButton" Description="Filter Button anzeigen" />
     <Member Name="WithoutFilters" Description="Ohne Filter" />
   </Type>
   <Type Name="UserQueryMessage">
@@ -2155,10 +2369,15 @@
     <Member Name="Save" Description="Speichern" />
   </Type>
   <Type Name="UserQueryPartEntity" Description="Benutzerabfrageteil" PluralDescription="Benutzerabfrageteile" Gender="n">
+    <Member Name="RenderMode" Description="Render-Modus" />
     <Member Name="RequiresTitle" Description="Erfordert Titel" />
     <Member Name="UserQuery" Description="Benutzer-Abfrage" />
   </Type>
-  <Type Name="UserQueryPartRenderMode" />
+  <Type Name="UserQueryPartRenderMode" Description="Benutzerabfrageteil Rendermodus">
+    <Member Name="BigValue" Description="Großer Wert" />
+    <Member Name="SearchControl" Description="Suchsteuerung" />
+    <Member Name="SearchControlWithoutSelection" Description="Suchsteuerung ohne Auswahl" />
+  </Type>
   <Type Name="UserQueryPermission">
     <Member Name="ViewUserQuery" Description="Benutzer-Abfrage anzeigen" />
   </Type>
@@ -2173,7 +2392,11 @@
     <Member Name="Ticket" Description="Ticket" />
     <Member Name="User" Description="Benutzer" />
   </Type>
-  <Type Name="ValueUserQueryElementEmbedded" />
+  <Type Name="ValueUserQueryElementEmbedded" Description="Wert der Benutzerabfrage">
+    <Member Name="Href" Description="Href" />
+    <Member Name="Label" Description="Etikett" />
+    <Member Name="UserQuery" Description="Benutzer-Abfrage" />
+  </Type>
   <Type Name="ValueUserQueryListPartEntity" Description="Benutzerwert Abfragelisten-stück">
     <Member Name="RequiresTitle" Description="Erfordert Titel" />
     <Member Name="UserQueries" Description="Benutzer-Abfragen" />
@@ -2187,7 +2410,9 @@
     <Member Name="User" Description="Benutzer" />
     <Member Name="ViewAction" Description="Anzeigeaktion" />
   </Type>
-  <Type Name="ViewLogMessage" />
+  <Type Name="ViewLogMessage">
+    <Member Name="ViewLogMyLast" Description="Zeige mein letztes log" />
+  </Type>
   <Type Name="WebDownload" Description="Webdownload">
     <Member Name="FileName" Description="Dateiname" />
     <Member Name="FullWebPath" Description="Vollständiger Web-Pfad" />
@@ -2195,9 +2420,15 @@
   <Type Name="WebImage" Description="Webbild">
     <Member Name="FullWebPath" Description="Vollständiger Web-Pfad" />
   </Type>
-  <Type Name="WordAttachmentEntity" />
+  <Type Name="WordAttachmentEntity" Description="Word-Anhang" PluralDescription="Word-Anhänge" Gender="m">
+    <Member Name="FileName" Description="Dateiname" />
+    <Member Name="ModelConverter" Description="Modell-Konverter" />
+    <Member Name="OverrideModel" Description="Modell überschreiben" />
+    <Member Name="WordTemplate" Description="Word-Vorlage" />
+  </Type>
   <Type Name="WordConverterSymbol" Description="Word-Konverter" Gender="m" />
   <Type Name="WordTemplateEntity" Description="Word-Vorlage">
+    <Member Name="Applicable" Description="Anwendbar" />
     <Member Name="Culture" Description="Kultur" />
     <Member Name="DisableAuthorization" Description="Autorisierung deaktivieren" />
     <Member Name="FileName" Description="Dateiname" />
@@ -2212,7 +2443,11 @@
     <Member Name="_01RequiresExtraParameters" Description="{0} {1} erfordert zusätzliche Parameter" />
     <Member Name="ChooseAReportTemplate" Description="Wählen Sie eine Berichtsvorlage" />
     <Member Name="ModelShouldBeSetToUseModel0" Description="Modell sollte angegeben werden, um Modell {0} zu benutzen" />
+    <Member Name="NoDefaultTemplateDefined" Description="Keine Standard-Vorlage definiert" />
+    <Member Name="SelectTheSourceOfDataForYourTableOrChart" Description="Wählen Sie die Quelle der Daten für Ihre Tabelle oder Diagramm" />
     <Member Name="Type0DoesNotHaveAPropertyWithName1" Description="Typ {0} verfügt nicht über eine Eigenschaft mit dem Namen {1}" />
+    <Member Name="WordReport" Description="Word-Bericht" />
+    <Member Name="WriteThisKeyAsTileInTheAlternativeTextOfYourTableOrChart" Description="Schreiben Sie diesen Schlüssel als Titel in den &quot;Alternativen Text&quot; Ihre Tabelle oder Diagramm" />
   </Type>
   <Type Name="WordTemplateOperation">
     <Member Name="CreateWordReport" Description="Word-Bericht erstellen" />
@@ -2360,6 +2595,7 @@
   <Type Name="WorkflowMessage">
     <Member Name="_0BelongsToADifferentWorkflow" Description="{0} gehört zu  einem anderem Arbeitsablauf" />
     <Member Name="ChangeWorkflowMainEntityTypeIsNotAllowedBecausueWeHaveNodesThatUseIt" Description="Die Änderung der Arbeitsablauf Hauptentitätentypen ist nicht erlaubt, da wir Knoten haben die diese benutzen." />
+    <Member Name="Color" Description="Farbe:" />
     <Member Name="Condition0IsDefinedFor1Not2" Description="Zustand {0} ist für {1} definiert, nicht für {2}" />
     <Member Name="JumpsToSameActivityNotAllowed" Description="Sprünge für dieselbe Tätigkeit sind nicht erlaubt" />
     <Member Name="JumpTo0FailedBecause1" Description="Wechseln zu &quot;{0}' ist fehlgeschlagen, da&quot;{1}&quot;" />

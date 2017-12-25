@@ -155,9 +155,9 @@ namespace Signum.Engine.UserAssets
 
         public static FixTokenResult FixValue(Replacements replacements, Type type, ref string valueString, bool allowRemoveToken, bool isList)
         {
-            string error = FilterValueConverter.TryParse(valueString, type, out object val, isList);
+            var res = FilterValueConverter.TryParse(valueString, type, isList, allowSmart: true);
 
-            if (error == null)
+            if (res is Result<object>.Success)
                 return FixTokenResult.Nothing;
 
             if (isList && valueString.Contains('|'))

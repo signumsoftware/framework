@@ -155,7 +155,7 @@ export module API {
 
     export function fromChartRequest(chartRequest: ChartRequest): Promise<UserChartEntity> {
 
-        const clone = ChartClient.API.cleanedChartRequest(chartRequest)
+        const clone = ChartClient.API.getRequest(chartRequest)
 
         return ajaxPost<UserChartEntity>({ url: "~/api/userChart/fromChartRequest/" }, clone);
     }

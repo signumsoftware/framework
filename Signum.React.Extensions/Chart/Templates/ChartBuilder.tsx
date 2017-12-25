@@ -86,7 +86,8 @@ export default class ChartBuilder extends React.Component<ChartBuilderProps, Cha
         this.props.onInvalidate();
     }
 
-    handleTokenChange = () => {
+    handleTokenChange = (cc: ChartColumnEmbedded) => {
+        cc.displayName = undefined;
         this.forceUpdate();
         this.props.onTokenChange();
     }
@@ -147,7 +148,7 @@ export default class ChartBuilder extends React.Component<ChartBuilderProps, Cha
                                 <tbody>
                                     { this.state.expanded && mlistItemContext(this.props.ctx.subCtx(c => c.columns, { formGroupSize: "ExtraSmall" })).flatMap((ctx, i) => [
                                         <ChartColumn chartBase={chart} ctx={ctx} key={"C" + i} scriptColumn={chart.chartScript!.columns[i].element} queryKey={this.props.queryKey}
-                                            onToggleInfo={() => this.handleOnToggleInfo(i)} onGroupChange={this.handleOnInvalidate} onTokenChange={this.handleTokenChange} />,
+                                            onToggleInfo={() => this.handleOnToggleInfo(i)} onGroupChange={this.handleOnInvalidate} onTokenChange={() => this.handleTokenChange(ctx.value)} />,
                                         this.state.expanded![i] && this.state.colorPalettes && <ChartColumnInfo ctx= { ctx } key= { "CI" + i } colorPalettes= {this.state.colorPalettes} onRedraw= { this.handleOnRedraw } />
                                     ]) }
                                 </tbody>
@@ -200,7 +201,6 @@ export default class ChartBuilder extends React.Component<ChartBuilderProps, Cha
 
             vl.valueHtmlAttributes = { size: null as any };
         }
-
         vl.onChange = this.handleOnRedraw;
 
         return <ValueLine {...vl} />;

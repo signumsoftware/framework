@@ -22,7 +22,7 @@ export default class ChartButton extends React.Component<ChartButtonProps> {
 
         const fo = this.props.searchControl.props.findOptions;
 
-        const path = ChartClient.Encoder.chartRequestPath(ChartRequest.New({
+        const path = ChartClient.Encoder.chartPath(ChartRequest.New({
             queryKey : fo.queryKey,
             orderOptions: [],
             filterOptions: fo.filterOptions.filter(a => a.token != undefined && a.operation != undefined)

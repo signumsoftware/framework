@@ -43,11 +43,13 @@ export default class ChartOmniboxProvider extends OmniboxProvider<ChartOmniboxRe
         if (result.QueryNameMatch == undefined)
             return undefined;
 
-        const path = ChartClient.Encoder.chartRequestPath(ChartRequest.New({
+        var cr = ChartRequest.New({
             queryKey: getQueryKey(result.QueryName),
-            orderOptions : [],
+            orderOptions: [],
             filterOptions: [],
-        }));
+        });
+
+        const path = ChartClient.Encoder.chartPath(cr);
 
         return Promise.resolve(path);
     }

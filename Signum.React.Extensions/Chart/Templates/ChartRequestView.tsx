@@ -29,8 +29,8 @@ import { Tab, Tabs, UncontrolledTabs } from '../../../../Framework/Signum.React/
 
 interface ChartRequestViewProps {
     chartRequest?: ChartRequest;
-    userChart?: UserChartEntity;
-    onChange: (newChartRequest: ChartRequest) => void;
+    userChart?: Lite<UserChartEntity>;
+    onChange: (newChartRequest: ChartRequest, userChart?: Lite<UserChartEntity>) => void;
     title?: string;
 }
 
@@ -55,8 +55,14 @@ export default class ChartRequestView extends React.Component<ChartRequestViewPr
     }
 
     componentWillReceiveProps(nextProps: ChartRequestViewProps) {
-        this.state = {};
-        this.forceUpdate();
+
+        var oldPath = this.props.chartRequest && ChartClient.Encoder.chartPath(this.props.chartRequest, this.props.userChart);
+        var newPath = nextProps.chartRequest && ChartClient.Encoder.chartPath(nextProps.chartRequest, nextProps.userChart);
+
+        if (oldPath == newPath)
+            return;
+        
+        this.setState({ chartResult: undefined, lastChartRequest: undefined });
         this.loadQueryDescription(nextProps);
     }
 
@@ -90,6 +96,7 @@ export default class ChartRequestView extends React.Component<ChartRequestViewPr
 
     handleOnRedraw = () => {
         this.forceUpdate();
+        this.props.onChange(this.props.chartRequest!, this.props.userChart);
     }
     
     componentWillUnmount() {
@@ -102,8 +109,14 @@ export default class ChartRequestView extends React.Component<ChartRequestViewPr
 
         this.setState({ chartResult: undefined, lastChartRequest: undefined });
 
-        this.abortableQuery.getData(this.props.chartRequest!)
-            .then(rt => this.setState({ chartResult: rt, lastChartRequest: JSON.parse(JSON.stringify(this.props.chartRequest)) }),
+        var cr = this.props.chartRequest!;
+
+        this.abortableQuery.getData(cr)
+            .then(
+            rt => {
+                this.setState({ chartResult: rt, lastChartRequest: JSON.parse(JSON.stringify(this.props.chartRequest)) });
+                this.props.onChange(cr, this.props.userChart);
+            },
             ifError(ValidationError, e => {
                 GraphExplorer.setModelState(this.props.chartRequest!, e.modelState, "request");
                 this.forceUpdate();
@@ -113,7 +126,7 @@ export default class ChartRequestView extends React.Component<ChartRequestViewPr
 
     handleOnFullScreen = (e: React.MouseEvent<any>) => {
         e.preventDefault();
-        Navigator.history.push(ChartClient.Encoder.chartRequestPath(this.props.chartRequest!));
+        Navigator.history.push(ChartClient.Encoder.chartPath(this.props.chartRequest!));
     }
 
     handleEditScript = (e: React.MouseEvent<any>) => {
@@ -121,7 +134,6 @@ export default class ChartRequestView extends React.Component<ChartRequestViewPr
     }
 
     render() {
-
         const cr = this.props.chartRequest;
         const qd = this.state.queryDescription;
         const s = this.state;
@@ -168,7 +180,7 @@ export default class ChartRequestView extends React.Component<ChartRequestViewPr
                                     <ChartRenderer chartRequest={cr} lastChartRequest={s.lastChartRequest} data={s.chartResult.chartTable} />
                                 </Tab>
 
-                                <Tab eventKey="data" title={ChartMessage.Data.niceToString() }>
+                                <Tab eventKey="data" title={<span>{ChartMessage.Data.niceToString()} ({(s.chartResult.resultTable.rows.length)})</span> as any}>
                                     <ChartTable chartRequest={cr} lastChartRequest={s.lastChartRequest} resultTable={s.chartResult.resultTable} onRedraw={this.handleOnDrawClick} />
                                 </Tab>
                             </UncontrolledTabs>

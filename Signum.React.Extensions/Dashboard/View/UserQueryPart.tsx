@@ -11,7 +11,7 @@ import { SearchControl, ValueSearchControl } from '../../../../Framework/Signum.
 import { TypeContext, FormGroupStyle, mlistItemContext } from '../../../../Framework/Signum.React/Scripts/TypeContext'
 import QueryTokenEntityBuilder from '../../UserAssets/Templates/QueryTokenEntityBuilder'
 import * as UserQueryClient from '../../UserQueries/UserQueryClient'
-import { UserQueryPartEntity, PanelPartEmbedded } from '../Signum.Entities.Dashboard'
+import { UserQueryPartEntity, PanelPartEmbedded, PanelStyle } from '../Signum.Entities.Dashboard'
 import { classes } from '../../../../Framework/Signum.React/Scripts/Globals';
 
 
@@ -56,7 +56,8 @@ export default class UserQueryPart extends React.Component<UserQueryPartProps, {
         if (this.props.part.renderMode == "BigValue") {
             return <BigValueSearchCounter
                 findOptions={this.state.fo}
-                text={this.props.part.userQuery!.displayName!}
+                text={this.props.partEmbedded.title || undefined}
+                style={this.props.partEmbedded.style!}
                 iconName={this.props.partEmbedded.iconName || undefined}
                 iconColor={this.props.partEmbedded.iconColor || undefined}
             />;
@@ -76,6 +77,7 @@ export default class UserQueryPart extends React.Component<UserQueryPartProps, {
 interface BigValueBadgeProps {
     findOptions: FindOptions;
     text?: string;
+    style: PanelStyle;
     iconName?: string;
     iconColor?: string;
 }
@@ -86,19 +88,27 @@ export class BigValueSearchCounter extends React.Component<BigValueBadgeProps> {
     render() {
         
         return (
-            <div className="panel panel-primary">
-                <div className="panel-heading">
+            <div className={"panel panel-" + this.props.style.toLowerCase()}>
+                <div className="panel-heading" onClick={this.vsc && this.vsc.handleClick} style={{ cursor: "pointer" }}>
                     <div className="row">
                         <div className="col-xs-3">
                             <i className={classes(this.props.iconName, "fa-5x")} style={{ color: this.props.iconColor }}></i>
                         </div>
-                        <div className="col-xs-9 text-right">
-                            <div className="huge"><ValueSearchControl findOptions={this.props.findOptions} isLink={false} isBadge={false} /></div>
-                            <div>{this.props.text || getQueryNiceName(this.props.findOptions.queryName)}!</div>
+                        <div className="col-xs-9 flip text-right">
+                            <div className="huge">
+                                <ValueSearchControl
+                                    ref={vsc => {
+                                        if (this.vsc == null && vsc) {
+                                            this.vsc = vsc;
+                                            this.forceUpdate();
+                                        }
+                                    }}
+                                    findOptions={this.props.findOptions} isLink={true} isBadge={false} />
+                            </div>
+                            <div className="large">{this.props.text || getQueryNiceName(this.props.findOptions.queryName)}</div>
                         </div>
                     </div>
                 </div>
-                
             </div>
         );
     }

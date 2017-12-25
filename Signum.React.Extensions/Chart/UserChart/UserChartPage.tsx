@@ -21,7 +21,7 @@ interface UserChartPageProps extends RouteComponentProps<{ userChartId: string; 
 }
 
 
-export default class UserChartPage extends React.Component<UserChartPageProps, { userChart?: UserChartEntity; chartRequest?: ChartRequest }> {
+export default class UserChartPage extends React.Component<UserChartPageProps> {
 
     constructor(props: UserChartPageProps) {
         super(props);
@@ -40,26 +40,19 @@ export default class UserChartPage extends React.Component<UserChartPageProps, {
 
     load(props: UserChartPageProps) {
 
-        const {userChartId, entity } = this.props.match.params;
+        const { userChartId, entity } = this.props.match.params;
 
         const lite = entity == undefined ? undefined : parseLite(entity);
 
         Navigator.API.fillToStrings(lite)
-            .then(()=> Navigator.API.fetchEntity(UserChartEntity, userChartId))
-            .then(uc => {
-                this.setState({ userChart : uc });
-                return UserChartClient.Converter.toChartRequest(uc, lite)
-            })
-            .then(cr => this.setState({ chartRequest: cr}))
+            .then(() => Navigator.API.fetchEntity(UserChartEntity, userChartId))
+            .then(uc => UserChartClient.Converter.toChartRequest(uc, lite)
+                .then(cr => Navigator.history.replace(ChartClient.Encoder.chartPath(cr, toLite(uc)))))
             .done();
     }
 
-
     render() {
-        return <ChartRequestView
-            chartRequest={this.state.chartRequest}
-            userChart={this.state.userChart}
-            onChange={cr => this.setState({ chartRequest: cr }) }/>;
+        return <span>{JavascriptMessage.loading.niceToString()}</span>;
     }
 }
 

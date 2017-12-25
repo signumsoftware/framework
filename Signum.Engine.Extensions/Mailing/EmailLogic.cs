@@ -285,7 +285,7 @@ namespace Signum.Engine.Mailing
                         Template = m.Template,
                         EditableMessage = m.EditableMessage,
                         State = EmailMessageState.Created,
-                        Attachments=m.Attachments.ToMList(),
+                        Attachments = m.Attachments.Select(a => a.Clone()).ToMList()
                     }
                 }.Register();
 

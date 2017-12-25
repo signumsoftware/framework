@@ -1,4 +1,5 @@
-﻿using Signum.Entities.Authorization;
+﻿using Signum.Entities;
+using Signum.Entities.Authorization;
 using Signum.Entities.Basics;
 using Signum.Entities.DynamicQuery;
 using Signum.Entities.UserAssets;
@@ -28,6 +29,8 @@ namespace Signum.Entities.UserQueries
 
         [NotNullValidator]
         public QueryEntity Query { get; set; }
+
+        public bool GroupResults { get; set; }
 
         public Lite<TypeEntity> EntityType { get; set; }
 
@@ -303,7 +306,7 @@ namespace Signum.Entities.UserQueries
         [StringLengthValidator(AllowNulls = true, Max = 300)]
         public string ValueString { get; set; }
 
-        public void ParseData(Entity context, QueryDescription description, SubTokensOptions options)
+        public void ParseData(ModifiableEntity context, QueryDescription description, SubTokensOptions options)
         {
             token.ParseData(context, description, options);
         }
@@ -330,7 +333,8 @@ namespace Signum.Entities.UserQueries
 
                 if (pi.Name == nameof(ValueString))
                 {
-                    return FilterValueConverter.TryParse(ValueString, Token.Token.Type, out object val, Operation.IsList());
+                    var result = FilterValueConverter.TryParse(ValueString, Token.Token.Type, Operation.IsList(), allowSmart: true);
+                    return result is Result<object>.Error e ? e.ErrorText : null;
                 }
             }
 
@@ -342,7 +346,7 @@ namespace Signum.Entities.UserQueries
             return new XElement("Filter",
                 new XAttribute("Token", Token.Token.FullKey()),
                 new XAttribute("Operation", Operation),
-                new XAttribute("Value", ValueString??""));
+                new XAttribute("Value", ValueString ?? ""));
         }
 
         public void FromXml(XElement element, IFromXmlContext ctx)
@@ -357,7 +361,12 @@ namespace Signum.Entities.UserQueries
             return "{0} {1} {2}".FormatWith(token, Operation, ValueString);
         }
 
-
+        internal QueryFilterEmbedded Clone() => new QueryFilterEmbedded
+        {
+            Token = Token.Clone(),
+            Operation = Operation,
+            ValueString = ValueString,
+        };
     }
 
     public static class UserQueryUtils
@@ -381,11 +390,12 @@ namespace Signum.Entities.UserQueries
                 Query = query,
                 WithoutFilters = withoutFilters,
                 Owner = DefaultOwner(),
+                GroupResults = request.GroupResults,
                 Filters = withoutFilters ? new MList<QueryFilterEmbedded>() : request.Filters.Select(f => new QueryFilterEmbedded
                 {
                     Token = new QueryTokenEmbedded(f.Token),
                     Operation = f.Operation,
-                    ValueString = FilterValueConverter.ToString(f.Value, f.Token.Type)
+                    ValueString = FilterValueConverter.ToString(f.Value, f.Token.Type, allowSmart: true)
                 }).ToMList(),
                 ColumnsMode = tuple.mode,
                 Columns = tuple.columns,

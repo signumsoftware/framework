@@ -106,8 +106,8 @@ namespace Signum.Entities.Authorization
         ResetPasswordSuccess,
         Save,
         TheConfirmationCodeThatYouHaveJustSentIsInvalid,
-        [Description("The password must have between 7 and 15 characters, each of them being a number 0-9 or a letter")]
-        ThePasswordMustHaveBetween7And15CharactersEachOfThemBeingANumber09OrALetter,
+        [Description("The password must have at least 5 characters")]
+        ThePasswordMustHaveAtLeast5Characters,
         [Description("There has been an error with your request to reset your password. Please, enter your login.")]
         ThereHasBeenAnErrorWithYourRequestToResetYourPasswordPleaseEnterYourLogin,
         [Description("There's not a registered user with that email address")]

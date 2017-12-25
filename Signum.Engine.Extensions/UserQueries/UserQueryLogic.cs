@@ -73,7 +73,7 @@ namespace Signum.Engine.UserQueries
             if (!userQuery.WithoutFilters)
             {
                 qr.Filters = userQuery.Filters.Select(qf =>
-                    new Filter(qf.Token.Token, qf.Operation, FilterValueConverter.Parse(qf.ValueString, qf.Token.Token.Type, qf.Operation.IsList()))).ToList();
+                    new Filter(qf.Token.Token, qf.Operation, FilterValueConverter.Parse(qf.ValueString, qf.Token.Token.Type, qf.Operation.IsList(), allowSmart: true))).ToList();
             }
 
             qr.Columns = MergeColumns(userQuery);
@@ -223,7 +223,7 @@ namespace Signum.Engine.UserQueries
                             switch (QueryTokenSynchronizer.FixToken(replacements, ref token, qd, SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement, "{0} {1}".FormatWith(item.Operation, item.ValueString), allowRemoveToken: true, allowReCreate: false))
                             {
                                 case FixTokenResult.Nothing: break;
-                                case FixTokenResult.DeleteEntity: return table.DeleteSqlSync(uq);
+                                case FixTokenResult.DeleteEntity: return table.DeleteSqlSync(uq, u => u.Guid == uq.Guid);
                                 case FixTokenResult.RemoveToken: uq.Filters.Remove(item); break;
                                 case FixTokenResult.SkipEntity: return null;
                                 case FixTokenResult.Fix: item.Token = token; break;
@@ -241,7 +241,7 @@ namespace Signum.Engine.UserQueries
                             switch (QueryTokenSynchronizer.FixToken(replacements, ref token, qd, SubTokensOptions.CanElement, item.DisplayName.HasText() ? "'{0}'".FormatWith(item.DisplayName) : null, allowRemoveToken: true, allowReCreate: false))
                             {
                                 case FixTokenResult.Nothing: break;
-                                case FixTokenResult.DeleteEntity:; return table.DeleteSqlSync(uq);
+                                case FixTokenResult.DeleteEntity:; return table.DeleteSqlSync(uq, u => u.Guid == uq.Guid);
                                 case FixTokenResult.RemoveToken: uq.Columns.Remove(item); break;
                                 case FixTokenResult.SkipEntity: return null;
                                 case FixTokenResult.Fix: item.Token = token; break;
@@ -259,7 +259,7 @@ namespace Signum.Engine.UserQueries
                             switch (QueryTokenSynchronizer.FixToken(replacements, ref token, qd, SubTokensOptions.CanElement, item.OrderType.ToString(), allowRemoveToken: true, allowReCreate: false))
                             {
                                 case FixTokenResult.Nothing: break;
-                                case FixTokenResult.DeleteEntity: return table.DeleteSqlSync(uq);
+                                case FixTokenResult.DeleteEntity: return table.DeleteSqlSync(uq, u => u.Guid == uq.Guid);
                                 case FixTokenResult.RemoveToken: uq.Orders.Remove(item); break;
                                 case FixTokenResult.SkipEntity: return null;
                                 case FixTokenResult.Fix: item.Token = token; break;
@@ -276,7 +276,7 @@ namespace Signum.Engine.UserQueries
                     switch (QueryTokenSynchronizer.FixValue(replacements, item.Token.Token.Type, ref val, allowRemoveToken: true, isList: item.Operation.IsList()))
                     {
                         case FixTokenResult.Nothing: break;
-                        case FixTokenResult.DeleteEntity: return table.DeleteSqlSync(uq);
+                        case FixTokenResult.DeleteEntity: return table.DeleteSqlSync(uq, u => u.Guid == uq.Guid);
                         case FixTokenResult.RemoveToken: uq.Filters.Remove(item); break;
                         case FixTokenResult.SkipEntity: return null;
                         case FixTokenResult.Fix: item.ValueString = val; goto retry;
@@ -295,7 +295,7 @@ namespace Signum.Engine.UserQueries
                 Console.Clear();
 
                 using (replacements.WithReplacedDatabaseName())
-                    return table.UpdateSqlSync(uq, includeCollections: true);
+                    return table.UpdateSqlSync(uq, u => u.Guid == uq.Guid, includeCollections: true);
             }
             catch (Exception e)
             {

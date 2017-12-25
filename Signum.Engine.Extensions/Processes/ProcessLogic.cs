@@ -147,7 +147,7 @@ namespace Signum.Engine.Processes
                 OperationLogic.AssertStarted(sb);
 
                 ProcessGraph.Register();
-                
+
                 dqm.RegisterExpression((ProcessAlgorithmSymbol p) => p.Processes(), () => typeof(ProcessEntity).NicePluralName());
                 dqm.RegisterExpression((ProcessAlgorithmSymbol p) => p.LastProcess(), () => ProcessMessage.LastProcess.NiceToString());
 
@@ -166,7 +166,9 @@ namespace Signum.Engine.Processes
         {
             void Remove(ProcessState processState)
             {
-                var query = Database.Query<ProcessEntity>().Where(p => p.State == processState && p.CreationDate < parameters.DateLimit);
+                var dateLimit = parameters.GetDateLimit(typeof(ProcessEntity).ToTypeEntity());
+
+                var query = Database.Query<ProcessEntity>().Where(p => p.State == processState && p.CreationDate < dateLimit);
 
                 query.SelectMany(a => a.ExceptionLines()).UnsafeDeleteChunksLog(parameters, sb, token);
 
@@ -197,7 +199,7 @@ namespace Signum.Engine.Processes
 
             registeredProcesses.Add(processAlgorithm, algorithm);
         }
-        
+
         public class ProcessGraph : Graph<ProcessEntity, ProcessState>
         {
             public static void Register()
@@ -224,7 +226,7 @@ namespace Signum.Engine.Processes
                     {
                         p.MachineName = JustMyProcesses ? Environment.MachineName : ProcessEntity.None;
                         p.ApplicationName = JustMyProcesses ? Schema.Current.ApplicationName : ProcessEntity.None;
-                      
+
                         p.State = ProcessState.Planned;
                         p.PlannedDate = args.GetArg<DateTime>();
                     }
@@ -248,7 +250,7 @@ namespace Signum.Engine.Processes
                     Execute = (p, _) =>
                     {
                         p.MachineName = JustMyProcesses ? Environment.MachineName : ProcessEntity.None;
-                        p.ApplicationName = JustMyProcesses ? Schema.Current.ApplicationName: ProcessEntity.None;
+                        p.ApplicationName = JustMyProcesses ? Schema.Current.ApplicationName : ProcessEntity.None;
 
                         p.SetAsQueued();
 
@@ -288,8 +290,8 @@ namespace Signum.Engine.Processes
                     ApplicationName = JustMyProcesses ? Schema.Current.ApplicationName : ProcessEntity.None,
                     User = UserHolder.Current.ToLite(),
                 };
-                
-                if(copyMixinsFrom != null)
+
+                if (copyMixinsFrom != null)
                     process.CopyMixinsFrom(copyMixinsFrom);
 
                 return result.Save();
@@ -312,14 +314,14 @@ namespace Signum.Engine.Processes
         {
             return registeredProcesses.GetOrThrow(processAlgorithm, "The process algorithm {0} is not registered");
         }
-        
+
         public static void ForEachLine<T>(this ExecutingProcess executingProcess, IQueryable<T> remainingLines, Action<T> action, int groupsOf = 100)
             where T : Entity, IProcessLineDataEntity, new()
         {
             var remainingNotExceptionsLines = remainingLines.Where(li => li.Exception(executingProcess.CurrentProcess) == null);
 
             var totalCount = remainingNotExceptionsLines.Count();
-            int j = 0; 
+            int j = 0;
             while (true)
             {
                 List<T> lines = remainingNotExceptionsLines.Take(groupsOf).ToList();
@@ -327,7 +329,7 @@ namespace Signum.Engine.Processes
                     return;
 
                 for (int i = 0; i < lines.Count; i++)
-                {   
+                {
                     executingProcess.CancellationToken.ThrowIfCancellationRequested();
 
                     T pl = lines[i];
@@ -368,53 +370,81 @@ namespace Signum.Engine.Processes
             }
         }
 
-        public static void ForEach<T>(this ExecutingProcess executingProcess, List<T> collection, Func<T, string> elementInfo,  Action<T> action)
+        public static void ForEach<T>(this ExecutingProcess executingProcess, List<T> collection,
+            Func<T, string> elementInfo, Action<T> action)
         {
-            var totalCount = collection.Count;
-            int j = 0;
-            foreach (var item in collection)
+            if (executingProcess == null)
             {
-                executingProcess.CancellationToken.ThrowIfCancellationRequested();
-                using (HeavyProfiler.Log("ProgressForeach", () => elementInfo(item)))
-                {
-                    try
+                collection.ProgressForeach(elementInfo, action);
+            }
+            else
+            {
+                executingProcess.ForEachNonTransactional(collection, elementInfo, item => {
+                    using (Transaction tr = Transaction.ForceNew())
                     {
-                        using (Transaction tr = Transaction.ForceNew())
+                        action(item);
+                        tr.Commit();
+                    }
+                });
+
+            }
+        }
+
+
+        public static void ForEachNonTransactional<T>(this ExecutingProcess executingProcess, List<T> collection,
+            Func<T, string> elementInfo, Action<T> action)
+        {
+            if (executingProcess == null)
+            {
+                collection.ProgressForeach(elementInfo, action, transactional: false);
+            }
+            else
+            {
+
+                var totalCount = collection.Count;
+                int j = 0;
+                foreach (var item in collection)
+                {
+                    executingProcess.CancellationToken.ThrowIfCancellationRequested();
+                    using (HeavyProfiler.Log("ProgressForeach", () => elementInfo(item)))
+                    {
+                        try
                         {
                             action(item);
-                            tr.Commit();
+
                         }
-                    }
-                    catch (Exception e)
-                    {
-                        if (Transaction.InTestTransaction)
-                            throw;
-
-                        var exLog = e.LogException();
-
-                        Transaction.ForceNew().EndUsing(tr =>
+                        catch (Exception e)
                         {
-                            new ProcessExceptionLineEntity
+                            if (Transaction.InTestTransaction)
+                                throw;
+
+                            var exLog = e.LogException();
+
+                            Transaction.ForceNew().EndUsing(tr =>
                             {
-                                Exception = exLog.ToLite(),
-                                ElementInfo = elementInfo(item),
-                                Process = executingProcess.CurrentProcess.ToLite()
-                            }.Save();
+                                new ProcessExceptionLineEntity
+                                {
+                                    Exception = exLog.ToLite(),
+                                    ElementInfo = elementInfo(item),
+                                    Process = executingProcess.CurrentProcess.ToLite()
+                                }.Save();
 
-                            tr.Commit();
-                        });
+                                tr.Commit();
+                            });
+                        }
+
+                        executingProcess.ProgressChanged(j++, totalCount);
                     }
-
-                    executingProcess.ProgressChanged(j++, totalCount);
                 }
+
             }
         }
 
         public static void Synchronize<K, N, O>(this ExecutingProcess ep,
-            Dictionary<K,N> newDictionary, 
-            Dictionary<K, O> oldDictionary, 
-            Action<K, N> createNew, 
-            Action<K, O> removeOld, 
+            Dictionary<K, N> newDictionary,
+            Dictionary<K, O> oldDictionary,
+            Action<K, N> createNew,
+            Action<K, O> removeOld,
             Action<K, N, O> merge)
         {
             HashSet<K> keys = new HashSet<K>();
@@ -440,7 +470,102 @@ namespace Signum.Engine.Processes
                 }
             }
         }
+
+        public static void WriteLineColor(this ExecutingProcess ep, ConsoleColor color, string s)
+        {
+            if (ep != null)
+            {
+                ep.WriteMessage(s);
+            }
+            else
+            {
+                if (!Console.IsOutputRedirected)
+                {
+                    SafeConsole.WriteLineColor(color, s);
+                }
+            }
+        }
+
+
+        public static void SynchronizeProgressForeach<K, N, O>(this ExecutingProcess ep,
+            Dictionary<K, N> newDictionary,
+            Dictionary<K, O> oldDictionary,
+            Action<K, N> createNew,
+            Action<K, O> removeOld,
+            Action<K, N, O> merge)
+            where O : class
+            where N : class
+        {
+
+            if (ep == null)
+                Synchronizer.SynchronizeProgressForeach(newDictionary, oldDictionary, createNew, removeOld, merge);
+            else
+            {
+                HashSet<K> keys = new HashSet<K>();
+                keys.UnionWith(oldDictionary.Keys);
+                keys.UnionWith(newDictionary.Keys);
+                ep.ForEach(keys.ToList(), key => key.ToString(), key =>
+                {
+                    var oldVal = oldDictionary.TryGetC(key);
+                    var newVal = newDictionary.TryGetC(key);
+
+                    if (oldVal == null)
+                    {
+                        createNew?.Invoke(key, newVal);
+                    }
+                    else if (newVal == null)
+                    {
+                        removeOld?.Invoke(key, oldVal);
+                    }
+                    else
+                    {
+                        merge?.Invoke(key, newVal, oldVal);
+                    }
+                });
+            }
+        }
+
+
+        public static void SynchronizeProgressForeachNonTransactional<K, N, O>(this ExecutingProcess ep,
+            Dictionary<K, N> newDictionary,
+            Dictionary<K, O> oldDictionary,
+            Action<K, N> createNew,
+            Action<K, O> removeOld,
+            Action<K, N, O> merge)
+            where O : class
+            where N : class
+        {
+
+            if (ep == null)
+                Synchronizer.SynchronizeProgressForeach(newDictionary, oldDictionary, createNew, removeOld, merge);
+            else
+            {
+                HashSet<K> keys = new HashSet<K>();
+                keys.UnionWith(oldDictionary.Keys);
+                keys.UnionWith(newDictionary.Keys);
+                ep.ForEachNonTransactional(keys.ToList(), key => key.ToString(), key =>
+                {
+                    var oldVal = oldDictionary.TryGetC(key);
+                    var newVal = newDictionary.TryGetC(key);
+
+                    if (oldVal == null)
+                    {
+                        createNew?.Invoke(key, newVal);
+                    }
+                    else if (newVal == null)
+                    {
+                        removeOld?.Invoke(key, oldVal);
+                    }
+                    else
+                    {
+                        merge?.Invoke(key, newVal, oldVal);
+                    }
+                });
+            }
+        }
     }
+
+
 
     public interface IProcessAlgorithm
     {

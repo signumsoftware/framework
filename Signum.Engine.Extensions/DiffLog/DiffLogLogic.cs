@@ -82,8 +82,10 @@ namespace Signum.Engine.DiffLog
 
         public static void DiffLogic_DeleteLogs(DeleteLogParametersEmbedded parameters, StringBuilder sb, CancellationToken token)
         {
-            Database.Query<OperationLogEntity>().Where(o => o.Start < parameters.DateLimit && o.Exception != null).UnsafeDeleteChunksLog(parameters, sb, token);
-            Database.Query<OperationLogEntity>().Where(o => o.Start < parameters.DateLimit && !o.Mixin<DiffLogMixin>().Cleaned).UnsafeUpdate()
+            var dateLimit = parameters.GetDateLimit(typeof(OperationLogEntity).ToTypeEntity());
+
+            Database.Query<OperationLogEntity>().Where(o => o.Start < dateLimit && o.Exception != null).UnsafeDeleteChunksLog(parameters, sb, token);
+            Database.Query<OperationLogEntity>().Where(o => o.Start < dateLimit && !o.Mixin<DiffLogMixin>().Cleaned).UnsafeUpdate()
                 .Set(a => a.Mixin<DiffLogMixin>().InitialState, a => null)
                 .Set(a => a.Mixin<DiffLogMixin>().FinalState, a => null)
                 .Set(a => a.Mixin<DiffLogMixin>().Cleaned, a => true)

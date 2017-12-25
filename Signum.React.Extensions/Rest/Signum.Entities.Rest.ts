@@ -32,6 +32,7 @@ export interface RestLogEntity extends Entities.Entity {
     Type: "RestLog";
     url: string;
     startDate: string;
+    replayDate: string | null;
     requestBody: string;
     queryString: Entities.MList<QueryStringValueEmbedded>;
     user: Entities.Lite<Basics.IUserEntity> | null;
@@ -43,6 +44,14 @@ export interface RestLogEntity extends Entities.Entity {
     exception: Entities.Lite<Basics.ExceptionEntity> | null;
     responseBody: string | null;
     endDate: string;
+    replayState: RestLogReplayState | null;
+    changedPercentage: number | null;
+    allowReplay: boolean;
 }
+
+export const RestLogReplayState = new EnumType<RestLogReplayState>("RestLogReplayState");
+export type RestLogReplayState =
+    "NoChanges" |
+    "WithChanges";
 
 

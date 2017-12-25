@@ -124,7 +124,7 @@ namespace Signum.Web.Profiler
         {
             XDocument doc = indices == null ?
                 HeavyProfiler.ExportXml() :
-                HeavyProfiler.Find(indices).ExportXmlDocument();
+                HeavyProfiler.Find(indices).ExportXmlDocument(false);
 
             using (MemoryStream ms = new MemoryStream())
             {

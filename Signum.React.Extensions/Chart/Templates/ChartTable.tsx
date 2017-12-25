@@ -92,20 +92,18 @@ export default class ChartTable extends React.Component<{ resultTable: ResultTab
     handleOnDoubleClick = (e: React.MouseEvent<HTMLTableRowElement>, row: ResultRow) => {
 
 
-        const cr = this.props.lastChartRequest!;
+        const lcr = this.props.lastChartRequest!;
 
-        if (cr.groupResults == false) {
+        if (lcr.groupResults == false) {
             
-            window.open(Navigator.navigateRoute(row.entity));
+            window.open(Navigator.navigateRoute(row.entity!));
 
         } else {
             
-            const filters = cr.filterOptions.filter(a => !hasAggregate(a.token));
+            const filters = lcr.filterOptions.filter(a => !hasAggregate(a.token));
             const columns: ColumnOption[] = [];
 
-
-
-            cr.columns.map((a, i) => {
+            lcr.columns.map((a, i) => {
 
                 const t = a.element.token;
 
@@ -130,7 +128,7 @@ export default class ChartTable extends React.Component<{ resultTable: ResultTab
             });
 
             window.open(Finder.findOptionsPath({
-                queryName: cr.queryKey,
+                queryName: lcr.queryKey,
                 filterOptions: filters.map(fop => ({
                     columnName: fop.token!.fullKey,
                     operation: fop.operation,

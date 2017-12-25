@@ -70,7 +70,7 @@ namespace Signum.Engine.Templating
 
                 Expression token = Expression.Constant(obj, type);
 
-                Expression value = Expression.Constant(FilterValueConverter.Parse(valueString, type, operation.Value.IsList()), type);
+                Expression value = Expression.Constant(FilterValueConverter.Parse(valueString, type, operation.Value.IsList(), allowSmart: true), type);
 
                 Expression newBody = QueryUtils.GetCompareExpression(operation.Value, token, value, inMemory: true);
                 var lambda = Expression.Lambda<Func<bool>>(newBody).Compile();
@@ -174,10 +174,10 @@ namespace Signum.Engine.Templating
             if (Type == null)
                 return;
 
-            string error = FilterValueConverter.TryParse(valueString, Type, out object rubish, Operation.Value.IsList());
+            var result = FilterValueConverter.TryParse(valueString, Type, Operation.Value.IsList(), allowSmart: true);
 
-            if (error.HasText())
-                addError(false, "Impossible to convert '{0}' to {1}: {2}".FormatWith(valueString, Type.TypeName(), error));
+            if (result is Result<object>.Error e)
+                addError(false, "Impossible to convert '{0}' to {1}: {2}".FormatWith(valueString, Type.TypeName(), e.ErrorText));
         }
     }
 
@@ -300,7 +300,7 @@ namespace Signum.Engine.Templating
             {
                 var type = this.Type;
 
-                object val = FilterValueConverter.Parse(stringValue, type, operation.Value.IsList());
+                object val = FilterValueConverter.Parse(stringValue, type, operation.Value.IsList(), allowSmart: true);
 
                 Expression value = Expression.Constant(val, type);
 
@@ -704,7 +704,7 @@ namespace Signum.Engine.Templating
         {
             try
             {
-                var obj = dateTimeExpression == null ? DateTime.Now: FilterValueConverter.Parse(dateTimeExpression, typeof(DateTime?), false);
+                var obj = dateTimeExpression == null ? DateTime.Now: FilterValueConverter.Parse(dateTimeExpression, typeof(DateTime?), isList: false, allowSmart: true);
                 this.dateTimeExpression = dateTimeExpression;
             }
             catch (Exception e)
@@ -717,7 +717,7 @@ namespace Signum.Engine.Templating
 
         public override object GetValue(TemplateParameters p)
         {
-            return dateTimeExpression == null ? DateTime.Now : FilterValueConverter.Parse(this.dateTimeExpression, typeof(DateTime?), false);
+            return dateTimeExpression == null ? DateTime.Now : FilterValueConverter.Parse(this.dateTimeExpression, typeof(DateTime?), isList: false, allowSmart: true);
         }
 
         public override void FillQueryTokens(List<QueryToken> list)

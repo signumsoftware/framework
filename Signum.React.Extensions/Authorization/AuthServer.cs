@@ -56,9 +56,10 @@ namespace Signum.React.Authorization
 
 
                 EntityPackTS.AddExtension += ep =>
-                {
+                {                  
                     var typeAllowed =
                     UserEntity.Current == null ? TypeAllowedBasic.None :
+                    ep.entity.IsNew ? TypeAuthLogic.GetAllowed(ep.entity.GetType()).MaxUI() :
                     TypeAuthLogic.IsAllowedFor(ep.entity, TypeAllowedBasic.Modify, true) ? TypeAllowedBasic.Modify :
                     TypeAuthLogic.IsAllowedFor(ep.entity, TypeAllowedBasic.Read, true) ? TypeAllowedBasic.Read :
                     TypeAllowedBasic.None;
