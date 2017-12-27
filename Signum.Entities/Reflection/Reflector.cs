@@ -308,7 +308,7 @@ namespace Signum.Entities.Reflection
                 a => a.GetCustomAttributes<GeneratedCodeAttribute>().Any(gc => gc.Tool == "SignumTask"));
 
             if (!isProcessed)
-                throw new InvalidOperationException("Entity {0} has auto-property {1}, but you can not use auto-propertes if the assembly iy not processed by 'SignumTask'".FormatWith(fieldInfo.DeclaringType.Name, fieldInfo.FieldType.Name));
+                throw new InvalidOperationException("Entity {0} has auto-property {1}, but you can not use auto-propertes if the assembly is not processed by 'SignumTask'".FormatWith(fieldInfo.DeclaringType.Name, fieldInfo.FieldType.Name));
         }
 
         public static PropertyInfo FindPropertyInfo(FieldInfo fi)
