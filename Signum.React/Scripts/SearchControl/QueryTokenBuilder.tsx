@@ -12,7 +12,7 @@ import * as PropTypes from "prop-types";
 
 
 import "./QueryTokenBuilder.css"
-import DropdownList from 'react-widgets/lib/DropdownList'
+import * as DropdownList from 'react-widgets/lib/DropdownList'
 
 
 interface QueryTokenBuilderProps extends React.Props<QueryTokenBuilder> {

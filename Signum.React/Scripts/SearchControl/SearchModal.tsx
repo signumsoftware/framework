@@ -1,6 +1,6 @@
 ﻿
 import * as React from 'react'
-import { Modal, ModalHeader, ModalBody, ModalFooter , ButtonToolbar } from 'reactstrap'
+import { Modal, ModalHeader, ModalBody } from 'reactstrap'
 import * as Finder from '../Finder'
 import { openModal, IModalProps } from '../Modals';
 import { ResultTable, FindOptions, FindMode, FilterOption, QueryDescription, ResultRow, ModalFindOptions } from '../FindOptions'
