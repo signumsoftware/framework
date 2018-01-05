@@ -45,7 +45,7 @@ namespace Signum.Entities.MachineLearning
         [ImplementedBy(typeof(UserEntity))]
         public Lite<IUserEntity> User { get; set; }
 
-        [ImplementedBy(typeof(NeuralNetworkSettingsEntity))]
+        [ImplementedBy(typeof(NeuralNetworkSettingsEntity)), NotifyChildProperty]
         public IPredictorAlgorithmSettings AlgorithmSettings { get; set; }
 
         public PredictorState State { get; set; }
@@ -264,7 +264,9 @@ namespace Signum.Entities.MachineLearning
     {
         Zero,
         Error,
-        Mean,
+        Average,
+        Min, 
+        Max,
     }
 
     public enum PredictorColumnEncoding
@@ -274,6 +276,9 @@ namespace Signum.Entities.MachineLearning
         Codified,
         [Description("Normalize Z-Score")]
         NormalizeZScore,
+
+        [Description("Normalize Min-Max")]
+        NormalizeMinMax,
 
         [Description("Normalize Log")]
         NormalizeLog,

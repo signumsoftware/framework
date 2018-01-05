@@ -135,5 +135,19 @@ namespace Signum.Engine.MachineLearning.CNTK
                     throw new InvalidOperationException("Unexpected Learner");
             }
         }
+
+        public static Function MeanAbsoluteError(Variable prediction, Variable targets)
+        {
+            var absolute = CNTKLib.Abs(CNTKLib.Minus(targets, prediction));
+
+            return CNTKLib.ReduceMean(absolute, Axis.DefaultBatchAxis() /*axis required here*/);
+        }
+
+        public static Function MeanAbsolutePercentageError(Variable prediction, Variable targets)
+        {
+            var absolute = CNTKLib.Abs(CNTKLib.Minus(targets, prediction));
+            var absolutePercentage = CNTKLib.ElementDivide(absolute, targets);
+            return CNTKLib.ReduceMean(absolutePercentage, Axis.DefaultBatchAxis()/*axis required here*/);
+        }
     }
 }

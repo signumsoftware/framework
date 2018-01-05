@@ -119,7 +119,9 @@ namespace Signum.Engine.MachineLearning
                         e.SplitKey1,
                         e.SplitKey2,
                         e.IsValue,
-                        e.Mean,
+                        e.Min,
+                        e.Max,
+                        e.Average,
                         e.StdDev,
                     });
 

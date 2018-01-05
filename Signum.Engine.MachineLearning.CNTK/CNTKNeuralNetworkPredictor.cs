@@ -87,6 +87,8 @@ namespace Signum.Engine.MachineLearning.CNTK
             {
                 loss = CNTKLib.SquaredError(calculatedOutputs, outputVariable);
                 evalError = CNTKLib.SquaredError(calculatedOutputs, outputVariable);
+                //loss = NetworkBuilder.MeanAbsoluteError(calculatedOutputs, outputVariable);
+                //evalError = NetworkBuilder.MeanAbsoluteError(calculatedOutputs, outputVariable);
             }
             else if (nn.PredictionType == PredictionType.Classification)
             {
@@ -239,7 +241,8 @@ namespace Signum.Engine.MachineLearning.CNTK
                 case PredictorColumnEncoding.None: return Convert.ToSingle(valueDefault);
                 case PredictorColumnEncoding.OneHot: return Object.Equals(valueDefault, c.IsValue) ? 1 : 0;
                 case PredictorColumnEncoding.Codified: throw new NotImplementedException("Codified is not usable for Neural Networks");
-                case PredictorColumnEncoding.NormalizeZScore: return (Convert.ToSingle(valueDefault) - c.Mean.Value) / c.StdDev.Value;
+                case PredictorColumnEncoding.NormalizeZScore: return (Convert.ToSingle(valueDefault) - c.Average.Value) / c.StdDev.Value;
+                case PredictorColumnEncoding.NormalizeMinMax: return (Convert.ToSingle(valueDefault) - c.Min.Value) / (c.Max.Value - c.Min.Value);
                 case PredictorColumnEncoding.NormalizeLog:
                     {
                         var val = Convert.ToDouble(valueDefault);
@@ -255,7 +258,9 @@ namespace Signum.Engine.MachineLearning.CNTK
             {
                 case PredictorColumnNullHandling.Zero: return 0;
                 case PredictorColumnNullHandling.Error: throw new Exception($"Null found on {c.Token} of {c.SubQuery?.ToString() ?? "MainQuery"}");
-                case PredictorColumnNullHandling.Mean: return c.Mean;
+                case PredictorColumnNullHandling.Average: return c.Average;
+                case PredictorColumnNullHandling.Min: return c.Min;
+                case PredictorColumnNullHandling.Max: return c.Max;
                 default: throw new NotImplementedException("Unexpected NullHanndling " + c.NullHandling);
             }
         }
@@ -360,12 +365,13 @@ namespace Signum.Engine.MachineLearning.CNTK
                                 case PredictorColumnEncoding.None:
                                     break;
                                 case PredictorColumnEncoding.NormalizeZScore:
+                                case PredictorColumnEncoding.NormalizeMinMax:
                                 case PredictorColumnEncoding.NormalizeLog:
                                     po[c.Index] = c.Denormalize(po[c.Index]);
                                     eo[c.Index] = c.Denormalize(eo[c.Index]);
                                     break;
                                 default:
-                                    break;
+                                    throw new NotImplementedException(c.Encoding + " not supported");
                             }
                         }
 
@@ -466,6 +472,7 @@ namespace Signum.Engine.MachineLearning.CNTK
                     }
                 case PredictorColumnEncoding.OneHot:return cols.WithMax(c => outputValues[c.Index]).IsValue;
                 case PredictorColumnEncoding.NormalizeZScore:
+                case PredictorColumnEncoding.NormalizeMinMax:
                 case PredictorColumnEncoding.NormalizeLog:
                     {
                         var c = cols.SingleEx();

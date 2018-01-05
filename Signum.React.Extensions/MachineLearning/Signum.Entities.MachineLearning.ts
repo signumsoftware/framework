@@ -141,8 +141,10 @@ export interface PredictorCodificationEntity extends Entities.Entity {
     splitKey2?: string | null;
     isValue?: string | null;
     codedValues: Entities.MList<string>;
-    mean?: number | null;
+    average?: number | null;
     stdDev?: number | null;
+    min?: number | null;
+    max?: number | null;
 }
 
 export const PredictorColumnEmbedded = new Type<PredictorColumnEmbedded>("PredictorColumnEmbedded");
@@ -160,13 +162,16 @@ export type PredictorColumnEncoding =
     "OneHot" |
     "Codified" |
     "NormalizeZScore" |
+    "NormalizeMinMax" |
     "NormalizeLog";
 
 export const PredictorColumnNullHandling = new EnumType<PredictorColumnNullHandling>("PredictorColumnNullHandling");
 export type PredictorColumnNullHandling =
     "Zero" |
     "Error" |
-    "Mean";
+    "Average" |
+    "Min" |
+    "Max";
 
 export const PredictorColumnUsage = new EnumType<PredictorColumnUsage>("PredictorColumnUsage");
 export type PredictorColumnUsage =
@@ -245,6 +250,7 @@ export module PredictorMessage {
     export const ThereShouldBe0ColumnsWith12Currently3 = new MessageKey("PredictorMessage", "ThereShouldBe0ColumnsWith12Currently3");
     export const ShouldBeOfType0 = new MessageKey("PredictorMessage", "ShouldBeOfType0");
     export const TooManyParentKeys = new MessageKey("PredictorMessage", "TooManyParentKeys");
+    export const _0CanNotBe1Because2Use3 = new MessageKey("PredictorMessage", "_0CanNotBe1Because2Use3");
 }
 
 export const PredictorMetricsEmbedded = new Type<PredictorMetricsEmbedded>("PredictorMetricsEmbedded");
