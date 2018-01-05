@@ -19,6 +19,7 @@ import UserChartMenu from './UserChartMenu'
 import * as ChartClient from '../ChartClient'
 import * as UserAssetsClient from '../../UserAssets/UserAssetClient'
 import { ImportRoute } from "../../../../Framework/Signum.React/Scripts/AsyncImport";
+import { OrderRequest } from '../../../../Framework/Signum.React/Scripts/FindOptions';
 
 
 export function start(options: { routes: JSX.Element[] }) {
@@ -153,9 +154,23 @@ export module API {
         return ajaxGet<Lite<UserChartEntity>[]>({ url: "~/api/userChart/forQuery/" + queryKey });
     }
 
+    export function cleanedChartRequest(request: ChartRequest) {
+        const clone = { ...request };
+        clone.orders = clone.orderOptions!
+            .map(oo => ({ token: oo.token.fullKey, orderType: oo.orderType }) as OrderRequest);
+        delete clone.orderOptions;
+
+        clone.filters = clone.filterOptions!
+            .filter(a => a.token != null)
+            .map(fo => ({ token: fo.token!.fullKey, operation: fo.operation, value: fo.value }) as FilterRequest);
+        delete clone.filterOptions;
+
+        return clone;
+    }
+
     export function fromChartRequest(chartRequest: ChartRequest): Promise<UserChartEntity> {
 
-        const clone = ChartClient.API.getRequest(chartRequest)
+        const clone = cleanedChartRequest(chartRequest);
 
         return ajaxPost<UserChartEntity>({ url: "~/api/userChart/fromChartRequest/" }, clone);
     }
