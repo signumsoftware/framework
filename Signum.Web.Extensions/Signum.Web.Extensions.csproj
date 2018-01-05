@@ -943,16 +943,6 @@
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
     </Compile>
-    <Compile Include="Translation\Views\TranslatorUserCulture.generated.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>TranslatorUserCulture.cshtml</DependentUpon>
-    </Compile>
-    <Compile Include="Translation\Views\TranslatorUser.generated.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>TranslatorUser.cshtml</DependentUpon>
-    </Compile>
     <Compile Include="Translation\Views\View.generated.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -1794,14 +1784,6 @@
     <Content Include="Translation\Views\_ViewStart.cshtml">
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>_ViewStart.generated.cs</LastGenOutput>
-    </Content>
-    <Content Include="Translation\Views\TranslatorUserCulture.cshtml">
-      <Generator>RazorGenerator</Generator>
-      <LastGenOutput>TranslatorUserCulture.generated.cs</LastGenOutput>
-    </Content>
-    <Content Include="Translation\Views\TranslatorUser.cshtml">
-      <Generator>RazorGenerator</Generator>
-      <LastGenOutput>TranslatorUser.generated.cs</LastGenOutput>
     </Content>
     <Content Include="Translation\Views\View.cshtml">
       <Generator>RazorGenerator</Generator>
