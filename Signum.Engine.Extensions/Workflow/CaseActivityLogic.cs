@@ -410,23 +410,26 @@ namespace Signum.Engine.Workflow
 
         static void InsertCaseActivityNotifications(CaseActivityEntity caseActivity)
         {
-            var lane = caseActivity.WorkflowActivity.Lane;
-            var actors = lane.Actors.ToList();
-            if (lane.ActorsEval != null)
-                actors = lane.ActorsEval.Algorithm.GetActors(caseActivity.Case.MainEntity, new WorkflowTransitionContext(caseActivity.Case, caseActivity, null, null)).EmptyIfNull().ToList();
-
-            var notifications = actors.Distinct().SelectMany(a =>
-            Database.Query<UserEntity>()
-            .Where(u => WorkflowLogic.IsCurrentUserActor.Evaluate(a, u))
-            .Select(u => new CaseNotificationEntity
+            using (ExecutionMode.Global())
             {
-                CaseActivity = caseActivity.ToLite(),
-                Actor = a,
-                State = CaseNotificationState.New,
-                User = u.ToLite()
-            })).ToList();
+                var lane = caseActivity.WorkflowActivity.Lane;
+                var actors = lane.Actors.ToList();
+                if (lane.ActorsEval != null)
+                    actors = lane.ActorsEval.Algorithm.GetActors(caseActivity.Case.MainEntity, new WorkflowTransitionContext(caseActivity.Case, caseActivity, null, null)).EmptyIfNull().ToList();
 
-            notifications.BulkInsert();
+                var notifications = actors.Distinct().SelectMany(a =>
+                Database.Query<UserEntity>()
+                .Where(u => WorkflowLogic.IsUserActorConstant.Evaluate(u, a))
+                .Select(u => new CaseNotificationEntity
+                {
+                    CaseActivity = caseActivity.ToLite(),
+                    Actor = a,
+                    State = CaseNotificationState.New,
+                    User = u.ToLite()
+                })).ToList();
+
+                notifications.BulkInsert();
+            }
         }
 
       
