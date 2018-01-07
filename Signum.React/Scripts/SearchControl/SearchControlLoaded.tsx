@@ -62,7 +62,8 @@ export interface SearchControlLoadedProps {
     largeToolbarButtons: boolean;
     avoidAutoRefresh: boolean;
     avoidChangeUrl: boolean;
-    
+    refreshKey: string | undefined;
+
     onCreate?: () => void;
     onDoubleClick?: (e: React.MouseEvent<any>, row: ResultRow) => void;
     onNavigated?: (lite: Lite<Entity>) => void;
@@ -124,6 +125,12 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
         if (this.props.searchOnLoad)
             this.doSearch().done();
+    }
+
+    componentWillReceiveProps(props: SearchControlLoadedProps) {
+        if (this.props.refreshKey != props.refreshKey) {
+            this.doSearchPage1();
+        }
     }
 
     componentWillUnmount() {
