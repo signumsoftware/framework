@@ -180,15 +180,15 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Signum.Engine\Signum.Engine.csproj">
-      <Project>{7F2DB6FE-C109-4057-B207-C62A767F905D}</Project>
+      <Project>{7f2db6fe-c109-4057-b207-c62a767f905d}</Project>
       <Name>Signum.Engine</Name>
     </ProjectReference>
     <ProjectReference Include="..\Signum.Entities\Signum.Entities.csproj">
-      <Project>{F2B51D08-498D-4C9F-8112-9521A7762B02}</Project>
+      <Project>{f2b51d08-498d-4c9f-8112-9521a7762b02}</Project>
       <Name>Signum.Entities</Name>
     </ProjectReference>
     <ProjectReference Include="..\Signum.Utilities\Signum.Utilities.csproj">
-      <Project>{F7D3F72D-741D-4F67-8CF8-CD41B9035FED}</Project>
+      <Project>{f7d3f72d-741d-4f67-8cf8-cd41b9035fed}</Project>
       <Name>Signum.Utilities</Name>
     </ProjectReference>
   </ItemGroup>

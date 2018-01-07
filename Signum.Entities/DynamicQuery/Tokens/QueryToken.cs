@@ -170,7 +170,7 @@ namespace Signum.Entities.DynamicQuery
                 return StepTokens(this, 4).AndHasValue(this);
 
             if (ut == typeof(int) || ut == typeof(long) || ut == typeof(short))
-                return StepTokens(this, 0).AndHasValue(this);
+                return StepTokens(this, 0).AndModuloTokens(this).AndHasValue(this);
 
             if (ut == typeof(string))
                 return StringTokens().AndHasValue(this);
@@ -477,6 +477,10 @@ namespace Signum.Entities.DynamicQuery
         [Description("{0} has value")]
         _0HasValue,
         [Description("Has value")]
-        HasValue
+        HasValue,
+        [Description("Modulo {0}")]
+        Modulo0,
+        [Description("{0} mod {1}")]
+        _0Mod1,
     }
 }

@@ -856,6 +856,13 @@ export function ifError<E, T>(ErrorClass: { new (...args: any[]): E }, onError: 
     };
 }
 
+export function bytesToSize(bytes: number): string {
+    var sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
+    if (bytes == 0) return '0 Bytes';
+    var unit = parseInt(Math.floor(Math.log(bytes) / Math.log(1024)) as any);
+    return Math.round((bytes / Math.pow(1024, unit)) * 100) / 100 + ' ' + sizes[unit];
+};
+
 export module DomUtils {
     export function matches(elem: HTMLElement, selector: string): boolean {
         // Vendor-specific implementations of `Element.prototype.matches()`.
