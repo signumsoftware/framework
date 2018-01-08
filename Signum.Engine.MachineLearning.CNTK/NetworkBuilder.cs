@@ -138,16 +138,14 @@ namespace Signum.Engine.MachineLearning.CNTK
 
         public static Function MeanAbsoluteError(Variable prediction, Variable targets)
         {
-            var absolute = CNTKLib.Abs(CNTKLib.Minus(targets, prediction));
-
-            return CNTKLib.ReduceMean(absolute, Axis.DefaultBatchAxis() /*axis required here*/);
+            return CNTKLib.ReduceMean(CNTKLib.Abs(CNTKLib.Minus(targets, prediction)), new Axis(-1));
         }
 
         public static Function MeanAbsolutePercentageError(Variable prediction, Variable targets)
         {
-            var absolute = CNTKLib.Abs(CNTKLib.Minus(targets, prediction));
-            var absolutePercentage = CNTKLib.ElementDivide(absolute, targets);
-            return CNTKLib.ReduceMean(absolutePercentage, Axis.DefaultBatchAxis()/*axis required here*/);
+            var error = CNTKLib.Abs(CNTKLib.Minus(targets, prediction));
+            var percentage = CNTKLib.ElementDivide(error, targets);
+            return CNTKLib.ReduceMean(percentage, new Axis(-1));
         }
     }
 }
