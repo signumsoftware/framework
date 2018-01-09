@@ -143,8 +143,8 @@ namespace Signum.Engine.MachineLearning.CNTK
 
         public static Function MeanAbsolutePercentageError(Variable prediction, Variable targets)
         {
-            var error = CNTKLib.Abs(CNTKLib.Minus(targets, prediction));
-            var percentage = CNTKLib.ElementDivide(error, targets);
+            var error = CNTKLib.Minus(targets, prediction);
+            var percentage = CNTKLib.Abs(CNTKLib.ElementDivide(error, targets));
             return CNTKLib.ReduceMean(percentage, new Axis(-1));
         }
     }
