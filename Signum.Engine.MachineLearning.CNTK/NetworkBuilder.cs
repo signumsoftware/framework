@@ -35,10 +35,11 @@ namespace Signum.Engine.MachineLearning.CNTK
         {
             System.Diagnostics.Debug.Assert(input.Shape.Rank == 1);
             int inputDim = input.Shape[0];
-            
-            var W = new Parameter(new int[] { outputDim, inputDim }, DataType.Float, GetInitializer(initializer, (uint)seed), device, "W");
 
-            var b = new Parameter(new int[] { outputDim }, 0.0f, device, "b");
+            var init = GetInitializer(initializer, (uint)seed);
+            var W = new Parameter(new int[] { outputDim, inputDim }, DataType.Float, init, device, "W");
+
+            var b = new Parameter(new int[] { outputDim }, DataType.Float, init, device, "b");
             return b + W * input;
         }
 
