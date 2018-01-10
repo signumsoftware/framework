@@ -409,7 +409,7 @@ namespace Signum.Engine.MachineLearning.CNTK
                     MeanSquaredError = mse.CleanDouble(),
                     RootMeanSquareError = Math.Sqrt(mse).CleanDouble(),
                     MeanPercentageError = pairs.Average(p => SafeDiv(Error(p), p.expected)).CleanDouble(),
-                    MeanPercentageAbsoluteError = pairs.Average(p => Math.Abs(SafeDiv(Error(p), p.expected))).CleanDouble(),
+                    MeanAbsolutePercentageError = pairs.Average(p => Math.Abs(SafeDiv(Error(p), p.expected))).CleanDouble(),
                 };
 
                 return result;
