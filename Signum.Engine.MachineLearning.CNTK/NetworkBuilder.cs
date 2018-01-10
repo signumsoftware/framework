@@ -89,6 +89,20 @@ namespace Signum.Engine.MachineLearning.CNTK
             return new TrainingParameterScheduleDouble(value);
         }
 
+        public static Function GetEvalFunction(NeuralNetworkEvalFunction lossFunction, Function calculatedOutputs, Variable outputVariable)
+        {
+            switch (lossFunction)
+            {
+                case NeuralNetworkEvalFunction.CrossEntropyWithSoftmax: return CNTKLib.CrossEntropyWithSoftmax(calculatedOutputs, outputVariable);
+                case NeuralNetworkEvalFunction.ClassificationError: return CNTKLib.ClassificationError(calculatedOutputs, outputVariable);
+                case NeuralNetworkEvalFunction.SquaredError: return CNTKLib.SquaredError(calculatedOutputs, outputVariable);
+                case NeuralNetworkEvalFunction.MeanAbsoluteError: return NetworkBuilder.MeanAbsoluteError(calculatedOutputs, outputVariable);
+                case NeuralNetworkEvalFunction.MeanAbsolutePercentageError: return NetworkBuilder.MeanAbsolutePercentageError(calculatedOutputs, outputVariable);
+                default:
+                    throw new InvalidOperationException("Unexpected " + lossFunction);
+            }
+        }
+
         internal static Learner GetInitializer(IList<Parameter> parameters, NeuralNetworkSettingsEntity s)
         {
             var vector = new ParameterVector((ICollection)parameters);

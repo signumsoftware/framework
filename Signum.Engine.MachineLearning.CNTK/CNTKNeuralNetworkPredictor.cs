@@ -89,25 +89,9 @@ namespace Signum.Engine.MachineLearning.CNTK
             });
             Function calculatedOutputs = NetworkBuilder.DenseLayer(currentVar, ctx.OutputColumns.Count, device, nn.OutputActivation, nn.OutputInitializer, p.Settings.Seed ?? 0, "output");
 
-            Function loss;
-            Function evalError; 
-            if (nn.PredictionType == PredictionType.Regression || nn.PredictionType == PredictionType.MultiRegression)
-            {
-                loss = CNTKLib.SquaredError(calculatedOutputs, outputVariable);
-                evalError = CNTKLib.SquaredError(calculatedOutputs, outputVariable);
-                //loss = NetworkBuilder.MeanAbsoluteError(calculatedOutputs, outputVariable);
-                //evalError = NetworkBuilder.MeanAbsoluteError(calculatedOutputs, outputVariable);
-            }
-            else if (nn.PredictionType == PredictionType.Classification)
-            {
-                loss = CNTKLib.CrossEntropyWithSoftmax(calculatedOutputs, outputVariable);
-                evalError = CNTKLib.ClassificationError(calculatedOutputs, outputVariable);
-            }
-            else
-            {
-                throw new InvalidOperationException("Unexpected " + nn.PredictionType);
-            }
-
+            Function loss = NetworkBuilder.GetEvalFunction(nn.LossFunction, calculatedOutputs, outputVariable);
+            Function evalError = NetworkBuilder.GetEvalFunction(nn.EvalErrorFunction, calculatedOutputs, outputVariable);
+           
             // prepare for training
             Learner learner = NetworkBuilder.GetInitializer(calculatedOutputs.Parameters(), nn);
 

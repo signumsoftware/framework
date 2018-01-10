@@ -39,6 +39,8 @@ namespace Signum.Entities.MachineLearning
         ShouldBeOfType0,
         TooManyParentKeys,
         [Description("{0} can not be {1} because {2} use {3}")]
-        _0CanNotBe1Because2Use3
+        _0CanNotBe1Because2Use3,
+        [Description("{0} is not compatible with {1} {2}")]
+        _0IsNotCompatibleWith12
     }
 }
