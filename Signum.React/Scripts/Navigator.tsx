@@ -550,7 +550,7 @@ export interface ViewOptions {
     propertyRoute?: PropertyRoute;
     readOnly?: boolean;
     modalSize?: Sizes;
-    isOperationVisible?: (eoc: Operations.EntityOperationContext<Entity>) => boolean;
+    isOperationVisible?: (eoc: Operations.EntityOperationContext<any /*Entity*/>) => boolean;
     validate?: boolean;
     requiresSaveOperation?: boolean;
     avoidPromptLooseChange?: boolean;

@@ -34,7 +34,7 @@ export interface SearchControlProps extends React.Props<SearchControl> {
     rowAttributes?: (row: ResultRow, columns: string[]) => React.HTMLAttributes<HTMLTableRowElement> | undefined;
     entityFormatter?: EntityFormatter;
     extraButtons?: (searchControl: SearchControlLoaded) => (React.ReactElement<any> | null | undefined | false)[];
-    getViewPromise?: (e: ModifiableEntity) => Navigator.ViewPromise<ModifiableEntity>;
+    getViewPromise?: (e: any /*Entity*/) => Navigator.ViewPromise<any /*Entity*/>;
     maxResultsHeight?: React.CSSWideKeyword | any;
     tag?: string | {};
 
@@ -59,6 +59,7 @@ export interface SearchControlProps extends React.Props<SearchControl> {
     avoidAutoRefresh?: boolean;
     avoidChangeUrl?: boolean;
     throwIfNotFindable?: boolean;
+    refreshKey?: string;
 
     onNavigated?: (lite: Lite<Entity>) => void;
     onDoubleClick?: (e: React.MouseEvent<any>, row: ResultRow) => void;
@@ -205,6 +206,7 @@ export default class SearchControl extends React.Component<SearchControlProps, S
             largeToolbarButtons={p.largeToolbarButtons != null ? p.largeToolbarButtons : false}
             avoidAutoRefresh={p.avoidAutoRefresh != null ? p.avoidAutoRefresh : false}
             avoidChangeUrl={p.avoidChangeUrl != null ? p.avoidChangeUrl : true}
+            refreshKey={p.refreshKey}
 
             onCreate={p.onCreate}
             onNavigated={p.onNavigated}

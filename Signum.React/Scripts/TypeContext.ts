@@ -316,7 +316,7 @@ export class TypeContext<T> extends StyleContext {
 export interface ButtonsContext {
     pack: EntityPack<ModifiableEntity>;
     frame: EntityFrame;
-    isOperationVisible?: (eoc: EntityOperationContext<Entity>) => boolean;
+    isOperationVisible?: (eoc: EntityOperationContext<any /*Entity*/>) => boolean;
     tag?: string;
 }
 
@@ -325,7 +325,7 @@ export interface IRenderButtons {
 }
 
 export interface IOperationVisible {
-    isOperationVisible(eoc: EntityOperationContext<Entity>): boolean;
+    isOperationVisible(eoc: EntityOperationContext<any /*Entity*/>): boolean;
 }
 
 export interface IHasChanges {

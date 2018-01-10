@@ -23,7 +23,7 @@ interface FrameModalProps extends React.Props<FrameModal>, IModalProps {
     title?: string;
     entityOrPack: Lite<Entity> | ModifiableEntity | EntityPack<ModifiableEntity>;
     propertyRoute?: PropertyRoute;
-    isOperationVisible?: (eoc: EntityOperationContext<Entity>) => boolean;
+    isOperationVisible?: (eoc: EntityOperationContext<any /*Entity*/>) => boolean;
     validate?: boolean;
     requiresSaveOperation?: boolean;
     avoidPromptLooseChange?: boolean;
