@@ -35,10 +35,11 @@ namespace Signum.Engine.MachineLearning.CNTK
         {
             System.Diagnostics.Debug.Assert(input.Shape.Rank == 1);
             int inputDim = input.Shape[0];
-            
-            var W = new Parameter(new int[] { outputDim, inputDim }, DataType.Float, GetInitializer(initializer, (uint)seed), device, "W");
 
-            var b = new Parameter(new int[] { outputDim }, 0.0f, device, "b");
+            var init = GetInitializer(initializer, (uint)seed);
+            var W = new Parameter(new int[] { outputDim, inputDim }, DataType.Float, init, device, "W");
+
+            var b = new Parameter(new int[] { outputDim }, DataType.Float, init, device, "b");
             return b + W * input;
         }
 
@@ -152,16 +153,14 @@ namespace Signum.Engine.MachineLearning.CNTK
 
         public static Function MeanAbsoluteError(Variable prediction, Variable targets)
         {
-            var absolute = CNTKLib.Abs(CNTKLib.Minus(targets, prediction));
-
-            return CNTKLib.ReduceMean(absolute, Axis.DefaultBatchAxis() /*axis required here*/);
+            return CNTKLib.ReduceMean(CNTKLib.Abs(CNTKLib.Minus(targets, prediction)), new Axis(-1));
         }
 
         public static Function MeanAbsolutePercentageError(Variable prediction, Variable targets)
         {
-            var absolute = CNTKLib.Abs(CNTKLib.Minus(targets, prediction));
-            var absolutePercentage = CNTKLib.ElementDivide(absolute, targets);
-            return CNTKLib.ReduceMean(absolutePercentage, Axis.DefaultBatchAxis()/*axis required here*/);
+            var error = CNTKLib.Minus(targets, prediction);
+            var percentage = CNTKLib.Abs(CNTKLib.ElementDivide(error, targets));
+            return CNTKLib.ReduceMean(percentage, new Axis(-1));
         }
     }
 }
