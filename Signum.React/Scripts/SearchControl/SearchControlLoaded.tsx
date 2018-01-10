@@ -459,7 +459,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
                 onClick={this.handleToggleFilters}
                 title={s.showFilters ? JavascriptMessage.hideFilters.niceToString() : JavascriptMessage.showFilters.niceToString()}><span className="glyphicon glyphicon glyphicon-filter"></span></a >),
 
-            p.showFilterButton && OrderUtils.setOrder(-4, <a
+            p.showGroupButton && OrderUtils.setOrder(-4, <a
                 className={"sf-query-button btn btn-default" + (p.findOptions.groupResults ? " active" : "")}
                 onClick={this.handleToggleGroupBy}
                 title={p.findOptions.groupResults ? JavascriptMessage.ungroupResults.niceToString() : JavascriptMessage.groupResults.niceToString()}>Ʃ</a >),
