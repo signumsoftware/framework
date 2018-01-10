@@ -74,7 +74,7 @@ namespace Signum.Engine.MachineLearning
         public static ConcurrentDictionary<Lite<PredictorEntity>, PredictorTrainingState> Trainings = new ConcurrentDictionary<Lite<PredictorEntity>, PredictorTrainingState>();
 
 
-        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm, IFileTypeAlgorithm predictorFileAlgorithm)
+        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm, Func<IFileTypeAlgorithm> predictorFileAlgorithm)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
@@ -140,7 +140,7 @@ namespace Signum.Engine.MachineLearning
                         e.EvaluationValidation,
                     });
 
-                FileTypeLogic.Register(PredictorFileType.PredictorFile, predictorFileAlgorithm);
+                FileTypeLogic.Register(PredictorFileType.PredictorFile, predictorFileAlgorithm());
 
                 SymbolLogic<PredictorAlgorithmSymbol>.Start(sb, dqm, () => Algorithms.Keys);
                 SymbolLogic<PredictorResultSaverSymbol>.Start(sb, dqm, () => ResultSavers.Keys);
