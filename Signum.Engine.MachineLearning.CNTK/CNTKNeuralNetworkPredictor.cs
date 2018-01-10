@@ -19,6 +19,14 @@ namespace Signum.Engine.MachineLearning.CNTK
 {
     public class CNTKNeuralNetworkPredictorAlgorithm : IPredictorAlgorithm
     {
+        public void InitialSetup()
+        {
+            /// This is a workaround to load unmanaged CNTK dlls from the applications \bin directory.
+            var dir = AppDomain.CurrentDomain.BaseDirectory + "/bin";
+            var oldPath = Environment.GetEnvironmentVariable("Path");
+            Environment.SetEnvironmentVariable("Path", dir + ";" + oldPath, EnvironmentVariableTarget.Process);
+        }
+
         public string ValidateEncodingProperty(PredictorEntity predictor, PredictorSubQueryEntity subQuery, PredictorColumnEncoding encoding, PredictorColumnUsage usage, QueryTokenEmbedded token)
         {
             var nn = (NeuralNetworkSettingsEntity)predictor.AlgorithmSettings;
