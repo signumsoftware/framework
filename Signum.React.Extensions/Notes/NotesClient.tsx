@@ -19,9 +19,16 @@ export function start(options: { routes: JSX.Element[], couldHaveNotes?: (typeNa
     Navigator.addSettings(new EntitySettings(NoteEntity, e => import('./Templates/Note')));
     Navigator.addSettings(new EntitySettings(NoteTypeEntity, e => import('./Templates/NoteType')));
 
-    if (options.couldHaveNotes) {
-        Operations.addSettings(new EntityOperationSettings(NoteOperation.CreateNoteFromEntity, {
-            isVisible: eoc => options.couldHaveNotes!(eoc.entity.Type)
-        }));
-    }
+    const couldHaveNotes = options.couldHaveNotes || (typeName => true);
+
+    Operations.addSettings(new EntityOperationSettings(NoteOperation.CreateNoteFromEntity, {
+        isVisible: eoc => couldHaveNotes!(eoc.entity.Type),
+        contextual: { icon: "fa fa-sticky-note", iconColor: "#0e4f8c", style: "info", isVisible: ctx => couldHaveNotes(ctx.context.lites[0].EntityType), }
+    }));
+
+    QuickLinks.registerGlobalQuickLink(ctx => new QuickLinks.QuickLinkExplore({
+        queryName: NoteEntity,
+        parentColumn: "Target",
+        parentValue: ctx.lite
+    }, { isVisible: couldHaveNotes(ctx.lite.EntityType), icon: "fa fa-sticky-note", iconColor: "#337ab7" }));
 }

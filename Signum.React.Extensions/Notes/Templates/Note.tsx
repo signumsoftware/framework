@@ -19,7 +19,7 @@ export default class Note extends React.Component<{ ctx: TypeContext<NoteEntity>
 
         const e = this.props.ctx;
 
-        const ec = e.subCtx({ labelColumns: { sm: 4 } });
+        const ec = e.subCtx({ labelColumns: { sm: 2 } });
         const sc = ec.subCtx({ formGroupStyle: "Basic" });
 
 
