@@ -374,7 +374,7 @@ namespace Signum.Engine.MachineLearning
                 using (OperationLogic.AllowSave<PredictorEntity>())
                     ctx.Predictor.Save();
             }
-            catch (OperationCanceledException e)
+            catch (OperationCanceledException)
             {
                 var p = ctx.Predictor.ToLite().RetrieveAndForget();
                 CleanTrained(p);

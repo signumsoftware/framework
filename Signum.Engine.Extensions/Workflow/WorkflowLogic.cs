@@ -629,9 +629,13 @@ namespace Signum.Engine.Workflow
             return WorkflowLogic.Scripts.Value.GetOrThrow(ws);
         }
 
-        public static Expression<Func<Lite<Entity>, UserEntity, bool>> IsCurrentUserActor = (actor, user) =>
-           actor.RefersTo(user) ||
-           (actor is Lite<RoleEntity> && AuthLogic.RolesFromRole(user.Role).Contains((Lite<RoleEntity>)actor));
+        public static Expression<Func<UserEntity, Lite<Entity>, bool>> IsUserConstantActor = (userConstant, actor) =>
+           actor.RefersTo(userConstant) ||
+           (actor is Lite<RoleEntity> && AuthLogic.InverseIndirectlyRelated((Lite<RoleEntity>)actor).Contains(userConstant.Role));
+
+        public static Expression<Func<UserEntity, Lite<Entity>, bool>> IsUserActorConstant = (user, actorConstant) =>
+          actorConstant.RefersTo(user) ||
+          (actorConstant is Lite<RoleEntity> && AuthLogic.IndirectlyRelated(user.Role).Contains((Lite<RoleEntity>)actorConstant));
 
 
         public static List<WorkflowEntity> GetAllowedStarts()
@@ -639,7 +643,7 @@ namespace Signum.Engine.Workflow
             return (from w in Database.Query<WorkflowEntity>()
                     let s = w.WorkflowEvents().Single(a => a.Type == WorkflowEventType.Start)
                     let a = (WorkflowActivityEntity)s.NextConnections().Single().To
-                    where a.Lane.Actors.Any(a => IsCurrentUserActor.Evaluate(a, UserEntity.Current))
+                    where a.Lane.Actors.Any(a => IsUserConstantActor.Evaluate(UserEntity.Current, a))
                     select w).ToList();
         }
 

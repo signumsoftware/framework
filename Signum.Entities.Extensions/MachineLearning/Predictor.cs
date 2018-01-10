@@ -160,7 +160,7 @@ namespace Signum.Entities.MachineLearning
         public double? MeanPercentageError { get; set; }
 
         [Format("P2"), Unit("±")]
-        public double? MeanPercentageAbsoluteError { get; set; }
+        public double? MeanAbsolutePercentageError { get; set; }
     }
 
     [Serializable]

@@ -24,7 +24,10 @@ namespace Signum.React.MachineLearning
     {
         public static void Start(HttpConfiguration config)
         {
-            AddBinDirectoryToProcessPath();
+            foreach (var item in PredictorLogic.Algorithms.Values)
+            {
+                item.InitialSetup();
+            }
 
             UserAssetServer.Start(config);
 
@@ -46,16 +49,6 @@ namespace Signum.React.MachineLearning
                     mc.ParseData(qd);
                 }
             });
-        }
-
-        /// <summary>
-        /// This is a workaround to load unmanaged CNTK dlls from the applications \bin directory.
-        /// </summary>
-        public static void AddBinDirectoryToProcessPath()
-        {
-            var dir = AppDomain.CurrentDomain.BaseDirectory + "/bin";
-            var oldPath = Environment.GetEnvironmentVariable("Path");
-            Environment.SetEnvironmentVariable("Path", dir + ";" + oldPath, EnvironmentVariableTarget.Process);
         }
     }
 }

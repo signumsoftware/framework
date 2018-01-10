@@ -159,6 +159,10 @@ namespace Signum.Engine.Mailing
                             }
                         }
                     }
+                    catch (ThreadAbortException)
+                    {
+
+                    }
                     catch (Exception e)
                     {
                         try

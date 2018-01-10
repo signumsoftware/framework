@@ -19,6 +19,14 @@ namespace Signum.Engine.MachineLearning.CNTK
 {
     public class CNTKNeuralNetworkPredictorAlgorithm : IPredictorAlgorithm
     {
+        public void InitialSetup()
+        {
+            /// This is a workaround to load unmanaged CNTK dlls from the applications \bin directory.
+            var dir = AppDomain.CurrentDomain.BaseDirectory + "/bin";
+            var oldPath = Environment.GetEnvironmentVariable("Path");
+            Environment.SetEnvironmentVariable("Path", dir + ";" + oldPath, EnvironmentVariableTarget.Process);
+        }
+
         public string ValidateEncodingProperty(PredictorEntity predictor, PredictorSubQueryEntity subQuery, PredictorColumnEncoding encoding, PredictorColumnUsage usage, QueryTokenEmbedded token)
         {
             var nn = (NeuralNetworkSettingsEntity)predictor.AlgorithmSettings;
@@ -81,25 +89,9 @@ namespace Signum.Engine.MachineLearning.CNTK
             });
             Function calculatedOutputs = NetworkBuilder.DenseLayer(currentVar, ctx.OutputColumns.Count, device, nn.OutputActivation, nn.OutputInitializer, p.Settings.Seed ?? 0, "output");
 
-            Function loss;
-            Function evalError; 
-            if (nn.PredictionType == PredictionType.Regression || nn.PredictionType == PredictionType.MultiRegression)
-            {
-                loss = CNTKLib.SquaredError(calculatedOutputs, outputVariable);
-                evalError = CNTKLib.SquaredError(calculatedOutputs, outputVariable);
-                //loss = NetworkBuilder.MeanAbsoluteError(calculatedOutputs, outputVariable);
-                //evalError = NetworkBuilder.MeanAbsoluteError(calculatedOutputs, outputVariable);
-            }
-            else if (nn.PredictionType == PredictionType.Classification)
-            {
-                loss = CNTKLib.CrossEntropyWithSoftmax(calculatedOutputs, outputVariable);
-                evalError = CNTKLib.ClassificationError(calculatedOutputs, outputVariable);
-            }
-            else
-            {
-                throw new InvalidOperationException("Unexpected " + nn.PredictionType);
-            }
-
+            Function loss = NetworkBuilder.GetEvalFunction(nn.LossFunction, calculatedOutputs, outputVariable);
+            Function evalError = NetworkBuilder.GetEvalFunction(nn.EvalErrorFunction, calculatedOutputs, outputVariable);
+           
             // prepare for training
             Learner learner = NetworkBuilder.GetInitializer(calculatedOutputs.Parameters(), nn);
 
@@ -401,7 +393,7 @@ namespace Signum.Engine.MachineLearning.CNTK
                     MeanSquaredError = mse.CleanDouble(),
                     RootMeanSquareError = Math.Sqrt(mse).CleanDouble(),
                     MeanPercentageError = pairs.Average(p => SafeDiv(Error(p), p.expected)).CleanDouble(),
-                    MeanPercentageAbsoluteError = pairs.Average(p => Math.Abs(SafeDiv(Error(p), p.expected))).CleanDouble(),
+                    MeanAbsolutePercentageError = pairs.Average(p => Math.Abs(SafeDiv(Error(p), p.expected))).CleanDouble(),
                 };
 
                 return result;

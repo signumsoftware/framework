@@ -1,11 +1,13 @@
 ﻿using Signum.Entities;
 using Signum.Entities.MachineLearning;
 using Signum.Entities.Processes;
+using Signum.Entities.Reflection;
 using Signum.Utilities;
 using Signum.Utilities.ExpressionTrees;
 using Signum.Utilities.Reflection;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -31,6 +33,9 @@ namespace Signum.Entities.MachineLearning
         public NeuralNetworkInitializer OutputInitializer { get; set; }
 
         public NeuralNetworkLearner Learner { get; set; }
+
+        public NeuralNetworkEvalFunction LossFunction { get; set; }
+        public NeuralNetworkEvalFunction EvalErrorFunction { get; set; }
 
         [DecimalsValidator(5)]
         public double LearningRate { get; set; } = 0.2;
@@ -77,6 +82,27 @@ namespace Signum.Entities.MachineLearning
                 }
             }
 
+            string Validate(NeuralNetworkEvalFunction function)
+            {
+                bool lossIsClassification = function == NeuralNetworkEvalFunction.CrossEntropyWithSoftmax || function == NeuralNetworkEvalFunction.ClassificationError;
+                bool typeIsClassification = this.PredictionType == PredictionType.Classification || this.PredictionType == PredictionType.MultiClassification;
+
+                if (lossIsClassification != typeIsClassification)
+                    return PredictorMessage._0IsNotCompatibleWith12.NiceToString(function.NiceToString(), this.NicePropertyName(a => a.PredictionType), this.PredictionType.NiceToString());
+
+                return null;
+            }
+
+            if (pi.Name == nameof(LossFunction))
+            {
+                return Validate(LossFunction);
+            }
+
+            if (pi.Name == nameof(EvalErrorFunction))
+            {
+                return Validate(EvalErrorFunction);
+            }
+
             return base.PropertyValidation(pi);
         }
 
@@ -89,6 +115,8 @@ namespace Signum.Entities.MachineLearning
             OutputActivation = OutputActivation,
             OutputInitializer = OutputInitializer,
 
+            LossFunction = LossFunction,
+            EvalErrorFunction = EvalErrorFunction,
             Learner = Learner,
             LearningRate = LearningRate,
             LearningMomentum = LearningMomentum,
@@ -158,6 +186,15 @@ namespace Signum.Entities.MachineLearning
         RMSProp,
         MomentumSGD,
         SGD,
+    }
+
+    public enum NeuralNetworkEvalFunction
+    {
+        CrossEntropyWithSoftmax,
+        ClassificationError,
+        SquaredError,
+        MeanAbsoluteError,
+        MeanAbsolutePercentageError,
     }
     
     [Serializable, EntityKind(EntityKind.Part, EntityData.Transactional)]

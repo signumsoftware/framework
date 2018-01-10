@@ -69,5 +69,10 @@ namespace Signum.Entities.Chart
             Name = x.Attribute("Name").Value;
             Value = x.Attribute("Value").Value;
         }
+
+        public override string ToString()
+        {
+            return Name + ": " + Value;
+        }
     }
 }
