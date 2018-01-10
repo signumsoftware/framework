@@ -364,6 +364,10 @@ namespace Signum.Engine.Scheduler
                         return;
                     }
             }
+            catch (ThreadAbortException)
+            {
+
+            }
             catch (Exception e)
             {
                 e.LogException(ex =>
