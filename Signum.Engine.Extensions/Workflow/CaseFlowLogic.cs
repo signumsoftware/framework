@@ -181,16 +181,16 @@ namespace Signum.Engine.Workflow
                     }
                 }
 
-                if (node is WorkflowGatewayEntity g && g.Type == WorkflowGatewayType.Inclusive && g.Direction == WorkflowGatewayDirection.Split)
-                {
-                    var next = gr.ParallelWorkflowPairs.GetOrThrow(g);
-                    if (!visited.Contains(next))
-                    {
-                        visited.Add(next);
-                        flood(next);
-                        visited.Remove(next);
-                    }
-                }
+                //if (node is WorkflowGatewayEntity g && g.Type == WorkflowGatewayType.Inclusive && g.Direction == WorkflowGatewayDirection.Split)
+                //{
+                //    var next = gr.ParallelWorkflowPairs.GetOrThrow(g);
+                //    if (!visited.Contains(next))
+                //    {
+                //        visited.Add(next);
+                //        flood(next);
+                //        visited.Remove(next);
+                //    }
+                //}
             };
 
             flood(from);
