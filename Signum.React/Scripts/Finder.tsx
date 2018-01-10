@@ -645,7 +645,7 @@ function parseValue(token: QueryToken, val: any, needToStr: Array<any>): any {
         case "Boolean": return parseBoolean(val);
         case "Integer": return nanToNull(parseInt(val));
         case "Decimal": return nanToNull(parseFloat(val));
-        case "DateTime": return moment(val).format();
+        case "DateTime": return (val == null ? null : moment(val).format());
         case "Lite":
             {
                 const lite = convertToLite(val);
