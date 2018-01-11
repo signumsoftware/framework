@@ -33,7 +33,7 @@ namespace Signum.Engine.MachineLearning.CNTK
             switch (encoding)
             {
                 case PredictorColumnEncoding.None:
-                    if (!ReflectionTools.IsNumber(token.Token.Type))
+                    if (!ReflectionTools.IsNumber(token.Token.Type) && token.Token.Type.UnNullify() != typeof(bool))
                         return PredictorMessage._0IsRequiredFor1.NiceToString(PredictorColumnEncoding.OneHot.NiceToString(), token.Token.NiceTypeName);
 
                     if (usage == PredictorColumnUsage.Output && (nn.PredictionType == PredictionType.Classification || nn.PredictionType == PredictionType.MultiClassification))
