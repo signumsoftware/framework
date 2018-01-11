@@ -512,7 +512,7 @@ namespace Signum.Engine.MachineLearning.CNTK
         {
             var nnSettings = (NeuralNetworkSettingsEntity)ctx.Predictor.AlgorithmSettings;
 
-            ctx.Model = Function.Load(ctx.Predictor.Files.SingleEx().FullPhysicalPath(), GetDevice(nnSettings));
+            ctx.Model = Function.Load(ctx.Predictor.Files.SingleEx().GetByteArray(), GetDevice(nnSettings));
         }
     }
 }
