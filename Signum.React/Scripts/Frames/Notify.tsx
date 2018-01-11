@@ -1,11 +1,11 @@
 ﻿import * as React from 'react'
-import { Dic } from '../Globals'
+import { Dic, classes } from '../Globals'
 import * as Navigator from '../Navigator'
 import { ResultTable, FindOptions, FilterOption, QueryDescription } from '../FindOptions'
 import { Entity, Lite, is, toLite, JavascriptMessage, getToString, EntityPack, ModelState, ModifiableEntity } from '../Signum.Entities'
 import { TypeContext, StyleOptions } from '../TypeContext'
 import { getTypeInfo, TypeInfo, PropertyRoute, ReadonlyBinding, getTypeInfos } from '../Reflection'
-import { Transition } from 'react-overlays'
+import { Transition } from 'react-transition-group'
 
 
 import "./Notify.css"
@@ -101,12 +101,11 @@ export default class Notify extends React.Component<{}, NotifyState>{
         }
     }
 
-    render() {
-        
+    render() {        
         return (
             <div id="sfNotify">
-                <Transition in={this.state.text != undefined} className='notify' enteredClassName='in' enteringClassName='in' >
-                    <span className={this.state.type}>{this.getIcon()}{this.state.text}</span>
+                <Transition in={this.state.text != undefined} timeout={200}>
+                    {(state: string) => <span className={classes(this.state.type, "notify", state == "entering" || state == "entered" ? "in" : undefined)}>{this.getIcon()}{this.state.text}</span>}
                 </Transition>
             </div>
         );
