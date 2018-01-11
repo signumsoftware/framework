@@ -119,7 +119,7 @@ namespace Signum.Engine.MachineLearning.CNTK
                         {
                             { inputVariable, inputValue },
                             { outputVariable, outputValue },
-                        }, device);
+                        }, false, device);
                     }
                 }
                 var ep = new EpochProgress
@@ -181,14 +181,14 @@ namespace Signum.Engine.MachineLearning.CNTK
                 p.RegressionTraining = evaluator.RegressionMetrics(training, nameof(p.RegressionValidation), nn.PredictionType == PredictionType.MultiRegression);
             }
 
-            var fp = new Entities.Files.FilePathEmbedded(PredictorFileType.PredictorFile, "Model.cntk", new byte[0]);
+            var bytes = calculatedOutputs.Save();
+            
+            var fp = new Entities.Files.FilePathEmbedded(PredictorFileType.PredictorFile, "Model.cntk", bytes);
 
             p.Files.Add(fp);
 
             using (OperationLogic.AllowSave<PredictorEntity>())
                 p.Save();
-
-            calculatedOutputs.Save(fp.FullPhysicalPath());
         }
 
  

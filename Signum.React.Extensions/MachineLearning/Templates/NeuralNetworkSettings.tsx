@@ -61,6 +61,17 @@ export default class NeuralNetworkSettings extends React.Component<{ ctx: TypeCo
                             <ValueLine ctx={ctxb.subCtx(a => a.outputInitializer)} />
                         </div>
                     </div>
+                    <div className="row">
+                        <div className="col-sm-4">
+                        </div>
+                        <div className="col-sm-4">
+                            <ValueLine ctx={ctxb.subCtx(a => a.lossFunction)} />
+                        </div>
+                        <div className="col-sm-4">
+                            <ValueLine ctx={ctxb.subCtx(a => a.evalErrorFunction)} />
+                        </div>
+
+                    </div>
                 </div>
                 <hr />
                 <div className="row">
