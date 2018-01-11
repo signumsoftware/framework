@@ -154,11 +154,11 @@ export class PaginationComponent extends React.Component<PaginationComponentProp
 
         return (
             <ul className="pagination">
-                {this.addPageLink(1, "«", "First", currentPage == 1 ? "disabled" : undefined)}
+                {this.addPageLink("First", 1, "«", "First", currentPage == 1 ? "disabled" : undefined)}
                 {first != 1 && <li className="disabled"><a role="button" href="#" tabIndex={-1}><span aria-label="More">…</span></a></li>}
-                {Array.range(first, last + 1).map(page => this.addPageLink(page, page.toString(), page.toString(), page == currentPage ? "active" : undefined))}
+                {Array.range(first, last + 1).map(page => this.addPageLink(page.toString(), page, page.toString(), page.toString(), page == currentPage ? "active" : undefined))}
                 {last != totalPages && <li className="disabled"><a role="button" href="#" tabIndex={-1}><span aria-label="More">…</span></a></li>}
-                {this.addPageLink(totalPages, "»", "Last", currentPage == totalPages ? "disabled" : undefined)}
+                {this.addPageLink("Last", totalPages, "»", "Last", currentPage == totalPages ? "disabled" : undefined)}
             </ul>
         );
     }
@@ -185,9 +185,9 @@ export class PaginationComponent extends React.Component<PaginationComponentProp
         };
     }
 
-    addPageLink(page: number, text: string, ariaLabel: string, mode?: "active" | "disabled") {
+    addPageLink(key: string, page: number, text: string, ariaLabel: string, mode?: "active" | "disabled") {
         return (
-            <li className={mode} key={page}>
+            <li className={mode} key={key}>
                 <a role="button" href={mode == undefined ? "#" : undefined} tabIndex={-1}
                     onClick={mode == undefined ? ((e: React.MouseEvent<any>) => this.handlePageClicked(e, page)) : undefined}>
                     <span aria-label="First">{text}</span>
