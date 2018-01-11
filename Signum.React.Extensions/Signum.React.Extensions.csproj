@@ -168,6 +168,7 @@
     <Compile Include="Dynamic\DynamicViewController.cs" />
     <Compile Include="Dynamic\DynamicServer.cs" />
     <TypeScriptCompile Include="DiffLog\Templates\DiffDocument.tsx" />
+    <TypeScriptCompile Include="MachineLearning\Signum.Entities.MachineLearning.ts" />
     <TypeScriptCompile Include="MachineLearning\Templates\LineChart.tsx" />
     <TypeScriptCompile Include="MachineLearning\Templates\PredictModal.tsx" />
     <TypeScriptCompile Include="MachineLearning\Templates\NeuralNetworkSettings.tsx" />
@@ -272,9 +273,6 @@
     <TypeScriptCompile Include="Dynamic\View\DynamicView.tsx" />
     <TypeScriptCompile Include="HtmlEditor\HtmlEditor.tsx" />
     <TypeScriptCompile Include="MachineLearning\PredictorClient.tsx" />
-    <TypeScriptCompile Include="MachineLearning\Signum.Entities.Excel.ts">
-      <DependentUpon>Signum.Entities.MachineLearning.t4s</DependentUpon>
-    </TypeScriptCompile>
     <TypeScriptCompile Include="MachineLearning\Templates\Predictor.tsx" />
     <TypeScriptCompile Include="Mailing\Templates\IFrameRenderer.tsx" />
     <Compile Include="Map\MapServer.cs" />
