@@ -24,6 +24,11 @@ namespace Signum.React.MachineLearning
     {
         public static void Start(HttpConfiguration config)
         {
+            foreach (var item in PredictorLogic.Algorithms.Values)
+            {
+                item.InitialSetup();
+            }
+
             UserAssetServer.Start(config);
 
             SignumControllerFactory.RegisterArea(MethodInfo.GetCurrentMethod());

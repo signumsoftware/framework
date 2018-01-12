@@ -271,8 +271,11 @@ export default class Predictor extends React.Component<{ ctx: TypeContext<Predic
 export function initializeColumn(p: PredictorEntity, pc: PredictorColumnEmbedded | PredictorSubQueryColumnEmbedded) {
     var token = pc.token && pc.token.token;
     if (token) {
-        pc.encoding = token.type.name == "number" || token.type.name == "decimal" ? "NormalizeZScore" :
-            NeuralNetworkSettingsEntity.isInstance(p.algorithmSettings) ? "OneHot" : "Codified";
+        pc.encoding =
+            token.type.name == "number" || token.type.name == "decimal" ? "NormalizeZScore" :
+                NeuralNetworkSettingsEntity.isInstance(p.algorithmSettings) ? (token.type.name == "boolean" ? "None" : "OneHot") :
+                    "Codified";
+
         pc.nullHandling = "Zero";
     }
 }

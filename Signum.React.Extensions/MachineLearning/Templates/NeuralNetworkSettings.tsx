@@ -19,6 +19,17 @@ import { is } from '../../../../Framework/Signum.React/Scripts/Signum.Entities';
 
 export default class NeuralNetworkSettings extends React.Component<{ ctx: TypeContext<NeuralNetworkSettingsEntity> }> {
 
+    handlePredictionTypeChanged = () => {
+        var nn = this.props.ctx.value;
+        if (nn.predictionType == "Classification" || nn.predictionType == "MultiClassification") {
+            nn.lossFunction = "CrossEntropyWithSoftmax";
+            nn.evalErrorFunction = "ClassificationError";
+        } else {
+            nn.lossFunction = "SquaredError";
+            nn.evalErrorFunction = "SquaredError";
+        }
+    }
+
     render() {
         const ctx = this.props.ctx;
 
@@ -31,7 +42,7 @@ export default class NeuralNetworkSettings extends React.Component<{ ctx: TypeCo
             <div>
                 <h4>{NeuralNetworkSettingsEntity.niceName()}</h4>
                 {p.algorithm && <DeviceLine ctx={ctx.subCtx(a => a.device)} algorithm={p.algorithm} />}
-                <ValueLine ctx={ctx.subCtx(a => a.predictionType)} />
+                <ValueLine ctx={ctx.subCtx(a => a.predictionType)} onChange={this.handlePredictionTypeChanged} />
                 {this.renderCount(ctx, p, "Input")}
                 <EntityTable ctx={ctx.subCtx(a => a.hiddenLayers)} columns={EntityTable.typedColumns<NeuralNetworkHidenLayerEmbedded>([
                     { property: a => a.size, headerHtmlAttributes: { style: { width: "33%" } } },
@@ -49,6 +60,17 @@ export default class NeuralNetworkSettings extends React.Component<{ ctx: TypeCo
                         <div className="col-sm-4">
                             <ValueLine ctx={ctxb.subCtx(a => a.outputInitializer)} />
                         </div>
+                    </div>
+                    <div className="row">
+                        <div className="col-sm-4">
+                        </div>
+                        <div className="col-sm-4">
+                            <ValueLine ctx={ctxb.subCtx(a => a.lossFunction)} />
+                        </div>
+                        <div className="col-sm-4">
+                            <ValueLine ctx={ctxb.subCtx(a => a.evalErrorFunction)} />
+                        </div>
+
                     </div>
                 </div>
                 <hr />

@@ -16,7 +16,7 @@ export default class AlertType extends React.Component<{ ctx: TypeContext<AlertT
 
     render() {
         const ctx = this.props.ctx;
-        const ctx4 = ctx.subCtx({ labelColumns: 4 });
+        const ctx4 = ctx.subCtx({ labelColumns: 2 });
         return (
             <div>
                 <ValueLine ctx={ctx4.subCtx(n => n.name)} />

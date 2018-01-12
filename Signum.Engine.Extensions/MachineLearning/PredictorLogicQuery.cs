@@ -134,17 +134,16 @@ namespace Signum.Engine.MachineLearning
                         return new List<PredictorCodification> { pc };
                     }
                 case PredictorColumnEncoding.NormalizeZScore:
+                case PredictorColumnEncoding.NormalizeMinMax:
+                case PredictorColumnEncoding.NormalizeLog:
                     {
                         var values = rc.Values.Cast<object>().NotNull().Select(a => Convert.ToSingle(a)).ToList();
                         var pc = factory();
-                        pc.Mean = values.Count == 0 ? 0 : values.Average();
+                        pc.Average = values.Count == 0 ? 0 : values.Average();
                         pc.StdDev = values.Count == 0 ? 1 : values.StdDev();
+                        pc.Min = values.Count == 0 ? 0 : values.Min();
+                        pc.Max = values.Count == 0 ? 1 : values.Max();
                         return new List<PredictorCodification> { pc };
-                    };
-                case PredictorColumnEncoding.NormalizeLog:
-                    return new List<PredictorCodification>
-                    {
-                        factory()
                     };
                 default:
                     throw new InvalidOperationException("Unexcpected Encoding");
@@ -249,8 +248,11 @@ namespace Signum.Engine.MachineLearning
         //Serves as Codification (i.e: Bayes)
         public Dictionary<object, int> ValuesToIndex;
 
-        public float? Mean;
+        public float? Average;
         public float? StdDev;
+
+        public float? Min;
+        public float? Max;
 
         public object[] CodedValues;
 
@@ -275,9 +277,12 @@ namespace Signum.Engine.MachineLearning
         public float Denormalize(float value)
         {
             if (Encoding == PredictorColumnEncoding.NormalizeZScore)
-                return Mean.Value + (StdDev.Value * value);
+                return Average.Value + (StdDev.Value * value);
 
-            if (Encoding == PredictorColumnEncoding.NormalizeLog) ;
+            if (Encoding == PredictorColumnEncoding.NormalizeMinMax)
+                return Min.Value + ((Max.Value - Min.Value) * value);
+
+            if (Encoding == PredictorColumnEncoding.NormalizeLog)
                 return (float)Math.Exp((double)value);
 
             throw new InvalidOperationException();

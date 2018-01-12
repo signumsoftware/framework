@@ -38,7 +38,7 @@ export default class PredictorRegressionMetrics extends React.Component<{ ctx: T
                         {this.renderRow(ctx, a => a.meanSquaredError)}
                         {this.renderRow(ctx, a => a.rootMeanSquareError)}
                         {this.renderRow(ctx, a => a.meanPercentageError)}
-                        {this.renderRow(ctx, a => a.meanPercentageAbsoluteError)}
+                        {this.renderRow(ctx, a => a.meanAbsolutePercentageError)}
                     </tbody>
                 </table>
             </fieldset>

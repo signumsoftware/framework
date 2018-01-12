@@ -19,13 +19,21 @@ namespace Signum.Engine.MachineLearning.CNTK
 {
     public class CNTKNeuralNetworkPredictorAlgorithm : IPredictorAlgorithm
     {
+        public void InitialSetup()
+        {
+            /// This is a workaround to load unmanaged CNTK dlls from the applications \bin directory.
+            var dir = AppDomain.CurrentDomain.BaseDirectory + "/bin";
+            var oldPath = Environment.GetEnvironmentVariable("Path");
+            Environment.SetEnvironmentVariable("Path", dir + ";" + oldPath, EnvironmentVariableTarget.Process);
+        }
+
         public string ValidateEncodingProperty(PredictorEntity predictor, PredictorSubQueryEntity subQuery, PredictorColumnEncoding encoding, PredictorColumnUsage usage, QueryTokenEmbedded token)
         {
             var nn = (NeuralNetworkSettingsEntity)predictor.AlgorithmSettings;
             switch (encoding)
             {
                 case PredictorColumnEncoding.None:
-                    if (!ReflectionTools.IsNumber(token.Token.Type))
+                    if (!ReflectionTools.IsNumber(token.Token.Type) && token.Token.Type.UnNullify() != typeof(bool))
                         return PredictorMessage._0IsRequiredFor1.NiceToString(PredictorColumnEncoding.OneHot.NiceToString(), token.Token.NiceTypeName);
 
                     if (usage == PredictorColumnUsage.Output && (nn.PredictionType == PredictionType.Classification || nn.PredictionType == PredictionType.MultiClassification))
@@ -81,23 +89,9 @@ namespace Signum.Engine.MachineLearning.CNTK
             });
             Function calculatedOutputs = NetworkBuilder.DenseLayer(currentVar, ctx.OutputColumns.Count, device, nn.OutputActivation, nn.OutputInitializer, p.Settings.Seed ?? 0, "output");
 
-            Function loss;
-            Function evalError; 
-            if (nn.PredictionType == PredictionType.Regression || nn.PredictionType == PredictionType.MultiRegression)
-            {
-                loss = CNTKLib.SquaredError(calculatedOutputs, outputVariable);
-                evalError = CNTKLib.SquaredError(calculatedOutputs, outputVariable);
-            }
-            else if (nn.PredictionType == PredictionType.Classification)
-            {
-                loss = CNTKLib.CrossEntropyWithSoftmax(calculatedOutputs, outputVariable);
-                evalError = CNTKLib.ClassificationError(calculatedOutputs, outputVariable);
-            }
-            else
-            {
-                throw new InvalidOperationException("Unexpected " + nn.PredictionType);
-            }
-
+            Function loss = NetworkBuilder.GetEvalFunction(nn.LossFunction, calculatedOutputs, outputVariable);
+            Function evalError = NetworkBuilder.GetEvalFunction(nn.EvalErrorFunction, calculatedOutputs, outputVariable);
+           
             // prepare for training
             Learner learner = NetworkBuilder.GetInitializer(calculatedOutputs.Parameters(), nn);
 
@@ -125,7 +119,7 @@ namespace Signum.Engine.MachineLearning.CNTK
                         {
                             { inputVariable, inputValue },
                             { outputVariable, outputValue },
-                        }, device);
+                        }, false, device);
                     }
                 }
                 var ep = new EpochProgress
@@ -187,14 +181,14 @@ namespace Signum.Engine.MachineLearning.CNTK
                 p.RegressionTraining = evaluator.RegressionMetrics(training, nameof(p.RegressionValidation), nn.PredictionType == PredictionType.MultiRegression);
             }
 
-            var fp = new Entities.Files.FilePathEmbedded(PredictorFileType.PredictorFile, "Model.cntk", new byte[0]);
+            var bytes = calculatedOutputs.Save();
+            
+            var fp = new Entities.Files.FilePathEmbedded(PredictorFileType.PredictorFile, "Model.cntk", bytes);
 
             p.Files.Add(fp);
 
             using (OperationLogic.AllowSave<PredictorEntity>())
                 p.Save();
-
-            calculatedOutputs.Save(fp.FullPhysicalPath());
         }
 
  
@@ -239,7 +233,8 @@ namespace Signum.Engine.MachineLearning.CNTK
                 case PredictorColumnEncoding.None: return Convert.ToSingle(valueDefault);
                 case PredictorColumnEncoding.OneHot: return Object.Equals(valueDefault, c.IsValue) ? 1 : 0;
                 case PredictorColumnEncoding.Codified: throw new NotImplementedException("Codified is not usable for Neural Networks");
-                case PredictorColumnEncoding.NormalizeZScore: return (Convert.ToSingle(valueDefault) - c.Mean.Value) / c.StdDev.Value;
+                case PredictorColumnEncoding.NormalizeZScore: return (Convert.ToSingle(valueDefault) - c.Average.Value) / c.StdDev.Value;
+                case PredictorColumnEncoding.NormalizeMinMax: return (Convert.ToSingle(valueDefault) - c.Min.Value) / (c.Max.Value - c.Min.Value);
                 case PredictorColumnEncoding.NormalizeLog:
                     {
                         var val = Convert.ToDouble(valueDefault);
@@ -255,7 +250,9 @@ namespace Signum.Engine.MachineLearning.CNTK
             {
                 case PredictorColumnNullHandling.Zero: return 0;
                 case PredictorColumnNullHandling.Error: throw new Exception($"Null found on {c.Token} of {c.SubQuery?.ToString() ?? "MainQuery"}");
-                case PredictorColumnNullHandling.Mean: return c.Mean;
+                case PredictorColumnNullHandling.Average: return c.Average;
+                case PredictorColumnNullHandling.Min: return c.Min;
+                case PredictorColumnNullHandling.Max: return c.Max;
                 default: throw new NotImplementedException("Unexpected NullHanndling " + c.NullHandling);
             }
         }
@@ -360,12 +357,13 @@ namespace Signum.Engine.MachineLearning.CNTK
                                 case PredictorColumnEncoding.None:
                                     break;
                                 case PredictorColumnEncoding.NormalizeZScore:
+                                case PredictorColumnEncoding.NormalizeMinMax:
                                 case PredictorColumnEncoding.NormalizeLog:
                                     po[c.Index] = c.Denormalize(po[c.Index]);
                                     eo[c.Index] = c.Denormalize(eo[c.Index]);
                                     break;
                                 default:
-                                    break;
+                                    throw new NotImplementedException(c.Encoding + " not supported");
                             }
                         }
 
@@ -395,7 +393,7 @@ namespace Signum.Engine.MachineLearning.CNTK
                     MeanSquaredError = mse.CleanDouble(),
                     RootMeanSquareError = Math.Sqrt(mse).CleanDouble(),
                     MeanPercentageError = pairs.Average(p => SafeDiv(Error(p), p.expected)).CleanDouble(),
-                    MeanPercentageAbsoluteError = pairs.Average(p => Math.Abs(SafeDiv(Error(p), p.expected))).CleanDouble(),
+                    MeanAbsolutePercentageError = pairs.Average(p => Math.Abs(SafeDiv(Error(p), p.expected))).CleanDouble(),
                 };
 
                 return result;
@@ -466,6 +464,7 @@ namespace Signum.Engine.MachineLearning.CNTK
                     }
                 case PredictorColumnEncoding.OneHot:return cols.WithMax(c => outputValues[c.Index]).IsValue;
                 case PredictorColumnEncoding.NormalizeZScore:
+                case PredictorColumnEncoding.NormalizeMinMax:
                 case PredictorColumnEncoding.NormalizeLog:
                     {
                         var c = cols.SingleEx();
@@ -513,7 +512,7 @@ namespace Signum.Engine.MachineLearning.CNTK
         {
             var nnSettings = (NeuralNetworkSettingsEntity)ctx.Predictor.AlgorithmSettings;
 
-            ctx.Model = Function.Load(ctx.Predictor.Files.SingleEx().FullPhysicalPath(), GetDevice(nnSettings));
+            ctx.Model = Function.Load(ctx.Predictor.Files.SingleEx().GetByteArray(), GetDevice(nnSettings));
         }
     }
 }

@@ -52,6 +52,7 @@ namespace Signum.Engine.Authorization
         }
 
         static ResetLazy<DirectedGraph<Lite<RoleEntity>>> roles;
+        static ResetLazy<DirectedGraph<Lite<RoleEntity>>> rolesInverse;
 
         class RoleData
         {
@@ -88,6 +89,7 @@ namespace Signum.Engine.Authorization
                     });
 
                 roles = sb.GlobalLazy(CacheRoles, new InvalidateWith(typeof(RoleEntity)), AuthLogic.NotifyRulesChanged);
+                rolesInverse = sb.GlobalLazy(()=>roles.Value.Inverse(), new InvalidateWith(typeof(RoleEntity)));
                 mergeStrategies = sb.GlobalLazy(() =>
                 {
                     var strategies = Database.Query<RoleEntity>().Select(r => KVP.Create(r.ToLite(), r.MergeStrategy)).ToDictionary();
@@ -331,9 +333,14 @@ namespace Signum.Engine.Authorization
             return roles.Value.IndirectlyRelatedTo(RoleEntity.Current, true);
         }
 
-        public static HashSet<Lite<RoleEntity>> RolesFromRole(Lite<RoleEntity> role)
+        public static HashSet<Lite<RoleEntity>> IndirectlyRelated(Lite<RoleEntity> role)
         {
             return roles.Value.IndirectlyRelatedTo(role, true);
+        }
+
+        public static HashSet<Lite<RoleEntity>> InverseIndirectlyRelated(Lite<RoleEntity> role)
+        {
+            return rolesInverse.Value.IndirectlyRelatedTo(role, true);
         }
 
         internal static int Rank(Lite<RoleEntity> role)

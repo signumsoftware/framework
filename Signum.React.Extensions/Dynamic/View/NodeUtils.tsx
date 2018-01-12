@@ -693,7 +693,7 @@ export function designEntityBase(dn: DesignerNode<EntityBaseNode>, options: { is
             {options.showMove && <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, (n: EntityListBaseNode) => n.move)} type="boolean" defaultValue={null} />}
             {options.showAutoComplete && <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => (n as EntityLineNode).autoComplete)} type="boolean" defaultValue={null} />}
             <FindOptionsLine dn={dn} binding={Binding.create(dn.node, n => n.findOptions)} avoidSuggestion={true} />
-            <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.onChange)} type={null} defaultValue={null} />
+            <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.onChange)} type={null} defaultValue={null} exampleExpression={"() => this.forceUpdate()"} />
         </div>
     );
 }

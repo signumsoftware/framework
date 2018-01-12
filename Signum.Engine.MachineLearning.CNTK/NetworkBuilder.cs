@@ -35,10 +35,11 @@ namespace Signum.Engine.MachineLearning.CNTK
         {
             System.Diagnostics.Debug.Assert(input.Shape.Rank == 1);
             int inputDim = input.Shape[0];
-            
-            var W = new Parameter(new int[] { outputDim, inputDim }, DataType.Float, GetInitializer(initializer, (uint)seed), device, "W");
 
-            var b = new Parameter(new int[] { outputDim }, 0.0f, device, "b");
+            var init = GetInitializer(initializer, (uint)seed);
+            var W = new Parameter(new int[] { outputDim, inputDim }, DataType.Float, init, device, "W");
+
+            var b = new Parameter(new int[] { outputDim }, DataType.Float, init, device, "b");
             return b + W * input;
         }
 
@@ -89,6 +90,20 @@ namespace Signum.Engine.MachineLearning.CNTK
             return new TrainingParameterScheduleDouble(value);
         }
 
+        public static Function GetEvalFunction(NeuralNetworkEvalFunction lossFunction, Function calculatedOutputs, Variable outputVariable)
+        {
+            switch (lossFunction)
+            {
+                case NeuralNetworkEvalFunction.CrossEntropyWithSoftmax: return CNTKLib.CrossEntropyWithSoftmax(calculatedOutputs, outputVariable);
+                case NeuralNetworkEvalFunction.ClassificationError: return CNTKLib.ClassificationError(calculatedOutputs, outputVariable);
+                case NeuralNetworkEvalFunction.SquaredError: return CNTKLib.SquaredError(calculatedOutputs, outputVariable);
+                case NeuralNetworkEvalFunction.MeanAbsoluteError: return NetworkBuilder.MeanAbsoluteError(calculatedOutputs, outputVariable);
+                case NeuralNetworkEvalFunction.MeanAbsolutePercentageError: return NetworkBuilder.MeanAbsolutePercentageError(calculatedOutputs, outputVariable);
+                default:
+                    throw new InvalidOperationException("Unexpected " + lossFunction);
+            }
+        }
+
         internal static Learner GetInitializer(IList<Parameter> parameters, NeuralNetworkSettingsEntity s)
         {
             var vector = new ParameterVector((ICollection)parameters);
@@ -134,6 +149,18 @@ namespace Signum.Engine.MachineLearning.CNTK
                 default:
                     throw new InvalidOperationException("Unexpected Learner");
             }
+        }
+
+        public static Function MeanAbsoluteError(Variable prediction, Variable targets)
+        {
+            return CNTKLib.ReduceMean(CNTKLib.Abs(CNTKLib.Minus(targets, prediction)), new Axis(-1));
+        }
+
+        public static Function MeanAbsolutePercentageError(Variable prediction, Variable targets)
+        {
+            var error = CNTKLib.Minus(targets, prediction);
+            var percentage = CNTKLib.Abs(CNTKLib.ElementDivide(error, targets));
+            return CNTKLib.ReduceMean(percentage, new Axis(-1));
         }
     }
 }

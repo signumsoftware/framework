@@ -74,7 +74,7 @@ namespace Signum.Engine.MachineLearning
         public static ConcurrentDictionary<Lite<PredictorEntity>, PredictorTrainingState> Trainings = new ConcurrentDictionary<Lite<PredictorEntity>, PredictorTrainingState>();
 
 
-        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm, IFileTypeAlgorithm predictorFileAlgorithm)
+        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm, Func<IFileTypeAlgorithm> predictorFileAlgorithm)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
@@ -119,7 +119,9 @@ namespace Signum.Engine.MachineLearning
                         e.SplitKey1,
                         e.SplitKey2,
                         e.IsValue,
-                        e.Mean,
+                        e.Min,
+                        e.Max,
+                        e.Average,
                         e.StdDev,
                     });
 
@@ -138,7 +140,7 @@ namespace Signum.Engine.MachineLearning
                         e.EvaluationValidation,
                     });
 
-                FileTypeLogic.Register(PredictorFileType.PredictorFile, predictorFileAlgorithm);
+                FileTypeLogic.Register(PredictorFileType.PredictorFile, predictorFileAlgorithm());
 
                 SymbolLogic<PredictorAlgorithmSymbol>.Start(sb, dqm, () => Algorithms.Keys);
                 SymbolLogic<PredictorResultSaverSymbol>.Start(sb, dqm, () => ResultSavers.Keys);
@@ -372,7 +374,7 @@ namespace Signum.Engine.MachineLearning
                 using (OperationLogic.AllowSave<PredictorEntity>())
                     ctx.Predictor.Save();
             }
-            catch (OperationCanceledException e)
+            catch (OperationCanceledException)
             {
                 var p = ctx.Predictor.ToLite().RetrieveAndForget();
                 CleanTrained(p);

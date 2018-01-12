@@ -157,6 +157,10 @@ namespace Signum.Engine.Workflow
                             }
                         }
                     }
+                    catch (ThreadAbortException)
+                    {
+
+                    }
                     catch (Exception e)
                     {
                         try

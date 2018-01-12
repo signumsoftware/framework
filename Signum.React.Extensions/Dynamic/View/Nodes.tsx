@@ -612,7 +612,7 @@ NodeUtils.register<FileLineNode>({
                 <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.dragAndDropMessage)} type="string" defaultValue={null} />
                 <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.fileType)} type="string" defaultValue={null} options={getFileTypes()} />
                 <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.accept)} type="string" defaultValue={null} />
-                <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.onChange)} type={null} defaultValue={null} />
+                <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.onChange)} type={null} defaultValue={null} exampleExpression={"() => this.forceUpdate()"} />
             </div>
         );
     }
@@ -673,7 +673,7 @@ NodeUtils.register<EnumCheckboxListNode>({
             <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.readOnly)} type="boolean" defaultValue={null} />
             <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.columnCount)} type="number" defaultValue={null} />
             <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.columnWidth)} type="number" defaultValue={200} />
-            <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.onChange)} type={null} defaultValue={null} />
+            <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.onChange)} type={null} defaultValue={null} exampleExpression={"() => this.forceUpdate()"} />
         </div>)
     },
 });
@@ -897,6 +897,7 @@ export interface SearchControlNode extends BaseNode {
     allowChangeColumns?: ExpressionOrValue<boolean>;
     create?: ExpressionOrValue<boolean>;
     navigate?: ExpressionOrValue<boolean>;
+    refreshKey?: Expression<string | undefined>;
 }
 
 NodeUtils.register<SearchControlNode>({
@@ -917,6 +918,7 @@ NodeUtils.register<SearchControlNode>({
         allowChangeColumns={NodeUtils.evaluateAndValidate(ctx, dn.node, f => f.allowChangeColumns, NodeUtils.isBooleanOrNull)}
         create={NodeUtils.evaluateAndValidate(ctx, dn.node, f => f.create, NodeUtils.isBooleanOrNull)}
         navigate={NodeUtils.evaluateAndValidate(ctx, dn.node, f => f.navigate, NodeUtils.isBooleanOrNull)}
+        refreshKey={NodeUtils.evaluateAndValidate(ctx, dn.node, f => f.refreshKey, NodeUtils.isStringOrNull)}
     />,
     renderDesigner: dn => <div>
         <FindOptionsLine dn={dn} binding={Binding.create(dn.node, a => a.findOptions)} />
@@ -928,6 +930,7 @@ NodeUtils.register<SearchControlNode>({
         <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, f => f.allowChangeColumns)} type="boolean" defaultValue={null} />
         <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, f => f.create)} type="boolean" defaultValue={null} />
         <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, f => f.navigate)} type="boolean" defaultValue={null} />
+        <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, f => f.refreshKey)} type={null} defaultValue={null} exampleExpression={"ctx.value.ticks"} />
     </div>
 });
 

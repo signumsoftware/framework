@@ -207,6 +207,7 @@ namespace Signum.Engine.MachineLearning
 
     public interface IPredictorAlgorithm
     {
+        void InitialSetup();
         string ValidateEncodingProperty(PredictorEntity predictor, PredictorSubQueryEntity subQuery, PredictorColumnEncoding encoding, PredictorColumnUsage usage, QueryTokenEmbedded token);
         void Train(PredictorTrainingContext ctx);
         void LoadModel(PredictorPredictContext predictor);
