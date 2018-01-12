@@ -7,7 +7,7 @@ import * as Finder from '../Finder'
 import { FindOptions } from '../FindOptions'
 import { TypeContext, StyleContext, StyleOptions, FormGroupStyle } from '../TypeContext'
 import { PropertyRoute, PropertyRouteType, MemberInfo, getTypeInfo, getTypeInfos, TypeInfo, IsByAll, getTypeName } from '../Reflection'
-import { LineBase, LineBaseProps, FormGroup, FormControlStatic, runTasks } from '../Lines/LineBase'
+import { LineBase, LineBaseProps, runTasks } from '../Lines/LineBase'
 import Typeahead from '../Lines/Typeahead'
 import { EntityBase, EntityBaseProps} from './EntityBase'
 
@@ -51,7 +51,7 @@ export abstract class EntityListBase<T extends EntityListBaseProps, S extends En
             return undefined;
 
         return (
-            <a className={classes("sf-line-button", "sf-move", btn ? "btn btn-default" : undefined) }
+            <a className={classes("sf-line-button", "sf-move", btn ? "btn btn-light" : undefined) }
                 onClick={() => this.moveUp(index) }
                 title={EntityControlMessage.MoveUp.niceToString() }>
                 <span className="fa fa-chevron-up"/>
@@ -70,7 +70,7 @@ export abstract class EntityListBase<T extends EntityListBaseProps, S extends En
             return undefined;
 
         return (
-            <a className={classes("sf-line-button", "sf-move", btn ? "btn btn-default" : undefined) }
+            <a className={classes("sf-line-button", "sf-move", btn ? "btn btn-light" : undefined) }
                 onClick={() => this.moveDown(index) }
                 title={EntityControlMessage.MoveUp.niceToString() }>
                 <span className="fa fa-chevron-down"/>

@@ -85,7 +85,7 @@ export function getEntityOperationButtons(ctx: ButtonsContext): Array<React.Reac
                 order: group.order != undefined ? group.order : 100,
                 button: (
                     <UncontrolledDropdown key={i}>
-                        <DropdownToggle data-key={group.key}>
+                        <DropdownToggle data-key={group.key} color="light" caret>
                             {group.text()}
                         </DropdownToggle>
                         <DropdownMenu>
@@ -178,7 +178,7 @@ export class OperationButton extends React.Component<OperationButtonProps> {
             <div className="btn-group">
                 {button}
                 <Button color={bsColor}
-                    className={classes("dropdown-toggle dropdown-toggle-split", disabled ? "disabled" : undefined)}
+                    className={classes("dropdown-toggle-split", disabled ? "disabled" : undefined)}
                     onClick={disabled ? undefined : e => { eoc.closeRequested = true; this.handleOnClick(e); }}
                     title={NormalWindowMessage._0AndClose.niceToString(eoc.operationInfo.niceName)}>
                     <span>&times;</span>

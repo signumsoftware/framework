@@ -10,7 +10,9 @@ import { getTypeInfos, IsByAll, getQueryKey, TypeInfo, EntityData, getQueryNiceN
 import * as Navigator from '../Navigator'
 import { StyleContext, TypeContext } from '../Typecontext'
 import ValueSearchControl from './ValueSearchControl'
-import { LineBase, LineBaseProps, FormGroup, FormControlStatic, runTasks } from '../Lines/LineBase'
+import { LineBase, LineBaseProps, runTasks } from '../Lines/LineBase'
+import { FormGroup } from '../Lines/FormGroup'
+import { FormControlReadonly } from '../Lines/FormControlReadonly'
 import { SearchControlProps } from "./SearchControl";
 
 export interface ValueSearchControlLineProps extends React.Props<ValueSearchControlLine> {
@@ -96,7 +98,7 @@ export default class ValueSearchControlLine extends React.Component<ValueSearchC
 
         let value = this.valueSearchControl && this.valueSearchControl.state.value;
         let find = value != undefined && coallesce(this.props.findButton, isQuery) &&
-            <a className={classes("sf-line-button", "sf-find", isFormControl ? "btn btn-default" : undefined)}
+            <a className={classes("sf-line-button", "sf-find", isFormControl ? "btn btn-light" : undefined)}
                 onClick={this.valueSearchControl!.handleClick}
                 title={EntityControlMessage.Find.niceToString()}>
                 <span className="fa fa-search" />
@@ -104,7 +106,7 @@ export default class ValueSearchControlLine extends React.Component<ValueSearchC
 
 
         let view = value != undefined && coallesce(this.props.viewEntityButton, isLite(value) && Navigator.isViewable(value.EntityType)) &&
-            <a className={classes("sf-line-button", "sf-view", isFormControl ? "btn btn-default" : undefined)}
+            <a className={classes("sf-line-button", "sf-view", isFormControl ? "btn btn-light" : undefined)}
                 onClick={this.handleViewEntityClick}
                 title={EntityControlMessage.View.niceToString()}>
                 <span className="fa fa-arrow-right" />
@@ -124,7 +126,7 @@ export default class ValueSearchControlLine extends React.Component<ValueSearchC
                         initialValue={this.props.initialValue}
                         isBadge={isBadge}
                         isLink={this.props.isLink}
-                        formControlClass={isFormControl ? this.props.ctx.formControlClassReadonly : undefined}
+                        formControlClass={isFormControl ? "form-control-plantext" : undefined}
                         valueToken={this.props.valueToken}
                         onValueChange={() => this.forceUpdate()}
                         onTokenLoaded={() => this.forceUpdate()}

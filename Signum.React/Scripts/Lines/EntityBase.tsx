@@ -7,7 +7,9 @@ import { FindOptions } from '../FindOptions'
 import { TypeContext, StyleContext, StyleOptions, FormGroupStyle, EntityFrame } from '../TypeContext'
 import { PropertyRoute, PropertyRouteType, MemberInfo, getTypeInfo, getTypeInfos, TypeInfo, IsByAll, TypeReference } from '../Reflection'
 import { ModifiableEntity, Lite, Entity, EntityControlMessage, JavascriptMessage, toLiteFat, is, liteKey, isLite, isEntity, entityInfo, SelectorMessage } from '../Signum.Entities'
-import { LineBase, LineBaseProps, FormGroup, FormControlStatic, runTasks } from '../Lines/LineBase'
+import { LineBase, LineBaseProps, runTasks } from './LineBase'
+import { FormGroup } from './FormGroup'
+import { FormControlReadonly } from './FormControlReadonly'
 import Typeahead from '../Lines/Typeahead'
 import SelectorModal from '../SelectorModal'
 import { TypeEntity } from "../Signum.Entities.Basics";
@@ -158,7 +160,7 @@ export abstract class EntityBase<T extends EntityBaseProps, S extends EntityBase
             return undefined;
 
         return (
-            <a className={classes("sf-line-button", "sf-view", btn ? "btn btn-default" : undefined) }
+            <a href="" className={classes("sf-line-button", "sf-view", btn ? "btn btn-light" : undefined)}
                 onClick={this.handleViewClick}
                 title={EntityControlMessage.View.niceToString() }>
                 <span className="fa fa-arrow-right"/>
@@ -235,7 +237,7 @@ export abstract class EntityBase<T extends EntityBaseProps, S extends EntityBase
             return undefined;
 
         return (
-            <a className={classes("sf-line-button", "sf-create", btn ? "btn btn-default" : undefined) }
+            <a href="" className={classes("sf-line-button", "sf-create", btn ? "btn btn-light" : undefined) }
                 onClick={this.handleCreateClick}
                 title={EntityControlMessage.Create.niceToString() }>
                 <span className="fa fa-plus sf-create"/>
@@ -282,7 +284,7 @@ export abstract class EntityBase<T extends EntityBaseProps, S extends EntityBase
             return undefined;
 
         return (
-            <a className={classes("sf-line-button", "sf-find", btn ? "btn btn-default" : undefined) }
+            <a href="" className={classes("sf-line-button", "sf-find", btn ? "btn btn-light" : undefined) }
                 onClick={this.handleFindClick}
                 title={EntityControlMessage.Find.niceToString() }>
                 <span className="fa fa-search"/>
@@ -308,7 +310,7 @@ export abstract class EntityBase<T extends EntityBaseProps, S extends EntityBase
             return undefined;
 
         return (
-            <a className={classes("sf-line-button", "sf-remove", btn ? "btn btn-default" : undefined) }
+            <a href="" className={classes("sf-line-button", "sf-remove", btn ? "btn btn-light" : undefined) }
                 onClick={this.handleRemoveClick}
                 title={EntityControlMessage.Remove.niceToString() }>
                 <span className="fa fa-remove"/>

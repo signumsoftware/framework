@@ -6,7 +6,7 @@ import * as Finder from '../Finder'
 import { FindOptions } from '../FindOptions'
 import { TypeContext, StyleContext, StyleOptions, FormGroupStyle, mlistItemContext, EntityFrame } from '../TypeContext'
 import { PropertyRoute, PropertyRouteType, MemberInfo, getTypeInfo, getTypeInfos, TypeInfo, IsByAll, ReadonlyBinding, LambdaMemberType, Type } from '../Reflection'
-import { LineBase, LineBaseProps, FormGroup, FormControlStatic, runTasks, } from '../Lines/LineBase'
+import { LineBase, LineBaseProps, runTasks, } from '../Lines/LineBase'
 import { ModifiableEntity, Lite, Entity, MList, MListElement, EntityControlMessage, JavascriptMessage, toLite, is, liteKey, getToString } from '../Signum.Entities'
 import Typeahead from '../Lines/Typeahead'
 import { EntityBase } from './EntityBase'
@@ -108,7 +108,7 @@ export class EntityTable extends EntityListBase<EntityTableProps, EntityTablePro
         const elementPr = ctx.propertyRoute.add(a => a[0].element);
 
         return (
-            <table className="table table-condensed sf-table">
+            <table className="table table-sm sf-table">
                 {
                     (!this.props.avoidEmptyTable || ctx.value.length > 0) && <thead>
                         <tr>

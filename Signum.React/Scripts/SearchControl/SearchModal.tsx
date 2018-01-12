@@ -70,7 +70,7 @@ export default class SearchModal extends React.Component<SearchModalProps, { sho
                                 {JavascriptMessage.ok.niceToString() }
                             </button>
 
-                            <button className ="btn btn-default sf-entity-button sf-close-button sf-cancel-button" onClick={this.handleCancelClicked}>{JavascriptMessage.cancel.niceToString() }</button>
+                            <button className ="btn btn-light sf-entity-button sf-close-button sf-cancel-button" onClick={this.handleCancelClicked}>{JavascriptMessage.cancel.niceToString() }</button>
                         </div>}
                     <h4>
                         <span className="sf-entity-title"> {this.props.title}</span>&nbsp;

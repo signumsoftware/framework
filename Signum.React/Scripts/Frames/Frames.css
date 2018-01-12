@@ -57,8 +57,10 @@ a.expand-window:hover {
   float: right;
 }
 
-.btn-toolbar > .btn, 
-.btn-toolbar > .btn-group, 
-.btn-toolbar > .input-group {
+.btn-toolbar > .btn,
+.btn-toolbar > .btn-group,
+.btn-toolbar > .input-group,
+.btn-toolbar > .dropdown {
     margin-bottom: 5px;
+    margin-right: 10px;
 }

@@ -61,7 +61,7 @@ export class MultiValueLine extends LineBase<MultiValueLineProps, MultiValueLine
         return (
             <FormGroup ctx={s.ctx} labelText={s.labelText}
                 htmlAttributes={{ ...this.baseHtmlAttributes(), ...this.state.formGroupHtmlAttributes }}
-                helpBlock={this.state.helpBlock}
+                helpText={this.state.helpText}
                 labelHtmlAttributes={s.labelHtmlAttributes}>
                 <table className="sf-multi-value">
                     <tbody>

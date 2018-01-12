@@ -2,15 +2,17 @@
 import * as moment from 'moment'
 import { TabPane } from 'reactstrap'
 import { ModifiableEntity, Lite, Entity, EntityControlMessage, JavascriptMessage, toLite, is, liteKey } from '../Signum.Entities'
-import { Dic } from '../Globals'
+import { Dic, classes } from '../Globals'
 import * as Navigator from '../Navigator'
 import * as Constructor from '../Constructor'
 import * as Finder from '../Finder'
 import { FindOptions } from '../FindOptions'
 import { TypeContext, StyleContext, StyleOptions, FormGroupStyle } from '../TypeContext'
 import { PropertyRoute, PropertyRouteType, MemberInfo, getTypeInfo, getTypeInfos, TypeInfo, IsByAll, TypeReference } from '../Reflection'
-import { LineBase, LineBaseProps, FormGroup, FormControlStatic, runTasks } from '../Lines/LineBase'
+import { LineBase, LineBaseProps, runTasks } from './LineBase'
 import { EntityBase, EntityBaseProps } from './EntityBase'
+import { FormGroup } from './FormGroup'
+import { FormControlReadonly } from './FormControlReadonly'
 
 
 export interface EntityComboProps extends EntityBaseProps {
@@ -33,7 +35,7 @@ export class EntityCombo extends EntityBase<EntityComboProps, EntityComboProps> 
         const hasValue = !!s.ctx.value;
 
         const buttons = (
-            <span className="input-group-btn">
+            <span className="input-group-append">
                 {!hasValue && this.renderCreateButton(true)}
                 {!hasValue && this.renderFindButton(true)}
                 {hasValue && this.renderViewButton(true, this.state.ctx.value!)}
@@ -42,11 +44,11 @@ export class EntityCombo extends EntityBase<EntityComboProps, EntityComboProps> 
         );
 
         return (
-            <FormGroup ctx={s.ctx} labelText={s.labelText} helpBlock={s.helpBlock}
+            <FormGroup ctx={s.ctx} labelText={s.labelText} helpText={s.helpText}
                 htmlAttributes={{ ...this.baseHtmlAttributes(), ...EntityBase.entityHtmlAttributes(s.ctx.value), ...s.formGroupHtmlAttributes }}
                 labelHtmlAttributes={s.labelHtmlAttributes} >
                 <div className="SF-entity-combo">
-                    <div className={EntityBase.hasChildrens(buttons) ? "input-group" : undefined}>
+                    <div className={EntityBase.hasChildrens(buttons) ? s.ctx.inputGroupClass : undefined}>
                         <EntityComboSelect ctx={s.ctx}
                             onChange={this.handleOnChange}
                             type={s.type!}
@@ -120,10 +122,10 @@ class EntityComboSelect extends React.Component<EntityComboSelectProps, { data?:
         const ctx = this.props.ctx;
 
         if (ctx.readOnly)
-            return <FormControlStatic ctx={ctx}>{ctx.value && ctx.value.toStr}</FormControlStatic>;
+            return <FormControlReadonly ctx={ctx}>{ctx.value && ctx.value.toStr}</FormControlReadonly>;
 
         return (
-            <select className="form-control" onChange={this.handleOnChange} value={lite ? liteKey(lite) : ""} disabled={ctx.readOnly}>
+            <select className={ctx.formControlClass} onChange={this.handleOnChange} value={lite ? liteKey(lite) : ""} disabled={ctx.readOnly} >
                 {this.renderOptions()}
             </select>
         );

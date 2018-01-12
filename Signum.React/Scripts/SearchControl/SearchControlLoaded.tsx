@@ -1,5 +1,5 @@
 ﻿import * as React from 'react'
-import { Dropdown, DropdownItem, UncontrolledTooltip } from 'reactstrap'
+import { Dropdown, DropdownItem, UncontrolledTooltip, DropdownMenu, DropdownToggle } from 'reactstrap'
 import { Dic, DomUtils, classes } from '../Globals'
 import * as Finder from '../Finder'
 import { CellFormatter, EntityFormatter } from '../Finder'
@@ -27,7 +27,7 @@ import { ISimpleFilterBuilder } from './SearchControl'
 import "./Search.css"
 import { FilterOperation } from '../Signum.Entities.DynamicQuery';
 
-export interface ShowBarExtensionOption {}
+export interface ShowBarExtensionOption { }
 
 export interface SearchControlLoadedProps {
     findOptions: FindOptionsParsed;
@@ -62,7 +62,7 @@ export interface SearchControlLoadedProps {
     largeToolbarButtons: boolean;
     avoidAutoRefresh: boolean;
     avoidChangeUrl: boolean;
-    
+
     onCreate?: () => void;
     onDoubleClick?: (e: React.MouseEvent<any>, row: ResultRow) => void;
     onNavigated?: (lite: Lite<Entity>) => void;
@@ -120,7 +120,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
         if (sfb) {
             this.setState({
-                showFilters : false,
+                showFilters: false,
                 simpleFilterBuilder: sfb
             });
         }
@@ -173,7 +173,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
         this.doSearch(avoidOnSearchEvent).done();
     };
 
-    resetResults(continuation: ()=> void) {
+    resetResults(continuation: () => void) {
         this.setState({
             resultTable: undefined,
             resultFindOptions: undefined,
@@ -344,12 +344,12 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
                 data-query-key={fo.queryKey}>
                 {p.showHeader &&
                     <div onKeyUp={this.handleFiltersKeyUp}>
-                    {
-                        this.state.showFilters ? <FilterBuilder
+                        {
+                            this.state.showFilters ? <FilterBuilder
                                 queryDescription={qd}
                                 filterOptions={fo.filterOptions}
-                            lastToken={this.state.lastToken}
-                            subTokensOptions={SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement | canAggregate}
+                                lastToken={this.state.lastToken}
+                                subTokensOptions={SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement | canAggregate}
                                 onTokenChanged={this.handleFilterTokenChanged}
                                 onFiltersChanged={this.handleFiltersChanged}
                                 onHeightChanged={this.handleHeightChanged}
@@ -370,7 +370,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
                 <div ref={d => this.containerDiv = d}
                     className="sf-search-results-container table-responsive"
                     style={{ maxHeight: this.props.maxResultsHeight }}>
-                    <table className="sf-search-results table table-hover table-condensed" onContextMenu={this.props.showContextMenu != false ? this.handleOnContextMenu : undefined} >
+                    <table className="sf-search-results table table-hover table-sm" onContextMenu={this.props.showContextMenu != false ? this.handleOnContextMenu : undefined} >
                         <thead ref={th => this.thead = th}>
                             {this.renderHeaders()}
                         </thead>
@@ -387,7 +387,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
 
     // TOOLBAR
-   
+
 
     handleSearchClick = (ev: React.MouseEvent<any>) => {
         ev.preventDefault();
@@ -451,18 +451,18 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
         var buttons = [
 
             p.showFilterButton && OrderUtils.setOrder(-5, <a
-                className={"sf-query-button sf-filters-header btn btn-default" + (s.showFilters ? " active" : "")}
+                className={"sf-query-button sf-filters-header btn btn-light" + (s.showFilters ? " active" : "")}
                 onClick={this.handleToggleFilters}
                 title={s.showFilters ? JavascriptMessage.hideFilters.niceToString() : JavascriptMessage.showFilters.niceToString()}><span className="fa fa-filter"></span></a >),
 
             p.showFilterButton && OrderUtils.setOrder(-4, <a
-                className={"sf-query-button btn btn-default" + (p.findOptions.groupResults ? " active" : "")}
+                className={"sf-query-button btn btn-light" + (p.findOptions.groupResults ? " active" : "")}
                 onClick={this.handleToggleGroupBy}
                 title={p.findOptions.groupResults ? JavascriptMessage.ungroupResults.niceToString() : JavascriptMessage.groupResults.niceToString()}>Ʃ</a >),
 
             OrderUtils.setOrder(-3, <button className={classes("sf-query-button sf-search btn", p.findOptions.pagination.mode == "All" ? "btn-danger" : "btn-primary")} onClick={this.handleSearchClick}>{SearchMessage.Search.niceToString()} </button>),
 
-            p.create && OrderUtils.setOrder(-2, <a className="sf-query-button btn btn-default sf-search-button sf-create" title={this.createTitle()} onClick={this.handleCreate}>
+            p.create && OrderUtils.setOrder(-2, <a className="sf-query-button btn btn-light sf-search-button sf-create" title={this.createTitle()} onClick={this.handleCreate}>
                 <span className="fa fa-plus sf-create"></span>
             </a>),
 
@@ -473,7 +473,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
             ...(this.props.extraButtons ? this.props.extraButtons(this) : []),
 
             !this.props.hideFullScreenButton && Finder.isFindable(p.findOptions.queryKey, true) &&
-            <a className="sf-query-button btn btn-default" href="#" onClick={this.handleFullScreenClick} >
+            <a className="sf-query-button btn btn-light" href="#" onClick={this.handleFullScreenClick} >
                 <span className="fa fa-new-window"></span>
             </a>
         ]
@@ -604,13 +604,16 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
         const title = JavascriptMessage.Selected.niceToString() + " (" + this.state.selectedRows!.length + ")";
 
         return OrderUtils.setOrder(-1,
-            <Dropdown id="selectedButton" className="sf-query-button sf-tm-selected" title={title}
+            <Dropdown id="selectedButton" className="sf-query-button sf-tm-selected"
                 isOpen={this.state.isSelectOpen}
                 toggle={this.handleSelectedToggle}
                 disabled={this.state.selectedRows!.length == 0}>
-                {this.state.currentMenuItems == undefined ? <DropdownItem className="sf-tm-selected-loading">{JavascriptMessage.loading.niceToString()}</DropdownItem> :
-                    this.state.currentMenuItems.length == 0 ? <DropdownItem className="sf-search-ctxitem-no-results">{JavascriptMessage.noActionsFound.niceToString()}</DropdownItem> :
-                        this.state.currentMenuItems.map((e, i) => React.cloneElement(e, { key: i }))}
+                <DropdownToggle color="light" caret>{title}</DropdownToggle>
+                <DropdownMenu>
+                    {this.state.currentMenuItems == undefined ? <DropdownItem className="sf-tm-selected-loading">{JavascriptMessage.loading.niceToString()}</DropdownItem> :
+                        this.state.currentMenuItems.length == 0 ? <DropdownItem className="sf-search-ctxitem-no-results">{JavascriptMessage.noActionsFound.niceToString()}</DropdownItem> :
+                            this.state.currentMenuItems.map((e, i) => React.cloneElement(e, { key: i }))}
+                </DropdownMenu>
             </Dropdown>
         );
     }
@@ -633,7 +636,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
                 token ? (filterOperations[token.filterType as any] || []).firstOrNull() as FilterOperation | undefined :
                     undefined as FilterOperation | undefined;
 
-        const rt = this.state.resultTable;        
+        const rt = this.state.resultTable;
 
         fo.filterOptions.push({
             token: token,
@@ -873,7 +876,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
                         onDragEnter={e => this.handlerHeaderDragOver(e, i)}
                         onDrop={this.handleHeaderDrop}>
                         <span className={"sf-header-sort " + this.orderClassName(co)} />
-                        {this.props.findOptions.groupResults && co.token && co.token.queryTokenType != "Aggregate"  && <span> <i className="fa fa-key" /></span>}
+                        {this.props.findOptions.groupResults && co.token && co.token.queryTokenType != "Aggregate" && <span> <i className="fa fa-key" /></span>}
                         <span> {co.displayName}</span></th>
                 )}
             </tr>
@@ -884,7 +887,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
         if (!column.token || !this.props.allowChangeOrder)
             return false;
 
-        const t = column.token; 
+        const t = column.token;
 
         if (t.type.isCollection)
             return false;
@@ -975,7 +978,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
             return;
         }
-        
+
         var lite = row.entity!;
 
         if (!Navigator.isNavigable(lite.EntityType, undefined, true))
@@ -1136,7 +1139,7 @@ function removeAggregates(array: { token?: QueryToken, displayName?: string }[],
     array.extract(a => a.token == null);
 }
 
-function withAggregates(array: { token?: QueryToken, displayName?: string }[], tc: Finder.TokenCompleter, mode: "request" | "get") : void {
+function withAggregates(array: { token?: QueryToken, displayName?: string }[], tc: Finder.TokenCompleter, mode: "request" | "get"): void {
     array.forEach(a => {
         if (a.token) {
             if (canHaveMin(a.token.type.name)) {
@@ -1151,10 +1154,10 @@ function withAggregates(array: { token?: QueryToken, displayName?: string }[], t
                         a.displayName = a.token.niceName;
                 }
             } else if (a.token.isGroupable) {
-                 //Nothing, will be group key
+                //Nothing, will be group key
             } else {
                 a.token = undefined;
-            } 
+            }
         }
     });
 

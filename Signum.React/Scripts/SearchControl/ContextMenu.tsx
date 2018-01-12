@@ -1,5 +1,7 @@
 ﻿import * as React from 'react'
+import { DropdownItemProps } from 'reactstrap'
 import { Dic, classes, combineFunction, DomUtils } from '../Globals'
+import * as PropTypes from "prop-types";
 
 
 export interface ContextMenuPosition {
@@ -15,6 +17,16 @@ export interface ContextMenuProps extends React.Props<ContextMenu>, React.HTMLAt
 }
 
 export default class ContextMenu extends React.Component<ContextMenuProps> {
+
+    handleToggle = () => {
+
+    }
+
+    getChildContext() {
+        return { toggle: this.handleToggle };
+    }
+
+    static childContextTypes = { "toggle": PropTypes.func };
 
     static getPosition(e: React.MouseEvent<any>, container: HTMLElement): ContextMenuPosition{
 
@@ -45,8 +57,8 @@ export default class ContextMenu extends React.Component<ContextMenuProps> {
 
         const childrens = React.Children.map(this.props.children,
             (rc) => {
-                let c = rc as React.ReactElement<any>;
-                return c && React.cloneElement(c, { "onSelect": combineFunction(c.props.onSelect, onHide) });
+                let c = rc as React.ReactElement<DropdownItemProps>;
+                return c && React.cloneElement(c, { onClick: combineFunction(c.props.onClick, onHide) } as Partial<DropdownItemProps>);
             });
 
         const ul = (

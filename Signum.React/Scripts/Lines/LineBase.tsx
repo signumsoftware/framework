@@ -7,85 +7,6 @@ import { TypeContext, StyleContext, StyleOptions, FormGroupStyle } from '../Type
 import { PropertyRouteType, MemberInfo, getTypeInfo, TypeInfo, TypeReference } from '../Reflection'
 import { ValidationMessage } from '../Signum.Entities'
 
-import "./Lines.css"
-
-export interface FormGroupProps extends React.Props<FormGroup> {
-    labelText?: React.ReactChild;
-    controlId?: string;
-    ctx: StyleContext;
-    labelHtmlAttributes?: React.HTMLAttributes<HTMLLabelElement>;
-    htmlAttributes?: React.HTMLAttributes<HTMLDivElement>;
-    helpBlock?: React.ReactChild;
-}
-
-export class FormGroup extends React.Component<FormGroupProps> {
-
-    render() {
-
-        const ctx = this.props.ctx;
-
-        const tCtx = ctx as TypeContext<any>;
-
-        const errorClass = tCtx.errorClass;
-
-        if (ctx.formGroupStyle == "None") {
-
-            const c = this.props.children as React.ReactElement<any>;
-
-            return (
-                <span {...this.props.htmlAttributes} className={classes(this.props.ctx.formGroupSizeCss, errorClass)}>
-                    {c}
-                </span>
-            );
-        }
-
-        const labelClasses = classes(ctx.formGroupStyle == "SrOnly" && "sr-only", ctx.formGroupStyle == "LabelColumns" && ("control-label " + ctx.labelColumnsCss));
-        let pr = tCtx.propertyRoute;
-        const label = (
-            <label htmlFor={this.props.controlId} {...this.props.labelHtmlAttributes } className={addClass(this.props.labelHtmlAttributes, labelClasses)} >
-                {this.props.labelText || (pr && pr.member && pr.member.niceName)}
-            </label>
-        );
-
-        const formGroupClasses = classes("form-group", this.props.ctx.formGroupSizeCss, errorClass);
-        return <div {...this.props.htmlAttributes} className={addClass(this.props.htmlAttributes, formGroupClasses)}>
-            {ctx.formGroupStyle != "BasicDown" && label}
-            {
-                ctx.formGroupStyle != "LabelColumns" ? this.props.children :
-                    (
-                        <div className={this.props.ctx.valueColumnsCss} >
-                            {this.props.children}
-                            {this.props.helpBlock && ctx.formGroupStyle == "LabelColumns" && <span className="help-block">{this.props.helpBlock}</span>}
-                        </div>
-                    )
-            }
-            {ctx.formGroupStyle == "BasicDown" && label}
-            {this.props.helpBlock && ctx.formGroupStyle != "LabelColumns" && <span className="help-block">{this.props.helpBlock}</span>}
-        </div>;
-    }
-}
-
-
-export interface FormControlStaticProps extends React.Props<FormControlStatic> {
-    ctx: StyleContext;
-    htmlAttributes?: React.HTMLAttributes<HTMLParagraphElement>;
-    className?: string
-}
-
-export class FormControlStatic extends React.Component<FormControlStaticProps>
-{
-    render() {
-        const ctx = this.props.ctx;
-
-        var p = this.props.htmlAttributes;
-
-        return (
-            <p {...p} className={classes(ctx.formControlClassReadonly, p && p.className, this.props.className)} >
-                {this.props.children}
-            </p>
-        );
-    }
-}
 
 export interface ChangeEvent {
     newValue: any;
@@ -102,7 +23,7 @@ export interface LineBaseProps extends StyleOptions {
     onValidate?: (val: any) => string;
     labelHtmlAttributes?: React.LabelHTMLAttributes<HTMLLabelElement>;
     formGroupHtmlAttributes?: React.HTMLAttributes<any>;
-    helpBlock?: React.ReactChild;
+    helpText?: React.ReactChild;
 }
 
 export abstract class LineBase<P extends LineBaseProps, S extends LineBaseProps> extends React.Component<P, S> {
@@ -121,8 +42,14 @@ export abstract class LineBase<P extends LineBaseProps, S extends LineBaseProps>
     }
 
     componentWillReceiveProps(nextProps: P, nextContext: any) {
-        this.state = this.calculateState(nextProps);
-        this.forceUpdate();
+        const newState = this.calculateState(nextProps);
+
+        Dic.getKeys(this.state).forEach(k => {
+            if (!(newState as any).hasOwnProperty(k))
+                (newState as any)[k] = undefined;
+        });
+
+        this.setState(newState);
     }
 
     changes = 0;
@@ -161,11 +88,11 @@ export abstract class LineBase<P extends LineBaseProps, S extends LineBaseProps>
     calculateState(props: P): S {
 
         const { type, ctx,
-            formControlClassReadonly, formGroupSize, formGroupStyle, labelColumns, placeholderLabels, readOnly, valueColumns,
+            readonlyAsPlainText, formSize, formGroupStyle, labelColumns, placeholderLabels, readOnly, valueColumns,
             ...otherProps
         } = props as LineBaseProps;
 
-        const so: StyleOptions = { formControlClassReadonly, formGroupSize, formGroupStyle, labelColumns, placeholderLabels, readOnly, valueColumns };
+        const so: StyleOptions = { readonlyAsPlainText, formSize, formGroupStyle, labelColumns, placeholderLabels, readOnly, valueColumns };
 
         const state = { ctx: ctx.subCtx(so), type: (type || ctx.propertyRoute.typeReference() ) } as LineBaseProps as S;
 
@@ -184,7 +111,7 @@ export abstract class LineBase<P extends LineBaseProps, S extends LineBaseProps>
 
     baseHtmlAttributes(): React.HTMLAttributes<any> {
         return {
-            'data-propertyPath': this.state.ctx.propertyPath,
+            'data-property-path': this.state.ctx.propertyPath,
             'data-changes': this.changes
         } as any;
     }

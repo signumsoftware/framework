@@ -158,7 +158,7 @@ export class QuickLinkWidget extends React.Component<QuickLinkWidgetProps, { lin
             <UncontrolledDropdown id="quickLinksWidget">
                 <QuickLinkToggle bsRole="toggle" links={links} />
                 <DropdownMenu>
-                    {links && links.orderBy(a => a.order).map((a, i) => React.cloneElement(a.toDropDownItem(), { key: i }))}
+                    {!links ? [] : links.orderBy(a => a.order).map((a, i) => React.cloneElement(a.toDropDownItem(), { key: i }))}
                 </DropdownMenu>
             </UncontrolledDropdown>
 

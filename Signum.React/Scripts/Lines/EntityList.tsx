@@ -7,7 +7,9 @@ import * as Finder from '../Finder'
 import { FindOptions } from '../FindOptions'
 import { TypeContext, StyleContext, StyleOptions, FormGroupStyle } from '../TypeContext'
 import { PropertyRoute, PropertyRouteType, MemberInfo, getTypeInfo, getTypeInfos, TypeInfo, IsByAll } from '../Reflection'
-import { LineBase, LineBaseProps, FormGroup, FormControlStatic, runTasks} from '../Lines/LineBase'
+import { LineBase, LineBaseProps, runTasks } from './LineBase'
+import { FormGroup } from './FormGroup'
+import { FormControlReadonly } from './FormControlReadonly'
 import { EntityListBase, EntityListBaseProps} from './EntityListBase'
 
 

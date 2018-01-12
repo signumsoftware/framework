@@ -279,7 +279,7 @@ export default class Typeahead extends React.Component<TypeaheadProps, Typeahead
                     />
                     <span>{/*placeholder for rouded borders*/}</span>
                 </Target>
-                {this.state.shown && <Popper placement="bottom-start">{this.props.renderList ? this.props.renderList(this) : this.renderDefaultList()}</Popper>}
+                {this.state.shown && <Popper placement="bottom-start" style={{zIndex: 1000}}>{this.props.renderList ? this.props.renderList(this) : this.renderDefaultList()}</Popper>}
             </Manager>
 
         );
@@ -289,7 +289,7 @@ export default class Typeahead extends React.Component<TypeaheadProps, Typeahead
         return (<ul className="typeahead dropdown-menu show">
             {
                 !this.state.items!.length ? <li className="no-results"><a><small>{this.props.noResultsMessage}</small></a></li> :
-                    this.state.items!.map((item, i) => <li key={i} className={i == this.state.selectedIndex ? "active" : undefined}
+                    this.state.items!.map((item, i) => <li key={i} className={classes("dropdown-item", i == this.state.selectedIndex ? "active" : undefined)}
                         onMouseEnter={e => this.handleElementMouseEnter(e, i)}
                         onMouseLeave={e => this.handleElementMouseLeave(e, i)}
                         {...this.props.liAttrs && this.props.liAttrs(item) }>

@@ -6,7 +6,9 @@ import * as Finder from '../Finder'
 import { FindOptions } from '../FindOptions'
 import { TypeContext, StyleContext, StyleOptions, FormGroupStyle, mlistItemContext, EntityFrame } from '../TypeContext'
 import { PropertyRoute, PropertyRouteType, MemberInfo, getTypeInfo, getTypeInfos, TypeInfo, IsByAll, ReadonlyBinding, LambdaMemberType } from '../Reflection'
-import { LineBase, LineBaseProps, FormGroup, FormControlStatic, runTasks, } from '../Lines/LineBase'
+import { LineBase, LineBaseProps, runTasks, } from '../Lines/LineBase'
+import { FormGroup } from '../Lines/FormGroup'
+import { FormControlReadonly } from '../Lines/FormControlReadonly'
 import { ModifiableEntity, Lite, Entity, MList, MListElement, EntityControlMessage, JavascriptMessage, toLite, is, liteKey, getToString, isLite } from '../Signum.Entities'
 import Typeahead from '../Lines/Typeahead'
 import { EntityListBase, EntityListBaseProps, DragConfig } from './EntityListBase'
@@ -46,7 +48,7 @@ export class EntityStrip extends EntityListBase<EntityStripProps, EntityStripPro
             <FormGroup ctx={s.ctx!}
                 labelText={s.labelText}
                 labelHtmlAttributes={s.labelHtmlAttributes}
-                helpBlock={s.helpBlock}
+                helpText={s.helpText}
                 htmlAttributes={{ ...this.baseHtmlAttributes(), ...this.state.formGroupHtmlAttributes }}>
                 <div className="SF-entity-strip SF-control-container">
                     <ul className={classes("sf-strip", this.props.vertical ? "sf-strip-vertical" : "sf-strip-horizontal")}>
@@ -62,7 +64,7 @@ export class EntityStrip extends EntityListBase<EntityStripProps, EntityStripPro
                                     onView={this.canView(mlec.value) ? e => this.handleViewElement(e, i) : undefined}
                                 />))
                         }
-                        <li className="sf-strip-input input-group">
+                        <li className={classes(s.ctx.inputGroupClass, "sf-strip-input")}>
                             {this.renderAutoComplete()}
                             <span>
                                 {this.renderCreateButton(false)}

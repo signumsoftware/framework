@@ -58,7 +58,7 @@ export default class SelectorModal extends React.Component<SelectorModalProps, {
                     }
                     {this.props.options.map((o, i) =>
                         <button key={i} type="button" onClick={() => this.handleButtonClicked(o.value)} name={o.value}
-                            className="sf-chooser-button sf-close-button btn btn-default" {...o.htmlAttributes}>
+                            className="sf-chooser-button sf-close-button btn btn-light" {...o.htmlAttributes}>
                             {o.displayName}
                         </button>)}
                 </div>

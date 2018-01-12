@@ -68,7 +68,7 @@ export default class MessageModal extends React.Component<MessageModalProps, { s
                             {JavascriptMessage.ok.niceToString()}
                         </button>
                         <button
-                            className="btn btn-default sf-close-button sf-button"
+                            className="btn btn-light sf-close-button sf-button"
                             onClick={() => this.handleButtonClicked("cancel")}
                             name="cancel">
                             {JavascriptMessage.cancel.niceToString()}
@@ -84,7 +84,7 @@ export default class MessageModal extends React.Component<MessageModalProps, { s
                             {BooleanEnum.niceName("True")}
                         </button>
                         <button
-                            className="btn btn-default sf-close-button sf-no-button"
+                            className="btn btn-light sf-close-button sf-no-button"
                             onClick={() => this.handleButtonClicked("no")}
                             name="no">
                             {BooleanEnum.niceName("False")}
@@ -100,13 +100,13 @@ export default class MessageModal extends React.Component<MessageModalProps, { s
                             {BooleanEnum.niceName("True")}
                         </button>
                         <button
-                            className="btn btn-default sf-close-button sf-no-button"
+                            className="btn btn-light sf-close-button sf-no-button"
                             onClick={() => this.handleButtonClicked("no")}
                             name="no">
                             {BooleanEnum.niceName("False")}
                         </button>
                         <button
-                            className="btn btn-default sf-close-button sf-cancel-button"
+                            className="btn btn-light sf-close-button sf-cancel-button"
                             onClick={() => this.handleButtonClicked("cancel")}
                             name="cancel">
                             {JavascriptMessage.cancel.niceToString()}

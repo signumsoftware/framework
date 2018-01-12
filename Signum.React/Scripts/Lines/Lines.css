@@ -257,23 +257,23 @@ ul.nav-tabs {
 
 /*form xs*/
 
-.form-xs .form-control,
+/*.form-xs .form-control,
 .form-xs .form-control-static {
     padding: 0px 3px;
 }
 
 
     .form-xs .form-control:not(textarea) {
-        height: 20px;
+        height: 24px;
         min-height: inherit;
     }
 
     .form-xs .form-control.readonly.readonly-textarea {
-        min-height: 20px;
+        min-height: 24px;
     }
 
 .form-xs .input-group-btn .btn {
-    height: 20px;
+    height: 24px;
 }
 
 
@@ -282,7 +282,7 @@ ul.nav-tabs {
 }
 
 .form-xs .sf-query-token-builder {
-    height: 20px;
+    height: 24px;
     margin-bottom: -3px;
 }
 
@@ -290,6 +290,7 @@ ul.nav-tabs {
 .form-xs select[size] {
     height: auto;
 }
+
 
 .form-xs input[type=checkbox].form-control {
     height: 16px;
@@ -300,61 +301,62 @@ ul.nav-tabs {
 .form-xs .input-group .btn,
 .form-xs .input-group .input-group-addon {
     padding: 0px 3px;
-    height: 20px;
-}
+    height: 24px;
+}*/
 
-.form-xs .rw-input {
+.rw-widget-sm .rw-input {
     padding: 0px 3px;
     height: 18px;
 }
 
-/*
-.form-xs .rw-select.rw-btn,
-.form-xs .rw-select > .rw-btn {
+.rw-widget-sm  .rw-select.rw-btn,
+.rw-widget-sm  .rw-select > .rw-btn {
     line-height: 18px;
     width: 1.5em;
     border-top: 0px;
 }
 
-.form-xs .rw-dropdown-list > .rw-widget-input {
+.rw-widget-sm  .rw-dropdown-list > .rw-widget-input {
     height: 18px;
 }
 
-.form-xs .rw-combobox,
-.form-xs .rw-numberpicker,
-.form-xs .rw-dropdown-list {
+.rw-widget-sm  .rw-combobox,
+.rw-widget-sm  .rw-numberpicker,
+.rw-widget-sm  .rw-dropdown-list {
     padding-right: 1.5em;
     line-height: 18px;
 }
-    */
 
-.form-xs .rw-widget-picker {
+
+.rw-widget-sm .rw-widget-picker {
     height: 20px;
     line-height: 10px;
 }
 
-.form-xs .rw-select {
+.rw-widget-sm .rw-select {
     vertical-align: top;
 }
 
+.form-group.form-group-sm {
+    margin-bottom: 6px;
+}
+
+/*
 .form-xs .sf-strip {
     margin-bottom: 0px;
 }
 
     .form-xs .sf-strip.sf-strip-vertical {
-        margin-top: 0px; /*sf-strip-vertical*/
+        margin-top: 0px; //sf-strip-vertical
     }
 
-.form-group.form-xs {
-    margin-bottom: 6px;
-}
 
 
 .form-xs fieldset > legend {
     padding: 0px 4px 0 4px;
     font-size: 16px;
 }
-
+*/
 
 /*form sm*/
 
@@ -389,6 +391,9 @@ ul.nav-tabs {
     height: auto;
 }
 
+.form-sm select.form-control:not([size]):not([multiple]) {
+    height: 26px;
+}
 
 .form-sm input[type=checkbox].form-control {
     height: 16px;
@@ -405,6 +410,8 @@ ul.nav-tabs {
     padding: 3px 6px;
     height: 24px;
 }
+
+
 /*
 .form-sm .rw-select.rw-btn,
 .form-sm .rw-select > .rw-btn {

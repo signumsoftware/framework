@@ -11,10 +11,11 @@ export type FormGroupStyle =
     "SrOnly" |    /// Label visible only for Screen-Readers. Requires form-vertical / form-inline container
     "LabelColumns"; /// (default) Label on the left, value on the right (exept RTL). Requires form-horizontal, affected by LabelColumns / ValueColumns
 
-export type FormGroupSize =
-    "Normal" | //Raw Bootstrap default
-    "Small" | //Signum default
-    "ExtraSmall"; //Like in FilterBuilder
+export type FormSize =
+    "ExtraSmall" |
+    "Small" |
+    "Normal" |
+    "Large";
    
 
 export class StyleContext {
@@ -32,11 +33,11 @@ export class StyleContext {
     static default: StyleContext = new StyleContext(undefined,
     {
         formGroupStyle : "LabelColumns",
-        formGroupSize : "Small",
+        formSize : "Small",
         labelColumns: { sm: 2 },
         readOnly : false,
         placeholderLabels : false,
-        formControlClassReadonly: "form-control-static", //form-control readonly
+        readonlyAsPlainText: false,
         frame: undefined,
     });
 
@@ -44,21 +45,51 @@ export class StyleContext {
         return this.styleOptions.formGroupStyle != undefined ? this.styleOptions.formGroupStyle : this.parent.formGroupStyle;
     }
 
-    get formGroupSize(): FormGroupSize {
-        return this.styleOptions.formGroupSize != undefined ? this.styleOptions.formGroupSize : this.parent.formGroupSize;
+    get formSize(): FormSize {
+        return this.styleOptions.formSize != undefined ? this.styleOptions.formSize : this.parent.formSize;
     }
 
-    get formGroupSizeCss(): string {
-        return this.formGroupSize == "Normal" ? "form-md" :
-            this.formGroupSize == "Small" ? "form-sm" : "form-xs";
+    get formGroupClass(): string | undefined {
+        return this.formSize == "Small" || this.formSize == "ExtraSmall" ? "form-group form-group-sm" :
+            this.formSize == "Normal" ? "form-group" :
+                this.formSize == "Large" ? "form-group" :
+                    undefined;
+    }
+
+    get colFormLabelClass(): string | undefined {
+        return this.formSize == "Small" || this.formSize == "ExtraSmall" ? "col-form-label col-form-label-sm" :
+            this.formSize == "Normal" ? "col-form-label" :
+                this.formSize == "Large" ? "col-form-label col-form-label-lg" :
+                    undefined;
+    }
+
+    get rwWidgetClass(): string | undefined {
+        return this.formSize == "Small" || this.formSize == "ExtraSmall" ? "rw-widget-sm" :
+            this.formSize == "Normal" ? undefined :
+                this.formSize == "Large" ? "rw-widget-sm-lg" :
+                    undefined;
+    }
+
+    get inputGroupClass(): string | undefined {
+        return this.formSize == "Small" || this.formSize == "ExtraSmall" ? "input-group input-group-sm" :
+            this.formSize == "Normal" ? "input-group" :
+                this.formSize == "Large" ? "input-group input-group-lg" :
+                    undefined;
+    }
+
+    get formControlClass(): string | undefined {
+        return this.formSize == "Small" || this.formSize == "ExtraSmall" ? "form-control form-control-sm" :
+            this.formSize == "Normal" ? "form-control" :
+                this.formSize == "Large" ? "form-control form-control-lg" :
+                    undefined;
     }
 
     get placeholderLabels(): boolean {
         return this.styleOptions.placeholderLabels != undefined ? this.styleOptions.placeholderLabels : this.parent.placeholderLabels;
     }
 
-    get formControlClassReadonly(): string {
-        return this.styleOptions.formControlClassReadonly != undefined ? this.styleOptions.formControlClassReadonly : this.parent.formControlClassReadonly;
+    get readonlyAsPlainText(): boolean {
+        return this.styleOptions.readonlyAsPlainText != undefined ? this.styleOptions.readonlyAsPlainText : this.parent.readonlyAsPlainText;
     }
     
     get labelColumns(): BsColumns {
@@ -124,9 +155,9 @@ function toBsColumn(bsColumnOrNumber: BsColumns | number): BsColumns {
 
 export interface StyleOptions {
     formGroupStyle?: FormGroupStyle;
-    formGroupSize?: FormGroupSize;
+    formSize?: FormSize;
     placeholderLabels?: boolean;
-    formControlClassReadonly?: string;
+    readonlyAsPlainText?: boolean;
     labelColumns?: BsColumns | number;
     valueColumns?: BsColumns | number;
     readOnly?: boolean;

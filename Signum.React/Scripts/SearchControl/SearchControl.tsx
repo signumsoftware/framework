@@ -100,10 +100,9 @@ export default class SearchControl extends React.Component<SearchControlProps, S
                 return;
         }
 
-        this.state = {};
-        this.forceUpdate();
-
-        this.initialLoad(newProps.findOptions);
+        this.setState({ findOptions: undefined, queryDescription: undefined }, () => {
+            this.initialLoad(newProps.findOptions);
+        });
     }
 
     doSearch(avoidOnSearchEvent?: boolean) {

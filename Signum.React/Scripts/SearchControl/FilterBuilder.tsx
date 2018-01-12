@@ -69,7 +69,7 @@ export default class FilterBuilder extends React.Component<FilterBuilderProps>{
             <fieldset className="form-xs">
                 {this.props.title && <legend>{this.props.title}</legend>}
                 <div className="sf-filters-list table-responsive" style={{ overflowX: "visible" }}>
-                    <table className="table table-condensed sf-filter-table">
+                    <table className="table table-sm sf-filter-table">
                         <thead>
                             <tr>
                                 <th style={{ minWidth: "24px" }}></th>
@@ -218,7 +218,7 @@ export class FilterComponent extends React.Component<FilterComponentProps>{
         if (isList(f.operation!))
             return <MultiValue values={f.value} onRenderItem={this.handleCreateAppropiateControl} readOnly={readOnly} onChange={this.handleValueChange} />;
 
-        const ctx = new TypeContext<any>(undefined, { formGroupStyle: "None", readOnly: readOnly, formGroupSize: "ExtraSmall" }, undefined as any, Binding.create(f, a => a.value));
+        const ctx = new TypeContext<any>(undefined, { formGroupStyle: "None", readOnly: readOnly, formSize: "Small" }, undefined as any, Binding.create(f, a => a.value));
 
         return this.handleCreateAppropiateControl(ctx);
     }
@@ -295,7 +295,7 @@ export class MultiValue extends React.Component<MultiValueProps> {
                                         this.props.onRenderItem(new TypeContext<any>(undefined,
                                             {
                                                 formGroupStyle: "None",
-                                                formGroupSize: "ExtraSmall",
+                                                formSize: "Small",
                                                 readOnly: this.props.readOnly
                                             }, undefined as any, new Binding<any>(this.props.values, i)))
                                     }

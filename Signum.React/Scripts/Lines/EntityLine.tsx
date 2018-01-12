@@ -2,11 +2,13 @@
 import * as Navigator from '../Navigator'
 import * as Constructor from '../Constructor'
 import * as Finder from '../Finder'
-import { Dic } from '../Globals'
+import { Dic, classes } from '../Globals'
 import { FindOptions, QueryDescription, FilterOptionParsed, FilterRequest } from '../FindOptions'
 import { TypeContext, StyleContext, StyleOptions, FormGroupStyle } from '../TypeContext'
 import { PropertyRoute, PropertyRouteType, MemberInfo, getTypeInfo, getTypeInfos, TypeInfo, IsByAll, getQueryKey } from '../Reflection'
-import { LineBase, LineBaseProps, FormGroup, FormControlStatic, runTasks } from '../Lines/LineBase'
+import { LineBase, LineBaseProps, runTasks } from '../Lines/LineBase'
+import { FormGroup } from '../Lines/FormGroup'
+import { FormControlReadonly } from '../Lines/FormControlReadonly'
 import { ModifiableEntity, Lite, Entity, EntityControlMessage, JavascriptMessage, toLite, is, liteKey, getToString, isLite, isEntity, isModifiableEntity } from '../Signum.Entities'
 import Typeahead from '../Lines/Typeahead'
 import { EntityBase, EntityBaseProps } from './EntityBase'
@@ -123,14 +125,14 @@ export class EntityLine extends EntityBase<EntityLineProps, EntityLineState> {
         var linkOrAutocomplete = hasValue ? this.renderLink() : this.renderAutoComplete();
 
         return (
-            <FormGroup ctx={s.ctx} labelText={s.labelText} helpBlock={s.helpBlock}
+            <FormGroup ctx={s.ctx} labelText={s.labelText} helpText={s.helpText}
                 htmlAttributes={{ ...this.baseHtmlAttributes(), ...EntityBase.entityHtmlAttributes(s.ctx.value!), ...s.formGroupHtmlAttributes }}
                 labelHtmlAttributes={s.labelHtmlAttributes}>
                 <div className="SF-entity-line">
                     {
                         !EntityBase.hasChildrens(buttons) ?
-                            <div style={{ position: "relative" }}>{linkOrAutocomplete}</div>:
-                            <div className="input-group">
+                            <div style={{ position: "relative" }}>{linkOrAutocomplete}</div> :
+                            <div className={s.ctx.inputGroupClass}>
                                 {linkOrAutocomplete}
                                 {buttons}
                             </div>
@@ -147,7 +149,7 @@ export class EntityLine extends EntityBase<EntityLineProps, EntityLineState> {
         var ac = this.state.autoComplete;
 
         if (ac == null || ctx.readOnly)
-            return <FormControlStatic ctx={ctx}>{ctx.value && ctx.value.toStr}</FormControlStatic>;
+            return <FormControlReadonly ctx={ctx}>{ctx.value && ctx.value.toStr}</FormControlReadonly>;
 
         return (
             <Typeahead ref={ta => this.typeahead = ta}
@@ -181,19 +183,19 @@ export class EntityLine extends EntityBase<EntityLineProps, EntityLineState> {
                     getToString(value);
 
         if (s.ctx.readOnly)
-            return <FormControlStatic ctx={s.ctx}>{ str }</FormControlStatic>
+            return <FormControlReadonly ctx={s.ctx}>{ str }</FormControlReadonly>
 
         if (s.navigate && s.view) {
             return (
                 <a href="#" onClick={this.handleViewClick}
-                    className="form-control btn-default sf-entity-line-entity"
+                    className={classes(s.ctx.formControlClass, "btn-light sf-entity-line-entity")}
                     title={JavascriptMessage.navigate.niceToString()} {...s.itemHtmlAttributes}>
                     {str}
                 </a>
             );
         } else {
             return (
-                <span className="form-control btn-default sf-entity-line-entity" {...s.itemHtmlAttributes}>
+                <span className={classes(s.ctx.formControlClass, "btn-light sf-entity-line-entity")} { ...s.itemHtmlAttributes } >
                     {str }
                 </span>
             );

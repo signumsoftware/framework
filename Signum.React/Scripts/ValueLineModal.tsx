@@ -79,7 +79,7 @@ export default class ValueLineModal extends React.Component<ValueLineModalProps,
                     <button disabled={disabled} className="btn btn-primary sf-entity-button sf-ok-button" onClick={this.handleOkClick}>
                         {JavascriptMessage.ok.niceToString()}
                     </button>
-                    <button className="btn btn-default sf-entity-button sf-close-button" onClick={this.handleCancelClicked}>
+                    <button className="btn btn-light sf-entity-button sf-close-button" onClick={this.handleCancelClicked}>
                         {JavascriptMessage.cancel.niceToString()}
                     </button>
                 </ModalFooter>
