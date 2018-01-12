@@ -17,6 +17,18 @@ namespace Signum.Entities.DynamicQuery
             list.Add(new HasValueToken(parent));
             return list;
         }
+
+        internal static List<QueryToken> AndModuloTokens(this List<QueryToken> list, QueryToken parent)
+        {
+            list.AddRange(new List<QueryToken>
+            {
+                new ModuloToken(parent, 10),
+                new ModuloToken(parent, 100),
+                new ModuloToken(parent, 1000),
+                new ModuloToken(parent, 10000),
+            });
+            return list;
+        }
     }
 
     [Serializable]

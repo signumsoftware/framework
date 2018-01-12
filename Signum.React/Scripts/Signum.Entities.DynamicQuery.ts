@@ -88,6 +88,8 @@ export module QueryTokenMessage {
     export const Length = new MessageKey("QueryTokenMessage", "Length");
     export const _0HasValue = new MessageKey("QueryTokenMessage", "_0HasValue");
     export const HasValue = new MessageKey("QueryTokenMessage", "HasValue");
+    export const Modulo0 = new MessageKey("QueryTokenMessage", "Modulo0");
+    export const _0Mod1 = new MessageKey("QueryTokenMessage", "_0Mod1");
 }
 
 export const UniqueType = new EnumType<UniqueType>("UniqueType");

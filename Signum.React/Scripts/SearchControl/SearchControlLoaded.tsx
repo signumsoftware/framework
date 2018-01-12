@@ -62,6 +62,7 @@ export interface SearchControlLoadedProps {
     largeToolbarButtons: boolean;
     avoidAutoRefresh: boolean;
     avoidChangeUrl: boolean;
+    refreshKey: string | undefined;
 
     onCreate?: () => void;
     onDoubleClick?: (e: React.MouseEvent<any>, row: ResultRow) => void;
@@ -127,6 +128,12 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
         if (this.props.searchOnLoad)
             this.doSearch().done();
+    }
+
+    componentWillReceiveProps(props: SearchControlLoadedProps) {
+        if (this.props.refreshKey != props.refreshKey) {
+            this.doSearchPage1();
+        }
     }
 
     componentWillUnmount() {
@@ -455,7 +462,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
                 onClick={this.handleToggleFilters}
                 title={s.showFilters ? JavascriptMessage.hideFilters.niceToString() : JavascriptMessage.showFilters.niceToString()}><span className="fa fa-filter"></span></a >),
 
-            p.showFilterButton && OrderUtils.setOrder(-4, <a
+            p.showGroupButton && OrderUtils.setOrder(-4, <a
                 className={"sf-query-button btn btn-light" + (p.findOptions.groupResults ? " active" : "")}
                 onClick={this.handleToggleGroupBy}
                 title={p.findOptions.groupResults ? JavascriptMessage.ungroupResults.niceToString() : JavascriptMessage.groupResults.niceToString()}>Ʃ</a >),

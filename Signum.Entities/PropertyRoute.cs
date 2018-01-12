@@ -576,7 +576,7 @@ namespace Signum.Entities
 
             var steps = this.Follow(a => a.Parent).Reverse();
             if (skipBefore != null)
-                steps = steps.SkipWhile(a => a.Equals(skipBefore));
+                steps = steps.SkipWhile(a => !a.Equals(skipBefore));
 
             foreach (var p in steps)
             {
