@@ -1,7 +1,7 @@
 ﻿
 import * as React from 'react'
 import { RouteComponentProps } from 'react-router'
-import { ButtonDropdown, DropdownItem } from 'reactstrap'
+import { ButtonDropdown, DropdownItem, DropdownMenu, DropdownToggle } from 'reactstrap'
 import { Dic, classes } from '../../../Framework/Signum.React/Scripts/Globals'
 import * as Finder from '../../../Framework/Signum.React/Scripts/Finder'
 import { ResultTable, FindOptions, FilterOption, QueryDescription } from '../../../Framework/Signum.React/Scripts/FindOptions'
@@ -65,24 +65,29 @@ export default class ExcelMenu extends React.Component<ExcelMenuProps, { excelRe
         const label = <span><i className="fa fa-file-excel-o"></i>&nbsp;{this.props.searchControl.props.largeToolbarButtons == true ? " " + ExcelMessage.ExcelReport.niceToString() : undefined}</span>;
 
         if (this.props.plainExcel && !this.props.excelReport)
-            return <button className={"sf-query-button sf-search btn btn-default"} onClick={this.handlePlainExcel}>{label} </button>;
+            return <button className={"sf-query-button sf-search btn btn-light"} onClick={this.handlePlainExcel}>{label} </button>;
 
         const excelReports = this.state.excelReport;
         return (
-            <ButtonDropdown title={label as any} id="userQueriesDropDown" className="sf-userquery-dropdown"
+            <ButtonDropdown id="userQueriesDropDown" className="sf-userquery-dropdown"
                 isOpen={this.state.isOpen} toggle={this.handleSelectedToggle}>
-                {this.props.plainExcel && <DropdownItem onSelect={this.handlePlainExcel} ><span><i className="fa fa-file-excel-o"></i>&nbsp; {ExcelMessage.ExcelReport.niceToString()}</span></DropdownItem>}
-                {this.props.plainExcel && excelReports && excelReports.length > 0 && <DropdownItem divider />}
-                {
-                    excelReports && excelReports.map((uq, i) =>
-                        <DropdownItem key={i}
-                            onSelect={() => this.handleSelect(uq)}>
-                            {uq.toStr}
-                        </DropdownItem>)
-                }
-                {(this.props.plainExcel || excelReports && excelReports.length > 0) && <DropdownItem divider />}
-                <DropdownItem onSelect={this.handleAdmnister}>{ExcelMessage.Administer.niceToString()}</DropdownItem>
-                <DropdownItem onSelect={this.handleCreate}>{ExcelMessage.CreateNew.niceToString()}</DropdownItem>
+                <DropdownToggle color="light" caret>
+                    {label as any}
+                </DropdownToggle>
+                <DropdownMenu>
+                    {this.props.plainExcel && <DropdownItem onSelect={this.handlePlainExcel} ><span><i className="fa fa-file-excel-o"></i>&nbsp; {ExcelMessage.ExcelReport.niceToString()}</span></DropdownItem>}
+                    {this.props.plainExcel && excelReports && excelReports.length > 0 && <DropdownItem divider />}
+                    {
+                        excelReports && excelReports.map((uq, i) =>
+                            <DropdownItem key={i}
+                                onSelect={() => this.handleSelect(uq)}>
+                                {uq.toStr}
+                            </DropdownItem>)
+                    }
+                    {(this.props.plainExcel || excelReports && excelReports.length > 0) && <DropdownItem divider />}
+                    <DropdownItem onSelect={this.handleAdmnister}>{ExcelMessage.Administer.niceToString()}</DropdownItem>
+                    <DropdownItem onSelect={this.handleCreate}>{ExcelMessage.CreateNew.niceToString()}</DropdownItem>
+                </DropdownMenu>
             </ButtonDropdown>
         );
     }

@@ -7,7 +7,8 @@ import * as Finder from '../../../Framework/Signum.React/Scripts/Finder'
 import { FindOptions } from '../../../Framework/Signum.React/Scripts/FindOptions'
 import { TypeContext, StyleContext, StyleOptions, FormGroupStyle } from '../../../Framework/Signum.React/Scripts/TypeContext'
 import { PropertyRoute, PropertyRouteType, MemberInfo, getTypeInfo, getTypeInfos, TypeInfo, IsByAll, New } from '../../../Framework/Signum.React/Scripts/Reflection'
-import { LineBase, LineBaseProps, FormGroup, FormControlStatic, runTasks} from '../../../Framework/Signum.React/Scripts/Lines/LineBase'
+import { LineBase, LineBaseProps } from '../../../Framework/Signum.React/Scripts/Lines/LineBase'
+import { FormGroup } from '../../../Framework/Signum.React/Scripts/Lines/FormGroup'
 import { ModifiableEntity, Lite, Entity, EntityControlMessage, JavascriptMessage, toLite, is, liteKey, getToString, } from '../../../Framework/Signum.React/Scripts/Signum.Entities'
 import { IFile, IFilePath, FileMessage, FileTypeSymbol, FileEntity, FilePathEntity, FileEmbedded, FilePathEmbedded } from './Signum.Entities.Files'
 import Typeahead from '../../../Framework/Signum.React/Scripts/Lines/Typeahead'
@@ -27,7 +28,7 @@ export interface FileLineProps extends EntityBaseProps {
     fileType?: FileTypeSymbol;
     accept?: string;
     configuration?: FileDownloaderConfiguration<IFile>;
-    helpBlock?: React.ReactChild;
+    helpText?: React.ReactChild;
 }
 
 
@@ -60,7 +61,7 @@ export default class FileLine extends EntityBase<FileLineProps, FileLineProps> {
             <FormGroup ctx={s.ctx} labelText={s.labelText}
                 labelHtmlAttributes={s.labelHtmlAttributes}
                 htmlAttributes={{ ...this.baseHtmlAttributes(), ...EntityBase.entityHtmlAttributes(s.ctx.value), ...s.formGroupHtmlAttributes }}
-                helpBlock={this.props.helpBlock}>
+                helpText={this.props.helpText}>
                 {hasValue ? this.renderFile() : s.ctx.readOnly ? undefined :
                     <FileUploader
                         accept={this.props.accept}

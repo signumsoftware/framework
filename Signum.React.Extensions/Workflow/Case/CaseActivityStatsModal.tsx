@@ -152,7 +152,7 @@ export class CaseActivityStatsComponent extends React.Component<CaseActivityStat
 
         return (
             <FormGroup ctx={ctx}>
-                <button className="btn btn-default" onClick={this.handleClick}>
+                <button className="btn btn-light" onClick={this.handleClick}>
                     <i className="fa fa-random" style={{ color: "green" }} /> {WorkflowActivityMessage.CaseFlow.niceToString()}
                 </button>
             </FormGroup>

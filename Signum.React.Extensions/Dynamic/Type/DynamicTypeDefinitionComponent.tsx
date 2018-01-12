@@ -1,7 +1,7 @@
 ﻿import * as React from 'react'
-import Combobox from 'react-widgets/lib/Combobox'
+import * as Combobox from 'react-widgets/lib/Combobox'
 import { DropdownItem, Card, CardHeader } from 'reactstrap'
-import { FormGroup, FormControlStatic, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityList, EntityRepeater } from '../../../../Framework/Signum.React/Scripts/Lines'
+import { FormGroup, FormControlReadonly, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityList, EntityRepeater } from '../../../../Framework/Signum.React/Scripts/Lines'
 import { classes, Dic } from '../../../../Framework/Signum.React/Scripts/Globals'
 import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
 import { QueryDescription, SubTokensOptions, QueryToken, filterOperations, OrderType, ColumnOptionsMode } from '../../../../Framework/Signum.React/Scripts/FindOptions'
@@ -973,14 +973,14 @@ export class TypeCombo extends React.Component<{ dc: DynamicTypeDesignContext; b
     render() {
         let lc = this.props.labelColumns;
         return (
-            <div className="form-group form-sm" >
-                <label className={classes("control-label", "col-sm-" + (lc == null ? 2 : lc))}>
+            <div className="form-group" >
+                <label className={classes("col-form-label", "col-form-label-sm", "col-sm-" + (lc == null ? 2 : lc))}>
                     {this.props.binding.member}
                 </label>
                 <div className={"col-sm-" + (lc == null ? 10 : 12 - lc)}>
                     <div style={{ position: "relative" }}>
                         <Typeahead
-                            inputAttrs={{ className: "form-control sf-entity-autocomplete" }}
+                            inputAttrs={{ className: "form-control form-control-sm sf-entity-autocomplete" }}
                             onBlur={this.props.onBlur}
                             getItems={this.handleGetItems}
                             value={this.props.binding.getValue()}
@@ -1084,7 +1084,7 @@ export class ComboBoxRepeaterComponent extends React.Component<ComboBoxRepeaterC
     render() {
         return (
             <div>
-                <table className="table table-condensed">
+                <table className="table table-sm">
                     <tbody>
                         {
                             this.props.list.map((value, i) => this.renderHeader(value, i))

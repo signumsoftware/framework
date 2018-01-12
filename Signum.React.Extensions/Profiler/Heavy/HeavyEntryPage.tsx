@@ -98,7 +98,7 @@ export default class HeavyEntry extends React.Component<HeavyEntryProps, { entri
                             <td colSpan={2}>
                                 <div className="btn-toolbar">
                                     <button onClick={this.handleDownload} className="btn btn-info">Download</button>
-                                    {!current.IsFinished && <button onClick={this.handleUpdate} className="btn btn-default">Update</button>}
+                                    {!current.IsFinished && <button onClick={this.handleUpdate} className="btn btn-light">Update</button>}
                                 </div>
                             </td>
                         </tr>
@@ -134,7 +134,7 @@ export class StackFrameTable extends React.Component<{ stackTrace: StackTraceTS[
             return <span>No StackTrace</span>;
 
         return (
-            <table className="table table-condensed">
+            <table className="table table-sm">
                 <thead>
                     <tr>
                         <th>Namespace

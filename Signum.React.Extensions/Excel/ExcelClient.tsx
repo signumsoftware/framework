@@ -40,7 +40,7 @@ export function start(options: { routes: JSX.Element[], plainExcel: boolean, exc
 
             return (
                 <button
-                    className="sf-query-button sf-chart-script-edit btn btn-default"
+                    className="sf-query-button sf-chart-script-edit btn btn-light"
                     onClick={() => { API.generatePlanExcel(ChartClient.API.getRequest(ctx.chartRequest)); }}>
                     <i className="fa fa-file-excel-o"></i> &nbsp; {ExcelMessage.ExcelReport.niceToString()}
                 </button>

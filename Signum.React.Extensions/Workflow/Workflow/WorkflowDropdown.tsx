@@ -13,7 +13,7 @@ import ButtonBar from '../../../../Framework/Signum.React/Scripts/Frames/ButtonB
 import { CaseActivityEntity, WorkflowEntity, ICaseMainEntity, CaseActivityOperation, CaseActivityQuery, WorkflowMainEntityStrategy } from '../Signum.Entities.Workflow'
 import * as WorkflowClient from '../WorkflowClient'
 
-import { Navbar, Nav, NavItem, UncontrolledNavDropdown, DropdownItem, DropdownToggle, DropdownMenu } from 'reactstrap'
+import { Navbar, Nav, NavItem, UncontrolledDropdown, DropdownItem, DropdownToggle, DropdownMenu } from 'reactstrap'
 import { LinkContainer } from '../../../../Framework/Signum.React/Scripts/LinkContainer';
 
 export default class WorkflowDropdown extends React.Component<{}, { starts: Array<WorkflowEntity> }>
@@ -34,8 +34,8 @@ export default class WorkflowDropdown extends React.Component<{}, { starts: Arra
         const inboxUrl = WorkflowClient.getDefaultInboxUrl();
 
         return (
-            <UncontrolledNavDropdown>
-                <DropdownToggle nav caret>
+            <UncontrolledDropdown>
+                <DropdownToggle color="light" nav caret>
                     {WorkflowEntity.nicePluralName()}
                 </DropdownToggle>
                 <DropdownMenu>
@@ -48,7 +48,7 @@ export default class WorkflowDropdown extends React.Component<{}, { starts: Arra
                     </LinkContainer>
                 )}
                 </DropdownMenu>
-            </UncontrolledNavDropdown>
+            </UncontrolledDropdown>
         );
     }
 

@@ -1,9 +1,9 @@
 ﻿import * as React from 'react'
-import { Tabs, Tab } from 'react-bootstrap';
 import * as numbro from 'numbro';
 import * as OrderUtils from '../../../../Framework/Signum.React/Scripts/Frames/OrderUtils'
 import { classes } from '../../../../Framework/Signum.React/Scripts/Globals'
-import { FormGroup, FormControlStatic, ValueLine, ValueLineType, EntityLine, EntityDetail, EntityCombo, EntityList, EntityRepeater, EntityTable, IRenderButtons, EntityTabRepeater } from '../../../../Framework/Signum.React/Scripts/Lines'
+import { Tab, Tabs, UncontrolledTabs } from '../../../../Framework/Signum.React/Scripts/Tabs'
+import { FormGroup, FormControlReadonly, ValueLine, ValueLineType, EntityLine, EntityDetail, EntityCombo, EntityList, EntityRepeater, EntityTable, IRenderButtons, EntityTabRepeater } from '../../../../Framework/Signum.React/Scripts/Lines'
 import { SearchControl, FilterOption, ColumnOption, FindOptions } from '../../../../Framework/Signum.React/Scripts/Search'
 import { TypeContext, FormGroupStyle, ButtonsContext } from '../../../../Framework/Signum.React/Scripts/TypeContext'
 import FileLine from '../../Files/FileLine'
@@ -44,7 +44,7 @@ export default class Predictor extends React.Component<{ ctx: TypeContext<Predic
                 columnOptionsMode: "Add",
                 columnOptions: p.mainQuery.columns.map(mle => ({ columnName: mle.element.token && mle.element.token.token!.fullKey }) as ColumnOption)
             })
-                .then(lite => PredictorClient.predict(toLite(p), lite && { "Entity" : lite }))
+                .then(lite => PredictorClient.predict(toLite(p), lite && { "Entity": lite }))
                 .done();
 
         } else {
@@ -197,7 +197,7 @@ export default class Predictor extends React.Component<{ ctx: TypeContext<Predic
                 <ValueLine ctx={ctxxs.subCtx(e => e.state, { readOnly: true })} />
                 <EntityLine ctx={ctxxs.subCtx(e => e.trainingException, { readOnly: true })} hideIfNull={true} />
                 {ctx.value.state == "Training" && <TrainingProgressComponent ctx={ctx} onStateChanged={this.handleOnFinished} />}
-                <Tabs id={ctx.prefix + "tabs"} unmountOnExit={true}>
+                <UncontrolledTabs unmountOnExit={true}>
                     <Tab eventKey="query" title={ctxmq.niceName(a => a.query)}>
                         <div>
                             <fieldset>
@@ -257,14 +257,12 @@ export default class Predictor extends React.Component<{ ctx: TypeContext<Predic
                             {ctx.value.classificationTraining && ctx.value.classificationValidation && <PredictorClassificationMetrics ctx={ctx} />}
                             {ctx.value.regressionTraining && ctx.value.regressionTraining && <PredictorRegressionMetrics ctx={ctx} />}
                             {ctx.value.resultSaver && PredictorClient.getResultRendered(ctx)}
-                            <div className="form-vertical">
-                                <EntityRepeater ctx={ctxxs.subCtx(f => f.files)} getComponent={ec =>
-                                    <FileLine ctx={ec.subCtx({ formGroupStyle: "SrOnly" })} remove={false} fileType={PredictorFileType.PredictorFile} />
-                                } />
-                            </div>
+                            <EntityRepeater ctx={ctxxs.subCtx(f => f.files)} getComponent={ec =>
+                                <FileLine ctx={ec.subCtx({ formGroupStyle: "SrOnly" })} remove={false} fileType={PredictorFileType.PredictorFile} />
+                            } />
                         </Tab>
                     }
-                </Tabs>
+                </UncontrolledTabs>
             </div>
         );
     }

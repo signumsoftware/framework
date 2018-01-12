@@ -55,7 +55,7 @@ export default class TimesPage extends React.Component<TimesPageProps, { times?:
             <div>
                 <h3>Times</h3>
                 <div className="btn-toolbar">
-                <button onClick={() => this.loadState()} className="btn btn-default">Reload</button>
+                <button onClick={() => this.loadState()} className="btn btn-light">Reload</button>
                 <button onClick={this.handleClear} className="btn btn-warning">Clear</button>
                     </div>
                 <br />

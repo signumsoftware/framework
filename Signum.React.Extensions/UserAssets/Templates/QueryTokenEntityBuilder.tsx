@@ -1,7 +1,7 @@
 ﻿import * as React from 'react'
 import { ajaxGet, ajaxPost, ServiceError } from '../../../../Framework/Signum.React/Scripts/Services'
 import { QueryTokenEmbedded } from '../Signum.Entities.UserAssets'
-import { FormGroup, FormControlStatic, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityList, EntityRepeater } from '../../../../Framework/Signum.React/Scripts/Lines'
+import { FormGroup, FormControlReadonly, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityList, EntityRepeater } from '../../../../Framework/Signum.React/Scripts/Lines'
 import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
 import { TypeContext } from '../../../../Framework/Signum.React/Scripts/TypeContext'
 import { QueryDescription, QueryToken, SubTokensOptions } from '../../../../Framework/Signum.React/Scripts/FindOptions'
@@ -16,7 +16,7 @@ interface QueryTokenEntityBuilderProps {
     queryKey: string;
     subTokenOptions: SubTokensOptions;
     onTokenChanged?: (newToken: QueryToken | undefined) => void;
-    helpBlock?: React.ReactChild;
+    helpText?: React.ReactChild;
 }
 
 export default class QueryTokenEntityBuilder extends React.Component<QueryTokenEntityBuilderProps> {
@@ -46,7 +46,7 @@ export default class QueryTokenEntityBuilder extends React.Component<QueryTokenE
             readOnly={this.props.ctx.readOnly} />
 
         return (
-            <FormGroup ctx={this.props.ctx} helpBlock={this.props.helpBlock}>
+            <FormGroup ctx={this.props.ctx} helpText={this.props.helpText}>
                 {
                     !qte || !qte.parseException ? tokenBuilder :
                         <div>

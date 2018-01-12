@@ -1,7 +1,7 @@
 ﻿
 import * as React from 'react'
 import { RouteComponentProps } from 'react-router'
-import { ButtonDropdown, DropdownItem } from 'reactstrap'
+import { ButtonDropdown, DropdownItem, DropdownToggle, DropdownMenu } from 'reactstrap'
 import { Dic, classes } from '../../../Framework/Signum.React/Scripts/Globals'
 import * as Finder from '../../../Framework/Signum.React/Scripts/Finder'
 import { ResultTable, FindOptions, FilterOption, QueryDescription } from '../../../Framework/Signum.React/Scripts/FindOptions'
@@ -98,19 +98,22 @@ export default class UserQueryMenu extends React.Component<UserQueryMenuProps, U
         const label = <span><i className="fa fa-list-alt"></i>&nbsp;{this.props.searchControl.props.largeToolbarButtons == true ? " " + UserQueryMessage.UserQueries_UserQueries.niceToString() : undefined}</span>;
         const userQueries = this.state.userQueries;
         return (
-            <ButtonDropdown title={label as any} id="userQueriesDropDown" className="sf-userquery-dropdown"
+            <ButtonDropdown id="userQueriesDropDown" className="sf-userquery-dropdown" color="light"
                 toggle={this.handleSelectedToggle} isOpen={this.state.isOpen}>
-                {
-                    userQueries && userQueries.map((uq, i) =>
-                        <DropdownItem key={i}
-                            className={classes("sf-userquery", is(uq, this.state.currentUserQuery) && "active")}
-                            onSelect={() => this.handleSelect(uq)}>
-                            {uq.toStr}
-                        </DropdownItem>)
-                }
-                {userQueries && userQueries.length > 0 && <DropdownItem divider />}
-                {this.state.currentUserQuery && <DropdownItem onSelect={this.handleEdit} >{UserQueryMessage.UserQueries_Edit.niceToString()}</DropdownItem>}
-                <DropdownItem onSelect={this.handleCreate}>{UserQueryMessage.UserQueries_CreateNew.niceToString()}</DropdownItem>
+                <DropdownToggle color="light" caret>{label as any}</DropdownToggle>
+                <DropdownMenu>
+                    {
+                        userQueries && userQueries.map((uq, i) =>
+                            <DropdownItem key={i}
+                                className={classes("sf-userquery", is(uq, this.state.currentUserQuery) && "active")}
+                                onSelect={() => this.handleSelect(uq)}>
+                                {uq.toStr}
+                            </DropdownItem>)
+                    }
+                    {userQueries && userQueries.length > 0 && <DropdownItem divider />}
+                    {this.state.currentUserQuery && <DropdownItem onSelect={this.handleEdit} >{UserQueryMessage.UserQueries_Edit.niceToString()}</DropdownItem>}
+                    <DropdownItem onSelect={this.handleCreate}>{UserQueryMessage.UserQueries_CreateNew.niceToString()}</DropdownItem>
+                </DropdownMenu>
             </ButtonDropdown>
         );
     }

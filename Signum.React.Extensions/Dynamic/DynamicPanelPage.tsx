@@ -154,7 +154,7 @@ export class CompileStep extends React.Component<{}, DynamicCompileStepState>{
 
         return (
             <div>
-                <table className="table table-condensed">
+                <table className="table table-sm">
                     <thead style={{ color: "#a94464" }}>
                         <tr>
                             <th>Error Number</th>

@@ -109,7 +109,7 @@ export default class ChangePassword extends React.Component<{}, { modelState?: M
                 </div>
                 <div className="row">
                     <div className="col-sm-offset-4 col-sm-6">
-                        <button type="submit" className="btn btn-default" id="changePassword"  disabled={!this.isEnabled() }>{AuthMessage.ChangePassword.niceToString() }</button>
+                        <button type="submit" className="btn btn-light" id="changePassword"  disabled={!this.isEnabled() }>{AuthMessage.ChangePassword.niceToString() }</button>
                     </div>
                 </div>
             </form>

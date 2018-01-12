@@ -1,5 +1,4 @@
 ﻿import * as React from 'react'
-import { BsStyle } from '../../../../Framework/Signum.React/Scripts/Operations';
 import { classes } from '../../../../Framework/Signum.React/Scripts/Globals'
 import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
 import * as numbro from 'numbro';

@@ -58,7 +58,7 @@ export default class ChartTable extends React.Component<{ resultTable: ResultTab
         }
 
         return (
-            <table className="sf-search-results table table-hover table-condensed">
+            <table className="sf-search-results table table-hover table-sm">
                 <thead>
                     <tr>
                         { !chartRequest.groupResults && <th></th> }

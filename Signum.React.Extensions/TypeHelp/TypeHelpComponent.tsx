@@ -169,11 +169,11 @@ export default class TypeHelpComponent extends React.Component<TypeHelpComponent
             <div className="form-sm sf-type-help-bar">
                 <div className="input-group">
                     <span className="input-group-btn">
-                        <button className="btn btn-default" disabled={!this.canBack()}
+                        <button className="btn btn-light" disabled={!this.canBack()}
                             onClick={e => this.handleGoHistory(e, this.state.historyIndex - 1)} type="button">
                             <span className="fa fa-arrow-circle-left" />
                         </button>
-                        <button className="btn btn-default" disabled={!this.canForth()}
+                        <button className="btn btn-light" disabled={!this.canForth()}
                             onClick={e => this.handleGoHistory(e, this.state.historyIndex + 1)} type="button">
                             <span className="fa fa-arrow-circle-right" />
                         </button>

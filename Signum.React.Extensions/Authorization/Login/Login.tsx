@@ -51,7 +51,7 @@ export default class Login extends React.Component<{}, { modelState?: ModelState
 
         return (
             <div className="container">
-                <form className="form-horizontal" onSubmit={(e) => this.handleSubmit(e)}>
+                <form onSubmit={(e) => this.handleSubmit(e)}>
                     <div className="row">
                         <div className="col-md-3"></div>
                         <div className="col-md-6">
@@ -106,15 +106,20 @@ export default class Login extends React.Component<{}, { modelState?: ModelState
                             </div>
                         </div>
                     }
-                    {AuthClient.resetPassword &&
+                    
                         <div className="row" style={{ paddingTop: "1rem" }}>
                             <div className="col-md-3"></div>
                             <div className="col-md-6">
                                 <button type="submit" className="btn btn-success"><i className="fa fa-sign-in"></i> {AuthMessage.Login.niceToString()}</button>
+                            {AuthClient.resetPassword &&
+                                <span>
+                                &nbsp;
                                 <Link to="~/auth/resetPassword">{AuthMessage.IHaveForgottenMyPassword.niceToString()}</Link>
+                                </span>
+                            }
                             </div>
                         </div>
-                    }
+                    
                 </form>
             </div>
         );

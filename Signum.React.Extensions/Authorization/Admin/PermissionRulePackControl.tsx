@@ -48,7 +48,7 @@ export default class PermissionRulesPackControl extends React.Component<{ ctx: T
                     <EntityLine ctx={ctx.subCtx(f => f.role) }  />
                     <ValueLine ctx={ctx.subCtx(f => f.strategy) }  />
                 </div>
-                <table className="table table-condensed sf-auth-rules">
+                <table className="table table-sm sf-auth-rules">
                     <thead>
                         <tr>
                             <th>

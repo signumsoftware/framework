@@ -1,7 +1,7 @@
 ﻿import * as React from 'react'
 import { TabPane, TabContent, ButtonToolbar } from 'reactstrap'
 import { classes } from '../../../Framework/Signum.React/Scripts/Globals'
-import { FormGroup, FormControlStatic, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityDetail, EntityList, EntityRepeater, EntityTabRepeater} from '../../../Framework/Signum.React/Scripts/Lines'
+import { FormGroup, FormControlReadonly, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityDetail, EntityList, EntityRepeater, EntityTabRepeater} from '../../../Framework/Signum.React/Scripts/Lines'
 import { SubTokensOptions, QueryToken, QueryTokenType, hasAnyOrAll }  from '../../../Framework/Signum.React/Scripts/FindOptions'
 import { SearchControl }  from '../../../Framework/Signum.React/Scripts/Search'
 import { getToString, getMixin }  from '../../../Framework/Signum.React/Scripts/Signum.Entities'
@@ -54,7 +54,7 @@ export default class TemplateControls extends React.Component<TemplateControlsPr
     }
 
     renderButton(text: string, canClick: string | undefined, buildPattern: (key: string) => string) {
-        return <input type="button" disabled={!!canClick} className="btn btn-default btn-sm sf-button"
+        return <input type="button" disabled={!!canClick} className="btn btn-light btn-sm sf-button"
             title={canClick} value={text}
             onClick={() => this.props.onInsert(buildPattern(this.state.currentToken ? this.state.currentToken.fullKey : "")) }/>;
     }

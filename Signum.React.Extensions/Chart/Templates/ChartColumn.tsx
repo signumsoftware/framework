@@ -60,7 +60,7 @@ export class ChartColumn extends React.Component<ChartColumnProps, {}> {
                     {groupVisible && <input type="checkbox" checked={cb.groupResults} className="sf-chart-group-trigger" disabled={cb.chartScript.groupBy == "Always"} onChange={this.handleGroupChecked} />}
                 </td>
                 <td>
-                    <div className={classes("sf-query-token", this.props.ctx.formGroupSizeCss)}>
+                    <div className={classes("sf-query-token")}>
                         <QueryTokenEntityBuilder
                             ctx={this.props.ctx.subCtx(a => a.token, { formGroupStyle: "None" })}
                             queryKey={this.props.queryKey}

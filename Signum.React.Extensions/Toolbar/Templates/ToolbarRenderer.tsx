@@ -14,7 +14,9 @@ import { ToolbarConfig } from "../ToolbarClient";
 import '../../../../Framework/Signum.React/Scripts/Frames/MenuIcons.css'
 import './Toolbar.css'
 import { PermissionSymbol } from "../../Authorization/Signum.Entities.Authorization";
-import { NavDropdown, DropdownItem, DropdownToggle, NavItem, NavLink, UncontrolledNavDropdown } from 'reactstrap';
+import { Dropdown, DropdownItem, DropdownToggle, DropdownMenu, NavItem, NavLink } from 'reactstrap';
+import * as PropTypes from "prop-types";
+
 
 export interface ToolbarRendererState {
     response?: ToolbarClient.ToolbarResponse<any>;
@@ -23,7 +25,7 @@ export interface ToolbarRendererState {
     isRtl: boolean;
 }
 
-export default class ToolbarRenderer extends React.Component<{ location?: ToolbarLocation;}, ToolbarRendererState>
+export default class ToolbarRenderer extends React.Component<{ location?: ToolbarLocation; }, ToolbarRendererState>
 {
     static defaultProps = { location: "Top" as ToolbarLocation };
 
@@ -57,13 +59,13 @@ export default class ToolbarRenderer extends React.Component<{ location?: Toolba
             );
         else
             return (
-                <ul className="nav">
+                <DropdownItemContainer>
                     {r.elements && r.elements.flatMap(sr => this.renderDropdownItem(sr, 0, r)).map((sr, i) => withKey(sr, i))}
-                </ul>
+                </DropdownItemContainer>
             );
     }
 
-    handleOnToggle = (res: ToolbarClient.ToolbarResponse<any>)  => {
+    handleOnToggle = (res: ToolbarClient.ToolbarResponse<any>) => {
 
         if (this.state.avoidCollapse.contains(res)) {
             this.state.avoidCollapse.remove(res);
@@ -87,12 +89,16 @@ export default class ToolbarRenderer extends React.Component<{ location?: Toolba
                 var icon = this.icon(res);
 
                 return (
-                    <NavDropdown
-                        toggle={() => this.handleOnToggle(res)}
-                        isOpen={this.state.expanded.contains(res)}>
-                            <DropdownToggle>{!icon ? title : (<span>{icon}{title}</span>)}</DropdownToggle>
+                    <Dropdown
+                        onClick={() => this.handleOnToggle(res)}
+                        isOpen={this.state.expanded.contains(res)} color="light">
+                        <DropdownToggle color="light">
+                            {!icon ? title : (<span>{icon}{title}</span>)}
+                        </DropdownToggle>
+                        <DropdownMenu>
                             {res.elements && res.elements.flatMap(sr => this.renderDropdownItem(sr, 0, res)).map((sr, i) => withKey(sr, i))}
-                    </NavDropdown>
+                        </DropdownMenu>
+                    </Dropdown>
                 );
             case "Header":
                 return (
@@ -106,12 +112,11 @@ export default class ToolbarRenderer extends React.Component<{ location?: Toolba
 
             case "Link":
 
-                if (res.url)
-                {
+                if (res.url) {
                     return (
                         <NavItem>
                             <NavLink onClick={e => Navigator.pushOrOpenInTab(res.url!, e)}>
-                            {ToolbarConfig.coloredIcon(res.iconName, res.iconColor)}{res.label}
+                                {ToolbarConfig.coloredIcon(res.iconName, res.iconColor)}{res.label}
                             </NavLink>
                         </NavItem>
                     );
@@ -154,10 +159,10 @@ export default class ToolbarRenderer extends React.Component<{ location?: Toolba
 
         this.forceUpdate();
     }
-    
+
     renderDropdownItem(res: ToolbarClient.ToolbarResponse<any>, indent: number, topRes: ToolbarClient.ToolbarResponse<any>): React.ReactElement<any>[] {
 
-        var padding  = (indent * 20) + "px";
+        var padding = (indent * 20) + "px";
 
 
 
@@ -178,7 +183,7 @@ export default class ToolbarRenderer extends React.Component<{ location?: Toolba
 
             case "Divider":
                 return [
-                    <DropdownItem divider className={menuItemN}/>
+                    <DropdownItem divider className={menuItemN} />
                 ];
 
             case "Link":
@@ -245,3 +250,27 @@ function findPath(target: ToolbarClient.ToolbarResponse<any>, list: ToolbarClien
 
     return null;
 }
+
+
+export class DropdownItemContainer extends React.Component<{}> {
+
+    handleToggle = () => {
+
+    }
+
+    getChildContext() {
+        return { toggle: this.handleToggle };
+    }
+
+    static childContextTypes = { "toggle": PropTypes.func };
+
+    render() {
+        return (
+            <ul className="nav">
+                {this.props.children}
+            </ul>
+        );
+    }
+}
+
+

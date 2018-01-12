@@ -1,5 +1,5 @@
 ﻿import { PredictorEntity } from "../Signum.Entities.MachineLearning";
-import { Modal } from "react-bootstrap";
+import { Modal, ModalHeader, ModalBody } from 'reactstrap'
 import * as React from "react";
 import * as Navigator from "../../../../Framework/Signum.React/Scripts/Navigator";
 import { IModalProps, openModal } from "../../../../Framework/Signum.React/Scripts/Modals";
@@ -22,7 +22,7 @@ interface PredictModalProps extends IModalProps {
 }
 
 interface PredictModalState {
-    show: boolean;
+    isOpen: boolean;
     predict: PredictRequest;
     hasChanged: boolean;
 }
@@ -31,11 +31,11 @@ export class PredictModal extends React.Component<PredictModalProps, PredictModa
 
     constructor(props: PredictModalProps) {
         super(props);
-        this.state = { show: true, predict: props.initialPredict, hasChanged: false };
+        this.state = { isOpen: true, predict: props.initialPredict, hasChanged: false };
     }
 
-    handleClosedClicked = () => {
-        this.setState({ show: false });
+    handleOnToggle = () => {
+        this.setState({ isOpen: false });
     }
 
     handleOnExited = () => {
@@ -59,26 +59,25 @@ export class PredictModal extends React.Component<PredictModalProps, PredictModa
         var sctx = new StyleContext(undefined, {});
 
         return (
-            <Modal onHide={this.handleClosedClicked} onExited={this.handleOnExited}
-                show={this.state.show} className="message-modal">
-                <Modal.Header closeButton={true}>
+            <Modal toggle={this.handleOnToggle} onExit={this.handleOnExited} isOpen={this.state.isOpen} className="message-modal">
+                <ModalHeader toggle={this.handleOnToggle}>
                     <h4 className={"modal-title"}>
                         {e && (<a href={Navigator.navigateRoute(e)} target="_blank" style={{ float: "right", marginRight: "20px" }}>{e.toStr}</a>)}
                         {p.predictor.toStr}<br />
                         <small>{PredictorEntity.niceName()}&nbsp;{p.predictor.id} (<a href={Navigator.navigateRoute(p.predictor)} target="_blank">{EntityControlMessage.View.niceToString()}</a>)</small>
                     </h4>
-                </Modal.Header>
-                <Modal.Body>
-                    <div className="form-horizontal">
+                </ModalHeader>
+                <ModalBody>
+                    <div>
                         {p.columns.filter(c => c.usage == "Input").map((col, i) =>
                             <PredictLine key={i} sctx={sctx} hasOriginal={p.hasOriginal} hasChanged={hasChanged} binding={Binding.create(col, c => c.value)} usage={col.usage} token={col.token} onChange={this.hangleOnChange} />)}
                     </div>
                     {p.subQueries.map((c, i) => <PredictTable key={i} sctx={sctx} table={c} onChange={this.hangleOnChange} hasChanged={hasChanged} hasOriginal={p.hasOriginal} />)}
-                    <div className="form-horizontal">
+                    <div>
                         {p.columns.filter(c => c.usage == "Output").map((col, i) =>
                             <PredictLine key={i} sctx={sctx} hasOriginal={p.hasOriginal} hasChanged={hasChanged} binding={Binding.create(col, c => c.value)} usage={col.usage} token={col.token} onChange={this.hangleOnChange} />)}
                     </div>
-                </Modal.Body>
+                </ModalBody>
             </Modal>
         );
     }
@@ -147,7 +146,7 @@ export class PredictTable extends React.Component<PredictTableProps> {
             <div>
                 <h4>{subQuery.toStr}</h4>
                 <div style={{ maxHeight: "500px", overflowY: "scroll", marginBottom: "10px" }}>
-                    <table className="table table-condensed">
+                    <table className="table table-sm">
                         <thead>
                             <tr >
                                 {

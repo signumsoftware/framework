@@ -30,7 +30,7 @@ export default class CaseFlowButton extends React.Component <CaseFlowButtonProps
 
     render() {
         return (
-            <button className="btn btn-default pull-right flip" onClick={this.handleClick}>
+            <button className="btn btn-light pull-right flip" onClick={this.handleClick}>
                 <i className="fa fa-random" style={{ color: "green" }} /> {WorkflowActivityMessage.CaseFlow.niceToString()}
             </button>
         );

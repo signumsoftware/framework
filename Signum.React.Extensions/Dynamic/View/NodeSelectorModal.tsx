@@ -67,7 +67,7 @@ export default class NodeSelectorModal extends React.Component<NodeSelectorModal
                                         {
                                             gr.elements.orderBy(n => n.order!).map(n =>
                                                 <button key={n.kind} type="button" onClick={() => this.handleButtonClicked(n)}
-                                                    className="sf-chooser-button sf-close-button btn btn-default">
+                                                    className="sf-chooser-button sf-close-button btn btn-light">
                                                     {n.kind}
                                                 </button>)
                                         }

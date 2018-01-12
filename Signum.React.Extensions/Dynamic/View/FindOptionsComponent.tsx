@@ -1,5 +1,5 @@
 ﻿import * as React from 'react'
-import { FormGroup, FormControlStatic, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityList, EntityRepeater } from '../../../../Framework/Signum.React/Scripts/Lines'
+import { FormGroup, FormControlReadonly, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityList, EntityRepeater } from '../../../../Framework/Signum.React/Scripts/Lines'
 import { classes, Dic } from '../../../../Framework/Signum.React/Scripts/Globals'
 import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
 import { QueryDescription, SubTokensOptions, QueryToken, filterOperations, OrderType, ColumnOptionsMode } from '../../../../Framework/Signum.React/Scripts/FindOptions'
@@ -286,12 +286,12 @@ export class QueryKeyLine extends React.Component<{ queryKey: string | undefined
     renderLink() {
         return (
             <div className="input-group">
-                <span className="form-control btn-default sf-entity-line-entity">
+                <span className="form-control btn-light sf-entity-line-entity">
                     {this.props.queryKey}
 
                 </span>
                 <span className="input-group-btn">
-                    <a className={classes("sf-line-button", "sf-remove btn btn-default")}
+                    <a className={classes("sf-line-button", "sf-remove btn btn-light")}
                         onClick={() => this.props.onChange(undefined)}
                         title={EntityControlMessage.Remove.niceToString()}>
                         <span className="fa fa-remove" />
@@ -441,7 +441,7 @@ abstract class BaseOptionsComponent<T> extends React.Component<BaseOptionsCompon
             <legend>
                 {this.renderTitle()}
             </legend>
-            <table className="table table-condensed code-container">
+            <table className="table table-sm code-container">
                 <thead>
                     {this.renderHeader()}
                 </thead>

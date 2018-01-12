@@ -1,6 +1,6 @@
 ﻿import * as React from 'react'
 import { classes } from '../../../../Framework/Signum.React/Scripts/Globals'
-import { FormGroup, FormControlStatic, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityList, EntityRepeater, EntityTable } from '../../../../Framework/Signum.React/Scripts/Lines'
+import { FormGroup, FormControlReadonly, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityList, EntityRepeater, EntityTable } from '../../../../Framework/Signum.React/Scripts/Lines'
 import { SearchControl, FindOptions, FilterOption, ColumnOption } from '../../../../Framework/Signum.React/Scripts/Search'
 import { TypeContext, FormGroupStyle } from '../../../../Framework/Signum.React/Scripts/TypeContext'
 import FileLine from '../../Files/FileLine'
@@ -140,7 +140,7 @@ export default class PredictorSubQuery extends React.Component<{ ctx: TypeContex
                                     queryKey={this.props.ctx.value.query!.key}
                                     subTokenOptions={SubTokensOptions.CanElement | SubTokensOptions.CanAggregate}
                                     onTokenChanged={() => this.handleChangeUsage(colCtx)}
-                                    helpBlock={getParentKeyMessage(colCtx.value)}
+                                    helpText={getParentKeyMessage(colCtx.value)}
                                 />,
                                 headerHtmlAttributes: { style: { width: "50%" } },
                             },

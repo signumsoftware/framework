@@ -71,7 +71,7 @@ export default class TreeModal extends React.Component<TreeModalProps, { isOpen:
                             {JavascriptMessage.ok.niceToString()}
                         </button>
 
-                        <button className="btn btn-default sf-entity-button sf-close-button sf-cancel-button" onClick={this.handleCancelClicked}>{JavascriptMessage.cancel.niceToString()}</button>
+                        <button className="btn btn-light sf-entity-button sf-close-button sf-cancel-button" onClick={this.handleCancelClicked}>{JavascriptMessage.cancel.niceToString()}</button>
                     </div>
                     <h4>
                         <span className="sf-entity-title"> {this.props.title || getTypeInfo(this.props.typeName).nicePluralName}</span>

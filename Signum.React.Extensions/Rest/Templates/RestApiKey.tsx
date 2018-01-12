@@ -17,7 +17,7 @@ export default class RestApiKeyComponent extends React.Component<{ ctx: TypeCont
                 <ValueLine ctx={ctx.subCtx(e => e.apiKey)}
                     ref={apiKey => this.apiKey = apiKey}
                     extraButtons={vl =>
-                    <a className={classes("sf-line-button", "sf-view", "btn btn-default")}
+                    <a className={classes("sf-line-button", "sf-view", "btn btn-light")}
                         onClick={this.generateApiKey}>
                         <span className="fa fa-key" />
                     </a>} />

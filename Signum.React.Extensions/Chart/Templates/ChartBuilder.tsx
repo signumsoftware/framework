@@ -146,7 +146,7 @@ export default class ChartBuilder extends React.Component<ChartBuilderProps, Cha
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    { this.state.expanded && mlistItemContext(this.props.ctx.subCtx(c => c.columns, { formGroupSize: "ExtraSmall" })).flatMap((ctx, i) => [
+                                    {this.state.expanded && mlistItemContext(this.props.ctx.subCtx(c => c.columns, { formGroupSize: "Small" })).flatMap((ctx, i) => [
                                         <ChartColumn chartBase={chart} ctx={ctx} key={"C" + i} scriptColumn={chart.chartScript!.columns[i].element} queryKey={this.props.queryKey}
                                             onToggleInfo={() => this.handleOnToggleInfo(i)} onGroupChange={this.handleOnInvalidate} onTokenChange={() => this.handleTokenChange(ctx.value)} />,
                                         this.state.expanded![i] && this.state.colorPalettes && <ChartColumnInfo ctx= { ctx } key= { "CI" + i } colorPalettes= {this.state.colorPalettes} onRedraw= { this.handleOnRedraw } />
@@ -158,7 +158,7 @@ export default class ChartBuilder extends React.Component<ChartBuilderProps, Cha
                     <div className="sf-chart-parameters panel panel-default">
                         <div className="panel-body">
                             {
-                                this.state.expanded && mlistItemContext(this.props.ctx.subCtx(c => c.parameters, { formGroupStyle: "Basic", formGroupSize: "ExtraSmall" }))
+                                this.state.expanded && mlistItemContext(this.props.ctx.subCtx(c => c.parameters, { formGroupStyle: "Basic", formGroupSize: "Small" }))
                                     .map((ctx, i) => this.getParameterValueLine(ctx, chart.chartScript.parameters[i].element))
                                     .groupsOf(6).map((gr, j) =>
                                         <div className="row" key={j}>

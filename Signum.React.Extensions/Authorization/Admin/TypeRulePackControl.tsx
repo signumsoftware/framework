@@ -140,12 +140,12 @@ export default class TypesRulesPackControl extends React.Component<{ ctx: TypeCo
                     <ValueLine ctx={ctx.subCtx(f => f.strategy) }  />
                 </div>
                 
-                <table className="table table-condensed sf-auth-rules">
+                <table className="table table-sm sf-auth-rules">
                     <thead>
                         <tr>
                             <th>
-                                <div className="form-sm" style={{ marginBottom: "-2px"}}>
-                                    <input type="text" className="form-control" id="filter" placeholder="Auth-!overriden+!conditions" value={this.state.filter} onChange={this.handleSetFilter} />
+                                <div style={{ marginBottom: "-2px"}}>
+                                    <input type="text" className="form-control-sm" id="filter" placeholder="Auth-!overriden+!conditions" value={this.state.filter} onChange={this.handleSetFilter} />
                                 </div>
                             </th>
 

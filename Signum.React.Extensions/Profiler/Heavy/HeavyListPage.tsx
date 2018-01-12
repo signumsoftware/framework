@@ -104,11 +104,11 @@ export default class HeavyList extends React.Component<HeavyListProps, { enabled
                     <button onClick={this.handleUpload} className="btn btn-info" disabled={!this.state.fileToUpload}><span className="fa fa-cloud-upload" aria-hidden="true"></span> Upload</button>
                 </div>
                 <div className="btn-toolbar">
-                    { !this.state.enabled ? <button onClick={() => this.handleSetEnabled(true) } className="btn btn-default primary">Enable</button> :
-                        <button onClick={() => this.handleSetEnabled(false) } className="btn btn-default" style={{ color: "red" }}>Disable</button>
+                    { !this.state.enabled ? <button onClick={() => this.handleSetEnabled(true) } className="btn btn-light primary">Enable</button> :
+                        <button onClick={() => this.handleSetEnabled(false) } className="btn btn-light" style={{ color: "red" }}>Disable</button>
                     }
-                    <button onClick={this.handleUpdate} className="btn btn-default">Update</button>
-                    <button onClick={this.handleClear} className="btn btn-default">Clear</button>
+                    <button onClick={this.handleUpdate} className="btn btn-light">Update</button>
+                    <button onClick={this.handleClear} className="btn btn-light">Clear</button>
                     <button onClick={this.handleDownload} className="btn btn-info"><span className="fa fa-cloud-download" aria-hidden="true"></span> Download</button>
                 </div>
                 <br/>

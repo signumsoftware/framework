@@ -35,7 +35,7 @@ export default class User extends React.Component<{ ctx: TypeContext<UserEntity>
     renderButton(ctx: TypeContext<UserEntity>) {
         return (
             <FormGroup labelText={AuthMessage.NewPassword.niceToString()} ctx={ctx}>
-                <a className="btn btn-default btn-sm" onClick={() => this.setState({ withPassword: true }) }>
+                <a className="btn btn-light btn-sm" onClick={() => this.setState({ withPassword: true }) }>
                     <i className="fa fa-key"></i> {AuthMessage.ChangePassword.niceToString() }
                 </a>
             </FormGroup>

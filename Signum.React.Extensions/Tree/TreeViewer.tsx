@@ -395,11 +395,11 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
 
         return (
             <div className="btn-toolbar">
-                <a className={"sf-query-button sf-filters-header btn btn-default" + (s.showFilters ? " active" : "")}
+                <a className={"sf-query-button sf-filters-header btn btn-light" + (s.showFilters ? " active" : "")}
                     onClick={this.handleToggleFilters}
                     title={s.showFilters ? JavascriptMessage.hideFilters.niceToString() : JavascriptMessage.showFilters.niceToString()}><span className="fa fa-filter"></span></a>
                 <button className="btn btn-primary" onClick={this.handleSearchSubmit}>{JavascriptMessage.search.niceToString()}</button>
-                {Operations.isOperationAllowed(TreeOperation.CreateRoot, this.props.typeName) && <button className="btn btn-default" onClick={this.handleAddRoot} disabled={s.treeNodes == null} > <i className="fa fa-star" aria-hidden="true"></i>&nbsp;{TreeViewerMessage.AddRoot.niceToString()}</button>}
+                {Operations.isOperationAllowed(TreeOperation.CreateRoot, this.props.typeName) && <button className="btn btn-light" onClick={this.handleAddRoot} disabled={s.treeNodes == null} > <i className="fa fa-star" aria-hidden="true"></i>&nbsp;{TreeViewerMessage.AddRoot.niceToString()}</button>}
                 <ButtonDropdown id="selectedButton"
                     className="sf-query-button sf-tm-selected"
                     title={`${JavascriptMessage.Selected.niceToString()} (${selected && selected.lite.toStr || TreeViewerMessage.AddRoot.niceToString()})`}
@@ -409,7 +409,7 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
                         menuItems.length == 0 ? <DropdownItem className="sf-search-ctxitem-no-results">{JavascriptMessage.noActionsFound.niceToString()}</DropdownItem> :
                             menuItems.map((e, i) => React.cloneElement(e, { key: i }))}
                 </ButtonDropdown>
-                <button className="btn btn-default" onClick={this.handleExplore} ><i className="fa fa-search"></i> &nbsp; {SearchMessage.Explore.niceToString()}</button>
+                <button className="btn btn-light" onClick={this.handleExplore} ><i className="fa fa-search"></i> &nbsp; {SearchMessage.Explore.niceToString()}</button>
             </div>
         );
     }

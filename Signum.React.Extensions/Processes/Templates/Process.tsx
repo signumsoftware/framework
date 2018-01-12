@@ -1,6 +1,6 @@
 ﻿import * as React from 'react'
 import { classes } from '../../../../Framework/Signum.React/Scripts/Globals'
-import { FormGroup, FormControlStatic, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityList, EntityRepeater} from '../../../../Framework/Signum.React/Scripts/Lines'
+import { FormGroup, FormControlReadonly, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityList, EntityRepeater} from '../../../../Framework/Signum.React/Scripts/Lines'
 import { ValueSearchControlLine }  from '../../../../Framework/Signum.React/Scripts/Search'
 import { toLite }  from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
 import * as Navigator  from '../../../../Framework/Signum.React/Scripts/Navigator'

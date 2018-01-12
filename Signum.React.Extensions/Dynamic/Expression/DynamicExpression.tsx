@@ -67,7 +67,7 @@ export default class DynamicExpressionComponent extends React.Component<DynamicE
                 <div className="row">
                     <div className="col-sm-6">
                         <ValueLine ctx={ctx.subCtx(dt => dt.format)} labelColumns={4}
-                            helpBlock={<span>See <a href="https://docs.microsoft.com/en-us/dotnet/standard/base-types/formatting-types" target="_blank">formatting types</a></span>} />
+                            helpText={<span>See <a href="https://docs.microsoft.com/en-us/dotnet/standard/base-types/formatting-types" target="_blank">formatting types</a></span>} />
                     </div>
                     <div className="col-sm-6">
                         <ValueLine ctx={ctx.subCtx(dt => dt.unit)} labelColumns={4} />

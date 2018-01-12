@@ -1,5 +1,5 @@
 ﻿import * as React from 'react'
-import { NavDropdown, UncontrolledNavDropdown, DropdownItem, DropdownMenu, DropdownToggle } from 'reactstrap'
+import { UncontrolledDropdown, DropdownItem, DropdownMenu, DropdownToggle } from 'reactstrap'
 import { Route } from 'react-router'
 import { Dic } from '../../../Framework/Signum.React/Scripts/Globals';
 import { ajaxPost, ajaxGet } from '../../../Framework/Signum.React/Scripts/Services';
@@ -46,7 +46,7 @@ export default class CultureDropdown extends React.Component<CultureDropdownProp
         const pair = Dic.map(cultures, (name, c) => ({ name, c })).filter(p => is(p.c, current)).singleOrNull();
 
         return (
-            <UncontrolledNavDropdown data-culture={pair && pair.name}>
+            <UncontrolledDropdown data-culture={pair && pair.name}>
                 <DropdownToggle nav caret>
                     {current.toStr}
                 </DropdownToggle>
@@ -57,7 +57,7 @@ export default class CultureDropdown extends React.Component<CultureDropdownProp
                         </DropdownItem>
                     )}
                 </DropdownMenu>
-            </UncontrolledNavDropdown>
+            </UncontrolledDropdown>
         );
     }
 }

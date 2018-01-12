@@ -63,9 +63,9 @@ export default class SchedulerPanelPage extends React.Component<SchedulerPanelPr
             <div>
                 <h2>SchedulerLogic state</h2>
                 <div className="btn-toolbar">
-                    {s.Running && <a href="" className="sf-button btn btn-default active" style={{ color: "red" }} onClick={this.handleStop}>Stop</a>}
-                    {!s.Running && <a href="" className="sf-button btn btn-default" style={{ color: "green" }} onClick={this.handleStart}>Start</a>}
-                    <a href="" className="sf-button btn btn-default" onClick={this.handleUpdate}>Update</a>
+                    {s.Running && <a href="" className="sf-button btn btn-light active" style={{ color: "red" }} onClick={this.handleStop}>Stop</a>}
+                    {!s.Running && <a href="" className="sf-button btn btn-light" style={{ color: "green" }} onClick={this.handleStart}>Start</a>}
+                    <a href="" className="sf-button btn btn-light" onClick={this.handleUpdate}>Update</a>
                 </div >
                 <div id="processMainDiv">
                     <br />
@@ -163,7 +163,7 @@ export default class SchedulerPanelPage extends React.Component<SchedulerPanelPr
                                     <td><EntityLink lite={item.SchedulerTaskLog} inSearch={true} onNavigated={() => this.loadState().done()} /></td>
                                     <td>{item.StartTime} ({moment(item.StartTime).fromNow()})</td>
                                     <td><pre>{item.Remarks}</pre></td>
-                                    <td><button className="btn btn-default btn-xs btn-danger" type="button" onClick={e => this.handleCancelClick(e, item.SchedulerTaskLog)}>Cancel</button></td>
+                                    <td><button className="btn btn-light btn-xs btn-danger" type="button" onClick={e => this.handleCancelClick(e, item.SchedulerTaskLog)}>Cancel</button></td>
                                 </tr>)
                             }
                         </tbody>

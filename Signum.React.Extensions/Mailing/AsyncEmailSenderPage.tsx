@@ -55,8 +55,8 @@ export default class AsyncEmailSenderPage extends React.Component<AsyncEmailSend
             <div>
                 <h2>AsyncEmailSender State</h2>
                 <div className="btn-toolbar">
-                    {s.Running && <a href="" className="sf-button btn btn-default active" style={{ color: "red" }} onClick={this.handleStop}>Stop</a>}
-                    {!s.Running && <a href="" className="sf-button btn btn-default" style={{ color: "green" }} onClick={this.handleStart}>Start</a>}
+                    {s.Running && <a href="" className="sf-button btn btn-light active" style={{ color: "red" }} onClick={this.handleStop}>Stop</a>}
+                    {!s.Running && <a href="" className="sf-button btn btn-light" style={{ color: "green" }} onClick={this.handleStart}>Start</a>}
                 </div >
 
                 <div>

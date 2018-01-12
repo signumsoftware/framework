@@ -1,5 +1,5 @@
 ﻿import * as React from 'react'
-import { UncontrolledNavDropdown, DropdownItem, NavItem, NavLink, DropdownToggle, DropdownMenu } from 'reactstrap'
+import { UncontrolledDropdown, DropdownItem, NavItem, NavLink, DropdownToggle, DropdownMenu } from 'reactstrap'
 import { AuthMessage, UserEntity } from '../Signum.Entities.Authorization'
 import * as AuthClient from '../AuthClient'
 import { LinkContainer } from '../../../../Framework/Signum.React/Scripts/LinkContainer'
@@ -14,7 +14,7 @@ export default class LoginDropdown extends React.Component<{}, { user: UserEntit
             return <NavItem><LinkContainer to="~/auth/login" className="sf-login"><NavLink>{AuthMessage.Login.niceToString()}</NavLink></LinkContainer></NavItem>;
 
         return (
-            <UncontrolledNavDropdown className="sf-user" id="sfUserDropDown">
+            <UncontrolledDropdown className="sf-user" id="sfUserDropDown">
                 <DropdownToggle nav caret>
                     {user.userName!}
                 </DropdownToggle>
@@ -25,7 +25,7 @@ export default class LoginDropdown extends React.Component<{}, { user: UserEntit
                     <DropdownItem divider />
                     <DropdownItem id="sf-auth-logout" onClick={() => AuthClient.logout()}><i className="fa fa-sign-out fa-fw"></i> {AuthMessage.Logout.niceToString()}</DropdownItem>
                 </DropdownMenu>
-            </UncontrolledNavDropdown>
+            </UncontrolledDropdown>
         );
     }
 }

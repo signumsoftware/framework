@@ -1,5 +1,5 @@
 ﻿import * as React from 'react'
-import { UncontrolledButtonDropdown, DropdownItem, Button } from 'reactstrap'
+import { UncontrolledButtonDropdown, DropdownItem, Button, DropdownToggle, DropdownMenu } from 'reactstrap'
 import {
     WorkflowEntitiesDictionary, WorkflowActivityModel, WorkflowActivityType, WorkflowPoolModel, WorkflowLaneModel, WorkflowConnectionModel, WorkflowEventModel, WorkflowEntity,
     IWorkflowNodeEntity, CaseFlowColor, CaseActivityEntity, CaseEntity, WorkflowMessage
@@ -125,7 +125,7 @@ export default class BpmnViewerComponent extends React.Component<BpmnViewerCompo
         caseFlowRenderer.maxDuration = Dic.getValues(this.props.caseFlow.Activities).map(a => a.map(a => a.Duration || 0).sum()).max()!;
         caseFlowRenderer.caseFlowColor = this.state.caseFlowColor;
 
-       
+
         conIcons.show();
     }
 
@@ -158,10 +158,13 @@ export default class BpmnViewerComponent extends React.Component<BpmnViewerCompo
         return (
             <div>
                 <Button style={{ marginLeft: "20px" }} onClick={this.handleZoomClick}>{WorkflowMessage.ResetZoom.niceToString()}</Button>{" "}
-                <UncontrolledButtonDropdown title={WorkflowMessage.Color.niceToString() + CaseFlowColor.niceName(this.state.caseFlowColor)} id="colorMenu">
-                    {this.menuItem("CaseMaxDuration")}
-                    {this.menuItem("AverageDuration")}
-                    {this.menuItem("EstimatedDuration")}
+                <UncontrolledButtonDropdown id="colorMenu">
+                    <DropdownToggle color="light" caret>{WorkflowMessage.Color.niceToString() + CaseFlowColor.niceName(this.state.caseFlowColor)}</DropdownToggle>
+                    <DropdownMenu>
+                        {this.menuItem("CaseMaxDuration")}
+                        {this.menuItem("AverageDuration")}
+                        {this.menuItem("EstimatedDuration")}
+                    </DropdownMenu>
                 </UncontrolledButtonDropdown>{" "}
                 <Button onClick={this.handleSearchClick}>{JavascriptMessage.search.niceToString()}</Button>
                 <div ref={de => this.divArea = de!} />

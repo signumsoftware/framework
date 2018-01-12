@@ -334,7 +334,7 @@ export function asOverrideFunction(dvo: DynamicViewOverrideEntity): (vr: ViewRep
     var EntityStrip = Lines.EntityStrip;
     var EntityTable = Lines.EntityTable;
     var FormGroup = Lines.FormGroup;
-    var FormControlStatic = Lines.FormControlStatic;
+    var FormControlReadonly = Lines.FormControlReadonly;
     var FileLine = FileLineModule.default;
 
     // Search
@@ -396,7 +396,6 @@ export function asOverrideFunction(dvo: DynamicViewOverrideEntity): (vr: ViewRep
     var Navbar = Reactstrap.Navbar;
     var NavbarBrand = Reactstrap.NavbarBrand;
     var NavbarToggler = Reactstrap.NavbarToggler;
-    var NavDropdown = Reactstrap.NavDropdown;
     var NavItem = Reactstrap.NavItem;
     var NavLink = Reactstrap.NavLink;
     var Pagination = Reactstrap.Pagination;
@@ -415,7 +414,6 @@ export function asOverrideFunction(dvo: DynamicViewOverrideEntity): (vr: ViewRep
     var UncontrolledAlert = Reactstrap.UncontrolledAlert;
     var UncontrolledButtonDropdown = Reactstrap.UncontrolledButtonDropdown;
     var UncontrolledDropdown = Reactstrap.UncontrolledDropdown;
-    var UncontrolledNavDropdown = Reactstrap.UncontrolledNavDropdown;
     var UncontrolledTooltip = Reactstrap.UncontrolledTooltip;
 
     // Signum

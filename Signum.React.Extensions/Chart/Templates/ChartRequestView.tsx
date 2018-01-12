@@ -168,9 +168,9 @@ export default class ChartRequestView extends React.Component<ChartRequestViewPr
                     </div >
                     <div className="sf-query-button-bar btn-toolbar">
                         <button type="submit" className="sf-query-button sf-chart-draw btn btn-primary" onClick={this.handleOnDrawClick}>{ChartMessage.DrawChart.niceToString()}</button>
-                        <button className="sf-query-button sf-chart-script-edit btn btn-default" onClick={this.handleEditScript}><i className="fa fa-pencil" aria-hidden="true"/> &nbsp; {ChartMessage.EditScript.niceToString()}</button>
+                        <button className="sf-query-button sf-chart-script-edit btn btn-light" onClick={this.handleEditScript}><i className="fa fa-pencil" aria-hidden="true"/> &nbsp; {ChartMessage.EditScript.niceToString()}</button>
                         {ChartClient.ButtonBarChart.getButtonBarElements({ chartRequest: cr, chartRequestView: this }).map((a, i) => React.cloneElement(a, { key: i }))}
-                        <button className="btn btn-default" onMouseUp={this.handleExplore} ><i className="fa fa-search"></i> &nbsp; {SearchMessage.Explore.niceToString()}</button>
+                        <button className="btn btn-light" onMouseUp={this.handleExplore} ><i className="fa fa-search"></i> &nbsp; {SearchMessage.Explore.niceToString()}</button>
                     </div>
                     <br />
                     <div className="sf-search-results-container" >
