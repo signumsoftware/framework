@@ -900,7 +900,7 @@ export interface SearchControlNode extends BaseNode {
     allowChangeColumns?: ExpressionOrValue<boolean>;
     create?: ExpressionOrValue<boolean>;
     navigate?: ExpressionOrValue<boolean>;
-    refreshKey?: Expression<string | undefined>;
+    refreshKey?: Expression<number | string | undefined>;
 }
 
 NodeUtils.register<SearchControlNode>({
@@ -932,7 +932,7 @@ NodeUtils.register<SearchControlNode>({
         allowChangeColumns={NodeUtils.evaluateAndValidate(ctx, dn.node, f => f.allowChangeColumns, NodeUtils.isBooleanOrNull)}
         create={NodeUtils.evaluateAndValidate(ctx, dn.node, f => f.create, NodeUtils.isBooleanOrNull)}
         navigate={NodeUtils.evaluateAndValidate(ctx, dn.node, f => f.navigate, NodeUtils.isBooleanOrNull)}
-        refreshKey={NodeUtils.evaluateAndValidate(ctx, dn.node, f => f.refreshKey, NodeUtils.isStringOrNull)}
+        refreshKey={NodeUtils.evaluateAndValidate(ctx, dn.node, f => f.refreshKey, NodeUtils.isNumberOrStringOrNull)}
     />,
     renderDesigner: dn => <div>
         <FindOptionsLine dn={dn} binding={Binding.create(dn.node, a => a.findOptions)} />
@@ -949,7 +949,7 @@ NodeUtils.register<SearchControlNode>({
         <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, f => f.allowChangeColumns)} type="boolean" defaultValue={null} />
         <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, f => f.create)} type="boolean" defaultValue={null} />
         <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, f => f.navigate)} type="boolean" defaultValue={null} />
-        <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, f => f.refreshKey)} type={null} defaultValue={null} exampleExpression={"ctx.value.ticks"} />
+        <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, f => f.refreshKey)} type={null} defaultValue={null} exampleExpression={"ctx.frame.refreshCount"} />
     </div>
 });
 
@@ -964,6 +964,7 @@ export interface ValueSearchControlLineNode extends BaseNode {
     isFormControl?: ExpressionOrValue<boolean>;
     findButton?: ExpressionOrValue<boolean>;
     viewEntityButton?: ExpressionOrValue<boolean>;
+    refreshKey?: Expression<number | string | undefined>;
     formGroupHtmlAttributes?: HtmlAttributesExpression;
 }
 
@@ -1011,6 +1012,7 @@ NodeUtils.register<ValueSearchControlLineNode>({
         viewEntityButton: node.viewEntityButton,
         labelHtmlAttributes: node.labelHtmlAttributes,
         formGroupHtmlAttributes: node.formGroupHtmlAttributes,
+        refreshKey: node.refreshKey,
     }),
     render: (dn, ctx) => <ValueSearchControlLine ctx={ctx}
         findOptions={dn.node.findOptions && toFindOptions(ctx, dn.node.findOptions!)}
@@ -1023,6 +1025,7 @@ NodeUtils.register<ValueSearchControlLineNode>({
         viewEntityButton={NodeUtils.evaluateAndValidate(ctx, dn.node, n => n.viewEntityButton, NodeUtils.isBooleanOrNull)}
         labelHtmlAttributes={toHtmlAttributes(ctx, dn.node.labelHtmlAttributes)}
         formGroupHtmlAttributes={toHtmlAttributes(ctx, dn.node.formGroupHtmlAttributes)}
+        refreshKey={NodeUtils.evaluateAndValidate(ctx, dn.node, f => f.refreshKey, NodeUtils.isNumberOrStringOrNull)}
     />,
     renderDesigner: dn => {
         return (<div>
@@ -1038,6 +1041,7 @@ NodeUtils.register<ValueSearchControlLineNode>({
             <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.findButton)} type="boolean" defaultValue={null} />
             <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.viewEntityButton)} type="boolean" defaultValue={null} />
             <HtmlAttributesLine dn={dn} binding={Binding.create(dn.node, n => n.formGroupHtmlAttributes)} />
+            <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, f => f.refreshKey)} type={null} defaultValue={null} exampleExpression={"ctx.frame.refreshCount"} />
         </div>);
     }
 });

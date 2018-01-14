@@ -532,6 +532,10 @@ export function isNumberOrNull(val: any) {
     return val == null || typeof val == "number" ? null : `The returned value (${JSON.stringify(val)}) should be a number or null`;
 }
 
+export function isNumberOrStringOrNull(val: any) {
+    return val == null || typeof val == "number" || typeof val == "string" ? null : `The returned value (${JSON.stringify(val)}) should be a number or string or null`;
+}
+
 export function isBooleanOrNull(val: any) {
     return val == null || typeof val == "boolean" ? null : `The returned value (${JSON.stringify(val)}) should be a boolean or null`;
 }

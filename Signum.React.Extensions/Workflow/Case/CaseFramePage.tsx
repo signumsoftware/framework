@@ -27,6 +27,7 @@ interface CaseFramePageProps extends RouteComponentProps<{ workflowId: string; m
 interface CaseFramePageState {
     pack?: WorkflowClient.CaseEntityPack;
     getComponent?: (ctx: TypeContext<Entity>) => React.ReactElement<any>;
+    refreshCount: number;
 }
 
 export default class CaseFramePage extends React.Component<CaseFramePageProps, CaseFramePageState> implements IHasCaseActivity {
@@ -45,8 +46,8 @@ export default class CaseFramePage extends React.Component<CaseFramePageProps, C
         this.load(this.props);
     }
     
-    calculateState(props: CaseFramePageProps) {
-        return { getComponent: undefined } as CaseFramePageState;
+    calculateState(props: CaseFramePageProps): CaseFramePageState {
+        return { getComponent: undefined, refreshCount: 0 };
     }
     
     componentWillReceiveProps(newProps: CaseFramePageProps) {
@@ -71,7 +72,7 @@ export default class CaseFramePage extends React.Component<CaseFramePageProps, C
         const routeParams = props.match.params;
         if (routeParams.caseActivityId) {
             return WorkflowClient.API.fetchActivityForViewing({ EntityType: CaseActivityEntity.typeName, id: routeParams.caseActivityId })
-                .then(pack => this.setState({ pack: pack  }));
+                .then(pack => this.setState({ pack: pack, refreshCount: 0 }));
 
         } else if (routeParams.workflowId) {
             const ti = getTypeInfo(WorkflowEntity);
@@ -80,7 +81,7 @@ export default class CaseFramePage extends React.Component<CaseFramePageProps, C
                     if (!pack)
                         Navigator.history.goBack();
                     else
-                        this.setState({ pack });
+                        this.setState({ pack, refreshCount: 0 });
                 });        
 
         } else
@@ -132,7 +133,7 @@ export default class CaseFramePage extends React.Component<CaseFramePageProps, C
                 else {
                     pack.activity = newActivity;
                     pack.canExecuteActivity = newPack.canExecute;
-                    this.forceUpdate();
+                    this.setState({ refreshCount: this.state.refreshCount + 1 });
                 }
             },
             onClose: () => this.onClose(),
@@ -141,6 +142,7 @@ export default class CaseFramePage extends React.Component<CaseFramePageProps, C
                 GraphExplorer.setModelState(pack.activity, ms, initialPrefix || "");
                 this.forceUpdate()
             },
+            refreshCount: this.state.refreshCount,
         };
 
      
@@ -193,7 +195,7 @@ export default class CaseFramePage extends React.Component<CaseFramePageProps, C
             onReload: newPack => {
                 pack.activity.case.mainEntity = newPack.entity as ICaseMainEntity;
                 pack.canExecuteMainEntity = newPack.canExecute;
-                this.forceUpdate();
+                this.setState({ refreshCount: this.state.refreshCount + 1 });
             },
             onClose: () => this.onClose(),
             revalidate: () => this.validationErrors && this.validationErrors.forceUpdate(),
@@ -201,6 +203,8 @@ export default class CaseFramePage extends React.Component<CaseFramePageProps, C
                 GraphExplorer.setModelState(mainEntity, ms, initialPrefix || "");
                 this.forceUpdate()
             },
+            refreshCount: this.state.refreshCount,
+
         };
 
         var ti = this.getMainTypeInfo();
