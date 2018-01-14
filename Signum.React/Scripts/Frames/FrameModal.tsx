@@ -39,6 +39,7 @@ interface FrameModalState {
     getComponent?: (ctx: TypeContext<ModifiableEntity>) => React.ReactElement<any>;
     propertyRoute?: PropertyRoute;
     show?: boolean;
+    refreshCount: number;
 }
 
 let modalCount = 0;
@@ -97,6 +98,7 @@ export default class FrameModal extends React.Component<FrameModalProps, FrameMo
         return {
             propertyRoute: pr,
             show: true,
+            refreshCount: 0,
         };
     }
 
@@ -104,7 +106,8 @@ export default class FrameModal extends React.Component<FrameModalProps, FrameMo
 
     setPack(pack: EntityPack<ModifiableEntity>): void {
         this.setState({
-            pack: pack
+            pack: pack,
+            refreshCount: this.state.refreshCount + 1
         });
     }
 
@@ -230,6 +233,7 @@ export default class FrameModal extends React.Component<FrameModalProps, FrameMo
                 GraphExplorer.setModelState(this.state.pack!.entity, modelState, initialPrefix!);
                 this.forceUpdate();
             },
+            refreshCount: this.state.refreshCount,
         };
 
         const pack = this.state.pack!;

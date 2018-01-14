@@ -22,6 +22,7 @@ interface FramePageProps extends RouteComponentProps<{ type: string; id?: string
 interface FramePageState {
     pack?: EntityPack<Entity>;
     getComponent?: (ctx: TypeContext<Entity>) => React.ReactElement<any>;
+    refreshCount: number;
 }
 
 export default class FramePage extends React.Component<FramePageProps, FramePageState> {
@@ -40,11 +41,13 @@ export default class FramePage extends React.Component<FramePageProps, FramePage
         return getTypeInfo(this.props.match.params.type);
     }
 
-    calculateState(props: FramePageProps) {
-
-        return { getComponent: undefined, pack: undefined } as FramePageState;
+    calculateState(props: FramePageProps): FramePageState {
+        return {
+            getComponent: undefined,
+            pack: undefined,
+            refreshCount: 0
+        };
     }
-
 
     componentWillReceiveProps(newProps: FramePageProps) {
         this.setState(this.calculateState(newProps), () => {
@@ -140,7 +143,7 @@ export default class FramePage extends React.Component<FramePageProps, FramePage
                 if (packEntity.entity.id != null && entity.id == null)
                     Navigator.history.push(Navigator.navigateRoute(packEntity.entity));
                 else
-                    this.setState({ pack: packEntity });
+                    this.setState({ pack: packEntity, refreshCount: this.state.refreshCount + 1 });
             },
             onClose: () => this.onClose(),
             revalidate: () => this.validationErrors && this.validationErrors.forceUpdate(),
@@ -148,6 +151,7 @@ export default class FramePage extends React.Component<FramePageProps, FramePage
                 GraphExplorer.setModelState(entity, ms, initialPrefix || "");
                 this.forceUpdate()
             },
+            refreshCount: this.state.refreshCount,
         };
 
         const ti = this.getTypeInfo();
@@ -158,7 +162,6 @@ export default class FramePage extends React.Component<FramePageProps, FramePage
         };
 
         const ctx = new TypeContext<Entity>(undefined, styleOptions, PropertyRoute.root(ti), new ReadonlyBinding(entity, ""));
-
 
         const wc: WidgetContext<Entity> = {
             ctx: ctx,

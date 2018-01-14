@@ -59,7 +59,7 @@ export interface SearchControlProps extends React.Props<SearchControl> {
     avoidAutoRefresh?: boolean;
     avoidChangeUrl?: boolean;
     throwIfNotFindable?: boolean;
-    refreshKey?: string;
+    refreshKey?: string | number;
 
     onNavigated?: (lite: Lite<Entity>) => void;
     onDoubleClick?: (e: React.MouseEvent<any>, row: ResultRow) => void;

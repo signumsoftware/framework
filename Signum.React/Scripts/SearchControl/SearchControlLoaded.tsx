@@ -62,7 +62,7 @@ export interface SearchControlLoadedProps {
     largeToolbarButtons: boolean;
     avoidAutoRefresh: boolean;
     avoidChangeUrl: boolean;
-    refreshKey: string | undefined;
+    refreshKey: string | number | undefined;
 
     onCreate?: () => void;
     onDoubleClick?: (e: React.MouseEvent<any>, row: ResultRow) => void;
