@@ -127,14 +127,18 @@ export default class CaseFramePage extends React.Component<CaseFramePageProps, C
             frameComponent: this,
             entityComponent: this.entityComponent,
             onReload: newPack => {
-                let newActivity = newPack.entity as CaseActivityEntity;
-                if (pack.activity.isNew && !newActivity.isNew)
-                    Navigator.history.push("~/workflow/activity/" + newActivity.id);
-                else {
-                    pack.activity = newActivity;
-                    pack.canExecuteActivity = newPack.canExecute;
-                    this.setState({ refreshCount: this.state.refreshCount + 1 });
+                if (newPack) {
+                    let newActivity = newPack.entity as CaseActivityEntity;
+                    if (pack.activity.isNew && !newActivity.isNew) {
+                        Navigator.history.push("~/workflow/activity/" + newActivity.id);
+                        return;
+                    }
+                    else {
+                        pack.activity = newActivity;
+                        pack.canExecuteActivity = newPack.canExecute;
+                    }
                 }
+                this.setState({ refreshCount: this.state.refreshCount + 1 });
             },
             onClose: () => this.onClose(),
             revalidate: () => { throw new Error("Not implemented"); },
@@ -193,8 +197,10 @@ export default class CaseFramePage extends React.Component<CaseFramePageProps, C
             frameComponent: this,
             entityComponent: this.entityComponent,
             onReload: newPack => {
-                pack.activity.case.mainEntity = newPack.entity as ICaseMainEntity;
-                pack.canExecuteMainEntity = newPack.canExecute;
+                if (newPack) {
+                    pack.activity.case.mainEntity = newPack.entity as ICaseMainEntity;
+                    pack.canExecuteMainEntity = newPack.canExecute;
+                }
                 this.setState({ refreshCount: this.state.refreshCount + 1 });
             },
             onClose: () => this.onClose(),

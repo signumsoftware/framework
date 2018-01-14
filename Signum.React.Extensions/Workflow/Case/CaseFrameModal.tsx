@@ -186,8 +186,10 @@ export default class CaseFrameModal extends React.Component<CaseFrameModalProps,
             frameComponent: this,
             entityComponent: this.entityComponent,
             onReload: newPack => {
-                pack.activity = newPack.entity as CaseActivityEntity;
-                pack.canExecuteActivity = newPack.canExecute;
+                if (newPack) {
+                    pack.activity = newPack.entity as CaseActivityEntity;
+                    pack.canExecuteActivity = newPack.canExecute;
+                }
                 this.setState({ refreshCount: this.state.refreshCount + 1 });
             },
             onClose: (ok?: boolean) => this.props.onExited!(ok ? this.getCaseActivity() : undefined),
@@ -227,8 +229,10 @@ export default class CaseFrameModal extends React.Component<CaseFrameModalProps,
             frameComponent: this,
             entityComponent: this.entityComponent,
             onReload: newPack => {
-                pack.activity.case.mainEntity = newPack.entity as CaseActivityEntity;
-                pack.canExecuteMainEntity = newPack.canExecute;
+                if (newPack) {
+                    pack.activity.case.mainEntity = newPack.entity as CaseActivityEntity;
+                    pack.canExecuteMainEntity = newPack.canExecute;
+                }
                 this.setState({ refreshCount: this.state.refreshCount + 1 });
             },
             onClose: () => this.props.onExited!(null),

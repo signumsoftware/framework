@@ -9,7 +9,7 @@ import { ModifiableEntity, Entity, Lite, isEntity } from '../../../../Framework/
 import { classes, Dic } from '../../../../Framework/Signum.React/Scripts/Globals'
 import * as Finder from '../../../../Framework/Signum.React/Scripts/Reflection'
 import { SubTokensOptions } from '../../../../Framework/Signum.React/Scripts/FindOptions'
-import { FindOptions, SearchControl, ValueSearchControlLine } from '../../../../Framework/Signum.React/Scripts/Search'
+import { FindOptions, SearchControl, ValueSearchControlLine, FindOptionsParsed, ResultTable } from '../../../../Framework/Signum.React/Scripts/Search'
 import {
     getQueryNiceName, TypeInfo, MemberInfo, getTypeInfo, EntityData, EntityKind, getTypeInfos, KindOfType,
     PropertyRoute, PropertyRouteType, LambdaMemberType, isTypeEntity, Binding, IsByAll, getAllTypes
@@ -901,6 +901,8 @@ export interface SearchControlNode extends BaseNode {
     create?: ExpressionOrValue<boolean>;
     navigate?: ExpressionOrValue<boolean>;
     refreshKey?: Expression<number | string | undefined>;
+    onSearch?: Expression<(fo: FindOptionsParsed, dataChange: boolean) => void>;
+    onResult?: Expression<(table: ResultTable, dataChange: boolean) => void>;
 }
 
 NodeUtils.register<SearchControlNode>({
@@ -920,6 +922,8 @@ NodeUtils.register<SearchControlNode>({
         create: node.create,
         navigate: node.navigate,
         refreshKey: node.refreshKey,
+        onSearch: node.onSearch,
+        onResult: node.onResult,
     }),
     render: (dn, ctx) => <SearchControl
         findOptions={toFindOptions(ctx, dn.node.findOptions!)}
@@ -933,6 +937,8 @@ NodeUtils.register<SearchControlNode>({
         create={NodeUtils.evaluateAndValidate(ctx, dn.node, f => f.create, NodeUtils.isBooleanOrNull)}
         navigate={NodeUtils.evaluateAndValidate(ctx, dn.node, f => f.navigate, NodeUtils.isBooleanOrNull)}
         refreshKey={NodeUtils.evaluateAndValidate(ctx, dn.node, f => f.refreshKey, NodeUtils.isNumberOrStringOrNull)}
+        onSearch={NodeUtils.evaluateAndValidate(ctx, dn.node, f => f.onSearch, NodeUtils.isFunctionOrNull)}
+        onResult={NodeUtils.evaluateAndValidate(ctx, dn.node, f => f.onResult, NodeUtils.isFunctionOrNull)}
     />,
     renderDesigner: dn => <div>
         <FindOptionsLine dn={dn} binding={Binding.create(dn.node, a => a.findOptions)} />
@@ -950,6 +956,8 @@ NodeUtils.register<SearchControlNode>({
         <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, f => f.create)} type="boolean" defaultValue={null} />
         <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, f => f.navigate)} type="boolean" defaultValue={null} />
         <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, f => f.refreshKey)} type={null} defaultValue={null} exampleExpression={"ctx.frame.refreshCount"} />
+        <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, f => f.onSearch)} type={null} defaultValue={null} exampleExpression={"(fop, dataChange) => {}"}/>
+        <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, f => f.onResult)} type={null} defaultValue={null} exampleExpression={"(table, dataChange) => dataChange && ctx.frame.onReload()"} />
     </div>
 });
 
