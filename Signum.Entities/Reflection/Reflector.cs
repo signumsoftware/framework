@@ -6,6 +6,7 @@ using System;
 using System.CodeDom.Compiler;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Globalization;
 using System.Linq;
 using System.Linq.Expressions;
@@ -48,7 +49,7 @@ namespace Signum.Entities.Reflection
 
         static bool DescriptionManager_ShouldLocalizeMemeber(MemberInfo arg)
         {
-            return !arg.HasAttribute<HiddenPropertyAttribute>();
+            return !arg.HasAttribute<HiddenPropertyAttribute>() || arg.HasAttribute<DescriptionAttribute>();
         }
 
         static ResetLazy<HashSet<Type>> EnumsInEntities = new ResetLazy<HashSet<Type>>(() =>
