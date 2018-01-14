@@ -17,7 +17,7 @@ import { ViewPromise } from "../Navigator";
 export interface RenderEntityProps {
     ctx: TypeContext<ModifiableEntity | Lite<Entity> | undefined | null>;
     getComponent?: (ctx: TypeContext<any /*T*/>) => React.ReactElement<any>;
-    getViewPromise?: (e: any /*T*/) => undefined | string | Navigator.ViewPromise<ModifiableEntity>;
+    getViewPromise?: (e: any /*T*/) => undefined | string | Navigator.ViewPromise<any>;
 }
 
 export interface RenderEntityState {

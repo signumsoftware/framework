@@ -38,7 +38,7 @@ export interface SearchControlLoadedProps {
     rowAttributes?: (row: ResultRow, columns: string[]) => React.HTMLAttributes<HTMLTableRowElement> | undefined;
     entityFormatter?: EntityFormatter;
     extraButtons?: (searchControl: SearchControlLoaded) => (React.ReactElement<any> | null | undefined | false)[];
-    getViewPromise?: (e: ModifiableEntity) => Navigator.ViewPromise<ModifiableEntity>;
+    getViewPromise?: (e: ModifiableEntity) => undefined | string | Navigator.ViewPromise<any>;
     maxResultsHeight?: React.CSSWideKeyword | any;
     tag?: string | {};
 
