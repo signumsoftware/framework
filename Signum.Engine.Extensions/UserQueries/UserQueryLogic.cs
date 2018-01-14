@@ -45,9 +45,9 @@ namespace Signum.Engine.UserQueries
                     .WithQuery(dqm, () => uq => new
                     {
                         Entity = uq,
-                        uq.Query,
                         uq.Id,
                         uq.DisplayName,
+                        uq.Query,
                         uq.EntityType,
                     });
                 

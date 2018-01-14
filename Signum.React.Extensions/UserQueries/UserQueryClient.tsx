@@ -137,7 +137,7 @@ export module Converter {
             .then(fop2 => {
                 fop.filterOptions = fop.filterOptions.filter(a => a.frozen);
                 fop.filterOptions.push(...fop2.filterOptions);
-                fop.groupResults = fop.groupResults;
+                fop.groupResults = fop2.groupResults;
                 fop.orderOptions = fop2.orderOptions;
                 fop.columnOptions = fop2.columnOptions;
                 fop.pagination = fop2.pagination;
