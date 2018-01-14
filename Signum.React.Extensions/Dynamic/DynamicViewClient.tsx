@@ -125,6 +125,12 @@ export class DynamicViewViewDispatcher implements Navigator.ViewDispatcher {
 
     getViewPromise(entity: ModifiableEntity, viewName?: string): ViewPromise<ModifiableEntity>{
 
+        if (viewName == "STATIC")
+            return this.static(entity);
+
+        if (viewName == "NEW")
+            return ViewPromise.flat(createDefaultDynamicView(entity.Type).then(dv => dynamicViewComponent(dv)));
+
         if (!isTypeEntity(entity.Type) || viewName != undefined)
             return this.fallback(entity, viewName);
 
