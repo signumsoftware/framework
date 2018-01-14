@@ -226,7 +226,7 @@ export default class FrameModal extends React.Component<FrameModalProps, FrameMo
         const frame: EntityFrame = {
             frameComponent: this,
             entityComponent: this.entityComponent,
-            onReload: pack => this.setPack(pack),
+            onReload: pack => this.setPack(pack || this.state.pack!),
             onClose: (ok?: boolean) => this.props.onExited!(ok ? this.state.pack!.entity : undefined),
             revalidate: () => this.validationErrors && this.validationErrors.forceUpdate(),
             setError: (modelState, initialPrefix = "") => {

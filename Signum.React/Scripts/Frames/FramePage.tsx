@@ -138,7 +138,7 @@ export default class FramePage extends React.Component<FramePageProps, FramePage
             entityComponent: this.entityComponent,
             onReload: pack => {
 
-                var packEntity = pack as EntityPack<Entity>;
+                var packEntity = (pack || this.state.pack) as EntityPack<Entity>;
 
                 if (packEntity.entity.id != null && entity.id == null)
                     Navigator.history.push(Navigator.navigateRoute(packEntity.entity));

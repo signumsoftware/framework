@@ -66,8 +66,8 @@ export interface SearchControlProps extends React.Props<SearchControl> {
     onSelectionChanged?: (entity: ResultRow[]) => void;
     onFiltersChanged?: (filters: FilterOptionParsed[]) => void;
     onHeighChanged?: () => void;
-    onResult?: (table: ResultTable) => void;
-    onSearch?: (fo: FindOptionsParsed) => void;
+    onSearch?: (fo: FindOptionsParsed, dataChange: boolean) => void;
+    onResult?: (table: ResultTable, dataChange: boolean) => void;
     onCreate?: () => void;
 }
 
@@ -108,12 +108,12 @@ export default class SearchControl extends React.Component<SearchControlProps, S
         this.initialLoad(newProps.findOptions);
     }
 
-    doSearch(avoidOnSearchEvent?: boolean) {
-        this.searchControlLoaded && this.searchControlLoaded.doSearch(avoidOnSearchEvent);
+    doSearch() {
+        this.searchControlLoaded && this.searchControlLoaded.doSearch();
     }
 
-    doSearchPage1(avoidOnSearchEvent?: boolean) {
-        this.searchControlLoaded && this.searchControlLoaded.doSearchPage1(avoidOnSearchEvent);
+    doSearchPage1() {
+        this.searchControlLoaded && this.searchControlLoaded.doSearchPage1();
     }
 
     initialLoad(fo: FindOptions) {
