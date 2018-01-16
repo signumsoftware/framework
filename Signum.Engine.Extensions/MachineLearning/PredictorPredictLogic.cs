@@ -17,6 +17,14 @@ namespace Signum.Engine.MachineLearning
     {
         public static RecentDictionary<Lite<PredictorEntity>, PredictorPredictContext> TrainedPredictorCache = new RecentDictionary<Lite<PredictorEntity>, PredictorPredictContext>(50);
 
+
+        public static Lite<PredictorEntity> GetCurrentPredictor(PredictorPublicationSymbol publication)
+        {
+            var predictor = Database.Query<PredictorEntity>().Where(a => a.Publication == publication).Select(a => a.ToLite()).SingleEx();
+
+            return predictor;
+        }
+
         public static PredictorPredictContext GetPredictContext(this Lite<PredictorEntity> predictor)
         {
             lock (TrainedPredictorCache)
@@ -94,8 +102,7 @@ namespace Signum.Engine.MachineLearning
         public static List<PredictDictionary> FromFilters(this PredictorPredictContext ctx, List<Filter> filters)
         {
             var qd = DynamicQueryManager.Current.QueryDescription(ctx.Predictor.MainQuery.Query.ToQueryName());
-
-
+            
             var qr = new QueryRequest
             {
                 QueryName = qd.QueryName,

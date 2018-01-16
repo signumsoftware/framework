@@ -18,7 +18,7 @@ import {
     PredictorAlgorithmSymbol, AccordPredictorAlgorithm, CNTKPredictorAlgorithm,
     PredictorResultSaverSymbol, PredictorSimpleResultSaver,
     NaiveBayesSettingsEntity, NeuralNetworkSettingsEntity, PredictorSettingsEmbedded, PredictorState, PredictorRegressionMetricsEmbedded,
-    PredictorClassificationMetricsEmbedded, PredictorMainQueryEmbedded, PredictorColumnUsage, PredictorOperation, PredictSimpleResultEntity
+    PredictorClassificationMetricsEmbedded, PredictorMainQueryEmbedded, PredictorColumnUsage, PredictorOperation, PredictSimpleResultEntity, PredictorPublicationSymbol
 } from './Signum.Entities.MachineLearning'
 import * as OmniboxClient from '../Omnibox/OmniboxClient'
 
@@ -26,6 +26,7 @@ import * as QuickLinks from '../../../Framework/Signum.React/Scripts/QuickLinks'
 import { QueryToken } from '../../../Framework/Signum.React/Scripts/FindOptions';
 import { ImportComponent } from '../../../Framework/Signum.React/Scripts/AsyncImport';
 import { TypeContext } from '../../../Framework/Signum.React/Scripts/Lines';
+import SelectorModal from '../../../Framework/Signum.React/Scripts/SelectorModal';
 
 export function start(options: { routes: JSX.Element[] }) {
 
@@ -58,6 +59,25 @@ export function start(options: { routes: JSX.Element[] }) {
     Operations.addSettings(new EntityOperationSettings(PredictorOperation.CancelTraining, { hideOnCanExecute: true }));
     Operations.addSettings(new EntityOperationSettings(PredictorOperation.Train, { hideOnCanExecute: true }));
     Operations.addSettings(new EntityOperationSettings(PredictorOperation.Untrain, { hideOnCanExecute: true }));
+    
+    Operations.addSettings(new EntityOperationSettings(PredictorOperation.Publish, {
+        hideOnCanExecute: true,
+        onClick: eoc => {
+            API.publications(eoc.entity.mainQuery.query!.key)
+                .then(pubs => SelectorModal.chooseElement(pubs))
+                .then(pps => pps && eoc.defaultClick(pps))
+                .done();
+        },
+        contextual: {
+            onClick: coc => {
+                Navigator.API.fetchAndForget(coc.context.lites[0])
+                    .then(p => API.publications(p.mainQuery.query!.key))
+                    .then(pubs => SelectorModal.chooseElement(pubs))
+                    .then(pps => pps && coc.defaultContextualClick(pps))
+                    .done();
+            }
+        }
+    }));
 
     Constructor.registerConstructor(PredictorEntity, () => PredictorEntity.New({
         mainQuery: PredictorMainQueryEmbedded.New(),
@@ -84,8 +104,8 @@ export function start(options: { routes: JSX.Element[] }) {
         saveValidationProgressEvery: 10,
     }));
 
-    registerResultRenderer(PredictorSimpleResultSaver.OneOutput, ctx =>
-        <ImportComponent onImportModule={() => import("./Templates/SimpleResultButton")} componentProps={{ ctx: ctx}} />
+    registerResultRenderer(PredictorSimpleResultSaver.Full, ctx =>
+        <ImportComponent onImportModule={() => import("./Templates/SimpleResultButton")} componentProps={{ ctx: ctx }} />
     );
 }
 
@@ -160,6 +180,10 @@ export namespace API {
 
     export function updatePredict(predict: PredictRequest): Promise<PredictRequest> {
         return ajaxPost<PredictRequest>({ url: `~/api/predict/update/` }, predict);
+    }
+
+    export function publications(queryKey: string): Promise<PredictorPublicationSymbol[]> {
+        return ajaxGet<PredictorPublicationSymbol[]>({ url: `~/api/predict/publications/${queryKey}` });
     }
 }
 

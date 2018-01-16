@@ -48,9 +48,9 @@ namespace Signum.Engine.MachineLearning
             });
         }
 
-        public void SaveEntity(PredictorEntity predictor)
+        public PredictorEpochProgressEntity SaveEntity(PredictorEntity predictor)
         {
-            new PredictorEpochProgressEntity
+            return new PredictorEpochProgressEntity
             {
                 Predictor = predictor.ToLite(),
                 Ellapsed = Ellapsed,

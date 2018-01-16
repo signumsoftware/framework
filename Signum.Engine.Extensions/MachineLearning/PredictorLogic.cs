@@ -71,9 +71,14 @@ namespace Signum.Engine.MachineLearning
             ResultSavers.Add(symbol, algorithm);
         }
 
+        public static Dictionary<PredictorPublicationSymbol, object> Publications = new Dictionary<PredictorPublicationSymbol, object>();
+        public static void RegisterPublication(PredictorPublicationSymbol publication, object queryName)
+        {
+            Publications.Add(publication, queryName);
+        }
+
         public static ConcurrentDictionary<Lite<PredictorEntity>, PredictorTrainingState> Trainings = new ConcurrentDictionary<Lite<PredictorEntity>, PredictorTrainingState>();
-
-
+        
         public static void Start(SchemaBuilder sb, DynamicQueryManager dqm, Func<IFileTypeAlgorithm> predictorFileAlgorithm)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
@@ -144,6 +149,7 @@ namespace Signum.Engine.MachineLearning
 
                 SymbolLogic<PredictorAlgorithmSymbol>.Start(sb, dqm, () => Algorithms.Keys);
                 SymbolLogic<PredictorResultSaverSymbol>.Start(sb, dqm, () => ResultSavers.Keys);
+                SymbolLogic<PredictorPublicationSymbol>.Start(sb, dqm, () => Publications.Keys);
 
                 sb.Schema.EntityEvents<PredictorEntity>().Retrieved += PredictorEntity_Retrieved;
                 sb.Schema.EntityEvents<PredictorSubQueryEntity>().Retrieved += PredictorMultiColumnEntity_Retrieved;
@@ -165,7 +171,10 @@ namespace Signum.Engine.MachineLearning
                         e.OriginalCategory,
                         e.PredictedCategory,
                     });
-                RegisterResultSaver(PredictorSimpleResultSaver.OneOutput, new PredictorSimpleSaver());
+
+                RegisterResultSaver(PredictorSimpleResultSaver.StatisticsOnly, new PredictorSimpleSaver { SaveSimpleResults = true });
+                RegisterResultSaver(PredictorSimpleResultSaver.Full, new PredictorSimpleSaver { SaveSimpleResults = true });
+
                 sb.Schema.EntityEvents<PredictorEntity>().PreUnsafeDelete += query => Database.Query<PredictSimpleResultEntity>().Where(a => query.Contains(a.Predictor.Entity)).UnsafeDelete();
 
                 sb.Schema.WhenIncluded<ProcessEntity>(() =>
@@ -549,6 +558,27 @@ namespace Signum.Engine.MachineLearning
                     },
                 }.Register();
 
+
+                new Execute(PredictorOperation.Publish)
+                {
+                    FromStates = { PredictorState.Trained },
+                    ToStates = { PredictorState.Trained },
+                    AllowsNew = true,
+                    Lite = false,
+                    Execute = (e, arg) =>
+                    {
+                        var publication = arg.GetArg<PredictorPublicationSymbol>();
+
+                        Database.Query<PredictorEntity>()
+                        .Where(a => a.Publication == publication)
+                        .UnsafeUpdate()
+                        .Set(a => a.Publication, a => null)
+                        .Execute();
+
+                        e.Publication = publication;
+                        e.Save();
+                    },
+                }.Register();
 
                 new Delete(PredictorOperation.Delete)
                 {

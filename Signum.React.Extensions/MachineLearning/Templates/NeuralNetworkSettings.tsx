@@ -85,6 +85,7 @@ export default class NeuralNetworkSettings extends React.Component<{ ctx: TypeCo
                     <div className="col-sm-6">
                         <ValueLine ctx={ctx6.subCtx(a => a.minibatchSize)} />
                         <ValueLine ctx={ctx6.subCtx(a => a.numMinibatches)} />
+                        <ValueLine ctx={ctx6.subCtx(a => a.bestResultFromLast)} />
                         <ValueLine ctx={ctx6.subCtx(a => a.saveProgressEvery)} />
                         <ValueLine ctx={ctx6.subCtx(a => a.saveValidationProgressEvery)} />
                     </div>

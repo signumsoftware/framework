@@ -125,6 +125,12 @@ namespace Signum.React.MachineLearning
             return request;
         }
 
+        [Route("api/predict/publications/{queryKey}"), HttpGet]
+        public List<PredictorPublicationSymbol> GetPublications(string queryKey)
+        {
+            object queryName = QueryLogic.ToQueryName(queryKey);
 
+            return PredictorLogic.Publications.Where(a => object.Equals(a.Value, queryName)).Select(a => a.Key).ToList();
+        }
     }
 }
