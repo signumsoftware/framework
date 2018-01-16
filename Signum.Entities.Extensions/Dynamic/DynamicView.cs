@@ -144,5 +144,10 @@ namespace Signum.Entities.Dynamic
 
         [Description("Aggregate is mandatory for '{0}' ({1}).")]
         AggregateIsMandatoryFor01,
+
+        [Description("ValueToken can not be use for '{0}' because is not an Entity.")]
+        ValueTokenCanNotBeUseFor0BecauseIsNotAnEntity,
+
+        ViewNameIsNotAllowedWhileHavingChildren,
     }
 }

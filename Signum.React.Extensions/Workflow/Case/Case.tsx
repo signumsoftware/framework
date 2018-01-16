@@ -9,7 +9,7 @@ import {
     EntityRepeater, EntityCheckboxList, EntityTabRepeater, TypeContext, EntityTable
 } from '../../../../Framework/Signum.React/Scripts/Lines'
 import { API, CaseFlow } from '../WorkflowClient'
-import BpmnViewerComponent from '../Bpmn/BpmnViewerComponent'
+import CaseFlowViewerComponent from '../Bpmn/CaseFlowViewerComponent'
 import InlineCaseTags from "../Case/InlineCaseTags";
 import { SearchControl } from "../../../../Framework/Signum.React/Scripts/Search";
 
@@ -32,7 +32,7 @@ export default class CaseComponent extends React.Component<CaseComponentProps, C
         this.state = { };
     }
 
-    bpmnViewerComponent?: BpmnViewerComponent | null;
+    caseFlowViewerComponent?: CaseFlowViewerComponent | null;
 
     loadState(props: CaseComponentProps) {
         API.getWorkflowModel(toLite(props.ctx.value.workflow))
@@ -81,7 +81,7 @@ export default class CaseComponent extends React.Component<CaseComponentProps, C
                     <Tab eventKey="CaseFlow" title={WorkflowActivityMessage.CaseFlow.niceToString()}>
                         {this.state.initialXmlDiagram && this.state.entities && this.state.caseFlow ?
                             <div className="code-container">
-                                <BpmnViewerComponent ref={m => this.bpmnViewerComponent = m}
+                                <CaseFlowViewerComponent ref={m => this.caseFlowViewerComponent = m}
                                     diagramXML={this.state.initialXmlDiagram}
                                     entities={this.state.entities}
                                     caseFlow={this.state.caseFlow}
