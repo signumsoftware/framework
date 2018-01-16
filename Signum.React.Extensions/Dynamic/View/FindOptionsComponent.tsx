@@ -20,6 +20,8 @@ import { FindOptionsExpr, FilterOptionExpr, OrderOptionExpr, ColumnOptionExpr } 
 import * as DynamicViewClient from '../DynamicViewClient'
 import { DynamicViewMessage, DynamicViewValidationMessage } from '../Signum.Entities.Dynamic'
 import SelectorModal from '../../../../Framework/Signum.React/Scripts/SelectorModal';
+import { getTypeInfos } from '../../../../Framework/Signum.React/Scripts/Reflection';
+import { TypeInfo } from '../../../../Framework/Signum.React/Scripts/Reflection';
 
 
 interface FindOptionsLineProps {
@@ -157,16 +159,21 @@ export class QueryTokenLine extends React.Component<QueryTokenLineProps, QueryTo
         this.props.dn.context.refreshView();
     }
 
+    componentWillReceiveProps(newProps: QueryTokenLineProps) {
+        if (this.props.queryKey != null && this.props.queryKey != newProps.queryKey)
+            this.handleChange(undefined);
+    }   
+
     render() {
         const columnName = this.props.binding.getValue();
 
         return (
             <div className="form-group">
                 <label className="control-label">
-                    {this.renderMember(columnName)}
+                    {this.renderMember(columnName)} {this.props.queryKey && <small>({getQueryNiceName(this.props.queryKey)})</small>}
                 </label>
                 <div>
-                    <QueryTokenBuilderString
+                    <QueryTokenBuilderString key={this.props.queryKey}
                         queryKey={this.props.queryKey}
                         columnName={columnName}
                         subTokenOptions={this.props.subTokenOptions}
@@ -191,6 +198,95 @@ export class QueryTokenLine extends React.Component<QueryTokenLineProps, QueryTo
     }
 }
 
+
+
+interface FetchQueryDescriptionProps {
+    queryName?: string;
+    children: (qd?: QueryDescription) => React.ReactElement<any>;
+}
+
+interface FetchQueryDescriptionState {
+    queryDescription?: QueryDescription
+}
+
+export class FetchQueryDescription extends React.Component<FetchQueryDescriptionProps, FetchQueryDescriptionState> {
+
+    constructor(props: FetchQueryDescriptionProps) {
+        super(props);
+        this.state = { queryDescription: undefined };
+    }
+
+    componentWillMount() {
+        this.loadData(this.props);
+    }
+
+    componentWillReceiveProps(newProps: FetchQueryDescriptionProps) {
+        if (newProps.queryName != this.props.queryName)
+            this.loadData(newProps);
+    }
+
+    loadData(props: FetchQueryDescriptionProps) {
+
+        if (!props.queryName)
+            this.setState({ queryDescription: undefined });
+        else
+            Finder.getQueryDescription(props.queryName)
+                .then(qd => this.setState({ queryDescription: qd }))
+                .done();
+    }
+
+    render() {
+        return this.props.children(this.state.queryDescription);
+    }
+}
+
+
+interface ViewNameComponentProps {
+    binding: Binding<any>;
+    dn: DesignerNode<BaseNode>;
+    typeName?: string;
+}
+
+interface ViewNameComponentState {
+    viewNames?: string[];
+}
+
+export class ViewNameComponent extends React.Component<ViewNameComponentProps, ViewNameComponentState> {
+
+    constructor(props: ViewNameComponentProps) {
+        super(props);
+        this.state = { viewNames: [] };
+    }
+
+    componentWillMount() {
+        this.loadData(this.props);
+    }
+
+    componentWillReceiveProps(newProps: ViewNameComponentProps) {
+        if (newProps.typeName != this.props.typeName)
+            this.loadData(newProps);
+    }
+
+    loadData(props: ViewNameComponentProps) {
+        if (props.typeName && !props.typeName.contains(", ") && !isTypeEntity(props.typeName))
+            this.setState({ viewNames: [] });
+        else
+            Promise.all(getTypeInfos(props.typeName || "").map(ti => Navigator.viewDispatcher.getViewNames(ti.name).then(array => [...array, (hastStaticView(ti) ? "STATIC" : undefined)])))
+                .then(arrays => this.setState({
+                    viewNames: [...(arrays.flatMap(a => a).filter(a => a != null) as string[]), "NEW"]
+                }))
+                .done();
+    }
+
+    render() {
+        return <ExpressionOrValueComponent dn={this.props.dn} binding={this.props.binding} type="string" defaultValue={null} options={this.state.viewNames} exampleExpression={"e => \"MyStaticOrDynamicViewName\""}/>;
+    }
+}
+
+function hastStaticView(t: TypeInfo) {
+    var es = Navigator.getSettings(t);
+    return es != null && es.getViewPromise != null;
+}
 
 interface FindOptionsComponentProps {
     dn: DesignerNode<BaseNode>;

@@ -29,11 +29,11 @@ namespace Signum.Engine.Translation
         void Feedback(string to, string wrongTranslation, string fixedTranslation);
     }
 
-    public class IdentityTranslator : ITranslator
+    public class EmptyTranslator : ITranslator
     {
         public List<string> TranslateBatch(List<string> list, string from, string to)
         {
-            return list.Select(text => "In{0}({1})".FormatWith(to, text)).ToList();
+            return list.Select(text => "").ToList();
         }
 
         public bool AutoSelect()
