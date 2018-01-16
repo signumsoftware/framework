@@ -37,13 +37,14 @@ namespace Signum.Entities.MachineLearning
         [StringLengthValidator(AllowNulls = true, Max = 200)]
         public string OriginalCategory { get; set; }
 
+        [Format("0.0000")]
         public double? OriginalValue { get; set; }
 
         [SqlDbType(Size = 200)]
         [StringLengthValidator(AllowNulls = true, Max = 200)]
         public string PredictedCategory { get; set; }
 
-
+        [Format("0.0000")]
         public double? PredictedValue { get; set; }
     }
 
