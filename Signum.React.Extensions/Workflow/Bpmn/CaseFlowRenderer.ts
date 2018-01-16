@@ -109,7 +109,7 @@ export class CaseFlowRenderer extends CustomRenderer {
                 pathGroups.slice(jumps.length).forEach(path => (path.parentNode as SVGGElement).removeChild(path));
 
                 if (jumps.length) {
-                    const moddleElements = ((this.viewer as any).definitions.diagrams[0].plane.planeElement as BPMN.ModdleElement[]);
+                    const moddleElements = ((this.viewer as any)._definitions.diagrams[0].plane.planeElement as BPMN.ModdleElement[]);
 
                     const fromModdle = moddleElements.filter(a => a.id == (element.id + "_di")).single();
                     const fromRec: Rectangle = toCenteredRectangle(fromModdle.bounds);
