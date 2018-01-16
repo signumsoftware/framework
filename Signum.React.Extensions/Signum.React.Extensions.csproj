@@ -358,7 +358,7 @@
       <DependentUpon>Signum.Entities.Workflow.t4s</DependentUpon>
     </TypeScriptCompile>
     <TypeScriptCompile Include="Workflow\Bpmn\BpmnModelerComponent.tsx" />
-    <TypeScriptCompile Include="Workflow\Bpmn\BpmnViewerComponent.tsx" />
+    <TypeScriptCompile Include="Workflow\Bpmn\CaseFlowViewerComponent.tsx" />
     <TypeScriptCompile Include="Workflow\Case\CaseFrameModal.tsx" />
     <TypeScriptCompile Include="Workflow\Case\CaseFramePage.tsx" />
     <TypeScriptCompile Include="Workflow\Bpmn\CustomRenderer.ts" />
