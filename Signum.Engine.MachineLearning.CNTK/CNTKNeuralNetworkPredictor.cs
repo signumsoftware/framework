@@ -14,6 +14,7 @@ using System.Diagnostics;
 using Signum.Engine.Files;
 using Signum.Engine.Operations;
 using Signum.Entities.UserAssets;
+using System.IO;
 
 namespace Signum.Engine.MachineLearning.CNTK
 {
@@ -22,9 +23,10 @@ namespace Signum.Engine.MachineLearning.CNTK
         public void InitialSetup()
         {
             /// This is a workaround to load unmanaged CNTK dlls from the applications \bin directory.
-            var dir = AppDomain.CurrentDomain.BaseDirectory + "/bin";
+            var dir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "bin");
             var oldPath = Environment.GetEnvironmentVariable("Path");
-            Environment.SetEnvironmentVariable("Path", dir + ";" + oldPath, EnvironmentVariableTarget.Process);
+            if (!oldPath.Contains(dir + ";"))
+                Environment.SetEnvironmentVariable("Path", dir + ";" + oldPath, EnvironmentVariableTarget.Process);
         }
 
         public string ValidateEncodingProperty(PredictorEntity predictor, PredictorSubQueryEntity subQuery, PredictorColumnEncoding encoding, PredictorColumnUsage usage, QueryTokenEmbedded token)
