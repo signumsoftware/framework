@@ -33,6 +33,12 @@ namespace Signum.Engine.MachineLearning
         public PredictorTrainingContext Context; 
     }
 
+    public class PublicationSettings
+    {
+        public object QueryName;
+        public Action<PredictorEntity> OnPublicate;
+    }
+
     public static class PredictorLogic
     {
         static Expression<Func<PredictorEntity, IQueryable<PredictSimpleResultEntity>>> SimpleResultsExpression =
@@ -71,10 +77,12 @@ namespace Signum.Engine.MachineLearning
             ResultSavers.Add(symbol, algorithm);
         }
 
-        public static Dictionary<PredictorPublicationSymbol, object> Publications = new Dictionary<PredictorPublicationSymbol, object>();
-        public static void RegisterPublication(PredictorPublicationSymbol publication, object queryName)
+        
+
+        public static Dictionary<PredictorPublicationSymbol, PublicationSettings> Publications = new Dictionary<PredictorPublicationSymbol, PublicationSettings>();
+        public static void RegisterPublication(PredictorPublicationSymbol publication, PublicationSettings settings)
         {
-            Publications.Add(publication, queryName);
+            Publications.Add(publication, settings);
         }
 
         public static ConcurrentDictionary<Lite<PredictorEntity>, PredictorTrainingState> Trainings = new ConcurrentDictionary<Lite<PredictorEntity>, PredictorTrainingState>();
@@ -577,6 +585,8 @@ namespace Signum.Engine.MachineLearning
 
                         e.Publication = publication;
                         e.Save();
+
+                        Publications.GetOrThrow(publication).OnPublicate?.Invoke(e);
                     },
                 }.Register();
 

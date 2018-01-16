@@ -228,6 +228,8 @@ namespace Signum.Engine.MachineLearning
             Predictor = predictor;
         }
 
+        public Lite<Entity> Entity { get; set; } //Optional
+
         public PredictorEntity Predictor { get; set; }
         public Dictionary<PredictorColumnEmbedded, object> MainQueryValues { get; set; } = new Dictionary<PredictorColumnEmbedded, object>();
         public Dictionary<PredictorSubQueryEntity, PredictSubQueryDictionary> SubQueries { get; set; } = new Dictionary<PredictorSubQueryEntity, PredictSubQueryDictionary>();
