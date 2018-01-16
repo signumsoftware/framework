@@ -10,7 +10,7 @@ export interface EntityLinkProps extends React.HTMLAttributes<HTMLAnchorElement>
     lite: Lite<Entity>;
     inSearch?: boolean;
     onNavigated?: (lite: Lite<Entity>) => void;
-    getViewPromise?: (e: ModifiableEntity) => Navigator.ViewPromise<ModifiableEntity>;
+    getViewPromise?: (e: ModifiableEntity) => undefined | string | Navigator.ViewPromise<ModifiableEntity>;
 }
 
 

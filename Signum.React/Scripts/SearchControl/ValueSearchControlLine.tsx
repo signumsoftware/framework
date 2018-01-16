@@ -30,6 +30,7 @@ export interface ValueSearchControlLineProps extends React.Props<ValueSearchCont
     onExplored?: () => void;
     viewEntityButton?: boolean;
     avoidAutoRefresh?: boolean;
+    refreshKey?: string | number;
     extraButtons?: (valueSearchControl: ValueSearchControl) => React.ReactNode | undefined;
     searchControlProps?: Partial<SearchControlProps>;
 }
@@ -131,6 +132,7 @@ export default class ValueSearchControlLine extends React.Component<ValueSearchC
                         onTokenLoaded={() => this.forceUpdate()}
                         onExplored={this.props.onExplored}
                         searchControlProps={this.props.searchControlProps}
+                        refreshKey={this.props.refreshKey}
                         />
                     {unit}
                     {(view || extra || find) && (isFormControl ?

@@ -34,7 +34,7 @@ export interface SearchControlProps extends React.Props<SearchControl> {
     rowAttributes?: (row: ResultRow, columns: string[]) => React.HTMLAttributes<HTMLTableRowElement> | undefined;
     entityFormatter?: EntityFormatter;
     extraButtons?: (searchControl: SearchControlLoaded) => (React.ReactElement<any> | null | undefined | false)[];
-    getViewPromise?: (e: any /*Entity*/) => Navigator.ViewPromise<any /*Entity*/>;
+    getViewPromise?: (e: any /*Entity*/) => undefined | string | Navigator.ViewPromise<any /*Entity*/>;
     maxResultsHeight?: React.CSSWideKeyword | any;
     tag?: string | {};
 
@@ -59,15 +59,15 @@ export interface SearchControlProps extends React.Props<SearchControl> {
     avoidAutoRefresh?: boolean;
     avoidChangeUrl?: boolean;
     throwIfNotFindable?: boolean;
-    refreshKey?: string;
+    refreshKey?: string | number;
 
     onNavigated?: (lite: Lite<Entity>) => void;
     onDoubleClick?: (e: React.MouseEvent<any>, row: ResultRow) => void;
     onSelectionChanged?: (entity: ResultRow[]) => void;
     onFiltersChanged?: (filters: FilterOptionParsed[]) => void;
     onHeighChanged?: () => void;
-    onResult?: (table: ResultTable) => void;
-    onSearch?: (fo: FindOptionsParsed) => void;
+    onSearch?: (fo: FindOptionsParsed, dataChange: boolean) => void;
+    onResult?: (table: ResultTable, dataChange: boolean) => void;
     onCreate?: () => void;
 }
 
@@ -108,12 +108,12 @@ export default class SearchControl extends React.Component<SearchControlProps, S
         this.initialLoad(newProps.findOptions);
     }
 
-    doSearch(avoidOnSearchEvent?: boolean) {
-        this.searchControlLoaded && this.searchControlLoaded.doSearch(avoidOnSearchEvent);
+    doSearch() {
+        this.searchControlLoaded && this.searchControlLoaded.doSearch();
     }
 
-    doSearchPage1(avoidOnSearchEvent?: boolean) {
-        this.searchControlLoaded && this.searchControlLoaded.doSearchPage1(avoidOnSearchEvent);
+    doSearchPage1() {
+        this.searchControlLoaded && this.searchControlLoaded.doSearchPage1();
     }
 
     initialLoad(fo: FindOptions) {
