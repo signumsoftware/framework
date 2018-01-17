@@ -174,7 +174,7 @@
     <Member Name="Save" Description="Speichern" />
     <Member Name="SendEmail" Description="E-Mail senden" />
     <Member Name="TheConfirmationCodeThatYouHaveJustSentIsInvalid" Description="Der Bestätigungs-Code, den Sie gerade gesendet haben, ist ungültig" />
-    <Member Name="ThePasswordMustHaveBetween7And15CharactersEachOfThemBeingANumber09OrALetter" Description="Das Passwort muss zwischen 7 und 15 Zeichen haben, jeder davon ist eine Zahl 0-9 oder ein Buchstabe." />
+    <Member Name="ThePasswordMustHaveAtLeast5Characters" Description="Das Passwort muss mindestens 5 Zeichen lang sein." />
     <Member Name="ThereHasBeenAnErrorWithYourRequestToResetYourPasswordPleaseEnterYourLogin" Description="Es ist ein Fehler beim Senden Ihrer Anfrage zum Zurücksetzen des Passworts aufgetreten. Bitte geben Sie Ihre Login-Daten ein." />
     <Member Name="ThereSNotARegisteredUserWithThatEmailAddress" Description="Es gibt kein registrierter Benutzer mit dieser E-Mail-Adresse" />
     <Member Name="TheSpecifiedPasswordsDontMatch" Description="Die angegebenen Passwörter stimmen nicht überein" />
@@ -200,6 +200,7 @@
     <Member Name="RefreshAnyTokenPreviousTo" Description="Aktualisieren Sie alle Token bis zu" />
     <Member Name="RefreshTokenEvery" Description="Aktualisieren Sie jeden Token" />
   </Type>
+  <Type Name="AutoconfigureNeuralNetworkEntity" />
   <Type Name="BaseRulePack`1">
     <Member Name="Role" Description="Rolle" />
     <Member Name="Rules" Description="Regeln" />
@@ -819,6 +820,8 @@
     <Member Name="OnlyChildNodesOfType0Allowed" Description="Nur untergeordnete Knoten vom Typ &quot;{0}&quot; erlaubt" />
     <Member Name="Type0DoesNotContainsField1" Description="Typ &quot;{0}&quot; enthält kein Feld &quot;{1}&quot;" />
     <Member Name="Value" Description="Wert" />
+    <Member Name="ValueTokenCanNotBeUseFor0BecauseIsNotAnEntity" Description="ValueToken kann für &quot;{0}&quot;  nicht benutzt werden da es keine Entität ist." />
+    <Member Name="ViewNameIsNotAllowedWhileHavingChildren" Description="Ansichtsname ist nicht erlaubt wenn Children vorhanden sind." />
   </Type>
   <Type Name="EmailAddressEmbedded" Description="E-Mail-Adresse">
     <Member Name="DisplayName" Description="Namen" />
@@ -1409,6 +1412,11 @@
   <Type Name="NamespaceHelpOperation">
     <Member Name="Save" Description="Speichern" />
   </Type>
+  <Type Name="NeuralNetworkActivation" />
+  <Type Name="NeuralNetworkEvalFunction" />
+  <Type Name="NeuralNetworkHidenLayerEmbedded" />
+  <Type Name="NeuralNetworkInitializer" />
+  <Type Name="NeuralNetworkLearner" />
   <Type Name="NeuralNetworkSettingsEntity" />
   <Type Name="NewsletterDeliveryEntity" Description="Newsletter-Versand" Gender="m">
     <Member Name="Newsletter" Description="Newsletter" />
@@ -1578,24 +1586,33 @@
     <Member Name="Exception" Description="Ausnahme" />
     <Member Name="Reception" Description="Empfang" />
   </Type>
+  <Type Name="PredictionSet" />
   <Type Name="PredictionType" />
   <Type Name="PredictorAlgorithmSymbol" />
   <Type Name="PredictorClassificationMetricsEmbedded" />
   <Type Name="PredictorCodificationEntity" />
   <Type Name="PredictorColumnEmbedded" />
   <Type Name="PredictorColumnEncoding" />
+  <Type Name="PredictorColumnNullHandling" />
   <Type Name="PredictorColumnUsage" />
   <Type Name="PredictorEntity" />
   <Type Name="PredictorEpochProgressEntity" />
   <Type Name="PredictorFileType" />
-  <Type Name="PredictorGroupKeyEmbedded" />
   <Type Name="PredictorMainQueryEmbedded" />
   <Type Name="PredictorMessage" />
+  <Type Name="PredictorMetricsEmbedded" />
   <Type Name="PredictorOperation" />
+  <Type Name="PredictorProcessAlgorithm" />
+  <Type Name="PredictorPublicationSymbol" />
   <Type Name="PredictorRegressionMetricsEmbedded" />
+  <Type Name="PredictorResultSaverSymbol" />
   <Type Name="PredictorSettingsEmbedded" />
+  <Type Name="PredictorSimpleResultSaver" />
   <Type Name="PredictorState" />
+  <Type Name="PredictorSubQueryColumnEmbedded" />
+  <Type Name="PredictorSubQueryColumnUsage" />
   <Type Name="PredictorSubQueryEntity" />
+  <Type Name="PredictSimpleResultEntity" />
   <Type Name="PrintLineEntity" Description="Zeile drucken">
     <Member Name="CreationDate" Description="Erstellungsdatum" />
     <Member Name="File" Description="Datei" />
@@ -1776,12 +1793,16 @@
   </Type>
   <Type Name="RestLogEntity" Description="Rest-Protokoll" PluralDescription="Rest-Protokolle" Gender="n">
     <Member Name="Action" Description="Aktion" />
+    <Member Name="AllowReplay" Description="Wiedergabe erlauben" />
+    <Member Name="ChangedPercentage" Description="Geänderter Prozentsatz" />
     <Member Name="Controller" Description="Controller" />
     <Member Name="Duration" Description="Dauer" />
     <Member Name="EndDate" Description="Enddatum" />
     <Member Name="Exception" Description="Ausnahme" />
     <Member Name="QueryString" Description="Query string" />
     <Member Name="Referrer" Description="Referrer" />
+    <Member Name="ReplayDate" Description="Wiedergabe Datum" />
+    <Member Name="ReplayState" Description="Wiedergabe Zustand" />
     <Member Name="RequestBody" Description="Request body" />
     <Member Name="ResponseBody" Description="Response body" />
     <Member Name="StartDate" Description="Startdatum" />
@@ -1789,6 +1810,10 @@
     <Member Name="User" Description="Benutzer" />
     <Member Name="UserHostAddress" Description="Benutzer Hostadresse" />
     <Member Name="UserHostName" Description="Benutzer Hostname" />
+  </Type>
+  <Type Name="RestLogReplayState" Description="Restlog Wiederholungszustand">
+    <Member Name="NoChanges" Description="Keine Änderungen" />
+    <Member Name="WithChanges" Description="Mit Änderungen" />
   </Type>
   <Type Name="RoleEntity" Description="Rolle">
     <Member Name="MergeStrategy" Description="Zusammenführstrategie" />
@@ -2339,6 +2364,7 @@
     <Member Name="ElementsPerPage" Description="Elemente pro Seite" />
     <Member Name="EntityType" Description="Entitätstyp" />
     <Member Name="Filters" Description="Filter" />
+    <Member Name="GroupResults" Description="Resultate der Gruppe" />
     <Member Name="Guid" Description="Guid" />
     <Member Name="Orders" Description="Reihenfolge" />
     <Member Name="Owner" Description="Eigentümer" />
