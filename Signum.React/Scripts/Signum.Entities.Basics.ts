@@ -55,6 +55,7 @@ export interface ExceptionEntity extends Entities.Entity {
     queryString?: string | null;
     session?: string | null;
     data?: string | null;
+    hResult?: number;
     referenced?: boolean;
 }
 
