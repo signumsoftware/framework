@@ -112,6 +112,8 @@ namespace Signum.Entities.Basics
         [SqlDbType(Size = int.MaxValue)]
         public string Data { get; set; }
 
+        public int HResult { get; internal set; }
+
         public bool Referenced { get; set; }
 
         public override string ToString()
