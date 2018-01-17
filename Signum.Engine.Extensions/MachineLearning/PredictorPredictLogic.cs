@@ -160,6 +160,7 @@ namespace Signum.Engine.MachineLearning
 
             var result = rt.Rows.Select(row => new PredictDictionary(ctx.Predictor)
             {
+                Entity = row.Entity,
                 MainQueryValues = ctx.Predictor.MainQuery.Columns.Select((c, i) => KVP.Create(c, row[i])).ToDictionaryEx(),
                 SubQueries = ctx.Predictor.SubQueries.ToDictionary(sq => sq, sq => new PredictSubQueryDictionary(sq)
                 {
