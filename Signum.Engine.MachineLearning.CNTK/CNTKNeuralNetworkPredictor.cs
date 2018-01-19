@@ -218,7 +218,6 @@ namespace Signum.Engine.MachineLearning.CNTK
 
         public PredictDictionary Predict(PredictorPredictContext ctx, PredictDictionary input)
         {
-            InitialSetup();
             var nnSettings = (NeuralNetworkSettingsEntity)ctx.Predictor.AlgorithmSettings;
             Function calculatedOutputs = (Function)ctx.Model;
 
@@ -289,6 +288,8 @@ namespace Signum.Engine.MachineLearning.CNTK
 
         public void LoadModel(PredictorPredictContext ctx)
         {
+            this.InitialSetup();
+
             var nnSettings = (NeuralNetworkSettingsEntity)ctx.Predictor.AlgorithmSettings;
 
             ctx.Model = Function.Load(ctx.Predictor.Files.SingleEx().GetByteArray(), GetDevice(nnSettings));
