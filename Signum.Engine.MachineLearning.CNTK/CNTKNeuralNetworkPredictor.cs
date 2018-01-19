@@ -23,7 +23,15 @@ namespace Signum.Engine.MachineLearning.CNTK
         public void InitialSetup()
         {
             /// This is a workaround to load unmanaged CNTK dlls from the applications \bin directory.
-            var dir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "bin");
+            var dir = AppDomain.CurrentDomain.BaseDirectory;
+
+            if (!Directory.GetFiles(dir, "Cntk.Core.*.dll").Any())
+            {
+                dir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "bin");
+                if (!Directory.Exists(dir) || !Directory.GetFiles(dir, "Cntk.Core.*.dll").Any())
+                    throw new InvalidOperationException($@"No CNTK dll found in {AppDomain.CurrentDomain.BaseDirectory} or {Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "bin")}");
+            }
+
             var oldPath = Environment.GetEnvironmentVariable("Path");
             if (!oldPath.Contains(dir + ";"))
                 Environment.SetEnvironmentVariable("Path", dir + ";" + oldPath, EnvironmentVariableTarget.Process);
@@ -36,6 +44,7 @@ namespace Signum.Engine.MachineLearning.CNTK
         
         public string[] GetAvailableDevices()
         {
+            InitialSetup();
             return DeviceDescriptor.AllDevices().Select(a => a.AsString()).ToArray();
         }
 
@@ -54,6 +63,7 @@ namespace Signum.Engine.MachineLearning.CNTK
         //Errors with CNTK: https://github.com/Microsoft/CNTK/issues/2614
         public void Train(PredictorTrainingContext ctx)
         {
+            InitialSetup();
             var p = ctx.Predictor;
 
             var nn = (NeuralNetworkSettingsEntity)p.AlgorithmSettings;
@@ -208,6 +218,7 @@ namespace Signum.Engine.MachineLearning.CNTK
 
         public PredictDictionary Predict(PredictorPredictContext ctx, PredictDictionary input)
         {
+            InitialSetup();
             var nnSettings = (NeuralNetworkSettingsEntity)ctx.Predictor.AlgorithmSettings;
             Function calculatedOutputs = (Function)ctx.Model;
 
