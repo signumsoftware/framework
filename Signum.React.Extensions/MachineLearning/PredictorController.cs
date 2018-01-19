@@ -130,7 +130,7 @@ namespace Signum.React.MachineLearning
         {
             object queryName = QueryLogic.ToQueryName(queryKey);
 
-            return PredictorLogic.Publications.Where(a => object.Equals(a.Value, queryName)).Select(a => a.Key).ToList();
+            return PredictorLogic.Publications.Where(a => object.Equals(a.Value.QueryName, queryName)).Select(a => a.Key).ToList();
         }
     }
 }

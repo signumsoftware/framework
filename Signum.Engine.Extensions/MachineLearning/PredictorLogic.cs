@@ -569,6 +569,7 @@ namespace Signum.Engine.MachineLearning
 
                 new Execute(PredictorOperation.Publish)
                 {
+                    CanExecute = p => PredictorLogic.Publications.Values.Any(a => object.Equals(a.QueryName, p.MainQuery.Query.ToQueryName())) ? null : PredictorMessage.NoPublicationsForQuery0Registered.NiceToString(p.MainQuery),
                     FromStates = { PredictorState.Trained },
                     ToStates = { PredictorState.Trained },
                     AllowsNew = true,

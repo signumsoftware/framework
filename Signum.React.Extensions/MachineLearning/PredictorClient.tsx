@@ -87,8 +87,8 @@ export function start(options: { routes: JSX.Element[] }) {
     registerInitializer(AccordPredictorAlgorithm.DiscreteNaiveBayes, a => a.algorithmSettings = NaiveBayesSettingsEntity.New());
     registerInitializer(CNTKPredictorAlgorithm.NeuralNetwork, a => a.algorithmSettings = NeuralNetworkSettingsEntity.New({
         predictionType: "Regression",
-        lossFunction: "CrossEntropyWithSoftmax",
-        evalErrorFunction: "ClassificationError",
+        lossFunction: "SquaredError",
+        evalErrorFunction: "MeanAbsoluteError",
 
         learner: "MomentumSGD",
 

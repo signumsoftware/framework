@@ -264,6 +264,7 @@ export module PredictorMessage {
     export const TooManyParentKeys = new MessageKey("PredictorMessage", "TooManyParentKeys");
     export const _0CanNotBe1Because2Use3 = new MessageKey("PredictorMessage", "_0CanNotBe1Because2Use3");
     export const _0IsNotCompatibleWith12 = new MessageKey("PredictorMessage", "_0IsNotCompatibleWith12");
+    export const NoPublicationsForQuery0Registered = new MessageKey("PredictorMessage", "NoPublicationsForQuery0Registered");
 }
 
 export const PredictorMetricsEmbedded = new Type<PredictorMetricsEmbedded>("PredictorMetricsEmbedded");

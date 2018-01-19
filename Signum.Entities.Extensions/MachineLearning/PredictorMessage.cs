@@ -41,6 +41,8 @@ namespace Signum.Entities.MachineLearning
         [Description("{0} can not be {1} because {2} use {3}")]
         _0CanNotBe1Because2Use3,
         [Description("{0} is not compatible with {1} {2}")]
-        _0IsNotCompatibleWith12
+        _0IsNotCompatibleWith12,
+        [Description("No publications for query {0} registered")]
+        NoPublicationsForQuery0Registered
     }
 }
