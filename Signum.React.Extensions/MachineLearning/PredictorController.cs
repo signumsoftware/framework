@@ -40,7 +40,8 @@ namespace Signum.React.MachineLearning
         {
             var key = SymbolLogic<PredictorAlgorithmSymbol>.ToSymbol(algorithmKey);
 
-            return PredictorLogic.Algorithms.GetOrThrow(key).GetAvailableDevices();
+            var alg = PredictorLogic.Algorithms.GetOrThrow(key);
+            return alg.GetAvailableDevices();
         }
 
         [Route("api/predictor/tsv/{id}"), HttpGet]
