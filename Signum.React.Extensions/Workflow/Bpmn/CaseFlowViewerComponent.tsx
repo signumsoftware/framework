@@ -18,7 +18,7 @@ import "bpmn-js/assets/bpmn-font/css/bpmn-embedded.css"
 import "diagram-js/assets/diagram-js.css"
 import "./Bpmn.css"
 
-export interface BpmnViewerComponentProps {
+export interface CaseFlowViewerComponentProps {
     diagramXML?: string;
     entities: WorkflowEntitiesDictionary;
     caseFlow: CaseFlow;
@@ -26,7 +26,7 @@ export interface BpmnViewerComponentProps {
     caseActivity?: CaseActivityEntity;
 }
 
-export interface BpmnViewerComponentState {
+export interface CaseFlowViewerComponentState {
     caseFlowColor: CaseFlowColor;
 }
 
@@ -37,9 +37,9 @@ class CustomViewer extends NavigatedViewer {
 CustomViewer.prototype._modules =
     CustomViewer.prototype._modules.concat([caseFlowRenderer]);
 
-export default class BpmnViewerComponent extends React.Component<BpmnViewerComponentProps, BpmnViewerComponentState> {
+export default class CaseFlowViewerComponent extends React.Component<CaseFlowViewerComponentProps, CaseFlowViewerComponentState> {
 
-    constructor(props: BpmnViewerComponentProps) {
+    constructor(props: CaseFlowViewerComponentProps) {
         super(props);
 
         this.state = { caseFlowColor: CaseFlowColor.value("CaseMaxDuration") };
@@ -94,7 +94,7 @@ export default class BpmnViewerComponent extends React.Component<BpmnViewerCompo
         this.viewer.destroy();
     }
 
-    componentWillReceiveProps(nextProps: BpmnViewerComponentProps) {
+    componentWillReceiveProps(nextProps: CaseFlowViewerComponentProps) {
         if (this.viewer) {
             if (nextProps.diagramXML !== undefined && this.props.diagramXML !== nextProps.diagramXML) {
                 this.viewer.importXML(nextProps.diagramXML, this.handleOnModelError);

@@ -36,6 +36,7 @@ interface CaseFrameModalState {
     getComponent?: (ctx: TypeContext<ICaseMainEntity>) => React.ReactElement<any>;
     show: boolean;
     prefix?: string;
+    refreshCount: number;
 }
 
 var modalCount = 0;
@@ -66,11 +67,12 @@ export default class CaseFrameModal extends React.Component<CaseFrameModalProps,
     calculateState(props: CaseFrameModalState): CaseFrameModalState {
         return {
             show: true,
+            refreshCount: 0,
         };
     }
 
     setPack(pack: WorkflowClient.CaseEntityPack): void {
-        this.setState({ pack: pack });
+        this.setState({ pack: pack, refreshCount: 0 });
     }
 
     loadComponent(): Promise<void> {
@@ -184,9 +186,11 @@ export default class CaseFrameModal extends React.Component<CaseFrameModalProps,
             frameComponent: this,
             entityComponent: this.entityComponent,
             onReload: newPack => {
-                pack.activity = newPack.entity as CaseActivityEntity;
-                pack.canExecuteActivity = newPack.canExecute;
-                this.forceUpdate();
+                if (newPack) {
+                    pack.activity = newPack.entity as CaseActivityEntity;
+                    pack.canExecuteActivity = newPack.canExecute;
+                }
+                this.setState({ refreshCount: this.state.refreshCount + 1 });
             },
             onClose: (ok?: boolean) => this.props.onExited!(ok ? this.getCaseActivity() : undefined),
             revalidate: () => this.validationErrors && this.validationErrors.forceUpdate(),
@@ -194,6 +198,7 @@ export default class CaseFrameModal extends React.Component<CaseFrameModalProps,
                 GraphExplorer.setModelState(pack.activity, modelState, initialPrefix || "");
                 this.forceUpdate();
             },
+            refreshCount: this.state.refreshCount,
         };
 
         var activityPack = { entity: pack.activity, canExecute: pack.canExecuteActivity };
@@ -224,9 +229,11 @@ export default class CaseFrameModal extends React.Component<CaseFrameModalProps,
             frameComponent: this,
             entityComponent: this.entityComponent,
             onReload: newPack => {
-                pack.activity.case.mainEntity = newPack.entity as CaseActivityEntity;
-                pack.canExecuteMainEntity = newPack.canExecute;
-                this.forceUpdate();
+                if (newPack) {
+                    pack.activity.case.mainEntity = newPack.entity as CaseActivityEntity;
+                    pack.canExecuteMainEntity = newPack.canExecute;
+                }
+                this.setState({ refreshCount: this.state.refreshCount + 1 });
             },
             onClose: () => this.props.onExited!(null),
             revalidate: () => this.validationErrors && this.validationErrors.forceUpdate(),
@@ -234,6 +241,7 @@ export default class CaseFrameModal extends React.Component<CaseFrameModalProps,
                 GraphExplorer.setModelState(mainEntity, ms, initialPrefix || "");
                 this.forceUpdate()
             },
+            refreshCount: this.state.refreshCount,
         };
 
         var ti = this.getMainTypeInfo();

@@ -183,6 +183,7 @@ export default class Predictor extends React.Component<{ ctx: TypeContext<Predic
             ctx = ctx.subCtx({ readOnly: true });
 
         const ctxxs = ctx.subCtx({ formSize: "ExtraSmall" });
+        const ctxxs4 = ctx.subCtx({ labelColumns: 4 });
         const ctxmq = ctxxs.subCtx(a => a.mainQuery);
         const entity = ctx.value;
         const queryKey = entity.mainQuery.query && entity.mainQuery.query.key;
@@ -191,11 +192,18 @@ export default class Predictor extends React.Component<{ ctx: TypeContext<Predic
 
         return (
             <div>
-                <ValueLine ctx={ctxxs.subCtx(e => e.name)} readOnly={this.props.ctx.readOnly} />
-                <EntityCombo ctx={ctxxs.subCtx(f => f.algorithm)} onChange={this.handleAlgorithmChange} />
-                <EntityCombo ctx={ctxxs.subCtx(f => f.resultSaver)} />
-                <ValueLine ctx={ctxxs.subCtx(e => e.state, { readOnly: true })} />
-                <EntityLine ctx={ctxxs.subCtx(e => e.trainingException, { readOnly: true })} hideIfNull={true} />
+                <div className="row">
+                    <div className="col-sm-6">
+                        <ValueLine ctx={ctxxs4.subCtx(e => e.name)} readOnly={this.props.ctx.readOnly} />
+                        <ValueLine ctx={ctxxs4.subCtx(e => e.state, { readOnly: true })} />
+                        <EntityLine ctx={ctxxs4.subCtx(e => e.trainingException, { readOnly: true })} hideIfNull={true} />
+                    </div>
+                    <div className="col-sm-6">
+                        <EntityCombo ctx={ctxxs4.subCtx(f => f.algorithm)} onChange={this.handleAlgorithmChange} />
+                        <EntityCombo ctx={ctxxs4.subCtx(f => f.resultSaver)} />
+                        <EntityCombo ctx={ctxxs4.subCtx(f => f.publication)} readOnly={true} />
+                    </div>
+                </div>
                 {ctx.value.state == "Training" && <TrainingProgressComponent ctx={ctx} onStateChanged={this.handleOnFinished} />}
                 <UncontrolledTabs unmountOnExit={true}>
                     <Tab eventKey="query" title={ctxmq.niceName(a => a.query)}>

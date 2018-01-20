@@ -40,6 +40,8 @@ namespace Signum.Entities.MachineLearning
 
         public PredictorResultSaverSymbol ResultSaver { get; set; }
 
+        public PredictorPublicationSymbol Publication { get; set; }
+
         public Lite<ExceptionEntity> TrainingException { get; set; }
 
         [ImplementedBy(typeof(UserEntity))]
@@ -76,6 +78,8 @@ namespace Signum.Entities.MachineLearning
             return ToStringExpression.Evaluate(this);
         }
     }
+
+   
 
     [Serializable]
     public class PredictorMainQueryEmbedded : EmbeddedEntity
@@ -122,6 +126,11 @@ namespace Signum.Entities.MachineLearning
         public PredictorColumnEmbedded FindColumn(string part)
         {
             return Columns.SingleEx(a => a.Token.Token.ContainsKey(part));
+        }
+
+        public PredictorColumnEmbedded TryFindColumn(string part)
+        {
+            return Columns.SingleOrDefaultEx(a => a.Token.Token.ContainsKey(part));
         }
     }
 
@@ -208,6 +217,7 @@ namespace Signum.Entities.MachineLearning
         public static readonly ExecuteSymbol<PredictorEntity> CancelTraining;
         public static readonly ExecuteSymbol<PredictorEntity> StopTraining;
         public static readonly ExecuteSymbol<PredictorEntity> Untrain;
+        public static readonly ExecuteSymbol<PredictorEntity> Publish;
         public static readonly DeleteSymbol<PredictorEntity> Delete;
         public static readonly ConstructSymbol<PredictorEntity>.From<PredictorEntity> Clone;
         public static readonly ConstructSymbol<ProcessEntity>.From<PredictorEntity> AutoconfigureNetwork;
@@ -433,6 +443,17 @@ namespace Signum.Entities.MachineLearning
     }
 
     [Serializable]
+    public class PredictorPublicationSymbol : Symbol
+    {
+        private PredictorPublicationSymbol() { }
+
+        public PredictorPublicationSymbol(Type declaringType, string fieldName) :
+            base(declaringType, fieldName)
+        {
+        }
+    }
+
+    [Serializable]
     public class PredictorAlgorithmSymbol : Symbol
     {
         private PredictorAlgorithmSymbol() { }
@@ -475,6 +496,7 @@ namespace Signum.Entities.MachineLearning
     [AutoInit]
     public static class PredictorSimpleResultSaver
     {
-        public static PredictorResultSaverSymbol OneOutput;
+        public static PredictorResultSaverSymbol StatisticsOnly;
+        public static PredictorResultSaverSymbol Full;
     }
 }

@@ -227,6 +227,8 @@ export module DynamicViewValidationMessage {
     export const EntityOrValue = new MessageKey("DynamicViewValidationMessage", "EntityOrValue");
     export const FilteringWithNew0ConsiderChangingVisibility = new MessageKey("DynamicViewValidationMessage", "FilteringWithNew0ConsiderChangingVisibility");
     export const AggregateIsMandatoryFor01 = new MessageKey("DynamicViewValidationMessage", "AggregateIsMandatoryFor01");
+    export const ValueTokenCanNotBeUseFor0BecauseIsNotAnEntity = new MessageKey("DynamicViewValidationMessage", "ValueTokenCanNotBeUseFor0BecauseIsNotAnEntity");
+    export const ViewNameIsNotAllowedWhileHavingChildren = new MessageKey("DynamicViewValidationMessage", "ViewNameIsNotAllowedWhileHavingChildren");
 }
 
 export interface EvalEmbedded<T> extends Entities.EmbeddedEntity {

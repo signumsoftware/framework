@@ -15,7 +15,7 @@ import { EntityBase, EntityBaseProps } from '../../../../Framework/Signum.React/
 import { EntityListBase, EntityListBaseProps } from '../../../../Framework/Signum.React/Scripts/Lines/EntityListBase'
 import { DynamicViewValidationMessage } from '../Signum.Entities.Dynamic'
 import { ExpressionOrValueComponent, FieldComponent } from './Designer'
-import { FindOptionsLine } from './FindOptionsComponent'
+import { FindOptionsLine, ViewNameComponent } from './FindOptionsComponent'
 import { FindOptionsExpr, toFindOptions } from './FindOptionsExpression'
 import { BaseNode, LineBaseNode, EntityBaseNode, EntityListBaseNode, EntityLineNode, ContainerNode, EntityTableColumnNode, CustomContextNode, TypeIsNode } from './Nodes'
 import { toHtmlAttributes, HtmlAttributesExpression, withClassName } from './HtmlAttributesExpression'
@@ -153,7 +153,7 @@ ${childrenString}
 
     getEntityBasePropsEx(node: EntityBaseNode, options: { showAutoComplete?: boolean, showMove?: boolean, avoidGetComponent?: boolean }): any/*: EntityBaseProps Expr*/ {
 
-        var result : any/*: EntityBaseProps*/ = {
+        var result : any /*EntityBaseProps*/ = {
             ctx: this.subCtxCode(node.field, node.styleOptions),
             labelText: node.labelText,
             labelHtmlAttributes: node.labelHtmlAttributes,
@@ -172,6 +172,7 @@ ${childrenString}
             onChange: node.onChange,
             findOptions: node.findOptions,
             getComponent: options.avoidGetComponent == true ? undefined : this.getGetComponentEx(node, true),
+            getViewPromise: toStringFunctionCode(node.viewName)
         };
 
 
@@ -210,6 +211,26 @@ ${assignments.indent(4)}
             return { __code__: `${cc.ctxName} => ${block}` };
     }
    
+}
+
+export function toStringFunction(val: string | undefined | ((e: ModifiableEntity) => string)): undefined | ((e: ModifiableEntity) => string) {
+    if (!val)
+        return undefined;
+
+    if (typeof val == "function")
+        return val;
+
+    return () => val;
+}
+
+export function toStringFunctionCode(val: ExpressionOrValue<string | ((e: ModifiableEntity) => string) | undefined>): Expression<((e: ModifiableEntity) => string)> | undefined {
+    if (!val)
+        return undefined;
+
+    if (isExpression(val))
+        return val;
+
+    return { __code__: "mod => '" + val + "'" };
 }
 
 
@@ -510,6 +531,10 @@ export function isNumberOrNull(val: any) {
     return val == null || typeof val == "number" ? null : `The returned value (${JSON.stringify(val)}) should be a number or null`;
 }
 
+export function isNumberOrStringOrNull(val: any) {
+    return val == null || typeof val == "number" || typeof val == "string" ? null : `The returned value (${JSON.stringify(val)}) should be a number or string or null`;
+}
+
 export function isBooleanOrNull(val: any) {
     return val == null || typeof val == "boolean" ? null : `The returned value (${JSON.stringify(val)}) should be a boolean or null`;
 }
@@ -520,6 +545,10 @@ export function isBooleanOrFunctionOrNull(val: any) {
 
 export function isFunctionOrNull(val: any) {
     return val == null || typeof val == "function" ? null : `The returned value (${JSON.stringify(val)}) should be a function or null`;
+}
+
+export function isFunctionOrStringOrNull(val: any) {
+    return val == null || typeof val == "function" || typeof val == "string" ? null : `The returned value (${JSON.stringify(val)}) should be a function or string or null`;
 }
 
 export function isFindOptionsOrNull(val: any) {
@@ -544,16 +573,24 @@ export function mandatory<T extends BaseNode>(dn: DesignerNode<T>, fieldAccessor
     return undefined;
 }
 
-export function validateFieldMandatory(dn: DesignerNode<LineBaseNode>) {
+export function validateFieldMandatory(dn: DesignerNode<LineBaseNode>): string | undefined {
     return mandatory(dn, n => n.field) || validateField(dn);
 }
 
-export function validateEntityBase(dn: DesignerNode<EntityBaseNode>, parentCtx: TypeContext<ModifiableEntity> | undefined) {
-    return validateFieldMandatory(dn) || (dn.node.findOptions && validateFindOptions(dn.node.findOptions, parentCtx));
+export function validateEntityBase(dn: DesignerNode<EntityBaseNode>, parentCtx: TypeContext<ModifiableEntity> | undefined): string | undefined {
+    return validateFieldMandatory(dn) ||
+        (dn.node.findOptions && validateFindOptions(dn.node.findOptions, parentCtx)) || 
+        viewNameOrChildrens(dn);
 }
 
 
-export function validateField(dn: DesignerNode<LineBaseNode>) {
+export function viewNameOrChildrens(dn: DesignerNode<EntityBaseNode>): string | undefined {
+    if (dn.node.children && dn.node.children.length > 0 && dn.node.viewName != null)
+        return DynamicViewValidationMessage.ViewNameIsNotAllowedWhileHavingChildren.niceToString()
+}
+
+
+export function validateField(dn: DesignerNode<LineBaseNode>): string | undefined  {
 
     const parentRoute = dn.parent!.fixRoute();
 
@@ -646,6 +683,7 @@ export function getEntityBaseProps(dn: DesignerNode<EntityBaseNode>, parentCtx: 
         onChange: evaluateAndValidate(parentCtx, dn.node, n => n.onChange, isFunctionOrNull),
         findOptions: dn.node.findOptions && toFindOptions(parentCtx, dn.node.findOptions),
         getComponent: options.avoidGetComponent == true ? undefined : getGetComponent(dn),
+        getViewPromise: toStringFunction(evaluateAndValidate(parentCtx, dn.node, n => n.viewName, isStringOrNull))
     };
 
     if (options.showAutoComplete)
@@ -680,6 +718,7 @@ export function designEntityBase(dn: DesignerNode<EntityBaseNode>, options: { is
             <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.labelText)} type="string" defaultValue={m && m.niceName || ""} />
             <HtmlAttributesLine dn={dn} binding={Binding.create(dn.node, n => n.labelHtmlAttributes)} />
             <HtmlAttributesLine dn={dn} binding={Binding.create(dn.node, n => n.formGroupHtmlAttributes)} />
+            <ViewNameComponent dn={dn} binding={Binding.create(dn.node, n => n.viewName)} typeName={m ? m.type.name : undefined} />
             <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.readOnly)} type="boolean" defaultValue={null} />
             <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.create)} type="boolean" defaultValue={null} />
             <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.onCreate)} type={null} defaultValue={null} exampleExpression={"() => Promise.resolve(modules.Reflection.New('" + typeName + "', { name: ''}))"} />

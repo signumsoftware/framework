@@ -51,6 +51,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CNTKEncoding.cs" />
     <Compile Include="CNTKNeuralNetworkPredictor.cs" />
     <Compile Include="NetworkBuilder.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

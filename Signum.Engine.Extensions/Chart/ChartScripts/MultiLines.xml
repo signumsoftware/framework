@@ -159,7 +159,7 @@
       .attr('data-click', function (v) { return getClickKeys(v.values[s.key].rowClick, data.columns); })
       .attr('shape-rendering', 'initial')
       .append('svg:title')
-      .text(function(v) { return v.values[s.key].value; });   
+      .text(function(v) { return v.values[s.key].valueTitle; });   
      
       if(data.parameters["NumberOpacity"] > 0){
         //paint graph - points-labels

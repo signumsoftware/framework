@@ -109,6 +109,7 @@ export interface NeuralNetworkSettingsEntity extends Entities.Entity, IPredictor
     learningVarianceMomentum?: number | null;
     minibatchSize?: number;
     numMinibatches?: number;
+    bestResultFromLast?: number;
     saveProgressEvery?: number;
     saveValidationProgressEvery?: number;
 }
@@ -195,6 +196,7 @@ export interface PredictorEntity extends Entities.Entity {
     settings?: PredictorSettingsEmbedded | null;
     algorithm?: PredictorAlgorithmSymbol | null;
     resultSaver?: PredictorResultSaverSymbol | null;
+    publication?: PredictorPublicationSymbol | null;
     trainingException?: Entities.Lite<Basics.ExceptionEntity> | null;
     user?: Entities.Lite<Basics.IUserEntity> | null;
     algorithmSettings?: IPredictorAlgorithmSettings | null;
@@ -262,6 +264,7 @@ export module PredictorMessage {
     export const TooManyParentKeys = new MessageKey("PredictorMessage", "TooManyParentKeys");
     export const _0CanNotBe1Because2Use3 = new MessageKey("PredictorMessage", "_0CanNotBe1Because2Use3");
     export const _0IsNotCompatibleWith12 = new MessageKey("PredictorMessage", "_0IsNotCompatibleWith12");
+    export const NoPublicationsForQuery0Registered = new MessageKey("PredictorMessage", "NoPublicationsForQuery0Registered");
 }
 
 export const PredictorMetricsEmbedded = new Type<PredictorMetricsEmbedded>("PredictorMetricsEmbedded");
@@ -277,6 +280,7 @@ export module PredictorOperation {
     export const CancelTraining : Entities.ExecuteSymbol<PredictorEntity> = registerSymbol("Operation", "PredictorOperation.CancelTraining");
     export const StopTraining : Entities.ExecuteSymbol<PredictorEntity> = registerSymbol("Operation", "PredictorOperation.StopTraining");
     export const Untrain : Entities.ExecuteSymbol<PredictorEntity> = registerSymbol("Operation", "PredictorOperation.Untrain");
+    export const Publish : Entities.ExecuteSymbol<PredictorEntity> = registerSymbol("Operation", "PredictorOperation.Publish");
     export const Delete : Entities.DeleteSymbol<PredictorEntity> = registerSymbol("Operation", "PredictorOperation.Delete");
     export const Clone : Entities.ConstructSymbol_From<PredictorEntity, PredictorEntity> = registerSymbol("Operation", "PredictorOperation.Clone");
     export const AutoconfigureNetwork : Entities.ConstructSymbol_From<Processes.ProcessEntity, PredictorEntity> = registerSymbol("Operation", "PredictorOperation.AutoconfigureNetwork");
@@ -284,6 +288,11 @@ export module PredictorOperation {
 
 export module PredictorProcessAlgorithm {
     export const AutoconfigureNeuralNetwork : Processes.ProcessAlgorithmSymbol = registerSymbol("ProcessAlgorithm", "PredictorProcessAlgorithm.AutoconfigureNeuralNetwork");
+}
+
+export const PredictorPublicationSymbol = new Type<PredictorPublicationSymbol>("PredictorPublication");
+export interface PredictorPublicationSymbol extends Entities.Symbol {
+    Type: "PredictorPublication";
 }
 
 export const PredictorRegressionMetricsEmbedded = new Type<PredictorRegressionMetricsEmbedded>("PredictorRegressionMetricsEmbedded");
@@ -310,7 +319,8 @@ export interface PredictorSettingsEmbedded extends Entities.EmbeddedEntity {
 }
 
 export module PredictorSimpleResultSaver {
-    export const OneOutput : PredictorResultSaverSymbol = registerSymbol("PredictorResultSaver", "PredictorSimpleResultSaver.OneOutput");
+    export const StatisticsOnly : PredictorResultSaverSymbol = registerSymbol("PredictorResultSaver", "PredictorSimpleResultSaver.StatisticsOnly");
+    export const Full : PredictorResultSaverSymbol = registerSymbol("PredictorResultSaver", "PredictorSimpleResultSaver.Full");
 }
 
 export const PredictorState = new EnumType<PredictorState>("PredictorState");

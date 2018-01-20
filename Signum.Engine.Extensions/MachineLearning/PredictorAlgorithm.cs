@@ -48,9 +48,9 @@ namespace Signum.Engine.MachineLearning
             });
         }
 
-        public void SaveEntity(PredictorEntity predictor)
+        public PredictorEpochProgressEntity SaveEntity(PredictorEntity predictor)
         {
-            new PredictorEpochProgressEntity
+            return new PredictorEpochProgressEntity
             {
                 Predictor = predictor.ToLite(),
                 Ellapsed = Ellapsed,
@@ -207,7 +207,6 @@ namespace Signum.Engine.MachineLearning
 
     public interface IPredictorAlgorithm
     {
-        void InitialSetup();
         string ValidateEncodingProperty(PredictorEntity predictor, PredictorSubQueryEntity subQuery, PredictorColumnEncoding encoding, PredictorColumnUsage usage, QueryTokenEmbedded token);
         void Train(PredictorTrainingContext ctx);
         void LoadModel(PredictorPredictContext predictor);
@@ -227,6 +226,8 @@ namespace Signum.Engine.MachineLearning
         {
             Predictor = predictor;
         }
+
+        public Lite<Entity> Entity { get; set; } //Optional
 
         public PredictorEntity Predictor { get; set; }
         public Dictionary<PredictorColumnEmbedded, object> MainQueryValues { get; set; } = new Dictionary<PredictorColumnEmbedded, object>();

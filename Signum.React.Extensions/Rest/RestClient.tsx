@@ -15,9 +15,6 @@ export function registerAuthenticator() {
 export function start(options: { routes: JSX.Element[] }) {
     Navigator.addSettings(new EntitySettings(RestLogEntity, e => import('./Templates/RestLog')));
     Navigator.addSettings(new EntitySettings(RestApiKeyEntity, e => import('./Templates/RestApiKey')));
-
-  
-  
 }
 
 export function loginFromApiKey(): Promise<AuthClient.AuthenticatedUser | undefined> {
@@ -32,7 +29,11 @@ export function loginFromApiKey(): Promise<AuthClient.AuthenticatedUser | undefi
 
 export module API {
     export function generateRestApiKey(): Promise<string> {
-        return ajaxGet<string>({ url: "~/api/restApiKey" });
+        return ajaxGet<string>({ url: "~/api/restApiKey/generate" });
+    }
+
+    export function getCurrentRestApiKey(): Promise<string> {
+        return ajaxGet<string>({ url: "~/api/restApiKey/current" });
     }
 
     export function loginFromApiKey(apiKey: string): Promise<AuthClient.API.LoginResponse> {

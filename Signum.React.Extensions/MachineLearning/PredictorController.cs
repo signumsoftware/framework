@@ -40,7 +40,8 @@ namespace Signum.React.MachineLearning
         {
             var key = SymbolLogic<PredictorAlgorithmSymbol>.ToSymbol(algorithmKey);
 
-            return PredictorLogic.Algorithms.GetOrThrow(key).GetAvailableDevices();
+            var alg = PredictorLogic.Algorithms.GetOrThrow(key);
+            return alg.GetAvailableDevices();
         }
 
         [Route("api/predictor/tsv/{id}"), HttpGet]
@@ -125,6 +126,12 @@ namespace Signum.React.MachineLearning
             return request;
         }
 
+        [Route("api/predict/publications/{queryKey}"), HttpGet]
+        public List<PredictorPublicationSymbol> GetPublications(string queryKey)
+        {
+            object queryName = QueryLogic.ToQueryName(queryKey);
 
+            return PredictorLogic.Publications.Where(a => object.Equals(a.Value.QueryName, queryName)).Select(a => a.Key).ToList();
+        }
     }
 }

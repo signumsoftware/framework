@@ -37,24 +37,30 @@ namespace Signum.Entities.MachineLearning
         public NeuralNetworkEvalFunction LossFunction { get; set; }
         public NeuralNetworkEvalFunction EvalErrorFunction { get; set; }
 
-        [DecimalsValidator(5)]
+        [DecimalsValidator(5), NumberIsValidator(ComparisonType.GreaterThan, 0)]
         public double LearningRate { get; set; } = 0.2;
 
-        [DecimalsValidator(5)]
+        [DecimalsValidator(5), NumberIsValidator(ComparisonType.GreaterThan, 0)]
         public double? LearningMomentum { get; set; } = null;
 
         public bool? LearningUnitGain { get; set; }
 
-        [DecimalsValidator(5)]
+        [DecimalsValidator(5), NumberIsValidator(ComparisonType.GreaterThan, 0)]
         public double? LearningVarianceMomentum { get; set; } = null;
 
+        [NumberIsValidator(ComparisonType.GreaterThan, 0)]
         public int MinibatchSize { get; set; } = 1000;
+
+        [NumberIsValidator(ComparisonType.GreaterThan, 0)]
         public int NumMinibatches { get; set; } = 100;
 
-        [Unit("Minibaches")]
+        [Unit("Minibaches"), NumberIsValidator(ComparisonType.GreaterThan, 0)]
+        public int BestResultFromLast { get; set; } = 10;
+
+        [Unit("Minibaches"), NumberIsValidator(ComparisonType.GreaterThan, 0)]
         public int SaveProgressEvery { get; set; } = 5;
 
-        [Unit("Minibaches")]
+        [Unit("Minibaches"), NumberIsValidator(ComparisonType.GreaterThan, 0)]
         public int SaveValidationProgressEvery { get; set; } = 10;
 
         protected override string PropertyValidation(PropertyInfo pi)
@@ -114,6 +120,7 @@ namespace Signum.Entities.MachineLearning
             HiddenLayers = HiddenLayers.Select(hl => hl.Clone()).ToMList(),
             OutputActivation = OutputActivation,
             OutputInitializer = OutputInitializer,
+            
 
             LossFunction = LossFunction,
             EvalErrorFunction = EvalErrorFunction,
@@ -125,6 +132,7 @@ namespace Signum.Entities.MachineLearning
 
             MinibatchSize = MinibatchSize,  
             NumMinibatches = NumMinibatches,
+            BestResultFromLast = BestResultFromLast,
             SaveProgressEvery = SaveProgressEvery,
             SaveValidationProgressEvery = SaveValidationProgressEvery,
         };
