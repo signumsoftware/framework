@@ -7,9 +7,7 @@ import { TypeContext, StyleOptions } from '../TypeContext'
 import { getTypeInfo, TypeInfo, PropertyRoute, ReadonlyBinding, getTypeInfos } from '../Reflection'
 import { Transition } from 'react-transition-group'
 
-
 import "./Notify.css"
-import Transition from 'react-transition-group/Transition';
 
 type NotifyType = "warning" | "error" | "success" | "loading";
 

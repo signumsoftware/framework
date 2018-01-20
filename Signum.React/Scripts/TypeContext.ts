@@ -50,38 +50,53 @@ export class StyleContext {
     }
 
     get formGroupClass(): string | undefined {
-        return this.formSize == "Small" || this.formSize == "ExtraSmall" ? "form-group form-group-sm" :
-            this.formSize == "Normal" ? "form-group" :
-                this.formSize == "Large" ? "form-group" :
-                    undefined;
+        switch (this.formSize) {
+            case "ExtraSmall": return "form-group form-group-xs";
+            case "Small": return "form-group form-group-sm";
+            case "Normal": return "form-group";
+            case "Large": return "form-group form-group-lg";
+            default: throw new Error("Unexpected formSize " + this.formSize);
+        }
     }
 
     get colFormLabelClass(): string | undefined {
-        return this.formSize == "Small" || this.formSize == "ExtraSmall" ? "col-form-label col-form-label-sm" :
-            this.formSize == "Normal" ? "col-form-label" :
-                this.formSize == "Large" ? "col-form-label col-form-label-lg" :
-                    undefined;
+        switch (this.formSize) {
+            case "ExtraSmall": return "col-form-label col-form-label-xs";
+            case "Small": return "col-form-label col-form-label-sm";
+            case "Normal": return "col-form-label";
+            case "Large": return "col-form-label col-form-label-lg";
+            default: throw new Error("Unexpected formSize " + this.formSize);
+        }
     }
 
     get rwWidgetClass(): string | undefined {
-        return this.formSize == "Small" || this.formSize == "ExtraSmall" ? "rw-widget-sm" :
-            this.formSize == "Normal" ? undefined :
-                this.formSize == "Large" ? "rw-widget-sm-lg" :
-                    undefined;
+        switch (this.formSize) {
+            case "ExtraSmall": return "rw-widget-xs";
+            case "Small": return "rw-widget-sm";
+            case "Normal": return "";
+            case "Large": return "rw-widget-lg";
+            default: throw new Error("Unexpected formSize " + this.formSize);
+        }
     }
 
     get inputGroupClass(): string | undefined {
-        return this.formSize == "Small" || this.formSize == "ExtraSmall" ? "input-group input-group-sm" :
-            this.formSize == "Normal" ? "input-group" :
-                this.formSize == "Large" ? "input-group input-group-lg" :
-                    undefined;
+        switch (this.formSize) {
+            case "ExtraSmall": return "input-group input-group-xs";
+            case "Small": return "input-group input-group-sm";
+            case "Normal": return "input-group";
+            case "Large": return "input-group input-group-lg";
+            default: throw new Error("Unexpected formSize " + this.formSize);
+        }
     }
 
     get formControlClass(): string | undefined {
-        return this.formSize == "Small" || this.formSize == "ExtraSmall" ? "form-control form-control-sm" :
-            this.formSize == "Normal" ? "form-control" :
-                this.formSize == "Large" ? "form-control form-control-lg" :
-                    undefined;
+        switch (this.formSize) {
+            case "ExtraSmall": return "form-control form-control-xs";
+            case "Small": return "form-control form-control-sm";
+            case "Normal": return "form-control";
+            case "Large": return "form-control form-control-lg";
+            default: throw new Error("Unexpected formSize " + this.formSize);
+        }
     }
 
     get placeholderLabels(): boolean {

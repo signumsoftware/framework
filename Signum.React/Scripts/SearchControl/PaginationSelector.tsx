@@ -95,15 +95,15 @@ export default class PaginationSelector extends React.Component<PaginationSelect
 
     renderCenter() {
         return (
-            <div className="sf-pagination-center form-inline form-xs">
-                <select value={this.props.pagination.mode} onChange={this.handleMode} ref="mode" className="form-control sf-pagination-mode">
+            <div className="sf-pagination-center form-inline">
+                <select value={this.props.pagination.mode} onChange={this.handleMode} ref="mode" className="form-control form-control-xs sf-pagination-mode">
                     {["Paginate" as PaginationMode,
                     "Firsts" as PaginationMode,
                     "All" as PaginationMode].map(mode =>
                         <option key={mode} value={mode.toString()}>{PaginationMode.niceName(mode)}</option>)}
                 </select>
                 {this.props.pagination.mode != "All" &&
-                    <select value={this.props.pagination.elementsPerPage!.toString()} onChange={this.handleElementsPerPage} ref="elementsPerPage" className="form-control sf-elements-per-page">
+                    <select value={this.props.pagination.elementsPerPage!.toString()} onChange={this.handleElementsPerPage} ref="elementsPerPage" className="form-control form-control-xs sf-elements-per-page">
                         {[5, 10, 20, 50, 100, 200].map(elem =>
                             <option key={elem} value={elem.toString()}>{elem}</option>)}
                     </select>
@@ -122,8 +122,8 @@ export default class PaginationSelector extends React.Component<PaginationSelect
         return (
             <PaginationComponent
                 currentPage={resultTable.pagination.currentPage!}
-                totalPages={totalPages}                
-                maxButtons={7}               
+                totalPages={totalPages}
+                maxButtons={7}
                 onSelect={num => this.handlePageClick(num)} />
         );
     }
@@ -153,11 +153,11 @@ export class PaginationComponent extends React.Component<PaginationComponentProp
         const { first, last } = this.getFirstLast();
 
         return (
-            <ul className="pagination">
+            <ul className="pagination justify-content-end">
                 {this.addPageLink("First", 1, "«", "First", currentPage == 1 ? "disabled" : undefined)}
-                {first != 1 && <li className="disabled"><a role="button" href="#" tabIndex={-1}><span aria-label="More">…</span></a></li>}
+                {first != 1 && <li className="page-item disabled"><span className="page-link">…</span></li>}
                 {Array.range(first, last + 1).map(page => this.addPageLink(page.toString(), page, page.toString(), page.toString(), page == currentPage ? "active" : undefined))}
-                {last != totalPages && <li className="disabled"><a role="button" href="#" tabIndex={-1}><span aria-label="More">…</span></a></li>}
+                {last != totalPages && <li className="page-item disabled"><span className="page-link">…</span></li>}
                 {this.addPageLink("Last", totalPages, "»", "Last", currentPage == totalPages ? "disabled" : undefined)}
             </ul>
         );
@@ -187,11 +187,14 @@ export class PaginationComponent extends React.Component<PaginationComponentProp
 
     addPageLink(key: string, page: number, text: string, ariaLabel: string, mode?: "active" | "disabled") {
         return (
-            <li className={mode} key={key}>
-                <a role="button" href={mode == undefined ? "#" : undefined} tabIndex={-1}
-                    onClick={mode == undefined ? ((e: React.MouseEvent<any>) => this.handlePageClicked(e, page)) : undefined}>
-                    <span aria-label="First">{text}</span>
-                </a>
+            <li className={classes("page-item", mode)} key={key} >
+                {
+                    mode != undefined ?
+                        <span className="page-link">{text}</span> :
+                        <a href="#" className="page-link" onClick={e => this.handlePageClicked(e, page)}>
+                            {text}
+                        </a>
+                }
             </li>
         );
     }

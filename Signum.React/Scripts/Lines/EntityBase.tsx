@@ -160,7 +160,7 @@ export abstract class EntityBase<T extends EntityBaseProps, S extends EntityBase
             return undefined;
 
         return (
-            <a href="" className={classes("sf-line-button", "sf-view", btn ? "btn btn-light" : undefined)}
+            <a href="" className={classes("sf-line-button", "sf-view", btn ? "btn btn-outline-secondary" : undefined)}
                 onClick={this.handleViewClick}
                 title={EntityControlMessage.View.niceToString() }>
                 <span className="fa fa-arrow-right"/>
@@ -237,7 +237,7 @@ export abstract class EntityBase<T extends EntityBaseProps, S extends EntityBase
             return undefined;
 
         return (
-            <a href="" className={classes("sf-line-button", "sf-create", btn ? "btn btn-light" : undefined) }
+            <a href="" className={classes("sf-line-button", "sf-create", btn ? "btn btn-outline-secondary" : undefined) }
                 onClick={this.handleCreateClick}
                 title={EntityControlMessage.Create.niceToString() }>
                 <span className="fa fa-plus sf-create"/>
@@ -284,7 +284,7 @@ export abstract class EntityBase<T extends EntityBaseProps, S extends EntityBase
             return undefined;
 
         return (
-            <a href="" className={classes("sf-line-button", "sf-find", btn ? "btn btn-light" : undefined) }
+            <a href="" className={classes("sf-line-button", "sf-find", btn ? "btn btn-outline-secondary" : undefined) }
                 onClick={this.handleFindClick}
                 title={EntityControlMessage.Find.niceToString() }>
                 <span className="fa fa-search"/>
@@ -310,7 +310,7 @@ export abstract class EntityBase<T extends EntityBaseProps, S extends EntityBase
             return undefined;
 
         return (
-            <a href="" className={classes("sf-line-button", "sf-remove", btn ? "btn btn-light" : undefined) }
+            <a href="" className={classes("sf-line-button", "sf-remove", btn ? "btn btn-outline-secondary" : undefined) }
                 onClick={this.handleRemoveClick}
                 title={EntityControlMessage.Remove.niceToString() }>
                 <span className="fa fa-remove"/>

@@ -196,8 +196,8 @@ export default class FrameModal extends React.Component<FrameModalProps, FrameMo
         const pack = this.state.pack;
 
         return (
-            <Modal size={this.props.modalSize || "lg"} isOpen={this.state.show} onExit={this.handleOnExited} className="sf-popup-control" >
-                <ModalHeader>
+            <Modal size={this.props.modalSize || "lg"} isOpen={this.state.show} onExit={this.handleOnExited} toggle={this.handleCancelClicked} className="sf-popup-control" >
+                <ModalHeader toggle={this.props.isNavigate ? this.handleCancelClicked : undefined}>
                     {!this.props.isNavigate && <ButtonToolbar className="pull-right flip">
                         <Button className="sf-entity-button sf-close-button sf-ok-button" color="primary" disabled={!pack} onClick={this.handleOkClicked}>{JavascriptMessage.ok.niceToString()}</Button>
                         <Button className="sf-entity-button sf-close-button sf-cancel-button" color="default" disabled={!pack} onClick={this.handleCancelClicked}>{JavascriptMessage.cancel.niceToString()}</Button>
@@ -264,12 +264,12 @@ export default class FrameModal extends React.Component<FrameModalProps, FrameMo
         const pr = this.props.propertyRoute;
 
         return (
-            <h4>
+            <span>
                 <span className="sf-entity-title">{this.props.title || getToString(entity)}</span>&nbsp;
                 {this.renderExpandLink()}
                 <br />
                 <small> {pr && pr.member && pr.member.typeNiceName || Navigator.getTypeTitle(entity, pr)}</small>
-            </h4>
+            </span>
         );
     }
 
@@ -285,7 +285,7 @@ export default class FrameModal extends React.Component<FrameModalProps, FrameMo
             return undefined;
 
         return (
-            <a className="sf-popup-fullscreen sf-pointer" onMouseUp={this.handlePopupFullScreen}>
+            <a className="sf-popup-fullscreen sf-pointer" href="#" onClick={this.handlePopupFullScreen}>
                 <span className="fa fa-external-link"></span>
             </a>
         );

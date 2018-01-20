@@ -94,16 +94,18 @@ label > input[type=checkbox] {
     }
 
 /* EntityLine buttons  */
-.input-group-btn.btn-group-vertical {
-    vertical-align: top;
+.input-group-append.input-group-vertical {
+    flex-direction: column;
+    align-items:stretch;
 }
 
-    .input-group-btn.btn-group-vertical > .btn {
+    .input-group-append.input-group-vertical > .btn {
         border-top-left-radius: 0px !important;
         border-bottom-left-radius: 0px !important;
+        margin-left: 0px;
     }
 
-        .input-group-btn.btn-group-vertical > .btn:first-child:not(:last-child) {
+        .input-group-append.input-group-vertical > .btn:first-child:not(:last-child) {
             border-top-right-radius: 4px;
             border-bottom-right-radius: 0;
             border-bottom-left-radius: 0;
@@ -257,6 +259,28 @@ ul.nav-tabs {
 
 /*form xs*/
 
+select.form-control-xs:not([size]):not([multiple]),
+.input-group-xs > select.form-control:not([size]):not([multiple]),
+.input-group-xs > .input-group-prepend > select.input-group-text:not([size]):not([multiple]),
+.input-group-xs > .input-group-append > select.input-group-text:not([size]):not([multiple]),
+.input-group-xs > .input-group-prepend > select.btn:not([size]):not([multiple]),
+.input-group-xs > .input-group-append > select.btn:not([size]):not([multiple]) {
+    height: 24px;
+    padding: 0 2px
+}
+
+.form-control-sm, 
+.input-group-sm > .form-control, 
+.input-group-sm > .input-group-prepend > .input-group-text, 
+.input-group-sm > .input-group-append > .input-group-text, 
+.input-group-sm > .input-group-prepend > .btn, 
+.input-group-sm > .input-group-append > .btn {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.875rem;
+    line-height: 1.5;
+    border-radius: 0.2rem;
+}
+
 /*.form-xs .form-control,
 .form-xs .form-control-static {
     padding: 0px 3px;
@@ -264,16 +288,16 @@ ul.nav-tabs {
 
 
     .form-xs .form-control:not(textarea) {
-        height: 24px;
+        height: 20px;
         min-height: inherit;
     }
 
     .form-xs .form-control.readonly.readonly-textarea {
-        min-height: 24px;
+        min-height: 20px;
     }
 
 .form-xs .input-group-btn .btn {
-    height: 24px;
+    height: 20px;
 }
 
 
@@ -282,7 +306,7 @@ ul.nav-tabs {
 }
 
 .form-xs .sf-query-token-builder {
-    height: 24px;
+    height: 20px;
     margin-bottom: -3px;
 }
 
@@ -290,7 +314,6 @@ ul.nav-tabs {
 .form-xs select[size] {
     height: auto;
 }
-
 
 .form-xs input[type=checkbox].form-control {
     height: 16px;
@@ -301,66 +324,47 @@ ul.nav-tabs {
 .form-xs .input-group .btn,
 .form-xs .input-group .input-group-addon {
     padding: 0px 3px;
-    height: 24px;
+    height: 20px;
 }*/
 
-.rw-widget-sm .rw-input {
+.rw-widget-xs .rw-input {
     padding: 0px 3px;
     height: 18px;
 }
 
-.rw-widget-sm  .rw-select.rw-btn,
-.rw-widget-sm  .rw-select > .rw-btn {
-    line-height: 18px;
-    width: 1.5em;
-    border-top: 0px;
-}
-
-.rw-widget-sm  .rw-dropdown-list > .rw-widget-input {
-    height: 18px;
-}
-
-.rw-widget-sm  .rw-combobox,
-.rw-widget-sm  .rw-numberpicker,
-.rw-widget-sm  .rw-dropdown-list {
-    padding-right: 1.5em;
-    line-height: 18px;
-}
-
-
-.rw-widget-sm .rw-widget-picker {
+.rw-widget-xs .rw-widget-picker {
     height: 20px;
     line-height: 10px;
 }
 
-.rw-widget-sm .rw-select {
+.rw-widget-xs .rw-select {
     vertical-align: top;
 }
 
-.form-group.form-group-sm {
-    margin-bottom: 6px;
+.form-group.form-group-xs {
+    margin-bottom: 5px;
 }
 
-/*
-.form-xs .sf-strip {
+
+/*.form-xs .sf-strip {
     margin-bottom: 0px;
 }
 
     .form-xs .sf-strip.sf-strip-vertical {
         margin-top: 0px; //sf-strip-vertical
-    }
+    }*/
 
-
+/*
 
 .form-xs fieldset > legend {
     padding: 0px 4px 0 4px;
     font-size: 16px;
-}
-*/
+}*/
+
 
 /*form sm*/
 
-.form-sm .form-control,
+/*.form-sm .form-control,
 .form-sm .form-control-static {
     padding: 2px 6px;
 }
@@ -391,9 +395,6 @@ ul.nav-tabs {
     height: auto;
 }
 
-.form-sm select.form-control:not([size]):not([multiple]) {
-    height: 26px;
-}
 
 .form-sm input[type=checkbox].form-control {
     height: 16px;
@@ -405,43 +406,24 @@ ul.nav-tabs {
 .form-sm .input-group .input-group-addon {
     padding: 2px 4px;
 }
+*/
 
-.form-sm .rw-input {
+.rw-widget-sm .rw-input {
     padding: 3px 6px;
     height: 24px;
 }
 
-
-/*
-.form-sm .rw-select.rw-btn,
-.form-sm .rw-select > .rw-btn {
-    line-height: 24px;
-    width: 1.5em;
-    border-top: 0px;
-}
-
-.form-sm .rw-dropdown-list > .rw-widget-input {
-    line-height: 24px;
-}
-
-
-.form-sm .rw-combobox,
-.form-sm .rw-numberpicker,
-.form-sm .rw-dropdown-list {
-    padding-right: 1.5em;
-    line-height: 24px;bn   
-}
-*/
-.form-sm .rw-widget-picker {
+.rw-widget-sm .rw-widget-picker {
     height: 24px;
 }
 
+/*
 .form-sm .sf-strip {
     margin-bottom: 4px;
 }
 
     .form-sm .sf-strip.sf-strip-vertical {
-        margin-top: 6px; /*sf-strip-vertical*/
+        margin-top: 6px; //sf-strip-vertical
     }
 
 .form-group.form-sm {
@@ -453,7 +435,11 @@ ul.nav-tabs {
     padding: 2px 5px 0 5px;
     font-size: 18px;
 }
+*/
 
+.form-group.form-group-sm {
+    margin-bottom: 6px;
+}
 
 /*form-inline*/
 .form-inline .sf-query-token-builder {
