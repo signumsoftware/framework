@@ -4,7 +4,7 @@ import { Dic, classes } from '../../../../Framework/Signum.React/Scripts/Globals
 import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
 import { Lite, toLite } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
 import { ResultTable, FindOptions, FilterOption, QueryDescription, SubTokensOptions, QueryToken, QueryTokenType } from '../../../../Framework/Signum.React/Scripts/FindOptions'
-import { TypeContext, FormGroupSize, FormGroupStyle, StyleOptions, StyleContext, mlistItemContext } from '../../../../Framework/Signum.React/Scripts/TypeContext'
+import { TypeContext, FormGroupStyle, StyleOptions, StyleContext, mlistItemContext } from '../../../../Framework/Signum.React/Scripts/TypeContext'
 import { SearchMessage, JavascriptMessage, parseLite, is, liteKey } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
 import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
 import { ValueLine, FormGroup, ValueLineProps, ValueLineType, OptionItem } from '../../../../Framework/Signum.React/Scripts/Lines'
@@ -146,7 +146,7 @@ export default class ChartBuilder extends React.Component<ChartBuilderProps, Cha
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {this.state.expanded && mlistItemContext(this.props.ctx.subCtx(c => c.columns, { formGroupSize: "Small" })).flatMap((ctx, i) => [
+                                    {this.state.expanded && mlistItemContext(this.props.ctx.subCtx(c => c.columns, { formSize: "ExtraSmall" })).flatMap((ctx, i) => [
                                         <ChartColumn chartBase={chart} ctx={ctx} key={"C" + i} scriptColumn={chart.chartScript!.columns[i].element} queryKey={this.props.queryKey}
                                             onToggleInfo={() => this.handleOnToggleInfo(i)} onGroupChange={this.handleOnInvalidate} onTokenChange={() => this.handleTokenChange(ctx.value)} />,
                                         this.state.expanded![i] && this.state.colorPalettes && <ChartColumnInfo ctx= { ctx } key= { "CI" + i } colorPalettes= {this.state.colorPalettes} onRedraw= { this.handleOnRedraw } />
@@ -158,7 +158,7 @@ export default class ChartBuilder extends React.Component<ChartBuilderProps, Cha
                     <div className="sf-chart-parameters panel panel-default">
                         <div className="panel-body">
                             {
-                                this.state.expanded && mlistItemContext(this.props.ctx.subCtx(c => c.parameters, { formGroupStyle: "Basic", formGroupSize: "Small" }))
+                                this.state.expanded && mlistItemContext(this.props.ctx.subCtx(c => c.parameters, { formSize: "ExtraSmall" }))
                                     .map((ctx, i) => this.getParameterValueLine(ctx, chart.chartScript.parameters[i].element))
                                     .groupsOf(6).map((gr, j) =>
                                         <div className="row" key={j}>

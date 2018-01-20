@@ -26,7 +26,7 @@ export default class UserQuery extends React.Component<{ ctx: TypeContext<UserQu
 
         const query = this.props.ctx.value.query;
         const ctx = this.props.ctx;
-        const ctxxs = ctx.subCtx({ formGroupSize: "ExtraSmall" });
+        const ctxxs = ctx.subCtx({ formSize: "ExtraSmall" });
 
         const canAggregate = ctx.value.groupResults ? SubTokensOptions.CanAggregate : 0;
 

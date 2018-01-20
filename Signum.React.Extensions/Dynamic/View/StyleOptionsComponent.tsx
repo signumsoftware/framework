@@ -16,7 +16,7 @@ import * as NodeUtils from './NodeUtils'
 import { DesignerNode, Expression, ExpressionOrValue } from './NodeUtils'
 import { FindOptionsComponent } from './FindOptionsComponent'
 import { BaseNode } from './Nodes'
-import { StyleOptionsExpression, formGroupStyle, formGroupSize } from './StyleOptionsExpression'
+import { StyleOptionsExpression, formGroupStyle, formSize } from './StyleOptionsExpression'
 import { openModal, IModalProps } from '../../../../Framework/Signum.React/Scripts/Modals';
 import SelectorModal from '../../../../Framework/Signum.React/Scripts/SelectorModal';
 import { DynamicViewMessage, DynamicViewValidationMessage } from '../Signum.Entities.Dynamic'
@@ -116,7 +116,7 @@ export class StyleOptionsComponent extends React.Component<StyleOptionsComponent
         return (
             <div className="form-sm code-container">
                 <ExpressionOrValueComponent dn={dn} refreshView={() => this.forceUpdate()} binding={Binding.create(so, s => s.formGroupStyle)} type="string" options={formGroupStyle} defaultValue={null} />
-                <ExpressionOrValueComponent dn={dn} refreshView={() => this.forceUpdate()} binding={Binding.create(so, s => s.formGroupSize)} type="string" options={formGroupSize} defaultValue={null} />
+                <ExpressionOrValueComponent dn={dn} refreshView={() => this.forceUpdate()} binding={Binding.create(so, s => s.formSize)} type="string" options={formSize} defaultValue={null} />
                 <ExpressionOrValueComponent dn={dn} refreshView={() => this.forceUpdate()} binding={Binding.create(so, s => s.placeholderLabels)} type="boolean" defaultValue={null} />
                 <ExpressionOrValueComponent dn={dn} refreshView={() => this.forceUpdate()} binding={Binding.create(so, s => s.readonlyAsPlainText)} type="string" defaultValue={null} />
                 <ExpressionOrValueComponent dn={dn} refreshView={() => this.forceUpdate()} binding={Binding.create(so, s => s.labelColumns)} type="number" defaultValue={null} />

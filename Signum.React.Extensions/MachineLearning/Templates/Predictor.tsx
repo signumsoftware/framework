@@ -182,7 +182,7 @@ export default class Predictor extends React.Component<{ ctx: TypeContext<Predic
         if (ctx.value.state != "Draft")
             ctx = ctx.subCtx({ readOnly: true });
 
-        const ctxxs = ctx.subCtx({ formGroupSize: "ExtraSmall" });
+        const ctxxs = ctx.subCtx({ formSize: "ExtraSmall" });
         const ctxmq = ctxxs.subCtx(a => a.mainQuery);
         const entity = ctx.value;
         const queryKey = entity.mainQuery.query && entity.mainQuery.query.key;

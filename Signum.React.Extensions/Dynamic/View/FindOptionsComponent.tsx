@@ -290,7 +290,7 @@ export class QueryKeyLine extends React.Component<{ queryKey: string | undefined
                     {this.props.queryKey}
 
                 </span>
-                <span className="input-group-btn">
+                <span className="input-group-append">
                     <a className={classes("sf-line-button", "sf-remove btn btn-light")}
                         onClick={() => this.props.onChange(undefined)}
                         title={EntityControlMessage.Remove.niceToString()}>

@@ -54,7 +54,7 @@ export default class EmailTemplate extends React.Component<{ ctx: TypeContext<Em
 
     renderQueryPart() {
         const ec = this.props.ctx.subCtx({ labelColumns: { sm: 2 } });
-        const ecXs = ec.subCtx({ formGroupSize: "ExtraSmall" });
+        const ecXs = ec.subCtx({ formSize: "ExtraSmall" });
         return (
             <div>
                 <EntityDetail ctx={ecXs.subCtx(e => e.from)} onChange={() => this.forceUpdate()} getComponent={this.renderContact} />

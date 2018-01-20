@@ -97,7 +97,7 @@ export default class FileLine extends EntityBase<FileLineProps, FileLineProps> {
         return (
             <div className="input-group">
                 {content}
-                <span className="input-group-btn">
+                <span className="input-group-append">
                     {removeButton }
                 </span>
             </div>

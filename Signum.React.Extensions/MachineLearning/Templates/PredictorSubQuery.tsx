@@ -95,7 +95,7 @@ export default class PredictorSubQuery extends React.Component<{ ctx: TypeContex
 
     render() {
         const ctx = this.props.ctx;
-        const ctxxs = ctx.subCtx({ formGroupSize: "ExtraSmall" });
+        const ctxxs = ctx.subCtx({ formSize: "ExtraSmall" });
         const entity = ctx.value;
         const queryKey = entity.query && entity.query.key;
         const targetType = this.props.mainQueryDescription.columns["Entity"].type;

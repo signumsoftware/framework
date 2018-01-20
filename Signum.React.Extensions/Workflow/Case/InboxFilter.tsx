@@ -5,7 +5,7 @@ import { Binding, LambdaMemberType } from '../../../../Framework/Signum.React/Sc
 import { Dic } from '../../../../Framework/Signum.React/Scripts/Globals'
 import { newMListElement } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
 import { InboxFilterModel, InboxMessage, CaseNotificationState } from '../Signum.Entities.Workflow'
-import { TypeContext, ValueLine, EntityLine, EntityCombo, EntityList, EntityDetail, EntityStrip, EntityRepeater, EnumCheckboxList, FormGroup, FormGroupStyle, FormGroupSize, StyleContext } from '../../../../Framework/Signum.React/Scripts/Lines'
+import { TypeContext, ValueLine, EntityLine, EntityCombo, EntityList, EntityDetail, EntityStrip, EntityRepeater, EnumCheckboxList, FormGroup, FormGroupStyle, StyleContext } from '../../../../Framework/Signum.React/Scripts/Lines'
 import { SearchControl, ValueSearchControl, FilterOperation, OrderType, PaginationMode, ISimpleFilterBuilder, extractFilterValue, FilterOption, FindOptionsParsed } from '../../../../Framework/Signum.React/Scripts/Search'
 import { FilterOptionParsed } from "../../../../Framework/Signum.React/Scripts/FindOptions";
 import CollapsableCard from "../../Basics/Templates/CollapsableCard";

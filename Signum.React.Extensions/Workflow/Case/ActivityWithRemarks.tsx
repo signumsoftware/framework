@@ -8,7 +8,7 @@ import {
     CaseActivityMessage, CaseNotificationEntity, CaseNotificationOperation, CaseActivityEntity, WorkflowActivityEntity, CaseTagTypeEntity,
     CaseTagsModel, CaseOperation, CaseEntity
 } from '../Signum.Entities.Workflow'
-import { TypeContext, ValueLine, EntityLine, EntityCombo, EntityList, EntityDetail, EntityStrip, EntityRepeater, EnumCheckboxList, FormGroup, FormGroupStyle, FormGroupSize, ValueLineType } from '../../../../Framework/Signum.React/Scripts/Lines'
+import { TypeContext, ValueLine, EntityLine, EntityCombo, EntityList, EntityDetail, EntityStrip, EntityRepeater, EnumCheckboxList, FormGroup, FormGroupStyle, ValueLineType } from '../../../../Framework/Signum.React/Scripts/Lines'
 import { SearchControl, ValueSearchControl, FilterOperation, OrderType, PaginationMode, ISimpleFilterBuilder, FilterOption, FindOptions  } from '../../../../Framework/Signum.React/Scripts/Search'
 import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
 import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
