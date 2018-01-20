@@ -15,6 +15,7 @@
   <Type Name="ConnectionMessage" />
   <Type Name="CorruptMixin" />
   <Type Name="DeleteLogParametersEmbedded" />
+  <Type Name="DeleteLogsTypeOverridesEmbedded" />
   <Type Name="EmbeddedEntity" />
   <Type Name="EngineMessage" />
   <Type Name="Entity" />

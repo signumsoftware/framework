@@ -56,10 +56,14 @@
   </Type>
   <Type Name="DeleteLogParametersEmbedded" Description="Lösche log Parameter">
     <Member Name="ChunkSize" Description="Chunk-Größe" />
-    <Member Name="DateLimit" Description="Frist" />
     <Member Name="DeleteLogsWithMoreThan" Description="Löschen Sie Protokolle mit mehr als" />
     <Member Name="MaxChunks" Description="Max Chunks" />
     <Member Name="PauseTime" Description="Pausenzeit" />
+    <Member Name="TypeOverrides" Description="Typen override" />
+  </Type>
+  <Type Name="DeleteLogsTypeOverridesEmbedded" Description="Lösche Log Typen overrides">
+    <Member Name="DeleteLogsWithMoreThan" Description="Löschen Sie Protokolle mit mehr als" />
+    <Member Name="Type" Description="Typ" />
   </Type>
   <Type Name="EmbeddedEntity" Description="Eingebettete Entität" />
   <Type Name="EngineMessage">
@@ -72,7 +76,9 @@
     <Member Name="TheresAlreadyA0With1EqualsTo2_G" Description="Es gibt bereits [m:einen|f:eine|n:ein] {0} mit {1}, [m:der|f:die|n:das] &quot;{2}&quot; entspricht" />
     <Member Name="UnauthorizedAccessTo0Because1" Description="Nicht zulässiger Zugriff auf {0}, weil {1}" />
   </Type>
-  <Type Name="Entity" Description="Entität" />
+  <Type Name="Entity" Description="Entität">
+    <Member Name="Id" Description="Id" />
+  </Type>
   <Type Name="EntityControlMessage">
     <Member Name="Create" Description="Erstellen" />
     <Member Name="Detail" Description="Detail" />
@@ -152,6 +158,7 @@
     <Member Name="error" Description="Fehler" />
     <Member Name="executed" Description="Ausgeführt" />
     <Member Name="find" Description="Finden" />
+    <Member Name="groupResults" Description="Resultate der Gruppe" />
     <Member Name="hideFilters" Description="Filter ausblenden" />
     <Member Name="insertColumn" Description="Spalte einfügen" />
     <Member Name="loading" Description="Lädt gerade..." />
@@ -179,6 +186,7 @@
     <Member Name="selectOnlyOneElement" Description="Wählen Sie nur ein Element" />
     <Member Name="selectToken" Description="Wählen Sie einen Token" />
     <Member Name="showFilters" Description="Filter anzeigen" />
+    <Member Name="ungroupResults" Description="Resultate der Gruppierung aufheben" />
     <Member Name="view" Description="Ansicht" />
   </Type>
   <Type Name="LiteMessage">
@@ -267,6 +275,7 @@
   <Type Name="QueryTokenMessage">
     <Member Name="_0As1" Description="({0} als {1})" />
     <Member Name="_0HasValue" Description="{0} hat einen Wert" />
+    <Member Name="_0Mod1" Description="{0} mod {1}" />
     <Member Name="_0Steps1" Description="{0} Schritt {1}" />
     <Member Name="And" Description=" und " />
     <Member Name="AnyEntity" Description="Jede Einheit" />
@@ -288,6 +297,7 @@
     <Member Name="ListOf0" Description="Liste von {0}" />
     <Member Name="Millisecond" Description="Millisekunde" />
     <Member Name="Minute" Description="Minute" />
+    <Member Name="Modulo0" Description="Modulo {0}" />
     <Member Name="Month" Description="Monat" />
     <Member Name="MonthStart" Description="Monatsbeginn " />
     <Member Name="MoreThanOneColumnNamed0" Description="Mehr als eine Spalte mit dem Namen {0}" />
@@ -437,6 +447,7 @@
     <Member Name="TheLengthOf0HasToBeLesserOrEqualTo1" Description="Die Länge von {0} muss kleiner als oder gleich {1} sein" />
     <Member Name="TheNumberOf0IsBeingMultipliedBy1" Description="Die Anzahl von {0} wird mit {1} multipliziert" />
     <Member Name="TheNumberOfElementsOf0HasToBe12" Description="Die Anzahl der Elemente von {0} muss {1} {2} sein" />
+    <Member Name="TheRowsAreBeingGroupedBy0" Description="Die Zeilen werden nach {0} gruppiert" />
     <Member Name="Type0NotAllowed" Description="Der Typ {0} ist nicht zulässig" />
   </Type>
   <Type Name="VoidEnumMessage">

@@ -32,6 +32,7 @@ export interface ValueSearchControlProps extends React.Props<ValueSearchControl>
     customStyle?: React.CSSProperties;
     format?: string;
     avoidNotifyPendingRequest?: boolean;
+    refreshKey?: string | number;
     searchControlProps?: Partial<SearchControlProps>;
 }
 
@@ -70,13 +71,17 @@ export default class ValueSearchControl extends React.Component<ValueSearchContr
 
     componentWillReceiveProps(newProps: ValueSearchControlProps) {
         if (Finder.findOptionsPath(this.props.findOptions) == Finder.findOptionsPath(newProps.findOptions) &&
-            this.props.valueToken == newProps.valueToken)
-            return;
+            this.props.valueToken == newProps.valueToken) {
 
-        this.loadToken(newProps);
+            if (this.props.refreshKey != newProps.refreshKey)
+                this.refreshValue(newProps)
 
-        if (newProps.initialValue == undefined)
-            this.refreshValue(newProps);
+        } else {
+            this.loadToken(newProps);
+
+            if (newProps.initialValue == undefined)
+                this.refreshValue(newProps);
+        }
     }
 
     loadToken(props: ValueSearchControlProps) {

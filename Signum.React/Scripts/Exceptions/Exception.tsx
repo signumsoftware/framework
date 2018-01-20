@@ -30,7 +30,7 @@ export default class Exception extends React.Component<{ ctx: TypeContext<Except
                 </div>
                 <ValueLine ctx={ctx.subCtx(f => f.requestUrl)} />
                 <ValueLine ctx={ctx.subCtx(f => f.urlReferer)} />
-                <h3 style={{ color: "rgb(139, 0, 0)" }}>{ctx.value.exceptionType}</h3>
+                <h3 style={{ color: "rgb(139, 0, 0)" }}>{ctx.value.exceptionType} <small>(HResult = {ctx.value.hResult})</small></h3>
                 <pre><code>{ctx.value.exceptionMessage}</code></pre>
                 <UncontrolledTabs>
                     {this.codeTab(0, a => a.stackTrace)}

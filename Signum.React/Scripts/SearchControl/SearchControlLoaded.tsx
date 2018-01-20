@@ -38,7 +38,7 @@ export interface SearchControlLoadedProps {
     rowAttributes?: (row: ResultRow, columns: string[]) => React.HTMLAttributes<HTMLTableRowElement> | undefined;
     entityFormatter?: EntityFormatter;
     extraButtons?: (searchControl: SearchControlLoaded) => (React.ReactElement<any> | null | undefined | false)[];
-    getViewPromise?: (e: ModifiableEntity) => Navigator.ViewPromise<ModifiableEntity>;
+    getViewPromise?: (e: ModifiableEntity) => undefined | string | Navigator.ViewPromise<any>;
     maxResultsHeight?: React.CSSWideKeyword | any;
     tag?: string | {};
 
@@ -62,7 +62,7 @@ export interface SearchControlLoadedProps {
     largeToolbarButtons: boolean;
     avoidAutoRefresh: boolean;
     avoidChangeUrl: boolean;
-    refreshKey: string | undefined;
+    refreshKey: string | number | undefined;
 
     onCreate?: () => void;
     onDoubleClick?: (e: React.MouseEvent<any>, row: ResultRow) => void;
@@ -70,8 +70,8 @@ export interface SearchControlLoadedProps {
     onSelectionChanged?: (rows: ResultRow[]) => void;
     onFiltersChanged?: (filters: FilterOptionParsed[]) => void;
     onHeighChanged?: () => void;
-    onSearch?: (fo: FindOptionsParsed) => void;
-    onResult?: (table: ResultTable) => void;
+    onSearch?: (fo: FindOptionsParsed, dataChange: boolean) => void;
+    onResult?: (table: ResultTable, dataChange: boolean) => void;
 }
 
 export interface SearchControlLoadedState {
@@ -171,13 +171,13 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
     }
 
     // MAIN
-    doSearchPage1(avoidOnSearchEvent?: boolean) {
+    doSearchPage1() {
         const fo = this.props.findOptions;
 
         if (fo.pagination.mode == "Paginate")
             fo.pagination.currentPage = 1;
 
-        this.doSearch(avoidOnSearchEvent).done();
+        this.doSearch().done();
     };
 
     resetResults(continuation: () => void) {
@@ -192,10 +192,10 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
     abortableSearch = new AbortableRequest((abortController, request: QueryRequest) => Finder.API.executeQuery(request, abortController));
 
-    doSearch(avoidOnSearchEvent?: boolean): Promise<void> {
+    doSearch(dataChanged?: boolean): Promise<void> {
         return this.getFindOptionsWithSFB().then(fop => {
-            if (!avoidOnSearchEvent && this.props.onSearch)
-                this.props.onSearch(fop);
+            if (this.props.onSearch)
+                this.props.onSearch(fop, dataChanged || false);
 
             this.setState({ editingColumn: undefined }, () => this.handleHeightChanged());
             var resultFindOptions = JSON.parse(JSON.stringify(this.props.findOptions));
@@ -209,7 +209,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
                     searchCount: (this.state.searchCount || 0) + 1
                 }, () => {
                     if (this.props.onResult)
-                        this.props.onResult(rt);
+                        this.props.onResult(rt, dataChanged || false);
                     this.notifySelectedRowsChanged();
                 });
             });
@@ -529,7 +529,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
                         Finder.setFilters(e.entity as Entity, this.props.findOptions.filterOptions)
                             .then(() => Navigator.navigate(e!, { getViewPromise: this.props.getViewPromise }))
-                            .then(() => this.props.avoidAutoRefresh ? undefined : this.doSearch())
+                            .then(() => this.props.avoidAutoRefresh ? undefined : this.doSearch(true))
                             .done();
                     }).done();
                 }
@@ -597,7 +597,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
     markRows = (dic: MarkedRowsDictionary) => {
         var promise = this.props.avoidAutoRefresh ? Promise.resolve(undefined) :
-            this.doSearch();
+            this.doSearch(true);
 
         promise.then(() => this.setState({ markedRows: { ...this.state.markedRows, ...dic } as MarkedRowsDictionary })).done();
 
@@ -1036,7 +1036,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
         }));
 
         const ctx: Finder.CellFormatterContext = {
-            refresh: () => this.doSearch().done()
+            refresh: () => this.doSearch(true).done()
         };
 
         const rowAttributes = this.props.rowAttributes || qs && qs.rowAttributes;
@@ -1092,7 +1092,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
         if (this.props.avoidAutoRefresh)
             return;
 
-        this.doSearch();
+        this.doSearch(true);
     }
 
     getMarkedRow(entity: Lite<Entity>): MarkedRow | undefined {

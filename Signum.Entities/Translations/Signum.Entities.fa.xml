@@ -1,0 +1,55 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<Translations>
+  <Type Name="AggregateFunction" />
+  <Type Name="BooleanEnum" />
+  <Type Name="CalendarMessage" />
+  <Type Name="CollectionElementType" />
+  <Type Name="ColorEmbedded" />
+  <Type Name="ColumnOptionsMode" />
+  <Type Name="ComparisonType" />
+  <Type Name="ConnectionMessage" />
+  <Type Name="CorruptMixin" />
+  <Type Name="DeleteLogParametersEmbedded" />
+  <Type Name="DeleteLogsTypeOverridesEmbedded" />
+  <Type Name="EmbeddedEntity" />
+  <Type Name="EngineMessage" />
+  <Type Name="Entity">
+    <Member Name="Id" Description="شناسه" />
+  </Type>
+  <Type Name="EntityControlMessage" />
+  <Type Name="EntityMessage" />
+  <Type Name="EnumEntity`1" />
+  <Type Name="ExceptionEntity" />
+  <Type Name="FilterOperation" />
+  <Type Name="IEntity" />
+  <Type Name="ImmutableEntity" />
+  <Type Name="IUserEntity" />
+  <Type Name="JavascriptMessage" />
+  <Type Name="LiteMessage" />
+  <Type Name="LockableEntity" />
+  <Type Name="MixinEntity" />
+  <Type Name="ModelEntity" />
+  <Type Name="ModifiableEntity" />
+  <Type Name="NormalControlMessage" />
+  <Type Name="NormalWindowMessage" />
+  <Type Name="OperationLogEntity" />
+  <Type Name="OperationMessage" />
+  <Type Name="OperationSymbol" />
+  <Type Name="OrderType" />
+  <Type Name="PaginationMessage" />
+  <Type Name="PaginationMode" />
+  <Type Name="PropertyRouteEntity" />
+  <Type Name="QueryEntity" />
+  <Type Name="QueryTokenMessage" />
+  <Type Name="QuickLinkMessage" />
+  <Type Name="RoundingType" />
+  <Type Name="SearchMessage" />
+  <Type Name="SelectorMessage" />
+  <Type Name="SemiSymbol" />
+  <Type Name="StringCase" />
+  <Type Name="Symbol" />
+  <Type Name="SynchronizerMessage" />
+  <Type Name="TypeEntity" />
+  <Type Name="ValidationMessage" />
+  <Type Name="VoidEnumMessage" />
+</Translations>

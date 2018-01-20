@@ -582,7 +582,7 @@ export interface NavigateOptions {
     readOnly?: boolean;
     modalSize?: string;
     avoidPromptLooseChange?: boolean;
-    getViewPromise?: (entity: ModifiableEntity) => string | ViewPromise<ModifiableEntity>;
+    getViewPromise?: (entity: ModifiableEntity) => undefined | string | ViewPromise<ModifiableEntity>;
     extraComponentProps?: {};
 }
 
