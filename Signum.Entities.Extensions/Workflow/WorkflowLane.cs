@@ -84,12 +84,12 @@ namespace Signum.Entities.Workflow
                     {
                         class MyWorkflowLaneActorEvaluator : IWorkflowLaneActorsEvaluator
                         {
-                            public List<Lite<Entity>> GetActors(ICaseMainEntity mainEntity, WorkflowTransitionContext ctx)
+                            public IEnumerable<Lite<Entity>> GetActors(ICaseMainEntity mainEntity, WorkflowTransitionContext ctx)
                             {
                                 return this.Evaluate((" + WorkflowEntityTypeName + @")mainEntity, ctx);
                             }
 
-                            List<Lite<Entity>> Evaluate(" + WorkflowEntityTypeName + @" e, WorkflowTransitionContext ctx)
+                            IEnumerable<Lite<Entity>> Evaluate(" + WorkflowEntityTypeName + @" e, WorkflowTransitionContext ctx)
                             {
                                 " + script + @"
                             }
@@ -105,7 +105,7 @@ namespace Signum.Entities.Workflow
 
     public interface IWorkflowLaneActorsEvaluator
     {
-        List<Lite<Entity>> GetActors(ICaseMainEntity mainEntity, WorkflowTransitionContext ctx);
+        IEnumerable<Lite<Entity>> GetActors(ICaseMainEntity mainEntity, WorkflowTransitionContext ctx);
     }
 
     [AutoInit]

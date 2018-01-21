@@ -27,7 +27,7 @@ import { TimeSpanEmbedded } from '../Basics/Signum.Entities.Basics'
 import TypeHelpButtonBarComponent from '../TypeHelp/TypeHelpButtonBarComponent'
 
 import { ValueLine, EntityLine, EntityCombo, EntityList, EntityDetail, EntityStrip, EntityRepeater } from '../../../Framework/Signum.React/Scripts/Lines'
-import { WorkflowConditionEval, WorkflowActionEval, WorkflowJumpEmbedded, DecisionResult } from './Signum.Entities.Workflow'
+import { WorkflowConditionEval, WorkflowActionEval, WorkflowJumpEmbedded, DecisionResult, WorkflowMessage, WorkflowActivityMonitorMessage } from './Signum.Entities.Workflow'
 
 import ActivityWithRemarks from './Case/ActivityWithRemarks'
 
@@ -38,7 +38,6 @@ import * as QuickLinks from '../../../Framework/Signum.React/Scripts/QuickLinks'
 import * as Constructor from '../../../Framework/Signum.React/Scripts/Constructor'
 import SelectorModal from '../../../Framework/Signum.React/Scripts/SelectorModal'
 import ValueLineModal from '../../../Framework/Signum.React/Scripts/ValueLineModal'
-
 import {
     WorkflowEntity, WorkflowLaneEntity, WorkflowActivityEntity, WorkflowConnectionEntity, WorkflowConditionEntity, WorkflowActionEntity, CaseActivityQuery, CaseActivityEntity,
     CaseActivityOperation, CaseEntity, CaseNotificationEntity, CaseNotificationState, InboxFilterModel, WorkflowOperation, WorkflowPoolEntity, WorkflowScriptEntity, WorkflowScriptEval,
@@ -58,13 +57,15 @@ import { SearchControl } from "../../../Framework/Signum.React/Scripts/Search";
 import { getTypeInfo } from "../../../Framework/Signum.React/Scripts/Reflection";
 import WorkflowHelpComponent from './Workflow/WorkflowHelpComponent';
 import { globalModules } from '../Dynamic/View/GlobalModules';
+import { FilterRequest, ColumnRequest } from '../../../Framework/Signum.React/Scripts/FindOptions';
 
 export function start(options: { routes: JSX.Element[] }) {
 
     options.routes.push(
         <ImportRoute path="~/workflow/activity/:caseActivityId" onImportModule={() => import("./Case/CaseFramePage")} />,
         <ImportRoute path="~/workflow/new/:workflowId/:mainEntityStrategy" onImportModule={() => import("./Case/CaseFramePage")} />,
-        <ImportRoute path="~/workflow/panel" onImportModule={() => import("./Workflow/WorkflowScriptRunnerPanelPage")} />
+        <ImportRoute path="~/workflow/panel" onImportModule={() => import("./Workflow/WorkflowScriptRunnerPanelPage")} />,
+        <ImportRoute path="~/workflow/activityMonitor/:workflowId" onImportModule={() => import("./ActivityMonitor/WorkflowActivityMonitorPage")} />,
     );
 
     QuickLinks.registerQuickLink(CaseActivityEntity, ctx => [
@@ -140,6 +141,11 @@ export function start(options: { routes: JSX.Element[] }) {
     caseActivityOperation(CaseActivityOperation.Undo, "danger");
     caseActivityOperation(CaseActivityOperation.Reject, "default");
 
+    QuickLinks.registerQuickLink(WorkflowEntity, ctx => new QuickLinks.QuickLinkLink("bam",
+        WorkflowActivityMonitorMessage.WorkflowActivityMonitor.niceToString(),
+        workflowActivityMonitorUrl(ctx.lite),
+        { icon: "fa fa-tachometer", iconColor: "green" }));
+
     Operations.addSettings(new EntityOperationSettings(WorkflowOperation.Save, { style: "primary", onClick: executeWorkflowSave }));
     Operations.addSettings(new EntityOperationSettings(WorkflowOperation.Delete, { contextualFromMany: { isVisible: ctx => false } }));
     Navigator.addSettings(new EntitySettings(WorkflowEntity, w => import('./Workflow/Workflow'), { avoidPopup: true }));
@@ -173,6 +179,11 @@ export function start(options: { routes: JSX.Element[] }) {
         element: <WorkflowHelpComponent typeName={props.typeName} mode={props.mode} />,
         order: 0,
     })]);
+}
+
+export function workflowActivityMonitorUrl
+    (workflow: Lite<WorkflowEntity>) {
+    return `~/workflow/activityMonitor/${workflow.id}`;
 }
 
 function registerCustomContexts() {
@@ -500,6 +511,10 @@ export namespace API {
     export function caseFlow(c: Lite<CaseEntity>): Promise<CaseFlow> {
         return ajaxGet<CaseFlow>({ url: `~/api/workflow/caseFlow/${c.id}` });
     }
+
+    export function workflowActivityMonitor(request: WorkflowActivityMonitorRequest): Promise<WorkflowActivityMonitor> {
+        return ajaxPost<WorkflowActivityMonitor>({ url: "~/api/workflow/activityMonitor" }, request);
+    }
 }
 
 export interface WorkflowFindNodeRequest {
@@ -582,3 +597,22 @@ export interface CaseFlow {
     Jumps: CaseConnectionStats[];
     AllNodes: string[];
 }
+
+export interface WorkflowActivityMonitorRequest {
+    workflow: Lite<WorkflowEntity>;
+    filters: FilterRequest[];
+    columns: ColumnRequest[];
+}
+    
+export interface WorkflowActivityStats {
+    WorkflowActivity: Lite<WorkflowActivityEntity>;
+    CaseActivityCount: number;
+    CustomValues: any[];
+}
+
+export interface WorkflowActivityMonitor {
+    Workflow: Lite<WorkflowEntity>;
+    CustomColumns: string[];
+    Activities: WorkflowActivityStats[];
+}
+

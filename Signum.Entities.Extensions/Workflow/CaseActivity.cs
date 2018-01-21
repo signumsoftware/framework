@@ -33,6 +33,7 @@ namespace Signum.Entities.Workflow
         public string OriginalWorkflowActivityName { get; set; }
 
         public DateTime StartDate { get; set; } = TimeZoneManager.Now;
+
         public Lite<CaseActivityEntity> Previous { get; set; }
 
         [SqlDbType(Size = int.MaxValue)]
@@ -43,6 +44,30 @@ namespace Signum.Entities.Workflow
 
         [Unit("min")]
         public double? Duration { get; set; }
+        
+        static Expression<Func<CaseActivityEntity, double?>> DurationRealTimeExpression =
+        @this =>  @this.Duration ?? (double?)(TimeZoneManager.Now - @this.StartDate).TotalMinutes;
+        [ExpressionField]
+        public double? DurationRealTime
+        {
+            get { return DurationRealTimeExpression.Evaluate(this); }
+        }
+
+        static Expression<Func<CaseActivityEntity, double?>> DurationRatioExpression =
+        @this => @this.Duration / @this.WorkflowActivity.EstimatedDuration;
+        [ExpressionField]
+        public double? DurationRatio
+        {
+            get { return DurationRatioExpression.Evaluate(this); }
+        }
+
+        static Expression<Func<CaseActivityEntity, double?>> DurationRealTimeRatioExpression =
+            @this => @this.DurationRealTime / @this.WorkflowActivity.EstimatedDuration;
+        [ExpressionField]
+        public double? DurationRealTimeRatio
+        {
+            get { return DurationRealTimeRatioExpression.Evaluate(this); }
+        }
 
         public Lite<UserEntity> DoneBy { get; set; }
         public DoneType? DoneType { get; set; }

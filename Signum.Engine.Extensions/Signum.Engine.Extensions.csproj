@@ -240,6 +240,7 @@
     <Compile Include="Word\TemplateParser.cs" />
     <Compile Include="Word\TemplateRenderer.cs" />
     <Compile Include="Workflow\CaseFlowLogic.cs" />
+    <Compile Include="Workflow\WorkflowActivityMonitorLogic.cs" />
     <Compile Include="Workflow\WorkflowEventTaskLogic.cs" />
     <Compile Include="Workflow\WorkflowNodeGraph.cs" />
     <Compile Include="Workflow\WorkflowScriptRunner.cs" />
