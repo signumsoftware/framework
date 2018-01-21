@@ -7,9 +7,9 @@ import { TypeInfo } from './Reflection'
 
 
 interface SelectorModalProps extends React.Props<SelectorModal>, IModalProps {
-    options: { value: any; displayName: React.ReactChild; name: string; htmlAttributes?: React.HTMLAttributes<HTMLButtonElement> }[];
-    title: React.ReactChild;
-    message: React.ReactChild;
+    options: { value: any; displayName: React.ReactNode; name: string; htmlAttributes?: React.HTMLAttributes<HTMLButtonElement> }[];
+    title: React.ReactNode;
+    message: React.ReactNode;
     size?: Sizes;
     dialogClassName?: string;
 }
@@ -104,10 +104,10 @@ export default class SelectorModal extends React.Component<SelectorModalProps, {
 
 export interface SelectorConfig<T> {
     buttonName?: (val: T) => string; //For testing
-    buttonDisplay?: (val: T) => React.ReactChild;
+    buttonDisplay?: (val: T) => React.ReactNode;
     buttonHtmlAttributes?: (val: T) => React.HTMLAttributes<HTMLButtonElement>; //For testing
-    title?: React.ReactChild;
-    message?: React.ReactChild;
+    title?: React.ReactNode;
+    message?: React.ReactNode;
     size?: Sizes;
     dialogClassName?: string;
     forceShow?: boolean;
