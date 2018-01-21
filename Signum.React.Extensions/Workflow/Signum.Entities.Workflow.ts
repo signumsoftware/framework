@@ -347,6 +347,14 @@ export type WorkflowActivityType =
     "CallWorkflow" |
     "Script";
 
+export module WorkflowBAMMessage {
+    export const BAM = new MessageKey("WorkflowBAMMessage", "BAM");
+    export const BusinessActivityMonitor = new MessageKey("WorkflowBAMMessage", "BusinessActivityMonitor");
+    export const Draw = new MessageKey("WorkflowBAMMessage", "Draw");
+    export const ResetZoom = new MessageKey("WorkflowBAMMessage", "ResetZoom");
+    export const Find = new MessageKey("WorkflowBAMMessage", "Find");
+}
+
 export const WorkflowConditionEntity = new Type<WorkflowConditionEntity>("WorkflowCondition");
 export interface WorkflowConditionEntity extends Entities.Entity {
     Type: "WorkflowCondition";

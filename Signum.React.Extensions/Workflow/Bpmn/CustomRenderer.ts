@@ -17,7 +17,7 @@ export class CustomRenderer extends BpmnRenderer {
 
         var result = super.drawConnection(visuals, element);
         
-        var dr = this.getDecisionResult(element);
+        var dr = this.getDecisionResult && this.getDecisionResult(element);
 
         if (dr)
             result.style.setProperty('stroke', dr == "Approve" ? "#0c9c01" : "#c71a01");

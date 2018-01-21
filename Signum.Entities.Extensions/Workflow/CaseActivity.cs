@@ -43,6 +43,14 @@ namespace Signum.Entities.Workflow
 
         [Unit("min")]
         public double? Duration { get; set; }
+        
+        static Expression<Func<CaseActivityEntity, double?>> DurationRealTimeExpression =
+        @this =>  @this.Duration ?? (double?)(TimeZoneManager.Now - @this.StartDate).TotalMinutes;
+        [ExpressionField]
+        public double? DurationRealTime
+        {
+            get { return DurationRealTimeExpression.Evaluate(this); }
+        }
 
         public Lite<UserEntity> DoneBy { get; set; }
         public DoneType? DoneType { get; set; }

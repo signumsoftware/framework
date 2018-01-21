@@ -239,4 +239,13 @@ namespace Signum.Entities.Workflow
         [Description("'{0}' is conditional start and condition is mandatory.")]
         _0IsConditionalStartAndTaskConditionIsMandatory
     }
+
+    public enum WorkflowBAMMessage
+    {
+        BAM, 
+        BusinessActivityMonitor,
+        Draw,
+        ResetZoom,
+        Find, 
+    }
 }
