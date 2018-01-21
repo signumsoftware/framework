@@ -161,9 +161,6 @@ export class CaseActivityStatsComponent extends React.Component<CaseActivityStat
 }
 
 function formatDate(date: string | undefined) {
-    if (date == undefined)
-        return undefined;
-
     return <span>{moment(date).format("L LT")} <mark>({moment(date).fromNow()})</mark></span>
 }
 
