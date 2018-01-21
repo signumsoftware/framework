@@ -3,29 +3,29 @@ import { DropdownButton, MenuItem } from 'react-bootstrap'
 import {
     WorkflowEntitiesDictionary, WorkflowActivityModel, WorkflowActivityType, WorkflowPoolModel,
     WorkflowLaneModel, WorkflowConnectionModel, WorkflowEventModel, WorkflowEntity,
-    IWorkflowNodeEntity, WorkflowMessage, WorkflowActivityEntity, WorkflowActivityMessage, WorkflowModel, WorkflowBAMMessage
+    IWorkflowNodeEntity, WorkflowMessage, WorkflowActivityEntity, WorkflowActivityMessage, WorkflowModel, WorkflowActivityMonitorMessage
 } from '../Signum.Entities.Workflow'
-import { WorkflowBAM, API } from '../WorkflowClient'
+import { WorkflowActivityMonitor, API } from '../WorkflowClient'
 import { JavascriptMessage, toLite } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
 import { Dic } from '../../../../Framework/Signum.React/Scripts/Globals'
 import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
 import * as NavigatedViewer from "bpmn-js/lib/NavigatedViewer"
-import * as BAMRenderer from './BAMRenderer'
+import * as WorkflowActivityMonitorRenderer from './WorkflowActivityMonitorRenderer'
 import * as searchPad from 'bpmn-js/lib/features/search'
 import * as BpmnUtils from './BpmnUtils'
-import WorkflowBAMActivityStatsModal from '../BAM/WorkflowBAMActivityStatsModal';
+import WorkflowActivityStatsModal from '../ActivityMonitor/WorkflowActivityStatsModal';
 import SelectorModal from '../../../../Framework/Signum.React/Scripts/SelectorModal';
 
 import "bpmn-js/assets/bpmn-font/css/bpmn-embedded.css"
 import "diagram-js/assets/diagram-js.css"
 import "./Bpmn.css"
 import { is } from '../../../../Framework/Signum.React/Scripts/Signum.Entities';
-import { WorkflowBAMConfig } from '../BAM/WorkflowBAMPage';
+import { WorkflowActivityMonitorConfig } from '../ActivityMonitor/WorkflowActivityMonitorPage';
 
-export interface BAMViewerComponentProps {
+export interface WorkflowActivityMonitorViewerComponentProps {
     workflowModel: WorkflowModel;
-    workflowBAM: WorkflowBAM;
-    workflowConfig: WorkflowBAMConfig;
+    workflowActivityMonitor: WorkflowActivityMonitor;
+    workflowConfig: WorkflowActivityMonitorConfig;
     onDraw: () => void;
 }
 
@@ -33,19 +33,17 @@ class CustomViewer extends NavigatedViewer {
 
 }
 
-CustomViewer.prototype._modules = 
-    CustomViewer.prototype._modules.concat([BAMRenderer]);
+CustomViewer.prototype._modules =
+    CustomViewer.prototype._modules.concat([WorkflowActivityMonitorRenderer]);
 
-export default class BAMViewerComponent extends React.Component<BAMViewerComponentProps> {
+export default class WorkflowActivityMonitorViewerComponent extends React.Component<WorkflowActivityMonitorViewerComponentProps> {
 
     viewer: NavigatedViewer;
     divArea: HTMLDivElement;
 
     handleOnModelError = (err: string) => {
         if (err)
-            throw new Error('Error rendering the model ' + err)
-        else 
-            this.resetZoom();
+            throw new Error('Error rendering the model ' + err);
     }
 
     componentDidMount() {
@@ -54,7 +52,7 @@ export default class BAMViewerComponent extends React.Component<BAMViewerCompone
             keyboard: {
                 bindTo: document
             },
-            height: 500,
+            height: 1000,
             additionalModules: [
                 searchPad,
             ]
@@ -74,9 +72,9 @@ export default class BAMViewerComponent extends React.Component<BAMViewerCompone
         if (mle && WorkflowActivityModel.isInstance(mle.element.model)) {
             var actMod = mle.element.model;
 
-            const stats = this.props.workflowBAM.Activities.singleOrNull(a => is(a.WorkflowActivity, actMod.workflowActivity));
+            const stats = this.props.workflowActivityMonitor.Activities.singleOrNull(a => is(a.WorkflowActivity, actMod.workflowActivity));
             if (stats) {
-                WorkflowBAMActivityStatsModal.show(stats, this.props.workflowConfig, actMod);
+                WorkflowActivityStatsModal.show(stats, this.props.workflowConfig, actMod);
             }
         }
     }
@@ -85,7 +83,7 @@ export default class BAMViewerComponent extends React.Component<BAMViewerCompone
         this.viewer.destroy();
     }
 
-    componentWillReceiveProps(nextProps: BAMViewerComponentProps) {
+    componentWillReceiveProps(nextProps: WorkflowActivityMonitorViewerComponentProps) {
         
         if (this.viewer) {
 
@@ -106,23 +104,23 @@ export default class BAMViewerComponent extends React.Component<BAMViewerCompone
                 this.viewer.importXML(nextProps.workflowModel.diagramXml, (error, warnings) => {
                     this.handleOnModelError(error);
 
-                    if (!error && this.props.workflowBAM != nextProps.workflowBAM)
+                    if (!error && this.props.workflowActivityMonitor != nextProps.workflowActivityMonitor)
                         redrawAll();
 
                 });
             } else {
-                if (this.props.workflowBAM != nextProps.workflowBAM)
+                if (this.props.workflowActivityMonitor != nextProps.workflowActivityMonitor)
                     redrawAll();
             }
         }
     }
 
-    configureModules(props: BAMViewerComponentProps) {
-        var bamRenderer = this.viewer.get<BAMRenderer.BAMRenderer>('bamRenderer');
-        bamRenderer.viewer = this.viewer;
-        bamRenderer.workflowBAM = props.workflowBAM;
-        bamRenderer.workflowModel = props.workflowModel;
-        bamRenderer.workflowConfig = props.workflowConfig;
+    configureModules(props: WorkflowActivityMonitorViewerComponentProps) {
+        var workflowActivityMonitorRenderer = this.viewer.get<WorkflowActivityMonitorRenderer.WorkflowActivityMonitorRenderer>('workflowActivityMonitorRenderer');
+        workflowActivityMonitorRenderer.viewer = this.viewer;
+        workflowActivityMonitorRenderer.workflowActivityMonitor = props.workflowActivityMonitor;
+        workflowActivityMonitorRenderer.workflowModel = props.workflowModel;
+        workflowActivityMonitorRenderer.workflowConfig = props.workflowConfig;
     }
 
     handleSearchClick = (e: React.MouseEvent<HTMLButtonElement>) => {
@@ -144,12 +142,12 @@ export default class BAMViewerComponent extends React.Component<BAMViewerCompone
     render() {
         return (
             <div>
-                <div className="btn-toolbar" style={{ marginBottom: "20px" }}>
-                    <button className="btn btn-primary" onClick={this.props.onDraw}>{WorkflowBAMMessage.Draw.niceToString()}</button>
-                    <button className="btn btn-default" onClick={this.handleZoomClick}>{WorkflowBAMMessage.ResetZoom.niceToString()}</button>
-                    <button className="btn btn-default" onClick={this.handleSearchClick}>{WorkflowBAMMessage.Find.niceToString()}</button>
+                <div className="btn-toolbar" style={{ marginBottom: "5px" }}>
+                    <button className="btn btn-primary" onClick={this.props.onDraw}>{WorkflowActivityMonitorMessage.Draw.niceToString()}</button>
+                    <button className="btn btn-default" onClick={this.handleZoomClick}>{WorkflowActivityMonitorMessage.ResetZoom.niceToString()}</button>
+                    <button className="btn btn-default" onClick={this.handleSearchClick}>{WorkflowActivityMonitorMessage.Find.niceToString()}</button>
                 </div>
-                <div ref={de => this.divArea = de!} />
+                <div style={{ border: "1px solid lightgray" }} ref={de => this.divArea = de!} />
             </div>
         );
     }

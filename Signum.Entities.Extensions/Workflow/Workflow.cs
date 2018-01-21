@@ -240,12 +240,13 @@ namespace Signum.Entities.Workflow
         _0IsConditionalStartAndTaskConditionIsMandatory
     }
 
-    public enum WorkflowBAMMessage
+    public enum WorkflowActivityMonitorMessage
     {
-        BAM, 
-        BusinessActivityMonitor,
+        WorkflowActivityMonitor,
         Draw,
         ResetZoom,
         Find, 
+        Filters, 
+        Columns
     }
 }

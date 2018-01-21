@@ -11,9 +11,9 @@ using System.Threading.Tasks;
 
 namespace Signum.Engine.Workflow
 {
-    public static class WorkflowBAMLogic
+    public static class WorkflowActivityMonitorLogic
     {
-        public static WorkflowBAM GetWorkflowBAM(WorkflowBAMRequest request)
+        public static WorkflowActivityMonitor GetWorkflowActivityMonitor(WorkflowActivityMonitorRequest request)
         {
             if (request.Columns.Any(c => !(c.Token is AggregateToken)))
                 throw new InvalidOperationException("Invalid columns");
@@ -46,11 +46,11 @@ namespace Signum.Engine.Workflow
 
             var customCols = rt.Columns.Skip(2).ToArray();
 
-            return new WorkflowBAM
+            return new WorkflowActivityMonitor
             {
                 Workflow = request.Workflow,
                 CustomColumns = request.Columns.Select(a => a.Token.FullKey()).ToList(),
-                Activities = rt.Rows.Select(row => new WorkflowBAMActivityStats
+                Activities = rt.Rows.Select(row => new WorkflowActivityStats
                 {
                     WorkflowActivity = (Lite<WorkflowActivityEntity>)row[0],
                     CaseActivityCount = (int)row[1],
@@ -60,24 +60,24 @@ namespace Signum.Engine.Workflow
         }
     }
 
-    public class WorkflowBAMRequest
+    public class WorkflowActivityMonitorRequest
     {
         public Lite<WorkflowEntity> Workflow;
         public List<Filter> Filters; // Case
         public List<Column> Columns; // CaseActivity
     }
 
-    public class WorkflowBAMActivityStats
+    public class WorkflowActivityStats
     {
         public Lite<WorkflowActivityEntity> WorkflowActivity;
         public int CaseActivityCount;
         public object[] CustomValues;
     }
 
-    public class WorkflowBAM
+    public class WorkflowActivityMonitor
     {
         public Lite<WorkflowEntity> Workflow;
         public List<string> CustomColumns;
-        public List<WorkflowBAMActivityStats> Activities;
+        public List<WorkflowActivityStats> Activities;
     }
 }

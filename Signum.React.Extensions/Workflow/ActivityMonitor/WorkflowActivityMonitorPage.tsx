@@ -3,56 +3,53 @@ import { Tabs, Tab, Modal } from "react-bootstrap";
 import { Dic } from '../../../../Framework/Signum.React/Scripts/Globals'
 import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
 import { getMixin, toLite, JavascriptMessage, is, Lite } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
-import { WorkflowEntity, WorkflowEntitiesDictionary, WorkflowActivityMessage, WorkflowActivityEntity, WorkflowOperation, WorkflowModel, WorkflowBAMMessage, CaseActivityEntity } from '../Signum.Entities.Workflow'
+import { WorkflowEntity, WorkflowEntitiesDictionary, WorkflowActivityMessage, WorkflowActivityEntity, WorkflowOperation, WorkflowModel, WorkflowActivityMonitorMessage, CaseActivityEntity } from '../Signum.Entities.Workflow'
 import {
     ValueLine, EntityLine, RenderEntity, EntityCombo, EntityList, EntityDetail, EntityStrip,
     EntityRepeater, EntityCheckboxList, EntityTabRepeater, TypeContext, EntityTable
 } from '../../../../Framework/Signum.React/Scripts/Lines'
 import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
-import { API, WorkflowBAM, WorkflowBAMRequest } from '../WorkflowClient'
-import BAMViewerComponent from '../Bpmn/BAMViewerComponent'
+import { API, WorkflowActivityMonitor, WorkflowActivityMonitorRequest } from '../WorkflowClient'
+import WorkflowActivityMonitorViewerComponent from '../Bpmn/WorkflowActivityMonitorViewerComponent'
 import { SearchControl } from "../../../../Framework/Signum.React/Scripts/Search";
-import { ColumnOptionParsed, FilterOptionParsed } from '../../../../Framework/Signum.React/Scripts/FindOptions';
+import { ColumnOptionParsed, FilterOptionParsed, SubTokensOptions, QueryDescription, FilterRequest, ColumnRequest } from '../../../../Framework/Signum.React/Scripts/FindOptions';
 import { RouteComponentProps } from "react-router";
 import { newLite } from '../../../../Framework/Signum.React/Scripts/Reflection';
 import * as WorkflowClient from '../WorkflowClient';
-import { FilterRequest } from '../../../../Framework/Signum.React/Scripts/FindOptions';
-import { ColumnRequest } from '../../../../Framework/Signum.React/Scripts/FindOptions';
 import FilterBuilder from '../../../../Framework/Signum.React/Scripts/SearchControl/FilterBuilder';
-import { SubTokensOptions } from '../../../../Framework/Signum.React/Scripts/FindOptions';
-import { QueryDescription } from '../../../../Framework/Signum.React/Scripts/FindOptions';
+import ColumnBuilder from '../../../../Framework/Signum.React/Scripts/SearchControl/ColumnBuilder';
 
-export interface WorkflowBAMConfig {
+export interface WorkflowActivityMonitorConfig {
     workflow: Lite<WorkflowEntity>;
     filters: FilterOptionParsed[];
     columns: ColumnOptionParsed[];
 }
 
-interface WorkflowBAMPageProps extends RouteComponentProps<{ workflowId: string }> {
+interface WorkflowActivityMonitorPageProps extends RouteComponentProps<{ workflowId: string }> {
 }
 
-interface WorkflowBAMPageState {
-    config?: WorkflowBAMConfig;
-    lastConfig?: WorkflowBAMConfig | undefined;
+interface WorkflowActivityMonitorPageState {
+    config?: WorkflowActivityMonitorConfig;
+    lastConfig?: WorkflowActivityMonitorConfig | undefined;
     workflowModel?: WorkflowModel;
-    workflowBAM?: WorkflowBAM;
+    workflowActivityMonitor?: WorkflowActivityMonitor;
 }
 
-export default class WorkflowBAMPage extends React.Component<WorkflowBAMPageProps, WorkflowBAMPageState> {
+export default class WorkflowActivityMonitorPage extends React.Component<WorkflowActivityMonitorPageProps, WorkflowActivityMonitorPageState> {
 
-    constructor(props: WorkflowBAMPageProps) {
+    constructor(props: WorkflowActivityMonitorPageProps) {
         super(props);
 
         this.state = {};
     }
 
-    BAMViewerComponent?: BAMViewerComponent | null;
+    WorkflowActvityMonitorViewerComponent?: WorkflowActivityMonitorViewerComponent | null;
 
-    loadState(props: WorkflowBAMPageProps) {
+    loadState(props: WorkflowActivityMonitorPageProps) {
         var workflow = newLite(WorkflowEntity, props.match.params.workflowId);
         Navigator.API.fillToStrings(workflow)
             .then(() => {
-                var config: WorkflowBAMConfig = {
+                var config: WorkflowActivityMonitorConfig = {
                     workflow: workflow,
                     filters: [],
                     columns: []
@@ -62,9 +59,9 @@ export default class WorkflowBAMPage extends React.Component<WorkflowBAMPageProp
 
                 var clone = JSON.parse(JSON.stringify(config));
                 
-                API.workflowBAM(toRequest(config))
+                API.workflowActivityMonitor(toRequest(config))
                     .then(result => this.setState({
-                        workflowBAM: result,
+                        workflowActivityMonitor: result,
                         lastConfig: clone ,
                     })).done();
             })
@@ -79,14 +76,14 @@ export default class WorkflowBAMPage extends React.Component<WorkflowBAMPageProp
 
     handleDraw = () => {
         var clone = JSON.parse(JSON.stringify(this.state.config));
-        API.workflowBAM(toRequest(this.state.config!))
+        API.workflowActivityMonitor(toRequest(this.state.config!))
             .then(result => this.setState({
-                workflowBAM: result,
+                workflowActivityMonitor: result,
                 lastConfig: clone,
             })).done();
     }
 
-    componentWillReceiveProps(newProps: WorkflowBAMPageProps) {
+    componentWillReceiveProps(newProps: WorkflowActivityMonitorPageProps) {
         if (this.props.match.params.workflowId != newProps.match.params.workflowId)
             this.loadState(newProps);
     }
@@ -98,20 +95,22 @@ export default class WorkflowBAMPage extends React.Component<WorkflowBAMPageProp
     render() {
         return (
             <div>
-                <h4 className="modal-title">
-                    {WorkflowBAMMessage.BusinessActivityMonitor.niceToString()}
-                    {this.state.config && <br/>}
-                    {this.state.config && <small>{this.state.config.workflow.toStr}</small>}
-                </h4>
-                {this.state.config && <WorkflowBAMConfigComponent config={this.state.config} />}
+                <h3 className="modal-title">
+                    {!this.state.config ? JavascriptMessage.loading.niceToString() : this.state.config.workflow.toStr}
+                    {this.state.config && Navigator.isViewable(WorkflowEntity) &&
+                        <small>&nbsp;<a href={Navigator.navigateRoute(this.state.config.workflow)} target="blank"><i className="fa fa-pencil" aria-hidden="true"></i></a></small>}
+                    <br />
+                    <small>{WorkflowActivityMonitorMessage.WorkflowActivityMonitor.niceToString()}</small>
+                </h3>
+                {this.state.config && <WorkflowActivityMonitorConfigComponent config={this.state.config} />}
 
-                {!this.state.workflowModel || !this.state.workflowBAM || !this.state.lastConfig ?
+                {!this.state.workflowModel || !this.state.workflowActivityMonitor || !this.state.lastConfig ?
                     <h3>{JavascriptMessage.loading.niceToString()}</h3> :
                     <div className="code-container">
-                        <BAMViewerComponent ref={m => this.BAMViewerComponent = m}
+                        <WorkflowActivityMonitorViewerComponent ref={m => this.WorkflowActvityMonitorViewerComponent = m}
                             onDraw={this.handleDraw}
                             workflowModel={this.state.workflowModel}
-                            workflowBAM={this.state.workflowBAM}
+                            workflowActivityMonitor={this.state.workflowActivityMonitor}
                             workflowConfig={this.state.lastConfig} />
                     </div>
                 }
@@ -120,7 +119,7 @@ export default class WorkflowBAMPage extends React.Component<WorkflowBAMPageProp
     }
 }
 
-function toRequest(conf: WorkflowBAMConfig): WorkflowBAMRequest {
+function toRequest(conf: WorkflowActivityMonitorConfig): WorkflowActivityMonitorRequest {
     return {
         workflow: conf.workflow,
         filters: conf.filters.filter(f => f.token != null && f.operation != undefined).map(f => ({
@@ -136,17 +135,17 @@ function toRequest(conf: WorkflowBAMConfig): WorkflowBAMRequest {
 }
 
 
-interface WorkflowBAMConfigComponentProps {
-    config: WorkflowBAMConfig;
+interface WorkflowActivityMonitorConfigComponentProps {
+    config: WorkflowActivityMonitorConfig;
 }
 
-interface WorkflowBAMConfigComponentState {
+interface WorkflowActivityMonitorConfigComponentState {
     queryDescription?: QueryDescription;
 }
 
-export class WorkflowBAMConfigComponent extends React.Component<WorkflowBAMConfigComponentProps, WorkflowBAMConfigComponentState> {
+export class WorkflowActivityMonitorConfigComponent extends React.Component<WorkflowActivityMonitorConfigComponentProps, WorkflowActivityMonitorConfigComponentState> {
 
-    constructor(props: WorkflowBAMConfigComponentProps) {
+    constructor(props: WorkflowActivityMonitorConfigComponentProps) {
         super(props);
         this.state = {};
     }
@@ -155,20 +154,25 @@ export class WorkflowBAMConfigComponent extends React.Component<WorkflowBAMConfi
         this.loadData(this.props);
     }  
 
-    loadData(props: WorkflowBAMConfigComponentProps) {
+    loadData(props: WorkflowActivityMonitorConfigComponentProps) {
         Finder.getQueryDescription(CaseActivityEntity)
             .then(qd => this.setState({ queryDescription: qd }))
             .done();
     }
 
     render() {
-        const options = SubTokensOptions.CanAggregate | SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement;
+        const filterOpts = SubTokensOptions.CanAggregate | SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement;
+        const columnOpts = SubTokensOptions.CanAggregate | SubTokensOptions.CanElement;
         const qd = this.state.queryDescription;
 
         return (qd == null ? null :
             <div>
-                <FilterBuilder queryDescription={qd} subTokensOptions={options}
+                <FilterBuilder title={WorkflowActivityMonitorMessage.Filters.niceToString()}
+                    queryDescription={qd} subTokensOptions={filterOpts}
                     filterOptions={this.props.config.filters} />
+                <ColumnBuilder title={WorkflowActivityMonitorMessage.Columns.niceToString()}
+                    queryDescription={qd} subTokensOptions={columnOpts}
+                    columnOptions={this.props.config.columns} />
             </div>
         );
     }

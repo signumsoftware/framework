@@ -11,23 +11,23 @@ import { JavascriptMessage, toLite } from '../../../../Framework/Signum.React/Sc
 import { TypeInfo, TypeReference, Binding } from '../../../../Framework/Signum.React/Scripts/Reflection'
 import { FormGroupStyle, TypeContext } from '../../../../Framework/Signum.React/Scripts/TypeContext'
 import { ValueLineType, ValueLine } from '../../../../Framework/Signum.React/Scripts/Lines/ValueLine'
-import { WorkflowBAMActivityStats } from "../WorkflowClient";
+import { WorkflowActivityStats } from "../WorkflowClient";
 import { FormGroup, StyleContext, FormControlStatic } from "../../../../Framework/Signum.React/Scripts/Lines";
-import { WorkflowActivityEntity, WorkflowActivityMessage, CaseNotificationEntity, WorkflowActivityType, WorkflowOperation, WorkflowEntity, WorkflowActivityModel, WorkflowBAMMessage, CaseActivityEntity } from "../Signum.Entities.Workflow";
+import { WorkflowActivityEntity, WorkflowActivityMessage, CaseNotificationEntity, WorkflowActivityType, WorkflowOperation, WorkflowEntity, WorkflowActivityModel, WorkflowActivityMonitorMessage, CaseActivityEntity } from "../Signum.Entities.Workflow";
 import { SearchControl, ColumnOption, FilterOption } from "../../../../Framework/Signum.React/Scripts/Search";
 import * as WorkflowClient from '../WorkflowClient';
-import { WorkflowBAMConfig } from './WorkflowBAMPage';
+import { WorkflowActivityMonitorConfig } from './WorkflowActivityMonitorPage';
 
 
-interface WorkflowBAMActivityStatsModalProps extends React.Props<WorkflowBAMActivityStatsModal>, IModalProps {
-    stats: WorkflowBAMActivityStats;
-    config: WorkflowBAMConfig;
+interface WorkflowActivityStatsModalProps extends React.Props<WorkflowActivityStatsModal>, IModalProps {
+    stats: WorkflowActivityStats;
+    config: WorkflowActivityMonitorConfig;
     activity: WorkflowActivityModel;
 }
 
-export default class WorkflowBAMActivityStatsModal extends React.Component<WorkflowBAMActivityStatsModalProps, { show: boolean }>  {
+export default class WorkflowActivityStatsModal extends React.Component<WorkflowActivityStatsModalProps, { show: boolean }>  {
 
-    constructor(props: WorkflowBAMActivityStatsModalProps) {
+    constructor(props: WorkflowActivityStatsModalProps) {
         super(props);
 
         this.state = {
@@ -108,23 +108,23 @@ export default class WorkflowBAMActivityStatsModal extends React.Component<Workf
 
         return (
             <FormGroup ctx={ctx}>
-                <button className="btn btn-default" onClick={this.handleSubWorkflowBAMClick}>
-                    <i className="fa fa-tachometer" style={{ color: "green" }} /> {WorkflowBAMMessage.BAM.niceToString()}
+                <button className="btn btn-default" onClick={this.handleClick}>
+                    <i className="fa fa-tachometer" style={{ color: "green" }} /> {WorkflowActivityMonitorMessage.WorkflowActivityMonitor.niceToString()}
                 </button>
             </FormGroup>
         );
     }
 
-    handleSubWorkflowBAMClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+    handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
         e.preventDefault();
         
         Navigator.API.fetchAndForget(this.props.stats.WorkflowActivity)
-            .then(wa => window.open(WorkflowClient.workflowBAMUrl(toLite(wa.subWorkflow!.workflow!))))
+            .then(wa => window.open(WorkflowClient.workflowActivityMonitorUrl(toLite(wa.subWorkflow!.workflow!))))
             .done();
     }
 
-    static show(stats: WorkflowBAMActivityStats, config: WorkflowBAMConfig, activity: WorkflowActivityModel): Promise<any> {
-        return openModal<any>(<WorkflowBAMActivityStatsModal stats={stats} config={config} activity={activity} />);
+    static show(stats: WorkflowActivityStats, config: WorkflowActivityMonitorConfig, activity: WorkflowActivityModel): Promise<any> {
+        return openModal<any>(<WorkflowActivityStatsModal stats={stats} config={config} activity={activity} />);
     }
 }
 

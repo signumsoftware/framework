@@ -195,23 +195,23 @@ namespace Signum.React.Workflow
             return CaseFlowLogic.GetCaseFlow(lite.Retrieve());
         }
 
-        [Route("api/workflow/BAM"), HttpPost]
-        public WorkflowBAM GetWorkflowBAM(WorkflowBAMRequestTS request)
+        [Route("api/workflow/activityMonitor"), HttpPost]
+        public WorkflowActivityMonitor GetWorkflowActivityMonitor(WorkflowActivityMonitorRequestTS request)
         {
-            return WorkflowBAMLogic.GetWorkflowBAM(request.ToRequest());
+            return WorkflowActivityMonitorLogic.GetWorkflowActivityMonitor(request.ToRequest());
         }
     }
 
-    public class WorkflowBAMRequestTS
+    public class WorkflowActivityMonitorRequestTS
     {
         public Lite<WorkflowEntity> workflow;
         public List<FilterTS> filters;
         public List<ColumnTS> columns;
 
-        public WorkflowBAMRequest ToRequest()
+        public WorkflowActivityMonitorRequest ToRequest()
         {
             var qd = DynamicQueryManager.Current.QueryDescription(typeof(CaseActivityEntity));
-            return new WorkflowBAMRequest
+            return new WorkflowActivityMonitorRequest
             {
                 Workflow = workflow,
                 Filters = filters.Select(f => f.ToFilter(qd, true)).ToList(),

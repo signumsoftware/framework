@@ -27,7 +27,7 @@ import { TimeSpanEmbedded } from '../Basics/Signum.Entities.Basics'
 import TypeHelpButtonBarComponent from '../TypeHelp/TypeHelpButtonBarComponent'
 
 import { ValueLine, EntityLine, EntityCombo, EntityList, EntityDetail, EntityStrip, EntityRepeater } from '../../../Framework/Signum.React/Scripts/Lines'
-import { WorkflowConditionEval, WorkflowActionEval, WorkflowJumpEmbedded, DecisionResult, WorkflowMessage, WorkflowBAMMessage } from './Signum.Entities.Workflow'
+import { WorkflowConditionEval, WorkflowActionEval, WorkflowJumpEmbedded, DecisionResult, WorkflowMessage, WorkflowActivityMonitorMessage } from './Signum.Entities.Workflow'
 
 import ActivityWithRemarks from './Case/ActivityWithRemarks'
 
@@ -65,7 +65,7 @@ export function start(options: { routes: JSX.Element[] }) {
         <ImportRoute path="~/workflow/activity/:caseActivityId" onImportModule={() => import("./Case/CaseFramePage")} />,
         <ImportRoute path="~/workflow/new/:workflowId/:mainEntityStrategy" onImportModule={() => import("./Case/CaseFramePage")} />,
         <ImportRoute path="~/workflow/panel" onImportModule={() => import("./Workflow/WorkflowScriptRunnerPanelPage")} />,
-        <ImportRoute path="~/workflow/bam/:workflowId" onImportModule={() => import("./BAM/WorkflowBAMPage")} />,
+        <ImportRoute path="~/workflow/activityMonitor/:workflowId" onImportModule={() => import("./ActivityMonitor/WorkflowActivityMonitorPage")} />,
     );
 
     QuickLinks.registerQuickLink(CaseActivityEntity, ctx => [
@@ -142,8 +142,8 @@ export function start(options: { routes: JSX.Element[] }) {
     caseActivityOperation(CaseActivityOperation.Reject, "default");
 
     QuickLinks.registerQuickLink(WorkflowEntity, ctx => new QuickLinks.QuickLinkLink("bam",
-        WorkflowBAMMessage.BAM.niceToString(),
-        workflowBAMUrl(ctx.lite),
+        WorkflowActivityMonitorMessage.WorkflowActivityMonitor.niceToString(),
+        workflowActivityMonitorUrl(ctx.lite),
         { icon: "fa fa-tachometer", iconColor: "green" }));
 
     Operations.addSettings(new EntityOperationSettings(WorkflowOperation.Save, { style: "primary", onClick: executeWorkflowSave }));
@@ -181,8 +181,9 @@ export function start(options: { routes: JSX.Element[] }) {
     })]);
 }
 
-export function workflowBAMUrl(workflow: Lite<WorkflowEntity>) {
-    return `~/workflow/bam/${workflow.id}`;
+export function workflowActivityMonitorUrl
+    (workflow: Lite<WorkflowEntity>) {
+    return `~/workflow/activityMonitor/${workflow.id}`;
 }
 
 function registerCustomContexts() {
@@ -511,8 +512,8 @@ export namespace API {
         return ajaxGet<CaseFlow>({ url: `~/api/workflow/caseFlow/${c.id}` });
     }
 
-    export function workflowBAM(request: WorkflowBAMRequest): Promise<WorkflowBAM> {
-        return ajaxPost<WorkflowBAM>({ url: "~/api/workflow/BAM" }, request);
+    export function workflowActivityMonitor(request: WorkflowActivityMonitorRequest): Promise<WorkflowActivityMonitor> {
+        return ajaxPost<WorkflowActivityMonitor>({ url: "~/api/workflow/activityMonitor" }, request);
     }
 }
 
@@ -597,21 +598,21 @@ export interface CaseFlow {
     AllNodes: string[];
 }
 
-export interface WorkflowBAMRequest {
+export interface WorkflowActivityMonitorRequest {
     workflow: Lite<WorkflowEntity>;
     filters: FilterRequest[];
     columns: ColumnRequest[];
 }
     
-export interface WorkflowBAMActivityStats {
+export interface WorkflowActivityStats {
     WorkflowActivity: Lite<WorkflowActivityEntity>;
     CaseActivityCount: number;
     CustomValues: any[];
 }
 
-export interface WorkflowBAM {
+export interface WorkflowActivityMonitor {
     Workflow: Lite<WorkflowEntity>;
     CustomColumns: string[];
-    Activities: WorkflowBAMActivityStats[];
+    Activities: WorkflowActivityStats[];
 }
 

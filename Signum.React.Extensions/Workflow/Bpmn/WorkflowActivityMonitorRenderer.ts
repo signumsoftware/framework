@@ -10,19 +10,19 @@ import {
 import { Lite, liteKey } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
 import { Color, Gradient } from '../../Basics/Color'
 import { CustomRenderer } from './CustomRenderer'
-import { WorkflowBAMActivityStats, WorkflowBAM } from '../WorkflowClient'
+import { WorkflowActivityStats, WorkflowActivityMonitor } from '../WorkflowClient'
 import * as BpmnUtils from './BpmnUtils'
 import { calculatePoint, Rectangle } from "../../Map/Utils"
 import * as NavigatedViewer from "bpmn-js/lib/NavigatedViewer"
 import "moment-duration-format"
-import { WorkflowBAMConfig } from "../BAM/WorkflowBAMPage";
+import { WorkflowActivityMonitorConfig } from "../ActivityMonitor/WorkflowActivityMonitorPage";
 import { QueryToken } from "../../../../Framework/Signum.React/Scripts/FindOptions";
 import { is } from "../../../../Framework/Signum.React/Scripts/Signum.Entities";
 
-export class BAMRenderer extends CustomRenderer {
+export class WorkflowActivityMonitorRenderer extends CustomRenderer {
 
-    workflowBAM: WorkflowBAM;
-    workflowConfig: WorkflowBAMConfig;
+    workflowActivityMonitor: WorkflowActivityMonitor;
+    workflowConfig: WorkflowActivityMonitorConfig;
     workflowModel: WorkflowModel;
 
     viewer: NavigatedViewer;
@@ -43,20 +43,20 @@ export class BAMRenderer extends CustomRenderer {
 
             var actMod = mle && (mle.element.model as WorkflowActivityModel);
 
-            const stats = actMod && this.workflowBAM.Activities.singleOrNull(ac => is(ac.WorkflowActivity, actMod!.workflowActivity));
+            const stats = actMod && this.workflowActivityMonitor.Activities.singleOrNull(ac => is(ac.WorkflowActivity, actMod!.workflowActivity));
             
             if (!stats) {
                 result.style.setProperty('stroke', "lightgray");
                 result.style.setProperty('fill', "#eee");
             }
             else if (this.workflowConfig.columns.length == 0) {
-                var max = Math.max(1, this.workflowBAM.Activities.max(a => a.CaseActivityCount));
+                var max = Math.max(1, this.workflowActivityMonitor.Activities.max(a => a.CaseActivityCount));
                 const color = this.gradient.getColor(stats.CaseActivityCount / max);
                 result.style.setProperty('stroke', color.lerp(0.5, Color.Black).toString());
                 result.style.setProperty('fill', color.toString());
 
             } else {
-                var max = Math.max(0.01, this.workflowBAM.Activities.max(a => a.CustomValues[0]));
+                var max = Math.max(0.01, this.workflowActivityMonitor.Activities.max(a => a.CustomValues[0]));
                 const color = this.gradient.getColor((stats.CustomValues[0] || 0) / max);
                 result.style.setProperty('stroke', color.lerp(0.5, Color.Black).toString());
                 result.style.setProperty('fill', color.toString());
@@ -72,12 +72,13 @@ export class BAMRenderer extends CustomRenderer {
     }
 }
 
-function getTitle(stats: WorkflowBAMActivityStats, config: WorkflowBAMConfig) {
+function getTitle(stats: WorkflowActivityStats, config: WorkflowActivityMonitorConfig) {
     let result = `${stats.WorkflowActivity.toStr} (${stats.CaseActivityCount})`;
 
-    result += config.columns.map((col, i) =>
-        `${col.displayName || col.token!.niceName}: ${formatDuration(stats.CustomValues[i], col.token!)}`).join("\n");
-
+    if (config.columns.length) {
+        result += "\n" + config.columns.map((col, i) =>
+            `${col.displayName || col.token!.niceName}: ${formatDuration(stats.CustomValues[i], col.token!)}`).join("\n");
+    }
     return result;
 }
 
@@ -90,5 +91,5 @@ function formatDuration(minutes: number | undefined, token: QueryToken) {
     return moment.duration(minutes, "minutes").format("d[d] h[h] m[m] s[s]");
 }
 
-export const __init__ = ['bamRenderer'];
-export const bamRenderer = ['type', BAMRenderer];
+export const __init__ = ['workflowActivityMonitorRenderer'];
+export const workflowActivityMonitorRenderer = ['type', WorkflowActivityMonitorRenderer];
