@@ -19,6 +19,7 @@ using Signum.Entities.Scheduler;
 using Signum.Entities.Dynamic;
 using System.CodeDom.Compiler;
 using System.Text.RegularExpressions;
+using System.Xml;
 
 namespace Signum.Engine.Workflow
 {
@@ -658,7 +659,7 @@ namespace Signum.Engine.Workflow
             if (model == null)
                 throw new ArgumentNullException(nameof(model));
 
-            var document = XDocument.Parse(model.DiagramXml);
+            var document = WorkflowBuilder.ParseDocument(model.DiagramXml);
             var wb = new WorkflowBuilder(workflow);
             return wb.PreviewChanges(document, model);
         }
@@ -678,5 +679,9 @@ namespace Signum.Engine.Workflow
             workflow.FullDiagramXml = new WorkflowXmlEmbedded { DiagramXml = wb.GetXDocument().ToString() };
             workflow.Save();
         }
+
+       
     }
+
+   
 }
