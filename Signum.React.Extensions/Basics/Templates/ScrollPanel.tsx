@@ -80,22 +80,27 @@ interface AnimateScroll {
 
 export function animateScroll(id: string, animate: AnimateScroll) {
     const element = id ? document.getElementById(id) : document.body;
-    console.warn(`Cannot find element: #${id}`);
 
     if (!element) {
+        console.warn(`Cannot find element: #${id}`);
         return null;
     }
 
     const { offset, duration, easing } = animate;
-    const start = getScrollTop();
-    const to = getOffsetTop(element) + offset;
+    const parent = getScrollParent(element);
+    if (!parent) {
+        console.warn(`Element #${id} has no scroll parent`);
+        return null;
+    }
+    const start = getScrollTop(parent);
+    const to = getOffsetTop(element, parent) + offset;
     const change = to - start;
 
     function animateFn(elapsedTime = 0) {
         const increment = 20;
         const elapsed = elapsedTime + increment;
         const position = easing(elapsed, start, change, duration);
-        setScrollTop(position);
+        setScrollTop(parent, position);
         elapsed < duration &&
             setTimeout(function () {
                 animateFn(elapsed);
@@ -106,20 +111,41 @@ export function animateScroll(id: string, animate: AnimateScroll) {
     return id;
 }
 
-export function updateHistory(id: string) {
-    window.location.hash = id;
+function getScrollTop(element: HTMLElement): number{
+    if (element == document.documentElement)
+        return document.documentElement.scrollTop || document.body.scrollTop /*Edge*/;
+    else
+        return element.scrollTop;
 }
 
-function getScrollTop() {
-    // like jQuery -> $('html, body').scrollTop
-    return document.documentElement.scrollTop || document.body.scrollTop;
+function setScrollTop(element: HTMLElement, value: number) {
+    if (element == document.documentElement) {
+        document.documentElement.scrollTop = value;
+        document.body.scrollTop = value;/*Edge*/
+    } else {
+        element.scrollTop = value;
+    }
 }
 
-function setScrollTop(position: number) {
-    document.documentElement.scrollTop = document.body.scrollTop = position;
+function getScrollParent(element: HTMLElement, includeHidden: boolean = false) {
+    var style = getComputedStyle(element);
+    var excludeStaticParent = style.position === "absolute";
+    var overflowRegex = includeHidden ? /(auto|scroll|hidden)/ : /(auto|scroll)/;
+
+    if (style.position === "fixed") return document.body;
+    for (var parent: HTMLElement = element; (parent = parent.parentElement!);) {
+        style = getComputedStyle(parent);
+        if (excludeStaticParent && style.position === "static") {
+            continue;
+        }
+        if (overflowRegex.test(style.overflow! + style.overflowY! + style.overflowX!))
+            return parent;
+    }
+
+    return document.documentElement;
 }
 
-function getOffsetTop(element: HTMLElement) {
+function getOffsetTop(element: HTMLElement, scrollParent: HTMLElement) {
     const { top } = element.getBoundingClientRect();
-    return top + getScrollTop();
+    return top + getScrollTop(scrollParent);
 }
