@@ -764,7 +764,6 @@ namespace Signum.Utilities
             return "{0:#,###.00} {1}".FormatWith(valor, (useAbbreviations ? abbreviations : magnitudes)[i]);
         }
 
-
         public static string Combine(this string separator, params object[] elements)
         {
             StringBuilder sb = null;
@@ -778,6 +777,26 @@ namespace Signum.Utilities
                         sb.Append(separator);
 
                     sb.Append(item.ToString());
+                }
+            }
+
+            return sb == null ? "" : sb.ToString();  // Remove at the end is faster
+        }
+
+        public static string CombineIfNotEmpty(this object[] elements, string separator)
+        {
+            StringBuilder sb = null;
+            foreach (var item in elements)
+            {
+                string str;
+                if (item != null && (str = item.ToString()).HasText())
+                {
+                    if (sb == null)
+                        sb = new StringBuilder();
+                    else
+                        sb.Append(separator);
+
+                    sb.Append(str);
                 }
             }
 
