@@ -296,7 +296,7 @@ export default class TypeHelpComponent extends React.Component<TypeHelpComponent
         if (cleanType != null)
             return (
                 <span>
-                    <a href="" className={"sf-member-" + (isTypeEnum(type) ? "enum" : "class")}
+                    <a href="#" className={"sf-member-" + (isTypeEnum(type) ? "enum" : "class")}
                         onClick={(e) => { e.preventDefault(); this.goTo(cleanType); } }>
                         {type}
                     </a>

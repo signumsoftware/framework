@@ -12,7 +12,7 @@
     margin-bottom: 4px;
 }
 
-.sf-chart-type > .panel-body
+.sf-chart-type > .card-body
 {
     padding: 14px;
 }
@@ -22,7 +22,7 @@
     margin-bottom: 6px;
 }
 
-.sf-chart-tokens > .panel-body
+.sf-chart-tokens > .card-body
 {
     padding: 0px
 }

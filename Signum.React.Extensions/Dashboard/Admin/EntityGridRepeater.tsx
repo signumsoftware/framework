@@ -13,6 +13,7 @@ import Typeahead from '../../../../Framework/Signum.React/Scripts/Lines/Typeahea
 import { EntityListBase, EntityListBaseProps } from '../../../../Framework/Signum.React/Scripts/Lines/EntityListBase'
 import { RenderEntity } from '../../../../Framework/Signum.React/Scripts/Lines/RenderEntity'
 import { isModifiableEntity } from '../../../../Framework/Signum.React/Scripts/Signum.Entities';
+import { PanelStyle } from '../Signum.Entities.Dashboard';
 
 interface IGridEntity {
     row: number;
@@ -302,7 +303,7 @@ export class EntityGridRepeater extends EntityListBase<EntityGridRepeaterProps, 
 
 export interface EntityGridItemProps {
     title?: React.ReactElement<any>;
-    bsStyle?: string;
+    bsStyle?: PanelStyle;
     children?: React.ReactNode;
 
     onResizerDragStart?: (resizer: "left" | "right", e: React.DragEvent<any>) => void;
@@ -315,19 +316,24 @@ export class EntityGridItem extends React.Component<EntityGridItemProps>{
 
     render() {
 
+        var style = this.props.bsStyle == undefined || this.props.bsStyle == "Default" ? undefined : this.props.bsStyle.toLowerCase();
+
         return (
-            <div className={"panel panel-" + (this.props.bsStyle ? this.props.bsStyle.toLowerCase() : "default") }>
-                <div className="panel-heading" draggable={!!this.props.onTitleDragStart}
+            <div className={classes("card", style && ("border-" + style))}>
+                <div className={classes("card-header",
+                    style && style != "light" && "text-white",
+                    style && ("bg-" + style)
+                )} draggable={!!this.props.onTitleDragStart}
                     onDragStart={this.props.onTitleDragStart} >
                     {this.props.onRemove &&
-                        <a className="sf-line-button sf-remove pull-right" onClick={this.props.onRemove}
+                        <a href="#" className="sf-line-button sf-remove pull-right" onClick={this.props.onRemove}
                             title={EntityControlMessage.Remove.niceToString() }>
                             <span className="fa fa-remove"></span>
                         </a>
                     }
                     {this.props.title}
                 </div>
-                <div className="panel-body">
+                <div className="card-body">
                     { this.props.children  }
                 </div>
                 {this.props.onResizerDragStart &&

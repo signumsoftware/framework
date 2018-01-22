@@ -41,9 +41,13 @@ export default class QueryTokenEntityBuilder extends React.Component<QueryTokenE
 
         const qte = this.props.ctx.value;
 
-        const tokenBuilder = <QueryTokenBuilder queryToken={qte && qte.token}
-            onTokenChange={this.handleTokenChanged} queryKey={this.props.queryKey} subTokenOptions={this.props.subTokenOptions}
-            readOnly={this.props.ctx.readOnly} />
+        const tokenBuilder = (
+            <div className={this.props.ctx.rwWidgetClass}>
+                <QueryTokenBuilder queryToken={qte && qte.token}
+                    onTokenChange={this.handleTokenChanged} queryKey={this.props.queryKey} subTokenOptions={this.props.subTokenOptions}
+                    readOnly={this.props.ctx.readOnly} />
+            </div>
+        );
 
         return (
             <FormGroup ctx={this.props.ctx} helpText={this.props.helpText}>

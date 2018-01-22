@@ -17,15 +17,16 @@ export default class RestApiKeyComponent extends React.Component<{ ctx: TypeCont
                 <ValueLine ctx={ctx.subCtx(e => e.apiKey)}
                     ref={apiKey => this.apiKey = apiKey}
                     extraButtons={vl =>
-                    <a className={classes("sf-line-button", "sf-view", "btn btn-light")}
-                        onClick={this.generateApiKey}>
-                        <span className="fa fa-key" />
-                    </a>} />
+                        <a href="#" className={classes("sf-line-button", "sf-view", "btn btn-light")}
+                            onClick={this.generateApiKey}>
+                            <span className="fa fa-key" />
+                        </a>} />
             </div>
         );
     }
 
-    generateApiKey = () => {
+    generateApiKey = (e: React.MouseEvent<any>) => {
+        e.preventDefault();
         API.generateRestApiKey()
             .then(key => this.apiKey!.setValue(key))
             .done();

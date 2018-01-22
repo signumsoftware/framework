@@ -46,7 +46,7 @@ export default class TreeModal extends React.Component<TreeModalProps, { isOpen:
         this.setState({ isOpen: false });
     }
 
-    handleOnExit = () => {
+    handleOnClosed = () => {
         this.props.onExited!(this.okPressed ? this.selectedNode : null);
     }
 
@@ -64,7 +64,7 @@ export default class TreeModal extends React.Component<TreeModalProps, { isOpen:
         const okEnabled = this.selectedNode != null;
 
         return (
-            <Modal size="lg" toggle={this.handleCancelClicked} isOpen={this.state.isOpen} onExit={this.handleOnExit}>
+            <Modal size="lg" toggle={this.handleCancelClicked} isOpen={this.state.isOpen} onClosed={this.handleOnClosed}>
                 <ModalHeader toggle={this.handleCancelClicked}>
                     <div className="btn-toolbar" style={{ float: "right" }}>
                         <button className="btn btn-primary sf-entity-button sf-close-button sf-ok-button" disabled={!okEnabled} onClick={this.handleOkClicked}>
@@ -76,7 +76,7 @@ export default class TreeModal extends React.Component<TreeModalProps, { isOpen:
                     <h4>
                         <span className="sf-entity-title"> {this.props.title || getTypeInfo(this.props.typeName).nicePluralName}</span>
                         &nbsp;
-                        <a className="sf-popup-fullscreen" href="" onClick={(e) => this.treeView && this.treeView.handleFullScreenClick(e)}>
+                        <a className="sf-popup-fullscreen" href="#" onClick={(e) => this.treeView && this.treeView.handleFullScreenClick(e)}>
                             <span className="fa fa-external-link"></span>
                         </a>
                     </h4>

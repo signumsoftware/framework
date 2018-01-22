@@ -792,6 +792,9 @@ export class PropertyRepeaterComponent extends React.Component<PropertyRepeaterC
     }
 
     handleCreateClick = (event: React.SyntheticEvent<any>) => {
+
+        event.preventDefault();
+
         var p = {
             uid: this.createGuid(),
             name: "Name",
@@ -826,7 +829,7 @@ export class PropertyRepeaterComponent extends React.Component<PropertyRepeaterC
                             </CollapsableCard>)
                     }
                 </div>
-                <a title="Create Property"
+                <a href="#" title="Create Property"
                     className="sf-line-button sf-create"
                     onClick={this.handleCreateClick}>
                     <span className="fa fa-plus sf-create sf-create-label" />Create Property
@@ -840,19 +843,19 @@ export class PropertyRepeaterComponent extends React.Component<PropertyRepeaterC
             <div>
 
                 <span className="item-group">
-                    <a className={classes("sf-line-button", "sf-remove")}
+                    <a href="#" className={classes("sf-line-button", "sf-remove")}
                         onClick={e => this.handleOnRemove(e, i)}
                         title={EntityControlMessage.Remove.niceToString()}>
                         <span className="fa fa-remove" />
                     </a>
 
-                    <a className={classes("sf-line-button", "move-up")}
+                    <a href="#" className={classes("sf-line-button", "move-up")}
                         onClick={e => this.handleOnMoveUp(e, i)}
                         title={EntityControlMessage.MoveUp.niceToString()}>
                         <span className="fa fa-chevron-up" />
                     </a>
 
-                    <a className={classes("sf-line-button", "move-down")}
+                    <a href="#" className={classes("sf-line-button", "move-down")}
                         onClick={e => this.handleOnMoveDown(e, i)}
                         title={EntityControlMessage.MoveDown.niceToString()}>
                         <span className="fa fa-chevron-down" />
@@ -1091,7 +1094,7 @@ export class ComboBoxRepeaterComponent extends React.Component<ComboBoxRepeaterC
                         }
                         <tr>
                             <td colSpan={2}>
-                                <a title="Create Query Column"
+                                <a href="#" title="Create Query Column"
                                     className="sf-line-button sf-create"
                                     onClick={this.handleCreateClick}>
                                     <span className="fa fa-plus sf-create sf-create-label" />Create Query Column
@@ -1109,19 +1112,19 @@ export class ComboBoxRepeaterComponent extends React.Component<ComboBoxRepeaterC
             <tr key={i}>
                 <td>
                     <span className="item-group">
-                        <a className={classes("sf-line-button", "sf-remove")}
+                        <a href="#" className={classes("sf-line-button", "sf-remove")}
                             onClick={e => this.handleOnRemove(e, i)}
                             title={EntityControlMessage.Remove.niceToString()}>
                             <span className="fa fa-remove" />
                         </a>
 
-                        <a className={classes("sf-line-button", "move-up")}
+                        <a href="#" className={classes("sf-line-button", "move-up")}
                             onClick={e => this.handleOnMoveUp(e, i)}
                             title={EntityControlMessage.MoveUp.niceToString()}>
                             <span className="fa fa-chevron-up" />
                         </a>
 
-                        <a className={classes("sf-line-button", "move-down")}
+                        <a href="#" className={classes("sf-line-button", "move-down")}
                             onClick={e => this.handleOnMoveDown(e, i)}
                             title={EntityControlMessage.MoveDown.niceToString()}>
                             <span className="fa fa-chevron-down" />
@@ -1156,7 +1159,7 @@ export class ValidatorRepeaterComponent extends React.Component<ValidatorRepeate
     }
 
     handleCreateClick = (event: React.SyntheticEvent<any>) => {
-
+        event.preventDefault();
         let val = this.props.property.validators!;
         if (val == null)
             this.props.property.validators = val = [];
@@ -1187,7 +1190,7 @@ export class ValidatorRepeaterComponent extends React.Component<ValidatorRepeate
                             </Card>)
                     }
                 </div>
-                <a title="Create Validator"
+                <a href="#" title="Create Validator"
                     className="sf-line-button sf-create"
                     onClick={this.handleCreateClick}>
                     <span className="fa fa-plus sf-create sf-create-label" />Create Validator
@@ -1200,7 +1203,7 @@ export class ValidatorRepeaterComponent extends React.Component<ValidatorRepeate
         return (
             <div>
                 <span className="item-group">
-                    <a className={classes("sf-line-button", "sf-remove")}
+                    <a href="#" className={classes("sf-line-button", "sf-remove")}
                         onClick={e => this.handleOnRemove(e, i)}
                         title={EntityControlMessage.Remove.niceToString()}>
                         <span className="fa fa-remove" />

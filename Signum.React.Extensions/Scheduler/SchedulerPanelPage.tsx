@@ -63,9 +63,9 @@ export default class SchedulerPanelPage extends React.Component<SchedulerPanelPr
             <div>
                 <h2>SchedulerLogic state</h2>
                 <div className="btn-toolbar">
-                    {s.Running && <a href="" className="sf-button btn btn-light active" style={{ color: "red" }} onClick={this.handleStop}>Stop</a>}
-                    {!s.Running && <a href="" className="sf-button btn btn-light" style={{ color: "green" }} onClick={this.handleStart}>Start</a>}
-                    <a href="" className="sf-button btn btn-light" onClick={this.handleUpdate}>Update</a>
+                    {s.Running && <a href="#" className="sf-button btn btn-light active" style={{ color: "red" }} onClick={this.handleStop}>Stop</a>}
+                    {!s.Running && <a href="#" className="sf-button btn btn-light" style={{ color: "green" }} onClick={this.handleStart}>Start</a>}
+                    <a href="#" className="sf-button btn btn-light" onClick={this.handleUpdate}>Update</a>
                 </div >
                 <div id="processMainDiv">
                     <br />

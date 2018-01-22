@@ -67,14 +67,14 @@ export default class ActivityWithRemarksComponent extends React.Component<Activi
             <span>
                 {this.props.data.workflowActivity.toStr}
                 &nbsp;
-                <a href="" onClick={this.handleRemarksClick} className={classes(
+                <a href="#" onClick={this.handleRemarksClick} className={classes(
                         "case-icon",
                         !this.state.remarks && "case-icon-ghost")}>
                     <span className={classes(
                         this.state.remarks ? "fa fa-comment" : "fa fa-comment-o")} />
                 </a>
                 {this.state.alerts > 0 && " "}
-                {this.state.alerts > 0 && <a href="" onClick={this.handleAlertsClick} style={{ color: "orange" }}>
+                {this.state.alerts > 0 && <a href="#" onClick={this.handleAlertsClick} style={{ color: "orange" }}>
                     <span className={"fa fa-bell"} />
                 </a>}
                 &nbsp;

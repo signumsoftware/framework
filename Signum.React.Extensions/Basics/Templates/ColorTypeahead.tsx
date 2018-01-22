@@ -12,23 +12,34 @@ import { namedColors } from '../Color'
 
 export class ColorTypeaheadLine extends React.Component<{ ctx: TypeContext<string | null | undefined>; onChange?: () => void }>{
 
+    handleOnChange = (newColor: string | undefined | null) => {
+        this.props.ctx.value = newColor;
+        if (this.props.onChange)
+            this.props.onChange();
+        this.forceUpdate();
+
+    }
+
     render() {
         var ctx = this.props.ctx;
 
         return (
             <FormGroup ctx={ctx} labelText={ctx.niceName()} >
-                <ColorTypeahead color={ctx.value} onChange={newColor => {
-                    ctx.value = newColor;
-                    if (this.props.onChange)
-                        this.props.onChange();
-                    this.forceUpdate();
-                }} />
+                <ColorTypeahead color={ctx.value}
+                    formControlClass={ctx.formControlClass}
+                    onChange={this.handleOnChange} />
             </FormGroup>
         );
     }
 }
 
-export class ColorTypeahead extends React.Component<{ color: string | null | undefined, onChange: (newColor: string | null | undefined) => void }>{
+interface ColorTypeaheadProps {
+    color: string | null | undefined;
+    onChange: (newColor: string | null | undefined) => void;
+    formControlClass: string | undefined;
+}
+
+export class ColorTypeahead extends React.Component<ColorTypeaheadProps>{
 
     handleGetItems = (query: string) => {
         if (!query)
@@ -71,7 +82,7 @@ export class ColorTypeahead extends React.Component<{ color: string | null | und
             <div style={{ position: "relative" }}>
                 <Typeahead
                     value={this.props.color || ""}
-                    inputAttrs={{ className: "form-control sf-entity-autocomplete" }}
+                    inputAttrs={{ className: classes(this.props.formControlClass, "sf-entity-autocomplete") }}
                     getItems={this.handleGetItems}
                     onSelect={this.handleSelect}
                     onChange={this.handleSelect}

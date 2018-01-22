@@ -89,7 +89,7 @@ export class BigValueSearchCounter extends React.Component<BigValueBadgeProps> {
         
         return (
             <div className={"panel panel-" + this.props.style.toLowerCase()}>
-                <div className="panel-heading" onClick={this.vsc && this.vsc.handleClick} style={{ cursor: "pointer" }}>
+                <div className="card-header" onClick={this.vsc && this.vsc.handleClick} style={{ cursor: "pointer" }}>
                     <div className="row">
                         <div className="col-xs-3">
                             <i className={classes(this.props.iconName, "fa-5x")} style={{ color: this.props.iconColor }}></i>

@@ -68,7 +68,7 @@ export class UserHelpComponent extends React.Component<UserHelpProps, { open: bo
     render() {
         return (
             <div style={{ marginTop: "10px" }}>
-                <a href="" onClick={this.handleHelpClick} className="case-help-button">
+                <a href="#" onClick={this.handleHelpClick} className="case-help-button">
                     {this.state.open ?
                         DynamicViewMessage.HideHelp.niceToString() :
                         DynamicViewMessage.ShowHelp.niceToString()}

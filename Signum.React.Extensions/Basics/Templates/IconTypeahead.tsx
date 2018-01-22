@@ -19,6 +19,13 @@ export interface IconTypeaheadLineProps {
 
 export class IconTypeaheadLine extends React.Component<IconTypeaheadLineProps>{
 
+    handleChange = (newIcon: string | undefined | null) => {
+        this.props.ctx.value = newIcon;
+        if (this.props.onChange)
+            this.props.onChange();
+        this.forceUpdate();
+    }
+
     render() {
         var ctx = this.props.ctx;
 
@@ -26,12 +33,8 @@ export class IconTypeaheadLine extends React.Component<IconTypeaheadLineProps>{
             <FormGroup ctx={ctx} labelText={ctx.niceName()} >
                 <IconTypeahead icon={ctx.value}
                     extraIcons={this.props.extraIcons}
-                    onChange={newIcon => {
-                        ctx.value = newIcon;
-                        if (this.props.onChange)
-                            this.props.onChange();
-                        this.forceUpdate();
-                    } }/>
+                    formControlClass={ctx.formControlClass}
+                    onChange={this.handleChange} />
             </FormGroup>
         );
     }
@@ -41,6 +44,7 @@ export interface IconTypeaheadProps {
     icon: string | null | undefined;
     onChange: (newIcon: string | null | undefined) => void;
     extraIcons?: string[];
+    formControlClass: string | undefined;
 }
 
 export class IconTypeahead extends React.Component<IconTypeaheadProps>{
@@ -85,7 +89,7 @@ export class IconTypeahead extends React.Component<IconTypeaheadProps>{
             <div style={{ position: "relative" }}>
                 <Typeahead
                     value={this.props.icon || ""}
-                    inputAttrs={{ className: "form-control sf-entity-autocomplete" }}
+                    inputAttrs={{ className: classes(this.props.formControlClass, "sf-entity-autocomplete") }}
                     getItems={this.handleGetItems}
                     onSelect={this.handleSelect}
                     onChange={this.handleSelect}

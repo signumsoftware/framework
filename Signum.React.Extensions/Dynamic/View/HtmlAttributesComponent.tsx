@@ -37,12 +37,14 @@ export class HtmlAttributesLine extends React.Component<HtmlAttributesLineProps>
         </span>);
     }
 
-    handleRemove = () => {
+    handleRemove = (e: React.MouseEvent<any>) => {
+        e.preventDefault();
         this.props.binding.deleteValue();
         this.props.dn.context.refreshView();
     }
 
-    handleCreate = () => {
+    handleCreate = (e: React.MouseEvent<any>) => {
+        e.preventDefault();
         this.modifyExpression({} as HtmlAttributesExpression);
     }
 
@@ -81,7 +83,7 @@ export class HtmlAttributesLine extends React.Component<HtmlAttributesLineProps>
                     {this.renderMember(val)}
 
                     {val && " "}
-                    {val && <a className={classes("sf-line-button", "sf-remove")}
+                    {val && <a href="#" className={classes("sf-line-button", "sf-remove")}
                         onClick={this.handleRemove}
                         title={EntityControlMessage.Remove.niceToString()}>
                         <span className="fa fa-remove" />
@@ -89,7 +91,7 @@ export class HtmlAttributesLine extends React.Component<HtmlAttributesLineProps>
                 </label>
                 <div>
                     {val ?
-                        <a href="" onClick={this.handleView}><pre style={{ padding: "0px", border: "none" }}>{this.getDescription(val)}</pre></a>
+                        <a href="#" onClick={this.handleView}><pre style={{ padding: "0px", border: "none" }}>{this.getDescription(val)}</pre></a>
                         :
                         <a title={EntityControlMessage.Create.niceToString()}
                             className="sf-line-button sf-create"
@@ -198,7 +200,8 @@ export class ExpressionOrValueStrip extends React.Component<ExpressionOrValueStr
         );
     }
 
-    handleOnRemove = (key: string) => {
+    handleOnRemove = (e: React.MouseEvent<any>, key: string) => {
+        e.preventDefault();
         delete this.props.object[key];
         this.forceUpdate();
     }
@@ -209,8 +212,8 @@ export class ExpressionOrValueStrip extends React.Component<ExpressionOrValueStr
             <ul className="expression-list">
                 {
                     Dic.getKeys(this.props.object).filter(this.props.filterKey).map(key => <li key={key}>
-                        <a className="sf-line-button sf-remove"
-                            onClick={() => this.handleOnRemove(key)}
+                        <a href="#" className="sf-line-button sf-remove"
+                            onClick={e => this.handleOnRemove(e, key)}
                             title={EntityControlMessage.Remove.niceToString()}>
                             <span className="fa fa-remove"></span>
                         </a>

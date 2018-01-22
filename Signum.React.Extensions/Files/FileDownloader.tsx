@@ -69,7 +69,7 @@ export default class FileDownloader extends React.Component<FileDownloaderProps>
 
         return (
             <a
-                href=""
+                href="#"
                 onClick={e => entity.binaryFile ? downloadBase64(e, entity.binaryFile, entity.fileName!) : configuration.downloadClick(e, entity)}
                 download={this.props.download == "View" ? undefined : entity.fileName }
                 title={entity.fileName || undefined}

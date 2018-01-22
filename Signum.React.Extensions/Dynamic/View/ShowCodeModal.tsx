@@ -28,14 +28,14 @@ export default class ShowCodeModal extends React.Component<ShowCodeModalProps, {
         this.setState({ show: false });
     }
 
-    handleOnExit = () => {
+    handleOnClosed = () => {
         this.props.onExited!(undefined);
     }
 
     render() {
         
         return (
-            <Modal size="lg" toggle={this.handleCancelClicked} isOpen={this.state.show} onExit={this.handleOnExit} className="sf-selector-modal">
+            <Modal size="lg" toggle={this.handleCancelClicked} isOpen={this.state.show} onClosed={this.handleOnClosed} className="sf-selector-modal">
                 <ModalHeader toggle={this.handleCancelClicked}>
                     <h4 className="modal-title">
                         {this.props.typeName + "Component code"}

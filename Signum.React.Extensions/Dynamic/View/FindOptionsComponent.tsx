@@ -39,13 +39,15 @@ export class FindOptionsLine extends React.Component<FindOptionsLineProps>{
         </span>);
     }
 
-    handleRemove = () => {
+    handleRemove = (e: React.MouseEvent<any>) => {
+        e.preventDefault();
         this.props.binding.deleteValue();
         this.props.dn.context.refreshView();
     }
 
-    handleCreate = () => {
+    handleCreate = (e: React.MouseEvent<any>) => {
 
+        e.preventDefault();
         const route = this.props.dn.route;
         const ti = route && route.typeReferenceInfo();
 
@@ -98,14 +100,14 @@ export class FindOptionsLine extends React.Component<FindOptionsLineProps>{
                 </label>
                 <div>
                     {fo ? <div>
-                        <a href="" onClick={this.handleView}>{this.getDescription(fo)}</a>
+                        <a href="#" onClick={this.handleView}>{this.getDescription(fo)}</a>
                         {" "}
-                        <a className={classes("sf-line-button", "sf-remove")}
+                        <a href="#" className={classes("sf-line-button", "sf-remove")}
                             onClick={this.handleRemove}
                             title={EntityControlMessage.Remove.niceToString()}>
                             <span className="fa fa-remove" />
                         </a></div> :
-                        <a title={EntityControlMessage.Create.niceToString()}
+                        <a href="#" title={EntityControlMessage.Create.niceToString()}
                             className="sf-line-button sf-create"
                             onClick={this.handleCreate}>
                             <span className="fa fa-plus sf-create sf-create-label" />{EntityControlMessage.Create.niceToString()}
@@ -384,10 +386,9 @@ export class QueryKeyLine extends React.Component<{ queryKey: string | undefined
             <div className="input-group">
                 <span className="form-control btn-light sf-entity-line-entity">
                     {this.props.queryKey}
-
                 </span>
                 <span className="input-group-append">
-                    <a className={classes("sf-line-button", "sf-remove btn btn-light")}
+                    <a href="#" className={classes("sf-line-button", "sf-remove btn btn-light")}
                         onClick={() => this.props.onChange(undefined)}
                         title={EntityControlMessage.Remove.niceToString()}>
                         <span className="fa fa-remove" />
@@ -502,19 +503,19 @@ abstract class BaseOptionsComponent<T> extends React.Component<BaseOptionsCompon
 
     renderButtons(index: number) {
         return (<div className="item-group">
-            <a className={classes("sf-line-button", "sf-remove")}
+            <a href="#" className={classes("sf-line-button", "sf-remove")}
                 onClick={e => this.handleOnRemove(e, index)}
                 title={EntityControlMessage.Remove.niceToString()}>
                 <span className="fa fa-remove" />
             </a>
 
-            <a className={classes("sf-line-button", "move-up")}
+            <a href="#" className={classes("sf-line-button", "move-up")}
                 onClick={e => this.handleOnMoveUp(e, index)}
                 title={EntityControlMessage.MoveUp.niceToString()}>
                 <span className="fa fa-chevron-up" />
             </a>
 
-            <a className={classes("sf-line-button", "move-down")}
+            <a href="#" className={classes("sf-line-button", "move-down")}
                 onClick={e => this.handleOnMoveDown(e, index)}
                 title={EntityControlMessage.MoveDown.niceToString()}>
                 <span className="fa fa-chevron-down" />

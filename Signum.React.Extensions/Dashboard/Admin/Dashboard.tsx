@@ -89,8 +89,8 @@ export default class Dashboard extends React.Component<{ ctx: TypeContext<Dashbo
     }
 
     renderPart = (tc: TypeContext<PanelPartEmbedded>) => {
-        
-        const tcs = tc.subCtx({ formGroupStyle: "Basic", placeholderLabels: true });
+
+        const tcs = tc.subCtx({ formGroupStyle: "Basic", formSize: "ExtraSmall", placeholderLabels: true });
         
         const title = (
             <div> 

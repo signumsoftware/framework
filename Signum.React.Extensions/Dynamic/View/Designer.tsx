@@ -257,7 +257,7 @@ export class NullableCheckBox extends React.Component<NullableCheckBoxProps>{
 
     render() {
         return (
-            <a href="" onClick={this.handleClick}>
+            <a href="#" onClick={this.handleClick}>
                 <span className={this.getIcon()}/>
                 {" "}
                 {this.props.label}
@@ -415,12 +415,12 @@ export class DesignerModal extends React.Component<DesignerModalProps, { isOpen:
         this.setState({ isOpen: false });
     }
 
-    handleOnExit = () => {
+    handleOnClosed = () => {
         this.props.onExited!(this.okClicked);
     }
 
     render() {
-        return <Modal size="lg" toggle={this.handleCancelClicked} isOpen={this.state.isOpen} onExit={this.handleOnExit} className="sf-selector-modal">
+        return <Modal size="lg" toggle={this.handleCancelClicked} isOpen={this.state.isOpen} onClosed={this.handleOnClosed} className="sf-selector-modal">
             <ModalHeader toggle={this.handleCancelClicked}>
                 <h4 className="modal-title">
                     {this.props.title}

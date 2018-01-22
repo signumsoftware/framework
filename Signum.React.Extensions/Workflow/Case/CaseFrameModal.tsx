@@ -144,7 +144,7 @@ export default class CaseFrameModal extends React.Component<CaseFrameModalProps,
         }
     }
 
-    handleOnExited = () => {
+    handleOnClosed = () => {
         this.props.onExited!(this.okClicked ? this.getCaseActivity() : undefined);
     }
 
@@ -157,7 +157,7 @@ export default class CaseFrameModal extends React.Component<CaseFrameModalProps,
         var pack = this.state.pack;
 
         return (
-            <Modal size="lg" isOpen={this.state.show} onExit={this.handleOnExited} className="sf-popup-control" >
+            <Modal size="lg" isOpen={this.state.show} onClosed={this.handleOnClosed} className="sf-popup-control" >
                 <ModalHeader>
                     {!this.props.isNavigate && <ButtonToolbar className="pull-right flip">
                         <Button className="sf-entity-button sf-close-button sf-ok-button" color="primary" disabled={!pack} onClick={this.handleOkClicked}>{JavascriptMessage.ok.niceToString()}</Button>
@@ -302,7 +302,7 @@ export default class CaseFrameModal extends React.Component<CaseFrameModalProps,
             return null;
 
         return (
-            <a href="" className="sf-popup-fullscreen" onClick={this.handlePopupFullScreen}>
+            <a href="#" className="sf-popup-fullscreen" onClick={this.handlePopupFullScreen}>
                 <span className="fa fa-external-link"></span>
             </a>
         );

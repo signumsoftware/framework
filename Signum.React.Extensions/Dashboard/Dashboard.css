@@ -11,13 +11,13 @@
     border-radius: 4px;
 }
 
-.sf-grid-element .panel
+.sf-grid-element .card
 {
     margin-bottom: 0px;
     overflow-x:hidden;
 }
 
-.sf-grid-element .panel-heading
+.sf-grid-element .card-heading
 {
     cursor:move;
 }
@@ -25,7 +25,7 @@
 .sf-rightHandle
 {
     width: 5px;
-    right: 13px; /*15 - 5/2*/
+    right: 3px; /*15 - 5/2*/
     cursor: e-resize;
     top: 6px;
     bottom: 6px;
@@ -38,7 +38,7 @@
 .sf-leftHandle
 {
     width: 5px;
-    left: 13px; /*15 - 5/2*/
+    left: 3px; /*15 - 5/2*/
     cursor: e-resize;
     top: 6px;
     bottom: 6px;

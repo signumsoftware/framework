@@ -37,7 +37,7 @@ export default class CaseActivityStatsModal extends React.Component<CaseActivity
         this.setState({ show: false });
     }
 
-    handleOnExit = () => {
+    handleOnClosed = () => {
         this.props.onExited!(undefined);
     }
 
@@ -45,7 +45,7 @@ export default class CaseActivityStatsModal extends React.Component<CaseActivity
 
         var caseActivityStats = this.props.caseActivityStats;
         return (
-            <Modal size="lg" toggle={this.handleCloseClicked} isOpen={this.state.show} onExit={this.handleOnExit}>
+            <Modal size="lg" toggle={this.handleCloseClicked} isOpen={this.state.show} onClosed={this.handleOnClosed}>
                 <ModalHeader toggle={this.handleCloseClicked}>
                     <h4 className="modal-title">
                         {caseActivityStats.first().WorkflowActivity.toStr} ({caseActivityStats.length} {caseActivityStats.length == 1 ? CaseActivityEntity.niceName() : CaseActivityEntity.nicePluralName()})

@@ -38,7 +38,7 @@ export class PredictModal extends React.Component<PredictModalProps, PredictModa
         this.setState({ isOpen: false });
     }
 
-    handleOnExited = () => {
+    handleOnClosed = () => {
         this.props.onExited!(undefined);
     }
 
@@ -59,7 +59,7 @@ export class PredictModal extends React.Component<PredictModalProps, PredictModa
         var sctx = new StyleContext(undefined, {});
 
         return (
-            <Modal toggle={this.handleOnToggle} onExit={this.handleOnExited} isOpen={this.state.isOpen} className="message-modal">
+            <Modal toggle={this.handleOnToggle} onClosed={this.handleOnClosed} isOpen={this.state.isOpen} className="message-modal">
                 <ModalHeader toggle={this.handleOnToggle}>
                     <h4 className={"modal-title"}>
                         {e && (<a href={Navigator.navigateRoute(e)} target="_blank" style={{ float: "right", marginRight: "20px" }}>{e.toStr}</a>)}

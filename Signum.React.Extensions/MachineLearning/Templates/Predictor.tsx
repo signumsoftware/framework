@@ -92,9 +92,8 @@ export default class Predictor extends React.Component<{ ctx: TypeContext<Predic
     handleQueryChange = () => {
 
         const p = this.props.ctx.value;
-        p.mainQuery.filters.forEach(a => a.element.token = fixTokenEmbedded(a.element.token || null, p.mainQuery.groupResults || false));
-        p.mainQuery.columns.forEach(a => a.element.token = fixTokenEmbedded(a.element.token || null, p.mainQuery.groupResults || false));
-        this.forceUpdate();
+        p.mainQuery.filters.clear();
+        p.mainQuery.columns.clear();
 
         this.setState({
             queryDescription: undefined
@@ -103,6 +102,15 @@ export default class Predictor extends React.Component<{ ctx: TypeContext<Predic
                 this.loadData(p.mainQuery.query);
         });
     }
+
+    handleGroupChange = () => {
+
+        const p = this.props.ctx.value;
+        p.mainQuery.filters.forEach(a => a.element.token = fixTokenEmbedded(a.element.token || null, p.mainQuery.groupResults || false));
+        p.mainQuery.columns.forEach(a => a.element.token = fixTokenEmbedded(a.element.token || null, p.mainQuery.groupResults || false));
+        this.forceUpdate();
+    }
+
 
     handleCreate = () => {
 
@@ -212,7 +220,7 @@ export default class Predictor extends React.Component<{ ctx: TypeContext<Predic
                                 <legend>{ctxmq.niceName()}</legend>
                                 <EntityLine ctx={ctxmq.subCtx(f => f.query)} remove={ctx.value.isNew} onChange={this.handleQueryChange} />
                                 {queryKey && <div>
-                                    <ValueLine ctx={ctxmq.subCtx(f => f.groupResults)} onChange={this.handleQueryChange} />
+                                    <ValueLine ctx={ctxmq.subCtx(f => f.groupResults)} onChange={this.handleGroupChange} />
 
                                     <FilterBuilderEmbedded ctx={ctxmq.subCtx(a => a.filters)}
                                         queryKey={queryKey}

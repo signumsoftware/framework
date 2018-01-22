@@ -37,12 +37,14 @@ export class StyleOptionsLine extends React.Component<StyleOptionsLineProps>{
         </span>);
     }
 
-    handleRemove = () => {
+    handleRemove = (e: React.MouseEvent<any>) => {
+        e.preventDefault();
         this.props.binding.deleteValue();
         this.props.dn.context.refreshView();
     }
 
-    handleCreate = () => {
+    handleCreate = (e: React.MouseEvent<any>) => {
+        e.preventDefault();
         this.modifyExpression({} as StyleOptionsExpression);
     }
 
@@ -76,7 +78,7 @@ export class StyleOptionsLine extends React.Component<StyleOptionsLineProps>{
                     {this.renderMember(val)}
 
                     {val && " "}
-                    {val && <a className={classes("sf-line-button", "sf-remove")}
+                    {val && <a href="#" className={classes("sf-line-button", "sf-remove")}
                         onClick={this.handleRemove}
                         title={EntityControlMessage.Remove.niceToString()}>
                         <span className="fa fa-remove" />
@@ -84,9 +86,9 @@ export class StyleOptionsLine extends React.Component<StyleOptionsLineProps>{
                 </label>
                 <div>
                     {val ?
-                        <a href="" onClick={this.handleView}><pre style={{ padding: "0px", border: "none" }}>{this.getDescription(val)}</pre></a>
+                        <a href="#" onClick={this.handleView}><pre style={{ padding: "0px", border: "none" }}>{this.getDescription(val)}</pre></a>
                         :
-                        <a title={EntityControlMessage.Create.niceToString()}
+                        <a href="#" title={EntityControlMessage.Create.niceToString()}
                             className="sf-line-button sf-create"
                             onClick={this.handleCreate}>
                             <span className="fa fa-plus sf-create sf-create-label" />{EntityControlMessage.Create.niceToString()}

@@ -33,7 +33,7 @@ export default class NodeSelectorModal extends React.Component<NodeSelectorModal
         this.setState({ isOpen: false });
     }
 
-    handleOnExited = () => {
+    handleOnClosed = () => {
         this.props.onExited!(this.selectedValue);
     }
 
@@ -48,36 +48,38 @@ export default class NodeSelectorModal extends React.Component<NodeSelectorModal
             .groupBy(n => n.group!)
             .groupsOf(nodes.length / 3, g => g.elements.length);
 
-        return <Modal size="lg" toggle={this.handleCancelClicked} isOpen={this.state.isOpen} onExit={this.handleOnExited} className="sf-selector-modal">
-            <ModalHeader toggle={this.handleCancelClicked} >
+        return (
+            <Modal size="lg" toggle={this.handleCancelClicked} isOpen={this.state.isOpen} onClosed={this.handleOnClosed} className="sf-selector-modal">
+                <ModalHeader toggle={this.handleCancelClicked} >
 
-                <h4 className="modal-title">
-                    {DynamicViewMessage.SelectATypeOfComponent.niceToString()}
-                </h4>
-            </ModalHeader>
+                    <h4 className="modal-title">
+                        {DynamicViewMessage.SelectATypeOfComponent.niceToString()}
+                    </h4>
+                </ModalHeader>
 
-            <ModalBody>
-                <div className="row">
-                    {
-                        columns.map((c, i) =>
-                            <div key={i} className={"col-sm-" + (12 / columns.length)}>
-                                {
-                                    c.map(gr => <fieldset key={gr.key}>
-                                        <legend>{gr.key}</legend>
-                                        {
-                                            gr.elements.orderBy(n => n.order!).map(n =>
-                                                <button key={n.kind} type="button" onClick={() => this.handleButtonClicked(n)}
-                                                    className="sf-chooser-button sf-close-button btn btn-light">
-                                                    {n.kind}
-                                                </button>)
-                                        }
-                                    </fieldset>)
-                                }
-                            </div>)
-                    }
-                </div>
-            </ModalBody>
-        </Modal>;
+                <ModalBody>
+                    <div className="row">
+                        {
+                            columns.map((c, i) =>
+                                <div key={i} className={"col-sm-" + (12 / columns.length)}>
+                                    {
+                                        c.map(gr => <fieldset key={gr.key}>
+                                            <legend>{gr.key}</legend>
+                                            {
+                                                gr.elements.orderBy(n => n.order!).map(n =>
+                                                    <button key={n.kind} type="button" onClick={() => this.handleButtonClicked(n)}
+                                                        className="sf-chooser-button sf-close-button btn btn-light">
+                                                        {n.kind}
+                                                    </button>)
+                                            }
+                                        </fieldset>)
+                                    }
+                                </div>)
+                        }
+                    </div>
+                </ModalBody>
+            </Modal>
+        );
     }
 
     static chooseElement(parentNode: string): Promise<NodeUtils.NodeOptions<BaseNode> | undefined> {

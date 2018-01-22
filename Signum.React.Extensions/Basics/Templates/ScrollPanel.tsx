@@ -1,7 +1,5 @@
 ﻿import * as React from 'react'
-import { Panel, PanelGroup } from "react-bootstrap";
 import { classes } from '../../../../Framework/Signum.React/Scripts/Globals'
-import { BsStyle } from "../../../../Framework/Signum.React/Scripts/Operations";
 
 export interface ScrollPanelsProps {
     children: React.ReactElement<ScrollPanelProps>[];
