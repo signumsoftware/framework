@@ -166,7 +166,7 @@ export default class ValueSearchControl extends React.Component<ValueSearchContr
 
         if (p.isLink) {
             return (
-                <a className={className} onClick={this.handleClick} href="" style={p.customStyle}>
+                <a className={className} onClick={this.handleClick} href="#" style={p.customStyle}>
                     {this.renderValue()}
                 </a>
             );

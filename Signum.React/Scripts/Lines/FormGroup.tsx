@@ -37,7 +37,7 @@ export class FormGroup extends React.Component<FormGroupProps> {
         const labelClasses = classes(
             ctx.formGroupStyle == "SrOnly" && "sr-only",
             ctx.formGroupStyle == "LabelColumns" && ctx.labelColumnsCss,
-            ctx.formGroupStyle == "LabelColumns" && ctx.colFormLabelClass,
+            ctx.formGroupStyle == "LabelColumns" ? ctx.colFormLabelClass : ctx.labelClass,
         );
 
         let pr = tCtx.propertyRoute;

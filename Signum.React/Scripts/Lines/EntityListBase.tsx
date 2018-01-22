@@ -51,8 +51,8 @@ export abstract class EntityListBase<T extends EntityListBaseProps, S extends En
             return undefined;
 
         return (
-            <a className={classes("sf-line-button", "sf-move", btn ? "btn btn-light" : undefined) }
-                onClick={() => this.moveUp(index) }
+            <a href="#" className={classes("sf-line-button", "sf-move", btn ? "btn btn-light" : undefined)}
+                onClick={e => { e.preventDefault(); this.moveUp(index); }}
                 title={EntityControlMessage.MoveUp.niceToString() }>
                 <span className="fa fa-chevron-up"/>
             </a>
@@ -70,8 +70,8 @@ export abstract class EntityListBase<T extends EntityListBaseProps, S extends En
             return undefined;
 
         return (
-            <a className={classes("sf-line-button", "sf-move", btn ? "btn btn-light" : undefined) }
-                onClick={() => this.moveDown(index) }
+            <a href="#" className={classes("sf-line-button", "sf-move", btn ? "btn btn-light" : undefined)}
+                onClick={e => { e.preventDefault(); this.moveDown(index); }}
                 title={EntityControlMessage.MoveUp.niceToString() }>
                 <span className="fa fa-chevron-down"/>
             </a>);

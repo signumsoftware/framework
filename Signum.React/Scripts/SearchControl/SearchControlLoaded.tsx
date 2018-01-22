@@ -136,7 +136,9 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
         }
     }
 
+    isUnmounted = false;
     componentWillUnmount() {
+        this.isUnmounted = true;
         this.abortableSearch.abort();
     }
 
@@ -193,6 +195,10 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
     abortableSearch = new AbortableRequest((abortController, request: QueryRequest) => Finder.API.executeQuery(request, abortController));
 
     doSearch(dataChanged?: boolean): Promise<void> {
+
+        if (this.isUnmounted)
+            return Promise.resolve();
+
         return this.getFindOptionsWithSFB().then(fop => {
             if (this.props.onSearch)
                 this.props.onSearch(fop, dataChanged || false);

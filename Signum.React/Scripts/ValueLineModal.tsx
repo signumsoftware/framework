@@ -37,7 +37,7 @@ export default class ValueLineModal extends React.Component<ValueLineModalProps,
         this.setState({ show: false });   
     }
 
-    handleOnExited = () => {
+    handleOnClosed = () => {
         this.props.onExited!(this.selectedValue);
     }
 
@@ -61,7 +61,7 @@ export default class ValueLineModal extends React.Component<ValueLineModalProps,
         const valueOnChanged = this.props.options.allowEmptyValue == false ? () => this.forceUpdate() : undefined;
 
         return (
-            <Modal size="lg" isOpen={this.state.show} onExit={this.handleOnExited} toggle={this.handleCancelClicked}>
+            <Modal size="lg" isOpen={this.state.show} onClosed={this.handleOnClosed} toggle={this.handleCancelClicked}>
                 <ModalHeader toggle={this.handleCancelClicked}>
                     <h4 className="modal-title">
                         {title === undefined ? SelectorMessage.ChooseAValue.niceToString() : title}

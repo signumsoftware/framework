@@ -81,7 +81,7 @@ export class EntityRepeater extends EntityListBase<EntityRepeaterProps, EntityRe
                 {
                     this.state.createAsLink && this.state.create && !readOnly &&
                     (typeof this.state.createAsLink == "function" ? this.state.createAsLink(this) :
-                        <a title={EntityControlMessage.Create.niceToString()}
+                        <a href="#" title={EntityControlMessage.Create.niceToString()}
                             className="sf-line-button sf-create"
                             onClick={this.handleCreateClick}>
                             <span className="fa fa-plus sf-create sf-create-label" />{EntityControlMessage.Create.niceToString()}
@@ -116,13 +116,13 @@ export class EntityRepeaterElement extends React.Component<EntityRepeaterElement
                     {...EntityListBase.entityHtmlAttributes(this.props.ctx.value) }>
                     <legend>
                         <div className="item-group">
-                            {this.props.onRemove && <a className={classes("sf-line-button", "sf-remove")}
+                            {this.props.onRemove && <a href="#" className={classes("sf-line-button", "sf-remove")}
                                 onClick={this.props.onRemove}
                                 title={EntityControlMessage.Remove.niceToString()}>
                                 <span className="fa fa-remove" />
                             </a>}
                             &nbsp;
-                        {drag && <a className={classes("sf-line-button", "sf-move")}
+                        {drag && <a href="#" className={classes("sf-line-button", "sf-move")}
                                 draggable={true}
                                 onDragStart={drag.onDragStart}
                                 onDragEnd={drag.onDragEnd}

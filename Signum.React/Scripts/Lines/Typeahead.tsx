@@ -277,7 +277,6 @@ export default class Typeahead extends React.Component<TypeaheadProps, Typeahead
                         onKeyDown={this.handleKeyDown}
                         onChange={this.handleOnChange}
                     />
-                    <span>{/*placeholder for rouded borders*/}</span>
                 </Target>
                 {this.state.shown && <Popper placement="bottom-start" style={{zIndex: 1000}}>{this.props.renderList ? this.props.renderList(this) : this.renderDefaultList()}</Popper>}
             </Manager>

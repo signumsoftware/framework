@@ -69,6 +69,16 @@ export class StyleContext {
         }
     }
 
+    get labelClass(): string | undefined {
+        switch (this.formSize) {
+            case "ExtraSmall": return "label-xs";
+            case "Small": return "label-sm";
+            case "Normal": return undefined;
+            case "Large": return undefined;
+            default: throw new Error("Unexpected formSize " + this.formSize);
+        }
+    }
+
     get rwWidgetClass(): string | undefined {
         switch (this.formSize) {
             case "ExtraSmall": return "rw-widget-xs";

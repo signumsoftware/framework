@@ -30,7 +30,8 @@ export class MultiValueLine extends LineBase<MultiValueLineProps, MultiValueLine
         this.setValue(list);
     }
 
-    handleAddValue = () => {
+    handleAddValue = (e: React.MouseEvent<any>) => {
+        e.preventDefault();
         const list = this.state.ctx.value;
         const newValuePromise = this.state.onCreate == null ? this.defaultCreate() : this.state.onCreate();
 
@@ -70,9 +71,9 @@ export class MultiValueLine extends LineBase<MultiValueLineProps, MultiValueLine
                                 <tr key={i}>
                                     <td>
                                         {!s.ctx.readOnly &&
-                                            <a title={SearchMessage.DeleteFilter.niceToString()}
+                                            <a href="#" title={SearchMessage.DeleteFilter.niceToString()}
                                                 className="sf-line-button sf-remove"
-                                                onClick={() => this.handleDeleteValue(i)}>
+                                                onClick={e => { e.preventDefault(); this.handleDeleteValue(i); }}>
                                                 <span className="fa fa-remove" />
                                             </a>}
                                     </td>
@@ -84,7 +85,7 @@ export class MultiValueLine extends LineBase<MultiValueLineProps, MultiValueLine
                         <tr >
                             <td colSpan={4}>
                                 {!s.ctx.readOnly &&
-                                    <a title={this.props.addValueText || SearchMessage.AddValue.niceToString()}
+                                    <a href="#"  title={this.props.addValueText || SearchMessage.AddValue.niceToString()}
                                         className="sf-line-button sf-create"
                                         onClick={this.handleAddValue}>
                                         <span className="fa fa-plus sf-create sf-create-label" />{this.props.addValueText || SearchMessage.AddValue.niceToString()}

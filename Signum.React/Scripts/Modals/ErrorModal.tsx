@@ -31,7 +31,7 @@ export default class ErrorModal extends React.Component<ErrorModalProps, { showD
         this.setState({ showDetails: !this.state.showDetails });
     }
 
-    handleOnExited = () => {
+    handleOnClosed = () => {
         this.props.onExited!(undefined);
     }
 
@@ -47,7 +47,7 @@ export default class ErrorModal extends React.Component<ErrorModalProps, { showD
         const ve = e instanceof ValidationError ? (e as ValidationError) : undefined;
 
         return (
-            <Modal isOpen={this.state.show} onExit={this.handleOnExited}>
+            <Modal isOpen={this.state.show} onClosed={this.handleOnClosed}>
                 <ModalHeader className="dialog-header-error">
                     {se ? this.renderServiceTitle(se) :
                         ve ? this.renderValidationTitle(ve) :

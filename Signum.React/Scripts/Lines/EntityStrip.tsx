@@ -224,7 +224,7 @@ export class EntityStripElement extends React.Component<EntityStripElementProps,
 
                     {
                         this.props.onView ?
-                            <a className="sf-entitStrip-link" href="" onClick={this.props.onView} {...htmlAttributes}>
+                            <a href="#" className="sf-entitStrip-link" onClick={this.props.onView} {...htmlAttributes}>
                                 {toStr}
                             </a>
                             :
@@ -235,10 +235,11 @@ export class EntityStripElement extends React.Component<EntityStripElementProps,
 
                     {this.props.onRemove &&
                         <span>
-                            <a className="sf-line-button sf-remove"
+                            <a href="#" className="sf-line-button sf-remove"
                                 onClick={this.props.onRemove}
                                 title={EntityControlMessage.Remove.niceToString()}>
-                                <span className="fa fa-remove"></span></a>
+                                <span className="fa fa-remove"></span>
+                            </a>
                         </span>
                     }
                     &nbsp;

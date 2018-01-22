@@ -84,6 +84,10 @@ label > input[type=checkbox] {
     color: lightgray;
 }
 
+.sf-line-button.btn {
+    color: gray;
+}
+
     .sf-line-button:hover {
         color: gray;
     }
@@ -93,10 +97,12 @@ label > input[type=checkbox] {
         margin: 0 2px;
     }
 
+
+
 /* EntityLine buttons  */
 .input-group-append.input-group-vertical {
     flex-direction: column;
-    align-items:stretch;
+    align-items: stretch;
 }
 
     .input-group-append.input-group-vertical > .btn {
@@ -279,6 +285,23 @@ select.form-control-xs:not([size]):not([multiple]),
     font-size: 0.875rem;
     line-height: 1.5;
     border-radius: 0.2rem;
+}
+
+.col-form-label-xs {
+    padding-top: 2px;
+    padding-bottom: 2px;
+    font-size: 0.875rem;
+    line-height: 1.5;
+}
+
+.label-sm {
+    font-size: 0.875rem;
+    margin-bottom: 0px;
+}
+
+.label-xs {
+    font-size: 0.875rem;
+    margin-bottom: 0px;
 }
 
 /*.form-xs .form-control,

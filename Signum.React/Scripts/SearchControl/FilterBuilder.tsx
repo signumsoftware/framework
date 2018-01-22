@@ -29,7 +29,9 @@ interface FilterBuilderProps {
 
 export default class FilterBuilder extends React.Component<FilterBuilderProps>{
 
-    handlerNewFilter = () => {
+    handlerNewFilter = (e: React.MouseEvent<any>) => {
+
+        e.preventDefault();
 
         this.props.filterOptions.push({
             token: this.props.lastToken,
@@ -87,15 +89,15 @@ export default class FilterBuilder extends React.Component<FilterBuilderProps>{
                                 onFilterChanged={this.handleFilterChanged}
                             />)}
                             {!this.props.readOnly &&
-                            <tr >
-                                <td colSpan={4}>
-                                    <a title={SearchMessage.AddFilter.niceToString()}
-                                        className="sf-line-button sf-create"
-                                        onClick={this.handlerNewFilter}>
+                                <tr >
+                                    <td colSpan={4}>
+                                        <a href="#" title={SearchMessage.AddFilter.niceToString()}
+                                            className="sf-line-button sf-create"
+                                            onClick={this.handlerNewFilter}>
                                             <span className="fa fa-plus sf-create sf-create-label" />{SearchMessage.AddFilter.niceToString()}
-                                    </a>
-                                </td>
-                            </tr>
+                                        </a>
+                                    </td>
+                                </tr>
                             }
                         </tbody>
                     </table>
@@ -119,7 +121,8 @@ export interface FilterComponentProps extends React.Props<FilterComponent> {
 
 export class FilterComponent extends React.Component<FilterComponentProps>{
 
-    handleDeleteFilter = () => {
+    handleDeleteFilter = (e: React.MouseEvent<any>) => {
+        e.preventDefault();
         this.props.onDeleteFilter(this.props.filter);
     }
 
@@ -134,7 +137,7 @@ export class FilterComponent extends React.Component<FilterComponentProps>{
         else {
 
             if (!areEqual(f.token, newToken, a => a.filterType) || !areEqual(f.token, newToken, a => a.preferEquals)) {
-                f.operation = newToken.preferEquals ? "EqualTo": newToken.filterType && filterOperations[newToken.filterType].first();
+                f.operation = newToken.preferEquals ? "EqualTo" : newToken.filterType && filterOperations[newToken.filterType].first();
                 f.value = f.operation && isList(f.operation) ? [undefined] : undefined;
             }
             else if (f.token && f.token.filterType == "DateTime" && newToken.filterType == "DateTime" && newToken.format && f.token.format != newToken.format) {
@@ -185,16 +188,16 @@ export class FilterComponent extends React.Component<FilterComponentProps>{
                         <a title={SearchMessage.DeleteFilter.niceToString()}
                             className="sf-line-button sf-remove"
                             onClick={this.handleDeleteFilter}>
-                            <span className="fa fa-remove"/>
+                            <span className="fa fa-remove" />
                         </a>}
                 </td>
                 <td>
                     <div className="rw-widget-xs">
-                    <QueryTokenBuilder
-                        queryToken={f.token}
-                        onTokenChange={this.handleTokenChanged}
-                        queryKey={this.props.queryDescription.queryKey}
-                        subTokenOptions={this.props.subTokenOptions}
+                        <QueryTokenBuilder
+                            queryToken={f.token}
+                            onTokenChange={this.handleTokenChanged}
+                            queryKey={this.props.queryDescription.queryKey}
+                            subTokenOptions={this.props.subTokenOptions}
                             readOnly={readOnly} />
                     </div>
                 </td>
@@ -264,15 +267,18 @@ export interface MultiValueProps {
 
 export class MultiValue extends React.Component<MultiValueProps> {
 
-    handleDeleteValue = (index: number) => {
-
+    handleDeleteValue = (e: React.MouseEvent<any>, index: number) => {
+        e.preventDefault();
         this.props.values.removeAt(index);
         this.props.onChange();
         this.forceUpdate();
 
     }
 
-    handleAddValue = () => {
+    handleAddValue = (e: React.MouseEvent<any>) => {
+
+        e.preventDefault();
+
         this.props.values.push(undefined);
         this.props.onChange();
         this.forceUpdate();
@@ -289,8 +295,8 @@ export class MultiValue extends React.Component<MultiValueProps> {
                                     {!this.props.readOnly &&
                                         <a title={SearchMessage.DeleteFilter.niceToString()}
                                             className="sf-line-button sf-remove"
-                                            onClick={() => this.handleDeleteValue(i)}>
-                                            <span className="fa fa-remove"/>
+                                            onClick={e => this.handleDeleteValue(e, i) }>
+                                            <span className="fa fa-remove" />
                                         </a>}
                                 </td>
                                 <td>
@@ -320,7 +326,6 @@ export class MultiValue extends React.Component<MultiValueProps> {
         );
 
     }
-
 }
 
 

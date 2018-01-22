@@ -34,13 +34,13 @@ export default class SelectorModal extends React.Component<SelectorModalProps, {
         this.setState({ show: false });
     }
 
-    handleOnExited = () => {
+    handleOnClosed = () => {
         this.props.onExited!(this.selectedValue);
     }
 
 
     render() {
-        return <Modal size={this.props.size ? this.props.size : "sm"} isOpen={this.state.show} onExit={this.handleOnExited} className="sf-selector-modal" modalClassName={this.props.dialogClassName}>
+        return <Modal size={this.props.size ? this.props.size : "sm"} isOpen={this.state.show} onClosed={this.handleOnClosed} className="sf-selector-modal" modalClassName={this.props.dialogClassName}>
             <ModalHeader>
                 {this.props.title &&
                     <h4 className="modal-title">

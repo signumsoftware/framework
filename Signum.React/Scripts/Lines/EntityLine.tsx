@@ -153,7 +153,7 @@ export class EntityLine extends EntityBase<EntityLineProps, EntityLineState> {
 
         return (
             <Typeahead ref={ta => this.typeahead = ta}
-                inputAttrs={{ className: "form-control sf-entity-autocomplete" }}
+                inputAttrs={{ className: classes(ctx.formControlClass, "sf-entity-autocomplete") }}
                 getItems={query => ac!.getItems(query)}
                 getItemsDelay={ac.getItemsDelay}
                 minLength={ac.minLength}
@@ -188,14 +188,14 @@ export class EntityLine extends EntityBase<EntityLineProps, EntityLineState> {
         if (s.navigate && s.view) {
             return (
                 <a href="#" onClick={this.handleViewClick}
-                    className={classes(s.ctx.formControlClass, "btn-light sf-entity-line-entity")}
+                    className={classes(s.ctx.formControlClass, "sf-entity-line-entity")}
                     title={JavascriptMessage.navigate.niceToString()} {...s.itemHtmlAttributes}>
                     {str}
                 </a>
             );
         } else {
             return (
-                <span className={classes(s.ctx.formControlClass, "btn-light sf-entity-line-entity")} { ...s.itemHtmlAttributes } >
+                <span className={classes(s.ctx.formControlClass, "sf-entity-line-entity")} { ...s.itemHtmlAttributes } >
                     {str }
                 </span>
             );

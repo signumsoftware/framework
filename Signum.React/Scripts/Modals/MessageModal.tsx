@@ -44,7 +44,7 @@ export default class MessageModal extends React.Component<MessageModalProps, { s
         this.setState({ show: false });
     }
 
-    handleOnExited = () => {
+    handleOnClosed = () => {
         this.props.onExited!(this.selectedValue);
     }
 
@@ -60,7 +60,7 @@ export default class MessageModal extends React.Component<MessageModalProps, { s
                     </button>);
             case "ok_cancel":
                 return (
-                    <div>
+                    <div className="btn-toolbar">
                         <button
                             className="btn btn-primary sf-close-button sf-ok-button"
                             onClick={() => this.handleButtonClicked("ok")}
@@ -68,7 +68,7 @@ export default class MessageModal extends React.Component<MessageModalProps, { s
                             {JavascriptMessage.ok.niceToString()}
                         </button>
                         <button
-                            className="btn btn-light sf-close-button sf-button"
+                            className="btn btn-secondary sf-close-button sf-button"
                             onClick={() => this.handleButtonClicked("cancel")}
                             name="cancel">
                             {JavascriptMessage.cancel.niceToString()}
@@ -76,7 +76,7 @@ export default class MessageModal extends React.Component<MessageModalProps, { s
                     </div>);
             case "yes_no":
                 return (
-                    <div>
+                    <div className="btn-toolbar">
                         <button
                             className="btn btn-primary sf-close-button sf-yes-button"
                             onClick={() => this.handleButtonClicked("yes")}
@@ -84,7 +84,7 @@ export default class MessageModal extends React.Component<MessageModalProps, { s
                             {BooleanEnum.niceName("True")}
                         </button>
                         <button
-                            className="btn btn-light sf-close-button sf-no-button"
+                            className="btn btn-secondary sf-close-button sf-no-button"
                             onClick={() => this.handleButtonClicked("no")}
                             name="no">
                             {BooleanEnum.niceName("False")}
@@ -92,7 +92,7 @@ export default class MessageModal extends React.Component<MessageModalProps, { s
                     </div>);
             case "yes_no_cancel":
                 return (
-                    <div>
+                    <div className="btn-toolbar">
                         <button
                             className="btn btn-primary sf-close-button sf-yes-button"
                             onClick={() => this.handleButtonClicked("yes")}
@@ -100,13 +100,13 @@ export default class MessageModal extends React.Component<MessageModalProps, { s
                             {BooleanEnum.niceName("True")}
                         </button>
                         <button
-                            className="btn btn-light sf-close-button sf-no-button"
+                            className="btn btn-secondary sf-close-button sf-no-button"
                             onClick={() => this.handleButtonClicked("no")}
                             name="no">
                             {BooleanEnum.niceName("False")}
                         </button>
                         <button
-                            className="btn btn-light sf-close-button sf-cancel-button"
+                            className="btn btn-secondary sf-close-button sf-cancel-button"
                             onClick={() => this.handleButtonClicked("cancel")}
                             name="cancel">
                             {JavascriptMessage.cancel.niceToString()}
@@ -136,7 +136,7 @@ export default class MessageModal extends React.Component<MessageModalProps, { s
                     icon = "fa fa-check-circle";
                     break;
                 case "warning":
-                    icon = "fa fa-exclamantion";
+                    icon = "fa fa-exclamation-triangle";
                     break;
             }
         }
@@ -158,7 +158,7 @@ export default class MessageModal extends React.Component<MessageModalProps, { s
 
     render() {
         return (
-            <Modal isOpen={this.state.show} onExit={this.handleOnExited} className="message-modal">
+            <Modal isOpen={this.state.show} onClosed={this.handleOnClosed} className="message-modal">
                 <ModalHeader className={dialogHeaderClass(this.props.style)}>
                     {this.renderTitle()}
                 </ModalHeader>
@@ -207,18 +207,21 @@ function dialogHeaderClass(style: MessageModalStyle | undefined) {
 }
 
 function dialogTextClass(style?: MessageModalStyle) {
-    switch (style) {
-        case "success":
-            return "text-success";
-        case "info":
-            return "text-info";
-        case "warning":
-            return "text-warning";
-        case "error":
-            return "text-danger";
-        default:
-            return "text-primary";
-    }
+
+    return undefined;
+
+    //switch (style) {
+    //    case "success":
+    //        return "text-success";
+    //    case "info":
+    //        return "text-info";
+    //    case "warning":
+    //        return "text-warning";
+    //    case "error":
+    //        return "text-danger";
+    //    default:
+    //        return "text-primary";
+    //}
 }
 
 

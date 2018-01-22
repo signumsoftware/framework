@@ -190,7 +190,7 @@ export default class FrameModal extends React.Component<FrameModalProps, FrameMo
         return entity.modified;
     }
 
-    handleOnExited = () => {
+    handleOnClosed = () => {
         this.props.onExited!(this.okClicked ? this.state.pack!.entity : undefined);
     }
 
@@ -199,7 +199,7 @@ export default class FrameModal extends React.Component<FrameModalProps, FrameMo
         const pack = this.state.pack;
 
         return (
-            <Modal size={this.props.modalSize || "lg"} isOpen={this.state.show} onExit={this.handleOnExited} toggle={this.handleCancelClicked} className="sf-popup-control" >
+            <Modal size={this.props.modalSize || "lg"} isOpen={this.state.show} onClosed={this.handleOnClosed} toggle={this.handleCancelClicked} className="sf-popup-control" >
                 <ModalHeader toggle={this.props.isNavigate ? this.handleCancelClicked : undefined}>
                     {!this.props.isNavigate && <ButtonToolbar className="pull-right flip">
                         <Button className="sf-entity-button sf-close-button sf-ok-button" color="primary" disabled={!pack} onClick={this.handleOkClicked}>{JavascriptMessage.ok.niceToString()}</Button>
