@@ -269,13 +269,13 @@ select.form-control-xs:not([size]):not([multiple]),
     padding: 0 2px
 }
 
-.form-control-sm, 
-.input-group-sm > .form-control, 
-.input-group-sm > .input-group-prepend > .input-group-text, 
-.input-group-sm > .input-group-append > .input-group-text, 
-.input-group-sm > .input-group-prepend > .btn, 
-.input-group-sm > .input-group-append > .btn {
-    padding: 0.25rem 0.5rem;
+.form-control-xs,
+.input-group-xs > .form-control,
+.input-group-xs > .input-group-prepend > .input-group-text,
+.input-group-xs > .input-group-append > .input-group-text,
+.input-group-xs > .input-group-prepend > .btn,
+.input-group-xs > .input-group-append > .btn {
+    padding: 1px 5px;
     font-size: 0.875rem;
     line-height: 1.5;
     border-radius: 0.2rem;

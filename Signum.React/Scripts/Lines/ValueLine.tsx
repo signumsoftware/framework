@@ -476,7 +476,7 @@ export class NumericTextBox extends React.Component<NumericTextBoxProps, { text?
                 value += "%";
         }
 
-        const result = value == undefined || value.length == 0 ? null : numbro().unformat(value);
+        const result = value == undefined || value.length == 0 ? null : numbro.unformat(value, this.props.format).value();
         this.setState({ text: undefined });
         this.props.onChange(result);
     }

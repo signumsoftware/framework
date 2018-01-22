@@ -7,7 +7,7 @@ interface UncontrolledTabsProps extends React.HTMLAttributes<HTMLDivElement> {
     defaultEventKey?: string | number;
     onToggled?: (eventKey: string | number) => void;
     unmountOnExit?: boolean;
-    children?: React.ReactNode;
+    children?: React.ReactFragment;
 }
 
 interface UncontrolledTabsState {
@@ -19,20 +19,20 @@ export class UncontrolledTabs extends React.Component<UncontrolledTabsProps, Unc
     constructor(props: UncontrolledTabsProps) {
         super(props);
         this.state = {
-            activeEventKey: props.defaultEventKey != null ? props.defaultEventKey : getFirstEventKey(props.defaultEventKey)
+            activeEventKey: props.defaultEventKey != null ? props.defaultEventKey : getFirstEventKey(props.children)
         };
     } 
 
     componentWillReceiveProps(newProps: UncontrolledTabsProps) {
         if (this.state.activeEventKey == undefined) {
-            const newEventKey = getFirstEventKey(newProps.defaultEventKey);
+            const newEventKey = getFirstEventKey(newProps.children);
             if (newEventKey != null)
                 this.setState({ activeEventKey: newEventKey });
         } else {
             var array = (React.Children.toArray(newProps.children) as React.ReactElement<TabProps>[]);
 
             if (!array.some(a => a.props.eventKey == this.state.activeEventKey)) {
-                const newEventKey = getFirstEventKey(newProps.defaultEventKey);
+                const newEventKey = getFirstEventKey(newProps.children);
                 this.setState({ activeEventKey: newEventKey });
             }
         }

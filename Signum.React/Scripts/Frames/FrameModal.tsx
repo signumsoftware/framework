@@ -262,7 +262,7 @@ export default class FrameModal extends React.Component<FrameModalProps, FrameMo
     renderTitle() {
 
         if (!this.state.pack)
-            return <h3>{JavascriptMessage.loading.niceToString()}</h3>;
+            return <span>{JavascriptMessage.loading.niceToString()}</span>;
 
         const entity = this.state.pack.entity;
         const pr = this.props.propertyRoute;
