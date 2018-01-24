@@ -783,26 +783,6 @@ namespace Signum.Utilities
             return sb == null ? "" : sb.ToString();  // Remove at the end is faster
         }
 
-        public static string CombineIfNotEmpty(this object[] elements, string separator)
-        {
-            StringBuilder sb = null;
-            foreach (var item in elements)
-            {
-                string str;
-                if (item != null && (str = item.ToString()).HasText())
-                {
-                    if (sb == null)
-                        sb = new StringBuilder();
-                    else
-                        sb.Append(separator);
-
-                    sb.Append(str);
-                }
-            }
-
-            return sb == null ? "" : sb.ToString();  // Remove at the end is faster
-        }
-
         public static string CombineIfNotEmpty(this string separator, params object[] elements)
         {
             StringBuilder sb = null;
