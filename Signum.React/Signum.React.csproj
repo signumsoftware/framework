@@ -160,6 +160,7 @@
     <Compile Include="JsonModelValidators\SignumBodyModelValidator.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Content Include="Scripts\Frames\MenuIcons.css" />
+    <Content Include="Scripts\SearchControl\ColumnBuilder.css" />
     <Content Include="Scripts\SearchControl\QueryTokenBuilder.css" />
     <Content Include="Scripts\SearchControl\FilterBuilder.css" />
     <Content Include="Scripts\SearchControl\PaginationSelector.css" />
@@ -236,6 +237,7 @@
     <TypeScriptCompile Include="Scripts\Operations\ContextualOperations.tsx" />
     <TypeScriptCompile Include="Scripts\QuickLinks.tsx" />
     <TypeScriptCompile Include="Scripts\SearchControl\ContextMenu.tsx" />
+    <TypeScriptCompile Include="Scripts\SearchControl\ColumnBuilder.tsx" />
     <TypeScriptCompile Include="Scripts\SearchControl\GroupByMessage.tsx" />
     <TypeScriptCompile Include="Scripts\SearchControl\ValueSearchControlLine.tsx" />
     <TypeScriptCompile Include="Scripts\SearchControl\EntityLink.tsx" />
