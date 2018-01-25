@@ -109,6 +109,16 @@ export class StyleContext {
         }
     }
 
+    get buttonClass(): string | undefined {
+        switch (this.formSize) {
+            case "ExtraSmall": return "btn-xs";
+            case "Small": return "btn-sm";
+            case "Normal": return undefined;
+            case "Large": return "btn-lg";
+            default: throw new Error("Unexpected formSize " + this.formSize);
+        }
+    }
+
     get placeholderLabels(): boolean {
         return this.styleOptions.placeholderLabels != undefined ? this.styleOptions.placeholderLabels : this.parent.placeholderLabels;
     }

@@ -1009,8 +1009,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
         else {
             Navigator.navigate(lite)
                 .then(() => {
-                    if (this.props.onNavigated)
-                        this.props.onNavigated(lite);
+                    this.handleOnNavigated(lite);
                 }).done();
         }
 

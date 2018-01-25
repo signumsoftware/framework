@@ -85,7 +85,7 @@ export function getEntityOperationButtons(ctx: ButtonsContext): Array<React.Reac
                 order: group.order != undefined ? group.order : 100,
                 button: (
                     <UncontrolledDropdown key={i}>
-                        <DropdownToggle data-key={group.key} color="light" caret>
+                        <DropdownToggle data-key={group.key} color={group.color || "light"} className={group.cssClass} caret>
                             {group.text()}
                         </DropdownToggle>
                         <DropdownMenu>

@@ -235,7 +235,7 @@ export class EntityOperationSettings<T extends Entity> extends OperationSettings
     }
 }
 
-export type BsColor = "default" | "primary" | "success" | "info" | "warning" | "danger";
+export type BsColor = "primary" | "secondary" | "success" | "info" | "warning" | "danger" | "light" | "dark";
 
 export interface EntityOperationOptions<T extends Entity> {
     contextual?: ContextualOperationOptions<T>;
@@ -268,6 +268,7 @@ export interface EntityOperationGroup {
     text: () => string;
     simplifyName?: (complexName: string) => string;
     cssClass?: string;
+    color?: BsColor;
     order?: number;
 }
 
@@ -282,7 +283,7 @@ export let isSave = (oi: OperationInfo): boolean => {
 
 export function autoColorFunction(oi: OperationInfo): BsColor {
     return oi.operationType == OperationType.Delete ? "danger" :
-        oi.operationType == OperationType.Execute && isSave(oi) ? "primary" : "default";
+        oi.operationType == OperationType.Execute && isSave(oi) ? "primary" : "light";
 }
 
 
