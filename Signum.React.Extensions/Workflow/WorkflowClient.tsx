@@ -138,7 +138,7 @@ export function start(options: { routes: JSX.Element[] }) {
     caseActivityOperation(CaseActivityOperation.Approve, "success");
     caseActivityOperation(CaseActivityOperation.Decline, "warning");
     caseActivityOperation(CaseActivityOperation.Undo, "danger");
-    caseActivityOperation(CaseActivityOperation.Reject, "default");
+    caseActivityOperation(CaseActivityOperation.Reject, "secondary");
 
     Operations.addSettings(new EntityOperationSettings(WorkflowOperation.Save, { color: "primary", onClick: executeWorkflowSave }));
     Operations.addSettings(new EntityOperationSettings(WorkflowOperation.Delete, { contextualFromMany: { isVisible: ctx => false } }));

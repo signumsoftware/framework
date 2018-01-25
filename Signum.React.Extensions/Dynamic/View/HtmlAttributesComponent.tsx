@@ -78,8 +78,8 @@ export class HtmlAttributesLine extends React.Component<HtmlAttributesLineProps>
         const val = this.props.binding.getValue();
 
         return (
-            <div className="form-group">
-                <label className="control-label">
+            <div className="form-group form-group-xs">
+                <label className="control-label label-xs">
                     {this.renderMember(val)}
 
                     {val && " "}
@@ -93,7 +93,7 @@ export class HtmlAttributesLine extends React.Component<HtmlAttributesLineProps>
                     {val ?
                         <a href="#" onClick={this.handleView}><pre style={{ padding: "0px", border: "none" }}>{this.getDescription(val)}</pre></a>
                         :
-                        <a title={EntityControlMessage.Create.niceToString()}
+                        <a href="#" title={EntityControlMessage.Create.niceToString()}
                             className="sf-line-button sf-create"
                             onClick={this.handleCreate}>
                             <span className="fa fa-plus sf-create sf-create-label" />{EntityControlMessage.Create.niceToString()}
@@ -245,7 +245,7 @@ export class ExpressionOrValueStrip extends React.Component<ExpressionOrValueStr
         return (
             <div style={{ position: "relative" }}>
                 <Typeahead
-                    inputAttrs={{ className: "form-control sf-entity-autocomplete" }}
+                    inputAttrs={{ className: "form-control form-control-xs sf-entity-autocomplete" }}
                     getItems={this.handleGetItems}
                     onSelect={this.handleSelect} />
             </div>

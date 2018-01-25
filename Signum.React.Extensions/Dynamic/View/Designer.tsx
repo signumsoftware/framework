@@ -100,7 +100,7 @@ export class ExpressionOrValueComponent extends React.Component<ExpressionOrValu
             if (p.defaultValue == null) {
 
                 return (<div>
-                    <label>
+                    <label className="label-xs">
                         {expressionIcon}
                         <NullableCheckBox value={value}
                             onChange={newValue => this.updateValue(newValue)}
@@ -112,7 +112,7 @@ export class ExpressionOrValueComponent extends React.Component<ExpressionOrValu
             } else {
                 return (
                     <div>
-                        <label>
+                        <label className="label-xs">
                             {expressionIcon}
                             <input className="design-check-box"
                                 type="checkbox"
@@ -135,8 +135,8 @@ export class ExpressionOrValueComponent extends React.Component<ExpressionOrValu
         }
 
         return (
-            <div className="form-group">
-                <label className="control-label">
+            <div className="form-group form-group-xs">
+                <label className="control-label label-xs">
                     { expressionIcon }
                     { this.renderMember(value) }
                 </label>
@@ -160,7 +160,7 @@ export class ExpressionOrValueComponent extends React.Component<ExpressionOrValu
     renderValue(value: number | string | null | undefined) {
 
         if (this.props.type == null)
-            return <p className="form-control-static">{DynamicViewMessage.UseExpression.niceToString()}</p>;
+            return <p className="form-control-static form-control-xs">{DynamicViewMessage.UseExpression.niceToString()}</p>;
 
         const val = value === undefined ? this.props.defaultValue : value;
 
@@ -171,14 +171,14 @@ export class ExpressionOrValueComponent extends React.Component<ExpressionOrValu
                 return (
                     <div style={{ position: "relative" }}>
                         <Typeahead
-                            inputAttrs={{ className: "form-control sf-entity-autocomplete" }}
+                            inputAttrs={{ className: "form-control form-control-xs sf-entity-autocomplete" }}
                             getItems={this.handleGetItems}
                             onSelect={this.handleTypeaheadSelect} />
                     </div>
                 );
                 else
             return (
-                <select className="form-control" style={style}
+                <select className="form-control form-control-xs" style={style}
                     value={val == null ? "" : val.toString()} onChange={this.handleChangeSelectOrInput} >
                     {this.props.defaultValue == null && <option value="">{" - "}</option>}
                     {this.props.options.map((o, i) =>
@@ -189,12 +189,12 @@ export class ExpressionOrValueComponent extends React.Component<ExpressionOrValu
         else {
 
             if (this.props.type == "textArea") {
-                return (<textarea className="form-control" style={style}
+                return (<textarea className="form-control form-control-xs" style={style}
                     value={val == null ? "" : val.toString()}
                     onChange={this.handleChangeSelectOrInput} />);
             }
 
-            return (<input className="form-control" style={style}
+            return (<input className="form-control form-control-xs" style={style}
                 type="text"
                 value={val == null ? "" : val.toString()}
                 onChange={this.handleChangeSelectOrInput} />);
@@ -291,8 +291,8 @@ export class FieldComponent extends React.Component<FieldComponentProps> {
         var value = p.binding.getValue();
         
         return (
-            <div className="form-group">
-                <label className="control-label">
+            <div className="form-group form-group-xs">
+                <label className="control-label label-xs">
                     {p.binding.member}
                 </label>
                 <div>
@@ -310,7 +310,7 @@ export class FieldComponent extends React.Component<FieldComponentProps> {
 
         const subMembers = route ? route.subMembers() : {};
 
-        return (<select className="form-control" value={strValue} onChange={this.handleChange} >
+        return (<select className="form-control form-control-xs" value={strValue} onChange={this.handleChange} >
             <option value=""> - </option>
             {Dic.getKeys(subMembers).filter(k => subMembers[k].name != "Id").map((name, i) =>
                 <option key={i} value={name}>{name}</option>)

@@ -73,8 +73,8 @@ export class StyleOptionsLine extends React.Component<StyleOptionsLineProps>{
         const val = this.props.binding.getValue();
 
         return (
-            <div className="form-group">
-                <label className="control-label">
+            <div className="form-group form-group-xs">
+                <label className="control-label label-xs">
                     {this.renderMember(val)}
 
                     {val && " "}

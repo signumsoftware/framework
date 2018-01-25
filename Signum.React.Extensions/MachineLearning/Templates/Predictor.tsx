@@ -351,7 +351,7 @@ export class TrainingProgressComponent extends React.Component<TrainingProgressC
         return (
             <div>
                 {tp && tp.EpochProgressesParsed && <LineChart height={200} series={getSeries(tp.EpochProgressesParsed, this.props.ctx.value)} />}
-                <ProgressBar color={tp == null || tp.Running == false ? "info" : "default"}
+                <ProgressBar color={tp == null || tp.Running == false ? "warning" : null}
                     value={tp && tp.Progress}
                     message={tp == null ? PredictorMessage.StartingTraining.niceToString() : tp.Message}
                 />

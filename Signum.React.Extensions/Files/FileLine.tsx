@@ -69,7 +69,8 @@ export default class FileLine extends EntityBase<FileLineProps, FileLineProps> {
                         dragAndDropMessage={this.props.dragAndDropMessage}
                         fileType={this.props.fileType}
                         onFileLoaded={this.handleFileLoaded}
-                        typeName={this.props.ctx.propertyRoute.typeReference().name}
+                        typeName={s.ctx.propertyRoute.typeReference().name}
+                        buttonCss={s.ctx.buttonClass}
                         divHtmlAttributes={{ className: "sf-file-line-new" }}/>
                 }
             </FormGroup>
@@ -79,15 +80,17 @@ export default class FileLine extends EntityBase<FileLineProps, FileLineProps> {
 
     renderFile() {
 
-        const val = this.state.ctx.value!;
+        var ctx = this.state.ctx;
+
+        const val = ctx.value!;
 
         const content = this.state.download == "None" ?
-            <span className="form-control file-control">{val.toStr}</span> :
+            <span className={classes(ctx.formControlClass, "file-control")} > {val.toStr}</span > :
             <FileDownloader
                 configuration={this.props.configuration}
                 download={this.props.download}
                 entityOrLite={val}
-                htmlAttributes={{ className: "form-control file-control" }} />;
+                htmlAttributes={{ className: classes(ctx.formControlClass, "file-control") }} />;
 
         const removeButton = this.renderRemoveButton(true, val);
 
@@ -95,7 +98,7 @@ export default class FileLine extends EntityBase<FileLineProps, FileLineProps> {
             return content;
 
         return (
-            <div className="input-group">
+            <div className={ctx.inputGroupClass}>
                 {content}
                 <span className="input-group-append">
                     {removeButton }

@@ -70,8 +70,8 @@ export default class ValueComponent extends React.Component<ValueComponentProps>
         const lc = this.props.labelColumns;
 
         return (
-            <div className="form-group form-sm" style={opacity}>
-                <label className={classes("control-label", this.props.labelClass,  "col-sm-" + (lc == null ? 2 : lc))}>
+            <div className="form-group form-group-sm" style={opacity}>
+                <label className={classes("control-label", this.props.labelClass, "col-sm-" + (lc == null ? 2 : lc))}>
                     {this.props.binding.member}
                 </label>
                 <div className={"col-sm-" + (lc == null ? 10 : 12 -lc)}>

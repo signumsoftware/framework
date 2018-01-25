@@ -88,10 +88,13 @@ export const PanelStyle = new EnumType<PanelStyle>("PanelStyle");
 export type PanelStyle =
     "Default" |
     "Primary" |
+    "Secondary" |
     "Success" |
     "Info" |
     "Warning" |
-    "Danger";
+    "Danger" |
+    "Light" |
+    "Dark";
 
 export const UserChartPartEntity = new Type<UserChartPartEntity>("UserChartPart");
 export interface UserChartPartEntity extends Entities.Entity, IPartEntity {

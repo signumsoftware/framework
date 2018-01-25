@@ -1131,7 +1131,7 @@ export class ComboBoxRepeaterComponent extends React.Component<ComboBoxRepeaterC
                         </a>
                     </span>
                 </td>
-                <td className="form-sm">
+                <td className="rw-widget-sm">
                     <Combobox value={value} key={i}
                         data={this.props.options.filter(o => o == value || !this.props.list.contains(o))}
                         onChange={val => this.handleChange(val, i)} />
