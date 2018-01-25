@@ -20,7 +20,7 @@ namespace Signum.Entities.SMS
 
         public bool EditableMessage { get; set; } = true;
 
-        [StringLengthValidator(AllowNulls = false)]
+        [StringLengthValidator(AllowNulls = false, Max = 200)]
         public string From { get; set; }
 
         [SecondsPrecissionValidator]
