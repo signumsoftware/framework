@@ -167,6 +167,22 @@ namespace Signum.Engine.Maps
             }
         }
 
+        public V ValidatorAttribute<V>(PropertyRoute propertyRoute) where V: ValidatorAttribute
+        {
+            if (propertyRoute.PropertyRouteType == PropertyRouteType.MListItems)
+                propertyRoute = propertyRoute.Parent;
+
+            if (propertyRoute.PropertyInfo == null)
+                return null;
+
+            var pp = Validator.TryGetPropertyValidator(propertyRoute);
+
+            if (pp == null)
+                return null;
+
+            return pp.Validators.OfType<V>().FirstOrDefault();
+        }
+
         public A TypeAttribute<A>(Type entityType) where A : Attribute
         {
             return (A)TypeAttributes(entityType).FirstOrDefault(a => a.GetType() == typeof(A));
@@ -182,6 +198,17 @@ namespace Signum.Engine.Maps
 
             if (FieldAttribute<NullableAttribute>(propertyRoute) != null)
                 return true;
+
+            if (ValidatorAttribute<NotNullValidatorAttribute>(propertyRoute) != null)
+                return false;
+
+            if (propertyRoute.Type == typeof(string))
+            {
+                var slv = ValidatorAttribute<StringLengthValidatorAttribute>(propertyRoute);
+
+                if (slv != null)
+                    return slv.AllowNulls;
+            }
 
             return !propertyRoute.Type.IsValueType || propertyRoute.Type.IsNullable();
         }
@@ -228,10 +255,17 @@ namespace Signum.Engine.Maps
             return GetSqlDbTypePair(type.UnNullify());
         }
 
-        internal int? GetSqlSize(SqlDbTypeAttribute att, SqlDbType sqlDbType)
+        internal int? GetSqlSize(SqlDbTypeAttribute att, PropertyRoute route, SqlDbType sqlDbType)
         {
             if (att != null && att.HasSize)
                 return att.Size;
+
+            if(route != null && route.Type == typeof(string))
+            {
+                var sla = ValidatorAttribute<StringLengthValidatorAttribute>(route);
+                if (sla != null)
+                    return sla.Max == -1 ? int.MaxValue : sla.Max;
+            }
 
             return defaultSize.TryGetS(sqlDbType);
         }
@@ -244,7 +278,6 @@ namespace Signum.Engine.Maps
                     throw  new InvalidOperationException($"{sqlDbType} can not have Scale");
 
                 return att.Scale;
-
             }
 
             return defaultScale.TryGetS(sqlDbType);
@@ -344,7 +377,7 @@ namespace Signum.Engine.Maps
             {
                 var au = AttributeUssageCache.GetOrCreate(a.GetType(), t => t.GetCustomAttribute<AttributeUsageAttribute>());
 
-                return au != null && (au.ValidOn & targets) == targets;
+                return au != null && (au.ValidOn & targets) != 0;
             }
         }
 

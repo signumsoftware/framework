@@ -725,7 +725,7 @@ namespace Signum.Engine.CodeGeneration
             if (pair.SqlDbType != col.SqlDbType)
                 parts.Add("SqlDbType = SqlDbType." + col.SqlDbType);
 
-            var defaultSize = CurrentSchema.Settings.GetSqlSize(null, pair.SqlDbType);
+            var defaultSize = CurrentSchema.Settings.GetSqlSize(null, null, pair.SqlDbType);
             if (defaultSize != null)
             {
                 if (!(defaultSize == col.Precission || defaultSize == col.Length / DiffColumn.BytesPerChar(col.SqlDbType) || defaultSize == int.MaxValue && col.Length == -1))

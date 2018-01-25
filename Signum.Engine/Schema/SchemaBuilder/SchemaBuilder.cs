@@ -470,7 +470,7 @@ namespace Signum.Engine.Maps
                 Collation = Settings.GetCollate(ticksAttr),
                 UserDefinedTypeName = pair.UserDefinedTypeName,
                 Nullable = false,
-                Size = Settings.GetSqlSize(ticksAttr, pair.SqlDbType),
+                Size = Settings.GetSqlSize(ticksAttr, null, pair.SqlDbType),
                 Scale = Settings.GetSqlScale(ticksAttr, pair.SqlDbType),
                 Default = ticksAttr?.Default,
             };
@@ -489,7 +489,7 @@ namespace Signum.Engine.Maps
                 Collation = Settings.GetCollate(att),
                 UserDefinedTypeName = pair.UserDefinedTypeName,
                 Nullable = Settings.IsNullable(route, forceNull),
-                Size = Settings.GetSqlSize(att, pair.SqlDbType),
+                Size = Settings.GetSqlSize(att, route, pair.SqlDbType),
                 Scale = Settings.GetSqlScale(att, pair.SqlDbType),
                 Default = att?.Default,
             }.Do(f => f.UniqueIndex = f.GenerateUniqueIndex(table, Settings.FieldAttribute<UniqueIndexAttribute>(route)));
@@ -605,7 +605,7 @@ namespace Signum.Engine.Maps
                     Collation = Settings.GetCollate(orderAttr),
                     UserDefinedTypeName = pair.UserDefinedTypeName,
                     Nullable = false,
-                    Size = Settings.GetSqlSize(orderAttr, pair.SqlDbType),
+                    Size = Settings.GetSqlSize(orderAttr, null, pair.SqlDbType),
                     Scale = Settings.GetSqlScale(orderAttr, pair.SqlDbType),
                 };
             }

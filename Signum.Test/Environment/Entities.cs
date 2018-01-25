@@ -16,7 +16,6 @@ namespace Signum.Test.Environment
     [Serializable, EntityKind(EntityKind.Shared, EntityData.Transactional), Mixin(typeof(CorruptMixin)), Mixin(typeof(ColaboratorsMixin)), PrimaryKey(typeof(Guid))]
     public class NoteWithDateEntity : Entity
     {
-        [SqlDbType(Size = int.MaxValue)]
         [StringLengthValidator(AllowNulls = false, Min = 3, MultiLine = true)]
         public string Text { get; set; }
 
@@ -65,7 +64,6 @@ namespace Signum.Test.Environment
     [Serializable, EntityKind(EntityKind.Shared, EntityData.Transactional)]
     public class ArtistEntity : Entity, IAuthorEntity
     {
-        [NotNullable, SqlDbType(Size = 100)]
         [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
         public string Name { get; set; }
 
@@ -143,7 +141,7 @@ namespace Signum.Test.Environment
     [Serializable, EntityKind(EntityKind.Main, EntityData.Transactional)]
     public class BandEntity : Entity, IAuthorEntity
     {
-        [NotNullable, SqlDbType(Size = 100), UniqueIndex]
+        [UniqueIndex]
         [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
         public string Name { get; set; }
 
@@ -191,7 +189,6 @@ namespace Signum.Test.Environment
     {
         public int Year { get; set; }
 
-        [NotNullable, SqlDbType(Size = 100)]
         [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
         public string Category { get; set; }
 
@@ -229,7 +226,7 @@ namespace Signum.Test.Environment
     [Serializable, EntityKind(EntityKind.Main, EntityData.Master)]
     public class LabelEntity : Entity
     {
-        [NotNullable, SqlDbType(Size = 100), UniqueIndex]
+        [UniqueIndex]
         [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
         public string Name { get; set; }
 
@@ -257,7 +254,7 @@ namespace Signum.Test.Environment
     [Serializable, EntityKind(EntityKind.SystemString, EntityData.Master)]
     public class CountryEntity : Entity
     {
-        [NotNullable, SqlDbType(Size = 100), UniqueIndex]
+        [UniqueIndex]
         [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
         public string Name { get; set; }
 
@@ -270,7 +267,7 @@ namespace Signum.Test.Environment
     [Serializable, EntityKind(EntityKind.Main, EntityData.Transactional)]
     public class AlbumEntity : Entity, ISecretContainer
     {
-        [NotNullable, SqlDbType(Size = 100), UniqueIndex]
+        [UniqueIndex]
         [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
         public string Name { get; set; }
 
@@ -327,7 +324,6 @@ namespace Signum.Test.Environment
     [Serializable]
     public class SongEmbedded : EmbeddedEntity
     {
-        [NotNullable, SqlDbType(Size = 100)]
         [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
         public string Name { get; set; }
 

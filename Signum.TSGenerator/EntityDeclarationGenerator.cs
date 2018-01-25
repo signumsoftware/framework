@@ -408,20 +408,20 @@ namespace Signum.TSGenerator
                 return false;
 
             if (GetTypescriptUndefined(p.DeclaringType) == false &&
-                p.CustomAttributes.Any(a => a.AttributeType.Name == "NotNullableAttribute" || a.AttributeType.Name == "NotNullValidatorAttribute"))
+                p.CustomAttributes.Any(a =>
+                a.AttributeType.Name == "NotNullableAttribute" ||
+                a.AttributeType.Name == "NotNullValidatorAttribute" ||
+                a.AttributeType.Name == "StringLengthValidatorAttribute" && a.NamedArguments.Any(na => na.MemberName == "AllowNulls" && false.Equals(na.TypedValue.Value))))
                 return false;
 
             return p.PropertyType.IsClass || p.PropertyType.IsInterface || Nullable.GetUnderlyingType(p.PropertyType) != null;
         }
-
-
+        
         private static string FirstLower(string name)
         {
             return char.ToLower(name[0]) + name.Substring(1);
         }
         
-    
-
         public static Type UnNullify(this Type type)
         {
             return Nullable.GetUnderlyingType(type) ?? type;
