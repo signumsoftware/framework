@@ -199,6 +199,9 @@ namespace Signum.Engine.Maps
             if (FieldAttribute<NullableAttribute>(propertyRoute) != null)
                 return true;
 
+            if (propertyRoute.PropertyRouteType == PropertyRouteType.MListItems)
+                return false;
+
             if (ValidatorAttribute<NotNullValidatorAttribute>(propertyRoute) != null)
                 return false;
 

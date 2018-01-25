@@ -1,4 +1,5 @@
 ﻿import * as React from 'react'
+import * as numbro from 'numbro'
 import * as Finder from '../Finder'
 import { classes, Dic } from '../Globals'
 import { ResultTable, Pagination, PaginationMode, PaginateMath } from '../FindOptions'
@@ -40,28 +41,32 @@ export default class PaginationSelector extends React.Component<PaginationSelect
 
         const pagination = this.props.pagination;
 
+        function format(num: number): string {
+            return numbro(num).format("0");
+        }
+
         switch (pagination.mode) {
 
             case "All":
                 return (
                     <span>{SearchMessage._0Results_N.niceToString().forGenderAndNumber(resultTable.totalElements).formatHtml(
-                        <span className="sf-pagination-strong" key={1}>{resultTable.totalElements}</span>)
+                        <span className="sf-pagination-strong" key={1}>{format(resultTable.totalElements)}</span>)
                     }</span>
                 );
 
             case "Firsts":
                 return (
                     <span>{SearchMessage.First0Results_N.niceToString().forGenderAndNumber(resultTable.rows.length).formatHtml(
-                        <span className={"sf-pagination-strong" + (resultTable.rows.length == resultTable.pagination.elementsPerPage ? " sf-pagination-overflow" : "")} key={1}>{resultTable.rows.length}</span>)
+                        <span className={"sf-pagination-strong" + (resultTable.rows.length == resultTable.pagination.elementsPerPage ? " sf-pagination-overflow" : "")} key={1}>{format(resultTable.rows.length)}</span>)
                     }</span>
                 );
 
             case "Paginate":
                 return (
                     <span>{SearchMessage._01of2Results_N.niceToString().forGenderAndNumber(resultTable.totalElements).formatHtml(
-                        <span className={"sf-pagination-strong"} key={1}>{PaginateMath.startElementIndex(pagination)}</span>,
-                        <span className={"sf-pagination-strong"} key={2}>{PaginateMath.endElementIndex(pagination, resultTable.rows.length)}</span>,
-                        <span className={"sf-pagination-strong"} key={3}>{resultTable.totalElements}</span>)
+                        <span className={"sf-pagination-strong"} key={1}>{format(PaginateMath.startElementIndex(pagination))}</span>,
+                        <span className={"sf-pagination-strong"} key={2}>{format(PaginateMath.endElementIndex(pagination, resultTable.rows.length))}</span>,
+                        <span className={"sf-pagination-strong"} key={3}>{format(resultTable.totalElements)}</span>)
                     }</span>
                 );
             default:

@@ -642,6 +642,12 @@ namespace Signum.Engine.Maps
 
             relationalTable.Field = GenerateField(relationalTable, route.Add("Item"), NameSequence.Void, forceNull: false, inMList: true);
 
+            if(relationalTable.Field is FieldEmbedded fe && fe.HasValue != null)
+            {
+
+            }
+
+
             relationalTable.GenerateColumns();
             
             return new FieldMList(route)

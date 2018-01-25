@@ -38,7 +38,6 @@ namespace Signum.Test.Environment
     {
         ColaboratorsMixin(Entity mainEntity, MixinEntity next) : base(mainEntity, next) { }
 
-        [NotNullable]
         [NotNullValidator, NoRepeatValidator]
         public MList<ArtistEntity> Colaborators { get; set; } = new MList<ArtistEntity>();
     }
@@ -145,13 +144,13 @@ namespace Signum.Test.Environment
         [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
         public string Name { get; set; }
 
-        [NotNullable]
+        [NotNullValidator]
         public MList<ArtistEntity> Members { get; set; } = new MList<ArtistEntity>();
 
         [ImplementedBy(typeof(GrammyAwardEntity), typeof(AmericanMusicAwardEntity))]
         public AwardEntity LastAward { get; set; }
 
-        [ImplementedBy(typeof(GrammyAwardEntity), typeof(AmericanMusicAwardEntity)), NotNullable]
+        [NotNullValidator, ImplementedBy(typeof(GrammyAwardEntity), typeof(AmericanMusicAwardEntity))]
         public MList<AwardEntity> OtherAwards { get; set; } = new MList<AwardEntity>();
 
         static Expression<Func<BandEntity, string>> FullNameExpression =
@@ -278,7 +277,7 @@ namespace Signum.Test.Environment
         [NotNullValidator]
         public IAuthorEntity Author { get; set; }
 
-        [NotNullable, PreserveOrder]
+        [NotNullValidator, PreserveOrder]
         public MList<SongEmbedded> Songs { get; set; } = new MList<SongEmbedded>();
 
         public SongEmbedded BonusTrack { get; set; }
@@ -378,7 +377,6 @@ namespace Signum.Test.Environment
     {
         public Lite<LabelEntity> DefaultLabel { get; set; }
 
-        [NotNullable]
         [NotNullValidator, NoRepeatValidator]
         public MList<Lite<GrammyAwardEntity>> Awards { get; set; } = new MList<Lite<GrammyAwardEntity>>();
     }
