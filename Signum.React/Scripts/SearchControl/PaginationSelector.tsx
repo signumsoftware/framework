@@ -42,7 +42,7 @@ export default class PaginationSelector extends React.Component<PaginationSelect
         const pagination = this.props.pagination;
 
         function format(num: number): string {
-            return numbro(num).format("0");
+            return numbro(num).format("0,0");
         }
 
         switch (pagination.mode) {
