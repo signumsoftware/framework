@@ -22,7 +22,6 @@ namespace Signum.Entities.Excel
         [StringLengthValidator(Min = 3)]
         public string DisplayName { get; set; }
 
-        [NotNullable]
         [NotNullValidator]
         public FileEmbedded File { get; set; }
 

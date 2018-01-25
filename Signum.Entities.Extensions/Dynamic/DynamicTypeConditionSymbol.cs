@@ -14,7 +14,6 @@ namespace Signum.Entities.Dynamic
     [Serializable, EntityKind(EntityKind.Shared, EntityData.Transactional)]
     public class DynamicTypeConditionSymbolEntity : Entity
     {
-        [NotNullable, SqlDbType(Size = 100)]
         [StringLengthValidator(AllowNulls = false, Min = 1, Max = 100), IdentifierValidator(IdentifierType.PascalAscii)]
         public string Name { get; set; }
 

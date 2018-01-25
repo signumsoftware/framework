@@ -26,11 +26,9 @@ namespace Signum.Entities.Dynamic
         [ImplementedBy(typeof(UserEntity))]
         public Lite<IUserEntity> ExecutedBy { get; set; }
 
-        [NotNullable, SqlDbType(Size = 200)]
         [StringLengthValidator(AllowNulls = false, Min = 3, Max = 200)]
         public string Comment { get; set; }
 
-        [NotNullable, SqlDbType(Size = int.MaxValue)]
         [StringLengthValidator(AllowNulls = false, Max = int.MaxValue, MultiLine = true)]
         public string Script { get; set; }
     }
@@ -56,15 +54,12 @@ namespace Signum.Entities.Dynamic
     {
         public DateTime CreationDate { get; private set; } = TimeZoneManager.Now;
 
-        [NotNullable, SqlDbType(Size = 200)]
         [StringLengthValidator(AllowNulls = false, Max = 200)]
         public string ReplacementKey { get; set; }
 
-        [NotNullable, SqlDbType(Size = 200)]
         [StringLengthValidator(AllowNulls = false, Max = 200)]
         public string OldName { get; set; }
 
-        [NotNullable, SqlDbType(Size = 200)]
         [StringLengthValidator(AllowNulls = false, Max = 200)]
         public string NewName { get; set; }
 

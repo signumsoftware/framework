@@ -37,7 +37,6 @@ namespace Signum.Entities.Files
             this.BinaryFile = fileData;
         }
 
-        [NotNullable, SqlDbType(Size = 260)]
         string fileName;
         [StringLengthValidator(AllowNulls = false, Min = 1, Max = 260), FileNameValidator]
         public string FileName
@@ -75,7 +74,6 @@ namespace Signum.Entities.Files
             get { return FileLengthStringExpression.Evaluate(this); }
         }
 
-        [NotNullable, SqlDbType(Size = 260)]
         [StringLengthValidator(AllowNulls = true, Min = 3, Max = 260)]
         public string Suffix { get; set; }
 

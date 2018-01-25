@@ -36,7 +36,6 @@ namespace Signum.Entities.Mailing
         [ImplementedByAll]
         public Lite<Entity> Target { get; set; }
 
-        [NotNullable]
         [NotNullValidator]
         public EmailAddressEmbedded From { get; set; }
 
@@ -75,7 +74,6 @@ namespace Signum.Entities.Mailing
             BodyHash = Convert.ToBase64String(SHA1.Create().ComputeHash(Encoding.ASCII.GetBytes(str.Trim(spaceChars))));
         }
 
-        [NotNullable, SqlDbType(Size = 150)]
         [StringLengthValidator(AllowNulls = true, Min = 1, Max = 150)]
         public string BodyHash { get; set; }
 
@@ -131,11 +129,10 @@ namespace Signum.Entities.Mailing
     [Serializable]
     public class EmailReceptionInfoEmbedded : EmbeddedEntity
     {
-        [NotNullable, SqlDbType(Size = 100), UniqueIndex(AllowMultipleNulls = true)]
+        [UniqueIndex(AllowMultipleNulls = true)]
         [StringLengthValidator(AllowNulls = false, Min = 1, Max = 100)]
         public string UniqueId { get; set; }
 
-        [NotNullable]
         [NotNullValidator]
         public Lite<Pop3ReceptionEntity> Reception { get; set; }
 
@@ -170,7 +167,6 @@ namespace Signum.Entities.Mailing
             }
         }
 
-        [NotNullable, SqlDbType(Size = 300)]
         [StringLengthValidator(AllowNulls = false, Min = 1, Max = 300)]
         public string ContentId { get; set; }
 
@@ -283,7 +279,6 @@ namespace Signum.Entities.Mailing
 
         public Lite<IEmailOwnerEntity> EmailOwner { get; set; }
 
-        [NotNullable, SqlDbType(Size = 100)]
         [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
         public string EmailAddress { get; set; }
 
@@ -420,7 +415,6 @@ namespace Signum.Entities.Mailing
     [Serializable, EntityKind(EntityKind.System, EntityData.Transactional), TicksColumn(false)]
     public class EmailPackageEntity : Entity, IProcessDataEntity
     {
-        [SqlDbType(Size = 200)]
         [StringLengthValidator(AllowNulls = true, Max = 200)]
         public string Name { get; set; }
 

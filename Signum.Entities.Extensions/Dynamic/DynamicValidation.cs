@@ -15,15 +15,13 @@ namespace Signum.Entities.Dynamic
     [Serializable, EntityKind(EntityKind.Shared, EntityData.Master)]
     public class DynamicValidationEntity : Entity
     {
-        [NotNullable, SqlDbType(Size = 100), UniqueIndex]
+        [UniqueIndex]
         [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
         public string Name { get; set; }
 
-        [NotNullable]
         [NotNullValidator]
         public TypeEntity EntityType { get; set; }
 
-        [NotNullable]
         [NotNullValidator]
         public PropertyRouteEntity PropertyRoute { get; set; }
 

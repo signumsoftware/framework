@@ -19,15 +19,12 @@ namespace Signum.Entities.Mailing
 
         public int Port { get; set; } = 110;
 
-        [NotNullable, SqlDbType(Size = 100)]
         [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
         public string Host { get; set; }
 
-        [SqlDbType(Size = 100)]
         [StringLengthValidator(AllowNulls = true, Max = 100)]
         public string Username { get; set; }
 
-        [SqlDbType(Size = 100)]
         [StringLengthValidator(AllowNulls = true, Max = 100)]
         public string Password { get; set; }
 
@@ -76,7 +73,6 @@ namespace Signum.Entities.Mailing
     [Serializable, EntityKind(EntityKind.System, EntityData.Transactional)]
     public class Pop3ReceptionEntity : Entity
     {
-        [NotNullable]
         [NotNullValidator]
         public Lite<Pop3ConfigurationEntity> Pop3Configuration { get; set; }
 
@@ -93,7 +89,6 @@ namespace Signum.Entities.Mailing
     [Serializable, EntityKind(EntityKind.System, EntityData.Transactional)]
     public class Pop3ReceptionExceptionEntity : Entity
     {
-        [NotNullable]
         [NotNullValidator]
         public Lite<Pop3ReceptionEntity> Reception { get; set; }
 

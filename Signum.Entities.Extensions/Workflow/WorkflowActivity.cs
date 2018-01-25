@@ -20,19 +20,16 @@ namespace Signum.Entities.Workflow
     [Serializable, EntityKind(EntityKind.Main, EntityData.Master)]
     public class WorkflowActivityEntity : Entity, IWorkflowNodeEntity, IWithModel
     {
-        [NotNullable]
         [NotNullValidator]
         public WorkflowLaneEntity Lane { get; set; }
 
-        [SqlDbType(Size = 100), NotNullable]
+        [NotNullable]
         [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
         public string Name { get; set; }
 
-        [NotNullable, SqlDbType(Size = 100)]
         [StringLengthValidator(AllowNulls = false, Min = 1, Max = 100)]
         public string BpmnElementId { get; set; }
 
-        [SqlDbType(Size = 400)]
         [StringLengthValidator(AllowNulls = true, Min = 3, Max = 400, MultiLine = true)]
         public string Comments { get; set; }
 
@@ -57,14 +54,12 @@ namespace Signum.Entities.Workflow
         [NotifyChildProperty]
         public WorkflowScriptPartEmbedded Script { get; set; }
 
-        [NotNullable]
         [NotNullValidator]
         public WorkflowXmlEmbedded Xml { get; set; }
         
         [NotifyChildProperty]
         public SubWorkflowEmbedded SubWorkflow { get; set; }
 
-        [SqlDbType(Size = int.MaxValue)]
         [StringLengthValidator(AllowNulls = true, MultiLine = true)]
         public string UserHelp { get; set; }
 
@@ -209,7 +204,6 @@ namespace Signum.Entities.Workflow
     [Serializable]
     public class WorkflowTimeoutEmbedded : EmbeddedEntity, IWorkflowTransitionTo
     {
-        [NotNullable]
         [NotNullValidator]
         public TimeSpanEmbedded Timeout { get; set; }
 
@@ -262,7 +256,6 @@ namespace Signum.Entities.Workflow
     [Serializable]
     public class SubWorkflowEmbedded : EmbeddedEntity
     {
-        [NotNullable]
         [NotNullValidator]
         public WorkflowEntity Workflow { get; set; }
 
@@ -338,7 +331,6 @@ namespace Signum.Entities.Workflow
         [NotNullValidator, InTypeScript(Undefined = false, Null = false)]
         public TypeEntity MainEntityType { get; set; }
         
-        [NotNullable, SqlDbType(Size = 100)]
         [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
         public string Name { get; set; }
 
@@ -362,11 +354,9 @@ namespace Signum.Entities.Workflow
         [StringLengthValidator(AllowNulls = true, Min = 3, Max = 255)]
         public string ViewName { get; set; }
 
-        [SqlDbType(Size = 400)]
         [StringLengthValidator(AllowNulls = true, Min = 3, Max = 400, MultiLine = true)]
         public string Comments { get; set; }
 
-        [SqlDbType(Size = int.MaxValue)]
         [StringLengthValidator(AllowNulls = true, MultiLine = true)]
         public string UserHelp { get; set; }
 

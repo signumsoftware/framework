@@ -12,7 +12,6 @@ namespace Signum.Entities.Processes
     [Serializable, EntityKind(EntityKind.Part, EntityData.Transactional)]
     public class PackageEntity : Entity, IProcessDataEntity
     {
-        [SqlDbType(Size = 200)]
         [StringLengthValidator(AllowNulls = true, Max = 200)]
         public string Name { get; set; }
 
@@ -53,7 +52,6 @@ namespace Signum.Entities.Processes
     [Serializable, EntityKind(EntityKind.System, EntityData.Transactional), TicksColumn(false)]
     public class PackageLineEntity : Entity, IProcessLineDataEntity
     {
-        [NotNullable]
         [NotNullValidator]
         public Lite<PackageEntity> Package { get; set; }
 

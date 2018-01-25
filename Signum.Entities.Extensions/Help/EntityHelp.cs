@@ -14,15 +14,12 @@ namespace Signum.Entities.Help
     [Serializable, EntityKind(EntityKind.Main, EntityData.Master)]
     public class EntityHelpEntity : Entity
     {
-        [NotNullable]
         [NotNullValidator]
         public TypeEntity Type { get; set; }
 
-        [NotNullable]
         [NotNullValidator]
         public CultureInfoEntity Culture { get; set; }
 
-        [SqlDbType(Size = int.MaxValue)]
 		[StringLengthValidator(AllowNulls = true, Min = 3, MultiLine = true)]
         public string Description { get; set; }
 
@@ -67,11 +64,9 @@ namespace Signum.Entities.Help
     [Serializable]
     public class PropertyRouteHelpEmbedded : EmbeddedEntity
     {
-        [NotNullable]
         [NotNullValidator]
         public PropertyRouteEntity Property { get; set; }
 
-        [NotNullable, SqlDbType(Size = int.MaxValue)]
 		[StringLengthValidator(AllowNulls = false, Min = 3, MultiLine = true)]
         public string Description { get; set; }
 
@@ -84,11 +79,9 @@ namespace Signum.Entities.Help
     [Serializable]
     public class OperationHelpEmbedded : EmbeddedEntity
     {
-        [NotNullable]
         [NotNullValidator]
         public OperationSymbol Operation { get; set; }
 
-        [NotNullable, SqlDbType(Size = int.MaxValue)]
         [StringLengthValidator(AllowNulls = false, Min = 3, MultiLine = true)]
         public string Description { get; set; }
 

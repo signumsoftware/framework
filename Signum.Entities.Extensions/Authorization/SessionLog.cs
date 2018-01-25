@@ -22,11 +22,9 @@ namespace Signum.Entities.Authorization
 
         public bool SessionTimeOut { get; set; }
 
-        [SqlDbType(Size = 100)]
         [StringLengthValidator(AllowNulls = true, Max = 100)]
         public string UserHostAddress { get; set; }
 
-        [SqlDbType(Size = 300)]
         [StringLengthValidator(AllowNulls = true, Max = 300)]
         public string UserAgent { get; set; }
 

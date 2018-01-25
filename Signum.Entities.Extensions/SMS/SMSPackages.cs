@@ -30,7 +30,6 @@ namespace Signum.Entities.SMS
             this.Name = GetType().NiceName() + ": " + TimeZoneManager.Now.ToString();
         }
 
-        [SqlDbType(Size = 200)]
         [StringLengthValidator(AllowNulls = true, Max = 200)]
         public string Name { get; set; }
 

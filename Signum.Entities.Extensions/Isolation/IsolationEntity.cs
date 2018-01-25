@@ -12,7 +12,7 @@ namespace Signum.Entities.Isolation
     [Serializable, EntityKind(EntityKind.String, EntityData.Master, IsLowPopulation = true)]
     public class IsolationEntity : Entity
     {
-        [NotNullable, SqlDbType(Size = 100), UniqueIndex]
+        [UniqueIndex]
         [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
         public string Name { get; set; }
 

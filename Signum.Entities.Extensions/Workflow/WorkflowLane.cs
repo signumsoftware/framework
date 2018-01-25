@@ -15,19 +15,15 @@ namespace Signum.Entities.Workflow
     [Serializable, EntityKind(EntityKind.Main, EntityData.Master)]
     public class WorkflowLaneEntity : Entity, IWorkflowObjectEntity, IWithModel
     {
-        [NotNullable, SqlDbType(Size = 100)]
         [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
         public string Name { get; set; }
 
-        [NotNullable, SqlDbType(Size = 100)]
         [StringLengthValidator(AllowNulls = false, Min = 1, Max = 100)]
         public string BpmnElementId { get; set; }
 
-        [NotNullable]
         [NotNullValidator]
         public WorkflowXmlEmbedded Xml { get; set; }
 
-        [NotNullable]
         [NotNullValidator]
         public WorkflowPoolEntity Pool { get; set; }
 
@@ -122,7 +118,6 @@ namespace Signum.Entities.Workflow
         [NotNullValidator, InTypeScript(Undefined = false, Null = false)]
         public TypeEntity MainEntityType { get; set; }
 
-        [NotNullable, SqlDbType(Size = 100)]
         [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
         public string Name { get; set; }
 

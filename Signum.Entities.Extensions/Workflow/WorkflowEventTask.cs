@@ -16,7 +16,6 @@ namespace Signum.Entities.Workflow
     [Serializable,  EntityKind(EntityKind.Shared, EntityData.Master)]
     public class WorkflowEventTaskEntity : Entity, ITaskEntity
     {
-        [NotNullable]
         [NotNullValidator]
         public Lite<WorkflowEntity> Workflow { get; set; }
 
@@ -38,7 +37,6 @@ namespace Signum.Entities.Workflow
         [NotifyChildProperty]
         public WorkflowEventTaskConditionEval Condition { get; set; }
 
-        [NotNullable]
         [NotNullValidator]
         [NotifyChildProperty]
         public WorkflowEventTaskActionEval Action { get; set; }
@@ -80,7 +78,6 @@ namespace Signum.Entities.Workflow
         [NotifyChildProperty]
         public WorkflowEventTaskConditionEval Condition { get; set; }
 
-        [NotNullable]
         [NotNullValidator]
         [NotifyChildProperty]
         public WorkflowEventTaskActionEval Action { get; set; }

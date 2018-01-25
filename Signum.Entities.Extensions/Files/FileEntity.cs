@@ -21,7 +21,6 @@ namespace Signum.Entities.Files
             this.BinaryFile = File.ReadAllBytes(path);
         }
 
-        [NotNullable, SqlDbType(Size = 254)]
         [StringLengthValidator(AllowNulls = false, Min = 3, Max = 254)]
         public string FileName { get; set; }
 

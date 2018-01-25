@@ -19,7 +19,6 @@ namespace Signum.Entities.Scheduler
 
         public ScheduledTaskEntity ScheduledTask { get; set; }
 
-        [NotNullable]
         [NotNullValidator]
         public Lite<IUserEntity> User { get; set; }
 
@@ -37,11 +36,9 @@ namespace Signum.Entities.Scheduler
             get { return EndTime == null ? null : DurationExpression.Evaluate(this); }
         }
 
-        [NotNullable, SqlDbType(Size = 200)]
         [StringLengthValidator(AllowNulls = false, Min = 3, Max = 200)]
         public string MachineName { get; set; }
 
-        [NotNullable, SqlDbType(Size = 200)]
         [StringLengthValidator(AllowNulls = false, Min = 3, Max = 200)]
         public string ApplicationName { get; set; }
 
@@ -51,7 +48,6 @@ namespace Signum.Entities.Scheduler
 
         public Lite<ExceptionEntity> Exception { get; set; }
 
-        [SqlDbType(Size = int.MaxValue)]
         [StringLengthValidator(AllowNulls = true, MultiLine = true)]
         public string Remarks { get; set; }
 
@@ -79,7 +75,6 @@ namespace Signum.Entities.Scheduler
 
         public Lite<ScheduledTaskLogEntity> SchedulerTaskLog { get; set; }
 
-        [NotNullable]
         [NotNullValidator]
         public Lite<ExceptionEntity> Exception { get; set; }
     }

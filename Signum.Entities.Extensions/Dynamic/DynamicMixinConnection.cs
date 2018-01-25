@@ -18,11 +18,9 @@ namespace Signum.Entities.Dynamic
     [Serializable, EntityKind(EntityKind.Main, EntityData.Master)]
     public class DynamicMixinConnectionEntity : Entity
     {
-        [NotNullable]
         [NotNullValidator]
         public Lite<TypeEntity> EntityType { get; set; }
 
-        [NotNullable]
         [NotNullValidator]
         public Lite<DynamicTypeEntity> DynamicMixin { get; set; }
 

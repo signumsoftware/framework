@@ -36,7 +36,7 @@ namespace Signum.Entities.Mailing
         [Ignore]
         internal object queryName;
 
-        [NotNullable, SqlDbType(Size = 100), UniqueIndex]
+        [UniqueIndex]
         [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
         public string Name { get; set; }
 
@@ -44,7 +44,6 @@ namespace Signum.Entities.Mailing
 
         public bool DisableAuthorization { get; set; }
 
-        [NotNullable]
         [NotNullValidator]
         public QueryEntity Query { get; set; }
 
@@ -172,7 +171,6 @@ namespace Signum.Entities.Mailing
             this.CultureInfo = culture;
         }
 
-        [NotNullable]
         [NotNullValidator]
         public CultureInfoEntity CultureInfo { get; set; }
 
@@ -192,7 +190,6 @@ namespace Signum.Entities.Mailing
         [Ignore]
         internal object TextParsedNode;
 
-        [SqlDbType(Size = 200)]
         string subject;
         [StringLengthValidator(AllowNulls = false, Min = 3, Max = 200)]
         public string Subject

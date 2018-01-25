@@ -13,11 +13,9 @@ namespace Signum.Entities.Workflow
     [Serializable, EntityKind(EntityKind.System, EntityData.Transactional)]
     public class CaseNotificationEntity : Entity
     {
-        [NotNullable]
         [NotNullValidator]
         public Lite<CaseActivityEntity> CaseActivity { get; set; }
 
-        [NotNullable]
         [NotNullValidator]
         public Lite<UserEntity> User { get; set; }
 
@@ -25,7 +23,6 @@ namespace Signum.Entities.Workflow
         [NotNullValidator]
         public Lite<Entity> Actor { get; internal set; }
 
-        [SqlDbType(Size = int.MaxValue)]
         [StringLengthValidator(AllowNulls = true, MultiLine = true)]
         public string Remarks { get; set; }
 

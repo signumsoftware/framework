@@ -15,11 +15,9 @@ namespace Signum.Entities.Dynamic
     [Serializable, EntityKind(EntityKind.Main, EntityData.Transactional)]
     public class DynamicTypeConditionEntity : Entity
     {
-        [NotNullable]
         [NotNullValidator]
         public DynamicTypeConditionSymbolEntity SymbolName { get; set; }
 
-        [NotNullable]
         [NotNullValidator]
         public TypeEntity EntityType { get; set; }
 

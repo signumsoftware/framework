@@ -51,15 +51,14 @@ namespace Signum.Entities.Processes
 
         public const string None = "none";
 
-        [SqlDbType(Size = 100), NotNullable]
+        [NotNullable]
         [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
         public string MachineName { get; set; }
 
-        [SqlDbType(Size = 100), NotNullable]
+        [NotNullable]
         [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
         public string ApplicationName { get; set; }
 
-        [NotNullable]
         [NotNullValidator]
         public Lite<IUserEntity> User { get; set; }
 
@@ -219,11 +218,9 @@ namespace Signum.Entities.Processes
 
         public Lite<IProcessLineDataEntity> Line { get; set; }
 
-        [NotNullable]
         [NotNullValidator]
         public Lite<ProcessEntity> Process { get; set; }
 
-        [NotNullable]
         [NotNullValidator]
         public Lite<ExceptionEntity> Exception { get; set; }
     }

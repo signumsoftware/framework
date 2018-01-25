@@ -19,7 +19,6 @@ namespace Signum.Entities.Mailing
 
         public bool ReciveEmails { get; set; }
 
-        [SqlDbType(Size = 100)]
         [StringLengthValidator(AllowNulls = true, Min = 3, Max = 100), EMailValidator]
         public string OverrideEmailAddress { get; set; }
 

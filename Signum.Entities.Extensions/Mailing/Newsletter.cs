@@ -18,28 +18,23 @@ namespace Signum.Entities.Mailing
     [Serializable, EntityKind(EntityKind.Main, EntityData.Transactional)]
     public class NewsletterEntity : Entity, IProcessDataEntity
     {
-        [NotNullable, SqlDbType(Size = 100)]
         [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
         public string Name { get; set; }
 
         public NewsletterState State { get; set; } = NewsletterState.Created;
 
-        [NotNullable, SqlDbType(Size = 100)]
-        [EMailValidator, StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
+                [EMailValidator, StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
         public string From { get; set; }
 
-        [NotNullable, SqlDbType(Size = 100)]
         [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
         public string DisplayFrom { get; set; }
 
-        [SqlDbType(Size = 300)]
         [StringLengthValidator(AllowNulls = true, Min = 3, Max = 300)]
         public string Subject { get; set; }
 
         [Ignore]
         internal object SubjectParsedNode;
 
-        [SqlDbType(Size = int.MaxValue)]
         [StringLengthValidator(AllowNulls = true, Min = 3, MultiLine = true)]
         public string Text { get; set; }
 

@@ -27,11 +27,9 @@ namespace Signum.Entities.MachineLearning
             RebindEvents();
         }
 
-        [SqlDbType(Size = 100),]
         [StringLengthValidator(AllowNulls = true, Min = 3, Max = 100)]
         public string Name { get; set; }
 
-        [NotNullable]
         [NotNullValidator]
         public PredictorSettingsEmbedded Settings { get; set; }
 
@@ -228,7 +226,6 @@ namespace Signum.Entities.MachineLearning
     {
         public PredictorColumnUsage Usage { get; set; }
 
-        [NotNullable]
         [NotNullValidator]
         public QueryTokenEmbedded Token { get; set; }
 
@@ -320,7 +317,6 @@ namespace Signum.Entities.MachineLearning
         [NotNullable]
         public Lite<PredictorEntity> Predictor { get; set; }
 
-        [NotNullable, SqlDbType(Size = 100)]
         [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
         public string Name { get; set; }
 
@@ -371,7 +367,6 @@ namespace Signum.Entities.MachineLearning
     {
         public PredictorSubQueryColumnUsage Usage { get; set; }
 
-        [NotNullable]
         [NotNullValidator]
         public QueryTokenEmbedded Token { get; set; }
 

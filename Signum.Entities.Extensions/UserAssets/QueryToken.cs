@@ -30,9 +30,8 @@ namespace Signum.Entities.UserAssets
 
             this.TokenString = tokenString;
         }
-
-        [NotNullable]
-        [StringLengthValidator(AllowNulls = false, Min = 1), InTypeScript(Undefined = false, Null = false)]
+        
+        [StringLengthValidator(AllowNulls = false, Min = 1, Max = 200), InTypeScript(Undefined = false, Null = false)]
         public string TokenString { get; set; }
 
         [Ignore]

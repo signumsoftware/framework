@@ -24,7 +24,7 @@ namespace Signum.Entities.Basics
             EnglishName = ci.EnglishName;
         }
 
-        [NotNullable, SqlDbType(Size = 10), UniqueIndex]
+        [UniqueIndex]
         [StringLengthValidator(AllowNulls = false, Min = 2, Max = 10)]
         public string Name { get; set; }
 

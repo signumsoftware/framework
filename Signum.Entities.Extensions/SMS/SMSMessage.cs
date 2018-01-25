@@ -15,7 +15,6 @@ namespace Signum.Entities.SMS
     {
         public Lite<SMSTemplateEntity> Template { get; set; }
 
-        [SqlDbType(Size = int.MaxValue)]
         [StringLengthValidator(AllowNulls=false, MultiLine = true)]
         public string Message { get; set; }
 
@@ -29,11 +28,9 @@ namespace Signum.Entities.SMS
 
         public SMSMessageState State { get; set; } = SMSMessageState.Created;
 
-        [NotNullable, SqlDbType(Size = int.MaxValue)]
         [StringLengthValidator(AllowNulls = false, Min = 9), MultipleTelephoneValidator]
         public string DestinationNumber { get; set; }
 
-        [SqlDbType(Size = 100)]
         [StringLengthValidator(AllowNulls = true, Max = 100)]
         public string MessageID { get; set; }
 

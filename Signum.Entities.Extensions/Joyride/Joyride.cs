@@ -11,7 +11,7 @@ namespace Signum.Entities.Joyride
     [Serializable, EntityKind(EntityKind.Main, EntityData.Master)]
     public class JoyrideEntity : Entity, IUserAssetEntity
     {
-        [NotNullable, SqlDbType(Size = 100), UniqueIndex]
+        [UniqueIndex]
         [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
         public string Name { get; set; }
 

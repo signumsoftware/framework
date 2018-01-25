@@ -10,15 +10,12 @@ namespace Signum.Entities.Translation
     [Serializable, EntityKind(EntityKind.Main, EntityData.Master)]
     public class TranslationReplacementEntity : Entity
     {
-        [NotNullable]
         [NotNullValidator]
         public CultureInfoEntity CultureInfo { get; set; }
 
-        [NotNullable, SqlDbType(Size = 200)]
         [StringLengthValidator(AllowNulls = false, Min = 3, Max = 200)]
         public string WrongTranslation { get; set; }
 
-        [NotNullable, SqlDbType(Size = 200)]
         [StringLengthValidator(AllowNulls = false, Min = 3, Max = 200)]
         public string RightTranslation { get; set; }
     }

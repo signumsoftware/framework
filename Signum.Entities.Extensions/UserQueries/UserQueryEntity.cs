@@ -37,7 +37,7 @@ namespace Signum.Entities.UserQueries
         public Lite<Entity> Owner { get; set; }
 
         [NotNullable]
-        [StringLengthValidator(Min = 1)]
+        [StringLengthValidator(Min = 1, Max = 200)]
         public string DisplayName { get; set; }
 
         bool withoutFilters;
@@ -193,7 +193,6 @@ namespace Signum.Entities.UserQueries
     [Serializable]
     public class QueryOrderEmbedded : EmbeddedEntity
     {
-        [NotNullable]
         [NotNullValidator]
         public QueryTokenEmbedded Token { get; set; }
 
@@ -236,7 +235,6 @@ namespace Signum.Entities.UserQueries
     [Serializable]
     public class QueryColumnEmbedded : EmbeddedEntity
     {
-        [NotNullable]
         [NotNullValidator]
         public QueryTokenEmbedded Token { get; set; }
 
@@ -304,7 +302,6 @@ namespace Signum.Entities.UserQueries
 
         public FilterOperation Operation { get; set; }
 
-        [SqlDbType(Size = 300)]
         [StringLengthValidator(AllowNulls = true, Max = 300)]
         public string ValueString { get; set; }
 

@@ -38,7 +38,6 @@ namespace Signum.Entities.Chart
         [Ignore]
         internal object queryName;
 
-        [NotNullable]
         [NotNullValidator]
         public QueryEntity Query { get; set; }
 
@@ -46,8 +45,7 @@ namespace Signum.Entities.Chart
 
         public Lite<Entity> Owner { get; set; }
 
-        [NotNullable, SqlDbType(Size = 100)]
-        [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
+        [StringLengthValidator(AllowNulls = false, Min = 3, Max = 200)]
         public string DisplayName { get; set; }
 
         [NotNullable]

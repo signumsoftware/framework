@@ -16,7 +16,7 @@ namespace Signum.Entities.Workflow
     [Serializable, EntityKind(EntityKind.Shared, EntityData.Master)]
     public class WorkflowScriptEntity : Entity
     {
-        [NotNullable, SqlDbType(Size = 100), UniqueIndex]
+        [UniqueIndex]
         [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
         public string Name { get; set; }
 
@@ -45,7 +45,6 @@ namespace Signum.Entities.Workflow
     [Serializable]
     public class WorkflowScriptEval : EvalEmbedded<IWorkflowScriptExecutor>
     {
-        [SqlDbType(Size = int.MaxValue)]
         [StringLengthValidator(AllowNulls = true, MultiLine = true)]
         public string CustomTypes { get; set; }
 
