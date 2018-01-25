@@ -677,14 +677,14 @@ namespace Signum.Utilities
         public static string FirstUpper(this string str)
         {
             if (str.HasText() && char.IsLower(str[0]))
-                return char.ToUpper(str[0]) + str.Substring(1);
+                return char.ToUpperInvariant(str[0]) + str.Substring(1);
             return str;
         }
 
         public static string FirstLower(this string str)
         {
             if (str.HasText() && char.IsUpper(str[0]))
-                return char.ToLower(str[0]) + str.Substring(1);
+                return char.ToLowerInvariant(str[0]) + str.Substring(1);
             return str;
         }
 
