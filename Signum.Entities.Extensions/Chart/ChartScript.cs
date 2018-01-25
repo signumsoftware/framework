@@ -30,10 +30,11 @@ namespace Signum.Entities.Chart
 
         public GroupByChart GroupBy { get; set; }
 
-        [NotifyCollectionChanged, NotifyChildProperty, NotNullable, PreserveOrder]
+        [NotifyCollectionChanged, NotifyChildProperty, PreserveOrder]
+        [NotNullValidator]
         public MList<ChartScriptColumnEmbedded> Columns { get; set; } = new MList<ChartScriptColumnEmbedded>();
 
-        [NotifyCollectionChanged, NotifyChildProperty, NotNullable, PreserveOrder]
+        [NotifyCollectionChanged, NotifyChildProperty, PreserveOrder]
         [NotNullValidator, NoRepeatValidator]
         public MList<ChartScriptParameterEmbedded> Parameters { get; set; } = new MList<ChartScriptParameterEmbedded>();
 

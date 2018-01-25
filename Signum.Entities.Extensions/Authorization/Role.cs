@@ -28,7 +28,7 @@ namespace Signum.Entities.Authorization
             }
         }
 
-        [NotNullable, NotifyCollectionChanged]
+        [NotNullValidator, NotifyCollectionChanged]
         public MList<Lite<RoleEntity>> Roles { get; set; } = new MList<Lite<RoleEntity>>();
 
         protected override void ChildCollectionChanged(object sender, NotifyCollectionChangedEventArgs args)

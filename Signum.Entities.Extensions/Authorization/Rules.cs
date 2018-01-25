@@ -64,7 +64,7 @@ namespace Signum.Entities.Authorization
     [Serializable]
     public class RuleTypeEntity : RuleEntity<TypeEntity, TypeAllowed>
     {
-        [NotNullable, PreserveOrder]
+        [NotNullValidator, PreserveOrder]
         public MList<RuleTypeConditionEmbedded> Conditions { get; set; } = new MList<RuleTypeConditionEmbedded>();
     }
 

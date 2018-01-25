@@ -12,7 +12,7 @@ namespace Signum.Entities.ViewLog
     [Serializable, EntityKind(EntityKind.System, EntityData.Transactional)]
     public class ViewLogEntity : Entity
     {
-        [NotNullable, ImplementedByAll]
+        [ImplementedByAll]
         [NotNullValidator]
         public Lite<Entity> Target { get; set; }
 

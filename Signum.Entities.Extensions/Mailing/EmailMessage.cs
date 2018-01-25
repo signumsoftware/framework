@@ -29,7 +29,7 @@ namespace Signum.Entities.Mailing
             this.UniqueIdentifier = Guid.NewGuid();
         }
 
-        [NotNullable]
+        [NotNullValidator]
         [CountIsValidator(ComparisonType.GreaterThan, 0)]
         public MList<EmailRecipientEntity> Recipients { get; set; } = new MList<EmailRecipientEntity>();
 
@@ -93,7 +93,6 @@ namespace Signum.Entities.Mailing
 
         public int SendRetries { get; set; }
 
-        [NotNullable]
         [NotNullValidator, NoRepeatValidator]
         public MList<EmailAttachmentEmbedded> Attachments { get; set; } = new MList<EmailAttachmentEmbedded>();
 
@@ -151,7 +150,6 @@ namespace Signum.Entities.Mailing
     {
         public EmailAttachmentType Type { get; set; }
 
-        [NotNullable]
         FilePathEmbedded file;
         [NotNullValidator]
         public FilePathEmbedded File

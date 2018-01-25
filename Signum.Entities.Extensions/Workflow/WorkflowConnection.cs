@@ -89,7 +89,6 @@ namespace Signum.Entities.Workflow
     [Serializable]
     public class WorkflowConnectionModel : ModelEntity
     {
-        [NotNullable]
         [NotNullValidator, InTypeScript(Undefined = false, Null = false)]
         public TypeEntity MainEntityType { get; set; }
 

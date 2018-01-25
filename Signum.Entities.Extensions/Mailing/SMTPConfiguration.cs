@@ -35,7 +35,7 @@ namespace Signum.Entities.Mailing
 
         public EmailAddressEmbedded DefaultFrom { get; set; }
 
-        [NotNullable]
+        [NotNullValidator]
         [NoRepeatValidator]
         public MList<EmailRecipientEntity> AdditionalRecipients { get; set; } = new MList<EmailRecipientEntity>();
 
@@ -85,7 +85,7 @@ namespace Signum.Entities.Mailing
 
         public bool EnableSSL { get; set; }
 
-        [NotNullable]
+        [NotNullValidator]
         public MList<ClientCertificationFileEmbedded> ClientCertificationFiles { get; set; } = new MList<ClientCertificationFileEmbedded>();
     }
 

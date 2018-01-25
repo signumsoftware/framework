@@ -47,7 +47,7 @@ namespace Signum.Entities.Mailing
         [Unit("d")]
         public int? DeleteMessagesAfter { get; set; } = 14;
 
-        [NotNullable]
+        [NotNullValidator]
         public MList<ClientCertificationFileEmbedded> ClientCertificationFiles { get; set; } = new MList<ClientCertificationFileEmbedded>();
 
         public override string ToString()
@@ -92,7 +92,7 @@ namespace Signum.Entities.Mailing
         [NotNullValidator]
         public Lite<Pop3ReceptionEntity> Reception { get; set; }
 
-        [NotNullable, UniqueIndex]
+        [UniqueIndex]
         [NotNullValidator]
         public Lite<ExceptionEntity> Exception { get; set; }
     }

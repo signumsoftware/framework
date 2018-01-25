@@ -27,7 +27,6 @@ namespace Signum.Entities.Dynamic
 
         public static Func<DynamicValidationEntity, Type> GetMainType; 
 
-        [NotNullable]
         [NotNullValidator, NotifyChildProperty, InTypeScript(Undefined = false, Null = false)]
         public DynamicValidationEval Eval { get; set; }
 

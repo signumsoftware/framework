@@ -229,7 +229,7 @@ namespace Signum.Entities.Dashboard
     [Serializable, EntityKind(EntityKind.Part, EntityData.Master)]
     public class ValueUserQueryListPartEntity : Entity, IPartEntity
     {
-        [NotNullable]
+        [NotNullValidator]
         public MList<ValueUserQueryElementEmbedded> UserQueries { get; set; } = new MList<ValueUserQueryElementEmbedded>();
 
         public override string ToString()
@@ -306,7 +306,7 @@ namespace Signum.Entities.Dashboard
     [Serializable, EntityKind(EntityKind.Part, EntityData.Master)]
     public class LinkListPartEntity : Entity, IPartEntity
     {
-        [NotNullable]
+        [NotNullValidator]
         public MList<LinkElementEmbedded> Links { get; set; } = new MList<LinkElementEmbedded>();
 
         public override string ToString()

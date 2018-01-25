@@ -22,7 +22,7 @@ namespace Signum.Entities.Help
         [StringLengthValidator(AllowNulls = true, Min = 3, MultiLine = true)]
         public string Description { get; set; }
 
-        [NotNullable, PreserveOrder]
+        [PreserveOrder]
         [NotNullValidator, NoRepeatValidator]
         public MList<QueryColumnHelpEmbedded> Columns { get; set; } = new MList<QueryColumnHelpEmbedded>();
 

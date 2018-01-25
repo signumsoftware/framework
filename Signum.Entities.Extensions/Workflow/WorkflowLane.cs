@@ -27,7 +27,7 @@ namespace Signum.Entities.Workflow
         [NotNullValidator]
         public WorkflowPoolEntity Pool { get; set; }
 
-        [NotNullable, ImplementedBy(typeof(UserEntity), typeof(RoleEntity))]
+        [ImplementedBy(typeof(UserEntity), typeof(RoleEntity))]
         [NotNullValidator, NoRepeatValidator]
         public MList<Lite<Entity>> Actors { get; set; } = new MList<Lite<Entity>>();
 
@@ -114,14 +114,13 @@ namespace Signum.Entities.Workflow
     [Serializable]
     public class WorkflowLaneModel : ModelEntity
     {
-        [NotNullable]
         [NotNullValidator, InTypeScript(Undefined = false, Null = false)]
         public TypeEntity MainEntityType { get; set; }
 
         [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
         public string Name { get; set; }
 
-        [NotNullable, ImplementedBy(typeof(UserEntity), typeof(RoleEntity))]
+        [ImplementedBy(typeof(UserEntity), typeof(RoleEntity))]
         [NotNullValidator, NoRepeatValidator]
         public MList<Lite<Entity>> Actors { get; set; } = new MList<Lite<Entity>>();
 

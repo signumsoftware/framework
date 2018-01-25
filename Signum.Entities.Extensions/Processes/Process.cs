@@ -39,7 +39,6 @@ namespace Signum.Entities.Processes
             this.algorithm = process;
         }
 
-        [NotNullable]
         ProcessAlgorithmSymbol algorithm;
         [NotNullValidator]
         public ProcessAlgorithmSymbol Algorithm
@@ -51,11 +50,9 @@ namespace Signum.Entities.Processes
 
         public const string None = "none";
 
-        [NotNullable]
         [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
         public string MachineName { get; set; }
 
-        [NotNullable]
         [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
         public string ApplicationName { get; set; }
 

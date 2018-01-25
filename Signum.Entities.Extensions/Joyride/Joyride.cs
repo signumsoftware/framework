@@ -17,10 +17,9 @@ namespace Signum.Entities.Joyride
 
         public Lite<CultureInfoEntity> Culture { get; set; }
 
-        [NotNullable]
         public JoyrideType Type { get; set; }
 
-        [NotNullable, PreserveOrder]
+        [PreserveOrder]
         [NotNullValidator, NoRepeatValidator]
         public MList<JoyrideStepEntity> Steps { get; set; } = new MList<JoyrideStepEntity>();
 

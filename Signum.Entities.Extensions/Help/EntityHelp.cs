@@ -23,11 +23,9 @@ namespace Signum.Entities.Help
 		[StringLengthValidator(AllowNulls = true, Min = 3, MultiLine = true)]
         public string Description { get; set; }
 
-        [NotNullable]
         [NotNullValidator, NoRepeatValidator]
         public MList<PropertyRouteHelpEmbedded> Properties { get; set; } = new MList<PropertyRouteHelpEmbedded>();
 
-        [NotNullable]
         [NotNullValidator, NoRepeatValidator]
         public MList<OperationHelpEmbedded> Operations { get; set; } = new MList<OperationHelpEmbedded>();
 

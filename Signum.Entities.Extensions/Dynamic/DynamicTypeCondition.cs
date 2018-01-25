@@ -21,7 +21,6 @@ namespace Signum.Entities.Dynamic
         [NotNullValidator]
         public TypeEntity EntityType { get; set; }
 
-        [NotNullable]
         [NotNullValidator, NotifyChildProperty, InTypeScript(Undefined = false, Null = false)]
         public DynamicTypeConditionEval Eval { get; set; }
 

@@ -38,7 +38,6 @@ namespace Signum.Entities.Dynamic
     [Serializable, EntityKind(EntityKind.Main, EntityData.Master)]
     public class DynamicViewSelectorEntity : Entity
     {
-        [NotNullable]
         [NotNullValidator, UniqueIndex]
         public TypeEntity EntityType { get; set; }
 

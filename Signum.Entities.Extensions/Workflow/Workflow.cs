@@ -148,7 +148,6 @@ namespace Signum.Entities.Workflow
     [Serializable]
     public class WorkflowReplacementItemEmbedded : EmbeddedEntity
     {
-        [NotNullable]
         [NotNullValidator, InTypeScript(Undefined = false, Null= false)]
         public Lite<WorkflowActivityEntity> OldTask { get; set; }
         

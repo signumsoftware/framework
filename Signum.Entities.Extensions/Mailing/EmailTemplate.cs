@@ -53,11 +53,10 @@ namespace Signum.Entities.Mailing
 
         public EmailTemplateContactEmbedded From { get; set; }
 
-        [NotNullable]
         [NotNullValidator, NoRepeatValidator]
         public MList<EmailTemplateRecipientEntity> Recipients { get; set; } = new MList<EmailTemplateRecipientEntity>();
 
-        [NotNullable, PreserveOrder]
+        [PreserveOrder]
         [NotNullValidator, NoRepeatValidator, ImplementedBy(typeof(ImageAttachmentEntity)), NotifyChildProperty]
         public MList<IAttachmentGeneratorEntity> Attachments { get; set; } = new MList<IAttachmentGeneratorEntity>();
 
@@ -65,7 +64,7 @@ namespace Signum.Entities.Mailing
 
         public bool IsBodyHtml { get; set; } = true;
 
-        [NotifyCollectionChanged, NotifyChildProperty]
+        [NotNullValidator, NotifyCollectionChanged, NotifyChildProperty]
         public MList<EmailTemplateMessageEmbedded> Messages { get; set; } = new MList<EmailTemplateMessageEmbedded>();
 
         [NotifyChildProperty]
@@ -174,7 +173,7 @@ namespace Signum.Entities.Mailing
         [NotNullValidator]
         public CultureInfoEntity CultureInfo { get; set; }
 
-        [NotNullable, SqlDbType(Size = int.MaxValue)]
+        [SqlDbType(Size = int.MaxValue)]
         string text;
         [StringLengthValidator(AllowNulls = false, MultiLine=true)]
         public string Text

@@ -22,7 +22,6 @@ namespace Signum.Entities.Workflow
 
         public TypeEntity MainEntityType { get; set; }
 
-        [NotNullable]
         [NotNullValidator, NotifyChildProperty]
         public WorkflowScriptEval Eval { get; set; }
 

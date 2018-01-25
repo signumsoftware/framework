@@ -20,7 +20,7 @@ namespace Signum.Entities.Mailing
         [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
         public string Name { get; set; }
 
-        [NotifyCollectionChanged, NotNullable]
+        [NotifyCollectionChanged, NotNullValidator]
         public MList<EmailMasterTemplateMessageEmbedded> Messages { get; set; } = new MList<EmailMasterTemplateMessageEmbedded>();
 
         public static readonly Regex MasterTemplateContentRegex = new Regex(@"\@\[content\]");

@@ -11,7 +11,6 @@ namespace Signum.Entities.Scheduler
     [Serializable, EntityKind(EntityKind.System, EntityData.Transactional)]
     public class SystemEventLogEntity : Entity
     {
-        [NotNullable]
         [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
         public string MachineName { get; set; }
 

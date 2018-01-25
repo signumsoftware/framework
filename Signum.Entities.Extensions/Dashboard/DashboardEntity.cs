@@ -52,7 +52,7 @@ namespace Signum.Entities.Dashboard
 
         public bool CombineSimilarRows { get; set; } = true;
 
-        [NotifyCollectionChanged, NotifyChildProperty, NotNullable]
+        [NotifyCollectionChanged, NotifyChildProperty, NotNullValidator]
         [NoRepeatValidator]
         public MList<PanelPartEmbedded> Parts { get; set; } = new MList<PanelPartEmbedded>();
 

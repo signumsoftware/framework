@@ -55,7 +55,7 @@ namespace Signum.Entities.Processes
         [NotNullValidator]
         public Lite<PackageEntity> Package { get; set; }
 
-        [NotNullable, ImplementedByAll]
+        [ImplementedByAll]
         [NotNullValidator]
         public Entity Target { get; set; }
 

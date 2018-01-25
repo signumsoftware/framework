@@ -25,7 +25,7 @@ namespace Signum.Entities.Rest
         [NotNullable, SqlDbType(Size = MaxValue)]
         public string RequestBody { get; set; }
 
-        [NotNullable, PreserveOrder]
+        [NotNullValidator, PreserveOrder]
         public MList<QueryStringValueEmbedded> QueryString { get; set; } = new MList<QueryStringValueEmbedded>();
 
         public Lite<IUserEntity> User { get; set; }
@@ -39,9 +39,11 @@ namespace Signum.Entities.Rest
         [SqlDbType(Size = int.MaxValue)]
         public string Referrer { get; set; }
 
-                public string Controller { get; set; }
+        [NotNullable, SqlDbType(Size = 100)]
+        public string Controller { get; set; }
 
-                public string Action { get; set; }
+        [NotNullable, SqlDbType(Size = 100)]
+        public string Action { get; set; }
 
         public Lite<ExceptionEntity> Exception { get; set; }
 

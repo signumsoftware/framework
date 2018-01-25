@@ -36,8 +36,7 @@ namespace Signum.Entities.UserQueries
 
         public Lite<Entity> Owner { get; set; }
 
-        [NotNullable]
-        [StringLengthValidator(Min = 1, Max = 200)]
+        [StringLengthValidator(AllowNulls = false, Min = 1, Max = 200)]
         public string DisplayName { get; set; }
 
         bool withoutFilters;
@@ -52,15 +51,15 @@ namespace Signum.Entities.UserQueries
         }
 
 
-        [NotNullable, PreserveOrder]
+        [NotNullValidator, PreserveOrder]
         public MList<QueryFilterEmbedded> Filters { get; set; } = new MList<QueryFilterEmbedded>();
 
-        [NotNullable, PreserveOrder]
+        [NotNullValidator, PreserveOrder]
         public MList<QueryOrderEmbedded> Orders { get; set; } = new MList<QueryOrderEmbedded>();
 
         public ColumnOptionsMode ColumnsMode { get; set; }
 
-        [NotNullable, PreserveOrder]
+        [NotNullValidator, PreserveOrder]
         public MList<QueryColumnEmbedded> Columns { get; set; } = new MList<QueryColumnEmbedded>();
         
         public bool SearchOnLoad { get; set; } = true;
@@ -284,7 +283,6 @@ namespace Signum.Entities.UserQueries
     {
         public QueryFilterEmbedded() { }
 
-        [NotNullable]
         QueryTokenEmbedded token;
         [NotNullValidator]
         public QueryTokenEmbedded Token

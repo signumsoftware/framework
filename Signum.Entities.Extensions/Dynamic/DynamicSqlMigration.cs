@@ -17,7 +17,7 @@ namespace Signum.Entities.Dynamic
     {
         public DateTime CreationDate { get; set; }
 
-        [NotNullable, ImplementedBy(typeof(UserEntity))]
+        [ImplementedBy(typeof(UserEntity))]
         [NotNullValidator]
         public Lite<IUserEntity> CreatedBy { get; set; }
 

@@ -22,7 +22,7 @@ namespace Signum.Entities.Workflow
         [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
         public string Description { get; set; }
 
-        [NotNullable, ImplementedByAll]
+        [ImplementedByAll]
         [NotNullValidator]
         public ICaseMainEntity MainEntity { get; set; }
 
@@ -51,11 +51,11 @@ namespace Signum.Entities.Workflow
     [Serializable]
     public class CaseTagsModel : ModelEntity
     {
-        [NotNullable, PreserveOrder]
+        [PreserveOrder]
         [NotNullValidator, NoRepeatValidator]
         public MList<CaseTagTypeEntity> CaseTags { get; set; } = new MList<CaseTagTypeEntity>();
 
-        [NotNullable, PreserveOrder]
+        [PreserveOrder]
         [NotNullValidator, NoRepeatValidator]
         public MList<CaseTagTypeEntity> OldCaseTags { get; set; } = new MList<CaseTagTypeEntity>();
     }
@@ -72,7 +72,6 @@ namespace Signum.Entities.Workflow
         [NotNullValidator]
         public CaseTagTypeEntity TagType { get; set; }
 
-        [NotNullable]
         [NotNullValidator, ImplementedBy(typeof(UserEntity))]
         public Lite<IUserEntity> CreatedBy { get; set; }
     }

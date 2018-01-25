@@ -74,7 +74,7 @@ namespace Signum.Entities.Files
             get { return FileLengthStringExpression.Evaluate(this); }
         }
 
-        [StringLengthValidator(AllowNulls = true, Min = 3, Max = 260)]
+        [StringLengthValidator(AllowNulls = true, Min = 3, Max = 260, DisabledInModelBinder = true)]
         public string Suffix { get; set; }
 
         [Ignore]

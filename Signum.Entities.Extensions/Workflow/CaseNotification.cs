@@ -19,7 +19,7 @@ namespace Signum.Entities.Workflow
         [NotNullValidator]
         public Lite<UserEntity> User { get; set; }
 
-        [NotNullable, ImplementedBy(typeof(UserEntity), typeof(RoleEntity))]
+        [ImplementedBy(typeof(UserEntity), typeof(RoleEntity))]
         [NotNullValidator]
         public Lite<Entity> Actor { get; internal set; }
 

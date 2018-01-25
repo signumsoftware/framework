@@ -28,7 +28,6 @@ namespace Signum.Entities.Workflow
             return fullWorkflow ?? GetWorkflowEntity(this.Workflow);
         }
         
-        [NotNullable]
         [NotNullValidator, UniqueIndex]
         public Lite<WorkflowEventEntity> Event { get; set; }
 
