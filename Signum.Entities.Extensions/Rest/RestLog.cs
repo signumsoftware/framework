@@ -92,6 +92,7 @@ namespace Signum.Entities.Rest
 
     public class RestDiffRequest
     {
+        public string httpMethod { get; set; }
         public string url { get; set; }
         public string apiKey { get; set; }
         public string requestBody { get; set; }
