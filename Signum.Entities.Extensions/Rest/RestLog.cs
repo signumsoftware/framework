@@ -14,13 +14,15 @@ namespace Signum.Entities.Rest
     [Serializable, EntityKind(EntityKind.System, EntityData.Transactional), InTypeScript(Undefined = false)]
     public class RestLogEntity : Entity
     {
+        [StringLengthValidator(AllowNulls = true, Max = 100)]
+        public string HttpMethod { get; set; }
+
         [NotNullable, SqlDbType(Size = MaxValue)]
         public string Url { get; set; }
 
         public DateTime StartDate { get; set; }
 
         public DateTime? ReplayDate { get; set; }
-
 
         [NotNullable, SqlDbType(Size = MaxValue)]
         public string RequestBody { get; set; }
@@ -73,15 +75,12 @@ namespace Signum.Entities.Rest
 
         [SqlDbType(Size = MaxValue)]
         public string Value { get; set; }
-
-
     }
 
     public enum RestLogReplayState
     {
         NoChanges,
         WithChanges
-
     }
 
     public class RestDiffResult

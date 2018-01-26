@@ -42,6 +42,7 @@ namespace Signum.React.RestLog
                 var request = new RestLogEntity
                 {
                     AllowReplay = this.AllowReplay,
+                    HttpMethod = actionContext.Request.Method.ToString(),
                     Url = actionContext.Request.RequestUri.ToString(),
                     QueryString = queryParams,
                     User = UserHolder.Current?.ToLite(),
