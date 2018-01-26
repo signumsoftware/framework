@@ -150,16 +150,16 @@ export default class TypesRulesPackControl extends React.Component<{ ctx: TypeCo
                             </th>
 
                             <th style={{ textAlign: "center" }}>
-                                {TypeAllowed.niceName("Create") }
+                                {TypeAllowed.niceToString("Create") }
                             </th>
                             <th style={{ textAlign: "center" }}>
-                                {TypeAllowed.niceName("Modify") }
+                                {TypeAllowed.niceToString("Modify") }
                             </th>
                             <th style={{ textAlign: "center" }}>
-                                {TypeAllowed.niceName("Read") }
+                                {TypeAllowed.niceToString("Read") }
                             </th>
                             <th style={{ textAlign: "center" }}>
-                                {TypeAllowed.niceName("None") }
+                                {TypeAllowed.niceToString("None") }
                             </th>
                             <th style={{ textAlign: "center" }}>
                                 {AuthAdminMessage.Overriden.niceToString() }
@@ -301,7 +301,7 @@ export default class TypesRulesPackControl extends React.Component<{ ctx: TypeCo
     colorRadio(b: Binding<TypeAllowed | null>, basicAllowed: TypeAllowedBasic, color: string) {
         const allowed = b.getValue();
 
-        const niceName = TypeAllowedBasic.niceName(basicAllowed)!;
+        const niceName = TypeAllowedBasic.niceToString(basicAllowed)!;
 
         const title = !allowed ? niceName :
             getDB(allowed) == getUI(allowed) && getUI(allowed) == basicAllowed ? niceName :

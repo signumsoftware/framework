@@ -108,7 +108,7 @@ export default class ImportAssetsPage extends React.Component<ImportAssetsPagePr
                         {
                             tc.value.lines!.map(mle =>
                                 <tr key={mle.element.type!.cleanName}>
-                                    <td> {EntityAction.niceName(mle.element.action) } </td>
+                                    <td> {EntityAction.niceToString(mle.element.action!)} </td>
                                     <td>
                                         { mle.element.action == "Different" &&
                                             <input type="checkbox" checked={mle.element.overrideEntity} onChange={e => {

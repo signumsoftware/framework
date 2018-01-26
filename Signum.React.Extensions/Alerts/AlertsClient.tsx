@@ -50,7 +50,7 @@ export function start(options: { routes: JSX.Element[], couldHaveAlerts?: (typeN
 function chooseDate(): Promise<moment.Moment | undefined>{
     return SelectorModal.chooseElement(DelayOption.values(), {
         title: AlertMessage.DelayDuration.niceToString(),
-        buttonDisplay: v => DelayOption.niceName(v) !,
+        buttonDisplay: v => DelayOption.niceToString(v) !,
     }).then(val => {
         if (!val)
             return undefined;
