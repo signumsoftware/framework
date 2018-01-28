@@ -1,5 +1,5 @@
 ﻿import * as React from 'react'
-import { DropdownItem, ButtonDropdown } from 'reactstrap'
+import { DropdownItem, Dropdown, DropdownToggle, DropdownMenu } from 'reactstrap'
 import { API, TreeNode, TreeNodeState, fixState } from './TreeClient'
 import { Dic, classes, DomUtils } from '../../../Framework/Signum.React/Scripts/Globals'
 import * as Navigator from '../../../Framework/Signum.React/Scripts/Navigator'
@@ -282,7 +282,7 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
             const frozenFilters = validFilters.filter(fo => fo.frozen == true).map(fo => ({ token: fo.token!.fullKey, operation: fo.operation!, value: fo.value }) as FilterRequest);
 
             const newLastFilters = JSON.stringify(userFilters);
-            
+
             if (userFilters.length == 0 && frozenFilters.length == 0)
                 userFilters.push({ token: "Entity.Level", operation: "EqualTo", value: 1 });
 
@@ -366,7 +366,7 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
     findParent(childNode: TreeNode) {
         return this.state.treeNodes!.flatMap(allNodes).filter(n => n.loadedChildren.contains(childNode)).singleOrNull();
     }
-    
+
     simpleFilterBuilderInstance?: ISimpleFilterBuilder;
     getFilterOptionsWithSFB(): Promise<FilterOptionParsed[]> {
 
@@ -400,21 +400,27 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
                     title={s.showFilters ? JavascriptMessage.hideFilters.niceToString() : JavascriptMessage.showFilters.niceToString()}><span className="fa fa-filter"></span></a>
                 <button className="btn btn-primary" onClick={this.handleSearchSubmit}>{JavascriptMessage.search.niceToString()}</button>
                 {Operations.isOperationAllowed(TreeOperation.CreateRoot, this.props.typeName) && <button className="btn btn-light" onClick={this.handleAddRoot} disabled={s.treeNodes == null} > <i className="fa fa-star" aria-hidden="true"></i>&nbsp;{TreeViewerMessage.AddRoot.niceToString()}</button>}
-                <ButtonDropdown id="selectedButton"
+                <Dropdown id="selectedButton"
                     className="sf-query-button sf-tm-selected"
-                    title={`${JavascriptMessage.Selected.niceToString()} (${selected && selected.lite.toStr || TreeViewerMessage.AddRoot.niceToString()})`}
-                    toggle={this.handleSelectedToggle} isOpen={s.isSelectOpen}
+                    toggle={this.handleSelectedToggle}
+                    isOpen={s.isSelectOpen}
                     disabled={selected == undefined}>
-                    {menuItems == undefined ? <DropdownItem className="sf-tm-selected-loading">{JavascriptMessage.loading.niceToString()}</DropdownItem> :
-                        menuItems.length == 0 ? <DropdownItem className="sf-search-ctxitem-no-results">{JavascriptMessage.noActionsFound.niceToString()}</DropdownItem> :
-                            menuItems.map((e, i) => React.cloneElement(e, { key: i }))}
-                </ButtonDropdown>
+                    <DropdownToggle color="light" caret disabled={selected == undefined}>
+                        {`${JavascriptMessage.Selected.niceToString()} (${selected ? selected.lite.toStr : TreeViewerMessage.None.niceToString()})`}
+                    </DropdownToggle>
+                    <DropdownMenu>
+                        {menuItems == undefined ? <DropdownItem className="sf-tm-selected-loading">{JavascriptMessage.loading.niceToString()}</DropdownItem> :
+                            menuItems.length == 0 ? <DropdownItem className="sf-search-ctxitem-no-results">{JavascriptMessage.noActionsFound.niceToString()}</DropdownItem> :
+                                menuItems.map((e, i) => React.cloneElement(e, { key: i }))}
+                    </DropdownMenu>
+                </Dropdown>
                 <button className="btn btn-light" onClick={this.handleExplore} ><i className="fa fa-search"></i> &nbsp; {SearchMessage.Explore.niceToString()}</button>
             </div>
         );
     }
 
     handleSelectedToggle = () => {
+        
         if (!this.state.isSelectOpen && this.state.currentMenuItems == undefined)
             this.loadMenuItems();
 
@@ -447,7 +453,7 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
 
         var isCopy = e.ctrlKey || e.shiftKey || e.altKey;
         e.dataTransfer.effectAllowed = isCopy ? "copy" : "move";
-        this.setState({ draggedNode: node, draggedKind: isCopy? "Copy":  "Move" });
+        this.setState({ draggedNode: node, draggedKind: isCopy ? "Copy" : "Move" });
     }
 
 
@@ -496,7 +502,7 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
 
         if (dragged == over.node)
             return;
-        
+
         var nodeParent = this.findParent(over.node);
         const ts = TreeClient.settings[this.props.typeName];
         if (ts && ts.dragTargetIsValid)
@@ -525,7 +531,7 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
         if (this.state.draggedKind == "Move") {
             const treeModel = MoveTreeModel.New(partial);
             Operations.API.executeLite(dragged.lite, TreeOperation.Move, treeModel).then(() =>
-                
+
                 this.setState({ draggedNode: undefined, draggedOver: undefined, draggedKind: undefined, selectedNode: dragged }, () => {
                     if (toExpand)
                         toExpand.nodeState = "Expanded";
@@ -583,10 +589,10 @@ class TreeNodeControl extends React.Component<TreeNodeControlProps> {
         var node = this.props.treeNode;
         const tv = this.props.treeViewer;
         switch (nodeState) {
-            case "Collapsed": return <span onClick={() => tv.handleNodeIconClick(node)} className = "tree-icon fa fa-plus-square-o" />;
+            case "Collapsed": return <span onClick={() => tv.handleNodeIconClick(node)} className="tree-icon fa fa-plus-square-o" />;
             case "Expanded": return <span onClick={() => tv.handleNodeIconClick(node)} className="tree-icon fa fa-minus-square-o" />;
             case "Filtered": return (
-                <span onClick={() => tv.handleNodeIconClick(node)} className = "tree-icon fa-stack fa-sm" >
+                <span onClick={() => tv.handleNodeIconClick(node)} className="tree-icon fa-stack fa-sm" >
                     <i className="fa fa-square-o fa-stack-2x"></i>
                     <i className="fa fa-filter fa-stack-1x"></i>
                 </span>);
@@ -605,7 +611,7 @@ class TreeNodeControl extends React.Component<TreeNodeControlProps> {
                     onDragEnter={de => tv.handleDragOver(node, de)}
                     onDragOver={de => tv.handleDragOver(node, de)}
                     onDragEnd={de => tv.handleDragEnd(node, de)}
-                    onDrop={this.props.dropDisabled ? undefined: de => tv.handleDrop(node, de)}
+                    onDrop={this.props.dropDisabled ? undefined : de => tv.handleDrop(node, de)}
                     style={this.getDragAndDropStyle(node)}>
                     {this.renderIcon(node.nodeState)}
 
@@ -619,8 +625,8 @@ class TreeNodeControl extends React.Component<TreeNodeControlProps> {
 
                 {node.loadedChildren.length > 0 && (node.nodeState == "Expanded" || node.nodeState == "Filtered") &&
                     <ul>
-                    {node.loadedChildren.map((n, i) =>
-                        <TreeNodeControl key={i} treeViewer={tv} treeNode={n} dropDisabled={this.props.dropDisabled || n == tv.state.draggedNode} />)}
+                        {node.loadedChildren.map((n, i) =>
+                            <TreeNodeControl key={i} treeViewer={tv} treeNode={n} dropDisabled={this.props.dropDisabled || n == tv.state.draggedNode} />)}
                     </ul>
                 }
             </li>

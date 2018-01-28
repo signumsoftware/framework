@@ -1,7 +1,7 @@
 ﻿import * as React from 'react'
 import { classes } from '../../../../Framework/Signum.React/Scripts/Globals'
 import { BsColor } from "../../../../Framework/Signum.React/Scripts/Operations";
-import { CardTitle, Card, Collapse } from 'reactstrap';
+import { CardTitle, Card, Collapse, CardBody } from 'reactstrap';
 
 export interface CollapsableCardProps {
     color?: BsColor;
@@ -56,19 +56,21 @@ export default class CollapsableCard extends React.Component<CollapsableCardProp
             this.props.isOpen;
 
         return (
-            <Card color={this.props.color}>
-                <CardTitle>
-                    {this.props.header}
-                    {(this.props.collapsable == undefined || this.props.collapsable == true) &&
-                        <span
-                        className={classes(this.state.isRTL ? "pull-left" : "pull-right", "fa", isOpen? "fa-chevron-up" : "fa-chevron-down")}
-                            style={{ cursor: "pointer" }}
-                            onClick={this.handleToggle}>
-                        </span>}
-                </CardTitle>
-                <Collapse isOpen={isOpen}>
-                    {this.props.children}
-                </Collapse>
+            <Card color={this.props.color} outline={true}>
+                <CardBody>
+                    <CardTitle>
+                        {this.props.header}
+                        {(this.props.collapsable == undefined || this.props.collapsable == true) &&
+                            <span
+                                className={classes(this.state.isRTL ? "pull-left" : "pull-right", "fa", isOpen ? "fa-chevron-up" : "fa-chevron-down")}
+                                style={{ cursor: "pointer" }}
+                                onClick={this.handleToggle}>
+                            </span>}
+                    </CardTitle>
+                    <Collapse isOpen={isOpen}>
+                        {this.props.children}
+                    </Collapse>
+                </CardBody>
             </Card>
         );
     }
