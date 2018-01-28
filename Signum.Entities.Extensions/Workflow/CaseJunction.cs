@@ -15,11 +15,9 @@ namespace Signum.Entities.Workflow
     {
         public WorkflowGatewayDirection Direction { get; set; }
 
-        [NotNullable]
         [NotNullValidator]
         public Lite<CaseActivityEntity> From { get; set; }
 
-        [NotNullable]
         [NotNullValidator]
         public Lite<CaseActivityEntity> To { get; set; }
     }

@@ -10,11 +10,9 @@ namespace Signum.Entities.Files
     [Serializable]
     public class FileEmbedded : EmbeddedEntity, IFile
     {
-        [NotNullable]
-        [StringLengthValidator(Min = 3)]
+        [StringLengthValidator(AllowNulls = false, Min = 3, Max = 200)]
         public string FileName { get; set; }
 
-        [NotNullable]
         [NotNullValidator]
         public byte[] BinaryFile { get; set; }
         

@@ -24,17 +24,15 @@ namespace Signum.Entities.Word
     [Serializable, EntityKind(EntityKind.Main, EntityData.Master)]
     public class WordTemplateEntity : Entity
     {
-        [NotNullable, SqlDbType(Size = 200), UniqueIndex]
+        [UniqueIndex]
         [StringLengthValidator(AllowNulls = false, Min = 3, Max = 200)]
         public string Name { get; set; }
 
-        [NotNullable]
         [NotNullValidator]
         public QueryEntity Query { get; set; }
 
         public SystemWordTemplateEntity SystemWordTemplate { get; set; }
 
-        [NotNullable]
         [NotNullValidator]
         public CultureInfoEntity Culture { get; set; }
 
@@ -46,7 +44,6 @@ namespace Signum.Entities.Word
 
         public Lite<FileEntity> Template { get; set; }
 
-        [NotNullable, SqlDbType(Size = 100)]
         [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100), FileNameValidator]
         public string FileName { get; set; }
 

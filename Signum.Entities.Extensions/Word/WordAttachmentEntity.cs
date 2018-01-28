@@ -23,7 +23,6 @@ namespace Signum.Entities.Word
             base.SetSelfModified();
         }
 
-        [NotNullable, SqlDbType(Size = 100)]
         string fileName;
         [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100), FileNameValidator]
         public string FileName
@@ -39,7 +38,6 @@ namespace Signum.Entities.Word
         [Ignore]
         internal object FileNameNode;
 
-        [NotNullable]
         [NotNullValidator]
         public Lite<WordTemplateEntity> WordTemplate { get; set; }
         

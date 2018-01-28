@@ -359,7 +359,7 @@ namespace Signum.Engine.Workflow
                     Name = oldLane.Name,
                     BpmnElementId = oldLane.BpmnElementId,
                     Actors = oldLane.Actors.ToMList(),
-                    ActorsEval = oldLane.ActorsEval.Clone(),
+                    ActorsEval = oldLane.ActorsEval != null ? oldLane.ActorsEval.Clone() : null,
                     Xml = oldLane.Xml,
                 }.Save();
 

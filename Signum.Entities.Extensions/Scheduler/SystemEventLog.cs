@@ -11,7 +11,6 @@ namespace Signum.Entities.Scheduler
     [Serializable, EntityKind(EntityKind.System, EntityData.Transactional)]
     public class SystemEventLogEntity : Entity
     {
-        [SqlDbType(Size = 100), NotNullable]
         [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
         public string MachineName { get; set; }
 
@@ -19,7 +18,6 @@ namespace Signum.Entities.Scheduler
 
         public Lite<IUserEntity> User { get; set; }
 
-        [NotNullable, SqlDbType(Size = 100)]
         [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
         public string EventType { get; set; }
         

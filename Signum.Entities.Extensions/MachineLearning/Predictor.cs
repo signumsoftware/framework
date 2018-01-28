@@ -27,15 +27,13 @@ namespace Signum.Entities.MachineLearning
             RebindEvents();
         }
 
-        [SqlDbType(Size = 100),]
         [StringLengthValidator(AllowNulls = true, Min = 3, Max = 100)]
         public string Name { get; set; }
 
-        [NotNullable]
         [NotNullValidator]
         public PredictorSettingsEmbedded Settings { get; set; }
 
-        [NotNullable, NotNullValidator]
+        [NotNullValidator]
         public PredictorAlgorithmSymbol Algorithm { get; set; }
 
         public PredictorResultSaverSymbol ResultSaver { get; set; }
@@ -52,14 +50,13 @@ namespace Signum.Entities.MachineLearning
 
         public PredictorState State { get; set; }
 
-        [NotNullable]
         [NotNullValidator, InTypeScript(Undefined = false, Null = false), NotifyChildProperty]
         public PredictorMainQueryEmbedded MainQuery { get; set; }
 
         [Ignore, NotifyChildProperty, NotifyCollectionChanged] //virtual Mlist
         public MList<PredictorSubQueryEntity> SubQueries { get; set; } = new MList<PredictorSubQueryEntity>();
         
-        [NotNullable, PreserveOrder]
+        [PreserveOrder]
         [NotNullValidator, NoRepeatValidator]
         public MList<FilePathEmbedded> Files { get; set; } = new MList<FilePathEmbedded>();
 
@@ -94,10 +91,10 @@ namespace Signum.Entities.MachineLearning
 
         public bool GroupResults { get; set; }
 
-        [NotNullable, PreserveOrder]
+        [NotNullValidator, PreserveOrder]
         public MList<QueryFilterEmbedded> Filters { get; set; } = new MList<QueryFilterEmbedded>();
 
-        [NotNullable, PreserveOrder]
+        [PreserveOrder]
         [NotNullValidator, NoRepeatValidator, NotifyChildProperty, NotifyCollectionChanged]
         public MList<PredictorColumnEmbedded> Columns { get; set; } = new MList<PredictorColumnEmbedded>();
 
@@ -228,7 +225,6 @@ namespace Signum.Entities.MachineLearning
     {
         public PredictorColumnUsage Usage { get; set; }
 
-        [NotNullable]
         [NotNullValidator]
         public QueryTokenEmbedded Token { get; set; }
 
@@ -317,20 +313,19 @@ namespace Signum.Entities.MachineLearning
             RebindEvents();
         }
 
-        [NotNullable]
+        [NotNullValidator(DisabledInModelBinder = true)]
         public Lite<PredictorEntity> Predictor { get; set; }
 
-        [NotNullable, SqlDbType(Size = 100)]
         [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
         public string Name { get; set; }
 
-        [NotNullable, NotNullValidator]
+        [NotNullValidator]
         public QueryEntity Query { get; set; }
 
-        [NotNullable, PreserveOrder]
+        [NotNullValidator, PreserveOrder]
         public MList<QueryFilterEmbedded> Filters { get; set; } = new MList<QueryFilterEmbedded>();
         
-        [NotNullable, PreserveOrder]
+        [PreserveOrder]
         [NotNullValidator, NoRepeatValidator, NotifyChildProperty, NotifyCollectionChanged]
         public MList<PredictorSubQueryColumnEmbedded> Columns { get; set; } = new MList<PredictorSubQueryColumnEmbedded>();
 
@@ -371,7 +366,6 @@ namespace Signum.Entities.MachineLearning
     {
         public PredictorSubQueryColumnUsage Usage { get; set; }
 
-        [NotNullable]
         [NotNullValidator]
         public QueryTokenEmbedded Token { get; set; }
 

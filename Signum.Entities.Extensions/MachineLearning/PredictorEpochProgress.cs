@@ -6,7 +6,6 @@ namespace Signum.Entities.MachineLearning
     [Serializable, EntityKind(EntityKind.System, EntityData.Transactional)]
     public class PredictorEpochProgressEntity : Entity
     {
-        [NotNullable]
         [NotNullValidator]
         public Lite<PredictorEntity> Predictor { get; set; }
 

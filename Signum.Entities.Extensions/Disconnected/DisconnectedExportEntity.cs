@@ -30,7 +30,7 @@ namespace Signum.Entities.Disconnected
         [Unit("ms")]
         public int? DisableForeignKeys { get; set; }
 
-        [NotNullable, PreserveOrder]
+        [NotNullValidator, PreserveOrder]
         public MList<DisconnectedExportTableEmbedded> Copies { get; set; } = new MList<DisconnectedExportTableEmbedded>();
 
         [Unit("ms")]

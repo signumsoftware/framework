@@ -12,11 +12,9 @@ namespace Signum.Entities.Rest
     [Serializable, EntityKind(EntityKind.Main, EntityData.Master)]
     public class RestApiKeyEntity : Entity
     {
-        [NotNullable]
         [NotNullValidator]
         public Lite<UserEntity> User { get; set; }
 
-        [SqlDbType(Size = 100)]
         [StringLengthValidator(AllowNulls = false, Min = 20, Max = 100)]
         [UniqueIndex(AllowMultipleNulls = true)]
         public string ApiKey { get; set; }

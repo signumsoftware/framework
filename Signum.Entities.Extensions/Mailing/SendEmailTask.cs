@@ -17,11 +17,10 @@ namespace Signum.Entities.Mailing
     [Serializable, EntityKind(EntityKind.Shared, EntityData.Master)]
     public class SendEmailTaskEntity : Entity, ITaskEntity
     {
-        [NotNullable, SqlDbType(Size = 100), UniqueIndex]
+        [UniqueIndex]
         [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
         public string Name { get; set; }
 
-        [NotNullable]
         [NotNullValidator]
         public Lite<EmailTemplateEntity> EmailTemplate { get; set; }
 

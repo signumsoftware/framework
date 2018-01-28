@@ -19,13 +19,12 @@ namespace Signum.Entities.MachineLearning
     [Serializable, EntityKind(EntityKind.Part, EntityData.Master)]
     public class NeuralNetworkSettingsEntity : Entity, IPredictorAlgorithmSettings
     {
-        [SqlDbType(Size = 100)]
         [StringLengthValidator(AllowNulls = true, Max = 100)]
         public string Device { get; set; }
 
         public PredictionType PredictionType { get; set; }
 
-        [NotNullable, PreserveOrder]
+        [PreserveOrder]
         [NotNullValidator, NoRepeatValidator]
         public MList<NeuralNetworkHidenLayerEmbedded> HiddenLayers { get; set; } = new MList<NeuralNetworkHidenLayerEmbedded>();
 
@@ -208,7 +207,6 @@ namespace Signum.Entities.MachineLearning
     [Serializable, EntityKind(EntityKind.Part, EntityData.Transactional)]
     public class AutoconfigureNeuralNetworkEntity : Entity, IProcessDataEntity
     {
-        [NotNullable]
         [NotNullValidator]
         public Lite<PredictorEntity> InitialPredictor { get; set; }
 

@@ -25,7 +25,7 @@ namespace Signum.Entities.Rest
         [NotNullable, SqlDbType(Size = MaxValue)]
         public string RequestBody { get; set; }
 
-        [NotNullable, PreserveOrder]
+        [NotNullValidator, PreserveOrder]
         public MList<QueryStringValueEmbedded> QueryString { get; set; } = new MList<QueryStringValueEmbedded>();
 
         public Lite<IUserEntity> User { get; set; }

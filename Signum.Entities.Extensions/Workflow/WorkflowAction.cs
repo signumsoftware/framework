@@ -15,13 +15,12 @@ namespace Signum.Entities.Workflow
     [Serializable, EntityKind(EntityKind.Shared, EntityData.Master)]
     public class WorkflowActionEntity : Entity
     {
-        [NotNullable, SqlDbType(Size = 100), UniqueIndex]
+        [UniqueIndex]
         [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
         public string Name { get; set; }
 
         public TypeEntity MainEntityType { get; set; }
 
-        [NotNullable]
         [NotNullValidator, NotifyChildProperty]
         public WorkflowActionEval Eval { get; set; }
 

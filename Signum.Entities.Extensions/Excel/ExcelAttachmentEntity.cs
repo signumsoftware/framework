@@ -22,7 +22,6 @@ namespace Signum.Entities.Excel
             base.SetSelfModified();
         }
 
-        [NotNullable, SqlDbType(Size = 100)]
         string fileName;
         [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100), FileNameValidator]
         public string FileName
@@ -38,7 +37,6 @@ namespace Signum.Entities.Excel
         [Ignore]
         internal object FileNameNode;
 
-        [SqlDbType(Size = 300)]
         string title;
         [StringLengthValidator(AllowNulls = true, Min = 3, Max = 300)]
         public string Title
@@ -55,7 +53,6 @@ namespace Signum.Entities.Excel
         [Ignore]
         internal object TitleNode;
 
-        [NotNullable]
         [NotNullValidator]
         public Lite<UserQueryEntity> UserQuery { get; set; }
 

@@ -23,7 +23,6 @@ namespace Signum.Entities.Printing
         [Ignore]
         public FileTypeSymbol TestFileType { get; set; }
 
-        [NotNullable]
         [NotNullValidator]
         public FilePathEmbedded File { get; set; }
 

@@ -23,11 +23,9 @@ namespace Signum.Entities.Workflow
         //[NotNullValidator] needs to be disabled temporally
         public IWorkflowNodeEntity To { get; set; }
 
-        [SqlDbType(Size = 100)]
         [StringLengthValidator(AllowNulls = true, Min = 3, Max = 100)]
         public string Name { get; set; }
 
-        [NotNullable, SqlDbType(Size = 100)]
         [StringLengthValidator(AllowNulls = false, Min = 1, Max = 100)]
         public string BpmnElementId { get; set; }
 
@@ -39,7 +37,6 @@ namespace Signum.Entities.Workflow
         
         public int? Order { get; set; }
 
-        [NotNullable]
         [NotNullValidator]
         public WorkflowXmlEmbedded Xml { get; set; }
 
@@ -92,11 +89,9 @@ namespace Signum.Entities.Workflow
     [Serializable]
     public class WorkflowConnectionModel : ModelEntity
     {
-        [NotNullable]
         [NotNullValidator, InTypeScript(Undefined = false, Null = false)]
         public TypeEntity MainEntityType { get; set; }
 
-        [SqlDbType(Size = 100)]
         [StringLengthValidator(AllowNulls = true, Min = 3, Max = 100)]
         public string Name { get; set; }
 
