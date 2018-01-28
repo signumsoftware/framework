@@ -22,6 +22,7 @@ import { OperationMessage } from "../../../../Framework/Signum.React/Scripts/Sig
 import "../../../../Framework/Signum.React/Scripts/Frames/Frames.css"
 import "./CaseAct.css"
 import { IHasCaseActivity } from '../WorkflowClient';
+import { ModalTitleButtons } from '../../../../Framework/Signum.React/Scripts/SearchControl/SearchModal';
 
 interface CaseFrameModalProps extends React.Props<CaseFrameModal>, IModalProps {
     title?: string;
@@ -129,7 +130,7 @@ export default class CaseFrameModal extends React.Component<CaseFrameModalProps,
         }
     }
     
-    handleOkClicked = (val: any) => {
+    handleOkClicked = () => {
         if (this.hasChanges()) {
             MessageModal.show({
                 title: NormalWindowMessage.ThereAreChanges.niceToString(),
@@ -159,11 +160,13 @@ export default class CaseFrameModal extends React.Component<CaseFrameModalProps,
         return (
             <Modal size="lg" isOpen={this.state.show} onClosed={this.handleOnClosed} className="sf-popup-control" >
                 <ModalHeader>
-                    {!this.props.isNavigate && <ButtonToolbar className="pull-right flip">
-                        <Button className="sf-entity-button sf-close-button sf-ok-button" color="primary" disabled={!pack} onClick={this.handleOkClicked}>{JavascriptMessage.ok.niceToString()}</Button>
-                        <Button className="sf-entity-button sf-close-button sf-cancel-button" color="default" disabled={!pack} onClick={this.handleCancelClicked}>{JavascriptMessage.cancel.niceToString()}</Button>
-                    </ButtonToolbar>}
-                    {this.renderTitle() }
+                    <ModalTitleButtons
+                        onClose={this.props.isNavigate ? this.handleCancelClicked : undefined}
+                        onOk={!this.props.isNavigate ? this.handleOkClicked : undefined}
+                        onCancel={!this.props.isNavigate ? this.handleCancelClicked : undefined}
+                        okDisabled={!pack}>
+                        {this.renderTitle()}
+                    </ModalTitleButtons>
                 </ModalHeader>
                 {pack && this.renderBody() }
             </Modal>
