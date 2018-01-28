@@ -1,4 +1,5 @@
 ﻿import * as React from 'react'
+import * as ReactDOM from 'react-dom'
 import { DropdownItemProps } from 'reactstrap'
 import { Dic, classes, combineFunction, DomUtils } from '../Globals'
 import * as PropTypes from "prop-types";
@@ -69,5 +70,32 @@ export default class ContextMenu extends React.Component<ContextMenuProps> {
 
         return ul;
         //return <RootCloseWrapper onRootClose={onHide}>{ul}</RootCloseWrapper>;
+    }
+
+    
+
+    componentDidMount() {
+
+        document.addEventListener('click', this.handleDocumentClick, true);
+        document.addEventListener('touchstart', this.handleDocumentClick, true);
+    }
+
+    componentWillUnmount() {
+        document.removeEventListener('click', this.handleDocumentClick, true);
+        document.removeEventListener('touchstart', this.handleDocumentClick, true);
+    }
+
+    handleDocumentClick = (e: MouseEvent | TouchEvent) => {
+        console.log(e);
+        if (e.which === 3)
+            return;
+
+        const container = ReactDOM.findDOMNode(this);
+        if (container.contains(e.target as Node) &&
+            container !== e.target) {
+            return;
+        }
+
+        this.props.onHide();
     }
 }

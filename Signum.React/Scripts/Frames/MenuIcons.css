@@ -1,22 +1,18 @@
-﻿body:not(.rtl-mode) .sidebar .arrow,
-body:not(.rtl-mode) .dropdown-menu .arrow {
+﻿body:not(.rtl-mode) .dropdown-item .arrow {
     float: right;
     margin-top: 3px;
 }
 
-body.rtl-mode .sidebar .arrow,
-body.rtl-mode .dropdown-menu .arrow {
+body.rtl-mode .dropdown-item .arrow {
     float: left;
     margin-top: 3px;
 }
 
-.dropdown-menu .fa.arrow:before,
-.sidebar .fa.arrow:before {
+.dropdown-item .fa.arrow:before {
     content: "\f104";
 }
 
-.dropdown-menu .active > a > .fa.arrow:before,
-.sidebar .active > a > .fa.arrow:before {
+.dropdown-item.active > .fa.arrow:before {
     content: "\f107";
 }
 
