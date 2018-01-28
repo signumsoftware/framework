@@ -1,5 +1,4 @@
 ﻿import * as React from 'react'
-import { DropdownButton, MenuItem } from 'react-bootstrap'
 import {
     WorkflowEntitiesDictionary, WorkflowActivityModel, WorkflowActivityType, WorkflowPoolModel,
     WorkflowLaneModel, WorkflowConnectionModel, WorkflowEventModel, WorkflowEntity,

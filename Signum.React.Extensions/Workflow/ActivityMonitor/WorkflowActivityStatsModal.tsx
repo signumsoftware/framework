@@ -1,7 +1,7 @@
 ﻿import * as moment from 'moment'
 import * as numbro from 'numbro'
 import * as React from 'react'
-import { Modal, ModalProps, ModalClass, ButtonToolbar, Tabs, Tab } from 'react-bootstrap'
+import { Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap'
 import { openModal, IModalProps } from '../../../../Framework/Signum.React/Scripts/Modals';
 import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder';
 import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator';
@@ -12,7 +12,7 @@ import { TypeInfo, TypeReference, Binding } from '../../../../Framework/Signum.R
 import { FormGroupStyle, TypeContext } from '../../../../Framework/Signum.React/Scripts/TypeContext'
 import { ValueLineType, ValueLine } from '../../../../Framework/Signum.React/Scripts/Lines/ValueLine'
 import { WorkflowActivityStats } from "../WorkflowClient";
-import { FormGroup, StyleContext, FormControlStatic } from "../../../../Framework/Signum.React/Scripts/Lines";
+import { FormGroup, StyleContext, FormControlReadonly } from "../../../../Framework/Signum.React/Scripts/Lines";
 import { WorkflowActivityEntity, WorkflowActivityMessage, CaseNotificationEntity, WorkflowActivityType, WorkflowOperation, WorkflowEntity, WorkflowActivityModel, WorkflowActivityMonitorMessage, CaseActivityEntity } from "../Signum.Entities.Workflow";
 import { SearchControl, ColumnOption, FilterOption } from "../../../../Framework/Signum.React/Scripts/Search";
 import * as WorkflowClient from '../WorkflowClient';
@@ -39,7 +39,7 @@ export default class WorkflowActivityStatsModal extends React.Component<Workflow
         this.setState({ show: false });
     }
 
-    handleOnExited = () => {
+    handleOnClosed = () => {
         this.props.onExited!(undefined);
     }
 
@@ -49,20 +49,20 @@ export default class WorkflowActivityStatsModal extends React.Component<Workflow
         var activity = this.props.activity;
         var config = this.props.config;
         var stats = this.props.stats;
-        return <Modal bsSize="lg" onHide={this.handleCloseClicked} show={this.state.show} onExited={this.handleOnExited}>
+        return <Modal size="lg" toggle={this.handleCloseClicked} isOpen={this.state.show} onClosed={this.handleOnClosed}>
 
-            <Modal.Header closeButton={true}>
+            <ModalHeader toggle={this.handleCloseClicked}>
                 <h4 className="modal-title">
                     {stats.WorkflowActivity.toStr}
                 </h4>
-            </Modal.Header>
+            </ModalHeader>
 
-            <Modal.Body>
+            <ModalBody>
                 {
                     <div className="form-horizontal">
-                        <FormGroup ctx={ctx} labelText={CaseActivityEntity.nicePluralName()}><FormControlStatic ctx={ctx}>{stats.CaseActivityCount}</FormControlStatic></FormGroup>
+                        <FormGroup ctx={ctx} labelText={CaseActivityEntity.nicePluralName()}><FormControlReadonly ctx={ctx}>{stats.CaseActivityCount}</FormControlReadonly></FormGroup>
                         {config.columns.map((col, i) =>
-                            <FormGroup ctx={ctx} labelText={col.displayName || col.token!.niceName}><FormControlStatic ctx={ctx}>{stats.CustomValues[i]}</FormControlStatic></FormGroup>
+                            <FormGroup ctx={ctx} labelText={col.displayName || col.token!.niceName}><FormControlReadonly ctx={ctx}>{stats.CustomValues[i]}</FormControlReadonly></FormGroup>
                         )}
                         {activity.type == "CallWorkflow" || activity.type == "DecompositionWorkflow" ?
                             this.renderSubWorkflowExtra(ctx) :
@@ -70,12 +70,12 @@ export default class WorkflowActivityStatsModal extends React.Component<Workflow
                         }
                     </div>
                 }
-            </Modal.Body>
-            <Modal.Footer>
+            </ModalBody>
+            <ModalFooter>
                 <button className="btn btn-primary sf-entity-button sf-ok-button" onClick={this.handleCloseClicked}>
                     {JavascriptMessage.ok.niceToString()}
                 </button>
-            </Modal.Footer>
+            </ModalFooter>
         </Modal>;
     }
 
