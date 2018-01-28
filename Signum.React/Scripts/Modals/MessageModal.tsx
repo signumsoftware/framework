@@ -35,6 +35,7 @@ export default class MessageModal extends React.Component<MessageModalProps, { s
     }
 
     selectedValue?: MessageModalResult;
+
     handleButtonClicked = (val: MessageModalResult) => {
         this.selectedValue = val;
         this.setState({ show: false });
@@ -150,15 +151,15 @@ export default class MessageModal extends React.Component<MessageModalProps, { s
         var iconSpan = icon && <span className={icon}></span>;
 
         return (
-            <h4 className={"modal-title"}>
+            <span>
                 {iconSpan && iconSpan}{iconSpan && <span>&nbsp;&nbsp;</span>}{this.props.title}
-            </h4>
+            </span>
             );
     }
 
     render() {
         return (
-            <Modal isOpen={this.state.show} onClosed={this.handleOnClosed} className="message-modal">
+            <Modal isOpen={this.state.show} onClosed={this.handleOnClosed} className="message-modal" toggle={this.handleCancelClicked} autoFocus={true}>
                 <ModalHeader className={dialogHeaderClass(this.props.style)}>
                     {this.renderTitle()}
                 </ModalHeader>
@@ -166,7 +167,7 @@ export default class MessageModal extends React.Component<MessageModalProps, { s
                     {renderText(this.props.message, this.props.style)}
                 </ModalBody>
                 <ModalFooter>
-                    {this.renderButtons(this.props.buttons)}
+                     {this.renderButtons(this.props.buttons)}
                 </ModalFooter>
             </Modal>
         );

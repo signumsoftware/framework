@@ -487,12 +487,6 @@ ul.dropdown-menu > li > a.disabled {
     opacity: .65;
 }
 
-/*Override absurd width for popups on sm*/
-@media (min-width: 768px) {
-    .modal-dialog:not(.modal-sm) {
-        min-width: 730px;
-    }
-}
 
 .help-block {
     display: block;
