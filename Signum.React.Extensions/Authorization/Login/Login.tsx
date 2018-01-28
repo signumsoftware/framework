@@ -38,9 +38,9 @@ export default class Login extends React.Component<{}, { modelState?: ModelState
             .done();
     }
 
-    userName: HTMLInputElement;
-    password: HTMLInputElement;
-    rememberMe: HTMLInputElement;
+    userName!: HTMLInputElement;
+    password!: HTMLInputElement;
+    rememberMe?: HTMLInputElement;
 
 
     error(field: string) {

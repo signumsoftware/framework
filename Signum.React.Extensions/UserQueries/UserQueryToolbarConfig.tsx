@@ -17,8 +17,7 @@ import { UserQueryEntity } from './Signum.Entities.UserQueries'
 export default class UserQueryToolbarConfig extends ToolbarConfig<UserQueryEntity> {
 
     constructor() {
-        super();
-        this.type = UserQueryEntity;
+        super(UserQueryEntity);
     }
 
     countIcon?: CountUserQueryIcon | null;

@@ -131,8 +131,8 @@ export class ConnectionIcons {
     };
 
 
-    hasAction: (con: BPMN.Connection) => Lite<WorkflowActionEntity> | undefined;
-    hasCondition: (con: BPMN.Connection) => Lite<WorkflowConditionEntity> | undefined;
+    hasAction!: (con: BPMN.Connection) => Lite<WorkflowActionEntity> | undefined;
+    hasCondition!: (con: BPMN.Connection) => Lite<WorkflowConditionEntity> | undefined;
 
     show() {
 

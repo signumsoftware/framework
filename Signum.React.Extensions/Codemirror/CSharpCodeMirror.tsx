@@ -30,7 +30,7 @@ interface CSharpCodeMirrorProps {
 
 export default class CSharpCodeMirror extends React.Component<CSharpCodeMirrorProps> { 
 
-    codeMirrorComponent: CodeMirrorComponent;
+    codeMirrorComponent!: CodeMirrorComponent;
 
     render() {        
 
