@@ -45,7 +45,7 @@ export default class WorkflowLaneModelComponent extends React.Component<Workflow
             <div className="row">
                 <div className="col-sm-7">
                     <div className="code-container">
-                        <pre style={{ border: "0px", margin: "0px" }}>{"List<Lite<Entity>> GetActors(" + mainEntityName + "Entity e, WorkflowTransitionContext ctx)\n{"}</pre>
+                        <pre style={{ border: "0px", margin: "0px" }}>{"IEnumerable<Lite<Entity>> GetActors(" + mainEntityName + "Entity e, WorkflowTransitionContext ctx)\n{"}</pre>
                         <CSharpCodeMirror script={ectx.value.script || ""} onChange={this.handleCodeChange} />
                         <pre style={{ border: "0px", margin: "0px" }}>{"}"}</pre>
                     </div>

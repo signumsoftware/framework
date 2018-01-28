@@ -15,23 +15,19 @@ namespace Signum.Entities.Workflow
     [Serializable, EntityKind(EntityKind.Main, EntityData.Master)]
     public class WorkflowLaneEntity : Entity, IWorkflowObjectEntity, IWithModel
     {
-        [NotNullable, SqlDbType(Size = 100)]
         [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
         public string Name { get; set; }
 
-        [NotNullable, SqlDbType(Size = 100)]
         [StringLengthValidator(AllowNulls = false, Min = 1, Max = 100)]
         public string BpmnElementId { get; set; }
 
-        [NotNullable]
         [NotNullValidator]
         public WorkflowXmlEmbedded Xml { get; set; }
 
-        [NotNullable]
         [NotNullValidator]
         public WorkflowPoolEntity Pool { get; set; }
 
-        [NotNullable, ImplementedBy(typeof(UserEntity), typeof(RoleEntity))]
+        [ImplementedBy(typeof(UserEntity), typeof(RoleEntity))]
         [NotNullValidator, NoRepeatValidator]
         public MList<Lite<Entity>> Actors { get; set; } = new MList<Lite<Entity>>();
 
@@ -84,12 +80,12 @@ namespace Signum.Entities.Workflow
                     {
                         class MyWorkflowLaneActorEvaluator : IWorkflowLaneActorsEvaluator
                         {
-                            public List<Lite<Entity>> GetActors(ICaseMainEntity mainEntity, WorkflowTransitionContext ctx)
+                            public IEnumerable<Lite<Entity>> GetActors(ICaseMainEntity mainEntity, WorkflowTransitionContext ctx)
                             {
                                 return this.Evaluate((" + WorkflowEntityTypeName + @")mainEntity, ctx);
                             }
 
-                            List<Lite<Entity>> Evaluate(" + WorkflowEntityTypeName + @" e, WorkflowTransitionContext ctx)
+                            IEnumerable<Lite<Entity>> Evaluate(" + WorkflowEntityTypeName + @" e, WorkflowTransitionContext ctx)
                             {
                                 " + script + @"
                             }
@@ -105,7 +101,7 @@ namespace Signum.Entities.Workflow
 
     public interface IWorkflowLaneActorsEvaluator
     {
-        List<Lite<Entity>> GetActors(ICaseMainEntity mainEntity, WorkflowTransitionContext ctx);
+        IEnumerable<Lite<Entity>> GetActors(ICaseMainEntity mainEntity, WorkflowTransitionContext ctx);
     }
 
     [AutoInit]
@@ -118,15 +114,13 @@ namespace Signum.Entities.Workflow
     [Serializable]
     public class WorkflowLaneModel : ModelEntity
     {
-        [NotNullable]
         [NotNullValidator, InTypeScript(Undefined = false, Null = false)]
         public TypeEntity MainEntityType { get; set; }
 
-        [NotNullable, SqlDbType(Size = 100)]
         [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
         public string Name { get; set; }
 
-        [NotNullable, ImplementedBy(typeof(UserEntity), typeof(RoleEntity))]
+        [ImplementedBy(typeof(UserEntity), typeof(RoleEntity))]
         [NotNullValidator, NoRepeatValidator]
         public MList<Lite<Entity>> Actors { get; set; } = new MList<Lite<Entity>>();
 

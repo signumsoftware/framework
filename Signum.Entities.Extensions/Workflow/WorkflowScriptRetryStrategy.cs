@@ -17,7 +17,7 @@ namespace Signum.Entities.Workflow
     [Serializable, EntityKind(EntityKind.Shared, EntityData.Master)]
     public class WorkflowScriptRetryStrategyEntity : Entity
     {
-        [NotNullable, SqlDbType(Size = 100), UniqueIndex]
+        [UniqueIndex]
         [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
         public string Rule { get; set; }
 

@@ -19,26 +19,25 @@ namespace Signum.Entities.Chart
     [Serializable, EntityKind(EntityKind.Main, EntityData.Master)]
     public class ChartScriptEntity : Entity
     {
-        [NotNullable, SqlDbType(Size = 100), UniqueIndex]
+        [UniqueIndex]
         [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
         public string Name { get; set; }
 
         public Lite<FileEntity> Icon { get; set; }
 
-        [NotNullable, SqlDbType(Size = int.MaxValue)]
         [StringLengthValidator(AllowNulls = false, Min = 3, MultiLine = true)]
         public string Script { get; set; }
 
         public GroupByChart GroupBy { get; set; }
 
-        [NotifyCollectionChanged, NotifyChildProperty, NotNullable, PreserveOrder]
+        [NotifyCollectionChanged, NotifyChildProperty, PreserveOrder]
+        [NotNullValidator]
         public MList<ChartScriptColumnEmbedded> Columns { get; set; } = new MList<ChartScriptColumnEmbedded>();
 
-        [NotifyCollectionChanged, NotifyChildProperty, NotNullable, PreserveOrder]
+        [NotifyCollectionChanged, NotifyChildProperty, PreserveOrder]
         [NotNullValidator, NoRepeatValidator]
         public MList<ChartScriptParameterEmbedded> Parameters { get; set; } = new MList<ChartScriptParameterEmbedded>();
 
-        [NotNullable, SqlDbType(Size = 100)]
         [StringLengthValidator(AllowNulls = true, Min = 3, Max = 100)]
         public string ColumnsStructure { get; set; }
 

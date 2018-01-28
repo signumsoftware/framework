@@ -15,7 +15,6 @@ namespace Signum.Entities.Mailing
         [Ignore]
         internal object FileNameNode;
 
-        [SqlDbType(Size = 100)]
         string fileName;
         [StringLengthValidator(AllowNulls = true, Min = 3, Max = 100), FileNameValidator]
         public string FileName
@@ -28,13 +27,11 @@ namespace Signum.Entities.Mailing
             }
         }
 
-        [NotNullable, SqlDbType(Size = 300)]
         [StringLengthValidator(AllowNulls = false, Min = 1, Max = 300)]
         public string ContentId { get; set; }
 
         public EmailAttachmentType Type { get; set; }
 
-        [NotNullable]
         [NotNullValidator]
         public FileEmbedded File { get; set; }
 

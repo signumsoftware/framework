@@ -12,18 +12,14 @@ namespace Signum.Entities.Help
     [Serializable, EntityKind(EntityKind.Main, EntityData.Master)]
     public class AppendixHelpEntity : Entity
     {
-        [NotNullable, SqlDbType(Size = 100)]
         [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
         public string UniqueName { get; set; }
 
-        [NotNullable]
         [NotNullValidator]
         public CultureInfoEntity Culture { get; set; }
 
-        [NotNullable, SqlDbType(Size = 300)]
-        public string Title { get; set; }
+                public string Title { get; set; }
 
-        [SqlDbType(Size = int.MaxValue)]
 		[StringLengthValidator(AllowNulls = true, Min = 3, MultiLine = true)]
         public string Description { get; set; }
 

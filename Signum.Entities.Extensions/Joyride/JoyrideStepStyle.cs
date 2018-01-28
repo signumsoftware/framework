@@ -10,31 +10,25 @@ namespace Signum.Entities.Joyride
     [Serializable, EntityKind(EntityKind.Main, EntityData.Master)]
     public class JoyrideStepStyleEntity : Entity, IUserAssetEntity
     {
-        [NotNullable, SqlDbType(Size = 100), UniqueIndex]
+        [UniqueIndex]
         [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
         public string Name { get; set; }
 
-        [SqlDbType(Size = 50)]
         [StringLengthValidator(AllowNulls = true, Min = 3, Max = 50)]
         public string BackgroundColor { get; set; }
 
-        [SqlDbType(Size = 50)]
         [StringLengthValidator(AllowNulls = true, Min = 3, Max = 50)]
         public string Color { get; set; }
 
-        [SqlDbType(Size = 50)]
         [StringLengthValidator(AllowNulls = true, Min = 3, Max = 50)]
         public string MainColor { get; set; }
 
-        [SqlDbType(Size = 50)]
         [StringLengthValidator(AllowNulls = true, Min = 3, Max = 50)]
         public string BorderRadius { get; set; }
 
-        [SqlDbType(Size = 50)]
         [StringLengthValidator(AllowNulls = true, Min = 3, Max = 50)]
         public string TextAlign { get; set; }
 
-        [SqlDbType(Size = 50)]
         [StringLengthValidator(AllowNulls = true, Min = 3, Max = 50)]
         public string Width { get; set; }
 

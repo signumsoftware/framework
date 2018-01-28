@@ -17,6 +17,8 @@ using Signum.Engine.DynamicQuery;
 using Signum.Engine.Basics;
 using Signum.Engine.Authorization;
 using Newtonsoft.Json;
+using Signum.Utilities;
+using Signum.React.ApiControllers;
 
 namespace Signum.React.Workflow
 {
@@ -191,6 +193,30 @@ namespace Signum.React.Workflow
             var lite = Lite.ParsePrimaryKey<CaseEntity>(caseId);
 
             return CaseFlowLogic.GetCaseFlow(lite.Retrieve());
+        }
+
+        [Route("api/workflow/activityMonitor"), HttpPost]
+        public WorkflowActivityMonitor GetWorkflowActivityMonitor(WorkflowActivityMonitorRequestTS request)
+        {
+            return WorkflowActivityMonitorLogic.GetWorkflowActivityMonitor(request.ToRequest());
+        }
+    }
+
+    public class WorkflowActivityMonitorRequestTS
+    {
+        public Lite<WorkflowEntity> workflow;
+        public List<FilterTS> filters;
+        public List<ColumnTS> columns;
+
+        public WorkflowActivityMonitorRequest ToRequest()
+        {
+            var qd = DynamicQueryManager.Current.QueryDescription(typeof(CaseActivityEntity));
+            return new WorkflowActivityMonitorRequest
+            {
+                Workflow = workflow,
+                Filters = filters.Select(f => f.ToFilter(qd, true)).ToList(),
+                Columns = columns.Select(c => c.ToColumn(qd, true)).ToList(),
+            };
         }
     }
 }

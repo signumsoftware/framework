@@ -13,7 +13,6 @@ namespace Signum.Entities.Printing
     [Serializable, EntityKind(EntityKind.System, EntityData.Transactional)]
     public class PrintPackageEntity : Entity, IProcessDataEntity
     {
-        [SqlDbType(Size = 200)]
         [StringLengthValidator(AllowNulls = true, Max = 200)]
         public string Name { get; set; }
 

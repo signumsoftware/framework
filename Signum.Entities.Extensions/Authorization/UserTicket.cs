@@ -19,14 +19,12 @@ namespace Signum.Entities.Authorization
         [NotNullValidator]
         public Lite<UserEntity> User { get; set; }
 
-        [NotNullable, SqlDbType(Size = 38)]
         [StringLengthValidator(AllowNulls = false, Min = 36, Max = 36)]
         public string Ticket { get; set; }
 
         public DateTime ConnectionDate { get; set; }
 
-        [NotNullable, SqlDbType(Size = 100)]
-        public string Device { get; set; }
+                public string Device { get; set; }
 
         public string StringTicket()
         {

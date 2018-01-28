@@ -18,7 +18,6 @@ namespace Signum.Entities.SMS
     [Serializable, EntityKind(EntityKind.Main, EntityData.Master)]
     public class SMSTemplateEntity : Entity
     {
-        [SqlDbType(Size = 100)]
         [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
         public string Name { get; set; }
 
@@ -31,7 +30,7 @@ namespace Signum.Entities.SMS
         [NotifyCollectionChanged]
         public MList<SMSTemplateMessageEmbedded> Messages { get; set; } = new MList<SMSTemplateMessageEmbedded>();
 
-        [StringLengthValidator(AllowNulls = false)]
+        [StringLengthValidator(AllowNulls = false, Max = 200)]
         public string From { get; set; }
 
         public MessageLengthExceeded MessageLengthExceeded { get; set; } = MessageLengthExceeded.NotAllowed;
@@ -137,11 +136,9 @@ namespace Signum.Entities.SMS
             set { template = value; }
         }
 
-        [NotNullable]
         [NotNullValidator]
         public CultureInfoEntity CultureInfo { get; set; }
 
-        [NotNullable, SqlDbType(Size = int.MaxValue)]
         [StringLengthValidator(AllowNulls = false, MultiLine = true)]
         public string Message { get; set; }
 

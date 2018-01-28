@@ -63,12 +63,10 @@ namespace Signum.Entities.Tree
         [Ignore]
         public bool IsSibling { get; set; }
 
-        [SqlDbType(Size = 255)]
         [StringLengthValidator(AllowNulls = false, Min = 1, Max = 255)]
         public string Name { get; set; }
 
-        [NotNullable, SqlDbType(Size = int.MaxValue)]
-        [StringLengthValidator(AllowNulls = true, Min = 1, Max = int.MaxValue)] //Set by BL
+        [StringLengthValidator(AllowNulls = false, Min = 1, Max = int.MaxValue, DisabledInModelBinder = true)]
         public string FullName { get; private set; }
 
         public void SetFullName(string newFullName)

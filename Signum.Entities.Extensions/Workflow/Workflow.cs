@@ -15,11 +15,10 @@ namespace Signum.Entities.Workflow
     [Serializable, EntityKind(EntityKind.Main, EntityData.Master)]
     public class WorkflowEntity : Entity
     {
-        [NotNullable, SqlDbType(Size = 100), UniqueIndex]
+        [UniqueIndex]
         [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
         public string Name { get; set; }
 
-        [NotNullable]
         [NotNullValidator]
         public TypeEntity MainEntityType { get; set; }
 
@@ -57,7 +56,6 @@ namespace Signum.Entities.Workflow
     [Serializable, InTypeScript(Undefined = false)]
     public class WorkflowModel : ModelEntity
     {
-        [NotNullable]
         [NotNullValidator]
         public string DiagramXml { get; set;  }
 
@@ -67,12 +65,10 @@ namespace Signum.Entities.Workflow
     [Serializable, InTypeScript(Undefined = false)]
     public class BpmnEntityPairEmbedded : EmbeddedEntity
     {
-        [NotNullable]
         [NotNullValidator]
         [ImplementedBy()]
         public ModelEntity Model { get; set; }
 
-        [NotNullable]
         [NotNullValidator]
         public string BpmnElementId { get; set; }
 
@@ -115,7 +111,6 @@ namespace Signum.Entities.Workflow
     [Serializable]
     public class WorkflowXmlEmbedded : EmbeddedEntity
     {
-        [NotNullable, SqlDbType(Size = int.MaxValue)]
         [StringLengthValidator(AllowNulls = false, Min = 3, Max = int.MaxValue, MultiLine = true)]
         public string DiagramXml { get; set; }
     }
@@ -153,7 +148,6 @@ namespace Signum.Entities.Workflow
     [Serializable]
     public class WorkflowReplacementItemEmbedded : EmbeddedEntity
     {
-        [NotNullable]
         [NotNullValidator, InTypeScript(Undefined = false, Null= false)]
         public Lite<WorkflowActivityEntity> OldTask { get; set; }
         
@@ -238,5 +232,15 @@ namespace Signum.Entities.Workflow
         _0IsTimerStartAndTaskIsMandatory,
         [Description("'{0}' is conditional start and condition is mandatory.")]
         _0IsConditionalStartAndTaskConditionIsMandatory
+    }
+
+    public enum WorkflowActivityMonitorMessage
+    {
+        WorkflowActivityMonitor,
+        Draw,
+        ResetZoom,
+        Find, 
+        Filters, 
+        Columns
     }
 }

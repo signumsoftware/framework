@@ -27,15 +27,12 @@ namespace Signum.Entities.Scheduler
 
         public bool Suspended { get; set; }
         
-        [NotNullable, SqlDbType(Size = 100)]
         [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
         public string MachineName { get; set; } = None;
 
-        [NotNullable]
         [NotNullValidator]
         public Lite<IUserEntity> User { get; set; }
 
-        [NotNullable, SqlDbType(Size = 100)]
         [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
         public string ApplicationName { get; set; } = None;
 

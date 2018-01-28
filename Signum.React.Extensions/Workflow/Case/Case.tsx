@@ -50,7 +50,7 @@ export default class CaseComponent extends React.Component<CaseComponentProps, C
     }
 
     componentWillReceiveProps(newProps: CaseComponentProps) {
-        if (is(this.props.ctx.value, newProps.ctx.value))
+        if (!is(this.props.ctx.value, newProps.ctx.value))
             this.loadState(newProps);
     }
 

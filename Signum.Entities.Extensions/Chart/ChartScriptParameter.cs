@@ -15,7 +15,6 @@ namespace Signum.Entities.Chart
     [Serializable]
     public class ChartScriptParameterEmbedded : EmbeddedEntity
     {
-        [NotNullable, SqlDbType(Size = 50)]
         [StringLengthValidator(AllowNulls = false, Min = 3, Max = 50)]
         public string Name { get; set; }
 
@@ -34,7 +33,6 @@ namespace Signum.Entities.Chart
 
         public int? ColumnIndex { get; set; }
 
-        [NotNullable, SqlDbType(Size = 200)]
         string valueDefinition;
         [StringLengthValidator(AllowNulls = true, Max = 200)]
         public string ValueDefinition

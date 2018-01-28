@@ -5,7 +5,7 @@ namespace Signum.Entities.MachineLearning
     [Serializable, EntityKind(EntityKind.System, EntityData.Transactional)]
     public class PredictorCodificationEntity : Entity
     {
-        [NotNullable]
+        [NotNullValidator]
         public Lite<PredictorEntity> Predictor { get; set; }
 
         public PredictorColumnUsage Usage { get; set; }
@@ -33,7 +33,7 @@ namespace Signum.Entities.MachineLearning
 
 
         //For encoding values
-        [NotNullable, PreserveOrder]
+        [PreserveOrder]
         [NotNullValidator, NoRepeatValidator, SqlDbType(Size = 100)]
         public MList<string> CodedValues { get; set; } = new MList<string>();
 

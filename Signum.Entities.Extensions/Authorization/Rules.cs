@@ -16,7 +16,6 @@ namespace Signum.Entities.Authorization
         [NotNullValidator]
         public Lite<RoleEntity> Role { get; set; }
 
-        [NotNullable]
         [NotNullValidator]
         public R Resource { get; set; }
 
@@ -46,7 +45,6 @@ namespace Signum.Entities.Authorization
     [Serializable, InTypeScript(Undefined = false)]
     public class OperationTypeEmbedded : EmbeddedEntity
     {
-        [NotNullable]
         [NotNullValidator]
         public OperationSymbol Operation { get; set; }
 
@@ -66,7 +64,7 @@ namespace Signum.Entities.Authorization
     [Serializable]
     public class RuleTypeEntity : RuleEntity<TypeEntity, TypeAllowed>
     {
-        [NotNullable, PreserveOrder]
+        [NotNullValidator, PreserveOrder]
         public MList<RuleTypeConditionEmbedded> Conditions { get; set; } = new MList<RuleTypeConditionEmbedded>();
     }
 

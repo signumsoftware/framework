@@ -18,11 +18,9 @@ namespace Signum.Entities.Excel
         [NotNullValidator]
         public QueryEntity Query { get; set; }
 
-        [NotNullable]
-        [StringLengthValidator(Min = 3)]
+        [StringLengthValidator(AllowNulls = false, Min = 3, Max = 200)]
         public string DisplayName { get; set; }
 
-        [NotNullable]
         [NotNullValidator]
         public FileEmbedded File { get; set; }
 

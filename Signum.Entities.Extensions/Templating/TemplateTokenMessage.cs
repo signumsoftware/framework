@@ -27,7 +27,7 @@ namespace Signum.Entities.Templating
     [Serializable]
     public class MultiEntityModel : ModelEntity
     {
-        [NotNullable, ImplementedByAll]
+        [ImplementedByAll]
         [NotNullValidator, NoRepeatValidator]
         public MList<Lite<Entity>> Entities { get; set; } = new MList<Lite<Entity>>();
     }

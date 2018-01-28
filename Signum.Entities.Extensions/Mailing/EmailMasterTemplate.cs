@@ -16,11 +16,11 @@ namespace Signum.Entities.Mailing
     [Serializable, EntityKind(EntityKind.Main, EntityData.Master)]
     public class EmailMasterTemplateEntity : Entity
     {
-        [NotNullable, SqlDbType(Size = 100), UniqueIndex]
+        [UniqueIndex]
         [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
         public string Name { get; set; }
 
-        [NotifyCollectionChanged, NotNullable]
+        [NotifyCollectionChanged, NotNullValidator]
         public MList<EmailMasterTemplateMessageEmbedded> Messages { get; set; } = new MList<EmailMasterTemplateMessageEmbedded>();
 
         public static readonly Regex MasterTemplateContentRegex = new Regex(@"\@\[content\]");
@@ -94,11 +94,9 @@ namespace Signum.Entities.Mailing
             set { masterTemplate = value; }
         }
 
-        [NotNullable]
         [NotNullValidator]
         public CultureInfoEntity CultureInfo { get; set; }
 
-        [NotNullable, SqlDbType(Size = int.MaxValue)]
         [StringLengthValidator(AllowNulls = false, MultiLine = true)]
         public string Text { get; set; }
 

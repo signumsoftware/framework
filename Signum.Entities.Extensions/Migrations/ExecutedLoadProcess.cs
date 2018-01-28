@@ -13,15 +13,12 @@ namespace Signum.Entities.Migrations
     [Serializable, EntityKind(EntityKind.System, EntityData.Transactional), TicksColumn(false)]
     public class LoadMethodLogEntity : Entity
     {
-        [SqlDbType(Size = 400)]
         [StringLengthValidator(AllowNulls = true, Min = 3, Max = 400)]
         public string MethodName { get; set; }
 
-        [SqlDbType(Size = 400)]
         [StringLengthValidator(AllowNulls = true, Min = 3, Max = 400)]
         public string ClassName { get; set; }
 
-        [SqlDbType(Size = 400)]
         [StringLengthValidator(AllowNulls = true, Min = 3, Max = 400)]
         public string Description { get; set; }
 

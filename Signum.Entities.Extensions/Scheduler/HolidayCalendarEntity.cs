@@ -13,11 +13,10 @@ namespace Signum.Entities.Scheduler
     [Serializable, EntityKind(EntityKind.Shared, EntityData.Master)]
     public class HolidayCalendarEntity : Entity
     {
-        [NotNullable, SqlDbType(Size = 100), UniqueIndex]
+        [UniqueIndex]
         [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
         public string Name { get; set; }
 
-        [NotNullable]
         [NotNullValidator]
         public MList<HolidayEmbedded> Holidays { get; set; } = new MList<HolidayEmbedded>();
 
@@ -63,7 +62,6 @@ namespace Signum.Entities.Scheduler
         [DaysPrecissionValidator]
         public DateTime Date { get; set; } = DateTime.Today;
 
-        [SqlDbType(Size = 100)]
         [StringLengthValidator(AllowNulls = true, Min = 3, Max = 100)]
         public string Name { get; set; }
 
