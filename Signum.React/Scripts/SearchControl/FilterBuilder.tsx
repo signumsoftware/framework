@@ -71,11 +71,11 @@ export default class FilterBuilder extends React.Component<FilterBuilderProps>{
             <fieldset className="form-xs">
                 {this.props.title && <legend>{this.props.title}</legend>}
                 <div className="sf-filters-list table-responsive" style={{ overflowX: "visible" }}>
-                    <table className="table table-sm sf-filter-table">
+                    <table className="table table-sm">
                         <thead>
                             <tr>
                                 <th style={{ minWidth: "24px" }}></th>
-                                <th className="sf-filter-field-header">{SearchMessage.Field.niceToString()}</th>
+                                <th>{SearchMessage.Field.niceToString()}</th>
                                 <th>{SearchMessage.Operation.niceToString()}</th>
                                 <th>{SearchMessage.Value.niceToString()}</th>
                             </tr>

@@ -23,7 +23,6 @@ namespace Signum.Entities.Basics
             set { route = value; }
         }
 
-        [NotNullable, SqlDbType(Size = 100)]
         [StringLengthValidator(AllowNulls = false, Min = 1, Max = 100)]
         public string Path { get; set; }
 

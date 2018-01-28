@@ -134,7 +134,7 @@ namespace Signum.Entities.Basics
         [Unit("Days"), NumberIsValidator(ComparisonType.GreaterThanOrEqualTo, 0)]
         public int DeleteLogsWithMoreThan { get; set; } = 30 * 6;
 
-        [NotNullable, PreserveOrder]
+        [PreserveOrder]
         [NotNullValidator, NoRepeatValidator]
         public MList<DeleteLogsTypeOverridesEmbedded> TypeOverrides { get; set; } = new MList<DeleteLogsTypeOverridesEmbedded>();
 
@@ -156,7 +156,6 @@ namespace Signum.Entities.Basics
     [Serializable]
     public class DeleteLogsTypeOverridesEmbedded : EmbeddedEntity
     {
-        [NotNullable]
         [NotNullValidator]
         public Lite<TypeEntity> Type { get; set; }
 

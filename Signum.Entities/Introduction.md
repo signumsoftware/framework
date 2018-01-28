@@ -49,7 +49,7 @@ People prefer to see the utility of things from the very beginning and follow a 
 [Serializable, EntityKind(EntityKind.Main, EntityData.Transactional)]
 public class ComputerEntity : Entity
 {
-    [NotNullable, SqlDbType(Size = 12), UniqueIndex]
+    [UniqueIndex]
     string serialNumber;
     [StringLengthValidator(AllowNulls = false, Min = 10, Max = 12)]
     public string SerialNumber
