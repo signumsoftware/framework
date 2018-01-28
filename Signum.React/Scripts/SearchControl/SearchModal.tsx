@@ -44,7 +44,7 @@ export default class SearchModal extends React.Component<SearchModalProps, { sho
         this.setState({ show: false });
     }
 
-    handleOnExited = () => {
+    handleOnClosed = () => {
         this.props.onExited!(this.okPressed ? this.selectedRows : undefined);
     }
 
@@ -62,7 +62,7 @@ export default class SearchModal extends React.Component<SearchModalProps, { sho
         const okEnabled = this.props.isMany ? this.selectedRows.length > 0 : this.selectedRows.length == 1;
 
         return (
-            <Modal size="lg" isOpen={this.state.show} onClosed={this.handleOnExited} toggle={this.handleCancelClicked}>
+            <Modal size="lg" isOpen={this.state.show} onClosed={this.handleOnClosed} toggle={this.handleCancelClicked}>
                 <ModalHeader toggle={this.handleCancelClicked}>
                     { this.props.findMode == "Find" &&
                         <div className="btn-toolbar pull-right flip">
