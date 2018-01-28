@@ -264,7 +264,7 @@ namespace Signum.React.ApiControllers
         public string token;
         public string displayName;
 
-        internal Column ToColumn(QueryDescription qd, bool canAggregate)
+        public Column ToColumn(QueryDescription qd, bool canAggregate)
         {
             var queryToken = QueryUtils.Parse(token, qd, SubTokensOptions.CanElement | (canAggregate ? SubTokensOptions.CanAggregate : 0));
 

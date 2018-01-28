@@ -5,7 +5,6 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
-using System.Text.RegularExpressions;
 
 namespace Signum.TSGenerator
 {
@@ -37,7 +36,7 @@ namespace Signum.TSGenerator
             options.AssemblyReferences.Values.ToList().ForEach(r => Assembly.LoadFrom(r.AssemblyFullPath));
 
             var entities = AppDomain.CurrentDomain.GetAssemblies().Single(a => a.GetName().Name == "Signum.Entities");
-            
+
             Cache = new TypeCache(entities);
 
             GetNamespaceReference(options, Cache.ModifiableEntity);
@@ -166,7 +165,7 @@ namespace Signum.TSGenerator
                     sb.AppendLine();
                 }
             }
-            
+
             var code = sb.ToString();
 
             return WriteFillFile(options, code);
@@ -181,7 +180,7 @@ namespace Signum.TSGenerator
             sb.AppendLine();
             var path = options.AssemblyReferences.GetOrThrow("Signum.Entities").NamespacesReferences.GetOrThrow("Signum.Entities").Path.Replace("Signum.Entities.ts", "Reflection.ts");
             sb.AppendLine($"import {{ MessageKey, QueryKey, Type, EnumType, registerSymbol }} from '{RelativePath(path, options.TemplateFileName)}'");
-            
+
             foreach (var a in options.AssemblyReferences.Values)
             {
                 foreach (var ns in a.NamespacesReferences.Values)
@@ -227,7 +226,7 @@ namespace Signum.TSGenerator
                 else
                     sb.AppendLine(";");
             }
-           
+
 
             return sb.ToString();
         }
@@ -297,7 +296,7 @@ namespace Signum.TSGenerator
 
             foreach (var i in type.GetInterfaces().Except(type.BaseType?.GetInterfaces() ?? Enumerable.Empty<Type>()).Where(i => Cache.IEntity.IsAssignableFrom(i)))
                 baseTypes.Add(TypeScriptName(i, type, options, $"By type {type.Name}"));
-            
+
             sb.AppendLine($"export interface {TypeScriptName(type, type, options, "declaring " + type.Name)} extends {string.Join(", ", baseTypes)} {{");
             if (!type.IsAbstract && Parents(type.BaseType).All(a => a.IsAbstract))
                 sb.AppendLine($"    Type: \"{CleanTypeName(type)}\";");
@@ -358,7 +357,7 @@ namespace Signum.TSGenerator
             return type.GetProperties(BindingFlags.Instance | BindingFlags.Public | (declaredOnly ? BindingFlags.DeclaredOnly : 0))
                             .Where(p => (p.InTypeScript() ?? !(p.ContainsAttribute("HiddenPropertyAttribute") || p.ContainsAttribute("ExpressionFieldAttribute"))));
         }
-        
+
         public static bool ContainsAttribute(this MemberInfo p, string attributeName)
         {
             return p.GetCustomAttributes().Any(a => a.GetType().Name == attributeName);
@@ -408,19 +407,19 @@ namespace Signum.TSGenerator
                 return false;
 
             if (GetTypescriptUndefined(p.DeclaringType) == false &&
-                p.CustomAttributes.Any(a => a.AttributeType.Name == "NotNullableAttribute" || a.AttributeType.Name == "NotNullValidatorAttribute"))
+                p.CustomAttributes.Any(a =>
+                a.AttributeType.Name == "NotNullableAttribute" ||
+                a.AttributeType.Name == "NotNullValidatorAttribute" ||
+                a.AttributeType.Name == "StringLengthValidatorAttribute" && a.NamedArguments.Any(na => na.MemberName == "AllowNulls" && false.Equals(na.TypedValue.Value))))
                 return false;
 
             return p.PropertyType.IsClass || p.PropertyType.IsInterface || Nullable.GetUnderlyingType(p.PropertyType) != null;
         }
 
-
         private static string FirstLower(string name)
         {
-            return char.ToLower(name[0]) + name.Substring(1);
+            return char.ToLowerInvariant(name[0]) + name.Substring(1);
         }
-        
-    
 
         public static Type UnNullify(this Type type)
         {
@@ -431,7 +430,7 @@ namespace Signum.TSGenerator
         {
             type = type.UnNullify();
 
-       
+
             if (!type.IsEnum)
             {
                 switch (Type.GetTypeCode(type))

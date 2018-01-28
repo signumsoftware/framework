@@ -78,7 +78,7 @@ namespace Signum.Entities.Basics
         }
 
 
-        [SqlDbType(Size = 200), UniqueIndex(AllowMultipleNulls = true)]
+        [UniqueIndex(AllowMultipleNulls = true)]
         [StringLengthValidator(AllowNulls = true, Min = 3, Max = 200)]
         public string Key { get; set; }
 
@@ -100,7 +100,6 @@ namespace Signum.Entities.Basics
                 .Any(a => typeof(SemiSymbol).IsAssignableFrom(a.FieldType)) ? DescriptionOptions.Members : (DescriptionOptions?)null;
         }
 
-        [NotNullable, SqlDbType(Size = 100)]
         [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
         public string Name { get; set; }
 

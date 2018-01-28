@@ -68,8 +68,7 @@ For example, `ExceptionEntity`, defined in Signum.Entities, saves detailed infor
 public class ExceptionEntity : Entity
 {    
     //...
-    [SqlDbType(Size = 100)]
-    [StringLengthValidator(AllowNulls = true, Max = 100)]
+        [StringLengthValidator(AllowNulls = true, Max = 100)]
     public string ControllerName { get; set; }
     
 

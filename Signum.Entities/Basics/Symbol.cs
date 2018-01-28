@@ -71,7 +71,7 @@ namespace Signum.Entities
         }
 
 
-        [NotNullable, SqlDbType(Size = 200), UniqueIndex]
+        [UniqueIndex]
         [StringLengthValidator(AllowNulls = false, Min = 3, Max = 200)]
         public string Key { get; set; }
 
