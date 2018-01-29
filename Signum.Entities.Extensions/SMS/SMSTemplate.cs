@@ -30,7 +30,7 @@ namespace Signum.Entities.SMS
         [NotifyCollectionChanged]
         public MList<SMSTemplateMessageEmbedded> Messages { get; set; } = new MList<SMSTemplateMessageEmbedded>();
 
-        [StringLengthValidator(AllowNulls = false)]
+        [StringLengthValidator(AllowNulls = false, Max = 200)]
         public string From { get; set; }
 
         public MessageLengthExceeded MessageLengthExceeded { get; set; } = MessageLengthExceeded.NotAllowed;
