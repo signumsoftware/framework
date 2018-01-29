@@ -212,8 +212,8 @@ function getOptionsItems(vl: ValueLine): OptionItem[]{
 
     if (vl.state.type!.name == "boolean")
         return ([
-            { label: BooleanEnum.niceName("False")!, value: false },
-            { label: BooleanEnum.niceName("True")!, value: true }
+            { label: BooleanEnum.niceToString("False")!, value: false },
+            { label: BooleanEnum.niceToString("True")!, value: true }
         ]);
 
     return Dic.getValues(ti.members).map(m => toOptionItem(m));
