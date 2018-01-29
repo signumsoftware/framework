@@ -199,7 +199,7 @@ export class FilterComponent extends React.Component<FilterComponentProps>{
                     {f.token && f.token.filterType && f.operation &&
                         <select className="form-control" value={f.operation as any} disabled={readOnly} onChange={this.handleChangeOperation}>
                             {f.token.filterType && filterOperations[f.token.filterType!]
-                                .map((ft, i) => <option key={i} value={ft as any}>{FilterOperation.niceName(ft)}</option>)}
+                                .map((ft, i) => <option key={i} value={ft as any}>{FilterOperation.niceToString(ft)}</option>)}
                         </select>}
                 </td>
 
