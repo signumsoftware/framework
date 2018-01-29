@@ -158,7 +158,7 @@ export default class CaseFlowViewerComponent extends React.Component<CaseFlowVie
         return (
             <div>
                 <Button style={{ marginLeft: "20px" }} onClick={this.handleZoomClick}>{WorkflowMessage.ResetZoom.niceToString()}</Button>{" "}
-                <DropdownButton title={WorkflowMessage.Color.niceToString() + CaseFlowColor.niceName(this.state.caseFlowColor)} id="colorMenu" onSelect={this.handleChangeColor}>
+                <DropdownButton title={WorkflowMessage.Color.niceToString() + CaseFlowColor.niceToString(this.state.caseFlowColor)} id="colorMenu" onSelect={this.handleChangeColor}>
                     {this.menuItem("CaseMaxDuration")}
                     {this.menuItem("AverageDuration")}
                     {this.menuItem("EstimatedDuration")}
@@ -171,6 +171,6 @@ export default class CaseFlowViewerComponent extends React.Component<CaseFlowVie
 
 
     menuItem(color: CaseFlowColor) {
-        return <MenuItem eventKey={color} selected={this.state.caseFlowColor == color}>{CaseFlowColor.niceName(color)}</MenuItem>
+        return <MenuItem eventKey={color} selected={this.state.caseFlowColor == color}>{CaseFlowColor.niceToString(color)}</MenuItem>
     }
 }
