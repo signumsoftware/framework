@@ -55,9 +55,7 @@ namespace Signum.Engine.Rest
             //create the new Request
             var restClient = new HttpClient { BaseAddress = new Uri(url) };
             restClient.DefaultRequestHeaders.Add("X-ApiKey", apiKey);
-            var request =
-                new HttpRequestMessage(string.IsNullOrWhiteSpace(oldRequestBody) ? HttpMethod.Get : HttpMethod.Post,
-                    url);
+            var request = new HttpRequestMessage(httpMethod, url);
 
             if (!string.IsNullOrWhiteSpace(oldRequestBody))
             {
