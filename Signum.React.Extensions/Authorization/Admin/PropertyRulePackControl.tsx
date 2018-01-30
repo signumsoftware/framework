@@ -69,13 +69,13 @@ export default class PropertyRulesPackControl extends React.Component<{ ctx: Typ
                                 { PropertyRouteEntity.niceName() }
                             </th>
                             <th style={{ textAlign: "center" }}>
-                                <a onClick={e => this.handleHeaderClick(e, "Modify")}>{PropertyAllowed.niceName("Modify")}</a>
+                                <a onClick={e => this.handleHeaderClick(e, "Modify")}>{PropertyAllowed.niceToString("Modify")}</a>
                             </th>
                             <th style={{ textAlign: "center" }}>
-                                <a onClick={e => this.handleHeaderClick(e, "Read")}>{PropertyAllowed.niceName("Read")}</a>
+                                <a onClick={e => this.handleHeaderClick(e, "Read")}>{PropertyAllowed.niceToString("Read")}</a>
                             </th>
                             <th style={{ textAlign: "center" }}>
-                                <a onClick={e => this.handleHeaderClick(e, "None")}>{PropertyAllowed.niceName("None")}</a>
+                                <a onClick={e => this.handleHeaderClick(e, "None")}>{PropertyAllowed.niceToString("None")}</a>
                             </th>
                             <th style={{ textAlign: "center" }}>
                                 {AuthAdminMessage.Overriden.niceToString()}

@@ -32,19 +32,20 @@ export default class RestLog extends React.Component<{ ctx: TypeContext<RestLogE
             <div>
                 <ValueLine ctx={ctx.subCtx(f => f.startDate)} unitText={moment(ctx.value.startDate).toUserInterface().fromNow()} />
                 <ValueLine ctx={ctx.subCtx(f => f.endDate)} />
-                <ValueLine ctx={ctx.subCtx(f => f.replayDate)} />
-                <ValueLine ctx={ctx.subCtx(f => f.changedPercentage)} />
 
                 <EntityLine ctx={ctx.subCtx(f => f.user)} />
-                <ValueLine ctx={ctx.subCtx(f => f.url)} />
+                <ValueLine ctx={ctx.subCtx(f => f.url)} unitText={ctx.value.httpMethod!} />
                 <ValueLine ctx={ctx.subCtx(f => f.controller)} />
+                <ValueLine ctx={ctx.subCtx(f => f.action)} />
+
                 <ValueLine ctx={ctx.subCtx(f => f.userHostAddress)} />
                 <ValueLine ctx={ctx.subCtx(f => f.userHostName)} />
                 <ValueLine ctx={ctx.subCtx(f => f.referrer)} />
-                <ValueLine ctx={ctx.subCtx(f => f.action)} />
-
 
                 <EntityLine ctx={ctx.subCtx(f => f.exception)} />
+
+                <ValueLine ctx={ctx.subCtx(f => f.replayDate)} />
+                <ValueLine ctx={ctx.subCtx(f => f.changedPercentage)} />
 
                 <EntityRepeater ctx={ctx.subCtx(f => f.queryString)} />
                 {ctx.value.allowReplay && <Form>

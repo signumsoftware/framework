@@ -42,7 +42,7 @@ export default class SchemaMapPage extends React.Component<SchemaMapPageProps, S
         this.state = { filter: "", color: "" };
     }
 
-    wasExpanded: boolean;
+    wasExpanded!: boolean;
 
     componentWillMount() {
 
@@ -104,7 +104,7 @@ export default class SchemaMapPage extends React.Component<SchemaMapPageProps, S
         return result;
     }
 
-    div: HTMLDivElement;
+    div!: HTMLDivElement;
     handleSetInitialSize = (div: HTMLDivElement) => {
 
         if (this.div)
@@ -297,7 +297,7 @@ export class SchemaMapRenderer extends React.Component<SchemaMapRendererProps, {
         this.state.mapD3.stop();
     }
 
-    svg: SVGElement;
+    svg!: SVGElement;
 
     render() {
 

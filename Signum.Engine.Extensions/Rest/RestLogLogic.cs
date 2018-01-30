@@ -48,16 +48,14 @@ namespace Signum.Engine.Rest
             Database.Query<RestLogEntity>().Where(a => a.StartDate < dateLimit).UnsafeDeleteChunksLog(parameters, sb, token);
         }
 
-        public static async Task<RestDiffResult> GetRestDiffResult(string url, string apiKey, string oldRequestBody, string oldResponseBody)
+        public static async Task<RestDiffResult> GetRestDiffResult(HttpMethod httpMethod, string url, string apiKey, string oldRequestBody, string oldResponseBody)
         {
             var result = new RestDiffResult { previous = oldResponseBody };
 
             //create the new Request
             var restClient = new HttpClient { BaseAddress = new Uri(url) };
             restClient.DefaultRequestHeaders.Add("X-ApiKey", apiKey);
-            var request =
-                new HttpRequestMessage(string.IsNullOrWhiteSpace(oldRequestBody) ? HttpMethod.Get : HttpMethod.Post,
-                    url);
+            var request = new HttpRequestMessage(httpMethod, url);
 
             if (!string.IsNullOrWhiteSpace(oldRequestBody))
             {

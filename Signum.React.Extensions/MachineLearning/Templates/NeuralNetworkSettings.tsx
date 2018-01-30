@@ -154,7 +154,7 @@ export default class NeuralNetworkSettings extends React.Component<{ ctx: TypeCo
 
     renderCount(ctx: StyleContext, p: PredictorEntity, usage: PredictorColumnUsage) {
         return (
-            <FormGroup ctx={ctx} labelText={PredictorColumnUsage.niceName(usage) + " columns"}>
+            <FormGroup ctx={ctx} labelText={PredictorColumnUsage.niceToString(usage) + " columns"}>
                 {p.state != "Trained" ? <FormControlReadonly ctx={ctx}>?</FormControlReadonly> : <ValueSearchControl isBadge={true} isLink={true} findOptions={{
                     queryName: PredictorCodificationEntity,
                     parentColumn: "Predictor",

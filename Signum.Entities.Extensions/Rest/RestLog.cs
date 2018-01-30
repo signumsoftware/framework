@@ -14,13 +14,15 @@ namespace Signum.Entities.Rest
     [Serializable, EntityKind(EntityKind.System, EntityData.Transactional), InTypeScript(Undefined = false)]
     public class RestLogEntity : Entity
     {
+        [StringLengthValidator(AllowNulls = true, Max = 100)]
+        public string HttpMethod { get; set; }
+
         [NotNullable, SqlDbType(Size = MaxValue)]
         public string Url { get; set; }
 
         public DateTime StartDate { get; set; }
 
         public DateTime? ReplayDate { get; set; }
-
 
         [NotNullable, SqlDbType(Size = MaxValue)]
         public string RequestBody { get; set; }
@@ -73,15 +75,12 @@ namespace Signum.Entities.Rest
 
         [SqlDbType(Size = MaxValue)]
         public string Value { get; set; }
-
-
     }
 
     public enum RestLogReplayState
     {
         NoChanges,
         WithChanges
-
     }
 
     public class RestDiffResult
@@ -89,13 +88,5 @@ namespace Signum.Entities.Rest
         public string previous { get; set; }
         public string current { get; set; }
         public List<StringDistance.DiffPair<List<StringDistance.DiffPair<string>>>> diff { get; set; }
-    }
-
-    public class RestDiffRequest
-    {
-        public string url { get; set; }
-        public string apiKey { get; set; }
-        public string requestBody { get; set; }
-        public string responseBody { get; set; }
     }
 }

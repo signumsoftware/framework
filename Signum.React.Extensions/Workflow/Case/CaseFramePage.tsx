@@ -102,7 +102,7 @@ export default class CaseFramePage extends React.Component<CaseFramePageProps, C
         Navigator.history.push(WorkflowClient.getDefaultInboxUrl());
     }
 
-    entityComponent: React.Component<any, any>;
+    entityComponent?: React.Component<any, any> | null;
 
     setComponent(c: React.Component<any, any>) {
         if (c && this.entityComponent != c) {

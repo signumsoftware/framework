@@ -29,13 +29,36 @@ CustomModeler.prototype._modules =
 
 export default class BpmnModelerComponent extends React.Component<BpmnModelerComponentProps> {
 
-    private modeler: Modeler;
-    private elementRegistry: BPMN.ElementRegistry;
-    private bpmnFactory: BPMN.BpmnFactory;
-    private divArea: HTMLDivElement; 
+    private modeler!: Modeler;
+    private elementRegistry!: BPMN.ElementRegistry;
+    private bpmnFactory!: BPMN.BpmnFactory;
+    private divArea!: HTMLDivElement; 
 
     constructor(props: any) {
         super(props);
+    }
+
+
+    componentDidMount() {
+        this.modeler = new CustomModeler({
+            container: this.divArea,
+            height: 1000,
+            keyboard: {
+                bindTo: document
+            },
+            additionalModules: [
+                connectionIcons,
+            ],
+        });
+        this.configureModules();
+        this.elementRegistry = this.modeler.get<BPMN.ElementRegistry>('elementRegistry');
+        this.bpmnFactory = this.modeler.get<BPMN.BpmnFactory>('bpmnFactory');
+        this.modeler.on('element.dblclick', 1500, this.handleElementDoubleClick as (obj: BPMN.Event) => void);
+        this.modeler.on('element.paste', 1500, this.handleElementPaste as (obj: BPMN.Event) => void);
+        this.modeler.on('shape.add', 1500, this.handleAddShapeOrConnection as (obj: BPMN.Event) => void);
+        this.modeler.on('connection.add', 1500, this.handleAddShapeOrConnection as (obj: BPMN.Event) => void);
+        this.modeler.on('label.add', 1500, () => this.lastPasted = undefined);
+        this.modeler.importXML(this.props.diagramXML, this.handleOnModelError)
     }
 
     existsMainEntityTypeRelatedNodes(): boolean {
@@ -177,27 +200,6 @@ export default class BpmnModelerComponent extends React.Component<BpmnModelerCom
         return undefined;
     }
 
-    componentDidMount() {
-        this.modeler = new CustomModeler({
-            container: this.divArea,
-            height: 1000,
-            keyboard: {
-                bindTo: document
-            },
-            additionalModules: [
-                connectionIcons,
-            ],
-        });
-        this.configureModules();
-        this.elementRegistry = this.modeler.get<BPMN.ElementRegistry>('elementRegistry');
-        this.bpmnFactory = this.modeler.get<BPMN.BpmnFactory>('bpmnFactory');
-        this.modeler.on('element.dblclick', 1500, this.handleElementDoubleClick as (obj: BPMN.Event) => void);
-        this.modeler.on('element.paste', 1500, this.handleElementPaste as (obj: BPMN.Event) => void);
-        this.modeler.on('shape.add', 1500, this.handleAddShapeOrConnection as (obj: BPMN.Event) => void);
-        this.modeler.on('connection.add', 1500, this.handleAddShapeOrConnection as (obj: BPMN.Event) => void);
-        this.modeler.on('label.add', 1500, () => this.lastPasted = undefined);
-        this.modeler.importXML(this.props.diagramXML, this.handleOnModelError)
-    }
 
     handleElementDoubleClick = (obj: BPMN.DoubleClickEvent) => {
         if (BpmnUtils.isEndEvent(obj.element.type))

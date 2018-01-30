@@ -67,13 +67,13 @@ export default class OperationRulePackControl extends React.Component<{ ctx: Typ
                                 { OperationSymbol.niceName() }
                             </th>
                             <th style={{ textAlign: "center" }}>
-                                <a onClick={e => this.handleHeaderClick(e, "Allow")}>{OperationAllowed.niceName("Allow")}</a>
+                                <a onClick={e => this.handleHeaderClick(e, "Allow")}>{OperationAllowed.niceToString("Allow")}</a>
                             </th>
                             <th style={{ textAlign: "center" }}>
-                                <a onClick={e => this.handleHeaderClick(e, "DBOnly")}>{ OperationAllowed.niceName("DBOnly") }</a>
+                                <a onClick={e => this.handleHeaderClick(e, "DBOnly")}>{ OperationAllowed.niceToString("DBOnly") }</a>
                             </th>
                             <th style={{ textAlign: "center" }}>
-                                <a onClick={e => this.handleHeaderClick(e, "None")}>{ OperationAllowed.niceName("None") }</a>
+                                <a onClick={e => this.handleHeaderClick(e, "None")}>{ OperationAllowed.niceToString("None") }</a>
                             </th>
                             <th style={{ textAlign: "center" }}>
                                 {AuthAdminMessage.Overriden.niceToString() }

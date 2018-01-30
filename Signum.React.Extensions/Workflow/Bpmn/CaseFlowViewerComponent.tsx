@@ -45,8 +45,8 @@ export default class CaseFlowViewerComponent extends React.Component<CaseFlowVie
         this.state = { caseFlowColor: CaseFlowColor.value("CaseMaxDuration") };
     }
 
-    viewer: NavigatedViewer;
-    divArea: HTMLDivElement;
+    viewer!: NavigatedViewer;
+    divArea!: HTMLDivElement;
 
     handleOnModelError = (err: string) => {
         if (err)
@@ -159,7 +159,7 @@ export default class CaseFlowViewerComponent extends React.Component<CaseFlowVie
             <div>
                 <Button style={{ marginLeft: "20px" }} onClick={this.handleZoomClick}>{WorkflowMessage.ResetZoom.niceToString()}</Button>{" "}
                 <UncontrolledButtonDropdown id="colorMenu">
-                    <DropdownToggle color="light" caret>{WorkflowMessage.Color.niceToString() + CaseFlowColor.niceName(this.state.caseFlowColor)}</DropdownToggle>
+                    <DropdownToggle color="light" caret>{WorkflowMessage.Color.niceToString() + CaseFlowColor.niceToString(this.state.caseFlowColor)}</DropdownToggle>
                     <DropdownMenu>
                         {this.menuItem("CaseMaxDuration")}
                         {this.menuItem("AverageDuration")}
@@ -176,7 +176,7 @@ export default class CaseFlowViewerComponent extends React.Component<CaseFlowVie
     menuItem(color: CaseFlowColor) {
         return (
             <DropdownItem onClick={() => this.handleChangeColor(color)} active={this.state.caseFlowColor == color}>
-                {CaseFlowColor.niceName(color)}
+                {CaseFlowColor.niceToString(color)}
             </DropdownItem>
         );
     }
