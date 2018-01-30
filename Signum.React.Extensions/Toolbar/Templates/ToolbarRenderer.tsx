@@ -14,7 +14,7 @@ import { ToolbarConfig } from "../ToolbarClient";
 import '../../../../Framework/Signum.React/Scripts/Frames/MenuIcons.css'
 import './Toolbar.css'
 import { PermissionSymbol } from "../../Authorization/Signum.Entities.Authorization";
-import { UncontrolledDropdown, DropdownItem, DropdownToggle, DropdownMenu, NavItem, NavLink } from 'reactstrap';
+import { UncontrolledDropdown, DropdownItem, DropdownToggle, DropdownMenu, NavItem, NavLink, Dropdown } from 'reactstrap';
 import * as PropTypes from "prop-types";
 
 
@@ -89,16 +89,16 @@ export default class ToolbarRenderer extends React.Component<{ location?: Toolba
                 var icon = this.icon(res);
 
                 return (
-                    <UncontrolledDropdown
-                        onClick={() => this.handleOnToggle(res)}
-                        isOpen={this.state.expanded.contains(res)} color="light">
-                        <DropdownToggle color="light">
+                    <Dropdown
+                        toggle={() => this.handleOnToggle(res)}
+                        isOpen={this.state.expanded.contains(res)}>
+                        <DropdownToggle nav caret>
                             {!icon ? title : (<span>{icon}{title}</span>)}
                         </DropdownToggle>
                         <DropdownMenu>
                             {res.elements && res.elements.flatMap(sr => this.renderDropdownItem(sr, 0, res)).map((sr, i) => withKey(sr, i))}
                         </DropdownMenu>
-                    </UncontrolledDropdown>
+                    </Dropdown>
                 );
             case "Header":
                 return (
