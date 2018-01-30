@@ -862,15 +862,19 @@ export class EnumType<T extends string> {
         return Dic.getKeys(this.typeInfo().members) as T[];
     }
 
+    isDefined(val: any): val is T {
+        return typeof val == "string" && this.typeInfo().members[val] != null
+    }
+
     value(val: T): T {
         return val;
     }
 
-    niceName(value?: T): string | undefined {
+    niceName(): string | undefined {
+        return this.typeInfo().niceName;
+    }
 
-        if (value == undefined)
-            return this.typeInfo().niceName;
-
+    niceToString(value: T): string {
         return this.typeInfo().members[value as string].niceName;
     }
 }
@@ -1189,19 +1193,18 @@ export class PropertyRoute {
 
 export type PropertyRouteType = "Root" | "Field" | "Mixin" | "LiteEntity" | "MListItem";
 
+export type GraphExplorerMode = "collect" | "set" | "clean";
+
 
 export class GraphExplorer {
 
     static propagateAll(...args: any[]) {
-        const ge = new GraphExplorer();
-        ge.modelStateMode = "clean";
+        const ge = new GraphExplorer("clean", {});
         args.forEach(o => ge.isModified(o, ""));
     }
 
     static setModelState(e: ModifiableEntity, modelState: ModelState | undefined, initialPrefix: string) {
-        const ge = new GraphExplorer();
-        ge.modelStateMode = "set";
-        ge.modelState = modelState == undefined ? {} : { ...modelState };
+        const ge = new GraphExplorer("set", modelState == undefined ? {} : { ...modelState });
         ge.isModifiableObject(e, initialPrefix);
         if (Dic.getValues(ge.modelState).length) //Assign remaining
         {
@@ -1216,9 +1219,7 @@ export class GraphExplorer {
     }
 
     static collectModelState(e: ModifiableEntity, initialPrefix: string): ModelState {
-        const ge = new GraphExplorer();
-        ge.modelStateMode = "collect";
-        ge.modelState = {};
+        const ge = new GraphExplorer("collect", {});
         ge.isModifiableObject(e, initialPrefix);
         return ge.modelState;
     }
@@ -1227,7 +1228,12 @@ export class GraphExplorer {
     private modified : any[] = [];
     private notModified: any[] = [];
 
-    private modelStateMode: "collect" | "set" | "clean";
+    constructor(mode: GraphExplorerMode, modelState: ModelState) {
+        this.modelState = modelState;
+        this.mode = mode;
+    }
+
+    private mode: GraphExplorerMode;
 
     private modelState: ModelState;
 
@@ -1308,7 +1314,7 @@ export class GraphExplorer {
             return result;
         }
 
-        if (this.modelStateMode == "collect") {
+        if (this.mode == "collect") {
             if (mod.error != undefined) {
                 for (const p in mod.error) {
                     const propertyPrefix = dot(modelStatePrefix, p);
@@ -1318,7 +1324,7 @@ export class GraphExplorer {
                 }
             }
         }
-        else if (this.modelStateMode == "set") {
+        else if (this.mode == "set") {
 
             mod.error = undefined;
 
@@ -1338,7 +1344,7 @@ export class GraphExplorer {
             if (mod.error == undefined)
                 delete mod.error;
         }
-        else if (this.modelStateMode == "clean") {
+        else if (this.mode == "clean") {
             if (mod.error)
                 delete mod.error
         }

@@ -66,14 +66,14 @@ export default class Typeahead extends React.Component<TypeaheadProps, Typeahead
         noResultsMessage: " - No results -",
     };
 
-    handle: number;
+    handle: number | undefined;
 
     lookup() {
         if (!this.props.getItemsDelay) {
             this.populate();
         }
         else {
-            if (this.handle)
+            if (this.handle != undefined)
                 clearTimeout(this.handle);
 
             this.handle = setTimeout(() => this.populate(), this.props.getItemsDelay);
@@ -81,7 +81,7 @@ export default class Typeahead extends React.Component<TypeaheadProps, Typeahead
     }
 
     componentWillUnmount() {
-        if (this.handle)
+        if (this.handle != undefined)
             clearTimeout(this.handle);
     }
 
@@ -240,7 +240,7 @@ export default class Typeahead extends React.Component<TypeaheadProps, Typeahead
             this.setState({ shown: false });
     }
 
-    input: HTMLInputElement;
+    input!: HTMLInputElement;
 
     //handlePopupLoaded = (elem: HTMLElement | null) => {
     //    if (!this.input)

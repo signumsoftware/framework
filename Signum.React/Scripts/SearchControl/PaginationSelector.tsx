@@ -105,7 +105,7 @@ export default class PaginationSelector extends React.Component<PaginationSelect
                     {["Paginate" as PaginationMode,
                     "Firsts" as PaginationMode,
                     "All" as PaginationMode].map(mode =>
-                        <option key={mode} value={mode.toString()}>{PaginationMode.niceName(mode)}</option>)}
+                        <option key={mode} value={mode.toString()}>{PaginationMode.niceToString(mode)}</option>)}
                 </select>
                 {this.props.pagination.mode != "All" &&
                     <select value={this.props.pagination.elementsPerPage!.toString()} onChange={this.handleElementsPerPage} ref="elementsPerPage" className="form-control form-control-xs sf-elements-per-page">

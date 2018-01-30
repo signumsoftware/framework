@@ -137,10 +137,10 @@ export default class SearchControl extends React.Component<SearchControlProps, S
         }).done();
     }
 
-    searchControlLoaded: SearchControlLoaded;
+    searchControlLoaded?: SearchControlLoaded;
 
     handleFullScreenClick(ev: React.MouseEvent<any>) {
-        this.searchControlLoaded.handleFullScreenClick(ev);
+        this.searchControlLoaded && this.searchControlLoaded.handleFullScreenClick(ev);
     }
 
     render() {
