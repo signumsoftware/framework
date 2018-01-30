@@ -18,6 +18,7 @@ import { EntityOperationContext } from '../Operations'
 
 import "./Frames.css"
 import { ViewPromise } from "../Navigator";
+import { ModalTitleButtons } from '../SearchControl/SearchModal';
 
 interface FrameModalProps extends React.Props<FrameModal>, IModalProps {
     title?: string;
@@ -125,7 +126,7 @@ export default class FrameModal extends React.Component<FrameModalProps, FrameMo
     }
 
     okClicked: boolean = false;
-    handleOkClicked = (val: any) => {
+    handleOkClicked = () => {
         if (this.hasChanges() &&
             (this.props.requiresSaveOperation != undefined ? this.props.requiresSaveOperation : Navigator.typeRequiresSaveOperation(this.state.pack!.entity.Type))) {
             MessageModal.show({
@@ -200,13 +201,13 @@ export default class FrameModal extends React.Component<FrameModalProps, FrameMo
 
         return (
             <Modal size={this.props.modalSize || "lg"} isOpen={this.state.show} onClosed={this.handleOnClosed} toggle={this.handleCancelClicked} className="sf-popup-control" >
-                <ModalHeader toggle={this.props.isNavigate ? this.handleCancelClicked : undefined}>
-                    {!this.props.isNavigate && <ButtonToolbar className="pull-right flip">
-                        <Button className="sf-entity-button sf-close-button sf-ok-button" color="primary" disabled={!pack} onClick={this.handleOkClicked}>{JavascriptMessage.ok.niceToString()}</Button>
-                        <Button className="sf-entity-button sf-close-button sf-cancel-button" color="default" disabled={!pack} onClick={this.handleCancelClicked}>{JavascriptMessage.cancel.niceToString()}</Button>
-                    </ButtonToolbar>}
+                <ModalTitleButtons
+                    onClose={this.props.isNavigate ? this.handleCancelClicked : undefined}
+                    onOk={!this.props.isNavigate ? this.handleOkClicked : undefined}
+                    onCancel={!this.props.isNavigate ? this.handleCancelClicked : undefined}
+                    okDisabled={!pack}>
                     {this.renderTitle()}
-                </ModalHeader>
+                </ModalTitleButtons>
                 {pack && this.renderBody()}
             </Modal>
         );

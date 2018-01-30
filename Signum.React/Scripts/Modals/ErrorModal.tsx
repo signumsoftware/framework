@@ -47,8 +47,8 @@ export default class ErrorModal extends React.Component<ErrorModalProps, { showD
         const ve = e instanceof ValidationError ? (e as ValidationError) : undefined;
 
         return (
-            <Modal isOpen={this.state.show} onClosed={this.handleOnClosed}>
-                <ModalHeader className="dialog-header-error">
+            <Modal isOpen={this.state.show} onClosed={this.handleOnClosed} toggle={this.handleCloseClicked}>
+                <ModalHeader className="dialog-header-error text-danger" toggle={this.handleCloseClicked}>
                     {se ? this.renderServiceTitle(se) :
                         ve ? this.renderValidationTitle(ve) :
                             this.renderTitle(e)}
@@ -77,25 +77,31 @@ export default class ErrorModal extends React.Component<ErrorModalProps, { showD
     }
 
     renderTitle(e: any) {
-            return <h4 className="modal-title text-danger"><span className="fa fa-exclamation-triangle"></span> Error </h4>;
+        return (
+            <span><span className="fa fa-exclamation-triangle"></span> Error </span>
+        );
     }
 
     renderServiceTitle(se: ServiceError) {
-        return (<h4 className="modal-title text-danger">
-            <span className={classes("fa", se.defaultIcon)}></span>&nbsp; <span>{se.httpError.ExceptionType}</span>
-            ({
-                Navigator.isViewable(ExceptionEntity) ?
-                    <a href={Navigator.navigateRoute(ExceptionEntity, se.httpError.ExceptionID!)}>{se.httpError.ExceptionID}</a> :
-                    <strong>{se.httpError.ExceptionID}</strong>
-            })
-        </h4>);
+        return (
+            <span>
+                <span className={classes("fa", se.defaultIcon)}></span>&nbsp; <span>{se.httpError.ExceptionType}</span>
+                ({
+                    Navigator.isViewable(ExceptionEntity) ?
+                        <a href={Navigator.navigateRoute(ExceptionEntity, se.httpError.ExceptionID!)}>{se.httpError.ExceptionID}</a> :
+                        <strong>{se.httpError.ExceptionID}</strong>
+                })
+            </span>
+        );
     }
 
 
     renderValidationTitle(ve: ValidationError) {
-        return <h4 className="modal-title text-danger">
-            <span className="fa fa-exclamation-triangle"></span> {NormalWindowMessage.ThereAreErrors.niceToString()}
-        </h4>;
+        return (
+            <span>
+                <span className="fa fa-exclamation-triangle"></span> {NormalWindowMessage.ThereAreErrors.niceToString()}
+            </span>
+        );
     }
 
     renderServiceMessage(se: ServiceError) {

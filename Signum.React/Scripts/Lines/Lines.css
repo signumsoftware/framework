@@ -242,9 +242,16 @@ ul.nav-tabs {
 
 /*has-error*/
 
+/* Emulating Bootstrap 3 Validation*/
 .has-error,
-.has-error div.rw-widget-picker.rw-widget-container
-/*bootstrap has his own rules*/ {
+.has-error div.rw-widget-picker.rw-widget-container {
+    border-color: #a94442;
+}
+
+.has-error label {
+    color: #a94442;
+}
+.has-error input {
     border-color: #a94442;
 }
 
@@ -487,12 +494,6 @@ ul.dropdown-menu > li > a.disabled {
     opacity: .65;
 }
 
-/*Override absurd width for popups on sm*/
-@media (min-width: 768px) {
-    .modal-dialog:not(.modal-sm) {
-        min-width: 730px;
-    }
-}
 
 .help-block {
     display: block;

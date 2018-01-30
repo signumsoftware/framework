@@ -1,4 +1,47 @@
-﻿.sf-button-bar
+﻿/*@media (min-width: 768px) {
+    .modal-dialog:not(.modal-sm) {
+        min-width: 730px;
+    }
+}*/
+
+@media (min-width: 768px) {
+    .modal-medium,
+    .modal-lg {
+        min-width: 730px;
+    }
+}
+
+@media (min-width: 992px) {
+    .modal-lg {
+        min-width: 960px;
+    }
+}
+
+@media (min-width: 1200px) {
+    .modal-lg {
+        min-width: 1160px;
+    }
+}
+
+/*@media (min-width: 1820px) {
+    .modal-lg {
+        min-width: 1780px;
+    }
+}
+
+@media (min-width: 2460px) {
+    .modal-lg {
+        min-width: 2400px;
+    }
+}
+
+@media (min-width: 3740px) {
+    .modal-lg {
+        min-width: 3680px;
+    }
+}*/
+
+.sf-button-bar
 {
     margin-bottom: 16px;
 }

@@ -479,7 +479,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
                 <span className="fa fa-plus sf-create"></span>
             </a>),
 
-            this.props.showContextMenu != false && this.renderSelecterButton(),
+            this.props.showContextMenu != false && this.renderSelectedButton(),
 
             ...(this.props.hideButtonBar ? [] : Finder.ButtonBarQuery.getButtonBarElements({ findOptions: p.findOptions, searchControl: this })),
 
@@ -609,7 +609,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
     }
 
-    renderSelecterButton() {
+    renderSelectedButton() {
 
         if (this.state.selectedRows == undefined)
             return null;
@@ -621,7 +621,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
                 isOpen={this.state.isSelectOpen}
                 toggle={this.handleSelectedToggle}
                 disabled={this.state.selectedRows!.length == 0}>
-                <DropdownToggle color="light" caret>{title}</DropdownToggle>
+                <DropdownToggle color="light" caret disabled={this.state.selectedRows!.length == 0}>{title}</DropdownToggle>
                 <DropdownMenu>
                     {this.state.currentMenuItems == undefined ? <DropdownItem className="sf-tm-selected-loading">{JavascriptMessage.loading.niceToString()}</DropdownItem> :
                         this.state.currentMenuItems.length == 0 ? <DropdownItem className="sf-search-ctxitem-no-results">{JavascriptMessage.noActionsFound.niceToString()}</DropdownItem> :

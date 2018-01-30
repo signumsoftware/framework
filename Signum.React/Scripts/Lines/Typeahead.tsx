@@ -1,4 +1,5 @@
 ﻿import * as React from 'react'
+import * as ReactDOM from 'react-dom'
 import { classes, Dic } from '../Globals'
 import { Popper, Manager, Target } from 'react-popper';
 
@@ -282,6 +283,40 @@ export default class Typeahead extends React.Component<TypeaheadProps, Typeahead
             </Manager>
 
         );
+    }
+
+
+    toggleEvents(isOpen: boolean | undefined) {
+        if (isOpen) {
+            document.addEventListener('click', this.handleDocumentClick, true);
+            document.addEventListener('touchstart', this.handleDocumentClick, true);
+        } else {
+            document.removeEventListener('click', this.handleDocumentClick, true);
+            document.removeEventListener('touchstart', this.handleDocumentClick, true);
+        }
+    }
+
+    componentDidMount() {
+        this.toggleEvents(this.state.shown);
+    }
+
+    componentWillUpdate(nextProps: TypeaheadProps, nextState: TypeaheadState) {
+        if (nextState.shown != this.state.shown)
+            this.toggleEvents(nextState.shown);
+    }
+
+    handleDocumentClick = (e: MouseEvent | TouchEvent) => {
+        console.log(e);
+        if (e.which === 3)
+            return;
+
+        const container = ReactDOM.findDOMNode(this);
+        if (container.contains(e.target as Node) &&
+            container !== e.target) {
+            return;
+        }
+
+        this.setState({ shown: false });
     }
 
     renderDefaultList() {
