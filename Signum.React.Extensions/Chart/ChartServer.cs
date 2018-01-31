@@ -87,7 +87,7 @@ namespace Signum.React.Chart
                 if (ep.entity.IsNew || !ChartPermission.ViewCharting.IsAuthorized())
                     return;
 
-                var userCharts = UserChartLogic.GetUserChartsEntity(ep.entity.GetType(), forQuickLink: true);
+                var userCharts = UserChartLogic.GetUserChartsEntity(ep.entity.GetType());
                 if (userCharts.Any())
                     ep.Extension.Add("userCharts", userCharts);
             };

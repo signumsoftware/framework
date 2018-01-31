@@ -40,7 +40,7 @@ namespace Signum.React.UserQueries
                 if (ep.entity.IsNew || !UserQueryPermission.ViewUserQuery.IsAuthorized())
                     return;
 
-                var userQueries = UserQueryLogic.GetUserQueriesEntity(ep.entity.GetType(), forQuickLink: true);
+                var userQueries = UserQueryLogic.GetUserQueriesEntity(ep.entity.GetType());
                 if (userQueries.Any())
                     ep.Extension.Add("userQueries", userQueries);
             };
