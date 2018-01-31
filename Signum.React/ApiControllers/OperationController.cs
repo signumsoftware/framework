@@ -114,22 +114,13 @@ namespace Signum.React.ApiControllers
 
             public object[] args { get; set; }
 
-            public OperationSymbol GetOperationSymbol(Type entityType) => ParseOperationAssert(this.operationKey, entityType, this.args); 
-        
+            public OperationSymbol GetOperationSymbol(Type entityType) => ParseOperationAssert(this.operationKey, entityType, this.args);
+
             public static OperationSymbol ParseOperationAssert(string operationKey, Type entityType, object[] args = null)
             {
                 var symbol = SymbolLogic<OperationSymbol>.ToSymbol(operationKey);
 
-                if (entityType != null)
-                    OperationLogic.AssertOperationAllowed(symbol, entityType, inUserInterface: true);
-                else
-                {
-                    var types = args.Select(o => o.GetType().CleanType()).Distinct();
-                    foreach (var type in types)
-                    {
-                        OperationLogic.AssertOperationAllowed(symbol, type, inUserInterface: true);
-                    }
-                }
+                OperationLogic.AssertOperationAllowed(symbol, entityType, inUserInterface: true);
 
                 return symbol;
             }
@@ -140,7 +131,7 @@ namespace Signum.React.ApiControllers
         [Route("api/operation/constructFromMany"), HttpPost, ValidateModelFilter, ProfilerActionSplitter]
         public EntityPackTS ConstructFromMany(MultiOperationRequest request)
         {
-            var type = request.type == null ? null : TypeLogic.GetType(request.type);
+            var type = request.lites.Select(l => l.EntityType).Distinct().Only() ?? TypeLogic.GetType(request.type);
 
             var entity = OperationLogic.ServiceConstructFromMany(request.lites, type, request.GetOperationSymbol(type), request.args);
 

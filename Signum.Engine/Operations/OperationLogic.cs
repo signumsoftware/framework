@@ -446,7 +446,7 @@ Consider the following options:
         #region ConstructFromMany
         public static Entity ServiceConstructFromMany(IEnumerable<Lite<IEntity>> lites, Type type, OperationSymbol operationSymbol, params object[] args)
         {
-            var onlyType = type ?? lites.Select(a => a.EntityType).Distinct().Only();
+            var onlyType = lites.Select(a => a.EntityType).Distinct().Only();
 
             return (Entity)Find<IConstructorFromManyOperation>(onlyType ?? type, operationSymbol).Construct(lites, args);
         }
