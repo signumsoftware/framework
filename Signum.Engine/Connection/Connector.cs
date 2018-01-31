@@ -155,7 +155,7 @@ namespace Signum.Engine
 
         public abstract bool AllowsIndexWithWhere(string where);
 
-        public abstract SqlPreCommand ShringDatabase(string schemaName);
+        public abstract SqlPreCommand ShrinkDatabase(string schemaName);
 
         public abstract bool AllowsConvertToDate { get; }
 
