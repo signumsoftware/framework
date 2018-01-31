@@ -40,10 +40,8 @@
   //yRule.debugY(chart);
 
 
-  
-  var colorQuantizer = d3.scale.quantize()
-    .domain([0, 100])
-    .range(colorbrewer[data.parameters["ColorSet"]][9]);
+ var colorSet = data.parameters["ColorSet"];
+ var colorInterpolation = ChartUtils.getColorInterpolation(colorSet); 
   
  var cords = d3.entries(data.columns)
     .filter(function(p, i){return p.key != "c0" && p.key != "entity" && p.value.token != undefined;})
@@ -54,9 +52,9 @@
       
       p.value.scale = scaleFor(p.value, values, 0, yRule.size('content'),  scaleType);
       
-      var scaleFunc = scaleFor(p.value, values, 0, 100, scaleType);
+      var scaleFunc = scaleFor(p.value, values, 0, 1, scaleType);
       
-      p.value.colorScale = function(r){return colorQuantizer(scaleFunc(r[p.key])) };
+      p.value.colorScale = function(r){return colorInterpolation(scaleFunc(r[p.key])) };
       
       return {
       key: p.key,
@@ -64,10 +62,11 @@
       };
   });
  
+
   
-   var x = d3.scale.ordinal()
+   var x = d3.scaleBand()
        .domain(cords.map(function(c){return c.key;}))
-      .rangePoints([0, width],.6);
+      .rangeRound([0, width]);
    
  
   chart.append('svg:g').attr('class', 'x-tick').attr('transform', translate(0, yRule.start('content')))
@@ -108,19 +107,18 @@
   
   var drawGradient = function(key)
   {    
-   chart.selectAll("g.x-tick-box .x-tick-box")
-     .style('fill', function(d){ return d.key != key ? '#ccc': '#000'; } )
-  
-    chart.selectAll("g.shape-serie .shape")
-      .attr("stroke", data.columns[key].colorScale);
- 
+     chart.selectAll("g.x-tick-box .x-tick-box")
+       .style('fill', function(d){ return d.key != key ? '#ccc': '#000'; } )
+
+      chart.selectAll("g.shape-serie .shape")
+        .attr("stroke", data.columns[key].colorScale);
   };
   
-   var line = d3.svg.line()
+   var line = d3.line()
     .x(function(r) { return x(r.key); })
     .y(function(r) { return  -data.columns[r.key].scale(r.value); })
     .defined(function(r){return r.value != undefined;})
-    .interpolate(data.parameters["Interpolate"]);
+    .curve(ChartUtils.getCurveByName(data.parameters["Interpolate"]));//"linear"
   
   //paint graph - line
   chart.enterData(data.rows, 'g', 'shape-serie').attr('transform', translate(0, yRule.end('content')))

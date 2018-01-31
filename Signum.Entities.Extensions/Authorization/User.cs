@@ -23,9 +23,10 @@ namespace Signum.Entities.Authorization
     {
         public static Func<string, string> ValidatePassword = p =>
         {
-            if (Regex.Match(p, @"^[0-9a-zA-Z]{7,15}$").Success)
+            if (p.Length > 5)
                 return null;
-            return AuthMessage.ThePasswordMustHaveBetween7And15CharactersEachOfThemBeingANumber09OrALetter.NiceToString();
+
+            return AuthMessage.ThePasswordMustHaveAtLeast5Characters.NiceToString();
         };
 
         public static string OnValidatePassword(string password)
@@ -36,7 +37,7 @@ namespace Signum.Entities.Authorization
             return null;
         }
 
-        [NotNullable, UniqueIndex(AvoidAttachToUniqueIndexes = true), SqlDbType(Size = 100)]
+        [UniqueIndex(AvoidAttachToUniqueIndexes = true)]
         [StringLengthValidator(AllowNulls = false, Min = 2, Max = 100)]
         public string UserName { get; set; }
 

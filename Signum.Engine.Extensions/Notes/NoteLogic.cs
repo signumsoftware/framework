@@ -17,6 +17,7 @@ using System.Linq.Expressions;
 using Signum.Utilities.Reflection;
 using Signum.Entities.Notes;
 using Signum.Engine.Extensions.Basics;
+using Signum.Engine.Basics;
 
 namespace Signum.Engine.Notes
 {
@@ -100,6 +101,14 @@ namespace Signum.Engine.Notes
                 Target = (Lite<Entity>)Lite.Create(entity.EntityType, entity.Id, entity.ToString()),
                 NoteType = noteType
             }.Execute(NoteOperation.Save);
+        }
+
+        public static void RegisterUserTypeCondition(SchemaBuilder sb, TypeConditionSymbol typeCondition)
+        {
+            sb.Schema.Settings.AssertImplementedBy((NoteEntity uq) => uq.CreatedBy, typeof(UserEntity));
+
+            TypeConditionLogic.RegisterCompile<NoteEntity>(typeCondition,
+                uq => uq.CreatedBy.RefersTo(UserEntity.Current));
         }
     }
 }

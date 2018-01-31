@@ -16,6 +16,7 @@ interface QueryTokenEntityBuilderProps {
     queryKey: string;
     subTokenOptions: SubTokensOptions;
     onTokenChanged?: (newToken: QueryToken | undefined) => void;
+    helpBlock?: React.ReactChild;
 }
 
 export default class QueryTokenEntityBuilder extends React.Component<QueryTokenEntityBuilderProps> {
@@ -45,7 +46,7 @@ export default class QueryTokenEntityBuilder extends React.Component<QueryTokenE
             readOnly={this.props.ctx.readOnly} />
 
         return (
-            <FormGroup ctx={this.props.ctx}>
+            <FormGroup ctx={this.props.ctx} helpBlock={this.props.helpBlock}>
                 {
                     !qte || !qte.parseException ? tokenBuilder :
                         <div>

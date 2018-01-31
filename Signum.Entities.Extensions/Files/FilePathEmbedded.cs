@@ -37,7 +37,6 @@ namespace Signum.Entities.Files
             this.BinaryFile = fileData;
         }
 
-        [NotNullable, SqlDbType(Size = 260)]
         string fileName;
         [StringLengthValidator(AllowNulls = false, Min = 1, Max = 260), FileNameValidator]
         public string FileName
@@ -75,8 +74,7 @@ namespace Signum.Entities.Files
             get { return FileLengthStringExpression.Evaluate(this); }
         }
 
-        [NotNullable, SqlDbType(Size = 260)]
-        [StringLengthValidator(AllowNulls = true, Min = 3, Max = 260)]
+        [StringLengthValidator(AllowNulls = true, Min = 3, Max = 260, DisabledInModelBinder = true)]
         public string Suffix { get; set; }
 
         [Ignore]
@@ -149,6 +147,12 @@ namespace Signum.Entities.Files
                 throw new InvalidOperationException("OnCalculatePrefixPair not set");
 
             this.GetPrefixPair();
+        }
+
+        public static Func<FilePathEmbedded, FilePathEmbedded> CloneFunc;
+        internal FilePathEmbedded Clone()
+        {
+            return CloneFunc(this);
         }
     }
 }

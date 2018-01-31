@@ -13,6 +13,7 @@ using System.Threading.Tasks;
 using System.Xml.Linq;
 using Signum.Utilities.DataStructures;
 using System.Linq.Expressions;
+using System.Xml;
 
 namespace Signum.Engine.Workflow
 {
@@ -103,6 +104,21 @@ namespace Signum.Engine.Workflow
             };
         }
 
+        public static XDocument ParseDocument(string diagramXml)
+        {
+            XmlNamespaceManager nmgr = new XmlNamespaceManager(new NameTable());
+            nmgr.AddNamespace("xsi", WorkflowBuilder.xsi.NamespaceName);
+            nmgr.AddNamespace("bpmn", WorkflowBuilder.bpmn.NamespaceName);
+            nmgr.AddNamespace("bpmndi", WorkflowBuilder.bpmndi.NamespaceName);
+            nmgr.AddNamespace("dc", WorkflowBuilder.dc.NamespaceName);
+            nmgr.AddNamespace("di", WorkflowBuilder.di.NamespaceName);
+
+            XmlParserContext pctx = new XmlParserContext(null, nmgr, null, XmlSpace.None);
+            XmlTextReader reader = new XmlTextReader(diagramXml, XmlNodeType.Document, pctx);
+
+            return XDocument.Load(reader);
+        }
+
         public XDocument GetXDocument()
         {
             return new XDocument(
@@ -153,7 +169,7 @@ namespace Signum.Engine.Workflow
 
         public void ApplyChanges(WorkflowModel model, WorkflowReplacementModel replacements)
         {
-            var document = XDocument.Parse(model.DiagramXml);
+            var document =  WorkflowBuilder.ParseDocument(model.DiagramXml);
 
             var participants = document.Descendants(bpmn + "collaboration").Elements(bpmn + "participant").ToDictionaryEx(a => a.Attribute("id").Value);
             var processElements = document.Descendants(bpmn + "process").ToDictionaryEx(a => a.Attribute("id").Value);

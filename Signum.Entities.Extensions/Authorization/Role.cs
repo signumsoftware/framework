@@ -13,7 +13,7 @@ namespace Signum.Entities.Authorization
     [Serializable, EntityKind(EntityKind.Shared, EntityData.Master)]
     public class RoleEntity : Entity
     {
-        [NotNullable, SqlDbType(Size = 100), UniqueIndex]
+        [UniqueIndex]
         [StringLengthValidator(AllowNulls = false, Min = 2, Max = 100)]
         public string Name { get; set; }
 
@@ -28,7 +28,7 @@ namespace Signum.Entities.Authorization
             }
         }
 
-        [NotNullable, NotifyCollectionChanged]
+        [NotNullValidator, NotifyCollectionChanged]
         public MList<Lite<RoleEntity>> Roles { get; set; } = new MList<Lite<RoleEntity>>();
 
         protected override void ChildCollectionChanged(object sender, NotifyCollectionChangedEventArgs args)

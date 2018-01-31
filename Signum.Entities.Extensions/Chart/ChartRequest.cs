@@ -90,10 +90,9 @@ namespace Signum.Entities.Chart
             }
         }
 
-        [NotifyCollectionChanged, NotifyChildProperty, NotNullable]
+        [NotifyCollectionChanged, NotifyChildProperty, NotNullValidator]
         public MList<ChartColumnEmbedded> Columns { get; set; } = new MList<ChartColumnEmbedded>();
 
-        [NotNullable]
         [NotNullValidator, NoRepeatValidator]
         public MList<ChartParameterEmbedded> Parameters { get; set; } = new MList<ChartParameterEmbedded>();
 

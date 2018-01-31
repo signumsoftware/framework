@@ -20,6 +20,16 @@ namespace Signum.React.RestLog
 {
     public class RestLogFilter : ActionFilterAttribute
     {
+        public RestLogFilter(bool allowReplay)
+        {
+            AllowReplay = allowReplay;
+        }
+
+        public bool AllowReplay { get; set; }
+
+        
+
+
         public override void OnActionExecuting(HttpActionContext actionContext)
         {
             try
@@ -31,6 +41,8 @@ namespace Signum.React.RestLog
 
                 var request = new RestLogEntity
                 {
+                    AllowReplay = this.AllowReplay,
+                    HttpMethod = actionContext.Request.Method.ToString(),
                     Url = actionContext.Request.RequestUri.ToString(),
                     QueryString = queryParams,
                     User = UserHolder.Current?.ToLite(),

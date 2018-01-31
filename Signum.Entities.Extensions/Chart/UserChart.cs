@@ -39,7 +39,6 @@ namespace Signum.Entities.Chart
         [Ignore]
         internal object queryName;
 
-        [NotNullable]
         [NotNullValidator]
         public QueryEntity Query { get; set; }
 
@@ -49,11 +48,9 @@ namespace Signum.Entities.Chart
 
         public Lite<Entity> Owner { get; set; }
 
-        [NotNullable, SqlDbType(Size = 100)]
-        [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
+        [StringLengthValidator(AllowNulls = false, Min = 3, Max = 200)]
         public string DisplayName { get; set; }
 
-        [NotNullable]
         ChartScriptEntity chartScript;
         [NotNullValidator]
         public ChartScriptEntity ChartScript
@@ -69,7 +66,6 @@ namespace Signum.Entities.Chart
             }
         }
 
-        [NotNullable]
         [NotNullValidator, NoRepeatValidator]
         public MList<ChartParameterEmbedded> Parameters { get; set; } = new MList<ChartParameterEmbedded>();
 
@@ -86,7 +82,7 @@ namespace Signum.Entities.Chart
             }
         }
 
-        [NotifyCollectionChanged, NotifyChildProperty, NotNullable, PreserveOrder]
+        [NotifyCollectionChanged, NotifyChildProperty, PreserveOrder]
         public MList<ChartColumnEmbedded> Columns { get; set; } = new MList<ChartColumnEmbedded>();
 
         void NotifyAllColumns()
@@ -97,10 +93,10 @@ namespace Signum.Entities.Chart
             }
         }
 
-        [NotNullable, PreserveOrder]
+        [NotNullValidator, PreserveOrder]
         public MList<QueryFilterEmbedded> Filters { get; set; } = new MList<QueryFilterEmbedded>();
 
-        [NotNullable, PreserveOrder]
+        [NotNullValidator, PreserveOrder]
         public MList<QueryOrderEmbedded> Orders { get; set; } = new MList<QueryOrderEmbedded>();
 
         [UniqueIndex]

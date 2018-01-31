@@ -334,6 +334,15 @@ export interface WorkflowActivityModel extends Entities.ModelEntity {
     subWorkflow?: SubWorkflowEmbedded | null;
 }
 
+export module WorkflowActivityMonitorMessage {
+    export const WorkflowActivityMonitor = new MessageKey("WorkflowActivityMonitorMessage", "WorkflowActivityMonitor");
+    export const Draw = new MessageKey("WorkflowActivityMonitorMessage", "Draw");
+    export const ResetZoom = new MessageKey("WorkflowActivityMonitorMessage", "ResetZoom");
+    export const Find = new MessageKey("WorkflowActivityMonitorMessage", "Find");
+    export const Filters = new MessageKey("WorkflowActivityMonitorMessage", "Filters");
+    export const Columns = new MessageKey("WorkflowActivityMonitorMessage", "Columns");
+}
+
 export module WorkflowActivityOperation {
     export const Save : Entities.ExecuteSymbol<WorkflowActivityEntity> = registerSymbol("Operation", "WorkflowActivityOperation.Save");
     export const Delete : Entities.DeleteSymbol<WorkflowActivityEntity> = registerSymbol("Operation", "WorkflowActivityOperation.Delete");

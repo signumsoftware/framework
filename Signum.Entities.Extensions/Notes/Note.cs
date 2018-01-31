@@ -16,7 +16,6 @@ namespace Signum.Entities.Notes
     [Serializable, EntityKind(EntityKind.Main, EntityData.Transactional)]
     public class NoteEntity : Entity
     {
-        [SqlDbType(Size = 100)]
         [StringLengthValidator(AllowNulls = true, Max = 100)]
         public string Title { get; set; }
 
@@ -26,7 +25,6 @@ namespace Signum.Entities.Notes
 
         public DateTime CreationDate { get; set; } = TimeZoneManager.Now;
 
-        [SqlDbType(Size = int.MaxValue)]
         [StringLengthValidator(AllowNulls = false, Min = 1, MultiLine = true)]
         public string Text { get; set; }
 

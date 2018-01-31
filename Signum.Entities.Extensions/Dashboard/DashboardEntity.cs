@@ -47,12 +47,12 @@ namespace Signum.Entities.Dashboard
         [Unit("s"), NumberIsValidator(Entities.ComparisonType.GreaterThanOrEqualTo, 10)]
         public int? AutoRefreshPeriod { get; set; }
 
-        [StringLengthValidator(AllowNulls = false, Min = 2)]
+        [StringLengthValidator(AllowNulls = false, Min = 2, Max = 200)]
         public string DisplayName { get; set; }
 
         public bool CombineSimilarRows { get; set; } = true;
 
-        [NotifyCollectionChanged, NotifyChildProperty, NotNullable]
+        [NotifyCollectionChanged, NotifyChildProperty, NotNullValidator]
         [NoRepeatValidator]
         public MList<PanelPartEmbedded> Parts { get; set; } = new MList<PanelPartEmbedded>();
 

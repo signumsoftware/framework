@@ -10,11 +10,25 @@ import QueryTokenEntityBuilder from '../../UserAssets/Templates/QueryTokenEntity
 const CurrentEntityKey = "[CurrentEntity]";
 export default class UserQuery extends React.Component<{ ctx: TypeContext<UserQueryEntity> }> {
 
+    handleGroupResultsChanged = () => {
+
+        var uq = this.props.ctx.value;
+        if (!uq.groupResults) {
+            uq.filters = [];
+            uq.columns = [];
+            uq.orders = [];
+        }
+
+        this.forceUpdate();
+    }
+
     render() {
 
         const query = this.props.ctx.value.query;
         const ctx = this.props.ctx;
         const ctxxs = ctx.subCtx({ formGroupSize: "ExtraSmall" });
+
+        const canAggregate = ctx.value.groupResults ? SubTokensOptions.CanAggregate : 0;
 
         return (
             <div>
@@ -42,6 +56,7 @@ export default class UserQuery extends React.Component<{ ctx: TypeContext<UserQu
                             </div>
                         }
                         <ValueLine ctx={ctx.subCtx(e => e.withoutFilters)} />
+                        <ValueLine ctx={ctx.subCtx(e => e.groupResults)} />
                         <div>
                             <EntityTable ctx={ctxxs.subCtx(e => e.filters)} columns={EntityTable.typedColumns<QueryFilterEmbedded>([
                                 {
@@ -49,7 +64,7 @@ export default class UserQuery extends React.Component<{ ctx: TypeContext<UserQu
                                     template: ctx => <QueryTokenEntityBuilder
                                         ctx={ctx.subCtx(a => a.token, { formGroupStyle: "SrOnly" })}
                                         queryKey={this.props.ctx.value.query!.key}
-                                        subTokenOptions={SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement} />,
+                                        subTokenOptions={SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement | canAggregate} />,
                                     headerHtmlAttributes: { style: { width: "40%" } },
                                 },
                                 { property: a => a.operation },
@@ -62,7 +77,7 @@ export default class UserQuery extends React.Component<{ ctx: TypeContext<UserQu
                                     template: ctx => <QueryTokenEntityBuilder
                                         ctx={ctx.subCtx(a => a.token, { formGroupStyle: "SrOnly" })}
                                         queryKey={this.props.ctx.value.query!.key}
-                                        subTokenOptions={SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement} />
+                                        subTokenOptions={SubTokensOptions.CanElement | canAggregate} />
                                 },
                                 { property: a => a.displayName }
                             ])} />
@@ -72,7 +87,7 @@ export default class UserQuery extends React.Component<{ ctx: TypeContext<UserQu
                                     template: ctx => <QueryTokenEntityBuilder
                                         ctx={ctx.subCtx(a => a.token, { formGroupStyle: "SrOnly" })}
                                         queryKey={this.props.ctx.value.query!.key}
-                                        subTokenOptions={SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement} />
+                                        subTokenOptions={SubTokensOptions.CanElement | canAggregate} />
                                 },
                                 { property: a => a.orderType }
                             ])} />

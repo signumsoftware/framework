@@ -16,6 +16,7 @@ using Signum.React.Facades;
 using Signum.Engine.UserQueries;
 using Signum.Engine.Authorization;
 using Signum.Entities.MachineLearning;
+using Signum.Engine.MachineLearning;
 
 namespace Signum.React.MachineLearning
 {
@@ -27,16 +28,15 @@ namespace Signum.React.MachineLearning
 
             SignumControllerFactory.RegisterArea(MethodInfo.GetCurrentMethod());
 
-            EntityJsonConverter.AfterDeserilization.Register((PredictorEntity p) =>
+            EntityJsonConverter.AfterDeserilization.Register((PredictorMainQueryEmbedded p) =>
             {
                 if (p.Query != null)
                 {
-                    var qd = DynamicQueryManager.Current.QueryDescription(p.Query.ToQueryName());
-                    p.ParseData(qd);
+                    p.ParseData();
                 }
             });
 
-            EntityJsonConverter.AfterDeserilization.Register((PredictorMultiColumnEntity mc) =>
+            EntityJsonConverter.AfterDeserilization.Register((PredictorSubQueryEntity mc) =>
             {
                 if (mc.Query != null)
                 {

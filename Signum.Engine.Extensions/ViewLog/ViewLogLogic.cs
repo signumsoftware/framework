@@ -86,12 +86,8 @@ namespace Signum.Engine.ViewLog
         {
             var t = Schema.Current.Table<ViewLogEntity>();
             var f = ((FieldImplementedByAll)Schema.Current.Field((ViewLogEntity vl) => vl.Target)).ColumnType;
-
-            var param = Connector.Current.ParameterBuilder.CreateReferenceParameter("@id", arg.Id, t.PrimaryKey);
-
-            return new SqlPreCommandSimple("DELETE FROM {0} WHERE {1} = {2}".FormatWith(t.Name, f.Name, param.ParameterName), new List<DbParameter> { param });
+            return Administrator.DeleteWhereScript(t, f, arg.Id);
         }
-
 
         static IDisposable Current_QueryExecuted(DynamicQueryManager.ExecuteType type, object queryName, BaseQueryRequest request)
         {
@@ -135,7 +131,9 @@ namespace Signum.Engine.ViewLog
 
         static void ExceptionLogic_DeleteLogs(DeleteLogParametersEmbedded parameters, StringBuilder sb, CancellationToken token)
         {
-            Database.Query<ViewLogEntity>().Where(view => view.StartDate < parameters.DateLimit).UnsafeDeleteChunksLog(parameters, sb, token);
+            var dateLimit = parameters.GetDateLimit(typeof(ViewLogEntity).ToTypeEntity());
+
+            Database.Query<ViewLogEntity>().Where(view => view.StartDate < dateLimit).UnsafeDeleteChunksLog(parameters, sb, token);
         }
 
         public static IDisposable LogView(Lite<IEntity> entity, string viewAction)

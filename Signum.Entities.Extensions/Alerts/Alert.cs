@@ -25,17 +25,14 @@ namespace Signum.Entities.Alerts
 
         public DateTime CreationDate { get; private set; } = TimeZoneManager.Now;
 
-        [NotNullable]
         [NotNullValidator]
         public DateTime? AlertDate { get; set; }
 
         public DateTime? AttendedDate { get; set; }
 
-        [SqlDbType(Size = 100)]
         [StringLengthValidator(AllowNulls = true, Max = 100)]
         public string Title { get; set; }
 
-        [NotNullable, SqlDbType(Size = int.MaxValue)]
         [StringLengthValidator(Min = 1, MultiLine = true)]
         public string Text { get; set; }
 

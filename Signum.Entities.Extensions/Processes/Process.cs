@@ -39,7 +39,6 @@ namespace Signum.Entities.Processes
             this.algorithm = process;
         }
 
-        [NotNullable]
         ProcessAlgorithmSymbol algorithm;
         [NotNullValidator]
         public ProcessAlgorithmSymbol Algorithm
@@ -51,15 +50,12 @@ namespace Signum.Entities.Processes
 
         public const string None = "none";
 
-        [SqlDbType(Size = 100), NotNullable]
         [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
         public string MachineName { get; set; }
 
-        [SqlDbType(Size = 100), NotNullable]
         [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
         public string ApplicationName { get; set; }
 
-        [NotNullable]
         [NotNullValidator]
         public Lite<IUserEntity> User { get; set; }
 
@@ -100,6 +96,14 @@ namespace Signum.Entities.Processes
             get { return ExecutionEnd == null ? null : DurationExpression.Evaluate(this); }
         }
 
+        static Expression<Func<ProcessEntity, TimeSpan?>> DurationSpanExpression =
+        log => log.ExecutionEnd - log.ExecutionStart;
+        [ExpressionField("DurationSpanExpression")]
+        public TimeSpan? DurationSpan
+        {
+            get { return ExecutionEnd == null ? null : DurationSpanExpression.Evaluate(this); }
+        }
+
         public DateTime? SuspendDate { get; set; }
 
         public DateTime? ExceptionDate { get; set; }
@@ -122,7 +126,7 @@ namespace Signum.Entities.Processes
        {ProcessState.Executing, null,           null,                   true,              true,                  false,               false,              true,        null,         false,               false,          true,          true },
        {ProcessState.Suspending,null,           null,                   true,              true,                  false,               true,               true,        null,         false,               false,          true,          true },
        {ProcessState.Suspended, null,           null,                   true,              true,                  false,               true,               true,        null,         false,               false,          null,          null },
-       {ProcessState.Finished,  null,           null,                   true,              true,                  true,                false,              false,       false,        false,               false,          null,          null },
+       {ProcessState.Finished,  null,           null,                   true,              true,                  true,                false,              false,       null,        false,               false,          null,          null },
        {ProcessState.Error,     null,           null,                   null,              null,                  null,                null,               null,        null,         true,                true ,          null,          null },
         };
 
@@ -219,11 +223,9 @@ namespace Signum.Entities.Processes
 
         public Lite<IProcessLineDataEntity> Line { get; set; }
 
-        [NotNullable]
         [NotNullValidator]
         public Lite<ProcessEntity> Process { get; set; }
 
-        [NotNullable]
         [NotNullValidator]
         public Lite<ExceptionEntity> Exception { get; set; }
     }

@@ -15,17 +15,14 @@ namespace Signum.Entities.Joyride
 
         public Lite<CultureInfoEntity> Culture { get; set; }
 
-        [NotNullable, SqlDbType(Size = 100)]
         [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
         public string Title { get; set; }
 
-        [NotNullable, SqlDbType(Size = int.MaxValue)]
         [StringLengthValidator(AllowNulls = false, MultiLine = true)]
         public string Text { get; set; }
 
         public JoyrideStepStyleEntity Style { get; set; }
 
-        [NotNullable, SqlDbType(Size = 100)]
         [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
         public string Selector { get; set; }
 

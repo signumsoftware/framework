@@ -19,6 +19,7 @@ using Signum.Entities.Scheduler;
 using Signum.Entities.Dynamic;
 using System.CodeDom.Compiler;
 using System.Text.RegularExpressions;
+using System.Xml;
 
 namespace Signum.Engine.Workflow
 {
@@ -629,9 +630,13 @@ namespace Signum.Engine.Workflow
             return WorkflowLogic.Scripts.Value.GetOrThrow(ws);
         }
 
-        public static Expression<Func<Lite<Entity>, UserEntity, bool>> IsCurrentUserActor = (actor, user) =>
-           actor.RefersTo(user) ||
-           actor.Is(user.Role);
+        public static Expression<Func<UserEntity, Lite<Entity>, bool>> IsUserConstantActor = (userConstant, actor) =>
+           actor.RefersTo(userConstant) ||
+           (actor is Lite<RoleEntity> && AuthLogic.InverseIndirectlyRelated((Lite<RoleEntity>)actor).Contains(userConstant.Role));
+
+        public static Expression<Func<UserEntity, Lite<Entity>, bool>> IsUserActorConstant = (user, actorConstant) =>
+          actorConstant.RefersTo(user) ||
+          (actorConstant is Lite<RoleEntity> && AuthLogic.IndirectlyRelated(user.Role).Contains((Lite<RoleEntity>)actorConstant));
 
 
         public static List<WorkflowEntity> GetAllowedStarts()
@@ -639,7 +644,7 @@ namespace Signum.Engine.Workflow
             return (from w in Database.Query<WorkflowEntity>()
                     let s = w.WorkflowEvents().Single(a => a.Type == WorkflowEventType.Start)
                     let a = (WorkflowActivityEntity)s.NextConnections().Single().To
-                    where a.Lane.Actors.Any(a => IsCurrentUserActor.Evaluate(a, UserEntity.Current))
+                    where a.Lane.Actors.Any(a => IsUserConstantActor.Evaluate(UserEntity.Current, a))
                     select w).ToList();
         }
 
@@ -654,7 +659,7 @@ namespace Signum.Engine.Workflow
             if (model == null)
                 throw new ArgumentNullException(nameof(model));
 
-            var document = XDocument.Parse(model.DiagramXml);
+            var document = WorkflowBuilder.ParseDocument(model.DiagramXml);
             var wb = new WorkflowBuilder(workflow);
             return wb.PreviewChanges(document, model);
         }
@@ -674,5 +679,9 @@ namespace Signum.Engine.Workflow
             workflow.FullDiagramXml = new WorkflowXmlEmbedded { DiagramXml = wb.GetXDocument().ToString() };
             workflow.Save();
         }
+
+       
     }
+
+   
 }

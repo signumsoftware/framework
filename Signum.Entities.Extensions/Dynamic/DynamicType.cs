@@ -20,7 +20,7 @@ namespace Signum.Entities.Dynamic
     {
         public DynamicBaseType BaseType { set; get; }
 
-        [NotNullable, SqlDbType(Size = 100), UniqueIndex]
+        [UniqueIndex]
         [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100), IdentifierValidator(IdentifierType.PascalAscii)]
         public string TypeName { get; set; }
 

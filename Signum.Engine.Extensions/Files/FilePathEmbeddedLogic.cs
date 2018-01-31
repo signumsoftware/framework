@@ -51,6 +51,8 @@ namespace Signum.Engine.Files
             {
                 FileTypeLogic.Start(sb, dqm);
 
+                FilePathEmbedded.CloneFunc = fp => new FilePathEmbedded(fp.FileType, fp.FileName, fp.GetByteArray());
+
                 FilePathEmbedded.OnPreSaving += efp =>
                 {
                     if(efp.BinaryFile != null) //First time

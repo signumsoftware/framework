@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="..\..\packages\Microsoft.Net.Compilers.2.3.2\build\Microsoft.Net.Compilers.props" Condition="Exists('..\..\packages\Microsoft.Net.Compilers.2.3.2\build\Microsoft.Net.Compilers.props')" />
-  <Import Project="..\..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.1.0.7\build\net45\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props" Condition="Exists('..\..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.1.0.7\build\net45\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props')" />
+  <Import Project="..\..\packages\Microsoft.Net.Compilers.2.6.1\build\Microsoft.Net.Compilers.props" Condition="Exists('..\..\packages\Microsoft.Net.Compilers.2.6.1\build\Microsoft.Net.Compilers.props')" />
+  <Import Project="..\..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.1.0.8\build\net45\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props" Condition="Exists('..\..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.1.0.8\build\net45\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props')" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
@@ -47,6 +47,7 @@
     <WarningLevel>4</WarningLevel>
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
     <Prefer32Bit>false</Prefer32Bit>
+    <LangVersion>latest</LangVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -57,13 +58,14 @@
     <WarningLevel>4</WarningLevel>
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
     <Prefer32Bit>false</Prefer32Bit>
+    <LangVersion>latest</LangVersion>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="DocumentFormat.OpenXml, Version=2.7.2.0, Culture=neutral, PublicKeyToken=8fb06cb64d019a17, processorArchitecture=MSIL">
       <HintPath>..\..\packages\DocumentFormat.OpenXml.2.7.2\lib\net46\DocumentFormat.OpenXml.dll</HintPath>
     </Reference>
-    <Reference Include="Microsoft.CodeDom.Providers.DotNetCompilerPlatform, Version=1.0.7.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.1.0.7\lib\net45\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.dll</HintPath>
+    <Reference Include="Microsoft.CodeDom.Providers.DotNetCompilerPlatform, Version=1.0.8.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.1.0.8\lib\net45\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.SqlServer.Types, Version=14.0.0.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91, processorArchitecture=MSIL">
       <HintPath>..\..\packages\Microsoft.SqlServer.Types.14.0.314.76\lib\net40\Microsoft.SqlServer.Types.dll</HintPath>
@@ -143,11 +145,17 @@
     <Compile Include="Dynamic\DynamicLogic.cs" />
     <Compile Include="Dynamic\DynamicMixinConnectionLogic.cs" />
     <Compile Include="Joyride\JoyrideLogic.cs" />
+    <Compile Include="MachineLearning\AutoconfigureNeuralNetworkAlgorithm.cs" />
+    <Compile Include="MachineLearning\PredictorAlgorithm.cs" />
+    <Compile Include="MachineLearning\PredictorCodificationLogic.cs" />
+    <Compile Include="MachineLearning\PredictorLogic.cs" />
+    <Compile Include="MachineLearning\PredictorLogicQuery.cs" />
+    <Compile Include="MachineLearning\PredictorPredictLogic.cs" />
+    <Compile Include="MachineLearning\PredictorSimpleSaver.cs" />
     <Compile Include="Mailing\ImageAttachmentLogic.cs" />
     <Compile Include="Rest\RestApiKeyLogic.cs" />
     <Compile Include="Files\FilePathEmbeddedLogic.cs" />
     <Compile Include="Templating\TemplatingLogic.cs" />
-    <Compile Include="MachineLearning\PredictorLogic.cs" />
     <Compile Include="Toolbar\ToolbarLogic.cs" />
     <Compile Include="Dynamic\DynamicSqlMigrationLogic.cs" />
     <Compile Include="Dynamic\DynamicExpressionLogic.cs" />
@@ -232,6 +240,7 @@
     <Compile Include="Word\TemplateParser.cs" />
     <Compile Include="Word\TemplateRenderer.cs" />
     <Compile Include="Workflow\CaseFlowLogic.cs" />
+    <Compile Include="Workflow\WorkflowActivityMonitorLogic.cs" />
     <Compile Include="Workflow\WorkflowEventTaskLogic.cs" />
     <Compile Include="Workflow\WorkflowNodeGraph.cs" />
     <Compile Include="Workflow\WorkflowScriptRunner.cs" />
@@ -244,11 +253,11 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Framework\Signum.Engine\Signum.Engine.csproj">
-      <Project>{7F2DB6FE-C109-4057-B207-C62A767F905D}</Project>
+      <Project>{7f2db6fe-c109-4057-b207-c62a767f905d}</Project>
       <Name>Signum.Engine</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\Framework\Signum.Entities\Signum.Entities.csproj">
-      <Project>{F2B51D08-498D-4C9F-8112-9521A7762B02}</Project>
+      <Project>{f2b51d08-498d-4c9f-8112-9521a7762b02}</Project>
       <Name>Signum.Entities</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\Framework\Signum.Utilities\Signum.Utilities.csproj">
@@ -256,7 +265,7 @@
       <Name>Signum.Utilities</Name>
     </ProjectReference>
     <ProjectReference Include="..\Signum.Entities.Extensions\Signum.Entities.Extensions.csproj">
-      <Project>{7D851227-5294-4BEB-990E-56B4FBB7A148}</Project>
+      <Project>{7d851227-5294-4beb-990e-56b4fbb7a148}</Project>
       <Name>Signum.Entities.Extensions</Name>
     </ProjectReference>
   </ItemGroup>
@@ -327,7 +336,7 @@
     <PropertyGroup>
       <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
     </PropertyGroup>
-    <Error Condition="!Exists('..\..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.1.0.7\build\net45\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.1.0.7\build\net45\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props'))" />
-    <Error Condition="!Exists('..\..\packages\Microsoft.Net.Compilers.2.3.2\build\Microsoft.Net.Compilers.props')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\Microsoft.Net.Compilers.2.3.2\build\Microsoft.Net.Compilers.props'))" />
+    <Error Condition="!Exists('..\..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.1.0.8\build\net45\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.1.0.8\build\net45\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props'))" />
+    <Error Condition="!Exists('..\..\packages\Microsoft.Net.Compilers.2.6.1\build\Microsoft.Net.Compilers.props')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\Microsoft.Net.Compilers.2.6.1\build\Microsoft.Net.Compilers.props'))" />
   </Target>
 </Project>

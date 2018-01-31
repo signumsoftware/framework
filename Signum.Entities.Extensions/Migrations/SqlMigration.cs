@@ -15,7 +15,6 @@ namespace Signum.Entities.Migrations
         [UniqueIndex]
         public string VersionNumber { get; set; }
 
-        [SqlDbType(Size = 400)]
         [StringLengthValidator(AllowNulls = true, Min = 0, Max = 400)]
         public string Comment { get; set; }
 

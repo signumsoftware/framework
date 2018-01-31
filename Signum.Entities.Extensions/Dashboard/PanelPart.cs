@@ -17,15 +17,12 @@ namespace Signum.Entities.Dashboard
     [Serializable]
     public class PanelPartEmbedded : EmbeddedEntity, IGridEntity
     {
-        [SqlDbType(Size = 100)]
         [StringLengthValidator(AllowNulls = true, Min = 3, Max = 100)]
         public string Title { get; set; }
 
-        [SqlDbType(Size = 100)]
         [StringLengthValidator(AllowNulls = true, Min = 3, Max = 100)]
         public string IconName { get; set; }
 
-        [SqlDbType(Size = 100)]
         [StringLengthValidator(AllowNulls = true, Min = 3, Max = 100)]
         public string IconColor { get; set; }
 
@@ -143,7 +140,6 @@ namespace Signum.Entities.Dashboard
     [Serializable, EntityKind(EntityKind.Part, EntityData.Master)]
     public class UserQueryPartEntity : Entity, IPartEntity
     {
-        [NotNullable]
         [NotNullValidator]
         public UserQueryEntity UserQuery { get; set; }
 
@@ -193,7 +189,6 @@ namespace Signum.Entities.Dashboard
     [Serializable, EntityKind(EntityKind.Part, EntityData.Master)]
     public class UserChartPartEntity : Entity, IPartEntity
     {
-        [NotNullable]
         [NotNullValidator]
         public UserChartEntity UserChart { get; set; }
 
@@ -240,7 +235,7 @@ namespace Signum.Entities.Dashboard
     [Serializable, EntityKind(EntityKind.Part, EntityData.Master)]
     public class ValueUserQueryListPartEntity : Entity, IPartEntity
     {
-        [NotNullable]
+        [NotNullValidator]
         public MList<ValueUserQueryElementEmbedded> UserQueries { get; set; } = new MList<ValueUserQueryElementEmbedded>();
 
         public override string ToString()
@@ -317,7 +312,7 @@ namespace Signum.Entities.Dashboard
     [Serializable, EntityKind(EntityKind.Part, EntityData.Master)]
     public class LinkListPartEntity : Entity, IPartEntity
     {
-        [NotNullable]
+        [NotNullValidator]
         public MList<LinkElementEmbedded> Links { get; set; } = new MList<LinkElementEmbedded>();
 
         public override string ToString()
@@ -354,11 +349,10 @@ namespace Signum.Entities.Dashboard
     [Serializable]
     public class LinkElementEmbedded : EmbeddedEntity
     {
-        [NotNullValidator]
+        [StringLengthValidator(AllowNulls = false, Max = 200)]
         public string Label { get; set; }
 
-        [SqlDbType(Size = int.MaxValue)]
-        [URLValidator(absolute: true, aspNetSiteRelative: true), StringLengthValidator(AllowNulls = false)]
+        [URLValidator(absolute: true, aspNetSiteRelative: true), StringLengthValidator(AllowNulls = false, Max = 200)]
         public string Link { get; set; }
 
         public LinkElementEmbedded Clone()

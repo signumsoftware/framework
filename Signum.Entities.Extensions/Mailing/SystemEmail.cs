@@ -11,7 +11,7 @@ namespace Signum.Entities.Mailing
     [Serializable, EntityKind(EntityKind.SystemString, EntityData.Master), TicksColumn(false)]
     public class SystemEmailEntity : Entity
     {
-        [NotNullable, UniqueIndex]
+        [NotNullValidator, UniqueIndex]
         public string FullClassName { get; set; }
 
         static Expression<Func<SystemEmailEntity, string>> ToStringExpression = e => e.FullClassName;

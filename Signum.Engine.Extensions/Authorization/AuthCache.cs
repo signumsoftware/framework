@@ -335,7 +335,7 @@ namespace Signum.Entities.Authorization
 
                     return restSql;
                 },
-                removeOld: (role, list) => list.Select(rt => table.DeleteSqlSync(rt)).Combine(Spacing.Simple)?.Do(p => p.GoBefore = true),
+                removeOld: (role, list) => list.Select(rt => table.DeleteSqlSync(rt, null)).Combine(Spacing.Simple)?.Do(p => p.GoBefore = true),
                 mergeBoth: (role, x, list) =>
                 {
                     var def = list.SingleOrDefaultEx(a => a.Resource == null);
@@ -354,12 +354,12 @@ namespace Signum.Entities.Authorization
                             var a = parseAllowed(xr.Attribute("Allowed").Value);
                             return table.InsertSqlSync(new RT { Resource = ToEntity(r), Role = role, Allowed = a }, comment: Comment(role, ToEntity(r), a));
                         },
-                        (r, rt) => table.DeleteSqlSync(rt, Comment(role, ToEntity(r), rt.Allowed)),
+                        (r, rt) => table.DeleteSqlSync(rt, null, Comment(role, ToEntity(r), rt.Allowed)),
                         (r, xr, rt) =>
                         {
                             var oldA = rt.Allowed;
                             rt.Allowed = parseAllowed(xr.Attribute("Allowed").Value);
-                            return table.UpdateSqlSync(rt, comment: Comment(role, ToEntity(r), oldA, rt.Allowed));
+                            return table.UpdateSqlSync(rt, null, comment: Comment(role, ToEntity(r), oldA, rt.Allowed));
                         })?.Do(p => p.GoBefore = true);
 
                     return restSql;

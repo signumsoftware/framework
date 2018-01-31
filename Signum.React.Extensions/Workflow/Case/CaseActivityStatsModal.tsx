@@ -60,7 +60,7 @@ export default class CaseActivityStatsModal extends React.Component<CaseActivity
                                     caseActivityStats.map(a =>
                                         <Tab key={a.CaseActivity.id} eventKey={a.CaseActivity.id} title={
                                             a.DoneDate == null ? CaseActivityMessage.Pending.niceToString() :
-                                                <span>{a.DoneBy.toStr} {DoneType.niceName(a.DoneType)} <mark>({moment(a.DoneDate).fromNow()})</mark></span> as any}>
+                                                <span>{a.DoneBy.toStr} {DoneType.niceToString(a.DoneType!)} <mark>({moment(a.DoneDate).fromNow()})</mark></span> as any}>
                                             <CaseActivityStatsComponent stats={a} caseEntity={this.props.case} />
                                         </Tab>)
                                 }
@@ -100,11 +100,11 @@ export class CaseActivityStatsComponent extends React.Component<CaseActivityStat
                 <FormGroup ctx={ctx} labelText={CaseActivityEntity.nicePropertyName(a => a.doneBy)}>{stats.DoneBy && <EntityLink lite={stats.DoneBy} />}</FormGroup>
                 <FormGroup ctx={ctx} labelText={CaseActivityEntity.nicePropertyName(a => a.startDate)}>{formatDate(stats.StartDate)}</FormGroup>
                 <FormGroup ctx={ctx} labelText={CaseActivityEntity.nicePropertyName(a => a.doneDate)}>{formatDate(stats.DoneDate)}</FormGroup>
-                <FormGroup ctx={ctx} labelText={CaseActivityEntity.nicePropertyName(a => a.doneType)}>{DoneType.niceName(stats.DoneType)}</FormGroup>
+                <FormGroup ctx={ctx} labelText={CaseActivityEntity.nicePropertyName(a => a.doneType)}>{DoneType.niceToString(stats.DoneType!)}</FormGroup>
                 <FormGroup ctx={ctx} labelText={WorkflowActivityEntity.nicePropertyName(a => a.estimatedDuration)}>{formatDuration(stats.EstimatedDuration)}</FormGroup>
                 <FormGroup ctx={ctx} labelText={WorkflowActivityMessage.AverageDuration.niceToString()}>{formatDuration(stats.AverageDuration)}</FormGroup>
                 <FormGroup ctx={ctx} labelText={CaseActivityEntity.nicePropertyName(a => a.duration)}>{formatDuration(stats.Duration)}</FormGroup>
-                <FormGroup ctx={ctx} labelText={WorkflowActivityType.niceName()}>{WorkflowActivityType.niceName(stats.WorkflowActivityType)}</FormGroup>
+                <FormGroup ctx={ctx} labelText={WorkflowActivityType.niceName()}>{WorkflowActivityType.niceToString(stats.WorkflowActivityType)}</FormGroup>
                 {
                     stats.WorkflowActivityType == "Task" || stats.WorkflowActivityType == "Decision" ? this.renderTaskExtra() :
                         stats.WorkflowActivityType == "Script" ? this.renderScriptTaskExtra() :
@@ -161,9 +161,6 @@ export class CaseActivityStatsComponent extends React.Component<CaseActivityStat
 }
 
 function formatDate(date: string | undefined) {
-    if (date == undefined)
-        return undefined;
-
     return <span>{moment(date).format("L LT")} <mark>({moment(date).fromNow()})</mark></span>
 }
 

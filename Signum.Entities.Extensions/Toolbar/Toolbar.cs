@@ -25,7 +25,6 @@ namespace Signum.Entities.Toolbar
         [ImplementedBy(typeof(UserEntity), typeof(RoleEntity))]
         public Lite<IEntity> Owner { get; set; }
 
-        [NotNullable, SqlDbType(Size = 100)]
         [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
         public string Name { get; set; }
 
@@ -33,7 +32,7 @@ namespace Signum.Entities.Toolbar
 
         public int? Priority { get; set; }
         
-        [NotNullable, PreserveOrder]
+        [PreserveOrder]
         [NotNullValidator, NoRepeatValidator]
         public MList<ToolbarElementEmbedded> Elements { get; set; } = new MList<ToolbarElementEmbedded>();
 
@@ -87,23 +86,19 @@ namespace Signum.Entities.Toolbar
     {
         public ToolbarElementType Type { get; set; }
 
-        [SqlDbType(Size = 100)]
         [StringLengthValidator(AllowNulls = true, Min = 3, Max = 100)]
         public string Label { get; set; }
 
-        [SqlDbType(Size = 100)]
         [StringLengthValidator(AllowNulls = true, Min = 3, Max = 100)]
         public string IconName { get; set; }
 
-        [SqlDbType(Size = 100)]
         [StringLengthValidator(AllowNulls = true, Min = 3, Max = 100)]
         public string IconColor { get; set; }
         
         [ImplementedBy(typeof(ToolbarMenuEntity), typeof(UserQueryEntity), typeof(UserChartEntity), typeof(QueryEntity), typeof(DashboardEntity), typeof(PermissionSymbol))]
         public Lite<Entity> Content { get; set; }
 
-        [SqlDbType(Size = 200)]
-        [StringLengthValidator(AllowNulls = true, Min = 3, Max = 200), URLValidator(absolute: true, aspNetSiteRelative: true)]
+        [StringLengthValidator(AllowNulls = true, Min = 3, Max = int.MaxValue), URLValidator(absolute: true, aspNetSiteRelative: true)]
         public string Url { get; set; }
 
         public bool OpenInPopup { get; set; }
@@ -202,11 +197,10 @@ namespace Signum.Entities.Toolbar
         [UniqueIndex]
         public Guid Guid { get; set; } = Guid.NewGuid();
 
-        [NotNullable, SqlDbType(Size = 100)]
         [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
         public string Name { get; set; }
 
-        [NotNullable, PreserveOrder]
+        [PreserveOrder]
         [NotNullValidator, NoRepeatValidator]
         public MList<ToolbarElementEmbedded> Elements { get; set; } = new MList<ToolbarElementEmbedded>();
 

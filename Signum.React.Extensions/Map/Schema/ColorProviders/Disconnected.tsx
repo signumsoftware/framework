@@ -1,7 +1,7 @@
 ﻿import * as React from 'react'
 import * as d3 from 'd3'
 import { ClientColorProvider, SchemaMapInfo  } from '../SchemaMap'
-import { colorScale, colorScaleSqr  } from '../../Utils'
+import { colorScale, colorScaleLog  } from '../../Utils'
 import { Upload, Download  } from '../../../Disconnected/Signum.Entities.Disconnected'
 export default function getDefaultProviders(info: SchemaMapInfo): ClientColorProvider[] {
 

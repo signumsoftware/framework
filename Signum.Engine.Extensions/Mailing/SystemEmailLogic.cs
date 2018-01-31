@@ -204,12 +204,12 @@ namespace Signum.Engine.Mailing
             using (replacements.WithReplacedDatabaseName())
                 return Synchronizer.SynchronizeScript(Spacing.Double, should, current,
                     createNew: (tn, s) => table.InsertSqlSync(s),
-                    removeOld: (tn, c) => table.DeleteSqlSync(c),
+                    removeOld: (tn, c) => table.DeleteSqlSync(c, se => se.FullClassName == c.FullClassName),
                     mergeBoth: (tn, s, c) =>
                     {
                         var oldClassName = c.FullClassName;
                         c.FullClassName = s.FullClassName;
-                        return table.UpdateSqlSync(c, comment: oldClassName);
+                        return table.UpdateSqlSync(c, se => se.FullClassName == c.FullClassName, comment: oldClassName);
                     });
         }
 

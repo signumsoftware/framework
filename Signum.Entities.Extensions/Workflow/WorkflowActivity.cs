@@ -20,19 +20,15 @@ namespace Signum.Entities.Workflow
     [Serializable, EntityKind(EntityKind.Main, EntityData.Master)]
     public class WorkflowActivityEntity : Entity, IWorkflowNodeEntity, IWithModel
     {
-        [NotNullable]
         [NotNullValidator]
         public WorkflowLaneEntity Lane { get; set; }
 
-        [SqlDbType(Size = 100), NotNullable]
         [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
         public string Name { get; set; }
 
-        [NotNullable, SqlDbType(Size = 100)]
         [StringLengthValidator(AllowNulls = false, Min = 1, Max = 100)]
         public string BpmnElementId { get; set; }
 
-        [SqlDbType(Size = 400)]
         [StringLengthValidator(AllowNulls = true, Min = 3, Max = 400, MultiLine = true)]
         public string Comments { get; set; }
 
@@ -50,21 +46,19 @@ namespace Signum.Entities.Workflow
         [StringLengthValidator(AllowNulls = true, Min = 3, Max = 255)]
         public string ViewName { get; set; }
         
-        [NotNullable, PreserveOrder]
+        [PreserveOrder]
         [NotNullValidator, NoRepeatValidator]
         public MList<WorkflowJumpEmbedded> Jumps { get; set; } = new MList<WorkflowJumpEmbedded>();
 
         [NotifyChildProperty]
         public WorkflowScriptPartEmbedded Script { get; set; }
 
-        [NotNullable]
         [NotNullValidator]
         public WorkflowXmlEmbedded Xml { get; set; }
         
         [NotifyChildProperty]
         public SubWorkflowEmbedded SubWorkflow { get; set; }
 
-        [SqlDbType(Size = int.MaxValue)]
         [StringLengthValidator(AllowNulls = true, MultiLine = true)]
         public string UserHelp { get; set; }
 
@@ -177,7 +171,6 @@ namespace Signum.Entities.Workflow
 
         public WorkflowScriptRetryStrategyEntity RetryStrategy { get; set; }
 
-        [NotNullable]
         [NotNullValidator, ImplementedBy(typeof(WorkflowActivityEntity), typeof(WorkflowEventEntity), typeof(WorkflowGatewayEntity))]
         public Lite<IWorkflowNodeEntity> OnFailureJump { get; set; }
 
@@ -209,11 +202,10 @@ namespace Signum.Entities.Workflow
     [Serializable]
     public class WorkflowTimeoutEmbedded : EmbeddedEntity, IWorkflowTransitionTo
     {
-        [NotNullable]
         [NotNullValidator]
         public TimeSpanEmbedded Timeout { get; set; }
 
-        [NotNullable, ImplementedBy(typeof(WorkflowActivityEntity), typeof(WorkflowEventEntity), typeof(WorkflowGatewayEntity))]
+        [ImplementedBy(typeof(WorkflowActivityEntity), typeof(WorkflowEventEntity), typeof(WorkflowGatewayEntity))]
         [NotNullValidator]
         public Lite<IWorkflowNodeEntity> To { get; set; }
 
@@ -262,11 +254,9 @@ namespace Signum.Entities.Workflow
     [Serializable]
     public class SubWorkflowEmbedded : EmbeddedEntity
     {
-        [NotNullable]
         [NotNullValidator]
         public WorkflowEntity Workflow { get; set; }
 
-        [NotNullable]
         [NotNullValidator, NotifyChildProperty]
         public SubEntitiesEval SubEntitiesEval { get; set; }
 
@@ -334,11 +324,9 @@ namespace Signum.Entities.Workflow
 
         public WorkflowEntity Workflow { get; set; }
 
-        [NotNullable]
         [NotNullValidator, InTypeScript(Undefined = false, Null = false)]
         public TypeEntity MainEntityType { get; set; }
         
-        [NotNullable, SqlDbType(Size = 100)]
         [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
         public string Name { get; set; }
 
@@ -353,7 +341,7 @@ namespace Signum.Entities.Workflow
         [Unit("min")]
         public double? EstimatedDuration { get; set; }
 
-        [NotNullable, PreserveOrder]
+        [PreserveOrder]
         [NotNullValidator, NoRepeatValidator]
         public MList<WorkflowJumpEmbedded> Jumps { get; set; } = new MList<WorkflowJumpEmbedded>();
 
@@ -362,11 +350,9 @@ namespace Signum.Entities.Workflow
         [StringLengthValidator(AllowNulls = true, Min = 3, Max = 255)]
         public string ViewName { get; set; }
 
-        [SqlDbType(Size = 400)]
         [StringLengthValidator(AllowNulls = true, Min = 3, Max = 400, MultiLine = true)]
         public string Comments { get; set; }
 
-        [SqlDbType(Size = int.MaxValue)]
         [StringLengthValidator(AllowNulls = true, MultiLine = true)]
         public string UserHelp { get; set; }
 

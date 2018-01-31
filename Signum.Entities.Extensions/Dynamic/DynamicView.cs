@@ -15,15 +15,12 @@ namespace Signum.Entities.Dynamic
     [Serializable, EntityKind(EntityKind.Main, EntityData.Master)]
     public class DynamicViewEntity : Entity
     {
-        [NotNullable, SqlDbType(Size = 100)]
         [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
         public string ViewName { get; set; } = "Default";
 
-        [NotNullable]
         [NotNullValidator]
         public TypeEntity EntityType { get; set; }
 
-        [SqlDbType(Size = int.MaxValue)]
         [StringLengthValidator(AllowNulls = false, Min = 3)]
         public string ViewContent { get; set; }
     }
@@ -41,11 +38,9 @@ namespace Signum.Entities.Dynamic
     [Serializable, EntityKind(EntityKind.Main, EntityData.Master)]
     public class DynamicViewSelectorEntity : Entity
     {
-        [NotNullable]
         [NotNullValidator, UniqueIndex]
         public TypeEntity EntityType { get; set; }
 
-        [SqlDbType(Size = int.MaxValue)]
         [StringLengthValidator(AllowNulls = false, Min = 3, MultiLine = true)]
         public string Script { get; set; }
         
@@ -69,15 +64,12 @@ namespace Signum.Entities.Dynamic
     [Serializable, EntityKind(EntityKind.Main, EntityData.Master)]
     public class DynamicViewOverrideEntity : Entity
     {
-        [NotNullable]
         [NotNullValidator]
         public TypeEntity EntityType { get; set; }
 
-        [SqlDbType(Size = 100)]
         [StringLengthValidator(AllowNulls = true, Min = 3, Max = 100)]
         public string ViewName { get; set; }
 
-        [SqlDbType(Size = int.MaxValue)]
         [StringLengthValidator(AllowNulls = false, Min = 3, MultiLine = true)]
         public string Script { get; set; }
 
@@ -144,5 +136,10 @@ namespace Signum.Entities.Dynamic
 
         [Description("Aggregate is mandatory for '{0}' ({1}).")]
         AggregateIsMandatoryFor01,
+
+        [Description("ValueToken can not be use for '{0}' because is not an Entity.")]
+        ValueTokenCanNotBeUseFor0BecauseIsNotAnEntity,
+
+        ViewNameIsNotAllowedWhileHavingChildren,
     }
 }

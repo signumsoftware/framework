@@ -52,6 +52,7 @@ namespace Signum.Engine.Authorization
         }
 
         static ResetLazy<DirectedGraph<Lite<RoleEntity>>> roles;
+        static ResetLazy<DirectedGraph<Lite<RoleEntity>>> rolesInverse;
 
         class RoleData
         {
@@ -88,6 +89,7 @@ namespace Signum.Engine.Authorization
                     });
 
                 roles = sb.GlobalLazy(CacheRoles, new InvalidateWith(typeof(RoleEntity)), AuthLogic.NotifyRulesChanged);
+                rolesInverse = sb.GlobalLazy(()=>roles.Value.Inverse(), new InvalidateWith(typeof(RoleEntity)));
                 mergeStrategies = sb.GlobalLazy(() =>
                 {
                     var strategies = Database.Query<RoleEntity>().Select(r => KVP.Create(r.ToLite(), r.MergeStrategy)).ToDictionary();
@@ -331,9 +333,14 @@ namespace Signum.Engine.Authorization
             return roles.Value.IndirectlyRelatedTo(RoleEntity.Current, true);
         }
 
-        public static HashSet<Lite<RoleEntity>> RolesFromRole(Lite<RoleEntity> role)
+        public static HashSet<Lite<RoleEntity>> IndirectlyRelated(Lite<RoleEntity> role)
         {
             return roles.Value.IndirectlyRelatedTo(role, true);
+        }
+
+        public static HashSet<Lite<RoleEntity>> InverseIndirectlyRelated(Lite<RoleEntity> role)
+        {
+            return rolesInverse.Value.IndirectlyRelatedTo(role, true);
         }
 
         internal static int Rank(Lite<RoleEntity> role)
@@ -462,13 +469,13 @@ namespace Signum.Engine.Authorization
                     removeOld: (name, role) => SqlPreCommand.Combine(Spacing.Simple,
                             new SqlPreCommandSimple("DELETE {0} WHERE {1} = {2} --{3}"
                                 .FormatWith(relationalTable.Name, ((IColumn)relationalTable.Field).Name.SqlEscape(), role.Id, role.Name)),
-                            table.DeleteSqlSync(role)),
+                            table.DeleteSqlSync(role, r => r.Name == role.Name)),
                     mergeBoth: (name, xElement, role) =>
                     {
                         var oldName = role.Name;
                         role.Name = name;
                         role.MergeStrategy = xElement.Attribute("MergeStrategy")?.Let(t => t.Value.ToEnum<MergeStrategy>()) ?? MergeStrategy.Union;
-                        return table.UpdateSqlSync(role, includeCollections: false, comment: oldName);
+                        return table.UpdateSqlSync(role, r => r.Name == oldName, includeCollections: false, comment: oldName);
                     });
 
                 if (roleInsertsDeletes != null)
@@ -505,7 +512,7 @@ namespace Signum.Engine.Authorization
 
                      role.Roles = should.Select(rs => rolesDic.GetOrThrow(rs).ToLite()).ToMList();
 
-                     return table.UpdateSqlSync(role);
+                     return table.UpdateSqlSync(role, r => r.Name == role.Name);
                  });
 
                 if (roleRelationships != null)

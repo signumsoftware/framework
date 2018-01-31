@@ -11,7 +11,6 @@ namespace Signum.Entities.Chart
     [Serializable]
     public class ChartScriptColumnEmbedded : EmbeddedEntity
     {
-        [NotNullable, SqlDbType(Size = 80)]
         [StringLengthValidator(AllowNulls = false, Min = 3, Max = 80)]
         public string DisplayName { get; set; }
 

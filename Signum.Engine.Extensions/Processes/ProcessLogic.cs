@@ -166,7 +166,9 @@ namespace Signum.Engine.Processes
         {
             void Remove(ProcessState processState)
             {
-                var query = Database.Query<ProcessEntity>().Where(p => p.State == processState && p.CreationDate < parameters.DateLimit);
+                var dateLimit = parameters.GetDateLimit(typeof(ProcessEntity).ToTypeEntity());
+
+                var query = Database.Query<ProcessEntity>().Where(p => p.State == processState && p.CreationDate < dateLimit);
 
                 query.SelectMany(a => a.ExceptionLines()).UnsafeDeleteChunksLog(parameters, sb, token);
 
@@ -368,45 +370,73 @@ namespace Signum.Engine.Processes
             }
         }
 
-        public static void ForEach<T>(this ExecutingProcess executingProcess, List<T> collection, Func<T, string> elementInfo, Action<T> action)
+        public static void ForEach<T>(this ExecutingProcess executingProcess, List<T> collection,
+            Func<T, string> elementInfo, Action<T> action)
         {
-            var totalCount = collection.Count;
-            int j = 0;
-            foreach (var item in collection)
+            if (executingProcess == null)
             {
-                executingProcess.CancellationToken.ThrowIfCancellationRequested();
-                using (HeavyProfiler.Log("ProgressForeach", () => elementInfo(item)))
-                {
-                    try
+                collection.ProgressForeach(elementInfo, action);
+            }
+            else
+            {
+                executingProcess.ForEachNonTransactional(collection, elementInfo, item => {
+                    using (Transaction tr = Transaction.ForceNew())
                     {
-                        using (Transaction tr = Transaction.ForceNew())
+                        action(item);
+                        tr.Commit();
+                    }
+                });
+
+            }
+        }
+
+
+        public static void ForEachNonTransactional<T>(this ExecutingProcess executingProcess, List<T> collection,
+            Func<T, string> elementInfo, Action<T> action)
+        {
+            if (executingProcess == null)
+            {
+                collection.ProgressForeach(elementInfo, action, transactional: false);
+            }
+            else
+            {
+
+                var totalCount = collection.Count;
+                int j = 0;
+                foreach (var item in collection)
+                {
+                    executingProcess.CancellationToken.ThrowIfCancellationRequested();
+                    using (HeavyProfiler.Log("ProgressForeach", () => elementInfo(item)))
+                    {
+                        try
                         {
                             action(item);
-                            tr.Commit();
+
                         }
-                    }
-                    catch (Exception e)
-                    {
-                        if (Transaction.InTestTransaction)
-                            throw;
-
-                        var exLog = e.LogException();
-
-                        Transaction.ForceNew().EndUsing(tr =>
+                        catch (Exception e)
                         {
-                            new ProcessExceptionLineEntity
+                            if (Transaction.InTestTransaction)
+                                throw;
+
+                            var exLog = e.LogException();
+
+                            Transaction.ForceNew().EndUsing(tr =>
                             {
-                                Exception = exLog.ToLite(),
-                                ElementInfo = elementInfo(item),
-                                Process = executingProcess.CurrentProcess.ToLite()
-                            }.Save();
+                                new ProcessExceptionLineEntity
+                                {
+                                    Exception = exLog.ToLite(),
+                                    ElementInfo = elementInfo(item),
+                                    Process = executingProcess.CurrentProcess.ToLite()
+                                }.Save();
 
-                            tr.Commit();
-                        });
+                                tr.Commit();
+                            });
+                        }
+
+                        executingProcess.ProgressChanged(j++, totalCount);
                     }
-
-                    executingProcess.ProgressChanged(j++, totalCount);
                 }
+
             }
         }
 
@@ -451,7 +481,7 @@ namespace Signum.Engine.Processes
             {
                 if (!Console.IsOutputRedirected)
                 {
-                    SafeConsole.WriteColor(color, s);
+                    SafeConsole.WriteLineColor(color, s);
                 }
             }
         }
@@ -475,6 +505,45 @@ namespace Signum.Engine.Processes
                 keys.UnionWith(oldDictionary.Keys);
                 keys.UnionWith(newDictionary.Keys);
                 ep.ForEach(keys.ToList(), key => key.ToString(), key =>
+                {
+                    var oldVal = oldDictionary.TryGetC(key);
+                    var newVal = newDictionary.TryGetC(key);
+
+                    if (oldVal == null)
+                    {
+                        createNew?.Invoke(key, newVal);
+                    }
+                    else if (newVal == null)
+                    {
+                        removeOld?.Invoke(key, oldVal);
+                    }
+                    else
+                    {
+                        merge?.Invoke(key, newVal, oldVal);
+                    }
+                });
+            }
+        }
+
+
+        public static void SynchronizeProgressForeachNonTransactional<K, N, O>(this ExecutingProcess ep,
+            Dictionary<K, N> newDictionary,
+            Dictionary<K, O> oldDictionary,
+            Action<K, N> createNew,
+            Action<K, O> removeOld,
+            Action<K, N, O> merge)
+            where O : class
+            where N : class
+        {
+
+            if (ep == null)
+                Synchronizer.SynchronizeProgressForeach(newDictionary, oldDictionary, createNew, removeOld, merge);
+            else
+            {
+                HashSet<K> keys = new HashSet<K>();
+                keys.UnionWith(oldDictionary.Keys);
+                keys.UnionWith(newDictionary.Keys);
+                ep.ForEachNonTransactional(keys.ToList(), key => key.ToString(), key =>
                 {
                     var oldVal = oldDictionary.TryGetC(key);
                     var newVal = newDictionary.TryGetC(key);

@@ -140,6 +140,30 @@ namespace Signum.Engine.Translation
             return result;
         }
 
+        public static void CopyTranslations()
+        {
+            var currentDirectory = Directory.GetCurrentDirectory();
+
+            var rootDir = currentDirectory.Before(@".Load\bin");
+            var appName = rootDir.AfterLast(@"\");
+            rootDir = rootDir.BeforeLast(@"\");
+
+            var reactDir = new DirectoryInfo($@"{rootDir}\{appName}.React\Translations");
+
+            foreach (var fi in reactDir.GetFiles("*.xml"))
+            {
+                var targetDir =
+                    fi.Name.StartsWith(appName + ".Entities") ? $@"{rootDir}\{appName}.Entities\Translations" :
+                    fi.Name.StartsWith("Signum.Entities.Extensions") ? $@"{rootDir}\Extensions\Signum.Entities.Extensions\Translations" :
+                    fi.Name.StartsWith("Signum.Entities") ? $@"{rootDir}\Framework\Signum.Entities\Translations" :
+                    fi.Name.StartsWith("Signum.Utilities") ? $@"{rootDir}\Framework\Signum.Utilities\Translations" :
+                    throw new InvalidOperationException("Unexpected file with name " + fi.Name);
+
+                var targetPath = Path.Combine(targetDir, fi.Name);
+                Console.WriteLine(targetPath);
+                File.Copy(fi.FullName, targetPath, overwrite: true);
+            }
+        }
     }
 
 

@@ -5,6 +5,7 @@ import { EntitySettings, ViewPromise } from "../../../Framework/Signum.React/Scr
 import * as Navigator from "../../../Framework/Signum.React/Scripts/Navigator";
 import { ajaxGet } from "../../../Framework/Signum.React/Scripts/Services";
 import * as AuthClient from "../Authorization/AuthClient";
+import * as  QuickLink  from '../../../Framework/Signum.React/Scripts/QuickLinks';
 
 export function registerAuthenticator() {
     AuthClient.authenticators.insertAt(0, loginFromApiKey);
@@ -28,10 +29,30 @@ export function loginFromApiKey(): Promise<AuthClient.AuthenticatedUser | undefi
 
 export module API {
     export function generateRestApiKey(): Promise<string> {
-        return ajaxGet<string>({ url: "~/api/restApiKey" });
+        return ajaxGet<string>({ url: "~/api/restApiKey/generate" });
+    }
+
+    export function getCurrentRestApiKey(): Promise<string> {
+        return ajaxGet<string>({ url: "~/api/restApiKey/current" });
     }
 
     export function loginFromApiKey(apiKey: string): Promise<AuthClient.API.LoginResponse> {
         return ajaxGet<AuthClient.API.LoginResponse>({ url: "~/api/auth/loginFromApiKey?apiKey=" + apiKey, avoidAuthToken: true });
     }
+
+    export function replayRestLog(restLogID: string | number, host:string){
+        return ajaxGet<RestLogDiff>({url: "~/api/restLog?id="+restLogID + "&url="+host});
+        
+    }
+}
+
+export interface RestLogDiff {
+    previous: string
+    diff: Array<DiffPair<Array<DiffPair<string>>>>;
+    current: string
+}
+
+export interface DiffPair<T> {
+    Action: "Equal" | "Added" | "Removed";
+    Value: T ;
 }

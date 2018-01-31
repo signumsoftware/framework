@@ -17,15 +17,12 @@ namespace Signum.Entities.Workflow
     [Serializable, EntityKind(EntityKind.String, EntityData.Master)]
     public class WorkflowEventEntity : Entity, IWorkflowNodeEntity, IWithModel
     {
-        [SqlDbType(Size = 100)]
         [StringLengthValidator(AllowNulls = true, Min = 3, Max = 100)]
         public string Name { get; set; }
 
-        [NotNullable, SqlDbType(Size = 100)]
         [StringLengthValidator(AllowNulls = false, Min = 1, Max = 100)]
         public string BpmnElementId { get; set; }
 
-        [NotNullable]
         [NotNullValidator]
         public WorkflowLaneEntity Lane { get; set; }
 
@@ -33,7 +30,6 @@ namespace Signum.Entities.Workflow
         public WorkflowEventType Type { get; set; }
 
 
-        [NotNullable]
         [NotNullValidator]
         public WorkflowXmlEmbedded Xml { get; set; }
 
@@ -96,11 +92,9 @@ namespace Signum.Entities.Workflow
     [Serializable]
     public class WorkflowEventModel : ModelEntity
     {
-        [NotNullable]
         [NotNullValidator, InTypeScript(Undefined = false, Null = false)]
         public TypeEntity MainEntityType { get; set; }
 
-        [NotNullable, SqlDbType(Size = 100)]
         [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
         public string Name { get; set; }
 

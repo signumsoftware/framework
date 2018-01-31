@@ -33,7 +33,7 @@ export class CaseFlowRenderer extends CustomRenderer {
         else {
             const pathGroup = (path.parentNode as SVGGElement).parentNode as SVGGElement;
             const title = (Array.toArray(pathGroup.childNodes) as SVGElement[]).filter(a => a.nodeName == "title").firstOrNull() || pathGroup.appendChild(document.createElementNS("http://www.w3.org/2000/svg", "title"));
-            title.textContent = stats.map(con => `${DoneType.niceName(con.DoneType)} (${con.DoneBy.toStr} ${moment(con.DoneDate).fromNow()})`).join("\n");
+            title.textContent = stats.map(con => `${DoneType.niceToString(con.DoneType)} (${con.DoneBy.toStr} ${moment(con.DoneDate).fromNow()})`).join("\n");
         }
 
         return path;
@@ -109,7 +109,7 @@ export class CaseFlowRenderer extends CustomRenderer {
                 pathGroups.slice(jumps.length).forEach(path => (path.parentNode as SVGGElement).removeChild(path));
 
                 if (jumps.length) {
-                    const moddleElements = ((this.viewer as any).definitions.diagrams[0].plane.planeElement as BPMN.ModdleElement[]);
+                    const moddleElements = ((this.viewer as any)._definitions.diagrams[0].plane.planeElement as BPMN.ModdleElement[]);
 
                     const fromModdle = moddleElements.filter(a => a.id == (element.id + "_di")).single();
                     const fromRec: Rectangle = toCenteredRectangle(fromModdle.bounds);
@@ -156,7 +156,7 @@ export class CaseFlowRenderer extends CustomRenderer {
                         const title = (Array.toArray(pathGroup.childNodes) as SVGElement[]).filter(a => a.nodeName == "title").firstOrNull() ||
                             pathGroup.appendChild(document.createElementNS("http://www.w3.org/2000/svg", "title"));
 
-                        title.textContent = `${DoneType.niceName(jump.DoneType)} (${jump.DoneBy.toStr} ${moment(jump.DoneDate).fromNow()})`;
+                        title.textContent = `${DoneType.niceToString(jump.DoneType)} (${jump.DoneBy.toStr} ${moment(jump.DoneDate).fromNow()})`;
                     });
                 }
             }
@@ -187,12 +187,12 @@ ${CaseActivityEntity.nicePropertyName(a => a.startDate)}: ${moment(stats.StartDa
     if (stats.DoneDate != null)
         result += `
 ${CaseActivityEntity.nicePropertyName(a => a.doneDate)}: ${moment(stats.DoneDate).format("L LT")} (${moment(stats.DoneDate).fromNow()})
-${CaseActivityEntity.nicePropertyName(a => a.doneBy)}: ${stats.DoneBy && stats.DoneBy.toStr} (${DoneType.niceName(stats.DoneType!)})
+${CaseActivityEntity.nicePropertyName(a => a.doneBy)}: ${stats.DoneBy && stats.DoneBy.toStr} (${DoneType.niceToString(stats.DoneType!)})
 ${CaseActivityEntity.nicePropertyName(a => a.duration)}: ${formatDuration(stats.Duration)}`;
 
     result += `
-${CaseFlowColor.niceName("AverageDuration")}: ${formatDuration(stats.AverageDuration)}
-${CaseFlowColor.niceName("EstimatedDuration")}: ${formatDuration(stats.EstimatedDuration)}`;
+${CaseFlowColor.niceToString("AverageDuration")}: ${formatDuration(stats.AverageDuration)}
+${CaseFlowColor.niceToString("EstimatedDuration")}: ${formatDuration(stats.EstimatedDuration)}`;
 
     return result;
 }

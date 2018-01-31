@@ -20,7 +20,7 @@ namespace Signum.Entities.Mailing
             DescriptionManager.ExternalEnums.Add(typeof(SmtpDeliveryMethod), m => m.Name);
         }
 
-        [NotNullable, SqlDbType(Size = 100), UniqueIndex]
+        [UniqueIndex]
         [StringLengthValidator(AllowNulls = false, Min = 1, Max = 100)]
         public string Name { get; set; }
 
@@ -30,13 +30,12 @@ namespace Signum.Entities.Mailing
 
         public SmtpNetworkDeliveryEmbedded Network { get; set; }
 
-        [SqlDbType(Size = 300)]
         [StringLengthValidator(AllowNulls = true, Min = 3, Max = 300), FileNameValidator]
         public string PickupDirectoryLocation { get; set; }
 
         public EmailAddressEmbedded DefaultFrom { get; set; }
 
-        [NotNullable]
+        [NotNullValidator]
         [NoRepeatValidator]
         public MList<EmailRecipientEntity> AdditionalRecipients { get; set; } = new MList<EmailRecipientEntity>();
 
@@ -71,17 +70,14 @@ namespace Signum.Entities.Mailing
     [Serializable]
     public class SmtpNetworkDeliveryEmbedded : EmbeddedEntity
     {
-        [NotNullable, SqlDbType(Size = 100)]
         [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
         public string Host { get; set; }
 
         public int Port { get; set; } = 25;
 
-        [SqlDbType(Size = 100)]
         [StringLengthValidator(AllowNulls = true, Max = 100)]
         public string Username { get; set; }
 
-        [SqlDbType(Size = 100)]
         [StringLengthValidator(AllowNulls = true, Max = 100)]
         public string Password { get; set; }
 
@@ -89,14 +85,13 @@ namespace Signum.Entities.Mailing
 
         public bool EnableSSL { get; set; }
 
-        [NotNullable]
+        [NotNullValidator]
         public MList<ClientCertificationFileEmbedded> ClientCertificationFiles { get; set; } = new MList<ClientCertificationFileEmbedded>();
     }
 
     [Serializable]
     public class ClientCertificationFileEmbedded : EmbeddedEntity
     {
-        [NotNullable, SqlDbType(Size = 300)]
         [StringLengthValidator(AllowNulls = false, Min = 2, Max = 300),]
         public string FullFilePath { get; set; }
 

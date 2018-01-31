@@ -14,27 +14,21 @@ namespace Signum.Entities.Dynamic
     [Serializable, EntityKind(EntityKind.Main, EntityData.Transactional)]
     public class DynamicExpressionEntity : Entity
     {
-        [NotNullable, SqlDbType(Size = 100)]
         [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100), IdentifierValidator(IdentifierType.PascalAscii)]
         public string Name { get; set; }
 
-        [NotNullable, SqlDbType(Size = 100)]
         [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
         public string FromType { get; set; }
 
-        [NotNullable, SqlDbType(Size = 100)]
         [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
         public string ReturnType { get; set; }
 
-        [NotNullable, SqlDbType(Size = int.MaxValue)]
         [StringLengthValidator(AllowNulls = false, Min = 1, MultiLine = true)]
         public string Body { get; set; }
 
-        [SqlDbType(Size = 100)]
         [StringLengthValidator(AllowNulls = true, Min = 1, Max = 100)]
         public string Format { get; set; }
 
-        [SqlDbType(Size = 100)]
         [StringLengthValidator(AllowNulls = true, Min = 1, Max = 100)]
         public string Unit { get; set; }
 

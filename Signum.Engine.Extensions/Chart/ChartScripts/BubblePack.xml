@@ -80,7 +80,6 @@
       .attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; })
 	  .attr('data-click', function(p) { return getClickKeys(p, data.columns); });
   
-  
   node.append("circle")
       .attr('shape-rendering', 'initial')
       .attr("r", function(d) { return d.r; })
@@ -89,7 +88,7 @@
       .style("stroke", function(d) { return data.parameters["StrokeColor"] || (d.data.folder ? folderColor(d.data.folder): color(d.data)); })
       .style("stroke-width", data.parameters["StrokeWidth"])
       .style("stroke-opacity", 1)
-      .attr('data-click', function(p) { return p.data.folder ? null : getClickKeys(p.data, data.columns); });
+      .attr('data-click', function(p) { return p.data.folder ? getClickKeys({ c2 : p.data.folder }, data.columns): getClickKeys(p.data, data.columns); });
 
   var showNumber = data.parameters["NumberOpacity"] > 0;
   var numberSizeLimit = data.parameters["NumberSizeLimit"];
@@ -99,7 +98,7 @@
       .attr('text-anchor', 'middle')
   	  .attr("dy",function(d) { return  showNumber &&  d.r > numberSizeLimit ? "-0.5em" : null;})
       .text(function(d) { return d.data.folder ? d.data.folder.niceToString(): d.data.c0 ? (d.data.c0.niceToString()) : undefined; })
-      .attr('data-click', function(p) { return p.data.folder ? null : getClickKeys(p.data, data.columns); })
+      .attr('data-click', function(p) { return p.data.folder ? getClickKeys({ c2 : p.data.folder }, data.columns) : getClickKeys(p.data, data.columns); })
       .each(function(d) { return ellipsis(this, d.r * 2, 1, ""); });
   
   if(showNumber)
@@ -112,7 +111,7 @@
         .attr('font-weight', 'bold')
     	.attr('opacity', function(d) { return data.parameters["NumberOpacity"] * d.r / 30; })
         .attr("dy", ".5em")
-        .attr('data-click', function(p) { return p.data.folder ? null : getClickKeys(p.data, data.columns); })
+        .attr('data-click', function(p) { return p.data.folder ? getClickKeys({ c2 : p.data.folder }, data.columns) : getClickKeys(p.data, data.columns); })
         .text(function(d) { return d.data.c1; });
   }
   

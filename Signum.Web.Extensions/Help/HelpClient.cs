@@ -61,7 +61,6 @@ namespace Signum.Web.Help
                     new EntitySettings<AppendixHelpEntity>(),
                     new EntitySettings<NamespaceHelpEntity>(),
                     new EmbeddedEntitySettings<PropertyRouteHelpEmbedded>(),
-                    new EntitySettings<OperationHelpEntity>(),
                     new EmbeddedEntitySettings<QueryColumnHelpEmbedded>(),
                 });
 

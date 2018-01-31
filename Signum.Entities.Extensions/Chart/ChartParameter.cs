@@ -29,11 +29,9 @@ namespace Signum.Entities.Chart
             set { scriptParameter = value; Notify(() => ScriptParameter); }
         }
 
-        [NotNullable, SqlDbType(Size = 100)]
         [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
         public string Name { get; set; }
 
-        [SqlDbType(Size = 50)]
         string value;
         [StringLengthValidator(AllowNulls = true, Max = 50)]
         public string Value
@@ -68,6 +66,11 @@ namespace Signum.Entities.Chart
         {
             Name = x.Attribute("Name").Value;
             Value = x.Attribute("Value").Value;
+        }
+
+        public override string ToString()
+        {
+            return Name + ": " + Value;
         }
     }
 }
