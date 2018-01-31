@@ -816,11 +816,18 @@ export class PropertyRepeaterComponent extends React.Component<PropertyRepeaterC
     render() {
         return (
             <div className="properties">
-                <PanelGroup activeKey={this.state.activeIndex} onSelect={this.handleSelect as any} accordion>
+                <PanelGroup id="panelProperties" activeKey={this.state.activeIndex} onSelect={this.handleSelect as any} accordion>
                     {
                         this.props.properties.map((p, i) =>
-                            <Panel header={this.renderPropertyHeader(p, i)} eventKey={i} key={i} bsStyle="info">
-                                <PropertyComponent property={p} dc={this.props.dc} showDatabaseMapping={this.props.showDatabaseMapping} />
+                            <Panel eventKey={i} key={i} bsStyle="info">
+                                <Panel.Heading>
+                                    <Panel.Title toggle>
+                                        {this.renderPropertyHeader(p, i)}
+                                    </Panel.Title>
+                                </Panel.Heading>
+                                <Panel.Body collapsible>
+                                    <PropertyComponent property={p} dc={this.props.dc} showDatabaseMapping={this.props.showDatabaseMapping} />
+                                </Panel.Body>
                             </Panel>)
                     }
                 </PanelGroup>
@@ -1179,8 +1186,13 @@ export class ValidatorRepeaterComponent extends React.Component<ValidatorRepeate
                 <div className="panel-group">
                     {
                         (this.props.property.validators || []).map((val, i) =>
-                            <Panel header={this.renderHeader(val, i)} eventKey={i} key={i} bsStyle="warning">
-                                {registeredValidators[val.type].render && registeredValidators[val.type].render!(val, this.props.dc)}
+                            <Panel eventKey={i} key={i} bsStyle="warning">
+                                <Panel.Heading>
+                                    {this.renderHeader(val, i)}
+                                </Panel.Heading>
+                                <Panel.Body>
+                                    {registeredValidators[val.type].render && registeredValidators[val.type].render!(val, this.props.dc)}
+                                </Panel.Body>
                             </Panel>)
                     }
                 </div>
