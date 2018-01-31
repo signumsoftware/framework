@@ -76,12 +76,12 @@ namespace Signum.Engine.DynamicQuery
 
         ResultTable ExecuteQuery(QueryRequest request);
         Task<ResultTable> ExecuteQueryAsync(QueryRequest request, CancellationToken cancellationToken);
+        ResultTable ExecuteQueryGroup(QueryRequest request);
+        Task<ResultTable> ExecuteQueryGroupAsync(QueryRequest request, CancellationToken cancellationToken);
         object ExecuteQueryValue(QueryValueRequest request);
         Task<object> ExecuteQueryValueAsync(QueryValueRequest request, CancellationToken cancellationToken);
         Lite<Entity> ExecuteUniqueEntity(UniqueEntityRequest request);
         Task<Lite<Entity>> ExecuteUniqueEntityAsync(UniqueEntityRequest request, CancellationToken cancellationToken);
-        ResultTable ExecuteQueryGroup(QueryGroupRequest request);
-        Task<ResultTable> ExecuteQueryGroupAsync(QueryGroupRequest request, CancellationToken cancellationToken);
 
         IQueryable<Lite<Entity>> GetEntities(QueryEntitiesRequest request);
     }
@@ -133,14 +133,14 @@ namespace Signum.Engine.DynamicQuery
         public abstract ResultTable ExecuteQuery(QueryRequest request);
         public abstract Task<ResultTable> ExecuteQueryAsync(QueryRequest request, CancellationToken cancellationToken);
 
+        public abstract ResultTable ExecuteQueryGroup(QueryRequest request);
+        public abstract Task<ResultTable> ExecuteQueryGroupAsync(QueryRequest request, CancellationToken cancellationToken);
+
         public abstract object ExecuteQueryValue(QueryValueRequest request);
         public abstract Task<object> ExecuteQueryValueAsync(QueryValueRequest request, CancellationToken cancellationToken);
 
         public abstract Lite<Entity> ExecuteUniqueEntity(UniqueEntityRequest request);
         public abstract Task<Lite<Entity>> ExecuteUniqueEntityAsync(UniqueEntityRequest request, CancellationToken cancellationToken);
-
-        public abstract ResultTable ExecuteQueryGroup(QueryGroupRequest request);
-        public abstract Task<ResultTable> ExecuteQueryGroupAsync(QueryGroupRequest request, CancellationToken cancellationToken);
         
         public abstract IQueryable<Lite<Entity>> GetEntities(QueryEntitiesRequest request);
 
@@ -274,7 +274,7 @@ namespace Signum.Engine.DynamicQuery
         public static Task<DEnumerableCount<T>> AllQueryOperationsAsync<T>(this DQueryable<T> query, QueryRequest request, CancellationToken token)
         {
             return query
-                .SelectMany(request.Multiplications)
+                .SelectMany(request.Multiplications())
                 .Where(request.Filters)
                 .OrderBy(request.Orders)
                 .Select(request.Columns)

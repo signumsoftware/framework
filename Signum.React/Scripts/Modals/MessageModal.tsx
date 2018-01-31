@@ -81,13 +81,13 @@ export default class MessageModal extends React.Component<MessageModalProps, { s
                             className="btn btn-primary sf-close-button sf-yes-button"
                             onClick={() => this.handleButtonClicked("yes")}
                             name="yes">
-                            {BooleanEnum.niceName("True")}
+                            {BooleanEnum.niceToString("True")}
                         </button>
                         <button
                             className="btn btn-default sf-close-button sf-no-button"
                             onClick={() => this.handleButtonClicked("no")}
                             name="no">
-                            {BooleanEnum.niceName("False")}
+                            {BooleanEnum.niceToString("False")}
                         </button>
                     </div>);
             case "yes_no_cancel":
@@ -97,13 +97,13 @@ export default class MessageModal extends React.Component<MessageModalProps, { s
                             className="btn btn-primary sf-close-button sf-yes-button"
                             onClick={() => this.handleButtonClicked("yes")}
                             name="yes">
-                            {BooleanEnum.niceName("True")}
+                            {BooleanEnum.niceToString("True")}
                         </button>
                         <button
                             className="btn btn-default sf-close-button sf-no-button"
                             onClick={() => this.handleButtonClicked("no")}
                             name="no">
-                            {BooleanEnum.niceName("False")}
+                            {BooleanEnum.niceToString("False")}
                         </button>
                         <button
                             className="btn btn-default sf-close-button sf-cancel-button"

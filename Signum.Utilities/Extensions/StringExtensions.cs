@@ -18,6 +18,8 @@ namespace Signum.Utilities
             return !string.IsNullOrEmpty(str);
         }
 
+        static readonly Expression<Func<string, string, string>> DefaultTextExpression = (a, b) => ((a ?? "").Length > 0) ? a : b;
+        [ExpressionField("DefaultTextExpression")]
         public static string DefaultText(this string str, string defaultText)
         {
             if (str.HasText())
@@ -675,14 +677,14 @@ namespace Signum.Utilities
         public static string FirstUpper(this string str)
         {
             if (str.HasText() && char.IsLower(str[0]))
-                return char.ToUpper(str[0]) + str.Substring(1);
+                return char.ToUpperInvariant(str[0]) + str.Substring(1);
             return str;
         }
 
         public static string FirstLower(this string str)
         {
             if (str.HasText() && char.IsUpper(str[0]))
-                return char.ToLower(str[0]) + str.Substring(1);
+                return char.ToLowerInvariant(str[0]) + str.Substring(1);
             return str;
         }
 
@@ -761,7 +763,6 @@ namespace Signum.Utilities
 
             return "{0:#,###.00} {1}".FormatWith(valor, (useAbbreviations ? abbreviations : magnitudes)[i]);
         }
-
 
         public static string Combine(this string separator, params object[] elements)
         {

@@ -82,6 +82,9 @@ namespace Signum.Engine.Maps
                 field = Fields.Values.FirstOrDefault(f => f .Field is IColumn && ((IColumn)f.Field).PrimaryKey);
                 if (field == null)
                     return null;
+
+                if (field.Field is FieldReference fr)
+                    return new ColumnExpression(Signum.Entities.PrimaryKey.Type(fr.ReferenceTable.Type).Nullify(), alias, fr.Name);
             }
 
             return field.Field.GetExpression(alias, null, null);

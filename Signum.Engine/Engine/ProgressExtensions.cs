@@ -16,6 +16,24 @@ namespace Signum.Engine
     {
         public static StopOnExceptionDelegate StopOnException = null;
 
+        public static List<R> ProgressSelect<T, R>(this IEnumerable<T> collection, 
+            Func<T, R> selector,
+            Func<T, string> elementID = null,
+            LogWriter writer = null,
+            ParallelOptions parallelOptions = null)
+        {
+            List<R> result = new List<R>();
+
+            collection.ProgressForeach(
+                action: a => result.Add(selector(a)),
+                elementID: elementID,
+                transactional: false,
+                writer: writer,
+                parallelOptions: parallelOptions);
+
+            return result;
+        }
+
         /// <summary>
         /// Executes an action for each element in the collection transactionally and showing the progress in the Console
         /// </summary>

@@ -686,8 +686,9 @@ namespace Signum.Entities
             if (((IMListPrivate<T>)this).IsEqualTo(newList, orderMatters: true))
                 return false;
             
-            var added = newList.Select(a => a.Element).Except(innerList.Select(a => a.Element)).ToList();
-            var removed = innerList.Select(a => a.Element).Except(newList.Select(a => a.Element)).ToList();
+            //Even if the entities are Equals, we need to call SetParentEntity
+            var added = newList.Select(a => a.Element).ToList();
+            var removed = innerList.Select(a => a.Element).ToList(); 
 
             innerList.Clear();
             innerList.AddRange(newList);

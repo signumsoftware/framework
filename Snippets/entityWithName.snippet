@@ -38,8 +38,8 @@
 				<![CDATA[[Serializable, EntityKind(EntityKind.String, EntityData.Master)]
     public class $entityName$Entity: Entity
     {
-        [NotNullable, SqlDbType( Size = 100), UniqueIndex]
-        [StringLengthValidator(AllowNulls=false, Min = 3, Max = 100)]
+        [UniqueIndex]
+        [StringLengthValidator(AllowNulls=false, Max = 100)]
         public string $Name$ { get; set; }
         
         $end$

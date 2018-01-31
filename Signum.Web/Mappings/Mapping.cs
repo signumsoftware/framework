@@ -22,6 +22,7 @@ using Microsoft.SqlServer.Types;
 using Signum.Entities.Basics;
 using System.Drawing;
 using static Signum.Entities.UserAssets.SmartDateTimeFilterValueConverter;
+using Signum.Entities.UserAssets;
 
 namespace Signum.Web
 {
@@ -94,11 +95,10 @@ namespace Signum.Web
                         return dt.FromUserInterface();
                     else
                     {
-                        SmartDateTimeSpan sts;
-                        string error = SmartDateTimeSpan.TryParse(input, out sts);
-                        if (!error.HasText())
+                        var res = SmartDateTimeSpan.TryParse(input, allowSmart: true);
+                        if (res is Result<SmartDateTimeSpan>.Success s)
                         {
-                            dt = sts.ToDateTime();
+                            dt = s.Value.ToDateTime();
                             return dt.FromUserInterface();
 
                         }

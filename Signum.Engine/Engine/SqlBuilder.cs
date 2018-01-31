@@ -37,11 +37,12 @@ namespace Signum.Engine
         #region Create Tables
         public static SqlPreCommandSimple CreateTableSql(ITable t)
         {
-            var primaryKeyConstraint = "CONSTRAINT {0} PRIMARY KEY CLUSTERED ({1} ASC)".FormatWith(PrimaryClusteredIndex.GetPrimaryKeyName(t.Name), t.PrimaryKey.Name.SqlEscape());
+            var primaryKeyConstraint = t.PrimaryKey == null ? null : "CONSTRAINT {0} PRIMARY KEY CLUSTERED ({1} ASC)".FormatWith(PrimaryClusteredIndex.GetPrimaryKeyName(t.Name), t.PrimaryKey.Name.SqlEscape());
 
             return new SqlPreCommandSimple("CREATE TABLE {0}(\r\n{1}\r\n)".FormatWith(
-                t.Name, 
-                t.Columns.Values.Select(c => SqlBuilder.CreateColumn(c)).And(primaryKeyConstraint).ToString(",\r\n").Indent(2)));
+                t.Name,
+                t.Columns.Values.Select(c => SqlBuilder.CreateColumn(c)).And(primaryKeyConstraint).NotNull().ToString(",\r\n").Indent(2))
+            );
         }
 
         public static SqlPreCommand DropTable(ObjectName tableName)
@@ -129,15 +130,20 @@ namespace Signum.Engine
 
         public static string CreateColumn(IColumn c)
         {
-            string fullType = (c.SqlDbType == SqlDbType.Udt ? c.UserDefinedTypeName : c.SqlDbType.ToString().ToUpper()) + GetSizeScale(c.Size, c.Scale);
-            
+            string fullType = GetColumnType(c);
+
             return $" ".CombineIfNotEmpty(
                 c.Name.SqlEscape(),
                 fullType,
                 c.Identity ? "IDENTITY " : null,
                 c.Collation != null ? ("COLLATE " + c.Collation) : null,
                 c.Nullable ? "NULL" : "NOT NULL",
-                c.Default != null ? "DEFAULT " +  Quote(c.SqlDbType, c.Default) : null);
+                c.Default != null ? "DEFAULT " + Quote(c.SqlDbType, c.Default) : null);
+        }
+
+        public static string GetColumnType(IColumn c)
+        {
+            return (c.SqlDbType == SqlDbType.Udt ? c.UserDefinedTypeName : c.SqlDbType.ToString().ToUpper()) + GetSizeScale(c.Size, c.Scale);
         }
 
         static string Quote(SqlDbType type, string @default)

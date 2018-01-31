@@ -636,7 +636,7 @@ namespace Signum.Engine.Maps
         public string Name { get; set; }
         public bool Nullable { get; set; }
     
-        bool IColumn.PrimaryKey { get { return false; } }
+        public bool PrimaryKey { get; set; } //For View
         bool IColumn.Identity { get { return false; } }
         bool IColumn.IdentityBehaviour { get { return false; } }
         int? IColumn.Size { get { return null; } }

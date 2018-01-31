@@ -250,6 +250,12 @@ Lose changes?")]
         executed,
         [Description("Hide filters")]
         hideFilters,
+        [Description("Show filters")]
+        showFilters,
+        [Description("Group results")]
+        groupResults,
+        [Description("Ungroup results")]
+        ungroupResults,
         [Description("Loading...")]
         loading,
         [Description("No actions found")]
@@ -284,8 +290,7 @@ Lose changes?")]
         Selected,
         [Description("Select a token")]
         selectToken,
-        [Description("Show filters")]
-        showFilters,
+
         [Description("Find")]
         find,
         [Description("Remove")]

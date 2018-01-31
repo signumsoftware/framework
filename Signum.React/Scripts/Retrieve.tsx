@@ -6,19 +6,28 @@ import { Entity, Lite, is } from './Signum.Entities';
 
 interface RetrieveProps {
     lite?: Lite<Entity> | null;
-    children: (entity?: Entity) => React.ReactElement<any> | null | undefined;
+    children: (entity?: Entity | null) => React.ReactElement<any> | null | undefined | false;
 }
 
 interface RetrieveState {
-    entity?: Entity;
-}
+    //undefined => for not loaded yet
+    //null => lite is null or undefined
+    entity?: Entity | null; }
 
 export class Retrieve extends React.Component<RetrieveProps, RetrieveState> {
+
+    static create<T extends Entity>(lite: Lite<T> | null | undefined, render: (entity?: T | null) => React.ReactElement<any> | null | undefined | false): React.ReactElement<any> {
+        return (
+            <Retrieve lite={lite}>
+                {entity => render(entity as T | undefined)}
+            </Retrieve>
+        );
+    }
 
     constructor(props: RetrieveProps) {
         super(props);
         this.state = {
-            entity: undefined
+            entity: props.lite ? undefined : null
         };
     }
 
@@ -33,12 +42,14 @@ export class Retrieve extends React.Component<RetrieveProps, RetrieveState> {
 
     loadData(props: RetrieveProps) {
 
-        if (this.props.lite == null)
+        if (props.lite == null)
+            this.setState({ entity: null });
+        else {
             this.setState({ entity: undefined });
-        else
-            Navigator.API.fetchAndForget(this.props.lite)
+            Navigator.API.fetchAndForget(props.lite)
                 .then(e => this.setState({ entity: e }))
                 .done();
+        }
     }
 
     render() {

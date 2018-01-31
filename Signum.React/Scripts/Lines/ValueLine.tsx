@@ -212,8 +212,8 @@ function getOptionsItems(vl: ValueLine): OptionItem[]{
 
     if (vl.state.type!.name == "boolean")
         return ([
-            { label: BooleanEnum.niceName("False")!, value: false },
-            { label: BooleanEnum.niceName("True")!, value: true }
+            { label: BooleanEnum.niceToString("False")!, value: false },
+            { label: BooleanEnum.niceToString("True")!, value: true }
         ]);
 
     return Dic.getValues(ti.members).map(m => toOptionItem(m));
@@ -460,7 +460,7 @@ export class NumericTextBox extends React.Component<NumericTextBoxProps, { text?
     handleOnBlur = (e: React.SyntheticEvent<any>) => {
         const input = e.currentTarget as HTMLInputElement;
 
-        let value = input.value;
+        let value = ValueLine.autoFixString(input.value, false);
 
         if (this.props.format && this.props.format.endsWith("%"))
         {

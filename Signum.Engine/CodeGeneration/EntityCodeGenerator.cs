@@ -584,7 +584,7 @@ namespace Signum.Engine.CodeGeneration
 
             StringBuilder sb = new StringBuilder();
 
-            WriteAttributeTag(sb, GetFieldAttributes(table, col, relatedEntity));
+            WriteAttributeTag(sb, GetFieldAttributes(table, col, relatedEntity, false));
             WriteAttributeTag(sb, GetPropertyAttributes(table, col, relatedEntity));
             sb.AppendLine("public {0} {1} {{ get; {2}set; }}".FormatWith(type, fieldName.FirstUpper(), IsReadonly(table, col) ? "private" : null));
 
@@ -608,7 +608,7 @@ namespace Signum.Engine.CodeGeneration
         {
             List<string> attributes = new List<string>();
 
-            if (HasNotNullableAttribute(col, relatedEntity) && GetValueType(col) != typeof(string))
+            if (RequiresNotNullableAttribute(col, relatedEntity) && GetValueType(col) != typeof(string))
                 attributes.Add("NotNullValidator");
 
             string stringLengthValidator = GetStringLengthValidator(table, col, relatedEntity);
@@ -642,7 +642,7 @@ namespace Signum.Engine.CodeGeneration
             return 1;
         }
 
-        protected virtual bool HasNotNullableAttribute(DiffColumn col, string relatedEntity)
+        protected virtual bool RequiresNotNullableAttribute(DiffColumn col, string relatedEntity)
         {
             return !col.Nullable && (relatedEntity != null || GetValueType(col).IsClass);
         }
@@ -663,11 +663,11 @@ namespace Signum.Engine.CodeGeneration
             return name.FirstLower();
         }
 
-        protected virtual IEnumerable<string> GetFieldAttributes(DiffTable table, DiffColumn col, string relatedEntity)
+        protected virtual IEnumerable<string> GetFieldAttributes(DiffTable table, DiffColumn col, string relatedEntity, bool isMList)
         {
             List<string> attributes = new List<string>();
 
-            if (HasNotNullableAttribute(col, relatedEntity))
+            if (RequiresNotNullableAttribute(col, relatedEntity) && NotNullAttributeNecessary(table, col, isMList))
                 attributes.Add("NotNullable");
 
             if (col.ForeignKey == null)
@@ -685,6 +685,11 @@ namespace Signum.Engine.CodeGeneration
                 attributes.Add("UniqueIndex");
 
             return attributes;
+        }
+
+        protected virtual bool NotNullAttributeNecessary(DiffTable table, DiffColumn col, bool isMList)
+        {
+            return false; //NotNullValidator is enought
         }
 
         protected virtual bool RequiresColumnName(DiffTable table, DiffColumn col)
@@ -711,11 +716,20 @@ namespace Signum.Engine.CodeGeneration
         {
             Type type = GetValueType(col);
             List<string> parts = GetSqlDbTypeParts(col, type);
-
-            if (parts.Any())
+            
+            if (parts.Any() && SqlTypeAttributeNecessary(parts, table, col))
                 return "SqlDbType(" + parts.ToString(", ") + ")";
 
             return null;
+        }
+
+        protected virtual bool SqlTypeAttributeNecessary(List<string> parts, DiffTable table, DiffColumn col)
+        {
+            var part = parts.Only();
+            if (part != null && part.StartsWith("Size = ") && GetValueType(col) == typeof(string))
+                return false;
+
+            return true;
         }
 
         protected virtual List<string> GetSqlDbTypeParts(DiffColumn col, Type type)
@@ -725,7 +739,7 @@ namespace Signum.Engine.CodeGeneration
             if (pair.SqlDbType != col.SqlDbType)
                 parts.Add("SqlDbType = SqlDbType." + col.SqlDbType);
 
-            var defaultSize = CurrentSchema.Settings.GetSqlSize(null, pair.SqlDbType);
+            var defaultSize = CurrentSchema.Settings.GetSqlSize(null, null, pair.SqlDbType);
             if (defaultSize != null)
             {
                 if (!(defaultSize == col.Precission || defaultSize == col.Length / DiffColumn.BytesPerChar(col.SqlDbType) || defaultSize == int.MaxValue && col.Length == -1))
@@ -825,7 +839,6 @@ namespace Signum.Engine.CodeGeneration
             string propertyName = fieldName.FirstUpper();
             string typeName = GetEmbeddedTypeName(fieldName);
 
-            sb.AppendLine("[NotNullable]");
             sb.AppendLine("[NotNullValidator]");
             sb.AppendLine("public {0} {1} { get; set; }".FormatWith(typeName, fieldName.FirstUpper()));
 
@@ -851,7 +864,7 @@ namespace Signum.Engine.CodeGeneration
                 string relatedEntity = GetRelatedEntity(relatedTable, mListInfo.TrivialElementColumn);
                 type = GetFieldType(relatedTable, mListInfo.TrivialElementColumn, relatedEntity);
 
-                fieldAttributes = GetFieldAttributes(relatedTable, mListInfo.TrivialElementColumn, relatedEntity).ToList(); 
+                fieldAttributes = GetFieldAttributes(relatedTable, mListInfo.TrivialElementColumn, relatedEntity, isMList: true).ToList(); 
             }
 
             var preserveOrder = GetPreserveOrderAttribute(mListInfo);

@@ -272,6 +272,8 @@ namespace Signum.Engine.Maps
         {
             get { return optionsVariable.Value; }
         }
+
+        public bool IsTemporal => this.Name.StartsWith("#");
     }
 
     public struct ObjectNameOptions

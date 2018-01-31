@@ -72,8 +72,10 @@ namespace Signum.Engine.Basics
 			entity.StackTrace = stacktraces.DefaultText("- No stacktrace -");
 			entity.ThreadId = Thread.CurrentThread.ManagedThreadId;
 			entity.ApplicationName = Schema.Current.ApplicationName;
+            entity.HResult = ex.HResult;
 
-			entity.Environment = CurrentEnvironment;
+
+            entity.Environment = CurrentEnvironment;
 			try
 			{
 				entity.User = UserHolder.Current?.ToLite(); //Session special situations
@@ -152,8 +154,10 @@ namespace Signum.Engine.Basics
 
                 token.ThrowIfCancellationRequested();
 
+                var dateLimit = parameters.GetDateLimit(typeof(ExceptionEntity).ToTypeEntity());
+
                 Database.Query<ExceptionEntity>()
-                    .Where(a => !a.Referenced && a.CreationDate < parameters.DateLimit)
+                    .Where(a => !a.Referenced && a.CreationDate < dateLimit)
                     .UnsafeDeleteChunksLog(parameters, sb, token);
 
                 tr.Commit();

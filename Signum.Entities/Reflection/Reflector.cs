@@ -6,6 +6,7 @@ using System;
 using System.CodeDom.Compiler;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Globalization;
 using System.Linq;
 using System.Linq.Expressions;
@@ -48,7 +49,7 @@ namespace Signum.Entities.Reflection
 
         static bool DescriptionManager_ShouldLocalizeMemeber(MemberInfo arg)
         {
-            return !arg.HasAttribute<HiddenPropertyAttribute>();
+            return !arg.HasAttribute<HiddenPropertyAttribute>() || arg.HasAttribute<DescriptionAttribute>();
         }
 
         static ResetLazy<HashSet<Type>> EnumsInEntities = new ResetLazy<HashSet<Type>>(() =>
@@ -308,7 +309,7 @@ namespace Signum.Entities.Reflection
                 a => a.GetCustomAttributes<GeneratedCodeAttribute>().Any(gc => gc.Tool == "SignumTask"));
 
             if (!isProcessed)
-                throw new InvalidOperationException("Entity {0} has auto-property {1}, but you can not use auto-propertes if the assembly iy not processed by 'SignumTask'".FormatWith(fieldInfo.DeclaringType.Name, fieldInfo.FieldType.Name));
+                throw new InvalidOperationException("Entity {0} has auto-property {1}, but you can not use auto-propertes if the assembly is not processed by 'SignumTask'".FormatWith(fieldInfo.DeclaringType.Name, fieldInfo.FieldType.Name));
         }
 
         public static PropertyInfo FindPropertyInfo(FieldInfo fi)

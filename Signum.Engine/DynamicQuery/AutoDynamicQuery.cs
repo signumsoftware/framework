@@ -32,14 +32,7 @@ namespace Signum.Engine.DynamicQuery
 
         public override ResultTable ExecuteQuery(QueryRequest request)
         {
-            request.Columns.Insert(0, new _EntityColumn(EntityColumnFactory().BuildColumnDescription(), QueryName));
-
-            DQueryable<T> query = Query
-                .ToDQueryable(GetQueryDescription())
-                .SelectMany(request.Multiplications)
-                .Where(request.Filters)
-                .OrderBy(request.Orders)
-                .Select(request.Columns);
+            DQueryable<T> query = GetDQueryable(request);
 
             var result = query.TryPaginate(request.Pagination);
 
@@ -48,18 +41,63 @@ namespace Signum.Engine.DynamicQuery
 
         public override async Task<ResultTable> ExecuteQueryAsync(QueryRequest request, CancellationToken token)
         {
-            request.Columns.Insert(0, new _EntityColumn(EntityColumnFactory().BuildColumnDescription(), QueryName));
-
-            DQueryable<T> query = Query
-                .ToDQueryable(GetQueryDescription())
-                .SelectMany(request.Multiplications)
-                .Where(request.Filters)
-                .OrderBy(request.Orders)
-                .Select(request.Columns);
+            DQueryable<T> query = GetDQueryable(request);
 
             var result = await query.TryPaginateAsync(request.Pagination, token);
 
             return result.ToResultTable(request);
+        }
+
+        public override ResultTable ExecuteQueryGroup(QueryRequest request)
+        {
+            DQueryable<T> query = GetDQueryable(request);
+
+            var result = query.TryPaginate(request.Pagination);
+
+            return result.ToResultTable(request);
+        }
+
+        public override async Task<ResultTable> ExecuteQueryGroupAsync(QueryRequest request, CancellationToken token)
+        {
+            DQueryable<T> query = GetDQueryable(request);
+
+            var result = await query.TryPaginateAsync(request.Pagination, token);
+
+            return result.ToResultTable(request);
+        }
+
+        private DQueryable<T> GetDQueryable(QueryRequest request)
+        {
+            if (!request.GroupResults)
+            {
+                request.Columns.Insert(0, new _EntityColumn(EntityColumnFactory().BuildColumnDescription(), QueryName));
+
+                return Query
+                    .ToDQueryable(GetQueryDescription())
+                    .SelectMany(request.Multiplications())
+                    .Where(request.Filters)
+                    .OrderBy(request.Orders)
+                    .Select(request.Columns);
+            }
+            else
+            {
+                var simpleFilters = request.Filters.Where(f => !(f.Token is AggregateToken)).ToList();
+                var aggregateFilters = request.Filters.Where(f => f.Token is AggregateToken).ToList();
+
+                var keys = request.Columns.Select(t => t.Token).Where(t => !(t is AggregateToken)).ToHashSet();
+
+                var allAggregates = request.AllTokens().OfType<AggregateToken>().ToHashSet();
+
+                DQueryable<T> query = Query
+                    .ToDQueryable(GetQueryDescription())
+                    .SelectMany(request.Multiplications())
+                    .Where(simpleFilters)
+                    .GroupBy(keys, allAggregates)
+                    .Where(aggregateFilters)
+                    .OrderBy(request.Orders);
+
+                return query;
+            }
         }
 
         public override object ExecuteQueryValue(QueryValueRequest request)
@@ -114,48 +152,7 @@ namespace Signum.Engine.DynamicQuery
             return (Lite<Entity>)result;
         }
         
-        public override ResultTable ExecuteQueryGroup(QueryGroupRequest request)
-        {
-            DQueryable<T> query = GetDQueryable(request);
-
-            var values = query.Query.ToArray();
-
-            var cols = request.Columns
-               .Select(column => (column, Expression.Lambda(column.Token.BuildExpression(query.Context), query.Context.Parameter))).ToList();
-
-            return values.ToResultTable(cols, values.Length, new Pagination.All());
-        }
-        
-        public override async Task<ResultTable> ExecuteQueryGroupAsync(QueryGroupRequest request, CancellationToken token)
-        {
-            DQueryable<T> query = GetDQueryable(request);
-            
-            var values = await query.Query.ToArrayAsync(token);
-
-            var cols = request.Columns
-               .Select(column => (column, Expression.Lambda(column.Token.BuildExpression(query.Context), query.Context.Parameter))).ToList();
-
-            return values.ToResultTable(cols, values.Length, new Pagination.All());
-        }
-
-        private DQueryable<T> GetDQueryable(QueryGroupRequest request)
-        {
-            var simpleFilters = request.Filters.Where(f => !(f.Token is AggregateToken)).ToList();
-            var aggregateFilters = request.Filters.Where(f => f.Token is AggregateToken).ToList();
-
-            var keys = request.Columns.Select(t => t.Token).Where(t => !(t is AggregateToken)).ToHashSet();
-
-            var allAggregates = request.AllTokens().OfType<AggregateToken>().ToHashSet();
-
-            DQueryable<T> query = Query
-                .ToDQueryable(GetQueryDescription())
-                .SelectMany(request.Multiplications)
-                .Where(simpleFilters)
-                .GroupBy(keys, allAggregates)
-                .Where(aggregateFilters)
-                .OrderBy(request.Orders);
-            return query;
-        }
+       
 
 
         public override IQueryable<Lite<Entity>> GetEntities(QueryEntitiesRequest request)

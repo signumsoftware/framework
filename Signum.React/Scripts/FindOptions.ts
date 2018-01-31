@@ -24,6 +24,7 @@ export interface ModalFindOptions {
 
 export interface FindOptions {
     queryName: PseudoType | QueryKey;
+    groupResults?: boolean;
     parentColumn?: string;
     parentValue?: any;
 
@@ -36,11 +37,11 @@ export interface FindOptions {
 
 export interface FindOptionsParsed {
     queryKey: string;
+    groupResults: boolean;
     filterOptions: FilterOptionParsed[];
     orderOptions: OrderOptionParsed[];
     columnOptions: ColumnOptionParsed[];
     pagination: Pagination;
-   
 }
 
 
@@ -104,6 +105,7 @@ export interface QueryToken {
     niceTypeName: string;
     isGroupable: boolean;
     hasOrderAdapter?: boolean;
+    preferEquals?: boolean;
     filterType?: FilterType;
     fullKey: string;
     queryTokenType?: QueryTokenType;
@@ -156,6 +158,7 @@ export function toQueryToken(cd: ColumnDescription): QueryToken {
         filterType: cd.filterType,
         isGroupable: cd.isGroupable,
         hasOrderAdapter: cd.hasOrderAdapter,
+        preferEquals: cd.preferEquals,
         propertyRoute: cd.propertyRoute
     };
 }
@@ -185,6 +188,7 @@ export interface QueryEntitiesRequest {
 
 export interface QueryRequest {
     queryKey: string;
+    groupResults: boolean;
     filters: FilterRequest[];
     orders: OrderRequest[];
     columns: ColumnRequest[];
@@ -215,7 +219,7 @@ export interface ResultTable {
 
 
 export interface ResultRow {
-    entity: Lite<Entity>;
+    entity?: Lite<Entity>;
     columns: any[];
 }
 
@@ -263,6 +267,7 @@ export interface ColumnDescription {
     displayName: string;
     isGroupable: boolean;
     hasOrderAdapter?: boolean;
+    preferEquals?: boolean;
     propertyRoute?: string;
 }
 

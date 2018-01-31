@@ -132,6 +132,9 @@ export function toNumbroFormat(format: string | undefined) {
     if (f.startsWith("D"))
         return "0".repeat(parseInt(f.after("D") || "1"));
 
+    if (f.startsWith("F"))
+        return "0." + "0".repeat(parseInt(f.after("F") || "2"));
+
     if (f.startsWith("E"))
         return "0." + "0".repeat(parseInt(f.after("E") || "2"));
 
@@ -859,15 +862,19 @@ export class EnumType<T extends string> {
         return Dic.getKeys(this.typeInfo().members) as T[];
     }
 
+    isDefined(val: any): val is T {
+        return typeof val == "string" && this.typeInfo().members[val] != null
+    }
+
     value(val: T): T {
         return val;
     }
 
-    niceName(value?: T): string | undefined {
+    niceName(): string | undefined {
+        return this.typeInfo().niceName;
+    }
 
-        if (value == undefined)
-            return this.typeInfo().niceName;
-
+    niceToString(value: T): string {
         return this.typeInfo().members[value as string].niceName;
     }
 }

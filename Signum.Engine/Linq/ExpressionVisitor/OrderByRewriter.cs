@@ -73,14 +73,14 @@ namespace Signum.Engine.Linq
                     gatheredKeys = new List<ColumnExpression>();
             }
 
-            List<ColumnExpression> saveKeys = null;
-            if (gatheredKeys != null && (select.IsDistinct || select.GroupBy.HasItems()))
-                saveKeys = gatheredKeys.ToList();
+            List<ColumnExpression> savedKeys = null;
+            if (gatheredKeys != null && (select.IsDistinct || select.GroupBy.HasItems() || select.IsAllAggregates))
+                savedKeys = gatheredKeys.ToList();
 
             select = (SelectExpression)base.VisitSelect(select);
 
-            if (saveKeys != null)
-                gatheredKeys = saveKeys;
+            if (savedKeys != null)
+                gatheredKeys = savedKeys;
 
             List<ColumnDeclaration> newColumns = null;
 
@@ -108,6 +108,14 @@ namespace Signum.Engine.Linq
                         newColumns = cg.Columns.ToList();
 
                     gatheredKeys.AddRange(newKeys.Select(cd => new ColumnExpression(cd.Expression.Type, select.Alias, cd.Name)));
+                }
+            }
+
+            if (select.IsAllAggregates)
+            {
+                if (gatheredKeys != null)
+                {
+                    gatheredKeys.AddRange(select.Columns.Select(cd => new ColumnExpression(cd.Expression.Type, select.Alias, cd.Name)));
                 }
             }
 

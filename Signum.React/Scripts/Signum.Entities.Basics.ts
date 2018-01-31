@@ -16,10 +16,17 @@ export const DeleteLogParametersEmbedded = new Type<DeleteLogParametersEmbedded>
 export interface DeleteLogParametersEmbedded extends Entities.EmbeddedEntity {
     Type: "DeleteLogParametersEmbedded";
     deleteLogsWithMoreThan?: number;
-    dateLimit?: string;
+    typeOverrides: Entities.MList<DeleteLogsTypeOverridesEmbedded>;
     chunkSize?: number;
     maxChunks?: number;
     pauseTime?: number | null;
+}
+
+export const DeleteLogsTypeOverridesEmbedded = new Type<DeleteLogsTypeOverridesEmbedded>("DeleteLogsTypeOverridesEmbedded");
+export interface DeleteLogsTypeOverridesEmbedded extends Entities.EmbeddedEntity {
+    Type: "DeleteLogsTypeOverridesEmbedded";
+    type?: Entities.Lite<TypeEntity> | null;
+    deleteLogsWithMoreThan?: number;
 }
 
 export const ExceptionEntity = new Type<ExceptionEntity>("Exception");
@@ -48,6 +55,7 @@ export interface ExceptionEntity extends Entities.Entity {
     queryString?: string | null;
     session?: string | null;
     data?: string | null;
+    hResult?: number;
     referenced?: boolean;
 }
 

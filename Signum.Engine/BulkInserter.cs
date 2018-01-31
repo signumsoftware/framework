@@ -25,22 +25,25 @@ namespace Signum.Engine
             string message = null)
             where T : Entity
         {
-            var table = Schema.Current.Table(typeof(T));
+            using (HeavyProfiler.Log(nameof(BulkInsert), () => typeof(T).TypeName()))
+            {
+                var table = Schema.Current.Table(typeof(T));
 
-            if (!disableIdentity && table.IdentityBehaviour && table.TablesMList().Any())
-                throw new InvalidOperationException($@"Table {typeof(T)} contains MList but the entities have no IDs. Consider: 
+                if (!disableIdentity && table.IdentityBehaviour && table.TablesMList().Any())
+                    throw new InvalidOperationException($@"Table {typeof(T)} contains MList but the entities have no IDs. Consider: 
 * Using BulkInsertQueryIds, that queries the inserted rows and uses the IDs to insert the MList elements.
 * Set {nameof(disableIdentity)} = true, and set manually the Ids of the entities before inseting using {nameof(UnsafeEntityExtensions.SetId)}.
 * If you know what you doing, call ${nameof(BulkInsertTable)} manually (MList wont be saved)."
-);
+    );
 
-            var list = entities.ToList();
+                var list = entities.ToList();
 
-            var rowNum = BulkInsertTable(list, copyOptions, preSaving, validateFirst, disableIdentity, timeout, message);
+                var rowNum = BulkInsertTable(list, copyOptions, preSaving, validateFirst, disableIdentity, timeout, message);
 
-            BulkInsertMLists<T>(list, copyOptions, timeout, message);
+                BulkInsertMLists<T>(list, copyOptions, timeout, message);
 
-            return rowNum;
+                return rowNum;
+            }
         }
 
         /// <param name="keySelector">Unique key to retrieve ids</param>
@@ -55,27 +58,33 @@ namespace Signum.Engine
             string message = null)
             where T : Entity
         {
-            var t = Schema.Current.Table(typeof(T));
-
-            var list = entities.ToList();
-
-            if (isNewPredicate == null)
-                isNewPredicate = GetFilterAutomatic<T>(t);
-
-            var rowNum = BulkInsertTable<T>(list, copyOptions, preSaving, validateFirst, false, timeout, message);
-
-            var dictionary = Database.Query<T>().Where(isNewPredicate).Select(a => KVP.Create(keySelector.Evaluate(a), a.Id)).ToDictionaryEx();
-
-            var getKeyFunc = keySelector.Compile();
-
-            list.ForEach(e =>
+            using (HeavyProfiler.Log(nameof(BulkInsertQueryIds), () => typeof(T).TypeName()))
             {
-                e.SetId(dictionary.GetOrThrow(getKeyFunc(e)));
-            });
+                var t = Schema.Current.Table(typeof(T));
 
-            BulkInsertMLists(list, copyOptions, timeout, message);
+                var list = entities.ToList();
 
-            return rowNum;
+                if (isNewPredicate == null)
+                    isNewPredicate = GetFilterAutomatic<T>(t);
+
+                var rowNum = BulkInsertTable<T>(list, copyOptions, preSaving, validateFirst, false, timeout, message);
+
+                var dictionary = Database.Query<T>().Where(isNewPredicate).Select(a => KVP.Create(keySelector.Evaluate(a), a.Id)).ToDictionaryEx();
+
+                var getKeyFunc = keySelector.Compile();
+
+                list.ForEach(e =>
+                {                    
+                    e.SetId(dictionary.GetOrThrow(getKeyFunc(e)));
+                    e.SetIsNew(false);
+                });
+
+                BulkInsertMLists(list, copyOptions, timeout, message);
+
+                GraphExplorer.CleanModifications(GraphExplorer.FromRoots(list));
+
+                return rowNum;
+            }
         }
 
         static void BulkInsertMLists<T>(List<T> list, SqlBulkCopyOptions options, int? timeout, string message) where T : Entity
@@ -115,66 +124,70 @@ namespace Signum.Engine
             string message = null)
             where T : Entity
         {
-            if (message != null)
-                return SafeConsole.WaitRows(message == "auto" ? $"BulkInsering {entities.Count()} {typeof(T).TypeName()}" : message,
-                    () => BulkInsertTable(entities, copyOptions, preSaving, validateFirst, disableIdentity, timeout, message: null));
-
-            if (disableIdentity)
-                copyOptions |= SqlBulkCopyOptions.KeepIdentity;
-
-            if (copyOptions.HasFlag(SqlBulkCopyOptions.UseInternalTransaction))
-                throw new InvalidOperationException("BulkInsertDisableIdentity not compatible with UseInternalTransaction");
-
-            var list = entities.ToList();
-
-            if (preSaving)
+            using (HeavyProfiler.Log(nameof(BulkInsertTable), () => typeof(T).TypeName()))
             {
-                Schema schema = Schema.Current;
-                GraphExplorer.PreSaving(() => GraphExplorer.FromRoots(list), (Modifiable m, ref bool graphModified) =>
+
+                if (message != null)
+                    return SafeConsole.WaitRows(message == "auto" ? $"BulkInsering {entities.Count()} {typeof(T).TypeName()}" : message,
+                        () => BulkInsertTable(entities, copyOptions, preSaving, validateFirst, disableIdentity, timeout, message: null));
+
+                if (disableIdentity)
+                    copyOptions |= SqlBulkCopyOptions.KeepIdentity;
+
+                if (copyOptions.HasFlag(SqlBulkCopyOptions.UseInternalTransaction))
+                    throw new InvalidOperationException("BulkInsertDisableIdentity not compatible with UseInternalTransaction");
+
+                var list = entities.ToList();
+
+                if (preSaving)
                 {
-                    if (m is ModifiableEntity me)
-                        me.SetTemporalErrors(null);
+                    Schema schema = Schema.Current;
+                    GraphExplorer.PreSaving(() => GraphExplorer.FromRoots(list), (Modifiable m, ref bool graphModified) =>
+                    {
+                        if (m is ModifiableEntity me)
+                            me.SetTemporalErrors(null);
 
-                    m.PreSaving(ref graphModified);
+                        m.PreSaving(ref graphModified);
 
-                    if (m is Entity ident)
-                        schema.OnPreSaving(ident, ref graphModified);
-                });
-            }
+                        if (m is Entity ident)
+                            schema.OnPreSaving(ident, ref graphModified);
+                    });
+                }
 
-            if (validateFirst)
-            {
-                Validate<T>(list);
-            }
+                if (validateFirst)
+                {
+                    Validate<T>(list);
+                }
 
-            var t = Schema.Current.Table<T>();
-            bool disableIdentityBehaviour = copyOptions.HasFlag(SqlBulkCopyOptions.KeepIdentity);
-            bool oldIdentityBehaviour = t.IdentityBehaviour;
+                var t = Schema.Current.Table<T>();
+                bool disableIdentityBehaviour = copyOptions.HasFlag(SqlBulkCopyOptions.KeepIdentity);
+                bool oldIdentityBehaviour = t.IdentityBehaviour;
 
-            DataTable dt = new DataTable();
-            foreach (var c in disableIdentityBehaviour ? t.Columns.Values : t.Columns.Values.Where(c => !c.IdentityBehaviour))
-                dt.Columns.Add(new DataColumn(c.Name, c.Type.UnNullify()));
+                DataTable dt = new DataTable();
+                foreach (var c in disableIdentityBehaviour ? t.Columns.Values : t.Columns.Values.Where(c => !c.IdentityBehaviour))
+                    dt.Columns.Add(new DataColumn(c.Name, c.Type.UnNullify()));
 
-            if (disableIdentityBehaviour) t.IdentityBehaviour = false;
-            foreach (var e in entities)
-            {
-                if (!e.IsNew)
-                    throw new InvalidOperationException("Entites should be new");
-                t.SetToStrField(e);
-                dt.Rows.Add(t.BulkInsertDataRow(e));
-            }
-            if (disableIdentityBehaviour) t.IdentityBehaviour = oldIdentityBehaviour;
+                if (disableIdentityBehaviour) t.IdentityBehaviour = false;
+                foreach (var e in list)
+                {
+                    if (!e.IsNew)
+                        throw new InvalidOperationException("Entites should be new");
+                    t.SetToStrField(e);
+                    dt.Rows.Add(t.BulkInsertDataRow(e));
+                }
+                if (disableIdentityBehaviour) t.IdentityBehaviour = oldIdentityBehaviour;
 
-            using (Transaction tr = new Transaction())
-            {
-                Schema.Current.OnPreBulkInsert(typeof(T), inMListTable: false);
+                using (Transaction tr = new Transaction())
+                {
+                    Schema.Current.OnPreBulkInsert(typeof(T), inMListTable: false);
 
-                Executor.BulkCopy(dt, t.Name, copyOptions, timeout);
+                    Executor.BulkCopy(dt, t.Name, copyOptions, timeout);
 
-                foreach (var item in list)
-                    item.SetNotModified();
+                    foreach (var item in list)
+                        item.SetNotModified();
 
-                return tr.Commit(list.Count);
+                    return tr.Commit(list.Count);
+                }
             }
         }
 
@@ -182,10 +195,10 @@ namespace Signum.Engine
         {
             foreach (var e in entities)
             {
-                var ic = e.IntegrityCheck();
+                var ic = e.FullIntegrityCheck();
 
                 if (ic != null)
-                    throw new IntegrityCheckException(new Dictionary<Guid, IntegrityCheck> { { e.temporalId, ic } });
+                    throw new IntegrityCheckException(ic);
             }
         }
 
@@ -207,26 +220,29 @@ namespace Signum.Engine
             string message = null)
             where E : Entity
         {
-            try
+            using (HeavyProfiler.Log(nameof(BulkInsertMListTable), () => $"{mListProperty} ({typeof(E).TypeName()})"))
             {
-                var func = mListProperty.Compile();
+                try
+                {
+                    var func = mListProperty.Compile();
 
-                var mlistElements = (from e in entities
-                                     from mle in func(e).Select((iw, i) => new MListElement<E, V>
-                                     {
-                                         Order = i,
-                                         Element = iw,
-                                         Parent = e,
-                                     })
-                                     select mle).ToList();
+                    var mlistElements = (from e in entities
+                                         from mle in func(e).Select((iw, i) => new MListElement<E, V>
+                                         {
+                                             Order = i,
+                                             Element = iw,
+                                             Parent = e,
+                                         })
+                                         select mle).ToList();
 
-                return BulkInsertMListTable(mlistElements, mListProperty, copyOptions, timeout, message);
-            }
-            catch (InvalidOperationException e) when (e.Message.Contains("has no Id"))
-            {
-                throw new InvalidOperationException($"{nameof(BulkInsertMListTable)} requires that you set the Id of the entities manually using {nameof(UnsafeEntityExtensions.SetId)}");
+                    return BulkInsertMListTable(mlistElements, mListProperty, copyOptions, timeout, message);
+                }
+                catch (InvalidOperationException e) when (e.Message.Contains("has no Id"))
+                {
+                    throw new InvalidOperationException($"{nameof(BulkInsertMListTable)} requires that you set the Id of the entities manually using {nameof(UnsafeEntityExtensions.SetId)}");
 
-                throw;
+                    throw;
+                }
             }
         }
 
@@ -238,33 +254,76 @@ namespace Signum.Engine
             string message = null)
             where E : Entity
         {
-
-            if (message != null)
-                return SafeConsole.WaitRows(message == "auto" ? $"BulkInsering MList<{ typeof(V).TypeName()}> in { typeof(E).TypeName()}" : message,
-                    () => BulkInsertMListTable(mlistElements, mListProperty, copyOptions, timeout, message: null));
-
-            if (copyOptions.HasFlag(SqlBulkCopyOptions.UseInternalTransaction))
-                throw new InvalidOperationException("BulkInsertDisableIdentity not compatible with UseInternalTransaction");
-
-            DataTable dt = new DataTable();
-            var t = ((FieldMList)Schema.Current.Field(mListProperty)).TableMList;
-            foreach (var c in t.Columns.Values.Where(c => !c.IdentityBehaviour))
-                dt.Columns.Add(new DataColumn(c.Name, c.Type.UnNullify()));
-
-            var list = mlistElements.ToList();
-
-            foreach (var e in list)
+            using (HeavyProfiler.Log(nameof(BulkInsertMListTable), () => $"{mListProperty} ({typeof(MListElement<E, V>).TypeName()})"))
             {
-                dt.Rows.Add(t.BulkInsertDataRow(e.Parent, e.Element, e.Order));
+                if (message != null)
+                    return SafeConsole.WaitRows(message == "auto" ? $"BulkInsering MList<{ typeof(V).TypeName()}> in { typeof(E).TypeName()}" : message,
+                        () => BulkInsertMListTable(mlistElements, mListProperty, copyOptions, timeout, message: null));
+
+                if (copyOptions.HasFlag(SqlBulkCopyOptions.UseInternalTransaction))
+                    throw new InvalidOperationException("BulkInsertDisableIdentity not compatible with UseInternalTransaction");
+
+                DataTable dt = new DataTable();
+                var t = ((FieldMList)Schema.Current.Field(mListProperty)).TableMList;
+                foreach (var c in t.Columns.Values.Where(c => !c.IdentityBehaviour))
+                    dt.Columns.Add(new DataColumn(c.Name, c.Type.UnNullify()));
+
+                var list = mlistElements.ToList();
+
+                foreach (var e in list)
+                {
+                    dt.Rows.Add(t.BulkInsertDataRow(e.Parent, e.Element, e.Order));
+                }
+
+                using (Transaction tr = copyOptions.HasFlag(SqlBulkCopyOptions.UseInternalTransaction) ? null : new Transaction())
+                {
+                    Schema.Current.OnPreBulkInsert(typeof(E), inMListTable: true);
+
+                    Executor.BulkCopy(dt, t.Name, copyOptions, timeout);
+
+                    return tr.Commit(list.Count);
+                }
             }
+        }
 
-            using (Transaction tr = copyOptions.HasFlag(SqlBulkCopyOptions.UseInternalTransaction) ? null : new Transaction())
+        public static int BulkInsertView<T>(this IEnumerable<T> entities,
+          SqlBulkCopyOptions copyOptions = SqlBulkCopyOptions.Default,
+          int? timeout = null,
+          string message = null)
+          where T : IView
+        {
+            using (HeavyProfiler.Log(nameof(BulkInsertView), () => typeof(T).Name))
             {
-                Schema.Current.OnPreBulkInsert(typeof(E), inMListTable: true);
+                if (message != null)
+                    return SafeConsole.WaitRows(message == "auto" ? $"BulkInsering {entities.Count()} {typeof(T).TypeName()}" : message,
+                        () => BulkInsertView(entities, copyOptions, timeout, message: null));
 
-                Executor.BulkCopy(dt, t.Name, copyOptions, timeout);
+                if (copyOptions.HasFlag(SqlBulkCopyOptions.UseInternalTransaction))
+                    throw new InvalidOperationException("BulkInsertDisableIdentity not compatible with UseInternalTransaction");
 
-                return tr.Commit(list.Count);
+                var t = Schema.Current.View<T>();
+
+                var list = entities.ToList();
+
+                bool disableIdentityBehaviour = copyOptions.HasFlag(SqlBulkCopyOptions.KeepIdentity);
+
+                DataTable dt = new DataTable();
+                foreach (var c in t.Columns.Values)
+                    dt.Columns.Add(new DataColumn(c.Name, c.Type.UnNullify()));
+
+                foreach (var e in entities)
+                {
+                    dt.Rows.Add(t.BulkInsertDataRow(e));
+                }
+
+                using (Transaction tr = new Transaction())
+                {
+                    Schema.Current.OnPreBulkInsert(typeof(T), inMListTable: false);
+
+                    Executor.BulkCopy(dt, t.Name, copyOptions, timeout);
+
+                    return tr.Commit(list.Count);
+                }
             }
         }
     }

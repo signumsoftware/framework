@@ -231,7 +231,7 @@ Array.prototype.max = function (this: any[], selector?: (element: any, index: nu
 Array.prototype.min = function (this: any[], selector?: (element: any, index: number, array: any[]) => any) {
 
     if (selector)
-        return Math.max.apply(undefined, this.map(selector));
+        return Math.min.apply(undefined, this.map(selector));
 
     return Math.min.apply(undefined, this);
 };
@@ -855,6 +855,13 @@ export function ifError<E, T>(ErrorClass: { new (...args: any[]): E }, onError: 
         throw error;
     };
 }
+
+export function bytesToSize(bytes: number): string {
+    var sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
+    if (bytes == 0) return '0 Bytes';
+    var unit = parseInt(Math.floor(Math.log(bytes) / Math.log(1024)) as any);
+    return Math.round((bytes / Math.pow(1024, unit)) * 100) / 100 + ' ' + sizes[unit];
+};
 
 export module DomUtils {
     export function matches(elem: HTMLElement, selector: string): boolean {

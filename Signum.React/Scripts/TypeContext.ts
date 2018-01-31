@@ -149,7 +149,7 @@ export class TypeContext<T> extends StyleContext {
     propertyRoute: PropertyRoute;
     binding: IBinding<T>;
     prefix: string;
-
+    
     get value() {
         if (this.binding == undefined)
             return undefined as any; //React Dev Tools
@@ -160,7 +160,6 @@ export class TypeContext<T> extends StyleContext {
     set value(val: T) {
         this.binding.setValue(val);
     }
-
 
     get error() {
         if (this.binding == undefined)
@@ -316,7 +315,7 @@ export class TypeContext<T> extends StyleContext {
 export interface ButtonsContext {
     pack: EntityPack<ModifiableEntity>;
     frame: EntityFrame;
-    isOperationVisible?: (eoc: EntityOperationContext<Entity>) => boolean;
+    isOperationVisible?: (eoc: EntityOperationContext<any /*Entity*/>) => boolean;
     tag?: string;
 }
 
@@ -325,7 +324,7 @@ export interface IRenderButtons {
 }
 
 export interface IOperationVisible {
-    isOperationVisible(eoc: EntityOperationContext<Entity>): boolean;
+    isOperationVisible(eoc: EntityOperationContext<any /*Entity*/>): boolean;
 }
 
 export interface IHasChanges {
@@ -335,10 +334,11 @@ export interface IHasChanges {
 export interface EntityFrame {
     frameComponent: React.Component<any, any>;
     entityComponent: React.Component<any, any>;
-    onReload: (pack: EntityPack<ModifiableEntity>) => void;
+    onReload: (pack?: EntityPack<ModifiableEntity>) => void;
     setError: (modelState: ModelState, initialPrefix?: string) => void;
     revalidate: () => void;
     onClose: (ok?: boolean) => void;
+    refreshCount: number;
 }
 
 

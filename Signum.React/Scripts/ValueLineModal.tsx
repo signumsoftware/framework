@@ -8,6 +8,7 @@ import { FormGroupStyle, TypeContext } from './TypeContext'
 import { ValueLineType, ValueLine } from './Lines/ValueLine'
 import { ValueLineProps } from "./Lines";
 import { ValidationMessage } from "./Signum.Entities";
+import { MemberInfo } from './Reflection';
 
 
 interface ValueLineModalProps extends React.Props<ValueLineModal>, IModalProps {
@@ -45,16 +46,16 @@ export default class ValueLineModal extends React.Component<ValueLineModalProps,
     
         const ctx = new TypeContext(undefined, undefined, undefined as any, Binding.create(this.state, s => s.value));
 
-        const { title, message, initialValue, ...valueLineProps } = this.props.options;
+        const { title, message, initialValue, ...props } = this.props.options;
         var vlp: ValueLineProps = {
             ctx: ctx,
-            formatText: valueLineProps.formatText,
-            unitText: valueLineProps.unitText,
-            labelText: valueLineProps.labelText,
-            type: valueLineProps.type,
-            valueLineType: valueLineProps.valueLineType,
-            valueHtmlAttributes: valueLineProps.valueHtmlAttributes,
-            initiallyFocused: valueLineProps.initiallyFocused,
+            formatText: props.formatText !== undefined ? props.formatText : props.member && props.member.format,
+            unitText: props.unitText !== undefined ? props.unitText : props.member && props.member.unit,
+            labelText: props.labelText !== undefined ? props.labelText : props.member && props.member.niceName,
+            type: props.type || props.member && props.member.type,
+            valueLineType: props.valueLineType || props.member && (props.member.isMultiline ? "TextArea" : undefined),
+            valueHtmlAttributes: props.valueHtmlAttributes,
+            initiallyFocused: props.initiallyFocused,
         };
 
         const disabled = this.props.options.allowEmptyValue == false ? (ctx.value as string).trim() ? false : true : undefined;
@@ -73,7 +74,7 @@ export default class ValueLineModal extends React.Component<ValueLineModalProps,
                     {message === undefined ? SelectorMessage.PleaseChooseAValueToContinue.niceToString() : message}
                 </p>
                 <ValueLine ctx={ctx}
-                    formGroupStyle={valueLineProps.labelText ? "Basic" : "SrOnly"} {...vlp} onChange={valueOnChanged} />
+                    formGroupStyle={props.labelText ? "Basic" : "SrOnly"} {...vlp} onChange={valueOnChanged} />
             </Modal.Body>
             <Modal.Footer>
                 <button disabled={disabled} className="btn btn-primary sf-entity-button sf-ok-button" onClick={this.handleOkClick}>
@@ -92,7 +93,8 @@ export default class ValueLineModal extends React.Component<ValueLineModalProps,
 }
 
 export interface ValueLineModalOptions {
-    type: TypeReference;
+    member?: MemberInfo;
+    type?: TypeReference;
     valueLineType?: ValueLineType;
     initialValue?: any;
     title?: React.ReactChild;

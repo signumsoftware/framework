@@ -1042,6 +1042,8 @@ namespace Signum.Entities
         TheLengthOf0HasToBeLesserOrEqualTo1,
         [Description("The number of {0} is being multiplied by {1}")]
         TheNumberOf0IsBeingMultipliedBy1,
+        [Description("The rows are being grouped by {0}")]
+        TheRowsAreBeingGroupedBy0,
         [Description("The number of elements of {0} has to be {1} {2}")]
         TheNumberOfElementsOf0HasToBe12,
         [Description("Type {0} not allowed")]

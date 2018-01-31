@@ -23,6 +23,7 @@ interface FilterBuilderProps {
     lastToken?: QueryToken;
     onFiltersChanged?: (filters: FilterOptionParsed[]) => void;
     onHeightChanged?: () => void;
+    readOnly?: boolean;
     title?: React.ReactNode;
 }
 
@@ -68,32 +69,34 @@ export default class FilterBuilder extends React.Component<FilterBuilderProps>{
             <fieldset className="form-xs">
                 {this.props.title && <legend>{this.props.title}</legend>}
                 <div className="sf-filters-list table-responsive" style={{ overflowX: "visible" }}>
-                    <table className="table table-condensed sf-filter-table">
+                    <table className="table table-condensed">
                         <thead>
                             <tr>
                                 <th style={{ minWidth: "24px" }}></th>
-                                <th className="sf-filter-field-header">{SearchMessage.Field.niceToString()}</th>
+                                <th>{SearchMessage.Field.niceToString()}</th>
                                 <th>{SearchMessage.Operation.niceToString()}</th>
                                 <th>{SearchMessage.Value.niceToString()}</th>
                             </tr>
                         </thead>
                         <tbody>
-                            {this.props.filterOptions.map((f, i) => <FilterComponent filter={f} key={i}
+                            {this.props.filterOptions.map((f, i) => <FilterComponent filter={f} readOnly={Boolean(this.props.readOnly)} key={i}
                                 onDeleteFilter={this.handlerDeleteFilter}
                                 subTokenOptions={this.props.subTokensOptions}
                                 queryDescription={this.props.queryDescription}
                                 onTokenChanged={this.props.onTokenChanged}
                                 onFilterChanged={this.handleFilterChanged}
                             />)}
-                            <tr >
-                                <td colSpan={4}>
-                                    <a title={SearchMessage.AddFilter.niceToString()}
-                                        className="sf-line-button sf-create"
-                                        onClick={this.handlerNewFilter}>
-                                        <span className="glyphicon glyphicon-plus sf-create sf-create-label" />{SearchMessage.AddFilter.niceToString()}
-                                    </a>
-                                </td>
-                            </tr>
+                            {!this.props.readOnly &&
+                                <tr >
+                                    <td colSpan={4}>
+                                        <a title={SearchMessage.AddFilter.niceToString()}
+                                            className="sf-line-button sf-create"
+                                            onClick={this.handlerNewFilter}>
+                                            <span className="glyphicon glyphicon-plus sf-create sf-create-label" />{SearchMessage.AddFilter.niceToString()}
+                                        </a>
+                                    </td>
+                                </tr>
+                            }
                         </tbody>
                     </table>
                 </div>
@@ -105,6 +108,7 @@ export default class FilterBuilder extends React.Component<FilterBuilderProps>{
 
 export interface FilterComponentProps extends React.Props<FilterComponent> {
     filter: FilterOptionParsed;
+    readOnly: boolean;
     onDeleteFilter: (fo: FilterOptionParsed) => void;
     queryDescription: QueryDescription;
     subTokenOptions: SubTokensOptions;
@@ -129,8 +133,8 @@ export class FilterComponent extends React.Component<FilterComponentProps>{
         }
         else {
 
-            if (!areEqual(f.token, newToken, a => a.filterType)) {
-                f.operation = newToken.filterType && filterOperations[newToken.filterType].first();
+            if (!areEqual(f.token, newToken, a => a.filterType) || !areEqual(f.token, newToken, a => a.preferEquals)) {
+                f.operation = newToken.preferEquals ? "EqualTo": newToken.filterType && filterOperations[newToken.filterType].first();
                 f.value = f.operation && isList(f.operation) ? [undefined] : undefined;
             }
             else if (f.token && f.token.filterType == "DateTime" && newToken.filterType == "DateTime" && newToken.format && f.token.format != newToken.format) {
@@ -172,10 +176,12 @@ export class FilterComponent extends React.Component<FilterComponentProps>{
     render() {
         const f = this.props.filter;
 
+        const readOnly = f.frozen || this.props.readOnly;
+
         return (
             <tr>
                 <td>
-                    {!f.frozen &&
+                    {!readOnly &&
                         <a title={SearchMessage.DeleteFilter.niceToString()}
                             className="sf-line-button sf-remove"
                             onClick={this.handleDeleteFilter}>
@@ -188,12 +194,12 @@ export class FilterComponent extends React.Component<FilterComponentProps>{
                         onTokenChange={this.handleTokenChanged}
                         queryKey={this.props.queryDescription.queryKey}
                         subTokenOptions={this.props.subTokenOptions}
-                        readOnly={!!f.frozen} /></td>
+                        readOnly={readOnly} /></td>
                 <td className="sf-filter-operation">
                     {f.token && f.token.filterType && f.operation &&
-                        <select className="form-control" value={f.operation as any} disabled={f.frozen} onChange={this.handleChangeOperation}>
+                        <select className="form-control" value={f.operation as any} disabled={readOnly} onChange={this.handleChangeOperation}>
                             {f.token.filterType && filterOperations[f.token.filterType!]
-                                .map((ft, i) => <option key={i} value={ft as any}>{FilterOperation.niceName(ft)}</option>)}
+                                .map((ft, i) => <option key={i} value={ft as any}>{FilterOperation.niceToString(ft)}</option>)}
                         </select>}
                 </td>
 
@@ -207,10 +213,12 @@ export class FilterComponent extends React.Component<FilterComponentProps>{
     renderValue() {
         const f = this.props.filter;
 
-        if (isList(f.operation!))
-            return <MultiValue values={f.value} onRenderItem={this.handleCreateAppropiateControl} frozen={!!this.props.filter.frozen} onChange={this.handleValueChange} />;
+        const readOnly = this.props.readOnly || f.frozen;
 
-        const ctx = new TypeContext<any>(undefined, { formGroupStyle: "None", readOnly: f.frozen, formGroupSize: "ExtraSmall" }, undefined as any, Binding.create(f, a => a.value));
+        if (isList(f.operation!))
+            return <MultiValue values={f.value} onRenderItem={this.handleCreateAppropiateControl} readOnly={readOnly} onChange={this.handleValueChange} />;
+
+        const ctx = new TypeContext<any>(undefined, { formGroupStyle: "None", readOnly: readOnly, formGroupSize: "ExtraSmall" }, undefined as any, Binding.create(f, a => a.value));
 
         return this.handleCreateAppropiateControl(ctx);
     }
@@ -247,7 +255,7 @@ export class FilterComponent extends React.Component<FilterComponentProps>{
 export interface MultiValueProps {
     values: any[],
     onRenderItem: (ctx: TypeContext<any>) => React.ReactElement<any>;
-    frozen: boolean;
+    readOnly: boolean;
     onChange: () => void;
 }
 
@@ -275,7 +283,7 @@ export class MultiValue extends React.Component<MultiValueProps> {
                         this.props.values.map((v, i) =>
                             <tr key={i}>
                                 <td>
-                                    {!this.props.frozen &&
+                                    {!this.props.readOnly &&
                                         <a title={SearchMessage.DeleteFilter.niceToString()}
                                             className="sf-line-button sf-remove"
                                             onClick={() => this.handleDeleteValue(i)}>
@@ -288,7 +296,7 @@ export class MultiValue extends React.Component<MultiValueProps> {
                                             {
                                                 formGroupStyle: "None",
                                                 formGroupSize: "ExtraSmall",
-                                                readOnly: this.props.frozen
+                                                readOnly: this.props.readOnly
                                             }, undefined as any, new Binding<any>(this.props.values, i)))
                                     }
                                 </td>
@@ -296,7 +304,7 @@ export class MultiValue extends React.Component<MultiValueProps> {
                     }
                     <tr >
                         <td colSpan={4}>
-                            {!this.props.frozen &&
+                            {!this.props.readOnly &&
                                 <a title={SearchMessage.AddValue.niceToString()}
                                     className="sf-line-button sf-create"
                                     onClick={this.handleAddValue}>

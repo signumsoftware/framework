@@ -7,6 +7,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
+using System.Collections.Concurrent;
 
 namespace Signum.TSGenerator
 {
@@ -85,32 +86,30 @@ namespace Signum.TSGenerator
                 CurrentAssembly = Path.GetFileNameWithoutExtension(projectFile).Replace(".React", ".Entities"),
                 AssemblyReferences = (from r in referenceList.Split(';')
                                       where r.Contains(".Entities")
-                                      let reactDirectory = FindReactDirectory(r)
+                                      let reactDirectory = ReactDirectoryCache.GetOrAdd(r, FindReactDirectory)
                                       select new AssemblyReference
                                       {
                                           AssemblyName = Path.GetFileNameWithoutExtension(r),
                                           AssemblyFullPath = r,
                                           ReactDirectory = reactDirectory,
-                                          AllTypescriptFiles = new DirectoryInfo(reactDirectory).EnumerateFiles("*.ts", SearchOption.AllDirectories)
-                                          .Concat(new DirectoryInfo(reactDirectory).EnumerateFiles("*.t4s", SearchOption.AllDirectories))
-                                          .Select(a => a.FullName)
-                                          .Where(fn => !fn.Contains(@"\obj\") && !fn.Contains(@"\bin\")) //Makes problem when deploying
-                                          .ToList(),
+                                          AllTypescriptFiles = AllFilesCache.GetOrAdd(reactDirectory, GetAllTypescriptFiles),
                                       }).ToDictionary(a => a.AssemblyName)
             };
 
             return EntityDeclarationGenerator.Process(options);
         }
 
-        private static string ToWindows(string nodeRelative)
+        ConcurrentDictionary<string, List<string>> AllFilesCache = new ConcurrentDictionary<string, List<string>>();
+        public static List<string> GetAllTypescriptFiles(string reactDirectory)
         {
-            var relative = nodeRelative;
-            if (nodeRelative.StartsWith("./"))
-                nodeRelative = nodeRelative.Substring(2);
-
-            return nodeRelative.Replace("/", @"\");
+            return new DirectoryInfo(reactDirectory).EnumerateFiles("*.ts", SearchOption.AllDirectories)
+                .Concat(new DirectoryInfo(reactDirectory).EnumerateFiles("*.t4s", SearchOption.AllDirectories))
+                .Select(a => a.FullName)
+                .Where(fn => !fn.Contains(@"\obj\") && !fn.Contains(@"\bin\")) //Makes problem when deploying
+                .ToList();
         }
 
+        ConcurrentDictionary<string, string> ReactDirectoryCache = new ConcurrentDictionary<string, string>();
         private string FindReactDirectory(string absoluteFilePath)
         {
             var prefix = absoluteFilePath;

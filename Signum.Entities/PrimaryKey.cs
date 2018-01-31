@@ -41,11 +41,19 @@ namespace Signum.Entities
             PrimaryKeyType.ImportDefinitions(dic);
         }
 
+        public readonly string VariableName; //Used for Sync scenarios
         public readonly IComparable Object;
 
         public PrimaryKey(IComparable obj)
         {
             this.Object = obj ?? throw new ArgumentNullException("obj");
+            this.VariableName = null;
+        }
+
+        public PrimaryKey(IComparable obj, string variableName)
+        {
+            this.Object = obj ?? throw new ArgumentNullException("obj");
+            this.VariableName = variableName;
         }
 
         public override string ToString()
@@ -244,6 +252,7 @@ namespace Signum.Entities
         private PrimaryKey(SerializationInfo info, StreamingContext ctxt)
         {
             this.Object = null;
+            this.VariableName = null;
             foreach (SerializationEntry item in info)
             {
                 switch (item.Name)

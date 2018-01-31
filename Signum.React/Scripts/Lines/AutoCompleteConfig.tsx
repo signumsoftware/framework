@@ -101,7 +101,7 @@ export class FindOptionsAutocompleteConfig implements AutocompleteConfig<Lite<En
             return Promise.resolve(this.parsedFilters);
 
         return Finder.getQueryDescription(this.findOptions.queryName)
-            .then(qd => Finder.parseFilterOptions(this.findOptions.filterOptions || [], qd))
+            .then(qd => Finder.parseFilterOptions(this.findOptions.filterOptions || [], false, qd))
             .then(filters => this.parsedFilters = filters);
     }
 
@@ -111,7 +111,7 @@ export class FindOptionsAutocompleteConfig implements AutocompleteConfig<Lite<En
             return Promise.resolve(this.parsedOrders);
 
         return Finder.getQueryDescription(this.findOptions.queryName)
-            .then(qd => Finder.parseOrderOptions(this.findOptions.orderOptions || [], qd))
+            .then(qd => Finder.parseOrderOptions(this.findOptions.orderOptions || [], false, qd))
             .then(orders => this.parsedOrders = orders);
     }
 

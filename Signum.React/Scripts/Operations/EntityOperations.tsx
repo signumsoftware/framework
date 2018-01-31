@@ -119,10 +119,10 @@ function getWithClose(eoc: EntityOperationContext<Entity>) {
 }
 
 interface OperationButtonProps extends React.HTMLProps<any> {
-    eoc: EntityOperationContext<Entity>;
+    eoc: EntityOperationContext<any /*Entity*/>;
     group?: EntityOperationGroup;
     canExecute?: string | null;
-    onOperationClick?: (eoc: EntityOperationContext<Entity>) => void;
+    onOperationClick?: (eoc: EntityOperationContext<any /*Entity*/>) => void;
 }
 
 export class OperationButton extends React.Component<OperationButtonProps> {

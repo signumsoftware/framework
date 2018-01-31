@@ -16,8 +16,8 @@ import { ViewPromise } from "../Navigator";
 
 export interface RenderEntityProps {
     ctx: TypeContext<ModifiableEntity | Lite<Entity> | undefined | null>;
-    getComponent?: (ctx: TypeContext<ModifiableEntity>) => React.ReactElement<any>;
-    getViewPromise?: (e: ModifiableEntity) => undefined | string | Navigator.ViewPromise<ModifiableEntity>;
+    getComponent?: (ctx: TypeContext<any /*T*/>) => React.ReactElement<any>;
+    getViewPromise?: (e: any /*T*/) => undefined | string | Navigator.ViewPromise<any>;
 }
 
 export interface RenderEntityState {
@@ -159,6 +159,7 @@ export class RenderEntity extends React.Component<RenderEntityProps, RenderEntit
             onClose: () => { throw new Error("Not implemented Exception"); },
             onReload: pack => { throw new Error("Not implemented Exception"); },
             setError: (modelState, initialPrefix) => { throw new Error("Not implemented Exception"); },
+            refreshCount: 0,
         }; 
 
         const newCtx = new TypeContext<ModifiableEntity>(ctx, { frame }, pr, new ReadonlyBinding(entity, ""));

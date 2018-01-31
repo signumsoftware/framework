@@ -32,6 +32,7 @@ namespace Signum.Engine.Linq
         SqlFunction,
         SqlTableValuedFunction,
         SqlConstant,
+        SqlVariable,
         SqlEnum,
         SqlCast,
         Case,
@@ -428,6 +429,8 @@ namespace Signum.Engine.Linq
             }
         }
 
+        public bool IsAllAggregates  => Columns.Any() && Columns.All(a => a.Expression is AggregateExpression);
+
         public override string ToString()
         {
             return "SELECT {0}{1}\r\n{2}\r\nFROM {3}\r\n{4}{5}{6}{7} AS {8}".FormatWith(
@@ -708,6 +711,27 @@ namespace Signum.Engine.Linq
         protected override Expression Accept(DbExpressionVisitor visitor)
         {
             return visitor.VisitSqlConstant(this);
+        }
+    }
+
+    internal class SqlVariableExpression : DbExpression
+    {
+        public readonly string VariableName;
+        
+        public SqlVariableExpression(string variableName, Type type)
+            : base(DbExpressionType.SqlConstant, type)
+        {
+            this.VariableName = variableName;
+        }
+
+        public override string ToString()
+        {
+            return VariableName;
+        }
+
+        protected override Expression Accept(DbExpressionVisitor visitor)
+        {
+            return visitor.VisitSqlVariable(this);
         }
     }
 

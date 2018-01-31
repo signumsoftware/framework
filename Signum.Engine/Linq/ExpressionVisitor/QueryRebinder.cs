@@ -166,6 +166,9 @@ namespace Signum.Engine.Linq
             Expression top = this.Visit(select.Top);
             Expression where = this.Visit(select.Where);
             ReadOnlyCollection<OrderExpression> orderBy = Visit(select.OrderBy, VisitOrderBy);
+            if (orderBy.HasItems())
+                orderBy = RemoveDuplicates(orderBy);
+
             ReadOnlyCollection<Expression> groupBy = Visit(select.GroupBy, Visit);
             ReadOnlyCollection<ColumnDeclaration> columns = Visit(select.Columns, VisitColumnDeclaration); ;
 
@@ -182,6 +185,26 @@ namespace Signum.Engine.Linq
                 return new SelectExpression(select.Alias, select.IsDistinct, top, columns, from, where, orderBy, groupBy, select.SelectOptions);
 
             return select;
+        }
+
+        protected internal override Expression VisitRowNumber(RowNumberExpression rowNumber)
+        {
+            var orderBys = RemoveDuplicates(Visit(rowNumber.OrderBy, VisitOrderBy));
+            if (orderBys != rowNumber.OrderBy)
+                return new RowNumberExpression(orderBys);
+            return rowNumber;
+        }
+
+        private static ReadOnlyCollection<OrderExpression> RemoveDuplicates(ReadOnlyCollection<OrderExpression> orderBy)
+        {
+            List<OrderExpression> result = new List<OrderExpression>();
+            HashSet<Expression> used = new HashSet<Expression>();
+            foreach (var ord in orderBy)
+            {
+                if (used.Add(ord.Expression))
+                    result.Add(ord);
+            }
+            return result.AsReadOnly();
         }
 
         private ReadOnlyCollection<ColumnDeclaration> AnswerAndExpand(ReadOnlyCollection<ColumnDeclaration> columns, Alias currentAlias, Dictionary<ColumnExpression, Expression> askedColumns)
