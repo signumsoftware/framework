@@ -33,9 +33,12 @@ export default class UserChart extends React.Component<{ ctx: TypeContext<UserCh
                 <EntityLine ctx={ctx.subCtx(e => e.entityType) } onChange={() => this.forceUpdate() }/>
                 {
                     entity.entityType &&
-                    <p className="messageEntity col-sm-offset-2">
-                        {UserQueryMessage.Use0ToFilterCurrentEntity.niceToString(CurrentEntityKey) }
-                    </p>
+                    <div>
+                        <ValueLine ctx={ctx.subCtx(e => e.hideQuickLink) } />
+                        <p className="messageEntity col-sm-offset-2">
+                            {UserQueryMessage.Use0ToFilterCurrentEntity.niceToString(CurrentEntityKey) }
+                        </p>
+                    </div>
                 }
                 <div className="form-xs">
                     <div className="repeater-inline form-inline sf-filters-list ">
