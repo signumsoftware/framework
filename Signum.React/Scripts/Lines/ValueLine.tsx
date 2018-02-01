@@ -502,7 +502,7 @@ ValueLine.renderers["DateTime" as ValueLineType] = (vl) => {
 
     const handleDatePickerOnChange = (date?: Date, str?: string) => {
 
-        const m = moment(date);
+        const m = showTime ? moment(date) : moment(date).startOf("day");
         vl.setValue(m.isValid() ? m.format() : null);
     };
 
