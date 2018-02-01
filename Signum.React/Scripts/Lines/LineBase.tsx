@@ -97,7 +97,7 @@ export abstract class LineBase<P extends LineBaseProps, S extends LineBaseProps>
         const state = { ctx: ctx.subCtx(so), type: (type || ctx.propertyRoute.typeReference() ) } as LineBaseProps as S;
 
         this.calculateDefaultState(state);
-        runTasks(this, state);
+        runTasks(this as any as LineBase<LineBaseProps, LineBaseProps>, state);
 
         this.overrideProps(state, otherProps as S);
         return state;

@@ -6,7 +6,7 @@ import "./Lines.css"
 
 export interface FormControlReadonlyProps extends React.Props<FormControlReadonly> {
     ctx: StyleContext;
-    htmlAttributes?: React.HTMLAttributes<HTMLParagraphElement>;
+    htmlAttributes?: React.HTMLAttributes<any>;
     className?: string
 }
 
