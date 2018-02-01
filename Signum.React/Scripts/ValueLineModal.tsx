@@ -106,7 +106,7 @@ export interface ValueLineModalOptions {
     initiallyFocused?: boolean;
     valueHtmlAttributes?: React.HTMLAttributes<any>;
     allowEmptyValue?: boolean;
-    modalSize?: Sizes;
+    modalSize?: string;
 }
 
 
