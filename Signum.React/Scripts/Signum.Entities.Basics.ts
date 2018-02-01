@@ -27,6 +27,7 @@ export interface DeleteLogsTypeOverridesEmbedded extends Entities.EmbeddedEntity
     Type: "DeleteLogsTypeOverridesEmbedded";
     type?: Entities.Lite<TypeEntity> | null;
     deleteLogsWithMoreThan?: number;
+    cleanLogsWithMoreThan?: number | null;
 }
 
 export const ExceptionEntity = new Type<ExceptionEntity>("Exception");

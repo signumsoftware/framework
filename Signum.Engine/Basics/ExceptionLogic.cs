@@ -186,5 +186,15 @@ namespace Signum.Engine.Basics
                 pauseMilliseconds: parameters.PauseTime,
                 cancellationToken: cancellationToken));
         }
-	}
+
+        public static void ExecuteChunksLog<T>(this IUpdateable<T> sources, DeleteLogParametersEmbedded parameters, StringBuilder sb, CancellationToken cancellationToken)
+          where T : Entity
+        {
+            WriteRows(sb, "Deleting " + typeof(T).Name, () => sources.ExecuteChunks(
+                parameters.ChunkSize,
+                parameters.MaxChunks,
+                pauseMilliseconds: parameters.PauseTime,
+                cancellationToken: cancellationToken));
+        }
+    }
 }

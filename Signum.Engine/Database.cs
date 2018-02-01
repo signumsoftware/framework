@@ -1396,7 +1396,7 @@ namespace Signum.Engine
             }
         }
 
-        public static int ExecuteChunks(this IUpdateable update, int chunkSize = 10000, int maxQueries = int.MaxValue)
+        public static int ExecuteChunks(this IUpdateable update, int chunkSize = 10000, int maxQueries = int.MaxValue, int? pauseMilliseconds = null, CancellationToken? cancellationToken = null)
         {
             int total = 0;
             for (int i = 0; i < maxQueries; i++)
@@ -1405,6 +1405,12 @@ namespace Signum.Engine
                 total += num;
                 if (num < chunkSize)
                     break;
+
+                if (cancellationToken.HasValue)
+                    cancellationToken.Value.ThrowIfCancellationRequested();
+
+                if (pauseMilliseconds.HasValue)
+                    Thread.Sleep(pauseMilliseconds.Value);
             }
             return total;
         }

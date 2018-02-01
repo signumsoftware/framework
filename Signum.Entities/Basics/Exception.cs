@@ -145,6 +145,16 @@ namespace Signum.Entities.Basics
             return moreThan == 0 ? TimeZoneManager.Now.TrimToHours() : TimeZoneManager.Now.Date.AddDays(-moreThan);
         }
 
+        public DateTime? GetDateLimitCleanup(TypeEntity type)
+        {
+            var moreThan = TypeOverrides.SingleOrDefaultEx(a => a.Type.RefersTo(type))?.CleanLogsWithMoreThan;
+
+            if (moreThan == null)
+                return null;
+
+            return moreThan.Value == 0 ? TimeZoneManager.Now.TrimToHours() : TimeZoneManager.Now.Date.AddDays(-moreThan.Value);
+        }
+
         public int ChunkSize { get; set; } = 1000;
 
         public int MaxChunks { get; set; } = 20;
@@ -162,5 +172,7 @@ namespace Signum.Entities.Basics
         [Unit("Days"), NumberIsValidator(ComparisonType.GreaterThanOrEqualTo, 0)]
         public int DeleteLogsWithMoreThan { get; set; } = 30 * 6;
 
+        [Unit("Days"), NumberIsValidator(ComparisonType.GreaterThanOrEqualTo, 0)]
+        public int? CleanLogsWithMoreThan { get; set; } = 30 * 6;
     }
 }
