@@ -66,7 +66,7 @@ namespace Signum.Entities.Tree
         [StringLengthValidator(AllowNulls = false, Min = 1, Max = 255)]
         public string Name { get; set; }
 
-        [StringLengthValidator(AllowNulls = true, Min = 1, Max = int.MaxValue)] //Set by BL
+        [StringLengthValidator(AllowNulls = false, Min = 1, Max = int.MaxValue, DisabledInModelBinder = true)]
         public string FullName { get; private set; }
 
         public void SetFullName(string newFullName)

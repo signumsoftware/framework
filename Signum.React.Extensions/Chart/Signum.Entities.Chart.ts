@@ -174,6 +174,7 @@ export interface UserChartEntity extends Entities.Entity, UserAssets.IUserAssetE
     Type: "UserChart";
     query: Basics.QueryEntity;
     entityType: Entities.Lite<Basics.TypeEntity> | null;
+    hideQuickLink: boolean;
     owner: Entities.Lite<Entities.Entity> | null;
     displayName: string;
     chartScript: ChartScriptEntity;
