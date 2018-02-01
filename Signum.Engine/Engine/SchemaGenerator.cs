@@ -52,6 +52,7 @@ namespace Signum.Engine
             if (!Connector.Current.AllowsSetSnapshotIsolation)
                 return null;
 
+
             var list = Schema.Current.DatabaseNames().Select(a => a?.ToString()).ToList();
 
             if (list.Contains(null))
@@ -60,17 +61,23 @@ namespace Signum.Engine
                 list.Add(Connector.Current.DatabaseName());
             }
 
-            var cmd = list.Select(a =>
-                SqlPreCommand.Combine(Spacing.Simple,
-                //DisconnectUsers(a.name, "SPID" + i) : null,
-                SqlBuilder.SetSingleUser(a),
-                SqlBuilder.SetSnapshotIsolation(a, true),
-                SqlBuilder.MakeSnapshotIsolationDefault(a, true),
-                SqlBuilder.SetMultiUser(a))                              
+            var cmd = list
+                .Where(db => !SnapshotIsolationEnabled(db))
+                .Select(a => SqlPreCommand.Combine(Spacing.Simple,
+                    SqlBuilder.SetSingleUser(a),
+                    SqlBuilder.SetSnapshotIsolation(a, true),
+                    SqlBuilder.MakeSnapshotIsolationDefault(a, true),
+                    SqlBuilder.SetMultiUser(a))                              
                 ).Combine(Spacing.Double);
 
             return cmd;
         }
-        
+
+        private static bool SnapshotIsolationEnabled(string dbName)
+        {
+            //SQL Server Replication makes it hard to do ALTER DATABASE statments, so we are conservative even if Generate should not have Synchronize behaviour
+            var result = Database.View<SysDatabases>().Where(s => s.name == dbName).Select(a => a.is_read_committed_snapshot_on && a.snapshot_isolation_state).SingleOrDefaultEx();
+            return result;
+        }
     }
 }

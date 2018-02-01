@@ -446,7 +446,7 @@ Consider the following options:
         #region ConstructFromMany
         public static Entity ServiceConstructFromMany(IEnumerable<Lite<IEntity>> lites, Type type, OperationSymbol operationSymbol, params object[] args)
         {
-            var onlyType = type ?? lites.Select(a => a.EntityType).Distinct().Only();
+            var onlyType = lites.Select(a => a.EntityType).Distinct().Only();
 
             return (Entity)Find<IConstructorFromManyOperation>(onlyType ?? type, operationSymbol).Construct(lites, args);
         }
@@ -487,7 +487,7 @@ Consider the following options:
 
         public static IOperation TryFindOperation(Type type, OperationSymbol operationSymbol)
         {
-            return operations.TryGetValue(type)?.TryGetC(operationSymbol);
+            return operations.TryGetValue(type.CleanType())?.TryGetC(operationSymbol);
         }
 
         public static Graph<T>.Construct FindConstruct<T>(ConstructSymbol<T>.Simple symbol) 

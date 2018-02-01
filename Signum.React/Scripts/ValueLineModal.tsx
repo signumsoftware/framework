@@ -62,7 +62,7 @@ export default class ValueLineModal extends React.Component<ValueLineModalProps,
         const valueOnChanged = this.props.options.allowEmptyValue == false ? () => this.forceUpdate() : undefined;
 
         return (
-            <Modal size="lg" isOpen={this.state.show} onClosed={this.handleOnClosed} toggle={this.handleCancelClicked}>
+            <Modal size={this.props.options.modalSize || "lg"} isOpen={this.state.show} onClosed={this.handleOnClosed} toggle={this.handleCancelClicked}>
                 <ModalHeader toggle={this.handleCancelClicked}>
                 <h4 className="modal-title">
                     {title === undefined ? SelectorMessage.ChooseAValue.niceToString() : title}
@@ -106,6 +106,7 @@ export interface ValueLineModalOptions {
     initiallyFocused?: boolean;
     valueHtmlAttributes?: React.HTMLAttributes<any>;
     allowEmptyValue?: boolean;
+    modalSize?: Sizes;
 }
 
 
