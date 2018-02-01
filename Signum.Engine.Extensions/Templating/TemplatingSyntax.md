@@ -201,4 +201,4 @@ But you can also use a `@declare` token to *only* create an alias.
 
 In WordTemplates use crazy colors (like green or magenta) for tokens that should not be rendered (@if, @declare, @foreach) as a poor man syntax hightlight. 
 
-The template will be easier to understand and the errors easier to sport in the generated report.  
+The template will be easier to understand and the errors easier to spot in the generated report.  
