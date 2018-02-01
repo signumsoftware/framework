@@ -27,7 +27,7 @@ export default class SearchModal extends React.Component<SearchModalProps, { sho
     }
 
     selectedRows: ResultRow[] = [];
-    okPressed: boolean;
+    okPressed: boolean = false;
 
     handleSelectionChanged = (selected: ResultRow[]) => {
         this.selectedRows = selected;
@@ -55,7 +55,7 @@ export default class SearchModal extends React.Component<SearchModalProps, { sho
         this.setState({ show: false });
     }
 
-    searchControl: SearchControl;
+    searchControl?: SearchControl;
 
     render() {
 
@@ -74,7 +74,7 @@ export default class SearchModal extends React.Component<SearchModalProps, { sho
                         </div>}
                     <h4>
                         <span className="sf-entity-title"> {this.props.title}</span>&nbsp;
-                        <a className="sf-popup-fullscreen pointer" onMouseUp={(e) => this.searchControl.handleFullScreenClick(e)}>
+                        <a className="sf-popup-fullscreen pointer" onMouseUp={(e) => this.searchControl && this.searchControl.handleFullScreenClick(e)}>
                             <span className="glyphicon glyphicon-new-window"></span>
                         </a>
                     </h4>
