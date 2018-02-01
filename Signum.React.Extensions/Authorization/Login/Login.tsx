@@ -84,7 +84,7 @@ export default class Login extends React.Component<{}, { modelState?: ModelState
                                 <label className="sr-only" htmlFor="password">Password</label>
                                 <div className="input-group mb-2 mr-sm-2 mb-sm-0">
                                     <div className="input-group-addon" style={{ width: "2.6rem" }}><i className="fa fa-key"></i></div>
-                                    <input ref={r => this.password = r} type="password" name="password" className="form-control" id="password" placeholder="Password" required />
+                                    <input ref={r => this.password = r!} type="password" name="password" className="form-control" id="password" placeholder="Password" required />
                                 </div>
                             </div>
                         </div>
@@ -100,7 +100,7 @@ export default class Login extends React.Component<{}, { modelState?: ModelState
                             <div className="col-md-6" style={{ paddingTop: ".35rem" }}>
                                 <div className="form-check mb-2 mr-sm-2 mb-sm-0">
                                     <label>
-                                        <input ref={r => this.rememberMe = r} name="remember" type="checkbox" /> {AuthMessage.RememberMe.niceToString()}
+                                        <input ref={r => this.rememberMe = r!} name="remember" type="checkbox" /> {AuthMessage.RememberMe.niceToString()}
                                     </label>
                                 </div>
                             </div>

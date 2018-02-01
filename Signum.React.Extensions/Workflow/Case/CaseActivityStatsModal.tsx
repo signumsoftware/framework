@@ -59,7 +59,7 @@ export default class CaseActivityStatsModal extends React.Component<CaseActivity
                                 {
                                     caseActivityStats.map(a =>
                                             <Tab key={a.CaseActivity.id!.toString()} eventKey={a.CaseActivity.id!}
-                                                title={a.DoneDate == null ? CaseActivityMessage.Pending.niceToString() : <span>{a.DoneBy.toStr} {DoneType.niceToString(a.DoneType)} <mark>({moment(a.DoneDate).fromNow()})</mark></span> as any}>
+                                                title={a.DoneDate == null ? CaseActivityMessage.Pending.niceToString() : <span>{a.DoneBy.toStr} {DoneType.niceToString(a.DoneType!)} <mark>({moment(a.DoneDate).fromNow()})</mark></span> as any}>
                                             <CaseActivityStatsComponent stats={a} caseEntity={this.props.case} />
                                         </Tab>)
                                 }
