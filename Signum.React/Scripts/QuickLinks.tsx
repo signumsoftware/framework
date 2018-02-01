@@ -1,5 +1,5 @@
 ﻿import * as React from 'react'
-import { UncontrolledDropdown, DropdownItem, DropdownMenu } from 'reactstrap'
+import { UncontrolledDropdown, DropdownItem, DropdownMenu, DropdownToggle } from 'reactstrap'
 import { TypeContext, StyleContext, StyleOptions, FormGroupStyle } from './TypeContext'
 import { PropertyRouteType, MemberInfo, getTypeInfo, TypeInfo, getQueryNiceName, getQueryKey, PseudoType, getTypeName, Type } from './Reflection'
 import { classes, Dic } from './Globals'
@@ -141,23 +141,21 @@ export class QuickLinkWidget extends React.Component<QuickLinkWidgetProps, { lin
         if (links != undefined && links.length == 0)
             return null;
 
-        const a = (
-            <a
-                className={classes("badge", "sf-widgets-active", "sf-quicklinks")}
-                title={QuickLinkMessage.Quicklinks.niceToString()}
-                role="button"
-                href="#"
-                data-toggle="dropdown"
-                onClick={e => e.preventDefault()} >
-                {links && <span className="fa fa-star"></span>}
-                {links ? "\u00A0" + links.length : "…"}
-            </a >
-        );
-
         return (
             <UncontrolledDropdown id="quickLinksWidget">
-                <QuickLinkToggle bsRole="toggle" links={links} />
-                <DropdownMenu>
+                <DropdownToggle tag="span" data-toggle="dropdown">
+                    <a
+                        className={classes("badge badge-secondary badge-pill", "sf-widgets-active", "sf-quicklinks")}
+                        title={QuickLinkMessage.Quicklinks.niceToString()}
+                        role="button"
+                        href="#"
+                        data-toggle="dropdown"
+                        onClick={e => e.preventDefault()} >
+                        {links && <span className="fa fa-star"></span>}
+                        {links ? "\u00A0" + links.length : "…"}
+                    </a >
+                </DropdownToggle>
+                <DropdownMenu right={true}>
                     {!links ? [] : links.orderBy(a => a.order).map((a, i) => React.cloneElement(a.toDropDownItem(), { key: i }))}
                 </DropdownMenu>
             </UncontrolledDropdown>
@@ -166,29 +164,6 @@ export class QuickLinkWidget extends React.Component<QuickLinkWidgetProps, { lin
     }
 }
 
-class QuickLinkToggle extends React.Component<{ bsRole: string, onClick?: (e: React.MouseEvent<any>) => void, links: any[] | undefined }>{
-
-    handleOnClick = (e: React.MouseEvent<any>) => {
-        e.preventDefault();
-
-        this.props.onClick!(e);
-    }
-
-    render() {
-        var links = this.props.links;
-
-        return (
-            <a
-                className={classes("badge", "sf-widgets-active", "sf-quicklinks")}
-                title={QuickLinkMessage.Quicklinks.niceToString()}
-                role="button"
-                onClick={this.handleOnClick} >
-                {links && <span className="fa fa-star"></span>}
-                {links ? "\u00A0" + links.length : "…"}
-            </a >
-        );
-    }
-}
 
 export interface QuickLinkOptions {
     isVisible?: boolean;
