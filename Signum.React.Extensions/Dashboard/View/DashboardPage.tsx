@@ -75,18 +75,21 @@ export default class DashboardPage extends React.Component<DashboardPageProps, D
         return (
             <div>
                 {entityKey &&
-                    <div style={{ float: "right", textAlign: "right" }}>
-                        {!entity ? <h3>{JavascriptMessage.loading.niceToString()}</h3> :
-                            <h3>
-                                {Navigator.isNavigable({ entity: entity, canExecute: {} } as EntityPack<Entity>) ?
-                                    <Link className="sf-entity-title" to={Navigator.navigateRoute(entity)}>{getToString(entity)}</Link> :
-                                    <span className="sf-entity-title">{getToString(entity)}</span>
-                                }
-                                <br />
-                                <small className="sf-type-nice-name">{Navigator.getTypeTitle(entity, undefined)}</small>
-                            </h3>
-                        }
-                    </div>}
+                    <div className="row">
+                        <div style={{ float: "right", textAlign: "right" }}>
+                            {!entity ? <h3>{JavascriptMessage.loading.niceToString()}</h3> :
+                                <h3>
+                                    {Navigator.isNavigable({ entity: entity, canExecute: {} } as EntityPack<Entity>) ?
+                                        <Link className="sf-entity-title" to={Navigator.navigateRoute(entity)}>{getToString(entity)}</Link> :
+                                        <span className="sf-entity-title">{getToString(entity)}</span>
+                                    }
+                                    <br />
+                                    <small className="sf-type-nice-name">{Navigator.getTypeTitle(entity, undefined)}</small>
+                                </h3>
+                            }
+                        </div>
+                    </div>
+                }
 
                 {!dashboard ? <h2>{JavascriptMessage.loading.niceToString()}</h2> :
                     <div className="sf-show-hover">
