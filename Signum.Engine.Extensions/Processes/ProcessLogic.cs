@@ -167,9 +167,12 @@ namespace Signum.Engine.Processes
         {
             void Remove(ProcessState processState)
             {
-                var dateLimit = parameters.GetDateLimit(typeof(ProcessEntity).ToTypeEntity());
+                var dateLimit = parameters.GetDateLimitDelete(typeof(ProcessEntity).ToTypeEntity());
 
-                var query = Database.Query<ProcessEntity>().Where(p => p.State == processState && p.CreationDate < dateLimit);
+                if (dateLimit == null)
+                    return;
+
+                var query = Database.Query<ProcessEntity>().Where(p => p.State == processState && p.CreationDate < dateLimit.Value);
 
                 query.SelectMany(a => a.ExceptionLines()).UnsafeDeleteChunksLog(parameters, sb, token);
 
