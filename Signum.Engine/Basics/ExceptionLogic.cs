@@ -154,11 +154,14 @@ namespace Signum.Engine.Basics
 
                 token.ThrowIfCancellationRequested();
 
-                var dateLimit = parameters.GetDateLimit(typeof(ExceptionEntity).ToTypeEntity());
+                var dateLimit = parameters.GetDateLimitDelete(typeof(ExceptionEntity).ToTypeEntity());
 
-                Database.Query<ExceptionEntity>()
-                    .Where(a => !a.Referenced && a.CreationDate < dateLimit)
-                    .UnsafeDeleteChunksLog(parameters, sb, token);
+                if (dateLimit != null)
+                {
+                    Database.Query<ExceptionEntity>()
+                        .Where(a => !a.Referenced && a.CreationDate < dateLimit)
+                        .UnsafeDeleteChunksLog(parameters, sb, token);
+                }
 
                 tr.Commit();
             }
