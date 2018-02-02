@@ -531,8 +531,6 @@ namespace Signum.Engine.MachineLearning
                 {
                     FromStates = { PredictorState.Training },
                     ToStates = { PredictorState.Training, PredictorState.Draft },
-                    AllowsNew = true,
-                    Lite = false,
                     Execute = (e, _) =>
                     {
                         if (Trainings.TryGetValue(e.ToLite(), out var state))
@@ -552,8 +550,6 @@ namespace Signum.Engine.MachineLearning
                 {
                     FromStates = { PredictorState.Training },
                     ToStates = { PredictorState.Training },
-                    AllowsNew = true,
-                    Lite = false,
                     Execute = (e, _) =>
                     {
                         if (Trainings.TryGetValue(e.ToLite(), out var state))
@@ -572,8 +568,6 @@ namespace Signum.Engine.MachineLearning
                     CanExecute = p => PredictorLogic.Publications.Values.Any(a => object.Equals(a.QueryName, p.MainQuery.Query.ToQueryName())) ? null : PredictorMessage.NoPublicationsForQuery0Registered.NiceToString(p.MainQuery),
                     FromStates = { PredictorState.Trained },
                     ToStates = { PredictorState.Trained },
-                    AllowsNew = true,
-                    Lite = false,
                     Execute = (e, arg) =>
                     {
                         var publication = arg.GetArg<PredictorPublicationSymbol>();

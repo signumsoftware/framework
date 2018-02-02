@@ -355,7 +355,7 @@ namespace Signum.Entities.Dashboard
         [StringLengthValidator(AllowNulls = false, Max = 200)]
         public string Label { get; set; }
 
-        [URLValidator(absolute: true, aspNetSiteRelative: true), StringLengthValidator(AllowNulls = false, Max = 200)]
+        [URLValidator(absolute: true, aspNetSiteRelative: true), StringLengthValidator(AllowNulls = false, Max = int.MaxValue)]
         public string Link { get; set; }
 
         public LinkElementEmbedded Clone()
