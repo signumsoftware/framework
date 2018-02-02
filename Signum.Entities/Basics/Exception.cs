@@ -170,7 +170,7 @@ namespace Signum.Entities.Basics
         public Lite<TypeEntity> Type { get; set; }
 
         [Unit("Days"), NumberIsValidator(ComparisonType.GreaterThanOrEqualTo, 0)]
-        public int DeleteLogsWithMoreThan { get; set; } = 30 * 6;
+        public int? DeleteLogsWithMoreThan { get; set; } = 30 * 6;
 
         [Unit("Days"), NumberIsValidator(ComparisonType.GreaterThanOrEqualTo, 0)]
         public int? CleanLogsWithMoreThan { get; set; } = 30 * 6;
