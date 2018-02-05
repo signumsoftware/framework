@@ -125,9 +125,12 @@ namespace Signum.Engine.Operations
 
         public static void ExceptionLogic_DeleteLogs(DeleteLogParametersEmbedded parameters, StringBuilder sb, CancellationToken token)
         {
-            var dateLimit = parameters.GetDateLimit(typeof(OperationLogEntity).ToTypeEntity());
+            var dateLimit = parameters.GetDateLimitDelete(typeof(OperationLogEntity).ToTypeEntity());
 
-            Database.Query<OperationLogEntity>().Where(o => o.Start < dateLimit).UnsafeDeleteChunksLog(parameters, sb, token);
+            if (dateLimit == null)
+                return;
+
+            Database.Query<OperationLogEntity>().Where(o => o.Start < dateLimit.Value).UnsafeDeleteChunksLog(parameters, sb, token);
         }
 
         static void OperationLogic_Initializing()

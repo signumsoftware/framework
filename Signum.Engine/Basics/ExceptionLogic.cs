@@ -154,11 +154,14 @@ namespace Signum.Engine.Basics
 
                 token.ThrowIfCancellationRequested();
 
-                var dateLimit = parameters.GetDateLimit(typeof(ExceptionEntity).ToTypeEntity());
+                var dateLimit = parameters.GetDateLimitDelete(typeof(ExceptionEntity).ToTypeEntity());
 
-                Database.Query<ExceptionEntity>()
-                    .Where(a => !a.Referenced && a.CreationDate < dateLimit)
-                    .UnsafeDeleteChunksLog(parameters, sb, token);
+                if (dateLimit != null)
+                {
+                    Database.Query<ExceptionEntity>()
+                        .Where(a => !a.Referenced && a.CreationDate < dateLimit)
+                        .UnsafeDeleteChunksLog(parameters, sb, token);
+                }
 
                 tr.Commit();
             }
@@ -186,5 +189,15 @@ namespace Signum.Engine.Basics
                 pauseMilliseconds: parameters.PauseTime,
                 cancellationToken: cancellationToken));
         }
-	}
+
+        public static void ExecuteChunksLog<T>(this IUpdateable<T> sources, DeleteLogParametersEmbedded parameters, StringBuilder sb, CancellationToken cancellationToken)
+          where T : Entity
+        {
+            WriteRows(sb, "Updating " + typeof(T).Name, () => sources.ExecuteChunks(
+                parameters.ChunkSize,
+                parameters.MaxChunks,
+                pauseMilliseconds: parameters.PauseTime,
+                cancellationToken: cancellationToken));
+        }
+    }
 }
