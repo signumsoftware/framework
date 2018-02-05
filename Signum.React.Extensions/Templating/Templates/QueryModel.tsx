@@ -20,7 +20,7 @@ interface QueryModelComponentProps {
 export default class QueryModelComponent extends React.Component<QueryModelComponentProps> {
     
     handleOnSearch = () => {
-        const qr = this.searchControl.searchControlLoaded.getQueryRequest();
+        const qr = this.searchControl.searchControlLoaded!.getQueryRequest();
         const model = this.props.ctx.value;
         model.filters = qr.filters;
         model.orders = qr.orders;
@@ -28,7 +28,7 @@ export default class QueryModelComponent extends React.Component<QueryModelCompo
         model.modified = true;
     }
 
-    searchControl: SearchControl;
+    searchControl!: SearchControl;
     render() {
         const ctx = this.props.ctx;
         return (

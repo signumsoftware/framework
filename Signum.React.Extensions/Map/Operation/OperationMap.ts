@@ -60,13 +60,13 @@ export class OperationMapD3 {
     selectedNode: ForceNode | undefined;
     link: d3.Selection<SVGPathElement, Transition, any, any>;
 
-    statesGroup: d3.Selection<SVGGElement, MapState, any, any>;
-    nodeStates: d3.Selection<SVGRectElement, MapState, any, any>;
-    labelStates: d3.Selection<SVGTextElement, MapState, any, any>;
+    statesGroup!: d3.Selection<SVGGElement, MapState, any, any>;
+    nodeStates!: d3.Selection<SVGRectElement, MapState, any, any>;
+    labelStates!: d3.Selection<SVGTextElement, MapState, any, any>;
 
-    operationsGroup: d3.Selection<SVGGElement, MapOperation, any, any>;
-    nodeOperations: d3.Selection<SVGRectElement, MapOperation, any, any>;
-    labelOperations: d3.Selection<SVGTextElement, MapOperation, any, any>;
+    operationsGroup!: d3.Selection<SVGGElement, MapOperation, any, any>;
+    nodeOperations!: d3.Selection<SVGRectElement, MapOperation, any, any>;
+    labelOperations!: d3.Selection<SVGTextElement, MapOperation, any, any>;
 
     constructor(
         public svgElement: SVGElement,

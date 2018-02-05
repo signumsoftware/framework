@@ -30,7 +30,7 @@ interface JavascriptCodeMirrorProps {
 
 export default class JavascriptCodeMirror extends React.Component<JavascriptCodeMirrorProps> {
     
-    codeMirrorComponent: CodeMirrorComponent;
+    codeMirrorComponent!: CodeMirrorComponent;
 
     render() {
         const options = {

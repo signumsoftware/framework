@@ -38,9 +38,9 @@ export default class ChangePassword extends React.Component<{}, { modelState?: M
             .done();
     }
 
-    oldPassword: HTMLInputElement;
-    newPassword: HTMLInputElement;
-    newPassword2: HTMLInputElement;
+    oldPassword!: HTMLInputElement;
+    newPassword!: HTMLInputElement;
+    newPassword2!: HTMLInputElement;
 
 
     error(field: string) {

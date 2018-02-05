@@ -60,7 +60,7 @@ export class DynamicViewTree extends React.Component<DynamicViewTreeProps, Dnami
         });
     }
 
-    treeContainer: HTMLElement;
+    treeContainer!: HTMLElement;
 
     render() {
         return (
