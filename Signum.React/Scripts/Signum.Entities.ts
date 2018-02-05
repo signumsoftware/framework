@@ -235,6 +235,8 @@ export module CalendarMessage {
 export module ConnectionMessage {
     export const AConnectionWithTheServerIsNecessaryToContinue = new MessageKey("ConnectionMessage", "AConnectionWithTheServerIsNecessaryToContinue");
     export const SessionExpired = new MessageKey("ConnectionMessage", "SessionExpired");
+    export const ANewVersionHasJustBeenDeployedSaveChangesAnd0 = new MessageKey("ConnectionMessage", "ANewVersionHasJustBeenDeployedSaveChangesAnd0");
+    export const Refresh = new MessageKey("ConnectionMessage", "Refresh");
 }
 
 export const CorruptMixin = new Type<CorruptMixin>("CorruptMixin");
