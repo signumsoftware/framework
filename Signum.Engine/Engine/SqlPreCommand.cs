@@ -221,6 +221,17 @@ namespace Signum.Engine
 
             return this;
         }
+
+        public SqlPreCommandSimple ReplaceFirstParameter(string variableName)
+        {
+            if (variableName == null)
+                return this;
+
+            var first = Parameters.FirstEx();
+            Sql = Regex.Replace(Sql, $@"(?<toReplace>{first.ParameterName})(\b|$)", variableName); //HACK
+            Parameters.Remove(first);
+            return this;
+        }
     }
 
     public class SqlPreCommandConcat : SqlPreCommand
