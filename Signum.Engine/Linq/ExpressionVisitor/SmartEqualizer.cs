@@ -738,7 +738,7 @@ namespace Signum.Engine.Linq
             {
                 var ei = (Entity)c.Value;
 
-                var id = ei.IdOrNull?.Let(pk => Expression.Constant(pk.Object, PrimaryKey.Type(ei.GetType()).Nullify())) ?? SmartEqualizer.NewId;
+                var id = GetPrimaryKeyValue(ei.IdOrNull, ei.GetType());
 
                 return new EntityExpression(ei.GetType(),
                     new PrimaryKeyExpression(id), null, null, null, avoidExpandOnRetrieving: true);
@@ -746,6 +746,8 @@ namespace Signum.Engine.Linq
             
             return null;
         }
+
+        
 
         public static Expression ConstantToLite(Expression expression)
         {
@@ -760,7 +762,7 @@ namespace Signum.Engine.Linq
             {
                 Lite<IEntity> lite = (Lite<IEntity>)c.Value;
 
-                var id = lite.IdOrNull?.Let(pk => Expression.Constant(pk.Object, PrimaryKey.Type(lite.EntityType).Nullify())) ?? SmartEqualizer.NewId;
+                var id = GetPrimaryKeyValue(lite.IdOrNull, lite.EntityType);
 
                 EntityExpression ere = new EntityExpression(lite.EntityType, new PrimaryKeyExpression(id), null, null, null, false);
 
@@ -768,6 +770,19 @@ namespace Signum.Engine.Linq
             }
 
             return null;
+        }
+
+        private static Expression GetPrimaryKeyValue(PrimaryKey? idOrNull, Type type)
+        {
+            if (idOrNull == null)
+                return SmartEqualizer.NewId;
+
+            var pkType = PrimaryKey.Type(type).Nullify();
+
+            if (idOrNull.Value.VariableName != null && PrimaryKeyExpression.PreferVariableNameVariable.Value)
+                return new SqlVariableExpression(idOrNull.Value.VariableName, pkType);
+
+            return Expression.Constant(idOrNull.Value.Object, pkType);
         }
     }
 }

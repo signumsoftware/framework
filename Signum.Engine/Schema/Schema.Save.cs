@@ -18,6 +18,7 @@ using System.Data.Common;
 using System.Collections.Concurrent;
 using Signum.Engine.Basics;
 using System.Globalization;
+using System.Text.RegularExpressions;
 
 namespace Signum.Engine.Maps
 {
@@ -652,8 +653,8 @@ namespace Signum.Engine.Maps
             {
                 var declare = DeclarePrimaryKeyVariable(entity, where);
                 string originalParameterName = SqlParameterBuilder.GetParameterName("id" + suffix);
-                sql = sql.Replace("WHERE ID = " + originalParameterName, "WHERE ID = " + entity.Id.VariableName); //HACK
-                parameters.Single(a => a.ParameterName == originalParameterName).ParameterName = entity.Id.VariableName;
+                sql = Regex.Replace(sql, $@"(?<toReplace>{originalParameterName})(\b|$)", entity.Id.VariableName); //HACK
+                parameters.RemoveAll(a => a.ParameterName == originalParameterName);
 
                 update = SqlPreCommand.Combine(Spacing.Simple, declare, new SqlPreCommandSimple(sql, parameters).AddComment(comment));
             }
