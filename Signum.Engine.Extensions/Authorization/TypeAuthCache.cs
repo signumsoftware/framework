@@ -38,6 +38,7 @@ namespace Signum.Entities.Authorization
             runtimeRules = sb.GlobalLazy(NewCache,
                 new InvalidateWith(typeof(RuleTypeEntity), typeof(RoleEntity)), AuthLogic.NotifyRulesChanged);
 
+            sb.Schema.EntityEvents<RoleEntity>().PreUnsafeDelete += query => Database.Query<RuleTypeEntity>().Where(r => query.Contains(r.Role.Entity)).UnsafeDelete();
             sb.Schema.Table<TypeEntity>().PreDeleteSqlSync += new Func<Entity, SqlPreCommand>(AuthCache_PreDeleteSqlSync);
 
             Validator.PropertyValidator((RuleTypeEntity r) => r.Conditions).StaticPropertyValidation += TypeAuthCache_StaticPropertyValidation;

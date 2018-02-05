@@ -124,3 +124,7 @@ a.sf-auth-link {
 a.sf-auth-link:hover {
     opacity:1;
 }
+
+.sf-master {
+    background: #fffbc2;
+}
