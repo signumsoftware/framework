@@ -676,7 +676,7 @@ namespace Signum.Engine.Authorization
                 .ToList();
 
             using (rep.WithReplacedDatabaseName())
-                return errors.Select(a => Administrator.UnsafeDeletePreCommand((RuleTypeEntity rt) => rt.Conditions, Database.MListQuery((RuleTypeEntity rt) => rt.Conditions)
+                return errors.Select(a => Administrator.UnsafeDeletePreCommandMList((RuleTypeEntity rt) => rt.Conditions, Database.MListQuery((RuleTypeEntity rt) => rt.Conditions)
                     .Where(mle => mle.Element.Condition.Is(a.Key.Condition) && mle.Parent.Resource.Is(a.Key.Resource)))
                     .AddComment("TypeCondition {0} not defined for {1} (roles {2})".FormatWith(a.Key.Condition, a.Key.Resource, a.ToString(", "))))
                     .Combine(Spacing.Double);
