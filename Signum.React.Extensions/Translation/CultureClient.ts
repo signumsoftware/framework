@@ -46,7 +46,7 @@ export function getCultures(withHidden: boolean): Promise<{ [name: string]: Lite
     return cachedCultures.then(list => {
         return list
             .filter(a => withHidden || !a.hidden)
-            .toObject(a => a.name, a => toLite(a));
+            .toObject(a => a.name, a => toLite(a, false, a.nativeName!));
     });
 }
 
