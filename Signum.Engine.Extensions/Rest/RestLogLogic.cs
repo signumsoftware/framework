@@ -43,9 +43,12 @@ namespace Signum.Engine.Rest
 
         private static void ExceptionLogic_DeleteRestLogs(DeleteLogParametersEmbedded parameters, StringBuilder sb, CancellationToken token)
         {
-            var dateLimit = parameters.GetDateLimit(typeof(RestLogEntity).ToTypeEntity());
+            var dateLimit = parameters.GetDateLimitDelete(typeof(RestLogEntity).ToTypeEntity());
 
-            Database.Query<RestLogEntity>().Where(a => a.StartDate < dateLimit).UnsafeDeleteChunksLog(parameters, sb, token);
+            if (dateLimit == null)
+                return;
+
+            Database.Query<RestLogEntity>().Where(a => a.StartDate < dateLimit.Value).UnsafeDeleteChunksLog(parameters, sb, token);
         }
 
         public static async Task<RestDiffResult> GetRestDiffResult(HttpMethod httpMethod, string url, string apiKey, string oldRequestBody, string oldResponseBody)

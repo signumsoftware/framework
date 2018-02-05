@@ -220,6 +220,10 @@ export default class TypesRulesPackControl extends React.Component<{ ctx: TypeCo
 
         let remaining = ctx.value.availableConditions.filter(tcs => !used.contains(tcs.id!));
 
+        var typeInfo = getTypeInfo(ctx.value.resource.cleanName);
+
+        var masterClass = typeInfo.entityData == "Master" ? "sf-master" : undefined;
+
         let fallback = Binding.create(ctx.value.allowed, a => a.fallback);
         return [
             <tr key={ctx.value.resource.namespace + "." + ctx.value.resource.className} className={classes("sf-auth-type", ctx.value.allowed.conditions.length > 0 && "sf-auth-with-conditions")}>
@@ -227,12 +231,12 @@ export default class TypesRulesPackControl extends React.Component<{ ctx: TypeCo
                     { remaining.length > 0 ? <a className="fa fa-plus-circle sf-condition-icon" aria-hidden="true" onClick={() => this.handleAddConditionClick(remaining, ctx.value.allowed) }></a> :
                         <i className="fa fa-circle sf-placeholder-icon" aria-hidden="true"></i> }
                     &nbsp;
-                    { getTypeInfo(ctx.value.resource.cleanName).niceName }
+                    {typeInfo.niceName} {typeInfo.entityData && <small title={typeInfo.entityData}>{typeInfo.entityData[0]}</small>}
                 </td>
-                <td style={{ textAlign: "center" }}>
+                <td style={{ textAlign: "center" }} className={masterClass}>
                     {this.colorRadio(fallback, "Create", "#0099FF") }
                 </td>
-                <td style={{ textAlign: "center" }}>
+                <td style={{ textAlign: "center" }} className={masterClass}>
                     {this.colorRadio(fallback, "Modify", "green") }
                 </td>
                 <td style={{ textAlign: "center" }}>
@@ -278,10 +282,10 @@ export default class TypesRulesPackControl extends React.Component<{ ctx: TypeCo
                         &nbsp;
                         <small>{ c.typeCondition.toStr.tryAfter(".") || c.typeCondition.toStr }</small>
                     </td>
-                    <td style={{ textAlign: "center" }}>
+                    <td style={{ textAlign: "center" }} className={masterClass}>
                         {this.colorRadio(b, "Create", "#0099FF") }
                     </td>
-                    <td style={{ textAlign: "center" }}>
+                    <td style={{ textAlign: "center" }} className={masterClass}>
                         {this.colorRadio(b, "Modify", "green") }
                     </td>
                     <td style={{ textAlign: "center" }}>
@@ -309,10 +313,17 @@ export default class TypesRulesPackControl extends React.Component<{ ctx: TypeCo
                     getUI(allowed) == basicAllowed ? AuthAdminMessage._0InUI.niceToString(niceName) :
                         niceName;
 
+        const icon = !allowed ? null :
+            getDB(allowed) == getUI(allowed) && getUI(allowed) == basicAllowed ? null :
+                getDB(allowed) == basicAllowed ? "fa fa-database" :
+                    getUI(allowed) == basicAllowed ? "fa fa-window-restore" :
+                        null;
+
         return <ColorRadio
             checked={isActive(allowed, basicAllowed)}
             title={title}
             color={color}
+            icon={icon}
             onClicked={e => { b.setValue(select(b.getValue(), basicAllowed, e)); this.updateFrame(); }}
         />;
     }
