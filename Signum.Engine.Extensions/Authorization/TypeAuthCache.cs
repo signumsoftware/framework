@@ -38,7 +38,8 @@ namespace Signum.Entities.Authorization
             runtimeRules = sb.GlobalLazy(NewCache,
                 new InvalidateWith(typeof(RuleTypeEntity), typeof(RoleEntity)), AuthLogic.NotifyRulesChanged);
 
-            sb.Schema.Table<TypeEntity>().PreDeleteSqlSync += new Func<Entity, SqlPreCommand>(AuthCache_PreDeleteSqlSync);
+            sb.Schema.Table<TypeEntity>().PreDeleteSqlSync += new Func<Entity, SqlPreCommand>(AuthCache_PreDeleteSqlSync_Type);
+            sb.Schema.Table<TypeConditionSymbol>().PreDeleteSqlSync += new Func<Entity, SqlPreCommand>(AuthCache_PreDeleteSqlSync_Condition);
 
             Validator.PropertyValidator((RuleTypeEntity r) => r.Conditions).StaticPropertyValidation += TypeAuthCache_StaticPropertyValidation;
         }
@@ -65,11 +66,20 @@ namespace Signum.Entities.Authorization
             return "Type {0} has no definitions for the conditions: {1}".FormatWith(type.Name, conditions.CommaAnd(a => a.Condition.Key));
         }
 
-        static SqlPreCommand AuthCache_PreDeleteSqlSync(Entity arg)
+        static SqlPreCommand AuthCache_PreDeleteSqlSync_Type(Entity arg)
         {
             TypeEntity type = (TypeEntity)arg;
 
             var command = Administrator.UnsafeDeletePreCommand(Database.Query<RuleTypeEntity>().Where(a => a.Resource == type));
+
+            return command;
+        }
+
+        static SqlPreCommand AuthCache_PreDeleteSqlSync_Condition(Entity arg)
+        {
+            TypeConditionSymbol condition = (TypeConditionSymbol)arg;
+
+            var command = Administrator.UnsafeDeletePreCommandMList((RuleTypeEntity rt)=>rt.Conditions,  Database.MListQuery((RuleTypeEntity rt) => rt.Conditions).Where(mle => mle.Element.Condition == condition));
 
             return command;
         }

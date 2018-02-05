@@ -669,7 +669,13 @@ namespace Signum.Engine.Authorization
                 .Where(gr =>
                 {
                     if (gr.Key.Condition.FieldInfo == null)
-                        return rep.TryGetC(typeof(TypeConditionSymbol).Name)?.TryGetC(gr.Key.Condition.Key) == null;
+                    {
+                        var replacedName = rep.TryGetC(typeof(TypeConditionSymbol).Name)?.TryGetC(gr.Key.Condition.Key);
+                        if (replacedName == null)
+                            return false; // Other Syncronizer will do it
+
+                        return !TypeConditionLogic.ConditionsFor(gr.Key.Resource.ToType()).Any(a => a.Key == replacedName);
+                    }
 
                     return !TypeConditionLogic.IsDefined(gr.Key.Resource.ToType(), gr.Key.Condition);
                 })
