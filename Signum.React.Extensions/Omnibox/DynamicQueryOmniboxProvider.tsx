@@ -128,7 +128,7 @@ interface OmniboxFilterResult {
     CanFilter: string;
 }
 
-interface FilterSyntax {
+class FilterSyntax {
     Index: number;
     TokenLength: number;
     Length: number;

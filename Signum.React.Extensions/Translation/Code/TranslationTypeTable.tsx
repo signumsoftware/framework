@@ -198,7 +198,7 @@ export class TranslationTypeDescription extends React.Component<{ type: Localiza
         }
     }
 
-    textArea?: HTMLTextAreaElement | null;
+    textArea: HTMLTextAreaElement | null;
     handleRefTextArea = (ta: HTMLTextAreaElement | null) => {
         if (this.textArea == null && ta != null)
             ta.focus();

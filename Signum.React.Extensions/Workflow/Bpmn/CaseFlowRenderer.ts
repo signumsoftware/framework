@@ -18,10 +18,9 @@ export class CaseFlowRenderer extends CustomRenderer {
         super(eventBus, styles, pathMap, canvas, 1200);
     }
 
-    caseFlow!: CaseFlow;
-    maxDuration!: number;
-    viewer!: NavigatedViewer;
-    caseFlowColor?: CaseFlowColor;
+    caseFlow: CaseFlow;
+
+    viewer: NavigatedViewer;
 
     drawConnection(visuals: any, element: BPMN.DiElement) {
 
@@ -40,7 +39,9 @@ export class CaseFlowRenderer extends CustomRenderer {
         return path;
     }    
 
-    
+    caseFlowColor?: CaseFlowColor;
+    maxDuration: number;
+
     gradient = new Gradient([
         { value: 0, color: Color.parse("rgb(117, 202, 112)")},
         { value: 0.5, color: Color.parse("rgb(251, 214, 95)") },

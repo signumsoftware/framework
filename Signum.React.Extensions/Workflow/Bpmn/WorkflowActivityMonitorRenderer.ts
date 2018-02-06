@@ -21,11 +21,11 @@ import { is } from "../../../../Framework/Signum.React/Scripts/Signum.Entities";
 
 export class WorkflowActivityMonitorRenderer extends CustomRenderer {
 
-    workflowActivityMonitor!: WorkflowActivityMonitor;
-    workflowConfig!: WorkflowActivityMonitorConfig;
-    workflowModel!: WorkflowModel;
+    workflowActivityMonitor: WorkflowActivityMonitor;
+    workflowConfig: WorkflowActivityMonitorConfig;
+    workflowModel: WorkflowModel;
 
-    viewer!: NavigatedViewer;
+    viewer: NavigatedViewer;
 
     gradient = new Gradient([
         { value: 0, color: Color.parse("rgb(117, 202, 112)")},

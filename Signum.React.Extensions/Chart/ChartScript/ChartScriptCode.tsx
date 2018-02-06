@@ -19,8 +19,8 @@ export default class ChartScriptCode extends React.Component<{ ctx: TypeContext<
         return this.props.ctx.value;
     }
 
-    changedHandler!: number;
-    exceptionHandler!: number;
+    changedHandler: number;
+    exceptionHandler: number;
 
     handleOnChange = (newValue: string) => {
         this.props.ctx.value.script = newValue;
@@ -40,9 +40,8 @@ export default class ChartScriptCode extends React.Component<{ ctx: TypeContext<
         }
     }
 
-    jsCodeMirror!: JavascriptCodeMirror;
-    lineHandle?: CodeMirror.LineHandle;
-
+    jsCodeMirror: JavascriptCodeMirror;
+    lineHandle: CodeMirror.LineHandle;
     getException = () => {
         const number = opener.getExceptionNumber();
         clearTimeout(this.exceptionHandler);

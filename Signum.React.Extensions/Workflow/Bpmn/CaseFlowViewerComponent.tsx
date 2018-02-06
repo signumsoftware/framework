@@ -45,8 +45,8 @@ export default class CaseFlowViewerComponent extends React.Component<CaseFlowVie
         this.state = { caseFlowColor: CaseFlowColor.value("CaseMaxDuration") };
     }
 
-    viewer!: NavigatedViewer;
-    divArea!: HTMLDivElement;
+    viewer: NavigatedViewer;
+    divArea: HTMLDivElement;
 
     handleOnModelError = (err: string) => {
         if (err)
