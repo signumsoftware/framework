@@ -1193,18 +1193,19 @@ export class PropertyRoute {
 
 export type PropertyRouteType = "Root" | "Field" | "Mixin" | "LiteEntity" | "MListItem";
 
-export type GraphExplorerMode = "collect" | "set" | "clean";
-
 
 export class GraphExplorer {
 
     static propagateAll(...args: any[]) {
-        const ge = new GraphExplorer("clean", {});
+        const ge = new GraphExplorer();
+        ge.modelStateMode = "clean";
         args.forEach(o => ge.isModified(o, ""));
     }
 
     static setModelState(e: ModifiableEntity, modelState: ModelState | undefined, initialPrefix: string) {
-        const ge = new GraphExplorer("set", modelState == undefined ? {} : { ...modelState });
+        const ge = new GraphExplorer();
+        ge.modelStateMode = "set";
+        ge.modelState = modelState == undefined ? {} : { ...modelState };
         ge.isModifiableObject(e, initialPrefix);
         if (Dic.getValues(ge.modelState).length) //Assign remaining
         {
@@ -1219,7 +1220,9 @@ export class GraphExplorer {
     }
 
     static collectModelState(e: ModifiableEntity, initialPrefix: string): ModelState {
-        const ge = new GraphExplorer("collect", {});
+        const ge = new GraphExplorer();
+        ge.modelStateMode = "collect";
+        ge.modelState = {};
         ge.isModifiableObject(e, initialPrefix);
         return ge.modelState;
     }
@@ -1228,12 +1231,7 @@ export class GraphExplorer {
     private modified : any[] = [];
     private notModified: any[] = [];
 
-    constructor(mode: GraphExplorerMode, modelState: ModelState) {
-        this.modelState = modelState;
-        this.mode = mode;
-    }
-
-    private mode: GraphExplorerMode;
+    private modelStateMode: "collect" | "set" | "clean";
 
     private modelState: ModelState;
 
@@ -1314,7 +1312,7 @@ export class GraphExplorer {
             return result;
         }
 
-        if (this.mode == "collect") {
+        if (this.modelStateMode == "collect") {
             if (mod.error != undefined) {
                 for (const p in mod.error) {
                     const propertyPrefix = dot(modelStatePrefix, p);
@@ -1324,7 +1322,7 @@ export class GraphExplorer {
                 }
             }
         }
-        else if (this.mode == "set") {
+        else if (this.modelStateMode == "set") {
 
             mod.error = undefined;
 
@@ -1344,7 +1342,7 @@ export class GraphExplorer {
             if (mod.error == undefined)
                 delete mod.error;
         }
-        else if (this.mode == "clean") {
+        else if (this.modelStateMode == "clean") {
             if (mod.error)
                 delete mod.error
         }
