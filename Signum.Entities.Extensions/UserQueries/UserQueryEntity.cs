@@ -152,7 +152,7 @@ namespace Signum.Entities.UserQueries
 
         public void FromXml(XElement element, IFromXmlContext ctx)
         {
-            Query = ctx.TryGetQuery(element.Attribute("Query").Value);
+            Query = ctx.GetQuery(element.Attribute("Query").Value);
             DisplayName = element.Attribute("DisplayName").Value;
             EntityType = element.Attribute("EntityType")?.Let(a => ctx.GetType(a.Value));
             HideQuickLink = element.Attribute("HideQuickLink")?.Let(a => bool.Parse(a.Value)) ?? false;
