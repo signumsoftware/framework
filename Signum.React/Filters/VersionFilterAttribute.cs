@@ -19,21 +19,8 @@ namespace Signum.React.Filters
         public override void OnActionExecuted(HttpActionExecutedContext actionContext)
         {
             base.OnActionExecuted(actionContext);
-
-            SetHeader(actionContext.Response.Headers);
-        }
-
-        private void SetHeader(HttpResponseHeaders headers)
-        {
-            if (!headers.Contains("X-App-Version"))
-                headers.Add("X-App-Version", CurrentVersion);
-        }
-
-        public override async Task OnActionExecutedAsync(HttpActionExecutedContext actionExecutedContext, CancellationToken cancellationToken)
-        {
-            await base.OnActionExecutedAsync(actionExecutedContext, cancellationToken);
-
-            SetHeader(actionExecutedContext.Response.Headers);
+            if (actionContext.Response != null)
+                actionContext.Response.Headers.Add("X-App-Version", CurrentVersion);
         }
     }
 }
