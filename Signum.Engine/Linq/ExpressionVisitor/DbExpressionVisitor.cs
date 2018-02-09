@@ -239,7 +239,7 @@ namespace Signum.Engine.Linq
 
             if (eee.Bindings != bindings || eee.HasValue != hasValue)
             {
-                return new EmbeddedEntityExpression(eee.Type, hasValue, bindings, eee.FieldEmbedded);
+                return new EmbeddedEntityExpression(eee.Type, hasValue, bindings, eee.FieldEmbedded, eee.ViewTable);
             }
             return eee;
         }
