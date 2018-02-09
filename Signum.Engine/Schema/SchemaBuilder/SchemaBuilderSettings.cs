@@ -169,6 +169,9 @@ namespace Signum.Engine.Maps
 
         public V ValidatorAttribute<V>(PropertyRoute propertyRoute) where V: ValidatorAttribute
         {
+            if (!typeof(ModifiableEntity).IsAssignableFrom(propertyRoute.RootType))
+                return null;
+
             if (propertyRoute.PropertyRouteType == PropertyRouteType.MListItems)
                 propertyRoute = propertyRoute.Parent;
 
