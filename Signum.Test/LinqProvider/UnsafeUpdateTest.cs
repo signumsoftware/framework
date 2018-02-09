@@ -570,5 +570,30 @@ namespace Signum.Test.LinqProviderUpdateDelete
                     .Execute();
             }
         }
+
+        [TableName("#MyView")]
+        class MyTempView : IView
+        {
+            [ViewPrimaryKey]
+            public int MyId { get; set; }
+
+            public bool Used { get; set; }
+        }
+
+        [TestMethod]
+        public void UnsafeUpdateMyView()
+        {
+            using (Transaction tr = new Transaction())
+            {
+                Administrator.CreateTemporaryTable<MyTempView>();
+
+                Database.Query<ArtistEntity>().UnsafeInsertView(a => new MyTempView { MyId = (int)a.Id, Used = false, });
+
+                Database.View<MyTempView>().Where(a => a.MyId > 1).UnsafeUpdateView().Set(a => a.Used, a => true).Execute();
+
+                tr.Commit();
+            }
+
+        }
     }
 }
