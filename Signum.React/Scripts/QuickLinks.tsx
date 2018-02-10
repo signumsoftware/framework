@@ -174,13 +174,12 @@ export interface QuickLinkOptions {
 }
 
 export abstract class QuickLink {
-    isVisible: boolean;
-    text: string;
-    order: number;
+    isVisible!: boolean;
+    text!: string;
+    order!: number;
     name: string;
-    icon: string;
-    iconColor: string;
-    ctx: QuickLinkContext<Entity>;
+    icon?: string;
+    iconColor?: string;
 
     constructor(name: string, options?: QuickLinkOptions) {
         this.name = name;
@@ -201,9 +200,6 @@ export abstract class QuickLink {
             </span>
         );
     }
-
-    onclick: () => void;
-
 }
 
 export class QuickLinkAction extends QuickLink {

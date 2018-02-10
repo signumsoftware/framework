@@ -33,7 +33,7 @@ export default class Notify extends React.Component<{}, NotifyState>{
         Notify.singletone = this;
     }
 
-    _isMounted: boolean;
+    _isMounted: boolean = false;
     componentDidMount() {
         this._isMounted = true;
     }
@@ -42,7 +42,7 @@ export default class Notify extends React.Component<{}, NotifyState>{
         this._isMounted = false;
     }
 
-    handler: number;
+    handler?: number;
     notifyTimeout(options: NotifyOptions, timeout: number = 2000) {
         this.notify(options);
         this.handler = setTimeout(() => this.clear(), timeout);
@@ -51,14 +51,20 @@ export default class Notify extends React.Component<{}, NotifyState>{
     notify(options: NotifyOptions) {
         if (!this._isMounted)
             return;
-        clearTimeout(this.handler);
+        if (this.handler != undefined) {
+            clearTimeout(this.handler);
+            this.handler = undefined;
+        }
         this.setState(options);
     }
 
     clear() {
         if (!this._isMounted)
             return;
-        clearTimeout(this.handler);
+        if (this.handler != undefined) {
+            clearTimeout(this.handler);
+            this.handler = undefined;
+        }
         this.setState({ text: undefined, type: undefined })
     }
 

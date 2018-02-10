@@ -465,7 +465,7 @@ function typeIsNavigable(typeName: string): EntityWhen {
 
     const es = entitySettings[typeName];
 
-    if (es != undefined && es.isViewable != undefined)
+    if (es != undefined && es.isNavigable != undefined)
         return es.isNavigable;
 
     const typeInfo = getTypeInfo(typeName);
@@ -758,19 +758,19 @@ export interface ViewOverride<T extends ModifiableEntity> {
 export class EntitySettings<T extends ModifiableEntity> {
     typeName: string;
 
-    avoidPopup: boolean;
+    avoidPopup!: boolean;
 
-    getToString: (entity: T) => string;
+    getToString!: (entity: T) => string;
 
     getViewPromise?: (entity: T) => ViewPromise<T>;
 
     viewOverrides?: Array<ViewOverride<T>>;
 
-    isCreable: EntityWhen;
-    isFindable: boolean;
-    isViewable: boolean;
-    isNavigable: EntityWhen;
-    isReadOnly: boolean;
+    isCreable?: EntityWhen;
+    isFindable?: boolean;
+    isViewable?: boolean;
+    isNavigable?: EntityWhen;
+    isReadOnly?: boolean;
     autocomplete?: AutocompleteConfig<any>;
     autocompleteDelay?: number;
     findOptions?: FindOptions;
@@ -834,7 +834,7 @@ export class NamedViewSettings<T extends ModifiableEntity> {
 export type ViewModule<T extends ModifiableEntity> = { default: React.ComponentClass<any /* { ctx: TypeContext<T> }*/> };
 
 export class ViewPromise<T extends ModifiableEntity> {
-    promise: Promise<(ctx: TypeContext<T>) => React.ReactElement<any>>;
+    promise!: Promise<(ctx: TypeContext<T>) => React.ReactElement<any>>;
 
     constructor(promise?: Promise<ViewModule<T>>) {
         if (promise)

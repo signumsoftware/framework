@@ -93,9 +93,7 @@ export function getEntityOperationsContextualItems(ctx: ContextualItemsContext<E
             const eos = getSettings(oi.key) as EntityOperationSettings<Entity> | undefined;
             const cos = eos == undefined ? undefined :
                 ctx.lites.length == 1 ? eos.contextual : eos.contextualFromMany
-            const coc = new ContextualOperationContext<Entity>();
-            coc.context = ctx;
-            coc.operationInfo = oi;
+            const coc = new ContextualOperationContext<Entity>(oi, ctx);
             coc.settings = cos;
             coc.entityOperationSettings = eos;
 
