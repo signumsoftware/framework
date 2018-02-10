@@ -1,5 +1,4 @@
 ﻿import * as React from 'react'
-import { ButtonDropdown, DropdownToggle, DropdownItem } from 'reactstrap'
 import { FormGroup, FormControlReadonly, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityList, EntityRepeater } from '../../../../Framework/Signum.React/Scripts/Lines'
 import { ModifiableEntity, OperationSymbol, JavascriptMessage, NormalWindowMessage, is } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
 import { classes } from '../../../../Framework/Signum.React/Scripts/Globals'
@@ -21,6 +20,7 @@ import ShowCodeModal from './ShowCodeModal'
 import { DynamicViewEntity, DynamicViewOperation, DynamicViewMessage } from '../Signum.Entities.Dynamic'
 
 import "./DynamicView.css"
+import { Dropdown, DropdownItem, DropdownToggle } from '../../../../Framework/Signum.React/Scripts/Components';
 
 export interface DynamicViewComponentProps {
     ctx: TypeContext<ModifiableEntity>;
@@ -258,7 +258,7 @@ class DynamicViewDesigner extends React.Component<DynamicViewDesignerProps, Dyna
             <div className="btn-group btn-group-sm" role="group" style={{ marginBottom: "5px" }}>
                 {operations[DynamicViewOperation.Save.key] && <button type="button" className="btn btn-primary" onClick={this.handleSave}>{operations[DynamicViewOperation.Save.key].niceName}</button>}
                 <button type="button" className="btn btn-success" onClick={this.handleShowCode}>Show code</button>
-                <ButtonDropdown id="bg-nested-dropdown" toggle={this.handleOnToggle} isOpen={this.state.isDropdownOpen} size="sm">
+                <Dropdown id="bg-nested-dropdown" toggle={this.handleOnToggle} isOpen={this.state.isDropdownOpen} size="sm">
                     <DropdownToggle>{" … "}</DropdownToggle>
                     {operations[DynamicViewOperation.Create.key] && <DropdownItem onSelect={this.handleCreate}>{operations[DynamicViewOperation.Create.key].niceName}</DropdownItem>}
                     {operations[DynamicViewOperation.Clone.key] && !this.props.dynamicView.isNew && <DropdownItem  onSelect={this.handleClone}>{operations[DynamicViewOperation.Clone.key].niceName}</DropdownItem>}
@@ -268,7 +268,7 @@ class DynamicViewDesigner extends React.Component<DynamicViewDesignerProps, Dyna
                         onSelect={() => this.handleChangeView(vn)}>
                         {vn}
                     </DropdownItem>)}
-                </ButtonDropdown>
+                </Dropdown>
             </div >);
     }
 }

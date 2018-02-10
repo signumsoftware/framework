@@ -1,6 +1,4 @@
-﻿
-import * as React from 'react'
-import { Button, DropdownItem, } from 'reactstrap'
+﻿import * as React from 'react'
 import { Dic, classes } from '../../../Framework/Signum.React/Scripts/Globals'
 import { getQueryKey } from '../../../Framework/Signum.React/Scripts/Reflection'
 import * as Finder from '../../../Framework/Signum.React/Scripts/Finder'
@@ -11,6 +9,7 @@ import * as Navigator from '../../../Framework/Signum.React/Scripts/Navigator'
 import { default as SearchControlLoaded } from '../../../Framework/Signum.React/Scripts/SearchControl/SearchControlLoaded'
 import { TreeMessage } from './Signum.Entities.Tree'
 import * as TreeClient from './TreeClient'
+import { Button } from '../../../Framework/Signum.React/Scripts/Components';
 
 export interface TreeButtonProps {
     searchControl: SearchControlLoaded;

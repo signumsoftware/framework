@@ -1,5 +1,4 @@
 ﻿import * as React from 'react'
-import { TabPane, TabContent } from 'reactstrap'
 import { classes } from '../../../../Framework/Signum.React/Scripts/Globals'
 import { FormGroup, FormControlReadonly, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityDetail, EntityList, EntityRepeater, EntityTabRepeater } from '../../../../Framework/Signum.React/Scripts/Lines'
 import { SearchControl } from '../../../../Framework/Signum.React/Scripts/Search'
@@ -14,6 +13,7 @@ import FileLine from '../../Files/FileLine'
 import IFrameRenderer from './IFrameRenderer'
 import HtmlCodemirror from '../../Codemirror/HtmlCodemirror'
 import { tryGetMixin } from "../../../../Framework/Signum.React/Scripts/Signum.Entities";
+import { UncontrolledTabs, Tab } from '../../../../Framework/Signum.React/Scripts/Components';
 
 
 export default class EmailMessage extends React.Component<{ ctx: TypeContext<EmailMessageEntity> }> {
@@ -29,8 +29,8 @@ export default class EmailMessage extends React.Component<{ ctx: TypeContext<Ema
         const sc1 = e.subCtx({ labelColumns: { sm: 1 } });
 
         return (
-            <TabContent id="newsletterTabs">
-                <TabPane title={EmailMessageEntity.niceName()}>
+            <UncontrolledTabs id="emailTabs">
+                <Tab title={EmailMessageEntity.niceName()} eventKey="mainTab">
                     <fieldset>
                         <legend>Properties</legend>
                         <div className="row">
@@ -64,9 +64,9 @@ export default class EmailMessage extends React.Component<{ ctx: TypeContext<Ema
                             </div>
                     }
                     <EmailMessageComponent ctx={e} invalidate={() => this.forceUpdate()} />
-                </TabPane>
+                </Tab>
                 {this.renderEmailReceptionMixin()}
-            </TabContent>
+            </UncontrolledTabs>
         );
     }
 
@@ -79,20 +79,22 @@ export default class EmailMessage extends React.Component<{ ctx: TypeContext<Ema
 
         const ri = this.props.ctx.subCtx(EmailReceptionMixin).subCtx(a => a.receptionInfo!);
 
-        return <TabPane title={EmailReceptionMixin.niceName()}>
-            <fieldset>
-                <legend>Properties</legend>
+        return (
+            <Tab title={EmailReceptionMixin.niceName()} eventKey="receptionMixin">
+                <fieldset>
+                    <legend>Properties</legend>
 
-                <EntityLine ctx={ri.subCtx(f => f.reception)} />
-                <ValueLine ctx={ri.subCtx(f => f.uniqueId)} />
-                <ValueLine ctx={ri.subCtx(f => f.sentDate)} />
-                <ValueLine ctx={ri.subCtx(f => f.receivedDate)} />
-                <ValueLine ctx={ri.subCtx(f => f.deletionDate)} />
+                    <EntityLine ctx={ri.subCtx(f => f.reception)} />
+                    <ValueLine ctx={ri.subCtx(f => f.uniqueId)} />
+                    <ValueLine ctx={ri.subCtx(f => f.sentDate)} />
+                    <ValueLine ctx={ri.subCtx(f => f.receivedDate)} />
+                    <ValueLine ctx={ri.subCtx(f => f.deletionDate)} />
 
-            </fieldset>
+                </fieldset>
 
-            <pre>{ri.value.rawContent}</pre>
-        </TabPane>;
+                <pre>{ri.value.rawContent}</pre>
+            </Tab>
+        );
     };
 
 

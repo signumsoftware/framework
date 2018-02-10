@@ -1,5 +1,4 @@
 ﻿import * as React from 'react'
-import { Button } from 'reactstrap'
 import * as numbro from 'numbro'
 import { classes } from '../../../../Framework/Signum.React/Scripts/Globals'
 import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
@@ -17,6 +16,7 @@ import { QueryRulePack, QueryAllowedRule, AuthAdminMessage, PermissionSymbol, Au
 import { ColorRadio, GrayCheckbox } from './ColoredRadios'
 
 import "./AuthAdmin.css"
+import { Button } from '../../../../Framework/Signum.React/Scripts/Components';
 
 export default class QueryRulesPackControl extends React.Component<{ ctx: TypeContext<QueryRulePack> }> implements IRenderButtons {
 

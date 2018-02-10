@@ -1,7 +1,6 @@
 ﻿
 import * as React from 'react'
 import { RouteComponentProps } from 'react-router'
-import { UncontrolledButtonDropdown, DropdownItem, DropdownToggle } from 'reactstrap'
 import { Dic, classes } from '../../../Framework/Signum.React/Scripts/Globals'
 import * as Finder from '../../../Framework/Signum.React/Scripts/Finder'
 import { ResultTable, FindOptions, FilterOption, QueryDescription } from '../../../Framework/Signum.React/Scripts/FindOptions'
@@ -11,6 +10,7 @@ import SearchControlLoaded from '../../../Framework/Signum.React/Scripts/SearchC
 import { WordTemplateEntity, WordTemplateMessage } from './Signum.Entities.Word'
 import * as WordClient from './WordClient'
 import { saveFile } from "../../../Framework/Signum.React/Scripts/Services";
+import { UncontrolledDropdown, DropdownToggle, DropdownItem, DropdownMenu } from '../../../Framework/Signum.React/Scripts/Components';
 
 export interface WordSearchMenuProps {
     searchControl: SearchControlLoaded;
@@ -49,19 +49,21 @@ export default class WordSearchMenu extends React.Component<WordSearchMenuProps>
         const label = <span><i className="fa fa-file-word-o"></i>&nbsp;{this.props.searchControl.props.largeToolbarButtons == true ? " " + WordTemplateMessage.WordReport.niceToString() : undefined}</span>;
 
         return (
-            <UncontrolledButtonDropdown id="wordTemplateDropDown" className="sf-word-dropdown">
+            <UncontrolledDropdown id="wordTemplateDropDown" className="sf-word-dropdown">
                 <DropdownToggle>{label}</DropdownToggle>
-                {
-                    wordReports.map((wt, i) =>
-                        <DropdownItem key={i}
-                            onSelect={() => this.handleSelect(wt) }>
-                            { wt.toStr }
-                        </DropdownItem>)
-                }
-            </UncontrolledButtonDropdown>
+                <DropdownMenu>
+                    {
+                        wordReports.map((wt, i) =>
+                            <DropdownItem key={i}
+                                onSelect={() => this.handleSelect(wt)}>
+                                {wt.toStr}
+                            </DropdownItem>)
+                    }
+                </DropdownMenu>
+            </UncontrolledDropdown>
         );
     }
- 
+
 }
 
 declare module '../../../Framework/Signum.React/Scripts/SearchControl/SearchControlLoaded' {

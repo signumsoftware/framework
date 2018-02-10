@@ -21,7 +21,7 @@ import { openModal, IModalProps } from '../../../../Framework/Signum.React/Scrip
 import SelectorModal from '../../../../Framework/Signum.React/Scripts/SelectorModal';
 import { DynamicViewMessage, DynamicViewValidationMessage } from '../Signum.Entities.Dynamic'
 import * as DynamicViewClient from '../DynamicViewClient'
-import Typeahead from '../../../../Framework/Signum.React/Scripts/Components/Typeahead'
+import { Typeahead } from '../../../../Framework/Signum.React/Scripts/Components';
 
 interface HtmlAttributesLineProps {
     binding: Binding<HtmlAttributesExpression | undefined>;

@@ -2,7 +2,6 @@
 import * as React from 'react'
 import * as moment from 'moment'
 import { Dic } from '../../../../Framework/Signum.React/Scripts/Globals'
-import { Modal, ModalHeader, ModalBody, ModalFooter, ButtonToolbar, Button } from 'reactstrap'
 import { openModal, IModalProps } from '../../../../Framework/Signum.React/Scripts/Modals'
 import { TypeContext, StyleOptions, EntityFrame } from '../../../../Framework/Signum.React/Scripts/TypeContext'
 import { TypeInfo, getTypeInfo, parseId, GraphExplorer, PropertyRoute, ReadonlyBinding, } from '../../../../Framework/Signum.React/Scripts/Reflection'

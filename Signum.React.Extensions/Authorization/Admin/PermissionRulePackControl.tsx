@@ -1,5 +1,4 @@
 ﻿import * as React from 'react'
-import { Button } from 'reactstrap'
 import * as numbro from 'numbro'
 import { classes } from '../../../../Framework/Signum.React/Scripts/Globals'
 import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
@@ -16,6 +15,7 @@ import { PermissionRulePack, PermissionAllowedRule, AuthAdminMessage, Permission
 import { ColorRadio, GrayCheckbox } from './ColoredRadios'
 
 import "./AuthAdmin.css"
+import { Button } from '../../../../Framework/Signum.React/Scripts/Components';
 
 export default class PermissionRulesPackControl extends React.Component<{ ctx: TypeContext<PermissionRulePack> }> implements IRenderButtons {
 

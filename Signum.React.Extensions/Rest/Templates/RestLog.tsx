@@ -1,5 +1,4 @@
 ﻿import * as React from 'react'
-import { Form, Button, Input } from 'reactstrap'
 import * as moment from 'moment'
 import { RestLogEntity } from '../Signum.Entities.Rest'
 import { TypeContext, ValueLine, ValueLineType, EntityLine, EntityRepeater } from "../../../../Framework/Signum.React/Scripts/Lines";
@@ -8,6 +7,7 @@ import { RestLogDiff, API } from '../RestClient'
 import { DiffDocument } from '../../DiffLog/Templates/DiffDocument';
 import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
 import { Tab, UncontrolledTabs } from '../../../../Framework/Signum.React/Scripts/Components/Tabs'
+import { Button } from '../../../../Framework/Signum.React/Scripts/Components';
 
 export interface RestLogState {
     diff?: RestLogDiff,
@@ -21,7 +21,6 @@ export default class RestLog extends React.Component<{ ctx: TypeContext<RestLogE
         var prefix = Navigator.toAbsoluteUrl("~/api");
         var suffix = props.ctx.subCtx(f => f.url).value.after("/api");
         this.state = {
-
             newURL: location.protocol + "//" + location.hostname + prefix + suffix
         }
     }
@@ -48,10 +47,12 @@ export default class RestLog extends React.Component<{ ctx: TypeContext<RestLogE
                 <ValueLine ctx={ctx.subCtx(f => f.changedPercentage)} />
 
                 <EntityRepeater ctx={ctx.subCtx(f => f.queryString)} />
-                {ctx.value.allowReplay && <Form>
-                    <Button color="info" onClick={() => { API.replayRestLog(ctx.value.id, encodeURIComponent(this.state.newURL)).then(d => this.setState({ diff: d })).done() }}>Replay</Button>
-                    <Input type="text" defaultValue={this.state.newURL} />
-                </Form>}
+                {
+                    ctx.value.allowReplay && <div>
+                        <Button color="info" onClick={() => { API.replayRestLog(ctx.value.id, encodeURIComponent(this.state.newURL)).then(d => this.setState({ diff: d })).done() }}>Replay</Button>
+                        <input type="text" className="form-control" value={this.state.newURL} onChange={e => this.setState({ newURL: e.currentTarget.value })} />
+                    </div>
+                }
                 {this.renderCode(ctx.subCtx(f => f.requestBody))}
 
                 <fieldset>

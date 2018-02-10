@@ -1,6 +1,5 @@
 ﻿/// <reference path="../bpmn-js.d.ts" />
 import * as React from 'react'
-import { Button } from "reactstrap";
 import { WorkflowEntitiesDictionary, WorkflowActivityModel, WorkflowActivityType, WorkflowPoolModel, WorkflowLaneModel, WorkflowConnectionModel, WorkflowEventModel, WorkflowEntity, IWorkflowNodeEntity, WorkflowMessage } from '../Signum.Entities.Workflow'
 import * as Modeler from "bpmn-js/lib/Modeler"
 import { ModelEntity, ValidationMessage, parseLite } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
@@ -13,6 +12,7 @@ import * as BpmnUtils from './BpmnUtils'
 import "bpmn-js/assets/bpmn-font/css/bpmn-embedded.css"
 import "diagram-js/assets/diagram-js.css"
 import "./Bpmn.css"
+import { Button } from '../../../../Framework/Signum.React/Scripts/Components';
 
 export interface BpmnModelerComponentProps {
     workflow: WorkflowEntity;

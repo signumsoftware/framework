@@ -1,6 +1,5 @@
 ﻿
 import * as React from 'react'
-import { ButtonDropdown, DropdownItem, DropdownToggle, DropdownMenu, } from 'reactstrap'
 import { Dic, classes } from '../../../../Framework/Signum.React/Scripts/Globals'
 import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
 import { Lite, toLite } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
@@ -11,6 +10,7 @@ import SearchControl from '../../../../Framework/Signum.React/Scripts/SearchCont
 import { UserChartEntity, ChartRequest, ChartMessage } from '../Signum.Entities.Chart'
 import * as UserChartClient from './UserChartClient'
 import ChartRequestView from '../Templates/ChartRequestView'
+import { Dropdown, DropdownToggle, DropdownMenu, DropdownItem } from '../../../../Framework/Signum.React/Scripts/Components';
 
 export interface UserChartMenuProps {
     chartRequestView: ChartRequestView;
@@ -108,7 +108,7 @@ export default class UserChartMenu extends React.Component<UserChartMenuProps, U
 
         const label = <span><i className="fa fa-bar-chart"></i> &nbsp; {labelText}</span>;
         return (
-            <ButtonDropdown id="userQueriesDropDown" className="sf-userquery-dropdown"
+            <Dropdown id="userQueriesDropDown" className="sf-userquery-dropdown"
                 toggle={this.handleSelectedToggle} isOpen={this.state.isOpen}>
                 <DropdownToggle color="light" caret>{label as any}</DropdownToggle>
                 <DropdownMenu>
@@ -124,7 +124,7 @@ export default class UserChartMenu extends React.Component<UserChartMenuProps, U
                     {crView.props.userChart && <DropdownItem onSelect={this.handleEdit}>{ChartMessage.EditUserChart.niceToString()}</DropdownItem>}
                     <DropdownItem onSelect={this.handleCreate}>{ChartMessage.CreateNew.niceToString()}</DropdownItem>
                 </DropdownMenu>
-            </ButtonDropdown>
+            </Dropdown>
         );
     }
 

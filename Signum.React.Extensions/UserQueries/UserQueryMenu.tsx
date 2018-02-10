@@ -1,7 +1,6 @@
 ﻿
 import * as React from 'react'
 import { RouteComponentProps } from 'react-router'
-import { ButtonDropdown, DropdownItem, DropdownToggle, DropdownMenu } from 'reactstrap'
 import { Dic, classes } from '../../../Framework/Signum.React/Scripts/Globals'
 import * as Finder from '../../../Framework/Signum.React/Scripts/Finder'
 import { ResultTable, FindOptions, FilterOption, QueryDescription } from '../../../Framework/Signum.React/Scripts/FindOptions'
@@ -10,6 +9,7 @@ import * as Navigator from '../../../Framework/Signum.React/Scripts/Navigator'
 import SearchControlLoaded from '../../../Framework/Signum.React/Scripts/SearchControl/SearchControlLoaded'
 import { UserQueryEntity, UserQueryMessage } from './Signum.Entities.UserQueries'
 import * as UserQueryClient from './UserQueryClient'
+import { DropdownMenu, DropdownItem, Dropdown, DropdownToggle } from '../../../Framework/Signum.React/Scripts/Components';
 
 export interface UserQueryMenuProps {
     searchControl: SearchControlLoaded;
@@ -98,7 +98,7 @@ export default class UserQueryMenu extends React.Component<UserQueryMenuProps, U
         const label = <span><i className="fa fa-list-alt"></i>&nbsp;{this.props.searchControl.props.largeToolbarButtons == true ? " " + UserQueryMessage.UserQueries_UserQueries.niceToString() : undefined}</span>;
         const userQueries = this.state.userQueries;
         return (
-            <ButtonDropdown id="userQueriesDropDown" className="sf-userquery-dropdown" color="light"
+            <Dropdown id="userQueriesDropDown" className="sf-userquery-dropdown" color="light"
                 toggle={this.handleSelectedToggle} isOpen={this.state.isOpen}>
                 <DropdownToggle color="light" caret>{label as any}</DropdownToggle>
                 <DropdownMenu>
@@ -114,7 +114,7 @@ export default class UserQueryMenu extends React.Component<UserQueryMenuProps, U
                     {this.state.currentUserQuery && <DropdownItem onSelect={this.handleEdit} >{UserQueryMessage.UserQueries_Edit.niceToString()}</DropdownItem>}
                     <DropdownItem onSelect={this.handleCreate}>{UserQueryMessage.UserQueries_CreateNew.niceToString()}</DropdownItem>
                 </DropdownMenu>
-            </ButtonDropdown>
+            </Dropdown>
         );
     }
 

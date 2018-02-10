@@ -1,7 +1,6 @@
 ﻿import * as moment from 'moment'
 import * as numbro from 'numbro'
 import * as React from 'react'
-import { Modal, ModalHeader, ModalBody, ModalFooter, ButtonToolbar, TabContent, TabPane } from 'reactstrap'
 import { openModal, IModalProps } from '../../../../Framework/Signum.React/Scripts/Modals';
 import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder';
 import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator';
@@ -16,6 +15,7 @@ import { CaseActivityEntity, WorkflowActivityEntity, WorkflowActivityMessage, Do
 import { EntityLink, SearchControl } from "../../../../Framework/Signum.React/Scripts/Search";
 import { OperationLogEntity } from "../../../../Framework/Signum.React/Scripts/Signum.Entities.Basics";
 import { Tab, Tabs, UncontrolledTabs } from '../../../../Framework/Signum.React/Scripts/Components/Tabs';
+import { Modal } from '../../../../Framework/Signum.React/Scripts/Components';
 
 
 interface CaseActivityStatsModalProps extends React.Props<CaseActivityStatsModal>, IModalProps {
@@ -37,7 +37,7 @@ export default class CaseActivityStatsModal extends React.Component<CaseActivity
         this.setState({ show: false });
     }
 
-    handleOnClosed = () => {
+    handleOnExited = () => {
         this.props.onExited!(undefined);
     }
 
@@ -45,35 +45,35 @@ export default class CaseActivityStatsModal extends React.Component<CaseActivity
 
         var caseActivityStats = this.props.caseActivityStats;
         return (
-            <Modal size="lg" toggle={this.handleCloseClicked} isOpen={this.state.show} onClosed={this.handleOnClosed}>
-                <ModalHeader toggle={this.handleCloseClicked}>
-                <h4 className="modal-title">
-                    {caseActivityStats.first().WorkflowActivity.toStr} ({caseActivityStats.length} {caseActivityStats.length == 1 ? CaseActivityEntity.niceName() : CaseActivityEntity.nicePluralName()})
-                </h4>
-                </ModalHeader>
-                <ModalBody>
-                {
-                    <div>
-                        {caseActivityStats.length == 1 ? <CaseActivityStatsComponent stats={caseActivityStats.first()} caseEntity={this.props.case} /> :
+            <Modal size="lg" onHide={this.handleCloseClicked} show={this.state.show} onExited={this.handleOnExited}>
+                <div className="modal-header">
+                    <h5 className="modal-title">{caseActivityStats.first().WorkflowActivity.toStr} ({caseActivityStats.length} {caseActivityStats.length == 1 ? CaseActivityEntity.niceName() : CaseActivityEntity.nicePluralName()})</h5>
+                    <button type="button" className="close" data-dismiss="modal" aria-label="Close" onClick={this.handleCloseClicked}>
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div className="modal-body">
+                    {
+                        <div>
+                            {caseActivityStats.length == 1 ? <CaseActivityStatsComponent stats={caseActivityStats.first()} caseEntity={this.props.case} /> :
                                 <UncontrolledTabs id="statsTabs">
-                                {
-                                    caseActivityStats.map(a =>
+                                    {
+                                        caseActivityStats.map(a =>
                                             <Tab key={a.CaseActivity.id!.toString()} eventKey={a.CaseActivity.id!}
                                                 title={a.DoneDate == null ? CaseActivityMessage.Pending.niceToString() : <span>{a.DoneBy.toStr} {DoneType.niceToString(a.DoneType!)} <mark>({moment(a.DoneDate).fromNow()})</mark></span> as any}>
-                                            <CaseActivityStatsComponent stats={a} caseEntity={this.props.case} />
-                                        </Tab>)
-                                }
+                                                <CaseActivityStatsComponent stats={a} caseEntity={this.props.case} />
+                                            </Tab>)
+                                    }
                                 </UncontrolledTabs>
-                        }
-                    </div>
-                }
-
-                </ModalBody>
-                <ModalFooter>
-                <button className="btn btn-primary sf-entity-button sf-ok-button" onClick={this.handleCloseClicked}>
-                    {JavascriptMessage.ok.niceToString()}
-                </button>
-                </ModalFooter>
+                            }
+                        </div>
+                    }
+                </div>
+                <div className="modal-footer">
+                    <button className="btn btn-primary sf-entity-button sf-ok-button" onClick={this.handleCloseClicked}>
+                        {JavascriptMessage.ok.niceToString()}
+                    </button>
+                </div>
             </Modal>
         );
     }
@@ -93,7 +93,7 @@ export class CaseActivityStatsComponent extends React.Component<CaseActivityStat
 
         var ctx = new StyleContext(undefined, { labelColumns: 3 });
         var stats = this.props.stats;
-        
+
         return (
             <div>
                 <FormGroup ctx={ctx} labelText={CaseActivityEntity.niceName()}> <EntityLink lite={stats.CaseActivity} /></FormGroup>

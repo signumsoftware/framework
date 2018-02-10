@@ -1,6 +1,5 @@
 ﻿import * as React from 'react'
 import * as moment from 'moment'
-import { Button } from "reactstrap"
 import { Binding, LambdaMemberType } from '../../../../Framework/Signum.React/Scripts/Reflection'
 import { Dic } from '../../../../Framework/Signum.React/Scripts/Globals'
 import { newMListElement } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
@@ -9,6 +8,7 @@ import { TypeContext, ValueLine, EntityLine, EntityCombo, EntityList, EntityDeta
 import { SearchControl, ValueSearchControl, FilterOperation, OrderType, PaginationMode, ISimpleFilterBuilder, extractFilterValue, FilterOption, FindOptionsParsed } from '../../../../Framework/Signum.React/Scripts/Search'
 import { FilterOptionParsed } from "../../../../Framework/Signum.React/Scripts/FindOptions";
 import CollapsableCard from "../../Basics/Templates/CollapsableCard";
+import { Button } from '../../../../Framework/Signum.React/Scripts/Components';
 
 export default class InboxFilter extends React.Component<{ ctx: TypeContext<InboxFilterModel> }> implements ISimpleFilterBuilder {
 

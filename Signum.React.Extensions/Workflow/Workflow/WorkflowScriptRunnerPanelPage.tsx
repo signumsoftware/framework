@@ -1,7 +1,6 @@
 ﻿import * as React from 'react'
 import * as moment from 'moment'
 import { RouteComponentProps } from 'react-router'
-import { TabContent, TabPane } from 'reactstrap'
 import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
 import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
 import EntityLink from '../../../../Framework/Signum.React/Scripts/SearchControl/EntityLink'

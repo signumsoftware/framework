@@ -10,7 +10,6 @@ import { TypeContext, FormGroupStyle } from '../../../../Framework/Signum.React/
 import ContextMenu from '../../../../Framework/Signum.React/Scripts/SearchControl/ContextMenu'
 import { ContextMenuPosition } from '../../../../Framework/Signum.React/Scripts/SearchControl/ContextMenu'
 import SelectorModal from '../../../../Framework/Signum.React/Scripts/SelectorModal'
-import { DropdownItem } from 'reactstrap'
 
 import * as NodeUtils from './NodeUtils'
 import NodeSelectorModal from './NodeSelectorModal'
@@ -19,6 +18,7 @@ import { BaseNode, ContainerNode, LineBaseNode, NodeConstructor, EntityTableNode
 import { DynamicViewEntity, DynamicViewMessage } from '../Signum.Entities.Dynamic'
 
 import "./DynamicViewTree.css"
+import { DropdownItem } from '../../../../Framework/Signum.React/Scripts/Components';
 
 export interface DynamicViewTreeProps {
     rootNode: DesignerNode<BaseNode>;

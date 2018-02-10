@@ -1,6 +1,5 @@
 ﻿
 import * as React from 'react'
-import { Button, DropdownItem, } from 'reactstrap'
 import { Dic, classes } from '../../../Framework/Signum.React/Scripts/Globals'
 import { getQueryKey } from '../../../Framework/Signum.React/Scripts/Reflection'
 import * as Finder from '../../../Framework/Signum.React/Scripts/Finder'
@@ -11,6 +10,7 @@ import * as Navigator from '../../../Framework/Signum.React/Scripts/Navigator'
 import { default as SearchControlLoaded } from '../../../Framework/Signum.React/Scripts/SearchControl/SearchControlLoaded'
 import { ChartMessage, ChartRequest } from './Signum.Entities.Chart'
 import * as ChartClient from './ChartClient'
+import { Button } from '../../../Framework/Signum.React/Scripts/Components';
 
 export interface ChartButtonProps {
     searchControl: SearchControlLoaded;

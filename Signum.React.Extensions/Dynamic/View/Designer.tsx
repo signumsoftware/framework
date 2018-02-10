@@ -7,16 +7,16 @@ import { FindOptions } from '../../../../Framework/Signum.React/Scripts/FindOpti
 import { getQueryNiceName, MemberInfo, PropertyRoute, Binding } from '../../../../Framework/Signum.React/Scripts/Reflection'
 import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
 import { TypeContext, FormGroupStyle } from '../../../../Framework/Signum.React/Scripts/TypeContext'
-import Typeahead from '../../../../Framework/Signum.React/Scripts/Components/Typeahead'
 import { Expression, ExpressionOrValue, DesignerContext, DesignerNode } from './NodeUtils'
 import { BaseNode, LineBaseNode } from './Nodes'
 import * as NodeUtils from './NodeUtils'
 import JavascriptCodeMirror from '../../Codemirror/JavascriptCodeMirror'
 import { DynamicViewEntity, DynamicViewMessage } from '../Signum.Entities.Dynamic'
-import { Modal, ModalBody, ModalHeader, ButtonToolbar, Button } from 'reactstrap'
 import { openModal, IModalProps } from '../../../../Framework/Signum.React/Scripts/Modals';
 import TypeHelpComponent from '../../TypeHelp/TypeHelpComponent'
 import ValueLineModal from '../../../../Framework/Signum.React/Scripts/ValueLineModal'
+import { Button, Modal, Typeahead } from '../../../../Framework/Signum.React/Scripts/Components';
+import { ModalHeaderButtons } from '../../../../Framework/Signum.React/Scripts/Components/Modal';
 
 export interface ExpressionOrValueProps {
     binding: Binding<any>;
@@ -396,45 +396,42 @@ interface DesignerModalProps extends React.Props<DesignerModal>, IModalProps {
     mainComponent: () => React.ReactElement<any>;
 }
 
-export class DesignerModal extends React.Component<DesignerModalProps, { isOpen: boolean }>  {
+export class DesignerModal extends React.Component<DesignerModalProps, { show: boolean }>  {
 
     constructor(props: DesignerModalProps) {
         super(props);
 
-        this.state = { isOpen: true };
+        this.state = { show: true };
     }
 
     okClicked?: boolean
     handleOkClicked = () => {
         this.okClicked = true;
-        this.setState({ isOpen: false });
+        this.setState({ show: false });
 
     }
 
     handleCancelClicked = () => {
-        this.setState({ isOpen: false });
+        this.setState({ show: false });
     }
 
-    handleOnClosed = () => {
+    handleOnExited = () => {
         this.props.onExited!(this.okClicked);
     }
 
     render() {
-        return <Modal size="lg" toggle={this.handleCancelClicked} isOpen={this.state.isOpen} onClosed={this.handleOnClosed} className="sf-selector-modal">
-            <ModalHeader toggle={this.handleCancelClicked}>
-                <h4 className="modal-title">
+        return (
+            <Modal size="lg" onHide={this.handleCancelClicked} show={this.state.show} onExited={this.handleOnExited} className="sf-selector-modal">
+                <ModalHeaderButtons
+                    onOk={this.handleOkClicked}
+                    onCancel={this.handleCancelClicked}>
                     {this.props.title}
-                </h4>
-                <ButtonToolbar>
-                    <Button className="sf-entity-button sf-close-button sf-ok-button" color="primary" onClick={this.handleOkClicked}>{JavascriptMessage.ok.niceToString()}</Button>
-                    <Button className="sf-entity-button sf-close-button sf-cancel-button" color="default" onClick={this.handleCancelClicked}>{JavascriptMessage.cancel.niceToString()}</Button>
-                </ButtonToolbar>
-            </ModalHeader>
-
-            <ModalBody>
-                {this.props.mainComponent()}
-            </ModalBody>
-        </Modal>;
+                </ModalHeaderButtons>
+                <div className="modal-body">
+                    {this.props.mainComponent()}
+                </div>
+            </Modal>
+        );
     }
 
     static show(title: React.ReactNode, mainComponent: () => React.ReactElement<any>): Promise<boolean | undefined> {

@@ -1,6 +1,4 @@
-﻿
-import * as React from 'react'
-import { Modal, ModalBody, ModalHeader, ButtonToolbar } from 'reactstrap'
+﻿import * as React from 'react'
 import { Dic } from '../../../../Framework/Signum.React/Scripts/Globals';
 import { openModal, IModalProps } from '../../../../Framework/Signum.React/Scripts/Modals';
 import { SelectorMessage } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
@@ -8,32 +6,34 @@ import { TypeInfo } from '../../../../Framework/Signum.React/Scripts/Reflection'
 import { DynamicViewMessage } from '../Signum.Entities.Dynamic'
 import * as NodeUtils from './NodeUtils'
 import { BaseNode } from './Nodes'
+import { Modal } from '../../../../Framework/Signum.React/Scripts/Components';
+import { ModalHeaderButtons } from '../../../../Framework/Signum.React/Scripts/Components/Modal';
 
 
 interface NodeSelectorModalProps extends React.Props<NodeSelectorModal>, IModalProps {
 }
 
-export default class NodeSelectorModal extends React.Component<NodeSelectorModalProps, { isOpen: boolean }>  {
+export default class NodeSelectorModal extends React.Component<NodeSelectorModalProps, { show: boolean }>  {
 
     constructor(props: NodeSelectorModalProps) {
         super(props);
 
-        this.state = { isOpen: true };
+        this.state = { show: true };
     }
 
 
     selectedValue: any;
     handleButtonClicked = (val: any) => {
         this.selectedValue = val;
-        this.setState({ isOpen: false });
+        this.setState({ show: false });
 
     }
 
     handleCancelClicked = () => {
-        this.setState({ isOpen: false });
+        this.setState({ show: false });
     }
 
-    handleOnClosed = () => {
+    handleOnExited = () => {
         this.props.onExited!(this.selectedValue);
     }
 
@@ -49,15 +49,11 @@ export default class NodeSelectorModal extends React.Component<NodeSelectorModal
             .groupsOf(nodes.length / 3, g => g.elements.length);
 
         return (
-            <Modal size="lg" toggle={this.handleCancelClicked} isOpen={this.state.isOpen} onClosed={this.handleOnClosed} className="sf-selector-modal">
-                <ModalHeader toggle={this.handleCancelClicked} >
-
-                    <h4 className="modal-title">
+            <Modal size="lg" onHide={this.handleCancelClicked} show={this.state.show} onExited={this.handleOnExited} className="sf-selector-modal">
+                <ModalHeaderButtons onClose={this.handleCancelClicked} >
                         {DynamicViewMessage.SelectATypeOfComponent.niceToString()}
-                    </h4>
-                </ModalHeader>
-
-                <ModalBody>
+                </ModalHeaderButtons>
+                <div className="modal-body">
                     <div className="row">
                         {
                             columns.map((c, i) =>
@@ -77,7 +73,7 @@ export default class NodeSelectorModal extends React.Component<NodeSelectorModal
                                 </div>)
                         }
                     </div>
-                </ModalBody>
+                </div>
             </Modal>
         );
     }

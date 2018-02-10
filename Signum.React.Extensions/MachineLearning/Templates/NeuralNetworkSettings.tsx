@@ -1,5 +1,4 @@
 ﻿import * as React from 'react'
-import { Popover, PopoverContent, PopoverTitle } from 'reactstrap';
 import { classes } from '../../../../Framework/Signum.React/Scripts/Globals'
 import { FormGroup, FormControlReadonly, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityList, EntityRepeater, EntityTable, StyleContext, OptionItem, LineBaseProps } from '../../../../Framework/Signum.React/Scripts/Lines'
 import { SearchControl, ValueSearchControl } from '../../../../Framework/Signum.React/Scripts/Search'
@@ -16,6 +15,7 @@ import { API } from '../PredictorClient';
 import FilterBuilderEmbedded from './FilterBuilderEmbedded';
 import { TypeReference } from '../../../../Framework/Signum.React/Scripts/Reflection';
 import { is } from '../../../../Framework/Signum.React/Scripts/Signum.Entities';
+import { UncontrolledPopover } from '../../../../Framework/Signum.React/Scripts/Components';
 
 export default class NeuralNetworkSettings extends React.Component<{ ctx: TypeContext<NeuralNetworkSettingsEntity> }> {
 
@@ -173,9 +173,13 @@ function withHelp(element: React.ReactElement<LineBaseProps>, text: React.ReactN
     var id = ctx.prefix + "_help";
 
     var label = (
-        <PopoverContainer id={id} popoverTitle={ctx.niceName()} popoverContent={text}>
-            <span>{ctx.niceName()} <i className="fa fa-question-circle" aria-hidden="true"></i></span>
-        </PopoverContainer>
+        <span>
+            <span id={id}>{ctx.niceName()} <i className="fa fa-question-circle" aria-hidden="true"></i></span>
+            <UncontrolledPopover placement="auto" target={id}>
+                <h3 className="popover-header">{ctx.niceName()}</h3>
+                <div className="popover-body">{text}</div>
+            </UncontrolledPopover>
+        </span>
     );
 
     return React.cloneElement(element, { labelText: label } as LineBaseProps);
@@ -220,50 +224,6 @@ export class DeviceLine extends React.Component<DeviceLineProps, DeviceLineState
         const ctx = this.props.ctx;
         return (
             <ValueLine ctx={ctx} comboBoxItems={(this.state.devices || []).map(a => ({ label: a, value: a }) as OptionItem)} valueLineType={"ComboBox"} valueHtmlAttributes={{ size: 1 }} />
-        );
-    }
-}
-
-
-export interface PopoverContainerProps {
-    id: string;
-    popoverTitle: React.ReactNode;
-    popoverContent: React.ReactNode;
-    placement?: any;
-    children: React.ReactElement<any>;
-}
-
-
-interface PopoverItemState {
-    popoverOpen: boolean;
-}
-
-
-class PopoverContainer extends React.Component<PopoverContainerProps, PopoverItemState> {
-    constructor(props: PopoverContainerProps) {
-        super(props);
-
-        this.toggle = this.toggle.bind(this);
-        this.state = {
-            popoverOpen: false
-        };
-    }
-
-    toggle() {
-        this.setState({
-            popoverOpen: !this.state.popoverOpen
-        });
-    }
-
-    render() {
-        return (
-            <span>
-                {React.cloneElement(this.props.children, { id: this.props.id, onClick: this.toggle })}
-                <Popover placement={this.props.placement} isOpen={this.state.popoverOpen} target={this.props.id} toggle={this.toggle}>
-                    <PopoverTitle>{this.props.popoverTitle}</PopoverTitle>
-                    <PopoverContent>{this.props.popoverContent}</PopoverContent>
-                </Popover>
-            </span>
         );
     }
 }

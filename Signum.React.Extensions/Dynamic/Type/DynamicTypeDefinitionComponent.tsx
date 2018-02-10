@@ -1,6 +1,5 @@
 ﻿import * as React from 'react'
 import * as Combobox from 'react-widgets/lib/Combobox'
-import { DropdownItem, Card, CardHeader } from 'reactstrap'
 import { FormGroup, FormControlReadonly, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityList, EntityRepeater } from '../../../../Framework/Signum.React/Scripts/Lines'
 import { classes, Dic } from '../../../../Framework/Signum.React/Scripts/Globals'
 import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
@@ -9,7 +8,6 @@ import { getQueryNiceName, Binding, EntityDataValues, EntityKindValues, EntityKi
 import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
 import { SearchControl } from '../../../../Framework/Signum.React/Scripts/Search'
 import { StyleContext, FormGroupStyle } from '../../../../Framework/Signum.React/Scripts/TypeContext'
-import Typeahead from '../../../../Framework/Signum.React/Scripts/Components/Typeahead'
 import QueryTokenBuilder from '../../../../Framework/Signum.React/Scripts/SearchControl/QueryTokenBuilder'
 import { ModifiableEntity, JavascriptMessage, EntityControlMessage, is, Lite, Entity, toLite } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
 import { QueryEntity, TypeEntity } from '../../../../Framework/Signum.React/Scripts/Signum.Entities.Basics'
@@ -31,6 +29,7 @@ import ValueLineModal from '../../../../Framework/Signum.React/Scripts/ValueLine
 import "./DynamicType.css"
 import { Tabs, Tab, UncontrolledTabs } from '../../../../Framework/Signum.React/Scripts/Components/Tabs';
 import CollapsableCard from '../../Basics/Templates/CollapsableCard';
+import { Typeahead } from '../../../../Framework/Signum.React/Scripts/Components';
 
 export interface DynamicTypeDesignContext {
     refreshView: () => void;
@@ -1184,10 +1183,13 @@ export class ValidatorRepeaterComponent extends React.Component<ValidatorRepeate
                 <div className="panel-group">
                     {
                         (this.props.property.validators || []).map((val, i) =>
-                            <Card key={i} color="warning">
-                                <CardHeader>{this.renderHeader(val, i)}</CardHeader>
-                                {registeredValidators[val.type].render && registeredValidators[val.type].render!(val, this.props.dc)}
-                            </Card>)
+                            <div className="card border-primary">
+                                <div className="card-header">{this.renderHeader(val, i)}</div>
+                                <div className="card-body text-primary">
+                                    {registeredValidators[val.type].render && registeredValidators[val.type].render!(val, this.props.dc)}
+                                </div>
+                            </div>
+                        )
                     }
                 </div>
                 <a href="#" title="Create Validator"

@@ -1,5 +1,4 @@
 ﻿import * as React from 'react'
-import { Card, CardHeader, Collapse } from "reactstrap";
 import { classes } from '../../../../Framework/Signum.React/Scripts/Globals'
 import CollapsableCard, { CollapsableCardProps } from './CollapsableCard';
 

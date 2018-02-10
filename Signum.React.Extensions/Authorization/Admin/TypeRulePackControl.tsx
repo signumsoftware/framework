@@ -1,5 +1,4 @@
 ﻿import * as React from 'react'
-import { Button } from 'reactstrap'
 import * as numbro from 'numbro'
 import { classes } from '../../../../Framework/Signum.React/Scripts/Globals'
 import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
@@ -26,6 +25,7 @@ import { QueryEntity, PropertyRouteEntity } from '../../../../Framework/Signum.R
 
 
 import "./AuthAdmin.css"
+import { Button } from '../../../../Framework/Signum.React/Scripts/Components';
 
 export default class TypesRulesPackControl extends React.Component<{ ctx: TypeContext<TypeRulePack> }, { filter: string }> implements IRenderButtons {
 

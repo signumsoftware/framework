@@ -1,5 +1,4 @@
 ﻿import * as React from 'react'
-import { DropdownItem, Dropdown, DropdownToggle, DropdownMenu } from 'reactstrap'
 import { API, TreeNode, TreeNodeState, fixState } from './TreeClient'
 import { Dic, classes, DomUtils } from '../../../Framework/Signum.React/Scripts/Globals'
 import * as Navigator from '../../../Framework/Signum.React/Scripts/Navigator'
@@ -24,6 +23,7 @@ import { getMixin } from "../../../Framework/Signum.React/Scripts/Signum.Entitie
 import { tryGetMixin } from "../../../Framework/Signum.React/Scripts/Signum.Entities";
 
 import "./TreeViewer.css"
+import { DropdownToggle, Dropdown, DropdownItem, DropdownMenu } from '../../../Framework/Signum.React/Scripts/Components';
 
 interface TreeViewerProps {
     typeName: string;

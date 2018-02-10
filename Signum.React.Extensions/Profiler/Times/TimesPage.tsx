@@ -1,5 +1,4 @@
 ﻿import * as React from 'react'
-import { TabPane, TabContent } from 'reactstrap'
 import * as numbro from 'numbro'
 import * as moment from 'moment'
 import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'

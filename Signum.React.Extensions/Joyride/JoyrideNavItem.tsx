@@ -1,6 +1,6 @@
 import * as React from 'react'
-import { NavItem } from 'reactstrap'
 import JoyrideComponent from "./JoyrideComponent";
+import { NavItem } from '../../../Framework/Signum.React/Scripts/Components';
 
 export interface JoyrideNavItemProps {
     getJoyrideComponent: () => JoyrideComponent;

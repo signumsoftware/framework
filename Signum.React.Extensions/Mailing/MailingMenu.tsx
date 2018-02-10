@@ -1,7 +1,6 @@
 ﻿
 import * as React from 'react'
 import { RouteComponentProps } from 'react-router'
-import { UncontrolledButtonDropdown, DropdownItem, DropdownToggle, DropdownMenu } from 'reactstrap'
 import { Dic, classes } from '../../../Framework/Signum.React/Scripts/Globals'
 import * as Finder from '../../../Framework/Signum.React/Scripts/Finder'
 import { ResultTable, FindOptions, FilterOption, QueryDescription } from '../../../Framework/Signum.React/Scripts/FindOptions'
@@ -11,6 +10,7 @@ import SearchControlLoaded from '../../../Framework/Signum.React/Scripts/SearchC
 import { EmailTemplateEntity, EmailMessageEntity } from './Signum.Entities.Mailing'
 import * as MailingClient from './MailingClient'
 import { saveFile } from "../../../Framework/Signum.React/Scripts/Services";
+import { UncontrolledDropdown, DropdownMenu, DropdownItem, DropdownToggle } from '../../../Framework/Signum.React/Scripts/Components';
 
 export interface MailingMenuProps {
     searchControl: SearchControlLoaded;
@@ -47,7 +47,7 @@ export default class MailingMenu extends React.Component<MailingMenuProps> {
         const label = <span><i className="fa fa-envelope-o"></i> &nbsp; {EmailMessageEntity.nicePluralName()}</span>;
 
         return (
-            <UncontrolledButtonDropdown id="mailingDropDown" className="sf-mailing-dropdown">
+            <UncontrolledDropdown id="mailingDropDown" className="sf-mailing-dropdown">
                 <DropdownToggle color="light" caret>{label as any}</DropdownToggle>
                 <DropdownMenu>
                     {
@@ -58,7 +58,7 @@ export default class MailingMenu extends React.Component<MailingMenuProps> {
                             </DropdownItem>)
                     }
                 </DropdownMenu>
-            </UncontrolledButtonDropdown>
+            </UncontrolledDropdown>
         );
     }
 

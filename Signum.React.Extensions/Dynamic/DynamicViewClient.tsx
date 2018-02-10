@@ -1,7 +1,6 @@
 
 import * as React from 'react'
 import { Route } from 'react-router'
-import * as Reactstrap from 'reactstrap'
 import * as QueryString from 'query-string'
 import { globalModules} from './View/GlobalModules'
 import { ajaxPost, ajaxGet } from '../../../Framework/Signum.React/Scripts/Services';
@@ -32,7 +31,7 @@ import * as NodeUtils from './View/NodeUtils' //Typings-only
 import MessageModal from "../../../Framework/Signum.React/Scripts/Modals/MessageModal";
 import { Dic } from "../../../Framework/Signum.React/Scripts/Globals";
 import * as LinkContainerModule from "../../../Framework/Signum.React/Scripts/LinkContainer";
-import * as TabsModule from "../../../Framework/Signum.React/Scripts/Components/Tabs";
+import * as Components from "../../../Framework/Signum.React/Scripts/Components";
 
 
 export function start(options: { routes: JSX.Element[] }) {
@@ -349,84 +348,25 @@ export function asOverrideFunction(dvo: DynamicViewOverrideEntity): (vr: ViewRep
     var ValueSearchControl = Search.ValueSearchControl;
     var ValueSearchControlLine = Search.ValueSearchControlLine;
 
-    // Reactstrap 
-    var Alert = Reactstrap.Alert;
-    var Badge = Reactstrap.Badge;
-    var Breadcrumb = Reactstrap.Breadcrumb;
-    var BreadcrumbItem = Reactstrap.BreadcrumbItem;
-    var Button = Reactstrap.Button;
-    var ButtonDropdown = Reactstrap.ButtonDropdown;
-    var ButtonGroup = Reactstrap.ButtonGroup;
-    var ButtonToolbar = Reactstrap.ButtonToolbar;
-    var Card = Reactstrap.Card;
-    var CardBlock = Reactstrap.CardBlock;
-    var CardColumns = Reactstrap.CardColumns;
-    var CardDeck = Reactstrap.CardDeck;
-    var CardFooter = Reactstrap.CardFooter;
-    var CardGroup = Reactstrap.CardGroup;
-    var CardHeader = Reactstrap.CardHeader;
-    var CardImg = Reactstrap.CardImg;
-    var CardImgOverlay = Reactstrap.CardImgOverlay;
-    var CardLink = Reactstrap.CardLink;
-    var CardSubtitle = Reactstrap.CardSubtitle;
-    var CardText = Reactstrap.CardText;
-    var CardTitle = Reactstrap.CardTitle;
-    var Col = Reactstrap.Col;
-    var Collapse = Reactstrap.Collapse;
-    var Container = Reactstrap.Container;
-    var Dropdown = Reactstrap.Dropdown;
-    var DropdownItem = Reactstrap.DropdownItem;
-    var DropdownMenu = Reactstrap.DropdownMenu;
-    var DropdownToggle = Reactstrap.DropdownToggle;
-    var Fade = Reactstrap.Fade;
-    var Form = Reactstrap.Form;
-    var FormFeedback = Reactstrap.FormFeedback;
-    //var FormGroup = Reactstrap.FormGroup;
-    var FormText = Reactstrap.FormText;
-    var Input = Reactstrap.Input;
-    var InputGroup = Reactstrap.InputGroup;
-    var InputGroupAddon = Reactstrap.InputGroupAddon;
-    var InputGroupButton = Reactstrap.InputGroupButton;
-    var Jumbotron = Reactstrap.Jumbotron;
-    var Label = Reactstrap.Label;
-    var ListGroup = Reactstrap.ListGroup;
-    var ListGroupItem = Reactstrap.ListGroupItem;
-    var ListGroupItemHeading = Reactstrap.ListGroupItemHeading;
-    var ListGroupItemText = Reactstrap.ListGroupItemText;
-    var Media = Reactstrap.Media;
-    var Modal = Reactstrap.Modal;
-    var ModalBody = Reactstrap.ModalBody;
-    var ModalFooter = Reactstrap.ModalFooter;
-    var ModalHeader = Reactstrap.ModalHeader;
-    var Nav = Reactstrap.Nav;
-    var Navbar = Reactstrap.Navbar;
-    var NavbarBrand = Reactstrap.NavbarBrand;
-    var NavbarToggler = Reactstrap.NavbarToggler;
-    var NavItem = Reactstrap.NavItem;
-    var NavLink = Reactstrap.NavLink;
-    var Pagination = Reactstrap.Pagination;
-    var PaginationItem = Reactstrap.PaginationItem;
-    var PaginationLink = Reactstrap.PaginationLink;
-    var Popover = Reactstrap.Popover;
-    var PopoverContent = Reactstrap.PopoverContent;
-    var PopoverTitle = Reactstrap.PopoverTitle;
-    var Progress = Reactstrap.Progress;
-    var Row = Reactstrap.Row;
-    var TabContent = Reactstrap.TabContent;
-    var Table = Reactstrap.Table;
-    var TabPane = Reactstrap.TabPane;
-    var PopperContent = Reactstrap.PopperContent;
-    var Tooltip = Reactstrap.Tooltip;
-    var UncontrolledAlert = Reactstrap.UncontrolledAlert;
-    var UncontrolledButtonDropdown = Reactstrap.UncontrolledButtonDropdown;
-    var UncontrolledDropdown = Reactstrap.UncontrolledDropdown;
-    var UncontrolledTooltip = Reactstrap.UncontrolledTooltip;
+    // Components 
+    var Button = Components.Button;
+    var Dropdown = Components.Dropdown;
+    var DropdownItem = Components.DropdownItem;
+    var DropdownMenu = Components.DropdownMenu;
+    var DropdownToggle = Components.DropdownToggle;
+    var Fade = Components.Fade;
+    var Modal = Components.Modal;
+    var NavItem = Components.NavItem;
+    var PopperContent = Components.PopperContent;
+    var Tooltip = Components.Tooltip;
+    var UncontrolledDropdown = Components.UncontrolledDropdown;
+    var UncontrolledTooltip = Components.UncontrolledTooltip;
+    var Tab = Components.Tab;
+    var Tabs = Components.Tabs;
+    var UncontrolledTabs = Components.UncontrolledTabs;
 
     // Signum
     var LinkContainer = LinkContainerModule.LinkContainer;
-    var Tab = TabsModule.Tab;
-    var Tabs = TabsModule.Tabs;
-    var UncontrolledTabs = TabsModule.UncontrolledTabs;
     
     var modules = globalModules;
 

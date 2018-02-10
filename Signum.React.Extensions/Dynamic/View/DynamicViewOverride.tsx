@@ -1,5 +1,4 @@
 ﻿import * as React from 'react'
-import { DropdownItem } from 'reactstrap'
 import { classes } from '../../../../Framework/Signum.React/Scripts/Globals'
 import * as Constructor from '../../../../Framework/Signum.React/Scripts/Constructor'
 import { DynamicViewOverrideEntity, DynamicViewMessage } from '../Signum.Entities.Dynamic'
@@ -16,6 +15,7 @@ import TypeHelpButtonBarComponent from '../../TypeHelp/TypeHelpButtonBarComponen
 import ValueLineModal from '../../../../Framework/Signum.React/Scripts/ValueLineModal'
 import MessageModal from '../../../../Framework/Signum.React/Scripts/Modals/MessageModal'
 import * as Nodes from '../../Dynamic/View/Nodes';
+import { DropdownItem } from '../../../../Framework/Signum.React/Scripts/Components';
 
 
 interface DynamicViewOverrideComponentProps {

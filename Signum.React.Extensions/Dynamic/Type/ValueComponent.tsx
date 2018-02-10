@@ -1,5 +1,4 @@
 ﻿import * as React from 'react'
-import { Button } from 'reactstrap'
 import { Dic, classes } from '../../../../Framework/Signum.React/Scripts/Globals'
 import { getTypeInfo, Binding, PropertyRoute } from '../../../../Framework/Signum.React/Scripts/Reflection'
 import { DynamicTypeDesignContext } from './DynamicTypeDefinitionComponent'

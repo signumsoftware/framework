@@ -2,7 +2,6 @@
 import * as React from 'react'
 import { Route } from 'react-router'
 import { Dic, classes } from '../../../Framework/Signum.React/Scripts/Globals';
-import { Button, UncontrolledTooltip, DropdownItem } from "reactstrap"
 import { ajaxPost, ajaxGet } from '../../../Framework/Signum.React/Scripts/Services';
 import { EntitySettings, ViewPromise } from '../../../Framework/Signum.React/Scripts/Navigator'
 import * as Navigator from '../../../Framework/Signum.React/Scripts/Navigator'
@@ -17,6 +16,7 @@ import * as AuthClient from '../Authorization/AuthClient'
 import { ImportRoute } from "../../../Framework/Signum.React/Scripts/AsyncImport";
 
 import "./Processes.css"
+import { DropdownItem, UncontrolledTooltip } from '../../../Framework/Signum.React/Scripts/Components';
 
 export function start(options: { routes: JSX.Element[], packages: boolean, packageOperations: boolean }) {
 

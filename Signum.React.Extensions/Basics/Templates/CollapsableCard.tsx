@@ -1,7 +1,7 @@
 ﻿import * as React from 'react'
 import { classes } from '../../../../Framework/Signum.React/Scripts/Globals'
-import { CardTitle, Card, Collapse, CardBody } from 'reactstrap';
 import { BsColor } from '../../../../Framework/Signum.React/Scripts/Components/Basic';
+import { Collapse } from '../../../../Framework/Signum.React/Scripts/Components';
 
 
 export interface CollapsableCardProps {
@@ -57,22 +57,23 @@ export default class CollapsableCard extends React.Component<CollapsableCardProp
             this.props.isOpen;
 
         return (
-            <Card color={this.props.color} outline={true}>
-                <CardBody>
-                    <CardTitle>
-                        {this.props.header}
-                        {(this.props.collapsable == undefined || this.props.collapsable == true) &&
-                            <span
-                                className={classes(this.state.isRTL ? "pull-left" : "pull-right", "fa", isOpen ? "fa-chevron-up" : "fa-chevron-down")}
-                                style={{ cursor: "pointer" }}
-                                onClick={this.handleToggle}>
-                            </span>}
-                    </CardTitle>
-                    <Collapse isOpen={isOpen}>
+            <div className="card border-primary mb-3">
+                <div className="card-header">
+                    {this.props.header}
+                    {(this.props.collapsable == undefined || this.props.collapsable == true) &&
+                        <span
+                            className={classes(this.state.isRTL ? "pull-left" : "pull-right", "fa", isOpen ? "fa-chevron-up" : "fa-chevron-down")}
+                            style={{ cursor: "pointer" }}
+                            onClick={this.handleToggle}>
+                        </span>
+                    }
+                </div>
+                <Collapse isOpen={isOpen}>
+                    <div className="card-body text-primary">
                         {this.props.children}
-                    </Collapse>
-                </CardBody>
-            </Card>
+                    </div>
+                </Collapse>
+            </div>
         );
     }
 }

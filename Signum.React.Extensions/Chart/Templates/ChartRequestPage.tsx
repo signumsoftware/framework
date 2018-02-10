@@ -1,5 +1,4 @@
 ﻿import * as React from 'react'
-import { ButtonDropdown, DropdownItem, TabContent, TabPane } from 'reactstrap'
 import * as QueryString from "query-string"
 import { Dic, classes, ifError } from '../../../../Framework/Signum.React/Scripts/Globals'
 import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'

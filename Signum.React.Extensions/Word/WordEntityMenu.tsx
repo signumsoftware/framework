@@ -1,7 +1,6 @@
 ﻿
 import * as React from 'react'
 import { RouteComponentProps } from 'react-router'
-import { UncontrolledButtonDropdown, DropdownToggle, DropdownItem } from 'reactstrap'
 import { Dic, classes } from '../../../Framework/Signum.React/Scripts/Globals'
 import * as Finder from '../../../Framework/Signum.React/Scripts/Finder'
 import { ResultTable, FindOptions, FilterOption, QueryDescription } from '../../../Framework/Signum.React/Scripts/FindOptions'
@@ -11,6 +10,7 @@ import SearchControlLoaded from '../../../Framework/Signum.React/Scripts/SearchC
 import { WordTemplateEntity, WordTemplateMessage } from './Signum.Entities.Word'
 import * as WordClient from './WordClient'
 import { saveFile } from "../../../Framework/Signum.React/Scripts/Services";
+import { UncontrolledDropdown, DropdownToggle, DropdownItem } from '../../../Framework/Signum.React/Scripts/Components';
 
 export interface WordEntityMenuProps {
     entityPack: EntityPack<Entity>;
@@ -46,7 +46,7 @@ export default class WordEntityMenu extends React.Component<WordEntityMenuProps>
         const label = <span><i className="fa fa-file-word-o"></i>&nbsp;{WordTemplateMessage.WordReport.niceToString()}</span>;
 
         return (
-            <UncontrolledButtonDropdown id="wordMenu" className="sf-word-dropdown">
+            <UncontrolledDropdown id="wordMenu" className="sf-word-dropdown">
                 <DropdownToggle>{label as any}</DropdownToggle>
                 {
                     this.props.entityPack.wordTemplates!.map((wt, i) =>
@@ -55,7 +55,7 @@ export default class WordEntityMenu extends React.Component<WordEntityMenuProps>
                             {wt.toStr}
                         </DropdownItem>)
                 }
-            </UncontrolledButtonDropdown>
+            </UncontrolledDropdown>
         );
     }
 

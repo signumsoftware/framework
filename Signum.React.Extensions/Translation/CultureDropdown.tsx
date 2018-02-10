@@ -1,5 +1,4 @@
 ﻿import * as React from 'react'
-import { UncontrolledDropdown, DropdownItem, DropdownMenu, DropdownToggle } from 'reactstrap'
 import { Route } from 'react-router'
 import { Dic } from '../../../Framework/Signum.React/Scripts/Globals';
 import { ajaxPost, ajaxGet } from '../../../Framework/Signum.React/Scripts/Services';
@@ -10,6 +9,7 @@ import { EntityOperationSettings } from '../../../Framework/Signum.React/Scripts
 import * as Operations from '../../../Framework/Signum.React/Scripts/Operations'
 import { CultureInfoEntity } from '../Basics/Signum.Entities.Basics'
 import * as CultureClient from './CultureClient'
+import { UncontrolledDropdown, DropdownToggle, DropdownMenu, DropdownItem } from '../../../Framework/Signum.React/Scripts/Components';
 
 export interface CultureDropdownProps {
 }

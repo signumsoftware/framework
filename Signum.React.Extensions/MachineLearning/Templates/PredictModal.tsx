@@ -1,5 +1,4 @@
 ﻿import { PredictorEntity } from "../Signum.Entities.MachineLearning";
-import { Modal, ModalHeader, ModalBody } from 'reactstrap'
 import * as React from "react";
 import * as Navigator from "../../../../Framework/Signum.React/Scripts/Navigator";
 import { IModalProps, openModal } from "../../../../Framework/Signum.React/Scripts/Modals";
@@ -14,6 +13,8 @@ import { PropertyRoute } from "../../../../Framework/Signum.React/Scripts/Reflec
 import { Binding } from "../../../../Framework/Signum.React/Scripts/Reflection";
 import { is } from "../../../../Framework/Signum.React/Scripts/Signum.Entities";
 import { isLite } from "../../../../Framework/Signum.React/Scripts/Signum.Entities";
+import { Modal } from "../../../../Framework/Signum.React/Scripts/Components";
+import { ModalHeaderButtons } from "../../../../Framework/Signum.React/Scripts/Components/Modal";
 
 
 interface PredictModalProps extends IModalProps {
@@ -22,7 +23,7 @@ interface PredictModalProps extends IModalProps {
 }
 
 interface PredictModalState {
-    isOpen: boolean;
+    show: boolean;
     predict: PredictRequest;
     hasChanged: boolean;
 }
@@ -31,14 +32,14 @@ export class PredictModal extends React.Component<PredictModalProps, PredictModa
 
     constructor(props: PredictModalProps) {
         super(props);
-        this.state = { isOpen: true, predict: props.initialPredict, hasChanged: false };
+        this.state = { show: true, predict: props.initialPredict, hasChanged: false };
     }
 
-    handleOnToggle = () => {
-        this.setState({ isOpen: false });
+    handleOnClose = () => {
+        this.setState({ show: false });
     }
 
-    handleOnClosed = () => {
+    handleOnExited = () => {
         this.props.onExited!(undefined);
     }
 
@@ -59,15 +60,15 @@ export class PredictModal extends React.Component<PredictModalProps, PredictModa
         var sctx = new StyleContext(undefined, {});
 
         return (
-            <Modal toggle={this.handleOnToggle} onClosed={this.handleOnClosed} isOpen={this.state.isOpen} className="message-modal">
-                <ModalHeader toggle={this.handleOnToggle}>
+            <Modal onHide={this.handleOnClose} onExited={this.handleOnExited} show={this.state.show} className="message-modal">
+                <ModalHeaderButtons onClose={this.handleOnClose}>
                     <h4 className={"modal-title"}>
                         {e && (<a href={Navigator.navigateRoute(e)} target="_blank" style={{ float: "right", marginRight: "20px" }}>{e.toStr}</a>)}
                         {p.predictor.toStr}<br />
                         <small>{PredictorEntity.niceName()}&nbsp;{p.predictor.id} (<a href={Navigator.navigateRoute(p.predictor)} target="_blank">{EntityControlMessage.View.niceToString()}</a>)</small>
                     </h4>
-                </ModalHeader>
-                <ModalBody>
+                </ModalHeaderButtons>
+                <div className="modal-body">
                     <div>
                         {p.columns.filter(c => c.usage == "Input").map((col, i) =>
                             <PredictLine key={i} sctx={sctx} hasOriginal={p.hasOriginal} hasChanged={hasChanged} binding={Binding.create(col, c => c.value)} usage={col.usage} token={col.token} onChange={this.hangleOnChange} />)}
@@ -77,7 +78,7 @@ export class PredictModal extends React.Component<PredictModalProps, PredictModa
                         {p.columns.filter(c => c.usage == "Output").map((col, i) =>
                             <PredictLine key={i} sctx={sctx} hasOriginal={p.hasOriginal} hasChanged={hasChanged} binding={Binding.create(col, c => c.value)} usage={col.usage} token={col.token} onChange={this.hangleOnChange} />)}
                     </div>
-                </ModalBody>
+                </div>
             </Modal>
         );
     }

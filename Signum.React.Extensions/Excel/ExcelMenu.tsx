@@ -1,7 +1,6 @@
 ﻿
 import * as React from 'react'
 import { RouteComponentProps } from 'react-router'
-import { ButtonDropdown, DropdownItem, DropdownMenu, DropdownToggle } from 'reactstrap'
 import { Dic, classes } from '../../../Framework/Signum.React/Scripts/Globals'
 import * as Finder from '../../../Framework/Signum.React/Scripts/Finder'
 import { ResultTable, FindOptions, FilterOption, QueryDescription } from '../../../Framework/Signum.React/Scripts/FindOptions'
@@ -10,6 +9,7 @@ import * as Navigator from '../../../Framework/Signum.React/Scripts/Navigator'
 import SearchControlLoaded from '../../../Framework/Signum.React/Scripts/SearchControl/SearchControlLoaded'
 import { ExcelReportEntity, ExcelMessage } from './Signum.Entities.Excel'
 import * as ExcelClient from './ExcelClient'
+import { DropdownMenu, DropdownToggle, Dropdown, DropdownItem } from '../../../Framework/Signum.React/Scripts/Components';
 
 export interface ExcelMenuProps {
     searchControl: SearchControlLoaded;
@@ -69,7 +69,7 @@ export default class ExcelMenu extends React.Component<ExcelMenuProps, { excelRe
 
         const excelReports = this.state.excelReport;
         return (
-            <ButtonDropdown id="userQueriesDropDown" className="sf-userquery-dropdown"
+            <Dropdown id="userQueriesDropDown" className="sf-userquery-dropdown"
                 isOpen={this.state.isOpen} toggle={this.handleSelectedToggle}>
                 <DropdownToggle color="light" caret>
                     {label as any}
@@ -88,7 +88,7 @@ export default class ExcelMenu extends React.Component<ExcelMenuProps, { excelRe
                     <DropdownItem onSelect={this.handleAdmnister}>{ExcelMessage.Administer.niceToString()}</DropdownItem>
                     <DropdownItem onSelect={this.handleCreate}>{ExcelMessage.CreateNew.niceToString()}</DropdownItem>
                 </DropdownMenu>
-            </ButtonDropdown>
+            </Dropdown>
         );
     }
 }
