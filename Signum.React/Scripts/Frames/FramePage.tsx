@@ -112,9 +112,9 @@ export default class FramePage extends React.Component<FramePageProps, FramePage
     }
 
 
-    entityComponent?: React.Component<any, any> | null;
+    entityComponent: React.Component<any, any>;
 
-    setComponent(c: React.Component<any, any> | null) {
+    setComponent(c: React.Component<any, any>) {
         if (c && this.entityComponent != c) {
             this.entityComponent = c;
             this.forceUpdate();
@@ -178,7 +178,7 @@ export default class FramePage extends React.Component<FramePageProps, FramePage
                 <ValidationErrors entity={this.state.pack.entity} ref={ve => this.validationErrors = ve}/>
                 { embeddedWidgets.top }
                 <div className="sf-main-control" data-test-ticks={new Date().valueOf() } data-main-entity={entityInfo(ctx.value) }>
-                    {this.state.getComponent && React.cloneElement(this.state.getComponent(ctx),  { ref: (c: React.Component<any, any> | null) => this.setComponent(c) }) }
+                    {this.state.getComponent && React.cloneElement(this.state.getComponent(ctx),  { ref: (c: React.Component<any, any>) => this.setComponent(c) }) }
                 </div>
                 { embeddedWidgets.bottom }
             </div>

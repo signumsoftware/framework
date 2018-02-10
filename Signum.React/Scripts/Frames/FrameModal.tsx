@@ -125,7 +125,7 @@ export default class FrameModal extends React.Component<FrameModalProps, FrameMo
             .then(c => this.setState({ getComponent: c }));
     }
 
-    okClicked: boolean = false;
+    okClicked: boolean;
     handleOkClicked = () => {
         if (this.hasChanges() &&
             (this.props.requiresSaveOperation != undefined ? this.props.requiresSaveOperation : Navigator.typeRequiresSaveOperation(this.state.pack!.entity.Type))) {
@@ -213,9 +213,9 @@ export default class FrameModal extends React.Component<FrameModalProps, FrameMo
         );
     }
 
-    entityComponent?: React.Component<any, any> | null;
+    entityComponent: React.Component<any, any>;
 
-    setComponent(c: React.Component<any, any> | null) {
+    setComponent(c: React.Component<any, any>) {
         if (c && this.entityComponent != c) {
             this.entityComponent = c;
             this.forceUpdate();
@@ -252,7 +252,7 @@ export default class FrameModal extends React.Component<FrameModalProps, FrameMo
                 {this.entityComponent && <ButtonBar frame={frame} pack={pack} isOperationVisible={this.props.isOperationVisible} />}
                 <ValidationErrors entity={pack.entity} ref={ve => this.validationErrors = ve} />
                 <div className="sf-main-control" data-test-ticks={new Date().valueOf()} data-main-entity={entityInfo(ctx.value)}>
-                    {this.state.getComponent && React.cloneElement(this.state.getComponent(ctx), { ref: (c: React.Component<any, any> | null) => this.setComponent(c) })}
+                    {this.state.getComponent && React.cloneElement(this.state.getComponent(ctx), { ref: (c: React.Component<any, any>) => this.setComponent(c) })}
                 </div>
             </ModalBody>
         );

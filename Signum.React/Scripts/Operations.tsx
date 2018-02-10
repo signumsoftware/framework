@@ -122,12 +122,6 @@ export class ConstructorOperationContext<T extends Entity> {
     settings: ConstructorOperationSettings<T>;
     typeInfo: TypeInfo;
 
-    constructor(operationInfo: OperationInfo, settings: ConstructorOperationSettings<T>, typeInfo: TypeInfo) {
-        this.operationInfo = operationInfo;
-        this.settings = settings;
-        this.typeInfo = typeInfo;
-    }
-
     defaultConstruct(...args: any[]): Promise<EntityPack<T> | undefined> {
         return API.construct<T>(this.typeInfo.name, this.operationInfo.key, ...args);
     }
@@ -177,14 +171,8 @@ export class ContextualOperationContext<T extends Entity> {
     event?: React.MouseEvent<any>;
     onContextualSuccess?: (pack: API.ErrorReport) => void;
     onConstructFromSuccess?: (pack: EntityPack<Entity>) => void;
-
     defaultContextualClick(...args: any[]) {
         defaultContextualClick(this, ...args);
-    }
-
-    constructor(operationInfo: OperationInfo, context: ContextualItemsContext<T>) {
-        this.operationInfo = operationInfo;
-        this.context = context;
     }
 }
 
@@ -194,10 +182,11 @@ export class EntityOperationContext<T extends Entity> {
     {
         if (!ctx.frame)
             throw new Error("a frame is necessary");
-        var oi = getTypeInfo(ctx.value.Type).operations![operation.key!];
-
-        var result = new EntityOperationContext<T>(ctx.frame, ctx.value, oi);
+        var result = new EntityOperationContext<T>();
+        result.frame = ctx.frame;
+        result.entity = ctx.value;
         result.settings = getSettings(operation) as EntityOperationSettings<T>;
+        result.operationInfo = getTypeInfo(ctx.value.Type).operations![operation.key!];
         result.canExecute = undefined;
         return result;
     }
@@ -213,12 +202,6 @@ export class EntityOperationContext<T extends Entity> {
     onExecuteSuccess?: (pack: EntityPack<T>) => void;
     onConstructFromSuccess?: (pack: EntityPack<Entity>) => void;
     onDeleteSuccess?: () => void;
-
-    constructor(frame: EntityFrame, entity: T, operationInfo: OperationInfo) {
-        this.frame = frame;
-        this.entity = entity;
-        this.operationInfo = operationInfo;
-    }
 
     defaultClick(...args: any[]) {
         defaultOnClick(this, ...args);

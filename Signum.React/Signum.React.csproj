@@ -28,7 +28,7 @@
     <UseGlobalApplicationHostFile />
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
-    <TypeScriptToolsVersion>2.7</TypeScriptToolsVersion>
+    <TypeScriptToolsVersion>2.6</TypeScriptToolsVersion>
     <Use64BitIISExpress />
     <DockerComposeProjectPath>..\..\docker-compose.dcproj</DockerComposeProjectPath>
   </PropertyGroup>
@@ -150,6 +150,7 @@
     <Compile Include="Facades\SignumControllerFactory.cs" />
     <Compile Include="Filters\SignumExceptionFilterAttribute.cs" />
     <Compile Include="Filters\ValidateModelFilterAttribute.cs" />
+    <Compile Include="Filters\VersionFilterAttribute.cs" />
     <Compile Include="JsonConverters\EntityJsonConverter.cs" />
     <Compile Include="JsonConverters\JsonSerializerExtensions.cs" />
     <Compile Include="JsonConverters\ArgsJsonConverter.cs" />
@@ -175,6 +176,7 @@
     <TypeScriptCompile Include="Scripts\Components\ModalDialog.tsx" />
     <TypeScriptCompile Include="Scripts\Components\Tabs.tsx" />
     <Content Include="Scripts\Frames\MenuIcons.css" />
+    <Content Include="Scripts\Frames\VersionChangedAlert.css" />
     <Content Include="Scripts\SearchControl\ColumnBuilder.css" />
     <Content Include="Scripts\SearchControl\QueryTokenBuilder.css" />
     <Content Include="Scripts\SearchControl\FilterBuilder.css" />
@@ -225,6 +227,7 @@
     <TypeScriptCompile Include="Scripts\Exceptions\ExceptionClient.tsx" />
     <Content Include="Scripts\fetchWithAbort.js" />
     <TypeScriptCompile Include="Scripts\Frames\ContainerToggle.tsx" />
+    <TypeScriptCompile Include="Scripts\Frames\VersionChangedAlert.tsx" />
     <TypeScriptCompile Include="Scripts\Frames\Notify.tsx" />
     <TypeScriptCompile Include="Scripts\Frames\OrderUtils.tsx" />
     <TypeScriptCompile Include="Scripts\Frames\ValidationErrors.tsx" />

@@ -1,0 +1,16 @@
+﻿.version-alert {
+    text-align:center;
+    margin-top:10px;
+    margin-bottom: 0px;
+    font-size: 1.3em;
+}
+
+.blink {
+    animation: blinker 2s linear infinite;
+}
+
+@keyframes blinker {
+    50% {
+        opacity: 0.5;
+    }
+}

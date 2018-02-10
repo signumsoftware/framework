@@ -203,7 +203,10 @@ Lose changes?")]
     {
         AConnectionWithTheServerIsNecessaryToContinue,
         [Description("Sesion Expired")]
-        SessionExpired
+        SessionExpired,
+        [Description("A new version has just been deployed! Save changes and {0}")]
+        ANewVersionHasJustBeenDeployedSaveChangesAnd0,
+        Refresh,
     }
 
 

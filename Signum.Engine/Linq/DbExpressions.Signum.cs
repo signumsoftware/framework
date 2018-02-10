@@ -87,8 +87,9 @@ namespace Signum.Engine.Linq
         public readonly ReadOnlyCollection<FieldBinding> Bindings;
 
         public readonly FieldEmbedded FieldEmbedded; //used for updates
+        public readonly Table ViewTable; //used for updates
 
-        public EmbeddedEntityExpression(Type type, Expression hasValue, IEnumerable<FieldBinding> bindings, FieldEmbedded fieldEmbedded)
+        public EmbeddedEntityExpression(Type type, Expression hasValue, IEnumerable<FieldBinding> bindings, FieldEmbedded fieldEmbedded, Table viewTable)
             : base(DbExpressionType.EmbeddedInit, type)
         {
             if (bindings == null)
@@ -102,6 +103,7 @@ namespace Signum.Engine.Linq
             Bindings = bindings.ToReadOnly();
 
             FieldEmbedded = fieldEmbedded; 
+            ViewTable = viewTable;
         }
 
         public Expression GetBinding(FieldInfo fi)
@@ -123,6 +125,13 @@ namespace Signum.Engine.Linq
         protected override Expression Accept(DbExpressionVisitor visitor)
         {
             return visitor.VisitEmbeddedEntity(this);
+        }
+
+        public Expression GetViewId()
+        {
+            var field = ViewTable.GetViewPrimaryKey();
+
+            return this.Bindings.SingleEx(b => ReflectionTools.FieldEquals(b.FieldInfo, field.FieldInfo)).Binding;
         }
     }
 
@@ -455,7 +464,7 @@ namespace Signum.Engine.Linq
 
     internal class PrimaryKeyExpression : DbExpression
     {
-        static Variable<bool> PreferVariableNameVariable = Statics.ThreadVariable<bool>("preferParameterName");
+        public static Variable<bool> PreferVariableNameVariable = Statics.ThreadVariable<bool>("preferParameterName");
 
         public static IDisposable PreferVariableName()
         {
@@ -473,11 +482,6 @@ namespace Signum.Engine.Linq
         {
             if (value.Type.Nullify() != value.Type)
                 throw new InvalidOperationException("value should be nullable");
-
-            if(value is ConstantExpression ce && ce.Value is PrimaryKey pk && pk.VariableName != null && PreferVariableNameVariable.Value)
-            {
-                this.Value = new SqlVariableExpression(pk.VariableName, value.Type);
-            }
 
             this.Value = value;
         }

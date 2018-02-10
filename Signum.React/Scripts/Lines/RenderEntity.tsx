@@ -113,9 +113,9 @@ export class RenderEntity extends React.Component<RenderEntityProps, RenderEntit
         return (result instanceof ViewPromise ? Anonymous : result);
     }
 
-    entityComponent?: React.Component<any, any> | null;
+    entityComponent: React.Component<any, any>;
 
-    setComponent(c: React.Component<any, any> | null) {
+    setComponent(c: React.Component<any, any>) {
         if (c && this.entityComponent != c) {
             this.entityComponent = c;
             this.forceUpdate();
@@ -165,7 +165,7 @@ export class RenderEntity extends React.Component<RenderEntityProps, RenderEntit
 
         return (
             <div data-propertypath={ctx.propertyPath}>
-                {React.cloneElement(getComponent(newCtx), { ref: (c: React.Component<any, any> | null) => this.setComponent(c) }) }
+                {React.cloneElement(getComponent(newCtx), { ref: (c: React.Component<any, any>) => this.setComponent(c) }) }
             </div>
         );
     }

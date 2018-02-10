@@ -48,7 +48,10 @@ export function construct(type: string | Type<any>): Promise<EntityPack<Modifiab
 
                     const settings = Operations.getSettings(oi.key) as Operations.ConstructorOperationSettings<Entity>;
 
-                    var ctx = new Operations.ConstructorOperationContext(oi, settings, ti);
+                    var ctx = new Operations.ConstructorOperationContext();
+                    ctx.operationInfo = oi;
+                    ctx.settings = settings;
+                    ctx.typeInfo = ti;
 
                     if (settings && settings.onConstruct)
                         return settings.onConstruct(ctx);

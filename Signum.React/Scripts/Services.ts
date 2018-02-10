@@ -10,6 +10,7 @@ export interface AjaxOptions {
     avoidThrowError?: boolean;
     avoidGraphExplorer?: boolean;
     avoidAuthToken?: boolean;
+    avoidVersionCheck?: boolean;
 
     
     headers?: { [index: string]: string };
@@ -82,6 +83,11 @@ export function ajaxPostRaw(options: AjaxOptions, data: any): Promise<Response> 
 
 export function wrapRequest(options: AjaxOptions, makeCall: () => Promise<Response>): Promise<Response>
 {
+    if (!options.avoidVersionCheck) {
+        const call = makeCall;
+        makeCall = () => VersionFilter.onVersionFilter(call);
+    }
+
     if (!options.avoidThrowError) {
         const call = makeCall;
         makeCall = () => ThrowErrorFilter.throwError(call);
@@ -110,6 +116,36 @@ export module AuthTokenFilter {
     export let addAuthToken: (options: AjaxOptions, makeCall: () => Promise<Response>) => Promise<Response>;
 }
 
+export module VersionFilter {
+    export let initialVersion: string | undefined;
+    export let latestVersion: string | undefined;
+
+    export let versionChanged: () => void = () => console.warn("New Server version detected, handle VersionFilter.versionChanged to inform user");
+
+    export function onVersionFilter(makeCall: () => Promise<Response>): Promise<Response> {
+
+        function changeVersion(response: Response) {
+            var ver = response.headers.get("X-App-Version");
+
+            if (!ver)
+                return;
+
+            if (initialVersion == undefined) {
+                initialVersion = ver;
+                latestVersion = ver;
+            }
+
+            if (latestVersion != ver) {
+                latestVersion = ver;
+                if (versionChanged)
+                    versionChanged();
+            }
+        }
+
+        return makeCall().then(resp => { changeVersion(resp); return resp; });
+    }
+
+}
 
 export module NotifyPendingFilter {
     export let notifyPendingRequests: (pendingRequests: number) => void = () => { };

@@ -28,7 +28,7 @@ export default class SearchPage extends React.Component<SearchPageProps, SearchP
         this.state = this.calculateState(this.props);
     }
 
-    searchControl!: SearchControl;
+    searchControl: SearchControl;
 
     componentWillReceiveProps(nextProps: SearchPageProps) {
         this.setState(this.calculateState(nextProps));
@@ -73,7 +73,7 @@ export default class SearchPage extends React.Component<SearchPageProps, SearchP
 
     changeUrl() {
 
-        const scl = this.searchControl.searchControlLoaded!; 
+        const scl = this.searchControl.searchControlLoaded; 
 
         const findOptions = Finder.toFindOptions(scl.props.findOptions, scl.props.queryDescription);
 

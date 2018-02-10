@@ -16,6 +16,7 @@ namespace Signum.Test.Environment
     [Serializable, EntityKind(EntityKind.Shared, EntityData.Transactional), Mixin(typeof(CorruptMixin)), Mixin(typeof(ColaboratorsMixin)), PrimaryKey(typeof(Guid))]
     public class NoteWithDateEntity : Entity
     {
+        [Nullable]
         [StringLengthValidator(AllowNulls = false, Min = 3, MultiLine = true)]
         public string Text { get; set; }
 
