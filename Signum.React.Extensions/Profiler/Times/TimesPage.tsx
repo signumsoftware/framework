@@ -13,7 +13,7 @@ import { API, TimeTrackerEntry } from '../ProfilerClient'
 import { RouteComponentProps } from "react-router";
 
 import "./Times.css"
-import { Tab, Tabs, UncontrolledTabs } from '../../../../Framework/Signum.React/Scripts/Tabs';
+import { Tab, Tabs, UncontrolledTabs } from '../../../../Framework/Signum.React/Scripts/Components/Tabs';
 
 interface TimesPageProps extends RouteComponentProps<{}> {
 

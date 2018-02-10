@@ -9,7 +9,6 @@ import { TypeContext, StyleContext, StyleOptions, FormGroupStyle, mlistItemConte
 import { PropertyRoute, PropertyRouteType, MemberInfo, getTypeInfo, getTypeInfos, TypeInfo, IsByAll, ReadonlyBinding, LambdaMemberType } from '../../../../Framework/Signum.React/Scripts/Reflection'
 import { LineBase, LineBaseProps } from '../../../../Framework/Signum.React/Scripts/Lines/LineBase'
 import { ModifiableEntity, Lite, Entity, MList, MListElement, EntityControlMessage, JavascriptMessage, toLite, is, liteKey, getToString } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
-import Typeahead from '../../../../Framework/Signum.React/Scripts/Lines/Typeahead'
 import { EntityListBase, EntityListBaseProps } from '../../../../Framework/Signum.React/Scripts/Lines/EntityListBase'
 import { RenderEntity } from '../../../../Framework/Signum.React/Scripts/Lines/RenderEntity'
 import { isModifiableEntity } from '../../../../Framework/Signum.React/Scripts/Signum.Entities';

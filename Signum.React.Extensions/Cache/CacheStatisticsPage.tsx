@@ -6,7 +6,7 @@ import { QueryDescription, SubTokensOptions } from '../../../Framework/Signum.Re
 import { getQueryNiceName, PropertyRoute, getTypeInfos } from '../../../Framework/Signum.React/Scripts/Reflection'
 import { ModifiableEntity, EntityControlMessage, Entity, parseLite, getToString, JavascriptMessage } from '../../../Framework/Signum.React/Scripts/Signum.Entities'
 import { API, CacheTableStats, ResetLazyStats, CacheState } from './CacheClient'
-import { Tabs, Tab, UncontrolledTabs } from '../../../Framework/Signum.React/Scripts/Tabs';
+import { Tabs, Tab, UncontrolledTabs } from '../../../Framework/Signum.React/Scripts/Components/Tabs';
 
 
 interface CacheStatisticsPageProps extends RouteComponentProps<{}> {

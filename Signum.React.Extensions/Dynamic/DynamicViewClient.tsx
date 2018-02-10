@@ -32,7 +32,7 @@ import * as NodeUtils from './View/NodeUtils' //Typings-only
 import MessageModal from "../../../Framework/Signum.React/Scripts/Modals/MessageModal";
 import { Dic } from "../../../Framework/Signum.React/Scripts/Globals";
 import * as LinkContainerModule from "../../../Framework/Signum.React/Scripts/LinkContainer";
-import * as TabsModule from "../../../Framework/Signum.React/Scripts/Tabs";
+import * as TabsModule from "../../../Framework/Signum.React/Scripts/Components/Tabs";
 
 
 export function start(options: { routes: JSX.Element[] }) {

@@ -24,7 +24,7 @@ import ChartRenderer from './ChartRenderer'
 
 import "../Chart.css"
 import "../../../../Framework/Signum.React/Scripts/SearchControl/Search.css"
-import { Tab, Tabs, UncontrolledTabs } from '../../../../Framework/Signum.React/Scripts/Tabs';
+import { Tab, Tabs, UncontrolledTabs } from '../../../../Framework/Signum.React/Scripts/Components/Tabs';
 
 
 interface ChartRequestViewProps {

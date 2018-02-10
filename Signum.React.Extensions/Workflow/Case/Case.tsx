@@ -11,7 +11,7 @@ import { API, CaseFlow } from '../WorkflowClient'
 import CaseFlowViewerComponent from '../Bpmn/CaseFlowViewerComponent'
 import InlineCaseTags from "../Case/InlineCaseTags";
 import { SearchControl } from "../../../../Framework/Signum.React/Scripts/Search";
-import { Tab, Tabs, UncontrolledTabs } from '../../../../Framework/Signum.React/Scripts/Tabs';
+import { Tab, Tabs, UncontrolledTabs } from '../../../../Framework/Signum.React/Scripts/Components/Tabs';
 
 interface CaseComponentProps {
     ctx: TypeContext<CaseEntity>;

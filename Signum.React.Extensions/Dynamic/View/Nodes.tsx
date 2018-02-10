@@ -31,7 +31,7 @@ import { toStyleOptions, subCtx, StyleOptionsExpression } from './StyleOptionsEx
 import FileLine from "../../Files/FileLine";
 import { DownloadBehaviour } from "../../Files/FileDownloader";
 import { registerSymbol } from "../../../../Framework/Signum.React/Scripts/Reflection";
-import { Tabs, Tab, UncontrolledTabs } from '../../../../Framework/Signum.React/Scripts/Tabs';
+import { Tabs, Tab, UncontrolledTabs } from '../../../../Framework/Signum.React/Scripts/Components/Tabs';
 
 export interface BaseNode {
     kind: string;

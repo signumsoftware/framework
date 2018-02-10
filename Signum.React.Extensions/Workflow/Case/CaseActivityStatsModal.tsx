@@ -15,7 +15,7 @@ import { FormGroup, StyleContext } from "../../../../Framework/Signum.React/Scri
 import { CaseActivityEntity, WorkflowActivityEntity, WorkflowActivityMessage, DoneType, CaseNotificationEntity, CaseActivityMessage, WorkflowActivityType, CaseEntity } from "../Signum.Entities.Workflow";
 import { EntityLink, SearchControl } from "../../../../Framework/Signum.React/Scripts/Search";
 import { OperationLogEntity } from "../../../../Framework/Signum.React/Scripts/Signum.Entities.Basics";
-import { Tab, Tabs, UncontrolledTabs } from '../../../../Framework/Signum.React/Scripts/Tabs';
+import { Tab, Tabs, UncontrolledTabs } from '../../../../Framework/Signum.React/Scripts/Components/Tabs';
 
 
 interface CaseActivityStatsModalProps extends React.Props<CaseActivityStatsModal>, IModalProps {

@@ -2,7 +2,7 @@
 import * as numbro from 'numbro';
 import * as OrderUtils from '../../../../Framework/Signum.React/Scripts/Frames/OrderUtils'
 import { classes } from '../../../../Framework/Signum.React/Scripts/Globals'
-import { Tab, Tabs, UncontrolledTabs } from '../../../../Framework/Signum.React/Scripts/Tabs'
+import { Tab, Tabs, UncontrolledTabs } from '../../../../Framework/Signum.React/Scripts/Components/Tabs'
 import { FormGroup, FormControlReadonly, ValueLine, ValueLineType, EntityLine, EntityDetail, EntityCombo, EntityList, EntityRepeater, EntityTable, IRenderButtons, EntityTabRepeater } from '../../../../Framework/Signum.React/Scripts/Lines'
 import { SearchControl, FilterOption, ColumnOption, FindOptions } from '../../../../Framework/Signum.React/Scripts/Search'
 import { TypeContext, FormGroupStyle, ButtonsContext } from '../../../../Framework/Signum.React/Scripts/TypeContext'

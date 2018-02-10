@@ -7,7 +7,7 @@ import { } from "../../../../Framework/Signum.React/Scripts/ConfigureReactWidget
 import { RestLogDiff, API } from '../RestClient'
 import { DiffDocument } from '../../DiffLog/Templates/DiffDocument';
 import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
-import { Tab, UncontrolledTabs } from '../../../../Framework/Signum.React/Scripts/Tabs'
+import { Tab, UncontrolledTabs } from '../../../../Framework/Signum.React/Scripts/Components/Tabs'
 
 export interface RestLogState {
     diff?: RestLogDiff,

@@ -7,7 +7,7 @@ import { FindOptions } from '../../../../Framework/Signum.React/Scripts/FindOpti
 import { getQueryNiceName, MemberInfo, PropertyRoute, Binding } from '../../../../Framework/Signum.React/Scripts/Reflection'
 import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
 import { TypeContext, FormGroupStyle } from '../../../../Framework/Signum.React/Scripts/TypeContext'
-import Typeahead from '../../../../Framework/Signum.React/Scripts/Lines/Typeahead'
+import Typeahead from '../../../../Framework/Signum.React/Scripts/Components/Typeahead'
 import { Expression, ExpressionOrValue, DesignerContext, DesignerNode } from './NodeUtils'
 import { BaseNode, LineBaseNode } from './Nodes'
 import * as NodeUtils from './NodeUtils'

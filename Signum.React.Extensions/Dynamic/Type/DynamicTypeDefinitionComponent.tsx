@@ -9,7 +9,7 @@ import { getQueryNiceName, Binding, EntityDataValues, EntityKindValues, EntityKi
 import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
 import { SearchControl } from '../../../../Framework/Signum.React/Scripts/Search'
 import { StyleContext, FormGroupStyle } from '../../../../Framework/Signum.React/Scripts/TypeContext'
-import Typeahead from '../../../../Framework/Signum.React/Scripts/Lines/Typeahead'
+import Typeahead from '../../../../Framework/Signum.React/Scripts/Components/Typeahead'
 import QueryTokenBuilder from '../../../../Framework/Signum.React/Scripts/SearchControl/QueryTokenBuilder'
 import { ModifiableEntity, JavascriptMessage, EntityControlMessage, is, Lite, Entity, toLite } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
 import { QueryEntity, TypeEntity } from '../../../../Framework/Signum.React/Scripts/Signum.Entities.Basics'
@@ -29,7 +29,7 @@ import { ContextMenuPosition } from '../../../../Framework/Signum.React/Scripts/
 import ValueLineModal from '../../../../Framework/Signum.React/Scripts/ValueLineModal'
 
 import "./DynamicType.css"
-import { Tabs, Tab, UncontrolledTabs } from '../../../../Framework/Signum.React/Scripts/Tabs';
+import { Tabs, Tab, UncontrolledTabs } from '../../../../Framework/Signum.React/Scripts/Components/Tabs';
 import CollapsableCard from '../../Basics/Templates/CollapsableCard';
 
 export interface DynamicTypeDesignContext {

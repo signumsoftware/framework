@@ -11,7 +11,7 @@ import { Entity } from '../../../Framework/Signum.React/Scripts/Signum.Entities'
 import * as Constructor from '../../../Framework/Signum.React/Scripts/Constructor'
 import { StyleContext } from '../../../Framework/Signum.React/Scripts/TypeContext'
 
-import Typeahead from '../../../Framework/Signum.React/Scripts/Lines/Typeahead'
+import Typeahead from '../../../Framework/Signum.React/Scripts/Components/Typeahead'
 import { ValueLine, EntityLine, EntityCombo, EntityList, EntityDetail, EntityStrip, EntityRepeater } from '../../../Framework/Signum.React/Scripts/Lines'
 import * as TypeHelpClient from './TypeHelpClient'
 import ContextMenu from '../../../Framework/Signum.React/Scripts/SearchControl/ContextMenu'

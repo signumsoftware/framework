@@ -18,7 +18,7 @@ import {
 import { API, WorkflowScriptRunnerState } from '../WorkflowClient'
 import { CaseActivityEntity, WorkflowActivityType, DoneType, WorkflowScriptRunnerPanelPermission, CaseActivityOperation } from '../Signum.Entities.Workflow'
 import * as AuthClient from '../../Authorization/AuthClient'
-import { UncontrolledTabs, Tab } from '../../../../Framework/Signum.React/Scripts/Tabs';
+import { UncontrolledTabs, Tab } from '../../../../Framework/Signum.React/Scripts/Components/Tabs';
 
 
 interface WorkflowScriptRunnerPanelPageProps extends RouteComponentProps<{}> {

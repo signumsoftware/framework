@@ -22,7 +22,7 @@ import { DynamicTypeEntity, DynamicMixinConnectionEntity, DynamicTypeOperation, 
 import DynamicTypeComponent from './Type/DynamicType' //typings only
 import * as DynamicClient from './DynamicClient'
 import * as AuthClient from '../Authorization/AuthClient'
-import { Tab } from '../../../Framework/Signum.React/Scripts/Tabs';
+import { Tab } from '../../../Framework/Signum.React/Scripts/Components/Tabs';
 
 export function start(options: { routes: JSX.Element[] }) {
 

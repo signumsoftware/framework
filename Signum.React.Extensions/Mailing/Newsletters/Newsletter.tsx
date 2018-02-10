@@ -8,7 +8,7 @@ import { ExceptionEntity }  from '../../../../Framework/Signum.React/Scripts/Sig
 import { TypeContext, FormGroupStyle } from '../../../../Framework/Signum.React/Scripts/TypeContext'
 import { NewsletterEntity } from '../Signum.Entities.Mailing'
 import TemplateControls from '../../Templating/TemplateControls'
-import { Tabs, Tab } from '../../../../Framework/Signum.React/Scripts/Tabs';
+import { Tabs, Tab } from '../../../../Framework/Signum.React/Scripts/Components/Tabs';
 
 export default class Newsletter extends React.Component<{ ctx: TypeContext<NewsletterEntity> }> {
 

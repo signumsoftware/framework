@@ -14,7 +14,6 @@ import { Binding } from '../../../../Framework/Signum.React/Scripts/Reflection';
 import CSharpCodeMirror from '../../Codemirror/CSharpCodeMirror'
 import TypeHelpComponent from "../../TypeHelp/TypeHelpComponent";
 import HtmlEditor from '../../HtmlEditor/HtmlEditor'
-import Typeahead from '../../../../Framework/Signum.React/Scripts/Lines/Typeahead'
 import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
 import { API } from '../WorkflowClient'
 

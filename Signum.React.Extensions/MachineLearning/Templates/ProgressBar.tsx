@@ -1,5 +1,5 @@
 ﻿import * as React from 'react'
-import { BsColor } from '../../../../Framework/Signum.React/Scripts/Operations';
+import { BsColor } from '../../../../Framework/Signum.React/Scripts/Components/Basic';
 import { classes } from '../../../../Framework/Signum.React/Scripts/Globals'
 import * as numbro from 'numbro';
 

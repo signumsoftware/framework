@@ -13,7 +13,7 @@ import { Type, PropertyRoute } from '../../../Framework/Signum.React/Scripts/Ref
 import { EntityFrame, TypeContext } from '../../../Framework/Signum.React/Scripts/TypeContext'
 import * as Navigator from '../../../Framework/Signum.React/Scripts/Navigator'
 import * as Finder from '../../../Framework/Signum.React/Scripts/Finder'
-import { EntityOperationSettings, addSettings, EntityOperationContext, BsColor } from '../../../Framework/Signum.React/Scripts/Operations'
+import { EntityOperationSettings, addSettings, EntityOperationContext } from '../../../Framework/Signum.React/Scripts/Operations'
 import * as Operations from '../../../Framework/Signum.React/Scripts/Operations'
 import { confirmInNecessary, notifySuccess } from '../../../Framework/Signum.React/Scripts/Operations/EntityOperations'
 
@@ -58,6 +58,7 @@ import { getTypeInfo } from "../../../Framework/Signum.React/Scripts/Reflection"
 import WorkflowHelpComponent from './Workflow/WorkflowHelpComponent';
 import { globalModules } from '../Dynamic/View/GlobalModules';
 import { FilterRequest, ColumnRequest } from '../../../Framework/Signum.React/Scripts/FindOptions';
+import { BsColor } from '../../../Framework/Signum.React/Scripts/Components/Basic';
 
 export function start(options: { routes: JSX.Element[] }) {
 

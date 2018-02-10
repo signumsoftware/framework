@@ -20,7 +20,7 @@ import { RouteComponentProps } from "react-router";
 import * as QueryString from 'query-string';
 
 import "./DynamicPanelPage.css"
-import { Tab, Tabs } from '../../../Framework/Signum.React/Scripts/Tabs';
+import { Tab, Tabs } from '../../../Framework/Signum.React/Scripts/Components/Tabs';
 
 interface DynamicPanelProps extends RouteComponentProps<{}> {
 }
