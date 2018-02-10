@@ -1,6 +1,5 @@
 ﻿
 import * as React from 'react'
-import { Modal, ModalHeader, ButtonToolbar } from 'reactstrap'
 import { classes, Dic } from '../Globals'
 import * as Finder from '../Finder'
 import { openModal, IModalProps } from '../Modals';

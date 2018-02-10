@@ -1,5 +1,4 @@
 ﻿import * as React from 'react'
-import { Modal, ModalHeader, ButtonToolbar } from 'reactstrap'
 import 'react-widgets/dist/css/react-widgets.css';
 import { areEqual, classes } from '../Globals'
 import * as Finder from '../Finder'

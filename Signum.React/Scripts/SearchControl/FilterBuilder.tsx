@@ -2,7 +2,6 @@
 import * as React from 'react'
 import * as numbro from 'numbro'
 import * as moment from 'moment'
-import { Modal, ModalHeader, ModalFooter, ModalBody, ButtonToolbar } from 'reactstrap'
 import * as Finder from '../Finder'
 import { Dic, areEqual } from '../Globals'
 import { openModal, IModalProps } from '../Modals';

@@ -1,8 +1,8 @@
 ﻿import * as React from 'react'
 import * as ReactDOM from 'react-dom'
-import { DropdownItemProps } from 'reactstrap'
 import { Dic, classes, combineFunction, DomUtils } from '../Globals'
 import * as PropTypes from "prop-types";
+import { DropdownItem, DropdownItemProps } from '../Components';
 
 
 export interface ContextMenuPosition {

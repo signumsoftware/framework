@@ -8,19 +8,23 @@ import { Manager } from 'react-popper';
 import { BsSize, KeyCodes } from './Basic';
 import { classes } from '../Globals';
 
-interface DropdownProps {
+export interface UncontrolledDropdownProps extends React.HTMLAttributes<any> {
     disabled?: boolean;
     dropup?: boolean,
     group?: boolean;
-    isOpen: boolean;
-    nav: boolean;
+    nav?: boolean;
     addonType?: false | "prepend" | "append";
     size?: BsSize;
     tag?: string;
-    toggle: () => void;
     className?: string;
     inNavbar?: boolean;
-};
+}
+
+
+export interface DropdownProps extends UncontrolledDropdownProps {
+    isOpen: boolean;
+    toggle: () => void;
+}
 
 export class Dropdown extends React.Component<DropdownProps> {
 
@@ -207,5 +211,22 @@ export class Dropdown extends React.Component<DropdownProps> {
             nav && 'nav-item'
         );
         return <Manager {...attrs} className={clss} onKeyDown={this.handleKeyDown} />;
+    }
+}
+
+export class UncontrolledDropdown extends React.Component<UncontrolledDropdownProps, { isOpen: boolean }> {
+    constructor(props: UncontrolledDropdownProps) {
+        super(props);
+
+        this.state = { isOpen: false };
+        this.toggle = this.toggle.bind(this);
+    }
+
+    toggle() {
+        this.setState({ isOpen: !this.state.isOpen });
+    }
+
+    render() {
+        return <Dropdown isOpen={this.state.isOpen} toggle={this.toggle} {...this.props} />;
     }
 }

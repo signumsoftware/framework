@@ -10,6 +10,7 @@ interface PopperContentProps {
     className?: string;
     placement?: PopperJS.Placement;
     placementPrefix?: string,
+    hideArrow?: boolean;
     tag?: string,
     isOpen: boolean;
     offset?: string | number;
@@ -17,14 +18,14 @@ interface PopperContentProps {
     flip?: boolean;
     container?: string | (() => HTMLElement) | HTMLElement;
     target: string | (() => HTMLElement) | HTMLElement;
-    modifiers: PopperJS.Modifiers;
+    modifiers?: PopperJS.Modifiers;
 }
 
 interface PopperContentState {
     placement?: Popper.Placement;
 }
 
-export default class PopperContent extends React.Component<PopperContentProps, PopperContentState> {
+export class PopperContent extends React.Component<PopperContentProps, PopperContentState> {
 
     static defaultProps = {
         placement: 'auto',

@@ -1,6 +1,5 @@
 ﻿
 import * as React from 'react'
-import { Modal, ModalBody, ModalHeader, ModalFooter, ButtonToolbar } from 'reactstrap'
 import * as Finder from '../Finder'
 import { openModal, IModalProps } from '../Modals';
 import * as Navigator from '../Navigator';
@@ -8,6 +7,7 @@ import { classes, Dic } from '../Globals';
 import { SearchMessage, JavascriptMessage, Lite, Entity, NormalWindowMessage, BooleanEnum } from '../Signum.Entities'
 
 import "./Modals.css"
+import { Modal } from '../Components';
 
 export type MessageModalStyle = "success" | "info" | "warning" | "error";
 
@@ -45,7 +45,7 @@ export default class MessageModal extends React.Component<MessageModalProps, { s
         this.setState({ show: false });
     }
 
-    handleOnClosed = () => {
+    handleOnExited = () => {
         this.props.onExited!(this.selectedValue);
     }
 
@@ -159,16 +159,16 @@ export default class MessageModal extends React.Component<MessageModalProps, { s
 
     render() {
         return (
-            <Modal isOpen={this.state.show} onClosed={this.handleOnClosed} className="message-modal" toggle={this.handleCancelClicked} autoFocus={true}>
-                <ModalHeader className={dialogHeaderClass(this.props.style)}>
+            <Modal show={this.state.show} onExited={this.handleOnExited} className="message-modal" onHide={this.handleCancelClicked} autoFocus={true}>
+                <div className={classes("modal-header", dialogHeaderClass(this.props.style))}>
                     {this.renderTitle()}
-                </ModalHeader>
-                <ModalBody>
+                </div>
+                <div className="modal-body">
                     {renderText(this.props.message, this.props.style)}
-                </ModalBody>
-                <ModalFooter>
+                </div>
+                <div className="modal-footer">
                      {this.renderButtons(this.props.buttons)}
-                </ModalFooter>
+                </div>
             </Modal>
         );
     }

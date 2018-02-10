@@ -3,11 +3,11 @@ import * as PropTypes from 'prop-types';
 import { Popper } from 'react-popper';
 import { classes } from '../Globals';
 
-export interface DropdownMenuProps {
-    tag: React.ReactType<any>;
-    right: boolean;
-    flip: boolean;
-    className: string;
+export interface DropdownMenuProps extends React.HTMLAttributes<any> {
+    tag?: React.ReactType<any>;
+    right?: boolean;
+    flip?: boolean;
+    className?: string;
 };
 
 
@@ -28,7 +28,7 @@ export class DropdownMenu extends React.Component<DropdownMenuProps> {
 
     render() {
         const ctx = this.context as DropdownMenuContext;
-        const { className, right, tag: Tag, flip, ...attrs } = this.props;
+        const { className, right, tag, flip, ...attrs } = this.props;
         const clss = classes(
             className,
             'dropdown-menu',
@@ -36,6 +36,7 @@ export class DropdownMenu extends React.Component<DropdownMenuProps> {
             ctx.isOpen && 'show',
         );
 
+        const Tag = tag!;
 
         if (ctx.isOpen && !ctx.inNavbar) {
 

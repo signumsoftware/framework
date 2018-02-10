@@ -1,6 +1,5 @@
 ﻿import * as React from "react"
 import { Router, Route, Redirect } from "react-router"
-import { Button, UncontrolledTooltip, UncontrolledDropdown, DropdownToggle, DropdownMenu, DropdownItem } from "reactstrap"
 import {
     Lite, Entity, ModifiableEntity, EmbeddedEntity, LiteMessage, EntityPack, toLite, JavascriptMessage,
     OperationSymbol, ConstructSymbol_From, ConstructSymbol_FromMany, ConstructSymbol_Simple, ExecuteSymbol, DeleteSymbol, OperationMessage, getToString, NormalControlMessage, NormalWindowMessage
@@ -18,6 +17,7 @@ import {
     operationInfos, getSettings, EntityOperationSettings, EntityOperationContext, EntityOperationGroup,
     CreateGroup, API, isEntityOperation, autoColorFunction, isSave
 } from '../Operations'
+import { UncontrolledDropdown, DropdownMenu, DropdownToggle, DropdownItem, UncontrolledTooltip, Button } from "../Components";
 
 
 export function getEntityOperationButtons(ctx: ButtonsContext): Array<React.ReactElement<any> | undefined> | undefined {
@@ -71,11 +71,11 @@ export function getEntityOperationButtons(ctx: ButtonsContext): Array<React.Reac
         if (gr.key == "") {
             return gr.elements.map((eoc, j) => ({
                 order: eoc.settings && eoc.settings.order != undefined ? eoc.settings.order : 0,
-                button: <OperationButton eoc={eoc} key={i + "-" + j}/>
+                button: <OperationButton eoc={eoc} key={i + "-" + j} />
             }));
         } else {
 
-            const group = getGroup(gr.elements[0]) !;
+            const group = getGroup(gr.elements[0])!;
 
 
             return [{
@@ -86,10 +86,10 @@ export function getEntityOperationButtons(ctx: ButtonsContext): Array<React.Reac
                             {group.text()}
                         </DropdownToggle>
                         <DropdownMenu>
-                        {gr.elements
-                            .orderBy(a => a.settings && a.settings.order)
-                            .map((eoc, j) => <OperationButton eoc={eoc} key={j} group={group}/>)
-                        }
+                            {gr.elements
+                                .orderBy(a => a.settings && a.settings.order)
+                                .map((eoc, j) => <OperationButton eoc={eoc} key={j} group={group} />)
+                            }
                         </DropdownMenu>
                     </UncontrolledDropdown >
                 )
@@ -129,22 +129,25 @@ interface OperationButtonProps extends React.HTMLProps<any> {
 
 export class OperationButton extends React.Component<OperationButtonProps> {
     render() {
-        let { eoc, group, onOperationClick, canExecute, ...props } = this.props;
+        let { eoc, group, onOperationClick, canExecute, size, ...props } = this.props;
 
         if (canExecute === undefined)
             canExecute = eoc.canExecute;
-        
+
         const bsColor = eoc.settings && eoc.settings.color || autoColorFunction(eoc.operationInfo);
 
         const disabled = !!canExecute;
-        
+
         const withClose = getWithClose(eoc);
 
         const id = canExecute && "button_" + eoc.operationInfo.key.replace(".", "_");
 
-        const tooltip = canExecute && id && (<UncontrolledTooltip placement="bottom" target={id}>
-            {canExecute}
-        </UncontrolledTooltip>);
+        const tooltip = canExecute && id &&
+            (
+                <UncontrolledTooltip placement="bottom" target={id}>
+                    {canExecute}
+                </UncontrolledTooltip>
+            );
 
         if (group) {
             return (
@@ -217,8 +220,7 @@ export class OperationButton extends React.Component<OperationButtonProps> {
 
 
 
-export function defaultOnClick<T extends Entity>(eoc: EntityOperationContext<T>, ...args: any[])
-{
+export function defaultOnClick<T extends Entity>(eoc: EntityOperationContext<T>, ...args: any[]) {
     if (eoc.operationInfo.lite) {
         switch (eoc.operationInfo.operationType) {
             case OperationType.ConstructorFrom: defaultConstructFromLite(eoc, ...args); return;

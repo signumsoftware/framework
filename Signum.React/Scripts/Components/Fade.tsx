@@ -24,7 +24,7 @@ const fadeClass = {
     ["entered" as TransitionState]: 'show',
 };
 
-export default class Fade extends React.Component<FadeProps> {
+export class Fade extends React.Component<FadeProps> {
 
     static defaultProps = {
         in: false,

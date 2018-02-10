@@ -6,9 +6,10 @@ import * as ReactDOM from 'react-dom';
 import * as BaseModal from 'react-overlays/lib/Modal';
 import isOverflowing from 'react-overlays/lib/utils/isOverflowing';
 
-import Fade from './Fade';
-import ModalDialog, { ModelDialogProps } from './ModalDialog';
+import { Fade } from './Fade';
+import { ModalDialog, ModelDialogProps } from './ModalDialog';
 import { classes } from '../Globals';
+import { JavascriptMessage } from '../Signum.Entities';
 
 export interface ModalProps extends ModelDialogProps  {
 
@@ -121,7 +122,7 @@ export interface ModalState {
 }
 /* eslint-enable no-use-before-define */
 
-export default class Modal extends React.Component<ModalProps, ModalState> {
+export class Modal extends React.Component<ModalProps, ModalState> {
 
     static defaultProps = {
         ...BaseModal.defaultProps,
@@ -266,11 +267,6 @@ export default class Modal extends React.Component<ModalProps, ModalState> {
     }
 }
 
-
-
-
-
-
 function ownerDocument(node?: HTMLElement) {
     return (node && node.ownerDocument) || document;
 }
@@ -293,3 +289,45 @@ function getScrollbarSize(recalc?: boolean) {
 
     return size
 }
+
+
+
+interface ModalHeaderButtonsProps {
+    onClose?: () => void;
+    onOk?: () => void;
+    okDisabled?: boolean;
+    onCancel?: () => void;
+}
+
+export class ModalHeaderButtons extends React.Component<ModalHeaderButtonsProps> {
+    render() {
+        const p = this.props;
+        return (
+            <div className="modal-header">
+                <h4 className="modal-title">
+                    {this.props.children}
+                </h4>
+                {this.props.onClose &&
+                    <button type="button" className="close" aria-label="Close" onClick={this.props.onClose}>
+                        <span aria-hidden="true">×</span>
+                    </button>
+                }
+                {(this.props.onCancel || this.props.onOk) &&
+                    <div className="btn-toolbar" style={{ flexWrap: "nowrap" }}>
+                        {this.props.onOk && <button className="btn btn-primary sf-entity-button sf-close-button sf-ok-button" disabled={this.props.okDisabled} onClick={this.props.onOk}>
+                            {JavascriptMessage.ok.niceToString()}
+                        </button>
+                        }
+                        {this.props.onCancel && <button className="btn btn-light sf-entity-button sf-close-button sf-cancel-button" onClick={this.props.onCancel}>
+                            {JavascriptMessage.cancel.niceToString()}
+                        </button>
+                        }
+                    </div>
+                }
+            </div>
+        );
+    }
+}
+
+
+

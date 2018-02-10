@@ -1,16 +1,16 @@
 ﻿
 import * as React from 'react'
-import { Modal, ModalHeader, ModalBody, ModalFooter, ButtonToolbar} from 'reactstrap'
 import { openModal, IModalProps } from './Modals';
 import { SelectorMessage } from './Signum.Entities'
 import { TypeInfo } from './Reflection'
+import { Modal, BsSize } from './Components';
 
 
 interface SelectorModalProps extends React.Props<SelectorModal>, IModalProps {
     options: { value: any; displayName: React.ReactNode; name: string; htmlAttributes?: React.HTMLAttributes<HTMLButtonElement> }[];
     title: React.ReactNode;
     message: React.ReactNode;
-    size?: string;
+    size?: BsSize;
     dialogClassName?: string;
 }
 
@@ -34,22 +34,23 @@ export default class SelectorModal extends React.Component<SelectorModalProps, {
         this.setState({ show: false });
     }
 
-    handleOnClosed = () => {
+    handleOnExited = () => {
         this.props.onExited!(this.selectedValue);
     }
 
 
     render() {
-        return <Modal size={this.props.size ? this.props.size : "sm"} isOpen={this.state.show} onClosed={this.handleOnClosed} className="sf-selector-modal" modalClassName={this.props.dialogClassName}>
-            <ModalHeader>
+        return <Modal size={this.props.size || "sm"} show={this.state.show} onExited={this.handleOnExited}
+            className="sf-selector-modal" dialogClassName={this.props.dialogClassName} onHide={this.handleCancelClicked}>
+            <div className="modal-header">
                 {this.props.title &&
                     <h4 className="modal-title">
                         {this.props.title}
                     </h4>
                 }
-            </ModalHeader>
+            </div>
 
-            <ModalBody>
+            <div className="modal-body">
                 <div>
                     {this.props.message &&
                         <p>
@@ -62,7 +63,7 @@ export default class SelectorModal extends React.Component<SelectorModalProps, {
                             {o.displayName}
                         </button>)}
                 </div>
-            </ModalBody>
+            </div>
         </Modal>;
     }
 
@@ -108,7 +109,7 @@ export interface SelectorConfig<T> {
     buttonHtmlAttributes?: (val: T) => React.HTMLAttributes<HTMLButtonElement>; //For testing
     title?: React.ReactNode;
     message?: React.ReactNode;
-    size?: string;
+    size?: BsSize;
     dialogClassName?: string;
     forceShow?: boolean;
 }

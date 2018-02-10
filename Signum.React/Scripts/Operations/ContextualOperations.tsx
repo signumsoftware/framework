@@ -1,6 +1,5 @@
 ﻿import * as React from "react"
 import { Router, Route, Redirect } from "react-router"
-import { Button, DropdownItem, UncontrolledTooltip } from "reactstrap"
 import {
     Lite, Entity, ModifiableEntity, EmbeddedEntity, LiteMessage, EntityPack, toLite, JavascriptMessage,
     OperationSymbol, ConstructSymbol_From, ConstructSymbol_FromMany, ConstructSymbol_Simple, ExecuteSymbol, DeleteSymbol, OperationMessage, getToString, SearchMessage
@@ -18,6 +17,8 @@ import {
     operationInfos, getSettings, ContextualOperationSettings, ContextualOperationContext, EntityOperationSettings, EntityOperationContext,
     CreateGroup, API, autoColorFunction, isEntityOperation
 } from '../Operations'
+import { DropdownItem } from "../Components/DropdownItem";
+import { UncontrolledTooltip } from "../Components/Tooltip";
 
 
 export function getConstructFromManyContextualItems(ctx: ContextualItemsContext<Entity>): Promise<MenuItemBlock | undefined> | undefined {
@@ -63,7 +64,7 @@ export function getConstructFromManyContextualItems(ctx: ContextualItemsContext<
 
 
 
-function defaultConstructFromMany(coc: ContextualOperationContext<Entity>,...args: any[]) {
+function defaultConstructFromMany(coc: ContextualOperationContext<Entity>, ...args: any[]) {
 
     confirmInNecessary(coc).then(conf => {
         if (!conf)
@@ -231,7 +232,7 @@ export namespace MenuItemConstructor { //To allow monkey patching
 }
 
 
-export function defaultContextualClick(coc: ContextualOperationContext<any>,...args: any[]) {
+export function defaultContextualClick(coc: ContextualOperationContext<any>, ...args: any[]) {
 
     coc.event!.persist();
 

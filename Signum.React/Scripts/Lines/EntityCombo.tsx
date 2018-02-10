@@ -1,6 +1,5 @@
 ﻿import * as React from 'react'
 import * as moment from 'moment'
-import { TabPane } from 'reactstrap'
 import { ModifiableEntity, Lite, Entity, EntityControlMessage, JavascriptMessage, toLite, is, liteKey } from '../Signum.Entities'
 import { Dic, classes } from '../Globals'
 import * as Navigator from '../Navigator'

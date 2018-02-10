@@ -18,6 +18,7 @@ import { FindOptions } from './FindOptions'
 import { ImportRoute } from "./AsyncImport";
 import * as AppRelativeRoutes from "./AppRelativeRoutes";
 import { NormalWindowMessage } from "./Signum.Entities";
+import { BsSize } from "./Components/Basic";
 
 
 Dic.skipClasses.push(React.Component);
@@ -548,7 +549,7 @@ export interface ViewOptions {
     title?: string;
     propertyRoute?: PropertyRoute;
     readOnly?: boolean;
-    modalSize?: string;
+    modalSize?: BsSize;
     isOperationVisible?: (eoc: Operations.EntityOperationContext<any /*Entity*/>) => boolean;
     validate?: boolean;
     requiresSaveOperation?: boolean;
@@ -580,7 +581,7 @@ export function viewDefault(entityOrPack: Lite<Entity> | ModifiableEntity | Enti
 
 export interface NavigateOptions {
     readOnly?: boolean;
-    modalSize?: string;
+    modalSize?: BsSize;
     avoidPromptLooseChange?: boolean;
     getViewPromise?: (entity: ModifiableEntity) => undefined | string | ViewPromise<ModifiableEntity>;
     extraComponentProps?: {};

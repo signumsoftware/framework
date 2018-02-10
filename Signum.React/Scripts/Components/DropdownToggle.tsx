@@ -2,20 +2,21 @@
 import * as PropTypes from 'prop-types';
 import { Target } from 'react-popper';
 import { classes } from '../Globals';
+import { Button } from './Button';
 
 interface DropdownToggleProps extends React.AnchorHTMLAttributes<any> {
-    caret: boolean;
-    color: string;
-    className: string;
-    disabled: boolean;
-    onClick: (e: React.MouseEvent<any>) => void;
-    'aria-haspopup': boolean;
-    split: boolean;
-    nav: boolean;
-};
+    caret?: boolean;
+    color?: string;
+    className?: string;
+    disabled?: boolean;
+    onClick?: (e: React.MouseEvent<any>) => void;
+    'aria-haspopup'?: boolean;
+    split?: boolean;
+    nav?: boolean;
+    tag?: React.ReactType<any>;
+}
 
-
-export default class DropdownToggle extends React.Component<DropdownToggleProps> {
+export class DropdownToggle extends React.Component<DropdownToggleProps> {
 
     static defaultProps = {
         'aria-haspopup': true,
@@ -52,7 +53,7 @@ export default class DropdownToggle extends React.Component<DropdownToggleProps>
     }
 
     render() {
-        const { className, color, caret, split, nav, ...props } = this.props;
+        const { className, color, caret, split, nav, tag, ...props } = this.props;
         const clss = classes(
             className,
             (caret || split) && 'dropdown-toggle',
@@ -63,16 +64,23 @@ export default class DropdownToggle extends React.Component<DropdownToggleProps>
         );
         const children = props.children || <span className="sr-only">Toggle Dropdown</span>;
 
-        var Tag = nav ? "a" : "button";
+        let Tag = tag!;
 
-        if (nav)
-            props.href = "#";
+        if (nav && !tag) {
+            Tag = 'a';
+            props.href = '#';
+        } else if (!tag) {
+            Tag = Button;
+            (props as any).color = color;
+        } else {
+            Tag = tag;
+        }
 
         if (this.context.inNavbar) {
             return (
                 <Tag
                     {...props}
-                    className={clss}
+                    className={classes}
                     onClick={this.onClick}
                     aria-expanded={this.context.isOpen}
                     children={children}
@@ -83,7 +91,7 @@ export default class DropdownToggle extends React.Component<DropdownToggleProps>
         return (
             <Target
                 {...props}
-                className={clss}
+                className={classes}
                 component={Tag}
                 onClick={this.onClick}
                 aria-expanded={this.context.isOpen}

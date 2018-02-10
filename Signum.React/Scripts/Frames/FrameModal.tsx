@@ -1,6 +1,5 @@
 ﻿
 import * as React from 'react'
-import { Modal, ModalHeader, ModalBody, ModalFooter, ButtonToolbar, Button} from 'reactstrap'
 import { openModal, IModalProps } from '../Modals'
 import MessageModal from '../Modals/MessageModal'
 import * as Navigator from '../Navigator'
@@ -18,7 +17,8 @@ import { EntityOperationContext } from '../Operations'
 
 import "./Frames.css"
 import { ViewPromise } from "../Navigator";
-import { ModalTitleButtons } from '../SearchControl/SearchModal';
+import { BsSize, Modal } from '../Components';
+import { ModalHeaderButtons } from '../Components/Modal';
 
 interface FrameModalProps extends React.Props<FrameModal>, IModalProps {
     title?: string;
@@ -32,14 +32,14 @@ interface FrameModalProps extends React.Props<FrameModal>, IModalProps {
     getViewPromise?: (e: ModifiableEntity) => undefined | string | Navigator.ViewPromise<ModifiableEntity>;
     isNavigate?: boolean;
     readOnly?: boolean;
-    modalSize?: string;
+    modalSize?: BsSize;
 }
 
 interface FrameModalState {
     pack?: EntityPack<ModifiableEntity>;
     getComponent?: (ctx: TypeContext<ModifiableEntity>) => React.ReactElement<any>;
     propertyRoute?: PropertyRoute;
-    show?: boolean;
+    show: boolean;
     refreshCount: number;
 }
 
@@ -191,7 +191,7 @@ export default class FrameModal extends React.Component<FrameModalProps, FrameMo
         return entity.modified;
     }
 
-    handleOnClosed = () => {
+    handleOnExited = () => {
         this.props.onExited!(this.okClicked ? this.state.pack!.entity : undefined);
     }
 
@@ -200,14 +200,14 @@ export default class FrameModal extends React.Component<FrameModalProps, FrameMo
         const pack = this.state.pack;
 
         return (
-            <Modal size={this.props.modalSize || "lg"} isOpen={this.state.show} onClosed={this.handleOnClosed} toggle={this.handleCancelClicked} className="sf-popup-control" >
-                <ModalTitleButtons
+            <Modal size={this.props.modalSize || "lg"} show={this.state.show} onExited={this.handleOnExited} onHide={this.handleCancelClicked} className="sf-popup-control" >
+                <ModalHeaderButtons
                     onClose={this.props.isNavigate ? this.handleCancelClicked : undefined}
                     onOk={!this.props.isNavigate ? this.handleOkClicked : undefined}
                     onCancel={!this.props.isNavigate ? this.handleCancelClicked : undefined}
                     okDisabled={!pack}>
                     {this.renderTitle()}
-                </ModalTitleButtons>
+                </ModalHeaderButtons>
                 {pack && this.renderBody()}
             </Modal>
         );
@@ -247,14 +247,14 @@ export default class FrameModal extends React.Component<FrameModalProps, FrameMo
         const ctx = new TypeContext(undefined, styleOptions, this.state.propertyRoute!, new ReadonlyBinding(pack.entity, this.prefix!));
 
         return (
-            <ModalBody>
+            <div className="modal-body">
                 {renderWidgets({ ctx: ctx, pack: pack })}
                 {this.entityComponent && <ButtonBar frame={frame} pack={pack} isOperationVisible={this.props.isOperationVisible} />}
                 <ValidationErrors entity={pack.entity} ref={ve => this.validationErrors = ve} />
                 <div className="sf-main-control" data-test-ticks={new Date().valueOf()} data-main-entity={entityInfo(ctx.value)}>
                     {this.state.getComponent && React.cloneElement(this.state.getComponent(ctx), { ref: (c: React.Component<any, any> | null) => this.setComponent(c) })}
                 </div>
-            </ModalBody>
+            </div>
         );
     }
 

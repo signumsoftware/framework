@@ -2,22 +2,22 @@
 import * as PropTypes from 'prop-types';
 import { classes } from '../Globals';
 
-interface DropdownItemProps extends React.AnchorHTMLAttributes<any> {
-    active: boolean;
-    disabled: boolean;
-    divider: boolean;
-    tag: React.ReactType<any>;
-    header: boolean;
-    onClick: (e: React.MouseEvent<any>) => void;
-    className: string;
-    toggle: boolean;
+export interface DropdownItemProps extends React.AnchorHTMLAttributes<any> {
+    active?: boolean;
+    disabled?: boolean;
+    divider?: boolean;
+    tag?: React.ReactType<any>;
+    header?: boolean;
+    onClick?: (e: React.MouseEvent<any>) => void;
+    className?: string;
+    toggle?: boolean;
 };
 
 const contextTypes = {
     toggle: PropTypes.func
 };
 
-export default class DropdownItem extends React.Component<DropdownItemProps> {
+export class DropdownItem extends React.Component<DropdownItemProps> {
 
     static defaultProps = {
         tag: 'button',
@@ -58,7 +58,7 @@ export default class DropdownItem extends React.Component<DropdownItemProps> {
         const tabIndex = this.getTabIndex();
         let {
             className,
-            tag: Tag,
+            tag,
             header,
             active,
             toggle,
@@ -73,6 +73,8 @@ export default class DropdownItem extends React.Component<DropdownItemProps> {
             header && 'dropdown-header',
             divider && 'dropdown-divider'
         );
+
+        let Tag = tag!;
 
         if (Tag === 'button') {
             if (header) {

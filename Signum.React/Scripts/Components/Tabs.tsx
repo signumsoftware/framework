@@ -1,6 +1,5 @@
 ﻿import * as React from 'react'
 import * as PropTypes from 'prop-types'
-import { TabPane, NavItem, Nav, NavLink } from 'reactstrap'
 import { classes } from '../Globals';
 
 

@@ -17,7 +17,7 @@ export interface ModelDialogProps {
     color?: BsColor;
 }
 
-export default class ModalDialog extends React.Component<ModelDialogProps> {
+export class ModalDialog extends React.Component<ModelDialogProps> {
 
 
     render() {

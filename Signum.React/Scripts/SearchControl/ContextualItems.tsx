@@ -1,10 +1,10 @@
 ﻿
 import * as React from 'react'
-import { DropdownItem} from 'reactstrap'
 import { Dic, classes, combineFunction } from '../Globals'
 import { QueryDescription, } from '../FindOptions'
 import { SearchMessage, JavascriptMessage, Lite, Entity } from '../Signum.Entities'
 import SearchControlLoaded from "./SearchControlLoaded";
+import { DropdownItem } from '../Components';
 
 
 export interface MenuItemBlock {

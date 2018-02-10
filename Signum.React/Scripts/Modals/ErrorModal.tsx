@@ -1,6 +1,5 @@
 ﻿
 import * as React from 'react'
-import { Modal, ModalHeader, ModalBody, ModalFooter, ButtonToolbar } from 'reactstrap'
 import * as Finder from '../Finder'
 import { openModal, IModalProps } from '../Modals';
 import * as Navigator from '../Navigator';
@@ -10,12 +9,14 @@ import { SearchMessage, JavascriptMessage, Lite, Entity, NormalWindowMessage } f
 import { ExceptionEntity } from '../Signum.Entities.Basics'
 
 import "./Modals.css"
+import { Modal } from '../Components';
+
 //http://codepen.io/m-e-conroy/pen/ALsdF
 interface ErrorModalProps extends IModalProps {
     error: any;
 }
 
-export default class ErrorModal extends React.Component<ErrorModalProps, { showDetails?: boolean; show?: boolean; }>  {
+export default class ErrorModal extends React.Component<ErrorModalProps, { showDetails?: boolean; show: boolean; }>  {
 
     constructor(props: ErrorModalProps) {
         super(props);
@@ -31,7 +32,7 @@ export default class ErrorModal extends React.Component<ErrorModalProps, { showD
         this.setState({ showDetails: !this.state.showDetails });
     }
 
-    handleOnClosed = () => {
+    handleOnExited = () => {
         this.props.onExited!(undefined);
     }
 
@@ -47,14 +48,17 @@ export default class ErrorModal extends React.Component<ErrorModalProps, { showD
         const ve = e instanceof ValidationError ? (e as ValidationError) : undefined;
 
         return (
-            <Modal isOpen={this.state.show} onClosed={this.handleOnClosed} toggle={this.handleCloseClicked}>
-                <ModalHeader className="dialog-header-error text-danger" toggle={this.handleCloseClicked}>
-                    {se ? this.renderServiceTitle(se) :
+            <Modal show={this.state.show} onExited={this.handleOnExited} onHide={this.handleCloseClicked}>
+                <div className="modal-header dialog-header-error text-danger">
+                    <h5 className="modal-title"> {se ? this.renderServiceTitle(se) :
                         ve ? this.renderValidationTitle(ve) :
-                            this.renderTitle(e)}
-                </ModalHeader>
+                            this.renderTitle(e)}</h5>
+                    <button type="button" className="close" data-dismiss="modal" aria-label="Close" onClick={this.handleCloseClicked}>
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
 
-                <ModalBody>
+                <div className="modal-body">
                     {se ? this.renderServiceMessage(se) :
                         ve ? this.renderValidationeMessage(ve) :
                             this.renderMessage(e)}
@@ -66,12 +70,12 @@ export default class ErrorModal extends React.Component<ErrorModalProps, { showD
                             {this.state.showDetails && <pre>{se.httpError.StackTrace}</pre>}
                         </div>
                     }
-                </ModalBody>
+                </div>
 
-                <ModalFooter>
+                <div className="modal-footer">
                     <button className ="btn btn-primary sf-close-button sf-ok-button" onClick={this.handleCloseClicked}>
                         {JavascriptMessage.ok.niceToString() }</button>
-                </ModalFooter>
+                </div>
             </Modal>
         );
     }

@@ -1,5 +1,5 @@
 ﻿import * as React from 'react'
-import { Dropdown, DropdownItem, UncontrolledTooltip, DropdownMenu, DropdownToggle } from 'reactstrap'
+import { Dropdown, DropdownItem, UncontrolledTooltip, DropdownMenu, DropdownToggle } from '../Components'
 import { Dic, DomUtils, classes } from '../Globals'
 import * as Finder from '../Finder'
 import { CellFormatter, EntityFormatter } from '../Finder'
