@@ -195,13 +195,11 @@ namespace Signum.Engine.Disconnected
         {
             TypeEntity type = (TypeEntity)arg;
 
-            var ce = Administrator.UnsafeDeletePreCommand((DisconnectedExportEntity de) => de.Copies, Database.MListQuery((DisconnectedExportEntity de) => de.Copies).Where(mle => mle.Element.Type.RefersTo(type)));
-            var ci = Administrator.UnsafeDeletePreCommand((DisconnectedImportEntity di) => di.Copies, Database.MListQuery((DisconnectedImportEntity di) => di.Copies).Where(mle => mle.Element.Type.RefersTo(type)));
+            var ce = Administrator.UnsafeDeletePreCommandMList((DisconnectedExportEntity de) => de.Copies, Database.MListQuery((DisconnectedExportEntity de) => de.Copies).Where(mle => mle.Element.Type.RefersTo(type)));
+            var ci = Administrator.UnsafeDeletePreCommandMList((DisconnectedImportEntity di) => di.Copies, Database.MListQuery((DisconnectedImportEntity di) => di.Copies).Where(mle => mle.Element.Type.RefersTo(type)));
 
             return SqlPreCommand.Combine(Spacing.Simple, ce, ci);
-        }
-
-
+        } 
 
         static void EntityEventsGlobal_Saving(Entity ident)
         {

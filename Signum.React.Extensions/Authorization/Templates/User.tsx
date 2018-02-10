@@ -60,8 +60,8 @@ class DoublePassword extends React.Component<{ ctx: TypeContext<string> }>{
         ctx.frame!.revalidate();
     }
 
-    newPass!: HTMLInputElement;
-    newPass2!: HTMLInputElement;
+    newPass: HTMLInputElement;
+    newPass2: HTMLInputElement;
 
     render() {
         return (

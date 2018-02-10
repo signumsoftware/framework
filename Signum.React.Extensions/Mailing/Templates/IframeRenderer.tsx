@@ -28,7 +28,7 @@ export default class IFrameRenderer extends React.Component<IFrameRendererProps>
         cd.body.innerHTML = html || "";
     }
 
-    iframe!: HTMLIFrameElement;
+    iframe: HTMLIFrameElement;
 
     render() {
 

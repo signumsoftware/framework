@@ -24,6 +24,13 @@ import "codemirror/addon/search/searchcursor"
 
 export default class HtmlCodemirror extends React.Component<{ ctx: TypeContext<string | null | undefined>, onChange?: (newValue: string) => void }> {
 
+    get entity() {
+        return this.props.ctx.value;
+    }
+
+    changedHandler: number;
+    exceptionHandler: number;
+
     handleOnChange = (newValue: string) => {
         const { ctx, onChange } = this.props;
 
@@ -32,7 +39,7 @@ export default class HtmlCodemirror extends React.Component<{ ctx: TypeContext<s
             onChange(ctx.value);
     };
     
-    codeMirrorComponent!: CodeMirrorComponent;
+    codeMirrorComponent: CodeMirrorComponent;
     
     render() {
 

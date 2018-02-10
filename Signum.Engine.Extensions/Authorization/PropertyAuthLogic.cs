@@ -43,6 +43,8 @@ namespace Signum.Engine.Authorization
                     invalidateWithTypes: true,
                     coercer: PropertyCoercer.Instance);
 
+                sb.Schema.EntityEvents<RoleEntity>().PreUnsafeDelete += query => Database.Query<RulePropertyEntity>().Where(r => query.Contains(r.Role.Entity)).UnsafeDelete();
+
                 PropertyRoute.SetIsAllowedCallback(pp => pp.GetAllowedFor(PropertyAllowed.Read));
 
                 AuthLogic.ExportToXml += exportAll => cache.ExportXml("Properties", "Property", p => TypeLogic.GetCleanName(p.RootType) + "|" + p.PropertyString(), pa => pa.ToString(),

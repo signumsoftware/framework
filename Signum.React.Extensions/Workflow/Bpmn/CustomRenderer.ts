@@ -11,7 +11,7 @@ export class CustomRenderer extends BpmnRenderer {
         super(eventBus, styles, pathMap, canvas, 1200);
     }
 
-    getDecisionResult!: (element: BPMN.DiElement) => DecisionResult | undefined; 
+    getDecisionResult : (element: BPMN.DiElement) => DecisionResult | undefined; 
 
     drawConnection(visuals: any, element: BPMN.DiElement) {
 

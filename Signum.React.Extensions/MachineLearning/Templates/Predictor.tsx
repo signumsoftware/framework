@@ -329,7 +329,7 @@ export class TrainingProgressComponent extends React.Component<TrainingProgressC
 
     refreshInterval = 500;
 
-    timeoutHandler!: number;
+    timeoutHandler: number;
 
     loadData(props: TrainingProgressComponentProps) {
         PredictorClient.API.getTrainingState(toLite(props.ctx.value))

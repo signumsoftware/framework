@@ -33,7 +33,8 @@ export default class UserQueryPage extends React.Component<UserQueryPageProps, {
         this.load(nextProps);
     }
 
-    searchControl!: SearchControl;
+    searchControl: SearchControl;
+
 
     load(props: UserQueryPageProps) {
 

@@ -37,8 +37,8 @@ CustomViewer.prototype._modules =
 
 export default class WorkflowActivityMonitorViewerComponent extends React.Component<WorkflowActivityMonitorViewerComponentProps> {
 
-    viewer!: NavigatedViewer;
-    divArea!: HTMLDivElement;
+    viewer: NavigatedViewer;
+    divArea: HTMLDivElement;
 
     handleOnModelError = (err: string) => {
         if (err)

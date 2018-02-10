@@ -83,8 +83,8 @@ export interface ClientColorProvider {
 
 export class SchemaMapD3 {
 
-    nodes!: ITableInfo[];
-    links!: IRelationInfo[];
+    nodes: ITableInfo[];
+    links: IRelationInfo[];
     simulation: d3.Simulation<ITableInfo, IRelationInfo>;
     fanIn: { [key: string]: IRelationInfo[] };
 

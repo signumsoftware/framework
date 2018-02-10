@@ -91,6 +91,13 @@ namespace Signum.Engine.UserAssets
                 elements = doc.Element("Entities").Elements().ToDictionary(a => Guid.Parse(a.Attribute("Guid").Value));
             }
 
+            public QueryEntity GetQuery(string queryKey)
+            {
+                var qn = QueryLogic.ToQueryName(queryKey);
+
+                return QueryLogic.GetQueryEntity(qn);
+            }
+
             QueryEntity IFromXmlContext.TryGetQuery(string queryKey)
             {
                 var qn = QueryLogic.TryToQueryName(queryKey);
@@ -193,6 +200,13 @@ namespace Signum.Engine.UserAssets
             {
                 this.overrideEntity = overrideEntity;
                 elements = doc.Element("Entities").Elements().ToDictionary(a => Guid.Parse(a.Attribute("Guid").Value));
+            }
+
+            QueryEntity IFromXmlContext.GetQuery(string queryKey)
+            {
+                var qn = QueryLogic.ToQueryName(queryKey);
+                
+                return QueryLogic.GetQueryEntity(qn);
             }
 
             QueryEntity IFromXmlContext.TryGetQuery(string queryKey)

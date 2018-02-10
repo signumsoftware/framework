@@ -35,7 +35,7 @@ export default class OperationMapPage extends React.Component<OperationMapPagePr
 
     state = { filter: "", color: "" } as OperationMapPropsState;
 
-    wasExpanded!: boolean;
+    wasExpanded: boolean;
 
     componentWillMount() {
 
@@ -83,7 +83,7 @@ export default class OperationMapPage extends React.Component<OperationMapPagePr
         return result;
     }
 
-    div!: HTMLDivElement;
+    div: HTMLDivElement;
     handleSetInitialSize = (div: HTMLDivElement) => {
 
         if (this.div)
@@ -238,7 +238,7 @@ export class OperationMapRenderer extends React.Component<OperationMapRendererPr
         this.state.mapD3.stop();
     }
 
-    svg!: SVGElement;
+    svg: SVGElement;
 
     render() {
 

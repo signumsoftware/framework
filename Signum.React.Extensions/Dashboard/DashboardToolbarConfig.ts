@@ -15,7 +15,8 @@ import { DashboardEntity } from './Signum.Entities.Dashboard'
 export default class DashboardToolbarConfig extends ToolbarConfig<DashboardEntity> {
 
     constructor() {
-        super(DashboardEntity);
+        super();
+        this.type = DashboardEntity;
     }
 
     getIcon(element: ToolbarResponse<DashboardEntity>) {

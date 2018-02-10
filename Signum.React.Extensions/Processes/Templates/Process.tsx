@@ -31,7 +31,7 @@ export default class Process extends React.Component<{ ctx: TypeContext<ProcessE
         }
     }
 
-    processExceptionsCounter!: ValueSearchControlLine;
+    processExceptionsCounter: ValueSearchControlLine;
 
     render() {
 

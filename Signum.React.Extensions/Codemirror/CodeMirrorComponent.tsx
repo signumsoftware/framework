@@ -18,14 +18,14 @@ export interface CodeMirrorProps {
 
 export default class CodeMirrorComponent extends React.Component<CodeMirrorProps, { isFocused: boolean }> {
 
-    codeMirror!: CodeMirror.EditorFromTextArea;
+    codeMirror: CodeMirror.EditorFromTextArea;
 
     constructor(props: CodeMirrorProps) {
         super(props);
         this.state = { isFocused: false, };
     }
 
-    textArea!: HTMLTextAreaElement; 
+    textArea: HTMLTextAreaElement; 
 
     componentDidMount() {
         this.codeMirror = CodeMirror.fromTextArea(this.textArea!, this.props.options);
