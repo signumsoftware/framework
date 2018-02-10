@@ -404,7 +404,7 @@ export class DesignerModal extends React.Component<DesignerModalProps, { isOpen:
         this.state = { isOpen: true };
     }
 
-    okClicked: boolean
+    okClicked?: boolean
     handleOkClicked = () => {
         this.okClicked = true;
         this.setState({ isOpen: false });

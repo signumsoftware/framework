@@ -33,6 +33,10 @@ export function start(options: { routes: JSX.Element[] }, ...configs: ToolbarCon
 
 export abstract class ToolbarConfig<T extends Entity> {
     type: Type<T>;
+    constructor(type: Type<T>) {
+        this.type = type;
+    }
+
     getIcon(element: ToolbarResponse<T>) {
         return ToolbarConfig.coloredIcon(element.iconName, element.iconColor);
     }

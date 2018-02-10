@@ -41,7 +41,7 @@ export default class OmniboxAutocomplete extends React.Component<OmniboxAutocomp
 
     abortRequest = new AbortableRequest((ac, query: string) => OmniboxClient.API.getResults(query, ac));
 
-    typeahead: Typeahead;
+    typeahead!: Typeahead;
 
     render() {
 

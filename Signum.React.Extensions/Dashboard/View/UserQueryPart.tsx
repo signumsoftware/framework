@@ -84,12 +84,12 @@ interface BigValueBadgeProps {
 
 export class BigValueSearchCounter extends React.Component<BigValueBadgeProps> {
 
-    vsc: ValueSearchControl;
+    vsc!: ValueSearchControl;
     render() {
         
         return (
             <div className={"panel panel-" + this.props.style.toLowerCase()}>
-                <div className="card-heading" onClick={this.vsc && this.vsc.handleClick} style={{ cursor: "pointer" }}>
+                <div className="card-heading" onClick={e=> this.vsc.handleClick(e)} style={{ cursor: "pointer" }}>
                     <div className="row">
                         <div className="col-xs-3">
                             <i className={classes(this.props.iconName, "fa-5x")} style={{ color: this.props.iconColor }}></i>
@@ -100,7 +100,6 @@ export class BigValueSearchCounter extends React.Component<BigValueBadgeProps> {
                                     ref={vsc => {
                                         if (this.vsc == null && vsc) {
                                             this.vsc = vsc;
-                                            this.forceUpdate();
                                         }
                                     }}
                                     findOptions={this.props.findOptions} isLink={true} isBadge={false} />

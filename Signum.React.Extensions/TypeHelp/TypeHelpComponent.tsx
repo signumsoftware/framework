@@ -135,10 +135,7 @@ export default class TypeHelpComponent extends React.Component<TypeHelpComponent
             contextualMenu: undefined
         });
     }
-
-    input: HTMLInputElement;
-
-
+    
     handleGetItems = (query: string) => {
         return TypeHelpClient.API.autocompleteEntityCleanType({
             query: query,
@@ -192,7 +189,7 @@ export default class TypeHelpComponent extends React.Component<TypeHelpComponent
         );
     }
 
-    typeHelpContainer: HTMLElement;
+    typeHelpContainer!: HTMLElement;
 
     renderHelp(h: TypeHelpClient.TypeHelp) {
         return (

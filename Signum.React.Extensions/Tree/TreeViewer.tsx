@@ -174,7 +174,7 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
             .done();
     }
 
-    treeContainer: HTMLElement;
+    treeContainer!: HTMLElement;
 
     render() {
         return (

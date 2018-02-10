@@ -118,12 +118,6 @@ export default class HeavyEntry extends React.Component<HeavyEntryProps, { entri
             </div>
         );
     }
-
-
-
-    chartContainer: HTMLDivElement;
-
-
 }
 
 
@@ -221,7 +215,7 @@ export class HeavyProfilerDetailsD3 extends React.Component<HeavyProfilerDetails
         this.updateChart!();
     }
 
-    chartContainer: HTMLDivElement;
+    chartContainer!: HTMLDivElement;
 
     handleWeel = (e: React.WheelEvent<any>) => {
 

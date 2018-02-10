@@ -112,7 +112,7 @@ export default class CaseFrameModal extends React.Component<CaseFrameModalProps,
         return entity.modified;
     }
 
-    okClicked: boolean;
+    okClicked: boolean = false;
     handleCancelClicked = () => {
         if (this.hasChanges() && !this.props.avoidPromptLooseChange) {
             MessageModal.show({
@@ -173,7 +173,7 @@ export default class CaseFrameModal extends React.Component<CaseFrameModalProps,
         );
     }
 
-    entityComponent: React.Component<any, any>;
+    entityComponent?: React.Component<any, any>;
 
     setComponent(c: React.Component<any, any>) {
         if (c && this.entityComponent != c) {
