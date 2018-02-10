@@ -1,12 +1,13 @@
 ﻿
 import * as React from 'react'
-import { Modal, ModalHeader, ModalBody } from 'reactstrap'
+//import { Modal, ModalHeader, ModalBody } from 'reactstrap'
 import * as Finder from '../Finder'
 import { openModal, IModalProps } from '../Modals';
 import { ResultTable, FindOptions, FindMode, FilterOption, QueryDescription, ResultRow, ModalFindOptions } from '../FindOptions'
 import { SearchMessage, JavascriptMessage, Lite, Entity } from '../Signum.Entities'
 import { getQueryNiceName } from '../Reflection'
 import SearchControl, { SearchControlProps} from './SearchControl'
+import Modal from '../Components/Modal';
 
 
 interface SearchModalProps extends React.Props<SearchModal>, IModalProps {
@@ -44,7 +45,7 @@ export default class SearchModal extends React.Component<SearchModalProps, { sho
         this.setState({ show: false });
     }
 
-    handleOnClosed = () => {
+    handleOnExisted = () => {
         this.props.onExited!(this.okPressed ? this.selectedRows : undefined);
     }
 
@@ -62,7 +63,7 @@ export default class SearchModal extends React.Component<SearchModalProps, { sho
         const okEnabled = this.props.isMany ? this.selectedRows.length > 0 : this.selectedRows.length == 1;
 
         return (
-            <Modal size="lg" isOpen={this.state.show} onClosed={this.handleOnClosed} toggle={this.handleCancelClicked}>
+            <Modal size="lg" show={this.state.show} onExited={this.handleOnExisted} onHide={this.handleCancelClicked}>
                 <ModalTitleButtons
                     onClose={this.props.findMode == "Explore" ? this.handleCancelClicked : undefined}
                     onOk={this.props.findMode == "Find" ? this.handleOkClicked : undefined}
@@ -71,11 +72,11 @@ export default class SearchModal extends React.Component<SearchModalProps, { sho
                 >
                     <span className="sf-entity-title"> {this.props.title}</span>
                     &nbsp;
-                        <a className="sf-popup-fullscreen pointer" onMouseUp={(e) => this.searchControl && this.searchControl.handleFullScreenClick(e)}>
-                            <span className="fa fa-external-link"></span>
-                        </a>
+                    <a className="sf-popup-fullscreen pointer" onMouseUp={(e) => this.searchControl && this.searchControl.handleFullScreenClick(e)}>
+                        <span className="fa fa-external-link"></span>
+                    </a>
                 </ModalTitleButtons>
-                <ModalBody>
+                <div className="modal-body">
                     <SearchControl
                         hideFullScreenButton={true}
                         throwIfNotFindable={true}
@@ -86,7 +87,7 @@ export default class SearchModal extends React.Component<SearchModalProps, { sho
                         onDoubleClick={this.props.findMode == "Find" ? this.handleDoubleClick : undefined}
                         {...this.props.searchControlProps}
                         />
-                </ModalBody>
+                </div>
             </Modal>
         );
     }

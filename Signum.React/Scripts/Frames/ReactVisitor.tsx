@@ -1,5 +1,5 @@
 ﻿import * as React from 'react'
-import { Tab } from '../Tabs'
+import { Tab } from '../Components/Tabs'
 import { Dic } from '../Globals'
 import * as Navigator from '../Navigator'
 import { ResultTable, FindOptions, FilterOption, QueryDescription } from '../FindOptions'

@@ -1,6 +1,7 @@
 ﻿import * as React from 'react'
-import { TabContent, TabPane, NavItem, Nav, NavLink } from 'reactstrap'
-import { classes } from './Globals';
+import * as PropTypes from 'prop-types'
+import { TabPane, NavItem, Nav, NavLink } from 'reactstrap'
+import { classes } from '../Globals';
 
 
 interface UncontrolledTabsProps extends React.HTMLAttributes<HTMLDivElement> {
@@ -21,7 +22,7 @@ export class UncontrolledTabs extends React.Component<UncontrolledTabsProps, Unc
         this.state = {
             activeEventKey: props.defaultEventKey != null ? props.defaultEventKey : getFirstEventKey(props.children)
         };
-    } 
+    }
 
     componentWillReceiveProps(newProps: UncontrolledTabsProps) {
         if (this.state.activeEventKey == undefined) {
@@ -78,7 +79,7 @@ function getFirstEventKey(children: React.ReactNode) {
 }
 
 export class Tabs extends React.Component<TabsProps> {
-    
+
     render() {
 
         var { activeEventKey, children, unmountOnExit, toggle, ...attrs } = this.props;
@@ -87,18 +88,21 @@ export class Tabs extends React.Component<TabsProps> {
 
         return (
             <div {...attrs}>
-                <Nav tabs>
+                <ul className="nav nav-tabs">
                     {array.map(t =>
-                        <NavItem key={t.props.eventKey}>
-                            <NavLink
-                                className={classes(this.props.activeEventKey == t.props.eventKey && "active")}
-                                onClick={() => this.props.toggle(t.props.eventKey)}
+                        <li className="nav-item" key={t.props.eventKey}>
+                            <a href="#"
+                                className={classes("nav-link", this.props.activeEventKey == t.props.eventKey && "active")}
+                                onClick={e => {
+                                    e.preventDefault();
+                                    this.props.toggle(t.props.eventKey)
+                                }}
                             >
                                 {t.props.title}
-                            </NavLink>
-                        </NavItem>
+                            </a>
+                        </li>
                     )}
-                </Nav>
+                </ul>
                 {array.filter(a => !this.props.unmountOnExit || a.props.eventKey == this.props.activeEventKey)}
             </div>
         );
@@ -111,13 +115,18 @@ interface TabProps extends React.HTMLAttributes<any> {
 }
 
 export class Tab extends React.Component<TabProps> {
+
+    static contextTypes = {
+        activeTabId: PropTypes.any
+    };
+
     render() {
         var { children, eventKey, title, ...rest } = this.props;
 
         return (
-            <TabPane tabId={eventKey} {...rest}>
+            <div className={classes("tab-pane", this.props.eventKey == this.context.activeTabId)} {...rest}>
                 {children}
-            </TabPane>
+            </div>
         );
     }
 }

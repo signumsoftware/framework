@@ -10,7 +10,6 @@ import { ModifiableEntity, Lite, Entity, EntityControlMessage, JavascriptMessage
 import { LineBase, LineBaseProps, runTasks } from './LineBase'
 import { FormGroup } from './FormGroup'
 import { FormControlReadonly } from './FormControlReadonly'
-import Typeahead from '../Lines/Typeahead'
 import SelectorModal from '../SelectorModal'
 import { TypeEntity } from "../Signum.Entities.Basics";
 

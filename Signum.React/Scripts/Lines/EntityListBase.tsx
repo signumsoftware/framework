@@ -8,8 +8,7 @@ import { FindOptions } from '../FindOptions'
 import { TypeContext, StyleContext, StyleOptions, FormGroupStyle } from '../TypeContext'
 import { PropertyRoute, PropertyRouteType, MemberInfo, getTypeInfo, getTypeInfos, TypeInfo, IsByAll, getTypeName } from '../Reflection'
 import { LineBase, LineBaseProps, runTasks } from '../Lines/LineBase'
-import Typeahead from '../Lines/Typeahead'
-import { EntityBase, EntityBaseProps} from './EntityBase'
+import { EntityBase, EntityBaseProps } from './EntityBase'
 
 
 export interface EntityListBaseProps extends EntityBaseProps {

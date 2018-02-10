@@ -17,7 +17,8 @@ import * as ContexualItems from './SearchControl/ContextualItems';
 import ButtonBar from './Frames/ButtonBar';
 import { getEntityOperationButtons, defaultOnClick } from './Operations/EntityOperations';
 import { getConstructFromManyContextualItems, getEntityOperationsContextualItems, defaultContextualClick } from './Operations/ContextualOperations';
-import { ContextualItemsContext} from './SearchControl/ContextualItems';
+import { ContextualItemsContext } from './SearchControl/ContextualItems';
+import { BsColor } from "./Components/Basic";
 
 export function start() {
     ButtonBar.onButtonBarRender.push(getEntityOperationButtons);
@@ -252,7 +253,7 @@ export class EntityOperationSettings<T extends Entity> extends OperationSettings
     }
 }
 
-export type BsColor = "primary" | "secondary" | "success" | "info" | "warning" | "danger" | "light" | "dark";
+
 
 export interface EntityOperationOptions<T extends Entity> {
     contextual?: ContextualOperationOptions<T>;

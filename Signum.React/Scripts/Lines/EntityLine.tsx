@@ -10,7 +10,7 @@ import { LineBase, LineBaseProps, runTasks } from '../Lines/LineBase'
 import { FormGroup } from '../Lines/FormGroup'
 import { FormControlReadonly } from '../Lines/FormControlReadonly'
 import { ModifiableEntity, Lite, Entity, EntityControlMessage, JavascriptMessage, toLite, is, liteKey, getToString, isLite, isEntity, isModifiableEntity } from '../Signum.Entities'
-import Typeahead from '../Lines/Typeahead'
+import Typeahead from '../Components/Typeahead'
 import { EntityBase, EntityBaseProps } from './EntityBase'
 import { AutocompleteConfig } from './AutocompleteConfig'
 

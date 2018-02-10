@@ -2,7 +2,7 @@
 import * as moment from 'moment'
 import { ExceptionEntity } from '../Signum.Entities.Basics'
 import { ValueLine, ValueLineType, EntityLine, TypeContext } from '../Lines'
-import { Tabs, Tab, UncontrolledTabs } from '../Tabs';
+import { Tabs, Tab, UncontrolledTabs } from '../Components/Tabs';
 
 export default class Exception extends React.Component<{ ctx: TypeContext<ExceptionEntity> }> {
     render() {
