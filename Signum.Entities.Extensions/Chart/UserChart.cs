@@ -11,6 +11,7 @@ using System.Xml.Linq;
 using Signum.Entities.UserAssets;
 using System.Reflection;
 using Signum.Utilities.ExpressionTrees;
+using Signum.Entities;
 
 namespace Signum.Entities.Chart
 {
@@ -42,6 +43,8 @@ namespace Signum.Entities.Chart
         public QueryEntity Query { get; set; }
 
         public Lite<TypeEntity> EntityType { get; set; }
+
+        public bool HideQuickLink { get; set; }
 
         public Lite<Entity> Owner { get; set; }
 
@@ -156,6 +159,7 @@ namespace Signum.Entities.Chart
                 new XAttribute("DisplayName", DisplayName),
                 new XAttribute("Query", Query.Key),
                 EntityType == null ? null : new XAttribute("EntityType", ctx.TypeToName(EntityType)),
+                new XAttribute("HideQuickLink", HideQuickLink),
                 Owner == null ? null : new XAttribute("Owner", Owner.Key()),
                 new XAttribute("ChartScript", ChartScript.Name),
                 new XAttribute("GroupResults", GroupResults),
@@ -168,8 +172,9 @@ namespace Signum.Entities.Chart
         public void FromXml(XElement element, IFromXmlContext ctx)
         {
             DisplayName = element.Attribute("DisplayName").Value;
-            Query = ctx.TryGetQuery(element.Attribute("Query").Value);
+            Query = ctx.GetQuery(element.Attribute("Query").Value);
             EntityType = element.Attribute("EntityType")?.Let(a => ctx.GetType(a.Value));
+            HideQuickLink = element.Attribute("HideQuickLink")?.Let(a => bool.Parse(a.Value)) ?? false;
             Owner = element.Attribute("Owner")?.Let(a => Lite.Parse(a.Value));
             ChartScript = ctx.ChartScript(element.Attribute("ChartScript").Value);
             GroupResults = bool.Parse(element.Attribute("GroupResults").Value);

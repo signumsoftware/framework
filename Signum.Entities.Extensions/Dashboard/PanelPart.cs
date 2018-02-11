@@ -87,6 +87,9 @@ namespace Signum.Entities.Dashboard
                 new XAttribute("StartColumn", StartColumn),
                 new XAttribute("Columns", Columns),
                 Title == null ? null : new XAttribute("Title", Title),
+                IconName == null ? null : new XAttribute("IconName", IconName),
+                IconColor == null ? null : new XAttribute("IconColor", IconColor),
+                new XAttribute("Style", Style),
                 Content.ToXml(ctx));
         }
 
@@ -96,6 +99,9 @@ namespace Signum.Entities.Dashboard
             StartColumn = int.Parse(x.Attribute("StartColumn").Value);
             Columns = int.Parse(x.Attribute("Columns").Value);
             Title = x.Attribute("Title")?.Value;
+            IconName = x.Attribute("IconName")?.Value;
+            IconColor = x.Attribute("IconColor")?.Value;
+            Style = (PanelStyle)(x.Attribute("Style")?.Let(a => Enum.Parse(typeof(PanelStyle), a.Value)) ?? PanelStyle.Default);
             Content = ctx.GetPart(Content, x.Elements().Single());
         }
 
@@ -346,7 +352,7 @@ namespace Signum.Entities.Dashboard
         [StringLengthValidator(AllowNulls = false, Max = 200)]
         public string Label { get; set; }
 
-        [URLValidator(absolute: true, aspNetSiteRelative: true), StringLengthValidator(AllowNulls = false, Max = 200)]
+        [URLValidator(absolute: true, aspNetSiteRelative: true), StringLengthValidator(AllowNulls = false, Max = int.MaxValue)]
         public string Link { get; set; }
 
         public LinkElementEmbedded Clone()

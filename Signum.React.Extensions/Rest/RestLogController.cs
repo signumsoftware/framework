@@ -28,23 +28,9 @@ namespace Signum.React.RestLog
             }
             var oldCredentials = Database.Query<RestApiKeyEntity>().Single(r => r.User.Is(oldRequest.User));
 
-            var result = await RestLogLogic.GetRestDiffResult(url, oldCredentials.ApiKey, oldRequest.RequestBody, oldRequest.ResponseBody);
+            var result = await RestLogLogic.GetRestDiffResult(new HttpMethod(oldRequest.HttpMethod), url, oldCredentials.ApiKey, oldRequest.RequestBody, oldRequest.ResponseBody);
 
             return RestLogLogic.RestDiffLog(result);
         }
-
-       
-        [Route("api/restLog/"), HttpPost]
-        public async Task<RestDiffResult> GetDiff(RestDiffRequest request)
-        {
-            var restDiffResult = await RestLogLogic.GetRestDiffResult(request.url, request.apiKey, request.requestBody, request.responseBody);
-            
-
-            return RestLogLogic.RestDiffLog(restDiffResult);
-        }
-
-       
     }
-
-   
 }

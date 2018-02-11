@@ -137,7 +137,8 @@ namespace Signum.Entities.Toolbar
             Content = string.IsNullOrEmpty(content) ? null :
                 Guid.TryParse(content, out Guid guid) ? (Lite<Entity>)ctx.GetEntity(guid).ToLiteFat() :
                 (Lite<Entity>)ctx.TryGetQuery(content)?.ToLite() ??
-                (Lite<Entity>)ctx.TryPermission(content)?.ToLite();
+                (Lite<Entity>)ctx.TryPermission(content)?.ToLite() ??
+                throw new InvalidOperationException($"Content '{content}' not found");
 
             Url = x.Attribute("Url")?.Value;
         }

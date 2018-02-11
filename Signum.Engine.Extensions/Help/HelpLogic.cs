@@ -254,10 +254,10 @@ namespace Signum.Engine.Help
                 sb.Schema.Synchronizing += Schema_Synchronizing;
 
                 sb.Schema.Table<OperationSymbol>().PreDeleteSqlSync += operation =>
-                    Administrator.UnsafeDeletePreCommand((EntityHelpEntity eh) => eh.Operations, Database.MListQuery((EntityHelpEntity eh) => eh.Operations).Where(mle => mle.Element.Operation == (OperationSymbol)operation));
+                    Administrator.UnsafeDeletePreCommandMList((EntityHelpEntity eh) => eh.Operations, Database.MListQuery((EntityHelpEntity eh) => eh.Operations).Where(mle => mle.Element.Operation == (OperationSymbol)operation));
 
                 sb.Schema.Table<PropertyRouteEntity>().PreDeleteSqlSync += property =>
-                    Administrator.UnsafeDeletePreCommand((EntityHelpEntity eh) => eh.Properties, Database.MListQuery((EntityHelpEntity eh) => eh.Properties).Where(mle => mle.Element.Property == (PropertyRouteEntity)property));
+                    Administrator.UnsafeDeletePreCommandMList((EntityHelpEntity eh) => eh.Properties, Database.MListQuery((EntityHelpEntity eh) => eh.Properties).Where(mle => mle.Element.Property == (PropertyRouteEntity)property));
                 
                 sb.Schema.Table<TypeEntity>().PreDeleteSqlSync += type =>
                     Administrator.UnsafeDeletePreCommand(Database.Query<EntityHelpEntity>().Where(e => e.Type == (TypeEntity)type));

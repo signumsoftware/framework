@@ -75,6 +75,7 @@ namespace Signum.Entities.UserAssets
     public interface IFromXmlContext
     {
         QueryEntity TryGetQuery(string queryKey);
+        QueryEntity GetQuery(string queryKey);
 
         PermissionSymbol TryPermission(string permissionKey);
 

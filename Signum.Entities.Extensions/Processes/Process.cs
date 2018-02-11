@@ -96,6 +96,14 @@ namespace Signum.Entities.Processes
             get { return ExecutionEnd == null ? null : DurationExpression.Evaluate(this); }
         }
 
+        static Expression<Func<ProcessEntity, TimeSpan?>> DurationSpanExpression =
+        log => log.ExecutionEnd - log.ExecutionStart;
+        [ExpressionField("DurationSpanExpression")]
+        public TimeSpan? DurationSpan
+        {
+            get { return ExecutionEnd == null ? null : DurationSpanExpression.Evaluate(this); }
+        }
+
         public DateTime? SuspendDate { get; set; }
 
         public DateTime? ExceptionDate { get; set; }

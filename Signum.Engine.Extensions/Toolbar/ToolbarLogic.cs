@@ -115,7 +115,7 @@ namespace Signum.Engine.Toolbar
                 {
                     var entity = (T)arg;
 
-                    var parts = Administrator.UnsafeDeletePreCommand((ToolbarEntity tb) => tb.Elements, Database.MListQuery((ToolbarEntity tb) => tb.Elements)
+                    var parts = Administrator.UnsafeDeletePreCommandMList((ToolbarEntity tb) => tb.Elements, Database.MListQuery((ToolbarEntity tb) => tb.Elements)
                         .Where(mle => mle.Element.Content.Entity == entity));
 
                     return parts;
@@ -133,7 +133,7 @@ namespace Signum.Engine.Toolbar
                 {
                     var entity = (T)arg;
 
-                    var parts = Administrator.UnsafeDeletePreCommand((ToolbarMenuEntity tb) => tb.Elements, Database.MListQuery((ToolbarMenuEntity tb) => tb.Elements)
+                    var parts = Administrator.UnsafeDeletePreCommandMList((ToolbarMenuEntity tb) => tb.Elements, Database.MListQuery((ToolbarMenuEntity tb) => tb.Elements)
                         .Where(mle => mle.Element.Content.Entity == entity));
 
                     return parts;
