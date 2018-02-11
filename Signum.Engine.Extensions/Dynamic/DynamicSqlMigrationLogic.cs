@@ -83,11 +83,12 @@ namespace Signum.Engine.Dynamic
                                 Replacements.AutoReplacement = ctx =>
                                 {
                                     var currentName =
-                                    ctx.ReplacementKey.StartsWith("Enums:") ? AutoReplacementEnums(ctx):
-                                    ctx.ReplacementKey.Contains(":") ? DynamicAutoReplacementsProperties(ctx, lastRenames) :
-                                    ctx.ReplacementKey == Replacements.KeyTables ? DynamicAutoReplacementsTable(ctx, lastRenames) :
+                                    ctx.ReplacementKey.StartsWith(Replacements.KeyEnumsForTable("")) ? AutoReplacementEnums(ctx):
+                                    ctx.ReplacementKey.StartsWith(PropertyRouteLogic.PropertiesFor.FormatWith("")) ? DynamicAutoReplacementsProperties(ctx, lastRenames) :
+                                    ctx.ReplacementKey.StartsWith(Replacements.KeyColumnsForTable("")) ? DynamicAutoReplacementsColumns(ctx, lastRenames) :
+                                    ctx.ReplacementKey == Replacements.KeyTables ? DynamicAutoReplacementsSimple(ctx, lastRenames, Replacements.KeyTables) :
                                     ctx.ReplacementKey == typeof(OperationSymbol).Name ? DynamicAutoReplacementsOperations(ctx, lastRenames) :
-                                    ctx.ReplacementKey == QueryLogic.QueriesKey ? DynamicAutoReplacementsSimple(ctx, lastRenames, Replacements.KeyTables) :
+                                    ctx.ReplacementKey == QueryLogic.QueriesKey ? DynamicAutoReplacementsSimple(ctx, lastRenames, DynamicTypeLogic.TypeNameKey) :
                                     DynamicAutoReplacementsSimple(ctx, lastRenames, ctx.ReplacementKey);
 
                                     if (currentName != null)
@@ -148,6 +149,11 @@ namespace Signum.Engine.Dynamic
                             }
 
                         }
+                        catch(MigrationException ex)
+                        {
+                            ex.InnerException.PreserveStackTrace();
+                            throw ex.InnerException;
+                        }
                         finally
                         {
                             LastLog = CurrentLog?.ToString();
@@ -196,7 +202,7 @@ namespace Signum.Engine.Dynamic
 
         public static string DynamicAutoReplacementsOperations(Replacements.AutoReplacementContext ctx, List<DynamicRenameEntity> lastRenames)
         {
-            var typeReplacements = lastRenames.Where(a => a.ReplacementKey == Replacements.KeyTables).ToList();
+            var typeReplacements = lastRenames.Where(a => a.ReplacementKey == DynamicTypeLogic.TypeNameKey).ToList();
 
             var typeName = ctx.OldValue.TryBefore("Operation.");
             if (typeName == null)
@@ -216,39 +222,41 @@ namespace Signum.Engine.Dynamic
             return null;
         }
 
-        public static string DynamicAutoReplacementsTable(Replacements.AutoReplacementContext ctx, List<DynamicRenameEntity> lastRenames)
-        {
-            var list = lastRenames.Where(a => a.ReplacementKey == ctx.ReplacementKey).ToList();
-
-            var currentName = ctx.OldValue.TryAfterLast(".");
-            if (currentName == null)
-                return null;
-
-            foreach (var r in list)
-            {
-                if (r.OldName == currentName)
-                    currentName = r.NewName;
-            }
-
-            var best = ctx.NewValues.Where(a => a.TryAfterLast(".") == currentName).Only();
-            if (best != null)
-                return best;
-
-            return null;
-        }
-
         public static string DynamicAutoReplacementsProperties(Replacements.AutoReplacementContext ctx, List<DynamicRenameEntity> lastRenames)
         {
             var prefix = ctx.ReplacementKey.Before(":");
-            var tableNames = GetTableRenames(ctx.ReplacementKey.After(":"), lastRenames);
+            var tableNames = GetAllRenames(ctx.ReplacementKey.After(":"), DynamicTypeLogic.TypeNameKey, lastRenames);
 
-            var list = lastRenames.Where(a => tableNames.Any(tn => a.ReplacementKey == prefix + ":" + tn)).ToList();
+            var allKeys = tableNames.Select(tn => prefix + ":" + tn).And(DynamicTypeLogic.UnknownPropertyKey).ToList();
+
+            var list = lastRenames.Where(a => allKeys.Contains(a.ReplacementKey)).ToList();
 
             var currentName = ctx.OldValue;
             foreach (var r in list)
             {
-                if (r.OldName == currentName)
-                    currentName = r.NewName;
+                if (currentName.Split('.').Contains(r.OldName))
+                    currentName = currentName.Split('.').Select(p => p == r.OldName ? r.NewName : p).ToString(".");
+            }
+
+            if (ctx.NewValues.Contains(currentName))
+                return currentName;
+
+            return null;
+        }
+        public static string DynamicAutoReplacementsColumns(Replacements.AutoReplacementContext ctx, List<DynamicRenameEntity> lastRenames)
+        {
+            var prefix = ctx.ReplacementKey.Before(":");
+            var tableNames = GetAllRenames(ctx.ReplacementKey.After(":"), Replacements.KeyTables, lastRenames);
+
+            var allKeys = tableNames.Select(tn => prefix + ":" + tn).And(DynamicTypeLogic.UnknownColumnKey).ToList();
+
+            var list = lastRenames.Where(a => allKeys.Contains(a.ReplacementKey)).ToList();
+
+            var currentName = ctx.OldValue;
+            foreach (var r in list)
+            {
+                if (currentName.Split('_').Contains(r.OldName))
+                    currentName = currentName.Split('_').Select(p => p == r.OldName ? r.NewName : p).ToString("_");
             }
 
             if (ctx.NewValues.Contains(currentName))
@@ -257,22 +265,22 @@ namespace Signum.Engine.Dynamic
             return null;
         }
 
-        private static List<string> GetTableRenames(string lastTableName, List<DynamicRenameEntity> lastRenames)
+        private static List<string> GetAllRenames(string lastName, string replacementKey, List<DynamicRenameEntity> lastRenames)
         {
-            var currentTableName = lastTableName.AfterLast(".");
-            var tableRenames = lastRenames.Where(a => a.ReplacementKey == Replacements.KeyTables);
+            var currentTypeName = lastName;
+            var typeRenames = lastRenames.Where(a => a.ReplacementKey == replacementKey);
 
-            List<string> allTableNames = new List<string> { currentTableName };
-            foreach (var item in tableRenames.Reverse())
+            List<string> allTypeNames = new List<string> { currentTypeName };
+            foreach (var item in typeRenames.Reverse())
             {
-                if (item.NewName == currentTableName)
+                if (item.NewName == currentTypeName)
                 {
-                    currentTableName = item.OldName;
-                    allTableNames.Add(currentTableName);
+                    currentTypeName = item.OldName;
+                    allTypeNames.Add(currentTypeName);
                 }
             }
 
-            return allTableNames;
+            return allTypeNames;
         }
 
         public static string GetLog()

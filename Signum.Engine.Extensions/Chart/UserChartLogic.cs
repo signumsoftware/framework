@@ -78,18 +78,28 @@ namespace Signum.Engine.Chart
             return userChart;
         }
 
-        static void ChartLogic_Retrieved(UserChartEntity userQuery)
+        static void ChartLogic_Retrieved(UserChartEntity userChart)
         {
-            object queryName = QueryLogic.ToQueryName(userQuery.Query.Key);
+            object queryName;
+            try
+            {
+                queryName = QueryLogic.ToQueryName(userChart.Query.Key);
+            }
+            catch (KeyNotFoundException ex) when (StartParameters.IgnoredCodeErrors != null)
+            {
+                StartParameters.IgnoredCodeErrors.Add(ex);
+
+                return;
+            }
 
             QueryDescription description = DynamicQueryManager.Current.QueryDescription(queryName);
 
-            foreach (var item in userQuery.Columns)
+            foreach (var item in userChart.Columns)
             {
-                item.parentChart = userQuery;
+                item.parentChart = userChart;
             }
 
-            userQuery.ParseData(description);
+            userChart.ParseData(description);
         }
 
         public static List<Lite<UserChartEntity>> GetUserCharts(object queryName)
