@@ -235,6 +235,8 @@ export module CalendarMessage {
 export module ConnectionMessage {
     export const AConnectionWithTheServerIsNecessaryToContinue = new MessageKey("ConnectionMessage", "AConnectionWithTheServerIsNecessaryToContinue");
     export const SessionExpired = new MessageKey("ConnectionMessage", "SessionExpired");
+    export const ANewVersionHasJustBeenDeployedSaveChangesAnd0 = new MessageKey("ConnectionMessage", "ANewVersionHasJustBeenDeployedSaveChangesAnd0");
+    export const Refresh = new MessageKey("ConnectionMessage", "Refresh");
 }
 
 export const CorruptMixin = new Type<CorruptMixin>("CorruptMixin");
@@ -512,6 +514,8 @@ export module ValidationMessage {
     export const _0ShouldBeOfType1 = new MessageKey("ValidationMessage", "_0ShouldBeOfType1");
     export const _0ShouldNotBeOfType1 = new MessageKey("ValidationMessage", "_0ShouldNotBeOfType1");
     export const _0And1CanNotBeSetAtTheSameTime = new MessageKey("ValidationMessage", "_0And1CanNotBeSetAtTheSameTime");
+    export const _0And1And2CanNotBeSetAtTheSameTime = new MessageKey("ValidationMessage", "_0And1And2CanNotBeSetAtTheSameTime");
+    export const _0Have1ElementsButAllowedOnly2 = new MessageKey("ValidationMessage", "_0Have1ElementsButAllowedOnly2");
 }
 
 export module VoidEnumMessage {

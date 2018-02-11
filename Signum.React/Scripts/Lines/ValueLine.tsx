@@ -212,8 +212,8 @@ function getOptionsItems(vl: ValueLine): OptionItem[]{
 
     if (vl.state.type!.name == "boolean")
         return ([
-            { label: BooleanEnum.niceName("False")!, value: false },
-            { label: BooleanEnum.niceName("True")!, value: true }
+            { label: BooleanEnum.niceToString("False")!, value: false },
+            { label: BooleanEnum.niceToString("True")!, value: true }
         ]);
 
     return Dic.getValues(ti.members).map(m => toOptionItem(m));
@@ -502,7 +502,7 @@ ValueLine.renderers["DateTime" as ValueLineType] = (vl) => {
 
     const handleDatePickerOnChange = (date?: Date, str?: string) => {
 
-        const m = moment(date);
+        const m = showTime ? moment(date) : moment(date).startOf("day");
         vl.setValue(m.isValid() ? m.format() : null);
     };
 

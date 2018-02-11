@@ -445,7 +445,7 @@ namespace Signum.Engine
 
         public static List<string> ComplexWhereKeywords = new List<string> { "OR" };
 
-        public override SqlPreCommand ShringDatabase(string schemaName)
+        public override SqlPreCommand ShrinkDatabase(string schemaName)
         {
             return new[]
             {
@@ -651,7 +651,7 @@ deallocate cur";
 
         internal static SqlPreCommand ShrinkDatabase(string schemaName)
         {
-            return Connector.Current.ShringDatabase(schemaName);
+            return Connector.Current.ShrinkDatabase(schemaName);
 
         }
     }

@@ -1519,7 +1519,7 @@ namespace Signum.Engine.Linq
 
                 var hasValue = CombineImplementations(strategy, expressions.SelectDictionary(w => ((EmbeddedEntityExpression)w).HasValue ?? new SqlConstantExpression(true)), typeof(bool));
 
-                return new EmbeddedEntityExpression(returnType, hasValue, bindings, null);
+                return new EmbeddedEntityExpression(returnType, hasValue, bindings, null, null);
             }
 
             if (expressions.All(e => e.Value is MixinEntityExpression))
@@ -1852,6 +1852,12 @@ namespace Signum.Engine.Linq
 
                 commands.Add(new DeleteExpression(mlee.Table, pr.Select, SmartEqualizer.EqualNullable(id, mlee.RowId)));
             }
+            else if (pr.Projector is EmbeddedEntityExpression eee)
+            {
+                Expression id = eee.ViewTable.GetIdExpression(aliasGenerator.Table(eee.ViewTable.Name));
+
+                commands.Add(new DeleteExpression(eee.ViewTable, pr.Select, SmartEqualizer.EqualNullable(id, eee.GetViewId())));
+            }
             else
                 throw new InvalidOperationException("Delete not supported for {0}".FormatWith(pr.Projector.GetType().TypeName()));
 
@@ -1874,9 +1880,11 @@ namespace Signum.Engine.Linq
                 entity = MapVisitExpand(cleanedSelector, pr);
             }
 
-            ITable table = entity is EntityExpression ?
-                (ITable)((EntityExpression)entity).Table :
-                (ITable)((MListElementExpression)entity).Table;
+            ITable table = 
+                entity is EntityExpression entEx ? (ITable)entEx.Table :
+                entity is EmbeddedEntityExpression eeEx ? (ITable)eeEx.ViewTable:
+                entity is MListElementExpression mlistEx ? (ITable)mlistEx.Table : 
+                throw new InvalidOperationException();
 
             Alias alias = aliasGenerator.Table(table.Name);
 
@@ -1929,6 +1937,13 @@ namespace Signum.Engine.Linq
 
                 condition = SmartEqualizer.EqualNullable(id, mlee.RowId);
                 table = mlee.Table;
+            }
+            else if (entity is EmbeddedEntityExpression eee)
+            {
+                Expression id = eee.ViewTable.GetIdExpression(aliasGenerator.Table(eee.ViewTable.Name));
+
+                condition = SmartEqualizer.EqualNullable(id, eee.GetViewId());
+                table = eee.ViewTable;
             }
             else
                 throw new InvalidOperationException("Update not supported for {0}".FormatWith(entity.GetType().TypeName()));
@@ -2868,7 +2883,8 @@ namespace Signum.Engine.Linq
                    new EmbeddedEntityExpression(col.Type,
                        Expression.Condition(test, t.HasValue, f.HasValue),
                        col.Bindings.Select(bin => GetBinding(bin.FieldInfo, Expression.Condition(test, t.GetBinding(bin.FieldInfo).Nullify(), f.GetBinding(bin.FieldInfo).Nullify()), bin.Binding)),
-                       col.FieldEmbedded));
+                       col.FieldEmbedded,
+                       col.ViewTable));
 
             return null;
         }
@@ -2976,7 +2992,8 @@ namespace Signum.Engine.Linq
                        col.Bindings.Select(bin => GetBinding(bin.FieldInfo, Expression.Coalesce(
                            l.GetBinding(bin.FieldInfo).Nullify(),
                            r.GetBinding(bin.FieldInfo).Nullify()), bin.Binding)),
-                       col.FieldEmbedded));
+                       col.FieldEmbedded,
+                       col.ViewTable));
 
             return null;
         }
@@ -3153,7 +3170,7 @@ namespace Signum.Engine.Linq
                             Expression.Constant(null, fi.FieldType.Nullify()) :
                             Expression.Constant(kvp.Value.Getter(value), fi.FieldType), bind)).ToReadOnly();
 
-            return new EmbeddedEntityExpression(contant.Type, Expression.Constant(value != null), bindings, embedded.FieldEmbedded);
+            return new EmbeddedEntityExpression(contant.Type, Expression.Constant(value != null), bindings, embedded.FieldEmbedded, embedded.ViewTable);
         }
 
         internal FieldBinding GetBinding(FieldInfo fi, Expression value, Expression binding)
@@ -3175,7 +3192,7 @@ namespace Signum.Engine.Linq
                                 (dic.TryGetC(fi.Name) ?? Expression.Constant(null, fi.FieldType)))
                             ).ToReadOnly();
 
-            return new EmbeddedEntityExpression(init.Type, Expression.Constant(true), bindings, embedded.FieldEmbedded);
+            return new EmbeddedEntityExpression(init.Type, Expression.Constant(true), bindings, embedded.FieldEmbedded, embedded.ViewTable);
         }
 
         IDisposable OverrideColExpression(Expression newColExpression)

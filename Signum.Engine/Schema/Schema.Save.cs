@@ -18,6 +18,7 @@ using System.Data.Common;
 using System.Collections.Concurrent;
 using Signum.Engine.Basics;
 using System.Globalization;
+using System.Text.RegularExpressions;
 
 namespace Signum.Engine.Maps
 {
@@ -529,7 +530,7 @@ namespace Signum.Engine.Maps
                             return update + "\r\nIF @@ROWCOUNT = 0 INSERT INTO @NotFound (id) VALUES ({0})".FormatWith(idParamName + suffix);
                     };
 
-                    List<Expression> parameters = trios.Select(a => (Expression)a.ParameterBuilder).ToList();
+                    List<Expression> parameters = new List<Expression>();
 
                     parameters.Add(pb.ParameterFactory(Trio.Concat(idParamName, paramSuffix), table.PrimaryKey.SqlDbType, null, false,
                         Expression.Field(Expression.Property(Expression.Field(paramIdent, fiId), "Value"), "Object")));
@@ -538,6 +539,8 @@ namespace Signum.Engine.Maps
                     {
                         parameters.Add(pb.ParameterFactory(Trio.Concat(oldTicksParamName, paramSuffix), table.Ticks.SqlDbType, null, false, table.Ticks.ConvertTicks(paramOldTicks)));
                     }
+
+                    parameters.AddRange(trios.Select(a => (Expression)a.ParameterBuilder));
 
                     var expr = Expression.Lambda<Func<Entity, long, Forbidden, string, List<DbParameter>>>(
                         CreateBlock(parameters, assigments), paramIdent, paramOldTicks, paramForbidden, paramSuffix);
@@ -555,7 +558,7 @@ namespace Signum.Engine.Maps
    
         class CollectionsCache
         {
-            public Func<Entity, string, SqlPreCommand> InsertCollectionsSync;
+            public Func<Entity, string, bool, SqlPreCommand> InsertCollectionsSync;
 
             public Action<List<EntityForbidden>> InsertCollections;
             public Action<List<EntityForbidden>> UpdateCollections;
@@ -586,8 +589,8 @@ namespace Signum.Engine.Maps
                                     rc.RelationalUpdates(entities);
                             },
 
-                            InsertCollectionsSync = (ident, suffix) =>
-                                caches.Select((rc, i) => rc.RelationalUpdateSync(ident, suffix + "_" + i.ToString())).Combine(Spacing.Double)
+                            InsertCollectionsSync = (ident, suffix, replaceParameter) =>
+                                caches.Select((rc, i) => rc.RelationalUpdateSync(ident, suffix + "_" + i.ToString(), replaceParameter)).Combine(Spacing.Double)
                         };
                     }
                 }
@@ -617,7 +620,7 @@ namespace Signum.Engine.Maps
             if (cc == null)
                 return insert;
 
-            SqlPreCommand collections = cc.InsertCollectionsSync((Entity)ident, suffix);
+            SqlPreCommand collections = cc.InsertCollectionsSync((Entity)ident, suffix, false);
 
             if (collections == null)
                 return insert;
@@ -650,12 +653,9 @@ namespace Signum.Engine.Maps
             SqlPreCommand update;
             if (where != null)
             {
-                var declare = DeclarePrimaryKeyVariable(entity, where);
-                string originalParameterName = SqlParameterBuilder.GetParameterName("id" + suffix);
-                sql = sql.Replace("WHERE ID = " + originalParameterName, "WHERE ID = " + entity.Id.VariableName); //HACK
-                parameters.Single(a => a.ParameterName == originalParameterName).ParameterName = entity.Id.VariableName;
-
-                update = SqlPreCommand.Combine(Spacing.Simple, declare, new SqlPreCommandSimple(sql, parameters).AddComment(comment));
+                update = SqlPreCommand.Combine(Spacing.Simple,
+                    DeclarePrimaryKeyVariable(entity, where),
+                    new SqlPreCommandSimple(sql, parameters).AddComment(comment).ReplaceFirstParameter(entity.Id.VariableName));
             }
             else
             {
@@ -669,8 +669,8 @@ namespace Signum.Engine.Maps
             if (cc == null)
                 return update;
 
-            SqlPreCommand collections = cc.InsertCollectionsSync((Entity)entity, suffix);
-
+            SqlPreCommand collections = cc.InsertCollectionsSync((Entity)entity, suffix, where != null);
+            
             return SqlPreCommand.Combine(Spacing.Simple, update, collections);
         }
 
@@ -739,7 +739,7 @@ namespace Signum.Engine.Maps
     {
         internal interface IMListCache
         {
-            SqlPreCommand RelationalUpdateSync(Entity parent, string suffix);
+            SqlPreCommand RelationalUpdateSync(Entity parent, string suffix, bool replaceParameter);
             void RelationalInserts(List<EntityForbidden> entities);
             void RelationalUpdates(List<EntityForbidden> entities);
 
@@ -995,7 +995,7 @@ namespace Signum.Engine.Maps
                 toInsert.SplitStatements(listPairs => GetInsert(listPairs.Count)(listPairs));
             }
 
-            public SqlPreCommand RelationalUpdateSync(Entity parent, string suffix)
+            public SqlPreCommand RelationalUpdateSync(Entity parent, string suffix, bool replaceParameter)
             {
                 MList<T> collection = Getter(parent);
 
@@ -1004,7 +1004,8 @@ namespace Signum.Engine.Maps
                     if (parent.IsNew)
                         return null;
 
-                    return new SqlPreCommandSimple(sqlDelete(suffix), new List<DbParameter> { DeleteParameter(parent, suffix) });
+                    return new SqlPreCommandSimple(sqlDelete(suffix), new List<DbParameter> { DeleteParameter(parent, suffix) })
+                        .ReplaceFirstParameter(replaceParameter ? parent.Id.VariableName : null);
                 }
 
                 if (collection.Modified == ModifiedState.Clean)
@@ -1025,9 +1026,11 @@ namespace Signum.Engine.Maps
                 else
                 {
                     return SqlPreCommand.Combine(Spacing.Simple,
-                        new SqlPreCommandSimple(sqlDelete(suffix), new List<DbParameter> { DeleteParameter(parent, suffix) }),
-                        collection.Select((e, i) => new SqlPreCommandSimple(sqlInsert(suffix + "_" + i, false), 
-                            InsertParameters(parent, e, i, new Forbidden(), suffix + "_" + i)).AddComment(e.ToString())).Combine(Spacing.Simple));
+                        new SqlPreCommandSimple(sqlDelete(suffix), new List<DbParameter> { DeleteParameter(parent, suffix) }).ReplaceFirstParameter(replaceParameter ? parent.Id.VariableName : null),
+                        collection.Select((e, i) => new SqlPreCommandSimple(sqlInsert(suffix + "_" + i, false), InsertParameters(parent, e, i, new Forbidden(), suffix + "_" + i))
+                            .AddComment(e.ToString())
+                            .ReplaceFirstParameter(replaceParameter ? parent.Id.VariableName : null)
+                        ).Combine(Spacing.Simple));
                 }
             }
         }

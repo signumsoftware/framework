@@ -31,7 +31,7 @@ namespace Signum.Engine.Maps
 
                 var hasValue = id == null ? Expression.Constant(true): SmartEqualizer.NotEqualNullable(id, Expression.Constant(null, id.Type.Nullify()));
 
-                return new EmbeddedEntityExpression(this.Type, hasValue, bindings, null);
+                return new EmbeddedEntityExpression(this.Type, hasValue, bindings, null, this);
             }
             else
             {
@@ -79,7 +79,7 @@ namespace Signum.Engine.Maps
 
             if (field == null)
             {
-                field = Fields.Values.FirstOrDefault(f => f .Field is IColumn && ((IColumn)f.Field).PrimaryKey);
+                field = GetViewPrimaryKey();
                 if (field == null)
                     return null;
 
@@ -88,6 +88,11 @@ namespace Signum.Engine.Maps
             }
 
             return field.Field.GetExpression(alias, null, null);
+        }
+
+        public EntityField GetViewPrimaryKey()
+        {
+            return Fields.Values.FirstOrDefault(f => f.Field is IColumn && ((IColumn)f.Field).PrimaryKey);
         }
 
         ColumnExpression ITablePrivate.GetPrimaryOrder(Alias alias)
@@ -243,7 +248,7 @@ namespace Signum.Engine.Maps
                 id is PrimaryKeyExpression ? QueryBinder.NullId(((PrimaryKeyExpression)id).ValueType) : (Expression)Expression.Constant(null, id.Type.Nullify())) :
                 new ColumnExpression(((IColumn)HasValue).Type, tableAlias, HasValue.Name);
 
-            return new EmbeddedEntityExpression(this.FieldType, hasValue, bindings, this); 
+            return new EmbeddedEntityExpression(this.FieldType, hasValue, bindings, this, null); 
         }
     }
 

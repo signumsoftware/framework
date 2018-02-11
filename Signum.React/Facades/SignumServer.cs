@@ -57,6 +57,7 @@ namespace Signum.React.Facades
             config.Filters.Add(new SignumAuthenticationFilterAttribute());
             config.Filters.Add(new SignumAuthorizationFilterAttribute());
             config.Filters.Add(new SignumExceptionFilterAttribute());
+            config.Filters.Add(new VersionFilterAttribute());
             
             ReflectionServer.Start();
         }

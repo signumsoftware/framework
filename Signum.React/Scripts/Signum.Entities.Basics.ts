@@ -15,8 +15,7 @@ export interface ColorEmbedded extends Entities.EmbeddedEntity {
 export const DeleteLogParametersEmbedded = new Type<DeleteLogParametersEmbedded>("DeleteLogParametersEmbedded");
 export interface DeleteLogParametersEmbedded extends Entities.EmbeddedEntity {
     Type: "DeleteLogParametersEmbedded";
-    deleteLogsWithMoreThan?: number;
-    typeOverrides: Entities.MList<DeleteLogsTypeOverridesEmbedded>;
+    deleteLogs: Entities.MList<DeleteLogsTypeOverridesEmbedded>;
     chunkSize?: number;
     maxChunks?: number;
     pauseTime?: number | null;
@@ -26,7 +25,8 @@ export const DeleteLogsTypeOverridesEmbedded = new Type<DeleteLogsTypeOverridesE
 export interface DeleteLogsTypeOverridesEmbedded extends Entities.EmbeddedEntity {
     Type: "DeleteLogsTypeOverridesEmbedded";
     type?: Entities.Lite<TypeEntity> | null;
-    deleteLogsWithMoreThan?: number;
+    deleteLogsWithMoreThan?: number | null;
+    cleanLogsWithMoreThan?: number | null;
 }
 
 export const ExceptionEntity = new Type<ExceptionEntity>("Exception");

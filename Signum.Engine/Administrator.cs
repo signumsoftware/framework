@@ -237,7 +237,7 @@ namespace Signum.Engine
                 return prov.Delete<SqlPreCommandSimple>(query, cm => cm, removeSelectRowCount: true);
         }
 
-        public static SqlPreCommandSimple UnsafeDeletePreCommand<E, V>(Expression<Func<E, MList<V>>> mListProperty, IQueryable<MListElement<E, V>> query)
+        public static SqlPreCommandSimple UnsafeDeletePreCommandMList<E, V>(Expression<Func<E, MList<V>>> mListProperty, IQueryable<MListElement<E, V>> query)
             where E : Entity
         {
             if (!Administrator.ExistsTable(Schema.Current.TableMList(mListProperty)) || !query.Any())

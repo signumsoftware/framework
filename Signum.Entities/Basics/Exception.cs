@@ -131,18 +131,28 @@ namespace Signum.Entities.Basics
     [Serializable]
     public class DeleteLogParametersEmbedded : EmbeddedEntity
     {
-        [Unit("Days"), NumberIsValidator(ComparisonType.GreaterThanOrEqualTo, 0)]
-        public int DeleteLogsWithMoreThan { get; set; } = 30 * 6;
-
         [PreserveOrder]
         [NotNullValidator, NoRepeatValidator]
-        public MList<DeleteLogsTypeOverridesEmbedded> TypeOverrides { get; set; } = new MList<DeleteLogsTypeOverridesEmbedded>();
+        public MList<DeleteLogsTypeOverridesEmbedded> DeleteLogs { get; set; } = new MList<DeleteLogsTypeOverridesEmbedded>();
 
-        public DateTime GetDateLimit(TypeEntity type)
+        public DateTime? GetDateLimitDelete(TypeEntity type)
         {
-            var moreThan = TypeOverrides.SingleOrDefaultEx(a => a.Type.RefersTo(type))?.DeleteLogsWithMoreThan ?? DeleteLogsWithMoreThan;
+            var moreThan = DeleteLogs.SingleOrDefaultEx(a => a.Type.RefersTo(type))?.DeleteLogsWithMoreThan;
 
-            return moreThan == 0 ? TimeZoneManager.Now.TrimToHours() : TimeZoneManager.Now.Date.AddDays(-moreThan);
+            if (moreThan == null)
+                return null;
+
+            return moreThan == 0 ? TimeZoneManager.Now.TrimToHours() : TimeZoneManager.Now.Date.AddDays(-moreThan.Value);
+        }
+
+        public DateTime? GetDateLimitClean(TypeEntity type)
+        {
+            var moreThan = DeleteLogs.SingleOrDefaultEx(a => a.Type.RefersTo(type))?.CleanLogsWithMoreThan;
+
+            if (moreThan == null)
+                return null;
+
+            return moreThan.Value == 0 ? TimeZoneManager.Now.TrimToHours() : TimeZoneManager.Now.Date.AddDays(-moreThan.Value);
         }
 
         public int ChunkSize { get; set; } = 1000;
@@ -160,7 +170,9 @@ namespace Signum.Entities.Basics
         public Lite<TypeEntity> Type { get; set; }
 
         [Unit("Days"), NumberIsValidator(ComparisonType.GreaterThanOrEqualTo, 0)]
-        public int DeleteLogsWithMoreThan { get; set; } = 30 * 6;
+        public int? DeleteLogsWithMoreThan { get; set; } = 30 * 6;
 
+        [Unit("Days"), NumberIsValidator(ComparisonType.GreaterThanOrEqualTo, 0)]
+        public int? CleanLogsWithMoreThan { get; set; } = 30 * 6;
     }
 }
