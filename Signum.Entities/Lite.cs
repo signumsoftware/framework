@@ -357,7 +357,7 @@ namespace Signum.Entities
         public static Lite<T> ToLite<T>(this T entity)
           where T : class, IEntity
         {
-            if (entity.IdOrNull==null)
+            if (entity.IdOrNull == null)
                 throw new InvalidOperationException("ToLite is not allowed for new entities, use ToLiteFat instead");
 
             return (Lite<T>)giNewLite.GetInvoker(entity.GetType())(entity.Id, entity.ToString());
