@@ -391,9 +391,24 @@ namespace Signum.Utilities
 
         public static DateTime WeekStart(this DateTime dateTime)
         {
-            return new DateTime(dateTime.Year, dateTime.Month, (-1 * (int)dateTime.DayOfWeek), 0, 0, 0, dateTime.Kind);
+            return new DateTime(dateTime.Year, dateTime.Month, dateTime.Day, 0, 0, 0, dateTime.Kind).AddDays(-(int)dateTime.DayOfWeek);
         }
 
+        public static DateTime HourStart(this DateTime dateTime)
+        {
+            return new DateTime(dateTime.Year, dateTime.Month, dateTime.Day, dateTime.Hour, 0, 0, dateTime.Kind);
+        }
+
+        public static DateTime MinuteStart(this DateTime dateTime)
+        {
+            return new DateTime(dateTime.Year, dateTime.Month, dateTime.Day, dateTime.Hour, dateTime.Minute, 0, dateTime.Kind);
+        }
+
+        public static DateTime SecondStart(this DateTime dateTime)
+        {
+            return new DateTime(dateTime.Year, dateTime.Month, dateTime.Day, dateTime.Hour, dateTime.Minute, dateTime.Second, dateTime.Kind);
+        }
+        
         public static string ToMonthName(this DateTime dateTime)
         {
             return CultureInfo.CurrentCulture.DateTimeFormat.GetMonthName(dateTime.Month);
