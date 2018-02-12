@@ -111,7 +111,7 @@ namespace Signum.Engine.Migrations
 
                 Console.WriteLine();
 
-                throw new MigrationException();
+                throw new MigrationException(e.Message, e);
             }
 
             CSharpMigrationEntity m = new CSharpMigrationEntity
