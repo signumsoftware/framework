@@ -11,26 +11,49 @@ using Signum.Utilities.ExpressionTrees;
 namespace Signum.Entities.DynamicQuery
 {
     [Serializable]
-    public class MonthStartToken : QueryToken
+    public class DatePartStartToken : QueryToken
     {
-        internal MonthStartToken(QueryToken parent)
+        public QueryTokenMessage Name { get; private set; }
+
+        internal DatePartStartToken(QueryToken parent, QueryTokenMessage name)
             : base(parent)
         {
+            this.Name = name;
+        }
+
+        private static MethodInfo GetMethodInfo(QueryTokenMessage name)
+        {
+            return 
+                name == QueryTokenMessage.MonthStart ? miMonthStart :
+                name == QueryTokenMessage.WeekStart ? miWeekStart :
+                name == QueryTokenMessage.HourStart ? miHourStart :
+                name == QueryTokenMessage.MinuteStart ? miMinuteStart :
+                name == QueryTokenMessage.SecondStart ? miSecondStart :
+                throw new InvalidOperationException("Unexpected name");
         }
 
         public override string ToString()
         {
-            return QueryTokenMessage.MonthStart.NiceToString();
+            return this.Name.NiceToString();
         }
 
         public override string NiceName()
         {
-            return QueryTokenMessage.MonthStart.NiceToString() + QueryTokenMessage.Of.NiceToString() + Parent.ToString();
+            return this.Name.NiceToString() + QueryTokenMessage.Of.NiceToString() + Parent.ToString();
         }
 
         public override string Format
         {
-            get { return "Y"; }
+            get
+            {
+                return
+                    Name == QueryTokenMessage.MonthStart ? "Y" :
+                    Name == QueryTokenMessage.WeekStart ? "d" :
+                    Name == QueryTokenMessage.HourStart ? "g" :
+                    Name == QueryTokenMessage.MinuteStart ? "g":
+                    Name == QueryTokenMessage.SecondStart ? "G" :
+                    throw new InvalidOperationException("Unexpected name");
+            }
         }
 
         public override string Unit
@@ -45,7 +68,7 @@ namespace Signum.Entities.DynamicQuery
 
         public override string Key
         {
-            get { return "MonthStart"; }
+            get { return this.Name.ToString(); }
         }
 
         protected override List<QueryToken> SubTokensOverride(SubTokensOptions options)
@@ -53,13 +76,17 @@ namespace Signum.Entities.DynamicQuery
             return new List<QueryToken>();
         }
 
-        static MethodInfo miMonthStart = ReflectionTools.GetMethodInfo(() => DateTimeExtensions.MonthStart(DateTime.MinValue));
+        public static MethodInfo miMonthStart = ReflectionTools.GetMethodInfo(() => DateTimeExtensions.MonthStart(DateTime.MinValue));
+        public static MethodInfo miWeekStart = ReflectionTools.GetMethodInfo(() => DateTimeExtensions.WeekStart(DateTime.MinValue));
+        public static MethodInfo miHourStart = ReflectionTools.GetMethodInfo(() => DateTimeExtensions.HourStart(DateTime.MinValue));
+        public static MethodInfo miMinuteStart = ReflectionTools.GetMethodInfo(() => DateTimeExtensions.MinuteStart(DateTime.MinValue));
+        public static MethodInfo miSecondStart = ReflectionTools.GetMethodInfo(() => DateTimeExtensions.SecondStart(DateTime.MinValue));
 
         protected override Expression BuildExpressionInternal(BuildExpressionContext context)
         {
             var exp = Parent.BuildExpression(context);
-            
-            return Expression.Call(miMonthStart, exp.UnNullify()).Nullify();
+            var mi = GetMethodInfo(this.Name);
+            return Expression.Call(mi, exp.UnNullify()).Nullify();
         }
 
         public override PropertyRoute GetPropertyRoute()
@@ -79,7 +106,7 @@ namespace Signum.Entities.DynamicQuery
 
         public override QueryToken Clone()
         {
-            return new MonthStartToken(Parent.Clone());
+            return new DatePartStartToken(Parent.Clone(), this.Name);
         }
 
         public override bool IsGroupable

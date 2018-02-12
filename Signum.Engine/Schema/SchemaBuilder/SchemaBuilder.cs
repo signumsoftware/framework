@@ -178,14 +178,25 @@ namespace Signum.Engine.Maps
                 if (schema.NameToType.ContainsKey(name))
                     throw new InvalidOperationException(route?.Let(r => "Error on field {0}: ".FormatWith(r)) + "Two types have the same cleanName, desambiguate using Schema.Current.Settings.Desambiguate method: \r\n {0}\r\n {1}".FormatWith(schema.NameToType[name].FullName, type.FullName));
 
-                result = new Table(type);
+                try
+                {
+                    result = new Table(type);
 
-                schema.Tables.Add(type, result);
-                schema.NameToType[name] = type;
-                schema.TypeToName[type] = name;
+                    schema.Tables.Add(type, result);
+                    schema.NameToType[name] = type;
+                    schema.TypeToName[type] = name;
 
-                Complete(result);
-                return result;
+                    Complete(result);
+
+                    return result;
+                }
+                catch (Exception ex) //Avoid half-cooked tables
+                {
+                    schema.Tables.Remove(type);
+                    schema.NameToType.Remove(name);
+                    schema.TypeToName.Remove(type);
+                    throw;
+                }
             }
         }
 

@@ -28,7 +28,7 @@ namespace Signum.React.ApiControllers
         [Route("api/reflection/typeEntity/{typeName}"), HttpGet]
         public TypeEntity GetTypeEntity(string typeName)
         {
-            return TypeLogic.GetType(typeName).ToTypeEntity();
+            return TypeLogic.TryGetType(typeName)?.ToTypeEntity();
         }
     }
 }
