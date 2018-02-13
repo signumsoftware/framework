@@ -895,7 +895,7 @@ namespace Signum.Engine.Maps
                 if (!e.IsNew && e.IsGraphModified)
                     action();
             };
-            ee.PreUnsafeUpdate += (u, q) => action();
+            ee.PreUnsafeUpdate += (u, q) => { action(); return null; };
         }
 
         static GenericInvoker<Action<Schema, Action>> giAttachInvalidations = new GenericInvoker<Action<Schema, Action>>((s, a) => AttachInvalidations<Entity>(s, a));
@@ -908,8 +908,8 @@ namespace Signum.Engine.Maps
                 if (e.IsGraphModified)
                     action();
             };
-            ee.PreUnsafeUpdate += (u, eq) => action();
-            ee.PreUnsafeDelete += (q) => action();
+            ee.PreUnsafeUpdate += (u, eq) => { action(); return null; };
+            ee.PreUnsafeDelete += (q) => { action(); return null; };
         }
 
         public virtual void OnLoad(SchemaBuilder sb, InvalidateWith invalidateWith)

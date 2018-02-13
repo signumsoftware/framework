@@ -31,10 +31,10 @@ namespace Signum.Test.LinqProviderUpdateDelete
         public void Initialize()
         {
             Connector.CurrentLogger = new DebugTextWriter();
-            Schema.Current.EntityEvents<LabelEntity>().PreUnsafeUpdate += (update, query) => { };
-            Schema.Current.EntityEvents<AlbumEntity>().PreUnsafeUpdate += (update, query) => { };
-            Schema.Current.EntityEvents<BandEntity>().PreUnsafeUpdate += (update, query) => { };
-            Schema.Current.EntityEvents<ArtistEntity>().PreUnsafeUpdate += (update, query) => { };
+            Schema.Current.EntityEvents<LabelEntity>().PreUnsafeUpdate += (update, query) => null;
+            Schema.Current.EntityEvents<AlbumEntity>().PreUnsafeUpdate += (update, query) => null;
+            Schema.Current.EntityEvents<BandEntity>().PreUnsafeUpdate += (update, query) => null;
+            Schema.Current.EntityEvents<ArtistEntity>().PreUnsafeUpdate += (update, query) => null;
         }
 
         [TestMethod]

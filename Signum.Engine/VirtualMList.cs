@@ -116,7 +116,11 @@ namespace Signum.Engine
                 mlist.SetCleanModified(false);
             };
 
-            sb.Schema.EntityEvents<T>().PreUnsafeDelete += query => query.SelectMany(e => Database.Query<L>().Where(se => getBackReference.Evaluate(se).RefersTo(e))).UnsafeDelete();
+            sb.Schema.EntityEvents<T>().PreUnsafeDelete += query =>
+            {
+                query.SelectMany(e => Database.Query<L>().Where(se => getBackReference.Evaluate(se).RefersTo(e))).UnsafeDelete();
+                return null;
+            };
 
             return fi;
         }
