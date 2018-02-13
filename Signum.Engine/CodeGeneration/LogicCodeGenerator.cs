@@ -101,8 +101,6 @@ namespace Signum.Engine.CodeGeneration
 
         protected virtual string WriteLogicClass(Module mod, List<ExpressionInfo> expressions)
         {
-            var allExpression = mod.Types.SelectMany(t => GetExpressions(t)).ToList(); 
-
             StringBuilder sb = new StringBuilder();
             sb.AppendLine("public static class " + mod.ModuleName + "Logic");
             sb.AppendLine("{");
@@ -155,6 +153,8 @@ namespace Signum.Engine.CodeGeneration
 
         protected virtual string WriteStartMethod(Module mod, List<ExpressionInfo> expressions)
         {
+            var allExpressions = expressions.ToList();
+
             StringBuilder sb = new StringBuilder();
             sb.AppendLine("public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)");
             sb.AppendLine("{");
@@ -163,9 +163,12 @@ namespace Signum.Engine.CodeGeneration
 
             foreach (var item in mod.Types)
             {
-                string include = WriteInclude(item);
+                string include = WriteInclude(item, allExpressions);
                 if (include != null)
+                {
                     sb.Append(include.Indent(8));
+                    sb.AppendLine();
+                }
 
                 string query = WriteQuery(item);
                 if (query != null)
@@ -182,9 +185,9 @@ namespace Signum.Engine.CodeGeneration
                 }
             }
             
-            if (expressions.Any())
+            if (allExpressions.Any())
             {
-                foreach (var ei in expressions)
+                foreach (var ei in allExpressions)
                 {
                     string register = GetRegisterExpression(ei);
                     if (register != null)
@@ -211,12 +214,14 @@ namespace Signum.Engine.CodeGeneration
                 .Replace("{NiceName}", ei.IsUnique ? "NiceName" : "NicePluralName");
         }
 
-        protected virtual string WriteInclude(Type type)
+        protected virtual string WriteInclude(Type type, List<ExpressionInfo> expression)
         {
             var ops = GetOperationsSymbols(type);
             var save = ops.SingleOrDefaultEx(o => GetOperationType(o) == OperationType.Execute && IsSave(o));
             var delete = ops.SingleOrDefaultEx(o => GetOperationType(o) == OperationType.Delete);
-            var p = ShouldWriteSimpleQuery(type) ?  GetVariableName(type)  : null;
+            var p = ShouldWriteSimpleQuery(type) ? GetVariableName(type) : null;
+
+            var simpleExpressions = expression.Extract(exp => IsSimpleExpression(exp, type));
 
             return new[]
             {
@@ -224,8 +229,14 @@ namespace Signum.Engine.CodeGeneration
                 GetWithVirtualMLists(type),
                 save != null && ShouldWriteSimpleOperations(save) ? ("   .WithSave(" + save.Symbol.ToString() + ")") : null,
                 delete != null && ShouldWriteSimpleOperations(delete) ? ("   .WithDelete(" + delete.Symbol.ToString() + ")") : null,
+                simpleExpressions.HasItems() ? simpleExpressions.ToString(e => $"   .WithExpressionFrom(dqm, ({e.FromType.Name} {GetVariableName(e.FromType)}) => {GetVariableName(e.FromType)}.{e.Name}())", "\r\n") : null,
                 p == null ? null : $"   .WithQuery(dqm, () => {p} => {WriteQueryConstructor(type, p)})"
             }.NotNull().ToString("\r\n") + ";";
+        }
+
+        private bool IsSimpleExpression(ExpressionInfo exp, Type type)
+        {
+            return !exp.IsUnique && type == exp.ToType;
         }
 
         protected virtual string WriteQuery(Type type)
@@ -390,7 +401,7 @@ public static IQueryable<{to}> {Method}(this {from} e)
             return (from p in Reflector.PublicInstancePropertiesInOrder(type)
                     let bp = GetVirtualMListBackReference(p)
                     where bp != null
-                    select GetWithVirtualMList(type, p, bp)).ToString("\r\n");
+                    select GetWithVirtualMList(type, p, bp)).ToString("\r\n").DefaultText(null);
         }
 
         protected virtual string GetWithVirtualMList(Type type, PropertyInfo p, PropertyInfo bp)
@@ -400,7 +411,9 @@ public static IQueryable<{to}> {Method}(this {from} e)
             if (p1 == p2)
                 p2 += "2";
 
-            return $"   .WithVirtualMList({p1} => {p1}.{p.Name}, {p2} => {p2}.{bp.Name})";
+            var cast = p.DeclaringType == bp.PropertyType.CleanType() ? "" : $"(Lite<{p.DeclaringType.Name}>)";
+
+            return $"   .WithVirtualMList({p1} => {p1}.{p.Name}, {p2} => {cast}{p2}.{bp.Name})";
         }
 
         protected virtual PropertyInfo GetVirtualMListBackReference(PropertyInfo pi)
@@ -429,7 +442,7 @@ public static IQueryable<{to}> {Method}(this {from} e)
             if (pi.PropertyType.CleanType() == targetType)
                 return true;
             
-            if (pi.PropertyType.GetCustomAttribute<ImplementedByAttribute>()?.ImplementedTypes.Contains(targetType) == true)
+            if (pi.GetCustomAttribute<ImplementedByAttribute>()?.ImplementedTypes.Contains(targetType) == true)
                 return true;
 
             return false;
