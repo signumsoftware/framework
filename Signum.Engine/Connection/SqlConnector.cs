@@ -121,7 +121,7 @@ namespace Signum.Engine
         {
             using (SqlConnection con = EnsureConnection())
             using (SqlCommand cmd = NewCommand(preCommand, con, commandType))
-            using (HeavyProfiler.Log("SQL", () => preCommand.PlainSql()))
+            using (HeavyProfiler.Log("SQL", () => preCommand.sp_executesql()))
             {
                 try
                 {
@@ -147,7 +147,7 @@ namespace Signum.Engine
         {
             using (SqlConnection con = EnsureConnection())
             using (SqlCommand cmd = NewCommand(preCommand, con, commandType))
-            using (HeavyProfiler.Log("SQL", () => preCommand.PlainSql()))
+            using (HeavyProfiler.Log("SQL", () => preCommand.sp_executesql()))
             {
                 try
                 {
@@ -174,7 +174,7 @@ namespace Signum.Engine
                 using (SqlConnection con = EnsureConnection())
                 using (SqlCommand cmd = NewCommand(preCommand, con, commandType))
                 using (HeavyProfiler.Log("SQL-Dependency"))
-                using (HeavyProfiler.Log("SQL", () => preCommand.PlainSql()))
+                using (HeavyProfiler.Log("SQL", () => preCommand.sp_executesql()))
                 {
                     try
                     {
@@ -270,7 +270,7 @@ namespace Signum.Engine
         {
             using (SqlConnection con = EnsureConnection())
             using (SqlCommand cmd = NewCommand(preCommand, con, commandType))
-            using (HeavyProfiler.Log("SQL", () => preCommand.PlainSql()))
+            using (HeavyProfiler.Log("SQL", () => preCommand.sp_executesql()))
             {
                 try
                 {
@@ -295,7 +295,7 @@ namespace Signum.Engine
         {
             using (SqlConnection con = EnsureConnection())
             using (SqlCommand cmd = NewCommand(preCommand, con, commandType))
-            using (HeavyProfiler.Log("SQL", () => preCommand.PlainSql()))
+            using (HeavyProfiler.Log("SQL", () => preCommand.sp_executesql()))
             {
                 try
                 {
@@ -318,7 +318,7 @@ namespace Signum.Engine
         public Exception HandleException(Exception ex, SqlPreCommandSimple command)
         {
             var nex = ReplaceException(ex, command);
-            nex.Data["Sql"] = command.PlainSql();
+            nex.Data["Sql"] = command.sp_executesql();
             return nex;
         }
 

@@ -161,6 +161,7 @@ namespace Signum.Engine.DynamicQuery
 
             DQueryable<T> query = Query
              .ToDQueryable(GetQueryDescription())
+             .SelectMany(request.Multiplications)
              .OrderBy(request.Orders)
              .Where(request.Filters)
              .Select(new List<Column> { ex });
@@ -168,6 +169,9 @@ namespace Signum.Engine.DynamicQuery
             var exp = Expression.Lambda<Func<object, Lite<Entity>>>(Expression.Convert(ex.Token.BuildExpression(query.Context), typeof(Lite<Entity>)), query.Context.Parameter);
 
             var result = query.Query.Select(exp);
+
+            if (request.Multiplications.Any())
+                result = result.Distinct();
 
             return result.TryTake(request.Count);
         }
