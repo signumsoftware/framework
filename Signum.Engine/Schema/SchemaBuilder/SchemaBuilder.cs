@@ -67,7 +67,7 @@ namespace Signum.Engine.Maps
         }
 
 
-        public UniqueIndex AddUniqueIndex<T>(Expression<Func<T, object>> fields, Expression<Func<T, bool>> where = null) where T : Entity
+        public UniqueIndex AddUniqueIndex<T>(Expression<Func<T, object>> fields, Expression<Func<T, bool>> where = null, Expression<Func<T, object>> includeFields = null) where T : Entity
         {
             var table = Schema.Table<T>();
 
@@ -78,10 +78,13 @@ namespace Signum.Engine.Maps
             if (where != null)
                 index.Where = IndexWhereExpressionVisitor.GetIndexWhere(where, table);
 
+            if (includeFields != null)
+                index.IncludeColumns = IndexKeyColumns.Split(table, includeFields);
+
             return index;
         }
 
-        public Index AddIndex<T>(Expression<Func<T, object>> fields, Expression<Func<T, bool>> where = null) where T : Entity
+        public Index AddIndex<T>(Expression<Func<T, object>> fields, Expression<Func<T, bool>> where = null, Expression<Func<T, object>> includeFields = null) where T : Entity
         {
             var table = Schema.Table<T>();
 
@@ -92,18 +95,18 @@ namespace Signum.Engine.Maps
             if (where != null)
                 index.Where = IndexWhereExpressionVisitor.GetIndexWhere(where, table);
 
+            if (includeFields != null)
+                index.IncludeColumns = IndexKeyColumns.Split(table, includeFields);
+
             AddIndex(index);
 
             return index;
         }
-
-        public UniqueIndex AddUniqueIndexMList<T, V>(Expression<Func<T, MList<V>>> toMList, Expression<Func<MListElement<T, V>, object>> fields)
-           where T : Entity
-        {
-            return AddUniqueIndexMList(toMList, fields, null);
-        }
-
-        public UniqueIndex AddUniqueIndexMList<T, V>(Expression<Func<T, MList<V>>> toMList, Expression<Func<MListElement<T, V>, object>> fields, Expression<Func<MListElement<T, V>, bool>> where)
+        
+        public UniqueIndex AddUniqueIndexMList<T, V>(Expression<Func<T, MList<V>>> toMList, 
+            Expression<Func<MListElement<T, V>, object>> fields, 
+            Expression<Func<MListElement<T, V>, bool>> where = null,
+            Expression<Func<MListElement<T, V>, object>> includeFields = null)
             where T : Entity
         {
             TableMList table = ((FieldMList)Schema.FindField(Schema.Table(typeof(T)), Reflector.GetMemberList(toMList))).TableMList;
@@ -114,6 +117,30 @@ namespace Signum.Engine.Maps
 
             if (where != null)
                 index.Where = IndexWhereExpressionVisitor.GetIndexWhere(where, table);
+
+            if (includeFields != null)
+                index.IncludeColumns = IndexKeyColumns.Split(table, includeFields);
+
+            return index;
+        }
+        
+        public Index AddIndexMList<T, V>(Expression<Func<T, MList<V>>> toMList, 
+            Expression<Func<MListElement<T, V>, object>> fields, 
+            Expression<Func<MListElement<T, V>, bool>> where = null,
+             Expression<Func<MListElement<T, V>, object>> includeFields = null)
+            where T : Entity
+        {
+            TableMList table = ((FieldMList)Schema.FindField(Schema.Table(typeof(T)), Reflector.GetMemberList(toMList))).TableMList;
+
+            IColumn[] columns = IndexKeyColumns.Split(table, fields);
+
+            var index = AddIndex(table, columns);
+
+            if (where != null)
+                index.Where = IndexWhereExpressionVisitor.GetIndexWhere(where, table);
+
+            if (includeFields != null)
+                index.IncludeColumns = IndexKeyColumns.Split(table, includeFields);
 
             return index;
         }
@@ -129,6 +156,20 @@ namespace Signum.Engine.Maps
         public UniqueIndex AddUniqueIndex(ITable table, IColumn[] columns)
         {
             var index = new UniqueIndex(table, columns);
+            AddIndex(index);
+            return index;
+        }
+
+        public Index AddIndex(ITable table, Field[] fields)
+        {
+            var index = new Index(table, Index.GetColumnsFromFields(fields));
+            AddIndex(index);
+            return index;
+        }
+
+        public Index AddIndex(ITable table, IColumn[] columns)
+        {
+            var index = new Index(table, columns);
             AddIndex(index);
             return index;
         }
