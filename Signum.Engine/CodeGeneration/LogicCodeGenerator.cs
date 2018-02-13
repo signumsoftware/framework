@@ -221,6 +221,7 @@ namespace Signum.Engine.CodeGeneration
             return new[]
             {
                 "sb.Include<" + type.TypeName() + ">()",
+                GetWithVirtualMLists(type),
                 save != null && ShouldWriteSimpleOperations(save) ? ("   .WithSave(" + save.Symbol.ToString() + ")") : null,
                 delete != null && ShouldWriteSimpleOperations(delete) ? ("   .WithDelete(" + delete.Symbol.ToString() + ")") : null,
                 p == null ? null : $"   .WithQuery(dqm, () => {p} => {WriteQueryConstructor(type, p)})"
@@ -382,6 +383,56 @@ public static IQueryable<{to}> {Method}(this {from} e)
                     where IsSimpleValueType(p.PropertyType) || p.PropertyType.IsEntity() || p.PropertyType.IsLite()
                     orderby p.Name.Contains("Name") ? 1 : 2
                     select p).Take(10);
+        }
+
+        protected virtual string GetWithVirtualMLists(Type type)
+        {
+            return (from p in Reflector.PublicInstancePropertiesInOrder(type)
+                    let bp = GetVirtualMListBackReference(p)
+                    where bp != null
+                    select GetWithVirtualMList(type, p, bp)).ToString("\r\n");
+        }
+
+        protected virtual string GetWithVirtualMList(Type type, PropertyInfo p, PropertyInfo bp)
+        {
+            var p1 = GetVariableName(type);
+            var p2 = GetVariableName(p.PropertyType.ElementType());
+            if (p1 == p2)
+                p2 += "2";
+
+            return $"   .WithVirtualMList({p1} => {p1}.{p.Name}, {p2} => {p2}.{bp.Name})";
+        }
+
+        protected virtual PropertyInfo GetVirtualMListBackReference(PropertyInfo pi)
+        {
+            if (!pi.PropertyType.IsMList())
+                return null;
+
+            if (!pi.PropertyType.ElementType().IsEntity())
+                return null;
+
+            if (!pi.HasAttribute<IgnoreAttribute>())
+                return null;
+
+            var t = pi.PropertyType.ElementType();
+
+            var backProperty = Reflector.PublicInstancePropertiesInOrder(t).SingleOrDefaultEx(bp => IsVirtualMListBackReference(bp, pi.DeclaringType));
+
+            return backProperty;
+        }
+
+        protected virtual bool IsVirtualMListBackReference(PropertyInfo pi, Type targetType)
+        {
+            if (!pi.PropertyType.IsLite())
+                return false;
+
+            if (pi.PropertyType.CleanType() == targetType)
+                return true;
+            
+            if (pi.PropertyType.GetCustomAttribute<ImplementedByAttribute>()?.ImplementedTypes.Contains(targetType) == true)
+                return true;
+
+            return false;
         }
 
         protected virtual bool IsSimpleValueType(Type type)
