@@ -47,6 +47,7 @@ namespace Signum.React.RestLog
                     QueryString = queryParams,
                     User = UserHolder.Current?.ToLite(),
                     Controller = actionContext.ControllerContext.Controller.ToString(),
+                    ControllerName = actionContext.ControllerContext.Controller.ToString().AfterLast('.'),
                     Action = actionContext.ActionDescriptor.ActionName,
                     StartDate = TimeZoneManager.Now,
                     UserHostAddress = SignumExceptionFilterAttribute.GetClientIp(actionContext.Request),
