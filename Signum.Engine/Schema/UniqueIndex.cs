@@ -62,6 +62,11 @@ namespace Signum.Engine.Maps
         {
             return IndexName;
         }
+
+        public string HintText()
+        {
+            return $"INDEX([{this.IndexName}])";
+        }
     }
 
     public class PrimaryClusteredIndex : Index
