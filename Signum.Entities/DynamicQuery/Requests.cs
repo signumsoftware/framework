@@ -224,6 +224,17 @@ namespace Signum.Entities.DynamicQuery
             set { orders = value; }
         }
 
+        public List<CollectionElementToken> Multiplications
+        {
+            get
+            {
+                HashSet<QueryToken> allTokens = Filters.Select(a => a.Token)
+                    .Concat(Orders.Select(a => a.Token)).ToHashSet();
+
+                return CollectionElementToken.GetElements(allTokens);
+            }
+        }
+
         public int? Count { get; set; }
 
         public override string ToString() => QueryName.ToString();

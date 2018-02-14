@@ -202,6 +202,16 @@ namespace Signum.Engine
             }
         }
 
+        public string sp_executesql()
+        {
+            var pars = this.Parameters.EmptyIfNull();
+
+            var parameterVars = pars.ToString(p => $"{p.ParameterName} {((SqlParameter)p).SqlDbType.ToString()}", ", ");
+            var parameterValues = pars.ToString(p => Encode(p.Value), ",");
+
+            return $"EXEC sp_executesql N'{this.Sql}', N'{parameterVars}', {parameterValues}";
+        }
+
         public override SqlPreCommand Clone()
         {
             return new SqlPreCommandSimple(Sql, Parameters?.Select(p => Connector.Current.CloneParameter(p))

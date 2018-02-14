@@ -255,11 +255,12 @@ namespace Signum.Engine
             }
             else
             {
-                return new SqlPreCommandSimple("CREATE {0}INDEX {1} ON {2}({3}){4}".FormatWith(
+                return new SqlPreCommandSimple("CREATE {0}INDEX {1} ON {2}({3}){4}{5}".FormatWith(
                     index is UniqueIndex ? "UNIQUE " : null,
                     index.IndexName,
                     index.Table.Name,
                     columns,
+                    index.IncludeColumns.HasItems() ? $" INCLUDE ({index.IncludeColumns.ToString(c => c.Name.SqlEscape(), ", ")})" : null,
                     index.Where.HasText() ? $" WHERE {index.Where}" : ""));
             }
         }

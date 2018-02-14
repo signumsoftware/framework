@@ -25,6 +25,8 @@ namespace Signum.Engine.CodeGeneration
 
         public Schema CurrentSchema;
 
+        protected bool? overwriteFiles = null;
+
         public virtual void GenerateLogicFromEntities()
         {
             CurrentSchema = Schema.Current;
@@ -35,9 +37,7 @@ namespace Signum.Engine.CodeGeneration
 
             if (!Directory.Exists(projectFolder))
                 throw new InvalidOperationException("{0} not found. Override GetProjectFolder".FormatWith(projectFolder));
-
-            bool? overwriteFiles = null;
-
+            
             foreach (var mod in GetModules())
             {
                 string str = WriteFile(mod);

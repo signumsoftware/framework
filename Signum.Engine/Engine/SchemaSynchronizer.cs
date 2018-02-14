@@ -227,7 +227,11 @@ namespace Signum.Engine
 
                                         difCol.ColumnEquals(tabCol, ignorePrimaryKey: true) ? null : SqlPreCommand.Combine(Spacing.Simple,
                                             tabCol.PrimaryKey && !difCol.PrimaryKey && dif.PrimaryKeyName != null ? SqlBuilder.DropPrimaryKeyConstraint(tab.Name) : null,
-                                            SqlBuilder.AlterTableAlterColumn(tab, tabCol),
+                                        difCol.CompatibleTypes(tabCol) ? SqlBuilder.AlterTableAlterColumn(tab, tabCol):
+                                                SqlPreCommand.Combine(Spacing.Simple, 
+                                                    SqlBuilder.AlterTableDropColumn(tab, tabCol.Name),
+                                                    SqlBuilder.AlterTableAddColumn(tab, tabCol)) 
+                                            ,
                                             tabCol.SqlDbType == SqlDbType.NVarChar && difCol.SqlDbType == SqlDbType.NChar ? SqlBuilder.UpdateTrim(tab, tabCol) : null),
 
                                         difCol.DefaultEquals(tabCol) ? null : SqlPreCommand.Combine(Spacing.Simple,
@@ -961,6 +965,204 @@ EXEC(@{1})".FormatWith(databaseName, variableName));
         public override string ToString()
         {
             return this.Name;
+        }
+
+        internal bool CompatibleTypes(IColumn tabCol)
+        {
+            //https://docs.microsoft.com/en-us/sql/t-sql/functions/cast-and-convert-transact-sql
+            switch (this.SqlDbType)
+            {
+                //BLACKLIST!!
+                case SqlDbType.Binary:
+                case SqlDbType.VarBinary:                    
+                    switch (tabCol.SqlDbType)
+                    {
+                        case SqlDbType.Float:
+                        case SqlDbType.Real:
+                        case SqlDbType.NText:
+                        case SqlDbType.Text:
+                            return false;
+                        default:
+                            return true;
+                    }
+
+                case SqlDbType.Char:
+                case SqlDbType.VarChar:
+                    return true;
+
+                case SqlDbType.NChar:
+                case SqlDbType.NVarChar:
+                    return tabCol.SqlDbType != SqlDbType.Image;
+
+                case SqlDbType.DateTime:
+                case SqlDbType.SmallDateTime:
+                    switch (tabCol.SqlDbType)
+                    {
+                        case SqlDbType.UniqueIdentifier:
+                        case SqlDbType.Image:
+                        case SqlDbType.NText:
+                        case SqlDbType.Text:
+                        case SqlDbType.Xml:
+                        case SqlDbType.Udt:
+                            return false;
+                        default:
+                            return true;
+                    }
+
+                case SqlDbType.Date:
+                    if (tabCol.SqlDbType == SqlDbType.Time)
+                        return false;
+                    goto case SqlDbType.DateTime2;
+
+                case SqlDbType.Time:
+                    if (tabCol.SqlDbType == SqlDbType.Date)
+                        return false;
+                    goto case SqlDbType.DateTime2;
+
+                case SqlDbType.DateTimeOffset:
+                case SqlDbType.DateTime2:
+                    switch (tabCol.SqlDbType)
+                    {
+                        case SqlDbType.Decimal:
+                        case SqlDbType.Float:
+                        case SqlDbType.Real:
+                        case SqlDbType.BigInt:
+                        case SqlDbType.Int:
+                        case SqlDbType.SmallInt:
+                        case SqlDbType.TinyInt:
+                        case SqlDbType.Money:
+                        case SqlDbType.SmallMoney:
+                        case SqlDbType.Bit:
+                        case SqlDbType.UniqueIdentifier:
+                        case SqlDbType.Image:
+                        case SqlDbType.NText:
+                        case SqlDbType.Text:
+                        case SqlDbType.Xml:
+                        case SqlDbType.Udt:
+                            return false;
+                        default:
+                            return true;
+                    }
+
+                case SqlDbType.Decimal:
+                case SqlDbType.Float:
+                case SqlDbType.Real:
+                case SqlDbType.BigInt:
+                case SqlDbType.Int:
+                case SqlDbType.SmallInt:
+                case SqlDbType.TinyInt:
+                case SqlDbType.Money:
+                case SqlDbType.SmallMoney:
+                case SqlDbType.Bit:
+                    switch (tabCol.SqlDbType)
+                    {
+                        case SqlDbType.Date:                         
+                        case SqlDbType.Time:                            
+                        case SqlDbType.DateTimeOffset:
+                        case SqlDbType.DateTime2:
+                        case SqlDbType.UniqueIdentifier:
+                        case SqlDbType.Image:
+                        case SqlDbType.NText:
+                        case SqlDbType.Text:
+                        case SqlDbType.Xml:
+                        case SqlDbType.Udt:
+                            return false;
+                        default:
+                            return true;
+                    }
+                   
+                case SqlDbType.Timestamp:
+                    switch (tabCol.SqlDbType)
+                    {
+                        case SqlDbType.NChar:
+                        case SqlDbType.NVarChar:
+                        case SqlDbType.Date:
+                        case SqlDbType.Time:
+                        case SqlDbType.DateTimeOffset:
+                        case SqlDbType.DateTime2:
+                        case SqlDbType.UniqueIdentifier:
+                        case SqlDbType.Image:
+                        case SqlDbType.NText:
+                        case SqlDbType.Text:
+                        case SqlDbType.Xml:
+                        case SqlDbType.Udt:
+                            return false;
+                        default:
+                            return true;
+                    }
+                case SqlDbType.Variant:
+                    switch (tabCol.SqlDbType)
+                    {
+                        case SqlDbType.Timestamp:
+                        case SqlDbType.Image:
+                        case SqlDbType.NText:
+                        case SqlDbType.Text:
+                        case SqlDbType.Xml:
+                        case SqlDbType.Udt:
+                            return false;
+                        default:
+                            return true;
+                    }
+
+                //WHITELIST!!
+                case SqlDbType.UniqueIdentifier:
+                    switch (tabCol.SqlDbType)
+                    {
+                        case SqlDbType.Binary:
+                        case SqlDbType.VarBinary:
+                        case SqlDbType.Char:
+                        case SqlDbType.VarChar:
+                        case SqlDbType.NChar:
+                        case SqlDbType.NVarChar:
+                        case SqlDbType.Variant:
+                            return true;
+                        default:
+                            return true;
+                    }
+                case SqlDbType.Image:
+                    switch (tabCol.SqlDbType)
+                    {
+                        case SqlDbType.Binary:
+                        case SqlDbType.VarBinary:
+                        case SqlDbType.Timestamp:
+                            return true;
+                        default:
+                            return true;
+                    }
+                case SqlDbType.NText:
+                case SqlDbType.Text:
+                    switch (tabCol.SqlDbType)
+                    {
+                        case SqlDbType.Char:
+                        case SqlDbType.VarChar:
+                        case SqlDbType.NChar:
+                        case SqlDbType.NVarChar:
+                        case SqlDbType.NText:
+                        case SqlDbType.Text:
+                        case SqlDbType.Xml:
+                            return true;
+                        default:
+                            return true;
+                    }
+                case SqlDbType.Xml:
+                case SqlDbType.Udt:
+                    switch (tabCol.SqlDbType)
+                    {
+                        case SqlDbType.Binary:
+                        case SqlDbType.VarBinary:
+                        case SqlDbType.Char:
+                        case SqlDbType.VarChar:
+                        case SqlDbType.NChar:
+                        case SqlDbType.NVarChar:
+                        case SqlDbType.Xml:
+                        case SqlDbType.Udt:
+                            return true;
+                        default:
+                            return true;
+                    }
+                default:
+                    throw new NotImplementedException("Unexpected SqlDbType");
+            }
         }
     }
 
