@@ -413,7 +413,7 @@ public static IQueryable<{to}> {Method}(this {from} e)
 
             var cast = p.DeclaringType == bp.PropertyType.CleanType() ? "" : $"(Lite<{p.DeclaringType.Name}>)";
 
-            return $"   .WithVirtualMList({p1} => {p1}.{p.Name}, {p2} => {cast}{p2}.{bp.Name})";
+            return $"   .WithVirtualMList(dqm, {p1} => {p1}.{p.Name}, {p2} => {cast}{p2}.{bp.Name})";
         }
 
         protected virtual PropertyInfo GetVirtualMListBackReference(PropertyInfo pi)

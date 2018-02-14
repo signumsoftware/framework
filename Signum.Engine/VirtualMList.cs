@@ -1,4 +1,5 @@
-﻿using Signum.Engine.Maps;
+﻿using Signum.Engine.DynamicQuery;
+using Signum.Engine.Maps;
 using Signum.Engine.Operations;
 using Signum.Entities;
 using Signum.Entities.Reflection;
@@ -17,15 +18,16 @@ namespace Signum.Engine
     public static class VirtualMList
     {
         public static FluentInclude<T> WithVirtualMList<T, L>(this FluentInclude<T> fi,
-         Expression<Func<T, MList<L>>> mListField,
-         Expression<Func<L, Lite<T>>> getBackReference,
-         ExecuteSymbol<L> saveOperation,
-         DeleteSymbol<L> deleteOperation)
+            DynamicQueryManager dqm,
+            Expression<Func<T, MList<L>>> mListField,
+            Expression<Func<L, Lite<T>>> getBackReference,
+            ExecuteSymbol<L> saveOperation,
+            DeleteSymbol<L> deleteOperation)
             where T : Entity
             where L : Entity
         {
 
-            return fi.WithVirtualMList(mListField, getBackReference,
+            return fi.WithVirtualMList(dqm, mListField, getBackReference,
                 onSave: saveOperation == null ? null : new Action<L, T>((line, e) =>
                 {
                     line.Execute(saveOperation);
@@ -36,7 +38,8 @@ namespace Signum.Engine
                 }));
         }
 
-        public static FluentInclude<T> WithVirtualMList<T, L>( this FluentInclude<T> fi, 
+        public static FluentInclude<T> WithVirtualMList<T, L>(this FluentInclude<T> fi,
+            DynamicQueryManager dqm, 
             Expression<Func<T, MList<L>>> mListField, 
             Expression<Func<L, Lite<T>>> getBackReference, 
             Action<L, T> onSave = null,
@@ -122,10 +125,16 @@ namespace Signum.Engine
                 return null;
             };
 
+            if (dqm != null)
+            {
+                var pi = ReflectionTools.GetPropertyInfo(mListField);
+                dqm.RegisterExpression((T e) => Database.Query<L>().Where(p => getBackReference.Evaluate(p) == e.ToLite()), () => pi.NiceName(), pi.Name);
+            }
             return fi;
         }
 
         public static FluentInclude<T> WithVirtualMListInitializeOnly<T, L>(this FluentInclude<T> fi,
+            DynamicQueryManager dqm,
             Func<T, MList<L>> getMList,
             Expression<Func<L, Lite<T>>> getBackReference,
             Action<L, T> onSave = null)
@@ -163,7 +172,11 @@ namespace Signum.Engine
                 }
                 mlist.SetCleanModified(false);
             };
-
+            if (dqm != null)
+            {
+                var pi = ReflectionTools.GetPropertyInfo(mListField);
+                dqm.RegisterExpression((T e) => Database.Query<L>().Where(p => getBackReference.Evaluate(p) == e.ToLite()), () => pi.NiceName(), pi.Name);
+            }
             return fi;
         }
 
