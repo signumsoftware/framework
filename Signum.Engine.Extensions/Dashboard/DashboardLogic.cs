@@ -76,6 +76,7 @@ namespace Signum.Engine.Dashboard
                     {
                         Database.MListQuery((DashboardEntity cp) => cp.Parts).Where(mle => query.Contains(((UserQueryPartEntity)mle.Element.Content).UserQuery)).UnsafeDeleteMList();
                         Database.Query<UserQueryPartEntity>().Where(uqp => query.Contains(uqp.UserQuery)).UnsafeDelete();
+                        return null;
                     };
 
                     sb.Schema.Table<UserQueryEntity>().PreDeleteSqlSync += arg =>
@@ -98,6 +99,7 @@ namespace Signum.Engine.Dashboard
                     {
                         Database.MListQuery((DashboardEntity cp) => cp.Parts).Where(mle => query.Contains(((UserChartPartEntity)mle.Element.Content).UserChart)).UnsafeDeleteMList();
                         Database.Query<UserChartPartEntity>().Where(uqp => query.Contains(uqp.UserChart)).UnsafeDelete();
+                        return null;
                     };
 
                     sb.Schema.Table<UserChartEntity>().PreDeleteSqlSync += arg =>

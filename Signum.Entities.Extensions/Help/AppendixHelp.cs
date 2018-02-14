@@ -18,7 +18,7 @@ namespace Signum.Entities.Help
         [NotNullValidator]
         public CultureInfoEntity Culture { get; set; }
 
-                public string Title { get; set; }
+        public string Title { get; set; }
 
 		[StringLengthValidator(AllowNulls = true, Min = 3, MultiLine = true)]
         public string Description { get; set; }

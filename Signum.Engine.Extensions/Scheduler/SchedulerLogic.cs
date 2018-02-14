@@ -205,7 +205,11 @@ namespace Signum.Engine.Scheduler
 
                 ScheduledTasksLazy.OnReset += ScheduledTasksLazy_OnReset;
 
-                sb.Schema.EntityEvents<ScheduledTaskLogEntity>().PreUnsafeDelete += query => query.SelectMany(e => e.ExceptionLines()).UnsafeDelete();
+                sb.Schema.EntityEvents<ScheduledTaskLogEntity>().PreUnsafeDelete += query =>
+                {
+                    query.SelectMany(e => e.ExceptionLines()).UnsafeDelete();
+                    return null;
+                };
 
                 ExceptionLogic.DeleteLogs += ExceptionLogic_DeleteLogs;
             }
