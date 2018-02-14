@@ -43,7 +43,8 @@ namespace Signum.Engine
             Expression<Func<T, MList<L>>> mListField, 
             Expression<Func<L, Lite<T>>> getBackReference, 
             Action<L, T> onSave = null,
-            Action<L, T> onRemove = null)
+            Action<L, T> onRemove = null,
+            bool? checkAnyBeforeDelete = null) //To avoid StackOverflows
             where T : Entity
             where L : Entity
         {
@@ -119,9 +120,20 @@ namespace Signum.Engine
                 mlist.SetCleanModified(false);
             };
 
+            
             sb.Schema.EntityEvents<T>().PreUnsafeDelete += query =>
             {
-                query.SelectMany(e => Database.Query<L>().Where(se => getBackReference.Evaluate(se).RefersTo(e))).UnsafeDelete();
+                //You can do a VirtualMList to itself at the table level, but there should not be cycles inside the instances
+                var toDelete = Database.Query<L>().Where(se => query.Any(e => getBackReference.Evaluate(se).RefersTo(e)));
+                if (checkAnyBeforeDelete ?? (typeof(L) == typeof(T)))
+                {
+                    if (toDelete.Any())
+                        toDelete.UnsafeDelete();
+                }
+                else
+                {
+                    toDelete.UnsafeDelete();
+                }
                 return null;
             };
 
