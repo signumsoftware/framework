@@ -178,4 +178,37 @@ namespace Signum.Engine
             return ReflectionTools.CreateSetter<L, Lite<T>>(((MemberExpression)body).Member);
         }
     }
+
+    public static class DeleteAfter
+    {
+        public static FluentInclude<T> WithDeletePart<T, L>(this FluentInclude<T> fi, Expression<Func<T, L>> relatedEntity)
+            where T : Entity
+            where L : Entity
+        {
+            fi.SchemaBuilder.Schema.EntityEvents<T>().PreUnsafeDelete += query =>
+            {
+                var toDelete = query.Select(relatedEntity).Select(a => a.ToLite()).ToList().NotNull().Distinct().ToList();
+                return new Disposable(() =>
+                {
+                    Database.DeleteList(toDelete);
+                });
+            };
+            return fi;
+        }
+
+        public static FluentInclude<T> WithDeletePart<T, L>(this FluentInclude<T> fi, Expression<Func<T, Lite<L>>> relatedEntity)
+            where T : Entity
+            where L : Entity
+        {
+            fi.SchemaBuilder.Schema.EntityEvents<T>().PreUnsafeDelete += query =>
+            {
+                var toDelete = query.Select(relatedEntity).ToList().NotNull().Distinct().ToList();;
+                return new Disposable(() =>
+                {
+                    Database.DeleteList(toDelete);
+                });
+            };
+            return fi;
+        }
+    }
 }
