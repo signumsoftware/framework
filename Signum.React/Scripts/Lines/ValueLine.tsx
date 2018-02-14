@@ -251,7 +251,10 @@ function internalComboBox(vl: ValueLine) {
         return (
             <FormGroup ctx={s.ctx} labelText={s.labelText} helpBlock={s.helpBlock} htmlAttributes={{ ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
                 {ValueLine.withItemGroup(vl,
-                    <FormControlStatic htmlAttributes={vl.state.valueHtmlAttributes} ctx={s.ctx}>
+                    <FormControlStatic htmlAttributes={{
+                        ...vl.state.valueHtmlAttributes,
+                        ...({ 'data-value': s.ctx.value } as any) /*Testing*/
+                    }} ctx={s.ctx}>
                         {label}
                     </FormControlStatic>)}
             </FormGroup>
