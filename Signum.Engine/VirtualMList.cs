@@ -147,23 +147,24 @@ namespace Signum.Engine
 
         public static FluentInclude<T> WithVirtualMListInitializeOnly<T, L>(this FluentInclude<T> fi,
             DynamicQueryManager dqm,
-            Func<T, MList<L>> mListField,
+           Expression<Func<T, MList<L>>> mListField,
             Expression<Func<L, Lite<T>>> getBackReference,
             Action<L, T> onSave = null)
             where T : Entity
             where L : Entity
         {
+            Func<T, MList<L>> getMList = mListField.Compile();
             Action<L, Lite<T>> setter = null;
             var sb = fi.SchemaBuilder;
 
             sb.Schema.EntityEvents<T>().Saving += (T e) =>
             {
-                if (GraphExplorer.IsGraphModified(mListField(e)))
+                if (GraphExplorer.IsGraphModified(getMList(e)))
                     e.SetModified();
             };
             sb.Schema.EntityEvents<T>().Saved += (T e, SavedEventArgs args) =>
             {
-                var mlist = mListField(e);
+                var mlist = getMList(e);
 
                 if (!GraphExplorer.IsGraphModified(mlist))
                     return;
