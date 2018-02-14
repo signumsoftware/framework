@@ -41,6 +41,7 @@ export interface RestLogEntity extends Entities.Entity {
     userHostName: string | null;
     referrer: string | null;
     controller: string;
+    controllerName: string | null;
     action: string;
     exception: Entities.Lite<Basics.ExceptionEntity> | null;
     responseBody: string | null;
