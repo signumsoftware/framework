@@ -565,7 +565,7 @@ JOIN {3} {4} ON {2}.{0} = {4}.Id".FormatWith(tabCol.Name,
                                                   Columns = (from ic in i.IndexColumns()
                                                              join c in t.Columns() on ic.column_id equals c.column_id
                                                              orderby ic.key_ordinal
-                                                             select c.name).ToList()
+                                                             select new DiffIndexColumn { ColumnName =  c.name  }).ToList()
                                               }).ToList(),
 
                              ViewIndices = (from v in Database.View<SysViews>()
@@ -579,7 +579,7 @@ JOIN {3} {4} ON {2}.{0} = {4}.Id".FormatWith(tabCol.Name,
                                                 Columns = (from ic in i.IndexColumns()
                                                            join c in v.Columns() on ic.column_id equals c.column_id
                                                            orderby ic.key_ordinal
-                                                           select c.name).ToList()
+                                                           select new DiffIndexColumn { ColumnName = c.name }).ToList()
 
                                             }).ToList(),
 
@@ -807,6 +807,12 @@ EXEC(@{1})".FormatWith(databaseName, variableName));
         public List<string> Columns;
     }
 
+    public class DiffIndexColumn
+    {
+        public string ColumnName;
+        public bool IsIncluded;
+    }
+
     public class DiffIndex
     {
         public bool IsUnique;
@@ -816,7 +822,7 @@ EXEC(@{1})".FormatWith(databaseName, variableName));
         public string FilterDefinition;
         public DiffIndexType? Type;
 
-        public List<string> Columns;
+        public List<DiffIndexColumn> Columns;
 
         public override string ToString()
         {
