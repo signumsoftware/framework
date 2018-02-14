@@ -367,7 +367,7 @@ namespace Signum.Engine.Help
                     if (type == null)
                         return null; //PreDeleteSqlSync
 
-                    var repProperties = replacements.TryGetC(PropertyRouteLogic.PropertiesFor.FormatWith(type.FullName));
+                    var repProperties = replacements.TryGetC(PropertyRouteLogic.PropertiesFor.FormatWith(eh.Type.CleanName));
                     var routes = PropertyRoute.GenerateRoutes(type).ToDictionary(pr => { var ps = pr.PropertyString(); return repProperties.TryGetC(ps) ?? ps; });
                     eh.Properties.RemoveAll(p => !routes.ContainsKey(p.Property.Path));
                     foreach (var prop in eh.Properties)
@@ -381,7 +381,7 @@ namespace Signum.Engine.Help
 
                     eh.Description = SynchronizeContent(eh.Description, replacements, data);
 
-                    return table.UpdateSqlSync(eh, e => e.Type.FullClassName == eh.Type.FullClassName);
+                    return table.UpdateSqlSync(eh, e => e.Type.CleanName == eh.Type.CleanName);
                 }).Combine(Spacing.Simple);
         }
 
