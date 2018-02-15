@@ -140,7 +140,7 @@ export class OperationButton extends React.Component<OperationButtonProps> {
 
         const withClose = getWithClose(eoc);
 
-        const id = canExecute && "button_" + eoc.operationInfo.key.replace(".", "_");
+        const id = canExecute ? "button_" + eoc.operationInfo.key.replace(".", "_") : undefined;
 
         const tooltip = canExecute && id &&
             (
@@ -153,10 +153,12 @@ export class OperationButton extends React.Component<OperationButtonProps> {
             return (
                 <DropdownItem
                     {...props}
+                    id={id}
                     className={classes("btn-" + bsColor, disabled ? "disabled" : undefined, props && props.className)}
                     onClick={disabled ? undefined : this.handleOnClick}
                     data-operation={eoc.operationInfo.key}>
                     {this.renderChildren()}
+                    {tooltip}
                 </DropdownItem>
             );
         }
@@ -164,10 +166,12 @@ export class OperationButton extends React.Component<OperationButtonProps> {
         var button = (
             <Button color={bsColor}
                 {...props}
+                id={id}
                 className={classes(disabled ? "disabled" : undefined, props && props.className)}
                 onClick={disabled ? undefined : this.handleOnClick}
                 data-operation={eoc.operationInfo.key}>
                 {this.renderChildren()}
+                {tooltip}
             </Button>
         );
 

@@ -3,7 +3,7 @@ import * as PropTypes from 'prop-types';
 import { BsSize } from './Basic';
 import { classes } from '../Globals';
 
-interface ButtonProps extends React.AnchorHTMLAttributes<any> {
+export interface ButtonProps extends React.AnchorHTMLAttributes<any> {
     active?: boolean;
     block?: boolean;
     color?: string;
@@ -16,12 +16,15 @@ interface ButtonProps extends React.AnchorHTMLAttributes<any> {
     className?: string;
 };
 
-const defaultProps = {
-    color: 'secondary',
-    tag: 'button',
-};
+
 
 export class Button extends React.Component<ButtonProps> {
+
+    static defaultProps = {
+        color: 'secondary',
+        tag: 'button',
+    };
+
     constructor(props: ButtonProps) {
         super(props);
 
@@ -71,7 +74,6 @@ export class Button extends React.Component<ButtonProps> {
 
         return (
             <Tag
-                type={(Tag === 'button' && attributes.onClick) ? 'button' : undefined}
                 {...attributes}
                 className={clss}
                 ref={innerRef}

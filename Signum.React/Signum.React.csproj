@@ -178,7 +178,6 @@
     <TypeScriptCompile Include="Scripts\LinkContainer.tsx" />
     <TypeScriptCompile Include="Scripts\Components\Fade.tsx" />
     <TypeScriptCompile Include="Scripts\Components\Modal.tsx" />
-    <TypeScriptCompile Include="Scripts\Components\ModalDialog.tsx" />
     <TypeScriptCompile Include="Scripts\Components\Tabs.tsx" />
     <Content Include="Scripts\Frames\MenuIcons.css" />
     <Content Include="Scripts\Frames\VersionChangedAlert.css" />

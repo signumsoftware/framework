@@ -50,8 +50,7 @@ export function getConstructFromManyContextualItems(ctx: ContextualItemsContext<
         .filter(coc => coc != undefined)
         .map(coc => coc!)
         .orderBy(coc => coc.settings && coc.settings.order)
-        .map((coc, i) => MenuItemConstructor.createContextualMenuItem(coc, defaultConstructFromMany, i));
-
+        .flatMap(coc => MenuItemConstructor.createContextualMenuItem(coc, defaultConstructFromMany));
 
     if (!menuItems.length)
         return undefined;
@@ -135,7 +134,7 @@ export function getEntityOperationsContextualItems(ctx: ContextualItemsContext<E
         const menuItems = ctxs.filter(coc => coc.canExecute == undefined || !hideOnCanExecute(coc))
             .orderBy(coc => coc.settings && coc.settings.order != undefined ? coc.settings.order :
                 coc.entityOperationSettings && coc.entityOperationSettings.order != undefined ? coc.entityOperationSettings.order : 0)
-            .map((coc, i) => MenuItemConstructor.createContextualMenuItem(coc, defaultContextualClick, i));
+            .flatMap(coc => MenuItemConstructor.createContextualMenuItem(coc, defaultContextualClick));
 
         if (menuItems.length == 0)
             return undefined;
@@ -198,13 +197,13 @@ export namespace MenuItemConstructor { //To allow monkey patching
         const array = new RegExp(OperationMessage.CreateFromRegex.niceToString()).exec(niceName);
         return array ? (niceName.tryBefore(array[1]) || "") + array[1].firstUpper() : niceName;
     }
-    export function createContextualMenuItem(coc: ContextualOperationContext<Entity>, defaultClick: (coc: ContextualOperationContext<Entity>) => void, key: any) {
+    export function createContextualMenuItem(coc: ContextualOperationContext<Entity>, defaultClick: (coc: ContextualOperationContext<Entity>) => void) {
 
         const text = coc.settings && coc.settings.text ? coc.settings.text() :
             coc.entityOperationSettings && coc.entityOperationSettings.text ? coc.entityOperationSettings.text() :
                 simplifyName(coc.operationInfo.niceName);
 
-        const bsStyle = coc.settings && coc.settings.color || coc.entityOperationSettings && coc.entityOperationSettings.color || autoColorFunction(coc.operationInfo);
+        const color = coc.settings && coc.settings.color || coc.entityOperationSettings && coc.entityOperationSettings.color || autoColorFunction(coc.operationInfo);
         const icon = coc.settings && coc.settings.icon;
 
         const disabled = !!coc.canExecute;
@@ -214,20 +213,20 @@ export namespace MenuItemConstructor { //To allow monkey patching
             coc.settings && coc.settings.onClick ? coc.settings!.onClick!(coc) : defaultClick(coc)
         }
 
-        const id = coc.canExecute && "contexual_" + coc.operationInfo.key.replace(".", "_");
+        let innerRef: HTMLElement | null;
 
-        return (
+        return [
             <DropdownItem
-                id={id}
+                innerRef={b => innerRef = b}
                 className={disabled ? "disabled" : undefined}
                 onClick={disabled ? undefined : onClick}
                 data-operation={coc.operationInfo.key}>
                 {icon ? <span className={classes("icon", icon)} style={{ color: coc.settings && coc.settings.iconColor }}></span> :
-                    bsStyle ? <span className={classes("icon", "empty-icon", "btn-" + bsStyle)}></span> : undefined}
+                    color ? <span className={classes("icon", "empty-icon", "btn-" + color)}></span> : undefined}
                 {text}
-                {coc.canExecute && id && <UncontrolledTooltip placement="right" target={id}>{coc.canExecute}</UncontrolledTooltip>}
-            </DropdownItem>
-        );
+            </DropdownItem>,
+            coc.canExecute ? <UncontrolledTooltip placement="right" target={() => innerRef!}>{coc.canExecute}</UncontrolledTooltip> : undefined
+        ].filter(a => a != null);
     }
 }
 

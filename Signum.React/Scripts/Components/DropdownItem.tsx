@@ -11,13 +11,14 @@ export interface DropdownItemProps extends React.AnchorHTMLAttributes<any> {
     onClick?: (e: React.MouseEvent<any>) => void;
     className?: string;
     toggle?: boolean;
-};
-
-const contextTypes = {
-    toggle: PropTypes.func
+    innerRef?: (r: HTMLElement | null) => void;
 };
 
 export class DropdownItem extends React.Component<DropdownItemProps> {
+
+    static contextTypes = {
+        toggle: PropTypes.func
+    };
 
     static defaultProps = {
         tag: 'button',
@@ -63,6 +64,7 @@ export class DropdownItem extends React.Component<DropdownItemProps> {
             active,
             toggle,
             divider,
+            innerRef,
             ...props } = this.props;
 
         const clss = classes(
@@ -88,6 +90,7 @@ export class DropdownItem extends React.Component<DropdownItemProps> {
 
         return (
             <Tag
+                ref={innerRef}
                 type={(Tag === 'button' && (props.onClick || this.props.toggle)) ? 'button' : undefined}
                 {...props}
                 tabIndex={tabIndex}

@@ -184,7 +184,7 @@ export class FilterComponent extends React.Component<FilterComponentProps>{
             <tr>
                 <td>
                     {!readOnly &&
-                        <a title={SearchMessage.DeleteFilter.niceToString()}
+                        <a href="#" title={SearchMessage.DeleteFilter.niceToString()}
                             className="sf-line-button sf-remove"
                             onClick={this.handleDeleteFilter}>
                             <span className="fa fa-remove" />

@@ -149,6 +149,7 @@ export class PopperContent extends React.Component<PopperContentProps, PopperCon
             tag,
             container,
             modifiers,
+            hideArrow, 
             ...attrs
         } = this.props;
         const placement = (this.state.placement || attrs.placement)!.split('-')[0];
@@ -169,9 +170,9 @@ export class PopperContent extends React.Component<PopperContentProps, PopperCon
         } as Popper.Modifiers;
 
         return (
-            <ReactPopper modifiers={extendedModifiers} {...attrs} component={1 as any /*????*/} className={popperClassName} >
+            <ReactPopper modifiers={extendedModifiers} {...attrs} component={tag} className={popperClassName} >
                 {children}
-                <Arrow className={"arrow"} />
+                {!hideArrow && < Arrow className={"arrow"} />}
             </ReactPopper>
         );
     }

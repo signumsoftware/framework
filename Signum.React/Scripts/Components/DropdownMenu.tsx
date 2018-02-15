@@ -13,13 +13,26 @@ export interface DropdownMenuProps extends React.HTMLAttributes<any> {
 
 interface DropdownMenuContext {
     isOpen: boolean;
-    dropup: boolean;
+    direction: "up" | "down" | "left" | "right";
     inNavbar: boolean;
 };
 
 const noFlipModifier = { flip: { enabled: false } };
 
+const directionPositionMap = {
+    up: 'top',
+    left: 'left',
+    right: 'right',
+    down: 'bottom',
+};
+
 export class DropdownMenu extends React.Component<DropdownMenuProps> {
+
+    static contextTypes = {
+        isOpen: PropTypes.bool.isRequired,
+        direction: PropTypes.oneOf(['up', 'down', 'left', 'right']).isRequired,
+        inNavbar: PropTypes.bool.isRequired,
+    };
 
     static defaultProps = {
         tag: 'div',
@@ -27,38 +40,36 @@ export class DropdownMenu extends React.Component<DropdownMenuProps> {
     };
 
     render() {
-        const ctx = this.context as DropdownMenuContext;
+        const context = this.context as DropdownMenuContext;
         const { className, right, tag, flip, ...attrs } = this.props;
         const clss = classes(
             className,
             'dropdown-menu',
             right && 'dropdown-menu-right',
-            ctx.isOpen && 'show',
+            context.isOpen && 'show',
         );
 
-        const Tag = tag!;
+        
+        let Tag = tag!;
 
-        if (ctx.isOpen && !ctx.inNavbar) {
+        if (context.isOpen && !context.inNavbar) {
+            Tag = Popper;
 
-            const position1 = ctx.dropup ? 'top' : 'bottom';
+            const position1 = directionPositionMap[context.direction] || 'bottom';
             const position2 = right ? 'end' : 'start';
-            return (
-                <Popper
-                    placement={`${position1}-${position2}` as any}
-                    component={Tag} modifiers={!flip ? noFlipModifier : undefined}
-                />
-            );
+            (attrs as any).placement = `${position1}-${position2}`;
+            (attrs as any).component = tag;
+            (attrs as any).modifiers = !flip ? noFlipModifier : undefined;
         }
-        else {
-            return (
-                <Tag
-                    tabIndex="-1"
-                    role="menu"
-                    {...attrs}
-                    aria-hidden={!ctx.isOpen}
-                    className={clss}
-                />
-            );
-        }
+
+        return (
+            <Tag
+                tabIndex="-1"
+                role="menu"
+                {...attrs}
+                aria-hidden={!context.isOpen}
+                className={clss}
+            />
+        );
     }
 }

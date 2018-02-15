@@ -46,7 +46,7 @@ export class Tooltip extends React.Component<TooltipProps> {
         super(props);
     }
 
-    _target?: HTMLElement;
+    _target!: HTMLElement;
     componentDidMount() {
         this._target = getTarget(this.props.target);
         this.addTargetEvents();
@@ -135,7 +135,7 @@ export class Tooltip extends React.Component<TooltipProps> {
         }
     }
 
-    addTargetEvents = ()=> {
+    addTargetEvents = () => {
         this._target!.addEventListener('mouseover', this.onMouseOverTooltip, true);
         this._target!.addEventListener('mouseout', this.onMouseLeaveTooltip, true);
         document.addEventListener('click', this.handleDocumentClick, true);

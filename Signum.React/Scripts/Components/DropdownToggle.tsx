@@ -2,7 +2,7 @@
 import * as PropTypes from 'prop-types';
 import { Target } from 'react-popper';
 import { classes } from '../Globals';
-import { Button } from './Button';
+import { Button, ButtonProps } from './Button';
 
 interface DropdownToggleProps extends React.AnchorHTMLAttributes<any> {
     caret?: boolean;
@@ -58,20 +58,18 @@ export class DropdownToggle extends React.Component<DropdownToggleProps> {
             className,
             (caret || split) && 'dropdown-toggle',
             split && 'dropdown-toggle-split',
-            nav && 'nav-link',
-            !nav && 'btn',
-            !nav && color && ('btn-' + color), 
+            nav && 'nav-link'
         );
         const children = props.children || <span className="sr-only">Toggle Dropdown</span>;
 
         let Tag = tag!;
-
+      
         if (nav && !tag) {
             Tag = 'a';
             props.href = '#';
         } else if (!tag) {
             Tag = Button;
-            (props as any).color = color;
+            (props as ButtonProps).color = color;
         } else {
             Tag = tag;
         }
@@ -80,7 +78,7 @@ export class DropdownToggle extends React.Component<DropdownToggleProps> {
             return (
                 <Tag
                     {...props}
-                    className={classes}
+                    className={clss}
                     onClick={this.onClick}
                     aria-expanded={this.context.isOpen}
                     children={children}
@@ -91,7 +89,7 @@ export class DropdownToggle extends React.Component<DropdownToggleProps> {
         return (
             <Target
                 {...props}
-                className={classes}
+                className={clss}
                 component={Tag}
                 onClick={this.onClick}
                 aria-expanded={this.context.isOpen}

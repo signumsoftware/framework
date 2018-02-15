@@ -10,7 +10,7 @@ import { classes } from '../Globals';
 
 export interface UncontrolledDropdownProps extends React.HTMLAttributes<any> {
     disabled?: boolean;
-    dropup?: boolean,
+    direction?: "up" | "down" | "left" | "right",
     group?: boolean;
     nav?: boolean;
     addonType?: false | "prepend" | "append";
@@ -30,7 +30,7 @@ export class Dropdown extends React.Component<DropdownProps> {
 
     static defaultProps = {
         isOpen: false,
-        dropup: false,
+        direction: "down",
         nav: false,
         addonType: false,
         inNavbar: false,
@@ -44,7 +44,7 @@ export class Dropdown extends React.Component<DropdownProps> {
     static childContextTypes = {
         toggle: PropTypes.func.isRequired,
         isOpen: PropTypes.bool.isRequired,
-        dropup: PropTypes.bool.isRequired,
+        direction: PropTypes.oneOf(['up', 'down', 'left', 'right']).isRequired,
         inNavbar: PropTypes.bool.isRequired,
     };
 
@@ -52,7 +52,7 @@ export class Dropdown extends React.Component<DropdownProps> {
         return {
             toggle: this.props.toggle,
             isOpen: this.props.isOpen,
-            dropup: this.props.dropup,
+            direction: this.props.direction,
             inNavbar: this.props.inNavbar,
         };
     }
@@ -186,7 +186,7 @@ export class Dropdown extends React.Component<DropdownProps> {
     render() {
         const {
             className,
-            dropup,
+            direction,
             isOpen,
             group,
             size,
@@ -207,7 +207,7 @@ export class Dropdown extends React.Component<DropdownProps> {
             size && `btn-group-${size}`,
             !group && !addonType && 'dropdown',
             isOpen && 'show',
-            dropup && 'dropup',
+            direction && `drop${direction}`,
             nav && 'nav-item'
         );
         return <Manager {...attrs} className={clss} onKeyDown={this.handleKeyDown} />;

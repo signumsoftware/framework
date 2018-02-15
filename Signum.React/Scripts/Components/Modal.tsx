@@ -7,9 +7,9 @@ import * as BaseModal from 'react-overlays/lib/Modal';
 import isOverflowing from 'react-overlays/lib/utils/isOverflowing';
 
 import { Fade } from './Fade';
-import { ModalDialog, ModelDialogProps } from './ModalDialog';
 import { classes } from '../Globals';
 import { JavascriptMessage } from '../Signum.Entities';
+import { BsSize, BsColor} from './index';
 
 export interface ModalProps extends ModelDialogProps  {
 
@@ -100,8 +100,8 @@ export interface ModalProps extends ModelDialogProps  {
 
     style?: React.CSSProperties;
 
-    bsSize?: "lg" | "md" | "sm" | "xs";
-    bsStyle?: string;
+    bsSize?: BsSize;
+    bsColor?: BsColor;
 };
 
 
@@ -127,10 +127,8 @@ export class Modal extends React.Component<ModalProps, ModalState> {
     static defaultProps = {
         ...BaseModal.defaultProps,
         animation: true,
-        dialogComponentClass: ModalDialog
     };
-
-
+    
     static TRANSITION_DURATION = 300;
     static BACKDROP_TRANSITION_DURATION = 150;
 
@@ -259,6 +257,7 @@ export class Modal extends React.Component<ModalProps, ModalState> {
                     size={size}
                     style={{ ...this.state.style, ...style }}
                     className={classes(className, inClassName)}
+                    onClick={backdrop == true ? this.handleDialogClick : undefined}
                 >
                     {children}
                 </ModalDialog>
@@ -291,6 +290,54 @@ function getScrollbarSize(recalc?: boolean) {
 }
 
 
+
+
+interface ModelDialogProps extends React.HTMLAttributes<any> {
+    /**
+     * A css class to apply to the Modal dialog DOM node.
+     */
+    dialogClassName?: string;
+    className?: string;
+    style?: React.CSSProperties;
+
+    size?: BsSize;
+    color?: BsColor;
+}
+
+class ModalDialog extends React.Component<ModelDialogProps> {
+
+
+    render() {
+        const {
+            dialogClassName,
+            className,
+            style,
+            children,
+            size,
+            color,
+            ...elementProps
+        } = this.props;
+
+        return (
+            <div
+                {...elementProps}
+                tabIndex={-1}
+                role="dialog"
+                style={{ display: 'block', ...style }}
+                className={classes(className, "modal")}>
+                <div className={classes(
+                    dialogClassName,
+                    "modal-dialog",
+                    color && "modal-" + color,
+                    size && "modal-" + size)}>
+                    <div className="modal-content" role="document">
+                        {children}
+                    </div>
+                </div>
+            </div>
+        );
+    }
+}
 
 interface ModalHeaderButtonsProps {
     onClose?: () => void;
