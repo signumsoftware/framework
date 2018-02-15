@@ -116,13 +116,13 @@ export default class UserChartMenu extends React.Component<UserChartMenuProps, U
                         userCharts && userCharts.map((uc, i) =>
                             <DropdownItem key={i}
                                 className={classes("sf-userquery", is(uc, crView.props.userChart) && "active")}
-                                onSelect={() => this.handleSelect(uc)}>
+                                onClick={() => this.handleSelect(uc)}>
                                 {uc.toStr}
                             </DropdownItem>)
                     }
                     {userCharts && userCharts.length > 0 && <DropdownItem divider />}
-                    {crView.props.userChart && <DropdownItem onSelect={this.handleEdit}>{ChartMessage.EditUserChart.niceToString()}</DropdownItem>}
-                    <DropdownItem onSelect={this.handleCreate}>{ChartMessage.CreateNew.niceToString()}</DropdownItem>
+                    {crView.props.userChart && <DropdownItem onClick={this.handleEdit}>{ChartMessage.EditUserChart.niceToString()}</DropdownItem>}
+                    <DropdownItem onClick={this.handleCreate}>{ChartMessage.CreateNew.niceToString()}</DropdownItem>
                 </DropdownMenu>
             </Dropdown>
         );

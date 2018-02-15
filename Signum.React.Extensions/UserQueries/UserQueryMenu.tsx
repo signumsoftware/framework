@@ -54,7 +54,7 @@ export default class UserQueryMenu extends React.Component<UserQueryMenuProps, U
     }
 
 
-    handleSelect = (uq: Lite<UserQueryEntity>) => {
+    handleOnClick = (uq: Lite<UserQueryEntity>) => {
 
         Navigator.API.fetchAndForget(uq).then(userQuery => {
             const sc = this.props.searchControl
@@ -106,13 +106,13 @@ export default class UserQueryMenu extends React.Component<UserQueryMenuProps, U
                         userQueries && userQueries.map((uq, i) =>
                             <DropdownItem key={i}
                                 className={classes("sf-userquery", is(uq, this.state.currentUserQuery) && "active")}
-                                onSelect={() => this.handleSelect(uq)}>
+                                onClick={() => this.handleOnClick(uq)}>
                                 {uq.toStr}
                             </DropdownItem>)
                     }
                     {userQueries && userQueries.length > 0 && <DropdownItem divider />}
-                    {this.state.currentUserQuery && <DropdownItem onSelect={this.handleEdit} >{UserQueryMessage.UserQueries_Edit.niceToString()}</DropdownItem>}
-                    <DropdownItem onSelect={this.handleCreate}>{UserQueryMessage.UserQueries_CreateNew.niceToString()}</DropdownItem>
+                    {this.state.currentUserQuery && <DropdownItem onClick={this.handleEdit} >{UserQueryMessage.UserQueries_Edit.niceToString()}</DropdownItem>}
+                    <DropdownItem onClick={this.handleCreate}>{UserQueryMessage.UserQueries_CreateNew.niceToString()}</DropdownItem>
                 </DropdownMenu>
             </Dropdown>
         );

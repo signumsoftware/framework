@@ -260,12 +260,12 @@ class DynamicViewDesigner extends React.Component<DynamicViewDesignerProps, Dyna
                 <button type="button" className="btn btn-success" onClick={this.handleShowCode}>Show code</button>
                 <Dropdown id="bg-nested-dropdown" toggle={this.handleOnToggle} isOpen={this.state.isDropdownOpen} size="sm">
                     <DropdownToggle>{" … "}</DropdownToggle>
-                    {operations[DynamicViewOperation.Create.key] && <DropdownItem onSelect={this.handleCreate}>{operations[DynamicViewOperation.Create.key].niceName}</DropdownItem>}
-                    {operations[DynamicViewOperation.Clone.key] && !this.props.dynamicView.isNew && <DropdownItem  onSelect={this.handleClone}>{operations[DynamicViewOperation.Clone.key].niceName}</DropdownItem>}
+                    {operations[DynamicViewOperation.Create.key] && <DropdownItem onClick={this.handleCreate}>{operations[DynamicViewOperation.Create.key].niceName}</DropdownItem>}
+                    {operations[DynamicViewOperation.Clone.key] && !this.props.dynamicView.isNew && <DropdownItem onClick={this.handleClone}>{operations[DynamicViewOperation.Clone.key].niceName}</DropdownItem>}
                     {this.state.viewNames && this.state.viewNames.length > 0 && <DropdownItem divider={true} />}
                     {this.state.viewNames && this.state.viewNames.map(vn => <DropdownItem key={vn}
                         className={classes("sf-dynamic-view", vn == this.props.dynamicView.viewName && "active")}
-                        onSelect={() => this.handleChangeView(vn)}>
+                        onClick={() => this.handleChangeView(vn)}>
                         {vn}
                     </DropdownItem>)}
                 </Dropdown>

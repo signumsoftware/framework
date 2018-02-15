@@ -18,7 +18,7 @@ export interface WordEntityMenuProps {
 
 export default class WordEntityMenu extends React.Component<WordEntityMenuProps> {
 
-    handleSelect = (wt: Lite<WordTemplateEntity>) => {
+    handleOnClick = (wt: Lite<WordTemplateEntity>) => {
 
         Navigator.API.fetchAndForget(wt)
             .then<string | undefined>(wordTemplate => wordTemplate.systemWordTemplate ? WordClient.API.getConstructorType(wordTemplate.systemWordTemplate!) : undefined)
@@ -51,7 +51,7 @@ export default class WordEntityMenu extends React.Component<WordEntityMenuProps>
                 {
                     this.props.entityPack.wordTemplates!.map((wt, i) =>
                         <DropdownItem key={i}
-                            onSelect={() => this.handleSelect(wt)}>
+                            onClick={() => this.handleOnClick(wt)}>
                             {wt.toStr}
                         </DropdownItem>)
                 }

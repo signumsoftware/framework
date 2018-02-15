@@ -55,25 +55,25 @@ function monkeyPatchCreateContextualMenuItem(){
 
     const base = ContextualOperations.MenuItemConstructor.createContextualMenuItem;
 
-    ContextualOperations.MenuItemConstructor.createContextualMenuItem = (coc: Operations.ContextualOperationContext<Entity>, defaultClick: (coc: Operations.ContextualOperationContext<Entity>) => void, key: any) => {
+    ContextualOperations.MenuItemConstructor.createContextualMenuItem = (coc: Operations.ContextualOperationContext<Entity>, defaultClick: (coc: Operations.ContextualOperationContext<Entity>) => void) => {
         
         if(!Navigator.isViewable(PackageOperationEntity) )
-            return base(coc, defaultClick, key);
+            return base(coc, defaultClick);
 
         if(coc.operationInfo.operationType == OperationType.Constructor ||
             coc.operationInfo.operationType == OperationType.ConstructorFromMany)
-            return base(coc, defaultClick, key);
+            return base(coc, defaultClick);
 
         if(coc.context.lites.length <= 1)
-            return base(coc, defaultClick, key);
+            return base(coc, defaultClick);
 
         const processSettings = processOperationSettings[coc.operationInfo.key];
         if(processSettings != undefined){
             if(processSettings.isVisible && !processSettings.isVisible(coc))
-                return base(coc, defaultClick, key);
+                return base(coc, defaultClick);
 
             if(processSettings.hideOnCanExecute && coc.canExecute != undefined)
-                return base(coc, defaultClick, key);
+                return base(coc, defaultClick);
         }
 
 
@@ -95,21 +95,22 @@ function monkeyPatchCreateContextualMenuItem(){
             processSettings && processSettings.onClick ? processSettings.onClick!(coc) : defaultConstructProcessFromMany(coc)
         }
 
-        const id = !coc.canExecute ? undefined : "process_" + + coc.operationInfo.key.replace(".", "_");
 
-        return (
+        let innerRef: HTMLElement | null;
+
+        return [
             <DropdownItem
-                id={id}
+                innerRef={r => innerRef = r}
                 className={disabled ? "disabled" : undefined}
                 onClick={disabled ? undefined : onClick}
-                data-operation={coc.operationInfo.key}
-                key={key}>
+                data-operation={coc.operationInfo.key}>
                 {bsColor && <span className={"icon empty-icon btn-" + bsColor}></span>}
                 {text}
                 <span className="fa fa-cog process-contextual-icon" aria-hidden={true} onClick={processOnClick}></span>
-                {coc.canExecute && id && <UncontrolledTooltip target={id} placement="right">{coc.canExecute}</UncontrolledTooltip>}
-            </DropdownItem>
-        );
+
+            </DropdownItem>,
+            coc.canExecute ? <UncontrolledTooltip target={() => innerRef!} placement="right">{coc.canExecute}</UncontrolledTooltip> : undefined
+        ].filter(a => a != null);
     };
 }
 

@@ -43,7 +43,7 @@ export default class ExcelMenu extends React.Component<ExcelMenuProps, { excelRe
     }
 
 
-    handleSelect = (er: Lite<ExcelReportEntity>) => {
+    handleClick = (er: Lite<ExcelReportEntity>) => {
         ExcelClient.API.generateExcelReport(this.props.searchControl.getQueryRequest(), er);
     }
 
@@ -75,18 +75,18 @@ export default class ExcelMenu extends React.Component<ExcelMenuProps, { excelRe
                     {label as any}
                 </DropdownToggle>
                 <DropdownMenu>
-                    {this.props.plainExcel && <DropdownItem onSelect={this.handlePlainExcel} ><span><i className="fa fa-file-excel-o"></i>&nbsp; {ExcelMessage.ExcelReport.niceToString()}</span></DropdownItem>}
+                    {this.props.plainExcel && <DropdownItem onClick={this.handlePlainExcel} ><span><i className="fa fa-file-excel-o"></i>&nbsp; {ExcelMessage.ExcelReport.niceToString()}</span></DropdownItem>}
                     {this.props.plainExcel && excelReports && excelReports.length > 0 && <DropdownItem divider />}
                     {
                         excelReports && excelReports.map((uq, i) =>
                             <DropdownItem key={i}
-                                onSelect={() => this.handleSelect(uq)}>
+                                onClick={() => this.handleClick(uq)}>
                                 {uq.toStr}
                             </DropdownItem>)
                     }
                     {(this.props.plainExcel || excelReports && excelReports.length > 0) && <DropdownItem divider />}
-                    <DropdownItem onSelect={this.handleAdmnister}>{ExcelMessage.Administer.niceToString()}</DropdownItem>
-                    <DropdownItem onSelect={this.handleCreate}>{ExcelMessage.CreateNew.niceToString()}</DropdownItem>
+                    <DropdownItem onClick={this.handleAdmnister}>{ExcelMessage.Administer.niceToString()}</DropdownItem>
+                    <DropdownItem onClick={this.handleCreate}>{ExcelMessage.CreateNew.niceToString()}</DropdownItem>
                 </DropdownMenu>
             </Dropdown>
         );

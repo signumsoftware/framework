@@ -18,7 +18,7 @@ export interface MailingMenuProps {
 
 export default class MailingMenu extends React.Component<MailingMenuProps> {
 
-    handleSelect = (et: Lite<EmailTemplateEntity>) => {
+    handleClick = (et: Lite<EmailTemplateEntity>) => {
 
         Navigator.API.fetchAndForget(et)
             .then(emailTemplate => MailingClient.API.getConstructorType(emailTemplate.systemEmail!))
@@ -53,7 +53,7 @@ export default class MailingMenu extends React.Component<MailingMenuProps> {
                     {
                         emailTemplates.map((wt, i) =>
                             <DropdownItem key={i}
-                                onSelect={() => this.handleSelect(wt)}>
+                                onClick={() => this.handleClick(wt)}>
                                 {wt.toStr}
                             </DropdownItem>)
                     }

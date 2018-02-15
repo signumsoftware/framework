@@ -18,7 +18,7 @@ export interface WordSearchMenuProps {
 
 export default class WordSearchMenu extends React.Component<WordSearchMenuProps> {
 
-    handleSelect = (wt: Lite<WordTemplateEntity>) => {
+    handleOnClick = (wt: Lite<WordTemplateEntity>) => {
 
         Navigator.API.fetchAndForget(wt)
             .then(wordTemplate => WordClient.API.getConstructorType(wordTemplate.systemWordTemplate!))
@@ -55,7 +55,7 @@ export default class WordSearchMenu extends React.Component<WordSearchMenuProps>
                     {
                         wordReports.map((wt, i) =>
                             <DropdownItem key={i}
-                                onSelect={() => this.handleSelect(wt)}>
+                                onClick={() => this.handleOnClick(wt)}>
                                 {wt.toStr}
                             </DropdownItem>)
                     }
