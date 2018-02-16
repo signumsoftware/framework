@@ -195,7 +195,15 @@ namespace Signum.Engine.SchemaInfoTables
         public int max_length;
         public int precision;
         public int scale;
-        public bool is_identity; 
+        public bool is_identity;
+
+        static Expression<Func<SysColumns, SysTypes>> TypeExpression =
+            c => Database.View<SysTypes>().SingleOrDefaultEx(a => a.system_type_id == c.system_type_id);
+        [ExpressionField]
+        public SysTypes Type()
+        {
+            return TypeExpression.Evaluate(this);
+        }
     }
 
     [TableName("sys.default_constraints")]
