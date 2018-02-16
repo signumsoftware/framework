@@ -792,7 +792,7 @@ namespace Signum.Engine.CodeGeneration
             return true;
         }
 
-        protected virtual Type GetValueType(DiffColumn col)
+        protected internal virtual Type GetValueType(DiffColumn col)
         {
             switch (col.SqlDbType)
             {
