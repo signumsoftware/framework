@@ -87,7 +87,11 @@ namespace Signum.Engine.Workflow
                     },
                 }.Register();
 
-                sb.Schema.EntityEvents<WorkflowEventTaskEntity>().PreUnsafeDelete += tasks => tasks.SelectMany(a => a.ConditionResults()).UnsafeDelete();
+                sb.Schema.EntityEvents<WorkflowEventTaskEntity>().PreUnsafeDelete += tasks =>
+                {
+                    tasks.SelectMany(a => a.ConditionResults()).UnsafeDelete();
+                    return null;
+                };
 
                 ExceptionLogic.DeleteLogs += ExceptionLogic_DeleteLogs;
 

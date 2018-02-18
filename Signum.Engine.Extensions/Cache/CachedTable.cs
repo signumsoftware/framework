@@ -730,7 +730,7 @@ namespace Signum.Engine.Cache
                 }
             };
             //ee.PreUnsafeDelete += query => DisableAndInvalidate();
-            ee.PreUnsafeUpdate += (update, entityQuery) => DisableAndInvalidateMassive();
+            ee.PreUnsafeUpdate += (update, entityQuery) => { DisableAndInvalidateMassive(); return null; };
             ee.PreUnsafeInsert += (query, constructor, entityQuery) =>
             {
                 if (constructor.Body.Type.IsInstantiationOf(typeof(MListElement<,>)))
@@ -738,7 +738,7 @@ namespace Signum.Engine.Cache
 
                 return constructor;
             };
-            ee.PreUnsafeMListDelete += (mlistQuery, entityQuery) => DisableAndInvalidateMassive();
+            ee.PreUnsafeMListDelete += (mlistQuery, entityQuery) => { DisableAndInvalidateMassive(); return null; };
             ee.PreBulkInsert += inMListTable =>
             {
                 if (inMListTable)

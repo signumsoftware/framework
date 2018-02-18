@@ -43,7 +43,11 @@ namespace Signum.Engine.Authorization
                     invalidateWithTypes: true,
                     coercer: PropertyCoercer.Instance);
 
-                sb.Schema.EntityEvents<RoleEntity>().PreUnsafeDelete += query => Database.Query<RulePropertyEntity>().Where(r => query.Contains(r.Role.Entity)).UnsafeDelete();
+                sb.Schema.EntityEvents<RoleEntity>().PreUnsafeDelete += query =>
+                {
+                    Database.Query<RulePropertyEntity>().Where(r => query.Contains(r.Role.Entity)).UnsafeDelete();
+                    return null;
+                };
 
                 PropertyRoute.SetIsAllowedCallback(pp => pp.GetAllowedFor(PropertyAllowed.Read));
 

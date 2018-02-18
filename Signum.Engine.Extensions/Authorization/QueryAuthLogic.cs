@@ -47,7 +47,11 @@ namespace Signum.Engine.Authorization
                     invalidateWithTypes: true,
                     coercer: QueryCoercer.Instance);
 
-                sb.Schema.EntityEvents<RoleEntity>().PreUnsafeDelete += query => Database.Query<RuleQueryEntity>().Where(r => query.Contains(r.Role.Entity)).UnsafeDelete();
+                sb.Schema.EntityEvents<RoleEntity>().PreUnsafeDelete += query =>
+                {
+                    Database.Query<RuleQueryEntity>().Where(r => query.Contains(r.Role.Entity)).UnsafeDelete();
+                    return null;
+                };
 
                 AuthLogic.ExportToXml += exportAll => cache.ExportXml("Queries", "Query", QueryUtils.GetKey, b => b.ToString(), 
                     exportAll ? QueryLogic.QueryNames.Values.ToList(): null);

@@ -92,7 +92,7 @@ namespace Signum.Engine.MachineLearning
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
                 sb.Include<PredictorEntity>()
-                    .WithVirtualMList(p => p.SubQueries, mc => mc.Predictor)
+                    .WithVirtualMList(dqm, p => p.SubQueries, mc => mc.Predictor)
                     .WithQuery(dqm, () => e => new
                     {
                         Entity = e,
@@ -183,7 +183,11 @@ namespace Signum.Engine.MachineLearning
                 RegisterResultSaver(PredictorSimpleResultSaver.StatisticsOnly, new PredictorSimpleSaver { SaveSimpleResults = true });
                 RegisterResultSaver(PredictorSimpleResultSaver.Full, new PredictorSimpleSaver { SaveSimpleResults = true });
 
-                sb.Schema.EntityEvents<PredictorEntity>().PreUnsafeDelete += query => Database.Query<PredictSimpleResultEntity>().Where(a => query.Contains(a.Predictor.Entity)).UnsafeDelete();
+                sb.Schema.EntityEvents<PredictorEntity>().PreUnsafeDelete += query =>
+                {
+                    Database.Query<PredictSimpleResultEntity>().Where(a => query.Contains(a.Predictor.Entity)).UnsafeDelete();
+                    return null;
+                };
 
                 sb.Schema.WhenIncluded<ProcessEntity>(() =>
                 {

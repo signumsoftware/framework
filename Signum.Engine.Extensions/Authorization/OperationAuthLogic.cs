@@ -50,7 +50,11 @@ namespace Signum.Engine.Authorization
                      invalidateWithTypes: true,
                      coercer:  OperationCoercer.Instance);
 
-                sb.Schema.EntityEvents<RoleEntity>().PreUnsafeDelete += query => Database.Query<RuleOperationEntity>().Where(r => query.Contains(r.Role.Entity)).UnsafeDelete();
+                sb.Schema.EntityEvents<RoleEntity>().PreUnsafeDelete += query =>
+                {
+                    Database.Query<RuleOperationEntity>().Where(r => query.Contains(r.Role.Entity)).UnsafeDelete();
+                    return null;
+                };
 
                 AuthLogic.ExportToXml += exportAll => cache.ExportXml("Operations", "Operation", s => s.operation.Key + "/" + s.type?.ToTypeEntity().CleanName, b => b.ToString(),
                     exportAll ? AllOperationTypes() : null);

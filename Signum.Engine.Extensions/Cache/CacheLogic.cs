@@ -430,10 +430,10 @@ namespace Signum.Engine.Cache
                     if (ident.IsGraphModified)
                         DisableAndInvalidate(withUpdates: true); //Even if new, loading the cache afterwars will Timeout
                 };
-                ee.PreUnsafeDelete += query => DisableAndInvalidate(withUpdates: false);
-                ee.PreUnsafeUpdate += (update, entityQuery) => DisableAndInvalidate(withUpdates: true);
+                ee.PreUnsafeDelete += query => { DisableAndInvalidate(withUpdates: false); return null; };
+                ee.PreUnsafeUpdate += (update, entityQuery) => { DisableAndInvalidate(withUpdates: true); return null; };
                 ee.PreUnsafeInsert += (query, constructor, entityQuery) => { DisableAndInvalidate(withUpdates: constructor.Body.Type.IsInstantiationOf(typeof(MListElement<,>))); return constructor; };
-                ee.PreUnsafeMListDelete += (mlistQuery, entityQuery) => DisableAndInvalidate(withUpdates: true);
+                ee.PreUnsafeMListDelete += (mlistQuery, entityQuery) => { DisableAndInvalidate(withUpdates: true); return null; };
                 ee.PreBulkInsert += inMListTable => DisableAndInvalidate(withUpdates: inMListTable);
             }
 
