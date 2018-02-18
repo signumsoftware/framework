@@ -36,6 +36,7 @@ export default class EntityLink extends React.Component<EntityLinkProps>{
     }
 
     handleClick = (event: React.MouseEvent<any>) => {
+       
 
         const lite = this.props.lite;
 
@@ -43,11 +44,17 @@ export default class EntityLink extends React.Component<EntityLinkProps>{
 
         const avoidPopup = s != undefined && s.avoidPopup;
 
-        if (avoidPopup || event.ctrlKey || event.button == 1)
+        if (event.ctrlKey || event.button == 1) {
+            event.preventDefault();
+            window.open(Navigator.navigateRoute(lite));
             return;
+        }
+
+        if (avoidPopup) {
+            return; //just go
+        }
 
         event.preventDefault();
-
         Navigator.navigate(lite, { getViewPromise: this.props.getViewPromise }).then(() => {
             this.props.onNavigated && this.props.onNavigated(lite);
         }).done();
