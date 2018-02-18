@@ -297,7 +297,7 @@ namespace Signum.Engine.Migrations
 
                     Console.WriteLine();
 
-                    throw new MigrationException();
+                    throw new MigrationException(ex.Message, ex);
                 }
             }
         }

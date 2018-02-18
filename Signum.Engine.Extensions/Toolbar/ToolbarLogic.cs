@@ -109,6 +109,7 @@ namespace Signum.Engine.Toolbar
                 sb.Schema.EntityEvents<T>().PreUnsafeDelete += query =>
                 {
                     Database.MListQuery((ToolbarEntity tb) => tb.Elements).Where(mle => query.Contains((T)mle.Element.Content.Entity)).UnsafeDeleteMList();
+                    return null;
                 };
 
                 sb.Schema.Table<T>().PreDeleteSqlSync += arg =>
@@ -127,6 +128,7 @@ namespace Signum.Engine.Toolbar
                 sb.Schema.EntityEvents<T>().PreUnsafeDelete += query =>
                 {
                     Database.MListQuery((ToolbarMenuEntity tb) => tb.Elements).Where(mle => query.Contains((T)mle.Element.Content.Entity)).UnsafeDeleteMList();
+                    return null;
                 };
 
                 sb.Schema.Table<T>().PreDeleteSqlSync += arg =>

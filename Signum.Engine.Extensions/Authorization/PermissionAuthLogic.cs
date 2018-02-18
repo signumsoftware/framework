@@ -84,7 +84,11 @@ namespace Signum.Engine.Authorization
                     merger: new PermissionMerger(),
                     invalidateWithTypes: false);
 
-                sb.Schema.EntityEvents<RoleEntity>().PreUnsafeDelete += query => Database.Query<RulePermissionEntity>().Where(r => query.Contains(r.Role.Entity)).UnsafeDelete();
+                sb.Schema.EntityEvents<RoleEntity>().PreUnsafeDelete += query =>
+                {
+                    Database.Query<RulePermissionEntity>().Where(r => query.Contains(r.Role.Entity)).UnsafeDelete();
+                    return null;
+                };
 
                 RegisterPermissions(BasicPermission.AdminRules, 
                     BasicPermission.AutomaticUpgradeOfProperties,

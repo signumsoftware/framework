@@ -69,8 +69,7 @@ export class DynamicTypeDefinitionComponent extends React.Component<DynamicTypeD
                 this.setState({ typeEntity: undefined });
             else
                 Navigator.API.getType(props.dynamicType.typeName!)
-                    .then(te => this.setState({ typeEntity: toLite(te) }))
-                    .catch(e => this.setState({ typeEntity: false }))
+                    .then(te => this.setState({ typeEntity: te ? toLite(te) : false }))
                     .done();
         } else {
             this.setState({ typeEntity: undefined });

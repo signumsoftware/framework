@@ -17,6 +17,7 @@ using Signum.Entities.Basics;
 using Signum.Entities.Alerts;
 using System.Linq.Expressions;
 using Signum.Engine.Extensions.Basics;
+using Signum.Engine.Basics;
 
 namespace Signum.Engine.Alerts
 {
@@ -145,6 +146,14 @@ namespace Signum.Engine.Alerts
                 return tr.Commit(alerta);
             }
         }
+
+        public static void RegisterUserTypeCondition(SchemaBuilder sb, TypeConditionSymbol typeCondition)
+        {
+            sb.Schema.Settings.AssertImplementedBy((AlertEntity a) => a.CreatedBy, typeof(UserEntity));
+
+            TypeConditionLogic.RegisterCompile<AlertEntity>(typeCondition,
+                a => a.CreatedBy.RefersTo(UserEntity.Current));
+        }
     }
 
     public class AlertGraph : Graph<AlertEntity, AlertState>
@@ -212,6 +221,4 @@ namespace Signum.Engine.Alerts
             }.Register();
         }
     }
-
- 
 }

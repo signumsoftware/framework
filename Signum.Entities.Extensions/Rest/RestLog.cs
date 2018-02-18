@@ -44,6 +44,9 @@ namespace Signum.Entities.Rest
         [NotNullable, SqlDbType(Size = 100)]
         public string Controller { get; set; }
 
+        [Nullable, SqlDbType(Size = 100)]
+        public string ControllerName { get; set; }
+
         [NotNullable, SqlDbType(Size = 100)]
         public string Action { get; set; }
 
