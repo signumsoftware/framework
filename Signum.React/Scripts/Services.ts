@@ -285,20 +285,28 @@ export namespace SessionSharing {
     export let avoidSharingSession = false;
 
     //localStorage: Domain+Browser
-    //sessionStorage: Browser tab
+    //sessionStorage: Browser tab, copied when Ctrl+Click from another tab, but not windows.open or just paste link
 
     var _appName: string = "";
 
+    export function getAppName() {
+        return _appName;
+    }
+
     export function setAppNameAndRequestSessionStorage(appName: string) {
         _appName = appName;
-        if (!sessionStorage.length) {
-            localStorage.setItem('requestSessionStorage' + _appName, new Date().toString());
-            localStorage.removeItem('requestSessionStorage' + _appName);
+        if (!sessionStorage.length) { //Copied from anote
+            requestSessionStorageFromAnyTab();
         }
+    }
+    
+    function requestSessionStorageFromAnyTab() {
+        localStorage.setItem('requestSessionStorage' + _appName, new Date().toString());
+        localStorage.removeItem('requestSessionStorage' + _appName);
     }
 
     //http://blog.guya.net/2015/06/12/sharing-sessionstorage-between-tabs-for-secure-multi-tab-authentication/
-    //To share session storage between tabs
+    //To share session storage between tabs for new tabs WITHOUT windows.opener
     window.addEventListener("storage", se => {
 
         if (avoidSharingSession)
@@ -312,13 +320,14 @@ export namespace SessionSharing {
 
         } else if (se.key == ('responseSessionStorage' + _appName) && !sessionStorage.length) {
             // sessionStorage is empty -> fill it
-
             if (se.newValue) {
                 const data = JSON.parse(se.newValue);
 
                 for (let key in data) {
                     sessionStorage.setItem(key, data[key]);
                 }
+
+                console.log("SessionStorage taken from any tab");
             }
         }
     });

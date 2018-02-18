@@ -642,7 +642,8 @@ export function createBinding(parentValue: any, lambdaMembers: LambdaMember[]): 
 const functionRegex = /^function\s*\(\s*([$a-zA-Z_][0-9a-zA-Z_$]*)\s*\)\s*{\s*(\"use strict\"\;)?\s*return\s*([^;]*)\s*;?\s*}$/;
 const lambdaRegex = /^\s*\(?\s*([$a-zA-Z_][0-9a-zA-Z_$]*)\s*\)?\s*=>\s*{?\s*(return\s+)?([^;]*)\s*;?\s*}?$/;
 const memberRegex = /^(.*)\.([$a-zA-Z_][0-9a-zA-Z_$]*)$/;
-const memberIndexerRegex = /^(.*)\["([$a-zA-Z_][0-9a-zA-Z_$]*)"\]$/; //Necessary for some crazy minimizers
+const memberIndexerRegex = /^(.*)\["([$a-zA-Z_][0-9a-zA-Z_$]*)"\]$/; 
+const mixinMemberRegex = /^(.*)\.mixins\["([$a-zA-Z_][0-9a-zA-Z_$]*)"\]$/; //Necessary for some crazy minimizers
 const indexRegex = /^(.*)\[(\d+)\]$/;
 
 export function getLambdaMembers(lambda: Function): LambdaMember[]{
@@ -660,7 +661,11 @@ export function getLambdaMembers(lambda: Function): LambdaMember[]{
 
     while (body != parameter) {
         let m: RegExpExecArray | null;
-        if (m = memberRegex.exec(body) || memberIndexerRegex.exec(body)) {
+        if (m = mixinMemberRegex.exec(body)) {
+            result.push({ name: m[2], type: "Mixin" });
+            body = m[1];
+        }
+        else if (m = memberRegex.exec(body) || memberIndexerRegex.exec(body)) {
             result.push({ name: m[2], type: "Member" });
             body = m[1];
         }
