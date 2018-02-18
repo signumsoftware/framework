@@ -47,6 +47,7 @@ export module AlertMessage {
 
 export module AlertOperation {
     export const CreateAlertFromEntity : Entities.ConstructSymbol_From<AlertEntity, Entities.Entity> = registerSymbol("Operation", "AlertOperation.CreateAlertFromEntity");
+    export const Create : Entities.ConstructSymbol_Simple<AlertEntity> = registerSymbol("Operation", "AlertOperation.Create");
     export const Save : Entities.ExecuteSymbol<AlertEntity> = registerSymbol("Operation", "AlertOperation.Save");
     export const Delay : Entities.ExecuteSymbol<AlertEntity> = registerSymbol("Operation", "AlertOperation.Delay");
     export const Attend : Entities.ExecuteSymbol<AlertEntity> = registerSymbol("Operation", "AlertOperation.Attend");

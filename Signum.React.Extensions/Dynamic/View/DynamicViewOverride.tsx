@@ -91,15 +91,15 @@ export default class DynamicViewOverrideComponent extends React.Component<Dynami
     }
 
     handleRemoveClick = (lambda: string) => {
-        setTimeout(() => this.showPropmt("Remove", `vr.remove(${lambda})`), 0);
+        setTimeout(() => this.showPropmt("Remove", `vr.removeLine(${lambda})`), 0);
     }
 
     handleInsertBeforeClick = (lambda: string) => {
-        setTimeout(() => this.showPropmt("InsertBefore", `vr.insertBefore(${lambda}))}, yourElement);`), 0);
+        setTimeout(() => this.showPropmt("InsertBefore", `vr.insertBeforeLine(${lambda}, ctx => [yourElement]);`), 0);
     }
 
     handleInsertAfterClick = (lambda: string) => {
-        setTimeout(() => this.showPropmt("InsertAfter", `vr.insertAfter(${lambda}, yourElement);`), 0);
+        setTimeout(() => this.showPropmt("InsertAfter", `vr.insertAfterLine(${lambda}, ctx => [yourElement]);`), 0);
     }
 
     handleRenderContextualMenu = (pr: PropertyRoute) => {
@@ -124,7 +124,7 @@ export default class DynamicViewOverrideComponent extends React.Component<Dynami
             return;
 
         const expression = TypeHelpComponent.getExpression("o", pr, "TypeScript");
-        const text = `React.createElement(${node.kind}, { ctx: vr.ctx.subCtx(o => ${expression}) })`;
+        const text = `modules.React.createElement(${node.kind}, { ctx: ctx.subCtx(o => ${expression}) })`;
 
         ValueLineModal.show({
             type: { name: "string" },
@@ -286,7 +286,7 @@ export default class DynamicViewOverrideComponent extends React.Component<Dynami
     }
 
     handleViewNameClick = (viewName: string) => {
-        this.showPropmt("View", `React.createElement(DynamicViewPart, {ctx: vr.ctx, viewName:"${viewName}"})`);
+        this.showPropmt("View", `modules.React.createElement(RenderEntity, {ctx: ctx, getViewPromise: ctx => "${viewName}"})`);
     }
 
     renderViewNameButtons() {
@@ -307,7 +307,7 @@ export default class DynamicViewOverrideComponent extends React.Component<Dynami
 
     handleExpressionClick = (member: TypeHelpClient.TypeMemberHelp) => {
         var paramValue = member.cleanTypeName ? `queryName : "${member.cleanTypeName}Entity"` : `valueToken: "Entity.${member.name}"`;
-        this.showPropmt("Expression", `React.createElement(ValueSearchControlLine, {ctx: vr.ctx, ${paramValue}})`);
+        this.showPropmt("Expression", `modules.React.createElement(ValueSearchControlLine, {ctx: ctx, ${paramValue}})`);
     }
        
     renderExpressionsButtons() {

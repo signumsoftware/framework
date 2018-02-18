@@ -113,6 +113,7 @@ namespace Signum.Entities.Alerts
     public static class AlertOperation
     {
         public static ConstructSymbol<AlertEntity>.From<Entity> CreateAlertFromEntity;
+        public static ConstructSymbol<AlertEntity>.Simple Create;
         public static ExecuteSymbol<AlertEntity> Save;
         public static ExecuteSymbol<AlertEntity> Delay;
         public static ExecuteSymbol<AlertEntity> Attend;

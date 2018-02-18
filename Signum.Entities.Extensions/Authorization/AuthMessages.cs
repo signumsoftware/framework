@@ -66,6 +66,7 @@ namespace Signum.Entities.Authorization
         Login,
         [Description("Logout")]
         Logout,
+        SwitchUser,
         NewPassword,
         [Description("Not allowed to save this {0} while offline")]
         NotAllowedToSaveThis0WhileOffline,
