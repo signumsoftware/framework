@@ -59,11 +59,7 @@ export default class ShowCodeModal extends React.Component<ShowCodeModalProps, {
 
 function renderFile(typeName: string, node: BaseNode): string {
 
-    var cc = new NodeUtils.CodeContext();
-    cc.usedNames = [];
-    cc.imports = [];
-    cc.assignments = {};
-    cc.ctxName = "ctx";
+    var cc = new NodeUtils.CodeContext("ctx", [], {}, []);
 
     var text = NodeUtils.renderCode(node, cc).indent(12);
 
