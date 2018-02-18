@@ -31,12 +31,9 @@ export function getEntityOperationButtons(ctx: ButtonsContext): Array<React.Reac
         .map(oi => {
             const eos = getSettings(oi.key) as EntityOperationSettings<Entity>;
 
-            const eoc = new EntityOperationContext<Entity>();
-            eoc.entity = ctx.pack.entity as Entity;
-            eoc.frame = ctx.frame;
+            const eoc = new EntityOperationContext<Entity>(ctx.frame, ctx.pack.entity as Entity, oi);
             eoc.tag = ctx.tag;
             eoc.canExecute = ctx.pack.canExecute[oi.key];
-            eoc.operationInfo = oi;
             eoc.settings = eos;
 
             return eoc;
