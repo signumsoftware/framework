@@ -147,12 +147,20 @@ namespace Signum.Engine.Alerts
             }
         }
 
-        public static void RegisterUserTypeCondition(SchemaBuilder sb, TypeConditionSymbol typeCondition)
+        public static void RegisterCreatorTypeCondition(SchemaBuilder sb, TypeConditionSymbol typeCondition)
         {
             sb.Schema.Settings.AssertImplementedBy((AlertEntity a) => a.CreatedBy, typeof(UserEntity));
 
             TypeConditionLogic.RegisterCompile<AlertEntity>(typeCondition,
                 a => a.CreatedBy.RefersTo(UserEntity.Current));
+        }
+
+        public static void RegisterRecipientTypeCondition(SchemaBuilder sb, TypeConditionSymbol typeCondition)
+        {
+            sb.Schema.Settings.AssertImplementedBy((AlertEntity a) => a.Recipient, typeof(UserEntity));
+
+            TypeConditionLogic.RegisterCompile<AlertEntity>(typeCondition,
+                a => a.Recipient.RefersTo(UserEntity.Current));
         }
     }
 
