@@ -11,7 +11,7 @@ namespace Signum.Engine.SchemaInfoTables
 {
 #pragma warning disable 649
 
-    [TableName("objects", SchemaName= "sys")]
+    [TableName("sys.objects")]
     public class SysObjects : IView
     {
         [ViewPrimaryKey]
@@ -22,7 +22,7 @@ namespace Signum.Engine.SchemaInfoTables
         public string name;
     }
 
-    [TableName("servers", SchemaName = "sys")]
+    [TableName("sys.servers")]
     public class SysServers : IView
     {
         [ViewPrimaryKey]
@@ -30,7 +30,7 @@ namespace Signum.Engine.SchemaInfoTables
         public string name;
     }
 
-    [TableName("databases", SchemaName = "sys")]
+    [TableName("sys.databases")]
     public class SysDatabases : IView
     {
         [ViewPrimaryKey]
@@ -45,7 +45,7 @@ namespace Signum.Engine.SchemaInfoTables
     }
 
 
-    [TableName("server_principals", SchemaName = "sys")]
+    [TableName("sys.server_principals")]
     public class SysServerPrincipals : IView
     {
         [ViewPrimaryKey]
@@ -55,7 +55,7 @@ namespace Signum.Engine.SchemaInfoTables
         public string type_desc;
     }
 
-    [TableName("database_principals", SchemaName = "sys")]
+    [TableName("sys.database_principals")]
     public class SysDatabasePrincipals : IView
     {
         [ViewPrimaryKey]
@@ -65,7 +65,7 @@ namespace Signum.Engine.SchemaInfoTables
         public string type_desc;
     }
 
-    [TableName("schemas", SchemaName = "sys")]
+    [TableName("sys.schemas")]
     public class SysSchemas : IView
     {
         [ViewPrimaryKey]
@@ -81,7 +81,7 @@ namespace Signum.Engine.SchemaInfoTables
         }
     }
 
-    [TableName("tables", SchemaName = "sys")]
+    [TableName("sys.tables")]
     public class SysTables : IView
     {
         public string name;
@@ -155,7 +155,7 @@ namespace Signum.Engine.SchemaInfoTables
         }
     }
 
-    [TableName("views", SchemaName = "sys")]
+    [TableName("sys.views")]
     public class SysViews : IView
     {
         public string name;
@@ -181,7 +181,7 @@ namespace Signum.Engine.SchemaInfoTables
         }
     }
 
-    [TableName("columns", SchemaName = "sys")]
+    [TableName("sys.columns")]
     public class SysColumns : IView
     {
         public string name;
@@ -195,10 +195,18 @@ namespace Signum.Engine.SchemaInfoTables
         public int max_length;
         public int precision;
         public int scale;
-        public bool is_identity; 
+        public bool is_identity;
+
+        static Expression<Func<SysColumns, SysTypes>> TypeExpression =
+            c => Database.View<SysTypes>().SingleOrDefaultEx(a => a.system_type_id == c.system_type_id);
+        [ExpressionField]
+        public SysTypes Type()
+        {
+            return TypeExpression.Evaluate(this);
+        }
     }
 
-    [TableName("default_constraints", SchemaName = "sys")]
+    [TableName("sys.default_constraints")]
     public class SysDefaultConstraints : IView
     {
         public string name;
@@ -209,7 +217,7 @@ namespace Signum.Engine.SchemaInfoTables
         public bool is_system_named;
     }
 
-    [TableName("types", SchemaName = "sys")]
+    [TableName("sys.types")]
     public class SysTypes : IView
     {
         [ViewPrimaryKey]
@@ -218,7 +226,7 @@ namespace Signum.Engine.SchemaInfoTables
         public string name;
     }
 
-    [TableName("key_constraints", SchemaName = "sys")]
+    [TableName("sys.key_constraints")]
     public class SysKeyConstraints : IView
     {
         public string name;
@@ -237,7 +245,7 @@ namespace Signum.Engine.SchemaInfoTables
         }
     }
 
-    [TableName("foreign_keys", SchemaName = "sys")]
+    [TableName("sys.foreign_keys")]
     public class SysForeignKeys : IView
     {
         [ViewPrimaryKey]
@@ -266,7 +274,7 @@ namespace Signum.Engine.SchemaInfoTables
         }
     }
 
-    [TableName("foreign_key_columns", SchemaName = "sys")]
+    [TableName("sys.foreign_key_columns")]
     public class SysForeignKeyColumns : IView
     {
         public int constraint_object_id;
@@ -277,7 +285,7 @@ namespace Signum.Engine.SchemaInfoTables
         public int referenced_column_id;
     }
 
-    [TableName("indexes", SchemaName = "sys")]
+    [TableName("sys.indexes")]
     public class SysIndexes : IView
     {
         [ViewPrimaryKey]
@@ -314,7 +322,7 @@ namespace Signum.Engine.SchemaInfoTables
         }
     }
 
-    [TableName("index_columns", SchemaName = "sys")]
+    [TableName("sys.index_columns")]
     public class SysIndexColumn : IView
     {
         public int object_id;
@@ -325,7 +333,7 @@ namespace Signum.Engine.SchemaInfoTables
         public bool is_descending_key;
     }
 
-    [TableName("stats", SchemaName = "sys")]
+    [TableName("sys.stats")]
     public class SysStats : IView
     {
         [ViewPrimaryKey]
@@ -345,7 +353,7 @@ namespace Signum.Engine.SchemaInfoTables
         }
     }
 
-    [TableName("stats_columns", SchemaName = "sys")]
+    [TableName("sys.stats_columns")]
     public class SysStatsColumn : IView
     {
         public int object_id;
@@ -354,14 +362,14 @@ namespace Signum.Engine.SchemaInfoTables
         public int column_id;
     }
 
-    [TableName("extended_properties", SchemaName = "sys")]
+    [TableName("sys.extended_properties")]
     public class SysExtendedProperties : IView
     {
         public int major_id;
         public string name;
     }
 
-    [TableName("sql_modules", SchemaName = "sys")]
+    [TableName("sys.sql_modules")]
     public class SysSqlModules : IView
     {
         [ViewPrimaryKey]
@@ -369,7 +377,7 @@ namespace Signum.Engine.SchemaInfoTables
         public string definition; 
     }
 
-    [TableName("procedures", SchemaName = "sys")]
+    [TableName("sys.procedures")]
     public class SysProcedures : IView
     {
         [ViewPrimaryKey]
@@ -387,7 +395,7 @@ namespace Signum.Engine.SchemaInfoTables
         }
     }
 
-    [TableName("service_queues", SchemaName = "sys")]
+    [TableName("sys.service_queues")]
     public class SysServiceQueues : IView
     {
         [ViewPrimaryKey]
@@ -405,7 +413,7 @@ namespace Signum.Engine.SchemaInfoTables
         }
     }
 
-    [TableName("partitions", SchemaName = "sys")]
+    [TableName("sys.partitions")]
     public class SysPartitions : IView
     {
         [ViewPrimaryKey]
@@ -423,7 +431,7 @@ namespace Signum.Engine.SchemaInfoTables
         }
     }
 
-    [TableName("allocation_units", SchemaName = "sys")]
+    [TableName("sys.allocation_units")]
     public class SysAllocationUnits : IView
     {
         [ViewPrimaryKey]

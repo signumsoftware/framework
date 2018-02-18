@@ -309,7 +309,7 @@ namespace Signum.Engine.CodeGeneration
 
             sb.AppendLine();
 
-            string operationSettings = WritetOperationSettings(mod);
+            string operationSettings = WriteOperationSettings(mod);
             if (operationSettings != null)
                 sb.Append(operationSettings.Indent(4));
             
@@ -335,7 +335,7 @@ namespace Signum.Engine.CodeGeneration
         {
             var v = GetVarName(type);
 
-            return "Navigator.addSettings(new EntitySettings({0}, {1} => new ViewPromise(resolve => require(['./Templates/{2}'], resolve))));".FormatWith(
+            return "Navigator.addSettings(new EntitySettings({0}, {1} => import('./Templates/{2}')));".FormatWith(
                 type.Name, v, GetViewName(type));
         }
 
@@ -344,7 +344,7 @@ namespace Signum.Engine.CodeGeneration
             return type.Name.Substring(0, 1).ToLower();
         }
 
-        protected virtual string WritetOperationSettings(Module mod)
+        protected virtual string WriteOperationSettings(Module mod)
         {
             StringBuilder sb = new StringBuilder();
             sb.AppendLine("//Operations.addSettings(new EntityOperationSettings(MyEntityOperations.Save, {}));");
@@ -366,7 +366,7 @@ namespace Signum.Engine.CodeGeneration
             sb.AppendLine("import * as React from 'react'");
             sb.AppendLine("import { "  + type.Name + " } from '../" + type.Namespace + "'");
             sb.AppendLine("import { TypeContext, ValueLine, EntityLine, EntityCombo, EntityList, EntityDetail, EntityStrip, EntityRepeater, FormGroup, FormGroupStyle, FormGroupSize } from '" + frp + "Signum.React/Scripts/Lines'");
-            sb.AppendLine("import { SearchControl, CountSearchControl, FilterOperation, OrderType, PaginationMode } from '" + frp + "Signum.React/Scripts/Search'");
+            sb.AppendLine("import { SearchControl, ValueSearchControl, FilterOperation, OrderType, PaginationMode } from '" + frp + "Signum.React/Scripts/Search'");
             
             var v = GetVarName(type);
 
@@ -375,7 +375,7 @@ namespace Signum.Engine.CodeGeneration
 
 
             sb.AppendLine();
-            sb.AppendLine("export default class {0} extends React.Component<{{ ctx: TypeContext<{1}> }}, void> {{".FormatWith(GetViewName(type), type.Name));
+            sb.AppendLine("export default class {0} extends React.Component<{{ ctx: TypeContext<{1}> }}> {{".FormatWith(GetViewName(type), type.Name));
             sb.AppendLine("");
             sb.AppendLine("    render() {");
             sb.AppendLine("        var ctx = this.props.ctx;");
@@ -419,7 +419,7 @@ namespace Signum.Engine.CodeGeneration
             var elementType = pi.PropertyType.ElementType().CleanType();
 
             if (!(elementType.IsLite() || elementType.IsModifiableEntity()))
-                return "{ /* {0} not supported */ }".FormatWith(pi.PropertyType.TypeName());
+                return $"{{ /* {pi.PropertyType.TypeName()} not supported */ }}";
 
             var eka = elementType.GetCustomAttribute<EntityKindAttribute>();
 

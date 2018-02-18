@@ -16,6 +16,7 @@ using System.Data.Common;
 using System.Data.SqlClient;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Text;
 
 namespace Signum.Engine
 {
@@ -31,6 +32,50 @@ namespace Signum.Engine
             {
                 command.ExecuteLeaves();
             }
+        }
+
+        public static string GenerateViewCodes(params string[] tableNames) => tableNames.ToString(tn => GenerateViewCode(tn), "\r\n\r\n");
+
+        public static string GenerateViewCode(string tableName) => GenerateViewCode(ObjectName.Parse(tableName));
+
+        public static string GenerateViewCode(ObjectName tableName)
+        {
+            var columns =
+                (from t in Database.View<SysTables>()
+                 where t.name == tableName.Name && t.Schema().name == tableName.Schema.Name
+                 from c in t.Columns()
+                 select new DiffColumn
+                 {
+                     Name = c.name,
+                     SqlDbType = SchemaSynchronizer.ToSqlDbType(c.Type().name),
+                     UserTypeName = null,
+                     Identity = c.is_identity,
+                     Nullable = c.is_nullable,
+                 }).ToList();
+
+            StringBuilder sb = new StringBuilder();
+            sb.AppendLine($@"[TableName(""{tableName.ToString()}"")]");
+            sb.AppendLine($"public class {tableName.Name} : IView");
+            sb.AppendLine(@"{");
+            foreach (var c in columns)
+            {
+                sb.Append(GenerateColumnCode(c).Indent(4));
+            }
+            sb.AppendLine(@"}");
+            return sb.ToString();
+        }
+
+        private static string GenerateColumnCode(DiffColumn c)
+        {
+            var type = CodeGeneration.CodeGenerator.Entities.GetValueType(c);
+            if (c.Nullable)
+                type = type.Nullify();
+
+            StringBuilder sb = new StringBuilder();
+            if (c.Identity)
+                sb.AppendLine("[ViewPrimaryKey]");
+            sb.AppendLine($"public {type.TypeName()} {c.Name};");
+            return sb.ToString();
         }
 
         public static SqlPreCommand TotalGenerationScript()

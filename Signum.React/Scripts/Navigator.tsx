@@ -729,7 +729,7 @@ export module API {
         return ajaxPost<void>({ url: "~/api/validateEntity" }, entity);
     }
 
-    export function getType(typeName: string): Promise<TypeEntity> {
+    export function getType(typeName: string): Promise<TypeEntity | null> {
 
         return ajaxGet<TypeEntity>({ url: `~/api/reflection/typeEntity/${typeName}` });
     }

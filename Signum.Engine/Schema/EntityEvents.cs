@@ -38,28 +38,37 @@ namespace Signum.Engine.Maps
             return FilterQuery.GetInvocationListTyped().Select(f => f()).ToList();
         }
 
-        internal void OnPreUnsafeDelete(IQueryable<T> entityQuery)
+        internal IDisposable OnPreUnsafeDelete(IQueryable<T> entityQuery)
         {
+            IDisposable result = null;
             if (PreUnsafeDelete != null)
                 foreach (var action in PreUnsafeDelete.GetInvocationListTyped().Reverse())
-                    action(entityQuery);
+                    result = Disposable.Combine(result, action(entityQuery));
+
+            return result;
         }
 
-        internal void OnPreUnsafeMListDelete(IQueryable mlistQuery, IQueryable<T> entityQuery)
+        internal IDisposable OnPreUnsafeMListDelete(IQueryable mlistQuery, IQueryable<T> entityQuery)
         {
+            IDisposable result = null;
             if (PreUnsafeMListDelete != null)
                 foreach (var action in PreUnsafeMListDelete.GetInvocationListTyped().Reverse())
-                    action(mlistQuery, entityQuery);
+                    result = Disposable.Combine(result, action(mlistQuery, entityQuery));
+
+            return result;
         }
 
-        void IEntityEvents.OnPreUnsafeUpdate(IUpdateable update)
+        IDisposable IEntityEvents.OnPreUnsafeUpdate(IUpdateable update)
         {
+            IDisposable result = null;
             if (PreUnsafeUpdate != null)
             {
                 var query = update.EntityQuery<T>();
                 foreach (var action in PreUnsafeUpdate.GetInvocationListTyped().Reverse())
-                    action(update, query);
+                    result = Disposable.Combine(result, action(update, query));
             }
+
+            return result;
         }
 
         LambdaExpression IEntityEvents.OnPreUnsafeInsert(IQueryable query, LambdaExpression constructor, IQueryable entityQuery)
@@ -138,9 +147,9 @@ namespace Signum.Engine.Maps
     public delegate FilterQueryResult<T> FilterQueryEventHandler<T>() where T : Entity;
     public delegate void AlternativeRetriveEventHandler<T>(PrimaryKey id, AlternativeRetrieveArgs<T> args) where T : Entity;
 
-    public delegate void PreUnsafeDeleteHandler<T>(IQueryable<T> entityQuery);
-    public delegate void PreUnsafeMListDeleteHandler<T>(IQueryable mlistQuery, IQueryable<T> entityQuery);
-    public delegate void PreUnsafeUpdateHandler<T>(IUpdateable update, IQueryable<T> entityQuery);
+    public delegate IDisposable PreUnsafeDeleteHandler<T>(IQueryable<T> entityQuery);
+    public delegate IDisposable PreUnsafeMListDeleteHandler<T>(IQueryable mlistQuery, IQueryable<T> entityQuery);
+    public delegate IDisposable PreUnsafeUpdateHandler<T>(IUpdateable update, IQueryable<T> entityQuery);
     public delegate LambdaExpression PreUnsafeInsertHandler<T>(IQueryable query, LambdaExpression constructor, IQueryable<T> entityQuery);
     public delegate void BulkInsetHandler<T>(bool inMListTable);
 
@@ -186,7 +195,7 @@ namespace Signum.Engine.Maps
 
         void OnRetrieved(Entity entity);
 
-        void OnPreUnsafeUpdate(IUpdateable update);
+        IDisposable OnPreUnsafeUpdate(IUpdateable update);
         LambdaExpression OnPreUnsafeInsert(IQueryable query, LambdaExpression constructor, IQueryable entityQuery);
         void OnPreBulkInsert(bool inMListTable);
 

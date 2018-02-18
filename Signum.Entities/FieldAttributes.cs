@@ -365,9 +365,13 @@ sb.Schema.Settings.FieldAttributes(({route.RootType.TypeName()} a) => a.{route.P
         public string DatabaseName { get; set; }
         public string ServerName { get; set; }
 
-        public TableNameAttribute(string name)
+        public TableNameAttribute(string fullName)
         {
-            this.Name = name;
+            var parts = fullName.Split('.');
+            this.Name = parts.ElementAtOrDefault(parts.Length - 1).Trim('[', ']');
+            this.SchemaName = parts.ElementAtOrDefault(parts.Length - 2)?.Trim('[', ']');
+            this.DatabaseName = parts.ElementAtOrDefault(parts.Length - 3)?.Trim('[', ']');
+            this.ServerName = parts.ElementAtOrDefault(parts.Length - 4)?.Trim('[', ']');
         }
     }
 

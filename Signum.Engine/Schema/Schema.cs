@@ -170,28 +170,31 @@ namespace Signum.Engine.Maps
             entityEventsGlobal.OnRetrieved(entity);
         }
 
-        internal void OnPreUnsafeDelete<T>(IQueryable<T> entityQuery) where T : Entity
+        internal IDisposable OnPreUnsafeDelete<T>(IQueryable<T> entityQuery) where T : Entity
         {
             AssertAllowed(typeof(T), inUserInterface: false);
 
             EntityEvents<T> ee = (EntityEvents<T>)entityEvents.TryGetC(typeof(T));
 
-            if (ee != null)
-                ee.OnPreUnsafeDelete(entityQuery);
+            if (ee == null)
+                return null;
+
+            return ee.OnPreUnsafeDelete(entityQuery);
         }
 
-        internal void OnPreUnsafeMListDelete<T>(IQueryable mlistQuery, IQueryable<T> entityQuery) where T : Entity
+        internal IDisposable OnPreUnsafeMListDelete<T>(IQueryable mlistQuery, IQueryable<T> entityQuery) where T : Entity
         {
             AssertAllowed(typeof(T), inUserInterface: false);
 
             EntityEvents<T> ee = (EntityEvents<T>)entityEvents.TryGetC(typeof(T));
 
-            if (ee != null)
-                ee.OnPreUnsafeMListDelete(mlistQuery, entityQuery);
+            if (ee == null)
+                return null;
+
+            return ee.OnPreUnsafeMListDelete(mlistQuery, entityQuery);
         }
-
-
-        internal void OnPreUnsafeUpdate(IUpdateable update)
+        
+        internal IDisposable OnPreUnsafeUpdate(IUpdateable update)
         {
             var type = update.EntityType;
             if (type.IsInstantiationOf(typeof(MListElement<,>)))
@@ -201,8 +204,10 @@ namespace Signum.Engine.Maps
 
             var ee = entityEvents.TryGetC(type);
 
-            if (ee != null)
-                ee.OnPreUnsafeUpdate(update);
+            if (ee == null)
+                return null;
+
+            return ee.OnPreUnsafeUpdate(update);
         }
 
         internal LambdaExpression OnPreUnsafeInsert(Type type, IQueryable query, LambdaExpression constructor, IQueryable entityQuery)

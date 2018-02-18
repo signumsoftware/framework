@@ -164,7 +164,7 @@ namespace Signum.Engine
 
                         var changes = Synchronizer.SynchronizeScript(Spacing.Simple, modelIxs, dif.Indices, 
                             createNew: null,
-                            removeOld: (i, dix) => dix.Columns.Any(removedColums.Contains) || dix.IsControlledIndex ? SqlBuilder.DropIndex(dif.Name, dix) : null,
+                            removeOld: (i, dix) => dix.Columns.Any(c => removedColums.Contains(c.ColumnName)) || dix.IsControlledIndex ? SqlBuilder.DropIndex(dif.Name, dix) : null,
                             mergeBoth: (i, mix, dix) => !dix.IndexEquals(dif, mix) ? SqlPreCommand.Combine(Spacing.Double, dix.IsPrimary ? DeleteAllForeignKey(dif.Name) : null, SqlBuilder.DropIndex(dif.Name, dix)) : null
                             );
 
@@ -227,7 +227,11 @@ namespace Signum.Engine
 
                                         difCol.ColumnEquals(tabCol, ignorePrimaryKey: true) ? null : SqlPreCommand.Combine(Spacing.Simple,
                                             tabCol.PrimaryKey && !difCol.PrimaryKey && dif.PrimaryKeyName != null ? SqlBuilder.DropPrimaryKeyConstraint(tab.Name) : null,
-                                            SqlBuilder.AlterTableAlterColumn(tab, tabCol),
+                                        difCol.CompatibleTypes(tabCol) ? SqlBuilder.AlterTableAlterColumn(tab, tabCol):
+                                                SqlPreCommand.Combine(Spacing.Simple, 
+                                                    SqlBuilder.AlterTableDropColumn(tab, tabCol.Name),
+                                                    SqlBuilder.AlterTableAddColumn(tab, tabCol)) 
+                                            ,
                                             tabCol.SqlDbType == SqlDbType.NVarChar && difCol.SqlDbType == SqlDbType.NChar ? SqlBuilder.UpdateTrim(tab, tabCol) : null),
 
                                         difCol.DefaultEquals(tabCol) ? null : SqlPreCommand.Combine(Spacing.Simple,
@@ -441,7 +445,7 @@ FROM {oldTable.Name}");
 
                     var news = newIx.Columns.Select(c => diff.Columns.TryGetC(c.Name)?.Name).NotNull().ToHashSet();
 
-                    if (!news.SetEquals(oldIx.Columns))
+                    if (!news.SetEquals(oldIx.Columns.Select(a => a.ColumnName)))
                         return false;
 
                     var oldWhere = oldIx.IndexName.TryAfter("__");
@@ -561,7 +565,7 @@ JOIN {3} {4} ON {2}.{0} = {4}.Id".FormatWith(tabCol.Name,
                                                   Columns = (from ic in i.IndexColumns()
                                                              join c in t.Columns() on ic.column_id equals c.column_id
                                                              orderby ic.key_ordinal
-                                                             select c.name).ToList()
+                                                             select new DiffIndexColumn { ColumnName =  c.name, IsIncluded = ic.is_included_column  }).ToList()
                                               }).ToList(),
 
                              ViewIndices = (from v in Database.View<SysViews>()
@@ -575,7 +579,7 @@ JOIN {3} {4} ON {2}.{0} = {4}.Id".FormatWith(tabCol.Name,
                                                 Columns = (from ic in i.IndexColumns()
                                                            join c in v.Columns() on ic.column_id equals c.column_id
                                                            orderby ic.key_ordinal
-                                                           select c.name).ToList()
+                                                           select new DiffIndexColumn { ColumnName = c.name, IsIncluded = ic.is_included_column }).ToList()
 
                                             }).ToList(),
 
@@ -803,6 +807,12 @@ EXEC(@{1})".FormatWith(databaseName, variableName));
         public List<string> Columns;
     }
 
+    public class DiffIndexColumn
+    {
+        public string ColumnName;
+        public bool IsIncluded;
+    }
+
     public class DiffIndex
     {
         public bool IsUnique;
@@ -812,7 +822,7 @@ EXEC(@{1})".FormatWith(databaseName, variableName));
         public string FilterDefinition;
         public DiffIndexType? Type;
 
-        public List<string> Columns;
+        public List<DiffIndexColumn> Columns;
 
         public override string ToString()
         {
@@ -849,14 +859,27 @@ EXEC(@{1})".FormatWith(databaseName, variableName));
 
         bool ColumnsChanged(DiffTable dif, Index mix)
         {
-            if (this.Columns.Count != mix.Columns.Length)
+            bool sameCols = IdenticalColumns(dif, mix.Columns, this.Columns.Where(a => !a.IsIncluded).ToList());
+            bool sameIncCols = IdenticalColumns(dif, mix.IncludeColumns, this.Columns.Where(a => a.IsIncluded).ToList());
+
+            if (sameIncCols && sameIncCols)
+                return false;
+
+            return true;
+        }
+
+        private static bool IdenticalColumns(DiffTable dif, IColumn[] modColumns, List<DiffIndexColumn> diffColumns)
+        {
+            if ((modColumns?.Length ?? 0) != diffColumns.Count)
+                return false;
+
+            if (diffColumns.Count == 0)
                 return true;
 
-            var difColumns = this.Columns.Select(cn => dif.Columns.Values.SingleOrDefault(dc => dc.Name == cn)).ToList();
+            var difColumns = diffColumns.Select(cn => dif.Columns.Values.SingleOrDefault(dc => dc.Name == cn.ColumnName)).ToList(); //Ny old name
 
-            var perfect = difColumns.ZipOrDefault(mix.Columns, (dc, mc) => dc != null && mc != null && dc.ColumnEquals(mc, ignorePrimaryKey: true)).All(a => a);
-
-            return !perfect;
+            var perfect = difColumns.ZipOrDefault(modColumns, (dc, mc) => dc != null && mc != null && dc.ColumnEquals(mc, ignorePrimaryKey: true)).All(a => a);
+            return perfect;
         }
 
         public bool IsControlledIndex
@@ -961,6 +984,204 @@ EXEC(@{1})".FormatWith(databaseName, variableName));
         public override string ToString()
         {
             return this.Name;
+        }
+
+        internal bool CompatibleTypes(IColumn tabCol)
+        {
+            //https://docs.microsoft.com/en-us/sql/t-sql/functions/cast-and-convert-transact-sql
+            switch (this.SqlDbType)
+            {
+                //BLACKLIST!!
+                case SqlDbType.Binary:
+                case SqlDbType.VarBinary:                    
+                    switch (tabCol.SqlDbType)
+                    {
+                        case SqlDbType.Float:
+                        case SqlDbType.Real:
+                        case SqlDbType.NText:
+                        case SqlDbType.Text:
+                            return false;
+                        default:
+                            return true;
+                    }
+
+                case SqlDbType.Char:
+                case SqlDbType.VarChar:
+                    return true;
+
+                case SqlDbType.NChar:
+                case SqlDbType.NVarChar:
+                    return tabCol.SqlDbType != SqlDbType.Image;
+
+                case SqlDbType.DateTime:
+                case SqlDbType.SmallDateTime:
+                    switch (tabCol.SqlDbType)
+                    {
+                        case SqlDbType.UniqueIdentifier:
+                        case SqlDbType.Image:
+                        case SqlDbType.NText:
+                        case SqlDbType.Text:
+                        case SqlDbType.Xml:
+                        case SqlDbType.Udt:
+                            return false;
+                        default:
+                            return true;
+                    }
+
+                case SqlDbType.Date:
+                    if (tabCol.SqlDbType == SqlDbType.Time)
+                        return false;
+                    goto case SqlDbType.DateTime2;
+
+                case SqlDbType.Time:
+                    if (tabCol.SqlDbType == SqlDbType.Date)
+                        return false;
+                    goto case SqlDbType.DateTime2;
+
+                case SqlDbType.DateTimeOffset:
+                case SqlDbType.DateTime2:
+                    switch (tabCol.SqlDbType)
+                    {
+                        case SqlDbType.Decimal:
+                        case SqlDbType.Float:
+                        case SqlDbType.Real:
+                        case SqlDbType.BigInt:
+                        case SqlDbType.Int:
+                        case SqlDbType.SmallInt:
+                        case SqlDbType.TinyInt:
+                        case SqlDbType.Money:
+                        case SqlDbType.SmallMoney:
+                        case SqlDbType.Bit:
+                        case SqlDbType.UniqueIdentifier:
+                        case SqlDbType.Image:
+                        case SqlDbType.NText:
+                        case SqlDbType.Text:
+                        case SqlDbType.Xml:
+                        case SqlDbType.Udt:
+                            return false;
+                        default:
+                            return true;
+                    }
+
+                case SqlDbType.Decimal:
+                case SqlDbType.Float:
+                case SqlDbType.Real:
+                case SqlDbType.BigInt:
+                case SqlDbType.Int:
+                case SqlDbType.SmallInt:
+                case SqlDbType.TinyInt:
+                case SqlDbType.Money:
+                case SqlDbType.SmallMoney:
+                case SqlDbType.Bit:
+                    switch (tabCol.SqlDbType)
+                    {
+                        case SqlDbType.Date:                         
+                        case SqlDbType.Time:                            
+                        case SqlDbType.DateTimeOffset:
+                        case SqlDbType.DateTime2:
+                        case SqlDbType.UniqueIdentifier:
+                        case SqlDbType.Image:
+                        case SqlDbType.NText:
+                        case SqlDbType.Text:
+                        case SqlDbType.Xml:
+                        case SqlDbType.Udt:
+                            return false;
+                        default:
+                            return true;
+                    }
+                   
+                case SqlDbType.Timestamp:
+                    switch (tabCol.SqlDbType)
+                    {
+                        case SqlDbType.NChar:
+                        case SqlDbType.NVarChar:
+                        case SqlDbType.Date:
+                        case SqlDbType.Time:
+                        case SqlDbType.DateTimeOffset:
+                        case SqlDbType.DateTime2:
+                        case SqlDbType.UniqueIdentifier:
+                        case SqlDbType.Image:
+                        case SqlDbType.NText:
+                        case SqlDbType.Text:
+                        case SqlDbType.Xml:
+                        case SqlDbType.Udt:
+                            return false;
+                        default:
+                            return true;
+                    }
+                case SqlDbType.Variant:
+                    switch (tabCol.SqlDbType)
+                    {
+                        case SqlDbType.Timestamp:
+                        case SqlDbType.Image:
+                        case SqlDbType.NText:
+                        case SqlDbType.Text:
+                        case SqlDbType.Xml:
+                        case SqlDbType.Udt:
+                            return false;
+                        default:
+                            return true;
+                    }
+
+                //WHITELIST!!
+                case SqlDbType.UniqueIdentifier:
+                    switch (tabCol.SqlDbType)
+                    {
+                        case SqlDbType.Binary:
+                        case SqlDbType.VarBinary:
+                        case SqlDbType.Char:
+                        case SqlDbType.VarChar:
+                        case SqlDbType.NChar:
+                        case SqlDbType.NVarChar:
+                        case SqlDbType.Variant:
+                            return true;
+                        default:
+                            return true;
+                    }
+                case SqlDbType.Image:
+                    switch (tabCol.SqlDbType)
+                    {
+                        case SqlDbType.Binary:
+                        case SqlDbType.VarBinary:
+                        case SqlDbType.Timestamp:
+                            return true;
+                        default:
+                            return true;
+                    }
+                case SqlDbType.NText:
+                case SqlDbType.Text:
+                    switch (tabCol.SqlDbType)
+                    {
+                        case SqlDbType.Char:
+                        case SqlDbType.VarChar:
+                        case SqlDbType.NChar:
+                        case SqlDbType.NVarChar:
+                        case SqlDbType.NText:
+                        case SqlDbType.Text:
+                        case SqlDbType.Xml:
+                            return true;
+                        default:
+                            return true;
+                    }
+                case SqlDbType.Xml:
+                case SqlDbType.Udt:
+                    switch (tabCol.SqlDbType)
+                    {
+                        case SqlDbType.Binary:
+                        case SqlDbType.VarBinary:
+                        case SqlDbType.Char:
+                        case SqlDbType.VarChar:
+                        case SqlDbType.NChar:
+                        case SqlDbType.NVarChar:
+                        case SqlDbType.Xml:
+                        case SqlDbType.Udt:
+                            return true;
+                        default:
+                            return true;
+                    }
+                default:
+                    throw new NotImplementedException("Unexpected SqlDbType");
+            }
         }
     }
 

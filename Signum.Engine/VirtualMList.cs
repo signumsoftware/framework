@@ -1,4 +1,5 @@
-﻿using Signum.Engine.Maps;
+﻿using Signum.Engine.DynamicQuery;
+using Signum.Engine.Maps;
 using Signum.Engine.Operations;
 using Signum.Entities;
 using Signum.Entities.Reflection;
@@ -17,15 +18,16 @@ namespace Signum.Engine
     public static class VirtualMList
     {
         public static FluentInclude<T> WithVirtualMList<T, L>(this FluentInclude<T> fi,
-         Expression<Func<T, MList<L>>> mListField,
-         Expression<Func<L, Lite<T>>> getBackReference,
-         ExecuteSymbol<L> saveOperation,
-         DeleteSymbol<L> deleteOperation)
+            DynamicQueryManager dqm,
+            Expression<Func<T, MList<L>>> mListField,
+            Expression<Func<L, Lite<T>>> getBackReference,
+            ExecuteSymbol<L> saveOperation,
+            DeleteSymbol<L> deleteOperation)
             where T : Entity
             where L : Entity
         {
 
-            return fi.WithVirtualMList(mListField, getBackReference,
+            return fi.WithVirtualMList(dqm, mListField, getBackReference,
                 onSave: saveOperation == null ? null : new Action<L, T>((line, e) =>
                 {
                     line.Execute(saveOperation);
@@ -36,11 +38,13 @@ namespace Signum.Engine
                 }));
         }
 
-        public static FluentInclude<T> WithVirtualMList<T, L>( this FluentInclude<T> fi, 
+        public static FluentInclude<T> WithVirtualMList<T, L>(this FluentInclude<T> fi,
+            DynamicQueryManager dqm, 
             Expression<Func<T, MList<L>>> mListField, 
             Expression<Func<L, Lite<T>>> getBackReference, 
             Action<L, T> onSave = null,
-            Action<L, T> onRemove = null)
+            Action<L, T> onRemove = null,
+            bool? checkAnyBeforeDelete = null) //To avoid StackOverflows
             where T : Entity
             where L : Entity
         {
@@ -116,18 +120,40 @@ namespace Signum.Engine
                 mlist.SetCleanModified(false);
             };
 
-            sb.Schema.EntityEvents<T>().PreUnsafeDelete += query => query.SelectMany(e => Database.Query<L>().Where(se => getBackReference.Evaluate(se).RefersTo(e))).UnsafeDelete();
+            
+            sb.Schema.EntityEvents<T>().PreUnsafeDelete += query =>
+            {
+                //You can do a VirtualMList to itself at the table level, but there should not be cycles inside the instances
+                var toDelete = Database.Query<L>().Where(se => query.Any(e => getBackReference.Evaluate(se).RefersTo(e)));
+                if (checkAnyBeforeDelete ?? (typeof(L) == typeof(T)))
+                {
+                    if (toDelete.Any())
+                        toDelete.UnsafeDelete();
+                }
+                else
+                {
+                    toDelete.UnsafeDelete();
+                }
+                return null;
+            };
 
+            if (dqm != null)
+            {
+                var pi = ReflectionTools.GetPropertyInfo(mListField);
+                dqm.RegisterExpression((T e) => Database.Query<L>().Where(p => getBackReference.Evaluate(p) == e.ToLite()), () => pi.NiceName(), pi.Name);
+            }
             return fi;
         }
 
         public static FluentInclude<T> WithVirtualMListInitializeOnly<T, L>(this FluentInclude<T> fi,
-            Func<T, MList<L>> getMList,
+            DynamicQueryManager dqm,
+           Expression<Func<T, MList<L>>> mListField,
             Expression<Func<L, Lite<T>>> getBackReference,
             Action<L, T> onSave = null)
             where T : Entity
             where L : Entity
         {
+            Func<T, MList<L>> getMList = mListField.Compile();
             Action<L, Lite<T>> setter = null;
             var sb = fi.SchemaBuilder;
 
@@ -159,7 +185,11 @@ namespace Signum.Engine
                 }
                 mlist.SetCleanModified(false);
             };
-
+            if (dqm != null)
+            {
+                var pi = ReflectionTools.GetPropertyInfo(mListField);
+                dqm.RegisterExpression((T e) => Database.Query<L>().Where(p => getBackReference.Evaluate(p) == e.ToLite()), () => pi.NiceName(), pi.Name);
+            }
             return fi;
         }
 
@@ -172,6 +202,39 @@ namespace Signum.Engine
                 body = ((UnaryExpression)body).Operand;
             
             return ReflectionTools.CreateSetter<L, Lite<T>>(((MemberExpression)body).Member);
+        }
+    }
+
+    public static class DeleteAfter
+    {
+        public static FluentInclude<T> WithDeletePart<T, L>(this FluentInclude<T> fi, Expression<Func<T, L>> relatedEntity)
+            where T : Entity
+            where L : Entity
+        {
+            fi.SchemaBuilder.Schema.EntityEvents<T>().PreUnsafeDelete += query =>
+            {
+                var toDelete = query.Select(relatedEntity).Select(a => a.ToLite()).ToList().NotNull().Distinct().ToList();
+                return new Disposable(() =>
+                {
+                    Database.DeleteList(toDelete);
+                });
+            };
+            return fi;
+        }
+
+        public static FluentInclude<T> WithDeletePart<T, L>(this FluentInclude<T> fi, Expression<Func<T, Lite<L>>> relatedEntity)
+            where T : Entity
+            where L : Entity
+        {
+            fi.SchemaBuilder.Schema.EntityEvents<T>().PreUnsafeDelete += query =>
+            {
+                var toDelete = query.Select(relatedEntity).ToList().NotNull().Distinct().ToList();;
+                return new Disposable(() =>
+                {
+                    Database.DeleteList(toDelete);
+                });
+            };
+            return fi;
         }
     }
 }
