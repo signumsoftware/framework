@@ -185,6 +185,21 @@ namespace Signum.Engine.Alerts
                 }
             }.Register();
 
+            new Construct(AlertOperation.Create)
+            {
+                ToStates = { AlertState.New },
+                Construct = (_) => new AlertEntity
+                {
+                    AlertDate = TimeZoneManager.Now,
+                    CreatedBy = UserHolder.Current.ToLite(),
+                    Recipient = AlertLogic.DefaultRecipient()?.ToLite(),
+                    Text = null,
+                    Title = null,
+                    Target = null,
+                    AlertType = null
+                }
+            }.Register();
+
             new Execute(AlertOperation.Save)
             {
                 FromStates = { AlertState.Saved, AlertState.New },
