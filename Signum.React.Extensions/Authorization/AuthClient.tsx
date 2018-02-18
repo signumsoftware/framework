@@ -53,7 +53,8 @@ export function startPublic(options: { routes: JSX.Element[], userTicket: boolea
 
                 var userName = se.newValue!.before("&&");
 
-                if (currentUser().userName == userName)
+                var cu = currentUser();
+                if (cu && cu.userName == userName)
                     logoutInternal();
             }
         });
@@ -326,6 +327,9 @@ export interface AuthenticatedUser {
 
 export function logout() {
     var user = currentUser();
+    if (user == null)
+        return;
+
     API.logout().then(() => {
         logoutInternal();
         logoutOtherTabs(user);
