@@ -140,46 +140,50 @@ export class OperationButton extends React.Component<OperationButtonProps> {
 
         const withClose = getWithClose(eoc);
 
-        const id = canExecute ? "button_" + eoc.operationInfo.key.replace(".", "_") : undefined;
 
-        const tooltip = canExecute && id &&
+        let elem: HTMLElement | null;
+
+        const tooltip = canExecute &&
             (
-                <UncontrolledTooltip placement="bottom" target={id}>
+                <UncontrolledTooltip placement="bottom" target={() => elem!} key="tooltip">
                     {canExecute}
                 </UncontrolledTooltip>
             );
 
         if (group) {
-            return (
+            return [
                 <DropdownItem
                     {...props}
-                    id={id}
+                    key="di"
+                    innerRef={r  => elem = r}
                     className={classes("btn-" + bsColor, disabled ? "disabled" : undefined, props && props.className)}
                     onClick={disabled ? undefined : this.handleOnClick}
                     data-operation={eoc.operationInfo.key}>
                     {this.renderChildren()}
-                    {tooltip}
-                </DropdownItem>
-            );
+                </DropdownItem>,
+                tooltip
+            ];
         }
 
-        var button = (
+        var button = [
             <Button color={bsColor}
                 {...props}
-                id={id}
+                key="button"
+                innerRef={r => elem = r}
                 className={classes(disabled ? "disabled" : undefined, props && props.className)}
                 onClick={disabled ? undefined : this.handleOnClick}
                 data-operation={eoc.operationInfo.key}>
                 {this.renderChildren()}
-                {tooltip}
-            </Button>
-        );
+            </Button>,
+            tooltip
+        ];
 
         if (!withClose)
             return button;
 
-        return (
-            <div className="btn-group">
+        return [
+            <div className="btn-group"
+                ref={r => elem = r} key="buttonGroup">
                 {button}
                 <Button color={bsColor}
                     className={classes("dropdown-toggle-split", disabled ? "disabled" : undefined)}
@@ -187,8 +191,9 @@ export class OperationButton extends React.Component<OperationButtonProps> {
                     title={NormalWindowMessage._0AndClose.niceToString(eoc.operationInfo.niceName)}>
                     <span>&times;</span>
                 </Button>
-            </div>
-        );
+            </div>,
+            tooltip
+        ];
     }
 
     renderChildren() {

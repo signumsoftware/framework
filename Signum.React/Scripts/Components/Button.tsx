@@ -10,7 +10,7 @@ export interface ButtonProps extends React.AnchorHTMLAttributes<any> {
     disabled?: boolean;
     outline?: boolean;
     tag?: React.ReactType,
-    innerRef?: (e: React.ReactElement<any> | null) => void;
+    innerRef?: (e: HTMLElement | null) => void;
     onClick?: (e: React.MouseEvent<any>) => void;
     size?: BsSize;
     className?: string;
