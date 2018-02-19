@@ -141,20 +141,12 @@ export class CaseActivityStatsComponent extends React.Component<CaseActivityStat
 
     handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
         e.preventDefault();
-        Finder.fetchEntitiesWithFilters(CaseEntity, [
-            { columnName: "Entity.DecompositionSurrogateActivity", value: this.props.stats.CaseActivity }
-        ], [], 2)
-            .then(cases => {
 
-                if (cases.length == 1)
-                    Navigator.navigate(cases.single());
-                else
-                    Finder.find<CaseEntity>({
-                        queryName: CaseEntity,
-                        filterOptions: [{ columnName: "Entity.DecompositionSurrogateActivity", value: this.props.stats.CaseActivity, frozen: true }]
-                    })
-                        .then(c => c && Navigator.navigate(c));
-            })
+        Finder.find<CaseEntity>({
+            queryName: CaseEntity,
+            filterOptions: [{ columnName: "Entity.DecompositionSurrogateActivity", value: this.props.stats.CaseActivity, frozen: true }]
+        }, { autoSelectIfOne: true })
+            .then(c => c && Navigator.navigate(c))
             .done();
     }
 
