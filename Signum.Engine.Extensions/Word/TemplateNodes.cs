@@ -747,9 +747,7 @@ namespace Signum.Engine.Word
 
     public class AnyNode : BlockContainerNode
     {
-        public readonly ValueProviderBase ValueProvider;
-        public readonly FilterOperation? Operation;
-        public string Value;
+        public readonly ConditionBase Condition;
 
         public MatchNodePair AnyToken;
         public MatchNodePair NotAnyToken;
@@ -758,26 +756,15 @@ namespace Signum.Engine.Word
         public BlockNode AnyBlock;
         public BlockNode NotAnyBlock;
 
-        public AnyNode(INodeProvider nodeProvider, ValueProviderBase valueProvider) : base(nodeProvider)
+        public AnyNode(INodeProvider nodeProvider, ConditionBase condition) : base(nodeProvider)
         {
-            this.ValueProvider = valueProvider;
-        }
-
-        internal AnyNode(INodeProvider nodeProvider, ValueProviderBase valueProvider, string operation, string value, Action<bool, string> addError): base(nodeProvider)
-        {
-            this.ValueProvider = valueProvider;
-            this.Operation = FilterValueConverter.ParseOperation(operation);
-            this.Value = value;
-
-            ValueProvider?.ValidateConditionValue(value, Operation, addError);
+            this.Condition = condition;
         }
 
         public AnyNode(AnyNode original)
             : base(original)
         {
-            this.ValueProvider = original.ValueProvider;
-            this.Operation = original.Operation;
-            this.Value = original.Value;
+            this.Condition= original.Condition.Clone();
 
             this.AnyToken = original.AnyToken.CloneNode();
             this.NotAnyToken = original.NotAnyToken.CloneNode();
@@ -842,7 +829,7 @@ namespace Signum.Engine.Word
 
         public override void FillTokens(List<QueryToken> tokens)
         {
-            this.ValueProvider.FillQueryTokens(tokens);
+            this.Condition.FillQueryTokens(tokens);
 
             this.AnyBlock.FillTokens(tokens);
             if (this.NotAnyBlock != null)
@@ -851,7 +838,7 @@ namespace Signum.Engine.Word
 
         protected internal override void RenderNode(WordTemplateParameters p)
         {
-            var filtered = this.ValueProvider.GetFilteredRows(p, Operation, Value);
+            var filtered = this.Condition.GetFilteredRows(p);
 
             using (filtered is IEnumerable<ResultRow> ? p.OverrideRows((IEnumerable<ResultRow>)filtered) : null)
             {
@@ -872,14 +859,11 @@ namespace Signum.Engine.Word
 
         public override void Synchronize(SyncronizationContext sc)
         {
-            this.ValueProvider.Synchronize(sc, "@any");
-
-            if (Operation != null)
-                sc.SynchronizeValue(this.ValueProvider.Type, ref Value, Operation.Value.IsList());
-
+            this.Condition.Synchronize(sc, "@any");
+            
             using (sc.NewScope())
             {
-                this.ValueProvider.Declare(sc.Variables);
+                this.Condition.Declare(sc.Variables);
 
                 AnyBlock.Synchronize(sc);
             }
@@ -888,7 +872,7 @@ namespace Signum.Engine.Word
             {
                 using (sc.NewScope())
                 {
-                    this.ValueProvider.Declare(sc.Variables);
+                    this.Condition.Declare(sc.Variables);
 
                     NotAnyBlock.Synchronize(sc);
                 }
@@ -901,12 +885,12 @@ namespace Signum.Engine.Word
             int index = parent.ChildElements.IndexOf(this);
             this.Remove();
 
-            string str = "@any" + this.ValueProvider.ToString(variables, Operation == null ? null : FilterValueConverter.ToStringOperation(Operation.Value) + Value);
+            string str = "@any" + this.Condition.ToString(variables);
 
             parent.InsertAt(this.AnyToken.ReplaceMatchNode(str), index++);
             {
                 var newVars = new ScopedDictionary<string, ValueProviderBase>(variables);
-                ValueProvider.Declare(newVars);
+                Condition.Declare(newVars);
                 this.AnyBlock.RenderTemplate(newVars);
                 parent.MoveChildsAt(ref index, this.AnyBlock.ChildElements);
             }
@@ -916,7 +900,7 @@ namespace Signum.Engine.Word
                 parent.InsertAt(this.NotAnyToken.ReplaceMatchNode("@notany"), index++);
 
                 var newVars = new ScopedDictionary<string, ValueProviderBase>(variables);
-                ValueProvider.Declare(newVars);
+                Condition.Declare(newVars);
                 this.NotAnyBlock.RenderTemplate(newVars);
                 parent.MoveChildsAt(ref index, this.NotAnyBlock.ChildElements);
             }
@@ -927,12 +911,11 @@ namespace Signum.Engine.Word
         public override string InnerText => $@"{this.AnyToken.MatchNode.InnerText}{this.AnyBlock.InnerText}{this.NotAnyToken.MatchNode?.InnerText}{this.NotAnyBlock?.InnerText}{this.EndAnyToken.MatchNode.InnerText}";
     }
 
+
     public class IfNode : BlockContainerNode
     {
-        public readonly ValueProviderBase ValueProvider;
+        public ConditionBase Condition;
 
-        private FilterOperation? Operation;
-        private string Value;
 
         public MatchNodePair IfToken;
         public MatchNodePair ElseToken;
@@ -941,26 +924,15 @@ namespace Signum.Engine.Word
         public BlockNode IfBlock;
         public BlockNode ElseBlock;
 
-        internal IfNode(INodeProvider nodeProvider, ValueProviderBase valueProvider) : base(nodeProvider)
+        internal IfNode(INodeProvider nodeProvider, ConditionBase condition) : base(nodeProvider)
         {
-            this.ValueProvider = valueProvider;
-        }
-
-        internal IfNode(INodeProvider nodeProvider, ValueProviderBase valueProvider, string operation, string value, Action<bool, string> addError) : base(nodeProvider)
-        {
-            this.ValueProvider = valueProvider;
-            this.Operation = FilterValueConverter.ParseOperation(operation);
-            this.Value = value;
-
-            ValueProvider?.ValidateConditionValue(value, Operation, addError);
+            this.Condition = condition;
         }
 
         public IfNode(IfNode original)
             : base(original)
         {
-            this.ValueProvider = original.ValueProvider;
-            this.Operation = original.Operation;
-            this.Value = original.Value;
+            this.Condition = original.Condition.Clone();
 
             this.IfToken = original.IfToken.CloneNode();
             this.ElseToken = original.ElseToken.CloneNode();
@@ -1025,7 +997,7 @@ namespace Signum.Engine.Word
 
         public override void FillTokens(List<QueryToken> tokens)
         {
-            this.ValueProvider.FillQueryTokens(tokens);
+            this.Condition.FillQueryTokens(tokens);
 
             this.IfBlock.FillTokens(tokens);
             if (this.ElseBlock != null)
@@ -1034,7 +1006,7 @@ namespace Signum.Engine.Word
 
         protected internal override void RenderNode(WordTemplateParameters p)
         {
-            if (this.ValueProvider.GetCondition(p, Operation, Value))
+            if (this.Condition.Evaluate(p))
             {
                 this.ReplaceBy(this.IfBlock);
                 this.IfBlock.RenderNode(p);
@@ -1050,14 +1022,11 @@ namespace Signum.Engine.Word
 
         public override void Synchronize(SyncronizationContext sc)
         {
-            this.ValueProvider.Synchronize(sc, "@if");
-
-            if (Operation != null)
-                sc.SynchronizeValue(this.ValueProvider.Type, ref Value, Operation.Value.IsList());
-
+            this.Condition.Synchronize(sc, "@if");
+            
             using (sc.NewScope())
             {
-                this.ValueProvider.Declare(sc.Variables);
+                this.Condition.Declare(sc.Variables);
 
                 IfBlock.Synchronize(sc);
             }
@@ -1066,7 +1035,7 @@ namespace Signum.Engine.Word
             {
                 using (sc.NewScope())
                 {
-                    this.ValueProvider.Declare(sc.Variables);
+                    this.Condition.Declare(sc.Variables);
 
                     ElseBlock.Synchronize(sc);
                 }
@@ -1079,12 +1048,12 @@ namespace Signum.Engine.Word
             int index = parent.ChildElements.IndexOf(this);
             this.Remove();
 
-            var str = "@if" + this.ValueProvider.ToString(variables, Operation == null ? null : FilterValueConverter.ToStringOperation(Operation.Value) + Value);
+            var str = "@if" + this.Condition.ToString(variables);
 
             parent.InsertAt(this.IfToken.ReplaceMatchNode(str), index++);
             {
                 var newVars = new ScopedDictionary<string, ValueProviderBase>(variables);
-                this.ValueProvider.Declare(newVars);
+                this.Condition.Declare(newVars);
                 this.IfBlock.RenderTemplate(newVars);
                 parent.MoveChildsAt(ref index, this.IfBlock.ChildElements);
             }
@@ -1094,7 +1063,7 @@ namespace Signum.Engine.Word
                 parent.InsertAt(this.ElseToken.ReplaceMatchNode("@else"), index++);
 
                 var newVars = new ScopedDictionary<string, ValueProviderBase>(variables);
-                this.ValueProvider.Declare(newVars);
+                this.Condition.Declare(newVars);
                 this.ElseBlock.RenderTemplate(newVars);
                 parent.MoveChildsAt(ref index, this.ElseBlock.ChildElements);
             }
