@@ -67,7 +67,7 @@ namespace Signum.Engine.Templating
             left = expr.TryBefore("&&");
             if (left != null)
             {
-                return new ConditionOr(
+                return new ConditionAnd(
                     ParseCondition(left, variable, parser),
                     ParseCondition(expr.After("&&"), variable, parser));
             }
@@ -75,7 +75,7 @@ namespace Signum.Engine.Templating
             left = expr.TryBefore(" AND ");
             if (left != null)
             {
-                return new ConditionOr(
+                return new ConditionAnd(
                     ParseCondition(left, variable, parser),
                     ParseCondition(expr.After(" AND "), variable, parser));
             }
