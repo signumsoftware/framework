@@ -79,7 +79,7 @@ namespace Signum.Engine.Basics
                         t.Namespace,
                     });
                 
-                TypeEntity.SetTypeDNCallbacks(
+                TypeEntity.SetTypeEntityCallbacks(
                     t => TypeToEntity.GetOrThrow(t),
                     t => EntityToType.GetOrThrow(t));
             }

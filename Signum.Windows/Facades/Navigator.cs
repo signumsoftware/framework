@@ -183,7 +183,7 @@ namespace Signum.Windows
                     t => Server.ServerTypes.GetOrThrow(t).CleanName,
                     Server.TryGetType);
 
-                TypeEntity.SetTypeDNCallbacks(
+                TypeEntity.SetTypeEntityCallbacks(
                     t => Server.ServerTypes.GetOrThrow(t),
                     tdn => Server.GetType(tdn.CleanName));
             }
