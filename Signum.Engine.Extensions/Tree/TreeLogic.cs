@@ -244,7 +244,7 @@ namespace Signum.Engine.Tree
                 c.Construct = (_) => new T
                 {
                     ParentOrSibling = null,
-                    Level = 0,
+                    Level = 1,
                     IsSibling = false
                 };
                 c.Register();

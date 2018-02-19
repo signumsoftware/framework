@@ -15,8 +15,7 @@ import { ToolbarConfig, ToolbarResponse } from './ToolbarClient'
 export default class QueryToolbarConfig extends ToolbarConfig<QueryEntity> {
 
     constructor() {
-        super();
-        this.type = QueryEntity;
+        super(QueryEntity);
     }
 
     getLabel(res: ToolbarResponse<QueryEntity>) {

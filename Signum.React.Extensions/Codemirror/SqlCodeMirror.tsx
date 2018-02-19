@@ -29,7 +29,7 @@ interface SqlCodeMirrorProps {
 
 export default class SqlCodeMirror extends React.Component<SqlCodeMirrorProps> {
 
-    codeMirrorComponent: CodeMirrorComponent;
+    codeMirrorComponent!: CodeMirrorComponent;
 
     render() {
 

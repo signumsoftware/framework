@@ -29,7 +29,7 @@ interface XmlCodeMirrorProps {
 
 export default class XmlCodeMirror extends React.Component<XmlCodeMirrorProps> {
 
-    codeMirrorComponent: CodeMirrorComponent;
+    codeMirrorComponent?: CodeMirrorComponent;
 
     render() {
 

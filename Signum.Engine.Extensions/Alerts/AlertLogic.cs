@@ -147,12 +147,20 @@ namespace Signum.Engine.Alerts
             }
         }
 
-        public static void RegisterUserTypeCondition(SchemaBuilder sb, TypeConditionSymbol typeCondition)
+        public static void RegisterCreatorTypeCondition(SchemaBuilder sb, TypeConditionSymbol typeCondition)
         {
             sb.Schema.Settings.AssertImplementedBy((AlertEntity a) => a.CreatedBy, typeof(UserEntity));
 
             TypeConditionLogic.RegisterCompile<AlertEntity>(typeCondition,
                 a => a.CreatedBy.RefersTo(UserEntity.Current));
+        }
+
+        public static void RegisterRecipientTypeCondition(SchemaBuilder sb, TypeConditionSymbol typeCondition)
+        {
+            sb.Schema.Settings.AssertImplementedBy((AlertEntity a) => a.Recipient, typeof(UserEntity));
+
+            TypeConditionLogic.RegisterCompile<AlertEntity>(typeCondition,
+                a => a.Recipient.RefersTo(UserEntity.Current));
         }
     }
 
@@ -173,6 +181,21 @@ namespace Signum.Engine.Alerts
                     Text = null,
                     Title = null,
                     Target = a.ToLite(),
+                    AlertType = null
+                }
+            }.Register();
+
+            new Construct(AlertOperation.Create)
+            {
+                ToStates = { AlertState.New },
+                Construct = (_) => new AlertEntity
+                {
+                    AlertDate = TimeZoneManager.Now,
+                    CreatedBy = UserHolder.Current.ToLite(),
+                    Recipient = AlertLogic.DefaultRecipient()?.ToLite(),
+                    Text = null,
+                    Title = null,
+                    Target = null,
                     AlertType = null
                 }
             }.Register();

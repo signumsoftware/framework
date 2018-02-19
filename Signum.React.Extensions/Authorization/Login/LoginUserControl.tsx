@@ -16,6 +16,7 @@ export default class LoginUserControl extends React.Component<{}, { user: UserEn
             <NavDropdown className="sf-user" title={user.userName!} id="sfUserDropDown">
                 <LinkContainer to="~/auth/changePassword"><MenuItem><i className="fa fa-key fa-fw"></i> {AuthMessage.ChangePassword.niceToString()}</MenuItem></LinkContainer>
                 <MenuItem divider />
+                <LinkContainer to="~/auth/login"><MenuItem><i className="fa fa-user-plus"></i> {AuthMessage.SwitchUser.niceToString()}</MenuItem></LinkContainer>
                 <MenuItem id="sf-auth-logout" onSelect={() => AuthClient.logout()}><i className="fa fa-sign-out fa-fw"></i> {AuthMessage.Logout.niceToString()}</MenuItem>
             </NavDropdown>
         );
