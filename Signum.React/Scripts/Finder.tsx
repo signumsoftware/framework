@@ -72,9 +72,20 @@ export function find(obj: FindOptions | Type<any>, modalOptions?: ModalFindOptio
     if (qs && qs.onFind && !(modalOptions && modalOptions.useDefaultBehaviour))
         return qs.onFind(fo, modalOptions);
 
-    return import("./SearchControl/SearchModal")
+    let getPromiseSearchModal: () => Promise<Lite<Entity> | undefined> = () => import("./SearchControl/SearchModal")
         .then(a => a.default.open(fo, modalOptions))
         .then(rr => rr && rr.entity);
+
+    if (modalOptions && modalOptions.autoSelectIfOne)
+        return fetchEntitiesWithFilters(fo.queryName, fo.filterOptions || [], fo.orderOptions || [], 2)
+            .then(data => {
+                if (data.length == 1)
+                    return Promise.resolve(data[0]);
+
+                return getPromiseSearchModal();
+            });
+
+    return getPromiseSearchModal();
 }
 
 export function findRow(fo: FindOptions, modalOptions?: ModalFindOptions): Promise<ResultRow | undefined> {
@@ -100,9 +111,20 @@ export function findMany(findOptions: FindOptions | Type<any>, modalOptions?: Mo
     if (qs && qs.onFindMany && !(modalOptions && modalOptions.useDefaultBehaviour))
         return qs.onFindMany(fo, modalOptions);
 
-    return import("./SearchControl/SearchModal")
+    let getPromiseSearchModal: () => Promise<Lite<Entity>[] | undefined> = () => import("./SearchControl/SearchModal")
         .then(a => a.default.openMany(fo, modalOptions))
         .then(rows => rows && rows.map(a => a.entity!));
+
+    if (modalOptions && modalOptions.autoSelectIfOne)
+        return fetchEntitiesWithFilters(fo.queryName, fo.filterOptions || [], fo.orderOptions || [], 2)
+            .then(data => {
+                if (data.length == 1)
+                    return Promise.resolve(data);
+
+                return getPromiseSearchModal();
+            });
+
+    return getPromiseSearchModal();
 }
 
 export function findManyRows(fo: FindOptions, modalOptions?: ModalFindOptions): Promise<ResultRow[] | undefined> {
