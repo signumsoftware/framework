@@ -35,9 +35,10 @@ namespace Signum.Engine.Maps
         {
             schema = new Schema(new SchemaSettings());
 
-            TypeEntity.SetTypeNameCallbacks(
-                t => schema.TypeToName.GetOrThrow(t, "Type {0} not found in the schema"),
-                cleanName => schema.NameToType.TryGetC(cleanName));
+            if (!TypeEntity.AlreadySet)
+                TypeEntity.SetTypeNameCallbacks(
+                    t => schema.TypeToName.GetOrThrow(t, "Type {0} not found in the schema"),
+                    cleanName => schema.NameToType.TryGetC(cleanName));
 
             FromEnumMethodExpander.miQuery = ReflectionTools.GetMethodInfo(() => Database.Query<Entity>()).GetGenericMethodDefinition();
             Include<TypeEntity>()
