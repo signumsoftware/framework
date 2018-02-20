@@ -546,12 +546,22 @@ namespace Signum.Utilities.DataStructures
             return adjacency.Where(a => a.Value.Count == 0).Select(a => a.Key).ToHashSet();
         }
 
-        public DirectedEdgedGraph<T, E> WhereEdges(Func<Edge<T, E>, bool> condition)
+        public DirectedEdgedGraph<T, E> WhereEdges(Func<Edge<T, E>, bool> condition, bool keepAllNodes)
         {
-            DirectedEdgedGraph<T, E> result = new DirectedEdgedGraph<T, E>(Comparer);
-            foreach (var item in Nodes)
-                result.Add(item, RelatedTo(item).Where(to => condition(new Edge<T, E>(item, to.Key, to.Value))));
-            return result;
+            if (keepAllNodes)
+            {
+                DirectedEdgedGraph<T, E> result = new DirectedEdgedGraph<T, E>(Comparer);
+                foreach (var item in Nodes)
+                    result.Add(item, RelatedTo(item).Where(to => condition(new Edge<T, E>(item, to.Key, to.Value))));
+                return result;
+            }
+            else
+            {
+                DirectedEdgedGraph<T, E> result = new DirectedEdgedGraph<T, E>(Comparer);
+                foreach (var e in EdgesWithValue.Where(condition))
+                    result.Add(e.From, e.To, e.Value);
+                return result;
+            }
         }
 
         public List<T> ShortestPath(T from, T to, Func<E, int> getWeight)
