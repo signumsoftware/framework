@@ -39,7 +39,20 @@ namespace Signum.Engine.Basics
                     new InvalidateWith(typeof(PropertyRouteEntity)), Schema.Current.InvalidateMetadata);
 
                 PropertyRouteEntity.ToPropertyRouteFunc = ToPropertyRouteImplementation;
+
+                sb.Schema.Table<TypeEntity>().PreDeleteSqlSync += PropertyRouteLogic_PreDeleteSqlSync;
             }
+        }
+
+        private static SqlPreCommand PropertyRouteLogic_PreDeleteSqlSync(Entity arg)
+        {
+            Table table = Schema.Current.Table<PropertyRouteEntity>();
+
+            var type = (TypeEntity)arg;
+
+            var prs = Database.Query<PropertyRouteEntity>().Where(a => a.RootType == type).ToList();
+
+            return prs.Select(pr => table.DeleteSqlSync(pr, p => p.RootType.CleanName == pr.RootType.CleanName && p.Path == pr.Path)).Combine(Spacing.Simple);
         }
 
         public static PropertyRouteEntity TryGetPropertyRouteEntity(TypeEntity entity, string path)
