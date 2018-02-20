@@ -31,6 +31,8 @@ namespace Signum.Engine.Linq
 
         bool isGroupKey = false;
 
+        Expression isNotNullRoot;
+
         bool innerProjection = false;
 
         HashSet<Expression> candidates = new HashSet<Expression>();
@@ -63,11 +65,20 @@ namespace Signum.Engine.Linq
             return result;
         }
 
+        static internal Expression FullNominateNotNullable(Expression expression)
+        {
+            DbExpressionNominator n = new DbExpressionNominator { isFullNominate = true, isNotNullRoot = expression };
+            Expression result = n.Visit(expression);
+
+            return result;
+        }
+
         public override Expression Visit(Expression exp)
         {
             Expression result = base.Visit(exp);
             if (isFullNominate && result != null && !Has(result) && !IsExcluded(exp))
                 throw new InvalidOperationException("The expression can not be translated to SQL: " + result.ToString());
+
 
             return result;
         }
@@ -94,15 +105,80 @@ namespace Signum.Engine.Linq
             return false;
         }
 
-        //protected internal override Expression VisitPrimaryKey(PrimaryKeyExpression pk)
-        //{
-        //    if (isFullNominate)
-        //        return Visit(pk.Value);
 
-        //    return base.VisitPrimaryKey(pk);
-        //}
+        protected internal override Expression VisitPrimaryKey(PrimaryKeyExpression pk)
+        {
+            if (pk == isNotNullRoot)
+                return Add(pk.Value);
 
-        //Dictionary<ColumnExpression, ScalarExpression> replacements; 
+            return base.VisitPrimaryKey(pk);
+        }
+
+        protected internal override Expression VisitEmbeddedEntity(EmbeddedEntityExpression eee)
+        {
+            if (eee == isNotNullRoot)
+                return Add(new CaseExpression(new[] {
+                    new When(Expression.Equal(eee.HasValue, Expression.Constant(false)), new SqlConstantExpression(null, typeof(bool?)))
+                    },
+                    eee.HasValue));
+
+            return base.VisitEmbeddedEntity(eee);
+        }
+
+        #region Not Null Root
+        protected internal override Expression VisitEntity(EntityExpression ee)
+        {
+            if (ee == isNotNullRoot)
+                return Add(ee.ExternalId.Value);
+
+            return base.VisitEntity(ee);
+        }
+
+        protected internal override Expression VisitTypeEntity(TypeEntityExpression typeFie)
+        {
+            if (typeFie == isNotNullRoot)
+                return Add(typeFie.ExternalId.Value);
+
+            return base.VisitTypeEntity(typeFie);
+        }
+
+        protected internal override Expression VisitImplementedBy(ImplementedByExpression ib)
+        {
+            if (ib == isNotNullRoot)
+                return Add(ib.Implementations.IsEmpty() ? new SqlConstantExpression(null, typeof(int?)) :
+                    ib.Implementations.Select(a => a.Value.ExternalId.Value).Aggregate((id1, id2) => Expression.Coalesce(id1, id2)));
+
+            return base.VisitImplementedBy(ib);
+        }
+
+        protected internal override Expression VisitTypeImplementedBy(TypeImplementedByExpression typeIb)
+        {
+            if (typeIb == isNotNullRoot)
+                return Add(typeIb.TypeImplementations.IsEmpty() ? new SqlConstantExpression(null, typeof(int?)) :
+                    typeIb.TypeImplementations.Select(a => a.Value.Value).Aggregate((id1, id2) => Expression.Coalesce(id1, id2)));
+
+            return base.VisitTypeImplementedBy(typeIb);
+        }
+
+        protected internal override Expression VisitImplementedByAll(ImplementedByAllExpression iba)
+        {
+            if (iba == isNotNullRoot)
+                return Add(iba.Id);
+
+            return base.VisitImplementedByAll(iba);
+        }
+
+        protected internal override Expression VisitTypeImplementedByAll(TypeImplementedByAllExpression typeIba)
+        {
+            if (typeIba == isNotNullRoot)
+                return Add(typeIba.TypeColumn);
+
+            return base.VisitTypeImplementedByAll(typeIba);
+        } 
+        #endregion
+
+
+
 
         protected internal override Expression VisitColumn(ColumnExpression column)
         {

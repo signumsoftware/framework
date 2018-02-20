@@ -332,7 +332,7 @@ namespace Signum.Engine.Linq
 
         protected override Expression Accept(DbExpressionVisitor visitor)
         {
-            return visitor.VisitTypeFieldInit(this);
+            return visitor.VisitTypeEntity(this);
         }
     }
 

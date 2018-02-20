@@ -91,7 +91,7 @@ namespace Signum.Engine.Linq
             return lite;
         }
 
-        protected internal virtual Expression VisitTypeFieldInit(TypeEntityExpression typeFie)
+        protected internal virtual Expression VisitTypeEntity(TypeEntityExpression typeFie)
         {
             var externalId = (PrimaryKeyExpression)Visit(typeFie.ExternalId);
 
