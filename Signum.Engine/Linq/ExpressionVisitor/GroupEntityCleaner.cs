@@ -27,9 +27,9 @@ namespace Signum.Engine.Linq
                 return base.Visit(exp);
         }
 
-        protected internal override Expression VisitTypeFieldInit(TypeEntityExpression typeFie)
+        protected internal override Expression VisitTypeEntity(TypeEntityExpression typeFie)
         {
-            return base.VisitTypeFieldInit(typeFie);
+            return base.VisitTypeEntity(typeFie);
         }
 
         private Expression VisitType(Expression exp)

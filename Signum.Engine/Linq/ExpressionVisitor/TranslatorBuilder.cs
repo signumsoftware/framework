@@ -385,7 +385,7 @@ namespace Signum.Engine.Linq
             static readonly ConstantExpression NullType = Expression.Constant(null, typeof(Type));
             static readonly ConstantExpression NullId = Expression.Constant(null, typeof(int?));
 
-            protected internal override Expression VisitTypeFieldInit(TypeEntityExpression typeFie)
+            protected internal override Expression VisitTypeEntity(TypeEntityExpression typeFie)
             {
                 return Expression.Condition(
                     Expression.NotEqual(Visit(NullifyColumn(typeFie.ExternalId)), NullId),

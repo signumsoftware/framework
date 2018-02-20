@@ -64,6 +64,24 @@ namespace Signum.Test.LinqProvider
         }
 
         [TestMethod]
+        public void GroupCountNull()
+        {
+            var sexos = from a in Database.Query<ArtistEntity>()
+                        group a by a.Sex into g
+                        select new
+                        {
+                            Key = g.Key,
+                            Count = g.Count(), //Fast
+                            CountNames = g.Count(a => a.Name != null), //Fast
+                            CountNullsFast = g.Count(a => (a.Name == null ? "hi": null) != null), //Fast
+                            CountNullSlow = g.Count(a => a.Name == null), //Slow
+
+                            CountLastAward = g.Count(a => a.LastAward != null), //Fast
+                        };
+            sexos.ToList();
+        }
+
+        [TestMethod]
         public void GroupMultiAggregateNoKeys()
         {
             var sexos = from a in Database.Query<ArtistEntity>()

@@ -43,12 +43,7 @@ namespace Signum.Engine.Linq
         static MethodInfo miDefaultIfEmptyQ = ReflectionTools.GetMethodInfo(() => Queryable.DefaultIfEmpty<int>(null)).GetGenericMethodDefinition();
         static MethodInfo miDefaultIfEmptyE = ReflectionTools.GetMethodInfo(() => Enumerable.DefaultIfEmpty<int>(null)).GetGenericMethodDefinition();
 
-        static MethodInfo miCountQ = ReflectionTools.GetMethodInfo(() => Queryable.Count((IQueryable<string>)null)).GetGenericMethodDefinition();
         static MethodInfo miCountE = ReflectionTools.GetMethodInfo(() => Enumerable.Count((IEnumerable<string>)null)).GetGenericMethodDefinition();
-
-        static MethodInfo miCount2Q = ReflectionTools.GetMethodInfo(() => Queryable.Count((IQueryable<string>)null, null)).GetGenericMethodDefinition();
-        static MethodInfo miCount2E = ReflectionTools.GetMethodInfo(() => Enumerable.Count((IEnumerable<string>)null, null)).GetGenericMethodDefinition();
-
         static MethodInfo miWhereQ = ReflectionTools.GetMethodInfo(() => Queryable.Where((IQueryable<string>)null, a => false)).GetGenericMethodDefinition();
         static MethodInfo miWhereE = ReflectionTools.GetMethodInfo(() => Enumerable.Where((IEnumerable<string>)null, a=>false)).GetGenericMethodDefinition();
 
@@ -246,18 +241,6 @@ namespace Signum.Engine.Linq
                         Expression.Call(mij, outer, group, outerKeySelector, 
                             Expression.Lambda(Expression.MakeMemberAccess(g, groupingType.GetProperty("Key")), g),
                             newResult);
-                }
-
-           
-                if (ReflectionTools.MethodEqual(mi, miCount2E) || ReflectionTools.MethodEqual(mi, miCount2Q))
-                {
-                    var source = Visit(m.GetArgument("source"));
-                    var predicate = (LambdaExpression)Visit(m.GetArgument("predicate").StripQuotes());
-
-                    MethodInfo mWhere = (query ? miWhereQ : miWhereE).MakeGenericMethod(paramTypes[0]);
-                    MethodInfo mCount = (query ? miCountQ : miCountE).MakeGenericMethod(paramTypes[0]);
-                    
-                    return Expression.Call(mCount, Expression.Call(mWhere, source, predicate)); 
                 }
 
                 if (ReflectionTools.MethodEqual(mi, miCastE) || ReflectionTools.MethodEqual(mi, miCastQ))
