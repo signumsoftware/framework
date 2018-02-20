@@ -355,7 +355,10 @@ namespace Signum.React.ApiControllers
             this.niceTypeName = token.NiceTypeName;
             this.isGroupable = token.IsGroupable;
             this.hasOrderAdapter = QueryUtils.OrderAdapters.ContainsKey(token.Type);
-            this.preferEquals = token.Type == typeof(string) && token.GetPropertyRoute() is PropertyRoute pr && Schema.Current.HasSomeIndex(pr);
+            this.preferEquals = token.Type == typeof(string) && 
+                token.GetPropertyRoute() is PropertyRoute pr &&
+                typeof(Entity).IsAssignableFrom(pr.RootType) &&
+                Schema.Current.HasSomeIndex(pr);
             this.unit = a.Unit;
             this.format = a.Format;
             this.displayName = a.DisplayName;
@@ -381,7 +384,12 @@ namespace Signum.React.ApiControllers
             this.queryTokenType = GetQueryTokenType(qt);
             this.isGroupable = qt.IsGroupable;
             this.hasOrderAdapter = QueryUtils.OrderAdapters.ContainsKey(qt.Type);
-            this.preferEquals = qt.Type == typeof(string) && qt.GetPropertyRoute() is PropertyRoute pr && Schema.Current.HasSomeIndex(pr);
+
+            this.preferEquals = qt.Type == typeof(string) &&
+                qt.GetPropertyRoute() is PropertyRoute pr &&
+                typeof(Entity).IsAssignableFrom(pr.RootType) &&
+                Schema.Current.HasSomeIndex(pr);
+
             this.propertyRoute = qt.GetPropertyRoute()?.ToString();
             if (recursive && qt.Parent != null)
                 this.parent = new QueryTokenTS(qt.Parent, recursive);
