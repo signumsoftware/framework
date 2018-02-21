@@ -96,10 +96,12 @@ export default class Process extends React.Component<{ ctx: TypeContext<ProcessE
 
         return (
             <ProgressBar
-                message={p.status}
-                value={p.state == "Created" ? 0 : p.progress == 0 ? null : p.progress}
+                message={p.state == "Finished" ? null : p.status}
+                value={p.state == "Created" ? 0 : (p.progress == 0 || p.progress == 1) ? null : p.progress}
                 color={style}
-                showPercentageInMessage={p.state != "Created"}
+                showPercentageInMessage={p.state != "Created" && p.state != "Finished"}
+                active={p.state == "Finished" ? false : undefined}
+                stripped={p.state == "Finished" ? false : undefined}
             />
         );
     }
