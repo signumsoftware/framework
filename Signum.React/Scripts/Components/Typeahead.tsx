@@ -16,7 +16,6 @@ export interface TypeaheadProps {
     renderItem?: (item: any, query: string) => React.ReactNode;
     onSelect?: (item: any, e: React.KeyboardEvent<any> | React.MouseEvent<any>) => string | null;
     scrollHeight?: number;
-    spanAttrs?: React.HTMLAttributes<HTMLSpanElement>;
     inputAttrs?: React.InputHTMLAttributes<HTMLInputElement>;
     liAttrs?: (item: any) => React.LiHTMLAttributes<HTMLLIElement>;
     noResultsMessage?: string;
@@ -268,9 +267,9 @@ export class Typeahead extends React.Component<TypeaheadProps, TypeaheadState>
     render() {
 
         return (
-            <Manager>
-                <Target component="span" {...this.props.spanAttrs} className={classes(this.props.spanAttrs && this.props.spanAttrs.className, "sf-typeahead")}>
-                    <input type="text" autoComplete="off" ref={inp => this.input = inp!} {...this.props.inputAttrs}
+            <Manager tag={false}>
+                <Target innerRef={inp => this.input = inp as HTMLInputElement}>
+                    {({ targetProps }) => <input type="text" autoComplete="off" {...this.props.inputAttrs} {...targetProps as any}
                         value={this.props.value}
                         onFocus={this.handleFocus}
                         onBlur={this.handleBlur}
@@ -278,6 +277,7 @@ export class Typeahead extends React.Component<TypeaheadProps, TypeaheadState>
                         onKeyDown={this.handleKeyDown}
                         onChange={this.handleOnChange}
                     />
+                    }
                 </Target>
                 {this.state.shown && <Popper placement="bottom-start" style={{zIndex: 1000}}>{this.props.renderList ? this.props.renderList(this) : this.renderDefaultList()}</Popper>}
             </Manager>
