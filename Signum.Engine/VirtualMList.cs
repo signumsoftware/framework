@@ -4,6 +4,7 @@ using Signum.Engine.Operations;
 using Signum.Entities;
 using Signum.Entities.Reflection;
 using Signum.Utilities;
+using Signum.Utilities.DataStructures;
 using Signum.Utilities.Reflection;
 using System;
 using System.Collections.Generic;
@@ -205,18 +206,37 @@ namespace Signum.Engine
         }
     }
 
-    public static class DeleteAfter
+    public static class DeletePart
     {
+        static readonly Variable<ImmutableStack<Type>> avoidTypes = Statics.ThreadVariable<ImmutableStack<Type>>("avoidDeletePart");
+
+        public static bool ShouldAvoidDeletePart(Type type)
+        {
+            var stack = avoidTypes.Value;
+            return (stack != null && stack.Contains(type));
+        }
+
+        public static IDisposable AvoidDeletePart(Type type)
+        {
+            avoidTypes.Value = (avoidTypes.Value ?? ImmutableStack<Type>.Empty).Push(type);
+
+            return new Disposable(() => avoidTypes.Value = avoidTypes.Value.Pop());
+        }
+
         public static FluentInclude<T> WithDeletePart<T, L>(this FluentInclude<T> fi, Expression<Func<T, L>> relatedEntity)
             where T : Entity
             where L : Entity
         {
             fi.SchemaBuilder.Schema.EntityEvents<T>().PreUnsafeDelete += query =>
             {
+                if (ShouldAvoidDeletePart(typeof(T)))
+                    return null;
+
                 var toDelete = query.Select(relatedEntity).Select(a => a.ToLite()).ToList().NotNull().Distinct().ToList();
                 return new Disposable(() =>
                 {
-                    Database.DeleteList(toDelete);
+                    var groups = toDelete.GroupsOf(Connector.Current.Schema.Settings.MaxNumberOfParameters).ToList();
+                    groups.ForEach(l => Database.DeleteList(l));
                 });
             };
             return fi;

@@ -100,6 +100,8 @@ namespace Signum.Engine.Linq
                     case "Contains":
                         return this.BindContains(m.Type, m.GetArgument("source"), m.TryGetArgument("item") ?? m.GetArgument("value"), m == root);
                     case "Count":
+                        return this.BindAggregate(m.Type, m.Method.Name.ToEnum<AggregateSqlFunction>(),
+                          m.GetArgument("source"), m.TryGetArgument("predicate").StripQuotes(), m == root);
                     case "Sum":
                     case "Min":
                     case "Max":
@@ -448,29 +450,45 @@ namespace Signum.Engine.Linq
 
         static MethodInfo miStringConcat = ReflectionTools.GetMethodInfo(() => string.Concat("", ""));
 
-        private Expression BindAggregate(Type resultType, AggregateSqlFunction aggregateFunction, Expression source, LambdaExpression selector, bool isRoot)
+        private Expression BindAggregate(Type resultType, AggregateSqlFunction aggregateFunction, Expression source, LambdaExpression selectorOrPredicate, bool isRoot)
         {
-            ProjectionExpression projection = this.VisitCastProjection(source);
-
-            GroupByInfo info = groupByMap.TryGetC(projection.Select.Alias);
-            if (info != null)
+            ProjectionExpression projection;
+            LambdaExpression selector;
+            if (aggregateFunction != AggregateSqlFunction.Count || selectorOrPredicate == null)
             {
-                Expression exp = aggregateFunction == AggregateSqlFunction.Count ? null :
-                    selector != null ? MapVisitExpand(selector, info.Projector, info.Source) :
+                projection = this.VisitCastProjection(source);
+                selector = selectorOrPredicate;
+            }
+            else
+            {
+                selector = UnwrapNotNull(selectorOrPredicate);
+                if (selector == null)
+                    projection = AsProjection(BindWhere(source.Type, source, selectorOrPredicate));
+                else
+                    projection = this.VisitCastProjection(source);
+            }
+          
+            GroupByInfo info = groupByMap.TryGetC(projection.Select.Alias);
+            if (info != null) 
+            {
+                Expression exp = aggregateFunction == AggregateSqlFunction.Count && selector == null ? null : //Count(*)
+                    selector != null ? MapVisitExpand(selector, info.Projector, info.Source) : //Sum(Amount), Avg(Amount), ...
                     info.Projector;
 
                 exp = exp == null ? null : SmartEqualizer.UnwrapPrimaryKey(exp);
 
-                var nominated = DbExpressionNominator.FullNominate(exp);
+                var nominated = aggregateFunction == AggregateSqlFunction.Count ?
+                    DbExpressionNominator.FullNominateNotNullable(exp) :
+                    DbExpressionNominator.FullNominate(exp);
 
                 var result = new AggregateRequestsExpression(info.GroupAlias,
-                    new AggregateExpression(GetBasicType(nominated), nominated, aggregateFunction));
+                    new AggregateExpression(aggregateFunction == AggregateSqlFunction.Count ? typeof(int) : GetBasicType(nominated), nominated, aggregateFunction));
 
                 return RestoreWrappedType(result, resultType);
             }
-            else
+            else //Complicated SubQuery
             {
-                Expression exp = aggregateFunction == AggregateSqlFunction.Count ? null :
+                Expression exp = aggregateFunction == AggregateSqlFunction.Count && selector == null ? null :
                     selector != null ? MapVisitExpand(selector, projection) :
                     projection.Projector;
 
@@ -487,9 +505,11 @@ namespace Signum.Engine.Linq
                 }
                 else
                 {
-                    var nominated = DbExpressionNominator.FullNominate(exp);
+                    var nominated = aggregateFunction == AggregateSqlFunction.Count ?
+                        DbExpressionNominator.FullNominateNotNullable(exp) :
+                        DbExpressionNominator.FullNominate(exp);
 
-                    aggregate = new AggregateExpression(GetBasicType(nominated), nominated, aggregateFunction);
+                    aggregate = new AggregateExpression(aggregateFunction == AggregateSqlFunction.Count ? typeof(int) : GetBasicType(nominated), nominated, aggregateFunction);
                 }
 
                 Alias alias = NextSelectAlias();
@@ -507,6 +527,23 @@ namespace Signum.Engine.Linq
 
                 return RestoreWrappedType(subquery, resultType);
             }
+        }
+
+        private LambdaExpression UnwrapNotNull(LambdaExpression selectorOrPredicate)
+        {
+            if(selectorOrPredicate.Body is BinaryExpression be && be.NodeType == ExpressionType.NotEqual)
+            {
+                var exp =
+                    be.Left.IsNull() ? be.Right :
+                    be.Right.IsNull() ? be.Left : null;
+
+                if (exp != null)
+                {
+                    return Expression.Lambda(exp, selectorOrPredicate.Parameters);
+                }
+            }
+
+            return null;
         }
 
         private Type GetBasicType(Expression nominated)

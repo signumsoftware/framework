@@ -47,20 +47,23 @@ namespace Signum.Entities.Basics
             return ClassName == type.Name && Namespace == type.Namespace;
         }
 
-        public static Func<Type, TypeEntity> ToTypeDNFunc = t => { throw new InvalidOperationException("Lite.ToTypeDNFunc is not set"); };
+        public static Func<Type, TypeEntity> ToTypeEntityFunc = t => { throw new InvalidOperationException("Lite.ToTypeDNFunc is not set"); };
         public static Func<TypeEntity, Type> ToTypeFunc = t => { throw new InvalidOperationException("Lite.ToTypeFunc is not set"); };
         public static Func<string, Type> TryGetType = s => { throw new InvalidOperationException("Lite.TryGetType is not set"); };
         public static Func<Type, string> GetCleanName = s => { throw new InvalidOperationException("Lite.GetCleanName is not set"); };
 
+        public static bool AlreadySet { get; private set; }
         public static void SetTypeNameCallbacks(Func<Type, string> getCleanName, Func<string, Type> tryGetType)
         {
             TypeEntity.GetCleanName = getCleanName;
             TypeEntity.TryGetType = tryGetType;
+
+            AlreadySet = true;
         }
 
-        public static void SetTypeDNCallbacks(Func<Type, TypeEntity> toTypeEntity, Func<TypeEntity, Type> toType)
+        public static void SetTypeEntityCallbacks(Func<Type, TypeEntity> toTypeEntity, Func<TypeEntity, Type> toType)
         {
-            TypeEntity.ToTypeDNFunc = toTypeEntity;
+            TypeEntity.ToTypeEntityFunc = toTypeEntity;
             TypeEntity.ToTypeFunc = toType;
         }
     }
@@ -74,7 +77,7 @@ namespace Signum.Entities.Basics
 
         public static TypeEntity ToTypeEntity(this Type type)
         {
-            return TypeEntity.ToTypeDNFunc(type);
+            return TypeEntity.ToTypeEntityFunc(type);
         }
     }
 }
