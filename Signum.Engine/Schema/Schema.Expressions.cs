@@ -60,6 +60,8 @@ namespace Signum.Engine.Maps
                     result.Add(new FieldBinding(fi, ef.Field.GetExpression(tableAlias, binder, id)));
             }
 
+            Schema.Current.EntityEvents
+
 
             return result.ToReadOnly();
         }

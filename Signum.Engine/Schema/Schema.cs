@@ -242,6 +242,17 @@ namespace Signum.Engine.Maps
             return ee.CacheController;
         }
 
+        internal Dictionary<FieldInfo, LambdaExpression> GetQueryBindings(Type type)
+        {
+            AssertAllowed(type, inUserInterface: false);
+
+            var ee = entityEvents.TryGetC(type);
+            if (ee == null)
+                return null;
+
+            return ee.AdditionalQueryBindings;
+        }
+
         internal CacheControllerBase<T> CacheController<T>() where T : Entity
         {
             EntityEvents<T> ee = (EntityEvents<T>)entityEvents.TryGetC(typeof(T));
@@ -267,6 +278,8 @@ namespace Signum.Engine.Maps
 
             return result;
         }
+
+
 
         FilterQueryResult<T> CombineFilterResult<T>(FilterQueryResult<T> result, FilterQueryResult<T> expression)
             where T : Entity

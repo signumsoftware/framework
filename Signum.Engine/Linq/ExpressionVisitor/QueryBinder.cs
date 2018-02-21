@@ -2279,8 +2279,7 @@ namespace Signum.Engine.Linq
         {
             if (entity.TableAlias != null)
                 return entity;
-
-
+            
             EntityExpression completed = entityReplacements.GetOrCreate(entity, () =>
             {
                 var table = entity.Table;
