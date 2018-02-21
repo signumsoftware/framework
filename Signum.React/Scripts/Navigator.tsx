@@ -824,7 +824,7 @@ export class NamedViewSettings<T extends ModifiableEntity> {
     constructor(type: Type<T>, viewName: string, getViewModule?: (entity: T) => Promise<ViewModule<T>>, options?: NamedViewSettingsOptions<T>) {
         this.type = type;
         this.viewName = viewName;
-        var getViewPromise = getViewModule && ((entity: T) => new ViewPromise(getViewModule(entity)));
+        var getViewPromise = (getViewModule && ((entity: T) => new ViewPromise(getViewModule(entity)))) || (options && options.getViewPromise);
         if (!getViewPromise)
             throw new Error("setting getViewModule or options.getViewPromise arguments is mandatory");
         this.getViewPromise = getViewPromise;
