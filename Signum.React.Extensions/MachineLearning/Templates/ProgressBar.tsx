@@ -17,7 +17,7 @@ export default class ProgressBar extends React.Component<ProgressBarProps> {
 
         const progressContainerClass = value == null ? "progress-bar-striped active" : "";
 
-        const progressStyle = color == null ? "progress-bar-" + color : "";
+        const progressStyle = color != null ? "progress-bar-" + color : "";
 
         const fullMessage = [
             (value == null || showPercentageInMessage === false ? undefined : `${numbro(value * 100).format("0.00")}%`),

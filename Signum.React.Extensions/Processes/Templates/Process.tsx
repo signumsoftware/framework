@@ -6,6 +6,8 @@ import { toLite }  from '../../../../Framework/Signum.React/Scripts/Signum.Entit
 import * as Navigator  from '../../../../Framework/Signum.React/Scripts/Navigator'
 import { TypeContext, FormGroupStyle } from '../../../../Framework/Signum.React/Scripts/TypeContext'
 import { ProcessEntity, ProcessState, ProcessExceptionLineEntity } from '../Signum.Entities.Processes'
+import ProgressBar from '../../MachineLearning/Templates/ProgressBar';
+import { BsStyle } from '../../../../Framework/Signum.React/Scripts/Operations';
 
 export default class Process extends React.Component<{ ctx: TypeContext<ProcessEntity> }> {
 
@@ -82,33 +84,23 @@ export default class Process extends React.Component<{ ctx: TypeContext<ProcessE
     renderProgress() {
 
         const p = this.props.ctx.value;
+        
 
-        const val = p.progress != undefined ? (p.progress == 0 && p.status != null ? 100: p.progress * 100) :
-            ((p.state == "Queued" || p.state == "Suspended" || p.state == "Finished" || p.state == "Error") ? 100 : 0);
-
-        const progressContainerClass =
-            p.state == "Executing" || p.state == "Queued" || p.state == "Suspending" ? "progress-striped active" : "";
-
-        const progressClass =
-            p.state == "Queued" ? "progress-bar-info" :
-                p.state == "Executing" ? "" :
-                    p.state == "Finished" ? "progress-bar-success" :
-                        p.state == "Suspending" || p.state == "Suspended" ? "progress-bar-warning" :
-                            p.state == "Error" ? "progress-bar-danger" :
-                                "";
-
-        const message =
-            p.state != "Executing" && p.state != "Suspending" ? "" :
-                val == 100 && p.status ? p.status :
-                    p.status ? `${val}% - ${p.status}` :
-                        `${val}%`;
+        const style: BsStyle =
+            p.state == "Queued" ? "info" :
+                p.state == "Executing" ? "default" :
+                    p.state == "Finished" ? "success" :
+                        p.state == "Suspending" || p.state == "Suspended" ? "warning" :
+                            p.state == "Error" ? "danger" :
+                                "default";
 
         return (
-            <div className={classes("progress",  progressContainerClass)}>
-                <div className={classes("progress-bar", progressClass)} role="progressbar" id="progressBar" aria-valuenow="@val" aria-valuemin="0" aria-valuemax="100" style={{ width: val + "%" }}>
-                    <span>{message}</span>
-                </div>
-            </div>
+            <ProgressBar
+                message={p.status}
+                value={p.state == "Created" ? 0 : p.progress == 0 ? null : p.progress}
+                color={style}
+                showPercentageInMessage={p.state != "Created"}
+            />
         );
     }
 }
