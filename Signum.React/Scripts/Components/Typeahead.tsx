@@ -242,23 +242,6 @@ export class Typeahead extends React.Component<TypeaheadProps, TypeaheadState>
 
     input!: HTMLInputElement;
 
-    //handlePopupLoaded = (elem: HTMLElement | null) => {
-    //    if (!this.input)
-    //        return;
-
-    //    const rec = this.input.getBoundingClientRect();
-    //    if (elem) {
-    //        elem.style.top = (rec.height) + "px";
-
-    //        if (getComputedStyle(elem).direction == "rtl")
-    //            elem.style.right = "0px";
-    //        else
-    //            elem.style.left = "0px";
-
-    //        elem.style.display = "table";
-    //    }
-    //}
-
     handleOnChange = () => {
         if (this.props.onChange)
             this.props.onChange(this.input.value);
@@ -320,16 +303,18 @@ export class Typeahead extends React.Component<TypeaheadProps, TypeaheadState>
     }
 
     renderDefaultList() {
-        return (<ul className="typeahead dropdown-menu show">
-            {
-                !this.state.items!.length ? <li className="no-results"><a><small>{this.props.noResultsMessage}</small></a></li> :
-                    this.state.items!.map((item, i) => <li key={i} className={classes("dropdown-item", i == this.state.selectedIndex ? "active" : undefined)}
-                        onMouseEnter={e => this.handleElementMouseEnter(e, i)}
-                        onMouseLeave={e => this.handleElementMouseLeave(e, i)}
-                        {...this.props.liAttrs && this.props.liAttrs(item) }>
-                        <a className="sf-pointer" onMouseUp={e => this.handleMenuClick(e, i)}>{this.props.renderItem!(item, this.state.query!)}</a>
-                    </li>)
-            }
-        </ul>);
+        return (
+            <ul className="typeahead dropdown-menu show">
+                {
+                    !this.state.items!.length ? <li className="no-results"><a><small>{this.props.noResultsMessage}</small></a></li> :
+                        this.state.items!.map((item, i) => <li key={i} className={classes("dropdown-item", i == this.state.selectedIndex ? "active" : undefined)}
+                            onMouseEnter={e => this.handleElementMouseEnter(e, i)}
+                            onMouseLeave={e => this.handleElementMouseLeave(e, i)}
+                            {...this.props.liAttrs && this.props.liAttrs(item)}>
+                            <a className="sf-pointer" onMouseUp={e => this.handleMenuClick(e, i)}>{this.props.renderItem!(item, this.state.query!)}</a>
+                        </li>)
+                }
+            </ul>
+        );
     }
 }
