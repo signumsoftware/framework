@@ -152,7 +152,7 @@ namespace Signum.Entities.Workflow
 
         public WorkflowActivityEntity WorkflowActivity { get; internal set; }
         public CaseActivityEntity CaseActivity { get; internal set; }
-        public DecisionResult? DecissionResult { get; internal set; }
+        public DecisionResult? DecisionResult { get; internal set; }
         public IWorkflowTransition Transition { get; internal set; }
 
         public bool Is(string workflowName, string activityName)

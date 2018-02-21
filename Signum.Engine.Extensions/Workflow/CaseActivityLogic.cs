@@ -740,7 +740,7 @@ namespace Signum.Engine.Workflow
     
             private static void ExecuteStep(CaseActivityEntity ca, DecisionResult? decisionResult, IWorkflowTransition transition)
             {
-                using (WorkflowActivityInfo.Scope(new WorkflowActivityInfo { CaseActivity = ca, WorkflowActivity = ca.WorkflowActivity, DecissionResult = decisionResult, Transition = transition }))
+                using (WorkflowActivityInfo.Scope(new WorkflowActivityInfo { CaseActivity = ca, WorkflowActivity = ca.WorkflowActivity, DecisionResult = decisionResult, Transition = transition }))
                 {
                     SaveEntity(ca.Case.MainEntity);
 

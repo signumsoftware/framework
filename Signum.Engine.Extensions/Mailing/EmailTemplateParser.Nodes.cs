@@ -91,7 +91,7 @@ namespace Signum.Engine.Mailing
             {
                 sb.Append("@declare");
 
-                ValueProvider.ToString(sb, variables, null);
+                ValueProvider.ToStringBrackets(sb, variables, null);
 
                 ValueProvider.Declare(variables);
             }
@@ -137,8 +137,7 @@ namespace Signum.Engine.Mailing
                 if (IsRaw)
                     sb.Append("raw");
 
-                ValueProvider.ToString(sb, variables,
-                    Format.HasText() ? (":" + TemplateUtils.ScapeColon(Format)) : null);
+                ValueProvider.ToStringBrackets(sb, variables, Format.HasText() ? (":" + TemplateUtils.ScapeColon(Format)) : null);
             }
 
             public override void Synchronize(SyncronizationContext sc)
@@ -236,7 +235,7 @@ namespace Signum.Engine.Mailing
             public override void ToString(StringBuilder sb, ScopedDictionary<string, ValueProviderBase> variables)
             {
                 sb.Append("@foreach");
-                ValueProvider.ToString(sb, variables, null);
+                ValueProvider.ToStringBrackets(sb, variables, null);
                 {
                     var newVars = new ScopedDictionary<string, ValueProviderBase>(variables);
                     ValueProvider.Declare(newVars);
@@ -260,27 +259,14 @@ namespace Signum.Engine.Mailing
 
         public class AnyNode : TextNode
         {
-            public readonly ValueProviderBase ValueProvider;
-            public readonly FilterOperation? Operation;
-            public string Value;
+            public ConditionBase Condition;
 
             public readonly BlockNode AnyBlock;
             public BlockNode NotAnyBlock;
 
-            internal AnyNode(ValueProviderBase valueProvider)
+            internal AnyNode(ConditionBase condition)
             {
-                this.ValueProvider = valueProvider;
-                AnyBlock = new BlockNode(this);
-            }
-
-            internal AnyNode(ValueProviderBase valueProvider, string operation, string value, Action<bool, string> addError)
-            {
-                this.ValueProvider = valueProvider;
-                this.Operation = FilterValueConverter.ParseOperation(operation);
-                this.Value = value;
-
-                ValueProvider.ValidateConditionValue(value, Operation, addError);
-
+                this.Condition = condition;
                 AnyBlock = new BlockNode(this);
             }
 
@@ -292,7 +278,7 @@ namespace Signum.Engine.Mailing
 
             public override void PrintList(EmailTemplateParameters p)
             {
-                var filtered = this.ValueProvider.GetFilteredRows(p, this.Operation, this.Value);
+                var filtered = this.Condition.GetFilteredRows(p);
 
                 using (filtered is IEnumerable<ResultRow> ? p.OverrideRows((IEnumerable<ResultRow>)filtered) : null)
                 {
@@ -309,7 +295,7 @@ namespace Signum.Engine.Mailing
 
             public override void FillQueryTokens(List<QueryToken> list)
             {
-                ValueProvider.FillQueryTokens(list);
+                Condition.FillQueryTokens(list);
                 AnyBlock.FillQueryTokens(list);
                 if (NotAnyBlock != null)
                     NotAnyBlock.FillQueryTokens(list);
@@ -319,10 +305,10 @@ namespace Signum.Engine.Mailing
             public override void ToString(StringBuilder sb, ScopedDictionary<string, ValueProviderBase> variables)
             {
                 sb.Append("@any");
-                ValueProvider.ToString(sb, variables, Operation == null ? null : FilterValueConverter.ToStringOperation(Operation.Value) + Value);
+                Condition.ToStringBrackets(sb, variables);
                 {
                     var newVars = new ScopedDictionary<string, ValueProviderBase>(variables);
-                    ValueProvider.Declare(newVars);
+                    Condition.Declare(newVars);
                     AnyBlock.ToString(sb, newVars);
                 }
                 
@@ -330,7 +316,7 @@ namespace Signum.Engine.Mailing
                 {
                     sb.Append("@notany");
                     var newVars = new ScopedDictionary<string, ValueProviderBase>(variables);
-                    ValueProvider.Declare(newVars);
+                    Condition.Declare(newVars);
                     NotAnyBlock.ToString(sb, newVars);
                 }
 
@@ -339,14 +325,11 @@ namespace Signum.Engine.Mailing
 
             public override void Synchronize(SyncronizationContext sc)
             {
-                ValueProvider.Synchronize(sc, "@any[]");
-
-                if (Operation != null)
-                    sc.SynchronizeValue(ValueProvider.Type, ref Value, Operation.Value.IsList());
-
+                Condition.Synchronize(sc, "@any[]");
+                
                 using (sc.NewScope())
                 {
-                    ValueProvider.Declare(sc.Variables);
+                    Condition.Declare(sc.Variables);
 
                     AnyBlock.Synchronize(sc);
                 }
@@ -355,7 +338,7 @@ namespace Signum.Engine.Mailing
                 {
                     using (sc.NewScope())
                     {
-                        ValueProvider.Declare(sc.Variables);
+                        Condition.Declare(sc.Variables);
 
                         NotAnyBlock.Synchronize(sc);
                     }
@@ -365,29 +348,16 @@ namespace Signum.Engine.Mailing
 
         public class IfNode : TextNode
         {
-            public readonly ValueProviderBase ValueProvider;
+            public readonly ConditionBase Condition;
             public readonly BlockNode IfBlock;
             public BlockNode ElseBlock;
-            private FilterOperation? Operation;
-            private string Value;
 
-            internal IfNode(ValueProviderBase valueProvider, TemplateWalker walker)
+            internal IfNode(ConditionBase condition, TemplateWalker walker)
             {
-                this.ValueProvider = valueProvider;
+                this.Condition = condition;
                 this.IfBlock = new BlockNode(this);
             }
-
-            internal IfNode(ValueProviderBase valueProvider, string operation, string value, Action<bool, string> addError)
-            {
-                this.ValueProvider = valueProvider;
-                this.Operation = FilterValueConverter.ParseOperation(operation);
-                this.Value = value;
-
-                ValueProvider.ValidateConditionValue(value, Operation, addError);
-
-                this.IfBlock = new BlockNode(this);
-            }
-
+            
             public BlockNode CreateElse()
             {
                 ElseBlock = new BlockNode(this);
@@ -396,7 +366,7 @@ namespace Signum.Engine.Mailing
 
             public override void FillQueryTokens(List<QueryToken> list)
             {
-                this.ValueProvider.FillQueryTokens(list);
+                this.Condition.FillQueryTokens(list);
                 IfBlock.FillQueryTokens(list);
                 if (ElseBlock != null)
                     ElseBlock.FillQueryTokens(list);
@@ -404,7 +374,7 @@ namespace Signum.Engine.Mailing
 
             public override void PrintList(EmailTemplateParameters p)
             {
-                if (ValueProvider.GetCondition(p, this.Operation, this.Value))
+                if (Condition.Evaluate(p))
                 {
                     IfBlock.PrintList(p);
                 }
@@ -416,11 +386,12 @@ namespace Signum.Engine.Mailing
 
             public override void ToString(StringBuilder sb, ScopedDictionary<string, ValueProviderBase> variables)
             {
-                sb.Append("@if");
-                ValueProvider.ToString(sb, variables, Operation == null ? null : FilterValueConverter.ToStringOperation(Operation.Value) + Value);
+                sb.Append("@if[");
+                Condition.ToStringInternal(sb, variables);
+                sb.Append("]");
                 {
                     var newVars = new ScopedDictionary<string, ValueProviderBase>(variables);
-                    ValueProvider.Declare(newVars);
+                    Condition.Declare(newVars);
                     IfBlock.ToString(sb, newVars);
                 }
 
@@ -428,7 +399,7 @@ namespace Signum.Engine.Mailing
                 {
                     sb.Append("@else");
                     var newVars = new ScopedDictionary<string, ValueProviderBase>(variables);
-                    ValueProvider.Declare(newVars);
+                    Condition.Declare(newVars);
                     ElseBlock.ToString(sb, newVars);
                 }
 
@@ -438,14 +409,11 @@ namespace Signum.Engine.Mailing
 
             public override void Synchronize(SyncronizationContext sc)
             {
-                ValueProvider.Synchronize(sc, "if[]");
-
-                if (Operation != null)
-                    sc.SynchronizeValue(ValueProvider.Type, ref Value, Operation.Value.IsList());
-
+                Condition.Synchronize(sc, "if[]");
+                
                 using (sc.NewScope())
                 {
-                    ValueProvider.Declare(sc.Variables);
+                    Condition.Declare(sc.Variables);
 
                     IfBlock.Synchronize(sc);
                 }
@@ -454,7 +422,7 @@ namespace Signum.Engine.Mailing
                 {
                     using (sc.NewScope())
                     {
-                        ValueProvider.Declare(sc.Variables);
+                        Condition.Declare(sc.Variables);
 
                         ElseBlock.Synchronize(sc);
                     }

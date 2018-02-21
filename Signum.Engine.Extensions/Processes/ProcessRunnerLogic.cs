@@ -25,6 +25,8 @@ namespace Signum.Engine.Processes
 {
     public static class ProcessRunnerLogic
     {
+        public static Action<ExecutingProcess> OnFinally;
+
         static Dictionary<Lite<ProcessEntity>, ExecutingProcess> executing = new Dictionary<Lite<ProcessEntity>, ExecutingProcess>();
 
         static Timer timerNextExecution;
@@ -464,7 +466,7 @@ namespace Signum.Engine.Processes
                 tr.Commit();
             }
         }
-
+        
         public void Execute()
         {
             var user = ExecutionMode.Global().Using(_ => CurrentProcess.User.Retrieve());
@@ -506,6 +508,10 @@ namespace Signum.Engine.Processes
                         CurrentProcess.Exception = e.LogException(el => el.ActionName = CurrentProcess.Algorithm.ToString()).ToLite();
                         using (OperationLogic.AllowSave<ProcessEntity>())
                             CurrentProcess.Save();
+                    }
+                    finally
+                    {
+                        ProcessRunnerLogic.OnFinally?.Invoke(this);
                     }
                 }
             }

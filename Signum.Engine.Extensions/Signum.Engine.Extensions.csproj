@@ -155,6 +155,7 @@
     <Compile Include="Mailing\ImageAttachmentLogic.cs" />
     <Compile Include="Rest\RestApiKeyLogic.cs" />
     <Compile Include="Files\FilePathEmbeddedLogic.cs" />
+    <Compile Include="Templating\Conditions.cs" />
     <Compile Include="Templating\TemplatingLogic.cs" />
     <Compile Include="Toolbar\ToolbarLogic.cs" />
     <Compile Include="Dynamic\DynamicSqlMigrationLogic.cs" />

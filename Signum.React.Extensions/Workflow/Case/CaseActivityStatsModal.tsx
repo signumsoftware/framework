@@ -16,6 +16,7 @@ import { EntityLink, SearchControl } from "../../../../Framework/Signum.React/Sc
 import { OperationLogEntity } from "../../../../Framework/Signum.React/Scripts/Signum.Entities.Basics";
 import { Tab, Tabs, UncontrolledTabs } from '../../../../Framework/Signum.React/Scripts/Components/Tabs';
 import { Modal } from '../../../../Framework/Signum.React/Scripts/Components';
+import * as SelectorModal from "../../../../Framework/Signum.React/Scripts/SelectorModal";
 
 
 interface CaseActivityStatsModalProps extends React.Props<CaseActivityStatsModal>, IModalProps {
@@ -100,7 +101,7 @@ export class CaseActivityStatsComponent extends React.Component<CaseActivityStat
                 <FormGroup ctx={ctx} labelText={CaseActivityEntity.nicePropertyName(a => a.doneBy)}>{stats.DoneBy && <EntityLink lite={stats.DoneBy} />}</FormGroup>
                 <FormGroup ctx={ctx} labelText={CaseActivityEntity.nicePropertyName(a => a.startDate)}>{formatDate(stats.StartDate)}</FormGroup>
                 <FormGroup ctx={ctx} labelText={CaseActivityEntity.nicePropertyName(a => a.doneDate)}>{formatDate(stats.DoneDate)}</FormGroup>
-                <FormGroup ctx={ctx} labelText={CaseActivityEntity.nicePropertyName(a => a.doneType)}>{DoneType.niceToString(stats.DoneType!)}</FormGroup>
+                <FormGroup ctx={ctx} labelText={CaseActivityEntity.nicePropertyName(a => a.doneType)}>{stats.DoneType && DoneType.niceToString(stats.DoneType)}</FormGroup>
                 <FormGroup ctx={ctx} labelText={WorkflowActivityEntity.nicePropertyName(a => a.estimatedDuration)}>{formatDuration(stats.EstimatedDuration)}</FormGroup>
                 <FormGroup ctx={ctx} labelText={WorkflowActivityMessage.AverageDuration.niceToString()}>{formatDuration(stats.AverageDuration)}</FormGroup>
                 <FormGroup ctx={ctx} labelText={CaseActivityEntity.nicePropertyName(a => a.duration)}>{formatDuration(stats.Duration)}</FormGroup>
@@ -140,10 +141,12 @@ export class CaseActivityStatsComponent extends React.Component<CaseActivityStat
 
     handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
         e.preventDefault();
-        Finder.fetchEntitiesWithFilters(CaseEntity, [
-            { columnName: "Entity.DecompositionSurrogateActivity", value: this.props.stats.CaseActivity }
-        ], [], 2)
-            .then(cases => Navigator.navigate(cases.single()))
+
+        Finder.find<CaseEntity>({
+            queryName: CaseEntity,
+            filterOptions: [{ columnName: "Entity.DecompositionSurrogateActivity", value: this.props.stats.CaseActivity, frozen: true }]
+        }, { autoSelectIfOne: true })
+            .then(c => c && Navigator.navigate(c))
             .done();
     }
 
@@ -161,6 +164,9 @@ export class CaseActivityStatsComponent extends React.Component<CaseActivityStat
 }
 
 function formatDate(date: string | undefined) {
+    if (date == undefined)
+        return undefined;
+
     return <span>{moment(date).format("L LT")} <mark>({moment(date).fromNow()})</mark></span>
 }
 
