@@ -19,6 +19,7 @@ export interface EntityStripProps extends EntityListBaseProps {
     autoComplete?: AutocompleteConfig<any> | null;
     onRenderItem?: (item: Lite<Entity> | ModifiableEntity) => React.ReactNode;
     onItemHtmlAttributes?: (item: Lite<Entity> | ModifiableEntity) => React.HTMLAttributes<HTMLSpanElement | HTMLAnchorElement>;
+    extraButtons?: () => (React.ReactElement<any> | null | undefined | false)[];
 }
 
 export class EntityStrip extends EntityListBase<EntityStripProps, EntityStripProps> {
@@ -67,6 +68,7 @@ export class EntityStrip extends EntityListBase<EntityStripProps, EntityStripPro
                             <span>
                                 {this.renderCreateButton(false)}
                                 {this.renderFindButton(false)}
+                                {this.props.extraButtons && this.props.extraButtons()}
                             </span>
                         </li>
                     </ul>
