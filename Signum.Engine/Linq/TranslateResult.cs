@@ -172,7 +172,7 @@ namespace Signum.Engine.Linq
                     {
                         var results = lookUp[kvp.Key];
 
-                        ((IMListPrivate<V>)kvp.Value).InnerList.AddRange(results);
+                        ((IMListPrivate<V>)kvp.Value).AssignMList(results.ToList());
                         ((IMListPrivate<V>)kvp.Value).InnerListModified(results.Select(a => a.Element).ToList(), null);
                         retriever.ModifiablePostRetrieving(kvp.Value);
                     }

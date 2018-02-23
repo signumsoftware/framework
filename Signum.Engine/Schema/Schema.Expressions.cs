@@ -35,11 +35,11 @@ namespace Signum.Engine.Maps
             }
             else
             {
-                var bindings = GenerateBindings(tableAlias, binder, id); 
-                var mixins = GenerateMixins(tableAlias, binder, id);
-
                 Schema.Current.AssertAllowed(Type, inUserInterface: false);
 
+                var bindings = GenerateBindings(tableAlias, binder, id); 
+                var mixins = GenerateMixins(tableAlias, binder, id);
+                
                 var result = new EntityExpression(this.Type, (PrimaryKeyExpression)id, tableAlias, bindings, mixins, avoidExpandOnRetrieving: false);
 
                 return result; 
@@ -60,6 +60,15 @@ namespace Signum.Engine.Maps
                     result.Add(new FieldBinding(fi, ef.Field.GetExpression(tableAlias, binder, id)));
             }
 
+            var additionalBindings = Schema.Current.GetAditionalQueryBindings(this.Type);
+
+            if (additionalBindings != null)
+            {
+                foreach (var fi in additionalBindings)
+                {
+                    result.Add(new FieldBinding(fi, new AdditionalFieldExpression(fi.FieldType, (PrimaryKeyExpression)id, this, fi)));
+                }
+            }
 
             return result.ToReadOnly();
         }
@@ -232,7 +241,7 @@ namespace Signum.Engine.Maps
     {
         internal override Expression GetExpression(Alias tableAlias, QueryBinder binder, Expression id)
         {
-            return new MListExpression(FieldType, id, TableMList); // keep back id empty for some seconds 
+            return new MListExpression(FieldType, (PrimaryKeyExpression)id, TableMList); // keep back id empty for some seconds 
         }
     }
 

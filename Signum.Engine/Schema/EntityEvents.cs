@@ -2,8 +2,10 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Reflection;
 using System.Text;
 using Signum.Entities;
+using Signum.Entities.Reflection;
 using Signum.Utilities;
 
 namespace Signum.Engine.Maps
@@ -29,6 +31,20 @@ namespace Signum.Engine.Maps
 
         public event PreUnsafeInsertHandler<T> PreUnsafeInsert;
         public event BulkInsetHandler<T> PreBulkInsert;
+
+        public Dictionary<FieldInfo, LambdaExpression> AdditionalQueryBindings { get; private set; }
+
+        public void RegisterBinding<M>(Expression<Func<T, M>> field, Expression<Func<T, M>> value)
+        {
+            if (AdditionalQueryBindings == null)
+                AdditionalQueryBindings = new Dictionary<FieldInfo, LambdaExpression>();
+
+            var ma = (MemberExpression)field.Body;
+
+            var fi = ma.Member as FieldInfo ?? Reflector.FindFieldInfo(typeof(T), (PropertyInfo)ma.Member);
+
+            AdditionalQueryBindings.Add(fi, value);
+        }
 
         internal IEnumerable<FilterQueryResult<T>> OnFilterQuery()
         {
@@ -200,5 +216,7 @@ namespace Signum.Engine.Maps
         void OnPreBulkInsert(bool inMListTable);
 
         ICacheController CacheController { get; }
+
+        Dictionary<FieldInfo, LambdaExpression> AdditionalQueryBindings { get; }
     }
 }

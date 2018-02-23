@@ -242,6 +242,24 @@ namespace Signum.Engine.Maps
             return ee.CacheController;
         }
 
+        internal HashSet<FieldInfo> GetAditionalQueryBindings(Type type)
+        {
+            AssertAllowed(type, inUserInterface: false);
+
+            var ee = entityEvents.TryGetC(type);
+            if (ee == null || ee.AdditionalQueryBindings == null)
+                return null;
+
+            return ee.AdditionalQueryBindings.Keys.ToHashSet();
+        }
+
+        internal LambdaExpression GetAditionalQueryBinding(Type type, FieldInfo fi)
+        {
+            AssertAllowed(type, inUserInterface: false);
+
+            return entityEvents.GetOrThrow(type).AdditionalQueryBindings.GetOrThrow(fi);
+        }
+
         internal CacheControllerBase<T> CacheController<T>() where T : Entity
         {
             EntityEvents<T> ee = (EntityEvents<T>)entityEvents.TryGetC(typeof(T));
@@ -267,6 +285,8 @@ namespace Signum.Engine.Maps
 
             return result;
         }
+
+
 
         FilterQueryResult<T> CombineFilterResult<T>(FilterQueryResult<T> result, FilterQueryResult<T> expression)
             where T : Entity

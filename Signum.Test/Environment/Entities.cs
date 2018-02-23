@@ -13,7 +13,8 @@ using Signum.Utilities.ExpressionTrees;
 
 namespace Signum.Test.Environment
 {
-    [Serializable, EntityKind(EntityKind.Shared, EntityData.Transactional), Mixin(typeof(CorruptMixin)), Mixin(typeof(ColaboratorsMixin)), PrimaryKey(typeof(Guid))]
+    [Serializable, EntityKind(EntityKind.Shared, EntityData.Transactional), Mixin(typeof(CorruptMixin)), 
+        Mixin(typeof(ColaboratorsMixin)), PrimaryKey(typeof(Guid))]
     public class NoteWithDateEntity : Entity
     {
         [Nullable]
@@ -91,8 +92,12 @@ namespace Signum.Test.Environment
             return FriendsCovariantExpression.Evaluate(this);
         }
 
-        //[NotNullable] Do not add Nullable for testing purposes
         public MList<Lite<ArtistEntity>> Friends { get; set; } = new MList<Lite<ArtistEntity>>();
+
+        [Ignore]
+        [NotNullValidator, NoRepeatValidator]
+        public MList<AwardNominationEntity> Nominations { get; set; } = new MList<AwardNominationEntity>();
+
 
         static Expression<Func<ArtistEntity, string>> FullNameExpression =
              a => a.Name + (a.Dead ? " Dead" : "") + (a.IsMale ? " Male" : " Female");
@@ -351,7 +356,7 @@ namespace Signum.Test.Environment
     }
 
     [Serializable, EntityKind(EntityKind.System, EntityData.Transactional)]
-    public class AwardNominationEntity : Entity
+    public class AwardNominationEntity : Entity, ICanBeOrdered
     {
         [ImplementedBy(typeof(ArtistEntity), typeof(BandEntity))]
         public Lite<IAuthorEntity> Author { get; set; }
@@ -360,6 +365,8 @@ namespace Signum.Test.Environment
         public Lite<AwardEntity> Award { get; set; }
 
         public int Year { get; set; }
+
+        public int Order { get; set; }
     }
 
     [Serializable, EntityKind(EntityKind.Main, EntityData.Transactional)]

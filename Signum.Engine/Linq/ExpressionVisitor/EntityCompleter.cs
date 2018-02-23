@@ -131,6 +131,15 @@ namespace Signum.Engine.Linq
             return new MListProjectionExpression(ml.Type, newProj);
         }
 
+        protected internal override Expression VisitAdditionalField(AdditionalFieldExpression afe)
+        {
+            var proj = binder.AdditionalFieldProjection(afe, withRowId: true);
+
+            var newProj = (ProjectionExpression)this.Visit(proj);
+
+            return new MListProjectionExpression(afe.Type, newProj);
+        }
+
         protected internal override Expression VisitProjection(ProjectionExpression proj)
         {
             Expression projector;
