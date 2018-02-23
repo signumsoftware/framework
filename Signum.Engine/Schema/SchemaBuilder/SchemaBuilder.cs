@@ -31,18 +31,23 @@ namespace Signum.Engine.Maps
             get { return schema.Settings; }
         }
 
-        public SchemaBuilder()
+        public SchemaBuilder(bool isDefault)
         {
             schema = new Schema(new SchemaSettings());
 
-            if (!TypeEntity.AlreadySet)
+            if (isDefault)
+            {
+                if (TypeEntity.AlreadySet)
+                    throw new InvalidOperationException("Only one default SchemaBuilder per application allowed");
+
                 TypeEntity.SetTypeNameCallbacks(
                     t => schema.TypeToName.GetOrThrow(t, "Type {0} not found in the schema"),
                     cleanName => schema.NameToType.TryGetC(cleanName));
 
-            FromEnumMethodExpander.miQuery = ReflectionTools.GetMethodInfo(() => Database.Query<Entity>()).GetGenericMethodDefinition();
-            Include<TypeEntity>()
-                .WithUniqueIndex(t => new { t.Namespace, t.ClassName });
+                FromEnumMethodExpander.miQuery = ReflectionTools.GetMethodInfo(() => Database.Query<Entity>()).GetGenericMethodDefinition();
+                Include<TypeEntity>()
+                    .WithUniqueIndex(t => new { t.Namespace, t.ClassName });
+            }
 
             Settings.AssertNotIncluded = MixinDeclarations.AssertNotIncluded = t =>
             {

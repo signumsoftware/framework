@@ -912,7 +912,7 @@ namespace Signum.Engine.Linq
             throw InvalidSqlExpression(p);
         }
 
-        protected internal override Expression VisitTypeFieldInit(TypeEntityExpression typeFie)
+        protected internal override Expression VisitTypeEntity(TypeEntityExpression typeFie)
         {
             throw InvalidSqlExpression(typeFie);
         }
