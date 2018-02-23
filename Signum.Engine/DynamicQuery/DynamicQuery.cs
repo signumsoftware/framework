@@ -844,26 +844,45 @@ namespace Signum.Engine.DynamicQuery
         }
 
 
-
+        static string Dummy = "Dummy";
 
         static Expression BuildAggregateExpressionEnumerable(Expression collection, AggregateToken at, BuildExpressionContext context)
         {  
             Type elementType = collection.Type.ElementType();
                 
-            if (at.AggregateFunction == AggregateFunction.Count)
+            if (at.AggregateFunction == AggregateFunction.Count && at.Parent == null)
                 return Expression.Call(typeof(Enumerable), "Count", new[] { elementType }, new[] { collection });
+
 
             var body = at.Parent.BuildExpression(context);
 
-            if (body.Type != at.Type)
-                body = body.TryConvert(at.Type);
+            if (at.AggregateFunction == AggregateFunction.Count)
+            {
+                if (at.CountIsValue == AggregateToken.AnyValue)
+                    body = body.Nullify();
+                else
+                    body = Expression.Condition(
+                        Expression.Equal(body.Nullify(), Expression.Constant(at.CountIsValue).Nullify()),
+                        Expression.Constant(Dummy, typeof(string)),
+                        Expression.Constant(null, typeof(string))
+                        );
 
-            var lambda = Expression.Lambda(body, context.Parameter);
+                var lambda = Expression.Lambda(Expression.NotEqual(body.Nullify(), Expression.Constant(null, body.Type.Nullify())), context.Parameter);
 
-            if (at.AggregateFunction == AggregateFunction.Min || at.AggregateFunction == AggregateFunction.Max)
-                return Expression.Call(typeof(Enumerable), at.AggregateFunction.ToString(), new[] { elementType, lambda.Body.Type }, new[] { collection, lambda });
+                return Expression.Call(typeof(Enumerable), at.AggregateFunction.ToString(), new[] { elementType }, new[] { collection, lambda });
+            }
+            else
+            {
+                if (body.Type != at.Type)
+                    body = body.TryConvert(at.Type);
 
-            return Expression.Call(typeof(Enumerable), at.AggregateFunction.ToString(), new[] { elementType }, new[] { collection, lambda });
+                var lambda = Expression.Lambda(body, context.Parameter);
+
+                if (at.AggregateFunction == AggregateFunction.Min || at.AggregateFunction == AggregateFunction.Max)
+                    return Expression.Call(typeof(Enumerable), at.AggregateFunction.ToString(), new[] { elementType, lambda.Body.Type }, new[] { collection, lambda });
+
+                return Expression.Call(typeof(Enumerable), at.AggregateFunction.ToString(), new[] { elementType }, new[] { collection, lambda });
+            }
         }
 
         static Expression BuildAggregateExpressionQueryable(Expression collection, AggregateToken at, BuildExpressionContext context)

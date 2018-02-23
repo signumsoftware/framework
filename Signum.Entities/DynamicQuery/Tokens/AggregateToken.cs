@@ -12,11 +12,11 @@ namespace Signum.Entities.DynamicQuery
     public class AggregateToken : QueryToken
     {
         public AggregateFunction AggregateFunction { get; private set; }
-
+        public object CountIsValue { get; private set; }
         object queryName; 
         public override object QueryName
         {
-            get { return AggregateFunction == AggregateFunction.Count ? queryName : base.QueryName; }
+            get { return  queryName ?? base.QueryName; }
         }
 
         public AggregateToken(AggregateFunction function, object queryName)
@@ -29,30 +29,50 @@ namespace Signum.Entities.DynamicQuery
             this.AggregateFunction = function;
         }
 
+        public static readonly object AnyValue = new object();
 
-        public AggregateToken(AggregateFunction function, QueryToken parent)
+        public AggregateToken(AggregateFunction function, QueryToken parent, object countIsValue = null)
             : base(parent)
         {
-            if (function == AggregateFunction.Count)
-                throw new ArgumentException("function should not different than Count for this overload");
+            if (countIsValue != null && function != AggregateFunction.Count)
+                throw new ArgumentException("CountIsValue should only be set for Count");
 
             if (parent == null)
                 throw new ArgumentNullException("parent");
 
+            this.CountIsValue = countIsValue;
             this.AggregateFunction = function;
         }
 
         public override string ToString()
         {
-            return AggregateFunction.NiceToString();
+            string suffix = GetNiceSuffix();
+
+            return AggregateFunction.NiceToString() + (suffix == null ? null : " " + suffix);
         }
 
         public override string NiceName()
         {
-            if (AggregateFunction == AggregateFunction.Count)
+            if (AggregateFunction == AggregateFunction.Count && Parent == null)
                 return AggregateFunction.NiceToString();
+            
+            string suffix = GetNiceSuffix();
 
-            return "{0} of {1}".FormatWith(AggregateFunction.NiceToString(), Parent.ToString());
+            return "{0}{1} of {1}".FormatWith(AggregateFunction.NiceToString(), suffix == null ? null : " " + suffix, Parent);
+        }
+
+        private string GetNiceSuffix()
+        {
+            if (this.AggregateFunction != AggregateFunction.Count)
+                return null;
+
+            if (this.Parent == null)
+                return null;
+
+            return CountIsValue == AnyValue ? null :
+               CountIsValue == null ? QueryTokenMessage.Null.NiceToString() :
+               CountIsValue is Enum e ? e.NiceToString() : 
+               CountIsValue.ToString();
         }
 
         public override string Format
@@ -75,6 +95,7 @@ namespace Signum.Entities.DynamicQuery
             {
                 if (AggregateFunction == AggregateFunction.Count)
                     return null;
+
                 return Parent.Unit;
             }
         }
@@ -104,7 +125,15 @@ namespace Signum.Entities.DynamicQuery
 
         public override string Key
         {
-            get { return AggregateFunction.ToString(); }
+            get
+            {
+                return AggregateFunction.ToString() +
+                  (
+                  this.AggregateFunction != AggregateFunction.Count || this.Parent == null ? null :
+                  this.CountIsValue == null ? "Null" :
+                  this.CountIsValue.ToString()
+                  );
+            }
         }
 
         protected override List<QueryToken> SubTokensOverride(SubTokensOptions options)
@@ -119,7 +148,7 @@ namespace Signum.Entities.DynamicQuery
 
         public override PropertyRoute GetPropertyRoute()
         {
-            if (AggregateFunction == AggregateFunction.Count)
+            if (Parent == null)
                 return null;
 
             return Parent.GetPropertyRoute();
@@ -132,7 +161,7 @@ namespace Signum.Entities.DynamicQuery
 
         public override string IsAllowed()
         {
-            if (AggregateFunction == AggregateFunction.Count)
+            if (Parent == null)
                 return null;
 
             return Parent.IsAllowed();
@@ -140,13 +169,12 @@ namespace Signum.Entities.DynamicQuery
 
         public override QueryToken Clone()
         {
-            if (AggregateFunction == AggregateFunction.Count)
-                return new AggregateToken(AggregateFunction.Count, this.queryName);
+            if (Parent == null)
+                return new AggregateToken(AggregateFunction, this.queryName);
             else
-                return new AggregateToken(AggregateFunction, Parent.Clone());
+                return new AggregateToken(AggregateFunction, Parent.Clone(), this.CountIsValue);
         }
-
-      
+        
 
         public override string TypeColor
         {

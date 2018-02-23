@@ -256,6 +256,26 @@ namespace Signum.Entities.DynamicQuery
                     yield return new AggregateToken(AggregateFunction.Min, token);
                     yield return new AggregateToken(AggregateFunction.Max, token);
                 }
+
+                if(ft != null)
+                {
+                    yield return new AggregateToken(AggregateFunction.Count, token, AggregateToken.AnyValue);
+                    yield return new AggregateToken(AggregateFunction.Count, token, null);
+                }
+
+                if(ft == FilterType.Enum)
+                {
+                    foreach (var v in Enum.GetValues(token.Type.UnNullify()))
+                    {
+                        yield return new AggregateToken(AggregateFunction.Count, token, v);
+                    }
+                }
+
+                if (ft == FilterType.Boolean)
+                {
+                    yield return new AggregateToken(AggregateFunction.Count, token, true);
+                    yield return new AggregateToken(AggregateFunction.Count, token, false);
+                }
             }
         }
 

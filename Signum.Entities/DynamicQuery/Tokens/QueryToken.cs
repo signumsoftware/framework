@@ -494,5 +494,7 @@ namespace Signum.Entities.DynamicQuery
         Modulo0,
         [Description("{0} mod {1}")]
         _0Mod1,
+        [Description("null")]
+        Null
     }
 }
