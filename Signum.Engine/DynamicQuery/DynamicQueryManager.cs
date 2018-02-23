@@ -35,6 +35,9 @@ namespace Signum.Engine.DynamicQuery
         public Polymorphic<Dictionary<string, ExtensionInfo>> RegisteredExtensions =
             new Polymorphic<Dictionary<string, ExtensionInfo>>(PolymorphicMerger.InheritDictionaryInterfaces, null);
 
+        public Dictionary<Type, ExtensionDictionaryInfo> RegisteredMultiExtensions =
+            new Dictionary<Type, ExtensionDictionaryInfo>();
+
         public void RegisterQuery<T>(object queryName, Func<DynamicQueryCore<T>> lazyQueryCore, Implementations? entityImplementations = null)
         {
             queries[queryName] = new DynamicQueryBucket(queryName, lazyQueryCore, entityImplementations ?? DefaultImplementations(typeof(T), queryName));
@@ -59,6 +62,8 @@ namespace Signum.Engine.DynamicQuery
 
             return Implementations.By(property.PropertyType.CleanType());
         }
+
+      
 
         public DynamicQueryBucket TryGetQuery(object queryName)
         {
@@ -307,6 +312,48 @@ namespace Signum.Engine.DynamicQuery
             return extension;
         }
 
+        
+
+        public ExtensionDictionaryInfo<T, KVP, K, V> RegisterExpressionDictionary<T, KVP, K, V>(
+            Expression<Func<T, IEnumerable<KVP>>> collectionSelector,
+            Expression<Func<KVP, K>> keySelector,
+            Expression<Func<KVP, V>> valueSelector,
+            ResetLazy<HashSet<K>> allKeys = null)
+            where T : Entity
+        {
+            var mei = new ExtensionDictionaryInfo<T, KVP, K, V>
+            {
+                CollectionSelector = collectionSelector,
+                KeySelector = keySelector,
+                ValueSelector = valueSelector,
+
+                AllKeys = allKeys ?? GetAllKeysLazy<T, KVP, K>(collectionSelector, keySelector)
+            };
+
+            RegisteredMultiExtensions.Add(typeof(T), mei);
+        }
+
+        private ResetLazy<HashSet<K>> GetAllKeysLazy<T, KVP, K>(Expression<Func<T, IEnumerable<KVP>>> collectionSelector, Expression<Func<KVP, K>> keySelector)
+            where T : Entity
+        {
+            if (typeof(K).IsEnum)
+                return new ResetLazy<HashSet<K>>(() => EnumExtensions.GetValues<K>().ToHashSet());
+
+            if (typeof(K).IsLite())
+                return GlobalLazy.WithoutInvalidations(() => Database.RetrieveAllLite(typeof(K).CleanType()).Cast<K>().ToHashSet());
+
+            if (collectionSelector.Body.Type.IsMList())
+            {
+                var lambda = Expression.Lambda<Func<T, MList<KVP>>>(collectionSelector.Body, collectionSelector.Parameters);
+
+                return GlobalLazy.WithoutInvalidations(() => Database.MListQuery(lambda).Select(kvp => keySelector.Evaluate(kvp.Element)).Distinct().ToHashSet());
+            }
+            else
+            {
+                return GlobalLazy.WithoutInvalidations(() => Database.Query<T>().SelectMany(collectionSelector).Select(keySelector).Distinct().ToHashSet());
+            }
+        }
+
         public Task<object[]> BatchExecute(BaseQueryRequest[] requests, CancellationToken token)
         {
             return Task.WhenAll<object>(requests.Select<BaseQueryRequest, Task<object>>(r =>
@@ -360,6 +407,26 @@ namespace Signum.Engine.DynamicQuery
         }
     }
         
+    public class ExtensionDictionaryInfo<T, KVP, K, V> 
+    {
+        public ResetLazy<HashSet<K>> AllKeys;
+
+        public Expression<Func<T, IEnumerable<KVP>>> CollectionSelector { get; set; }
+
+        public Expression<Func<KVP, K>> KeySelector { get; set; }
+
+        public Expression<Func<KVP, V>> ValueSelector { get; set; }
+
+        public List<QueryToken> GetAllTokens()
+        {
+            AllKeys.Value.Select(a=> )
+        }
+    }
+
+    public interface IExtensionDictionaryInfo
+    {
+        List<QueryToken> GetAllTokens();
+    }
 
     public class ExtensionInfo
     {

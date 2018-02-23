@@ -57,8 +57,8 @@ namespace Signum.Engine
                 .OfType<PreserveOrderAttribute>()
                 .Any();
 
-            if (preserveOrder && !typeof(ICanBeOrdered).IsAssignableFrom(typeof(T)))
-                throw new InvalidOperationException($"'{typeof(L)}' should implement '{nameof(ICanBeOrdered)}' because '{ReflectionTools.GetPropertyInfo(mListField).Name}' contains '[{nameof(PreserveOrderAttribute)}]'");
+            if (preserveOrder && !typeof(ICanBeOrdered).IsAssignableFrom(typeof(L)))
+                throw new InvalidOperationException($"'{typeof(L).Name}' should implement '{nameof(ICanBeOrdered)}' because '{ReflectionTools.GetPropertyInfo(mListField).Name}' contains '[{nameof(PreserveOrderAttribute)}]'");
 
 
             var sb = fi.SchemaBuilder;
