@@ -152,7 +152,7 @@ namespace Signum.Engine.Linq
 
         protected internal virtual Expression VisitMList(MListExpression ml)
         {
-            var newBackID = Visit(ml.BackID);
+            var newBackID = (PrimaryKeyExpression)Visit(ml.BackID);
             if (newBackID != ml.BackID)
                 return new MListExpression(ml.Type, newBackID, ml.TableMList);
             return ml;
@@ -175,6 +175,14 @@ namespace Signum.Engine.Linq
             if (rowId != mle.RowId || parent != mle.Parent || order != mle.Order || element != mle.Element)
                 return new MListElementExpression(rowId, parent, order, element, mle.Table);
             return mle;
+        }
+
+        protected internal virtual Expression VisitAdditionalField(AdditionalFieldExpression ml)
+        {
+            var newBackID = (PrimaryKeyExpression)Visit(ml.BackID);
+            if (newBackID != ml.BackID)
+                return new AdditionalFieldExpression(ml.Type, newBackID, ml.Table, ml.FieldInfo);
+            return ml;
         }
 
         protected internal virtual Expression VisitSqlEnum(SqlEnumExpression sqlEnum)

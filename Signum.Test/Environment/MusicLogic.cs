@@ -65,6 +65,7 @@ namespace Signum.Test.Environment
                 MinimumExtensions.IncludeFunction(sb.Schema.Assets);
                 sb.Include<ArtistEntity>()
                     .WithSave(ArtistOperation.Save)
+                    .WithVirtualMList(dqm, a => a.Nominations, n => (Lite<ArtistEntity>)n.Author)
                     .WithQuery(dqm, () => a => new
                     {
                         Entity = a,

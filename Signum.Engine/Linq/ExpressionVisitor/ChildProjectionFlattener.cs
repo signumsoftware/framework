@@ -7,6 +7,8 @@ using System.Linq.Expressions;
 using System.Reflection;
 using System.Text;
 using Signum.Engine.Maps;
+using Signum.Entities;
+using Signum.Entities.Reflection;
 using Signum.Utilities;
 using Signum.Utilities.ExpressionTrees;
 using Signum.Utilities.Reflection;
@@ -28,6 +30,19 @@ namespace Signum.Engine.Linq
             var result = VisitProjection(mlp.Projection);
             inMList = oldInEntity;
             return result;
+        }
+
+        private static PropertyInfo GetOrderColumn(Type type)
+        {
+            if (!typeof(ICanBeOrdered).IsAssignableFrom(type))
+                throw new InvalidOperationException($"Type '{type.Name}' should implement '{nameof(ICanBeOrdered)}'");
+
+            var pi = type.GetProperty(nameof(ICanBeOrdered.Order), BindingFlags.Instance | BindingFlags.Public);
+
+            if (pi == null)
+                throw new InvalidOperationException("Order Property not found");
+
+            return pi;
         }
 
         static internal ProjectionExpression Flatten(ProjectionExpression proj, AliasGenerator aliasGenerator)

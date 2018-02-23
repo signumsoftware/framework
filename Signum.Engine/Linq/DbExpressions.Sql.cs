@@ -61,6 +61,7 @@ namespace Signum.Engine.Linq
         MList,
         MListProjection,
         MListElement,
+        AdditionalField,
         PrimaryKey,
         PrimaryKeyString,
     }
@@ -1072,7 +1073,7 @@ namespace Signum.Engine.Linq
         public readonly Expression Projector;
         public readonly UniqueFunction? UniqueFunction;
 
-        internal ProjectionExpression(SelectExpression source, Expression projector, UniqueFunction? uniqueFunction, Type resultType)
+        internal ProjectionExpression(SelectExpression select, Expression projector, UniqueFunction? uniqueFunction, Type resultType)
             : base(DbExpressionType.Projection, resultType)
         {
             if (projector == null)
@@ -1084,7 +1085,7 @@ namespace Signum.Engine.Linq
                     projector.Type.TypeName(),
                     elementType.TypeName()));
 
-            this.Select = source ?? throw new ArgumentNullException("source");
+            this.Select = select ?? throw new ArgumentNullException("select");
             this.Projector = projector;
             this.UniqueFunction = uniqueFunction;
         }

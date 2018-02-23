@@ -44,34 +44,59 @@ namespace Signum.Engine
             Expression<Func<L, Lite<T>>> getBackReference, 
             Action<L, T> onSave = null,
             Action<L, T> onRemove = null,
-            bool? checkAnyBeforeDelete = null) //To avoid StackOverflows
+            bool? lazyRetrieveAndDelete = null) //To avoid StackOverflows
             where T : Entity
             where L : Entity
         {
+            var lazy = lazyRetrieveAndDelete ?? (typeof(L) == typeof(T));
+
             Func<T, MList<L>> getMList = mListField.Compile();
             Action<L, Lite<T>> setter = null;
             bool preserveOrder = fi.SchemaBuilder.Settings.FieldAttributes(mListField)
                 .OfType<PreserveOrderAttribute>()
                 .Any();
-            var sb = fi.SchemaBuilder;
-            sb.Schema.EntityEvents<T>().Retrieved += (T e) =>
-            {
-                var mlist = getMList(e);
 
-                List<L> list = Database.Query<L>()
-                    .Where(line => getBackReference.Evaluate(line) == e.ToLite())
-                    .ToList();
+            if (preserveOrder && !typeof(ICanBeOrdered).IsAssignableFrom(typeof(T)))
+                throw new InvalidOperationException($"'{typeof(L)}' should implement '{nameof(ICanBeOrdered)}' because '{ReflectionTools.GetPropertyInfo(mListField).Name}' contains '[{nameof(PreserveOrderAttribute)}]'");
+
+
+            var sb = fi.SchemaBuilder;
+
+            if (lazy)
+            {
+                sb.Schema.EntityEvents<T>().Retrieved += (T e) =>
+                {
+                    var mlist = getMList(e);
+
+                    var query = Database.Query<L>()
+                        .Where(line => getBackReference.Evaluate(line) == e.ToLite());
+
+                    MList<L> newList = preserveOrder ?
+                        query.ToVirtualMListWithOrder() :
+                        query.ToVirtualMList();
+                    
+                    mlist.AssignMList(newList);
+                    mlist.PostRetrieving();
+                };
+            }
+            else
+            {
                 if (preserveOrder)
                 {
-                    list = list.OrderBy(le => ((ICanBeOrdered)le).Order).ToList();
-                } 
+                    sb.Schema.EntityEvents<T>().RegisterBinding(mListField, e =>
+                        Database.Query<L>()
+                            .Where(line => getBackReference.Evaluate(line) == e.ToLite())
+                            .ToVirtualMListWithOrder());
+                }
+                else
+                {
+                    sb.Schema.EntityEvents<T>().RegisterBinding(mListField, e =>
+                        Database.Query<L>()
+                            .Where(line => getBackReference.Evaluate(line) == e.ToLite())
+                            .ToVirtualMList());
+                }
 
-                var rowIdElements = list
-                    .Select(line => new MList<L>.RowIdElement(line, line.Id, null));
-
-                ((IMListPrivate<L>)mlist).InnerList.AddRange(rowIdElements);
-                ((IMListPrivate<L>)mlist).InnerListModified(rowIdElements.Select(a => a.Element).ToList(), null);
-            };
+            }
 
             sb.Schema.EntityEvents<T>().Saving += (T e) =>
             {
@@ -125,7 +150,7 @@ namespace Signum.Engine
             {
                 //You can do a VirtualMList to itself at the table level, but there should not be cycles inside the instances
                 var toDelete = Database.Query<L>().Where(se => query.Any(e => getBackReference.Evaluate(se).RefersTo(e)));
-                if (checkAnyBeforeDelete ?? (typeof(L) == typeof(T)))
+                if (lazy)
                 {
                     if (toDelete.Any())
                         toDelete.UnsafeDelete();
@@ -147,7 +172,7 @@ namespace Signum.Engine
 
         public static FluentInclude<T> WithVirtualMListInitializeOnly<T, L>(this FluentInclude<T> fi,
             DynamicQueryManager dqm,
-           Expression<Func<T, MList<L>>> mListField,
+            Expression<Func<T, MList<L>>> mListField,
             Expression<Func<L, Lite<T>>> getBackReference,
             Action<L, T> onSave = null)
             where T : Entity
@@ -202,6 +227,18 @@ namespace Signum.Engine
                 body = ((UnaryExpression)body).Operand;
             
             return ReflectionTools.CreateSetter<L, Lite<T>>(((MemberExpression)body).Member);
+        }
+
+        public static MList<T> ToVirtualMListWithOrder<T>(this IEnumerable<T> elements)
+            where T : Entity
+        {
+            return new MList<T>(elements.Select(line => new MList<T>.RowIdElement(line, line.Id, ((ICanBeOrdered)line).Order)));
+        }
+
+        public static MList<T> ToVirtualMList<T>(this IEnumerable<T> elements)
+            where T : Entity
+        {
+            return new MList<T>(elements.Select(line => new MList<T>.RowIdElement(line, line.Id, null)));
         }
     }
 

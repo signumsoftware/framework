@@ -242,15 +242,22 @@ namespace Signum.Engine.Maps
             return ee.CacheController;
         }
 
-        internal Dictionary<FieldInfo, LambdaExpression> GetQueryBindings(Type type)
+        internal HashSet<FieldInfo> GetAditionalQueryBindings(Type type)
         {
             AssertAllowed(type, inUserInterface: false);
 
             var ee = entityEvents.TryGetC(type);
-            if (ee == null)
+            if (ee == null || ee.AdditionalQueryBindings == null)
                 return null;
 
-            return ee.AdditionalQueryBindings;
+            return ee.AdditionalQueryBindings.Keys.ToHashSet();
+        }
+
+        internal LambdaExpression GetAditionalQueryBinding(Type type, FieldInfo fi)
+        {
+            AssertAllowed(type, inUserInterface: false);
+
+            return entityEvents.GetOrThrow(type).AdditionalQueryBindings.GetOrThrow(fi);
         }
 
         internal CacheControllerBase<T> CacheController<T>() where T : Entity

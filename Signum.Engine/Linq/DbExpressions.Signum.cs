@@ -383,10 +383,10 @@ namespace Signum.Engine.Linq
 
     internal class MListExpression : DbExpression
     {
-        public readonly Expression BackID; // not readonly
+        public readonly PrimaryKeyExpression BackID; // not readonly
         public readonly TableMList TableMList;
 
-        public MListExpression(Type type, Expression backID, TableMList tr)
+        public MListExpression(Type type, PrimaryKeyExpression backID, TableMList tr)
             :base(DbExpressionType.MList, type)
         {
             this.BackID = backID;
@@ -401,6 +401,31 @@ namespace Signum.Engine.Linq
         protected override Expression Accept(DbExpressionVisitor visitor)
         {
             return visitor.VisitMList(this);
+        }
+    }
+
+    internal class AdditionalFieldExpression : DbExpression
+    {
+        public readonly PrimaryKeyExpression BackID; // not readonly
+        public readonly Table Table;
+        public readonly FieldInfo FieldInfo;
+
+        public AdditionalFieldExpression(Type type, PrimaryKeyExpression backID, Table table, FieldInfo fi)
+            : base(DbExpressionType.AdditionalField, type)
+        {
+            this.BackID = backID;
+            this.Table = table;
+            this.FieldInfo = fi;
+        }
+
+        public override string ToString()
+        {
+            return "new AdditionalField({0},{1})".FormatWith(this.FieldInfo.Name, Table.Name);
+        }
+
+        protected override Expression Accept(DbExpressionVisitor visitor)
+        {
+            return visitor.VisitAdditionalField(this);
         }
     }
 

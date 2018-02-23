@@ -228,7 +228,7 @@ namespace Signum.Engine.Linq
             return MapVisitExpand(lambda, projection.Projector, projection.Select);
         }
 
-        private Expression MapVisitExpand(LambdaExpression lambda, Expression projector, SourceExpression source)
+        internal Expression MapVisitExpand(LambdaExpression lambda, Expression projector, SourceExpression source)
         {
             using (SetCurrentSource(source))
             {
@@ -1291,8 +1291,11 @@ namespace Signum.Engine.Linq
 
                                         Expression result = Completed(ee).GetBinding(fi);
 
-                                        if (result is MListExpression)
-                                            return MListProjection((MListExpression)result, withRowId: false);
+                                        if (result is MListExpression me)
+                                            return MListProjection(me, withRowId: false);
+
+                                        if (result is AdditionalFieldExpression afe)
+                                            return AdditionalFieldProjection(afe, withRowId: false);
 
                                         return result;
                                     }
@@ -1534,6 +1537,9 @@ namespace Signum.Engine.Linq
             }
 
             if (expressions.Any(e => e.Value is MListExpression))
+                throw new InvalidOperationException("MList on ImplementedBy are not supported yet");
+
+            if (expressions.Any(e => e.Value is AdditionalFieldExpression))
                 throw new InvalidOperationException("MList on ImplementedBy are not supported yet");
 
             if (expressions.Any(e => e.Value is TypeImplementedByAllExpression || e.Value is TypeImplementedByExpression || e.Value is TypeEntityExpression))
@@ -2289,7 +2295,7 @@ namespace Signum.Engine.Linq
                 var mixins = table.GenerateMixins(newAlias, this, id);
 
                 var result = new EntityExpression(entity.Type, entity.ExternalId, newAlias, bindings, mixins, avoidExpandOnRetrieving: false);
-
+                
                 AddRequest(new TableRequest
                 {
                     CompleteEntity = result,
@@ -2484,6 +2490,59 @@ namespace Signum.Engine.Linq
                  pc.Projector, null, projectType);
 
             return proj;
+        }
+
+        internal ProjectionExpression AdditionalFieldProjection(AdditionalFieldExpression af, bool withRowId)
+        {
+            var lambda = Schema.Current.GetAditionalQueryBinding(af.Table.Type, af.FieldInfo);
+
+            var cleanLambda = (LambdaExpression)DbQueryProvider.Clean(lambda, filter: true, log: null);
+
+            var parentEntity = new EntityExpression(af.Table.Type, af.BackID, null, null, null, false);
+
+            var expression = this.MapVisitExpand(cleanLambda, parentEntity, null);
+
+            if(expression is MethodCallExpression mce)
+            {
+                if (mce.Method.DeclaringType == typeof(VirtualMList) && (
+                    mce.Method.Name == nameof(VirtualMList.ToVirtualMList) ||
+                    mce.Method.Name == nameof(VirtualMList.ToVirtualMListWithOrder)))
+                {
+                    var proj = (ProjectionExpression)mce.Arguments[0];
+
+                    var preserveOrder = mce.Method.Name == nameof(VirtualMList.ToVirtualMListWithOrder);
+
+                    var ee = (EntityExpression)proj.Projector;
+
+                    var type = mce.Method.GetGenericArguments()[0];
+
+                    var mlistType = typeof(MList<>.RowIdElement).MakeGenericType(type);
+
+                    var ci = mlistType.GetConstructor(new[] { type, typeof(PrimaryKey), typeof(int?) });
+
+                    var order = preserveOrder ? (Expression)Expression.Constant(null, typeof(int?)) :
+                        ee.GetBinding(Reflector.FindFieldInfo(type, GetOrderColumn(type)));
+
+                    var newExp = Expression.New(ci, ee, ee.ExternalId.UnNullify(), order.Nullify());
+
+                    return new ProjectionExpression(proj.Select, newExp, proj.UniqueFunction, typeof(IQueryable<>).MakeGenericType(mlistType));
+                }
+            }
+
+            throw new NotImplementedException($"AdditionalFields only support {nameof(VirtualMList.ToVirtualMList)} {nameof(VirtualMList.ToVirtualMListWithOrder)}");
+        }
+
+        private static PropertyInfo GetOrderColumn(Type type)
+        {
+            if (!typeof(ICanBeOrdered).IsAssignableFrom(type))
+                throw new InvalidOperationException($"Type '{type.Name}' should implement '{nameof(ICanBeOrdered)}'");
+
+            var pi = type.GetProperty(nameof(ICanBeOrdered.Order), BindingFlags.Instance | BindingFlags.Public);
+
+            if (pi == null)
+                throw new InvalidOperationException("Order Property not found");
+
+            return pi;
         }
 
         internal Alias NextSelectAlias()

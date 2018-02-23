@@ -516,6 +516,13 @@ namespace Signum.Engine.Linq
                 && Compare(a.BackID, b.BackID);
         }
 
+        protected virtual bool CompareMList(AdditionalFieldExpression a, AdditionalFieldExpression b)
+        {
+            return a.Table == b.Table 
+                && a.FieldInfo == b.FieldInfo
+                && Compare(a.BackID, b.BackID);
+        }
+
         protected virtual bool CompareMListElement(MListElementExpression a, MListElementExpression b)
         {
             return a.Table == b.Table
