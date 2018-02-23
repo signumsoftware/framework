@@ -564,7 +564,7 @@ JOIN {3} {4} ON {2}.{0} = {4}.Id".FormatWith(tabCol.Name,
                                                   Type = (DiffIndexType)i.type,
                                                   Columns = (from ic in i.IndexColumns()
                                                              join c in t.Columns() on ic.column_id equals c.column_id
-                                                             orderby ic.key_ordinal
+                                                             orderby ic.index_column_id
                                                              select new DiffIndexColumn { ColumnName =  c.name, IsIncluded = ic.is_included_column  }).ToList()
                                               }).ToList(),
 
@@ -578,7 +578,7 @@ JOIN {3} {4} ON {2}.{0} = {4}.Id".FormatWith(tabCol.Name,
                                                 IndexName = i.name,
                                                 Columns = (from ic in i.IndexColumns()
                                                            join c in v.Columns() on ic.column_id equals c.column_id
-                                                           orderby ic.key_ordinal
+                                                           orderby ic.index_column_id
                                                            select new DiffIndexColumn { ColumnName = c.name, IsIncluded = ic.is_included_column }).ToList()
 
                                             }).ToList(),
