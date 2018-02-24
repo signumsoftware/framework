@@ -1202,6 +1202,27 @@ namespace Signum.Engine.Linq
             if (m.Method.Name == "ToString")
                 return TrySqlToString(m);
 
+            if (m.Method.Name == "Equals")
+            {
+                var obj = m.Object;
+                var arg = m.Arguments.SingleEx();
+
+                if(obj.Type != arg.Type)
+                {
+                    if(arg.Type == typeof(object))
+                    {
+                        if (arg is ConstantExpression c)
+                            arg = Expression.Constant(c.Value);
+                        if (arg is UnaryExpression u && (u.NodeType == ExpressionType.Convert || u.NodeType == ExpressionType.Convert))
+                            arg = u.Operand;
+                    }
+
+                }
+
+                return VisitBinary(Expression.Equal(obj, arg));
+            }
+                
+
             switch (m.Method.DeclaringType.TypeName() + "." + m.Method.Name)
             {
                 case "string.IndexOf":
