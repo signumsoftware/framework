@@ -10,7 +10,7 @@ using Signum.Utilities.ExpressionTrees;
 namespace Signum.Entities.DynamicQuery
 {
     [Serializable]
-    public class ExtensionDictionaryToken<K, V> : QueryToken
+    public class ExtensionDictionaryToken<T, K, V> : QueryToken
     {
         public ExtensionDictionaryToken(QueryToken parent, K key,
             string unit, string format, 
@@ -18,12 +18,6 @@ namespace Signum.Entities.DynamicQuery
             PropertyRoute propertyRoute)
             : base(parent)
         {
-            var shouldHaveImplementations = typeof(IEntity).IsAssignableFrom(type.CleanType());
-
-            if (shouldHaveImplementations && implementations == null)
-                throw new ArgumentException(@"Impossible to determine automatically the implementations for extension token '{0}' (of type {1}) registered on type {2}.  
-Consider using dqm.RegisterExpression(({2} e) => e.{0}).ForceImplementations = Implementations.By(typeof({1}));".FormatWith(key, type.TypeName(), parent.Type.CleanType().TypeName()));
-
             this.keyValue= key;
             this.unit = unit;
             this.format = format;
@@ -35,16 +29,15 @@ Consider using dqm.RegisterExpression(({2} e) => e.{0}).ForceImplementations = I
 
         public override string ToString()
         {
-            return "[" + (((object)keyValue) is Enum e ? e.NiceToString() : Key.ToString()) + "]";
+            return "[" + (((object)keyValue) is Enum e ? e.NiceToString() : keyValue.ToString()) + "]";
         }
 
         public override string NiceName()
         {
-            return ((object)keyValue) is Enum e ? e.NiceToString() : Key.ToString();
+            return ((object)keyValue) is Enum e ? e.NiceToString() : keyValue.ToString();
         }
-
-        Type type;
-        public override Type Type { get { return type.BuildLiteNullifyUnwrapPrimaryKey(new[] { this.GetPropertyRoute() }); } }
+        
+        public override Type Type { get { return typeof(V).BuildLiteNullifyUnwrapPrimaryKey(new[] { this.GetPropertyRoute() }); } }
 
         K keyValue;
         public override string Key => "[" + keyValue.ToString() + "]";
@@ -57,21 +50,16 @@ Consider using dqm.RegisterExpression(({2} e) => e.{0}).ForceImplementations = I
 
         protected override List<QueryToken> SubTokensOverride(SubTokensOptions options)
         {
-            return base.SubTokensBase(type, options, implementations);  
+            return base.SubTokensBase(typeof(V), options, implementations);  
         }
 
-        public static Func<Type, string, Expression, Expression> BuildExtension;
+        public Expression<Func<T, V>> Lambda;
 
         protected override Expression BuildExpressionInternal(BuildExpressionContext context)
         {
-            throw new InvalidOperationException();
-
-            if (BuildExtension == null)
-                throw new InvalidOperationException("ExtensionToken.BuildExtension not set");
-
             var parentExpression = Parent.BuildExpression(context).ExtractEntity(false).UnNullify();
 
-            var result = BuildExtension(Parent.Type.CleanType().UnNullify(), Key, parentExpression);
+            var result = Expression.Invoke(Lambda, parentExpression);
 
             return result.BuildLiteNulifyUnwrapPrimaryKey(new[] { this.propertyRoute });
         }
@@ -98,7 +86,10 @@ Consider using dqm.RegisterExpression(({2} e) => e.{0}).ForceImplementations = I
 
         public override QueryToken Clone()
         {
-            return new ExtensionDictionaryToken<K, V>(this.Parent.Clone(), keyValue, unit, format, implementations, propertyRoute); 
+            return new ExtensionDictionaryToken<T, K, V>(this.Parent.Clone(), keyValue, unit, format, implementations, propertyRoute)
+            {
+                Lambda = Lambda
+            }; 
         }
     }
 }

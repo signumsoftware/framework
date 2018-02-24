@@ -35,8 +35,8 @@ namespace Signum.Engine.DynamicQuery
         public Polymorphic<Dictionary<string, ExtensionInfo>> RegisteredExtensions =
             new Polymorphic<Dictionary<string, ExtensionInfo>>(PolymorphicMerger.InheritDictionaryInterfaces, null);
 
-        public Dictionary<Type, ExtensionDictionaryInfo> RegisteredMultiExtensions =
-            new Dictionary<Type, ExtensionDictionaryInfo>();
+        public Dictionary<Type, IExtensionDictionaryInfo> RegisteredExtensionsDictionaries =
+            new Dictionary<Type, IExtensionDictionaryInfo>();
 
         public void RegisterQuery<T>(object queryName, Func<DynamicQueryCore<T>> lazyQueryCore, Implementations? entityImplementations = null)
         {
@@ -259,11 +259,16 @@ namespace Signum.Engine.DynamicQuery
             var parentType = parent.Type.CleanType().UnNullify();
 
             var dic = RegisteredExtensions.TryGetValue(parentType);
-            
-            if (dic == null)
-                return Enumerable.Empty<QueryToken>();
 
-            return dic.Values.Where(a => a.Inherit || a.SourceType == parentType).Select(v => v.CreateToken(parent));
+            IEnumerable<QueryToken> extensionsTokens = dic == null ? Enumerable.Empty<QueryToken>() :
+                dic.Values.Where(ei => ei.Inherit || ei.SourceType == parentType).Select(v => v.CreateToken(parent));
+
+            var edi = RegisteredExtensionsDictionaries.TryGetC(parentType);
+
+            IEnumerable<QueryToken> dicExtensionsTokens = edi == null ? Enumerable.Empty<QueryToken>() :
+                edi.GetAllTokens(parent);
+
+            return extensionsTokens.Concat(dicExtensionsTokens);
         }
         
         public ExtensionInfo RegisterExpression<E, S>(Expression<Func<E, S>> lambdaToMethodOrProperty, Func<string> niceName = null)
@@ -330,7 +335,9 @@ namespace Signum.Engine.DynamicQuery
                 AllKeys = allKeys ?? GetAllKeysLazy<T, KVP, K>(collectionSelector, keySelector)
             };
 
-            RegisteredMultiExtensions.Add(typeof(T), mei);
+            RegisteredExtensionsDictionaries.Add(typeof(T), mei);
+
+            return mei;
         }
 
         private ResetLazy<HashSet<K>> GetAllKeysLazy<T, KVP, K>(Expression<Func<T, IEnumerable<KVP>>> collectionSelector, Expression<Func<KVP, K>> keySelector)
@@ -406,8 +413,13 @@ namespace Signum.Engine.DynamicQuery
             return fi;
         }
     }
-        
-    public class ExtensionDictionaryInfo<T, KVP, K, V> 
+
+    public interface IExtensionDictionaryInfo
+    {
+        IEnumerable<QueryToken> GetAllTokens(QueryToken parent);
+    }
+    
+    public class ExtensionDictionaryInfo<T, KVP, K, V> : IExtensionDictionaryInfo
     {
         public ResetLazy<HashSet<K>> AllKeys;
 
@@ -417,28 +429,48 @@ namespace Signum.Engine.DynamicQuery
 
         public Expression<Func<KVP, V>> ValueSelector { get; set; }
 
-        public List<QueryToken> GetAllTokens()
+        ConcurrentDictionary<QueryToken, ExtensionRouteInfo> metas = new ConcurrentDictionary<QueryToken, ExtensionRouteInfo>();
+        
+        public IEnumerable<QueryToken> GetAllTokens(QueryToken parent)
         {
-            AllKeys.Value.Select(a=> )
+            var info = metas.GetOrAdd(parent, qt =>
+            {
+                Expression<Func<T, V>> lambda = t => ValueSelector.Evaluate(CollectionSelector.Evaluate(t).SingleOrDefaultEx());
+
+                Expression e = MetadataVisitor.JustVisit(lambda, MetaExpression.FromToken(qt, typeof(T)));
+
+                MetaExpression me = e as MetaExpression;
+                
+                var result = new ExtensionRouteInfo();
+
+                if (me?.Meta is CleanMeta cm && cm.PropertyRoutes.Any())
+                {
+                    var cleanType = me.Type.CleanType();
+
+                    result.PropertyRoute = cm.PropertyRoutes.Only();
+                    result.Implementations = me.Meta.Implementations;
+                    result.Format = ColumnDescriptionFactory.GetFormat(cm.PropertyRoutes);
+                    result.Unit = ColumnDescriptionFactory.GetUnit(cm.PropertyRoutes);
+                }
+                
+                return result;
+            });
+
+            return AllKeys.Value.Select(key => new ExtensionDictionaryToken<T, K, V>(parent,
+                key: key,
+                unit: info.Unit,
+                format: info.Format,
+                implementations: info.Implementations,
+                propertyRoute: info.PropertyRoute)
+            {
+                Lambda = t => ValueSelector.Evaluate(CollectionSelector.Evaluate(t).SingleOrDefaultEx(kvp => KeySelector.Evaluate(kvp).Equals(key)))
+            });
         }
     }
 
-    public interface IExtensionDictionaryInfo
-    {
-        List<QueryToken> GetAllTokens();
-    }
 
     public class ExtensionInfo
     {
-        public class ExtensionRouteInfo
-        {
-            public string Format;
-            public string Unit;
-            public Implementations? Implementations;
-            public Func<string> IsAllowed;
-            public PropertyRoute PropertyRoute;
-        }
-
         ConcurrentDictionary<QueryToken, ExtensionRouteInfo> metas = new ConcurrentDictionary<QueryToken, ExtensionRouteInfo>();
 
 
@@ -527,5 +559,14 @@ namespace Signum.Engine.DynamicQuery
                 DisplayName = NiceName()
             }; 
         }
+    }
+
+    public class ExtensionRouteInfo
+    {
+        public string Format;
+        public string Unit;
+        public Implementations? Implementations;
+        public Func<string> IsAllowed;
+        public PropertyRoute PropertyRoute;
     }
 }
