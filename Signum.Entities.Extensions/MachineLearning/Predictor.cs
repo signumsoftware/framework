@@ -306,7 +306,7 @@ namespace Signum.Entities.MachineLearning
 
 
     [Serializable, EntityKind(EntityKind.Part, EntityData.Transactional)]
-    public class PredictorSubQueryEntity : Entity
+    public class PredictorSubQueryEntity : Entity, ICanBeOrdered
     {
         public PredictorSubQueryEntity()
         {
@@ -328,6 +328,8 @@ namespace Signum.Entities.MachineLearning
         [PreserveOrder]
         [NotNullValidator, NoRepeatValidator, NotifyChildProperty, NotifyCollectionChanged]
         public MList<PredictorSubQueryColumnEmbedded> Columns { get; set; } = new MList<PredictorSubQueryColumnEmbedded>();
+
+        public int Order { get; set; }
 
         public void ParseData(QueryDescription description)
         {

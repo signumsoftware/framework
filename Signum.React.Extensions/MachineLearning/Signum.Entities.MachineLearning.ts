@@ -354,6 +354,7 @@ export interface PredictorSubQueryEntity extends Entities.Entity {
     query?: Basics.QueryEntity | null;
     filters: Entities.MList<UserQueries.QueryFilterEmbedded>;
     columns: Entities.MList<PredictorSubQueryColumnEmbedded>;
+    order?: number;
 }
 
 export const PredictSimpleResultEntity = new Type<PredictSimpleResultEntity>("PredictSimpleResult");
