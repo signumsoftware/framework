@@ -7,10 +7,10 @@ import * as Finder from '../../../Framework/Signum.React/Scripts/Finder'
 import { FindOptions } from '../../../Framework/Signum.React/Scripts/FindOptions'
 import { TypeContext, StyleContext, StyleOptions, FormGroupStyle } from '../../../Framework/Signum.React/Scripts/TypeContext'
 import { PropertyRoute, PropertyRouteType, MemberInfo, getTypeInfo, getTypeInfos, TypeInfo, IsByAll, New } from '../../../Framework/Signum.React/Scripts/Reflection'
-import { LineBase, LineBaseProps, FormGroup, FormControlStatic, runTasks} from '../../../Framework/Signum.React/Scripts/Lines/LineBase'
+import { LineBase, LineBaseProps } from '../../../Framework/Signum.React/Scripts/Lines/LineBase'
+import { FormGroup } from '../../../Framework/Signum.React/Scripts/Lines/FormGroup'
 import { ModifiableEntity, Lite, Entity, EntityControlMessage, JavascriptMessage, toLite, is, liteKey, getToString, } from '../../../Framework/Signum.React/Scripts/Signum.Entities'
 import { IFile, IFilePath, FileMessage, FileTypeSymbol, FileEntity, FilePathEntity, FileEmbedded, FilePathEmbedded } from './Signum.Entities.Files'
-import Typeahead from '../../../Framework/Signum.React/Scripts/Lines/Typeahead'
 import { EntityBase, EntityBaseProps } from '../../../Framework/Signum.React/Scripts/Lines/EntityBase'
 import { default as FileDownloader, FileDownloaderConfiguration, DownloadBehaviour } from './FileDownloader'
 import FileUploader from './FileUploader'
@@ -27,7 +27,7 @@ export interface FileLineProps extends EntityBaseProps {
     fileType?: FileTypeSymbol;
     accept?: string;
     configuration?: FileDownloaderConfiguration<IFile>;
-    helpBlock?: React.ReactChild;
+    helpText?: React.ReactChild;
 }
 
 
@@ -60,7 +60,7 @@ export default class FileLine extends EntityBase<FileLineProps, FileLineProps> {
             <FormGroup ctx={s.ctx} labelText={s.labelText}
                 labelHtmlAttributes={s.labelHtmlAttributes}
                 htmlAttributes={{ ...this.baseHtmlAttributes(), ...EntityBase.entityHtmlAttributes(s.ctx.value), ...s.formGroupHtmlAttributes }}
-                helpBlock={this.props.helpBlock}>
+                helpText={this.props.helpText}>
                 {hasValue ? this.renderFile() : s.ctx.readOnly ? undefined :
                     <FileUploader
                         accept={this.props.accept}
@@ -68,7 +68,8 @@ export default class FileLine extends EntityBase<FileLineProps, FileLineProps> {
                         dragAndDropMessage={this.props.dragAndDropMessage}
                         fileType={this.props.fileType}
                         onFileLoaded={this.handleFileLoaded}
-                        typeName={this.props.ctx.propertyRoute.typeReference().name}
+                        typeName={s.ctx.propertyRoute.typeReference().name}
+                        buttonCss={s.ctx.buttonClass}
                         divHtmlAttributes={{ className: "sf-file-line-new" }}/>
                 }
             </FormGroup>
@@ -78,15 +79,17 @@ export default class FileLine extends EntityBase<FileLineProps, FileLineProps> {
 
     renderFile() {
 
-        const val = this.state.ctx.value!;
+        var ctx = this.state.ctx;
+
+        const val = ctx.value!;
 
         const content = this.state.download == "None" ?
-            <span className="form-control file-control">{val.toStr}</span> :
+            <span className={classes(ctx.formControlClass, "file-control")} > {val.toStr}</span > :
             <FileDownloader
                 configuration={this.props.configuration}
                 download={this.props.download}
                 entityOrLite={val}
-                htmlAttributes={{ className: "form-control file-control" }} />;
+                htmlAttributes={{ className: classes(ctx.formControlClass, "file-control") }} />;
 
         const removeButton = this.renderRemoveButton(true, val);
 
@@ -94,9 +97,9 @@ export default class FileLine extends EntityBase<FileLineProps, FileLineProps> {
             return content;
 
         return (
-            <div className="input-group">
+            <div className={ctx.inputGroupClass}>
                 {content}
-                <span className="input-group-btn">
+                <span className="input-group-append">
                     {removeButton }
                 </span>
             </div>

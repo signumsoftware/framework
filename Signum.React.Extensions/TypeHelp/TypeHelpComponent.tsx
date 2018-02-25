@@ -11,7 +11,7 @@ import { Entity } from '../../../Framework/Signum.React/Scripts/Signum.Entities'
 import * as Constructor from '../../../Framework/Signum.React/Scripts/Constructor'
 import { StyleContext } from '../../../Framework/Signum.React/Scripts/TypeContext'
 
-import Typeahead from '../../../Framework/Signum.React/Scripts/Lines/Typeahead'
+import { Typeahead } from '../../../Framework/Signum.React/Scripts/Components'
 import { ValueLine, EntityLine, EntityCombo, EntityList, EntityDetail, EntityStrip, EntityRepeater } from '../../../Framework/Signum.React/Scripts/Lines'
 import * as TypeHelpClient from './TypeHelpClient'
 import ContextMenu from '../../../Framework/Signum.React/Scripts/SearchControl/ContextMenu'
@@ -163,21 +163,21 @@ export default class TypeHelpComponent extends React.Component<TypeHelpComponent
 
     renderHeader() {
         return (
-            <div className="form-sm sf-type-help-bar">
-                <div className="input-group">
-                    <span className="input-group-btn">
-                        <button className="btn btn-default" disabled={!this.canBack()}
+            <div className="sf-type-help-bar">
+                <div className="input-group input-group-sm">
+                    <span className="input-group-prepend">
+                        <button className="btn input-group-text" disabled={!this.canBack()}
                             onClick={e => this.handleGoHistory(e, this.state.historyIndex - 1)} type="button">
-                            <span className="glyphicon glyphicon-circle-arrow-left" />
+                            <span className="fa fa-arrow-circle-left" />
                         </button>
-                        <button className="btn btn-default" disabled={!this.canForth()}
+                        <button className="btn input-group-text" disabled={!this.canForth()}
                             onClick={e => this.handleGoHistory(e, this.state.historyIndex + 1)} type="button">
-                            <span className="glyphicon glyphicon-circle-arrow-right" />
+                            <span className="fa fa-arrow-circle-right" />
                         </button>
                     </span>
                     <div style={{ position: "relative" }}>
                         <Typeahead
-                            inputAttrs={{ className: "form-control sf-entity-autocomplete" }}
+                            inputAttrs={{ className: "form-control form-control-sm sf-entity-autocomplete" }}
                             getItems={this.handleGetItems}
                             value={this.state.tempQuery == undefined ? this.currentType() : this.state.tempQuery}
                             onBlur={() => this.setState({ tempQuery: undefined })}
@@ -194,7 +194,7 @@ export default class TypeHelpComponent extends React.Component<TypeHelpComponent
     renderHelp(h: TypeHelpClient.TypeHelp) {
         return (
             <div>
-                <h4>{h.type}</h4>
+                <h4 className="mb-1 mt-2">{h.type}</h4>
              
                 <ul className="sf-members" style={{ paddingLeft: "0px" }}>
                     {h.members.map((m, i) => this.renderMember(h, m, i))}
@@ -293,7 +293,7 @@ export default class TypeHelpComponent extends React.Component<TypeHelpComponent
         if (cleanType != null)
             return (
                 <span>
-                    <a href="" className={"sf-member-" + (isTypeEnum(type) ? "enum" : "class")}
+                    <a href="#" className={"sf-member-" + (isTypeEnum(type) ? "enum" : "class")}
                         onClick={(e) => { e.preventDefault(); this.goTo(cleanType); } }>
                         {type}
                     </a>

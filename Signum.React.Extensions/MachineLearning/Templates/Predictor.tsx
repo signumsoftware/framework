@@ -1,9 +1,9 @@
 ﻿import * as React from 'react'
-import { Tabs, Tab } from 'react-bootstrap';
 import * as numbro from 'numbro';
 import * as OrderUtils from '../../../../Framework/Signum.React/Scripts/Frames/OrderUtils'
 import { classes } from '../../../../Framework/Signum.React/Scripts/Globals'
-import { FormGroup, FormControlStatic, ValueLine, ValueLineType, EntityLine, EntityDetail, EntityCombo, EntityList, EntityRepeater, EntityTable, IRenderButtons, EntityTabRepeater } from '../../../../Framework/Signum.React/Scripts/Lines'
+import { Tab, Tabs, UncontrolledTabs } from '../../../../Framework/Signum.React/Scripts/Components/Tabs'
+import { FormGroup, FormControlReadonly, ValueLine, ValueLineType, EntityLine, EntityDetail, EntityCombo, EntityList, EntityRepeater, EntityTable, IRenderButtons, EntityTabRepeater } from '../../../../Framework/Signum.React/Scripts/Lines'
 import { SearchControl, FilterOption, ColumnOption, FindOptions } from '../../../../Framework/Signum.React/Scripts/Search'
 import { TypeContext, FormGroupStyle, ButtonsContext } from '../../../../Framework/Signum.React/Scripts/TypeContext'
 import FileLine from '../../Files/FileLine'
@@ -44,7 +44,7 @@ export default class Predictor extends React.Component<{ ctx: TypeContext<Predic
                 columnOptionsMode: "Add",
                 columnOptions: p.mainQuery.columns.map(mle => ({ columnName: mle.element.token && mle.element.token.token!.fullKey }) as ColumnOption)
             })
-                .then(lite => PredictorClient.predict(toLite(p), lite && { "Entity" : lite }))
+                .then(lite => PredictorClient.predict(toLite(p), lite && { "Entity": lite }))
                 .done();
 
         } else {
@@ -92,9 +92,8 @@ export default class Predictor extends React.Component<{ ctx: TypeContext<Predic
     handleQueryChange = () => {
 
         const p = this.props.ctx.value;
-        p.mainQuery.filters.forEach(a => a.element.token = fixTokenEmbedded(a.element.token || null, p.mainQuery.groupResults || false));
-        p.mainQuery.columns.forEach(a => a.element.token = fixTokenEmbedded(a.element.token || null, p.mainQuery.groupResults || false));
-        this.forceUpdate();
+        p.mainQuery.filters.clear();
+        p.mainQuery.columns.clear();
 
         this.setState({
             queryDescription: undefined
@@ -103,6 +102,15 @@ export default class Predictor extends React.Component<{ ctx: TypeContext<Predic
                 this.loadData(p.mainQuery.query);
         });
     }
+
+    handleGroupChange = () => {
+
+        const p = this.props.ctx.value;
+        p.mainQuery.filters.forEach(a => a.element.token = fixTokenEmbedded(a.element.token || null, p.mainQuery.groupResults || false));
+        p.mainQuery.columns.forEach(a => a.element.token = fixTokenEmbedded(a.element.token || null, p.mainQuery.groupResults || false));
+        this.forceUpdate();
+    }
+
 
     handleCreate = () => {
 
@@ -182,7 +190,7 @@ export default class Predictor extends React.Component<{ ctx: TypeContext<Predic
         if (ctx.value.state != "Draft")
             ctx = ctx.subCtx({ readOnly: true });
 
-        const ctxxs = ctx.subCtx({ formGroupSize: "ExtraSmall" });
+        const ctxxs = ctx.subCtx({ formSize: "ExtraSmall" });
         const ctxxs4 = ctx.subCtx({ labelColumns: 4 });
         const ctxmq = ctxxs.subCtx(a => a.mainQuery);
         const entity = ctx.value;
@@ -205,14 +213,14 @@ export default class Predictor extends React.Component<{ ctx: TypeContext<Predic
                     </div>
                 </div>
                 {ctx.value.state == "Training" && <TrainingProgressComponent ctx={ctx} onStateChanged={this.handleOnFinished} />}
-                <Tabs id={ctx.prefix + "tabs"} unmountOnExit={true}>
+                <UncontrolledTabs unmountOnExit={true}>
                     <Tab eventKey="query" title={ctxmq.niceName(a => a.query)}>
                         <div>
                             <fieldset>
                                 <legend>{ctxmq.niceName()}</legend>
                                 <EntityLine ctx={ctxmq.subCtx(f => f.query)} remove={ctx.value.isNew} onChange={this.handleQueryChange} />
                                 {queryKey && <div>
-                                    <ValueLine ctx={ctxmq.subCtx(f => f.groupResults)} onChange={this.handleQueryChange} />
+                                    <ValueLine ctx={ctxmq.subCtx(f => f.groupResults)} onChange={this.handleGroupChange} />
 
                                     <FilterBuilderEmbedded ctx={ctxmq.subCtx(a => a.filters)}
                                         queryKey={queryKey}
@@ -265,14 +273,12 @@ export default class Predictor extends React.Component<{ ctx: TypeContext<Predic
                             {ctx.value.classificationTraining && ctx.value.classificationValidation && <PredictorClassificationMetrics ctx={ctx} />}
                             {ctx.value.regressionTraining && ctx.value.regressionTraining && <PredictorRegressionMetrics ctx={ctx} />}
                             {ctx.value.resultSaver && PredictorClient.getResultRendered(ctx)}
-                            <div className="form-vertical">
-                                <EntityRepeater ctx={ctxxs.subCtx(f => f.files)} getComponent={ec =>
-                                    <FileLine ctx={ec.subCtx({ formGroupStyle: "SrOnly" })} remove={false} fileType={PredictorFileType.PredictorFile} />
-                                } />
-                            </div>
+                            <EntityRepeater ctx={ctxxs.subCtx(f => f.files)} getComponent={ec =>
+                                <FileLine ctx={ec.subCtx({ formGroupStyle: "SrOnly" })} remove={false} fileType={PredictorFileType.PredictorFile} />
+                            } />
                         </Tab>
                     }
-                </Tabs>
+                </UncontrolledTabs>
             </div>
         );
     }
@@ -345,7 +351,7 @@ export class TrainingProgressComponent extends React.Component<TrainingProgressC
         return (
             <div>
                 {tp && tp.EpochProgressesParsed && <LineChart height={200} series={getSeries(tp.EpochProgressesParsed, this.props.ctx.value)} />}
-                <ProgressBar color={tp == null || tp.Running == false ? "info" : "default"}
+                <ProgressBar color={tp == null || tp.Running == false ? "warning" : null}
                     value={tp && tp.Progress}
                     message={tp == null ? PredictorMessage.StartingTraining.niceToString() : tp.Message}
                 />

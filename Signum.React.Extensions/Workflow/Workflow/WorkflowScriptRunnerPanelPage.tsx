@@ -1,7 +1,6 @@
 ﻿import * as React from 'react'
 import * as moment from 'moment'
 import { RouteComponentProps } from 'react-router'
-import { Tabs, Tab } from 'react-bootstrap'
 import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
 import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
 import EntityLink from '../../../../Framework/Signum.React/Scripts/SearchControl/EntityLink'
@@ -18,6 +17,7 @@ import {
 import { API, WorkflowScriptRunnerState } from '../WorkflowClient'
 import { CaseActivityEntity, WorkflowActivityType, DoneType, WorkflowScriptRunnerPanelPermission, CaseActivityOperation } from '../Signum.Entities.Workflow'
 import * as AuthClient from '../../Authorization/AuthClient'
+import { UncontrolledTabs, Tab } from '../../../../Framework/Signum.React/Scripts/Components/Tabs';
 
 
 interface WorkflowScriptRunnerPanelPageProps extends RouteComponentProps<{}> {
@@ -65,8 +65,8 @@ export default class WorkflowScriptRunnerPanelPage extends React.Component<Workf
             <div>
                 <h2>{title}</h2>
                 <div className="btn-toolbar">
-                    {s.Running && <a href="" className="sf-button btn btn-default active" style={{ color: "red" }} onClick={this.handleStop}>Stop</a> }
-                    {!s.Running && <a href="" className="sf-button btn btn-default" style={{ color: "green" }} onClick={this.handleStart}>Start</a> }
+                    {s.Running && <a href="#" className="sf-button btn btn-light active" style={{ color: "red" }} onClick={this.handleStop}>Stop</a> }
+                    {!s.Running && <a href="#" className="sf-button btn btn-light" style={{ color: "green" }} onClick={this.handleStart}>Start</a> }
                 </div >
 
                 <div>
@@ -110,7 +110,7 @@ export default class WorkflowScriptRunnerPanelPage extends React.Component<Workf
                     ],
                     pagination: { elementsPerPage: 10, mode: "Firsts" }
                 }} />
-                <Tabs unmountOnExit={true} id="tabs" defaultActiveKey="logs">
+                <UncontrolledTabs unmountOnExit={true}>
                     <Tab title="Last operation logs" eventKey="logs">
                         <SearchControl findOptions={{
                             queryName: OperationLogEntity,
@@ -151,7 +151,7 @@ export default class WorkflowScriptRunnerPanelPage extends React.Component<Workf
                             pagination: { elementsPerPage: 10, mode: "Firsts" }
                         }} />
                     </Tab>
-                </Tabs>
+                </UncontrolledTabs>
            </div>
         );
     }

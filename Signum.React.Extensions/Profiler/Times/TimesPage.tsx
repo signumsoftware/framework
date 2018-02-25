@@ -1,5 +1,4 @@
 ﻿import * as React from 'react'
-import { Tabs, Tab } from 'react-bootstrap'
 import * as numbro from 'numbro'
 import * as moment from 'moment'
 import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
@@ -13,6 +12,7 @@ import { API, TimeTrackerEntry } from '../ProfilerClient'
 import { RouteComponentProps } from "react-router";
 
 import "./Times.css"
+import { Tab, Tabs, UncontrolledTabs } from '../../../../Framework/Signum.React/Scripts/Components/Tabs';
 
 interface TimesPageProps extends RouteComponentProps<{}> {
 
@@ -54,18 +54,18 @@ export default class TimesPage extends React.Component<TimesPageProps, { times?:
             <div>
                 <h3>Times</h3>
                 <div className="btn-toolbar">
-                <button onClick={() => this.loadState()} className="btn btn-default">Reload</button>
+                <button onClick={() => this.loadState()} className="btn btn-light">Reload</button>
                 <button onClick={this.handleClear} className="btn btn-warning">Clear</button>
                     </div>
-                <br/>
-                <Tabs id="timesTabs">
+                <br />
+                <UncontrolledTabs>
                     <Tab eventKey="bars" title="Bars">
                         {this.renderBars()}
                     </Tab>
                     <Tab eventKey="table" title="Table">
                         {this.renderTable()}
                     </Tab>
-                </Tabs>
+                </UncontrolledTabs>
             </div>
         );
     }

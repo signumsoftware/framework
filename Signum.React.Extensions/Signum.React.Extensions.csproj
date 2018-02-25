@@ -189,8 +189,8 @@
     <Compile Include="Rest\RestLogController.cs" />
     <Compile Include="Rest\RestLogFilter.cs" />
     <Compile Include="Rest\RestServer.cs" />
-    <TypeScriptCompile Include="Basics\Templates\AccordionPanel.tsx" />
-    <TypeScriptCompile Include="Basics\Templates\CollapsablePanel.tsx" />
+    <TypeScriptCompile Include="Basics\Templates\Accordion.tsx" />
+    <TypeScriptCompile Include="Basics\Templates\CollapsableCard.tsx" />
     <Content Include="Joyride\joyride.d.ts" />
     <TypeScriptCompile Include="Joyride\JoyrideClient.tsx" />
     <TypeScriptCompile Include="Joyride\JoyrideComponent.tsx" />
@@ -357,6 +357,7 @@
     <TypeScriptCompile Include="Workflow\Bpmn\CustomRenderer.ts" />
     <TypeScriptCompile Include="Workflow\Bpmn\ConnectionIcons.ts" />
     <TypeScriptCompile Include="Workflow\Case\InboxFilter.tsx" />
+    <TypeScriptCompile Include="Workflow\Workflow\WorkflowHelpComponent.tsx" />
     <TypeScriptCompile Include="Workflow\ActivityMonitor\WorkflowActivityStatsModal.tsx" />
     <TypeScriptCompile Include="Workflow\ActivityMonitor\WorkflowActivityMonitorPage.tsx" />
     <TypeScriptCompile Include="Workflow\Workflow\WorkflowHelpComponent.tsx" />
@@ -480,7 +481,7 @@
     <TypeScriptCompile Include="Authorization\Templates\Role.tsx" />
     <TypeScriptCompile Include="Authorization\Templates\User.tsx" />
     <TypeScriptCompile Include="Authorization\Login\Login.tsx" />
-    <TypeScriptCompile Include="Authorization\Login\LoginUserControl.tsx" />
+    <TypeScriptCompile Include="Authorization\Login\LoginDropdown.tsx" />
     <TypeScriptCompile Include="Basics\Signum.Entities.Basics.ts">
       <DependentUpon>Signum.Entities.Basics.t4s</DependentUpon>
     </TypeScriptCompile>

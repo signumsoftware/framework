@@ -7,10 +7,9 @@ import * as Finder from '../../../Framework/Signum.React/Scripts/Finder'
 import { FindOptions } from '../../../Framework/Signum.React/Scripts/FindOptions'
 import { TypeContext, StyleContext, StyleOptions, FormGroupStyle } from '../../../Framework/Signum.React/Scripts/TypeContext'
 import { PropertyRoute, PropertyRouteType, MemberInfo, getTypeInfo, getTypeInfos, TypeInfo, IsByAll, New, getTypeName } from '../../../Framework/Signum.React/Scripts/Reflection'
-import { LineBase, LineBaseProps, FormGroup, FormControlStatic, runTasks } from '../../../Framework/Signum.React/Scripts/Lines/LineBase'
+import { LineBase, LineBaseProps } from '../../../Framework/Signum.React/Scripts/Lines/LineBase'
 import { ModifiableEntity, Lite, Entity, EntityControlMessage, JavascriptMessage, toLite, is, liteKey, getToString } from '../../../Framework/Signum.React/Scripts/Signum.Entities'
 import { IFile, IFilePath, FileMessage, FileTypeSymbol, FileEntity, FilePathEntity, FileEmbedded, FilePathEmbedded } from './Signum.Entities.Files'
-import Typeahead from '../../../Framework/Signum.React/Scripts/Lines/Typeahead'
 import { EntityBase, EntityBaseProps} from '../../../Framework/Signum.React/Scripts/Lines/EntityBase'
 
 import "./Files.css"
@@ -24,7 +23,8 @@ export interface FileUploaderProps {
     dragAndDrop?: boolean;
     dragAndDropMessage?: string;
     accept?: string;
-    multiple?: boolean
+    multiple?: boolean;
+    buttonCss?: string;
     divHtmlAttributes?: React.HTMLAttributes<HTMLDivElement>
 }
 
@@ -106,7 +106,7 @@ export default class FileUploader extends React.Component<FileUploaderProps, Fil
     render() {
         return (
             <div {...this.props.divHtmlAttributes}>
-                <div className="sf-upload btn btn-default">
+                <div className={classes("sf-upload btn btn-light", this.props.buttonCss)}>
                     <i className="fa fa-upload" />
                     {FileMessage.SelectFile.niceToString()}
                     <input type='file' accept={this.props.accept} onChange={this.handleFileChange} multiple={this.props.multiple}/>

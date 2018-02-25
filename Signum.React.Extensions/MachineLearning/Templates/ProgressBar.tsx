@@ -1,5 +1,5 @@
 ﻿import * as React from 'react'
-import { BsStyle } from '../../../../Framework/Signum.React/Scripts/Operations';
+import { BsColor } from '../../../../Framework/Signum.React/Scripts/Components/Basic';
 import { classes } from '../../../../Framework/Signum.React/Scripts/Globals'
 import * as numbro from 'numbro';
 
@@ -7,7 +7,7 @@ interface ProgressBarProps {
     value?: number | null; /*0...1*/
     showPercentageInMessage?: boolean | null;
     message?: string | null;
-    color?: BsStyle | null;
+    color?: BsColor | null;
     stripped?: boolean;
     active?: boolean;
 }

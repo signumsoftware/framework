@@ -1,7 +1,6 @@
 ﻿import * as React from 'react'
-import { Tab, Tabs } from 'react-bootstrap'
 import { classes } from '../../../../Framework/Signum.React/Scripts/Globals'
-import { FormGroup, FormControlStatic, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityDetail, EntityList, EntityRepeater, EntityTabRepeater } from '../../../../Framework/Signum.React/Scripts/Lines'
+import { FormGroup, FormControlReadonly, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityDetail, EntityList, EntityRepeater, EntityTabRepeater } from '../../../../Framework/Signum.React/Scripts/Lines'
 import { SubTokensOptions, QueryToken, QueryTokenType, hasAnyOrAll } from '../../../../Framework/Signum.React/Scripts/FindOptions'
 import { SearchControl } from '../../../../Framework/Signum.React/Scripts/Search'
 import { getToString, getMixin } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
@@ -21,7 +20,7 @@ export default class TimeSpan extends React.Component<{ ctx: TypeContext<TimeSpa
         const sc = e.subCtx({ formGroupStyle: "BasicDown" });
 
         return (
-            <div className="row form-vertical">
+            <div className="row">
                 <div className="col-sm-3">
                     <ValueLine ctx={sc.subCtx(n => n.days)} />
                 </div>

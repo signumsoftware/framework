@@ -50,7 +50,7 @@ export default class ChangePassword extends React.Component<{}, { modelState?: M
     handlePasswordBlur = (event: React.SyntheticEvent<any>) => {
         
         if (this.newPassword.value && this.newPassword2.value && this.newPassword2.value != this.newPassword.value)
-            this.setState({ modelState: { ["newPassword"]: [AuthMessage.PasswordsAreDifferent.niceToString()] } });
+            this.setState({ modelState: { ["newPassword"]: [AuthMessage.PasswordsAreDifferent.niceToString()] } as ModelState });
         else
             this.setState({ modelState: undefined });
     }
@@ -84,7 +84,7 @@ export default class ChangePassword extends React.Component<{}, { modelState?: M
                         <p>{ AuthMessage.ChangePasswordAspx_EnterActualPasswordAndNewOne.niceToString() }</p>
                     </div>
                 </div>
-                <div className="form-horizontal">
+                <div>
                     <div className="form-group">
                         <label className="col-sm-offset-2 col-sm-2 control-label">{AuthMessage.ChangePasswordAspx_ActualPassword.niceToString() }</label>
                         <div className="col-sm-4">
@@ -109,7 +109,7 @@ export default class ChangePassword extends React.Component<{}, { modelState?: M
                 </div>
                 <div className="row">
                     <div className="col-sm-offset-4 col-sm-6">
-                        <button type="submit" className="btn btn-default" id="changePassword"  disabled={!this.isEnabled() }>{AuthMessage.ChangePassword.niceToString() }</button>
+                        <button type="submit" className="btn btn-light" id="changePassword"  disabled={!this.isEnabled() }>{AuthMessage.ChangePassword.niceToString() }</button>
                     </div>
                 </div>
             </form>

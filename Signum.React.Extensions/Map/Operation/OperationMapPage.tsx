@@ -156,7 +156,7 @@ export default class OperationMapPage extends React.Component<OperationMapPagePr
                 </span>
                 &nbsp;
                 <a id="sfFullScreen" className="sf-popup-fullscreen" onClick={this.handleFullscreenClick} href="#">
-                    <span className="glyphicon glyphicon-new-window"></span>
+                    <span className="fa fa-external-link"></span>
                 </a>
             </div>
         );

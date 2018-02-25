@@ -125,7 +125,7 @@ export default class ImportAssetsPage extends React.Component<ImportAssetsPagePr
                         }
                     </tbody>
                 </table>
-                <button onClick={this.handleImport} className="btn btn-info"><span className="glyphicon glyphicon-cloud-upload" aria-hidden="true"></span> Import</button>
+                <button onClick={this.handleImport} className="btn btn-info"><span className="fa fa-cloud-upload" aria-hidden="true"></span> Import</button>
             </div>
         );
     }

@@ -1,6 +1,6 @@
 ﻿
 import * as React from 'react'
-import { FormGroup, FormControlStatic, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityList, EntityRepeater, RenderEntity } from '../../../../Framework/Signum.React/Scripts/Lines'
+import { FormGroup, FormControlReadonly, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityList, EntityRepeater, RenderEntity } from '../../../../Framework/Signum.React/Scripts/Lines'
 import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
 import { QueryDescription, SubTokensOptions, FindOptions } from '../../../../Framework/Signum.React/Scripts/FindOptions'
 import { getQueryNiceName, PropertyRoute, getTypeInfos } from '../../../../Framework/Signum.React/Scripts/Reflection'
@@ -89,7 +89,7 @@ export class BigValueSearchCounter extends React.Component<BigValueBadgeProps> {
         
         return (
             <div className={"panel panel-" + this.props.style.toLowerCase()}>
-                <div className="panel-heading" onClick={e=> this.vsc.handleClick(e)} style={{ cursor: "pointer" }}>
+                <div className="card-heading" onClick={e=> this.vsc.handleClick(e)} style={{ cursor: "pointer" }}>
                     <div className="row">
                         <div className="col-xs-3">
                             <i className={classes(this.props.iconName, "fa-5x")} style={{ color: this.props.iconColor }}></i>

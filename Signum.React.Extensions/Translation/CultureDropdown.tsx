@@ -1,5 +1,4 @@
 ﻿import * as React from 'react'
-import { NavDropdown, MenuItem }  from 'react-bootstrap'
 import { Route } from 'react-router'
 import { Dic } from '../../../Framework/Signum.React/Scripts/Globals';
 import { ajaxPost, ajaxGet } from '../../../Framework/Signum.React/Scripts/Services';
@@ -10,6 +9,7 @@ import { EntityOperationSettings } from '../../../Framework/Signum.React/Scripts
 import * as Operations from '../../../Framework/Signum.React/Scripts/Operations'
 import { CultureInfoEntity } from '../Basics/Signum.Entities.Basics'
 import * as CultureClient from './CultureClient'
+import { UncontrolledDropdown, DropdownToggle, DropdownMenu, DropdownItem } from '../../../Framework/Signum.React/Scripts/Components';
 
 export interface CultureDropdownProps {
 }
@@ -24,7 +24,7 @@ export default class CultureDropdown extends React.Component<CultureDropdownProp
         super(props);
         this.state = {};
     }
-    
+
     componentWillMount() {
         CultureClient.getCultures(false)
             .then(cultures => this.setState({ cultures: cultures }))
@@ -46,14 +46,18 @@ export default class CultureDropdown extends React.Component<CultureDropdownProp
         const pair = Dic.map(cultures, (name, c) => ({ name, c })).filter(p => is(p.c, current)).singleOrNull();
 
         return (
-            <NavDropdown id="culture-dropdown" title={current.nativeName!} data-culture={pair && pair.name}>
-                {
-                    Dic.map(cultures, (name, c, i) =>
-                        <MenuItem key={i} data-culture={name} selected={is(c, current) } onSelect={() => this.handleSelect(c)}>
+            <UncontrolledDropdown data-culture={pair && pair.name}>
+                <DropdownToggle nav caret>
+                    {current.nativeName}
+                </DropdownToggle>
+                <DropdownMenu right>
+                    {Dic.map(cultures, (name, c, i) =>
+                        <DropdownItem key={i} data-culture={name} disabled={is(c, current)} onClick={() => this.handleSelect(c)}>
                             {c.toStr}
-                        </MenuItem>)
-                }
-            </NavDropdown>
+                        </DropdownItem>
+                    )}
+                </DropdownMenu>
+            </UncontrolledDropdown>
         );
     }
 }

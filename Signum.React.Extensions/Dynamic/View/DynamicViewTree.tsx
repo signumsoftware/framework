@@ -1,5 +1,5 @@
 ﻿import * as React from 'react'
-import { FormGroup, FormControlStatic, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityList, EntityRepeater } from '../../../../Framework/Signum.React/Scripts/Lines'
+import { FormGroup, FormControlReadonly, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityList, EntityRepeater } from '../../../../Framework/Signum.React/Scripts/Lines'
 import { ModifiableEntity } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
 import { classes, DomUtils, Dic } from '../../../../Framework/Signum.React/Scripts/Globals'
 import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
@@ -10,7 +10,6 @@ import { TypeContext, FormGroupStyle } from '../../../../Framework/Signum.React/
 import ContextMenu from '../../../../Framework/Signum.React/Scripts/SearchControl/ContextMenu'
 import { ContextMenuPosition } from '../../../../Framework/Signum.React/Scripts/SearchControl/ContextMenu'
 import SelectorModal from '../../../../Framework/Signum.React/Scripts/SelectorModal'
-import { MenuItem } from 'react-bootstrap'
 
 import * as NodeUtils from './NodeUtils'
 import NodeSelectorModal from './NodeSelectorModal'
@@ -19,6 +18,7 @@ import { BaseNode, ContainerNode, LineBaseNode, NodeConstructor, EntityTableNode
 import { DynamicViewEntity, DynamicViewMessage } from '../Signum.Entities.Dynamic'
 
 import "./DynamicViewTree.css"
+import { DropdownItem } from '../../../../Framework/Signum.React/Scripts/Components';
 
 export interface DynamicViewTreeProps {
     rootNode: DesignerNode<BaseNode>;
@@ -91,16 +91,16 @@ export class DynamicViewTree extends React.Component<DynamicViewTreeProps, Dnami
         
         return (
                 <ContextMenu position={cm.position} onHide={this.handleContextOnHide}>
-                    {no.isContainer && <MenuItem onClick={this.handleAddChildren}><i className="fa fa-arrow-right" aria-hidden="true"></i>&nbsp; {DynamicViewMessage.AddChild.niceToString()}</MenuItem>}
-                    {!isRoot && <MenuItem onClick={this.handleAddSibling}><i className="fa fa-arrow-down" aria-hidden="true"></i>&nbsp; {DynamicViewMessage.AddSibling.niceToString()}</MenuItem>}
+                    {no.isContainer && <DropdownItem onClick={this.handleAddChildren}><i className="fa fa-arrow-right" aria-hidden="true"></i>&nbsp; {DynamicViewMessage.AddChild.niceToString()}</DropdownItem>}
+                    {!isRoot && <DropdownItem onClick={this.handleAddSibling}><i className="fa fa-arrow-down" aria-hidden="true"></i>&nbsp; {DynamicViewMessage.AddSibling.niceToString()}</DropdownItem>}
 
-                    {no.isContainer && <MenuItem divider={true} />}
+                    {no.isContainer && <DropdownItem divider={true} />}
 
-                    {no.isContainer && cn.children.length == 0 && dn.route && <MenuItem onClick={this.handleGenerateChildren}><i className="fa fa-bolt" aria-hidden="true"></i>&nbsp; {DynamicViewMessage.GenerateChildren.niceToString()}</MenuItem>}
-                    {no.isContainer && cn.children.length > 0 && <MenuItem onClick={this.handleClearChildren} bsClass="danger"><i className="fa fa-trash" aria-hidden="true"></i>&nbsp; {DynamicViewMessage.ClearChildren.niceToString()}</MenuItem>}
+                    {no.isContainer && cn.children.length == 0 && dn.route && <DropdownItem onClick={this.handleGenerateChildren}><i className="fa fa-bolt" aria-hidden="true"></i>&nbsp; {DynamicViewMessage.GenerateChildren.niceToString()}</DropdownItem>}
+                    {no.isContainer && cn.children.length > 0 && <DropdownItem onClick={this.handleClearChildren} color="danger"><i className="fa fa-trash" aria-hidden="true"></i>&nbsp; {DynamicViewMessage.ClearChildren.niceToString()}</DropdownItem>}
 
-                    {!isRoot && <MenuItem divider={true} />}
-                    {!isRoot && <MenuItem onClick={this.handleRemove} bsClass="danger"><i className="fa fa-times" aria-hidden="true"></i>&nbsp; {DynamicViewMessage.Remove.niceToString()}</MenuItem>}
+                    {!isRoot && <DropdownItem divider={true} />}
+                    {!isRoot && <DropdownItem onClick={this.handleRemove} color="danger"><i className="fa fa-times" aria-hidden="true"></i>&nbsp; {DynamicViewMessage.Remove.niceToString()}</DropdownItem>}
                 </ContextMenu>
         );
     }

@@ -1,6 +1,5 @@
 ﻿
 import * as React from 'react'
-import { Button, MenuItem, } from 'react-bootstrap'
 import { Dic, classes } from '../../../Framework/Signum.React/Scripts/Globals'
 import { getQueryKey } from '../../../Framework/Signum.React/Scripts/Reflection'
 import * as Finder from '../../../Framework/Signum.React/Scripts/Finder'
@@ -11,6 +10,7 @@ import * as Navigator from '../../../Framework/Signum.React/Scripts/Navigator'
 import { default as SearchControlLoaded } from '../../../Framework/Signum.React/Scripts/SearchControl/SearchControlLoaded'
 import { ChartMessage, ChartRequest } from './Signum.Entities.Chart'
 import * as ChartClient from './ChartClient'
+import { Button } from '../../../Framework/Signum.React/Scripts/Components';
 
 export interface ChartButtonProps {
     searchControl: SearchControlLoaded;
@@ -19,7 +19,7 @@ export interface ChartButtonProps {
 export default class ChartButton extends React.Component<ChartButtonProps> {
 
     handleOnMouseUp = (e: React.MouseEvent<any>) => {
-
+        
         const fo = this.props.searchControl.props.findOptions;
 
         const path = ChartClient.Encoder.chartPath(ChartRequest.New({
@@ -37,7 +37,7 @@ export default class ChartButton extends React.Component<ChartButtonProps> {
     render() {
         var label = this.props.searchControl.props.largeToolbarButtons == true ? " " + ChartMessage.Chart.niceToString() : undefined;
         return (
-            <Button onMouseUp={this.handleOnMouseUp}><i className="glyphicon glyphicon-stats"></i>&nbsp;{label}</Button>
+            <Button onMouseUp={this.handleOnMouseUp} color="light"><i className="fa fa-bar-chart"></i>&nbsp;{label}</Button>
         );
     }
  

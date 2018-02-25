@@ -58,6 +58,7 @@ import { getTypeInfo } from "../../../Framework/Signum.React/Scripts/Reflection"
 import WorkflowHelpComponent from './Workflow/WorkflowHelpComponent';
 import { globalModules } from '../Dynamic/View/GlobalModules';
 import { FilterRequest, ColumnRequest } from '../../../Framework/Signum.React/Scripts/FindOptions';
+import { BsColor } from '../../../Framework/Signum.React/Scripts/Components/Basic';
 
 export function start(options: { routes: JSX.Element[] }) {
 
@@ -124,7 +125,7 @@ export function start(options: { routes: JSX.Element[] }) {
     }));
 
     Operations.addSettings(new EntityOperationSettings(CaseOperation.SetTags, { isVisible: ctx => false }));
-    Operations.addSettings(new EntityOperationSettings(CaseActivityOperation.Register, { hideOnCanExecute: true, style: "primary", onClick: eoc => executeCaseActivity(eoc, e => e.defaultClick()), }));
+    Operations.addSettings(new EntityOperationSettings(CaseActivityOperation.Register, { hideOnCanExecute: true, color: "primary", onClick: eoc => executeCaseActivity(eoc, e => e.defaultClick()), }));
     Operations.addSettings(new EntityOperationSettings(CaseActivityOperation.Delete, { hideOnCanExecute: true, isVisible: ctx => false, contextual: { isVisible: ctx => true } }));
     Operations.addSettings(new EntityOperationSettings(CaseActivityOperation.Jump, { onClick: eoc => executeCaseActivity(eoc, executeWorkflowJump), contextual: { isVisible: ctx => true, onClick: executeWorkflowJumpContextual } }));
     Operations.addSettings(new EntityOperationSettings(CaseActivityOperation.Timeout, { isVisible: ctx => false }));
@@ -139,14 +140,14 @@ export function start(options: { routes: JSX.Element[] }) {
     caseActivityOperation(CaseActivityOperation.Approve, "success");
     caseActivityOperation(CaseActivityOperation.Decline, "warning");
     caseActivityOperation(CaseActivityOperation.Undo, "danger");
-    caseActivityOperation(CaseActivityOperation.Reject, "default");
+    caseActivityOperation(CaseActivityOperation.Reject, "secondary");
 
     QuickLinks.registerQuickLink(WorkflowEntity, ctx => new QuickLinks.QuickLinkLink("bam",
         WorkflowActivityMonitorMessage.WorkflowActivityMonitor.niceToString(),
         workflowActivityMonitorUrl(ctx.lite),
         { icon: "fa fa-tachometer", iconColor: "green" }));
 
-    Operations.addSettings(new EntityOperationSettings(WorkflowOperation.Save, { style: "primary", onClick: executeWorkflowSave }));
+    Operations.addSettings(new EntityOperationSettings(WorkflowOperation.Save, { color: "primary", onClick: executeWorkflowSave }));
     Operations.addSettings(new EntityOperationSettings(WorkflowOperation.Delete, { contextualFromMany: { isVisible: ctx => false } }));
     Navigator.addSettings(new EntitySettings(WorkflowEntity, w => import('./Workflow/Workflow'), { avoidPopup: true }));
 
@@ -290,15 +291,15 @@ public interface IWorkflowTransition
     }).done();
 }
 
-function caseActivityOperation(operation: ExecuteSymbol<CaseActivityEntity>, style: Operations.BsStyle) {
+function caseActivityOperation(operation: ExecuteSymbol<CaseActivityEntity>, color: BsColor) {
     Operations.addSettings(new EntityOperationSettings(operation, {
         hideOnCanExecute: true,
-        style: style,
+        color: color,
         onClick: eoc => executeCaseActivity(eoc, executeAndClose),
         contextual: { isVisible: ctx => true },
         contextualFromMany: {
             isVisible: ctx => true,
-            style: style
+            color: color
         },
     }));
 }

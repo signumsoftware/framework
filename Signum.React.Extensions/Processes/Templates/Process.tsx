@@ -1,13 +1,13 @@
 ﻿import * as React from 'react'
 import { classes } from '../../../../Framework/Signum.React/Scripts/Globals'
-import { FormGroup, FormControlStatic, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityList, EntityRepeater} from '../../../../Framework/Signum.React/Scripts/Lines'
+import { FormGroup, FormControlReadonly, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityList, EntityRepeater} from '../../../../Framework/Signum.React/Scripts/Lines'
 import { ValueSearchControlLine }  from '../../../../Framework/Signum.React/Scripts/Search'
 import { toLite }  from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
 import * as Navigator  from '../../../../Framework/Signum.React/Scripts/Navigator'
 import { TypeContext, FormGroupStyle } from '../../../../Framework/Signum.React/Scripts/TypeContext'
 import { ProcessEntity, ProcessState, ProcessExceptionLineEntity } from '../Signum.Entities.Processes'
 import ProgressBar from '../../MachineLearning/Templates/ProgressBar';
-import { BsStyle } from '../../../../Framework/Signum.React/Scripts/Operations';
+import { BsColor } from '../../../../Framework/Signum.React/Scripts/Components';
 
 export default class Process extends React.Component<{ ctx: TypeContext<ProcessEntity> }> {
 
@@ -84,21 +84,20 @@ export default class Process extends React.Component<{ ctx: TypeContext<ProcessE
     renderProgress() {
 
         const p = this.props.ctx.value;
-        
 
-        const style: BsStyle =
+        const color: BsColor | undefined =
             p.state == "Queued" ? "info" :
-                p.state == "Executing" ? "default" :
+                p.state == "Executing" ? undefined :
                     p.state == "Finished" ? "success" :
                         p.state == "Suspending" || p.state == "Suspended" ? "warning" :
                             p.state == "Error" ? "danger" :
-                                "default";
+                                undefined;
 
         return (
             <ProgressBar
                 message={p.state == "Finished" ? null : p.status}
                 value={p.state == "Created" ? 0 : (p.progress == 0 || p.progress == 1) ? null : p.progress}
-                color={style}
+                color={color}
                 showPercentageInMessage={p.state != "Created" && p.state != "Finished"}
                 active={p.state == "Finished" ? false : undefined}
                 stripped={p.state == "Finished" ? false : undefined}

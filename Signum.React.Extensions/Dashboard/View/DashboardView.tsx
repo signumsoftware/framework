@@ -1,6 +1,6 @@
 ﻿
 import * as React from 'react'
-import { FormGroup, FormControlStatic, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityList, EntityRepeater, RenderEntity } from '../../../../Framework/Signum.React/Scripts/Lines'
+import { FormGroup, FormControlReadonly, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityList, EntityRepeater, RenderEntity } from '../../../../Framework/Signum.React/Scripts/Lines'
 import { classes } from '../../../../Framework/Signum.React/Scripts/Globals'
 import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
 import { QueryDescription, SubTokensOptions } from '../../../../Framework/Signum.React/Scripts/FindOptions'
@@ -238,19 +238,24 @@ export class PanelPart extends React.Component<PanelPartProps, PanelPartState>{
                 <span className={icon} style={{ color: color }} />&nbsp;{titleText}
             </span>;
 
+        var style = p.style == undefined || p.style == "Default" ? undefined : p.style.toLowerCase();
+
         return (
-            <div className={classes("panel", "panel-" + (p.style == undefined ? "default" : p.style.firstLower()))}>
-                <div className="panel-heading sf-show-hover">
+            <div className={classes("card", style && ("border-" + style))}>
+                <div className={classes("card-header", "sf-show-hover", 
+                    style && style != "light" && "text-white",
+                    style && ("bg-" + style)
+                )}>
                     {renderer.handleEditClick &&
                         <a className="sf-pointer pull-right flip sf-hide" onMouseUp={e => renderer.handleEditClick!(content, lite, e)}>
-                            <span className="glyphicon glyphicon-edit"></span>&nbsp;Edit
+                            <span className="fa fa-edit"></span>&nbsp;Edit
                         </a>}
                     &nbsp;
                     {renderer.handleTitleClick == undefined ? title :
                         <a className="sf-pointer" onMouseUp={e => renderer.handleTitleClick!(content, lite, e)}>{title}</a>}
 
                 </div>
-                <div className="panel-body">
+                <div className="card-body">
                     {
                         React.createElement(this.state.component, {
                             partEmbedded: p,

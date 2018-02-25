@@ -1,6 +1,5 @@
 ﻿
 import * as React from 'react'
-import { Modal, ModalProps, ModalClass, ButtonToolbar } from 'react-bootstrap'
 import { Dic } from '../../../../Framework/Signum.React/Scripts/Globals';
 import { openModal, IModalProps } from '../../../../Framework/Signum.React/Scripts/Modals';
 import { SelectorMessage } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
@@ -9,6 +8,7 @@ import { TypeContext, StyleContext } from '../../../../Framework/Signum.React/Sc
 import { DynamicViewMessage } from '../Signum.Entities.Dynamic'
 import * as NodeUtils from './NodeUtils'
 import { BaseNode } from './Nodes'
+import { Modal } from '../../../../Framework/Signum.React/Scripts/Components';
 
 
 interface ShowCodeModalProps extends React.Props<ShowCodeModal>, IModalProps {
@@ -35,18 +35,18 @@ export default class ShowCodeModal extends React.Component<ShowCodeModalProps, {
     render() {
         
         return (
-            <Modal bsSize="lg" onHide={this.handleCancelClicked} show={this.state.show} onExited={this.handleOnExited} className="sf-selector-modal">
-                <Modal.Header closeButton={true}>
-                    <h4 className="modal-title">
-                        {this.props.typeName + "Component code"}
-                    </h4>
-                </Modal.Header>
-
-                <Modal.Body>
+            <Modal size="lg" onHide={this.handleCancelClicked} show={this.state.show} onExited={this.handleOnExited} className="sf-selector-modal">
+                <div className="modal-header">
+                    <h5 className="modal-title">{this.props.typeName + "Component code"}</h5>
+                    <button type="button" className="close" data-dismiss="modal" aria-label="Close" onClick={this.handleCancelClicked}>
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div className="modal-body">
                     <pre>
                         {renderFile(this.props.typeName, this.props.node)}
                     </pre>
-                </Modal.Body>
+                </div>
             </Modal>
         );
     }

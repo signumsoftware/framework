@@ -1,7 +1,6 @@
 ﻿import * as React from 'react'
-import { Tab, Tabs } from 'react-bootstrap'
 import { classes } from '../../../../Framework/Signum.React/Scripts/Globals'
-import { FormGroup, FormControlStatic, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityDetail, EntityList, EntityRepeater, EntityTabRepeater } from '../../../../Framework/Signum.React/Scripts/Lines'
+import { FormGroup, FormControlReadonly, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityDetail, EntityList, EntityRepeater, EntityTabRepeater } from '../../../../Framework/Signum.React/Scripts/Lines'
 import { SearchControl } from '../../../../Framework/Signum.React/Scripts/Search'
 import { getToString, getMixin } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
 import { TypeContext, FormGroupStyle } from '../../../../Framework/Signum.React/Scripts/TypeContext'
@@ -14,6 +13,7 @@ import FileLine from '../../Files/FileLine'
 import IFrameRenderer from './IFrameRenderer'
 import HtmlCodemirror from '../../Codemirror/HtmlCodemirror'
 import { tryGetMixin } from "../../../../Framework/Signum.React/Scripts/Signum.Entities";
+import { UncontrolledTabs, Tab } from '../../../../Framework/Signum.React/Scripts/Components';
 
 
 export default class EmailMessage extends React.Component<{ ctx: TypeContext<EmailMessageEntity> }> {
@@ -29,8 +29,8 @@ export default class EmailMessage extends React.Component<{ ctx: TypeContext<Ema
         const sc1 = e.subCtx({ labelColumns: { sm: 1 } });
 
         return (
-            <Tabs id="newsletterTabs">
-                <Tab title={EmailMessageEntity.niceName()}>
+            <UncontrolledTabs id="emailTabs">
+                <Tab title={EmailMessageEntity.niceName()} eventKey="mainTab">
                     <fieldset>
                         <legend>Properties</legend>
                         <div className="row">
@@ -59,14 +59,14 @@ export default class EmailMessage extends React.Component<{ ctx: TypeContext<Ema
                     <ValueLine ctx={sc1.subCtx(f => f.isBodyHtml)} inlineCheckbox={true} onChange={() => this.forceUpdate()} />
                     {sc1.value.state != "Created" ? <IFrameRenderer style={{ width: "100%" }} html={e.value.body} /> :
                         sc1.value.isBodyHtml ? <div className="code-container"><HtmlCodemirror ctx={e.subCtx(f => f.body)} /></div> :
-                            <div className="form-vertical">
+                            <div>
                                 <ValueLine ctx={e.subCtx(f => f.body)} valueLineType="TextArea" valueHtmlAttributes={{ style: { height: "180px" } }} formGroupStyle="SrOnly" />
                             </div>
                     }
                     <EmailMessageComponent ctx={e} invalidate={() => this.forceUpdate()} />
                 </Tab>
                 {this.renderEmailReceptionMixin()}
-            </Tabs>
+            </UncontrolledTabs>
         );
     }
 
@@ -79,20 +79,22 @@ export default class EmailMessage extends React.Component<{ ctx: TypeContext<Ema
 
         const ri = this.props.ctx.subCtx(EmailReceptionMixin).subCtx(a => a.receptionInfo!);
 
-        return <Tab title={EmailReceptionMixin.niceName()}>
-            <fieldset>
-                <legend>Properties</legend>
+        return (
+            <Tab title={EmailReceptionMixin.niceName()} eventKey="receptionMixin">
+                <fieldset>
+                    <legend>Properties</legend>
 
-                <EntityLine ctx={ri.subCtx(f => f.reception)} />
-                <ValueLine ctx={ri.subCtx(f => f.uniqueId)} />
-                <ValueLine ctx={ri.subCtx(f => f.sentDate)} />
-                <ValueLine ctx={ri.subCtx(f => f.receivedDate)} />
-                <ValueLine ctx={ri.subCtx(f => f.deletionDate)} />
+                    <EntityLine ctx={ri.subCtx(f => f.reception)} />
+                    <ValueLine ctx={ri.subCtx(f => f.uniqueId)} />
+                    <ValueLine ctx={ri.subCtx(f => f.sentDate)} />
+                    <ValueLine ctx={ri.subCtx(f => f.receivedDate)} />
+                    <ValueLine ctx={ri.subCtx(f => f.deletionDate)} />
 
-            </fieldset>
+                </fieldset>
 
-            <pre>{ri.value.rawContent}</pre>
-        </Tab>;
+                <pre>{ri.value.rawContent}</pre>
+            </Tab>
+        );
     };
 
 
@@ -135,7 +137,7 @@ export class EmailMessageComponent extends React.Component<EmailMessageComponent
         const ec = this.props.ctx.subCtx({ labelColumns: { sm: 2 } });
         return (
             <div className="sf-email-template-message">
-                <div className="form-vertical">
+                <div>
                     <br />
                     <a href="#" onClick={this.handlePreviewClick}>
                         {this.state.showPreview ?

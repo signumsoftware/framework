@@ -1,7 +1,6 @@
 ﻿import * as React from 'react'
-import { Popover, OverlayTrigger } from 'react-bootstrap';
 import { classes } from '../../../../Framework/Signum.React/Scripts/Globals'
-import { FormGroup, FormControlStatic, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityList, EntityRepeater, EntityTable, StyleContext, OptionItem, LineBaseProps } from '../../../../Framework/Signum.React/Scripts/Lines'
+import { FormGroup, FormControlReadonly, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityList, EntityRepeater, EntityTable, StyleContext, OptionItem, LineBaseProps } from '../../../../Framework/Signum.React/Scripts/Lines'
 import { SearchControl, ValueSearchControl } from '../../../../Framework/Signum.React/Scripts/Search'
 import { TypeContext, FormGroupStyle } from '../../../../Framework/Signum.React/Scripts/TypeContext'
 import FileLine from '../../Files/FileLine'
@@ -16,6 +15,7 @@ import { API } from '../PredictorClient';
 import FilterBuilderEmbedded from './FilterBuilderEmbedded';
 import { TypeReference } from '../../../../Framework/Signum.React/Scripts/Reflection';
 import { is } from '../../../../Framework/Signum.React/Scripts/Signum.Entities';
+import { UncontrolledPopover } from '../../../../Framework/Signum.React/Scripts/Components';
 
 export default class NeuralNetworkSettings extends React.Component<{ ctx: TypeContext<NeuralNetworkSettingsEntity> }> {
 
@@ -76,7 +76,7 @@ export default class NeuralNetworkSettings extends React.Component<{ ctx: TypeCo
                 <hr />
                 <div className="row">
                     <div className="col-sm-6">
-                        <ValueLine ctx={ctx6.subCtx(a => a.learner)} onChange={this.handleLearnerChange} helpBlock={this.getHelpBlock(ctx.value.learner)} />
+                        <ValueLine ctx={ctx6.subCtx(a => a.learner)} onChange={this.handleLearnerChange} helpText={this.getHelpBlock(ctx.value.learner)} />
                         <ValueLine ctx={ctx6.subCtx(a => a.learningRate)} />
                         <ValueLine ctx={ctx6.subCtx(a => a.learningMomentum)} formGroupHtmlAttributes={hideFor(ctx6, "AdaDelta", "AdaGrad", "SGD")} />
                         {withHelp(<ValueLine ctx={ctx6.subCtx(a => a.learningUnitGain)} formGroupHtmlAttributes={hideFor(ctx6, "AdaDelta", "AdaGrad", "SGD")} />, <p>true makes it stable (Loss = 1)<br/>false diverge (Loss >> 1)</p>)}
@@ -155,7 +155,7 @@ export default class NeuralNetworkSettings extends React.Component<{ ctx: TypeCo
     renderCount(ctx: StyleContext, p: PredictorEntity, usage: PredictorColumnUsage) {
         return (
             <FormGroup ctx={ctx} labelText={PredictorColumnUsage.niceToString(usage) + " columns"}>
-                {p.state != "Trained" ? <FormControlStatic ctx={ctx}>?</FormControlStatic> : <ValueSearchControl isBadge={true} isLink={true} findOptions={{
+                {p.state != "Trained" ? <FormControlReadonly ctx={ctx}>?</FormControlReadonly> : <ValueSearchControl isBadge={true} isLink={true} findOptions={{
                     queryName: PredictorCodificationEntity,
                     parentColumn: "Predictor",
                     parentValue: p,
@@ -172,11 +172,15 @@ function withHelp(element: React.ReactElement<LineBaseProps>, text: React.ReactN
     var ctx = element.props.ctx;
     var id = ctx.prefix + "_help";
 
-    var popover = <Popover id={id} title={ctx.niceName()}> {text}</Popover>;
-
-    var label = <OverlayTrigger trigger="hover" placement="bottom" overlay={popover}>
-        <span>{ctx.niceName()} <i className="fa fa-question-circle" aria-hidden="true"></i></span>
-    </OverlayTrigger>; 
+    var label = (
+        <span>
+            <span id={id}>{ctx.niceName()} <i className="fa fa-question-circle" aria-hidden="true"></i></span>
+            <UncontrolledPopover placement="auto" target={id}>
+                <h3 className="popover-header">{ctx.niceName()}</h3>
+                <div className="popover-body">{text}</div>
+            </UncontrolledPopover>
+        </span>
+    );
 
     return React.cloneElement(element, { labelText: label } as LineBaseProps);
 }
@@ -223,4 +227,3 @@ export class DeviceLine extends React.Component<DeviceLineProps, DeviceLineState
         );
     }
 }
-

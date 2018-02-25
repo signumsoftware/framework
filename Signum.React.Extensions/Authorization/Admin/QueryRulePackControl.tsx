@@ -1,5 +1,4 @@
 ﻿import * as React from 'react'
-import { Button } from 'react-bootstrap'
 import * as numbro from 'numbro'
 import { classes } from '../../../../Framework/Signum.React/Scripts/Globals'
 import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
@@ -17,6 +16,7 @@ import { QueryRulePack, QueryAllowedRule, AuthAdminMessage, PermissionSymbol, Au
 import { ColorRadio, GrayCheckbox } from './ColoredRadios'
 
 import "./AuthAdmin.css"
+import { Button } from '../../../../Framework/Signum.React/Scripts/Components';
 
 export default class QueryRulesPackControl extends React.Component<{ ctx: TypeContext<QueryRulePack> }> implements IRenderButtons {
 
@@ -34,7 +34,7 @@ export default class QueryRulesPackControl extends React.Component<{ ctx: TypeCo
 
     renderButtons(bc: ButtonsContext) {
         return [
-            <Button bsStyle="primary" onClick={() => this.handleSaveClick(bc) }>{AuthMessage.Save.niceToString() }</Button>
+            <Button color="primary" onClick={() => this.handleSaveClick(bc)}>{AuthMessage.Save.niceToString()}</Button>
         ];
     }
 
@@ -61,7 +61,7 @@ export default class QueryRulesPackControl extends React.Component<{ ctx: TypeCo
                     <ValueLine ctx={ctx.subCtx(f => f.strategy) }  />
                     <EntityLine ctx={ctx.subCtx(f => f.type) }  />
                 </div>
-                <table className="table table-condensed sf-auth-rules">
+                <table className="table table-sm sf-auth-rules">
                     <thead>
                         <tr>
                             <th>

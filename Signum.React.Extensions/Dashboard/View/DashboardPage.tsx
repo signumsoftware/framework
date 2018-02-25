@@ -1,7 +1,7 @@
 ﻿
 import * as React from 'react'
 import { Link } from 'react-router-dom'
-import { FormGroup, FormControlStatic, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityList, EntityRepeater, RenderEntity } from '../../../../Framework/Signum.React/Scripts/Lines'
+import { FormGroup, FormControlReadonly, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityList, EntityRepeater, RenderEntity } from '../../../../Framework/Signum.React/Scripts/Lines'
 import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
 import { QueryDescription, SubTokensOptions } from '../../../../Framework/Signum.React/Scripts/FindOptions'
 import { getQueryNiceName, PropertyRoute, getTypeInfos } from '../../../../Framework/Signum.React/Scripts/Reflection'
@@ -94,7 +94,7 @@ export default class DashboardPage extends React.Component<DashboardPageProps, D
                 {!dashboard ? <h2>{JavascriptMessage.loading.niceToString()}</h2> :
                     <div className="sf-show-hover">
                         {Navigator.isNavigable({ entity: dashboard, canExecute: {} } as EntityPack<Entity>) &&
-                            <Link className="sf-hide pull-right flip" to={Navigator.navigateRoute(dashboard)}><span className="glyphicon glyphicon-edit"></span>&nbsp;Edit</Link>
+                            <Link className="sf-hide pull-right flip" to={Navigator.navigateRoute(dashboard)}><span className="fa fa-pencil"></span>&nbsp;Edit</Link>
                         }
                         <h2>{getToString(dashboard)}</h2>
                     </div>}

@@ -79,7 +79,7 @@ function moveModal(lite: Lite<TreeEntity>) {
     else
         return Navigator.view(MoveTreeModel.New({ insertPlace: "LastNode" }), {
             title: TreeMessage.Move0.niceToString(lite.toStr),
-            modalSize: "medium",
+            modalSize: "md",
             extraComponentProps: { lite },
         })
 }
@@ -91,7 +91,7 @@ function copyModal(lite: Lite<TreeEntity>) {
     else
         return Navigator.view(MoveTreeModel.New({ insertPlace: "LastNode" }), {
             title: TreeMessage.Copy0.niceToString(lite.toStr),
-            modalSize: "medium",
+            modalSize: "md",
             extraComponentProps: { lite },
         });
 }

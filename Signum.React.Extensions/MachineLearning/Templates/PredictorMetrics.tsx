@@ -1,6 +1,6 @@
 ﻿import * as React from 'react'
 import { classes } from '../../../../Framework/Signum.React/Scripts/Globals'
-import { FormGroup, FormControlStatic, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityList, EntityRepeater, EntityTable } from '../../../../Framework/Signum.React/Scripts/Lines'
+import { FormGroup, FormControlReadonly, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityList, EntityRepeater, EntityTable } from '../../../../Framework/Signum.React/Scripts/Lines'
 import { SearchControl } from '../../../../Framework/Signum.React/Scripts/Search'
 import { TypeContext, FormGroupStyle } from '../../../../Framework/Signum.React/Scripts/TypeContext'
 import FileLine from '../../Files/FileLine'
@@ -22,9 +22,9 @@ export default class PredictorRegressionMetrics extends React.Component<{ ctx: T
 
 
         return (
-            <fieldset className="form-vertical">
+            <fieldset>
                 <legend>Last results</legend>
-                <table className="table table-condensed" style={{ width: "initial" }}>
+                <table className="table table-sm" style={{ width: "initial" }}>
                     <thead>
                         <tr>
                             <th></th>

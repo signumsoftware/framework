@@ -1,11 +1,10 @@
 ﻿import * as React from 'react'
-import { DropdownButton, MenuItem, Tabs, Tab} from 'react-bootstrap'
 import { Dic, classes, ifError } from '../../../../Framework/Signum.React/Scripts/Globals'
 import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
 import { ValidationError, AbortableRequest } from '../../../../Framework/Signum.React/Scripts/Services'
 import { Lite, toLite } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
 import { ResultTable, FindOptions, FilterOption, QueryDescription, SubTokensOptions, QueryToken, QueryTokenType, ColumnOption } from '../../../../Framework/Signum.React/Scripts/FindOptions'
-import { TypeContext, FormGroupSize, FormGroupStyle, StyleOptions, StyleContext, mlistItemContext } from '../../../../Framework/Signum.React/Scripts/TypeContext'
+import { TypeContext, FormGroupStyle, StyleOptions, StyleContext, mlistItemContext } from '../../../../Framework/Signum.React/Scripts/TypeContext'
 import { SearchMessage, JavascriptMessage, parseLite, is, liteKey } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
 import { PropertyRoute, getQueryNiceName, getTypeInfo, ReadonlyBinding, GraphExplorer }  from '../../../../Framework/Signum.React/Scripts/Reflection'
 import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
@@ -24,6 +23,7 @@ import ChartRenderer from './ChartRenderer'
 
 import "../Chart.css"
 import "../../../../Framework/Signum.React/Scripts/SearchControl/Search.css"
+import { Tab, Tabs, UncontrolledTabs } from '../../../../Framework/Signum.React/Scripts/Components/Tabs';
 
 
 interface ChartRequestViewProps {
@@ -147,7 +147,7 @@ export default class ChartRequestView extends React.Component<ChartRequestViewPr
                 <h2>
                     <span className="sf-entity-title">{getQueryNiceName(cr.queryKey) }</span>&nbsp;
                     <a className ="sf-popup-fullscreen" href="#" onClick={this.handleOnFullScreen}>
-                        <span className="glyphicon glyphicon-new-window"></span>
+                        <span className="fa fa-external-link"></span>
                     </a>
                 </h2 >
                 <ValidationErrors entity={cr}/>
@@ -167,14 +167,14 @@ export default class ChartRequestView extends React.Component<ChartRequestViewPr
                     </div >
                     <div className="sf-query-button-bar btn-toolbar">
                         <button type="submit" className="sf-query-button sf-chart-draw btn btn-primary" onClick={this.handleOnDrawClick}>{ChartMessage.DrawChart.niceToString()}</button>
-                        <button className="sf-query-button sf-chart-script-edit btn btn-default" onClick={this.handleEditScript}><i className="fa fa-pencil" aria-hidden="true"/> &nbsp; {ChartMessage.EditScript.niceToString()}</button>
+                        <button className="sf-query-button sf-chart-script-edit btn btn-light" onClick={this.handleEditScript}><i className="fa fa-pencil" aria-hidden="true"/> &nbsp; {ChartMessage.EditScript.niceToString()}</button>
                         {ChartClient.ButtonBarChart.getButtonBarElements({ chartRequest: cr, chartRequestView: this }).map((a, i) => React.cloneElement(a, { key: i }))}
-                        <button className="btn btn-default" onMouseUp={this.handleExplore} ><i className="glyphicon glyphicon-search"></i> &nbsp; {SearchMessage.Explore.niceToString()}</button>
+                        <button className="btn btn-light" onMouseUp={this.handleExplore} ><i className="fa fa-search"></i> &nbsp; {SearchMessage.Explore.niceToString()}</button>
                     </div>
                     <br />
                     <div className="sf-search-results-container" >
                         {!s.chartResult || !s.lastChartRequest ? JavascriptMessage.searchForResults.niceToString() :
-                            <Tabs id="chartResultTabs" animation={false} unmountOnExit={true}>
+                            <UncontrolledTabs id="chartResultTabs" unmountOnExit={true}>
                                 <Tab eventKey="chart" title={ChartMessage.Chart.niceToString()}>
                                     <ChartRenderer chartRequest={cr} lastChartRequest={s.lastChartRequest} data={s.chartResult.chartTable} />
                                 </Tab>
@@ -182,7 +182,7 @@ export default class ChartRequestView extends React.Component<ChartRequestViewPr
                                 <Tab eventKey="data" title={<span>{ChartMessage.Data.niceToString()} ({(s.chartResult.resultTable.rows.length)})</span> as any}>
                                     <ChartTable chartRequest={cr} lastChartRequest={s.lastChartRequest} resultTable={s.chartResult.resultTable} onRedraw={this.handleOnDrawClick} />
                                 </Tab>
-                            </Tabs>
+                            </UncontrolledTabs>
                         }
                     </div>
                 </div>

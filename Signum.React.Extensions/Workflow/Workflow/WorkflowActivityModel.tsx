@@ -14,7 +14,6 @@ import { Binding } from '../../../../Framework/Signum.React/Scripts/Reflection';
 import CSharpCodeMirror from '../../Codemirror/CSharpCodeMirror'
 import TypeHelpComponent from "../../TypeHelp/TypeHelpComponent";
 import HtmlEditor from '../../HtmlEditor/HtmlEditor'
-import Typeahead from '../../../../Framework/Signum.React/Scripts/Lines/Typeahead'
 import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
 import { API } from '../WorkflowClient'
 
@@ -128,7 +127,7 @@ export default class WorkflowActivityModelComponent extends React.Component<Work
                                         ctx={tctx.subCtx(t => t.to)}
                                         autoComplete={new LiteAutocompleteConfig((ac,str) => API.findNode({ workflowId: ctx.value.workflow!.id, subString: str, count: 5, excludes: this.getCurrentJumpsTo() }, ac), false)}
                                         find={false}
-                                        helpBlock={WorkflowMessage.ToUseNewNodesOnJumpsYouSouldSaveWorkflow.niceToString()} />
+                                        helpText={WorkflowMessage.ToUseNewNodesOnJumpsYouSouldSaveWorkflow.niceToString()} />
                                     <EntityLine ctx={tctx.subCtx(t => t.action)} findOptions={{
                                         queryName: WorkflowActionEntity,
                                         parentColumn: "Entity.MainEntityType",
@@ -230,7 +229,7 @@ class ScriptComponent extends React.Component<{ ctx: TypeContext<WorkflowScriptP
                     ctx={ctx.subCtx(s => s.onFailureJump)}
                     autoComplete={new LiteAutocompleteConfig((ac, str) => API.findNode({ workflowId: this.props.workflow.id, subString: str, count: 5 }, ac), false)}
                     find={false}
-                    helpBlock={WorkflowMessage.ToUseNewNodesOnJumpsYouSouldSaveWorkflow.niceToString()} />
+                    helpText={WorkflowMessage.ToUseNewNodesOnJumpsYouSouldSaveWorkflow.niceToString()} />
              
             </fieldset>
         );

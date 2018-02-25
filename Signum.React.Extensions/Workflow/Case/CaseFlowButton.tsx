@@ -2,7 +2,6 @@
 import * as React from 'react'
 import * as moment from 'moment'
 import { Dic } from '../../../../Framework/Signum.React/Scripts/Globals'
-import { Modal, ModalProps, ModalClass, ButtonToolbar, Button } from 'react-bootstrap'
 import { openModal, IModalProps } from '../../../../Framework/Signum.React/Scripts/Modals'
 import { TypeContext, StyleOptions, EntityFrame } from '../../../../Framework/Signum.React/Scripts/TypeContext'
 import { TypeInfo, getTypeInfo, parseId, GraphExplorer, PropertyRoute, ReadonlyBinding, } from '../../../../Framework/Signum.React/Scripts/Reflection'
@@ -31,7 +30,7 @@ export default class CaseFlowButton extends React.Component <CaseFlowButtonProps
 
     render() {
         return (
-            <button className="btn btn-default pull-right flip" onClick={this.handleClick}>
+            <button className="btn btn-light pull-right flip" onClick={this.handleClick}>
                 <i className="fa fa-random" style={{ color: "green" }} /> {WorkflowActivityMessage.CaseFlow.niceToString()}
             </button>
         );

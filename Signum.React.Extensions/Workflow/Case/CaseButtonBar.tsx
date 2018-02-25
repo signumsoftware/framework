@@ -2,7 +2,6 @@
 import * as React from 'react'
 import * as moment from 'moment'
 import { Dic } from '../../../../Framework/Signum.React/Scripts/Globals'
-import { Modal, ModalProps, ModalClass, ButtonToolbar, Button } from 'react-bootstrap'
 import { openModal, IModalProps } from '../../../../Framework/Signum.React/Scripts/Modals'
 import { TypeContext, StyleOptions, EntityFrame } from '../../../../Framework/Signum.React/Scripts/TypeContext'
 import { TypeInfo, getTypeInfo, parseId, GraphExplorer, PropertyRoute, ReadonlyBinding, } from '../../../../Framework/Signum.React/Scripts/Reflection'
@@ -68,7 +67,7 @@ export class UserHelpComponent extends React.Component<UserHelpProps, { open: bo
     render() {
         return (
             <div style={{ marginTop: "10px" }}>
-                <a href="" onClick={this.handleHelpClick} className="case-help-button">
+                <a href="#" onClick={this.handleHelpClick} className="case-help-button">
                     {this.state.open ?
                         DynamicViewMessage.HideHelp.niceToString() :
                         DynamicViewMessage.ShowHelp.niceToString()}

@@ -1,5 +1,4 @@
 ﻿import * as React from 'react'
-import { MenuItem } from 'react-bootstrap'
 import { classes } from '../../../../Framework/Signum.React/Scripts/Globals'
 import * as Constructor from '../../../../Framework/Signum.React/Scripts/Constructor'
 import { DynamicViewOverrideEntity, DynamicViewMessage } from '../Signum.Entities.Dynamic'
@@ -16,6 +15,7 @@ import TypeHelpButtonBarComponent from '../../TypeHelp/TypeHelpButtonBarComponen
 import ValueLineModal from '../../../../Framework/Signum.React/Scripts/ValueLineModal'
 import MessageModal from '../../../../Framework/Signum.React/Scripts/Modals/MessageModal'
 import * as Nodes from '../../Dynamic/View/Nodes';
+import { DropdownItem } from '../../../../Framework/Signum.React/Scripts/Components';
 
 
 interface DynamicViewOverrideComponentProps {
@@ -105,13 +105,13 @@ export default class DynamicViewOverrideComponent extends React.Component<Dynami
     handleRenderContextualMenu = (pr: PropertyRoute) => {
         const lambda = "e => " + TypeHelpComponent.getExpression("e", pr, "TypeScript");
         return (
-            <MenuItem>
-                <MenuItem header>{pr.propertyPath()}</MenuItem>
-                <MenuItem divider />
-                <MenuItem onClick={() => this.handleRemoveClick(lambda)}><i className="fa fa-trash" aria-hidden="true" />&nbsp; Remove</MenuItem>
-                <MenuItem onClick={() => this.handleInsertBeforeClick(lambda)}><i className="glyphicon glyphicon-menu-left" aria-hidden="true" />&nbsp; Insert Before</MenuItem>
-                <MenuItem onClick={() => this.handleInsertAfterClick(lambda)}><i className="glyphicon glyphicon-menu-right" aria-hidden="true" />&nbsp; Insert After</MenuItem>
-            </MenuItem>
+            <DropdownItem>
+                <DropdownItem header>{pr.propertyPath()}</DropdownItem>
+                <DropdownItem divider />
+                <DropdownItem onClick={() => this.handleRemoveClick(lambda)}><i className="fa fa-trash" aria-hidden="true" />&nbsp; Remove</DropdownItem>
+                <DropdownItem onClick={() => this.handleInsertBeforeClick(lambda)}><i className="fa fa-arrow-up" aria-hidden="true" />&nbsp; Insert Before</DropdownItem>
+                <DropdownItem onClick={() => this.handleInsertAfterClick(lambda)}><i className="fa fa-arrow-down" aria-hidden="true" />&nbsp; Insert After</DropdownItem>
+            </DropdownItem>
         );
     }
 
@@ -201,7 +201,7 @@ export default class DynamicViewOverrideComponent extends React.Component<Dynami
         const exampleCtx = new TypeContext<Entity | undefined>(undefined, undefined, PropertyRoute.root(typeName), Binding.create(this.state, s => s.exampleEntity));
 
         return (
-            <div className="form-vertical code-container">
+            <div className="code-container">
                 <EntityLine ctx={exampleCtx} create={true} find={true} remove={true} view={true} onView={this.handleOnView} onChange={this.handleEntityChange} formGroupStyle="Basic"
                     type={{ name: typeName }} labelText={DynamicViewMessage.ExampleEntity.niceToString()} />
             </div>

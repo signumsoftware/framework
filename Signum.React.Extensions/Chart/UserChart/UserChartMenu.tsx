@@ -1,6 +1,5 @@
 ﻿
 import * as React from 'react'
-import { DropdownButton, MenuItem, } from 'react-bootstrap'
 import { Dic, classes } from '../../../../Framework/Signum.React/Scripts/Globals'
 import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
 import { Lite, toLite } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
@@ -11,23 +10,35 @@ import SearchControl from '../../../../Framework/Signum.React/Scripts/SearchCont
 import { UserChartEntity, ChartRequest, ChartMessage } from '../Signum.Entities.Chart'
 import * as UserChartClient from './UserChartClient'
 import ChartRequestView from '../Templates/ChartRequestView'
+import { Dropdown, DropdownToggle, DropdownMenu, DropdownItem } from '../../../../Framework/Signum.React/Scripts/Components';
 
 export interface UserChartMenuProps {
     chartRequestView: ChartRequestView;
 }
 
-export default class UserChartMenu extends React.Component<UserChartMenuProps, { userCharts?: Lite<UserChartEntity>[] }> {
+
+interface UserChartMenuState {
+    userCharts?: Lite<UserChartEntity>[];
+    isOpen: boolean;
+}
+
+
+export default class UserChartMenu extends React.Component<UserChartMenuProps, UserChartMenuState> {
 
     constructor(props: UserChartMenuProps) {
         super(props);
-        this.state = { };
+        this.state = {
+            isOpen: false
+        };
     }
 
 
-    handleSelectedToggle = (isOpen: boolean) => {
+    handleSelectedToggle = () => {
 
-        if (isOpen && this.state.userCharts == undefined)
+        if (!this.state.isOpen && this.state.userCharts == undefined)
             this.reloadList().done();
+
+        this.setState({ isOpen: !this.state.isOpen });
     }
 
     reloadList(): Promise<void> {
@@ -95,23 +106,26 @@ export default class UserChartMenu extends React.Component<UserChartMenuProps, {
         const crView = this.props.chartRequestView;
         const labelText = !crView.props.userChart ? UserChartEntity.nicePluralName() : crView.props.userChart.toStr
 
-        const label = <span><i className="glyphicon glyphicon-stats"></i> &nbsp; {labelText}</span>;
+        const label = <span><i className="fa fa-bar-chart"></i> &nbsp; {labelText}</span>;
         return (
-            <DropdownButton title={label as any} id="userQueriesDropDown" className="sf-userquery-dropdown"
-                onToggle={this.handleSelectedToggle}>
-                {
-                    userCharts && userCharts.map((uc, i) =>
-                        <MenuItem key={i}
-                            className={classes("sf-userquery", is(uc, crView.props.userChart) && "active")}
-                            onSelect={() => this.handleSelect(uc) }>
-                            { uc.toStr }
-                        </MenuItem>)
-                }
-                { userCharts && userCharts.length > 0 && <MenuItem divider/> }
-                {crView.props.userChart && <MenuItem onSelect={this.handleEdit} >{ChartMessage.EditUserChart.niceToString() }</MenuItem> }
-                <MenuItem onSelect={this.handleCreate}>{ChartMessage.CreateNew.niceToString() }</MenuItem>
-            </DropdownButton>
+            <Dropdown id="userQueriesDropDown" className="sf-userquery-dropdown"
+                toggle={this.handleSelectedToggle} isOpen={this.state.isOpen}>
+                <DropdownToggle color="light" caret>{label as any}</DropdownToggle>
+                <DropdownMenu>
+                    {
+                        userCharts && userCharts.map((uc, i) =>
+                            <DropdownItem key={i}
+                                className={classes("sf-userquery", is(uc, crView.props.userChart) && "active")}
+                                onClick={() => this.handleSelect(uc)}>
+                                {uc.toStr}
+                            </DropdownItem>)
+                    }
+                    {userCharts && userCharts.length > 0 && <DropdownItem divider />}
+                    {crView.props.userChart && <DropdownItem onClick={this.handleEdit}>{ChartMessage.EditUserChart.niceToString()}</DropdownItem>}
+                    <DropdownItem onClick={this.handleCreate}>{ChartMessage.CreateNew.niceToString()}</DropdownItem>
+                </DropdownMenu>
+            </Dropdown>
         );
     }
- 
+
 }

@@ -2,7 +2,6 @@
 import * as React from 'react'
 import { Route } from 'react-router'
 import { Dic, classes } from '../../../Framework/Signum.React/Scripts/Globals';
-import { Button, OverlayTrigger, Tooltip, MenuItem } from "react-bootstrap"
 import { ajaxPost, ajaxGet } from '../../../Framework/Signum.React/Scripts/Services';
 import { EntitySettings, ViewPromise } from '../../../Framework/Signum.React/Scripts/Navigator'
 import * as Navigator from '../../../Framework/Signum.React/Scripts/Navigator'
@@ -17,6 +16,7 @@ import * as AuthClient from '../Authorization/AuthClient'
 import { ImportRoute } from "../../../Framework/Signum.React/Scripts/AsyncImport";
 
 import "./Processes.css"
+import { DropdownItem, UncontrolledTooltip } from '../../../Framework/Signum.React/Scripts/Components';
 
 export function start(options: { routes: JSX.Element[], packages: boolean, packageOperations: boolean }) {
 
@@ -55,25 +55,25 @@ function monkeyPatchCreateContextualMenuItem(){
 
     const base = ContextualOperations.MenuItemConstructor.createContextualMenuItem;
 
-    ContextualOperations.MenuItemConstructor.createContextualMenuItem = (coc: Operations.ContextualOperationContext<Entity>, defaultClick: (coc: Operations.ContextualOperationContext<Entity>) => void, key: any) => {
+    ContextualOperations.MenuItemConstructor.createContextualMenuItem = (coc: Operations.ContextualOperationContext<Entity>, defaultClick: (coc: Operations.ContextualOperationContext<Entity>) => void) => {
         
         if(!Navigator.isViewable(PackageOperationEntity) )
-            return base(coc, defaultClick, key);
+            return base(coc, defaultClick);
 
         if(coc.operationInfo.operationType == OperationType.Constructor ||
             coc.operationInfo.operationType == OperationType.ConstructorFromMany)
-            return base(coc, defaultClick, key);
+            return base(coc, defaultClick);
 
         if(coc.context.lites.length <= 1)
-            return base(coc, defaultClick, key);
+            return base(coc, defaultClick);
 
         const processSettings = processOperationSettings[coc.operationInfo.key];
         if(processSettings != undefined){
             if(processSettings.isVisible && !processSettings.isVisible(coc))
-                return base(coc, defaultClick, key);
+                return base(coc, defaultClick);
 
             if(processSettings.hideOnCanExecute && coc.canExecute != undefined)
-                return base(coc, defaultClick, key);
+                return base(coc, defaultClick);
         }
 
 
@@ -81,7 +81,7 @@ function monkeyPatchCreateContextualMenuItem(){
         coc.entityOperationSettings && coc.entityOperationSettings.text ? coc.entityOperationSettings.text() :
             coc.operationInfo.niceName;
 
-        const bsStyle = coc.settings && coc.settings.style || Operations.autoStyleFunction(coc.operationInfo);
+        const bsColor = coc.settings && coc.settings.color || Operations.autoColorFunction(coc.operationInfo);
 
         const disabled = !!coc.canExecute;
 
@@ -95,22 +95,22 @@ function monkeyPatchCreateContextualMenuItem(){
             processSettings && processSettings.onClick ? processSettings.onClick!(coc) : defaultConstructProcessFromMany(coc)
         }
 
-        const menuItem = <MenuItem
-            className={disabled ? "disabled" : undefined}
-            onClick={disabled ? undefined : onClick}
-            data-operation={coc.operationInfo.key}
-            key={key}>
-            {bsStyle && <span className={"icon empty-icon btn-" + bsStyle}></span>}
-            {text}
-            <span className="glyphicon glyphicon-cog process-contextual-icon" aria-hidden={true} onClick={processOnClick}></span>
-            </MenuItem>;
 
-        if (!coc.canExecute)
-            return menuItem;
+        let innerRef: HTMLElement | null;
 
-        const tooltip = <Tooltip id={"tooltip_" + coc.operationInfo.key.replace(".", "_") }>{coc.canExecute}</Tooltip>;
+        return [
+            <DropdownItem
+                innerRef={r => innerRef = r}
+                className={disabled ? "disabled" : undefined}
+                onClick={disabled ? undefined : onClick}
+                data-operation={coc.operationInfo.key}>
+                {bsColor && <span className={"icon empty-icon btn-" + bsColor}></span>}
+                {text}
+                <span className="fa fa-cog process-contextual-icon" aria-hidden={true} onClick={processOnClick}></span>
 
-        return <OverlayTrigger placement="right" overlay={tooltip} >{menuItem}</OverlayTrigger>;
+            </DropdownItem>,
+            coc.canExecute ? <UncontrolledTooltip target={() => innerRef!} placement="right">{coc.canExecute}</UncontrolledTooltip> : undefined
+        ].filter(a => a != null);
     };
 }
 

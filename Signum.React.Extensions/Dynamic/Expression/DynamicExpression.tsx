@@ -4,7 +4,6 @@ import { PropertyRoute, Binding, isTypeEntity } from '../../../../Framework/Sign
 import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
 import CSharpCodeMirror from '../../Codemirror/CSharpCodeMirror'
 import { Entity } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
-import Typeahead from '../../../../Framework/Signum.React/Scripts/Lines/Typeahead'
 import { DynamicExpressionEntity } from '../Signum.Entities.Dynamic'
 import { DynamicExpressionTestResponse, API } from '../DynamicExpressionClient'
 import * as TypeHelpClient from '../../TypeHelp/TypeHelpClient';
@@ -12,6 +11,7 @@ import TypeHelpComponent from '../../TypeHelp/TypeHelpComponent'
 import ValueLineModal from '../../../../Framework/Signum.React/Scripts/ValueLineModal'
 import { ModifiableEntity } from '../../../../Framework/Signum.React/Scripts/Signum.Entities';
 import { Lite } from '../../../../Framework/Signum.React/Scripts/Signum.Entities';
+import { Typeahead } from '../../../../Framework/Signum.React/Scripts/Components';
 
 interface DynamicExpressionComponentProps {
     ctx: TypeContext<DynamicExpressionEntity>;
@@ -67,7 +67,7 @@ export default class DynamicExpressionComponent extends React.Component<DynamicE
                 <div className="row">
                     <div className="col-sm-6">
                         <ValueLine ctx={ctx.subCtx(dt => dt.format)} labelColumns={4}
-                            helpBlock={<span>See <a href="https://docs.microsoft.com/en-us/dotnet/standard/base-types/formatting-types" target="_blank">formatting types</a></span>} />
+                            helpText={<span>See <a href="https://docs.microsoft.com/en-us/dotnet/standard/base-types/formatting-types" target="_blank">formatting types</a></span>} />
                     </div>
                     <div className="col-sm-6">
                         <ValueLine ctx={ctx.subCtx(dt => dt.unit)} labelColumns={4} />

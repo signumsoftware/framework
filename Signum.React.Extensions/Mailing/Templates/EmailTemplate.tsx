@@ -1,7 +1,6 @@
 ﻿import * as React from 'react'
-import { Tab, Tabs } from 'react-bootstrap'
 import { classes } from '../../../../Framework/Signum.React/Scripts/Globals'
-import { FormGroup, FormControlStatic, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityDetail, EntityList, EntityRepeater, EntityTabRepeater } from '../../../../Framework/Signum.React/Scripts/Lines'
+import { FormGroup, FormControlReadonly, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityDetail, EntityList, EntityRepeater, EntityTabRepeater } from '../../../../Framework/Signum.React/Scripts/Lines'
 import { SubTokensOptions, QueryToken, QueryTokenType, hasAnyOrAll } from '../../../../Framework/Signum.React/Scripts/FindOptions'
 import { SearchControl } from '../../../../Framework/Signum.React/Scripts/Search'
 import { getToString, getMixin } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
@@ -54,7 +53,7 @@ export default class EmailTemplate extends React.Component<{ ctx: TypeContext<Em
 
     renderQueryPart() {
         const ec = this.props.ctx.subCtx({ labelColumns: { sm: 2 } });
-        const ecXs = ec.subCtx({ formGroupSize: "ExtraSmall" });
+        const ecXs = ec.subCtx({ formSize: "ExtraSmall" });
         return (
             <div>
                 <EntityDetail ctx={ecXs.subCtx(e => e.from)} onChange={() => this.forceUpdate()} getComponent={this.renderContact} />
@@ -77,7 +76,7 @@ export default class EmailTemplate extends React.Component<{ ctx: TypeContext<Em
 
         return (
             <div>
-                <div className="row form-vertical">
+                <div className="row">
                     <div className="col-sm-2" >
                         <FormGroup labelText={EmailTemplateEntity.nicePropertyName(a => a.recipients![0].element.kind)} ctx={sc}>
                             <span className="form-control">{EmailTemplateEntity.nicePropertyName(a => a.from)} </span>
@@ -106,7 +105,7 @@ export default class EmailTemplate extends React.Component<{ ctx: TypeContext<Em
 
         return (
             <div>
-                <div className="row form-vertical">
+                <div className="row">
                     <div className="col-sm-2">
                         <label>
                             <ValueLine ctx={sc.subCtx(c => c.kind)} />
@@ -161,7 +160,7 @@ export class EmailTemplateMessageComponent extends React.Component<EmailTemplate
         return (
             <div className="sf-email-template-message">
                 <EntityCombo ctx={ec.subCtx(e => e.cultureInfo)} labelText={EmailTemplateViewMessage.Language.niceToString()} onChange={this.props.invalidate} />
-                <div className="form-vertical">
+                <div>
                     <TemplateControls queryKey={this.props.queryKey} onInsert={this.handleOnInsert} forHtml={true} />
                     <ValueLine ctx={ec.subCtx(e => e.subject)} formGroupStyle={"SrOnly"} placeholderLabels={true} labelHtmlAttributes={{ style: { width: "100px" } }} />
                     <div className="code-container">

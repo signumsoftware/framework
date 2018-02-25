@@ -15,7 +15,7 @@ export default class EntityOmniboxProvider extends OmniboxProvider<EntityOmnibox
     }
 
     icon() {
-        return this.coloredIcon("glyphicon glyphicon-circle-arrow-right", "#BCDEFF");
+        return this.coloredIcon("fa fa-arrow-circle-right", "#BCDEFF");
     }
 
     renderItem(result: EntityOmniboxResult): React.ReactChild[] {

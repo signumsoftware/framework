@@ -1,7 +1,6 @@
 ﻿import * as React from 'react'
 import { Route } from 'react-router'
 import { Dic, classes } from '../../../Framework/Signum.React/Scripts/Globals';
-import { Button, OverlayTrigger, Tooltip, MenuItem } from "react-bootstrap"
 import { ajaxPost, ajaxPostRaw, ajaxGet, saveFile } from '../../../Framework/Signum.React/Scripts/Services';
 import { EntitySettings, ViewPromise } from '../../../Framework/Signum.React/Scripts/Navigator'
 import * as Navigator from '../../../Framework/Signum.React/Scripts/Navigator'
@@ -25,6 +24,7 @@ import { QueryRequest, FilterRequest } from "../../../Framework/Signum.React/Scr
 import WordSearchMenu from "./WordSearchMenu";
 import WordEntityMenu from "./WordEntityMenu";
 import { ButtonsContext } from "../../../Framework/Signum.React/Scripts/TypeContext";
+import { DropdownItem } from '../../../Framework/Signum.React/Scripts/Components';
 
 export function start(options: { routes: JSX.Element[], contextual: boolean, queryButton: boolean, entityButton: boolean  }) {
     
@@ -139,10 +139,10 @@ export function getWordTemplates(ctx: ContextualItemsContext<Entity>): Promise<M
             return {
                 header: WordTemplateEntity.nicePluralName(),
                 menuItems: wts.map(wt =>
-                    <MenuItem data-operation={wt.EntityType} onClick={() => handleMenuClick(wt, ctx)}>
+                    <DropdownItem data-operation={wt.EntityType} onClick={() => handleMenuClick(wt, ctx)}>
                         <span className={classes("icon", "fa fa-file-word-o")}></span>
                         {wt.toStr}
-                    </MenuItem>
+                    </DropdownItem>
                 )
             } as MenuItemBlock;
         });

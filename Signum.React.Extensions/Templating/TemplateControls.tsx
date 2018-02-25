@@ -1,10 +1,9 @@
 ﻿import * as React from 'react'
-import { Tab, Tabs, ButtonToolbar }from 'react-bootstrap'
 import { classes } from '../../../Framework/Signum.React/Scripts/Globals'
-import { FormGroup, FormControlStatic, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityDetail, EntityList, EntityRepeater, EntityTabRepeater} from '../../../Framework/Signum.React/Scripts/Lines'
-import { SubTokensOptions, QueryToken, QueryTokenType, hasAnyOrAll }  from '../../../Framework/Signum.React/Scripts/FindOptions'
-import { SearchControl }  from '../../../Framework/Signum.React/Scripts/Search'
-import { getToString, getMixin }  from '../../../Framework/Signum.React/Scripts/Signum.Entities'
+import { FormGroup, FormControlReadonly, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityDetail, EntityList, EntityRepeater, EntityTabRepeater } from '../../../Framework/Signum.React/Scripts/Lines'
+import { SubTokensOptions, QueryToken, QueryTokenType, hasAnyOrAll } from '../../../Framework/Signum.React/Scripts/FindOptions'
+import { SearchControl } from '../../../Framework/Signum.React/Scripts/Search'
+import { getToString, getMixin } from '../../../Framework/Signum.React/Scripts/Signum.Entities'
 import { TypeContext, FormGroupStyle } from '../../../Framework/Signum.React/Scripts/TypeContext'
 import { TemplateTokenMessage } from './Signum.Entities.Templating'
 
@@ -35,28 +34,30 @@ export default class TemplateControls extends React.Component<TemplateControlsPr
             return null;
 
         return (
-            <div className="form-sm">
-                <QueryTokenBuilder queryToken={ct} queryKey={this.props.queryKey} onTokenChange={t => this.setState({ currentToken: t || undefined })} subTokenOptions={SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement} readOnly={false} />
+            <div>
+                <span className="rw-widget-sm">
+                    <QueryTokenBuilder queryToken={ct} queryKey={this.props.queryKey} onTokenChange={t => this.setState({ currentToken: t || undefined })} subTokenOptions={SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement} readOnly={false} />
+                </span>
                 <div className="btn-group" style={{ marginLeft: "10px" }}>
-                    {this.renderButton(TemplateTokenMessage.Insert.niceToString(), this.canElement(), token => `@[${token}]`) }
+                    {this.renderButton(TemplateTokenMessage.Insert.niceToString(), this.canElement(), token => `@[${token}]`)}
                     {this.renderButton("if", this.canIf(), token => this.props.forHtml ?
                         `<!--@if[${token}]--> <!--@else--> <!--@endif-->` :
-                        `@if[${token}] @else @endif`) }
+                        `@if[${token}] @else @endif`)}
                     {this.renderButton("foreach", this.canForeach(), token => this.props.forHtml ?
                         `<!--@foreach[${token}]--> <!--@endforeach-->` :
-                        `@foreach[${token}] @endforeach`) }
+                        `@foreach[${token}] @endforeach`)}
                     {this.renderButton("any", this.canElement(), token => this.props.forHtml ?
                         `<!--@any[${token}]--> <!--@notany--> <!--@endany-->` :
-                        `@any[${token}] @notany @endany`) }
+                        `@any[${token}] @notany @endany`)}
                 </div>
             </div>
         );
     }
 
     renderButton(text: string, canClick: string | undefined, buildPattern: (key: string) => string) {
-        return <input type="button" disabled={!!canClick} className="btn btn-default btn-sm sf-button"
+        return <input type="button" disabled={!!canClick} className="btn btn-light btn-sm sf-button"
             title={canClick} value={text}
-            onClick={() => this.props.onInsert(buildPattern(this.state.currentToken ? this.state.currentToken.fullKey : "")) }/>;
+            onClick={() => this.props.onInsert(buildPattern(this.state.currentToken ? this.state.currentToken.fullKey : ""))} />;
     }
 
 

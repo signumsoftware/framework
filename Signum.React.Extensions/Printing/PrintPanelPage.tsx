@@ -42,7 +42,7 @@ export default class PrintPanelPage extends React.Component<{}, PrintPanelPageSt
             <div>
                 <h2>PrintPanel</h2>
 
-                <div className="form-horizontal">
+                <div>
                     <fieldset>
                         <legend>Ready To Print</legend>
                         {this.state.stats.map((s, i) =>
@@ -76,13 +76,14 @@ export default class PrintPanelPage extends React.Component<{}, PrintPanelPageSt
             return undefined;
 
         return (
-            <a className="sf-line-button" title="Print" onClick={() => this.handlePrintClick(fileType, vsc)}>
-                <span className="glyphicon glyphicon-print"></span>
+            <a href="#" className="sf-line-button" title="Print" onClick={e => this.handlePrintClick(e, fileType, vsc)}>
+                <span className="fa fa-print"></span>
             </a>
         );
     }
 
-    handlePrintClick = (fileType: FileTypeSymbol, vsc: ValueSearchControl) => {
+    handlePrintClick = (e: React.MouseEvent<any>, fileType: FileTypeSymbol, vsc: ValueSearchControl) => {
+        e.preventDefault();
         API.createPrintProcess(fileType)
             .then(p => p && Navigator.navigate(p))
             .then(p => vsc.refreshValue())

@@ -1,7 +1,6 @@
 ﻿import * as moment from 'moment'
 import * as numbro from 'numbro'
 import * as React from 'react'
-import { Modal, ModalProps, ModalClass, ButtonToolbar, Tabs, Tab } from 'react-bootstrap'
 import { openModal, IModalProps } from '../../../../Framework/Signum.React/Scripts/Modals';
 import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder';
 import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator';
@@ -12,11 +11,13 @@ import { TypeInfo, TypeReference, Binding } from '../../../../Framework/Signum.R
 import { FormGroupStyle, TypeContext } from '../../../../Framework/Signum.React/Scripts/TypeContext'
 import { ValueLineType, ValueLine } from '../../../../Framework/Signum.React/Scripts/Lines/ValueLine'
 import { WorkflowActivityStats } from "../WorkflowClient";
-import { FormGroup, StyleContext, FormControlStatic } from "../../../../Framework/Signum.React/Scripts/Lines";
+import { FormGroup, StyleContext, FormControlReadonly } from "../../../../Framework/Signum.React/Scripts/Lines";
 import { WorkflowActivityEntity, WorkflowActivityMessage, CaseNotificationEntity, WorkflowActivityType, WorkflowOperation, WorkflowEntity, WorkflowActivityModel, WorkflowActivityMonitorMessage, CaseActivityEntity } from "../Signum.Entities.Workflow";
 import { SearchControl, ColumnOption, FilterOption } from "../../../../Framework/Signum.React/Scripts/Search";
 import * as WorkflowClient from '../WorkflowClient';
 import { WorkflowActivityMonitorConfig } from './WorkflowActivityMonitorPage';
+import { Modal } from '../../../../Framework/Signum.React/Scripts/Components';
+import { ModalHeaderButtons } from '../../../../Framework/Signum.React/Scripts/Components/Modal';
 
 
 interface WorkflowActivityStatsModalProps extends React.Props<WorkflowActivityStatsModal>, IModalProps {
@@ -49,20 +50,16 @@ export default class WorkflowActivityStatsModal extends React.Component<Workflow
         var activity = this.props.activity;
         var config = this.props.config;
         var stats = this.props.stats;
-        return <Modal bsSize="lg" onHide={this.handleCloseClicked} show={this.state.show} onExited={this.handleOnExited}>
-
-            <Modal.Header closeButton={true}>
-                <h4 className="modal-title">
-                    {stats.WorkflowActivity.toStr}
-                </h4>
-            </Modal.Header>
-
-            <Modal.Body>
+        return <Modal size="lg" onHide={this.handleCloseClicked} show={this.state.show} onExited={this.handleOnExited}>
+            <ModalHeaderButtons onClose={this.handleCloseClicked}>
+                {stats.WorkflowActivity.toStr}
+            </ModalHeaderButtons>
+            <div className="modal-body">
                 {
                     <div className="form-horizontal">
-                        <FormGroup ctx={ctx} labelText={CaseActivityEntity.nicePluralName()}><FormControlStatic ctx={ctx}>{stats.CaseActivityCount}</FormControlStatic></FormGroup>
+                        <FormGroup ctx={ctx} labelText={CaseActivityEntity.nicePluralName()}><FormControlReadonly ctx={ctx}>{stats.CaseActivityCount}</FormControlReadonly></FormGroup>
                         {config.columns.map((col, i) =>
-                            <FormGroup ctx={ctx} labelText={col.displayName || col.token!.niceName}><FormControlStatic ctx={ctx}>{stats.CustomValues[i]}</FormControlStatic></FormGroup>
+                            <FormGroup ctx={ctx} labelText={col.displayName || col.token!.niceName}><FormControlReadonly ctx={ctx}>{stats.CustomValues[i]}</FormControlReadonly></FormGroup>
                         )}
                         {activity.type == "CallWorkflow" || activity.type == "DecompositionWorkflow" ?
                             this.renderSubWorkflowExtra(ctx) :
@@ -70,12 +67,12 @@ export default class WorkflowActivityStatsModal extends React.Component<Workflow
                         }
                     </div>
                 }
-            </Modal.Body>
-            <Modal.Footer>
+            </div>
+            <div className="modal-footer">
                 <button className="btn btn-primary sf-entity-button sf-ok-button" onClick={this.handleCloseClicked}>
                     {JavascriptMessage.ok.niceToString()}
                 </button>
-            </Modal.Footer>
+            </div>
         </Modal>;
     }
 
@@ -96,8 +93,8 @@ export default class WorkflowActivityStatsModal extends React.Component<Workflow
                             .map(a => ({ columnName: a.token!.fullKey, operation: a.operation, value: a.value, frozen: true }) as FilterOption),
                         columnOptionsMode: "Add",
                         columnOptions: this.props.config.columns
-                                .filter(c => c.token && c.token.fullKey.contains("."))
-                                .map(c => ({ columnName: c.token!.fullKey.beforeLast(".") }) as ColumnOption),
+                            .filter(c => c.token && c.token.fullKey.contains("."))
+                            .map(c => ({ columnName: c.token!.fullKey.beforeLast(".") }) as ColumnOption),
                     }} />
             </div>
         );
@@ -117,7 +114,7 @@ export default class WorkflowActivityStatsModal extends React.Component<Workflow
 
     handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
         e.preventDefault();
-        
+
         Navigator.API.fetchAndForget(this.props.stats.WorkflowActivity)
             .then(wa => window.open(WorkflowClient.workflowActivityMonitorUrl(toLite(wa.subWorkflow!.workflow!))))
             .done();
@@ -135,7 +132,7 @@ function formatDuration(duration: number | undefined, unit: string | undefined) 
     if (unit == "min")
 
 
-    var unit = WorkflowActivityEntity.memberInfo(a => a.estimatedDuration).unit;
+        var unit = WorkflowActivityEntity.memberInfo(a => a.estimatedDuration).unit;
 
     return <span>{numbro(duration).format("0.00")} {unit} <mark>({moment.duration(duration, "minutes").format("d[d] h[h] m[m] s[s]")})</mark></span>
 }

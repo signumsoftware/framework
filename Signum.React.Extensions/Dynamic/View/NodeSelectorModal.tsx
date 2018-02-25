@@ -1,6 +1,4 @@
-﻿
-import * as React from 'react'
-import { Modal, ModalProps, ModalClass, ButtonToolbar } from 'react-bootstrap'
+﻿import * as React from 'react'
 import { Dic } from '../../../../Framework/Signum.React/Scripts/Globals';
 import { openModal, IModalProps } from '../../../../Framework/Signum.React/Scripts/Modals';
 import { SelectorMessage } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
@@ -8,6 +6,8 @@ import { TypeInfo } from '../../../../Framework/Signum.React/Scripts/Reflection'
 import { DynamicViewMessage } from '../Signum.Entities.Dynamic'
 import * as NodeUtils from './NodeUtils'
 import { BaseNode } from './Nodes'
+import { Modal } from '../../../../Framework/Signum.React/Scripts/Components';
+import { ModalHeaderButtons } from '../../../../Framework/Signum.React/Scripts/Components/Modal';
 
 
 interface NodeSelectorModalProps extends React.Props<NodeSelectorModal>, IModalProps {
@@ -48,36 +48,34 @@ export default class NodeSelectorModal extends React.Component<NodeSelectorModal
             .groupBy(n => n.group!)
             .groupsOf(nodes.length / 3, g => g.elements.length);
 
-        return <Modal bsSize="lg" onHide={this.handleCancelClicked} show={this.state.show} onExited={this.handleOnExited} className="sf-selector-modal">
-            <Modal.Header closeButton={true}>
-                
-                <h4 className="modal-title">
-                    {DynamicViewMessage.SelectATypeOfComponent.niceToString()}
-                    </h4>
-            </Modal.Header>
-
-            <Modal.Body>
-                <div className="row">
-                    {
-                        columns.map((c, i) =>
-                            <div key={i} className={"col-sm-" + (12 / columns.length)}>
-                                {
-                                    c.map(gr => <fieldset key={gr.key}>
-                                        <legend>{gr.key}</legend>
-                                        {
-                                            gr.elements.orderBy(n => n.order!).map(n =>
-                                                <button key={n.kind} type="button" onClick={() => this.handleButtonClicked(n)}
-                                                    className="sf-chooser-button sf-close-button btn btn-default">
-                                                    {n.kind}
-                                                </button>)
-                                        }
-                                    </fieldset>)
-                                }
-                            </div>)
-                    }
+        return (
+            <Modal size="lg" onHide={this.handleCancelClicked} show={this.state.show} onExited={this.handleOnExited} className="sf-selector-modal">
+                <ModalHeaderButtons onClose={this.handleCancelClicked} >
+                        {DynamicViewMessage.SelectATypeOfComponent.niceToString()}
+                </ModalHeaderButtons>
+                <div className="modal-body">
+                    <div className="row">
+                        {
+                            columns.map((c, i) =>
+                                <div key={i} className={"col-sm-" + (12 / columns.length)}>
+                                    {
+                                        c.map(gr => <fieldset key={gr.key}>
+                                            <legend>{gr.key}</legend>
+                                            {
+                                                gr.elements.orderBy(n => n.order!).map(n =>
+                                                    <button key={n.kind} type="button" onClick={() => this.handleButtonClicked(n)}
+                                                        className="sf-chooser-button sf-close-button btn btn-light">
+                                                        {n.kind}
+                                                    </button>)
+                                            }
+                                        </fieldset>)
+                                    }
+                                </div>)
+                        }
+                    </div>
                 </div>
-            </Modal.Body>
-        </Modal>;
+            </Modal>
+        );
     }
 
     static chooseElement(parentNode: string): Promise<NodeUtils.NodeOptions<BaseNode> | undefined> {

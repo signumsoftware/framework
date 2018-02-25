@@ -1,7 +1,6 @@
 ﻿import * as React from 'react'
 import { Route } from 'react-router'
 import { Dic, classes } from '../../../Framework/Signum.React/Scripts/Globals';
-import { Button, OverlayTrigger, Tooltip, MenuItem } from "react-bootstrap"
 import { ajaxPost, ajaxPostRaw, ajaxGet, saveFile } from '../../../Framework/Signum.React/Scripts/Services';
 import { EntitySettings, ViewPromise } from '../../../Framework/Signum.React/Scripts/Navigator'
 import * as Navigator from '../../../Framework/Signum.React/Scripts/Navigator'
@@ -23,7 +22,7 @@ export function start(options: { routes: JSX.Element[], couldHaveNotes?: (typeNa
 
     Operations.addSettings(new EntityOperationSettings(NoteOperation.CreateNoteFromEntity, {
         isVisible: eoc => couldHaveNotes!(eoc.entity.Type),
-        contextual: { icon: "fa fa-sticky-note", iconColor: "#0e4f8c", style: "info", isVisible: ctx => couldHaveNotes(ctx.context.lites[0].EntityType), }
+        contextual: { icon: "fa fa-sticky-note", iconColor: "#0e4f8c", color: "info", isVisible: ctx => couldHaveNotes(ctx.context.lites[0].EntityType), }
     }));
 
     QuickLinks.registerGlobalQuickLink(ctx => new QuickLinks.QuickLinkExplore({
