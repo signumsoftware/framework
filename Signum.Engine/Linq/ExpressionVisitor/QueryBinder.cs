@@ -707,7 +707,7 @@ namespace Signum.Engine.Linq
             ProjectionExpression projection = this.VisitCastProjection(source);
             bool outer = OverloadingSimplifier.ExtractDefaultIfEmpty(ref collectionSelector);
 
-            JoinType joinType = IsTable(collectionSelector.Body) ? JoinType.CrossJoin :
+            JoinType joinType = IsTable(collectionSelector.Body) && !outer ? JoinType.CrossJoin :
                                 outer ? JoinType.OuterApply :
                                 JoinType.CrossApply;
 

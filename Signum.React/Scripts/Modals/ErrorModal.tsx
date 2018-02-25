@@ -1,6 +1,5 @@
 ﻿
 import * as React from 'react'
-import { Modal, ModalProps, ModalClass, ButtonToolbar } from 'react-bootstrap'
 import * as Finder from '../Finder'
 import { openModal, IModalProps } from '../Modals';
 import * as Navigator from '../Navigator';
@@ -10,12 +9,14 @@ import { SearchMessage, JavascriptMessage, Lite, Entity, NormalWindowMessage } f
 import { ExceptionEntity } from '../Signum.Entities.Basics'
 
 import "./Modals.css"
+import { Modal } from '../Components';
+
 //http://codepen.io/m-e-conroy/pen/ALsdF
 interface ErrorModalProps extends IModalProps {
     error: any;
 }
 
-export default class ErrorModal extends React.Component<ErrorModalProps, { showDetails?: boolean; show?: boolean; }>  {
+export default class ErrorModal extends React.Component<ErrorModalProps, { showDetails?: boolean; show: boolean; }>  {
 
     constructor(props: ErrorModalProps) {
         super(props);
@@ -47,14 +48,17 @@ export default class ErrorModal extends React.Component<ErrorModalProps, { showD
         const ve = e instanceof ValidationError ? (e as ValidationError) : undefined;
 
         return (
-            <Modal onHide={this.handleCloseClicked} show={this.state.show} onExited={this.handleOnExited}>
-                <Modal.Header closeButton={true} className="dialog-header-error">
-                    {se ? this.renderServiceTitle(se) :
+            <Modal show={this.state.show} onExited={this.handleOnExited} onHide={this.handleCloseClicked}>
+                <div className="modal-header dialog-header-error text-danger">
+                    <h5 className="modal-title"> {se ? this.renderServiceTitle(se) :
                         ve ? this.renderValidationTitle(ve) :
-                            this.renderTitle(e)}
-                </Modal.Header>
+                            this.renderTitle(e)}</h5>
+                    <button type="button" className="close" data-dismiss="modal" aria-label="Close" onClick={this.handleCloseClicked}>
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
 
-                <Modal.Body>
+                <div className="modal-body">
                     {se ? this.renderServiceMessage(se) :
                         ve ? this.renderValidationeMessage(ve) :
                             this.renderMessage(e)}
@@ -66,36 +70,42 @@ export default class ErrorModal extends React.Component<ErrorModalProps, { showD
                             {this.state.showDetails && <pre>{se.httpError.StackTrace}</pre>}
                         </div>
                     }
-                </Modal.Body>
+                </div>
 
-                <Modal.Footer>
+                <div className="modal-footer">
                     <button className ="btn btn-primary sf-close-button sf-ok-button" onClick={this.handleCloseClicked}>
                         {JavascriptMessage.ok.niceToString() }</button>
-                </Modal.Footer>
+                </div>
             </Modal>
         );
     }
 
     renderTitle(e: any) {
-            return <h4 className="modal-title text-danger"><span className="glyphicon glyphicon-alert"></span> Error </h4>;
+        return (
+            <span><span className="fa fa-exclamation-triangle"></span> Error </span>
+        );
     }
 
     renderServiceTitle(se: ServiceError) {
-        return (<h4 className="modal-title text-danger">
-            <span className={classes("glyphicon", se.defaultIcon)}></span>&nbsp; <span>{se.httpError.ExceptionType}</span>
-            ({
-                Navigator.isViewable(ExceptionEntity) ?
-                    <a href={Navigator.navigateRoute(ExceptionEntity, se.httpError.ExceptionID!)}>{se.httpError.ExceptionID}</a> :
-                    <strong>{se.httpError.ExceptionID}</strong>
-            })
-        </h4>);
+        return (
+            <span>
+                <span className={classes("fa", se.defaultIcon)}></span>&nbsp; <span>{se.httpError.ExceptionType}</span>
+                ({
+                    Navigator.isViewable(ExceptionEntity) ?
+                        <a href={Navigator.navigateRoute(ExceptionEntity, se.httpError.ExceptionID!)}>{se.httpError.ExceptionID}</a> :
+                        <strong>{se.httpError.ExceptionID}</strong>
+                })
+            </span>
+        );
     }
 
 
     renderValidationTitle(ve: ValidationError) {
-        return <h4 className="modal-title text-danger">
-            <span className="glyphicon glyphicon-alert"></span> {NormalWindowMessage.ThereAreErrors.niceToString()}
-        </h4>;
+        return (
+            <span>
+                <span className="fa fa-exclamation-triangle"></span> {NormalWindowMessage.ThereAreErrors.niceToString()}
+            </span>
+        );
     }
 
     renderServiceMessage(se: ServiceError) {

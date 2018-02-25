@@ -1,7 +1,6 @@
 ﻿/// <reference path="../globals.d.ts" />
 
 import * as React from 'react'
-import { DropdownButton, MenuItem, OverlayTrigger, Tooltip } from 'react-bootstrap'
 import { Dic, DomUtils, classes, coalesce } from '../Globals'
 import * as Finder from '../Finder'
 import { CellFormatter, EntityFormatter } from '../Finder'
@@ -102,10 +101,9 @@ export default class SearchControl extends React.Component<SearchControlProps, S
                 return;
         }
 
-        this.state = {};
-        this.forceUpdate();
-
-        this.initialLoad(newProps.findOptions);
+        this.setState({ findOptions: undefined, queryDescription: undefined }, () => {
+            this.initialLoad(newProps.findOptions);
+        });
     }
 
     doSearch() {

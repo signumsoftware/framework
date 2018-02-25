@@ -1,5 +1,5 @@
 ﻿import * as React from 'react'
-import { Tab } from 'react-bootstrap'
+import { Tab } from '../Components/Tabs'
 import { Dic } from '../Globals'
 import * as Navigator from '../Navigator'
 import { ResultTable, FindOptions, FilterOption, QueryDescription } from '../FindOptions'
@@ -227,27 +227,27 @@ export class ViewReplacer<T extends ModifiableEntity> {
 
     
 
-    removeTab(eventKey: string): this {
+    removeTab(tabId: string | number): this {
         this.result = new ReplaceVisitor(
-            e => e.type == Tab && e.props.eventKey == eventKey,
+            e => e.type == Tab && e.props.eventKey == tabId,
             e => [])
             .visit(this.result);
 
         return this;
     }
 
-    insertTabAfter(eventKey: string, ...newTabs: Tab[]): this {
+    insertTabAfter(tabId: string | number, ...newTabs: Tab[]): this {
         this.result = new ReplaceVisitor(
-            e => e.type == Tab && e.props.eventKey == eventKey,
+            e => e.type == Tab && e.props.eventKey == tabId,
             e => [e, ...newTabs])
             .visit(this.result);
 
         return this;
     }
 
-    insertTabBefore(eventKey: string, ...newTabs: Tab[]): this {
+    insertTabBefore(tabId: string | number, ...newTabs: Tab[]): this {
         this.result = new ReplaceVisitor(
-            e => e.type == Tab && e.props.eventKey == eventKey,
+            e => e.type == Tab && e.props.eventKey == tabId,
             e => [...newTabs, e])
             .visit(this.result);
 

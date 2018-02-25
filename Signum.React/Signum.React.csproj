@@ -30,6 +30,7 @@
     </NuGetPackageImportStamp>
     <TypeScriptToolsVersion>2.7</TypeScriptToolsVersion>
     <Use64BitIISExpress />
+    <DockerComposeProjectPath>..\..\docker-compose.dcproj</DockerComposeProjectPath>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -151,6 +152,24 @@
     <Compile Include="JsonConverters\LiteJsonConverter.cs" />
     <Compile Include="JsonModelValidators\SignumBodyModelValidator.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <TypeScriptCompile Include="Scripts\Components\Basic.tsx" />
+    <TypeScriptCompile Include="Scripts\Components\Button.tsx" />
+    <TypeScriptCompile Include="Scripts\Components\Collapse.tsx" />
+    <TypeScriptCompile Include="Scripts\Components\index.tsx" />
+    <TypeScriptCompile Include="Scripts\Components\Dropdown.tsx" />
+    <TypeScriptCompile Include="Scripts\Components\DropdownItem.tsx" />
+    <TypeScriptCompile Include="Scripts\Components\DropdownToggle.tsx" />
+    <TypeScriptCompile Include="Scripts\Components\DropdownMenu.tsx" />
+    <TypeScriptCompile Include="Scripts\Components\NavItem.tsx" />
+    <TypeScriptCompile Include="Scripts\Components\Popover.tsx" />
+    <TypeScriptCompile Include="Scripts\Components\PopperContent.tsx" />
+    <TypeScriptCompile Include="Scripts\Components\Tooltip.tsx" />
+    <TypeScriptCompile Include="Scripts\Lines\FormControlReadonly.tsx" />
+    <TypeScriptCompile Include="Scripts\Lines\FormGroup.tsx" />
+    <TypeScriptCompile Include="Scripts\LinkContainer.tsx" />
+    <TypeScriptCompile Include="Scripts\Components\Fade.tsx" />
+    <TypeScriptCompile Include="Scripts\Components\Modal.tsx" />
+    <TypeScriptCompile Include="Scripts\Components\Tabs.tsx" />
     <Content Include="Scripts\Frames\MenuIcons.css" />
     <Content Include="Scripts\Frames\VersionChangedAlert.css" />
     <Content Include="Scripts\SearchControl\ColumnBuilder.css" />
@@ -195,7 +214,6 @@
     <Content Include="Scripts\Signum.Entities.Basics.t4s" />
     <Content Include="Scripts\Signum.Entities.DynamicQuery.t4s" />
     <Content Include="Scripts\Signum.Entities.Patterns.t4s" />
-    <None Include="package.disabled.json" />
     <None Include="Scripts\Signum.Entities.t4s" />
     <Content Include="tsconfig.json" />
     <TypeScriptCompile Include="Scripts\AppRelativeRoutes.tsx" />
@@ -239,7 +257,7 @@
     <TypeScriptCompile Include="Scripts\Lines\EntityListBase.tsx" />
     <TypeScriptCompile Include="Scripts\Finder.tsx" />
     <TypeScriptCompile Include="Scripts\FindOptions.ts" />
-    <TypeScriptCompile Include="Scripts\Lines\Typeahead.tsx" />
+    <TypeScriptCompile Include="Scripts\Components\Typeahead.tsx" />
     <TypeScriptCompile Include="Scripts\Lines\LineBase.tsx" />
     <TypeScriptCompile Include="Scripts\Modals.tsx" />
     <TypeScriptCompile Include="Scripts\Constructor.tsx" />

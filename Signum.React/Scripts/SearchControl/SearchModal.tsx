@@ -1,12 +1,13 @@
 ﻿
 import * as React from 'react'
-import { Modal, ModalProps, ModalClass, ButtonToolbar } from 'react-bootstrap'
 import * as Finder from '../Finder'
 import { openModal, IModalProps } from '../Modals';
 import { ResultTable, FindOptions, FindMode, FilterOption, QueryDescription, ResultRow, ModalFindOptions } from '../FindOptions'
 import { SearchMessage, JavascriptMessage, Lite, Entity } from '../Signum.Entities'
 import { getQueryNiceName } from '../Reflection'
 import SearchControl, { SearchControlProps} from './SearchControl'
+import { Modal } from '../Components';
+import { ModalHeaderButtons } from '../Components/Modal';
 
 
 interface SearchModalProps extends React.Props<SearchModal>, IModalProps {
@@ -44,7 +45,7 @@ export default class SearchModal extends React.Component<SearchModalProps, { sho
         this.setState({ show: false });
     }
 
-    handleOnExited = () => {
+    handleOnExisted = () => {
         this.props.onExited!(this.okPressed ? this.selectedRows : undefined);
     }
 
@@ -62,25 +63,19 @@ export default class SearchModal extends React.Component<SearchModalProps, { sho
         const okEnabled = this.props.isMany ? this.selectedRows.length > 0 : this.selectedRows.length == 1;
 
         return (
-            <Modal bsSize="lg" onHide={this.handleCancelClicked} show={this.state.show} onExited={this.handleOnExited}>
-                <Modal.Header closeButton={this.props.findMode == "Explore"}>
-                    { this.props.findMode == "Find" &&
-                        <div className="btn-toolbar pull-right flip">
-                            <button className ="btn btn-primary sf-entity-button sf-close-button sf-ok-button" disabled={!okEnabled} onClick={this.handleOkClicked}>
-                                {JavascriptMessage.ok.niceToString() }
-                            </button>
-
-                            <button className ="btn btn-default sf-entity-button sf-close-button sf-cancel-button" onClick={this.handleCancelClicked}>{JavascriptMessage.cancel.niceToString() }</button>
-                        </div>}
-                    <h4>
-                        <span className="sf-entity-title"> {this.props.title}</span>&nbsp;
+            <Modal size="lg" show={this.state.show} onExited={this.handleOnExisted} onHide={this.handleCancelClicked}>
+                <ModalHeaderButtons
+                    onClose={this.props.findMode == "Explore" ? this.handleCancelClicked : undefined}
+                    onOk={this.props.findMode == "Find" ? this.handleOkClicked : undefined}
+                    onCancel={this.props.findMode == "Find" ? this.handleCancelClicked : undefined}
+                    okDisabled={!okEnabled}>
+                    <span className="sf-entity-title"> {this.props.title}</span>
+                    &nbsp;
                         <a className="sf-popup-fullscreen pointer" onMouseUp={(e) => this.searchControl && this.searchControl.handleFullScreenClick(e)}>
-                            <span className="glyphicon glyphicon-new-window"></span>
+                        <span className="fa fa-external-link"></span>
                         </a>
-                    </h4>
-                </Modal.Header>
-
-                <Modal.Body>
+                </ModalHeaderButtons>
+                <div className="modal-body">
                     <SearchControl
                         hideFullScreenButton={true}
                         throwIfNotFindable={true}
@@ -91,7 +86,7 @@ export default class SearchModal extends React.Component<SearchModalProps, { sho
                         onDoubleClick={this.props.findMode == "Find" ? this.handleDoubleClick : undefined}
                         {...this.props.searchControlProps}
                         />
-                </Modal.Body>
+                </div>
             </Modal>
         );
     }
@@ -126,6 +121,3 @@ export default class SearchModal extends React.Component<SearchModalProps, { sho
             title={modalOptions && modalOptions.title || getQueryNiceName(findOptions.queryName) } />);
     }
 }
-
-
-

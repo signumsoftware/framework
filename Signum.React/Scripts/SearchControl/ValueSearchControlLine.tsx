@@ -1,5 +1,4 @@
 import * as React from 'react'
-import { DropdownButton, MenuItem, OverlayTrigger, Tooltip } from 'react-bootstrap'
 import { Dic, DomUtils, classes } from '../Globals'
 import * as Finder from '../Finder'
 import {
@@ -11,7 +10,9 @@ import { getTypeInfos, IsByAll, getQueryKey, TypeInfo, EntityData, getQueryNiceN
 import * as Navigator from '../Navigator'
 import { StyleContext, TypeContext } from '../Typecontext'
 import ValueSearchControl from './ValueSearchControl'
-import { LineBase, LineBaseProps, FormGroup, FormControlStatic, runTasks } from '../Lines/LineBase'
+import { LineBase, LineBaseProps, runTasks } from '../Lines/LineBase'
+import { FormGroup } from '../Lines/FormGroup'
+import { FormControlReadonly } from '../Lines/FormControlReadonly'
 import { SearchControlProps } from "./SearchControl";
 
 export interface ValueSearchControlLineProps extends React.Props<ValueSearchControlLine> {
@@ -98,18 +99,18 @@ export default class ValueSearchControlLine extends React.Component<ValueSearchC
 
         let value = this.valueSearchControl && this.valueSearchControl.state.value;
         let find = value != undefined && coallesce(this.props.findButton, isQuery) &&
-            <a className={classes("sf-line-button", "sf-find", isFormControl ? "btn btn-default" : undefined)}
+            <a href="#" className={classes("sf-line-button", "sf-find", isFormControl ? "btn btn-light" : undefined)}
                 onClick={this.valueSearchControl!.handleClick}
                 title={EntityControlMessage.Find.niceToString()}>
-                <span className="glyphicon glyphicon-search" />
+                <span className="fa fa-search" />
             </a>;
 
 
         let view = value != undefined && coallesce(this.props.viewEntityButton, isLite(value) && Navigator.isViewable(value.EntityType)) &&
-            <a className={classes("sf-line-button", "sf-view", isFormControl ? "btn btn-default" : undefined)}
+            <a href="#" className={classes("sf-line-button", "sf-view", isFormControl ? "btn btn-light" : undefined)}
                 onClick={this.handleViewEntityClick}
                 title={EntityControlMessage.View.niceToString()}>
-                <span className="glyphicon glyphicon-arrow-right" />
+                <span className="fa fa-arrow-right" />
             </a>
 
         let extra = this.valueSearchControl && this.props.extraButtons && this.props.extraButtons(this.valueSearchControl);
@@ -126,7 +127,7 @@ export default class ValueSearchControlLine extends React.Component<ValueSearchC
                         initialValue={this.props.initialValue}
                         isBadge={isBadge}
                         isLink={this.props.isLink}
-                        formControlClass={isFormControl ? this.props.ctx.formControlClassReadonly : undefined}
+                        formControlClass={isFormControl ? "form-control-plantext" : undefined}
                         valueToken={this.props.valueToken}
                         onValueChange={() => this.forceUpdate()}
                         onTokenLoaded={() => this.forceUpdate()}
@@ -136,7 +137,7 @@ export default class ValueSearchControlLine extends React.Component<ValueSearchC
                         />
                     {unit}
                     {(view || extra || find) && (isFormControl ?
-                        <div className="input-group-btn">
+                        <div className="input-group-append">
                             {view}
                             {find}
                             {extra}

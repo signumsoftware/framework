@@ -17,8 +17,8 @@ import { AutocompleteConfig, FindOptionsAutocompleteConfig, LiteAutocompleteConf
 import { FindOptions } from './FindOptions'
 import { ImportRoute } from "./AsyncImport";
 import * as AppRelativeRoutes from "./AppRelativeRoutes";
-import { Sizes } from "react-bootstrap";
 import { NormalWindowMessage } from "./Signum.Entities";
+import { BsSize } from "./Components/Basic";
 
 
 Dic.skipClasses.push(React.Component);
@@ -228,7 +228,7 @@ export class DynamicComponentViewDispatcher implements ViewDispatcher {
         if (viewName == undefined) {
 
             if (!es || !es.getViewPromise)
-                return new ViewPromise<ModifiableEntity>(import('./Lines/DynamicComponent'));
+            return new ViewPromise<ModifiableEntity>(import('./Lines/DynamicComponent'));
 
             return es.getViewPromise(entity).applyViewOverrides(entity.Type);
         } else {
@@ -549,7 +549,7 @@ export interface ViewOptions {
     title?: string;
     propertyRoute?: PropertyRoute;
     readOnly?: boolean;
-    modalSize?: Sizes;
+    modalSize?: BsSize;
     isOperationVisible?: (eoc: Operations.EntityOperationContext<any /*Entity*/>) => boolean;
     validate?: boolean;
     requiresSaveOperation?: boolean;
@@ -581,7 +581,7 @@ export function viewDefault(entityOrPack: Lite<Entity> | ModifiableEntity | Enti
 
 export interface NavigateOptions {
     readOnly?: boolean;
-    modalSize?: Sizes;
+    modalSize?: BsSize;
     avoidPromptLooseChange?: boolean;
     getViewPromise?: (entity: ModifiableEntity) => undefined | string | ViewPromise<ModifiableEntity>;
     extraComponentProps?: {};
@@ -630,7 +630,7 @@ export function pushOrOpenInTab(path: string, e: React.MouseEvent<any> | React.K
     e.preventDefault();
     if (e.ctrlKey || (e as React.MouseEvent<any>).button == 1)
         window.open(toAbsoluteUrl(path));
-    else 
+    else
         history.push(path);
 }
 
@@ -869,12 +869,12 @@ export class ViewPromise<T extends ModifiableEntity> {
         
         this.promise = this.promise.then(func =>
             viewDispatcher.getViewOverrides(typeName, viewName).then(vos => {
-                return (ctx: TypeContext<T>) => {
-                    var result = func(ctx);
-                    var component = result.type as React.ComponentClass<{ ctx: TypeContext<T> }>;
+            return (ctx: TypeContext<T>) => {
+                var result = func(ctx);
+                var component = result.type as React.ComponentClass<{ ctx: TypeContext<T> }>;
                     monkeyPatchComponent(component, vos!);
-                    return result;
-                };
+                return result;
+            };
             }));
 
         return this;
@@ -891,7 +891,7 @@ function monkeyPatchComponent<T extends ModifiableEntity>(component: React.Compo
 
     if (!component.prototype.render)
         throw new Error("render function not defined in " + component);
-    
+
     if (component.prototype.render.withViewOverrides)
         return;
 

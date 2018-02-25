@@ -1,6 +1,5 @@
 ﻿
 import * as React from 'react'
-import { Modal, ModalProps, ModalClass, ButtonToolbar } from 'react-bootstrap'
 import { classes, Dic } from '../Globals'
 import * as Finder from '../Finder'
 import { openModal, IModalProps } from '../Modals';
@@ -34,7 +33,7 @@ export default class MultipliedMessage extends React.Component<{ findOptions: Fi
 
         return (
             <div className="sf-td-multiply alert alert-warning">
-                <span className="glyphicon glyphicon-exclamation-sign" />&nbsp;{message}
+                <span className="fa fa-exclamation-triangle" />&nbsp;{message}
             </div>
         );
     }

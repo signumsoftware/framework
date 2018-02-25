@@ -1,5 +1,7 @@
 ﻿import * as React from 'react'
+import * as ReactDOM from 'react-dom'
 import { classes, Dic } from '../Globals'
+import { Popper, Manager, Target } from 'react-popper';
 
 
 
@@ -14,10 +16,8 @@ export interface TypeaheadProps {
     renderItem?: (item: any, query: string) => React.ReactNode;
     onSelect?: (item: any, e: React.KeyboardEvent<any> | React.MouseEvent<any>) => string | null;
     scrollHeight?: number;
-    spanAttrs?: React.HTMLAttributes<HTMLSpanElement>;
     inputAttrs?: React.InputHTMLAttributes<HTMLInputElement>;
     liAttrs?: (item: any) => React.LiHTMLAttributes<HTMLLIElement>;
-    loadingMessage?: string;
     noResultsMessage?: string;
 }
 
@@ -29,7 +29,7 @@ export interface TypeaheadState {
 }
 
 
-export default class Typeahead extends React.Component<TypeaheadProps, TypeaheadState>
+export class Typeahead extends React.Component<TypeaheadProps, TypeaheadState>
 {
     constructor(props: TypeaheadProps) {
         super(props);
@@ -63,7 +63,6 @@ export default class Typeahead extends React.Component<TypeaheadProps, Typeahead
         renderItem: Typeahead.highlightedText,
         onSelect: (elem, event) => elem,
         scrollHeight: 0,
-        loadingMessage: "Loading...",
         noResultsMessage: " - No results -",
     };
 
@@ -104,11 +103,11 @@ export default class Typeahead extends React.Component<TypeaheadProps, Typeahead
         })).done();
     }
 
-    static normalizeString(str: string) : string {
+    static normalizeString(str: string): string {
         return str;
     }
 
-    select(e: React.KeyboardEvent<any> | React.MouseEvent<any>): boolean {        
+    select(e: React.KeyboardEvent<any> | React.MouseEvent<any>): boolean {
         if (this.state.items!.length == 0)
             return false;
 
@@ -141,8 +140,8 @@ export default class Typeahead extends React.Component<TypeaheadProps, Typeahead
     handleBlur = () => {
         this.focused = false;
 
-        if (!this.mouseover && this.state.shown)
-            this.setState({ shown: false });
+        //if (!this.mouseover && this.state.shown)
+        //    this.setState({ shown: false });
 
         if (this.props.onBlur)
             this.props.onBlur();
@@ -243,23 +242,6 @@ export default class Typeahead extends React.Component<TypeaheadProps, Typeahead
 
     input!: HTMLInputElement;
 
-    handlePopupLoaded = (elem: HTMLElement | null) => {
-        if (!this.input)
-            return;
-
-        const rec = this.input.getBoundingClientRect();
-        if (elem) {
-            elem.style.top = (rec.height) + "px";
-
-            if (getComputedStyle(elem).direction == "rtl")
-                elem.style.right = "0px";
-            else
-                elem.style.left = "0px";
-
-            elem.style.display = "table";
-        }
-    }
-
     handleOnChange = () => {
         if (this.props.onChange)
             this.props.onChange(this.input.value);
@@ -268,34 +250,71 @@ export default class Typeahead extends React.Component<TypeaheadProps, Typeahead
     render() {
 
         return (
-            <span {...this.props.spanAttrs} className={classes(this.props.spanAttrs && this.props.spanAttrs.className, "sf-typeahead")}>
-                <input type="text" autoComplete="off" ref={inp => this.input = inp!} {...this.props.inputAttrs}
-                    value={this.props.value}
-                    onFocus={this.handleFocus}
-                    onBlur={this.handleBlur}
-                    onKeyUp={this.handleKeyUp}
-                    onKeyDown={this.handleKeyDown}
-                    onChange={this.handleOnChange}
+            <Manager tag={false}>
+                <Target innerRef={inp => this.input = inp as HTMLInputElement}>
+                    {({ targetProps }) => <input type="text" autoComplete="off" {...this.props.inputAttrs} {...targetProps as any}
+                        value={this.props.value}
+                        onFocus={this.handleFocus}
+                        onBlur={this.handleBlur}
+                        onKeyUp={this.handleKeyUp}
+                        onKeyDown={this.handleKeyDown}
+                        onChange={this.handleOnChange}
                     />
-                <span>{/*placeholder for rouded borders*/}</span>
-                {
-                    this.state.shown && (this.props.renderList ? this.props.renderList(this) : this.renderDefaultList())
-                }
-            </span>
+                    }
+                </Target>
+                {this.state.shown && <Popper placement="bottom-start" style={{zIndex: 1000}}>{this.props.renderList ? this.props.renderList(this) : this.renderDefaultList()}</Popper>}
+            </Manager>
+
         );
     }
 
+
+    toggleEvents(isOpen: boolean | undefined) {
+        if (isOpen) {
+            document.addEventListener('click', this.handleDocumentClick, true);
+            document.addEventListener('touchstart', this.handleDocumentClick, true);
+        } else {
+            document.removeEventListener('click', this.handleDocumentClick, true);
+            document.removeEventListener('touchstart', this.handleDocumentClick, true);
+        }
+    }
+
+    componentDidMount() {
+        this.toggleEvents(this.state.shown);
+    }
+
+    componentWillUpdate(nextProps: TypeaheadProps, nextState: TypeaheadState) {
+        if (nextState.shown != this.state.shown)
+            this.toggleEvents(nextState.shown);
+    }
+
+    handleDocumentClick = (e: MouseEvent | TouchEvent) => {
+        console.log(e);
+        if (e.which === 3)
+            return;
+
+        const container = ReactDOM.findDOMNode(this);
+        if (container.contains(e.target as Node) &&
+            container !== e.target) {
+            return;
+        }
+
+        this.setState({ shown: false });
+    }
+
     renderDefaultList() {
-        return (<ul className="typeahead dropdown-menu" ref={this.handlePopupLoaded}>
-            {
-                !this.state.items!.length ? <li className="no-results"><a><small>{this.props.noResultsMessage}</small></a></li> :
-                    this.state.items!.map((item, i) => <li key={i} className={i == this.state.selectedIndex ? "active" : undefined}
-                        onMouseEnter={e => this.handleElementMouseEnter(e, i)}
-                        onMouseLeave={e => this.handleElementMouseLeave(e, i)}
-                        {...this.props.liAttrs && this.props.liAttrs(item) }>
-                        <a className="sf-pointer" onMouseUp={e => this.handleMenuClick(e, i)}>{this.props.renderItem!(item, this.state.query!)}</a>
-                    </li>)
-            }
-        </ul>);
+        return (
+            <ul className="typeahead dropdown-menu show">
+                {
+                    !this.state.items!.length ? <li className="no-results"><a><small>{this.props.noResultsMessage}</small></a></li> :
+                        this.state.items!.map((item, i) => <li key={i} className={classes("dropdown-item", i == this.state.selectedIndex ? "active" : undefined)}
+                            onMouseEnter={e => this.handleElementMouseEnter(e, i)}
+                            onMouseLeave={e => this.handleElementMouseLeave(e, i)}
+                            {...this.props.liAttrs && this.props.liAttrs(item)}>
+                            <a className="sf-pointer" onMouseUp={e => this.handleMenuClick(e, i)}>{this.props.renderItem!(item, this.state.query!)}</a>
+                        </li>)
+                }
+            </ul>
+        );
     }
 }

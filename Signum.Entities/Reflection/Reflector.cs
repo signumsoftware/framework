@@ -54,7 +54,8 @@ namespace Signum.Entities.Reflection
 
         static ResetLazy<HashSet<Type>> EnumsInEntities = new ResetLazy<HashSet<Type>>(() =>
         {
-            return (from a in AppDomain.CurrentDomain.GetAssemblies().Where(a => a.HasAttribute<DefaultAssemblyCultureAttribute>())
+            return (from a in AppDomain.CurrentDomain.GetAssemblies()
+                    where a.GetName().Name != "Signum.Analyzer" && a.HasAttribute<DefaultAssemblyCultureAttribute>()
                     from t in a.GetTypes()
                     where typeof(IEntity).IsAssignableFrom(t) || typeof(ModifiableEntity).IsAssignableFrom(t)
                     let da = t.GetCustomAttribute<DescriptionOptionsAttribute>(true)

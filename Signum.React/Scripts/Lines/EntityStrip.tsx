@@ -6,9 +6,11 @@ import * as Finder from '../Finder'
 import { FindOptions } from '../FindOptions'
 import { TypeContext, StyleContext, StyleOptions, FormGroupStyle, mlistItemContext, EntityFrame } from '../TypeContext'
 import { PropertyRoute, PropertyRouteType, MemberInfo, getTypeInfo, getTypeInfos, TypeInfo, IsByAll, ReadonlyBinding, LambdaMemberType } from '../Reflection'
-import { LineBase, LineBaseProps, FormGroup, FormControlStatic, runTasks, } from '../Lines/LineBase'
+import { LineBase, LineBaseProps, runTasks, } from '../Lines/LineBase'
+import { FormGroup } from '../Lines/FormGroup'
+import { FormControlReadonly } from '../Lines/FormControlReadonly'
 import { ModifiableEntity, Lite, Entity, MList, MListElement, EntityControlMessage, JavascriptMessage, toLite, is, liteKey, getToString, isLite } from '../Signum.Entities'
-import Typeahead from '../Lines/Typeahead'
+import { Typeahead } from '../Components'
 import { EntityListBase, EntityListBaseProps, DragConfig } from './EntityListBase'
 import { AutocompleteConfig } from './AutocompleteConfig'
 
@@ -46,7 +48,7 @@ export class EntityStrip extends EntityListBase<EntityStripProps, EntityStripPro
             <FormGroup ctx={s.ctx!}
                 labelText={s.labelText}
                 labelHtmlAttributes={s.labelHtmlAttributes}
-                helpBlock={s.helpBlock}
+                helpText={s.helpText}
                 htmlAttributes={{ ...this.baseHtmlAttributes(), ...this.state.formGroupHtmlAttributes }}>
                 <div className="SF-entity-strip SF-control-container">
                     <ul className={classes("sf-strip", this.props.vertical ? "sf-strip-vertical" : "sf-strip-horizontal")}>
@@ -62,7 +64,7 @@ export class EntityStrip extends EntityListBase<EntityStripProps, EntityStripPro
                                     onView={this.canView(mlec.value) ? e => this.handleViewElement(e, i) : undefined}
                                 />))
                         }
-                        <li className="sf-strip-input input-group">
+                        <li className={classes(s.ctx.inputGroupClass, "sf-strip-input")}>
                             {this.renderAutoComplete()}
                             <span>
                                 {this.renderCreateButton(false)}
@@ -222,7 +224,7 @@ export class EntityStripElement extends React.Component<EntityStripElementProps,
 
                     {
                         this.props.onView ?
-                            <a className="sf-entitStrip-link" href="" onClick={this.props.onView} {...htmlAttributes}>
+                            <a href="#" className="sf-entitStrip-link" onClick={this.props.onView} {...htmlAttributes}>
                                 {toStr}
                             </a>
                             :
@@ -233,10 +235,11 @@ export class EntityStripElement extends React.Component<EntityStripElementProps,
 
                     {this.props.onRemove &&
                         <span>
-                            <a className="sf-line-button sf-remove"
+                            <a href="#" className="sf-line-button sf-remove"
                                 onClick={this.props.onRemove}
                                 title={EntityControlMessage.Remove.niceToString()}>
-                                <span className="glyphicon glyphicon-remove"></span></a>
+                                <span className="fa fa-remove"></span>
+                            </a>
                         </span>
                     }
                     &nbsp;
@@ -245,7 +248,7 @@ export class EntityStripElement extends React.Component<EntityStripElementProps,
                         onDragStart={drag.onDragStart}
                         onDragEnd={drag.onDragEnd}
                         title={EntityControlMessage.Move.niceToString()}>
-                        <span className="glyphicon glyphicon-menu-hamburger" />
+                        <span className="fa fa-bars" />
                     </span>}
                 </div>
             </li>

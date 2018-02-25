@@ -7,9 +7,9 @@ import { AbortableRequest } from '../Services'
 import { FindOptions, QueryDescription, FilterOptionParsed, FilterRequest, OrderOptionParsed, OrderRequest } from '../FindOptions'
 import { TypeContext, StyleContext, StyleOptions, FormGroupStyle } from '../TypeContext'
 import { PropertyRoute, PropertyRouteType, MemberInfo, getTypeInfo, getTypeInfos, TypeInfo, IsByAll, getQueryKey } from '../Reflection'
-import { LineBase, LineBaseProps, FormGroup, FormControlStatic, runTasks } from '../Lines/LineBase'
+import { LineBase, LineBaseProps, runTasks } from '../Lines/LineBase'
 import { ModifiableEntity, Lite, Entity, EntityControlMessage, JavascriptMessage, toLite, is, liteKey, getToString, isLite, isEntity } from '../Signum.Entities'
-import Typeahead from '../Lines/Typeahead'
+import { Typeahead } from '../Components'
 import { EntityBase, EntityBaseProps} from './EntityBase'
 
 export interface AutocompleteConfig<T> {

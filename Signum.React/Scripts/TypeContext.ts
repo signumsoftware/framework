@@ -11,10 +11,11 @@ export type FormGroupStyle =
     "SrOnly" |    /// Label visible only for Screen-Readers. Requires form-vertical / form-inline container
     "LabelColumns"; /// (default) Label on the left, value on the right (exept RTL). Requires form-horizontal, affected by LabelColumns / ValueColumns
 
-export type FormGroupSize =
-    "Normal" | //Raw Bootstrap default
-    "Small" | //Signum default
-    "ExtraSmall"; //Like in FilterBuilder
+export type FormSize =
+    "ExtraSmall" |
+    "Small" |
+    "Normal" |
+    "Large";
    
 
 export class StyleContext {
@@ -32,11 +33,11 @@ export class StyleContext {
     static default: StyleContext = new StyleContext(undefined,
     {
         formGroupStyle : "LabelColumns",
-        formGroupSize : "Small",
+        formSize : "Small",
         labelColumns: { sm: 2 },
         readOnly : false,
         placeholderLabels : false,
-        formControlClassReadonly: "form-control-static", //form-control readonly
+        readonlyAsPlainText: false,
         frame: undefined,
     });
 
@@ -44,21 +45,86 @@ export class StyleContext {
         return this.styleOptions.formGroupStyle != undefined ? this.styleOptions.formGroupStyle : this.parent.formGroupStyle;
     }
 
-    get formGroupSize(): FormGroupSize {
-        return this.styleOptions.formGroupSize != undefined ? this.styleOptions.formGroupSize : this.parent.formGroupSize;
+    get formSize(): FormSize {
+        return this.styleOptions.formSize != undefined ? this.styleOptions.formSize : this.parent.formSize;
     }
 
-    get formGroupSizeCss(): string {
-        return this.formGroupSize == "Normal" ? "form-md" :
-            this.formGroupSize == "Small" ? "form-sm" : "form-xs";
+    get formGroupClass(): string | undefined {
+        switch (this.formSize) {
+            case "ExtraSmall": return "form-group form-group-xs";
+            case "Small": return "form-group form-group-sm";
+            case "Normal": return "form-group";
+            case "Large": return "form-group form-group-lg";
+            default: throw new Error("Unexpected formSize " + this.formSize);
+        }
+    }
+
+    get colFormLabelClass(): string | undefined {
+        switch (this.formSize) {
+            case "ExtraSmall": return "col-form-label col-form-label-xs";
+            case "Small": return "col-form-label col-form-label-sm";
+            case "Normal": return "col-form-label";
+            case "Large": return "col-form-label col-form-label-lg";
+            default: throw new Error("Unexpected formSize " + this.formSize);
+        }
+    }
+
+    get labelClass(): string | undefined {
+        switch (this.formSize) {
+            case "ExtraSmall": return "label-xs";
+            case "Small": return "label-sm";
+            case "Normal": return undefined;
+            case "Large": return undefined;
+            default: throw new Error("Unexpected formSize " + this.formSize);
+        }
+    }
+
+    get rwWidgetClass(): string | undefined {
+        switch (this.formSize) {
+            case "ExtraSmall": return "rw-widget-xs";
+            case "Small": return "rw-widget-sm";
+            case "Normal": return "";
+            case "Large": return "rw-widget-lg";
+            default: throw new Error("Unexpected formSize " + this.formSize);
+        }
+    }
+
+    get inputGroupClass(): string | undefined {
+        switch (this.formSize) {
+            case "ExtraSmall": return "input-group input-group-xs";
+            case "Small": return "input-group input-group-sm";
+            case "Normal": return "input-group";
+            case "Large": return "input-group input-group-lg";
+            default: throw new Error("Unexpected formSize " + this.formSize);
+        }
+    }
+
+    get formControlClass(): string | undefined {
+        switch (this.formSize) {
+            case "ExtraSmall": return "form-control form-control-xs";
+            case "Small": return "form-control form-control-sm";
+            case "Normal": return "form-control";
+            case "Large": return "form-control form-control-lg";
+            default: throw new Error("Unexpected formSize " + this.formSize);
+        }
+    }
+
+    get buttonClass(): string | undefined {
+        switch (this.formSize) {
+            case "ExtraSmall": return "btn-xs";
+            case "Small": return "btn-sm";
+            case "Normal": return undefined;
+            case "Large": return "btn-lg";
+            default: throw new Error("Unexpected formSize " + this.formSize);
+        }
     }
 
     get placeholderLabels(): boolean {
         return this.styleOptions.placeholderLabels != undefined ? this.styleOptions.placeholderLabels : this.parent.placeholderLabels;
     }
 
-    get formControlClassReadonly(): string {
-        return this.styleOptions.formControlClassReadonly != undefined ? this.styleOptions.formControlClassReadonly : this.parent.formControlClassReadonly;
+    get readonlyAsPlainText(): boolean {
+        return this.styleOptions.readonlyAsPlainText != undefined ? this.styleOptions.readonlyAsPlainText : this.parent.readonlyAsPlainText;
     }
     
     get labelColumns(): BsColumns {
@@ -124,9 +190,9 @@ function toBsColumn(bsColumnOrNumber: BsColumns | number): BsColumns {
 
 export interface StyleOptions {
     formGroupStyle?: FormGroupStyle;
-    formGroupSize?: FormGroupSize;
+    formSize?: FormSize;
     placeholderLabels?: boolean;
-    formControlClassReadonly?: string;
+    readonlyAsPlainText?: boolean;
     labelColumns?: BsColumns | number;
     valueColumns?: BsColumns | number;
     readOnly?: boolean;

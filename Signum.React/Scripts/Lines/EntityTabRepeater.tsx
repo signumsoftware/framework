@@ -1,5 +1,4 @@
 ﻿import * as React from 'react'
-import { Tab, Tabs } from 'react-bootstrap'
 import { classes, Dic } from '../Globals'
 import * as Navigator from '../Navigator'
 import * as Constructor from '../Constructor'
@@ -7,11 +6,11 @@ import * as Finder from '../Finder'
 import { FindOptions } from '../FindOptions'
 import { TypeContext, StyleContext, StyleOptions, FormGroupStyle, mlistItemContext, EntityFrame } from '../TypeContext'
 import { PropertyRoute, PropertyRouteType, MemberInfo, getTypeInfo, getTypeInfos, TypeInfo, IsByAll, ReadonlyBinding, LambdaMemberType } from '../Reflection'
-import { LineBase, LineBaseProps, FormGroup, FormControlStatic, runTasks, } from '../Lines/LineBase'
+import { LineBase, LineBaseProps } from '../Lines/LineBase'
 import { ModifiableEntity, Lite, Entity, MList, MListElement, EntityControlMessage, JavascriptMessage, toLite, is, liteKey, getToString } from '../Signum.Entities'
-import Typeahead from '../Lines/Typeahead'
 import { EntityListBase, EntityListBaseProps } from './EntityListBase'
 import { RenderEntity } from './RenderEntity'
+import { Tab, UncontrolledTabs, Tabs } from '../Components/Tabs';
 import { newMListElement } from '../Signum.Entities';
 import { isLite } from '../Signum.Entities';
 
@@ -82,7 +81,7 @@ export class EntityTabRepeater extends EntityListBase<EntityTabRepeaterProps, En
         const readOnly = ctx.readOnly;
 
         return (
-            <Tabs id={ctx.compose("tabs")} animation={false} activeKey={this.state.selectedIndex || 0} onSelect={(activeKey: any) => this.setState({ selectedIndex: activeKey })}>
+            <Tabs activeEventKey={this.state.selectedIndex || 0} toggle={(activeKey: any) => this.setState({ selectedIndex: activeKey })}>
                 {
                     mlistItemContext(ctx).map((mlec, i) => {
                         const drag = this.canMove(mlec.value) && !readOnly ? this.getDragConfig(i, "h") : undefined;
@@ -102,7 +101,7 @@ export class EntityTabRepeater extends EntityListBase<EntityTabRepeaterProps, En
                                         <span className={classes("sf-line-button", "sf-create")}
                                             onClick={e => { e.stopPropagation(); this.handleRemoveElementClick(e, i) } }
                                             title={EntityControlMessage.Remove.niceToString()}>
-                                            <span className="glyphicon glyphicon-remove" />
+                                            <span className="fa fa-remove" />
                                         </span>
                                     }
                                     &nbsp;
@@ -111,7 +110,7 @@ export class EntityTabRepeater extends EntityListBase<EntityTabRepeaterProps, En
                                         onDragStart={drag.onDragStart}
                                         onDragEnd={drag.onDragEnd}
                                         title={EntityControlMessage.Move.niceToString()}>
-                                        <span className="glyphicon glyphicon-menu-hamburger" />
+                                        <span className="fa fa-bars" />
                                     </span>}
                                 </div> as any
                             }>

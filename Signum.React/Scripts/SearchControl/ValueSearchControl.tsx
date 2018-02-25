@@ -1,7 +1,6 @@
 import * as React from 'react'
 import * as numbro from 'numbro'
 import * as moment from 'moment'
-import { DropdownButton, MenuItem, OverlayTrigger, Tooltip } from 'react-bootstrap'
 import { Dic, DomUtils, classes } from '../Globals'
 import * as Finder from '../Finder'
 import {
@@ -12,7 +11,7 @@ import { SearchMessage, JavascriptMessage, Lite, liteKey, is, Entity, getToStrin
 import { getTypeInfos, IsByAll, getQueryKey, TypeInfo, EntityData, getQueryNiceName, toNumbroFormat, toMomentFormat, getEnumInfo } from '../Reflection'
 import * as Navigator from '../Navigator'
 import { StyleContext } from '../Typecontext'
-import { LineBase, LineBaseProps, FormGroup, FormControlStatic, runTasks } from '../Lines/LineBase'
+import { LineBase, LineBaseProps } from '../Lines/LineBase'
 import { AbortableRequest } from "../Services";
 import { SearchControlProps } from "./SearchControl";
 
@@ -167,7 +166,7 @@ export default class ValueSearchControl extends React.Component<ValueSearchContr
 
         if (p.isLink) {
             return (
-                <a className={className} onClick={this.handleClick} href="" style={p.customStyle}>
+                <a className={className} onClick={this.handleClick} href="#" style={p.customStyle}>
                     {this.renderValue()}
                 </a>
             );

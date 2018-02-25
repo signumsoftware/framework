@@ -815,15 +815,15 @@ export function classes(...classNames: (string | null | undefined | boolean /*fa
     return classNames.filter(a=> a && a != "").join(" ");
 }
 
-export function addClass(props: { className?: string } | null | undefined, newClasses: string) {
+export function addClass(props: { className?: string } | null | undefined, newClasses?: string | null): string | undefined {
     if (!props || !props.className)
-        return newClasses;
+        return newClasses || undefined;
 
     return classes(props.className, newClasses)
 }
 
 
-export function combineFunction<F extends Function>(func1: F, func2: F) : F {
+export function combineFunction<F extends Function>(func1?: F | null, func2?: F | null): F | null | undefined {
     if (!func1)
         return func2;
 
