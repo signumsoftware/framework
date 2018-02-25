@@ -219,10 +219,11 @@ td.centered-cell{
 
 .empty-icon {
     display: inline-block;
-    width: 1.2em;
-    height: 1.2em;
+    width: 1em;
+    height: 1em;
     border-radius: 2px;
-    content: "&nbsp;"
+    content: "&nbsp;";
+    margin-bottom: -2px;
 }
 
 /* check box */

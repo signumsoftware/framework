@@ -86,7 +86,6 @@ export default class ContextMenu extends React.Component<ContextMenuProps> {
     }
 
     handleDocumentClick = (e: MouseEvent | TouchEvent) => {
-        console.log(e);
         if (e.which === 3)
             return;
 
