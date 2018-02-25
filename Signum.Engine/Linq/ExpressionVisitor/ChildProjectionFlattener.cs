@@ -218,10 +218,33 @@ namespace Signum.Engine.Linq
                 {
                     case JoinType.SingleRowLeftOuterJoin:
                         return Keys(join.Left);
+                    case JoinType.CrossApply:
+                        {
+                            var leftKeys = Keys(join.Left);
+                            var rightKeys = Keys(join.Right);
 
+                            var onlyLeftKey = leftKeys.Only();
+
+                            if(onlyLeftKey != null && 
+                                join.Right is SelectExpression r && 
+                                r.Where is BinaryExpression b && 
+                                b.NodeType == ExpressionType.Equal &&
+                                b.Left is ColumnExpression cLeft && 
+                                b.Right is ColumnExpression cRight)
+                            {
+                                if(cLeft.Equals(onlyLeftKey) ^ cRight.Equals(onlyLeftKey))
+                                {
+                                    var other = b.Left == onlyLeftKey ? b.Right : b.Left;
+
+                                    if (other is ColumnExpression c && join.Right.KnownAliases.Contains(c.Alias))
+                                        return rightKeys;
+                                }
+                            }
+
+                            return leftKeys.Concat(rightKeys);
+                        }
                     case JoinType.CrossJoin:
                     case JoinType.InnerJoin:
-                    case JoinType.CrossApply:
                     case JoinType.OuterApply:
                     case JoinType.LeftOuterJoin:
                     case JoinType.RightOuterJoin:
