@@ -126,6 +126,22 @@ namespace Signum.Engine.Linq
         }
 
         #region Not Null Root
+        protected internal override Expression VisitLiteReference(LiteReferenceExpression lite)
+        {
+            if (lite == isNotNullRoot)
+            {
+                if (lite.Reference is EntityExpression rr)
+                    return Add(rr.ExternalId.Value);
+                if (lite.Reference is ImplementedByExpression ib)
+                    return Add(GetImplmentedById(ib));
+                if (lite.Reference is ImplementedByAllExpression iba)
+                    return Add(iba.Id);
+            }
+
+            return base.VisitLiteReference(lite);
+        }
+
+
         protected internal override Expression VisitEntity(EntityExpression ee)
         {
             if (ee == isNotNullRoot)
@@ -145,10 +161,15 @@ namespace Signum.Engine.Linq
         protected internal override Expression VisitImplementedBy(ImplementedByExpression ib)
         {
             if (ib == isNotNullRoot)
-                return Add(ib.Implementations.IsEmpty() ? new SqlConstantExpression(null, typeof(int?)) :
-                    ib.Implementations.Select(a => a.Value.ExternalId.Value).Aggregate((id1, id2) => Expression.Coalesce(id1, id2)));
+                return Add(GetImplmentedById(ib));
 
             return base.VisitImplementedBy(ib);
+        }
+
+        private static Expression GetImplmentedById(ImplementedByExpression ib)
+        {
+            return ib.Implementations.IsEmpty() ? new SqlConstantExpression(null, typeof(int?)) :
+                                ib.Implementations.Select(a => a.Value.ExternalId.Value).Aggregate((id1, id2) => Expression.Coalesce(id1, id2));
         }
 
         protected internal override Expression VisitTypeImplementedBy(TypeImplementedByExpression typeIb)
