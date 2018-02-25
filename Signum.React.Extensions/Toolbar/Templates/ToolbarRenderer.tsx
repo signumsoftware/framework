@@ -19,6 +19,12 @@ import { Dropdown, DropdownToggle, DropdownMenu, DropdownItem, NavItem } from '.
 import { NavLink } from '../../../../Framework/Signum.React/Scripts/Components/NavItem';
 
 
+export interface ToolbarRendererProps {
+    location?: ToolbarLocation;
+    className?: string;
+}
+
+
 export interface ToolbarRendererState {
     response?: ToolbarClient.ToolbarResponse<any>;
     expanded: ToolbarClient.ToolbarResponse<any>[];
@@ -26,7 +32,7 @@ export interface ToolbarRendererState {
     isRtl: boolean;
 }
 
-export default class ToolbarRenderer extends React.Component<{ location?: ToolbarLocation; }, ToolbarRendererState>
+export default class ToolbarRenderer extends React.Component<ToolbarRendererProps, ToolbarRendererState>
 {
     static defaultProps = { location: "Top" as ToolbarLocation };
 
@@ -54,13 +60,13 @@ export default class ToolbarRenderer extends React.Component<{ location?: Toolba
 
         if (this.props.location == "Top")
             return (
-                <ul className="nav navbar-nav">
+                <div className={classes("nav navbar-nav", this.props.className)}>
                     {r.elements && r.elements.map((res, i) => withKey(this.renderNavItem(res, i), i))}
-                </ul>
+                </div>
             );
         else
             return (
-                <DropdownItemContainer>
+                <DropdownItemContainer className={this.props.className}>
                     {r.elements && r.elements.flatMap(sr => this.renderDropdownItem(sr, 0, r)).map((sr, i) => withKey(sr, i))}
                 </DropdownItemContainer>
             );
@@ -253,7 +259,7 @@ function findPath(target: ToolbarClient.ToolbarResponse<any>, list: ToolbarClien
 }
 
 
-export class DropdownItemContainer extends React.Component<{}> {
+export class DropdownItemContainer extends React.Component<{ className?: string}> {
 
     handleToggle = () => {
 
@@ -267,9 +273,9 @@ export class DropdownItemContainer extends React.Component<{}> {
 
     render() {
         return (
-            <ul className="nav">
+            <div className={classes("nav", this.props.className)}>
                 {this.props.children}
-            </ul>
+            </div>
         );
     }
 }
