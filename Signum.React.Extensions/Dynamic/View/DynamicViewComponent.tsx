@@ -20,7 +20,7 @@ import ShowCodeModal from './ShowCodeModal'
 import { DynamicViewEntity, DynamicViewOperation, DynamicViewMessage } from '../Signum.Entities.Dynamic'
 
 import "./DynamicView.css"
-import { Dropdown, DropdownItem, DropdownToggle } from '../../../../Framework/Signum.React/Scripts/Components';
+import { Dropdown, DropdownItem, DropdownToggle, DropdownMenu } from '../../../../Framework/Signum.React/Scripts/Components';
 
 export interface DynamicViewComponentProps {
     ctx: TypeContext<ModifiableEntity>;
@@ -89,7 +89,7 @@ export default class DynamicViewComponent extends React.Component<DynamicViewCom
     }
 
     render() {
-        
+
         const rootNode = this.getZeroNode().createChild(this.state.rootNode);
         const ctx = this.props.ctx;
 
@@ -157,7 +157,7 @@ class DynamicViewDesigner extends React.Component<DynamicViewDesignerProps, Dyna
 
     constructor(props: DynamicViewDesignerProps) {
         super(props);
-        this.state = { isDropdownOpen: true };
+        this.state = { isDropdownOpen: false };
     }
 
     render() {
@@ -258,16 +258,18 @@ class DynamicViewDesigner extends React.Component<DynamicViewDesignerProps, Dyna
             <div className="btn-group btn-group-sm" role="group" style={{ marginBottom: "5px" }}>
                 {operations[DynamicViewOperation.Save.key] && <button type="button" className="btn btn-primary" onClick={this.handleSave}>{operations[DynamicViewOperation.Save.key].niceName}</button>}
                 <button type="button" className="btn btn-success" onClick={this.handleShowCode}>Show code</button>
-                <Dropdown id="bg-nested-dropdown" toggle={this.handleOnToggle} isOpen={this.state.isDropdownOpen} size="sm">
+                <Dropdown id="bg-nested-dropdown" tag={false} toggle={this.handleOnToggle} isOpen={this.state.isDropdownOpen} size="sm">
                     <DropdownToggle>{" … "}</DropdownToggle>
-                    {operations[DynamicViewOperation.Create.key] && <DropdownItem onClick={this.handleCreate}>{operations[DynamicViewOperation.Create.key].niceName}</DropdownItem>}
-                    {operations[DynamicViewOperation.Clone.key] && !this.props.dynamicView.isNew && <DropdownItem onClick={this.handleClone}>{operations[DynamicViewOperation.Clone.key].niceName}</DropdownItem>}
-                    {this.state.viewNames && this.state.viewNames.length > 0 && <DropdownItem divider={true} />}
-                    {this.state.viewNames && this.state.viewNames.map(vn => <DropdownItem key={vn}
-                        className={classes("sf-dynamic-view", vn == this.props.dynamicView.viewName && "active")}
-                        onClick={() => this.handleChangeView(vn)}>
-                        {vn}
-                    </DropdownItem>)}
+                    <DropdownMenu>
+                        {operations[DynamicViewOperation.Create.key] && <DropdownItem onClick={this.handleCreate}>{operations[DynamicViewOperation.Create.key].niceName}</DropdownItem>}
+                        {operations[DynamicViewOperation.Clone.key] && !this.props.dynamicView.isNew && <DropdownItem onClick={this.handleClone}>{operations[DynamicViewOperation.Clone.key].niceName}</DropdownItem>}
+                        {this.state.viewNames && this.state.viewNames.length > 0 && <DropdownItem divider={true} />}
+                        {this.state.viewNames && this.state.viewNames.map(vn => <DropdownItem key={vn}
+                            className={classes("sf-dynamic-view", vn == this.props.dynamicView.viewName && "active")}
+                            onClick={() => this.handleChangeView(vn)}>
+                            {vn}
+                        </DropdownItem>)}
+                    </DropdownMenu>
                 </Dropdown>
             </div >);
     }

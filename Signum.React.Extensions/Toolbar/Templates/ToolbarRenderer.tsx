@@ -21,7 +21,7 @@ import { NavLink } from '../../../../Framework/Signum.React/Scripts/Components/N
 
 export interface ToolbarRendererProps {
     location?: ToolbarLocation;
-    className?: string;
+    tag?: boolean;
 }
 
 
@@ -34,7 +34,7 @@ export interface ToolbarRendererState {
 
 export default class ToolbarRenderer extends React.Component<ToolbarRendererProps, ToolbarRendererState>
 {
-    static defaultProps = { location: "Top" as ToolbarLocation };
+    static defaultProps = { location: "Top" as ToolbarLocation, tag: true };
 
     constructor(props: {}) {
         super(props);
@@ -58,15 +58,22 @@ export default class ToolbarRenderer extends React.Component<ToolbarRendererProp
         if (!r)
             return null;
 
-        if (this.props.location == "Top")
+        if (this.props.location == "Top") {
+
+            var navItems = r.elements && r.elements.map((res, i) => withKey(this.renderNavItem(res, i), i));
+
+            if (!this.props.tag)
+                return navItems;
+
             return (
-                <div className={classes("nav navbar-nav", this.props.className)}>
-                    {r.elements && r.elements.map((res, i) => withKey(this.renderNavItem(res, i), i))}
+                <div className={classes("nav navbar-nav", this.props.tag)}>
+                    {navItems}
                 </div>
             );
+        }
         else
             return (
-                <DropdownItemContainer className={this.props.className}>
+                <DropdownItemContainer tag={this.props.tag}>
                     {r.elements && r.elements.flatMap(sr => this.renderDropdownItem(sr, 0, r)).map((sr, i) => withKey(sr, i))}
                 </DropdownItemContainer>
             );
@@ -259,7 +266,7 @@ function findPath(target: ToolbarClient.ToolbarResponse<any>, list: ToolbarClien
 }
 
 
-export class DropdownItemContainer extends React.Component<{ className?: string}> {
+export class DropdownItemContainer extends React.Component<{ tag?: boolean }> {
 
     handleToggle = () => {
 
@@ -272,8 +279,12 @@ export class DropdownItemContainer extends React.Component<{ className?: string}
     static childContextTypes = { "toggle": PropTypes.func };
 
     render() {
+
+        if (!this.props.tag)
+            return this.props.children;
+
         return (
-            <div className={classes("nav", this.props.className)}>
+            <div className="nav">
                 {this.props.children}
             </div>
         );
