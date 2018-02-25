@@ -237,7 +237,7 @@ namespace Signum.Engine.Maps
 
                     return result;
                 }
-                catch (Exception ex) //Avoid half-cooked tables
+                catch (Exception) //Avoid half-cooked tables
                 {
                     schema.Tables.Remove(type);
                     schema.NameToType.Remove(name);

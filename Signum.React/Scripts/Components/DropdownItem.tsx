@@ -65,11 +65,12 @@ export class DropdownItem extends React.Component<DropdownItemProps> {
             toggle,
             divider,
             innerRef,
+            disabled,
             ...props } = this.props;
 
         const clss = classes(
             className,
-            props.disabled && 'disabled',
+            disabled && 'disabled',
             !divider && !header && 'dropdown-item',
             active && 'active',
             header && 'dropdown-header',

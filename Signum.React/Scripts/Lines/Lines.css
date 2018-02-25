@@ -84,9 +84,9 @@ label > input[type=checkbox] {
     color: lightgray;
 }
 
-.sf-line-button.btn {
-    color: gray;
-}
+    .sf-line-button.btn {
+        color: gray;
+    }
 
     .sf-line-button:hover {
         color: gray;
@@ -240,6 +240,11 @@ ul.nav-tabs {
     cursor: move;
 }
 
+.form-group.row > label {
+    text-align: end;
+    font-weight: 500;
+}
+
 /*has-error*/
 
 /* Emulating Bootstrap 3 Validation*/
@@ -248,12 +253,16 @@ ul.nav-tabs {
     border-color: #a94442;
 }
 
-.has-error label {
-    color: #a94442;
-}
-.has-error input {
-    border-color: #a94442;
-}
+    .has-error label {
+        color: #a94442;
+    }
+
+    .has-error input,
+    .has-error textarea,
+    .has-error select
+    {
+        border-color: #a94442;
+    }
 
 .form-group .form-group {
     margin-bottom: 0px;

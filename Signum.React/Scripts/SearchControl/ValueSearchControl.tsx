@@ -153,12 +153,12 @@ export default class ValueSearchControl extends React.Component<ValueSearchContr
         }
 
         let className = classes(
-           p.valueToken == undefined && "count-search",
-           p.valueToken == undefined && this.state.value > 0 ? "count-with-results" : "count-no-results",
-           p.formControlClass,
-           p.formControlClass && this.isNumeric() && "numeric",
-           p.isBadge == true || (p.isBadge == "MoreThanZero" && this.state.value > 0) ? "badge" : "",
-           p.customClass
+            p.valueToken == undefined && "count-search",
+            p.valueToken == undefined && this.state.value > 0 ? "count-with-results" : "count-no-results",
+            p.formControlClass,
+            p.formControlClass && this.isNumeric() && "numeric",
+            p.isBadge == true || (p.isBadge == "MoreThanZero" && this.state.value > 0) ? "badge badge-pill badge-secondary" : "",
+            p.customClass
         );
 
         if (p.formControlClass)

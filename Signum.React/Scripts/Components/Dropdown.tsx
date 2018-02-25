@@ -15,7 +15,7 @@ export interface UncontrolledDropdownProps extends React.HTMLAttributes<any> {
     nav?: boolean;
     addonType?: false | "prepend" | "append";
     size?: BsSize;
-    tag?: string;
+    tag?: string | boolean;
     className?: string;
     inNavbar?: boolean;
 }
@@ -198,7 +198,7 @@ export class Dropdown extends React.Component<DropdownProps> {
             ...attrs
         } = this.props;
 
-        attrs.tag = attrs.tag || (nav ? 'li' : 'div');
+        attrs.tag = attrs.tag == undefined ? (nav ? 'li' : 'div') : attrs.tag;
 
         const clss = classes(
             className,

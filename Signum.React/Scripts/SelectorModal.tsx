@@ -48,6 +48,9 @@ export default class SelectorModal extends React.Component<SelectorModalProps, {
                         {this.props.title}
                     </h4>
                 }
+                <button type="button" className="close" data-dismiss="modal" aria-label="Close" onClick={this.handleCancelClicked}>
+                    <span aria-hidden="true">&times;</span>
+                </button>
             </div>
 
             <div className="modal-body">

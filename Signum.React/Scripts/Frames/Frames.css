@@ -72,12 +72,22 @@
     margin-bottom: 6px;
 }
 
+.modal-content {
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+}
+
+.sf-entity-title {
+    font-size: 2rem;
+    font-weight: 300;
+    margin-top: 10px;
+}
 
 
-
-
+button.dropdown-item:not(:disabled):not(.disabled) {
+    cursor: pointer;
+}
 .sf-pointer {
-    cursor:pointer;
+    cursor: pointer;
 }
 
 a.expand-window {

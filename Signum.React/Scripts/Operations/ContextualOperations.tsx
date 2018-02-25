@@ -218,8 +218,8 @@ export namespace MenuItemConstructor { //To allow monkey patching
         return [
             <DropdownItem
                 innerRef={b => innerRef = b}
-                className={disabled ? "disabled" : undefined}
                 onClick={disabled ? undefined : onClick}
+                disabled={disabled}
                 data-operation={coc.operationInfo.key}>
                 {icon ? <span className={classes("icon", icon)} style={{ color: coc.settings && coc.settings.iconColor }}></span> :
                     color ? <span className={classes("icon", "empty-icon", "btn-" + color)}></span> : undefined}

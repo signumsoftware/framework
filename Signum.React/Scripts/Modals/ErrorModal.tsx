@@ -48,7 +48,7 @@ export default class ErrorModal extends React.Component<ErrorModalProps, { showD
         const ve = e instanceof ValidationError ? (e as ValidationError) : undefined;
 
         return (
-            <Modal show={this.state.show} onExited={this.handleOnExited} onHide={this.handleCloseClicked}>
+            <Modal show={this.state.show} onExited={this.handleOnExited} onHide={this.handleCloseClicked} size="lg">
                 <div className="modal-header dialog-header-error text-danger">
                     <h5 className="modal-title"> {se ? this.renderServiceTitle(se) :
                         ve ? this.renderValidationTitle(ve) :
