@@ -99,9 +99,6 @@ export interface ModalProps extends ModelDialogProps  {
     className?: string;
 
     style?: React.CSSProperties;
-
-    bsSize?: BsSize;
-    bsColor?: BsColor;
 };
 
 
@@ -225,6 +222,7 @@ export class Modal extends React.Component<ModalProps, ModalState> {
             onExited,
             size,
             color,
+            dialogClassName,
             ...dialogProps
         } = this.props;
 
@@ -255,6 +253,7 @@ export class Modal extends React.Component<ModalProps, ModalState> {
                 <ModalDialog
                     color={color}
                     size={size}
+                    dialogClassName={dialogClassName}
                     style={{ ...this.state.style, ...style }}
                     className={classes(className, inClassName)}
                     onClick={backdrop == true ? this.handleDialogClick : undefined}

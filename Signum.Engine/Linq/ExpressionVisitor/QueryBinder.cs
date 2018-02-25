@@ -2557,8 +2557,9 @@ namespace Signum.Engine.Linq
 
                     var ci = mlistType.GetConstructor(new[] { type, typeof(PrimaryKey), typeof(int?) });
 
-                    var order = preserveOrder ? (Expression)Expression.Constant(null, typeof(int?)) :
-                        ee.GetBinding(Reflector.FindFieldInfo(type, GetOrderColumn(type)));
+                    var order = preserveOrder ?
+                        ee.GetBinding(Reflector.FindFieldInfo(type, GetOrderColumn(type))) :
+                        (Expression)Expression.Constant(null, typeof(int?));
 
                     var newExp = Expression.New(ci, ee, ee.ExternalId.UnNullify(), order.Nullify());
 

@@ -463,21 +463,25 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
         var buttons = [
 
-            p.showFilterButton && OrderUtils.setOrder(-5, <a
+            p.showFilterButton && OrderUtils.setOrder(-5, <button
                 className={"sf-query-button sf-filters-header btn btn-light" + (s.showFilters ? " active" : "")}
                 onClick={this.handleToggleFilters}
-                title={s.showFilters ? JavascriptMessage.hideFilters.niceToString() : JavascriptMessage.showFilters.niceToString()}><span className="fa fa-filter"></span></a >),
+                title={s.showFilters ? JavascriptMessage.hideFilters.niceToString() : JavascriptMessage.showFilters.niceToString()}>
+                <span className="fa fa-filter"/>
+            </button>),
 
-            p.showGroupButton && OrderUtils.setOrder(-4, <a
+            p.showGroupButton && OrderUtils.setOrder(-4, <button
                 className={"sf-query-button btn btn-light" + (p.findOptions.groupResults ? " active" : "")}
                 onClick={this.handleToggleGroupBy}
-                title={p.findOptions.groupResults ? JavascriptMessage.ungroupResults.niceToString() : JavascriptMessage.groupResults.niceToString()}>Ʃ</a >),
+                title={p.findOptions.groupResults ? JavascriptMessage.ungroupResults.niceToString() : JavascriptMessage.groupResults.niceToString()}>
+                Ʃ
+            </button>),
 
             OrderUtils.setOrder(-3, <button className={classes("sf-query-button sf-search btn", p.findOptions.pagination.mode == "All" ? "btn-danger" : "btn-primary")} onClick={this.handleSearchClick}>{SearchMessage.Search.niceToString()} </button>),
 
-            p.create && OrderUtils.setOrder(-2, <a className="sf-query-button btn btn-light sf-search-button sf-create" title={this.createTitle()} onClick={this.handleCreate}>
-                <span className="fa fa-plus sf-create"></span>
-            </a>),
+            p.create && OrderUtils.setOrder(-2, <button className="sf-query-button btn btn-light sf-search-button sf-create" title={this.createTitle()} onClick={this.handleCreate}>
+                <span className="fa fa-plus sf-create" />
+            </button>),
 
             this.props.showContextMenu != false && this.renderSelectedButton(),
 
@@ -486,9 +490,9 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
             ...(this.props.extraButtons ? this.props.extraButtons(this) : []),
 
             !this.props.hideFullScreenButton && Finder.isFindable(p.findOptions.queryKey, true) &&
-            <a className="sf-query-button btn btn-light" href="#" onClick={this.handleFullScreenClick} >
-                <span className="fa fa-new-window"></span>
-            </a>
+            <button className="sf-query-button btn btn-light" onClick={this.handleFullScreenClick} >
+                <span className="fa fa-external-link" />
+            </button>
         ]
             .filter(a => a)
             .map(a => a as React.ReactElement<any>)

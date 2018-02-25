@@ -110,7 +110,7 @@ export class EntityTable extends EntityListBase<EntityTableProps, EntityTablePro
             <table className="table table-sm sf-table">
                 {
                     (!this.props.avoidEmptyTable || ctx.value.length > 0) && <thead>
-                        <tr>
+                        <tr className="bg-light">
                             <th></th>
                             {
                                 this.state.columns!.map((c, i) => <th key={i} {...c.headerHtmlAttributes}>

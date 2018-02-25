@@ -1,5 +1,4 @@
-﻿
-import * as React from 'react'
+﻿import * as React from 'react'
 import { RouteComponentProps } from 'react-router'
 import { Dic } from '../Globals'
 import * as Finder from '../Finder'

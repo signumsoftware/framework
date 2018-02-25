@@ -1,12 +1,12 @@
 ﻿import * as React from 'react';
 import * as PropTypes from 'prop-types';
-import { BsSize } from './Basic';
+import { BsSize, BsColor } from './Basic';
 import { classes } from '../Globals';
 
 export interface ButtonProps extends React.AnchorHTMLAttributes<any> {
     active?: boolean;
     block?: boolean;
-    color?: string;
+    color?: BsColor;
     disabled?: boolean;
     outline?: boolean;
     tag?: React.ReactType,

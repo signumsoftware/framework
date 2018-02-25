@@ -6,7 +6,6 @@ import { classes } from '../Globals';
 interface UncontrolledTabsProps extends React.HTMLAttributes<HTMLDivElement> {
     defaultEventKey?: string | number;
     onToggled?: (eventKey: string | number) => void;
-    unmountOnExit?: boolean;
     children?: React.ReactFragment;
 }
 
@@ -50,10 +49,10 @@ export class UncontrolledTabs extends React.Component<UncontrolledTabsProps, Unc
 
     render() {
 
-        const { unmountOnExit, children, defaultEventKey } = this.props;
+        const { children, defaultEventKey } = this.props;
 
         return (
-            <Tabs activeEventKey={this.state.activeEventKey} unmountOnExit={unmountOnExit} toggle={this.handleToggle}>
+            <Tabs activeEventKey={this.state.activeEventKey} toggle={this.handleToggle}>
                 {children}
             </Tabs>
         );
@@ -65,7 +64,6 @@ export class UncontrolledTabs extends React.Component<UncontrolledTabsProps, Unc
 interface TabsProps extends React.HTMLAttributes<HTMLDivElement> {
     activeEventKey: string | number | undefined;
     toggle: (eventKey: string | number) => void;
-    unmountOnExit?: boolean;
 }
 
 function getFirstEventKey(children: React.ReactNode) {
@@ -81,7 +79,7 @@ export class Tabs extends React.Component<TabsProps> {
 
     render() {
 
-        var { activeEventKey, children, unmountOnExit, toggle, ...attrs } = this.props;
+        var { activeEventKey, children, toggle, ...attrs } = this.props;
 
         var array = (React.Children.toArray(this.props.children) as React.ReactElement<TabProps>[]);
 
@@ -102,7 +100,7 @@ export class Tabs extends React.Component<TabsProps> {
                         </li>
                     )}
                 </ul>
-                {array.filter(a => !this.props.unmountOnExit || a.props.eventKey == this.props.activeEventKey)}
+                {array.filter(a => a.props.eventKey == this.props.activeEventKey)}
             </div>
         );
     }

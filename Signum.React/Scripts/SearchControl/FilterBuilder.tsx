@@ -72,7 +72,7 @@ export default class FilterBuilder extends React.Component<FilterBuilderProps>{
                 <div className="sf-filters-list table-responsive" style={{ overflowX: "visible" }}>
                     <table className="table table-sm">
                         <thead>
-                            <tr>
+                            <tr className="bg-light">
                                 <th style={{ minWidth: "24px" }}></th>
                                 <th>{SearchMessage.Field.niceToString()}</th>
                                 <th>{SearchMessage.Operation.niceToString()}</th>

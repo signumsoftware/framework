@@ -63,9 +63,9 @@ export default class ContextMenu extends React.Component<ContextMenuProps> {
             });
 
         const ul = (
-            <ul {...props as any} className={classes(props.className, "dropdown-menu sf-context-menu") } style={style}>
+            <div {...props as any} className={classes(props.className, "dropdown-menu sf-context-menu") } style={style}>
                 {childrens}
-            </ul>
+            </div>
         );
 
         return ul;
@@ -86,7 +86,6 @@ export default class ContextMenu extends React.Component<ContextMenuProps> {
     }
 
     handleDocumentClick = (e: MouseEvent | TouchEvent) => {
-        console.log(e);
         if (e.which === 3)
             return;
 

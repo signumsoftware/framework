@@ -120,7 +120,7 @@ function getWithClose(eoc: EntityOperationContext<Entity>) {
     return isSave(eoc.operationInfo);
 }
 
-interface OperationButtonProps extends React.HTMLProps<any> {
+interface OperationButtonProps extends React.HTMLAttributes<HTMLButtonElement> {
     eoc: EntityOperationContext<any /*Entity*/>;
     group?: EntityOperationGroup;
     canExecute?: string | null;
@@ -129,7 +129,7 @@ interface OperationButtonProps extends React.HTMLProps<any> {
 
 export class OperationButton extends React.Component<OperationButtonProps> {
     render() {
-        let { eoc, group, onOperationClick, canExecute, size, ...props } = this.props;
+        let { eoc, group, onOperationClick, canExecute, color, ...props } = this.props;
 
         if (canExecute === undefined)
             canExecute = eoc.canExecute;
@@ -156,7 +156,7 @@ export class OperationButton extends React.Component<OperationButtonProps> {
                     {...props}
                     key="di"
                     innerRef={r  => elem = r}
-                    className={classes("btn-" + bsColor, disabled ? "disabled" : undefined, props && props.className)}
+                    className={classes("btn-" + color, disabled ? "disabled" : undefined, props && props.className)}
                     onClick={disabled ? undefined : this.handleOnClick}
                     data-operation={eoc.operationInfo.key}>
                     {this.renderChildren()}
