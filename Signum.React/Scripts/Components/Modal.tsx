@@ -99,9 +99,6 @@ export interface ModalProps extends ModelDialogProps  {
     className?: string;
 
     style?: React.CSSProperties;
-
-    bsSize?: BsSize;
-    bsColor?: BsColor;
 };
 
 
