@@ -122,7 +122,7 @@ namespace Signum.React.Authorization
        
 
         [Route("api/auth/ChangePassword"), HttpPost]
-        public UserEntity ChangePassword(ChangePasswordRequest request)
+        public LoginResponse ChangePassword(ChangePasswordRequest request)
         {
             if (string.IsNullOrEmpty(request.oldPassword))
                 throw ModelException("oldPassword", AuthMessage.PasswordMustHaveAValue.NiceToString());
@@ -139,7 +139,7 @@ namespace Signum.React.Authorization
             using (AuthLogic.Disable())
                 user.Execute(UserOperation.Save);
 
-            return user;
+            return new LoginResponse { userEntity = user, token = AuthTokenServer.CreateToken(UserEntity.Current) };
         }
 
         private HttpResponseException ModelException(string field, string error)

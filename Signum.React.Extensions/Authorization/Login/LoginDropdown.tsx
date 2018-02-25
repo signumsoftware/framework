@@ -20,7 +20,7 @@ export default class LoginDropdown extends React.Component<{}, { user: UserEntit
             );
 
         return (
-            <UncontrolledDropdown className="sf-user" id="sfUserDropDown">
+            <UncontrolledDropdown className="sf-user" id="sfUserDropDown" nav inNavbar>
                 <DropdownToggle nav caret>
                     {user.userName!}
                 </DropdownToggle>
@@ -29,6 +29,7 @@ export default class LoginDropdown extends React.Component<{}, { user: UserEntit
                         <DropdownItem><i className="fa fa-key fa-fw"></i> {AuthMessage.ChangePassword.niceToString()}</DropdownItem>
                     </LinkContainer>
                     <DropdownItem divider />
+                    <LinkContainer to="~/auth/login"><DropdownItem><i className="fa fa-user-plus"></i> {AuthMessage.SwitchUser.niceToString()}</DropdownItem></LinkContainer>
                     <DropdownItem id="sf-auth-logout" onClick={() => AuthClient.logout()}><i className="fa fa-sign-out fa-fw"></i> {AuthMessage.Logout.niceToString()}</DropdownItem>
                 </DropdownMenu>
             </UncontrolledDropdown>

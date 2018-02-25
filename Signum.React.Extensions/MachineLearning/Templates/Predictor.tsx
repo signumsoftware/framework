@@ -213,7 +213,7 @@ export default class Predictor extends React.Component<{ ctx: TypeContext<Predic
                     </div>
                 </div>
                 {ctx.value.state == "Training" && <TrainingProgressComponent ctx={ctx} onStateChanged={this.handleOnFinished} />}
-                <UncontrolledTabs unmountOnExit={true}>
+                <UncontrolledTabs>
                     <Tab eventKey="query" title={ctxmq.niceName(a => a.query)}>
                         <div>
                             <fieldset>

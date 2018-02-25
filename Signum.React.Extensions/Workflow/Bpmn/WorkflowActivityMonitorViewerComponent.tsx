@@ -15,7 +15,7 @@ import * as BpmnUtils from './BpmnUtils'
 import WorkflowActivityStatsModal from '../ActivityMonitor/WorkflowActivityStatsModal';
 import SelectorModal from '../../../../Framework/Signum.React/Scripts/SelectorModal';
 
-import "bpmn-js/assets/bpmn-font/css/bpmn-embedded.css"
+import "bpmn-js/dist/assets/bpmn-font/css/bpmn-embedded.css"
 import "diagram-js/assets/diagram-js.css"
 import "./Bpmn.css"
 import { is } from '../../../../Framework/Signum.React/Scripts/Signum.Entities';

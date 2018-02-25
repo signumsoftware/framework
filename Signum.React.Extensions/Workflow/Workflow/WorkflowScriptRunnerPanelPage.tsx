@@ -110,7 +110,7 @@ export default class WorkflowScriptRunnerPanelPage extends React.Component<Workf
                     ],
                     pagination: { elementsPerPage: 10, mode: "Firsts" }
                 }} />
-                <UncontrolledTabs unmountOnExit={true}>
+                <UncontrolledTabs>
                     <Tab title="Last operation logs" eventKey="logs">
                         <SearchControl findOptions={{
                             queryName: OperationLogEntity,

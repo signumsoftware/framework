@@ -256,13 +256,10 @@ export function getAuthToken(): string | undefined {
 }
 
 export function setAuthToken(authToken: string | undefined): void{
-    debugger;
     sessionStorage.setItem("authToken", authToken || "");
 }
 
 export function autoLogin(): Promise<UserEntity | undefined>  {
-
-    debugger;
     if (Navigator.currentUser)
         return Promise.resolve(Navigator.currentUser as UserEntity);
 
@@ -403,8 +400,8 @@ export module API {
         newPassword: string;
     }
 
-    export function changePassword(request: ChangePasswordRequest): Promise<UserEntity> {
-        return ajaxPost<UserEntity>({ url: "~/api/auth/ChangePassword" }, request);
+    export function changePassword(request: ChangePasswordRequest): Promise<LoginResponse> {
+        return ajaxPost<LoginResponse>({ url: "~/api/auth/ChangePassword" }, request);
     }
 
     export function fetchCurrentUser(): Promise<UserEntity> {

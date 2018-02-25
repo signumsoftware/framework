@@ -34,7 +34,7 @@ export default class CollapsableCard extends React.Component<CollapsableCardProp
 
     static checkProps(props: CollapsableCardProps) {
         if ((props.isOpen == null) != (props.toggle == null))
-            throw new Error("isOpen and togle should be set together");
+            throw new Error("isOpen and toggle should be set together");
     }
 
     componentWillReceiveProps(newProps: CollapsableCardProps) {

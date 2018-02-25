@@ -113,7 +113,7 @@ export default class TypeHelpComponent extends React.Component<TypeHelpComponent
         return (
             <div className="sf-type-help" ref={(th) => this.typeHelpContainer = th!}>
                 {this.renderHeader()}
-                {this.state.help == undefined ? <h4>Loading {this.currentType()}…</h4> : 
+                {this.state.help == undefined ? <h4>Loading {this.currentType()}…</h4> :
                     this.state.help == false ? <h4>Not found {this.currentType()}</h4> :
                         this.renderHelp(this.state.help)}
                 {this.state.contextualMenu && this.renderContextualMenu()}
@@ -135,7 +135,7 @@ export default class TypeHelpComponent extends React.Component<TypeHelpComponent
             contextualMenu: undefined
         });
     }
-    
+
     handleGetItems = (query: string) => {
         return TypeHelpClient.API.autocompleteEntityCleanType({
             query: query,
@@ -175,16 +175,20 @@ export default class TypeHelpComponent extends React.Component<TypeHelpComponent
                             <span className="fa fa-arrow-circle-right" />
                         </button>
                     </span>
-                    <div style={{ position: "relative" }}>
-                        <Typeahead
-                            inputAttrs={{ className: "form-control form-control-sm sf-entity-autocomplete" }}
-                            getItems={this.handleGetItems}
-                            value={this.state.tempQuery == undefined ? this.currentType() : this.state.tempQuery}
-                            onBlur={() => this.setState({ tempQuery: undefined })}
-                            onChange={newValue => this.setState({ tempQuery: newValue })}
-                            onSelect={this.handleSelect} />
-                    </div>
+                    <Typeahead
+                        inputAttrs={{ className: "form-control form-control-sm sf-entity-autocomplete" }}
+                        getItems={this.handleGetItems}
+                        value={this.state.tempQuery == undefined ? this.currentType() : this.state.tempQuery}
+                        onBlur={() => this.setState({ tempQuery: undefined })}
+                        onChange={newValue => this.setState({ tempQuery: newValue })}
+                        onSelect={this.handleSelect} />
+                    <span className="input-group-append">
+                        <div className="input-group-text" style={{ color: "white", backgroundColor: this.props.mode == "CSharp" ? "#007e01" : "#017acc" }}>
+                            {this.props.mode == "CSharp" ? "C#" : this.props.mode}
+                        </div>
+                    </span>
                 </div>
+
             </div>
         );
     }
@@ -195,7 +199,7 @@ export default class TypeHelpComponent extends React.Component<TypeHelpComponent
         return (
             <div>
                 <h4 className="mb-1 mt-2">{h.type}</h4>
-             
+
                 <ul className="sf-members" style={{ paddingLeft: "0px" }}>
                     {h.members.map((m, i) => this.renderMember(h, m, i))}
                 </ul>
@@ -284,8 +288,8 @@ export default class TypeHelpComponent extends React.Component<TypeHelpComponent
             return (
                 <span>
                     {this.renderType(type.substr(0, type.length - 1), cleanType)}
-                    {this.props.mode == "TypeScript"? " | " : "?"}
-                    {this.props.mode == "TypeScript" && <span className="sf-member-primitive">null</span> }
+                    {this.props.mode == "TypeScript" ? " | " : "?"}
+                    {this.props.mode == "TypeScript" && <span className="sf-member-primitive">null</span>}
                 </span>
             );
         }
@@ -294,7 +298,7 @@ export default class TypeHelpComponent extends React.Component<TypeHelpComponent
             return (
                 <span>
                     <a href="#" className={"sf-member-" + (isTypeEnum(type) ? "enum" : "class")}
-                        onClick={(e) => { e.preventDefault(); this.goTo(cleanType); } }>
+                        onClick={(e) => { e.preventDefault(); this.goTo(cleanType); }}>
                         {type}
                     </a>
                 </span>

@@ -10,7 +10,7 @@ import SearchControlLoaded from '../../../Framework/Signum.React/Scripts/SearchC
 import { WordTemplateEntity, WordTemplateMessage } from './Signum.Entities.Word'
 import * as WordClient from './WordClient'
 import { saveFile } from "../../../Framework/Signum.React/Scripts/Services";
-import { UncontrolledDropdown, DropdownToggle, DropdownItem } from '../../../Framework/Signum.React/Scripts/Components';
+import { UncontrolledDropdown, DropdownToggle, DropdownItem, DropdownMenu } from '../../../Framework/Signum.React/Scripts/Components';
 
 export interface WordEntityMenuProps {
     entityPack: EntityPack<Entity>;
@@ -47,14 +47,16 @@ export default class WordEntityMenu extends React.Component<WordEntityMenuProps>
 
         return (
             <UncontrolledDropdown id="wordMenu" className="sf-word-dropdown">
-                <DropdownToggle>{label as any}</DropdownToggle>
+                <DropdownToggle caret>{label as any}</DropdownToggle>
+                <DropdownMenu>
                 {
                     this.props.entityPack.wordTemplates!.map((wt, i) =>
                         <DropdownItem key={i}
                             onClick={() => this.handleOnClick(wt)}>
                             {wt.toStr}
                         </DropdownItem>)
-                }
+                    }
+                </DropdownMenu>
             </UncontrolledDropdown>
         );
     }

@@ -12,8 +12,7 @@ import * as connectionIcons from './ConnectionIcons'
 import * as searchPad from 'bpmn-js/lib/features/search'
 import * as BpmnUtils from './BpmnUtils'
 import CaseActivityStatsModal from "../Case/CaseActivityStatsModal"
-
-import "bpmn-js/assets/bpmn-font/css/bpmn-embedded.css"
+import "bpmn-js/dist/assets/bpmn-font/css/bpmn-embedded.css"
 import "diagram-js/assets/diagram-js.css"
 import "./Bpmn.css"
 import { Button, UncontrolledDropdown, DropdownToggle, DropdownMenu, DropdownItem } from '../../../../Framework/Signum.React/Scripts/Components';
@@ -157,18 +156,20 @@ export default class CaseFlowViewerComponent extends React.Component<CaseFlowVie
     render() {
         return (
             <div>
-                <Button style={{ marginLeft: "20px" }} onClick={this.handleZoomClick}>{WorkflowMessage.ResetZoom.niceToString()}</Button>{" "}
-                <UncontrolledDropdown id="colorMenu">
-                    <DropdownToggle color="light" caret>
-                        {WorkflowMessage.Color.niceToString() + CaseFlowColor.niceToString(this.state.caseFlowColor)}
-                    </DropdownToggle>
-                    <DropdownMenu>
-                        {this.menuItem("CaseMaxDuration")}
-                        {this.menuItem("AverageDuration")}
-                        {this.menuItem("EstimatedDuration")}
-                    </DropdownMenu>
-                </UncontrolledDropdown>{" "}
-                <Button onClick={this.handleSearchClick}>{JavascriptMessage.search.niceToString()}</Button>
+                <div className="btn-toolbar">
+                    <Button color="light" onClick={this.handleZoomClick}>{WorkflowMessage.ResetZoom.niceToString()}</Button>
+                    <UncontrolledDropdown id="colorMenu">
+                        <DropdownToggle color="light" caret>
+                            {WorkflowMessage.Color.niceToString() + CaseFlowColor.niceToString(this.state.caseFlowColor)}
+                        </DropdownToggle>
+                        <DropdownMenu>
+                            {this.menuItem("CaseMaxDuration")}
+                            {this.menuItem("AverageDuration")}
+                            {this.menuItem("EstimatedDuration")}
+                        </DropdownMenu>
+                    </UncontrolledDropdown>
+                    <Button color="light" onClick={this.handleSearchClick}>{JavascriptMessage.search.niceToString()}</Button>
+                </div>
                 <div ref={de => this.divArea = de!} />
             </div>
         );

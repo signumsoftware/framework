@@ -32,13 +32,14 @@ export default class AccordionPanel extends React.Component<AccordionProps, Acco
                         let p = e as React.ReactElement<CollapsableCardProps>;
                         if (p.type != CollapsableCard)
                             throw new Error("Childrens of AccordionPanel should be CollapsableCard");
-
+                        
                         if (p.props.cardId == null)
                             throw new Error("Childrens of AccordionPanel should have the cardId prop set");
 
                         return React.cloneElement(p,
                             {
                                 key: p.props.cardId,
+                                isOpen: this.state.cardId == p.props.cardId,
                                 toggle: (open: boolean) => this.handleSelect(open, p.props.cardId!)
                             } as Partial<CollapsableCardProps>);
                     })

@@ -644,7 +644,7 @@ namespace Signum.Engine.Workflow
             return (from w in Database.Query<WorkflowEntity>()
                     let s = w.WorkflowEvents().Single(a => a.Type == WorkflowEventType.Start)
                     let a = (WorkflowActivityEntity)s.NextConnections().Single().To
-                    where a.Lane.Actors.Any(a => IsUserActorConstant.Evaluate(UserEntity.Current, a))
+                    where a.Lane.Actors.Any(a => IsUserConstantActor.Evaluate(UserEntity.Current, a))
                     select w).ToList();
         }
 
