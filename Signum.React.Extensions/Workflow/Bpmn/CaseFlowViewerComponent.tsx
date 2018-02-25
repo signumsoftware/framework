@@ -156,18 +156,20 @@ export default class CaseFlowViewerComponent extends React.Component<CaseFlowVie
     render() {
         return (
             <div>
-                <Button style={{ marginLeft: "20px" }} onClick={this.handleZoomClick}>{WorkflowMessage.ResetZoom.niceToString()}</Button>{" "}
-                <UncontrolledDropdown id="colorMenu">
-                    <DropdownToggle color="light" caret>
-                        {WorkflowMessage.Color.niceToString() + CaseFlowColor.niceToString(this.state.caseFlowColor)}
-                    </DropdownToggle>
-                    <DropdownMenu>
-                        {this.menuItem("CaseMaxDuration")}
-                        {this.menuItem("AverageDuration")}
-                        {this.menuItem("EstimatedDuration")}
-                    </DropdownMenu>
-                </UncontrolledDropdown>{" "}
-                <Button onClick={this.handleSearchClick}>{JavascriptMessage.search.niceToString()}</Button>
+                <div className="btn-toolbar">
+                    <Button color="light" onClick={this.handleZoomClick}>{WorkflowMessage.ResetZoom.niceToString()}</Button>
+                    <UncontrolledDropdown id="colorMenu">
+                        <DropdownToggle color="light" caret>
+                            {WorkflowMessage.Color.niceToString() + CaseFlowColor.niceToString(this.state.caseFlowColor)}
+                        </DropdownToggle>
+                        <DropdownMenu>
+                            {this.menuItem("CaseMaxDuration")}
+                            {this.menuItem("AverageDuration")}
+                            {this.menuItem("EstimatedDuration")}
+                        </DropdownMenu>
+                    </UncontrolledDropdown>
+                    <Button color="light" onClick={this.handleSearchClick}>{JavascriptMessage.search.niceToString()}</Button>
+                </div>
                 <div ref={de => this.divArea = de!} />
             </div>
         );

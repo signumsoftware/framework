@@ -400,8 +400,8 @@ export module API {
         newPassword: string;
     }
 
-    export function changePassword(request: ChangePasswordRequest): Promise<UserEntity> {
-        return ajaxPost<UserEntity>({ url: "~/api/auth/ChangePassword" }, request);
+    export function changePassword(request: ChangePasswordRequest): Promise<LoginResponse> {
+        return ajaxPost<LoginResponse>({ url: "~/api/auth/ChangePassword" }, request);
     }
 
     export function fetchCurrentUser(): Promise<UserEntity> {

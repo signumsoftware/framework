@@ -174,7 +174,7 @@ export default class ChartRequestView extends React.Component<ChartRequestViewPr
                     <br />
                     <div className="sf-search-results-container" >
                         {!s.chartResult || !s.lastChartRequest ? JavascriptMessage.searchForResults.niceToString() :
-                            <UncontrolledTabs id="chartResultTabs" unmountOnExit={true}>
+                            <UncontrolledTabs id="chartResultTabs">
                                 <Tab eventKey="chart" title={ChartMessage.Chart.niceToString()}>
                                     <ChartRenderer chartRequest={cr} lastChartRequest={s.lastChartRequest} data={s.chartResult.chartTable} />
                                 </Tab>
