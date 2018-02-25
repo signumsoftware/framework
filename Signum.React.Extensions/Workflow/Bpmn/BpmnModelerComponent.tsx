@@ -9,7 +9,7 @@ import * as customRenderer from './CustomRenderer'
 import * as customPopupMenu from './CustomPopupMenu'
 import * as BpmnUtils from './BpmnUtils'
 
-import "bpmn-js/assets/bpmn-font/css/bpmn-embedded.css"
+import "bpmn-js/dist/assets/bpmn-font/css/bpmn-embedded.css"
 import "diagram-js/assets/diagram-js.css"
 import "./Bpmn.css"
 import { Button } from '../../../../Framework/Signum.React/Scripts/Components';

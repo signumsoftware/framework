@@ -12,8 +12,7 @@ import * as connectionIcons from './ConnectionIcons'
 import * as searchPad from 'bpmn-js/lib/features/search'
 import * as BpmnUtils from './BpmnUtils'
 import CaseActivityStatsModal from "../Case/CaseActivityStatsModal"
-
-import "bpmn-js/assets/bpmn-font/css/bpmn-embedded.css"
+import "bpmn-js/dist/assets/bpmn-font/css/bpmn-embedded.css"
 import "diagram-js/assets/diagram-js.css"
 import "./Bpmn.css"
 import { Button, UncontrolledDropdown, DropdownToggle, DropdownMenu, DropdownItem } from '../../../../Framework/Signum.React/Scripts/Components';
