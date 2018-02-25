@@ -115,7 +115,7 @@ export default class ChartBuilder extends React.Component<ChartBuilderProps, Cha
                 <div className="col-lg-2">
                     <div className="sf-chart-type card">
                         <div className="card-header">
-                            {ChartScriptEntity.nicePluralName()}
+                            <h6 className="card-title mb-0">{ChartScriptEntity.nicePluralName()}</h6>
                         </div>
                         <div className="card-body">
                             {this.state.chartScripts && this.state.expanded && this.state.chartScripts.flatMap(a => a).map((cs, i) =>
@@ -128,7 +128,7 @@ export default class ChartBuilder extends React.Component<ChartBuilderProps, Cha
                 <div className="col-lg-10">
                     <div className="sf-chart-tokens card">
                         <div className="card-header">
-                            {ChartMessage.Chart_ChartSettings.niceToString()}
+                            <h6 className="card-title mb-0">{ChartMessage.Chart_ChartSettings.niceToString()}</h6>
                         </div>
                         <div className="card-body">
                             <table className="table" style={{ marginBottom: "0px" }}>

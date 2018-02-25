@@ -20,7 +20,7 @@ export default class LoginDropdown extends React.Component<{}, { user: UserEntit
             );
 
         return (
-            <UncontrolledDropdown className="sf-user" id="sfUserDropDown">
+            <UncontrolledDropdown className="sf-user" id="sfUserDropDown" nav inNavbar>
                 <DropdownToggle nav caret>
                     {user.userName!}
                 </DropdownToggle>

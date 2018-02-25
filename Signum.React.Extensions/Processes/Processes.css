@@ -13,7 +13,7 @@
 	height: auto;
 }
 
-ul.dropdown-menu li a span.glyphicon.process-contextual-icon {
+.dropdown-menu button span.process-contextual-icon {
     float: right;
     font-size: initial;
     margin-right: -10px;
@@ -21,6 +21,6 @@ ul.dropdown-menu li a span.glyphicon.process-contextual-icon {
     color: gray;
 }
 
-ul.dropdown-menu li a span.glyphicon.process-contextual-icon:hover {
+.dropdown-menu button span.process-contextual-icon:hover {
     color: black;
 }
