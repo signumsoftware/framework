@@ -176,14 +176,14 @@ export default class SchemaMapPage extends React.Component<SchemaMapPageProps, S
         const s = this.state;
 
         return (
-            <div className="form-inline form-sm container" style={{ marginTop: "10px" }}>
-                <div className="form-group">
+            <div className="form-inline container" style={{ marginTop: "10px" }}>
+                <div className="form-group form-group-sm">
                     <label htmlFor="filter"> { MapMessage.Filter.niceToString() }</label>&nbsp;
-                    <input type="text" className="form-control" id="filter" placeholder="type or namespace" value={s.filter} onChange={this.handleSetFilter}/>
+                    <input type="text" className="form-control form-control-sm" id="filter" placeholder="type or namespace" value={s.filter} onChange={this.handleSetFilter}/>
                 </div>
-                <div className="form-group" style={{ marginLeft: "10px" }}>
+                <div className="form-group form-group-sm" style={{ marginLeft: "10px" }}>
                     <label htmlFor="color"> { MapMessage.Color.niceToString() }</label>&nbsp;
-                    <select className="form-control" id="color" value={s.color} onChange={this.handleSetColor}>
+                    <select className="form-control form-control-sm" id="color" value={s.color} onChange={this.handleSetColor}>
                         {
                             s.schemaMapInfo &&
                             s.schemaMapInfo.providers.map((a, i) =>
