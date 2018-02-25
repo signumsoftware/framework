@@ -3,10 +3,11 @@ import * as PropTypes from 'prop-types';
 import { Target } from 'react-popper';
 import { classes } from '../Globals';
 import { Button, ButtonProps } from './Button';
+import { BsColor } from '.';
 
 interface DropdownToggleProps extends React.AnchorHTMLAttributes<any> {
     caret?: boolean;
-    color?: string;
+    color?: BsColor;
     className?: string;
     disabled?: boolean;
     onClick?: (e: React.MouseEvent<any>) => void;
