@@ -463,7 +463,7 @@ namespace Signum.Engine.DynamicQuery
                 implementations: info.Implementations,
                 propertyRoute: info.PropertyRoute)
             {
-                Lambda = t => ValueSelector.Evaluate(CollectionSelector.Evaluate(t).SingleOrDefaultEx(kvp => KeySelector.Evaluate(kvp).Equals(key)))
+                Lambda = t => ValueSelector.Evaluate(CollectionSelector.Evaluate(t).SingleOrDefaultEx(kvp => KeySelector.Evaluate(kvp).Equals(key))),
             });
         }
     }

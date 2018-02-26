@@ -23,6 +23,7 @@ namespace Signum.Entities.DynamicQuery
             this.format = format;
             this.implementations = implementations;
             this.propertyRoute = propertyRoute;
+            this.Priority = -10;
         }
 
         public string DisplayName { get; set; }
