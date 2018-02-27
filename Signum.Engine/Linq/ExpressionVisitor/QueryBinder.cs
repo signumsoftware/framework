@@ -2533,6 +2533,9 @@ namespace Signum.Engine.Linq
         {
             var lambda = Schema.Current.GetAditionalQueryBinding(af.Table.Type, af.FieldInfo);
 
+            if (lambda == null)
+                return null;
+
             var cleanLambda = (LambdaExpression)DbQueryProvider.Clean(lambda, filter: true, log: null);
 
             var parentEntity = new EntityExpression(af.Table.Type, af.BackID, null, null, null, false);

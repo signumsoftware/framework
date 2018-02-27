@@ -257,7 +257,9 @@ namespace Signum.Engine.Maps
         {
             AssertAllowed(type, inUserInterface: false);
 
-            return entityEvents.GetOrThrow(type).AdditionalQueryBindings.GetOrThrow(fi);
+            var ee = entityEvents.GetOrThrow(type);
+
+            return ee.AdditionalQueryBindings.GetOrThrow(fi)();
         }
 
         internal CacheControllerBase<T> CacheController<T>() where T : Entity

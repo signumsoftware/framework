@@ -32,18 +32,18 @@ namespace Signum.Engine.Maps
         public event PreUnsafeInsertHandler<T> PreUnsafeInsert;
         public event BulkInsetHandler<T> PreBulkInsert;
 
-        public Dictionary<FieldInfo, LambdaExpression> AdditionalQueryBindings { get; private set; }
+        public Dictionary<FieldInfo, Func<LambdaExpression>> AdditionalQueryBindings { get; private set; }
 
-        public void RegisterBinding<M>(Expression<Func<T, M>> field, Expression<Func<T, M>> value)
+        public void RegisterBinding<M>(Expression<Func<T, M>> field, Func<Expression<Func<T, M>>> getValueExpression)
         {
             if (AdditionalQueryBindings == null)
-                AdditionalQueryBindings = new Dictionary<FieldInfo, LambdaExpression>();
+                AdditionalQueryBindings = new Dictionary<FieldInfo, Func<LambdaExpression>>();
 
             var ma = (MemberExpression)field.Body;
 
             var fi = ma.Member as FieldInfo ?? Reflector.FindFieldInfo(typeof(T), (PropertyInfo)ma.Member);
-
-            AdditionalQueryBindings.Add(fi, value);
+            
+            AdditionalQueryBindings.Add(fi, getValueExpression);
         }
 
         internal IEnumerable<FilterQueryResult<T>> OnFilterQuery()
@@ -217,6 +217,6 @@ namespace Signum.Engine.Maps
 
         ICacheController CacheController { get; }
 
-        Dictionary<FieldInfo, LambdaExpression> AdditionalQueryBindings { get; }
+        Dictionary<FieldInfo, Func<LambdaExpression>> AdditionalQueryBindings { get; }
     }
 }
