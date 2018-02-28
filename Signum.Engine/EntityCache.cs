@@ -19,17 +19,19 @@ namespace Signum.Engine
     {
         internal class RealEntityCache
         {   
-            readonly Dictionary<Type, Dictionary<PrimaryKey, Entity>> dic = new Dictionary<Type, Dictionary<PrimaryKey, Entity>>();
+            readonly Dictionary<(Type type, PrimaryKey id), Entity> dic = new Dictionary<(Type type, PrimaryKey id), Entity>();
 
             public void Add(Entity e)
             {
                 if (e == null)
                     throw new ArgumentNullException("ie");
-                
-                Entity ident = dic.TryGetC(e.GetType())?.TryGetC(e.Id);
+
+                var tuple = (e.GetType(), e.Id);
+
+                Entity ident = dic.TryGetC(tuple);
 
                 if (ident == null)
-                    dic.GetOrCreate(e.GetType()).GetOrCreate(e.Id, e);
+                    dic.Add(tuple, e);
                 else if (ident != e)
                 {
                     //Odd but allowed
@@ -39,17 +41,12 @@ namespace Signum.Engine
 
             public bool Contains(Type type, PrimaryKey id)
             {
-                return dic.TryGetC(type)?.ContainsKey(id) ?? false;
+                return dic.ContainsKey((type, id));
             }
 
             public Entity Get(Type type, PrimaryKey id)
             {
-                return dic.TryGetC(type)?.TryGetC(id);
-            }
-            
-            public IEnumerable<Entity> GetAll(Type type)
-            {
-                return (dic.TryGetC(type)?.Values).EmptyIfNull();
+                return dic.TryGetC((type, id));
             }
 
             public void AddFullGraph(ModifiableEntity ie)
@@ -93,17 +90,10 @@ namespace Signum.Engine
 
             internal bool TryGetValue((Type type, PrimaryKey id) tuple, out Entity result)
             {
-                var d = dic.TryGetC(tuple.type);
-                if (d == null)
-                {
-                    result = null;
-                    return false;
-                }
-                return d.TryGetValue(tuple.id, out result);
+                return dic.TryGetValue(tuple, out result);
             }
 
             public bool IsSealed { get; private set; }
-
             internal Dictionary<string, object> GetRetrieverUserData() => this.retriever.GetUserData();
         }
 
@@ -195,12 +185,6 @@ namespace Signum.Engine
             return Current.Get(type, id);
         }
 
-        public static IEnumerable<T> GetAll<T>()
-            where T : Entity
-        {
-            return Current.GetAll(typeof(T)).Cast<T>();
-        }
-
         public static Dictionary<string, object> RetrieverUserData()
         {
             return Current.GetRetrieverUserData();
@@ -231,8 +215,6 @@ namespace Signum.Engine
                 }
             }
         }
-
-       
     }
 
     public enum EntityCacheType
