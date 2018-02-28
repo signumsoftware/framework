@@ -53,7 +53,8 @@ namespace Signum.Entities.MachineLearning
         [NotNullValidator, InTypeScript(Undefined = false, Null = false), NotifyChildProperty]
         public PredictorMainQueryEmbedded MainQuery { get; set; }
 
-        [Ignore, NotifyChildProperty, NotifyCollectionChanged] //virtual Mlist
+        [Ignore, QueryableProperty] //virtual Mlist
+        [NotifyChildProperty, NotifyCollectionChanged]
         public MList<PredictorSubQueryEntity> SubQueries { get; set; } = new MList<PredictorSubQueryEntity>();
         
         [PreserveOrder]
