@@ -304,16 +304,21 @@ namespace Signum.Engine.DynamicQuery
                 throw new InvalidOperationException("The parameter 'lambdaToMethod' should be an expression calling a expression method");
         }
 
-        public ExtensionInfo RegisterExpression<E, S>(Expression<Func<E, S>> extensionLambda, Func<string> niceName, string key) 
+        public ExtensionInfo RegisterExpression<E, S>(Expression<Func<E, S>> extensionLambda, Func<string> niceName, string key, bool replace = false) 
         {
             var extension = new ExtensionInfo(typeof(E), extensionLambda, typeof(S), key, niceName);
 
             return RegisterExpression(extension);
         }
 
-        public ExtensionInfo RegisterExpression(ExtensionInfo extension)
+        public ExtensionInfo RegisterExpression(ExtensionInfo extension, bool replace = false)
         {
-            RegisteredExtensions.GetOrAddDefinition(extension.SourceType)[extension.Key] = extension;
+            var dic = RegisteredExtensions.GetOrAddDefinition(extension.SourceType);
+
+            if (replace)
+                dic[extension.Key] = extension;
+            else
+                dic.Add(extension.Key, extension);
 
             RegisteredExtensions.ClearCache();
 
@@ -415,6 +420,23 @@ namespace Signum.Engine.DynamicQuery
         }
 
         public static FluentInclude<T> WithExpressionFrom<T, F>(this FluentInclude<T> fi, DynamicQueryManager dqm, Expression<Func<F, IQueryable<T>>> lambdaToMethodOrProperty, Func<string> niceName)
+            where T : Entity
+        {
+            dqm.RegisterExpression(lambdaToMethodOrProperty, niceName);
+            return fi;
+        }
+
+        /// <summary>
+        /// Uses NicePluralName as niceName
+        /// </summary>
+        public static FluentInclude<T> WithExpressionFrom<T, F>(this FluentInclude<T> fi, DynamicQueryManager dqm, Expression<Func<F, T>> lambdaToMethodOrProperty)
+            where T : Entity
+        {
+            dqm.RegisterExpression(lambdaToMethodOrProperty, () => typeof(T).NicePluralName());
+            return fi;
+        }
+
+        public static FluentInclude<T> WithExpressionFrom<T, F>(this FluentInclude<T> fi, DynamicQueryManager dqm, Expression<Func<F, T>> lambdaToMethodOrProperty, Func<string> niceName)
             where T : Entity
         {
             dqm.RegisterExpression(lambdaToMethodOrProperty, niceName);

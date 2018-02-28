@@ -51,7 +51,6 @@ namespace Signum.Engine
         }
 
         public static FluentInclude<T> WithVirtualMList<T, L>(this FluentInclude<T> fi,
-            DynamicQueryManager dqm,
             Expression<Func<T, MList<L>>> mListField,
             Expression<Func<L, Lite<T>>> getBackReference,
             ExecuteSymbol<L> saveOperation,
@@ -60,7 +59,7 @@ namespace Signum.Engine
             where L : Entity
         {
 
-            return fi.WithVirtualMList(dqm, mListField, getBackReference,
+            return fi.WithVirtualMList(mListField, getBackReference,
                 onSave: saveOperation == null ? null : new Action<L, T>((line, e) =>
                 {
                     line.Execute(saveOperation);
@@ -72,7 +71,6 @@ namespace Signum.Engine
         }
 
         public static FluentInclude<T> WithVirtualMList<T, L>(this FluentInclude<T> fi,
-            DynamicQueryManager dqm, 
             Expression<Func<T, MList<L>>> mListField, 
             Expression<Func<L, Lite<T>>> backReference, 
             Action<L, T> onSave = null,
@@ -225,11 +223,6 @@ namespace Signum.Engine
                 return null;
             };
 
-            if (dqm != null)
-            {
-                var pi = ReflectionTools.GetPropertyInfo(mListField);
-                dqm.RegisterExpression((T e) => Database.Query<L>().Where(p => backReference.Evaluate(p) == e.ToLite()), () => pi.NiceName(), pi.Name);
-            }
             return fi;
         }
 

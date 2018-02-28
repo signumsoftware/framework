@@ -308,12 +308,7 @@ namespace Signum.Engine.Linq
                 NewExpression nex = (NewExpression)expression;
                 return (ProjectionExpression)nex.Arguments[1];
             }
-
-            if (expression is MethodCallExpression && IsTableValuedFunction((MethodCallExpression)expression))
-            {
-
-            }
-
+            
             throw new InvalidOperationException("Impossible to convert in ProjectionExpression: \r\n" + expression.ToString());
         }
 
@@ -1349,6 +1344,9 @@ namespace Signum.Engine.Linq
                                         if (result is MListExpression)
                                             return MListProjection((MListExpression)result, withRowId: false);
 
+                                        if (result is AdditionalFieldExpression afe)
+                                            return BindAdditionalField(afe, withRowId: false);
+
                                         return result;
                                     }
                                 case DbExpressionType.MixinInit:
@@ -1368,6 +1366,9 @@ namespace Signum.Engine.Linq
 
                                         if (result is MListExpression)
                                             return MListProjection((MListExpression)result, withRowId: false);
+
+                                        if (result is AdditionalFieldExpression afe)
+                                            return BindAdditionalField(afe, withRowId: false);
 
                                         return result;
                                     }
