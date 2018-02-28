@@ -35,8 +35,8 @@ namespace Signum.Engine.DynamicQuery
         public Polymorphic<Dictionary<string, ExtensionInfo>> RegisteredExtensions =
             new Polymorphic<Dictionary<string, ExtensionInfo>>(PolymorphicMerger.InheritDictionaryInterfaces, null);
 
-        public Dictionary<Type, IExtensionDictionaryInfo> RegisteredExtensionsDictionaries =
-            new Dictionary<Type, IExtensionDictionaryInfo>();
+        public Dictionary<PropertyRoute, IExtensionDictionaryInfo> RegisteredExtensionsDictionaries =
+            new Dictionary<PropertyRoute, IExtensionDictionaryInfo>();
 
         public void RegisterQuery<T>(object queryName, Func<DynamicQueryCore<T>> lazyQueryCore, Implementations? entityImplementations = null)
         {
@@ -262,8 +262,11 @@ namespace Signum.Engine.DynamicQuery
 
             IEnumerable<QueryToken> extensionsTokens = dic == null ? Enumerable.Empty<QueryToken>() :
                 dic.Values.Where(ei => ei.Inherit || ei.SourceType == parentType).Select(v => v.CreateToken(parent));
-
-            var edi = RegisteredExtensionsDictionaries.TryGetC(parentType);
+            
+            var pr = parentType.IsEntity() ? PropertyRoute.Root(parentType) :
+                parentType.IsEmbeddedEntity() ? parent.GetPropertyRoute() : null;
+            
+            var edi = pr == null ? null: RegisteredExtensionsDictionaries.TryGetC(parent.GetPropertyRoute());
 
             IEnumerable<QueryToken> dicExtensionsTokens = edi == null ? Enumerable.Empty<QueryToken>() :
                 edi.GetAllTokens(parent);
@@ -323,6 +326,7 @@ namespace Signum.Engine.DynamicQuery
             Expression<Func<T, IEnumerable<KVP>>> collectionSelector,
             Expression<Func<KVP, K>> keySelector,
             Expression<Func<KVP, V>> valueSelector,
+            Expression<Func<T, EmbeddedEntity>> forEmbedded = null,
             ResetLazy<HashSet<K>> allKeys = null)
             where T : Entity
         {
@@ -335,7 +339,11 @@ namespace Signum.Engine.DynamicQuery
                 AllKeys = allKeys ?? GetAllKeysLazy<T, KVP, K>(collectionSelector, keySelector)
             };
 
-            RegisteredExtensionsDictionaries.Add(typeof(T), mei);
+            var route = forEmbedded == null ? 
+                PropertyRoute.Root(typeof(T)) : 
+                PropertyRoute.Construct(forEmbedded);
+
+            RegisteredExtensionsDictionaries.Add(route, mei);
 
             return mei;
         }
