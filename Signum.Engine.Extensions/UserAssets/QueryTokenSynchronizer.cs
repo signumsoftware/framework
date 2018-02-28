@@ -379,7 +379,7 @@ namespace Signum.Engine.UserAssets
                 if (Console.Out == null)
                     throw new InvalidOperationException("Impossible to synchronize without interactive Console");
 
-                var subTokens = token.SubTokens(qd, options).OrderBy(a => a.Parent != null).ThenBy(a => a.Key).ToList();
+                var subTokens = token.SubTokens(qd, options).OrderBy(a => a.Parent != null).ThenByDescending(a=>a.Priority).ThenBy(a => a.Key).ToList();
 
                 int startingIndex = 0;
 
