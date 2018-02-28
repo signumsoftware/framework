@@ -23,7 +23,7 @@ namespace Signum.Engine
         public static bool ShouldAvoidMListType(Type elementType)
         {
             var stack = avoidTypes.Value;
-            return (stack != null && stack.Contains(elementType) || stack.Contains(null));
+            return (stack != null && (stack.Contains(elementType) || stack.Contains(null)));
         }
 
         /// <param name="elementType">Use null for every type</param>
@@ -32,6 +32,22 @@ namespace Signum.Engine
             avoidTypes.Value = (avoidTypes.Value ?? ImmutableStack<Type>.Empty).Push(elementType);
 
             return new Disposable(() => avoidTypes.Value = avoidTypes.Value.Pop());
+        }
+
+        static readonly Variable<ImmutableStack<Type>> considerNewTypes = Statics.ThreadVariable<ImmutableStack<Type>>("considerNewTypes");
+
+        public static bool ShouldConsiderNew(Type parentType)
+        {
+            var stack = considerNewTypes.Value;
+            return (stack != null && (stack.Contains(parentType) || stack.Contains(null)));
+        }
+
+        /// <param name="parentType">Use null for every type</param>
+        public static IDisposable ConsiderNewType(Type parentType)
+        {
+            considerNewTypes.Value = (considerNewTypes.Value ?? ImmutableStack<Type>.Empty).Push(parentType);
+
+            return new Disposable(() => considerNewTypes.Value = considerNewTypes.Value.Pop());
         }
 
         public static FluentInclude<T> WithVirtualMList<T, L>(this FluentInclude<T> fi,
@@ -67,7 +83,7 @@ namespace Signum.Engine
         {
             var lazy = lazyRetrieveAndDelete ?? (typeof(L) == typeof(T));
 
-            Func<T, MList<L>> getMList = mListField.Compile();
+            Func<T, MList<L>> getMList = GetAccessor(mListField);
             Action<L, Lite<T>> setter = null;
             bool preserveOrder = fi.SchemaBuilder.Settings.FieldAttributes(mListField)
                 .OfType<PreserveOrderAttribute>()
@@ -86,6 +102,9 @@ namespace Signum.Engine
                         return;
 
                     var mlist = getMList(e);
+
+                    if (mlist == null)
+                        return;
 
                     var query = Database.Query<L>()
                         .Where(line => backReference.Evaluate(line) == e.ToLite());
@@ -134,6 +153,9 @@ namespace Signum.Engine
                     return;
 
                 var mlist = getMList(e);
+                if (mlist == null)
+                    return;
+
                 if (preserveOrder)
                 {
                     mlist.ForEach((o,i) => ((ICanBeOrdered) o).Order = i);
@@ -148,11 +170,13 @@ namespace Signum.Engine
                     return;
 
                 var mlist = getMList(e);
+                if (mlist == null)
+                    return;
 
                 if (!GraphExplorer.IsGraphModified(mlist))
                     return;
 
-                if (!args.WasNew)
+                if (!(args.WasNew || ShouldConsiderNew(typeof(T))))
                 {
                     var oldElements = mlist.Where(line => !line.IsNew);
                     var query = Database.Query<L>()
@@ -223,7 +247,7 @@ namespace Signum.Engine
             where T : Entity
             where L : Entity
         {
-            Func<T, MList<L>> getMList = mListField.Compile();
+            Func<T, MList<L>> getMList = GetAccessor(mListField);
             Action<L, Lite<T>> setter = null;
             var sb = fi.SchemaBuilder;
 
@@ -232,6 +256,10 @@ namespace Signum.Engine
                 if (VirtualMList.ShouldAvoidMListType(typeof(L)))
                     return;
 
+                var mlist = getMList(e);
+                if (mlist == null)
+                    return;
+                
                 if (GraphExplorer.IsGraphModified(getMList(e)))
                     e.SetModified();
             };
@@ -242,6 +270,8 @@ namespace Signum.Engine
                     return;
 
                 var mlist = getMList(e);
+                if (mlist == null)
+                    return;
 
                 if (!GraphExplorer.IsGraphModified(mlist))
                     return;
@@ -271,7 +301,31 @@ namespace Signum.Engine
             return fi;
         }
 
-        private static Action<L, Lite<T>> CreateSetter<T, L>(Expression<Func<L, Lite<T>>> getBackReference)
+        public static Func<T, MList<L>> GetAccessor<T, L>(Expression<Func<T, MList<L>>> mListField)
+            where T : Entity
+            where L : Entity
+        {
+            var body = mListField.Body;
+
+            var param = mListField.Parameters.SingleEx();
+
+            var newBody = SafeAccess(param, (MemberExpression)body, body);
+
+            return Expression.Lambda<Func<T, MList<L>>>(newBody, mListField.Parameters.Single()).Compile();
+        }
+
+        private static Expression SafeAccess(ParameterExpression param, MemberExpression member, Expression acum)
+        {
+            if (member.Expression == param)
+                return acum;
+
+            return SafeAccess(param,
+                member: (MemberExpression)member.Expression,
+                acum: Expression.Condition(Expression.Equal(member.Expression, Expression.Constant(null, member.Expression.Type)), Expression.Constant(null, acum.Type), acum)
+                );
+        }
+
+        public static Action<L, Lite<T>> CreateSetter<T, L>(Expression<Func<L, Lite<T>>> getBackReference)
             where T : Entity
             where L : Entity
         {

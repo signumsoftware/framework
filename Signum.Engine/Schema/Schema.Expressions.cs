@@ -60,15 +60,8 @@ namespace Signum.Engine.Maps
                     result.Add(new FieldBinding(fi, ef.Field.GetExpression(tableAlias, binder, id)));
             }
 
-            var additionalBindings = Schema.Current.GetAditionalQueryBindings(this.Type);
-
-            if (additionalBindings != null)
-            {
-                foreach (var fi in additionalBindings)
-                {
-                    result.Add(new FieldBinding(fi, new AdditionalFieldExpression(fi.FieldType, (PrimaryKeyExpression)id, this, fi)));
-                }
-            }
+            if (this.Type.IsEntity())
+                result.AddRange(Schema.Current.GetAdditionalQueryBindings(PropertyRoute.Root(this.Type), (PrimaryKeyExpression)id));
 
             return result.ToReadOnly();
         }
@@ -251,7 +244,9 @@ namespace Signum.Engine.Maps
         {
             var bindings = (from kvp in EmbeddedFields
                             let fi = kvp.Value.FieldInfo
-                            select new FieldBinding(fi, kvp.Value.Field.GetExpression(tableAlias, binder, id))).ToReadOnly();
+                            select new FieldBinding(fi, kvp.Value.Field.GetExpression(tableAlias, binder, id)))
+                            .Concat(Schema.Current.GetAdditionalQueryBindings(this.Route, (PrimaryKeyExpression)id))
+                            .ToReadOnly();
 
             Expression hasValue = HasValue == null ? SmartEqualizer.NotEqualNullable(id,
                 id is PrimaryKeyExpression ? QueryBinder.NullId(((PrimaryKeyExpression)id).ValueType) : (Expression)Expression.Constant(null, id.Type.Nullify())) :
@@ -267,7 +262,9 @@ namespace Signum.Engine.Maps
         {
             var bindings = (from kvp in Fields
                             let fi = kvp.Value.FieldInfo
-                            select new FieldBinding(fi, kvp.Value.Field.GetExpression(tableAlias, binder, id))).ToReadOnly();
+                            select new FieldBinding(fi, kvp.Value.Field.GetExpression(tableAlias, binder, id)))
+                            .Concat(Schema.Current.GetAdditionalQueryBindings(this.Route, (PrimaryKeyExpression)id))
+                            .ToReadOnly();
 
             return new MixinEntityExpression(this.FieldType, bindings, tableAlias, this);
         }

@@ -2531,14 +2531,14 @@ namespace Signum.Engine.Linq
 
         internal ProjectionExpression AdditionalFieldProjection(AdditionalFieldExpression af, bool withRowId)
         {
-            var lambda = Schema.Current.GetAditionalQueryBinding(af.Table.Type, af.FieldInfo);
+            var lambda = Schema.Current.GetAditionalQueryBinding(af.Route);
 
             if (lambda == null)
                 return null;
 
             var cleanLambda = (LambdaExpression)DbQueryProvider.Clean(lambda, filter: true, log: null);
 
-            var parentEntity = new EntityExpression(af.Table.Type, af.BackID, null, null, null, false);
+            var parentEntity = new EntityExpression(af.Route.RootType, af.BackID, null, null, null, false);
 
             var expression = this.MapVisitExpand(cleanLambda, parentEntity, null);
 

@@ -99,18 +99,7 @@ namespace Signum.Engine.Linq
 
             previousTypes = previousTypes.Push(ee.Type);
 
-            var bindings = ee.Bindings.Select(fb =>
-            {
-                var r = Visit(fb.Binding);
-
-                if (r == null)
-                    return null;
-
-                if (r == fb.Binding)
-                    return fb;
-
-                return new FieldBinding(fb.FieldInfo, r);
-            }).NotNull().ToReadOnly();
+            var bindings = Visit(ee.Bindings, VisitFieldBinding);
 
             var mixins = Visit(ee.Mixins, VisitMixinEntity);
 
@@ -146,9 +135,6 @@ namespace Signum.Engine.Linq
         protected internal override Expression VisitAdditionalField(AdditionalFieldExpression afe)
         {
             var proj = binder.AdditionalFieldProjection(afe, withRowId: true);
-
-            if (proj == null)
-                return null;
 
             var newProj = (ProjectionExpression)this.Visit(proj);
 
