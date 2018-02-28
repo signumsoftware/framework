@@ -134,11 +134,14 @@ namespace Signum.Engine.Linq
 
         protected internal override Expression VisitAdditionalField(AdditionalFieldExpression afe)
         {
-            var proj = binder.AdditionalFieldProjection(afe, withRowId: true);
+            var exp = binder.BindAdditionalField(afe, withRowId: true);
 
-            var newProj = (ProjectionExpression)this.Visit(proj);
+            var newEx = this.Visit(exp);
 
-            return new MListProjectionExpression(afe.Type, newProj);
+            if (newEx is ProjectionExpression newProj && newProj.Projector.Type.IsInstantiationOf(typeof(MList<>.RowIdElement)))
+                return new MListProjectionExpression(afe.Type, newProj);
+
+            return newEx;
         }
 
         protected internal override Expression VisitProjection(ProjectionExpression proj)

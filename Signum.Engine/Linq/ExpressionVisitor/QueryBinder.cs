@@ -1332,7 +1332,7 @@ namespace Signum.Engine.Linq
                                             return MListProjection(me, withRowId: false);
 
                                         if (result is AdditionalFieldExpression afe)
-                                            return AdditionalFieldProjection(afe, withRowId: false);
+                                            return BindAdditionalField(afe, withRowId: false);
 
                                         return result;
                                     }
@@ -2529,7 +2529,7 @@ namespace Signum.Engine.Linq
             return proj;
         }
 
-        internal ProjectionExpression AdditionalFieldProjection(AdditionalFieldExpression af, bool withRowId)
+        internal Expression BindAdditionalField(AdditionalFieldExpression af, bool withRowId)
         {
             var lambda = Schema.Current.GetAditionalQueryBinding(af.Route);
 
@@ -2569,7 +2569,7 @@ namespace Signum.Engine.Linq
                 }
             }
 
-            throw new NotImplementedException($"AdditionalFields only support {nameof(VirtualMList.ToVirtualMList)} {nameof(VirtualMList.ToVirtualMListWithOrder)}");
+            return expression;
         }
 
         private static PropertyInfo GetOrderColumn(Type type)
