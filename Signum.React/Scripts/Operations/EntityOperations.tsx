@@ -145,7 +145,7 @@ export class OperationButton extends React.Component<OperationButtonProps> {
 
         const tooltip = canExecute &&
             (
-                <UncontrolledTooltip placement="bottom" target={() => elem!} key="tooltip">
+                <UncontrolledTooltip placement={group ? "right" : "bottom"} target={() => elem!} key="tooltip">
                     {canExecute}
                 </UncontrolledTooltip>
             );
@@ -156,7 +156,7 @@ export class OperationButton extends React.Component<OperationButtonProps> {
                     {...props}
                     key="di"
                     innerRef={r  => elem = r}
-                    className={classes("btn-" + color, disabled ? "disabled" : undefined, props && props.className)}
+                    disabled={disabled}
                     onClick={disabled ? undefined : this.handleOnClick}
                     data-operation={eoc.operationInfo.key}>
                     {this.renderChildren()}
