@@ -1327,7 +1327,7 @@ namespace Signum.Engine.Linq
                                             return MListProjection(me, withRowId: false);
 
                                         if (result is AdditionalFieldExpression afe)
-                                            return BindAdditionalField(afe, withRowId: false);
+                                            return BindAdditionalField(afe, entityCompleter: false);
 
                                         return result;
                                     }
@@ -1345,7 +1345,7 @@ namespace Signum.Engine.Linq
                                             return MListProjection((MListExpression)result, withRowId: false);
 
                                         if (result is AdditionalFieldExpression afe)
-                                            return BindAdditionalField(afe, withRowId: false);
+                                            return BindAdditionalField(afe, entityCompleter: false);
 
                                         return result;
                                     }
@@ -1368,7 +1368,7 @@ namespace Signum.Engine.Linq
                                             return MListProjection((MListExpression)result, withRowId: false);
 
                                         if (result is AdditionalFieldExpression afe)
-                                            return BindAdditionalField(afe, withRowId: false);
+                                            return BindAdditionalField(afe, entityCompleter: false);
 
                                         return result;
                                     }
@@ -2530,9 +2530,9 @@ namespace Signum.Engine.Linq
             return proj;
         }
 
-        internal Expression BindAdditionalField(AdditionalFieldExpression af, bool withRowId)
+        internal Expression BindAdditionalField(AdditionalFieldExpression af, bool entityCompleter)
         {
-            var lambda = Schema.Current.GetAditionalQueryBinding(af.Route);
+            var lambda = Schema.Current.GetAditionalQueryBinding(af.Route, entityCompleter);
 
             if (lambda == null)
                 return null;
@@ -2550,6 +2550,9 @@ namespace Signum.Engine.Linq
                     mce.Method.Name == nameof(VirtualMList.ToVirtualMListWithOrder)))
                 {
                     var proj = (ProjectionExpression)mce.Arguments[0];
+
+                    if (!entityCompleter)
+                        return proj;
 
                     var preserveOrder = mce.Method.Name == nameof(VirtualMList.ToVirtualMListWithOrder);
 

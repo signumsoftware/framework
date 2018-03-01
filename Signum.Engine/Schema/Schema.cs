@@ -251,18 +251,23 @@ namespace Signum.Engine.Maps
                 return Enumerable.Empty<FieldBinding>();
 
             return ee.AdditionalQueryBindings
-                .Where(kvp => kvp.Key.Parent.Equals(parent) && kvp.Value() != null)
+                .Where(kvp => kvp.Key.Parent.Equals(parent))
                 .Select(kvp => new FieldBinding(kvp.Key.FieldInfo, new AdditionalFieldExpression(kvp.Key.FieldInfo.FieldType, (PrimaryKeyExpression)id, kvp.Key)))
                 .ToList();
         }
 
-        internal LambdaExpression GetAditionalQueryBinding(PropertyRoute pr)
+        internal LambdaExpression GetAditionalQueryBinding(PropertyRoute pr, bool entityCompleter)
         {
             AssertAllowed(pr.Type, inUserInterface: false);
 
             var ee = entityEvents.GetOrThrow(pr.RootType);
 
-            return ee.AdditionalQueryBindings.GetOrThrow(pr)();
+            var ab = ee.AdditionalQueryBindings.GetOrThrow(pr);
+
+            if (entityCompleter && !ab.ExpandQuery())
+                return null;
+
+            return ab.ValueExpression;
         }
 
         internal CacheControllerBase<T> CacheController<T>() where T : Entity

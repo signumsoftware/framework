@@ -10,6 +10,7 @@ using Signum.Entities.Reflection;
 using Signum.Engine.Maps;
 using Signum.Utilities.ExpressionTrees;
 using Signum.Utilities.DataStructures;
+using System.Collections.ObjectModel;
 
 namespace Signum.Engine.Linq
 {
@@ -99,7 +100,7 @@ namespace Signum.Engine.Linq
 
             previousTypes = previousTypes.Push(ee.Type);
 
-            var bindings = Visit(ee.Bindings, VisitFieldBinding);
+            var bindings = VisitBindings(ee.Bindings);
 
             var mixins = Visit(ee.Mixins, VisitMixinEntity);
 
@@ -110,6 +111,42 @@ namespace Signum.Engine.Linq
             previousTypes = previousTypes.Pop();
 
             return result;
+        }
+
+        private ReadOnlyCollection<FieldBinding> VisitBindings(ReadOnlyCollection<FieldBinding> bindings)
+        {
+            return bindings.Select(b =>
+            {
+                var newB = Visit(b.Binding);
+
+                if (newB != null)
+                    return new FieldBinding(b.FieldInfo, newB);
+
+                return null;
+            }).NotNull().ToReadOnly();
+        }
+
+        protected internal override Expression VisitEmbeddedEntity(EmbeddedEntityExpression eee)
+        {
+            var bindings = VisitBindings(eee.Bindings);
+            var hasValue = Visit(eee.HasValue);
+
+            if (eee.Bindings != bindings || eee.HasValue != hasValue)
+            {
+                return new EmbeddedEntityExpression(eee.Type, hasValue, bindings, eee.FieldEmbedded, eee.ViewTable);
+            }
+            return eee;
+        }
+
+        protected internal override MixinEntityExpression VisitMixinEntity(MixinEntityExpression me)
+        {
+            var bindings = VisitBindings(me.Bindings);
+
+            if (me.Bindings != bindings)
+            {
+                return new MixinEntityExpression(me.Type, bindings, me.MainEntityAlias, me.FieldMixin);
+            }
+            return me;
         }
 
         private bool IsCached(Type type)
@@ -134,7 +171,7 @@ namespace Signum.Engine.Linq
 
         protected internal override Expression VisitAdditionalField(AdditionalFieldExpression afe)
         {
-            var exp = binder.BindAdditionalField(afe, withRowId: true);
+            var exp = binder.BindAdditionalField(afe, entityCompleter: true);
 
             var newEx = this.Visit(exp);
 

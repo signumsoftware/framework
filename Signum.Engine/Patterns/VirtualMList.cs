@@ -116,33 +116,22 @@ namespace Signum.Engine
                     mlist.PostRetrieving();
                 };
             }
+
+            if (preserveOrder)
+            {
+                sb.Schema.EntityEvents<T>().RegisterBinding(mListField,
+                     e => Database.Query<L>()
+                    .Where(line => backReference.Evaluate(line) == e.ToLite())
+                    .ToVirtualMListWithOrder(),
+                     expandQuery: () => !lazy && !VirtualMList.ShouldAvoidMListType(typeof(L)));
+            }
             else
             {
-                if (preserveOrder)
-                {
-                    sb.Schema.EntityEvents<T>().RegisterBinding(mListField, () =>
-                    {
-                        if (VirtualMList.ShouldAvoidMListType(typeof(L)))
-                            return null;
-
-                        return e => Database.Query<L>()
-                        .Where(line => backReference.Evaluate(line) == e.ToLite())
-                        .ToVirtualMListWithOrder();
-                    });
-                }
-                else
-                {
-                    sb.Schema.EntityEvents<T>().RegisterBinding(mListField, () =>
-                    {
-                        if (VirtualMList.ShouldAvoidMListType(typeof(L)))
-                            return null;
-
-                        return e => Database.Query<L>()
-                        .Where(line => backReference.Evaluate(line) == e.ToLite())
-                        .ToVirtualMList();
-                    });
-                }
-
+                sb.Schema.EntityEvents<T>().RegisterBinding(mListField,
+                    e => Database.Query<L>()
+                    .Where(line => backReference.Evaluate(line) == e.ToLite())
+                    .ToVirtualMList(),
+                     expandQuery: () => !lazy && !VirtualMList.ShouldAvoidMListType(typeof(L)));
             }
 
             sb.Schema.EntityEvents<T>().Saving += (T e) =>
