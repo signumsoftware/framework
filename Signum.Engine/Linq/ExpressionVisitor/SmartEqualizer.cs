@@ -766,7 +766,7 @@ namespace Signum.Engine.Linq
 
                 EntityExpression ere = new EntityExpression(lite.EntityType, new PrimaryKeyExpression(id), null, null, null, false);
 
-                return new LiteReferenceExpression(Lite.Generate(lite.EntityType), ere, null);
+                return new LiteReferenceExpression(Lite.Generate(lite.EntityType), ere, null, false, false);
             }
 
             return null;

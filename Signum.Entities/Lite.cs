@@ -513,16 +513,31 @@ namespace Signum.Entities
             return new LiteImp<T>(id, toStr);
         }
 
-        static ConcurrentDictionary<Type, ConstructorInfo> ciLiteConstructor = new ConcurrentDictionary<Type, ConstructorInfo>();
-
-        public static ConstructorInfo LiteConstructor(Type type)
+        static ConcurrentDictionary<Type, ConstructorInfo> ciLiteConstructorId = new ConcurrentDictionary<Type, ConstructorInfo>();
+        public static ConstructorInfo LiteConstructorId(Type type)
         {
-            return ciLiteConstructor.GetOrAdd(type, t => typeof(LiteImp<>).MakeGenericType(t).GetConstructor(new[] { typeof(PrimaryKey), typeof(string) }));
+            return ciLiteConstructorId.GetOrAdd(type, t => typeof(LiteImp<>).MakeGenericType(t).GetConstructor(new[] { typeof(PrimaryKey), typeof(string) }));
         }
 
         public static NewExpression NewExpression(Type type, Expression id, Expression toString)
         {
-            return Expression.New(Lite.LiteConstructor(type), id.UnNullify(), toString);
+            return Expression.New(Lite.LiteConstructorId(type), id.UnNullify(), toString);
+        }
+
+
+        static Lite<T> ToLiteFatInternal<T>(this T entity, string toStr)
+            where T : class, IEntity
+        {
+            if (entity == null)
+                return null;
+
+            return entity.ToLiteFat(toStr);
+        }
+
+        static MethodInfo miToLiteFatInternal = ReflectionTools.GetMethodInfo(() => ToLiteFatInternal<Entity>(null, null)).GetGenericMethodDefinition();
+        public static Expression ToLiteFatInternalExpression(Expression reference, Expression toString )
+        {
+            return Expression.Call(miToLiteFatInternal.MakeGenericMethod(reference.Type), reference, toString);
         }
 
         public static Lite<T> ParsePrimaryKey<T>(string id)

@@ -77,7 +77,7 @@ namespace Signum.Engine.Linq
             var newRef = Visit(lite.Reference);
             var newToStr = Visit(lite.CustomToStr);
             if (newRef != lite.Reference || newToStr != lite.CustomToStr)
-                return new LiteReferenceExpression(lite.Type,  newRef, newToStr);
+                return new LiteReferenceExpression(lite.Type,  newRef, newToStr, lite.LazyToStr, lite.EagerEntity);
             return lite;
         }
 

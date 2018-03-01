@@ -87,6 +87,7 @@ namespace Signum.Engine
                     sb.Schema.EntityEvents<T>().RegisterBinding(mListField, e =>
                         Database.Query<L>()
                             .Where(line => getBackReference.Evaluate(line) == e.ToLite())
+                            .ExpandLite(line => getBackReference.Evaluate(line), ExpandLite.ToStringLazy)
                             .ToVirtualMListWithOrder());
                 }
                 else
@@ -94,6 +95,7 @@ namespace Signum.Engine
                     sb.Schema.EntityEvents<T>().RegisterBinding(mListField, e =>
                         Database.Query<L>()
                             .Where(line => getBackReference.Evaluate(line) == e.ToLite())
+                            .ExpandLite(line=> getBackReference.Evaluate(line), ExpandLite.ToStringLazy)
                             .ToVirtualMList());
                 }
 

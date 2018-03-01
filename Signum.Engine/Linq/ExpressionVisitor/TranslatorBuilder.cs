@@ -416,6 +416,15 @@ namespace Signum.Engine.Linq
                 return Expression.Call(Expression.Constant(Schema.Current), miGetType, Visit(typeIba.TypeColumn).UnNullify());
             }
 
+            protected internal override Expression VisitLiteReference(LiteReferenceExpression lite)
+            {
+                var reference = Visit(lite.Reference);
+
+                var toStr = Visit(lite.CustomToStr);
+
+                return Lite.ToLiteFatInternalExpression(reference, toStr ?? Expression.Constant(null, typeof(string)));
+            }
+
             protected internal override Expression VisitLiteValue(LiteValueExpression lite)
             {
                 var id = Visit(NullifyColumn(lite.Id));
