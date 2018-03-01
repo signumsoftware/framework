@@ -23,7 +23,7 @@ namespace Signum.Entities.Authorization
     {
         public static Func<string, string> ValidatePassword = p =>
         {
-            if (p.Length > 5)
+            if (p.Length >= 5)
                 return null;
 
             return AuthMessage.ThePasswordMustHaveAtLeast5Characters.NiceToString();
