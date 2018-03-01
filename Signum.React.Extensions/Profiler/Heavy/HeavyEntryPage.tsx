@@ -206,7 +206,6 @@ export class HeavyProfilerDetailsD3 extends React.Component<HeavyProfilerDetails
             this.mountChart(newProps);
         }
         else if (newProps.selected != this.props.selected) {
-            this.resetZoom(newProps.selected);
             this.mountChart(newProps);
         }
     }
@@ -326,7 +325,7 @@ export class HeavyProfilerDetailsD3 extends React.Component<HeavyProfilerDetails
             newGroups.on("click", e => {
 
                 if (e == this.props.selected) {
-                    this.resetZoom(e);
+
                 }
                 else {
                     let url = "~/profiler/heavy/entry/" + e.FullIndex;
@@ -338,6 +337,10 @@ export class HeavyProfilerDetailsD3 extends React.Component<HeavyProfilerDetails
                         Navigator.history.push(url);
                     }
                 }
+            });
+            
+            newGroups.on("dblclick", e => {
+                this.resetZoom(e);
             });
 
             chart.attr('width', width);

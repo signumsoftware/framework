@@ -92,7 +92,7 @@ namespace Signum.Engine.MachineLearning
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
                 sb.Include<PredictorEntity>()
-                    .WithVirtualMList(dqm, p => p.SubQueries, mc => mc.Predictor)
+                    .WithVirtualMList(p => p.SubQueries, mc => mc.Predictor)
                     .WithQuery(dqm, () => e => new
                     {
                         Entity = e,
