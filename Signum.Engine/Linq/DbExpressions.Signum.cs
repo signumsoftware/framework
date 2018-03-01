@@ -442,20 +442,18 @@ namespace Signum.Engine.Linq
     internal class AdditionalFieldExpression : DbExpression
     {
         public readonly PrimaryKeyExpression BackID; // not readonly
-        public readonly Table Table;
-        public readonly FieldInfo FieldInfo;
+        public readonly PropertyRoute Route;
 
-        public AdditionalFieldExpression(Type type, PrimaryKeyExpression backID, Table table, FieldInfo fi)
+        public AdditionalFieldExpression(Type type, PrimaryKeyExpression backID, PropertyRoute route)
             : base(DbExpressionType.AdditionalField, type)
         {
             this.BackID = backID;
-            this.Table = table;
-            this.FieldInfo = fi;
+            this.Route = route;
         }
 
         public override string ToString()
         {
-            return "new AdditionalField({0},{1})".FormatWith(this.FieldInfo.Name, Table.Name);
+            return "new AdditionalField({0})".FormatWith(this.Route);
         }
 
         protected override Expression Accept(DbExpressionVisitor visitor)

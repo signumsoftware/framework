@@ -15,11 +15,42 @@ using System.Threading.Tasks;
 
 namespace Signum.Engine
 {
-    
+
     public static class VirtualMList
     {
+        static readonly Variable<ImmutableStack<Type>> avoidTypes = Statics.ThreadVariable<ImmutableStack<Type>>("avoidVirtualMList");
+
+        public static bool ShouldAvoidMListType(Type elementType)
+        {
+            var stack = avoidTypes.Value;
+            return (stack != null && (stack.Contains(elementType) || stack.Contains(null)));
+        }
+
+        /// <param name="elementType">Use null for every type</param>
+        public static IDisposable AvoidMListType(Type elementType)
+        {
+            avoidTypes.Value = (avoidTypes.Value ?? ImmutableStack<Type>.Empty).Push(elementType);
+
+            return new Disposable(() => avoidTypes.Value = avoidTypes.Value.Pop());
+        }
+
+        static readonly Variable<ImmutableStack<Type>> considerNewTypes = Statics.ThreadVariable<ImmutableStack<Type>>("considerNewTypes");
+
+        public static bool ShouldConsiderNew(Type parentType)
+        {
+            var stack = considerNewTypes.Value;
+            return (stack != null && (stack.Contains(parentType) || stack.Contains(null)));
+        }
+
+        /// <param name="parentType">Use null for every type</param>
+        public static IDisposable ConsiderNewType(Type parentType)
+        {
+            considerNewTypes.Value = (considerNewTypes.Value ?? ImmutableStack<Type>.Empty).Push(parentType);
+
+            return new Disposable(() => considerNewTypes.Value = considerNewTypes.Value.Pop());
+        }
+
         public static FluentInclude<T> WithVirtualMList<T, L>(this FluentInclude<T> fi,
-            DynamicQueryManager dqm,
             Expression<Func<T, MList<L>>> mListField,
             Expression<Func<L, Lite<T>>> getBackReference,
             ExecuteSymbol<L> saveOperation,
@@ -28,7 +59,7 @@ namespace Signum.Engine
             where L : Entity
         {
 
-            return fi.WithVirtualMList(dqm, mListField, getBackReference,
+            return fi.WithVirtualMList(mListField, getBackReference,
                 onSave: saveOperation == null ? null : new Action<L, T>((line, e) =>
                 {
                     line.Execute(saveOperation);
@@ -40,9 +71,8 @@ namespace Signum.Engine
         }
 
         public static FluentInclude<T> WithVirtualMList<T, L>(this FluentInclude<T> fi,
-            DynamicQueryManager dqm, 
             Expression<Func<T, MList<L>>> mListField, 
-            Expression<Func<L, Lite<T>>> getBackReference, 
+            Expression<Func<L, Lite<T>>> backReference, 
             Action<L, T> onSave = null,
             Action<L, T> onRemove = null,
             bool? lazyRetrieveAndDelete = null) //To avoid StackOverflows
@@ -51,7 +81,7 @@ namespace Signum.Engine
         {
             var lazy = lazyRetrieveAndDelete ?? (typeof(L) == typeof(T));
 
-            Func<T, MList<L>> getMList = mListField.Compile();
+            Func<T, MList<L>> getMList = GetAccessor(mListField);
             Action<L, Lite<T>> setter = null;
             bool preserveOrder = fi.SchemaBuilder.Settings.FieldAttributes(mListField)
                 .OfType<PreserveOrderAttribute>()
@@ -59,51 +89,62 @@ namespace Signum.Engine
 
             if (preserveOrder && !typeof(ICanBeOrdered).IsAssignableFrom(typeof(L)))
                 throw new InvalidOperationException($"'{typeof(L).Name}' should implement '{nameof(ICanBeOrdered)}' because '{ReflectionTools.GetPropertyInfo(mListField).Name}' contains '[{nameof(PreserveOrderAttribute)}]'");
-
-
+            
             var sb = fi.SchemaBuilder;
 
             if (lazy)
             {
                 sb.Schema.EntityEvents<T>().Retrieved += (T e) =>
                 {
+                    if (ShouldAvoidMListType(typeof(L)))
+                        return;
+
                     var mlist = getMList(e);
 
+                    if (mlist == null)
+                        return;
+
                     var query = Database.Query<L>()
-                        .Where(line => getBackReference.Evaluate(line) == e.ToLite());
+                        .Where(line => backReference.Evaluate(line) == e.ToLite());
 
                     MList<L> newList = preserveOrder ?
                         query.ToVirtualMListWithOrder() :
                         query.ToVirtualMList();
-                    
+
+                    AssignAndPostRetrieving(mlist, newList);
                     mlist.AssignMList(newList);
                     mlist.PostRetrieving();
                 };
             }
+
+            if (preserveOrder)
+            {
+                sb.Schema.EntityEvents<T>().RegisterBinding(mListField,
+                     e => Database.Query<L>()
+                    .Where(line => backReference.Evaluate(line) == e.ToLite())
+                    .ExpandLite(line => getBackReference.Evaluate(line), ExpandLite.ToStringLazy)
+                    .ToVirtualMListWithOrder(),
+                     expandQuery: () => !lazy && !VirtualMList.ShouldAvoidMListType(typeof(L)));
+            }
             else
             {
-                if (preserveOrder)
-                {
-                    sb.Schema.EntityEvents<T>().RegisterBinding(mListField, e =>
-                        Database.Query<L>()
-                            .Where(line => getBackReference.Evaluate(line) == e.ToLite())
-                            .ExpandLite(line => getBackReference.Evaluate(line), ExpandLite.ToStringLazy)
-                            .ToVirtualMListWithOrder());
-                }
-                else
-                {
-                    sb.Schema.EntityEvents<T>().RegisterBinding(mListField, e =>
-                        Database.Query<L>()
-                            .Where(line => getBackReference.Evaluate(line) == e.ToLite())
-                            .ExpandLite(line=> getBackReference.Evaluate(line), ExpandLite.ToStringLazy)
-                            .ToVirtualMList());
-                }
-
+                sb.Schema.EntityEvents<T>().RegisterBinding(mListField,
+                    e => Database.Query<L>()
+                    .Where(line => backReference.Evaluate(line) == e.ToLite())
+					.ExpandLite(line => getBackReference.Evaluate(line), ExpandLite.ToStringLazy)                    
+					.ToVirtualMList(),
+                     expandQuery: () => !lazy && !VirtualMList.ShouldAvoidMListType(typeof(L)));
             }
 
             sb.Schema.EntityEvents<T>().Saving += (T e) =>
             {
+                if (VirtualMList.ShouldAvoidMListType(typeof(L)))
+                    return;
+
                 var mlist = getMList(e);
+                if (mlist == null)
+                    return;
+
                 if (preserveOrder)
                 {
                     mlist.ForEach((o,i) => ((ICanBeOrdered) o).Order = i);
@@ -114,16 +155,21 @@ namespace Signum.Engine
             };
             sb.Schema.EntityEvents<T>().Saved += (T e, SavedEventArgs args) =>
             {
+                if (VirtualMList.ShouldAvoidMListType(typeof(L)))
+                    return;
+
                 var mlist = getMList(e);
+                if (mlist == null)
+                    return;
 
                 if (!GraphExplorer.IsGraphModified(mlist))
                     return;
 
-                if (!args.WasNew)
+                if (!(args.WasNew || ShouldConsiderNew(typeof(T))))
                 {
                     var oldElements = mlist.Where(line => !line.IsNew);
                     var query = Database.Query<L>()
-                    .Where(p => getBackReference.Evaluate(p) == e.ToLite());
+                    .Where(p => backReference.Evaluate(p) == e.ToLite());
 
                     if(onRemove == null)
                         query.Where(p => !oldElements.Contains(p)).UnsafeDelete();
@@ -132,7 +178,7 @@ namespace Signum.Engine
                 }
 
                 if (setter == null)
-                    setter = CreateSetter(getBackReference);
+                    setter = CreateSetter(backReference);
 
                 mlist.ForEach(line => setter(line, e.ToLite()));
                 if (onSave == null)
@@ -151,8 +197,11 @@ namespace Signum.Engine
             
             sb.Schema.EntityEvents<T>().PreUnsafeDelete += query =>
             {
+                if (VirtualMList.ShouldAvoidMListType(typeof(L)))
+                    return null;
+
                 //You can do a VirtualMList to itself at the table level, but there should not be cycles inside the instances
-                var toDelete = Database.Query<L>().Where(se => query.Any(e => getBackReference.Evaluate(se).RefersTo(e)));
+                var toDelete = Database.Query<L>().Where(se => query.Any(e => backReference.Evaluate(se).RefersTo(e)));
                 if (lazy)
                 {
                     if (toDelete.Any())
@@ -165,40 +214,54 @@ namespace Signum.Engine
                 return null;
             };
 
-            if (dqm != null)
-            {
-                var pi = ReflectionTools.GetPropertyInfo(mListField);
-                dqm.RegisterExpression((T e) => Database.Query<L>().Where(p => getBackReference.Evaluate(p) == e.ToLite()), () => pi.NiceName(), pi.Name);
-            }
             return fi;
+        }
+
+        public static void AssignAndPostRetrieving<T>(this MList<T> mlist, MList<T> newList)
+        {
+            mlist.AssignMList(newList);
+            mlist.PostRetrieving();
         }
 
         public static FluentInclude<T> WithVirtualMListInitializeOnly<T, L>(this FluentInclude<T> fi,
             DynamicQueryManager dqm,
             Expression<Func<T, MList<L>>> mListField,
-            Expression<Func<L, Lite<T>>> getBackReference,
+            Expression<Func<L, Lite<T>>> backReference,
             Action<L, T> onSave = null)
             where T : Entity
             where L : Entity
         {
-            Func<T, MList<L>> getMList = mListField.Compile();
+            Func<T, MList<L>> getMList = GetAccessor(mListField);
             Action<L, Lite<T>> setter = null;
             var sb = fi.SchemaBuilder;
 
             sb.Schema.EntityEvents<T>().Saving += (T e) =>
             {
+                if (VirtualMList.ShouldAvoidMListType(typeof(L)))
+                    return;
+
+                var mlist = getMList(e);
+                if (mlist == null)
+                    return;
+                
                 if (GraphExplorer.IsGraphModified(getMList(e)))
                     e.SetModified();
             };
+
             sb.Schema.EntityEvents<T>().Saved += (T e, SavedEventArgs args) =>
             {
+                if (VirtualMList.ShouldAvoidMListType(typeof(L)))
+                    return;
+
                 var mlist = getMList(e);
+                if (mlist == null)
+                    return;
 
                 if (!GraphExplorer.IsGraphModified(mlist))
                     return;
 
                 if (setter == null)
-                    setter = CreateSetter(getBackReference);
+                    setter = CreateSetter(backReference);
 
                 mlist.ForEach(line => setter(line, e.ToLite()));
                 if (onSave == null)
@@ -213,15 +276,40 @@ namespace Signum.Engine
                 }
                 mlist.SetCleanModified(false);
             };
+
             if (dqm != null)
             {
                 var pi = ReflectionTools.GetPropertyInfo(mListField);
-                dqm.RegisterExpression((T e) => Database.Query<L>().Where(p => getBackReference.Evaluate(p) == e.ToLite()), () => pi.NiceName(), pi.Name);
+                dqm.RegisterExpression((T e) => Database.Query<L>().Where(p => backReference.Evaluate(p) == e.ToLite()), () => pi.NiceName(), pi.Name);
             }
             return fi;
         }
 
-        private static Action<L, Lite<T>> CreateSetter<T, L>(Expression<Func<L, Lite<T>>> getBackReference)
+        public static Func<T, MList<L>> GetAccessor<T, L>(Expression<Func<T, MList<L>>> mListField)
+            where T : Entity
+            where L : Entity
+        {
+            var body = mListField.Body;
+
+            var param = mListField.Parameters.SingleEx();
+
+            var newBody = SafeAccess(param, (MemberExpression)body, body);
+
+            return Expression.Lambda<Func<T, MList<L>>>(newBody, mListField.Parameters.Single()).Compile();
+        }
+
+        private static Expression SafeAccess(ParameterExpression param, MemberExpression member, Expression acum)
+        {
+            if (member.Expression == param)
+                return acum;
+
+            return SafeAccess(param,
+                member: (MemberExpression)member.Expression,
+                acum: Expression.Condition(Expression.Equal(member.Expression, Expression.Constant(null, member.Expression.Type)), Expression.Constant(null, acum.Type), acum)
+                );
+        }
+
+        public static Action<L, Lite<T>> CreateSetter<T, L>(Expression<Func<L, Lite<T>>> getBackReference)
             where T : Entity
             where L : Entity
         {
@@ -242,58 +330,6 @@ namespace Signum.Engine
             where T : Entity
         {
             return new MList<T>(elements.Select(line => new MList<T>.RowIdElement(line, line.Id, null)));
-        }
-    }
-
-    public static class DeletePart
-    {
-        static readonly Variable<ImmutableStack<Type>> avoidTypes = Statics.ThreadVariable<ImmutableStack<Type>>("avoidDeletePart");
-
-        public static bool ShouldAvoidDeletePart(Type type)
-        {
-            var stack = avoidTypes.Value;
-            return (stack != null && stack.Contains(type));
-        }
-
-        public static IDisposable AvoidDeletePart(Type type)
-        {
-            avoidTypes.Value = (avoidTypes.Value ?? ImmutableStack<Type>.Empty).Push(type);
-
-            return new Disposable(() => avoidTypes.Value = avoidTypes.Value.Pop());
-        }
-
-        public static FluentInclude<T> WithDeletePart<T, L>(this FluentInclude<T> fi, Expression<Func<T, L>> relatedEntity)
-            where T : Entity
-            where L : Entity
-        {
-            fi.SchemaBuilder.Schema.EntityEvents<T>().PreUnsafeDelete += query =>
-            {
-                if (ShouldAvoidDeletePart(typeof(T)))
-                    return null;
-
-                var toDelete = query.Select(relatedEntity).Select(a => a.ToLite()).ToList().NotNull().Distinct().ToList();
-                return new Disposable(() =>
-                {
-                    var groups = toDelete.GroupsOf(Connector.Current.Schema.Settings.MaxNumberOfParameters).ToList();
-                    groups.ForEach(l => Database.DeleteList(l));
-                });
-            };
-            return fi;
-        }
-
-        public static FluentInclude<T> WithDeletePart<T, L>(this FluentInclude<T> fi, Expression<Func<T, Lite<L>>> relatedEntity)
-            where T : Entity
-            where L : Entity
-        {
-            fi.SchemaBuilder.Schema.EntityEvents<T>().PreUnsafeDelete += query =>
-            {
-                var toDelete = query.Select(relatedEntity).ToList().NotNull().Distinct().ToList();;
-                return new Disposable(() =>
-                {
-                    Database.DeleteList(toDelete);
-                });
-            };
-            return fi;
         }
     }
 }

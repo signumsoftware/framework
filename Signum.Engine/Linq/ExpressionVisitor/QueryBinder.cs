@@ -413,12 +413,7 @@ namespace Signum.Engine.Linq
                 NewExpression nex = (NewExpression)expression;
                 return (ProjectionExpression)nex.Arguments[1];
             }
-
-            if (expression is MethodCallExpression && IsTableValuedFunction((MethodCallExpression)expression))
-            {
-
-            }
-
+            
             throw new InvalidOperationException("Impossible to convert in ProjectionExpression: \r\n" + expression.ToString());
         }
 
@@ -1437,7 +1432,7 @@ namespace Signum.Engine.Linq
                                             return MListProjection(me, withRowId: false);
 
                                         if (result is AdditionalFieldExpression afe)
-                                            return AdditionalFieldProjection(afe, withRowId: false);
+                                            return BindAdditionalField(afe, entityCompleter: false);
 
                                         return result;
                                     }
@@ -1453,6 +1448,9 @@ namespace Signum.Engine.Linq
 
                                         if (result is MListExpression)
                                             return MListProjection((MListExpression)result, withRowId: false);
+
+                                        if (result is AdditionalFieldExpression afe)
+                                            return BindAdditionalField(afe, entityCompleter: false);
 
                                         return result;
                                     }
@@ -1473,6 +1471,9 @@ namespace Signum.Engine.Linq
 
                                         if (result is MListExpression)
                                             return MListProjection((MListExpression)result, withRowId: false);
+
+                                        if (result is AdditionalFieldExpression afe)
+                                            return BindAdditionalField(afe, entityCompleter: false);
 
                                         return result;
                                     }
@@ -2634,13 +2635,16 @@ namespace Signum.Engine.Linq
             return proj;
         }
 
-        internal ProjectionExpression AdditionalFieldProjection(AdditionalFieldExpression af, bool withRowId)
+        internal Expression BindAdditionalField(AdditionalFieldExpression af, bool entityCompleter)
         {
-            var lambda = Schema.Current.GetAditionalQueryBinding(af.Table.Type, af.FieldInfo);
+            var lambda = Schema.Current.GetAditionalQueryBinding(af.Route, entityCompleter);
+
+            if (lambda == null)
+                return null;
 
             var cleanLambda = (LambdaExpression)DbQueryProvider.Clean(lambda, filter: true, log: null);
 
-            var parentEntity = new EntityExpression(af.Table.Type, af.BackID, null, null, null, false);
+            var parentEntity = new EntityExpression(af.Route.RootType, af.BackID, null, null, null, false);
 
             var expression = this.MapVisitExpand(cleanLambda, parentEntity, null);
 
@@ -2651,6 +2655,9 @@ namespace Signum.Engine.Linq
                     mce.Method.Name == nameof(VirtualMList.ToVirtualMListWithOrder)))
                 {
                     var proj = (ProjectionExpression)mce.Arguments[0];
+
+                    if (!entityCompleter)
+                        return proj;
 
                     var preserveOrder = mce.Method.Name == nameof(VirtualMList.ToVirtualMListWithOrder);
 
@@ -2672,7 +2679,7 @@ namespace Signum.Engine.Linq
                 }
             }
 
-            throw new NotImplementedException($"AdditionalFields only support {nameof(VirtualMList.ToVirtualMList)} {nameof(VirtualMList.ToVirtualMListWithOrder)}");
+            return expression;
         }
 
         private static PropertyInfo GetOrderColumn(Type type)

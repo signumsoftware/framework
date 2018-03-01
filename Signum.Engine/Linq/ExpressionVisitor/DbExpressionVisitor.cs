@@ -181,7 +181,7 @@ namespace Signum.Engine.Linq
         {
             var newBackID = (PrimaryKeyExpression)Visit(ml.BackID);
             if (newBackID != ml.BackID)
-                return new AdditionalFieldExpression(ml.Type, newBackID, ml.Table, ml.FieldInfo);
+                return new AdditionalFieldExpression(ml.Type, newBackID, ml.Route);
             return ml;
         }
 

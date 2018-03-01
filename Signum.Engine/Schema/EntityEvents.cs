@@ -32,19 +32,26 @@ namespace Signum.Engine.Maps
         public event PreUnsafeInsertHandler<T> PreUnsafeInsert;
         public event BulkInsetHandler<T> PreBulkInsert;
 
-        public Dictionary<FieldInfo, LambdaExpression> AdditionalQueryBindings { get; private set; }
+        public Dictionary<PropertyRoute, IAdditionalBinding> AdditionalQueryBindings { get; private set; }
 
-        public void RegisterBinding<M>(Expression<Func<T, M>> field, Expression<Func<T, M>> value)
+        public void RegisterBinding<M>(Expression<Func<T, M>> field, Expression<Func<T, M>> valueExpression, Func<bool> expandQuery)
         {
             if (AdditionalQueryBindings == null)
-                AdditionalQueryBindings = new Dictionary<FieldInfo, LambdaExpression>();
+                AdditionalQueryBindings = new Dictionary<PropertyRoute, IAdditionalBinding>();
 
             var ma = (MemberExpression)field.Body;
 
-            var fi = ma.Member as FieldInfo ?? Reflector.FindFieldInfo(typeof(T), (PropertyInfo)ma.Member);
+            var pr = PropertyRoute.Construct(field);
 
-            AdditionalQueryBindings.Add(fi, value);
+            AdditionalQueryBindings.Add(pr, new AdditionalBinding<T, M>
+            {
+                PropertyRoute = pr,
+                ValueExpression = valueExpression,
+                ExpandQuery = expandQuery
+            });
         }
+
+       
 
         internal IEnumerable<FilterQueryResult<T>> OnFilterQuery()
         {
@@ -156,6 +163,21 @@ namespace Signum.Engine.Maps
         }
     }
 
+    public interface IAdditionalBinding
+    {
+        PropertyRoute PropertyRoute { get; }
+        LambdaExpression ValueExpression { get; }
+        Func<bool> ExpandQuery { get; }
+    }
+
+    public class AdditionalBinding<T, M> : IAdditionalBinding
+    {
+        public PropertyRoute PropertyRoute { get; set; }
+        public Expression<Func<T, M>> ValueExpression { get; set; }
+        public Func<bool> ExpandQuery { get; set; }
+        LambdaExpression IAdditionalBinding.ValueExpression => ValueExpression;
+    }
+
     public delegate void PreSavingEventHandler<T>(T ident, ref bool graphModified) where T : Entity;
     public delegate void RetrievedEventHandler<T>(T ident) where T : Entity;
     public delegate void SavingEventHandler<T>(T ident) where T : Entity;
@@ -217,6 +239,6 @@ namespace Signum.Engine.Maps
 
         ICacheController CacheController { get; }
 
-        Dictionary<FieldInfo, LambdaExpression> AdditionalQueryBindings { get; }
+        Dictionary<PropertyRoute, IAdditionalBinding> AdditionalQueryBindings { get; }
     }
 }

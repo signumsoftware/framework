@@ -9,6 +9,7 @@ using Signum.Utilities.Reflection;
 using System.Linq.Expressions;
 using System.Globalization;
 using Signum.Utilities.ExpressionTrees;
+using System.Text.RegularExpressions;
 
 namespace Signum.Entities.DynamicQuery
 {
@@ -335,7 +336,8 @@ namespace Signum.Entities.DynamicQuery
             if (string.IsNullOrEmpty(tokenString))
                 throw new ArgumentNullException("tokenString");
 
-            string[] parts = tokenString.Split('.');
+            //https://stackoverflow.com/questions/35418597/split-string-on-the-dot-characters-that-are-not-inside-of-brackets
+            string[] parts = Regex.Split(tokenString, @"\.(?!([^[]*\]|[^(]*\)))"); 
 
             string firstPart = parts.FirstEx();
 
