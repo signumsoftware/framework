@@ -518,8 +518,7 @@ namespace Signum.Engine.Linq
 
         protected virtual bool CompareMList(AdditionalFieldExpression a, AdditionalFieldExpression b)
         {
-            return a.Table == b.Table 
-                && a.FieldInfo == b.FieldInfo
+            return a.Route.Equals(b.Route)
                 && Compare(a.BackID, b.BackID);
         }
 

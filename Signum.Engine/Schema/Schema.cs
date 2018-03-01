@@ -242,22 +242,32 @@ namespace Signum.Engine.Maps
             return ee.CacheController;
         }
 
-        internal HashSet<FieldInfo> GetAditionalQueryBindings(Type type)
+        internal IEnumerable<FieldBinding> GetAdditionalQueryBindings(PropertyRoute parent, PrimaryKeyExpression id)
         {
-            AssertAllowed(type, inUserInterface: false);
+            AssertAllowed(parent.RootType, inUserInterface: false);
 
-            var ee = entityEvents.TryGetC(type);
+            var ee = entityEvents.TryGetC(parent.RootType);
             if (ee == null || ee.AdditionalQueryBindings == null)
-                return null;
+                return Enumerable.Empty<FieldBinding>();
 
-            return ee.AdditionalQueryBindings.Keys.ToHashSet();
+            return ee.AdditionalQueryBindings
+                .Where(kvp => kvp.Key.Parent.Equals(parent))
+                .Select(kvp => new FieldBinding(kvp.Key.FieldInfo, new AdditionalFieldExpression(kvp.Key.FieldInfo.FieldType, (PrimaryKeyExpression)id, kvp.Key)))
+                .ToList();
         }
 
-        internal LambdaExpression GetAditionalQueryBinding(Type type, FieldInfo fi)
+        internal LambdaExpression GetAditionalQueryBinding(PropertyRoute pr, bool entityCompleter)
         {
-            AssertAllowed(type, inUserInterface: false);
+            AssertAllowed(pr.Type, inUserInterface: false);
 
-            return entityEvents.GetOrThrow(type).AdditionalQueryBindings.GetOrThrow(fi);
+            var ee = entityEvents.GetOrThrow(pr.RootType);
+
+            var ab = ee.AdditionalQueryBindings.GetOrThrow(pr);
+
+            if (entityCompleter && !ab.ExpandQuery())
+                return null;
+
+            return ab.ValueExpression;
         }
 
         internal CacheControllerBase<T> CacheController<T>() where T : Entity
