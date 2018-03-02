@@ -18,7 +18,7 @@ import "./Files.css"
 export { FileTypeSymbol };
 
 export interface FileUploaderProps {
-    onFileLoaded: (file: IFile & ModifiableEntity) => void;
+    onFileLoaded: (file: IFile & ModifiableEntity, index: number, count: number) => void;
     typeName: string;
     fileType?: FileTypeSymbol;
     dragAndDrop?: boolean;
@@ -66,7 +66,7 @@ export default class FileUploader extends React.Component<FileUploaderProps, Fil
         });
 
         for (var i = 0; i < e.dataTransfer.files.length; i++) {
-            this.uploadFile(e.dataTransfer.files[i]);
+            this.uploadFile(e.dataTransfer.files[i], i + 1, e.dataTransfer.files!.length);
         }
     }
 
@@ -81,11 +81,11 @@ export default class FileUploader extends React.Component<FileUploaderProps, Fil
         var input = e.target as HTMLInputElement;
 
         for (var i = 0; i < input.files!.length; i++) {
-            this.uploadFile(input.files![i]);
+            this.uploadFile(input.files![i], i + 1, input.files!.length);
         }
     }
 
-    uploadFile(file: File) {
+    uploadFile(file: File, index:number, count: number) {
         const fileReader = new FileReader();
         fileReader.onerror = e => { setTimeout(() => { throw (e as any).error; }, 0); };
         fileReader.onload = e => {
@@ -98,7 +98,7 @@ export default class FileUploader extends React.Component<FileUploaderProps, Fil
 
             this.setState({ isLoading: false });
 
-            this.props.onFileLoaded(fileEntity); 
+            this.props.onFileLoaded(fileEntity, index, count); 
         };
         fileReader.readAsDataURL(file);
     }
