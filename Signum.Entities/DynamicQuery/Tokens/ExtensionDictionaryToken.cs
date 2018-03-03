@@ -23,6 +23,7 @@ namespace Signum.Entities.DynamicQuery
             this.format = format;
             this.implementations = implementations;
             this.propertyRoute = propertyRoute;
+            this.Priority = -10;
         }
 
         public string DisplayName { get; set; }
@@ -57,7 +58,9 @@ namespace Signum.Entities.DynamicQuery
 
         protected override Expression BuildExpressionInternal(BuildExpressionContext context)
         {
-            var parentExpression = Parent.BuildExpression(context).ExtractEntity(false).UnNullify();
+            var liteParent = Parent.Follow(a => a.Parent).FirstEx(p => p.Type.IsLite());
+
+            var parentExpression = liteParent.BuildExpression(context).ExtractEntity(false).UnNullify();
 
             var result = Expression.Invoke(Lambda, parentExpression);
 

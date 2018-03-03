@@ -35,8 +35,8 @@ namespace Signum.Engine.DynamicQuery
         public Polymorphic<Dictionary<string, ExtensionInfo>> RegisteredExtensions =
             new Polymorphic<Dictionary<string, ExtensionInfo>>(PolymorphicMerger.InheritDictionaryInterfaces, null);
 
-        public Dictionary<Type, IExtensionDictionaryInfo> RegisteredExtensionsDictionaries =
-            new Dictionary<Type, IExtensionDictionaryInfo>();
+        public Dictionary<PropertyRoute, IExtensionDictionaryInfo> RegisteredExtensionsDictionaries =
+            new Dictionary<PropertyRoute, IExtensionDictionaryInfo>();
 
         public void RegisterQuery<T>(object queryName, Func<DynamicQueryCore<T>> lazyQueryCore, Implementations? entityImplementations = null)
         {
@@ -262,8 +262,11 @@ namespace Signum.Engine.DynamicQuery
 
             IEnumerable<QueryToken> extensionsTokens = dic == null ? Enumerable.Empty<QueryToken>() :
                 dic.Values.Where(ei => ei.Inherit || ei.SourceType == parentType).Select(v => v.CreateToken(parent));
-
-            var edi = RegisteredExtensionsDictionaries.TryGetC(parentType);
+            
+            var pr = parentType.IsEntity() ? PropertyRoute.Root(parentType) :
+                parentType.IsEmbeddedEntity() ? parent.GetPropertyRoute() : null;
+            
+            var edi = pr == null ? null: RegisteredExtensionsDictionaries.TryGetC(pr);
 
             IEnumerable<QueryToken> dicExtensionsTokens = edi == null ? Enumerable.Empty<QueryToken>() :
                 edi.GetAllTokens(parent);
@@ -301,16 +304,21 @@ namespace Signum.Engine.DynamicQuery
                 throw new InvalidOperationException("The parameter 'lambdaToMethod' should be an expression calling a expression method");
         }
 
-        public ExtensionInfo RegisterExpression<E, S>(Expression<Func<E, S>> extensionLambda, Func<string> niceName, string key) 
+        public ExtensionInfo RegisterExpression<E, S>(Expression<Func<E, S>> extensionLambda, Func<string> niceName, string key, bool replace = false) 
         {
             var extension = new ExtensionInfo(typeof(E), extensionLambda, typeof(S), key, niceName);
 
             return RegisterExpression(extension);
         }
 
-        public ExtensionInfo RegisterExpression(ExtensionInfo extension)
+        public ExtensionInfo RegisterExpression(ExtensionInfo extension, bool replace = false)
         {
-            RegisteredExtensions.GetOrAddDefinition(extension.SourceType)[extension.Key] = extension;
+            var dic = RegisteredExtensions.GetOrAddDefinition(extension.SourceType);
+
+            if (replace)
+                dic[extension.Key] = extension;
+            else
+                dic.Add(extension.Key, extension);
 
             RegisteredExtensions.ClearCache();
 
@@ -323,6 +331,7 @@ namespace Signum.Engine.DynamicQuery
             Expression<Func<T, IEnumerable<KVP>>> collectionSelector,
             Expression<Func<KVP, K>> keySelector,
             Expression<Func<KVP, V>> valueSelector,
+            Expression<Func<T, EmbeddedEntity>> forEmbedded = null,
             ResetLazy<HashSet<K>> allKeys = null)
             where T : Entity
         {
@@ -335,7 +344,11 @@ namespace Signum.Engine.DynamicQuery
                 AllKeys = allKeys ?? GetAllKeysLazy<T, KVP, K>(collectionSelector, keySelector)
             };
 
-            RegisteredExtensionsDictionaries.Add(typeof(T), mei);
+            var route = forEmbedded == null ? 
+                PropertyRoute.Root(typeof(T)) : 
+                PropertyRoute.Construct(forEmbedded);
+
+            RegisteredExtensionsDictionaries.Add(route, mei);
 
             return mei;
         }
@@ -412,6 +425,23 @@ namespace Signum.Engine.DynamicQuery
             dqm.RegisterExpression(lambdaToMethodOrProperty, niceName);
             return fi;
         }
+
+        /// <summary>
+        /// Uses NicePluralName as niceName
+        /// </summary>
+        public static FluentInclude<T> WithExpressionFrom<T, F>(this FluentInclude<T> fi, DynamicQueryManager dqm, Expression<Func<F, T>> lambdaToMethodOrProperty)
+            where T : Entity
+        {
+            dqm.RegisterExpression(lambdaToMethodOrProperty, () => typeof(T).NicePluralName());
+            return fi;
+        }
+
+        public static FluentInclude<T> WithExpressionFrom<T, F>(this FluentInclude<T> fi, DynamicQueryManager dqm, Expression<Func<F, T>> lambdaToMethodOrProperty, Func<string> niceName)
+            where T : Entity
+        {
+            dqm.RegisterExpression(lambdaToMethodOrProperty, niceName);
+            return fi;
+        }
     }
 
     public interface IExtensionDictionaryInfo
@@ -463,7 +493,7 @@ namespace Signum.Engine.DynamicQuery
                 implementations: info.Implementations,
                 propertyRoute: info.PropertyRoute)
             {
-                Lambda = t => ValueSelector.Evaluate(CollectionSelector.Evaluate(t).SingleOrDefaultEx(kvp => KeySelector.Evaluate(kvp).Equals(key)))
+                Lambda = t => ValueSelector.Evaluate(CollectionSelector.Evaluate(t).SingleOrDefaultEx(kvp => KeySelector.Evaluate(kvp).Equals(key))),
             });
         }
     }

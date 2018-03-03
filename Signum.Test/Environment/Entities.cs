@@ -367,6 +367,16 @@ namespace Signum.Test.Environment
         public int Year { get; set; }
 
         public int Order { get; set; }
+
+        [PreserveOrder]
+        [NotNullValidator, NoRepeatValidator]
+        public MList<NominationPointEmbedded> Points { get; set; } = new MList<NominationPointEmbedded>();
+    }
+
+    [Serializable]
+    public class NominationPointEmbedded : EmbeddedEntity
+    {
+        public int Point { get; set; }
     }
 
     [Serializable, EntityKind(EntityKind.Main, EntityData.Transactional)]

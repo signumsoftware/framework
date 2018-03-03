@@ -16,6 +16,8 @@ namespace Signum.Engine
 {
     public interface IRetriever : IDisposable
     {
+        Dictionary<string, object> GetUserData();
+
         T Complete<T>(PrimaryKey? id, Action<T> complete) where T : Entity;
         T Request<T>(PrimaryKey? id) where T : Entity;
         T RequestIBA<T>(PrimaryKey? typeId, string id) where T : class, IEntity;
@@ -31,6 +33,9 @@ namespace Signum.Engine
 
     class RealRetriever : IRetriever
     {
+        Dictionary<string, object> userData;
+        public Dictionary<string, object> GetUserData() => userData ?? (userData = new Dictionary<string, object>());
+
         public IRetriever Parent
         {
             get { return null; }
@@ -288,7 +293,7 @@ namespace Signum.Engine
                 retrieved.Count > currentlyRetrieved.Count
                 ) // PostRetrieving could retrieve as well
             {
-                retrieved.RemoveAll(a =>  currentlyRetrieved.Contains(a.Value));
+                retrieved.RemoveAll(a => currentlyRetrieved.Contains(a.Value));
                 modifiablePostRetrieving.RemoveAll(a => currentlyModifiableRetrieved.Contains(a));
                 goto retry;
             }
@@ -341,6 +346,8 @@ namespace Signum.Engine
 
     class ChildRetriever : IRetriever
     {
+        public Dictionary<string, object> GetUserData() => this.Parent.GetUserData();
+
         EntityCache.RealEntityCache entityCache;
         public IRetriever Parent { get; set; }
         public ChildRetriever(IRetriever parent, EntityCache.RealEntityCache entityCache)

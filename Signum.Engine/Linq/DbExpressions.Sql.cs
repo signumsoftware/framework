@@ -1092,7 +1092,7 @@ namespace Signum.Engine.Linq
 
         public override string ToString()
         {
-            return "(SOURCE\r\n{0}\r\nPROJECTION\r\n{1})".FormatWith(Select.ToString().Indent(4), Projector.ToString().Indent(4));
+            return "(SOURCE\r\n{0}\r\nPROJECTOR\r\n{1})".FormatWith(Select.ToString().Indent(4), Projector.ToString().Indent(4));
         }
 
         protected override Expression Accept(DbExpressionVisitor visitor)
