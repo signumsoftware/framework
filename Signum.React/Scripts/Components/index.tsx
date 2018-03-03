@@ -10,11 +10,14 @@ export { PopperContent } from './PopperContent'
 export { Tab, Tabs, UncontrolledTabs } from './Tabs'
 export { Tooltip, UncontrolledTooltip } from './Tooltip'
 export { Popover, UncontrolledPopover } from './Popover'
-export { NavItem } from './NavItem'
+export { NavItem, NavLink } from './NavItem'
 export { Collapse } from './Collapse'
 
 //Components taken from https://react-bootstrap.github.io/
 export { Modal, ModalProps } from './Modal'
+
+//Components taken from react-router-bootstrap
+export { LinkContainer } from './LinkContainer'
 
 //Other Components
 export { Typeahead } from './Typeahead'

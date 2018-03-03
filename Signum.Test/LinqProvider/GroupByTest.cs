@@ -534,5 +534,20 @@ namespace Signum.Test.LinqProvider
                 .Select(gr => new { NumSongs = gr.Key, Count = gr.Count() })
                 .ToList();
         }
+
+        [TestMethod]
+        public void FirstLast()
+        {
+            var list = (from a in Database.Query<AlbumEntity>()
+                        select new
+                        {
+                            First = a.Songs.OrderBy(s => s.Index).FirstOrDefault(),
+                            Last = a.Songs.OrderByDescending(s => s.Index).FirstOrDefault()
+                        }).ToList();
+
+            Assert.IsTrue(list.All(a => a.First.Index != a.Last.Index));
+
+
+        }
     }
 }

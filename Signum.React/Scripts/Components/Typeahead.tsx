@@ -17,7 +17,7 @@ export interface TypeaheadProps {
     onSelect?: (item: any, e: React.KeyboardEvent<any> | React.MouseEvent<any>) => string | null;
     scrollHeight?: number;
     inputAttrs?: React.InputHTMLAttributes<HTMLInputElement>;
-    liAttrs?: (item: any) => React.LiHTMLAttributes<HTMLLIElement>;
+    itemAttrs?: (item: any) => React.LiHTMLAttributes<HTMLButtonElement>;
     noResultsMessage?: string;
 }
 
@@ -39,6 +39,8 @@ export class Typeahead extends React.Component<TypeaheadProps, TypeaheadState>
             selectedIndex: undefined,
         };
     }
+
+    rtl = document.body.classList.contains("rtl");
 
     static highlightedText = (val: string, query?: string): React.ReactNode => {
 
@@ -262,7 +264,7 @@ export class Typeahead extends React.Component<TypeaheadProps, TypeaheadState>
                     />
                     }
                 </Target>
-                {this.state.shown && <Popper placement="bottom-start" style={{zIndex: 1000}}>{this.props.renderList ? this.props.renderList(this) : this.renderDefaultList()}</Popper>}
+                {this.state.shown && <Popper placement={this.rtl ? "bottom-end" : "bottom-start"} style={{ zIndex: 1000 }}>{this.props.renderList ? this.props.renderList(this) : this.renderDefaultList()}</Popper>}
             </Manager>
 
         );
@@ -304,17 +306,19 @@ export class Typeahead extends React.Component<TypeaheadProps, TypeaheadState>
 
     renderDefaultList() {
         return (
-            <ul className="typeahead dropdown-menu show">
+            <div className={classes("typeahead dropdown-menu show", this.rtl && "dropdown-menu-right")} >
                 {
-                    !this.state.items!.length ? <li className="no-results"><a><small>{this.props.noResultsMessage}</small></a></li> :
-                        this.state.items!.map((item, i) => <li key={i} className={classes("dropdown-item", i == this.state.selectedIndex ? "active" : undefined)}
+                    !this.state.items!.length ? <button className="no-results"><small>{this.props.noResultsMessage}</small></button> :
+                        this.state.items!.map((item, i) => <button key={i}
+                            className={classes("dropdown-item", i == this.state.selectedIndex ? "active" : undefined)}
                             onMouseEnter={e => this.handleElementMouseEnter(e, i)}
                             onMouseLeave={e => this.handleElementMouseLeave(e, i)}
-                            {...this.props.liAttrs && this.props.liAttrs(item)}>
-                            <a className="sf-pointer" onMouseUp={e => this.handleMenuClick(e, i)}>{this.props.renderItem!(item, this.state.query!)}</a>
-                        </li>)
+                            onMouseUp={e => this.handleMenuClick(e, i)}
+                            {...this.props.itemAttrs && this.props.itemAttrs(item)}>                            
+                            {this.props.renderItem!(item, this.state.query!)}
+                        </button>)
                 }
-            </ul>
+            </div>
         );
     }
 }

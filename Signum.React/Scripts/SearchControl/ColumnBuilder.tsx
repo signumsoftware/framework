@@ -80,7 +80,7 @@ export default class ColumnsBuilder extends React.Component<ColumnsBuilderProps>
                                         <a title={SearchMessage.AddColumn.niceToString()}
                                             className="sf-line-button sf-create"
                                             onClick={this.handlerNewColumn}>
-                                            <span className="fa fa-plus sf-create sf-create-label" />{SearchMessage.AddColumn.niceToString()}
+                                            <span className="fa fa-plus sf-create" />&nbsp;{SearchMessage.AddColumn.niceToString()}
                                         </a>
                                     </td>
                                 </tr>

@@ -41,7 +41,11 @@ export class DropdownMenu extends React.Component<DropdownMenuProps> {
 
     render() {
         const context = this.context as DropdownMenuContext;
-        const { className, right, tag, flip, ...attrs } = this.props;
+        let { className, right, tag, flip, ...attrs } = this.props;
+
+        if (document.body.classList.contains("rtl"))
+            right = !right;
+
         const clss = classes(
             className,
             'dropdown-menu',

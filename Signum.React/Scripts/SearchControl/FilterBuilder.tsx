@@ -93,7 +93,7 @@ export default class FilterBuilder extends React.Component<FilterBuilderProps>{
                                         <a href="#" title={SearchMessage.AddFilter.niceToString()}
                                             className="sf-line-button sf-create"
                                             onClick={this.handlerNewFilter}>
-                                            <span className="fa fa-plus sf-create sf-create-label" />{SearchMessage.AddFilter.niceToString()}
+                                            <span className="fa fa-plus sf-create" />&nbsp;{SearchMessage.AddFilter.niceToString()}
                                         </a>
                                     </td>
                                 </tr>
@@ -294,7 +294,7 @@ export class MultiValue extends React.Component<MultiValueProps> {
                                     {!this.props.readOnly &&
                                         <a title={SearchMessage.DeleteFilter.niceToString()}
                                             className="sf-line-button sf-remove"
-                                            onClick={e => this.handleDeleteValue(e, i) }>
+                                            onClick={e => this.handleDeleteValue(e, i)}>
                                             <span className="fa fa-remove" />
                                         </a>}
                                 </td>
@@ -316,7 +316,7 @@ export class MultiValue extends React.Component<MultiValueProps> {
                                 <a title={SearchMessage.AddValue.niceToString()}
                                     className="sf-line-button sf-create"
                                     onClick={this.handleAddValue}>
-                                    <span className="fa fa-plus sf-create sf-create-label" />{SearchMessage.AddValue.niceToString()}
+                                    <span className="fa fa-plus sf-create" />&nbsp;{SearchMessage.AddValue.niceToString()}
                                 </a>}
                         </td>
                     </tr>
