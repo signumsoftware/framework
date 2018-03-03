@@ -830,7 +830,7 @@ export class PropertyRepeaterComponent extends React.Component<PropertyRepeaterC
                 <a href="#" title="Create Property"
                     className="sf-line-button sf-create"
                     onClick={this.handleCreateClick}>
-                    <span className="fa fa-plus sf-create sf-create-label" />Create Property
+                    <span className="fa fa-plus sf-create" />&nbsp;Create Property
                 </a>
             </div>
         );
@@ -1095,7 +1095,7 @@ export class ComboBoxRepeaterComponent extends React.Component<ComboBoxRepeaterC
                                 <a href="#" title="Create Query Column"
                                     className="sf-line-button sf-create"
                                     onClick={this.handleCreateClick}>
-                                    <span className="fa fa-plus sf-create sf-create-label" />Create Query Column
+                                    <span className="fa fa-plus sf-create" />&nbsp;Create Query Column
                                 </a>
                             </td>
                         </tr>
@@ -1194,7 +1194,7 @@ export class ValidatorRepeaterComponent extends React.Component<ValidatorRepeate
                 <a href="#" title="Create Validator"
                     className="sf-line-button sf-create"
                     onClick={this.handleCreateClick}>
-                    <span className="fa fa-plus sf-create sf-create-label" />Create Validator
+                    <span className="fa fa-plus sf-create" />&nbsp;Create Validator
                 </a>
             </div>
         );
