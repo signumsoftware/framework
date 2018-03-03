@@ -130,6 +130,7 @@ namespace Signum.Entities.DynamicQuery
                 return AggregateFunction.ToString() +
                   (
                   this.AggregateFunction != AggregateFunction.Count || this.Parent == null ? null :
+                  this.CountIsValue == AnyValue ? null :
                   this.CountIsValue == null ? "Null" :
                   this.CountIsValue.ToString()
                   );
