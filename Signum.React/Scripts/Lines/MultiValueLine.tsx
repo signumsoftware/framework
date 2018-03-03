@@ -40,7 +40,7 @@ export class MultiValueLine extends LineBase<MultiValueLineProps, MultiValueLine
                 return;
 
             if (Array.isArray(v)) {
-                list.push(...v.map(e=>newMListElement(e)));
+                list.push(...v.map(e => newMListElement(e)));
             }
             else {
                 list.push(newMListElement(v));
@@ -85,10 +85,10 @@ export class MultiValueLine extends LineBase<MultiValueLineProps, MultiValueLine
                         <tr >
                             <td colSpan={4}>
                                 {!s.ctx.readOnly &&
-                                    <a href="#"  title={this.props.addValueText || SearchMessage.AddValue.niceToString()}
+                                    <a href="#" title={this.props.addValueText || SearchMessage.AddValue.niceToString()}
                                         className="sf-line-button sf-create"
                                         onClick={this.handleAddValue}>
-                                        <span className="fa fa-plus sf-create sf-create-label" />{this.props.addValueText || SearchMessage.AddValue.niceToString()}
+                                        <span className="fa fa-plus sf-create" />&nbsp;{this.props.addValueText || SearchMessage.AddValue.niceToString()}
                                     </a>}
                             </td>
                         </tr>

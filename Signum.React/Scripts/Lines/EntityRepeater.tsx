@@ -83,7 +83,7 @@ export class EntityRepeater extends EntityListBase<EntityRepeaterProps, EntityRe
                         <a href="#" title={EntityControlMessage.Create.niceToString()}
                             className="sf-line-button sf-create"
                             onClick={this.handleCreateClick}>
-                            <span className="fa fa-plus sf-create sf-create-label" />{EntityControlMessage.Create.niceToString()}
+                            <span className="fa fa-plus sf-create" />&nbsp;{EntityControlMessage.Create.niceToString()}
                         </a>)
                 }
             </div>

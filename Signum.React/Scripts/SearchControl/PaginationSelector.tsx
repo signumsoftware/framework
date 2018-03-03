@@ -100,19 +100,21 @@ export default class PaginationSelector extends React.Component<PaginationSelect
 
     renderCenter() {
         return (
-            <div className="sf-pagination-center form-inline">
-                <select value={this.props.pagination.mode} onChange={this.handleMode} ref="mode" className="form-control form-control-xs sf-pagination-mode">
-                    {["Paginate" as PaginationMode,
-                    "Firsts" as PaginationMode,
-                    "All" as PaginationMode].map(mode =>
-                        <option key={mode} value={mode.toString()}>{PaginationMode.niceToString(mode)}</option>)}
-                </select>
-                {this.props.pagination.mode != "All" &&
-                    <select value={this.props.pagination.elementsPerPage!.toString()} onChange={this.handleElementsPerPage} ref="elementsPerPage" className="form-control form-control-xs sf-elements-per-page">
-                        {[5, 10, 20, 50, 100, 200].map(elem =>
-                            <option key={elem} value={elem.toString()}>{elem}</option>)}
+            <div className="sf-pagination-center">
+                <div className="form-inline">
+                    <select value={this.props.pagination.mode} onChange={this.handleMode} ref="mode" className="form-control form-control-xs sf-pagination-mode">
+                        {["Paginate" as PaginationMode,
+                        "Firsts" as PaginationMode,
+                        "All" as PaginationMode].map(mode =>
+                            <option key={mode} value={mode.toString()}>{PaginationMode.niceToString(mode)}</option>)}
                     </select>
-                }
+                    {this.props.pagination.mode != "All" &&
+                        <select value={this.props.pagination.elementsPerPage!.toString()} onChange={this.handleElementsPerPage} ref="elementsPerPage" className="form-control form-control-xs sf-elements-per-page">
+                            {[5, 10, 20, 50, 100, 200].map(elem =>
+                                <option key={elem} value={elem.toString()}>{elem}</option>)}
+                        </select>
+                    }
+                </div>
             </div>
         );
     }
@@ -158,7 +160,7 @@ export class PaginationComponent extends React.Component<PaginationComponentProp
         const { first, last } = this.getFirstLast();
 
         return (
-            <ul className="pagination justify-content-end">
+            <ul className="pagination">
                 {this.addPageLink("First", 1, "«", "First", currentPage == 1 ? "disabled" : undefined)}
                 {first != 1 && <li className="page-item disabled"><span className="page-link">…</span></li>}
                 {Array.range(first, last + 1).map(page => this.addPageLink(page.toString(), page, page.toString(), page.toString(), page == currentPage ? "active" : undefined))}

@@ -164,6 +164,13 @@ fieldset.sf-repeater-element {
         }
 
 
+body.rtl .fa-arrow-right:before {
+    content: "\F060";
+}
+
+body.rtl .fa-arrow-left:before {
+    content: "\F061";
+}
 /*EntityStrip*/
 
 ul.sf-strip-horizontal > li {
@@ -171,7 +178,7 @@ ul.sf-strip-horizontal > li {
     margin-right: 10px;
 }
 
-body.rtl-mode ul.sf-strip-horizontal > li {
+body.rtl ul.sf-strip-horizontal > li {
     float: right;
 }
 
@@ -510,11 +517,6 @@ ul.dropdown-menu > li > a.disabled {
     margin-bottom: 0px;
     color: #737373;
 }
-
-.sf-create-label {
-    margin-right: 5px;
-}
-
 
 .item-group {
     white-space: nowrap;

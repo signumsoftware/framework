@@ -144,7 +144,7 @@ export class EntityStrip extends EntityListBase<EntityStripProps, EntityStripPro
                 getItems={q => ac!.getItems(q)}
                 getItemsDelay={ac.getItemsDelay}
                 renderItem={(e, str) => ac!.renderItem(e, str)}
-                liAttrs={item => {
+                itemAttrs={item => {
                     const entity = ac!.getEntityFromItem(item);
                     const key = isLite(entity) ? liteKey(entity) :
                         (entity as Entity).id ? liteKey(toLite(entity as Entity)) :

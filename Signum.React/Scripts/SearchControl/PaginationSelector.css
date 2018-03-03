@@ -1,20 +1,34 @@
-﻿.sf-pagination-center > div {
-    display: inline;
+﻿
+/*Pagination*/
+
+body:not(.rtl) .sf-pagination-left {
+    text-align: left;
 }
 
 
-/*Pagination*/
+body.rtl .sf-pagination-left {
+    text-align: right;
+}
+
+
 
 .sf-pagination-center {
     text-align: center;
 }
 
-.sf-pagination-right {
+body:not(.rtl) .sf-pagination-right {
     text-align: right;
 }
 
+body.rtl .sf-pagination-right {
+    text-align: left;
+}
+
+
+div.sf-pagination-center > div.form-inline,
 div.sf-pagination-right > ul.pagination {
-    margin: 0px;
+    display: inline-flex;
+    padding: 0px;
 }
 
     div.sf-pagination-right > ul.pagination > li > a,
