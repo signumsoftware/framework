@@ -187,7 +187,7 @@ export default class ToolbarRenderer extends React.Component<ToolbarRendererProp
                 return [
                     <DropdownItem onClick={e => this.handleClick(e, res, topRes)}
                         className={classes(menuItemN, this.state.expanded.contains(res) && "active")}>
-                        {this.icon(res)}{res.label || res.content!.toStr}<span className="fa arrow" />
+                        {this.icon(res)}{res.label || res.content!.toStr}<span className={classes("fa", this.state.expanded.contains(res) ? "fa-chevron-down" : "fa-chevron-left", "arrow-align")} />
                     </DropdownItem>
                 ].concat(res.elements && res.elements.length && this.state.expanded.contains(res) ? res.elements.flatMap(r => this.renderDropdownItem(r, indent + 1, topRes)) : []);
             case "Header":

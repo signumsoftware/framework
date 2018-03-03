@@ -30,7 +30,6 @@ import * as Nodes from './View/Nodes' //Typings-only
 import * as NodeUtils from './View/NodeUtils' //Typings-only
 import MessageModal from "../../../Framework/Signum.React/Scripts/Modals/MessageModal";
 import { Dic } from "../../../Framework/Signum.React/Scripts/Globals";
-import * as LinkContainerModule from "../../../Framework/Signum.React/Scripts/LinkContainer";
 import * as Components from "../../../Framework/Signum.React/Scripts/Components";
 
 
@@ -364,9 +363,8 @@ export function asOverrideFunction(dvo: DynamicViewOverrideEntity): (vr: ViewRep
     var Tab = Components.Tab;
     var Tabs = Components.Tabs;
     var UncontrolledTabs = Components.UncontrolledTabs;
+    var LinkContainer = Components.LinkContainer;
 
-    // Signum
-    var LinkContainer = LinkContainerModule.LinkContainer;
     
     var modules = globalModules;
 

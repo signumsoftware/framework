@@ -13,8 +13,7 @@ import ButtonBar from '../../../../Framework/Signum.React/Scripts/Frames/ButtonB
 import { CaseActivityEntity, WorkflowEntity, ICaseMainEntity, CaseActivityOperation, CaseActivityQuery, WorkflowMainEntityStrategy } from '../Signum.Entities.Workflow'
 import * as WorkflowClient from '../WorkflowClient'
 
-import { UncontrolledDropdown, DropdownItem, DropdownToggle, DropdownMenu } from '../../../../Framework/Signum.React/Scripts/Components'
-import { LinkContainer } from '../../../../Framework/Signum.React/Scripts/LinkContainer';
+import { UncontrolledDropdown, DropdownItem, DropdownToggle, DropdownMenu, LinkContainer } from '../../../../Framework/Signum.React/Scripts/Components'
 
 export default class WorkflowDropdown extends React.Component<{}, { starts: Array<WorkflowEntity> }>
 {
@@ -34,19 +33,19 @@ export default class WorkflowDropdown extends React.Component<{}, { starts: Arra
         const inboxUrl = WorkflowClient.getDefaultInboxUrl();
 
         return (
-            <UncontrolledDropdown>
-                <DropdownToggle color="light" nav caret>
+            <UncontrolledDropdown className="sf-workflow" id="workflowDropdown" nav inNavbar>
+                <DropdownToggle nav caret>
                     {WorkflowEntity.nicePluralName()}
                 </DropdownToggle>
-                <DropdownMenu>
-                <LinkContainer exact to={inboxUrl}><DropdownItem>{CaseActivityQuery.Inbox.niceName()}</DropdownItem></LinkContainer>
-                {this.state.starts.length > 0 && <DropdownItem divider />}
-                {this.state.starts.length > 0 && <DropdownItem disabled>{JavascriptMessage.create.niceToString()}</DropdownItem>}
-                {this.getStarts().map((val, i) =>
-                    <LinkContainer key={i} to={`~/workflow/new/${val.workflow.id}/${val.mainEntityStrategy}`}>
-                        <DropdownItem>{val.workflow.toStr}{val.mainEntityStrategy == "SelectByUser" ? `(${WorkflowMainEntityStrategy.niceToString(val.mainEntityStrategy)})` : ""}</DropdownItem>
-                    </LinkContainer>
-                )}
+                <DropdownMenu style={{ minWidth: "200px" }}>
+                    <LinkContainer exact to={inboxUrl}><DropdownItem>{CaseActivityQuery.Inbox.niceName()}</DropdownItem></LinkContainer>
+                    {this.state.starts.length > 0 && <DropdownItem divider />}
+                    {this.state.starts.length > 0 && <DropdownItem disabled>{JavascriptMessage.create.niceToString()}</DropdownItem>}
+                    {this.getStarts().map((val, i) =>
+                        <LinkContainer key={i} to={`~/workflow/new/${val.workflow.id}/${val.mainEntityStrategy}`}>
+                            <DropdownItem>{val.workflow.toStr}{val.mainEntityStrategy == "SelectByUser" ? `(${WorkflowMainEntityStrategy.niceToString(val.mainEntityStrategy)})` : ""}</DropdownItem>
+                        </LinkContainer>
+                    )}
                 </DropdownMenu>
             </UncontrolledDropdown>
         );
