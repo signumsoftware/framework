@@ -58,7 +58,7 @@ namespace Signum.Entities.DynamicQuery
             
             string suffix = GetNiceSuffix();
 
-            return "{0}{1} of {1}".FormatWith(AggregateFunction.NiceToString(), suffix == null ? null : " " + suffix, Parent);
+            return $"{AggregateFunction.NiceToString()}{(suffix == null ? null : " " + suffix)} of {Parent}";
         }
 
         private string GetNiceSuffix()

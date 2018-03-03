@@ -266,7 +266,7 @@ namespace Signum.Engine.DynamicQuery
             var pr = parentType.IsEntity() ? PropertyRoute.Root(parentType) :
                 parentType.IsEmbeddedEntity() ? parent.GetPropertyRoute() : null;
             
-            var edi = pr == null ? null: RegisteredExtensionsDictionaries.TryGetC(parent.GetPropertyRoute());
+            var edi = pr == null ? null: RegisteredExtensionsDictionaries.TryGetC(pr);
 
             IEnumerable<QueryToken> dicExtensionsTokens = edi == null ? Enumerable.Empty<QueryToken>() :
                 edi.GetAllTokens(parent);
