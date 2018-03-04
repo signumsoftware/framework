@@ -51,7 +51,7 @@ namespace Signum.Engine.Linq
 
             var result = Visit(expression);
 
-            var expandedResult = QueryJoinExpander.ExpandJoins(result, this);
+            var expandedResult = QueryJoinExpander.ExpandJoins(result, this, cleanRequests: true);
 
             return expandedResult;
         }
@@ -444,7 +444,11 @@ namespace Signum.Engine.Linq
         public Dictionary<ProjectionExpression, Expression> uniqueFunctionReplacements = new Dictionary<ProjectionExpression, Expression>(DbExpressionComparer.GetComparer<ProjectionExpression>(false));
         private Expression BindUniqueRow(Type resultType, UniqueFunction function, Expression source, LambdaExpression predicate, bool isRoot)
         {
-            ProjectionExpression projection = this.VisitCastProjection(source);
+            ProjectionExpression rawProjector = this.VisitCastProjection(source);
+
+            var expandedProjector = QueryJoinExpander.ExpandJoins(rawProjector, this, cleanRequests: false);
+
+            ProjectionExpression projection = (ProjectionExpression)AliasReplacer.Replace(expandedProjector, this.aliasGenerator);
 
             Expression where = predicate == null ? null : DbExpressionNominator.FullNominate(MapVisitExpand(predicate, projection));
 
@@ -1981,7 +1985,7 @@ namespace Signum.Engine.Linq
         {
             List<CommandExpression> commands = new List<CommandExpression>();
 
-            ProjectionExpression pr = (ProjectionExpression)QueryJoinExpander.ExpandJoins(VisitCastProjection(source), this);
+            ProjectionExpression pr = (ProjectionExpression)QueryJoinExpander.ExpandJoins(VisitCastProjection(source), this, cleanRequests: true);
 
             if (pr.Projector is EntityExpression ee)
             {
@@ -2103,7 +2107,7 @@ namespace Signum.Engine.Linq
                 new SelectRowCountExpression()
             });
 
-            return (CommandAggregateExpression)QueryJoinExpander.ExpandJoins(result, this);
+            return (CommandAggregateExpression)QueryJoinExpander.ExpandJoins(result, this, cleanRequests: true);
         }
 
         internal CommandExpression BindInsert(Expression source, LambdaExpression constructor, ITable table)
@@ -2146,7 +2150,7 @@ namespace Signum.Engine.Linq
                 new SelectRowCountExpression()
             });
 
-            return (CommandAggregateExpression)QueryJoinExpander.ExpandJoins(result, this);
+            return (CommandAggregateExpression)QueryJoinExpander.ExpandJoins(result, this, cleanRequests: true);
         }
 
         static readonly MethodInfo miSetReadonly = ReflectionTools.GetMethodInfo(() => UnsafeEntityExtensions.SetReadonly(null, (Entity a) => a.Id, 1)).GetGenericMethodDefinition();
@@ -2885,7 +2889,7 @@ namespace Signum.Engine.Linq
         Dictionary<SourceExpression, List<ExpansionRequest>> requests;
         AliasGenerator aliasGenerator;
 
-        public static Expression ExpandJoins(Expression expression, QueryBinder binder)
+        public static Expression ExpandJoins(Expression expression, QueryBinder binder, bool cleanRequests)
         {
             if (binder.requests.IsEmpty())
                 return expression;
@@ -2903,10 +2907,9 @@ namespace Signum.Engine.Linq
 
             //if (nonConsumed.Any())
             //    throw new InvalidOperationException("All the expansiosn should be consumed at this stage");
-
-
-            binder.requests.Clear();
-
+            
+            if (cleanRequests)
+                binder.requests.Clear();
 
             return result;
         }

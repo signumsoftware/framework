@@ -536,16 +536,53 @@ namespace Signum.Test.LinqProvider
         }
 
         [TestMethod]
-        public void FirstLast()
+        public void FirstLastMList()
         {
             var list = (from a in Database.Query<AlbumEntity>()
+                        where a.Songs.Count > 1
                         select new
                         {
-                            First = a.Songs.OrderBy(s => s.Index).FirstOrDefault(),
-                            Last = a.Songs.OrderByDescending(s => s.Index).FirstOrDefault()
+                            FirstName = a.Songs.OrderBy(s => s.Name).FirstOrDefault().Name,
+                            FirstDuration = a.Songs.OrderBy(s => s.Name).FirstOrDefault().Duration,
+                            Last = a.Songs.OrderByDescending(s => s.Name).FirstOrDefault()
                         }).ToList();
 
-            Assert.IsTrue(list.All(a => a.First.Index != a.Last.Index));
+            Assert.IsTrue(list.All(a => a.FirstName != a.Last.Name));
+        }
+
+        [TestMethod]
+        public void FirstLastGroup()
+        {
+            var list = (from mle in Database.MListQuery((AlbumEntity a)=>a.Songs)
+                        group mle.Element by mle.Parent into g
+                        where g.Count() > 1
+                        select new
+                        {
+                            FirstName = g.OrderBy(s => s.Name).FirstOrDefault().Name,
+                            FirstDuration = g.OrderBy(s => s.Name).FirstOrDefault().Duration,
+                            Last = g.OrderByDescending(s => s.Name).FirstOrDefault()
+                        }).ToList();
+
+            Assert.IsTrue(list.All(a => a.FirstName != a.Last.Name));
+
+
+        }
+
+
+        [TestMethod]
+        public void FirstLastList()
+        {
+            var list = (from a in Database.Query<AlbumEntity>()
+                        select a.Songs into songs
+                        where songs.Count > 1
+                        select new
+                        {
+                            FirstName = songs.OrderBy(s => s.Name).FirstOrDefault().Name,
+                            FirstDuration = songs.OrderBy(s => s.Name).FirstOrDefault().Duration,
+                            Last = songs.OrderByDescending(s => s.Name).FirstOrDefault()
+                        }).ToList();
+
+            Assert.IsTrue(list.All(a => a.FirstName != a.Last.Name));
 
 
         }

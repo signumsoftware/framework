@@ -25,7 +25,7 @@ namespace Signum.Engine.Linq
             
             var result = pc.Visit(source);
 
-            var expandedResul = QueryJoinExpander.ExpandJoins(result, binder);
+            var expandedResul = QueryJoinExpander.ExpandJoins(result, binder, cleanRequests: true);
 
             return expandedResul;
         }
