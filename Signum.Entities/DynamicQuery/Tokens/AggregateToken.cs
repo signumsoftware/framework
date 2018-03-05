@@ -12,7 +12,11 @@ namespace Signum.Entities.DynamicQuery
     public class AggregateToken : QueryToken
     {
         public AggregateFunction AggregateFunction { get; private set; }
-        public object CountIsValue { get; private set; }
+        public object Value { get; private set; }
+        public FilterOperation? FilterOperation { get; private set; }
+        public bool Distinct { get; private set; }
+
+
         object queryName; 
         public override object QueryName
         {
@@ -28,51 +32,68 @@ namespace Signum.Entities.DynamicQuery
             this.queryName = queryName ?? throw new ArgumentNullException("queryName");
             this.AggregateFunction = function;
         }
-
-        public static readonly object AnyValue = new object();
-
-        public AggregateToken(AggregateFunction function, QueryToken parent, object countIsValue = null)
+        
+        public AggregateToken(AggregateFunction function, QueryToken parent, FilterOperation? filterOperation = null, object value = null, bool distinct = false)
             : base(parent)
         {
-            if (countIsValue != null && function != AggregateFunction.Count)
-                throw new ArgumentException("CountIsValue should only be set for Count");
-
             if (parent == null)
                 throw new ArgumentNullException("parent");
 
-            this.CountIsValue = countIsValue;
             this.AggregateFunction = function;
+
+            if (function == AggregateFunction.Count)
+            {
+                if (distinct == false && filterOperation == null)
+                    throw new ArgumentException("Either distinct or filterOperation should be set");
+
+                else if (distinct == true && this.FilterOperation.HasValue)
+                    throw new ArgumentException("distinct and filterOperation are incompatibles");
+
+                this.Value = value;
+                this.FilterOperation = filterOperation;
+                this.Distinct = distinct;
+
+            }
+            else
+            {
+                if (distinct == true || this.FilterOperation.HasValue)
+                    throw new ArgumentException("distinct and filterOperation are incompatibles");
+            }
         }
 
         public override string ToString()
         {
-            string suffix = GetNiceSuffix();
+            string suffix = GetNiceOperation();
 
-            return AggregateFunction.NiceToString() + (suffix == null ? null : " " + suffix);
+            return " ".CombineIfNotEmpty(AggregateFunction.NiceToString(), this.GeNiceDistinct(), this.GetNiceOperation(), this.GetNiceValue());
         }
 
         public override string NiceName()
         {
             if (AggregateFunction == AggregateFunction.Count && Parent == null)
                 return AggregateFunction.NiceToString();
-            
-            string suffix = GetNiceSuffix();
 
-            return $"{AggregateFunction.NiceToString()}{(suffix == null ? null : " " + suffix)} of {Parent}";
+            return " ".CombineIfNotEmpty(AggregateFunction.NiceToString(), this.GeNiceDistinct(), this.GetNiceOperation(), this.GetNiceValue(), "of", Parent);
         }
 
-        private string GetNiceSuffix()
+        string GetNiceOperation()
         {
-            if (this.AggregateFunction != AggregateFunction.Count)
-                return null;
+            return this.FilterOperation == null || this.FilterOperation == DynamicQuery.FilterOperation.EqualTo ? null :
+                this.FilterOperation == DynamicQuery.FilterOperation.DistinctTo ? QueryTokenMessage.Not.NiceToString() :
+                this.FilterOperation.NiceToString();
+        }
 
-            if (this.Parent == null)
-                return null;
+        string GetNiceValue()
+        {
+            return this.FilterOperation == null ? null :
+               Value == null ? QueryTokenMessage.Null.NiceToString() :
+               Value is Enum e ? e.NiceToString() :
+               Value.ToString();
+        }
 
-            return CountIsValue == AnyValue ? null :
-               CountIsValue == null ? QueryTokenMessage.Null.NiceToString() :
-               CountIsValue is Enum e ? e.NiceToString() : 
-               CountIsValue.ToString();
+        string GeNiceDistinct()
+        {
+            return this.Distinct ? QueryTokenMessage.Distinct.NiceToString() : null;
         }
 
         public override string Format
@@ -127,13 +148,20 @@ namespace Signum.Entities.DynamicQuery
         {
             get
             {
-                return AggregateFunction.ToString() +
-                  (
-                  this.AggregateFunction != AggregateFunction.Count || this.Parent == null ? null :
-                  this.CountIsValue == AnyValue ? null :
-                  this.CountIsValue == null ? "Null" :
-                  this.CountIsValue.ToString()
-                  );
+                var distinct = this.Distinct ? "Distinct" : null;
+
+                var op =
+                    this.FilterOperation == null ? null :
+                    this.FilterOperation == DynamicQuery.FilterOperation.EqualTo ? "" :
+                    this.FilterOperation == DynamicQuery.FilterOperation.DistinctTo ? "Not" :
+                    this.FilterOperation.Value.ToString();
+
+                var value =
+                    this.FilterOperation == null ? null :
+                    this.Value == null ? "Null" :
+                    this.Value.ToString();
+
+                return AggregateFunction.ToString() + distinct + op + value;
             }
         }
 
@@ -173,7 +201,7 @@ namespace Signum.Entities.DynamicQuery
             if (Parent == null)
                 return new AggregateToken(AggregateFunction, this.queryName);
             else
-                return new AggregateToken(AggregateFunction, Parent.Clone(), this.CountIsValue);
+                return new AggregateToken(AggregateFunction, Parent.Clone(), this.FilterOperation, this.Value, this.Distinct);
         }
         
 

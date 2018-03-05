@@ -554,45 +554,171 @@ namespace Signum.Engine.Linq
 
         static MethodInfo miStringConcat = ReflectionTools.GetMethodInfo(() => string.Concat("", ""));
 
-        private Expression BindAggregate(Type resultType, AggregateSqlFunction aggregateFunction, Expression source, LambdaExpression selectorOrPredicate, bool isRoot)
+        
+        (Expression newSource, LambdaExpression selector, bool distinct) DisassembleAggregate(AggregateSqlFunction aggregate, Expression source, LambdaExpression selectorOrPredicate, bool isRoot)
         {
-            ProjectionExpression projection;
-            LambdaExpression selector;
-            if (aggregateFunction != AggregateSqlFunction.Count || selectorOrPredicate == null)
+            if(aggregate == AggregateSqlFunction.Count)
             {
-                projection = this.VisitCastProjection(source);
-                selector = selectorOrPredicate;
+                if (selectorOrPredicate != null)
+                {
+                    var miWhere = source.Type.IsInstanceOfType(typeof(Queryable)) ?
+         OverloadingSimplifier.miWhereQ :
+         OverloadingSimplifier.miWhereE;
+
+                    source = Expression.Call(miWhere.MakeGenericMethod(source.Type.ElementType()), source, selectorOrPredicate);
+                    selectorOrPredicate = null;
+                }
+
+                if (isRoot)
+                    return (source, null, false);
+
+                //Select Distinct NotNull
+                {
+                    if (ExtractWhere(source, out var inner, out var predicate) &&
+                        ExtractDistinct(inner, out var inner2) &&
+                        ExtractSelect(inner2, out var inner3, out var selector) &&
+                        IsNotNull(predicate.Body, out var p) && p == predicate.Parameters.SingleEx())
+                        return (inner3, selector, true);
+                }
+
+                //Select NotNull Distinct
+                {
+                    if (ExtractDistinct(source, out var inner) &&
+                        ExtractWhere(inner, out var inner2, out var predicate) &&
+                        ExtractSelect(inner2, out var inner3, out var selector) &&
+                        IsNotNull(predicate.Body, out var p) && p == predicate.Parameters.SingleEx())
+                        return (inner3, selector, true);
+                }
+
+                //NotNull Select Distinct
+                {
+                    if (ExtractDistinct(source, out var inner) &&
+                        ExtractSelect(inner, out var inner2, out var selector) &&
+                        ExtractWhere(inner2, out var inner3, out var predicate) &&
+                        IsNotNull(predicate.Body, out var p) && ExpressionComparer.AreEqual(p, selector.Body, 
+                        new ScopedDictionary<ParameterExpression, ParameterExpression>(null) { { predicate.Parameters.Single(), selector.Parameters.Single() } }))
+                        return (inner3, selector, true);
+                }
+
+                //NotNull Select
+                {
+                    if (ExtractWhere(source, out var inner, out var predicate))
+                        return (inner, predicate, false);
+                }
+
+                return (source, null, false);
             }
             else
             {
-                selector = UnwrapNotNull(selectorOrPredicate);
-                if (selector == null)
-                    projection = AsProjection(BindWhere(source.Type, source, selectorOrPredicate));
+                if(selectorOrPredicate != null)
+                    return (source, selectorOrPredicate, false);
+                else if(ExtractSelect(source, out var innerSource, out var selector))
+                    return (innerSource, selector, false);
                 else
-                    projection = this.VisitCastProjection(source);
+                    return (source, null, false);
             }
-          
+        }
+
+        private bool IsNotNull(Expression body, out Expression p)
+        {
+            if(body is BinaryExpression b && b.NodeType == ExpressionType.NotEqual)
+            {
+                p = b.Left.IsNull() ? b.Right :
+                    b.Right.IsNull() ? b.Left :
+                    null;
+
+                return p != null;
+            }
+
+            p = null;
+
+            return false;
+
+        }
+
+        bool ExtractSelect(Expression source, out Expression innerSource, out LambdaExpression selector)
+        {
+            if(source is MethodCallExpression mc &&
+                    (mc.Method.IsInstantiationOf(OverloadingSimplifier.miSelectE) ||
+                    mc.Method.IsInstantiationOf(OverloadingSimplifier.miSelectQ)))
+            {
+                innerSource = mc.Arguments[0];
+                selector = (LambdaExpression)mc.Arguments[1];
+                return true;
+            }
+            else
+            {
+                innerSource = null;
+                selector = null;
+                return false;
+            }
+        }
+
+        bool ExtractWhere(Expression source, out Expression innerSource, out LambdaExpression predicate)
+        {
+            if (source is MethodCallExpression mc &&
+                    (mc.Method.IsInstantiationOf(OverloadingSimplifier.miWhereE) ||
+                    mc.Method.IsInstantiationOf(OverloadingSimplifier.miWhereQ)))
+            {
+                innerSource = mc.Arguments[0];
+                predicate = (LambdaExpression)mc.Arguments[1];
+                return true;
+            }
+            else
+            {
+                innerSource = null;
+                predicate = null;
+                return false;
+            }
+        }
+
+        bool ExtractDistinct(Expression source, out Expression innerSource)
+        {
+            if (source is MethodCallExpression mc &&
+                    (mc.Method.IsInstantiationOf(OverloadingSimplifier.miDistinctE) ||
+                    mc.Method.IsInstantiationOf(OverloadingSimplifier.miDistinctQ)))
+            {
+                innerSource = mc.Arguments[0];
+                return true;
+            }
+            else
+            {
+                innerSource = null;
+                return false;
+            }
+        }
+
+
+        private Expression BindAggregate(Type resultType, AggregateSqlFunction aggregateFunction, Expression source, LambdaExpression selectorOrPredicate, bool isRoot)
+        {
+            var (newSource, selector, distinct) = DisassembleAggregate(aggregateFunction, source, selectorOrPredicate, isRoot);
+            
+            ProjectionExpression projection = VisitCastProjection(newSource);
+            
             GroupByInfo info = groupByMap.TryGetC(projection.Select.Alias);
             if (info != null) 
             {
                 Expression exp = aggregateFunction == AggregateSqlFunction.Count && selector == null ? null : //Count(*)
+                    aggregateFunction == AggregateSqlFunction.Count && !distinct ? MapVisitExpand(ToNotNullPredicate(selector), info.Projector, info.Source) :
                     selector != null ? MapVisitExpand(selector, info.Projector, info.Source) : //Sum(Amount), Avg(Amount), ...
                     info.Projector;
 
                 exp = exp == null ? null : SmartEqualizer.UnwrapPrimaryKey(exp);
 
-                var nominated = aggregateFunction == AggregateSqlFunction.Count ?
-                    DbExpressionNominator.FullNominateNotNullable(exp) :
+                var nominated = aggregateFunction == AggregateSqlFunction.Count ? DbExpressionNominator.FullNominateNotNullable(exp) :
                     DbExpressionNominator.FullNominate(exp);
 
                 var result = new AggregateRequestsExpression(info.GroupAlias,
-                    new AggregateExpression(aggregateFunction == AggregateSqlFunction.Count ? typeof(int) : GetBasicType(nominated), nominated, aggregateFunction));
+                    new AggregateExpression(aggregateFunction == AggregateSqlFunction.Count ? typeof(int) : GetBasicType(nominated), 
+                    nominated, aggregateFunction, 
+                    distinct));
 
                 return RestoreWrappedType(result, resultType);
             }
             else //Complicated SubQuery
             {
                 Expression exp = aggregateFunction == AggregateSqlFunction.Count && selector == null ? null :
+                    aggregateFunction == AggregateSqlFunction.Count && !distinct ? MapVisitExpand(ToNotNullPredicate(selector), projection) :
                     selector != null ? MapVisitExpand(selector, projection) :
                     projection.Projector;
 
@@ -604,16 +730,18 @@ namespace Signum.Engine.Linq
                     var nominated = DbExpressionNominator.FullNominate(exp).Nullify();
 
                     aggregate = (Expression)Expression.Coalesce(
-                        new AggregateExpression(GetBasicType(nominated), nominated, aggregateFunction),
+                        new AggregateExpression(GetBasicType(nominated), nominated, aggregateFunction, distinct),
                         new SqlConstantExpression(Activator.CreateInstance(nominated.Type.UnNullify())));
                 }
                 else
                 {
-                    var nominated = aggregateFunction == AggregateSqlFunction.Count ?
-                        DbExpressionNominator.FullNominateNotNullable(exp) :
+                    var nominated = aggregateFunction == AggregateSqlFunction.Count ? DbExpressionNominator.FullNominateNotNullable(exp) :
                         DbExpressionNominator.FullNominate(exp);
 
-                    aggregate = new AggregateExpression(aggregateFunction == AggregateSqlFunction.Count ? typeof(int) : GetBasicType(nominated), nominated, aggregateFunction);
+                    aggregate = new AggregateExpression(aggregateFunction == AggregateSqlFunction.Count ? typeof(int) : GetBasicType(nominated), 
+                        nominated, 
+                        aggregateFunction,
+                        distinct);
                 }
 
                 Alias alias = NextSelectAlias();
@@ -633,9 +761,9 @@ namespace Signum.Engine.Linq
             }
         }
 
-        private LambdaExpression UnwrapNotNull(LambdaExpression selectorOrPredicate)
+        private LambdaExpression ToNotNullPredicate(LambdaExpression predicate)
         {
-            if(selectorOrPredicate.Body is BinaryExpression be && be.NodeType == ExpressionType.NotEqual)
+            if(predicate.Body is BinaryExpression be && be.NodeType == ExpressionType.NotEqual)
             {
                 var exp =
                     be.Left.IsNull() ? be.Right :
@@ -643,8 +771,14 @@ namespace Signum.Engine.Linq
 
                 if (exp != null)
                 {
-                    return Expression.Lambda(exp, selectorOrPredicate.Parameters);
+                    return Expression.Lambda(exp, predicate.Parameters);
                 }
+            }
+            else
+            {
+                var conditional = Expression.Condition(predicate.Body, Expression.Constant("placeholder"), Expression.Constant(null, typeof(string)));
+
+                return Expression.Lambda(conditional, predicate.Parameters);
             }
 
             return null;
