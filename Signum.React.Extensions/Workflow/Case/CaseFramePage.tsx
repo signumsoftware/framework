@@ -20,6 +20,7 @@ import { RouteComponentProps } from "react-router";
 import "../../../../Framework/Signum.React/Scripts/Frames/Frames.css"
 import "./CaseAct.css"
 import { IHasCaseActivity } from '../WorkflowClient';
+import { ErrorBoundary } from '../../../../Framework/Signum.React/Scripts/Components';
 
 interface CaseFramePageProps extends RouteComponentProps<{ workflowId: string; mainEntityStrategy: string; caseActivityId?: string }> {
 }
