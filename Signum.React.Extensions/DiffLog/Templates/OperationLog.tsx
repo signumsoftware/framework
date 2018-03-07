@@ -10,8 +10,7 @@ import {SearchControl }  from '../../../../Framework/Signum.React/Scripts/Search
 import { TypeContext, FormGroupStyle } from '../../../../Framework/Signum.React/Scripts/TypeContext'
 import { DiffDocument } from './DiffDocument'
 import "./DiffLog.css"
-import { LinkContainer } from '../../../../Framework/Signum.React/Scripts/LinkContainer';
-import { UncontrolledTabs, Tab } from '../../../../Framework/Signum.React/Scripts/Components';
+import { UncontrolledTabs, Tab, LinkContainer } from '../../../../Framework/Signum.React/Scripts/Components';
 
 export default class OperationLog extends React.Component<{ ctx: TypeContext<OperationLogEntity> }> {
 

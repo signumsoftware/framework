@@ -43,7 +43,7 @@ span.design-default {
         flex-direction: row;
     }
 
-    body.rtl-mode div.design-main {
+    body.rtl div.design-main {
         flex-direction: row-reverse;
     }
 

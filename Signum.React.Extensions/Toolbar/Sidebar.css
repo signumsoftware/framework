@@ -16,11 +16,11 @@
         flex-direction: row;
     }
 
-    body:not(.rtl-mode) .sidebar {
+    body:not(.rtl) .sidebar {
         border-right: 1px solid #e7e7e7;
     }
 
-    body.rtl-mode .sidebar {
+    body.rtl .sidebar {
         border-left: 1px solid #e7e7e7;
     }
 
@@ -46,13 +46,13 @@
         margin: -5px;
     }
 
-    body:not(.rtl-mode) .navbar-brand {
+    body:not(.rtl) .navbar-brand {
         border-right: 1px solid #e7e7e7;
         margin-right: 10px !important;
         padding-left: 10px;
     }
 
-    body.rtl-mode .navbar-brand {
+    body.rtl .navbar-brand {
         border-left: 1px solid #e7e7e7;
         margin-left: 10px !important;
         padding-right: 10px;

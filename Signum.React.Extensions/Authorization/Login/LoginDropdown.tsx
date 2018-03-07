@@ -1,9 +1,7 @@
 ﻿import * as React from 'react'
 import { AuthMessage, UserEntity } from '../Signum.Entities.Authorization'
 import * as AuthClient from '../AuthClient'
-import { LinkContainer } from '../../../../Framework/Signum.React/Scripts/LinkContainer'
-import { DropdownToggle, NavItem, UncontrolledDropdown, DropdownMenu, DropdownItem } from '../../../../Framework/Signum.React/Scripts/Components';
-import { NavLink } from '../../../../Framework/Signum.React/Scripts/Components/NavItem';
+import { DropdownToggle, NavItem, UncontrolledDropdown, DropdownMenu, DropdownItem, NavLink, LinkContainer } from '../../../../Framework/Signum.React/Scripts/Components';
 
 
 export default class LoginDropdown extends React.Component<{}, { user: UserEntity }> {

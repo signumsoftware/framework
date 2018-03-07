@@ -12,7 +12,25 @@ export interface CollapsableCardProps {
     isOpen?: boolean;
     toggle?: (isOpen: boolean) => void;
     cardId?: string | number;
+    cardStyle?: CardStyle;
+    headerStyle?: CardStyle;
+    bodyStyle?: CardStyle;
 }
+interface CardStyle {
+    border?: BsColor;
+    text?: BsColor;
+    background?: BsColor 
+}
+
+function cardStyleClasses(style?: CardStyle) {
+    return classes(
+        style && style.text && "text-" + style.text,
+        style && style.background && "bg-" + style.background,
+        style && style.border && "border-" + style.border,
+    )
+}
+
+
 
 export interface CollapsableCardState {
     isOpen: boolean,
@@ -57,8 +75,8 @@ export default class CollapsableCard extends React.Component<CollapsableCardProp
             this.props.isOpen;
 
         return (
-            <div className="card border-primary mb-3">
-                <div className="card-header">
+            <div className={classes("card", cardStyleClasses(this.props.cardStyle))}>
+                <div className={classes("card-header", cardStyleClasses(this.props.headerStyle))} style={{ cursor: "pointer" }} onClick={this.handleToggle}>
                     {this.props.header}
                     {(this.props.collapsable == undefined || this.props.collapsable == true) &&
                         <span
@@ -69,7 +87,7 @@ export default class CollapsableCard extends React.Component<CollapsableCardProp
                     }
                 </div>
                 <Collapse isOpen={isOpen}>
-                    <div className="card-body text-primary">
+                    <div className={classes("card-body", cardStyleClasses(this.props.bodyStyle))}>
                         {this.props.children}
                     </div>
                 </Collapse>
