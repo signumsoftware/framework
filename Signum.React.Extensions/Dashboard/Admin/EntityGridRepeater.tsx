@@ -48,22 +48,22 @@ export class EntityGridRepeater extends EntityListBase<EntityGridRepeaterProps, 
     renderInternal() {
         const s = this.state;
         return (
-            <fieldset className={classes("SF-grid-repeater-field SF-control-container", this.state.ctx.errorClass) }>
+            <fieldset className={classes("SF-grid-repeater-field SF-control-container", this.state.ctx.errorClass)}>
                 <legend>
                     <div>
                         <span>{this.state.labelText}</span>
                         <span className="pull-right">
-                            {this.renderCreateButton(false) }
-                            {this.renderFindButton(false) }
+                            {this.renderCreateButton(false)}
+                            {this.renderFindButton(false)}
                         </span>
                     </div>
                 </legend>
                 <div className="row rule">
-                    { Array.range(0, 12).map(i =>
+                    {Array.range(0, 12).map(i =>
                         <div className="col-sm-1" key={i}>
-                            <div className="ruleItem"/>
+                            <div className="ruleItem" />
                         </div>
-                    ) }
+                    )}
                 </div>
                 <div className={s.dragMode == "move" ? "sf-dragging" : undefined} onDrop={this.handleOnDrop}>
                     {
@@ -76,7 +76,7 @@ export class EntityGridRepeater extends EntityListBase<EntityGridRepeaterProps, 
                             .orderBy(gr => parseInt(gr.key))
                             .flatMap((gr, i, groups) => [
                                 this.renderSeparator(parseInt(gr.key)),
-                                <div className="row items-row" key={"row" + gr.key} onDragOver={e => this.handleItemsRowDragOver(e, parseInt(gr.key)) }>
+                                <div className="row items-row" key={"row" + gr.key} onDragOver={e => this.handleItemsRowDragOver(e, parseInt(gr.key))}>
                                     {gr.elements.orderBy(a => a.ctx.value.startColumn).map((p, j, list) => {
                                         let item = this.props.getComponent!(p.ctx);
                                         const s = this.state;
@@ -96,7 +96,7 @@ export class EntityGridRepeater extends EntityListBase<EntityGridRepeaterProps, 
                                                 {/*StartColumn: {p.ctx.value.startColumn} | Columns: {p.ctx.value.columns} | Row: {p.ctx.value.row}*/}
                                             </div>
                                         );
-                                    }) }
+                                    })}
                                 </div>,
                                 i == groups.length - 1 && this.renderSeparator(parseInt(gr.key) + 1)
                             ])
@@ -109,11 +109,11 @@ export class EntityGridRepeater extends EntityListBase<EntityGridRepeaterProps, 
 
     renderSeparator(rowIndex: number) {
         return (
-            <div className={classes("row separator-row", this.state.currentRow == rowIndex ? "sf-over" : undefined) } key={"sep" + rowIndex}
-                onDragOver = {e => this.handleRowDragOver(e, rowIndex) }
-                onDragEnter = {e => this.handleRowDragOver(e, rowIndex) }
-                onDragLeave = {() => this.handleRowDragLeave() }
-                onDrop = {e => this.handleRowDrop(e, rowIndex) } />
+            <div className={classes("row separator-row", this.state.currentRow == rowIndex ? "sf-over" : undefined)} key={"sep" + rowIndex}
+                onDragOver={e => this.handleRowDragOver(e, rowIndex)}
+                onDragEnter={e => this.handleRowDragOver(e, rowIndex)}
+                onDragLeave={() => this.handleRowDragLeave()}
+                onDrop={e => this.handleRowDrop(e, rowIndex)} />
         );
     }
 
@@ -169,10 +169,10 @@ export class EntityGridRepeater extends EntityListBase<EntityGridRepeaterProps, 
 
                 if (!e)
                     return;
-                
+
                 if (!isModifiableEntity(e))
                     throw new Error("Should be an entity");
-                
+
                 let ge = e as ModifiableEntity & IGridEntity;
 
                 const list = this.props.ctx.value!;
@@ -325,23 +325,23 @@ export class EntityGridItem extends React.Component<EntityGridItemProps>{
                     onDragStart={this.props.onTitleDragStart} >
                     {this.props.onRemove &&
                         <a href="#" className="sf-line-button sf-remove pull-right" onClick={this.props.onRemove}
-                            title={EntityControlMessage.Remove.niceToString() }>
+                            title={EntityControlMessage.Remove.niceToString()}>
                             <span className="fa fa-remove"></span>
                         </a>
                     }
                     {this.props.title}
                 </div>
                 <div className="card-body">
-                    { this.props.children  }
+                    {this.props.children}
                 </div>
                 {this.props.onResizerDragStart &&
                     <div className="sf-leftHandle" draggable={true}
-                        onDragStart={e => this.props.onResizerDragStart!("left", e) }>
+                        onDragStart={e => this.props.onResizerDragStart!("left", e)}>
                     </div>
                 }
                 {this.props.onResizerDragStart &&
                     <div className="sf-rightHandle" draggable={true}
-                        onDragStart={e => this.props.onResizerDragStart!("right", e) }>
+                        onDragStart={e => this.props.onResizerDragStart!("right", e)}>
                     </div>
                 }
             </div>

@@ -1,14 +1,5 @@
-﻿/*var style: React.CSSProperties = {
-    paddingLeft: this.state.isRtl ? "" : padding, paddingRight: this.state.isRtl ? padding : ""
-}
+﻿
 
-;*/
-
-.icon {
-    margin-left: 5px;
-    margin-right: 5px;
-    text-align: center;
-}
 
 .dropdown-divider {
     width: 100%;
