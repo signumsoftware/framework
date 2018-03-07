@@ -21,3 +21,4 @@ export { LinkContainer } from './LinkContainer'
 
 //Other Components
 export { Typeahead } from './Typeahead'
+export { ErrorBoundary } from './ErrorBoundary'

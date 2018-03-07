@@ -10,6 +10,7 @@ import { LineBase, LineBaseProps, runTasks, } from '../Lines/LineBase'
 import { ModifiableEntity, Lite, Entity, EntityControlMessage, JavascriptMessage, toLite, is, isEntity, isLite, isModifiableEntity, liteKey, getToString } from '../Signum.Entities'
 import { EntityBase, EntityBaseProps} from './EntityBase'
 import { ViewPromise } from "../Navigator";
+import { ErrorBoundary } from '../Components';
 
 
 
@@ -165,7 +166,9 @@ export class RenderEntity extends React.Component<RenderEntityProps, RenderEntit
 
         return (
             <div data-propertypath={ctx.propertyPath}>
-                {React.cloneElement(getComponent(newCtx), { ref: (c: React.Component<any, any> | null) => this.setComponent(c) }) }
+                <ErrorBoundary>
+                    {React.cloneElement(getComponent(newCtx), { ref: (c: React.Component<any, any> | null) => this.setComponent(c) })}
+                </ErrorBoundary>
             </div>
         );
     }

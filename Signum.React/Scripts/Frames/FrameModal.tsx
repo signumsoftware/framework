@@ -17,7 +17,7 @@ import { EntityOperationContext } from '../Operations'
 
 import "./Frames.css"
 import { ViewPromise } from "../Navigator";
-import { BsSize, Modal } from '../Components';
+import { BsSize, Modal, ErrorBoundary } from '../Components';
 import { ModalHeaderButtons } from '../Components/Modal';
 
 interface FrameModalProps extends React.Props<FrameModal>, IModalProps {
@@ -180,8 +180,8 @@ export default class FrameModal extends React.Component<FrameModalProps, FrameMo
 
     hasChanges() {
 
-        var hc = this.entityComponent as IHasChanges;
-        if (hc.componentHasChanges)
+        var hc = this.entityComponent as IHasChanges | null | undefined;
+        if (hc && hc.componentHasChanges)
             return hc.componentHasChanges();
 
         const entity = this.state.pack!.entity;
@@ -252,7 +252,9 @@ export default class FrameModal extends React.Component<FrameModalProps, FrameMo
                 {this.entityComponent && <ButtonBar frame={frame} pack={pack} isOperationVisible={this.props.isOperationVisible} />}
                 <ValidationErrors entity={pack.entity} ref={ve => this.validationErrors = ve} />
                 <div className="sf-main-control" data-test-ticks={new Date().valueOf()} data-main-entity={entityInfo(ctx.value)}>
-                    {this.state.getComponent && React.cloneElement(this.state.getComponent(ctx), { ref: (c: React.Component<any, any> | null) => this.setComponent(c) })}
+                    <ErrorBoundary>
+                        {this.state.getComponent && React.cloneElement(this.state.getComponent(ctx), { ref: (c: React.Component<any, any> | null) => this.setComponent(c) })}
+                    </ErrorBoundary>
                 </div>
             </div>
         );
