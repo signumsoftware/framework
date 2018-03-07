@@ -76,7 +76,7 @@ export default class FilterBuilder extends React.Component<FilterBuilderProps>{
                                 <th style={{ minWidth: "24px" }}></th>
                                 <th>{SearchMessage.Field.niceToString()}</th>
                                 <th>{SearchMessage.Operation.niceToString()}</th>
-                                <th>{SearchMessage.Value.niceToString()}</th>
+                                <th style={{ paddingRight: "20px" }}>{SearchMessage.Value.niceToString()}</th>
                             </tr>
                         </thead>
                         <tbody>

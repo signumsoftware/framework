@@ -15,6 +15,10 @@ input[type=checkbox].form-control {
     margin-top: 9px;
 }
 
+.input-group {
+    flex-wrap:nowrap;
+}
+
 p.form-control {
     background-color: #f6f6f6;
     margin: 0px;
@@ -242,7 +246,6 @@ ul.nav-tabs {
 
 .form-group.row > label {
     text-align: end;
-    font-weight: 500;
 }
 
 /*has-error*/

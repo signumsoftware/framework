@@ -42,13 +42,15 @@ export default class ColumnEditor extends React.Component<ColumnEditorProps>{
             <div className={classes("sf-column-editor", "form-xs", isCollection ? "error" : undefined) }
                 title={isCollection ? SearchMessage.CollectionsCanNotBeAddedAsColumns.niceToString() : undefined }>
                 <button type="button" className="close" aria-label="Close" onClick={this.props.close} ><span aria-hidden="true">×</span></button>
+                <div className="rw-widget-sm">
                 <QueryTokenBuilder
                     queryToken={co.token!}
                     onTokenChange={this.handleTokenChanged}
                     queryKey={this.props.queryDescription.queryKey}
                     subTokenOptions={this.props.subTokensOptions}
-                    readOnly={false}/>
-                <input className="form-control"
+                        readOnly={false} />
+                </div>
+                <input className="form-control form-control-xs"
                     value={co.displayName || ""}
                     onChange={this.handleOnChange} />
             </div>
