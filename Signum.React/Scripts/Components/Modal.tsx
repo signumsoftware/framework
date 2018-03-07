@@ -10,6 +10,7 @@ import { Fade } from './Fade';
 import { classes } from '../Globals';
 import { JavascriptMessage } from '../Signum.Entities';
 import { BsSize, BsColor} from './index';
+import { ErrorBoundary } from './ErrorBoundary';
 
 export interface ModalProps extends ModelDialogProps  {
 
@@ -258,7 +259,9 @@ export class Modal extends React.Component<ModalProps, ModalState> {
                     className={classes(className, inClassName)}
                     onClick={backdrop == true ? this.handleDialogClick : undefined}
                 >
-                    {children}
+                    <ErrorBoundary>
+                        {children}
+                    </ErrorBoundary>
                 </ModalDialog>
             </BaseModal>
         );
