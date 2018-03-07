@@ -21,7 +21,7 @@ import { OperationMessage } from "../../../../Framework/Signum.React/Scripts/Sig
 import "../../../../Framework/Signum.React/Scripts/Frames/Frames.css"
 import "./CaseAct.css"
 import { IHasCaseActivity } from '../WorkflowClient';
-import { Modal } from '../../../../Framework/Signum.React/Scripts/Components';
+import { Modal, ErrorBoundary } from '../../../../Framework/Signum.React/Scripts/Components';
 import { ModalHeaderButtons } from '../../../../Framework/Signum.React/Scripts/Components/Modal';
 
 interface CaseFrameModalProps extends React.Props<CaseFrameModal>, IModalProps {
@@ -268,7 +268,9 @@ export default class CaseFrameModal extends React.Component<CaseFrameModalProps,
                 {renderWidgets(wc)}
                 {this.entityComponent && !mainEntity.isNew && !pack.activity.doneBy ? <ButtonBar frame={mainFrame} pack={mainPack} /> : <br />}
                 <ValidationErrors entity={mainEntity} ref={ve => this.validationErrors = ve} />
-                {this.state.getComponent && React.cloneElement(this.state.getComponent(ctx), { ref: (c: React.Component<any, any>) => this.setComponent(c) })}
+                <ErrorBoundary>
+                    {this.state.getComponent && React.cloneElement(this.state.getComponent(ctx), { ref: (c: React.Component<any, any>) => this.setComponent(c) })}
+                </ErrorBoundary>
             </div>
         );
     }
