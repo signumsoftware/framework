@@ -19,7 +19,7 @@ export class FormControlReadonly extends React.Component<FormControlReadonlyProp
 
         if (ctx.readonlyAsPlainText) {
             return (
-                <p {...attrs} className={classes("form-control-plaintext", attrs && attrs.className, this.props.className)}>
+                <p {...attrs} className={classes(ctx.formControlPlainTextClass, attrs && attrs.className, this.props.className)}>
                     {this.props.children}
                 </p>
             );

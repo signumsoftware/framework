@@ -382,7 +382,7 @@ select.form-control-xs:not([size]):not([multiple]),
 }
 
 .rw-widget-xs .rw-widget-picker {
-    height: 20px;
+    height: 24px;
     line-height: 10px;
 }
 
@@ -466,6 +466,9 @@ select.form-control-xs:not([size]):not([multiple]),
     height: 24px;
 }
 
+.input-group > .form-control-plaintext {
+    padding-right: 5px;
+}
 /*
 .form-sm .sf-strip {
     margin-bottom: 4px;
@@ -485,7 +488,6 @@ select.form-control-xs:not([size]):not([multiple]),
     font-size: 18px;
 }
 */
-
 .form-group.form-group-sm {
     margin-bottom: 6px;
 }

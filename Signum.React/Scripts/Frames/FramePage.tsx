@@ -195,11 +195,11 @@ export default class FramePage extends React.Component<FramePageProps, FramePage
         const entity = this.state.pack.entity;
 
         return (
-            <h3>
-                <span className="sf-entity-title">{ getToString(entity) }</span>
+            <h4 className="mt-2">
+                <span className="display-6">{getToString(entity)}</span>
                 <br/>
                 <small className="sf-type-nice-name">{ Navigator.getTypeTitle(entity, undefined) }</small>
-            </h3>
+            </h4>
         );
     }
 }
