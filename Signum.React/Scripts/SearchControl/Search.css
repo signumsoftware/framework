@@ -2,8 +2,13 @@
     min-height: 50px;
 }
 
-    .sf-search-footer > div {
+    body:not(.rtl) .sf-search-footer > div {
         float: left;
+        width: 33%;
+    }
+
+    body.rtl .sf-search-footer > div {
+        float: right;
         width: 33%;
     }
 

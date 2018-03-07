@@ -81,6 +81,7 @@
     <Compile Include="Environment\Entities.cs" />
     <Compile Include="LinqProvider\AllAnyContainsTest.cs" />
     <Compile Include="LinqProvider\AsyncTest.cs" />
+    <Compile Include="LinqProvider\ExpandTest.cs" />
     <Compile Include="LinqProvider\UnsafeInsertTest.cs" />
     <Compile Include="LinqProvider\ToStringTest.cs" />
     <Compile Include="LinqProvider\InDBTest.cs" />

@@ -260,22 +260,29 @@ namespace Signum.Entities.DynamicQuery
 
                 if(ft != null)
                 {
-                    yield return new AggregateToken(AggregateFunction.Count, token, AggregateToken.AnyValue);
-                    yield return new AggregateToken(AggregateFunction.Count, token, null);
+                    yield return new AggregateToken(AggregateFunction.Count, token, FilterOperation.DistinctTo, null);
+                    yield return new AggregateToken(AggregateFunction.Count, token,  FilterOperation.EqualTo, null);
                 }
 
-                if(ft == FilterType.Enum)
+                if (token.IsGroupable)
+                {
+                    yield return new AggregateToken(AggregateFunction.Count, token, distinct: true);
+
+                }
+
+                if (ft == FilterType.Enum)
                 {
                     foreach (var v in Enum.GetValues(token.Type.UnNullify()))
                     {
-                        yield return new AggregateToken(AggregateFunction.Count, token, v);
+                        yield return new AggregateToken(AggregateFunction.Count, token, FilterOperation.EqualTo, v);
+                        yield return new AggregateToken(AggregateFunction.Count, token, FilterOperation.DistinctTo, v);
                     }
                 }
 
                 if (ft == FilterType.Boolean)
                 {
-                    yield return new AggregateToken(AggregateFunction.Count, token, true);
-                    yield return new AggregateToken(AggregateFunction.Count, token, false);
+                    yield return new AggregateToken(AggregateFunction.Count, token, FilterOperation.EqualTo, true);
+                    yield return new AggregateToken(AggregateFunction.Count, token, FilterOperation.EqualTo, false);
                 }
             }
         }

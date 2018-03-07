@@ -122,6 +122,7 @@ namespace Signum.Engine
                 sb.Schema.EntityEvents<T>().RegisterBinding(mListField,
                      e => Database.Query<L>()
                     .Where(line => backReference.Evaluate(line) == e.ToLite())
+                    .ExpandLite(line => backReference.Evaluate(line), ExpandLite.ToStringLazy)
                     .ToVirtualMListWithOrder(),
                      expandQuery: () => !lazy && !VirtualMList.ShouldAvoidMListType(typeof(L)));
             }
@@ -130,7 +131,8 @@ namespace Signum.Engine
                 sb.Schema.EntityEvents<T>().RegisterBinding(mListField,
                     e => Database.Query<L>()
                     .Where(line => backReference.Evaluate(line) == e.ToLite())
-                    .ToVirtualMList(),
+					.ExpandLite(line => backReference.Evaluate(line), ExpandLite.ToStringLazy)                    
+					.ToVirtualMList(),
                      expandQuery: () => !lazy && !VirtualMList.ShouldAvoidMListType(typeof(L)));
             }
 
@@ -222,7 +224,6 @@ namespace Signum.Engine
         }
 
         public static FluentInclude<T> WithVirtualMListInitializeOnly<T, L>(this FluentInclude<T> fi,
-            DynamicQueryManager dqm,
             Expression<Func<T, MList<L>>> mListField,
             Expression<Func<L, Lite<T>>> backReference,
             Action<L, T> onSave = null)
@@ -232,6 +233,13 @@ namespace Signum.Engine
             Func<T, MList<L>> getMList = GetAccessor(mListField);
             Action<L, Lite<T>> setter = null;
             var sb = fi.SchemaBuilder;
+
+            sb.Schema.EntityEvents<T>().RegisterBinding(mListField,
+                  e => Database.Query<L>()
+                 .Where(line => backReference.Evaluate(line) == e.ToLite())
+                 .ExpandLite(line => backReference.Evaluate(line), ExpandLite.ToStringLazy)
+                 .ToVirtualMListWithOrder(),
+                  expandQuery: () => false);
 
             sb.Schema.EntityEvents<T>().Saving += (T e) =>
             {
@@ -274,12 +282,6 @@ namespace Signum.Engine
                 }
                 mlist.SetCleanModified(false);
             };
-
-            if (dqm != null)
-            {
-                var pi = ReflectionTools.GetPropertyInfo(mListField);
-                dqm.RegisterExpression((T e) => Database.Query<L>().Where(p => backReference.Evaluate(p) == e.ToLite()), () => pi.NiceName(), pi.Name);
-            }
             return fi;
         }
 

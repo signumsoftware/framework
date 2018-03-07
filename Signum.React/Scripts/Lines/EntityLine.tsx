@@ -159,13 +159,13 @@ export class EntityLine extends EntityBase<EntityLineProps, EntityLineState> {
                 minLength={ac.minLength}
                 renderItem={(item, query) => ac!.renderItem(item, query)}
                 renderList={ac!.renderList && (ta => ac!.renderList!(ta))}
-                liAttrs={item => {
+                itemAttrs={item => {
                     const entity = ac!.getEntityFromItem(item);
                     const key = isLite(entity) ? liteKey(entity) :
                         (entity as Entity).id ? liteKey(toLite(entity as Entity)) :
                             undefined;
 
-                    return ({ 'data-entity-key': key }) as React.HTMLAttributes<HTMLLIElement>;
+                    return ({ 'data-entity-key': key }) as React.HTMLAttributes<HTMLButtonElement>;
                 }}
                 onSelect={this.handleOnSelect}/>
         );

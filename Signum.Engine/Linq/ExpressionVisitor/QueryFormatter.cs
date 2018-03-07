@@ -522,6 +522,9 @@ namespace Signum.Engine.Linq
         {
             sb.Append(dic[aggregate.AggregateFunction]);
             sb.Append("(");
+            if (aggregate.Distinct)
+                sb.Append("DISTINCT ");
+
             if (aggregate.Expression == null)
                 sb.Append("*");
             else

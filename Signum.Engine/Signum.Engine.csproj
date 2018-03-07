@@ -127,6 +127,7 @@
     <Compile Include="Engine\Synchronizer.cs" />
     <Compile Include="ExecutionContext.cs" />
     <Compile Include="GlobalLazy.cs" />
+    <Compile Include="LinqExpandHints.cs" />
     <Compile Include="Linq\AliasGenerator.cs" />
     <Compile Include="Linq\DbExpressions.Sql.cs" />
     <Compile Include="Linq\DbQueryProvider.cs" />

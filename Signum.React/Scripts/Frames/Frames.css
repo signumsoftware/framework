@@ -117,3 +117,8 @@ a.expand-window:hover {
     margin-bottom: 5px;
     margin-right: 10px;
 }
+
+.code-container {
+    direction: ltr;
+    text-align: left;
+}

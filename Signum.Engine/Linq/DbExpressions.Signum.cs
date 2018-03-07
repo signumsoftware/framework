@@ -77,6 +77,19 @@ namespace Signum.Engine.Linq
         {
             return visitor.VisitEntity(this);
         }
+        
+        internal EntityExpression WithExpandEntity(ExpandEntity expandEntity)
+        {
+            switch (expandEntity)
+            {
+                case ExpandEntity.EagerEntity:
+                    return new EntityExpression(this.Type, this.ExternalId, this.TableAlias, this.Bindings, this.Mixins, avoidExpandOnRetrieving: false);
+                case ExpandEntity.LazyEntity:
+                    return new EntityExpression(this.Type, this.ExternalId, this.TableAlias, this.Bindings, this.Mixins, avoidExpandOnRetrieving: true);
+                default:
+                    throw new NotImplementedException();
+            }
+        }
     }
 
   
@@ -260,10 +273,12 @@ namespace Signum.Engine.Linq
 
     internal class LiteReferenceExpression : DbExpression
     {
+        public bool LazyToStr;
+        public bool EagerEntity;
         public readonly Expression Reference; //Fie, ImplementedBy, ImplementedByAll or Constant to NullEntityExpression
         public readonly Expression CustomToStr; //Not readonly
 
-        public LiteReferenceExpression(Type type, Expression reference, Expression customToStr) :
+        public LiteReferenceExpression(Type type, Expression reference, Expression customToStr, bool lazyToStr, bool eagerEntity) :
             base(DbExpressionType.LiteReference, type)
         {
             Type cleanType = Lite.Extract(type);
@@ -274,6 +289,9 @@ namespace Signum.Engine.Linq
             this.Reference = reference;
 
             this.CustomToStr = customToStr;
+
+            this.LazyToStr = lazyToStr;
+            this.EagerEntity = eagerEntity;
         }
 
         public override string ToString()
@@ -284,6 +302,23 @@ namespace Signum.Engine.Linq
         protected override Expression Accept(DbExpressionVisitor visitor)
         {
             return visitor.VisitLiteReference(this);
+        }
+
+        internal LiteReferenceExpression WithExpandLite(ExpandLite expandLite)
+        {
+            switch (expandLite)
+            {
+                case ExpandLite.EntityEager:
+                    return new LiteReferenceExpression(this.Type, this.Reference, this.CustomToStr, lazyToStr: false, eagerEntity: true);
+                case ExpandLite.ToStringEager:
+                    return new LiteReferenceExpression(this.Type, this.Reference, this.CustomToStr, lazyToStr: false, eagerEntity: false);
+                case ExpandLite.ToStringLazy:
+                    return new LiteReferenceExpression(this.Type, this.Reference, this.CustomToStr, lazyToStr: true, eagerEntity: false);
+                case ExpandLite.ToStringNull:
+                    return new LiteReferenceExpression(this.Type, this.Reference, Expression.Constant(null, typeof(string)), lazyToStr: true, eagerEntity: false);
+                default:
+                    throw new NotImplementedException();
+            }
         }
     }
 

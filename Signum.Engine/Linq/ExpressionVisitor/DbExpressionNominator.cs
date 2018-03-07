@@ -106,6 +106,7 @@ namespace Signum.Engine.Linq
         }
 
 
+        #region Not Null Root
         protected internal override Expression VisitPrimaryKey(PrimaryKeyExpression pk)
         {
             if (pk == isNotNullRoot)
@@ -125,7 +126,6 @@ namespace Signum.Engine.Linq
             return base.VisitEmbeddedEntity(eee);
         }
 
-        #region Not Null Root
         protected internal override Expression VisitLiteReference(LiteReferenceExpression lite)
         {
             if (lite == isNotNullRoot)

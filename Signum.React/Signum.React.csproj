@@ -166,7 +166,7 @@
     <TypeScriptCompile Include="Scripts\Components\Tooltip.tsx" />
     <TypeScriptCompile Include="Scripts\Lines\FormControlReadonly.tsx" />
     <TypeScriptCompile Include="Scripts\Lines\FormGroup.tsx" />
-    <TypeScriptCompile Include="Scripts\LinkContainer.tsx" />
+    <TypeScriptCompile Include="Scripts\Components\LinkContainer.tsx" />
     <TypeScriptCompile Include="Scripts\Components\Fade.tsx" />
     <TypeScriptCompile Include="Scripts\Components\Modal.tsx" />
     <TypeScriptCompile Include="Scripts\Components\Tabs.tsx" />

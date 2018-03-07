@@ -1,21 +1,14 @@
-﻿body:not(.rtl-mode) .dropdown-item .arrow {
+﻿body:not(.rtl) .dropdown-item .arrow-align {
     float: right;
+    font-size: 11px;
     margin-top: 3px;
 }
 
-body.rtl-mode .dropdown-item .arrow {
+body.rtl .dropdown-item .arrow-align {
     float: left;
+    font-size: 11px;
     margin-top: 3px;
 }
-
-.dropdown-item .fa.arrow:before {
-    content: "\f104";
-}
-
-.dropdown-item.active > .fa.arrow:before {
-    content: "\f107";
-}
-
 
 .navbar-nav li a span.icon {
     display: inline-block;
@@ -23,20 +16,9 @@ body.rtl-mode .dropdown-item .arrow {
     margin-right: 8px;
 }
 
-.rtl-mode .navbar-nav li a span.icon {
+.rtl .navbar-nav li a span.icon {
     margin-left: 8px;
     margin-right: -8px;
-}
-
-
-ul.dropdown-menu li a span.icon {
-    margin-left: -10px;
-    margin-right: 10px;
-}
-
-.rtl-mode ul.dropdown-menu li a span.icon {
-    margin-left: 10px;
-    margin-right: -10px;
 }
 
 .sidebar-nav li a span.icon {
@@ -44,7 +26,7 @@ ul.dropdown-menu li a span.icon {
     margin-right: 8px;
 }
 
-.rtl-mode .sidebar-nav li a span.icon {
+.rtl .sidebar-nav li a span.icon {
     margin-left: 8px;
     margin-right: 0px;
 }

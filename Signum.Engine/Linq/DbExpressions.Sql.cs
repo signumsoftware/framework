@@ -289,20 +289,25 @@ namespace Signum.Engine.Linq
     internal class AggregateExpression : DbExpression
     {
         public readonly Expression Expression;
+        public readonly bool Distinct; 
         public readonly AggregateSqlFunction AggregateFunction;
-        public AggregateExpression(Type type, Expression expression, AggregateSqlFunction aggregateFunction)
+        public AggregateExpression(Type type, Expression expression, AggregateSqlFunction aggregateFunction, bool distinct)
             : base(DbExpressionType.Aggregate, type)
         {
-            if (expression == null && aggregateFunction != AggregateSqlFunction.Count)
+            if (aggregateFunction != AggregateSqlFunction.Count && expression == null )
                 throw new ArgumentNullException("expression");
 
+            if (distinct && (aggregateFunction != AggregateSqlFunction.Count || expression == null))
+                throw new ArgumentException("Distinct only allowed for Count with expression");
+
+            this.Distinct = distinct;
             this.Expression = expression;
             this.AggregateFunction = aggregateFunction;
         }
 
         public override string ToString()
         {
-            return "{0}({1})".FormatWith(AggregateFunction, Expression?.ToString() ?? "*");
+            return $"{AggregateFunction}({(Distinct ? "Distinct " : "")}{Expression?.ToString() ?? "*"})";
         }
 
         protected override Expression Accept(DbExpressionVisitor visitor)
