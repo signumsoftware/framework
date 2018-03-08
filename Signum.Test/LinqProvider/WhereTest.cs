@@ -30,8 +30,8 @@ namespace Signum.Test.LinqProvider
         public void Initialize()
         {
             Connector.CurrentLogger = new DebugTextWriter();
-        }      
-     
+        }
+
         [TestMethod]
         public void Where()
         {
@@ -127,9 +127,9 @@ namespace Signum.Test.LinqProvider
             ArtistEntity wretzky = Database.Query<ArtistEntity>().SingleEx(a => a.Sex == Sex.Female);
 
             BandEntity smashing = (from b in Database.Query<BandEntity>()
-                               from a in b.Members
-                               where a == wretzky
-                               select b).SingleEx();
+                                   from a in b.Members
+                                   where a == wretzky
+                                   select b).SingleEx();
         }
 
 
@@ -139,9 +139,9 @@ namespace Signum.Test.LinqProvider
             ArtistEntity wretzky = Database.Query<ArtistEntity>().SingleEx(a => a.Sex == Sex.Female);
 
             BandEntity smashing = (from b in Database.Query<BandEntity>()
-                               from a in b.Members
-                               where a.ToLite() == wretzky.ToLite()
-                               select b).SingleEx();
+                                   from a in b.Members
+                                   where a.ToLite() == wretzky.ToLite()
+                                   select b).SingleEx();
         }
 
 
@@ -416,7 +416,7 @@ namespace Signum.Test.LinqProvider
 
             var count = Database.Query<BandEntity>().Count(a => a.LastAward == award);
 
-            Assert.AreEqual(0, count); 
+            Assert.AreEqual(0, count);
         }
 
 
@@ -440,6 +440,14 @@ namespace Signum.Test.LinqProvider
             Assert.AreEqual(0, count);
         }
 
+        [TestMethod]
+        public void WhereCount()
+        {
+            var album = Database.Query<ArtistEntity>()
+                .Where(a => Database.Query<AlbumEntity>().Where(al => al.Author.Is(a)).Count() > 0)
+                .Select(a => a.Name)
+                .ToList();
+        }
 
     }
 }

@@ -568,10 +568,7 @@ namespace Signum.Engine.Linq
                     source = Expression.Call(miWhere.MakeGenericMethod(source.Type.ElementType()), source, selectorOrPredicate);
                     selectorOrPredicate = null;
                 }
-
-                if (isRoot)
-                    return (source, null, false);
-
+                
                 //Select Distinct NotNull
                 {
                     if (ExtractWhere(source, out var inner, out var predicate) &&
@@ -599,10 +596,15 @@ namespace Signum.Engine.Linq
                         new ScopedDictionary<ParameterExpression, ParameterExpression>(null) { { predicate.Parameters.Single(), selector.Parameters.Single() } }))
                         return (inner3, selector, true);
                 }
-
-                //NotNull Select
+                
+                if(!isRoot)
                 {
-                    if (ExtractWhere(source, out var inner, out var predicate))
+                    //Preferring Count(predicate) 
+                    //instead of Count (*) Where predicate
+                    //is tricky
+                    if (ExtractWhere(source, out var inner, out var predicate) && 
+                        inner is ParameterExpression p && p.Type.IsInstantiationOf(typeof(IGrouping<,>)) &&
+                        SimplePredicateVisitor.IsSimple(predicate))
                         return (inner, predicate, false);
                 }
 
@@ -616,6 +618,29 @@ namespace Signum.Engine.Linq
                     return (innerSource, selector, false);
                 else
                     return (source, null, false);
+            }
+        }
+
+        class SimplePredicateVisitor : ExpressionVisitor
+        {
+            public ParameterExpression[] AllowedParameters;
+            public bool HasExternalParameter = false;
+            public static bool IsSimple(LambdaExpression lambda)
+            {
+                var extParam = new SimplePredicateVisitor
+                {
+                    AllowedParameters = lambda.Parameters.ToArray()
+                };
+                extParam.Visit(lambda.Body);
+                return !extParam.HasExternalParameter;
+            }
+
+            protected override Expression VisitParameter(ParameterExpression node)
+            {
+                if (!AllowedParameters.Contains(node))
+                    this.HasExternalParameter = true;
+
+                return base.VisitParameter(node);
             }
         }
 
@@ -643,7 +668,7 @@ namespace Signum.Engine.Linq
                     mc.Method.IsInstantiationOf(OverloadingSimplifier.miSelectQ)))
             {
                 innerSource = mc.Arguments[0];
-                selector = (LambdaExpression)mc.Arguments[1];
+                selector = (LambdaExpression)mc.Arguments[1].StripQuotes();
                 return true;
             }
             else
@@ -661,7 +686,7 @@ namespace Signum.Engine.Linq
                     mc.Method.IsInstantiationOf(OverloadingSimplifier.miWhereQ)))
             {
                 innerSource = mc.Arguments[0];
-                predicate = (LambdaExpression)mc.Arguments[1];
+                predicate = (LambdaExpression)mc.Arguments[1].StripQuotes();
                 return true;
             }
             else

@@ -441,9 +441,6 @@ namespace Signum.Engine.Linq
                     {
                         this.Indent(Indentation.Outer);
                     }
-
-
-
                 }
             }
 
