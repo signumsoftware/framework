@@ -9,7 +9,7 @@ import { PropertyRoute, PropertyRouteType, MemberInfo, getTypeInfo, getTypeInfos
 import { LineBase, LineBaseProps, runTasks, } from '../Lines/LineBase'
 import { FormGroup } from '../Lines/FormGroup'
 import { FormControlReadonly } from '../Lines/FormControlReadonly'
-import { ModifiableEntity, Lite, Entity, MList, MListElement, EntityControlMessage, JavascriptMessage, toLite, is, liteKey, getToString, isLite } from '../Signum.Entities'
+import { ModifiableEntity, Lite, Entity, MList, MListElement, EntityControlMessage, JavascriptMessage, toLite, is, liteKey, getToString, isEntity, isLite } from '../Signum.Entities'
 import { Typeahead } from '../Components'
 import { EntityListBase, EntityListBaseProps, DragConfig } from './EntityListBase'
 import { AutocompleteConfig } from './AutocompleteConfig'
@@ -212,6 +212,13 @@ export class EntityStripElement extends React.Component<EntityStripElementProps,
 
         var drag = this.props.drag;
         const htmlAttributes = this.props.onItemHtmlAttributes && this.props.onItemHtmlAttributes(this.props.ctx.value);
+
+        var val = this.props.ctx.value;
+
+        //Till https://github.com/facebook/react/issues/8529 gets fixed
+        var url = isEntity(val) ? Navigator.navigateRoute(val) :
+            isLite(val) ? Navigator.navigateRoute(val) : "#";
+
         return (
             <li className="sf-strip-element input-group"
                 {...EntityListBase.entityHtmlAttributes(this.props.ctx.value) }>
@@ -224,7 +231,7 @@ export class EntityStripElement extends React.Component<EntityStripElementProps,
 
                     {
                         this.props.onView ?
-                            <a href="#" className="sf-entitStrip-link" onClick={this.props.onView} {...htmlAttributes}>
+                            <a href={url} className="sf-entitStrip-link" onClick={this.props.onView} {...htmlAttributes}>
                                 {toStr}
                             </a>
                             :
@@ -235,7 +242,7 @@ export class EntityStripElement extends React.Component<EntityStripElementProps,
 
                     {this.props.onRemove &&
                         <span>
-                            <a href="#" className="sf-line-button sf-remove"
+                            <a className="sf-line-button sf-remove"
                                 onClick={this.props.onRemove}
                                 title={EntityControlMessage.Remove.niceToString()}>
                                 <span className="fa fa-remove"></span>
