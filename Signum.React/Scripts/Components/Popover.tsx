@@ -3,7 +3,7 @@ import { PopperContent, getTarget } from './PopperContent';
 import PopperJS from "popper.js";
 import { classes } from '../Globals';
 
-interface UncontrolledPopoverProps {
+interface PopoverProps {
     placement: PopperJS.Placement;
     target: string | (() => HTMLElement) | HTMLElement;
     container?: string | (() => HTMLElement) | HTMLElement;
@@ -14,9 +14,6 @@ interface UncontrolledPopoverProps {
     placementPrefix?: string;
     delay?: number | { show: number, hide: number };
     modifiers?: PopperJS.Modifiers;
-}
-
-interface PopoverProps extends UncontrolledPopoverProps {
     isOpen?: boolean;
     toggle?: () => void,
 }
@@ -36,15 +33,6 @@ export class Popover extends React.Component<PopoverProps> {
         delay: DEFAULT_DELAYS,
         toggle: () => { },
     };
-
-    constructor(props: PopoverProps) {
-        super(props);
-
-        this.addTargetEvents = this.addTargetEvents.bind(this);
-        this.handleDocumentClick = this.handleDocumentClick.bind(this);
-        this.removeTargetEvents = this.removeTargetEvents.bind(this);
-        this.toggle = this.toggle.bind(this);
-    }
 
     _target?: HTMLElement;
     componentDidMount() {
@@ -149,7 +137,8 @@ export class Popover extends React.Component<PopoverProps> {
             return null;
         }
 
-        const { placement,
+        const {
+            placement,
             target,
             container,
             isOpen,
@@ -184,27 +173,9 @@ export class Popover extends React.Component<PopoverProps> {
                 placement={placement}
                 placementPrefix={placementPrefix}
                 container={container}
-                modifiers={modifiers}
-            >
+                modifiers={modifiers}>
                 <div {...attributes} className={clss} ref={this.getRef} />
             </PopperContent>
         );
-    }
-}
-
-export class UncontrolledPopover extends React.Component<UncontrolledPopoverProps, { isOpen: boolean }> {
-    constructor(props: PopoverProps) {
-        super(props);
-
-        this.state = { isOpen: false };
-        this.toggle = this.toggle.bind(this);
-    }
-
-    toggle() {
-        this.setState({ isOpen: !this.state.isOpen });
-    }
-
-    render() {
-        return <Popover isOpen={this.state.isOpen} toggle={this.toggle} {...this.props} />;
     }
 }

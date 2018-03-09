@@ -9,7 +9,7 @@ export { Fade } from './Fade'
 export { PopperContent } from './PopperContent'
 export { Tab, Tabs, UncontrolledTabs } from './Tabs'
 export { Tooltip, UncontrolledTooltip } from './Tooltip'
-export { Popover, UncontrolledPopover } from './Popover'
+export { Popover } from './Popover'
 export { NavItem, NavLink } from './NavItem'
 export { Collapse } from './Collapse'
 

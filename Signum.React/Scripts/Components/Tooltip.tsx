@@ -206,10 +206,9 @@ export class UncontrolledTooltip extends React.Component<UncontrolledTooltipProp
         super(props);
 
         this.state = { isOpen: false };
-        this.toggle = this.toggle.bind(this);
     }
 
-    toggle() {
+    toggle = () => {
         this.setState({ isOpen: !this.state.isOpen });
     }
 
