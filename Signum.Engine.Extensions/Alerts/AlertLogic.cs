@@ -105,12 +105,12 @@ namespace Signum.Engine.Alerts
             SystemAlertTypes.Add(alertType);
         }
 
-        public static AlertEntity CreateAlert(this IEntity entity, string text, AlertTypeEntity alertType, DateTime? alertDate = null, Lite<IUserEntity> user = null, string title = null)
+        public static AlertEntity CreateAlert(this IEntity entity, string text, AlertTypeEntity alertType, DateTime? alertDate = null, Lite<IUserEntity> user = null, string title = null, Lite<IUserEntity> recipient = null)
         {
             return CreateAlert(entity.ToLiteFat(), text, alertType, alertDate, user, title);
         }
 
-        public static AlertEntity CreateAlert<T>(this Lite<T> entity, string text, AlertTypeEntity alertType, DateTime? alertDate = null, Lite<IUserEntity> user = null, string title = null) where T : class, IEntity
+        public static AlertEntity CreateAlert<T>(this Lite<T> entity, string text, AlertTypeEntity alertType, DateTime? alertDate = null, Lite<IUserEntity> user = null, string title = null, Lite<IUserEntity> recipient = null) where T : class, IEntity
         {
             if (Started == false)
                 return null;
@@ -122,7 +122,8 @@ namespace Signum.Engine.Alerts
                 Text = text,
                 Title = title,
                 Target = (Lite<Entity>)entity,
-                AlertType = alertType
+                AlertType = alertType,
+                Recipient = recipient
             };
 
             return result.Execute(AlertOperation.Save);
