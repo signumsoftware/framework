@@ -261,8 +261,6 @@ export function setAuthToken(authToken: string | undefined): void{
 }
 
 export function autoLogin(): Promise<UserEntity | undefined>  {
-
-    debugger;
     if (Navigator.currentUser)
         return Promise.resolve(Navigator.currentUser as UserEntity);
 
