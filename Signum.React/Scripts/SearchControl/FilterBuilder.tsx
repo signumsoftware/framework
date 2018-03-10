@@ -70,13 +70,13 @@ export default class FilterBuilder extends React.Component<FilterBuilderProps>{
             <fieldset className="form-xs">
                 {this.props.title && <legend>{this.props.title}</legend>}
                 <div className="sf-filters-list table-responsive" style={{ overflowX: "visible" }}>
-                    <table className="table table-sm">
+                    <table className="table-sm">
                         <thead>
-                            <tr className="bg-light">
+                            <tr>
                                 <th style={{ minWidth: "24px" }}></th>
                                 <th>{SearchMessage.Field.niceToString()}</th>
                                 <th>{SearchMessage.Operation.niceToString()}</th>
-                                <th>{SearchMessage.Value.niceToString()}</th>
+                                <th style={{ paddingRight: "20px" }}>{SearchMessage.Value.niceToString()}</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -292,11 +292,11 @@ export class MultiValue extends React.Component<MultiValueProps> {
                             <tr key={i}>
                                 <td>
                                     {!this.props.readOnly &&
-                                        <a title={SearchMessage.DeleteFilter.niceToString()}
+                                        <button title={SearchMessage.DeleteFilter.niceToString()}
                                             className="sf-line-button sf-remove"
                                             onClick={e => this.handleDeleteValue(e, i)}>
                                             <span className="fa fa-remove" />
-                                        </a>}
+                                        </button>}
                                 </td>
                                 <td>
                                     {
@@ -313,11 +313,11 @@ export class MultiValue extends React.Component<MultiValueProps> {
                     <tr >
                         <td colSpan={4}>
                             {!this.props.readOnly &&
-                                <a title={SearchMessage.AddValue.niceToString()}
+                                <button title={SearchMessage.AddValue.niceToString()}
                                     className="sf-line-button sf-create"
                                     onClick={this.handleAddValue}>
                                     <span className="fa fa-plus sf-create" />&nbsp;{SearchMessage.AddValue.niceToString()}
-                                </a>}
+                            </button>}
                         </td>
                     </tr>
                 </tbody>

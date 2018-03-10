@@ -73,8 +73,9 @@ namespace Signum.Test.LinqProvider
                             Key = g.Key,
                             Count = g.Count(), //Fast
                             CountNames = g.Count(a => a.Name != null), //Fast
-                            CountNullsFast = g.Count(a => (a.Name == null ? "hi" : null) != null), //Fast
-                            CountNullSlow = g.Count(a => a.Name == null), //Fast
+                            CountNullFast = g.Count(a => (a.Name == null ? "hi" : null) != null), //Fast
+                            CountNullFast1 = g.Where(a => a.Name == null).Count(), //Fast
+                            CountNullFast2= g.Count(a => a.Name == null), //Fast
                             CountLastAward = g.Count(a => a.LastAward != null), //Fast
                         };
             sexes.ToList();
@@ -95,6 +96,13 @@ namespace Signum.Test.LinqProvider
                         };
             sexes.ToList();
         }
+
+        [TestMethod]
+        public void RootCountDistinct()
+        {
+            var count = Database.Query<ArtistEntity>().Select(a => a.Name).Where(a => a != null).Distinct().Count();
+        }
+
 
         [TestMethod]
         public void GroupCountDistinctSlow()

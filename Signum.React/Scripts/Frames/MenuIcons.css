@@ -1,4 +1,10 @@
-﻿body:not(.rtl) .dropdown-item .arrow-align {
+﻿.icon {
+    margin-left: 5px;
+    margin-right: 5px;
+    text-align: center;
+}
+
+body:not(.rtl) .dropdown-item .arrow-align {
     float: right;
     font-size: 11px;
     margin-top: 3px;
@@ -10,18 +16,18 @@ body.rtl .dropdown-item .arrow-align {
     margin-top: 3px;
 }
 
-.navbar-nav li a span.icon {
+.dropdown-menu span.icon {
     display: inline-block;
     margin-left: -8px;
     margin-right: 8px;
 }
 
-.rtl .navbar-nav li a span.icon {
+.rtl .dropdown-menu span.icon {
     margin-left: 8px;
     margin-right: -8px;
 }
 
-.sidebar-nav li a span.icon {
+.sidebar-nav .dropdown-menu span.icon {
     margin-left: 0px;
     margin-right: 8px;
 }
