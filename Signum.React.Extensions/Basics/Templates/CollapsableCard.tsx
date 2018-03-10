@@ -77,7 +77,6 @@ export default class CollapsableCard extends React.Component<CollapsableCardProp
         return (
             <div className={classes("card", cardStyleClasses(this.props.cardStyle))}>
                 <div className={classes("card-header", cardStyleClasses(this.props.headerStyle))} style={{ cursor: "pointer" }} onClick={this.handleToggle}>
-                    {this.props.header}
                     {(this.props.collapsable == undefined || this.props.collapsable == true) &&
                         <span
                             className={classes(this.state.isRTL ? "pull-left" : "pull-right", "fa", isOpen ? "fa-chevron-up" : "fa-chevron-down")}
@@ -85,6 +84,7 @@ export default class CollapsableCard extends React.Component<CollapsableCardProp
                             onClick={this.handleToggle}>
                         </span>
                     }
+                    {this.props.header}
                 </div>
                 <Collapse isOpen={isOpen}>
                     <div className={classes("card-body", cardStyleClasses(this.props.bodyStyle))}>
