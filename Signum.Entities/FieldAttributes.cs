@@ -287,7 +287,7 @@ sb.Schema.Settings.FieldAttributes(({route.RootType.TypeName()} a) => a.{route.P
         {
             get { return scale.HasValue; }
         }
-
+        
         public string UserDefinedTypeName { get; set; }
 
         public string Default { get; set; }
@@ -388,6 +388,17 @@ sb.Schema.Settings.FieldAttributes(({route.RootType.TypeName()} a) => a.{route.P
         {
             this.HasTicks = hasTicks;
         }
+    }
+
+    /// <summary>
+    /// Activates SQL Server 2016 Temporal Tables
+    /// </summary>
+    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Field | AttributeTargets.Property /*MList fields*/, Inherited = true, AllowMultiple = false)]
+    public sealed class SystemVersionedAttribute : Attribute
+    {
+        public string TemporalTableName { get; set; }
+        public string StartDateColumnName { get; set; } = "SysStartDate";
+        public string EndDateColumnName { get; set; } = "SysEndDate";
     }
 
     [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property)]

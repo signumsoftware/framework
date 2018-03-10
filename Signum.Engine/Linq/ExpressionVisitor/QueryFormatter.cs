@@ -35,6 +35,7 @@ namespace Signum.Engine.Linq
             internal string Name;
         }
 
+
         Dictionary<Expression, DbParameterPair> parameterExpressions = new Dictionary<Expression, DbParameterPair>();
 
         int parameter = 0;
@@ -591,8 +592,63 @@ namespace Signum.Engine.Linq
         protected internal override Expression VisitTable(TableExpression table)
         {
             sb.Append(table.Name.ToString());
+            WriteSystemTime(table.SystemTime);
 
             return table;
+        }
+
+        private void WriteSystemTime(SystemTime st)
+        {
+            if (st != null)
+            {
+                sb.Append("FOR SYSTEM_TIME ");
+
+                if (st is SystemTime.AsOf asOf)
+                {
+                    sb.Append("AS OF ");
+                    this.VisitSystemTimeConstant(asOf.DateTime);
+                }
+                else if (st is SystemTime.FromTo fromTo)
+                {
+                    sb.Append("FROM ");
+                    this.VisitSystemTimeConstant(fromTo.StartDateTime);
+
+                    sb.Append("TO ");
+                    this.VisitSystemTimeConstant(fromTo.StartDateTime);
+                }
+                else if (st is SystemTime.Between between)
+                {
+                    sb.Append("BETWEEN (");
+                    this.VisitSystemTimeConstant(between.StartDateTime);
+
+                    sb.Append(", ");
+                    this.VisitSystemTimeConstant(between.StartDateTime);
+                    sb.Append(")");
+                }
+                else if (st is SystemTime.ContainerIn contained)
+                {
+                    sb.Append("CONTAINER IN (");
+                    this.VisitSystemTimeConstant(contained.StartDateTime);
+
+                    sb.Append(", ");
+                    this.VisitSystemTimeConstant(contained.StartDateTime);
+                    sb.Append(")");
+                }
+                else if (st is SystemTime.All)
+                {
+                    sb.Append("ALL");
+                }
+                else
+                    throw new InvalidOperationException("Unexpected");
+            }
+        }
+
+        Dictionary<DateTime, ConstantExpression> systemTimeConstants = new Dictionary<DateTime, ConstantExpression>();
+        void VisitSystemTimeConstant(DateTime datetime)
+        {
+            var c = systemTimeConstants.GetOrCreate(datetime, dt => Expression.Constant(dt));
+
+            VisitConstant(c);
         }
 
         protected internal override SourceExpression VisitSource(SourceExpression source)
