@@ -822,7 +822,14 @@ export class PropertyRepeaterComponent extends React.Component<PropertyRepeaterC
                 <div>
                     {
                         this.props.properties.map((p, i) =>
-                            <CollapsableCard isOpen={this.state.currentEventKey == i} toggle={() => this.handleSelect(i)} header={this.renderPropertyHeader(p, i)} key={i} color="info">
+                            <CollapsableCard
+                                key={i}
+                                header={this.renderPropertyHeader(p, i)}
+                                cardStyle={{ background: "secondary" }}
+                                headerStyle={{ text: "light" }}
+                                bodyStyle={{ background: "light" }}
+                                isOpen={this.state.currentEventKey == i}
+                                toggle={() => this.handleSelect(i)} >
                                 <PropertyComponent property={p} dc={this.props.dc} showDatabaseMapping={this.props.showDatabaseMapping} />
                             </CollapsableCard>)
                     }
@@ -1182,12 +1189,13 @@ export class ValidatorRepeaterComponent extends React.Component<ValidatorRepeate
                 <div className="panel-group">
                     {
                         (this.props.property.validators || []).map((val, i) =>
-                            <div className="card border-primary">
-                                <div className="card-header">{this.renderHeader(val, i)}</div>
-                                <div className="card-body text-primary">
-                                    {registeredValidators[val.type].render && registeredValidators[val.type].render!(val, this.props.dc)}
-                                </div>
-                            </div>
+                            <CollapsableCard
+                                key={i}
+                                header={this.renderHeader(val, i)}
+                                cardStyle={{ background: "light" }}
+                                defaultOpen={true}>
+                                {registeredValidators[val.type].render && registeredValidators[val.type].render!(val, this.props.dc)}
+                            </CollapsableCard>
                         )
                     }
                 </div>

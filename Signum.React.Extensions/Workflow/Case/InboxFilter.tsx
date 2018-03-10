@@ -34,25 +34,29 @@ export default class InboxFilter extends React.Component<{ ctx: TypeContext<Inbo
         var ctx4 = this.props.ctx.subCtx({ labelColumns: 4 });
 
         return (
-            <CollapsableCard
-                header={InboxMessage.Filters.niceToString()}
-                color="success">
-                <div className="sf-main-control">
-                    <div className="row">
-                        <div className="col-sm-3">
-                            <EnumCheckboxList ctx={ctx.subCtx(o => o.states)} columnCount={2} formGroupHtmlAttributes={{ style: { marginTop: -15, marginBottom: -15 } }} />
-                        </div>
-                        <div className="col-sm-3">
-                            <ValueLine ctx={ctx4.subCtx(o => o.range)} />
-                            <ValueLine ctx={ctx4.subCtx(o => o.fromDate)} />
-                            <ValueLine ctx={ctx4.subCtx(o => o.toDate)} />
-                        </div>
-                        <div className="col-sm-1">
-                            <Button color="warning" className="btn" onClick={this.handleOnClearFiltersClick}>{InboxMessage.Clear.niceToString()}</Button>
+            <div style={{ marginBottom: "5px" }}>
+                <CollapsableCard
+                    header={InboxMessage.Filters.niceToString()}
+                    cardStyle={{ background: "success"  }}
+                    headerStyle={{ text: "light" }}
+                    bodyStyle={{ background: "light" }}>
+                    <div className="sf-main-control">
+                        <div className="row">
+                            <div className="col-sm-3">
+                                <EnumCheckboxList ctx={ctx.subCtx(o => o.states)} columnCount={2} formGroupHtmlAttributes={{ style: { marginTop: -15, marginBottom: -15 } }} />
+                            </div>
+                            <div className="col-sm-3">
+                                <ValueLine ctx={ctx4.subCtx(o => o.range)} />
+                                <ValueLine ctx={ctx4.subCtx(o => o.fromDate)} />
+                                <ValueLine ctx={ctx4.subCtx(o => o.toDate)} />
+                            </div>
+                            <div className="col-sm-1">
+                                <Button color="warning" className="btn" onClick={this.handleOnClearFiltersClick}>{InboxMessage.Clear.niceToString()}</Button>
+                            </div>
                         </div>
                     </div>
-                </div>
-            </CollapsableCard>
+                </CollapsableCard>
+            </div>
         );
     }
 
