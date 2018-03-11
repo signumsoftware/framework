@@ -30,6 +30,10 @@ export function start(options: { routes: JSX.Element[] }) {
     Navigator.addSettings(new EntitySettings(DynamicMixinConnectionEntity, w => import('./Type/DynamicMixinConnection')));
     Navigator.addSettings(new EntitySettings(DynamicSqlMigrationEntity, w => import('./Type/DynamicSqlMigration')));
 
+    Operations.addSettings(new EntityOperationSettings(DynamicTypeOperation.Clone, {
+        contextual: { icon: "fa fa-clone", iconColor: "black" },
+    }));
+
     Operations.addSettings(new EntityOperationSettings(DynamicTypeOperation.Save, {
         onClick: eoc => {
             (eoc.frame.entityComponent as DynamicTypeComponent).beforeSave();
