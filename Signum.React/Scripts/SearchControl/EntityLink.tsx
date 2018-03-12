@@ -25,8 +25,8 @@ export default class EntityLink extends React.Component<EntityLinkProps>{
 
         return (
             <Link
-                to={Navigator.navigateRoute(lite) }
-                title={lite.toStr}
+                to={Navigator.navigateRoute(lite)}
+                title={this.props.title || lite.toStr}
                 onClick={this.handleClick}
                 data-entity={liteKey(lite)}
                 {...(htmlAtts as React.HTMLAttributes<HTMLAnchorElement>) }>
