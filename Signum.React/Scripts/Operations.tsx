@@ -28,7 +28,11 @@ export function start() {
         queryName: OperationLogEntity,
         parentColumn: "Target",
         parentValue: ctx.lite
-    }, { isVisible: getTypeInfo(ctx.lite.EntityType) && getTypeInfo(ctx.lite.EntityType).requiresSaveOperation, icon: "fa fa-history", iconColor: "green" }));
+    }, {
+            isVisible: getTypeInfo(ctx.lite.EntityType) && getTypeInfo(ctx.lite.EntityType).requiresSaveOperation && Finder.isFindable(OperationLogEntity, false),
+            icon: "fa fa-history",
+            iconColor: "green"
+        }));
 }
 
 export const operationSettings: { [operationKey: string]: OperationSettings } = {};
