@@ -175,6 +175,8 @@ namespace Signum.Engine.Linq
 
         public ObjectName Name { get { return Table.Name; } }
 
+        public SystemTime SystemTime { get; private set; }
+
         public readonly string WithHint;
 
         public override Alias[] KnownAliases
@@ -182,10 +184,11 @@ namespace Signum.Engine.Linq
             get { return new[] { Alias }; }
         }
 
-        internal TableExpression(Alias alias, ITable table, string withHint)
+        internal TableExpression(Alias alias, ITable table, SystemTime systemTime, string withHint)
             : base(DbExpressionType.Table, alias)
         {
             this.Table = table;
+            this.SystemTime = systemTime;
             this.WithHint = withHint;
         }
 

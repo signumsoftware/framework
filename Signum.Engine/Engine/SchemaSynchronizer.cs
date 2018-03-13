@@ -205,10 +205,18 @@ namespace Signum.Engine
                         ),
                         removeOld: (tn, dif) => SqlBuilder.DropTable(dif.Name),
                         mergeBoth: (tn, tab, dif) =>
-                            SqlPreCommand.Combine(Spacing.Simple,
-                                !object.Equals(dif.Name, tab.Name) ? SqlBuilder.RenameOrMove(dif, tab) : null,
+                        {
+                            var rename = !object.Equals(dif.Name, tab.Name) ? SqlBuilder.RenameOrMove(dif, tab) : null;
 
-                                Synchronizer.SynchronizeScript(
+                            var disableSystemVersioning = (dif.TemporalType != SysTableTemporalType.None && (
+                                tab.SysteVersioned == null || !dif.TemporalTableName.Equals(tab.SysteVersioned.TableName)) ?
+                                SqlBuilder.AlterTableDisableSystemVersioning(tab) : null);
+
+                            var dropPeriod = (dif.Period != null &&
+                                (tab.SysteVersioned == null || !dif.Period.PeriodEquals(tab.SysteVersioned)) ?
+                                SqlBuilder.AlterTableDropPeriod(tab) : null);
+
+                            var columns = Synchronizer.SynchronizeScript(
                                     Spacing.Simple,
                                     tab.Columns,
                                     dif.Columns,
@@ -218,7 +226,7 @@ namespace Signum.Engine
                                         AlterTableAddColumnDefault(tab, tabCol, replacements)),
 
                                     removeOld: (cn, difCol) => SqlPreCommand.Combine(Spacing.Simple,
-                                         difCol.Default != null ? SqlBuilder.DropDefaultConstraint(tab.Name, difCol.Name) : null,
+                                         difCol.DefaultConstraint != null ? SqlBuilder.AlterTableDropConstraint(tab.Name, difCol.DefaultConstraint.Name) : null,
                                         SqlBuilder.AlterTableDropColumn(tab, cn)),
 
                                     mergeBoth: (cn, tabCol, difCol) => SqlPreCommand.Combine(Spacing.Simple,
@@ -227,22 +235,48 @@ namespace Signum.Engine
 
                                         difCol.ColumnEquals(tabCol, ignorePrimaryKey: true) ? null : SqlPreCommand.Combine(Spacing.Simple,
                                             tabCol.PrimaryKey && !difCol.PrimaryKey && dif.PrimaryKeyName != null ? SqlBuilder.DropPrimaryKeyConstraint(tab.Name) : null,
-                                        difCol.CompatibleTypes(tabCol) ? SqlBuilder.AlterTableAlterColumn(tab, tabCol):
-                                                SqlPreCommand.Combine(Spacing.Simple, 
+                                        difCol.CompatibleTypes(tabCol) ? SqlBuilder.AlterTableAlterColumn(tab, tabCol) :
+                                                SqlPreCommand.Combine(Spacing.Simple,
                                                     SqlBuilder.AlterTableDropColumn(tab, tabCol.Name),
-                                                    SqlBuilder.AlterTableAddColumn(tab, tabCol)) 
+                                                    SqlBuilder.AlterTableAddColumn(tab, tabCol))
                                             ,
                                             tabCol.SqlDbType == SqlDbType.NVarChar && difCol.SqlDbType == SqlDbType.NChar ? SqlBuilder.UpdateTrim(tab, tabCol) : null),
 
                                         difCol.DefaultEquals(tabCol) ? null : SqlPreCommand.Combine(Spacing.Simple,
-                                            difCol.Default != null ? SqlBuilder.DropDefaultConstraint(tab.Name, tabCol.Name) : null,
+                                            difCol.DefaultConstraint != null ? SqlBuilder.AlterTableDropConstraint(tab.Name, difCol.DefaultConstraint.Name) : null,
                                             tabCol.Default != null ? SqlBuilder.AddDefaultConstraint(tab.Name, tabCol.Name, tabCol.Default, tabCol.SqlDbType) : null),
 
                                         UpdateByFkChange(tn, difCol, tabCol, ChangeName, copyDataFrom)
                                     )
-                                )
-                            )
-                        );
+                                );
+                            
+                            var addPeriod = ((tab.SysteVersioned != null &&
+                                (dif.Period == null || !dif.Period.PeriodEquals(tab.SysteVersioned))) ?
+                                (SqlPreCommandSimple)SqlBuilder.AlterTableAddPeriod(tab) : null);
+
+                            var addSystemVersioning = (tab.SysteVersioned != null &&
+                                (dif.Period == null || !dif.TemporalTableName.Equals(tab.SysteVersioned.TableName)) ?
+                                SqlBuilder.AlterTableEnableSystemVersioning(tab).Do(a=>a.GoBefore = true) : null);
+
+
+                            SqlPreCommand combinedAddPeriod = null;
+                            if(addPeriod != null && columns is SqlPreCommandConcat cols)
+                            {
+                                var periodRows = cols.Leaves().Where(pcs => pcs.Sql.Contains(" ADD ") && pcs.Sql.Contains("GENERATED ALWAYS AS ROW")).ToList();
+                                if (periodRows.Count == 2) {
+
+                                    combinedAddPeriod = new SqlPreCommandSimple($@"ALTER TABLE {tn} ADD
+    {periodRows[0].Sql.After(" ADD ")},
+    {periodRows[1].Sql.After(" ADD ")},
+    {addPeriod.Sql.After(" ADD ")}
+");
+                                    addPeriod = null;
+                                    columns = cols.Leaves().Except(periodRows).Combine(cols.Spacing);
+                                }
+                            }
+
+                            return SqlPreCommand.Combine(Spacing.Simple, rename, disableSystemVersioning, dropPeriod, combinedAddPeriod, columns, addPeriod, addSystemVersioning);
+                        });
 
                 if (tables != null)
                     tables.GoAfter = true;
@@ -357,22 +391,20 @@ namespace Signum.Engine
             if (!temporalDefault)
                 return SqlBuilder.AlterTableAddColumn(table, column);
 
-            try
-            {
-                var defaultValue = GetDefaultValue(table, column, rep);
-                if (defaultValue == "force")
-                    return SqlBuilder.AlterTableAddColumn(table, column);
 
-                column.Default = defaultValue;
+            var defaultValue = GetDefaultValue(table, column, rep);
+            if (defaultValue == "force")
+                return SqlBuilder.AlterTableAddColumn(table, column);
 
-                return SqlPreCommand.Combine(Spacing.Simple,
-                    SqlBuilder.AlterTableAddColumn(table, column),
-                    SqlBuilder.DropDefaultConstraint(table.Name, column.Name));
-            }
-            finally
+            var tempDefault = new DiffDefaultConstraint
             {
-                column.Default = null;
-            }
+                Definition = defaultValue,
+                Name = "DF_TEMP_" + column.Name
+            };
+            
+            return SqlPreCommand.Combine(Spacing.Simple,
+                SqlBuilder.AlterTableAddColumn(table, column, tempDefault),
+                SqlBuilder.AlterTableDropConstraint(table.Name, tempDefault.Name));
         }
 
         internal static SqlPreCommand CopyData(ITable newTable, DiffTable oldTable, Replacements rep)
@@ -398,6 +430,13 @@ FROM {oldTable.Name}");
 
         public static string GetDefaultValue(ITable table, IColumn column, Replacements rep)
         {
+            if(column is SystemVersionedInfo.Column svc)
+            {
+                return svc.SystemVersionColumnType == SystemVersionedInfo.ColumnType.Start ?
+                    "SYSUTCDATETIME()" :
+                    "CONVERT(datetime2, '9999-12-31 23:59:59.9999999')";
+            }
+
             string defaultValue = rep.Interactive ? SafeConsole.AskString("Default value for '{0}.{1}'? (or press enter) ".FormatWith(table.Name.Name, column.Name), stringValidator: str => null) : "";
             if (defaultValue == "force")
                 return defaultValue;
@@ -508,12 +547,34 @@ JOIN {3} {4} ON {2}.{0} = {4}.Id".FormatWith(tabCol.Name,
 
                     var sysDb = Database.View<SysDatabases>().Single(a => a.name == databaseName);
 
+                    var con = Connector.Current;
+
                     var tables =
                         (from s in Database.View<SysSchemas>()
                          from t in s.Tables().Where(t => !t.ExtendedProperties().Any(a => a.name == "microsoft_database_tools_support")) //IntelliSense bug
                          select new DiffTable
                          {
                              Name = new ObjectName(new SchemaName(db, s.name), t.name),
+
+                             TemporalType = !con.SupportsTemporalTables ? SysTableTemporalType.None: t.temporal_type,
+
+                             Period = !con.SupportsTemporalTables ? null : 
+                             (from p in t.Periods()
+                              join sc in t.Columns() on p.start_column_id equals sc.column_id 
+                              join ec in t.Columns() on p.end_column_id equals ec.column_id
+#pragma warning disable CS0472 
+                              select (int?)p.object_id == null ? null : new DiffPeriod
+#pragma warning restore CS0472
+                              {
+                                  StartColumnName = sc.name,
+                                  EndColumnName = ec.name,
+                              }).SingleOrDefaultEx(),
+
+                             TemporalTableName = !con.SupportsTemporalTables || t.history_table_id == null ? null : 
+                             Database.View<SysTables>()
+                             .Where(ht => ht.object_id == t.history_table_id)
+                             .Select(ht => new ObjectName(new SchemaName(db, t.Schema().name), t.name))
+                             .SingleOrDefault(),
 
                              PrimaryKeyName = (from k in t.KeyConstraints()
                                                where k.type == "PK"
@@ -535,7 +596,12 @@ JOIN {3} {4} ON {2}.{0} = {4}.Id".FormatWith(tabCol.Name,
                                             Precission = c.precision,
                                             Scale = c.scale,
                                             Identity = c.is_identity,
-                                            Default = ctr.definition,
+                                            GeneratedAlwaysType = con.SupportsTemporalTables ? c.generated_always_type : GeneratedAlwaysType.None,
+                                            DefaultConstraint = ctr.name == null ? null : new DiffDefaultConstraint
+                                            {
+                                                Name = ctr.name,
+                                                Definition = ctr.definition
+                                            },
                                             PrimaryKey = t.Indices().Any(i => i.is_primary_key && i.IndexColumns().Any(ic => ic.column_id == c.column_id)),
                                         }).ToDictionaryEx(a => a.Name, "columns"),
 
@@ -597,7 +663,7 @@ JOIN {3} {4} ON {2}.{0} = {4}.Id".FormatWith(tabCol.Name,
 
                     tables.ForEach(t => t.ForeignKeysToColumns());
 
-                    allTables.AddRange(tables);
+                    allTables.AddRange(tables.Where(a => a.TemporalType != SysTableTemporalType.HistoryTable));
                 }
             }
 
@@ -759,6 +825,18 @@ EXEC(@{1})".FormatWith(databaseName, variableName));
         }
     }
 
+    public class DiffPeriod
+    {
+        public string StartColumnName;
+        public string EndColumnName;
+
+        internal bool PeriodEquals(SystemVersionedInfo systemVersioned)
+        {
+            return systemVersioned.StartColumnName == StartColumnName && 
+                systemVersioned.EndColumnName == EndColumnName;
+        }
+    }
+
     public class DiffTable
     {
         public ObjectName Name;
@@ -778,6 +856,10 @@ EXEC(@{1})".FormatWith(databaseName, variableName));
             get { return Indices.Values.ToList(); }
             set { Indices.AddRange(value, a => a.IndexName, a => a); }
         }
+
+        public SysTableTemporalType TemporalType;
+        public ObjectName TemporalTableName;
+        public DiffPeriod Period;
 
         public Dictionary<string, DiffIndex> Indices = new Dictionary<string, DiffIndex>();
 
@@ -900,6 +982,19 @@ EXEC(@{1})".FormatWith(databaseName, variableName));
         NonClusteredHash = 7,
     }
 
+    public enum GeneratedAlwaysType
+    {
+        None = 0,
+        AsRowStart = 1,
+        AsRowEnd = 2
+    }
+
+    public class DiffDefaultConstraint
+    {
+        public string Name;
+        public string Definition;
+    }
+
     public class DiffColumn
     {
         public string Name;
@@ -915,7 +1010,9 @@ EXEC(@{1})".FormatWith(databaseName, variableName));
 
         public DiffForeignKey ForeignKey;
 
-        public string Default;
+        public DiffDefaultConstraint DefaultConstraint;
+
+        public GeneratedAlwaysType GeneratedAlwaysType;
 
         public bool ColumnEquals(IColumn other, bool ignorePrimaryKey)
         {
@@ -927,7 +1024,8 @@ EXEC(@{1})".FormatWith(databaseName, variableName));
                 && (other.Size == null || other.Size.Value == Precission || other.Size.Value == Length / BytesPerChar(other.SqlDbType) || other.Size.Value == int.MaxValue && Length == -1)
                 && (other.Scale == null || other.Scale.Value == Scale)
                 && Identity == other.Identity
-                && (ignorePrimaryKey || PrimaryKey == other.PrimaryKey);
+                && (ignorePrimaryKey || PrimaryKey == other.PrimaryKey)
+                && GeneratedAlwaysType == other.GetGeneratedAlwaysType();
 
             return result;
         }
@@ -942,10 +1040,10 @@ EXEC(@{1})".FormatWith(databaseName, variableName));
 
         public bool DefaultEquals(IColumn other)
         {
-            if (other.Default == null && this.Default == null)
+            if (other.Default == null && this.DefaultConstraint == null)
                 return true;
 
-            var result = CleanParenthesis(this.Default) == CleanParenthesis(other.Default);
+            var result = CleanParenthesis(this.DefaultConstraint?.Definition) == CleanParenthesis(other.Default);
 
             return result;
         }
@@ -969,7 +1067,7 @@ EXEC(@{1})".FormatWith(databaseName, variableName));
             {
                 Name = Name,
                 ForeignKey = ForeignKey,
-                Default = Default,
+                DefaultConstraint = DefaultConstraint?.Let(dc => new DiffDefaultConstraint { Name = dc.Name, Definition = dc.Definition }),
                 Identity = Identity,
                 Length = Length,
                 PrimaryKey = PrimaryKey,

@@ -42,6 +42,57 @@ namespace Signum.Engine.Maps
         List<Index> GeneratAllIndexes();
 
         void GenerateColumns();
+
+        SystemVersionedInfo SysteVersioned { get; }
+    }
+
+    public class SystemVersionedInfo
+    {
+        public ObjectName TableName;
+        public string StartColumnName;
+        public string EndColumnName;
+
+        internal IEnumerable<IColumn> Columns()
+        {
+            return new[]
+            {
+                new Column(this.StartColumnName, ColumnType.Start),
+                new Column(this.EndColumnName, ColumnType.End)
+            };
+        }
+
+        public enum ColumnType
+        {
+            Start, 
+            End,
+        }
+
+        public class Column : IColumn
+        {
+            public Column(string name, ColumnType systemVersionColumnType)
+            {
+                this.Name = name;
+                this.SystemVersionColumnType = systemVersionColumnType;
+            }
+
+            public string Name { get; private set; }
+            public ColumnType SystemVersionColumnType { get; private set; }
+
+            public bool Nullable => false;
+            public SqlDbType SqlDbType => SqlDbType.DateTime2;
+            public Type Type => typeof(DateTime);
+            public string UserDefinedTypeName => null;
+            public bool PrimaryKey => false;
+            public bool IdentityBehaviour => false;
+            public bool Identity => false;
+            public string Default { get; set; }
+            public int? Size => null;
+            public int? Scale => null;
+            public string Collation => null;
+            public Table ReferenceTable => null;
+            public bool AvoidForeignKey => false;
+        }
+
     }
 
     interface ITablePrivate
@@ -59,6 +110,8 @@ namespace Signum.Engine.Maps
         public bool IdentityBehaviour { get; set; }
         public bool IsView { get; internal set; }
         public string CleanTypeName { get; set; }
+
+        public SystemVersionedInfo SysteVersioned { get; set; }
 
         public Dictionary<string, EntityField> Fields { get; set; }
         public Dictionary<Type, FieldMixin> Mixins { get; set; }
@@ -86,7 +139,10 @@ namespace Signum.Engine.Maps
 
             if (Mixins != null)
                 columns.AddRange(Mixins.Values.SelectMany(m => m.Fields.Values).SelectMany(f => f.Field.Columns()).ToDictionaryEx(c => c.Name, errorSuffix), errorSuffix);
-            
+
+            if (this.SysteVersioned != null)
+                columns.AddRange(this.SysteVersioned.Columns().ToDictionaryEx(a => a.Name), errorSuffix);
+
             Columns = columns;
 
             inserterDisableIdentity = new ResetLazy<InsertCacheDisableIdentity>(() => InsertCacheDisableIdentity.InitializeInsertDisableIdentity(this));
@@ -314,7 +370,7 @@ namespace Signum.Engine.Maps
         bool PrimaryKey { get; }
         bool IdentityBehaviour { get; }
         bool Identity { get; }
-        string Default { get; set; }
+        string Default { get; }
         int? Size { get; }
         int? Scale { get; }
         string Collation { get; }
@@ -327,6 +383,14 @@ namespace Signum.Engine.Maps
         public static string GetSqlDbTypeString(this IColumn column)
         {
             return column.SqlDbType.ToString().ToUpper(CultureInfo.InvariantCulture) + SqlBuilder.GetSizeScale(column.Size, column.Scale);
+        }
+
+        public static GeneratedAlwaysType GetGeneratedAlwaysType(this IColumn column)
+        {
+            if (column is SystemVersionedInfo.Column svc)
+                return svc.SystemVersionColumnType == SystemVersionedInfo.ColumnType.Start ? GeneratedAlwaysType.AsRowStart : GeneratedAlwaysType.AsRowEnd;
+
+            return GeneratedAlwaysType.None;
         }
     }
 
@@ -645,7 +709,7 @@ namespace Signum.Engine.Maps
         public SqlDbType SqlDbType { get { return ReferenceTable.PrimaryKey.SqlDbType; } }
         public string Collation { get { return ReferenceTable.PrimaryKey.Collation; } }
         public string UserDefinedTypeName { get { return ReferenceTable.PrimaryKey.UserDefinedTypeName; } }
-        public Type Type { get { return this.Nullable ? ReferenceTable.PrimaryKey.Type.Nullify() : ReferenceTable.PrimaryKey.Type; } }
+        public virtual Type Type { get { return this.Nullable ? ReferenceTable.PrimaryKey.Type.Nullify() : ReferenceTable.PrimaryKey.Type; } }
         
         public bool AvoidForeignKey { get; set; }
 
@@ -708,10 +772,23 @@ namespace Signum.Engine.Maps
         }
     }
 
-    public partial class FieldEnum : FieldReference
+    public partial class FieldEnum : FieldReference, IColumn
     {
-        public FieldEnum(PropertyRoute route) : base(route) { }
+        public override Type Type
+        {
+            get
+            {
+                if (this.ReferenceTable != null)
+                    return base.Type;
 
+                var ut = Enum.GetUnderlyingType(this.FieldType.UnNullify());
+
+                return this.Nullable ? ut.Nullify() : ut;
+            }
+        } 
+
+        public FieldEnum(PropertyRoute route) : base(route) { }
+        
         public override string ToString()
         {
             return "{0} -> {1} {4} ({2})".FormatWith(
@@ -971,6 +1048,8 @@ namespace Signum.Engine.Maps
         public FieldValue Order { get; set; }
         public Field Field { get; set; }
 
+        public SystemVersionedInfo SysteVersioned { get; set; }
+
         public Type CollectionType { get; private set; }
         public Func<IList> Constructor { get; private set; }
 
@@ -997,6 +1076,9 @@ namespace Signum.Engine.Maps
                 cols.Add(Order); 
 
             cols.AddRange(Field.Columns());
+
+            if (this.SysteVersioned != null)
+                cols.AddRange(this.SysteVersioned.Columns());
 
             Columns = cols.ToDictionary(a => a.Name);
         }

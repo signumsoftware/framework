@@ -164,6 +164,8 @@ namespace Signum.Engine
         public abstract bool SupportsSqlDependency { get; }
 
         public abstract bool SupportsFormat { get; }
+
+        public abstract bool SupportsTemporalTables { get; }
     }
 
     public abstract class ParameterBuilder

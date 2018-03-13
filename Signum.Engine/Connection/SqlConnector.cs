@@ -26,6 +26,7 @@ namespace Signum.Engine
         SqlServer2008,
         SqlServer2012,
         SqlServer2014,
+        SqlServer2016,
         AzureSQL,
     }
 
@@ -479,9 +480,15 @@ namespace Signum.Engine
         {
             get { return Version != SqlServerVersion.AzureSQL && Version >= SqlServerVersion.SqlServer2008; }
         }
+
         public override bool SupportsFormat
         {
             get { return  Version >= SqlServerVersion.SqlServer2012; }
+        }
+
+        public override bool SupportsTemporalTables
+        {
+            get { return Version >= SqlServerVersion.SqlServer2016; }
         }
     }
 

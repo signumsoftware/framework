@@ -31,8 +31,11 @@ namespace Signum.Engine.Linq
 
         internal AliasGenerator aliasGenerator;
 
+        SystemTime systemTime;
+
         public QueryBinder(AliasGenerator aliasGenerator)
         {
+            this.systemTime = SystemTime.Current;
             this.aliasGenerator = aliasGenerator;
         }
 
@@ -1267,7 +1270,7 @@ namespace Signum.Engine.Linq
                 ((TableMList)table).GetProjectorExpression(tableAlias, this);
 
             Type resultType = typeof(IQueryable<>).MakeGenericType(query.ElementType);
-            TableExpression tableExpression = new TableExpression(tableAlias, table, currentTableHint);
+            TableExpression tableExpression = new TableExpression(tableAlias, table, table.SysteVersioned != null ? this.systemTime : null, currentTableHint);
             currentTableHint = null;
 
             Alias selectAlias = NextSelectAlias();
@@ -2483,7 +2486,7 @@ namespace Signum.Engine.Linq
 
                         return new UnionEntity
                         {
-                            Table = new TableExpression(alias, ee.Table, null),
+                            Table = new TableExpression(alias, ee.Table, ee.Table.SysteVersioned != null ? this.systemTime : null, null),
                             Entity = (EntityExpression)ee.Table.GetProjectorExpression(alias, this),
                         };
                     }).ToReadOnly()
@@ -2605,7 +2608,7 @@ namespace Signum.Engine.Linq
                 AddRequest(new TableRequest
                 {
                     CompleteEntity = result,
-                    Table = new TableExpression(newAlias, table, null),
+                    Table = new TableExpression(newAlias, table, table.SysteVersioned != null ? this.systemTime : null, null),
                 });
 
                 return result;
@@ -2778,7 +2781,7 @@ namespace Signum.Engine.Linq
             TableMList relationalTable = mle.TableMList;
 
             Alias tableAlias = NextTableAlias(mle.TableMList.Name);
-            TableExpression tableExpression = new TableExpression(tableAlias, relationalTable, null);
+            TableExpression tableExpression = new TableExpression(tableAlias, relationalTable, relationalTable.SysteVersioned != null ? this.systemTime : null, null);
 
             Expression projector = relationalTable.FieldExpression(tableAlias, this, withRowId);
 
