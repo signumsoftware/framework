@@ -79,6 +79,15 @@ namespace Signum.Engine.Cache
             return Expression.Lambda<Func<object, PrimaryKey>>(primaryKey, originObject).Compile();
         }
 
+        internal Func<object, PrimaryKey?> GetPrimaryKeyNullableGetter(IColumn column)
+        {
+            var access = TupleReflection.TupleChainProperty(Expression.Convert(originObject, tupleType), table.Columns.Values.IndexOf(column));
+
+            var primaryKey = WrapPrimaryKey(access);
+
+            return Expression.Lambda<Func<object, PrimaryKey?>>(primaryKey, originObject).Compile();
+        }
+
         static ConstructorInfo ciPrimaryKey = ReflectionTools.GetConstuctorInfo(() => new PrimaryKey(1));
 
         internal static Expression NewPrimaryKey(Expression expression)
@@ -86,7 +95,7 @@ namespace Signum.Engine.Cache
             return Expression.New(ciPrimaryKey, Expression.Convert(expression, typeof(IComparable)));
         }
 
-
+        
         static GenericInvoker<Func<ICacheLogicController, AliasGenerator, string, string, CachedTableBase>> ciCachedTable =
          new GenericInvoker<Func<ICacheLogicController, AliasGenerator, string, string, CachedTableBase>>((controller, aliasGenerator, lastPartialJoin, remainingJoins) =>
              new CachedTable<Entity>(controller, aliasGenerator, lastPartialJoin, remainingJoins));
