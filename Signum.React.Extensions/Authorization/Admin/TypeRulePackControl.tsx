@@ -26,6 +26,7 @@ import { QueryEntity, PropertyRouteEntity } from '../../../../Framework/Signum.R
 
 
 import "./AuthAdmin.css"
+import { is } from '../../../../Framework/Signum.React/Scripts/Signum.Entities';
 
 export default class TypesRulesPackControl extends React.Component<{ ctx: TypeContext<TypeRulePack> }, { filter: string }> implements IRenderButtons {
 
@@ -377,7 +378,7 @@ function typeAllowedEquals(allowed: TypeAllowedAndConditions, allowedBase: TypeA
         && allowed.conditions!.map(mle => mle.element)
             .every((c, i) => {
                 let b = allowedBase.conditions![i].element;
-                return c.allowed == b.allowed && c.typeCondition!.id == b.typeCondition!.id;
+                return c.allowed == b.allowed && is(c.typeCondition, b.typeCondition);
             });
 }
 

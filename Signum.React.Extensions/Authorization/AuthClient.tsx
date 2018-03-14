@@ -256,7 +256,6 @@ export function getAuthToken(): string | undefined {
 }
 
 export function setAuthToken(authToken: string | undefined): void{
-    debugger;
     sessionStorage.setItem("authToken", authToken || "");
 }
 
