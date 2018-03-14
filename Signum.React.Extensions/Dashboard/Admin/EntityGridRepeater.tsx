@@ -91,7 +91,7 @@ export class EntityGridRepeater extends EntityListBase<EntityGridRepeaterProps, 
                                         const offset = p.ctx.value.startColumn - (last ? (last.startColumn + last.columns) : 0);
 
                                         return (
-                                            <div key={j} className={`sf-grid-element col-sm-${p.ctx.value.columns} col-sm-offset-${offset}`}>
+                                            <div key={j} className={`sf-grid-element col-sm-${p.ctx.value.columns} offset-sm-${offset}`}>
                                                 {item}
                                                 {/*StartColumn: {p.ctx.value.startColumn} | Columns: {p.ctx.value.columns} | Row: {p.ctx.value.row}*/}
                                             </div>
