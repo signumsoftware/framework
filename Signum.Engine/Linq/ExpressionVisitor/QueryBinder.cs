@@ -2532,7 +2532,7 @@ namespace Signum.Engine.Linq
 
         internal Expression BindAdditionalField(AdditionalFieldExpression af, bool entityCompleter)
         {
-            var lambda = Schema.Current.GetAditionalQueryBinding(af.Route, entityCompleter);
+            var lambda = Schema.Current.GetAdditionalQueryBinding(af.Route, entityCompleter);
 
             if (lambda == null)
                 return null;

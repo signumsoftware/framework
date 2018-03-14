@@ -111,27 +111,25 @@ namespace Signum.Engine
                         query.ToVirtualMListWithOrder() :
                         query.ToVirtualMList();
 
-                    AssignAndPostRetrieving(mlist, newList);
-                    mlist.AssignMList(newList);
-                    mlist.PostRetrieving();
+                    mlist.AssignAndPostRetrieving(newList);
                 };
             }
 
             if (preserveOrder)
             {
-                sb.Schema.EntityEvents<T>().RegisterBinding(mListField,
-                     e => Database.Query<L>()
-                    .Where(line => backReference.Evaluate(line) == e.ToLite())
-                    .ToVirtualMListWithOrder(),
-                     expandQuery: () => !lazy && !VirtualMList.ShouldAvoidMListType(typeof(L)));
+                sb.Schema.EntityEvents<T>().RegisterBinding<MList<L>>(mListField,
+                     shouldSet: () => !lazy && !VirtualMList.ShouldAvoidMListType(typeof(L)),
+                     valueExpression: e => Database.Query<L>().Where(line => backReference.Evaluate(line) == e.ToLite()).ToVirtualMListWithOrder(),
+                     valueFunction: (e, retriever) => Schema.Current.CacheController<L>().RequestByBackReference<T>(retriever, backReference, e.ToLite()).ToVirtualMListWithOrder()
+                );
             }
             else
             {
                 sb.Schema.EntityEvents<T>().RegisterBinding(mListField,
-                    e => Database.Query<L>()
-                    .Where(line => backReference.Evaluate(line) == e.ToLite())
-                    .ToVirtualMList(),
-                     expandQuery: () => !lazy && !VirtualMList.ShouldAvoidMListType(typeof(L)));
+                    shouldSet: () => !lazy && !VirtualMList.ShouldAvoidMListType(typeof(L)),
+                    valueExpression: e => Database.Query<L>().Where(line => backReference.Evaluate(line) == e.ToLite()).ToVirtualMList(),
+                    valueFunction: (e, retriever) => Schema.Current.CacheController<L>().RequestByBackReference<T>(retriever, backReference, e.ToLite()).ToVirtualMList()
+                );
             }
 
             sb.Schema.EntityEvents<T>().Saving += (T e) =>
@@ -157,15 +155,13 @@ namespace Signum.Engine
                     return;
 
                 var mlist = getMList(e);
-                if (mlist == null)
-                    return;
-
-                if (!GraphExplorer.IsGraphModified(mlist))
+              
+                if (mlist != null && !GraphExplorer.IsGraphModified(mlist))
                     return;
 
                 if (!(args.WasNew || ShouldConsiderNew(typeof(T))))
                 {
-                    var oldElements = mlist.Where(line => !line.IsNew);
+                    var oldElements = mlist.EmptyIfNull().Where(line => !line.IsNew);
                     var query = Database.Query<L>()
                     .Where(p => backReference.Evaluate(p) == e.ToLite());
 
@@ -175,21 +171,24 @@ namespace Signum.Engine
                         query.ToList().ForEach(line => onRemove(line, e));
                 }
 
-                if (setter == null)
-                    setter = CreateSetter(backReference);
-
-                mlist.ForEach(line => setter(line, e.ToLite()));
-                if (onSave == null)
-                    mlist.SaveList();
-                else
-                    mlist.ForEach(line => { if (GraphExplorer.IsGraphModified(line)) onSave(line, e); });
-                var priv = (IMListPrivate)mlist;
-                for (int i = 0; i < mlist.Count; i++)
+                if (mlist != null)
                 {
-                    if (priv.GetRowId(i) == null)
-                        priv.SetRowId(i, mlist[i].Id);
+                    if (setter == null)
+                        setter = CreateSetter(backReference);
+
+                    mlist.ForEach(line => setter(line, e.ToLite()));
+                    if (onSave == null)
+                        mlist.SaveList();
+                    else
+                        mlist.ForEach(line => { if (GraphExplorer.IsGraphModified(line)) onSave(line, e); });
+                    var priv = (IMListPrivate)mlist;
+                    for (int i = 0; i < mlist.Count; i++)
+                    {
+                        if (priv.GetRowId(i) == null)
+                            priv.SetRowId(i, mlist[i].Id);
+                    }
+                    mlist.SetCleanModified(false);
                 }
-                mlist.SetCleanModified(false);
             };
 
             
@@ -215,11 +214,7 @@ namespace Signum.Engine
             return fi;
         }
 
-        public static void AssignAndPostRetrieving<T>(this MList<T> mlist, MList<T> newList)
-        {
-            mlist.AssignMList(newList);
-            mlist.PostRetrieving();
-        }
+     
 
         public static FluentInclude<T> WithVirtualMListInitializeOnly<T, L>(this FluentInclude<T> fi,
             DynamicQueryManager dqm,

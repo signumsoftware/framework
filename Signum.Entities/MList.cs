@@ -747,6 +747,12 @@ namespace Signum.Entities
             }
 
         }
+
+        public void AssignAndPostRetrieving(IMListPrivate newList)
+        {
+            this.AssignMList((MList<T>)newList);
+            this.PostRetrieving();
+        }
     }
 
     public interface IMListPrivate
@@ -759,7 +765,9 @@ namespace Signum.Entities
         void SetRowId(int index, PrimaryKey rowId);
         void ForceRowId(int index, PrimaryKey rowId);
 
-        void InnerListModified(IList newItems, IList oldItems); 
+        void InnerListModified(IList newItems, IList oldItems);
+
+        void AssignAndPostRetrieving(IMListPrivate newList);
     }
 
     public interface IMListPrivate<T>  : IMListPrivate
