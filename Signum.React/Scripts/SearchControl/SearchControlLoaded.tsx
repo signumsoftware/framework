@@ -327,9 +327,11 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
     handleFiltersKeyUp = (e: React.KeyboardEvent<HTMLDivElement>) => {
         if (e.keyCode == 13) {
-            var input = (document.activeElement as HTMLInputElement);
-            input.blur();
-            this.doSearchPage1();
+            setTimeout(() => {
+                var input = (document.activeElement as HTMLInputElement);
+                input.blur();
+                this.doSearchPage1();
+            }, 200);
         }
     }
 
