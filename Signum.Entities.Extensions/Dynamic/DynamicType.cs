@@ -57,7 +57,7 @@ namespace Signum.Entities.Dynamic
                 var def = this.GetDefinition();
 
                 return def.Properties.Where(p => p.Name.HasText() && !IdentifierValidatorAttribute.PascalAscii.IsMatch(p.Name)).Select(p =>
-                  ValidationMessage._0DoesNotHaveAValid1Format.NiceToString("'" + p.Name + "'", IdentifierType.PascalAscii)).ToString("\r\n").DefaultText(null);
+                  ValidationMessage._0DoesNotHaveAValid1IdentifierFormat.NiceToString(p.Name, IdentifierType.PascalAscii)).ToString("\r\n").DefaultText(null);
             }
             return base.PropertyValidation(pi);
         }
