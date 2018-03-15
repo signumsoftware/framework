@@ -456,6 +456,7 @@ export module SynchronizerMessage {
 
 export module ValidationMessage {
     export const _0DoesNotHaveAValid1Format = new MessageKey("ValidationMessage", "_0DoesNotHaveAValid1Format");
+    export const _0DoesNotHaveAValid1IdentifierFormat = new MessageKey("ValidationMessage", "_0DoesNotHaveAValid1IdentifierFormat");
     export const _0HasAnInvalidFormat = new MessageKey("ValidationMessage", "_0HasAnInvalidFormat");
     export const _0HasMoreThan1DecimalPlaces = new MessageKey("ValidationMessage", "_0HasMoreThan1DecimalPlaces");
     export const _0HasSomeRepeatedElements1 = new MessageKey("ValidationMessage", "_0HasSomeRepeatedElements1");
