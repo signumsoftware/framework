@@ -205,6 +205,7 @@ export default class BpmnModelerComponent extends React.Component<BpmnModelerCom
         if (BpmnUtils.isEndEvent(obj.element.type))
             return;
 
+        var elementType = obj.element.type;
         var model = this.props.entities[obj.element.id] as (ModelEntity | undefined);
         if (!model) {
             model = this.newModel(obj.element);
@@ -215,8 +216,6 @@ export default class BpmnModelerComponent extends React.Component<BpmnModelerCom
         }
         else
             (model as any).name = obj.element.businessObject.name;
-
-        var elementType = obj.element.type;
 
         if (BpmnUtils.isConnection(elementType)) {
             var sourceElementType = (obj.element.businessObject as BPMN.ConnectionModdleElemnet).sourceRef.$type;
@@ -248,7 +247,6 @@ export default class BpmnModelerComponent extends React.Component<BpmnModelerCom
                     var et = (me as WorkflowEventModel).type;
                     obj.element.type = (et == "Start" || et == "TimerStart") ? "bpmn:StartEvent" : "bpmn:EndEvent";
 
-
                     var bo = obj.element.businessObject;
                     var shouldEvent =
                         (et == "Start" || et == "Finish") ? null :
@@ -267,8 +265,15 @@ export default class BpmnModelerComponent extends React.Component<BpmnModelerCom
                     }
                 }
 
+                var newName = (me as any).name;
+
+                if (WorkflowConnectionModel.isInstance(me)) {
+                    newName = (newName.tryAfterLast(":") == undefined ? newName : newName.beforeLast(":")) +
+                        (me.order != null ? ": " + me.order! : "");
+                }
+
                 this.modeler.get<any>("modeling").updateProperties(obj.element, {
-                    name: (me as any).name,
+                    name: newName,
                 });
             };
         }).done();
