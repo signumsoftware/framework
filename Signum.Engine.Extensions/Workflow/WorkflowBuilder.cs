@@ -526,7 +526,7 @@ namespace Signum.Engine.Workflow
             wc.BpmnElementId = bpmnElementId;
 
             var name = flow.Attribute("name")?.Value;
-            name = name.TryAfterLast(":") == null ? name : name.BeforeLast(":");
+            name = (name.TryBeforeLast(":") ?? name);
 
             if (model != null && model.Order.HasValue)
                 name = name + ": " + model.Order.ToString();

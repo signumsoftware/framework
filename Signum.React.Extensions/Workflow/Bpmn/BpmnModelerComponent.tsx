@@ -268,8 +268,7 @@ export default class BpmnModelerComponent extends React.Component<BpmnModelerCom
                 var newName = (me as any).name;
 
                 if (WorkflowConnectionModel.isInstance(me)) {
-                    newName = (newName.tryAfterLast(":") == undefined ? newName : newName.beforeLast(":")) +
-                        (me.order != null ? ": " + me.order! : "");
+                    newName = (newName.tryBeforeLast(":") || newName) + (me.order != null ? ": " + me.order! : "");
                 }
 
                 this.modeler.get<any>("modeling").updateProperties(obj.element, {
