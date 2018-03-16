@@ -18,6 +18,8 @@ namespace Signum.Engine
 
     public static class VirtualMList
     {
+        public static Dictionary<Type, HashSet<Type>> RegisteredVirtualMLists = new Dictionary<Type, HashSet<Type>>();
+
         static readonly Variable<ImmutableStack<Type>> avoidTypes = Statics.ThreadVariable<ImmutableStack<Type>>("avoidVirtualMList");
 
         public static bool ShouldAvoidMListType(Type elementType)
@@ -79,6 +81,8 @@ namespace Signum.Engine
             where T : Entity
             where L : Entity
         {
+            RegisteredVirtualMLists.GetOrCreate(typeof(T)).Add(typeof(L));
+
             var lazy = lazyRetrieveAndDelete ?? (typeof(L) == typeof(T));
 
             Func<T, MList<L>> getMList = GetAccessor(mListField);
