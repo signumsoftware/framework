@@ -42,8 +42,11 @@ namespace Signum.Engine.Dynamic
             string packagesDir = Path.Combine(basePath, @"..\..\..\packages");
             if (!Directory.Exists(packagesDir))
                 return null;
+            
+            var dir = Directory.GetDirectories(packagesDir, "Microsoft.Net.Compilers.*").OrderByDescending().FirstOrDefault();
 
-            var dir = Directory.GetDirectories(packagesDir, "Microsoft.Net.Compilers.*").SingleOrDefaultEx();
+            if (dir == null)
+                return null;
 
             var result = Path.Combine(dir, "tools");
 
