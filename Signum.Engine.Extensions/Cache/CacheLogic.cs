@@ -86,13 +86,27 @@ namespace Signum.Engine.Cache
                     CacheInvalidator.ReceiveInvalidation += CacheInvalidator_ReceiveInvalidation;
                 }
 
-                sb.Schema.SchemaCompleted += Schema_SchemaCompleted;
+                sb.Schema.SchemaCompleted += () => Schema_SchemaCompleted(sb);
                 sb.Schema.BeforeDatabaseAccess += StartSqlDependencyAndEnableBrocker;
             }
         }
 
-        static void Schema_SchemaCompleted()
+        static void Schema_SchemaCompleted(SchemaBuilder sb)
         {
+            foreach (var type in VirtualMList.RegisteredVirtualMLists.Keys)
+            {
+                if (controllers.ContainsKey(type))
+                {
+                    foreach (var rType in VirtualMList.RegisteredVirtualMLists.GetOrThrow(type))
+                    {
+                        TryCacheTable(sb, rType);
+
+                        dependencies.Add(type, rType);
+                        inverseDependencies.Add(rType, type);
+                    }
+                }
+            }
+
             foreach (var cont in controllers.Values.NotNull())
             {
                 cont.BuildCachedTable();
@@ -166,14 +180,15 @@ namespace Signum.Engine.Cache
                 CacheLogic.LogWriter.WriteLine("Load ToListWithInvalidations {0} {1}".FormatWith(typeof(T).TypeName()), exceptionContext);
 
             using (new EntityCache())
-            using (var r = EntityCache.NewRetriever()) {
+            using (var r = EntityCache.NewRetriever())
+            {
                 subConnector.ExecuteDataReaderDependency(tr.MainCommand, onChange, StartSqlDependencyAndEnableBrocker, fr =>
-                    {
-                        if (reader == null)
-                            reader = new SimpleReader(fr, r);
+                {
+                    if (reader == null)
+                        reader = new SimpleReader(fr, r);
 
-                        list.Add(projector(reader));
-                    }, CommandType.Text);
+                    list.Add(projector(reader));
+                }, CommandType.Text);
 
                 r.CompleteAll();
             }
