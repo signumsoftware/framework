@@ -264,7 +264,7 @@ namespace Signum.Engine.Maps
                 tr.Switch("GenerateMixins");
                 table.Mixins = GenerateMixins(PropertyRoute.Root(type), table, NameSequence.Void);
                 tr.Switch("GenerateTemporal");
-                table.SysteVersioned = ToSystemVersionedInfo(Settings.TypeAttribute<SystemVersionedAttribute>(type), table.Name);
+                table.SystemVersioned = ToSystemVersionedInfo(Settings.TypeAttribute<SystemVersionedAttribute>(type), table.Name);
                 tr.Switch("GenerateColumns");
                 table.GenerateColumns();
             }
@@ -726,7 +726,7 @@ namespace Signum.Engine.Maps
             var sysAttribute = Settings.FieldAttribute<SystemVersionedAttribute>(route) ??
                 (Settings.TypeAttribute<SystemVersionedAttribute>(table.Type) != null ? new SystemVersionedAttribute() : null);
 
-            relationalTable.SysteVersioned = ToSystemVersionedInfo(sysAttribute, relationalTable.Name);
+            relationalTable.SystemVersioned = ToSystemVersionedInfo(sysAttribute, relationalTable.Name);
 
             relationalTable.GenerateColumns();
             

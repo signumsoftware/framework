@@ -209,11 +209,11 @@ namespace Signum.Engine
                             var rename = !object.Equals(dif.Name, tab.Name) ? SqlBuilder.RenameOrMove(dif, tab) : null;
 
                             var disableSystemVersioning = (dif.TemporalType != SysTableTemporalType.None && (
-                                tab.SysteVersioned == null || !dif.TemporalTableName.Equals(tab.SysteVersioned.TableName)) ?
+                                tab.SystemVersioned == null || !dif.TemporalTableName.Equals(tab.SystemVersioned.TableName)) ?
                                 SqlBuilder.AlterTableDisableSystemVersioning(tab) : null);
 
                             var dropPeriod = (dif.Period != null &&
-                                (tab.SysteVersioned == null || !dif.Period.PeriodEquals(tab.SysteVersioned)) ?
+                                (tab.SystemVersioned == null || !dif.Period.PeriodEquals(tab.SystemVersioned)) ?
                                 SqlBuilder.AlterTableDropPeriod(tab) : null);
 
                             var columns = Synchronizer.SynchronizeScript(
@@ -250,12 +250,12 @@ namespace Signum.Engine
                                     )
                                 );
                             
-                            var addPeriod = ((tab.SysteVersioned != null &&
-                                (dif.Period == null || !dif.Period.PeriodEquals(tab.SysteVersioned))) ?
+                            var addPeriod = ((tab.SystemVersioned != null &&
+                                (dif.Period == null || !dif.Period.PeriodEquals(tab.SystemVersioned))) ?
                                 (SqlPreCommandSimple)SqlBuilder.AlterTableAddPeriod(tab) : null);
 
-                            var addSystemVersioning = (tab.SysteVersioned != null &&
-                                (dif.Period == null || !dif.TemporalTableName.Equals(tab.SysteVersioned.TableName)) ?
+                            var addSystemVersioning = (tab.SystemVersioned != null &&
+                                (dif.Period == null || !dif.TemporalTableName.Equals(tab.SystemVersioned.TableName)) ?
                                 SqlBuilder.AlterTableEnableSystemVersioning(tab).Do(a=>a.GoBefore = true) : null);
 
 

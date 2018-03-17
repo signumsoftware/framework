@@ -438,4 +438,23 @@ END");
     {
         public int? MinValue;
     }
+
+
+
+    [Serializable, EntityKind(EntityKind.System, EntityData.Transactional), SystemVersioned]
+    public class FolderEntity : Entity
+    {
+        [UniqueIndex]
+        [StringLengthValidator(AllowNulls = false, Max = 100)]
+        public string Name { get; set; }
+
+        public Lite<FolderEntity> Parent { get; set; }
+
+        static Expression<Func<FolderEntity, string>> ToStringExpression = @this => @this.Name;
+        [ExpressionField]
+        public override string ToString()
+        {
+            return ToStringExpression.Evaluate(this);
+        }
+    }
 }

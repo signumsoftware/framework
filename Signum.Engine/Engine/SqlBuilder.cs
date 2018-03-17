@@ -39,7 +39,7 @@ namespace Signum.Engine
         {
             var primaryKeyConstraint = t.PrimaryKey == null ? null : "CONSTRAINT {0} PRIMARY KEY CLUSTERED ({1} ASC)".FormatWith(PrimaryClusteredIndex.GetPrimaryKeyName(t.Name), t.PrimaryKey.Name.SqlEscape());
 
-            var systemPeriod = t.SysteVersioned == null ? null : Period(t.SysteVersioned);
+            var systemPeriod = t.SystemVersioned == null ? null : Period(t.SystemVersioned);
 
             var columns = t.Columns.Values.Select(c => SqlBuilder.CreateColumn(c))
                 .And(primaryKeyConstraint)
@@ -47,8 +47,8 @@ namespace Signum.Engine
                 .NotNull()
                 .ToString(",\r\n");
 
-            var systemVersioning = t.SysteVersioned == null ? null :
-                $"\r\nWITH (SYSTEM_VERSIONING = ON (HISTORY_TABLE = {t.SysteVersioned.TableName}))";
+            var systemVersioning = t.SystemVersioned == null ? null :
+                $"\r\nWITH (SYSTEM_VERSIONING = ON (HISTORY_TABLE = {t.SystemVersioned.TableName}))";
 
             return new SqlPreCommandSimple($"CREATE TABLE {t.Name}(\r\n{columns}\r\n)" + systemVersioning);
         }
@@ -73,7 +73,7 @@ namespace Signum.Engine
 
         public static SqlPreCommand AlterTableAddPeriod(ITable table)
         {
-            return new SqlPreCommandSimple($"ALTER TABLE {table.Name} ADD {Period(table.SysteVersioned)}");
+            return new SqlPreCommandSimple($"ALTER TABLE {table.Name} ADD {Period(table.SystemVersioned)}");
         }
 
         static string Period(SystemVersionedInfo sv) => $"PERIOD FOR SYSTEM_TIME ({sv.StartColumnName.SqlEscape()}, {sv.EndColumnName.SqlEscape()})";
@@ -85,7 +85,7 @@ namespace Signum.Engine
 
         public static SqlPreCommand AlterTableEnableSystemVersioning(ITable table)
         {
-            return new SqlPreCommandSimple($"ALTER TABLE {table.Name} SET (SYSTEM_VERSIONING = ON (HISTORY_TABLE = {table.SysteVersioned.TableName}))");
+            return new SqlPreCommandSimple($"ALTER TABLE {table.Name} SET (SYSTEM_VERSIONING = ON (HISTORY_TABLE = {table.SystemVersioned.TableName}))");
         }
 
         public static SqlPreCommand AlterTableDisableSystemVersioning(ITable table)
