@@ -232,11 +232,9 @@ namespace Signum.Engine
             var sb = fi.SchemaBuilder;
 
             sb.Schema.EntityEvents<T>().RegisterBinding(mListField,
-                  e => Database.Query<L>()
-                 .Where(line => backReference.Evaluate(line) == e.ToLite())
-                 .ExpandLite(line => backReference.Evaluate(line), ExpandLite.ToStringLazy)
-                 .ToVirtualMListWithOrder(),
-                  expandQuery: () => false);
+                shouldSet: () => false,
+                valueExpression: e => Database.Query<L>().Where(line => backReference.Evaluate(line) == e.ToLite()).ExpandLite(line => backReference.Evaluate(line), ExpandLite.ToStringLazy).ToVirtualMListWithOrder()
+                );
 
             sb.Schema.EntityEvents<T>().Saving += (T e) =>
             {
