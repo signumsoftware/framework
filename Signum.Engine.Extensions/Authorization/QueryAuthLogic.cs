@@ -25,7 +25,7 @@ namespace Signum.Engine.Authorization
 
         public static bool IsStarted { get { return cache != null; } }
 
-        public readonly static HashSet<object> AvoidAutomaticUpgradeCollection = new HashSet<object>();
+        public readonly static Dictionary<object, QueryAllowed> MaxAutomaticUpgrade = new Dictionary<object, QueryAllowed>();
 
         public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
         {
@@ -90,6 +90,11 @@ namespace Signum.Engine.Authorization
         static SqlPreCommand AuthCache_PreDeleteSqlSync(Entity arg)
         {
             return Administrator.DeleteWhereScript((RuleQueryEntity rt) => rt.Resource, (QueryEntity)arg);
+        }
+
+        public static void SetMaxAutomaticUpgrade(object queryName, QueryAllowed allowed)
+        {
+            MaxAutomaticUpgrade.Add(queryName, allowed);
         }
 
         static bool dqm_AllowQuery(object queryName, bool fullScreen)
@@ -158,11 +163,20 @@ namespace Signum.Engine.Authorization
                 Max(baseValues.Select(a => a.Value)) :
                 Min(baseValues.Select(a => a.Value));
 
-            if (!BasicPermission.AutomaticUpgradeOfQueries.IsAuthorized(role) || QueryAuthLogic.AvoidAutomaticUpgradeCollection.Contains(key))
+            var maxUp = QueryAuthLogic.MaxAutomaticUpgrade.TryGetS(key);
+
+            if (maxUp.HasValue && maxUp <= best)
+                return best;
+
+            if (!BasicPermission.AutomaticUpgradeOfQueries.IsAuthorized(role))
                 return best;
 
             if (baseValues.Where(a => a.Value.Equals(best)).All(a => GetDefault(key, a.Key).Equals(a.Value)))
-                return GetDefault(key, role);
+            {
+                var def = GetDefault(key, role);
+
+                return maxUp.HasValue && maxUp <= def ? maxUp.Value : def;
+            }
 
             return best;
         }
@@ -202,11 +216,14 @@ namespace Signum.Engine.Authorization
         {
             return key =>
             {
-                if (!BasicPermission.AutomaticUpgradeOfQueries.IsAuthorized(role) || 
-                OperationAuthLogic.AvoidAutomaticUpgradeCollection.Contains(key))
+                if (!BasicPermission.AutomaticUpgradeOfQueries.IsAuthorized(role))
                     return AuthLogic.GetDefaultAllowed(role) ? QueryAllowed.Allow: QueryAllowed.None;
 
-                return GetDefault(key, role);
+                var maxUp = QueryAuthLogic.MaxAutomaticUpgrade.TryGetS(key);
+
+                var def = GetDefault(key, role);
+
+                return maxUp.HasValue && maxUp <= def ? maxUp.Value : def;
             };
         }
 
