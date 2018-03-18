@@ -159,7 +159,7 @@ export default class CaseFrameModal extends React.Component<CaseFrameModalProps,
 
         return (
             <Modal size="lg" show={this.state.show} onExited={this.handleOnExited} onHide={this.handleCancelClicked} className="sf-popup-control" >
-                <ModalHeaderButtons
+                <ModalHeaderButtons htmlAttributes={{ style: { display: "block" } }} closeBeforeTitle={true}
                     onClose={this.props.isNavigate ? this.handleCancelClicked : undefined}
                     onOk={!this.props.isNavigate ? this.handleOkClicked : undefined}
                     onCancel={!this.props.isNavigate ? this.handleCancelClicked : undefined}
@@ -278,18 +278,18 @@ export default class CaseFrameModal extends React.Component<CaseFrameModalProps,
     renderTitle() {
 
         if (!this.state.pack)
-            return <h3>{JavascriptMessage.loading.niceToString()}</h3>;
+            return JavascriptMessage.loading.niceToString();
 
         const activity = this.state.pack.activity;
 
         return (
-            <h4>
+            <div>
                 <span className="sf-entity-title">{this.props.title || getToString(activity)}</span>&nbsp;
                 {this.renderExpandLink()}
                 <br />
                 {!activity.case.isNew && <CaseFlowButton caseActivity={this.state.pack.activity} />}
                 <small> {Navigator.getTypeTitle(activity, undefined)}</small>
-            </h4>
+            </div>
         );
     }
 
