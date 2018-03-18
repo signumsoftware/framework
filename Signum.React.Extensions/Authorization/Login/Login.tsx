@@ -63,34 +63,30 @@ export default class Login extends React.Component<{}, { modelState?: ModelState
                     <div className="row">
                         <div className="col-md-3"></div>
                         <div className="col-md-6">
-                            <div className={classes("form-group", this.error("userName") && "has-danger")}>
+                            <div className={classes("form-group", this.error("userName") && "has-error")}>
                                 <label className="sr-only" htmlFor="userName">{AuthMessage.Username.niceToString()}</label>
                                 <div className="input-group mb-2 mr-sm-2 mb-sm-0">
                                     <div className="input-group-prepend">
                                         <div className="input-group-text"><i className="fa fa-user" style={{ width: "16px" }}></i></div>
                                     </div>
-                                    <input type="text" className={classes("form-control", this.error("userName") && "is-invalid")} id="userName" ref={r => this.userName = r!} placeholder={AuthMessage.Username.niceToString()} />
-                                    {this.error("userName") && <div className="invalid-feedback">
-                                        {this.error("userName")}
-                                    </div>}
+                                    <input type="text" className="form-control" id="userName" ref={r => this.userName = r!} placeholder={AuthMessage.Username.niceToString()} />
                                 </div>
+                                {this.error("userName") && <span className="help-block">{this.error("userName")}</span>}
                             </div>
                         </div>
                     </div>
                     <div className="row">
                         <div className="col-md-3"></div>
                         <div className="col-md-6">
-                            <div className="form-group">
+                            <div className={classes("form-group", this.error("password") && "has-error")}>
                                 <label className="sr-only" htmlFor="password">Password</label>
                                 <div className="input-group mb-2 mr-sm-2 mb-sm-0">
                                     <div className="input-group-prepend">
                                         <div className="input-group-text"><i className="fa fa-key" style={{ width: "16px" }}></i></div>
                                     </div>
-                                    <input ref={r => this.password = r!} type="password" name="password" className={classes("form-control", this.error("password") && "is-invalid")} id="password" placeholder="Password" />
-                                    {this.error("password") && <div className="invalid-feedback">
-                                        {this.error("password")}
-                                    </div>}
+                                    <input ref={r => this.password = r!} type="password" name="password" className="form-control" id="password" placeholder="Password" />
                                 </div>
+                                {this.error("password") && <span className="help-block">{this.error("password")}</span>}
                             </div>
                         </div>
                     </div>

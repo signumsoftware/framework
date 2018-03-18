@@ -15,7 +15,7 @@ import { API } from '../PredictorClient';
 import FilterBuilderEmbedded from './FilterBuilderEmbedded';
 import { TypeReference } from '../../../../Framework/Signum.React/Scripts/Reflection';
 import { is } from '../../../../Framework/Signum.React/Scripts/Signum.Entities';
-import { UncontrolledPopover } from '../../../../Framework/Signum.React/Scripts/Components';
+import { Popover } from '../../../../Framework/Signum.React/Scripts/Components';
 
 export default class NeuralNetworkSettings extends React.Component<{ ctx: TypeContext<NeuralNetworkSettingsEntity> }> {
 
@@ -170,19 +170,46 @@ export default class NeuralNetworkSettings extends React.Component<{ ctx: TypeCo
 
 function withHelp(element: React.ReactElement<LineBaseProps>, text: React.ReactNode): React.ReactElement<any> {
     var ctx = element.props.ctx;
-    var id = ctx.prefix + "_help";
-
-    var label = (
-        <span>
-            <span id={id}>{ctx.niceName()} <i className="fa fa-question-circle" aria-hidden="true"></i></span>
-            <UncontrolledPopover placement="auto" target={id}>
-                <h3 className="popover-header">{ctx.niceName()}</h3>
-                <div className="popover-body">{text}</div>
-            </UncontrolledPopover>
-        </span>
-    );
+  
+    var label = <LabelWithHelp ctx={ctx} text={text} />;
 
     return React.cloneElement(element, { labelText: label } as LineBaseProps);
+}
+
+
+interface LabelWithHelpProps {
+    ctx: TypeContext<LineBaseProps>;
+    text: React.ReactNode;
+}
+
+interface LabelWithHelpState {
+    isOpen?: boolean
+}
+
+export class LabelWithHelp extends React.Component<LabelWithHelpProps, LabelWithHelpState> {
+
+    constructor(props: LabelWithHelpProps) {
+        super(props);
+        this.state = {};
+    }
+
+    toggle = () => {
+        this.setState({ isOpen: !this.state.isOpen });
+    }
+
+    span?: HTMLSpanElement | null;
+    render() {
+        const ctx = this.props.ctx;
+        return [
+            <span ref={r => this.span = r} onClick={this.toggle} key="s">
+                {ctx.niceName()} <i className="fa fa-question-circle" aria-hidden="true" />
+            </span>,
+            <Popover placement="auto" target={() => this.span!} toggle={this.toggle} isOpen={this.state.isOpen} key="p">
+                <h3 className="popover-header">{ctx.niceName()}</h3>
+                <div className="popover-body">{this.props.text}</div>
+            </Popover>
+        ];
+    }
 }
 
 function hideFor(ctx: TypeContext<NeuralNetworkSettingsEntity>, ...learners: NeuralNetworkLearner[]): React.HTMLAttributes<any> | undefined {

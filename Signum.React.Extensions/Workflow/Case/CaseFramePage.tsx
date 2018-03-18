@@ -1,7 +1,7 @@
 ﻿
 import * as React from 'react'
 import { Dic } from '../../../../Framework/Signum.React/Scripts/Globals'
-import { TypeContext, StyleOptions, EntityFrame  } from '../../../../Framework/Signum.React/Scripts/TypeContext'
+import { TypeContext, StyleOptions, EntityFrame } from '../../../../Framework/Signum.React/Scripts/TypeContext'
 import { TypeInfo, getTypeInfo, parseId, GraphExplorer, PropertyRoute, ReadonlyBinding, } from '../../../../Framework/Signum.React/Scripts/Reflection'
 import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
 import * as Operations from '../../../../Framework/Signum.React/Scripts/Operations'
@@ -20,6 +20,7 @@ import { RouteComponentProps } from "react-router";
 import "../../../../Framework/Signum.React/Scripts/Frames/Frames.css"
 import "./CaseAct.css"
 import { IHasCaseActivity } from '../WorkflowClient';
+import { ErrorBoundary } from '../../../../Framework/Signum.React/Scripts/Components';
 
 interface CaseFramePageProps extends RouteComponentProps<{ workflowId: string; mainEntityStrategy: string; caseActivityId?: string }> {
 }
@@ -45,11 +46,11 @@ export default class CaseFramePage extends React.Component<CaseFramePageProps, C
     componentWillMount() {
         this.load(this.props);
     }
-    
+
     calculateState(props: CaseFramePageProps): CaseFramePageState {
         return { getComponent: undefined, refreshCount: 0 };
     }
-    
+
     componentWillReceiveProps(newProps: CaseFramePageProps) {
         this.setState(this.calculateState(newProps), () => {
             this.load(newProps);
@@ -82,7 +83,7 @@ export default class CaseFramePage extends React.Component<CaseFramePageProps, C
                         Navigator.history.goBack();
                     else
                         this.setState({ pack, refreshCount: 0 });
-                });        
+                });
 
         } else
             throw new Error("No caseActivityId or workflowId set");
@@ -112,17 +113,17 @@ export default class CaseFramePage extends React.Component<CaseFramePageProps, C
     }
 
     render() {
-        
+
         if (!this.state.pack) {
             return (
                 <div className="normal-control">
-                    {this.renderTitle() }
+                    {this.renderTitle()}
                 </div>
             );
         }
 
         var pack = this.state.pack;
-        
+
         const activityFrame: EntityFrame = {
             frameComponent: this,
             entityComponent: this.entityComponent,
@@ -149,16 +150,16 @@ export default class CaseFramePage extends React.Component<CaseFramePageProps, C
             refreshCount: this.state.refreshCount,
         };
 
-     
+
         var activityPack = { entity: pack.activity, canExecute: pack.canExecuteActivity };
-      
+
         return (
             <div className="normal-control">
-                {this.renderTitle()}     
-                <CaseFromSenderInfo current={pack.activity} />  
+                {this.renderTitle()}
+                <CaseFromSenderInfo current={pack.activity} />
                 {!pack.activity.case.isNew && <div className="inline-tags"> <InlineCaseTags case={toLite(pack.activity.case)} /></div>}
-                <div className="sf-main-control" data-test-ticks={new Date().valueOf() } data-activity-entity={entityInfo(pack.activity) }>
-                    {this.renderMainEntity() }
+                <div className="sf-main-control" data-test-ticks={new Date().valueOf()} data-activity-entity={entityInfo(pack.activity)}>
+                    {this.renderMainEntity()}
                 </div>
                 {this.entityComponent && <CaseButtonBar frame={activityFrame} pack={activityPack} />}
             </div>
@@ -168,15 +169,15 @@ export default class CaseFramePage extends React.Component<CaseFramePageProps, C
     renderTitle() {
 
         if (!this.state.pack)
-            return <h3>{JavascriptMessage.loading.niceToString() }</h3>;
+            return <h3>{JavascriptMessage.loading.niceToString()}</h3>;
 
         const activity = this.state.pack.activity;
 
         return (
             <h3>
                 {!activity.case.isNew && <CaseFlowButton caseActivity={this.state.pack.activity} />}
-                <span className="sf-entity-title">{ getToString(activity) }</span>
-                <br/>
+                <span className="sf-entity-title">{getToString(activity)}</span>
+                <br />
                 <small className="sf-type-nice-name">{Navigator.getTypeTitle(activity, undefined)}</small>
             </h3>
         );
@@ -232,13 +233,15 @@ export default class CaseFramePage extends React.Component<CaseFramePageProps, C
         };
 
         return (
-            <div className="sf-main-entity case-main-entity" data-main-entity={entityInfo(mainEntity) }>
-                { renderWidgets(wc) }
-                { this.entityComponent && !mainEntity.isNew && !pack.activity.doneBy ? <ButtonBar frame={mainFrame} pack={mainPack} /> : <br /> }
-                <ValidationErrors entity={mainEntity} ref={ve => this.validationErrors = ve}/>
-                {this.state.getComponent && React.cloneElement(this.state.getComponent(ctx), { ref: (c: React.Component<any, any>) => this.setComponent(c) })}
+            <div className="sf-main-entity case-main-entity" data-main-entity={entityInfo(mainEntity)}>
+                {renderWidgets(wc)}
+                {this.entityComponent && !mainEntity.isNew && !pack.activity.doneBy ? <ButtonBar frame={mainFrame} pack={mainPack} /> : <br />}
+                <ValidationErrors entity={mainEntity} ref={ve => this.validationErrors = ve} />
+                <ErrorBoundary>
+                    {this.state.getComponent && React.cloneElement(this.state.getComponent(ctx), { ref: (c: React.Component<any, any>) => this.setComponent(c) })}
+                </ErrorBoundary>
             </div>
         );
     }
-   
+
 }

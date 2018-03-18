@@ -48,7 +48,7 @@ export default class DashboardView extends React.Component<{ dashboard: Dashboar
                                     const offset = c.value.startColumn! - (prev ? (prev.startColumn! + prev.columns!) : 0);
 
                                     return (
-                                        <div key={j} className={`col-sm-${c.value.columns} col-sm-offset-${offset}`}>
+                                        <div key={j} className={`col-sm-${c.value.columns} offset-sm-${offset}`}>
                                             <PanelPart ctx={c} entity={this.props.entity} />
                                         </div>
                                     );
@@ -88,7 +88,7 @@ export default class DashboardView extends React.Component<{ dashboard: Dashboar
                             const offset = c.startColumn! - (last ? (last.startColumn! + last.columnWidth!) : 0);
 
                             return (
-                                <div key={j} className={`col-sm-${c.columnWidth} col-sm-offset-${offset}`}>
+                                <div key={j} className={`col-sm-${c.columnWidth} offset-sm-${offset}`}>
                                     {c.parts.map((p, i) => <PanelPart key={i} ctx={p} entity={this.props.entity} />)}
                                 </div>
                             );
@@ -241,7 +241,7 @@ export class PanelPart extends React.Component<PanelPartProps, PanelPartState>{
         var style = p.style == undefined || p.style == "Default" ? undefined : p.style.toLowerCase();
 
         return (
-            <div className={classes("card", style && ("border-" + style))}>
+            <div className={classes("card", style && ("border-" + style), "mb-4")}>
                 <div className={classes("card-header", "sf-show-hover", 
                     style && style != "light" && "text-white",
                     style && ("bg-" + style)

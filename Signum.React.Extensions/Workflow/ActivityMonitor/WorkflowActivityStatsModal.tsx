@@ -56,7 +56,7 @@ export default class WorkflowActivityStatsModal extends React.Component<Workflow
             </ModalHeaderButtons>
             <div className="modal-body">
                 {
-                    <div className="form-horizontal">
+                    <div>
                         <FormGroup ctx={ctx} labelText={CaseActivityEntity.nicePluralName()}><FormControlReadonly ctx={ctx}>{stats.CaseActivityCount}</FormControlReadonly></FormGroup>
                         {config.columns.map((col, i) =>
                             <FormGroup ctx={ctx} labelText={col.displayName || col.token!.niceName}><FormControlReadonly ctx={ctx}>{stats.CustomValues[i]}</FormControlReadonly></FormGroup>
