@@ -61,6 +61,7 @@ export interface SearchControlProps extends React.Props<SearchControl> {
     throwIfNotFindable?: boolean;
     refreshKey?: string | number;
 
+    simpleFilterBuilder?: (qd: QueryDescription, initialFilterOptions: FilterOptionParsed[]) => React.ReactElement<any> | undefined;
     onNavigated?: (lite: Lite<Entity>) => void;
     onDoubleClick?: (e: React.MouseEvent<any>, row: ResultRow) => void;
     onSelectionChanged?: (entity: ResultRow[]) => void;
@@ -196,6 +197,7 @@ export default class SearchControl extends React.Component<SearchControlProps, S
             allowChangeOrder={p.allowChangeOrder != null ? p.allowChangeOrder : true}
             create={p.create != null ? p.create : tis.some(ti => Navigator.isCreable(ti, false, true))}
             navigate={p.navigate != null ? p.navigate : tis.some(ti => Navigator.isNavigable(ti, undefined, true))}
+            
 
             allowSelection={p.allowSelection != null ? p.allowSelection : true}
             showContextMenu={p.showContextMenu != null ? p.showContextMenu : true}
@@ -207,6 +209,8 @@ export default class SearchControl extends React.Component<SearchControlProps, S
             avoidAutoRefresh={p.avoidAutoRefresh != null ? p.avoidAutoRefresh : false}
             avoidChangeUrl={p.avoidChangeUrl != null ? p.avoidChangeUrl : true}
             refreshKey={p.refreshKey}
+
+            simpleFilterBuilder={p.simpleFilterBuilder}
 
             onCreate={p.onCreate}
             onNavigated={p.onNavigated}

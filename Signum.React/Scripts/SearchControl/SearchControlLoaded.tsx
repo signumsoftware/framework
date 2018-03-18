@@ -67,6 +67,7 @@ export interface SearchControlLoadedProps {
     avoidChangeUrl: boolean;
     refreshKey: string | number | undefined;
 
+    simpleFilterBuilder?: (qd: QueryDescription, initialFilterOptions: FilterOptionParsed[]) => React.ReactElement<any> | undefined;
     onCreate?: () => void;
     onDoubleClick?: (e: React.MouseEvent<any>, row: ResultRow) => void;
     onNavigated?: (lite: Lite<Entity>) => void;
@@ -120,7 +121,9 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
         const qd = this.props.queryDescription;
 
         const sfb = this.props.showSimpleFilterBuilder == false || fo.groupResults ? undefined :
-            qs && qs.simpleFilterBuilder && qs.simpleFilterBuilder(qd, fo.filterOptions);
+            this.props.simpleFilterBuilder ? this.props.simpleFilterBuilder(qd, fo.filterOptions) :
+                qs && qs.simpleFilterBuilder ? qs.simpleFilterBuilder(qd, fo.filterOptions) :
+                    undefined;
 
         if (sfb) {
             this.setState({
@@ -328,9 +331,11 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
     handleFiltersKeyUp = (e: React.KeyboardEvent<HTMLDivElement>) => {
         if (e.keyCode == 13) {
-            var input = (document.activeElement as HTMLInputElement);
-            input.blur();
-            this.doSearchPage1();
+            setTimeout(() => {
+                var input = (document.activeElement as HTMLInputElement);
+                input.blur();
+                this.doSearchPage1();
+            }, 200);
         }
     }
 

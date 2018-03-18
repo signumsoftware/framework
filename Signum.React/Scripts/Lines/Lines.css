@@ -533,5 +533,6 @@ table.sf-multi-value {
 }
 
     table.sf-multi-value > tbody > tr > td {
-        padding-bottom: 4px;
+        padding:0px;
+        padding-bottom: 2px;
     }

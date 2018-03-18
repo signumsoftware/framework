@@ -244,7 +244,7 @@ namespace Signum.Engine.Maps
 
         internal IEnumerable<FieldBinding> GetAdditionalQueryBindings(PropertyRoute parent, PrimaryKeyExpression id, NewExpression period)
         {
-            AssertAllowed(parent.RootType, inUserInterface: false);
+            //AssertAllowed(parent.RootType, inUserInterface: false);
 
             var ee = entityEvents.TryGetC(parent.RootType);
             if (ee == null || ee.AdditionalQueryBindings == null)
@@ -258,7 +258,7 @@ namespace Signum.Engine.Maps
 
         internal LambdaExpression GetAditionalQueryBinding(PropertyRoute pr, bool entityCompleter)
         {
-            AssertAllowed(pr.Type, inUserInterface: false);
+            //AssertAllowed(pr.Type, inUserInterface: false);
 
             var ee = entityEvents.GetOrThrow(pr.RootType);
 
