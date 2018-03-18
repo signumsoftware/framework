@@ -169,6 +169,9 @@ export function findOptionsPathQuery(fo: FindOptions, extra?: any): any {
         paginationMode: fo.pagination && fo.pagination.mode,
         elementsPerPage: fo.pagination && fo.pagination.elementsPerPage,
         currentPage: fo.pagination && fo.pagination.currentPage,
+        systemTimeMode: fo.systemTime && fo.systemTime.mode,
+        systemTimeStartDate: fo.systemTime && fo.systemTime.startDate,
+        systemTimeEndDate: fo.systemTime && fo.systemTime.endDate,
         ...extra
     };
 
@@ -219,6 +222,11 @@ export function parseFindOptionsPath(queryName: PseudoType | QueryKey, query: an
             elementsPerPage: query.elementsPerPage,
             currentPage: query.currentPage,
         } as Pagination,
+        systemTime: query.systemTimeMode && {
+            mode: query.systemTimeMode,
+            startDate: query.systemTimeStartDate,
+            endDate: query.systemTimeEndDate,
+        }
     };
     
     return Dic.simplify(result);
@@ -370,6 +378,7 @@ export function toFindOptions(fo: FindOptionsParsed, qd: QueryDescription): Find
         columnOptions: pair.columns,
         columnOptionsMode: pair.mode,
         pagination: fo.pagination && !equalsPagination(fo.pagination, defPagination) ? fo.pagination : undefined,
+        systemTime: fo.systemTime,
     } as FindOptions;
 
     if (!findOptions.groupResults && findOptions.orderOptions && findOptions.orderOptions.length == 1) {
@@ -440,6 +449,7 @@ export function parseFindOptions(findOptions: FindOptions, qd: QueryDescription)
             queryKey: qd.queryKey,
             groupResults: fo.groupResults == true,
             pagination: fo.pagination != null ? fo.pagination : qs && qs.pagination || defaultPagination,
+            systemTime: fo.systemTime,
 
             columnOptions: (fo.columnOptions || []).map(co => ({
                 token: completer.get(co.columnName),
@@ -927,6 +937,7 @@ export let defaultPagination: Pagination = {
 export interface QuerySettings {
     queryName: PseudoType | QueryKey;
     pagination?: Pagination;
+    allowSystemTime?: boolean;
     defaultOrderColumn?: string;
     defaultOrderType?: OrderType;
     hiddenColumns?: ColumnOption[];

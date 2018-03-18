@@ -1,5 +1,5 @@
-﻿using Signum.Engine.History;
-using Signum.Engine.Maps;
+﻿using Signum.Engine.Maps;
+using Signum.Entities;
 using Signum.Entities.DynamicQuery;
 using Signum.Utilities;
 using Signum.Utilities.ExpressionTrees;

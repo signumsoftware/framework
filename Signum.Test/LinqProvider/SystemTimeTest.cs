@@ -8,7 +8,6 @@ using Signum.Utilities;
 using Signum.Entities;
 using Signum.Utilities.ExpressionTrees;
 using Signum.Test.Environment;
-using Signum.Engine.History;
 using Signum.Utilities.DataStructures;
 
 namespace Signum.Test.LinqProvider

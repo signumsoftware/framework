@@ -1,13 +1,15 @@
-﻿using Signum.Entities;
-using Signum.Utilities;
+﻿using Signum.Utilities;
 using Signum.Utilities.DataStructures;
-using Signum.Utilities.ExpressionTrees;
 using Signum.Utilities.Reflection;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+using System.Text;
+using System.Threading.Tasks;
 
-namespace Signum.Engine.History
+namespace Signum.Entities
 {
     public abstract class SystemTime
     {
@@ -97,9 +99,9 @@ namespace Signum.Engine.History
         {
             throw new InvalidOperationException("Only for queries");
         }
-        
+
         public static Interval<DateTime> SystemPeriod<E, T>(this MListElement<E, T> mlistElement)
-            where E: Entity
+            where E : Entity
         {
             throw new InvalidOperationException("Only for queries");
         }
@@ -113,7 +115,7 @@ namespace Signum.Engine.History
 
             if (interval2 == null)
                 return null;
-            
+
             var min1 = interval1.Arguments[0];
             var max1 = interval1.Arguments[1];
             var min2 = interval2.Arguments[0];

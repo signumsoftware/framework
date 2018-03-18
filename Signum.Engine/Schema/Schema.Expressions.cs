@@ -16,7 +16,6 @@ using Signum.Engine.Linq;
 using Signum.Entities.Reflection;
 using Signum.Utilities.Reflection;
 using Signum.Utilities.ExpressionTrees;
-using Signum.Engine.History;
 using Signum.Utilities.DataStructures;
 
 namespace Signum.Engine.Maps
@@ -51,9 +50,9 @@ namespace Signum.Engine.Maps
 
         internal static ConstructorInfo intervalConstructor = typeof(Interval<DateTime>).GetConstructor(new[] { typeof(DateTime), typeof(DateTime) });
 
-        internal NewExpression GenerateSystemPeriod(Alias tableAlias, QueryBinder binder)
+        internal NewExpression GenerateSystemPeriod(Alias tableAlias, QueryBinder binder, bool force = false)
         {
-            return this.SystemVersioned != null && binder.systemTime is SystemTime.Interval ? Expression.New(intervalConstructor,
+            return this.SystemVersioned != null && (force || binder.systemTime is SystemTime.Interval) ? Expression.New(intervalConstructor,
                 new ColumnExpression(typeof(DateTime), tableAlias, this.SystemVersioned.StartColumnName),
                 new ColumnExpression(typeof(DateTime), tableAlias, this.SystemVersioned.EndColumnName)
             ) : null;
@@ -172,12 +171,13 @@ namespace Signum.Engine.Maps
                 this.Order == null ? null : OrderExpression(tableAlias),
                 this.Field.GetExpression(tableAlias, binder, rowId, period),
                 period,
-                this);
+                this,
+                tableAlias);
         }
 
-        private NewExpression GenerateSystemPeriod(Alias tableAlias, QueryBinder binder)
+        internal NewExpression GenerateSystemPeriod(Alias tableAlias, QueryBinder binder, bool force = false)
         {
-            return this.SystemVersioned != null || binder.systemTime is SystemTime.Interval ? Expression.New(Table.intervalConstructor,
+            return this.SystemVersioned != null || (force || binder.systemTime is SystemTime.Interval) ? Expression.New(Table.intervalConstructor,
                 new ColumnExpression(typeof(DateTime), tableAlias, this.SystemVersioned.StartColumnName),
                 new ColumnExpression(typeof(DateTime), tableAlias, this.SystemVersioned.EndColumnName)
             ) : null;

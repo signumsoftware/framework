@@ -1,6 +1,5 @@
 ﻿using Microsoft.SqlServer.Server;
 using Signum.Engine.Basics;
-using Signum.Engine.History;
 using Signum.Engine.Maps;
 using Signum.Entities;
 using Signum.Entities.Basics;
@@ -1465,9 +1464,9 @@ namespace Signum.Engine.Linq
 
             if(m.Method.DeclaringType == typeof(SystemTimeExtensions) && m.Method.Name.StartsWith(nameof(SystemTimeExtensions.SystemPeriod)))
             {
-                var tablePeriod = 
-                    source is EntityExpression e ? Completed(e).TablePeriod :
-                    source is MListElementExpression mle ? mle.TablePeriod :
+                var tablePeriod =
+                    source is EntityExpression e ? Completed(e).Let(ec => ec.TablePeriod ?? ec.Table.GenerateSystemPeriod(ec.TableAlias, this, force: true)) :
+                    source is MListElementExpression mle ? mle.TablePeriod ?? mle.Table.GenerateSystemPeriod(mle.Alias, this, force: true) :
                     throw new InvalidOperationException("Unexpected source");
 
                 if (tablePeriod == null)

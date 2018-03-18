@@ -109,6 +109,15 @@ table.sf-search-results > tbody > tr > td {
     background: #f2dede;
 }
 
+.sf-system-time-editor {
+    padding: 4px 8px;
+    border-radius: 4px;
+    margin-top: -10px;
+    margin-bottom: 5px;
+    display: flex;
+    flex-direction: row;
+}
+
 table.sf-search-results th.sf-current-column {
     background-color: #eee;
     border-bottom: 2px solid #aaa;

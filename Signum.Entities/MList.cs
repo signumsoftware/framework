@@ -14,8 +14,6 @@ using System.Runtime.Serialization;
 
 namespace Signum.Entities
 {
-
-
     [Serializable, DebuggerTypeProxy(typeof(MListDebugging<>)), DebuggerDisplay("Count = {Count}")]
     public class MList<T> : Modifiable, IList<T>, IList, INotifyCollectionChanged, INotifyPropertyChanged, IMListPrivate<T>
     {
@@ -746,6 +744,20 @@ namespace Signum.Entities
                 return current.Count == 0;
             }
 
+        }
+    }
+
+
+    public class MListElement<E, V> where E : Entity
+    {
+        public PrimaryKey RowId { get; set; }
+        public int Order { get; set; }
+        public E Parent { get; set; }
+        public V Element { get; set; }
+
+        public override string ToString()
+        {
+            return $"MListEntity: ({nameof(RowId)}:{RowId}, {nameof(Order)}:{Order}, {nameof(Parent)}:{Parent}, {nameof(Element)}:{Element})";
         }
     }
 

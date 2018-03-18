@@ -1,4 +1,5 @@
 ﻿import * as React from 'react'
+import * as moment from 'moment'
 import { Dropdown, DropdownItem, UncontrolledTooltip, DropdownMenu, DropdownToggle } from '../Components'
 import { Dic, DomUtils, classes } from '../Globals'
 import * as Finder from '../Finder'
@@ -26,6 +27,7 @@ import { ISimpleFilterBuilder } from './SearchControl'
 
 import "./Search.css"
 import { FilterOperation } from '../Signum.Entities.DynamicQuery';
+import SystemTimeEditor from './SystemTimeEditor';
 
 export interface ShowBarExtensionOption { }
 
@@ -53,6 +55,7 @@ export interface SearchControlLoadedProps {
     showFilters: boolean;
     showSimpleFilterBuilder: boolean;
     showFilterButton: boolean;
+    showSystemTimeButton: boolean;
     showGroupButton: boolean;
     showFooter: boolean;
     allowChangeColumns: boolean;
@@ -169,6 +172,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
                 .concat((!fo.groupResults && qs && qs.hiddenColumns || []).map(co => ({ token: co.columnName, displayName: "" }))),
             orders: fo.orderOptions.filter(a => a.token != undefined).map(oo => ({ token: oo.token.fullKey, orderType: oo.orderType })),
             pagination: fo.pagination,
+            systemTime: fo.systemTime,
         };
     }
 
@@ -374,6 +378,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
                 {p.showHeader && this.renderToolBar()}
                 {<MultipliedMessage findOptions={fo} mainType={this.entityColumn().type} />}
                 {fo.groupResults && <GroupByMessage findOptions={fo} mainType={this.entityColumn().type} />}
+                {fo.systemTime && <SystemTimeEditor systenTime={fo.systemTime} />}
                 {this.state.editingColumn && <ColumnEditor
                     columnOption={this.state.editingColumn}
                     onChange={this.handleColumnChanged}
@@ -417,6 +422,17 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
                 showFilters: !this.state.showFilters
             }, () => this.handleHeightChanged());
         }).done();
+    }
+
+    handleSystemTimeClick = () => {
+        var fo = this.props.findOptions;
+
+        if (fo.systemTime == null)
+            fo.systemTime = { mode: "AsOf", startDate: moment().format() };
+        else
+            fo.systemTime = undefined;
+
+        this.forceUpdate();
     }
 
     handleToggleGroupBy = () => {
@@ -475,6 +491,13 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
                 onClick={this.handleToggleGroupBy}
                 title={p.findOptions.groupResults ? JavascriptMessage.ungroupResults.niceToString() : JavascriptMessage.groupResults.niceToString()}>
                 Ʃ
+            </button>),
+
+            p.showSystemTimeButton && OrderUtils.setOrder(-3.5, <button
+                className={"sf-query-button btn " + (p.findOptions.systemTime ? "alert-primary" : "btn-light")}
+                onClick={this.handleSystemTimeClick}
+                title={p.findOptions.systemTime ? JavascriptMessage.deactivateTimeMachine.niceToString() : JavascriptMessage.activateTimeMachine.niceToString()}>
+                <i className="fa fa-history" />
             </button>),
 
             OrderUtils.setOrder(-3, <button className={classes("sf-query-button sf-search btn", p.findOptions.pagination.mode == "All" ? "btn-danger" : "btn-primary")} onClick={this.handleSearchClick}>{SearchMessage.Search.niceToString()} </button>),

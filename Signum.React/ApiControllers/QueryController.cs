@@ -193,6 +193,7 @@ namespace Signum.React.ApiControllers
         public List<OrderTS> orders;
         public List<ColumnTS> columns;
         public PaginationTS pagination;
+        public SystemTimeTS/*?*/ systemTime;
 
         public QueryRequest ToQueryRequest()
         {
@@ -206,7 +207,8 @@ namespace Signum.React.ApiControllers
                 Filters = this.filters.EmptyIfNull().Select(f => f.ToFilter(qd, canAggregate: groupResults)).ToList(),
                 Orders = this.orders.EmptyIfNull().Select(f => f.ToOrder(qd, canAggregate: groupResults)).ToList(),
                 Columns = this.columns.EmptyIfNull().Select(f => f.ToColumn(qd, canAggregate: groupResults)).ToList(),
-                Pagination = this.pagination.ToPagination()
+                Pagination = this.pagination.ToPagination(),
+                SystemTime = this.systemTime?.ToSystemTime(),
             };
         }
 
@@ -301,6 +303,65 @@ namespace Signum.React.ApiControllers
                 case PaginationMode.Firsts: return new Pagination.Firsts(this.elementsPerPage.Value);
                 case PaginationMode.Paginate: return new Pagination.Paginate(this.elementsPerPage.Value, this.currentPage.Value);
                 default:throw new InvalidOperationException($"Unexpected {mode}");
+            }
+        }
+    }
+
+    public class SystemTimeTS
+    {
+        public SystemTimeMode mode;
+        public DateTime? startDate;
+        public DateTime? endDate;
+
+        public SystemTimeTS() { }
+
+        public SystemTimeTS(SystemTime systemTime)
+        {
+            if (systemTime is SystemTime.AsOf asOf)
+            {
+                mode = SystemTimeMode.AsOf;
+                startDate = asOf.DateTime;
+            }
+            else if (systemTime is SystemTime.Between between)
+            {
+                mode = SystemTimeMode.Between;
+                startDate = between.StartDateTime;
+                endDate = between.EndtDateTime;
+            }
+            else if (systemTime is SystemTime.FromTo fromTo)
+            {
+                mode = SystemTimeMode.Between; //Same
+                startDate = fromTo.StartDateTime;
+                endDate = fromTo.EndtDateTime;
+            }
+            else if (systemTime is SystemTime.ContainerIn containedIn)
+            {
+                mode = SystemTimeMode.Between; //Same
+                startDate = containedIn.StartDateTime;
+                endDate = containedIn.EndtDateTime;
+            }
+            else if (systemTime is SystemTime.All all)
+            {
+                mode = SystemTimeMode.All;
+                startDate = null;
+                endDate = null;
+            }
+            else
+                throw new InvalidOperationException("Unexpected System Time");
+        }
+
+        public override string ToString() => $"{mode} {startDate} {endDate}";
+
+
+        public SystemTime ToSystemTime()
+        {
+            switch (mode)
+            {
+                case SystemTimeMode.All: return new SystemTime.All();
+                case SystemTimeMode.AsOf: return new SystemTime.AsOf(startDate.Value);
+                case SystemTimeMode.Between: return new SystemTime.Between(startDate.Value, endDate.Value);
+                case SystemTimeMode.ContainedIn: return new SystemTime.ContainerIn(startDate.Value, endDate.Value);
+                default: throw new InvalidOperationException($"Unexpected {mode}");
             }
         }
     }

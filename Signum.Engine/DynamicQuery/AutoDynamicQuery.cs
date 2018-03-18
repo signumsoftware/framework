@@ -41,20 +41,26 @@ namespace Signum.Engine.DynamicQuery
 
         public override async Task<ResultTable> ExecuteQueryAsync(QueryRequest request, CancellationToken token)
         {
-            DQueryable<T> query = GetDQueryable(request);
+            using (SystemTime.Override(request.SystemTime))
+            {
+                DQueryable<T> query = GetDQueryable(request);
 
-            var result = await query.TryPaginateAsync(request.Pagination, token);
+                var result = await query.TryPaginateAsync(request.Pagination, token);
 
-            return result.ToResultTable(request);
+                return result.ToResultTable(request);
+            }
         }
 
         public override ResultTable ExecuteQueryGroup(QueryRequest request)
         {
-            DQueryable<T> query = GetDQueryable(request);
+            using (SystemTime.Override(request.SystemTime))
+            {
+                DQueryable<T> query = GetDQueryable(request);
 
-            var result = query.TryPaginate(request.Pagination);
+                var result = query.TryPaginate(request.Pagination);
 
-            return result.ToResultTable(request);
+                return result.ToResultTable(request);
+            }
         }
 
         public override async Task<ResultTable> ExecuteQueryGroupAsync(QueryRequest request, CancellationToken token)

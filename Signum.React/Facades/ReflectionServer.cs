@@ -166,6 +166,7 @@ namespace Signum.React.Facades
 
             var dqm = DynamicQueryManager.Current;
 
+            var schema = Schema.Current;
             var settings = Schema.Current.Settings;
 
             var result = (from type in TypeLogic.TypeToEntity.Keys.Concat(models)
@@ -181,6 +182,7 @@ namespace Signum.React.Facades
                               EntityKind = type.IsIEntity() ? EntityKindCache.GetEntityKind(type) : (EntityKind?)null,
                               EntityData = type.IsIEntity() ? EntityKindCache.GetEntityData(type) : (EntityData?)null,
                               IsLowPopulation = type.IsIEntity() ? EntityKindCache.IsLowPopulation(type) : false,
+                              IsSystemVersioned = type.IsIEntity() ? schema.Table(type).SystemVersioned != null : false,
                               ToStringFunction = LambdaToJavascriptConverter.ToJavascript(ExpressionCleaner.GetFieldExpansion(type, miToString)),
                               QueryDefined = dqm.QueryDefined(type),
                               Members = PropertyRoute.GenerateRoutes(type).Where(pr => InTypeScript(pr))
@@ -325,6 +327,8 @@ namespace Signum.React.Facades
         public EntityData? EntityData { get; set; }
         [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, PropertyName = "isLowPopulation")]
         public bool IsLowPopulation { get; set; }
+        [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, PropertyName = "isSystemVersioned")]
+        public bool IsSystemVersioned { get; set; }
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore, PropertyName = "toStringFunction")]
         public string ToStringFunction { get; set; }
         [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, PropertyName = "queryDefined")]

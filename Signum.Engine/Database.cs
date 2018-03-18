@@ -1608,18 +1608,6 @@ namespace Signum.Engine
 
 
 
-    public class MListElement<E, V> where E : Entity
-    {
-        public PrimaryKey RowId { get; set; }
-        public int Order { get; set; }
-        public E Parent { get; set; }
-        public V Element { get; set; }
-
-        public override string ToString()
-        {
-            return $"MListEntity: ({nameof(RowId)}:{RowId}, {nameof(Order)}:{Order}, {nameof(Parent)}:{Parent}, {nameof(Element)}:{Element})";
-        }
-    }
 
     interface ISignumTable
     {

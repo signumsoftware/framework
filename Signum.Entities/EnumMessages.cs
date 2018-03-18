@@ -259,6 +259,12 @@ Lose changes?")]
         groupResults,
         [Description("Ungroup results")]
         ungroupResults,
+        [Description("Acivate Time Machine")]
+        activateTimeMachine,
+        [Description("Deactivate Time Machine")]
+        deactivateTimeMachine,
+        [Description("Show Records")]
+        showRecords,
         [Description("Loading...")]
         loading,
         [Description("No actions found")]

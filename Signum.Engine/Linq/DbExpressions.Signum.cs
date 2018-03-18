@@ -508,9 +508,11 @@ namespace Signum.Engine.Linq
 
         public readonly TableMList Table;
 
+        public readonly Alias Alias;
+
         public readonly NewExpression TablePeriod;
 
-        public MListElementExpression(PrimaryKeyExpression rowId, EntityExpression parent, Expression order, Expression element, NewExpression systemPeriod, TableMList table)
+        public MListElementExpression(PrimaryKeyExpression rowId, EntityExpression parent, Expression order, Expression element, NewExpression systemPeriod, TableMList table, Alias alias)
             : base(DbExpressionType.MListElement, typeof(MListElement<,>).MakeGenericType(parent.Type, element.Type))
         {
             this.RowId = rowId;
@@ -519,6 +521,7 @@ namespace Signum.Engine.Linq
             this.Element = element;
             this.TablePeriod = systemPeriod;
             this.Table = table;
+            this.Alias = alias;
         }
 
         public override string ToString()

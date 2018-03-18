@@ -48,6 +48,7 @@ export interface SearchControlProps extends React.Props<SearchControl> {
     showFilters?: boolean;
     showSimpleFilterBuilder?: boolean;
     showFilterButton?: boolean;
+    showSystemTimeButton?: boolean;
     showGroupButton?: boolean;
     showFooter?: boolean;
     allowChangeColumns?: boolean;
@@ -188,6 +189,7 @@ export default class SearchControl extends React.Component<SearchControlProps, S
             showFilters={p.showFilters != null ? p.showFilters : false}
             showSimpleFilterBuilder={p.showSimpleFilterBuilder != null ? p.showSimpleFilterBuilder : true}
             showFilterButton={p.showFilterButton != null ? p.showFilterButton : true}
+            showSystemTimeButton={p.showSystemTimeButton != null ? p.showSystemTimeButton : qs && qs.allowSystemTime != null ? qs.allowSystemTime : tis.some(a => a.isSystemVersioned == true)}
             showGroupButton={p.showGroupButton != null ? p.showGroupButton : false}
             showFooter={ p.showFooter != null ? p.showFooter : true}
             allowChangeColumns={p.allowChangeColumns != null ? p.allowChangeColumns : true}

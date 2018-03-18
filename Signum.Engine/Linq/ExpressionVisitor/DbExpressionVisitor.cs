@@ -175,7 +175,7 @@ namespace Signum.Engine.Linq
             var element = Visit(mle.Element);
             var period = (NewExpression)Visit(mle.TablePeriod);
             if (rowId != mle.RowId || parent != mle.Parent || order != mle.Order || element != mle.Element || period != mle.TablePeriod)
-                return new MListElementExpression(rowId, parent, order, element, period, mle.Table);
+                return new MListElementExpression(rowId, parent, order, element, period, mle.Table, mle.Alias);
             return mle;
         }
         
