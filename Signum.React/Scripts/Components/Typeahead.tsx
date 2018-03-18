@@ -308,7 +308,7 @@ export class Typeahead extends React.Component<TypeaheadProps, TypeaheadState>
         return (
             <div className={classes("typeahead dropdown-menu show", this.rtl && "dropdown-menu-right")} >
                 {
-                    !this.state.items!.length ? <button className="no-results"><small>{this.props.noResultsMessage}</small></button> :
+                    !this.state.items!.length ? <button className="no-results dropdown-item"><small>{this.props.noResultsMessage}</small></button> :
                         this.state.items!.map((item, i) => <button key={i}
                             className={classes("dropdown-item", i == this.state.selectedIndex ? "active" : undefined)}
                             onMouseEnter={e => this.handleElementMouseEnter(e, i)}

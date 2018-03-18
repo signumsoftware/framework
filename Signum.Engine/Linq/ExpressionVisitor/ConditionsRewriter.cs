@@ -312,7 +312,7 @@ namespace Signum.Engine.Linq
         {
             Expression source = MakeSqlValue(Visit(aggregate.Expression));
             if (source != aggregate.Expression)
-                return new AggregateExpression(aggregate.Type, source, aggregate.AggregateFunction);
+                return new AggregateExpression(aggregate.Type, source, aggregate.AggregateFunction, aggregate.Distinct);
             return aggregate;
         }
 

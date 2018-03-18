@@ -263,9 +263,27 @@ namespace Signum.Engine.Maps
                 table.Fields = GenerateFields(PropertyRoute.Root(type), table, NameSequence.Void, forceNull: false, inMList: false);
                 tr.Switch("GenerateMixins");
                 table.Mixins = GenerateMixins(PropertyRoute.Root(type), table, NameSequence.Void);
+                tr.Switch("GenerateTemporal");
+                table.SysteVersioned = ToSystemVersionedInfo(Settings.TypeAttribute<SystemVersionedAttribute>(type), table.Name);
                 tr.Switch("GenerateColumns");
                 table.GenerateColumns();
             }
+        }
+
+        public SystemVersionedInfo ToSystemVersionedInfo(SystemVersionedAttribute att, ObjectName tableName)
+        {
+            if (att == null)
+                return null;
+
+            return new SystemVersionedInfo
+            {
+                TableName = att.TemporalTableName != null ? 
+                    ObjectName.Parse(att.TemporalTableName) : 
+                    new ObjectName(tableName.Schema, tableName.Name + "_History"),
+
+                StartColumnName = att.StartDateColumnName,
+                EndColumnName = att.EndDateColumnName,
+            };
         }
 
         private Dictionary<Type, FieldMixin> GenerateMixins(PropertyRoute propertyRoute, Table table, NameSequence nameSequence)
@@ -705,6 +723,10 @@ namespace Signum.Engine.Maps
 
             }
 
+            var sysAttribute = Settings.FieldAttribute<SystemVersionedAttribute>(route) ??
+                (Settings.TypeAttribute<SystemVersionedAttribute>(table.Type) != null ? new SystemVersionedAttribute() : null);
+
+            relationalTable.SysteVersioned = ToSystemVersionedInfo(sysAttribute, relationalTable.Name);
 
             relationalTable.GenerateColumns();
             
@@ -986,6 +1008,25 @@ namespace Signum.Engine.Maps
                 result.PrimaryKey = true;
 
             return result;
+        }
+
+        protected override FieldEnum GenerateFieldEnum(ITable table, PropertyRoute route, NameSequence name, bool forceNull)
+        {
+            var att = Settings.FieldAttribute<SqlDbTypeAttribute>(route);
+
+            Type cleanEnum = route.Type.UnNullify();
+
+            //var referenceTable = Include(EnumEntity.Generate(cleanEnum), route);
+
+            return new FieldEnum(route)
+            {
+                Name = name.ToString(),
+                Nullable = Settings.IsNullable(route, forceNull),
+                IsLite = false,
+                ReferenceTable = null,//referenceTable,
+                AvoidForeignKey = Settings.FieldAttribute<AvoidForeignKeyAttribute>(route) != null,
+                Default = att?.Default,
+            }.Do(f => f.UniqueIndex = f.GenerateUniqueIndex(table, Settings.FieldAttribute<UniqueIndexAttribute>(route)));
         }
     }
 

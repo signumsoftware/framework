@@ -66,19 +66,56 @@ namespace Signum.Test.LinqProvider
         [TestMethod]
         public void GroupCountNull()
         {
-            var sexos = from a in Database.Query<ArtistEntity>()
+            var sexes = from a in Database.Query<ArtistEntity>()
                         group a by a.Sex into g
                         select new
                         {
                             Key = g.Key,
                             Count = g.Count(), //Fast
                             CountNames = g.Count(a => a.Name != null), //Fast
-                            CountNullsFast = g.Count(a => (a.Name == null ? "hi": null) != null), //Fast
-                            CountNullSlow = g.Count(a => a.Name == null), //Slow
-
+                            CountNullFast = g.Count(a => (a.Name == null ? "hi" : null) != null), //Fast
+                            CountNullFast1 = g.Where(a => a.Name == null).Count(), //Fast
+                            CountNullFast2= g.Count(a => a.Name == null), //Fast
                             CountLastAward = g.Count(a => a.LastAward != null), //Fast
                         };
-            sexos.ToList();
+            sexes.ToList();
+        }
+
+        [TestMethod]
+        public void GroupCountDistinctFast()
+        {
+            var sexes = from a in Database.Query<ArtistEntity>()
+                        group a by a.Sex into g
+                        select new
+                        {
+                            Key = g.Key,
+                            Count1 = g.Select(a => a.Name).Where(a => a != null).Distinct().Count(), //Fast
+                            Count2 = g.Where(a => a.Name != null).Select(a => a.Name).Distinct().Count(), //Fast
+                            Count3 = g.Select(a => a.Name).Distinct().Where(a => a != null).Count(), //Fast
+                            Count4 = g.Select(a => a.Name).Distinct().Count(a => a != null), //Fast
+                        };
+            sexes.ToList();
+        }
+
+        [TestMethod]
+        public void RootCountDistinct()
+        {
+            var count = Database.Query<ArtistEntity>().Select(a => a.Name).Where(a => a != null).Distinct().Count();
+        }
+
+
+        [TestMethod]
+        public void GroupCountDistinctSlow()
+        {
+            var sexes = from a in Database.Query<ArtistEntity>()
+                        group a by a.Sex into g
+                        select new
+                        {
+                            Key = g.Key,
+                            Count1 = g.Select(a => a.Name).Distinct().Count(), //Slow
+                            Count2 = g.Distinct().Count(), //Slow
+                        };
+            sexes.ToList();
         }
 
         [TestMethod]

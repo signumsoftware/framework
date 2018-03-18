@@ -109,6 +109,16 @@ export class StyleContext {
         }
     }
 
+    get formControlPlainTextClass(): string | undefined {
+        switch (this.formSize) {
+            case "ExtraSmall": return "form-control-plaintext form-control-xs";
+            case "Small": return "form-control-plaintext form-control-sm";
+            case "Normal": return "form-control-plaintext";
+            case "Large": return "form-control-plaintext form-control-lg";
+            default: throw new Error("Unexpected formSize " + this.formSize);
+        }
+    }
+
     get buttonClass(): string | undefined {
         switch (this.formSize) {
             case "ExtraSmall": return "btn-xs";

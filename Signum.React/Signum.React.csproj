@@ -155,6 +155,7 @@
     <TypeScriptCompile Include="Scripts\Components\Basic.tsx" />
     <TypeScriptCompile Include="Scripts\Components\Button.tsx" />
     <TypeScriptCompile Include="Scripts\Components\Collapse.tsx" />
+    <TypeScriptCompile Include="Scripts\Components\ErrorBoundary.tsx" />
     <TypeScriptCompile Include="Scripts\Components\index.tsx" />
     <TypeScriptCompile Include="Scripts\Components\Dropdown.tsx" />
     <TypeScriptCompile Include="Scripts\Components\DropdownItem.tsx" />

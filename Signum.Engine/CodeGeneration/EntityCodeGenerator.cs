@@ -762,8 +762,8 @@ namespace Signum.Engine.CodeGeneration
                     parts.Add("Scale = " + col.Scale);
             }
 
-            if (col.Default != null)
-                parts.Add("Default = \"" + CleanDefault(col.Default) + "\"");
+            if (col.DefaultConstraint != null)
+                parts.Add("Default = \"" + CleanDefault(col.DefaultConstraint.Definition) + "\"");
 
             return parts;
         }

@@ -19,8 +19,11 @@ namespace Signum.Engine.Linq
     /// </summary>
     internal class OverloadingSimplifier : ExpressionVisitor
     {
-        static MethodInfo miSelectQ = ReflectionTools.GetMethodInfo(() => Queryable.Select((IQueryable<string>)null, s => s)).GetGenericMethodDefinition();
-        static MethodInfo miSelectE = ReflectionTools.GetMethodInfo(() => Enumerable.Select((IEnumerable<string>)null, s => s)).GetGenericMethodDefinition();
+        public static MethodInfo miDistinctQ = ReflectionTools.GetMethodInfo(() => Queryable.Distinct((IQueryable<string>)null)).GetGenericMethodDefinition();
+        public static MethodInfo miDistinctE = ReflectionTools.GetMethodInfo(() => Enumerable.Distinct((IQueryable<string>)null)).GetGenericMethodDefinition();
+
+        public static MethodInfo miSelectQ = ReflectionTools.GetMethodInfo(() => Queryable.Select((IQueryable<string>)null, s => s)).GetGenericMethodDefinition();
+        public static MethodInfo miSelectE = ReflectionTools.GetMethodInfo(() => Enumerable.Select((IEnumerable<string>)null, s => s)).GetGenericMethodDefinition();
 
         static MethodInfo miGroupBySQ = ReflectionTools.GetMethodInfo(() => Queryable.GroupBy((IQueryable<string>)null, s => s)).GetGenericMethodDefinition();
         static MethodInfo miGroupBySE = ReflectionTools.GetMethodInfo(() => Enumerable.GroupBy((IEnumerable<string>)null, s => s)).GetGenericMethodDefinition();
@@ -44,8 +47,8 @@ namespace Signum.Engine.Linq
         static MethodInfo miDefaultIfEmptyE = ReflectionTools.GetMethodInfo(() => Enumerable.DefaultIfEmpty<int>(null)).GetGenericMethodDefinition();
 
         static MethodInfo miCountE = ReflectionTools.GetMethodInfo(() => Enumerable.Count((IEnumerable<string>)null)).GetGenericMethodDefinition();
-        static MethodInfo miWhereQ = ReflectionTools.GetMethodInfo(() => Queryable.Where((IQueryable<string>)null, a => false)).GetGenericMethodDefinition();
-        static MethodInfo miWhereE = ReflectionTools.GetMethodInfo(() => Enumerable.Where((IEnumerable<string>)null, a=>false)).GetGenericMethodDefinition();
+        public static MethodInfo miWhereQ = ReflectionTools.GetMethodInfo(() => Queryable.Where((IQueryable<string>)null, a => false)).GetGenericMethodDefinition();
+        public static MethodInfo miWhereE = ReflectionTools.GetMethodInfo(() => Enumerable.Where((IEnumerable<string>)null, a=>false)).GetGenericMethodDefinition();
 
         static MethodInfo miWhereIndexQ = ReflectionTools.GetMethodInfo(() => Queryable.Where((IQueryable<string>)null, (a, i) => false)).GetGenericMethodDefinition();
         static MethodInfo miWhereIndexE = ReflectionTools.GetMethodInfo(() => Enumerable.Where((IEnumerable<string>)null, (a, i) => false)).GetGenericMethodDefinition();

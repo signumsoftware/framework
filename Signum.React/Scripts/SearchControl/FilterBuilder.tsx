@@ -70,13 +70,13 @@ export default class FilterBuilder extends React.Component<FilterBuilderProps>{
             <fieldset className="form-xs">
                 {this.props.title && <legend>{this.props.title}</legend>}
                 <div className="sf-filters-list table-responsive" style={{ overflowX: "visible" }}>
-                    <table className="table table-sm">
+                    <table className="table-sm">
                         <thead>
-                            <tr className="bg-light">
+                            <tr>
                                 <th style={{ minWidth: "24px" }}></th>
                                 <th>{SearchMessage.Field.niceToString()}</th>
                                 <th>{SearchMessage.Operation.niceToString()}</th>
-                                <th>{SearchMessage.Value.niceToString()}</th>
+                                <th style={{ paddingRight: "20px" }}>{SearchMessage.Value.niceToString()}</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -271,7 +271,6 @@ export class MultiValue extends React.Component<MultiValueProps> {
         this.props.values.removeAt(index);
         this.props.onChange();
         this.forceUpdate();
-
     }
 
     handleAddValue = (e: React.MouseEvent<any>) => {
@@ -285,14 +284,14 @@ export class MultiValue extends React.Component<MultiValueProps> {
 
     render() {
         return (
-            <table style={{ marginBottom: "0px" }}>
+            <table style={{ marginBottom: "0px" }} className="sf-multi-value">
                 <tbody>
                     {
                         this.props.values.map((v, i) =>
                             <tr key={i}>
                                 <td>
                                     {!this.props.readOnly &&
-                                        <a title={SearchMessage.DeleteFilter.niceToString()}
+                                        <a href="#" title={SearchMessage.DeleteFilter.niceToString()}
                                             className="sf-line-button sf-remove"
                                             onClick={e => this.handleDeleteValue(e, i)}>
                                             <span className="fa fa-remove" />
@@ -313,11 +312,11 @@ export class MultiValue extends React.Component<MultiValueProps> {
                     <tr >
                         <td colSpan={4}>
                             {!this.props.readOnly &&
-                                <a title={SearchMessage.AddValue.niceToString()}
+                                <a href="#" title={SearchMessage.AddValue.niceToString()}
                                     className="sf-line-button sf-create"
                                     onClick={this.handleAddValue}>
                                     <span className="fa fa-plus sf-create" />&nbsp;{SearchMessage.AddValue.niceToString()}
-                                </a>}
+                            </a>}
                         </td>
                     </tr>
                 </tbody>

@@ -81,6 +81,24 @@ namespace Signum.Engine.SchemaInfoTables
         }
     }
 
+    public enum SysTableTemporalType
+    {
+        None = 0,
+        HistoryTable = 1, 
+        SystemVersionTemporalTable = 2
+    }
+
+    [TableName("sys.periods")]
+    public class SysPeriods : IView
+    {
+        [ViewPrimaryKey]
+        public int object_id;
+
+        public int start_column_id;
+        public int end_column_id;
+    }
+
+
     [TableName("sys.tables")]
     public class SysTables : IView
     {
@@ -88,6 +106,11 @@ namespace Signum.Engine.SchemaInfoTables
         [ViewPrimaryKey]
         public int object_id;
         public int schema_id;
+
+        [ColumnName("temporal_type")]
+        public SysTableTemporalType temporal_type;
+        public int? history_table_id;
+
 
         static Expression<Func<SysTables, IQueryable<SysColumns>>> ColumnsExpression =
             t => Database.View<SysColumns>().Where(c => c.object_id == t.object_id);
@@ -139,15 +162,24 @@ namespace Signum.Engine.SchemaInfoTables
         }
 
         static Expression<Func<SysTables, IQueryable<SysForeignKeyColumns>>> ForeignKeyColumnsExpression =
-            fk => Database.View<SysForeignKeyColumns>().Where(fkc => fkc.parent_object_id == fk.object_id);
+            t => Database.View<SysForeignKeyColumns>().Where(fkc => fkc.parent_object_id == t.object_id);
         [ExpressionField]
         public IQueryable<SysForeignKeyColumns> ForeignKeyColumns()
         {
             return ForeignKeyColumnsExpression.Evaluate(this);
         }
 
+        static Expression<Func<SysTables, IQueryable<SysPeriods>>> PeriodsExpression =
+            t => Database.View<SysPeriods>().Where(p => p.object_id == t.object_id);
+        [ExpressionField]
+        public IQueryable<SysPeriods> Periods()
+        {
+            return PeriodsExpression.Evaluate(this);
+        }
+
         static Expression<Func<SysTables, SysSchemas>> SchemaExpression =
             i => Database.View<SysSchemas>().Single(a => a.schema_id == i.schema_id);
+
         [ExpressionField]
         public SysSchemas Schema()
         {
@@ -185,6 +217,7 @@ namespace Signum.Engine.SchemaInfoTables
     public class SysColumns : IView
     {
         public string name;
+        [ViewPrimaryKey]
         public int object_id;
         public int column_id;
         public int default_object_id;
@@ -196,6 +229,9 @@ namespace Signum.Engine.SchemaInfoTables
         public int precision;
         public int scale;
         public bool is_identity;
+
+        [ColumnName("generated_always_type")]
+        public GeneratedAlwaysType generated_always_type;
 
         static Expression<Func<SysColumns, SysTypes>> TypeExpression =
             c => Database.View<SysTypes>().SingleOrDefaultEx(a => a.system_type_id == c.system_type_id);

@@ -1,7 +1,7 @@
 ﻿import * as React from 'react'
 import * as PropTypes from 'prop-types'
 import { classes } from '../Globals';
-
+import { ErrorBoundary } from './ErrorBoundary';
 
 interface UncontrolledTabsProps extends React.HTMLAttributes<HTMLDivElement> {
     defaultEventKey?: string | number;
@@ -122,7 +122,9 @@ export class Tab extends React.Component<TabProps> {
 
         return (
             <div className={classes("tab-pane", this.props.eventKey == this.context.activeTabId)} {...rest}>
-                {children}
+                <ErrorBoundary>
+                    {children}
+                </ErrorBoundary>
             </div>
         );
     }

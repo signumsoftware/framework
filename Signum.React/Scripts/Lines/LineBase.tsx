@@ -71,7 +71,7 @@ export abstract class LineBase<P extends LineBaseProps, S extends LineBaseProps>
 
     defaultValidate(val: any) {
         if (this.state.type!.isNotNullable && val == undefined)
-            return ValidationMessage._0IsNotSet.niceToString(this.state.ctx.niceName());
+            return ValidationMessage._0IsNotSet.niceToString(this.state.labelText);
 
         return undefined;
     }

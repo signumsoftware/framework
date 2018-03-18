@@ -858,18 +858,28 @@ namespace Signum.Engine.DynamicQuery
 
             if (at.AggregateFunction == AggregateFunction.Count)
             {
-                if (at.CountIsValue == AggregateToken.AnyValue)
-                    body = body.Nullify();
+                if (at.FilterOperation.HasValue)
+                {
+                    var condition = QueryUtils.GetCompareExpression(at.FilterOperation.Value, body.Nullify(), Expression.Constant(at.Value, body.Type.Nullify()));
+
+                    var lambda = Expression.Lambda(condition, context.Parameter);
+
+                    return Expression.Call(typeof(Enumerable), AggregateFunction.Count.ToString(), new[] { elementType }, new[] { collection, lambda });
+                }
+                else if (at.Distinct)
+                {
+                    var lambda = Expression.Lambda(body, context.Parameter);
+
+                    var select = Expression.Call(typeof(Enumerable), "Select", new[] { elementType, body.Type }, new[] { collection, lambda });
+                    var distinct = Expression.Call(typeof(Enumerable), "Distinct", new[] { body.Type }, new[] { select });
+                    var param = Expression.Parameter(lambda.Body.Type);
+                    LambdaExpression notNull = Expression.Lambda(Expression.NotEqual(param, Expression.Constant(null, param.Type.Nullify())), param);
+                    var count = Expression.Call(typeof(Enumerable), "Count", new[] { body.Type }, new Expression[] { distinct, notNull });
+
+                    return count;
+                }
                 else
-                    body = Expression.Condition(
-                        Expression.Equal(body.Nullify(), Expression.Constant(at.CountIsValue).Nullify()),
-                        Expression.Constant(Dummy, typeof(string)),
-                        Expression.Constant(null, typeof(string))
-                        );
-
-                var lambda = Expression.Lambda(Expression.NotEqual(body.Nullify(), Expression.Constant(null, body.Type.Nullify())), context.Parameter);
-
-                return Expression.Call(typeof(Enumerable), at.AggregateFunction.ToString(), new[] { elementType }, new[] { collection, lambda });
+                    throw new InvalidOperationException();
             }
             else
             {

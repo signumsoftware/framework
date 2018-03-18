@@ -111,6 +111,7 @@
     <Compile Include="Connection\SqlConnector.cs" />
     <Compile Include="Connection\Transaction.cs" />
     <Compile Include="Connection\UserConnections.cs" />
+    <Compile Include="SystemTime.cs" />
     <Compile Include="Patterns\DeletePart.cs" />
     <Compile Include="DynamicQuery\AutoDynamicQuery.cs" />
     <Compile Include="DynamicQuery\DynamicQuery.cs" />

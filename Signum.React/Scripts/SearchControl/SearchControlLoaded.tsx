@@ -64,6 +64,7 @@ export interface SearchControlLoadedProps {
     avoidChangeUrl: boolean;
     refreshKey: string | number | undefined;
 
+    simpleFilterBuilder?: (qd: QueryDescription, initialFilterOptions: FilterOptionParsed[]) => React.ReactElement<any> | undefined;
     onCreate?: () => void;
     onDoubleClick?: (e: React.MouseEvent<any>, row: ResultRow) => void;
     onNavigated?: (lite: Lite<Entity>) => void;
@@ -117,7 +118,9 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
         const qd = this.props.queryDescription;
 
         const sfb = this.props.showSimpleFilterBuilder == false || fo.groupResults ? undefined :
-            qs && qs.simpleFilterBuilder && qs.simpleFilterBuilder(qd, fo.filterOptions);
+            this.props.simpleFilterBuilder ? this.props.simpleFilterBuilder(qd, fo.filterOptions) :
+                qs && qs.simpleFilterBuilder ? qs.simpleFilterBuilder(qd, fo.filterOptions) :
+                    undefined;
 
         if (sfb) {
             this.setState({
@@ -324,9 +327,11 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
     handleFiltersKeyUp = (e: React.KeyboardEvent<HTMLDivElement>) => {
         if (e.keyCode == 13) {
-            var input = (document.activeElement as HTMLInputElement);
-            input.blur();
-            this.doSearchPage1();
+            setTimeout(() => {
+                var input = (document.activeElement as HTMLInputElement);
+                input.blur();
+                this.doSearchPage1();
+            }, 200);
         }
     }
 
@@ -715,16 +720,16 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
         const menuItems: React.ReactElement<any>[] = [];
         if (this.canFilter() && cm.columnIndex != undefined)
-            menuItems.push(<DropdownItem className="sf-quickfilter-header" onClick={this.handleQuickFilter}>{JavascriptMessage.addFilter.niceToString()}</DropdownItem>);
+            menuItems.push(<DropdownItem className="sf-quickfilter-header" onClick={this.handleQuickFilter}><span className="icon fa fa-filter"/>&nbsp;{JavascriptMessage.addFilter.niceToString()}</DropdownItem>);
 
         if (cm.rowIndex == undefined && p.allowChangeColumns) {
 
             if (menuItems.length)
                 menuItems.push(<DropdownItem divider />);
 
-            menuItems.push(<DropdownItem className="sf-insert-header" onClick={this.handleInsertColumn}>{JavascriptMessage.insertColumn.niceToString()}</DropdownItem>);
-            menuItems.push(<DropdownItem className="sf-edit-header" onClick={this.handleEditColumn}>{JavascriptMessage.editColumn.niceToString()}</DropdownItem>);
-            menuItems.push(<DropdownItem className="sf-remove-header" onClick={this.handleRemoveColumn}>{JavascriptMessage.removeColumn.niceToString()}</DropdownItem>);
+            menuItems.push(<DropdownItem className="sf-insert-header" onClick={this.handleInsertColumn}><span className="icon fa fa-plus-circle" />&nbsp;{JavascriptMessage.insertColumn.niceToString()}</DropdownItem>);
+            menuItems.push(<DropdownItem className="sf-edit-header" onClick={this.handleEditColumn}><span className="icon fa fa-pencil" />&nbsp;{JavascriptMessage.editColumn.niceToString()}</DropdownItem>);
+            menuItems.push(<DropdownItem className="sf-remove-header" onClick={this.handleRemoveColumn}><span className="icon fa fa-minus-circle" />&nbsp;{JavascriptMessage.removeColumn.niceToString()}</DropdownItem>);
         }
 
         if (cm.rowIndex != undefined) {

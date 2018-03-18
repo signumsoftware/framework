@@ -15,6 +15,10 @@ input[type=checkbox].form-control {
     margin-top: 9px;
 }
 
+.input-group {
+    flex-wrap:nowrap;
+}
+
 p.form-control {
     background-color: #f6f6f6;
     margin: 0px;
@@ -249,7 +253,6 @@ ul.nav-tabs {
 
 .form-group.row > label {
     text-align: end;
-    font-weight: 500;
 }
 
 /*has-error*/
@@ -379,7 +382,7 @@ select.form-control-xs:not([size]):not([multiple]),
 }
 
 .rw-widget-xs .rw-widget-picker {
-    height: 20px;
+    height: 24px;
     line-height: 10px;
 }
 
@@ -463,6 +466,9 @@ select.form-control-xs:not([size]):not([multiple]),
     height: 24px;
 }
 
+.input-group > .form-control-plaintext {
+    padding-right: 5px;
+}
 /*
 .form-sm .sf-strip {
     margin-bottom: 4px;
@@ -482,7 +488,6 @@ select.form-control-xs:not([size]):not([multiple]),
     font-size: 18px;
 }
 */
-
 .form-group.form-group-sm {
     margin-bottom: 6px;
 }
@@ -528,5 +533,6 @@ table.sf-multi-value {
 }
 
     table.sf-multi-value > tbody > tr > td {
-        padding-bottom: 4px;
+        padding:0px;
+        padding-bottom: 2px;
     }
