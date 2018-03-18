@@ -170,7 +170,7 @@ export function is<T extends Entity>(a: Lite<T> | T | null | undefined, b: Lite<
         return false;
 
     const aType = (a as T).Type || (a as Lite<T>).EntityType;
-    const bType = (a as T).Type || (a as Lite<T>).EntityType;
+    const bType = (b as T).Type || (b as Lite<T>).EntityType;
 
     if(!aType || !bType)
         throw new Error("No Type found");

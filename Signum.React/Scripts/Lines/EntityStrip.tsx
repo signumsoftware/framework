@@ -18,6 +18,7 @@ import { AutocompleteConfig } from './AutocompleteConfig'
 
 export interface EntityStripProps extends EntityListBaseProps {
     vertical?: boolean;
+    iconStart?: boolean;
     autoComplete?: AutocompleteConfig<any> | null;
     onRenderItem?: (item: Lite<Entity> | ModifiableEntity) => React.ReactNode;
     onItemHtmlAttributes?: (item: Lite<Entity> | ModifiableEntity) => React.HTMLAttributes<HTMLSpanElement | HTMLAnchorElement>;
@@ -56,6 +57,7 @@ export class EntityStrip extends EntityListBase<EntityStripProps, EntityStripPro
                             mlistItemContext(s.ctx).map((mlec, i) =>
                                 (<EntityStripElement key={i}
                                     ctx={mlec}
+                                    iconStart={s.iconStart}
                                     autoComplete={s.autoComplete}
                                     onRenderItem={s.onRenderItem}
                                     drag={this.canMove(mlec.value) && !readOnly ? this.getDragConfig(i, this.props.vertical ? "v" : "h") : undefined}
@@ -120,6 +122,7 @@ export class EntityStrip extends EntityListBase<EntityStripProps, EntityStripPro
                         list[index].element = m;
                         if (e.modified)
                             this.setValue(list);
+                        this.forceUpdate();
                     } else {
                         list[index] = { rowId: null, element: m };
                         this.setValue(list);
@@ -159,6 +162,7 @@ export class EntityStrip extends EntityListBase<EntityStripProps, EntityStripPro
 
 
 export interface EntityStripElementProps {
+    iconStart?: boolean;
     onRemove?: (event: React.MouseEvent<any>) => void;
     onView?: (event: React.MouseEvent<any>) => void;
     ctx: TypeContext<Lite<Entity> | ModifiableEntity>;
@@ -228,7 +232,7 @@ export class EntityStripElement extends React.Component<EntityStripElementProps,
                     onDrop={drag && drag.onDrop}
 
                 >
-
+                    {this.props.iconStart && <span style={{ marginRight: "5px" }}>{this.removeIcon()}&nbsp;{this.dragIcon()}</span>}
                     {
                         this.props.onView ?
                             <a href={url} className="sf-entitStrip-link" onClick={this.props.onView} {...htmlAttributes}>
@@ -239,8 +243,14 @@ export class EntityStripElement extends React.Component<EntityStripElementProps,
                                 {toStr}
                             </span>
                     }
+                    {!this.props.iconStart && <span>{this.removeIcon()}&nbsp;{this.dragIcon()}</span>}
+                </div>
+            </li>
+        );
+    }
 
-                    {this.props.onRemove &&
+    removeIcon() {
+        return this.props.onRemove &&
                         <span>
                             <a className="sf-line-button sf-remove"
                                 onClick={this.props.onRemove}
@@ -249,17 +259,16 @@ export class EntityStripElement extends React.Component<EntityStripElementProps,
                             </a>
                         </span>
                     }
-                    &nbsp;
-            {drag && <span className={classes("sf-line-button", "sf-move")}
+
+    dragIcon() {
+        var drag = this.props.drag;
+        return drag && <span className={classes("sf-line-button", "sf-move")}
                         draggable={true}
                         onDragStart={drag.onDragStart}
                         onDragEnd={drag.onDragEnd}
                         title={EntityControlMessage.Move.niceToString()}>
                         <span className="fa fa-bars" />
-                    </span>}
-                </div>
-            </li>
-        );
+        </span>;
     }
 }
 
