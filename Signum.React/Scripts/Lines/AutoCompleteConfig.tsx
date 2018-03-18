@@ -60,7 +60,7 @@ export class LiteAutocompleteConfig<T extends Entity> implements AutocompleteCon
 
         return this.abortableRequest.getData(lite.id!.toString()).then(lites => {
 
-            const result = lites.filter(a => a.id == lite.id).firstOrNull();
+            const result = lites.filter(a => is(a, lite)).firstOrNull();
 
             if (!result)
                 throw new Error("Impossible to getInitialItem with the current implementation of getItems");
@@ -158,7 +158,7 @@ export class FindOptionsAutocompleteConfig implements AutocompleteConfig<Lite<En
             subString: ""
         }).then(lites => {
 
-            const result = lites.filter(a => a.id == lite.id).firstOrNull();
+            const result = lites.filter(a => is(a, lite)).firstOrNull();
 
             if (!result)
                 throw new Error("Impossible to getInitialItem with the current implementation of getItems");
