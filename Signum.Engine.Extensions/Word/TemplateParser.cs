@@ -401,10 +401,5 @@ namespace Signum.Engine.Word
                     throw new InvalidOperationException("{0} unexpected MatchNode instances found: \r\n{1}".FormatWith(list.Count, list.ToString("\r\n").Indent(4)));
             }
         }
-
-        void ITemplateParser.AddError(bool fatal, string error)
-        {
-            throw new NotImplementedException();
-        }
     }
 }
