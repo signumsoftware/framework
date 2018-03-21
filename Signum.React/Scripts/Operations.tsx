@@ -24,11 +24,13 @@ export function start() {
     ButtonBar.onButtonBarRender.push(getEntityOperationButtons);
     ContexualItems.onContextualItems.push(getConstructFromManyContextualItems);
     ContexualItems.onContextualItems.push(getEntityOperationsContextualItems);
+
     QuickLinks.registerGlobalQuickLink(ctx => new QuickLinks.QuickLinkExplore({
         queryName: OperationLogEntity,
         parentColumn: "Target",
         parentValue: ctx.lite
-    }, {
+    },
+        {
             isVisible: getTypeInfo(ctx.lite.EntityType) && getTypeInfo(ctx.lite.EntityType).requiresSaveOperation && Finder.isFindable(OperationLogEntity, false),
             icon: "fa fa-history",
             iconColor: "green"

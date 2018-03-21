@@ -2805,7 +2805,10 @@ namespace Signum.Engine.Linq
             Alias sourceAlias = NextSelectAlias();
             ProjectedColumns pc = ColumnProjector.ProjectColumns(projector, sourceAlias); // no Token
 
-            var where = DbExpressionNominator.FullNominate(SmartEqualizer.EqualNullable(mle.BackID, relationalTable.BackColumnExpression(tableAlias)));
+            var where = DbExpressionNominator.FullNominate(
+                SmartEqualizer.EqualNullable(mle.BackID, relationalTable.BackColumnExpression(tableAlias))
+                .And(mle.ExternalPeriod.Overlaps(relationalTable.GenerateSystemPeriod(tableAlias, this)))
+                );
 
             var projectType = withRowId ?
                 typeof(IEnumerable<>).MakeGenericType(typeof(MList<>.RowIdElement).MakeGenericType(mle.Type.ElementType())) :

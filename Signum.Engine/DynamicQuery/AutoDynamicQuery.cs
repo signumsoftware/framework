@@ -32,11 +32,14 @@ namespace Signum.Engine.DynamicQuery
 
         public override ResultTable ExecuteQuery(QueryRequest request)
         {
-            DQueryable<T> query = GetDQueryable(request);
+            using (SystemTime.Override(request.SystemTime))
+            {
+                DQueryable<T> query = GetDQueryable(request);
 
-            var result = query.TryPaginate(request.Pagination);
+                var result = query.TryPaginate(request.Pagination);
 
-            return result.ToResultTable(request);
+                return result.ToResultTable(request);
+            }
         }
 
         public override async Task<ResultTable> ExecuteQueryAsync(QueryRequest request, CancellationToken token)
@@ -65,11 +68,14 @@ namespace Signum.Engine.DynamicQuery
 
         public override async Task<ResultTable> ExecuteQueryGroupAsync(QueryRequest request, CancellationToken token)
         {
-            DQueryable<T> query = GetDQueryable(request);
+            using (SystemTime.Override(request.SystemTime))
+            {
+                DQueryable<T> query = GetDQueryable(request);
 
-            var result = await query.TryPaginateAsync(request.Pagination, token);
+                var result = await query.TryPaginateAsync(request.Pagination, token);
 
-            return result.ToResultTable(request);
+                return result.ToResultTable(request);
+            }
         }
 
         private DQueryable<T> GetDQueryable(QueryRequest request)
@@ -138,7 +144,19 @@ namespace Signum.Engine.DynamicQuery
 
         public override Lite<Entity> ExecuteUniqueEntity(UniqueEntityRequest request)
         {
-            throw new NotImplementedException();
+            var ex = new _EntityColumn(EntityColumnFactory().BuildColumnDescription(), QueryName);
+
+            DQueryable<T> orderQuery = Query
+                .ToDQueryable(GetQueryDescription())
+                .SelectMany(request.Multiplications)
+                .Where(request.Filters)
+                .OrderBy(request.Orders);
+
+            var result = orderQuery
+                .SelectOne(ex.Token)
+                .Unique(request.UniqueType);
+
+            return (Lite<Entity>)result;
         }
 
         public override async Task<Lite<Entity>> ExecuteUniqueEntityAsync(UniqueEntityRequest request, CancellationToken token)

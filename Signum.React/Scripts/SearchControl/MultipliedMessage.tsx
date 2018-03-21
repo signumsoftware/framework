@@ -32,7 +32,7 @@ export default class MultipliedMessage extends React.Component<{ findOptions: Fi
             tokens.map(a => <strong>{a.parent!.niceName}</strong>).joinCommaHtml(External.CollectionMessage.And.niceToString()))
 
         return (
-            <div className="sf-td-multiply alert alert-warning">
+            <div className="sf-search-message alert alert-warning">
                 <span className="fa fa-exclamation-triangle" />&nbsp;{message}
             </div>
         );

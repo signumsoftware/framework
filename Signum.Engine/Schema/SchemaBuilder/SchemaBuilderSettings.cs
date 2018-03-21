@@ -55,7 +55,7 @@ namespace Signum.Engine.Maps
 
             {typeof(char), SqlDbType.NChar},
             {typeof(string), SqlDbType.NVarChar},
-            {typeof(DateTime), SqlDbType.DateTime},
+            {typeof(DateTime), SqlDbType.DateTime2},
 
             {typeof(Byte[]), SqlDbType.VarBinary},
 

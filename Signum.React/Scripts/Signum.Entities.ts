@@ -320,6 +320,8 @@ export module JavascriptMessage {
     export const newEntity = new MessageKey("JavascriptMessage", "newEntity");
     export const ok = new MessageKey("JavascriptMessage", "ok");
     export const cancel = new MessageKey("JavascriptMessage", "cancel");
+    export const showPeriod = new MessageKey("JavascriptMessage", "showPeriod");
+    export const showPreviousOperation = new MessageKey("JavascriptMessage", "showPreviousOperation");
 }
 
 export module LiteMessage {
@@ -374,6 +376,7 @@ export module OperationMessage {
     export const PleaseConfirmYouDLikeToDeleteTheSelectedEntitiesFromTheSystem = new MessageKey("OperationMessage", "PleaseConfirmYouDLikeToDeleteTheSelectedEntitiesFromTheSystem");
     export const TheOperation0DidNotReturnAnEntity = new MessageKey("OperationMessage", "TheOperation0DidNotReturnAnEntity");
     export const Logs = new MessageKey("OperationMessage", "Logs");
+    export const PreviousOperationLog = new MessageKey("OperationMessage", "PreviousOperationLog");
 }
 
 export const OperationSymbol = new Type<OperationSymbol>("Operation");

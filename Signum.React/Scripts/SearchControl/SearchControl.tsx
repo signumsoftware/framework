@@ -21,6 +21,7 @@ import SelectorModal from '../SelectorModal'
 import SearchControlLoaded, { ShowBarExtensionOption } from './SearchControlLoaded'
 
 import "./Search.css"
+import { ErrorBoundary } from '../Components';
 
 export interface SimpleFilterBuilderProps {
     findOptions: FindOptions;
@@ -146,7 +147,7 @@ export default class SearchControl extends React.Component<SearchControlProps, S
     }
 
     render() {
-        
+
         var errorMessage = Finder.validateNewEntities(this.props.findOptions);
         if (errorMessage) {
             return (
@@ -163,7 +164,7 @@ export default class SearchControl extends React.Component<SearchControlProps, S
 
         if (!Finder.isFindable(fo.queryKey, false))
             return null;
-        
+
 
         const p = this.props;
 
@@ -171,56 +172,60 @@ export default class SearchControl extends React.Component<SearchControlProps, S
         const qd = this.state.queryDescription!;
 
         const tis = getTypeInfos(qd.columns["Entity"].type);
-        
-        return <SearchControlLoaded ref={lo => this.searchControlLoaded = lo!}
-            findOptions={fo}
-            queryDescription={qd}
-            querySettings={qs}
 
-            formatters={p.formatters}
-            rowAttributes={p.rowAttributes}
-            entityFormatter={p.entityFormatter}
-            extraButtons={p.extraButtons}
-            getViewPromise={p.getViewPromise}
-            maxResultsHeight={p.maxResultsHeight}
-            tag={p.tag}
+        return (
+            <ErrorBoundary>
+                <SearchControlLoaded ref={lo => this.searchControlLoaded = lo!}
+                    findOptions={fo}
+                    queryDescription={qd}
+                    querySettings={qs}
 
-            searchOnLoad={p.searchOnLoad != null ? p.searchOnLoad : true}
-            showHeader={p.showHeader != null ? p.showHeader : true}
-            showFilters={p.showFilters != null ? p.showFilters : false}
-            showSimpleFilterBuilder={p.showSimpleFilterBuilder != null ? p.showSimpleFilterBuilder : true}
-            showFilterButton={p.showFilterButton != null ? p.showFilterButton : true}
-            showSystemTimeButton={p.showSystemTimeButton != null ? p.showSystemTimeButton : qs && qs.allowSystemTime != null ? qs.allowSystemTime : tis.some(a => a.isSystemVersioned == true)}
-            showGroupButton={p.showGroupButton != null ? p.showGroupButton : false}
-            showFooter={ p.showFooter != null ? p.showFooter : true}
-            allowChangeColumns={p.allowChangeColumns != null ? p.allowChangeColumns : true}
-            allowChangeOrder={p.allowChangeOrder != null ? p.allowChangeOrder : true}
-            create={p.create != null ? p.create : tis.some(ti => Navigator.isCreable(ti, false, true))}
-            navigate={p.navigate != null ? p.navigate : tis.some(ti => Navigator.isNavigable(ti, undefined, true))}
-            
+                    formatters={p.formatters}
+                    rowAttributes={p.rowAttributes}
+                    entityFormatter={p.entityFormatter}
+                    extraButtons={p.extraButtons}
+                    getViewPromise={p.getViewPromise}
+                    maxResultsHeight={p.maxResultsHeight}
+                    tag={p.tag}
 
-            allowSelection={p.allowSelection != null ? p.allowSelection : true}
-            showContextMenu={p.showContextMenu != null ? p.showContextMenu : true}
-            hideButtonBar={p.hideButtonBar != null ? p.hideButtonBar : false}
-            hideFullScreenButton={p.hideFullScreenButton != null ? p.hideFullScreenButton : false}
-            showBarExtension={p.showBarExtension != null ? p.showBarExtension : true}
-            showBarExtensionOption={p.showBarExtensionOption}
-            largeToolbarButtons={p.largeToolbarButtons != null ? p.largeToolbarButtons : false}
-            avoidAutoRefresh={p.avoidAutoRefresh != null ? p.avoidAutoRefresh : false}
-            avoidChangeUrl={p.avoidChangeUrl != null ? p.avoidChangeUrl : true}
-            refreshKey={p.refreshKey}
+                    searchOnLoad={p.searchOnLoad != null ? p.searchOnLoad : true}
+                    showHeader={p.showHeader != null ? p.showHeader : true}
+                    showFilters={p.showFilters != null ? p.showFilters : false}
+                    showSimpleFilterBuilder={p.showSimpleFilterBuilder != null ? p.showSimpleFilterBuilder : true}
+                    showFilterButton={p.showFilterButton != null ? p.showFilterButton : true}
+                    showSystemTimeButton={p.showSystemTimeButton != null ? p.showSystemTimeButton : qs && qs.allowSystemTime != null ? qs.allowSystemTime : tis.some(a => a.isSystemVersioned == true)}
+                    showGroupButton={p.showGroupButton != null ? p.showGroupButton : false}
+                    showFooter={p.showFooter != null ? p.showFooter : true}
+                    allowChangeColumns={p.allowChangeColumns != null ? p.allowChangeColumns : true}
+                    allowChangeOrder={p.allowChangeOrder != null ? p.allowChangeOrder : true}
+                    create={p.create != null ? p.create : tis.some(ti => Navigator.isCreable(ti, false, true))}
+                    navigate={p.navigate != null ? p.navigate : tis.some(ti => Navigator.isNavigable(ti, undefined, true))}
 
-            simpleFilterBuilder={p.simpleFilterBuilder}
 
-            onCreate={p.onCreate}
-            onNavigated={p.onNavigated}
-            onSearch={p.onSearch}
-            onDoubleClick={p.onDoubleClick}
-            onSelectionChanged={p.onSelectionChanged}
-            onFiltersChanged={p.onFiltersChanged}
-            onHeighChanged={p.onHeighChanged}
-            onResult={p.onResult}
-            />
+                    allowSelection={p.allowSelection != null ? p.allowSelection : true}
+                    showContextMenu={p.showContextMenu != null ? p.showContextMenu : true}
+                    hideButtonBar={p.hideButtonBar != null ? p.hideButtonBar : false}
+                    hideFullScreenButton={p.hideFullScreenButton != null ? p.hideFullScreenButton : false}
+                    showBarExtension={p.showBarExtension != null ? p.showBarExtension : true}
+                    showBarExtensionOption={p.showBarExtensionOption}
+                    largeToolbarButtons={p.largeToolbarButtons != null ? p.largeToolbarButtons : false}
+                    avoidAutoRefresh={p.avoidAutoRefresh != null ? p.avoidAutoRefresh : false}
+                    avoidChangeUrl={p.avoidChangeUrl != null ? p.avoidChangeUrl : true}
+                    refreshKey={p.refreshKey}
+
+                    simpleFilterBuilder={p.simpleFilterBuilder}
+
+                    onCreate={p.onCreate}
+                    onNavigated={p.onNavigated}
+                    onSearch={p.onSearch}
+                    onDoubleClick={p.onDoubleClick}
+                    onSelectionChanged={p.onSelectionChanged}
+                    onFiltersChanged={p.onFiltersChanged}
+                    onHeighChanged={p.onHeighChanged}
+                    onResult={p.onResult}
+                />
+            </ErrorBoundary>
+        );
     }
 }
 

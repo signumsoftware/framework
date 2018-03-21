@@ -41,7 +41,7 @@ namespace Signum.Engine
 
             var systemPeriod = t.SystemVersioned == null ? null : Period(t.SystemVersioned);
 
-            var columns = t.Columns.Values.Select(c => SqlBuilder.CreateColumn(c))
+            var columns = t.Columns.Values.Select(c => SqlBuilder.CreateColumn(c, t.Name.Name))
                 .And(primaryKeyConstraint)
                 .And(systemPeriod)
                 .NotNull()
@@ -100,7 +100,7 @@ namespace Signum.Engine
 
         public static SqlPreCommand AlterTableAddColumn(ITable table, IColumn column, DiffDefaultConstraint tempDefault = null)
         {
-            return new SqlPreCommandSimple("ALTER TABLE {0} ADD {1}".FormatWith(table.Name, CreateColumn(column, tempDefault)));
+            return new SqlPreCommandSimple("ALTER TABLE {0} ADD {1}".FormatWith(table.Name, CreateColumn(column, table.Name.Name, tempDefault)));
         }
 
         public static bool IsNumber(SqlDbType sqlDbType)
@@ -158,7 +158,7 @@ namespace Signum.Engine
             return new SqlPreCommandSimple("ALTER TABLE {0} ALTER COLUMN {1}".FormatWith(table.Name, CreateColumn(column)));
         }
 
-        public static string CreateColumn(IColumn c, DiffDefaultConstraint tempDefault = null)
+        public static string CreateColumn(IColumn c, string tableName = null, DiffDefaultConstraint tempDefault = null)
         {
             string fullType = GetColumnType(c);
 
@@ -168,7 +168,7 @@ namespace Signum.Engine
 
             var defaultConstraint = 
                 tempDefault != null ? $"CONSTRAINT {tempDefault.Name} DEFAULT " + Quote(c.SqlDbType, tempDefault.Definition) :
-                c.Default != null ? $"CONSTRAINT DF_{c.Name} DEFAULT " + Quote(c.SqlDbType, c.Default) : null;
+                c.Default != null ? $"CONSTRAINT DF_{tableName}_{c.Name} DEFAULT " + Quote(c.SqlDbType, c.Default) : null;
 
             return $" ".CombineIfNotEmpty(
                 c.Name.SqlEscape(),

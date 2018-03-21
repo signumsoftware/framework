@@ -192,6 +192,7 @@ namespace Signum.Entities.DynamicQuery
                         IsSystemVersioned(onlyType) ? new SystemTimeToken(this, SystemTimeProperty.SystemValidFrom): null,
                         IsSystemVersioned(onlyType) ? new SystemTimeToken(this, SystemTimeProperty.SystemValidTo): null,
                     }
+                    .NotNull()
                     .Concat(EntityProperties(onlyType)).ToList().AndHasValue(this); ;
 
                 return implementations.Value.Types.Select(t => (QueryToken)new AsTypeToken(this, t)).ToList().AndHasValue(this);

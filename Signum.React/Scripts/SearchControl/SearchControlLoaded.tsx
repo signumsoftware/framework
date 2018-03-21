@@ -383,7 +383,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
                 {p.showHeader && this.renderToolBar()}
                 {<MultipliedMessage findOptions={fo} mainType={this.entityColumn().type} />}
                 {fo.groupResults && <GroupByMessage findOptions={fo} mainType={this.entityColumn().type} />}
-                {fo.systemTime && <SystemTimeEditor systenTime={fo.systemTime} />}
+                {fo.systemTime && <SystemTimeEditor findOptions={fo} queryDescription={qd} onChanged={() => this.forceUpdate()} />}
                 {this.state.editingColumn && <ColumnEditor
                     columnOption={this.state.editingColumn}
                     onChange={this.handleColumnChanged}
@@ -492,7 +492,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
             </button>),
 
             p.showGroupButton && OrderUtils.setOrder(-4, <button
-                className={"sf-query-button btn btn-light" + (p.findOptions.groupResults ? " active" : "")}
+                className={"sf-query-button btn " + (p.findOptions.groupResults ? "alert-info" : "btn-light")}
                 onClick={this.handleToggleGroupBy}
                 title={p.findOptions.groupResults ? JavascriptMessage.ungroupResults.niceToString() : JavascriptMessage.groupResults.niceToString()}>
                 Ʃ
@@ -1018,7 +1018,8 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
             Finder.explore({
                 queryName: resFo.queryKey,
-                filterOptions: nonAggregateFilters.concat(keyFilters)
+                filterOptions: nonAggregateFilters.concat(keyFilters),
+                systemTime: resFo.systemTime && { ...resFo.systemTime },
             }).done();
 
             return;

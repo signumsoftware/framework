@@ -59,7 +59,7 @@ namespace Signum.Entities.DynamicQuery
 
         public override string Format
         {
-            get { return "o"; }
+            get { return Reflector.FormatString(typeof(DateTime)); }
         }
 
         public override string Unit

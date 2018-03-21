@@ -24,7 +24,7 @@ export default class GroupByMessage extends React.Component<{ findOptions: FindO
         const message = ValidationMessage.TheRowsAreBeingGroupedBy0.niceToString().formatHtml(
             tokens.map(a => <strong>{a.niceName}</strong>).joinCommaHtml(External.CollectionMessage.And.niceToString()));
         return (
-            <div className="sf-td-multiply alert alert-info">
+            <div className="sf-search-message alert alert-info">
                 {"Ʃ"}&nbsp;{message}
             </div>
         );

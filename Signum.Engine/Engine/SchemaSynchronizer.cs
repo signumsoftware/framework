@@ -432,9 +432,9 @@ FROM {oldTable.Name}");
         {
             if(column is SystemVersionedInfo.Column svc)
             {
-                return svc.SystemVersionColumnType == SystemVersionedInfo.ColumnType.Start ?
-                    "SYSUTCDATETIME()" :
-                    "CONVERT(datetime2, '9999-12-31 23:59:59.9999999')";
+                var date = svc.SystemVersionColumnType == SystemVersionedInfo.ColumnType.Start ? DateTime.MinValue : DateTime.MaxValue;
+
+                return $"CONVERT(datetime2, '{date:yyyy-MM-dd HH:mm:ss.fffffff}')";
             }
 
             string defaultValue = rep.Interactive ? SafeConsole.AskString("Default value for '{0}.{1}'? (or press enter) ".FormatWith(table.Name.Name, column.Name), stringValidator: str => null) : "";
@@ -573,7 +573,7 @@ JOIN {3} {4} ON {2}.{0} = {4}.Id".FormatWith(tabCol.Name,
                              TemporalTableName = !con.SupportsTemporalTables || t.history_table_id == null ? null : 
                              Database.View<SysTables>()
                              .Where(ht => ht.object_id == t.history_table_id)
-                             .Select(ht => new ObjectName(new SchemaName(db, t.Schema().name), t.name))
+                             .Select(ht => new ObjectName(new SchemaName(db, ht.Schema().name), ht.name))
                              .SingleOrDefault(),
 
                              PrimaryKeyName = (from k in t.KeyConstraints()

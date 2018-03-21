@@ -17,6 +17,8 @@ namespace Signum.Entities
 
         public static SystemTime Current => currentVariable.Value;
 
+
+        public static IDisposable Override(DateTime asOf) => Override(new SystemTime.AsOf(asOf));
         public static IDisposable Override(SystemTime systemTime)
         {
             var old = currentVariable.Value;

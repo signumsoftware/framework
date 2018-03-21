@@ -322,10 +322,23 @@ export function parseOrderOptions(orderOptions: OrderOption[], groupResults: boo
     orderOptions.forEach(a => completer.request(a.columnName, sto));
 
     return completer.finished()
-        .then(() => orderOptions.map(fo => ({
-            token: completer.get(fo.columnName),
-            orderType: fo.orderType || "Ascending",
+        .then(() => orderOptions.map(oo => ({
+            token: completer.get(oo.columnName),
+            orderType: oo.orderType || "Ascending",
         }) as OrderOptionParsed));
+}
+
+export function parseColumnOptions(columnOptions: ColumnOption[], groupResults: boolean, qd: QueryDescription): Promise<ColumnOptionParsed[]> {
+
+    const completer = new TokenCompleter(qd);
+    var sto = SubTokensOptions.CanElement | (groupResults ? SubTokensOptions.CanAggregate : 0);
+    columnOptions.forEach(a => completer.request(a.columnName, sto));
+
+    return completer.finished()
+        .then(() => columnOptions.map(co => ({
+            token: completer.get(co.columnName),
+            displayName: co.displayName || completer.get(co.columnName).niceName,
+        }) as ColumnOptionParsed));
 }
 
 export function setFilters(e: Entity, filterOptionsParsed: FilterOptionParsed[]): Promise<Entity> {
