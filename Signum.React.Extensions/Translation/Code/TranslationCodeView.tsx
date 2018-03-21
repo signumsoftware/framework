@@ -1,6 +1,4 @@
 ﻿import * as React from 'react'
-import * as numbro from 'numbro'
-import * as moment from 'moment'
 import { Dic } from '../../../../Framework/Signum.React/Scripts/Globals'
 import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
 import { notifySuccess } from '../../../../Framework/Signum.React/Scripts/Operations/EntityOperations'
