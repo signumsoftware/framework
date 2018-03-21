@@ -1,5 +1,4 @@
 ﻿import * as React from 'react'
-import * as numbro from 'numbro'
 import { classes } from '../../../../Framework/Signum.React/Scripts/Globals'
 import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
 import { PropertyRouteEntity } from '../../../../Framework/Signum.React/Scripts/Signum.Entities.Basics';

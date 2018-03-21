@@ -152,7 +152,8 @@ namespace Signum.Entities.Authorization
                Database.Query<RT>()
                .Select(a => new { a.Role, a.Allowed, a.Resource })
                   .AgGroupToDictionary(ru => ru.Role, gr => gr
-                      .ToDictionaryCatch(ru => ToKey(ru.Resource), ru => ru.Allowed));
+                    .SelectCatch(ru => KVP.Create(ToKey(ru.Resource), ru.Allowed))
+                    .ToDictionaryEx());
 
             Dictionary<Lite<RoleEntity>, RoleAllowedCache> newRules = new Dictionary<Lite<RoleEntity>, RoleAllowedCache>();
             foreach (var role in roles)
@@ -378,37 +379,4 @@ namespace Signum.Entities.Authorization
             return "{0} {1} for {2} ({3} -> {4})".FormatWith(typeof(R).NiceName(), resource.ToString(), role, from, to);
         }
     }
-
-    public static class AuthCacheTools
-    {
-        public static Dictionary<K, V> ToDictionaryCatch<T, K ,V>(this IEnumerable<T> elements, Func<T, K> getKeyOrCrash, Func<T, V> getValue)
-        {
-            Dictionary<K, V> result = new Dictionary<K, V>();
-            foreach (var e in elements)
-            {
-                K key;
-                try
-                {
-                    key = getKeyOrCrash(e);
-                }
-                catch (Exception ex) when (StartParameters.IgnoredDatabaseMismatches != null)
-                {
-                    //This try { throw } catch is here to alert developers.
-                    //In production, in some cases its OK to attempt starting an application with a slightly different schema (dynamic entities, green-blue deployments).  
-                    //In development, consider synchronize.  
-                    StartParameters.IgnoredDatabaseMismatches.Add(ex);
-                    continue;
-                }
-                if (result.ContainsKey(key))
-                    throw new InvalidOperationException($"Key {key} already added to {typeof(Dictionary<K, V>).TypeName()}");
-
-                result.Add(key, getValue(e));
-            }
-
-            return result;
-
-        }
-    }
-
-
 }

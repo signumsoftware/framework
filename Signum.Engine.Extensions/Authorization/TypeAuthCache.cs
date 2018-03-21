@@ -56,15 +56,27 @@ namespace Signum.Entities.Authorization
                 return null;
             }
 
-            Type type = TypeLogic.EntityToType.GetOrThrow(rt.Resource);
-            var conditions = rt.Conditions.Where(a => 
-            a.Condition.FieldInfo != null && /*Not 100% Sync*/
-            !TypeConditionLogic.IsDefined(type, a.Condition));
+            try
+            {
 
-            if (conditions.IsEmpty())
+                Type type = TypeLogic.EntityToType.GetOrThrow(rt.Resource);
+                var conditions = rt.Conditions.Where(a =>
+                a.Condition.FieldInfo != null && /*Not 100% Sync*/
+                !TypeConditionLogic.IsDefined(type, a.Condition));
+
+                if (conditions.IsEmpty())
+                    return null;
+
+                return "Type {0} has no definitions for the conditions: {1}".FormatWith(type.Name, conditions.CommaAnd(a => a.Condition.Key));
+            }
+            catch (Exception ex) when (StartParameters.IgnoredDatabaseMismatches != null)
+            {
+                //This try { throw } catch is here to alert developers.
+                //In production, in some cases its OK to attempt starting an application with a slightly different schema (dynamic entities, green-blue deployments).  
+                //In development, consider synchronize.  
+                StartParameters.IgnoredDatabaseMismatches.Add(ex);
                 return null;
-
-            return "Type {0} has no definitions for the conditions: {1}".FormatWith(type.Name, conditions.CommaAnd(a => a.Condition.Key));
+            }
         }
 
         static SqlPreCommand AuthCache_PreDeleteSqlSync_Type(Entity arg)
@@ -168,7 +180,8 @@ namespace Signum.Entities.Authorization
 
                 Dictionary<Lite<RoleEntity>, Dictionary<Type, TypeAllowedAndConditions>> realRules =
                    rules.AgGroupToDictionary(ru => ru.Role, gr => gr
-                          .ToDictionaryCatch(ru => TypeLogic.EntityToType.GetOrThrow(ru.Resource), ru => ru.ToTypeAllowedAndConditions()));
+                          .SelectCatch(ru => KVP.Create(TypeLogic.EntityToType.GetOrThrow(ru.Resource), ru.ToTypeAllowedAndConditions()))
+                          .ToDictionaryEx());
 
                 Dictionary<Lite<RoleEntity>, RoleAllowedCache> newRules = new Dictionary<Lite<RoleEntity>, RoleAllowedCache>();
                 foreach (var role in roles)

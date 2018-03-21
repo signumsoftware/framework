@@ -906,7 +906,7 @@ export class PropertyComponent extends React.Component<PropertyComponentProps>{
             <div>
                 <div className="row">
                     <div className="col-sm-7">
-                        <ValueComponent dc={this.props.dc} labelColumns={3} binding={Binding.create(p, d => d.name)} type="string" defaultValue={null} />
+                        <ValueComponent dc={this.props.dc} labelColumns={3} binding={Binding.create(p, d => d.name)} type="string" defaultValue={null} onBlur={this.handleAutoFix} />
                         {this.props.showDatabaseMapping &&
                             <ValueComponent dc={this.props.dc} labelColumns={3} binding={Binding.create(p, d => d.columnName)} type="string" defaultValue={null} labelClass="database-mapping" />
                         }
@@ -1000,6 +1000,9 @@ export class TypeCombo extends React.Component<{ dc: DynamicTypeDesignContext; b
 }
 
 function autoFix(p: DynamicProperty) {
+
+    if (p.name && p.name != p.name.firstUpper())
+        p.name = p.name.firstUpper();
 
     if (!p.type)
         return;
