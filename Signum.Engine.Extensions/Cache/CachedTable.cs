@@ -259,6 +259,13 @@ namespace Signum.Engine.Cache
                 CacheLogic.LogWriter.WriteLine((rows.IsValueCreated ? "RESET {0}" : "Reset {0}").FormatWith(GetType().TypeName()));
 
             rows.Reset();
+            if (this.BackReferenceDictionaries != null)
+            {
+                foreach (var item in this.BackReferenceDictionaries.Values)
+                {
+                    item.Reset();
+                }
+            }
         }
 
         protected override void Load()
@@ -300,6 +307,14 @@ namespace Signum.Engine.Cache
                 throw new EntityNotFoundException(typeof(T), entity.Id);
 
             completer(origin, retriever, entity);
+
+            var additional = Schema.Current.GetAdditionalBindings(typeof(T));
+
+            if(additional != null)
+            {
+                foreach (var ab in additional)
+                    ab.SetInMemory(entity, retriever);
+            }
         }
 
         internal IEnumerable<PrimaryKey> GetAllIds()
@@ -327,6 +342,68 @@ namespace Signum.Engine.Cache
         internal override bool Contains(PrimaryKey primaryKey)
         {
             return this.GetRows().ContainsKey(primaryKey);
+        }
+
+        ConcurrentDictionary<LambdaExpression, ResetLazy<Dictionary<PrimaryKey, List<PrimaryKey>>>> BackReferenceDictionaries = 
+            new ConcurrentDictionary<LambdaExpression, ResetLazy<Dictionary<PrimaryKey, List<PrimaryKey>>>>(ExpressionComparer.GetComparer<LambdaExpression>(false));
+
+        internal Dictionary<PrimaryKey, List<PrimaryKey>> GetBackReferenceDictionary<R>(Expression<Func<T, Lite<R>>> backReference)
+            where R : Entity
+        {
+            var lazy = BackReferenceDictionaries.GetOrCreate(backReference, () =>
+            {
+                var column = GetColumn(Reflector.GetMemberList(backReference));
+
+                var idGetter = this.Constructor.GetPrimaryKeyGetter(table.PrimaryKey);
+
+                if (column.Nullable)
+                {
+                    var backReferenceGetter = this.Constructor.GetPrimaryKeyNullableGetter(column);
+
+                    return new ResetLazy<Dictionary<PrimaryKey, List<PrimaryKey>>>(() =>
+                    {
+                        return this.rows.Value.Values
+                        .Where(a => backReferenceGetter(a) != null)
+                        .GroupToDictionary(a => backReferenceGetter(a).Value, a => idGetter(a));
+                    }, LazyThreadSafetyMode.ExecutionAndPublication);
+                }
+                else
+                {
+                    var backReferenceGetter = this.Constructor.GetPrimaryKeyGetter(column);
+                    return new ResetLazy<Dictionary<PrimaryKey, List<PrimaryKey>>>(() =>
+                    {
+                        return this.rows.Value.Values
+                        .GroupToDictionary(a => backReferenceGetter(a), a => idGetter(a));
+                    }, LazyThreadSafetyMode.ExecutionAndPublication);
+                }
+            });
+
+            return lazy.Value;
+        }
+
+        private IColumn GetColumn(MemberInfo[] members) 
+        {
+            IFieldFinder current = (Table)this.Table;
+            Field field = null;
+
+            for (int i = 0; i < members.Length - 1; i++)
+            {
+                if (current == null)
+                    throw new InvalidOperationException("{0} does not implement {1}".FormatWith(field, typeof(IFieldFinder).Name));
+
+                field = current.GetField(members[i]);
+
+                current = field as IFieldFinder;
+            }
+
+            var lastMember = members[members.Length - 1];
+
+            if (lastMember is Type t)
+                return ((FieldImplementedBy)field).ImplementationColumns.GetOrThrow(t);
+            else if (current != null)
+                return (IColumn)current.GetField(lastMember);
+            else
+                throw new InvalidOperationException("Unexpected");
         }
     }
 
