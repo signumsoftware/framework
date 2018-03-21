@@ -14,10 +14,23 @@ import * as Operations from '../../../Framework/Signum.React/Scripts/Operations'
 import * as OmniboxClient from '../Omnibox/OmniboxClient'
 import * as AuthClient from '../Authorization/AuthClient'
 import * as QuickLinks from '../../../Framework/Signum.React/Scripts/QuickLinks'
+import { TimeMachineMessage } from './Signum.Entities.DiffLog';
+import { ImportRoute } from '../../../Framework/Signum.React/Scripts/AsyncImport';
+import { getTypeInfo } from '../../../Framework/Signum.React/Scripts/Reflection';
 
-export function start(options: { routes: JSX.Element[] }) {
+export function start(options: { routes: JSX.Element[], timeMachine: boolean }) {
 
-    Navigator.addSettings(new EntitySettings(OperationLogEntity, e => import('./Templates/OperationLog')))    
+    Navigator.addSettings(new EntitySettings(OperationLogEntity, e => import('./Templates/OperationLog')));
+
+    if (options.timeMachine) {
+
+        QuickLinks.registerGlobalQuickLink(ctx => getTypeInfo(ctx.lite.EntityType).isSystemVersioned ? new QuickLinks.QuickLinkLink("TimeMachine", TimeMachineMessage.TimeMachine.niceToString(), "~/timeMachine/" + ctx.lite.EntityType + "/" + ctx.lite.id, {
+            icon: "fa fa-history",
+            iconColor: "blue"
+        }) : undefined);
+
+        options.routes.push(<ImportRoute path="~/timeMachine/:type/:id" onImportModule={() => import("./Templates/TimeMachinePage")} />);
+    }
 }
 
 export namespace API {
@@ -25,15 +38,25 @@ export namespace API {
     export function diffLog(id: string | number): Promise<DiffLogResult> {
         return ajaxGet<DiffLogResult>({ url: "~/api/diffLog/" + id });
     }
+
+    export function retrieveVersion(lite: Lite<Entity>, asOf: string,): Promise<Entity> {
+        return ajaxGet<Entity>({ url: `~/api/retrieveVersion/${lite.EntityType}/${lite.id}?asOf=${asOf}`});
+    }
+
+    export function diffVersions(lite: Lite<Entity>, from: string, to: string): Promise<DiffBlock> {
+        return ajaxGet<DiffBlock>({ url: `~/api/diffVersions/${lite.EntityType}/${lite.id}?from=${from}&to=${to}` });
+    }
 }
 
 export interface DiffLogResult {
     prev: Lite<OperationLogEntity>;
-    diffPrev: Array<DiffPair<Array<DiffPair<string>>>>;
-    diff: Array<DiffPair<Array<DiffPair<string>>>>;
-    diffNext: Array<DiffPair<Array<DiffPair<string>>>>;
+    diffPrev: DiffBlock;
+    diff: DiffBlock;
+    diffNext: DiffBlock;
     next: Lite<OperationLogEntity>;
 }
+
+export type DiffBlock = Array<DiffPair<Array<DiffPair<string>>>>;
 
 export interface DiffPair<T> {
     Action: "Equal" | "Added" | "Removed";

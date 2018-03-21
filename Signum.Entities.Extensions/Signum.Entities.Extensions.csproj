@@ -121,6 +121,7 @@
     <Compile Include="Dashboard\DashboardOmniboxResultGenerator.cs" />
     <Compile Include="DiffLog\DiffLogMixin.cs" />
     <Compile Include="DiffLog\Services.cs" />
+    <Compile Include="DiffLog\TimeMachine.cs" />
     <Compile Include="Dynamic\DynamicCode.cs" />
     <Compile Include="Dynamic\Dynamic.cs" />
     <Compile Include="Dynamic\DynamicMixinConnection.cs" />
