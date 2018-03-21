@@ -18,6 +18,8 @@ namespace Signum.Engine
 
     public static class VirtualMList
     {
+        public static Dictionary<Type, HashSet<Type>> RegisteredVirtualMLists = new Dictionary<Type, HashSet<Type>>();
+
         static readonly Variable<ImmutableStack<Type>> avoidTypes = Statics.ThreadVariable<ImmutableStack<Type>>("avoidVirtualMList");
 
         public static bool ShouldAvoidMListType(Type elementType)
@@ -79,6 +81,8 @@ namespace Signum.Engine
             where T : Entity
             where L : Entity
         {
+            RegisteredVirtualMLists.GetOrCreate(typeof(T)).Add(typeof(L));
+
             var lazy = lazyRetrieveAndDelete ?? (typeof(L) == typeof(T));
 
             Func<T, MList<L>> getMList = GetAccessor(mListField);
@@ -111,29 +115,25 @@ namespace Signum.Engine
                         query.ToVirtualMListWithOrder() :
                         query.ToVirtualMList();
 
-                    AssignAndPostRetrieving(mlist, newList);
-                    mlist.AssignMList(newList);
-                    mlist.PostRetrieving();
+                    mlist.AssignAndPostRetrieving(newList);
                 };
             }
 
             if (preserveOrder)
             {
-                sb.Schema.EntityEvents<T>().RegisterBinding(mListField,
-                     e => Database.Query<L>()
-                    .Where(line => backReference.Evaluate(line) == e.ToLite())
-                    .ExpandLite(line => backReference.Evaluate(line), ExpandLite.ToStringLazy)
-                    .ToVirtualMListWithOrder(),
-                     expandQuery: () => !lazy && !VirtualMList.ShouldAvoidMListType(typeof(L)));
+                sb.Schema.EntityEvents<T>().RegisterBinding<MList<L>>(mListField,
+                     shouldSet: () => !lazy && !VirtualMList.ShouldAvoidMListType(typeof(L)),
+                     valueExpression: e => Database.Query<L>().Where(line => backReference.Evaluate(line) == e.ToLite()).ExpandLite(line => backReference.Evaluate(line), ExpandLite.ToStringLazy).ToVirtualMListWithOrder(),
+                     valueFunction: (e, retriever) => Schema.Current.CacheController<L>().RequestByBackReference<T>(retriever, backReference, e.ToLite()).ToVirtualMListWithOrder()
+                );
             }
             else
             {
                 sb.Schema.EntityEvents<T>().RegisterBinding(mListField,
-                    e => Database.Query<L>()
-                    .Where(line => backReference.Evaluate(line) == e.ToLite())
-					.ExpandLite(line => backReference.Evaluate(line), ExpandLite.ToStringLazy)                    
-					.ToVirtualMList(),
-                     expandQuery: () => !lazy && !VirtualMList.ShouldAvoidMListType(typeof(L)));
+                    shouldSet: () => !lazy && !VirtualMList.ShouldAvoidMListType(typeof(L)),
+                    valueExpression: e => Database.Query<L>().Where(line => backReference.Evaluate(line) == e.ToLite()).ExpandLite(line => backReference.Evaluate(line), ExpandLite.ToStringLazy).ToVirtualMList(),
+                    valueFunction: (e, retriever) => Schema.Current.CacheController<L>().RequestByBackReference<T>(retriever, backReference, e.ToLite()).ToVirtualMList()
+                );
             }
 
             sb.Schema.EntityEvents<T>().Saving += (T e) =>
@@ -159,15 +159,13 @@ namespace Signum.Engine
                     return;
 
                 var mlist = getMList(e);
-                if (mlist == null)
-                    return;
-
-                if (!GraphExplorer.IsGraphModified(mlist))
+              
+                if (mlist != null && !GraphExplorer.IsGraphModified(mlist))
                     return;
 
                 if (!(args.WasNew || ShouldConsiderNew(typeof(T))))
                 {
-                    var oldElements = mlist.Where(line => !line.IsNew);
+                    var oldElements = mlist.EmptyIfNull().Where(line => !line.IsNew);
                     var query = Database.Query<L>()
                     .Where(p => backReference.Evaluate(p) == e.ToLite());
 
@@ -177,21 +175,24 @@ namespace Signum.Engine
                         query.ToList().ForEach(line => onRemove(line, e));
                 }
 
-                if (setter == null)
-                    setter = CreateSetter(backReference);
-
-                mlist.ForEach(line => setter(line, e.ToLite()));
-                if (onSave == null)
-                    mlist.SaveList();
-                else
-                    mlist.ForEach(line => { if (GraphExplorer.IsGraphModified(line)) onSave(line, e); });
-                var priv = (IMListPrivate)mlist;
-                for (int i = 0; i < mlist.Count; i++)
+                if (mlist != null)
                 {
-                    if (priv.GetRowId(i) == null)
-                        priv.SetRowId(i, mlist[i].Id);
+                    if (setter == null)
+                        setter = CreateSetter(backReference);
+
+                    mlist.ForEach(line => setter(line, e.ToLite()));
+                    if (onSave == null)
+                        mlist.SaveList();
+                    else
+                        mlist.ForEach(line => { if (GraphExplorer.IsGraphModified(line)) onSave(line, e); });
+                    var priv = (IMListPrivate)mlist;
+                    for (int i = 0; i < mlist.Count; i++)
+                    {
+                        if (priv.GetRowId(i) == null)
+                            priv.SetRowId(i, mlist[i].Id);
+                    }
+                    mlist.SetCleanModified(false);
                 }
-                mlist.SetCleanModified(false);
             };
 
             
@@ -217,11 +218,7 @@ namespace Signum.Engine
             return fi;
         }
 
-        public static void AssignAndPostRetrieving<T>(this MList<T> mlist, MList<T> newList)
-        {
-            mlist.AssignMList(newList);
-            mlist.PostRetrieving();
-        }
+     
 
         public static FluentInclude<T> WithVirtualMListInitializeOnly<T, L>(this FluentInclude<T> fi,
             Expression<Func<T, MList<L>>> mListField,
@@ -235,11 +232,9 @@ namespace Signum.Engine
             var sb = fi.SchemaBuilder;
 
             sb.Schema.EntityEvents<T>().RegisterBinding(mListField,
-                  e => Database.Query<L>()
-                 .Where(line => backReference.Evaluate(line) == e.ToLite())
-                 .ExpandLite(line => backReference.Evaluate(line), ExpandLite.ToStringLazy)
-                 .ToVirtualMListWithOrder(),
-                  expandQuery: () => false);
+                shouldSet: () => false,
+                valueExpression: e => Database.Query<L>().Where(line => backReference.Evaluate(line) == e.ToLite()).ExpandLite(line => backReference.Evaluate(line), ExpandLite.ToStringLazy).ToVirtualMListWithOrder()
+                );
 
             sb.Schema.EntityEvents<T>().Saving += (T e) =>
             {

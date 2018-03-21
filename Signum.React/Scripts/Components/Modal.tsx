@@ -346,21 +346,25 @@ interface ModalHeaderButtonsProps {
     onOk?: () => void;
     okDisabled?: boolean;
     onCancel?: () => void;
+    closeBeforeTitle?: boolean;
+    htmlAttributes?: React.HTMLAttributes<HTMLDivElement>;
 }
 
 export class ModalHeaderButtons extends React.Component<ModalHeaderButtonsProps> {
     render() {
         const p = this.props;
+        var close = this.props.onClose &&
+            <button type="button" className="close" aria-label="Close" onClick={this.props.onClose}>
+                <span aria-hidden="true">×</span>
+            </button>;
+
         return (
-            <div className="modal-header">
-                <h4 className="modal-title">
+            <div className="modal-header" {...p.htmlAttributes}>
+                {p.closeBeforeTitle && close}
+                <h4 className="modal-title" >
                     {this.props.children}
                 </h4>
-                {this.props.onClose &&
-                    <button type="button" className="close" aria-label="Close" onClick={this.props.onClose}>
-                        <span aria-hidden="true">×</span>
-                    </button>
-                }
+                {!p.closeBeforeTitle && close}
                 {(this.props.onCancel || this.props.onOk) &&
                     <div className="btn-toolbar" style={{ flexWrap: "nowrap" }}>
                         {this.props.onOk && <button className="btn btn-primary sf-entity-button sf-close-button sf-ok-button" disabled={this.props.okDisabled} onClick={this.props.onOk}>

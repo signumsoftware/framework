@@ -398,13 +398,13 @@ namespace Signum.Entities
             return true;
         }
 
-        public int RemoveAll(Predicate<T> match)
+        public int RemoveAll(Predicate<T> predicate)
         {
             List<T> removed = new List<T>(); 
             for (int i = 0; i < this.innerList.Count; )
             {
                 var val = innerList[i].Element;
-                if (match(val))
+                if (predicate(val))
                 {
                     innerList.RemoveAt(i);
                     removed.Add(val);
@@ -423,6 +423,34 @@ namespace Signum.Entities
             }
 
             return removed.Count; 
+        }
+
+
+        public int RemoveAllElements(Predicate<RowIdElement> predicate)
+        {
+            List<T> removed = new List<T>();
+            for (int i = 0; i < this.innerList.Count;)
+            {
+                var rowElem = innerList[i];
+                if (predicate(rowElem))
+                {
+                    innerList.RemoveAt(i);
+                    removed.Add(rowElem.Element);
+                }
+                else
+                {
+                    i++;
+                }
+            }
+
+            if (removed.Any())
+            {
+                SetSelfModified();
+                foreach (var item in removed)
+                    OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, item));
+            }
+
+            return removed.Count;
         }
 
         public void RemoveAt(int index)
@@ -745,6 +773,12 @@ namespace Signum.Entities
             }
 
         }
+
+        public void AssignAndPostRetrieving(IMListPrivate newList)
+        {
+            this.AssignMList((MList<T>)newList);
+            this.PostRetrieving();
+        }
     }
 
 
@@ -771,7 +805,9 @@ namespace Signum.Entities
         void SetRowId(int index, PrimaryKey rowId);
         void ForceRowId(int index, PrimaryKey rowId);
 
-        void InnerListModified(IList newItems, IList oldItems); 
+        void InnerListModified(IList newItems, IList oldItems);
+
+        void AssignAndPostRetrieving(IMListPrivate newList);
     }
 
     public interface IMListPrivate<T>  : IMListPrivate
