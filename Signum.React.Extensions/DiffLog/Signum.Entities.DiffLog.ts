@@ -29,4 +29,8 @@ export interface DiffLogMixin extends Entities.MixinEntity {
     cleaned?: boolean;
 }
 
+export module TimeMachineMessage {
+    export const TimeMachine = new MessageKey("TimeMachineMessage", "TimeMachine");
+}
+
 

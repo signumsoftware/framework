@@ -148,6 +148,7 @@
     <Compile Include="Chart\UserChart\UserChartController.cs" />
     <Compile Include="Dashboard\DashboardController.cs" />
     <Compile Include="Dashboard\DashboardServer.cs" />
+    <Compile Include="DiffLog\TimeMachineController.cs" />
     <Compile Include="DiffLog\DiffLogController.cs" />
     <Compile Include="DiffLog\DiffLogServer.cs" />
     <Compile Include="Disconnected\DisconnectedServer.cs" />
@@ -160,6 +161,7 @@
     <Compile Include="Dynamic\DynamicServer.cs" />
     <TypeScriptCompile Include="Basics\Templates\ScrollPanel.tsx" />
     <TypeScriptCompile Include="DiffLog\Templates\DiffDocument.tsx" />
+    <TypeScriptCompile Include="DiffLog\Templates\TimeMachinePage.tsx" />
     <TypeScriptCompile Include="MachineLearning\Signum.Entities.MachineLearning.ts" />
     <TypeScriptCompile Include="MachineLearning\Templates\LineChart.tsx" />
     <TypeScriptCompile Include="MachineLearning\Templates\PredictModal.tsx" />
