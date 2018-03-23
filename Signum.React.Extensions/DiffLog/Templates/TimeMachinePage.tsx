@@ -63,14 +63,14 @@ export default class TimeMachinePage extends React.Component<TimeMachinePageProp
         var ctx = new StyleContext(undefined, undefined);
         const lite = this.state.lite;
         if (lite == null)
-            return <h4 className="mt-2"><span className="display-6">{JavascriptMessage.loading.niceToString()}</span></h4>;
+            return <h4><span className="display-6">{JavascriptMessage.loading.niceToString()}</span></h4>;
 
         var scl = this.searchControl && this.searchControl.searchControlLoaded || undefined;
         var colIndex = scl && scl.props.findOptions.columnOptions.findIndex(a => a.token != null && a.token.fullKey == "Entity.SystemValidFrom");
 
         return (
             <div>
-                <h4 className="mt-2">
+                <h4>
                     <span className="display-5">{TimeMachineMessage.TimeMachine.niceToString()}</span>
                     <br />
                     <small className="sf-type-nice-name">
