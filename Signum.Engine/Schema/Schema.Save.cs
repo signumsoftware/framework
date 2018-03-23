@@ -692,7 +692,7 @@ namespace Signum.Engine.Maps
             {
                 this.SourceColumn = column.Name;
                 this.ParameterName = Engine.ParameterBuilder.GetParameterName(column.Name);
-                this.ParameterBuilder = Connector.Current.ParameterBuilder.ParameterFactory(Concat(this.ParameterName, suffix), column.SqlDbType, column.UserDefinedTypeName, column.Nullable, value);
+                this.ParameterBuilder = Connector.Current.ParameterBuilder.ParameterFactory(Concat(this.ParameterName, suffix), column.SqlDbType, column.UserDefinedTypeName, column.Nullable.ToBool(), value);
             }
 
             public string SourceColumn;
