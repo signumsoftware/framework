@@ -65,6 +65,12 @@ namespace Signum.Entities.Reflection
             return DirectedGraph<Modifiable>.Generate(root, ModifyInspector.FullExplore, ReferenceEqualityComparer<Modifiable>.Default);
         }
 
+        public static DirectedGraph<Modifiable> FromRootVirtual(Modifiable root)
+        {
+            return DirectedGraph<Modifiable>.Generate(root, ModifyInspector.FullExploreVirtual, ReferenceEqualityComparer<Modifiable>.Default);
+        }
+
+
         public static DirectedGraph<Modifiable> FromRoots<T>(IEnumerable<T> roots)
             where T : Modifiable
         {
@@ -96,7 +102,7 @@ namespace Signum.Entities.Reflection
 
             return result;
         }
-        
+
         public static Dictionary<Guid, IntegrityCheck> EntityIntegrityCheck(DirectedGraph<Modifiable> graph)
         {
             return graph.OfType<ModifiableEntity>()
@@ -115,7 +121,7 @@ namespace Signum.Entities.Reflection
                             .Select(a => a.IntegrityCheck())
                             .NotNull();
 
-            return identErrors.Concat(modErros).ToDictionaryOrNull(a => a.TemporalId, a => a); 
+            return identErrors.Concat(modErros).ToDictionaryOrNull(a => a.TemporalId, a => a);
         }
 
         static void AssertCloneAttack(DirectedGraph<Modifiable> graph)
@@ -186,7 +192,7 @@ namespace Signum.Entities.Reflection
         }
 
 
-        static string[] colors = 
+        static string[] colors =
         {
              "aquamarine1",  "aquamarine4", "blue", "blueviolet",
              "brown4", "burlywood", "cadetblue1", "cadetblue",
@@ -254,7 +260,7 @@ namespace Signum.Entities.Reflection
                 new[]
                 {
                     new XAttribute("Label", n.ToString() ?? "[null]"),
-                    new XAttribute("TypeName", n.GetType().TypeName()), 
+                    new XAttribute("TypeName", n.GetType().TypeName()),
                     new XAttribute("Background", ColorExtensions.ToHtmlColor(n.GetType().FullName.GetHashCode()))
                 });
         }
@@ -264,7 +270,7 @@ namespace Signum.Entities.Reflection
             return new[]
             {
                new XAttribute("Label", (ie.ToString() ?? "[null]")  + Modified(ie)),
-               new XAttribute("TypeName", ie.GetType().TypeName()), 
+               new XAttribute("TypeName", ie.GetType().TypeName()),
                new XAttribute("Background", ColorExtensions.ToHtmlColor(ie.GetType().FullName.GetHashCode())),
                new XAttribute("Description", ie.IdOrNull?.ToString() ?? "New")
             };
@@ -280,7 +286,7 @@ namespace Signum.Entities.Reflection
             return new[]
             {
                new XAttribute("Label", (lite.ToString() ?? "[null]") + Modified((Modifiable)lite)),
-               new XAttribute("TypeName", lite.GetType().TypeName()), 
+               new XAttribute("TypeName", lite.GetType().TypeName()),
                new XAttribute("Stroke", ColorExtensions.ToHtmlColor(lite.EntityType.FullName.GetHashCode())),
                new XAttribute("StrokeThickness", "2"),
                new XAttribute("Background", ColorExtensions.ToHtmlColor(lite.EntityType.FullName.GetHashCode()).Replace("#", "#44")),
@@ -293,7 +299,7 @@ namespace Signum.Entities.Reflection
             return new[]
             {
                new XAttribute("Label", (ee.ToString() ?? "[null]")+  Modified(ee)),
-               new XAttribute("TypeName", ee.GetType().TypeName()), 
+               new XAttribute("TypeName", ee.GetType().TypeName()),
                new XAttribute("NodeRadius", 0),
                new XAttribute("Background", ColorExtensions.ToHtmlColor(ee.GetType().FullName.GetHashCode())),
             };
@@ -304,7 +310,7 @@ namespace Signum.Entities.Reflection
             return new[]
             {
                new XAttribute("Label", (ee.ToString() ?? "[null]") +  Modified(ee)),
-               new XAttribute("TypeName", ee.GetType().TypeName()), 
+               new XAttribute("TypeName", ee.GetType().TypeName()),
                new XAttribute("Background", ColorExtensions.ToHtmlColor(ee.GetType().FullName.GetHashCode())),
             };
         }
@@ -314,7 +320,7 @@ namespace Signum.Entities.Reflection
             return new[]
             {
                new XAttribute("Label", (list.ToString() ?? "[null]") +  Modified((Modifiable)list)),
-               new XAttribute("TypeName", list.GetType().TypeName()), 
+               new XAttribute("TypeName", list.GetType().TypeName()),
                new XAttribute("NodeRadius", 2),
                new XAttribute("Background", ColorExtensions.ToHtmlColor(list.GetType().ElementType().FullName.GetHashCode())),
             };
@@ -343,7 +349,7 @@ namespace Signum.Entities.Reflection
             }
 
             if (copy.Any())
-                throw new InvalidOperationException(copy.Values.ToString("\r\n"));       
+                throw new InvalidOperationException(copy.Values.ToString("\r\n"));
         }
     }
 
