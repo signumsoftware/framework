@@ -145,11 +145,11 @@ namespace Signum.Entities.Dynamic
             return null;
         }
 
-        protected override void PreSaving(ref bool graphModified)
+        protected override void PreSaving(PreSavingContext ctx)
         {
             CompileIfNecessary();
 
-            base.PreSaving(ref graphModified);
+            base.PreSaving(ctx);
         }
 
         private void CompileIfNecessary()

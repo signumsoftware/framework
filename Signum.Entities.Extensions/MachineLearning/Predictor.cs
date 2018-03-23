@@ -138,13 +138,14 @@ namespace Signum.Entities.MachineLearning
         public int TotalCount { get; set; }
         public int MissCount { get; set; }
         [Format("p2")]
+
         public double? MissRate { get; set; }
-
-        protected override void PreSaving(ref bool graphModified)
+        
+        protected override void PreSaving(PreSavingContext ctx)
         {
-            MissRate = TotalCount == 0 ? (double?)null : Math.Round(MissCount / (double)TotalCount, 2);
+            base.PreSaving(ctx);
 
-            base.PreSaving(ref graphModified);
+            MissRate = TotalCount == 0 ? (double?)null : Math.Round(MissCount / (double)TotalCount, 2);
         }
     }
 

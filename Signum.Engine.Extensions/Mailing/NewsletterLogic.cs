@@ -116,7 +116,7 @@ namespace Signum.Engine.Mailing
         }
 
 
-        static void Newsletter_PreSaving(NewsletterEntity newsletter, ref bool graphModified)
+        static void Newsletter_PreSaving(NewsletterEntity newsletter, PreSavingContext ctx)
         {
             var queryname = QueryLogic.ToQueryName(newsletter.Query.Key);
             QueryDescription qd = DynamicQueryManager.Current.QueryDescription(queryname);

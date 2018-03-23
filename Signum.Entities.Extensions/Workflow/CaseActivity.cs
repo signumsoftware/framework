@@ -94,9 +94,9 @@ namespace Signum.Entities.Workflow
             return ToStringExpression.Evaluate(this);
         }
 
-        protected override void PreSaving(ref bool graphModified)
-        {
-            base.PreSaving(ref graphModified);
+        protected override void PreSaving(PreSavingContext ctx)
+        { 
+            base.PreSaving(ctx);
             this.Duration = this.DoneDate == null ? (double?)null :
                 (this.DoneDate.Value - this.StartDate).TotalMinutes;
         }

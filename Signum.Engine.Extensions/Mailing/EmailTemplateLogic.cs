@@ -223,7 +223,7 @@ namespace Signum.Engine.Mailing
             }
         }
 
-        static void EmailTemplate_PreSaving(EmailTemplateEntity template, ref bool graphModified)
+        static void EmailTemplate_PreSaving(EmailTemplateEntity template, PreSavingContext ctx)
         {
             using (template.DisableAuthorization ? ExecutionMode.Global() : null)
             {

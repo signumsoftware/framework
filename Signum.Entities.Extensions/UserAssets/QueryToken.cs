@@ -62,7 +62,7 @@ namespace Signum.Entities.UserAssets
             get { return parseException; }
         }
 
-        protected override void PreSaving(ref bool graphModified)
+        protected override void PreSaving(PreSavingContext ctx)
         {
             TokenString = token?.FullKey();
         }

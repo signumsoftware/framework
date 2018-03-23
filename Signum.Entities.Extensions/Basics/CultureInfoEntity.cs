@@ -59,7 +59,7 @@ namespace Signum.Entities.Basics
             base.SetSelfModified();
         }
 
-        protected override void PreSaving(ref bool graphModified)
+        protected override void PreSaving(PreSavingContext ctx)
         {
             try
             {
@@ -75,7 +75,7 @@ namespace Signum.Entities.Basics
             {
             }
 
-            base.PreSaving(ref graphModified);
+            base.PreSaving(ctx);
         }
 
         static Expression<Func<CultureInfoEntity, string>> ToStringExpression = e => e.EnglishName;
