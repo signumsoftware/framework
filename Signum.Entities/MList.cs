@@ -798,6 +798,8 @@ namespace Signum.Entities
     public interface IMListPrivate
     {
         bool IsNew { get; }
+        
+        int Count { get; }
 
         void ExecutePostRetrieving();
         void SetOldIndex(int index);

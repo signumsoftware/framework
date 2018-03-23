@@ -113,9 +113,9 @@ namespace Signum.Engine.Maps
                     action(inMListTable);
         }
 
-        void IEntityEvents.OnPreSaving(Entity entity, ref bool graphModified)
+        void IEntityEvents.OnPreSaving(Entity entity, PreSavingContext ctx)
         {
-            PreSaving?.Invoke((T)entity, ref graphModified);
+            PreSaving?.Invoke((T)entity, ctx);
         }
 
         void IEntityEvents.OnSaving(Entity entity)
@@ -237,7 +237,7 @@ namespace Signum.Engine.Maps
         }
     }
 
-    public delegate void PreSavingEventHandler<T>(T ident, ref bool graphModified) where T : Entity;
+    public delegate void PreSavingEventHandler<T>(T ident, PreSavingContext ctx) where T : Entity;
     public delegate void RetrievedEventHandler<T>(T ident) where T : Entity;
     public delegate void SavingEventHandler<T>(T ident) where T : Entity;
     public delegate void SavedEventHandler<T>(T ident, SavedEventArgs args) where T : Entity;
@@ -286,7 +286,7 @@ namespace Signum.Engine.Maps
     internal interface IEntityEvents
     {
         Entity OnAlternativeRetriving(PrimaryKey id);
-        void OnPreSaving(Entity entity, ref bool graphModified);
+        void OnPreSaving(Entity entity, PreSavingContext ctx);
         void OnSaving(Entity entity);
         void OnSaved(Entity entity, SavedEventArgs args);
 

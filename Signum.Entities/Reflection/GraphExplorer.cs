@@ -144,26 +144,27 @@ namespace Signum.Entities.Reflection
 
         public static DirectedGraph<Modifiable> PreSaving(Func<DirectedGraph<Modifiable>> recreate)
         {
-            return PreSaving(recreate, (Modifiable m, ref bool graphModified) => 
+            return PreSaving(recreate, (Modifiable m, PreSavingContext ctx) =>
             {
-
                 if (m is ModifiableEntity me)
                     me.SetTemporalErrors(null);
 
-                m.PreSaving(ref graphModified);
+                m.PreSaving(ctx);
             });
         }
 
-        public delegate void ModifyEntityEventHandler(Modifiable m, ref bool graphModified);
+        public delegate void ModifyEntityEventHandler(Modifiable m, PreSavingContext ctx);
 
         public static DirectedGraph<Modifiable> PreSaving(Func<DirectedGraph<Modifiable>> recreate, ModifyEntityEventHandler modifier)
         {
             DirectedGraph<Modifiable> graph = recreate();
 
+            PreSavingContext ctx = new PreSavingContext(graph);
+
             bool graphModified = false;
             foreach (var m in graph)
             {
-                modifier(m, ref graphModified);
+                modifier(m, ctx);
             }
 
             if (!graphModified)
@@ -172,10 +173,10 @@ namespace Signum.Entities.Reflection
             do
             {
                 var newGraph = recreate();
-                graphModified = false;
+                ctx = new PreSavingContext(graph);
                 foreach (var m in newGraph.Except(graph))
                 {
-                    modifier(m, ref graphModified);
+                    modifier(m, ctx);
                 }
 
                 graph = newGraph;

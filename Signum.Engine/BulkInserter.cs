@@ -144,17 +144,7 @@ namespace Signum.Engine
 
                 if (preSaving)
                 {
-                    Schema schema = Schema.Current;
-                    GraphExplorer.PreSaving(() => GraphExplorer.FromRoots(list), (Modifiable m, ref bool graphModified) =>
-                    {
-                        if (m is ModifiableEntity me)
-                            me.SetTemporalErrors(null);
-
-                        m.PreSaving(ref graphModified);
-
-                        if (m is Entity ident)
-                            schema.OnPreSaving(ident, ref graphModified);
-                    });
+                    Saver.PreSaving(() => GraphExplorer.FromRoots(list));
                 }
 
                 if (validateFirst)

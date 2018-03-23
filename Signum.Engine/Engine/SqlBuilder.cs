@@ -123,7 +123,6 @@ namespace Signum.Engine
             return false;
         }
 
-
         public static bool IsString(SqlDbType sqlDbType)
         {
             switch (sqlDbType)

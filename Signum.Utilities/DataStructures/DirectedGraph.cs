@@ -266,6 +266,18 @@ namespace Signum.Utilities.DataStructures
             return this.Inverse().Do(g => g.UnionWith(this));
         }
 
+        public DirectedGraph<T> RemoveAllNodes(DirectedGraph<T> graph)
+        {
+            var inv = this.Inverse();
+
+            foreach (var item in this.Where(a=>graph.Contains(a)).ToList())
+            {
+                this.RemoveFullNode(item, inv.RelatedTo(item));
+            }
+
+            return this;
+        }
+
         public void UnionWith(DirectedGraph<T> other)
         {
             foreach (var item in other.Nodes)

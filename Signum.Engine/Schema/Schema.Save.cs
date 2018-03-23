@@ -677,18 +677,7 @@ namespace Signum.Engine.Maps
         void PrepareEntitySync(Entity entity)
         {
             Schema current = Schema.Current;
-            DirectedGraph<Modifiable> modifiables = GraphExplorer.PreSaving(() => GraphExplorer.FromRoot(entity), (Modifiable m, ref bool graphModified) =>
-            {
-
-                if (m is ModifiableEntity me)
-                    me.SetTemporalErrors(null);
-
-                m.PreSaving(ref graphModified);
-
-
-                if (m is Entity ident)
-                    current.OnPreSaving(ident, ref graphModified);
-            });
+            DirectedGraph<Modifiable> modifiables = Saver.PreSaving(() => GraphExplorer.FromRoot(entity));
 
             var error = GraphExplorer.FullIntegrityCheck(modifiables);
             if (error != null)

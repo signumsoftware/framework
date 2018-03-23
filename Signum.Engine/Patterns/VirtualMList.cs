@@ -136,6 +136,25 @@ namespace Signum.Engine
                 );
             }
 
+            sb.Schema.EntityEvents<T>().PreSaving += (T e, PreSavingContext ctx) =>
+            {
+                if (VirtualMList.ShouldAvoidMListType(typeof(L)))
+                    return;
+
+                var mlist = getMList(e);
+                if (mlist == null)
+                    return;
+
+                if (mlist.Count > 0)
+                {
+                    var graph = Saver.PreSaving(() => GraphExplorer.FromRoot(mlist).RemoveAllNodes(ctx.Graph));
+                    GraphExplorer.PropagateModifications(graph);
+                }
+
+                if (mlist.IsGraphModified)
+                    e.SetModified();
+            };
+
             sb.Schema.EntityEvents<T>().Saving += (T e) =>
             {
                 if (VirtualMList.ShouldAvoidMListType(typeof(L)))
@@ -177,19 +196,23 @@ namespace Signum.Engine
 
                 if (mlist != null)
                 {
-                    if (setter == null)
-                        setter = CreateSetter(backReference);
-
-                    mlist.ForEach(line => setter(line, e.ToLite()));
-                    if (onSave == null)
-                        mlist.SaveList();
-                    else
-                        mlist.ForEach(line => { if (GraphExplorer.IsGraphModified(line)) onSave(line, e); });
-                    var priv = (IMListPrivate)mlist;
-                    for (int i = 0; i < mlist.Count; i++)
+                    if (mlist.Any())
                     {
-                        if (priv.GetRowId(i) == null)
-                            priv.SetRowId(i, mlist[i].Id);
+                        if (setter == null)
+                            setter = CreateSetter(backReference);
+
+                        mlist.ForEach(line => setter(line, e.ToLite()));
+                        if (onSave == null)
+                            mlist.SaveList();
+                        else
+                            mlist.ForEach(line => { if (GraphExplorer.IsGraphModified(line)) onSave(line, e); });
+
+                        var priv = (IMListPrivate)mlist;
+                        for (int i = 0; i < mlist.Count; i++)
+                        {
+                            if (priv.GetRowId(i) == null)
+                                priv.SetRowId(i, mlist[i].Id);
+                        }
                     }
                     mlist.SetCleanModified(false);
                 }
@@ -217,8 +240,6 @@ namespace Signum.Engine
 
             return fi;
         }
-
-     
 
         public static FluentInclude<T> WithVirtualMListInitializeOnly<T, L>(this FluentInclude<T> fi,
             Expression<Func<T, MList<L>>> mListField,
