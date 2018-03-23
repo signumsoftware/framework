@@ -102,10 +102,10 @@ export default class TimeMachinePage extends React.Component<TimeMachinePageProp
                 <h5>Selected Versions</h5>
                 <UncontrolledTabs hideOnly>
                     {scl && scl.state.selectedRows && scl.state.selectedRows.map(sr => sr.columns[colIndex!] as string).orderBy(a => a).flatMap((d, i, dates) => [
-                        <Tab eventKey={d} title={d.replace("T", " ")}>
+                        <Tab title={d.replace("T", " ")} key={d} eventKey={d}>
                             <RenderEntityVersion lite={lite} asOf={d} />
                         </Tab>,
-                        (i < dates.length - 1) && <Tab title="<- Diff ->" eventKey={"diff-" + d + "-" + dates[i+1]}>
+                        (i < dates.length - 1) && <Tab title="<- Diff ->" key={"diff-" + d + "-" + dates[i + 1]} eventKey={"diff-" + d + "-" + dates[i+1]}>
                             <DiffEntityVersion lite={lite} validFrom={d} validTo={dates[i+1]} />
                         </Tab>
                     ])}
