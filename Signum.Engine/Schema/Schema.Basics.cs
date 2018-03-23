@@ -43,7 +43,7 @@ namespace Signum.Engine.Maps
 
         void GenerateColumns();
 
-        SystemVersionedInfo SysteVersioned { get; }
+        SystemVersionedInfo SystemVersioned { get; }
     }
 
     public class SystemVersionedInfo
@@ -111,7 +111,7 @@ namespace Signum.Engine.Maps
         public bool IsView { get; internal set; }
         public string CleanTypeName { get; set; }
 
-        public SystemVersionedInfo SysteVersioned { get; set; }
+        public SystemVersionedInfo SystemVersioned { get; set; }
 
         public Dictionary<string, EntityField> Fields { get; set; }
         public Dictionary<Type, FieldMixin> Mixins { get; set; }
@@ -140,8 +140,8 @@ namespace Signum.Engine.Maps
             if (Mixins != null)
                 columns.AddRange(Mixins.Values.SelectMany(m => m.Fields.Values).SelectMany(f => f.Field.Columns()).ToDictionaryEx(c => c.Name, errorSuffix), errorSuffix);
 
-            if (this.SysteVersioned != null)
-                columns.AddRange(this.SysteVersioned.Columns().ToDictionaryEx(a => a.Name), errorSuffix);
+            if (this.SystemVersioned != null)
+                columns.AddRange(this.SystemVersioned.Columns().ToDictionaryEx(a => a.Name), errorSuffix);
 
             Columns = columns;
 
@@ -1061,7 +1061,7 @@ namespace Signum.Engine.Maps
         public FieldValue Order { get; set; }
         public Field Field { get; set; }
 
-        public SystemVersionedInfo SysteVersioned { get; set; }
+        public SystemVersionedInfo SystemVersioned { get; set; }
 
         public Type CollectionType { get; private set; }
         public Func<IList> Constructor { get; private set; }
@@ -1090,8 +1090,8 @@ namespace Signum.Engine.Maps
 
             cols.AddRange(Field.Columns());
 
-            if (this.SysteVersioned != null)
-                cols.AddRange(this.SysteVersioned.Columns());
+            if (this.SystemVersioned != null)
+                cols.AddRange(this.SystemVersioned.Columns());
 
             Columns = cols.ToDictionary(a => a.Name);
         }

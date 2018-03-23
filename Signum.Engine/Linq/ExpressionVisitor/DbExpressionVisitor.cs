@@ -153,8 +153,9 @@ namespace Signum.Engine.Linq
         protected internal virtual Expression VisitMList(MListExpression ml)
         {
             var newBackID = (PrimaryKeyExpression)Visit(ml.BackID);
-            if (newBackID != ml.BackID)
-                return new MListExpression(ml.Type, newBackID, ml.TableMList);
+            var externalPeriod = (NewExpression)Visit(ml.ExternalPeriod);
+            if (newBackID != ml.BackID || externalPeriod != ml.ExternalPeriod)
+                return new MListExpression(ml.Type, newBackID, externalPeriod, ml.TableMList);
             return ml;
         }
 
@@ -172,16 +173,18 @@ namespace Signum.Engine.Linq
             var parent = (EntityExpression)Visit(mle.Parent);
             var order = Visit(mle.Order);
             var element = Visit(mle.Element);
-            if (rowId != mle.RowId || parent != mle.Parent || order != mle.Order || element != mle.Element)
-                return new MListElementExpression(rowId, parent, order, element, mle.Table);
+            var period = (NewExpression)Visit(mle.TablePeriod);
+            if (rowId != mle.RowId || parent != mle.Parent || order != mle.Order || element != mle.Element || period != mle.TablePeriod)
+                return new MListElementExpression(rowId, parent, order, element, period, mle.Table, mle.Alias);
             return mle;
         }
-
+        
         protected internal virtual Expression VisitAdditionalField(AdditionalFieldExpression ml)
         {
             var newBackID = (PrimaryKeyExpression)Visit(ml.BackID);
-            if (newBackID != ml.BackID)
-                return new AdditionalFieldExpression(ml.Type, newBackID, ml.Route);
+            var externalPeriod = (NewExpression)Visit(ml.ExternalPeriod);
+            if (newBackID != ml.BackID || externalPeriod != ml.ExternalPeriod)
+                return new AdditionalFieldExpression(ml.Type, newBackID, externalPeriod, ml.Route);
             return ml;
         }
 
@@ -212,9 +215,10 @@ namespace Signum.Engine.Linq
         {
             var id = Visit(iba.Id);
             var typeId = (TypeImplementedByAllExpression)Visit(iba.TypeId);
+            var externalPeriod = (NewExpression)Visit(iba.ExternalPeriod);
 
-            if (id != iba.Id || typeId != iba.TypeId)
-                return new ImplementedByAllExpression(iba.Type, id, typeId);
+            if (id != iba.Id || typeId != iba.TypeId || externalPeriod != iba.ExternalPeriod)
+                return new ImplementedByAllExpression(iba.Type, id, typeId, externalPeriod);
             return iba;
         }
 
@@ -232,10 +236,13 @@ namespace Signum.Engine.Linq
             var bindings = Visit(ee.Bindings, VisitFieldBinding);
             var mixins = Visit(ee.Mixins, VisitMixinEntity);
 
-            var id = (PrimaryKeyExpression)Visit(ee.ExternalId);
+            var externalId = (PrimaryKeyExpression)Visit(ee.ExternalId);
+            var externalPeriod = (NewExpression)Visit(ee.ExternalPeriod);
 
-            if (ee.Bindings != bindings || ee.ExternalId != id || ee.Mixins != mixins)
-                return new EntityExpression(ee.Type, id, ee.TableAlias, bindings, mixins, ee.AvoidExpandOnRetrieving);
+            var period = (NewExpression)Visit(ee.TablePeriod);
+
+            if (ee.Bindings != bindings || ee.ExternalId != externalId || ee.ExternalPeriod != externalPeriod || ee.Mixins != mixins || ee.TablePeriod != period)
+                return new EntityExpression(ee.Type, externalId, externalPeriod, ee.TableAlias, bindings, mixins, period, ee.AvoidExpandOnRetrieving);
 
             return ee;
         }

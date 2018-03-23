@@ -242,7 +242,7 @@ namespace Signum.Engine.Maps
             return ee.CacheController;
         }
 
-        internal IEnumerable<FieldBinding> GetAdditionalQueryBindings(PropertyRoute parent, PrimaryKeyExpression id)
+        internal IEnumerable<FieldBinding> GetAdditionalQueryBindings(PropertyRoute parent, PrimaryKeyExpression id, NewExpression period)
         {
             //AssertAllowed(parent.RootType, inUserInterface: false);
 
@@ -252,7 +252,7 @@ namespace Signum.Engine.Maps
 
             return ee.AdditionalBindings
                 .Where(kvp => kvp.Key.Parent.Equals(parent))
-                .Select(kvp => new FieldBinding(kvp.Key.FieldInfo, new AdditionalFieldExpression(kvp.Key.FieldInfo.FieldType, (PrimaryKeyExpression)id, kvp.Key)))
+                .Select(kvp => new FieldBinding(kvp.Key.FieldInfo, new AdditionalFieldExpression(kvp.Key.FieldInfo.FieldType, (PrimaryKeyExpression)id, period, kvp.Key)))
                 .ToList();
         }
 

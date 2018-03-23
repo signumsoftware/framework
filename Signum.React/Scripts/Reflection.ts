@@ -28,6 +28,7 @@ export interface TypeInfo {
     entityData?: EntityData;
     toStringFunction?: string;
     isLowPopulation?: boolean;
+    isSystemVersioned?: boolean;
     requiresSaveOperation?: boolean;
     queryDefined?: boolean;
     members: { [name: string]: MemberInfo };
@@ -87,7 +88,8 @@ export function toMomentFormat(format: string | undefined): string | undefined {
         case "M":
         case "m": return "D MMM";
         case "u":
-        case "s": return moment.ISO_8601 as any;
+        case "s":
+        case "o": return undefined;
         case "t": return "LT";
         case "T": return "LTS";
         case "y": return "LTS";

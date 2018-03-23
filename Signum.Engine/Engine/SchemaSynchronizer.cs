@@ -209,11 +209,11 @@ namespace Signum.Engine
                             var rename = !object.Equals(dif.Name, tab.Name) ? SqlBuilder.RenameOrMove(dif, tab) : null;
 
                             var disableSystemVersioning = (dif.TemporalType != SysTableTemporalType.None && (
-                                tab.SysteVersioned == null || !dif.TemporalTableName.Equals(tab.SysteVersioned.TableName)) ?
+                                tab.SystemVersioned == null || !dif.TemporalTableName.Equals(tab.SystemVersioned.TableName)) ?
                                 SqlBuilder.AlterTableDisableSystemVersioning(tab) : null);
 
                             var dropPeriod = (dif.Period != null &&
-                                (tab.SysteVersioned == null || !dif.Period.PeriodEquals(tab.SysteVersioned)) ?
+                                (tab.SystemVersioned == null || !dif.Period.PeriodEquals(tab.SystemVersioned)) ?
                                 SqlBuilder.AlterTableDropPeriod(tab) : null);
 
                             var columns = Synchronizer.SynchronizeScript(
@@ -250,12 +250,12 @@ namespace Signum.Engine
                                     )
                                 );
                             
-                            var addPeriod = ((tab.SysteVersioned != null &&
-                                (dif.Period == null || !dif.Period.PeriodEquals(tab.SysteVersioned))) ?
+                            var addPeriod = ((tab.SystemVersioned != null &&
+                                (dif.Period == null || !dif.Period.PeriodEquals(tab.SystemVersioned))) ?
                                 (SqlPreCommandSimple)SqlBuilder.AlterTableAddPeriod(tab) : null);
 
-                            var addSystemVersioning = (tab.SysteVersioned != null &&
-                                (dif.Period == null || !dif.TemporalTableName.Equals(tab.SysteVersioned.TableName)) ?
+                            var addSystemVersioning = (tab.SystemVersioned != null &&
+                                (dif.Period == null || !dif.TemporalTableName.Equals(tab.SystemVersioned.TableName)) ?
                                 SqlBuilder.AlterTableEnableSystemVersioning(tab).Do(a=>a.GoBefore = true) : null);
 
 
@@ -445,9 +445,9 @@ FROM {oldTable.Name}");
         {
             if(column is SystemVersionedInfo.Column svc)
             {
-                return svc.SystemVersionColumnType == SystemVersionedInfo.ColumnType.Start ?
-                    "SYSUTCDATETIME()" :
-                    "CONVERT(datetime2, '9999-12-31 23:59:59.9999999')";
+                var date = svc.SystemVersionColumnType == SystemVersionedInfo.ColumnType.Start ? DateTime.MinValue : DateTime.MaxValue;
+
+                return $"CONVERT(datetime2, '{date:yyyy-MM-dd HH:mm:ss.fffffff}')";
             }
 
             string defaultValue = rep.Interactive ? SafeConsole.AskString("Default value for '{0}.{1}'? (or press enter) ".FormatWith(table.Name.Name, column.Name), stringValidator: str => null) : "";
@@ -586,7 +586,7 @@ JOIN {3} {4} ON {2}.{0} = {4}.Id".FormatWith(tabCol.Name,
                              TemporalTableName = !con.SupportsTemporalTables || t.history_table_id == null ? null : 
                              Database.View<SysTables>()
                              .Where(ht => ht.object_id == t.history_table_id)
-                             .Select(ht => new ObjectName(new SchemaName(db, t.Schema().name), t.name))
+                             .Select(ht => new ObjectName(new SchemaName(db, ht.Schema().name), ht.name))
                              .SingleOrDefault(),
 
                              PrimaryKeyName = (from k in t.KeyConstraints()

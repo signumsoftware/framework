@@ -290,6 +290,9 @@ export module JavascriptMessage {
     export const showFilters = new MessageKey("JavascriptMessage", "showFilters");
     export const groupResults = new MessageKey("JavascriptMessage", "groupResults");
     export const ungroupResults = new MessageKey("JavascriptMessage", "ungroupResults");
+    export const activateTimeMachine = new MessageKey("JavascriptMessage", "activateTimeMachine");
+    export const deactivateTimeMachine = new MessageKey("JavascriptMessage", "deactivateTimeMachine");
+    export const showRecords = new MessageKey("JavascriptMessage", "showRecords");
     export const loading = new MessageKey("JavascriptMessage", "loading");
     export const noActionsFound = new MessageKey("JavascriptMessage", "noActionsFound");
     export const saveChangesBeforeOrPressCancel = new MessageKey("JavascriptMessage", "saveChangesBeforeOrPressCancel");
@@ -317,6 +320,8 @@ export module JavascriptMessage {
     export const newEntity = new MessageKey("JavascriptMessage", "newEntity");
     export const ok = new MessageKey("JavascriptMessage", "ok");
     export const cancel = new MessageKey("JavascriptMessage", "cancel");
+    export const showPeriod = new MessageKey("JavascriptMessage", "showPeriod");
+    export const showPreviousOperation = new MessageKey("JavascriptMessage", "showPreviousOperation");
 }
 
 export module LiteMessage {
@@ -371,6 +376,7 @@ export module OperationMessage {
     export const PleaseConfirmYouDLikeToDeleteTheSelectedEntitiesFromTheSystem = new MessageKey("OperationMessage", "PleaseConfirmYouDLikeToDeleteTheSelectedEntitiesFromTheSystem");
     export const TheOperation0DidNotReturnAnEntity = new MessageKey("OperationMessage", "TheOperation0DidNotReturnAnEntity");
     export const Logs = new MessageKey("OperationMessage", "Logs");
+    export const PreviousOperationLog = new MessageKey("OperationMessage", "PreviousOperationLog");
 }
 
 export const OperationSymbol = new Type<OperationSymbol>("Operation");

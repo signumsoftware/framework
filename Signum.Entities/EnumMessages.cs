@@ -27,7 +27,8 @@ namespace Signum.Entities
 
         [Description("{0} didn't return an entity")]
         TheOperation0DidNotReturnAnEntity,
-        Logs
+        Logs,
+        PreviousOperationLog
     }
 
     public enum SynchronizerMessage
@@ -259,6 +260,12 @@ Lose changes?")]
         groupResults,
         [Description("Ungroup results")]
         ungroupResults,
+        [Description("Acivate Time Machine")]
+        activateTimeMachine,
+        [Description("Deactivate Time Machine")]
+        deactivateTimeMachine,
+        [Description("Show Records")]
+        showRecords,
         [Description("Loading...")]
         loading,
         [Description("No actions found")]
@@ -314,6 +321,10 @@ Lose changes?")]
         ok,
         [Description("Cancel")]
         cancel,
+        [Description("Show Period")]
+        showPeriod,
+        [Description("Show Previous Operation")]
+        showPreviousOperation
     }
 
     public enum QuickLinkMessage

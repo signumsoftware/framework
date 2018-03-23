@@ -99,6 +99,13 @@ export module QueryTokenMessage {
     export const Distinct = new MessageKey("QueryTokenMessage", "Distinct");
 }
 
+export const SystemTimeMode = new EnumType<SystemTimeMode>("SystemTimeMode");
+export type SystemTimeMode =
+    "AsOf" |
+    "Between" |
+    "ContainedIn" |
+    "All";
+
 export const UniqueType = new EnumType<UniqueType>("UniqueType");
 export type UniqueType =
     "First" |
