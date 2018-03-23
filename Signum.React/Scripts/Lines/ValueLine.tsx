@@ -444,7 +444,7 @@ export interface NumericTextBoxProps {
     validateKey: React.KeyboardEventHandler<any>;
     format?: string;
     formControlClass?: string;
-    htmlAttributes: React.HTMLAttributes<HTMLInputElement>;
+    htmlAttributes?: React.HTMLAttributes<HTMLInputElement>;
 }
 
 export class NumericTextBox extends React.Component<NumericTextBoxProps, { text?: string }> {

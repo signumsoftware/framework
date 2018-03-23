@@ -81,7 +81,7 @@ export class Tabs extends React.Component<TabsProps> {
 
     render() {
 
-        var { activeEventKey, children, toggle, ...attrs } = this.props;
+        var { activeEventKey, children, toggle, hideOnly, ...attrs } = this.props;
 
         var array = (React.Children.toArray(this.props.children) as React.ReactElement<TabProps>[]);
 
@@ -102,7 +102,7 @@ export class Tabs extends React.Component<TabsProps> {
                         </li>
                     )}
                 </ul>
-                {this.props.hideOnly ?
+                {hideOnly ?
                     array.map(elem => React.cloneElement(elem, ({ style: elem.props.eventKey == this.props.activeEventKey ? undefined : { display: "none" } }) as React.HTMLAttributes<any>)) :
                 array.filter(elem => elem.props.eventKey == this.props.activeEventKey)
             }
