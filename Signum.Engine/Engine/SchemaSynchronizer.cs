@@ -386,15 +386,28 @@ namespace Signum.Engine
 
         private static SqlPreCommand AlterTableAddColumnDefault(ITable table, IColumn column, Replacements rep)
         {
-            bool temporalDefault = !column.Nullable && !column.Identity && column.Default == null;
-
-            if (!temporalDefault)
+            if (column.Nullable == IsNullable.Yes || column.Identity || column.Default != null)
                 return SqlBuilder.AlterTableAddColumn(table, column);
-
-
+            
             var defaultValue = GetDefaultValue(table, column, rep);
             if (defaultValue == "force")
                 return SqlBuilder.AlterTableAddColumn(table, column);
+
+            if(column.Nullable == IsNullable.Forced)
+            {
+                var hasValueColumn = table.Columns.Values
+                    .Where(a => a.Name.EndsWith("_HasValue") && column.Name.StartsWith(a.Name.BeforeLast("_HasValue")))
+                    .OrderByDescending(a => a.Name.Length)
+                    .FirstOrDefault();
+
+                var where = hasValueColumn != null ? $"{hasValueColumn.Name} = 1" : "??";
+
+                return SqlPreCommand.Combine(Spacing.Simple,
+                    SqlBuilder.AlterTableAddColumn(table, column).Do(a => a.GoAfter = true),
+                    new SqlPreCommandSimple($@"UPDATE {table.Name} SET
+    {column.Name} = {SqlBuilder.Quote(column.SqlDbType, defaultValue)} 
+WHERE {where}"));
+            }
 
             var tempDefault = new DiffDefaultConstraint
             {
@@ -1020,7 +1033,7 @@ EXEC(@{1})".FormatWith(databaseName, variableName));
                    SqlDbType == other.SqlDbType
                 && Collation == other.Collation
                 && StringComparer.InvariantCultureIgnoreCase.Equals(UserTypeName, other.UserDefinedTypeName)
-                && Nullable == other.Nullable
+                && Nullable == (other.Nullable.ToBool())
                 && (other.Size == null || other.Size.Value == Precission || other.Size.Value == Length / BytesPerChar(other.SqlDbType) || other.Size.Value == int.MaxValue && Length == -1)
                 && (other.Scale == null || other.Scale.Value == Scale)
                 && Identity == other.Identity

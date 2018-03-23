@@ -176,7 +176,7 @@ namespace Signum.Engine
                 c.Identity ? "IDENTITY " : null,
                 generatedAlways,
                 c.Collation != null ? ("COLLATE " + c.Collation) : null,
-                c.Nullable ? "NULL" : "NOT NULL",
+                c.Nullable.ToBool() ? "NULL" : "NOT NULL",
                 defaultConstraint
                 );
         }
@@ -186,7 +186,7 @@ namespace Signum.Engine
             return (c.SqlDbType == SqlDbType.Udt ? c.UserDefinedTypeName : c.SqlDbType.ToString().ToUpper()) + GetSizeScale(c.Size, c.Scale);
         }
 
-        static string Quote(SqlDbType type, string @default)
+        public static string Quote(SqlDbType type, string @default)
         {
             if (IsString(type) && !(@default.StartsWith("'") && @default.StartsWith("'")))
                 return "'" + @default + "'";

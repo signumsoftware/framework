@@ -177,7 +177,7 @@ namespace Signum.Engine
 
         public DbParameter CreateReferenceParameter(string parameterName, PrimaryKey? id, IColumn column)
         {
-            return CreateParameter(parameterName, column.SqlDbType, null, column.Nullable, id == null ? (object)null : id.Value.Object);
+            return CreateParameter(parameterName, column.SqlDbType, null, column.Nullable.ToBool(), id == null ? (object)null : id.Value.Object);
         }
 
         public DbParameter CreateParameter(string parameterName, object value, Type type)
