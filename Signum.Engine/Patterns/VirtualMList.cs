@@ -148,7 +148,7 @@ namespace Signum.Engine
                 if (mlist.Count > 0)
                 {
                     var graph = Saver.PreSaving(() => GraphExplorer.FromRoot(mlist).RemoveAllNodes(ctx.Graph));
-                    GraphExplorer.PropagateModifications(graph);
+                    GraphExplorer.PropagateModifications(graph.Inverse());
                 }
 
                 if (mlist.IsGraphModified)
