@@ -842,10 +842,7 @@ namespace Signum.Engine.DynamicQuery
               context.Parameter);
             return keySelector;
         }
-
-
-        static string Dummy = "Dummy";
-
+        
         static Expression BuildAggregateExpressionEnumerable(Expression collection, AggregateToken at, BuildExpressionContext context)
         {  
             Type elementType = collection.Type.ElementType();

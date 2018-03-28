@@ -236,6 +236,13 @@ namespace Signum.Engine.DynamicQuery
             QueryToken.EntityExtensions = parent => DynamicQueryManager.Current.GetExtensions(parent);
             ExtensionToken.BuildExtension = (parentType, key, parentExpression) => DynamicQueryManager.Current.BuildExtension(parentType, key, parentExpression);
             QueryToken.ImplementedByAllSubTokens = GetImplementedByAllSubTokens;
+            QueryToken.IsSystemVersioned = IsSystemVersioned;
+        }
+
+        static bool IsSystemVersioned(Type type)
+        {
+            var table = Schema.Current.Tables.TryGetC(type);
+            return table != null && table.SystemVersioned != null;
         }
 
         static List<QueryToken> GetImplementedByAllSubTokens(QueryToken queryToken, Type type, SubTokensOptions options)

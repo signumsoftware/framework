@@ -39,7 +39,7 @@ export default class ColumnEditor extends React.Component<ColumnEditorProps>{
         const isCollection = co.token && co.token.type.isCollection;
 
         return (
-            <div className={classes("sf-column-editor", "form-xs", isCollection ? "error" : undefined)}
+            <div className={classes("sf-column-editor", isCollection ? "error" : undefined)}
                 title={isCollection ? SearchMessage.CollectionsCanNotBeAddedAsColumns.niceToString() : undefined}>
                 <button type="button" className="close" aria-label="Close" onClick={this.props.close} ><span aria-hidden="true">×</span></button>
                 <div className="rw-widget-xs">

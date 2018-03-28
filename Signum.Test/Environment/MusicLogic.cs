@@ -116,6 +116,15 @@ namespace Signum.Test.Environment
                         a.Name,
                     });
 
+
+                sb.Include<FolderEntity>()
+                    .WithQuery(dqm, () => e => new
+                    {
+                        Entity = e,
+                        e.Id,
+                        e.Name
+                    });
+
                 RegisterAwards(sb, dqm);
 
                 dqm.RegisterQuery(typeof(IAuthorEntity), () => DynamicQueryCore.Manual(async (request, descriptions, token) =>

@@ -26,10 +26,28 @@ namespace Signum.Entities.Reflection
                 });
         }
 
+        static Dictionary<Type, Func<object, object>[]> getterVirtualCache = new Dictionary<Type, Func<object, object>[]>();
+
+        static Func<object, object>[] ModifiableFieldGettersVirtual(Type type)
+        {
+            lock (getterVirtualCache)
+                return getterVirtualCache.GetOrCreate(type, () =>
+                {
+                    FieldInfo[] aux = Reflector.InstanceFieldsInOrder(type);
+                    return aux.Where(fi => Reflector.IsModifiableIdentifiableOrLite(fi.FieldType) && (!IsIgnored(fi) || IsQueryableProperty(fi)))
+                        .Select(fi => ReflectionTools.CreateGetterUntyped(type, fi)).ToArray();
+                });
+        }
+
         private static bool IsIgnored(FieldInfo fi)
         {
             return fi.HasAttribute<IgnoreAttribute>() ||
-                (Reflector.FindPropertyInfo(fi)?.HasAttribute<IgnoreAttribute>() ?? false);
+                (Reflector.FindPropertyInfo(fi).HasAttribute<IgnoreAttribute>());
+        }
+
+        private static bool IsQueryableProperty(FieldInfo fi)
+        {
+            return (Reflector.TryFindPropertyInfo(fi)?.HasAttribute<QueryablePropertyAttribute>() ?? false);
         }
 
 
@@ -52,6 +70,44 @@ namespace Signum.Entities.Reflection
             else
             {
                 foreach (Func<object, object> getter in ModifiableFieldGetters(obj.GetType()))
+                {
+                    object field = getter(obj);
+
+                    if (field == null)
+                        continue;
+
+                    yield return (Modifiable)field;
+                }
+
+                if (obj is Entity ident)
+                {
+                    foreach (var mixin in ident.Mixins)
+                    {
+                        yield return mixin;
+                    }
+                }
+            }
+        }
+
+        public static IEnumerable<Modifiable> FullExploreVirtual(Modifiable obj)
+        {
+            if (obj == null)
+                yield break;
+
+            if (Reflector.IsMList(obj.GetType()))
+            {
+                Type t = obj.GetType().ElementType();
+                if (Reflector.IsModifiableIdentifiableOrLite(t))
+                {
+                    IEnumerable col = obj as IEnumerable;
+                    foreach (Modifiable item in col)
+                        if (item != null)
+                            yield return item;
+                }
+            }
+            else
+            {
+                foreach (Func<object, object> getter in ModifiableFieldGettersVirtual(obj.GetType()))
                 {
                     object field = getter(obj);
 

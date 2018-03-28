@@ -633,7 +633,23 @@ open cur
 close cur 
 deallocate cur";
 
-
+        public static readonly string StopSystemVersioning = @"declare @schema nvarchar(128), @tbl nvarchar(128)
+DECLARE @sql nvarchar(255)
+ 
+declare cur cursor fast_forward for 
+select distinct s.name, t.name
+from sys.tables t
+join sys.schemas s on t.schema_id = s.schema_id where history_table_id is not null
+open cur 
+    fetch next from cur into @schema, @tbl
+    while @@fetch_status <> -1 
+    begin 
+        select @sql = 'ALTER TABLE [' + @schema + '].[' + @tbl + '] SET (SYSTEM_VERSIONING = OFF);'
+        exec sp_executesql @sql 
+        fetch next from cur into @schema, @tbl
+    end 
+close cur 
+deallocate cur";
 
         public static SqlPreCommand RemoveAllScript(DatabaseName databaseName)
         {
@@ -643,6 +659,7 @@ deallocate cur";
                 new SqlPreCommandSimple(Use(databaseName, RemoveAllProceduresScript)),
                 new SqlPreCommandSimple(Use(databaseName, RemoveAllViewsScript)),
                 new SqlPreCommandSimple(Use(databaseName, RemoveAllConstraintsScript)),
+                Connector.Current.SupportsTemporalTables ? new SqlPreCommandSimple(Use(databaseName, StopSystemVersioning)) : null,
                 new SqlPreCommandSimple(Use(databaseName, RemoveAllTablesScript)),
                 new SqlPreCommandSimple(Use(databaseName, RemoveAllSchemasScript.FormatWith(schemas)))
                 );

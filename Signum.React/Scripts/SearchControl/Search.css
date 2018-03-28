@@ -28,10 +28,6 @@ table.sf-search-results > tbody > tr > td {
     vertical-align: middle;
 }
 
-.sf-query-button-bar:not(.btn-toolbar-small) {
-    margin-bottom: 10px;
-}
-
 /*.sf-filter-table div.sf-query-token-builder {
     display: table;
 }*/
@@ -93,9 +89,9 @@ table.sf-search-results > tbody > tr > td {
 
 /* Multiply */
 
-.sf-td-multiply.alert {
+.sf-search-message.alert {
     padding: 4px 10px;
-    margin: 3px 0px;
+    margin: 0px 0px 3px 0px;
 }
 
 .sf-column-editor {
@@ -107,6 +103,14 @@ table.sf-search-results > tbody > tr > td {
 .sf-column-editor.error
 {
     background: #f2dede;
+}
+
+.sf-system-time-editor {
+    padding: 4px 8px;
+    border-radius: 4px;
+    margin: 0px 0px 3px 0px;
+    display: flex;
+    flex-direction: row;
 }
 
 table.sf-search-results th.sf-current-column {

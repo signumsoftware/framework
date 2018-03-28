@@ -109,16 +109,16 @@ namespace Signum.Engine.Maps
         }
 
 
-        internal void OnPreSaving(Entity entity, ref bool graphModified)
+        internal void OnPreSaving(Entity entity, PreSavingContext ctx)
         {
             AssertAllowed(entity.GetType(), inUserInterface: false);
 
             IEntityEvents ee = entityEvents.TryGetC(entity.GetType());
 
             if (ee != null)
-                ee.OnPreSaving(entity, ref graphModified);
+                ee.OnPreSaving(entity, ctx);
 
-            entityEventsGlobal.OnPreSaving(entity, ref graphModified);
+            entityEventsGlobal.OnPreSaving(entity, ctx);
         }
 
         internal Entity OnAlternativeRetriving(Type entityType, PrimaryKey id)
@@ -242,29 +242,38 @@ namespace Signum.Engine.Maps
             return ee.CacheController;
         }
 
-        internal IEnumerable<FieldBinding> GetAdditionalQueryBindings(PropertyRoute parent, PrimaryKeyExpression id)
+        internal IEnumerable<FieldBinding> GetAdditionalQueryBindings(PropertyRoute parent, PrimaryKeyExpression id, NewExpression period)
         {
             //AssertAllowed(parent.RootType, inUserInterface: false);
 
             var ee = entityEvents.TryGetC(parent.RootType);
-            if (ee == null || ee.AdditionalQueryBindings == null)
+            if (ee == null || ee.AdditionalBindings == null)
                 return Enumerable.Empty<FieldBinding>();
 
-            return ee.AdditionalQueryBindings
+            return ee.AdditionalBindings
                 .Where(kvp => kvp.Key.Parent.Equals(parent))
-                .Select(kvp => new FieldBinding(kvp.Key.FieldInfo, new AdditionalFieldExpression(kvp.Key.FieldInfo.FieldType, (PrimaryKeyExpression)id, kvp.Key)))
+                .Select(kvp => new FieldBinding(kvp.Key.FieldInfo, new AdditionalFieldExpression(kvp.Key.FieldInfo.FieldType, (PrimaryKeyExpression)id, period, kvp.Key)))
                 .ToList();
         }
 
-        internal LambdaExpression GetAditionalQueryBinding(PropertyRoute pr, bool entityCompleter)
+        public List<IAdditionalBinding> GetAdditionalBindings(Type rootType)
+        {
+            var ee = entityEvents.TryGetC(rootType);
+            if (ee == null || ee.AdditionalBindings == null)
+                return null;
+
+            return ee.AdditionalBindings.Values.ToList();
+        }
+
+        internal LambdaExpression GetAdditionalQueryBinding(PropertyRoute pr, bool entityCompleter)
         {
             //AssertAllowed(pr.Type, inUserInterface: false);
 
             var ee = entityEvents.GetOrThrow(pr.RootType);
 
-            var ab = ee.AdditionalQueryBindings.GetOrThrow(pr);
+            var ab = ee.AdditionalBindings.GetOrThrow(pr);
 
-            if (entityCompleter && !ab.ExpandQuery())
+            if (entityCompleter && !ab.ShouldSet())
                 return null;
 
             return ab.ValueExpression;
@@ -801,9 +810,8 @@ namespace Signum.Engine.Maps
 
         public abstract string GetToString(PrimaryKey id);
         public abstract string TryGetToString(PrimaryKey id);
+
+        public abstract List<T> RequestByBackReference<R>(IRetriever retriever, Expression<Func<T, Lite<R>>> backReference, Lite<R> lite)
+            where R : Entity;
     }
-
-
-
-
 }

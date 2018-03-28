@@ -160,6 +160,8 @@ namespace Signum.Entities.DynamicQuery
 
         public static Func<QueryToken, Type, SubTokensOptions, List<QueryToken>> ImplementedByAllSubTokens = (quetyToken, type, options) => throw new NotImplementedException("QueryToken.ImplementedByAllSubTokens not set");
 
+        public static Func<Type, bool> IsSystemVersioned = t => false;
+
         protected List<QueryToken> SubTokensBase(Type type, SubTokensOptions options, Implementations? implementations)
         {
             var ut = type.UnNullify();
@@ -184,8 +186,14 @@ namespace Signum.Entities.DynamicQuery
                 var onlyType = implementations.Value.Types.Only();
 
                 if (onlyType != null && onlyType == cleanType)
-                    return new[] { EntityPropertyToken.IdProperty(this), new EntityToStringToken(this) }
-                        .Concat(EntityProperties(onlyType)).ToList().AndHasValue(this); ;
+                    return new[] {
+                        EntityPropertyToken.IdProperty(this),
+                        new EntityToStringToken(this),
+                        IsSystemVersioned(onlyType) ? new SystemTimeToken(this, SystemTimeProperty.SystemValidFrom): null,
+                        IsSystemVersioned(onlyType) ? new SystemTimeToken(this, SystemTimeProperty.SystemValidTo): null,
+                    }
+                    .NotNull()
+                    .Concat(EntityProperties(onlyType)).ToList().AndHasValue(this); ;
 
                 return implementations.Value.Types.Select(t => (QueryToken)new AsTypeToken(this, t)).ToList().AndHasValue(this);
             }

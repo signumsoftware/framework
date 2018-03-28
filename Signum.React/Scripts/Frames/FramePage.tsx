@@ -192,12 +192,12 @@ export default class FramePage extends React.Component<FramePageProps, FramePage
     renderTitle() {
 
         if (!this.state.pack)
-            return <h3>{JavascriptMessage.loading.niceToString()}</h3>;
+            return <h3 className="display-6">{JavascriptMessage.loading.niceToString()}</h3>;
 
         const entity = this.state.pack.entity;
 
         return (
-            <h4 className="mt-2">
+            <h4>
                 <span className="display-6">{getToString(entity)}</span>
                 <br />
                 <small className="sf-type-nice-name">{Navigator.getTypeTitle(entity, undefined)}</small>

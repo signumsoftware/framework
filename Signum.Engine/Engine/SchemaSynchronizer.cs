@@ -209,11 +209,11 @@ namespace Signum.Engine
                             var rename = !object.Equals(dif.Name, tab.Name) ? SqlBuilder.RenameOrMove(dif, tab) : null;
 
                             var disableSystemVersioning = (dif.TemporalType != SysTableTemporalType.None && (
-                                tab.SysteVersioned == null || !dif.TemporalTableName.Equals(tab.SysteVersioned.TableName)) ?
+                                tab.SystemVersioned == null || !dif.TemporalTableName.Equals(tab.SystemVersioned.TableName)) ?
                                 SqlBuilder.AlterTableDisableSystemVersioning(tab) : null);
 
                             var dropPeriod = (dif.Period != null &&
-                                (tab.SysteVersioned == null || !dif.Period.PeriodEquals(tab.SysteVersioned)) ?
+                                (tab.SystemVersioned == null || !dif.Period.PeriodEquals(tab.SystemVersioned)) ?
                                 SqlBuilder.AlterTableDropPeriod(tab) : null);
 
                             var columns = Synchronizer.SynchronizeScript(
@@ -250,12 +250,12 @@ namespace Signum.Engine
                                     )
                                 );
                             
-                            var addPeriod = ((tab.SysteVersioned != null &&
-                                (dif.Period == null || !dif.Period.PeriodEquals(tab.SysteVersioned))) ?
+                            var addPeriod = ((tab.SystemVersioned != null &&
+                                (dif.Period == null || !dif.Period.PeriodEquals(tab.SystemVersioned))) ?
                                 (SqlPreCommandSimple)SqlBuilder.AlterTableAddPeriod(tab) : null);
 
-                            var addSystemVersioning = (tab.SysteVersioned != null &&
-                                (dif.Period == null || !dif.TemporalTableName.Equals(tab.SysteVersioned.TableName)) ?
+                            var addSystemVersioning = (tab.SystemVersioned != null &&
+                                (dif.Period == null || !dif.TemporalTableName.Equals(tab.SystemVersioned.TableName)) ?
                                 SqlBuilder.AlterTableEnableSystemVersioning(tab).Do(a=>a.GoBefore = true) : null);
 
 
@@ -386,15 +386,28 @@ namespace Signum.Engine
 
         private static SqlPreCommand AlterTableAddColumnDefault(ITable table, IColumn column, Replacements rep)
         {
-            bool temporalDefault = !column.Nullable && !column.Identity && column.Default == null;
-
-            if (!temporalDefault)
+            if (column.Nullable == IsNullable.Yes || column.Identity || column.Default != null)
                 return SqlBuilder.AlterTableAddColumn(table, column);
-
-
+            
             var defaultValue = GetDefaultValue(table, column, rep);
             if (defaultValue == "force")
                 return SqlBuilder.AlterTableAddColumn(table, column);
+
+            if(column.Nullable == IsNullable.Forced)
+            {
+                var hasValueColumn = table.Columns.Values
+                    .Where(a => a.Name.EndsWith("_HasValue") && column.Name.StartsWith(a.Name.BeforeLast("_HasValue")))
+                    .OrderByDescending(a => a.Name.Length)
+                    .FirstOrDefault();
+
+                var where = hasValueColumn != null ? $"{hasValueColumn.Name} = 1" : "??";
+
+                return SqlPreCommand.Combine(Spacing.Simple,
+                    SqlBuilder.AlterTableAddColumn(table, column).Do(a => a.GoAfter = true),
+                    new SqlPreCommandSimple($@"UPDATE {table.Name} SET
+    {column.Name} = {SqlBuilder.Quote(column.SqlDbType, defaultValue)} 
+WHERE {where}"));
+            }
 
             var tempDefault = new DiffDefaultConstraint
             {
@@ -432,9 +445,9 @@ FROM {oldTable.Name}");
         {
             if(column is SystemVersionedInfo.Column svc)
             {
-                return svc.SystemVersionColumnType == SystemVersionedInfo.ColumnType.Start ?
-                    "SYSUTCDATETIME()" :
-                    "CONVERT(datetime2, '9999-12-31 23:59:59.9999999')";
+                var date = svc.SystemVersionColumnType == SystemVersionedInfo.ColumnType.Start ? DateTime.MinValue : DateTime.MaxValue;
+
+                return $"CONVERT(datetime2, '{date:yyyy-MM-dd HH:mm:ss.fffffff}')";
             }
 
             string defaultValue = rep.Interactive ? SafeConsole.AskString("Default value for '{0}.{1}'? (or press enter) ".FormatWith(table.Name.Name, column.Name), stringValidator: str => null) : "";
@@ -573,7 +586,7 @@ JOIN {3} {4} ON {2}.{0} = {4}.Id".FormatWith(tabCol.Name,
                              TemporalTableName = !con.SupportsTemporalTables || t.history_table_id == null ? null : 
                              Database.View<SysTables>()
                              .Where(ht => ht.object_id == t.history_table_id)
-                             .Select(ht => new ObjectName(new SchemaName(db, t.Schema().name), t.name))
+                             .Select(ht => new ObjectName(new SchemaName(db, ht.Schema().name), ht.name))
                              .SingleOrDefault(),
 
                              PrimaryKeyName = (from k in t.KeyConstraints()
@@ -1020,7 +1033,7 @@ EXEC(@{1})".FormatWith(databaseName, variableName));
                    SqlDbType == other.SqlDbType
                 && Collation == other.Collation
                 && StringComparer.InvariantCultureIgnoreCase.Equals(UserTypeName, other.UserDefinedTypeName)
-                && Nullable == other.Nullable
+                && Nullable == (other.Nullable.ToBool())
                 && (other.Size == null || other.Size.Value == Precission || other.Size.Value == Length / BytesPerChar(other.SqlDbType) || other.Size.Value == int.MaxValue && Length == -1)
                 && (other.Scale == null || other.Scale.Value == Scale)
                 && Identity == other.Identity

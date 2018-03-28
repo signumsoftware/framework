@@ -459,11 +459,11 @@ select.form-control-xs:not([size]):not([multiple]),
 
 .rw-widget-sm .rw-input {
     padding: 3px 6px;
-    height: 24px;
+    height: 28px;
 }
 
 .rw-widget-sm .rw-widget-picker {
-    height: 24px;
+    height: 31px;
 }
 
 .input-group > .form-control-plaintext {

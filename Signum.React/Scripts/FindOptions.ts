@@ -1,7 +1,7 @@
 ﻿import { TypeReference, PropertyRoute, PseudoType, QueryKey } from './Reflection';
 import { Dic } from './Globals';
 import { Lite, Entity } from './Signum.Entities';
-import { PaginationMode, OrderType, FilterOperation, FilterType, ColumnOptionsMode, UniqueType } from './Signum.Entities.DynamicQuery';
+import { PaginationMode, OrderType, FilterOperation, FilterType, ColumnOptionsMode, UniqueType, SystemTimeMode } from './Signum.Entities.DynamicQuery';
 import { SearchControlProps } from "./Search";
 
 export { PaginationMode, OrderType, FilterOperation, FilterType, ColumnOptionsMode, UniqueType };
@@ -33,7 +33,8 @@ export interface FindOptions {
     orderOptions?: OrderOption[];
     columnOptionsMode?: ColumnOptionsMode;
     columnOptions?: ColumnOption[];
-    pagination?: Pagination,
+    pagination?: Pagination;
+    systemTime?: SystemTime;
 }
 
 export interface FindOptionsParsed {
@@ -43,6 +44,7 @@ export interface FindOptionsParsed {
     orderOptions: OrderOptionParsed[];
     columnOptions: ColumnOptionParsed[];
     pagination: Pagination;
+    systemTime?: SystemTime;
 }
 
 
@@ -194,6 +196,7 @@ export interface QueryRequest {
     orders: OrderRequest[];
     columns: ColumnRequest[];
     pagination: Pagination;
+    systemTime?: SystemTime;
 }
 
 export type AggregateType = "Count" | "Average" | "Sum" | "Min" | "Max";
@@ -228,6 +231,12 @@ export interface Pagination {
     mode: PaginationMode;
     elementsPerPage?: number;
     currentPage?: number;
+}
+
+export interface SystemTime {
+    mode: SystemTimeMode;
+    startDate?: string;
+    endDate?: string;
 }
 
 export module PaginateMath {
