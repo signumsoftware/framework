@@ -135,7 +135,7 @@ export function toLite<T extends Entity>(entity: T | null | undefined, fat?: boo
         return null;
 
     if(fat)
-       return toLiteFat(entity,toStr);
+       return toLiteFat(entity, toStr);
 
     if(entity.id == undefined)
         throw new Error(`The ${entity.Type} has no Id`);
@@ -147,7 +147,7 @@ export function toLite<T extends Entity>(entity: T | null | undefined, fat?: boo
     }
 }
 
-export function toLiteFat<T extends Entity>(entity: T, toStr?: string) : Lite<T> {
+export function toLiteFat<T extends Entity>(entity: T, toStr?:string) : Lite<T> {
     
     return {
        entity : entity,
