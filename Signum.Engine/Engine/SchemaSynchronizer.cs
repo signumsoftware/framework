@@ -959,7 +959,7 @@ EXEC(@{1})".FormatWith(databaseName, variableName));
             bool sameCols = IdenticalColumns(dif, mix.Columns, this.Columns.Where(a => !a.IsIncluded).ToList());
             bool sameIncCols = IdenticalColumns(dif, mix.IncludeColumns, this.Columns.Where(a => a.IsIncluded).ToList());
 
-            if (sameIncCols && sameIncCols)
+            if (sameCols && sameIncCols)
                 return false;
 
             return true;
