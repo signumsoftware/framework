@@ -449,5 +449,34 @@ namespace Signum.Test.LinqProvider
                 .ToList();
         }
 
+
+        [TestMethod]
+        public void WhereFormat()
+        {
+            var album = Database.Query<ArtistEntity>()
+                .Where(a => $"Hi {(a.IsMale ? "Mr." : "Ms.")} {a}".Contains("Mr. Michael"))
+                .Select(a => a.ToLite())
+                .ToList();
+        }
+
+
+        [TestMethod]
+        public void WhereFormat4()
+        {
+            var album = Database.Query<ArtistEntity>()
+                .Where(a => $"Hi {a.Name} {a.Name} {a.Name} {a.Name}".Contains("Mr. Michael"))
+                .Select(a => a.ToLite())
+                .ToList();
+        }
+
+
+        [TestMethod]
+        public void WhereNoFormat()
+        {
+            var album = Database.Query<ArtistEntity>()
+                .Where(a => ("Hi " + (a.IsMale ? "Mr." : "Ms.") + " " + a.Name + " ToStr " + a).Contains("Mr. Michael"))
+                .Select(a => a.ToLite())
+                .ToList();
+        }
     }
 }
