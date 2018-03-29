@@ -106,9 +106,7 @@ export default class HeavyEntry extends React.Component<HeavyEntryProps, { entri
                 </table>
                 <br />
                 <h3>Aditional Data</h3>
-                <div>
-                    <pre><code>{current.AdditionalData}</code></pre>
-                </div>
+                <pre style={{ maxWidth: "1000px", overflowY: "scroll" }}><code>{current.AdditionalData}</code></pre>
                 <br />
                 <h3>StackTrace</h3>
                 {
