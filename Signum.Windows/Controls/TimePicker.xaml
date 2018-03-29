@@ -1,5 +1,0 @@
-﻿<UserControl x:Class="Signum.Windows.TimePicker"
-    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Focusable="True" x:Name="me">
-    <TextBox Name="textBox" VerticalAlignment="Center" IsReadOnly="{Binding IsReadOnly, ElementName=me}" MinWidth="40" />
-</UserControl>
