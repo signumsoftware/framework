@@ -591,7 +591,7 @@ namespace Signum.Engine.Linq
         {
             sb.Append(table.Name.ToString());
 
-            if (table.SystemTime != null)
+            if (table.SystemTime != null && !(table.SystemTime is SystemTime.HistoryTable))
             {
                 sb.Append(" ");
                 WriteSystemTime(table.SystemTime);
@@ -614,7 +614,7 @@ namespace Signum.Engine.Linq
                 this.VisitSystemTimeConstant(fromTo.StartDateTime);
 
                 sb.Append(" TO ");
-                this.VisitSystemTimeConstant(fromTo.StartDateTime);
+                this.VisitSystemTimeConstant(fromTo.EndtDateTime);
             }
             else if (st is SystemTime.Between between)
             {
@@ -622,15 +622,15 @@ namespace Signum.Engine.Linq
                 this.VisitSystemTimeConstant(between.StartDateTime);
 
                 sb.Append(" AND ");
-                this.VisitSystemTimeConstant(between.StartDateTime);
+                this.VisitSystemTimeConstant(between.EndtDateTime);
             }
-            else if (st is SystemTime.ContainerIn contained)
+            else if (st is SystemTime.ContainedIn contained)
             {
-                sb.Append("CONTAINER IN (");
+                sb.Append("CONTAINED IN (");
                 this.VisitSystemTimeConstant(contained.StartDateTime);
 
                 sb.Append(", ");
-                this.VisitSystemTimeConstant(contained.StartDateTime);
+                this.VisitSystemTimeConstant(contained.EndtDateTime);
                 sb.Append(")");
             }
             else if (st is SystemTime.All)
@@ -765,7 +765,7 @@ namespace Signum.Engine.Linq
         protected internal override Expression VisitDelete(DeleteExpression delete)
         {
             sb.Append("DELETE ");
-            sb.Append(delete.Table.Name.ToString());
+            sb.Append(delete.Name.ToString());
             this.AppendNewLine(Indentation.Same);
             sb.Append("FROM ");
             VisitSource(delete.Source);
@@ -781,7 +781,7 @@ namespace Signum.Engine.Linq
         protected internal override Expression VisitUpdate(UpdateExpression update)
         {
             sb.Append("UPDATE ");
-            sb.Append(update.Table.Name.ToString());
+            sb.Append(update.Name.ToString());
             sb.Append(" SET");
             this.AppendNewLine(Indentation.Inner);
 
@@ -813,7 +813,7 @@ namespace Signum.Engine.Linq
         protected internal override Expression VisitInsertSelect(InsertSelectExpression insertSelect)
         {
             sb.Append("INSERT INTO ");
-            sb.Append(insertSelect.Table.Name.ToString());
+            sb.Append(insertSelect.Name.ToString());
             sb.Append("(");
             for (int i = 0, n = insertSelect.Assigments.Count; i < n; i++)
             {

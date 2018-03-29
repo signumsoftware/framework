@@ -77,13 +77,18 @@ namespace Signum.Engine
             Expression<Func<L, Lite<T>>> backReference, 
             Action<L, T> onSave = null,
             Action<L, T> onRemove = null,
-            bool? lazyRetrieveAndDelete = null) //To avoid StackOverflows
+            bool? lazyRetrieve = null,
+            bool? lazyDelete = null) //To avoid StackOverflows
             where T : Entity
             where L : Entity
         {
             RegisteredVirtualMLists.GetOrCreate(typeof(T)).Add(typeof(L));
+            
+            if (lazyRetrieve == null)
+                lazyRetrieve = (typeof(L) == typeof(T));
 
-            var lazy = lazyRetrieveAndDelete ?? (typeof(L) == typeof(T));
+            if (lazyDelete == null) 
+                lazyDelete = (typeof(L) == typeof(T));
 
             Func<T, MList<L>> getMList = GetAccessor(mListField);
             Action<L, Lite<T>> setter = null;
@@ -96,7 +101,7 @@ namespace Signum.Engine
             
             var sb = fi.SchemaBuilder;
 
-            if (lazy)
+            if (lazyRetrieve.Value)
             {
                 sb.Schema.EntityEvents<T>().Retrieved += (T e) =>
                 {
@@ -122,7 +127,7 @@ namespace Signum.Engine
             if (preserveOrder)
             {
                 sb.Schema.EntityEvents<T>().RegisterBinding<MList<L>>(mListField,
-                     shouldSet: () => !lazy && !VirtualMList.ShouldAvoidMListType(typeof(L)),
+                     shouldSet: () => !lazyRetrieve.Value && !VirtualMList.ShouldAvoidMListType(typeof(L)),
                      valueExpression: e => Database.Query<L>().Where(line => backReference.Evaluate(line) == e.ToLite()).ExpandLite(line => backReference.Evaluate(line), ExpandLite.ToStringLazy).ToVirtualMListWithOrder(),
                      valueFunction: (e, retriever) => Schema.Current.CacheController<L>().RequestByBackReference<T>(retriever, backReference, e.ToLite()).ToVirtualMListWithOrder()
                 );
@@ -130,7 +135,7 @@ namespace Signum.Engine
             else
             {
                 sb.Schema.EntityEvents<T>().RegisterBinding(mListField,
-                    shouldSet: () => !lazy && !VirtualMList.ShouldAvoidMListType(typeof(L)),
+                    shouldSet: () => !lazyRetrieve.Value && !VirtualMList.ShouldAvoidMListType(typeof(L)),
                     valueExpression: e => Database.Query<L>().Where(line => backReference.Evaluate(line) == e.ToLite()).ExpandLite(line => backReference.Evaluate(line), ExpandLite.ToStringLazy).ToVirtualMList(),
                     valueFunction: (e, retriever) => Schema.Current.CacheController<L>().RequestByBackReference<T>(retriever, backReference, e.ToLite()).ToVirtualMList()
                 );
@@ -152,7 +157,7 @@ namespace Signum.Engine
                 }
 
                 if (mlist.IsGraphModified)
-                    e.SetModified();
+                    e.SetSelfModified();
             };
 
             sb.Schema.EntityEvents<T>().Saving += (T e) =>
@@ -226,7 +231,7 @@ namespace Signum.Engine
 
                 //You can do a VirtualMList to itself at the table level, but there should not be cycles inside the instances
                 var toDelete = Database.Query<L>().Where(se => query.Any(e => backReference.Evaluate(se).RefersTo(e)));
-                if (lazy)
+                if (lazyDelete.Value)
                 {
                     if (toDelete.Any())
                         toDelete.UnsafeDelete();

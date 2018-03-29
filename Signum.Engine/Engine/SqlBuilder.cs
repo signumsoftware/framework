@@ -250,39 +250,44 @@ namespace Signum.Engine
 
         public static SqlPreCommand CreateIndex(Index index)
         {
-            string columns = index.Columns.ToString(c => c.Name.SqlEscape(), ", ");
 
             if (index is PrimaryClusteredIndex)
             {
-                return new SqlPreCommandSimple("ALTER TABLE {0} ADD CONSTRAINT {1} PRIMARY KEY CLUSTERED({2})".FormatWith(
-                  index.Table.Name,
-                  index.IndexName,
-                  columns));
+                var columns = index.Columns.ToString(c => c.Name.SqlEscape(), ", ");
+
+                return new SqlPreCommandSimple($"ALTER TABLE {index.Table.Name} ADD CONSTRAINT {index.IndexName} PRIMARY KEY CLUSTERED({columns})");
             }
 
             if (index is UniqueIndex uIndex && uIndex.ViewName != null)
             {
                 ObjectName viewName = new ObjectName(uIndex.Table.Name.Schema, uIndex.ViewName);
 
-                SqlPreCommandSimple viewSql = new SqlPreCommandSimple(@"CREATE VIEW {0} WITH SCHEMABINDING AS SELECT {1} FROM {2} WHERE {3}"
-                    .FormatWith(viewName, columns, uIndex.Table.Name.ToString(), uIndex.Where))
+                var columns = index.Columns.ToString(c => c.Name.SqlEscape(), ", ");
+
+
+                SqlPreCommandSimple viewSql = new SqlPreCommandSimple($"CREATE VIEW {viewName} WITH SCHEMABINDING AS SELECT {columns} FROM {uIndex.Table.Name.ToString()} WHERE {uIndex.Where}")
                 { GoBefore = true, GoAfter = true };
 
-                SqlPreCommandSimple indexSql = new SqlPreCommandSimple(@"CREATE UNIQUE CLUSTERED INDEX {0} ON {1}({2})"
-                    .FormatWith(uIndex.IndexName, viewName, uIndex.Columns.ToString(c => c.Name.SqlEscape(), ", ")));
+                SqlPreCommandSimple indexSql = new SqlPreCommandSimple($"CREATE UNIQUE CLUSTERED INDEX {uIndex.IndexName} ON {viewName}({columns})");
 
                 return SqlPreCommand.Combine(Spacing.Simple, viewSql, indexSql);
             }
             else
             {
-                return new SqlPreCommandSimple("CREATE {0}INDEX {1} ON {2}({3}){4}{5}".FormatWith(
-                    index is UniqueIndex ? "UNIQUE " : null,
-                    index.IndexName,
-                    index.Table.Name,
-                    columns,
-                    index.IncludeColumns.HasItems() ? $" INCLUDE ({index.IncludeColumns.ToString(c => c.Name.SqlEscape(), ", ")})" : null,
-                    index.Where.HasText() ? $" WHERE {index.Where}" : ""));
+                return CreateIndexBasic(index, forHistoryTable: false);
             }
+        }
+
+        public static SqlPreCommand CreateIndexBasic(Index index, bool forHistoryTable)
+        {
+            var indexType = index is UniqueIndex ? "UNIQUE INDEX" : "INDEX";
+            var columns = index.Columns.ToString(c => c.Name.SqlEscape(), ", ");
+            var include = index.IncludeColumns.HasItems() ? $" INCLUDE ({index.IncludeColumns.ToString(c => c.Name.SqlEscape(), ", ")})" : null;
+            var where = index.Where.HasText() ? $" WHERE {index.Where}" : "";
+
+            var tableName = forHistoryTable ? index.Table.SystemVersioned.TableName : index.Table.Name;
+            
+            return new SqlPreCommandSimple($"CREATE {indexType} {index.IndexName} ON {tableName}({columns}){include}{where}");
         }
 
         internal static SqlPreCommand UpdateTrim(ITable tab, IColumn tabCol)
@@ -391,9 +396,9 @@ FROM {1} as [table]".FormatWith(
             return SP_RENAME(table.Name.Schema.Database, table.Name.OnDatabase(null) + "." + oldName, newName, "COLUMN");
         }
 
-        public static SqlPreCommand RenameIndex(ITable table, string oldName, string newName)
+        public static SqlPreCommand RenameIndex(ObjectName tableName, string oldName, string newName)
         {
-            return SP_RENAME(table.Name.Schema.Database, table.Name.OnDatabase(null) + "." + oldName, newName, "INDEX");
+            return SP_RENAME(tableName.Schema.Database, tableName.OnDatabase(null) + "." + oldName, newName, "INDEX");
         }
         #endregion
 

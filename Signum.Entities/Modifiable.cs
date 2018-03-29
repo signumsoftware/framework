@@ -43,7 +43,7 @@ namespace Signum.Entities
             get { return Modified == ModifiedState.Modified || Modified == ModifiedState.SelfModified; }
         }
 
-        protected internal virtual void SetSelfModified()
+        public virtual void SetSelfModified()
         {
             Modified = ModifiedState.SelfModified;
         }
