@@ -76,7 +76,13 @@ namespace Signum.Engine
             return new SqlPreCommandSimple($"ALTER TABLE {table.Name} ADD {Period(table.SystemVersioned)}");
         }
 
-        static string Period(SystemVersionedInfo sv) => $"PERIOD FOR SYSTEM_TIME ({sv.StartColumnName.SqlEscape()}, {sv.EndColumnName.SqlEscape()})";
+        static string Period(SystemVersionedInfo sv) {
+
+            if (!Connector.Current.SupportsTemporalTables)
+                throw new InvalidOperationException($"The current connector '{Connector.Current}' does not support Temporal Tables");
+
+            return $"PERIOD FOR SYSTEM_TIME ({sv.StartColumnName.SqlEscape()}, {sv.EndColumnName.SqlEscape()})";
+        }
 
         public static SqlPreCommand AlterTableDropPeriod(ITable table)
         {
