@@ -134,7 +134,7 @@ namespace Signum.Utilities
 
             lock (SyncKey)
             {
-                Console.Write(question + " ({0} - !forAll) ".FormatWith(answers.ToString("/")));
+                Console.Write(question + " ({0} - use '!' for all) ".FormatWith(answers.ToString("/")));
                 do
                 {
                     var userAnswer = Console.ReadLine().ToLower();
@@ -151,7 +151,7 @@ namespace Signum.Utilities
                         return result;
                     }
 
-                    Console.Write("Possible answers: ({0} - !forAll)".FormatWith(answers.ToString("/")));
+                    Console.Write("Possible answers: ({0} - use '!' for all)".FormatWith(answers.ToString("/")));
                 } while (true);
             }
         }
