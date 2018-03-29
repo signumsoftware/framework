@@ -16,10 +16,7 @@ namespace Signum.Engine.CodeGeneration
     {
         public static EntityCodeGenerator Entities = new EntityCodeGenerator();
         public static LogicCodeGenerator Logic = new LogicCodeGenerator();
-        public static WebCodeGenerator Web = new WebCodeGenerator();
-        public static WindowsCodeGenerator Windows = new WindowsCodeGenerator();
         public static ReactCodeGenerator React = new ReactCodeGenerator();
-        public static ReactCodeConverter ReactTransformer = new ReactCodeConverter();
 
         public static void GenerateCodeConsole()
         {
@@ -29,10 +26,7 @@ namespace Signum.Engine.CodeGeneration
                 {
                     {"E", Entities.GenerateEntitiesFromDatabaseTables, "Entities (from Database tables)"},
                     {"L", Logic.GenerateLogicFromEntities, "Logic (from entites)"},
-                    {"Web", Web.GenerateWebFromEntities, "Web (from entites)"},
-                    {"Win", Windows.GenerateWindowsFromEntities, "Windows (from entites)"},
                     {"React", React.GenerateReactFromEntities, "React (from entites)"},
-                    {"WR", ReactTransformer.ToRazorInteractive, "React (from web)"},
                 }.Choose();
 
                 if (action == null)
