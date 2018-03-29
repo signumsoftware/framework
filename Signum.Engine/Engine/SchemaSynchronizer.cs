@@ -235,7 +235,8 @@ namespace Signum.Engine
 
                                         difCol.ColumnEquals(tabCol, ignorePrimaryKey: true) ? null : SqlPreCommand.Combine(Spacing.Simple,
                                             tabCol.PrimaryKey && !difCol.PrimaryKey && dif.PrimaryKeyName != null ? SqlBuilder.DropPrimaryKeyConstraint(tab.Name) : null,
-                                        difCol.CompatibleTypes(tabCol) ? SqlBuilder.AlterTableAlterColumn(tab, tabCol) :
+
+                                        difCol.CompatibleTypes(tabCol) ? SqlBuilder.AlterTableAlterColumn(tab, tabCol, difCol.DefaultConstraint?.Name) :
                                                 SqlPreCommand.Combine(Spacing.Simple,
                                                     SqlBuilder.AlterTableDropColumn(tab, tabCol.Name),
                                                     SqlBuilder.AlterTableAddColumn(tab, tabCol))
@@ -244,7 +245,7 @@ namespace Signum.Engine
 
                                         difCol.DefaultEquals(tabCol) ? null : SqlPreCommand.Combine(Spacing.Simple,
                                             difCol.DefaultConstraint != null ? SqlBuilder.AlterTableDropConstraint(tab.Name, difCol.DefaultConstraint.Name) : null,
-                                            tabCol.Default != null ? SqlBuilder.AddDefaultConstraint(tab.Name, tabCol.Name, tabCol.Default, tabCol.SqlDbType) : null),
+                                            tabCol.Default != null ? SqlBuilder.AlterTableAddDefaultConstraint(tab.Name, SqlBuilder.GetDefaultConstaint(tab, tabCol)) : null),
 
                                         UpdateByFkChange(tn, difCol, tabCol, ChangeName, copyDataFrom)
                                     )
@@ -409,10 +410,11 @@ namespace Signum.Engine
 WHERE {where}"));
             }
 
-            var tempDefault = new DiffDefaultConstraint
+            var tempDefault = new SqlBuilder.DefaultConstraint
             {
-                Definition = defaultValue,
-                Name = "DF_TEMP_" + column.Name
+                ColumnName = column.Name,
+                Name = "DF_TEMP_" + column.Name,
+                QuotedDefinition = SqlBuilder.Quote(column.SqlDbType, defaultValue),
             };
             
             return SqlPreCommand.Combine(Spacing.Simple,

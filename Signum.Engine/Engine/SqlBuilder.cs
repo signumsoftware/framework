@@ -41,7 +41,7 @@ namespace Signum.Engine
 
             var systemPeriod = t.SystemVersioned == null ? null : Period(t.SystemVersioned);
 
-            var columns = t.Columns.Values.Select(c => SqlBuilder.CreateColumn(c, t.Name.Name))
+            var columns = t.Columns.Values.Select(c => SqlBuilder.CreateColumn(c, GetDefaultConstaint(t, c)))
                 .And(primaryKeyConstraint)
                 .And(systemPeriod)
                 .NotNull()
@@ -62,7 +62,7 @@ namespace Signum.Engine
         {
             return new SqlPreCommandSimple("DROP VIEW {0}".FormatWith(viewName));
         }
-        
+
         static SqlPreCommand DropViewIndex(ObjectName viewName, string index)
         {
             return new[]{
@@ -104,9 +104,9 @@ namespace Signum.Engine
             return new SqlPreCommandSimple("ALTER TABLE {0} DROP COLUMN {1}".FormatWith(table.Name, columnName.SqlEscape()));
         }
 
-        public static SqlPreCommand AlterTableAddColumn(ITable table, IColumn column, DiffDefaultConstraint tempDefault = null)
+        public static SqlPreCommand AlterTableAddColumn(ITable table, IColumn column, SqlBuilder.DefaultConstraint tempDefault = null)
         {
-            return new SqlPreCommandSimple("ALTER TABLE {0} ADD {1}".FormatWith(table.Name, CreateColumn(column, table.Name.Name, tempDefault)));
+            return new SqlPreCommandSimple("ALTER TABLE {0} ADD {1}".FormatWith(table.Name, CreateColumn(column, tempDefault ?? GetDefaultConstaint(table, column))));
         }
 
         public static bool IsNumber(SqlDbType sqlDbType)
@@ -156,14 +156,39 @@ namespace Signum.Engine
             return false;
         }
 
-
-
-        public static SqlPreCommand AlterTableAlterColumn(ITable table, IColumn column)
+        public static SqlPreCommand AlterTableAlterColumn(ITable table, IColumn column, string defaultConstraintName = null)
         {
-            return new SqlPreCommandSimple("ALTER TABLE {0} ALTER COLUMN {1}".FormatWith(table.Name, CreateColumn(column)));
+            var alterColumn = new SqlPreCommandSimple("ALTER TABLE {0} ALTER COLUMN {1}".FormatWith(table.Name, CreateColumn(column, null)));
+
+            if (column.Default == null)
+                return alterColumn;
+
+            var defCons = GetDefaultConstaint(table, column);
+
+            return SqlPreCommand.Combine(Spacing.Simple,
+                AlterTableDropConstraint(table.Name, defaultConstraintName ?? defCons.Name),
+                alterColumn,
+                AlterTableAddDefaultConstraint(table.Name, defCons)
+            );
         }
 
-        public static string CreateColumn(IColumn c, string tableName = null, DiffDefaultConstraint tempDefault = null)
+        public static DefaultConstraint GetDefaultConstaint(ITable t, IColumn c)
+        {
+            if (c.Default == null)
+                return null;
+
+            return new DefaultConstraint { ColumnName = c.Name, Name = $"DF_{t.Name.Name}_{c.Name}", QuotedDefinition = Quote(c.SqlDbType, c.Default) };
+        }
+
+        public class DefaultConstraint
+        {
+            public string ColumnName;
+            public string Name;
+            public string QuotedDefinition;
+        }
+
+
+        public static string CreateColumn(IColumn c, DefaultConstraint constraint)
         {
             string fullType = GetColumnType(c);
 
@@ -171,9 +196,7 @@ namespace Signum.Engine
                 $"GENERATED ALWAYS AS ROW {(svc.SystemVersionColumnType == SystemVersionedInfo.ColumnType.Start ? "START" : "END")} HIDDEN" : 
                 null;
 
-            var defaultConstraint = 
-                tempDefault != null ? $"CONSTRAINT {tempDefault.Name} DEFAULT " + Quote(c.SqlDbType, tempDefault.Definition) :
-                c.Default != null ? $"CONSTRAINT DF_{tableName}_{c.Name} DEFAULT " + Quote(c.SqlDbType, c.Default) : null;
+            var defaultConstraint = constraint != null ? $"CONSTRAINT {constraint.Name} DEFAULT " + constraint.QuotedDefinition : null;
 
             return $" ".CombineIfNotEmpty(
                 c.Name.SqlEscape(),
@@ -306,10 +329,9 @@ namespace Signum.Engine
                 constraintName.SqlEscape()));
         }
 
-        public static SqlPreCommand AlterTableAddDefaultConstraint(ObjectName tableName, string column, string constraintName, string definition)
+        public static SqlPreCommandSimple AlterTableAddDefaultConstraint(ObjectName tableName, DefaultConstraint constraint)
         {
-            return new SqlPreCommandSimple("ALTER TABLE {0} ADD CONSTRAINT {1} DEFAULT {2} FOR {3}"
-                        .FormatWith(tableName, constraintName.SqlEscape(), definition, column.SqlEscape()));
+            return new SqlPreCommandSimple($"ALTER TABLE {tableName} ADD CONSTRAINT {constraint.Name} DEFAULT {constraint.QuotedDefinition} FOR {constraint.ColumnName}");
         }
 
         public static SqlPreCommand AlterTableAddConstraintForeignKey(ITable table, string fieldName, ITable foreignTable)
@@ -489,12 +511,6 @@ EXEC DB.dbo.sp_executesql @sql"
             return new SqlPreCommandSimple(command);
         }
 
-        public static SqlPreCommandSimple AddDefaultConstraint(ObjectName tableName, string columnName, string definition, SqlDbType sqlDbType)
-        {
-            string constraintName = "DF_{0}".FormatWith(columnName);
-            
-            return new SqlPreCommandSimple($"ALTER TABLE {tableName} ADD CONSTRAINT {constraintName} DEFAULT {Quote(sqlDbType, definition)} FOR {columnName}");
-        }
 
         internal static SqlPreCommand DropStatistics(string tn, List<DiffStats> list)
         {
