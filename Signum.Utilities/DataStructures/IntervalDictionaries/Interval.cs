@@ -43,7 +43,7 @@ namespace Signum.Utilities.DataStructures
         }
 
 
-        public Interval<T>? Intersection(Interval<T> other)
+        public Interval<T>? TryIntersection(Interval<T> other)
         {
             T minVal = min.CompareTo(other.min) > 0 ? min : other.min;
             T maxVal = max.CompareTo(other.max) < 0 ? max : other.max;
@@ -51,6 +51,15 @@ namespace Signum.Utilities.DataStructures
             if (minVal.CompareTo(maxVal) >= 0)
                 return null;
 
+            return new Interval<T>(minVal, maxVal);
+        }
+
+        [MethodExpander(typeof(IntersectionMethodExpander))]
+        public Interval<T> Intersection(Interval<T> other)
+        {
+            T minVal = min.CompareTo(other.min) > 0 ? min : other.min;
+            T maxVal = max.CompareTo(other.max) < 0 ? max : other.max;
+            
             return new Interval<T>(minVal, maxVal);
         }
 
@@ -154,7 +163,29 @@ namespace Signum.Utilities.DataStructures
                   ));
         }
     }
-   
+
+    //Intersection
+    class IntersectionMethodExpander : IMethodExpander
+    {
+        public Expression Expand(Expression instance, Expression[] arguments, MethodInfo mi)
+        {
+            Expression other = arguments.SingleEx();
+
+            var t = other.Type.GetGenericArguments()[0];
+
+            var c = other.Type.GetConstructor(new[] { t, t });
+
+            var minI = Expression.Property(instance, "Min");
+            var maxI = Expression.Property(instance, "Max");
+            var minO = Expression.Property(other, "Min");
+            var maxO = Expression.Property(other, "Max");
+
+            return Expression.New(c,
+                  Expression.Condition(Expression.LessThan(minI, minO), minI, minO),
+                  Expression.Condition(Expression.GreaterThan(maxI, maxO), minI, minO));
+        }
+    }
+
 
     [Serializable]
     public struct NullableInterval<T> : IEquatable<NullableInterval<T>>, IComparable<NullableInterval<T>>, IFormattable, IComparable
@@ -583,7 +614,7 @@ namespace Signum.Utilities.DataStructures
 
                 while (enumerator.MoveNext())
                 {
-                    result = result.Value.Intersection(enumerator.Current);
+                    result = result.Value.TryIntersection(enumerator.Current);
                     if (result == null)
                         return null;
                 }

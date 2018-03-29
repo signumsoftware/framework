@@ -316,7 +316,7 @@ namespace Signum.Utilities.DataStructures
             IntervalDictionary<K, VR> result  = new IntervalDictionary<K,VR>(); 
             foreach (var item in me)
 	        {
-                var intersection = item.Key.Intersection(filter);
+                var intersection = item.Key.TryIntersection(filter);
                 if(intersection != null)
                     result.Add(intersection.Value, mapper(intersection.Value, item.Value)); 
 	        }

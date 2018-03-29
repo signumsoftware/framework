@@ -26,7 +26,9 @@ namespace Signum.Engine
             where T : Entity
         {
             using (HeavyProfiler.Log(nameof(BulkInsert), () => typeof(T).TypeName()))
+            using (Transaction tr = new Transaction())
             {
+
                 var table = Schema.Current.Table(typeof(T));
 
                 if (!disableIdentity && table.IdentityBehaviour && table.TablesMList().Any())
@@ -42,7 +44,7 @@ namespace Signum.Engine
 
                 BulkInsertMLists<T>(list, copyOptions, timeout, message);
 
-                return rowNum;
+                return tr.Commit(rowNum);
             }
         }
 
@@ -59,6 +61,7 @@ namespace Signum.Engine
             where T : Entity
         {
             using (HeavyProfiler.Log(nameof(BulkInsertQueryIds), () => typeof(T).TypeName()))
+            using (Transaction tr = new Transaction())
             {
                 var t = Schema.Current.Table(typeof(T));
 
@@ -74,7 +77,7 @@ namespace Signum.Engine
                 var getKeyFunc = keySelector.Compile();
 
                 list.ForEach(e =>
-                {                    
+                {
                     e.SetId(dictionary.GetOrThrow(getKeyFunc(e)));
                     e.SetIsNew(false);
                 });
@@ -83,7 +86,7 @@ namespace Signum.Engine
 
                 GraphExplorer.CleanModifications(GraphExplorer.FromRoots(list));
 
-                return rowNum;
+                return tr.Commit(rowNum);
             }
         }
 
@@ -141,17 +144,7 @@ namespace Signum.Engine
 
                 if (preSaving)
                 {
-                    Schema schema = Schema.Current;
-                    GraphExplorer.PreSaving(() => GraphExplorer.FromRoots(list), (Modifiable m, ref bool graphModified) =>
-                    {
-                        if (m is ModifiableEntity me)
-                            me.SetTemporalErrors(null);
-
-                        m.PreSaving(ref graphModified);
-
-                        if (m is Entity ident)
-                            schema.OnPreSaving(ident, ref graphModified);
-                    });
+                    Saver.PreSaving(() => GraphExplorer.FromRoots(list));
                 }
 
                 if (validateFirst)
@@ -164,7 +157,7 @@ namespace Signum.Engine
                 bool oldIdentityBehaviour = t.IdentityBehaviour;
 
                 DataTable dt = new DataTable();
-                foreach (var c in disableIdentityBehaviour ? t.Columns.Values : t.Columns.Values.Where(c => !c.IdentityBehaviour))
+                foreach (var c in t.Columns.Values.Where(c => !(c is SystemVersionedInfo.Column) && (disableIdentityBehaviour || !c.IdentityBehaviour)))
                     dt.Columns.Add(new DataColumn(c.Name, c.Type.UnNullify()));
 
                 if (disableIdentityBehaviour) t.IdentityBehaviour = false;
@@ -265,7 +258,7 @@ namespace Signum.Engine
 
                 DataTable dt = new DataTable();
                 var t = ((FieldMList)Schema.Current.Field(mListProperty)).TableMList;
-                foreach (var c in t.Columns.Values.Where(c => !c.IdentityBehaviour))
+                foreach (var c in t.Columns.Values.Where(c => !(c is SystemVersionedInfo.Column) && !c.IdentityBehaviour))
                     dt.Columns.Add(new DataColumn(c.Name, c.Type.UnNullify()));
 
                 var list = mlistElements.ToList();
@@ -275,7 +268,7 @@ namespace Signum.Engine
                     dt.Rows.Add(t.BulkInsertDataRow(e.Parent, e.Element, e.Order));
                 }
 
-                using (Transaction tr = copyOptions.HasFlag(SqlBulkCopyOptions.UseInternalTransaction) ? null : new Transaction())
+                using (Transaction tr = new Transaction())
                 {
                     Schema.Current.OnPreBulkInsert(typeof(E), inMListTable: true);
 

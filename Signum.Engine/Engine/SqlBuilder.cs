@@ -39,16 +39,16 @@ namespace Signum.Engine
         {
             var primaryKeyConstraint = t.PrimaryKey == null ? null : "CONSTRAINT {0} PRIMARY KEY CLUSTERED ({1} ASC)".FormatWith(PrimaryClusteredIndex.GetPrimaryKeyName(t.Name), t.PrimaryKey.Name.SqlEscape());
 
-            var systemPeriod = t.SysteVersioned == null ? null : Period(t.SysteVersioned);
+            var systemPeriod = t.SystemVersioned == null ? null : Period(t.SystemVersioned);
 
-            var columns = t.Columns.Values.Select(c => SqlBuilder.CreateColumn(c))
+            var columns = t.Columns.Values.Select(c => SqlBuilder.CreateColumn(c, t.Name.Name))
                 .And(primaryKeyConstraint)
                 .And(systemPeriod)
                 .NotNull()
                 .ToString(",\r\n");
 
-            var systemVersioning = t.SysteVersioned == null ? null :
-                $"\r\nWITH (SYSTEM_VERSIONING = ON (HISTORY_TABLE = {t.SysteVersioned.TableName}))";
+            var systemVersioning = t.SystemVersioned == null ? null :
+                $"\r\nWITH (SYSTEM_VERSIONING = ON (HISTORY_TABLE = {t.SystemVersioned.TableName}))";
 
             return new SqlPreCommandSimple($"CREATE TABLE {t.Name}(\r\n{columns}\r\n)" + systemVersioning);
         }
@@ -73,7 +73,7 @@ namespace Signum.Engine
 
         public static SqlPreCommand AlterTableAddPeriod(ITable table)
         {
-            return new SqlPreCommandSimple($"ALTER TABLE {table.Name} ADD {Period(table.SysteVersioned)}");
+            return new SqlPreCommandSimple($"ALTER TABLE {table.Name} ADD {Period(table.SystemVersioned)}");
         }
 
         static string Period(SystemVersionedInfo sv) => $"PERIOD FOR SYSTEM_TIME ({sv.StartColumnName.SqlEscape()}, {sv.EndColumnName.SqlEscape()})";
@@ -85,7 +85,7 @@ namespace Signum.Engine
 
         public static SqlPreCommand AlterTableEnableSystemVersioning(ITable table)
         {
-            return new SqlPreCommandSimple($"ALTER TABLE {table.Name} SET (SYSTEM_VERSIONING = ON (HISTORY_TABLE = {table.SysteVersioned.TableName}))");
+            return new SqlPreCommandSimple($"ALTER TABLE {table.Name} SET (SYSTEM_VERSIONING = ON (HISTORY_TABLE = {table.SystemVersioned.TableName}))");
         }
 
         public static SqlPreCommand AlterTableDisableSystemVersioning(ITable table)
@@ -100,7 +100,7 @@ namespace Signum.Engine
 
         public static SqlPreCommand AlterTableAddColumn(ITable table, IColumn column, DiffDefaultConstraint tempDefault = null)
         {
-            return new SqlPreCommandSimple("ALTER TABLE {0} ADD {1}".FormatWith(table.Name, CreateColumn(column, tempDefault)));
+            return new SqlPreCommandSimple("ALTER TABLE {0} ADD {1}".FormatWith(table.Name, CreateColumn(column, table.Name.Name, tempDefault)));
         }
 
         public static bool IsNumber(SqlDbType sqlDbType)
@@ -122,7 +122,6 @@ namespace Signum.Engine
 
             return false;
         }
-
 
         public static bool IsString(SqlDbType sqlDbType)
         {
@@ -158,7 +157,7 @@ namespace Signum.Engine
             return new SqlPreCommandSimple("ALTER TABLE {0} ALTER COLUMN {1}".FormatWith(table.Name, CreateColumn(column)));
         }
 
-        public static string CreateColumn(IColumn c, DiffDefaultConstraint tempDefault = null)
+        public static string CreateColumn(IColumn c, string tableName = null, DiffDefaultConstraint tempDefault = null)
         {
             string fullType = GetColumnType(c);
 
@@ -168,7 +167,7 @@ namespace Signum.Engine
 
             var defaultConstraint = 
                 tempDefault != null ? $"CONSTRAINT {tempDefault.Name} DEFAULT " + Quote(c.SqlDbType, tempDefault.Definition) :
-                c.Default != null ? $"CONSTRAINT DF_{c.Name} DEFAULT " + Quote(c.SqlDbType, c.Default) : null;
+                c.Default != null ? $"CONSTRAINT DF_{tableName}_{c.Name} DEFAULT " + Quote(c.SqlDbType, c.Default) : null;
 
             return $" ".CombineIfNotEmpty(
                 c.Name.SqlEscape(),
@@ -176,7 +175,7 @@ namespace Signum.Engine
                 c.Identity ? "IDENTITY " : null,
                 generatedAlways,
                 c.Collation != null ? ("COLLATE " + c.Collation) : null,
-                c.Nullable ? "NULL" : "NOT NULL",
+                c.Nullable.ToBool() ? "NULL" : "NOT NULL",
                 defaultConstraint
                 );
         }
@@ -186,7 +185,7 @@ namespace Signum.Engine
             return (c.SqlDbType == SqlDbType.Udt ? c.UserDefinedTypeName : c.SqlDbType.ToString().ToUpper()) + GetSizeScale(c.Size, c.Scale);
         }
 
-        static string Quote(SqlDbType type, string @default)
+        public static string Quote(SqlDbType type, string @default)
         {
             if (IsString(type) && !(@default.StartsWith("'") && @default.StartsWith("'")))
                 return "'" + @default + "'";

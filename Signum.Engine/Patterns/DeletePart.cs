@@ -16,7 +16,7 @@ namespace Signum.Engine
         public static bool ShouldAvoidDeletePart(Type partType)
         {
             var stack = avoidTypes.Value;
-            return (stack != null && stack.Contains(partType) || stack.Contains(null));
+            return stack != null && (stack.Contains(partType) || stack.Contains(null));
         }
 
         /// <param name="partType">Use null for every type</param>

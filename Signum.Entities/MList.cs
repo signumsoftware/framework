@@ -14,8 +14,6 @@ using System.Runtime.Serialization;
 
 namespace Signum.Entities
 {
-
-
     [Serializable, DebuggerTypeProxy(typeof(MListDebugging<>)), DebuggerDisplay("Count = {Count}")]
     public class MList<T> : Modifiable, IList<T>, IList, INotifyCollectionChanged, INotifyPropertyChanged, IMListPrivate<T>
     {
@@ -400,13 +398,13 @@ namespace Signum.Entities
             return true;
         }
 
-        public int RemoveAll(Predicate<T> match)
+        public int RemoveAll(Predicate<T> predicate)
         {
             List<T> removed = new List<T>(); 
             for (int i = 0; i < this.innerList.Count; )
             {
                 var val = innerList[i].Element;
-                if (match(val))
+                if (predicate(val))
                 {
                     innerList.RemoveAt(i);
                     removed.Add(val);
@@ -425,6 +423,34 @@ namespace Signum.Entities
             }
 
             return removed.Count; 
+        }
+
+
+        public int RemoveAllElements(Predicate<RowIdElement> predicate)
+        {
+            List<T> removed = new List<T>();
+            for (int i = 0; i < this.innerList.Count;)
+            {
+                var rowElem = innerList[i];
+                if (predicate(rowElem))
+                {
+                    innerList.RemoveAt(i);
+                    removed.Add(rowElem.Element);
+                }
+                else
+                {
+                    i++;
+                }
+            }
+
+            if (removed.Any())
+            {
+                SetSelfModified();
+                foreach (var item in removed)
+                    OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, item));
+            }
+
+            return removed.Count;
         }
 
         public void RemoveAt(int index)
@@ -747,11 +773,33 @@ namespace Signum.Entities
             }
 
         }
+
+        public void AssignAndPostRetrieving(IMListPrivate newList)
+        {
+            this.AssignMList((MList<T>)newList);
+            this.PostRetrieving();
+        }
+    }
+
+
+    public class MListElement<E, V> where E : Entity
+    {
+        public PrimaryKey RowId { get; set; }
+        public int Order { get; set; }
+        public E Parent { get; set; }
+        public V Element { get; set; }
+
+        public override string ToString()
+        {
+            return $"MListEntity: ({nameof(RowId)}:{RowId}, {nameof(Order)}:{Order}, {nameof(Parent)}:{Parent}, {nameof(Element)}:{Element})";
+        }
     }
 
     public interface IMListPrivate
     {
         bool IsNew { get; }
+        
+        int Count { get; }
 
         void ExecutePostRetrieving();
         void SetOldIndex(int index);
@@ -759,7 +807,9 @@ namespace Signum.Entities
         void SetRowId(int index, PrimaryKey rowId);
         void ForceRowId(int index, PrimaryKey rowId);
 
-        void InnerListModified(IList newItems, IList oldItems); 
+        void InnerListModified(IList newItems, IList oldItems);
+
+        void AssignAndPostRetrieving(IMListPrivate newList);
     }
 
     public interface IMListPrivate<T>  : IMListPrivate

@@ -7,6 +7,7 @@ interface UncontrolledTabsProps extends React.HTMLAttributes<HTMLDivElement> {
     defaultEventKey?: string | number;
     onToggled?: (eventKey: string | number) => void;
     children?: React.ReactFragment;
+    hideOnly?: boolean;
 }
 
 interface UncontrolledTabsState {
@@ -49,10 +50,10 @@ export class UncontrolledTabs extends React.Component<UncontrolledTabsProps, Unc
 
     render() {
 
-        const { children, defaultEventKey } = this.props;
+        const { children, defaultEventKey, hideOnly } = this.props;
 
         return (
-            <Tabs activeEventKey={this.state.activeEventKey} toggle={this.handleToggle}>
+            <Tabs activeEventKey={this.state.activeEventKey} toggle={this.handleToggle} hideOnly={hideOnly}>
                 {children}
             </Tabs>
         );
@@ -64,6 +65,7 @@ export class UncontrolledTabs extends React.Component<UncontrolledTabsProps, Unc
 interface TabsProps extends React.HTMLAttributes<HTMLDivElement> {
     activeEventKey: string | number | undefined;
     toggle: (eventKey: string | number) => void;
+    hideOnly?: boolean;
 }
 
 function getFirstEventKey(children: React.ReactNode) {
@@ -79,7 +81,7 @@ export class Tabs extends React.Component<TabsProps> {
 
     render() {
 
-        var { activeEventKey, children, toggle, ...attrs } = this.props;
+        var { activeEventKey, children, toggle, hideOnly, ...attrs } = this.props;
 
         var array = (React.Children.toArray(this.props.children) as React.ReactElement<TabProps>[]);
 
@@ -100,7 +102,10 @@ export class Tabs extends React.Component<TabsProps> {
                         </li>
                     )}
                 </ul>
-                {array.filter(a => a.props.eventKey == this.props.activeEventKey)}
+                {hideOnly ?
+                    array.map(elem => React.cloneElement(elem, ({ style: elem.props.eventKey == this.props.activeEventKey ? undefined : { display: "none" } }) as React.HTMLAttributes<any>)) :
+                array.filter(elem => elem.props.eventKey == this.props.activeEventKey)
+            }
             </div>
         );
     }

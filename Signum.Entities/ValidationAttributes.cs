@@ -966,6 +966,8 @@ namespace Signum.Entities
     {
         [Description("{0} does not have a valid {1} format")]
         _0DoesNotHaveAValid1Format,
+        [Description("'{0}' does not have a valid {1} identifier format")]
+        _0DoesNotHaveAValid1IdentifierFormat,
         [Description("{0} has an invalid format")]
         _0HasAnInvalidFormat,
         [Description("{0} has more than {1} decimal places")]
