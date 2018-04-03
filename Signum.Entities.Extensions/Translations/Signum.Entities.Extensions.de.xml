@@ -50,6 +50,7 @@
   </Type>
   <Type Name="AlertOperation">
     <Member Name="Attend" Description="Erledigen" />
+    <Member Name="Create" Description="Erstellen" />
     <Member Name="CreateAlertFromEntity" Description="Warnung aus Entität erstellen" />
     <Member Name="Delay" Description="Verzögerung" />
     <Member Name="Save" Description="Speichern" />
@@ -173,6 +174,7 @@
     <Member Name="ResetPasswordSuccess" Description="Ihr Passwort wurde erfolgreich geändert" />
     <Member Name="Save" Description="Speichern" />
     <Member Name="SendEmail" Description="E-Mail senden" />
+    <Member Name="SwitchUser" Description="Benutzer wechseln" />
     <Member Name="TheConfirmationCodeThatYouHaveJustSentIsInvalid" Description="Der Bestätigungs-Code, den Sie gerade gesendet haben, ist ungültig" />
     <Member Name="ThePasswordMustHaveAtLeast5Characters" Description="Das Passwort muss mindestens 5 Zeichen lang sein." />
     <Member Name="ThereHasBeenAnErrorWithYourRequestToResetYourPasswordPleaseEnterYourLogin" Description="Es ist ein Fehler beim Senden Ihrer Anfrage zum Zurücksetzen des Passworts aufgetreten. Bitte geben Sie Ihre Login-Daten ein." />
@@ -1658,6 +1660,7 @@
     <Member Name="CreationDate" Description="Erstellungsdatum" />
     <Member Name="Data" Description="Daten" />
     <Member Name="Duration" Description="Dauer" />
+    <Member Name="DurationSpan" Description="Dauer-span" />
     <Member Name="Exception" Description="Ausnahme" />
     <Member Name="ExceptionDate" Description="Ausnahmedatum" />
     <Member Name="ExecutionEnd" Description="Ausführungsende" />
@@ -1796,9 +1799,11 @@
     <Member Name="AllowReplay" Description="Wiedergabe erlauben" />
     <Member Name="ChangedPercentage" Description="Geänderter Prozentsatz" />
     <Member Name="Controller" Description="Controller" />
+    <Member Name="ControllerName" Description="Controllername" />
     <Member Name="Duration" Description="Dauer" />
     <Member Name="EndDate" Description="Enddatum" />
     <Member Name="Exception" Description="Ausnahme" />
+    <Member Name="HttpMethod" Description="HTTP-Methode" />
     <Member Name="QueryString" Description="Query string" />
     <Member Name="Referrer" Description="Referrer" />
     <Member Name="ReplayDate" Description="Wiedergabe Datum" />
@@ -2321,6 +2326,7 @@
     <Member Name="Filters" Description="Filter" />
     <Member Name="GroupResults" Description="Ergebnisse gruppieren" />
     <Member Name="Guid" Description="Guid" />
+    <Member Name="HideQuickLink" Description="Verstecke quick Link" />
     <Member Name="Invalidator" Description="Invalidator" />
     <Member Name="Orders" Description="Reihenfolge" />
     <Member Name="Owner" Description="Eigentümer" />
@@ -2366,6 +2372,7 @@
     <Member Name="Filters" Description="Filter" />
     <Member Name="GroupResults" Description="Resultate der Gruppe" />
     <Member Name="Guid" Description="Guid" />
+    <Member Name="HideQuickLink" Description="Verstecke quick Link" />
     <Member Name="Orders" Description="Reihenfolge" />
     <Member Name="Owner" Description="Eigentümer" />
     <Member Name="PaginationMode" Description="Paginierungsmodus" />
@@ -2504,6 +2511,7 @@
     <Member Name="Type" Description="Typ" />
     <Member Name="ViewName" Description="Ansichtsname" />
   </Type>
+  <Type Name="WorkflowActivityMonitorMessage" />
   <Type Name="WorkflowActivityOperation">
     <Member Name="Delete" Description="Löschen" />
     <Member Name="Save" Description="Speichern" />
