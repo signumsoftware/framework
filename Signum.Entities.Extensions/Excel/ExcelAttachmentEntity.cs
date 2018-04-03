@@ -17,11 +17,6 @@ namespace Signum.Entities.Excel
     [Serializable, EntityKind(EntityKind.Part, EntityData.Master)]
     public class ExcelAttachmentEntity : Entity, IAttachmentGeneratorEntity
     {
-        protected override void SetSelfModified()
-        {
-            base.SetSelfModified();
-        }
-
         string fileName;
         [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100), FileNameValidator]
         public string FileName

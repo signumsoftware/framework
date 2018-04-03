@@ -53,12 +53,7 @@ namespace Signum.Entities.Basics
 
             return base.PropertyValidation(pi);
         }
-
-        protected override void SetSelfModified()
-        {
-            base.SetSelfModified();
-        }
-
+        
         protected override void PreSaving(PreSavingContext ctx)
         {
             try
