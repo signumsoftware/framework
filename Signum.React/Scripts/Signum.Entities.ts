@@ -133,7 +133,6 @@ export function toLite<T extends Entity>(entity: T | null | undefined, fat?: boo
 
     if(!entity)
         return null;
-
     if(fat)
        return toLiteFat(entity, toStr);
 
