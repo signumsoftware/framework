@@ -100,7 +100,6 @@ namespace Signum.Engine.Maps
         ColumnExpression GetPrimaryOrder(Alias alias);
     }
       
-
     public partial class Table : IFieldFinder, ITable, ITablePrivate
     {
         public Type Type { get; private set; }
@@ -238,6 +237,11 @@ namespace Signum.Engine.Maps
                 }
             }
 
+            if(this.SystemVersioned != null)
+            {
+                result.Add(new Index(this, this.SystemVersioned.Columns().PreAnd(this.PrimaryKey).ToArray()));
+            }
+
             return result;
         }
 
@@ -357,6 +361,11 @@ namespace Signum.Engine.Maps
         {
             if (!Implements(field, type))
                 throw new InvalidOperationException("{0} does not implement {1}".FormatWith(field.ToString(), type.Name));
+        }
+
+        public static ObjectName GetName(this ITable table, bool useHistoryName)
+        {
+            return useHistoryName && table.SystemVersioned != null ? table.SystemVersioned.TableName : table.Name;
         }
     }
 

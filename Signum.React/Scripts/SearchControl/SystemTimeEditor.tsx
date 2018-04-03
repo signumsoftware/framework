@@ -131,7 +131,7 @@ export default class SystemTimeEditor extends React.Component<SystemTimeEditorPr
         var st = this.props.findOptions.systemTime!;
 
         return (
-            <select value={SystemTimeMode.niceToString(st.mode)} className="form-control form-control-sm ml-1" style={{ width: "auto" }} onChange={this.handleChangeMode}>
+            <select value={st.mode} className="form-control form-control-sm ml-1" style={{ width: "auto" }} onChange={this.handleChangeMode}>
                 {SystemTimeMode.values().map((st, i) => <option key={i} value={st}>{SystemTimeMode.niceToString(st)}</option>)}
             </select>
         );

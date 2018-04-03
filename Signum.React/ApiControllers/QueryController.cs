@@ -334,7 +334,7 @@ namespace Signum.React.ApiControllers
                 startDate = fromTo.StartDateTime;
                 endDate = fromTo.EndtDateTime;
             }
-            else if (systemTime is SystemTime.ContainerIn containedIn)
+            else if (systemTime is SystemTime.ContainedIn containedIn)
             {
                 mode = SystemTimeMode.Between; //Same
                 startDate = containedIn.StartDateTime;
@@ -360,7 +360,7 @@ namespace Signum.React.ApiControllers
                 case SystemTimeMode.All: return new SystemTime.All();
                 case SystemTimeMode.AsOf: return new SystemTime.AsOf(startDate.Value);
                 case SystemTimeMode.Between: return new SystemTime.Between(startDate.Value, endDate.Value);
-                case SystemTimeMode.ContainedIn: return new SystemTime.ContainerIn(startDate.Value, endDate.Value);
+                case SystemTimeMode.ContainedIn: return new SystemTime.ContainedIn(startDate.Value, endDate.Value);
                 default: throw new InvalidOperationException($"Unexpected {mode}");
             }
         }

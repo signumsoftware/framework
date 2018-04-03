@@ -1069,7 +1069,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
         const columns = this.props.findOptions.columnOptions.map(co => ({
             columnOption: co,
-            cellFormatter: (co.token && this.props.formatters && this.props.formatters[co.token.fullKey]) || Finder.getCellFormatter(qs, co),
+            cellFormatter: (co.token && this.props.formatters && this.props.formatters[co.token.fullKey]) || Finder.getCellFormatter(qs, co, this),
             resultIndex: co.token == undefined ? -1 : resultTable.columns.indexOf(co.token.fullKey)
         }));
 
@@ -1103,7 +1103,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
                     {this.props.navigate && !this.props.findOptions.groupResults &&
                         <td>
-                            {(this.props.entityFormatter || (qs && qs.entityFormatter) || Finder.entityFormatRules.filter(a => a.isApplicable(row)).last("EntityFormatRules").formatter)(row, resultTable.columns, this)}
+                            {(this.props.entityFormatter || (qs && qs.entityFormatter) || Finder.entityFormatRules.filter(a => a.isApplicable(row, this)).last("EntityFormatRules").formatter)(row, resultTable.columns, this)}
                         </td>
                     }
 

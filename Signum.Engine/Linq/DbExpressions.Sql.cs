@@ -173,7 +173,7 @@ namespace Signum.Engine.Linq
     {
         public readonly ITable Table;
 
-        public ObjectName Name { get { return Table.Name; } }
+        public ObjectName Name { get { return SystemTime is SystemTime.HistoryTable ? Table.SystemVersioned.TableName : Table.Name; } }
 
         public SystemTime SystemTime { get; private set; }
 
@@ -194,7 +194,9 @@ namespace Signum.Engine.Linq
 
         public override string ToString()
         {
-            return "{0} as {1}".FormatWith(Name, Alias);
+            var st = SystemTime != null && SystemTime is SystemTime.HistoryTable ? "FOR SYSTEM_TIME " + SystemTime.ToString() : null;
+
+            return $"{Name}{st} as {Alias}";
         }
 
         internal ColumnExpression GetIdExpression()
@@ -1147,13 +1149,17 @@ namespace Signum.Engine.Linq
     internal class DeleteExpression : CommandExpression
     {
         public readonly ITable Table;
+        public readonly bool UseHistoryTable;
+        public ObjectName Name { get { return UseHistoryTable ? Table.SystemVersioned.TableName : Table.Name; } }
+
         public readonly SourceWithAliasExpression Source;
         public readonly Expression Where;
 
-        public DeleteExpression(ITable table, SourceWithAliasExpression source, Expression where)
+        public DeleteExpression(ITable table, bool useHistoryTable, SourceWithAliasExpression source, Expression where)
             : base(DbExpressionType.Delete)
         {
             this.Table = table;
+            this.UseHistoryTable = useHistoryTable;
             this.Source = source;
             this.Where = where;
         }
@@ -1175,14 +1181,18 @@ namespace Signum.Engine.Linq
     internal class UpdateExpression : CommandExpression
     {
         public readonly ITable Table;
+        public readonly bool UseHistoryTable;
+        public ObjectName Name { get { return UseHistoryTable ? Table.SystemVersioned.TableName : Table.Name; } }
+
         public readonly ReadOnlyCollection<ColumnAssignment> Assigments;
         public readonly SourceWithAliasExpression Source;
         public readonly Expression Where;
 
-        public UpdateExpression(ITable table, SourceWithAliasExpression source, Expression where, IEnumerable<ColumnAssignment> assigments)
+        public UpdateExpression(ITable table, bool useHistoryTable, SourceWithAliasExpression source, Expression where, IEnumerable<ColumnAssignment> assigments)
             : base(DbExpressionType.Update)
         {
             this.Table = table;
+            this.UseHistoryTable = useHistoryTable;
             this.Assigments = assigments.ToReadOnly();
             this.Source = source;
             this.Where = where;
@@ -1206,13 +1216,16 @@ namespace Signum.Engine.Linq
     internal class InsertSelectExpression : CommandExpression
     {
         public readonly ITable Table;
+        public readonly bool UseHistoryTable;
+        public ObjectName Name { get { return UseHistoryTable ? Table.SystemVersioned.TableName : Table.Name; } }
         public readonly ReadOnlyCollection<ColumnAssignment> Assigments;
         public readonly SourceWithAliasExpression Source;
 
-        public InsertSelectExpression(ITable table, SourceWithAliasExpression source, IEnumerable<ColumnAssignment> assigments)
+        public InsertSelectExpression(ITable table, bool useHistoryTable, SourceWithAliasExpression source, IEnumerable<ColumnAssignment> assigments)
             : base(DbExpressionType.InsertSelect)
         {
             this.Table = table;
+            this.UseHistoryTable = useHistoryTable;
             this.Assigments = assigments.ToReadOnly();
             this.Source = source;
         }

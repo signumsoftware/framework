@@ -36,7 +36,7 @@ namespace Signum.Engine.Linq
             var source = VisitSource(delete.Source);
             var where = Visit(delete.Where);
             if (source != delete.Source || where != delete.Where)
-                return new DeleteExpression(delete.Table, (SourceWithAliasExpression)source, where);
+                return new DeleteExpression(delete.Table, delete.UseHistoryTable, (SourceWithAliasExpression)source, where);
             return delete;
         }
 
@@ -46,7 +46,7 @@ namespace Signum.Engine.Linq
             var where = Visit(update.Where);
             var assigments = Visit(update.Assigments, VisitColumnAssigment);
             if(source != update.Source || where != update.Where || assigments != update.Assigments)
-                return new UpdateExpression(update.Table, (SourceWithAliasExpression)source, where, assigments);
+                return new UpdateExpression(update.Table, update.UseHistoryTable, (SourceWithAliasExpression)source, where, assigments);
             return update;
         }
 
@@ -55,7 +55,7 @@ namespace Signum.Engine.Linq
             var source = VisitSource(insertSelect.Source);
             var assigments = Visit(insertSelect.Assigments, VisitColumnAssigment);
             if (source != insertSelect.Source ||  assigments != insertSelect.Assigments)
-                return new InsertSelectExpression(insertSelect.Table, (SourceWithAliasExpression)source, assigments);
+                return new InsertSelectExpression(insertSelect.Table, insertSelect.UseHistoryTable, (SourceWithAliasExpression)source, assigments);
             return insertSelect;
         }
 

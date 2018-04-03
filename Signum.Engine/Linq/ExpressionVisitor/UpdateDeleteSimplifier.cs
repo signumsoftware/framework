@@ -39,7 +39,7 @@ namespace Signum.Engine.Linq
             if (!TrivialWhere(delete, select))
                 return delete;
 
-            return new DeleteExpression(delete.Table, table, select.Where);
+            return new DeleteExpression(delete.Table, delete.UseHistoryTable, table, select.Where);
         }
 
         private bool TrivialWhere(DeleteExpression delete, SelectExpression select)
