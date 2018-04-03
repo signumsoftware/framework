@@ -19,7 +19,6 @@ export interface FileEmbedded extends IFile { }
 
 export interface IFilePath extends IFile
 {
-   fullPhysicalPath?: string | null;
    fileType?: FileTypeSymbol | null; 
    suffix?: string | null;
 }
