@@ -248,14 +248,6 @@ namespace Signum.Engine
             return t.GeneratAllIndexes().Where(a => !(a is PrimaryClusteredIndex)).Select(CreateIndex).Combine(Spacing.Simple);
         }
 
-        public static SqlPreCommand DropIndex(UniqueIndex ix)
-        {
-            if (ix.ViewName == null)
-                return DropIndex(ix.Table.Name, ix.IndexName);
-            else
-                return DropViewIndex(new ObjectName(ix.Table.Name.Schema, ix.ViewName), ix.IndexName);
-        }
-
         public static SqlPreCommand DropIndex(ObjectName tableName, DiffIndex index)
         {
             if (index.IsPrimary)

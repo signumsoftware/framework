@@ -254,7 +254,7 @@ namespace Signum.Engine
 
                                         difCol.Name == tabCol.Name ? null : SqlBuilder.RenameColumn(tab, difCol.Name, tabCol.Name),
 
-                                        difCol.ColumnEquals(tabCol, ignorePrimaryKey: true, ignoreIdentity: false) ? null : SqlPreCommand.Combine(Spacing.Simple,
+                                        difCol.ColumnEquals(tabCol, ignorePrimaryKey: true, ignoreIdentity: false, ignoreGenerateAlways: false) ? null : SqlPreCommand.Combine(Spacing.Simple,
                                             tabCol.PrimaryKey && !difCol.PrimaryKey && dif.PrimaryKeyName != null ? SqlBuilder.DropPrimaryKeyConstraint(tab.Name) : null,
 
                                         difCol.CompatibleTypes(tabCol) ? SqlBuilder.AlterTableAlterColumn(tab, tabCol, difCol.DefaultConstraint?.Name) :
@@ -385,7 +385,7 @@ namespace Signum.Engine
                         Dictionary<string, Index> modelIxs = modelIndices[tab].Where(kvp => kvp.Value.GetType() == typeof(Index)).ToDictionary();
 
                         var controlledIndexes = Synchronizer.SynchronizeScript(Spacing.Simple, modelIxs, dif.Indices,
-                            createNew: (i, mix) => mix is UniqueIndex || mix.Columns.Any(isNew) || SafeConsole.Ask(ref createMissingFreeIndexes, "Create missing non-unique index {0} in {1}?".FormatWith(mix.IndexName, tab.Name)) ? SqlBuilder.CreateIndex(mix) : null,
+                            createNew: (i, mix) => mix is UniqueIndex || mix.Columns.Any(isNew) || SafeConsole.Ask(ref createMissingFreeIndexes, "Create missing non-unique index {0} in {1}?".FormatWith(mix.IndexName, tab.Name)) ? SqlBuilder.CreateIndexBasic(mix, forHistoryTable: true) : null,
                             removeOld: null,
                             mergeBoth: (i, mix, dix) => !dix.IndexEquals(dif, mix) ? SqlBuilder.CreateIndexBasic(mix, forHistoryTable: true) :
                                 mix.IndexName != dix.IndexName ? SqlBuilder.RenameIndex(tab.SystemVersioned.TableName, dix.IndexName, mix.IndexName) : null);
@@ -1017,7 +1017,7 @@ EXEC(@{1})".FormatWith(databaseName, variableName));
 
             var difColumns = diffColumns.Select(cn => dif.Columns.Values.SingleOrDefault(dc => dc.Name == cn.ColumnName)).ToList(); //Ny old name
 
-            var perfect = difColumns.ZipOrDefault(modColumns, (dc, mc) => dc != null && mc != null && dc.ColumnEquals(mc, ignorePrimaryKey: true, ignoreIdentity: true)).All(a => a);
+            var perfect = difColumns.ZipOrDefault(modColumns, (dc, mc) => dc != null && mc != null && dc.ColumnEquals(mc, ignorePrimaryKey: true, ignoreIdentity: true, ignoreGenerateAlways: true)).All(a => a);
             return perfect;
         }
 
@@ -1071,7 +1071,7 @@ EXEC(@{1})".FormatWith(databaseName, variableName));
 
         public GeneratedAlwaysType GeneratedAlwaysType;
 
-        public bool ColumnEquals(IColumn other, bool ignorePrimaryKey, bool ignoreIdentity)
+        public bool ColumnEquals(IColumn other, bool ignorePrimaryKey, bool ignoreIdentity, bool ignoreGenerateAlways)
         {
             var result =
                    SqlDbType == other.SqlDbType
@@ -1082,7 +1082,7 @@ EXEC(@{1})".FormatWith(databaseName, variableName));
                 && (other.Scale == null || other.Scale.Value == Scale)
                 && (ignoreIdentity || Identity == other.Identity)
                 && (ignorePrimaryKey || PrimaryKey == other.PrimaryKey)
-                && GeneratedAlwaysType == other.GetGeneratedAlwaysType();
+                && (ignoreGenerateAlways || GeneratedAlwaysType == other.GetGeneratedAlwaysType());
 
             return result;
         }
