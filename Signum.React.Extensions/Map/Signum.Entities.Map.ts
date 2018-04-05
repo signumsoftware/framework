@@ -19,6 +19,8 @@ export module MapMessage {
     export const Color = new MessageKey("MapMessage", "Color");
     export const State = new MessageKey("MapMessage", "State");
     export const StateColor = new MessageKey("MapMessage", "StateColor");
+    export const RowsHistory = new MessageKey("MapMessage", "RowsHistory");
+    export const TableSizeHistory = new MessageKey("MapMessage", "TableSizeHistory");
 }
 
 export module MapPermission {

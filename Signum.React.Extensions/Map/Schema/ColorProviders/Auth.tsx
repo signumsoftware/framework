@@ -1,13 +1,13 @@
 ﻿import * as React from 'react'
 import * as ReactDOM from 'react-dom'
 import * as d3 from 'd3'
-import { ClientColorProvider, SchemaMapInfo  } from '../SchemaMap'
+import { ClientColorProvider, SchemaMapInfo } from '../SchemaMap'
 import { TypeAllowedBasic, BasicPermission } from '../../../Authorization/Signum.Entities.Authorization'
 import { isPermissionAuthorized } from '../../../Authorization/AuthClient'
-import { colorScale, colorScaleLog  } from '../../Utils'
+import { colorScale, colorScaleLog } from '../../Utils'
 
-export default function getDefaultProviders(info: SchemaMapInfo): ClientColorProvider[] {   
-    
+export default function getDefaultProviders(info: SchemaMapInfo): ClientColorProvider[] {
+
     if (!isPermissionAuthorized(BasicPermission.AdminRules))
         return [];
 
@@ -21,7 +21,7 @@ export default function getDefaultProviders(info: SchemaMapInfo): ClientColorPro
 }
 
 
-function getDefs(info: SchemaMapInfo): JSX.Element[]{
+function getDefs(info: SchemaMapInfo): JSX.Element[] {
     const roles = info.providers.filter(p => p.name.startsWith("role-")).map(a => a.name);
 
     const distinctValues = info.tables.flatMap(t => roles.flatMap(r => [
@@ -37,23 +37,21 @@ function getDefs(info: SchemaMapInfo): JSX.Element[]{
 
 function gradient(name: string) {
 
-    const list = name.after("auth-").split("-").map(a=>a as TypeAllowedBasic);
+    const list = name.after("auth-").split("-").map(a => a as TypeAllowedBasic);
 
     return (
         <linearGradient id={name} x1="0%" y1="0% " x2="100% " y2="0%">
-        { list.map((l, i) => [
-            <stop offset={ (100 * i / list.length)  +  "%" } stopColor={color(l) } />,
-            <stop offset={ ((100 * (i + 1) / list.length) - 1) + "%" } stopColor={color(l) } />]) 
-        }
+            {list.map((l, i) => [
+                <stop key={i} offset={(100 * i / list.length) + "%"} stopColor={color(l)} />,
+                <stop key={i + "b"} offset={((100 * (i + 1) / list.length) - 1) + "%"} stopColor={color(l)} />])
+            }
         </linearGradient>
     );
 }
 
 
-function color(typeAllowedBasic: TypeAllowedBasic) : string
-{
-    switch (typeAllowedBasic)
-    {
+function color(typeAllowedBasic: TypeAllowedBasic): string {
+    switch (typeAllowedBasic) {
         case undefined: return "black";
         case "Create": return "#0066FF";
         case "Modify": return "green";
