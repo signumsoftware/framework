@@ -296,6 +296,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
                     currentMenuItems: undefined
                 }, () => {
                     this.loadMenuItems();
+                    this.notifySelectedRowsChanged();
                 });
             }
 
