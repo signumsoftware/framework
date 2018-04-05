@@ -506,9 +506,13 @@ export module ValidationMessage {
     export const TheNumberOfElementsOf0HasToBe12 = new MessageKey("ValidationMessage", "TheNumberOfElementsOf0HasToBe12");
     export const Type0NotAllowed = new MessageKey("ValidationMessage", "Type0NotAllowed");
     export const _0IsMandatoryWhen1IsNotSet = new MessageKey("ValidationMessage", "_0IsMandatoryWhen1IsNotSet");
+    export const _0IsMandatoryWhen1IsNotSetTo2 = new MessageKey("ValidationMessage", "_0IsMandatoryWhen1IsNotSetTo2");
     export const _0IsMandatoryWhen1IsSet = new MessageKey("ValidationMessage", "_0IsMandatoryWhen1IsSet");
+    export const _0IsMandatoryWhen1IsSetTo2 = new MessageKey("ValidationMessage", "_0IsMandatoryWhen1IsSetTo2");
     export const _0ShouldBeNullWhen1IsNotSet = new MessageKey("ValidationMessage", "_0ShouldBeNullWhen1IsNotSet");
+    export const _0ShouldBeNullWhen1IsNotSetTo2 = new MessageKey("ValidationMessage", "_0ShouldBeNullWhen1IsNotSetTo2");
     export const _0ShouldBeNullWhen1IsSet = new MessageKey("ValidationMessage", "_0ShouldBeNullWhen1IsSet");
+    export const _0ShouldBeNullWhen1IsSetTo2 = new MessageKey("ValidationMessage", "_0ShouldBeNullWhen1IsSetTo2");
     export const _0ShouldBeNull = new MessageKey("ValidationMessage", "_0ShouldBeNull");
     export const _0ShouldBeADateInThePast = new MessageKey("ValidationMessage", "_0ShouldBeADateInThePast");
     export const BeInThePast = new MessageKey("ValidationMessage", "BeInThePast");
