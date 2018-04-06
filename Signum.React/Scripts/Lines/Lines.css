@@ -178,12 +178,8 @@ body.rtl .fa-arrow-left:before {
 /*EntityStrip*/
 
 ul.sf-strip-horizontal > li {
-    float: left;
+    display: inline-block;
     margin-right: 10px;
-}
-
-body.rtl ul.sf-strip-horizontal > li {
-    float: right;
 }
 
 ul.sf-strip-vertical > li {

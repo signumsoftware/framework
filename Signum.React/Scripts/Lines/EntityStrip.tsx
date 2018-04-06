@@ -224,7 +224,7 @@ export class EntityStripElement extends React.Component<EntityStripElementProps,
             isLite(val) ? Navigator.navigateRoute(val) : "#";
 
         return (
-            <li className="sf-strip-element input-group"
+            <li className="sf-strip-element"
                 {...EntityListBase.entityHtmlAttributes(this.props.ctx.value) }>
                 <div className={classes(drag && "sf-strip-dropable", drag && drag.dropClass)}
                     onDragEnter={drag && drag.onDragOver}
@@ -254,6 +254,7 @@ export class EntityStripElement extends React.Component<EntityStripElementProps,
                         <span>
                             <a className="sf-line-button sf-remove"
                                 onClick={this.props.onRemove}
+                                href="#"
                                 title={EntityControlMessage.Remove.niceToString()}>
                                 <span className="fa fa-remove"></span>
                             </a>
