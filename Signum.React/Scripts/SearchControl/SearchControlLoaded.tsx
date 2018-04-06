@@ -28,6 +28,7 @@ import { ISimpleFilterBuilder } from './SearchControl'
 import "./Search.css"
 import { FilterOperation } from '../Signum.Entities.DynamicQuery';
 import SystemTimeEditor from './SystemTimeEditor';
+import { MaxHeightProperty } from 'csstype';
 
 export interface ShowBarExtensionOption { }
 
@@ -41,7 +42,7 @@ export interface SearchControlLoadedProps {
     entityFormatter?: EntityFormatter;
     extraButtons?: (searchControl: SearchControlLoaded) => (React.ReactElement<any> | null | undefined | false)[];
     getViewPromise?: (e: ModifiableEntity) => undefined | string | Navigator.ViewPromise<any>;
-    maxResultsHeight?: React.CSSWideKeyword | any;
+    maxResultsHeight?: MaxHeightProperty<string | number> | any;
     tag?: string | {};
 
     searchOnLoad: boolean;
