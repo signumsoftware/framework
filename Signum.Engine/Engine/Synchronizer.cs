@@ -44,7 +44,8 @@ namespace Signum.Engine
           Dictionary<K, O> oldDictionary,
           Action<K, N> createNew,
           Action<K, O> removeOld,
-          Action<K, N, O> merge)
+          Action<K, N, O> merge,
+          bool showProgress = true)
         {
             HashSet<K> keys = new HashSet<K>();
             keys.UnionWith(oldDictionary.Keys);
@@ -65,7 +66,7 @@ namespace Signum.Engine
                     else
                         throw new InvalidOperationException("Unexpected key: " + key);
                 }
-            });
+            }, showProgress: showProgress);
         }
 
         public static void SynchronizeReplacing<N, O>(
