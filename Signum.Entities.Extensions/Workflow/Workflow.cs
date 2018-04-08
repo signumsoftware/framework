@@ -100,7 +100,7 @@ namespace Signum.Entities.Workflow
         [Description("To use '{0}', you should set the workflow '{1}'")]
         ToUse0YouSouldSetTheWorkflow1,
         [Description("Change workflow main entity type is not allowed because we have nodes that use it.")]
-        ChangeWorkflowMainEntityTypeIsNotAllowedBecausueWeHaveNodesThatUseIt,
+        ChangeWorkflowMainEntityTypeIsNotAllowedBecauseWeHaveNodesThatUseIt,
         [Description("Workflow uses in {0} for decomposition or call workflow.")]
         WorkflowUsedIn0ForDecompositionOrCallWorkflow,
         ResetZoom,
@@ -231,7 +231,8 @@ namespace Signum.Entities.Workflow
         [Description("'{0}' is timer start and task is mandatory.")]
         _0IsTimerStartAndTaskIsMandatory,
         [Description("'{0}' is conditional start and condition is mandatory.")]
-        _0IsConditionalStartAndTaskConditionIsMandatory
+        _0IsConditionalStartAndTaskConditionIsMandatory,
+        DelayActivitiesShouldHaveExactlyOneInterruptingTimer
     }
 
     public enum WorkflowActivityMonitorMessage

@@ -287,8 +287,10 @@ namespace Signum.Engine.Workflow
                         errors.Add(WorkflowValidationMessage.Activity0CanNotRejectToParallelGateway.NiceToString(wa));
                 }
 
-                if (wa.Timeout != null)
-                    ValidateTransition(wa, wa.Timeout);
+                foreach (var timer in wa.Timers)
+                {
+                    ValidateTransition(wa, timer);
+                } 
 
                 if (wa.Script != null)
                     ValidateTransition(wa, wa.Script);

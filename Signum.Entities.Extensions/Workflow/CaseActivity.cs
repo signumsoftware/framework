@@ -144,7 +144,7 @@ namespace Signum.Entities.Workflow
         public static readonly ExecuteSymbol<CaseActivityEntity> Decline;
         public static readonly ExecuteSymbol<CaseActivityEntity> Jump;
         public static readonly ExecuteSymbol<CaseActivityEntity> Reject;
-        public static readonly ExecuteSymbol<CaseActivityEntity> Timeout;
+        public static readonly ExecuteSymbol<CaseActivityEntity> Timer;
         public static readonly ExecuteSymbol<CaseActivityEntity> MarkAsUnread;
         public static readonly ExecuteSymbol<CaseActivityEntity> Undo;
         public static readonly ExecuteSymbol<CaseActivityEntity> ScriptExecute;
@@ -189,7 +189,7 @@ namespace Signum.Entities.Workflow
         [Description("Activity '{0}' has no reject")]
         Activity0HasNoReject,
         [Description("Activity '{0}' has no timeout")]
-        Activity0HasNoTimeout,
+        Activity0HasNoTimers,
         ThereIsNoPreviousActivity,
         OnlyForScriptWorkflowActivities,
         Pending
@@ -211,5 +211,16 @@ namespace Signum.Entities.Workflow
         public string remarks { get; set; }
         public int alerts { get; set; }
         public List<CaseTagTypeEntity> tags { get; set; }
+    }
+
+    [Serializable, EntityKind(EntityKind.System, EntityData.Transactional)]
+    public class CaseActivityExecutedTimerEntity : Entity
+    {
+        public DateTime CreationDate { get; private set; } = TimeZoneManager.Now;
+
+        public Lite<CaseActivityEntity> CaseActivity { get; set; }
+
+        [StringLengthValidator(AllowNulls = false, Min = 1, Max = 100)]
+        public string BpmnElementId { get; set; }
     }
 }
