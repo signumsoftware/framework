@@ -55,6 +55,7 @@ export default class BpmnModelerComponent extends React.Component<BpmnModelerCom
         this.bpmnFactory = this.modeler.get<BPMN.BpmnFactory>('bpmnFactory');
         this.modeler.on('element.dblclick', 1500, this.handleElementDoubleClick as (obj: BPMN.Event) => void);
         this.modeler.on('element.paste', 1500, this.handleElementPaste as (obj: BPMN.Event) => void);
+        this.modeler.on('create.ended', 1500, this.handleCreateEnded as (obj: BPMN.Event) => void);
         this.modeler.on('shape.add', 1500, this.handleAddShapeOrConnection as (obj: BPMN.Event) => void);
         this.modeler.on('connection.add', 1500, this.handleAddShapeOrConnection as (obj: BPMN.Event) => void);
         this.modeler.on('label.add', 1500, () => this.lastPasted = undefined);
@@ -88,8 +89,8 @@ export default class BpmnModelerComponent extends React.Component<BpmnModelerCom
 
             if (BpmnUtils.isTaskAnyKind(e.type) && (
                 (model as WorkflowActivityModel).script != null ||
-                ((model as WorkflowActivityModel).timeout != null && (model as WorkflowActivityModel).timeout!.action != null) ||
-                ((model as WorkflowActivityModel).jumps.length > 0 && (model as WorkflowActivityModel).jumps!.filter(j => j.element.action != null || j.element.condition != null).length > 0)))
+                (model as WorkflowActivityModel).timers.some(t => t.element.action != null || t.element.condition != null) ||
+                (model as WorkflowActivityModel).jumps.some(j => j.element.action != null || j.element.condition != null)))
                 result = true;
         });
 
@@ -291,9 +292,12 @@ export default class BpmnModelerComponent extends React.Component<BpmnModelerCom
             };
     }
 
+    handleCreateEnded = (obj: BPMN.Event) => {
+        console.log(obj);
+    }
+
     handleAddShapeOrConnection = (obj: BPMN.AddClickEvent) => {
         if (this.lastPasted) {
-            console.log("Pasted", this.lastPasted, obj.element.id);
             var model = this.props.entities[this.lastPasted.id];
             if (model) {
                 var clone: ModelEntity = JSON.parse(JSON.stringify(model));

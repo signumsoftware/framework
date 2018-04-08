@@ -1,11 +1,11 @@
 ﻿import * as React from 'react'
 import {
     WorkflowActivityEntity, WorkflowActivityModel, WorkflowMessage, WorkflowActivityMessage, WorkflowConditionEntity, WorkflowActionEntity,
-    WorkflowJumpEmbedded, WorkflowTimeoutEmbedded, IWorkflowNodeEntity, SubWorkflowEmbedded, SubEntitiesEval, WorkflowScriptEntity, WorkflowScriptPartEmbedded, WorkflowScriptEval, WorkflowEntity
+    WorkflowJumpEmbedded, WorkflowTimerEmbedded, IWorkflowNodeEntity, SubWorkflowEmbedded, SubEntitiesEval, WorkflowScriptEntity, WorkflowScriptPartEmbedded, WorkflowScriptEval, WorkflowEntity, WorkflowActivityType
 } from '../Signum.Entities.Workflow'
 import * as WorkflowClient from '../WorkflowClient'
 import * as DynamicViewClient from '../../Dynamic/DynamicViewClient'
-import { TypeContext, ValueLine, ValueLineType, EntityLine, EntityTable, EntityDetail, FormGroup, LiteAutocompleteConfig, RenderEntity } from '../../../../Framework/Signum.React/Scripts/Lines'
+import { TypeContext, ValueLine, ValueLineType, EntityLine, EntityTable, EntityDetail, FormGroup, LiteAutocompleteConfig, RenderEntity, EntityRepeater } from '../../../../Framework/Signum.React/Scripts/Lines'
 import { is, JavascriptMessage, Lite } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
 import { TypeEntity } from '../../../../Framework/Signum.React/Scripts/Signum.Entities.Basics'
 import { DynamicValidationEntity } from '../../Dynamic/Signum.Entities.Dynamic'
@@ -16,6 +16,8 @@ import TypeHelpComponent from "../../TypeHelp/TypeHelpComponent";
 import HtmlEditor from '../../HtmlEditor/HtmlEditor'
 import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
 import { API } from '../WorkflowClient'
+import { newMListElement } from '../../../../Framework/Signum.React/Scripts/Signum.Entities';
+import { TimeSpanEmbedded } from '../../Basics/Signum.Entities.Basics';
 
 interface WorkflowActivityModelComponentProps {
     ctx: TypeContext<WorkflowActivityModel>;
@@ -30,7 +32,7 @@ export default class WorkflowActivityModelComponent extends React.Component<Work
     constructor(props: WorkflowActivityModelComponentProps) {
         super(props);
 
-        this.state = { };
+        this.state = {};
     }
 
     componentWillMount() {
@@ -56,8 +58,16 @@ export default class WorkflowActivityModelComponent extends React.Component<Work
     handleTypeChange = () => {
 
         var wa = this.props.ctx.value;
-        if (wa.type != "Task")
-            wa.timeout = null;
+        if (!allowsTimers(wa.type))
+            wa.timers.clear();
+        else if (wa.type == "Delay") {
+            wa.timers = [
+                newMListElement(WorkflowTimerEmbedded.New({
+                    duration: TimeSpanEmbedded.New({ days: 1 }),
+                    interrupting: true
+                }))
+            ];
+        }
 
         if (wa.type == "Script") {
             if (!wa.script)
@@ -102,39 +112,42 @@ export default class WorkflowActivityModelComponent extends React.Component<Work
 
                 {ctx.value.type != "DecompositionWorkflow" && ctx.value.type != "CallWorkflow" && ctx.value.type != "Script" &&
                     <div>
-                    {ctx.value.mainEntityType ?
-                        <FormGroup ctx={ctx.subCtx(d => d.viewName)} labelText={ctx.niceName(d => d.viewName)}>
-                            {
-                                <select value={ctx.value.viewName ? ctx.value.viewName : ""} className="form-control" onChange={this.handleViewNameChange}>
-                                    <option value="">{" - "}</option>
-                                    {(this.state.viewNames || []).map((v, i) => <option key={i} value={v}>{v}</option>)}
-                                </select>
-                            }
-                        </FormGroup>
-                        : <div className="alert alert-warning">{WorkflowMessage.ToUse0YouSouldSetTheWorkflow1.niceToString(ctx.niceName(e => e.viewName), ctx.niceName(e => e.mainEntityType))}</div>}
+                        {ctx.value.mainEntityType ?
+                            <FormGroup ctx={ctx.subCtx(d => d.viewName)} labelText={ctx.niceName(d => d.viewName)}>
+                                {
+                                    <select value={ctx.value.viewName ? ctx.value.viewName : ""} className="form-control" onChange={this.handleViewNameChange}>
+                                        <option value="">{" - "}</option>
+                                        {(this.state.viewNames || []).map((v, i) => <option key={i} value={v}>{v}</option>)}
+                                    </select>
+                                }
+                            </FormGroup>
+                            : <div className="alert alert-warning">{WorkflowMessage.ToUse0YouSouldSetTheWorkflow1.niceToString(ctx.niceName(e => e.viewName), ctx.niceName(e => e.mainEntityType))}</div>}
 
 
                         <ValueLine ctx={ctx.subCtx(a => a.requiresOpen)} />
                         <EntityDetail ctx={ctx.subCtx(a => a.reject)} />
 
-                        {ctx.value.type == "Task" ? ctx.value.workflow ?
-                            <EntityDetail ctx={ctx.subCtx(a => a.timeout)} getComponent={(tctx: TypeContext<WorkflowTimeoutEmbedded>) =>
-                                <div>
-                                    <FormGroup ctx={tctx.subCtx(t => t.timeout)} >
-                                        <RenderEntity ctx={tctx.subCtx(t => t.timeout)} />
-                                    </FormGroup>
-                                    <EntityLine
-                                        ctx={tctx.subCtx(t => t.to)}
-                                        autoComplete={new LiteAutocompleteConfig((ac,str) => API.findNode({ workflowId: ctx.value.workflow!.id, subString: str, count: 5, excludes: this.getCurrentJumpsTo() }, ac), false)}
-                                        find={false}
-                                        helpText={WorkflowMessage.ToUseNewNodesOnJumpsYouSouldSaveWorkflow.niceToString()} />
-                                    <EntityLine ctx={tctx.subCtx(t => t.action)} findOptions={{
-                                        queryName: WorkflowActionEntity,
-                                        parentColumn: "Entity.MainEntityType",
-                                        parentValue: ctx.value.mainEntityType
-                                    }} />
-                            </div>
-                        } /> : <div className="alert alert-warning">{WorkflowMessage.ToUse0YouSouldSaveWorkflow.niceToString(ctx.niceName(e => e.timeout))}</div>
+                        {allowsTimers(ctx.value.type) ? ctx.value.workflow ?
+                            <EntityRepeater ctx={ctx.subCtx(a => a.timers)} create={ctx.value.type != "Delay"} remove={ctx.value.type != "Delay"} getComponent={(tctx: TypeContext<WorkflowTimerEmbedded>) =>
+                                <div className="row">
+                                    <div className="col-sm-6">
+                                        <ValueLine ctx={tctx.subCtx(t => t.interrupting)} visible={ctx.value.type != "Delay"} />
+                                        <EntityLine ctx={tctx.subCtx(t => t.condition)} />
+                                        <EntityDetail ctx={tctx.subCtx(t => t.duration)} />
+                                    </div>
+                                    <div className="col-sm-6">
+                                        <EntityLine
+                                            ctx={tctx.subCtx(t => t.to)}
+                                            autoComplete={new LiteAutocompleteConfig((ac, str) => API.findNode({ workflowId: ctx.value.workflow!.id, subString: str, count: 5, excludes: this.getCurrentJumpsTo() }, ac), false)}
+                                            find={false} />
+                                        <EntityLine ctx={tctx.subCtx(t => t.action)} findOptions={{
+                                            queryName: WorkflowActionEntity,
+                                            parentColumn: "Entity.MainEntityType",
+                                            parentValue: ctx.value.mainEntityType
+                                        }} />
+                                    </div>
+                                </div>
+                            } /> : <div className="alert alert-warning">{WorkflowMessage.ToUse0YouSouldSaveWorkflow.niceToString(ctx.niceName(e => e.timers))}</div>
                             : undefined}
 
                         {ctx.value.workflow ?
@@ -154,7 +167,7 @@ export default class WorkflowActivityModelComponent extends React.Component<Work
                                     },
                                     {
                                         property: wj => wj.action,
-                                        headerHtmlAttributes: { style: { width: "30%" }},
+                                        headerHtmlAttributes: { style: { width: "30%" } },
                                         template: (jctx, row, state) => {
                                             return <EntityLine ctx={jctx.subCtx(wj => wj.action)} findOptions={{
                                                 queryName: WorkflowActionEntity,
@@ -210,6 +223,10 @@ export default class WorkflowActivityModelComponent extends React.Component<Work
     }
 }
 
+function allowsTimers(type: WorkflowActivityType | null | undefined) {
+    return type == "Task" || type == "Decision" || type == "Delay";
+}
+
 class ScriptComponent extends React.Component<{ ctx: TypeContext<WorkflowScriptPartEmbedded>, mainEntityType: TypeEntity, workflow: WorkflowEntity }>{
 
 
@@ -230,7 +247,7 @@ class ScriptComponent extends React.Component<{ ctx: TypeContext<WorkflowScriptP
                     autoComplete={new LiteAutocompleteConfig((ac, str) => API.findNode({ workflowId: this.props.workflow.id, subString: str, count: 5 }, ac), false)}
                     find={false}
                     helpText={WorkflowMessage.ToUseNewNodesOnJumpsYouSouldSaveWorkflow.niceToString()} />
-             
+
             </fieldset>
         );
     }
