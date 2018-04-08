@@ -290,9 +290,7 @@ namespace Signum.Entities.Reflection
     {
         protected override IEqualityComparer GetEqualityComparerInternal(Type type, PropertyInfo pi)
         {
-            if (typeof(EmbeddedEntity).IsAssignableFrom(type) ||
-                typeof(MixinEntity).IsAssignableFrom(type) ||
-                typeof(ModelEntity).IsAssignableFrom(type))
+            if (typeof(ModifiableEntity).IsAssignableFrom(type))
             {
                 return (IEqualityComparer)Activator.CreateInstance(typeof(EntityStructuralEqualityComparer<>).MakeGenericType(type));
             }
@@ -300,13 +298,13 @@ namespace Signum.Entities.Reflection
             if (typeof(IList).IsAssignableFrom(type))
             {
                 if (pi?.HasAttribute<PreserveOrderAttribute>() == true)
-                    return (IEqualityComparer)Activator.CreateInstance(typeof(SortedListEqualityComparer<>).MakeGenericType(type));
+                    return (IEqualityComparer)Activator.CreateInstance(typeof(SortedListEqualityComparer<>).MakeGenericType(type.ElementType()));
                 else
-                    return (IEqualityComparer)Activator.CreateInstance(typeof(UnsortedListEqualityComparer<>).MakeGenericType(type));
+                    return (IEqualityComparer)Activator.CreateInstance(typeof(UnsortedListEqualityComparer<>).MakeGenericType(type.ElementType()));
             }
 
-            if (type.IsClass && type.GetMethod("Equals", BindingFlags.Instance | BindingFlags.Public | BindingFlags.DeclaredOnly) == null)
-                return (IEqualityComparer)Activator.CreateInstance(typeof(ClassStructuralEqualityComparer<>).MakeGenericType(type)); ;
+            if (type.IsClass && type.GetMethod("Equals", BindingFlags.Instance | BindingFlags.Public | BindingFlags.DeclaredOnly, null, new[] { typeof(object) }, null) == null)
+                return (IEqualityComparer)Activator.CreateInstance(typeof(ClassStructuralEqualityComparer<>).MakeGenericType(type));
             
             return (IEqualityComparer)typeof(EqualityComparer<>).MakeGenericType(type).GetProperty("Default").GetValue(null);
         }
