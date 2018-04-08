@@ -742,7 +742,9 @@ export class PropertyRepeaterComponent extends React.Component<PropertyRepeaterC
     }
 
     handleSelect = (eventKey: number) => {
-        this.setState({ currentEventKey: eventKey });
+        this.setState({
+            currentEventKey: eventKey == this.state.currentEventKey ? undefined : eventKey
+        });
     }
 
     handleOnRemove = (event: React.MouseEvent<any>, index: number) => {
@@ -825,9 +827,8 @@ export class PropertyRepeaterComponent extends React.Component<PropertyRepeaterC
                             <CollapsableCard
                                 key={i}
                                 header={this.renderPropertyHeader(p, i)}
-                                cardStyle={{ background: "secondary" }}
-                                headerStyle={{ text: "light" }}
-                                bodyStyle={{ background: "light" }}
+                                cardStyle={{ background: "light" }}
+                                headerStyle={{ text: "secondary" }}
                                 isOpen={this.state.currentEventKey == i}
                                 toggle={() => this.handleSelect(i)} >
                                 <PropertyComponent property={p} dc={this.props.dc} showDatabaseMapping={this.props.showDatabaseMapping} />
@@ -905,28 +906,28 @@ export class PropertyComponent extends React.Component<PropertyComponentProps>{
         return (
             <div>
                 <div className="row">
-                    <div className="col-sm-7">
-                        <ValueComponent dc={this.props.dc} labelColumns={3} binding={Binding.create(p, d => d.name)} type="string" defaultValue={null} onBlur={this.handleAutoFix} />
+                    <div className="col-sm-6">
+                        <ValueComponent dc={this.props.dc} labelColumns={4} binding={Binding.create(p, d => d.name)} type="string" defaultValue={null} onBlur={this.handleAutoFix} />
                         {this.props.showDatabaseMapping &&
-                            <ValueComponent dc={this.props.dc} labelColumns={3} binding={Binding.create(p, d => d.columnName)} type="string" defaultValue={null} labelClass="database-mapping" />
+                            <ValueComponent dc={this.props.dc} labelColumns={4} binding={Binding.create(p, d => d.columnName)} type="string" defaultValue={null} labelClass="database-mapping" />
                         }
-                        <TypeCombo dc={this.props.dc} labelColumns={3} binding={Binding.create(p, d => d.type)} onBlur={this.handleAutoFix} />
+                        <TypeCombo dc={this.props.dc} labelColumns={4} binding={Binding.create(p, d => d.type)} onBlur={this.handleAutoFix} />
                         {this.props.showDatabaseMapping &&
-                            <ValueComponent dc={this.props.dc} labelColumns={3} binding={Binding.create(p, d => d.columnType)} type="string" defaultValue={null} labelClass="database-mapping" />
+                            <ValueComponent dc={this.props.dc} labelColumns={4} binding={Binding.create(p, d => d.columnType)} type="string" defaultValue={null} labelClass="database-mapping" />
                         }
-                        <ValueComponent dc={this.props.dc} labelColumns={3} binding={Binding.create(p, d => d.isNullable)} type="string" defaultValue={null} options={DynamicTypeClient.IsNullableValues} onChange={this.handleAutoFix} />
+                        <ValueComponent dc={this.props.dc} labelColumns={4} binding={Binding.create(p, d => d.isNullable)} type="string" defaultValue={null} options={DynamicTypeClient.IsNullableValues} onChange={this.handleAutoFix} />
                     </div>
-                    <div className="col-sm-5">
+                    <div className="col-sm-6">
                         <IsMListFieldsetComponent
                             binding={Binding.create(p, d => d.isMList)}
                             title="Is MList"
                             onCreate={() => ({ preserveOrder: true })}
                             renderContent={mle =>
                                 <div className="database-mapping">
-                                    <ValueComponent dc={this.props.dc} labelColumns={6} binding={Binding.create(mle, d => d.preserveOrder)} type="boolean" defaultValue={null} />
-                                    <ValueComponent dc={this.props.dc} labelColumns={6} binding={Binding.create(mle, d => d.orderName)} type="string" defaultValue={null} />
-                                    <ValueComponent dc={this.props.dc} labelColumns={6} binding={Binding.create(mle, d => d.tableName)} type="string" defaultValue={null} />
-                                    <ValueComponent dc={this.props.dc} labelColumns={6} binding={Binding.create(mle, d => d.backReferenceName)} type="string" defaultValue={null} />
+                                    <ValueComponent dc={this.props.dc} labelColumns={4} binding={Binding.create(mle, d => d.preserveOrder)} type="boolean" defaultValue={null} />
+                                    <ValueComponent dc={this.props.dc} labelColumns={4} binding={Binding.create(mle, d => d.orderName)} type="string" defaultValue={null} />
+                                    <ValueComponent dc={this.props.dc} labelColumns={4} binding={Binding.create(mle, d => d.tableName)} type="string" defaultValue={null} />
+                                    <ValueComponent dc={this.props.dc} labelColumns={4} binding={Binding.create(mle, d => d.backReferenceName)} type="string" defaultValue={null} />
                                 </div>
                             }
                             onChange={() => {
@@ -981,8 +982,8 @@ export class TypeCombo extends React.Component<{ dc: DynamicTypeDesignContext; b
     render() {
         let lc = this.props.labelColumns;
         return (
-            <div className="form-group" >
-                <label className={classes("col-form-label", "col-form-label-sm", "col-sm-" + (lc == null ? 2 : lc))}>
+            <div className="form-group form-group-sm row" >
+                <label className={classes("col-form-label col-form-label-sm", "col-sm-" + (lc == null ? 2 : lc))}>
                     {this.props.binding.member}
                 </label>
                 <div className={"col-sm-" + (lc == null ? 10 : 12 - lc)}>
