@@ -61,7 +61,9 @@ export function start(options: { routes: JSX.Element[] }) {
 
     QuickLink.registerQuickLink(DynamicTypeEntity, ctx => new QuickLink.QuickLinkLink("ViewDynamicPanel",
         symbolNiceName(DynamicPanelPermission.ViewDynamicPanel), "~/dynamic/panel", {
-            isVisible: AuthClient.isPermissionAuthorized(DynamicPanelPermission.ViewDynamicPanel)
+            isVisible: AuthClient.isPermissionAuthorized(DynamicPanelPermission.ViewDynamicPanel),
+            icon: "fa fa-arrows-alt",
+            iconColor: "purple",
         }));
 
     DynamicClient.Options.onGetDynamicLineForPanel.push(ctx => <ValueSearchControlLine ctx={ctx} findOptions={{ queryName: DynamicTypeEntity }} />);
