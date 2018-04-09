@@ -97,7 +97,6 @@ label > input[type=checkbox] {
     }
 
     .sf-line-button:not(.btn) {
-        vertical-align: middle;
         margin: 0 2px;
     }
 
@@ -142,6 +141,10 @@ fieldset {
 
         fieldset > legend > div > span.pull-right {
             margin-left: 5px;
+        }
+
+        fieldset > legend > input[type=checkbox] {
+            vertical-align: middle;
         }
 
 .border {
