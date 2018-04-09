@@ -242,11 +242,7 @@ namespace Signum.Engine
                 (c.ReferenceTable == null || c.AvoidForeignKey) ? null : SqlBuilder.AlterTableAddConstraintForeignKey(t, c.Name, c.ReferenceTable))
                 .Combine(Spacing.Simple);
         }
-
-        public static SqlPreCommand CreateAllIndices(ITable t)
-        {
-            return t.GeneratAllIndexes().Where(a => !(a is PrimaryClusteredIndex)).Select(CreateIndex).Combine(Spacing.Simple);
-        }
+        
 
         public static SqlPreCommand DropIndex(ObjectName tableName, DiffIndex index)
         {
