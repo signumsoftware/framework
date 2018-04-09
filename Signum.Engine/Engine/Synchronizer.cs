@@ -45,7 +45,8 @@ namespace Signum.Engine
           Action<K, N> createNew,
           Action<K, O> removeOld,
           Action<K, N, O> merge,
-          bool showProgress = true)
+          bool showProgress = true,
+          bool transactional = true)
         {
             HashSet<K> keys = new HashSet<K>();
             keys.UnionWith(oldDictionary.Keys);
@@ -66,7 +67,9 @@ namespace Signum.Engine
                     else
                         throw new InvalidOperationException("Unexpected key: " + key);
                 }
-            }, showProgress: showProgress);
+            }, 
+            showProgress: showProgress, 
+            transactional: transactional);
         }
 
         public static void SynchronizeReplacing<N, O>(

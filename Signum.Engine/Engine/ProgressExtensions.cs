@@ -119,7 +119,7 @@ namespace Signum.Engine
         {
             var enumerator = collection.ToProgressEnumerator(out IProgressInfo pi);
 
-            if (!Console.IsOutputRedirected)
+            if (!Console.IsOutputRedirected && showProgress)
                 SafeConsole.WriteSameLine(pi.ToString());
 
             foreach (var item in enumerator)
@@ -149,10 +149,10 @@ namespace Signum.Engine
                             throw;
                     }
 
-                if (!Console.IsOutputRedirected)
+                if (!Console.IsOutputRedirected && showProgress)
                     SafeConsole.WriteSameLine(pi.ToString());
             }
-            if (!Console.IsOutputRedirected)
+            if (!Console.IsOutputRedirected && showProgress)
                 SafeConsole.ClearSameLine();
 
         }
