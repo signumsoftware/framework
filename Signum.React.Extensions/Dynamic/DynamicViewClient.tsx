@@ -353,7 +353,7 @@ export function asOverrideFunction(dvo: DynamicViewOverrideEntity): (vr: ViewRep
     var DropdownItem = Components.DropdownItem;
     var DropdownMenu = Components.DropdownMenu;
     var DropdownToggle = Components.DropdownToggle;
-    var Fade = Components.Fade;
+    var Fade = Components.ModalFade;
     var Modal = Components.Modal;
     var NavItem = Components.NavItem;
     var PopperContent = Components.PopperContent;
