@@ -84,22 +84,20 @@ export default class ChartScript extends React.Component<{ ctx: TypeContext<Char
     renderParameter = (ctx: TypeContext<ChartScriptParameterEmbedded>) => {
         const cc = ctx.subCtx({ formGroupStyle: "Basic" });
         return (
-            <div>
-                <div>
-                    <div className="col-sm-2">
-                        <ValueLine ctx={cc.subCtx(c => c.name) }  />
-                    </div>
+            <div className="row">
+                <div className="col-sm-2">
+                    <ValueLine ctx={cc.subCtx(c => c.name)} />
+                </div>
 
-                    <div className="col-sm-2">
-                        <ValueLine ctx={cc.subCtx(c => c.type) }  />
-                    </div>
+                <div className="col-sm-2">
+                    <ValueLine ctx={cc.subCtx(c => c.type)} />
+                </div>
 
-                    <div className="col-sm-6">
-                        <ValueLine ctx={cc.subCtx(c => c.valueDefinition) }  />
-                    </div>
-                    <div className="col-sm-2">
-                        <ValueLine ctx={cc.subCtx(c => c.columnIndex) }  />
-                    </div>
+                <div className="col-sm-6">
+                    <ValueLine ctx={cc.subCtx(c => c.valueDefinition)} />
+                </div>
+                <div className="col-sm-2">
+                    <ValueLine ctx={cc.subCtx(c => c.columnIndex)} />
                 </div>
             </div>
         );
