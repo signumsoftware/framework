@@ -161,6 +161,7 @@
     <TypeScriptCompile Include="Scripts\Components\DropdownItem.tsx" />
     <TypeScriptCompile Include="Scripts\Components\DropdownToggle.tsx" />
     <TypeScriptCompile Include="Scripts\Components\DropdownMenu.tsx" />
+    <TypeScriptCompile Include="Scripts\Components\Fade.tsx" />
     <TypeScriptCompile Include="Scripts\Components\NavItem.tsx" />
     <TypeScriptCompile Include="Scripts\Components\Popover.tsx" />
     <TypeScriptCompile Include="Scripts\Components\PopperContent.tsx" />
@@ -168,7 +169,7 @@
     <TypeScriptCompile Include="Scripts\Lines\FormControlReadonly.tsx" />
     <TypeScriptCompile Include="Scripts\Lines\FormGroup.tsx" />
     <TypeScriptCompile Include="Scripts\Components\LinkContainer.tsx" />
-    <TypeScriptCompile Include="Scripts\Components\Fade.tsx" />
+    <TypeScriptCompile Include="Scripts\Components\ModalFade.tsx" />
     <TypeScriptCompile Include="Scripts\Components\Modal.tsx" />
     <TypeScriptCompile Include="Scripts\Components\Tabs.tsx" />
     <Content Include="Scripts\Frames\MenuIcons.css" />
