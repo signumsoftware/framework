@@ -8,6 +8,8 @@ interface UncontrolledTabsProps extends React.HTMLAttributes<HTMLDivElement> {
     onToggled?: (eventKey: string | number) => void;
     children?: React.ReactFragment;
     hideOnly?: boolean;
+    pills?: boolean;
+    fill?: boolean;
 }
 
 interface UncontrolledTabsState {
@@ -66,6 +68,8 @@ interface TabsProps extends React.HTMLAttributes<HTMLDivElement> {
     activeEventKey: string | number | undefined;
     toggle: (eventKey: string | number) => void;
     hideOnly?: boolean;
+    pills?: boolean;
+    fill?: boolean;
 }
 
 function getFirstEventKey(children: React.ReactNode) {
@@ -81,13 +85,13 @@ export class Tabs extends React.Component<TabsProps> {
 
     render() {
 
-        var { activeEventKey, children, toggle, hideOnly, ...attrs } = this.props;
+        var { activeEventKey, children, toggle, hideOnly, pills, fill, ...attrs } = this.props;
 
         var array = (React.Children.toArray(this.props.children) as React.ReactElement<TabProps>[]);
 
         return (
             <div {...attrs}>
-                <ul className="nav nav-tabs">
+                <ul className={"nav " + (pills ? "nav-pills" : "nav-tabs") + (fill ? " nav-fill" : "")}>
                     {array.map(t =>
                         <li className="nav-item" key={t.props.eventKey}>
                             <a href="#"
