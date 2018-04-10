@@ -8,7 +8,7 @@ import { bytesToSize } from '../../../../../Framework/Signum.React/Scripts/Globa
 
 export default function getDefaultProviders(info: SchemaMapInfo): ClientColorProvider[] {
 
-    const namespaceColor = d3.scaleOrdinal(d3.schemeCategory20);
+    const namespaceColor = d3.scaleOrdinal(d3.schemePaired);
     const namespace: ClientColorProvider = {
         name: "namespace",
         getFill: t => namespaceColor(t.namespace),

@@ -23,7 +23,7 @@ export default class IFrameRenderer extends React.Component<IFrameRendererProps>
     }
 
     load(html: string | null | undefined) {
-        const cd = this.iframe.contentDocument;
+        const cd = this.iframe.contentDocument!;
 
         cd.body.innerHTML = html || "";
     }
