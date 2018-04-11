@@ -12,7 +12,6 @@ import { Entity, Lite, ModifiableEntity, JavascriptMessage, NormalWindowMessage,
 import { getTypeInfo, TypeInfo, PropertyRoute, ReadonlyBinding, GraphExplorer, isTypeModel, parseId } from '../Reflection'
 import ValidationErrors from './ValidationErrors'
 import { renderWidgets, WidgetContext } from './Widgets'
-import { needsCanExecute } from '../Operations/EntityOperations'
 import { EntityOperationContext } from '../Operations'
 
 import "./Frames.css"
