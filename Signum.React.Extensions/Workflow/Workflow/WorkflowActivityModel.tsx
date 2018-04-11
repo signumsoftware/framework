@@ -115,7 +115,7 @@ export default class WorkflowActivityModelComponent extends React.Component<Work
                         {ctx.value.mainEntityType ?
                             <FormGroup ctx={ctx.subCtx(d => d.viewName)} labelText={ctx.niceName(d => d.viewName)}>
                                 {
-                                    <select value={ctx.value.viewName ? ctx.value.viewName : ""} className="form-control" onChange={this.handleViewNameChange}>
+                                    <select value={ctx.value.viewName ? ctx.value.viewName : ""} className="form-control form-control-sm" onChange={this.handleViewNameChange}>
                                         <option value="">{" - "}</option>
                                         {(this.state.viewNames || []).map((v, i) => <option key={i} value={v}>{v}</option>)}
                                     </select>
