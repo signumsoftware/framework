@@ -23,12 +23,20 @@ export class CustomReplaceMenuProvider extends BpmnReplaceMenuProvider {
     }
 
     _createEntries(element: BPMN.DiElement, replaceOptions: ReplaceOptions[]) {
-
         if (BpmnUtils.isGatewayAnyKind(element.type))
             return super._createEntries(element, replaceOptions.filter(a =>
                 a.actionName == "replace-with-parallel-gateway" ||
                 a.actionName == "replace-with-inclusive-gateway" ||
                 a.actionName == "replace-with-exclusive-gateway"));
+
+        if (element.type == "bpmn:IntermediateThrowEvent")
+            return super._createEntries(element, replaceOptions.filter(a =>
+                a.actionName == "replace-with-timer-intermediate-catch"));
+
+        if (element.type == "bpmn:BoundaryEvent")
+            return super._createEntries(element, replaceOptions.filter(a =>
+                a.actionName == "replace-with-timer-boundary" ||
+                a.actionName == "replace-with-non-interrupting-timer-boundary"));
 
         return [];
     }
