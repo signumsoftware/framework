@@ -127,28 +127,28 @@ export default class WorkflowActivityModelComponent extends React.Component<Work
                         <ValueLine ctx={ctx.subCtx(a => a.requiresOpen)} />
                         <EntityDetail ctx={ctx.subCtx(a => a.reject)} />
 
-                        {allowsTimers(ctx.value.type) ? ctx.value.workflow ?
-                            <EntityRepeater ctx={ctx.subCtx(a => a.timers)} create={ctx.value.type != "Delay"} remove={ctx.value.type != "Delay"} getComponent={(tctx: TypeContext<WorkflowTimerEmbedded>) =>
-                                <div className="row">
-                                    <div className="col-sm-6">
-                                        <ValueLine ctx={tctx.subCtx(t => t.interrupting)} visible={ctx.value.type != "Delay"} />
-                                        <EntityLine ctx={tctx.subCtx(t => t.condition)} />
-                                        <EntityDetail ctx={tctx.subCtx(t => t.duration)} />
-                                    </div>
-                                    <div className="col-sm-6">
-                                        <EntityLine
-                                            ctx={tctx.subCtx(t => t.to)}
-                                            autoComplete={new LiteAutocompleteConfig((ac, str) => API.findNode({ workflowId: ctx.value.workflow!.id, subString: str, count: 5, excludes: this.getCurrentJumpsTo() }, ac), false)}
-                                            find={false} />
-                                        <EntityLine ctx={tctx.subCtx(t => t.action)} findOptions={{
-                                            queryName: WorkflowActionEntity,
-                                            parentColumn: "Entity.MainEntityType",
-                                            parentValue: ctx.value.mainEntityType
-                                        }} />
-                                    </div>
+                    {allowsTimers(ctx.value.type) ? ctx.value.workflow ?
+                        <EntityRepeater ctx={ctx.subCtx(a => a.timers)} create={ctx.value.type != "Delay"} remove={ctx.value.type != "Delay"} getComponent={(tctx: TypeContext<WorkflowTimerEmbedded>) =>
+                            <div className="row">
+                                <div className="col-sm-6">
+                                    <EntityLine ctx={tctx.subCtx(t => t.condition)} />
+                                    <EntityDetail ctx={tctx.subCtx(t => t.duration)} />
                                 </div>
-                            } /> : <div className="alert alert-warning">{WorkflowMessage.ToUse0YouSouldSaveWorkflow.niceToString(ctx.niceName(e => e.timers))}</div>
-                            : undefined}
+                                <div className="col-sm-6">
+                                    <ValueLine ctx={tctx.subCtx(t => t.interrupting)} visible={ctx.value.type != "Delay"} />
+                                    <EntityLine
+                                        ctx={tctx.subCtx(t => t.to)}
+                                        autoComplete={new LiteAutocompleteConfig((ac, str) => API.findNode({ workflowId: ctx.value.workflow!.id, subString: str, count: 5, excludes: this.getCurrentJumpsTo() }, ac), false)}
+                                        find={false} />
+                                    <EntityLine ctx={tctx.subCtx(t => t.action)} findOptions={{
+                                        queryName: WorkflowActionEntity,
+                                        parentColumn: "Entity.MainEntityType",
+                                        parentValue: ctx.value.mainEntityType
+                                    }} />
+                                </div>
+                            </div>
+                        } /> : <div className="alert alert-warning">{WorkflowMessage.ToUse0YouSouldSaveWorkflow.niceToString(ctx.niceName(e => e.timers))}</div>
+                        : undefined}
 
                         {ctx.value.workflow ?
                             <EntityTable
