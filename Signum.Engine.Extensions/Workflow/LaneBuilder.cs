@@ -363,7 +363,7 @@ namespace Signum.Engine.Workflow
                     Xml = oldLane.Xml,
                 }.Save();
 
-                var newActivities = this.activities.Values.Select(a=>a.Entity).ToDictionary(a => a, a => new WorkflowActivityEntity
+                var newActivities = this.activities.Values.Select(a => a.Entity).ToDictionary(a => a, a => new WorkflowActivityEntity
                 {
                     Lane = newLane,
                     Name = a.Name,
@@ -373,7 +373,7 @@ namespace Signum.Engine.Workflow
                     ViewName = a.ViewName,
                     RequiresOpen = a.RequiresOpen,
                     Reject = a.Reject,
-                    Timeout = a.Timeout,
+                    Timers = a.Timers.Select(t => t.Clone()).ToMList(),
                     EstimatedDuration = a.EstimatedDuration,
                     Jumps = a.Jumps.Select(j => j.Clone()).ToMList(),
                     Script = a.Script?.Clone(),

@@ -95,7 +95,7 @@ export default class Workflow extends React.Component<WorkflowProps, WorkflowSta
         if (this.bpmnModelerComponent!.existsMainEntityTypeRelatedNodes()) {
             return MessageModal.show({
                 title: JavascriptMessage.error.niceToString(),
-                message: WorkflowMessage.ChangeWorkflowMainEntityTypeIsNotAllowedBecausueWeHaveNodesThatUseIt.niceToString(),
+                message: WorkflowMessage.ChangeWorkflowMainEntityTypeIsNotAllowedBecauseWeHaveNodesThatUseIt.niceToString(),
                 buttons: "ok",
                 icon: "warning",
                 style: "warning",
