@@ -9,7 +9,6 @@ import { IUserEntity, TypeEntity } from './Signum.Entities.Basics';
 import { PropertyRoute, PseudoType, EntityKind, TypeInfo, IType, Type, getTypeInfo, getTypeInfos, getTypeName, isTypeEmbeddedOrValue, isTypeModel, KindOfType, OperationType, TypeReference, IsByAll } from './Reflection';
 import { TypeContext } from './TypeContext';
 import * as Finder from './Finder';
-import { needsCanExecute } from './Operations/EntityOperations';
 import * as Operations from './Operations';
 import FrameModal from './Frames/FrameModal';
 import { ViewReplacer } from './Frames/ReactVisitor'
@@ -646,10 +645,10 @@ export function toEntityPack(entityOrEntityPack: Lite<Entity> | ModifiableEntity
     if (entity == undefined)
         return API.fetchEntityPack(entityOrEntityPack as Lite<Entity>);
 
-    if (!needsCanExecute(entity))
+    if (!getTypeInfo(entity.Type).requiresEntityPack)
         return Promise.resolve({ entity: cloneEntity(entity), canExecute: {} });
 
-    return API.fetchCanExecute(entity as Entity);
+    return API.fetchEntityPackEntity(entity as Entity);
 }
 
 function cloneEntity(obj: any) {
@@ -720,7 +719,7 @@ export module API {
     }
 
 
-    export function fetchCanExecute<T extends Entity>(entity: T): Promise<EntityPack<T>> {
+    export function fetchEntityPackEntity<T extends Entity>(entity: T): Promise<EntityPack<T>> {
 
         return ajaxPost<EntityPack<T>>({ url: "~/api/entityPackEntity" }, entity);
     }

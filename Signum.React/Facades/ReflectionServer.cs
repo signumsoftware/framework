@@ -171,6 +171,7 @@ namespace Signum.React.Facades
             var result = (from type in TypeLogic.TypeToEntity.Keys.Concat(models)
                           where !type.IsEnumEntity() && !ReflectionServer.ExcludeTypes.Contains(type)
                           let descOptions = LocalizedAssembly.GetDescriptionOptions(type)
+                          let allOperations = !type.IsEntity() ? null : OperationLogic.GetAllOperationInfos(type)
                           select KVP.Create(GetTypeName(type), OnAddTypeExtension(new TypeInfoTS
                           {
                               Kind = KindOfType.Entity,
@@ -202,8 +203,9 @@ namespace Signum.React.Facades
                                     return OnAddPropertyRouteExtension(mi, p);
                                 }),
 
-                              Operations = !type.IsEntity() ? null : OperationLogic.GetAllOperationInfos(type)
-                                .ToDictionary(oi => oi.OperationSymbol.Key, oi => OnAddOperationExtension(new OperationInfoTS(oi), oi, type))
+                              Operations = allOperations == null ? null : allOperations.ToDictionary(oi => oi.OperationSymbol.Key, oi => OnAddOperationExtension(new OperationInfoTS(oi), oi, type)),
+
+                              RequiresEntityPack = allOperations != null && allOperations.Any(oi => oi.HasCanExecute != null),
 
                           }, type))).ToDictionaryEx("entities");
 
@@ -333,7 +335,8 @@ namespace Signum.React.Facades
         public Dictionary<string, MemberInfoTS> Members { get; set; }
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore, PropertyName = "operations")]
         public Dictionary<string, OperationInfoTS> Operations { get; set; }
-
+        [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, PropertyName = "requiresEntityPack")]
+        public bool RequiresEntityPack { get; set; }
 
         [JsonExtensionData]
         public Dictionary<string, object> Extension { get; set; } = new Dictionary<string, object>();

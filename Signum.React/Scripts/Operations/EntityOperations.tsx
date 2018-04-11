@@ -380,13 +380,3 @@ function getConfirmMessage<T extends Entity>(eoc: EntityOperationContext<T>) {
 
     return undefined;
 }
-
-export function needsCanExecute(entity: ModifiableEntity) {
-
-    const ti = getTypeInfo(entity.Type);
-
-    if (!ti)
-        return false;
-
-    return operationInfos(ti).some(a => a.hasCanExecute && isEntityOperation(a.operationType) && (a.allowsNew || !entity.isNew));
-}
