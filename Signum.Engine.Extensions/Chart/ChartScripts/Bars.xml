@@ -10,6 +10,8 @@
     <Parameter Name="LabelsMargin" Type="Number" ValueDefinition="100" />
     <Parameter Name="NumberOpacity" Type="Number" ValueDefinition="0.8" />
     <Parameter Name="NumberColor" Type="String" ValueDefinition="white" />
+    <Parameter Name="ColorScheme" Type="Enum" ValueDefinition="category10|accent|dark2|paired|pastel1|pastel2|set1|set2|set3|BrBG[K]|PRGn[K]|PiYG[K]|PuOr[K]|RdBu[K]|RdGy[K]|RdYlBu[K]|RdYlGn[K]|Spectral[K]|Blues[K]|Greys[K]|Oranges[K]|Purples[K]|Reds[K]|BuGn[K]|BuPu[K]|OrRd[K]|PuBuGn[K]|PuBu[K]|PuRd[K]|RdPu[K]|YlGnBu[K]|YlGn[K]|YlOrBr[K]|YlOrRd[K]" />
+    <Parameter Name="ColorSchemeSteps" Type="Enum" ValueDefinition="3|4|5|6|7|8|9|10|11" />
   </Parameters>
   <Icon FileName="bars.png"><![CDATA[iVBORw0KGgoAAAANSUhEUgAAACgAAAAoCAYAAACM/rhtAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAlxJREFUeNrsmL8vBEEUx2f2VEqdRCSikmhEoUJodAo9nU4n8V+IQqsRhX9ASDSU/AMKkWj9BxJm3vN+zNzO3XG3zhwb2bnMzdvZ2Z3PfN/b2Ze1iGjqXApT89IAZgHc3j/DRsH/CjgWjYfjSSwI13Jny+rJljGtIZcwPrVqJjbObTbA6eWDShcguGB4+gNqXGlDsBHM6/NFXgUrgxEIQyBw6z6xnQBmd/GXYDyZTJiCQQLD4Kg2JPaoAUuw/u5MwXj8ryhY2Z0MkoLGxYwKsBMMSzUGuRMTt2eE6wBUOAUb7E7T9UAE92aG61KwjztZKf/WqWbizlGA9QA+3hxlvfHM/FpewMX9F2tqWJpkoQGsTbq1tXeaJau2lqs1RUGVWhvbjr5C2tWlWbOzuWArAa6vLAzOaOQdjbKXA6DxZHhPlfZL77U6sdE476nSOad9wH20bwJtnUD75jtdf3v3xIB50i15WdAPBI4g+DWcAJVw1IYa+0AWoZUXyIvjwgvLkg+KYgwHqqAPEwpEql4EA2wf+wgoYGDS7wQ85keAGODErcDqlXBRHYbgiZ1LAQM0X8PnMSyu6/4/UjCFkwkQNKaSmONjR0EV40yVTGKSwwA1LHrxjIwdLh9EvR20VQOxe+LNlSqmDwgrKtdy24cBhlEQ5WfVPTxhCGoPpQshqkdPqj6xwa0QFwNB+f6TfysGMUgHaMWdGj/BXQwHumV40O1DYk7G6DGEMRGuykczgG+4+PL6/lfeDFY2bW03VuaqA16d7Dbp1v9OFur0Ce7scLsdbrb5Rt0A/nH5EGAAuxjsP4eQmj4AAAAASUVORK5CYII=]]></Icon>
   <Script><![CDATA[function DrawChart(chart, data){
@@ -87,7 +89,7 @@
     .attr('dominant-baseline', 'central')
     .text(data.columns.c0.title);
 
-  var color = d3.scaleOrdinal(d3.schemeCategory20).domain(data.rows.map(function (v) { return v.c0; }));
+  var color = d3.scaleOrdinal(ChartUtils.getColorScheme(data.parameters["ColorScheme"], data.parameters["ColorSchemeSteps"])).domain(data.rows.map(function (v) { return v.c0; }));
   //PAINT GRAPH
   chart.append('svg:g').attr('class', 'shape').attr('transform', translate(xRule.start('content'), yRule.start('content')))
 	.enterData(data.rows, 'rect', 'shape')

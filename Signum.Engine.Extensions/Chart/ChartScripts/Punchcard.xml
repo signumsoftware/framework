@@ -16,7 +16,7 @@
     <Parameter Name="Shape" Type="Enum" ValueDefinition="Circle | Rectangle | ProgressBar" />
     <Parameter Name="SizeScale" Type="Enum" ValueDefinition="ZeroMax | MinMax | Log | Sqrt" />
     <Parameter Name="ColorScale" Type="Enum" ValueDefinition="ZeroMax | MinMax | Sqrt  | Log" />
-    <Parameter Name="ColorSet" Type="Enum" ValueDefinition="YlGn|YlGnBu|GnBu|BuGn|PuBuGn|PuBu|BuPu|RdPu|PuRd|OrRd|YlOrRd|YlOrBr|Purples|Blues|Greens|Oranges|Reds|Greys|PuOr|BrBG|PRGn|PiYG|RdBu|RdGy|RdYlBu|Spectral|RdYlGn" />
+    <Parameter Name="ColorInterpolate" Type="Enum" ValueDefinition="YlGn|YlGnBu|GnBu|BuGn|PuBuGn|PuBu|BuPu|RdPu|PuRd|OrRd|YlOrRd|YlOrBr|Purples|Blues|Greens|Oranges|Reds|Greys|PuOr|BrBG|PRGn|PiYG|RdBu|RdGy|RdYlBu|Spectral|RdYlGn" />
     <Parameter Name="StrokeColor" Type="String" ValueDefinition="gray" />
     <Parameter Name="StrokeWidth" Type="Number" ValueDefinition="2" />
     <Parameter Name="FillColor" Type="String" ValueDefinition="gray" />
@@ -101,7 +101,7 @@
     
     var colorQuantizer = d3.scale.quantize()
         .domain([0, 100])
-        .range(colorbrewer[data.parameters["ColorSet"]][9]);
+        .range(colorbrewer[data.parameters["ColorInterpolate"]][9]);
     
     color = function(v){return colorQuantizer(scaleFunc(v)); }
   }

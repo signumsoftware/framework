@@ -9,6 +9,8 @@
     <Parameter Name="Charge" Type="Number" ValueDefinition="150" />
     <Parameter Name="LinkDistance" Type="Number" ValueDefinition="60" />
     <Parameter Name="MaxWidth" Type="Number" ValueDefinition="4" />
+    <Parameter Name="ColorScheme" Type="Enum" ValueDefinition="category10|accent|dark2|paired|pastel1|pastel2|set1|set2|set3|BrBG[K]|PRGn[K]|PiYG[K]|PuOr[K]|RdBu[K]|RdGy[K]|RdYlBu[K]|RdYlGn[K]|Spectral[K]|Blues[K]|Greys[K]|Oranges[K]|Purples[K]|Reds[K]|BuGn[K]|BuPu[K]|OrRd[K]|PuBuGn[K]|PuBu[K]|PuRd[K]|RdPu[K]|YlGnBu[K]|YlGn[K]|YlOrBr[K]|YlOrRd[K]" />
+    <Parameter Name="ColorSchemeSteps" Type="Enum" ValueDefinition="3|4|5|6|7|8|9|10|11" />
   </Parameters>
   <Icon FileName="forcegraph.png"><![CDATA[iVBORw0KGgoAAAANSUhEUgAAACgAAAAoCAYAAACM/rhtAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAABMxJREFUeNrsWH1MU1cUP69fdC1lhZWN8KFMYA6pc3GRbSpMogISSpBgQDSMbZrhjMQYl5BNsy0ys+xLNon+wfzDRZk4N5QGVzvcdFqnEKxOhmELcwNkETJK+SjwcOt+tz5iIWBbLMwlPckv975z+879vXPvOffccna7nR5kEdEDLj6CPoL/tUgmG/j4oMn+7bkmRz9lWRxtXb+Ycx5vbajQ8cMD9NiTKaQKmqWfcYKM3JyYx0kpl9H3F5opyF8hzs98+m829ldNhl3adZX8ZEoa7jpKlHggQxXoGcnSz032Uz/ccUBaUhxtWTfWAS4JMtGoleQnFZNIxNF3x0sPGI4M/JK+fIE6SWomRUwOcTI1Dbca6NZ1I6kWb/DIM4zcqANqTc2MoGd7cGXCPKqrb6Qf6xppxZJYus0PfQ31QLelN4aTKEkk15BIqgTJALL09MqnsnzMAWqV3OGAyYRzdZJ8UFZZYD5/LB3dlyqOfNnHdF3Hl9vtfK+DpLXjKu08s6QW6jcxXueKVF7umhA0r8SnbS1hXpRIxJSGPb4p91luSgQFo+VoToJAlZPuyvrMpZXa51L/KC7e0Q9VMWDShMzZt/vtzVrLDRPxQwMUEptMSvUsPX4vw3gOkA2wzbcf9lpdze0uwRQ0+TC4TngORcO8poXuH0EXhGYTsHBv/kgW32kmEYJI7B9BRRUBbIN9CHQCb+Gdn7ydB88BMpBYIDw/D5hHyTFBvxt4F91dfGcDgmgNPRSTR/aRARK8+z6Q5Qk5twnCqA3NWeYoQZUI1E3gaUXmivmrxwcR5EXYOAF4XDpx7pZbmFwjkFwInAdexYSXoWebO5JtfGA18PAnud1hzkEUVdjBTTVRu01wDxKrUUisq5BYL+r3sBy6FtgGRAHM0DFgHyMufNQJ9iqez3j9JBkvRqfEehqJVYkDhX0g0AJsBImjE7z2JxAxLUedq5NFWGbmvV/vsbc6gNAZqWaSE++eLCuXxpKQMi4CO4W0MxnB8BkhWH+yNDiw31ij6vkm6jVkfXjtZajnAWKgEiT3As+Me639fgl6EsVsOTUg9sYEYyxJZ7EjHOCBQ7r8HQbD2evU2z/kqFY2Zi/iptWDkCKgbJI8yZL0Z+gWAF+wlpGTq9QUFR3pqFam1YPw0HY00SBR6K7hVRvK7fGLtI6gqr/cRFVlBdPjQZBToWHF3nueGE594W5QpSTEMjsJU3Ih8+C9sDYnuxDY7+p3zjhYZY53ft68ZZsONi4Bj3pih0HkwnuBLMOw08GTj8bVYMw5XfbpR/rIufGnhWgP89oSy/wUrHa7hb137X4vP7vfeZ1FfzXbKiApnnKQ2Kytuu4bF8hqscga2v1LDDXVeSBo9tYtDeTYanSXbM+9xt222sLikkmmCte7RZCRGzQVVTsXm5qMUxx5UdpazHmK5l2HWc14Z47ZFJBUnjEZyTFL3PP7JZqg2PSqSG2/9fGd9U5z9NHNplr3ioURfpD8hGKTE/uNFpteFX7YRrJxc/BDNveCJPiJZSRRRdBgy1c01Gok680rXicYMjeJJAGzx8wRpk11P0gGrW26jp8NNIwbWej8dFIHR3v9b42RvnZdW6PBcesLfyqd/B+J0rtN0Pfvlo+gj+D/jOC/AgwA8opVZPu2VagAAAAASUVORK5CYII=]]></Icon>
   <Script><![CDATA[function DrawChart(chart, data){ 
@@ -37,18 +39,16 @@
      .filter(function(c){return c.key != undefined;}); 
   
    
-  
  var nodes = d3.nest()
     .key(function(c){return c.key; })
     .rollup(function(cs){return cs[0]; })
     .entries(keys)
-     .map(function(p){return { column: p.values };}); //distinct
+     .map(function(p){return { column: p.value };}); //distinct
              
+  
   var nodeKeys = nodes.map(function(c){return c.column.key;});
   
-  
-  
- var links =  data.rows
+  var links =  data.rows
      			.filter(function(r){
                   return r.c0.key != undefined && 
    						 r.c1.key != undefined; })
@@ -60,22 +60,31 @@
                     c0: r.c0,
                     c1: r.c1,
                  }; });
-     			
   
-                     
-  
- var color = d3.scale.category20();
+ var color = d3.scaleOrdinal(ChartUtils.getColorScheme(data.parameters["ColorScheme"], data.parameters["ColorSchemeSteps"]))
    
- var force = d3.layout.force()
-     .charge(-charge) 
-     .linkDistance(linkDistance)
-     .size([width, height]);
+ var simulation = d3.forceSimulation()
+    .force("link", d3.forceLink().id(function(d) { return d.id; }))
+    .force("charge", d3.forceManyBody())
+    .force("center", d3.forceCenter(width / 2, height / 2));
+ 
+//  var force = d3.layout.force()
+//      .charge(-charge) 
+//      .linkDistance(linkDistance)
+//      .size([width, height]);
 
   
-   force
-       .nodes(nodes)
-       .links(links)
-       .start();
+//    force
+//        .nodes(nodes)
+//        .links(links)
+//        .start();
+  
+    simulation
+      .nodes(nodes)
+      .on("tick", ticked);
+  
+   simulation.force("link")
+      .links(links);
  
    var link = chart.selectAll("line.link")
        .data(links)
@@ -103,7 +112,7 @@
    node.append("title")
        .text(function(d) { return d.column.niceToString(); });
  
-   force.on("tick", function() {
+ function ticked() {
      link.attr("x1", function(d) { return d.source.x; })
          .attr("y1", function(d) { return d.source.y; })
          .attr("x2", function(d) { return d.target.x; })
@@ -111,7 +120,8 @@
  
      node.attr("cx", function(d) { return d.x; })
          .attr("cy", function(d) { return d.y; });
-   });
+   }
+
 
 }]]></Script>
 </ChartScript>

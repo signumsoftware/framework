@@ -16,6 +16,8 @@
     <Parameter Name="Interpolate" Type="Enum" ValueDefinition="linear | step-before | step-after | cardinal | monotone | basis" />
     <Parameter Name="NumberOpacity" Type="Number" ValueDefinition="0.8" />
     <Parameter Name="NumberColor" Type="String" ValueDefinition="white" />
+    <Parameter Name="ColorScheme" Type="Enum" ValueDefinition="category10|accent|dark2|paired|pastel1|pastel2|set1|set2|set3|BrBG[K]|PRGn[K]|PiYG[K]|PuOr[K]|RdBu[K]|RdGy[K]|RdYlBu[K]|RdYlGn[K]|Spectral[K]|Blues[K]|Greys[K]|Oranges[K]|Purples[K]|Reds[K]|BuGn[K]|BuPu[K]|OrRd[K]|PuBuGn[K]|PuBu[K]|PuRd[K]|RdPu[K]|YlGnBu[K]|YlGn[K]|YlOrBr[K]|YlOrRd[K]" />
+    <Parameter Name="ColorSchemeSteps" Type="Enum" ValueDefinition="3|4|5|6|7|8|9|10|11" />
   </Parameters>
   <Icon FileName="stackedareas.png"><![CDATA[iVBORw0KGgoAAAANSUhEUgAAACgAAAAoCAYAAACM/rhtAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAABUNJREFUeNrsmHtsU1Ucx7+3vW3T9bFWto51g7GtIGxzo9sKiwETwEgixCiC/wiJz0zB+MBABIMKGmOiJBITwJEYcaiwaUxMRCARIg4dG4JDgzCUTZExcGNbt7VZH/d4zu27996uGwj7g5P8eh/nnN/9nO/vnN+5txwhBBO5qDDBy23AGwK46uX6CTsR+Rvp7JEX9xBezWNBTRGeXjGHm1AhfvvDw2TWzCLUzL0LbX/04pWt+8nhlg4yIQD3fttGLlxyIzvLCnAqTC8ugM5gxY5Pj2HXFy3klgM27m/DrDsLIVAUllcJPcnMNMFVXYaW37qxadtBcssAd+5tJkWF+dBotVE4gR2pcSqqpqMAPujx0HO7SV3D2NW8LsBDP54nTSf/Rn7+ZAlc9EjvWSwmOJ2l+Ol0F159/wC5aauYzbGqylLxXAkucq3iOBRSpfv63Lj/qV0pN9gHF89G7QoXlwDIVuHG2oVpp4aPvjxB7HYbTCbDqHCRemZmsxFVrvJwG8j2OXT0DANMDLFGb8HK9XtJ48Ff0wrBwaZzKC6aMia4hLYKcEKStlHALJoi7q6Zje+aO7Bz3/GUkO/UHSEOOvlVNKXcaDiiBMgqdFoNqumc6rzswfLn68mRlgsS0H0HTpP2i/3InmT9X+DYtSIgCecxljZclSWoaziO+q9PJfRo+OYXzHBMk4UT6NOvFy6FghHIEChLtDV0Mv9A08j2z5vFXjtozisosENLlU527PP50H/pLHK66+DxeMYNJ5CUCsZUZA15Xo3yshno7PZiGU20x07+hTx7jqzjQfcQ1ju/wsM1HB4gazHsHhwXXLKCvFyIhSgsEbevvLwc2HNtinOuv68fz+a+CV3uUtFXyRwb8s+twbYrW8FnWMV76cIxBo/XJ1XQ7w/KwqXaIdhxaHAI8/iPkeVYxLK1aJzGiMyyx7DO8R4MQ6fgGxlJG052DhqNJlzu6saVq71jgmPzLsPdivnlmeDUGqYT7RQMG4F+6n1YXdWKSnyGEY83LTjZOajT67H+nlPIF5rR29ufFhy79g1exTMV30NtsIdXWVCEJEIganxmMZbONaPWtgk+r2dUOFkFObpPctTZisp+zNd+gp5/r40KN9A3gNWTN0Fjc8UBCaJFQg0SEI2FPL/kXmws3gLBOwAhEFCES96kVZEFwkbO8XpUldqxyrolBKkANzw4jOW6DTAWLkkAiVlQarQYChbideduZKEDxO+ThVPMgwhDspLjmI819s3o6bkmzrN4OP+IH9OGGzB9VgV93+MVYIQ4RQOJIbc48MLcn1Fi6QQCIxI4eUDx4aqE8BimzMPawncx1HUGXq83mnh5z3ksK/kT6gxbeEBCNLTxIIpqgr56aY1YWX4WLxV/AFWQphTWN2WIxR+pQ53NiXXVB2DuOwIPDat7wI0ns9+CJrsiBsMeIPbzS0BC56EBJyvJ7tnypmNz+XYYOC9U1McoIfbLhkdtLsDj1e3I9TdBJdCX96mLpSAijDxIdBAMKmKsbbifzlqE11yNmGn+h+4aAYWdRAxfWMHQ63GEWvxl4XzU2Umrf6f5zhYCibaJax9/L1aZdCmEHxnrw2lNeKL8BFovtqOxY4EUMBTi2GpLfhgRdweDaCSqAFLDJPVXHkDsvmuKG0XGPdjQt0SqYCQ8Y1ZlLCCydYm+JlkyYDZmyLwsBEfAxSuYZnjSB1EeWIJP9vnB83IhJjEH4wjPeEDS/+ykcEHCQR1JC7KFGzU8EkxZX9zYAS1mHd44ugiJakpz0s0qd1j1seHc/o/6NuAtLv8JMADhVUxtvGMrBgAAAABJRU5ErkJggg==]]></Icon>
   <Script><![CDATA[function DrawChart(chart, data){ 
@@ -134,7 +136,7 @@
       .attr('dominant-baseline', 'middle')
       .text(pivot.title);
   
-  var color =  d3.scaleOrdinal(d3.schemeCategory20).domain(pivot.columns.map(function (s) { return s.key; }));
+  var color = d3.scaleOrdinal(ChartUtils.getColorScheme(data.parameters["ColorScheme"], data.parameters["ColorSchemeSteps"])).domain(pivot.columns.map(function (s) { return s.key; }));
   
   var pInterpolate = data.parameters["Interpolate"];
   
