@@ -68,7 +68,9 @@ export class EntityStrip extends EntityListBase<EntityStripProps, EntityStripPro
                             <span>
                                 {this.renderCreateButton(false)}
                                 {this.renderFindButton(false)}
-                                {this.props.extraButtons && this.props.extraButtons()}
+                                {this.props.extraButtons && this.props.extraButtons().map((btn, i) => {
+                                    return btn && React.cloneElement(btn, { key: i });
+                                })}
                             </span>
                         </li>
                     </ul>
