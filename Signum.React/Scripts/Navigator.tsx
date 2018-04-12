@@ -645,7 +645,8 @@ export function toEntityPack(entityOrEntityPack: Lite<Entity> | ModifiableEntity
     if (entity == undefined)
         return API.fetchEntityPack(entityOrEntityPack as Lite<Entity>);
 
-    if (!getTypeInfo(entity.Type).requiresEntityPack)
+    let ti = getTypeInfo(entity.Type);
+    if (ti  == null || !ti.requiresEntityPack)
         return Promise.resolve({ entity: cloneEntity(entity), canExecute: {} });
 
     return API.fetchEntityPackEntity(entity as Entity);
