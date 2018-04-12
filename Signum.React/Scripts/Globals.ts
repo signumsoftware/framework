@@ -679,7 +679,7 @@ String.prototype.repeat = function (this: string, n: number) {
 };
 
 Promise.prototype.done = function () {
-    this.catch(error => setTimeout(() => { throw error; }, 0));
+    this.catch(error => setTimeout(() => { window.lastPromiseError = error; throw error; }, 0));
 };
 
 export module Dic {

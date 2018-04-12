@@ -130,9 +130,10 @@ export default class ErrorModal extends React.Component<ErrorModalProps, { showD
         return textDanger(e.message ? e.message : e);
     }
 
-
-    static showError(error: any): Promise<void> {
-        return openModal<void>(<ErrorModal error={error}/>);
+    static showLastError(): Promise<void> {
+        var error = window.lastPromiseError;
+        window.lastPromiseError = null;
+        return openModal<void>(<ErrorModal error={error} />);
     }
 }
 
