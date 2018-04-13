@@ -1,10 +1,6 @@
 ﻿declare function require<T>(path: string): T;
 declare function require<T>(paths: string[], callback: (...modules: any[]) => void): void;
 
-declare interface Window {
-    lastPromiseError: any;
-}
-
 declare interface Promise<T> {
     done(this: Promise<T>): void;
 }
