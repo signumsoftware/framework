@@ -100,6 +100,7 @@ export class Tabs extends React.Component<TabsProps> {
                                     e.preventDefault();
                                     this.props.toggle(t.props.eventKey)
                                 }}
+                                {...t.props.anchorHtmlProps}
                             >
                                 {t.props.title}
                             </a>
@@ -118,6 +119,7 @@ export class Tabs extends React.Component<TabsProps> {
 interface TabProps extends React.HTMLAttributes<any> {
     eventKey: string | number;
     title?: string /*| React.ReactChild*/;
+    anchorHtmlProps?: React.HTMLAttributes<HTMLAnchorElement>;
 }
 
 export class Tab extends React.Component<TabProps> {
@@ -127,7 +129,7 @@ export class Tab extends React.Component<TabProps> {
     };
 
     render() {
-        var { children, eventKey, title, ...rest } = this.props;
+        var { children, eventKey, title, anchorHtmlProps, ...rest } = this.props;
 
         return (
             <div className={classes("tab-pane", this.props.eventKey == this.context.activeTabId)} {...rest}>
