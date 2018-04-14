@@ -38,7 +38,9 @@ namespace Signum.Entities.Authorization
             runtimeRules = sb.GlobalLazy(NewCache,
                 new InvalidateWith(typeof(RuleTypeEntity), typeof(RoleEntity)), AuthLogic.NotifyRulesChanged);
 
-            sb.Schema.Table<TypeEntity>().PreDeleteSqlSync += new Func<Entity, SqlPreCommand>(AuthCache_PreDeleteSqlSync);
+            sb.Schema.EntityEvents<RoleEntity>().PreUnsafeDelete += query => { Database.Query<RuleTypeEntity>().Where(r => query.Contains(r.Role.Entity)).UnsafeDelete(); return null; };
+            sb.Schema.Table<TypeEntity>().PreDeleteSqlSync += new Func<Entity, SqlPreCommand>(AuthCache_PreDeleteSqlSync_Type);
+            sb.Schema.Table<TypeConditionSymbol>().PreDeleteSqlSync += new Func<Entity, SqlPreCommand>(AuthCache_PreDeleteSqlSync_Condition);
 
             Validator.PropertyValidator((RuleTypeEntity r) => r.Conditions).StaticPropertyValidation += TypeAuthCache_StaticPropertyValidation;
         }
@@ -54,18 +56,30 @@ namespace Signum.Entities.Authorization
                 return null;
             }
 
-            Type type = TypeLogic.EntityToType[rt.Resource];
-            var conditions = rt.Conditions.Where(a => 
-            a.Condition.FieldInfo != null && /*Not 100% Sync*/
-            !TypeConditionLogic.IsDefined(type, a.Condition));
+            try
+            {
 
-            if (conditions.IsEmpty())
+                Type type = TypeLogic.EntityToType.GetOrThrow(rt.Resource);
+                var conditions = rt.Conditions.Where(a =>
+                a.Condition.FieldInfo != null && /*Not 100% Sync*/
+                !TypeConditionLogic.IsDefined(type, a.Condition));
+
+                if (conditions.IsEmpty())
+                    return null;
+
+                return "Type {0} has no definitions for the conditions: {1}".FormatWith(type.Name, conditions.CommaAnd(a => a.Condition.Key));
+            }
+            catch (Exception ex) when (StartParameters.IgnoredDatabaseMismatches != null)
+            {
+                //This try { throw } catch is here to alert developers.
+                //In production, in some cases its OK to attempt starting an application with a slightly different schema (dynamic entities, green-blue deployments).  
+                //In development, consider synchronize.  
+                StartParameters.IgnoredDatabaseMismatches.Add(ex);
                 return null;
-
-            return "Type {0} has no definitions for the conditions: {1}".FormatWith(type.Name, conditions.CommaAnd(a => a.Condition.Key));
+            }
         }
 
-        static SqlPreCommand AuthCache_PreDeleteSqlSync(Entity arg)
+        static SqlPreCommand AuthCache_PreDeleteSqlSync_Type(Entity arg)
         {
             TypeEntity type = (TypeEntity)arg;
 
@@ -74,9 +88,18 @@ namespace Signum.Entities.Authorization
             return command;
         }
 
+        static SqlPreCommand AuthCache_PreDeleteSqlSync_Condition(Entity arg)
+        {
+            TypeConditionSymbol condition = (TypeConditionSymbol)arg;
+
+            var command = Administrator.UnsafeDeletePreCommandMList((RuleTypeEntity rt)=>rt.Conditions,  Database.MListQuery((RuleTypeEntity rt) => rt.Conditions).Where(mle => mle.Element.Condition == condition));
+
+            return command;
+        }
+
         TypeAllowedAndConditions IManualAuth<Type, TypeAllowedAndConditions>.GetAllowed(Lite<RoleEntity> role, Type key)
         {
-            TypeEntity resource = TypeLogic.TypeToEntity[key];
+            TypeEntity resource = TypeLogic.TypeToEntity.GetOrThrow(key);
 
             ManualResourceCache miniCache = new ManualResourceCache(resource, merger);
 
@@ -85,7 +108,7 @@ namespace Signum.Entities.Authorization
 
         void IManualAuth<Type, TypeAllowedAndConditions>.SetAllowed(Lite<RoleEntity> role, Type key, TypeAllowedAndConditions allowed)
         {
-            TypeEntity resource = TypeLogic.TypeToEntity[key];
+            TypeEntity resource = TypeLogic.TypeToEntity.GetOrThrow(key);
 
             ManualResourceCache miniCache = new ManualResourceCache(resource, merger);
 
@@ -157,14 +180,15 @@ namespace Signum.Entities.Authorization
 
                 Dictionary<Lite<RoleEntity>, Dictionary<Type, TypeAllowedAndConditions>> realRules =
                    rules.AgGroupToDictionary(ru => ru.Role, gr => gr
-                          .ToDictionary(ru => TypeLogic.EntityToType[ru.Resource], ru => ru.ToTypeAllowedAndConditions()));
+                          .SelectCatch(ru => KVP.Create(TypeLogic.EntityToType.GetOrThrow(ru.Resource), ru.ToTypeAllowedAndConditions()))
+                          .ToDictionaryEx());
 
                 Dictionary<Lite<RoleEntity>, RoleAllowedCache> newRules = new Dictionary<Lite<RoleEntity>, RoleAllowedCache>();
                 foreach (var role in roles)
                 {
                     var related = AuthLogic.RelatedTo(role);
 
-                    newRules.Add(role, new RoleAllowedCache(role, merger, related.Select(r => newRules[r]).ToList(), realRules.TryGetC(role)));
+                    newRules.Add(role, new RoleAllowedCache(role, merger, related.Select(r => newRules.GetOrThrow(r)).ToList(), realRules.TryGetC(role)));
                 }
 
                 return newRules;
@@ -173,12 +197,12 @@ namespace Signum.Entities.Authorization
 
         internal void GetRules(BaseRulePack<TypeAllowedRule> rules, IEnumerable<TypeEntity> resources)
         {
-            RoleAllowedCache cache = runtimeRules.Value[rules.Role];
+            RoleAllowedCache cache = runtimeRules.Value.GetOrThrow(rules.Role);
 
             rules.MergeStrategy = AuthLogic.GetMergeStrategy(rules.Role);
             rules.SubRoles = AuthLogic.RelatedTo(rules.Role).ToMList();
             rules.Rules = (from r in resources
-                           let type = TypeLogic.EntityToType[r]
+                           let type = TypeLogic.EntityToType.GetOrThrow(r)
                            select new TypeAllowedRule()
                            {
                                Resource = r,
@@ -219,17 +243,17 @@ namespace Signum.Entities.Authorization
 
         internal TypeAllowedAndConditions GetAllowed(Lite<RoleEntity> role, Type key)
         {
-            return runtimeRules.Value[role].GetAllowed(key);
+            return runtimeRules.Value.GetOrThrow(role).GetAllowed(key);
         }
 
         internal TypeAllowedAndConditions GetAllowedBase(Lite<RoleEntity> role, Type key)
         {
-            return runtimeRules.Value[role].GetAllowedBase(key);
+            return runtimeRules.Value.GetOrThrow(role).GetAllowedBase(key);
         }
 
         internal DefaultDictionary<Type, TypeAllowedAndConditions> GetDefaultDictionary()
         {
-            return runtimeRules.Value[RoleEntity.Current].DefaultDictionary();
+            return runtimeRules.Value.GetOrThrow(RoleEntity.Current).DefaultDictionary();
         }
 
         public class RoleAllowedCache
@@ -305,7 +329,7 @@ namespace Signum.Entities.Authorization
 
             return new XElement("Types",
                 (from r in AuthLogic.RolesInOrder()
-                 let rac = rules[r]
+                 let rac = rules.GetOrThrow(r)
                  select new XElement("Role",
                      new XAttribute("Name", r.ToString()),
                          from k in allTypes ?? (rac.DefaultDictionary().OverrideDictionary?.Keys).EmptyIfNull()
@@ -335,7 +359,7 @@ namespace Signum.Entities.Authorization
         {
             var current = Database.RetrieveAll<RuleTypeEntity>().GroupToDictionary(a => a.Role);
             var xRoles = (element.Element("Types")?.Elements("Role")).EmptyIfNull();
-            var should = xRoles.ToDictionary(x => roles[x.Attribute("Name").Value]);
+            var should = xRoles.ToDictionary(x => roles.GetOrThrow(x.Attribute("Name").Value));
 
             Table table = Schema.Current.Table(typeof(RuleTypeEntity));
 
@@ -355,7 +379,7 @@ namespace Signum.Entities.Authorization
                 if (type == null)
                     return null;
 
-                return TypeLogic.TypeToEntity[type];
+                return TypeLogic.TypeToEntity.GetOrThrow(type);
             };
 
 

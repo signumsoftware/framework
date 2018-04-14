@@ -6,7 +6,7 @@ div.properties a.sf-line-button:not(:hover) {
     color: #87a6b5;
 }
 
-div.properties div.panel-heading {
+div.properties div.card-header {
     padding: 5px;
 }
 
@@ -22,7 +22,7 @@ div.validators a.sf-line-button:not(:hover) {
     color: #e6b600;
 }
 
-div.validators div.panel-heading {
+div.validators div.card-header {
     padding: 2px;
 }
 

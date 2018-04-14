@@ -1,5 +1,5 @@
 ﻿import * as React from 'react'
-import { BsStyle } from '../../../../Framework/Signum.React/Scripts/Operations';
+import { BsColor } from '../../../../Framework/Signum.React/Scripts/Components/Basic';
 import { classes } from '../../../../Framework/Signum.React/Scripts/Globals'
 import * as numbro from 'numbro';
 
@@ -7,17 +7,25 @@ interface ProgressBarProps {
     value?: number | null; /*0...1*/
     showPercentageInMessage?: boolean | null;
     message?: string | null;
-    color?: BsStyle | null;
+    color?: BsColor | null;
+    striped?: boolean;
+    active?: boolean;
 }
 
 export default class ProgressBar extends React.Component<ProgressBarProps> {
     render() {
 
-        const { value, showPercentageInMessage, message, color } = this.props;
+        let { value, showPercentageInMessage, message, color, striped, active } = this.props;
 
-        const progressContainerClass = value == null ? "progress-bar-striped active" : "";
+        if (striped == null)
+            striped = value == null;
 
-        const progressStyle = color == null ? "progress-bar-" + color : "";
+        if (active == null)
+            active = value == null;
+
+        const progressContainerClass = value == null ? " active" : "";
+
+        const progressStyle = color != null ? "progress-bar-" + color : "";
 
         const fullMessage = [
             (value == null || showPercentageInMessage === false ? undefined : `${numbro(value * 100).format("0.00")}%`),
@@ -26,7 +34,13 @@ export default class ProgressBar extends React.Component<ProgressBarProps> {
 
         return (
             <div className={classes("progress")}>
-                <div className={classes("progress-bar", progressStyle, progressContainerClass)} role="progressbar" id="progressBar"
+                <div className={classes(
+                    "progress-bar",
+                    progressStyle,
+                    striped && "progress-bar-striped",
+                    active && "active"
+                )}
+                    role="progressbar" id="progressBar"
                     aria-valuenow={value == null ? undefined : value * 100}
                     aria-valuemin={value == null ? undefined : 0}
                     aria-valuemax={value == null ? undefined : 100}

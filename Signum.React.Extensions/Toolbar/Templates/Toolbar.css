@@ -1,8 +1,14 @@
-﻿/*var style: React.CSSProperties = {
-    paddingLeft: this.state.isRtl ? "" : padding, paddingRight: this.state.isRtl ? padding : ""
+﻿
+
+
+.dropdown-divider {
+    width: 100%;
 }
 
-;*/
+.menu-item-0 {
+    padding-left: 10px;
+    padding-right: 10px;
+}
 
 body:not(.rtl) .menu-item-1{
     padding-left: 20px;
@@ -10,6 +16,21 @@ body:not(.rtl) .menu-item-1{
 
 body.rtl .menu-item-1 {
     padding-right: 20px;
+}
+
+.menu-item-1 {
+    background-color: #f3f3f3;
+}
+
+li.menu-item-1 > a {
+    padding-top: 5px;
+    padding-bottom: 5px;
+    
+}
+
+.sidebar .divider {
+    height: 2px;
+    background-color: #e7e7e7;
 }
 
 .menu-item-1 {

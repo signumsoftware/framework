@@ -98,7 +98,7 @@ export default class HeavyEntry extends React.Component<HeavyEntryProps, { entri
                             <td colSpan={2}>
                                 <div className="btn-toolbar">
                                     <button onClick={this.handleDownload} className="btn btn-info">Download</button>
-                                    {!current.IsFinished && <button onClick={this.handleUpdate} className="btn btn-default">Update</button>}
+                                    {!current.IsFinished && <button onClick={this.handleUpdate} className="btn btn-light">Update</button>}
                                 </div>
                             </td>
                         </tr>
@@ -106,9 +106,7 @@ export default class HeavyEntry extends React.Component<HeavyEntryProps, { entri
                 </table>
                 <br />
                 <h3>Aditional Data</h3>
-                <div>
-                    <pre><code>{current.AdditionalData}</code></pre>
-                </div>
+                <pre style={{ maxWidth: "1000px", overflowY: "scroll" }}><code>{current.AdditionalData}</code></pre>
                 <br />
                 <h3>StackTrace</h3>
                 {
@@ -118,12 +116,6 @@ export default class HeavyEntry extends React.Component<HeavyEntryProps, { entri
             </div>
         );
     }
-
-
-
-    chartContainer: HTMLDivElement;
-
-
 }
 
 
@@ -134,7 +126,7 @@ export class StackFrameTable extends React.Component<{ stackTrace: StackTraceTS[
             return <span>No StackTrace</span>;
 
         return (
-            <table className="table table-condensed">
+            <table className="table table-sm">
                 <thead>
                     <tr>
                         <th>Namespace
@@ -212,7 +204,6 @@ export class HeavyProfilerDetailsD3 extends React.Component<HeavyProfilerDetails
             this.mountChart(newProps);
         }
         else if (newProps.selected != this.props.selected) {
-            this.resetZoom(newProps.selected);
             this.mountChart(newProps);
         }
     }
@@ -221,7 +212,7 @@ export class HeavyProfilerDetailsD3 extends React.Component<HeavyProfilerDetails
         this.updateChart!();
     }
 
-    chartContainer: HTMLDivElement;
+    chartContainer!: HTMLDivElement;
 
     handleWeel = (e: React.WheelEvent<any>) => {
 
@@ -332,7 +323,7 @@ export class HeavyProfilerDetailsD3 extends React.Component<HeavyProfilerDetails
             newGroups.on("click", e => {
 
                 if (e == this.props.selected) {
-                    this.resetZoom(e);
+
                 }
                 else {
                     let url = "~/profiler/heavy/entry/" + e.FullIndex;
@@ -344,6 +335,10 @@ export class HeavyProfilerDetailsD3 extends React.Component<HeavyProfilerDetails
                         Navigator.history.push(url);
                     }
                 }
+            });
+            
+            newGroups.on("dblclick", e => {
+                this.resetZoom(e);
             });
 
             chart.attr('width', width);

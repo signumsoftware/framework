@@ -15,7 +15,7 @@ export default class DynamicQueryOmniboxProvider extends OmniboxProvider<Dynamic
     }
 
     icon() {
-        return this.coloredIcon("glyphicon glyphicon-search", "orange");
+        return this.coloredIcon("fa fa-search", "orange");
     }
 
 
@@ -128,7 +128,7 @@ interface OmniboxFilterResult {
     CanFilter: string;
 }
 
-class FilterSyntax {
+interface FilterSyntax {
     Index: number;
     TokenLength: number;
     Length: number;

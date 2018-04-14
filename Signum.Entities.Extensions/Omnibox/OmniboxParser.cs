@@ -139,6 +139,29 @@ $@"(?<entity>{ident};(\d+|{guid}))|
 
             return result;
         }
+
+        public static Dictionary<string, V> ToOmniboxPascalDictionary<T, V>(this IEnumerable<T> collection, Func<T, string> getKey, Func<T, V> getValue)
+        {
+            Dictionary<string, V> result = new Dictionary<string, V>();
+            foreach (var item in collection)
+            {
+                var key = getKey(item).ToOmniboxPascal();
+                if (result.ContainsKey(key))
+                {
+                    for (int i = 1; ; i++)
+                    {
+                        var newKey = key + $"(Duplicated{(i == 1 ? "" : (" "  + i.ToString()))}!)";
+                        if (!result.ContainsKey(newKey))
+                        {
+                            key = newKey;
+                            break;
+                        }
+                    }
+                }
+                result.Add(key, getValue(item));
+            }
+            return result;
+        }
     }
 
     public abstract class OmniboxManager
@@ -166,7 +189,7 @@ $@"(?<entity>{ident};(\d+|{guid}))|
         public Dictionary<string, object> GetQueries()
         {
             return queries.GetOrAdd(CultureInfo.CurrentCulture, ci =>
-                 GetAllQueryNames().ToDictionaryEx(qn => QueryUtils.GetNiceName(qn).ToOmniboxPascal(), "Translated QueryNames"));
+                 GetAllQueryNames().ToOmniboxPascalDictionary(qn => QueryUtils.GetNiceName(qn), qn => qn));
         }
 
         protected abstract IEnumerable<Type> GetAllTypes();
@@ -176,7 +199,7 @@ $@"(?<entity>{ident};(\d+|{guid}))|
         public Dictionary<string, Type> Types()
         {
             return types.GetOrAdd(CultureInfo.CurrentUICulture, ci =>
-               GetAllTypes().Where(t => !t.IsEnumEntityOrSymbol()).ToDictionaryEx(t => t.NicePluralName().ToOmniboxPascal(), "Translated Types"));
+               GetAllTypes().Where(t => !t.IsEnumEntityOrSymbol()).ToOmniboxPascalDictionary(t => t.NicePluralName(), t => t));
         }
     }
 

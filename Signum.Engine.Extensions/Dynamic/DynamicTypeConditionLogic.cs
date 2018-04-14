@@ -44,6 +44,15 @@ namespace Signum.Engine.Dynamic
                         e.Eval.Script,
                     });
 
+                new Graph<DynamicTypeConditionEntity>.ConstructFrom<DynamicTypeConditionEntity>(DynamicTypeConditionOperation.Clone)
+                {
+                    Construct = (e, args) => new DynamicTypeConditionEntity() {
+                        SymbolName = e.SymbolName,
+                        EntityType = e.EntityType,
+                        Eval = new DynamicTypeConditionEval() { Script = e.Eval.Script } ,
+                    }
+                }.Register();
+
                 new Graph<DynamicTypeConditionSymbolEntity>.Execute(DynamicTypeConditionSymbolOperation.Save)
                 {
                     Lite = false,
@@ -66,6 +75,7 @@ namespace Signum.Engine.Dynamic
                 DynamicLogic.GetCodeFiles += GetCodeFiles;
                 DynamicLogic.OnWriteDynamicStarter += WriteDynamicStarter;
                 sb.Schema.Table<TypeEntity>().PreDeleteSqlSync += type => Administrator.UnsafeDeletePreCommand(Database.Query<DynamicTypeConditionEntity>().Where(dtc => dtc.EntityType == type));
+                sb.AddUniqueIndex((DynamicTypeConditionEntity e) => new { e.SymbolName, e.EntityType });
             }
         }
 

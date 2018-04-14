@@ -1,5 +1,4 @@
 ﻿import * as React from 'react'
-import { Button } from 'react-bootstrap'
 import { Dic, classes } from '../../../../Framework/Signum.React/Scripts/Globals'
 import { getTypeInfo, Binding, PropertyRoute } from '../../../../Framework/Signum.React/Scripts/Reflection'
 import { DynamicTypeDesignContext } from './DynamicTypeDefinitionComponent'
@@ -70,8 +69,8 @@ export default class ValueComponent extends React.Component<ValueComponentProps>
         const lc = this.props.labelColumns;
 
         return (
-            <div className="form-group form-sm" style={opacity}>
-                <label className={classes("control-label", this.props.labelClass,  "col-sm-" + (lc == null ? 2 : lc))}>
+            <div className="form-group form-group-sm row" style={opacity}>
+                <label className={classes("col-form-label col-form-label-sm", this.props.labelClass, "col-sm-" + (lc == null ? 2 : lc))}>
                     {this.props.binding.member}
                 </label>
                 <div className={"col-sm-" + (lc == null ? 10 : 12 -lc)}>
@@ -89,7 +88,7 @@ export default class ValueComponent extends React.Component<ValueComponentProps>
 
         if (this.props.options) {
             return (
-                <select className="form-control" style={style} onBlur={this.props.onBlur}
+                <select className="form-control form-control-sm" style={style} onBlur={this.props.onBlur}
                     value={val == null ? "" : val.toString()} onChange={this.handleChangeSelectOrInput} >
                     {val == null && <option value="">{" - "}</option>}
                     {this.props.options.map((o, i) =>
@@ -102,18 +101,19 @@ export default class ValueComponent extends React.Component<ValueComponentProps>
             if (this.props.type == "boolean") {
                 return (<input
                     type="checkbox" onBlur={this.props.onBlur}
+                    className="form-control"
                     checked={value == undefined ? this.props.defaultValue as boolean : value as boolean}
                     onChange={this.handleChangeCheckbox} />
                 );
             }
 
             if (this.props.type == "textArea") {
-                return (<textarea className="form-control" style={style} onBlur={this.props.onBlur}
+                return (<textarea className="form-control form-control-sm" style={style} onBlur={this.props.onBlur}
                     value={val == null ? "" : val.toString()}
                     onChange={this.handleChangeSelectOrInput} />);
             }
 
-            return (<input className="form-control" style={style} onBlur={this.props.onBlur}
+            return (<input className="form-control form-control-sm" style={style} onBlur={this.props.onBlur}
                 type="text"
                 value={val == null ? "" : val.toString()}
                 onChange={this.handleChangeSelectOrInput} />);

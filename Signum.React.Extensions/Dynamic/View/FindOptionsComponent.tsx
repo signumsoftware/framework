@@ -1,12 +1,12 @@
 ﻿import * as React from 'react'
-import { FormGroup, FormControlStatic, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityList, EntityRepeater } from '../../../../Framework/Signum.React/Scripts/Lines'
+import { FormGroup, FormControlReadonly, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityList, EntityRepeater } from '../../../../Framework/Signum.React/Scripts/Lines'
 import { classes, Dic } from '../../../../Framework/Signum.React/Scripts/Globals'
 import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
 import { QueryDescription, SubTokensOptions, QueryToken, filterOperations, OrderType, ColumnOptionsMode } from '../../../../Framework/Signum.React/Scripts/FindOptions'
 import { getQueryNiceName, getTypeInfo, isTypeEntity, Binding } from '../../../../Framework/Signum.React/Scripts/Reflection'
 import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
 import { TypeContext, FormGroupStyle } from '../../../../Framework/Signum.React/Scripts/TypeContext'
-import Typeahead from '../../../../Framework/Signum.React/Scripts/Lines/Typeahead'
+import { Typeahead } from '../../../../Framework/Signum.React/Scripts/Components'
 import QueryTokenBuilder from '../../../../Framework/Signum.React/Scripts/SearchControl/QueryTokenBuilder'
 import { ModifiableEntity, JavascriptMessage, EntityControlMessage } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
 import { QueryEntity } from '../../../../Framework/Signum.React/Scripts/Signum.Entities.Basics'
@@ -39,13 +39,15 @@ export class FindOptionsLine extends React.Component<FindOptionsLineProps>{
         </span>);
     }
 
-    handleRemove = () => {
+    handleRemove = (e: React.MouseEvent<any>) => {
+        e.preventDefault();
         this.props.binding.deleteValue();
         this.props.dn.context.refreshView();
     }
 
-    handleCreate = () => {
+    handleCreate = (e: React.MouseEvent<any>) => {
 
+        e.preventDefault();
         const route = this.props.dn.route;
         const ti = route && route.typeReferenceInfo();
 
@@ -98,17 +100,17 @@ export class FindOptionsLine extends React.Component<FindOptionsLineProps>{
                 </label>
                 <div>
                     {fo ? <div>
-                        <a href="" onClick={this.handleView}>{this.getDescription(fo)}</a>
+                        <a href="#" onClick={this.handleView}>{this.getDescription(fo)}</a>
                         {" "}
-                        <a className={classes("sf-line-button", "sf-remove")}
+                        <a href="#" className={classes("sf-line-button", "sf-remove")}
                             onClick={this.handleRemove}
                             title={EntityControlMessage.Remove.niceToString()}>
-                            <span className="glyphicon glyphicon-remove" />
+                            <span className="fa fa-remove" />
                         </a></div> :
-                        <a title={EntityControlMessage.Create.niceToString()}
+                        <a href="#" title={EntityControlMessage.Create.niceToString()}
                             className="sf-line-button sf-create"
                             onClick={this.handleCreate}>
-                            <span className="glyphicon glyphicon-plus sf-create sf-create-label" />{EntityControlMessage.Create.niceToString()}
+                            <span className="fa fa-plus sf-create sf-create-label" />{EntityControlMessage.Create.niceToString()}
                         </a>}
                 </div>
             </div>
@@ -382,15 +384,14 @@ export class QueryKeyLine extends React.Component<{ queryKey: string | undefined
     renderLink() {
         return (
             <div className="input-group">
-                <span className="form-control btn-default sf-entity-line-entity">
+                <span className="form-control btn-light sf-entity-line-entity">
                     {this.props.queryKey}
-
                 </span>
-                <span className="input-group-btn">
-                    <a className={classes("sf-line-button", "sf-remove btn btn-default")}
+                <span className="input-group-append">
+                    <a href="#" className={classes("sf-line-button", "sf-remove btn btn-light")}
                         onClick={() => this.props.onChange(undefined)}
                         title={EntityControlMessage.Remove.niceToString()}>
-                        <span className="glyphicon glyphicon-remove" />
+                        <span className="fa fa-remove" />
                     </a>
                 </span>
             </div>
@@ -502,22 +503,22 @@ abstract class BaseOptionsComponent<T> extends React.Component<BaseOptionsCompon
 
     renderButtons(index: number) {
         return (<div className="item-group">
-            <a className={classes("sf-line-button", "sf-remove")}
+            <a href="#" className={classes("sf-line-button", "sf-remove")}
                 onClick={e => this.handleOnRemove(e, index)}
                 title={EntityControlMessage.Remove.niceToString()}>
-                <span className="glyphicon glyphicon-remove" />
+                <span className="fa fa-remove" />
             </a>
 
-            <a className={classes("sf-line-button", "move-up")}
+            <a href="#" className={classes("sf-line-button", "move-up")}
                 onClick={e => this.handleOnMoveUp(e, index)}
                 title={EntityControlMessage.MoveUp.niceToString()}>
-                <span className="glyphicon glyphicon-chevron-up" />
+                <span className="fa fa-chevron-up" />
             </a>
 
-            <a className={classes("sf-line-button", "move-down")}
+            <a href="#" className={classes("sf-line-button", "move-down")}
                 onClick={e => this.handleOnMoveDown(e, index)}
                 title={EntityControlMessage.MoveDown.niceToString()}>
-                <span className="glyphicon glyphicon-chevron-down" />
+                <span className="fa fa-chevron-down" />
             </a>
         </div>);
     }
@@ -537,7 +538,7 @@ abstract class BaseOptionsComponent<T> extends React.Component<BaseOptionsCompon
             <legend>
                 {this.renderTitle()}
             </legend>
-            <table className="table table-condensed form-vertical code-container">
+            <table className="table table-sm code-container">
                 <thead>
                     {this.renderHeader()}
                 </thead>
@@ -548,7 +549,7 @@ abstract class BaseOptionsComponent<T> extends React.Component<BaseOptionsCompon
                             <a title={EntityControlMessage.Create.niceToString()}
                                 className="sf-line-button sf-create"
                                 onClick={this.handleCreateClick}>
-                                <span className="glyphicon glyphicon-plus sf-create sf-create-label" />{EntityControlMessage.Create.niceToString()}
+                                <span className="fa fa-plus sf-create" />&nbsp;{EntityControlMessage.Create.niceToString()}
                             </a>
                         </td>
                     </tr>

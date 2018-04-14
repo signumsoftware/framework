@@ -19,19 +19,23 @@ using Signum.Utilities.Reflection;
 
 namespace Signum.Engine.Word
 {
-    public class TemplateParser
+    public class TemplateParser : ITemplateParser
     {
         public List<TemplateError> Errors = new List<TemplateError>();
-        QueryDescription queryDescription;
-        ScopedDictionary<string, ValueProviderBase> variables = new ScopedDictionary<string, ValueProviderBase>(null);
-        public readonly Type SystemWordTemplateType;
+        public QueryDescription QueryDescription { get; private set; }
+        public ScopedDictionary<string, ValueProviderBase> Variables { get; private set; } = new ScopedDictionary<string, ValueProviderBase>(null);
+        public Type ModelType { get; private set; }
+
+        static PropertyInfo piSystemWordTemplate = ReflectionTools.GetPropertyInfo((WordTemplateEntity e) => e.SystemWordTemplate);
+        public PropertyInfo ModelProperty => piSystemWordTemplate;
+
         OpenXmlPackage document;
         WordTemplateEntity template;
 
         public TemplateParser(OpenXmlPackage document, QueryDescription queryDescription, Type systemWordTemplateType, WordTemplateEntity template)
         {
-            this.queryDescription = queryDescription;
-            this.SystemWordTemplateType = systemWordTemplateType;
+            this.QueryDescription = queryDescription;
+            this.ModelType = systemWordTemplateType;
             this.document = document;
             this.template = template;
         }
@@ -190,20 +194,19 @@ namespace Signum.Engine.Word
                 {
                     var m = matchNode.Match;
 
-                    var type = m.Groups["type"].Value;
-                    var token = m.Groups["token"].Value;
+                    var expr = m.Groups["expr"].Value;
                     var keyword = m.Groups["keyword"].Value;
-                    var dec = m.Groups["dec"].Value;
+                    var variable = m.Groups["dec"].Value;
 
                     switch (keyword)
                     {
                         case "":
-                            var s = TemplateUtils.SplitToken(token);
+                            var s = TemplateUtils.SplitToken(expr);
                             if (s == null)
-                                AddError(true, "{0} has invalid format".FormatWith(token));
+                                AddError(true, "{0} has invalid format".FormatWith(expr));
                             else
                             {
-                                var vp = TryParseValueProvider(type, s.Value.Token, dec);
+                                var vp = ValueProviderBase.TryParse(s.Value.Token, variable, this);
 
                                 matchNode.Parent.ReplaceChild(new TokenNode(matchNode.NodeProvider, vp, s.Value.Format)
                                 {
@@ -215,8 +218,7 @@ namespace Signum.Engine.Word
                             break;
                         case "declare":
                             {
-                                var vp = TryParseValueProvider(type, token, dec);
-
+                                var vp = ValueProviderBase.TryParse(expr, variable, this);
                                 matchNode.Parent.ReplaceChild(new DeclareNode(matchNode.NodeProvider, vp, this.AddError)
                                 {
                                     RunProperties = (OpenXmlCompositeElement)matchNode.RunProperties?.CloneNode(true)
@@ -227,25 +229,15 @@ namespace Signum.Engine.Word
                             break;
                         case "any":
                             {
-                                AnyNode any;
-                                ValueProviderBase vp;
-                                var filter = TemplateUtils.TokenOperationValueRegex.Match(token);
-                                if (!filter.Success)
+                                ConditionBase cond = TemplateUtils.ParseCondition(expr, variable, this);
+                                AnyNode any = new AnyNode(matchNode.NodeProvider, cond)
                                 {
-                                    vp = TryParseValueProvider(type, token, dec);
-                                    any = new AnyNode(matchNode.NodeProvider, vp) { AnyToken = new MatchNodePair(matchNode) };
-                                }
-                                else
-                                {
-                                    vp = TryParseValueProvider(type, filter.Groups["token"].Value, dec);
-                                    var comparer = filter.Groups["comparer"].Value;
-                                    var value = filter.Groups["value"].Value;
-                                    any = new AnyNode(matchNode.NodeProvider, vp, comparer, value, this.AddError) { AnyToken = new MatchNodePair(matchNode) };
-                                }
-
+                                    AnyToken = new MatchNodePair(matchNode)
+                                };
                                 PushBlock(any);
 
-                                DeclareVariable(vp);
+                                if (cond is ConditionCompare cc)
+                                    DeclareVariable(cc.ValueProvider);
                                 break;
                             }
                         case "notany":
@@ -270,25 +262,15 @@ namespace Signum.Engine.Word
                             }
                         case "if":
                             {
-                                IfNode ifn;
-                                ValueProviderBase vpb;
-                                var filter = TemplateUtils.TokenOperationValueRegex.Match(token);
-                                if (!filter.Success)
+                                var cond = TemplateUtils.ParseCondition(expr, variable, this);
+                                IfNode ifn = new IfNode(matchNode.NodeProvider, cond)
                                 {
-                                    vpb = TryParseValueProvider(type, token, dec);
-                                    ifn = new IfNode(matchNode.NodeProvider, vpb) { IfToken = new MatchNodePair(matchNode) };
-                                }
-                                else
-                                {
-                                    vpb = TryParseValueProvider(type, filter.Groups["token"].Value, dec);
-                                    var comparer = filter.Groups["comparer"].Value;
-                                    var value = filter.Groups["value"].Value;
-                                    ifn = new IfNode(matchNode.NodeProvider, vpb, comparer, value, this.AddError) { IfToken = new MatchNodePair(matchNode) };
-                                }
-
+                                    IfToken = new MatchNodePair(matchNode)
+                                };
                                 PushBlock(ifn);
 
-                                DeclareVariable(vpb);
+                                if (cond is ConditionCompare cc)
+                                    DeclareVariable(cc.ValueProvider);
 
                                 break;
                             }
@@ -314,7 +296,7 @@ namespace Signum.Engine.Word
                             }
                         case "foreach":
                             {
-                                var vp = TryParseValueProvider(type, token, dec);
+                                var vp = ValueProviderBase.TryParse(expr, variable, this);
                                 var fn = new ForeachNode(matchNode.NodeProvider, vp) { ForeachToken = new MatchNodePair(matchNode) };
                                 PushBlock(fn);
 
@@ -343,7 +325,7 @@ namespace Signum.Engine.Word
         void PushBlock(BlockContainerNode node)
         {
             stack.Push(node);
-            variables = new ScopedDictionary<string, ValueProviderBase>(variables);
+            Variables = new ScopedDictionary<string, ValueProviderBase>(Variables);
         }
 
         T PopBlock<T>() where T : BlockContainerNode
@@ -361,7 +343,7 @@ namespace Signum.Engine.Word
                 return null;
             }
 
-            variables = variables.Previous;
+            Variables = Variables.Previous;
             return (T)n;
         }
 
@@ -381,19 +363,13 @@ namespace Signum.Engine.Word
             }
 
 
-            variables = variables.Previous;
-            variables = new ScopedDictionary<string, ValueProviderBase>(variables);
+            Variables = Variables.Previous;
+            Variables = new ScopedDictionary<string, ValueProviderBase>(Variables);
             return (T)n;
         }
 
-        public ValueProviderBase TryParseValueProvider(string type, string token, string variable)
-        {
-            return ValueProviderBase.TryParse(type, token, variable, this.SystemWordTemplateType, piSystemWordTemplate, this.queryDescription, this.variables, this.AddError);
-        }
-
-        static PropertyInfo piSystemWordTemplate = ReflectionTools.GetPropertyInfo((WordTemplateEntity e) => e.SystemWordTemplate);
         
-        internal void AddError(bool fatal, string message)
+        public void AddError(bool fatal, string message)
         {
             this.Errors.Add(new TemplateError(fatal, message));
         }
@@ -403,14 +379,14 @@ namespace Signum.Engine.Word
         {
             if (token?.Variable.HasText() == true)
             {
-                if (variables.TryGetValue(token.Variable, out ValueProviderBase t))
+                if (Variables.TryGetValue(token.Variable, out ValueProviderBase t))
                 {
                     if (!t.Equals(token))
                         AddError(true, "There's already a variable '{0}' defined in this scope".FormatWith(token.Variable));
                 }
                 else
                 {
-                    variables.Add(token.Variable, token);
+                    Variables.Add(token.Variable, token);
                 }
             }
         }

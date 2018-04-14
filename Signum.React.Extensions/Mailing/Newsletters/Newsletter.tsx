@@ -1,13 +1,13 @@
 ﻿import * as React from 'react'
-import { Tab, Tabs}  from 'react-bootstrap'
 import { classes } from '../../../../Framework/Signum.React/Scripts/Globals'
-import { FormGroup, FormControlStatic, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityList, EntityRepeater, EntityTabRepeater, EntityDetail} from '../../../../Framework/Signum.React/Scripts/Lines'
+import { FormGroup, FormControlReadonly, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityList, EntityRepeater, EntityTabRepeater, EntityDetail} from '../../../../Framework/Signum.React/Scripts/Lines'
 import { SearchControl, ValueSearchControl }  from '../../../../Framework/Signum.React/Scripts/Search'
 import { getToString }  from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
 import { ExceptionEntity }  from '../../../../Framework/Signum.React/Scripts/Signum.Entities.Basics'
 import { TypeContext, FormGroupStyle } from '../../../../Framework/Signum.React/Scripts/TypeContext'
 import { NewsletterEntity } from '../Signum.Entities.Mailing'
 import TemplateControls from '../../Templating/TemplateControls'
+import { Tabs, Tab } from '../../../../Framework/Signum.React/Scripts/Components/Tabs';
 
 export default class Newsletter extends React.Component<{ ctx: TypeContext<NewsletterEntity> }> {
 
@@ -15,12 +15,8 @@ export default class Newsletter extends React.Component<{ ctx: TypeContext<Newsl
 
         const nc = this.props.ctx;
         
-        
-
         return (
             <div>
-                <Tabs id="newsletterTabs">
-                    <Tab eventKey={0}>
                         <ValueLine ctx={nc.subCtx(n => n.name)}  />
                         <ValueLine ctx={nc.subCtx(n => n.state)} readOnly={true} />
 
@@ -31,16 +27,9 @@ export default class Newsletter extends React.Component<{ ctx: TypeContext<Newsl
 
                         { nc.value.state == "Sent"?  this.renderIFrame(): this.renderEditor() }
                         
-                    </Tab>
-                    <Tab>
-                              
+                       
                         <ValueLine ctx={nc.subCtx(n => n.subject)}  />
                         <ValueLine ctx={nc.subCtx(n => n.text)} valueLineType="TextArea" valueHtmlAttributes={{ style: {width: "100%", height: "180px"} }} />
-                    </Tab>
-                    <Tab>
-                    
-                        </Tab>
-                </Tabs>
             </div>
         );
     }

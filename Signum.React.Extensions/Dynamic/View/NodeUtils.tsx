@@ -1,7 +1,6 @@
 ﻿import * as React from 'react'
-import { Tabs, Tab } from 'react-bootstrap'
 import { globalModules } from './GlobalModules'
-import { FormGroup, FormControlStatic, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityList, EntityRepeater, EntityDetail, EntityStrip } from '../../../../Framework/Signum.React/Scripts/Lines'
+import { FormGroup, FormControlReadonly, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityList, EntityRepeater, EntityDetail, EntityStrip } from '../../../../Framework/Signum.React/Scripts/Lines'
 import { ModifiableEntity, isLite, isEntity, External } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
 import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
 import { classes, Dic } from '../../../../Framework/Signum.React/Scripts/Globals'
@@ -59,6 +58,15 @@ export class CodeContext {
     usedNames: string[];
     assignments: { [name: string]: string };
     imports: string[];
+
+    constructor(ctxName: string, usedNames: string[], assignments: { [name: string]: string }, imports: string[])
+    {
+        this.ctxName = ctxName;
+        this.usedNames = usedNames;
+        this.assignments = assignments;
+        this.imports = imports;
+    }
+
     
     subCtx(field?: string, options?: StyleOptionsExpression): CodeContext {
         if (!field && !options)
@@ -71,12 +79,7 @@ export class CodeContext {
 
     createNewContext(newName: string): CodeContext {
         this.usedNames.push(newName);
-        var result = new CodeContext();
-        result.ctxName = newName;
-        result.usedNames = this.usedNames;
-        result.imports = this.imports;
-        result.assignments = this.assignments;
-        return result;
+        return new CodeContext(newName, this.usedNames, this.assignments, this.imports);;
     }
 
     stringifyObject(expressionOrValue: ExpressionOrValue<any>): string {
@@ -191,12 +194,9 @@ ${childrenString}
         if (!node.children || !node.children.length)
             return undefined;
 
-        const cc = new CodeContext();
-        cc.ctxName = "ctx" + (this.usedNames.length + 1);
-        this.usedNames.push(cc.ctxName);
-        cc.usedNames = this.usedNames;
-        cc.imports = this.imports;
-        cc.assignments = {};
+        var newName = "ctx" + (this.usedNames.length + 1);
+        this.usedNames.push(newName);
+        const cc = new CodeContext(newName, this.usedNames, {}, this.imports);
 
         const div = cc.elementCodeWithChildren("div", null, node);
 
@@ -248,23 +248,26 @@ export class DesignerNode<N extends BaseNode> {
     node: N;
     route?: PropertyRoute;
 
+    constructor(parent: DesignerNode<BaseNode> | undefined, context: DesignerContext, node: N, route: PropertyRoute | undefined) {
+        this.parent = parent;
+        this.context = context;
+        this.node = node;
+        this.route = route;
+    }
+
     static zero<N extends BaseNode>(context: DesignerContext, typeName: string) {
-        var res = new DesignerNode();
-        res.context = context;
-        res.route = PropertyRoute.root(typeName);
+        var res = new DesignerNode(undefined, context, null as any as N, PropertyRoute.root(typeName));
         return res;
     }
 
     createChild<T extends BaseNode>(node: T): DesignerNode<T> {
-        var res = new DesignerNode<T>();
-        res.parent = this;
-        res.context = this.context;
-        res.node = node;
-        res.route = this.fixRoute();
+        var route = this.fixRoute()
         const lbn = node as any as { field: string };
-        if (lbn.field && res.route)
-            res.route = res.route.tryAddMember({ name: lbn.field, type: "Member" });
+        if (lbn.field && route)
+            route = route.tryAddMember({ name: lbn.field, type: "Member" });
 
+        var res = new DesignerNode<T>(this, this.context, node, route);
+      
         return res;
     }
 
@@ -450,7 +453,7 @@ export function evaluateUntyped(parentCtx: TypeContext<ModifiableEntity>, expres
     if (!expressionOrValue.__code__)
         return undefined;
 
-    var f = asFunction(parentCtx.frame!.entityComponent, expressionOrValue, getFieldName);
+    var f = asFunction(parentCtx.frame!.entityComponent!, expressionOrValue, getFieldName);
 
     try {
         return f(parentCtx);

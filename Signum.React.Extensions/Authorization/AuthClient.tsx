@@ -31,7 +31,7 @@ export function registerUserTicketAuthenticator() {
     authenticators.push(loginFromCookie);
 }
 
-export function startPublic(options: { routes: JSX.Element[], userTicket: boolean, resetPassword: boolean }) {
+export function startPublic(options: { routes: JSX.Element[], userTicket: boolean, resetPassword: boolean, notifyLogout: boolean }) {
     userTicket = options.userTicket;
     resetPassword = options.resetPassword;
 
@@ -42,7 +42,32 @@ export function startPublic(options: { routes: JSX.Element[], userTicket: boolea
 
     options.routes.push(<ImportRoute path="~/auth/login" onImportModule={() => import("./Login/Login")} />);
     options.routes.push(<ImportRoute path="~/auth/changePassword" onImportModule={() => import("./Login/ChangePassword")} />);
+
+
+    if (options.notifyLogout) {
+        notifyLogout = options.notifyLogout;
+
+        window.addEventListener("storage", se => {
+
+            if (se.key == 'requestLogout' + Services.SessionSharing.getAppName()) {
+
+                var userName = se.newValue!.before("&&");
+
+                var cu = currentUser();
+                if (cu && cu.userName == userName)
+                    logoutInternal();
+            }
+        });
+    }
 }
+
+export function logoutOtherTabs(user: UserEntity) {
+
+    if (notifyLogout)
+        localStorage.setItem('requestLogout' + Services.SessionSharing.getAppName(), user.userName + "&&" + new Date().toString());
+}
+
+var notifyLogout: boolean;
 
 export let types: boolean;
 export let properties: boolean;
@@ -235,11 +260,10 @@ export function setAuthToken(authToken: string | undefined): void{
 }
 
 export function autoLogin(): Promise<UserEntity | undefined>  {
-
     if (Navigator.currentUser)
         return Promise.resolve(Navigator.currentUser as UserEntity);
 
-    if (Services.SessionSharing.avoidSharingSession == false && getAuthToken())
+    if (getAuthToken())
         return API.fetchCurrentUser().then(u => {
             setCurrentUser(u);
             Navigator.resetUI();
@@ -248,7 +272,7 @@ export function autoLogin(): Promise<UserEntity | undefined>  {
 
     return new Promise<UserEntity>((resolve) => {
         setTimeout(() => {
-            if (Services.SessionSharing.avoidSharingSession == false && getAuthToken()) {
+            if (getAuthToken()) {
                 API.fetchCurrentUser()
                     .then(u => {
                         setCurrentUser(u);
@@ -276,7 +300,10 @@ export function autoLogin(): Promise<UserEntity | undefined>  {
 export const authenticators: Array<() => Promise<AuthenticatedUser | undefined>> = [];  
 
 export function loginFromCookie(): Promise<AuthenticatedUser | undefined> {
-    return API.loginFromCookie();
+    return API.loginFromCookie().then(au => {
+        au && console.log("loginFromCookie");
+        return au;
+    });
 }
 
 export async function authenticate(): Promise<AuthenticatedUser | undefined> {
@@ -296,12 +323,20 @@ export interface AuthenticatedUser {
 }
 
 export function logout() {
+    var user = currentUser();
+    if (user == null)
+        return;
 
     API.logout().then(() => {
-        setAuthToken(undefined);
-        setCurrentUser(undefined);
-        Options.onLogout();
+        logoutInternal();
+        logoutOtherTabs(user);
     }).done();
+}
+
+function logoutInternal() {
+    setAuthToken(undefined);
+    setCurrentUser(undefined);
+    Options.onLogout();
 }
 
 export namespace Options {
@@ -365,8 +400,8 @@ export module API {
         newPassword: string;
     }
 
-    export function changePassword(request: ChangePasswordRequest): Promise<UserEntity> {
-        return ajaxPost<UserEntity>({ url: "~/api/auth/ChangePassword" }, request);
+    export function changePassword(request: ChangePasswordRequest): Promise<LoginResponse> {
+        return ajaxPost<LoginResponse>({ url: "~/api/auth/ChangePassword" }, request);
     }
 
     export function fetchCurrentUser(): Promise<UserEntity> {

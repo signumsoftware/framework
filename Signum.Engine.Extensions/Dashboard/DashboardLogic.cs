@@ -76,13 +76,14 @@ namespace Signum.Engine.Dashboard
                     {
                         Database.MListQuery((DashboardEntity cp) => cp.Parts).Where(mle => query.Contains(((UserQueryPartEntity)mle.Element.Content).UserQuery)).UnsafeDeleteMList();
                         Database.Query<UserQueryPartEntity>().Where(uqp => query.Contains(uqp.UserQuery)).UnsafeDelete();
+                        return null;
                     };
 
                     sb.Schema.Table<UserQueryEntity>().PreDeleteSqlSync += arg =>
                     {
                         var uq = (UserQueryEntity)arg;
 
-                        var parts = Administrator.UnsafeDeletePreCommand((DashboardEntity cp) => cp.Parts, Database.MListQuery((DashboardEntity cp) => cp.Parts)
+                        var parts = Administrator.UnsafeDeletePreCommandMList((DashboardEntity cp) => cp.Parts, Database.MListQuery((DashboardEntity cp) => cp.Parts)
                             .Where(mle => ((UserQueryPartEntity)mle.Element.Content).UserQuery == uq));
 
                         var parts2 = Administrator.UnsafeDeletePreCommand(Database.Query<UserQueryPartEntity>()
@@ -98,13 +99,14 @@ namespace Signum.Engine.Dashboard
                     {
                         Database.MListQuery((DashboardEntity cp) => cp.Parts).Where(mle => query.Contains(((UserChartPartEntity)mle.Element.Content).UserChart)).UnsafeDeleteMList();
                         Database.Query<UserChartPartEntity>().Where(uqp => query.Contains(uqp.UserChart)).UnsafeDelete();
+                        return null;
                     };
 
                     sb.Schema.Table<UserChartEntity>().PreDeleteSqlSync += arg =>
                     {
                         var uc = (UserChartEntity)arg;
 
-                        var parts = Administrator.UnsafeDeletePreCommand((DashboardEntity cp) => cp.Parts, Database.MListQuery((DashboardEntity cp) => cp.Parts)
+                        var parts = Administrator.UnsafeDeletePreCommandMList((DashboardEntity cp) => cp.Parts, Database.MListQuery((DashboardEntity cp) => cp.Parts)
                             .Where(mle => ((UserChartPartEntity)mle.Element.Content).UserChart == uc));
 
                         var parts2 = Administrator.UnsafeDeletePreCommand(Database.Query<UserChartPartEntity>()

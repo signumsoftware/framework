@@ -52,8 +52,9 @@ namespace Signum.Entities.Chart
 
 		public static bool IsDateOnly(QueryToken token)
 		{
-			if (token is MonthStartToken || token is DateToken)
-				return true;
+            if ((token is DatePartStartToken dt && (dt.Name == QueryTokenMessage.MonthStart || dt.Name == QueryTokenMessage.WeekStart)) ||
+                token is DateToken)
+                return true;
 
 			PropertyRoute route = token.GetPropertyRoute();
 
@@ -401,11 +402,11 @@ namespace Signum.Entities.Chart
 			return result;
 		}
 
-		internal static void FixParameters(ChartRequest chartRequest, ChartColumnEmbedded chartColumn)
+		internal static void FixParameters(IChartBase chart, ChartColumnEmbedded chartColumn)
 		{
-			int index = chartRequest.Columns.IndexOf(chartColumn);
+			int index = chart.Columns.IndexOf(chartColumn);
 
-			foreach (var p in chartRequest.Parameters.Where(p => p.ScriptParameter.ColumnIndex == index))
+			foreach (var p in chart.Parameters.Where(p => p.ScriptParameter.ColumnIndex == index))
 			{
 				if (p.PropertyCheck(() => p.Value).HasText())
 					p.Value = p.ScriptParameter.DefaultValue(chartColumn.Token?.Token);

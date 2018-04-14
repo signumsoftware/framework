@@ -109,13 +109,14 @@ namespace Signum.Engine.Toolbar
                 sb.Schema.EntityEvents<T>().PreUnsafeDelete += query =>
                 {
                     Database.MListQuery((ToolbarEntity tb) => tb.Elements).Where(mle => query.Contains((T)mle.Element.Content.Entity)).UnsafeDeleteMList();
+                    return null;
                 };
 
                 sb.Schema.Table<T>().PreDeleteSqlSync += arg =>
                 {
                     var entity = (T)arg;
 
-                    var parts = Administrator.UnsafeDeletePreCommand((ToolbarEntity tb) => tb.Elements, Database.MListQuery((ToolbarEntity tb) => tb.Elements)
+                    var parts = Administrator.UnsafeDeletePreCommandMList((ToolbarEntity tb) => tb.Elements, Database.MListQuery((ToolbarEntity tb) => tb.Elements)
                         .Where(mle => mle.Element.Content.Entity == entity));
 
                     return parts;
@@ -127,13 +128,14 @@ namespace Signum.Engine.Toolbar
                 sb.Schema.EntityEvents<T>().PreUnsafeDelete += query =>
                 {
                     Database.MListQuery((ToolbarMenuEntity tb) => tb.Elements).Where(mle => query.Contains((T)mle.Element.Content.Entity)).UnsafeDeleteMList();
+                    return null;
                 };
 
                 sb.Schema.Table<T>().PreDeleteSqlSync += arg =>
                 {
                     var entity = (T)arg;
 
-                    var parts = Administrator.UnsafeDeletePreCommand((ToolbarMenuEntity tb) => tb.Elements, Database.MListQuery((ToolbarMenuEntity tb) => tb.Elements)
+                    var parts = Administrator.UnsafeDeletePreCommandMList((ToolbarMenuEntity tb) => tb.Elements, Database.MListQuery((ToolbarMenuEntity tb) => tb.Elements)
                         .Where(mle => mle.Element.Content.Entity == entity));
 
                     return parts;
@@ -223,12 +225,27 @@ namespace Signum.Engine.Toolbar
 
         static Dictionary<Type, Func<Lite<Entity>, bool>> IsAuthorizedDictionary = new Dictionary<Type, Func<Lite<Entity>, bool>>
         {
-            { typeof(QueryEntity), a => DynamicQueryManager.Current.QueryAllowed(QueryLogic.QueryNames.GetOrThrow(a.ToString()), true)  },
+            { typeof(QueryEntity), a => IsQueryAllowed((Lite<QueryEntity>)a) },
             { typeof(PermissionSymbol), a => PermissionAuthLogic.IsAuthorized((PermissionSymbol)a.Retrieve()) },
             { typeof(UserQueryEntity), a => InMemoryFilter(UserQueryLogic.UserQueries.Value.GetOrCreate((Lite<UserQueryEntity>)a)) },
             { typeof(UserChartEntity), a => InMemoryFilter(UserChartLogic.UserCharts.Value.GetOrCreate((Lite<UserChartEntity>)a)) },
             { typeof(DashboardEntity), a => InMemoryFilter(DashboardLogic.Dashboards.Value.GetOrCreate((Lite<DashboardEntity>)a)) },
         };
+
+        static bool IsQueryAllowed(Lite<QueryEntity> query)
+        {
+            try
+            {
+                return DynamicQueryManager.Current.QueryAllowed(QueryLogic.QueryNames.GetOrThrow(query.ToString()), true);
+            }
+            catch (Exception e) when (StartParameters.IgnoredDatabaseMismatches != null)
+            {
+                //Could happen when not 100% synchronized
+                StartParameters.IgnoredDatabaseMismatches.Add(e);
+
+                return false;
+            }
+        }
         
         static bool InMemoryFilter<T>(T entity) where T : Entity
         {

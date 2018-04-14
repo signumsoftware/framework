@@ -307,6 +307,7 @@ namespace Signum.Engine.Workflow
                     To = nodes.GetOrThrow(c.Entity.To),
                 }).SaveList();
             }
+
             
             foreach (var item in nodes.Where(a => a.Key is WorkflowEventEntity e && e.Type.IsTimerStart()))
             {
@@ -524,7 +525,14 @@ namespace Signum.Engine.Workflow
             if (model != null)
                 wc.SetModel(model);
             wc.BpmnElementId = bpmnElementId;
-            wc.Name = flow.Attribute("name")?.Value;
+
+            var name = flow.Attribute("name")?.Value;
+            name = (name.TryBeforeLast(":") ?? name);
+
+            if (model != null && model.Order.HasValue)
+                name = name + ": " + model.Order.ToString();
+
+            wc.Name = name;
             wc.Xml.DiagramXml = locator.GetDiagram(bpmnElementId).ToString();
 
             var gateway = (wc.From as WorkflowGatewayEntity);

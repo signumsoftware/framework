@@ -1,7 +1,6 @@
 ﻿
 import * as React from 'react'
 import { RouteComponentProps } from 'react-router'
-import { DropdownButton, MenuItem } from 'react-bootstrap'
 import { Dic, classes } from '../../../Framework/Signum.React/Scripts/Globals'
 import * as Finder from '../../../Framework/Signum.React/Scripts/Finder'
 import { ResultTable, FindOptions, FilterOption, QueryDescription } from '../../../Framework/Signum.React/Scripts/FindOptions'
@@ -11,20 +10,21 @@ import SearchControlLoaded from '../../../Framework/Signum.React/Scripts/SearchC
 import { WordTemplateEntity, WordTemplateMessage } from './Signum.Entities.Word'
 import * as WordClient from './WordClient'
 import { saveFile } from "../../../Framework/Signum.React/Scripts/Services";
+import { UncontrolledDropdown, DropdownToggle, DropdownItem, DropdownMenu } from '../../../Framework/Signum.React/Scripts/Components';
 
 export interface WordEntityMenuProps {
     entityPack: EntityPack<Entity>;
 }
 
 export default class WordEntityMenu extends React.Component<WordEntityMenuProps> {
-    
-    handleSelect = (wt: Lite<WordTemplateEntity>) => {
+
+    handleOnClick = (wt: Lite<WordTemplateEntity>) => {
 
         Navigator.API.fetchAndForget(wt)
             .then<string | undefined>(wordTemplate => wordTemplate.systemWordTemplate ? WordClient.API.getConstructorType(wordTemplate.systemWordTemplate!) : undefined)
             .then(ct => {
 
-                if (!ct)
+                if (!ct || ct == this.props.entityPack.entity.Type)
                     return WordClient.API.createAndDownloadReport({ template: wt, lite: toLite(this.props.entityPack.entity) });
 
                 var s = WordClient.settings[ct];
@@ -42,22 +42,25 @@ export default class WordEntityMenu extends React.Component<WordEntityMenuProps>
     }
 
     render() {
-        
+
         const label = <span><i className="fa fa-file-word-o"></i>&nbsp;{WordTemplateMessage.WordReport.niceToString()}</span>;
 
         return (
-            <DropdownButton title={label as any} id="wordMenu" className="sf-word-dropdown">
+            <UncontrolledDropdown id="wordMenu" className="sf-word-dropdown">
+                <DropdownToggle caret>{label as any}</DropdownToggle>
+                <DropdownMenu>
                 {
                     this.props.entityPack.wordTemplates!.map((wt, i) =>
-                        <MenuItem key={i}
-                            onSelect={() => this.handleSelect(wt)}>
+                        <DropdownItem key={i}
+                            onClick={() => this.handleOnClick(wt)}>
                             {wt.toStr}
-                        </MenuItem>)
-                }
-            </DropdownButton>
+                        </DropdownItem>)
+                    }
+                </DropdownMenu>
+            </UncontrolledDropdown>
         );
     }
- 
+
 }
 
 

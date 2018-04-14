@@ -12,7 +12,9 @@
     <Parameter Name="PointSize" Type="Number" ValueDefinition="4" />
     <Parameter Name="DrawingMode" Type="Enum" ValueDefinition="Svg|Canvas" />
     <Parameter Name="ColorScale" Type="Enum" ValueDefinition="Ordinal | ZeroMax | MinMax | Sqrt  | Log" />
-    <Parameter Name="ColorSet" Type="Enum" ValueDefinition="YlGn|YlGnBu|GnBu|BuGn|PuBuGn|PuBu|BuPu|RdPu|PuRd|OrRd|YlOrRd|YlOrBr|Purples|Blues|Greens|Oranges|Reds|Greys|PuOr|BrBG|PRGn|PiYG|RdBu|RdGy|RdYlBu|Spectral|RdYlGn" />
+    <Parameter Name="ColorInterpolate" Type="Enum" ValueDefinition="YlGn|YlGnBu|GnBu|BuGn|PuBuGn|PuBu|BuPu|RdPu|PuRd|OrRd|YlOrRd|YlOrBr|Purples|Blues|Greens|Oranges|Reds|Greys|PuOr|BrBG|PRGn|PiYG|RdBu|RdGy|RdYlBu|Spectral|RdYlGn" />
+    <Parameter Name="ColorScheme" Type="Enum" ValueDefinition="category10|accent|dark2|paired|pastel1|pastel2|set1|set2|set3|BrBG[K]|PRGn[K]|PiYG[K]|PuOr[K]|RdBu[K]|RdGy[K]|RdYlBu[K]|RdYlGn[K]|Spectral[K]|Blues[K]|Greys[K]|Oranges[K]|Purples[K]|Reds[K]|BuGn[K]|BuPu[K]|OrRd[K]|PuBuGn[K]|PuBu[K]|PuRd[K]|RdPu[K]|YlGnBu[K]|YlGn[K]|YlOrBr[K]|YlOrRd[K]" />
+    <Parameter Name="ColorSchemeSteps" Type="Enum" ValueDefinition="3|4|5|6|7|8|9|10|11" />
   </Parameters>
   <Icon FileName="points.png"><![CDATA[iVBORw0KGgoAAAANSUhEUgAAACgAAAAoCAYAAACM/rhtAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAytJREFUeNrsWN1PUnEYfmhw+FC0Tz+T6bxwols206ZMzPIDLw43XbRVduVFN62vv6PuyjZnrdwqda0SU8GWlnnhbSpaQssVDQQMBZQM+XUOWihgATvUueDdzthg4332vs/zvO97BIQQ8Dn2gOeRAsgJwLbr3bwlojDalx6nmf7ybgCUJA0F5RqI5Id1XCd22U3016kBiJkceWUaSDMLdDEB9Dg/0ra+uv6DeUcQsDuwbO9DRkOXluIQpMtupp1P1P1ZbA6HA157L8iJLq0sU6H7Kwct08PIzK+ARNEMafFp+FcWYH0/ymn1rDNhOdyfYf8wFptIKIkMZH0FgR9eBHwOEL8XlFjGKUBKLInIIaKksXEwX9mIFVsP1uYfIrDOgMuqgrzwOKcAc5RNWGXaGspRCekuOSIAslzLaOjUWmYMQQLLi1WgOBZJkGv1nVqr0QBKmg5pUS2i8S8Y7Kg7f+0BYT/5+KQmSVKM+k9xp2eSvBidgd+/AU29EpfbVAJeVVA/Poua6nJUV5Vj+LWRfxWkREIsLa/C7fUh64CcfxxsVJXAbPoEn9vFtLg0+STku80Ik12A248nydDYpqia1UpcvRCfqJJuMyNvQ6IyvDEmXyTxRiBA4HL74PWt/xsVB/e5RRNtmdJBLGWWTaUGsr2KXWf1KUZUQ4xvssG2OOkiWbKZaFNHLrE/1xBbzzGy+PQk8XxboHkzi23GoR3L5obHwiybo/zxQZFYGmXZlPBnkuSUNmEtbNkUF9bwB2AaKwg1s2zOGoJXn7xIhfQwkTit87R1mr3YZMgua4V8n0LHGcAOxlgHt4y1hVHdlSjGyoIsrmmP+odOq5l2Pavvz2YvtiUHfI5eQH1PK9+fGMgIDhq2Gas+AWNdnIsUkWP+1e/fbz2aJPTFu6S1vZPcvD9B4gb4y1gdLm9CLWEFEy4ioTh0sb2cCBVgZNwYf4vZbWVwy1hbEjDW7NJmfLdvuwoPHUVuxRldopMlAuClc7UC5klYdUFB1HVpbXN65v5NQ27l2R3ca6gtgX5sswBNdTEUIHXVceWDfHsF132jLWhvgtQ76hTA/xw/BRgAN0sztqA7z64AAAAASUVORK5CYII=]]></Icon>
   <Script><![CDATA[function DrawChart(chart, data){
@@ -110,12 +112,11 @@
   
   var color;
   if(data.parameters["ColorScale"] == "Ordinal"){
-    color = d3.scaleOrdinal(d3.schemeCategory20).domain( data.rows.map(function(v) { return v.c0; }));
+    color = d3.scaleOrdinal(ChartUtils.getColorScheme(data.parameters["ColorScheme"], data.parameters["ColorSchemeSteps"])).domain( data.rows.map(function(v) { return v.c0; }));
   }else{
-    debugger;
     var scaleFunc = scaleFor(data.columns.c0, data.rows.map(function(r){return r.c0;}), 0, 1, data.parameters["ColorScale"]);
-    var colorSet = data.parameters["ColorSet"];
-    var colorInterpolation = ChartUtils.getColorInterpolation(colorSet); 
+    var colorInterpolate = data.parameters["ColorInterpolate"];
+    var colorInterpolation = ChartUtils.getColorInterpolation(colorInterpolate); 
     color = function(v){return colorInterpolation(scaleFunc(v)); }
   }
   

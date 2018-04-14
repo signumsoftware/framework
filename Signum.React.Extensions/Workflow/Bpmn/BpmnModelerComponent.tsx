@@ -1,6 +1,5 @@
 ﻿/// <reference path="../bpmn-js.d.ts" />
 import * as React from 'react'
-import { Button } from "react-bootstrap";
 import { WorkflowEntitiesDictionary, WorkflowActivityModel, WorkflowActivityType, WorkflowPoolModel, WorkflowLaneModel, WorkflowConnectionModel, WorkflowEventModel, WorkflowEntity, IWorkflowNodeEntity, WorkflowMessage } from '../Signum.Entities.Workflow'
 import * as Modeler from "bpmn-js/lib/Modeler"
 import { ModelEntity, ValidationMessage, parseLite } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
@@ -10,9 +9,10 @@ import * as customRenderer from './CustomRenderer'
 import * as customPopupMenu from './CustomPopupMenu'
 import * as BpmnUtils from './BpmnUtils'
 
-import "bpmn-js/assets/bpmn-font/css/bpmn-embedded.css"
+import "bpmn-js/dist/assets/bpmn-font/css/bpmn-embedded.css"
 import "diagram-js/assets/diagram-js.css"
 import "./Bpmn.css"
+import { Button } from '../../../../Framework/Signum.React/Scripts/Components';
 
 export interface BpmnModelerComponentProps {
     workflow: WorkflowEntity;
@@ -29,13 +29,37 @@ CustomModeler.prototype._modules =
 
 export default class BpmnModelerComponent extends React.Component<BpmnModelerComponentProps> {
 
-    private modeler: Modeler;
-    private elementRegistry: BPMN.ElementRegistry;
-    private bpmnFactory: BPMN.BpmnFactory;
-    private divArea: HTMLDivElement; 
+    private modeler!: Modeler;
+    private elementRegistry!: BPMN.ElementRegistry;
+    private bpmnFactory!: BPMN.BpmnFactory;
+    private divArea!: HTMLDivElement; 
 
     constructor(props: any) {
         super(props);
+    }
+
+
+    componentDidMount() {
+        this.modeler = new CustomModeler({
+            container: this.divArea,
+            height: 1000,
+            keyboard: {
+                bindTo: document
+            },
+            additionalModules: [
+                connectionIcons,
+            ],
+        });
+        this.configureModules();
+        this.elementRegistry = this.modeler.get<BPMN.ElementRegistry>('elementRegistry');
+        this.bpmnFactory = this.modeler.get<BPMN.BpmnFactory>('bpmnFactory');
+        this.modeler.on('element.dblclick', 1500, this.handleElementDoubleClick as (obj: BPMN.Event) => void);
+        this.modeler.on('element.paste', 1500, this.handleElementPaste as (obj: BPMN.Event) => void);
+        this.modeler.on('create.ended', 1500, this.handleCreateEnded as (obj: BPMN.Event) => void);
+        this.modeler.on('shape.add', 1500, this.handleAddShapeOrConnection as (obj: BPMN.Event) => void);
+        this.modeler.on('connection.add', 1500, this.handleAddShapeOrConnection as (obj: BPMN.Event) => void);
+        this.modeler.on('label.add', 1500, () => this.lastPasted = undefined);
+        this.modeler.importXML(this.props.diagramXML, this.handleOnModelError)
     }
 
     existsMainEntityTypeRelatedNodes(): boolean {
@@ -65,8 +89,8 @@ export default class BpmnModelerComponent extends React.Component<BpmnModelerCom
 
             if (BpmnUtils.isTaskAnyKind(e.type) && (
                 (model as WorkflowActivityModel).script != null ||
-                ((model as WorkflowActivityModel).timeout != null && (model as WorkflowActivityModel).timeout!.action != null) ||
-                ((model as WorkflowActivityModel).jumps.length > 0 && (model as WorkflowActivityModel).jumps!.filter(j => j.element.action != null || j.element.condition != null).length > 0)))
+                (model as WorkflowActivityModel).timers.some(t => t.element.action != null || t.element.condition != null) ||
+                (model as WorkflowActivityModel).jumps.some(j => j.element.action != null || j.element.condition != null)))
                 result = true;
         });
 
@@ -177,32 +201,12 @@ export default class BpmnModelerComponent extends React.Component<BpmnModelerCom
         return undefined;
     }
 
-    componentDidMount() {
-        this.modeler = new CustomModeler({
-            container: this.divArea,
-            height: 1000,
-            keyboard: {
-                bindTo: document
-            },
-            additionalModules: [
-                connectionIcons,
-            ],
-        });
-        this.configureModules();
-        this.elementRegistry = this.modeler.get<BPMN.ElementRegistry>('elementRegistry');
-        this.bpmnFactory = this.modeler.get<BPMN.BpmnFactory>('bpmnFactory');
-        this.modeler.on('element.dblclick', 1500, this.handleElementDoubleClick as (obj: BPMN.Event) => void);
-        this.modeler.on('element.paste', 1500, this.handleElementPaste as (obj: BPMN.Event) => void);
-        this.modeler.on('shape.add', 1500, this.handleAddShapeOrConnection as (obj: BPMN.Event) => void);
-        this.modeler.on('connection.add', 1500, this.handleAddShapeOrConnection as (obj: BPMN.Event) => void);
-        this.modeler.on('label.add', 1500, () => this.lastPasted = undefined);
-        this.modeler.importXML(this.props.diagramXML, this.handleOnModelError)
-    }
 
     handleElementDoubleClick = (obj: BPMN.DoubleClickEvent) => {
         if (BpmnUtils.isEndEvent(obj.element.type))
             return;
 
+        var elementType = obj.element.type;
         var model = this.props.entities[obj.element.id] as (ModelEntity | undefined);
         if (!model) {
             model = this.newModel(obj.element);
@@ -213,8 +217,6 @@ export default class BpmnModelerComponent extends React.Component<BpmnModelerCom
         }
         else
             (model as any).name = obj.element.businessObject.name;
-
-        var elementType = obj.element.type;
 
         if (BpmnUtils.isConnection(elementType)) {
             var sourceElementType = (obj.element.businessObject as BPMN.ConnectionModdleElemnet).sourceRef.$type;
@@ -246,7 +248,6 @@ export default class BpmnModelerComponent extends React.Component<BpmnModelerCom
                     var et = (me as WorkflowEventModel).type;
                     obj.element.type = (et == "Start" || et == "TimerStart") ? "bpmn:StartEvent" : "bpmn:EndEvent";
 
-
                     var bo = obj.element.businessObject;
                     var shouldEvent =
                         (et == "Start" || et == "Finish") ? null :
@@ -265,8 +266,14 @@ export default class BpmnModelerComponent extends React.Component<BpmnModelerCom
                     }
                 }
 
+                var newName = (me as any).name;
+
+                if (WorkflowConnectionModel.isInstance(me)) {
+                    newName = (newName.tryBeforeLast(":") || newName) + (me.order != null ? ": " + me.order! : "");
+                }
+
                 this.modeler.get<any>("modeling").updateProperties(obj.element, {
-                    name: (me as any).name,
+                    name: newName,
                 });
             };
         }).done();
@@ -285,9 +292,12 @@ export default class BpmnModelerComponent extends React.Component<BpmnModelerCom
             };
     }
 
+    handleCreateEnded = (obj: BPMN.Event) => {
+        console.log(obj);
+    }
+
     handleAddShapeOrConnection = (obj: BPMN.AddClickEvent) => {
         if (this.lastPasted) {
-            console.log("Pasted", this.lastPasted, obj.element.id);
             var model = this.props.entities[this.lastPasted.id];
             if (model) {
                 var clone: ModelEntity = JSON.parse(JSON.stringify(model));
@@ -335,7 +345,7 @@ export default class BpmnModelerComponent extends React.Component<BpmnModelerCom
         }
     }
 
-    handleZoomClick = (e: React.MouseEvent<Button>) => {
+    handleZoomClick = (e: React.MouseEvent<any>) => {
         var zoomScroll = this.modeler.get<any>("zoomScroll");
         zoomScroll.reset();
     }

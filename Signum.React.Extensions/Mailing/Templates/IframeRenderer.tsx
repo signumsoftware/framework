@@ -2,7 +2,7 @@
 import { classes, Dic } from '../../../../Framework/Signum.React/Scripts/Globals'
 import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
 import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
-import { FormGroup, FormControlStatic, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityList, EntityRepeater, EntityTabRepeater, EntityDetail} from '../../../../Framework/Signum.React/Scripts/Lines'
+import { FormGroup, FormControlReadonly, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityList, EntityRepeater, EntityTabRepeater, EntityDetail } from '../../../../Framework/Signum.React/Scripts/Lines'
 import { SearchControl }  from '../../../../Framework/Signum.React/Scripts/Search'
 import { getToString, Lite, is }  from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
 import { TypeContext, FormGroupStyle } from '../../../../Framework/Signum.React/Scripts/TypeContext'
@@ -23,12 +23,12 @@ export default class IFrameRenderer extends React.Component<IFrameRendererProps>
     }
 
     load(html: string | null | undefined) {
-        const cd = this.iframe.contentDocument;
+        const cd = this.iframe.contentDocument!;
 
         cd.body.innerHTML = html || "";
     }
 
-    iframe: HTMLIFrameElement;
+    iframe!: HTMLIFrameElement;
 
     render() {
 

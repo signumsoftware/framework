@@ -87,7 +87,11 @@ namespace Signum.Engine.Workflow
                     },
                 }.Register();
 
-                sb.Schema.EntityEvents<WorkflowEventTaskEntity>().PreUnsafeDelete += tasks => tasks.SelectMany(a => a.ConditionResults()).UnsafeDelete();
+                sb.Schema.EntityEvents<WorkflowEventTaskEntity>().PreUnsafeDelete += tasks =>
+                {
+                    tasks.SelectMany(a => a.ConditionResults()).UnsafeDelete();
+                    return null;
+                };
 
                 ExceptionLogic.DeleteLogs += ExceptionLogic_DeleteLogs;
 
@@ -223,10 +227,13 @@ namespace Signum.Engine.Workflow
 
         public static void ExceptionLogic_DeleteLogs(DeleteLogParametersEmbedded parameters, StringBuilder sb, CancellationToken token)
         {
-            var dateLimit = parameters.GetDateLimit(typeof(WorkflowEventTaskConditionResultEntity).ToTypeEntity());
+            var dateLimit = parameters.GetDateLimitDelete(typeof(WorkflowEventTaskConditionResultEntity).ToTypeEntity());
+
+            if (dateLimit == null)
+                return;
 
             Database.Query<WorkflowEventTaskConditionResultEntity>()
-               .Where(a => a.CreationDate < dateLimit)
+               .Where(a => a.CreationDate < dateLimit.Value)
                .UnsafeDeleteChunksLog(parameters, sb, token);
         }
 

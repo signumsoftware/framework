@@ -53,7 +53,8 @@ namespace Signum.Entities.MachineLearning
         [NotNullValidator, InTypeScript(Undefined = false, Null = false), NotifyChildProperty]
         public PredictorMainQueryEmbedded MainQuery { get; set; }
 
-        [Ignore, NotifyChildProperty, NotifyCollectionChanged] //virtual Mlist
+        [Ignore, QueryableProperty] //virtual Mlist
+        [NotifyChildProperty, NotifyCollectionChanged]
         public MList<PredictorSubQueryEntity> SubQueries { get; set; } = new MList<PredictorSubQueryEntity>();
         
         [PreserveOrder]
@@ -137,13 +138,14 @@ namespace Signum.Entities.MachineLearning
         public int TotalCount { get; set; }
         public int MissCount { get; set; }
         [Format("p2")]
+
         public double? MissRate { get; set; }
-
-        protected override void PreSaving(ref bool graphModified)
+        
+        protected override void PreSaving(PreSavingContext ctx)
         {
-            MissRate = TotalCount == 0 ? (double?)null : Math.Round(MissCount / (double)TotalCount, 2);
+            base.PreSaving(ctx);
 
-            base.PreSaving(ref graphModified);
+            MissRate = TotalCount == 0 ? (double?)null : Math.Round(MissCount / (double)TotalCount, 2);
         }
     }
 
@@ -306,7 +308,7 @@ namespace Signum.Entities.MachineLearning
 
 
     [Serializable, EntityKind(EntityKind.Part, EntityData.Transactional)]
-    public class PredictorSubQueryEntity : Entity
+    public class PredictorSubQueryEntity : Entity, ICanBeOrdered
     {
         public PredictorSubQueryEntity()
         {
@@ -328,6 +330,8 @@ namespace Signum.Entities.MachineLearning
         [PreserveOrder]
         [NotNullValidator, NoRepeatValidator, NotifyChildProperty, NotifyCollectionChanged]
         public MList<PredictorSubQueryColumnEmbedded> Columns { get; set; } = new MList<PredictorSubQueryColumnEmbedded>();
+
+        public int Order { get; set; }
 
         public void ParseData(QueryDescription description)
         {

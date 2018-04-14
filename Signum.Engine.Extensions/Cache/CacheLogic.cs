@@ -86,13 +86,27 @@ namespace Signum.Engine.Cache
                     CacheInvalidator.ReceiveInvalidation += CacheInvalidator_ReceiveInvalidation;
                 }
 
-                sb.Schema.SchemaCompleted += Schema_SchemaCompleted;
+                sb.Schema.SchemaCompleted += () => Schema_SchemaCompleted(sb);
                 sb.Schema.BeforeDatabaseAccess += StartSqlDependencyAndEnableBrocker;
             }
         }
 
-        static void Schema_SchemaCompleted()
+        static void Schema_SchemaCompleted(SchemaBuilder sb)
         {
+            foreach (var type in VirtualMList.RegisteredVirtualMLists.Keys)
+            {
+                if (controllers.ContainsKey(type))
+                {
+                    foreach (var rType in VirtualMList.RegisteredVirtualMLists.GetOrThrow(type))
+                    {
+                        TryCacheTable(sb, rType);
+
+                        dependencies.Add(type, rType);
+                        inverseDependencies.Add(rType, type);
+                    }
+                }
+            }
+
             foreach (var cont in controllers.Values.NotNull())
             {
                 cont.BuildCachedTable();
@@ -166,14 +180,15 @@ namespace Signum.Engine.Cache
                 CacheLogic.LogWriter.WriteLine("Load ToListWithInvalidations {0} {1}".FormatWith(typeof(T).TypeName()), exceptionContext);
 
             using (new EntityCache())
-            using (var r = EntityCache.NewRetriever()) {
+            using (var r = EntityCache.NewRetriever())
+            {
                 subConnector.ExecuteDataReaderDependency(tr.MainCommand, onChange, StartSqlDependencyAndEnableBrocker, fr =>
-                    {
-                        if (reader == null)
-                            reader = new SimpleReader(fr, r);
+                {
+                    if (reader == null)
+                        reader = new SimpleReader(fr, r);
 
-                        list.Add(projector(reader));
-                    }, CommandType.Text);
+                    list.Add(projector(reader));
+                }, CommandType.Text);
 
                 r.CompleteAll();
             }
@@ -430,10 +445,10 @@ namespace Signum.Engine.Cache
                     if (ident.IsGraphModified)
                         DisableAndInvalidate(withUpdates: true); //Even if new, loading the cache afterwars will Timeout
                 };
-                ee.PreUnsafeDelete += query => DisableAndInvalidate(withUpdates: false);
-                ee.PreUnsafeUpdate += (update, entityQuery) => DisableAndInvalidate(withUpdates: true);
+                ee.PreUnsafeDelete += query => { DisableAndInvalidate(withUpdates: false); return null; };
+                ee.PreUnsafeUpdate += (update, entityQuery) => { DisableAndInvalidate(withUpdates: true); return null; };
                 ee.PreUnsafeInsert += (query, constructor, entityQuery) => { DisableAndInvalidate(withUpdates: constructor.Body.Type.IsInstantiationOf(typeof(MListElement<,>))); return constructor; };
-                ee.PreUnsafeMListDelete += (mlistQuery, entityQuery) => DisableAndInvalidate(withUpdates: true);
+                ee.PreUnsafeMListDelete += (mlistQuery, entityQuery) => { DisableAndInvalidate(withUpdates: true); return null; };
                 ee.PreBulkInsert += inMListTable => DisableAndInvalidate(withUpdates: inMListTable);
             }
 
@@ -529,6 +544,15 @@ namespace Signum.Engine.Cache
             public void NotifyInvalidated()
             {
                 Invalidated?.Invoke(this, CacheEventArgs.Invalidated);
+            }
+            
+            public override List<T> RequestByBackReference<R>(IRetriever retriever, Expression<Func<T, Lite<R>>> backReference, Lite<R> lite)
+            {
+                var dic = this.cachedTable.GetBackReferenceDictionary(backReference);
+
+                var ids = dic.TryGetC(lite.Id).EmptyIfNull();
+
+                return ids.Select(id => retriever.Complete<T>(id, e => this.Complete(e, retriever))).ToList();
             }
 
             public Type Type

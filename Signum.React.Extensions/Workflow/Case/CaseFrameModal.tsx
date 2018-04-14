@@ -1,8 +1,7 @@
 ﻿import * as React from 'react'
 import { Dic } from '../../../../Framework/Signum.React/Scripts/Globals'
-import { Modal, ModalProps, ModalClass, ButtonToolbar, Button } from 'react-bootstrap'
 import { openModal, IModalProps } from '../../../../Framework/Signum.React/Scripts/Modals'
-import { TypeContext, StyleOptions, EntityFrame  } from '../../../../Framework/Signum.React/Scripts/TypeContext'
+import { TypeContext, StyleOptions, EntityFrame } from '../../../../Framework/Signum.React/Scripts/TypeContext'
 import { TypeInfo, getTypeInfo, parseId, GraphExplorer, PropertyRoute, ReadonlyBinding, } from '../../../../Framework/Signum.React/Scripts/Reflection'
 import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
 import MessageModal from '../../../../Framework/Signum.React/Scripts/Modals/MessageModal'
@@ -22,6 +21,8 @@ import { OperationMessage } from "../../../../Framework/Signum.React/Scripts/Sig
 import "../../../../Framework/Signum.React/Scripts/Frames/Frames.css"
 import "./CaseAct.css"
 import { IHasCaseActivity } from '../WorkflowClient';
+import { Modal, ErrorBoundary } from '../../../../Framework/Signum.React/Scripts/Components';
+import { ModalHeaderButtons } from '../../../../Framework/Signum.React/Scripts/Components/Modal';
 
 interface CaseFrameModalProps extends React.Props<CaseFrameModal>, IModalProps {
     title?: string;
@@ -58,7 +59,7 @@ export default class CaseFrameModal extends React.Component<CaseFrameModalProps,
     componentWillReceiveProps(props: any) {
         this.setState(this.calculateState(props));
 
-        WorkflowClient.toEntityPackWorkflow(this.props.entityOrPack)  
+        WorkflowClient.toEntityPackWorkflow(this.props.entityOrPack)
             .then(ep => this.setPack(ep))
             .then(() => this.loadComponent())
             .done();
@@ -93,13 +94,13 @@ export default class CaseFrameModal extends React.Component<CaseFrameModalProps,
                 style: "warning"
             }).then(result => {
                 if (result != "yes")
-                return;
+                    return;
 
                 this.setState({ show: false });
             }).done();
         }
         else
-        this.setState({ show: false });
+            this.setState({ show: false });
     }
 
     hasChanges() {
@@ -111,7 +112,7 @@ export default class CaseFrameModal extends React.Component<CaseFrameModalProps,
         return entity.modified;
     }
 
-    okClicked: boolean;
+    okClicked: boolean = false;
     handleCancelClicked = () => {
         if (this.hasChanges() && !this.props.avoidPromptLooseChange) {
             MessageModal.show({
@@ -128,8 +129,8 @@ export default class CaseFrameModal extends React.Component<CaseFrameModalProps,
             this.setState({ show: false });
         }
     }
-    
-    handleOkClicked = (val: any) => {
+
+    handleOkClicked = () => {
         if (this.hasChanges()) {
             MessageModal.show({
                 title: NormalWindowMessage.ThereAreChanges.niceToString(),
@@ -157,20 +158,20 @@ export default class CaseFrameModal extends React.Component<CaseFrameModalProps,
         var pack = this.state.pack;
 
         return (
-            <Modal bsSize="lg" onHide= { this.handleCloseClicked } show= { this.state.show } onExited= { this.handleOnExited } className= "sf-popup-control" >
-                <Modal.Header closeButton={this.props.isNavigate}>
-                    {!this.props.isNavigate && <ButtonToolbar className="pull-right flip">
-                        <Button className="sf-entity-button sf-close-button sf-ok-button" bsStyle="primary" disabled={!pack} onClick={this.handleOkClicked}>{JavascriptMessage.ok.niceToString()}</Button>
-                        <Button className="sf-entity-button sf-close-button sf-cancel-button" bsStyle="default" disabled={!pack} onClick={this.handleCancelClicked}>{JavascriptMessage.cancel.niceToString()}</Button>
-                    </ButtonToolbar>}
-                    {this.renderTitle() }
-                </Modal.Header>
-                {pack && this.renderBody() }
+            <Modal size="lg" show={this.state.show} onExited={this.handleOnExited} onHide={this.handleCancelClicked} className="sf-popup-control" >
+                <ModalHeaderButtons htmlAttributes={{ style: { display: "block" } }} closeBeforeTitle={true}
+                    onClose={this.props.isNavigate ? this.handleCancelClicked : undefined}
+                    onOk={!this.props.isNavigate ? this.handleOkClicked : undefined}
+                    onCancel={!this.props.isNavigate ? this.handleCancelClicked : undefined}
+                    okDisabled={!pack}>
+                    {this.renderTitle()}
+                </ModalHeaderButtons>
+                {pack && this.renderBody()}
             </Modal>
         );
     }
 
-    entityComponent: React.Component<any, any>;
+    entityComponent?: React.Component<any, any>;
 
     setComponent(c: React.Component<any, any>) {
         if (c && this.entityComponent != c) {
@@ -202,16 +203,16 @@ export default class CaseFrameModal extends React.Component<CaseFrameModalProps,
         };
 
         var activityPack = { entity: pack.activity, canExecute: pack.canExecuteActivity };
-        
+
         return (
-            <Modal.Body>
+            <div className="modal-body">
                 <CaseFromSenderInfo current={pack.activity} />
                 {!pack.activity.case.isNew && <div className="inline-tags"> <InlineCaseTags case={toLite(pack.activity.case)} /></div>}
-                <div className="sf-main-control form-horizontal" data-test-ticks={new Date().valueOf() } data-activity-entity={entityInfo(pack.activity) }>
-                    { this.renderMainEntity() }
+                <div className="sf-main-control" data-test-ticks={new Date().valueOf()} data-activity-entity={entityInfo(pack.activity)}>
+                    {this.renderMainEntity()}
                 </div>
                 {this.entityComponent && <CaseButtonBar frame={activityFrame} pack={activityPack} />}
-            </Modal.Body>
+            </div>
         );
     }
 
@@ -261,13 +262,15 @@ export default class CaseFrameModal extends React.Component<CaseFrameModalProps,
             ctx: ctx,
             pack: mainPack,
         };
-        
+
         return (
             <div className="sf-main-entity case-main-entity" data-main-entity={entityInfo(mainEntity)}>
                 {renderWidgets(wc)}
                 {this.entityComponent && !mainEntity.isNew && !pack.activity.doneBy ? <ButtonBar frame={mainFrame} pack={mainPack} /> : <br />}
                 <ValidationErrors entity={mainEntity} ref={ve => this.validationErrors = ve} />
-                {this.state.getComponent && React.cloneElement(this.state.getComponent(ctx), { ref: (c: React.Component<any, any>) => this.setComponent(c) })}
+                <ErrorBoundary>
+                    {this.state.getComponent && React.cloneElement(this.state.getComponent(ctx), { ref: (c: React.Component<any, any>) => this.setComponent(c) })}
+                </ErrorBoundary>
             </div>
         );
     }
@@ -275,18 +278,18 @@ export default class CaseFrameModal extends React.Component<CaseFrameModalProps,
     renderTitle() {
 
         if (!this.state.pack)
-            return <h3>{JavascriptMessage.loading.niceToString() }</h3>;
+            return JavascriptMessage.loading.niceToString();
 
         const activity = this.state.pack.activity;
 
         return (
-            <h4>
-                <span className="sf-entity-title">{this.props.title || getToString(activity) }</span>&nbsp;
-                {this.renderExpandLink() }
+            <div>
+                <span className="sf-entity-title">{this.props.title || getToString(activity)}</span>&nbsp;
+                {this.renderExpandLink()}
                 <br />
                 {!activity.case.isNew && <CaseFlowButton caseActivity={this.state.pack.activity} />}
                 <small> {Navigator.getTypeTitle(activity, undefined)}</small>
-            </h4>
+            </div>
         );
     }
 
@@ -302,8 +305,8 @@ export default class CaseFrameModal extends React.Component<CaseFrameModalProps,
             return null;
 
         return (
-            <a href="" className="sf-popup-fullscreen" onClick={this.handlePopupFullScreen}>
-                <span className="glyphicon glyphicon-new-window"></span>
+            <a href="#" className="sf-popup-fullscreen" onClick={this.handlePopupFullScreen}>
+                <span className="fa fa-external-link"></span>
             </a>
         );
     }
@@ -322,7 +325,7 @@ export default class CaseFrameModal extends React.Component<CaseFrameModalProps,
     }
 
 
-    static openNavigate(entityOrPack: Lite<CaseActivityEntity> | CaseActivityEntity | WorkflowClient.CaseEntityPack, readOnly? :boolean): Promise<void> {
+    static openNavigate(entityOrPack: Lite<CaseActivityEntity> | CaseActivityEntity | WorkflowClient.CaseEntityPack, readOnly?: boolean): Promise<void> {
 
         return openModal<void>(<CaseFrameModal
             entityOrPack={entityOrPack}

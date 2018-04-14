@@ -1,6 +1,6 @@
 ﻿import * as React from 'react'
 import { classes } from '../../../../Framework/Signum.React/Scripts/Globals'
-import { FormGroup, FormControlStatic, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityList, EntityRepeater, EntityTabRepeater} from '../../../../Framework/Signum.React/Scripts/Lines'
+import { FormGroup, FormControlReadonly, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityList, EntityRepeater, EntityTabRepeater} from '../../../../Framework/Signum.React/Scripts/Lines'
 import { SearchControl }  from '../../../../Framework/Signum.React/Scripts/Search'
 import { getToString }  from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
 import { TypeContext, FormGroupStyle } from '../../../../Framework/Signum.React/Scripts/TypeContext'
@@ -55,7 +55,7 @@ export class EmailTemplateMessageComponent extends React.Component<EmailMasterTe
         return (
             <div className="sf-email-template-message">
                 <EntityCombo ctx={ec.subCtx(e => e.cultureInfo) } labelText={EmailTemplateViewMessage.Language.niceToString() } onChange={this.props.invalidate} />
-                <div className="form-vertical">
+                <div>
                     <div className="code-container">
                         <HtmlCodemirror ctx={ec.subCtx(e => e.text)} onChange={this.handleCodeMirrorChange} />
                     </div>

@@ -1,5 +1,4 @@
 ﻿import * as React from 'react'
-import { Button } from 'react-bootstrap'
 import * as numbro from 'numbro'
 import { classes } from '../../../../Framework/Signum.React/Scripts/Globals'
 import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
@@ -19,7 +18,8 @@ interface ColorRadioProps {
     checked: boolean;
     onClicked: (e: React.MouseEvent<HTMLAnchorElement>) => void;
     color: string;
- 	title?: string;
+    title?: string;
+    icon?: string | null;
 }
 
 export class ColorRadio extends React.Component<ColorRadioProps>{
@@ -27,7 +27,7 @@ export class ColorRadio extends React.Component<ColorRadioProps>{
     render() {
         return (
             <a onClick={e => { e.preventDefault(); this.props.onClicked(e); }} title={this.props.title}
-                className={classes("sf-auth-chooser", "fa", this.props.checked ? "fa-dot-circle-o" : "fa-circle-o")}
+                className={classes("sf-auth-chooser", "fa", this.props.icon || (this.props.checked ? "fa-dot-circle-o" : "fa-circle-o"))}
                 style={{ color: this.props.checked ? this.props.color : "#aaa" }}>
             </a>
         );

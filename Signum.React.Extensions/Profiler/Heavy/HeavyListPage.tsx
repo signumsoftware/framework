@@ -1,8 +1,6 @@
 ﻿import * as React from 'react'
 import { RouteComponentProps } from 'react-router'
 import * as d3 from 'd3'
-import * as numbro from 'numbro'
-import * as moment from 'moment'
 import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
 import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
 import EntityLink from '../../../../Framework/Signum.React/Scripts/SearchControl/EntityLink'
@@ -101,15 +99,15 @@ export default class HeavyList extends React.Component<HeavyListProps, { enabled
                 <br />
                 <div className="btn-toolbar" style={{ float: "right" }}>
                     <input key={this.state.fileVer} type="file" className="form-control" onChange={this.handleInputChange} style={{ display: "inline", float: "left", width: "inherit" }} />
-                    <button onClick={this.handleUpload} className="btn btn-info" disabled={!this.state.fileToUpload}><span className="glyphicon glyphicon-cloud-upload" aria-hidden="true"></span> Upload</button>
+                    <button onClick={this.handleUpload} className="btn btn-info" disabled={!this.state.fileToUpload}><span className="fa fa-cloud-upload" aria-hidden="true"></span> Upload</button>
                 </div>
                 <div className="btn-toolbar">
-                    { !this.state.enabled ? <button onClick={() => this.handleSetEnabled(true) } className="btn btn-default primary">Enable</button> :
-                        <button onClick={() => this.handleSetEnabled(false) } className="btn btn-default" style={{ color: "red" }}>Disable</button>
+                    { !this.state.enabled ? <button onClick={() => this.handleSetEnabled(true) } className="btn btn-light primary">Enable</button> :
+                        <button onClick={() => this.handleSetEnabled(false) } className="btn btn-light" style={{ color: "red" }}>Disable</button>
                     }
-                    <button onClick={this.handleUpdate} className="btn btn-default">Update</button>
-                    <button onClick={this.handleClear} className="btn btn-default">Clear</button>
-                    <button onClick={this.handleDownload} className="btn btn-info"><span className="glyphicon glyphicon-cloud-download" aria-hidden="true"></span> Download</button>
+                    <button onClick={this.handleUpdate} className="btn btn-light">Update</button>
+                    <button onClick={this.handleClear} className="btn btn-light">Clear</button>
+                    <button onClick={this.handleDownload} className="btn btn-info"><span className="fa fa-cloud-download" aria-hidden="true"></span> Download</button>
                 </div>
                 <br/>
                 <p className="help-block">Upload previous runs to compare performance.</p>

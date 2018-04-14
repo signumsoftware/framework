@@ -18,9 +18,10 @@ export class CaseFlowRenderer extends CustomRenderer {
         super(eventBus, styles, pathMap, canvas, 1200);
     }
 
-    caseFlow: CaseFlow;
-
-    viewer: NavigatedViewer;
+    caseFlow!: CaseFlow;
+    maxDuration!: number;
+    viewer!: NavigatedViewer;
+    caseFlowColor?: CaseFlowColor;
 
     drawConnection(visuals: any, element: BPMN.DiElement) {
 
@@ -33,15 +34,12 @@ export class CaseFlowRenderer extends CustomRenderer {
         else {
             const pathGroup = (path.parentNode as SVGGElement).parentNode as SVGGElement;
             const title = (Array.toArray(pathGroup.childNodes) as SVGElement[]).filter(a => a.nodeName == "title").firstOrNull() || pathGroup.appendChild(document.createElementNS("http://www.w3.org/2000/svg", "title"));
-            title.textContent = stats.map(con => `${DoneType.niceToString(con.DoneType)} (${con.DoneBy.toStr} ${moment(con.DoneDate).fromNow()})`).join("\n");
+            title.textContent = stats.filter(con => con.DoneDate != null).map(con => `${DoneType.niceToString(con.DoneType)} (${con.DoneBy.toStr} ${moment(con.DoneDate).fromNow()})`).join("\n");
         }
 
         return path;
     }    
-
-    caseFlowColor?: CaseFlowColor;
-    maxDuration: number;
-
+    
     gradient = new Gradient([
         { value: 0, color: Color.parse("rgb(117, 202, 112)")},
         { value: 0.5, color: Color.parse("rgb(251, 214, 95)") },

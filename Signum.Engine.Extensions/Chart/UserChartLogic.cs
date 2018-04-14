@@ -58,8 +58,10 @@ namespace Signum.Engine.Chart
 
                 UserChartsByQuery = sb.GlobalLazy(() => UserCharts.Value.Values.Where(a => a.EntityType == null).GroupToDictionary(a => a.Query.ToQueryName(), a => a.ToLite()),
                     new InvalidateWith(typeof(UserChartEntity)));
-                
-                UserChartsByTypeForQuickLinks = sb.GlobalLazy(() => UserCharts.Value.Values.Where(a => a.EntityType != null && !a.HideQuickLink).GroupToDictionary(a => TypeLogic.IdToType.GetOrThrow(a.EntityType.Id), a => a.ToLite()),
+
+                UserChartsByTypeForQuickLinks = sb.GlobalLazy(() => UserCharts.Value.Values.Where(a => a.EntityType != null && !a.HideQuickLink)
+                .SelectCatch(a => new { Type = TypeLogic.IdToType.GetOrThrow(a.EntityType.Id), Lite = a.ToLite() })
+                .GroupToDictionary(a => a.Type, a => a.Lite),
                     new InvalidateWith(typeof(UserChartEntity)));
             }
         }
@@ -78,18 +80,28 @@ namespace Signum.Engine.Chart
             return userChart;
         }
 
-        static void ChartLogic_Retrieved(UserChartEntity userQuery)
+        static void ChartLogic_Retrieved(UserChartEntity userChart)
         {
-            object queryName = QueryLogic.ToQueryName(userQuery.Query.Key);
+            object queryName;
+            try
+            {
+                queryName = QueryLogic.ToQueryName(userChart.Query.Key);
+            }
+            catch (KeyNotFoundException ex) when (StartParameters.IgnoredCodeErrors != null)
+            {
+                StartParameters.IgnoredCodeErrors.Add(ex);
+
+                return;
+            }
 
             QueryDescription description = DynamicQueryManager.Current.QueryDescription(queryName);
 
-            foreach (var item in userQuery.Columns)
+            foreach (var item in userChart.Columns)
             {
-                item.parentChart = userQuery;
+                item.parentChart = userChart;
             }
 
-            userQuery.ParseData(description);
+            userChart.ParseData(description);
         }
 
         public static List<Lite<UserChartEntity>> GetUserCharts(object queryName)

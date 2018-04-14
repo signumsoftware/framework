@@ -1,6 +1,6 @@
 ﻿
 import * as React from 'react'
-import { FormGroup, FormControlStatic, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityList, EntityRepeater, RenderEntity } from '../../../../Framework/Signum.React/Scripts/Lines'
+import { FormGroup, FormControlReadonly, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityList, EntityRepeater, RenderEntity } from '../../../../Framework/Signum.React/Scripts/Lines'
 import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
 import { QueryDescription, SubTokensOptions, FindOptions } from '../../../../Framework/Signum.React/Scripts/FindOptions'
 import { getQueryNiceName, PropertyRoute, getTypeInfos } from '../../../../Framework/Signum.React/Scripts/Reflection'
@@ -27,7 +27,7 @@ export default class UserQueryPart extends React.Component<UserQueryPartProps, {
         super(props);
         this.state = { fo: undefined };
     }
-    
+
     componentWillMount() {
         this.loadFindOptions(this.props);
     }
@@ -84,29 +84,35 @@ interface BigValueBadgeProps {
 
 export class BigValueSearchCounter extends React.Component<BigValueBadgeProps> {
 
-    vsc: ValueSearchControl;
+    vsc!: ValueSearchControl;
     render() {
-        
+
         return (
-            <div className={"panel panel-" + this.props.style.toLowerCase()}>
-                <div className="panel-heading" onClick={this.vsc && this.vsc.handleClick} style={{ cursor: "pointer" }}>
+            <div className={classes(
+                "card",
+                this.props.style != "Light" && "text-white",
+                "bg-" + this.props.style.toLowerCase(),
+                "o-hidden"
+            )}>
+                <div className={classes("card-body", "bg-" + this.props.style.toLowerCase())} onClick={e => this.vsc.handleClick(e)} style={{ cursor: "pointer" }}>
                     <div className="row">
-                        <div className="col-xs-3">
-                            <i className={classes(this.props.iconName, "fa-5x")} style={{ color: this.props.iconColor }}></i>
+                        <div className="col-3">
+                            <i className={classes(this.props.iconName, "fa-4x")} style={{ color: this.props.iconColor }}></i>
                         </div>
-                        <div className="col-xs-9 flip text-right">
-                            <div className="huge">
+                        <div className="col-9 flip text-right">
+                            <h1>
                                 <ValueSearchControl
                                     ref={vsc => {
                                         if (this.vsc == null && vsc) {
                                             this.vsc = vsc;
-                                            this.forceUpdate();
                                         }
                                     }}
-                                    findOptions={this.props.findOptions} isLink={true} isBadge={false} />
-                            </div>
-                            <div className="large">{this.props.text || getQueryNiceName(this.props.findOptions.queryName)}</div>
+                                    findOptions={this.props.findOptions} isLink={false} isBadge={false} />
+                            </h1>
                         </div>
+                    </div>
+                    <div className="flip text-right">
+                        <h6 className="large">{this.props.text || getQueryNiceName(this.props.findOptions.queryName)}</h6>
                     </div>
                 </div>
             </div>

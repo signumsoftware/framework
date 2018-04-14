@@ -20,6 +20,7 @@ using Signum.Engine.Cache;
 using Signum.Entities.Cache;
 using Signum.Engine.Authorization;
 using Signum.Engine.Maps;
+using Signum.Entities.Files;
 
 namespace Signum.React.Files
 {
@@ -28,6 +29,23 @@ namespace Signum.React.Files
         public static void Start(HttpConfiguration config)
         {
             SignumControllerFactory.RegisterArea(MethodInfo.GetCurrentMethod());
+
+            PropertyConverter.GetPropertyConverters(typeof(FilePathEmbedded)).Add("fullWebPath", new PropertyConverter()
+            {
+                CustomWriteJsonProperty = ctx =>
+                {
+                    var csp = (FilePathEmbedded)ctx.Entity;
+                    
+                    ctx.JsonWriter.WritePropertyName(ctx.LowerCaseName);
+                    ctx.JsonSerializer.Serialize(ctx.JsonWriter, csp.FullWebPath());
+                },
+                AvoidValidate = true,
+                CustomReadJsonProperty = ctx =>
+                {
+                    var list = ctx.JsonSerializer.Deserialize(ctx.JsonReader);
+                    //Discard
+                }
+            });
         }
     }
 }

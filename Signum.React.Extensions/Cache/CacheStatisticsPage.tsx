@@ -1,12 +1,12 @@
 ﻿
 import * as React from 'react'
 import { Link, RouteComponentProps } from 'react-router-dom'
-import { Tabs, Tab } from 'react-bootstrap'
 import * as Finder from '../../../Framework/Signum.React/Scripts/Finder'
 import { QueryDescription, SubTokensOptions } from '../../../Framework/Signum.React/Scripts/FindOptions'
 import { getQueryNiceName, PropertyRoute, getTypeInfos } from '../../../Framework/Signum.React/Scripts/Reflection'
 import { ModifiableEntity, EntityControlMessage, Entity, parseLite, getToString, JavascriptMessage } from '../../../Framework/Signum.React/Scripts/Signum.Entities'
 import { API, CacheTableStats, ResetLazyStats, CacheState } from './CacheClient'
+import { Tabs, Tab, UncontrolledTabs } from '../../../Framework/Signum.React/Scripts/Components/Tabs';
 
 
 interface CacheStatisticsPageProps extends RouteComponentProps<{}> {
@@ -58,11 +58,11 @@ export default class CacheStatisticsPage extends React.Component<CacheStatistics
             <div>
                 <h2>Cache Statistics</h2>
                 <div className="btn-toolbar">
-                    {this.state.isEnabled == true && <a href="#" onClick={this.handleDisabled} className="sf-button btn btn-default" style={{ color: "red" }}>Disable</a>}
-                    {this.state.isEnabled == false && <a href="#" onClick={this.handleEnabled} className="sf-button btn btn-default" style={{ color: "green" }}>Enabled</a>}
-                    {<a href="#" onClick={this.handleClear} className="sf-button btn btn-default" style={{ color: "blue" }}>Clear</a>}
+                    {this.state.isEnabled == true && <a href="#" onClick={this.handleDisabled} className="sf-button btn btn-light" style={{ color: "red" }}>Disable</a>}
+                    {this.state.isEnabled == false && <a href="#" onClick={this.handleEnabled} className="sf-button btn btn-light" style={{ color: "green" }}>Enabled</a>}
+                    {<a href="#" onClick={this.handleClear} className="sf-button btn btn-light" style={{ color: "blue" }}>Clear</a>}
                 </div >
-                <Tabs id="tabs" justified={true}>
+                <UncontrolledTabs id="tabs">
                     {this.state.tables &&
                         <Tab title="Tables" eventKey="table">
                             {this.renderTables()}
@@ -72,7 +72,7 @@ export default class CacheStatisticsPage extends React.Component<CacheStatistics
                             {this.renderLazies()}
                         </Tab>
                     }
-                </Tabs>
+                </UncontrolledTabs>
 
 
             </div>
@@ -81,7 +81,7 @@ export default class CacheStatisticsPage extends React.Component<CacheStatistics
 
     renderLazies() {
         return (
-            <table className="table table-condensed">
+            <table className="table table-sm">
                 <thead>
                     <tr>
                         <th>Type</th>
@@ -110,7 +110,7 @@ export default class CacheStatisticsPage extends React.Component<CacheStatistics
             this.state.tables.forEach(st => this.showTree(list, st, 0));
 
         return (
-            <table className="table table-condensed">
+            <table className="table table-sm">
                 <thead>
                     <tr>
                         <th>Table</th>

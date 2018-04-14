@@ -103,14 +103,14 @@ namespace Signum.Entities.Chart
             return base.PropertyValidation(pi);
         }
 
-        protected override void PreSaving(ref bool graphModified)
+        protected override void PreSaving(PreSavingContext ctx)
         {
             string from = Columns.Where(a => a.IsGroupKey).ToString(c => c.ColumnType.GetCode() + (c.IsOptional ? "?" : ""), ",");
             string to = Columns.Where(a => !a.IsGroupKey).ToString(c => c.ColumnType.GetCode() + (c.IsOptional ? "?" : ""), ",");
 
             ColumnsStructure = "{0} -> {1}".FormatWith(from.HasText()? from:"n", to.HasText() ? to : "n");
 
-            base.PreSaving(ref graphModified);
+            base.PreSaving(ctx);
         }
 
         protected override void PostRetrieving()

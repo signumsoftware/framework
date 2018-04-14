@@ -1,5 +1,4 @@
 ﻿import * as React from 'react'
-import { Button } from 'react-bootstrap'
 import * as numbro from 'numbro'
 import { classes } from '../../../../Framework/Signum.React/Scripts/Globals'
 import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
@@ -26,6 +25,8 @@ import { QueryEntity, PropertyRouteEntity } from '../../../../Framework/Signum.R
 
 
 import "./AuthAdmin.css"
+import { Button } from '../../../../Framework/Signum.React/Scripts/Components';
+import { is } from '../../../../Framework/Signum.React/Scripts/Signum.Entities';
 
 export default class TypesRulesPackControl extends React.Component<{ ctx: TypeContext<TypeRulePack> }, { filter: string }> implements IRenderButtons {
 
@@ -77,9 +78,9 @@ export default class TypesRulesPackControl extends React.Component<{ ctx: TypeCo
         const hasChanges = bc.pack.entity.modified;
 
         return [
-            <Button bsStyle="primary" disabled={!hasChanges} onClick={() => this.handleSaveClick(bc)}>{AuthMessage.Save.niceToString()}</Button>,
-            <Button bsStyle="warning" disabled={!hasChanges} onClick={() => this.handleResetChangesClick(bc)}>{AuthAdminMessage.ResetChanges.niceToString()}</Button>,
-            <Button bsStyle="info" disabled={hasChanges} onClick={() => this.handleSwitchToClick(bc)}>{AuthAdminMessage.SwitchTo.niceToString()}</Button>
+            <Button color="primary" disabled={!hasChanges} onClick={() => this.handleSaveClick(bc)}>{AuthMessage.Save.niceToString()}</Button>,
+            <Button color="warning" disabled={!hasChanges} onClick={() => this.handleResetChangesClick(bc)}>{AuthAdminMessage.ResetChanges.niceToString()}</Button>,
+            <Button color="info" disabled={hasChanges} onClick={() => this.handleSwitchToClick(bc)}>{AuthAdminMessage.SwitchTo.niceToString()}</Button>
         ];
     }
 
@@ -140,12 +141,12 @@ export default class TypesRulesPackControl extends React.Component<{ ctx: TypeCo
                     <ValueLine ctx={ctx.subCtx(f => f.strategy) }  />
                 </div>
                 
-                <table className="table table-condensed sf-auth-rules">
+                <table className="table table-sm sf-auth-rules">
                     <thead>
                         <tr>
                             <th>
-                                <div className="form-sm" style={{ marginBottom: "-2px"}}>
-                                    <input type="text" className="form-control" id="filter" placeholder="Auth-!overriden+!conditions" value={this.state.filter} onChange={this.handleSetFilter} />
+                                <div style={{ marginBottom: "-2px"}}>
+                                    <input type="text" className="form-control-sm" id="filter" placeholder="Auth-!overriden+!conditions" value={this.state.filter} onChange={this.handleSetFilter} />
                                 </div>
                             </th>
 
@@ -220,6 +221,10 @@ export default class TypesRulesPackControl extends React.Component<{ ctx: TypeCo
 
         let remaining = ctx.value.availableConditions.filter(tcs => !used.contains(tcs.id!));
 
+        var typeInfo = getTypeInfo(ctx.value.resource.cleanName);
+
+        var masterClass = typeInfo.entityData == "Master" ? "sf-master" : undefined;
+
         let fallback = Binding.create(ctx.value.allowed, a => a.fallback);
         return [
             <tr key={ctx.value.resource.namespace + "." + ctx.value.resource.className} className={classes("sf-auth-type", ctx.value.allowed.conditions.length > 0 && "sf-auth-with-conditions")}>
@@ -227,12 +232,12 @@ export default class TypesRulesPackControl extends React.Component<{ ctx: TypeCo
                     { remaining.length > 0 ? <a className="fa fa-plus-circle sf-condition-icon" aria-hidden="true" onClick={() => this.handleAddConditionClick(remaining, ctx.value.allowed) }></a> :
                         <i className="fa fa-circle sf-placeholder-icon" aria-hidden="true"></i> }
                     &nbsp;
-                    { getTypeInfo(ctx.value.resource.cleanName).niceName }
+                    {typeInfo.niceName} {typeInfo.entityData && <small title={typeInfo.entityData}>{typeInfo.entityData[0]}</small>}
                 </td>
-                <td style={{ textAlign: "center" }}>
+                <td style={{ textAlign: "center" }} className={masterClass}>
                     {this.colorRadio(fallback, "Create", "#0099FF") }
                 </td>
-                <td style={{ textAlign: "center" }}>
+                <td style={{ textAlign: "center" }} className={masterClass}>
                     {this.colorRadio(fallback, "Modify", "green") }
                 </td>
                 <td style={{ textAlign: "center" }}>
@@ -278,10 +283,10 @@ export default class TypesRulesPackControl extends React.Component<{ ctx: TypeCo
                         &nbsp;
                         <small>{ c.typeCondition.toStr.tryAfter(".") || c.typeCondition.toStr }</small>
                     </td>
-                    <td style={{ textAlign: "center" }}>
+                    <td style={{ textAlign: "center" }} className={masterClass}>
                         {this.colorRadio(b, "Create", "#0099FF") }
                     </td>
-                    <td style={{ textAlign: "center" }}>
+                    <td style={{ textAlign: "center" }} className={masterClass}>
                         {this.colorRadio(b, "Modify", "green") }
                     </td>
                     <td style={{ textAlign: "center" }}>
@@ -309,10 +314,17 @@ export default class TypesRulesPackControl extends React.Component<{ ctx: TypeCo
                     getUI(allowed) == basicAllowed ? AuthAdminMessage._0InUI.niceToString(niceName) :
                         niceName;
 
+        const icon = !allowed ? null :
+            getDB(allowed) == getUI(allowed) && getUI(allowed) == basicAllowed ? null :
+                getDB(allowed) == basicAllowed ? "fa fa-database" :
+                    getUI(allowed) == basicAllowed ? "fa fa-window-restore" :
+                        null;
+
         return <ColorRadio
             checked={isActive(allowed, basicAllowed)}
             title={title}
             color={color}
+            icon={icon}
             onClicked={e => { b.setValue(select(b.getValue(), basicAllowed, e)); this.updateFrame(); }}
         />;
     }
@@ -366,7 +378,7 @@ function typeAllowedEquals(allowed: TypeAllowedAndConditions, allowedBase: TypeA
         && allowed.conditions!.map(mle => mle.element)
             .every((c, i) => {
                 let b = allowedBase.conditions![i].element;
-                return c.allowed == b.allowed && c.typeCondition!.id == b.typeCondition!.id;
+                return c.allowed == b.allowed && is(c.typeCondition, b.typeCondition);
             });
 }
 

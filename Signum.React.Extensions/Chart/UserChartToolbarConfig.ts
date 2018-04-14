@@ -1,7 +1,6 @@
 ﻿import * as React from 'react'
 import { Route } from 'react-router'
 import { Dic, classes } from '../../../Framework/Signum.React/Scripts/Globals';
-import { Button, OverlayTrigger, Tooltip, MenuItem, } from "react-bootstrap"
 import { ajaxPost, ajaxPostRaw, ajaxGet, saveFile } from '../../../Framework/Signum.React/Scripts/Services';
 import * as Navigator from '../../../Framework/Signum.React/Scripts/Navigator'
 import * as Finder from '../../../Framework/Signum.React/Scripts/Finder'
@@ -17,8 +16,7 @@ import { UserChartEntity  } from './Signum.Entities.Chart'
 export default class UserChartToolbarConfig extends ToolbarConfig<UserChartEntity> {
 
     constructor() {
-        super();
-        this.type = UserChartEntity;
+        super(UserChartEntity);
     }
 
     getIcon(element: ToolbarResponse<UserChartEntity>) {

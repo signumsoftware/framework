@@ -1,7 +1,6 @@
 ﻿import * as React from 'react'
-import { Tab, Tabs } from 'react-bootstrap'
 import { classes } from '../../../../Framework/Signum.React/Scripts/Globals'
-import { FormGroup, FormControlStatic, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityDetail, EntityList, EntityRepeater, EntityTabRepeater } from '../../../../Framework/Signum.React/Scripts/Lines'
+import { FormGroup, FormControlReadonly, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityDetail, EntityList, EntityRepeater, EntityTabRepeater } from '../../../../Framework/Signum.React/Scripts/Lines'
 import { SubTokensOptions, QueryToken, QueryTokenType, hasAnyOrAll } from '../../../../Framework/Signum.React/Scripts/FindOptions'
 import { SearchControl } from '../../../../Framework/Signum.React/Scripts/Search'
 import { getToString, getMixin } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
@@ -49,7 +48,7 @@ export default class ToolbarElement extends React.Component<{ ctx: TypeContext<T
                             <ColorTypeaheadLine ctx={ctx4.subCtx(t => t.iconColor)} onChange={() => this.forceUpdate()} />
                         </div>
                         <div className="col-sm-1">
-                            {ctx4.value.iconName && <span className={ctx4.value.iconName} style={{ backgroundColor: bgColor, color: ctx4.value.iconColor, fontSize: "25px", marginTop: "17px" }} />}
+                            {ctx4.value.iconName && <span className={ctx4.value.iconName} style={{ backgroundColor: bgColor, color: ctx4.value.iconColor || undefined, fontSize: "25px", marginTop: "17px" }} />}
                         </div>
                         <div className="col-sm-5">
                             <ValueLine ctx={ctx2.subCtx(t => t.label)} valueHtmlAttributes={{ placeholder: content && content.toStr || undefined }} />

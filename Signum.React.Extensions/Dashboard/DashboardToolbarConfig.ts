@@ -1,7 +1,6 @@
 ﻿import * as React from 'react'
 import { Route } from 'react-router'
 import { Dic, classes } from '../../../Framework/Signum.React/Scripts/Globals';
-import { Button, OverlayTrigger, Tooltip, MenuItem, } from "react-bootstrap"
 import { ajaxPost, ajaxPostRaw, ajaxGet, saveFile } from '../../../Framework/Signum.React/Scripts/Services';
 import * as Navigator from '../../../Framework/Signum.React/Scripts/Navigator'
 import * as Finder from '../../../Framework/Signum.React/Scripts/Finder'
@@ -16,8 +15,7 @@ import { DashboardEntity } from './Signum.Entities.Dashboard'
 export default class DashboardToolbarConfig extends ToolbarConfig<DashboardEntity> {
 
     constructor() {
-        super();
-        this.type = DashboardEntity;
+        super(DashboardEntity);
     }
 
     getIcon(element: ToolbarResponse<DashboardEntity>) {

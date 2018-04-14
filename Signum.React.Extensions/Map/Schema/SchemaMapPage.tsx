@@ -42,7 +42,7 @@ export default class SchemaMapPage extends React.Component<SchemaMapPageProps, S
         this.state = { filter: "", color: "" };
     }
 
-    wasExpanded: boolean;
+    wasExpanded!: boolean;
 
     componentWillMount() {
 
@@ -104,7 +104,7 @@ export default class SchemaMapPage extends React.Component<SchemaMapPageProps, S
         return result;
     }
 
-    div: HTMLDivElement;
+    div!: HTMLDivElement;
     handleSetInitialSize = (div: HTMLDivElement) => {
 
         if (this.div)
@@ -176,14 +176,14 @@ export default class SchemaMapPage extends React.Component<SchemaMapPageProps, S
         const s = this.state;
 
         return (
-            <div className="form-inline form-sm container" style={{ marginTop: "10px" }}>
-                <div className="form-group">
+            <div className="form-inline container" style={{ marginTop: "10px" }}>
+                <div className="form-group form-group-sm">
                     <label htmlFor="filter"> { MapMessage.Filter.niceToString() }</label>&nbsp;
-                    <input type="text" className="form-control" id="filter" placeholder="type or namespace" value={s.filter} onChange={this.handleSetFilter}/>
+                    <input type="text" className="form-control form-control-sm" id="filter" placeholder="type or namespace" value={s.filter} onChange={this.handleSetFilter}/>
                 </div>
-                <div className="form-group" style={{ marginLeft: "10px" }}>
+                <div className="form-group form-group-sm" style={{ marginLeft: "10px" }}>
                     <label htmlFor="color"> { MapMessage.Color.niceToString() }</label>&nbsp;
-                    <select className="form-control" id="color" value={s.color} onChange={this.handleSetColor}>
+                    <select className="form-control form-control-sm" id="color" value={s.color} onChange={this.handleSetColor}>
                         {
                             s.schemaMapInfo &&
                             s.schemaMapInfo.providers.map((a, i) =>
@@ -196,7 +196,7 @@ export default class SchemaMapPage extends React.Component<SchemaMapPageProps, S
                 </span>
                 &nbsp;
                 <a id="sfFullScreen" className="sf-popup-fullscreen" onClick={this.handleFullscreenClick} href="#">
-                    <span className="glyphicon glyphicon-new-window"></span>
+                    <span className="fa fa-external-link"></span>
                 </a>
             </div>
         );
@@ -297,7 +297,7 @@ export class SchemaMapRenderer extends React.Component<SchemaMapRendererProps, {
         this.state.mapD3.stop();
     }
 
-    svg: SVGElement;
+    svg!: SVGElement;
 
     render() {
 
@@ -317,7 +317,7 @@ export class SchemaMapRenderer extends React.Component<SchemaMapRendererProps, {
                             <path fill="gray" d="M0,0L0,-5L10,0L0,5L0,0L-10,5L-10,-5L0,0" />
                         </marker>
                         {
-                            React.Children.map(Dic.getValues(this.props.providers).map(a => a.defs).filter(d=>!!d),
+                            React.Children.map(Dic.getValues(this.props.providers).map(a => a.defs).filter(defs => !!defs).flatMap(defs => defs!),
                                 (c, i) => React.cloneElement(c as React.ReactElement<any>, { key: i }))
                         }
                     </defs>

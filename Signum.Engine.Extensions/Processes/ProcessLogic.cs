@@ -154,9 +154,10 @@ namespace Signum.Engine.Processes
                 dqm.RegisterExpression((IProcessDataEntity p) => p.Processes(), () => typeof(ProcessEntity).NicePluralName());
                 dqm.RegisterExpression((IProcessDataEntity p) => p.LastProcess(), () => ProcessMessage.LastProcess.NiceToString());
 
+                dqm.RegisterExpression((ProcessEntity p) => p.ExceptionLines(), () => ProcessMessage.ExceptionLines.NiceToString());
                 dqm.RegisterExpression((IProcessLineDataEntity p) => p.ExceptionLines(), () => ProcessMessage.ExceptionLines.NiceToString());
 
-                PropertyAuthLogic.AvoidAutomaticUpgradeCollection.Add(PropertyRoute.Construct((ProcessEntity p) => p.User));
+                PropertyAuthLogic.SetMaxAutomaticUpgrade(PropertyRoute.Construct((ProcessEntity p) => p.User), PropertyAllowed.Read);
 
                 ExceptionLogic.DeleteLogs += ExceptionLogic_DeleteLogs;
             }
@@ -166,9 +167,12 @@ namespace Signum.Engine.Processes
         {
             void Remove(ProcessState processState)
             {
-                var dateLimit = parameters.GetDateLimit(typeof(ProcessEntity).ToTypeEntity());
+                var dateLimit = parameters.GetDateLimitDelete(typeof(ProcessEntity).ToTypeEntity());
 
-                var query = Database.Query<ProcessEntity>().Where(p => p.State == processState && p.CreationDate < dateLimit);
+                if (dateLimit == null)
+                    return;
+
+                var query = Database.Query<ProcessEntity>().Where(p => p.State == processState && p.CreationDate < dateLimit.Value);
 
                 query.SelectMany(a => a.ExceptionLines()).UnsafeDeleteChunksLog(parameters, sb, token);
 
@@ -371,7 +375,7 @@ namespace Signum.Engine.Processes
         }
 
         public static void ForEach<T>(this ExecutingProcess executingProcess, List<T> collection,
-            Func<T, string> elementInfo, Action<T> action)
+            Func<T, string> elementInfo, Action<T> action, string status = null)
         {
             if (executingProcess == null)
             {
@@ -385,14 +389,14 @@ namespace Signum.Engine.Processes
                         action(item);
                         tr.Commit();
                     }
-                });
+                }, status);
 
             }
         }
 
 
         public static void ForEachNonTransactional<T>(this ExecutingProcess executingProcess, List<T> collection,
-            Func<T, string> elementInfo, Action<T> action)
+            Func<T, string> elementInfo, Action<T> action, string status = null)
         {
             if (executingProcess == null)
             {
@@ -411,7 +415,6 @@ namespace Signum.Engine.Processes
                         try
                         {
                             action(item);
-
                         }
                         catch (Exception e)
                         {
@@ -433,7 +436,7 @@ namespace Signum.Engine.Processes
                             });
                         }
 
-                        executingProcess.ProgressChanged(j++, totalCount);
+                        executingProcess.ProgressChanged(j++, totalCount, status);
                     }
                 }
 
@@ -492,13 +495,17 @@ namespace Signum.Engine.Processes
             Dictionary<K, O> oldDictionary,
             Action<K, N> createNew,
             Action<K, O> removeOld,
-            Action<K, N, O> merge)
+            Action<K, N, O> merge,
+            string status = null)
             where O : class
             where N : class
         {
 
             if (ep == null)
+            {
+                ep.WriteLineColor(ConsoleColor.Green, status);
                 Synchronizer.SynchronizeProgressForeach(newDictionary, oldDictionary, createNew, removeOld, merge);
+            }
             else
             {
                 HashSet<K> keys = new HashSet<K>();
@@ -521,7 +528,7 @@ namespace Signum.Engine.Processes
                     {
                         merge?.Invoke(key, newVal, oldVal);
                     }
-                });
+                }, status);
             }
         }
 

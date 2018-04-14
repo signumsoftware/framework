@@ -72,10 +72,14 @@ namespace Signum.React.Selenium
             IWebElement textOrTextArea = this.Element.TryFindElement(By.CssSelector("input[type=text], textarea"));
             if (textOrTextArea != null)
                 return textOrTextArea.GetAttribute("value");
-            
+
+            IWebElement select = this.Element.TryFindElement(By.CssSelector("select"));
+            if (select != null)
+                return select.SelectElement().SelectedOption.GetAttribute("value").ToString();
+
             IWebElement readonlyField = this.Element.TryFindElement(By.CssSelector("p.form-control, p.form-control-static"));
             if (readonlyField != null)
-                return readonlyField.Text;
+                return readonlyField.GetAttribute("data-value") ?? readonlyField.Text;
 
             throw new InvalidOperationException("Element {0} not found".FormatWith(Route.PropertyString()));
         }
@@ -84,6 +88,12 @@ namespace Signum.React.Selenium
         {
             return this.Element.IsElementPresent(By.CssSelector("p.form-control"));
         }
+
+        public bool IsDisabled()
+        {
+            return this.EditableElement.WaitVisible().GetAttribute("disabled") == "true";
+        }
+
 
         public WebElementLocator EditableElement
         {

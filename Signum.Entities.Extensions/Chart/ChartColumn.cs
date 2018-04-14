@@ -150,7 +150,7 @@ namespace Signum.Entities.Chart
             return DisplayName + (unit.HasText() ? " ({0})".FormatWith(unit) : null);
         }
 
-        protected override void PreSaving(ref bool graphModified)
+        protected override void PreSaving(PreSavingContext ctx)
         {
             DisplayName = displayName;
         }

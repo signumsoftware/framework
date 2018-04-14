@@ -1,5 +1,4 @@
 ﻿import * as React from 'react'
-import { Tabs, Tab } from 'react-bootstrap'
 import * as numbro from 'numbro'
 import * as moment from 'moment'
 import { classes } from '../../../Framework/Signum.React/Scripts/Globals'
@@ -21,6 +20,7 @@ import { RouteComponentProps } from "react-router";
 import * as QueryString from 'query-string';
 
 import "./DynamicPanelPage.css"
+import { Tab, Tabs } from '../../../Framework/Signum.React/Scripts/Components/Tabs';
 
 interface DynamicPanelProps extends RouteComponentProps<{}> {
 }
@@ -63,12 +63,12 @@ export default class DynamicPanelPage extends React.Component<DynamicPanelProps,
                 {errors && errors.length > 0 &&
                     <div role="alert" className="alert alert-danger" style={{ marginTop: "20px" }}>
                         <p>
-                        <span className="glyphicon glyphicon-warning-sign"></span>
-                        {" "}The server started, but there {errors.length > 1 ? "are" : "is"} <a href="" onClick={this.handleErrorClick}>{errors.length} {errors.length > 1 ? "errors" : "error"}</a>.
+                        <span className="fa fa-exclamation-triangle"></span>
+                        {" "}The server started, but there {errors.length > 1 ? "are" : "is"} <a href="#" onClick={this.handleErrorClick}>{errors.length} {errors.length > 1 ? "errors" : "error"}</a>.
                         </p>
                     </div>
                 }
-                <Tabs activeKey={step || "compile"} id="dynamicPanelTabs" style={{ marginTop: "20px" }} onSelect={this.handleSelect}>
+                <Tabs activeEventKey={step || "compile"} id="dynamicPanelTabs" style={{ marginTop: "20px" }} toggle={this.handleSelect}>
                     <Tab eventKey="compile" title="1. Edit and Compile">
                         <CompileStep />
                     </Tab>
@@ -119,7 +119,7 @@ export class CompileStep extends React.Component<{}, DynamicCompileStepState>{
         var sc = new StyleContext(undefined, { labelColumns: { sm: 3 } });
 
         const lines = Options.onGetDynamicLineForPanel.map(f => f(sc));
-        const lineContainer = React.cloneElement(<div className="form-horizontal" />, undefined, ...lines);
+        const lineContainer = React.cloneElement(<div />, undefined, ...lines);
 
         const errors = this.state.complationErrors;
 
@@ -154,7 +154,7 @@ export class CompileStep extends React.Component<{}, DynamicCompileStepState>{
 
         return (
             <div>
-                <table className="table table-condensed">
+                <table className="table table-sm">
                     <thead style={{ color: "#a94464" }}>
                         <tr>
                             <th>Error Number</th>

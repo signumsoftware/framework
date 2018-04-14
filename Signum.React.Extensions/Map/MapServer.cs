@@ -17,6 +17,7 @@ using Signum.Entities.DynamicQuery;
 using Signum.React.Maps;
 using Signum.Entities.Map;
 using Signum.React.Facades;
+using Signum.Engine.Maps;
 
 namespace Signum.React.Map
 {
@@ -71,6 +72,18 @@ namespace Signum.React.Map
                     NiceName = MapMessage.Rows.NiceToString(),
                 }
             };
+            
+            if (Schema.Current.Tables.Any(a => a.Value.SystemVersioned != null))
+            {
+                SchemaMap.GetColorProviders += () => new[]
+                {
+                    new MapColorProvider
+                    {
+                        Name = "rows_history",
+                        NiceName = MapMessage.RowsHistory.NiceToString(),
+                    }
+                };
+            }
 
             SchemaMap.GetColorProviders += () => new[]
             {
@@ -80,6 +93,18 @@ namespace Signum.React.Map
                     NiceName = MapMessage.TableSize.NiceToString(),
                 }
             };
+
+            if(Schema.Current.Tables.Any(a => a.Value.SystemVersioned != null))
+            { 
+                SchemaMap.GetColorProviders += () => new[]
+                {
+                    new MapColorProvider
+                    {
+                        Name = "tableSize_history",
+                        NiceName = MapMessage.TableSizeHistory.NiceToString(),
+                    }
+                };
+            }
         }
     }
 }

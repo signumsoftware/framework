@@ -1,7 +1,5 @@
 ﻿import * as React from 'react'
-import { Panel, PanelGroup } from "react-bootstrap";
 import { classes } from '../../../../Framework/Signum.React/Scripts/Globals'
-import { BsStyle } from "../../../../Framework/Signum.React/Scripts/Operations";
 
 export interface ScrollPanelsProps {
     children: React.ReactElement<ScrollPanelProps>[];
@@ -17,7 +15,7 @@ export class ScrollPanels extends React.Component<ScrollPanelsProps> {
                 <ul className="nav nav-pills" role="tablist" id={this.props.backId}>
                     {
                         this.props.children.map(p =>
-                            <li role="presentation" key={p.props.id}>
+                            <li className="nav-item" role="presentation" key={p.props.id}>
                                 <Scrollchor to={p.props.id}>{p.props.title}</Scrollchor>
                             </li>
                         )
@@ -64,7 +62,7 @@ export class Scrollchor extends React.Component<ScrollchorProps> {
 
         return !this.props.children
             ? null
-            : <a {...props} href={'#' + this.props.to} onClick={this.handleClick} />;
+            : <a className="nav-link" {...props} href={'#' + this.props.to} onClick={this.handleClick} />;
     }
 }
 

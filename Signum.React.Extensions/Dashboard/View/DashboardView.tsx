@@ -1,6 +1,6 @@
 ﻿
 import * as React from 'react'
-import { FormGroup, FormControlStatic, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityList, EntityRepeater, RenderEntity } from '../../../../Framework/Signum.React/Scripts/Lines'
+import { FormGroup, FormControlReadonly, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityList, EntityRepeater, RenderEntity } from '../../../../Framework/Signum.React/Scripts/Lines'
 import { classes } from '../../../../Framework/Signum.React/Scripts/Globals'
 import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
 import { QueryDescription, SubTokensOptions } from '../../../../Framework/Signum.React/Scripts/FindOptions'
@@ -48,7 +48,7 @@ export default class DashboardView extends React.Component<{ dashboard: Dashboar
                                     const offset = c.value.startColumn! - (prev ? (prev.startColumn! + prev.columns!) : 0);
 
                                     return (
-                                        <div key={j} className={`col-sm-${c.value.columns} col-sm-offset-${offset}`}>
+                                        <div key={j} className={`col-sm-${c.value.columns} offset-sm-${offset}`}>
                                             <PanelPart ctx={c} entity={this.props.entity} />
                                         </div>
                                     );
@@ -88,7 +88,7 @@ export default class DashboardView extends React.Component<{ dashboard: Dashboar
                             const offset = c.startColumn! - (last ? (last.startColumn! + last.columnWidth!) : 0);
 
                             return (
-                                <div key={j} className={`col-sm-${c.columnWidth} col-sm-offset-${offset}`}>
+                                <div key={j} className={`col-sm-${c.columnWidth} offset-sm-${offset}`}>
                                     {c.parts.map((p, i) => <PanelPart key={i} ctx={p} entity={this.props.entity} />)}
                                 </div>
                             );
@@ -238,19 +238,24 @@ export class PanelPart extends React.Component<PanelPartProps, PanelPartState>{
                 <span className={icon} style={{ color: color }} />&nbsp;{titleText}
             </span>;
 
+        var style = p.style == undefined || p.style == "Default" ? undefined : p.style.toLowerCase();
+
         return (
-            <div className={classes("panel", "panel-" + (p.style == undefined ? "default" : p.style.firstLower()))}>
-                <div className="panel-heading sf-show-hover">
+            <div className={classes("card", style && ("border-" + style), "mb-4")}>
+                <div className={classes("card-header", "sf-show-hover", 
+                    style && style != "light" && "text-white",
+                    style && ("bg-" + style)
+                )}>
                     {renderer.handleEditClick &&
                         <a className="sf-pointer pull-right flip sf-hide" onMouseUp={e => renderer.handleEditClick!(content, lite, e)}>
-                            <span className="glyphicon glyphicon-edit"></span>&nbsp;Edit
+                            <span className="fa fa-edit"></span>&nbsp;Edit
                         </a>}
                     &nbsp;
                     {renderer.handleTitleClick == undefined ? title :
                         <a className="sf-pointer" onMouseUp={e => renderer.handleTitleClick!(content, lite, e)}>{title}</a>}
 
                 </div>
-                <div className="panel-body">
+                <div className="card-body">
                     {
                         React.createElement(this.state.component, {
                             partEmbedded: p,

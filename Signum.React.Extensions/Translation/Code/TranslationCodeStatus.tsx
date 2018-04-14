@@ -1,7 +1,5 @@
 ﻿import * as React from 'react'
 import { Link, RouteComponentProps } from 'react-router-dom'
-import * as numbro from 'numbro'
-import * as moment from 'moment'
 import { Dic } from '../../../../Framework/Signum.React/Scripts/Globals'
 import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
 import { ValueSearchControl, SearchControl } from '../../../../Framework/Signum.React/Scripts/Search'

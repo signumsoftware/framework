@@ -1,7 +1,6 @@
 ﻿import * as React from 'react'
-import { Tab, Tabs } from 'react-bootstrap'
 import { classes } from '../../../../Framework/Signum.React/Scripts/Globals'
-import { FormGroup, FormControlStatic, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityDetail, EntityList, EntityRepeater, EntityTabRepeater } from '../../../../Framework/Signum.React/Scripts/Lines'
+import { FormGroup, FormControlReadonly, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityDetail, EntityList, EntityRepeater, EntityTabRepeater } from '../../../../Framework/Signum.React/Scripts/Lines'
 import { SubTokensOptions, QueryToken, QueryTokenType, hasAnyOrAll } from '../../../../Framework/Signum.React/Scripts/FindOptions'
 import { SearchControl } from '../../../../Framework/Signum.React/Scripts/Search'
 import { getToString, getMixin } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
@@ -45,8 +44,8 @@ export default class WordTemplate extends React.Component<{ ctx: TypeContext<Wor
                 {sc.value.query &&
                     <div>
                         <div>
-                            <div className="panel panel-default form-xs" style={{ marginTop: "10px", marginBottom: "10px" }}>
-                                <div className="panel-heading" style={{ padding: "5px" }}>
+                            <div className="card form-xs" style={{ marginTop: "10px", marginBottom: "10px" }}>
+                                <div className="card-header" style={{ padding: "5px" }}>
                                     <TemplateControls queryKey={sc.value.query.key} forHtml={false} onInsert={this.handleOnInsert} />
                                 </div>
                             </div>

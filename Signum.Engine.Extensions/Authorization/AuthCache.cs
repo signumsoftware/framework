@@ -14,6 +14,7 @@ using System.Data.SqlClient;
 using System.Threading;
 using System.Data.Common;
 using Signum.Engine.Cache;
+using Signum.Utilities.ExpressionTrees;
 
 namespace Signum.Entities.Authorization
 {
@@ -151,7 +152,8 @@ namespace Signum.Entities.Authorization
                Database.Query<RT>()
                .Select(a => new { a.Role, a.Allowed, a.Resource })
                   .AgGroupToDictionary(ru => ru.Role, gr => gr
-                      .ToDictionary(ru => ToKey(ru.Resource), ru => ru.Allowed));
+                    .SelectCatch(ru => KVP.Create(ToKey(ru.Resource), ru.Allowed))
+                    .ToDictionaryEx());
 
             Dictionary<Lite<RoleEntity>, RoleAllowedCache> newRules = new Dictionary<Lite<RoleEntity>, RoleAllowedCache>();
             foreach (var role in roles)
@@ -161,7 +163,7 @@ namespace Signum.Entities.Authorization
                 newRules.Add(role, new RoleAllowedCache(
                     role,
                     merger,
-                    related.Select(r => newRules[r]).ToList(),
+                    related.Select(r => newRules.GetOrThrow(r)).ToList(),
                     realRules.TryGetC(role),
                     coercer.GetCoerceValue(role)));
             }
@@ -171,7 +173,7 @@ namespace Signum.Entities.Authorization
 
         internal void GetRules(BaseRulePack<AR> rules, IEnumerable<R> resources)
         {
-            RoleAllowedCache cache = runtimeRules.Value[rules.Role];
+            RoleAllowedCache cache = runtimeRules.Value.GetOrThrow(rules.Role);
 
             rules.MergeStrategy = AuthLogic.GetMergeStrategy(rules.Role);
             rules.SubRoles = AuthLogic.RelatedTo(rules.Role).ToMList();
@@ -206,12 +208,12 @@ namespace Signum.Entities.Authorization
 
         internal A GetAllowed(Lite<RoleEntity> role, K key)
         {
-            return runtimeRules.Value[role].GetAllowed(key);
+            return runtimeRules.Value.GetOrThrow(role).GetAllowed(key);
         }
 
         internal DefaultDictionary<K, A> GetDefaultDictionary()
         {
-            return runtimeRules.Value[RoleEntity.Current].DefaultDictionary();
+            return runtimeRules.Value.GetOrThrow(RoleEntity.Current).DefaultDictionary();
         }
 
         public class RoleAllowedCache
@@ -292,7 +294,7 @@ namespace Signum.Entities.Authorization
 
             return new XElement(rootName,
                 (from r in AuthLogic.RolesInOrder()
-                 let rac = rules[r]
+                 let rac = rules.GetOrThrow(r)
                  select new XElement("Role",
                      new XAttribute("Name", r.ToString()),
                          from k in allKeys ?? (rac.DefaultDictionary().OverrideDictionary?.Keys).EmptyIfNull()
@@ -377,11 +379,4 @@ namespace Signum.Entities.Authorization
             return "{0} {1} for {2} ({3} -> {4})".FormatWith(typeof(R).NiceName(), resource.ToString(), role, from, to);
         }
     }
-
-    public static class AuthCacheTools
-    {
-
-    }
-
-
 }

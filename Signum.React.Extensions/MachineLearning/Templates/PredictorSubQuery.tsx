@@ -1,6 +1,6 @@
 ﻿import * as React from 'react'
 import { classes } from '../../../../Framework/Signum.React/Scripts/Globals'
-import { FormGroup, FormControlStatic, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityList, EntityRepeater, EntityTable } from '../../../../Framework/Signum.React/Scripts/Lines'
+import { FormGroup, FormControlReadonly, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityList, EntityRepeater, EntityTable } from '../../../../Framework/Signum.React/Scripts/Lines'
 import { SearchControl, FindOptions, FilterOption, ColumnOption } from '../../../../Framework/Signum.React/Scripts/Search'
 import { TypeContext, FormGroupStyle } from '../../../../Framework/Signum.React/Scripts/TypeContext'
 import FileLine from '../../Files/FileLine'
@@ -95,7 +95,7 @@ export default class PredictorSubQuery extends React.Component<{ ctx: TypeContex
 
     render() {
         const ctx = this.props.ctx;
-        const ctxxs = ctx.subCtx({ formGroupSize: "ExtraSmall" });
+        const ctxxs = ctx.subCtx({ formSize: "ExtraSmall" });
         const entity = ctx.value;
         const queryKey = entity.query && entity.query.key;
         const targetType = this.props.mainQueryDescription.columns["Entity"].type;
@@ -123,7 +123,7 @@ export default class PredictorSubQuery extends React.Component<{ ctx: TypeContex
 
         return (
             <div>
-                <ValueLine ctx={ctx.subCtx(f => f.name)} onTextboxBlur={() => parentCtx.frame!.entityComponent.forceUpdate()} />
+                <ValueLine ctx={ctx.subCtx(f => f.name)} onTextboxBlur={() => parentCtx.frame!.entityComponent!.forceUpdate()} />
                 <EntityLine ctx={ctx.subCtx(f => f.query)} remove={ctx.value.isNew} onChange={this.handleOnChange} />
                 {queryKey &&
                     <div>
@@ -140,7 +140,7 @@ export default class PredictorSubQuery extends React.Component<{ ctx: TypeContex
                                     queryKey={this.props.ctx.value.query!.key}
                                     subTokenOptions={SubTokensOptions.CanElement | SubTokensOptions.CanAggregate}
                                     onTokenChanged={() => this.handleChangeUsage(colCtx)}
-                                    helpBlock={getParentKeyMessage(colCtx.value)}
+                                    helpText={getParentKeyMessage(colCtx.value)}
                                 />,
                                 headerHtmlAttributes: { style: { width: "50%" } },
                             },

@@ -108,7 +108,7 @@ namespace Signum.Engine.Files
                return fp.FileType.GetAlgorithm().GetPrefixPair(fp);
         }
 
-        public static void FilePathLogic_PreUnsafeDelete(IQueryable<FilePathEntity> query)
+        public static IDisposable FilePathLogic_PreUnsafeDelete(IQueryable<FilePathEntity> query)
         {
             if (!unsafeMode.Value)
             {
@@ -123,6 +123,8 @@ namespace Signum.Engine.Files
                     }
                 };
             }
+
+            return null;
         }
 
         static readonly Variable<bool> unsafeMode = Statics.ThreadVariable<bool>("filePathUnsafeMode");
@@ -134,7 +136,7 @@ namespace Signum.Engine.Files
             return new Disposable(() => unsafeMode.Value = false);
         }
 
-        public static void FilePath_PreSaving(FilePathEntity fp, ref bool graphModified)
+        public static void FilePath_PreSaving(FilePathEntity fp, PreSavingContext ctx)
         {
             if (fp.IsNew && !unsafeMode.Value)
             {

@@ -24,6 +24,8 @@ namespace Signum.Entities.Map
         Color,
         State,
         StateColor,
+        RowsHistory,
+        TableSizeHistory,
     }
 
     [DescriptionOptions(DescriptionOptions.Members)]

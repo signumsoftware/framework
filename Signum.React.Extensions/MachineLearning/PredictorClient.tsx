@@ -2,7 +2,6 @@
 import { Route } from 'react-router'
 import { Dic, classes } from '../../../Framework/Signum.React/Scripts/Globals';
 import * as Constructor from '../../../Framework/Signum.React/Scripts/Constructor';
-import { Button, OverlayTrigger, Tooltip, MenuItem } from "react-bootstrap"
 import { ajaxPost, ajaxPostRaw, ajaxGet, saveFile, ajaxGetRaw } from '../../../Framework/Signum.React/Scripts/Services';
 import { EntitySettings, ViewPromise } from '../../../Framework/Signum.React/Scripts/Navigator'
 import * as Navigator from '../../../Framework/Signum.React/Scripts/Navigator'

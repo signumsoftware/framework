@@ -26,7 +26,7 @@ namespace Signum.Engine.Authorization
 
         public static bool IsStarted { get { return cache != null; } }
 
-        public static readonly HashSet<OperationSymbol> AvoidAutomaticUpgradeCollection = new HashSet<OperationSymbol>();
+        public static readonly Dictionary<OperationSymbol, OperationAllowed> MaxAutomaticUpgrade = new Dictionary<OperationSymbol, OperationAllowed>();
 
         internal static readonly string operationReplacementKey = "AuthRules:" + typeof(OperationSymbol).Name;
 
@@ -49,6 +49,12 @@ namespace Signum.Engine.Authorization
                      merger: new OperationMerger(),
                      invalidateWithTypes: true,
                      coercer:  OperationCoercer.Instance);
+
+                sb.Schema.EntityEvents<RoleEntity>().PreUnsafeDelete += query =>
+                {
+                    Database.Query<RuleOperationEntity>().Where(r => query.Contains(r.Role.Entity)).UnsafeDelete();
+                    return null;
+                };
 
                 AuthLogic.ExportToXml += exportAll => cache.ExportXml("Operations", "Operation", s => s.operation.Key + "/" + s.type?.ToTypeEntity().CleanName, b => b.ToString(),
                     exportAll ? AllOperationTypes() : null);
@@ -123,9 +129,9 @@ namespace Signum.Engine.Authorization
             return Administrator.DeleteWhereScript((RuleOperationEntity rt) => rt.Resource.Type, (TypeEntity)arg);
         }
 
-        public static T AvoidAutomaticUpgrade<T>(this T operation) where T : IOperation
+        public static T SetMaxAutomaticUpgrade<T>(this T operation, OperationAllowed allowed) where T : IOperation
         {
-            AvoidAutomaticUpgradeCollection.Add(operation.OperationSymbol);
+            MaxAutomaticUpgrade.Add(operation.OperationSymbol, allowed);
 
             return operation;
         }
@@ -266,11 +272,20 @@ namespace Signum.Engine.Authorization
                 Max(baseValues.Select(a => a.Value)):
                 Min(baseValues.Select(a => a.Value));
 
-            if (!BasicPermission.AutomaticUpgradeOfOperations.IsAuthorized(role) || OperationAuthLogic.AvoidAutomaticUpgradeCollection.Contains(operationType.Item1))
+            if (!BasicPermission.AutomaticUpgradeOfOperations.IsAuthorized(role))
                return best;
 
+            var maxUp = OperationAuthLogic.MaxAutomaticUpgrade.TryGetS(operationType.Item1);
+
+            if (maxUp.HasValue && maxUp <= best)
+                return best;
+
             if (baseValues.Where(a => a.Value.Equals(best)).All(a => GetDefault(operationType, a.Key).Equals(a.Value)))
-                return GetDefault(operationType, role);
+            {
+                var def = GetDefault(operationType, role);
+
+                return maxUp.HasValue && maxUp <= def ? maxUp.Value : def;
+            }
 
             return best; 
         }
@@ -316,10 +331,14 @@ namespace Signum.Engine.Authorization
         {
             return key => 
             {
-                if (!BasicPermission.AutomaticUpgradeOfOperations.IsAuthorized(role) || OperationAuthLogic.AvoidAutomaticUpgradeCollection.Contains(key.operation))
+                if (!BasicPermission.AutomaticUpgradeOfOperations.IsAuthorized(role))
                     return AuthLogic.GetDefaultAllowed(role) ? OperationAllowed.Allow : OperationAllowed.None;
+                
+                var maxUp = OperationAuthLogic.MaxAutomaticUpgrade.TryGetS(key.operation);
 
-                return GetDefault(key, role);
+                var def = GetDefault(key, role);
+
+                return maxUp.HasValue && maxUp <= def ? maxUp.Value : def;
             };
         }
 

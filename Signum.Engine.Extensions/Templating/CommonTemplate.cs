@@ -18,21 +18,22 @@ namespace Signum.Engine.Templating
 {
     public static class TemplateUtils
     {
-        public static readonly Regex KeywordsRegex = new Regex(@"\@(((?<keyword>(foreach|if|raw|global|model|modelraw|any|declare|))\[((?<type>[\w]):)?(?<token>[^\]\}]+)\](\s+as\s+(?<dec>\$\w*))?)|(?<keyword>endforeach|else|endif|notany|endany))");
+        public static readonly Regex KeywordsRegex = new Regex(@"\@(((?<keyword>(foreach|if|raw|global|model|modelraw|any|declare|))\[(?<expr>[^\]\}]+)\](\s+as\s+(?<dec>\$\w*))?)|(?<keyword>endforeach|else|endif|notany|endany))");
 
-        public static readonly Regex TokenFormatRegex = new Regex(@"(?<token>(\\\]|\\\:|[^\:])+)(\:(?<format>.*))?");
-        public static readonly Regex TokenOperationValueRegex = new Regex(@"(?<token>.+?)(?<comparer>(" + FilterValueConverter.OperationRegex + @"))(?<value>[^\]\:]+)");
+        public static readonly Regex TokenOperationValueRegex = new Regex(@"(?<token>((?<type>[\w]):)?.+?)(?<operation>(" + FilterValueConverter.OperationRegex + @"))(?<value>[^\]\:]+)");
 
-
+        public static readonly Regex TokenFormatRegex = new Regex(@"(?<token>((?<type>[\w]):)?(\\\]|\\\:|[^\:])+)(\:(?<format>.*))?");
+        
         public struct SplittedToken
         {
             public string Token;
             public string Format; 
         }
 
-        public static SplittedToken? SplitToken(string fullToken)
+        public static SplittedToken? SplitToken(string formattedToken)
         {
-            var tok = TemplateUtils.TokenFormatRegex.Match(fullToken);
+            var tok = TemplateUtils.TokenFormatRegex.Match(formattedToken);
+
             if (tok == null)
                 return null;
 
@@ -43,6 +44,57 @@ namespace Signum.Engine.Templating
             };
         }
 
+        public static ConditionBase ParseCondition(string expr, string variable, ITemplateParser parser)
+        {
+            expr = expr.Trim();
+
+            var left = expr.TryBefore("||");
+            if (left != null)
+            {
+                return new ConditionOr(
+                    ParseCondition(left, variable, parser),
+                    ParseCondition(expr.After("||"), variable, parser));
+            }
+
+            left = expr.TryBefore(" OR ");
+            if (left != null)
+            {
+                return new ConditionOr(
+                    ParseCondition(left, variable, parser),
+                    ParseCondition(expr.After(" OR "), variable, parser));
+            }
+
+            left = expr.TryBefore("&&");
+            if (left != null)
+            {
+                return new ConditionAnd(
+                    ParseCondition(left, variable, parser),
+                    ParseCondition(expr.After("&&"), variable, parser));
+            }
+
+            left = expr.TryBefore(" AND ");
+            if (left != null)
+            {
+                return new ConditionAnd(
+                    ParseCondition(left, variable, parser),
+                    ParseCondition(expr.After(" AND "), variable, parser));
+            }
+
+            var filter = TemplateUtils.TokenOperationValueRegex.Match(expr);
+            if (!filter.Success)
+            {
+                return new ConditionCompare(ValueProviderBase.TryParse(expr, variable, parser));
+            }
+            else
+            {
+                var vpb = ValueProviderBase.TryParse(filter.Groups["token"].Value, variable, parser);
+                var operation = filter.Groups["operation"].Value;
+                var value = filter.Groups["value"].Value;
+                return new ConditionCompare(vpb, operation, value, parser.AddError);
+            }
+        }
+
+       
 
         public static string ScapeColon(string tokenOrFormat)
         {

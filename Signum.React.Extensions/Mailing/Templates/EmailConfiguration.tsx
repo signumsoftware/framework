@@ -1,6 +1,6 @@
 ﻿import * as React from 'react'
 import { classes } from '../../../../Framework/Signum.React/Scripts/Globals'
-import { FormGroup, FormControlStatic, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityList, EntityRepeater, EntityTabRepeater, EntityDetail} from '../../../../Framework/Signum.React/Scripts/Lines'
+import { FormGroup, FormControlReadonly, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityList, EntityRepeater, EntityTabRepeater, EntityDetail} from '../../../../Framework/Signum.React/Scripts/Lines'
 import { SearchControl }  from '../../../../Framework/Signum.React/Scripts/Search'
 import { getToString }  from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
 import { TypeContext, FormGroupStyle } from '../../../../Framework/Signum.React/Scripts/TypeContext'
@@ -21,7 +21,7 @@ export default class EmailConfiguration extends React.Component<{ ctx: TypeConte
                 <EntityCombo ctx={sc.subCtx(ca => ca.defaultCulture) }  />
                 <ValueLine ctx={sc.subCtx(ca => ca.urlLeft) }  />
                 
-                <fieldset className="form-vertical">
+                <fieldset>
                     <legend>Async</legend>
                     <div className="row">
                         <div className="col-sm-6">

@@ -1,5 +1,4 @@
 ﻿import * as React from 'react'
-import { Tabs, Tab, Modal } from "react-bootstrap";
 import { Dic } from '../../../../Framework/Signum.React/Scripts/Globals'
 import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
 import { getMixin, toLite, JavascriptMessage, is, Lite } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'

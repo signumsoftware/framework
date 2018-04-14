@@ -85,19 +85,37 @@ namespace Signum.Engine.Dynamic
                         {
                             var old = e.ToLite().Retrieve();
                             if (e.TypeName != old.TypeName)
-                                DynamicSqlMigrationLogic.AddDynamicRename(Replacements.KeyTables, old.TypeName, e.TypeName);
+                                DynamicSqlMigrationLogic.AddDynamicRename(TypeNameKey, old.TypeName, e.TypeName);
 
                             var newDef = e.GetDefinition();
                             var oldDef = old.GetDefinition();
+                            var newName = GetTableName(e, newDef);
+                            var oldName = GetTableName(old, oldDef);
+
+                            if (newName != oldName)
+                                DynamicSqlMigrationLogic.AddDynamicRename(Replacements.KeyTables, oldName, newName);
 
                             var pairs = newDef.Properties
                                 .Join(oldDef.Properties, n => n.UID, o => o.UID, (n, o) => new { n, o })
                                 .Where(a => a.n.Type == a.o.Type);
 
-                            foreach (var a in pairs.Where(a => a.n.Name != a.o.Name))
                             {
-                                DynamicSqlMigrationLogic.AddDynamicRename(Replacements.KeyColumnsForTable(old.TypeName),
-                                    a.o.Name, a.n.Name);
+                                string ColName(DynamicProperty dp) => dp.ColumnName ?? dp.Name;
+
+                                string replacementKey = (e.BaseType != DynamicBaseType.Entity || old.BaseType != DynamicBaseType.Entity) ? UnknownColumnKey : Replacements.KeyColumnsForTable(oldName);
+                                foreach (var a in pairs.Where(a => ColName(a.n) != ColName(a.o)))
+                                {
+                                    DynamicSqlMigrationLogic.AddDynamicRename(replacementKey, ColName(a.o), ColName(a.n));
+                                }
+                            }
+
+                            {
+                                string replacementKey = (e.BaseType != DynamicBaseType.Entity || old.BaseType != DynamicBaseType.Entity) ? UnknownPropertyKey : PropertyRouteLogic.PropertiesFor.FormatWith(old.TypeName);
+                                foreach (var a in pairs.Where(a => a.n.Name != a.o.Name))
+                                {
+                                    DynamicSqlMigrationLogic.AddDynamicRename(replacementKey, a.o.Name, a.n.Name);
+                                }
+
                             }
                         }
                     },
@@ -112,6 +130,12 @@ namespace Signum.Engine.Dynamic
                 }.Register();
             }
         }
+
+        public const string UnknownPropertyKey = "UnknownProperty";
+        public const string UnknownColumnKey = "UnknownColumn";
+        public const string TypeNameKey = "TypeName";
+
+        public static Func<DynamicTypeEntity, DynamicTypeDefinition, string> GetTableName = (dt, def) => def.TableName ?? ("codegen." + dt.TypeName);
 
         public static string GetPropertyType(DynamicProperty property)
         {
@@ -455,7 +479,7 @@ namespace Signum.Engine.Dynamic
         private List<string> GetFieldAttributes(DynamicProperty property)
         {
             List<string> atts = new List<string>();
-            if (property.IsNullable != IsNullable.Yes)
+            if (property.IsNullable != Entities.Dynamic.IsNullable.Yes)
                 atts.Add("NotNullable");
 
             if (property.Size != null || property.Scale != null || property.ColumnType.HasText())
@@ -527,7 +551,7 @@ namespace Signum.Engine.Dynamic
 
             var t = TryResolveType(property.Type);
             
-            if (property.IsNullable != IsNullable.No && t?.IsValueType == true)
+            if (property.IsNullable != Entities.Dynamic.IsNullable.No && t?.IsValueType == true)
                 result = result + "?";
 
             if (property.IsLite)

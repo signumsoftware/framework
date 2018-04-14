@@ -17,6 +17,7 @@ using Signum.Entities.Basics;
 using Signum.Entities.Alerts;
 using System.Linq.Expressions;
 using Signum.Engine.Extensions.Basics;
+using Signum.Engine.Basics;
 
 namespace Signum.Engine.Alerts
 {
@@ -146,6 +147,22 @@ namespace Signum.Engine.Alerts
                 return tr.Commit(alerta);
             }
         }
+
+        public static void RegisterCreatorTypeCondition(SchemaBuilder sb, TypeConditionSymbol typeCondition)
+        {
+            sb.Schema.Settings.AssertImplementedBy((AlertEntity a) => a.CreatedBy, typeof(UserEntity));
+
+            TypeConditionLogic.RegisterCompile<AlertEntity>(typeCondition,
+                a => a.CreatedBy.RefersTo(UserEntity.Current));
+        }
+
+        public static void RegisterRecipientTypeCondition(SchemaBuilder sb, TypeConditionSymbol typeCondition)
+        {
+            sb.Schema.Settings.AssertImplementedBy((AlertEntity a) => a.Recipient, typeof(UserEntity));
+
+            TypeConditionLogic.RegisterCompile<AlertEntity>(typeCondition,
+                a => a.Recipient.RefersTo(UserEntity.Current));
+        }
     }
 
     public class AlertGraph : Graph<AlertEntity, AlertState>
@@ -165,6 +182,21 @@ namespace Signum.Engine.Alerts
                     Text = null,
                     Title = null,
                     Target = a.ToLite(),
+                    AlertType = null
+                }
+            }.Register();
+
+            new Construct(AlertOperation.Create)
+            {
+                ToStates = { AlertState.New },
+                Construct = (_) => new AlertEntity
+                {
+                    AlertDate = TimeZoneManager.Now,
+                    CreatedBy = UserHolder.Current.ToLite(),
+                    Recipient = AlertLogic.DefaultRecipient()?.ToLite(),
+                    Text = null,
+                    Title = null,
+                    Target = null,
                     AlertType = null
                 }
             }.Register();
@@ -213,6 +245,4 @@ namespace Signum.Engine.Alerts
             }.Register();
         }
     }
-
- 
 }

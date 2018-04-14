@@ -41,11 +41,10 @@ namespace Signum.Engine.Dynamic
                         e.PropertyRoute,
                         e.Eval,
                     });
-                DynamicValidations = sb.GlobalLazy(() =>
-                    Database.Query<DynamicValidationEntity>()
-                    .Select(dv => new DynamicValidationPair { Validation = dv, PropertyRoute = dv.PropertyRoute.ToPropertyRoute() })
-                    .GroupToDictionary(a => a.PropertyRoute.PropertyInfo),
-                        new InvalidateWith(typeof(DynamicValidationEntity)));
+                DynamicValidations = sb.GlobalLazy(() => Database.Query<DynamicValidationEntity>()
+                        .SelectCatch(dv => new DynamicValidationPair { Validation = dv, PropertyRoute = dv.PropertyRoute.ToPropertyRoute() })
+                        .GroupToDictionary(a => a.PropertyRoute.PropertyInfo),
+                new InvalidateWith(typeof(DynamicValidationEntity)));
 
                 DynamicValidationEntity.GetMainType = dve => dve.PropertyRoute?.ToPropertyRoute().Parent.Type;
 

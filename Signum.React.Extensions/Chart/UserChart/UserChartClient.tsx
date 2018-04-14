@@ -48,7 +48,7 @@ export function start(options: { routes: JSX.Element[] }) {
         return promise.then(uqs =>
             uqs.map(uc => new QuickLinks.QuickLinkAction(liteKey(uc), uc.toStr || "", e => {
                 window.open(Navigator.toAbsoluteUrl(`~/userChart/${uc.id}/${liteKey(ctx.lite)}`));
-            }, { icon: "glyphicon glyphicon-stats", iconColor: "darkviolet" })));
+            }, { icon: "fa fa-bar-chart", iconColor: "darkviolet" })));
     });
 
     QuickLinks.registerQuickLink(UserChartEntity, ctx => new QuickLinks.QuickLinkAction("preview", ChartMessage.Preview.niceToString(),

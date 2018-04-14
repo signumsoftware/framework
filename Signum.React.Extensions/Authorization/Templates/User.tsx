@@ -35,7 +35,7 @@ export default class User extends React.Component<{ ctx: TypeContext<UserEntity>
     renderButton(ctx: TypeContext<UserEntity>) {
         return (
             <FormGroup labelText={AuthMessage.NewPassword.niceToString()} ctx={ctx}>
-                <a className="btn btn-default btn-sm" onClick={() => this.setState({ withPassword: true }) }>
+                <a className="btn btn-light btn-sm" onClick={() => this.setState({ withPassword: true }) }>
                     <i className="fa fa-key"></i> {AuthMessage.ChangePassword.niceToString() }
                 </a>
             </FormGroup>
@@ -60,17 +60,17 @@ class DoublePassword extends React.Component<{ ctx: TypeContext<string> }>{
         ctx.frame!.revalidate();
     }
 
-    newPass: HTMLInputElement;
-    newPass2: HTMLInputElement;
+    newPass!: HTMLInputElement;
+    newPass2!: HTMLInputElement;
 
     render() {
         return (
             <div>
-                <FormGroup ctx={ this.props.ctx } labelText={AuthMessage.ChangePasswordAspx_NewPassword.niceToString() }>
-                    <input type="password" ref={p => this.newPass = p!} className="form-control" onBlur={this.handlePasswordBlur}/>
+                <FormGroup ctx={this.props.ctx} labelText={AuthMessage.ChangePasswordAspx_NewPassword.niceToString()}>
+                    <input type="password" ref={p => this.newPass = p!} className={this.props.ctx.formControlClass} onBlur={this.handlePasswordBlur} />
                 </FormGroup>
                 <FormGroup ctx={ this.props.ctx } labelText={AuthMessage.ChangePasswordAspx_ConfirmNewPassword.niceToString() }>
-                    <input type="password" ref={p => this.newPass2 = p!} className="form-control" onBlur={this.handlePasswordBlur}/>
+                    <input type="password" ref={p => this.newPass2 = p!} className={this.props.ctx.formControlClass} onBlur={this.handlePasswordBlur}/>
                 </FormGroup>
             </div>
         );

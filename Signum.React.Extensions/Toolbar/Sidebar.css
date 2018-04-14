@@ -16,15 +16,16 @@
         flex-direction: row;
     }
 
-    body:not(.rtl-mode) .sidebar {
+    body:not(.rtl) .sidebar {
         border-right: 1px solid #e7e7e7;
     }
 
-    body.rtl-mode .sidebar {
+    body.rtl .sidebar {
         border-left: 1px solid #e7e7e7;
     }
 
-    .sidebar{
+    .sidebar {
+        width: 251px;
         min-width: 251px;
     }
 }
@@ -39,16 +40,22 @@
 
 
 @media (min-width: 768px) {
-    body:not(.rtl-mode) .navbar-header {
-        width: 235px;
-        border-right: 1px solid #e7e7e7;
-        margin-right: 10px !important;
+
+    .navbar-brand {
+        width: 251px;
+        margin: -5px;
     }
 
-    body.rtl-mode .navbar-header {
-        width: 235px;
+    body:not(.rtl) .navbar-brand {
+        border-right: 1px solid #e7e7e7;
+        margin-right: 10px !important;
+        padding-left: 10px;
+    }
+
+    body.rtl .navbar-brand {
         border-left: 1px solid #e7e7e7;
         margin-left: 10px !important;
+        padding-right: 10px;
     }
 
     .navbar-toggle {

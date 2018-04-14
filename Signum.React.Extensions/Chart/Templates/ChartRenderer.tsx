@@ -34,7 +34,7 @@ export interface ChartRendererProps {
 
 export default class ChartRenderer extends React.Component<ChartRendererProps> {
 
-    exceptionLine: number | null;
+    exceptionLine?: number | null;
 
     componentWillMount(){
 

@@ -1,5 +1,4 @@
 ﻿import * as React from 'react'
-import { Button } from 'react-bootstrap'
 import * as numbro from 'numbro'
 import { classes } from '../../../../Framework/Signum.React/Scripts/Globals'
 import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
@@ -16,6 +15,7 @@ import { PermissionRulePack, PermissionAllowedRule, AuthAdminMessage, Permission
 import { ColorRadio, GrayCheckbox } from './ColoredRadios'
 
 import "./AuthAdmin.css"
+import { Button } from '../../../../Framework/Signum.React/Scripts/Components';
 
 export default class PermissionRulesPackControl extends React.Component<{ ctx: TypeContext<PermissionRulePack> }> implements IRenderButtons {
 
@@ -33,7 +33,7 @@ export default class PermissionRulesPackControl extends React.Component<{ ctx: T
 
     renderButtons(bc: ButtonsContext) {
         return [
-            <Button bsStyle="primary" onClick={() => this.handleSaveClick(bc) }>{AuthMessage.Save.niceToString() }</Button>
+            <Button color="primary" onClick={() => this.handleSaveClick(bc)}>{AuthMessage.Save.niceToString()}</Button>
         ];
     }
 
@@ -48,7 +48,7 @@ export default class PermissionRulesPackControl extends React.Component<{ ctx: T
                     <EntityLine ctx={ctx.subCtx(f => f.role) }  />
                     <ValueLine ctx={ctx.subCtx(f => f.strategy) }  />
                 </div>
-                <table className="table table-condensed sf-auth-rules">
+                <table className="table table-sm sf-auth-rules">
                     <thead>
                         <tr>
                             <th>

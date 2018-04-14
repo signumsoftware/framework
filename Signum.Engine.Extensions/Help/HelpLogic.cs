@@ -254,10 +254,10 @@ namespace Signum.Engine.Help
                 sb.Schema.Synchronizing += Schema_Synchronizing;
 
                 sb.Schema.Table<OperationSymbol>().PreDeleteSqlSync += operation =>
-                    Administrator.UnsafeDeletePreCommand((EntityHelpEntity eh) => eh.Operations, Database.MListQuery((EntityHelpEntity eh) => eh.Operations).Where(mle => mle.Element.Operation == (OperationSymbol)operation));
+                    Administrator.UnsafeDeletePreCommandMList((EntityHelpEntity eh) => eh.Operations, Database.MListQuery((EntityHelpEntity eh) => eh.Operations).Where(mle => mle.Element.Operation == (OperationSymbol)operation));
 
                 sb.Schema.Table<PropertyRouteEntity>().PreDeleteSqlSync += property =>
-                    Administrator.UnsafeDeletePreCommand((EntityHelpEntity eh) => eh.Properties, Database.MListQuery((EntityHelpEntity eh) => eh.Properties).Where(mle => mle.Element.Property == (PropertyRouteEntity)property));
+                    Administrator.UnsafeDeletePreCommandMList((EntityHelpEntity eh) => eh.Properties, Database.MListQuery((EntityHelpEntity eh) => eh.Properties).Where(mle => mle.Element.Property == (PropertyRouteEntity)property));
                 
                 sb.Schema.Table<TypeEntity>().PreDeleteSqlSync += type =>
                     Administrator.UnsafeDeletePreCommand(Database.Query<EntityHelpEntity>().Where(e => e.Type == (TypeEntity)type));
@@ -367,7 +367,7 @@ namespace Signum.Engine.Help
                     if (type == null)
                         return null; //PreDeleteSqlSync
 
-                    var repProperties = replacements.TryGetC(PropertyRouteLogic.PropertiesFor.FormatWith(type.FullName));
+                    var repProperties = replacements.TryGetC(PropertyRouteLogic.PropertiesFor.FormatWith(eh.Type.CleanName));
                     var routes = PropertyRoute.GenerateRoutes(type).ToDictionary(pr => { var ps = pr.PropertyString(); return repProperties.TryGetC(ps) ?? ps; });
                     eh.Properties.RemoveAll(p => !routes.ContainsKey(p.Property.Path));
                     foreach (var prop in eh.Properties)
@@ -381,7 +381,7 @@ namespace Signum.Engine.Help
 
                     eh.Description = SynchronizeContent(eh.Description, replacements, data);
 
-                    return table.UpdateSqlSync(eh, e => e.Type.FullClassName == eh.Type.FullClassName);
+                    return table.UpdateSqlSync(eh, e => e.Type.CleanName == eh.Type.CleanName);
                 }).Combine(Spacing.Simple);
         }
 

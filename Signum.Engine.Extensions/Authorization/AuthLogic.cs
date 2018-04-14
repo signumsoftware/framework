@@ -465,10 +465,15 @@ namespace Signum.Engine.Authorization
                 Console.WriteLine("Part 1: Syncronize roles without relationships");
 
                 var roleInsertsDeletes = Synchronizer.SynchronizeScript(Spacing.Double, rolesXml, rolesDic,
-                    createNew: (name, xelement) => table.InsertSqlSync(new RoleEntity { Name = name }, includeCollections: false),
+                    createNew: (name, xElement) => table.InsertSqlSync(new RoleEntity {
+                        Name = name,
+                        MergeStrategy = xElement.Attribute("MergeStrategy")?.Let(t => t.Value.ToEnum<MergeStrategy>()) ?? MergeStrategy.Union
+                    }, includeCollections: false),
+
                     removeOld: (name, role) => SqlPreCommand.Combine(Spacing.Simple,
                             new SqlPreCommandSimple("DELETE {0} WHERE {1} = {2} --{3}"
                                 .FormatWith(relationalTable.Name, ((IColumn)relationalTable.Field).Name.SqlEscape(), role.Id, role.Name)),
+
                             table.DeleteSqlSync(role, r => r.Name == role.Name)),
                     mergeBoth: (name, xElement, role) =>
                     {

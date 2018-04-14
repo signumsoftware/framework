@@ -115,10 +115,13 @@ namespace Signum.Entities.Dashboard
     {
         Default,
         Primary,
+        Secondary,
         Success,
         Info,
         Warning,
-        Danger
+        Danger,
+        Light,
+        Dark,
     }
 
     public interface IGridEntity

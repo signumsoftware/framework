@@ -1,6 +1,4 @@
 ﻿import * as React from 'react'
-import * as numbro from 'numbro'
-import * as moment from 'moment'
 import { Dic } from '../../../../Framework/Signum.React/Scripts/Globals'
 import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
 import { notifySuccess } from '../../../../Framework/Signum.React/Scripts/Operations/EntityOperations'
@@ -107,9 +105,9 @@ export class TranslateSearchBox extends React.Component<{ search: (newValue: str
             <form onSubmit={this.handleSearch} className="input-group">
                 <input type="text" className="form-control"
                     placeholder={ TranslationMessage.Search.niceToString() }  value={ this.state.filter} onChange={this.handleChange}/>
-                <div className="input-group-btn">
-                    <button className="btn btn-default" type="submit" title={ TranslationMessage.Search.niceToString() }>
-                        <i className="glyphicon glyphicon-search"></i>
+                <div className="input-group-append">
+                    <button className="btn btn-light" type="submit" title={ TranslationMessage.Search.niceToString() }>
+                        <i className="fa fa-search"></i>
                     </button>
                 </div>
             </form>

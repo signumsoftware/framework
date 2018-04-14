@@ -26,7 +26,7 @@ namespace Signum.Entities.Authorization
             return "{0} for {1} <- {2}".FormatWith(Resource, Role, Allowed);
         }
 
-        protected override void PreSaving(ref bool graphModified)
+        protected override void PreSaving(PreSavingContext ctx)
         {
             this.toStr = this.ToString();
         }

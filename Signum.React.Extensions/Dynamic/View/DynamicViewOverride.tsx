@@ -1,5 +1,4 @@
 ﻿import * as React from 'react'
-import { MenuItem } from 'react-bootstrap'
 import { classes } from '../../../../Framework/Signum.React/Scripts/Globals'
 import * as Constructor from '../../../../Framework/Signum.React/Scripts/Constructor'
 import { DynamicViewOverrideEntity, DynamicViewMessage } from '../Signum.Entities.Dynamic'
@@ -16,6 +15,7 @@ import TypeHelpButtonBarComponent from '../../TypeHelp/TypeHelpButtonBarComponen
 import ValueLineModal from '../../../../Framework/Signum.React/Scripts/ValueLineModal'
 import MessageModal from '../../../../Framework/Signum.React/Scripts/Modals/MessageModal'
 import * as Nodes from '../../Dynamic/View/Nodes';
+import { DropdownItem, Dropdown, DropdownMenu, DropdownToggle, UncontrolledDropdown } from '../../../../Framework/Signum.React/Scripts/Components';
 
 
 interface DynamicViewOverrideComponentProps {
@@ -91,27 +91,27 @@ export default class DynamicViewOverrideComponent extends React.Component<Dynami
     }
 
     handleRemoveClick = (lambda: string) => {
-        setTimeout(() => this.showPropmt("Remove", `vr.remove(${lambda})`), 0);
+        setTimeout(() => this.showPropmt("Remove", `vr.removeLine(${lambda})`), 0);
     }
 
     handleInsertBeforeClick = (lambda: string) => {
-        setTimeout(() => this.showPropmt("InsertBefore", `vr.insertBefore(${lambda}))}, yourElement);`), 0);
+        setTimeout(() => this.showPropmt("InsertBefore", `vr.insertBeforeLine(${lambda}, ctx => [yourElement]);`), 0);
     }
 
     handleInsertAfterClick = (lambda: string) => {
-        setTimeout(() => this.showPropmt("InsertAfter", `vr.insertAfter(${lambda}, yourElement);`), 0);
+        setTimeout(() => this.showPropmt("InsertAfter", `vr.insertAfterLine(${lambda}, ctx => [yourElement]);`), 0);
     }
 
     handleRenderContextualMenu = (pr: PropertyRoute) => {
         const lambda = "e => " + TypeHelpComponent.getExpression("e", pr, "TypeScript");
         return (
-            <MenuItem>
-                <MenuItem header>{pr.propertyPath()}</MenuItem>
-                <MenuItem divider />
-                <MenuItem onClick={() => this.handleRemoveClick(lambda)}><i className="fa fa-trash" aria-hidden="true" />&nbsp; Remove</MenuItem>
-                <MenuItem onClick={() => this.handleInsertBeforeClick(lambda)}><i className="glyphicon glyphicon-menu-left" aria-hidden="true" />&nbsp; Insert Before</MenuItem>
-                <MenuItem onClick={() => this.handleInsertAfterClick(lambda)}><i className="glyphicon glyphicon-menu-right" aria-hidden="true" />&nbsp; Insert After</MenuItem>
-            </MenuItem>
+            <DropdownItem>
+                <DropdownItem header>{pr.propertyPath()}</DropdownItem>
+                <DropdownItem divider />
+                <DropdownItem onClick={() => this.handleRemoveClick(lambda)}><i className="fa fa-trash" aria-hidden="true" />&nbsp; Remove</DropdownItem>
+                <DropdownItem onClick={() => this.handleInsertBeforeClick(lambda)}><i className="fa fa-arrow-up" aria-hidden="true" />&nbsp; Insert Before</DropdownItem>
+                <DropdownItem onClick={() => this.handleInsertAfterClick(lambda)}><i className="fa fa-arrow-down" aria-hidden="true" />&nbsp; Insert After</DropdownItem>
+            </DropdownItem>
         );
     }
 
@@ -124,7 +124,7 @@ export default class DynamicViewOverrideComponent extends React.Component<Dynami
             return;
 
         const expression = TypeHelpComponent.getExpression("o", pr, "TypeScript");
-        const text = `React.createElement(${node.kind}, { ctx: vr.ctx.subCtx(o => ${expression}) })`;
+        const text = `modules.React.createElement(${node.kind}, { ctx: ctx.subCtx(o => ${expression}) })`;
 
         ValueLineModal.show({
             type: { name: "string" },
@@ -163,11 +163,11 @@ export default class DynamicViewOverrideComponent extends React.Component<Dynami
                                 {this.renderEditor()}
                             </div>
                             <div className="col-sm-5">
-                            <TypeHelpComponent
-                                initialType={ctx.value.entityType.cleanName}
-                                mode="TypeScript"
-                                renderContextMenu={this.handleRenderContextualMenu}
-                                onMemberClick={this.handleTypeHelpClick} />
+                                <TypeHelpComponent
+                                    initialType={ctx.value.entityType.cleanName}
+                                    mode="TypeScript"
+                                    renderContextMenu={this.handleRenderContextualMenu}
+                                    onMemberClick={this.handleTypeHelpClick} />
                                 <br />
                             </div>
                         </div>
@@ -201,7 +201,7 @@ export default class DynamicViewOverrideComponent extends React.Component<Dynami
         const exampleCtx = new TypeContext<Entity | undefined>(undefined, undefined, PropertyRoute.root(typeName), Binding.create(this.state, s => s.exampleEntity));
 
         return (
-            <div className="form-vertical code-container">
+            <div className="code-container">
                 <EntityLine ctx={exampleCtx} create={true} find={true} remove={true} view={true} onView={this.handleOnView} onChange={this.handleEntityChange} formGroupStyle="Basic"
                     type={{ name: typeName }} labelText={DynamicViewMessage.ExampleEntity.niceToString()} />
             </div>
@@ -259,11 +259,11 @@ export default class DynamicViewOverrideComponent extends React.Component<Dynami
         try {
             func = DynamicViewClient.asOverrideFunction(dvo);
             this.setState({
-                viewOverride : func
+                viewOverride: func
             });
         } catch (e) {
             this.setState({
-                syntaxError : (e as Error).message
+                syntaxError: (e as Error).message
             });
             return;
         }
@@ -274,10 +274,11 @@ export default class DynamicViewOverrideComponent extends React.Component<Dynami
         const ctx = this.props.ctx;
         return (
             <div className="code-container">
-                {this.state.viewNames && this.renderViewNameButtons()}
-                {this.allExpressions().length > 0 && <br />}
-                {this.allExpressions().length > 0 && this.renderExpressionsButtons()}
-                <TypeHelpButtonBarComponent typeName={ctx.value.entityType!.cleanName} mode="TypeScript" ctx={ctx} />
+                <div className="btn-toolbar">
+                    {this.state.viewNames && this.renderViewNameButtons()}
+                    {this.allExpressions().length > 0 && this.renderExpressionsButtons()}
+                    <TypeHelpButtonBarComponent typeName={ctx.value.entityType!.cleanName} mode="TypeScript" ctx={ctx} />
+                </div>
                 <pre style={{ border: "0px", margin: "0px" }}>{`(vr: ViewReplacer<${ctx.value.entityType!.className}>, modules) =>`}</pre>
                 <JavascriptCodeMirror code={ctx.value.script || ""} onChange={this.handleCodeChange} />
                 {this.state.syntaxError && <div className="alert alert-danger">{this.state.syntaxError}</div>}
@@ -286,15 +287,19 @@ export default class DynamicViewOverrideComponent extends React.Component<Dynami
     }
 
     handleViewNameClick = (viewName: string) => {
-        this.showPropmt("View", `React.createElement(DynamicViewPart, {ctx: vr.ctx, viewName:"${viewName}"})`);
+        this.showPropmt("View", `modules.React.createElement(RenderEntity, {ctx: ctx, getViewPromise: ctx => "${viewName}"})`);
     }
 
     renderViewNameButtons() {
         return (
-            <div className="btn-group" style={{ marginBottom: "3px" }}>
-                {this.state.viewNames!.map((vn, i) =>
-                    <input key={i} type="button" className="btn btn-success btn-xs sf-button" value={vn} onClick={() => this.handleViewNameClick(vn)} />)}
-            </div>);
+            <UncontrolledDropdown>
+                <DropdownToggle color="success" caret>View Names</DropdownToggle>
+                <DropdownMenu>
+                    {this.state.viewNames!.map((vn, i) =>
+                        <DropdownItem key={i} onClick={() => this.handleViewNameClick(vn)}>{vn}</DropdownItem>)}
+                </DropdownMenu>
+            </UncontrolledDropdown>
+        );
     }
 
     allExpressions() {
@@ -307,14 +312,19 @@ export default class DynamicViewOverrideComponent extends React.Component<Dynami
 
     handleExpressionClick = (member: TypeHelpClient.TypeMemberHelp) => {
         var paramValue = member.cleanTypeName ? `queryName : "${member.cleanTypeName}Entity"` : `valueToken: "Entity.${member.name}"`;
-        this.showPropmt("Expression", `React.createElement(ValueSearchControlLine, {ctx: vr.ctx, ${paramValue}})`);
+        this.showPropmt("Expression", `modules.React.createElement(ValueSearchControlLine, {ctx: ctx, ${paramValue}})`);
     }
-       
+
     renderExpressionsButtons() {
-        return (<div className="btn-group" style={{ marginBottom: "3px" }}>
-            {this.allExpressions().map((m, i) =>
-                <input key={i} type="button" className="btn btn-warning btn-xs sf-button" value={m.name} onClick={() => this.handleExpressionClick(m)} />)}
-        </div>);
+        return (
+            <UncontrolledDropdown>
+                <DropdownToggle color="warning" caret>Expressions</DropdownToggle>
+                <DropdownMenu>
+                    {this.allExpressions().map((m, i) =>
+                        <DropdownItem key={i} onClick={() => this.handleExpressionClick(m)}>{m.name}</DropdownItem>)}
+                </DropdownMenu>
+            </UncontrolledDropdown>
+        );
     }
 
     showPropmt(title: string, text: string) {

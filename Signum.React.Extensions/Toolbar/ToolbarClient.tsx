@@ -1,7 +1,6 @@
 ﻿import * as React from 'react'
 import { Route } from 'react-router'
 import { Dic, classes } from '../../../Framework/Signum.React/Scripts/Globals';
-import { Button, OverlayTrigger, Tooltip, MenuItem,  } from "react-bootstrap"
 import { ajaxPost, ajaxPostRaw, ajaxGet, saveFile } from '../../../Framework/Signum.React/Scripts/Services';
 import { EntitySettings, ViewPromise } from '../../../Framework/Signum.React/Scripts/Navigator'
 import * as Navigator from '../../../Framework/Signum.React/Scripts/Navigator'
@@ -34,6 +33,10 @@ export function start(options: { routes: JSX.Element[] }, ...configs: ToolbarCon
 
 export abstract class ToolbarConfig<T extends Entity> {
     type: Type<T>;
+    constructor(type: Type<T>) {
+        this.type = type;
+    }
+
     getIcon(element: ToolbarResponse<T>) {
         return ToolbarConfig.coloredIcon(element.iconName, element.iconColor);
     }
@@ -42,7 +45,7 @@ export abstract class ToolbarConfig<T extends Entity> {
         if (!className || className.toLowerCase() == "none")
             return null;
 
-        return <span className={"icon " + className} style={{ color: color }} />;
+        return <span className={"icon " + className} style={{ color: color || undefined }} />;
     }
 
     getLabel(element: ToolbarResponse<T>) {

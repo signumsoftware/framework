@@ -1,7 +1,7 @@
 ﻿
 import * as React from 'react'
 import { Link } from 'react-router-dom'
-import { FormGroup, FormControlStatic, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityList, EntityRepeater, RenderEntity } from '../../../../Framework/Signum.React/Scripts/Lines'
+import { FormGroup, FormControlReadonly, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityList, EntityRepeater, RenderEntity } from '../../../../Framework/Signum.React/Scripts/Lines'
 import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
 import { QueryDescription, SubTokensOptions } from '../../../../Framework/Signum.React/Scripts/FindOptions'
 import { getQueryNiceName, PropertyRoute, getTypeInfos } from '../../../../Framework/Signum.React/Scripts/Reflection'
@@ -80,8 +80,8 @@ export default class DashboardPage extends React.Component<DashboardPageProps, D
                             {!entity ? <h3>{JavascriptMessage.loading.niceToString()}</h3> :
                                 <h3>
                                     {Navigator.isNavigable({ entity: entity, canExecute: {} } as EntityPack<Entity>) ?
-                                        <Link className="sf-entity-title" to={Navigator.navigateRoute(entity)}>{getToString(entity)}</Link> :
-                                        <span className="sf-entity-title">{getToString(entity)}</span>
+                                        <Link className="display-6" to={Navigator.navigateRoute(entity)}>{getToString(entity)}</Link> :
+                                        <span className="display-6">{getToString(entity)}</span>
                                     }
                                     <br />
                                     <small className="sf-type-nice-name">{Navigator.getTypeTitle(entity, undefined)}</small>
@@ -91,12 +91,12 @@ export default class DashboardPage extends React.Component<DashboardPageProps, D
                     </div>
                 }
 
-                {!dashboard ? <h2>{JavascriptMessage.loading.niceToString()}</h2> :
+                {!dashboard ? <h2 className="display-5">{JavascriptMessage.loading.niceToString()}</h2> :
                     <div className="sf-show-hover">
                         {Navigator.isNavigable({ entity: dashboard, canExecute: {} } as EntityPack<Entity>) &&
-                            <Link className="sf-hide pull-right flip" to={Navigator.navigateRoute(dashboard)}><span className="glyphicon glyphicon-edit"></span>&nbsp;Edit</Link>
+                            <Link className="sf-hide pull-right flip mt-3" style={{ textDecoration: "none" }} to={Navigator.navigateRoute(dashboard)}><span className="fa fa-edit"></span>&nbsp;Edit</Link>
                         }
-                        <h2>{getToString(dashboard)}</h2>
+                        <h2 className="display-5">{getToString(dashboard)}</h2>
                     </div>}
                 {dashboard && (!entityKey || entity) && <DashboardView dashboard={dashboard} entity={entity} />}
             </div>

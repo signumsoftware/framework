@@ -1,7 +1,6 @@
 ﻿import * as React from 'react'
-import Combobox from 'react-widgets/lib/Combobox'
-import { PanelGroup, Panel, Tabs, Tab, MenuItem } from 'react-bootstrap'
-import { FormGroup, FormControlStatic, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityList, EntityRepeater } from '../../../../Framework/Signum.React/Scripts/Lines'
+import * as Combobox from 'react-widgets/lib/Combobox'
+import { FormGroup, FormControlReadonly, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityList, EntityRepeater } from '../../../../Framework/Signum.React/Scripts/Lines'
 import { classes, Dic } from '../../../../Framework/Signum.React/Scripts/Globals'
 import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
 import { QueryDescription, SubTokensOptions, QueryToken, filterOperations, OrderType, ColumnOptionsMode } from '../../../../Framework/Signum.React/Scripts/FindOptions'
@@ -9,7 +8,6 @@ import { getQueryNiceName, Binding, EntityDataValues, EntityKindValues, EntityKi
 import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
 import { SearchControl } from '../../../../Framework/Signum.React/Scripts/Search'
 import { StyleContext, FormGroupStyle } from '../../../../Framework/Signum.React/Scripts/TypeContext'
-import Typeahead from '../../../../Framework/Signum.React/Scripts/Lines/Typeahead'
 import QueryTokenBuilder from '../../../../Framework/Signum.React/Scripts/SearchControl/QueryTokenBuilder'
 import { ModifiableEntity, JavascriptMessage, EntityControlMessage, is, Lite, Entity, toLite } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
 import { QueryEntity, TypeEntity } from '../../../../Framework/Signum.React/Scripts/Signum.Entities.Basics'
@@ -29,6 +27,9 @@ import { ContextMenuPosition } from '../../../../Framework/Signum.React/Scripts/
 import ValueLineModal from '../../../../Framework/Signum.React/Scripts/ValueLineModal'
 
 import "./DynamicType.css"
+import { Tabs, Tab, UncontrolledTabs } from '../../../../Framework/Signum.React/Scripts/Components/Tabs';
+import CollapsableCard from '../../Basics/Templates/CollapsableCard';
+import { Typeahead } from '../../../../Framework/Signum.React/Scripts/Components';
 
 export interface DynamicTypeDesignContext {
     refreshView: () => void;
@@ -68,8 +69,7 @@ export class DynamicTypeDefinitionComponent extends React.Component<DynamicTypeD
                 this.setState({ typeEntity: undefined });
             else
                 Navigator.API.getType(props.dynamicType.typeName!)
-                    .then(te => this.setState({ typeEntity: toLite(te) }))
-                    .catch(e => this.setState({ typeEntity: false }))
+                    .then(te => this.setState({ typeEntity: te ? toLite(te) : false }))
                     .done();
         } else {
             this.setState({ typeEntity: undefined });
@@ -215,7 +215,7 @@ export class DynamicTypeDefinitionComponent extends React.Component<DynamicTypeD
                     </div>
                 }
 
-                <Tabs unmountOnExit={true} defaultActiveKey="properties" id="DynamicTypeTabs" onSelect={this.handleTabSelect}>
+                <UncontrolledTabs defaultEventKey="properties" id="DynamicTypeTabs" onToggled={this.handleTabSelect}>
                     <Tab eventKey="properties" title="Properties">
                         <PropertyRepeaterComponent dc={this.props.dc} properties={def.properties} onRemove={this.handlePropertyRemoved} showDatabaseMapping={this.props.showDatabaseMapping} />
                         <br/>
@@ -250,7 +250,7 @@ export class DynamicTypeDefinitionComponent extends React.Component<DynamicTypeD
                     }
 
                     {dt.baseType == "Entity" &&
-                        <Tab unmountOnExit={true} eventKey="operations" title="Operations">
+                        <Tab eventKey="operations" title="Operations">
                             <div className="row">
                                 <div className="col-sm-7">
                                     <CreateOperationFieldsetComponent
@@ -295,7 +295,7 @@ export class DynamicTypeDefinitionComponent extends React.Component<DynamicTypeD
                         </Tab>
                     }
 
-                    <Tab unmountOnExit={true} eventKey="customCode" title="Custom Code">
+                    <Tab eventKey="customCode" title="Custom Code">
                         <CustomCodeTab definition={def} dynamicType={dt} />
                     </Tab>
 
@@ -326,7 +326,7 @@ export class DynamicTypeDefinitionComponent extends React.Component<DynamicTypeD
                             {this.renderOthers()}
                         </Tab>
                     }
-                </Tabs>
+                </UncontrolledTabs>
             </div>
         );
     }
@@ -723,14 +723,14 @@ export interface PropertyRepeaterComponentProps {
 }
 
 export interface PropertyRepeaterComponentState {
-    activeIndex?: number;
+    currentEventKey?: number;
 }
 
 export class PropertyRepeaterComponent extends React.Component<PropertyRepeaterComponentProps, PropertyRepeaterComponentState> {
 
     constructor(props: PropertyRepeaterComponentProps) {
         super(props);
-        this.state = { activeIndex: 0 };
+        this.state = { currentEventKey: 0 };
     }
 
     componentWillMount() {
@@ -741,8 +741,10 @@ export class PropertyRepeaterComponent extends React.Component<PropertyRepeaterC
         newProps.properties.filter(a => a._propertyType_ == undefined).forEach(p => fetchPropertyType(p, this.props.dc));
     }
 
-    handleSelect = (activeIndex: number) => {
-        this.setState({ activeIndex });
+    handleSelect = (eventKey: number) => {
+        this.setState({
+            currentEventKey: eventKey == this.state.currentEventKey ? undefined : eventKey
+        });
     }
 
     handleOnRemove = (event: React.MouseEvent<any>, index: number) => {
@@ -751,8 +753,8 @@ export class PropertyRepeaterComponent extends React.Component<PropertyRepeaterC
         var old = this.props.properties[index];
         this.props.properties.removeAt(index);
 
-        if (this.state.activeIndex == index)
-            this.setState({ activeIndex: undefined });
+        if (this.state.currentEventKey == index)
+            this.setState({ currentEventKey: undefined });
 
         this.props.dc.refreshView();
 
@@ -765,10 +767,10 @@ export class PropertyRepeaterComponent extends React.Component<PropertyRepeaterC
         event.stopPropagation();
         const newIndex = this.props.properties.moveUp(index);
         if (newIndex != index) {
-            if (index == this.state.activeIndex)
-                this.setState({ activeIndex: this.state.activeIndex - 1 });
-            else if (newIndex == this.state.activeIndex)
-                this.setState({ activeIndex: this.state.activeIndex + 1 });
+            if (index == this.state.currentEventKey)
+                this.setState({ currentEventKey: this.state.currentEventKey - 1 });
+            else if (newIndex == this.state.currentEventKey)
+                this.setState({ currentEventKey: this.state.currentEventKey + 1 });
         }
 
         this.props.dc.refreshView();
@@ -780,16 +782,19 @@ export class PropertyRepeaterComponent extends React.Component<PropertyRepeaterC
         const newIndex = this.props.properties.moveDown(index);
 
         if (newIndex != index) {
-            if (index == this.state.activeIndex)
-                this.setState({ activeIndex: this.state.activeIndex + 1 });
-            else if (newIndex == this.state.activeIndex)
-                this.setState({ activeIndex: this.state.activeIndex - 1 });
+            if (index == this.state.currentEventKey)
+                this.setState({ currentEventKey: this.state.currentEventKey + 1 });
+            else if (newIndex == this.state.currentEventKey)
+                this.setState({ currentEventKey: this.state.currentEventKey - 1 });
         }
 
         this.props.dc.refreshView();
     }
 
     handleCreateClick = (event: React.SyntheticEvent<any>) => {
+
+        event.preventDefault();
+
         var p = {
             uid: this.createGuid(),
             name: "Name",
@@ -798,7 +803,7 @@ export class PropertyRepeaterComponent extends React.Component<PropertyRepeaterC
         } as DynamicProperty;
         autoFix(p);
         this.props.properties.push(p);
-        this.setState({ activeIndex: this.props.properties.length - 1 });
+        this.setState({ currentEventKey: this.props.properties.length - 1 });
         this.props.dc.refreshView();
 
         fetchPropertyType(p, this.props.dc);
@@ -816,25 +821,24 @@ export class PropertyRepeaterComponent extends React.Component<PropertyRepeaterC
     render() {
         return (
             <div className="properties">
-                <PanelGroup id="panelProperties" activeKey={this.state.activeIndex} onSelect={this.handleSelect as any} accordion>
+                <div>
                     {
                         this.props.properties.map((p, i) =>
-                            <Panel eventKey={i} key={i} bsStyle="info">
-                                <Panel.Heading>
-                                    <Panel.Title toggle>
-                                        {this.renderPropertyHeader(p, i)}
-                                    </Panel.Title>
-                                </Panel.Heading>
-                                <Panel.Body collapsible>
-                                    <PropertyComponent property={p} dc={this.props.dc} showDatabaseMapping={this.props.showDatabaseMapping} />
-                                </Panel.Body>
-                            </Panel>)
+                            <CollapsableCard
+                                key={i}
+                                header={this.renderPropertyHeader(p, i)}
+                                cardStyle={{ background: "light" }}
+                                headerStyle={{ text: "secondary" }}
+                                isOpen={this.state.currentEventKey == i}
+                                toggle={() => this.handleSelect(i)} >
+                                <PropertyComponent property={p} dc={this.props.dc} showDatabaseMapping={this.props.showDatabaseMapping} />
+                            </CollapsableCard>)
                     }
-                </PanelGroup>
-                <a title="Create Property"
+                </div>
+                <a href="#" title="Create Property"
                     className="sf-line-button sf-create"
                     onClick={this.handleCreateClick}>
-                    <span className="glyphicon glyphicon-plus sf-create sf-create-label" />Create Property
+                    <span className="fa fa-plus sf-create" />&nbsp;Create Property
                 </a>
             </div>
         );
@@ -845,22 +849,22 @@ export class PropertyRepeaterComponent extends React.Component<PropertyRepeaterC
             <div>
 
                 <span className="item-group">
-                    <a className={classes("sf-line-button", "sf-remove")}
+                    <a href="#" className={classes("sf-line-button", "sf-remove")}
                         onClick={e => this.handleOnRemove(e, i)}
                         title={EntityControlMessage.Remove.niceToString()}>
-                        <span className="glyphicon glyphicon-remove" />
+                        <span className="fa fa-remove" />
                     </a>
 
-                    <a className={classes("sf-line-button", "move-up")}
+                    <a href="#" className={classes("sf-line-button", "move-up")}
                         onClick={e => this.handleOnMoveUp(e, i)}
                         title={EntityControlMessage.MoveUp.niceToString()}>
-                        <span className="glyphicon glyphicon-chevron-up" />
+                        <span className="fa fa-chevron-up" />
                     </a>
 
-                    <a className={classes("sf-line-button", "move-down")}
+                    <a href="#" className={classes("sf-line-button", "move-down")}
                         onClick={e => this.handleOnMoveDown(e, i)}
                         title={EntityControlMessage.MoveDown.niceToString()}>
-                        <span className="glyphicon glyphicon-chevron-down" />
+                        <span className="fa fa-chevron-down" />
                     </a>
                 </span>
                 {" " + (p._propertyType_ || "") + " " + p.name}
@@ -902,28 +906,28 @@ export class PropertyComponent extends React.Component<PropertyComponentProps>{
         return (
             <div>
                 <div className="row">
-                    <div className="col-sm-7">
-                        <ValueComponent dc={this.props.dc} labelColumns={3} binding={Binding.create(p, d => d.name)} type="string" defaultValue={null} />
+                    <div className="col-sm-6">
+                        <ValueComponent dc={this.props.dc} labelColumns={4} binding={Binding.create(p, d => d.name)} type="string" defaultValue={null} onBlur={this.handleAutoFix} />
                         {this.props.showDatabaseMapping &&
-                            <ValueComponent dc={this.props.dc} labelColumns={3} binding={Binding.create(p, d => d.columnName)} type="string" defaultValue={null} labelClass="database-mapping" />
+                            <ValueComponent dc={this.props.dc} labelColumns={4} binding={Binding.create(p, d => d.columnName)} type="string" defaultValue={null} labelClass="database-mapping" />
                         }
-                        <TypeCombo dc={this.props.dc} labelColumns={3} binding={Binding.create(p, d => d.type)} onBlur={this.handleAutoFix} />
+                        <TypeCombo dc={this.props.dc} labelColumns={4} binding={Binding.create(p, d => d.type)} onBlur={this.handleAutoFix} />
                         {this.props.showDatabaseMapping &&
-                            <ValueComponent dc={this.props.dc} labelColumns={3} binding={Binding.create(p, d => d.columnType)} type="string" defaultValue={null} labelClass="database-mapping" />
+                            <ValueComponent dc={this.props.dc} labelColumns={4} binding={Binding.create(p, d => d.columnType)} type="string" defaultValue={null} labelClass="database-mapping" />
                         }
-                        <ValueComponent dc={this.props.dc} labelColumns={3} binding={Binding.create(p, d => d.isNullable)} type="string" defaultValue={null} options={DynamicTypeClient.IsNullableValues} onChange={this.handleAutoFix} />
+                        <ValueComponent dc={this.props.dc} labelColumns={4} binding={Binding.create(p, d => d.isNullable)} type="string" defaultValue={null} options={DynamicTypeClient.IsNullableValues} onChange={this.handleAutoFix} />
                     </div>
-                    <div className="col-sm-5">
+                    <div className="col-sm-6">
                         <IsMListFieldsetComponent
                             binding={Binding.create(p, d => d.isMList)}
                             title="Is MList"
                             onCreate={() => ({ preserveOrder: true })}
                             renderContent={mle =>
                                 <div className="database-mapping">
-                                    <ValueComponent dc={this.props.dc} labelColumns={6} binding={Binding.create(mle, d => d.preserveOrder)} type="boolean" defaultValue={null} />
-                                    <ValueComponent dc={this.props.dc} labelColumns={6} binding={Binding.create(mle, d => d.orderName)} type="string" defaultValue={null} />
-                                    <ValueComponent dc={this.props.dc} labelColumns={6} binding={Binding.create(mle, d => d.tableName)} type="string" defaultValue={null} />
-                                    <ValueComponent dc={this.props.dc} labelColumns={6} binding={Binding.create(mle, d => d.backReferenceName)} type="string" defaultValue={null} />
+                                    <ValueComponent dc={this.props.dc} labelColumns={4} binding={Binding.create(mle, d => d.preserveOrder)} type="boolean" defaultValue={null} />
+                                    <ValueComponent dc={this.props.dc} labelColumns={4} binding={Binding.create(mle, d => d.orderName)} type="string" defaultValue={null} />
+                                    <ValueComponent dc={this.props.dc} labelColumns={4} binding={Binding.create(mle, d => d.tableName)} type="string" defaultValue={null} />
+                                    <ValueComponent dc={this.props.dc} labelColumns={4} binding={Binding.create(mle, d => d.backReferenceName)} type="string" defaultValue={null} />
                                 </div>
                             }
                             onChange={() => {
@@ -978,14 +982,14 @@ export class TypeCombo extends React.Component<{ dc: DynamicTypeDesignContext; b
     render() {
         let lc = this.props.labelColumns;
         return (
-            <div className="form-group form-sm" >
-                <label className={classes("control-label", "col-sm-" + (lc == null ? 2 : lc))}>
+            <div className="form-group form-group-sm row" >
+                <label className={classes("col-form-label col-form-label-sm", "col-sm-" + (lc == null ? 2 : lc))}>
                     {this.props.binding.member}
                 </label>
                 <div className={"col-sm-" + (lc == null ? 10 : 12 - lc)}>
                     <div style={{ position: "relative" }}>
                         <Typeahead
-                            inputAttrs={{ className: "form-control sf-entity-autocomplete" }}
+                            inputAttrs={{ className: "form-control form-control-sm sf-entity-autocomplete" }}
                             onBlur={this.props.onBlur}
                             getItems={this.handleGetItems}
                             value={this.props.binding.getValue()}
@@ -997,6 +1001,9 @@ export class TypeCombo extends React.Component<{ dc: DynamicTypeDesignContext; b
 }
 
 function autoFix(p: DynamicProperty) {
+
+    if (p.name && p.name != p.name.firstUpper())
+        p.name = p.name.firstUpper();
 
     if (!p.type)
         return;
@@ -1089,17 +1096,17 @@ export class ComboBoxRepeaterComponent extends React.Component<ComboBoxRepeaterC
     render() {
         return (
             <div>
-                <table className="table table-condensed">
+                <table className="table table-sm">
                     <tbody>
                         {
                             this.props.list.map((value, i) => this.renderHeader(value, i))
                         }
                         <tr>
                             <td colSpan={2}>
-                                <a title="Create Query Column"
+                                <a href="#" title="Create Query Column"
                                     className="sf-line-button sf-create"
                                     onClick={this.handleCreateClick}>
-                                    <span className="glyphicon glyphicon-plus sf-create sf-create-label" />Create Query Column
+                                    <span className="fa fa-plus sf-create" />&nbsp;Create Query Column
                                 </a>
                             </td>
                         </tr>
@@ -1114,26 +1121,26 @@ export class ComboBoxRepeaterComponent extends React.Component<ComboBoxRepeaterC
             <tr key={i}>
                 <td>
                     <span className="item-group">
-                        <a className={classes("sf-line-button", "sf-remove")}
+                        <a href="#" className={classes("sf-line-button", "sf-remove")}
                             onClick={e => this.handleOnRemove(e, i)}
                             title={EntityControlMessage.Remove.niceToString()}>
-                            <span className="glyphicon glyphicon-remove" />
+                            <span className="fa fa-remove" />
                         </a>
 
-                        <a className={classes("sf-line-button", "move-up")}
+                        <a href="#" className={classes("sf-line-button", "move-up")}
                             onClick={e => this.handleOnMoveUp(e, i)}
                             title={EntityControlMessage.MoveUp.niceToString()}>
-                            <span className="glyphicon glyphicon-chevron-up" />
+                            <span className="fa fa-chevron-up" />
                         </a>
 
-                        <a className={classes("sf-line-button", "move-down")}
+                        <a href="#" className={classes("sf-line-button", "move-down")}
                             onClick={e => this.handleOnMoveDown(e, i)}
                             title={EntityControlMessage.MoveDown.niceToString()}>
-                            <span className="glyphicon glyphicon-chevron-down" />
+                            <span className="fa fa-chevron-down" />
                         </a>
                     </span>
                 </td>
-                <td className="form-sm">
+                <td className="rw-widget-sm">
                     <Combobox value={value} key={i}
                         data={this.props.options.filter(o => o == value || !this.props.list.contains(o))}
                         onChange={val => this.handleChange(val, i)} />
@@ -1161,7 +1168,7 @@ export class ValidatorRepeaterComponent extends React.Component<ValidatorRepeate
     }
 
     handleCreateClick = (event: React.SyntheticEvent<any>) => {
-
+        event.preventDefault();
         let val = this.props.property.validators!;
         if (val == null)
             this.props.property.validators = val = [];
@@ -1186,20 +1193,20 @@ export class ValidatorRepeaterComponent extends React.Component<ValidatorRepeate
                 <div className="panel-group">
                     {
                         (this.props.property.validators || []).map((val, i) =>
-                            <Panel eventKey={i} key={i} bsStyle="warning">
-                                <Panel.Heading>
-                                    {this.renderHeader(val, i)}
-                                </Panel.Heading>
-                                <Panel.Body>
-                                    {registeredValidators[val.type].render && registeredValidators[val.type].render!(val, this.props.dc)}
-                                </Panel.Body>
-                            </Panel>)
+                            <CollapsableCard
+                                key={i}
+                                header={this.renderHeader(val, i)}
+                                cardStyle={{ background: "light" }}
+                                defaultOpen={true}>
+                                {registeredValidators[val.type].render && registeredValidators[val.type].render!(val, this.props.dc)}
+                            </CollapsableCard>
+                        )
                     }
                 </div>
-                <a title="Create Validator"
+                <a href="#" title="Create Validator"
                     className="sf-line-button sf-create"
                     onClick={this.handleCreateClick}>
-                    <span className="glyphicon glyphicon-plus sf-create sf-create-label" />Create Validator
+                    <span className="fa fa-plus sf-create" />&nbsp;Create Validator
                 </a>
             </div>
         );
@@ -1209,10 +1216,10 @@ export class ValidatorRepeaterComponent extends React.Component<ValidatorRepeate
         return (
             <div>
                 <span className="item-group">
-                    <a className={classes("sf-line-button", "sf-remove")}
+                    <a href="#" className={classes("sf-line-button", "sf-remove")}
                         onClick={e => this.handleOnRemove(e, i)}
                         title={EntityControlMessage.Remove.niceToString()}>
-                        <span className="glyphicon glyphicon-remove" />
+                        <span className="fa fa-remove" />
                     </a>
                 </span>
                 {" "}

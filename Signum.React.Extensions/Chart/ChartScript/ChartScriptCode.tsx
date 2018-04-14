@@ -2,7 +2,7 @@
 import { UserQueryEntity, UserQueryMessage, QueryFilterEmbedded, QueryOrderEmbedded, QueryColumnEmbedded } from '../../UserQueries/Signum.Entities.UserQueries'
 import ChartBuilder from '../Templates/ChartBuilder'
 import { ChartScriptEntity, ChartScriptColumnEmbedded, ChartScriptParameterEmbedded } from '../Signum.Entities.Chart'
-import { FormGroup, FormControlStatic, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityList, EntityRepeater} from '../../../../Framework/Signum.React/Scripts/Lines'
+import { FormGroup, FormControlReadonly, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityList, EntityRepeater} from '../../../../Framework/Signum.React/Scripts/Lines'
 import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
 import { QueryDescription, SubTokensOptions } from '../../../../Framework/Signum.React/Scripts/FindOptions'
 import { getQueryNiceName } from '../../../../Framework/Signum.React/Scripts/Reflection'
@@ -19,8 +19,8 @@ export default class ChartScriptCode extends React.Component<{ ctx: TypeContext<
         return this.props.ctx.value;
     }
 
-    changedHandler: number;
-    exceptionHandler: number;
+    changedHandler!: number;
+    exceptionHandler!: number;
 
     handleOnChange = (newValue: string) => {
         this.props.ctx.value.script = newValue;
@@ -40,8 +40,9 @@ export default class ChartScriptCode extends React.Component<{ ctx: TypeContext<
         }
     }
 
-    jsCodeMirror: JavascriptCodeMirror;
-    lineHandle: CodeMirror.LineHandle;
+    jsCodeMirror!: JavascriptCodeMirror;
+    lineHandle?: CodeMirror.LineHandle;
+
     getException = () => {
         const number = opener.getExceptionNumber();
         clearTimeout(this.exceptionHandler);

@@ -16,7 +16,7 @@ export default class DashboardOmniboxProvider extends OmniboxProvider<DashboardO
     }
 
     icon() {
-        return this.coloredIcon("glyphicon glyphicon-th-large", "darkslateblue");
+        return this.coloredIcon("fa fa-tachometer", "darkslateblue");
     }
 
     renderItem(result: DashboardOmniboxResult): React.ReactChild[] {

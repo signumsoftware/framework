@@ -23,7 +23,7 @@ namespace Signum.Engine.Authorization
 
         public static bool IsStarted { get { return cache != null; } }
 
-        public readonly static HashSet<PropertyRoute> AvoidAutomaticUpgradeCollection = new HashSet<PropertyRoute>();
+        public readonly static Dictionary<PropertyRoute, PropertyAllowed> MaxAutomaticUpgrade = new Dictionary<PropertyRoute, PropertyAllowed>();
 
         public static void Start(SchemaBuilder sb)
         {
@@ -42,6 +42,12 @@ namespace Signum.Engine.Authorization
                     merger: new PropertyMerger(),
                     invalidateWithTypes: true,
                     coercer: PropertyCoercer.Instance);
+
+                sb.Schema.EntityEvents<RoleEntity>().PreUnsafeDelete += query =>
+                {
+                    Database.Query<RulePropertyEntity>().Where(r => query.Contains(r.Role.Entity)).UnsafeDelete();
+                    return null;
+                };
 
                 PropertyRoute.SetIsAllowedCallback(pp => pp.GetAllowedFor(PropertyAllowed.Read));
 
@@ -143,7 +149,10 @@ namespace Signum.Engine.Authorization
             cache.SetRules(rules, r => r.RootType == rules.Type); 
         }
 
-
+        public static void SetMaxAutomaticUpgrade(PropertyRoute property, PropertyAllowed allowed)
+        {
+            MaxAutomaticUpgrade.Add(property, allowed);
+        }
 
         public static PropertyAllowed GetPropertyAllowed(Lite<RoleEntity> role, PropertyRoute property)
         {
@@ -209,12 +218,21 @@ namespace Signum.Engine.Authorization
             PropertyAllowed best = AuthLogic.GetMergeStrategy(role) == MergeStrategy.Union ?
                 Max(baseValues.Select(a => a.Value)) :
                 Min(baseValues.Select(a => a.Value));
+            
+            if (!BasicPermission.AutomaticUpgradeOfProperties.IsAuthorized(role))
+                return best;
 
-            if (!BasicPermission.AutomaticUpgradeOfProperties.IsAuthorized(role) || PropertyAuthLogic.AvoidAutomaticUpgradeCollection.Contains(key))
+            var maxUp = PropertyAuthLogic.MaxAutomaticUpgrade.TryGetS(key);
+
+            if (maxUp.HasValue && maxUp <= best)
                 return best;
 
             if (baseValues.Where(a => a.Value.Equals(best)).All(a => GetDefault(key, a.Key).Equals(a.Value)))
-                return GetDefault(key, role);
+            {
+                var def = GetDefault(key, role);
+
+                return maxUp.HasValue && maxUp <= def ? maxUp.Value : def;
+            }
 
             return best;
         }
@@ -258,10 +276,14 @@ namespace Signum.Engine.Authorization
         {
             return pr =>
             {
-                if (!BasicPermission.AutomaticUpgradeOfProperties.IsAuthorized(role) || PropertyAuthLogic.AvoidAutomaticUpgradeCollection.Contains(pr))
+                if (!BasicPermission.AutomaticUpgradeOfProperties.IsAuthorized(role))
                     return AuthLogic.GetDefaultAllowed(role) ? PropertyAllowed.Modify : PropertyAllowed.None;
 
-                return GetDefault(pr, role);
+                var maxUp = PropertyAuthLogic.MaxAutomaticUpgrade.TryGetS(pr);
+
+                var def = GetDefault(pr, role);
+
+                return maxUp.HasValue && maxUp <= def ? maxUp.Value : def;
             };
         }
     }

@@ -1,11 +1,10 @@
 ﻿
 import * as React from 'react'
-import { DropdownButton, MenuItem, } from 'react-bootstrap'
 import { Dic, classes } from '../../../../Framework/Signum.React/Scripts/Globals'
 import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
 import { Lite, toLite } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
 import { ResultTable, FindOptions, FilterOption, QueryDescription, SubTokensOptions, QueryToken } from '../../../../Framework/Signum.React/Scripts/FindOptions'
-import { TypeContext, FormGroupSize, FormGroupStyle, StyleOptions, StyleContext } from '../../../../Framework/Signum.React/Scripts/TypeContext'
+import { TypeContext, FormGroupStyle, StyleOptions, StyleContext } from '../../../../Framework/Signum.React/Scripts/TypeContext'
 import { SearchMessage, JavascriptMessage, parseLite, is } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
 import { getTypeInfos, TypeInfo, isTypeEnum } from '../../../../Framework/Signum.React/Scripts/Reflection'
 import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
@@ -61,7 +60,7 @@ export class ChartColumn extends React.Component<ChartColumnProps, {}> {
                     {groupVisible && <input type="checkbox" checked={cb.groupResults} className="sf-chart-group-trigger" disabled={cb.chartScript.groupBy == "Always"} onChange={this.handleGroupChecked} />}
                 </td>
                 <td>
-                    <div className={classes("sf-query-token", this.props.ctx.formGroupSizeCss)}>
+                    <div className={classes("sf-query-token")}>
                         <QueryTokenEntityBuilder
                             ctx={this.props.ctx.subCtx(a => a.token, { formGroupStyle: "None" })}
                             queryKey={this.props.queryKey}
@@ -99,7 +98,7 @@ export class ChartColumnInfo extends React.Component<ChartColumnInfoProps> {
 
     render() {
 
-        const ctx = this.props.ctx.subCtx({ formGroupSize: "Small", formGroupStyle: "Basic" });
+        const ctx = this.props.ctx.subCtx({ formSize: "Small", formGroupStyle: "Basic" });
 
 
 
@@ -108,7 +107,7 @@ export class ChartColumnInfo extends React.Component<ChartColumnInfoProps> {
                 <td></td>
                 <td></td>
                 <td colSpan={1}>
-                    <div className="form-vertical">
+                    <div>
                         <div className="row">
                             <div className="col-sm-4">
                                 <ValueLine ctx={ctx.subCtx(a => a.displayName)} onTextboxBlur={this.props.onRedraw} />

@@ -1,7 +1,7 @@
 ﻿
 import * as React from 'react'
 import { Dic } from '../../../../Framework/Signum.React/Scripts/Globals'
-import { TypeContext, StyleOptions, EntityFrame  } from '../../../../Framework/Signum.React/Scripts/TypeContext'
+import { TypeContext, StyleOptions, EntityFrame } from '../../../../Framework/Signum.React/Scripts/TypeContext'
 import { TypeInfo, getTypeInfo, parseId, GraphExplorer, PropertyRoute, ReadonlyBinding, } from '../../../../Framework/Signum.React/Scripts/Reflection'
 import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
 import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
@@ -13,8 +13,7 @@ import ButtonBar from '../../../../Framework/Signum.React/Scripts/Frames/ButtonB
 import { CaseActivityEntity, WorkflowEntity, ICaseMainEntity, CaseActivityOperation, CaseActivityQuery, WorkflowMainEntityStrategy } from '../Signum.Entities.Workflow'
 import * as WorkflowClient from '../WorkflowClient'
 
-import { Navbar, Nav, NavItem, NavDropdown, MenuItem } from 'react-bootstrap'
-import { LinkContainer, IndexLinkContainer } from 'react-router-bootstrap'
+import { UncontrolledDropdown, DropdownItem, DropdownToggle, DropdownMenu, LinkContainer } from '../../../../Framework/Signum.React/Scripts/Components'
 
 export default class WorkflowDropdown extends React.Component<{}, { starts: Array<WorkflowEntity> }>
 {
@@ -32,17 +31,23 @@ export default class WorkflowDropdown extends React.Component<{}, { starts: Arra
     render() {
 
         const inboxUrl = WorkflowClient.getDefaultInboxUrl();
-        
+
         return (
-            <NavDropdown title={WorkflowEntity.nicePluralName()} id="workflow-dropdown" >
-                <IndexLinkContainer to={inboxUrl}><MenuItem>{CaseActivityQuery.Inbox.niceName()}</MenuItem></IndexLinkContainer>
-                {this.state.starts.length > 0 && <MenuItem divider />}
-                {this.state.starts.length > 0 && <MenuItem disabled>{JavascriptMessage.create.niceToString()}</MenuItem>}
-                {this.getStarts().map((val, i) =>
-                    <LinkContainer key={i} to={`~/workflow/new/${val.workflow.id}/${val.mainEntityStrategy}`}>
-                        <MenuItem>{val.workflow.toStr}{val.mainEntityStrategy == "SelectByUser" ? `(${WorkflowMainEntityStrategy.niceToString(val.mainEntityStrategy)})` : ""}</MenuItem></LinkContainer>
+            <UncontrolledDropdown className="sf-workflow" id="workflowDropdown" nav inNavbar>
+                <DropdownToggle nav caret>
+                    {WorkflowEntity.nicePluralName()}
+                </DropdownToggle>
+                <DropdownMenu style={{ minWidth: "200px" }}>
+                    <LinkContainer exact to={inboxUrl}><DropdownItem>{CaseActivityQuery.Inbox.niceName()}</DropdownItem></LinkContainer>
+                    {this.state.starts.length > 0 && <DropdownItem divider />}
+                    {this.state.starts.length > 0 && <DropdownItem disabled>{JavascriptMessage.create.niceToString()}</DropdownItem>}
+                    {this.getStarts().map((val, i) =>
+                        <LinkContainer key={i} to={`~/workflow/new/${val.workflow.id}/${val.mainEntityStrategy}`}>
+                            <DropdownItem>{val.workflow.toStr}{val.mainEntityStrategy == "SelectByUser" ? `(${WorkflowMainEntityStrategy.niceToString(val.mainEntityStrategy)})` : ""}</DropdownItem>
+                        </LinkContainer>
                     )}
-            </NavDropdown>
+                </DropdownMenu>
+            </UncontrolledDropdown>
         );
     }
 

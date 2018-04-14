@@ -383,6 +383,8 @@ namespace Signum.Engine.Workflow
                         e.To,
                     });
 
+                WorkflowEventTaskEntity.GetWorkflowEntity = lite => WorkflowGraphLazy.Value.GetOrThrow(lite).Workflow;
+
                 WorkflowGraphLazy = sb.GlobalLazy(() =>
                 {
                     using (new EntityCache())
@@ -426,112 +428,177 @@ namespace Signum.Engine.Workflow
                     return null;
                 };
 
-                sb.Include<WorkflowConditionEntity>()
-                   .WithSave(WorkflowConditionOperation.Save)
-                   .WithQuery(dqm, () => e => new
-                   {
-                       Entity = e,
-                       e.Id,
-                       e.Name,
-                       e.MainEntityType,
-                       e.Eval.Script
-                   });
+                StartWorkflowConditions(sb, dqm);
 
-                new Graph<WorkflowConditionEntity>.Delete(WorkflowConditionOperation.Delete)
-                {
-                    Delete = (e, _) =>
-                    {
-                        ThrowConnectionError(Database.Query<WorkflowConnectionEntity>().Where(a => a.Condition == e.ToLite()), e);
-                        e.Delete();
-                    },
-                }.Register();
-
-                new Graph<WorkflowConditionEntity>.ConstructFrom<WorkflowConditionEntity>(WorkflowConditionOperation.Clone)
-                {
-                    Construct = (e, args) =>
-                    {
-                        return new WorkflowConditionEntity
-                        {
-                            MainEntityType = e.MainEntityType,
-                            Eval = new WorkflowConditionEval { Script = e.Eval.Script }
-                        };
-                    },
-                }.Register();
-
-                WorkflowEventTaskEntity.GetWorkflowEntity = lite => WorkflowGraphLazy.Value.GetOrThrow(lite).Workflow;
-
-                Conditions = sb.GlobalLazy(() => Database.Query<WorkflowConditionEntity>().ToDictionary(a => a.ToLite()),
-                    new InvalidateWith(typeof(WorkflowConditionEntity)));
-
-                sb.Include<WorkflowActionEntity>()
-                   .WithSave(WorkflowActionOperation.Save)
-                   .WithQuery(dqm, () => e => new
-                   {
-                       Entity = e,
-                       e.Id,
-                       e.Name,
-                       e.MainEntityType,
-                       e.Eval.Script
-                   });
-
-                new Graph<WorkflowActionEntity>.Delete(WorkflowActionOperation.Delete)
-                {
-                    Delete = (e, _) =>
-                    {
-                        ThrowConnectionError(Database.Query<WorkflowConnectionEntity>().Where(a => a.Action == e.ToLite()), e);
-                        e.Delete();
-                    },
-                }.Register();
-
-                new Graph<WorkflowActionEntity>.ConstructFrom<WorkflowActionEntity>(WorkflowActionOperation.Clone)
-                {
-                    Construct = (e, args) =>
-                    {
-                        return new WorkflowActionEntity
-                        {
-                            MainEntityType = e.MainEntityType,
-                            Eval = new WorkflowActionEval { Script = e.Eval.Script }
-                        };
-                    },
-                }.Register();
-
-                Actions = sb.GlobalLazy(() => Database.Query<WorkflowActionEntity>().ToDictionary(a => a.ToLite()),
-                    new InvalidateWith(typeof(WorkflowActionEntity)));
-
-                sb.Include<WorkflowScriptEntity>()
-                 .WithSave(WorkflowScriptOperation.Save)
-                 .WithQuery(dqm, () => s => new
-                 {
-                     Entity = s,
-                     s.Id,
-                     s.Name,
-                     s.MainEntityType,
-                 });
-
-                new Graph<WorkflowScriptEntity>.Delete(WorkflowScriptOperation.Delete)
-                {
-                    Delete = (s, _) =>
-                    {
-                        ThrowConnectionError(Database.Query<WorkflowActivityEntity>().Where(a => a.Script.Script == s.ToLite()), s);
-                        s.Delete();
-                    },
-                }.Register();
-
-                Scripts = sb.GlobalLazy(() => Database.Query<WorkflowScriptEntity>().ToDictionary(a => a.ToLite()),
-                    new InvalidateWith(typeof(WorkflowScriptEntity)));
-
-                sb.Include<WorkflowScriptRetryStrategyEntity>()
-                    .WithSave(WorkflowScriptRetryStrategyOperation.Save)
-                    .WithDelete(WorkflowScriptRetryStrategyOperation.Delete)
-                    .WithQuery(dqm, () => e => new
-                    {
-                        Entity = e,
-                        e.Id,
-                        e.Rule
-                    });
+                StartWorkflowTimerConditions(sb, dqm);
+              
+                StartWorkflowActions(sb, dqm);
+                
+                StartWorkflowScript(sb, dqm);
             }
         }
 
+
+        public static ResetLazy<Dictionary<Lite<WorkflowTimerConditionEntity>, WorkflowTimerConditionEntity>> TimerConditions;
+        public static WorkflowTimerConditionEntity RetrieveFromCache(this Lite<WorkflowTimerConditionEntity> wc) => TimerConditions.Value.GetOrThrow(wc);
+        private static void StartWorkflowTimerConditions(SchemaBuilder sb, DynamicQueryManager dqm)
+        {
+            sb.Include<WorkflowTimerConditionEntity>()
+               .WithSave(WorkflowTimerConditionOperation.Save)
+               .WithQuery(dqm, () => e => new
+               {
+                   Entity = e,
+                   e.Id,
+                   e.Name,
+                   e.MainEntityType,
+                   e.Eval.Script
+               });
+
+            new Graph<WorkflowTimerConditionEntity>.Delete(WorkflowTimerConditionOperation.Delete)
+            {
+                Delete = (e, _) =>
+                {
+                    ThrowConnectionError(Database.Query<WorkflowActivityEntity>().Where(a => a.Timers.Any(t => t.Condition == e.ToLite())), e);
+                    e.Delete();
+                },
+            }.Register();
+
+            new Graph<WorkflowTimerConditionEntity>.ConstructFrom<WorkflowTimerConditionEntity>(WorkflowTimerConditionOperation.Clone)
+            {
+                Construct = (e, args) =>
+                {
+                    return new WorkflowTimerConditionEntity
+                    {
+                        MainEntityType = e.MainEntityType,
+                        Eval = new  WorkflowTimerConditionEval { Script = e.Eval.Script }
+                    };
+                },
+            }.Register();
+
+            TimerConditions = sb.GlobalLazy(() => Database.Query<WorkflowTimerConditionEntity>().ToDictionary(a => a.ToLite()),
+                 new InvalidateWith(typeof(WorkflowTimerConditionEntity)));
+        }
+
+        public static ResetLazy<Dictionary<Lite<WorkflowActionEntity>, WorkflowActionEntity>> Actions;
+        public static WorkflowActionEntity RetrieveFromCache(this Lite<WorkflowActionEntity> wa) => Actions.Value.GetOrThrow(wa);
+        private static void StartWorkflowActions(SchemaBuilder sb, DynamicQueryManager dqm)
+        {
+            sb.Include<WorkflowActionEntity>()
+               .WithSave(WorkflowActionOperation.Save)
+               .WithQuery(dqm, () => e => new
+               {
+                   Entity = e,
+                   e.Id,
+                   e.Name,
+                   e.MainEntityType,
+                   e.Eval.Script
+               });
+
+            new Graph<WorkflowActionEntity>.Delete(WorkflowActionOperation.Delete)
+            {
+                Delete = (e, _) =>
+                {
+                    ThrowConnectionError(Database.Query<WorkflowConnectionEntity>().Where(a => a.Action == e.ToLite()), e);
+                    e.Delete();
+                },
+            }.Register();
+
+            new Graph<WorkflowActionEntity>.ConstructFrom<WorkflowActionEntity>(WorkflowActionOperation.Clone)
+            {
+                Construct = (e, args) =>
+                {
+                    return new WorkflowActionEntity
+                    {
+                        MainEntityType = e.MainEntityType,
+                        Eval = new WorkflowActionEval { Script = e.Eval.Script }
+                    };
+                },
+            }.Register();
+
+            Actions = sb.GlobalLazy(() => Database.Query<WorkflowActionEntity>().ToDictionary(a => a.ToLite()),
+                new InvalidateWith(typeof(WorkflowActionEntity)));
+        }
+
+        public static ResetLazy<Dictionary<Lite<WorkflowConditionEntity>, WorkflowConditionEntity>> Conditions;
+        public static WorkflowConditionEntity RetrieveFromCache(this Lite<WorkflowConditionEntity> wc) => Conditions.Value.GetOrThrow(wc);
+        private static void StartWorkflowConditions(SchemaBuilder sb, DynamicQueryManager dqm)
+        {
+            sb.Include<WorkflowConditionEntity>()
+               .WithSave(WorkflowConditionOperation.Save)
+               .WithQuery(dqm, () => e => new
+               {
+                   Entity = e,
+                   e.Id,
+                   e.Name,
+                   e.MainEntityType,
+                   e.Eval.Script
+               });
+
+            new Graph<WorkflowConditionEntity>.Delete(WorkflowConditionOperation.Delete)
+            {
+                Delete = (e, _) =>
+                {
+                    ThrowConnectionError(Database.Query<WorkflowConnectionEntity>().Where(a => a.Condition == e.ToLite()), e);
+                    e.Delete();
+                },
+            }.Register();
+
+            new Graph<WorkflowConditionEntity>.ConstructFrom<WorkflowConditionEntity>(WorkflowConditionOperation.Clone)
+            {
+                Construct = (e, args) =>
+                {
+                    return new WorkflowConditionEntity
+                    {
+                        MainEntityType = e.MainEntityType,
+                        Eval = new WorkflowConditionEval { Script = e.Eval.Script }
+                    };
+                },
+            }.Register();
+
+
+            Conditions = sb.GlobalLazy(() => Database.Query<WorkflowConditionEntity>().ToDictionary(a => a.ToLite()),
+                new InvalidateWith(typeof(WorkflowConditionEntity)));
+        }
+
+
+        public static ResetLazy<Dictionary<Lite<WorkflowScriptEntity>, WorkflowScriptEntity>> Scripts;
+        public static WorkflowScriptEntity RetrieveFromCache(this Lite<WorkflowScriptEntity> ws)=> Scripts.Value.GetOrThrow(ws);
+        private static void StartWorkflowScript(SchemaBuilder sb, DynamicQueryManager dqm)
+        {
+            sb.Include<WorkflowScriptEntity>()
+              .WithSave(WorkflowScriptOperation.Save)
+              .WithQuery(dqm, () => s => new
+              {
+                  Entity = s,
+                  s.Id,
+                  s.Name,
+                  s.MainEntityType,
+              });
+
+            new Graph<WorkflowScriptEntity>.Delete(WorkflowScriptOperation.Delete)
+            {
+                Delete = (s, _) =>
+                {
+                    ThrowConnectionError(Database.Query<WorkflowActivityEntity>().Where(a => a.Script.Script == s.ToLite()), s);
+                    s.Delete();
+                },
+            }.Register();
+
+            Scripts = sb.GlobalLazy(() => Database.Query<WorkflowScriptEntity>().ToDictionary(a => a.ToLite()),
+                new InvalidateWith(typeof(WorkflowScriptEntity)));
+
+            sb.Include<WorkflowScriptRetryStrategyEntity>()
+                .WithSave(WorkflowScriptRetryStrategyOperation.Save)
+                .WithDelete(WorkflowScriptRetryStrategyOperation.Delete)
+                .WithQuery(dqm, () => e => new
+                {
+                    Entity = e,
+                    e.Id,
+                    e.Rule
+                });
+        }
+
+     
 
         private static void ThrowConnectionError(IQueryable<WorkflowConnectionEntity> queryable, Entity toDelete)
         {
@@ -612,31 +679,15 @@ namespace Signum.Engine.Workflow
             }
         }
 
-        public static ResetLazy<Dictionary<Lite<WorkflowConditionEntity>, WorkflowConditionEntity>> Conditions;
-        public static WorkflowConditionEntity RetrieveFromCache(this Lite<WorkflowConditionEntity> wc)
-        {
-            return WorkflowLogic.Conditions.Value.GetOrThrow(wc);
-        }
 
-        public static ResetLazy<Dictionary<Lite<WorkflowActionEntity>, WorkflowActionEntity>> Actions;
-        public static WorkflowActionEntity RetrieveFromCache(this Lite<WorkflowActionEntity> wa)
-        {
-            return WorkflowLogic.Actions.Value.GetOrThrow(wa);
-        }
-
-        public static ResetLazy<Dictionary<Lite<WorkflowScriptEntity>, WorkflowScriptEntity>> Scripts;
-        public static WorkflowScriptEntity RetrieveFromCache(this Lite<WorkflowScriptEntity> ws)
-        {
-            return WorkflowLogic.Scripts.Value.GetOrThrow(ws);
-        }
 
         public static Expression<Func<UserEntity, Lite<Entity>, bool>> IsUserConstantActor = (userConstant, actor) =>
-           actor.RefersTo(userConstant) ||
-           (actor is Lite<RoleEntity> && AuthLogic.InverseIndirectlyRelated((Lite<RoleEntity>)actor).Contains(userConstant.Role));
+         actor.RefersTo(userConstant) ||
+          (actor is Lite<RoleEntity> && AuthLogic.IndirectlyRelated(userConstant.Role).Contains((Lite<RoleEntity>)actor));
 
         public static Expression<Func<UserEntity, Lite<Entity>, bool>> IsUserActorConstant = (user, actorConstant) =>
-          actorConstant.RefersTo(user) ||
-          (actorConstant is Lite<RoleEntity> && AuthLogic.IndirectlyRelated(user.Role).Contains((Lite<RoleEntity>)actorConstant));
+            actorConstant.RefersTo(user) ||
+           (actorConstant is Lite<RoleEntity> && AuthLogic.InverseIndirectlyRelated((Lite<RoleEntity>)actorConstant).Contains(user.Role));
 
 
         public static List<WorkflowEntity> GetAllowedStarts()
