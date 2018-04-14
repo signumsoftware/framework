@@ -6,7 +6,6 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Reflection;
-using System.Web.Http;
 using Signum.Entities;
 using Signum.React.Facades;
 using Signum.Utilities;
@@ -14,6 +13,8 @@ using Signum.Engine;
 using Signum.React.Filters;
 using Signum.Entities.Basics;
 using Signum.Engine.Basics;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Signum.React.ApiControllers
 {

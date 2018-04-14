@@ -13,10 +13,11 @@ using System.Reflection;
 using Signum.Utilities.Reflection;
 using System.Linq.Expressions;
 using Signum.Utilities.ExpressionTrees;
-using Microsoft.SqlServer.Types;
+//using Microsoft.SqlServer.Types;
 using Microsoft.SqlServer.Server;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.SqlServer.Types;
 
 namespace Signum.Engine
 {

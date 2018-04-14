@@ -12,7 +12,6 @@ using Signum.Utilities.ExpressionTrees;
 using System.Diagnostics;
 using Signum.Entities.Reflection;
 using System.Linq.Expressions;
-using System.Runtime.Remoting.Contexts;
 using Signum.Engine.Linq;
 using Signum.Entities.Basics;
 using Signum.Engine.Basics;
@@ -310,7 +309,7 @@ namespace Signum.Engine.Maps
 
             var should = methodBase.DeclaringType.GetMethods(BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic)
              .Where(m => !m.HasAttribute<MethodExpanderAttribute>())
-             .Select(m => m.GetCustomAttribute<ExpressionFieldAttribute>()?.Name ?? m.Name + "Expression").ToList();
+             .Select(m => m.GetCustomAttribute<ExpressionFieldAttribute>()?.Name).ToList();
 
             var fields = methodBase.DeclaringType.GetFields(BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic)
                 .Where(f => f.Name.EndsWith("Expression") && f.FieldType.IsInstantiationOf(typeof(Expression<>)));

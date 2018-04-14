@@ -3,6 +3,7 @@ using Mono.Cecil;
 using System.Linq;
 using System.Collections.Generic;
 using Mono.Cecil.Cil;
+using System.Diagnostics;
 
 namespace Signum.MSBuildTask
 {
@@ -27,16 +28,44 @@ namespace Signum.MSBuildTask
             this.GetMethod = Assembly.MainModule.ImportReference(this.ModifiableEntity.Methods.Single(m => m.Name == "Get" && m.IsDefinition));
         }
 
-        internal void FixProperties()
+        internal bool FixProperties()
         {
             var entityTypes = (from t in this.Assembly.MainModule.Types
-                               where t.IsClass && t.Parents().Any(td => td.FullName == ModifiableEntity.FullName) && t.HasProperties
+                               where IsModifiableEntity(t) && t.HasProperties
                                select t).ToList();
 
             foreach (var type in entityTypes)
             {
                 FixProperties(type);
             }
+
+            return false;
+        }
+
+        internal bool IsModifiableEntity(TypeDefinition t)
+        {
+            if (!t.IsClass)
+                return false;
+
+            if (!InheritsFromModEntity(t))
+                return false;
+
+            return true;
+        }
+
+        private bool InheritsFromModEntity(TypeDefinition t)
+        {
+            if (t.FullName == ModifiableEntity.FullName)
+                return true;
+
+            if (t.BaseType == null || t.BaseType.FullName == "System.Object")
+                return false;
+
+            var baseType = t.BaseType.Resolve();
+            
+            var result = InheritsFromModEntity(baseType);
+
+            return result;
         }
 
         private void FixProperties(TypeDefinition type)

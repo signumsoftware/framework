@@ -400,7 +400,7 @@ namespace Signum.React.Json
                 var result = (ModifiableEntity)Activator.CreateInstance(type, nonPublic: true);
 
                 if (identityInfo.Id != null)
-                    ((Entity)result).Id = PrimaryKey.Parse(identityInfo.Id, type);
+                    ((Entity)result).SetId(PrimaryKey.Parse(identityInfo.Id, type));
 
                 return result;
             }

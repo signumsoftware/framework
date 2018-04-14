@@ -10,7 +10,7 @@ using Signum.Entities;
 using Signum.Utilities.DataStructures;
 using Signum.Engine.Maps;
 using System.Globalization;
-using Microsoft.SqlServer.Types;
+//using Microsoft.SqlServer.Types;
 
 
 namespace Signum.Engine

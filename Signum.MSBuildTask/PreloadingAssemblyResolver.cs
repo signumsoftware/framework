@@ -5,11 +5,11 @@ namespace Signum.MSBuildTask
     internal class PreloadingAssemblyResolver : DefaultAssemblyResolver
     {
         public AssemblyDefinition SignumUtilities { get; private set; } 
-        public AssemblyDefinition SignumEntities { get; private set; } 
+        public AssemblyDefinition SignumEntities { get; private set; }
 
-        public PreloadingAssemblyResolver(string references)
+        public PreloadingAssemblyResolver(string[] references)
         {
-            foreach (var dll in references.Split(';'))
+            foreach (var dll in references)
             {
                 var assembly = ModuleDefinition.ReadModule(dll, new ReaderParameters { AssemblyResolver = this }).Assembly;
 

@@ -9,7 +9,7 @@ using System.Reflection;
 using System.Linq.Expressions;
 using System.Data;
 using Signum.Entities.Reflection;
-using Microsoft.SqlServer.Types;
+//using Microsoft.SqlServer.Types;
 using Microsoft.SqlServer.Server;
 using System.Collections.ObjectModel;
 using System.Collections.Concurrent;

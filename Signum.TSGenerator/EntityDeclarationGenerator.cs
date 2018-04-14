@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.Loader;
 using System.Text;
 
 namespace Signum.TSGenerator
@@ -32,7 +33,8 @@ namespace Signum.TSGenerator
         {
             StringBuilder sb = new StringBuilder();
 
-            var assembly = Assembly.LoadFrom(options.CurrentAssemblyReference.AssemblyFullPath);
+            var assembly = AssemblyLoadContext.Default.LoadFromAssemblyPath(options.CurrentAssemblyReference.AssemblyFullPath);
+            AssemblyLoadContext.Default.Resolving += options.Default_Resolving;
             options.AssemblyReferences.Values.ToList().ForEach(r => Assembly.LoadFrom(r.AssemblyFullPath));
 
             var entities = AppDomain.CurrentDomain.GetAssemblies().Single(a => a.GetName().Name == "Signum.Entities");
@@ -45,7 +47,10 @@ namespace Signum.TSGenerator
             if (exportedTypes.Count == 0)
                 throw new InvalidOperationException($"Assembly '{options.CurrentAssembly}' has not types in namespace '{options.CurrentNamespace}'");
 
-            var imported = assembly.GetCustomAttributes(Cache.ImportInTypeScriptAttribute).Select(a => (Type)((dynamic)a).Type).ToList();
+            var imported = assembly.GetCustomAttributes(Cache.ImportInTypeScriptAttribute)
+                .Where(a=> (((dynamic)a).ForNamesace) == options.CurrentNamespace)
+                .Select(a => (Type)((dynamic)a).Type)
+                .ToList();
             var importedMessage = imported.Where(a => a.Name.EndsWith("Message")).ToList();
             var importedEnums = imported.Except(importedMessage).ToList();
 
@@ -170,6 +175,8 @@ namespace Signum.TSGenerator
 
             return WriteFillFile(options, code);
         }
+
+
 
         private static string WriteFillFile(Options options, string code)
         {
@@ -648,12 +655,23 @@ namespace Signum.TSGenerator
 
         public Dictionary<string, AssemblyReference> AssemblyReferences;
 
+        public Dictionary<string, string> AllReferences { get; internal set; }
 
         public bool IsExternal(Type type)
         {
             return type.Assembly.GetName().Name != CurrentAssembly &&
                  !AssemblyReferences.ContainsKey(type.Assembly.GetName().Name);
         }
+
+        public Assembly Default_Resolving(AssemblyLoadContext arg1, AssemblyName arg2)
+        {
+            Console.WriteLine(arg2.Name);
+            if (AllReferences.TryGetValue(arg2.Name, out string path))
+                return arg1.LoadFromAssemblyPath(path);
+
+            return null;
+        }
+
     }
 
     [Serializable]

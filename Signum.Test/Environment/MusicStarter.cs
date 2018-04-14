@@ -12,10 +12,9 @@ using Signum.Entities.Basics;
 using Signum.Engine.DynamicQuery;
 using Signum.Utilities.ExpressionTrees;
 using Signum.Utilities;
-using Microsoft.SqlServer.Types;
 using Signum.Engine.Operations;
 using Signum.Engine.Basics;
-using Signum.Test.Properties;
+using Microsoft.Extensions.Configuration;
 
 namespace Signum.Test.Environment
 {
@@ -24,9 +23,22 @@ namespace Signum.Test.Environment
         static bool startedAndLoaded = false;
         public static void StartAndLoad()
         {
-            if (!startedAndLoaded)
+            if (startedAndLoaded)
+                return;
+
+            lock (typeof(MusicStarter))
             {
-                Start(UserConnections.Replace(Settings.Default.SignumTest));
+                if (startedAndLoaded)
+                    return;
+
+                var conf = new ConfigurationBuilder()
+                    .SetBasePath(Directory.GetCurrentDirectory())
+                    .AddJsonFile("appsettings.json")
+                    .Build();
+
+                var connectionString = conf.GetConnectionString("SignumTest");
+
+                Start(UserConnections.Replace(connectionString));
 
                 Administrator.TotalGeneration();
 

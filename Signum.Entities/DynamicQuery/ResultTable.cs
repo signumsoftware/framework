@@ -246,11 +246,11 @@ namespace Signum.Entities.DynamicQuery
             this.pagination = pagination;
         }
 
-        [OnDeserialized]
-        private void OnDeserialized(StreamingContext context)
-        {
-            CreateIndices(columns);
-        }
+        //[OnDeserialized]
+        //private void OnDeserialized(StreamingContext context)
+        //{
+        //    CreateIndices(columns);
+        //}
 
         void CreateIndices(ResultColumn[] columns)
         {

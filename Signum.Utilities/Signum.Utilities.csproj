@@ -1,290 +1,43 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>9.0.30729</ProductVersion>
-    <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{F7D3F72D-741D-4F67-8CF8-CD41B9035FED}</ProjectGuid>
-    <OutputType>Library</OutputType>
-    <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Signum.Utilities</RootNamespace>
-    <AssemblyName>Signum.Utilities</AssemblyName>
-    <TargetFrameworkVersion>v4.6.2</TargetFrameworkVersion>
-    <FileAlignment>512</FileAlignment>
-    <SignAssembly>false</SignAssembly>
-    <AssemblyOriginatorKeyFile>
-    </AssemblyOriginatorKeyFile>
-    <FileUpgradeFlags>
-    </FileUpgradeFlags>
-    <OldToolsVersion>3.5</OldToolsVersion>
-    <UpgradeBackupLocation />
-    <PublishUrl>publish\</PublishUrl>
-    <Install>true</Install>
-    <InstallFrom>Disk</InstallFrom>
-    <UpdateEnabled>false</UpdateEnabled>
-    <UpdateMode>Foreground</UpdateMode>
-    <UpdateInterval>7</UpdateInterval>
-    <UpdateIntervalUnits>Days</UpdateIntervalUnits>
-    <UpdatePeriodically>false</UpdatePeriodically>
-    <UpdateRequired>false</UpdateRequired>
-    <MapFileExtensions>true</MapFileExtensions>
-    <ApplicationRevision>0</ApplicationRevision>
-    <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
-    <IsWebBootstrapper>false</IsWebBootstrapper>
-    <UseApplicationTrust>false</UseApplicationTrust>
-    <BootstrapperEnabled>true</BootstrapperEnabled>
-    <TargetFrameworkProfile>
-    </TargetFrameworkProfile>
+    <TargetFramework>netcoreapp2.1</TargetFramework>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
-    <NoWarn>0067</NoWarn>
-    <Prefer32Bit>false</Prefer32Bit>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <LangVersion>latest</LangVersion>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
-    <Prefer32Bit>false</Prefer32Bit>
-  </PropertyGroup>
+
   <ItemGroup>
-    <Reference Include="Microsoft.SqlServer.Types, Version=14.0.0.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Microsoft.SqlServer.Types.14.0.314.76\lib\net40\Microsoft.SqlServer.Types.dll</HintPath>
-    </Reference>
-    <Reference Include="System" />
-    <Reference Include="System.Core">
-      <RequiredTargetFramework>3.5</RequiredTargetFramework>
-    </Reference>
-    <Reference Include="System.Drawing" />
-    <Reference Include="System.Runtime.Serialization.Formatters.Soap" />
-    <Reference Include="System.ValueTuple, Version=4.0.2.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\System.ValueTuple.4.4.0\lib\net461\System.ValueTuple.dll</HintPath>
-    </Reference>
-    <Reference Include="System.Web" />
-    <Reference Include="System.Xml.Linq">
-      <RequiredTargetFramework>3.5</RequiredTargetFramework>
-    </Reference>
-    <Reference Include="System.Data" />
-    <Reference Include="System.Xml" />
+    <None Update="Translations\Signum.Utilities.de.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Translations\Signum.Utilities.en.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Translations\Signum.Utilities.es.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Translations\Signum.Utilities.fa.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Translations\Signum.Utilities.fr.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Translations\Signum.Utilities.it.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Translations\Signum.Utilities.pt.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
+
   <ItemGroup>
-    <Compile Include="AboutTools.cs" />
-    <Compile Include="Tsv.cs" />
-    <Compile Include="ExpressionExpanderAttributes.cs" />
-    <Compile Include="ExpressionTrees\QueryableAsyncExtensions.cs" />
-    <Compile Include="Extensions\ArgsExtensions.cs" />
-    <Compile Include="Extensions\ArrayExtensions.cs" />
-    <Compile Include="Extensions\ColorExtensions.cs" />
-    <Compile Include="ConsoleSwitch.cs" />
-    <Compile Include="Extensions\XmlExtensions.cs" />
-    <Compile Include="NaturalLanguage\English.cs" />
-    <Compile Include="NaturalLanguage\German.cs" />
-    <Compile Include="NaturalLanguage\Spanish.cs" />
-    <Compile Include="Profiler\TimeTracker.cs" />
-    <Compile Include="StartParameters.cs" />
-    <Compile Include="Statics.cs" />
-    <Compile Include="DataStructures\HashsetComparer.cs" />
-    <Compile Include="DataStructures\MinMax.cs" />
-    <Compile Include="DataStructures\ScopedDictionary.cs" />
-    <Compile Include="DescriptionManager.cs" />
-    <Compile Include="ExpressionTrees\ExpressionComparer.cs" />
-    <Compile Include="ExpressionTrees\ExpressionReplacer.cs" />
-    <Compile Include="ExpressionTrees\Linq.cs" />
-    <Compile Include="Extensions\FileExtensions.cs" />
-    <Compile Include="NaturalLanguage\NaturalLanguageTools.cs" />
-    <Compile Include="Extensions\PageExtensions.cs" />
-    <Compile Include="Polymorphic.cs" />
-    <Compile Include="Reflection\GenericInvoker.cs" />
-    <Compile Include="Reflection\TupleExtensions.cs" />
-    <Compile Include="Synchronization\ResetLazy.cs" />
-    <Compile Include="Extensions\TimeSpanExtensions.cs" />
-    <Compile Include="Csv.cs" />
-    <Compile Include="DataStructures\Grouping.cs" />
-    <Compile Include="DataStructures\ImmutableStack.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="DataStructures\LambdaComparer.cs" />
-    <Compile Include="DataStructures\ReferenceEqualityComparer.cs" />
-    <Compile Include="DataStructures\Sequence.cs" />
-    <Compile Include="Extensions\DateTimeExtensions.cs" />
-    <Compile Include="DebugTextWriter.cs" />
-    <Compile Include="Extensions\DictionaryExtensions.cs" />
-    <Compile Include="Profiler\HeavyProfiler.cs" />
-    <Compile Include="Extensions\EnumerableExtensions.cs" />
-    <Compile Include="Extensions\EnumExtensions.cs" />
-    <Compile Include="DataStructures\DirectedEdgedGraph.cs" />
-    <Compile Include="DataStructures\IntervalDictionaries\Cube.cs" />
-    <Compile Include="DataStructures\IntervalDictionaries\CubeDictionary.cs" />
-    <Compile Include="DataStructures\DirectedGraph.cs" />
-    <Compile Include="DataStructures\IntervalDictionaries\Interval.cs" />
-    <Compile Include="DataStructures\IntervalDictionaries\IntervalDictionary.cs" />
-    <Compile Include="DataStructures\IntervalDictionaries\Square.cs" />
-    <Compile Include="DataStructures\IntervalDictionaries\SquareDictionary.cs" />
-    <Compile Include="DataStructures\PriorityQueue.cs" />
-    <Compile Include="DataStructures\RecentsDictionary.cs" />
-    <Compile Include="Extensions\ExpressionExtensions.cs" />
-    <Compile Include="ExpressionTrees\ExpressionEvaluator.cs" />
-    <Compile Include="ExpressionTrees\ExpressionHelper.cs" />
-    <Compile Include="ExpressionTrees\ExpressionNominator.cs" />
-    <Compile Include="ExpressionTrees\Query.cs" />
-    <Compile Include="ExpressionTrees\QueryProvider.cs" />
-    <Compile Include="Extensions\ReflectionExtensions.cs" />
-    <Compile Include="Reflection\MemberEntryFactory.cs" />
-    <Compile Include="Serialization.cs" />
-    <Compile Include="ExpressionTrees\CSharpRenderer.cs" />
-    <Compile Include="ExpressionTrees\CSharpTreeVisitor.cs" />
-    <Compile Include="Extensions\Extensions.cs" />
-    <Compile Include="Extensions\GroupExtensions.cs" />
-    <Compile Include="ExpressionTrees\ExpressionCleaner.cs" />
-    <Compile Include="ExpressionTrees\ExpandableQueryProvider.cs" />
-    <Compile Include="ExpressionExpanderSamples.cs" />
-    <Compile Include="Extensions\ListExtensions.cs" />
-    <Compile Include="MyRandom.cs" />
-    <Compile Include="Reflection\ReflectionTools.cs" />
-    <Compile Include="Extensions\RegexExtensions.cs" />
-    <Compile Include="SafeConsole.cs" />
-    <Compile Include="Disposable.cs" />
-    <Compile Include="Extensions\ProgressEnumerator.cs" />
-    <Compile Include="ProgressProxy.cs" />
-    <Compile Include="Synchronization\CultureInfoUtils.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Synchronization\ThreadSafeEnumerator.cs" />
-    <Compile Include="Extensions\StreamExtensions.cs" />
-    <Compile Include="StringDistance.cs" />
-    <Compile Include="Extensions\StringExtensions.cs" />
-    <Compile Include="Properties\Version.cs" />
-    <Compile Include="Extensions\TreeHelper.cs" />
+    <Folder Include="Properties\" />
   </ItemGroup>
+
   <ItemGroup>
-    <BootstrapperPackage Include="Microsoft.Net.Client.3.5">
-      <Visible>False</Visible>
-      <ProductName>.NET Framework 3.5 SP1 Client Profile</ProductName>
-      <Install>false</Install>
-    </BootstrapperPackage>
-    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
-      <Visible>False</Visible>
-      <ProductName>.NET Framework 3.5 SP1</ProductName>
-      <Install>true</Install>
-    </BootstrapperPackage>
-    <BootstrapperPackage Include="Microsoft.Windows.Installer.3.1">
-      <Visible>False</Visible>
-      <ProductName>Windows Installer 3.1</ProductName>
-      <Install>true</Install>
-    </BootstrapperPackage>
+    <PackageReference Include="Microsoft.SqlServer.Types" Version="14.0.314.76" />
   </ItemGroup>
-  <ItemGroup>
-    <None Include="AboutTools.md" />
-    <None Include="ConsoleSwitch.md" />
-    <None Include="DataStructures\DirectedEdgedGraph.md" />
-    <None Include="DataStructures\DirectedGraph.md" />
-    <None Include="DataStructures\Grouping.md" />
-    <None Include="DataStructures\ImmutableStack.md" />
-    <None Include="DataStructures\IntervalDictionaries\CubeDictionary.md" />
-    <None Include="DataStructures\IntervalDictionaries\Interval.md" />
-    <None Include="DataStructures\IntervalDictionaries\IntervalDictionary.md" />
-    <None Include="DataStructures\IntervalDictionaries\SquareDictionary.md" />
-    <None Include="DataStructures\LambdaComparer.md" />
-    <None Include="DataStructures\MinMax.md" />
-    <None Include="DataStructures\PriorityQueue.md" />
-    <None Include="DataStructures\RecentsDictionary.md" />
-    <None Include="DataStructures\ReferenceEqualityComparer.md" />
-    <None Include="DebugTextWriter.md" />
-    <None Include="DescriptionManager.md" />
-    <None Include="Disposable.md" />
-    <None Include="ExpressionTrees\0.Intro.md" />
-    <None Include="ExpressionTrees\CSharpRenderer.md" />
-    <None Include="ExpressionTrees\ExpressionCleaner.md" />
-    <None Include="ExpressionTrees\ExpressionComparer.md" />
-    <None Include="ExpressionTrees\ExpressionEvaluator.md" />
-    <None Include="ExpressionTrees\ExpressionHelper.md" />
-    <None Include="ExpressionTrees\ExpressionNominator.md" />
-    <None Include="ExpressionTrees\LinqExtensibility.md" />
-    <None Include="ExpressionTrees\Query.md" />
-    <None Include="ExpressionTrees\QueryProvider.md" />
-    <None Include="Extensions\ArgsExtensions.md" />
-    <None Include="Extensions\ColorExtensions.md" />
-    <None Include="Extensions\index.mdi" />
-    <None Include="Extensions\Introduction.md" />
-    <None Include="Extensions\PageExtensions.md" />
-    <None Include="Extensions\ProgressEnumerator.md" />
-    <None Include="Extensions\ReflectionExtensions.md" />
-    <None Include="Extensions\StringExtensions.md" />
-    <None Include="Extensions\TimeSpanExtensions.md" />
-    <None Include="Extensions\ExpressionExtensions.md" />
-    <Content Include="Translations\Signum.Utilities.de.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Translations\Signum.Utilities.fa.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Translations\Signum.Utilities.en.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Translations\Signum.Utilities.es.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Translations\Signum.Utilities.fr.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Translations\Signum.Utilities.it.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Translations\Signum.Utilities.pt.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <None Include="Extensions\Extensions.md" />
-    <None Include="Csv.md" />
-    <None Include="Extensions\EnumerableExtensions.md" />
-    <None Include="Extensions\GroupingExtensions.md" />
-    <None Include="Extensions\DictionaryExtensions.md" />
-    <None Include="Extensions\ArrayExtensions.md" />
-    <None Include="Extensions\RegexExtensions.md" />
-    <None Include="Extensions\DateTimeExtensions.md" />
-    <None Include="Extensions\EnumExtensions.md" />
-    <None Include="Extensions\ListExtensions.md" />
-    <None Include="Extensions\TreeHelper.md" />
-    <None Include="index.mdi" />
-    <None Include="Introduction.md" />
-    <None Include="MyRandom.md" />
-    <None Include="NaturalLanguage\NaturalLangageTools.md" />
-    <None Include="packages.config" />
-    <None Include="Polymorphic.md" />
-    <None Include="Profiler\HeavyProfiler.md" />
-    <None Include="Profiler\TimeTracker.md" />
-    <None Include="ProgressProxy.md" />
-    <None Include="Reflection\ReflectionTools.md" />
-    <None Include="SafeConsole.md" />
-    <None Include="Serialization.md" />
-    <None Include="Statics.md" />
-    <None Include="StringDistance.md" />
-    <None Include="Synchronization\CultureInfoUtils.md" />
-    <None Include="Synchronization\ThreadSafeEnumerator.md" />
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Docs\" />
-  </ItemGroup>
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <PropertyGroup>
-    <PreBuildEvent>
-    </PreBuildEvent>
-  </PropertyGroup>
-  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
-       Other similar extension points exist, see Microsoft.Common.targets.
-  <Target Name="BeforeBuild">
-  </Target>
-  <Target Name="AfterBuild">
-  </Target>
-  -->
+
 </Project>

@@ -1,21 +1,22 @@
 ﻿using System;
-using Microsoft.Build.Utilities;
 using Mono.Cecil;
 using System.Linq;
 using Mono.Cecil.Cil;
+using System.IO;
 
 namespace Signum.MSBuildTask
 {
     internal class AutoExpressionField
     {
         private AssemblyDefinition Assembly;
-        private TaskLoggingHelper Log;
+        private TextWriter Log;
         private PreloadingAssemblyResolver Resolver;
         private AssemblyDefinition SignumUtilities;
         public TypeDefinition ExpressionField;
+        bool hasErrors = false;
 
 
-        public AutoExpressionField(AssemblyDefinition assembly, PreloadingAssemblyResolver resolver, TaskLoggingHelper log)
+        public AutoExpressionField(AssemblyDefinition assembly, PreloadingAssemblyResolver resolver, TextWriter log)
         {
             this.Assembly = assembly;
             this.Resolver = resolver;
@@ -24,7 +25,7 @@ namespace Signum.MSBuildTask
             this.ExpressionField = SignumUtilities.MainModule.GetType("Signum.Utilities", "ExpressionFieldAttribute");
         }
 
-        internal void FixAutoExpressionField()
+        internal bool FixAutoExpressionField()
         {
             var methodPairs = (from t in this.Assembly.MainModule.Types
                                where t.HasMethods
@@ -51,6 +52,8 @@ namespace Signum.MSBuildTask
                 if(fieldName != null)
                     p.at.ConstructorArguments[0] = new CustomAttributeArgument(p.at.ConstructorArguments[0].Type, fieldName);
             }
+
+            return hasErrors;
         }
 
         private string GetExpressionFieldName(MethodDefinition m)
@@ -89,8 +92,8 @@ namespace Signum.MSBuildTask
 
         private void LogError(MethodDefinition m, string error)
         {
-            Log.LogError("Signum.MSBuildTask: {0}.{1} should be a simple evaluation of an expression field in order to use ExpressionFieldAttribute without parameters ({2})",
-                m.DeclaringType.Name, m.Name, error);
+            Log.WriteLine("Signum.MSBuildTask: {0}.{1} should be a simple evaluation of an expression field in order to use ExpressionFieldAttribute without parameters ({2})", m.DeclaringType.Name, m.Name, error);
+            hasErrors = true;
         }
     }
 }

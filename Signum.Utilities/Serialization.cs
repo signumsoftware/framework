@@ -4,7 +4,6 @@ using System.Linq;
 using System.Text;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
-using System.Runtime.Serialization.Formatters.Soap;
 
 namespace Signum.Utilities
 {
@@ -41,42 +40,6 @@ namespace Signum.Utilities
             using (FileStream fs = File.OpenRead(fileName))
             {
                 return new BinaryFormatter().Deserialize(fs);
-            }
-        }
-
-
-
-        //SOAP
-        public static string ToString(object graph)
-        {
-            using (MemoryStream ms = new MemoryStream())
-            {
-                new SoapFormatter().Serialize(ms, graph);
-                return Encoding.UTF8.GetString(ms.ToArray());
-            }
-        }
-
-        public static void ToStringFile(object graph, string fileName)
-        {
-            using (FileStream fs = File.OpenWrite(fileName))
-            {
-                new SoapFormatter().Serialize(fs, graph);
-            }
-        }
-
-        public static object FromString(string str)
-        {
-            using (MemoryStream ms = new MemoryStream(Encoding.UTF8.GetBytes(str)))
-            {
-                return new SoapFormatter().Deserialize(ms);
-            }
-        }
-
-        public static object FromStringFile(string fileName)
-        {
-            using (FileStream fs = File.OpenRead(fileName))
-            {
-                return new SoapFormatter().Deserialize(fs);
             }
         }
     }

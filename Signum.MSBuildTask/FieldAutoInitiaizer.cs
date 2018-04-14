@@ -3,15 +3,16 @@ using Mono.Cecil;
 using System.Linq;
 using System.Collections.Generic;
 using Mono.Cecil.Cil;
-using Microsoft.Build.Utilities;
 using Mono.Cecil.Rocks;
+using System.IO;
+
 namespace Signum.MSBuildTask
 {
     internal class FieldAutoInitializer
     {
         public AssemblyDefinition Assembly;
         public PreloadingAssemblyResolver Resolver;
-        public TaskLoggingHelper Log;
+        public TextWriter Log;
 
         public TypeDefinition SystemType;
         public MethodDefinition GetTypeFromHandle;
@@ -21,13 +22,17 @@ namespace Signum.MSBuildTask
         public TypeDefinition OperationSymbol;
         public TypeDefinition OperationSymbolConstruct;
 
-        public FieldAutoInitializer(AssemblyDefinition assembly, PreloadingAssemblyResolver resolver, TaskLoggingHelper log)
+        public FieldAutoInitializer(AssemblyDefinition assembly, PreloadingAssemblyResolver resolver, TextWriter log)
         {
             this.Assembly = assembly;
             this.Resolver = resolver;
             this.Log = log;
 
-            this.SystemType = resolver.Resolve(AssemblyNameReference.Parse("mscorlib")).MainModule.GetType("System", "Type");
+            var module = resolver.Resolve(AssemblyNameReference.Parse("System.Runtime")).MainModule;
+
+            var tr = module.ExportedTypes.Single(a=>a.FullName == "System.Type");
+
+            this.SystemType = tr.Resolve();
             this.GetTypeFromHandle = this.SystemType.GetMethods().Single(a => a.Name == "GetTypeFromHandle");
 
             this.SigumEntities = assembly.Name.Name == "Signum.Entities" ? assembly : resolver.SignumEntities;
@@ -37,16 +42,19 @@ namespace Signum.MSBuildTask
 
         }
 
-        internal void FixAutoInitializer()
+        bool hasErrors = false;
+        internal bool FixAutoInitializer()
         {
             var entityTypes = (from t in this.Assembly.MainModule.Types
                                where t.HasCustomAttributes && t.CustomAttributes.Any(a=>a.AttributeType.FullName == AutoInit.FullName)
                                select t).ToList();
 
+           
             foreach (var type in entityTypes)
             {
                 AutoInitFields(type);
             }
+            return hasErrors;
         }
 
         private bool IsStatic(TypeDefinition t)
@@ -58,13 +66,15 @@ namespace Signum.MSBuildTask
         {
             if (!IsStatic(type))
             {
-                Log.LogError("Signum.MSBuildTask: {0} class should be static to use AutoInitAttribute", type.FullName);
+                Log.WriteLine("Signum.MSBuildTask: {0} class should be static to use AutoInitAttribute", type.FullName);
+                hasErrors = true;
                 return;
             }
 
             if (type.Methods.Any(a => a.IsStatic && a.IsConstructor))
             {
-                Log.LogError("Signum.MSBuildTask: {0} class should not have static constructor (or field initializers) to use AutoInitAttribute", type.FullName);
+                Log.WriteLine("Signum.MSBuildTask: {0} class should not have static constructor (or field initializers) to use AutoInitAttribute", type.FullName);
+                hasErrors = true;
                 return;
             }
 
@@ -138,7 +148,7 @@ namespace Signum.MSBuildTask
 
             if (constructor == null)
             {
-                Log.LogError("Signum.MSBuildTask: Type {0} has no constructor (Type, string)", fieldType.Name);
+                Log.WriteLine("Signum.MSBuildTask: Type {0} has no constructor (Type, string)", fieldType.Name);
                 return null;
             }
 

@@ -11,8 +11,9 @@ using System.IO;
 using System.Threading;
 using System.Diagnostics;
 using System.Data.Common;
-using Microsoft.SqlServer.Types;
+//using Microsoft.SqlServer.Types;
 using System.Globalization;
+using Microsoft.SqlServer.Types;
 
 namespace Signum.Engine
 {

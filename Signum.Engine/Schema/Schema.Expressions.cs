@@ -5,7 +5,6 @@ using System.Text;
 using System.Reflection;
 using System.Data;
 using System.IO;
-using Microsoft.SqlServer.Server;
 using Signum.Utilities;
 using Signum.Entities;
 using Signum.Engine;

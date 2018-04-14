@@ -34,3 +34,4 @@ Signum.React/node_modules/*.js
 *.ncrunchproject
 .vs/config/applicationhost.config
 */.vs/*
+/Signum.MSBuildTask/packages/*

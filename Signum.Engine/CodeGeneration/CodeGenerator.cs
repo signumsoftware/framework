@@ -5,7 +5,6 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using System.Windows.Forms;
 using Signum.Engine.Maps;
 using Signum.Entities.Reflection;
 using Signum.Utilities;
@@ -68,17 +67,11 @@ namespace Signum.Engine.CodeGeneration
                 if (selected.IsNullOrEmpty())
                     yield break;
 
-                SafeConsole.WriteColor(ConsoleColor.Gray, "Module name? (Nothing to exit):");
-
                 string moduleName = GetDefaultModuleName(selected, solutionName);
-                if (moduleName.HasText())
-                    SendKeys.SendWait(moduleName);
-
-                moduleName = Console.ReadLine();
-
-                if (!moduleName.HasText())
-                    yield break;
-
+                SafeConsole.WriteColor(ConsoleColor.Gray, $"Module name? ([Enter] for '{moduleName}'):");
+                
+                moduleName = Console.ReadLine().DefaultText(moduleName);
+                
                 yield return new Module
                 {
                     ModuleName = moduleName,

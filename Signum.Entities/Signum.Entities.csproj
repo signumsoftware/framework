@@ -1,246 +1,29 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>9.0.30729</ProductVersion>
-    <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{F2B51D08-498D-4C9F-8112-9521A7762B02}</ProjectGuid>
-    <OutputType>Library</OutputType>
-    <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Signum.Entities</RootNamespace>
-    <AssemblyName>Signum.Entities</AssemblyName>
-    <TargetFrameworkVersion>v4.6.2</TargetFrameworkVersion>
-    <FileAlignment>512</FileAlignment>
-    <StartupObject>
-    </StartupObject>
-    <SignAssembly>false</SignAssembly>
-    <AssemblyOriginatorKeyFile>
-    </AssemblyOriginatorKeyFile>
-    <FileUpgradeFlags>
-    </FileUpgradeFlags>
-    <OldToolsVersion>3.5</OldToolsVersion>
-    <UpgradeBackupLocation />
-    <PublishUrl>publish\</PublishUrl>
-    <Install>true</Install>
-    <InstallFrom>Disk</InstallFrom>
-    <UpdateEnabled>false</UpdateEnabled>
-    <UpdateMode>Foreground</UpdateMode>
-    <UpdateInterval>7</UpdateInterval>
-    <UpdateIntervalUnits>Days</UpdateIntervalUnits>
-    <UpdatePeriodically>false</UpdatePeriodically>
-    <UpdateRequired>false</UpdateRequired>
-    <MapFileExtensions>true</MapFileExtensions>
-    <ApplicationRevision>0</ApplicationRevision>
-    <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
-    <IsWebBootstrapper>false</IsWebBootstrapper>
-    <UseApplicationTrust>false</UseApplicationTrust>
-    <BootstrapperEnabled>true</BootstrapperEnabled>
-    <TargetFrameworkProfile>
-    </TargetFrameworkProfile>
+    <TargetFramework>netcoreapp2.1</TargetFramework>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
-    <Prefer32Bit>false</Prefer32Bit>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <LangVersion>latest</LangVersion>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
-    <Prefer32Bit>false</Prefer32Bit>
-  </PropertyGroup>
+
   <ItemGroup>
-    <Reference Include="Microsoft.SqlServer.Types, Version=14.0.0.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Microsoft.SqlServer.Types.14.0.314.76\lib\net40\Microsoft.SqlServer.Types.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="System" />
-    <Reference Include="System.Core">
-      <RequiredTargetFramework>3.5</RequiredTargetFramework>
-    </Reference>
-    <Reference Include="System.Data" />
-    <Reference Include="System.Drawing" />
-    <Reference Include="System.Runtime.Serialization">
-      <RequiredTargetFramework>3.0</RequiredTargetFramework>
-    </Reference>
-    <Reference Include="System.ServiceModel">
-      <RequiredTargetFramework>3.0</RequiredTargetFramework>
-    </Reference>
-    <Reference Include="System.ValueTuple, Version=4.0.2.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\System.ValueTuple.4.4.0\lib\net461\System.ValueTuple.dll</HintPath>
-    </Reference>
-    <Reference Include="System.Xml" />
-    <Reference Include="System.Xml.Linq" />
+    <ProjectReference Include="..\Signum.Utilities\Signum.Utilities.csproj" />
   </ItemGroup>
-  <ItemGroup>
-    <Compile Include="..\Signum.Utilities\Properties\Version.cs">
-      <Link>Properties\Version.cs</Link>
-    </Compile>
-    <Compile Include="Basics\Exception.cs" />
-    <Compile Include="Basics\IUserEntity.cs" />
-    <Compile Include="Basics\Operation.cs" />
-    <Compile Include="Basics\OperationLog.cs" />
-    <Compile Include="Basics\PropertyRouteEntity.cs" />
-    <Compile Include="Basics\QueryEntity.cs" />
-    <Compile Include="Basics\SemiSymbol.cs" />
-    <Compile Include="DynamicQuery\Tokens\AggregateToken.cs" />
-    <Compile Include="DynamicQuery\Tokens\SystemTimeToken.cs" />
-    <Compile Include="DynamicQuery\Tokens\ExtensionDictionaryToken.cs" />
-    <Compile Include="DynamicQuery\Tokens\HasValueToken.cs" />
-    <Compile Include="DynamicQuery\Tokens\DecimalSpecialTokens.cs" />
-    <Compile Include="DynamicQuery\Tokens\EntityToStringToken.cs" />
-    <Compile Include="DynamicQuery\Tokens\CountToken.cs" />
-    <Compile Include="DynamicQuery\Tokens\DateToken.cs" />
-    <Compile Include="DynamicQuery\Tokens\ExtensionToken.cs" />
-    <Compile Include="DynamicQuery\Tokens\CollectionElementToken.cs" />
-    <Compile Include="DynamicQuery\Tokens\EntityPropertyToken.cs" />
-    <Compile Include="DynamicQuery\Tokens\AsTypeToken.cs" />
-    <Compile Include="DynamicQuery\Tokens\ColumnToken.cs" />
-    <Compile Include="DynamicQuery\Tokens\DateTimeSpecialTokens.cs" />
-    <Compile Include="DynamicQuery\Tokens\NetPropertyToken.cs" />
-    <Compile Include="EnumEntity.cs" />
-    <Compile Include="EnumMessages.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="FieldNotificationAttributes.cs" />
-    <Compile Include="MixinEntity.cs" />
-    <Compile Include="ModelEntity.cs" />
-    <Compile Include="DynamicQuery\Column.cs" />
-    <Compile Include="DynamicQuery\Filter.cs" />
-    <Compile Include="DynamicQuery\Requests.cs" />
-    <Compile Include="DynamicQuery\ResultTable.cs" />
-    <Compile Include="DynamicQuery\QueryUtils.cs" />
-    <Compile Include="DynamicQuery\Tokens\QueryToken.cs" />
-    <Compile Include="FieldAttributes.cs" />
-    <Compile Include="Basics\Color.cs" />
-    <Compile Include="DynamicQuery\Meta.cs" />
-    <Compile Include="ObjectDumper.cs" />
-    <Compile Include="Patterns\CorruptEntity.cs" />
-    <Compile Include="DynamicQuery\Order.cs" />
-    <Compile Include="DynamicQuery\QueryDescription.cs" />
-    <Compile Include="Patterns\ImmutableEntity.cs" />
-    <Compile Include="Patterns\LockeableEntity.cs" />
-    <Compile Include="PrimaryKey.cs" />
-    <Compile Include="PropertyAttributes.cs" />
-    <Compile Include="PropertyRoute.cs" />
-    <Compile Include="Reflection\GraphExplorer.cs" />
-    <Compile Include="Reflection\Reflector.cs" />
-    <Compile Include="Reflection\StringHashEncoder.cs" />
-    <Compile Include="Reflection\EntityStructuralEqualityComparer.cs" />
-    <Compile Include="Services\ExceptionMarshalling.cs" />
-    <Compile Include="Services\IOperationServer.cs" />
-    <Compile Include="Basics\Symbol.cs" />
-    <Compile Include="SystemTime.cs" />
-    <Compile Include="TimeZoneManager.cs" />
-    <Compile Include="TypeAttributes.cs" />
-    <Compile Include="Validator.cs" />
-    <Compile Include="Services\IBaseServer.cs" />
-    <Compile Include="Services\IDynamicQueryServer.cs" />
-    <Compile Include="Services\NetDataContractAttribute.cs" />
-    <Compile Include="Services\Security.cs" />
-    <Compile Include="Basics\Type.cs" />
-    <Compile Include="ModifiableEntity.cs" />
-    <Compile Include="Lite.cs" />
-    <Compile Include="EmbeddedEntity.cs" />
-    <Compile Include="Entity.cs" />
-    <Compile Include="MList.cs" />
-    <Compile Include="Modifiable.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Reflection\ModifyInspector.cs" />
-    <Compile Include="ValidationAttributes.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <BootstrapperPackage Include="Microsoft.Net.Client.3.5">
-      <Visible>False</Visible>
-      <ProductName>.NET Framework 3.5 SP1 Client Profile</ProductName>
-      <Install>false</Install>
-    </BootstrapperPackage>
-    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
-      <Visible>False</Visible>
-      <ProductName>.NET Framework 3.5 SP1</ProductName>
-      <Install>true</Install>
-    </BootstrapperPackage>
-    <BootstrapperPackage Include="Microsoft.Windows.Installer.3.1">
-      <Visible>False</Visible>
-      <ProductName>Windows Installer 3.1</ProductName>
-      <Install>true</Install>
-    </BootstrapperPackage>
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\Signum.Utilities\Signum.Utilities.csproj">
-      <Project>{f7d3f72d-741d-4f67-8cf8-cd41b9035fed}</Project>
-      <Name>Signum.Utilities</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="Translations\Signum.Entities.de.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Translations\Signum.Entities.en.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Translations\Signum.Entities.es.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <SubType>Designer</SubType>
-    </Content>
-    <Content Include="Translations\Signum.Entities.fr.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Translations\Signum.Entities.it.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Translations\Signum.Entities.nl.xml" />
-    <Content Include="Translations\Signum.Entities.fa.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Translations\Signum.Entities.pt.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="BaseEntities.md" />
-    <None Include="ChangeTracking.md" />
-    <None Include="EntityKindAttribute.md" />
-    <None Include="EnumEntity.md" />
-    <None Include="FieldAttributes.md" />
-    <None Include="index.mdi" />
-    <None Include="Inheritance.md" />
-    <None Include="Introduction.md" />
-    <None Include="Lite.md" />
-    <None Include="Mixin.md" />
-    <None Include="MList.md" />
-    <None Include="packages.config" />
-    <None Include="PrimaryKey.md" />
-    <None Include="PropertyAttributes.md" />
-    <None Include="PropertyRoute.md" />
-    <None Include="Services\Services.md" />
-    <None Include="Symbol.md" />
-    <None Include="Validation.md" />
-  </ItemGroup>
+
   <ItemGroup>
     <Analyzer Include="..\Signum.Analyzer\Binaries\Signum.Analyzer.dll" />
   </ItemGroup>
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
-       Other similar extension points exist, see Microsoft.Common.targets.
-  <Target Name="BeforeBuild">
-  </Target>
-  <Target Name="AfterBuild">
-  </Target>
-  -->
-  <UsingTask TaskName="SignumTask" AssemblyFile="..\Signum.MSBuildTask\Binaries\Signum.MSBuildTask.dll" />
-  <Target Name="AfterCompile" DependsOnTargets="CoreCompile">
-    <SignumTask Assembly="@(IntermediateAssembly)" References="@(ReferencePath)" KeyFile="$(KeyOriginatorFile)" />
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.SqlServer.Types" Version="14.0.314.76" />
+  </ItemGroup>
+
+  <Target Name="SignumAfterCompile" AfterTargets="Build" DependsOnTargets="CoreCompile">
+    <WriteLinesToFile File="$(BaseIntermediateOutputPath)SignumReferences.txt" Lines="@(ReferencePath)" Overwrite="true" Encoding="Unicode" />
+    <Exec command="dotnet &quot;..\Signum.MSBuildTask\Binaries\netcoreapp2.1\Signum.MSBuildTask.dll&quot; &quot;@(IntermediateAssembly)&quot; &quot;$(BaseIntermediateOutputPath)SignumReferences.txt&quot;" ConsoleToMSBuild="false">
+      <Output TaskParameter="ConsoleOutput" PropertyName="OutputOfExec" />
+    </Exec>
   </Target>
 </Project>

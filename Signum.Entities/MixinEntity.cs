@@ -114,10 +114,9 @@ namespace Signum.Entities
         {
             return Declarations.GetOrAdd(mainEntity, me =>
                 {
-                    var hs = me.GetCustomAttributes(typeof(MixinAttribute), inherit: false)
+                    var hs = new HashSet<Type>(me.GetCustomAttributes(typeof(MixinAttribute), inherit: false)
                         .Cast<MixinAttribute>()
-                        .Select(t => t.MixinType)
-                        .ToHashSet();
+                        .Select(t => t.MixinType));
 
                     foreach (var t in hs)
                         AddConstructor(t);

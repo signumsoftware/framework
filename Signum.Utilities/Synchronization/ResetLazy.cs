@@ -28,7 +28,6 @@ namespace Signum.Utilities
 
 
     [ComVisible(false)]
-    [HostProtection(Action = SecurityAction.LinkDemand, Resources = HostProtectionResource.Synchronization | HostProtectionResource.SharedState)]
     public class ResetLazy<T>: IResetLazy where T : class
     {
         class Box

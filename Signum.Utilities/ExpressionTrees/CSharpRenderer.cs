@@ -17,48 +17,22 @@ namespace Signum.Utilities.ExpressionTrees
 {
     public static class CSharpRenderer
     {
-        public static string GenerateCSharpCode(this Expression expression, string[] importedNamespaces)
-        {
-            return new CSharpTreeVisitor { ImportedNamespaces = importedNamespaces }.VisitReal(expression);
-        }
-
-        public static string GenerateCSharpCode(this Expression expression)
-        {
-            return new CSharpTreeVisitor().VisitReal(expression);
-        }
-
-        /// <summary>
-        /// Dummy method to collapse un collection o object initializer in one single line
-        /// </summary>
-        public static T Collapse<T>(this T obj)
-        {
-            return obj;
-        }
-
-        /// <summary>
-        /// Allows to write string litterals in an expression tree, be carefull with parenthesis
-        /// </summary>
-        public static T Literal<T>(string literal)
-        {
-            return default(T);
-        }
-
-        public static bool IsBasicType(Type t) 
+        public static bool IsBasicType(Type t)
         {
             return BasicTypeNames.ContainsKey(Type.GetTypeCode(t));
         }
 
         public static Dictionary<TypeCode, string> BasicTypeNames = new Dictionary<TypeCode, string>
         {
-            { TypeCode.Boolean, "bool"}, 
-            { TypeCode.Byte, "byte"}, 
-            { TypeCode.Char, "char"}, 
-            { TypeCode.Decimal, "decimal"}, 
-            { TypeCode.Double, "double"},  
-            { TypeCode.Int16, "short"}, 
-            { TypeCode.Int32, "int"}, 
-            { TypeCode.Int64, "long"}, 
-            { TypeCode.SByte, "sbyte"}, 
+            { TypeCode.Boolean, "bool"},
+            { TypeCode.Byte, "byte"},
+            { TypeCode.Char, "char"},
+            { TypeCode.Decimal, "decimal"},
+            { TypeCode.Double, "double"},
+            { TypeCode.Int16, "short"},
+            { TypeCode.Int32, "int"},
+            { TypeCode.Int64, "long"},
+            { TypeCode.SByte, "sbyte"},
             { TypeCode.Single, "float"},
             { TypeCode.String, "string"},
             { TypeCode.UInt16, "ushort"},
@@ -167,135 +141,64 @@ namespace Signum.Utilities.ExpressionTrees
                 .Replace("<>h__TransparentIdentifier", "τ");
         }
 
-        public static string Value(object value, Type type, string[] importedNamespaces)
+        public static string Value(object obj)
         {
-            var expr = GetRightExpressionForValue(value, type, importedNamespaces);
-            if (expr == null)
-                return value.ToString();
+            if (obj == null)
+                return "null";
 
-            StringBuilder sb = new StringBuilder();
-            using (StringWriter sw = new StringWriter(sb))
-                new CSharpCodeProvider().GenerateCodeFromExpression(expr, sw, new CodeGeneratorOptions());
+            if (obj is bool b)
+                return b ? "true" : "false";
 
-            return sb.ToString();
+            if (obj is string s)
+                return ToSrtringLiteral(s);
+
+            return obj.ToString();
         }
 
-        public static CodeExpression GetRightExpressionForValue(object value, Type type, string[] importedNamespaces)
+        static string ToSrtringLiteral(string input)
         {
-            if (value is DBNull || value == null)
+            StringBuilder literal = new StringBuilder(input.Length + 2);
+            literal.Append("\"");
+            foreach (var c in input)
             {
-                return new CodePrimitiveExpression(null);
-            }
-
-            if (type == typeof(decimal))
-            {
-                return new CodePrimitiveExpression(value);
-            }
-       
-            if ((type == typeof(string)) && (value is string))
-            {
-                return new CodePrimitiveExpression((string)value);
-            }
-            if (type.IsPrimitive)
-            {
-                if (type != value.GetType())
+                switch (c)
                 {
-                    TypeConverter converter = TypeDescriptor.GetConverter(type);
-                    if (converter.CanConvertFrom(value.GetType()))
-                    {
-                        return new CodePrimitiveExpression(converter.ConvertFrom(value));
-                    }
-                }
-                return new CodePrimitiveExpression(value);
-            }
-            if (type.IsArray)
-            {
-                Array array = (Array)value;
-                CodeArrayCreateExpression expression = new CodeArrayCreateExpression()
-                {
-                    CreateType = TypeReference(type.GetElementType(), importedNamespaces)
-                };
-                if (array != null)
-                {
-                    foreach (object obj2 in array)
-                    {
-                        expression.Initializers.Add(GetRightExpressionForValue(obj2, type.GetElementType(), importedNamespaces));
-                    }
-                }
-                return expression;
-            }
-            TypeConverter converter2 = null;
-            converter2 = TypeDescriptor.GetConverter(type);
-            if (type.IsEnum && (value is string))
-            {
-                value = converter2.ConvertFromString(value.ToString());
-            }
-            if (converter2 != null)
-            {
-                InstanceDescriptor descriptor = null;
-                if (converter2.CanConvertTo(typeof(InstanceDescriptor)))
-                {
-                    descriptor = (InstanceDescriptor)converter2.ConvertTo(value, typeof(InstanceDescriptor));
-                }
-                if (descriptor != null)
-                {
-                    if (descriptor.MemberInfo is FieldInfo)
-                    {
-                        return new CodeFieldReferenceExpression(new CodeTypeReferenceExpression(TypeReference( descriptor.MemberInfo.DeclaringType, importedNamespaces)), descriptor.MemberInfo.Name);
-                    }
-                    if (descriptor.MemberInfo is PropertyInfo)
-                    {
-                        return new CodePropertyReferenceExpression(new CodeTypeReferenceExpression(TypeReference(descriptor.MemberInfo.DeclaringType, importedNamespaces)), descriptor.MemberInfo.Name);
-                    }
-                    object[] objArray = new object[descriptor.Arguments.Count];
-                    descriptor.Arguments.CopyTo(objArray, 0);
-                    CodeExpression[] expressionArray = new CodeExpression[objArray.Length];
-                    if (descriptor.MemberInfo is MethodInfo)
-                    {
-                        ParameterInfo[] parameters = ((MethodInfo)descriptor.MemberInfo).GetParameters();
-                        for (int i = 0; i < objArray.Length; i++)
+                    case '\'': literal.Append(@"\'"); break;
+                    case '\"': literal.Append("\\\""); break;
+                    case '\\': literal.Append(@"\\"); break;
+                    case '\0': literal.Append(@"\0"); break;
+                    case '\a': literal.Append(@"\a"); break;
+                    case '\b': literal.Append(@"\b"); break;
+                    case '\f': literal.Append(@"\f"); break;
+                    case '\n': literal.Append(@"\n"); break;
+                    case '\r': literal.Append(@"\r"); break;
+                    case '\t': literal.Append(@"\t"); break;
+                    case '\v': literal.Append(@"\v"); break;
+                    default:
+                        // ASCII printable character
+                        if (c >= 0x20 && c <= 0x7e)
                         {
-                            expressionArray[i] = GetRightExpressionForValue(objArray[i], parameters[i].ParameterType, importedNamespaces);
+                            literal.Append(c);
+                            // As UTF16 escaped character
                         }
-                        CodeMethodInvokeExpression expression4 = new CodeMethodInvokeExpression(new CodeTypeReferenceExpression(descriptor.MemberInfo.DeclaringType.FullName), descriptor.MemberInfo.Name, new CodeExpression[0]);
-                        foreach (CodeExpression expression5 in expressionArray)
+                        else
                         {
-                            expression4.Parameters.Add(expression5);
+                            literal.Append(@"\u");
+                            literal.Append(((int)c).ToString("x4"));
                         }
-                        return expression4;
-                    }
-                    if (descriptor.MemberInfo is ConstructorInfo)
-                    {
-                        ParameterInfo[] infoArray2 = ((ConstructorInfo)descriptor.MemberInfo).GetParameters();
-                        for (int j = 0; j < objArray.Length; j++)
-                        {
-                            expressionArray[j] = GetRightExpressionForValue(objArray[j], infoArray2[j].ParameterType, importedNamespaces);
-                        }
-                        CodeObjectCreateExpression expression6 = new CodeObjectCreateExpression(descriptor.MemberInfo.DeclaringType.FullName, new CodeExpression[0]);
-                        foreach (CodeExpression expression7 in expressionArray)
-                        {
-                            expression6.Parameters.Add(expression7);
-                        }
-                        return expression6;
-                    }
+                        break;
                 }
             }
-            return null;
+            literal.Append("\"");
+            return literal.ToString();
         }
 
-        public static CodeTypeReference TypeReference(Type type, string[] importedNamespaces)
-        {
-            if (!type.IsGenericType && !type.IsArray && importedNamespaces != null && importedNamespaces.Contains(type.Namespace))
-                return new CodeTypeReference(type.Name);
-            else
-                return new CodeTypeReference(type); ;
-        }
-        public static HashSet<string> Keywords = @"abstract as base bool break byte case catch char checked class const continue decimal default 
+        public static HashSet<string> Keywords = new HashSet<string>(@"abstract as base bool break byte case catch char checked class const continue decimal default 
 delegate do double else enum event explicit extern false finally fixed float for foreach goto if implicit in int interface internal is lock long
 namespace new null object operator out out override params private protected public readonly ref return sbyte sealed short sizeof stackalloc static 
-string struct switch this throw true try typeof uint ulong unchecked unsafe ushort using virtual void volatile while".Split(' ', '\r', '\n').NotNull().ToHashSet();
+string struct switch this throw true try typeof uint ulong unchecked unsafe ushort using virtual void volatile while".Split(' ', '\r', '\n').NotNull());
 
-        public static string Escape(string p)
+        public static string EscapeIdentifier(string p)
         {
             if (Keywords.Contains(p))
                 return "@" + p;

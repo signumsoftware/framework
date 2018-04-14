@@ -5,86 +5,73 @@ using System.Linq;
 using System.Runtime.Serialization;
 using System.Text;
 using System.Text.RegularExpressions;
-using Microsoft.Build.Framework;
-using Microsoft.Build.Utilities;
 using System.Collections.Concurrent;
 
 namespace Signum.TSGenerator
 {
-    public class SignumTSGenerator : Task
+    public static class Program
     {
-        [Required]
-        public string References { get; set; }
-
-        [Required]
-        public string Content { get; set; }
-
-        public override bool Execute()
+        public static int Main(string[] args)
         {
-            AppDomain domain = AppDomain.CreateDomain("reflectionRomain");
-            try
+            string projectFile = args[0];
+            string[] references = File.ReadAllLines(args[1]);
+            string[] content = File.ReadAllLines(args[2]);
+
+            var log = Console.Out;
+
+            var obj = new ProxyGenerator();
+
+            log.WriteLine("Starting SigumTSGenerator");
+
+            var currentDir = Directory.GetCurrentDirectory();
+            var files = content
+                .Where(file => Path.GetExtension(file) == ".t4s")
+                .Select(file => Path.Combine(currentDir, file))
+                .ToList();
+
+            bool hasErrors = false;
+            foreach (var file in files)
             {
-                dynamic obj = domain.CreateInstanceFromAndUnwrap(this.GetType().Assembly.Location, "Signum.TSGenerator.ProxyGenerator");
-
-                Log.LogMessage("Starting SigumTSGenerator");
-
-                var currentDir = Directory.GetCurrentDirectory();
-                var files = Content.Split(';')
-                    .Where(file => Path.GetExtension(file) == ".t4s")
-                    .Select(file => Path.Combine(currentDir, file))
-                    .ToList();
-
-                foreach (var file in files)
+                try
                 {
-                    try
-                    {
-                        Log.LogMessage($"Reading {file}");
+                    log.WriteLine($"Reading {file}");
 
-                        string result = obj.Process(file, References, this.BuildEngine.ProjectFileOfTaskNode);
+                    string result = obj.Process(file, references, projectFile);
 
-                        var targetFile = Path.ChangeExtension(file, ".ts");
-                        if (File.Exists(targetFile) && File.ReadAllText(targetFile) == result)
-                        {
-                            Log.LogMessage($"Skipping {targetFile} (Up to date)");
-                        }
-                        else
-                        {
-                            Log.LogMessage($"Writing {targetFile}");
-                            File.WriteAllText(targetFile, result);
-                        }
-                    }
-                    catch (LoggerException ex)
+                    var targetFile = Path.ChangeExtension(file, ".ts");
+                    if (File.Exists(targetFile) && File.ReadAllText(targetFile) == result)
                     {
-                        Log.LogError(null, ex.ErrorCode, ex.HelpKeyword, file, (int)ex.Data["LineNumber"], 0, 0, 0, ex.Message);
+                        log.WriteLine($"Skipping {targetFile} (Up to date)");
                     }
-                    catch (Exception ex)
+                    else
                     {
-                        Log.LogError(null, null, null, file, 0, 0, 0, 0, ex.Message);
+                        log.WriteLine($"Writing {targetFile}");
+                        File.WriteAllText(targetFile, result);
                     }
                 }
-
-
-                Log.LogMessage("Finish SigumTSGenerator");
-            }
-            finally
-            {
-                AppDomain.Unload(domain);
+                catch (Exception ex)
+                {
+                    hasErrors = true;
+                    log.WriteLine(ex.Message);
+                }
             }
 
-            return !Log.HasLoggedErrors;
+            log.WriteLine("Finish SigumTSGenerator");
+
+            return hasErrors ? -1 : 0;
         }
     }
 
     public class ProxyGenerator: MarshalByRefObject
     {
-        public string Process(string templateFile, string referenceList, string projectFile)
+        public string Process(string templateFile, string[] referenceList, string projectFile)
         {
             var options = new Options
             {
                 TemplateFileName = templateFile,
                 CurrentNamespace = Path.GetFileNameWithoutExtension(templateFile),
                 CurrentAssembly = Path.GetFileNameWithoutExtension(projectFile).Replace(".React", ".Entities"),
-                AssemblyReferences = (from r in referenceList.Split(';')
+                AssemblyReferences = (from r in referenceList
                                       where r.Contains(".Entities")
                                       let reactDirectory = ReactDirectoryCache.GetOrAdd(r, FindReactDirectory)
                                       select new AssemblyReference
@@ -93,7 +80,8 @@ namespace Signum.TSGenerator
                                           AssemblyFullPath = r,
                                           ReactDirectory = reactDirectory,
                                           AllTypescriptFiles = AllFilesCache.GetOrAdd(reactDirectory, GetAllTypescriptFiles),
-                                      }).ToDictionary(a => a.AssemblyName)
+                                      }).ToDictionary(a => a.AssemblyName),
+                AllReferences = referenceList.ToDictionary(a => Path.GetFileNameWithoutExtension(a)),
             };
 
             return EntityDeclarationGenerator.Process(options);
@@ -110,6 +98,7 @@ namespace Signum.TSGenerator
         }
 
         ConcurrentDictionary<string, string> ReactDirectoryCache = new ConcurrentDictionary<string, string>();
+        
         private string FindReactDirectory(string absoluteFilePath)
         {
             var prefix = absoluteFilePath;

@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
-using System.Web.Http;
 using Signum.Engine.Basics;
 using Signum.Engine.DynamicQuery;
 using Signum.Entities.DynamicQuery;
@@ -13,6 +12,7 @@ using Signum.Entities;
 using Signum.Engine;
 using Signum.Engine.Operations;
 using Signum.React.Filters;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Signum.React.ApiControllers
 {

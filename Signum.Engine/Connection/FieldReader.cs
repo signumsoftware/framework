@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Data.SqlClient;
 using Signum.Utilities.Reflection;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -11,9 +10,10 @@ using Signum.Engine.Maps;
 using Signum.Entities;
 using System.Data.SqlTypes;
 using System.Data.Common;
-using Microsoft.SqlServer.Types;
-using Microsoft.SqlServer.Server;
+//using Microsoft.SqlServer.Types;
 using Signum.Utilities.ExpressionTrees;
+using System.Data.SqlClient;
+using Microsoft.SqlServer.Server;
 
 namespace Signum.Engine
 {
@@ -518,9 +518,9 @@ namespace Signum.Engine
             return GetGuid(ordinal);
         }
 
-        static MethodInfo miGetUdt = ReflectionTools.GetMethodInfo((FieldReader r) => r.GetUdt<IBinarySerialize>(0)).GetGenericMethodDefinition(); 
+        static MethodInfo miGetUdt = ReflectionTools.GetMethodInfo((FieldReader r) => r.GetUdt<object>(0)).GetGenericMethodDefinition(); 
 
-        public T GetUdt<T>(int ordinal) where T : IBinarySerialize
+        public T GetUdt<T>(int ordinal)
         {
             LastOrdinal = ordinal;
             if (reader.IsDBNull(ordinal))

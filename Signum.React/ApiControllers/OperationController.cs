@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 using Signum.Engine;
 using Signum.Engine.Basics;
 using Signum.Engine.DynamicQuery;
@@ -13,12 +14,10 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
-using System.Net.Http;
-using System.Web.Http;
 
 namespace Signum.React.ApiControllers
 {
-    public class OperationController : ApiController
+    public class OperationController : Controller
     {
         [Route("api/operation/construct"), HttpPost, ValidateModelFilter, ProfilerActionSplitter]
         public EntityPackTS Construct(ConstructOperationRequest request)
@@ -47,7 +46,7 @@ namespace Signum.React.ApiControllers
 
 
         [Route("api/operation/executeEntity"), HttpPost, ValidateModelFilter, ProfilerActionSplitter]
-        public EntityPackTS ExecuteEntity(EntityOperationRequest request)
+        public ActionResult<EntityPackTS> ExecuteEntity(EntityOperationRequest request)
         {
             Entity entity;
             try
@@ -57,8 +56,8 @@ namespace Signum.React.ApiControllers
             catch (IntegrityCheckException ex)
             {
                 GraphExplorer.SetValidationErrors(GraphExplorer.FromRoot(request.entity), ex);
-                this.Validate(request, "request");
-                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, this.ModelState));
+                this.TryValidateModel(request, "request");
+                return BadRequest(this.ModelState);
             }
 
             return SignumServer.GetEntityPack(entity);

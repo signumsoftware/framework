@@ -1,4 +1,7 @@
-﻿using Newtonsoft.Json;
+﻿using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Signum.Engine.Maps;
 using Signum.Engine.Operations;
@@ -12,30 +15,17 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Web;
-using System.Web.Http;
-using System.Web.Http.Dispatcher;
-using System.Web.Http.Validation;
-using System.Web.Routing;
-
 namespace Signum.React.Facades
 {
     public static class SignumServer
     {
-        public static void Start(HttpConfiguration config, Assembly mainAsembly)
+        public static void AddSignumJsonConverters(this MvcJsonOptions jsonOptions)
         {
-            Schema.Current.ApplicationName = System.Web.Hosting.HostingEnvironment.ApplicationHost.GetPhysicalPath();
-
-            config.IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always;
-            config.Services.Replace(typeof(IHttpControllerSelector), new SignumControllerFactory(config, mainAsembly));
-
-            SignumControllerFactory.RegisterArea(typeof(EntitiesController));
-            // Web API configuration and services
-            var appXmlType = config.Formatters.XmlFormatter.SupportedMediaTypes.FirstOrDefault(t => t.MediaType == "application/xml");
-            config.Formatters.XmlFormatter.SupportedMediaTypes.Remove(appXmlType);
-
             //Signum converters
-            config.Formatters.JsonFormatter.SerializerSettings.Do(s =>
+            jsonOptions.SerializerSettings.Do(s =>
             {
+                FilterTS.JsonSerializerSettings = s;
+
                 s.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
                 s.Formatting = Newtonsoft.Json.Formatting.Indented;
                 s.Converters.Add(new LiteJsonConverter());
@@ -45,22 +35,38 @@ namespace Signum.React.Facades
                 s.Converters.Add(new ResultTableConverter());
                 s.Converters.Add(new TimeSpanConverter());
             });
-
-            SignumControllerFactory.RegisterArea(MethodInfo.GetCurrentMethod());
-
-
-            // Web API routes
-            config.MapHttpAttributeRoutes();
-
-            config.Services.Replace(typeof(IBodyModelValidator), new SignumBodyModelValidator());
-
-            config.Filters.Add(new SignumAuthenticationFilterAttribute());
-            config.Filters.Add(new SignumAuthorizationFilterAttribute());
-            config.Filters.Add(new SignumExceptionFilterAttribute());
-            config.Filters.Add(new VersionFilterAttribute());
-            
-            ReflectionServer.Start();
         }
+
+        //public static void Start(IApplicationBuilder app, IHostingEnvironment hostingEnvironment, Assembly mainAsembly)
+        //{
+        //    Schema.Current.ApplicationName = hostingEnvironment.ContentRootPath;
+
+        //    config.IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always;
+        //    config.Services.Replace(typeof(IHttpControllerSelector), new SignumControllerFactory(config, mainAsembly));
+
+        //    SignumControllerFactory.RegisterArea(typeof(EntitiesController));
+ 
+
+        //    SignumControllerFactory.RegisterArea(MethodInfo.GetCurrentMethod());
+
+
+        //    // Web API configuration and services
+        //    var appXmlType = config.Formatters.XmlFormatter.SupportedMediaTypes.FirstOrDefault(t => t.MediaType == "application/xml");
+        //    config.Formatters.XmlFormatter.SupportedMediaTypes.Remove(appXmlType);
+
+
+        //    // Web API routes
+        //    config.MapHttpAttributeRoutes();
+
+        //    config.Services.Replace(typeof(IBodyModelValidator), new SignumBodyModelValidator());
+
+        //    config.Filters.Add(new SignumAuthenticationFilterAttribute());
+        //    config.Filters.Add(new SignumAuthorizationFilterAttribute());
+        //    config.Filters.Add(new SignumExceptionFilterAttribute());
+        //    config.Filters.Add(new VersionFilterAttribute());
+            
+        //    ReflectionServer.Start();
+        //}
 
         
         public static EntityPackTS GetEntityPack(Entity entity)

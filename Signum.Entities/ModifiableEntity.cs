@@ -174,11 +174,11 @@ namespace Signum.Entities
             }
         }
 
-        [OnDeserialized]
-        private void OnDeserialized(StreamingContext context)
-        {
-            RebindEvents();
-        }
+        //[OnDeserialized]
+        //private void OnDeserialized(StreamingContext context)
+        //{
+        //    RebindEvents();
+        //}
 
         protected virtual void ChildCollectionChanged(object sender, NotifyCollectionChangedEventArgs args)
         {

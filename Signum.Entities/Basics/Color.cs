@@ -41,7 +41,7 @@ namespace Signum.Entities.Basics
 
         public static ColorEmbedded FromRGBHex(string htmlColor)
         {
-            return ColorEmbedded.FromARGB(ColorTranslator.FromHtml(htmlColor).ToArgb());
+            return ColorEmbedded.FromARGB(ColorExtensions.FromHex(htmlColor).ToArgb());
         }
 
         public int Argb { get; set; }

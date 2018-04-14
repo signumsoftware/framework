@@ -6,7 +6,6 @@ using Signum.Utilities;
 using Signum.Engine.Maps;
 using System.Linq;
 using System.IO;
-using System.Data.SqlClient;
 using Signum.Utilities.ExpressionTrees;
 using System.Text.RegularExpressions;
 using Signum.Engine.DynamicQuery;
@@ -15,9 +14,9 @@ using System.Linq.Expressions;
 using Signum.Entities;
 using Signum.Utilities.Reflection;
 using System.Reflection;
-using Microsoft.SqlServer.Server;
 using System.Threading.Tasks;
 using System.Threading;
+using System.Data.SqlClient;
 
 namespace Signum.Engine
 {
@@ -84,7 +83,7 @@ namespace Signum.Engine
                         .ToString(p => "{0} {1}: {2}".FormatWith(
                             p.ParameterName,
                             Connector.Current.GetSqlDbType(p),
-                            p.Value?.Let(v => CSharpRenderer.Value(v, v.GetType(), null))), "\r\n"));
+                            p.Value?.Let(v => v.ToString())), "\r\n"));
                 log.WriteLine();
             }
         }

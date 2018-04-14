@@ -11,7 +11,6 @@ using System.Xml.Linq;
 using Signum.Utilities.Reflection;
 using Signum.Utilities.ExpressionTrees;
 using System.Runtime.Serialization;
-using System.ServiceModel;
 
 namespace Signum.Entities.Reflection
 {

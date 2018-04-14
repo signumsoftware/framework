@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
-using System.Web.Http;
 using Signum.Engine.Basics;
 using Signum.Engine.DynamicQuery;
 using Signum.Entities.DynamicQuery;
@@ -20,6 +19,7 @@ using Signum.Engine.Maps;
 using System.Threading;
 using System.Threading.Tasks;
 using Signum.Utilities.ExpressionTrees;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Signum.React.ApiControllers
 {
@@ -241,6 +241,8 @@ namespace Signum.React.ApiControllers
 
     public class FilterTS
     {
+        internal static JsonSerializerSettings JsonSerializerSettings;
+
         public string token;
         public FilterOperation operation;
         public object value;
@@ -251,8 +253,10 @@ namespace Signum.React.ApiControllers
             var parsedToken = QueryUtils.Parse(token, qd, options);
             var expectedValueType = operation.IsList() ? typeof(ObservableCollection<>).MakeGenericType(parsedToken.Type.Nullify()) : parsedToken.Type;
             
+            
+
             var val = value is JToken ?
-                 ((JToken)value).ToObject(expectedValueType, JsonSerializer.Create(GlobalConfiguration.Configuration.Formatters.JsonFormatter.SerializerSettings)) :
+                 ((JToken)value).ToObject(expectedValueType, JsonSerializer.Create(JsonSerializerSettings)) :
                  value;
 
             return new Filter(parsedToken, operation, val);
