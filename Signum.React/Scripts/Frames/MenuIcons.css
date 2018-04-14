@@ -1,54 +1,38 @@
-﻿body:not(.rtl-mode) .sidebar .arrow,
-body:not(.rtl-mode) .dropdown-menu .arrow {
+﻿.icon {
+    margin-left: 5px;
+    margin-right: 5px;
+    text-align: center;
+}
+
+body:not(.rtl) .dropdown-item .arrow-align {
     float: right;
+    font-size: 11px;
     margin-top: 3px;
 }
 
-body.rtl-mode .sidebar .arrow,
-body.rtl-mode .dropdown-menu .arrow {
+body.rtl .dropdown-item .arrow-align {
     float: left;
+    font-size: 11px;
     margin-top: 3px;
 }
 
-.dropdown-menu .fa.arrow:before,
-.sidebar .fa.arrow:before {
-    content: "\f104";
-}
-
-.dropdown-menu .active > a > .fa.arrow:before,
-.sidebar .active > a > .fa.arrow:before {
-    content: "\f107";
-}
-
-
-.navbar-nav li a span.icon {
+.dropdown-menu span.icon {
     display: inline-block;
     margin-left: -8px;
     margin-right: 8px;
 }
 
-.rtl-mode .navbar-nav li a span.icon {
+.rtl .dropdown-menu span.icon {
     margin-left: 8px;
     margin-right: -8px;
 }
 
-
-ul.dropdown-menu li a span.icon {
-    margin-left: -10px;
-    margin-right: 10px;
-}
-
-.rtl-mode ul.dropdown-menu li a span.icon {
-    margin-left: 10px;
-    margin-right: -10px;
-}
-
-.sidebar-nav li a span.icon {
+.sidebar-nav .dropdown-menu span.icon {
     margin-left: 0px;
     margin-right: 8px;
 }
 
-.rtl-mode .sidebar-nav li a span.icon {
+.rtl .sidebar-nav li a span.icon {
     margin-left: 8px;
     margin-right: 0px;
 }

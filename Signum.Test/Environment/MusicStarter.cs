@@ -40,12 +40,12 @@ namespace Signum.Test.Environment
 
         public static void Start(string connectionString)
         {
-            SchemaBuilder sb = new SchemaBuilder();
+            SchemaBuilder sb = new SchemaBuilder(true);
             DynamicQueryManager dqm = new DynamicQueryManager();
            
             //Connector.Default = new SqlCeConnector(@"Data Source=C:\BaseDatos.sdf", sb.Schema, dqm);
             
-            Connector.Default = new SqlConnector(connectionString, sb.Schema, dqm, SqlServerVersion.SqlServer2008);
+            Connector.Default = new SqlConnector(connectionString, sb.Schema, dqm, SqlServerVersion.SqlServer2016);
 
 
             sb.Schema.Version = typeof(MusicStarter).Assembly.GetName().Version;

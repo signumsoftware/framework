@@ -39,10 +39,18 @@ namespace Signum.Engine
         {
             var primaryKeyConstraint = t.PrimaryKey == null ? null : "CONSTRAINT {0} PRIMARY KEY CLUSTERED ({1} ASC)".FormatWith(PrimaryClusteredIndex.GetPrimaryKeyName(t.Name), t.PrimaryKey.Name.SqlEscape());
 
-            return new SqlPreCommandSimple("CREATE TABLE {0}(\r\n{1}\r\n)".FormatWith(
-                t.Name,
-                t.Columns.Values.Select(c => SqlBuilder.CreateColumn(c)).And(primaryKeyConstraint).NotNull().ToString(",\r\n").Indent(2))
-            );
+            var systemPeriod = t.SystemVersioned == null ? null : Period(t.SystemVersioned);
+
+            var columns = t.Columns.Values.Select(c => SqlBuilder.CreateColumn(c, GetDefaultConstaint(t, c)))
+                .And(primaryKeyConstraint)
+                .And(systemPeriod)
+                .NotNull()
+                .ToString(",\r\n");
+
+            var systemVersioning = t.SystemVersioned == null ? null :
+                $"\r\nWITH (SYSTEM_VERSIONING = ON (HISTORY_TABLE = {t.SystemVersioned.TableName}))";
+
+            return new SqlPreCommandSimple($"CREATE TABLE {t.Name}(\r\n{columns}\r\n)" + systemVersioning);
         }
 
         public static SqlPreCommand DropTable(ObjectName tableName)
@@ -63,14 +71,42 @@ namespace Signum.Engine
             }.Combine(Spacing.Simple);
         }
 
+        public static SqlPreCommand AlterTableAddPeriod(ITable table)
+        {
+            return new SqlPreCommandSimple($"ALTER TABLE {table.Name} ADD {Period(table.SystemVersioned)}");
+        }
+
+        static string Period(SystemVersionedInfo sv) {
+
+            if (!Connector.Current.SupportsTemporalTables)
+                throw new InvalidOperationException($"The current connector '{Connector.Current}' does not support Temporal Tables");
+
+            return $"PERIOD FOR SYSTEM_TIME ({sv.StartColumnName.SqlEscape()}, {sv.EndColumnName.SqlEscape()})";
+        }
+
+        public static SqlPreCommand AlterTableDropPeriod(ITable table)
+        {
+            return new SqlPreCommandSimple($"ALTER TABLE {table.Name} DROP PERIOD FOR SYSTEM_TIME");
+        }
+
+        public static SqlPreCommand AlterTableEnableSystemVersioning(ITable table)
+        {
+            return new SqlPreCommandSimple($"ALTER TABLE {table.Name} SET (SYSTEM_VERSIONING = ON (HISTORY_TABLE = {table.SystemVersioned.TableName}))");
+        }
+
+        public static SqlPreCommand AlterTableDisableSystemVersioning(ITable table)
+        {
+            return new SqlPreCommandSimple($"ALTER TABLE {table.Name} SET (SYSTEM_VERSIONING = OFF)");
+        }
+
         public static SqlPreCommand AlterTableDropColumn(ITable table, string columnName)
         {
             return new SqlPreCommandSimple("ALTER TABLE {0} DROP COLUMN {1}".FormatWith(table.Name, columnName.SqlEscape()));
         }
 
-        public static SqlPreCommand AlterTableAddColumn(ITable table, IColumn column)
+        public static SqlPreCommand AlterTableAddColumn(ITable table, IColumn column, SqlBuilder.DefaultConstraint tempDefault = null)
         {
-            return new SqlPreCommandSimple("ALTER TABLE {0} ADD {1}".FormatWith(table.Name, CreateColumn(column)));
+            return new SqlPreCommandSimple("ALTER TABLE {0} ADD {1}".FormatWith(table.Name, CreateColumn(column, tempDefault ?? GetDefaultConstaint(table, column))));
         }
 
         public static bool IsNumber(SqlDbType sqlDbType)
@@ -92,7 +128,6 @@ namespace Signum.Engine
 
             return false;
         }
-
 
         public static bool IsString(SqlDbType sqlDbType)
         {
@@ -121,24 +156,57 @@ namespace Signum.Engine
             return false;
         }
 
-
-
-        public static SqlPreCommand AlterTableAlterColumn(ITable table, IColumn column)
+        public static SqlPreCommand AlterTableAlterColumn(ITable table, IColumn column, string defaultConstraintName = null)
         {
-            return new SqlPreCommandSimple("ALTER TABLE {0} ALTER COLUMN {1}".FormatWith(table.Name, CreateColumn(column)));
+            var alterColumn = new SqlPreCommandSimple("ALTER TABLE {0} ALTER COLUMN {1}".FormatWith(table.Name, CreateColumn(column, null)));
+
+            if (column.Default == null)
+                return alterColumn;
+
+            var defCons = GetDefaultConstaint(table, column);
+
+            return SqlPreCommand.Combine(Spacing.Simple,
+                AlterTableDropConstraint(table.Name, defaultConstraintName ?? defCons.Name),
+                alterColumn,
+                AlterTableAddDefaultConstraint(table.Name, defCons)
+            );
         }
 
-        public static string CreateColumn(IColumn c)
+        public static DefaultConstraint GetDefaultConstaint(ITable t, IColumn c)
+        {
+            if (c.Default == null)
+                return null;
+
+            return new DefaultConstraint { ColumnName = c.Name, Name = $"DF_{t.Name.Name}_{c.Name}", QuotedDefinition = Quote(c.SqlDbType, c.Default) };
+        }
+
+        public class DefaultConstraint
+        {
+            public string ColumnName;
+            public string Name;
+            public string QuotedDefinition;
+        }
+
+
+        public static string CreateColumn(IColumn c, DefaultConstraint constraint)
         {
             string fullType = GetColumnType(c);
+
+            var generatedAlways = c is SystemVersionedInfo.Column svc ? 
+                $"GENERATED ALWAYS AS ROW {(svc.SystemVersionColumnType == SystemVersionedInfo.ColumnType.Start ? "START" : "END")} HIDDEN" : 
+                null;
+
+            var defaultConstraint = constraint != null ? $"CONSTRAINT {constraint.Name} DEFAULT " + constraint.QuotedDefinition : null;
 
             return $" ".CombineIfNotEmpty(
                 c.Name.SqlEscape(),
                 fullType,
                 c.Identity ? "IDENTITY " : null,
+                generatedAlways,
                 c.Collation != null ? ("COLLATE " + c.Collation) : null,
-                c.Nullable ? "NULL" : "NOT NULL",
-                c.Default != null ? "DEFAULT " + Quote(c.SqlDbType, c.Default) : null);
+                c.Nullable.ToBool() ? "NULL" : "NOT NULL",
+                defaultConstraint
+                );
         }
 
         public static string GetColumnType(IColumn c)
@@ -146,7 +214,7 @@ namespace Signum.Engine
             return (c.SqlDbType == SqlDbType.Udt ? c.UserDefinedTypeName : c.SqlDbType.ToString().ToUpper()) + GetSizeScale(c.Size, c.Scale);
         }
 
-        static string Quote(SqlDbType type, string @default)
+        public static string Quote(SqlDbType type, string @default)
         {
             if (IsString(type) && !(@default.StartsWith("'") && @default.StartsWith("'")))
                 return "'" + @default + "'";
@@ -174,19 +242,7 @@ namespace Signum.Engine
                 (c.ReferenceTable == null || c.AvoidForeignKey) ? null : SqlBuilder.AlterTableAddConstraintForeignKey(t, c.Name, c.ReferenceTable))
                 .Combine(Spacing.Simple);
         }
-
-        public static SqlPreCommand CreateAllIndices(ITable t)
-        {
-            return t.GeneratAllIndexes().Where(a => !(a is PrimaryClusteredIndex)).Select(CreateIndex).Combine(Spacing.Simple);
-        }
-
-        public static SqlPreCommand DropIndex(UniqueIndex ix)
-        {
-            if (ix.ViewName == null)
-                return DropIndex(ix.Table.Name, ix.IndexName);
-            else
-                return DropViewIndex(new ObjectName(ix.Table.Name.Schema, ix.ViewName), ix.IndexName);
-        }
+        
 
         public static SqlPreCommand DropIndex(ObjectName tableName, DiffIndex index)
         {
@@ -209,59 +265,46 @@ namespace Signum.Engine
                     .FormatWith(objectName.Schema.Database.ToString().SqlEscape(), indexName.SqlEscape(), objectName.OnDatabase(null).ToString()));
         }
 
-        public static SqlPreCommand ReCreateFreeIndex(ITable table, DiffIndex index, string oldTable, Dictionary<string, string> tableReplacements)
-        {
-            if (index.IsControlledIndex)
-                throw new InvalidOperationException("The Index is not a free index");
-
-            var onlyColumn = index.Columns.Only();
-
-            string indexName = onlyColumn != null && index.IndexName.StartsWith("FIX_") ? "FIX_{0}_{1}".FormatWith(table.Name.Name, (tableReplacements.TryGetC(onlyColumn) ?? onlyColumn)) :
-                tableReplacements == null ? index.IndexName.Replace(oldTable, table.Name.Name) :
-                index.IndexName.Replace(tableReplacements).Replace(oldTable, table.Name.Name);
-
-            string columns = index.Columns.ToString(c => (tableReplacements.TryGetC(c) ?? c).SqlEscape(), ", ");
-
-            return new SqlPreCommandSimple("CREATE INDEX {0} ON {1}({2})".FormatWith(
-                 indexName.SqlEscape(),
-                 table.Name,
-                 columns));
-        }
-
         public static SqlPreCommand CreateIndex(Index index)
         {
-            string columns = index.Columns.ToString(c => c.Name.SqlEscape(), ", ");
 
             if (index is PrimaryClusteredIndex)
             {
-                return new SqlPreCommandSimple("ALTER TABLE {0} ADD CONSTRAINT {1} PRIMARY KEY CLUSTERED({2})".FormatWith(
-                  index.Table.Name,
-                  index.IndexName,
-                  columns));
+                var columns = index.Columns.ToString(c => c.Name.SqlEscape(), ", ");
+
+                return new SqlPreCommandSimple($"ALTER TABLE {index.Table.Name} ADD CONSTRAINT {index.IndexName} PRIMARY KEY CLUSTERED({columns})");
             }
 
             if (index is UniqueIndex uIndex && uIndex.ViewName != null)
             {
                 ObjectName viewName = new ObjectName(uIndex.Table.Name.Schema, uIndex.ViewName);
 
-                SqlPreCommandSimple viewSql = new SqlPreCommandSimple(@"CREATE VIEW {0} WITH SCHEMABINDING AS SELECT {1} FROM {2} WHERE {3}"
-                    .FormatWith(viewName, columns, uIndex.Table.Name.ToString(), uIndex.Where))
+                var columns = index.Columns.ToString(c => c.Name.SqlEscape(), ", ");
+
+
+                SqlPreCommandSimple viewSql = new SqlPreCommandSimple($"CREATE VIEW {viewName} WITH SCHEMABINDING AS SELECT {columns} FROM {uIndex.Table.Name.ToString()} WHERE {uIndex.Where}")
                 { GoBefore = true, GoAfter = true };
 
-                SqlPreCommandSimple indexSql = new SqlPreCommandSimple(@"CREATE UNIQUE CLUSTERED INDEX {0} ON {1}({2})"
-                    .FormatWith(uIndex.IndexName, viewName, uIndex.Columns.ToString(c => c.Name.SqlEscape(), ", ")));
+                SqlPreCommandSimple indexSql = new SqlPreCommandSimple($"CREATE UNIQUE CLUSTERED INDEX {uIndex.IndexName} ON {viewName}({columns})");
 
                 return SqlPreCommand.Combine(Spacing.Simple, viewSql, indexSql);
             }
             else
             {
-                return new SqlPreCommandSimple("CREATE {0}INDEX {1} ON {2}({3}){4}".FormatWith(
-                    index is UniqueIndex ? "UNIQUE " : null,
-                    index.IndexName,
-                    index.Table.Name,
-                    columns,
-                    index.Where.HasText() ? $" WHERE {index.Where}" : ""));
+                return CreateIndexBasic(index, forHistoryTable: false);
             }
+        }
+
+        public static SqlPreCommand CreateIndexBasic(Index index, bool forHistoryTable)
+        {
+            var indexType = index is UniqueIndex ? "UNIQUE INDEX" : "INDEX";
+            var columns = index.Columns.ToString(c => c.Name.SqlEscape(), ", ");
+            var include = index.IncludeColumns.HasItems() ? $" INCLUDE ({index.IncludeColumns.ToString(c => c.Name.SqlEscape(), ", ")})" : null;
+            var where = index.Where.HasText() ? $" WHERE {index.Where}" : "";
+
+            var tableName = forHistoryTable ? index.Table.SystemVersioned.TableName : index.Table.Name;
+            
+            return new SqlPreCommandSimple($"CREATE {indexType} {index.IndexName} ON {tableName}({columns}){include}{where}");
         }
 
         internal static SqlPreCommand UpdateTrim(ITable tab, IColumn tabCol)
@@ -269,17 +312,19 @@ namespace Signum.Engine
             return new SqlPreCommandSimple("UPDATE {0} SET {1} = RTRIM({1})".FormatWith(tab.Name, tabCol.Name));;
         }
 
-        public static SqlPreCommand AlterTableDropConstraint(ObjectName tableName, ObjectName constraintName)
+        public static SqlPreCommand AlterTableDropConstraint(ObjectName tableName, ObjectName constraintName) =>
+            AlterTableDropConstraint(tableName, constraintName.Name);
+
+        public static SqlPreCommand AlterTableDropConstraint(ObjectName tableName, string constraintName)
         {
             return new SqlPreCommandSimple("ALTER TABLE {0} DROP CONSTRAINT {1}".FormatWith(
                 tableName,
-                constraintName.Name.SqlEscape()));
+                constraintName.SqlEscape()));
         }
 
-        public static SqlPreCommand AlterTableAddDefaultConstraint(ObjectName tableName, string column, string constraintName, string definition)
+        public static SqlPreCommandSimple AlterTableAddDefaultConstraint(ObjectName tableName, DefaultConstraint constraint)
         {
-            return new SqlPreCommandSimple("ALTER TABLE {0} ADD CONSTRAINT {1} DEFAULT {2} FOR {3}"
-                        .FormatWith(tableName, constraintName.SqlEscape(), definition, column.SqlEscape()));
+            return new SqlPreCommandSimple($"ALTER TABLE {tableName} ADD CONSTRAINT {constraint.Name} DEFAULT {constraint.QuotedDefinition} FOR {constraint.ColumnName}");
         }
 
         public static SqlPreCommand AlterTableAddConstraintForeignKey(ITable table, string fieldName, ITable foreignTable)
@@ -367,9 +412,9 @@ FROM {1} as [table]".FormatWith(
             return SP_RENAME(table.Name.Schema.Database, table.Name.OnDatabase(null) + "." + oldName, newName, "COLUMN");
         }
 
-        public static SqlPreCommand RenameIndex(ITable table, string oldName, string newName)
+        public static SqlPreCommand RenameIndex(ObjectName tableName, string oldName, string newName)
         {
-            return SP_RENAME(table.Name.Schema.Database, table.Name.OnDatabase(null) + "." + oldName, newName, "INDEX");
+            return SP_RENAME(tableName.Schema.Database, tableName.OnDatabase(null) + "." + oldName, newName, "INDEX");
         }
         #endregion
 
@@ -437,30 +482,6 @@ FROM {1} as [table]".FormatWith(
             return new SqlPreCommandSimple("ALTER INDEX [{0}] ON {1} REBUILD".FormatWith(indexName, tableName));
         }
 
-        public static SqlPreCommandSimple DropDefaultConstraint(ObjectName tableName, string columnName)
-        {
-            DatabaseName db = tableName.Schema.Database;
-
-            var tn = tableName.OnDatabase(null);
-
-            string varName = "Constraint_" + tableName.Name + "_" + columnName;
-
-            string command = @"DECLARE @sql nvarchar(max)
-SELECT  @sql = 'ALTER TABLE {Table} DROP CONSTRAINT [' + dc.name  + '];' 
-FROM DB.sys.default_constraints dc
-JOIN DB.sys.columns c ON dc.parent_object_id = c.object_id AND dc.parent_column_id = c.column_id
-WHERE c.object_id = OBJECT_ID('{FullTable}') AND c.name = '{Column}'
-EXEC DB.dbo.sp_executesql @sql
-"
-                .Replace("DB.", db == null ? null : (db.ToString() + "."))
-                .Replace("@sql", "@" + varName)
-                .Replace("{FullTable}", tableName.ToString())
-                .Replace("{Table}", tn.ToString())
-                .Replace("{Column}", columnName);
-
-            return new SqlPreCommandSimple(command);
-        }
-
         public static SqlPreCommandSimple DropPrimaryKeyConstraint(ObjectName tableName)
         {
             DatabaseName db = tableName.Schema.Database;
@@ -483,15 +504,6 @@ EXEC DB.dbo.sp_executesql @sql"
             return new SqlPreCommandSimple(command);
         }
 
-        public static SqlPreCommandSimple AddDefaultConstraint(ObjectName tableName, string columnName, string definition, SqlDbType sqlDbType)
-        {
-            string constraintName = "DF_{0}_{1}".FormatWith(tableName.Name, columnName);
-            return new SqlPreCommandSimple("ALTER TABLE {0} ADD CONSTRAINT {1} DEFAULT {2}{3}{2} FOR {4}"
-                .FormatWith(tableName, constraintName,
-                sqlDbType == SqlDbType.Char || sqlDbType == SqlDbType.NChar || 
-                sqlDbType == SqlDbType.VarChar || sqlDbType == SqlDbType.NVarChar ? "'": "",
-                definition, columnName));
-        }
 
         internal static SqlPreCommand DropStatistics(string tn, List<DiffStats> list)
         {

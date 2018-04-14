@@ -2,7 +2,6 @@
 import * as React from 'react'
 import * as numbro from 'numbro'
 import * as moment from 'moment'
-import { Modal, ModalProps, ModalClass, ButtonToolbar } from 'react-bootstrap'
 import * as Finder from '../Finder'
 import { Dic, areEqual } from '../Globals'
 import { openModal, IModalProps } from '../Modals';
@@ -29,7 +28,9 @@ interface FilterBuilderProps {
 
 export default class FilterBuilder extends React.Component<FilterBuilderProps>{
 
-    handlerNewFilter = () => {
+    handlerNewFilter = (e: React.MouseEvent<any>) => {
+
+        e.preventDefault();
 
         this.props.filterOptions.push({
             token: this.props.lastToken,
@@ -69,13 +70,13 @@ export default class FilterBuilder extends React.Component<FilterBuilderProps>{
             <fieldset className="form-xs">
                 {this.props.title && <legend>{this.props.title}</legend>}
                 <div className="sf-filters-list table-responsive" style={{ overflowX: "visible" }}>
-                    <table className="table table-condensed">
+                    <table className="table-sm">
                         <thead>
                             <tr>
                                 <th style={{ minWidth: "24px" }}></th>
                                 <th>{SearchMessage.Field.niceToString()}</th>
                                 <th>{SearchMessage.Operation.niceToString()}</th>
-                                <th>{SearchMessage.Value.niceToString()}</th>
+                                <th style={{ paddingRight: "20px" }}>{SearchMessage.Value.niceToString()}</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -89,10 +90,10 @@ export default class FilterBuilder extends React.Component<FilterBuilderProps>{
                             {!this.props.readOnly &&
                                 <tr >
                                     <td colSpan={4}>
-                                        <a title={SearchMessage.AddFilter.niceToString()}
+                                        <a href="#" title={SearchMessage.AddFilter.niceToString()}
                                             className="sf-line-button sf-create"
                                             onClick={this.handlerNewFilter}>
-                                            <span className="glyphicon glyphicon-plus sf-create sf-create-label" />{SearchMessage.AddFilter.niceToString()}
+                                            <span className="fa fa-plus sf-create" />&nbsp;{SearchMessage.AddFilter.niceToString()}
                                         </a>
                                     </td>
                                 </tr>
@@ -119,7 +120,8 @@ export interface FilterComponentProps extends React.Props<FilterComponent> {
 
 export class FilterComponent extends React.Component<FilterComponentProps>{
 
-    handleDeleteFilter = () => {
+    handleDeleteFilter = (e: React.MouseEvent<any>) => {
+        e.preventDefault();
         this.props.onDeleteFilter(this.props.filter);
     }
 
@@ -134,7 +136,7 @@ export class FilterComponent extends React.Component<FilterComponentProps>{
         else {
 
             if (!areEqual(f.token, newToken, a => a.filterType) || !areEqual(f.token, newToken, a => a.preferEquals)) {
-                f.operation = newToken.preferEquals ? "EqualTo": newToken.filterType && filterOperations[newToken.filterType].first();
+                f.operation = newToken.preferEquals ? "EqualTo" : newToken.filterType && filterOperations[newToken.filterType].first();
                 f.value = f.operation && isList(f.operation) ? [undefined] : undefined;
             }
             else if (f.token && f.token.filterType == "DateTime" && newToken.filterType == "DateTime" && newToken.format && f.token.format != newToken.format) {
@@ -182,22 +184,25 @@ export class FilterComponent extends React.Component<FilterComponentProps>{
             <tr>
                 <td>
                     {!readOnly &&
-                        <a title={SearchMessage.DeleteFilter.niceToString()}
+                        <a href="#" title={SearchMessage.DeleteFilter.niceToString()}
                             className="sf-line-button sf-remove"
                             onClick={this.handleDeleteFilter}>
-                            <span className="glyphicon glyphicon-remove" />
+                            <span className="fa fa-remove" />
                         </a>}
                 </td>
                 <td>
-                    <QueryTokenBuilder
-                        queryToken={f.token}
-                        onTokenChange={this.handleTokenChanged}
-                        queryKey={this.props.queryDescription.queryKey}
-                        subTokenOptions={this.props.subTokenOptions}
-                        readOnly={readOnly} /></td>
+                    <div className="rw-widget-xs">
+                        <QueryTokenBuilder
+                            queryToken={f.token}
+                            onTokenChange={this.handleTokenChanged}
+                            queryKey={this.props.queryDescription.queryKey}
+                            subTokenOptions={this.props.subTokenOptions}
+                            readOnly={readOnly} />
+                    </div>
+                </td>
                 <td className="sf-filter-operation">
                     {f.token && f.token.filterType && f.operation &&
-                        <select className="form-control" value={f.operation as any} disabled={readOnly} onChange={this.handleChangeOperation}>
+                        <select className="form-control form-control-xs" value={f.operation as any} disabled={readOnly} onChange={this.handleChangeOperation}>
                             {f.token.filterType && filterOperations[f.token.filterType!]
                                 .map((ft, i) => <option key={i} value={ft as any}>{FilterOperation.niceToString(ft)}</option>)}
                         </select>}
@@ -218,7 +223,7 @@ export class FilterComponent extends React.Component<FilterComponentProps>{
         if (isList(f.operation!))
             return <MultiValue values={f.value} onRenderItem={this.handleCreateAppropiateControl} readOnly={readOnly} onChange={this.handleValueChange} />;
 
-        const ctx = new TypeContext<any>(undefined, { formGroupStyle: "None", readOnly: readOnly, formGroupSize: "ExtraSmall" }, undefined as any, Binding.create(f, a => a.value));
+        const ctx = new TypeContext<any>(undefined, { formGroupStyle: "None", readOnly: readOnly, formSize: "ExtraSmall" }, undefined as any, Binding.create(f, a => a.value));
 
         return this.handleCreateAppropiateControl(ctx);
     }
@@ -261,15 +266,17 @@ export interface MultiValueProps {
 
 export class MultiValue extends React.Component<MultiValueProps> {
 
-    handleDeleteValue = (index: number) => {
-
+    handleDeleteValue = (e: React.MouseEvent<any>, index: number) => {
+        e.preventDefault();
         this.props.values.removeAt(index);
         this.props.onChange();
         this.forceUpdate();
-
     }
 
-    handleAddValue = () => {
+    handleAddValue = (e: React.MouseEvent<any>) => {
+
+        e.preventDefault();
+
         this.props.values.push(undefined);
         this.props.onChange();
         this.forceUpdate();
@@ -277,17 +284,17 @@ export class MultiValue extends React.Component<MultiValueProps> {
 
     render() {
         return (
-            <table style={{ marginBottom: "0px" }}>
+            <table style={{ marginBottom: "0px" }} className="sf-multi-value">
                 <tbody>
                     {
                         this.props.values.map((v, i) =>
                             <tr key={i}>
                                 <td>
                                     {!this.props.readOnly &&
-                                        <a title={SearchMessage.DeleteFilter.niceToString()}
+                                        <a href="#" title={SearchMessage.DeleteFilter.niceToString()}
                                             className="sf-line-button sf-remove"
-                                            onClick={() => this.handleDeleteValue(i)}>
-                                            <span className="glyphicon glyphicon-remove" />
+                                            onClick={e => this.handleDeleteValue(e, i)}>
+                                            <span className="fa fa-remove" />
                                         </a>}
                                 </td>
                                 <td>
@@ -295,7 +302,7 @@ export class MultiValue extends React.Component<MultiValueProps> {
                                         this.props.onRenderItem(new TypeContext<any>(undefined,
                                             {
                                                 formGroupStyle: "None",
-                                                formGroupSize: "ExtraSmall",
+                                                formSize: "ExtraSmall",
                                                 readOnly: this.props.readOnly
                                             }, undefined as any, new Binding<any>(this.props.values, i)))
                                     }
@@ -305,11 +312,11 @@ export class MultiValue extends React.Component<MultiValueProps> {
                     <tr >
                         <td colSpan={4}>
                             {!this.props.readOnly &&
-                                <a title={SearchMessage.AddValue.niceToString()}
+                                <a href="#" title={SearchMessage.AddValue.niceToString()}
                                     className="sf-line-button sf-create"
                                     onClick={this.handleAddValue}>
-                                    <span className="glyphicon glyphicon-plus sf-create sf-create-label" />{SearchMessage.AddValue.niceToString()}
-                                </a>}
+                                    <span className="fa fa-plus sf-create" />&nbsp;{SearchMessage.AddValue.niceToString()}
+                            </a>}
                         </td>
                     </tr>
                 </tbody>
@@ -317,7 +324,6 @@ export class MultiValue extends React.Component<MultiValueProps> {
         );
 
     }
-
 }
 
 

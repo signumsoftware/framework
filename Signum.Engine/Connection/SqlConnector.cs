@@ -26,6 +26,7 @@ namespace Signum.Engine
         SqlServer2008,
         SqlServer2012,
         SqlServer2014,
+        SqlServer2016,
         AzureSQL,
     }
 
@@ -121,7 +122,7 @@ namespace Signum.Engine
         {
             using (SqlConnection con = EnsureConnection())
             using (SqlCommand cmd = NewCommand(preCommand, con, commandType))
-            using (HeavyProfiler.Log("SQL", () => preCommand.PlainSql()))
+            using (HeavyProfiler.Log("SQL", () => preCommand.sp_executesql()))
             {
                 try
                 {
@@ -147,7 +148,7 @@ namespace Signum.Engine
         {
             using (SqlConnection con = EnsureConnection())
             using (SqlCommand cmd = NewCommand(preCommand, con, commandType))
-            using (HeavyProfiler.Log("SQL", () => preCommand.PlainSql()))
+            using (HeavyProfiler.Log("SQL", () => preCommand.sp_executesql()))
             {
                 try
                 {
@@ -174,7 +175,7 @@ namespace Signum.Engine
                 using (SqlConnection con = EnsureConnection())
                 using (SqlCommand cmd = NewCommand(preCommand, con, commandType))
                 using (HeavyProfiler.Log("SQL-Dependency"))
-                using (HeavyProfiler.Log("SQL", () => preCommand.PlainSql()))
+                using (HeavyProfiler.Log("SQL", () => preCommand.sp_executesql()))
                 {
                     try
                     {
@@ -270,7 +271,7 @@ namespace Signum.Engine
         {
             using (SqlConnection con = EnsureConnection())
             using (SqlCommand cmd = NewCommand(preCommand, con, commandType))
-            using (HeavyProfiler.Log("SQL", () => preCommand.PlainSql()))
+            using (HeavyProfiler.Log("SQL", () => preCommand.sp_executesql()))
             {
                 try
                 {
@@ -295,7 +296,7 @@ namespace Signum.Engine
         {
             using (SqlConnection con = EnsureConnection())
             using (SqlCommand cmd = NewCommand(preCommand, con, commandType))
-            using (HeavyProfiler.Log("SQL", () => preCommand.PlainSql()))
+            using (HeavyProfiler.Log("SQL", () => preCommand.sp_executesql()))
             {
                 try
                 {
@@ -318,7 +319,7 @@ namespace Signum.Engine
         public Exception HandleException(Exception ex, SqlPreCommandSimple command)
         {
             var nex = ReplaceException(ex, command);
-            nex.Data["Sql"] = command.PlainSql();
+            nex.Data["Sql"] = command.sp_executesql();
             return nex;
         }
 
@@ -479,10 +480,18 @@ namespace Signum.Engine
         {
             get { return Version != SqlServerVersion.AzureSQL && Version >= SqlServerVersion.SqlServer2008; }
         }
+
         public override bool SupportsFormat
         {
             get { return  Version >= SqlServerVersion.SqlServer2012; }
         }
+
+        public override bool SupportsTemporalTables
+        {
+            get { return Version >= SqlServerVersion.SqlServer2016; }
+        }
+
+        public override string ToString() => $"SqlConnector({Version})";
     }
 
     public class SqlParameterBuilder : ParameterBuilder
@@ -626,7 +635,23 @@ open cur
 close cur 
 deallocate cur";
 
-
+        public static readonly string StopSystemVersioning = @"declare @schema nvarchar(128), @tbl nvarchar(128)
+DECLARE @sql nvarchar(255)
+ 
+declare cur cursor fast_forward for 
+select distinct s.name, t.name
+from sys.tables t
+join sys.schemas s on t.schema_id = s.schema_id where history_table_id is not null
+open cur 
+    fetch next from cur into @schema, @tbl
+    while @@fetch_status <> -1 
+    begin 
+        select @sql = 'ALTER TABLE [' + @schema + '].[' + @tbl + '] SET (SYSTEM_VERSIONING = OFF);'
+        exec sp_executesql @sql 
+        fetch next from cur into @schema, @tbl
+    end 
+close cur 
+deallocate cur";
 
         public static SqlPreCommand RemoveAllScript(DatabaseName databaseName)
         {
@@ -636,6 +661,7 @@ deallocate cur";
                 new SqlPreCommandSimple(Use(databaseName, RemoveAllProceduresScript)),
                 new SqlPreCommandSimple(Use(databaseName, RemoveAllViewsScript)),
                 new SqlPreCommandSimple(Use(databaseName, RemoveAllConstraintsScript)),
+                Connector.Current.SupportsTemporalTables ? new SqlPreCommandSimple(Use(databaseName, StopSystemVersioning)) : null,
                 new SqlPreCommandSimple(Use(databaseName, RemoveAllTablesScript)),
                 new SqlPreCommandSimple(Use(databaseName, RemoveAllSchemasScript.FormatWith(schemas)))
                 );

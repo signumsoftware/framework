@@ -10,6 +10,7 @@ export interface AjaxOptions {
     avoidThrowError?: boolean;
     avoidGraphExplorer?: boolean;
     avoidAuthToken?: boolean;
+    avoidVersionCheck?: boolean;
 
     
     headers?: { [index: string]: string };
@@ -82,6 +83,11 @@ export function ajaxPostRaw(options: AjaxOptions, data: any): Promise<Response> 
 
 export function wrapRequest(options: AjaxOptions, makeCall: () => Promise<Response>): Promise<Response>
 {
+    if (!options.avoidVersionCheck) {
+        const call = makeCall;
+        makeCall = () => VersionFilter.onVersionFilter(call);
+    }
+
     if (!options.avoidThrowError) {
         const call = makeCall;
         makeCall = () => ThrowErrorFilter.throwError(call);
@@ -110,6 +116,36 @@ export module AuthTokenFilter {
     export let addAuthToken: (options: AjaxOptions, makeCall: () => Promise<Response>) => Promise<Response>;
 }
 
+export module VersionFilter {
+    export let initialVersion: string | undefined;
+    export let latestVersion: string | undefined;
+
+    export let versionChanged: () => void = () => console.warn("New Server version detected, handle VersionFilter.versionChanged to inform user");
+
+    export function onVersionFilter(makeCall: () => Promise<Response>): Promise<Response> {
+
+        function changeVersion(response: Response) {
+            var ver = response.headers.get("X-App-Version");
+
+            if (!ver)
+                return;
+
+            if (initialVersion == undefined) {
+                initialVersion = ver;
+                latestVersion = ver;
+            }
+
+            if (latestVersion != ver) {
+                latestVersion = ver;
+                if (versionChanged)
+                    versionChanged();
+            }
+        }
+
+        return makeCall().then(resp => { changeVersion(resp); return resp; });
+    }
+
+}
 
 export module NotifyPendingFilter {
     export let notifyPendingRequests: (pendingRequests: number) => void = () => { };
@@ -249,20 +285,28 @@ export namespace SessionSharing {
     export let avoidSharingSession = false;
 
     //localStorage: Domain+Browser
-    //sessionStorage: Browser tab
+    //sessionStorage: Browser tab, copied when Ctrl+Click from another tab, but not windows.open or just paste link
 
     var _appName: string = "";
 
+    export function getAppName() {
+        return _appName;
+    }
+
     export function setAppNameAndRequestSessionStorage(appName: string) {
         _appName = appName;
-        if (!sessionStorage.length) {
-            localStorage.setItem('requestSessionStorage' + _appName, new Date().toString());
-            localStorage.removeItem('requestSessionStorage' + _appName);
+        if (!sessionStorage.length) { //Copied from anote
+            requestSessionStorageFromAnyTab();
         }
+    }
+    
+    function requestSessionStorageFromAnyTab() {
+        localStorage.setItem('requestSessionStorage' + _appName, new Date().toString());
+        localStorage.removeItem('requestSessionStorage' + _appName);
     }
 
     //http://blog.guya.net/2015/06/12/sharing-sessionstorage-between-tabs-for-secure-multi-tab-authentication/
-    //To share session storage between tabs
+    //To share session storage between tabs for new tabs WITHOUT windows.opener
     window.addEventListener("storage", se => {
 
         if (avoidSharingSession)
@@ -276,13 +320,14 @@ export namespace SessionSharing {
 
         } else if (se.key == ('responseSessionStorage' + _appName) && !sessionStorage.length) {
             // sessionStorage is empty -> fill it
-
             if (se.newValue) {
                 const data = JSON.parse(se.newValue);
 
                 for (let key in data) {
                     sessionStorage.setItem(key, data[key]);
                 }
+
+                console.log("SessionStorage taken from any tab");
             }
         }
     });

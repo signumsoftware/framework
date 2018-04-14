@@ -20,6 +20,7 @@ namespace Signum.Engine
             Func<T, R> selector,
             Func<T, string> elementID = null,
             LogWriter writer = null,
+            bool showProgress = true,
             ParallelOptions parallelOptions = null)
         {
             List<R> result = new List<R>();
@@ -28,6 +29,7 @@ namespace Signum.Engine
                 action: a => result.Add(selector(a)),
                 elementID: elementID,
                 transactional: false,
+                showProgress: showProgress,
                 writer: writer,
                 parallelOptions: parallelOptions);
 
@@ -41,6 +43,7 @@ namespace Signum.Engine
             Func<T, string> elementID = null,
             Action<T> action = null,
             bool transactional = true,
+            bool showProgress = true,
             LogWriter writer = null,
             ParallelOptions parallelOptions = null,
             Type disableIdentityFor = null)
@@ -58,7 +61,7 @@ namespace Signum.Engine
 
             if (disableIdentityFor == null)
             {
-                collection.ProgressForeachInternal(elementID, writer, parallelOptions, transactional, action);
+                collection.ProgressForeachInternal(elementID, writer, parallelOptions, transactional, showProgress, action);
             }
             else
             {
@@ -73,7 +76,7 @@ namespace Signum.Engine
                 table.IdentityBehaviour = false;
                 try
                 {
-                    collection.ProgressForeachInternal(elementID, writer, parallelOptions, transactional: true, action: item =>
+                    collection.ProgressForeachInternal(elementID, writer, parallelOptions, transactional, showProgress, action: item =>
                     {
                         using (Transaction tr = Transaction.ForceNew())
                         {
@@ -97,29 +100,26 @@ namespace Signum.Engine
             LogWriter writer,
             ParallelOptions parallelOptions,
             bool transactional,
+            bool showProgress,
             Action<T> action
         )
         {
-
             if (parallelOptions != null)
-            {
-                collection.ProgressForeachParallel(elementID, writer, parallelOptions, transactional, action);
-            }
+                collection.ProgressForeachParallel(elementID, writer, parallelOptions, transactional, showProgress, action);
             else
-            {
-                collection.ProgressForeachSequential(elementID, writer, transactional, action);
-            }
+                collection.ProgressForeachSequential(elementID, writer, transactional, showProgress, action);
         }
 
-        private static void ProgressForeachSequential<T>(this IEnumerable<T> collection, Func<T, string> elementID,
-            LogWriter writer, bool transactional, Action<T> action)
+        private static void ProgressForeachSequential<T>(this IEnumerable<T> collection, 
+            Func<T, string> elementID,
+            LogWriter writer, 
+            bool transactional, 
+            bool showProgress, 
+            Action<T> action)
         {
-            
-         
-
             var enumerator = collection.ToProgressEnumerator(out IProgressInfo pi);
 
-            if (!Console.IsOutputRedirected)
+            if (!Console.IsOutputRedirected && showProgress)
                 SafeConsole.WriteSameLine(pi.ToString());
 
             foreach (var item in enumerator)
@@ -149,10 +149,10 @@ namespace Signum.Engine
                             throw;
                     }
 
-                if (!Console.IsOutputRedirected)
+                if (!Console.IsOutputRedirected && showProgress)
                     SafeConsole.WriteSameLine(pi.ToString());
             }
-            if (!Console.IsOutputRedirected)
+            if (!Console.IsOutputRedirected && showProgress)
                 SafeConsole.ClearSameLine();
 
         }
@@ -168,15 +168,15 @@ namespace Signum.Engine
             LogWriter writer,
             ParallelOptions paralelOptions,
             bool transactional,
+            bool showProgress,
             Action<T> action
         )
         {
             try
             {
-
                 var col = collection.ToProgressEnumerator(out IProgressInfo pi);
 
-                if (!Console.IsOutputRedirected)
+                if (!Console.IsOutputRedirected && showProgress)
                     lock (SafeConsole.SyncKey)
                         SafeConsole.WriteSameLine(pi.ToString());
 
@@ -184,7 +184,7 @@ namespace Signum.Engine
 
                 using (ExecutionContext.SuppressFlow())
                     Parallel.ForEach(col,
-                        paralelOptions ?? new ParallelOptions {MaxDegreeOfParallelism = Environment.ProcessorCount},
+                        paralelOptions ?? new ParallelOptions { MaxDegreeOfParallelism = Environment.ProcessorCount },
                         (item, state) =>
                         {
                             using (HeavyProfiler.Log("ProgressForeach", () => elementID(item)))
@@ -205,15 +205,14 @@ namespace Signum.Engine
                                 }
                                 catch (Exception e)
                                 {
-                                    writer(ConsoleColor.Red, "{0:u} Error in {1}: {2}", DateTime.Now, elementID(item),
-                                        e.Message);
+                                    writer(ConsoleColor.Red, "{0:u} Error in {1}: {2}", DateTime.Now, elementID(item), e.Message);
                                     writer(ConsoleColor.DarkRed, e.StackTrace.Indent(4));
 
                                     if (StopOnException != null && StopOnException(elementID(item), e))
                                         stopException = e;
                                 }
 
-                            if (!Console.IsOutputRedirected)
+                            if (!Console.IsOutputRedirected && showProgress)
                                 lock (SafeConsole.SyncKey)
                                     SafeConsole.WriteSameLine(pi.ToString());
 
@@ -227,7 +226,7 @@ namespace Signum.Engine
             }
             finally
             {
-                if (!Console.IsOutputRedirected)
+                if (!Console.IsOutputRedirected && showProgress)
                     SafeConsole.ClearSameLine();
             }
         }

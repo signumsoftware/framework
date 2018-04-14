@@ -1,6 +1,5 @@
 ﻿import * as React from "react"
 import { Router, Route, Redirect } from "react-router"
-import { Button, OverlayTrigger, Tooltip, MenuItem, DropdownButton } from "react-bootstrap"
 import {
     Lite, Entity, ModifiableEntity, EmbeddedEntity, LiteMessage, EntityPack, toLite, JavascriptMessage,
     OperationSymbol, ConstructSymbol_From, ConstructSymbol_FromMany, ConstructSymbol_Simple, ExecuteSymbol, DeleteSymbol, OperationMessage, getToString, NormalControlMessage, NormalWindowMessage
@@ -16,8 +15,9 @@ import { ajaxPost, ValidationError } from '../Services';
 import { TypeContext } from '../TypeContext';
 import {
     operationInfos, getSettings, EntityOperationSettings, EntityOperationContext, EntityOperationGroup,
-    CreateGroup, API, isEntityOperation, autoStyleFunction, isSave
+    CreateGroup, API, isEntityOperation, autoColorFunction, isSave
 } from '../Operations'
+import { UncontrolledDropdown, DropdownMenu, DropdownToggle, DropdownItem, UncontrolledTooltip, Button } from "../Components";
 
 
 export function getEntityOperationButtons(ctx: ButtonsContext): Array<React.ReactElement<any> | undefined> | undefined {
@@ -31,12 +31,9 @@ export function getEntityOperationButtons(ctx: ButtonsContext): Array<React.Reac
         .map(oi => {
             const eos = getSettings(oi.key) as EntityOperationSettings<Entity>;
 
-            const eoc = new EntityOperationContext<Entity>();
-            eoc.entity = ctx.pack.entity as Entity;
-            eoc.frame = ctx.frame;
+            const eoc = new EntityOperationContext<Entity>(ctx.frame, ctx.pack.entity as Entity, oi);
             eoc.tag = ctx.tag;
             eoc.canExecute = ctx.pack.canExecute[oi.key];
-            eoc.operationInfo = oi;
             eoc.settings = eos;
 
             return eoc;
@@ -74,22 +71,27 @@ export function getEntityOperationButtons(ctx: ButtonsContext): Array<React.Reac
         if (gr.key == "") {
             return gr.elements.map((eoc, j) => ({
                 order: eoc.settings && eoc.settings.order != undefined ? eoc.settings.order : 0,
-                button: <OperationButton eoc={eoc} key={i + "-" + j}/>
+                button: <OperationButton eoc={eoc} key={i + "-" + j} />
             }));
         } else {
 
-            const group = getGroup(gr.elements[0]) !;
+            const group = getGroup(gr.elements[0])!;
 
 
             return [{
                 order: group.order != undefined ? group.order : 100,
                 button: (
-                    <DropdownButton title={group.text()} data-key={group.key} key={i} id={group.key}>
-                        {gr.elements
-                            .orderBy(a => a.settings && a.settings.order)
-                            .map((eoc, j) => <OperationButton eoc={eoc} key={j} group={group}/>)
-                        }
-                    </DropdownButton>
+                    <UncontrolledDropdown key={i}>
+                        <DropdownToggle data-key={group.key} color={group.color || "light"} className={group.cssClass} caret>
+                            {group.text()}
+                        </DropdownToggle>
+                        <DropdownMenu>
+                            {gr.elements
+                                .orderBy(a => a.settings && a.settings.order)
+                                .map((eoc, j) => <OperationButton eoc={eoc} key={j} group={group} />)
+                            }
+                        </DropdownMenu>
+                    </UncontrolledDropdown >
                 )
             }];
         }
@@ -118,7 +120,7 @@ function getWithClose(eoc: EntityOperationContext<Entity>) {
     return isSave(eoc.operationInfo);
 }
 
-interface OperationButtonProps extends React.HTMLProps<any> {
+interface OperationButtonProps extends React.HTMLAttributes<HTMLButtonElement> {
     eoc: EntityOperationContext<any /*Entity*/>;
     group?: EntityOperationGroup;
     canExecute?: string | null;
@@ -127,66 +129,71 @@ interface OperationButtonProps extends React.HTMLProps<any> {
 
 export class OperationButton extends React.Component<OperationButtonProps> {
     render() {
-        let { eoc, group, onOperationClick, canExecute, ...props } = this.props;
+        let { eoc, group, onOperationClick, canExecute, color, ...props } = this.props;
 
         if (canExecute === undefined)
             canExecute = eoc.canExecute;
 
-        var btn = this.renderButton(eoc, group, canExecute, props);
-
-        if (!canExecute)
-            return btn;
-
-        const tooltip = <Tooltip id={"tooltip_" + eoc.operationInfo.key.replace(".", "_")}>{canExecute}</Tooltip>;
-
-        return <OverlayTrigger placement="bottom" overlay={tooltip}>{btn}</OverlayTrigger>;
-    }
-
-    renderButton(eoc: EntityOperationContext<Entity>, group: EntityOperationGroup | undefined, canExecute: string | undefined | null, props: React.HTMLProps<any>) {
-        
-        const bsStyle = eoc.settings && eoc.settings.style || autoStyleFunction(eoc.operationInfo);
+        const bsColor = eoc.settings && eoc.settings.color || autoColorFunction(eoc.operationInfo);
 
         const disabled = !!canExecute;
-        
+
         const withClose = getWithClose(eoc);
 
-        if (group) {
-            return (
-                <MenuItem
-                    {...props}
-                    className={classes("btn-" + bsStyle, disabled ? "disabled" : undefined, props && props.className)}
-                    onClick={disabled ? undefined : this.handleOnClick}
-                    data-operation={eoc.operationInfo.key}
-                >
-                    {this.renderChildren()}
-                </MenuItem>
+
+        let elem: HTMLElement | null;
+
+        const tooltip = canExecute &&
+            (
+                <UncontrolledTooltip placement={group ? "right" : "bottom"} target={() => elem!} key="tooltip">
+                    {canExecute}
+                </UncontrolledTooltip>
             );
+
+        if (group) {
+            return [
+                <DropdownItem
+                    {...props}
+                    key="di"
+                    innerRef={r  => elem = r}
+                    disabled={disabled}
+                    onClick={disabled ? undefined : this.handleOnClick}
+                    data-operation={eoc.operationInfo.key}>
+                    {this.renderChildren()}
+                </DropdownItem>,
+                tooltip
+            ];
         }
 
-        var button = (
-            <Button bsStyle={bsStyle}
+        var button = [
+            <Button color={bsColor}
                 {...props}
+                key="button"
+                innerRef={r => elem = r}
                 className={classes(disabled ? "disabled" : undefined, props && props.className)}
                 onClick={disabled ? undefined : this.handleOnClick}
                 data-operation={eoc.operationInfo.key}>
                 {this.renderChildren()}
-            </Button>
-        );
+            </Button>,
+            tooltip
+        ];
 
         if (!withClose)
             return button;
 
-        return (
-            <div className="btn-group">
+        return [
+            <div className="btn-group"
+                ref={r => elem = r} key="buttonGroup">
                 {button}
-                <Button bsStyle={bsStyle}
-                    className={classes("dropdown-toggle dropdown-toggle-split", disabled ? "disabled" : undefined)}
+                <Button color={bsColor}
+                    className={classes("dropdown-toggle-split", disabled ? "disabled" : undefined)}
                     onClick={disabled ? undefined : e => { eoc.closeRequested = true; this.handleOnClick(e); }}
                     title={NormalWindowMessage._0AndClose.niceToString(eoc.operationInfo.niceName)}>
                     <span>&times;</span>
                 </Button>
-            </div>
-        );
+            </div>,
+            tooltip
+        ];
     }
 
     renderChildren() {
@@ -222,8 +229,7 @@ export class OperationButton extends React.Component<OperationButtonProps> {
 
 
 
-export function defaultOnClick<T extends Entity>(eoc: EntityOperationContext<T>, ...args: any[])
-{
+export function defaultOnClick<T extends Entity>(eoc: EntityOperationContext<T>, ...args: any[]) {
     if (eoc.operationInfo.lite) {
         switch (eoc.operationInfo.operationType) {
             case OperationType.ConstructorFrom: defaultConstructFromLite(eoc, ...args); return;
@@ -382,14 +388,4 @@ function getConfirmMessage<T extends Entity>(eoc: EntityOperationContext<T>) {
         return OperationMessage.PleaseConfirmYouDLikeToDeleteTheEntityFromTheSystem.niceToString(getToString(eoc.entity));
 
     return undefined;
-}
-
-export function needsCanExecute(entity: ModifiableEntity) {
-
-    const ti = getTypeInfo(entity.Type);
-
-    if (!ti)
-        return false;
-
-    return operationInfos(ti).some(a => a.hasCanExecute && isEntityOperation(a.operationType) && (a.allowsNew || !entity.isNew));
 }

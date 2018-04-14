@@ -20,15 +20,15 @@ namespace Signum.Engine.Maps
             SchemaBuilder = schemaBuilder;
         }
 
-        public FluentInclude<T> WithUniqueIndex(Expression<Func<T, object>> fields, Expression<Func<T, bool>> where = null)
+        public FluentInclude<T> WithUniqueIndex(Expression<Func<T, object>> fields, Expression<Func<T, bool>> where = null, Expression<Func<T, object>> includeFields = null)
         {
-            this.SchemaBuilder.AddUniqueIndex<T>(fields, where);
+            this.SchemaBuilder.AddUniqueIndex<T>(fields, where, includeFields);
             return this;
         }
 
-        public FluentInclude<T> WithIndex(Expression<Func<T, object>> fields, Expression<Func<T, bool>> where = null)
+        public FluentInclude<T> WithIndex(Expression<Func<T, object>> fields, Expression<Func<T, bool>> where = null, Expression<Func<T, object>> includeFields = null)
         {
-            this.SchemaBuilder.AddIndex<T>(fields, where);
+            this.SchemaBuilder.AddIndex<T>(fields, where, includeFields);
             return this;
         }
     }

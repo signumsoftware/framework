@@ -9,7 +9,6 @@ import { IUserEntity, TypeEntity } from './Signum.Entities.Basics';
 import { PropertyRoute, PseudoType, EntityKind, TypeInfo, IType, Type, getTypeInfo, getTypeInfos, getTypeName, isTypeEmbeddedOrValue, isTypeModel, KindOfType, OperationType, TypeReference, IsByAll } from './Reflection';
 import { TypeContext } from './TypeContext';
 import * as Finder from './Finder';
-import { needsCanExecute } from './Operations/EntityOperations';
 import * as Operations from './Operations';
 import FrameModal from './Frames/FrameModal';
 import { ViewReplacer } from './Frames/ReactVisitor'
@@ -17,8 +16,8 @@ import { AutocompleteConfig, FindOptionsAutocompleteConfig, LiteAutocompleteConf
 import { FindOptions } from './FindOptions'
 import { ImportRoute } from "./AsyncImport";
 import * as AppRelativeRoutes from "./AppRelativeRoutes";
-import { Sizes } from "react-bootstrap";
 import { NormalWindowMessage } from "./Signum.Entities";
+import { BsSize } from "./Components/Basic";
 
 
 Dic.skipClasses.push(React.Component);
@@ -228,7 +227,7 @@ export class DynamicComponentViewDispatcher implements ViewDispatcher {
         if (viewName == undefined) {
 
             if (!es || !es.getViewPromise)
-                return new ViewPromise<ModifiableEntity>(import('./Lines/DynamicComponent'));
+            return new ViewPromise<ModifiableEntity>(import('./Lines/DynamicComponent'));
 
             return es.getViewPromise(entity).applyViewOverrides(entity.Type);
         } else {
@@ -466,7 +465,7 @@ function typeIsNavigable(typeName: string): EntityWhen {
 
     const es = entitySettings[typeName];
 
-    if (es != undefined && es.isViewable != undefined)
+    if (es != undefined && es.isNavigable != undefined)
         return es.isNavigable;
 
     const typeInfo = getTypeInfo(typeName);
@@ -549,7 +548,7 @@ export interface ViewOptions {
     title?: string;
     propertyRoute?: PropertyRoute;
     readOnly?: boolean;
-    modalSize?: Sizes;
+    modalSize?: BsSize;
     isOperationVisible?: (eoc: Operations.EntityOperationContext<any /*Entity*/>) => boolean;
     validate?: boolean;
     requiresSaveOperation?: boolean;
@@ -581,7 +580,7 @@ export function viewDefault(entityOrPack: Lite<Entity> | ModifiableEntity | Enti
 
 export interface NavigateOptions {
     readOnly?: boolean;
-    modalSize?: Sizes;
+    modalSize?: BsSize;
     avoidPromptLooseChange?: boolean;
     getViewPromise?: (entity: ModifiableEntity) => undefined | string | ViewPromise<ModifiableEntity>;
     extraComponentProps?: {};
@@ -630,7 +629,7 @@ export function pushOrOpenInTab(path: string, e: React.MouseEvent<any> | React.K
     e.preventDefault();
     if (e.ctrlKey || (e as React.MouseEvent<any>).button == 1)
         window.open(toAbsoluteUrl(path));
-    else 
+    else
         history.push(path);
 }
 
@@ -646,10 +645,11 @@ export function toEntityPack(entityOrEntityPack: Lite<Entity> | ModifiableEntity
     if (entity == undefined)
         return API.fetchEntityPack(entityOrEntityPack as Lite<Entity>);
 
-    if (!needsCanExecute(entity))
+    let ti = getTypeInfo(entity.Type);
+    if (ti  == null || !ti.requiresEntityPack)
         return Promise.resolve({ entity: cloneEntity(entity), canExecute: {} });
 
-    return API.fetchCanExecute(entity as Entity);
+    return API.fetchEntityPackEntity(entity as Entity);
 }
 
 function cloneEntity(obj: any) {
@@ -720,7 +720,7 @@ export module API {
     }
 
 
-    export function fetchCanExecute<T extends Entity>(entity: T): Promise<EntityPack<T>> {
+    export function fetchEntityPackEntity<T extends Entity>(entity: T): Promise<EntityPack<T>> {
 
         return ajaxPost<EntityPack<T>>({ url: "~/api/entityPackEntity" }, entity);
     }
@@ -729,7 +729,7 @@ export module API {
         return ajaxPost<void>({ url: "~/api/validateEntity" }, entity);
     }
 
-    export function getType(typeName: string): Promise<TypeEntity> {
+    export function getType(typeName: string): Promise<TypeEntity | null> {
 
         return ajaxGet<TypeEntity>({ url: `~/api/reflection/typeEntity/${typeName}` });
     }
@@ -759,19 +759,19 @@ export interface ViewOverride<T extends ModifiableEntity> {
 export class EntitySettings<T extends ModifiableEntity> {
     typeName: string;
 
-    avoidPopup: boolean;
+    avoidPopup!: boolean;
 
-    getToString: (entity: T) => string;
+    getToString!: (entity: T) => string;
 
     getViewPromise?: (entity: T) => ViewPromise<T>;
 
     viewOverrides?: Array<ViewOverride<T>>;
 
-    isCreable: EntityWhen;
-    isFindable: boolean;
-    isViewable: boolean;
-    isNavigable: EntityWhen;
-    isReadOnly: boolean;
+    isCreable?: EntityWhen;
+    isFindable?: boolean;
+    isViewable?: boolean;
+    isNavigable?: EntityWhen;
+    isReadOnly?: boolean;
     autocomplete?: AutocompleteConfig<any>;
     autocompleteDelay?: number;
     findOptions?: FindOptions;
@@ -824,7 +824,7 @@ export class NamedViewSettings<T extends ModifiableEntity> {
     constructor(type: Type<T>, viewName: string, getViewModule?: (entity: T) => Promise<ViewModule<T>>, options?: NamedViewSettingsOptions<T>) {
         this.type = type;
         this.viewName = viewName;
-        var getViewPromise = getViewModule && ((entity: T) => new ViewPromise(getViewModule(entity)));
+        var getViewPromise = (getViewModule && ((entity: T) => new ViewPromise(getViewModule(entity)))) || (options && options.getViewPromise);
         if (!getViewPromise)
             throw new Error("setting getViewModule or options.getViewPromise arguments is mandatory");
         this.getViewPromise = getViewPromise;
@@ -835,7 +835,7 @@ export class NamedViewSettings<T extends ModifiableEntity> {
 export type ViewModule<T extends ModifiableEntity> = { default: React.ComponentClass<any /* { ctx: TypeContext<T> }*/> };
 
 export class ViewPromise<T extends ModifiableEntity> {
-    promise: Promise<(ctx: TypeContext<T>) => React.ReactElement<any>>;
+    promise!: Promise<(ctx: TypeContext<T>) => React.ReactElement<any>>;
 
     constructor(promise?: Promise<ViewModule<T>>) {
         if (promise)
@@ -869,12 +869,12 @@ export class ViewPromise<T extends ModifiableEntity> {
         
         this.promise = this.promise.then(func =>
             viewDispatcher.getViewOverrides(typeName, viewName).then(vos => {
-                return (ctx: TypeContext<T>) => {
-                    var result = func(ctx);
-                    var component = result.type as React.ComponentClass<{ ctx: TypeContext<T> }>;
+            return (ctx: TypeContext<T>) => {
+                var result = func(ctx);
+                var component = result.type as React.ComponentClass<{ ctx: TypeContext<T> }>;
                     monkeyPatchComponent(component, vos!);
-                    return result;
-                };
+                return result;
+            };
             }));
 
         return this;
@@ -891,7 +891,7 @@ function monkeyPatchComponent<T extends ModifiableEntity>(component: React.Compo
 
     if (!component.prototype.render)
         throw new Error("render function not defined in " + component);
-    
+
     if (component.prototype.render.withViewOverrides)
         return;
 

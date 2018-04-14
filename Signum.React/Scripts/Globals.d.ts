@@ -23,6 +23,7 @@ interface Array<T> {
     toObject<V>(this: Array<T>, keySelector: (element: T) => string, valueSelector: (element: T) => V): { [key: string]: V };
     toObjectDistinct(this: Array<T>, keySelector: (element: T) => string): { [key: string]: T };
     toObjectDistinct<V>(this: Array<T>, keySelector: (element: T) => string, valueSelector: (element: T) => V): { [key: string]: V };
+    distinctBy(this: Array<T>, keySelector?: (element: T) => string): T[];
     flatMap<R>(this: Array<T>, selector: (element: T, index: number, array: T[]) => R[]): R[];
     clear(this: Array<T>): void;
     groupsOf(this: Array<T>, groupSize: number, elementSize?: (item: T) => number): T[][];

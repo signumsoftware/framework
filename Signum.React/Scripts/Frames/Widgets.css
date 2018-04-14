@@ -5,13 +5,13 @@
     margin-top:-34px;
 }
 
-body.rtl-mode ul.sf-widgets{
+body.rtl ul.sf-widgets{
     float:left;
 }
 
 .modal-body > ul.sf-widgets
 {
-    margin-top: -45px;
+    margin-top: -60px;
 }
 
 ul.sf-widgets>li

@@ -55,7 +55,7 @@ namespace Signum.Engine.Maps
 
             {typeof(char), SqlDbType.NChar},
             {typeof(string), SqlDbType.NVarChar},
-            {typeof(DateTime), SqlDbType.DateTime},
+            {typeof(DateTime), SqlDbType.DateTime2},
 
             {typeof(Byte[]), SqlDbType.VarBinary},
 
@@ -169,6 +169,9 @@ namespace Signum.Engine.Maps
 
         public V ValidatorAttribute<V>(PropertyRoute propertyRoute) where V: ValidatorAttribute
         {
+            if (!typeof(ModifiableEntity).IsAssignableFrom(propertyRoute.RootType))
+                return null;
+
             if (propertyRoute.PropertyRouteType == PropertyRouteType.MListItems)
                 propertyRoute = propertyRoute.Parent;
 
@@ -188,32 +191,39 @@ namespace Signum.Engine.Maps
             return (A)TypeAttributes(entityType).FirstOrDefault(a => a.GetType() == typeof(A));
         }
 
-        internal bool IsNullable(PropertyRoute propertyRoute, bool forceNull)
+        internal IsNullable GetIsNullable(PropertyRoute propertyRoute, bool forceNull)
         {
-            if (forceNull)
-                return true;
+            var result = GetIsNullablePrivate(propertyRoute);
 
+            if (result == IsNullable.No && forceNull)
+                return IsNullable.Forced;
+
+            return result;
+        }
+
+        private IsNullable GetIsNullablePrivate(PropertyRoute propertyRoute)
+        {
             if (FieldAttribute<NotNullableAttribute>(propertyRoute) != null)
-                return false;
+                return IsNullable.No;
 
             if (FieldAttribute<NullableAttribute>(propertyRoute) != null)
-                return true;
+                return IsNullable.Yes;
 
             if (propertyRoute.PropertyRouteType == PropertyRouteType.MListItems)
-                return false;
+                return IsNullable.No;
 
             if (ValidatorAttribute<NotNullValidatorAttribute>(propertyRoute) != null)
-                return false;
+                return IsNullable.No;
 
             if (propertyRoute.Type == typeof(string))
             {
                 var slv = ValidatorAttribute<StringLengthValidatorAttribute>(propertyRoute);
 
                 if (slv != null)
-                    return slv.AllowNulls;
+                    return slv.AllowNulls ? IsNullable.Yes : IsNullable.No;
             }
 
-            return !propertyRoute.Type.IsValueType || propertyRoute.Type.IsNullable();
+            return !propertyRoute.Type.IsValueType || propertyRoute.Type.IsNullable() ? IsNullable.Yes : IsNullable.No;
         }
 
         public bool ImplementedBy<T>(Expression<Func<T, object>> propertyRoute, Type typeToImplement) where T : Entity

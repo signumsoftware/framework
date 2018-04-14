@@ -385,7 +385,7 @@ namespace Signum.Engine.Linq
             static readonly ConstantExpression NullType = Expression.Constant(null, typeof(Type));
             static readonly ConstantExpression NullId = Expression.Constant(null, typeof(int?));
 
-            protected internal override Expression VisitTypeFieldInit(TypeEntityExpression typeFie)
+            protected internal override Expression VisitTypeEntity(TypeEntityExpression typeFie)
             {
                 return Expression.Condition(
                     Expression.NotEqual(Visit(NullifyColumn(typeFie.ExternalId)), NullId),
@@ -414,6 +414,15 @@ namespace Signum.Engine.Linq
             private MethodCallExpression SchemaGetType(TypeImplementedByAllExpression typeIba)
             {
                 return Expression.Call(Expression.Constant(Schema.Current), miGetType, Visit(typeIba.TypeColumn).UnNullify());
+            }
+
+            protected internal override Expression VisitLiteReference(LiteReferenceExpression lite)
+            {
+                var reference = Visit(lite.Reference);
+
+                var toStr = Visit(lite.CustomToStr);
+
+                return Lite.ToLiteFatInternalExpression(reference, toStr ?? Expression.Constant(null, typeof(string)));
             }
 
             protected internal override Expression VisitLiteValue(LiteValueExpression lite)

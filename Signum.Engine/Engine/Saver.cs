@@ -30,18 +30,7 @@ namespace Signum.Engine
             using (var log = HeavyProfiler.LogNoStackTrace("PreSaving"))
             {
                 Schema schema = Schema.Current;
-                DirectedGraph<Modifiable> modifiables = GraphExplorer.PreSaving(() => GraphExplorer.FromRoots(entities), (Modifiable m, ref bool graphModified) =>
-                {
-
-                    if (m is ModifiableEntity me)
-                        me.SetTemporalErrors(null);
-
-                    m.PreSaving(ref graphModified);
-
-
-                    if (m is Entity ident)
-                        schema.OnPreSaving(ident, ref graphModified);
-                });
+                DirectedGraph<Modifiable> modifiables = PreSaving(() => GraphExplorer.FromRoots(entities));
                 
                 HashSet<Entity> wasNew = modifiables.OfType<Entity>().Where(a=>a.IsNew).ToHashSet(ReferenceEqualityComparer<Entity>.Default);
                 HashSet<Entity> wasSelfModified = modifiables.OfType<Entity>().Where(a => a.Modified == ModifiedState.SelfModified).ToHashSet(ReferenceEqualityComparer<Entity>.Default);
@@ -161,6 +150,21 @@ namespace Signum.Engine
             {
                 return $"{Type} IsNew={IsNew}";
             }
+        }
+
+        internal static DirectedGraph<Modifiable> PreSaving(Func<DirectedGraph<Modifiable>> recreate)
+        {
+            Schema schema = Schema.Current;
+            return GraphExplorer.PreSaving(recreate, (Modifiable m, PreSavingContext ctx) =>
+            {
+                if (m is ModifiableEntity me)
+                    me.SetTemporalErrors(null);
+
+                m.PreSaving(ctx);
+
+                if (m is Entity ident)
+                    schema.OnPreSaving(ident, ctx);
+            });
         }
     }
 }

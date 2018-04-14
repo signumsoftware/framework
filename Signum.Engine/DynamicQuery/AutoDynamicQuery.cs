@@ -32,38 +32,50 @@ namespace Signum.Engine.DynamicQuery
 
         public override ResultTable ExecuteQuery(QueryRequest request)
         {
-            DQueryable<T> query = GetDQueryable(request);
+            using (SystemTime.Override(request.SystemTime))
+            {
+                DQueryable<T> query = GetDQueryable(request);
 
-            var result = query.TryPaginate(request.Pagination);
+                var result = query.TryPaginate(request.Pagination);
 
-            return result.ToResultTable(request);
+                return result.ToResultTable(request);
+            }
         }
 
         public override async Task<ResultTable> ExecuteQueryAsync(QueryRequest request, CancellationToken token)
         {
-            DQueryable<T> query = GetDQueryable(request);
+            using (SystemTime.Override(request.SystemTime))
+            {
+                DQueryable<T> query = GetDQueryable(request);
 
-            var result = await query.TryPaginateAsync(request.Pagination, token);
+                var result = await query.TryPaginateAsync(request.Pagination, token);
 
-            return result.ToResultTable(request);
+                return result.ToResultTable(request);
+            }
         }
 
         public override ResultTable ExecuteQueryGroup(QueryRequest request)
         {
-            DQueryable<T> query = GetDQueryable(request);
+            using (SystemTime.Override(request.SystemTime))
+            {
+                DQueryable<T> query = GetDQueryable(request);
 
-            var result = query.TryPaginate(request.Pagination);
+                var result = query.TryPaginate(request.Pagination);
 
-            return result.ToResultTable(request);
+                return result.ToResultTable(request);
+            }
         }
 
         public override async Task<ResultTable> ExecuteQueryGroupAsync(QueryRequest request, CancellationToken token)
         {
-            DQueryable<T> query = GetDQueryable(request);
+            using (SystemTime.Override(request.SystemTime))
+            {
+                DQueryable<T> query = GetDQueryable(request);
 
-            var result = await query.TryPaginateAsync(request.Pagination, token);
+                var result = await query.TryPaginateAsync(request.Pagination, token);
 
-            return result.ToResultTable(request);
+                return result.ToResultTable(request);
+            }
         }
 
         private DQueryable<T> GetDQueryable(QueryRequest request)
@@ -132,7 +144,19 @@ namespace Signum.Engine.DynamicQuery
 
         public override Lite<Entity> ExecuteUniqueEntity(UniqueEntityRequest request)
         {
-            throw new NotImplementedException();
+            var ex = new _EntityColumn(EntityColumnFactory().BuildColumnDescription(), QueryName);
+
+            DQueryable<T> orderQuery = Query
+                .ToDQueryable(GetQueryDescription())
+                .SelectMany(request.Multiplications)
+                .Where(request.Filters)
+                .OrderBy(request.Orders);
+
+            var result = orderQuery
+                .SelectOne(ex.Token)
+                .Unique(request.UniqueType);
+
+            return (Lite<Entity>)result;
         }
 
         public override async Task<Lite<Entity>> ExecuteUniqueEntityAsync(UniqueEntityRequest request, CancellationToken token)
@@ -161,6 +185,7 @@ namespace Signum.Engine.DynamicQuery
 
             DQueryable<T> query = Query
              .ToDQueryable(GetQueryDescription())
+             .SelectMany(request.Multiplications)
              .OrderBy(request.Orders)
              .Where(request.Filters)
              .Select(new List<Column> { ex });
@@ -168,6 +193,9 @@ namespace Signum.Engine.DynamicQuery
             var exp = Expression.Lambda<Func<object, Lite<Entity>>>(Expression.Convert(ex.Token.BuildExpression(query.Context), typeof(Lite<Entity>)), query.Context.Parameter);
 
             var result = query.Query.Select(exp);
+
+            if (request.Multiplications.Any())
+                result = result.Distinct();
 
             return result.TryTake(request.Count);
         }

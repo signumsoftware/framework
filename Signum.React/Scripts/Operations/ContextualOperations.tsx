@@ -1,6 +1,5 @@
 ﻿import * as React from "react"
 import { Router, Route, Redirect } from "react-router"
-import { Button, OverlayTrigger, Tooltip, MenuItem } from "react-bootstrap"
 import {
     Lite, Entity, ModifiableEntity, EmbeddedEntity, LiteMessage, EntityPack, toLite, JavascriptMessage,
     OperationSymbol, ConstructSymbol_From, ConstructSymbol_FromMany, ConstructSymbol_Simple, ExecuteSymbol, DeleteSymbol, OperationMessage, getToString, SearchMessage
@@ -16,8 +15,10 @@ import { Dic } from '../Globals';
 import { ajaxPost, ValidationError } from '../Services';
 import {
     operationInfos, getSettings, ContextualOperationSettings, ContextualOperationContext, EntityOperationSettings, EntityOperationContext,
-    CreateGroup, API, autoStyleFunction, isEntityOperation
+    CreateGroup, API, autoColorFunction, isEntityOperation
 } from '../Operations'
+import { DropdownItem } from "../Components/DropdownItem";
+import { UncontrolledTooltip } from "../Components/Tooltip";
 
 
 export function getConstructFromManyContextualItems(ctx: ContextualItemsContext<Entity>): Promise<MenuItemBlock | undefined> | undefined {
@@ -49,8 +50,7 @@ export function getConstructFromManyContextualItems(ctx: ContextualItemsContext<
         .filter(coc => coc != undefined)
         .map(coc => coc!)
         .orderBy(coc => coc.settings && coc.settings.order)
-        .map((coc, i) => MenuItemConstructor.createContextualMenuItem(coc, defaultConstructFromMany, i));
-
+        .flatMap(coc => MenuItemConstructor.createContextualMenuItem(coc, defaultConstructFromMany));
 
     if (!menuItems.length)
         return undefined;
@@ -63,7 +63,7 @@ export function getConstructFromManyContextualItems(ctx: ContextualItemsContext<
 
 
 
-function defaultConstructFromMany(coc: ContextualOperationContext<Entity>,...args: any[]) {
+function defaultConstructFromMany(coc: ContextualOperationContext<Entity>, ...args: any[]) {
 
     confirmInNecessary(coc).then(conf => {
         if (!conf)
@@ -93,9 +93,7 @@ export function getEntityOperationsContextualItems(ctx: ContextualItemsContext<E
             const eos = getSettings(oi.key) as EntityOperationSettings<Entity> | undefined;
             const cos = eos == undefined ? undefined :
                 ctx.lites.length == 1 ? eos.contextual : eos.contextualFromMany
-            const coc = new ContextualOperationContext<Entity>();
-            coc.context = ctx;
-            coc.operationInfo = oi;
+            const coc = new ContextualOperationContext<Entity>(oi, ctx);
             coc.settings = cos;
             coc.entityOperationSettings = eos;
 
@@ -136,7 +134,7 @@ export function getEntityOperationsContextualItems(ctx: ContextualItemsContext<E
         const menuItems = ctxs.filter(coc => coc.canExecute == undefined || !hideOnCanExecute(coc))
             .orderBy(coc => coc.settings && coc.settings.order != undefined ? coc.settings.order :
                 coc.entityOperationSettings && coc.entityOperationSettings.order != undefined ? coc.entityOperationSettings.order : 0)
-            .map((coc, i) => MenuItemConstructor.createContextualMenuItem(coc, defaultContextualClick, i));
+            .flatMap(coc => MenuItemConstructor.createContextualMenuItem(coc, defaultContextualClick));
 
         if (menuItems.length == 0)
             return undefined;
@@ -199,13 +197,13 @@ export namespace MenuItemConstructor { //To allow monkey patching
         const array = new RegExp(OperationMessage.CreateFromRegex.niceToString()).exec(niceName);
         return array ? (niceName.tryBefore(array[1]) || "") + array[1].firstUpper() : niceName;
     }
-    export function createContextualMenuItem(coc: ContextualOperationContext<Entity>, defaultClick: (coc: ContextualOperationContext<Entity>) => void, key: any) {
+    export function createContextualMenuItem(coc: ContextualOperationContext<Entity>, defaultClick: (coc: ContextualOperationContext<Entity>) => void) {
 
         const text = coc.settings && coc.settings.text ? coc.settings.text() :
             coc.entityOperationSettings && coc.entityOperationSettings.text ? coc.entityOperationSettings.text() :
                 simplifyName(coc.operationInfo.niceName);
 
-        const bsStyle = coc.settings && coc.settings.style || coc.entityOperationSettings && coc.entityOperationSettings.style || autoStyleFunction(coc.operationInfo);
+        const color = coc.settings && coc.settings.color || coc.entityOperationSettings && coc.entityOperationSettings.color || autoColorFunction(coc.operationInfo);
         const icon = coc.settings && coc.settings.icon;
 
         const disabled = !!coc.canExecute;
@@ -215,26 +213,26 @@ export namespace MenuItemConstructor { //To allow monkey patching
             coc.settings && coc.settings.onClick ? coc.settings!.onClick!(coc) : defaultClick(coc)
         }
 
-        const menuItem = <MenuItem
-            className={disabled ? "disabled" : undefined}
-            onClick={disabled ? undefined : onClick}
-            data-operation={coc.operationInfo.key}>
-            {icon ? <span className={classes("icon", icon)} style={{ color: coc.settings && coc.settings.iconColor }}></span> :
-                bsStyle ? <span className={classes("icon", "empty-icon", "btn-" + bsStyle)}></span> : undefined}
-            {text}
-        </MenuItem>;
+        let innerRef: HTMLElement | null;
 
-        if (!coc.canExecute)
-            return menuItem;
-
-        const tooltip = <Tooltip id={"tooltip_" + coc.operationInfo.key.replace(".", "_")}>{coc.canExecute}</Tooltip>;
-
-        return <OverlayTrigger placement="right" overlay={tooltip} >{menuItem}</OverlayTrigger>;
+        return [
+            <DropdownItem
+                innerRef={b => innerRef = b}
+                onClick={disabled ? undefined : onClick}
+                disabled={disabled}
+                data-operation={coc.operationInfo.key}>
+                {icon ? <span className={classes("icon", icon)} style={{ color: coc.settings && coc.settings.iconColor }}></span> :
+                    color ? <span className={classes("icon", "empty-icon", "btn-" + color)}></span> : undefined}
+                {(icon || color) && " "}
+                {text}
+            </DropdownItem>,
+            coc.canExecute ? <UncontrolledTooltip placement="right" target={() => innerRef!}>{coc.canExecute}</UncontrolledTooltip> : undefined
+        ].filter(a => a != null);
     }
 }
 
 
-export function defaultContextualClick(coc: ContextualOperationContext<any>,...args: any[]) {
+export function defaultContextualClick(coc: ContextualOperationContext<any>, ...args: any[]) {
 
     coc.event!.persist();
 

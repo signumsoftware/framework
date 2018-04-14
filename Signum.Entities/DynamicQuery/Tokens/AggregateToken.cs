@@ -12,11 +12,15 @@ namespace Signum.Entities.DynamicQuery
     public class AggregateToken : QueryToken
     {
         public AggregateFunction AggregateFunction { get; private set; }
+        public object Value { get; private set; }
+        public FilterOperation? FilterOperation { get; private set; }
+        public bool Distinct { get; private set; }
+
 
         object queryName; 
         public override object QueryName
         {
-            get { return AggregateFunction == AggregateFunction.Count ? queryName : base.QueryName; }
+            get { return  queryName ?? base.QueryName; }
         }
 
         public AggregateToken(AggregateFunction function, object queryName)
@@ -28,31 +32,68 @@ namespace Signum.Entities.DynamicQuery
             this.queryName = queryName ?? throw new ArgumentNullException("queryName");
             this.AggregateFunction = function;
         }
-
-
-        public AggregateToken(AggregateFunction function, QueryToken parent)
+        
+        public AggregateToken(AggregateFunction function, QueryToken parent, FilterOperation? filterOperation = null, object value = null, bool distinct = false)
             : base(parent)
         {
-            if (function == AggregateFunction.Count)
-                throw new ArgumentException("function should not different than Count for this overload");
-
             if (parent == null)
                 throw new ArgumentNullException("parent");
 
             this.AggregateFunction = function;
+
+            if (function == AggregateFunction.Count)
+            {
+                if (distinct == false && filterOperation == null)
+                    throw new ArgumentException("Either distinct or filterOperation should be set");
+
+                else if (distinct == true && this.FilterOperation.HasValue)
+                    throw new ArgumentException("distinct and filterOperation are incompatibles");
+
+                this.Value = value;
+                this.FilterOperation = filterOperation;
+                this.Distinct = distinct;
+
+            }
+            else
+            {
+                if (distinct == true || this.FilterOperation.HasValue)
+                    throw new ArgumentException("distinct and filterOperation are incompatibles");
+            }
         }
 
         public override string ToString()
         {
-            return AggregateFunction.NiceToString();
+            string suffix = GetNiceOperation();
+
+            return " ".CombineIfNotEmpty(AggregateFunction.NiceToString(), this.GeNiceDistinct(), this.GetNiceOperation(), this.GetNiceValue());
         }
 
         public override string NiceName()
         {
-            if (AggregateFunction == AggregateFunction.Count)
+            if (AggregateFunction == AggregateFunction.Count && Parent == null)
                 return AggregateFunction.NiceToString();
 
-            return "{0} of {1}".FormatWith(AggregateFunction.NiceToString(), Parent.ToString());
+            return " ".CombineIfNotEmpty(AggregateFunction.NiceToString(), this.GeNiceDistinct(), this.GetNiceOperation(), this.GetNiceValue(), "of", Parent);
+        }
+
+        string GetNiceOperation()
+        {
+            return this.FilterOperation == null || this.FilterOperation == DynamicQuery.FilterOperation.EqualTo ? null :
+                this.FilterOperation == DynamicQuery.FilterOperation.DistinctTo ? QueryTokenMessage.Not.NiceToString() :
+                this.FilterOperation.NiceToString();
+        }
+
+        string GetNiceValue()
+        {
+            return this.FilterOperation == null ? null :
+               Value == null ? QueryTokenMessage.Null.NiceToString() :
+               Value is Enum e ? e.NiceToString() :
+               Value.ToString();
+        }
+
+        string GeNiceDistinct()
+        {
+            return this.Distinct ? QueryTokenMessage.Distinct.NiceToString() : null;
         }
 
         public override string Format
@@ -75,6 +116,7 @@ namespace Signum.Entities.DynamicQuery
             {
                 if (AggregateFunction == AggregateFunction.Count)
                     return null;
+
                 return Parent.Unit;
             }
         }
@@ -104,7 +146,23 @@ namespace Signum.Entities.DynamicQuery
 
         public override string Key
         {
-            get { return AggregateFunction.ToString(); }
+            get
+            {
+                var distinct = this.Distinct ? "Distinct" : null;
+
+                var op =
+                    this.FilterOperation == null ? null :
+                    this.FilterOperation == DynamicQuery.FilterOperation.EqualTo ? "" :
+                    this.FilterOperation == DynamicQuery.FilterOperation.DistinctTo ? "Not" :
+                    this.FilterOperation.Value.ToString();
+
+                var value =
+                    this.FilterOperation == null ? null :
+                    this.Value == null ? "Null" :
+                    this.Value.ToString();
+
+                return AggregateFunction.ToString() + distinct + op + value;
+            }
         }
 
         protected override List<QueryToken> SubTokensOverride(SubTokensOptions options)
@@ -119,7 +177,7 @@ namespace Signum.Entities.DynamicQuery
 
         public override PropertyRoute GetPropertyRoute()
         {
-            if (AggregateFunction == AggregateFunction.Count)
+            if (Parent == null)
                 return null;
 
             return Parent.GetPropertyRoute();
@@ -132,7 +190,7 @@ namespace Signum.Entities.DynamicQuery
 
         public override string IsAllowed()
         {
-            if (AggregateFunction == AggregateFunction.Count)
+            if (Parent == null)
                 return null;
 
             return Parent.IsAllowed();
@@ -140,13 +198,12 @@ namespace Signum.Entities.DynamicQuery
 
         public override QueryToken Clone()
         {
-            if (AggregateFunction == AggregateFunction.Count)
-                return new AggregateToken(AggregateFunction.Count, this.queryName);
+            if (Parent == null)
+                return new AggregateToken(AggregateFunction, this.queryName);
             else
-                return new AggregateToken(AggregateFunction, Parent.Clone());
+                return new AggregateToken(AggregateFunction, Parent.Clone(), this.FilterOperation, this.Value, this.Distinct);
         }
-
-      
+        
 
         public override string TypeColor
         {

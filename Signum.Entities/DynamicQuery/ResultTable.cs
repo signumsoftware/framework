@@ -445,6 +445,11 @@ namespace Signum.Entities.DynamicQuery
             get { return (Lite<Entity>)Table.entityColumn.Values[Index]; }
         }
 
+        public Lite<Entity> TryEntity
+        {
+            get { return Table.entityColumn == null ? null : (Lite<Entity>)Table.entityColumn.Values[Index]; }
+        }
+
         public T GetValue<T>(string columnName)
         {
             return (T)this[Table.Columns.Where(c => c.Column.Name == columnName).SingleEx(() => columnName)];

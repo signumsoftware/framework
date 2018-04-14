@@ -9,6 +9,7 @@ using Signum.Utilities.Reflection;
 using System.Linq.Expressions;
 using System.Globalization;
 using Signum.Utilities.ExpressionTrees;
+using System.Text.RegularExpressions;
 
 namespace Signum.Entities.DynamicQuery
 {
@@ -256,6 +257,33 @@ namespace Signum.Entities.DynamicQuery
                     yield return new AggregateToken(AggregateFunction.Min, token);
                     yield return new AggregateToken(AggregateFunction.Max, token);
                 }
+
+                if(ft != null)
+                {
+                    yield return new AggregateToken(AggregateFunction.Count, token, FilterOperation.DistinctTo, null);
+                    yield return new AggregateToken(AggregateFunction.Count, token,  FilterOperation.EqualTo, null);
+                }
+
+                if (token.IsGroupable)
+                {
+                    yield return new AggregateToken(AggregateFunction.Count, token, distinct: true);
+
+                }
+
+                if (ft == FilterType.Enum)
+                {
+                    foreach (var v in Enum.GetValues(token.Type.UnNullify()))
+                    {
+                        yield return new AggregateToken(AggregateFunction.Count, token, FilterOperation.EqualTo, v);
+                        yield return new AggregateToken(AggregateFunction.Count, token, FilterOperation.DistinctTo, v);
+                    }
+                }
+
+                if (ft == FilterType.Boolean)
+                {
+                    yield return new AggregateToken(AggregateFunction.Count, token, FilterOperation.EqualTo, true);
+                    yield return new AggregateToken(AggregateFunction.Count, token, FilterOperation.EqualTo, false);
+                }
             }
         }
 
@@ -315,7 +343,8 @@ namespace Signum.Entities.DynamicQuery
             if (string.IsNullOrEmpty(tokenString))
                 throw new ArgumentNullException("tokenString");
 
-            string[] parts = tokenString.Split('.');
+            //https://stackoverflow.com/questions/35418597/split-string-on-the-dot-characters-that-are-not-inside-of-brackets
+            string[] parts = Regex.Split(tokenString, @"\.(?!([^[]*\]|[^(]*\)))"); 
 
             string firstPart = parts.FirstEx();
 

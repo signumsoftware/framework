@@ -1277,9 +1277,9 @@ namespace Signum.Engine
 
                 using (Transaction tr = new Transaction())
                 {
-                    Schema.Current.OnPreUnsafeDelete<T>(query);
-
-                    int rows = DbQueryProvider.Single.Delete(query, sql => (int)sql.ExecuteScalar());
+                    int rows;
+                    using (Schema.Current.OnPreUnsafeDelete<T>(query))
+                        rows = DbQueryProvider.Single.Delete(query, sql => (int)sql.ExecuteScalar());
 
                     return tr.Commit(rows);
                 }
@@ -1300,9 +1300,31 @@ namespace Signum.Engine
 
                 using (Transaction tr = new Transaction())
                 {
-                    Schema.Current.OnPreUnsafeMListDelete<E>(mlistQuery, mlistQuery.Select(mle => mle.Parent));
+                    int rows;
+                    using (Schema.Current.OnPreUnsafeMListDelete<E>(mlistQuery, mlistQuery.Select(mle => mle.Parent)))
+                        rows = DbQueryProvider.Single.Delete(mlistQuery, sql => (int)sql.ExecuteScalar());
 
-                    int rows = DbQueryProvider.Single.Delete(mlistQuery, sql => (int)sql.ExecuteScalar());
+                    return tr.Commit(rows);
+                }
+            }
+        }
+
+        public static int UnsafeDeleteView<T>(this IQueryable<T> query, string message = null)
+           where T : IView
+        {
+            if (message != null)
+                return SafeConsole.WaitRows(message == "auto" ? $"Deleting {typeof(T).TypeName()}" : message,
+                    () => query.UnsafeDeleteView(message: null));
+
+
+            using (HeavyProfiler.Log("DBUnsafeDelete", () => typeof(T).TypeName()))
+            {
+                if (query == null)
+                    throw new ArgumentNullException("query");
+
+                using (Transaction tr = new Transaction())
+                {
+                    int rows = DbQueryProvider.Single.Delete(query, sql => (int)sql.ExecuteScalar());
 
                     return tr.Commit(rows);
                 }
@@ -1363,6 +1385,12 @@ namespace Signum.Engine
             return new Updateable<MListElement<E, V>>(query, null);
         }
 
+        public static IUpdateable<V> UnsafeUpdateView<V>(this IQueryable<V> query)
+             where V : IView
+        {
+            return new Updateable<V>(query, null);
+        }
+
         public static IUpdateablePart<A, E> UnsafeUpdatePart<A, E>(this IQueryable<A> query, Expression<Func<A, E>> partSelector)
             where E : Entity
         {
@@ -1373,6 +1401,12 @@ namespace Signum.Engine
             where E : Entity
         {
             return new UpdateablePart<A, MListElement<E, V>>(query, partSelector, null);
+        }
+
+        public static IUpdateablePart<A, V> UnsafeUpdateViewPart<A, V>(this IQueryable<A> query, Expression<Func<A, V>> partSelector)
+               where V : Entity
+        {
+            return new UpdateablePart<A, V>(query, partSelector, null);
         }
 
         public static int Execute(this IUpdateable update, string message = null)
@@ -1388,15 +1422,16 @@ namespace Signum.Engine
 
                 using (Transaction tr = new Transaction())
                 {
-                    Schema.Current.OnPreUnsafeUpdate(update);
-                    int rows = DbQueryProvider.Single.Update(update, sql => (int)sql.ExecuteScalar());
+                    int rows;
+                    using (Schema.Current.OnPreUnsafeUpdate(update))
+                        rows = DbQueryProvider.Single.Update(update, sql => (int)sql.ExecuteScalar());
 
                     return tr.Commit(rows);
                 }
             }
         }
 
-        public static int ExecuteChunks(this IUpdateable update, int chunkSize = 10000, int maxQueries = int.MaxValue)
+        public static int ExecuteChunks(this IUpdateable update, int chunkSize = 10000, int maxQueries = int.MaxValue, int? pauseMilliseconds = null, CancellationToken? cancellationToken = null)
         {
             int total = 0;
             for (int i = 0; i < maxQueries; i++)
@@ -1405,6 +1440,12 @@ namespace Signum.Engine
                 total += num;
                 if (num < chunkSize)
                     break;
+
+                if (cancellationToken.HasValue)
+                    cancellationToken.Value.ThrowIfCancellationRequested();
+
+                if (pauseMilliseconds.HasValue)
+                    Thread.Sleep(pauseMilliseconds.Value);
             }
             return total;
         }
@@ -1567,18 +1608,6 @@ namespace Signum.Engine
 
 
 
-    public class MListElement<E, V> where E : Entity
-    {
-        public PrimaryKey RowId { get; set; }
-        public int Order { get; set; }
-        public E Parent { get; set; }
-        public V Element { get; set; }
-
-        public override string ToString()
-        {
-            return $"MListEntity: ({nameof(RowId)}:{RowId}, {nameof(Order)}:{Order}, {nameof(Parent)}:{Parent}, {nameof(Element)}:{Element})";
-        }
-    }
 
     interface ISignumTable
     {

@@ -2,7 +2,6 @@
 import * as React from 'react'
 import * as numbro from 'numbro'
 import * as moment from 'moment'
-import { Modal, ModalProps, ModalClass, ButtonToolbar } from 'react-bootstrap'
 import * as Finder from '../Finder'
 import { Dic, areEqual } from '../Globals'
 import { openModal, IModalProps } from '../Modals';
@@ -77,11 +76,11 @@ export default class ColumnsBuilder extends React.Component<ColumnsBuilderProps>
                             />)}
                             {!this.props.readonly &&
                                 <tr>
-                                <td colSpan={4}>
-                                    <a title={SearchMessage.AddColumn.niceToString()}
+                                    <td colSpan={4}>
+                                        <a title={SearchMessage.AddColumn.niceToString()}
                                             className="sf-line-button sf-create"
-                                        onClick={this.handlerNewColumn}>
-                                        <span className="glyphicon glyphicon-plus sf-create sf-create-label" />{SearchMessage.AddColumn.niceToString()}
+                                            onClick={this.handlerNewColumn}>
+                                            <span className="fa fa-plus sf-create" />&nbsp;{SearchMessage.AddColumn.niceToString()}
                                         </a>
                                     </td>
                                 </tr>
@@ -137,7 +136,7 @@ export class ColumnComponent extends React.Component<ColumnComponentProps>{
                         <a title={JavascriptMessage.removeColumn.niceToString()}
                             className="sf-line-button sf-remove"
                             onClick={this.handleDeleteColumn}>
-                            <span className="glyphicon glyphicon-remove" />
+                            <span className="fa fa-times" />
                         </a>}
                 </td>
                 <td>
@@ -150,6 +149,6 @@ export class ColumnComponent extends React.Component<ColumnComponentProps>{
                 </td>
             </tr>
         );
-    }   
+    }
 }
 

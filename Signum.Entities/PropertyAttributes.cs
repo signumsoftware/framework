@@ -8,7 +8,11 @@ namespace Signum.Entities
     [AttributeUsage(AttributeTargets.Property)]
     public sealed class QueryablePropertyAttribute : Attribute
     {
-        public bool AvailableForQueries { get; set; }
+        public bool AvailableForQueries { get; set; } = true;
+
+        public QueryablePropertyAttribute()
+        {
+        }
 
         public QueryablePropertyAttribute(bool availableForQueries)
         {

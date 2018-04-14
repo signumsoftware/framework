@@ -95,6 +95,8 @@
     <Compile Include="Basics\QueryEntity.cs" />
     <Compile Include="Basics\SemiSymbol.cs" />
     <Compile Include="DynamicQuery\Tokens\AggregateToken.cs" />
+    <Compile Include="DynamicQuery\Tokens\SystemTimeToken.cs" />
+    <Compile Include="DynamicQuery\Tokens\ExtensionDictionaryToken.cs" />
     <Compile Include="DynamicQuery\Tokens\HasValueToken.cs" />
     <Compile Include="DynamicQuery\Tokens\DecimalSpecialTokens.cs" />
     <Compile Include="DynamicQuery\Tokens\EntityToStringToken.cs" />
@@ -139,6 +141,7 @@
     <Compile Include="Services\ExceptionMarshalling.cs" />
     <Compile Include="Services\IOperationServer.cs" />
     <Compile Include="Basics\Symbol.cs" />
+    <Compile Include="SystemTime.cs" />
     <Compile Include="TimeZoneManager.cs" />
     <Compile Include="TypeAttributes.cs" />
     <Compile Include="Validator.cs" />

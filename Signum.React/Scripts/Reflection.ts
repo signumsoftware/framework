@@ -28,8 +28,10 @@ export interface TypeInfo {
     entityData?: EntityData;
     toStringFunction?: string;
     isLowPopulation?: boolean;
+    isSystemVersioned?: boolean;
     requiresSaveOperation?: boolean;
     queryDefined?: boolean;
+    requiresEntityPack?: boolean;
     members: { [name: string]: MemberInfo };
     membersById?: { [name: string]: MemberInfo };
 
@@ -87,7 +89,8 @@ export function toMomentFormat(format: string | undefined): string | undefined {
         case "M":
         case "m": return "D MMM";
         case "u":
-        case "s": return moment.ISO_8601 as any;
+        case "s":
+        case "o": return undefined;
         case "t": return "LT";
         case "T": return "LTS";
         case "y": return "LTS";
@@ -642,7 +645,8 @@ export function createBinding(parentValue: any, lambdaMembers: LambdaMember[]): 
 const functionRegex = /^function\s*\(\s*([$a-zA-Z_][0-9a-zA-Z_$]*)\s*\)\s*{\s*(\"use strict\"\;)?\s*return\s*([^;]*)\s*;?\s*}$/;
 const lambdaRegex = /^\s*\(?\s*([$a-zA-Z_][0-9a-zA-Z_$]*)\s*\)?\s*=>\s*{?\s*(return\s+)?([^;]*)\s*;?\s*}?$/;
 const memberRegex = /^(.*)\.([$a-zA-Z_][0-9a-zA-Z_$]*)$/;
-const memberIndexerRegex = /^(.*)\["([$a-zA-Z_][0-9a-zA-Z_$]*)"\]$/; //Necessary for some crazy minimizers
+const memberIndexerRegex = /^(.*)\["([$a-zA-Z_][0-9a-zA-Z_$]*)"\]$/; 
+const mixinMemberRegex = /^(.*)\.mixins\["([$a-zA-Z_][0-9a-zA-Z_$]*)"\]$/; //Necessary for some crazy minimizers
 const indexRegex = /^(.*)\[(\d+)\]$/;
 
 export function getLambdaMembers(lambda: Function): LambdaMember[]{
@@ -660,7 +664,11 @@ export function getLambdaMembers(lambda: Function): LambdaMember[]{
 
     while (body != parameter) {
         let m: RegExpExecArray | null;
-        if (m = memberRegex.exec(body) || memberIndexerRegex.exec(body)) {
+        if (m = mixinMemberRegex.exec(body)) {
+            result.push({ name: m[2], type: "Mixin" });
+            body = m[1];
+        }
+        else if (m = memberRegex.exec(body) || memberIndexerRegex.exec(body)) {
             result.push({ name: m[2], type: "Member" });
             body = m[1];
         }
@@ -1193,19 +1201,18 @@ export class PropertyRoute {
 
 export type PropertyRouteType = "Root" | "Field" | "Mixin" | "LiteEntity" | "MListItem";
 
+export type GraphExplorerMode = "collect" | "set" | "clean";
+
 
 export class GraphExplorer {
 
     static propagateAll(...args: any[]) {
-        const ge = new GraphExplorer();
-        ge.modelStateMode = "clean";
+        const ge = new GraphExplorer("clean", {});
         args.forEach(o => ge.isModified(o, ""));
     }
 
     static setModelState(e: ModifiableEntity, modelState: ModelState | undefined, initialPrefix: string) {
-        const ge = new GraphExplorer();
-        ge.modelStateMode = "set";
-        ge.modelState = modelState == undefined ? {} : { ...modelState };
+        const ge = new GraphExplorer("set", modelState == undefined ? {} : { ...modelState });
         ge.isModifiableObject(e, initialPrefix);
         if (Dic.getValues(ge.modelState).length) //Assign remaining
         {
@@ -1220,9 +1227,7 @@ export class GraphExplorer {
     }
 
     static collectModelState(e: ModifiableEntity, initialPrefix: string): ModelState {
-        const ge = new GraphExplorer();
-        ge.modelStateMode = "collect";
-        ge.modelState = {};
+        const ge = new GraphExplorer("collect", {});
         ge.isModifiableObject(e, initialPrefix);
         return ge.modelState;
     }
@@ -1231,7 +1236,12 @@ export class GraphExplorer {
     private modified : any[] = [];
     private notModified: any[] = [];
 
-    private modelStateMode: "collect" | "set" | "clean";
+    constructor(mode: GraphExplorerMode, modelState: ModelState) {
+        this.modelState = modelState;
+        this.mode = mode;
+    }
+
+    private mode: GraphExplorerMode;
 
     private modelState: ModelState;
 
@@ -1312,7 +1322,7 @@ export class GraphExplorer {
             return result;
         }
 
-        if (this.modelStateMode == "collect") {
+        if (this.mode == "collect") {
             if (mod.error != undefined) {
                 for (const p in mod.error) {
                     const propertyPrefix = dot(modelStatePrefix, p);
@@ -1322,7 +1332,7 @@ export class GraphExplorer {
                 }
             }
         }
-        else if (this.modelStateMode == "set") {
+        else if (this.mode == "set") {
 
             mod.error = undefined;
 
@@ -1342,7 +1352,7 @@ export class GraphExplorer {
             if (mod.error == undefined)
                 delete mod.error;
         }
-        else if (this.modelStateMode == "clean") {
+        else if (this.mode == "clean") {
             if (mod.error)
                 delete mod.error
         }

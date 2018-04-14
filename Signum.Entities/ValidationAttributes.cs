@@ -966,6 +966,8 @@ namespace Signum.Entities
     {
         [Description("{0} does not have a valid {1} format")]
         _0DoesNotHaveAValid1Format,
+        [Description("'{0}' does not have a valid {1} identifier format")]
+        _0DoesNotHaveAValid1IdentifierFormat,
         [Description("{0} has an invalid format")]
         _0HasAnInvalidFormat,
         [Description("{0} has more than {1} decimal places")]
@@ -1051,12 +1053,20 @@ namespace Signum.Entities
 
         [Description("{0} is mandatory when {1} is not set")]
         _0IsMandatoryWhen1IsNotSet,
+        [Description("{0} is mandatory when {1} is not set to {2}.")]
+        _0IsMandatoryWhen1IsNotSetTo2,
         [Description("{0} is mandatory when {1} is set")]
         _0IsMandatoryWhen1IsSet,
+        [Description("{0} is mandatory when {1} is set to {2}.")]
+        _0IsMandatoryWhen1IsSetTo2,
         [Description("{0} should be null when {1} is not set")]
         _0ShouldBeNullWhen1IsNotSet,
+        [Description("{0} should be null when {1} is not set to {2}.")]
+        _0ShouldBeNullWhen1IsNotSetTo2,
         [Description("{0} should be null when {1} is set")]
         _0ShouldBeNullWhen1IsSet,
+        [Description("{0} should be null when {1} is set to {2}.")]
+        _0ShouldBeNullWhen1IsSetTo2,
         [Description("{0} should be null")]
         _0ShouldBeNull,
         [Description("{0} should be a date in the past")]
@@ -1078,5 +1088,9 @@ namespace Signum.Entities
         _0ShouldNotBeOfType1,
         [Description("{0} and {1} can not be set at the same time")]
         _0And1CanNotBeSetAtTheSameTime,
+        [Description("{0} and {1} and {2} can not be set at the same time")]
+        _0And1And2CanNotBeSetAtTheSameTime,
+        [Description("{0} have {1} elements, but allowed only {2}")]
+        _0Have1ElementsButAllowedOnly2,
     }
 }

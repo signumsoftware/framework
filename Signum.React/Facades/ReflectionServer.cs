@@ -166,11 +166,13 @@ namespace Signum.React.Facades
 
             var dqm = DynamicQueryManager.Current;
 
+            var schema = Schema.Current;
             var settings = Schema.Current.Settings;
 
             var result = (from type in TypeLogic.TypeToEntity.Keys.Concat(models)
                           where !type.IsEnumEntity() && !ReflectionServer.ExcludeTypes.Contains(type)
                           let descOptions = LocalizedAssembly.GetDescriptionOptions(type)
+                          let allOperations = !type.IsEntity() ? null : OperationLogic.GetAllOperationInfos(type)
                           select KVP.Create(GetTypeName(type), OnAddTypeExtension(new TypeInfoTS
                           {
                               Kind = KindOfType.Entity,
@@ -181,6 +183,7 @@ namespace Signum.React.Facades
                               EntityKind = type.IsIEntity() ? EntityKindCache.GetEntityKind(type) : (EntityKind?)null,
                               EntityData = type.IsIEntity() ? EntityKindCache.GetEntityData(type) : (EntityData?)null,
                               IsLowPopulation = type.IsIEntity() ? EntityKindCache.IsLowPopulation(type) : false,
+                              IsSystemVersioned = type.IsIEntity() ? schema.Table(type).SystemVersioned != null : false,
                               ToStringFunction = LambdaToJavascriptConverter.ToJavascript(ExpressionCleaner.GetFieldExpansion(type, miToString)),
                               QueryDefined = dqm.QueryDefined(type),
                               Members = PropertyRoute.GenerateRoutes(type).Where(pr => InTypeScript(pr))
@@ -202,8 +205,9 @@ namespace Signum.React.Facades
                                     return OnAddPropertyRouteExtension(mi, p);
                                 }),
 
-                              Operations = !type.IsEntity() ? null : OperationLogic.GetAllOperationInfos(type)
-                                .ToDictionary(oi => oi.OperationSymbol.Key, oi => OnAddOperationExtension(new OperationInfoTS(oi), oi, type))
+                              Operations = allOperations == null ? null : allOperations.ToDictionary(oi => oi.OperationSymbol.Key, oi => OnAddOperationExtension(new OperationInfoTS(oi), oi, type)),
+
+                              RequiresEntityPack = allOperations != null && allOperations.Any(oi => oi.HasCanExecute != null),
 
                           }, type))).ToDictionaryEx("entities");
 
@@ -325,6 +329,8 @@ namespace Signum.React.Facades
         public EntityData? EntityData { get; set; }
         [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, PropertyName = "isLowPopulation")]
         public bool IsLowPopulation { get; set; }
+        [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, PropertyName = "isSystemVersioned")]
+        public bool IsSystemVersioned { get; set; }
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore, PropertyName = "toStringFunction")]
         public string ToStringFunction { get; set; }
         [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, PropertyName = "queryDefined")]
@@ -333,7 +339,8 @@ namespace Signum.React.Facades
         public Dictionary<string, MemberInfoTS> Members { get; set; }
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore, PropertyName = "operations")]
         public Dictionary<string, OperationInfoTS> Operations { get; set; }
-
+        [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, PropertyName = "requiresEntityPack")]
+        public bool RequiresEntityPack { get; set; }
 
         [JsonExtensionData]
         public Dictionary<string, object> Extension { get; set; } = new Dictionary<string, object>();

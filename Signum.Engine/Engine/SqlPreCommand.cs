@@ -202,6 +202,16 @@ namespace Signum.Engine
             }
         }
 
+        public string sp_executesql()
+        {
+            var pars = this.Parameters.EmptyIfNull();
+
+            var parameterVars = pars.ToString(p => $"{p.ParameterName} {((SqlParameter)p).SqlDbType.ToString()}{SqlBuilder.GetSizeScale(p.Size.DefaultToNull(), p.Scale.DefaultToNull())}", ", ");
+            var parameterValues = pars.ToString(p => Encode(p.Value), ",");
+
+            return $"EXEC sp_executesql N'{this.Sql}', N'{parameterVars}', {parameterValues}";
+        }
+
         public override SqlPreCommand Clone()
         {
             return new SqlPreCommandSimple(Sql, Parameters?.Select(p => Connector.Current.CloneParameter(p))
@@ -219,6 +229,17 @@ namespace Signum.Engine
                     Sql = Sql.Insert(index, " -- " + comment);
             }
 
+            return this;
+        }
+
+        public SqlPreCommandSimple ReplaceFirstParameter(string variableName)
+        {
+            if (variableName == null)
+                return this;
+
+            var first = Parameters.FirstEx();
+            Sql = Regex.Replace(Sql, $@"(?<toReplace>{first.ParameterName})(\b|$)", variableName); //HACK
+            Parameters.Remove(first);
             return this;
         }
     }

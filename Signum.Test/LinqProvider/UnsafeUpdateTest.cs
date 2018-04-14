@@ -31,10 +31,10 @@ namespace Signum.Test.LinqProviderUpdateDelete
         public void Initialize()
         {
             Connector.CurrentLogger = new DebugTextWriter();
-            Schema.Current.EntityEvents<LabelEntity>().PreUnsafeUpdate += (update, query) => { };
-            Schema.Current.EntityEvents<AlbumEntity>().PreUnsafeUpdate += (update, query) => { };
-            Schema.Current.EntityEvents<BandEntity>().PreUnsafeUpdate += (update, query) => { };
-            Schema.Current.EntityEvents<ArtistEntity>().PreUnsafeUpdate += (update, query) => { };
+            Schema.Current.EntityEvents<LabelEntity>().PreUnsafeUpdate += (update, query) => null;
+            Schema.Current.EntityEvents<AlbumEntity>().PreUnsafeUpdate += (update, query) => null;
+            Schema.Current.EntityEvents<BandEntity>().PreUnsafeUpdate += (update, query) => null;
+            Schema.Current.EntityEvents<ArtistEntity>().PreUnsafeUpdate += (update, query) => null;
         }
 
         [TestMethod]
@@ -569,6 +569,31 @@ namespace Signum.Test.LinqProviderUpdateDelete
                     .Set(ctr => ctr.BonusTrack.Index, lb => 2)
                     .Execute();
             }
+        }
+
+        [TableName("#MyView")]
+        class MyTempView : IView
+        {
+            [ViewPrimaryKey]
+            public int MyId { get; set; }
+
+            public bool Used { get; set; }
+        }
+
+        [TestMethod]
+        public void UnsafeUpdateMyView()
+        {
+            using (Transaction tr = new Transaction())
+            {
+                Administrator.CreateTemporaryTable<MyTempView>();
+
+                Database.Query<ArtistEntity>().UnsafeInsertView(a => new MyTempView { MyId = (int)a.Id, Used = false, });
+
+                Database.View<MyTempView>().Where(a => a.MyId > 1).UnsafeUpdateView().Set(a => a.Used, a => true).Execute();
+
+                tr.Commit();
+            }
+
         }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using Signum.Engine.Maps;
+using Signum.Entities;
 using Signum.Entities.DynamicQuery;
 using Signum.Utilities;
 using Signum.Utilities.ExpressionTrees;
@@ -34,6 +35,7 @@ namespace Signum.Engine.Linq
             internal DbParameter Parameter;
             internal string Name;
         }
+
 
         Dictionary<Expression, DbParameterPair> parameterExpressions = new Dictionary<Expression, DbParameterPair>();
 
@@ -441,9 +443,6 @@ namespace Signum.Engine.Linq
                     {
                         this.Indent(Indentation.Outer);
                     }
-
-
-
                 }
             }
 
@@ -522,6 +521,9 @@ namespace Signum.Engine.Linq
         {
             sb.Append(dic[aggregate.AggregateFunction]);
             sb.Append("(");
+            if (aggregate.Distinct)
+                sb.Append("DISTINCT ");
+
             if (aggregate.Expression == null)
                 sb.Append("*");
             else
@@ -589,7 +591,63 @@ namespace Signum.Engine.Linq
         {
             sb.Append(table.Name.ToString());
 
+            if (table.SystemTime != null && !(table.SystemTime is SystemTime.HistoryTable))
+            {
+                sb.Append(" ");
+                WriteSystemTime(table.SystemTime);
+            }
             return table;
+        }
+
+        private void WriteSystemTime(SystemTime st)
+        {
+            sb.Append("FOR SYSTEM_TIME ");
+
+            if (st is SystemTime.AsOf asOf)
+            {
+                sb.Append("AS OF ");
+                this.VisitSystemTimeConstant(asOf.DateTime);
+            }
+            else if (st is SystemTime.FromTo fromTo)
+            {
+                sb.Append("FROM ");
+                this.VisitSystemTimeConstant(fromTo.StartDateTime);
+
+                sb.Append(" TO ");
+                this.VisitSystemTimeConstant(fromTo.EndtDateTime);
+            }
+            else if (st is SystemTime.Between between)
+            {
+                sb.Append("BETWEEN ");
+                this.VisitSystemTimeConstant(between.StartDateTime);
+
+                sb.Append(" AND ");
+                this.VisitSystemTimeConstant(between.EndtDateTime);
+            }
+            else if (st is SystemTime.ContainedIn contained)
+            {
+                sb.Append("CONTAINED IN (");
+                this.VisitSystemTimeConstant(contained.StartDateTime);
+
+                sb.Append(", ");
+                this.VisitSystemTimeConstant(contained.EndtDateTime);
+                sb.Append(")");
+            }
+            else if (st is SystemTime.All)
+            {
+                sb.Append("ALL");
+            }
+            else
+                throw new InvalidOperationException("Unexpected");
+
+        }
+
+        Dictionary<DateTime, ConstantExpression> systemTimeConstants = new Dictionary<DateTime, ConstantExpression>();
+        void VisitSystemTimeConstant(DateTime datetime)
+        {
+            var c = systemTimeConstants.GetOrCreate(datetime, dt => Expression.Constant(dt));
+
+            VisitConstant(c);
         }
 
         protected internal override SourceExpression VisitSource(SourceExpression source)
@@ -707,7 +765,7 @@ namespace Signum.Engine.Linq
         protected internal override Expression VisitDelete(DeleteExpression delete)
         {
             sb.Append("DELETE ");
-            sb.Append(delete.Table.Name.ToString());
+            sb.Append(delete.Name.ToString());
             this.AppendNewLine(Indentation.Same);
             sb.Append("FROM ");
             VisitSource(delete.Source);
@@ -723,7 +781,7 @@ namespace Signum.Engine.Linq
         protected internal override Expression VisitUpdate(UpdateExpression update)
         {
             sb.Append("UPDATE ");
-            sb.Append(update.Table.Name.ToString());
+            sb.Append(update.Name.ToString());
             sb.Append(" SET");
             this.AppendNewLine(Indentation.Inner);
 
@@ -755,7 +813,7 @@ namespace Signum.Engine.Linq
         protected internal override Expression VisitInsertSelect(InsertSelectExpression insertSelect)
         {
             sb.Append("INSERT INTO ");
-            sb.Append(insertSelect.Table.Name.ToString());
+            sb.Append(insertSelect.Name.ToString());
             sb.Append("(");
             for (int i = 0, n = insertSelect.Assigments.Count; i < n; i++)
             {
@@ -912,7 +970,7 @@ namespace Signum.Engine.Linq
             throw InvalidSqlExpression(p);
         }
 
-        protected internal override Expression VisitTypeFieldInit(TypeEntityExpression typeFie)
+        protected internal override Expression VisitTypeEntity(TypeEntityExpression typeFie)
         {
             throw InvalidSqlExpression(typeFie);
         }

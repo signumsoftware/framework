@@ -1,6 +1,5 @@
 ﻿import * as React from "react"
 import { Router, Route, Redirect } from "react-router"
-import { Button, OverlayTrigger, Tooltip, MenuItem, DropdownButton } from "react-bootstrap"
 import { Dic } from './Globals';
 import { ajaxGet, ajaxPost } from './Services';
 import { openModal } from './Modals';
@@ -18,17 +17,24 @@ import * as ContexualItems from './SearchControl/ContextualItems';
 import ButtonBar from './Frames/ButtonBar';
 import { getEntityOperationButtons, defaultOnClick } from './Operations/EntityOperations';
 import { getConstructFromManyContextualItems, getEntityOperationsContextualItems, defaultContextualClick } from './Operations/ContextualOperations';
-import { ContextualItemsContext} from './SearchControl/ContextualItems';
+import { ContextualItemsContext } from './SearchControl/ContextualItems';
+import { BsColor } from "./Components/Basic";
 
 export function start() {
     ButtonBar.onButtonBarRender.push(getEntityOperationButtons);
     ContexualItems.onContextualItems.push(getConstructFromManyContextualItems);
     ContexualItems.onContextualItems.push(getEntityOperationsContextualItems);
+
     QuickLinks.registerGlobalQuickLink(ctx => new QuickLinks.QuickLinkExplore({
         queryName: OperationLogEntity,
         parentColumn: "Target",
         parentValue: ctx.lite
-    }, { isVisible: getTypeInfo(ctx.lite.EntityType) && getTypeInfo(ctx.lite.EntityType).requiresSaveOperation }));
+    },
+        {
+            isVisible: getTypeInfo(ctx.lite.EntityType) && getTypeInfo(ctx.lite.EntityType).requiresSaveOperation && Finder.isFindable(OperationLogEntity, false),
+            icon: "fa fa-history",
+            iconColor: "green"
+        }));
 }
 
 export const operationSettings: { [operationKey: string]: OperationSettings } = {};
@@ -122,6 +128,12 @@ export class ConstructorOperationContext<T extends Entity> {
     settings: ConstructorOperationSettings<T>;
     typeInfo: TypeInfo;
 
+    constructor(operationInfo: OperationInfo, settings: ConstructorOperationSettings<T>, typeInfo: TypeInfo) {
+        this.operationInfo = operationInfo;
+        this.settings = settings;
+        this.typeInfo = typeInfo;
+    }
+
     defaultConstruct(...args: any[]): Promise<EntityPack<T> | undefined> {
         return API.construct<T>(this.typeInfo.name, this.operationInfo.key, ...args);
     }
@@ -138,7 +150,7 @@ export class ContextualOperationSettings<T extends Entity> extends OperationSett
     hideOnCanExecute?: boolean;
     confirmMessage?: (ctx: ContextualOperationContext<T>) => string;
     onClick?: (ctx: ContextualOperationContext<T>) => void;
-    style?: BsStyle;
+    color?: BsColor;
     icon?: string;
     iconColor?: string;
     order?: number;
@@ -156,7 +168,7 @@ export interface ContextualOperationOptions<T extends Entity> {
     hideOnCanExecute?: boolean;
     confirmMessage?: (ctx: ContextualOperationContext<T>) => string;
     onClick?: (ctx: ContextualOperationContext<T>) => void;
-    style?: BsStyle;
+    color?: BsColor;
     icon?: string;
     iconColor?: string;
     order?: number;
@@ -171,8 +183,14 @@ export class ContextualOperationContext<T extends Entity> {
     event?: React.MouseEvent<any>;
     onContextualSuccess?: (pack: API.ErrorReport) => void;
     onConstructFromSuccess?: (pack: EntityPack<Entity>) => void;
+
     defaultContextualClick(...args: any[]) {
         defaultContextualClick(this, ...args);
+    }
+
+    constructor(operationInfo: OperationInfo, context: ContextualItemsContext<T>) {
+        this.operationInfo = operationInfo;
+        this.context = context;
     }
 }
 
@@ -182,11 +200,10 @@ export class EntityOperationContext<T extends Entity> {
     {
         if (!ctx.frame)
             throw new Error("a frame is necessary");
-        var result = new EntityOperationContext<T>();
-        result.frame = ctx.frame;
-        result.entity = ctx.value;
+        var oi = getTypeInfo(ctx.value.Type).operations![operation.key!];
+
+        var result = new EntityOperationContext<T>(ctx.frame, ctx.value, oi);
         result.settings = getSettings(operation) as EntityOperationSettings<T>;
-        result.operationInfo = getTypeInfo(ctx.value.Type).operations![operation.key!];
         result.canExecute = undefined;
         return result;
     }
@@ -202,6 +219,12 @@ export class EntityOperationContext<T extends Entity> {
     onExecuteSuccess?: (pack: EntityPack<T>) => void;
     onConstructFromSuccess?: (pack: EntityPack<Entity>) => void;
     onDeleteSuccess?: () => void;
+
+    constructor(frame: EntityFrame, entity: T, operationInfo: OperationInfo) {
+        this.frame = frame;
+        this.entity = entity;
+        this.operationInfo = operationInfo;
+    }
 
     defaultClick(...args: any[]) {
         defaultOnClick(this, ...args);
@@ -223,7 +246,7 @@ export class EntityOperationSettings<T extends Entity> extends OperationSettings
     hideOnCanExecute?: boolean;
     group?: EntityOperationGroup | null;
     order?: number;
-    style?: BsStyle;
+    color?: BsColor;
     withClose?: boolean;
 
     constructor(operationSymbol: ExecuteSymbol<T> | DeleteSymbol<T> | ConstructSymbol_From<any, T>, options: EntityOperationOptions<T>) {
@@ -236,7 +259,7 @@ export class EntityOperationSettings<T extends Entity> extends OperationSettings
     }
 }
 
-export type BsStyle = "default" | "primary" | "success" | "info" | "warning" | "danger";
+
 
 export interface EntityOperationOptions<T extends Entity> {
     contextual?: ContextualOperationOptions<T>;
@@ -249,7 +272,7 @@ export interface EntityOperationOptions<T extends Entity> {
     hideOnCanExecute?: boolean;
     group?: EntityOperationGroup | null;
     order?: number;
-    style?: BsStyle;
+    color?: BsColor;
     withClose?: boolean;
 }
 
@@ -269,6 +292,7 @@ export interface EntityOperationGroup {
     text: () => string;
     simplifyName?: (complexName: string) => string;
     cssClass?: string;
+    color?: BsColor;
     order?: number;
 }
 
@@ -281,9 +305,9 @@ export let isSave = (oi: OperationInfo): boolean => {
     return oi.key.endsWith(".Save");
 }
 
-export function autoStyleFunction(oi: OperationInfo): BsStyle {
+export function autoColorFunction(oi: OperationInfo): BsColor {
     return oi.operationType == OperationType.Delete ? "danger" :
-        oi.operationType == OperationType.Execute && isSave(oi) ? "primary" : "default";
+        oi.operationType == OperationType.Execute && isSave(oi) ? "primary" : "light";
 }
 
 

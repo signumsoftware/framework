@@ -1,11 +1,10 @@
 ﻿
 import * as React from 'react'
-import { MenuItem, Overlay } from 'react-bootstrap'
 import { Dic, classes, combineFunction } from '../Globals'
 import { QueryDescription, } from '../FindOptions'
 import { SearchMessage, JavascriptMessage, Lite, Entity } from '../Signum.Entities'
-import * as RootCloseWrapper from 'react-overlays/lib/RootCloseWrapper'
 import SearchControlLoaded from "./SearchControlLoaded";
+import { DropdownItem } from '../Components';
 
 
 export interface MenuItemBlock {
@@ -44,10 +43,10 @@ export function renderContextualItems(ctx: ContextualItemsContext<Entity>): Prom
                 return;
 
             if (result.length)
-                result.push(<MenuItem divider/>);
+                result.push(<DropdownItem divider/>);
 
             if (block.header)
-                result.push(<MenuItem header>{block.header}</MenuItem>);
+                result.push(<DropdownItem header>{block.header}</DropdownItem>);
 
             if (block.header)
                 result.splice(result.length, 0, ...block.menuItems);

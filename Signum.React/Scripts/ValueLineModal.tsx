@@ -1,5 +1,4 @@
 ﻿import * as React from 'react'
-import { Modal, ModalProps, ModalClass, ButtonToolbar, Sizes } from 'react-bootstrap'
 import { openModal, IModalProps } from './Modals';
 import { Dic } from './Globals';
 import { SelectorMessage, JavascriptMessage } from './Signum.Entities'
@@ -9,6 +8,7 @@ import { ValueLineType, ValueLine } from './Lines/ValueLine'
 import { ValueLineProps } from "./Lines";
 import { ValidationMessage } from "./Signum.Entities";
 import { MemberInfo } from './Reflection';
+import { Modal, BsSize } from './Components';
 
 
 interface ValueLineModalProps extends React.Props<ValueLineModal>, IModalProps {
@@ -35,7 +35,7 @@ export default class ValueLineModal extends React.Component<ValueLineModalProps,
 
     handleCancelClicked = () => {
         this.selectedValue = undefined;
-        this.setState({ show: false });   
+        this.setState({ show: false });
     }
 
     handleOnExited = () => {
@@ -43,7 +43,7 @@ export default class ValueLineModal extends React.Component<ValueLineModalProps,
     }
 
     render() {
-    
+
         const ctx = new TypeContext(undefined, undefined, undefined as any, Binding.create(this.state, s => s.value));
 
         const { title, message, initialValue, ...props } = this.props.options;
@@ -61,34 +61,35 @@ export default class ValueLineModal extends React.Component<ValueLineModalProps,
         const disabled = this.props.options.allowEmptyValue == false ? (ctx.value as string).trim() ? false : true : undefined;
         const valueOnChanged = this.props.options.allowEmptyValue == false ? () => this.forceUpdate() : undefined;
 
-        return <Modal bsSize={this.props.options.modalSize || "lg"} onHide={this.handleCancelClicked} show={this.state.show} onExited={this.handleOnExited}>
-
-            <Modal.Header closeButton={true}>
-                <h4 className="modal-title">
-                    {title === undefined ? SelectorMessage.ChooseAValue.niceToString() : title}
-                </h4>
-            </Modal.Header>
-
-            <Modal.Body>
-                <p>
-                    {message === undefined ? SelectorMessage.PleaseChooseAValueToContinue.niceToString() : message}
-                </p>
-                <ValueLine ctx={ctx}
-                    formGroupStyle={props.labelText ? "Basic" : "SrOnly"} {...vlp} onChange={valueOnChanged} />
-            </Modal.Body>
-            <Modal.Footer>
-                <button disabled={disabled} className="btn btn-primary sf-entity-button sf-ok-button" onClick={this.handleOkClick}>
-                    {JavascriptMessage.ok.niceToString()}
-                </button>
-                <button className="btn btn-default sf-entity-button sf-close-button" onClick={this.handleCancelClicked}>
-                    {JavascriptMessage.cancel.niceToString()}
-                </button>
-            </Modal.Footer>
-        </Modal>;
+        return (
+            <Modal size={this.props.options.modalSize || "lg"} show={this.state.show} onExited={this.handleOnExited} onHide={this.handleCancelClicked}>
+                <div className="modal-header">
+                    <h5 className="modal-title">{title === undefined ? SelectorMessage.ChooseAValue.niceToString() : title}</h5>
+                    <button type="button" className="close" data-dismiss="modal" aria-label="Close" onClick={this.handleCancelClicked}>
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div className="modal-body">
+                    <p>
+                        {message === undefined ? SelectorMessage.PleaseChooseAValueToContinue.niceToString() : message}
+                    </p>
+                    <ValueLine ctx={ctx}
+                        formGroupStyle={props.labelText ? "Basic" : "SrOnly"} {...vlp} onChange={valueOnChanged} />
+                </div>
+                <div className="modal-footer">
+                    <button disabled={disabled} className="btn btn-primary sf-entity-button sf-ok-button" onClick={this.handleOkClick}>
+                        {JavascriptMessage.ok.niceToString()}
+                    </button>
+                    <button className="btn btn-light sf-entity-button sf-close-button" onClick={this.handleCancelClicked}>
+                        {JavascriptMessage.cancel.niceToString()}
+                    </button>
+                </div>
+            </Modal>
+        );
     }
 
     static show(options: ValueLineModalOptions): Promise<any> {
-        return openModal<any>(<ValueLineModal options={options}/>);
+        return openModal<any>(<ValueLineModal options={options} />);
     }
 }
 
@@ -105,7 +106,7 @@ export interface ValueLineModalOptions {
     initiallyFocused?: boolean;
     valueHtmlAttributes?: React.HTMLAttributes<any>;
     allowEmptyValue?: boolean;
-    modalSize?: Sizes;
+    modalSize?: BsSize;
 }
 
 

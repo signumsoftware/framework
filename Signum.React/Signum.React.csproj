@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="..\..\packages\Microsoft.Net.Compilers.2.6.1\build\Microsoft.Net.Compilers.props" Condition="Exists('..\..\packages\Microsoft.Net.Compilers.2.6.1\build\Microsoft.Net.Compilers.props')" />
+  <Import Project="..\..\packages\Microsoft.Net.Compilers.2.7.0\build\Microsoft.Net.Compilers.props" Condition="Exists('..\..\packages\Microsoft.Net.Compilers.2.7.0\build\Microsoft.Net.Compilers.props')" />
   <Import Project="..\..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.1.0.8\build\net45\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props" Condition="Exists('..\..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.1.0.8\build\net45\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props')" />
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\TypeScript\Microsoft.TypeScript.Default.props" Condition="Exists('$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\TypeScript\Microsoft.TypeScript.Default.props')" />
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
@@ -28,8 +28,9 @@
     <UseGlobalApplicationHostFile />
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
-    <TypeScriptToolsVersion>2.6</TypeScriptToolsVersion>
+    <TypeScriptToolsVersion>2.8</TypeScriptToolsVersion>
     <Use64BitIISExpress />
+    <DockerComposeProjectPath>..\..\docker-compose.dcproj</DockerComposeProjectPath>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -63,16 +64,15 @@
       <Private>True</Private>
       <HintPath>..\..\packages\Microsoft.Web.Infrastructure.1.0.0.0\lib\net40\Microsoft.Web.Infrastructure.dll</HintPath>
     </Reference>
-    <Reference Include="Newtonsoft.Json, Version=10.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Newtonsoft.Json.10.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
+    <Reference Include="Newtonsoft.Json, Version=11.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Newtonsoft.Json.11.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="System.Activities" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="System.IdentityModel" />
     <Reference Include="System.Net.Http" />
-    <Reference Include="System.Net.Http.Formatting, Version=5.2.3.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Microsoft.AspNet.WebApi.Client.5.2.3\lib\net45\System.Net.Http.Formatting.dll</HintPath>
-      <Private>True</Private>
+    <Reference Include="System.Net.Http.Formatting, Version=5.2.4.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Microsoft.AspNet.WebApi.Client.5.2.4\lib\net45\System.Net.Http.Formatting.dll</HintPath>
     </Reference>
     <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.ServiceModel" />
@@ -92,36 +92,28 @@
     <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.Web.Extensions" />
     <Reference Include="System.Web.Helpers, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\packages\Microsoft.AspNet.WebPages.3.2.3\lib\net45\System.Web.Helpers.dll</HintPath>
+      <HintPath>..\..\packages\Microsoft.AspNet.WebPages.3.2.4\lib\net45\System.Web.Helpers.dll</HintPath>
     </Reference>
-    <Reference Include="System.Web.Http, Version=5.2.3.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Microsoft.AspNet.WebApi.Core.5.2.3\lib\net45\System.Web.Http.dll</HintPath>
-      <Private>True</Private>
+    <Reference Include="System.Web.Http, Version=5.2.4.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Microsoft.AspNet.WebApi.Core.5.2.4\lib\net45\System.Web.Http.dll</HintPath>
     </Reference>
-    <Reference Include="System.Web.Http.WebHost, Version=5.2.3.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Microsoft.AspNet.WebApi.WebHost.5.2.3\lib\net45\System.Web.Http.WebHost.dll</HintPath>
-      <Private>True</Private>
+    <Reference Include="System.Web.Http.WebHost, Version=5.2.4.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Microsoft.AspNet.WebApi.WebHost.5.2.4\lib\net45\System.Web.Http.WebHost.dll</HintPath>
     </Reference>
-    <Reference Include="System.Web.Mvc, Version=5.2.3.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\packages\Microsoft.AspNet.Mvc.5.2.3\lib\net45\System.Web.Mvc.dll</HintPath>
+    <Reference Include="System.Web.Mvc, Version=5.2.4.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Microsoft.AspNet.Mvc.5.2.4\lib\net45\System.Web.Mvc.dll</HintPath>
     </Reference>
     <Reference Include="System.Web.Razor, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\packages\Microsoft.AspNet.Razor.3.2.3\lib\net45\System.Web.Razor.dll</HintPath>
+      <HintPath>..\..\packages\Microsoft.AspNet.Razor.3.2.4\lib\net45\System.Web.Razor.dll</HintPath>
     </Reference>
     <Reference Include="System.Web.WebPages, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\packages\Microsoft.AspNet.WebPages.3.2.3\lib\net45\System.Web.WebPages.dll</HintPath>
+      <HintPath>..\..\packages\Microsoft.AspNet.WebPages.3.2.4\lib\net45\System.Web.WebPages.dll</HintPath>
     </Reference>
     <Reference Include="System.Web.WebPages.Deployment, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\packages\Microsoft.AspNet.WebPages.3.2.3\lib\net45\System.Web.WebPages.Deployment.dll</HintPath>
+      <HintPath>..\..\packages\Microsoft.AspNet.WebPages.3.2.4\lib\net45\System.Web.WebPages.Deployment.dll</HintPath>
     </Reference>
     <Reference Include="System.Web.WebPages.Razor, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\packages\Microsoft.AspNet.WebPages.3.2.3\lib\net45\System.Web.WebPages.Razor.dll</HintPath>
+      <HintPath>..\..\packages\Microsoft.AspNet.WebPages.3.2.4\lib\net45\System.Web.WebPages.Razor.dll</HintPath>
     </Reference>
     <Reference Include="System.WorkflowServices" />
     <Reference Include="System.Web" />
@@ -149,6 +141,7 @@
     <Compile Include="Facades\SignumControllerFactory.cs" />
     <Compile Include="Filters\SignumExceptionFilterAttribute.cs" />
     <Compile Include="Filters\ValidateModelFilterAttribute.cs" />
+    <Compile Include="Filters\VersionFilterAttribute.cs" />
     <Compile Include="JsonConverters\EntityJsonConverter.cs" />
     <Compile Include="JsonConverters\JsonSerializerExtensions.cs" />
     <Compile Include="JsonConverters\ArgsJsonConverter.cs" />
@@ -159,7 +152,28 @@
     <Compile Include="JsonConverters\LiteJsonConverter.cs" />
     <Compile Include="JsonModelValidators\SignumBodyModelValidator.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <TypeScriptCompile Include="Scripts\Components\Basic.tsx" />
+    <TypeScriptCompile Include="Scripts\Components\Button.tsx" />
+    <TypeScriptCompile Include="Scripts\Components\Collapse.tsx" />
+    <TypeScriptCompile Include="Scripts\Components\ErrorBoundary.tsx" />
+    <TypeScriptCompile Include="Scripts\Components\index.tsx" />
+    <TypeScriptCompile Include="Scripts\Components\Dropdown.tsx" />
+    <TypeScriptCompile Include="Scripts\Components\DropdownItem.tsx" />
+    <TypeScriptCompile Include="Scripts\Components\DropdownToggle.tsx" />
+    <TypeScriptCompile Include="Scripts\Components\DropdownMenu.tsx" />
+    <TypeScriptCompile Include="Scripts\Components\Fade.tsx" />
+    <TypeScriptCompile Include="Scripts\Components\NavItem.tsx" />
+    <TypeScriptCompile Include="Scripts\Components\Popover.tsx" />
+    <TypeScriptCompile Include="Scripts\Components\PopperContent.tsx" />
+    <TypeScriptCompile Include="Scripts\Components\Tooltip.tsx" />
+    <TypeScriptCompile Include="Scripts\Lines\FormControlReadonly.tsx" />
+    <TypeScriptCompile Include="Scripts\Lines\FormGroup.tsx" />
+    <TypeScriptCompile Include="Scripts\Components\LinkContainer.tsx" />
+    <TypeScriptCompile Include="Scripts\Components\ModalFade.tsx" />
+    <TypeScriptCompile Include="Scripts\Components\Modal.tsx" />
+    <TypeScriptCompile Include="Scripts\Components\Tabs.tsx" />
     <Content Include="Scripts\Frames\MenuIcons.css" />
+    <Content Include="Scripts\Frames\VersionChangedAlert.css" />
     <Content Include="Scripts\SearchControl\ColumnBuilder.css" />
     <Content Include="Scripts\SearchControl\QueryTokenBuilder.css" />
     <Content Include="Scripts\SearchControl\FilterBuilder.css" />
@@ -202,7 +216,6 @@
     <Content Include="Scripts\Signum.Entities.Basics.t4s" />
     <Content Include="Scripts\Signum.Entities.DynamicQuery.t4s" />
     <Content Include="Scripts\Signum.Entities.Patterns.t4s" />
-    <None Include="package.disabled.json" />
     <None Include="Scripts\Signum.Entities.t4s" />
     <Content Include="tsconfig.json" />
     <TypeScriptCompile Include="Scripts\AppRelativeRoutes.tsx" />
@@ -210,6 +223,7 @@
     <TypeScriptCompile Include="Scripts\Exceptions\ExceptionClient.tsx" />
     <Content Include="Scripts\fetchWithAbort.js" />
     <TypeScriptCompile Include="Scripts\Frames\ContainerToggle.tsx" />
+    <TypeScriptCompile Include="Scripts\Frames\VersionChangedAlert.tsx" />
     <TypeScriptCompile Include="Scripts\Frames\Notify.tsx" />
     <TypeScriptCompile Include="Scripts\Frames\OrderUtils.tsx" />
     <TypeScriptCompile Include="Scripts\Frames\ValidationErrors.tsx" />
@@ -236,6 +250,7 @@
     <TypeScriptCompile Include="Scripts\Lines\EntityLine.tsx" />
     <TypeScriptCompile Include="Scripts\Operations\ContextualOperations.tsx" />
     <TypeScriptCompile Include="Scripts\QuickLinks.tsx" />
+    <TypeScriptCompile Include="Scripts\SearchControl\SystemTimeEditor.tsx" />
     <TypeScriptCompile Include="Scripts\SearchControl\ContextMenu.tsx" />
     <TypeScriptCompile Include="Scripts\SearchControl\ColumnBuilder.tsx" />
     <TypeScriptCompile Include="Scripts\SearchControl\GroupByMessage.tsx" />
@@ -245,7 +260,7 @@
     <TypeScriptCompile Include="Scripts\Lines\EntityListBase.tsx" />
     <TypeScriptCompile Include="Scripts\Finder.tsx" />
     <TypeScriptCompile Include="Scripts\FindOptions.ts" />
-    <TypeScriptCompile Include="Scripts\Lines\Typeahead.tsx" />
+    <TypeScriptCompile Include="Scripts\Components\Typeahead.tsx" />
     <TypeScriptCompile Include="Scripts\Lines\LineBase.tsx" />
     <TypeScriptCompile Include="Scripts\Modals.tsx" />
     <TypeScriptCompile Include="Scripts\Constructor.tsx" />
@@ -343,7 +358,7 @@
       <ErrorText>This project references NuGet package(s) that are missing on this computer. Enable NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
     </PropertyGroup>
     <Error Condition="!Exists('..\..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.1.0.8\build\net45\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.1.0.8\build\net45\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props'))" />
-    <Error Condition="!Exists('..\..\packages\Microsoft.Net.Compilers.2.6.1\build\Microsoft.Net.Compilers.props')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\Microsoft.Net.Compilers.2.6.1\build\Microsoft.Net.Compilers.props'))" />
+    <Error Condition="!Exists('..\..\packages\Microsoft.Net.Compilers.2.7.0\build\Microsoft.Net.Compilers.props')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\Microsoft.Net.Compilers.2.7.0\build\Microsoft.Net.Compilers.props'))" />
   </Target>
   <UsingTask TaskName="SignumTSGenerator" AssemblyFile="..\Signum.TSGenerator\Binaries\Signum.TSGenerator.dll" />
   <Target Name="GenerateSignumTS">

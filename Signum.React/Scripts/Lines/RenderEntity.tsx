@@ -6,11 +6,11 @@ import * as Finder from '../Finder'
 import { FindOptions } from '../FindOptions'
 import { TypeContext, StyleContext, StyleOptions, FormGroupStyle, EntityFrame } from '../TypeContext'
 import { PropertyRoute, PropertyRouteType, MemberInfo, getTypeInfo, getTypeInfos, TypeInfo, IsByAll, ReadonlyBinding, LambdaMemberType } from '../Reflection'
-import { LineBase, LineBaseProps, FormGroup, FormControlStatic, runTasks, } from '../Lines/LineBase'
+import { LineBase, LineBaseProps, runTasks, } from '../Lines/LineBase'
 import { ModifiableEntity, Lite, Entity, EntityControlMessage, JavascriptMessage, toLite, is, isEntity, isLite, isModifiableEntity, liteKey, getToString } from '../Signum.Entities'
-import Typeahead from '../Lines/Typeahead'
 import { EntityBase, EntityBaseProps} from './EntityBase'
 import { ViewPromise } from "../Navigator";
+import { ErrorBoundary } from '../Components';
 
 
 
@@ -114,9 +114,9 @@ export class RenderEntity extends React.Component<RenderEntityProps, RenderEntit
         return (result instanceof ViewPromise ? Anonymous : result);
     }
 
-    entityComponent: React.Component<any, any>;
+    entityComponent?: React.Component<any, any> | null;
 
-    setComponent(c: React.Component<any, any>) {
+    setComponent(c: React.Component<any, any> | null) {
         if (c && this.entityComponent != c) {
             this.entityComponent = c;
             this.forceUpdate();
@@ -166,7 +166,9 @@ export class RenderEntity extends React.Component<RenderEntityProps, RenderEntit
 
         return (
             <div data-propertypath={ctx.propertyPath}>
-                {React.cloneElement(getComponent(newCtx), { ref: (c: React.Component<any, any>) => this.setComponent(c) }) }
+                <ErrorBoundary>
+                    {React.cloneElement(getComponent(newCtx), { ref: (c: React.Component<any, any> | null) => this.setComponent(c) })}
+                </ErrorBoundary>
             </div>
         );
     }

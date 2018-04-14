@@ -1,6 +1,5 @@
 ﻿
 import * as React from 'react'
-import { Modal, ModalProps, ModalClass, ButtonToolbar, Sizes } from 'react-bootstrap'
 import * as Finder from '../Finder'
 import { openModal, IModalProps } from '../Modals';
 import * as Navigator from '../Navigator';
@@ -8,6 +7,7 @@ import { classes, Dic } from '../Globals';
 import { SearchMessage, JavascriptMessage, Lite, Entity, NormalWindowMessage, BooleanEnum } from '../Signum.Entities'
 
 import "./Modals.css"
+import { Modal } from '../Components';
 
 export type MessageModalStyle = "success" | "info" | "warning" | "error";
 
@@ -35,6 +35,7 @@ export default class MessageModal extends React.Component<MessageModalProps, { s
     }
 
     selectedValue?: MessageModalResult;
+
     handleButtonClicked = (val: MessageModalResult) => {
         this.selectedValue = val;
         this.setState({ show: false });
@@ -60,7 +61,7 @@ export default class MessageModal extends React.Component<MessageModalProps, { s
                     </button>);
             case "ok_cancel":
                 return (
-                    <div>
+                    <div className="btn-toolbar">
                         <button
                             className="btn btn-primary sf-close-button sf-ok-button"
                             onClick={() => this.handleButtonClicked("ok")}
@@ -68,7 +69,7 @@ export default class MessageModal extends React.Component<MessageModalProps, { s
                             {JavascriptMessage.ok.niceToString()}
                         </button>
                         <button
-                            className="btn btn-default sf-close-button sf-button"
+                            className="btn btn-secondary sf-close-button sf-button"
                             onClick={() => this.handleButtonClicked("cancel")}
                             name="cancel">
                             {JavascriptMessage.cancel.niceToString()}
@@ -76,7 +77,7 @@ export default class MessageModal extends React.Component<MessageModalProps, { s
                     </div>);
             case "yes_no":
                 return (
-                    <div>
+                    <div className="btn-toolbar">
                         <button
                             className="btn btn-primary sf-close-button sf-yes-button"
                             onClick={() => this.handleButtonClicked("yes")}
@@ -84,7 +85,7 @@ export default class MessageModal extends React.Component<MessageModalProps, { s
                             {BooleanEnum.niceToString("True")}
                         </button>
                         <button
-                            className="btn btn-default sf-close-button sf-no-button"
+                            className="btn btn-secondary sf-close-button sf-no-button"
                             onClick={() => this.handleButtonClicked("no")}
                             name="no">
                             {BooleanEnum.niceToString("False")}
@@ -92,7 +93,7 @@ export default class MessageModal extends React.Component<MessageModalProps, { s
                     </div>);
             case "yes_no_cancel":
                 return (
-                    <div>
+                    <div className="btn-toolbar">
                         <button
                             className="btn btn-primary sf-close-button sf-yes-button"
                             onClick={() => this.handleButtonClicked("yes")}
@@ -100,13 +101,13 @@ export default class MessageModal extends React.Component<MessageModalProps, { s
                             {BooleanEnum.niceToString("True")}
                         </button>
                         <button
-                            className="btn btn-default sf-close-button sf-no-button"
+                            className="btn btn-secondary sf-close-button sf-no-button"
                             onClick={() => this.handleButtonClicked("no")}
                             name="no">
                             {BooleanEnum.niceToString("False")}
                         </button>
                         <button
-                            className="btn btn-default sf-close-button sf-cancel-button"
+                            className="btn btn-secondary sf-close-button sf-cancel-button"
                             onClick={() => this.handleButtonClicked("cancel")}
                             name="cancel">
                             {JavascriptMessage.cancel.niceToString()}
@@ -124,19 +125,19 @@ export default class MessageModal extends React.Component<MessageModalProps, { s
         if (this.props.icon) {
             switch (this.props.icon) {
                 case "info":
-                    icon = "glyphicon glyphicon-info-sign";
+                    icon = "fa fa-info-circle";
                     break;
                 case "error":
-                    icon = "glyphicon glyphicon-alert";
+                    icon = "fa fa-exclamation-circle";
                     break;
                 case "question":
-                    icon = "glyphicon glyphicon-question-sign";
+                    icon = "fa fa-question-circle";
                     break;
                 case "success":
-                    icon = "glyphicon glyphicon-ok-sign";
+                    icon = "fa fa-check-circle";
                     break;
                 case "warning":
-                    icon = "glyphicon glyphicon-exclamation-sign";
+                    icon = "fa fa-exclamation-triangle";
                     break;
             }
         }
@@ -150,24 +151,24 @@ export default class MessageModal extends React.Component<MessageModalProps, { s
         var iconSpan = icon && <span className={icon}></span>;
 
         return (
-            <h4 className={"modal-title"}>
+            <span>
                 {iconSpan && iconSpan}{iconSpan && <span>&nbsp;&nbsp;</span>}{this.props.title}
-            </h4>
+            </span>
             );
     }
 
     render() {
         return (
-            <Modal onHide={this.handleCancelClicked} show={this.state.show} onExited={this.handleOnExited} className="message-modal">
-                <Modal.Header closeButton={true} className={dialogHeaderClass(this.props.style)}>
+            <Modal show={this.state.show} onExited={this.handleOnExited} className="message-modal" onHide={this.handleCancelClicked} autoFocus={true}>
+                <div className={classes("modal-header", dialogHeaderClass(this.props.style))}>
                     {this.renderTitle()}
-                </Modal.Header>
-                <Modal.Body>
+                </div>
+                <div className="modal-body">
                     {renderText(this.props.message, this.props.style)}
-                </Modal.Body>
-                <Modal.Footer>
-                    {this.renderButtons(this.props.buttons)}
-                </Modal.Footer>
+                </div>
+                <div className="modal-footer">
+                     {this.renderButtons(this.props.buttons)}
+                </div>
             </Modal>
         );
     }
@@ -207,18 +208,21 @@ function dialogHeaderClass(style: MessageModalStyle | undefined) {
 }
 
 function dialogTextClass(style?: MessageModalStyle) {
-    switch (style) {
-        case "success":
-            return "text-success";
-        case "info":
-            return "text-info";
-        case "warning":
-            return "text-warning";
-        case "error":
-            return "text-danger";
-        default:
-            return "text-primary";
-    }
+
+    return undefined;
+
+    //switch (style) {
+    //    case "success":
+    //        return "text-success";
+    //    case "info":
+    //        return "text-info";
+    //    case "warning":
+    //        return "text-warning";
+    //    case "error":
+    //        return "text-danger";
+    //    default:
+    //        return "text-primary";
+    //}
 }
 
 

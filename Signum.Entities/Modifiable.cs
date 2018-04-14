@@ -43,17 +43,32 @@ namespace Signum.Entities
             get { return Modified == ModifiedState.Modified || Modified == ModifiedState.SelfModified; }
         }
 
-        protected internal virtual void SetSelfModified()
+        public virtual void SetSelfModified()
         {
             Modified = ModifiedState.SelfModified;
         }
 
-        protected internal virtual void PreSaving(ref bool graphModified)
+        protected internal virtual void PreSaving(PreSavingContext ctx)
         {
         }
 
         protected internal virtual void PostRetrieving()
         {
+        }
+    }
+
+    public class PreSavingContext
+    {
+        internal PreSavingContext(DirectedGraph<Modifiable> graph)
+        {
+            this.Graph = graph;
+        }
+
+        public DirectedGraph<Modifiable> Graph { get; private set; }
+        public bool IsGraphInvalidated { get; private set; }
+        public void InvalidateGraph()
+        {
+            this.IsGraphInvalidated = true;
         }
     }
 

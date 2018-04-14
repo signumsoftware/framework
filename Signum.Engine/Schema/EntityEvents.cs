@@ -2,9 +2,12 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Reflection;
 using System.Text;
 using Signum.Entities;
+using Signum.Entities.Reflection;
 using Signum.Utilities;
+using Signum.Utilities.Reflection;
 
 namespace Signum.Engine.Maps
 {
@@ -30,6 +33,29 @@ namespace Signum.Engine.Maps
         public event PreUnsafeInsertHandler<T> PreUnsafeInsert;
         public event BulkInsetHandler<T> PreBulkInsert;
 
+        public Dictionary<PropertyRoute, IAdditionalBinding> AdditionalBindings { get; private set; }
+        
+        /// <param name="valueFunction">For Caching scenarios</param>
+        public void RegisterBinding<M>(Expression<Func<T, M>> field, Func<bool> shouldSet, Expression<Func<T, M>> valueExpression, Func<T, IRetriever, M> valueFunction = null)
+        {
+            if (AdditionalBindings == null)
+                AdditionalBindings = new Dictionary<PropertyRoute, IAdditionalBinding>();
+
+            var ma = (MemberExpression)field.Body;
+
+            var pr = PropertyRoute.Construct(field);
+
+            AdditionalBindings.Add(pr, new AdditionalBinding<T, M>
+            {
+                PropertyRoute = pr,
+                ShouldSet = shouldSet,
+                ValueExpression = valueExpression,
+                ValueFunction = valueFunction,
+            });
+        }
+
+       
+
         internal IEnumerable<FilterQueryResult<T>> OnFilterQuery()
         {
             if (FilterQuery == null)
@@ -38,28 +64,37 @@ namespace Signum.Engine.Maps
             return FilterQuery.GetInvocationListTyped().Select(f => f()).ToList();
         }
 
-        internal void OnPreUnsafeDelete(IQueryable<T> entityQuery)
+        internal IDisposable OnPreUnsafeDelete(IQueryable<T> entityQuery)
         {
+            IDisposable result = null;
             if (PreUnsafeDelete != null)
                 foreach (var action in PreUnsafeDelete.GetInvocationListTyped().Reverse())
-                    action(entityQuery);
+                    result = Disposable.Combine(result, action(entityQuery));
+
+            return result;
         }
 
-        internal void OnPreUnsafeMListDelete(IQueryable mlistQuery, IQueryable<T> entityQuery)
+        internal IDisposable OnPreUnsafeMListDelete(IQueryable mlistQuery, IQueryable<T> entityQuery)
         {
+            IDisposable result = null;
             if (PreUnsafeMListDelete != null)
                 foreach (var action in PreUnsafeMListDelete.GetInvocationListTyped().Reverse())
-                    action(mlistQuery, entityQuery);
+                    result = Disposable.Combine(result, action(mlistQuery, entityQuery));
+
+            return result;
         }
 
-        void IEntityEvents.OnPreUnsafeUpdate(IUpdateable update)
+        IDisposable IEntityEvents.OnPreUnsafeUpdate(IUpdateable update)
         {
+            IDisposable result = null;
             if (PreUnsafeUpdate != null)
             {
                 var query = update.EntityQuery<T>();
                 foreach (var action in PreUnsafeUpdate.GetInvocationListTyped().Reverse())
-                    action(update, query);
+                    result = Disposable.Combine(result, action(update, query));
             }
+
+            return result;
         }
 
         LambdaExpression IEntityEvents.OnPreUnsafeInsert(IQueryable query, LambdaExpression constructor, IQueryable entityQuery)
@@ -78,9 +113,9 @@ namespace Signum.Engine.Maps
                     action(inMListTable);
         }
 
-        void IEntityEvents.OnPreSaving(Entity entity, ref bool graphModified)
+        void IEntityEvents.OnPreSaving(Entity entity, PreSavingContext ctx)
         {
-            PreSaving?.Invoke((T)entity, ref graphModified);
+            PreSaving?.Invoke((T)entity, ctx);
         }
 
         void IEntityEvents.OnSaving(Entity entity)
@@ -131,16 +166,87 @@ namespace Signum.Engine.Maps
         }
     }
 
-    public delegate void PreSavingEventHandler<T>(T ident, ref bool graphModified) where T : Entity;
+    public interface IAdditionalBinding
+    {
+        PropertyRoute PropertyRoute { get; }
+        Func<bool> ShouldSet { get; }
+        LambdaExpression ValueExpression { get; }
+        void SetInMemory(Entity entity, IRetriever retriever);
+    }
+
+    public class AdditionalBinding<T, M> : IAdditionalBinding
+        where T : Entity
+    {
+        public PropertyRoute PropertyRoute { get; set; }
+        public Func<bool> ShouldSet { get; set; }
+        public Expression<Func<T, M>> ValueExpression { get; set; }
+        public Func<T, IRetriever, M> ValueFunction { get; set; }
+        LambdaExpression IAdditionalBinding.ValueExpression => ValueExpression;
+
+        Action<T, M> _setter;
+
+        public void SetInMemory(Entity entity, IRetriever retriever) => SetInMemory((T)entity, retriever);
+        void SetInMemory(T entity, IRetriever retriever)
+        {
+            if (!ShouldSet())
+                return;
+
+            if (ValueFunction == null)
+                throw new InvalidOperationException($"ValueFunction should be set in AdditionalBinding {PropertyRoute} because {PropertyRoute.Type} is Cached");
+
+            var setter = _setter ?? (_setter = CreateSetter());
+
+            var value = ValueFunction(entity, retriever);
+
+            setter(entity, value);
+        }
+
+        Action<T, M> CreateSetter()
+        {
+            if (PropertyRoute.Type.IsMList())
+            {
+                var partGetter = PropertyRoute.GetLambdaExpression<T, M>(true).Compile();
+
+                return (e, value) =>
+                {
+                    var mlist = partGetter(e);
+
+                    if (mlist == null)
+                        return;
+
+                    ((IMListPrivate)mlist).AssignAndPostRetrieving((IMListPrivate)value);
+                };
+            }
+            else if (PropertyRoute.Parent.PropertyRouteType == PropertyRouteType.Root)
+                return ReflectionTools.CreateSetter<T, M>(PropertyRoute.PropertyInfo);
+            else
+            {
+                var partGetter = PropertyRoute.Parent.GetLambdaExpression<T, ModifiableEntity>(true).Compile();
+
+                var setter = ReflectionTools.CreateSetter<ModifiableEntity, M>(PropertyRoute.PropertyInfo);
+
+                return (e, value) =>
+                {
+                    var part = partGetter(e);
+                    if (part == null)
+                        return;
+
+                    setter(part, value);
+                };
+            }
+        }
+    }
+
+    public delegate void PreSavingEventHandler<T>(T ident, PreSavingContext ctx) where T : Entity;
     public delegate void RetrievedEventHandler<T>(T ident) where T : Entity;
     public delegate void SavingEventHandler<T>(T ident) where T : Entity;
     public delegate void SavedEventHandler<T>(T ident, SavedEventArgs args) where T : Entity;
     public delegate FilterQueryResult<T> FilterQueryEventHandler<T>() where T : Entity;
     public delegate void AlternativeRetriveEventHandler<T>(PrimaryKey id, AlternativeRetrieveArgs<T> args) where T : Entity;
 
-    public delegate void PreUnsafeDeleteHandler<T>(IQueryable<T> entityQuery);
-    public delegate void PreUnsafeMListDeleteHandler<T>(IQueryable mlistQuery, IQueryable<T> entityQuery);
-    public delegate void PreUnsafeUpdateHandler<T>(IUpdateable update, IQueryable<T> entityQuery);
+    public delegate IDisposable PreUnsafeDeleteHandler<T>(IQueryable<T> entityQuery);
+    public delegate IDisposable PreUnsafeMListDeleteHandler<T>(IQueryable mlistQuery, IQueryable<T> entityQuery);
+    public delegate IDisposable PreUnsafeUpdateHandler<T>(IUpdateable update, IQueryable<T> entityQuery);
     public delegate LambdaExpression PreUnsafeInsertHandler<T>(IQueryable query, LambdaExpression constructor, IQueryable<T> entityQuery);
     public delegate void BulkInsetHandler<T>(bool inMListTable);
 
@@ -180,16 +286,18 @@ namespace Signum.Engine.Maps
     internal interface IEntityEvents
     {
         Entity OnAlternativeRetriving(PrimaryKey id);
-        void OnPreSaving(Entity entity, ref bool graphModified);
+        void OnPreSaving(Entity entity, PreSavingContext ctx);
         void OnSaving(Entity entity);
         void OnSaved(Entity entity, SavedEventArgs args);
 
         void OnRetrieved(Entity entity);
 
-        void OnPreUnsafeUpdate(IUpdateable update);
+        IDisposable OnPreUnsafeUpdate(IUpdateable update);
         LambdaExpression OnPreUnsafeInsert(IQueryable query, LambdaExpression constructor, IQueryable entityQuery);
         void OnPreBulkInsert(bool inMListTable);
 
         ICacheController CacheController { get; }
+
+        Dictionary<PropertyRoute, IAdditionalBinding> AdditionalBindings { get; }
     }
 }

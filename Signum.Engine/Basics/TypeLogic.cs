@@ -79,7 +79,7 @@ namespace Signum.Engine.Basics
                         t.Namespace,
                     });
                 
-                TypeEntity.SetTypeDNCallbacks(
+                TypeEntity.SetTypeEntityCallbacks(
                     t => TypeToEntity.GetOrThrow(t),
                     t => EntityToType.GetOrThrow(t));
             }
@@ -94,12 +94,21 @@ namespace Signum.Engine.Basics
 
         public static SqlPreCommand Schema_Synchronizing(Replacements replacements)
         {
-            Table table = Schema.Current.Table<TypeEntity>();
+            var schema = Schema.Current;
 
             Dictionary<string, TypeEntity> should = GenerateSchemaTypes().ToDictionaryEx(s => s.TableName, "tableName in memory");
 
-            Dictionary<string, TypeEntity> current = ApplyReplacementsToOld(replacements, 
-                Administrator.TryRetrieveAll<TypeEntity>(replacements).ToDictionaryEx(c => c.TableName, "tableName in database"), Replacements.KeyTables);
+            var currentList = Administrator.TryRetrieveAll<TypeEntity>(replacements);
+
+            { //External entities are nt asked in SchemaSynchronizer
+                replacements.AskForReplacements(
+                    currentList.Where(t => schema.IsExternalDatabase(ObjectName.Parse(t.TableName).Schema.Database)).Select(a => a.TableName).ToHashSet(),
+                    should.Values.Where(t => schema.IsExternalDatabase(ObjectName.Parse(t.TableName).Schema.Database)).Select(a => a.TableName).ToHashSet(),
+                    Replacements.KeyTables);
+            }
+
+            Dictionary<string, TypeEntity> current = ApplyReplacementsToOld(replacements,
+                currentList.ToDictionaryEx(c => c.TableName, "tableName in database"), Replacements.KeyTables);
 
             { //Temporal solution until applications are updated
                 var repeated =
@@ -115,6 +124,8 @@ namespace Signum.Engine.Basics
                 should = should.SelectDictionary(simplify, v => v);
                 current = current.SelectDictionary(simplify, v => v);
             }
+
+            Table table = schema.Table<TypeEntity>();
 
             using (replacements.WithReplacedDatabaseName())
                 return Synchronizer.SynchronizeScript(

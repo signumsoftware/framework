@@ -1,6 +1,5 @@
 ﻿
 import * as React from 'react'
-import { Modal, ModalProps, ModalClass, ButtonToolbar, Button, Sizes } from 'react-bootstrap'
 import { openModal, IModalProps } from '../Modals'
 import MessageModal from '../Modals/MessageModal'
 import * as Navigator from '../Navigator'
@@ -13,11 +12,12 @@ import { Entity, Lite, ModifiableEntity, JavascriptMessage, NormalWindowMessage,
 import { getTypeInfo, TypeInfo, PropertyRoute, ReadonlyBinding, GraphExplorer, isTypeModel, parseId } from '../Reflection'
 import ValidationErrors from './ValidationErrors'
 import { renderWidgets, WidgetContext } from './Widgets'
-import { needsCanExecute } from '../Operations/EntityOperations'
 import { EntityOperationContext } from '../Operations'
 
 import "./Frames.css"
 import { ViewPromise } from "../Navigator";
+import { BsSize, Modal, ErrorBoundary } from '../Components';
+import { ModalHeaderButtons } from '../Components/Modal';
 
 interface FrameModalProps extends React.Props<FrameModal>, IModalProps {
     title?: string;
@@ -31,14 +31,14 @@ interface FrameModalProps extends React.Props<FrameModal>, IModalProps {
     getViewPromise?: (e: ModifiableEntity) => undefined | string | Navigator.ViewPromise<ModifiableEntity>;
     isNavigate?: boolean;
     readOnly?: boolean;
-    modalSize?: Sizes;
+    modalSize?: BsSize;
 }
 
 interface FrameModalState {
     pack?: EntityPack<ModifiableEntity>;
     getComponent?: (ctx: TypeContext<ModifiableEntity>) => React.ReactElement<any>;
     propertyRoute?: PropertyRoute;
-    show?: boolean;
+    show: boolean;
     refreshCount: number;
 }
 
@@ -124,8 +124,8 @@ export default class FrameModal extends React.Component<FrameModalProps, FrameMo
             .then(c => this.setState({ getComponent: c }));
     }
 
-    okClicked: boolean;
-    handleOkClicked = (val: any) => {
+    okClicked: boolean = false;
+    handleOkClicked = () => {
         if (this.hasChanges() &&
             (this.props.requiresSaveOperation != undefined ? this.props.requiresSaveOperation : Navigator.typeRequiresSaveOperation(this.state.pack!.entity.Type))) {
             MessageModal.show({
@@ -179,8 +179,8 @@ export default class FrameModal extends React.Component<FrameModalProps, FrameMo
 
     hasChanges() {
 
-        var hc = this.entityComponent as IHasChanges;
-        if (hc.componentHasChanges)
+        var hc = this.entityComponent as IHasChanges | null | undefined;
+        if (hc && hc.componentHasChanges)
             return hc.componentHasChanges();
 
         const entity = this.state.pack!.entity;
@@ -199,22 +199,22 @@ export default class FrameModal extends React.Component<FrameModalProps, FrameMo
         const pack = this.state.pack;
 
         return (
-            <Modal bsSize={this.props.modalSize || "lg"} onHide= { this.handleCancelClicked } show= { this.state.show } onExited= { this.handleOnExited } className= "sf-popup-control" >
-                <Modal.Header closeButton={this.props.isNavigate}>
-                    {!this.props.isNavigate && <ButtonToolbar className="pull-right flip">
-                        <Button className="sf-entity-button sf-close-button sf-ok-button" bsStyle="primary" disabled={!pack} onClick={this.handleOkClicked}>{JavascriptMessage.ok.niceToString()}</Button>
-                        <Button className="sf-entity-button sf-close-button sf-cancel-button" bsStyle="default" disabled={!pack} onClick={this.handleCancelClicked}>{JavascriptMessage.cancel.niceToString()}</Button>
-                    </ButtonToolbar>}
+            <Modal size={this.props.modalSize || "lg"} show={this.state.show} onExited={this.handleOnExited} onHide={this.handleCancelClicked} className="sf-popup-control" >
+                <ModalHeaderButtons
+                    onClose={this.props.isNavigate ? this.handleCancelClicked : undefined}
+                    onOk={!this.props.isNavigate ? this.handleOkClicked : undefined}
+                    onCancel={!this.props.isNavigate ? this.handleCancelClicked : undefined}
+                    okDisabled={!pack}>
                     {this.renderTitle()}
-                </Modal.Header>
+                </ModalHeaderButtons>
                 {pack && this.renderBody()}
             </Modal>
         );
     }
 
-    entityComponent: React.Component<any, any>;
+    entityComponent?: React.Component<any, any> | null;
 
-    setComponent(c: React.Component<any, any>) {
+    setComponent(c: React.Component<any, any> | null) {
         if (c && this.entityComponent != c) {
             this.entityComponent = c;
             this.forceUpdate();
@@ -246,14 +246,16 @@ export default class FrameModal extends React.Component<FrameModalProps, FrameMo
         const ctx = new TypeContext(undefined, styleOptions, this.state.propertyRoute!, new ReadonlyBinding(pack.entity, this.prefix!));
 
         return (
-            <Modal.Body>
+            <div className="modal-body">
                 {renderWidgets({ ctx: ctx, pack: pack })}
                 {this.entityComponent && <ButtonBar frame={frame} pack={pack} isOperationVisible={this.props.isOperationVisible} />}
                 <ValidationErrors entity={pack.entity} ref={ve => this.validationErrors = ve} />
-                <div className="sf-main-control form-horizontal" data-test-ticks={new Date().valueOf()} data-main-entity={entityInfo(ctx.value)}>
-                    {this.state.getComponent && React.cloneElement(this.state.getComponent(ctx), { ref: (c: React.Component<any, any>) => this.setComponent(c) })}
+                <div className="sf-main-control" data-test-ticks={new Date().valueOf()} data-main-entity={entityInfo(ctx.value)}>
+                    <ErrorBoundary>
+                        {this.state.getComponent && React.cloneElement(this.state.getComponent(ctx), { ref: (c: React.Component<any, any> | null) => this.setComponent(c) })}
+                    </ErrorBoundary>
                 </div>
-            </Modal.Body>
+            </div>
         );
     }
 
@@ -262,18 +264,18 @@ export default class FrameModal extends React.Component<FrameModalProps, FrameMo
     renderTitle() {
 
         if (!this.state.pack)
-            return <h3>{JavascriptMessage.loading.niceToString()}</h3>;
+            return <span className="sf-entity-title">{JavascriptMessage.loading.niceToString()}</span>;
 
         const entity = this.state.pack.entity;
         const pr = this.props.propertyRoute;
 
         return (
-            <h4>
+            <span>
                 <span className="sf-entity-title">{this.props.title || getToString(entity)}</span>&nbsp;
                 {this.renderExpandLink()}
                 <br />
                 <small> {pr && pr.member && pr.member.typeNiceName || Navigator.getTypeTitle(entity, pr)}</small>
-            </h4>
+            </span>
         );
     }
 
@@ -289,8 +291,8 @@ export default class FrameModal extends React.Component<FrameModalProps, FrameMo
             return undefined;
 
         return (
-            <a className="sf-popup-fullscreen sf-pointer" onMouseUp={this.handlePopupFullScreen}>
-                <span className="glyphicon glyphicon-new-window"></span>
+            <a className="sf-popup-fullscreen sf-pointer" href="#" onClick={this.handlePopupFullScreen}>
+                <span className="fa fa-external-link"></span>
             </a>
         );
     }

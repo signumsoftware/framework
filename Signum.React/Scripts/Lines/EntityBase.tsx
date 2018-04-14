@@ -7,8 +7,9 @@ import { FindOptions } from '../FindOptions'
 import { TypeContext, StyleContext, StyleOptions, FormGroupStyle, EntityFrame } from '../TypeContext'
 import { PropertyRoute, PropertyRouteType, MemberInfo, getTypeInfo, getTypeInfos, TypeInfo, IsByAll, TypeReference } from '../Reflection'
 import { ModifiableEntity, Lite, Entity, EntityControlMessage, JavascriptMessage, toLiteFat, is, liteKey, isLite, isEntity, entityInfo, SelectorMessage } from '../Signum.Entities'
-import { LineBase, LineBaseProps, FormGroup, FormControlStatic, runTasks } from '../Lines/LineBase'
-import Typeahead from '../Lines/Typeahead'
+import { LineBase, LineBaseProps, runTasks } from './LineBase'
+import { FormGroup } from './FormGroup'
+import { FormControlReadonly } from './FormControlReadonly'
 import SelectorModal from '../SelectorModal'
 import { TypeEntity } from "../Signum.Entities.Basics";
 
@@ -102,7 +103,8 @@ export abstract class EntityBase<T extends EntityBaseProps, S extends EntityBase
     }
 
 
-    defaultView(value: ModifiableEntity | Lite<Entity>, propertyRoute: PropertyRoute): Promise<ModifiableEntity | undefined> {        
+    defaultView(value: ModifiableEntity | Lite<Entity>, propertyRoute: PropertyRoute): Promise<ModifiableEntity | undefined> { 
+        debugger;
         return Navigator.view(value, {
             propertyRoute: propertyRoute,
             getViewPromise: this.getGetViewPromise(value) 
@@ -158,10 +160,10 @@ export abstract class EntityBase<T extends EntityBaseProps, S extends EntityBase
             return undefined;
 
         return (
-            <a className={classes("sf-line-button", "sf-view", btn ? "btn btn-default" : undefined) }
+            <a href="#" className={classes("sf-line-button", "sf-view", btn ? "btn input-group-text" : undefined)}
                 onClick={this.handleViewClick}
                 title={EntityControlMessage.View.niceToString() }>
-                <span className="glyphicon glyphicon-arrow-right"/>
+                <span className="fa fa-arrow-right"/>
             </a>
         );
     }
@@ -235,10 +237,10 @@ export abstract class EntityBase<T extends EntityBaseProps, S extends EntityBase
             return undefined;
 
         return (
-            <a className={classes("sf-line-button", "sf-create", btn ? "btn btn-default" : undefined) }
+            <a href="#" className={classes("sf-line-button", "sf-create", btn ? "btn input-group-text" : undefined) }
                 onClick={this.handleCreateClick}
                 title={EntityControlMessage.Create.niceToString() }>
-                <span className="glyphicon glyphicon-plus sf-create"/>
+                <span className="fa fa-plus sf-create"/>
             </a>
         );
     }
@@ -282,10 +284,10 @@ export abstract class EntityBase<T extends EntityBaseProps, S extends EntityBase
             return undefined;
 
         return (
-            <a className={classes("sf-line-button", "sf-find", btn ? "btn btn-default" : undefined) }
+            <a href="#" className={classes("sf-line-button", "sf-find", btn ? "btn input-group-text" : undefined) }
                 onClick={this.handleFindClick}
                 title={EntityControlMessage.Find.niceToString() }>
-                <span className="glyphicon glyphicon-search"/>
+                <span className="fa fa-search"/>
             </a>
         );
     }
@@ -308,10 +310,10 @@ export abstract class EntityBase<T extends EntityBaseProps, S extends EntityBase
             return undefined;
 
         return (
-            <a className={classes("sf-line-button", "sf-remove", btn ? "btn btn-default" : undefined) }
+            <a href="#" className={classes("sf-line-button", "sf-remove", btn ? "btn input-group-text" : undefined) }
                 onClick={this.handleRemoveClick}
                 title={EntityControlMessage.Remove.niceToString() }>
-                <span className="glyphicon glyphicon-remove"/>
+                <span className="fa fa-remove"/>
             </a>
         );
     }

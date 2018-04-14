@@ -312,7 +312,7 @@ namespace Signum.Engine.Linq
         {
             Expression source = MakeSqlValue(Visit(aggregate.Expression));
             if (source != aggregate.Expression)
-                return new AggregateExpression(aggregate.Type, source, aggregate.AggregateFunction);
+                return new AggregateExpression(aggregate.Type, source, aggregate.AggregateFunction, aggregate.Distinct);
             return aggregate;
         }
 
@@ -377,7 +377,7 @@ namespace Signum.Engine.Linq
                 return c;
             });
             if (source != update.Source || where != update.Where || assigments != update.Assigments)
-                return new UpdateExpression(update.Table, (SelectExpression)source, where, assigments);
+                return new UpdateExpression(update.Table, update.UseHistoryTable, (SelectExpression)source, where, assigments);
             return update;
         }
 

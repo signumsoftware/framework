@@ -15,6 +15,10 @@ input[type=checkbox].form-control {
     margin-top: 9px;
 }
 
+.input-group {
+    flex-wrap:nowrap;
+}
+
 p.form-control {
     background-color: #f6f6f6;
     margin: 0px;
@@ -84,26 +88,33 @@ label > input[type=checkbox] {
     color: lightgray;
 }
 
+    .sf-line-button.btn {
+        color: gray;
+    }
+
     .sf-line-button:hover {
         color: gray;
     }
 
     .sf-line-button:not(.btn) {
-        vertical-align: middle;
         margin: 0 2px;
     }
 
+
+
 /* EntityLine buttons  */
-.input-group-btn.btn-group-vertical {
-    vertical-align: top;
+.input-group-append.input-group-vertical {
+    flex-direction: column;
+    align-items: stretch;
 }
 
-    .input-group-btn.btn-group-vertical > .btn {
+    .input-group-append.input-group-vertical > .btn {
         border-top-left-radius: 0px !important;
         border-bottom-left-radius: 0px !important;
+        margin-left: 0px;
     }
 
-        .input-group-btn.btn-group-vertical > .btn:first-child:not(:last-child) {
+        .input-group-append.input-group-vertical > .btn:first-child:not(:last-child) {
             border-top-right-radius: 4px;
             border-bottom-right-radius: 0;
             border-bottom-left-radius: 0;
@@ -132,6 +143,10 @@ fieldset {
             margin-left: 5px;
         }
 
+        fieldset > legend > input[type=checkbox] {
+            vertical-align: middle;
+        }
+
 .border {
     border: 1px solid #ddd;
     padding: 10px;
@@ -156,15 +171,18 @@ fieldset.sf-repeater-element {
         }
 
 
+body.rtl .fa-arrow-right:before {
+    content: "\F060";
+}
+
+body.rtl .fa-arrow-left:before {
+    content: "\F061";
+}
 /*EntityStrip*/
 
 ul.sf-strip-horizontal > li {
-    float: left;
+    display: inline-block;
     margin-right: 10px;
-}
-
-body.rtl-mode ul.sf-strip-horizontal > li {
-    float: right;
 }
 
 ul.sf-strip-vertical > li {
@@ -232,13 +250,28 @@ ul.nav-tabs {
     cursor: move;
 }
 
+.form-group.row > label {
+    text-align: end;
+}
+
 /*has-error*/
 
+/* Emulating Bootstrap 3 Validation*/
 .has-error,
-.has-error div.rw-widget-picker.rw-widget-container
-/*bootstrap has his own rules*/ {
+.has-error div.rw-widget-picker.rw-widget-container {
     border-color: #a94442;
 }
+
+    .has-error label {
+        color: #a94442;
+    }
+
+    .has-error input,
+    .has-error textarea,
+    .has-error select
+    {
+        border-color: #a94442;
+    }
 
 .form-group .form-group {
     margin-bottom: 0px;
@@ -257,7 +290,46 @@ ul.nav-tabs {
 
 /*form xs*/
 
-.form-xs .form-control,
+select.form-control-xs:not([size]):not([multiple]),
+.input-group-xs > select.form-control:not([size]):not([multiple]),
+.input-group-xs > .input-group-prepend > select.input-group-text:not([size]):not([multiple]),
+.input-group-xs > .input-group-append > select.input-group-text:not([size]):not([multiple]),
+.input-group-xs > .input-group-prepend > select.btn:not([size]):not([multiple]),
+.input-group-xs > .input-group-append > select.btn:not([size]):not([multiple]) {
+    height: 24px;
+    padding: 0 2px
+}
+
+.form-control-xs,
+.input-group-xs > .form-control,
+.input-group-xs > .input-group-prepend > .input-group-text,
+.input-group-xs > .input-group-append > .input-group-text,
+.input-group-xs > .input-group-prepend > .btn,
+.input-group-xs > .input-group-append > .btn {
+    padding: 1px 5px;
+    font-size: 0.875rem;
+    line-height: 1.5;
+    border-radius: 0.2rem;
+}
+
+.col-form-label-xs {
+    padding-top: 2px;
+    padding-bottom: 2px;
+    font-size: 0.875rem;
+    line-height: 1.5;
+}
+
+.label-sm {
+    font-size: 0.875rem;
+    margin-bottom: 0px;
+}
+
+.label-xs {
+    font-size: 0.875rem;
+    margin-bottom: 0px;
+}
+
+/*.form-xs .form-control,
 .form-xs .form-control-static {
     padding: 0px 3px;
 }
@@ -301,76 +373,46 @@ ul.nav-tabs {
 .form-xs .input-group .input-group-addon {
     padding: 0px 3px;
     height: 20px;
-}
+}*/
 
-.form-xs .rw-input {
+.rw-widget-xs .rw-input {
     padding: 0px 3px;
     height: 18px;
 }
 
-/*
-.form-xs .rw-select.rw-btn,
-.form-xs .rw-select > .rw-btn {
-    line-height: 18px;
-    width: 1.5em;
-    border-top: 0px;
-}
-
-.form-xs .rw-dropdown-list > .rw-widget-input {
-    height: 18px;
-}
-
-.form-xs .rw-combobox,
-.form-xs .rw-numberpicker,
-.form-xs .rw-dropdown-list {
-    padding-right: 1.5em;
-    line-height: 18px;
-}
-    */
-
-.form-xs .rw-widget-picker {
-    height: 20px;
+.rw-widget-xs .rw-widget-picker {
+    height: 24px;
     line-height: 10px;
 }
 
-.form-xs .rw-select {
+.rw-widget-xs .rw-select {
     vertical-align: top;
 }
 
-.form-xs .sf-strip {
+.form-group.form-group-xs {
+    margin-bottom: 5px;
+}
+
+
+/*.form-xs .sf-strip {
     margin-bottom: 0px;
 }
 
     .form-xs .sf-strip.sf-strip-vertical {
-        margin-top: 0px; /*sf-strip-vertical*/
-    }
+        margin-top: 0px; //sf-strip-vertical
+    }*/
 
-.form-group.form-xs {
-    margin-bottom: 6px;
-}
-
+/*
 
 .form-xs fieldset > legend {
     padding: 0px 4px 0 4px;
     font-size: 16px;
-}
-
-.form-horizontal .form-xs .control-label,
-.form-horizontal .form-xs .radio,
-.form-horizontal .form-xs .checkbox,
-.form-horizontal .form-xs .radio-inline,
-.form-horizontal .form-xs .checkbox-inline,
-.form-horizontal .form-xs .form-control-static {
-    margin-top: 0;
-    margin-bottom: 0;
-    padding-top: 0px;
-}
-
+}*/
 
 
 /*form sm*/
 
-.form-sm .form-control,
+/*.form-sm .form-control,
 .form-sm .form-control-static {
     padding: 2px 6px;
 }
@@ -412,41 +454,27 @@ ul.nav-tabs {
 .form-sm .input-group .input-group-addon {
     padding: 2px 4px;
 }
+*/
 
-.form-sm .rw-input {
+.rw-widget-sm .rw-input {
     padding: 3px 6px;
-    height: 24px;
+    height: 28px;
+}
+
+.rw-widget-sm .rw-widget-picker {
+    height: 31px;
+}
+
+.input-group > .form-control-plaintext {
+    padding-right: 5px;
 }
 /*
-.form-sm .rw-select.rw-btn,
-.form-sm .rw-select > .rw-btn {
-    line-height: 24px;
-    width: 1.5em;
-    border-top: 0px;
-}
-
-.form-sm .rw-dropdown-list > .rw-widget-input {
-    line-height: 24px;
-}
-
-
-.form-sm .rw-combobox,
-.form-sm .rw-numberpicker,
-.form-sm .rw-dropdown-list {
-    padding-right: 1.5em;
-    line-height: 24px;bn   
-}
-*/
-.form-sm .rw-widget-picker {
-    height: 24px;
-}
-
 .form-sm .sf-strip {
     margin-bottom: 4px;
 }
 
     .form-sm .sf-strip.sf-strip-vertical {
-        margin-top: 6px; /*sf-strip-vertical*/
+        margin-top: 6px; //sf-strip-vertical
     }
 
 .form-group.form-sm {
@@ -458,55 +486,14 @@ ul.nav-tabs {
     padding: 2px 5px 0 5px;
     font-size: 18px;
 }
-
-.form-horizontal .form-sm .control-label,
-.form-horizontal .form-sm .radio,
-.form-horizontal .form-sm .checkbox,
-.form-horizontal .form-sm .radio-inline,
-.form-horizontal .form-sm .checkbox-inline,
-.form-horizontal .form-sm .form-control-static {
-    margin-top: 0;
-    margin-bottom: 0;
-    padding-top: 2px;
+*/
+.form-group.form-group-sm {
+    margin-bottom: 6px;
 }
-
 
 /*form-inline*/
-.form-horizontal .form-inline .form-group {
-    margin-right: 0px;
-    margin-left: 0px;
-}
-
 .form-inline .sf-query-token-builder {
     vertical-align: middle;
-}
-
-/*form-vertical*/
-.form-vertical .form-group > label {
-    float: none;
-    padding-top: 0;
-    text-align: start;
-    width: auto;
-}
-
-.form-vertical .form-sm.form-group > label {
-    margin-bottom: 0px;
-}
-
-.form-vertical .form-xs.form-group > label {
-    margin-bottom: 0px;
-}
-
-.form-vertical .form-group {
-    margin-left: 0;
-    margin-right: 0;
-}
-
-.form-vertical .form-control,
-.form-vertical .form-control-static {
-    display: block;
-    /*width: initial;*/
-    vertical-align: baseline;
 }
 
 /* table non-fluid*/
@@ -527,12 +514,6 @@ ul.dropdown-menu > li > a.disabled {
     opacity: .65;
 }
 
-/*Override absurd width for popups on sm*/
-@media (min-width: 768px) {
-    .modal-dialog:not(.modal-sm) {
-        min-width: 730px;
-    }
-}
 
 .help-block {
     display: block;
@@ -540,11 +521,6 @@ ul.dropdown-menu > li > a.disabled {
     margin-bottom: 0px;
     color: #737373;
 }
-
-.sf-create-label {
-    margin-right: 5px;
-}
-
 
 .item-group {
     white-space: nowrap;
@@ -556,5 +532,6 @@ table.sf-multi-value {
 }
 
     table.sf-multi-value > tbody > tr > td {
-        padding-bottom: 4px;
+        padding:0px;
+        padding-bottom: 2px;
     }

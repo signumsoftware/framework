@@ -17,6 +17,7 @@ using System.Linq.Expressions;
 using Signum.Entities.Basics;
 using System.Data.Common;
 using Signum.Engine.Operations.Internal;
+using Signum.Engine;
 
 namespace Signum.Engine.Operations
 {
@@ -28,6 +29,15 @@ namespace Signum.Engine.Operations
         public static IQueryable<OperationLogEntity> OperationLogs(this Entity e)
         {
             return OperationLogsEntityExpression.Evaluate(e);
+        }
+
+
+        static Expression<Func<Entity, OperationLogEntity>> CurrentOperationLogExpression =
+            e => e.OperationLogs().Where(ol => ol.End.HasValue && e.SystemPeriod().Contains(ol.End.Value)).OrderBy(a => a.End.Value).FirstOrDefault();
+        [ExpressionField]
+        public static OperationLogEntity PreviousOperationLog(this Entity e)
+        {
+            return CurrentOperationLogExpression.Evaluate(e);
         }
 
         static Expression<Func<OperationSymbol, IQueryable<OperationLogEntity>>> LogsExpression =
@@ -118,16 +128,41 @@ namespace Signum.Engine.Operations
                 sb.Schema.Table<TypeEntity>().PreDeleteSqlSync += new Func<Entity, SqlPreCommand>(Type_PreDeleteSqlSync);
 
                 sb.Schema.SchemaCompleted += OperationLogic_Initializing;
+                sb.Schema.SchemaCompleted += () => RegisterCurrentLogs(sb.Schema, dqm);
                 
                 ExceptionLogic.DeleteLogs += ExceptionLogic_DeleteLogs;
             }
         }
 
+        private static void RegisterCurrentLogs(Schema schema, DynamicQueryManager dqm)
+        {
+            var s = Schema.Current;
+            foreach (var t in s.Tables.Values.Where(t => t.SystemVersioned != null))
+            {
+                giRegisterExpression.GetInvoker(t.Type)(dqm);
+            }
+        }
+
+        static GenericInvoker<Action<DynamicQueryManager>> giRegisterExpression =
+            new GenericInvoker<Action<DynamicQueryManager>>((dqm) => RegisterPreviousLog<Entity>(dqm));
+
+        public static void RegisterPreviousLog<T>(DynamicQueryManager dqm)
+            where T : Entity
+        {
+            dqm.RegisterExpression(
+                (T entity) => entity.PreviousOperationLog(),
+                () => OperationMessage.PreviousOperationLog.NiceToString());
+        }
+
+
         public static void ExceptionLogic_DeleteLogs(DeleteLogParametersEmbedded parameters, StringBuilder sb, CancellationToken token)
         {
-            var dateLimit = parameters.GetDateLimit(typeof(OperationLogEntity).ToTypeEntity());
+            var dateLimit = parameters.GetDateLimitDelete(typeof(OperationLogEntity).ToTypeEntity());
 
-            Database.Query<OperationLogEntity>().Where(o => o.Start < dateLimit).UnsafeDeleteChunksLog(parameters, sb, token);
+            if (dateLimit == null)
+                return;
+
+            Database.Query<OperationLogEntity>().Where(o => o.Start < dateLimit.Value).UnsafeDeleteChunksLog(parameters, sb, token);
         }
 
         static void OperationLogic_Initializing()

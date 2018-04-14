@@ -111,6 +111,7 @@
     <Compile Include="Connection\SqlConnector.cs" />
     <Compile Include="Connection\Transaction.cs" />
     <Compile Include="Connection\UserConnections.cs" />
+    <Compile Include="Patterns\DeletePart.cs" />
     <Compile Include="DynamicQuery\AutoDynamicQuery.cs" />
     <Compile Include="DynamicQuery\DynamicQuery.cs" />
     <Compile Include="DynamicQuery\ColumnDescriptionFactory.cs" />
@@ -126,6 +127,7 @@
     <Compile Include="Engine\Synchronizer.cs" />
     <Compile Include="ExecutionContext.cs" />
     <Compile Include="GlobalLazy.cs" />
+    <Compile Include="LinqExpandHints.cs" />
     <Compile Include="Linq\AliasGenerator.cs" />
     <Compile Include="Linq\DbExpressions.Sql.cs" />
     <Compile Include="Linq\DbQueryProvider.cs" />
@@ -194,7 +196,7 @@
     <Compile Include="Schema\UniqueIndex.cs" />
     <Compile Include="ServerBasic.cs" />
     <Compile Include="Basics\TypeLogic.cs" />
-    <Compile Include="VirtualMList.cs" />
+    <Compile Include="Patterns\VirtualMList.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Administrator.md" />

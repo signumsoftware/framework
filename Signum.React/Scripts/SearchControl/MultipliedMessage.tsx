@@ -1,6 +1,5 @@
 ﻿
 import * as React from 'react'
-import { Modal, ModalProps, ModalClass, ButtonToolbar } from 'react-bootstrap'
 import { classes, Dic } from '../Globals'
 import * as Finder from '../Finder'
 import { openModal, IModalProps } from '../Modals';
@@ -33,8 +32,8 @@ export default class MultipliedMessage extends React.Component<{ findOptions: Fi
             tokens.map(a => <strong>{a.parent!.niceName}</strong>).joinCommaHtml(External.CollectionMessage.And.niceToString()))
 
         return (
-            <div className="sf-td-multiply alert alert-warning">
-                <span className="glyphicon glyphicon-exclamation-sign" />&nbsp;{message}
+            <div className="sf-search-message alert alert-warning">
+                <span className="fa fa-exclamation-triangle" />&nbsp;{message}
             </div>
         );
     }

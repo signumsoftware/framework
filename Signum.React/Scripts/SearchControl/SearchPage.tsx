@@ -1,5 +1,4 @@
-﻿
-import * as React from 'react'
+﻿import * as React from 'react'
 import { RouteComponentProps } from 'react-router'
 import { Dic } from '../Globals'
 import * as Finder from '../Finder'
@@ -28,7 +27,7 @@ export default class SearchPage extends React.Component<SearchPageProps, SearchP
         this.state = this.calculateState(this.props);
     }
 
-    searchControl: SearchControl;
+    searchControl!: SearchControl;
 
     componentWillReceiveProps(nextProps: SearchPageProps) {
         this.setState(this.calculateState(nextProps));
@@ -73,7 +72,7 @@ export default class SearchPage extends React.Component<SearchPageProps, SearchP
 
     changeUrl() {
 
-        const scl = this.searchControl.searchControlLoaded; 
+        const scl = this.searchControl.searchControlLoaded!; 
 
         const findOptions = Finder.toFindOptions(scl.props.findOptions, scl.props.queryDescription);
 
@@ -90,22 +89,22 @@ export default class SearchPage extends React.Component<SearchPageProps, SearchP
         if (!Finder.isFindable(fo.queryName, true))
             return (
                 <div id="divSearchPage">
-                    <h2>
-                        <span className="sf-entity-title">{getQueryNiceName(fo.queryName)}</span>
+                    <h3>
+                        <span className="display-6">{getQueryNiceName(fo.queryName)}</span>
                         <small>Error: Query not allowed in full screen</small>
-                    </h2>
+                    </h3>
                 </div>
             );
 
         return (
             <div id="divSearchPage">
-                <h2>
-                    <span className="sf-entity-title">{getQueryNiceName(fo.queryName)}</span>
+                <h3 className="display-6">
+                    <span>{getQueryNiceName(fo.queryName)}</span>
                     &nbsp;
                     <a className="sf-popup-fullscreen" href="#" onClick={(e) => this.searchControl.handleFullScreenClick(e) }>
-                        <span className="glyphicon glyphicon-new-window"></span>
+                        <span className="fa fa-external-link"></span>
                     </a>
-                </h2>
+                </h3>
                 <SearchControl ref={e => this.searchControl = e!}
                     findOptions={fo}
                     tag="SearchPage"

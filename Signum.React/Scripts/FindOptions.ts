@@ -1,7 +1,7 @@
 ﻿import { TypeReference, PropertyRoute, PseudoType, QueryKey } from './Reflection';
 import { Dic } from './Globals';
 import { Lite, Entity } from './Signum.Entities';
-import { PaginationMode, OrderType, FilterOperation, FilterType, ColumnOptionsMode, UniqueType } from './Signum.Entities.DynamicQuery';
+import { PaginationMode, OrderType, FilterOperation, FilterType, ColumnOptionsMode, UniqueType, SystemTimeMode } from './Signum.Entities.DynamicQuery';
 import { SearchControlProps } from "./Search";
 
 export { PaginationMode, OrderType, FilterOperation, FilterType, ColumnOptionsMode, UniqueType };
@@ -19,6 +19,7 @@ export interface CountOptionsParsed {
 export interface ModalFindOptions {
     title?: string;
     useDefaultBehaviour?: boolean;
+    autoSelectIfOne?: boolean;
     searchControlProps?: Partial<SearchControlProps>;
 }
 
@@ -32,7 +33,8 @@ export interface FindOptions {
     orderOptions?: OrderOption[];
     columnOptionsMode?: ColumnOptionsMode;
     columnOptions?: ColumnOption[];
-    pagination?: Pagination,
+    pagination?: Pagination;
+    systemTime?: SystemTime;
 }
 
 export interface FindOptionsParsed {
@@ -42,6 +44,7 @@ export interface FindOptionsParsed {
     orderOptions: OrderOptionParsed[];
     columnOptions: ColumnOptionParsed[];
     pagination: Pagination;
+    systemTime?: SystemTime;
 }
 
 
@@ -193,6 +196,7 @@ export interface QueryRequest {
     orders: OrderRequest[];
     columns: ColumnRequest[];
     pagination: Pagination;
+    systemTime?: SystemTime;
 }
 
 export type AggregateType = "Count" | "Average" | "Sum" | "Min" | "Max";
@@ -229,6 +233,12 @@ export interface Pagination {
     currentPage?: number;
 }
 
+export interface SystemTime {
+    mode: SystemTimeMode;
+    startDate?: string;
+    endDate?: string;
+}
+
 export module PaginateMath {
     export function startElementIndex(p: Pagination) {
         return (p.elementsPerPage! * (p.currentPage! - 1)) + 1;
@@ -239,7 +249,7 @@ export module PaginateMath {
     }
 
     export function totalPages(p: Pagination, totalElements: number) {
-        return Math.ceil(totalElements / p.elementsPerPage!); //Round up
+        return Math.max(1, Math.ceil(totalElements / p.elementsPerPage!)); //Round up
     }
 
     export function maxElementIndex(p: Pagination) {

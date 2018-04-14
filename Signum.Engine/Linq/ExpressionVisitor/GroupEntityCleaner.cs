@@ -27,9 +27,9 @@ namespace Signum.Engine.Linq
                 return base.Visit(exp);
         }
 
-        protected internal override Expression VisitTypeFieldInit(TypeEntityExpression typeFie)
+        protected internal override Expression VisitTypeEntity(TypeEntityExpression typeFie)
         {
-            return base.VisitTypeFieldInit(typeFie);
+            return base.VisitTypeEntity(typeFie);
         }
 
         private Expression VisitType(Expression exp)
@@ -40,11 +40,11 @@ namespace Signum.Engine.Linq
             return new TypeImplementedByAllExpression(QueryBinder.ExtractTypeId(exp));
         }
 
-        protected internal override Expression VisitEntity(EntityExpression fieldInit)
+        protected internal override Expression VisitEntity(EntityExpression entity)
         {
-            var newID = (PrimaryKeyExpression)Visit(fieldInit.ExternalId);
+            var newID = (PrimaryKeyExpression)Visit(entity.ExternalId);
 
-            return new EntityExpression(fieldInit.Type, newID, null, null, null, fieldInit.AvoidExpandOnRetrieving); // remove bindings
+            return new EntityExpression(entity.Type, newID, null, null, null, null, null, entity.AvoidExpandOnRetrieving); // remove bindings
         }
     }
 }

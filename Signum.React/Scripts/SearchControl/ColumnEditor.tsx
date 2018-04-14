@@ -1,6 +1,5 @@
 ﻿
 import * as React from 'react'
-import { Modal, ModalProps, ModalClass, ButtonToolbar } from 'react-bootstrap'
 import * as Finder from '../Finder'
 import { classes } from '../Globals';
 import { openModal, IModalProps } from '../Modals';
@@ -40,16 +39,18 @@ export default class ColumnEditor extends React.Component<ColumnEditorProps>{
         const isCollection = co.token && co.token.type.isCollection;
 
         return (
-            <div className={classes("sf-column-editor", "form-xs", isCollection ? "error" : undefined) }
-                title={isCollection ? SearchMessage.CollectionsCanNotBeAddedAsColumns.niceToString() : undefined }>
+            <div className={classes("sf-column-editor", isCollection ? "error" : undefined)}
+                title={isCollection ? SearchMessage.CollectionsCanNotBeAddedAsColumns.niceToString() : undefined}>
                 <button type="button" className="close" aria-label="Close" onClick={this.props.close} ><span aria-hidden="true">×</span></button>
-                <QueryTokenBuilder
-                    queryToken={co.token!}
-                    onTokenChange={this.handleTokenChanged}
-                    queryKey={this.props.queryDescription.queryKey}
-                    subTokenOptions={this.props.subTokensOptions}
-                    readOnly={false}/>
-                <input className="form-control"
+                <div className="rw-widget-xs">
+                    <QueryTokenBuilder
+                        queryToken={co.token!}
+                        onTokenChange={this.handleTokenChanged}
+                        queryKey={this.props.queryDescription.queryKey}
+                        subTokenOptions={this.props.subTokensOptions}
+                        readOnly={false} />
+                </div>
+                <input className="form-control form-control-xs"
                     value={co.displayName || ""}
                     onChange={this.handleOnChange} />
             </div>

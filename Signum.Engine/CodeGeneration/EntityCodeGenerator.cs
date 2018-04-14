@@ -210,7 +210,7 @@ namespace Signum.Engine.CodeGeneration
             sb.AppendLine("public class {0} : {1}".FormatWith(name, GetEntityBaseClass(table.Name)));
             sb.AppendLine("{");
 
-            string multiColumnIndexComment = WriteMultiColumnIndexComment(table, name, table.Columns.Values);
+            string multiColumnIndexComment = WriteMultiColumnIndexComment(table, name);
             if (multiColumnIndexComment != null)
             {
                 sb.Append(multiColumnIndexComment.Indent(4));
@@ -298,7 +298,7 @@ namespace Signum.Engine.CodeGeneration
             sb.AppendLine("public class {0} : {1}".FormatWith(name, typeof(EmbeddedEntity).Name));
             sb.AppendLine("{");
 
-            string multiColumnIndexComment = WriteMultiColumnIndexComment(table, name, table.Columns.Values);
+            string multiColumnIndexComment = WriteMultiColumnIndexComment(table, name);
             if (multiColumnIndexComment != null)
             {
                 sb.Append(multiColumnIndexComment.Indent(4));
@@ -399,17 +399,20 @@ namespace Signum.Engine.CodeGeneration
             return false;
         }
 
-        protected virtual string WriteMultiColumnIndexComment(DiffTable table, string name, IEnumerable<DiffColumn> columns)
+        protected virtual string WriteMultiColumnIndexComment(DiffTable table, string name)
         {
-            var columnNames = columns.Select(c=>c.Name).ToHashSet();
             StringBuilder sb = new StringBuilder();
-            foreach (var ix in table.Indices.Values.Where(a => a.Columns.Count > 1 || a.FilterDefinition.HasText())
-                .Where(ix => ix.Columns.Intersect(columnNames).Any()))
+            foreach (var ix in table.Indices.Values.Where(ix => ix.Columns.Count > 1 || ix.FilterDefinition.HasText() || ix.Columns.Any(ic => ic.IsIncluded)))
             {
+                var columns =
+                    $"e => new {{ {ix.Columns.Where(a => !a.IsIncluded).ToString(c => "e." + GetFieldName(table, table.Columns.GetOrThrow(c.ColumnName)).FirstUpper(), ", ")} }}";
+
+                var incColumns = ix.Columns.Any(a => a.IsIncluded) ? null :
+                    $"e => new {{ {ix.Columns.Where(a => a.IsIncluded).ToString(c => "e." + GetFieldName(table, table.Columns.GetOrThrow(c.ColumnName)).FirstUpper(), ", ")} }}";
+
                 sb.AppendLine("//Add to Logic class");
-                sb.AppendLine("//sb.AddUniqueIndex<{0}>(e => new {{ {1} }}{2});".FormatWith(name,
-                    ix.Columns.ToString(c => "e." + GetFieldName(table, table.Columns.GetOrThrow(c)).FirstUpper(), ", "),
-                    ix.FilterDefinition == null ? null : ", " + ix.FilterDefinition));
+                sb.AppendLine("//sb.AddUniqueIndex<{0}>({1});".FormatWith(name,
+                    new object[] { columns, ix.FilterDefinition, incColumns }.NotNull().ToString(", ")));
             }
 
             return sb.ToString().DefaultText(null);
@@ -699,7 +702,11 @@ namespace Signum.Engine.CodeGeneration
 
         protected virtual bool HasUniqueIndex(DiffTable table, DiffColumn col)
         {
-            return table.Indices.Values.Any(a => a.FilterDefinition == null && a.Columns.Only() == col.Name && a.IsUnique && a.Type == DiffIndexType.NonClustered);
+            return table.Indices.Values.Any(ix =>
+                ix.FilterDefinition == null &&
+                ix.Columns.Only()?.Let(ic => ic.ColumnName == col.Name && ic.IsIncluded == false) == true &&
+                ix.IsUnique &&
+                ix.Type == DiffIndexType.NonClustered);
         }
 
         protected virtual string DefaultColumnName(DiffTable table, DiffColumn col)
@@ -755,8 +762,8 @@ namespace Signum.Engine.CodeGeneration
                     parts.Add("Scale = " + col.Scale);
             }
 
-            if (col.Default != null)
-                parts.Add("Default = \"" + CleanDefault(col.Default) + "\"");
+            if (col.DefaultConstraint != null)
+                parts.Add("Default = \"" + CleanDefault(col.DefaultConstraint.Definition) + "\"");
 
             return parts;
         }
@@ -792,7 +799,7 @@ namespace Signum.Engine.CodeGeneration
             return true;
         }
 
-        protected virtual Type GetValueType(DiffColumn col)
+        protected internal virtual Type GetValueType(DiffColumn col)
         {
             switch (col.SqlDbType)
             {

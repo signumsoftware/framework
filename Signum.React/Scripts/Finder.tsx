@@ -29,6 +29,7 @@ import SearchModal from './SearchControl/SearchModal';
 import EntityLink from './SearchControl/EntityLink';
 import SearchControlLoaded from './SearchControl/SearchControlLoaded';
 import { ImportRoute } from "./AsyncImport";
+import { SearchControl } from "./Search";
 
 
 export const querySettings: { [queryKey: string]: QuerySettings } = {};
@@ -72,9 +73,20 @@ export function find(obj: FindOptions | Type<any>, modalOptions?: ModalFindOptio
     if (qs && qs.onFind && !(modalOptions && modalOptions.useDefaultBehaviour))
         return qs.onFind(fo, modalOptions);
 
-    return import("./SearchControl/SearchModal")
+    let getPromiseSearchModal: () => Promise<Lite<Entity> | undefined> = () => import("./SearchControl/SearchModal")
         .then(a => a.default.open(fo, modalOptions))
         .then(rr => rr && rr.entity);
+
+    if (modalOptions && modalOptions.autoSelectIfOne)
+        return fetchEntitiesWithFilters(fo.queryName, fo.filterOptions || [], fo.orderOptions || [], 2)
+            .then(data => {
+                if (data.length == 1)
+                    return Promise.resolve(data[0]);
+
+                return getPromiseSearchModal();
+            });
+
+    return getPromiseSearchModal();
 }
 
 export function findRow(fo: FindOptions, modalOptions?: ModalFindOptions): Promise<ResultRow | undefined> {
@@ -100,9 +112,20 @@ export function findMany(findOptions: FindOptions | Type<any>, modalOptions?: Mo
     if (qs && qs.onFindMany && !(modalOptions && modalOptions.useDefaultBehaviour))
         return qs.onFindMany(fo, modalOptions);
 
-    return import("./SearchControl/SearchModal")
+    let getPromiseSearchModal: () => Promise<Lite<Entity>[] | undefined> = () => import("./SearchControl/SearchModal")
         .then(a => a.default.openMany(fo, modalOptions))
         .then(rows => rows && rows.map(a => a.entity!));
+
+    if (modalOptions && modalOptions.autoSelectIfOne)
+        return fetchEntitiesWithFilters(fo.queryName, fo.filterOptions || [], fo.orderOptions || [], 2)
+            .then(data => {
+                if (data.length == 1)
+                    return Promise.resolve(data);
+
+                return getPromiseSearchModal();
+            });
+
+    return getPromiseSearchModal();
 }
 
 export function findManyRows(fo: FindOptions, modalOptions?: ModalFindOptions): Promise<ResultRow[] | undefined> {
@@ -147,6 +170,9 @@ export function findOptionsPathQuery(fo: FindOptions, extra?: any): any {
         paginationMode: fo.pagination && fo.pagination.mode,
         elementsPerPage: fo.pagination && fo.pagination.elementsPerPage,
         currentPage: fo.pagination && fo.pagination.currentPage,
+        systemTimeMode: fo.systemTime && fo.systemTime.mode,
+        systemTimeStartDate: fo.systemTime && fo.systemTime.startDate,
+        systemTimeEndDate: fo.systemTime && fo.systemTime.endDate,
         ...extra
     };
 
@@ -197,6 +223,11 @@ export function parseFindOptionsPath(queryName: PseudoType | QueryKey, query: an
             elementsPerPage: query.elementsPerPage,
             currentPage: query.currentPage,
         } as Pagination,
+        systemTime: query.systemTimeMode && {
+            mode: query.systemTimeMode,
+            startDate: query.systemTimeStartDate,
+            endDate: query.systemTimeEndDate,
+        }
     };
     
     return Dic.simplify(result);
@@ -292,10 +323,23 @@ export function parseOrderOptions(orderOptions: OrderOption[], groupResults: boo
     orderOptions.forEach(a => completer.request(a.columnName, sto));
 
     return completer.finished()
-        .then(() => orderOptions.map(fo => ({
-            token: completer.get(fo.columnName),
-            orderType: fo.orderType || "Ascending",
+        .then(() => orderOptions.map(oo => ({
+            token: completer.get(oo.columnName),
+            orderType: oo.orderType || "Ascending",
         }) as OrderOptionParsed));
+}
+
+export function parseColumnOptions(columnOptions: ColumnOption[], groupResults: boolean, qd: QueryDescription): Promise<ColumnOptionParsed[]> {
+
+    const completer = new TokenCompleter(qd);
+    var sto = SubTokensOptions.CanElement | (groupResults ? SubTokensOptions.CanAggregate : 0);
+    columnOptions.forEach(a => completer.request(a.columnName, sto));
+
+    return completer.finished()
+        .then(() => columnOptions.map(co => ({
+            token: completer.get(co.columnName),
+            displayName: co.displayName || completer.get(co.columnName).niceName,
+        }) as ColumnOptionParsed));
 }
 
 export function setFilters(e: Entity, filterOptionsParsed: FilterOptionParsed[]): Promise<Entity> {
@@ -348,6 +392,7 @@ export function toFindOptions(fo: FindOptionsParsed, qd: QueryDescription): Find
         columnOptions: pair.columns,
         columnOptionsMode: pair.mode,
         pagination: fo.pagination && !equalsPagination(fo.pagination, defPagination) ? fo.pagination : undefined,
+        systemTime: fo.systemTime,
     } as FindOptions;
 
     if (!findOptions.groupResults && findOptions.orderOptions && findOptions.orderOptions.length == 1) {
@@ -418,6 +463,7 @@ export function parseFindOptions(findOptions: FindOptions, qd: QueryDescription)
             queryKey: qd.queryKey,
             groupResults: fo.groupResults == true,
             pagination: fo.pagination != null ? fo.pagination : qs && qs.pagination || defaultPagination,
+            systemTime: fo.systemTime,
 
             columnOptions: (fo.columnOptions || []).map(co => ({
                 token: completer.get(co.columnName),
@@ -905,6 +951,7 @@ export let defaultPagination: Pagination = {
 export interface QuerySettings {
     queryName: PseudoType | QueryKey;
     pagination?: Pagination;
+    allowSystemTime?: boolean;
     defaultOrderColumn?: string;
     defaultOrderType?: OrderType;
     hiddenColumns?: ColumnOption[];
@@ -921,7 +968,7 @@ export interface QuerySettings {
 export interface FormatRule {
     name: string;
     formatter: (column: ColumnOptionParsed) => CellFormatter;
-    isApplicable: (column: ColumnOptionParsed) => boolean;
+    isApplicable: (column: ColumnOptionParsed, sc: SearchControlLoaded | undefined) => boolean;
 }
 
 export class CellFormatter {
@@ -936,7 +983,7 @@ export interface CellFormatterContext {
 }
 
 
-export function getCellFormatter(qs: QuerySettings, co: ColumnOptionParsed): CellFormatter | undefined {
+export function getCellFormatter(qs: QuerySettings, co: ColumnOptionParsed, sc: SearchControlLoaded | undefined): CellFormatter | undefined {
     if (!co.token)
         return undefined;
 
@@ -949,7 +996,7 @@ export function getCellFormatter(qs: QuerySettings, co: ColumnOptionParsed): Cel
     if (prRoute)
         return prRoute;
 
-    const rule = formatRules.filter(a => a.isApplicable(co)).last("FormatRules");
+    const rule = formatRules.filter(a => a.isApplicable(co, sc)).last("FormatRules");
 
     return rule.formatter(co);
 }
@@ -1017,7 +1064,7 @@ export const formatRules: FormatRule[] = [
 export interface EntityFormatRule {
     name: string;
     formatter: EntityFormatter;
-    isApplicable: (row: ResultRow) => boolean;
+    isApplicable: (row: ResultRow, sc: SearchControlLoaded | undefined) => boolean;
 }
 
 

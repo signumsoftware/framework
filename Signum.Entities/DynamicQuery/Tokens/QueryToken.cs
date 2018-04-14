@@ -160,6 +160,8 @@ namespace Signum.Entities.DynamicQuery
 
         public static Func<QueryToken, Type, SubTokensOptions, List<QueryToken>> ImplementedByAllSubTokens = (quetyToken, type, options) => throw new NotImplementedException("QueryToken.ImplementedByAllSubTokens not set");
 
+        public static Func<Type, bool> IsSystemVersioned = t => false;
+
         protected List<QueryToken> SubTokensBase(Type type, SubTokensOptions options, Implementations? implementations)
         {
             var ut = type.UnNullify();
@@ -184,8 +186,14 @@ namespace Signum.Entities.DynamicQuery
                 var onlyType = implementations.Value.Types.Only();
 
                 if (onlyType != null && onlyType == cleanType)
-                    return new[] { EntityPropertyToken.IdProperty(this), new EntityToStringToken(this) }
-                        .Concat(EntityProperties(onlyType)).ToList().AndHasValue(this); ;
+                    return new[] {
+                        EntityPropertyToken.IdProperty(this),
+                        new EntityToStringToken(this),
+                        IsSystemVersioned(onlyType) ? new SystemTimeToken(this, SystemTimeProperty.SystemValidFrom): null,
+                        IsSystemVersioned(onlyType) ? new SystemTimeToken(this, SystemTimeProperty.SystemValidTo): null,
+                    }
+                    .NotNull()
+                    .Concat(EntityProperties(onlyType)).ToList().AndHasValue(this); ;
 
                 return implementations.Value.Types.Select(t => (QueryToken)new AsTypeToken(this, t)).ToList().AndHasValue(this);
             }
@@ -230,15 +238,19 @@ namespace Signum.Entities.DynamicQuery
             {
                 new NetPropertyToken(parent, ReflectionTools.GetPropertyInfo((DateTime dt)=>dt.Year), () => utc + QueryTokenMessage.Year.NiceToString()),
                 new NetPropertyToken(parent, ReflectionTools.GetPropertyInfo((DateTime dt)=>dt.Month),() => utc + QueryTokenMessage.Month.NiceToString()),
-                new MonthStartToken(parent),
+                new DatePartStartToken(parent, QueryTokenMessage.MonthStart),
                 new WeekNumberToken(parent),
+                new DatePartStartToken(parent, QueryTokenMessage.WeekStart),
                 new NetPropertyToken(parent, ReflectionTools.GetPropertyInfo((DateTime dt)=>dt.Day), () => utc + QueryTokenMessage.Day.NiceToString()),
                 new DayOfYearToken(parent),
                 new DayOfWeekToken(parent),
                 new DateToken(parent),
                 precission < DateTimePrecision.Hours ? null: new NetPropertyToken(parent, ReflectionTools.GetPropertyInfo((DateTime dt)=>dt.Hour), () => utc + QueryTokenMessage.Hour.NiceToString()),
+                precission < DateTimePrecision.Hours ? null: new DatePartStartToken(parent, QueryTokenMessage.HourStart),
                 precission < DateTimePrecision.Minutes ? null: new NetPropertyToken(parent, ReflectionTools.GetPropertyInfo((DateTime dt)=>dt.Minute), () => utc + QueryTokenMessage.Minute.NiceToString()),
+                precission < DateTimePrecision.Minutes ? null: new DatePartStartToken(parent, QueryTokenMessage.MinuteStart),
                 precission < DateTimePrecision.Seconds ? null: new NetPropertyToken(parent, ReflectionTools.GetPropertyInfo((DateTime dt)=>dt.Second), () => utc + QueryTokenMessage.Second.NiceToString()),
+                precission < DateTimePrecision.Seconds ? null: new DatePartStartToken(parent, QueryTokenMessage.SecondStart),
                 precission < DateTimePrecision.Milliseconds? null: new NetPropertyToken(parent, ReflectionTools.GetPropertyInfo((DateTime dt)=>dt.Millisecond), () => utc + QueryTokenMessage.Millisecond.NiceToString()),
             }.NotNull().ToList();
         }
@@ -456,8 +468,16 @@ namespace Signum.Entities.DynamicQuery
         Millisecond,
         Minute,
         Month,
-        [Description("Month Start ")]
+        [Description("Month Start")]
         MonthStart,
+        [Description("Week Start")]
+        WeekStart,
+        [Description("Hour Start")]
+        HourStart,
+        [Description("Minute Start")]
+        MinuteStart,
+        [Description("Second Start")]
+        SecondStart,
         [Description("More than one column named {0}")]
         MoreThanOneColumnNamed0,
         [Description("number")]
@@ -482,5 +502,8 @@ namespace Signum.Entities.DynamicQuery
         Modulo0,
         [Description("{0} mod {1}")]
         _0Mod1,
+        Null,
+        Not,
+        Distinct
     }
 }

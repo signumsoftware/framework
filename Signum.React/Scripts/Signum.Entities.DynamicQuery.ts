@@ -76,6 +76,10 @@ export module QueryTokenMessage {
     export const Minute = new MessageKey("QueryTokenMessage", "Minute");
     export const Month = new MessageKey("QueryTokenMessage", "Month");
     export const MonthStart = new MessageKey("QueryTokenMessage", "MonthStart");
+    export const WeekStart = new MessageKey("QueryTokenMessage", "WeekStart");
+    export const HourStart = new MessageKey("QueryTokenMessage", "HourStart");
+    export const MinuteStart = new MessageKey("QueryTokenMessage", "MinuteStart");
+    export const SecondStart = new MessageKey("QueryTokenMessage", "SecondStart");
     export const MoreThanOneColumnNamed0 = new MessageKey("QueryTokenMessage", "MoreThanOneColumnNamed0");
     export const Number = new MessageKey("QueryTokenMessage", "Number");
     export const Of = new MessageKey("QueryTokenMessage", "Of");
@@ -90,7 +94,17 @@ export module QueryTokenMessage {
     export const HasValue = new MessageKey("QueryTokenMessage", "HasValue");
     export const Modulo0 = new MessageKey("QueryTokenMessage", "Modulo0");
     export const _0Mod1 = new MessageKey("QueryTokenMessage", "_0Mod1");
+    export const Null = new MessageKey("QueryTokenMessage", "Null");
+    export const Not = new MessageKey("QueryTokenMessage", "Not");
+    export const Distinct = new MessageKey("QueryTokenMessage", "Distinct");
 }
+
+export const SystemTimeMode = new EnumType<SystemTimeMode>("SystemTimeMode");
+export type SystemTimeMode =
+    "AsOf" |
+    "Between" |
+    "ContainedIn" |
+    "All";
 
 export const UniqueType = new EnumType<UniqueType>("UniqueType");
 export type UniqueType =

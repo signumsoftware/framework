@@ -655,6 +655,14 @@ namespace Signum.Test.LinqProvider
 
             var list = Database.Query<AlbumEntity>().Average(selectorDouble);
         }
+
+        [TestMethod]
+        public void SelectVirtualMListNoDistinct()
+        {
+            var list = Database.Query<ArtistEntity>().ToList();
+
+            Assert.IsTrue(!Database.Query<ArtistEntity>().QueryText().Contains("DISTINCT"));
+        }
     }
 
     public static class AuthorExtensions

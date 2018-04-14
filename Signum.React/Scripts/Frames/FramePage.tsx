@@ -1,5 +1,4 @@
-﻿
-import * as React from 'react'
+﻿import * as React from 'react'
 import { RouteComponentProps } from 'react-router'
 import { Dic } from '../Globals'
 import * as Navigator from '../Navigator'
@@ -14,6 +13,7 @@ import { renderWidgets, renderEmbeddedWidgets, WidgetContext } from './Widgets'
 import ValidationErrors from './ValidationErrors'
 import * as QueryString from 'query-string'
 import "./Frames.css"
+import { ErrorBoundary } from '../Components';
 
 interface FramePageProps extends RouteComponentProps<{ type: string; id?: string, waitData?: string }> {
 }
@@ -82,7 +82,7 @@ export default class FramePage extends React.Component<FramePageProps, FramePage
         const ti = this.getTypeInfo();
 
         if (this.props.match.params.id) {
-            
+
             const lite: Lite<Entity> = {
                 EntityType: ti.name,
                 id: parseId(ti, props.match.params.id!),
@@ -112,9 +112,9 @@ export default class FramePage extends React.Component<FramePageProps, FramePage
     }
 
 
-    entityComponent: React.Component<any, any>;
+    entityComponent?: React.Component<any, any> | null;
 
-    setComponent(c: React.Component<any, any>) {
+    setComponent(c: React.Component<any, any> | null) {
         if (c && this.entityComponent != c) {
             this.entityComponent = c;
             this.forceUpdate();
@@ -126,7 +126,7 @@ export default class FramePage extends React.Component<FramePageProps, FramePage
         if (!this.state.pack) {
             return (
                 <div className="normal-control">
-                    {this.renderTitle() }
+                    {this.renderTitle()}
                 </div>
             );
         }
@@ -172,15 +172,17 @@ export default class FramePage extends React.Component<FramePageProps, FramePage
 
         return (
             <div className="normal-control">
-                { this.renderTitle() }
-                { renderWidgets(wc) }
-                { this.entityComponent && <ButtonBar frame={frame} pack={this.state.pack} /> }
-                <ValidationErrors entity={this.state.pack.entity} ref={ve => this.validationErrors = ve}/>
-                { embeddedWidgets.top }
-                <div className="sf-main-control form-horizontal" data-test-ticks={new Date().valueOf() } data-main-entity={entityInfo(ctx.value) }>
-                    {this.state.getComponent && React.cloneElement(this.state.getComponent(ctx),  { ref: (c: React.Component<any, any>) => this.setComponent(c) }) }
+                {this.renderTitle()}
+                {renderWidgets(wc)}
+                {this.entityComponent && <ButtonBar frame={frame} pack={this.state.pack} />}
+                <ValidationErrors entity={this.state.pack.entity} ref={ve => this.validationErrors = ve} />
+                {embeddedWidgets.top}
+                <div className="sf-main-control" data-test-ticks={new Date().valueOf()} data-main-entity={entityInfo(ctx.value)}>
+                    <ErrorBoundary>
+                        {this.state.getComponent && React.cloneElement(this.state.getComponent(ctx), { ref: (c: React.Component<any, any> | null) => this.setComponent(c) })}
+                    </ErrorBoundary>
                 </div>
-                { embeddedWidgets.bottom }
+                {embeddedWidgets.bottom}
             </div>
         );
     }
@@ -190,16 +192,16 @@ export default class FramePage extends React.Component<FramePageProps, FramePage
     renderTitle() {
 
         if (!this.state.pack)
-            return <h3>{JavascriptMessage.loading.niceToString() }</h3>;
+            return <h3 className="display-6">{JavascriptMessage.loading.niceToString()}</h3>;
 
         const entity = this.state.pack.entity;
 
         return (
-            <h3>
-                <span className="sf-entity-title">{ getToString(entity) }</span>
-                <br/>
-                <small className="sf-type-nice-name">{ Navigator.getTypeTitle(entity, undefined) }</small>
-            </h3>
+            <h4>
+                <span className="display-6">{getToString(entity)}</span>
+                <br />
+                <small className="sf-type-nice-name">{Navigator.getTypeTitle(entity, undefined)}</small>
+            </h4>
         );
     }
 }

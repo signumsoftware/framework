@@ -1,6 +1,6 @@
 ﻿import * as React from 'react'
-import { TypeContext, StyleContext, StyleOptions, FormGroupStyle, FormGroupSize, IRenderButtons } from './TypeContext'
-export { TypeContext, StyleContext, StyleOptions, FormGroupStyle, FormGroupSize, IRenderButtons };
+import { TypeContext, StyleContext, StyleOptions, FormGroupStyle, FormSize, IRenderButtons } from './TypeContext'
+export { TypeContext, StyleContext, StyleOptions, FormGroupStyle, FormSize, IRenderButtons };
 
 import { PropertyRouteType, MemberInfo, getTypeInfo, TypeInfo, PropertyRoute, Binding, ReadonlyBinding } from './Reflection'
 export { Binding, ReadonlyBinding }
@@ -11,8 +11,14 @@ import { ViewReplacer } from  './Frames/ReactVisitor'
 
 export { PropertyRoute };
 
-import { FormGroup, FormGroupProps, FormControlStatic, FormControlStaticProps, LineBase, LineBaseProps, tasks, ChangeEvent } from './Lines/LineBase'
-export { FormGroup, FormGroupProps, FormControlStatic, FormControlStaticProps, LineBase, LineBaseProps, tasks, ChangeEvent }
+import { LineBase, LineBaseProps, tasks, ChangeEvent } from './Lines/LineBase'
+export { LineBase, LineBaseProps, tasks, ChangeEvent }
+
+import { FormGroup, FormGroupProps } from './Lines/FormGroup'
+export { FormGroup, FormGroupProps }
+
+import { FormControlReadonly, FormControlReadonlyProps } from './Lines/FormControlReadonly'
+export { FormControlReadonly, FormControlReadonlyProps }
 
 import { ValueLine, ValueLineType, ValueLineProps, OptionItem } from './Lines/ValueLine'
 export { ValueLine, ValueLineType, ValueLineProps, OptionItem }

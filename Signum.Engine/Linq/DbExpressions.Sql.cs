@@ -61,6 +61,7 @@ namespace Signum.Engine.Linq
         MList,
         MListProjection,
         MListElement,
+        AdditionalField,
         PrimaryKey,
         PrimaryKeyString,
     }
@@ -172,7 +173,9 @@ namespace Signum.Engine.Linq
     {
         public readonly ITable Table;
 
-        public ObjectName Name { get { return Table.Name; } }
+        public ObjectName Name { get { return SystemTime is SystemTime.HistoryTable ? Table.SystemVersioned.TableName : Table.Name; } }
+
+        public SystemTime SystemTime { get; private set; }
 
         public readonly string WithHint;
 
@@ -181,16 +184,19 @@ namespace Signum.Engine.Linq
             get { return new[] { Alias }; }
         }
 
-        internal TableExpression(Alias alias, ITable table, string withHint)
+        internal TableExpression(Alias alias, ITable table, SystemTime systemTime, string withHint)
             : base(DbExpressionType.Table, alias)
         {
             this.Table = table;
+            this.SystemTime = systemTime;
             this.WithHint = withHint;
         }
 
         public override string ToString()
         {
-            return "{0} as {1}".FormatWith(Name, Alias);
+            var st = SystemTime != null && SystemTime is SystemTime.HistoryTable ? "FOR SYSTEM_TIME " + SystemTime.ToString() : null;
+
+            return $"{Name}{st} as {Alias}";
         }
 
         internal ColumnExpression GetIdExpression()
@@ -288,20 +294,25 @@ namespace Signum.Engine.Linq
     internal class AggregateExpression : DbExpression
     {
         public readonly Expression Expression;
+        public readonly bool Distinct; 
         public readonly AggregateSqlFunction AggregateFunction;
-        public AggregateExpression(Type type, Expression expression, AggregateSqlFunction aggregateFunction)
+        public AggregateExpression(Type type, Expression expression, AggregateSqlFunction aggregateFunction, bool distinct)
             : base(DbExpressionType.Aggregate, type)
         {
-            if (expression == null && aggregateFunction != AggregateSqlFunction.Count)
+            if (aggregateFunction != AggregateSqlFunction.Count && expression == null )
                 throw new ArgumentNullException("expression");
 
+            if (distinct && (aggregateFunction != AggregateSqlFunction.Count || expression == null))
+                throw new ArgumentException("Distinct only allowed for Count with expression");
+
+            this.Distinct = distinct;
             this.Expression = expression;
             this.AggregateFunction = aggregateFunction;
         }
 
         public override string ToString()
         {
-            return "{0}({1})".FormatWith(AggregateFunction, Expression?.ToString() ?? "*");
+            return $"{AggregateFunction}({(Distinct ? "Distinct " : "")}{Expression?.ToString() ?? "*"})";
         }
 
         protected override Expression Accept(DbExpressionVisitor visitor)
@@ -1072,7 +1083,7 @@ namespace Signum.Engine.Linq
         public readonly Expression Projector;
         public readonly UniqueFunction? UniqueFunction;
 
-        internal ProjectionExpression(SelectExpression source, Expression projector, UniqueFunction? uniqueFunction, Type resultType)
+        internal ProjectionExpression(SelectExpression select, Expression projector, UniqueFunction? uniqueFunction, Type resultType)
             : base(DbExpressionType.Projection, resultType)
         {
             if (projector == null)
@@ -1084,14 +1095,14 @@ namespace Signum.Engine.Linq
                     projector.Type.TypeName(),
                     elementType.TypeName()));
 
-            this.Select = source ?? throw new ArgumentNullException("source");
+            this.Select = select ?? throw new ArgumentNullException("select");
             this.Projector = projector;
             this.UniqueFunction = uniqueFunction;
         }
 
         public override string ToString()
         {
-            return "(SOURCE\r\n{0}\r\nPROJECTION\r\n{1})".FormatWith(Select.ToString().Indent(4), Projector.ToString().Indent(4));
+            return "(SOURCE\r\n{0}\r\nPROJECTOR\r\n{1})".FormatWith(Select.ToString().Indent(4), Projector.ToString().Indent(4));
         }
 
         protected override Expression Accept(DbExpressionVisitor visitor)
@@ -1138,13 +1149,17 @@ namespace Signum.Engine.Linq
     internal class DeleteExpression : CommandExpression
     {
         public readonly ITable Table;
+        public readonly bool UseHistoryTable;
+        public ObjectName Name { get { return UseHistoryTable ? Table.SystemVersioned.TableName : Table.Name; } }
+
         public readonly SourceWithAliasExpression Source;
         public readonly Expression Where;
 
-        public DeleteExpression(ITable table, SourceWithAliasExpression source, Expression where)
+        public DeleteExpression(ITable table, bool useHistoryTable, SourceWithAliasExpression source, Expression where)
             : base(DbExpressionType.Delete)
         {
             this.Table = table;
+            this.UseHistoryTable = useHistoryTable;
             this.Source = source;
             this.Where = where;
         }
@@ -1166,14 +1181,18 @@ namespace Signum.Engine.Linq
     internal class UpdateExpression : CommandExpression
     {
         public readonly ITable Table;
+        public readonly bool UseHistoryTable;
+        public ObjectName Name { get { return UseHistoryTable ? Table.SystemVersioned.TableName : Table.Name; } }
+
         public readonly ReadOnlyCollection<ColumnAssignment> Assigments;
         public readonly SourceWithAliasExpression Source;
         public readonly Expression Where;
 
-        public UpdateExpression(ITable table, SourceWithAliasExpression source, Expression where, IEnumerable<ColumnAssignment> assigments)
+        public UpdateExpression(ITable table, bool useHistoryTable, SourceWithAliasExpression source, Expression where, IEnumerable<ColumnAssignment> assigments)
             : base(DbExpressionType.Update)
         {
             this.Table = table;
+            this.UseHistoryTable = useHistoryTable;
             this.Assigments = assigments.ToReadOnly();
             this.Source = source;
             this.Where = where;
@@ -1197,13 +1216,16 @@ namespace Signum.Engine.Linq
     internal class InsertSelectExpression : CommandExpression
     {
         public readonly ITable Table;
+        public readonly bool UseHistoryTable;
+        public ObjectName Name { get { return UseHistoryTable ? Table.SystemVersioned.TableName : Table.Name; } }
         public readonly ReadOnlyCollection<ColumnAssignment> Assigments;
         public readonly SourceWithAliasExpression Source;
 
-        public InsertSelectExpression(ITable table, SourceWithAliasExpression source, IEnumerable<ColumnAssignment> assigments)
+        public InsertSelectExpression(ITable table, bool useHistoryTable, SourceWithAliasExpression source, IEnumerable<ColumnAssignment> assigments)
             : base(DbExpressionType.InsertSelect)
         {
             this.Table = table;
+            this.UseHistoryTable = useHistoryTable;
             this.Assigments = assigments.ToReadOnly();
             this.Source = source;
         }

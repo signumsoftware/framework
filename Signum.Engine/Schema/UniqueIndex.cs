@@ -15,6 +15,7 @@ namespace Signum.Engine.Maps
     {
         public ITable Table { get; private set; }
         public IColumn[] Columns { get; private set; }
+        public IColumn[] IncludeColumns { get; set; }
 
         public string Where { get; set; }
 
@@ -49,15 +50,22 @@ namespace Signum.Engine.Maps
         protected string ColumnSignature()
         {
             string columns = Columns.ToString(c => c.Name, "_");
-            if (string.IsNullOrEmpty(Where))
+            var includeColumns = IncludeColumns.HasItems() ? IncludeColumns.ToString(c => c.Name, "_") : null;
+            
+            if (string.IsNullOrEmpty(Where)  && includeColumns == null)
                 return columns;
 
-            return columns + "__" + StringHashEncoder.Codify(Where);
+            return columns + "__" + StringHashEncoder.Codify(Where + includeColumns);
         }
 
         public override string ToString()
         {
             return IndexName;
+        }
+
+        public string HintText()
+        {
+            return $"INDEX([{this.IndexName}])";
         }
     }
 

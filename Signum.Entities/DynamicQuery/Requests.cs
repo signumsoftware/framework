@@ -33,6 +33,8 @@ namespace Signum.Entities.DynamicQuery
         
         public Pagination Pagination { get; set; }
 
+        public SystemTime SystemTime { get; set; }
+
         public List<CollectionElementToken> Multiplications()
         {
             HashSet<QueryToken> allTokens = this.AllTokens().ToHashSet();
@@ -60,6 +62,22 @@ namespace Signum.Entities.DynamicQuery
         All,
         Firsts,
         Paginate
+    }
+
+    [DescriptionOptions(DescriptionOptions.Members), InTypeScript(true)]
+    public enum SystemTimeMode
+    {
+        AsOf,
+        Between,
+        ContainedIn,
+        All
+    }
+
+    [DescriptionOptions(DescriptionOptions.Members)]
+    public enum SystemTimeProperty
+    {
+        SystemValidFrom,
+        SystemValidTo,
     }
 
     [Serializable]
@@ -222,6 +240,17 @@ namespace Signum.Entities.DynamicQuery
         {
             get { return orders; }
             set { orders = value; }
+        }
+
+        public List<CollectionElementToken> Multiplications
+        {
+            get
+            {
+                HashSet<QueryToken> allTokens = Filters.Select(a => a.Token)
+                    .Concat(Orders.Select(a => a.Token)).ToHashSet();
+
+                return CollectionElementToken.GetElements(allTokens);
+            }
         }
 
         public int? Count { get; set; }

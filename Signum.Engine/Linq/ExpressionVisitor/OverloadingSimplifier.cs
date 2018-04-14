@@ -19,8 +19,11 @@ namespace Signum.Engine.Linq
     /// </summary>
     internal class OverloadingSimplifier : ExpressionVisitor
     {
-        static MethodInfo miSelectQ = ReflectionTools.GetMethodInfo(() => Queryable.Select((IQueryable<string>)null, s => s)).GetGenericMethodDefinition();
-        static MethodInfo miSelectE = ReflectionTools.GetMethodInfo(() => Enumerable.Select((IEnumerable<string>)null, s => s)).GetGenericMethodDefinition();
+        public static MethodInfo miDistinctQ = ReflectionTools.GetMethodInfo(() => Queryable.Distinct((IQueryable<string>)null)).GetGenericMethodDefinition();
+        public static MethodInfo miDistinctE = ReflectionTools.GetMethodInfo(() => Enumerable.Distinct((IQueryable<string>)null)).GetGenericMethodDefinition();
+
+        public static MethodInfo miSelectQ = ReflectionTools.GetMethodInfo(() => Queryable.Select((IQueryable<string>)null, s => s)).GetGenericMethodDefinition();
+        public static MethodInfo miSelectE = ReflectionTools.GetMethodInfo(() => Enumerable.Select((IEnumerable<string>)null, s => s)).GetGenericMethodDefinition();
 
         static MethodInfo miGroupBySQ = ReflectionTools.GetMethodInfo(() => Queryable.GroupBy((IQueryable<string>)null, s => s)).GetGenericMethodDefinition();
         static MethodInfo miGroupBySE = ReflectionTools.GetMethodInfo(() => Enumerable.GroupBy((IEnumerable<string>)null, s => s)).GetGenericMethodDefinition();
@@ -43,14 +46,9 @@ namespace Signum.Engine.Linq
         static MethodInfo miDefaultIfEmptyQ = ReflectionTools.GetMethodInfo(() => Queryable.DefaultIfEmpty<int>(null)).GetGenericMethodDefinition();
         static MethodInfo miDefaultIfEmptyE = ReflectionTools.GetMethodInfo(() => Enumerable.DefaultIfEmpty<int>(null)).GetGenericMethodDefinition();
 
-        static MethodInfo miCountQ = ReflectionTools.GetMethodInfo(() => Queryable.Count((IQueryable<string>)null)).GetGenericMethodDefinition();
         static MethodInfo miCountE = ReflectionTools.GetMethodInfo(() => Enumerable.Count((IEnumerable<string>)null)).GetGenericMethodDefinition();
-
-        static MethodInfo miCount2Q = ReflectionTools.GetMethodInfo(() => Queryable.Count((IQueryable<string>)null, null)).GetGenericMethodDefinition();
-        static MethodInfo miCount2E = ReflectionTools.GetMethodInfo(() => Enumerable.Count((IEnumerable<string>)null, null)).GetGenericMethodDefinition();
-
-        static MethodInfo miWhereQ = ReflectionTools.GetMethodInfo(() => Queryable.Where((IQueryable<string>)null, a => false)).GetGenericMethodDefinition();
-        static MethodInfo miWhereE = ReflectionTools.GetMethodInfo(() => Enumerable.Where((IEnumerable<string>)null, a=>false)).GetGenericMethodDefinition();
+        public static MethodInfo miWhereQ = ReflectionTools.GetMethodInfo(() => Queryable.Where((IQueryable<string>)null, a => false)).GetGenericMethodDefinition();
+        public static MethodInfo miWhereE = ReflectionTools.GetMethodInfo(() => Enumerable.Where((IEnumerable<string>)null, a=>false)).GetGenericMethodDefinition();
 
         static MethodInfo miWhereIndexQ = ReflectionTools.GetMethodInfo(() => Queryable.Where((IQueryable<string>)null, (a, i) => false)).GetGenericMethodDefinition();
         static MethodInfo miWhereIndexE = ReflectionTools.GetMethodInfo(() => Enumerable.Where((IEnumerable<string>)null, (a, i) => false)).GetGenericMethodDefinition();
@@ -248,18 +246,6 @@ namespace Signum.Engine.Linq
                             newResult);
                 }
 
-           
-                if (ReflectionTools.MethodEqual(mi, miCount2E) || ReflectionTools.MethodEqual(mi, miCount2Q))
-                {
-                    var source = Visit(m.GetArgument("source"));
-                    var predicate = (LambdaExpression)Visit(m.GetArgument("predicate").StripQuotes());
-
-                    MethodInfo mWhere = (query ? miWhereQ : miWhereE).MakeGenericMethod(paramTypes[0]);
-                    MethodInfo mCount = (query ? miCountQ : miCountE).MakeGenericMethod(paramTypes[0]);
-                    
-                    return Expression.Call(mCount, Expression.Call(mWhere, source, predicate)); 
-                }
-
                 if (ReflectionTools.MethodEqual(mi, miCastE) || ReflectionTools.MethodEqual(mi, miCastQ))
                 {
                     var source = Visit(m.GetArgument("source"));
@@ -421,6 +407,12 @@ namespace Signum.Engine.Linq
                 }
             }
 
+            if (m.Method.DeclaringType == typeof(string) && m.Method.Name == nameof(string.Format))
+                return VisitFormat(m);
+
+            if (m.Method.DeclaringType == typeof(StringExtensions) && m.Method.Name == nameof(StringExtensions.FormatWith))
+                return VisitFormat(m);
+            
             return base.VisitMethodCall(m); 
         }
 
@@ -441,6 +433,23 @@ namespace Signum.Engine.Linq
             return base.VisitMember(m);
         }
 
+        MethodCallExpression VisitFormat(MethodCallExpression m)
+        {
+            return Expression.Call(m.Object, m.Method, m.Arguments.Zip(m.Method.GetParameters(), (aExp, p) =>
+            {
+                if (p.Name == "arg0" || p.Name == "arg1" || p.Name == "arg2")
+                    return CallToString(aExp);
+
+                if (p.Name == "args")
+                {
+                    var arr = (NewArrayExpression)aExp;
+                    return Expression.NewArrayInit(typeof(string), arr.Expressions.Select(e => CallToString(e)).ToArray());
+                }
+
+                return aExp;
+            }));
+        }
+
         protected override Expression VisitBinary(BinaryExpression b)
         {
             var r = (BinaryExpression)base.VisitBinary(b);
@@ -456,6 +465,9 @@ namespace Signum.Engine.Linq
         {
             if (expression.Type == typeof(string))
                 return expression;
+
+            if (expression is ConstantExpression c && c.Value != null)
+                return Expression.Call(expression, miToString);
 
             return Expression.Condition(
                 Expression.Equal(expression, Expression.Constant(null, expression.Type.Nullify())),

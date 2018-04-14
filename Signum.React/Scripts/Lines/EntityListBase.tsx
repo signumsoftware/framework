@@ -7,9 +7,8 @@ import * as Finder from '../Finder'
 import { FindOptions } from '../FindOptions'
 import { TypeContext, StyleContext, StyleOptions, FormGroupStyle } from '../TypeContext'
 import { PropertyRoute, PropertyRouteType, MemberInfo, getTypeInfo, getTypeInfos, TypeInfo, IsByAll, getTypeName } from '../Reflection'
-import { LineBase, LineBaseProps, FormGroup, FormControlStatic, runTasks } from '../Lines/LineBase'
-import Typeahead from '../Lines/Typeahead'
-import { EntityBase, EntityBaseProps} from './EntityBase'
+import { LineBase, LineBaseProps, runTasks } from '../Lines/LineBase'
+import { EntityBase, EntityBaseProps } from './EntityBase'
 
 
 export interface EntityListBaseProps extends EntityBaseProps {
@@ -51,10 +50,10 @@ export abstract class EntityListBase<T extends EntityListBaseProps, S extends En
             return undefined;
 
         return (
-            <a className={classes("sf-line-button", "sf-move", btn ? "btn btn-default" : undefined) }
-                onClick={() => this.moveUp(index) }
+            <a href="#" className={classes("sf-line-button", "sf-move", btn ? "btn btn-light" : undefined)}
+                onClick={e => { e.preventDefault(); this.moveUp(index); }}
                 title={EntityControlMessage.MoveUp.niceToString() }>
-                <span className="glyphicon glyphicon-chevron-up"/>
+                <span className="fa fa-chevron-up"/>
             </a>
         );
     }
@@ -70,10 +69,10 @@ export abstract class EntityListBase<T extends EntityListBaseProps, S extends En
             return undefined;
 
         return (
-            <a className={classes("sf-line-button", "sf-move", btn ? "btn btn-default" : undefined) }
-                onClick={() => this.moveDown(index) }
+            <a href="#" className={classes("sf-line-button", "sf-move", btn ? "btn btn-light" : undefined)}
+                onClick={e => { e.preventDefault(); this.moveDown(index); }}
                 title={EntityControlMessage.MoveUp.niceToString() }>
-                <span className="glyphicon glyphicon-chevron-down"/>
+                <span className="fa fa-chevron-down"/>
             </a>);
     }
 

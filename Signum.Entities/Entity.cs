@@ -18,6 +18,7 @@ using System.Data;
 using System.Globalization;
 using System.Diagnostics;
 using System.Collections.Concurrent;
+using Signum.Entities;
 
 namespace Signum.Entities
 {
@@ -26,7 +27,8 @@ namespace Signum.Entities
     {
         [Ignore, DebuggerBrowsable(DebuggerBrowsableState.Never)]
         internal PrimaryKey? id;
-        
+
+
         [Ignore, DebuggerBrowsable(DebuggerBrowsableState.Never)]
         protected internal string toStr; //for queries and lites on entities with non-expression ToString 
 
@@ -286,7 +288,7 @@ namespace Signum.Entities
         public static T SetModified<T>(this T ident)
             where T : Modifiable
         {
-            ident.Modified = ModifiedState.SelfModified;
+            ident.Modified = ModifiedState.Modified;
             return ident;
         }
 

@@ -30,7 +30,8 @@ export class MultiValueLine extends LineBase<MultiValueLineProps, MultiValueLine
         this.setValue(list);
     }
 
-    handleAddValue = () => {
+    handleAddValue = (e: React.MouseEvent<any>) => {
+        e.preventDefault();
         const list = this.state.ctx.value;
         const newValuePromise = this.state.onCreate == null ? this.defaultCreate() : this.state.onCreate();
 
@@ -39,7 +40,7 @@ export class MultiValueLine extends LineBase<MultiValueLineProps, MultiValueLine
                 return;
 
             if (Array.isArray(v)) {
-                list.push(...v.map(e=>newMListElement(e)));
+                list.push(...v.map(e => newMListElement(e)));
             }
             else {
                 list.push(newMListElement(v));
@@ -61,7 +62,7 @@ export class MultiValueLine extends LineBase<MultiValueLineProps, MultiValueLine
         return (
             <FormGroup ctx={s.ctx} labelText={s.labelText}
                 htmlAttributes={{ ...this.baseHtmlAttributes(), ...this.state.formGroupHtmlAttributes }}
-                helpBlock={this.state.helpBlock}
+                helpText={this.state.helpText}
                 labelHtmlAttributes={s.labelHtmlAttributes}>
                 <table className="sf-multi-value">
                     <tbody>
@@ -70,10 +71,10 @@ export class MultiValueLine extends LineBase<MultiValueLineProps, MultiValueLine
                                 <tr key={i}>
                                     <td>
                                         {!s.ctx.readOnly &&
-                                            <a title={SearchMessage.DeleteFilter.niceToString()}
+                                            <a href="#" title={SearchMessage.DeleteFilter.niceToString()}
                                                 className="sf-line-button sf-remove"
-                                                onClick={() => this.handleDeleteValue(i)}>
-                                                <span className="glyphicon glyphicon-remove" />
+                                                onClick={e => { e.preventDefault(); this.handleDeleteValue(i); }}>
+                                                <span className="fa fa-remove" />
                                             </a>}
                                     </td>
                                     <td>
@@ -84,10 +85,10 @@ export class MultiValueLine extends LineBase<MultiValueLineProps, MultiValueLine
                         <tr >
                             <td colSpan={4}>
                                 {!s.ctx.readOnly &&
-                                    <a title={this.props.addValueText || SearchMessage.AddValue.niceToString()}
+                                    <a href="#" title={this.props.addValueText || SearchMessage.AddValue.niceToString()}
                                         className="sf-line-button sf-create"
                                         onClick={this.handleAddValue}>
-                                        <span className="glyphicon glyphicon-plus sf-create sf-create-label" />{this.props.addValueText || SearchMessage.AddValue.niceToString()}
+                                        <span className="fa fa-plus sf-create" />&nbsp;{this.props.addValueText || SearchMessage.AddValue.niceToString()}
                                     </a>}
                             </td>
                         </tr>

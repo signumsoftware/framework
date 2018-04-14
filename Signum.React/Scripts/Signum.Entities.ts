@@ -133,9 +133,8 @@ export function toLite<T extends Entity>(entity: T | null | undefined, fat?: boo
 
     if(!entity)
         return null;
-
     if(fat)
-       return toLiteFat(entity);
+       return toLiteFat(entity, toStr);
 
     if(entity.id == undefined)
         throw new Error(`The ${entity.Type} has no Id`);
@@ -147,13 +146,13 @@ export function toLite<T extends Entity>(entity: T | null | undefined, fat?: boo
     }
 }
 
-export function toLiteFat<T extends Entity>(entity: T) : Lite<T> {
+export function toLiteFat<T extends Entity>(entity: T, toStr?:string) : Lite<T> {
     
     return {
        entity : entity,
        EntityType  :entity.Type,
        id: entity.id,
-       toStr: getToString(entity),
+       toStr: toStr || getToString(entity),
     }
 }
 
@@ -177,7 +176,7 @@ export function is<T extends Entity>(a: Lite<T> | T | null | undefined, b: Lite<
         return false;
 
     const aType = (a as T).Type || (a as Lite<T>).EntityType;
-    const bType = (a as T).Type || (a as Lite<T>).EntityType;
+    const bType = (b as T).Type || (b as Lite<T>).EntityType;
 
     if(!aType || !bType)
         throw new Error("No Type found");
@@ -235,6 +234,8 @@ export module CalendarMessage {
 export module ConnectionMessage {
     export const AConnectionWithTheServerIsNecessaryToContinue = new MessageKey("ConnectionMessage", "AConnectionWithTheServerIsNecessaryToContinue");
     export const SessionExpired = new MessageKey("ConnectionMessage", "SessionExpired");
+    export const ANewVersionHasJustBeenDeployedSaveChangesAnd0 = new MessageKey("ConnectionMessage", "ANewVersionHasJustBeenDeployedSaveChangesAnd0");
+    export const Refresh = new MessageKey("ConnectionMessage", "Refresh");
 }
 
 export const CorruptMixin = new Type<CorruptMixin>("CorruptMixin");
@@ -288,6 +289,9 @@ export module JavascriptMessage {
     export const showFilters = new MessageKey("JavascriptMessage", "showFilters");
     export const groupResults = new MessageKey("JavascriptMessage", "groupResults");
     export const ungroupResults = new MessageKey("JavascriptMessage", "ungroupResults");
+    export const activateTimeMachine = new MessageKey("JavascriptMessage", "activateTimeMachine");
+    export const deactivateTimeMachine = new MessageKey("JavascriptMessage", "deactivateTimeMachine");
+    export const showRecords = new MessageKey("JavascriptMessage", "showRecords");
     export const loading = new MessageKey("JavascriptMessage", "loading");
     export const noActionsFound = new MessageKey("JavascriptMessage", "noActionsFound");
     export const saveChangesBeforeOrPressCancel = new MessageKey("JavascriptMessage", "saveChangesBeforeOrPressCancel");
@@ -315,6 +319,8 @@ export module JavascriptMessage {
     export const newEntity = new MessageKey("JavascriptMessage", "newEntity");
     export const ok = new MessageKey("JavascriptMessage", "ok");
     export const cancel = new MessageKey("JavascriptMessage", "cancel");
+    export const showPeriod = new MessageKey("JavascriptMessage", "showPeriod");
+    export const showPreviousOperation = new MessageKey("JavascriptMessage", "showPreviousOperation");
 }
 
 export module LiteMessage {
@@ -369,6 +375,7 @@ export module OperationMessage {
     export const PleaseConfirmYouDLikeToDeleteTheSelectedEntitiesFromTheSystem = new MessageKey("OperationMessage", "PleaseConfirmYouDLikeToDeleteTheSelectedEntitiesFromTheSystem");
     export const TheOperation0DidNotReturnAnEntity = new MessageKey("OperationMessage", "TheOperation0DidNotReturnAnEntity");
     export const Logs = new MessageKey("OperationMessage", "Logs");
+    export const PreviousOperationLog = new MessageKey("OperationMessage", "PreviousOperationLog");
 }
 
 export const OperationSymbol = new Type<OperationSymbol>("Operation");
@@ -454,6 +461,7 @@ export module SynchronizerMessage {
 
 export module ValidationMessage {
     export const _0DoesNotHaveAValid1Format = new MessageKey("ValidationMessage", "_0DoesNotHaveAValid1Format");
+    export const _0DoesNotHaveAValid1IdentifierFormat = new MessageKey("ValidationMessage", "_0DoesNotHaveAValid1IdentifierFormat");
     export const _0HasAnInvalidFormat = new MessageKey("ValidationMessage", "_0HasAnInvalidFormat");
     export const _0HasMoreThan1DecimalPlaces = new MessageKey("ValidationMessage", "_0HasMoreThan1DecimalPlaces");
     export const _0HasSomeRepeatedElements1 = new MessageKey("ValidationMessage", "_0HasSomeRepeatedElements1");
@@ -498,9 +506,13 @@ export module ValidationMessage {
     export const TheNumberOfElementsOf0HasToBe12 = new MessageKey("ValidationMessage", "TheNumberOfElementsOf0HasToBe12");
     export const Type0NotAllowed = new MessageKey("ValidationMessage", "Type0NotAllowed");
     export const _0IsMandatoryWhen1IsNotSet = new MessageKey("ValidationMessage", "_0IsMandatoryWhen1IsNotSet");
+    export const _0IsMandatoryWhen1IsNotSetTo2 = new MessageKey("ValidationMessage", "_0IsMandatoryWhen1IsNotSetTo2");
     export const _0IsMandatoryWhen1IsSet = new MessageKey("ValidationMessage", "_0IsMandatoryWhen1IsSet");
+    export const _0IsMandatoryWhen1IsSetTo2 = new MessageKey("ValidationMessage", "_0IsMandatoryWhen1IsSetTo2");
     export const _0ShouldBeNullWhen1IsNotSet = new MessageKey("ValidationMessage", "_0ShouldBeNullWhen1IsNotSet");
+    export const _0ShouldBeNullWhen1IsNotSetTo2 = new MessageKey("ValidationMessage", "_0ShouldBeNullWhen1IsNotSetTo2");
     export const _0ShouldBeNullWhen1IsSet = new MessageKey("ValidationMessage", "_0ShouldBeNullWhen1IsSet");
+    export const _0ShouldBeNullWhen1IsSetTo2 = new MessageKey("ValidationMessage", "_0ShouldBeNullWhen1IsSetTo2");
     export const _0ShouldBeNull = new MessageKey("ValidationMessage", "_0ShouldBeNull");
     export const _0ShouldBeADateInThePast = new MessageKey("ValidationMessage", "_0ShouldBeADateInThePast");
     export const BeInThePast = new MessageKey("ValidationMessage", "BeInThePast");
@@ -512,6 +524,8 @@ export module ValidationMessage {
     export const _0ShouldBeOfType1 = new MessageKey("ValidationMessage", "_0ShouldBeOfType1");
     export const _0ShouldNotBeOfType1 = new MessageKey("ValidationMessage", "_0ShouldNotBeOfType1");
     export const _0And1CanNotBeSetAtTheSameTime = new MessageKey("ValidationMessage", "_0And1CanNotBeSetAtTheSameTime");
+    export const _0And1And2CanNotBeSetAtTheSameTime = new MessageKey("ValidationMessage", "_0And1And2CanNotBeSetAtTheSameTime");
+    export const _0Have1ElementsButAllowedOnly2 = new MessageKey("ValidationMessage", "_0Have1ElementsButAllowedOnly2");
 }
 
 export module VoidEnumMessage {

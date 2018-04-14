@@ -6,9 +6,8 @@ import * as Finder from '../Finder'
 import { FindOptions } from '../FindOptions'
 import { TypeContext, StyleContext, StyleOptions, FormGroupStyle, mlistItemContext, EntityFrame } from '../TypeContext'
 import { PropertyRoute, PropertyRouteType, MemberInfo, getTypeInfo, getTypeInfos, TypeInfo, IsByAll, ReadonlyBinding, LambdaMemberType, Type } from '../Reflection'
-import { LineBase, LineBaseProps, FormGroup, FormControlStatic, runTasks, } from '../Lines/LineBase'
+import { LineBase, LineBaseProps, runTasks, } from '../Lines/LineBase'
 import { ModifiableEntity, Lite, Entity, MList, MListElement, EntityControlMessage, JavascriptMessage, toLite, is, liteKey, getToString } from '../Signum.Entities'
-import Typeahead from '../Lines/Typeahead'
 import { EntityBase } from './EntityBase'
 import { EntityListBase, EntityListBaseProps, DragConfig } from './EntityListBase'
 import DynamicComponent from './DynamicComponent'
@@ -108,10 +107,10 @@ export class EntityTable extends EntityListBase<EntityTableProps, EntityTablePro
         const elementPr = ctx.propertyRoute.add(a => a[0].element);
 
         return (
-            <table className="table table-condensed form-vertical sf-table">
+            <table className="table table-sm sf-table">
                 {
                     (!this.props.avoidEmptyTable || ctx.value.length > 0) && <thead>
-                        <tr>
+                        <tr className="bg-light">
                             <th></th>
                             {
                                 this.state.columns!.map((c, i) => <th key={i} {...c.headerHtmlAttributes}>
@@ -138,10 +137,10 @@ export class EntityTable extends EntityListBase<EntityTableProps, EntityTablePro
                         <tr>
                             <td colSpan={1 + this.state.columns!.length}>
                                 {typeof this.state.createAsLink == "function" ? this.state.createAsLink(this) :
-                                    <a title={EntityControlMessage.Create.niceToString()}
+                                    <a href="#" title={EntityControlMessage.Create.niceToString()}
                                         className="sf-line-button sf-create"
                                         onClick={this.handleCreateClick}>
-                                        <span className="glyphicon glyphicon-plus sf-create sf-create-label" />{EntityControlMessage.Create.niceToString()}
+                                        <span className="fa fa-plus sf-create" />&nbsp;{EntityControlMessage.Create.niceToString()}
                                     </a>}
                             </td>
                         </tr>
@@ -180,25 +179,25 @@ export class EntityTableRow extends React.Component<EntityTableRowProps, { rowSt
         var rowAtts = this.props.onRowHtmlAttributes && this.props.onRowHtmlAttributes(ctx, this, this.state.rowState);
         const drag = this.props.draggable;
         return (
-            <tr style={{ backgroundColor: rowAtts && rowAtts.style && rowAtts.style.backgroundColor }}
+            <tr style={{ backgroundColor: rowAtts && rowAtts.style && rowAtts.style.backgroundColor || undefined }}
                 onDragEnter={drag && drag.onDragOver}
                 onDragOver={drag && drag.onDragOver}
                 onDrop={drag && drag.onDrop}
                 className={drag && drag.dropClass}>
                 <td>
                     <div className="item-group">
-                        {this.props.onRemove && <a className={classes("sf-line-button", "sf-remove")}
+                        {this.props.onRemove && <a href="#" className={classes("sf-line-button", "sf-remove")}
                             onClick={this.props.onRemove}
                             title={EntityControlMessage.Remove.niceToString()}>
-                            <span className="glyphicon glyphicon-remove" />
+                            <span className="fa fa-remove"/>
                         </a>}
                         &nbsp;
-                        {drag && <a className={classes("sf-line-button", "sf-move")}
+                        {drag && <a href="#" className={classes("sf-line-button", "sf-move")}
                             draggable={true}
                             onDragStart={drag.onDragStart}
                             onDragEnd={drag.onDragEnd}
                             title={EntityControlMessage.Move.niceToString()}>
-                            <span className="glyphicon glyphicon-menu-hamburger" />
+                            <span className="fa fa-bars"/>
                         </a>}
                     </div>
                 </td>

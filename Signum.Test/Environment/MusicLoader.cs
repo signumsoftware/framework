@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Signum.Utilities;
+using System.Threading;
 
 namespace Signum.Test.Environment
 {
@@ -245,6 +246,53 @@ namespace Signum.Test.Environment
                     Awards = { ga.ToLite() }
                 }
             }.Execute(ConfigOperation.Save);
+
+
+            CreateFolders();
+        }
+
+
+        //       |--X1(a)-|-X1(B)-|-X2--|
+        //  |---A1-----|--A2-----------------|
+        //    |---B1---------|---B2-------|
+
+        private static void CreateFolders()
+        {
+            var TIME = 100;
+
+            var a = new FolderEntity { Name = "A1" }.Save();
+            Thread.Sleep(TIME);
+
+            var b = new FolderEntity { Name = "B1" }.Save();
+            Thread.Sleep(TIME);
+
+            var x = new FolderEntity { Name = "X1", Parent = a.ToLite() }.Save();
+            Thread.Sleep(TIME);
+
+            a.Name = "A2";
+            a.Save();
+            Thread.Sleep(TIME);
+
+            x.Parent = b.ToLite();
+            x.Save();
+            Thread.Sleep(TIME);
+
+            x.Name = "X2";
+            x.Save();
+            Thread.Sleep(TIME);
+
+            b.Name = "B2";
+            b.Save();
+            Thread.Sleep(TIME);
+
+            x.Delete();
+            Thread.Sleep(TIME);
+
+            b.Delete();
+            Thread.Sleep(TIME);
+
+            a.Delete();
+            Thread.Sleep(TIME);
         }
     }
 }
