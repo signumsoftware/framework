@@ -211,7 +211,7 @@ namespace Signum.Engine.Workflow
             public static Dictionary<WorkflowEventType, string> WorkflowEventTypes = new Dictionary<WorkflowEventType, string>()
             {
                 { WorkflowEventType.Start, "startEvent" },
-                { WorkflowEventType.TimerStart, "startEvent" },
+                { WorkflowEventType.ScheduledStart, "startEvent" },
                 { WorkflowEventType.Finish, "endEvent" },
             };
 
@@ -236,7 +236,7 @@ namespace Signum.Engine.Workflow
                 return new XElement(bpmn + WorkflowEventTypes.GetOrThrow(e.Entity.Type),
                     new XAttribute("id", e.bpmnElementId),
                     e.Entity.Name.HasText() ? new XAttribute("name", e.Entity.Name) : null,
-                    e.Entity.Type.IsTimerStart() ? 
+                    e.Entity.Type.IsScheduledStart() ? 
                         new XElement(bpmn + (((WorkflowEventModel)e.Entity.GetModel()).Task.TriggeredOn == TriggeredOn.Always ? "timerEventDefinition" : "conditionalEventDefinition")) : null, 
                     GetConnections(e.Entity.ToLite()));
             }
@@ -373,7 +373,7 @@ namespace Signum.Engine.Workflow
                     ViewName = a.ViewName,
                     RequiresOpen = a.RequiresOpen,
                     Reject = a.Reject,
-                    Timers = a.Timers.Select(t => t.Clone()).ToMList(),
+                    BoundaryTimers = a.BoundaryTimers.Select(t => t.Clone()).ToMList(),
                     EstimatedDuration = a.EstimatedDuration,
                     Jumps = a.Jumps.Select(j => j.Clone()).ToMList(),
                     Script = a.Script?.Clone(),

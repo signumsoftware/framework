@@ -224,7 +224,7 @@ namespace Signum.Engine.Workflow
                     var candidates =
                     (from ca in Database.Query<CaseActivityEntity>()
                      where ca.State == CaseActivityState.PendingDecision || ca.State == CaseActivityState.PendingNext
-                     from timer in ca.WorkflowActivity.Timers
+                     from timer in ca.WorkflowActivity.BoundaryTimers
                      where timer.Interrupting || !ca.ExecutedTimers().Any(t => t.BpmnElementId == timer.BpmnElementId)
                      select new { Activity = ca, Timer = timer });
                     
@@ -385,12 +385,11 @@ namespace Signum.Engine.Workflow
 
         public class WorkflowExecuteStepContext
         {
-            public DecisionResult? DecisionResult;
             public CaseEntity Case;
             public CaseActivityEntity CaseActivity;
             public List<WorkflowActivityEntity> ToActivities = new List<WorkflowActivityEntity>();
             public bool IsFinished { get; set; }
-            public List<IWorkflowTransition> Connections = new List<IWorkflowTransition>();
+            public List<WorkflowConnectionEntity> Connections = new List<WorkflowConnectionEntity>();
         }
 
         static bool Applicable(this WorkflowConnectionEntity wc, WorkflowExecuteStepContext ctx)
@@ -577,7 +576,7 @@ namespace Signum.Engine.Workflow
                     Execute = (ca, _) =>
                     {
                         CheckRequiresOpen(ca);
-                        ExecuteStep(ca, DecisionResult.Approve, null);
+                        ExecuteStep(ca, DoneType.Approve, null);
                     },
                 }.Register();
 
@@ -589,7 +588,7 @@ namespace Signum.Engine.Workflow
                     Execute = (ca, _) =>
                     {
                         CheckRequiresOpen(ca);
-                        ExecuteStep(ca, DecisionResult.Decline, null);
+                        ExecuteStep(ca, DoneType.Decline, null);
                     },
                 }.Register();
 
@@ -601,7 +600,7 @@ namespace Signum.Engine.Workflow
                     Execute = (ca, args) =>
                     {
                         CheckRequiresOpen(ca);
-                        ExecuteStep(ca, null, null);
+                        ExecuteStep(ca, DoneType.Next, null);
                     },
                 }.Register();
 
@@ -611,14 +610,14 @@ namespace Signum.Engine.Workflow
                 {
                     FromStates = { CaseActivityState.PendingNext, CaseActivityState.PendingDecision },
                     ToStates = { CaseActivityState.Done },
-                    CanExecute = a => a.WorkflowActivity.Jumps.Any() ? null : CaseActivityMessage.Activity0HasNoJumps.NiceToString(a.WorkflowActivity),
+                    CanExecute = a => a.WorkflowActivity.NextConnectionsFromCache().Where(c => c.Type == ConnectionType.Jump).Any() ? null : CaseActivityMessage.Activity0HasNoJumps.NiceToString(a.WorkflowActivity),
                     Lite = false,
                     Execute = (ca, args) =>
                     {
                         CheckRequiresOpen(ca);
                         var to = args.GetArg<Lite<IWorkflowNodeEntity>>();
-                        WorkflowJumpEmbedded jump = ca.WorkflowActivity.Jumps.SingleEx(j => j.To.Is(to));
-                        ExecuteStep(ca, null, jump);
+                        var jump = ca.WorkflowActivity.NextConnectionsFromCache().SingleEx(c => c.Type == ConnectionType.Jump && to.RefersTo(c.To));
+                        ExecuteStep(ca, DoneType.Jump, jump);
                     },
                 }.Register();
 
@@ -626,8 +625,8 @@ namespace Signum.Engine.Workflow
                 {
                     FromStates = { CaseActivityState.PendingNext, CaseActivityState.PendingDecision },
                     ToStates = { CaseActivityState.Done },
-                    CanExecute = ca => 
-                        ca.WorkflowActivity.Reject == null ?  CaseActivityMessage.Activity0HasNoReject.NiceToString(ca.WorkflowActivity) : 
+                    CanExecute = ca =>
+                        !ca.WorkflowActivity.NextConnectionsFromCache().Any(a=>a.Type == ConnectionType.Reject) ? CaseActivityMessage.Activity0HasNoReject.NiceToString(ca.WorkflowActivity) : 
                         ca.Previous == null ? CaseActivityMessage.ThereIsNoPreviousActivity.NiceToString() :
                         null,
                     Lite = false,
@@ -637,7 +636,9 @@ namespace Signum.Engine.Workflow
                         if (!pwa.Lane.Pool.Workflow.Is(ca.WorkflowActivity.Lane.Pool.Workflow))
                             throw new InvalidOperationException("Previous in different workflow");
 
-                        ExecuteStep(ca, null, ca.WorkflowActivity.Reject);
+                        var reject = ca.WorkflowActivity.NextConnectionsFromCache().SingleEx(a => a.Type == ConnectionType.Reject && a.To.Is(pwa));
+
+                        ExecuteStep(ca, DoneType.Rejected, reject);
                     },
                 }.Register();
 
@@ -645,14 +646,18 @@ namespace Signum.Engine.Workflow
                 {
                     FromStates = { CaseActivityState.PendingNext, CaseActivityState.PendingDecision },
                     ToStates = { CaseActivityState.Done, CaseActivityState.PendingNext, CaseActivityState.PendingDecision },
-                    CanExecute = ca => ca.WorkflowActivity.Timers.Count == 0 ? CaseActivityMessage.Activity0HasNoTimers.NiceToString(ca.WorkflowActivity) : null,
+                    CanExecute = ca => (ca.WorkflowActivity is WorkflowEventEntity we && we.Type.IsTimer() || 
+                    ca.WorkflowActivity is WorkflowActivityEntity wa && wa.BoundaryTimers.Any()) ?  null : CaseActivityMessage.Activity0HasNoTimers.NiceToString(ca.WorkflowActivity),
                     Execute = (ca, _) =>
                     {
                         var now = TimeZoneManager.Now;
 
                         var alreadyExecuted = ca.ExecutedTimers().Select(a => a.BpmnElementId).ToHashSet();
 
-                        var timer = ca.WorkflowActivity.Timers.Where(a => a.Interrupting || !alreadyExecuted.Contains(a.BpmnElementId)).FirstOrDefault(t =>
+                        var candidates = ca.WorkflowActivity is WorkflowEventEntity e ? new WorkflowEventEntity[] { e } :
+                        ((WorkflowActivityEntity)ca.WorkflowActivity).BoundaryTimers.Select(e => e.Retrieve()).ToArray();Ö
+
+                        var timer = (WorkflowEventEntity)ca.WorkflowActivity.BoundaryTimers.Where(a => a.Interrupting || !alreadyExecuted.Contains(a.BpmnElementId)).FirstOrDefault(t =>
                            {
                                if (t.Duration != null)
                                    return t.Duration.Add(ca.StartDate) < now;
@@ -795,22 +800,15 @@ namespace Signum.Engine.Workflow
             }
 
     
-            private static void ExecuteStep(CaseActivityEntity ca, DecisionResult? decisionResult, IWorkflowTransition transition)
+            private static void ExecuteStep(CaseActivityEntity ca, DoneType doneType, WorkflowConnectionEntity firstConnection)
             {
-                using (WorkflowActivityInfo.Scope(new WorkflowActivityInfo { CaseActivity = ca, WorkflowActivity = ca.WorkflowActivity, DecisionResult = decisionResult, Transition = transition }))
+                using (WorkflowActivityInfo.Scope(new WorkflowActivityInfo { CaseActivity = ca, WorkflowActivity = ca.WorkflowActivity, Connection = firstConnection }))
                 {
                     SaveEntity(ca.Case.MainEntity);
 
                     ca.DoneBy = UserEntity.Current.ToLite();
                     ca.DoneDate = TimeZoneManager.Now;
-                    ca.DoneType = transition is WorkflowJumpEmbedded ? DoneType.Jump :
-                                  transition is WorkflowRejectEmbedded ? DoneType.Rejected :
-                                  transition is WorkflowTimerEmbedded ? DoneType.Timeout :
-                                  transition is WorkflowScriptPartEmbedded ? DoneType.ScriptFailure :
-                                  decisionResult == DecisionResult.Approve ? DoneType.Approve :
-                                  decisionResult == DecisionResult.Decline ? DoneType.Decline :
-                                  ca.WorkflowActivity.Type == WorkflowActivityType.Script ? DoneType.ScriptSuccess :
-                                  DoneType.Next;
+                    ca.DoneType = doneType;
                     ca.Case.Description = ca.Case.MainEntity.ToString().Trim();
                     ca.Save();
 
@@ -823,29 +821,21 @@ namespace Signum.Engine.Workflow
                     {
                         Case = ca.Case,
                         CaseActivity = ca,
-                        DecisionResult = decisionResult,
                     };
 
-                    if (transition != null)
+                    if (firstConnection != null)
                     {
-                        var to =
-                            transition is WorkflowJumpEmbedded jump ? jump.To.Retrieve() :
-                            transition is WorkflowTimerEmbedded timer ? timer.To.Retrieve() :
-                            transition is WorkflowScriptPartEmbedded ? ((IWorkflowTransitionTo)transition).To.Retrieve() :
-                            transition is WorkflowRejectEmbedded ? ca.Previous.Retrieve().WorkflowActivity :
-                            throw new NotImplementedException();
-
-                        if (transition.Condition != null)
+                        if (firstConnection.Condition != null)
                         {
-                            var jumpCtx = new WorkflowTransitionContext(ca.Case, ca, transition, null);
-                            var alg = transition.Condition.RetrieveFromCache().Eval.Algorithm;
+                            var jumpCtx = new WorkflowTransitionContext(ca.Case, ca, firstConnection, null);
+                            var alg = firstConnection.Condition.RetrieveFromCache().Eval.Algorithm;
                             var result = alg.EvaluateUntyped(ca.Case.MainEntity, jumpCtx);
                             if (!result)
-                                throw new ApplicationException(WorkflowMessage.JumpTo0FailedBecause1.NiceToString(to, transition.Condition));
+                                throw new ApplicationException(WorkflowMessage.JumpTo0FailedBecause1.NiceToString(firstConnection.To, firstConnection.Condition));
                         }
 
-                        ctx.Connections.Add(transition);
-                        if (!FindNext(to, ctx))
+                        ctx.Connections.Add(firstConnection);
+                        if (!FindNext(firstConnection.To, ctx))
                             return;
                     }
                     else

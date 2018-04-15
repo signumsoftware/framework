@@ -109,7 +109,7 @@ namespace Signum.Engine.Workflow
                         errors.Add(WorkflowValidationMessage._0HasOutputs.NiceToString(e));
                 }
 
-                if (e.Type.IsTimerStart())
+                if (e.Type.IsScheduledStart())
                 {
                     var schedule = e.ScheduledTask();
 
@@ -287,7 +287,7 @@ namespace Signum.Engine.Workflow
                         errors.Add(WorkflowValidationMessage.Activity0CanNotRejectToParallelGateway.NiceToString(wa));
                 }
 
-                foreach (var timer in wa.Timers)
+                foreach (var timer in wa.BoundaryTimers)
                 {
                     ValidateTransition(wa, timer);
                 } 

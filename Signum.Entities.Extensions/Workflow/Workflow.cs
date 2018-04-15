@@ -127,18 +127,6 @@ namespace Signum.Entities.Workflow
         WorkflowLaneEntity Lane { get; set; }
     }
 
-    public interface IWorkflowTransition
-    {
-        Lite<WorkflowConditionEntity> Condition { get; }
-
-        Lite<WorkflowActionEntity> Action { get; }
-    }
-
-    public interface IWorkflowTransitionTo : IWorkflowTransition
-    {
-        Lite<IWorkflowNodeEntity> To { get; }
-    }
-
     [Serializable]
     public class WorkflowReplacementModel: ModelEntity
     {
@@ -158,7 +146,7 @@ namespace Signum.Entities.Workflow
 
     public class WorkflowTransitionContext
     {
-        public WorkflowTransitionContext(CaseEntity @case, CaseActivityEntity previous, IWorkflowTransition conn, DecisionResult? dr)
+        public WorkflowTransitionContext(CaseEntity @case, CaseActivityEntity previous, WorkflowConnectionEntity conn, DecisionResult? dr)
         {
             this.Case = @case;
             this.PreviousCaseActivity = previous;
@@ -168,7 +156,7 @@ namespace Signum.Entities.Workflow
 
         public CaseActivityEntity PreviousCaseActivity { get; internal set; }
         public DecisionResult? DecisionResult { get; internal set; }
-        public IWorkflowTransition Connection { get; internal set; }
+        public WorkflowConnectionEntity Connection { get; internal set; }
         public CaseEntity Case { get; set; }
     }
 

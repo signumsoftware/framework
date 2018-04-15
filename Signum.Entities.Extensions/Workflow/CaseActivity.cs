@@ -23,9 +23,9 @@ namespace Signum.Entities.Workflow
         [NotNullValidator]
         public CaseEntity Case { get; set; }
         
-        [NotNullValidator]
-        public WorkflowActivityEntity WorkflowActivity { get; set; }
-
+        [ImplementedBy(typeof(WorkflowActivityEntity), typeof(WorkflowEventEntity))]
+        public IWorkflowNodeEntity WorkflowActivity { get; set; }
+        
         [StringLengthValidator(AllowNulls = false, Min = 3, Max = 255)]
         public string OriginalWorkflowActivityName { get; set; }
 
@@ -50,7 +50,7 @@ namespace Signum.Entities.Workflow
         }
 
         static Expression<Func<CaseActivityEntity, double?>> DurationRatioExpression =
-        @this => @this.Duration / @this.WorkflowActivity.EstimatedDuration;
+        @this => @this.Duration / (@this.WorkflowActivity as WorkflowActivityEntity).EstimatedDuration;
         [ExpressionField]
         public double? DurationRatio
         {
@@ -58,7 +58,7 @@ namespace Signum.Entities.Workflow
         }
 
         static Expression<Func<CaseActivityEntity, double?>> DurationRealTimeRatioExpression =
-            @this => @this.DurationRealTime / @this.WorkflowActivity.EstimatedDuration;
+            @this => @this.DurationRealTime / (@this.WorkflowActivity as WorkflowActivityEntity).EstimatedDuration;
         [ExpressionField]
         public double? DurationRealTimeRatio
         {
@@ -73,7 +73,7 @@ namespace Signum.Entities.Workflow
 
         static Expression<Func<CaseActivityEntity, CaseActivityState>> StateExpression =
         @this => @this.DoneDate.HasValue ? CaseActivityState.Done :
-        @this.WorkflowActivity.Type == WorkflowActivityType.Decision ? CaseActivityState.PendingDecision : 
+        (@this.WorkflowActivity as WorkflowActivityEntity).Type == WorkflowActivityType.Decision ? CaseActivityState.PendingDecision : 
         CaseActivityState.PendingNext;
         [ExpressionField("StateExpression")]
         public CaseActivityState State
