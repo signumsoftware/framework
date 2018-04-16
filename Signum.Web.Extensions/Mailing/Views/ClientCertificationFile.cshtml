@@ -1,7 +1,0 @@
-﻿@using Signum.Entities.Mailing
-
-@using (var sc = Html.TypeContext<ClientCertificationFileEmbedded>())
-{
-    @Html.ValueLine(sc, s => s.CertFileType)
-    @Html.ValueLine(sc, s => s.FullFilePath)
-}
