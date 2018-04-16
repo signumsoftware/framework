@@ -52,10 +52,10 @@ export class UncontrolledTabs extends React.Component<UncontrolledTabsProps, Unc
 
     render() {
 
-        const { children, defaultEventKey, hideOnly } = this.props;
+        const { children, defaultEventKey, hideOnly , fill, pills } = this.props;
 
         return (
-            <Tabs activeEventKey={this.state.activeEventKey} toggle={this.handleToggle} hideOnly={hideOnly}>
+            <Tabs activeEventKey={this.state.activeEventKey} toggle={this.handleToggle} fill={fill} pills={pills} hideOnly={hideOnly}>
                 {children}
             </Tabs>
         );
