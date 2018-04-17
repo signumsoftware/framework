@@ -70,7 +70,7 @@ namespace Signum.Engine.UserQueries
             {
                 QueryName = userQuery.Query.ToQueryName()
             };
-            if (!userQuery.WithoutFilters)
+            if (!userQuery.AppendFilters)
             {
                 qr.Filters = userQuery.Filters.Select(qf =>
                     new Filter(qf.Token.Token, qf.Operation, FilterValueConverter.Parse(qf.ValueString, qf.Token.Token.Type, qf.Operation.IsList(), allowSmart: true))).ToList();
@@ -294,7 +294,7 @@ namespace Signum.Engine.UserQueries
                     }
                 }
 
-                if (uq.WithoutFilters)
+                if (uq.AppendFilters)
                     uq.Filters.Clear();
 
                 if (!uq.ShouldHaveElements && uq.ElementsPerPage.HasValue)

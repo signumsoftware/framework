@@ -41,18 +41,8 @@ namespace Signum.Entities.UserQueries
         [StringLengthValidator(AllowNulls = false, Min = 1, Max = 200)]
         public string DisplayName { get; set; }
 
-        bool withoutFilters;
-        public bool WithoutFilters
-        {
-            get { return withoutFilters; }
-            set
-            {
-                if (Set(ref withoutFilters, value) && withoutFilters)
-                    Filters.Clear();
-            }
-        }
-
-
+        public bool AppendFilters { get; set; }
+        
         [NotNullValidator, PreserveOrder]
         public MList<QueryFilterEmbedded> Filters { get; set; } = new MList<QueryFilterEmbedded>();
 
@@ -98,10 +88,7 @@ namespace Signum.Entities.UserQueries
                 if (ElementsPerPage == null && ShouldHaveElements)
                     return UserQueryMessage._0ShouldBeSetIf1Is2.NiceToString().FormatWith(pi.NiceName(), NicePropertyName(() => PaginationMode), PaginationMode.NiceToString());
             }
-
-            if (pi.Name == nameof(Filters) && WithoutFilters && Filters.Any())
-                return UserQueryMessage._0ShouldBeEmptyIf1IsSet.NiceToString().FormatWith(pi.NiceName(), ReflectionTools.GetPropertyInfo(() => WithoutFilters).NiceName());
-
+           
             return base.PropertyValidation(pi);
         }
 
@@ -141,7 +128,7 @@ namespace Signum.Entities.UserQueries
                 EntityType == null ? null : new XAttribute("EntityType", ctx.TypeToName(EntityType)),
                 new XAttribute("HideQuickLink", HideQuickLink),
                 Owner == null ? null : new XAttribute("Owner", Owner.Key()),
-                WithoutFilters == true ? null : new XAttribute("WithoutFilters", true),
+                AppendFilters == true ? null : new XAttribute("WithoutFilters", true),
                 ElementsPerPage == null ? null : new XAttribute("ElementsPerPage", ElementsPerPage),
                 PaginationMode == null ? null : new XAttribute("PaginationMode", PaginationMode),
                 new XAttribute("ColumnsMode", ColumnsMode),
@@ -157,7 +144,7 @@ namespace Signum.Entities.UserQueries
             EntityType = element.Attribute("EntityType")?.Let(a => ctx.GetType(a.Value));
             HideQuickLink = element.Attribute("HideQuickLink")?.Let(a => bool.Parse(a.Value)) ?? false;
             Owner = element.Attribute("Owner")?.Let(a => Lite.Parse(a.Value));
-            WithoutFilters = element.Attribute("WithoutFilters")?.Let(a => a.Value == true.ToString()) ?? false;
+            AppendFilters = element.Attribute("WithoutFilters")?.Let(a => a.Value == true.ToString()) ?? false;
             ElementsPerPage = element.Attribute("ElementsPerPage")?.Let(a => int.Parse(a.Value));
             PaginationMode = element.Attribute("PaginationMode")?.Let(a => a.Value.ToEnum<PaginationMode>());
             ColumnsMode = element.Attribute("ColumnsMode").Value.ToEnum<ColumnOptionsMode>();
@@ -389,7 +376,7 @@ namespace Signum.Entities.UserQueries
             return new UserQueryEntity
             {
                 Query = query,
-                WithoutFilters = withoutFilters,
+                AppendFilters = withoutFilters,
                 Owner = DefaultOwner(),
                 GroupResults = request.GroupResults,
                 Filters = withoutFilters ? new MList<QueryFilterEmbedded>() : request.Filters.Select(f => new QueryFilterEmbedded
