@@ -128,7 +128,7 @@ namespace Signum.Entities.UserQueries
                 EntityType == null ? null : new XAttribute("EntityType", ctx.TypeToName(EntityType)),
                 new XAttribute("HideQuickLink", HideQuickLink),
                 Owner == null ? null : new XAttribute("Owner", Owner.Key()),
-                AppendFilters == true ? null : new XAttribute("WithoutFilters", true),
+                AppendFilters == true ? null : new XAttribute("AppendFilters", true),
                 ElementsPerPage == null ? null : new XAttribute("ElementsPerPage", ElementsPerPage),
                 PaginationMode == null ? null : new XAttribute("PaginationMode", PaginationMode),
                 new XAttribute("ColumnsMode", ColumnsMode),
@@ -144,7 +144,7 @@ namespace Signum.Entities.UserQueries
             EntityType = element.Attribute("EntityType")?.Let(a => ctx.GetType(a.Value));
             HideQuickLink = element.Attribute("HideQuickLink")?.Let(a => bool.Parse(a.Value)) ?? false;
             Owner = element.Attribute("Owner")?.Let(a => Lite.Parse(a.Value));
-            AppendFilters = element.Attribute("WithoutFilters")?.Let(a => a.Value == true.ToString()) ?? false;
+            AppendFilters = element.Attribute("AppendFilters")?.Let(a => a.Value == true.ToString()) ?? false;
             ElementsPerPage = element.Attribute("ElementsPerPage")?.Let(a => int.Parse(a.Value));
             PaginationMode = element.Attribute("PaginationMode")?.Let(a => a.Value.ToEnum<PaginationMode>());
             ColumnsMode = element.Attribute("ColumnsMode").Value.ToEnum<ColumnOptionsMode>();
