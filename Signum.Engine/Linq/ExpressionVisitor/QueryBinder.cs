@@ -515,10 +515,11 @@ namespace Signum.Engine.Linq
             ProjectionExpression projection = this.VisitCastProjection(source);
 
             Alias alias = NextSelectAlias();
-            ProjectedColumns pc = ColumnProjector.ProjectColumns(projection.Projector, alias, isGroupKey: true, selectTrivialColumns: true);
+            var proj = DistinctEntityCleaner.Clean(projection.Projector);
+            ProjectedColumns pc = ColumnProjector.ProjectColumns(proj, alias, isGroupKey: true, selectTrivialColumns: true);
             return new ProjectionExpression(
                 new SelectExpression(alias, true, null, pc.Columns, projection.Select, null, null, null, 0),
-                pc.Projector, null, resultType);
+                proj, null, resultType);
         }
 
         private Expression BindReverse(Type resultType, Expression source)
