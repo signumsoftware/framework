@@ -7,7 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Web;
-using System.Web.Http;
+using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using Signum.Entities;
 using Signum.Utilities.Reflection;
@@ -19,7 +19,7 @@ using Signum.Engine.Basics;
 using Signum.React.Map;
 using Signum.Engine.DynamicQuery;
 using Signum.Engine.Maps;
-using System.Web.Http.Controllers;
+using Microsoft.AspNetCore.Builder;
 
 namespace Signum.React.Authorization
 {
@@ -27,12 +27,12 @@ namespace Signum.React.Authorization
     {
         public static bool MergeInvalidUsernameAndPasswordMessages = false;
 
-        public static Action<ApiController, UserEntity> UserPreLogin;
+        public static Action<Controller, UserEntity> UserPreLogin;
         public static Action<UserEntity> UserLogged;
         public static Action UserLoggingOut;
         
 
-        public static void Start(HttpConfiguration config, Func<AuthTokenConfigurationEmbedded> tokenConfig, string hashableEncryptionKey)
+        public static void Start(IApplicationBuilder app, Func<AuthTokenConfigurationEmbedded> tokenConfig, string hashableEncryptionKey)
         {
             SignumControllerFactory.RegisterArea(MethodInfo.GetCurrentMethod());
 
@@ -143,13 +143,8 @@ namespace Signum.React.Authorization
             
             SchemaMap.GetColorProviders += GetMapColors;
         }
-
-        private static void AuthTokensServer(HttpActionContext obj)
-        {
-            throw new NotImplementedException();
-        }
-
-        public static void OnUserPreLogin(ApiController controller, UserEntity user)
+        
+        public static void OnUserPreLogin(Controller controller, UserEntity user)
         {
             AuthServer.UserPreLogin?.Invoke(controller, user);
         }

@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
-using System.Web.Http;
+using Microsoft.AspNetCore.Mvc;
 using Signum.Engine.Authorization;
 using Signum.Entities;
 using Signum.Entities.Authorization;
@@ -19,6 +19,8 @@ using Signum.Engine.Basics;
 using Signum.React.Files;
 using System.IO;
 using Signum.React.Filters;
+using Signum.React.ApiControllers;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Signum.React.Authorization
 {

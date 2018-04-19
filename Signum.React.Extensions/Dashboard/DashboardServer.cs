@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Web;
-using System.Web.Http;
+using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using Signum.Engine.DynamicQuery;
 using Signum.Engine.Basics;
@@ -15,14 +15,15 @@ using Signum.React.Facades;
 using Signum.Engine.Dashboard;
 using Signum.Entities.Dashboard;
 using Signum.Engine.Authorization;
+using Microsoft.AspNetCore.Builder;
 
 namespace Signum.React.Dashboard
 {
     public static class DashboardServer
     {
-        public static void Start(HttpConfiguration config)
+        public static void Start(IApplicationBuilder app)
         {
-            UserAssetServer.Start(config);
+            UserAssetServer.Start(app);
 
             SignumControllerFactory.RegisterArea(MethodInfo.GetCurrentMethod());
 

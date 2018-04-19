@@ -151,7 +151,7 @@ namespace Signum.Entities.Chart
         [InTypeScript(false)]
         public List<CollectionElementToken> Multiplications
         {
-            get { return CollectionElementToken.GetElements(AllTokens().ToHashSet()); }
+            get { return  CollectionElementToken.GetElements(new HashSet<QueryToken>(AllTokens())); }
         }
 
         public void CleanOrderColumns()

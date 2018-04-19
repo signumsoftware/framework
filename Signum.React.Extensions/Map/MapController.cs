@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Web.Mvc.Html;
 using Signum.Entities;
 using Signum.Engine;
 using Signum.Entities.Basics;
@@ -13,7 +12,8 @@ using Signum.Engine.Basics;
 using Signum.Entities.Map;
 using Signum.Engine.Authorization;
 using Signum.React.Maps;
-using System.Web.Http;
+using Microsoft.AspNetCore.Mvc;
+using Signum.React.ApiControllers;
 
 namespace Signum.React.Map
 {

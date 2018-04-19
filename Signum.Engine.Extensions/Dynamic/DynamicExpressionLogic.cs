@@ -213,9 +213,9 @@ namespace Signum.Engine.Dynamic
 
                 sb.AppendLine($"        var {varName} = dqm.RegisterExpression(({entity.FromType} e) => e.{entity.Name}(){GetNiceNameCode(entity)});");
                 if(entity.Format.HasText()) 
-                    sb.AppendLine($"        {varName}.ForceFormat = {CSharpRenderer.Value(entity.Format, typeof(string), new string[0])};");
+                    sb.AppendLine($"        {varName}.ForceFormat = {CSharpRenderer.Value(entity.Format)};");
                 if (entity.Unit.HasText())  
-                    sb.AppendLine($"        {varName}.ForceUnit = {CSharpRenderer.Value(entity.Unit, typeof(string), new string[0])};");
+                    sb.AppendLine($"        {varName}.ForceUnit = {CSharpRenderer.Value(entity.Unit)};");
             }
             sb.AppendLine("    }");
             sb.AppendLine("}");

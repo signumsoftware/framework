@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Web;
-using System.Web.Http;
+using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using Signum.Engine.DynamicQuery;
 using Signum.Engine.Basics;
@@ -24,14 +24,15 @@ using Signum.Entities.Mailing;
 using Signum.Entities.Templating;
 using Signum.Engine.Mailing;
 using Signum.React.TypeHelp;
+using Microsoft.AspNetCore.Builder;
 
 namespace Signum.React.Mailing
 {
     public static class MailingServer
     {
-        public static void Start(HttpConfiguration config)
+        public static void Start(IApplicationBuilder app)
         {
-            TypeHelpServer.Start(config);
+            TypeHelpServer.Start(app);
             SignumControllerFactory.RegisterArea(MethodInfo.GetCurrentMethod());
 
             ReflectionServer.RegisterLike(typeof(TemplateTokenMessage));

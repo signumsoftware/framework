@@ -4,7 +4,6 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
-using System.Web.Http;
 using Signum.Engine.Authorization;
 using Signum.Entities;
 using Signum.Entities.Authorization;
@@ -20,6 +19,7 @@ using Signum.Entities.UserAssets;
 using Signum.Entities.DynamicQuery;
 using Signum.Engine.DynamicQuery;
 using Signum.Engine;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Signum.React.UserQueries
 {

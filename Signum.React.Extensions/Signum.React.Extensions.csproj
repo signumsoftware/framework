@@ -1,785 +1,671 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="..\..\packages\Microsoft.Net.Compilers.2.7.0\build\Microsoft.Net.Compilers.props" Condition="Exists('..\..\packages\Microsoft.Net.Compilers.2.7.0\build\Microsoft.Net.Compilers.props')" />
-  <Import Project="..\..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.1.0.8\build\net45\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props" Condition="Exists('..\..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.1.0.8\build\net45\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props')" />
-  <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\TypeScript\Microsoft.TypeScript.Default.props" Condition="Exists('$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\TypeScript\Microsoft.TypeScript.Default.props')" />
-  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{CF4FB560-C11F-493C-ADDD-8BB74DEE5997}</ProjectGuid>
-    <ProjectTypeGuids>{349c5851-65df-11da-9384-00065b846f21};{fae04ec0-301f-11d3-bf4b-00c04f79efbc}</ProjectTypeGuids>
-    <OutputType>Library</OutputType>
-    <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Signum.React</RootNamespace>
-    <AssemblyName>Signum.React.Extensions</AssemblyName>
-    <TargetFrameworkVersion>v4.6.2</TargetFrameworkVersion>
-    <MvcBuildViews>false</MvcBuildViews>
-    <UseIISExpress>false</UseIISExpress>
-    <FileUpgradeFlags>
-    </FileUpgradeFlags>
-    <IISExpressSSLPort />
-    <IISExpressAnonymousAuthentication />
-    <IISExpressWindowsAuthentication />
-    <IISExpressUseClassicPipelineMode />
-    <MvcProjectUpgradeChecked>true</MvcProjectUpgradeChecked>
-    <TargetFrameworkProfile />
-    <UseGlobalApplicationHostFile />
-    <NuGetPackageImportStamp>
-    </NuGetPackageImportStamp>
+    <TargetFramework>netcoreapp2.1</TargetFramework>
     <TypeScriptToolsVersion>2.7</TypeScriptToolsVersion>
-    <Use64BitIISExpress />
+    <ApplicationIcon />
+    <OutputType>Library</OutputType>
+    <StartupObject />
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <OutputPath>bin\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
-    <Prefer32Bit>false</Prefer32Bit>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
-    <Prefer32Bit>false</Prefer32Bit>
-    <LangVersion>latest</LangVersion>
-  </PropertyGroup>
+
   <ItemGroup>
-    <Reference Include="DocumentFormat.OpenXml, Version=2.7.2.0, Culture=neutral, PublicKeyToken=8fb06cb64d019a17, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\DocumentFormat.OpenXml.2.7.2\lib\net46\DocumentFormat.OpenXml.dll</HintPath>
-    </Reference>
-    <Reference Include="Microsoft.CodeDom.Providers.DotNetCompilerPlatform, Version=1.0.8.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.1.0.8\lib\net45\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.dll</HintPath>
-    </Reference>
-    <Reference Include="Microsoft.SqlServer.Types, Version=14.0.0.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Microsoft.SqlServer.Types.14.0.314.76\lib\net40\Microsoft.SqlServer.Types.dll</HintPath>
-    </Reference>
-    <Reference Include="Microsoft.Web.Infrastructure, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <Private>True</Private>
-      <HintPath>..\..\packages\Microsoft.Web.Infrastructure.1.0.0.0\lib\net40\Microsoft.Web.Infrastructure.dll</HintPath>
-    </Reference>
-    <Reference Include="Newtonsoft.Json, Version=11.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Newtonsoft.Json.11.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
-    </Reference>
-    <Reference Include="System.Activities" />
-    <Reference Include="System.Data.DataSetExtensions" />
-    <Reference Include="System.IdentityModel" />
-    <Reference Include="System.IO.FileSystem.Primitives, Version=4.0.2.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\System.IO.FileSystem.Primitives.4.3.0\lib\net46\System.IO.FileSystem.Primitives.dll</HintPath>
-    </Reference>
-    <Reference Include="System.IO.Packaging, Version=4.0.1.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\System.IO.Packaging.4.3.0\lib\net46\System.IO.Packaging.dll</HintPath>
-    </Reference>
-    <Reference Include="System.Net.Http" />
-    <Reference Include="System.Net.Http.Formatting, Version=5.2.4.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Microsoft.AspNet.WebApi.Client.5.2.4\lib\net45\System.Net.Http.Formatting.dll</HintPath>
-    </Reference>
-    <Reference Include="System.Runtime.Serialization" />
-    <Reference Include="System.ServiceModel" />
-    <Reference Include="System.ServiceModel.Activation" />
-    <Reference Include="System.ServiceModel.Activities" />
-    <Reference Include="System.ServiceModel.Web" />
-    <Reference Include="Microsoft.CSharp" />
-    <Reference Include="System" />
-    <Reference Include="System.Data" />
-    <Reference Include="System.Drawing" />
-    <Reference Include="System.ValueTuple, Version=4.0.2.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\System.ValueTuple.4.4.0\lib\net461\System.ValueTuple.dll</HintPath>
-    </Reference>
-    <Reference Include="System.Web.DynamicData" />
-    <Reference Include="System.Web.Entity" />
-    <Reference Include="System.Web.ApplicationServices" />
-    <Reference Include="System.ComponentModel.DataAnnotations" />
-    <Reference Include="System.Web.Extensions" />
-    <Reference Include="System.Web.Helpers, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Microsoft.AspNet.WebPages.3.2.4\lib\net45\System.Web.Helpers.dll</HintPath>
-    </Reference>
-    <Reference Include="System.Web.Http, Version=5.2.4.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Microsoft.AspNet.WebApi.Core.5.2.4\lib\net45\System.Web.Http.dll</HintPath>
-    </Reference>
-    <Reference Include="System.Web.Http.WebHost, Version=5.2.4.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Microsoft.AspNet.WebApi.WebHost.5.2.4\lib\net45\System.Web.Http.WebHost.dll</HintPath>
-    </Reference>
-    <Reference Include="System.Web.Mvc, Version=5.2.4.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Microsoft.AspNet.Mvc.5.2.4\lib\net45\System.Web.Mvc.dll</HintPath>
-    </Reference>
-    <Reference Include="System.Web.Razor, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Microsoft.AspNet.Razor.3.2.4\lib\net45\System.Web.Razor.dll</HintPath>
-    </Reference>
-    <Reference Include="System.Web.WebPages, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Microsoft.AspNet.WebPages.3.2.4\lib\net45\System.Web.WebPages.dll</HintPath>
-    </Reference>
-    <Reference Include="System.Web.WebPages.Deployment, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Microsoft.AspNet.WebPages.3.2.4\lib\net45\System.Web.WebPages.Deployment.dll</HintPath>
-    </Reference>
-    <Reference Include="System.Web.WebPages.Razor, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Microsoft.AspNet.WebPages.3.2.4\lib\net45\System.Web.WebPages.Razor.dll</HintPath>
-    </Reference>
-    <Reference Include="System.WorkflowServices" />
-    <Reference Include="System.Web" />
-    <Reference Include="System.Web.Abstractions" />
-    <Reference Include="System.Web.Routing" />
-    <Reference Include="System.Xml" />
-    <Reference Include="System.Configuration" />
-    <Reference Include="System.Web.Services" />
-    <Reference Include="System.EnterpriseServices" />
-    <Reference Include="System.Xml.Linq" />
-    <Reference Include="WindowsBase" />
+    <None Remove="Alerts\AlertsClient.tsx" />
+    <None Remove="Alerts\Signum.Entities.Alerts.ts" />
+    <None Remove="Alerts\Templates\Alert.tsx" />
+    <None Remove="Alerts\Templates\AlertType.tsx" />
+    <None Remove="Authorization\Admin\ColoredRadios.tsx" />
+    <None Remove="Authorization\Admin\OperationRulePackControl.tsx" />
+    <None Remove="Authorization\Admin\PermissionRulePackControl.tsx" />
+    <None Remove="Authorization\Admin\PropertyRulePackControl.tsx" />
+    <None Remove="Authorization\Admin\QueryRulePackControl.tsx" />
+    <None Remove="Authorization\Admin\TypeRulePackControl.tsx" />
+    <None Remove="Authorization\AuthClient.tsx" />
+    <None Remove="Authorization\Login\ChangePassword.tsx" />
+    <None Remove="Authorization\Login\Login.tsx" />
+    <None Remove="Authorization\Login\LoginDropdown.tsx" />
+    <None Remove="Authorization\Signum.Entities.Authorization.ts" />
+    <None Remove="Authorization\Templates\Role.tsx" />
+    <None Remove="Authorization\Templates\User.tsx" />
+    <None Remove="Basics\BasicsClient.tsx" />
+    <None Remove="Basics\Color.ts" />
+    <None Remove="Basics\DisabledClient.tsx" />
+    <None Remove="Basics\Signum.Entities.Basics.ts" />
+    <None Remove="Basics\Templates\Accordion.tsx" />
+    <None Remove="Basics\Templates\CollapsableCard.tsx" />
+    <None Remove="Basics\Templates\ColorTypeahead.tsx" />
+    <None Remove="Basics\Templates\DateSpan.tsx" />
+    <None Remove="Basics\Templates\IconTypeahead.tsx" />
+    <None Remove="Basics\Templates\PropertyRouteCombo.tsx" />
+    <None Remove="Basics\Templates\ScrollPanel.tsx" />
+    <None Remove="Basics\Templates\TimeSpan.tsx" />
+    <None Remove="Cache\CacheClient.tsx" />
+    <None Remove="Cache\CacheStatisticsPage.tsx" />
+    <None Remove="Cache\Signum.Entities.Cache.ts" />
+    <None Remove="Chart\ChartButton.tsx" />
+    <None Remove="Chart\ChartClient.tsx" />
+    <None Remove="Chart\ChartOmniboxProvider.tsx" />
+    <None Remove="Chart\ChartScript\ChartScript.tsx" />
+    <None Remove="Chart\ChartScript\ChartScriptCode.tsx" />
+    <None Remove="Chart\Signum.Entities.Chart.ts" />
+    <None Remove="Chart\Templates\ChartBuilder.tsx" />
+    <None Remove="Chart\Templates\ChartColumn.tsx" />
+    <None Remove="Chart\Templates\ChartRenderer.tsx" />
+    <None Remove="Chart\Templates\ChartRequestPage.tsx" />
+    <None Remove="Chart\Templates\ChartRequestView.tsx" />
+    <None Remove="Chart\Templates\ChartTable.tsx" />
+    <None Remove="Chart\Templates\ChartUtils.ts" />
+    <None Remove="Chart\UserChartOmniboxProvider.tsx" />
+    <None Remove="Chart\UserChartToolbarConfig.ts" />
+    <None Remove="Chart\UserChart\UserChart.tsx" />
+    <None Remove="Chart\UserChart\UserChartClient.tsx" />
+    <None Remove="Chart\UserChart\UserChartMenu.tsx" />
+    <None Remove="Chart\UserChart\UserChartPage.tsx" />
+    <None Remove="Codemirror\codemirror.d.ts" />
+    <None Remove="Codemirror\CodeMirrorComponent.tsx" />
+    <None Remove="Codemirror\CSharpCodeMirror.tsx" />
+    <None Remove="Codemirror\HtmlCodemirror.tsx" />
+    <None Remove="Codemirror\JavascriptCodeMirror.tsx" />
+    <None Remove="Codemirror\SqlCodeMirror.tsx" />
+    <None Remove="Codemirror\XmlCodeMirror.tsx" />
+    <None Remove="Dashboard\Admin\Dashboard.tsx" />
+    <None Remove="Dashboard\Admin\EntityGridRepeater.tsx" />
+    <None Remove="Dashboard\Admin\LinkListPart.tsx" />
+    <None Remove="Dashboard\Admin\UserChartPart.tsx" />
+    <None Remove="Dashboard\Admin\UserQueryPart.tsx" />
+    <None Remove="Dashboard\Admin\ValueUserQueryListPart.tsx" />
+    <None Remove="Dashboard\DashboardClient.tsx" />
+    <None Remove="Dashboard\DashboardOmniboxProvider.tsx" />
+    <None Remove="Dashboard\DashboardToolbarConfig.ts" />
+    <None Remove="Dashboard\Signum.Entities.Dashboard.ts" />
+    <None Remove="Dashboard\View\DashboardPage.tsx" />
+    <None Remove="Dashboard\View\DashboardView.tsx" />
+    <None Remove="Dashboard\View\LinkListPart.tsx" />
+    <None Remove="Dashboard\View\UserChartPart.tsx" />
+    <None Remove="Dashboard\View\UserQueryPart.tsx" />
+    <None Remove="Dashboard\View\ValueUserQueryListPart.tsx" />
+    <None Remove="DiffLog\DiffLogClient.tsx" />
+    <None Remove="DiffLog\Signum.Entities.DiffLog.ts" />
+    <None Remove="DiffLog\Templates\DiffDocument.tsx" />
+    <None Remove="DiffLog\Templates\OperationLog.tsx" />
+    <None Remove="DiffLog\Templates\TimeMachinePage.tsx" />
+    <None Remove="Disconnected\Signum.Entities.Disconnected.ts" />
+    <None Remove="Dynamic\DynamicClient.tsx" />
+    <None Remove="Dynamic\DynamicExpressionClient.tsx" />
+    <None Remove="Dynamic\DynamicPanelPage.tsx" />
+    <None Remove="Dynamic\DynamicTypeClient.tsx" />
+    <None Remove="Dynamic\DynamicTypeConditionClient.tsx" />
+    <None Remove="Dynamic\DynamicValidationClient.tsx" />
+    <None Remove="Dynamic\DynamicViewClient.tsx" />
+    <None Remove="Dynamic\Expression\DynamicExpression.tsx" />
+    <None Remove="Dynamic\Signum.Entities.Dynamic.ts" />
+    <None Remove="Dynamic\TypeCondition\DynamicTypeCondition.tsx" />
+    <None Remove="Dynamic\Type\DynamicMixinConnection.tsx" />
+    <None Remove="Dynamic\Type\DynamicSqlMigration.tsx" />
+    <None Remove="Dynamic\Type\DynamicType.tsx" />
+    <None Remove="Dynamic\Type\DynamicTypeDefinitionComponent.tsx" />
+    <None Remove="Dynamic\Type\ValueComponent.tsx" />
+    <None Remove="Dynamic\Validation\DynamicValidation.tsx" />
+    <None Remove="Dynamic\View\Designer.tsx" />
+    <None Remove="Dynamic\View\DynamicView.tsx" />
+    <None Remove="Dynamic\View\DynamicViewComponent.tsx" />
+    <None Remove="Dynamic\View\DynamicViewOverride.tsx" />
+    <None Remove="Dynamic\View\DynamicViewSelector.tsx" />
+    <None Remove="Dynamic\View\DynamicViewTree.tsx" />
+    <None Remove="Dynamic\View\FindOptionsComponent.tsx" />
+    <None Remove="Dynamic\View\FindOptionsExpression.tsx" />
+    <None Remove="Dynamic\View\GlobalModules.ts" />
+    <None Remove="Dynamic\View\HtmlAttributesComponent.tsx" />
+    <None Remove="Dynamic\View\HtmlAttributesExpression.tsx" />
+    <None Remove="Dynamic\View\Nodes.tsx" />
+    <None Remove="Dynamic\View\NodeSelectorModal.tsx" />
+    <None Remove="Dynamic\View\NodeUtils.tsx" />
+    <None Remove="Dynamic\View\ShowCodeModal.tsx" />
+    <None Remove="Dynamic\View\StyleOptionsComponent.tsx" />
+    <None Remove="Dynamic\View\StyleOptionsExpression.tsx" />
+    <None Remove="Excel\ExcelClient.tsx" />
+    <None Remove="Excel\ExcelMenu.tsx" />
+    <None Remove="Excel\Signum.Entities.Excel.ts" />
+    <None Remove="Excel\Templates\ExcelReport.tsx" />
+    <None Remove="Files\FileDownloader.tsx" />
+    <None Remove="Files\FileLine.tsx" />
+    <None Remove="Files\FilesClient.tsx" />
+    <None Remove="Files\FileUploader.tsx" />
+    <None Remove="Files\Signum.Entities.Files.ts" />
+    <None Remove="Help\Signum.Entities.Help.ts" />
+    <None Remove="HtmlEditor\HtmlEditor.tsx" />
+    <None Remove="HtmlEditor\react-rte.d.ts" />
+    <None Remove="Isolation\Signum.Entities.Isolation.ts" />
+    <None Remove="Joyride\joyride.d.ts" />
+    <None Remove="Joyride\JoyrideClient.tsx" />
+    <None Remove="Joyride\JoyrideComponent.tsx" />
+    <None Remove="Joyride\JoyrideNavItem.tsx" />
+    <None Remove="Joyride\Signum.Entities.Joyride.ts" />
+    <None Remove="Joyride\Templates\Joyride.tsx" />
+    <None Remove="Joyride\Templates\JoyrideStep.tsx" />
+    <None Remove="Joyride\Templates\JoyrideStepStyle.tsx" />
+    <None Remove="MachineLearning\PredictorClient.tsx" />
+    <None Remove="MachineLearning\Signum.Entities.MachineLearning.ts" />
+    <None Remove="MachineLearning\Templates\FilterBuilderEmbedded.tsx" />
+    <None Remove="MachineLearning\Templates\LineChart.tsx" />
+    <None Remove="MachineLearning\Templates\NeuralNetworkSettings.tsx" />
+    <None Remove="MachineLearning\Templates\PredictModal.tsx" />
+    <None Remove="MachineLearning\Templates\Predictor.tsx" />
+    <None Remove="MachineLearning\Templates\PredictorClassificationMetrics.tsx" />
+    <None Remove="MachineLearning\Templates\PredictorMetrics.tsx" />
+    <None Remove="MachineLearning\Templates\PredictorRegressionMetrics.tsx" />
+    <None Remove="MachineLearning\Templates\PredictorSubQuery.tsx" />
+    <None Remove="MachineLearning\Templates\PredictSimpleResult.tsx" />
+    <None Remove="MachineLearning\Templates\ProgressBar.tsx" />
+    <None Remove="MachineLearning\Templates\SimpleResultButton.tsx" />
+    <None Remove="Mailing\AsyncEmailSenderPage.tsx" />
+    <None Remove="Mailing\MailingClient.tsx" />
+    <None Remove="Mailing\MailingMenu.tsx" />
+    <None Remove="Mailing\Newsletters\Newsletter.tsx" />
+    <None Remove="Mailing\Newsletters\NewsletterDelivery.tsx" />
+    <None Remove="Mailing\Pop3\Pop3Configuration.tsx" />
+    <None Remove="Mailing\Pop3\Pop3Reception.tsx" />
+    <None Remove="Mailing\Signum.Entities.Mailing.ts" />
+    <None Remove="Mailing\Templates\EmailAddress.tsx" />
+    <None Remove="Mailing\Templates\EmailConfiguration.tsx" />
+    <None Remove="Mailing\Templates\EmailMasterTemplate.tsx" />
+    <None Remove="Mailing\Templates\EmailMessage.tsx" />
+    <None Remove="Mailing\Templates\EmailPackage.tsx" />
+    <None Remove="Mailing\Templates\EmailRecipient.tsx" />
+    <None Remove="Mailing\Templates\EmailTemplate.tsx" />
+    <None Remove="Mailing\Templates\IframeRenderer.tsx" />
+    <None Remove="Mailing\Templates\SendEmailTask.tsx" />
+    <None Remove="Mailing\Templates\SmtpConfiguration.tsx" />
+    <None Remove="Map\MapClient.tsx" />
+    <None Remove="Map\MapOmniboxProvider.tsx" />
+    <None Remove="Map\Operation\OperationMap.ts" />
+    <None Remove="Map\Operation\OperationMapPage.tsx" />
+    <None Remove="Map\Schema\ColorProviders\Auth.tsx" />
+    <None Remove="Map\Schema\ColorProviders\Cache.tsx" />
+    <None Remove="Map\Schema\ColorProviders\Default.ts" />
+    <None Remove="Map\Schema\ColorProviders\Disconnected.tsx" />
+    <None Remove="Map\Schema\ColorProviders\Isolation.tsx" />
+    <None Remove="Map\Schema\SchemaMap.ts" />
+    <None Remove="Map\Schema\SchemaMapPage.tsx" />
+    <None Remove="Map\Signum.Entities.Map.ts" />
+    <None Remove="Map\Utils.ts" />
+    <None Remove="Migrations\Signum.Entities.Migrations.ts" />
+    <None Remove="Notes\NotesClient.tsx" />
+    <None Remove="Notes\Signum.Entities.Notes.ts" />
+    <None Remove="Notes\Templates\Note.tsx" />
+    <None Remove="Notes\Templates\NoteType.tsx" />
+    <None Remove="Omnibox\DynamicQueryOmniboxProvider.tsx" />
+    <None Remove="Omnibox\EntityOmniboxProvider.tsx" />
+    <None Remove="Omnibox\OmniboxAutocomplete.tsx" />
+    <None Remove="Omnibox\OmniboxClient.tsx" />
+    <None Remove="Omnibox\Signum.Entities.Omnibox.ts" />
+    <None Remove="Omnibox\SpecialOmniboxProvider.tsx" />
+    <None Remove="Printing\PrintClient.tsx" />
+    <None Remove="Printing\PrintPanelPage.tsx" />
+    <None Remove="Printing\Signum.Entities.Printing.ts" />
+    <None Remove="Printing\Templates\PrintLine.tsx" />
+    <None Remove="Printing\Templates\PrintPackage.tsx" />
+    <None Remove="Processes\ProcessClient.tsx" />
+    <None Remove="Processes\ProcessPanelPage.tsx" />
+    <None Remove="Processes\Signum.Entities.Processes.ts" />
+    <None Remove="Processes\Templates\Package.tsx" />
+    <None Remove="Processes\Templates\PackageLine.tsx" />
+    <None Remove="Processes\Templates\PackageOperation.tsx" />
+    <None Remove="Processes\Templates\Process.tsx" />
+    <None Remove="Profiler\Heavy\HeavyEntryPage.tsx" />
+    <None Remove="Profiler\Heavy\HeavyListPage.tsx" />
+    <None Remove="Profiler\ProfilerClient.tsx" />
+    <None Remove="Profiler\Signum.Entities.Profiler.ts" />
+    <None Remove="Profiler\Times\TimesPage.tsx" />
+    <None Remove="Rest\RestClient.tsx" />
+    <None Remove="Rest\Signum.Entities.Rest.ts" />
+    <None Remove="Rest\Templates\RestApiKey.tsx" />
+    <None Remove="Rest\Templates\RestLog.tsx" />
+    <None Remove="Scheduler\SchedulerClient.tsx" />
+    <None Remove="Scheduler\SchedulerPanelPage.tsx" />
+    <None Remove="Scheduler\Signum.Entities.Scheduler.ts" />
+    <None Remove="Scheduler\Templates\HolidayCalendar.tsx" />
+    <None Remove="Scheduler\Templates\ScheduledTask.tsx" />
+    <None Remove="Scheduler\Templates\ScheduleRuleMinutely.tsx" />
+    <None Remove="Scheduler\Templates\ScheduleRuleMonths.tsx" />
+    <None Remove="Scheduler\Templates\ScheduleRuleWeekDays.tsx" />
+    <None Remove="SMS\Signum.Entities.SMS.ts" />
+    <None Remove="Templating\Signum.Entities.Templating.ts" />
+    <None Remove="Templating\TemplateControls.tsx" />
+    <None Remove="Templating\Templates\QueryModel.tsx" />
+    <None Remove="Templating\Templates\TemplateApplicable.tsx" />
+    <None Remove="Toolbar\QueryToolbarConfig.ts" />
+    <None Remove="Toolbar\SidebarContainer.tsx" />
+    <None Remove="Toolbar\Signum.Entities.Toolbar.ts" />
+    <None Remove="Toolbar\Templates\Toolbar.tsx" />
+    <None Remove="Toolbar\Templates\ToolbarElement.tsx" />
+    <None Remove="Toolbar\Templates\ToolbarMenu.tsx" />
+    <None Remove="Toolbar\Templates\ToolbarRenderer.tsx" />
+    <None Remove="Toolbar\ToolbarClient.tsx" />
+    <None Remove="Translation\Code\TranslationCodeStatus.tsx" />
+    <None Remove="Translation\Code\TranslationCodeSync.tsx" />
+    <None Remove="Translation\Code\TranslationCodeSyncNamespaces.tsx" />
+    <None Remove="Translation\Code\TranslationCodeView.tsx" />
+    <None Remove="Translation\Code\TranslationTypeTable.tsx" />
+    <None Remove="Translation\CultureClient.ts" />
+    <None Remove="Translation\CultureDropdown.tsx" />
+    <None Remove="Translation\Signum.Entities.Translation.ts" />
+    <None Remove="Translation\TranslationClient.tsx" />
+    <None Remove="TypeHelp\TypeHelpButtonBarComponent.tsx" />
+    <None Remove="TypeHelp\TypeHelpClient.tsx" />
+    <None Remove="TypeHelp\TypeHelpComponent.tsx" />
+    <None Remove="UserAssets\ImportAssetsPage.tsx" />
+    <None Remove="UserAssets\Signum.Entities.UserAssets.ts" />
+    <None Remove="UserAssets\Templates\QueryTokenEntityBuilder.tsx" />
+    <None Remove="UserAssets\UserAssetClient.tsx" />
+    <None Remove="UserQueries\Signum.Entities.UserQueries.ts" />
+    <None Remove="UserQueries\Templates\UserQuery.tsx" />
+    <None Remove="UserQueries\Templates\UserQueryPage.tsx" />
+    <None Remove="UserQueries\UserQueryClient.tsx" />
+    <None Remove="UserQueries\UserQueryMenu.tsx" />
+    <None Remove="UserQueries\UserQueryOmniboxProvider.tsx" />
+    <None Remove="UserQueries\UserQueryToolbarConfig.tsx" />
+    <None Remove="ViewLog\Signum.Entities.ViewLog.ts" />
+    <None Remove="Word\Signum.Entities.Word.ts" />
+    <None Remove="Word\Templates\WordTemplate.tsx" />
+    <None Remove="Word\WordClient.tsx" />
+    <None Remove="Word\WordEntityMenu.tsx" />
+    <None Remove="Word\WordSearchMenu.tsx" />
+    <None Remove="Workflow\ActivityMonitor\WorkflowActivityMonitorPage.tsx" />
+    <None Remove="Workflow\ActivityMonitor\WorkflowActivityStatsModal.tsx" />
+    <None Remove="Workflow\bpmn-js.d.ts" />
+    <None Remove="Workflow\Bpmn\BpmnModelerComponent.tsx" />
+    <None Remove="Workflow\Bpmn\BpmnUtils.tsx" />
+    <None Remove="Workflow\Bpmn\CaseFlowRenderer.ts" />
+    <None Remove="Workflow\Bpmn\CaseFlowViewerComponent.tsx" />
+    <None Remove="Workflow\Bpmn\ConnectionIcons.ts" />
+    <None Remove="Workflow\Bpmn\CustomPopupMenu.ts" />
+    <None Remove="Workflow\Bpmn\CustomRenderer.ts" />
+    <None Remove="Workflow\Bpmn\WorkflowActivityMonitorRenderer.ts" />
+    <None Remove="Workflow\Bpmn\WorkflowActivityMonitorViewerComponent.tsx" />
+    <None Remove="Workflow\Case\ActivityWithRemarks.tsx" />
+    <None Remove="Workflow\Case\Case.tsx" />
+    <None Remove="Workflow\Case\CaseActivityStatsModal.tsx" />
+    <None Remove="Workflow\Case\CaseButtonBar.tsx" />
+    <None Remove="Workflow\Case\CaseFlowButton.tsx" />
+    <None Remove="Workflow\Case\CaseFrameModal.tsx" />
+    <None Remove="Workflow\Case\CaseFramePage.tsx" />
+    <None Remove="Workflow\Case\CaseFromSenderInfo.tsx" />
+    <None Remove="Workflow\Case\CaseTagsModel.tsx" />
+    <None Remove="Workflow\Case\CaseTagType.tsx" />
+    <None Remove="Workflow\Case\InboxFilter.tsx" />
+    <None Remove="Workflow\Case\InlineCaseTags.tsx" />
+    <None Remove="Workflow\Case\Tag.tsx" />
+    <None Remove="Workflow\Signum.Entities.Workflow.ts" />
+    <None Remove="Workflow\WorkflowClient.tsx" />
+    <None Remove="Workflow\Workflow\Workflow.tsx" />
+    <None Remove="Workflow\Workflow\WorkflowAction.tsx" />
+    <None Remove="Workflow\Workflow\WorkflowActivityModel.tsx" />
+    <None Remove="Workflow\Workflow\WorkflowCondition.tsx" />
+    <None Remove="Workflow\Workflow\WorkflowConnectionModel.tsx" />
+    <None Remove="Workflow\Workflow\WorkflowDropdown.tsx" />
+    <None Remove="Workflow\Workflow\WorkflowEventModel.tsx" />
+    <None Remove="Workflow\Workflow\WorkflowEventTask.tsx" />
+    <None Remove="Workflow\Workflow\WorkflowEventTaskActionComponent.tsx" />
+    <None Remove="Workflow\Workflow\WorkflowEventTaskConditionComponent.tsx" />
+    <None Remove="Workflow\Workflow\WorkflowHelpComponent.tsx" />
+    <None Remove="Workflow\Workflow\WorkflowLaneModel.tsx" />
+    <None Remove="Workflow\Workflow\WorkflowReplacementComponent.tsx" />
+    <None Remove="Workflow\Workflow\WorkflowScript.tsx" />
+    <None Remove="Workflow\Workflow\WorkflowScriptRunnerPanelPage.tsx" />
   </ItemGroup>
+
+  
+
   <ItemGroup>
-    <Compile Include="Authorization\AuthAdminController.cs" />
-    <Compile Include="Authorization\AuthController.cs" />
-    <Compile Include="Authorization\AuthServer.cs" />
-    <Compile Include="Authorization\UserTicketServer.cs" />
-    <Compile Include="Authorization\AuthTokensServer.cs" />
-    <Compile Include="Cache\CacheController.cs" />
-    <Compile Include="Cache\CacheServer.cs" />
-    <Compile Include="Chart\ChartController.cs" />
-    <Compile Include="Chart\ChartServer.cs" />
-    <Compile Include="Chart\UserChart\UserChartController.cs" />
-    <Compile Include="Dashboard\DashboardController.cs" />
-    <Compile Include="Dashboard\DashboardServer.cs" />
-    <Compile Include="DiffLog\TimeMachineController.cs" />
-    <Compile Include="DiffLog\DiffLogController.cs" />
-    <Compile Include="DiffLog\DiffLogServer.cs" />
-    <Compile Include="Disconnected\DisconnectedServer.cs" />
-    <Compile Include="Dynamic\DynamicController.cs" />
-    <Compile Include="Dynamic\DynamicExpressionController.cs" />
-    <Compile Include="Dynamic\DynamicTypeConditionController.cs" />
-    <Compile Include="Dynamic\DynamicValidationController.cs" />
-    <Compile Include="Dynamic\DynamicTypeController.cs" />
-    <Compile Include="Dynamic\DynamicViewController.cs" />
-    <Compile Include="Dynamic\DynamicServer.cs" />
-    <TypeScriptCompile Include="Basics\Templates\ScrollPanel.tsx" />
-    <TypeScriptCompile Include="DiffLog\Templates\DiffDocument.tsx" />
-    <TypeScriptCompile Include="DiffLog\Templates\TimeMachinePage.tsx" />
-    <TypeScriptCompile Include="MachineLearning\Signum.Entities.MachineLearning.ts" />
-    <TypeScriptCompile Include="MachineLearning\Templates\LineChart.tsx" />
-    <TypeScriptCompile Include="MachineLearning\Templates\PredictModal.tsx" />
-    <TypeScriptCompile Include="MachineLearning\Templates\NeuralNetworkSettings.tsx" />
-    <TypeScriptCompile Include="MachineLearning\Templates\PredictorMetrics.tsx" />
-    <TypeScriptCompile Include="MachineLearning\Templates\PredictorRegressionMetrics.tsx" />
-    <TypeScriptCompile Include="MachineLearning\Templates\PredictorClassificationMetrics.tsx" />
-    <TypeScriptCompile Include="MachineLearning\Templates\PredictSimpleResult.tsx" />
-    <TypeScriptCompile Include="MachineLearning\Templates\SimpleResultButton.tsx" />
-    <TypeScriptCompile Include="MachineLearning\Templates\ProgressBar.tsx" />
-    <TypeScriptCompile Include="TypeHelp\TypeHelpClient.tsx" />
-    <TypeScriptCompile Include="TypeHelp\TypeHelpButtonBarComponent.tsx" />
-    <Compile Include="Excel\ExcelController.cs" />
-    <Compile Include="Excel\ExcelServer.cs" />
-    <Compile Include="Files\FilesController.cs" />
-    <Compile Include="Files\FilesServer.cs" />
-    <Compile Include="Isolation\IsolationServer.cs" />
-    <Compile Include="MachineLearning\PredictRequest.cs" />
-    <Compile Include="MachineLearning\PredictorServer.cs" />
-    <Compile Include="Printing\PrintController.cs" />
-    <Compile Include="Printing\PrintServer.cs" />
-    <Compile Include="MachineLearning\PredictorController.cs" />
-    <Compile Include="Mailing\MailingController.cs" />
-    <Compile Include="Mailing\MailingServer.cs" />
-    <Compile Include="Rest\RestLogServer.cs" />
-    <Compile Include="Rest\RestApiKeyController.cs" />
-    <Compile Include="Rest\RestLogController.cs" />
-    <Compile Include="Rest\RestLogFilter.cs" />
-    <Compile Include="Rest\RestServer.cs" />
-    <TypeScriptCompile Include="Basics\Templates\Accordion.tsx" />
-    <TypeScriptCompile Include="Basics\Templates\CollapsableCard.tsx" />
-    <Content Include="Joyride\joyride.d.ts" />
-    <TypeScriptCompile Include="Joyride\JoyrideClient.tsx" />
-    <TypeScriptCompile Include="Joyride\JoyrideComponent.tsx" />
-    <Content Include="Joyride\JoyrideNavItem.tsx" />
-    <TypeScriptCompile Include="Joyride\Templates\Joyride.tsx" />
-    <TypeScriptCompile Include="Joyride\Templates\JoyrideStepStyle.tsx" />
-    <TypeScriptCompile Include="Joyride\Templates\JoyrideStep.tsx" />
-    <TypeScriptCompile Include="MachineLearning\Templates\FilterBuilderEmbedded.tsx" />
-    <TypeScriptCompile Include="MachineLearning\Templates\PredictorSubQuery.tsx" />
-    <TypeScriptCompile Include="Templating\Templates\TemplateApplicable.tsx" />
-    <TypeScriptCompile Include="Toolbar\SidebarContainer.tsx" />
-    <Compile Include="Toolbar\ToolbarController.cs" />
-    <Compile Include="Toolbar\ToolbarServer.cs" />
-    <Compile Include="Tree\TreeController.cs" />
-    <Compile Include="Tree\TreeServer.cs" />
-    <Compile Include="TypeHelp\TypeHelpServer.cs" />
-    <Compile Include="TypeHelp\TypeHelpController.cs" />
-    <Compile Include="Workflow\WorkflowServer.cs" />
-    <Compile Include="Workflow\WorkflowController.cs" />
+    <Analyzer Include="..\..\Framework\Signum.Analyzer\Binaries\Signum.Analyzer.dll" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <DotNetCliToolReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Tools" Version="2.0.3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Framework\Signum.Engine\Signum.Engine.csproj" />
+    <ProjectReference Include="..\..\Framework\Signum.Entities\Signum.Entities.csproj" />
+    <ProjectReference Include="..\..\Framework\Signum.React\Signum.React.csproj" />
+    <ProjectReference Include="..\..\Framework\Signum.Utilities\Signum.Utilities.csproj" />
+    <ProjectReference Include="..\Signum.Engine.Extensions\Signum.Engine.Extensions.csproj" />
+    <ProjectReference Include="..\Signum.Entities.Extensions\Signum.Entities.Extensions.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
     <TypeScriptCompile Include="Alerts\AlertsClient.tsx" />
-    <TypeScriptCompile Include="Alerts\Templates\AlertType.tsx" />
+    <TypeScriptCompile Include="Alerts\Signum.Entities.Alerts.ts" />
     <TypeScriptCompile Include="Alerts\Templates\Alert.tsx" />
-    <TypeScriptCompile Include="Basics\DisabledClient.tsx" />
+    <TypeScriptCompile Include="Alerts\Templates\AlertType.tsx" />
+    <TypeScriptCompile Include="Authorization\Admin\ColoredRadios.tsx" />
+    <TypeScriptCompile Include="Authorization\Admin\OperationRulePackControl.tsx" />
+    <TypeScriptCompile Include="Authorization\Admin\PermissionRulePackControl.tsx" />
+    <TypeScriptCompile Include="Authorization\Admin\PropertyRulePackControl.tsx" />
+    <TypeScriptCompile Include="Authorization\Admin\QueryRulePackControl.tsx" />
+    <TypeScriptCompile Include="Authorization\Admin\TypeRulePackControl.tsx" />
+    <TypeScriptCompile Include="Authorization\AuthClient.tsx" />
+    <TypeScriptCompile Include="Authorization\Login\ChangePassword.tsx" />
+    <TypeScriptCompile Include="Authorization\Login\Login.tsx" />
+    <TypeScriptCompile Include="Authorization\Login\LoginDropdown.tsx" />
+    <TypeScriptCompile Include="Authorization\Signum.Entities.Authorization.ts" />
+    <TypeScriptCompile Include="Authorization\Templates\Role.tsx" />
+    <TypeScriptCompile Include="Authorization\Templates\User.tsx" />
     <TypeScriptCompile Include="Basics\BasicsClient.tsx" />
     <TypeScriptCompile Include="Basics\Color.ts" />
+    <TypeScriptCompile Include="Basics\DisabledClient.tsx" />
+    <TypeScriptCompile Include="Basics\Signum.Entities.Basics.ts" />
+    <TypeScriptCompile Include="Basics\Templates\Accordion.tsx" />
+    <TypeScriptCompile Include="Basics\Templates\CollapsableCard.tsx" />
+    <TypeScriptCompile Include="Basics\Templates\ColorTypeahead.tsx" />
     <TypeScriptCompile Include="Basics\Templates\DateSpan.tsx" />
+    <TypeScriptCompile Include="Basics\Templates\IconTypeahead.tsx" />
     <TypeScriptCompile Include="Basics\Templates\PropertyRouteCombo.tsx" />
+    <TypeScriptCompile Include="Basics\Templates\ScrollPanel.tsx" />
     <TypeScriptCompile Include="Basics\Templates\TimeSpan.tsx" />
+    <TypeScriptCompile Include="Cache\CacheClient.tsx" />
+    <TypeScriptCompile Include="Cache\CacheStatisticsPage.tsx" />
+    <TypeScriptCompile Include="Cache\Signum.Entities.Cache.ts" />
+    <TypeScriptCompile Include="Chart\ChartButton.tsx" />
+    <TypeScriptCompile Include="Chart\ChartClient.tsx" />
+    <TypeScriptCompile Include="Chart\ChartOmniboxProvider.tsx" />
+    <TypeScriptCompile Include="Chart\ChartScript\ChartScript.tsx" />
+    <TypeScriptCompile Include="Chart\ChartScript\ChartScriptCode.tsx" />
+    <TypeScriptCompile Include="Chart\Signum.Entities.Chart.ts" />
+    <TypeScriptCompile Include="Chart\Templates\ChartBuilder.tsx" />
+    <TypeScriptCompile Include="Chart\Templates\ChartColumn.tsx" />
+    <TypeScriptCompile Include="Chart\Templates\ChartRenderer.tsx" />
+    <TypeScriptCompile Include="Chart\Templates\ChartRequestPage.tsx" />
+    <TypeScriptCompile Include="Chart\Templates\ChartRequestView.tsx" />
+    <TypeScriptCompile Include="Chart\Templates\ChartTable.tsx" />
+    <TypeScriptCompile Include="Chart\Templates\ChartUtils.ts" />
+    <TypeScriptCompile Include="Chart\UserChartOmniboxProvider.tsx" />
     <TypeScriptCompile Include="Chart\UserChartToolbarConfig.ts" />
+    <TypeScriptCompile Include="Chart\UserChart\UserChart.tsx" />
+    <TypeScriptCompile Include="Chart\UserChart\UserChartClient.tsx" />
+    <TypeScriptCompile Include="Chart\UserChart\UserChartMenu.tsx" />
+    <TypeScriptCompile Include="Chart\UserChart\UserChartPage.tsx" />
+    <TypeScriptCompile Include="Codemirror\codemirror.d.ts" />
+    <TypeScriptCompile Include="Codemirror\CodeMirrorComponent.tsx" />
+    <TypeScriptCompile Include="Codemirror\CSharpCodeMirror.tsx" />
+    <TypeScriptCompile Include="Codemirror\HtmlCodemirror.tsx" />
+    <TypeScriptCompile Include="Codemirror\JavascriptCodeMirror.tsx" />
+    <TypeScriptCompile Include="Codemirror\SqlCodeMirror.tsx" />
     <TypeScriptCompile Include="Codemirror\XmlCodeMirror.tsx" />
+    <TypeScriptCompile Include="Dashboard\Admin\Dashboard.tsx" />
+    <TypeScriptCompile Include="Dashboard\Admin\EntityGridRepeater.tsx" />
+    <TypeScriptCompile Include="Dashboard\Admin\LinkListPart.tsx" />
+    <TypeScriptCompile Include="Dashboard\Admin\UserChartPart.tsx" />
+    <TypeScriptCompile Include="Dashboard\Admin\UserQueryPart.tsx" />
+    <TypeScriptCompile Include="Dashboard\Admin\ValueUserQueryListPart.tsx" />
+    <TypeScriptCompile Include="Dashboard\DashboardClient.tsx" />
+    <TypeScriptCompile Include="Dashboard\DashboardOmniboxProvider.tsx" />
     <TypeScriptCompile Include="Dashboard\DashboardToolbarConfig.ts" />
+    <TypeScriptCompile Include="Dashboard\Signum.Entities.Dashboard.ts" />
+    <TypeScriptCompile Include="Dashboard\View\DashboardPage.tsx" />
+    <TypeScriptCompile Include="Dashboard\View\DashboardView.tsx" />
+    <TypeScriptCompile Include="Dashboard\View\LinkListPart.tsx" />
+    <TypeScriptCompile Include="Dashboard\View\UserChartPart.tsx" />
+    <TypeScriptCompile Include="Dashboard\View\UserQueryPart.tsx" />
+    <TypeScriptCompile Include="Dashboard\View\ValueUserQueryListPart.tsx" />
+    <TypeScriptCompile Include="DiffLog\DiffLogClient.tsx" />
+    <TypeScriptCompile Include="DiffLog\Signum.Entities.DiffLog.ts" />
+    <TypeScriptCompile Include="DiffLog\Templates\DiffDocument.tsx" />
+    <TypeScriptCompile Include="DiffLog\Templates\OperationLog.tsx" />
+    <TypeScriptCompile Include="DiffLog\Templates\TimeMachinePage.tsx" />
+    <TypeScriptCompile Include="Disconnected\Signum.Entities.Disconnected.ts" />
     <TypeScriptCompile Include="Dynamic\DynamicClient.tsx" />
-    <TypeScriptCompile Include="Dynamic\DynamicTypeClient.tsx" />
     <TypeScriptCompile Include="Dynamic\DynamicExpressionClient.tsx" />
+    <TypeScriptCompile Include="Dynamic\DynamicPanelPage.tsx" />
+    <TypeScriptCompile Include="Dynamic\DynamicTypeClient.tsx" />
     <TypeScriptCompile Include="Dynamic\DynamicTypeConditionClient.tsx" />
+    <TypeScriptCompile Include="Dynamic\DynamicValidationClient.tsx" />
     <TypeScriptCompile Include="Dynamic\DynamicViewClient.tsx" />
     <TypeScriptCompile Include="Dynamic\Expression\DynamicExpression.tsx" />
-    <TypeScriptCompile Include="Dynamic\Signum.Entities.Dynamic.ts">
-      <DependentUpon>Signum.Entities.Dynamic.t4s</DependentUpon>
-    </TypeScriptCompile>
-    <TypeScriptCompile Include="TypeHelp\TypeHelpComponent.tsx" />
+    <TypeScriptCompile Include="Dynamic\Signum.Entities.Dynamic.ts" />
     <TypeScriptCompile Include="Dynamic\TypeCondition\DynamicTypeCondition.tsx" />
-    <TypeScriptCompile Include="Dynamic\Type\DynamicSqlMigration.tsx" />
     <TypeScriptCompile Include="Dynamic\Type\DynamicMixinConnection.tsx" />
-    <TypeScriptCompile Include="Dynamic\Type\DynamicTypeDefinitionComponent.tsx" />
-    <TypeScriptCompile Include="Dynamic\DynamicPanelPage.tsx" />
-    <TypeScriptCompile Include="Codemirror\SqlCodeMirror.tsx" />
-    <TypeScriptCompile Include="Dynamic\Type\ValueComponent.tsx" />
+    <TypeScriptCompile Include="Dynamic\Type\DynamicSqlMigration.tsx" />
     <TypeScriptCompile Include="Dynamic\Type\DynamicType.tsx" />
+    <TypeScriptCompile Include="Dynamic\Type\DynamicTypeDefinitionComponent.tsx" />
+    <TypeScriptCompile Include="Dynamic\Type\ValueComponent.tsx" />
+    <TypeScriptCompile Include="Dynamic\Validation\DynamicValidation.tsx" />
+    <TypeScriptCompile Include="Dynamic\View\Designer.tsx" />
+    <TypeScriptCompile Include="Dynamic\View\DynamicView.tsx" />
+    <TypeScriptCompile Include="Dynamic\View\DynamicViewComponent.tsx" />
     <TypeScriptCompile Include="Dynamic\View\DynamicViewOverride.tsx" />
     <TypeScriptCompile Include="Dynamic\View\DynamicViewSelector.tsx" />
     <TypeScriptCompile Include="Dynamic\View\DynamicViewTree.tsx" />
-    <TypeScriptCompile Include="Dynamic\View\DynamicViewComponent.tsx" />
-    <TypeScriptCompile Include="Dynamic\View\Designer.tsx" />
-    <TypeScriptCompile Include="Dynamic\View\GlobalModules.ts" />
-    <TypeScriptCompile Include="Dynamic\View\ShowCodeModal.tsx" />
-    <TypeScriptCompile Include="Dynamic\View\StyleOptionsComponent.tsx" />
-    <TypeScriptCompile Include="Dynamic\View\HtmlAttributesComponent.tsx" />
-    <TypeScriptCompile Include="Dynamic\View\StyleOptionsExpression.tsx" />
-    <TypeScriptCompile Include="Dynamic\View\HtmlAttributesExpression.tsx" />
-    <TypeScriptCompile Include="Codemirror\JavascriptCodeMirror.tsx" />
     <TypeScriptCompile Include="Dynamic\View\FindOptionsComponent.tsx" />
     <TypeScriptCompile Include="Dynamic\View\FindOptionsExpression.tsx" />
-    <TypeScriptCompile Include="Dynamic\View\NodeUtils.tsx" />
+    <TypeScriptCompile Include="Dynamic\View\GlobalModules.ts" />
+    <TypeScriptCompile Include="Dynamic\View\HtmlAttributesComponent.tsx" />
+    <TypeScriptCompile Include="Dynamic\View\HtmlAttributesExpression.tsx" />
     <TypeScriptCompile Include="Dynamic\View\Nodes.tsx" />
-    <TypeScriptCompile Include="Dynamic\DynamicValidationClient.tsx" />
-    <TypeScriptCompile Include="Codemirror\CSharpCodeMirror.tsx" />
-    <TypeScriptCompile Include="Dynamic\Validation\DynamicValidation.tsx" />
     <TypeScriptCompile Include="Dynamic\View\NodeSelectorModal.tsx" />
-    <TypeScriptCompile Include="Files\FileUploader.tsx" />
-    <TypeScriptCompile Include="Files\FileDownloader.tsx" />
-    <TypeScriptCompile Include="Dynamic\View\DynamicView.tsx" />
-    <TypeScriptCompile Include="HtmlEditor\HtmlEditor.tsx" />
-    <TypeScriptCompile Include="MachineLearning\PredictorClient.tsx" />
-    <TypeScriptCompile Include="MachineLearning\Templates\Predictor.tsx" />
-    <TypeScriptCompile Include="Mailing\Templates\IFrameRenderer.tsx" />
-    <Compile Include="Map\MapServer.cs" />
-    <Compile Include="Map\MapController.cs" />
-    <Compile Include="Map\OperationMap.cs" />
-    <Compile Include="Map\SchemaMap.cs" />
-    <Compile Include="Omnibox\OmniboxServer.cs" />
-    <Compile Include="Omnibox\OmniboxController.cs" />
-    <Compile Include="Omnibox\ReactSpecialOmniboxGenerator.cs" />
-    <Compile Include="Processes\ProcessServer.cs" />
-    <Compile Include="Processes\ProcessController.cs" />
-    <Compile Include="Profiler\ProfilerServer.cs" />
-    <Compile Include="Profiler\ProfilerHeavyController.cs" />
-    <Compile Include="Profiler\ProfilerTimesController.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Scheduler\SchedulerServer.cs" />
-    <Compile Include="Scheduler\SchedulerController.cs" />
-    <Compile Include="Translation\CulturesController.cs" />
-    <Compile Include="Translation\TranslationController.cs" />
-    <Compile Include="Translation\TranslationServer.cs" />
-    <Compile Include="UserAssets\UserAssetServer.cs" />
-    <Compile Include="UserAssets\UserAssetController.cs" />
-    <Compile Include="UserQueries\UserQueryController.cs" />
-    <Compile Include="UserQueries\UserQueryServer.cs" />
-    <Compile Include="Word\WordServer.cs" />
-    <Compile Include="Word\WordController.cs" />
-    <TypeScriptCompile Include="Mailing\MailingMenu.tsx" />
-    <TypeScriptCompile Include="Notes\NotesClient.tsx" />
-    <TypeScriptCompile Include="Notes\Templates\NoteType.tsx" />
-    <TypeScriptCompile Include="Notes\Templates\Note.tsx" />
-    <TypeScriptCompile Include="Printing\PrintClient.tsx" />
-    <TypeScriptCompile Include="Printing\PrintPanelPage.tsx" />
-    <TypeScriptCompile Include="Printing\Signum.Entities.Printing.ts">
-      <DependentUpon>Signum.Entities.Printing.t4s</DependentUpon>
-    </TypeScriptCompile>
-    <TypeScriptCompile Include="Printing\Templates\PrintPackage.tsx" />
-    <TypeScriptCompile Include="Printing\Templates\PrintLine.tsx" />
-    <TypeScriptCompile Include="HtmlEditor\react-rte.d.ts" />
-    <TypeScriptCompile Include="Rest\RestClient.tsx" />
-    <TypeScriptCompile Include="Rest\Signum.Entities.Rest.ts" />
-    <TypeScriptCompile Include="Rest\Templates\RestApiKey.tsx" />
-    <TypeScriptCompile Include="Rest\Templates\RestLog.tsx" />
-    <TypeScriptCompile Include="Templating\Templates\QueryModel.tsx" />
-    <TypeScriptCompile Include="Toolbar\QueryToolbarConfig.ts" />
-    <TypeScriptCompile Include="Toolbar\Signum.Entities.Toolbar.ts">
-      <DependentUpon>Signum.Entities.Toolbar.t4s</DependentUpon>
-    </TypeScriptCompile>
-    <TypeScriptCompile Include="Basics\Templates\IconTypeahead.tsx" />
-    <TypeScriptCompile Include="Basics\Templates\ColorTypeahead.tsx" />
-    <TypeScriptCompile Include="Toolbar\Templates\ToolbarRenderer.tsx" />
-    <TypeScriptCompile Include="Toolbar\Templates\ToolbarElement.tsx" />
-    <TypeScriptCompile Include="Toolbar\Templates\ToolbarMenu.tsx" />
-    <TypeScriptCompile Include="Translation\Code\TranslationCodeSyncNamespaces.tsx" />
-    <TypeScriptCompile Include="Translation\Code\TranslationTypeTable.tsx" />
-    <TypeScriptCompile Include="Tree\Templates\MoveTreeModel.tsx" />
-    <TypeScriptCompile Include="Tree\TreeButton.tsx" />
-    <TypeScriptCompile Include="Tree\TreeClient.tsx" />
-    <TypeScriptCompile Include="Tree\TreeModal.tsx" />
-    <TypeScriptCompile Include="Tree\TreeOmniboxProvider.tsx" />
-    <TypeScriptCompile Include="Tree\TreePage.tsx" />
-    <TypeScriptCompile Include="Tree\TreeViewer.tsx" />
-    <TypeScriptCompile Include="UserQueries\UserQueryToolbarConfig.tsx" />
-    <TypeScriptCompile Include="Word\WordEntityMenu.tsx" />
-    <TypeScriptCompile Include="Word\WordSearchMenu.tsx" />
-    <TypeScriptCompile Include="Word\Templates\WordTemplate.tsx" />
-    <TypeScriptCompile Include="Word\WordClient.tsx" />
-    <TypeScriptCompile Include="Workflow\bpmn-js.d.ts" />
-    <TypeScriptCompile Include="Workflow\Bpmn\WorkflowActivityMonitorViewerComponent.tsx" />
-    <TypeScriptCompile Include="Workflow\Bpmn\WorkflowActivityMonitorRenderer.ts" />
-    <TypeScriptCompile Include="Workflow\Bpmn\CustomPopupMenu.ts" />
-    <TypeScriptCompile Include="Workflow\Bpmn\BpmnUtils.tsx" />
-    <TypeScriptCompile Include="Workflow\Bpmn\CaseFlowRenderer.ts" />
-    <TypeScriptCompile Include="Workflow\Case\CaseButtonBar.tsx" />
-    <TypeScriptCompile Include="Workflow\Case\ActivityWithRemarks.tsx" />
-    <TypeScriptCompile Include="Workflow\Case\CaseFlowButton.tsx" />
-    <TypeScriptCompile Include="Workflow\Case\CaseFromSenderInfo.tsx" />
-    <TypeScriptCompile Include="Workflow\Case\Case.tsx" />
-    <TypeScriptCompile Include="Workflow\Case\CaseTagsModel.tsx" />
-    <TypeScriptCompile Include="Workflow\Case\InlineCaseTags.tsx" />
-    <TypeScriptCompile Include="Workflow\Case\Tag.tsx" />
-    <TypeScriptCompile Include="Workflow\Case\CaseTagType.tsx" />
-    <TypeScriptCompile Include="Workflow\Case\CaseActivityStatsModal.tsx" />
-    <TypeScriptCompile Include="Workflow\Signum.Entities.Workflow.ts">
-      <DependentUpon>Signum.Entities.Workflow.t4s</DependentUpon>
-    </TypeScriptCompile>
-    <TypeScriptCompile Include="Workflow\Bpmn\BpmnModelerComponent.tsx" />
-    <TypeScriptCompile Include="Workflow\Bpmn\CaseFlowViewerComponent.tsx" />
-    <TypeScriptCompile Include="Workflow\Case\CaseFrameModal.tsx" />
-    <TypeScriptCompile Include="Workflow\Case\CaseFramePage.tsx" />
-    <TypeScriptCompile Include="Workflow\Bpmn\CustomRenderer.ts" />
-    <TypeScriptCompile Include="Workflow\Bpmn\ConnectionIcons.ts" />
-    <TypeScriptCompile Include="Workflow\Case\InboxFilter.tsx" />
-    <TypeScriptCompile Include="Workflow\Workflow\WorkflowHelpComponent.tsx" />
-    <TypeScriptCompile Include="Workflow\ActivityMonitor\WorkflowActivityStatsModal.tsx" />
-    <TypeScriptCompile Include="Workflow\ActivityMonitor\WorkflowActivityMonitorPage.tsx" />
-    <TypeScriptCompile Include="Workflow\Workflow\WorkflowHelpComponent.tsx" />
-    <TypeScriptCompile Include="Workflow\Workflow\WorkflowEventTask.tsx" />
-    <TypeScriptCompile Include="Workflow\Workflow\WorkflowEventModel.tsx" />
-    <TypeScriptCompile Include="Workflow\Workflow\WorkflowEventTaskActionComponent.tsx" />
-    <TypeScriptCompile Include="Workflow\Workflow\WorkflowEventTaskConditionComponent.tsx" />
-    <TypeScriptCompile Include="Workflow\Workflow\WorkflowScriptRunnerPanelPage.tsx" />
-    <TypeScriptCompile Include="Workflow\Workflow\Workflow.tsx" />
-    <TypeScriptCompile Include="Workflow\Workflow\WorkflowScript.tsx" />
-    <TypeScriptCompile Include="Workflow\Workflow\WorkflowConnectionModel.tsx" />
-    <TypeScriptCompile Include="Workflow\Workflow\WorkflowActivityModel.tsx" />
-    <TypeScriptCompile Include="Workflow\Workflow\WorkflowAction.tsx" />
-    <TypeScriptCompile Include="Workflow\Workflow\WorkflowLaneModel.tsx" />
-    <TypeScriptCompile Include="Workflow\Workflow\WorkflowCondition.tsx" />
-    <TypeScriptCompile Include="Workflow\Workflow\WorkflowDropdown.tsx" />
-    <TypeScriptCompile Include="Workflow\Workflow\WorkflowReplacementComponent.tsx" />
-    <TypeScriptCompile Include="Workflow\WorkflowClient.tsx" />
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="Authorization\Admin\AuthAdmin.css" />
-    <Content Include="Chart\Chart.css" />
-    <Content Include="Dashboard\Dashboard.css" />
-    <Content Include="DiffLog\Templates\DiffLog.css" />
-    <Content Include="TypeHelp\TypeHelpComponent.css" />
-    <Content Include="Dynamic\DynamicPanelPage.css" />
-    <Content Include="Dynamic\Type\DynamicType.css" />
-    <Content Include="Dynamic\View\DynamicView.css" />
-    <Content Include="Dynamic\View\DynamicViewTree.css" />
-    <Content Include="Files\Files.css" />
-    <Content Include="Mailing\Mailing.css" />
-    <Content Include="Map\Operation\operationMap.css" />
-    <Content Include="Map\Schema\schemaMap.css" />
-    <Content Include="packages.config" />
-    <Content Include="Toolbar\Sidebar.css" />
-    <Content Include="Toolbar\Templates\Toolbar.css" />
-    <Content Include="Tree\TreeViewer.css" />
-    <Content Include="Workflow\Case\Tag.css" />
-    <Content Include="Workflow\Case\Inbox.css" />
-    <Content Include="Workflow\Workflow\InitialWorkflow.xml">
-      <SubType>Designer</SubType>
-    </Content>
-    <Content Include="Workflow\Case\CaseAct.css" />
-    <Content Include="Workflow\Bpmn\Bpmn.css" />
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="Processes\Processes.css" />
-    <Content Include="Profiler\Heavy\Profiler.css" />
-    <Content Include="Profiler\Times\Times.css" />
-    <Content Include="Translation\Translation.css" />
-    <Content Include="Web.config">
-      <SubType>Designer</SubType>
-    </Content>
-    <Content Include="Basics\Signum.Entities.Basics.t4s" />
-    <Content Include="Mailing\Signum.Entities.Mailing.t4s" />
-    <Content Include="Processes\Signum.Entities.Processes.t4s" />
-    <Content Include="Scheduler\Signum.Entities.Scheduler.t4s" />
-    <Content Include="Files\Signum.Entities.Files.t4s" />
-    <Content Include="UserAssets\Signum.Entities.UserAssets.t4s" />
-    <Content Include="Chart\Signum.Entities.Chart.t4s" />
-    <Content Include="UserQueries\Signum.Entities.UserQueries.t4s" />
-    <Content Include="Word\Signum.Entities.Word.t4s" />
-    <Content Include="Notes\Signum.Entities.Notes.t4s" />
-    <Content Include="Alerts\Signum.Entities.Alerts.t4s" />
-    <Content Include="Dashboard\Signum.Entities.Dashboard.t4s" />
-    <Content Include="DiffLog\Signum.Entities.DiffLog.t4s" />
-    <Content Include="Disconnected\Signum.Entities.Disconnected.t4s" />
-    <Content Include="Excel\Signum.Entities.Excel.t4s" />
-    <Content Include="Help\Signum.Entities.Help.t4s" />
-    <Content Include="Isolation\Signum.Entities.Isolation.t4s" />
-    <Content Include="Migrations\Signum.Entities.Migrations.t4s" />
-    <Content Include="SMS\Signum.Entities.SMS.t4s" />
-    <Content Include="Translation\Signum.Entities.Translation.t4s" />
-    <Content Include="ViewLog\Signum.Entities.ViewLog.t4s" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\..\Framework\Signum.Engine\Signum.Engine.csproj">
-      <Project>{7f2db6fe-c109-4057-b207-c62a767f905d}</Project>
-      <Name>Signum.Engine</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\Framework\Signum.Entities\Signum.Entities.csproj">
-      <Project>{f2b51d08-498d-4c9f-8112-9521a7762b02}</Project>
-      <Name>Signum.Entities</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\Framework\Signum.React\Signum.React.csproj">
-      <Project>{c6fd211b-db43-4338-ae80-cd5d6be15922}</Project>
-      <Name>Signum.React</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\Framework\Signum.Utilities\Signum.Utilities.csproj">
-      <Project>{F7D3F72D-741D-4F67-8CF8-CD41B9035FED}</Project>
-      <Name>Signum.Utilities</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Signum.Engine.Extensions\Signum.Engine.Extensions.csproj">
-      <Project>{ba7fa363-61a1-41b1-945b-9b9c7bbcd357}</Project>
-      <Name>Signum.Engine.Extensions</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Signum.Entities.Extensions\Signum.Entities.Extensions.csproj">
-      <Project>{7d851227-5294-4beb-990e-56b4fbb7a148}</Project>
-      <Name>Signum.Entities.Extensions</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <Service Include="{4A0DDDB5-7A95-4FBF-97CC-616D07737A77}" />
-    <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
-  </ItemGroup>
-  <ItemGroup>
-    <TypeScriptCompile Include="Alerts\Signum.Entities.Alerts.ts">
-      <DependentUpon>Signum.Entities.Alerts.t4s</DependentUpon>
-    </TypeScriptCompile>
-    <TypeScriptCompile Include="Authorization\Admin\ColoredRadios.tsx" />
-    <TypeScriptCompile Include="Authorization\Admin\QueryRulePackControl.tsx" />
-    <TypeScriptCompile Include="Authorization\Admin\OperationRulePackControl.tsx" />
-    <TypeScriptCompile Include="Authorization\Admin\PropertyRulePackControl.tsx" />
-    <TypeScriptCompile Include="Authorization\Admin\TypeRulePackControl.tsx" />
-    <TypeScriptCompile Include="Authorization\Admin\PermissionRulePackControl.tsx" />
-    <TypeScriptCompile Include="Authorization\AuthClient.tsx" />
-    <TypeScriptCompile Include="Authorization\Login\ChangePassword.tsx" />
-    <TypeScriptCompile Include="Authorization\Signum.Entities.Authorization.ts">
-      <DependentUpon>Signum.Entities.Authorization.t4s</DependentUpon>
-    </TypeScriptCompile>
-    <TypeScriptCompile Include="Authorization\Templates\Role.tsx" />
-    <TypeScriptCompile Include="Authorization\Templates\User.tsx" />
-    <TypeScriptCompile Include="Authorization\Login\Login.tsx" />
-    <TypeScriptCompile Include="Authorization\Login\LoginDropdown.tsx" />
-    <TypeScriptCompile Include="Basics\Signum.Entities.Basics.ts">
-      <DependentUpon>Signum.Entities.Basics.t4s</DependentUpon>
-    </TypeScriptCompile>
-    <TypeScriptCompile Include="Cache\CacheClient.tsx" />
-    <TypeScriptCompile Include="Cache\CacheStatisticsPage.tsx" />
-    <TypeScriptCompile Include="Cache\Signum.Entities.Cache.ts">
-      <DependentUpon>Signum.Entities.Cache.t4s</DependentUpon>
-    </TypeScriptCompile>
-    <TypeScriptCompile Include="Chart\Templates\ChartRequestPage.tsx" />
-    <TypeScriptCompile Include="Chart\UserChartOmniboxProvider.tsx" />
-    <TypeScriptCompile Include="Chart\ChartScript\ChartScript.tsx" />
-    <TypeScriptCompile Include="Chart\ChartScript\ChartScriptCode.tsx" />
-    <TypeScriptCompile Include="Codemirror\codemirror.d.ts" />
-    <TypeScriptCompile Include="Codemirror\CodeMirrorComponent.tsx" />
-    <TypeScriptCompile Include="Chart\ChartOmniboxProvider.tsx" />
-    <TypeScriptCompile Include="Chart\Signum.Entities.Chart.ts">
-      <DependentUpon>Signum.Entities.Chart.t4s</DependentUpon>
-    </TypeScriptCompile>
-    <TypeScriptCompile Include="Chart\ChartClient.tsx" />
-    <TypeScriptCompile Include="Chart\ChartButton.tsx" />
-    <TypeScriptCompile Include="Chart\Templates\ChartRenderer.tsx" />
-    <TypeScriptCompile Include="Chart\Templates\ChartTable.tsx" />
-    <TypeScriptCompile Include="Chart\Templates\ChartRequestView.tsx" />
-    <TypeScriptCompile Include="Chart\Templates\ChartBuilder.tsx" />
-    <TypeScriptCompile Include="Chart\Templates\ChartColumn.tsx" />
-    <TypeScriptCompile Include="Chart\Templates\ChartUtils.ts" />
-    <TypeScriptCompile Include="Chart\UserChart\UserChartPage.tsx" />
-    <TypeScriptCompile Include="Chart\UserChart\UserChart.tsx" />
-    <TypeScriptCompile Include="Chart\UserChart\UserChartMenu.tsx" />
-    <TypeScriptCompile Include="Chart\UserChart\UserChartClient.tsx" />
-    <TypeScriptCompile Include="Dashboard\Admin\UserChartPart.tsx" />
-    <TypeScriptCompile Include="Dashboard\Admin\UserQueryPart.tsx" />
-    <TypeScriptCompile Include="Dashboard\Admin\LinkListPart.tsx" />
-    <TypeScriptCompile Include="Dashboard\Admin\ValueUserQueryListPart.tsx" />
-    <TypeScriptCompile Include="Dashboard\Admin\Dashboard.tsx" />
-    <TypeScriptCompile Include="Dashboard\Admin\EntityGridRepeater.tsx" />
-    <TypeScriptCompile Include="Dashboard\DashboardClient.tsx" />
-    <TypeScriptCompile Include="Dashboard\Signum.Entities.Dashboard.ts">
-      <DependentUpon>Signum.Entities.Dashboard.t4s</DependentUpon>
-    </TypeScriptCompile>
-    <TypeScriptCompile Include="Dashboard\DashboardOmniboxProvider.tsx" />
-    <TypeScriptCompile Include="Dashboard\View\UserChartPart.tsx" />
-    <TypeScriptCompile Include="Dashboard\View\UserQueryPart.tsx" />
-    <TypeScriptCompile Include="Dashboard\View\LinkListPart.tsx" />
-    <TypeScriptCompile Include="Dashboard\View\ValueUserQueryListPart.tsx" />
-    <TypeScriptCompile Include="Dashboard\View\DashboardView.tsx" />
-    <TypeScriptCompile Include="Dashboard\View\DashboardPage.tsx" />
-    <TypeScriptCompile Include="DiffLog\DiffLogClient.tsx" />
-    <TypeScriptCompile Include="DiffLog\Templates\OperationLog.tsx" />
-    <TypeScriptCompile Include="DiffLog\Signum.Entities.DiffLog.ts">
-      <DependentUpon>Signum.Entities.DiffLog.t4s</DependentUpon>
-    </TypeScriptCompile>
-    <TypeScriptCompile Include="Disconnected\Signum.Entities.Disconnected.ts">
-      <DependentUpon>Signum.Entities.Disconnected.t4s</DependentUpon>
-    </TypeScriptCompile>
-    <TypeScriptCompile Include="Excel\Signum.Entities.Excel.ts">
-      <DependentUpon>Signum.Entities.Excel.t4s</DependentUpon>
-    </TypeScriptCompile>
+    <TypeScriptCompile Include="Dynamic\View\NodeUtils.tsx" />
+    <TypeScriptCompile Include="Dynamic\View\ShowCodeModal.tsx" />
+    <TypeScriptCompile Include="Dynamic\View\StyleOptionsComponent.tsx" />
+    <TypeScriptCompile Include="Dynamic\View\StyleOptionsExpression.tsx" />
     <TypeScriptCompile Include="Excel\ExcelClient.tsx" />
-    <TypeScriptCompile Include="Excel\Templates\ExcelReport.tsx" />
     <TypeScriptCompile Include="Excel\ExcelMenu.tsx" />
+    <TypeScriptCompile Include="Excel\Signum.Entities.Excel.ts" />
+    <TypeScriptCompile Include="Excel\Templates\ExcelReport.tsx" />
+    <TypeScriptCompile Include="Files\FileDownloader.tsx" />
     <TypeScriptCompile Include="Files\FileLine.tsx" />
     <TypeScriptCompile Include="Files\FilesClient.tsx" />
-    <TypeScriptCompile Include="Files\Signum.Entities.Files.ts">
-      <DependentUpon>Signum.Entities.Files.t4s</DependentUpon>
-    </TypeScriptCompile>
-    <TypeScriptCompile Include="Help\Signum.Entities.Help.ts">
-      <DependentUpon>Signum.Entities.Help.t4s</DependentUpon>
-    </TypeScriptCompile>
-    <TypeScriptCompile Include="Isolation\Signum.Entities.Isolation.ts">
-      <DependentUpon>Signum.Entities.Isolation.t4s</DependentUpon>
-    </TypeScriptCompile>
-    <TypeScriptCompile Include="Mailing\MailingClient.tsx" />
+    <TypeScriptCompile Include="Files\FileUploader.tsx" />
+    <TypeScriptCompile Include="Files\Signum.Entities.Files.ts" />
+    <TypeScriptCompile Include="Help\Signum.Entities.Help.ts" />
+    <TypeScriptCompile Include="HtmlEditor\HtmlEditor.tsx" />
+    <TypeScriptCompile Include="HtmlEditor\react-rte.d.ts" />
+    <TypeScriptCompile Include="Isolation\Signum.Entities.Isolation.ts" />
+    <TypeScriptCompile Include="Joyride\joyride.d.ts" />
+    <TypeScriptCompile Include="Joyride\JoyrideClient.tsx" />
+    <TypeScriptCompile Include="Joyride\JoyrideComponent.tsx" />
+    <TypeScriptCompile Include="Joyride\JoyrideNavItem.tsx" />
+    <TypeScriptCompile Include="Joyride\Signum.Entities.Joyride.ts" />
+    <TypeScriptCompile Include="Joyride\Templates\Joyride.tsx" />
+    <TypeScriptCompile Include="Joyride\Templates\JoyrideStep.tsx" />
+    <TypeScriptCompile Include="Joyride\Templates\JoyrideStepStyle.tsx" />
+    <TypeScriptCompile Include="MachineLearning\PredictorClient.tsx" />
+    <TypeScriptCompile Include="MachineLearning\Signum.Entities.MachineLearning.ts" />
+    <TypeScriptCompile Include="MachineLearning\Templates\FilterBuilderEmbedded.tsx" />
+    <TypeScriptCompile Include="MachineLearning\Templates\LineChart.tsx" />
+    <TypeScriptCompile Include="MachineLearning\Templates\NeuralNetworkSettings.tsx" />
+    <TypeScriptCompile Include="MachineLearning\Templates\PredictModal.tsx" />
+    <TypeScriptCompile Include="MachineLearning\Templates\Predictor.tsx" />
+    <TypeScriptCompile Include="MachineLearning\Templates\PredictorClassificationMetrics.tsx" />
+    <TypeScriptCompile Include="MachineLearning\Templates\PredictorMetrics.tsx" />
+    <TypeScriptCompile Include="MachineLearning\Templates\PredictorRegressionMetrics.tsx" />
+    <TypeScriptCompile Include="MachineLearning\Templates\PredictorSubQuery.tsx" />
+    <TypeScriptCompile Include="MachineLearning\Templates\PredictSimpleResult.tsx" />
+    <TypeScriptCompile Include="MachineLearning\Templates\ProgressBar.tsx" />
+    <TypeScriptCompile Include="MachineLearning\Templates\SimpleResultButton.tsx" />
     <TypeScriptCompile Include="Mailing\AsyncEmailSenderPage.tsx" />
+    <TypeScriptCompile Include="Mailing\MailingClient.tsx" />
+    <TypeScriptCompile Include="Mailing\MailingMenu.tsx" />
     <TypeScriptCompile Include="Mailing\Newsletters\Newsletter.tsx" />
     <TypeScriptCompile Include="Mailing\Newsletters\NewsletterDelivery.tsx" />
     <TypeScriptCompile Include="Mailing\Pop3\Pop3Configuration.tsx" />
     <TypeScriptCompile Include="Mailing\Pop3\Pop3Reception.tsx" />
-    <TypeScriptCompile Include="Mailing\Signum.Entities.Mailing.ts">
-      <DependentUpon>Signum.Entities.Mailing.t4s</DependentUpon>
-    </TypeScriptCompile>
-    <TypeScriptCompile Include="Codemirror\HtmlCodemirror.tsx" />
-    <TypeScriptCompile Include="Profiler\Heavy\HeavyEntryPage.tsx" />
-    <TypeScriptCompile Include="Profiler\ProfilerClient.tsx" />
-    <TypeScriptCompile Include="Profiler\Signum.Entities.Profiler.ts">
-      <DependentUpon>Signum.Entities.Profiler.t4s</DependentUpon>
-    </TypeScriptCompile>
-    <TypeScriptCompile Include="Profiler\Heavy\HeavyListPage.tsx" />
-    <TypeScriptCompile Include="Profiler\Times\TimesPage.tsx" />
-    <TypeScriptCompile Include="Templating\Signum.Entities.Templating.ts">
-      <DependentUpon>Signum.Entities.Templating.t4s</DependentUpon>
-    </TypeScriptCompile>
-    <TypeScriptCompile Include="Templating\TemplateControls.tsx" />
-    <TypeScriptCompile Include="Mailing\Templates\SendEmailTask.tsx" />
-    <TypeScriptCompile Include="Mailing\Templates\EmailRecipient.tsx" />
+    <TypeScriptCompile Include="Mailing\Signum.Entities.Mailing.ts" />
     <TypeScriptCompile Include="Mailing\Templates\EmailAddress.tsx" />
     <TypeScriptCompile Include="Mailing\Templates\EmailConfiguration.tsx" />
-    <TypeScriptCompile Include="Mailing\Templates\SmtpConfiguration.tsx" />
-    <TypeScriptCompile Include="Mailing\Templates\EmailPackage.tsx" />
-    <TypeScriptCompile Include="Mailing\Templates\EmailTemplate.tsx" />
-    <TypeScriptCompile Include="Mailing\Templates\EmailMessage.tsx" />
     <TypeScriptCompile Include="Mailing\Templates\EmailMasterTemplate.tsx" />
-    <TypeScriptCompile Include="Map\MapOmniboxProvider.tsx" />
+    <TypeScriptCompile Include="Mailing\Templates\EmailMessage.tsx" />
+    <TypeScriptCompile Include="Mailing\Templates\EmailPackage.tsx" />
+    <TypeScriptCompile Include="Mailing\Templates\EmailRecipient.tsx" />
+    <TypeScriptCompile Include="Mailing\Templates\EmailTemplate.tsx" />
+    <TypeScriptCompile Include="Mailing\Templates\IframeRenderer.tsx" />
+    <TypeScriptCompile Include="Mailing\Templates\SendEmailTask.tsx" />
+    <TypeScriptCompile Include="Mailing\Templates\SmtpConfiguration.tsx" />
     <TypeScriptCompile Include="Map\MapClient.tsx" />
+    <TypeScriptCompile Include="Map\MapOmniboxProvider.tsx" />
     <TypeScriptCompile Include="Map\Operation\OperationMap.ts" />
     <TypeScriptCompile Include="Map\Operation\OperationMapPage.tsx" />
     <TypeScriptCompile Include="Map\Schema\ColorProviders\Auth.tsx" />
+    <TypeScriptCompile Include="Map\Schema\ColorProviders\Cache.tsx" />
+    <TypeScriptCompile Include="Map\Schema\ColorProviders\Default.ts" />
     <TypeScriptCompile Include="Map\Schema\ColorProviders\Disconnected.tsx" />
     <TypeScriptCompile Include="Map\Schema\ColorProviders\Isolation.tsx" />
-    <TypeScriptCompile Include="Map\Schema\ColorProviders\Cache.tsx" />
-    <TypeScriptCompile Include="Map\Signum.Entities.Map.ts">
-      <DependentUpon>Signum.Entities.Map.t4s</DependentUpon>
-    </TypeScriptCompile>
-    <TypeScriptCompile Include="Map\Schema\ColorProviders\Default.ts" />
     <TypeScriptCompile Include="Map\Schema\SchemaMap.ts" />
     <TypeScriptCompile Include="Map\Schema\SchemaMapPage.tsx" />
+    <TypeScriptCompile Include="Map\Signum.Entities.Map.ts" />
     <TypeScriptCompile Include="Map\Utils.ts" />
-    <TypeScriptCompile Include="Migrations\Signum.Entities.Migrations.ts">
-      <DependentUpon>Signum.Entities.Migrations.t4s</DependentUpon>
-    </TypeScriptCompile>
-    <TypeScriptCompile Include="Notes\Signum.Entities.Notes.ts">
-      <DependentUpon>Signum.Entities.Notes.t4s</DependentUpon>
-    </TypeScriptCompile>
-    <TypeScriptCompile Include="Omnibox\SpecialOmniboxProvider.tsx" />
-    <TypeScriptCompile Include="Omnibox\EntityOmniboxProvider.tsx" />
+    <TypeScriptCompile Include="Migrations\Signum.Entities.Migrations.ts" />
+    <TypeScriptCompile Include="Notes\NotesClient.tsx" />
+    <TypeScriptCompile Include="Notes\Signum.Entities.Notes.ts" />
+    <TypeScriptCompile Include="Notes\Templates\Note.tsx" />
+    <TypeScriptCompile Include="Notes\Templates\NoteType.tsx" />
     <TypeScriptCompile Include="Omnibox\DynamicQueryOmniboxProvider.tsx" />
+    <TypeScriptCompile Include="Omnibox\EntityOmniboxProvider.tsx" />
     <TypeScriptCompile Include="Omnibox\OmniboxAutocomplete.tsx" />
     <TypeScriptCompile Include="Omnibox\OmniboxClient.tsx" />
-    <TypeScriptCompile Include="Omnibox\Signum.Entities.Omnibox.ts">
-      <DependentUpon>Signum.Entities.Omnibox.t4s</DependentUpon>
-    </TypeScriptCompile>
+    <TypeScriptCompile Include="Omnibox\Signum.Entities.Omnibox.ts" />
+    <TypeScriptCompile Include="Omnibox\SpecialOmniboxProvider.tsx" />
+    <TypeScriptCompile Include="Printing\PrintClient.tsx" />
+    <TypeScriptCompile Include="Printing\PrintPanelPage.tsx" />
+    <TypeScriptCompile Include="Printing\Signum.Entities.Printing.ts" />
+    <TypeScriptCompile Include="Printing\Templates\PrintLine.tsx" />
+    <TypeScriptCompile Include="Printing\Templates\PrintPackage.tsx" />
     <TypeScriptCompile Include="Processes\ProcessClient.tsx" />
     <TypeScriptCompile Include="Processes\ProcessPanelPage.tsx" />
-    <TypeScriptCompile Include="Processes\Signum.Entities.Processes.ts">
-      <DependentUpon>Signum.Entities.Processes.t4s</DependentUpon>
-    </TypeScriptCompile>
-    <TypeScriptCompile Include="Processes\Templates\PackageLine.tsx" />
+    <TypeScriptCompile Include="Processes\Signum.Entities.Processes.ts" />
     <TypeScriptCompile Include="Processes\Templates\Package.tsx" />
+    <TypeScriptCompile Include="Processes\Templates\PackageLine.tsx" />
     <TypeScriptCompile Include="Processes\Templates\PackageOperation.tsx" />
     <TypeScriptCompile Include="Processes\Templates\Process.tsx" />
+    <TypeScriptCompile Include="Profiler\Heavy\HeavyEntryPage.tsx" />
+    <TypeScriptCompile Include="Profiler\Heavy\HeavyListPage.tsx" />
+    <TypeScriptCompile Include="Profiler\ProfilerClient.tsx" />
+    <TypeScriptCompile Include="Profiler\Signum.Entities.Profiler.ts" />
+    <TypeScriptCompile Include="Profiler\Times\TimesPage.tsx" />
+    <TypeScriptCompile Include="Rest\RestClient.tsx" />
+    <TypeScriptCompile Include="Rest\Signum.Entities.Rest.ts" />
+    <TypeScriptCompile Include="Rest\Templates\RestApiKey.tsx" />
+    <TypeScriptCompile Include="Rest\Templates\RestLog.tsx" />
     <TypeScriptCompile Include="Scheduler\SchedulerClient.tsx" />
     <TypeScriptCompile Include="Scheduler\SchedulerPanelPage.tsx" />
-    <TypeScriptCompile Include="Scheduler\Signum.Entities.Scheduler.ts">
-      <DependentUpon>Signum.Entities.Scheduler.t4s</DependentUpon>
-    </TypeScriptCompile>
+    <TypeScriptCompile Include="Scheduler\Signum.Entities.Scheduler.ts" />
     <TypeScriptCompile Include="Scheduler\Templates\HolidayCalendar.tsx" />
+    <TypeScriptCompile Include="Scheduler\Templates\ScheduledTask.tsx" />
     <TypeScriptCompile Include="Scheduler\Templates\ScheduleRuleMinutely.tsx" />
     <TypeScriptCompile Include="Scheduler\Templates\ScheduleRuleMonths.tsx" />
     <TypeScriptCompile Include="Scheduler\Templates\ScheduleRuleWeekDays.tsx" />
-    <TypeScriptCompile Include="Scheduler\Templates\ScheduledTask.tsx" />
-    <TypeScriptCompile Include="SMS\Signum.Entities.SMS.ts">
-      <DependentUpon>Signum.Entities.SMS.t4s</DependentUpon>
-    </TypeScriptCompile>
-    <TypeScriptCompile Include="Translation\Code\TranslationCodeSync.tsx" />
-    <TypeScriptCompile Include="Translation\Code\TranslationCodeView.tsx" />
-    <TypeScriptCompile Include="Translation\Code\TranslationCodeStatus.tsx" />
-    <TypeScriptCompile Include="Translation\CultureDropdown.tsx" />
-    <TypeScriptCompile Include="Translation\TranslationClient.tsx" />
-    <TypeScriptCompile Include="Translation\Signum.Entities.Translation.ts">
-      <DependentUpon>Signum.Entities.Translation.t4s</DependentUpon>
-    </TypeScriptCompile>
-    <TypeScriptCompile Include="Translation\CultureClient.ts" />
-    <TypeScriptCompile Include="UserAssets\Signum.Entities.UserAssets.ts">
-      <DependentUpon>Signum.Entities.UserAssets.t4s</DependentUpon>
-    </TypeScriptCompile>
-    <TypeScriptCompile Include="UserAssets\Templates\QueryTokenEntityBuilder.tsx" />
-    <TypeScriptCompile Include="UserAssets\ImportAssetsPage.tsx" />
-    <TypeScriptCompile Include="UserAssets\UserAssetClient.tsx" />
-    <TypeScriptCompile Include="UserQueries\Templates\UserQueryPage.tsx" />
-    <TypeScriptCompile Include="UserQueries\UserQueryOmniboxProvider.tsx" />
-    <TypeScriptCompile Include="UserQueries\UserQueryMenu.tsx" />
-    <TypeScriptCompile Include="UserQueries\Templates\UserQuery.tsx" />
-    <TypeScriptCompile Include="UserQueries\UserQueryClient.tsx" />
-    <TypeScriptCompile Include="UserQueries\Signum.Entities.UserQueries.ts">
-      <DependentUpon>Signum.Entities.UserQueries.t4s</DependentUpon>
-    </TypeScriptCompile>
-    <TypeScriptCompile Include="ViewLog\Signum.Entities.ViewLog.ts">
-      <DependentUpon>Signum.Entities.ViewLog.t4s</DependentUpon>
-    </TypeScriptCompile>
+    <TypeScriptCompile Include="SMS\Signum.Entities.SMS.ts" />
+    <TypeScriptCompile Include="Templating\Signum.Entities.Templating.ts" />
+    <TypeScriptCompile Include="Templating\TemplateControls.tsx" />
+    <TypeScriptCompile Include="Templating\Templates\QueryModel.tsx" />
+    <TypeScriptCompile Include="Templating\Templates\TemplateApplicable.tsx" />
+    <TypeScriptCompile Include="Toolbar\QueryToolbarConfig.ts" />
+    <TypeScriptCompile Include="Toolbar\SidebarContainer.tsx" />
+    <TypeScriptCompile Include="Toolbar\Signum.Entities.Toolbar.ts" />
     <TypeScriptCompile Include="Toolbar\Templates\Toolbar.tsx" />
+    <TypeScriptCompile Include="Toolbar\Templates\ToolbarElement.tsx" />
+    <TypeScriptCompile Include="Toolbar\Templates\ToolbarMenu.tsx" />
+    <TypeScriptCompile Include="Toolbar\Templates\ToolbarRenderer.tsx" />
     <TypeScriptCompile Include="Toolbar\ToolbarClient.tsx" />
-    <TypeScriptCompile Include="Word\Signum.Entities.Word.ts">
-      <DependentUpon>Signum.Entities.Word.t4s</DependentUpon>
-    </TypeScriptCompile>
+    <TypeScriptCompile Include="Translation\Code\TranslationCodeStatus.tsx" />
+    <TypeScriptCompile Include="Translation\Code\TranslationCodeSync.tsx" />
+    <TypeScriptCompile Include="Translation\Code\TranslationCodeSyncNamespaces.tsx" />
+    <TypeScriptCompile Include="Translation\Code\TranslationCodeView.tsx" />
+    <TypeScriptCompile Include="Translation\Code\TranslationTypeTable.tsx" />
+    <TypeScriptCompile Include="Translation\CultureClient.ts" />
+    <TypeScriptCompile Include="Translation\CultureDropdown.tsx" />
+    <TypeScriptCompile Include="Translation\Signum.Entities.Translation.ts" />
+    <TypeScriptCompile Include="Translation\TranslationClient.tsx" />
+    <TypeScriptCompile Include="TypeHelp\TypeHelpButtonBarComponent.tsx" />
+    <TypeScriptCompile Include="TypeHelp\TypeHelpClient.tsx" />
+    <TypeScriptCompile Include="TypeHelp\TypeHelpComponent.tsx" />
+    <TypeScriptCompile Include="UserAssets\ImportAssetsPage.tsx" />
+    <TypeScriptCompile Include="UserAssets\Signum.Entities.UserAssets.ts" />
+    <TypeScriptCompile Include="UserAssets\Templates\QueryTokenEntityBuilder.tsx" />
+    <TypeScriptCompile Include="UserAssets\UserAssetClient.tsx" />
+    <TypeScriptCompile Include="UserQueries\Signum.Entities.UserQueries.ts" />
+    <TypeScriptCompile Include="UserQueries\Templates\UserQuery.tsx" />
+    <TypeScriptCompile Include="UserQueries\Templates\UserQueryPage.tsx" />
+    <TypeScriptCompile Include="UserQueries\UserQueryClient.tsx" />
+    <TypeScriptCompile Include="UserQueries\UserQueryMenu.tsx" />
+    <TypeScriptCompile Include="UserQueries\UserQueryOmniboxProvider.tsx" />
+    <TypeScriptCompile Include="UserQueries\UserQueryToolbarConfig.tsx" />
+    <TypeScriptCompile Include="ViewLog\Signum.Entities.ViewLog.ts" />
+    <TypeScriptCompile Include="Word\Signum.Entities.Word.ts" />
+    <TypeScriptCompile Include="Word\Templates\WordTemplate.tsx" />
+    <TypeScriptCompile Include="Word\WordClient.tsx" />
+    <TypeScriptCompile Include="Word\WordEntityMenu.tsx" />
+    <TypeScriptCompile Include="Word\WordSearchMenu.tsx" />
+    <TypeScriptCompile Include="Workflow\ActivityMonitor\WorkflowActivityMonitorPage.tsx" />
+    <TypeScriptCompile Include="Workflow\ActivityMonitor\WorkflowActivityStatsModal.tsx" />
+    <TypeScriptCompile Include="Workflow\bpmn-js.d.ts" />
+    <TypeScriptCompile Include="Workflow\Bpmn\BpmnModelerComponent.tsx" />
+    <TypeScriptCompile Include="Workflow\Bpmn\BpmnUtils.tsx" />
+    <TypeScriptCompile Include="Workflow\Bpmn\CaseFlowRenderer.ts" />
+    <TypeScriptCompile Include="Workflow\Bpmn\CaseFlowViewerComponent.tsx" />
+    <TypeScriptCompile Include="Workflow\Bpmn\ConnectionIcons.ts" />
+    <TypeScriptCompile Include="Workflow\Bpmn\CustomPopupMenu.ts" />
+    <TypeScriptCompile Include="Workflow\Bpmn\CustomRenderer.ts" />
+    <TypeScriptCompile Include="Workflow\Bpmn\WorkflowActivityMonitorRenderer.ts" />
+    <TypeScriptCompile Include="Workflow\Bpmn\WorkflowActivityMonitorViewerComponent.tsx" />
+    <TypeScriptCompile Include="Workflow\Case\ActivityWithRemarks.tsx" />
+    <TypeScriptCompile Include="Workflow\Case\Case.tsx" />
+    <TypeScriptCompile Include="Workflow\Case\CaseActivityStatsModal.tsx" />
+    <TypeScriptCompile Include="Workflow\Case\CaseButtonBar.tsx" />
+    <TypeScriptCompile Include="Workflow\Case\CaseFlowButton.tsx" />
+    <TypeScriptCompile Include="Workflow\Case\CaseFrameModal.tsx" />
+    <TypeScriptCompile Include="Workflow\Case\CaseFramePage.tsx" />
+    <TypeScriptCompile Include="Workflow\Case\CaseFromSenderInfo.tsx" />
+    <TypeScriptCompile Include="Workflow\Case\CaseTagsModel.tsx" />
+    <TypeScriptCompile Include="Workflow\Case\CaseTagType.tsx" />
+    <TypeScriptCompile Include="Workflow\Case\InboxFilter.tsx" />
+    <TypeScriptCompile Include="Workflow\Case\InlineCaseTags.tsx" />
+    <TypeScriptCompile Include="Workflow\Case\Tag.tsx" />
+    <TypeScriptCompile Include="Workflow\Signum.Entities.Workflow.ts" />
+    <TypeScriptCompile Include="Workflow\WorkflowClient.tsx" />
+    <TypeScriptCompile Include="Workflow\Workflow\Workflow.tsx" />
+    <TypeScriptCompile Include="Workflow\Workflow\WorkflowAction.tsx" />
+    <TypeScriptCompile Include="Workflow\Workflow\WorkflowActivityModel.tsx" />
+    <TypeScriptCompile Include="Workflow\Workflow\WorkflowCondition.tsx" />
+    <TypeScriptCompile Include="Workflow\Workflow\WorkflowConnectionModel.tsx" />
+    <TypeScriptCompile Include="Workflow\Workflow\WorkflowDropdown.tsx" />
+    <TypeScriptCompile Include="Workflow\Workflow\WorkflowEventModel.tsx" />
+    <TypeScriptCompile Include="Workflow\Workflow\WorkflowEventTask.tsx" />
+    <TypeScriptCompile Include="Workflow\Workflow\WorkflowEventTaskActionComponent.tsx" />
+    <TypeScriptCompile Include="Workflow\Workflow\WorkflowEventTaskConditionComponent.tsx" />
+    <TypeScriptCompile Include="Workflow\Workflow\WorkflowHelpComponent.tsx" />
+    <TypeScriptCompile Include="Workflow\Workflow\WorkflowLaneModel.tsx" />
+    <TypeScriptCompile Include="Workflow\Workflow\WorkflowReplacementComponent.tsx" />
+    <TypeScriptCompile Include="Workflow\Workflow\WorkflowScript.tsx" />
+    <TypeScriptCompile Include="Workflow\Workflow\WorkflowScriptRunnerPanelPage.tsx" />
   </ItemGroup>
+
   <ItemGroup>
-    <Content Include="Authorization\Signum.Entities.Authorization.t4s" />
+    <Folder Include="Properties\" />
   </ItemGroup>
+
   <ItemGroup>
-    <Content Include="tsconfig.json" />
+    <PackageReference Include="Microsoft.AspNetCore.All" Version="2.1.0-preview2-final" />
   </ItemGroup>
-  <ItemGroup>
-    <Content Include="Omnibox\Signum.Entities.Omnibox.t4s" />
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Chart\ChartColor\" />
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="Map\Signum.Entities.Map.t4s" />
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="Cache\Signum.Entities.Cache.t4s" />
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="Templating\Signum.Entities.Templating.t4s" />
-  </ItemGroup>
-  <ItemGroup>
-    <Analyzer Include="..\..\Framework\Signum.Analyzer\Binaries\Signum.Analyzer.dll" />
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="Profiler\Signum.Entities.Profiler.t4s" />
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="Dynamic\Signum.Entities.Dynamic.t4s" />
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="Workflow\Signum.Entities.Workflow.t4s" />
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="Printing\Signum.Entities.Printing.t4s" />
-    <Content Include="Toolbar\Signum.Entities.Toolbar.t4s" />
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="Tree\Signum.Entities.Tree.t4s" />
-    <Content Include="MachineLearning\Signum.Entities.MachineLearning.t4s" />
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="Rest\Signum.Entities.Rest.t4s" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Joyride\Signum.Entities.Joyride.t4s" />
-  </ItemGroup>
-  <PropertyGroup>
-    <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">12.0</VisualStudioVersion>
-    <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>
-  </PropertyGroup>
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
-    <TypeScriptTarget>ES5</TypeScriptTarget>
-    <TypeScriptJSXEmit>React</TypeScriptJSXEmit>
-    <TypeScriptCompileOnSaveEnabled>True</TypeScriptCompileOnSaveEnabled>
-    <TypeScriptNoImplicitAny>False</TypeScriptNoImplicitAny>
-    <TypeScriptModuleKind>CommonJS</TypeScriptModuleKind>
-    <TypeScriptRemoveComments>False</TypeScriptRemoveComments>
-    <TypeScriptOutFile />
-    <TypeScriptOutDir />
-    <TypeScriptGeneratesDeclarations>False</TypeScriptGeneratesDeclarations>
-    <TypeScriptNoEmitOnError>True</TypeScriptNoEmitOnError>
-    <TypeScriptSourceMap>True</TypeScriptSourceMap>
-    <TypeScriptMapRoot />
-    <TypeScriptSourceRoot />
-    <LangVersion>latest</LangVersion>
-  </PropertyGroup>
-  <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\TypeScript\Microsoft.TypeScript.targets" Condition="Exists('$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\TypeScript\Microsoft.TypeScript.targets')" />
-  <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v12.0\WebApplications\Microsoft.WebApplication.targets" Condition="false" />
-  <Target Name="BeforeBuild">
-    <ItemGroup>
-      <EmbeddedResource Include="**\*.gif;**\*.png;**\*.jpg;**\*.css;**\*.ts;**\*.map;**\*.js;**\*.tsx" />
-    </ItemGroup>
+
+  <!--<Target Name="GenerateSignumTS">
+    <WriteLinesToFile File="$(BaseIntermediateOutputPath)SignumReferences.txt" Lines="@(ReferencePath)" Overwrite="true" Encoding="Unicode" />
+    <WriteLinesToFile File="$(BaseIntermediateOutputPath)SignumContent.txt" Lines="@(Content);@(None)" Overwrite="true" Encoding="Unicode" />
+    <Exec command="dotnet &quot;..\..\Framework\Signum.TSGenerator\Binaries\netcoreapp2.1\Signum.TSGenerator.dll&quot; &quot;@(IntermediateAssembly)&quot; &quot;$(BaseIntermediateOutputPath)SignumReferences.txt&quot; &quot;$(BaseIntermediateOutputPath)SignumContent.txt&quot;" ConsoleToMSBuild="false">
+      <Output TaskParameter="ConsoleOutput" PropertyName="OutputOfExec" />
+    </Exec>
   </Target>
-  <Target Name="MvcBuildViews" AfterTargets="AfterBuild" Condition="'$(MvcBuildViews)'=='true'">
-    <AspNetCompiler VirtualPath="temp" PhysicalPath="$(WebProjectOutputDir)" />
-  </Target>
-  <ProjectExtensions>
-    <VisualStudio>
-      <FlavorProperties GUID="{349c5851-65df-11da-9384-00065b846f21}">
-        <WebProjectProperties>
-          <UseIIS>False</UseIIS>
-          <AutoAssignPort>True</AutoAssignPort>
-          <DevelopmentServerPort>7518</DevelopmentServerPort>
-          <DevelopmentServerVPath>/</DevelopmentServerVPath>
-          <IISUrl>
-          </IISUrl>
-          <NTLMAuthentication>False</NTLMAuthentication>
-          <UseCustomServer>False</UseCustomServer>
-          <CustomServerUrl>http://google.com</CustomServerUrl>
-          <SaveServerSettingsInUserFile>False</SaveServerSettingsInUserFile>
-        </WebProjectProperties>
-      </FlavorProperties>
-    </VisualStudio>
-  </ProjectExtensions>
-  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
-    <PropertyGroup>
-      <ErrorText>This project references NuGet package(s) that are missing on this computer. Enable NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
-    </PropertyGroup>
-    <Error Condition="!Exists('..\..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.1.0.8\build\net45\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.1.0.8\build\net45\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props'))" />
-    <Error Condition="!Exists('..\..\packages\Microsoft.Net.Compilers.2.7.0\build\Microsoft.Net.Compilers.props')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\Microsoft.Net.Compilers.2.7.0\build\Microsoft.Net.Compilers.props'))" />
-  </Target>
-  <UsingTask TaskName="SignumTSGenerator" AssemblyFile="..\..\Framework\Signum.TSGenerator\Binaries\Signum.TSGenerator.dll" />
-  <Target Name="GenerateSignumTS">
-    <SignumTSGenerator References="@(ReferencePath)" Content="@(Content);@(None)" />
-  </Target>
+
   <PropertyGroup>
     <CompileTypeScriptDependsOn>
       GenerateSignumTS;
       $(CompileTypeScriptDependsOn);
     </CompileTypeScriptDependsOn>
+    <ApplicationIcon />
+    <OutputType>Library</OutputType>
+    <StartupObject></StartupObject>
+  </PropertyGroup>-->
+  
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <LangVersion>latest</LangVersion>
   </PropertyGroup>
 </Project>

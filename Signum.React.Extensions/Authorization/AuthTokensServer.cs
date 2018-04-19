@@ -15,11 +15,10 @@ using System.Runtime.Serialization;
 using System.Security.Authentication;
 using System.Security.Cryptography;
 using System.Text;
-using System.Web.Http;
-using System.Web.Http.Controllers;
+using Microsoft.AspNetCore.Mvc;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Net.Http.Formatting;
+using System.Runtime.Serialization.Formatters.Binary;
 
 namespace Signum.React.Authorization
 {
@@ -32,69 +31,69 @@ namespace Signum.React.Authorization
             Configuration = tokenConfig;
             CryptoKey = new MD5CryptoServiceProvider().Using(p => p.ComputeHash(UTF8Encoding.UTF8.GetBytes(hashableEncryptionKey)));
 
-            SignumAuthenticationFilterAttribute.Authenticators.Add(TokenAuthenticator);
-            SignumAuthenticationFilterAttribute.Authenticators.Add(AnonymousAuthenticator);
-            SignumAuthenticationFilterAttribute.Authenticators.Add(InvalidAuthenticator);
+            //SignumAuthenticationFilterAttribute.Authenticators.Add(TokenAuthenticator);
+            //SignumAuthenticationFilterAttribute.Authenticators.Add(AnonymousAuthenticator);
+            //SignumAuthenticationFilterAttribute.Authenticators.Add(InvalidAuthenticator);
         }
 
-        public static SignumAuthenticationResult InvalidAuthenticator(HttpActionContext actionContext)
-        {
-            throw new AuthenticationException("No authentication information found!");
-        }
+        //public static SignumAuthenticationResult InvalidAuthenticator(HttpActionContext actionContext)
+        //{
+        //    throw new AuthenticationException("No authentication information found!");
+        //}
 
-        public static SignumAuthenticationResult AnonymousAuthenticator(HttpActionContext actionContext)
-        {
-            var r = actionContext.ActionDescriptor as ReflectedHttpActionDescriptor;
-            if (r.GetCustomAttributes<AllowAnonymousAttribute>().Any() || r.ControllerDescriptor.ControllerType.HasAttribute<AllowAnonymousAttribute>())
-                return new SignumAuthenticationResult();
+        //public static SignumAuthenticationResult AnonymousAuthenticator(HttpActionContext actionContext)
+        //{
+        //    var r = actionContext.ActionDescriptor as ReflectedHttpActionDescriptor;
+        //    if (r.GetCustomAttributes<AllowAnonymousAttribute>().Any() || r.ControllerDescriptor.ControllerType.HasAttribute<AllowAnonymousAttribute>())
+        //        return new SignumAuthenticationResult();
             
-            return null;
-        }
+        //    return null;
+        //}
 
-        static SignumAuthenticationResult TokenAuthenticator(HttpActionContext ctx)
-        {
-            var tokenString = ctx.Request.Headers.Authorization?.Parameter;
-            if (tokenString == null)
-            {
-                return null;
-            }
+        //static SignumAuthenticationResult TokenAuthenticator(HttpActionContext ctx)
+        //{
+        //    var tokenString = ctx.Request.Headers.Authorization?.Parameter;
+        //    if (tokenString == null)
+        //    {
+        //        return null;
+        //    }
 
-            var token = DeserializeToken(tokenString);
+        //    var token = DeserializeToken(tokenString);
 
-            var c = Configuration();
+        //    var c = Configuration();
 
-            bool requiresRefresh = token.CreationDate.AddMinutes(c.RefreshTokenEvery) < TimeZoneManager.Now ||
-                c.RefreshAnyTokenPreviousTo.HasValue && token.CreationDate < c.RefreshAnyTokenPreviousTo;
+        //    bool requiresRefresh = token.CreationDate.AddMinutes(c.RefreshTokenEvery) < TimeZoneManager.Now ||
+        //        c.RefreshAnyTokenPreviousTo.HasValue && token.CreationDate < c.RefreshAnyTokenPreviousTo;
 
-            if (requiresRefresh)
-            {
-                return new SignumAuthenticationResult { ErrorResult = new UpgradeTokenResult(ctx.RequestContext.Configuration.Formatters.JsonFormatter) };
-            }
+        //    if (requiresRefresh)
+        //    {
+        //        return new SignumAuthenticationResult { ErrorResult = new UpgradeTokenResult(ctx.RequestContext.Configuration.Formatters.JsonFormatter) };
+        //    }
 
-            return new SignumAuthenticationResult { User = token.User };
-        }
+        //    return new SignumAuthenticationResult { User = token.User };
+        //}
 
-        internal class UpgradeTokenResult : IHttpActionResult
-        {
-            private JsonMediaTypeFormatter jsonFormatter;
+        //internal class UpgradeTokenResult : IHttpActionResult
+        //{
+        //    private JsonMediaTypeFormatter jsonFormatter;
 
-            public UpgradeTokenResult(JsonMediaTypeFormatter jsonFormatter)
-            {
-                this.jsonFormatter = jsonFormatter;
-            }
+        //    public UpgradeTokenResult(JsonMediaTypeFormatter jsonFormatter)
+        //    {
+        //        this.jsonFormatter = jsonFormatter;
+        //    }
 
-            public Task<HttpResponseMessage> ExecuteAsync(CancellationToken cancellationToken)
-            {
-                var error = new HttpError(new NewTokenRequiredException("Please upgrade the token to continue using the service"), includeErrorDetail: true); //Avoid annoying exception
+        //    public Task<HttpResponseMessage> ExecuteAsync(CancellationToken cancellationToken)
+        //    {
+        //        var error = new HttpError(new NewTokenRequiredException("Please upgrade the token to continue using the service"), includeErrorDetail: true); //Avoid annoying exception
                 
-                var message = new HttpResponseMessage(HttpStatusCode.UpgradeRequired)
-                {
-                    Content = new ObjectContent<HttpError>(error, jsonFormatter),
-                };
+        //        var message = new HttpResponseMessage(HttpStatusCode.UpgradeRequired)
+        //        {
+        //            Content = new ObjectContent<HttpError>(error, jsonFormatter),
+        //        };
 
-                return Task.FromResult(message); 
-            }
-        }
+        //        return Task.FromResult(message); 
+        //    }
+        //}
 
         public static string RefreshToken(string oldToken, out UserEntity newUser)
         {
@@ -125,7 +124,8 @@ namespace Signum.React.Authorization
             return result;
         }
 
-        static NetDataContractSerializer formatter = new NetDataContractSerializer();
+        static BinaryFormatter formatter = new BinaryFormatter();
+
 
         static AuthToken DeserializeToken(string authHeader)
         {

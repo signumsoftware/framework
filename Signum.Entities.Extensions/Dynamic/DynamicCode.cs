@@ -7,6 +7,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Reflection;
+using Signum.Entities.Authorization;
+using Newtonsoft.Json;
+using Microsoft.CodeAnalysis;
 
 namespace Signum.Entities.Dynamic
 {
@@ -77,25 +80,20 @@ namespace Signum.Entities.Dynamic
             "Signum.Entities.Tree",
         };
 
-        public static HashSet<string> Assemblies = new HashSet<string>
-        {
-            "Signum.Engine.dll",
-            "Signum.Entities.dll",
-            "Signum.Utilities.dll",
-            "Signum.Entities.Extensions.dll",
-            "Signum.Engine.Extensions.dll",
-            "Microsoft.SqlServer.Types.dll",
-            "Newtonsoft.Json.dll",
-            "Microsoft.CodeDom.Providers.DotNetCompilerPlatform.dll",
-            "DocumentFormat.OpenXml.dll",
-
+        public static HashSet<Type> AssemblyTypes = new HashSet<Type>
+        {   
+            typeof(object),
+            typeof(Csv), //  "Signum.Utilities.dll",
+            typeof(Entity), //"Signum.Entities.dll",
+            typeof(UserEntity), //"Signum.Entities.Extensions.dll",
+            typeof(JsonConvert), //"Newtonsoft.Json.dll",
         };
 
-        public static IEnumerable<string> GetAssemblies()
+        public static IEnumerable<MetadataReference> GetMetadataReferences()
         {
-            return DynamicCode.Assemblies
-                .Select(ass => Path.Combine(DynamicCode.AssemblyDirectory, ass))
-                .And(DynamicCode.CodeGenAssemblyPath)
+            return DynamicCode.AssemblyTypes
+                .Select(type => MetadataReference.CreateFromFile(type.Assembly.Location))
+                .And(MetadataReference.CreateFromFile(DynamicCode.CodeGenAssemblyPath))
                 .NotNull()
                 .EmptyIfNull();
         }
@@ -117,12 +115,18 @@ namespace Signum.Entities.Dynamic
             return namespaces.ToString(ns => "using {0};\r\n".FormatWith(ns), "");
         }
 
-        public static Func<string, List<CompilerError>> GetCustomErrors;
+        public static Func<string, List<CustomCompilerError>> GetCustomErrors;
 
-        public static void AddFullAssembly(Assembly assembly)
+        public static void AddFullAssembly(Type type)
         {
-            Namespaces.AddRange(assembly.ExportedTypes.Select(a => a.Namespace));
-            Assemblies.Add(Path.GetFileName(assembly.Location));
+            Namespaces.AddRange(type.Assembly.ExportedTypes.Select(a => a.Namespace));
+            AssemblyTypes.Add(type);
         }
+    }
+
+    public class CustomCompilerError
+    {
+        public int Line { get; set; }
+        public string ErrorText { get; set; }
     }
 }

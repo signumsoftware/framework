@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Web;
-using System.Web.Http;
+using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using Signum.Engine.DynamicQuery;
 using Signum.Engine.Basics;
@@ -18,12 +18,13 @@ using Signum.React.Maps;
 using Signum.Entities.Map;
 using Signum.React.Facades;
 using Signum.Engine.Isolation;
+using Microsoft.AspNetCore.Builder;
 
 namespace Signum.React.Isolation
 {
     public static class IsolationServer
     {
-        public static void Start(HttpConfiguration config)
+        public static void Start(IApplicationBuilder app)
         {
             ReflectionServer.RegisterLike(typeof(MapMessage));
             SignumControllerFactory.RegisterArea(MethodInfo.GetCurrentMethod());

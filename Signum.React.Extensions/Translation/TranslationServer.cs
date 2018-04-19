@@ -8,12 +8,13 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Web;
-using System.Web.Http;
-using System.Web.Http.Controllers;
+using Microsoft.AspNetCore.Mvc;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using Signum.React.Facades;
 using Signum.Entities.Translation;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Http;
 
 namespace Signum.React.Translation
 {
@@ -21,7 +22,7 @@ namespace Signum.React.Translation
     {
         public static ITranslator Translator;
 
-        public static void Start(HttpConfiguration config, ITranslator translator, bool copyNewTranslationsToRootFolder = true)
+        public static void Start(IApplicationBuilder app, ITranslator translator, bool copyNewTranslationsToRootFolder = true)
         {
             ReflectionServer.RegisterLike(typeof(TranslationMessage));
 
@@ -67,23 +68,11 @@ namespace Signum.React.Translation
 
             return null;
         }
+        
 
-        public static void AddLanguageCookie(HttpResponseMessage resp, HttpRequestMessage request, CultureInfo ci)
+        public static string ReadLanguageCookie(ActionContext ac)
         {
-            resp.Headers.AddCookies(new[]
-            {
-                new CookieHeaderValue("language", ci.Name)
-                {
-                    Expires = DateTime.Now.AddMonths(6),
-                    Domain = request.RequestUri.Host,
-                    Path =  VirtualPathUtility.ToAbsolute("~/")
-                }
-            });
-        }
-
-        public static string ReadLanguageCookie(HttpRequestMessage request)
-        {
-            return request.Headers.GetCookies().FirstOrDefault()?.Cookies.FirstOrDefault(cs => cs.Name == "language")?.Value;
+            return ac.HttpContext.Request.Cookies.TryGetValue("language", out string value) ? value : null;
         }
     }
 }

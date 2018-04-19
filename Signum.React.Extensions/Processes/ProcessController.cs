@@ -6,7 +6,7 @@ using Signum.React.ApiControllers;
 using Signum.React.Facades;
 using Signum.React.Filters;
 using System.Threading;
-using System.Web.Http;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Signum.React.Processes
 {

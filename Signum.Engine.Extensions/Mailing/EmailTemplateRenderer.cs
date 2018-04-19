@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Configuration;
 using System.Globalization;
 using System.Linq;
-using System.Net.Configuration;
 using System.Text;
 using Signum.Engine.Basics;
 using Signum.Engine.DynamicQuery;
@@ -182,12 +181,7 @@ namespace Signum.Engine.Mailing
                 }
                 else
                 {
-                    SmtpSection smtpSection = ConfigurationManager.GetSection("system.net/mailSettings/smtp") as SmtpSection;
-
-                    yield return new EmailAddressEmbedded
-                    {
-                        EmailAddress = smtpSection.From
-                    };
+                    throw new InvalidOperationException("Not Default From found");
                 }
             }
         }

@@ -54,7 +54,7 @@ namespace Signum.Entities.Workflow
             var script = this.Script.Trim();
             var WorkflowEntityTypeName = parent.MainEntityType.ToType().FullName;
 
-            return Compile(DynamicCode.GetAssemblies(),
+            return Compile(DynamicCode.GetMetadataReferences(),
                 DynamicCode.GetUsingNamespaces() +
                     @"
                     namespace Signum.Entities.Workflow

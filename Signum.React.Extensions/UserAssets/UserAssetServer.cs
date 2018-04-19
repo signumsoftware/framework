@@ -6,17 +6,18 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Web;
-using System.Web.Http;
+using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using Signum.React.ApiControllers;
 using Signum.React.Facades;
+using Microsoft.AspNetCore.Builder;
 
 namespace Signum.React.UserAssets
 {
     public static class UserAssetServer
     {
         static bool started;
-        public static void Start(HttpConfiguration config)
+        public static void Start(IApplicationBuilder app)
         {
             if (started)
                 return;

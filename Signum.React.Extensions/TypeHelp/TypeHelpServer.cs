@@ -10,13 +10,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Web;
-using System.Web.Http;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Builder;
 
 namespace Signum.React.TypeHelp
 {
     public static class TypeHelpServer
     {
-        public static void Start(HttpConfiguration config)
+        public static void Start(IApplicationBuilder app)
         {
             SignumControllerFactory.RegisterArea(MethodInfo.GetCurrentMethod());
         }

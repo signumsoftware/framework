@@ -11,7 +11,6 @@ using System.Web;
 using Signum.Engine.Translation;
 using Signum.Entities.Translation;
 using Signum.Utilities;
-using System.Web.Configuration;
 using System.Reflection;
 using System.Runtime.Serialization.Json;
 

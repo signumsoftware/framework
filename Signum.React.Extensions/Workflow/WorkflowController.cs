@@ -10,7 +10,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
-using System.Web.Http;
 using System.Xml.Linq;
 using Signum.Entities.Basics;
 using Signum.Engine.DynamicQuery;
@@ -19,6 +18,7 @@ using Signum.Engine.Authorization;
 using Newtonsoft.Json;
 using Signum.Utilities;
 using Signum.React.ApiControllers;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Signum.React.Workflow
 {

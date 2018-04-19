@@ -1,14 +1,17 @@
-﻿using Microsoft.CSharp;
+﻿using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CSharp;
 using Signum.Entities;
 using Signum.Utilities;
 using System;
 using System.CodeDom.Compiler;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Reflection.Metadata;
+using System.Runtime.Loader;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -67,68 +70,72 @@ namespace Signum.Entities.Dynamic
         static ConcurrentDictionary<string, CompilationResult> resultCache = new ConcurrentDictionary<string, CompilationResult>();
 
 
-        public static CompilationResult Compile(IEnumerable<string> assemblies, string code)
+        public static CompilationResult Compile(IEnumerable<MetadataReference> references, string code)
         {
-            return resultCache.GetOrAdd(code, _ =>
+            return resultCache.GetOrAdd(code, (Func<string, CompilationResult>)(_ =>
             {
                 using (HeavyProfiler.Log("COMPILE", () => code))
                 {
                     try
                     {
-                        CodeDomProvider supplier = new Microsoft.CodeDom.Providers.DotNetCompilerPlatform.CSharpCodeProvider();
-
-                        CompilerParameters parameters = new CompilerParameters();
-
-                        parameters.ReferencedAssemblies.Add("System.dll");
-                        parameters.ReferencedAssemblies.Add("System.Data.dll");
-                        parameters.ReferencedAssemblies.Add("System.Core.dll");
+                        var tree = SyntaxFactory.ParseSyntaxTree(code);
                         
-                        foreach (var ass in assemblies)
+                        var compilation = CSharpCompilation.Create("EvalEmbeddedCode.dll")
+                         .WithOptions(new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary))
+                         .AddReferences(references)
+                         .AddSyntaxTrees(tree);
+
+                        using (MemoryStream ms = new MemoryStream())
                         {
-                            parameters.ReferencedAssemblies.Add(ass);
-                        }
+                            var emit = compilation.Emit(ms);
 
-                        parameters.GenerateInMemory = true;
-
-                        CompilerResults compiled = supplier.CompileAssemblyFromSource(parameters, code);
-
-                        if (compiled.Errors.HasErrors)
-                        {
-                            var lines = code.Split('\n');
-                            var errors = compiled.Errors.Cast<CompilerError>();
-                            return new CompilationResult
+                            if (!emit.Success)
                             {
-                                CompilationErrors = errors.Count() + " Errors:\r\n" + errors.ToString(e => "Line {0}: {1}".FormatWith(e.Line, e.ErrorText) + "\r\n" + lines[e.Line - 1], "\r\n\r\n")
-                            };
-                        }
-
-                        if (DynamicCode.GetCustomErrors != null)
-                        {
-                            var allCustomErrors = DynamicCode.GetCustomErrors.GetInvocationListTyped().SelectMany(a => a(code) ?? new List<CompilerError>()).ToList();
-                            if (allCustomErrors.Any())
-                            {
-                                var lines = code.Split('\n');
+                                var lines = code.Lines();
+                                var errors = emit.Diagnostics.Where(a => a.DefaultSeverity == DiagnosticSeverity.Error);
                                 return new CompilationResult
                                 {
-                                    CompilationErrors = allCustomErrors.Count() + " Errors:\r\n" + allCustomErrors.ToString(e => "Line {0}: {1}".FormatWith(e.Line, e.ErrorText) + "\r\n" + lines[e.Line - 1], "\r\n\r\n")
+                                    CompilationErrors = errors.Count() + " Errors:\r\n" + errors.ToString(e =>
+                                    {
+                                        var line = e.Location.GetLineSpan().StartLinePosition.Line;
+                                        return "Line {0}: {1}".FormatWith(line, e.GetMessage() + "\r\n" + lines[line]);
+                                    }, "\r\n\r\n")
                                 };
                             }
+
+                            if (DynamicCode.GetCustomErrors != null)
+                            {
+                                var allCustomErrors = DynamicCode.GetCustomErrors.GetInvocationListTyped()
+                                .SelectMany((Func<string, List<CustomCompilerError>> a) => a(code) ?? Enumerable.Empty<CustomCompilerError>()).ToList();
+
+                                if (allCustomErrors.Any())
+                                {
+                                    var lines = code.Split('\n');
+                                    return new CompilationResult
+                                    {
+                                        CompilationErrors = allCustomErrors.Count() + " Errors:\r\n" + allCustomErrors.ToString(e => {
+                                            return "Line {0}: {1}".FormatWith(e.Line, e.ErrorText) + "\r\n" + lines[e.Line - 1];
+                                        }, "\r\n\r\n")
+                                    };
+                                }
+                            }
+
+                            ms.Seek(0, SeekOrigin.Begin);
+                            var assembly = AssemblyLoadContext.Default.LoadFromStream(ms);
+
+                            Type type = assembly.GetTypes().Where(a => typeof(T).IsAssignableFrom(a)).SingleEx();
+
+                            T algorithm = (T)assembly.CreateInstance(type.FullName);
+
+                            return new CompilationResult { Algorithm = algorithm };
                         }
-
-                        Assembly assembly = compiled.CompiledAssembly;
-                        Type type = assembly.GetTypes().Where(a => typeof(T).IsAssignableFrom(a)).SingleEx();
-
-                        T algorithm = (T)assembly.CreateInstance(type.FullName);
-
-                        return new CompilationResult { Algorithm = algorithm };
-
                     }
                     catch (Exception e)
                     {
                         return new CompilationResult { CompilationErrors = e.Message };
                     }
                 }
-            });
+            }));
         }
 
         [HiddenProperty]

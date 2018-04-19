@@ -9,7 +9,8 @@ using Signum.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Text;
-using System.Web.Http;
+using Microsoft.AspNetCore.Mvc;
+using Signum.React.ApiControllers;
 
 namespace Signum.React.DiffLog
 {

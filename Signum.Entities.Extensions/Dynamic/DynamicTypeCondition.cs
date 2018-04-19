@@ -47,7 +47,7 @@ namespace Signum.Entities.Dynamic
             script = script.Contains(';') ? script : ("return " + script + ";");
             var entityTypeName = ((DynamicTypeConditionEntity)this.GetParentEntity()).EntityType.ToType().FullName;
 
-            return Compile(DynamicCode.GetAssemblies(),
+            return Compile(DynamicCode.GetMetadataReferences(),
                 DynamicCode.GetUsingNamespaces() +
 @"
 namespace Signum.Entities.Dynamic

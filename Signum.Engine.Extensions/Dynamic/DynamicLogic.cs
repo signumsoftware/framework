@@ -1,4 +1,7 @@
-﻿using Signum.Engine;
+﻿using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.Text;
+using Signum.Engine;
 using Signum.Engine.Authorization;
 using Signum.Engine.Basics;
 using Signum.Engine.DynamicQuery;
@@ -53,9 +56,9 @@ namespace Signum.Engine.Dynamic
                 var cr = Compile(codeFiles, inMemory: false);
 
                 if (cr.Errors.Count != 0)
-                    throw new InvalidOperationException("Errors compiling  dynamic assembly:\r\n" + cr.Errors.Cast<CompilerError>().ToString("\r\n").Indent(4));
+                    throw new InvalidOperationException("Errors compiling  dynamic assembly:\r\n" + cr.Errors.ToString("\r\n").Indent(4));
 
-                DynamicCode.CodeGenAssemblyPath = cr.PathToAssembly;
+                DynamicCode.CodeGenAssemblyPath = cr.OutputAssembly;
             }
             catch (Exception e)
             {
@@ -138,35 +141,57 @@ namespace Signum.Engine.Dynamic
             return GetCodeFiles.GetInvocationListTyped().SelectMany(f => f()).ToDictionaryEx(a => a.FileName, "C# code files");
         }
 
-        public static CompilerResults Compile(Dictionary<string, CodeFile> codeFiles, bool inMemory)
+        public class CompilationResult
+        {
+            public string OutputAssembly;
+            public List<CompilationError> Errors;
+        }
+
+        public class CompilationError
+        {
+            public string FileName;
+            public int Line;
+            public int Column;
+            public string ErrorNumber;
+            public string ErrorText;
+            public string FileContent;
+        }
+
+        public static CompilationResult Compile(Dictionary<string, CodeFile> codeFiles, bool inMemory)
         {
             using (HeavyProfiler.Log("COMPILE"))
             {
-                CodeDomProvider supplier = new Microsoft.CodeDom.Providers.DotNetCompilerPlatform.CSharpCodeProvider();
-
-                CompilerParameters parameters = new CompilerParameters();
-
-                parameters.ReferencedAssemblies.Add("System.dll");
-                parameters.ReferencedAssemblies.Add("System.Data.dll");
-                parameters.ReferencedAssemblies.Add("System.Core.dll");
-                foreach (var ass in DynamicCode.Assemblies)
-                {
-                    parameters.ReferencedAssemblies.Add(Path.Combine(DynamicCode.AssemblyDirectory, ass));
-                }
-
-                if (inMemory)
-                    parameters.GenerateInMemory = true;
-                else
-                    parameters.OutputAssembly = Path.Combine(DynamicCode.CodeGenDirectory, DynamicCode.CodeGenAssembly);
-
                 Directory.CreateDirectory(DynamicCode.CodeGenDirectory);
                 Directory.EnumerateFiles(DynamicCode.CodeGenDirectory).Where(a => !inMemory || a != DynamicCode.CodeGenAssemblyPath).ToList().ForEach(a => File.Delete(a));
 
                 codeFiles.Values.ToList().ForEach(a => File.WriteAllText(Path.Combine(DynamicCode.CodeGenDirectory, a.FileName), a.FileContent));
 
-                CompilerResults compiled = supplier.CompileAssemblyFromFile(parameters, codeFiles.Values.Select(a => Path.Combine(DynamicCode.CodeGenDirectory, a.FileName)).ToArray());
+                var compilation = CSharpCompilation.Create(DynamicCode.CodeGenAssembly)
+                      .WithOptions(new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary))
+                      .AddReferences(DynamicCode.GetMetadataReferences());
 
-                return compiled;
+                var outputAssembly = inMemory ? Path.Combine(DynamicCode.CodeGenDirectory, DynamicCode.CodeGenAssembly) : null;
+
+                using (var stream = inMemory ? (Stream)new MemoryStream() : File.Create(outputAssembly))
+                {
+                    var emitResult = compilation.Emit(stream);
+
+                    return new CompilationResult
+                    {
+                        OutputAssembly = emitResult.Success ? outputAssembly : null,
+                        Errors = emitResult.Diagnostics.Where(a => a.Severity == DiagnosticSeverity.Error)
+                        .Select(d => new CompilationError
+                        {
+                            Column = d.Location.GetLineSpan().StartLinePosition.Character,
+                            Line = d.Location.GetLineSpan().StartLinePosition.Line,
+                            FileContent = d.Location.SourceTree.ToString(),
+                            FileName = null,
+                            ErrorNumber = d.Descriptor.Id,
+                            ErrorText = d.Descriptor.Description.ToString()
+                        })
+                        .ToList()
+                    };
+                }
             }
         }
 

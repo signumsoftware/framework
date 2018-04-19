@@ -357,7 +357,7 @@ namespace Signum.Entities.Dynamic
             if (obj is decimal)
                 obj = (double)(decimal)obj;
 
-            return CSharpRenderer.Value(obj, obj.GetType(), null);
+            return CSharpRenderer.Value(obj);
         }
 
 

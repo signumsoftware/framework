@@ -19,6 +19,7 @@ using Signum.Utilities;
 using Signum.Utilities.DataStructures;
 using Signum.Engine.Templating;
 using System.Collections;
+using Microsoft.AspNetCore.Html;
 
 namespace Signum.Engine.Mailing
 {

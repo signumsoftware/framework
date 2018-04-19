@@ -6,6 +6,9 @@ using Signum.Engine.Authorization;
 using Signum.Entities.Authorization;
 using Signum.Utilities;
 using Signum.React.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Http.Features;
+using Microsoft.AspNetCore.Http;
 
 namespace Signum.React.Authorization
 {
@@ -14,30 +17,25 @@ namespace Signum.React.Authorization
         public static Func<string> OnCookieName = () => "sfUser";
         public static string CookieName { get { return OnCookieName(); } }
 
-        public static bool LoginFromCookie()
+        public static bool LoginFromCookie(ActionContext ac)
         {
             using (AuthLogic.Disable())
             {
                 try
                 {
-                    var authCookie = System.Web.HttpContext.Current.Request.Cookies[CookieName];
-                    if (authCookie == null || !authCookie.Value.HasText())
+                    if (ac.HttpContext.Request.Cookies.TryGetValue(CookieName, out string ticketText) || !ticketText.HasText())
                         return false;   //there is no cookie
 
-                    string ticketText = authCookie.Value;
+                    var httpConnection = ac.HttpContext.Features.Get<IHttpConnectionFeature>();
 
-                    UserEntity user = UserTicketLogic.UpdateTicket(
-                           System.Web.HttpContext.Current.Request.UserHostAddress,
-                           ref ticketText);
+                    UserEntity user = UserTicketLogic.UpdateTicket(httpConnection.RemoteIpAddress.ToString(), ref ticketText);
 
                     AuthServer.OnUserPreLogin(null, user);
 
-                    System.Web.HttpContext.Current.Response.Cookies.Add(new HttpCookie(CookieName, ticketText)
+                    ac.HttpContext.Response.Cookies.Append(CookieName, ticketText, new CookieOptions
                     {
                         Expires = DateTime.UtcNow.Add(UserTicketLogic.ExpirationInterval),
-                        HttpOnly = true,
-                        Domain = System.Web.HttpContext.Current.Request.Url.Host
-
+                        Domain = ac.HttpContext.Request.Host.ToString(),
                     });
 
                     AuthServer.AddUserSession(user);
@@ -46,35 +44,29 @@ namespace Signum.React.Authorization
                 catch
                 {
                     //Remove cookie
-                    RemoveCookie();
+                    RemoveCookie(ac);
 
                     return false;
                 }
             }
         }
 
-        public static void RemoveCookie()
+        public static void RemoveCookie(ActionContext ac)
         {
-            HttpCookie cookie = new HttpCookie(CookieName)
-            {
-                Expires = DateTime.UtcNow.AddDays(-10), // or any other time in the past
-                HttpOnly = true,
-                Domain = System.Web.HttpContext.Current.Request.Url.Host
-            };
-            System.Web.HttpContext.Current.Response.Cookies.Set(cookie);
+            ac.HttpContext.Response.Cookies.Delete(CookieName);
         }
 
-        public static void SaveCookie()
+        public static void SaveCookie(ActionContext ac)
         {
-            string ticketText = UserTicketLogic.NewTicket(
-                      System.Web.HttpContext.Current.Request.UserHostAddress);
+            var httpConnection = ac.HttpContext.Features.Get<IHttpConnectionFeature>();
 
-            HttpCookie cookie = new HttpCookie(CookieName, ticketText)
+            string ticketText = UserTicketLogic.NewTicket(httpConnection.LocalIpAddress.ToString());
+
+            ac.HttpContext.Response.Cookies.Append(CookieName, ticketText, new CookieOptions
             {
+                Domain = ac.HttpContext.Request.Host.ToString(),
                 Expires = DateTime.UtcNow.Add(UserTicketLogic.ExpirationInterval),
-            };
-
-            System.Web.HttpContext.Current.Response.Cookies.Add(cookie);
+            });
         }
     }
 }

@@ -112,6 +112,8 @@ namespace Signum.Entities.Files
             return Path.Combine(pp.PhysicalPrefix, Suffix);
         }
 
+        public static Func<string, string> ToAbsolute = str => throw new NotImplementedException("ToAbsolute not set");
+
         public string FullWebPath()
         {
             var pp = this.GetPrefixPair();
@@ -123,7 +125,7 @@ namespace Signum.Entities.Files
             if (url.StartsWith("http"))
                 return url;
 
-            return VirtualPathUtility.ToAbsolute(url);
+            return ToAbsolute(url);
         }
 
         public override string ToString()

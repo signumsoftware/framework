@@ -117,7 +117,7 @@ namespace Signum.Entities.Workflow
             script = script.Contains(';') ? script : ("return " + script + ";");
             var WorkflowEntityTypeName = parent.GetWorkflow().MainEntityType.ToType().FullName;
 
-            return Compile(DynamicCode.GetAssemblies(),
+            return Compile(DynamicCode.GetMetadataReferences(),
                 DynamicCode.GetUsingNamespaces() +
                     @"
                     namespace Signum.Entities.Workflow
@@ -149,7 +149,7 @@ namespace Signum.Entities.Workflow
             script = script.Contains(';') ? script : ("return " + script + ";");
             var WorkflowEntityTypeName = parent.GetWorkflow().MainEntityType.ToType().FullName;
 
-            return Compile(DynamicCode.GetAssemblies(),
+            return Compile(DynamicCode.GetMetadataReferences(),
                 DynamicCode.GetUsingNamespaces() +
                     @"
                     namespace Signum.Entities.Workflow

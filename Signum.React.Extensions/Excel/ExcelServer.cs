@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Web;
-using System.Web.Http;
+using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using Signum.Engine.DynamicQuery;
 using Signum.Engine.Basics;
@@ -22,12 +22,13 @@ using Signum.Engine.Authorization;
 using Signum.Engine.Maps;
 using Signum.Entities.Templating;
 using Signum.Entities.Excel;
+using Microsoft.AspNetCore.Builder;
 
 namespace Signum.React.Excel
 {
     public static class ExcelServer
     {
-        public static void Start(HttpConfiguration config)
+        public static void Start(IApplicationBuilder app)
         {
             SignumControllerFactory.RegisterArea(MethodInfo.GetCurrentMethod());
 

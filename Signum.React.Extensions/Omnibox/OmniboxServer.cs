@@ -15,11 +15,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Web;
-using System.Web.Http;
+using Microsoft.AspNetCore.Mvc;
 using Signum.Entities.Chart;
 using Signum.Entities.Dashboard;
 using Signum.Entities.Map;
 using Signum.Entities.UserQueries;
+using Microsoft.AspNetCore.Builder;
 
 namespace Signum.React.Omnibox
 {
@@ -27,7 +28,7 @@ namespace Signum.React.Omnibox
     {
         public static Func<Type, bool> IsNavigable;
 
-        public static void Start(HttpConfiguration config, params IOmniboxResultGenerator[] generators)
+        public static void Start(IApplicationBuilder app, params IOmniboxResultGenerator[] generators)
         {
             SignumControllerFactory.RegisterArea(MethodInfo.GetCurrentMethod());
             QueryTokenJsonConverter.GetQueryTokenTS = qt => new QueryTokenTS(qt, true);

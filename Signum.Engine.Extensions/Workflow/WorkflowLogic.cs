@@ -208,7 +208,7 @@ namespace Signum.Engine.Workflow
         }
 
         static Regex CurrentIsRegex = new Regex($@"{nameof(WorkflowActivityInfo)}\s*\.\s*{nameof(WorkflowActivityInfo.Current)}\s*\.\s*{nameof(WorkflowActivityInfo.Is)}\s*\(\s*""(?<workflowName>[^""]*)""\s*,\s*""(?<activityName>[^""]*)""\s*\)");
-        internal static List<CompilerError> GetCustomErrors(string code)
+        internal static List<CustomCompilerError> GetCustomErrors(string code)
         {
             var matches = CurrentIsRegex.Matches(code).Cast<Match>().ToList();
 
@@ -229,7 +229,7 @@ namespace Signum.Engine.Workflow
             }).NotNull().ToList();
         }
 
-        private static CompilerError CreateCompilerError(string code, Match m, string errorText)
+        private static CustomCompilerError CreateCompilerError(string code, Match m, string errorText)
         {
             int index = 0;
             int line = 1;
@@ -237,7 +237,7 @@ namespace Signum.Engine.Workflow
             {
                 var newIndex = code.IndexOf('\n', index + 1);
                 if (newIndex >= m.Index || newIndex == -1)
-                    return new CompilerError("DynamicCode.cs", line, m.Index - index, "CustomError", errorText);
+                    return new CustomCompilerError { ErrorText = errorText, Line = line };
 
                 index = newIndex;
                 line++;

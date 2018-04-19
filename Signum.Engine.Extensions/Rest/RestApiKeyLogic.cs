@@ -11,6 +11,7 @@ using System.Security.Cryptography;
 using Signum.Entities;
 using Signum.Entities.Authorization;
 using System.Web;
+using Microsoft.AspNetCore.WebUtilities;
 
 namespace Signum.Engine.Rest
 {
@@ -56,7 +57,7 @@ namespace Signum.Engine.Rest
             {
                 byte[] tokenData = new byte[32];
                 rng.GetBytes(tokenData);
-                return HttpServerUtility.UrlTokenEncode(tokenData);
+                return WebEncoders.Base64UrlEncode(tokenData);
             }
         }
     }

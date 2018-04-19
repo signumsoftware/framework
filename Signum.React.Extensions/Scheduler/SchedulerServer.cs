@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Web;
-using System.Web.Http;
+using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using Signum.Engine.DynamicQuery;
 using Signum.Engine.Basics;
@@ -20,32 +20,25 @@ using Signum.Engine.Cache;
 using Signum.Entities.Cache;
 using Signum.Engine.Authorization;
 using Signum.Engine.Maps;
-using System.Web.Hosting;
 using Signum.Engine.Scheduler;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Hosting;
 
 namespace Signum.React.Scheduler
 {
     public static class SchedulerServer
     {
-        public static void Start(HttpConfiguration config)
+        public static void Start(IApplicationBuilder app, IApplicationLifetime lifetime)
         {
             SignumControllerFactory.RegisterArea(MethodInfo.GetCurrentMethod());
 
-            HostingEnvironment.RegisterObject(new SchedulerStopper());
+            lifetime.ApplicationStopping.Register(() =>
+            {
+                if (SchedulerLogic.Running)
+                    SchedulerLogic.StopScheduledTasks();
 
-        }
-    }
-
-    internal class SchedulerStopper : IRegisteredObject
-    {
-        public void Stop(bool immediate)
-        {
-            if (SchedulerLogic.Running)
-                SchedulerLogic.StopScheduledTasks();
-
-            SchedulerLogic.StopRunningTasks();
-
-            HostingEnvironment.UnregisterObject(this);
+                SchedulerLogic.StopRunningTasks();
+            });
         }
     }
 }

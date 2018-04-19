@@ -4,7 +4,6 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
-using System.Web.Http;
 using Signum.Engine.Authorization;
 using Signum.Entities;
 using Signum.Entities.Authorization;
@@ -23,6 +22,7 @@ using Signum.Engine;
 using Signum.React.Files;
 using Signum.Engine.UserAssets;
 using System.IO;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Signum.React.UserAssets
 { 

@@ -20,7 +20,8 @@ using System.Linq.Expressions;
 using System.Net;
 using System.Net.Http;
 using System.Reflection;
-using System.Web.Http;
+using Microsoft.AspNetCore.Mvc;
+using Signum.React.ApiControllers;
 
 namespace Signum.React.Dynamic
 {
@@ -54,7 +55,7 @@ namespace Signum.Entities.Dynamic
     }}                   
 }}";
 
-                var res = EvalEmbedded<IDynamicExpressionEvaluator>.Compile(DynamicCode.GetAssemblies(), code);
+                var res = EvalEmbedded<IDynamicExpressionEvaluator>.Compile(DynamicCode.GetMetadataReferences(), code);
 
                 if (res.CompilationErrors.HasText())
                     throw new InvalidOperationException(res.CompilationErrors);

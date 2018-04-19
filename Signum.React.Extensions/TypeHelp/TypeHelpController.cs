@@ -1,10 +1,12 @@
-﻿using Signum.Engine.Basics;
+﻿
+using Signum.Engine.Basics;
 using Signum.Engine.Dynamic;
 using Signum.Engine.DynamicQuery;
 using Signum.Engine.Maps;
 using Signum.Engine.Scheduler;
 using Signum.Entities;
 using Signum.Entities.Dynamic;
+using Signum.React.ApiControllers;
 using Signum.React.Facades;
 using Signum.Utilities;
 using Signum.Utilities.ExpressionTrees;
@@ -15,7 +17,8 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
-using System.Web.Http;
+using Microsoft.AspNetCore.Mvc;
+
 
 namespace Signum.React.TypeHelp
 {

@@ -11,15 +11,16 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Web;
-using System.Web.Http;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Builder;
 
 namespace Signum.React.Dynamic
 {
     public static class DynamicServer
     {
-        public static void Start(HttpConfiguration config)
+        public static void Start(IApplicationBuilder app)
         {
-            TypeHelpServer.Start(config);
+            TypeHelpServer.Start(app);
             SignumControllerFactory.RegisterArea(MethodInfo.GetCurrentMethod());
 
             EntityJsonConverter.AfterDeserilization.Register((PropertyRouteEntity wc) =>

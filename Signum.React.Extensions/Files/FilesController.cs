@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
-using System.Web.Http;
+using Microsoft.AspNetCore.Mvc;
 using Signum.Engine.Authorization;
 using Signum.Entities;
 using Signum.Entities.Authorization;
@@ -19,6 +19,9 @@ using System.Web;
 using Signum.Engine.Files;
 using System.IO;
 using System.Net.Http.Headers;
+using Signum.React.ApiControllers;
+using Microsoft.AspNetCore.StaticFiles;
+using Signum.Engine.Mailing;
 
 namespace Signum.React.Files
 {
@@ -70,7 +73,10 @@ namespace Signum.React.Files
                     FileName = Path.GetFileName(fileName)
                 };
             }
-            var mime = MimeMapping.GetMimeMapping(fileName);
+
+            var mimeConverter = new FileExtensionContentTypeProvider();
+
+            var mime = MimeMapping.GetMimeType(fileName);
             response.Content.Headers.ContentType = new MediaTypeHeaderValue(mime);
             return response;
         }

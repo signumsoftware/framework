@@ -159,9 +159,6 @@ namespace Signum.Entities.Workflow
         {
             return this.WorkflowActivity != null && this.WorkflowActivity.Name == activityName && this.WorkflowActivity.Lane.Pool.Workflow.Name == workflowName;
         }
-
-
-       
     }
     
     [Serializable]
@@ -283,7 +280,7 @@ namespace Signum.Entities.Workflow
             var MainEntityTypeName = activity.Lane.Pool.Workflow.MainEntityType.ToType().FullName;
             var SubEntityTypeName = decomposition.Workflow.MainEntityType.ToType().FullName;
 
-            return Compile(DynamicCode.GetAssemblies(),
+            return Compile(DynamicCode.GetMetadataReferences(),
                 DynamicCode.GetUsingNamespaces() +
                     @"
                     namespace Signum.Entities.Workflow

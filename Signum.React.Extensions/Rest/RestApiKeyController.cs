@@ -1,10 +1,11 @@
 ﻿using System.Linq;
-using System.Web.Http;
+using Microsoft.AspNetCore.Mvc;
 using Signum.Engine;
 using Signum.Engine.Rest;
 using Signum.Entities;
 using Signum.Entities.Authorization;
 using Signum.Entities.Rest;
+using Signum.React.ApiControllers;
 
 namespace Signum.React.Profiler
 {

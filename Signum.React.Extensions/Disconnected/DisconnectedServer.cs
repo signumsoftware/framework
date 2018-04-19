@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Web;
-using System.Web.Http;
+using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using Signum.Engine.DynamicQuery;
 using Signum.Engine.Basics;
@@ -17,12 +17,13 @@ using Signum.Entities.DynamicQuery;
 using Signum.React.Maps;
 using Signum.React.Facades;
 using Signum.Engine.Disconnected;
+using Microsoft.AspNetCore.Builder;
 
 namespace Signum.React.Map
 {
     public static class DisconnectedServer
     {
-        public static void Start(HttpConfiguration config)
+        public static void Start(IApplicationBuilder app)
         {
             SignumControllerFactory.RegisterArea(MethodInfo.GetCurrentMethod());
 

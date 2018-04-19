@@ -53,9 +53,8 @@ LOG ON
         {
             DataTable dataTable = Executor.ExecuteDataTable("RESTORE FILELISTONLY FROM DISK ='{0}'".FormatWith(backupFile));
 
-
-            string logicalDatabaseFile = dataTable.AsEnumerable().Single(a => a.Field<string>("Type") == "D").Field<string>("LogicalName");
-            string logicalDatabaseLogFile = dataTable.AsEnumerable().Single(a => a.Field<string>("Type") == "L").Field<string>("LogicalName");
+            string logicalDatabaseFile = (string)dataTable.Rows.Cast<DataRow>().Single(a => (string)a["Type"] == "D")["LogicalName"];
+            string logicalDatabaseLogFile = (string)dataTable.Rows.Cast<DataRow>().Single(a => (string)a["Type"] == "L")["LogicalName"];
 
             new SqlPreCommandSimple(
 @"RESTORE DATABASE {0}

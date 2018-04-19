@@ -13,7 +13,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
-using System.Web.Http;
+using Microsoft.AspNetCore.Mvc;
+using Signum.React.Facades;
 
 namespace Signum.React.MachineLearning
 {
@@ -23,7 +24,7 @@ namespace Signum.React.MachineLearning
         {
             Dictionary<QueryToken, object> filters = new Dictionary<QueryToken, object>();
 
-            var serializer = JsonSerializer.Create(GlobalConfiguration.Configuration.Formatters.JsonFormatter.SerializerSettings);
+            var serializer = JsonSerializer.Create(SignumServer.JsonSerializerSettings);
             var qd = DynamicQueryManager.Current.QueryDescription(pctx.Predictor.MainQuery.Query.ToQueryName());
             foreach (var kvp in mainKeys)
             {
@@ -198,7 +199,7 @@ namespace Signum.React.MachineLearning
 
         public static void ParseValues(this PredictRequestTS predict, PredictorPredictContext ctx)
         {
-            var serializer = JsonSerializer.Create(GlobalConfiguration.Configuration.Formatters.JsonFormatter.SerializerSettings);
+            var serializer = JsonSerializer.Create(SignumServer.JsonSerializerSettings);
 
             for (int i = 0; i < ctx.Predictor.MainQuery.Columns.Count; i++)
             {

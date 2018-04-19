@@ -27,13 +27,13 @@ using Signum.Entities.DynamicQuery;
 using System.Text.RegularExpressions;
 using System.Globalization;
 using Signum.Engine.Translation;
-using System.Net.Configuration;
 using System.Configuration;
 using Signum.Entities.UserQueries;
 using System.IO;
 using Signum.Utilities.ExpressionTrees;
 using Signum.Engine.Files;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.StaticFiles;
 
 namespace Signum.Engine.Mailing
 {
@@ -369,17 +369,19 @@ namespace Signum.Engine.Mailing
                 IsBodyHtml = email.IsBodyHtml,
             };
 
+            
+
             AlternateView view = AlternateView.CreateAlternateViewFromString(email.Body, null, email.IsBodyHtml ? "text/html" : "text/plain");
             view.LinkedResources.AddRange(email.Attachments
                 .Where(a => a.Type == EmailAttachmentType.LinkedResource)
-                .Select(a => new LinkedResource(a.File.OpenRead(), MimeMapping.GetMimeMapping(a.File.FileName))
+                .Select(a => new LinkedResource(a.File.OpenRead(), MimeMapping.GetMimeType(a.File.FileName))
                 {
                     ContentId = a.ContentId,
                 }));
 
             message.Attachments.AddRange(email.Attachments
                 .Where(a => a.Type == EmailAttachmentType.Attachment)
-                .Select(a => new Attachment(a.File.OpenRead(), MimeMapping.GetMimeMapping(a.File.FileName))
+                .Select(a => new Attachment(a.File.OpenRead(), MimeMapping.GetMimeType(a.File.FileName))
                 {
                     ContentId = a.ContentId,
                     Name = a.File.FileName,
@@ -392,6 +394,19 @@ namespace Signum.Engine.Mailing
             message.Bcc.AddRange(email.Recipients.Where(r => r.Kind == EmailRecipientKind.Bcc).Select(r => r.ToMailAddress()).ToList());
 
             return message;
+        }
+    }
+
+
+    public static class MimeMapping
+    {        
+        public static string GetMimeType(string fileName)
+        {
+            var extension = Path.GetExtension(fileName);
+
+            FileExtensionContentTypeProvider mimeConverter = new FileExtensionContentTypeProvider();
+
+            return mimeConverter.Mappings.TryGetValue(extension ?? "", out var result) ? result : "application/octet-stream";
         }
     }
 }

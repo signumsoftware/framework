@@ -42,8 +42,10 @@ namespace Signum.Engine.Dynamic
                 AvailableEmbeddedEntities = sb.GlobalLazy(() =>
                 {
                     var namespaces = DynamicCode.GetNamespaces().ToHashSet();
-                    return DynamicCode.GetAssemblies()
-                    .SelectMany(a => Assembly.LoadFile(a).GetTypes())
+                    return DynamicCode.AssemblyTypes
+                    .Select(t => t.Assembly)
+                    .Distinct()
+                    .SelectMany(a => a.GetTypes())
                     .Where(t => typeof(EmbeddedEntity).IsAssignableFrom(t) && namespaces.Contains(t.Namespace))
                     .ToHashSet();
 
@@ -417,7 +419,7 @@ namespace Signum.Engine.Dynamic
 
         string Literal(object obj)
         {
-            return CSharpRenderer.Value(obj, obj.GetType(), null);
+            return CSharpRenderer.Value(obj);
         }
 
         protected virtual string WriteProperty(DynamicProperty property)
@@ -445,10 +447,7 @@ namespace Signum.Engine.Dynamic
         {
             var fn = property.Name.FirstLower();
 
-            if (CSharpRenderer.Keywords.Contains(fn))
-                return "@" + fn;
-
-            return fn;
+            return CSharpRenderer.EscapeIdentifier(fn);
         }
 
         private IEnumerable<string> GetPropertyAttributes(DynamicProperty property)

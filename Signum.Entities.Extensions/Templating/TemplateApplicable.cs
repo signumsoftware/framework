@@ -18,7 +18,7 @@ namespace Signum.Entities.Templating
             script = script.Contains(';') ? script : ("return " + script + ";");
             var entityTypeName = (QueryEntity.GetEntityImplementations(((WordTemplateEntity)this.GetParentEntity()).Query).Types.Only() ?? typeof(Entity)).Name;
 
-            return Compile(DynamicCode.GetAssemblies(),
+            return Compile(DynamicCode.GetMetadataReferences(),
                 DynamicCode.GetUsingNamespaces() +
 @"
 namespace Signum.Entities.Templating

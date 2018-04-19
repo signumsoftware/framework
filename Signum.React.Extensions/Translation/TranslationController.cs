@@ -18,7 +18,8 @@ using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Reflection;
-using System.Web.Http;
+using Microsoft.AspNetCore.Mvc;
+using Signum.React.ApiControllers;
 
 namespace Signum.React.Translation
 {

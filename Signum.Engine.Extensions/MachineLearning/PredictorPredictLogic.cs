@@ -141,7 +141,7 @@ namespace Signum.Engine.MachineLearning
 
                 ResultTable resultTable = DynamicQueryManager.Current.ExecuteQuery(qgr);
 
-                var tuples = sqe.Columns.Zip(resultTable.Columns, (sqc, rc) => (sqc, rc)).ToList();
+                var tuples = sqe.Columns.Zip(resultTable.Columns, (sqc, rc) => (sqc: sqc, rc: rc)).ToList();
                 ResultColumn[] entityGroupKey = tuples.Extract(t => t.sqc.Usage == PredictorSubQueryColumnUsage.ParentKey).Select(a=>a.rc).ToArray();
                 ResultColumn[] remainingKeys = tuples.Extract(t => t.sqc.Usage == PredictorSubQueryColumnUsage.SplitBy).Select(a => a.rc).ToArray();
                 var valuesTuples = tuples;
@@ -178,7 +178,7 @@ namespace Signum.Engine.MachineLearning
             {
                 var resultTable = ctx.SubQueries[sqe].ResultTable;
 
-                var tuples = sqe.Columns.Zip(resultTable.Columns, (sqc, rc) => (sqc, rc)).ToList();
+                var tuples = sqe.Columns.Zip(resultTable.Columns, (sqc, rc) => (sqc: sqc, rc: rc)).ToList();
                 ResultColumn[] parentKeys = tuples.Extract(t => t.sqc.Usage == PredictorSubQueryColumnUsage.ParentKey).Select(a => a.rc).ToArray();
                 ResultColumn[] remainingKeys = tuples.Extract(t => t.sqc.Usage == PredictorSubQueryColumnUsage.SplitBy).Select(a => a.rc).ToArray();
                 var valuesTuples = tuples;

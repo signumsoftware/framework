@@ -15,19 +15,27 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
-using System.Web.Http;
+using Microsoft.AspNetCore.Mvc;
+using Signum.React.ApiControllers;
+using Microsoft.AspNetCore.Hosting;
 
 namespace Signum.React.Dynamic
 {
     public class DynamicController : ApiController
     {
+        IApplicationLifetime lifeTime;
+        public DynamicController(IApplicationLifetime lifeTime)
+        {
+            this.lifeTime = lifeTime;
+        }
+
         [Route("api/dynamic/compile"), HttpPost]
         public List<CompilationErrorTS> Compile()
         {
             SystemEventLogLogic.Log("DynamicController.Compile");
             Dictionary<string, CodeFile> codeFiles = DynamicLogic.GetCodeFilesDictionary();
             var result = DynamicLogic.Compile(codeFiles, inMemory: true);
-            return (from ce in result.Errors.Cast<CompilerError>()
+            return (from ce in result.Errors
                     let fileName = Path.GetFileName(ce.FileName)
                     select (new CompilationErrorTS
                     {
@@ -54,15 +62,15 @@ namespace Signum.React.Dynamic
         public void RestartServer()
         {
             SystemEventLogLogic.Log("DynamicController.RestartServer");
-            System.Web.HttpRuntime.UnloadAppDomain();
+            lifeTime.StopApplication();
         }
 
         [Route("api/dynamic/startErrors"), HttpGet]
-        public List<HttpError> GetStartErrors()
+        public List<Exception> GetStartErrors()
         {
             return StartParameters.IgnoredCodeErrors.EmptyIfNull()
                 .PreAnd(DynamicLogic.CodeGenError).NotNull()
-                .Select(e => new HttpError(e, true))
+                .Select(e => e)
                 .ToList();
         }
     }

@@ -9,20 +9,22 @@ using System;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
-using System.Web.Http;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
+using Signum.React.ApiControllers;
 
 namespace Signum.React.Authorization
 {
     public class AuthController : ApiController
     {
         [Route("api/auth/login"), HttpPost, AllowAnonymous]
-        public LoginResponse Login([FromBody]LoginRequest data)
+        public ActionResult<LoginResponse> Login([FromBody]LoginRequest data)
         {
             if (string.IsNullOrEmpty(data.userName))
-                throw ModelException("userName", AuthMessage.UserNameMustHaveAValue.NiceToString());
+                return ModelError("userName", AuthMessage.UserNameMustHaveAValue.NiceToString());
 
             if (string.IsNullOrEmpty(data.password))
-                throw ModelException("password", AuthMessage.PasswordMustHaveAValue.NiceToString());
+                return ModelError("password", AuthMessage.PasswordMustHaveAValue.NiceToString());
 
             // Attempt to login
             UserEntity user = null;
@@ -34,22 +36,22 @@ namespace Signum.React.Authorization
             {
                 if (AuthServer.MergeInvalidUsernameAndPasswordMessages)
                 {
-                    ModelState.AddModelError("userName", AuthMessage.InvalidUsernameOrPassword.NiceToString());
-                    ModelState.AddModelError("password", AuthMessage.InvalidUsernameOrPassword.NiceToString());
-                    throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, this.ModelState));
+                    ActionContext.ModelState.AddModelError("userName", AuthMessage.InvalidUsernameOrPassword.NiceToString());
+                    ActionContext.ModelState.AddModelError("password", AuthMessage.InvalidUsernameOrPassword.NiceToString());
+                    return new BadRequestObjectResult(ActionContext.ModelState);
                 }
                 else if (e is IncorrectUsernameException)
                 {
-                    throw ModelException("userName", AuthMessage.InvalidUsername.NiceToString());
+                    return ModelError("userName", AuthMessage.InvalidUsername.NiceToString());
                 }
                 else if (e is IncorrectPasswordException)
                 {
-                    throw ModelException("password", AuthMessage.InvalidPassword.NiceToString());
+                    return ModelError("password", AuthMessage.InvalidPassword.NiceToString());
                 }
             }
             catch (IncorrectPasswordException)
             {
-                throw ModelException("password", AuthServer.MergeInvalidUsernameAndPasswordMessages ?
+                return ModelError("password", AuthServer.MergeInvalidUsernameAndPasswordMessages ?
                     AuthMessage.InvalidUsernameOrPassword.NiceToString() :
                     AuthMessage.InvalidPassword.NiceToString());
             }
@@ -58,7 +60,7 @@ namespace Signum.React.Authorization
             {
                 if (data.rememberMe == true)
                 {
-                    UserTicketServer.SaveCookie();
+                    UserTicketServer.SaveCookie(this.ActionContext);
                 }
 
                 AuthServer.AddUserSession(user);
@@ -86,7 +88,7 @@ namespace Signum.React.Authorization
         {
             using (ScopeSessionFactory.OverrideSession())
             {
-                if (!UserTicketServer.LoginFromCookie())
+                if (!UserTicketServer.LoginFromCookie(this.ActionContext))
                     return null;
 
                 string message = AuthLogic.OnLoginMessage();
@@ -108,7 +110,7 @@ namespace Signum.React.Authorization
         {
             AuthServer.UserLoggingOut?.Invoke();
 
-            UserTicketServer.RemoveCookie();
+            UserTicketServer.RemoveCookie(this.ActionContext);
         }
 
         [Route("api/auth/refreshToken"), HttpPost, AllowAnonymous]
@@ -119,21 +121,19 @@ namespace Signum.React.Authorization
             return new LoginResponse { message = null, userEntity = user, token = newToken };
         }
 
-       
-
         [Route("api/auth/ChangePassword"), HttpPost]
-        public LoginResponse ChangePassword(ChangePasswordRequest request)
+        public ActionResult<LoginResponse> ChangePassword(ChangePasswordRequest request)
         {
             if (string.IsNullOrEmpty(request.oldPassword))
-                throw ModelException("oldPassword", AuthMessage.PasswordMustHaveAValue.NiceToString());
+                return ModelError("oldPassword", AuthMessage.PasswordMustHaveAValue.NiceToString());
 
             if (string.IsNullOrEmpty(request.newPassword))
-                throw ModelException("newPassword", AuthMessage.PasswordMustHaveAValue.NiceToString());
+                return ModelError("newPassword", AuthMessage.PasswordMustHaveAValue.NiceToString());
 
             var user = UserEntity.Current;
 
             if (!user.PasswordHash.SequenceEqual(Security.EncodePassword(request.oldPassword)))
-                throw ModelException("oldPassword", AuthMessage.InvalidPassword.NiceToString());
+                return ModelError("oldPassword", AuthMessage.InvalidPassword.NiceToString());
 
             user.PasswordHash = Security.EncodePassword(request.newPassword);
             using (AuthLogic.Disable())
@@ -142,10 +142,10 @@ namespace Signum.React.Authorization
             return new LoginResponse { userEntity = user, token = AuthTokenServer.CreateToken(UserEntity.Current) };
         }
 
-        private HttpResponseException ModelException(string field, string error)
+        private BadRequestObjectResult ModelError(string field, string error)
         {
-            ModelState.AddModelError(field, error);
-            return new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, this.ModelState));
+            this.ActionContext.ModelState.AddModelError(field, error);
+            return new BadRequestObjectResult(ActionContext.ModelState);
         }
 
 #pragma warning disable IDE1006 // Naming Styles

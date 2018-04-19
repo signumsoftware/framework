@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Web;
-using System.Web.Http;
+using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using Signum.Engine.DynamicQuery;
 using Signum.Entities.UserQueries;
@@ -15,14 +15,15 @@ using Signum.React.UserAssets;
 using Signum.React.Facades;
 using Signum.Engine.UserQueries;
 using Signum.Engine.Authorization;
+using Microsoft.AspNetCore.Builder;
 
 namespace Signum.React.UserQueries
 {
     public static class UserQueryServer
     {
-        public static void Start(HttpConfiguration config)
+        public static void Start(IApplicationBuilder app)
         {
-            UserAssetServer.Start(config);
+            UserAssetServer.Start(app);
 
             SignumControllerFactory.RegisterArea(MethodInfo.GetCurrentMethod());
 

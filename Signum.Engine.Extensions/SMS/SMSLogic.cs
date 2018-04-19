@@ -381,19 +381,8 @@ namespace Signum.Engine.SMS
 
             return result;
         }
-
-
-        internal class CombinedLiteral
-        {
-            public string Name;
-            public string Value;
-        }
-
-
         #endregion
-
-
-
+        
         #region processes
 
         public static void StartProcesses(SchemaBuilder sb, DynamicQueryManager dqm)
@@ -462,9 +451,7 @@ namespace Signum.Engine.SMS
 
 
         #endregion
-
-      
-
+        
         public static void SendSMS(SMSMessageEntity message)
         {
             if (Provider == null)

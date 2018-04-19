@@ -16,7 +16,6 @@ using Signum.Utilities.ExpressionTrees;
 using Signum.Utilities.Reflection;
 using Signum.Engine.Processes;
 using Signum.Entities.Processes;
-using System.ServiceModel.Channels;
 using System.ServiceModel;
 using Signum.Engine.Scheduler;
 using Signum.Entities.Scheduler;
@@ -191,20 +190,7 @@ namespace Signum.Engine.Isolation
                 Schema.Current.Settings.FieldAttributes((T e) => e.Mixin<IsolationMixin>().Isolation).Remove<NotNullableAttribute>(); //Remove non-null 
             }
         }
-
-
-        public static IDisposable IsolationFromOperationContext()
-        {
-            MessageHeaders headers = OperationContext.Current.IncomingMessageHeaders;
-
-            int val = headers.FindHeader("CurrentIsolation", "http://www.signumsoftware.com/Isolation");
-
-            if (val == -1)
-                return null;
-
-            return IsolationEntity.Override(Lite.Parse<IsolationEntity>(headers.GetHeader<string>(val)));
-        }
-
+        
         public static IEnumerable<T> WhereCurrentIsolationInMemory<T>(this IEnumerable<T> collection) where T : Entity
         {
             var curr = IsolationEntity.Current;

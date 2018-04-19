@@ -9,7 +9,6 @@ using Signum.Entities.Patterns;
 using Signum.Entities.Basics;
 using System.Linq.Expressions;
 using System.ComponentModel;
-using System.ServiceModel;
 using Signum.Services;
 using System.Runtime.CompilerServices;
 using System.Diagnostics;

@@ -17,12 +17,22 @@ using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Reflection;
-using System.Web.Http;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
+using Signum.React.ApiControllers;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 
 namespace Signum.React.Translation
 {
     public class CultureController : ApiController
     {
+        IHostingEnvironment _env;
+        public CultureController(IHostingEnvironment env)
+        {
+            _env = env;
+        }
+
         [Route("api/culture/cultures"), HttpGet, AllowAnonymous]
         public List<CultureInfoEntity> GetCultures()
         {
@@ -36,7 +46,7 @@ namespace Signum.React.Translation
         }
 
         [Route("api/culture/currentCulture"), HttpPost, AllowAnonymous]
-        public HttpResponseMessage SetCurrentCulture(Lite<CultureInfoEntity> culture)
+        public void SetCurrentCulture(Lite<CultureInfoEntity> culture)
         {
             var ci = ExecutionMode.Global().Using(_ => culture.Retrieve().ToCultureInfo());
 
@@ -50,9 +60,12 @@ namespace Signum.React.Translation
                     user.Save();
             }
 
-            var resp = Request.CreateResponse(ci.Name);
-            TranslationServer.AddLanguageCookie(resp, Request, ci);
-            return resp;
+            this.ActionContext.HttpContext.Response.Cookies.Append("language", ci.Name, new CookieOptions
+            {
+                Expires = DateTime.Now.AddMonths(6),
+                Domain = ActionContext.HttpContext.Request.Host.ToString(),
+                Path = _env.WebRootPath
+            });
         }
     }
 }
