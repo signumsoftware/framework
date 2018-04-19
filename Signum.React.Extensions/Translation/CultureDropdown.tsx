@@ -46,7 +46,7 @@ export default class CultureDropdown extends React.Component<CultureDropdownProp
         const pair = Dic.map(cultures, (name, c) => ({ name, c })).filter(p => is(p.c, current)).singleOrNull();
 
         return (
-            <UncontrolledDropdown data-culture={pair && pair.name} nav inNavbar>
+            <UncontrolledDropdown id="cultureDropdown" data-culture={pair && pair.name} nav inNavbar>
                 <DropdownToggle nav caret>
                     {current.nativeName}
                 </DropdownToggle>

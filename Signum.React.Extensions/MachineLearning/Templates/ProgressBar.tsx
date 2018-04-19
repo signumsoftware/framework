@@ -8,24 +8,24 @@ interface ProgressBarProps {
     showPercentageInMessage?: boolean | null;
     message?: string | null;
     color?: BsColor | null;
-    stripped?: boolean;
+    striped?: boolean;
     active?: boolean;
 }
 
 export default class ProgressBar extends React.Component<ProgressBarProps> {
     render() {
 
-        let { value, showPercentageInMessage, message, color, stripped, active } = this.props;
+        let { value, showPercentageInMessage, message, color, striped, active } = this.props;
 
-        if (stripped == null)
-            stripped = value == null;
+        if (striped == null)
+            striped = value == null;
 
         if (active == null)
             active = value == null;
 
         const progressContainerClass = value == null ? " active" : "";
 
-        const progressStyle = color != null ? "progress-bar-" + color : "";
+        const progressStyle = color != null ? "bg-" + color : "";
 
         const fullMessage = [
             (value == null || showPercentageInMessage === false ? undefined : `${numbro(value * 100).format("0.00")}%`),
@@ -37,7 +37,7 @@ export default class ProgressBar extends React.Component<ProgressBarProps> {
                 <div className={classes(
                     "progress-bar",
                     progressStyle,
-                    stripped && "progress-bar-striped",
+                    striped && "progress-bar-striped",
                     active && "active"
                 )}
                     role="progressbar" id="progressBar"

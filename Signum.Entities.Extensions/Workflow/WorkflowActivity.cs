@@ -37,8 +37,10 @@ namespace Signum.Entities.Workflow
         public bool RequiresOpen { get; set; }
 
         public WorkflowRejectEmbedded Reject { get; set; }
-
-        public WorkflowTimeoutEmbedded Timeout { get; set; }
+        
+        [PreserveOrder]
+        [NotNullValidator, NoRepeatValidator]
+        public MList<WorkflowTimerEmbedded> Timers { get; set; } = new MList<WorkflowTimerEmbedded>();
         
         [Unit("min")]
         public double? EstimatedDuration { get; set; }
@@ -83,7 +85,23 @@ namespace Signum.Entities.Workflow
                     return ValidationMessage._0IsNotSet.NiceToString(pi.NiceName());
             }
 
-            if(pi.Name == nameof(Jumps))
+            if (pi.Name == nameof(Script))
+            {
+                var requiresScript = this.Type == WorkflowActivityType.Script;
+                if (Script != null && !requiresScript)
+                    return ValidationMessage._0ShouldBeNull.NiceToString(pi.NiceName());
+
+                if (Script == null && requiresScript)
+                    return ValidationMessage._0IsNotSet.NiceToString(pi.NiceName());
+            }
+
+            if (pi.Name == nameof(Timers) && this.Type == WorkflowActivityType.Delay)
+            {
+                if (Timers.Count != 1 || Timers.SingleEx().Interrupting == false)
+                    return WorkflowValidationMessage.DelayActivitiesShouldHaveExactlyOneInterruptingTimer.NiceToString();
+            }
+
+            if (pi.Name == nameof(Jumps))
             {
                 var repated = NoRepeatValidatorAttribute.ByKey(Jumps, j => j.To);
                 if (repated.HasText())
@@ -107,7 +125,7 @@ namespace Signum.Entities.Workflow
             model.Type = this.Type;
             model.RequiresOpen = this.RequiresOpen;
             model.Reject = this.Reject;
-            model.Timeout = this.Timeout;
+            model.Timers.AssignMList(this.Timers);
             model.EstimatedDuration = this.EstimatedDuration;
             model.Jumps.AssignMList(this.Jumps);
             model.Script = this.Script;
@@ -125,7 +143,7 @@ namespace Signum.Entities.Workflow
             this.Type = wModel.Type;
             this.RequiresOpen = wModel.RequiresOpen;
             this.Reject = wModel.Reject;
-            this.Timeout = wModel.Timeout;
+            this.Timers.AssignMList(wModel.Timers);
             this.EstimatedDuration = wModel.EstimatedDuration;
             this.Jumps.AssignMList(wModel.Jumps);
             this.Script = wModel.Script;
@@ -197,10 +215,14 @@ namespace Signum.Entities.Workflow
     }
 
     [Serializable]
-    public class WorkflowTimeoutEmbedded : EmbeddedEntity, IWorkflowTransitionTo
+    public class WorkflowTimerEmbedded : EmbeddedEntity, IWorkflowTransitionTo
     {
-        [NotNullValidator]
-        public TimeSpanEmbedded Timeout { get; set; }
+        public TimeSpanEmbedded Duration { get; set; }
+
+        public Lite<WorkflowTimerConditionEntity> Condition { get; set; }
+
+        [StringLengthValidator(AllowNulls = false, Min = 1, Max = 100)]
+        public string BpmnElementId { get; set; }
 
         [ImplementedBy(typeof(WorkflowActivityEntity), typeof(WorkflowEventEntity), typeof(WorkflowGatewayEntity))]
         [NotNullValidator]
@@ -209,7 +231,30 @@ namespace Signum.Entities.Workflow
         public Lite<WorkflowActionEntity> Action { get; set; }
 
         Lite<WorkflowConditionEntity> IWorkflowTransition.Condition => null;
+
+        public bool Interrupting { get; set; }
+
+        protected override string PropertyValidation(PropertyInfo pi)
+        {
+            if(pi.Name == nameof(Duration) && Duration == null && Condition == null)
+            {
+                return ValidationMessage._0IsMandatoryWhen1IsNotSet.NiceToString(pi.NiceName(), NicePropertyName(() => Condition));
+            }
+            return base.PropertyValidation(pi);
+        }
+
+        internal WorkflowTimerEmbedded Clone() => new WorkflowTimerEmbedded
+        {
+            Duration = Duration?.Clone(),
+            Condition = Condition,
+            BpmnElementId = BpmnElementId,
+            To = To,
+            Action = Action,
+            Interrupting = Interrupting
+        };
     }
+
+
 
     [Serializable]
     public class WorkflowJumpEmbedded : EmbeddedEntity, IWorkflowTransitionTo
@@ -239,6 +284,7 @@ namespace Signum.Entities.Workflow
         DecompositionWorkflow,
         CallWorkflow,
         Script,
+        Delay
     }
 
     [AutoInit]
@@ -332,8 +378,10 @@ namespace Signum.Entities.Workflow
         public bool RequiresOpen { get; set; }
 
         public WorkflowRejectEmbedded Reject { get; set; }
-
-        public WorkflowTimeoutEmbedded Timeout { get; set; }
+        
+        [PreserveOrder]
+        [NotNullValidator, NoRepeatValidator]
+        public MList<WorkflowTimerEmbedded> Timers { get; set; } = new MList<WorkflowTimerEmbedded>();
 
         [Unit("min")]
         public double? EstimatedDuration { get; set; }
@@ -365,5 +413,8 @@ namespace Signum.Entities.Workflow
         AverageDuration,
         [Description("Activity Is")]
         ActivityIs,
+        BehavesLikeParallelGateway,
+        BehavesLikeExclusiveGateway,
+        NoActiveTimerFound,
     }
 }

@@ -134,7 +134,7 @@ namespace Signum.Entities.Files
         }
 
         public static Action<FilePathEmbedded> OnPreSaving;
-        protected override void PreSaving(ref bool graphModified)
+        protected override void PreSaving(PreSavingContext ctx)
         {
             if (OnPreSaving == null)
                 throw new InvalidOperationException("OnPreSaving not set");

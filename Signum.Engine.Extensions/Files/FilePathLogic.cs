@@ -136,7 +136,7 @@ namespace Signum.Engine.Files
             return new Disposable(() => unsafeMode.Value = false);
         }
 
-        public static void FilePath_PreSaving(FilePathEntity fp, ref bool graphModified)
+        public static void FilePath_PreSaving(FilePathEntity fp, PreSavingContext ctx)
         {
             if (fp.IsNew && !unsafeMode.Value)
             {

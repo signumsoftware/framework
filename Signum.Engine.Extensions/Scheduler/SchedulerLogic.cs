@@ -578,6 +578,9 @@ namespace Signum.Engine.Scheduler
                     }
                     catch (Exception e)
                     {
+                        SafeConsole.WriteLineColor(ConsoleColor.Red, "{0:u} Error in {1}: {2}", DateTime.Now, elementID(item), e.Message);
+                        SafeConsole.WriteLineColor(ConsoleColor.DarkRed, e.StackTrace.Indent(4));
+
                         var ex = e.LogException();
                         using (ExecutionMode.Global())
                         using (Transaction tr = Transaction.ForceNew())

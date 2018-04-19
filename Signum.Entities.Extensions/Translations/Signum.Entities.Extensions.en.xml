@@ -434,6 +434,7 @@
   <Type Name="WorkflowActivityEntity" />
   <Type Name="WorkflowActivityMessage" />
   <Type Name="WorkflowActivityModel" />
+  <Type Name="WorkflowActivityMonitorMessage" />
   <Type Name="WorkflowActivityOperation" />
   <Type Name="WorkflowActivityType" />
   <Type Name="WorkflowConditionEntity" />

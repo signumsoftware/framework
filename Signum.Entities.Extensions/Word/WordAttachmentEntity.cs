@@ -18,11 +18,6 @@ namespace Signum.Entities.Word
     [Serializable, EntityKind(EntityKind.Part, EntityData.Master)]
     public class WordAttachmentEntity : Entity, IAttachmentGeneratorEntity
     {
-        protected override void SetSelfModified()
-        {
-            base.SetSelfModified();
-        }
-
         string fileName;
         [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100), FileNameValidator]
         public string FileName

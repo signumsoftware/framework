@@ -356,7 +356,7 @@ namespace Signum.Engine.Cache
 
                 var idGetter = this.Constructor.GetPrimaryKeyGetter(table.PrimaryKey);
 
-                if (column.Nullable)
+                if (column.Nullable.ToBool())
                 {
                     var backReferenceGetter = this.Constructor.GetPrimaryKeyNullableGetter(column);
 

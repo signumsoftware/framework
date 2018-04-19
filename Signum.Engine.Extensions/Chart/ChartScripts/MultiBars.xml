@@ -14,6 +14,8 @@
     <Parameter Name="Scale" Type="Enum" ValueDefinition="ZeroMax(M) | MinMax | Log(M)" ColumnIndex="2" />
     <Parameter Name="NumberOpacity" Type="Number" ValueDefinition="0.8" />
     <Parameter Name="NumberColor" Type="String" ValueDefinition="White" />
+    <Parameter Name="ColorScheme" Type="Enum" ValueDefinition="category10|accent|dark2|paired|pastel1|pastel2|set1|set2|set3|BrBG[K]|PRGn[K]|PiYG[K]|PuOr[K]|RdBu[K]|RdGy[K]|RdYlBu[K]|RdYlGn[K]|Spectral[K]|Blues[K]|Greys[K]|Oranges[K]|Purples[K]|Reds[K]|BuGn[K]|BuPu[K]|OrRd[K]|PuBuGn[K]|PuBu[K]|PuRd[K]|RdPu[K]|YlGnBu[K]|YlGn[K]|YlOrBr[K]|YlOrRd[K]" />
+    <Parameter Name="ColorSchemeSteps" Type="Enum" ValueDefinition="3|4|5|6|7|8|9|10|11" />
   </Parameters>
   <Icon FileName="multibars.png"><![CDATA[iVBORw0KGgoAAAANSUhEUgAAACgAAAAoCAYAAACM/rhtAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAsdJREFUeNrsmD1rFUEUhmeuN1Y2USLR1iakEKxSCAoWEbG3u6VdSCPiHxA7axFSmcI/IKQSDFprJwGFNBYWNlYxZuccz9fM7N6sUe/uxC3uwmTOfNydh/fM7L4bj4huyNfIDfyaA/YCOHmwPdiNOI7B/vPLuECtkXfOjxaoELunDu8pHmvsYjyycoaGNQnjxRW3eGvLFwNcWnt44kREoD9gLY4DNa2P4sMvr8sq2AokARgQSq1QVQZMsFV5wAYULZqB6m2F4z6ZL2Bo4wUB08INqKPmGEZAUy2mPfYXBawOpgBVGVk4Lj4FFVVTJY+KAHp+1fFj5tv3H8UfGXdurrrNyXU/k4J319daDorsLlFSRKUOoML9XAdghbkGiYELqQmB+nhuAKt5DNzO7kcG7HaK0cBk3ycgrp2AcDaD9NHiQceDAEECCQaaoEHndduDCUh2nrSzQgZUW5Bho4qi1FS/zoOsOHQErGgReaqZSqqAyylMCplaoMrFNsa0mlpyH9sKaJCdAH+GIDcXINs3af/EdFr6BMiUracQBVzVilno7THzZvf9qZzimQF3tu57N8Brblh724NfX1xB9Xi+V+6zS9fc+dsvfWfAc1c3/uoHf/KF2fFo+2D/VRk/2A4F2TQkX2iGwmCnHU8Rw3qiSo32bxxPLe7PbtVVOuae8bhZjSpFwPR7zGa2V0dNfk4XmgaCVh+YVapBljzF955d6HSjS8sX3ZOVR62nuBfAuh8UR4MuvYOTY6F2VVERoxAs1jmf9j675cd75T47eeuAy9YooFmnoLXABAOjcW5LbOPFH9QhmtKQrRXHVa1I2xSTNmSXUxxQFEFTiA5qBcEAWS2NRckQ0w5mZHFmM/pPgIcMIalU5TSVYKlEA659f6B6x1N7F79996HTjdZvrJYFHKofTIBD+hfc9tOJb3y4zw3rHPA/Xr8EGAASLnxI0iSooQAAAABJRU5ErkJggg==]]></Icon>
   <Script><![CDATA[function DrawChart(chart, data){
@@ -114,7 +116,7 @@
   
   var interMagin = 2;
   
-  var color = d3.scaleOrdinal(d3.schemeCategory20).domain(pivot.columns.map(function (s) { return s.key; }));
+  var color = d3.scaleOrdinal(ChartUtils.getColorScheme(data.parameters["ColorScheme"], data.parameters["ColorSchemeSteps"])).domain(pivot.columns.map(function (s) { return s.key; }));
   
   var ySubscale = d3.scaleBand()
     .domain(pivot.columns.map(function (s) { return s.key; }))

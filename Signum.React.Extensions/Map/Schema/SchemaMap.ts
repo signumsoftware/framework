@@ -16,9 +16,12 @@ export interface MListTableInfo extends ITableInfo {
 export interface ITableInfo extends d3.SimulationNodeDatum, Rectangle {
     tableName: string;
     niceName: string;
-    rows: number | null;
     columns: number;
+    sql: number | null;
+    rows: number | null;
     total_size_kb: number | null;
+    rows_history: number | null;
+    total_size_kb_history: number | null;
     entityKind: EntityKind;
     entityData: EntityData;
     entityBaseType: EntityBaseType;

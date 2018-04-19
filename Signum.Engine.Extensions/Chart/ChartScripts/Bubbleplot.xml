@@ -14,6 +14,10 @@
     <Parameter Name="ShowLabel" Type="Enum" ValueDefinition="Yes | No" />
     <Parameter Name="FillOpacity" Type="Number" ValueDefinition=".4" />
     <Parameter Name="LabelColor" Type="String" ValueDefinition="" />
+    <Parameter Name="ColorScale" Type="Enum" ValueDefinition="Ordinal | ZeroMax | MinMax | Sqrt  | Log" />
+    <Parameter Name="ColorInterpolate" Type="Enum" ValueDefinition="YlGn|YlGnBu|GnBu|BuGn|PuBuGn|PuBu|BuPu|RdPu|PuRd|OrRd|YlOrRd|YlOrBr|Purples|Blues|Greens|Oranges|Reds|Greys|PuOr|BrBG|PRGn|PiYG|RdBu|RdGy|RdYlBu|Spectral|RdYlGn" />
+    <Parameter Name="ColorScheme" Type="Enum" ValueDefinition="category10|accent|dark2|paired|pastel1|pastel2|set1|set2|set3|BrBG[K]|PRGn[K]|PiYG[K]|PuOr[K]|RdBu[K]|RdGy[K]|RdYlBu[K]|RdYlGn[K]|Spectral[K]|Blues[K]|Greys[K]|Oranges[K]|Purples[K]|Reds[K]|BuGn[K]|BuPu[K]|OrRd[K]|PuBuGn[K]|PuBu[K]|PuRd[K]|RdPu[K]|YlGnBu[K]|YlGn[K]|YlOrBr[K]|YlOrRd[K]" />
+    <Parameter Name="ColorSchemeSteps" Type="Enum" ValueDefinition="3|4|5|6|7|8|9|10|11" />
   </Parameters>
   <Icon FileName="bubbles.png"><![CDATA[iVBORw0KGgoAAAANSUhEUgAAACgAAAAoCAYAAACM/rhtAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAABQVJREFUeNrsmP1vU1UYx7+nL1u73Xbtdke3zo69sY051oFj6AAjUQwYthj9QX+QBBD8wYQoIZj4i/8AYZKYyCIiPyAxGuNw0+BbRIlDB4pjZmyOt40x2Mratevajvb2Hs+57Wo7eVlY92KyJ3nS9p7c9nO/z/d5zu0llFIs5FBhgcciYFIAt+49RhcVfMjQPOyJp85dpb93DqDnyjBkNglKC7OxuiofzzxeQuYd8KU9H9MMowGCkAaLNReyTDE44kNX859498hP9OvDO8m8lfjlPcfpkuxM5OVZYDAKUKtVSgoGAVarBSJb27zzMJ03wIwMAaJoZqrJSoaZepGUlTRnmRXw785cpnMO2Hj0NOVl5SXlvuNg8iRcmEZThj4tDe0dfXOvYM+129DpUiOKRWEi+a+CfC0lNQXdrHnmvEmoohq/KhqDiSk45f28eLC0IBvjPn8MIl41Oaomh5wITKC82DL3Cq6qtOGvE+eh0+tjvptUTY42C/dmwB9Arb0qOi/76A9tPbh4aUi5AJNRj43ry7G1fiVJuoJPrykiY55xjNx2ReHkODUjsF63BxN+PzatjQzsjz5vR5ikotpeBru9HEtyc3Hy9CUcbf6DzsqYOfH+NuJ0jmJ4yAGv14dgSEKIpX/ch1GnE+NjYzj54S4F7uCxNpotZrLG0kFi6klSGCAEWezYt6e7Z28naW3aQfica7/Qj+7LQ8ox7jle1knlePRedcCUmRWBUwBlhMJh8B7yeAPJBfSPDdT7Ow+1yI4zkNy9qGA/YhcLoKqoQ3r1Gw1pGbbWqeekpmhwJyhBo4UCGJLkGGzSu/jWJ3Ut1PELtBlFEB7dBWPlq9CaSkCHTqH7yJqWu52zZmUBXKMeBSzIyhuKpt8XQFmRJTmAAabctcM2arI9Bl1BPTTm5SBaQUltZgX0JS8iv2g5zh2wUp97oD5h3960gricbgwPj8Dnm0BgIgjv2DjcLheefbIiOYC+zqYWQSxGSs7auKMyn9rKK2VdnJq3AflWEf6Oxv8o+eWh7WTz+mXQkyBwxwv7six81bSdPLduerdlD/SgPHKWlbUkbjsJxyA5XOQY85mpDBLz593ilS12wnJ2BnWYNYQuty4BjspS9LMcU1NtsMHd34Z4Z7k7P6Ch/hblO3iozeXQLm2AacX07xen2STyfeEir4mdOfLj63Tiwn6otOnQFz8PXeEWEKa0s+0dZS1pCqqNhZC8A9CaS+NKOgWOK+29DsGcp7x3nX+PSoPfM7AXoNKJMfXVehGZgg2Oi83QiNXUVPUambGCRKyFNNp9Xzi+xmcjsayLwN74hjXVEwlwk55VM8CsRyoR6mtOTonTqnY3OIYGEbz58z3h+Nr1Wy7o7XsaIr79Gxrj0jhrRBuKn8/KrDYWQXJ1JafE6SZba+XuG6TjoJXmBkagYR2tFvJiZeXKcbjVe2/GykXl4OQNZCJcgpfDyd1JSra1N6hyNjA/Xoez6zMluTeJdSPKd/zWkOBbQwGksf57wvEL05jLkrsXC0xJ4alGRaUHbVIqWz2CPU1Qp+eAaIREOL8DnpsXYK59e3b/uN8vxNp9ZNjZQf29nyLFUsMUZX6UQ5A8V+AZ7IChcCMyV+0m8waoqLz5OLl9dj+V+r+Aq+9XqNh9oCG7GBk1b0GseZMkbQ7OJLKZkqjdh5n8O/n/PDxaaI/gjh3YqtiALD6jXgSc5/hHgAEA3YHVJnv5B90AAAAASUVORK5CYII=]]></Icon>
   <Script><![CDATA[function DrawChart(chart, data){
@@ -108,8 +112,15 @@
     .attr('dominant-baseline', 'middle')
     .text(data.columns.c2.title);
   
-  var color = d3.scaleOrdinal(d3.schemeCategory20).domain(data.rows.map(function(v) { return v.c0; }));
-  
+  var color;
+  if(data.parameters["ColorScale"] == "Ordinal"){
+    color = d3.scaleOrdinal(ChartUtils.getColorScheme(data.parameters["ColorScheme"], data.parameters["ColorSchemeSteps"])).domain( data.rows.map(function(v) { return v.c0; }));
+  }else{
+    var scaleFunc = scaleFor(data.columns.c0, data.rows.map(function(r){return r.c0;}), 0, 1, data.parameters["ColorScale"]);
+    var colorInterpolate = data.parameters["ColorInterpolate"];
+    var colorInterpolation = ChartUtils.getColorInterpolation(colorInterpolate); 
+    color = function(v){return colorInterpolation(scaleFunc(v)); }
+  }  
   var sizeList = data.rows.map(function(r){return r.c3;});
       
   var sizeTemp = scaleFor(data.columns.c3, sizeList, 0, 1, data.parameters["SizeScale"]);

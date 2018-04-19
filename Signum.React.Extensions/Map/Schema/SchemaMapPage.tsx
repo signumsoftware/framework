@@ -317,7 +317,7 @@ export class SchemaMapRenderer extends React.Component<SchemaMapRendererProps, {
                             <path fill="gray" d="M0,0L0,-5L10,0L0,5L0,0L-10,5L-10,-5L0,0" />
                         </marker>
                         {
-                            React.Children.map(Dic.getValues(this.props.providers).map(a => a.defs).filter(d=>!!d),
+                            React.Children.map(Dic.getValues(this.props.providers).map(a => a.defs).filter(defs => !!defs).flatMap(defs => defs!),
                                 (c, i) => React.cloneElement(c as React.ReactElement<any>, { key: i }))
                         }
                     </defs>

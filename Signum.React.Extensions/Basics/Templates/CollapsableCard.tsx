@@ -19,7 +19,7 @@ export interface CollapsableCardProps {
 interface CardStyle {
     border?: BsColor;
     text?: BsColor;
-    background?: BsColor 
+    background?: BsColor
 }
 
 function cardStyleClasses(style?: CardStyle) {
@@ -80,7 +80,7 @@ export default class CollapsableCard extends React.Component<CollapsableCardProp
                     {(this.props.collapsable == undefined || this.props.collapsable == true) &&
                         <span
                             className={classes(this.state.isRTL ? "pull-left" : "pull-right", "fa", isOpen ? "fa-chevron-up" : "fa-chevron-down")}
-                            style={{ cursor: "pointer" }}
+                            style={{ cursor: "pointer", margin: "4px" }}
                             onClick={this.handleToggle}>
                         </span>
                     }

@@ -62,9 +62,10 @@ namespace Signum.Entities.UserAssets
             get { return parseException; }
         }
 
-        protected override void PreSaving(ref bool graphModified)
+        protected override void PreSaving(PreSavingContext ctx)
         {
-            TokenString = token?.FullKey();
+            if (token != null)
+                TokenString = token.FullKey();
         }
 
         public void ParseData(ModifiableEntity context, QueryDescription description, SubTokensOptions options)

@@ -34,12 +34,16 @@ namespace Signum.React.Maps
                              @namespace = type.Namespace,
                              rows = getStats.TryGetC(t.Name)?.rows,
                              total_size_kb = getStats.TryGetC(t.Name)?.total_size_kb,
+                             rows_history = t.SystemVersioned?.Let(sv => getStats.TryGetC(sv.TableName)?.rows),
+                             total_size_kb_history = t.SystemVersioned?.Let(sv => getStats.TryGetC(sv.TableName)?.total_size_kb),
                              mlistTables = t.TablesMList().Select(ml => new MListTableInfo
                              {
                                  niceName = ml.PropertyRoute.PropertyInfo.NiceName(),
                                  tableName = ml.Name.ToString(),
                                  rows = getStats.TryGetC(ml.Name)?.rows,
                                  total_size_kb = getStats.TryGetC(ml.Name)?.total_size_kb,
+                                 history_rows = ml.SystemVersioned?.Let(sv => getStats.TryGetC(sv.TableName)?.rows),
+                                 history_total_size_kb = ml.SystemVersioned?.Let(sv => getStats.TryGetC(sv.TableName)?.total_size_kb),
                                  columns = ml.Columns.Count,
                              }).ToList()
                          }).ToList();
@@ -116,7 +120,7 @@ namespace Signum.React.Maps
                         new ObjectName(new SchemaName(dbName, t.Schema().name), t.name),
                         new RuntimeStats
                         {
-                            rows = ((int?)t.Indices().SingleOrDefault(a => a.is_primary_key).Partition().rows) ?? 0,
+                            rows = ((int?)t.Indices().SingleOrDefault(a => a.type == (int)DiffIndexType.Clustered).Partition().rows) ?? 0,
                             total_size_kb = t.Indices().SelectMany(i => i.Partition().AllocationUnits()).Sum(a => a.total_pages) * 8
                         })).ToDictionary();
 
@@ -155,6 +159,8 @@ namespace Signum.React.Maps
         public int columns;
         public int? rows;
         public int? total_size_kb;
+        public int? rows_history;
+        public int? total_size_kb_history;
         public Dictionary<string, object> extra = new Dictionary<string, object>();
 
         public List<MListTableInfo> mlistTables;
@@ -174,9 +180,11 @@ namespace Signum.React.Maps
     {
         public string niceName;
         public string tableName;
-        public int? rows;
         public int columns;
+        public int? rows;
         public int? total_size_kb;
+        public int? history_rows;
+        public int? history_total_size_kb;
 
         public Dictionary<string, object> extra = new Dictionary<string, object>();
     }

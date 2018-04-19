@@ -24,7 +24,7 @@ export default class WordEntityMenu extends React.Component<WordEntityMenuProps>
             .then<string | undefined>(wordTemplate => wordTemplate.systemWordTemplate ? WordClient.API.getConstructorType(wordTemplate.systemWordTemplate!) : undefined)
             .then(ct => {
 
-                if (!ct)
+                if (!ct || ct == this.props.entityPack.entity.Type)
                     return WordClient.API.createAndDownloadReport({ template: wt, lite: toLite(this.props.entityPack.entity) });
 
                 var s = WordClient.settings[ct];

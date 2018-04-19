@@ -34,7 +34,7 @@ namespace Signum.Entities.Chart
         public int? ColumnIndex { get; set; }
 
         string valueDefinition;
-        [StringLengthValidator(AllowNulls = true, Max = 200)]
+        [StringLengthValidator(AllowNulls = true, Max = int.MaxValue)]
         public string ValueDefinition
         {
             get { return valueDefinition; }

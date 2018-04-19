@@ -15,7 +15,7 @@ export default class SidebarContainer extends React.Component<SidebarContainerPr
         return (
             <div className="sidebar-container">
                 {visible && this.renderSideBar()}
-                <div className="container-fluid">
+                <div className="container-fluid" style={{ paddingTop: "10px" }}>
                     {this.props.children}
                 </div>
             </div>
@@ -24,7 +24,7 @@ export default class SidebarContainer extends React.Component<SidebarContainerPr
 
     renderSideBar() {
         return (
-            <div className="navbar-default sidebar sidebar-nav" role="navigation">
+            <div className="navbar-light bg-light sidebar sidebar-nav" role="navigation" style={{ paddingTop: "10px" }}>
                 {this.props.sidebarContent}
             </div>
         );

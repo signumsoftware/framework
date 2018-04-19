@@ -100,7 +100,7 @@ export default class Process extends React.Component<{ ctx: TypeContext<ProcessE
                 color={color}
                 showPercentageInMessage={p.state != "Created" && p.state != "Finished"}
                 active={p.state == "Finished" ? false : undefined}
-                stripped={p.state == "Finished" ? false : undefined}
+                striped={p.state == "Finished" ? false : undefined}
             />
         );
     }

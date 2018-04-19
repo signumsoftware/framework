@@ -48,7 +48,7 @@ export default class ChartTable extends React.Component<{ resultTable: ResultTab
             .map(cc => ({ token: cc.token!.token, displayName: cc.displayName } as ColumnOptionParsed))
             .map(co => ({
                 column: co,
-                cellFormatter: (qs && qs.formatters && qs.formatters[co.token!.fullKey]) || Finder.formatRules.filter(a => a.isApplicable(co)).last("FormatRules").formatter(co),
+                cellFormatter: (qs && qs.formatters && qs.formatters[co.token!.fullKey]) || Finder.formatRules.filter(a => a.isApplicable(co, undefined)).last("FormatRules").formatter(co),
                 resultIndex: resultTable.columns.indexOf(co.token!.fullKey)
             }));
 
@@ -74,7 +74,7 @@ export default class ChartTable extends React.Component<{ resultTable: ResultTab
                     {
                         resultTable.rows.map((row, i) =>
                             <tr key={i} onDoubleClick={e => this.handleOnDoubleClick(e, row)}>
-                                {!chartRequest.groupResults && <td>{((qs && qs.entityFormatter) || Finder.entityFormatRules.filter(a => a.isApplicable(row)).last("EntityFormatRules").formatter)(row, resultTable.columns, undefined)}</td>}
+                                {!chartRequest.groupResults && <td>{((qs && qs.entityFormatter) || Finder.entityFormatRules.filter(a => a.isApplicable(row, undefined)).last("EntityFormatRules").formatter)(row, resultTable.columns, undefined)}</td>}
                                 {columns.map((c, j) =>
                                     <td key={j} className={c.cellFormatter && c.cellFormatter.cellClass}>
                                         {c.resultIndex == -1 || c.cellFormatter == undefined ? undefined : c.cellFormatter.formatter(row.columns[c.resultIndex], ctx) }
@@ -103,22 +103,22 @@ export default class ChartTable extends React.Component<{ resultTable: ResultTab
             const filters = lcr.filterOptions.filter(a => !hasAggregate(a.token));
             const columns: ColumnOption[] = [];
 
-            lcr.columns.map((a, i) => {
+            lcr.columns.filter(a => a.element.token).map((a, i) => {
 
-                const t = a.element.token;
+                const t = a.element.token!.token!;
 
-                if (t && t.token && !hasAggregate(t.token)) {
+                if (!hasAggregate(t)) {
                     filters.push({
-                        token: t!.token!,
+                        token: t,
                         operation: "EqualTo",
                         value: row.columns[i],
                         frozen: false
                     } as FilterOptionParsed);
                 }
 
-                if (t && t.token && t.token.parent != undefined) //Avoid Count and simple Columns that are already added
+                if (t.parent != undefined) //Avoid Count and simple Columns that are already added
                 {
-                    var col = t.token.queryTokenType == "Aggregate" ? t.token.parent : t.token
+                    var col = t.queryTokenType == "Aggregate" ? t.parent : t
 
                     if (col.parent)
                         columns.push({

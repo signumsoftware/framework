@@ -153,7 +153,7 @@ export function handleMenuClick(wt: Lite<WordTemplateEntity>, ctx: ContextualIte
     Navigator.API.fetchAndForget(wt)
         .then(wordTemplate => wordTemplate.systemWordTemplate ? API.getConstructorType(wordTemplate.systemWordTemplate) : Promise.resolve(undefined))
         .then(ct => {
-            if (!ct)
+            if (!ct || ctx.lites.length == 1 && ctx.lites.single().EntityType == ct)
                 return API.createAndDownloadReport({ template: wt, lite: ctx.lites.single() });
 
             var s = settings[ct];

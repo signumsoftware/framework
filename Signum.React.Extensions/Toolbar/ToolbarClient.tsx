@@ -45,7 +45,7 @@ export abstract class ToolbarConfig<T extends Entity> {
         if (!className || className.toLowerCase() == "none")
             return null;
 
-        return <span className={"icon " + className} style={{ color: color }} />;
+        return <span className={"icon " + className} style={{ color: color || undefined }} />;
     }
 
     getLabel(element: ToolbarResponse<T>) {

@@ -94,9 +94,9 @@ namespace Signum.Entities.SMS
             }
         }
 
-        protected override void PreSaving(ref bool graphModified)
+        protected override void PreSaving(PreSavingContext ctx)
         {
-            base.PreSaving(ref graphModified);
+            base.PreSaving(ctx);
 
             Messages.ForEach(e => e.Template = this);
         }

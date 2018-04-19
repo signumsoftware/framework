@@ -1,4 +1,5 @@
-﻿using DocumentFormat.OpenXml.Drawing;
+﻿using DocumentFormat.OpenXml;
+using DocumentFormat.OpenXml.Drawing;
 using DocumentFormat.OpenXml.Drawing.Wordprocessing;
 using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Wordprocessing;
@@ -37,11 +38,15 @@ namespace Signum.Engine.Word
             blip.Embed = doc.MainDocumentPart.GetIdOfPart(img);
         }
 
-        public static void RemoveImage(WordprocessingDocument doc, string title)
+        public static void RemoveImage(WordprocessingDocument doc, string title, bool removeFullDrawing)
         {
             Blip blip = FindBlip(doc, title);
             doc.MainDocumentPart.DeletePart(blip.Embed);
-            blip.Remove();
+
+            if (removeFullDrawing)
+                ((OpenXmlElement)blip).Follow(a => a.Parent).OfType<Drawing>().FirstEx().Remove();
+            else
+                blip.Remove();
         }
 
         static ImagePart CreateImagePart(WordprocessingDocument doc, Bitmap bitmap, string id, ImagePartType imagePartType = ImagePartType.Png)

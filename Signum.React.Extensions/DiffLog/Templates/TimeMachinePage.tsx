@@ -63,14 +63,14 @@ export default class TimeMachinePage extends React.Component<TimeMachinePageProp
         var ctx = new StyleContext(undefined, undefined);
         const lite = this.state.lite;
         if (lite == null)
-            return <h4 className="mt-2"><span className="display-6">{JavascriptMessage.loading.niceToString()}</span></h4>;
+            return <h4><span className="display-6">{JavascriptMessage.loading.niceToString()}</span></h4>;
 
         var scl = this.searchControl && this.searchControl.searchControlLoaded || undefined;
         var colIndex = scl && scl.props.findOptions.columnOptions.findIndex(a => a.token != null && a.token.fullKey == "Entity.SystemValidFrom");
 
         return (
             <div>
-                <h4 className="mt-2">
+                <h4>
                     <span className="display-5">{TimeMachineMessage.TimeMachine.niceToString()}</span>
                     <br />
                     <small className="sf-type-nice-name">
@@ -102,10 +102,10 @@ export default class TimeMachinePage extends React.Component<TimeMachinePageProp
                 <h5>Selected Versions</h5>
                 <UncontrolledTabs hideOnly>
                     {scl && scl.state.selectedRows && scl.state.selectedRows.map(sr => sr.columns[colIndex!] as string).orderBy(a => a).flatMap((d, i, dates) => [
-                        <Tab eventKey={d} title={d.replace("T", " ")}>
+                        <Tab title={d.replace("T", " ")} key={d} eventKey={d}>
                             <RenderEntityVersion lite={lite} asOf={d} />
                         </Tab>,
-                        (i < dates.length - 1) && <Tab title="<- Diff ->" eventKey={"diff-" + d + "-" + dates[i+1]}>
+                        (i < dates.length - 1) && <Tab title="<- Diff ->" key={"diff-" + d + "-" + dates[i + 1]} eventKey={"diff-" + d + "-" + dates[i+1]}>
                             <DiffEntityVersion lite={lite} validFrom={d} validTo={dates[i+1]} />
                         </Tab>
                     ])}
