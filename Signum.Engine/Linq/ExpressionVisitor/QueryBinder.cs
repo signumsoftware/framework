@@ -270,6 +270,9 @@ namespace Signum.Engine.Linq
             {
                 if (projector is EntityExpression ee)
                 {
+                    ee = Completed(ee);
+
+
                     var fi = m as FieldInfo ?? Reflector.FindFieldInfo(m.DeclaringType, (PropertyInfo)m);
 
                     var newBinding = ChangeProjector(index + 1, members, ee.GetBinding(fi), changeExpression);
@@ -290,7 +293,26 @@ namespace Signum.Engine.Linq
 
                     var arguments = ne.Arguments.Select((oldArg, i) => i != index ? oldArg : newArg);
 
-                    return Expression.New(ne.Constructor, ne.Arguments, ne.Members);
+                    return Expression.New(ne.Constructor, arguments, ne.Members);
+                }
+                else if (projector is MListExpression me)
+                {
+                    var proj = MListProjection(me, true);
+                    using (SetCurrentSource(proj.Select))
+                    {
+                        var mle = (NewExpression) proj.Projector;
+
+                        var paramIndex = mle.Constructor.GetParameters().IndexOf(p => p.Name == "value");
+
+                        var newElement = ChangeProjector(index + 1, members, mle.Arguments[paramIndex], changeExpression);
+
+                        var newMle = Expression.New(mle.Constructor,
+                            mle.Arguments.Select((a, i) => paramIndex == i ? newElement : a));
+
+                        var newProjection = new ProjectionExpression(proj.Select, newMle, proj.UniqueFunction, proj.Type);
+
+                        return new MListProjectionExpression(me.Type, newProjection);
+                    }
                 }
             }
 
@@ -493,10 +515,11 @@ namespace Signum.Engine.Linq
             ProjectionExpression projection = this.VisitCastProjection(source);
 
             Alias alias = NextSelectAlias();
-            ProjectedColumns pc = ColumnProjector.ProjectColumns(projection.Projector, alias, isGroupKey: true, selectTrivialColumns: true);
+            var proj = DistinctEntityCleaner.Clean(projection.Projector);
+            ProjectedColumns pc = ColumnProjector.ProjectColumns(proj, alias, isGroupKey: true, selectTrivialColumns: true);
             return new ProjectionExpression(
                 new SelectExpression(alias, true, null, pc.Columns, projection.Select, null, null, null, 0),
-                pc.Projector, null, resultType);
+                proj, null, resultType);
         }
 
         private Expression BindReverse(Type resultType, Expression source)
@@ -2159,33 +2182,35 @@ namespace Signum.Engine.Linq
 
         internal CommandExpression BindDelete(Expression source)
         {
+            var isHistory = this.systemTime is SystemTime.HistoryTable;
+
             List<CommandExpression> commands = new List<CommandExpression>();
 
             ProjectionExpression pr = (ProjectionExpression)QueryJoinExpander.ExpandJoins(VisitCastProjection(source), this, cleanRequests: true);
 
             if (pr.Projector is EntityExpression ee)
             {
-                Expression id = ee.Table.GetIdExpression(aliasGenerator.Table(ee.Table.Name));
+                Expression id = ee.Table.GetIdExpression(aliasGenerator.Table(ee.Table.GetName(isHistory)));
 
                 commands.AddRange(ee.Table.TablesMList().Select(t =>
                 {
-                    Expression backId = t.BackColumnExpression(aliasGenerator.Table(t.Name));
-                    return new DeleteExpression(t, pr.Select, SmartEqualizer.EqualNullable(backId, ee.ExternalId));
+                    Expression backId = t.BackColumnExpression(aliasGenerator.Table(t.GetName(isHistory)));
+                    return new DeleteExpression(t, isHistory && t.SystemVersioned != null, pr.Select, SmartEqualizer.EqualNullable(backId, ee.ExternalId));
                 }));
 
-                commands.Add(new DeleteExpression(ee.Table, pr.Select, SmartEqualizer.EqualNullable(id, ee.ExternalId)));
+                commands.Add(new DeleteExpression(ee.Table, isHistory && ee.Table.SystemVersioned != null, pr.Select, SmartEqualizer.EqualNullable(id, ee.ExternalId)));
             }
             else if (pr.Projector is MListElementExpression mlee)
             {
-                Expression id = mlee.Table.RowIdExpression(aliasGenerator.Table(mlee.Table.Name));
+                Expression id = mlee.Table.RowIdExpression(aliasGenerator.Table(mlee.Table.GetName(isHistory)));
 
-                commands.Add(new DeleteExpression(mlee.Table, pr.Select, SmartEqualizer.EqualNullable(id, mlee.RowId)));
+                commands.Add(new DeleteExpression(mlee.Table, isHistory && mlee.Table.SystemVersioned != null, pr.Select, SmartEqualizer.EqualNullable(id, mlee.RowId)));
             }
             else if (pr.Projector is EmbeddedEntityExpression eee)
             {
                 Expression id = eee.ViewTable.GetIdExpression(aliasGenerator.Table(eee.ViewTable.Name));
 
-                commands.Add(new DeleteExpression(eee.ViewTable, pr.Select, SmartEqualizer.EqualNullable(id, eee.GetViewId())));
+                commands.Add(new DeleteExpression(eee.ViewTable, false, pr.Select, SmartEqualizer.EqualNullable(id, eee.GetViewId())));
             }
             else
                 throw new InvalidOperationException("Delete not supported for {0}".FormatWith(pr.Projector.GetType().TypeName()));
@@ -2250,26 +2275,27 @@ namespace Signum.Engine.Linq
                     assignments.AddRange(AdaptAssign(colExpression, valExpression));
                 }
             }
-
+            
+            var isHistory = this.systemTime is SystemTime.HistoryTable;
             Expression condition;
 
             if (entity is EntityExpression ee)
             {
-                Expression id = ee.Table.GetIdExpression(aliasGenerator.Table(ee.Table.Name));
+                Expression id = ee.Table.GetIdExpression(aliasGenerator.Table(ee.Table.GetName(isHistory)));
 
                 condition = SmartEqualizer.EqualNullable(id, ee.ExternalId);
                 table = ee.Table;
             }
             else if (entity is MListElementExpression mlee)
             {
-                Expression id = mlee.Table.RowIdExpression(aliasGenerator.Table(mlee.Table.Name));
+                Expression id = mlee.Table.RowIdExpression(aliasGenerator.Table(mlee.Table.GetName(isHistory)));
 
                 condition = SmartEqualizer.EqualNullable(id, mlee.RowId);
                 table = mlee.Table;
             }
             else if (entity is EmbeddedEntityExpression eee)
             {
-                Expression id = eee.ViewTable.GetIdExpression(aliasGenerator.Table(eee.ViewTable.Name));
+                Expression id = eee.ViewTable.GetIdExpression(aliasGenerator.Table(eee.ViewTable.GetName(isHistory)));
 
                 condition = SmartEqualizer.EqualNullable(id, eee.GetViewId());
                 table = eee.ViewTable;
@@ -2277,9 +2303,10 @@ namespace Signum.Engine.Linq
             else
                 throw new InvalidOperationException("Update not supported for {0}".FormatWith(entity.GetType().TypeName()));
 
+
             var result = new CommandAggregateExpression(new CommandExpression[]
             {
-                new UpdateExpression(table, pr.Select, condition, assignments),
+                new UpdateExpression(table, isHistory && table.SystemVersioned != null, pr.Select, condition, assignments),
                 new SelectRowCountExpression()
             });
 
@@ -2320,9 +2347,11 @@ namespace Signum.Engine.Linq
                 assignments.Add(new ColumnAssignment(entityTable.Ticks.Name, Expression.Constant(0L, typeof(long))));
             }
 
+            var isHistory = this.systemTime is SystemTime.HistoryTable;
+
             var result = new CommandAggregateExpression(new CommandExpression[]
             {
-                new InsertSelectExpression(table, pr.Select, assignments),
+                new InsertSelectExpression(table, isHistory && table.SystemVersioned != null, pr.Select, assignments),
                 new SelectRowCountExpression()
             });
 
@@ -3192,7 +3221,7 @@ namespace Signum.Engine.Linq
             if (source != update.Source || where != update.Where || assigments != update.Assigments)
             {
                 var select = (source as SourceWithAliasExpression) ?? WrapSelect(source);
-                return new UpdateExpression(update.Table, select, where, assigments);
+                return new UpdateExpression(update.Table, update.UseHistoryTable, select, where, assigments);
             }
             return update;
         }
@@ -3204,7 +3233,7 @@ namespace Signum.Engine.Linq
             if (source != insertSelect.Source || assigments != insertSelect.Assigments)
             {
                 var select = (source as SourceWithAliasExpression) ?? WrapSelect(source);
-                return new InsertSelectExpression(insertSelect.Table, select, assigments);
+                return new InsertSelectExpression(insertSelect.Table, insertSelect.UseHistoryTable, select, assigments);
             }
             return insertSelect;
         }

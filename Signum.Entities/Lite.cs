@@ -162,13 +162,12 @@ namespace Signum.Entities
             {
                 id = entityOrNull.Id;
             }
-
-
-            protected internal override void PreSaving(ref bool graphModified)
+            
+            protected internal override void PreSaving(PreSavingContext ctx)
             {
                 if (entityOrNull != null)
                 {
-                    entityOrNull.PreSaving(ref graphModified);
+                    entityOrNull.PreSaving(ctx);
                 }
             }
 

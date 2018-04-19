@@ -409,7 +409,8 @@ namespace Signum.Engine.Linq
 
         protected virtual bool CompareDelete(DeleteExpression a, DeleteExpression b)
         {
-            return a.Table == b.Table
+            return a.Table == b.Table 
+                && a.UseHistoryTable == b.UseHistoryTable
                 && Compare(a.Source, b.Source)
                 && Compare(a.Where, b.Where);
         }
@@ -417,6 +418,7 @@ namespace Signum.Engine.Linq
         protected virtual bool CompareUpdate(UpdateExpression a, UpdateExpression b)
         {
             return a.Table == b.Table
+                && a.UseHistoryTable == b.UseHistoryTable
                 && CompareList(a.Assigments, b.Assigments, CompareAssigment)
                 && Compare(a.Source, b.Source)
                 && Compare(a.Where, b.Where);
@@ -425,6 +427,7 @@ namespace Signum.Engine.Linq
         protected virtual bool CompareInsertSelect(InsertSelectExpression a, InsertSelectExpression b)
         {
             return a.Table == b.Table
+                && a.UseHistoryTable == b.UseHistoryTable
                 && CompareList(a.Assigments, b.Assigments, CompareAssigment)
                 && Compare(a.Source, b.Source);
         }

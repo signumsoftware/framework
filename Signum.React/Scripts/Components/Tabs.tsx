@@ -8,6 +8,8 @@ interface UncontrolledTabsProps extends React.HTMLAttributes<HTMLDivElement> {
     onToggled?: (eventKey: string | number) => void;
     children?: React.ReactFragment;
     hideOnly?: boolean;
+    pills?: boolean;
+    fill?: boolean;
 }
 
 interface UncontrolledTabsState {
@@ -50,10 +52,10 @@ export class UncontrolledTabs extends React.Component<UncontrolledTabsProps, Unc
 
     render() {
 
-        const { children, defaultEventKey, hideOnly } = this.props;
+        const { children, defaultEventKey, hideOnly , fill, pills } = this.props;
 
         return (
-            <Tabs activeEventKey={this.state.activeEventKey} toggle={this.handleToggle} hideOnly={hideOnly}>
+            <Tabs activeEventKey={this.state.activeEventKey} toggle={this.handleToggle} fill={fill} pills={pills} hideOnly={hideOnly}>
                 {children}
             </Tabs>
         );
@@ -66,6 +68,8 @@ interface TabsProps extends React.HTMLAttributes<HTMLDivElement> {
     activeEventKey: string | number | undefined;
     toggle: (eventKey: string | number) => void;
     hideOnly?: boolean;
+    pills?: boolean;
+    fill?: boolean;
 }
 
 function getFirstEventKey(children: React.ReactNode) {
@@ -81,28 +85,29 @@ export class Tabs extends React.Component<TabsProps> {
 
     render() {
 
-        var { activeEventKey, children, toggle, ...attrs } = this.props;
+        var { activeEventKey, children, toggle, hideOnly, pills, fill, ...attrs } = this.props;
 
         var array = (React.Children.toArray(this.props.children) as React.ReactElement<TabProps>[]);
 
         return (
             <div {...attrs}>
-                <ul className="nav nav-tabs">
+                <ul className={"nav " + (pills ? "nav-pills" : "nav-tabs") + (fill ? " nav-fill" : "")}>
                     {array.map(t =>
-                        <li className="nav-item" key={t.props.eventKey}>
+                        <li className="nav-item" key={t.props.eventKey} data-eventKey={t.props.eventKey}>
                             <a href="#"
                                 className={classes("nav-link", this.props.activeEventKey == t.props.eventKey && "active")}
                                 onClick={e => {
                                     e.preventDefault();
                                     this.props.toggle(t.props.eventKey)
                                 }}
+                                {...t.props.anchorHtmlProps}
                             >
                                 {t.props.title}
                             </a>
                         </li>
                     )}
                 </ul>
-                {this.props.hideOnly ?
+                {hideOnly ?
                     array.map(elem => React.cloneElement(elem, ({ style: elem.props.eventKey == this.props.activeEventKey ? undefined : { display: "none" } }) as React.HTMLAttributes<any>)) :
                 array.filter(elem => elem.props.eventKey == this.props.activeEventKey)
             }
@@ -114,6 +119,7 @@ export class Tabs extends React.Component<TabsProps> {
 interface TabProps extends React.HTMLAttributes<any> {
     eventKey: string | number;
     title?: string /*| React.ReactChild*/;
+    anchorHtmlProps?: React.HTMLAttributes<HTMLAnchorElement>;
 }
 
 export class Tab extends React.Component<TabProps> {
@@ -123,7 +129,7 @@ export class Tab extends React.Component<TabProps> {
     };
 
     render() {
-        var { children, eventKey, title, ...rest } = this.props;
+        var { children, eventKey, title, anchorHtmlProps, ...rest } = this.props;
 
         return (
             <div className={classes("tab-pane", this.props.eventKey == this.context.activeTabId)} {...rest}>

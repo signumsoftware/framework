@@ -13,9 +13,9 @@ namespace Signum.Entities
 
         public bool Corrupt { get; set; }
 
-        protected internal override void PreSaving(ref bool graphModified)
+        protected internal override void PreSaving(PreSavingContext ctx)
         {
-            base.PreSaving(ref graphModified);
+            base.PreSaving(ctx);
 
             if (Corrupt)
             {

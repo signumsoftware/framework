@@ -6,7 +6,7 @@ import * as ReactDOM from 'react-dom';
 import * as BaseModal from 'react-overlays/lib/Modal';
 import isOverflowing from 'react-overlays/lib/utils/isOverflowing';
 
-import { Fade } from './Fade';
+import { ModalFade } from './ModalFade';
 import { classes } from '../Globals';
 import { JavascriptMessage } from '../Signum.Entities';
 import { BsSize, BsColor} from './index';
@@ -107,11 +107,11 @@ export interface ModalProps extends ModelDialogProps  {
 
 /* eslint-disable no-use-before-define, react/no-multi-comp */
 function DialogTransition(props : any) {
-    return <Fade { ...props } timeout = { Modal.TRANSITION_DURATION } />;
+    return <ModalFade { ...props } timeout = { Modal.TRANSITION_DURATION } />;
 }
 
 function BackdropTransition(props : any) {
-    return <Fade { ...props } timeout = { Modal.BACKDROP_TRANSITION_DURATION } />;
+    return <ModalFade { ...props } timeout = { Modal.BACKDROP_TRANSITION_DURATION } />;
 }
 
 

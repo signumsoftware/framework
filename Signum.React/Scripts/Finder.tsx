@@ -29,6 +29,7 @@ import SearchModal from './SearchControl/SearchModal';
 import EntityLink from './SearchControl/EntityLink';
 import SearchControlLoaded from './SearchControl/SearchControlLoaded';
 import { ImportRoute } from "./AsyncImport";
+import { SearchControl } from "./Search";
 
 
 export const querySettings: { [queryKey: string]: QuerySettings } = {};
@@ -907,10 +908,9 @@ export module Decoder {
     }
 
     export function decodeOrders(query: any): OrderOption[] {
-
         return valuesInOrder(query, "order").map(val => ({
             orderType: val[0] == "-" ? "Descending" : "Ascending",
-            columnName: val.tryAfter("-") || val
+            columnName: val[0] == "-" ? val.tryAfter("-") : val
         } as OrderOption));
     }
 
@@ -967,7 +967,7 @@ export interface QuerySettings {
 export interface FormatRule {
     name: string;
     formatter: (column: ColumnOptionParsed) => CellFormatter;
-    isApplicable: (column: ColumnOptionParsed) => boolean;
+    isApplicable: (column: ColumnOptionParsed, sc: SearchControlLoaded | undefined) => boolean;
 }
 
 export class CellFormatter {
@@ -982,7 +982,7 @@ export interface CellFormatterContext {
 }
 
 
-export function getCellFormatter(qs: QuerySettings, co: ColumnOptionParsed): CellFormatter | undefined {
+export function getCellFormatter(qs: QuerySettings, co: ColumnOptionParsed, sc: SearchControlLoaded | undefined): CellFormatter | undefined {
     if (!co.token)
         return undefined;
 
@@ -995,7 +995,7 @@ export function getCellFormatter(qs: QuerySettings, co: ColumnOptionParsed): Cel
     if (prRoute)
         return prRoute;
 
-    const rule = formatRules.filter(a => a.isApplicable(co)).last("FormatRules");
+    const rule = formatRules.filter(a => a.isApplicable(co, sc)).last("FormatRules");
 
     return rule.formatter(co);
 }
@@ -1063,7 +1063,7 @@ export const formatRules: FormatRule[] = [
 export interface EntityFormatRule {
     name: string;
     formatter: EntityFormatter;
-    isApplicable: (row: ResultRow) => boolean;
+    isApplicable: (row: ResultRow, sc: SearchControlLoaded | undefined) => boolean;
 }
 
 

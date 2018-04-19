@@ -22,7 +22,7 @@ interface PopperContentProps {
 }
 
 interface PopperContentState {
-    placement?: Popper.Placement;
+    placement?: PopperJS.Placement;
 }
 
 export class PopperContent extends React.Component<PopperContentProps, PopperContentState> {
@@ -91,7 +91,7 @@ export class PopperContent extends React.Component<PopperContentProps, PopperCon
         return getTarget(this.props.container!);
     }
 
-    handlePlacementChange = (data: Popper.Data) => {
+    handlePlacementChange = (data: PopperJS.Data) => {
         if (this.state.placement !== data.placement) {
             this.setState({ placement: data.placement });
         }
@@ -167,7 +167,7 @@ export class PopperContent extends React.Component<PopperContentProps, PopperCon
                 fn: this.handlePlacementChange,
             },
             ...modifiers,
-        } as Popper.Modifiers;
+        } as PopperJS.Modifiers;
 
         return (
             <ReactPopper modifiers={extendedModifiers} {...attrs} component={tag} className={popperClassName} >

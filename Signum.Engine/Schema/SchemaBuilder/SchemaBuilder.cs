@@ -544,7 +544,7 @@ namespace Signum.Engine.Maps
                 SqlDbType = pair.SqlDbType,
                 Collation = Settings.GetCollate(ticksAttr),
                 UserDefinedTypeName = pair.UserDefinedTypeName,
-                Nullable = false,
+                Nullable = IsNullable.No,
                 Size = Settings.GetSqlSize(ticksAttr, null, pair.SqlDbType),
                 Scale = Settings.GetSqlScale(ticksAttr, pair.SqlDbType),
                 Default = ticksAttr?.Default,
@@ -563,7 +563,7 @@ namespace Signum.Engine.Maps
                 SqlDbType = pair.SqlDbType,
                 Collation = Settings.GetCollate(att),
                 UserDefinedTypeName = pair.UserDefinedTypeName,
-                Nullable = Settings.IsNullable(route, forceNull),
+                Nullable = Settings.GetIsNullable(route, forceNull),
                 Size = Settings.GetSqlSize(att, route, pair.SqlDbType),
                 Scale = Settings.GetSqlScale(att, pair.SqlDbType),
                 Default = att?.Default,
@@ -581,7 +581,7 @@ namespace Signum.Engine.Maps
             return new FieldEnum(route)
             {
                 Name = name.ToString(),
-                Nullable = Settings.IsNullable(route, forceNull),
+                Nullable = Settings.GetIsNullable(route, forceNull),
                 IsLite = false,
                 ReferenceTable = referenceTable,
                 AvoidForeignKey = Settings.FieldAttribute<AvoidForeignKeyAttribute>(route) != null,
@@ -593,7 +593,7 @@ namespace Signum.Engine.Maps
         {
             var referenceTable = Include(Lite.Extract(route.Type) ?? route.Type, route);
 
-            var nullable = Settings.IsNullable(route, forceNull);
+            var nullable = Settings.GetIsNullable(route, forceNull);
 
             return new FieldReference(route)
             {
@@ -614,7 +614,10 @@ namespace Signum.Engine.Maps
             if (errors.Length != 0)
                 throw new InvalidOperationException("Type {0} do not implement {1}".FormatWith(errors, cleanType));
 
-            bool nullable = Settings.IsNullable(route, forceNull) || types.Count() > 1;
+            var nullable = Settings.GetIsNullable(route, forceNull);
+            
+            if (types.Count() > 1 && nullable == IsNullable.No)
+                nullable = IsNullable.Forced;
 
             CombineStrategy strategy = Settings.FieldAttribute<CombineStrategyAttribute>(route)?.Strategy ?? CombineStrategy.Case;
 
@@ -637,7 +640,7 @@ namespace Signum.Engine.Maps
 
         protected virtual FieldImplementedByAll GenerateFieldImplementedByAll(PropertyRoute route, ITable table, NameSequence preName, bool forceNull)
         {
-            bool nullable = Settings.IsNullable(route, forceNull);
+            var nullable = Settings.GetIsNullable(route, forceNull);
 
             return new FieldImplementedByAll(route)
             {
@@ -679,7 +682,7 @@ namespace Signum.Engine.Maps
                     SqlDbType = pair.SqlDbType,
                     Collation = Settings.GetCollate(orderAttr),
                     UserDefinedTypeName = pair.UserDefinedTypeName,
-                    Nullable = false,
+                    Nullable = IsNullable.No,
                     Size = Settings.GetSqlSize(orderAttr, null, pair.SqlDbType),
                     Scale = Settings.GetSqlScale(orderAttr, pair.SqlDbType),
                 };
@@ -737,12 +740,12 @@ namespace Signum.Engine.Maps
 
         protected virtual FieldEmbedded GenerateFieldEmbedded(ITable table, PropertyRoute route, NameSequence name, bool forceNull, bool inMList)
         {
-            bool nullable = Settings.IsNullable(route, false);
+            var nullable = Settings.GetIsNullable(route, false);
 
             return new FieldEmbedded(route)
             {
-                HasValue = nullable ? new FieldEmbedded.EmbeddedHasValueColumn() { Name = name.Add("HasValue").ToString() } : null,
-                EmbeddedFields = GenerateFields(route, table, name, forceNull: nullable || forceNull, inMList: inMList)
+                HasValue = nullable.ToBool() ? new FieldEmbedded.EmbeddedHasValueColumn() { Name = name.Add("HasValue").ToString() } : null,
+                EmbeddedFields = GenerateFields(route, table, name, forceNull: nullable.ToBool() || forceNull, inMList: inMList)
             };
         }
 
@@ -1020,7 +1023,7 @@ namespace Signum.Engine.Maps
             return new FieldEnum(route)
             {
                 Name = name.ToString(),
-                Nullable = Settings.IsNullable(route, forceNull),
+                Nullable = Settings.GetIsNullable(route, forceNull),
                 IsLite = false,
                 ReferenceTable = null,//referenceTable,
                 AvoidForeignKey = Settings.FieldAttribute<AvoidForeignKeyAttribute>(route) != null,

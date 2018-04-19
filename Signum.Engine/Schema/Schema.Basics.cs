@@ -78,7 +78,7 @@ namespace Signum.Engine.Maps
             public string Name { get; private set; }
             public ColumnType SystemVersionColumnType { get; private set; }
 
-            public bool Nullable => false;
+            public IsNullable Nullable => IsNullable.No;
             public SqlDbType SqlDbType => SqlDbType.DateTime2;
             public Type Type => typeof(DateTime);
             public string UserDefinedTypeName => null;
@@ -100,7 +100,6 @@ namespace Signum.Engine.Maps
         ColumnExpression GetPrimaryOrder(Alias alias);
     }
       
-
     public partial class Table : IFieldFinder, ITable, ITablePrivate
     {
         public Type Type { get; private set; }
@@ -238,6 +237,11 @@ namespace Signum.Engine.Maps
                 }
             }
 
+            if(this.SystemVersioned != null)
+            {
+                result.Add(new Index(this, this.SystemVersioned.Columns().PreAnd(this.PrimaryKey).ToArray()));
+            }
+
             return result;
         }
 
@@ -358,12 +362,17 @@ namespace Signum.Engine.Maps
             if (!Implements(field, type))
                 throw new InvalidOperationException("{0} does not implement {1}".FormatWith(field.ToString(), type.Name));
         }
+
+        public static ObjectName GetName(this ITable table, bool useHistoryName)
+        {
+            return useHistoryName && table.SystemVersioned != null ? table.SystemVersioned.TableName : table.Name;
+        }
     }
 
     public partial interface IColumn
     {
         string Name { get; }
-        bool Nullable { get; }
+        IsNullable Nullable { get; }
         SqlDbType SqlDbType { get; }
         Type Type { get; }
         string UserDefinedTypeName { get; }
@@ -378,8 +387,21 @@ namespace Signum.Engine.Maps
         bool AvoidForeignKey { get; }
     }
 
+    public enum IsNullable
+    {
+        No,
+        Yes,
+        //Nullable only because in a Embedded nullabled
+        Forced
+    }
+
     public static partial class ColumnExtensions
     {
+        public static bool ToBool(this IsNullable isNullable)
+        {
+            return isNullable != IsNullable.No;
+        }
+
         public static string GetSqlDbTypeString(this IColumn column)
         {
             return column.SqlDbType.ToString().ToUpper(CultureInfo.InvariantCulture) + SqlBuilder.GetSizeScale(column.Size, column.Scale);
@@ -405,7 +427,7 @@ namespace Signum.Engine.Maps
     public partial class FieldPrimaryKey : Field, IColumn
     {
         public string Name { get; set; }
-        bool IColumn.Nullable { get { return false; } }
+        IsNullable IColumn.Nullable { get { return IsNullable.No; } }
         public SqlDbType SqlDbType { get; set; }
         public string UserDefinedTypeName { get; set; }
         bool IColumn.PrimaryKey { get { return true; } }
@@ -458,7 +480,7 @@ namespace Signum.Engine.Maps
     public partial class FieldValue : Field, IColumn
     {
         public string Name { get; set; }
-        public bool Nullable { get; set; }
+        public IsNullable Nullable { get; set; }
         public SqlDbType SqlDbType { get; set; }
         public string UserDefinedTypeName { get; set; }
         public bool PrimaryKey { get; set; }
@@ -481,7 +503,7 @@ namespace Signum.Engine.Maps
             return "{0} {1} ({2},{3},{4})".FormatWith(
                 Name,
                 SqlDbType,
-                Nullable ? "Nullable" : "",
+                Nullable.ToBool() ? "Nullable" : "",
                 Size,
                 Scale);
         }
@@ -503,7 +525,7 @@ namespace Signum.Engine.Maps
 
         public virtual Type Type
         {
-            get { return this.Nullable ? this.FieldType.Nullify() : this.FieldType; }
+            get { return this.Nullable.ToBool() ? this.FieldType.Nullify() : this.FieldType; }
         }
     }
 
@@ -522,7 +544,7 @@ namespace Signum.Engine.Maps
         public partial class EmbeddedHasValueColumn : IColumn
         {
             public string Name { get; set; }
-            public bool Nullable { get { return false; } } //even on neasted embeddeds
+            public IsNullable Nullable { get { return IsNullable.No; } } //even on neasted embeddeds
             public SqlDbType SqlDbType { get { return SqlDbType.Bit; } }
             string IColumn.UserDefinedTypeName { get { return null; } }
             bool IColumn.PrimaryKey { get { return false; } }
@@ -698,7 +720,7 @@ namespace Signum.Engine.Maps
     public partial class FieldReference : Field, IColumn, IFieldReference
     {
         public string Name { get; set; }
-        public bool Nullable { get; set; }
+        public IsNullable Nullable { get; set; }
     
         public bool PrimaryKey { get; set; } //For View
         bool IColumn.Identity { get { return false; } }
@@ -709,7 +731,7 @@ namespace Signum.Engine.Maps
         public SqlDbType SqlDbType { get { return ReferenceTable.PrimaryKey.SqlDbType; } }
         public string Collation { get { return ReferenceTable.PrimaryKey.Collation; } }
         public string UserDefinedTypeName { get { return ReferenceTable.PrimaryKey.UserDefinedTypeName; } }
-        public virtual Type Type { get { return this.Nullable ? ReferenceTable.PrimaryKey.Type.Nullify() : ReferenceTable.PrimaryKey.Type; } }
+        public virtual Type Type { get { return this.Nullable.ToBool() ? ReferenceTable.PrimaryKey.Type.Nullify() : ReferenceTable.PrimaryKey.Type; } }
         
         public bool AvoidForeignKey { get; set; }
 
@@ -725,7 +747,7 @@ namespace Signum.Engine.Maps
                 Name,
                 ReferenceTable.Name,
                 IsLite ? "Lite" : "",
-                Nullable ? "Nullable" : "");
+                Nullable.ToBool() ? "Nullable" : "");
         }
 
         public override IEnumerable<IColumn> Columns()
@@ -739,7 +761,7 @@ namespace Signum.Engine.Maps
             {
                  IsLite = IsLite,
                  IsCollection = false,
-                 IsNullable = Nullable
+                 IsNullable = Nullable.ToBool()
             }); 
         }
 
@@ -783,7 +805,7 @@ namespace Signum.Engine.Maps
 
                 var ut = Enum.GetUnderlyingType(this.FieldType.UnNullify());
 
-                return this.Nullable ? ut.Nullify() : ut;
+                return this.Nullable.ToBool() ? ut.Nullify() : ut;
             }
         } 
 
@@ -795,7 +817,7 @@ namespace Signum.Engine.Maps
                 Name,
                 "-",
                 IsLite ? "Lite" : "",
-                Nullable ? "Nullable" : "");
+                Nullable.ToBool() ? "Nullable" : "");
         }
 
         internal override IEnumerable<KeyValuePair<Table, RelationInfo>> GetTables()
@@ -806,7 +828,7 @@ namespace Signum.Engine.Maps
             {
                 IsLite = IsLite,
                 IsCollection = false,
-                IsNullable = Nullable,
+                IsNullable = Nullable.ToBool(),
                 IsEnum = true,
             });
         }
@@ -843,7 +865,7 @@ namespace Signum.Engine.Maps
             {
                 IsLite = IsLite,
                 IsCollection = false,
-                IsNullable = a.Value.Nullable
+                IsNullable = a.Value.Nullable.ToBool()
             }));
         }
 
@@ -893,8 +915,8 @@ namespace Signum.Engine.Maps
         {
             yield return KVP.Create(ColumnType.ReferenceTable, new RelationInfo
             {
-                 IsNullable = this.ColumnType.Nullable,
-                 IsLite = true,
+                 IsNullable = this.ColumnType.Nullable.ToBool(),
+                IsLite = true,
                  IsImplementedByAll = true,
             });
         }
@@ -931,7 +953,7 @@ namespace Signum.Engine.Maps
     public partial class ImplementationColumn : IColumn
     {
         public string Name { get; set; }
-        public bool Nullable { get; set; }
+        public IsNullable Nullable { get; set; }
         bool IColumn.PrimaryKey { get { return false; } }
         bool IColumn.Identity { get { return false; } }
         bool IColumn.IdentityBehaviour { get { return false; } }
@@ -941,7 +963,7 @@ namespace Signum.Engine.Maps
         public SqlDbType SqlDbType { get { return ReferenceTable.PrimaryKey.SqlDbType; } }
         public string Collation { get { return ReferenceTable.PrimaryKey.Collation; } }
         public string UserDefinedTypeName { get { return ReferenceTable.PrimaryKey.UserDefinedTypeName; } }
-        public Type Type { get { return this.Nullable ? ReferenceTable.PrimaryKey.Type.Nullify() : ReferenceTable.PrimaryKey.Type; } }
+        public Type Type { get { return this.Nullable.ToBool() ? ReferenceTable.PrimaryKey.Type.Nullify() : ReferenceTable.PrimaryKey.Type; } }
         public bool AvoidForeignKey { get; set; }
         public string Default { get; set; }
     }
@@ -949,7 +971,7 @@ namespace Signum.Engine.Maps
     public partial class ImplementationStringColumn : IColumn
     {
         public string Name { get; set; }
-        public bool Nullable { get; set; }
+        public IsNullable Nullable { get; set; }
         string IColumn.UserDefinedTypeName { get { return null; } }
         bool IColumn.PrimaryKey { get { return false; } }
         bool IColumn.Identity { get { return false; } }
@@ -1024,7 +1046,7 @@ namespace Signum.Engine.Maps
         public class PrimaryKeyColumn : IColumn
         {
             public string Name { get; set; }
-            bool IColumn.Nullable { get { return false; } }
+            IsNullable IColumn.Nullable { get { return IsNullable.No; } }
             public SqlDbType SqlDbType { get; set; }
             public string Collation { get; set; }
             public string UserDefinedTypeName { get; set; }

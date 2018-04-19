@@ -109,16 +109,16 @@ namespace Signum.Engine.Maps
         }
 
 
-        internal void OnPreSaving(Entity entity, ref bool graphModified)
+        internal void OnPreSaving(Entity entity, PreSavingContext ctx)
         {
             AssertAllowed(entity.GetType(), inUserInterface: false);
 
             IEntityEvents ee = entityEvents.TryGetC(entity.GetType());
 
             if (ee != null)
-                ee.OnPreSaving(entity, ref graphModified);
+                ee.OnPreSaving(entity, ctx);
 
-            entityEventsGlobal.OnPreSaving(entity, ref graphModified);
+            entityEventsGlobal.OnPreSaving(entity, ctx);
         }
 
         internal Entity OnAlternativeRetriving(Type entityType, PrimaryKey id)

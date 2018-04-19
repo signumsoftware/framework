@@ -5,6 +5,7 @@ export { Dropdown, UncontrolledDropdown, DropdownProps, UncontrolledDropdownProp
 export { DropdownItem, DropdownItemProps } from './DropdownItem'
 export { DropdownMenu } from './DropdownMenu'
 export { DropdownToggle } from './DropdownToggle'
+export { ModalFade } from './ModalFade'
 export { Fade } from './Fade'
 export { PopperContent } from './PopperContent'
 export { Tab, Tabs, UncontrolledTabs } from './Tabs'

@@ -288,7 +288,7 @@ namespace Signum.Entities
         public static T SetModified<T>(this T ident)
             where T : Modifiable
         {
-            ident.Modified = ModifiedState.SelfModified;
+            ident.Modified = ModifiedState.Modified;
             return ident;
         }
 

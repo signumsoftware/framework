@@ -12,6 +12,7 @@ using System.Globalization;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+using System.Text.RegularExpressions;
 
 namespace Signum.Engine.Linq
 {
@@ -242,9 +243,13 @@ namespace Signum.Engine.Linq
                     return Add(Expression.Constant(((PrimaryKey)c.Value).Object));
             }
 
-            if (!innerProjection && IsFullNominateOrAggresive && (Schema.Current.Settings.IsDbType(c.Type.UnNullify()) || c.Type == typeof(object) && c.IsNull()))
+            if (!innerProjection && IsFullNominateOrAggresive)
             {
-                return Add(c);
+                if (Schema.Current.Settings.IsDbType(c.Type.UnNullify()))
+                    return Add(c);
+
+                if (c.Type == typeof(object) && (c.IsNull() || (Schema.Current.Settings.IsDbType(c.Value.GetType()))))
+                    return Add(c);
             }
             return c;
         }
@@ -1197,9 +1202,7 @@ namespace Signum.Engine.Linq
                 default: return null;
             }
         }
-
-        static MethodInfo c = ReflectionTools.GetMethodInfo(() => string.Concat("", ""));
-
+        
         protected override Expression VisitMethodCall(MethodCallExpression m)
         {
             Expression result = HardCodedMethods(m);
@@ -1243,7 +1246,6 @@ namespace Signum.Engine.Linq
                 return VisitBinary(Expression.Equal(obj, arg));
             }
                 
-
             switch (m.Method.DeclaringType.TypeName() + "." + m.Method.Name)
             {
                 case "string.IndexOf":
@@ -1282,6 +1284,9 @@ namespace Signum.Engine.Linq
                         TrySqlFunction(null, SqlFunction.REVERSE, m.Type, m.GetArgument("value")),
                         TrySqlFunction(null, SqlFunction.REVERSE, m.Type, m.Object),
                         index => Expression.Equal(index, new SqlConstantExpression(1)));
+                case "string.Format":
+                case "StringExtensions.FormatWith":
+                    return this.IsFullNominateOrAggresive ? TryStringFormat(m) : null;
                 case "StringExtensions.Start":
                     return TrySqlFunction(null, SqlFunction.LEFT, m.Type, m.GetArgument("str"), m.GetArgument("numChars"));
                 case "StringExtensions.End":
@@ -1369,6 +1374,52 @@ namespace Signum.Engine.Linq
                 case "long.Parse": return Add(new SqlCastExpression(typeof(long), m.GetArgument("s")));
                 default: return null;
             }
+        }
+
+        private Expression TryStringFormat(MethodCallExpression m)
+        {
+            var prov = m.TryGetArgument("provider");
+            if (prov != null)
+                return null;
+
+            var format = (m.Object ?? m.GetArgument("format")) as ConstantExpression;
+            
+            var args = m.TryGetArgument("args")?.Let(a => ((NewArrayExpression)a).Expressions) ??
+                new[] { m.TryGetArgument("arg0"), m.TryGetArgument("arg1"), m.TryGetArgument("arg2"), m.TryGetArgument("arg3") }.NotNull().ToReadOnly();
+            
+            var strFormat = (string)format.Value;
+
+            var matches = Regex.Matches(strFormat, @"\{(?<index>\d+)(?<format>:[^}]*)?\}").Cast<Match>().ToList();
+
+            if (matches.Count == 0)
+                return Add(Expression.Constant(strFormat));
+
+            var firsStr = strFormat.Substring(0, matches.FirstEx().Index);
+
+            Expression acum = firsStr.HasText() ? new SqlConstantExpression(firsStr) : null;
+
+            for (int i = 0; i < matches.Count; i++)
+            {
+                var match = matches[i];
+                if (match.Groups["format"].Value.HasText())
+                    throw new InvalidOperationException("formatters not supported in: " + strFormat);
+
+                var index = int.Parse(match.Groups["index"].Value);
+
+                var exp = Visit(args[index]);
+                if (!Has(exp))
+                    return null;
+                
+                acum = acum == null ? exp : Expression.Add(acum, exp, miSimpleConcat);
+
+                var nextStr = i == matches.Count - 1 ?
+                    strFormat.Substring(match.EndIndex()) :
+                    strFormat.Substring(match.EndIndex(), matches[i + 1].Index - match.EndIndex());
+
+                acum = string.IsNullOrEmpty(nextStr) ? acum : Expression.Add(acum, new SqlConstantExpression(nextStr), miSimpleConcat);
+            }
+            
+            return Add(acum);
         }
 
         private Expression TryEtc(Expression str, Expression max, Expression etcString)

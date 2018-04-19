@@ -26,13 +26,25 @@ namespace Signum.Engine
         public static SqlPreCommand CreateTablesScript()
         {
             Schema s = Schema.Current;
-            List<ITable> tables =s.GetDatabaseTables().Where(t => !s.IsExternalDatabase(t.Name.Schema.Database)).ToList();
+            List<ITable> tables = s.GetDatabaseTables().Where(t => !s.IsExternalDatabase(t.Name.Schema.Database)).ToList();
             
             SqlPreCommand createTables = tables.Select(SqlBuilder.CreateTableSql).Combine(Spacing.Double).PlainSqlCommand();
 
             SqlPreCommand foreignKeys = tables.Select(SqlBuilder.AlterTableForeignKeys).Combine(Spacing.Double).PlainSqlCommand();
 
-            SqlPreCommand indices = tables.Select(SqlBuilder.CreateAllIndices).NotNull().Combine(Spacing.Double).PlainSqlCommand();
+            SqlPreCommand indices = tables.Select(t =>
+            {
+                var allIndexes = t.GeneratAllIndexes().Where(a => !(a is PrimaryClusteredIndex)); ;
+
+                var mainIndices = allIndexes.Select(ix => SqlBuilder.CreateIndex(ix)).Combine(Spacing.Simple);
+
+                var historyIndices = t.SystemVersioned == null ? null :
+                         allIndexes.Where(a => a.GetType() == typeof(Index)).Select(mix => SqlBuilder.CreateIndexBasic(mix, forHistoryTable: true)).Combine(Spacing.Simple);
+
+                return SqlPreCommand.Combine(Spacing.Double, mainIndices, historyIndices);
+
+            }).NotNull().Combine(Spacing.Double).PlainSqlCommand();
+
 
             return SqlPreCommand.Combine(Spacing.Triple, createTables, foreignKeys, indices);
         }

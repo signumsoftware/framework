@@ -165,7 +165,7 @@ export class RenderEntity extends React.Component<RenderEntityProps, RenderEntit
         const newCtx = new TypeContext<ModifiableEntity>(ctx, { frame }, pr, new ReadonlyBinding(entity, ""));
 
         return (
-            <div data-propertypath={ctx.propertyPath}>
+            <div data-property-path={ctx.propertyPath}>
                 <ErrorBoundary>
                     {React.cloneElement(getComponent(newCtx), { ref: (c: React.Component<any, any> | null) => this.setComponent(c) })}
                 </ErrorBoundary>

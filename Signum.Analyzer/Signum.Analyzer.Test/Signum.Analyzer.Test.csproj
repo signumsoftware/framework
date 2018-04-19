@@ -92,6 +92,7 @@
     <Reference Include="Microsoft.VisualStudio.QualityTools.UnitTestFramework" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="LiteCastTest.cs" />
     <Compile Include="LiteEqualiyTest.cs" />
     <Compile Include="ExpressionFieldTest.cs" />
     <Compile Include="Verifiers\CodeFixVerifier.cs" />

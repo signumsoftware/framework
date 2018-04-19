@@ -407,6 +407,12 @@ namespace Signum.Engine.Linq
                 }
             }
 
+            if (m.Method.DeclaringType == typeof(string) && m.Method.Name == nameof(string.Format))
+                return VisitFormat(m);
+
+            if (m.Method.DeclaringType == typeof(StringExtensions) && m.Method.Name == nameof(StringExtensions.FormatWith))
+                return VisitFormat(m);
+            
             return base.VisitMethodCall(m); 
         }
 
@@ -427,6 +433,23 @@ namespace Signum.Engine.Linq
             return base.VisitMember(m);
         }
 
+        MethodCallExpression VisitFormat(MethodCallExpression m)
+        {
+            return Expression.Call(m.Object, m.Method, m.Arguments.Zip(m.Method.GetParameters(), (aExp, p) =>
+            {
+                if (p.Name == "arg0" || p.Name == "arg1" || p.Name == "arg2")
+                    return CallToString(aExp);
+
+                if (p.Name == "args")
+                {
+                    var arr = (NewArrayExpression)aExp;
+                    return Expression.NewArrayInit(typeof(string), arr.Expressions.Select(e => CallToString(e)).ToArray());
+                }
+
+                return aExp;
+            }));
+        }
+
         protected override Expression VisitBinary(BinaryExpression b)
         {
             var r = (BinaryExpression)base.VisitBinary(b);
@@ -442,6 +465,9 @@ namespace Signum.Engine.Linq
         {
             if (expression.Type == typeof(string))
                 return expression;
+
+            if (expression is ConstantExpression c && c.Value != null)
+                return Expression.Call(expression, miToString);
 
             return Expression.Condition(
                 Expression.Equal(expression, Expression.Constant(null, expression.Type.Nullify())),

@@ -171,6 +171,18 @@ Array.prototype.toObjectDistinct = function (this: any[], keySelector: (element:
     return obj;
 };
 
+Array.prototype.distinctBy = function (this: any[], keySelector: (element: any) => any): any[] {
+    const obj: any = {};
+
+    this.forEach(item => {
+        const key = keySelector(item);
+
+        obj[key] = item;
+    });
+
+    return Dic.getValues(obj);
+};
+
 Array.prototype.flatMap = function (this: any[], selector: (element: any, index: number, array: any[]) => any[]): any {
 
     const result : any[] = [];

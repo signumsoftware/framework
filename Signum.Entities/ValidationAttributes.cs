@@ -1053,12 +1053,20 @@ namespace Signum.Entities
 
         [Description("{0} is mandatory when {1} is not set")]
         _0IsMandatoryWhen1IsNotSet,
+        [Description("{0} is mandatory when {1} is not set to {2}.")]
+        _0IsMandatoryWhen1IsNotSetTo2,
         [Description("{0} is mandatory when {1} is set")]
         _0IsMandatoryWhen1IsSet,
+        [Description("{0} is mandatory when {1} is set to {2}.")]
+        _0IsMandatoryWhen1IsSetTo2,
         [Description("{0} should be null when {1} is not set")]
         _0ShouldBeNullWhen1IsNotSet,
+        [Description("{0} should be null when {1} is not set to {2}.")]
+        _0ShouldBeNullWhen1IsNotSetTo2,
         [Description("{0} should be null when {1} is set")]
         _0ShouldBeNullWhen1IsSet,
+        [Description("{0} should be null when {1} is set to {2}.")]
+        _0ShouldBeNullWhen1IsSetTo2,
         [Description("{0} should be null")]
         _0ShouldBeNull,
         [Description("{0} should be a date in the past")]

@@ -26,6 +26,11 @@ namespace Signum.Entities
             return new Disposable(() => currentVariable.Value = old);
         }
 
+        public class HistoryTable : SystemTime
+        {
+            public override string ToString() => "HistoryTable";
+        }
+
         public class AsOf : SystemTime
         {
             public DateTime DateTime { get; private set; }
@@ -71,12 +76,12 @@ namespace Signum.Entities
             public override string ToString() => $"BETWEEN {StartDateTime:u} AND {EndtDateTime:u}";
         }
 
-        public class ContainerIn : Interval
+        public class ContainedIn : Interval
         {
             public DateTime StartDateTime { get; private set; }
             public DateTime EndtDateTime { get; private set; }
 
-            public ContainerIn(DateTime startDateTime, DateTime endDateTime)
+            public ContainedIn(DateTime startDateTime, DateTime endDateTime)
             {
                 this.StartDateTime = startDateTime;
                 this.EndtDateTime = endDateTime;
@@ -123,10 +128,10 @@ namespace Signum.Entities
             var min2 = interval2.Arguments[0];
             var max2 = interval2.Arguments[1];
 
-            return Expression.Not(Expression.Or(
-                 Expression.LessThanOrEqual(max1, min2),
-                 Expression.LessThanOrEqual(max2, min1)
-                 ));
+            return Expression.And(
+                 Expression.GreaterThan(max1, min2),
+                 Expression.GreaterThan(max2, min1)
+                 );
         }
 
 

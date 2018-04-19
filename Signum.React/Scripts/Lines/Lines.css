@@ -97,7 +97,6 @@ label > input[type=checkbox] {
     }
 
     .sf-line-button:not(.btn) {
-        vertical-align: middle;
         margin: 0 2px;
     }
 
@@ -144,6 +143,10 @@ fieldset {
             margin-left: 5px;
         }
 
+        fieldset > legend > input[type=checkbox] {
+            vertical-align: middle;
+        }
+
 .border {
     border: 1px solid #ddd;
     padding: 10px;
@@ -178,12 +181,8 @@ body.rtl .fa-arrow-left:before {
 /*EntityStrip*/
 
 ul.sf-strip-horizontal > li {
-    float: left;
+    display: inline-block;
     margin-right: 10px;
-}
-
-body.rtl ul.sf-strip-horizontal > li {
-    float: right;
 }
 
 ul.sf-strip-vertical > li {

@@ -85,8 +85,8 @@ export default class ContextMenu extends React.Component<ContextMenuProps> {
         document.removeEventListener('touchstart', this.handleDocumentClick, true);
     }
 
-    handleDocumentClick = (e: MouseEvent | TouchEvent) => {
-        if (e.which === 3)
+    handleDocumentClick = (e: MouseEvent | /*Touch*/Event) => {
+        if ((e as TouchEvent).which === 3)
             return;
 
         const container = ReactDOM.findDOMNode(this);

@@ -490,6 +490,8 @@ namespace Signum.Engine
         {
             get { return Version >= SqlServerVersion.SqlServer2016; }
         }
+
+        public override string ToString() => $"SqlConnector({Version})";
     }
 
     public class SqlParameterBuilder : ParameterBuilder
