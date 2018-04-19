@@ -16,10 +16,6 @@
     <Analyzer Include="..\Signum.Analyzer\Binaries\Signum.Analyzer.dll" />
   </ItemGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Microsoft.SqlServer.Types" Version="14.0.314.76" />
-  </ItemGroup>
-
   <Target Name="SignumAfterCompile" AfterTargets="Build" DependsOnTargets="CoreCompile">
     <WriteLinesToFile File="$(BaseIntermediateOutputPath)SignumReferences.txt" Lines="@(ReferencePath)" Overwrite="true" Encoding="Unicode" />
     <Exec command="dotnet &quot;..\Signum.MSBuildTask\Binaries\netcoreapp2.1\Signum.MSBuildTask.dll&quot; &quot;@(IntermediateAssembly)&quot; &quot;$(BaseIntermediateOutputPath)SignumReferences.txt&quot;" ConsoleToMSBuild="false">

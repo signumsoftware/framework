@@ -13,7 +13,6 @@ using System.Diagnostics;
 using System.Data.Common;
 //using Microsoft.SqlServer.Types;
 using System.Globalization;
-using Microsoft.SqlServer.Types;
 
 namespace Signum.Engine
 {
@@ -179,8 +178,8 @@ namespace Signum.Engine
             if (value is bool b)
                 return (b ? 1 : 0).ToString();
 
-            if (value is SqlHierarchyId sh)
-                return "CAST('{0}' AS hierarchyid)".FormatWith(sh);
+            //if (value is SqlHierarchyId sh)
+            //    return "CAST('{0}' AS hierarchyid)".FormatWith(sh);
 
             if (value.GetType().IsEnum)
                 return Convert.ToInt32(value).ToString();

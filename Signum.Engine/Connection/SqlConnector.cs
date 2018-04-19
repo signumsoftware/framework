@@ -17,7 +17,6 @@ using Signum.Utilities.ExpressionTrees;
 using Microsoft.SqlServer.Server;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.SqlServer.Types;
 
 namespace Signum.Engine
 {
@@ -52,14 +51,14 @@ namespace Signum.Engine
                 if (!s.TypeValues.ContainsKey(typeof(TimeSpan)))
                     schema.Settings.TypeValues.Add(typeof(TimeSpan), SqlDbType.Time);
 
-                if (!s.UdtSqlName.ContainsKey(typeof(SqlHierarchyId)))
-                    s.UdtSqlName.Add(typeof(SqlHierarchyId), "HierarchyId");
+                //if (!s.UdtSqlName.ContainsKey(typeof(SqlHierarchyId)))
+                //    s.UdtSqlName.Add(typeof(SqlHierarchyId), "HierarchyId");
 
-                if (!s.UdtSqlName.ContainsKey(typeof(SqlGeography)))
-                    s.UdtSqlName.Add(typeof(SqlGeography), "Geography");
+                //if (!s.UdtSqlName.ContainsKey(typeof(SqlGeography)))
+                //    s.UdtSqlName.Add(typeof(SqlGeography), "Geography");
 
-                if (!s.UdtSqlName.ContainsKey(typeof(SqlGeometry)))
-                    s.UdtSqlName.Add(typeof(SqlGeometry), "Geometry");
+                //if (!s.UdtSqlName.ContainsKey(typeof(SqlGeometry)))
+                //    s.UdtSqlName.Add(typeof(SqlGeometry), "Geometry");
             }
         }
 
