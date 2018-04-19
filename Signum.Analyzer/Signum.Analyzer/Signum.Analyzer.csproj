@@ -37,6 +37,7 @@
     <Compile Include="AutoPropertyCodeFixProvider.cs" />
     <Compile Include="AutoPropertyAnalyzer.cs" />
     <Compile Include="Extensions.cs" />
+    <Compile Include="LiteCastAnalyzer.cs" />
     <Compile Include="LiteEqualityAnalyzer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
