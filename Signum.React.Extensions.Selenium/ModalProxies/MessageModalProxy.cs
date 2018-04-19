@@ -13,7 +13,7 @@ namespace Signum.React.Selenium.ModalProxies
     {
         public MessageModalProxy(IWebElement element) : base(element)
         {
-            if (!this.Element.HasClass("modal", "fade", "in"))
+            if (!this.Element.HasClass("modal"))
                 throw new InvalidOperationException("Not a valid modal");
         }
 
