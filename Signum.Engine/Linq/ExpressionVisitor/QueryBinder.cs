@@ -293,7 +293,7 @@ namespace Signum.Engine.Linq
 
                     var arguments = ne.Arguments.Select((oldArg, i) => i != index ? oldArg : newArg);
 
-                    return Expression.New(ne.Constructor, ne.Arguments, ne.Members);
+                    return Expression.New(ne.Constructor, arguments, ne.Members);
                 }
                 else if (projector is MListExpression me)
                 {
