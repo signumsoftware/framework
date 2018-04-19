@@ -250,7 +250,6 @@ export class Typeahead extends React.Component<TypeaheadProps, TypeaheadState>
     }
 
     render() {
-
         return (
             <Manager tag={false}>
                 <Target innerRef={inp => this.input = inp as HTMLInputElement}>
@@ -266,7 +265,6 @@ export class Typeahead extends React.Component<TypeaheadProps, TypeaheadState>
                 </Target>
                 {this.state.shown && <Popper placement={this.rtl ? "bottom-end" : "bottom-start"} style={{ zIndex: 1000 }}>{this.props.renderList ? this.props.renderList(this) : this.renderDefaultList()}</Popper>}
             </Manager>
-
         );
     }
 
