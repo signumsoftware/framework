@@ -28,7 +28,7 @@ namespace Signum.React.Selenium
 
         public LineContainer<T> Details<T>() where T : ModifiableEntity
         {
-            return new LineContainer<T>(this.Element.FindElement(By.CssSelector("div[data-propertypath]")), Route);
+            return new LineContainer<T>(this.Element.FindElement(By.CssSelector("div[data-property-path]")), Route);
         }
 
         public EntityInfoProxy EntityInfo()
