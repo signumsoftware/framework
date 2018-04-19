@@ -116,10 +116,20 @@ export default class TimeMachineLink extends React.Component<TimeMachineLinkProp
             <Link
                 to={timeMachineRoute(lite)}
                 title={lite.toStr}
+                onClick={this.handleClick}
                 data-entity={liteKey(lite)}
                 {...(htmlAtts as React.HTMLAttributes<HTMLAnchorElement>)}>
                 {children || lite.toStr}
             </Link>
         );
+    }
+
+    handleClick = (event: React.MouseEvent<any>) => {
+
+        const lite = this.props.lite;
+        
+        event.preventDefault();
+
+        window.open(Navigator.toAbsoluteUrl(timeMachineRoute(lite)));
     }
 }
