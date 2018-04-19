@@ -19,7 +19,7 @@ namespace Signum.React
         public static HashSet<Type> AllowedControllers { get; private set; } = new HashSet<Type>();
         public Assembly MainAssembly { get; set; }
 
-        //public SignumControllerFactory(HttpConfiguration configuration, Assembly mainAssembly) : base(configuration)
+        //public SignumControllerFactory(IApplicationBuilder appuration, Assembly mainAssembly) : base(configuration)
         //{
         //    this.MainAssembly = mainAssembly;
         //}

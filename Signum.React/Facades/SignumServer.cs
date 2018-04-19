@@ -19,12 +19,14 @@ namespace Signum.React.Facades
 {
     public static class SignumServer
     {
+        public static JsonSerializerSettings JsonSerializerSettings;
+        
         public static void AddSignumJsonConverters(this MvcJsonOptions jsonOptions)
         {
             //Signum converters
             jsonOptions.SerializerSettings.Do(s =>
             {
-                FilterTS.JsonSerializerSettings = s;
+                JsonSerializerSettings = s;
 
                 s.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
                 s.Formatting = Newtonsoft.Json.Formatting.Indented;

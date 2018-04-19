@@ -241,8 +241,6 @@ namespace Signum.React.ApiControllers
 
     public class FilterTS
     {
-        internal static JsonSerializerSettings JsonSerializerSettings;
-
         public string token;
         public FilterOperation operation;
         public object value;
@@ -256,7 +254,7 @@ namespace Signum.React.ApiControllers
             
 
             var val = value is JToken ?
-                 ((JToken)value).ToObject(expectedValueType, JsonSerializer.Create(JsonSerializerSettings)) :
+                 ((JToken)value).ToObject(expectedValueType, JsonSerializer.Create(SignumServer.JsonSerializerSettings)) :
                  value;
 
             return new Filter(parsedToken, operation, val);

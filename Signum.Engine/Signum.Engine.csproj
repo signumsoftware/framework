@@ -14,7 +14,7 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.SqlServer.Types" Version="14.0.314.76" />
-    <PackageReference Include="System.Data.SqlClient" Version="4.5.0-preview1-26216-02" />
+    <PackageReference Include="System.Data.SqlClient" Version="4.5.0-preview2-26406-04" />
   </ItemGroup>
 
   <ItemGroup>
