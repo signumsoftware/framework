@@ -1461,6 +1461,12 @@ namespace Signum.Engine
 
         #region UnsafeInsert
 
+        public static int UnsafeInsert<E>(this IQueryable<E> query, string message = null)
+              where E : Entity
+        {
+            return query.UnsafeInsert(a => a, message);
+        }
+
         public static int UnsafeInsert<T, E>(this IQueryable<T> query, Expression<Func<T, E>> constructor, string message = null)
             where E : Entity
         {
@@ -1487,6 +1493,11 @@ namespace Signum.Engine
             }
         }
 
+        public static int UnsafeInsertMList<E, V>(this IQueryable<MListElement<E, V>> query, Expression<Func<E, MList<V>>> mListProperty, string message = null)
+            where E : Entity
+        {
+            return query.UnsafeInsertMList(mListProperty, a => a, message);
+        }
 
         public static int UnsafeInsertMList<T, E, V>(this IQueryable<T> query, Expression<Func<E, MList<V>>> mListProperty, Expression<Func<T, MListElement<E, V>>> constructor, string message = null)
                where E : Entity
