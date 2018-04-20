@@ -356,7 +356,8 @@ ValueLine.renderers["TextArea" as ValueLineType] = (vl) => {
     if (s.ctx.readOnly)
         return (
             <FormGroup ctx={s.ctx} labelText={s.labelText} helpText={s.helpText} htmlAttributes={{ ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
-                {ValueLine.withItemGroup(vl, <FormControlReadonly htmlAttributes={vl.state.valueHtmlAttributes} className="readonly-textarea" ctx={s.ctx}>{s.ctx.value}</FormControlReadonly>)}
+                <textarea {...vl.state.valueHtmlAttributes} className={addClass(vl.state.valueHtmlAttributes, s.ctx.formControlClass)} value={s.ctx.value || ""}
+                    disabled={true} />
             </FormGroup>
         );
 
