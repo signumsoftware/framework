@@ -162,12 +162,12 @@ namespace Signum.React.Selenium
         }
         public static void AutoCompleteBasic(IWebElement autoCompleteElement, Lite<IEntity> lite)
         {
-            autoCompleteElement.FindElement(By.CssSelector("input")).SafeSendKeys(lite.Id.ToString());
+            autoCompleteElement.SafeSendKeys(lite.Id.ToString());
             //Selenium.FireEvent(autoCompleteLocator, "keyup");
 
             var listLocator = By.CssSelector(".typeahead.dropdown-menu");
 
-            var list = autoCompleteElement.WaitElementVisible(listLocator);
+            var list = autoCompleteElement.GetParent().WaitElementVisible(By.TagName("div")).WaitElementVisible(listLocator);
             IWebElement itemElement = list.FindElement(By.CssSelector("[data-entity-key='{0}']".FormatWith(lite.Key())));
             
             itemElement.Click();
