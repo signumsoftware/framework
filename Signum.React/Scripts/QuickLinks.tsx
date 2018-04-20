@@ -214,10 +214,15 @@ export class QuickLinkAction extends QuickLink {
     toDropDownItem() {
 
         return (
-            <DropdownItem data-name={this.name} className="sf-quick-link" onMouseUp={this.action}>
+            <DropdownItem data-name={this.name} className="sf-quick-link" onMouseUp={this.handleClick}>
                 {this.renderIcon()}&nbsp;{this.text}
             </DropdownItem>
         );
+    }
+
+    handleClick = (e: React.MouseEvent<any>) => {
+        e.persist();
+        this.action(e);
     }
 }
 

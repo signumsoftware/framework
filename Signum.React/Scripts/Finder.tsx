@@ -908,10 +908,9 @@ export module Decoder {
     }
 
     export function decodeOrders(query: any): OrderOption[] {
-
         return valuesInOrder(query, "order").map(val => ({
             orderType: val[0] == "-" ? "Descending" : "Ascending",
-            columnName: val.tryAfter("-") || val
+            columnName: val[0] == "-" ? val.tryAfter("-") : val
         } as OrderOption));
     }
 
