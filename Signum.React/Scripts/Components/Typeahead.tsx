@@ -216,7 +216,7 @@ export class Typeahead extends React.Component<TypeaheadProps, TypeaheadState>
     }
 
 
-    handleMenuClick = (e: React.MouseEvent<any>, index: number) => {
+    handleMenuMouseUp = (e: React.MouseEvent<any>, index: number) => {
         e.preventDefault();
         e.persist();
         this.setState({
@@ -311,7 +311,7 @@ export class Typeahead extends React.Component<TypeaheadProps, TypeaheadState>
                             className={classes("dropdown-item", i == this.state.selectedIndex ? "active" : undefined)}
                             onMouseEnter={e => this.handleElementMouseEnter(e, i)}
                             onMouseLeave={e => this.handleElementMouseLeave(e, i)}
-                            onMouseUp={e => this.handleMenuClick(e, i)}
+                            onMouseUp={e => this.handleMenuMouseUp(e, i)}
                             {...this.props.itemAttrs && this.props.itemAttrs(item)}>                            
                             {this.props.renderItem!(item, this.state.query!)}
                         </button>)

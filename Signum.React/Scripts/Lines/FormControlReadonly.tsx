@@ -17,18 +17,13 @@ export class FormControlReadonly extends React.Component<FormControlReadonlyProp
 
         var attrs = this.props.htmlAttributes;
 
-        if (ctx.readonlyAsPlainText) {
-            return (
-                <p {...attrs} className={classes(ctx.formControlPlainTextClass, attrs && attrs.className, this.props.className)}>
-                    {this.props.children}
-                </p>
-            );
 
-        } else {
-            return (
-                <input type="text" readOnly {...attrs} className={classes(ctx.formControlClass, attrs && attrs.className, this.props.className)}
-                    value={React.Children.toArray(this.props.children)[0] as string || ""} />
-            );
-        }
+        var formControlClasses = ctx.readonlyAsPlainText ? ctx.formControlPlainTextClass : classes(ctx.formControlClass, "readonly");
+
+        return (
+            <div {...attrs} className={classes(formControlClasses, attrs && attrs.className, this.props.className)}>
+                {this.props.children}
+            </div>
+        );
     }
 }
