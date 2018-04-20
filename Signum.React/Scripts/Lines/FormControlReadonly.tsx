@@ -22,7 +22,7 @@ export class FormControlReadonly extends React.Component<FormControlReadonlyProp
 
         return (
             <div {...attrs} className={classes(formControlClasses, attrs && attrs.className, this.props.className)}>
-                {this.props.children}
+                {this.props.children || "\u00A0" /*To get min height*/}
             </div>
         );
     }
