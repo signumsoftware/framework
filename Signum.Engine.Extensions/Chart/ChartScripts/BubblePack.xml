@@ -29,7 +29,7 @@
   var color = null;
   if(data.columns.c3.token != null)
   {
-    var scaleFunc = scaleFor(data.columns.c3, data.rows.map(function(r){return r.c3;}), 0, 100, data.parameters["ColorScale"]);
+    var scaleFunc = scaleFor(data.columns.c3, data.rows.map(function(r){return r.c3;}), 0, 1, data.parameters["ColorScale"]);
     var colorInterpolator = ChartUtils.getColorInterpolation(data.parameters["ColorInterpolate"]);
     color = function(v){return colorInterpolator(scaleFunc(v.c3)); }
   }

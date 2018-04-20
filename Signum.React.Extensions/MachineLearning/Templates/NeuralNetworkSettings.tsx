@@ -49,7 +49,7 @@ export default class NeuralNetworkSettings extends React.Component<{ ctx: TypeCo
                     { property: a => a.activation, headerHtmlAttributes: { style: { width: "33%" } } },
                     { property: a => a.initializer, headerHtmlAttributes: { style: { width: "33%" } } },
                 ])} />
-                <div className="form-vertical">
+                <div>
                     <div className="row">
                         <div className="col-sm-4">
                             {this.renderCount(ctxb, p, "Output")}

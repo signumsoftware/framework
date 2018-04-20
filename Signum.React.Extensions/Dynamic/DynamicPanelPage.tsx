@@ -246,7 +246,7 @@ export class RestartServerAppStep extends React.Component<RestartServerAppStepPr
 
         return (
             <div className="progress">
-                <div className="progress-bar progress-bar-striped progress-bar-warning active" role="progressbar" style={{ width: "100%" }}>
+                <div className="progress-bar progress-bar-striped bg-warning active" role="progressbar" style={{ width: "100%" }}>
                     <span>Restarting...</span>
                 </div>
             </div>

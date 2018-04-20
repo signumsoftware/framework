@@ -41,7 +41,7 @@ export interface UserQueryEntity extends Entities.Entity, UserAssets.IUserAssetE
     hideQuickLink?: boolean;
     owner?: Entities.Lite<Entities.Entity> | null;
     displayName?: string | null;
-    withoutFilters?: boolean;
+    appendFilters?: boolean;
     filters: Entities.MList<QueryFilterEmbedded>;
     orders: Entities.MList<QueryOrderEmbedded>;
     columnsMode?: DynamicQuery.ColumnOptionsMode;

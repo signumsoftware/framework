@@ -106,7 +106,7 @@ export default class Login extends React.Component<{}, { modelState?: ModelState
                     <div className="row" style={{ paddingTop: "1rem" }}>
                         <div className="col-md-3"></div>
                         <div className="col-md-6">
-                            <button type="submit" className="btn btn-success"><i className="fa fa-sign-in"></i> {AuthMessage.Login.niceToString()}</button>
+                            <button type="submit" id="login" className="btn btn-success"><i className="fa fa-sign-in"></i> {AuthMessage.Login.niceToString()}</button>
                             {AuthClient.resetPassword &&
                                 <span>
                                     &nbsp;

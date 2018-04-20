@@ -82,7 +82,7 @@ export module Converter {
 
         var fo = { queryName: query.key, groupResults: uq.groupResults } as FindOptions;
 
-        const convertedFilters = uq.withoutFilters ? Promise.resolve([] as FilterRequest[]) : UserAssetsClient.API.parseFilters({
+        const convertedFilters = UserAssetsClient.API.parseFilters({
             queryKey: query.key,
             canAggregate: uq.groupResults || false,
             entity: entity,
@@ -95,15 +95,12 @@ export module Converter {
 
         return convertedFilters.then(filters => {
 
-            if (!uq.withoutFilters && filters) {
-                fo.filterOptions = (fo.filterOptions || []).filter(f => f.frozen);
-                fo.filterOptions.push(...filters.map(f => ({
-                    columnName: f.token,
-                    operation: f.operation,
-                    value: f.value,
-                    frozen: false
-                }) as FilterOption));
-            }
+            fo.filterOptions = filters.map(f => ({
+                columnName: f.token,
+                operation: f.operation,
+                value: f.value,
+                frozen: false
+            }) as FilterOption);
 
             fo.columnOptionsMode = uq.columnsMode;
 
@@ -135,7 +132,9 @@ export module Converter {
         return toFindOptions(uq, entity)
             .then(fo => Finder.getQueryDescription(fo.queryName).then(qd => Finder.parseFindOptions(fo, qd)))
             .then(fop2 => {
-                fop.filterOptions = fop.filterOptions.filter(a => a.frozen);
+                if (!uq.appendFilters)
+                    fop.filterOptions = fop.filterOptions.filter(a => a.frozen);
+
                 fop.filterOptions.push(...fop2.filterOptions);
                 fop.groupResults = fop2.groupResults;
                 fop.orderOptions = fop2.orderOptions;

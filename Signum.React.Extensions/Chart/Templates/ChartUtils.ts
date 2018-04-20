@@ -431,7 +431,7 @@ export function stratifyTokens(
     d3.HierarchyNode<ChartRow | Folder | Root> {
 
     const folders = data.rows
-        .filter(r => r[keyColumnParent] && r[keyColumnParent].key)
+        .filter(r => r[keyColumnParent] && r[keyColumnParent].key != null)
         .map(r => ({ folder: r[keyColumnParent] }) as Folder)
         .toObjectDistinct(r => r.folder.key!.toString());
 
@@ -452,7 +452,7 @@ export function stratifyTokens(
                 return root;
 
             const parentValue = r[keyColumnParent];
-            if (!parentValue || !parentValue.key)
+            if (!parentValue || parentValue.key == null)
                 return root;  //Either null
 
             return folders[parentValue.key as string]; // Parent folder
@@ -467,7 +467,7 @@ export function stratifyTokens(
 
             const parentValue = r[keyColumnParent];
 
-            const parentFolder = parentValue && parentValue.key && folders[parentValue.key as string];
+            const parentFolder = parentValue && parentValue.key != null && folders[parentValue.key as string];
 
             if (!parentFolder)
                 return root; //No key an no parent
