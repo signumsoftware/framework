@@ -50,13 +50,13 @@ export class CaseFlowRenderer extends CustomRenderer {
         
         const result = super.drawShape(visuals, element);
 
-        if (BpmnUtils.isLabel(element.type)) {
+        if (element.type == "label") {
             if (!this.caseFlow.AllNodes.contains(element.businessObject.id) &&
                 !this.caseFlow.Connections[element.businessObject.id])
                 result.style.setProperty('fill', "gray");
         }
-        else if (BpmnUtils.isStartEvent(element.type) ||
-            BpmnUtils.isEndEvent(element.type) ||
+        else if (element.type == "bpmn:StartEvent" ||
+            element.type == "bpmn:EndEvent" ||
             BpmnUtils.isGatewayAnyKind(element.type)) {
 
             if (!this.caseFlow.AllNodes.contains(element.id)) {

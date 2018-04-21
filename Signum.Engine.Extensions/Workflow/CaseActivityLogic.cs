@@ -45,11 +45,9 @@ namespace Signum.Engine.Workflow
         {
             return NextActivitiesExpression.Evaluate(e);
         }
-        
+
         static Expression<Func<CaseEntity, CaseActivityEntity>> DecompositionSurrogateActivityExpression =
-          childCase => Database.Query<CaseActivityEntity>()
-          .Where(ca => ca.Case == childCase.ParentCase)
-          .SingleOrDefaultEx(ca => ca.WorkflowActivity.SubWorkflow.Workflow == childCase.Workflow);
+            childCase => childCase.CaseActivities().OrderBy(ca => ca.StartDate).Select(a => a.Previous.Entity).First();
         [ExpressionField]
         public static CaseActivityEntity DecompositionSurrogateActivity(this CaseEntity childCase)
         {
@@ -1001,7 +999,7 @@ namespace Signum.Engine.Workflow
                     foreach (var se in subEntities)
                     {
                         var caseActivity = subWorkflow.ConstructFrom(CaseActivityOperation.CreateCaseActivityFromWorkflow, se, @case);
-                        caseActivity.Previous = previous?.ToLite();
+                        caseActivity.Previous = surrogate.ToLite();
                         caseActivity.Execute(CaseActivityOperation.Register);
                     }
                 }
