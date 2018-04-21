@@ -131,6 +131,19 @@ namespace Signum.Entities
             return new PrimaryKey(id.Value);
         }
 
+        public static implicit operator PrimaryKey(DateTime id)
+        {
+            return new PrimaryKey(id);
+        }
+
+        public static implicit operator PrimaryKey? (DateTime? id)
+        {
+            if (id == null)
+                return null;
+
+            return new PrimaryKey(id.Value);
+        }
+
 
         public static explicit operator int(PrimaryKey key)
         {
@@ -169,6 +182,19 @@ namespace Signum.Entities
                 return null;
 
             return (Guid)key.Value.Object;
+        }
+
+        public static explicit operator DateTime(PrimaryKey key)
+        {
+            return (DateTime)key.Object;
+        }
+
+        public static explicit operator DateTime? (PrimaryKey? key)
+        {
+            if (key == null)
+                return null;
+
+            return (DateTime)key.Value.Object;
         }
 
         public static bool operator ==(PrimaryKey a, PrimaryKey b)
