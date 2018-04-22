@@ -22,6 +22,20 @@ namespace Signum.Engine.Workflow
         public Dictionary<Lite<WorkflowGatewayEntity>, WorkflowGatewayEntity> Gateways { get; internal set; }
         public Dictionary<Lite<WorkflowConnectionEntity>, WorkflowConnectionEntity> Connections { get; internal set; }
 
+        public IWorkflowNodeEntity GetNode(Lite<IWorkflowNodeEntity> lite)
+        {
+            if (lite is Lite<WorkflowEventEntity> we)
+                return Events.GetOrThrow(we);
+
+            if (lite is Lite<WorkflowActivityEntity> wa)
+                return Activities.GetOrThrow(wa);
+
+            if (lite is Lite<WorkflowGatewayEntity> wg)
+                return Gateways.GetOrThrow(wg);
+
+            throw new InvalidOperationException("Unexpected " + lite.EntityType);
+        }
+
         internal List<Lite<IWorkflowNodeEntity>> Autocomplete(string subString, int count, List<Lite<IWorkflowNodeEntity>> excludes)
         {
             var events = AutocompleteUtils.Autocomplete(Events.Where(a => a.Value.Type == WorkflowEventType.Finish).Select(a => a.Key), subString, count);
@@ -148,7 +162,7 @@ namespace Signum.Engine.Workflow
                 {
                     if (g.Type == WorkflowGatewayType.Exclusive || g.Type == WorkflowGatewayType.Inclusive)
                     {
-                        if (NextGraph.RelatedTo(g).OrderByDescending(a => a.Value.Order).Any(c => c.Value.DecisonResult != null))
+                        if (NextGraph.RelatedTo(g).Any(c => IsDecision(c.Value.Type)))
                         {
                             List<WorkflowActivityEntity> previousActivities = new List<WorkflowActivityEntity>();
 
@@ -168,10 +182,10 @@ namespace Signum.Engine.Workflow
                         }
                     }
 
-                    if (g.Type == WorkflowGatewayType.Exclusive && NextGraph.RelatedTo(g).OrderByDescending(a => a.Value.Order).Skip(1).Any(c => c.Value.DecisonResult == null && c.Value.Condition == null))
+                    if (g.Type == WorkflowGatewayType.Exclusive && NextGraph.RelatedTo(g).OrderByDescending(a => a.Value.Order).Skip(1).Any(c => !IsDecision(c.Value.Type) && c.Value.Condition == null))
                         errors.Add(WorkflowValidationMessage.Gateway0ShouldHasConditionOrDecisionOnEachOutputExceptTheLast.NiceToString(g));
 
-                    if (g.Type == WorkflowGatewayType.Inclusive && NextGraph.RelatedTo(g).Any(c => c.Value.DecisonResult == null && c.Value.Condition == null))
+                    if (g.Type == WorkflowGatewayType.Inclusive && NextGraph.RelatedTo(g).Any(c => !IsDecision(c.Value.Type) && c.Value.Condition == null))
                         errors.Add(WorkflowValidationMessage.Gateway0ShouldHasConditionOnEachOutput.NiceToString(g));
                 }
             });
@@ -233,35 +247,10 @@ namespace Signum.Engine.Workflow
                 })
             );
 
-            Action<WorkflowActivityEntity, IWorkflowTransitionTo> ValidateTransition = (WorkflowActivityEntity wa, IWorkflowTransitionTo item) =>
-            {
-                var activity0CanNotXTo1Because2 = (item is WorkflowJumpEmbedded || item is WorkflowScriptPartEmbedded) ?
-                    WorkflowValidationMessage.Activity0CanNotJumpTo1Because2 :
-                    WorkflowValidationMessage.Activity0CanNotTimeoutTo1Because2;
-
-                var to =
-                    item.To is Lite<WorkflowActivityEntity> ? (IWorkflowNodeEntity)Activities.TryGetC((Lite<WorkflowActivityEntity>)item.To) :
-                    item.To is Lite<WorkflowGatewayEntity> ? (IWorkflowNodeEntity)Gateways.TryGetC((Lite<WorkflowGatewayEntity>)item.To) :
-                    item.To is Lite<WorkflowEventEntity> ? (IWorkflowNodeEntity)Events.TryGetC((Lite<WorkflowEventEntity>)item.To) : null;
-
-                if (to == null)
-                    errors.Add(activity0CanNotXTo1Because2.NiceToString(wa, item.To, WorkflowValidationMessage.IsNotInWorkflow.NiceToString()));
-
-                if (to is WorkflowEventEntity && ((WorkflowEventEntity)to).Type.IsStart())
-                    errors.Add(activity0CanNotXTo1Because2.NiceToString(wa, item.To, WorkflowValidationMessage.IsStart.NiceToString()));
-
-                if (to is WorkflowActivityEntity && to == wa)
-                    errors.Add(activity0CanNotXTo1Because2.NiceToString(wa, item.To, WorkflowValidationMessage.IsSelfJumping.NiceToString()));
-
-                if (TrackId.GetOrThrow(to) != TrackId.GetOrThrow(wa))
-                    errors.Add(activity0CanNotXTo1Because2.NiceToString(wa, item.To, WorkflowValidationMessage.IsInDifferentParallelTrack.NiceToString()));
-            };
-
-
             foreach (var wa in Activities.Values)
             {
-                var fanIn = PreviousGraph.RelatedTo(wa).Count;
-                var fanOut = NextGraph.RelatedTo(wa).Count;
+                var fanIn = PreviousGraph.RelatedTo(wa).Count(a=> IsNormalOrDecision(a.Value.Type));
+                var fanOut = NextGraph.RelatedTo(wa).Count(a => IsNormalOrDecision(a.Value.Type));
 
                 if (fanIn == 0)
                     errors.Add(WorkflowValidationMessage._0HasNoInputs.NiceToString(wa));
@@ -275,29 +264,14 @@ namespace Signum.Engine.Workflow
                     var nextConn = NextGraph.RelatedTo(wa).Single().Value;
                     if (!(nextConn.To is WorkflowGatewayEntity) || ((WorkflowGatewayEntity)nextConn.To).Type == WorkflowGatewayType.Parallel)
                         errors.Add(WorkflowValidationMessage.Activity0WithDecisionTypeShouldGoToAnExclusiveOrInclusiveGateways.NiceToString(wa));
-                }
-
-                if (wa.Reject != null)
+                }   
+                
+                if(wa.Type == WorkflowActivityType.Script)
                 {
-                    var prevs = PreviousGraph.IndirectlyRelatedTo(wa, kvp => !(kvp.Key is WorkflowActivityEntity));
-                    if (prevs.Any(a => a is WorkflowEventEntity && ((WorkflowEventEntity)a).Type.IsStart()))
-                        errors.Add(WorkflowValidationMessage.Activity0CanNotRejectToStart.NiceToString(wa));
+                    var scriptException = NextGraph.RelatedTo(wa).Where(a => a.Value.Type == ConnectionType.ScriptException).Only().Value;
 
-                    if (prevs.Any(a => IsParallelGateway(a)))
-                        errors.Add(WorkflowValidationMessage.Activity0CanNotRejectToParallelGateway.NiceToString(wa));
-                }
-
-                foreach (var timer in wa.BoundaryTimers)
-                {
-                    ValidateTransition(wa, timer);
-                } 
-
-                if (wa.Script != null)
-                    ValidateTransition(wa, wa.Script);
-
-                foreach (var item in wa.Jumps)
-                {
-                    ValidateTransition(wa, item);
+                    if(scriptException == null)
+                        errors.Add(WorkflowValidationMessage.Activity0OfType1ShouldHaveExactlyOneConnectionOfType2.NiceToString(wa, wa.Type.NiceToString(), ConnectionType.ScriptException.NiceToString()));
                 }
             }
 
@@ -309,6 +283,16 @@ namespace Signum.Engine.Workflow
             }
 
             return errors;
+        }
+
+        private bool IsNormalOrDecision(ConnectionType type)
+        {
+            return type == ConnectionType.Normal || IsDecision(type);
+        }
+
+        private bool IsDecision(ConnectionType type)
+        {
+            return type == ConnectionType.Approve || type == ConnectionType.Decline;
         }
 
         private bool IsParallelGateway(IWorkflowNodeEntity a, WorkflowGatewayDirection? direction = null)

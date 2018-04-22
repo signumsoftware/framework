@@ -152,9 +152,14 @@ namespace Signum.Engine.Workflow
             return NextConnectionsExpression.Evaluate(e);
         }
 
-        public static IEnumerable<WorkflowConnectionEntity> NextConnectionsFromCache(this IWorkflowNodeEntity e)
+        public static IEnumerable<WorkflowConnectionEntity> NextConnectionsFromCache(this IWorkflowNodeEntity e, ConnectionType? type)
         {
-            return GetWorkflowNodeGraph(e.Lane.Pool.Workflow.ToLite()).NextGraph.RelatedTo(e).Values;
+            var result = GetWorkflowNodeGraph(e.Lane.Pool.Workflow.ToLite()).NextGraph.RelatedTo(e).Values;
+
+            if (type == null)
+                return result;
+
+            return result.Where(a => a.Type == type);
         }
 
         static Expression<Func<IWorkflowNodeEntity, IQueryable<WorkflowConnectionEntity>>> PreviousConnectionsExpression =
@@ -456,7 +461,7 @@ namespace Signum.Engine.Workflow
             {
                 Delete = (e, _) =>
                 {
-                    ThrowConnectionError(Database.Query<WorkflowEventEntity>().Where(a => a.Timer.TimerCondition == e.ToLite()), e);
+                    ThrowConnectionError(Database.Query<WorkflowEventEntity>().Where(a => a.Timer.Condition == e.ToLite()), e);
                     e.Delete();
                 },
             }.Register();

@@ -1,7 +1,7 @@
 ﻿/// <reference path="../bpmn-js.d.ts" />
 import * as Modeler from "bpmn-js/lib/Modeler"
 import * as BpmnRenderer from "bpmn-js/lib/draw/BpmnRenderer"
-import { WorkflowConditionEntity, WorkflowActionEntity, DecisionResult } from '../Signum.Entities.Workflow'
+import { WorkflowConditionEntity, WorkflowActionEntity, ConnectionType } from '../Signum.Entities.Workflow'
 import { Lite, liteKey } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
 import * as BpmnUtils from './BpmnUtils'
 
@@ -11,16 +11,22 @@ export class CustomRenderer extends BpmnRenderer {
         super(eventBus, styles, pathMap, canvas, 1200);
     }
 
-    getDecisionResult!: (element: BPMN.DiElement) => DecisionResult | undefined; 
+    getConnectionType!: (element: BPMN.DiElement) => ConnectionType | undefined; 
 
     drawConnection(visuals: any, element: BPMN.DiElement) {
 
         var result = super.drawConnection(visuals, element);
-        
-        var dr = this.getDecisionResult && this.getDecisionResult(element);
 
-        if (dr)
-            result.style.setProperty('stroke', dr == "Approve" ? "#0c9c01" : "#c71a01");
+        var ct = this.getConnectionType && this.getConnectionType(element);
+
+        if (ct && ct != "Normal")
+            result.style.setProperty('stroke',
+                ct == "Approve" ? "#0c9c01" :
+                    ct == "Decline" ? "#c71a01" :
+                        ct == "Reject" ? "orange" :
+                            ct == "Jump" ? "blue" :
+                                ct == "ScriptException" ? "mangenta" :
+                                    "gray");
             
         return result;
     }

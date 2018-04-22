@@ -93,10 +93,8 @@ export default class BpmnModelerComponent extends React.Component<BpmnModelerCom
                 ((e.type == "bpmn:ExclusiveGateway" || e.type == "bpmn:InclusiveGateway") && (model as WorkflowConnectionModel).condition != null))
                 result = true;
 
-            if (BpmnUtils.isTaskAnyKind(e.type) && (
-                (model as WorkflowActivityModel).script != null ||
-                (model as WorkflowActivityModel).timers.some(t => t.element.action != null || t.element.condition != null) ||
-                (model as WorkflowActivityModel).jumps.some(j => j.element.action != null || j.element.condition != null)))
+            if (BpmnUtils.isTaskAnyKind(e.type) &&
+                (model as WorkflowActivityModel).script != null)
                 result = true;
         });
 
@@ -123,9 +121,9 @@ export default class BpmnModelerComponent extends React.Component<BpmnModelerCom
         };
 
         var cusRenderer = this.modeler.get<customRenderer.CustomRenderer>('customRenderer');
-        cusRenderer.getDecisionResult = con => {
+        cusRenderer.getConnectionType = con => {
             var mod = this.props.entities[con.id] as (WorkflowConnectionModel | undefined);
-            return mod && mod.decisonResult || undefined;
+            return mod && mod.type || undefined;
         }
 
         conIcons.show();
@@ -201,18 +199,13 @@ export default class BpmnModelerComponent extends React.Component<BpmnModelerCom
             });
 
         if (elementType == "bpmn:IntermediateCatchEvent")
-            return WorkflowActivityModel.New({
+            return WorkflowEventModel.New({
                 name: elementName,
-                type: "Delay",
-                workflow: this.props.workflow,
+                type: "IntermediateTimer",
                 mainEntityType: mainEntityType,
-                timers: [
-                    newMListElement(WorkflowTimerEmbedded.New({
-                        duration: TimeSpanEmbedded.New({ days: 1 }),
-                        bpmnElementId: element.id,
-                        interrupting: true
-                    }))
-                ],
+                timer: WorkflowTimerEmbedded.New({
+                    duration: TimeSpanEmbedded.New({ days: 1 }),
+                }),
             });
 
         if (BpmnUtils.isConnection(elementType))
@@ -245,7 +238,6 @@ export default class BpmnModelerComponent extends React.Component<BpmnModelerCom
             var sourceElementType = (e.element.businessObject as BPMN.ConnectionModdleElemnet).sourceRef.$type;
             var connModel = (model as WorkflowConnectionModel);
 
-            connModel.needDecisonResult = sourceElementType == "bpmn:ExclusiveGateway";
             connModel.needCondition = (sourceElementType == "bpmn:ExclusiveGateway" || sourceElementType == "bpmn:InclusiveGateway");
             connModel.needOrder = sourceElementType == "bpmn:ExclusiveGateway";
         }
@@ -269,7 +261,7 @@ export default class BpmnModelerComponent extends React.Component<BpmnModelerCom
                                     "bpmn:Task";
                 } else if (e.element.type == "bpmn:StartEvent") {
                     var et = (me as WorkflowEventModel).type;
-                    e.element.type = (et == "Start" || et == "TimerStart") ? "bpmn:StartEvent" : "bpmn:EndEvent";
+                    e.element.type = (et == "Start" || et == "ScheduledStart") ? "bpmn:StartEvent" : "bpmn:EndEvent";
 
                     var bo = e.element.businessObject;
                     var shouldEvent =

@@ -47,7 +47,8 @@ namespace Signum.Entities.Workflow
                 MainEntityType = this.Lane.Pool.Workflow.MainEntityType,
                 Name = this.Name,
                 Type = this.Type,
-                Task = WorkflowEventTaskModel.GetModel(this)
+                Task = WorkflowEventTaskModel.GetModel(this),
+                Timer = this.Timer,
             };
             return model;
         }
@@ -57,6 +58,7 @@ namespace Signum.Entities.Workflow
             var wModel = (WorkflowEventModel)model;
             this.Name = wModel.Name;
             this.Type = wModel.Type;
+            this.Timer = wModel.Timer;
             //WorkflowEventTaskModel.ApplyModel(this, wModel.Task);
         }
 
@@ -78,15 +80,15 @@ namespace Signum.Entities.Workflow
     [Serializable]
     public class WorkflowTimerEmbedded : EmbeddedEntity
     {
-        public TimeSpanEmbedded TimerDuration { get; set; }
+        public TimeSpanEmbedded Duration { get; set; }
 
-        public Lite<WorkflowTimerConditionEntity> TimerCondition { get; set; }
+        public Lite<WorkflowTimerConditionEntity> Condition { get; set; }
 
         protected override string PropertyValidation(PropertyInfo pi)
         {
-            if (pi.Name == nameof(TimerDuration) && TimerDuration == null && TimerCondition == null)
+            if (pi.Name == nameof(Duration) && Duration == null && Condition == null)
             {
-                return ValidationMessage._0IsMandatoryWhen1IsNotSet.NiceToString(pi.NiceName(), NicePropertyName(() => TimerCondition));
+                return ValidationMessage._0IsMandatoryWhen1IsNotSet.NiceToString(pi.NiceName(), NicePropertyName(() => Condition));
             }
             return base.PropertyValidation(pi);
         }
@@ -140,5 +142,7 @@ namespace Signum.Entities.Workflow
         public WorkflowEventType Type { get; set; }
         
         public WorkflowEventTaskModel Task { get; set; }
+
+        public WorkflowTimerEmbedded Timer { get; set; }
     }
 }

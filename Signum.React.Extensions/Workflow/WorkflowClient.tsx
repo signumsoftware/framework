@@ -27,7 +27,7 @@ import { TimeSpanEmbedded } from '../Basics/Signum.Entities.Basics'
 import TypeHelpButtonBarComponent from '../TypeHelp/TypeHelpButtonBarComponent'
 
 import { ValueLine, EntityLine, EntityCombo, EntityList, EntityDetail, EntityStrip, EntityRepeater } from '../../../Framework/Signum.React/Scripts/Lines'
-import { WorkflowConditionEval, WorkflowActionEval, WorkflowJumpEmbedded, DecisionResult, WorkflowMessage, WorkflowActivityMonitorMessage } from './Signum.Entities.Workflow'
+import { WorkflowConditionEval, WorkflowActionEval, WorkflowMessage, WorkflowActivityMonitorMessage, ConnectionType } from './Signum.Entities.Workflow'
 
 import ActivityWithRemarks from './Case/ActivityWithRemarks'
 
@@ -354,10 +354,9 @@ export function executeWorkflowJumpContextual(coc: Operations.ContextualOperatio
 
     Navigator.API.fetchAndForget(coc.context.lites[0])
         .then(ca => {
-            const jumps = ca.workflowActivity.jumps;
-
-            getWorkflowJumpSelector(jumps)
-                .then(dest => dest && coc.defaultContextualClick(dest.to));
+            
+            getWorkflowJumpSelector(toLite(ca.workflowActivity as WorkflowActivityEntity))
+                .then(dest => dest && coc.defaultContextualClick(dest));
         })
         .done();
 }
@@ -365,22 +364,21 @@ export function executeWorkflowJumpContextual(coc: Operations.ContextualOperatio
 export function executeWorkflowJump(eoc: Operations.EntityOperationContext<CaseActivityEntity>) {
 
     eoc.closeRequested = true;
-    var jumps = eoc.entity.workflowActivity.jumps;
 
-    getWorkflowJumpSelector(jumps)
-        .then(dest => dest && eoc.defaultClick(dest.to))
+    getWorkflowJumpSelector(toLite(eoc.entity.workflowActivity as WorkflowActivityEntity))
+        .then(dest => dest && eoc.defaultClick(dest))
         .done();
 }
 
-function getWorkflowJumpSelector(jumps: MListElement<WorkflowJumpEmbedded>[]): Promise<WorkflowJumpEmbedded | undefined> {
+function getWorkflowJumpSelector(activity: Lite<WorkflowActivityEntity>): Promise<Lite<IWorkflowNodeEntity> | undefined> {
 
-    var opts = jumps.map(j => j.element);
-    return SelectorModal.chooseElement(opts,
-        {
-            title: WorkflowActivityMessage.ChooseADestinationForWorkflowJumping.niceToString(),
-            buttonDisplay: a => a.to!.toStr || "",
-            forceShow: true
-        });
+    return API.nextConnections({ workflowActivity: activity, connectionType: "Jump" })
+        .then(jumps => SelectorModal.chooseElement(jumps,
+            {
+                title: WorkflowActivityMessage.ChooseADestinationForWorkflowJumping.niceToString(),
+                buttonDisplay: a => a.toStr || "",
+                forceShow: true
+            }));
 }
 
 export function executeAndClose(eoc: Operations.EntityOperationContext<CaseActivityEntity>) {
@@ -458,7 +456,9 @@ export function inWorkflow(ctx: TypeContext<any>, workflowName: string, activity
     if (!ca)
         return false;
 
-    return ca.workflowActivity.lane!.pool!.workflow!.name == workflowName && ca.workflowActivity.name == activityName;
+    var wa = ca.workflowActivity as WorkflowActivityEntity;
+
+    return wa.lane!.pool!.workflow!.name == workflowName && wa.name == activityName;
 }
 
 export namespace API {
@@ -516,6 +516,15 @@ export namespace API {
     export function workflowActivityMonitor(request: WorkflowActivityMonitorRequest): Promise<WorkflowActivityMonitor> {
         return ajaxPost<WorkflowActivityMonitor>({ url: "~/api/workflow/activityMonitor" }, request);
     }
+    
+    export function nextConnections(request: NextConnectionsRequest): Promise<Array<Lite<IWorkflowNodeEntity>>> {
+        return ajaxPost<Array<Lite<IWorkflowNodeEntity>>>({ url: "~/api/workflow/nextConnections" }, request);
+    }
+}
+
+export interface NextConnectionsRequest {
+    workflowActivity: Lite<WorkflowActivityEntity>;
+    connectionType: ConnectionType;
 }
 
 export interface WorkflowFindNodeRequest {
@@ -528,7 +537,6 @@ export interface WorkflowFindNodeRequest {
 export interface WorkflowConditionTestRequest {
     workflowCondition: WorkflowConditionEntity;
     exampleEntity: ICaseMainEntity;
-    decisionResult?: DecisionResult;
 }
 
 export interface WorkflowConditionTestResponse {

@@ -30,7 +30,7 @@ namespace Signum.React.Workflow
             var lite = Lite.ParsePrimaryKey<CaseActivityEntity>(caseActivityId);
 
             var activity = CaseActivityLogic.RetrieveForViewing(lite);
-            using (WorkflowActivityInfo.Scope(new WorkflowActivityInfo { CaseActivity = activity, WorkflowActivity = activity.WorkflowActivity }))
+            using (WorkflowActivityInfo.Scope(new WorkflowActivityInfo { CaseActivity = activity }))
             {
                 var ep = SignumServer.GetEntityPack((Entity)activity.Case.MainEntity);
 
@@ -131,7 +131,7 @@ namespace Signum.React.Workflow
             {
                 return new WorkflowConditionTestResponse
                 {
-                    validationResult = evaluator.EvaluateUntyped(request.exampleEntity, new WorkflowTransitionContext(null, null, null, request.decisionResult))
+                    validationResult = evaluator.EvaluateUntyped(request.exampleEntity, new WorkflowTransitionContext(null, null, null))
                 };
             }
             catch (Exception e)
@@ -147,7 +147,6 @@ namespace Signum.React.Workflow
         {
             public WorkflowConditionEntity workflowCondition;
             public ICaseMainEntity exampleEntity;
-            public DecisionResult decisionResult;
         }
 
         public class WorkflowConditionTestResponse
@@ -200,6 +199,22 @@ namespace Signum.React.Workflow
         {
             return WorkflowActivityMonitorLogic.GetWorkflowActivityMonitor(request.ToRequest());
         }
+
+        [Route("api/workflow/nextConnections"), HttpPost]
+        public List<Lite<IWorkflowNodeEntity>> GetNextJumps(NextConnectionsRequest request)
+        {
+            return request.workflowActivity.RetrieveAndForget()
+                .NextConnectionsFromCache(request.connectionType)
+                .Select(a => a.To.ToLite())
+                .ToList();
+        }
+    }
+
+    public class NextConnectionsRequest
+    {
+        public Lite<WorkflowActivityEntity> workflowActivity;
+        public ConnectionType connectionType;
+
     }
 
     public class WorkflowActivityMonitorRequestTS

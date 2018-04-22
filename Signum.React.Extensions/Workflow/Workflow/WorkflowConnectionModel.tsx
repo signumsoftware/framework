@@ -15,7 +15,7 @@ export default class WorkflowConnectionModelComponent extends React.Component<{ 
         return (
             <div>
                 <ValueLine ctx={ctx.subCtx(e => e.name)} />
-                {ctx.value.needDecisonResult && <ValueLine ctx={ctx.subCtx(e => e.decisonResult)} />}
+                <ValueLine ctx={ctx.subCtx(e => e.type)} />
 
                 {ctx.value.needCondition ?
                     ctx.value.mainEntityType ?

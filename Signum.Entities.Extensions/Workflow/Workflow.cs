@@ -146,16 +146,14 @@ namespace Signum.Entities.Workflow
 
     public class WorkflowTransitionContext
     {
-        public WorkflowTransitionContext(CaseEntity @case, CaseActivityEntity previous, WorkflowConnectionEntity conn, DecisionResult? dr)
+        public WorkflowTransitionContext(CaseEntity @case, CaseActivityEntity previous, WorkflowConnectionEntity conn)
         {
             this.Case = @case;
             this.PreviousCaseActivity = previous;
             this.Connection = conn;
-            this.DecisionResult = dr;
         }
 
         public CaseActivityEntity PreviousCaseActivity { get; internal set; }
-        public DecisionResult? DecisionResult { get; internal set; }
         public WorkflowConnectionEntity Connection { get; internal set; }
         public CaseEntity Case { get; set; }
     }
@@ -220,7 +218,9 @@ namespace Signum.Entities.Workflow
         _0IsTimerStartAndTaskIsMandatory,
         [Description("'{0}' is conditional start and condition is mandatory.")]
         _0IsConditionalStartAndTaskConditionIsMandatory,
-        DelayActivitiesShouldHaveExactlyOneInterruptingTimer
+        DelayActivitiesShouldHaveExactlyOneInterruptingTimer,
+        [Description("Activity '{0}' of type '{1}' should have exactly one connection of type '{2}'.")]
+        Activity0OfType1ShouldHaveExactlyOneConnectionOfType2
     }
 
     public enum WorkflowActivityMonitorMessage

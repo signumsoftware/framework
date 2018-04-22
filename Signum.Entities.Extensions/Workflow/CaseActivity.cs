@@ -120,6 +120,7 @@ namespace Signum.Entities.Workflow
         Timeout,
         ScriptSuccess,
         ScriptFailure,
+        Recompose,
     }
 
     public enum CaseActivityState
@@ -192,7 +193,8 @@ namespace Signum.Entities.Workflow
         Activity0HasNoTimers,
         ThereIsNoPreviousActivity,
         OnlyForScriptWorkflowActivities,
-        Pending
+        Pending,
+        NoWorkflowActivity
     }
 
 
@@ -218,9 +220,11 @@ namespace Signum.Entities.Workflow
     {
         public DateTime CreationDate { get; private set; } = TimeZoneManager.Now;
 
+        [NotNullValidator]
         public Lite<CaseActivityEntity> CaseActivity { get; set; }
 
-        [StringLengthValidator(AllowNulls = false, Min = 1, Max = 100)]
-        public string BpmnElementId { get; set; }
+
+        [NotNullValidator]
+        public Lite<WorkflowEventEntity> BoundaryEvent { get; set; }
     }
 }

@@ -1,8 +1,8 @@
 ﻿import * as React from 'react'
-import { ValueLine, EntityLine, TypeContext, FormGroup, EntityStrip, EntityDetail } from '../../../../Framework/Signum.React/Scripts/Lines'
+import { ValueLine, EntityLine, TypeContext, FormGroup, EntityStrip, EntityDetail, RenderEntity } from '../../../../Framework/Signum.React/Scripts/Lines'
 import { ScheduledTaskEntity } from '../../Scheduler/Signum.Entities.Scheduler'
 import { is } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
-import { WorkflowEventModel, WorkflowEventTaskModel, WorkflowEventTaskActionEval, WorkflowEventTaskConditionEval, WorkflowMessage, WorkflowEventType, TriggeredOn } from '../Signum.Entities.Workflow'
+import { WorkflowEventModel, WorkflowEventTaskModel, WorkflowEventTaskActionEval, WorkflowEventTaskConditionEval, WorkflowMessage, WorkflowEventType, TriggeredOn, WorkflowTimerEmbedded } from '../Signum.Entities.Workflow'
 import WorkflowEventTaskConditionComponent from './WorkflowEventTaskConditionComponent'
 import WorkflowEventTaskActionComponent from './WorkflowEventTaskActionComponent'
 import MessageModal from "../../../../Framework/Signum.React/Scripts/Modals/MessageModal";
@@ -15,8 +15,8 @@ interface WorkflowEventModelComponentProps {
 
 export default class WorkflowEventModelComponent extends React.Component<WorkflowEventModelComponentProps> {
 
-    isTimerStart() {
-        return (this.props.ctx.value.type == "TimerStart");
+    isSchedulesStart() {
+        return (this.props.ctx.value.type == "ScheduledStart");
     }
 
     isConditional() {
@@ -26,7 +26,7 @@ export default class WorkflowEventModelComponent extends React.Component<Workflo
     loadTask() {
         var ctx = this.props.ctx;
 
-        if (!this.isTimerStart())
+        if (!this.isSchedulesStart())
         {
             ctx.value.task = null;
             ctx.value.modified = true;
@@ -51,6 +51,17 @@ export default class WorkflowEventModelComponent extends React.Component<Workflo
 
     handleTypeChange = () => {
         this.loadTask();
+        var event = this.props.ctx.value;
+
+        if (event.type == "BoundaryForkTimer" ||
+            event.type == "IntermediateTimer" ||
+            event.type == "BoundaryInterruptingTimer") {
+            if (!event.timer)
+                event.timer = WorkflowTimerEmbedded.New();
+        } else {
+            if (event.timer)
+                event.timer = null;
+        }
     }
 
     render() {
@@ -59,10 +70,9 @@ export default class WorkflowEventModelComponent extends React.Component<Workflo
         return (
             <div>
                 <ValueLine ctx={ctx.subCtx(we => we.name)} />
-                <ValueLine ctx={ctx.subCtx(we => we.type)}
-                    comboBoxItems={[WorkflowEventType.value("Start"), WorkflowEventType.value("TimerStart")]}
-                    onChange={this.handleTypeChange} />
-                {this.isTimerStart() && this.renderTaskModel(ctx)}
+                <ValueLine ctx={ctx.subCtx(we => we.type)} onChange={this.handleTypeChange} />
+                {this.isSchedulesStart() && this.renderTaskModel(ctx)}
+                {ctx.value.timer && <RenderEntity ctx={ctx.subCtx(a => a.timer)} />}
             </div>
         );
     }

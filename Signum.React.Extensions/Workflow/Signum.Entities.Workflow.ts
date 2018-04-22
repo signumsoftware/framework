@@ -48,7 +48,7 @@ export const CaseActivityEntity = new Type<CaseActivityEntity>("CaseActivity");
 export interface CaseActivityEntity extends Entities.Entity {
     Type: "CaseActivity";
     case: CaseEntity;
-    workflowActivity: WorkflowActivityEntity;
+    workflowActivity: IWorkflowNodeEntity | null;
     originalWorkflowActivityName: string;
     startDate: string;
     previous: Entities.Lite<CaseActivityEntity> | null;
@@ -65,7 +65,7 @@ export interface CaseActivityExecutedTimerEntity extends Entities.Entity {
     Type: "CaseActivityExecutedTimer";
     creationDate?: string;
     caseActivity?: Entities.Lite<CaseActivityEntity> | null;
-    bpmnElementId?: string | null;
+    boundaryEvent?: Entities.Lite<WorkflowEventEntity> | null;
 }
 
 export module CaseActivityMessage {
@@ -86,6 +86,7 @@ export module CaseActivityMessage {
     export const ThereIsNoPreviousActivity = new MessageKey("CaseActivityMessage", "ThereIsNoPreviousActivity");
     export const OnlyForScriptWorkflowActivities = new MessageKey("CaseActivityMessage", "OnlyForScriptWorkflowActivities");
     export const Pending = new MessageKey("CaseActivityMessage", "Pending");
+    export const NoWorkflowActivity = new MessageKey("CaseActivityMessage", "NoWorkflowActivity");
 }
 
 export module CaseActivityOperation {
@@ -197,17 +198,21 @@ export module CaseTagTypeOperation {
     export const Save : Entities.ExecuteSymbol<CaseTagTypeEntity> = registerSymbol("Operation", "CaseTagTypeOperation.Save");
 }
 
+export const ConnectionType = new EnumType<ConnectionType>("ConnectionType");
+export type ConnectionType =
+    "Normal" |
+    "Approve" |
+    "Decline" |
+    "Jump" |
+    "ScriptException" |
+    "Reject";
+
 export const DateFilterRange = new EnumType<DateFilterRange>("DateFilterRange");
 export type DateFilterRange =
     "All" |
     "LastWeek" |
     "LastMonth" |
     "CurrentYear";
-
-export const DecisionResult = new EnumType<DecisionResult>("DecisionResult");
-export type DecisionResult =
-    "Approve" |
-    "Decline";
 
 export const DoneType = new EnumType<DoneType>("DoneType");
 export type DoneType =
@@ -218,7 +223,8 @@ export type DoneType =
     "Rejected" |
     "Timeout" |
     "ScriptSuccess" |
-    "ScriptFailure";
+    "ScriptFailure" |
+    "Recompose";
 
 export interface ICaseMainEntity extends Entities.Entity {
 }
@@ -304,11 +310,9 @@ export interface WorkflowActivityEntity extends Entities.Entity, IWorkflowNodeEn
     comments?: string | null;
     type?: WorkflowActivityType;
     requiresOpen?: boolean;
-    reject?: WorkflowRejectEmbedded | null;
-    timers: Entities.MList<WorkflowTimerEmbedded>;
+    boundaryTimers: Entities.MList<Entities.Lite<WorkflowEventEntity>>;
     estimatedDuration?: number | null;
     viewName?: string | null;
-    jumps: Entities.MList<WorkflowJumpEmbedded>;
     script?: WorkflowScriptPartEmbedded | null;
     xml?: WorkflowXmlEmbedded | null;
     subWorkflow?: SubWorkflowEmbedded | null;
@@ -335,10 +339,8 @@ export interface WorkflowActivityModel extends Entities.ModelEntity {
     name?: string | null;
     type?: WorkflowActivityType;
     requiresOpen?: boolean;
-    reject?: WorkflowRejectEmbedded | null;
-    timers: Entities.MList<WorkflowTimerEmbedded>;
+    boundaryTimers: Entities.MList<Entities.Lite<WorkflowEventEntity>>;
     estimatedDuration?: number | null;
-    jumps: Entities.MList<WorkflowJumpEmbedded>;
     script?: WorkflowScriptPartEmbedded | null;
     viewName?: string | null;
     comments?: string | null;
@@ -366,8 +368,7 @@ export type WorkflowActivityType =
     "Decision" |
     "DecompositionWorkflow" |
     "CallWorkflow" |
-    "Script" |
-    "Delay";
+    "Script";
 
 export const WorkflowConditionEntity = new Type<WorkflowConditionEntity>("WorkflowCondition");
 export interface WorkflowConditionEntity extends Entities.Entity {
@@ -403,7 +404,7 @@ export interface WorkflowConnectionEntity extends Entities.Entity, IWorkflowObje
     to?: IWorkflowNodeEntity | null;
     name?: string | null;
     bpmnElementId?: string | null;
-    decisonResult?: DecisionResult | null;
+    type?: ConnectionType;
     condition?: Entities.Lite<WorkflowConditionEntity> | null;
     action?: Entities.Lite<WorkflowActionEntity> | null;
     order?: number | null;
@@ -415,10 +416,9 @@ export interface WorkflowConnectionModel extends Entities.ModelEntity {
     Type: "WorkflowConnectionModel";
     mainEntityType: Basics.TypeEntity;
     name?: string | null;
-    needDecisonResult?: boolean;
     needCondition?: boolean;
     needOrder?: boolean;
-    decisonResult?: DecisionResult | null;
+    type?: ConnectionType;
     condition?: Entities.Lite<WorkflowConditionEntity> | null;
     action?: Entities.Lite<WorkflowActionEntity> | null;
     order?: number | null;
@@ -444,6 +444,7 @@ export interface WorkflowEventEntity extends Entities.Entity, IWorkflowNodeEntit
     bpmnElementId?: string | null;
     lane?: WorkflowLaneEntity | null;
     type?: WorkflowEventType;
+    timer?: WorkflowTimerEmbedded | null;
     xml?: WorkflowXmlEmbedded | null;
 }
 
@@ -454,6 +455,7 @@ export interface WorkflowEventModel extends Entities.ModelEntity {
     name?: string | null;
     type?: WorkflowEventType;
     task?: WorkflowEventTaskModel | null;
+    timer?: WorkflowTimerEmbedded | null;
 }
 
 export module WorkflowEventOperation {
@@ -507,8 +509,11 @@ export module WorkflowEventTaskOperation {
 export const WorkflowEventType = new EnumType<WorkflowEventType>("WorkflowEventType");
 export type WorkflowEventType =
     "Start" |
-    "TimerStart" |
-    "Finish";
+    "ScheduledStart" |
+    "Finish" |
+    "BoundaryForkTimer" |
+    "BoundaryInterruptingTimer" |
+    "IntermediateTimer";
 
 export const WorkflowGatewayDirection = new EnumType<WorkflowGatewayDirection>("WorkflowGatewayDirection");
 export type WorkflowGatewayDirection =
@@ -544,14 +549,6 @@ export type WorkflowGatewayType =
     "Exclusive" |
     "Inclusive" |
     "Parallel";
-
-export const WorkflowJumpEmbedded = new Type<WorkflowJumpEmbedded>("WorkflowJumpEmbedded");
-export interface WorkflowJumpEmbedded extends Entities.EmbeddedEntity {
-    Type: "WorkflowJumpEmbedded";
-    to?: Entities.Lite<IWorkflowNodeEntity> | null;
-    condition?: Entities.Lite<WorkflowConditionEntity> | null;
-    action?: Entities.Lite<WorkflowActionEntity> | null;
-}
 
 export const WorkflowLaneActorsEval = new Type<WorkflowLaneActorsEval>("WorkflowLaneActorsEval");
 export interface WorkflowLaneActorsEval extends Dynamic.EvalEmbedded<IWorkflowLaneActorsEvaluator> {
@@ -636,13 +633,6 @@ export module WorkflowPoolOperation {
     export const Delete : Entities.DeleteSymbol<WorkflowPoolEntity> = registerSymbol("Operation", "WorkflowPoolOperation.Delete");
 }
 
-export const WorkflowRejectEmbedded = new Type<WorkflowRejectEmbedded>("WorkflowRejectEmbedded");
-export interface WorkflowRejectEmbedded extends Entities.EmbeddedEntity {
-    Type: "WorkflowRejectEmbedded";
-    condition?: Entities.Lite<WorkflowConditionEntity> | null;
-    action?: Entities.Lite<WorkflowActionEntity> | null;
-}
-
 export const WorkflowReplacementItemEmbedded = new Type<WorkflowReplacementItemEmbedded>("WorkflowReplacementItemEmbedded");
 export interface WorkflowReplacementItemEmbedded extends Entities.EmbeddedEntity {
     Type: "WorkflowReplacementItemEmbedded";
@@ -681,7 +671,6 @@ export interface WorkflowScriptPartEmbedded extends Entities.EmbeddedEntity {
     Type: "WorkflowScriptPartEmbedded";
     script?: Entities.Lite<WorkflowScriptEntity> | null;
     retryStrategy?: WorkflowScriptRetryStrategyEntity | null;
-    onFailureJump?: Entities.Lite<IWorkflowNodeEntity> | null;
 }
 
 export const WorkflowScriptRetryStrategyEntity = new Type<WorkflowScriptRetryStrategyEntity>("WorkflowScriptRetryStrategy");
@@ -723,10 +712,6 @@ export interface WorkflowTimerEmbedded extends Entities.EmbeddedEntity {
     Type: "WorkflowTimerEmbedded";
     duration?: Signum.TimeSpanEmbedded | null;
     condition?: Entities.Lite<WorkflowTimerConditionEntity> | null;
-    bpmnElementId?: string | null;
-    to?: Entities.Lite<IWorkflowNodeEntity> | null;
-    action?: Entities.Lite<WorkflowActionEntity> | null;
-    interrupting?: boolean;
 }
 
 export module WorkflowValidationMessage {
@@ -764,6 +749,7 @@ export module WorkflowValidationMessage {
     export const _0IsTimerStartAndTaskIsMandatory = new MessageKey("WorkflowValidationMessage", "_0IsTimerStartAndTaskIsMandatory");
     export const _0IsConditionalStartAndTaskConditionIsMandatory = new MessageKey("WorkflowValidationMessage", "_0IsConditionalStartAndTaskConditionIsMandatory");
     export const DelayActivitiesShouldHaveExactlyOneInterruptingTimer = new MessageKey("WorkflowValidationMessage", "DelayActivitiesShouldHaveExactlyOneInterruptingTimer");
+    export const Activity0OfType1ShouldHaveExactlyOneConnectionOfType2 = new MessageKey("WorkflowValidationMessage", "Activity0OfType1ShouldHaveExactlyOneConnectionOfType2");
 }
 
 export const WorkflowXmlEmbedded = new Type<WorkflowXmlEmbedded>("WorkflowXmlEmbedded");

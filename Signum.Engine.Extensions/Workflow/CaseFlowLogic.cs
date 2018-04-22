@@ -14,15 +14,18 @@ namespace Signum.Engine.Workflow
     {
         public static CaseFlow GetCaseFlow(CaseEntity @case)
         {
-            var averages = @case.Workflow.WorkflowActivities().Select(w => KVP.Create(w.ToLite(), w.CaseActivities().Average(a => a.Duration))).ToDictionary();
+            var averages = new Dictionary<Lite<IWorkflowNodeEntity>, double?>();            
+            averages.AddRange(@case.Workflow.WorkflowActivities().Select(a => KVP.Create((Lite<IWorkflowNodeEntity>)a.ToLite(), a.AverageDuration())));
+            averages.AddRange(@case.Workflow.WorkflowEvents().Where(e => e.Type == WorkflowEventType.IntermediateTimer).Select(e => KVP.Create((Lite<IWorkflowNodeEntity>)e.ToLite(), e.AverageDuration())));
             
             var caseActivities = @case.CaseActivities().Select(ca => new CaseActivityStats
             {
                 CaseActivity = ca.ToLite(),
                 PreviousActivity = ca.Previous,
                 WorkflowActivity = ca.WorkflowActivity.ToLite(),
-                WorkflowActivityType = ca.WorkflowActivity.Type,
-                SubWorkflow = ca.WorkflowActivity.SubWorkflow.Workflow.ToLite(),
+                WorkflowActivityType = (WorkflowActivityType?)(ca.WorkflowActivity as WorkflowActivityEntity).Type,
+                WorkflowEventType = (WorkflowEventType?)(ca.WorkflowActivity as WorkflowEventEntity).Type,
+                SubWorkflow =(ca.WorkflowActivity as WorkflowActivityEntity).SubWorkflow.Workflow.ToLite(),
                 BpmnElementId = ca.WorkflowActivity.BpmnElementId,
                 Notifications = ca.Notifications().Count(),
                 StartDate = ca.StartDate,
@@ -31,7 +34,11 @@ namespace Signum.Engine.Workflow
                 DoneBy = ca.DoneBy,
                 Duration = ca.Duration,
                 AverageDuration = averages.TryGetS(ca.WorkflowActivity.ToLite()),
-                EstimatedDuration = ca.WorkflowActivity.EstimatedDuration,
+                EstimatedDuration = ca.WorkflowActivity is WorkflowActivityEntity ? 
+                ((WorkflowActivityEntity)ca.WorkflowActivity).EstimatedDuration :
+                ((WorkflowEventEntity)ca.WorkflowActivity).Timer.Duration == null ? (double?)null :
+                ((WorkflowEventEntity)ca.WorkflowActivity).Timer.Duration.ToTimeSpan().TotalMinutes
+                ,
             }).ToDictionary(a => a.CaseActivity);
 
             var gr = WorkflowLogic.GetWorkflowNodeGraph(@case.Workflow.ToLite());
@@ -41,8 +48,8 @@ namespace Signum.Engine.Workflow
                 .SelectMany(cs =>
                 {
                     var prev = caseActivities.GetOrThrow(cs.PreviousActivity);
-                    var from = gr.Activities.GetOrThrow(prev.WorkflowActivity);
-                    var to = gr.Activities.GetOrThrow(cs.WorkflowActivity);
+                    var from = gr.GetNode(prev.WorkflowActivity);
+                    var to = gr.GetNode(cs.WorkflowActivity);
                     if (IsNormal(prev.DoneType.Value))
                     {
                         var conns = GetAllConnections(gr, from, to);
@@ -79,7 +86,7 @@ namespace Signum.Engine.Workflow
             foreach (var f in firsts)
             {
                 WorkflowEventEntity start = GetStartEvent(@case, f.CaseActivity, gr);
-                connections.AddRange(GetAllConnections(gr, start, gr.Activities.GetOrThrow(f.WorkflowActivity)).Select(c => new CaseConnectionStats
+                connections.AddRange(GetAllConnections(gr, start, gr.GetNode(f.WorkflowActivity)).Select(c => new CaseConnectionStats
                 {
                     BpmnElementId = c.BpmnElementId,
                     Connection = c.ToLite(),
@@ -99,7 +106,7 @@ namespace Signum.Engine.Workflow
                 {
                     foreach (var end in ends)
                     {
-                        connections.AddRange(GetAllConnections(gr, gr.Activities.GetOrThrow(last.WorkflowActivity), end).Select(c => new CaseConnectionStats
+                        connections.AddRange(GetAllConnections(gr, gr.GetNode(last.WorkflowActivity), end).Select(c => new CaseConnectionStats
                         {
                             BpmnElementId = c.BpmnElementId,
                             Connection = c.ToLite(),
@@ -192,8 +199,9 @@ namespace Signum.Engine.Workflow
     {
         public Lite<CaseActivityEntity> CaseActivity;
         public Lite<CaseActivityEntity> PreviousActivity;
-        public Lite<WorkflowActivityEntity> WorkflowActivity;
-        public WorkflowActivityType WorkflowActivityType;
+        public Lite<IWorkflowNodeEntity> WorkflowActivity;
+        public WorkflowActivityType? WorkflowActivityType;
+        public WorkflowEventType? WorkflowEventType;
         public Lite<WorkflowEntity> SubWorkflow;
         public int Notifications;
         public DateTime StartDate;

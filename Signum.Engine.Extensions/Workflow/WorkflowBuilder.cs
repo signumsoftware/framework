@@ -300,7 +300,7 @@ namespace Signum.Engine.Workflow
                     BpmnElementId = c.bpmnElementId,
                     Action = c.Entity.Action,
                     Condition = c.Entity.Condition,
-                    DecisonResult = c.Entity.DecisonResult,
+                    Type = c.Entity.Type,
                     Order = c.Entity.Order,
                     Xml = c.Entity.Xml,
                     From = nodes.GetOrThrow(c.Entity.From),
@@ -539,7 +539,6 @@ namespace Signum.Engine.Workflow
 
             if (gateway == null || gateway.Type != WorkflowGatewayType.Exclusive)
             {
-                wc.DecisonResult = null;
                 wc.Order = null;
             };
 

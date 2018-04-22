@@ -143,7 +143,7 @@ namespace Signum.Entities.Workflow
             return new Disposable(() => CurrentVariable.Value = old);
         }
 
-        public WorkflowActivityEntity WorkflowActivity { get; internal set; }
+        public WorkflowActivityEntity WorkflowActivity => CaseActivity?.WorkflowActivity as WorkflowActivityEntity;
         public CaseActivityEntity CaseActivity { get; internal set; }
         public WorkflowConnectionEntity Connection { get; internal set; }
 
@@ -151,9 +151,6 @@ namespace Signum.Entities.Workflow
         {
             return this.WorkflowActivity != null && this.WorkflowActivity.Name == activityName && this.WorkflowActivity.Lane.Pool.Workflow.Name == workflowName;
         }
-
-
-       
     }
     
     [Serializable]
