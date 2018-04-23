@@ -68,7 +68,7 @@ namespace Signum.React.Selenium
 
         public WebElementLocator Operation(IOperationSymbolContainer symbolContainer)
         {
-            return this.Element.WithLocator(By.CssSelector("a[data-operation=\'{0}']".FormatWith(symbolContainer.Symbol.Key)));
+            return this.Element.WithLocator(By.CssSelector("button[data-operation=\'{0}']".FormatWith(symbolContainer.Symbol.Key)));
         }
 
         public bool OperationIsDisabled(IOperationSymbolContainer symbolContainer)
