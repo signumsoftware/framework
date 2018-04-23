@@ -58,7 +58,7 @@ export class ValueLine extends LineBase<ValueLineProps, ValueLineProps> {
         state.valueLineType = ValueLine.getValueLineType(state.type!);
 
         if (state.valueLineType == undefined)
-            throw new Error(`No ValueLine found for '${state.type!.name}' (property route = ${state.ctx.propertyRoute ? state.ctx.propertyRoute.propertyPath() : "??"})`);
+            throw new Error(`No ValueLineType found for type '${state.type!.name}' (property route = ${state.ctx.propertyRoute ? state.ctx.propertyRoute.propertyPath() : "??"})`);
     }
 
     inputElement?: HTMLElement | null;
