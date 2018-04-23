@@ -93,7 +93,7 @@ export class Tabs extends React.Component<TabsProps> {
             <div {...attrs}>
                 <ul className={"nav " + (pills ? "nav-pills" : "nav-tabs") + (fill ? " nav-fill" : "")}>
                     {array.map(t =>
-                        <li className="nav-item" key={t.props.eventKey} data-eventKey={t.props.eventKey}>
+                        <li className="nav-item" key={t.props.eventKey} data-eventkey={t.props.eventKey}>
                             <a href="#"
                                 className={classes("nav-link", this.props.activeEventKey == t.props.eventKey && "active")}
                                 onClick={e => {
