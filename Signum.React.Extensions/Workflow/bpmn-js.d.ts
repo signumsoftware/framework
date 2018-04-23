@@ -1,6 +1,39 @@
 ﻿
 declare namespace BPMN {
 
+    type ElementType =
+        "bpmn:Participant" |
+        "bpmn:Lane" |
+
+        "bpmn:StartEvent" |
+        "bpmn:EndEvent" |
+
+        "bpmn:IntermediateThrowEvent" |
+        "bpmn:BoundaryEvent" | 
+        "bpmn:IntermediateCatchEvent" | 
+
+        "bpmn:Task" |
+        "bpmn:UserTask" |
+        "bpmn:CallActivity" |
+        "bpmn:ScriptTask" |
+
+        "bpmn:ExclusiveGateway" |
+        "bpmn:InclusiveGateway" |
+        "bpmn:ParallelGateway" |
+
+        "bpmn:SequenceFlow" |
+        "bpmn:MessageFlow" |
+
+        "label" |
+        "bpmn:TextAnnotation" |
+        "bpmn:DataObjectReference" |
+        "bpmn:DataStoreReference";
+
+
+    type EventDefinitionType =
+        "bpmn:TimerEventDefinition" |
+        "bpmn:ConditionalEventDefinition";
+
     interface Options {
         container?: HTMLElement;
         width?: number | string;
@@ -22,7 +55,7 @@ declare namespace BPMN {
     }
 
     interface Event {
-
+        type: string;
     }
 
     interface DoubleClickEvent extends Event {
@@ -30,12 +63,11 @@ declare namespace BPMN {
         gfx: SVGElement;
         originalEvent: MouseEvent;
 
-        type: string;
         stopPropagation(): void;
         preventDefault(): void;
     }
 
-    interface AddClickEvent extends Event {
+    interface ElementEvent extends Event {
         element: DiElement;
     }
 
@@ -43,7 +75,7 @@ declare namespace BPMN {
         createdElements: { [oldId: string]: CreatedElement };
         descriptor: Descriptor;
     }
-
+    
     interface CreatedElement {
         descriptor: Descriptor;
         element: DiElement;
@@ -55,10 +87,17 @@ declare namespace BPMN {
         type: string;
     }
 
+    interface EndedEvent extends Event {
+        context: {
+            shape: DiElement;
+            target: DiElement;
+        }
+    }
+
     interface DiElement {
         attachers: any[];
         businessObject: ModdleElement;
-        type: string;
+        type: ElementType;
         id: string;
         host: any;
         parent: DiElement;
@@ -82,7 +121,7 @@ declare namespace BPMN {
         parent: ModdleElement;
         di: DiElement;
         name: string;
-        $type: string;
+        $type: ElementType;
         bounds: BoundsElement;
         lanes: ModdleElement[];
         eventDefinitions?: ModdleElement[];
@@ -113,6 +152,15 @@ declare namespace BPMN {
 
     interface BpmnFactory {
         create(type: string, attrs: any): ModdleElement;
+    }
+
+    interface BpmnReplace {
+        replaceElement(element: BPMN.DiElement, target: BpmnReplaceTarget, hints?: any): BPMN.DiElement;
+    }
+
+    interface BpmnReplaceTarget {
+        type: ElementType;
+        eventDefinitionType: EventDefinitionType;
     }
 
     interface EventBus {

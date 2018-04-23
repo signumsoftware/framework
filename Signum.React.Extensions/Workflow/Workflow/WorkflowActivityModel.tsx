@@ -60,15 +60,7 @@ export default class WorkflowActivityModelComponent extends React.Component<Work
         var wa = this.props.ctx.value;
         if (!allowsTimers(wa.type))
             wa.timers.clear();
-        else if (wa.type == "Delay") {
-            wa.timers = [
-                newMListElement(WorkflowTimerEmbedded.New({
-                    duration: TimeSpanEmbedded.New({ days: 1 }),
-                    interrupting: true
-                }))
-            ];
-        }
-
+        
         if (wa.type == "Script") {
             if (!wa.script)
                 wa.script = WorkflowScriptPartEmbedded.New({
@@ -107,7 +99,7 @@ export default class WorkflowActivityModelComponent extends React.Component<Work
         return (
             <div>
                 <ValueLine ctx={ctx.subCtx(d => d.name)} onChange={() => this.forceUpdate()} />
-                <ValueLine ctx={ctx.subCtx(d => d.type)} onChange={this.handleTypeChange} />
+                <ValueLine ctx={ctx.subCtx(d => d.type)} onChange={this.handleTypeChange} readOnly={ctx.value.type == "Delay" || undefined} comboBoxItems={WorkflowActivityType.values().filter(a => a != "Delay")} />
                 <ValueLine ctx={ctx.subCtx(a => a.estimatedDuration)} />
 
                 {ctx.value.type != "DecompositionWorkflow" && ctx.value.type != "CallWorkflow" && ctx.value.type != "Script" &&
