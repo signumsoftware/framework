@@ -77,6 +77,8 @@
   <Type Name="StringCase" />
   <Type Name="Symbol" />
   <Type Name="SynchronizerMessage" />
+  <Type Name="SystemTimeMode" />
+  <Type Name="SystemTimeProperty" />
   <Type Name="TypeEntity" />
   <Type Name="ValidationMessage" />
   <Type Name="VoidEnumMessage" />
