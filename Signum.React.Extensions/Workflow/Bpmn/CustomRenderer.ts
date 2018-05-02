@@ -32,15 +32,15 @@ export class CustomRenderer extends BpmnRenderer {
         var strokeColor: string = "";
         var fillColor: string = "";
 
-        if (BpmnUtils.isStartEvent(element.type)) {
+        if (element.type == "bpmn:StartEvent") {
             strokeColor = "#62A716";
             fillColor = "#E6FF97";
         }
-        else if (BpmnUtils.isEndEvent(element.type)) {
+        else if (element.type == "bpmn:EndEvent") {
             strokeColor = "#990000";
             fillColor = "#EEAAAA";
         }
-        else if (BpmnUtils.isIntermediateThrowEvent(element.type)) {
+        else if (element.type == "bpmn:IntermediateThrowEvent" || element.type == "bpmn:IntermediateCatchEvent") {
             strokeColor = "#A09B58";
             fillColor = "#FEFAEF";
         }
@@ -52,7 +52,7 @@ export class CustomRenderer extends BpmnRenderer {
             strokeColor = "#ACAC28";
             fillColor = "#FFFFCC";
         }
-        else if (BpmnUtils.isTextAnnotation(element.type) || BpmnUtils.isDataObjectReference(element.type) || BpmnUtils.isDataStoreReference(element.type)) {
+        else if (element.type == "bpmn:TextAnnotation" || element.type == "bpmn:DataObjectReference" || element.type == "bpmn:DataStoreReference") {
             strokeColor = "#666666";
             fillColor = "#F0F0F0";
         };
