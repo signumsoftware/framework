@@ -47,7 +47,7 @@ namespace Signum.React.Facades
         //    config.Services.Replace(typeof(IHttpControllerSelector), new SignumControllerFactory(config, mainAsembly));
 
         //    SignumControllerFactory.RegisterArea(typeof(EntitiesController));
- 
+
 
         //    SignumControllerFactory.RegisterArea(MethodInfo.GetCurrentMethod());
 
@@ -66,11 +66,11 @@ namespace Signum.React.Facades
         //    config.Filters.Add(new SignumAuthorizationFilterAttribute());
         //    config.Filters.Add(new SignumExceptionFilterAttribute());
         //    config.Filters.Add(new VersionFilterAttribute());
-            
+
         //    ReflectionServer.Start();
         //}
 
-        
+
         public static EntityPackTS GetEntityPack(Entity entity)
         {
             var canExecutes = OperationLogic.ServiceCanExecute(entity);

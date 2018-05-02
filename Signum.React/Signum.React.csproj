@@ -20,6 +20,7 @@
     <None Remove="Scripts\Components\index.tsx" />
     <None Remove="Scripts\Components\LinkContainer.tsx" />
     <None Remove="Scripts\Components\Modal.tsx" />
+    <None Remove="Scripts\Components\ModalFade.tsx" />
     <None Remove="Scripts\Components\NavItem.tsx" />
     <None Remove="Scripts\Components\Popover.tsx" />
     <None Remove="Scripts\Components\PopperContent.tsx" />
@@ -108,11 +109,11 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.All" Version="2.1.0-preview2-final" />
+    <DotNetCliToolReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Tools" Version="2.0.3" />
   </ItemGroup>
 
   <ItemGroup>
-    <DotNetCliToolReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Tools" Version="2.0.3" />
+    <PackageReference Include="Microsoft.AspNetCore.All" Version="2.1.0-preview2-final" />
   </ItemGroup>
 
   <ItemGroup>
@@ -136,6 +137,7 @@
     <TypeScriptCompile Include="Scripts\Components\index.tsx" />
     <TypeScriptCompile Include="Scripts\Components\LinkContainer.tsx" />
     <TypeScriptCompile Include="Scripts\Components\Modal.tsx" />
+    <TypeScriptCompile Include="Scripts\Components\ModalFade.tsx" />
     <TypeScriptCompile Include="Scripts\Components\NavItem.tsx" />
     <TypeScriptCompile Include="Scripts\Components\Popover.tsx" />
     <TypeScriptCompile Include="Scripts\Components\PopperContent.tsx" />
