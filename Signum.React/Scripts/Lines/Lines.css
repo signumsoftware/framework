@@ -373,7 +373,7 @@ select.form-control-xs:not([size]):not([multiple]),
 
 .rw-widget-xs .rw-input {
     padding: 0px 3px;
-    height: 18px;
+    height: 22px;
 }
 
 .rw-widget-xs .rw-widget-picker {
