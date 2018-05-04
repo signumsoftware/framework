@@ -289,7 +289,6 @@ export class Typeahead extends React.Component<TypeaheadProps, TypeaheadState>
     }
 
     handleDocumentClick = (e: MouseEvent | /*Touch*/Event) => {
-        console.log(e);
         if ((e as TouchEvent).which === 3)
             return;
 
