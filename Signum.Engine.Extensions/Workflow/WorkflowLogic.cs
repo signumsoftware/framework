@@ -307,7 +307,6 @@ namespace Signum.Engine.Workflow
                 sb.Include<WorkflowActivityEntity>()
                     .WithUniqueIndex(w => new { w.Lane, w.Name })
                     .WithSave(WorkflowActivityOperation.Save)
-                    .WithDelete(WorkflowActivityOperation.Delete)
                     .WithExpressionFrom(dqm, (WorkflowEntity p) => p.WorkflowActivities())
                     .WithExpressionFrom(dqm, (WorkflowLaneEntity p) => p.WorkflowActivities())
                     .WithQuery(dqm, () => e => new
@@ -320,6 +319,14 @@ namespace Signum.Engine.Workflow
                         e.Lane,
                         e.Lane.Pool.Workflow,
                     });
+
+                new Graph<WorkflowActivityEntity>.Delete(WorkflowActivityOperation.Delete)
+                {
+                    Delete = (e, _) => {
+                        e.Delete();
+                        Database.Query<WorkflowEventEntity>().Where(we => e.BoundaryTimers.Contains(we)).UnsafeDelete();
+                    }
+                }.Register();
 
                 sb.Include<WorkflowEventEntity>()
                     .WithSave(WorkflowEventOperation.Save)

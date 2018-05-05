@@ -99,7 +99,7 @@ declare namespace BPMN {
         businessObject: ModdleElement;
         type: ElementType;
         id: string;
-        host: any;
+        host: DiElement;
         parent: DiElement;
         label: DiElement;
         colapsed: boolean;

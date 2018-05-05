@@ -140,7 +140,6 @@ export function start(options: { routes: JSX.Element[] }) {
     caseActivityOperation(CaseActivityOperation.Approve, "success");
     caseActivityOperation(CaseActivityOperation.Decline, "warning");
     caseActivityOperation(CaseActivityOperation.Undo, "danger");
-    caseActivityOperation(CaseActivityOperation.Reject, "secondary");
 
     QuickLinks.registerQuickLink(WorkflowEntity, ctx => new QuickLinks.QuickLinkLink("bam",
         WorkflowActivityMonitorMessage.WorkflowActivityMonitor.niceToString(),

@@ -237,7 +237,7 @@ namespace Signum.Engine.Workflow
                     var boundaryCandidates =
                     (from ca in Database.Query<CaseActivityEntity>()
                      where ca.State == CaseActivityState.PendingDecision || ca.State == CaseActivityState.PendingNext
-                     from we in ((WorkflowActivityEntity)ca.WorkflowActivity).BoundaryTimers.Select(a => a.Entity)
+                     from we in ((WorkflowActivityEntity)ca.WorkflowActivity).BoundaryTimers
                      where we.Type == WorkflowEventType.BoundaryInterruptingTimer ? true :
                      we.Type == WorkflowEventType.BoundaryForkTimer ? !ca.ExecutedTimers().Any(t => t.BoundaryEvent.RefersTo(we)) :
                      false
@@ -670,28 +670,6 @@ namespace Signum.Engine.Workflow
                     },
                 }.Register();
 
-                new Execute(CaseActivityOperation.Reject)
-                {
-                    FromStates = { CaseActivityState.PendingNext, CaseActivityState.PendingDecision },
-                    ToStates = { CaseActivityState.Done },
-                    CanExecute = ca =>
-                        !(ca.WorkflowActivity is WorkflowActivityEntity) ? CaseActivityMessage.NoWorkflowActivity.NiceToString() :
-                        !ca.WorkflowActivity.NextConnectionsFromCache(ConnectionType.Reject).Any() ? CaseActivityMessage.Activity0HasNoReject.NiceToString(ca.WorkflowActivity) : 
-                        ca.Previous == null ? CaseActivityMessage.ThereIsNoPreviousActivity.NiceToString() :
-                        null,
-                    Lite = false,
-                    Execute = (ca, _) =>
-                    {
-                        var pwa = ca.Previous.Retrieve().WorkflowActivity;
-                        if (!pwa.Lane.Pool.Workflow.Is(ca.WorkflowActivity.Lane.Pool.Workflow))
-                            throw new InvalidOperationException("Previous in different workflow");
-
-                        var reject = ca.WorkflowActivity.NextConnectionsFromCache(ConnectionType.Reject).SingleEx(a => a.To.Is(pwa));
-
-                        ExecuteStep(ca, DoneType.Rejected, reject);
-                    },
-                }.Register();
-
                 new Execute(CaseActivityOperation.Timer)
                 {
                     FromStates = { CaseActivityState.PendingNext, CaseActivityState.PendingDecision },
@@ -705,7 +683,7 @@ namespace Signum.Engine.Workflow
                         var alreadyExecuted = ca.ExecutedTimers().Select(a => a.BoundaryEvent).ToHashSet();
 
                         var candidateEvents = ca.WorkflowActivity is WorkflowEventEntity @event ? new WorkflowEventEntity[] { @event } :
-                        ((WorkflowActivityEntity)ca.WorkflowActivity).BoundaryTimers.Select(bt => bt.Retrieve()).ToArray();
+                        ((WorkflowActivityEntity)ca.WorkflowActivity).BoundaryTimers.ToArray();
 
                         var timer = candidateEvents.Where(e => e.Type == WorkflowEventType.BoundaryInterruptingTimer || !alreadyExecuted.Contains(e.ToLite())).FirstOrDefault(t =>
                         {

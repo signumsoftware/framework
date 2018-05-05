@@ -140,6 +140,22 @@ namespace Signum.Engine.Workflow
                             errors.Add(WorkflowValidationMessage._0IsConditionalStartAndTaskConditionIsMandatory.NiceToString(e));
                     }
                 }
+
+                if (e.Type.IsTimer())
+                {
+                    var boundaryOutput = NextGraph.RelatedTo(e).Where(c => c.Value.Type == ConnectionType.Normal).Only().Value;
+
+                    if (boundaryOutput == null)
+                    {
+                        if (e.Type == WorkflowEventType.IntermediateTimer)
+                            errors.Add(WorkflowValidationMessage.IntermediateTimer0ShouldHaveOneOutputOfType1.NiceToString(e, ConnectionType.Normal.NiceToString()));
+                        else
+                        {
+                            var wa = Activities.Values.Where(a => a.BoundaryTimers.Contains(e)).SingleEx();
+                            errors.Add(WorkflowValidationMessage.BoundaryTimer0OfActivity1ShouldHaveExactlyOneConnectionOfType2.NiceToString(e, wa, ConnectionType.Normal.NiceToString()));
+                        }
+                    }
+                }
             });
 
             Gateways.Values.ToList().ForEach(g =>
@@ -266,12 +282,18 @@ namespace Signum.Engine.Workflow
                         errors.Add(WorkflowValidationMessage.Activity0WithDecisionTypeShouldGoToAnExclusiveOrInclusiveGateways.NiceToString(wa));
                 }   
                 
-                if(wa.Type == WorkflowActivityType.Script)
+                if (wa.Type == WorkflowActivityType.Script)
                 {
                     var scriptException = NextGraph.RelatedTo(wa).Where(a => a.Value.Type == ConnectionType.ScriptException).Only().Value;
 
                     if(scriptException == null)
                         errors.Add(WorkflowValidationMessage.Activity0OfType1ShouldHaveExactlyOneConnectionOfType2.NiceToString(wa, wa.Type.NiceToString(), ConnectionType.ScriptException.NiceToString()));
+                }
+
+                if (wa.Type == WorkflowActivityType.CallWorkflow || wa.Type == WorkflowActivityType.DecompositionWorkflow)
+                {
+                    if (NextGraph.RelatedTo(wa).Any(a => a.Value.Type != ConnectionType.Normal))
+                        errors.Add(WorkflowValidationMessage.Activity0OfType1ShouldHaveExactlyOneConnectionOfType2.NiceToString(wa, wa.Type.NiceToString(), ConnectionType.Normal.NiceToString()));
                 }
             }
 

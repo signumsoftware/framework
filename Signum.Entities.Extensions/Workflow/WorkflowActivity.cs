@@ -38,7 +38,7 @@ namespace Signum.Entities.Workflow
         
         [PreserveOrder]
         [NotNullValidator, NoRepeatValidator]
-        public MList<Lite<WorkflowEventEntity>> BoundaryTimers { get; set; } = new MList<Lite<WorkflowEventEntity>>();
+        public MList<WorkflowEventEntity> BoundaryTimers { get; set; } = new MList<WorkflowEventEntity>();
         
         [Unit("min")]
         public double? EstimatedDuration { get; set; }
@@ -103,7 +103,14 @@ namespace Signum.Entities.Workflow
             model.Name = this.Name;
             model.Type = this.Type;
             model.RequiresOpen = this.RequiresOpen;
-            model.BoundaryTimers.AssignMList(this.BoundaryTimers);
+            model.BoundaryTimers.AssignMList(this.BoundaryTimers.Select(we => new WorkflowEventModel()
+            {
+                Name = we.Name,
+                MainEntityType = we.Lane.Pool.Workflow.MainEntityType,
+                Type = we.Type,
+                Timer = we.Timer,
+                BpmnElementId = we.BpmnElementId
+            }).ToMList());
             model.EstimatedDuration = this.EstimatedDuration;
             model.Script = this.Script;
             model.ViewName = this.ViewName;
@@ -119,7 +126,8 @@ namespace Signum.Entities.Workflow
             this.Name = wModel.Name;
             this.Type = wModel.Type;
             this.RequiresOpen = wModel.RequiresOpen;
-            this.BoundaryTimers.AssignMList(wModel.BoundaryTimers);
+            // We can not set boundary timers in model
+            //this.BoundaryTimers.AssignMList(wModel.BoundaryTimers); 
             this.EstimatedDuration = wModel.EstimatedDuration;
             this.Script = wModel.Script;
             this.ViewName = wModel.ViewName;
@@ -271,7 +279,7 @@ namespace Signum.Entities.Workflow
         
         [PreserveOrder]
         [NotNullValidator, NoRepeatValidator]
-        public MList<Lite<WorkflowEventEntity>> BoundaryTimers { get; set; } = new MList<Lite<WorkflowEventEntity>>();
+        public MList<WorkflowEventModel> BoundaryTimers { get; set; } = new MList<WorkflowEventModel>();
 
         [Unit("min")]
         public double? EstimatedDuration { get; set; }

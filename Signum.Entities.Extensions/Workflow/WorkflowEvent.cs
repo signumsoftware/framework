@@ -121,6 +121,10 @@ namespace Signum.Entities.Workflow
             type == WorkflowEventType.BoundaryForkTimer ||
             type == WorkflowEventType.BoundaryInterruptingTimer ||
             type == WorkflowEventType.IntermediateTimer;
+
+        public static bool IsBoundaryTimer(this WorkflowEventType type) =>
+            type == WorkflowEventType.BoundaryForkTimer ||
+            type == WorkflowEventType.BoundaryInterruptingTimer;
     }
 
     [AutoInit]
@@ -144,5 +148,7 @@ namespace Signum.Entities.Workflow
         public WorkflowEventTaskModel Task { get; set; }
 
         public WorkflowTimerEmbedded Timer { get; set; }
+
+        public string BpmnElementId { get; set; }
     }
 }

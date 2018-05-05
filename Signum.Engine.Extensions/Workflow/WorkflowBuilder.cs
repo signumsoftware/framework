@@ -487,12 +487,46 @@ namespace Signum.Engine.Workflow
             return we;
         }
 
-        public static WorkflowActivityEntity ApplyXml(this WorkflowActivityEntity wa, XElement activity, Locator locator)
+        public static WorkflowActivityEntity ApplyXml(this WorkflowActivityEntity wa, XElement activity, Locator locator, Dictionary<string, XmlEntity<WorkflowEventEntity>> currentEvents)
         {
             var bpmnElementId = activity.Attribute("id").Value;
             var model = locator.GetModelEntity<WorkflowActivityModel>(bpmnElementId);
             if (model != null)
+            {
                 wa.SetModel(model);
+
+                var oldTimers = wa.BoundaryTimers.ToDictionaryEx(a => a.BpmnElementId, "oldTimers");
+                var timers = model.BoundaryTimers.ToDictionaryEx(a => a.BpmnElementId, "newTimers");
+
+                Synchronizer.Synchronize(timers, oldTimers,
+                    (id, m) =>
+                    {
+                        var we = new WorkflowEventEntity()
+                        {
+                            Name = m.Name,
+                            Lane = wa.Lane,
+                            BpmnElementId = id,
+                            Xml = new WorkflowXmlEmbedded() { DiagramXml = locator.GetDiagram(id).ToString() },
+                            Type = m.Type,
+                            Timer = m.Timer,
+                        }.Execute(WorkflowEventOperation.Save);
+                        wa.BoundaryTimers.Add(we);
+                        currentEvents.Add(id, new XmlEntity<WorkflowEventEntity>(we));
+                    },
+
+                    (id, e) =>
+                    {
+                        wa.MListElements(a => a.BoundaryTimers).Where(a => a.Element == e).UnsafeDeleteMList();
+                        e.Delete(WorkflowEventOperation.Delete);
+                        currentEvents.Remove(id);
+                    },
+
+                    (id, m,  e) =>
+                    {
+                        e.SetModel(m);
+                        e.Execute(WorkflowEventOperation.Save);
+                    });
+            }
             wa.BpmnElementId = bpmnElementId;
             wa.Name = activity.Attribute("name")?.Value ?? bpmnElementId;
             wa.Xml.DiagramXml = locator.GetDiagram(bpmnElementId).ToString();
@@ -527,7 +561,8 @@ namespace Signum.Engine.Workflow
             wc.BpmnElementId = bpmnElementId;
 
             var name = flow.Attribute("name")?.Value;
-            name = (name.TryBeforeLast(":") ?? name);
+            if (name != null)
+                name = (name.TryBeforeLast(":") ?? name);
 
             if (model != null && model.Order.HasValue)
                 name = name + ": " + model.Order.ToString();

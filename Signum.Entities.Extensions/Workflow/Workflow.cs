@@ -173,8 +173,6 @@ namespace Signum.Entities.Workflow
         [Description("The following tasks are going to be deleted :")]
         TheFollowingTasksAreGoingToBeDeleted,
         FinishEventIsRequired,
-        [Description("Activity '{0}' can not reject to start.")]
-        Activity0CanNotRejectToStart,
         [Description("'{0}' has inputs.")]
         _0HasInputs,
         [Description("'{0}' has outputs.")]
@@ -187,8 +185,6 @@ namespace Signum.Entities.Workflow
         _0HasJustOneInputAndOneOutput,
         [Description("'{0}' has multiple outputs.")]
         _0HasMultipleOutputs,
-        [Description("Activity '{0}' can not reject to parallel gateways.")]
-        Activity0CanNotRejectToParallelGateway,
         IsNotInWorkflow,
         [Description("Activity '{0}' can not jump to '{1}' because '{2}'.")]
         Activity0CanNotJumpTo1Because2,
@@ -220,7 +216,11 @@ namespace Signum.Entities.Workflow
         _0IsConditionalStartAndTaskConditionIsMandatory,
         DelayActivitiesShouldHaveExactlyOneInterruptingTimer,
         [Description("Activity '{0}' of type '{1}' should have exactly one connection of type '{2}'.")]
-        Activity0OfType1ShouldHaveExactlyOneConnectionOfType2
+        Activity0OfType1ShouldHaveExactlyOneConnectionOfType2,
+        [Description("Boundary timer '{0}' of activity '{1}' should have exactly one connection of type '{2}'.")]
+        BoundaryTimer0OfActivity1ShouldHaveExactlyOneConnectionOfType2,
+        [Description("Intermediate timer '{0}' should have one output of type '{1}'.")]
+        IntermediateTimer0ShouldHaveOneOutputOfType1,
     }
 
     public enum WorkflowActivityMonitorMessage

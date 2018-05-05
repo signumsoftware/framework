@@ -167,7 +167,6 @@ export class CaseFlowRenderer extends CustomRenderer {
 function getDoneColor(doneType: DoneType) {
     switch (doneType) {
         case "Jump": return "#ff7504";
-        case "Rejected": return "red";
         case "Timeout": return "gold";
         case "ScriptSuccess": return "green";
         case "ScriptFailure": return "violet";

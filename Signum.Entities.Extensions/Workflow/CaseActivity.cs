@@ -116,7 +116,6 @@ namespace Signum.Entities.Workflow
         Approve,
         Decline,
         Jump,
-        Rejected,
         Timeout,
         ScriptSuccess,
         ScriptFailure,
@@ -144,7 +143,6 @@ namespace Signum.Entities.Workflow
         public static readonly ExecuteSymbol<CaseActivityEntity> Approve;
         public static readonly ExecuteSymbol<CaseActivityEntity> Decline;
         public static readonly ExecuteSymbol<CaseActivityEntity> Jump;
-        public static readonly ExecuteSymbol<CaseActivityEntity> Reject;
         public static readonly ExecuteSymbol<CaseActivityEntity> Timer;
         public static readonly ExecuteSymbol<CaseActivityEntity> MarkAsUnread;
         public static readonly ExecuteSymbol<CaseActivityEntity> Undo;
@@ -187,8 +185,6 @@ namespace Signum.Entities.Workflow
         Only0CanUndoThisOperation,
         [Description("Activity '{0}' has no jumps")]
         Activity0HasNoJumps,
-        [Description("Activity '{0}' has no reject")]
-        Activity0HasNoReject,
         [Description("Activity '{0}' has no timeout")]
         Activity0HasNoTimers,
         ThereIsNoPreviousActivity,

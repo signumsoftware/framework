@@ -16,6 +16,7 @@ import { Button } from '../../../../Framework/Signum.React/Scripts/Components';
 import { TypeEntity } from '../../../../Framework/Signum.React/Scripts/Signum.Entities.Basics';
 import { newMListElement } from '../../../../Framework/Signum.React/Scripts/Signum.Entities';
 import { TimeSpanEmbedded } from '../../Basics/Signum.Entities.Basics';
+import { Dic } from '../../../../Framework/Signum.React/Scripts/Globals';
 
 export interface BpmnModelerComponentProps {
     workflow: WorkflowEntity;
@@ -63,6 +64,7 @@ export default class BpmnModelerComponent extends React.Component<BpmnModelerCom
         this.modeler.on('element.changed', 1500, this.handleElementChanged as (obj: BPMN.Event) => void);
         this.modeler.on('create.ended', 1500, this.handleCreateEnded as (obj: BPMN.Event) => void);
         this.modeler.on('shape.add', 1500, this.handleAddShapeOrConnection as (obj: BPMN.Event) => void);
+        this.modeler.on('shape.remove', 1500, this.handleRemoveShape as (obj: BPMN.Event) => void);
         this.modeler.on('connection.add', 1500, this.handleAddShapeOrConnection as (obj: BPMN.Event) => void);
         this.modeler.on('label.add', 1500, () => this.lastPasted = undefined);
         this.modeler.importXML(this.props.diagramXML, this.handleOnModelError)
@@ -190,6 +192,22 @@ export default class BpmnModelerComponent extends React.Component<BpmnModelerCom
             });
         }
 
+        if (elementType == "bpmn:BoundaryEvent") {
+            var parentTask = this.props.entities[element.host.id] as WorkflowActivityModel;
+            var boundaryTimer = WorkflowEventModel.New({
+                name: elementName,
+                type: "BoundaryInterruptingTimer",
+                mainEntityType: mainEntityType,
+                bpmnElementId: element.id,
+                timer: WorkflowTimerEmbedded.New({
+                    duration: TimeSpanEmbedded.New({ days: 1 }),
+                })
+            });
+
+            parentTask.boundaryTimers.push(newMListElement(boundaryTimer));
+            return boundaryTimer;
+        }
+
         if (BpmnUtils.isTaskAnyKind(elementType))
             return WorkflowActivityModel.New({
                 name: elementName,
@@ -203,6 +221,7 @@ export default class BpmnModelerComponent extends React.Component<BpmnModelerCom
                 name: elementName,
                 type: "IntermediateTimer",
                 mainEntityType: mainEntityType,
+                bpmnElementId: element.id,
                 timer: WorkflowTimerEmbedded.New({
                     duration: TimeSpanEmbedded.New({ days: 1 }),
                 }),
@@ -212,18 +231,40 @@ export default class BpmnModelerComponent extends React.Component<BpmnModelerCom
             return WorkflowConnectionModel.New({
                 name: elementName,
                 mainEntityType: mainEntityType,
+                type: "Normal",
             });
 
         throw new Error("Impossible to create new Model: Unexpected " + elementType);
     }
 
+    getModel(element: BPMN.DiElement): ModelEntity | undefined {
+
+        if (element.type == "bpmn:BoundaryEvent") {
+            var timers = (this.props.entities[element.host.id] as WorkflowActivityModel).boundaryTimers.singleOrNull(a => a.element.bpmnElementId == element.id);
+            if (!timers)
+                return undefined;
+
+            return timers.element;
+        }
+        else
+            return this.props.entities[element.id];
+    }
+
+    setModel(element: BPMN.DiElement, value: ModelEntity) {
+        if (element.type == "bpmn:BoundaryEvent") {
+            var parentTask = (this.props.entities[element.host.id] as WorkflowActivityModel);
+            parentTask.boundaryTimers.single(a => a.element.bpmnElementId == element.id).element = (value as WorkflowEventModel);
+        }
+        else
+            this.props.entities[element.id] = value;
+    }
 
     handleElementDoubleClick = (e: BPMN.DoubleClickEvent) => {
         if (e.element.type == "bpmn:EndEvent")
             return;
          
-        var elementType = e.element.type;
-        var model = this.props.entities[e.element.id] as (ModelEntity | undefined);
+        var model = this.getModel(e.element);
+
         if (!model) {
             if (BpmnUtils.isConnection(e.element.type)) {
                 model = this.props.entities[e.element.id] = this.newModel(e.element);
@@ -234,7 +275,7 @@ export default class BpmnModelerComponent extends React.Component<BpmnModelerCom
 
         (model as any).name = e.element.businessObject.name;
 
-        if (BpmnUtils.isConnection(elementType)) {
+        if (BpmnUtils.isConnection(e.element.type)) {
             var sourceElementType = (e.element.businessObject as BPMN.ConnectionModdleElemnet).sourceRef.$type;
             var connModel = (model as WorkflowConnectionModel);
 
@@ -248,7 +289,7 @@ export default class BpmnModelerComponent extends React.Component<BpmnModelerCom
         Navigator.view(model).then(me => {
 
             if (me) {
-                this.props.entities[e.element.id] = me;
+                this.setModel(e.element, me);
 
                 e.element.businessObject.name = (me as any).name;
 
@@ -284,7 +325,12 @@ export default class BpmnModelerComponent extends React.Component<BpmnModelerCom
                 var newName = (me as any).name;
 
                 if (WorkflowConnectionModel.isInstance(me)) {
-                    newName = (newName.tryBeforeLast(":") || newName) + (me.order != null ? ": " + me.order! : "");
+
+                    if (newName)
+                        newName = newName.tryBeforeLast(":") || newName;
+
+                    if (me.order)
+                        newName = newName + ": " + me.order;
                 }
 
                 this.modeler.get<any>("modeling").updateProperties(e.element, {
@@ -295,6 +341,7 @@ export default class BpmnModelerComponent extends React.Component<BpmnModelerCom
     }
 
     handleElementChanged = (e: BPMN.ElementEvent) => {
+
         if (BpmnUtils.isTaskAnyKind(e.element.type)) {
             const act = this.props.entities[e.element.id] as WorkflowActivityModel | undefined;
             if (act) {
@@ -302,30 +349,49 @@ export default class BpmnModelerComponent extends React.Component<BpmnModelerCom
                 act.modified = true;
             }
         }
+        else if (e.element.type == "bpmn:BoundaryEvent") {
+            if (e.element.host) {
+                var timer = this.getModel(e.element);
+                if (timer) {
+                    (timer as WorkflowEventModel).type = (e.element.businessObject as any).cancelActivity ? "BoundaryInterruptingTimer" : "BoundaryForkTimer";
+                    this.setModel(e.element, timer);
+                }
+            }
+        }   
     }
 
     handleCreateEnded = (e: BPMN.EndedEvent) => {
 
-        console.log(e);
-
         let shape = e.context.shape;
         const target = e.context.target;
-        if (shape.type == "bpmn:BoundaryEvent") {
-            shape = this.bpmnReplace.replaceElement(shape, {
-                type: "bpmn:BoundaryEvent",
-                eventDefinitionType: "bpmn:TimerEventDefinition"
-            });
-        }
-        else if (shape.type == "bpmn:IntermediateThrowEvent") {
-            shape = this.bpmnReplace.replaceElement(shape, {
-                type: "bpmn:IntermediateCatchEvent",
-                eventDefinitionType: "bpmn:TimerEventDefinition"
-            });
-        }
 
-        this.props.entities[shape.id!] = this.newModel(shape);
+        if (shape.type == "bpmn:EndEvent")
+            return;
+
+        this.isReplacing = true;
+        try {
+            if (shape.type == "bpmn:BoundaryEvent") {
+                shape = this.bpmnReplace.replaceElement(shape, {
+                    type: "bpmn:BoundaryEvent",
+                    eventDefinitionType: "bpmn:TimerEventDefinition"
+                });
+            }
+            else if (shape.type == "bpmn:IntermediateThrowEvent") {
+                shape = this.bpmnReplace.replaceElement(shape, {
+                    type: "bpmn:IntermediateCatchEvent",
+                    eventDefinitionType: "bpmn:TimerEventDefinition"
+                });
+            }
+
+            var model = this.newModel(shape);
+            if (shape.type != "bpmn:BoundaryEvent")
+                this.props.entities[shape.id!] = model;
+        } finally
+        {
+            this.isReplacing = false;
+        }
     }
-    
+
     lastPasted?: { id: string; name?: string };
     handleElementPaste = (e: BPMN.PasteEvent) => {
         if (this.lastPasted) {
@@ -337,6 +403,28 @@ export default class BpmnModelerComponent extends React.Component<BpmnModelerCom
                 id: e.descriptor.id,
                 name: e.descriptor.name
             };
+    }
+
+    isReplacing: boolean = false;
+    handleRemoveShape = (e: BPMN.ElementEvent) => {
+
+        if (this.isReplacing)
+            return;
+
+        if (e.element.type == "bpmn:BoundaryEvent") {
+
+            var parentActivity = Dic.getValues(this.props.entities)
+                .single(model => WorkflowActivityModel.isInstance(model) &&
+                    model.boundaryTimers.some(a => a.element.bpmnElementId == e.element.id)) as WorkflowActivityModel;
+
+            var timer = parentActivity.boundaryTimers.single(a => a.element.bpmnElementId == e.element.id);
+            parentActivity.boundaryTimers.remove(timer);
+        }
+        else {
+            var model = this.props.entities[e.element.id];
+            if (model && model.isNew)
+                delete this.props.entities[e.element.id];
+        };
     }
 
     handleAddShapeOrConnection = (e: BPMN.ElementEvent) => {

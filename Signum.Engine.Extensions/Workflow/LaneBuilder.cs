@@ -46,8 +46,8 @@ namespace Signum.Engine.Workflow
                 var laneIds = laneElement.Elements(bpmn + "flowNodeRef").Select(a => a.Value).ToHashSet();
                 var laneElements = processElement.Elements().Where(a => laneIds.Contains(a.Attribute("id")?.Value));
 
-                var events = laneElements.Where(a=>WorkflowEventTypes.Values.Contains(a.Name.LocalName)).ToDictionary(a => a.Attribute("id").Value);
-                var oldEvents = this.events.Values.ToDictionaryEx(a => a.bpmnElementId, "events");
+                var events = laneElements.Where(a => WorkflowEventTypes.Where(kvp => !kvp.Key.IsBoundaryTimer()).ToDictionary().Values.Contains(a.Name.LocalName)).ToDictionary(a => a.Attribute("id").Value);
+                var oldEvents = this.events.Values.Where(a => !a.Entity.Type.IsBoundaryTimer()).ToDictionaryEx(a => a.bpmnElementId, "events");
 
                 Synchronizer.Synchronize(events, oldEvents,
                    (id, e) =>
@@ -88,7 +88,7 @@ namespace Signum.Engine.Workflow
                            already.Lane = this.lane.Entity;
                        }
 
-                       var wa = (already ?? new WorkflowActivityEntity { Xml = new WorkflowXmlEmbedded(), Lane = this.lane.Entity }).ApplyXml(a, locator);
+                       var wa = (already ?? new WorkflowActivityEntity { Xml = new WorkflowXmlEmbedded(), Lane = this.lane.Entity }).ApplyXml(a, locator, this.events);
                        this.activities.Add(id, new XmlEntity<WorkflowActivityEntity>(wa));
                    },
                    (id, oa) =>
@@ -101,7 +101,7 @@ namespace Signum.Engine.Workflow
                    },
                    (id, a, oa) =>
                    {
-                       var we = oa.Entity.ApplyXml(a, locator);
+                       var we = oa.Entity.ApplyXml(a, locator, this.events);
                    });
 
                 var gateways = laneElements
@@ -213,6 +213,10 @@ namespace Signum.Engine.Workflow
                 { WorkflowEventType.Start, "startEvent" },
                 { WorkflowEventType.ScheduledStart, "startEvent" },
                 { WorkflowEventType.Finish, "endEvent" },
+                { WorkflowEventType.BoundaryForkTimer, "boundaryEvent" },
+                { WorkflowEventType.BoundaryInterruptingTimer, "boundaryEvent" },
+                { WorkflowEventType.IntermediateTimer, "intermediateCatchEvent" },
+
             };
 
             public static Dictionary<WorkflowActivityType, string> WorkflowActivityTypes = new Dictionary<WorkflowActivityType, string>()
@@ -233,11 +237,16 @@ namespace Signum.Engine.Workflow
 
             private XElement GetEventProcessElement(XmlEntity<WorkflowEventEntity> e)
             {
+                var activity = this.activities.Values.Where(a => a.Entity.BoundaryTimers.Contains(e.Entity)).SingleOrDefaultEx();
+
                 return new XElement(bpmn + WorkflowEventTypes.GetOrThrow(e.Entity.Type),
                     new XAttribute("id", e.bpmnElementId),
+                    activity != null ? new XAttribute("attachedToRef", activity.Entity.BpmnElementId) : null,
+                    e.Entity.Type == WorkflowEventType.BoundaryForkTimer ? new XAttribute("cancelActivity", false) : null,
                     e.Entity.Name.HasText() ? new XAttribute("name", e.Entity.Name) : null,
-                    e.Entity.Type.IsScheduledStart() ? 
-                        new XElement(bpmn + (((WorkflowEventModel)e.Entity.GetModel()).Task.TriggeredOn == TriggeredOn.Always ? "timerEventDefinition" : "conditionalEventDefinition")) : null, 
+                    e.Entity.Type.IsScheduledStart() || e.Entity.Type.IsTimer() ? 
+                        new XElement(bpmn + ((((WorkflowEventModel)e.Entity.GetModel()).Task?.TriggeredOn == TriggeredOn.Always || e.Entity.Type.IsTimer()) ? 
+                            "timerEventDefinition" : "conditionalEventDefinition")) : null, 
                     GetConnections(e.Entity.ToLite()));
             }
 
@@ -363,21 +372,25 @@ namespace Signum.Engine.Workflow
                     Xml = oldLane.Xml,
                 }.Save();
 
-                var newActivities = this.activities.Values.Select(a => a.Entity).ToDictionary(a => a, a => new WorkflowActivityEntity
-                {
-                    Lane = newLane,
-                    Name = a.Name,
-                    BpmnElementId = a.BpmnElementId,
-                    Xml = a.Xml,
-                    Type = a.Type,
-                    ViewName = a.ViewName,
-                    RequiresOpen = a.RequiresOpen,
-                    BoundaryTimers = a.BoundaryTimers.Select(t => t.Clone()).ToMList(),
-                    EstimatedDuration = a.EstimatedDuration,
-                    Script = a.Script?.Clone(),
-                    SubWorkflow = a.SubWorkflow?.Clone(),
-                    UserHelp = a.UserHelp,
-                    Comments = a.Comments,
+                var newActivities = this.activities.Values.Select(a => a.Entity).ToDictionary(a => a, a => {
+                    var na = new WorkflowActivityEntity
+                    {
+                        Lane = newLane,
+                        Name = a.Name,
+                        BpmnElementId = a.BpmnElementId,
+                        Xml = a.Xml,
+                        Type = a.Type,
+                        ViewName = a.ViewName,
+                        RequiresOpen = a.RequiresOpen,
+                        EstimatedDuration = a.EstimatedDuration,
+                        Script = a.Script?.Clone(),
+                        SubWorkflow = a.SubWorkflow?.Clone(),
+                        UserHelp = a.UserHelp,
+                        Comments = a.Comments,
+                    };
+                    na.BoundaryTimers.AssignMList(a.BoundaryTimers);
+                    return na;
+
                 });
                 newActivities.Values.SaveList();
                 nodes.AddRange(newActivities.ToDictionary(kvp => (IWorkflowNodeEntity)kvp.Key, kvp => (IWorkflowNodeEntity)kvp.Value));

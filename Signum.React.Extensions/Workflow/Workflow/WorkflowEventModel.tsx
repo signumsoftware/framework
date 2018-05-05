@@ -23,6 +23,12 @@ export default class WorkflowEventModelComponent extends React.Component<Workflo
         return this.props.ctx.value.task!.triggeredOn != TriggeredOn.value("Always");
     }
 
+    isTimer(type: WorkflowEventType) {
+        return type == "BoundaryForkTimer" ||
+            type == "BoundaryInterruptingTimer" ||
+            type == "IntermediateTimer";
+    }
+
     loadTask() {
         var ctx = this.props.ctx;
 
@@ -51,17 +57,6 @@ export default class WorkflowEventModelComponent extends React.Component<Workflo
 
     handleTypeChange = () => {
         this.loadTask();
-        var event = this.props.ctx.value;
-
-        if (event.type == "BoundaryForkTimer" ||
-            event.type == "IntermediateTimer" ||
-            event.type == "BoundaryInterruptingTimer") {
-            if (!event.timer)
-                event.timer = WorkflowTimerEmbedded.New();
-        } else {
-            if (event.timer)
-                event.timer = null;
-        }
     }
 
     render() {
@@ -70,11 +65,18 @@ export default class WorkflowEventModelComponent extends React.Component<Workflo
         return (
             <div>
                 <ValueLine ctx={ctx.subCtx(we => we.name)} />
-                <ValueLine ctx={ctx.subCtx(we => we.type)} onChange={this.handleTypeChange} />
+                <ValueLine ctx={ctx.subCtx(we => we.type)} readOnly={this.isTimer(ctx.value.type!)} comboBoxItems={this.getTypeComboItems()} onChange={this.handleTypeChange} />
                 {this.isSchedulesStart() && this.renderTaskModel(ctx)}
                 {ctx.value.timer && <RenderEntity ctx={ctx.subCtx(a => a.timer)} />}
             </div>
         );
+    }
+
+    getTypeComboItems = () => {
+        const ctx = this.props.ctx;
+        return this.isTimer(ctx.value.type!) ?
+            [WorkflowEventType.value(ctx.value.type!)] :
+            WorkflowEventType.values().filter(a => !this.isTimer(a)).map(a => WorkflowEventType.value(a));
     }
 
     renderTaskModel(ctx: TypeContext<WorkflowEventModel>) {

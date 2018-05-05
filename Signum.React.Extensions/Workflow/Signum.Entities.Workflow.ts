@@ -81,7 +81,6 @@ export module CaseActivityMessage {
     export const NextActivityOfDecompositionSurrogateAlreadyInProgress = new MessageKey("CaseActivityMessage", "NextActivityOfDecompositionSurrogateAlreadyInProgress");
     export const Only0CanUndoThisOperation = new MessageKey("CaseActivityMessage", "Only0CanUndoThisOperation");
     export const Activity0HasNoJumps = new MessageKey("CaseActivityMessage", "Activity0HasNoJumps");
-    export const Activity0HasNoReject = new MessageKey("CaseActivityMessage", "Activity0HasNoReject");
     export const Activity0HasNoTimers = new MessageKey("CaseActivityMessage", "Activity0HasNoTimers");
     export const ThereIsNoPreviousActivity = new MessageKey("CaseActivityMessage", "ThereIsNoPreviousActivity");
     export const OnlyForScriptWorkflowActivities = new MessageKey("CaseActivityMessage", "OnlyForScriptWorkflowActivities");
@@ -98,7 +97,6 @@ export module CaseActivityOperation {
     export const Approve : Entities.ExecuteSymbol<CaseActivityEntity> = registerSymbol("Operation", "CaseActivityOperation.Approve");
     export const Decline : Entities.ExecuteSymbol<CaseActivityEntity> = registerSymbol("Operation", "CaseActivityOperation.Decline");
     export const Jump : Entities.ExecuteSymbol<CaseActivityEntity> = registerSymbol("Operation", "CaseActivityOperation.Jump");
-    export const Reject : Entities.ExecuteSymbol<CaseActivityEntity> = registerSymbol("Operation", "CaseActivityOperation.Reject");
     export const Timer : Entities.ExecuteSymbol<CaseActivityEntity> = registerSymbol("Operation", "CaseActivityOperation.Timer");
     export const MarkAsUnread : Entities.ExecuteSymbol<CaseActivityEntity> = registerSymbol("Operation", "CaseActivityOperation.MarkAsUnread");
     export const Undo : Entities.ExecuteSymbol<CaseActivityEntity> = registerSymbol("Operation", "CaseActivityOperation.Undo");
@@ -204,8 +202,7 @@ export type ConnectionType =
     "Approve" |
     "Decline" |
     "Jump" |
-    "ScriptException" |
-    "Reject";
+    "ScriptException";
 
 export const DateFilterRange = new EnumType<DateFilterRange>("DateFilterRange");
 export type DateFilterRange =
@@ -220,7 +217,6 @@ export type DoneType =
     "Approve" |
     "Decline" |
     "Jump" |
-    "Rejected" |
     "Timeout" |
     "ScriptSuccess" |
     "ScriptFailure" |
@@ -310,7 +306,7 @@ export interface WorkflowActivityEntity extends Entities.Entity, IWorkflowNodeEn
     comments?: string | null;
     type?: WorkflowActivityType;
     requiresOpen?: boolean;
-    boundaryTimers: Entities.MList<Entities.Lite<WorkflowEventEntity>>;
+    boundaryTimers: Entities.MList<WorkflowEventEntity>;
     estimatedDuration?: number | null;
     viewName?: string | null;
     script?: WorkflowScriptPartEmbedded | null;
@@ -339,7 +335,7 @@ export interface WorkflowActivityModel extends Entities.ModelEntity {
     name?: string | null;
     type?: WorkflowActivityType;
     requiresOpen?: boolean;
-    boundaryTimers: Entities.MList<Entities.Lite<WorkflowEventEntity>>;
+    boundaryTimers: Entities.MList<WorkflowEventModel>;
     estimatedDuration?: number | null;
     script?: WorkflowScriptPartEmbedded | null;
     viewName?: string | null;
@@ -456,6 +452,7 @@ export interface WorkflowEventModel extends Entities.ModelEntity {
     type?: WorkflowEventType;
     task?: WorkflowEventTaskModel | null;
     timer?: WorkflowTimerEmbedded | null;
+    bpmnElementId?: string | null;
 }
 
 export module WorkflowEventOperation {
@@ -722,14 +719,12 @@ export module WorkflowValidationMessage {
     export const NormalStartEventIsRequiredWhenThe0Are1Or2 = new MessageKey("WorkflowValidationMessage", "NormalStartEventIsRequiredWhenThe0Are1Or2");
     export const TheFollowingTasksAreGoingToBeDeleted = new MessageKey("WorkflowValidationMessage", "TheFollowingTasksAreGoingToBeDeleted");
     export const FinishEventIsRequired = new MessageKey("WorkflowValidationMessage", "FinishEventIsRequired");
-    export const Activity0CanNotRejectToStart = new MessageKey("WorkflowValidationMessage", "Activity0CanNotRejectToStart");
     export const _0HasInputs = new MessageKey("WorkflowValidationMessage", "_0HasInputs");
     export const _0HasOutputs = new MessageKey("WorkflowValidationMessage", "_0HasOutputs");
     export const _0HasNoInputs = new MessageKey("WorkflowValidationMessage", "_0HasNoInputs");
     export const _0HasNoOutputs = new MessageKey("WorkflowValidationMessage", "_0HasNoOutputs");
     export const _0HasJustOneInputAndOneOutput = new MessageKey("WorkflowValidationMessage", "_0HasJustOneInputAndOneOutput");
     export const _0HasMultipleOutputs = new MessageKey("WorkflowValidationMessage", "_0HasMultipleOutputs");
-    export const Activity0CanNotRejectToParallelGateway = new MessageKey("WorkflowValidationMessage", "Activity0CanNotRejectToParallelGateway");
     export const IsNotInWorkflow = new MessageKey("WorkflowValidationMessage", "IsNotInWorkflow");
     export const Activity0CanNotJumpTo1Because2 = new MessageKey("WorkflowValidationMessage", "Activity0CanNotJumpTo1Because2");
     export const Activity0CanNotTimeoutTo1Because2 = new MessageKey("WorkflowValidationMessage", "Activity0CanNotTimeoutTo1Because2");
@@ -750,6 +745,8 @@ export module WorkflowValidationMessage {
     export const _0IsConditionalStartAndTaskConditionIsMandatory = new MessageKey("WorkflowValidationMessage", "_0IsConditionalStartAndTaskConditionIsMandatory");
     export const DelayActivitiesShouldHaveExactlyOneInterruptingTimer = new MessageKey("WorkflowValidationMessage", "DelayActivitiesShouldHaveExactlyOneInterruptingTimer");
     export const Activity0OfType1ShouldHaveExactlyOneConnectionOfType2 = new MessageKey("WorkflowValidationMessage", "Activity0OfType1ShouldHaveExactlyOneConnectionOfType2");
+    export const BoundaryTimer0OfActivity1ShouldHaveExactlyOneConnectionOfType2 = new MessageKey("WorkflowValidationMessage", "BoundaryTimer0OfActivity1ShouldHaveExactlyOneConnectionOfType2");
+    export const IntermediateTimer0ShouldHaveOneOutputOfType1 = new MessageKey("WorkflowValidationMessage", "IntermediateTimer0ShouldHaveOneOutputOfType1");
 }
 
 export const WorkflowXmlEmbedded = new Type<WorkflowXmlEmbedded>("WorkflowXmlEmbedded");

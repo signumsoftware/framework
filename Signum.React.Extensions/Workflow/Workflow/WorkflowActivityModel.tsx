@@ -115,7 +115,7 @@ export default class WorkflowActivityModelComponent extends React.Component<Work
 
                         <ValueLine ctx={ctx.subCtx(a => a.requiresOpen)} />
 
-                        {ctx.value.workflow ? <EntityRepeater ctx={ctx.subCtx(a => a.boundaryTimers)} /> :
+                        {ctx.value.workflow ? <EntityRepeater ctx={ctx.subCtx(a => a.boundaryTimers)} readOnly={true} /> :
                             <div className="alert alert-warning">{WorkflowMessage.ToUse0YouSouldSaveWorkflow.niceToString(ctx.niceName(e => e.boundaryTimers))}</div>}
 
                         <fieldset>

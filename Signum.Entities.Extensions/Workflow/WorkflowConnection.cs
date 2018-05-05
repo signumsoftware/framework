@@ -80,7 +80,6 @@ namespace Signum.Entities.Workflow
         Decline,
         Jump,
         ScriptException,
-        Reject,
     }
     
     [AutoInit]
