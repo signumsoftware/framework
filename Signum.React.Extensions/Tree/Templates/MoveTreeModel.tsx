@@ -23,7 +23,7 @@ export default class MoveTreeModelComponent extends React.Component<MoveTreeMode
         const type = { name: typeName, isLite: true } as TypeReference; 
         return (
             <div>
-                <EntityLine ctx={ctx.subCtx(a => a.newParent)} type={type} onChange={() => this.forceUpdate()}
+                <EntityLine ctx={ctx.subCtx(a => a.newParent)} type={type} onChange={this.handleNewParentChange}
                     findOptions={{
                         queryName: typeName,
                         filterOptions: [{ columnName: "Entity", operation: "DistinctTo", value: this.props.lite, frozen: true }]
@@ -32,7 +32,7 @@ export default class MoveTreeModelComponent extends React.Component<MoveTreeMode
 
                 <ValueLine ctx={ctx.subCtx(a => a.insertPlace)} onChange={() => this.forceUpdate()} />
 
-                {(ctx.value.insertPlace == "Before" || ctx.value.insertPlace == "After") &&
+                {ctx.value.newParent && (ctx.value.insertPlace == "Before" || ctx.value.insertPlace == "After") &&
                     <EntityLine ctx={ctx.subCtx(a => a.sibling)} type={type}
                         findOptions={{ queryName: typeName, parentColumn: "Entity.Parent", parentValue: ctx.value.newParent }}
                         onFind={() => TreeClient.openTree(typeName, [{ columnName: "Entity.Parent", value: ctx.value.newParent }])} />}
@@ -40,6 +40,15 @@ export default class MoveTreeModelComponent extends React.Component<MoveTreeMode
         );
     }
 
-    
+    handleNewParentChange = () => {
+        var ctx = this.props.ctx;
+
+        if (!ctx.value.newParent && ctx.value.sibling) {
+            ctx.value.sibling = null;
+            ctx.value.modified = true;
+        }
+
+        this.forceUpdate();
+    }
 }
                 
