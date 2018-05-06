@@ -47,7 +47,7 @@ namespace Signum.Engine.Workflow
                 var laneElements = processElement.Elements().Where(a => laneIds.Contains(a.Attribute("id")?.Value));
 
                 var events = laneElements.Where(a => WorkflowEventTypes.Where(kvp => !kvp.Key.IsBoundaryTimer()).ToDictionary().Values.Contains(a.Name.LocalName)).ToDictionary(a => a.Attribute("id").Value);
-                var oldEvents = this.events.Values.Where(a => !a.Entity.Type.IsBoundaryTimer()).ToDictionaryEx(a => a.bpmnElementId, "events");
+                var oldEvents = this.events.Values.Where(a => a.Entity.BoundaryOf == null).ToDictionaryEx(a => a.bpmnElementId, "events");
 
                 Synchronizer.Synchronize(events, oldEvents,
                    (id, e) =>
@@ -237,11 +237,11 @@ namespace Signum.Engine.Workflow
 
             private XElement GetEventProcessElement(XmlEntity<WorkflowEventEntity> e)
             {
-                var activity = this.activities.Values.Where(a => a.Entity.BoundaryTimers.Contains(e.Entity)).SingleOrDefaultEx();
-
+                var activity = e.Entity.BoundaryOf?.Let(lite => this.activities.Values.SingleEx(a => lite.RefersTo(a.Entity))).Entity;
+                
                 return new XElement(bpmn + WorkflowEventTypes.GetOrThrow(e.Entity.Type),
                     new XAttribute("id", e.bpmnElementId),
-                    activity != null ? new XAttribute("attachedToRef", activity.Entity.BpmnElementId) : null,
+                    activity != null ? new XAttribute("attachedToRef", activity.BpmnElementId) : null,
                     e.Entity.Type == WorkflowEventType.BoundaryForkTimer ? new XAttribute("cancelActivity", false) : null,
                     e.Entity.Name.HasText() ? new XAttribute("name", e.Entity.Name) : null,
                     e.Entity.Type.IsScheduledStart() || e.Entity.Type.IsTimer() ? 
@@ -372,7 +372,19 @@ namespace Signum.Engine.Workflow
                     Xml = oldLane.Xml,
                 }.Save();
 
-                var newActivities = this.activities.Values.Select(a => a.Entity).ToDictionary(a => a, a => {
+                var newEvents = this.events.Values.Select(e => e.Entity).ToDictionary(e => e, e => new WorkflowEventEntity
+                {
+                    Lane = newLane,
+                    Name = e.Name,
+                    BpmnElementId = e.BpmnElementId,
+                    Type = e.Type,
+                    Xml = e.Xml,
+                });
+                newEvents.Values.SaveList();
+                nodes.AddRange(newEvents.ToDictionary(kvp => (IWorkflowNodeEntity)kvp.Key, kvp => (IWorkflowNodeEntity)kvp.Value));
+
+                var newActivities = this.activities.Values.Select(a => a.Entity).ToDictionary(a => a, a =>
+                {
                     var na = new WorkflowActivityEntity
                     {
                         Lane = newLane,
@@ -388,24 +400,12 @@ namespace Signum.Engine.Workflow
                         UserHelp = a.UserHelp,
                         Comments = a.Comments,
                     };
-                    na.BoundaryTimers.AssignMList(a.BoundaryTimers);
+                    na.BoundaryTimers  = (a.BoundaryTimers.Select(newEvents.GetOrThrow)).ToMList();
                     return na;
-
                 });
                 newActivities.Values.SaveList();
                 nodes.AddRange(newActivities.ToDictionary(kvp => (IWorkflowNodeEntity)kvp.Key, kvp => (IWorkflowNodeEntity)kvp.Value));
-
-                var newEvents = this.events.Values.Select(e => e.Entity).ToDictionary(e => e, e => new WorkflowEventEntity
-                {
-                    Lane = newLane,
-                    Name = e.Name,
-                    BpmnElementId = e.BpmnElementId,
-                    Type = e.Type,
-                    Xml = e.Xml,
-                });
-                newEvents.Values.SaveList();
-                nodes.AddRange(newEvents.ToDictionary(kvp => (IWorkflowNodeEntity)kvp.Key, kvp => (IWorkflowNodeEntity)kvp.Value));
-
+                
                 var newGateways = this.gateways.Values.Select(g => g.Entity).ToDictionary(g => g, g => new WorkflowGatewayEntity
                 {
                     Lane = newLane,

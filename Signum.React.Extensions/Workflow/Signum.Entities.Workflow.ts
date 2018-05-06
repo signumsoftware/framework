@@ -441,6 +441,7 @@ export interface WorkflowEventEntity extends Entities.Entity, IWorkflowNodeEntit
     lane?: WorkflowLaneEntity | null;
     type?: WorkflowEventType;
     timer?: WorkflowTimerEmbedded | null;
+    boundaryOf?: Entities.Lite<WorkflowActivityEntity> | null;
     xml?: WorkflowXmlEmbedded | null;
 }
 

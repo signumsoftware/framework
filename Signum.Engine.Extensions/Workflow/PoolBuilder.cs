@@ -43,7 +43,7 @@ namespace Signum.Engine.Workflow
                  },
                  (id, sf, osf) =>
                  {
-                     osf.Entity.ApplyXml(sf, locator);
+                     //osf.Entity.ApplyXml(sf, locator);
                  });
 
                 var oldLanes = this.lanes.Values.ToDictionaryEx(a => a.lane.bpmnElementId, "lanes");

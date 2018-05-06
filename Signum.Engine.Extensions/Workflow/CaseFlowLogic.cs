@@ -54,16 +54,22 @@ namespace Signum.Engine.Workflow
                     {
                         var conns = GetAllConnections(gr, from, to);
                         if (conns.Any())
-                            return conns.Select(c => new CaseConnectionStats
-                            {
-                                BpmnElementId = c.BpmnElementId,
-                                Connection = c.ToLite(),
-                                FromBpmnElementId = c.From.BpmnElementId,
-                                ToBpmnElementId = c.To.BpmnElementId,
-                                DoneBy = prev.DoneBy,
-                                DoneDate = prev.DoneDate.Value,
-                                DoneType = prev.DoneType.Value
-                            });
+                            return conns.Select(c => new CaseConnectionStats().WithConnection(c).WithDone(prev));
+                    }
+                    else if (prev.DoneType == DoneType.Timeout)
+                    {
+                        if (from is WorkflowActivityEntity wa)
+                        {
+                            var conns = wa.BoundaryTimers.SelectMany(e => GetAllConnections(gr, e, to));
+                            if (conns.Any())
+                                return conns.Select(c => new CaseConnectionStats().WithConnection(c).WithDone(prev));
+                        }
+                        else if (from is WorkflowEventEntity we)
+                        {
+                            var conns = GetAllConnections(gr, we, to);
+                            if (conns.Any())
+                                return conns.Select(c => new CaseConnectionStats().WithConnection(c).WithDone(prev));
+                        }
                     }
 
                     return new[]
@@ -72,10 +78,7 @@ namespace Signum.Engine.Workflow
                         {
                             FromBpmnElementId = from.BpmnElementId,
                             ToBpmnElementId = to.BpmnElementId,
-                            DoneBy = prev.DoneBy,
-                            DoneDate = prev.DoneDate.Value,
-                            DoneType = prev.DoneType.Value
-                        }
+                        }.WithDone(prev)
                     };
                 }).ToList();
 
@@ -86,15 +89,7 @@ namespace Signum.Engine.Workflow
             foreach (var f in firsts)
             {
                 WorkflowEventEntity start = GetStartEvent(@case, f.CaseActivity, gr);
-                connections.AddRange(GetAllConnections(gr, start, gr.GetNode(f.WorkflowActivity)).Select(c => new CaseConnectionStats
-                {
-                    BpmnElementId = c.BpmnElementId,
-                    Connection = c.ToLite(),
-                    FromBpmnElementId = c.From.BpmnElementId,
-                    ToBpmnElementId = c.To.BpmnElementId,
-                    DoneBy = f.DoneBy,
-                    DoneDate = f.StartDate,
-                }));
+                connections.AddRange(GetAllConnections(gr, start, gr.GetNode(f.WorkflowActivity)).Select(c => new CaseConnectionStats().WithConnection(c).WithDone(f)));
             }
 
             if(@case.FinishDate != null)
@@ -106,15 +101,7 @@ namespace Signum.Engine.Workflow
                 {
                     foreach (var end in ends)
                     {
-                        connections.AddRange(GetAllConnections(gr, gr.GetNode(last.WorkflowActivity), end).Select(c => new CaseConnectionStats
-                        {
-                            BpmnElementId = c.BpmnElementId,
-                            Connection = c.ToLite(),
-                            FromBpmnElementId = c.From.BpmnElementId,
-                            ToBpmnElementId = c.To.BpmnElementId,
-                            DoneBy = last.DoneBy,
-                            DoneDate = last.DoneDate.Value,
-                        }));
+                        connections.AddRange(GetAllConnections(gr, gr.GetNode(last.WorkflowActivity), end).Select(c => new CaseConnectionStats().WithConnection(c).WithDone(last)));
                     }
                 }
             }
@@ -217,6 +204,23 @@ namespace Signum.Engine.Workflow
 
     public class CaseConnectionStats
     {
+        public CaseConnectionStats WithConnection(WorkflowConnectionEntity c)
+        {
+            this.BpmnElementId = c.BpmnElementId;
+            this.Connection = c.ToLite();
+            this.FromBpmnElementId = c.From.BpmnElementId;
+            this.ToBpmnElementId = c.To.BpmnElementId;
+            return this;
+        }
+
+        public CaseConnectionStats WithDone(CaseActivityStats activity)
+        {
+            this.DoneBy = activity.DoneBy;
+            this.DoneDate = activity.DoneDate.Value;
+            this.DoneType = activity.DoneType.Value;
+            return this;
+        }
+
         public Lite<WorkflowConnectionEntity> Connection;
         public DateTime DoneDate;
         public Lite<IUserEntity> DoneBy;

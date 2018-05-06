@@ -36,7 +36,7 @@ namespace Signum.Entities.Workflow
 
         public bool RequiresOpen { get; set; }
         
-        [PreserveOrder]
+        [Ignore, QueryableProperty]
         [NotNullValidator, NoRepeatValidator]
         public MList<WorkflowEventEntity> BoundaryTimers { get; set; } = new MList<WorkflowEventEntity>();
         

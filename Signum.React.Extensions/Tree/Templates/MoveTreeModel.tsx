@@ -6,6 +6,7 @@ import { SearchControl } from '../../../../Framework/Signum.React/Scripts/Search
 import { getToString, getMixin, Lite } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
 import { TypeContext, FormGroupStyle } from '../../../../Framework/Signum.React/Scripts/TypeContext'
 import { MoveTreeModel, TreeEntity } from '../Signum.Entities.Tree'
+import * as Finder from "../../../../Framework/Signum.React/Scripts/Finder";
 import * as TreeClient from '../TreeClient'
 import { TypeReference } from "../../../../Framework/Signum.React/Scripts/Reflection";
 import { is } from "../../../../Framework/Signum.React/Scripts/Signum.Entities";
@@ -32,22 +33,22 @@ export default class MoveTreeModelComponent extends React.Component<MoveTreeMode
 
                 <ValueLine ctx={ctx.subCtx(a => a.insertPlace)} onChange={() => this.forceUpdate()} />
 
-                {ctx.value.newParent && (ctx.value.insertPlace == "Before" || ctx.value.insertPlace == "After") &&
+                {(ctx.value.insertPlace == "Before" || ctx.value.insertPlace == "After") &&
                     <EntityLine ctx={ctx.subCtx(a => a.sibling)} type={type}
                         findOptions={{ queryName: typeName, parentColumn: "Entity.Parent", parentValue: ctx.value.newParent }}
-                        onFind={() => TreeClient.openTree(typeName, [{ columnName: "Entity.Parent", value: ctx.value.newParent }])} />}
+                        onFind={() => Finder.find({
+                            queryName: typeName,
+                            filterOptions: [{ columnName: "Entity.Parent", value: ctx.value.newParent, frozen: true }]
+                        }, { useDefaultBehaviour: true, searchControlProps: { create: false } })}
+                    />}
             </div>
         );
     }
 
     handleNewParentChange = () => {
         var ctx = this.props.ctx;
-
-        if (!ctx.value.newParent && ctx.value.sibling) {
-            ctx.value.sibling = null;
-            ctx.value.modified = true;
-        }
-
+        ctx.value.sibling = null;
+        ctx.value.modified = true;
         this.forceUpdate();
     }
 }

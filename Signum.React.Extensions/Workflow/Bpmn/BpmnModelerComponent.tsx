@@ -64,7 +64,7 @@ export default class BpmnModelerComponent extends React.Component<BpmnModelerCom
         this.modeler.on('element.changed', 1500, this.handleElementChanged as (obj: BPMN.Event) => void);
         this.modeler.on('create.ended', 1500, this.handleCreateEnded as (obj: BPMN.Event) => void);
         this.modeler.on('shape.add', 1500, this.handleAddShapeOrConnection as (obj: BPMN.Event) => void);
-        this.modeler.on('shape.remove', 1500, this.handleRemoveShape as (obj: BPMN.Event) => void);
+        this.modeler.on('commandStack.elements.delete.postExecuted', 1500, this.handleElementDeletePostExecuted as (obj: BPMN.Event) => void);
         this.modeler.on('connection.add', 1500, this.handleAddShapeOrConnection as (obj: BPMN.Event) => void);
         this.modeler.on('label.add', 1500, () => this.lastPasted = undefined);
         this.modeler.importXML(this.props.diagramXML, this.handleOnModelError)
@@ -341,7 +341,6 @@ export default class BpmnModelerComponent extends React.Component<BpmnModelerCom
     }
 
     handleElementChanged = (e: BPMN.ElementEvent) => {
-
         if (BpmnUtils.isTaskAnyKind(e.element.type)) {
             const act = this.props.entities[e.element.id] as WorkflowActivityModel | undefined;
             if (act) {
@@ -351,13 +350,13 @@ export default class BpmnModelerComponent extends React.Component<BpmnModelerCom
         }
         else if (e.element.type == "bpmn:BoundaryEvent") {
             if (e.element.host) {
-                var timer = this.getModel(e.element);
+                var timer = this.getModel(e.element) as WorkflowEventModel;
                 if (timer) {
-                    (timer as WorkflowEventModel).type = (e.element.businessObject as any).cancelActivity ? "BoundaryInterruptingTimer" : "BoundaryForkTimer";
+                    timer.type = (e.element.businessObject as any).cancelActivity ? "BoundaryInterruptingTimer" : "BoundaryForkTimer";
                     this.setModel(e.element, timer);
                 }
             }
-        }   
+        }
     }
 
     handleCreateEnded = (e: BPMN.EndedEvent) => {
@@ -368,28 +367,22 @@ export default class BpmnModelerComponent extends React.Component<BpmnModelerCom
         if (shape.type == "bpmn:EndEvent")
             return;
 
-        this.isReplacing = true;
-        try {
-            if (shape.type == "bpmn:BoundaryEvent") {
-                shape = this.bpmnReplace.replaceElement(shape, {
-                    type: "bpmn:BoundaryEvent",
-                    eventDefinitionType: "bpmn:TimerEventDefinition"
-                });
-            }
-            else if (shape.type == "bpmn:IntermediateThrowEvent") {
-                shape = this.bpmnReplace.replaceElement(shape, {
-                    type: "bpmn:IntermediateCatchEvent",
-                    eventDefinitionType: "bpmn:TimerEventDefinition"
-                });
-            }
-
-            var model = this.newModel(shape);
-            if (shape.type != "bpmn:BoundaryEvent")
-                this.props.entities[shape.id!] = model;
-        } finally
-        {
-            this.isReplacing = false;
+        if (shape.type == "bpmn:BoundaryEvent") {
+            shape = this.bpmnReplace.replaceElement(shape, {
+                type: "bpmn:BoundaryEvent",
+                eventDefinitionType: "bpmn:TimerEventDefinition"
+            });
         }
+        else if (shape.type == "bpmn:IntermediateThrowEvent") {
+            shape = this.bpmnReplace.replaceElement(shape, {
+                type: "bpmn:IntermediateCatchEvent",
+                eventDefinitionType: "bpmn:TimerEventDefinition"
+            });
+        }
+
+        var model = this.newModel(shape);
+        if (shape.type != "bpmn:BoundaryEvent")
+            this.props.entities[shape.id!] = model;
     }
 
     lastPasted?: { id: string; name?: string };
@@ -405,11 +398,9 @@ export default class BpmnModelerComponent extends React.Component<BpmnModelerCom
             };
     }
 
-    isReplacing: boolean = false;
-    handleRemoveShape = (e: BPMN.ElementEvent) => {
+    handleElementDeletePostExecuted = (e: BPMN.ElementEvent) => {
 
-        if (this.isReplacing)
-            return;
+        debugger;
 
         if (e.element.type == "bpmn:BoundaryEvent") {
 

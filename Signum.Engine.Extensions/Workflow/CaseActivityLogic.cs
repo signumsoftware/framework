@@ -241,7 +241,7 @@ namespace Signum.Engine.Workflow
                      where we.Type == WorkflowEventType.BoundaryInterruptingTimer ? true :
                      we.Type == WorkflowEventType.BoundaryForkTimer ? !ca.ExecutedTimers().Any(t => t.BoundaryEvent.RefersTo(we)) :
                      false
-                     select new { Activity = ca, Event = we });
+                     select new { Activity = ca, Event = we }).ToList();
 
 
                     var intermediateCandidates =
@@ -249,7 +249,7 @@ namespace Signum.Engine.Workflow
                      where ca.State == CaseActivityState.PendingDecision || ca.State == CaseActivityState.PendingNext
                      let we = ((WorkflowEventEntity)ca.WorkflowActivity)
                      where we.Type == WorkflowEventType.IntermediateTimer
-                     select new { Activity = ca, Event = we });
+                     select new { Activity = ca, Event = we }).ToList();
 
                     var conditions = boundaryCandidates.Concat(intermediateCandidates).Select(a => a.Event.Timer.Condition).Distinct().ToList();
 
@@ -939,6 +939,12 @@ namespace Signum.Engine.Workflow
                         return;
 
                     CreateNextActivities(@case, ctx, ca);
+
+                    new CaseActivityExecutedTimerEntity
+                    {
+                        BoundaryEvent = boundaryEvent.ToLite(),
+                        CaseActivity = ca.ToLite(),
+                    }.Save();
                 }
             }
 

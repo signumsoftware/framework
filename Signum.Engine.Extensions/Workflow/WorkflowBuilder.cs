@@ -171,6 +171,7 @@ namespace Signum.Engine.Workflow
         {
             var document =  WorkflowBuilder.ParseDocument(model.DiagramXml);
 
+
             var participants = document.Descendants(bpmn + "collaboration").Elements(bpmn + "participant").ToDictionaryEx(a => a.Attribute("id").Value);
             var processElements = document.Descendants(bpmn + "process").ToDictionaryEx(a => a.Attribute("id").Value);
             var diagramElements = document.Descendants(bpmndi + "BPMNPlane").Elements().ToDictionaryEx(a => a.Attribute("bpmnElement").Value, "bpmnElement");
@@ -179,8 +180,23 @@ namespace Signum.Engine.Workflow
                 throw new InvalidOperationException(WorkflowValidationMessage.ParticipantsAndProcessesAreNotSynchronized.NiceToString());
 
             Locator locator = new Workflow.Locator(this, diagramElements, model, replacements);
-            var oldPools = this.pools.Values.ToDictionaryEx(a => a.pool.bpmnElementId, "pools");
+            
+            var messageFlows = document.Descendants(bpmn + "collaboration").Elements(bpmn + "messageFlow").ToDictionaryEx(a => a.Attribute("id").Value);
+            var oldMessageFlows = this.messageFlows.ToDictionaryEx(a => a.bpmnElementId, "messageFlows");
 
+            Synchronizer.Synchronize(messageFlows, oldMessageFlows,
+               null,
+               (id, omf) =>
+               {
+                   this.messageFlows.Remove(omf);
+                   omf.Entity.Delete(WorkflowConnectionOperation.Delete);
+               },
+               (id, mf, omf) =>
+               {
+                   omf.Entity.ApplyXml(mf, locator);
+               });
+
+            var oldPools = this.pools.Values.ToDictionaryEx(a => a.pool.bpmnElementId, "pools");
             Synchronizer.Synchronize(participants, oldPools,
                 (id, pa) =>
                 {
@@ -200,20 +216,14 @@ namespace Signum.Engine.Workflow
                     pb.ApplyChanges(processElements.GetOrThrow(pa.Attribute("processRef").Value), locator);
                 });
 
-            var messageFlows = document.Descendants(bpmn + "collaboration").Elements(bpmn + "messageFlow").ToDictionaryEx(a => a.Attribute("id").Value);
-            var oldMessageFlows = this.messageFlows.ToDictionaryEx(a => a.bpmnElementId, "messageFlows");
-
+          
             Synchronizer.Synchronize(messageFlows, oldMessageFlows,
                 (id, mf) =>
                 {
                     var wc = new WorkflowConnectionEntity { Xml = new WorkflowXmlEmbedded() }.ApplyXml(mf, locator);
                     this.messageFlows.Add(new XmlEntity<WorkflowConnectionEntity>(wc));
                 },
-                (id, omf) =>
-                {
-                    this.messageFlows.Remove(omf);
-                    omf.Entity.Delete(WorkflowConnectionOperation.Delete);
-                },
+                null,
                 (id, mf, omf) =>
                 {
                     omf.Entity.ApplyXml(mf, locator);
@@ -509,22 +519,21 @@ namespace Signum.Engine.Workflow
                             Xml = new WorkflowXmlEmbedded() { DiagramXml = locator.GetDiagram(id).ToString() },
                             Type = m.Type,
                             Timer = m.Timer,
-                        }.Execute(WorkflowEventOperation.Save);
+                        };
                         wa.BoundaryTimers.Add(we);
                         currentEvents.Add(id, new XmlEntity<WorkflowEventEntity>(we));
                     },
 
                     (id, e) =>
                     {
-                        wa.MListElements(a => a.BoundaryTimers).Where(a => a.Element == e).UnsafeDeleteMList();
-                        e.Delete(WorkflowEventOperation.Delete);
+                        wa.BoundaryTimers.Remove(e);
                         currentEvents.Remove(id);
                     },
 
                     (id, m,  e) =>
                     {
+                        e.Xml.DiagramXml = locator.GetDiagram(id).ToString();
                         e.SetModel(m);
-                        e.Execute(WorkflowEventOperation.Save);
                     });
             }
             wa.BpmnElementId = bpmnElementId;
