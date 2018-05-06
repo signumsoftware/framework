@@ -196,7 +196,7 @@ namespace Signum.Engine
                     if(onRemove == null)
                         query.Where(p => !oldElements.Contains(p)).UnsafeDelete();
                     else
-                        query.ToList().ForEach(line => onRemove(line, e));
+                        query.Where(p => !oldElements.Contains(p)).ToList().ForEach(line => onRemove(line, e));
                 }
 
                 if (mlist != null)
