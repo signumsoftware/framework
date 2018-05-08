@@ -282,23 +282,6 @@ namespace Signum.Utilities.DataStructures
             }
         }
 
-        public void BreadthExploreConnections(T root, Func<T, E, T, bool> condition)
-        {
-            Queue<T> queue = new Queue<T>();
-            queue.Enqueue(root);
-
-            while (queue.Count > 0)
-            {
-                T node = queue.Dequeue();
-
-                foreach (var kvp in RelatedTo(node))
-                {
-                    if (condition(node, kvp.Value, kvp.Key))
-                        queue.Enqueue(kvp.Key);
-                }
-            }
-        }
-
         public DirectedEdgedGraph<T, E> Inverse()
         {
             DirectedEdgedGraph<T, E> result = new DirectedEdgedGraph<T, E>(Comparer);
