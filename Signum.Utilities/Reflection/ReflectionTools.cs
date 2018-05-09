@@ -422,9 +422,6 @@ namespace Signum.Utilities.Reflection
             if (utype.IsEnum)
                 return Enum.Parse(utype, (string)value);
 
-            if (utype.Name == "Boolean" && (value.ToLower() == "yes" || value.ToLower() == "no") )
-                return value.ToLower() == "yes";
-
             if (utype == typeof(Guid))
                 return Guid.Parse(value);
 
@@ -780,7 +777,6 @@ namespace Signum.Utilities.Reflection
         {
             return (pi.CanRead && pi.GetGetMethod().IsStatic) ||
                   (pi.CanWrite && pi.GetSetMethod().IsStatic);
-        }
-      
+        }    
     }
 }
