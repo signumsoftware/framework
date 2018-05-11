@@ -24,7 +24,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="CNTK.CPUOnly" Version="2.6.0-rc0.dev20180413" />
+    <PackageReference Include="CNTK.CPUOnly" Version="2.6.0-rc0.dev20180510" />
   </ItemGroup>
 
   <Target Name="SignumAfterCompile" AfterTargets="Build" DependsOnTargets="CoreCompile">
