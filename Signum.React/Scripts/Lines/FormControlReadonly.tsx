@@ -3,7 +3,6 @@ import { StyleContext, TypeContext } from '../Lines';
 import { classes, addClass } from '../Globals';
 
 import "./Lines.css"
-import { navigatorIsReadOnly } from '../../../../Extensions/Signum.React.Extensions/Authorization/AuthClient';
 
 export interface FormControlReadonlyProps extends React.Props<FormControlReadonly> {
     ctx: StyleContext;
