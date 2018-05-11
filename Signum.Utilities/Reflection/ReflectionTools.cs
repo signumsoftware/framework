@@ -777,6 +777,6 @@ namespace Signum.Utilities.Reflection
         {
             return (pi.CanRead && pi.GetGetMethod().IsStatic) ||
                   (pi.CanWrite && pi.GetSetMethod().IsStatic);
-        }
+        }    
     }
 }
