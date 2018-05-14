@@ -86,7 +86,7 @@ namespace Signum.Engine.Linq
         protected internal override Expression VisitEntity(EntityExpression entity)
         {
             if (!inLite)
-                return this.VisitEntity(entity);
+                return base.VisitEntity(entity);
 
             var newID = (PrimaryKeyExpression)Visit(entity.ExternalId);
 
