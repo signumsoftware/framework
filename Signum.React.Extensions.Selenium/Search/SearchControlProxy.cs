@@ -57,16 +57,16 @@ namespace Signum.React.Selenium
 
         public EntityContextMenuProxy SelectedClick()
         {
-            this.Element.FindElement(By.CssSelector("ul.sf-tm-selected")).Click();
+            this.Element.FindElement(By.CssSelector(".sf-tm-selected")).Click();
 
-            var element = this.Element.WaitElementVisible(By.CssSelector("div.dropdown  > ul.dropdown-menu"));
+            var element = this.Element.WaitElementVisible(By.CssSelector("div.dropdown  > .dropdown-menu"));
 
             return new EntityContextMenuProxy(this.Results, element);
         }
 
         public IWebElement WaitContextMenu()
         {
-            return Element.WaitElementVisible(By.CssSelector("ul.sf-context-menu"));
+            return Element.WaitElementVisible(By.CssSelector(".dropdown-menu.sf-context-menu"));
         }
 
         public WebElementLocator ToggleFiltersButton

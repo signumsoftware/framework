@@ -269,7 +269,7 @@ namespace Signum.React.Selenium
 
         public static void SelectTab(this ILineContainer lineContainer, string eventKey)
         {
-            lineContainer.Element.WaitElementVisible(By.CssSelector($"li.nav-item[data-eventKey={eventKey}] a")).Click();
+            lineContainer.Element.WaitElementVisible(By.CssSelector($"li.nav-item[data-eventkey={eventKey}] a")).Click();
         }
 
         public static SearchControlProxy GetSearchControl(this ILineContainer lineContainer, object queryName)
