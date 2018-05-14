@@ -605,5 +605,21 @@ namespace Signum.Utilities.DataStructures
         {
             return "{0}-{1}->{2}".FormatWith(From, Value, To);
         }
-    };
+    }
+
+    public static class DirectedEdgedGraphExtensions
+    {
+        public static E GetOrCreate<T, E>(this DirectedEdgedGraph<T, E> graph, T from, T to)
+            where E : new()
+        {
+            var dic = graph.TryRelatedTo(from);
+
+            if (dic != null)
+                return dic.GetOrCreate(to);
+            
+            E newEdge = new E();
+            graph.Add(from, to, newEdge);
+            return newEdge;
+        }
+    }
 }
