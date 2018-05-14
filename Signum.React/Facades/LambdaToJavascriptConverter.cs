@@ -138,7 +138,7 @@ namespace Signum.React.Facades
             if (expr.NodeType != ExpressionType.MemberAccess)
                 return r;
 
-            if (expr.Type.IsModifiableEntity() || expr.Type.IsLite())
+            if (expr.Type.IsModifiableEntity() || expr.Type.IsLite() || expr.Type.IsIEntity())
                 return "getToString(" + r + ")";
 
             string formatFull = format == null ? null : (", '" + format + "'");
