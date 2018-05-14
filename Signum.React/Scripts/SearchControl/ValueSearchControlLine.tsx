@@ -120,14 +120,14 @@ export default class ValueSearchControlLine extends React.Component<ValueSearchC
                 labelText={this.props.labelText || (token ? token.niceName : getQueryNiceName(fo.queryName))}
                 labelHtmlAttributes={this.props.labelHtmlAttributes}
                 htmlAttributes={this.props.formGroupHtmlAttributes}>
-                <div className={isFormControl && (unit ||view || extra || find) ? "input-group" : undefined}>
+                <div className={isFormControl && (unit || view || extra || find) ? "input-group" : this.props.ctx.formControlPlainTextClass}>
                     <ValueSearchControl
                         ref={this.handleValueSearchControlLoaded}
                         findOptions={fo}
                         initialValue={this.props.initialValue}
                         isBadge={isBadge}
                         isLink={this.props.isLink}
-                        formControlClass={isFormControl ? "form-control-plantext" : undefined}
+                        formControlClass={isFormControl ? this.props.ctx.formControlPlainTextClass : undefined}
                         valueToken={this.props.valueToken}
                         onValueChange={() => this.forceUpdate()}
                         onTokenLoaded={() => this.forceUpdate()}
