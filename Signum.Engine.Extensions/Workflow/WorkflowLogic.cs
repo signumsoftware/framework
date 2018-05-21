@@ -93,7 +93,7 @@ namespace Signum.Engine.Workflow
 
         public static IEnumerable<WorkflowConnectionEntity> WorkflowConnectionsFromCache(this WorkflowEntity e)
         {
-            return GetWorkflowNodeGraph(e.ToLite()).NextGraph.EdgesWithValue.Select(edge => edge.Value);
+            return GetWorkflowNodeGraph(e.ToLite()).NextGraph.EdgesWithValue.SelectMany(edge => edge.Value);
         }
 
         static Expression<Func<WorkflowEntity, IQueryable<WorkflowConnectionEntity>>> WorkflowMessageConnectionsExpression =
@@ -152,9 +152,14 @@ namespace Signum.Engine.Workflow
             return NextConnectionsExpression.Evaluate(e);
         }
 
-        public static IEnumerable<WorkflowConnectionEntity> NextConnectionsFromCache(this IWorkflowNodeEntity e)
+        public static IEnumerable<WorkflowConnectionEntity> NextConnectionsFromCache(this IWorkflowNodeEntity e, ConnectionType? type)
         {
-            return GetWorkflowNodeGraph(e.Lane.Pool.Workflow.ToLite()).NextGraph.RelatedTo(e).Values;
+            var result = GetWorkflowNodeGraph(e.Lane.Pool.Workflow.ToLite()).NextConnections(e);
+
+            if (type == null)
+                return result;
+
+            return result.Where(a => a.Type == type);
         }
 
         static Expression<Func<IWorkflowNodeEntity, IQueryable<WorkflowConnectionEntity>>> PreviousConnectionsExpression =
@@ -167,7 +172,7 @@ namespace Signum.Engine.Workflow
 
         public static IEnumerable<WorkflowConnectionEntity> PreviousConnectionsFromCache(this IWorkflowNodeEntity e)
         {
-            return GetWorkflowNodeGraph(e.Lane.Pool.Workflow.ToLite()).PreviousGraph.RelatedTo(e).Values;
+            return GetWorkflowNodeGraph(e.Lane.Pool.Workflow.ToLite()).PreviousConnections(e);
         }
 
 
@@ -189,7 +194,7 @@ namespace Signum.Engine.Workflow
                 if (graph.TrackId != null)
                     return graph;
 
-                var errors = graph.Validate((g, newDirection)=>
+                var errors = graph.Validate((g, newDirection) =>
                 {
                     throw new InvalidOperationException($"Unexpected direction of gateway '{g}' (Should be '{newDirection.NiceToString()}'). Consider saving Workflow '{workflow}'.");
                 });
@@ -250,7 +255,7 @@ namespace Signum.Engine.Workflow
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
-                PermissionAuthLogic.RegisterPermissions(WorkflowScriptRunnerPanelPermission.ViewWorkflowScriptRunnerPanel);
+                PermissionAuthLogic.RegisterPermissions(WorkflowPanelPermission.ViewWorkflowPanel);
 
                 WorkflowLogic.getConfiguration = getConfiguration;
 
@@ -305,6 +310,7 @@ namespace Signum.Engine.Workflow
                     .WithDelete(WorkflowActivityOperation.Delete)
                     .WithExpressionFrom(dqm, (WorkflowEntity p) => p.WorkflowActivities())
                     .WithExpressionFrom(dqm, (WorkflowLaneEntity p) => p.WorkflowActivities())
+                    .WithVirtualMList(wa => wa.BoundaryTimers, e => e.BoundaryOf, WorkflowEventOperation.Save, WorkflowEventOperation.Delete)
                     .WithQuery(dqm, () => e => new
                     {
                         Entity = e,
@@ -315,8 +321,6 @@ namespace Signum.Engine.Workflow
                         e.Lane,
                         e.Lane.Pool.Workflow,
                     });
-
-                sb.AddUniqueIndexMList((WorkflowActivityEntity a) => a.Jumps, mle => new { mle.Parent, mle.Element.To });
 
                 sb.Include<WorkflowEventEntity>()
                     .WithSave(WorkflowEventOperation.Save)
@@ -338,7 +342,7 @@ namespace Signum.Engine.Workflow
                     Delete = (e, _) =>
                     {
 
-                        if (e.Type.IsTimerStart())
+                        if (e.Type.IsScheduledStart())
                         {
                             var scheduled = e.ScheduledTask();
                             if (scheduled != null)
@@ -458,7 +462,7 @@ namespace Signum.Engine.Workflow
             {
                 Delete = (e, _) =>
                 {
-                    ThrowConnectionError(Database.Query<WorkflowActivityEntity>().Where(a => a.Timers.Any(t => t.Condition == e.ToLite())), e);
+                    ThrowConnectionError(Database.Query<WorkflowEventEntity>().Where(a => a.Timer.Condition == e.ToLite()), e);
                     e.Delete();
                 },
             }.Register();
@@ -614,20 +618,20 @@ namespace Signum.Engine.Workflow
             throw new ApplicationException($"Impossible to delete '{toDelete}' because is used in some connections: \r\n" + formattedErrors);
         }
 
-        private static void ThrowConnectionError(IQueryable<WorkflowActivityEntity> queryable, Entity toDelete)
+        private static void ThrowConnectionError<T>(IQueryable<T> queryable, Entity toDelete)
+            where T : Entity, IWorkflowNodeEntity
         {
             if (queryable.Count() == 0)
                 return;
 
-            var errors = queryable.Select(a => new { Activity = a.ToLite(), Workflow = a.Lane.Pool.Workflow.ToLite() }).ToList();
+            var errors = queryable.Select(a => new { Entity = a.ToLite(), Workflow = a.Lane.Pool.Workflow.ToLite() }).ToList();
 
             var formattedErrors = errors.GroupBy(a => a.Workflow).ToString(gr => $"Workflow '{gr.Key}':" +
-                  gr.ToString(a => $"Activity {a.Activity}", "\r\n").Indent(4),
+                  gr.ToString(a => $"{typeof(T).NiceName()} {a.Entity}", "\r\n").Indent(4),
                 "\r\n\r\n").Indent(4);
 
-            throw new ApplicationException($"Impossible to delete '{toDelete}' because is used in some activities: \r\n" + formattedErrors);
+            throw new ApplicationException($"Impossible to delete '{toDelete}' because is used in some {typeof(T).NicePluralName()}: \r\n" + formattedErrors);
         }
-
 
         public class WorkflowGraph : Graph<WorkflowEntity>
         {

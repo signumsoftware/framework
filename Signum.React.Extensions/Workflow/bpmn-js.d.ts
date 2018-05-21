@@ -76,6 +76,11 @@ declare namespace BPMN {
         descriptor: Descriptor;
     }
     
+    interface DeletePostExecutedEvent extends Event {
+        command: string;
+        context: { elements: DiElement[] };
+    }
+
     interface CreatedElement {
         descriptor: Descriptor;
         element: DiElement;
@@ -94,12 +99,16 @@ declare namespace BPMN {
         }
     }
 
+    interface AutoPlaceEndEvent extends Event {
+        shape: DiElement;
+    }
+
     interface DiElement {
         attachers: any[];
         businessObject: ModdleElement;
         type: ElementType;
         id: string;
-        host: any;
+        host: DiElement;
         parent: DiElement;
         label: DiElement;
         colapsed: boolean;

@@ -146,7 +146,7 @@ export default class TypesRulesPackControl extends React.Component<{ ctx: TypeCo
                         <tr>
                             <th>
                                 <div style={{ marginBottom: "-2px"}}>
-                                    <input type="text" className="form-control-sm" id="filter" placeholder="Auth-!overriden+!conditions" value={this.state.filter} onChange={this.handleSetFilter} />
+                                    <input type="text" className="form-control form-control-sm" id="filter" placeholder="Auth-!overriden+!conditions" value={this.state.filter} onChange={this.handleSetFilter} />
                                 </div>
                             </th>
 

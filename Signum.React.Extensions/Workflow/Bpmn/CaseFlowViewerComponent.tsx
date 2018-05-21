@@ -1,7 +1,7 @@
 ﻿import * as React from 'react'
 import {
     WorkflowEntitiesDictionary, WorkflowActivityModel, WorkflowActivityType, WorkflowPoolModel, WorkflowLaneModel, WorkflowConnectionModel, WorkflowEventModel, WorkflowEntity,
-    IWorkflowNodeEntity, CaseFlowColor, CaseActivityEntity, CaseEntity, WorkflowMessage
+    IWorkflowNodeEntity, CaseFlowColor, CaseActivityEntity, CaseEntity, WorkflowMessage, WorkflowEventEntity, WorkflowActivityEntity
 } from '../Signum.Entities.Workflow'
 import { JavascriptMessage } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
 import { Dic } from '../../../../Framework/Signum.React/Scripts/Globals'
@@ -54,7 +54,7 @@ export default class CaseFlowViewerComponent extends React.Component<CaseFlowVie
 
             if (this.props.caseActivity) {
                 var sp = this.viewer.get("searchPad") as any;
-                sp._search(this.props.caseActivity.workflowActivity.bpmnElementId);
+                sp._search((this.props.caseActivity.workflowActivity as (WorkflowEventEntity | WorkflowActivityEntity)).bpmnElementId);
             }
         }
     }
@@ -114,9 +114,9 @@ export default class CaseFlowViewerComponent extends React.Component<CaseFlowVie
         };
 
         var caseFlowRenderer = this.viewer.get<caseFlowRenderer.CaseFlowRenderer>('caseFlowRenderer');
-        caseFlowRenderer.getDecisionResult = con => {
+        caseFlowRenderer.getConnectionType = con => {
             var mod = this.props.entities[con.id] as (WorkflowConnectionModel | undefined);
-            return mod && mod.decisonResult || undefined;
+            return mod && mod.type || undefined;
         }
 
         caseFlowRenderer.viewer = this.viewer;

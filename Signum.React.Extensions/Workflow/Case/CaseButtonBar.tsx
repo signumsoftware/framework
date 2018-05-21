@@ -26,28 +26,28 @@ export default class CaseButtonBar extends React.Component<CaseButtonBarProps>{
 
     render() {
 
-        var a = this.props.pack.entity;
+        var ca = this.props.pack.entity;
 
-        if (a.doneDate != null) {
+        if (ca.doneDate != null) {
             return (
                 <div className="workflow-buttons">
                     {CaseActivityMessage.DoneBy0On1.niceToString().formatHtml(
-                        <strong>{a.doneBy && a.doneBy.toStr}</strong>,
-                        a.doneDate && <strong>{moment(a.doneDate).format("L LT")} ({moment(a.doneDate).fromNow()})</strong>)
+                        <strong>{ca.doneBy && ca.doneBy.toStr}</strong>,
+                        ca.doneDate && <strong>{moment(ca.doneDate).format("L LT")} ({moment(ca.doneDate).fromNow()})</strong>)
                     }
                 </div>
             );
         }
 
-        const ctx = new TypeContext(undefined, undefined, PropertyRoute.root(CaseActivityEntity), new ReadonlyBinding(a, "act"));
+        const ctx = new TypeContext(undefined, undefined, PropertyRoute.root(CaseActivityEntity), new ReadonlyBinding(ca, "act"));
         return (
             <div>
                 <div className="workflow-buttons">
                     <ButtonBar frame={this.props.frame} pack={this.props.pack} />
                     <ValueLine ctx={ctx.subCtx(a => a.note)} formGroupStyle="None" placeholderLabels={true} />
                 </div>
-                {a.workflowActivity.userHelp &&
-                    <UserHelpComponent activity={a.workflowActivity} />}
+                {(ca.workflowActivity as WorkflowActivityEntity).userHelp &&
+                    <UserHelpComponent activity={ca.workflowActivity as WorkflowActivityEntity} />}
             </div>
         );
     }
