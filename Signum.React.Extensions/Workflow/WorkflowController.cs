@@ -159,7 +159,7 @@ namespace Signum.React.Workflow
         [Route("api/workflow/scriptRunner/view"), HttpGet]
         public WorkflowScriptRunnerState View()
         {
-            WorkflowScriptRunnerPanelPermission.ViewWorkflowScriptRunnerPanel.AssertAuthorized();
+            WorkflowPanelPermission.ViewWorkflowPanel.AssertAuthorized();
 
             WorkflowScriptRunnerState state = WorkflowScriptRunner.ExecutionState();
 
@@ -169,7 +169,7 @@ namespace Signum.React.Workflow
         [Route("api/workflow/scriptRunner/start"), HttpPost]
         public void Start()
         {
-            WorkflowScriptRunnerPanelPermission.ViewWorkflowScriptRunnerPanel.AssertAuthorized();
+            WorkflowPanelPermission.ViewWorkflowPanel.AssertAuthorized();
 
             WorkflowScriptRunner.StartRunningScripts(0);
 
@@ -179,7 +179,7 @@ namespace Signum.React.Workflow
         [Route("api/workflow/scriptRunner/stop"), HttpPost]
         public void Stop()
         {
-            WorkflowScriptRunnerPanelPermission.ViewWorkflowScriptRunnerPanel.AssertAuthorized();
+            WorkflowPanelPermission.ViewWorkflowPanel.AssertAuthorized();
 
             WorkflowScriptRunner.Stop();
 
