@@ -256,11 +256,16 @@ namespace Signum.Engine
 
                                         difCol.ColumnEquals(tabCol, ignorePrimaryKey: true, ignoreIdentity: false, ignoreGenerateAlways: false) ? null : SqlPreCommand.Combine(Spacing.Simple,
                                             tabCol.PrimaryKey && !difCol.PrimaryKey && dif.PrimaryKeyName != null ? SqlBuilder.DropPrimaryKeyConstraint(tab.Name) : null,
-
-                                        difCol.CompatibleTypes(tabCol) ? SqlBuilder.AlterTableAlterColumn(tab, tabCol, difCol.DefaultConstraint?.Name) :
-                                                SqlPreCommand.Combine(Spacing.Simple,
-                                                    SqlBuilder.AlterTableDropColumn(tab, tabCol.Name),
-                                                    SqlBuilder.AlterTableAddColumn(tab, tabCol))
+                                        difCol.CompatibleTypes(tabCol) ?
+                                                 SqlPreCommand.Combine(Spacing.Simple, 
+                                                    difCol.Nullable && !tabCol.Nullable.ToBool() ? NotNullUpdate(tab, tabCol, replacements) : null,
+                                                    SqlBuilder.AlterTableAlterColumn(tab, tabCol, difCol.DefaultConstraint?.Name)
+                                                ):
+                                                SqlPreCommand.Combine(Spacing.Simple, 
+                                                    SqlBuilder.AlterTableAddColumn(tab, tabCol),
+                                                    new SqlPreCommandSimple($"UPDATE {tab.Name} SET {tabCol.Name} = YourCode({difCol.Name})"),
+                                                    SqlBuilder.AlterTableDropColumn(tab, tabCol.Name)
+                                                ) 
                                             ,
                                             tabCol.SqlDbType == SqlDbType.NVarChar && difCol.SqlDbType == SqlDbType.NChar ? SqlBuilder.UpdateTrim(tab, tabCol) : null),
 
@@ -270,8 +275,8 @@ namespace Signum.Engine
 
                                         UpdateByFkChange(tn, difCol, tabCol, ChangeName, copyDataFrom)
                                     )
-                                );
-                            
+                        );
+
                             var addPeriod = ((tab.SystemVersioned != null &&
                                 (dif.Period == null || !dif.Period.PeriodEquals(tab.SystemVersioned))) ?
                                 (SqlPreCommandSimple)SqlBuilder.AlterTableAddPeriod(tab) : null);
@@ -405,6 +410,16 @@ namespace Signum.Engine
             }
         }
 
+        private static SqlPreCommandSimple NotNullUpdate(ITable tab, IColumn tabCol, Replacements rep)
+        {
+            var defaultValue = GetDefaultValue(tab, tabCol, rep, forNewColumn: false);
+
+            if (defaultValue == "force")
+                return null;
+
+            return new SqlPreCommandSimple($"UPDATE {tab.Name} SET {tabCol.Name} = {defaultValue} WHERE {tabCol.Name} IS NULL");
+        }
+
         private static bool DifferentDatabase(ObjectName name, ObjectName name2)
         {
             return !object.Equals(name.Schema.Database, name2.Schema.Database);
@@ -431,10 +446,10 @@ namespace Signum.Engine
         {
             if (column.Nullable == IsNullable.Yes || column.Identity || column.Default != null)
                 return SqlBuilder.AlterTableAddColumn(table, column);
-            
-            var defaultValue = GetDefaultValue(table, column, rep);
-            if (defaultValue == "force")
-                return SqlBuilder.AlterTableAddColumn(table, column);
+
+                var defaultValue = GetDefaultValue(table, column, rep, forNewColumn: true);
+                if (defaultValue == "force")
+                    return SqlBuilder.AlterTableAddColumn(table, column);
 
             if(column.Nullable == IsNullable.Forced)
             {
@@ -467,7 +482,7 @@ WHERE {where}"));
         internal static SqlPreCommand CopyData(ITable newTable, DiffTable oldTable, Replacements rep)
         {
             var selectColumns = newTable.Columns
-                .Select(col => oldTable.Columns.TryGetC(col.Key)?.Name ?? GetDefaultValue(newTable, col.Value, rep))
+                .Select(col => oldTable.Columns.TryGetC(col.Key)?.Name ?? GetDefaultValue(newTable, col.Value, rep, forNewColumn: true))
                 .ToString(", ");
 
             var insertSelect = new SqlPreCommandSimple(
@@ -485,16 +500,22 @@ FROM {oldTable.Name}");
             );
         }
 
-        public static string GetDefaultValue(ITable table, IColumn column, Replacements rep)
+        public static string GetDefaultValue(ITable table, IColumn column, Replacements rep, bool forNewColumn)
         {
-            if(column is SystemVersionedInfo.Column svc)
+     		if(column is SystemVersionedInfo.Column svc)
             {
                 var date = svc.SystemVersionColumnType == SystemVersionedInfo.ColumnType.Start ? DateTime.MinValue : DateTime.MaxValue;
 
                 return $"CONVERT(datetime2, '{date:yyyy-MM-dd HH:mm:ss.fffffff}')";
             }
 
-            string defaultValue = rep.Interactive ? SafeConsole.AskString("Default value for '{0}.{1}'? (or press enter) ".FormatWith(table.Name.Name, column.Name), stringValidator: str => null) : "";
+            string typeDefault = SqlBuilder.IsNumber(column.SqlDbType) ? "0" :
+                                 SqlBuilder.IsString(column.SqlDbType) ? "''" :
+                                 SqlBuilder.IsDate(column.SqlDbType) ? "GetDate()" :
+                                 column.SqlDbType == SqlDbType.UniqueIdentifier ? "NEWID()" :
+                                 "?";
+
+            string defaultValue = rep.Interactive ? SafeConsole.AskString($"Default value for '{table.Name.Name}.{column.Name}'? ([Enter] for {typeDefault} or 'force' if there are no {(forNewColumn ? "rows" : "nulls")}) ", stringValidator: str => null) : "";
             if (defaultValue == "force")
                 return defaultValue;
 
@@ -502,11 +523,7 @@ FROM {oldTable.Name}");
                 defaultValue = "'" + defaultValue + "'";
 
             if (string.IsNullOrEmpty(defaultValue))
-                defaultValue = SqlBuilder.IsNumber(column.SqlDbType) ? "0" :
-                    SqlBuilder.IsString(column.SqlDbType) ? "''" :
-                    SqlBuilder.IsDate(column.SqlDbType) ? "GetDate()" :
-                    column.SqlDbType == SqlDbType.UniqueIdentifier ? "NEWID()" :
-                    "?";
+                return typeDefault;
 
             return defaultValue;
         }

@@ -179,7 +179,7 @@ export class EntityTableRow extends React.Component<EntityTableRowProps, { rowSt
         var rowAtts = this.props.onRowHtmlAttributes && this.props.onRowHtmlAttributes(ctx, this, this.state.rowState);
         const drag = this.props.draggable;
         return (
-            <tr style={{ backgroundColor: rowAtts && rowAtts.style && rowAtts.style.backgroundColor }}
+            <tr style={{ backgroundColor: rowAtts && rowAtts.style && rowAtts.style.backgroundColor || undefined }}
                 onDragEnter={drag && drag.onDragOver}
                 onDragOver={drag && drag.onDragOver}
                 onDrop={drag && drag.onDrop}

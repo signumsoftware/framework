@@ -28,6 +28,7 @@ import { ISimpleFilterBuilder } from './SearchControl'
 import "./Search.css"
 import { FilterOperation } from '../Signum.Entities.DynamicQuery';
 import SystemTimeEditor from './SystemTimeEditor';
+import { MaxHeightProperty } from 'csstype';
 
 export interface ShowBarExtensionOption { }
 
@@ -41,7 +42,7 @@ export interface SearchControlLoadedProps {
     entityFormatter?: EntityFormatter;
     extraButtons?: (searchControl: SearchControlLoaded) => (React.ReactElement<any> | null | undefined | false)[];
     getViewPromise?: (e: ModifiableEntity) => undefined | string | Navigator.ViewPromise<any>;
-    maxResultsHeight?: React.CSSWideKeyword | any;
+    maxResultsHeight?: MaxHeightProperty<string | number> | any;
     tag?: string | {};
 
     searchOnLoad: boolean;
@@ -1013,13 +1014,18 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
                 .map((col, i) => ({ col, value: row.columns[i] }))
                 .filter(a => a.col.token && a.col.token.queryTokenType != "Aggregate")
                 .map(a => ({ columnName: a.col.token!.fullKey, operation: "EqualTo", value: a.value }) as FilterOption);
-
+            
             var nonAggregateFilters = resFo.filterOptions.filter(fo => fo.token != null && fo.token.queryTokenType != "Aggregate")
                 .map(fo => ({ columnName: fo.token!.fullKey, operation: fo.operation, value: fo.value }) as FilterOption);
+
+            var extraColumns = resFo.columnOptions.filter(a => a.token && a.token.queryTokenType == "Aggregate" && a.token.parent)
+                .map(a => ({ columnName: a.token!.parent!.fullKey }) as ColumnOption);
 
             Finder.explore({
                 queryName: resFo.queryKey,
                 filterOptions: nonAggregateFilters.concat(keyFilters),
+                columnOptions: extraColumns,
+                columnOptionsMode: "Add",
                 systemTime: resFo.systemTime && { ...resFo.systemTime },
             }).done();
 

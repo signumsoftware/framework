@@ -84,13 +84,13 @@ export class Dropdown extends React.Component<DropdownProps> {
     removeEvents() {
 
         document.removeEventListener("click", this.handleDocumentClick);
-        document.removeEventListener("touchstart", this.handleDocumentClick);
+        document.removeEventListener("touchstart", this.handleDocumentClick );
         document.removeEventListener("keyup", this.handleDocumentKeyUp);
     }
 
-    handleDocumentClick = (e: MouseEvent | TouchEvent) => {
+    handleDocumentClick = (e: MouseEvent | /*Touch*/Event) => {
 
-        if (e.which == 3)
+        if ((e as TouchEvent).which == 3)
             return;
 
         const container = this.getContainer();
@@ -175,7 +175,7 @@ export class Dropdown extends React.Component<DropdownProps> {
         }
     }
 
-    toggle = (e: KeyboardEvent | MouseEvent | TouchEvent | React.KeyboardEvent<any>) => {
+    toggle = (e: KeyboardEvent | MouseEvent | /*Touch*/Event | React.KeyboardEvent<any>) => {
         if (this.props.disabled) {
             return e && e.preventDefault();
         }

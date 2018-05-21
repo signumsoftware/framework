@@ -270,6 +270,9 @@ namespace Signum.Engine.Linq
             {
                 if (projector is EntityExpression ee)
                 {
+                    ee = Completed(ee);
+
+
                     var fi = m as FieldInfo ?? Reflector.FindFieldInfo(m.DeclaringType, (PropertyInfo)m);
 
                     var newBinding = ChangeProjector(index + 1, members, ee.GetBinding(fi), changeExpression);
@@ -290,7 +293,26 @@ namespace Signum.Engine.Linq
 
                     var arguments = ne.Arguments.Select((oldArg, i) => i != index ? oldArg : newArg);
 
-                    return Expression.New(ne.Constructor, ne.Arguments, ne.Members);
+                    return Expression.New(ne.Constructor, arguments, ne.Members);
+                }
+                else if (projector is MListExpression me)
+                {
+                    var proj = MListProjection(me, true);
+                    using (SetCurrentSource(proj.Select))
+                    {
+                        var mle = (NewExpression) proj.Projector;
+
+                        var paramIndex = mle.Constructor.GetParameters().IndexOf(p => p.Name == "value");
+
+                        var newElement = ChangeProjector(index + 1, members, mle.Arguments[paramIndex], changeExpression);
+
+                        var newMle = Expression.New(mle.Constructor,
+                            mle.Arguments.Select((a, i) => paramIndex == i ? newElement : a));
+
+                        var newProjection = new ProjectionExpression(proj.Select, newMle, proj.UniqueFunction, proj.Type);
+
+                        return new MListProjectionExpression(me.Type, newProjection);
+                    }
                 }
             }
 
@@ -493,10 +515,11 @@ namespace Signum.Engine.Linq
             ProjectionExpression projection = this.VisitCastProjection(source);
 
             Alias alias = NextSelectAlias();
-            ProjectedColumns pc = ColumnProjector.ProjectColumns(projection.Projector, alias, isGroupKey: true, selectTrivialColumns: true);
+            var proj = DistinctEntityCleaner.Clean(projection.Projector);
+            ProjectedColumns pc = ColumnProjector.ProjectColumns(proj, alias, isGroupKey: true, selectTrivialColumns: true);
             return new ProjectionExpression(
                 new SelectExpression(alias, true, null, pc.Columns, projection.Select, null, null, null, 0),
-                pc.Projector, null, resultType);
+                proj, null, resultType);
         }
 
         private Expression BindReverse(Type resultType, Expression source)

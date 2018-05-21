@@ -123,7 +123,7 @@ export class Tooltip extends React.Component<TooltipProps> {
         this._hideTimeout = undefined;
     }
 
-    handleDocumentClick = (e: MouseEvent | TouchEvent) => {
+    handleDocumentClick = (e: MouseEvent | /*Touch*/Event) => {
         if (e.target === this._target || this._target!.contains(e.target as HTMLElement)) {
             if (this._hideTimeout) {
                 this.clearHideTimeout();
