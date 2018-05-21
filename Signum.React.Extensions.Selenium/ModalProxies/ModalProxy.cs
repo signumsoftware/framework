@@ -22,7 +22,7 @@ namespace Signum.React.Selenium
             this.Selenium = element.GetDriver();
             this.Element = element;
 
-            if (!this.Element.HasClass("modal", "fade", "in"))
+            if (!this.Element.HasClass("modal"))
                 throw new InvalidOperationException("Not a valid modal");
         }
 

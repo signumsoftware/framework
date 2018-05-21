@@ -6,6 +6,7 @@ using Signum.Engine.Authorization;
 using Signum.Entities.Authorization;
 using Signum.Utilities;
 using Signum.React.Authorization;
+using System.Web.Http;
 
 namespace Signum.React.Authorization
 {
@@ -14,7 +15,7 @@ namespace Signum.React.Authorization
         public static Func<string> OnCookieName = () => "sfUser";
         public static string CookieName { get { return OnCookieName(); } }
 
-        public static bool LoginFromCookie()
+        public static bool LoginFromCookie(ApiController controller)
         {
             using (AuthLogic.Disable())
             {
@@ -30,7 +31,7 @@ namespace Signum.React.Authorization
                            System.Web.HttpContext.Current.Request.UserHostAddress,
                            ref ticketText);
 
-                    AuthServer.OnUserPreLogin(null, user);
+                    AuthServer.OnUserPreLogin(controller, user);
 
                     System.Web.HttpContext.Current.Response.Cookies.Add(new HttpCookie(CookieName, ticketText)
                     {
@@ -40,7 +41,7 @@ namespace Signum.React.Authorization
 
                     });
 
-                    AuthServer.AddUserSession(user);
+                    AuthServer.AddUserSession(controller, user);
                     return true;
                 }
                 catch

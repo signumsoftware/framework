@@ -47,7 +47,7 @@ export default class UserQuery extends React.Component<{ ctx: TypeContext<UserQu
                     (<div>
                         <EntityLine ctx={ctx.subCtx(e => e.entityType)} onChange={() => this.forceUpdate()} />
                         {
-                        this.props.ctx.value.entityType &&
+                            this.props.ctx.value.entityType &&
                             <div>
                                 <ValueLine ctx={ctx.subCtx(e => e.hideQuickLink)} />
                                 <p className="messageEntity col-sm-offset-2">
@@ -55,7 +55,7 @@ export default class UserQuery extends React.Component<{ ctx: TypeContext<UserQu
                                 </p>
                             </div>
                         }
-                        <ValueLine ctx={ctx.subCtx(e => e.withoutFilters)} />
+                        <ValueLine ctx={ctx.subCtx(e => e.appendFilters)} />
                         <ValueLine ctx={ctx.subCtx(e => e.groupResults)} />
                         <div>
                             <EntityTable ctx={ctxxs.subCtx(e => e.filters)} columns={EntityTable.typedColumns<QueryFilterEmbedded>([

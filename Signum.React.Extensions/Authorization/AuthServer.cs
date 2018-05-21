@@ -28,7 +28,7 @@ namespace Signum.React.Authorization
         public static bool MergeInvalidUsernameAndPasswordMessages = false;
 
         public static Action<ApiController, UserEntity> UserPreLogin;
-        public static Action<UserEntity> UserLogged;
+        public static Action<ApiController, UserEntity> UserLogged;
         public static Action UserLoggingOut;
         
 
@@ -50,8 +50,14 @@ namespace Signum.React.Authorization
             {
                 ReflectionServer.AddTypeExtension += (ti, t) =>
                 {
+
                     if (typeof(Entity).IsAssignableFrom(t))
-                        ti.Extension.Add("typeAllowed", UserEntity.Current == null ? TypeAllowedBasic.None : TypeAuthLogic.GetAllowed(t).MaxUI());
+                    {
+                        var ta = UserEntity.Current != null ? TypeAuthLogic.GetAllowed(t) : null;
+
+                        ti.Extension.Add("typeAllowed", ta == null ? TypeAllowedBasic.None : ta.MaxUI());
+                        ti.RequiresEntityPack |= ta != null && ta.Conditions.Any();
+                    }
                 };
 
 
@@ -140,6 +146,14 @@ namespace Signum.React.Authorization
             
             if (TypeAuthLogic.IsStarted)
                 Omnibox.OmniboxServer.IsNavigable += type => TypeAuthLogic.GetAllowed(type).MaxUI() >= TypeAllowedBasic.Read;
+
+            if (SessionLogLogic.IsStarted)
+                AuthServer.UserLogged +=  (ApiController controller, UserEntity user) =>
+                {
+                    SessionLogLogic.SessionStart(
+                        controller.Request.Headers.Host,
+                        controller.Request.Headers.UserAgent.ToString());
+                };
             
             SchemaMap.GetColorProviders += GetMapColors;
         }
@@ -154,13 +168,12 @@ namespace Signum.React.Authorization
             AuthServer.UserPreLogin?.Invoke(controller, user);
         }
 
-        public static void AddUserSession(UserEntity user)
+        public static void AddUserSession(ApiController controller, UserEntity user)
         {
             UserEntity.Current = user;
 
-            AuthServer.UserLogged?.Invoke(user);
+            AuthServer.UserLogged?.Invoke(controller, user);
         }
-
 
         static MapColorProvider[] GetMapColors()
         {

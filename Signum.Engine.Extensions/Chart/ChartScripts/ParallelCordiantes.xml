@@ -12,7 +12,7 @@
     <Column DisplayName="Dimension8" ColumnType="Positionable" IsOptional="true" />
   </Columns>
   <Parameters>
-    <Parameter Name="ColorSet" Type="Enum" ValueDefinition="YlGn|YlGnBu|GnBu|BuGn|PuBuGn|PuBu|BuPu|RdPu|PuRd|OrRd|YlOrRd|YlOrBr|Purples|Blues|Greens|Oranges|Reds|Greys|PuOr|BrBG|PRGn|PiYG|RdBu|RdGy|RdYlBu|Spectral|RdYlGn" />
+    <Parameter Name="ColorInterpolate" Type="Enum" ValueDefinition="YlGn|YlGnBu|GnBu|BuGn|PuBuGn|PuBu|BuPu|RdPu|PuRd|OrRd|YlOrRd|YlOrBr|Purples|Blues|Greens|Oranges|Reds|Greys|PuOr|BrBG|PRGn|PiYG|RdBu|RdGy|RdYlBu|Spectral|RdYlGn" />
     <Parameter Name="Scale1" Type="Enum" ValueDefinition="ZeroMax(M) | MinMax | Log(M) | Sqrt(M)" ColumnIndex="1" />
     <Parameter Name="Scale2" Type="Enum" ValueDefinition="ZeroMax(M) | MinMax | Log(M) | Sqrt(M)" ColumnIndex="2" />
     <Parameter Name="Scale3" Type="Enum" ValueDefinition="ZeroMax(M) | MinMax | Log(M) | Sqrt(M)" ColumnIndex="3" />
@@ -40,8 +40,8 @@
   //yRule.debugY(chart);
 
 
- var colorSet = data.parameters["ColorSet"];
- var colorInterpolation = ChartUtils.getColorInterpolation(colorSet); 
+ var colorInterpolate = data.parameters["ColorInterpolate"];
+ var colorInterpolation = ChartUtils.getColorInterpolation(colorInterpolate); 
   
  var cords = d3.entries(data.columns)
     .filter(function(p, i){return p.key != "c0" && p.key != "entity" && p.value.token != undefined;})

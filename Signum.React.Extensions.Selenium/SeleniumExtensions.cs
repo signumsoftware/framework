@@ -314,7 +314,7 @@ namespace Signum.React.Selenium
                 if (last == newLast)
                     return null;
 
-                return newLast.TryFindElement(By.CssSelector(".fade.in.modal"));
+                return newLast.TryFindElement(By.CssSelector(".modal.fade.show"));
             });
 
             return result;

@@ -16,6 +16,8 @@ namespace Signum.Engine.Authorization
 {
     public static class SessionLogLogic
     {
+        public static bool IsStarted { get; private set; }
+
         public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
@@ -36,6 +38,8 @@ namespace Signum.Engine.Authorization
                 PermissionAuthLogic.RegisterPermissions(SessionLogPermission.TrackSession);
 
                 ExceptionLogic.DeleteLogs += ExceptionLogic_DeleteLogs;
+
+                IsStarted = true;
             }
         }
 

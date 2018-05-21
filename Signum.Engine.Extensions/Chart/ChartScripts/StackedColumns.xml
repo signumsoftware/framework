@@ -17,6 +17,8 @@
     <Parameter Name="LabelsMargin" Type="Number" ValueDefinition="100" />
     <Parameter Name="NumberOpacity" Type="Number" ValueDefinition="0.8" />
     <Parameter Name="NumberColor" Type="String" ValueDefinition="White" />
+    <Parameter Name="ColorScheme" Type="Enum" ValueDefinition="category10|accent|dark2|paired|pastel1|pastel2|set1|set2|set3|BrBG[K]|PRGn[K]|PiYG[K]|PuOr[K]|RdBu[K]|RdGy[K]|RdYlBu[K]|RdYlGn[K]|Spectral[K]|Blues[K]|Greys[K]|Oranges[K]|Purples[K]|Reds[K]|BuGn[K]|BuPu[K]|OrRd[K]|PuBuGn[K]|PuBu[K]|PuRd[K]|RdPu[K]|YlGnBu[K]|YlGn[K]|YlOrBr[K]|YlOrRd[K]" />
+    <Parameter Name="ColorSchemeSteps" Type="Enum" ValueDefinition="3|4|5|6|7|8|9|10|11" />
   </Parameters>
   <Icon FileName="stackedcolumns.png"><![CDATA[iVBORw0KGgoAAAANSUhEUgAAACgAAAAoCAYAAACM/rhtAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAoJJREFUeNrsmL1uE0EUha9RuhRQBSVKA8iKe6gQUYqEAiHxAsgSqVJFUYQoyRvwEMFPkFSBxg6isCWkdFDElIhHcOyduTc7P7uZtWfHG9+11oVHWs2sLc98e+aeM9bWiAgWuT2ABW9LwFIAmx9bC1uIK/Oa+Ov5FXW6fZCIICXangDtPSLB3qstOHz/slYJ4GXvL7zZfQ4Yp4QQCMNIwHAk4GYoYDBUfQTffvxRgNXUINr4olipRD11CWkUVH2RiJsbIKECMKBoITVcPBZo+iIRPFcFlUIS7SXprh7tVamCSrVUPcckZotNX2kOkrO1iXJu/SlVKwVEyjdHAlytgphvjiQH2UF9enZF7e51WkMo3QXMIq+3G96wRco3h7TgbMBOrw9v917oSUdCxkErddgO4pA1gRvBxeVvb9iGzCHLqkFOlhFRrjmk3X42ICfL1Md55kgiiL3FnCxr1Dfhe/uXmQPJ+yCNZxs8QE6WHa0dw+rOvqdshB1I+Nc9iQf/eVtcRpb54NS4iJFX5pZlJJydQDVZBi69Z9UgI8vIfueHE3pcxMhTTTJ7lqEDh9rWLhxhsdNkqklmzjLl2hTOALlwQBFfQVaW6Rr0wZlewRMXsP50fWqW1Z88zq/BEJwc8U1y+PADPDr4NFZLdlGM9P31z89x/y4AmYXTvY4b4m9xxoVuPLhuDG2xfQgfXJqJHECdwxNwUVrkoSwzDg/AlZGD8T+siey6Tx2Z7ykLl/xGzVHGmwUfnLtgUH0XLnOCUFkKUj5cMg6or9UaLxELR2UAUuZ4kjlqBOWfgCtqjoJHnVNHPjUCdWTU58GpVlPhu2iv31pfmrUM4PIN6xKwwnYrwADxV36Q8C7avwAAAABJRU5ErkJggg==]]></Icon>
   <Script><![CDATA[function DrawChart(chart, data){
@@ -116,7 +118,7 @@
     .attr('dominant-baseline', 'middle')
     .text(pivot.title);
   
-  var color =  d3.scaleOrdinal(d3.schemeCategory20).domain(pivot.columns.map(function (s) { return s.key; }));
+  var color = d3.scaleOrdinal(ChartUtils.getColorScheme(data.parameters["ColorScheme"], data.parameters["ColorSchemeSteps"])).domain(pivot.columns.map(function (s) { return s.key; }));
   
   //PAINT CHART
   chart.enterData(stackedSeries, 'g', 'shape-serie').attr('transform', translate(xRule.start('content'), yRule.end('content')))

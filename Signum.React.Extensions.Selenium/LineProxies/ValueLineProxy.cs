@@ -77,7 +77,9 @@ namespace Signum.React.Selenium
             if (select != null)
                 return select.SelectElement().SelectedOption.GetAttribute("value").ToString();
 
-            IWebElement readonlyField = this.Element.TryFindElement(By.CssSelector("p.form-control, p.form-control-static"));
+            IWebElement readonlyField =  
+                this.Element.TryFindElement(By.CssSelector("div.form-control")) ??  
+                this.Element.TryFindElement(By.CssSelector("div.form-control-plaintext"));
             if (readonlyField != null)
                 return readonlyField.GetAttribute("data-value") ?? readonlyField.Text;
 
@@ -86,7 +88,9 @@ namespace Signum.React.Selenium
 
         public bool IsReadonly()
         {
-            return this.Element.IsElementPresent(By.CssSelector("p.form-control"));
+            return Element.TryFindElement(By.CssSelector(".form-control-plaintext")) != null ||
+                Element.TryFindElement(By.CssSelector(".form-control.readonly")) != null ||
+                Element.TryFindElement(By.CssSelector(".form-control[readonly]")) != null;
         }
 
         public bool IsDisabled()

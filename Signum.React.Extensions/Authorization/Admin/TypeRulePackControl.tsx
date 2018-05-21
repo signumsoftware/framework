@@ -273,12 +273,12 @@ export default class TypesRulesPackControl extends React.Component<{ ctx: TypeCo
                             m.rules.every(a => a.element.allowed == "Allow") ? "All" : "Mix")}
                 </td>}
             </tr>
-        ].concat(ctx.value.allowed!.conditions!.map(mle => mle.element).map(c => {
+        ].concat(ctx.value.allowed!.conditions!.map(mle => mle.element).map((c, i)=> {
             let b = Binding.create(c, ca => ca.allowed);
             return (
                 <tr key={ctx.value.resource.namespace + "." + ctx.value.resource.className + "_" + c.typeCondition.id} className= "sf-auth-condition" >
                     <td>
-                        &nbsp; &nbsp;
+                        {"\u00A0 \u00A0".repeat(i + 1)} 
                         <a className="fa fa-minus-circle sf-condition-icon" aria-hidden="true" onClick={() => this.handleRemoveConditionClick(ctx.value.allowed, c) }></a>
                         &nbsp;
                         <small>{ c.typeCondition.toStr.tryAfter(".") || c.typeCondition.toStr }</small>

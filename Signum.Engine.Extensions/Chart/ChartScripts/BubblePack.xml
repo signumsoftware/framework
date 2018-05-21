@@ -5,7 +5,7 @@
     <Column DisplayName="Size" ColumnType="Magnitude" />
     <Column DisplayName="Parent" ColumnType="Groupable" IsGroupKey="true" IsOptional="true" />
     <Column DisplayName="ColorScale" ColumnType="Magnitude" IsOptional="true" />
-    <Column DisplayName="ColorCategory" ColumnType="Groupable" IsGroupKey="true" IsOptional="true" />
+    <Column DisplayName="ColorScheme" ColumnType="Groupable" IsGroupKey="true" IsOptional="true" />
   </Columns>
   <Parameters>
     <Parameter Name="Scale" Type="Enum" ValueDefinition="ZeroMax | MinMax | Log" />
@@ -13,8 +13,9 @@
     <Parameter Name="StrokeWidth" Type="Number" ValueDefinition="2" />
     <Parameter Name="FillOpacity" Type="Number" ValueDefinition="0.8" />
     <Parameter Name="ColorScale" Type="Enum" ValueDefinition="ZeroMax | MinMax | Sqrt  | Log" />
-    <Parameter Name="ColorSet" Type="Enum" ValueDefinition="YlGn|YlGnBu|GnBu|BuGn|PuBuGn|PuBu|BuPu|RdPu|PuRd|OrRd|YlOrRd|YlOrBr|Purples|Blues|Greens|Oranges|Reds|Greys|PuOr|BrBG|PRGn|PiYG|RdBu|RdGy|RdYlBu|Spectral|RdYlGn" />
-    <Parameter Name="ColorCategory" Type="Enum" ValueDefinition="category10 | category20 | category20b | category20c | accent | paired | pastel1 | pastel2 | set1 | set2 | set3" />
+    <Parameter Name="ColorInterpolate" Type="Enum" ValueDefinition="YlGn|YlGnBu|GnBu|BuGn|PuBuGn|PuBu|BuPu|RdPu|PuRd|OrRd|YlOrRd|YlOrBr|Purples|Blues|Greens|Oranges|Reds|Greys|PuOr|BrBG|PRGn|PiYG|RdBu|RdGy|RdYlBu|Spectral|RdYlGn" />
+    <Parameter Name="ColorScheme" Type="Enum" ValueDefinition="category10|accent|dark2|paired|pastel1|pastel2|set1|set2|set3|BrBG[K]|PRGn[K]|PiYG[K]|PuOr[K]|RdBu[K]|RdGy[K]|RdYlBu[K]|RdYlGn[K]|Spectral[K]|Blues[K]|Greys[K]|Oranges[K]|Purples[K]|Reds[K]|BuGn[K]|BuPu[K]|OrRd[K]|PuBuGn[K]|PuBu[K]|PuRd[K]|RdPu[K]|YlGnBu[K]|YlGn[K]|YlOrBr[K]|YlOrRd[K]" />
+    <Parameter Name="ColorSchemeSteps" Type="Enum" ValueDefinition="3|4|5|6|7|8|9|10|11" />
     <Parameter Name="NumberOpacity" Type="Number" ValueDefinition="0.8" />
     <Parameter Name="NumberSizeLimit" Type="Number" ValueDefinition="18" />
     <Parameter Name="NumberColor" Type="String" ValueDefinition="white" />
@@ -28,26 +29,26 @@
   var color = null;
   if(data.columns.c3.token != null)
   {
-    var scaleFunc = scaleFor(data.columns.c3, data.rows.map(function(r){return r.c3;}), 0, 100, data.parameters["ColorScale"]);
-    var colorInterpolator = ChartUtils.getColorInterpolation(data.parameters["ColorSet"]);
+    var scaleFunc = scaleFor(data.columns.c3, data.rows.map(function(r){return r.c3;}), 0, 1, data.parameters["ColorScale"]);
+    var colorInterpolator = ChartUtils.getColorInterpolation(data.parameters["ColorInterpolate"]);
     color = function(v){return colorInterpolator(scaleFunc(v.c3)); }
   }
   else if(data.columns.c4.token != null) 
   {
-    var scheme = ChartUtils.getColorScheme(data.parameters["ColorCategory"]);
+    var scheme = ChartUtils.getColorScheme(data.parameters["ColorScheme"], data.parameters["ColorSchemeSteps"]);
     var categoryColor = d3.scaleOrdinal(scheme).domain(data.rows.map(function(v) { return v.c4; }));
     color = function(v) { return v.c4.color || categoryColor(v.c4); };
   }
   else
   { 
-    var scheme = ChartUtils.getColorScheme(data.parameters["ColorCategory"]);
+    var scheme = ChartUtils.getColorScheme(data.parameters["ColorScheme"], data.parameters["ColorSchemeSteps"]);
     var categoryColor =  d3.scaleOrdinal(scheme).domain(data.rows.map(function(v) { return v.c0; }));
     color = function(v) { return v.c0.color || categoryColor(v.c0); };
   }
   
   var folderColor = null;
   if(!data.columns.c2.token != null){
-    var scheme = ChartUtils.getColorScheme(data.parameters["ColorCategory"]);
+    var scheme = ChartUtils.getColorScheme(data.parameters["ColorScheme"], data.parameters["ColorSchemeSteps"]);
     var categoryColor =  d3.scaleOrdinal(scheme).domain(data.rows.map(function(v) { return v.c2; }));
     folderColor = function(c2) { return  c2.color || categoryColor(c2); };
   }

@@ -26,10 +26,7 @@ namespace Signum.React.RestLog
         }
 
         public bool AllowReplay { get; set; }
-
         
-
-
         public override void OnActionExecuting(HttpActionContext actionContext)
         {
             try
