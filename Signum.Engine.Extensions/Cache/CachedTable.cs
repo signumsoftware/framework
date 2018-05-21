@@ -350,9 +350,9 @@ namespace Signum.Engine.Cache
         internal Dictionary<PrimaryKey, List<PrimaryKey>> GetBackReferenceDictionary<R>(Expression<Func<T, Lite<R>>> backReference)
             where R : Entity
         {
-            var lazy = BackReferenceDictionaries.GetOrCreate(backReference, () =>
+            var lazy = BackReferenceDictionaries.GetOrAdd(backReference, br =>
             {
-                var column = GetColumn(Reflector.GetMemberList(backReference));
+                var column = GetColumn(Reflector.GetMemberList((Expression<Func<T, Lite<R>>>)br));
 
                 var idGetter = this.Constructor.GetPrimaryKeyGetter(table.PrimaryKey);
 
