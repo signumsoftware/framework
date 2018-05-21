@@ -229,6 +229,8 @@ namespace Signum.Entities.Workflow
         ParallelSplit0ShouldHaveAtLeastOneConnection,
         [Description("Parallel Split '{0}' should have only normal connections without conditions.")]
         ParallelSplit0ShouldHaveOnlyNormalConnectionsWithoutConditions,
+        [Description("Join '{0}' (of type {1}) does not match with its pair, the Split '{2}' (of type {3})")]
+        Join0OfType1DoesNotMatchWithItsPairTheSplit2OfType3,
     }
 
     public enum WorkflowActivityMonitorMessage

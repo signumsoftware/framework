@@ -1123,7 +1123,7 @@ namespace Signum.Engine.Workflow
                             }
                             else //if (gateway.Direction == WorkflowGatewayDirection.Join)
                             {
-                                if (!FindPrevious(0, gateway, ctx))
+                                if (!AllTrackCompleted(0, gateway, ctx))
                                     return false;
 
                                 var singleConnection = gateway.NextConnectionsFromCache(ConnectionType.Normal).SingleEx();
@@ -1134,53 +1134,94 @@ namespace Signum.Engine.Workflow
                     }
                 }
             }
-            
-            private static bool FindPrevious(int depth, IWorkflowNodeEntity node, WorkflowExecuteStepContext ctx)
+
+            static bool? IsCaseActivityCompleted(int depth, IWorkflowNodeEntity node, WorkflowExecuteStepContext ctx)
+            {
+                if (node.Is(ctx.CaseActivity.WorkflowActivity))
+                    return true;
+
+                // Parallel gateways always have CaseActivity but for Inclusive gateways maybe not be created because of conditions
+                var last = ctx.Case.CaseActivities().Where(a => a.WorkflowActivity.Is(node)).OrderBy(a => a.StartDate).LastOrDefault();
+                if (last != null)
+                    return (last.DoneDate.HasValue);
+                else
+                    return null;
+            }
+
+            private static bool AllTrackCompleted(int depth, IWorkflowNodeEntity node, WorkflowExecuteStepContext ctx)
             {
                 if (node is WorkflowActivityEntity || node is WorkflowEventEntity we && we.Type == WorkflowEventType.IntermediateTimer)
                 {
-                    if (node.Is(ctx.CaseActivity.WorkflowActivity))
-                        return true;
+                    var completed = IsCaseActivityCompleted(depth, node, ctx);
 
-                    // Parallel gateways always have CaseActivity but for Inclusive gateways maybe not be created because of conditions
-                    var last = ctx.Case.CaseActivities().Where(a => a.WorkflowActivity.Is(node)).OrderBy(a => a.StartDate).LastOrDefault();
-                    if (last != null)
-                        return (last.DoneDate.HasValue);
-                    else
+                    if (completed.HasValue)
+                        return completed.Value;
+
+                    var previous = node.PreviousConnectionsFromCache().Select(a => a.From).ToList();
+                    return previous.Any(wn => AllTrackCompleted(depth, wn, ctx));
+                }
+                if (node is WorkflowEventEntity e && (e.Type == WorkflowEventType.BoundaryForkTimer || e.Type == WorkflowEventType.BoundaryInterruptingTimer))
+                {
+                    var parentActivity = WorkflowLogic.GetWorkflowNodeGraph(e.Lane.Pool.Workflow.ToLite()).Activities.GetOrThrow(e.BoundaryOf);
+
+                    var completed = IsCaseActivityCompleted(depth, parentActivity, ctx);
+
+                    if (completed.HasValue)
+                        return completed.Value;
+                    
+                    var previous = parentActivity.PreviousConnectionsFromCache().Select(a => a.From).ToList();
+                    if (parentActivity.BoundaryTimers.Any(a => a.Type == WorkflowEventType.BoundaryForkTimer))
                     {
-                        // We should continue backtracking reaching an CaseActivity or gateways with split direction
-                        var prevsConnections = node.PreviousConnectionsFromCache().Select(a => a.From).ToList();
-                        return prevsConnections.All(wn => FindPrevious(depth, wn, ctx));
+                        if (depth <= 1)
+                            return true;
+
+                        return previous.Any(wn => AllTrackCompleted(depth - 1, wn, ctx));
                     }
+                    else
+                        return previous.Any(wn => AllTrackCompleted(depth, wn, ctx));
+
                 }
                 else if (node is WorkflowGatewayEntity g)
                 {
-                    if (g.Type == WorkflowGatewayType.Parallel || 
-                        g.Type == WorkflowGatewayType.Inclusive)
+                    if (g.Direction == WorkflowGatewayDirection.Split)
                     {
-                        depth += (g.Direction == WorkflowGatewayDirection.Split ? -1 : 1);
-                        if (depth == 0)
-                            return true;
-                    }
+                        var from = g.PreviousConnectionsFromCache().Select(a => a.From).SingleEx();
 
-                    switch (g.Type)
-                    {
-                        case WorkflowGatewayType.Exclusive:
-                            {
-                                var prevsExclusive = g.PreviousConnectionsFromCache().Select(a => a.From).ToList();
-                                return prevsExclusive.Any(wn => FindPrevious(depth, wn, ctx));
-                            }
-                        case WorkflowGatewayType.Parallel:
-                        case WorkflowGatewayType.Inclusive:
-                            {
-                                var prevsParallelAndInclusive = g.PreviousConnectionsFromCache().Select(a => a.From).ToList();
-                                return prevsParallelAndInclusive.All(wn => FindPrevious(depth, wn, ctx));
-                            }
-                        default:
-                            throw new InvalidOperationException();
+                        switch (g.Type)
+                        {
+                            case WorkflowGatewayType.Exclusive:
+                                return AllTrackCompleted(depth, from, ctx);
+                            case WorkflowGatewayType.Inclusive:
+                            case WorkflowGatewayType.Parallel:
+                                if (depth <= 1)
+                                    return true;
+
+                                return AllTrackCompleted(depth - 1, from, ctx);
+                            default:
+                                throw new UnexpectedValueException(g.Type);
+                        }
                     }
+                    else if (g.Direction == WorkflowGatewayDirection.Join)
+                    {
+                        var previous = g.PreviousConnectionsFromCache().Select(a => a.From).ToList();
+
+                        switch (g.Type)
+                        {
+                            case WorkflowGatewayType.Exclusive:
+                                return previous.Any(wn => AllTrackCompleted(depth, wn, ctx));
+                            case WorkflowGatewayType.Inclusive:
+                            case WorkflowGatewayType.Parallel:
+                                return previous.All(wn => AllTrackCompleted(depth + 1, wn, ctx));
+                            default:
+                                throw new UnexpectedValueException(g.Type);
+
+                        }
+
+
+                    }
+                    else throw new UnexpectedValueException(g.Direction);
                 }
-                throw new InvalidOperationException($"Unexpected {node} in {nameof(FindPrevious)}");
+                throw new UnexpectedValueException(node);
             }
         }
     }

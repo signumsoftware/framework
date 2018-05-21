@@ -752,6 +752,7 @@ export module WorkflowValidationMessage {
     export const IntermediateTimer0ShouldHaveOneOutputOfType1 = new MessageKey("WorkflowValidationMessage", "IntermediateTimer0ShouldHaveOneOutputOfType1");
     export const ParallelSplit0ShouldHaveAtLeastOneConnection = new MessageKey("WorkflowValidationMessage", "ParallelSplit0ShouldHaveAtLeastOneConnection");
     export const ParallelSplit0ShouldHaveOnlyNormalConnectionsWithoutConditions = new MessageKey("WorkflowValidationMessage", "ParallelSplit0ShouldHaveOnlyNormalConnectionsWithoutConditions");
+    export const Join0OfType1DoesNotMatchWithItsPairTheSplit2OfType3 = new MessageKey("WorkflowValidationMessage", "Join0OfType1DoesNotMatchWithItsPairTheSplit2OfType3");
 }
 
 export const WorkflowXmlEmbedded = new Type<WorkflowXmlEmbedded>("WorkflowXmlEmbedded");

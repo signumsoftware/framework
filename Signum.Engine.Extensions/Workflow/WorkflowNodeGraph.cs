@@ -68,10 +68,15 @@ namespace Signum.Engine.Workflow
             this.PreviousGraph = graph.Inverse();
         }
 
-        //Split -> Join
-        public Dictionary<WorkflowGatewayEntity, WorkflowGatewayEntity> ParallelWorkflowPairs;
         public Dictionary<IWorkflowNodeEntity, int> TrackId;
-        public Dictionary<int, WorkflowGatewayEntity> TrackCreatedBy;
+        public Dictionary<int, IWorkflowNodeEntity> TrackCreatedBy;
+
+        public IWorkflowNodeEntity GetSplit(WorkflowGatewayEntity entity)
+        {
+            return PreviousConnections(entity).Select(a => TrackCreatedBy.GetOrThrow(TrackId.GetOrThrow(a.From))).Distinct().SingleEx();
+        }
+
+
         public IEnumerable<WorkflowConnectionEntity> NextConnections(IWorkflowNodeEntity node)
         {
             return NextGraph.RelatedTo(node).SelectMany(a => a.Value);
@@ -239,60 +244,118 @@ namespace Signum.Engine.Workflow
 
             var starts = Events.Values.Where(a => a.Type.IsStart()).ToList();
             TrackId = starts.ToDictionary(a => (IWorkflowNodeEntity)a, a => 0);
-            TrackCreatedBy = new Dictionary<int, WorkflowGatewayEntity> { { 0, null } };
+            TrackCreatedBy = new Dictionary<int, IWorkflowNodeEntity> { { 0, null } };
 
-            ParallelWorkflowPairs = new Dictionary<WorkflowGatewayEntity, WorkflowGatewayEntity>();
 
-            starts.ForEach(st =>
-               NextGraph.BreadthExploreConnections(st,
-                (prev, conn, next) =>
+            Queue<IWorkflowNodeEntity> queue = new Queue<IWorkflowNodeEntity>();
+            queue.EnqueueRange(starts);
+            while (queue.Count > 0)
+            {
+                IWorkflowNodeEntity node = queue.Dequeue();
+
+                var nextConns = NextConnections(node).ToList(); //Clone;
+                if (node is WorkflowActivityEntity wa && wa.BoundaryTimers.Any())
                 {
-                    var prevTrackId = TrackId.GetOrThrow(prev);
-                    int newTrackId;
-
-                    if (IsParallelGateway(prev, WorkflowGatewayDirection.Split))
+                    foreach (var bt in wa.BoundaryTimers)
                     {
-                        if (IsParallelGateway(next, WorkflowGatewayDirection.Join))
-                            newTrackId = prevTrackId;
-                        else
+                        nextConns.AddRange(NextConnections(bt));
+                    }
+                }
+
+                foreach (var con in nextConns)
+                {
+                    if (ContinueExplore(node, con, con.To))
+                        queue.Enqueue(con.To);
+                }
+            }
+
+
+            bool ContinueExplore(IWorkflowNodeEntity prev, WorkflowConnectionEntity conn, IWorkflowNodeEntity next)
+            {
+                var prevTrackId = TrackId.GetOrThrow(prev);
+                int newTrackId;
+
+                if (IsParallelGateway(prev, WorkflowGatewayDirection.Split)) 
+                {
+                    if (IsParallelGateway(next, WorkflowGatewayDirection.Join))
+                        newTrackId = prevTrackId;
+                    else
+                    {
+                        newTrackId = TrackCreatedBy.Count + 1;
+                        TrackCreatedBy.Add(newTrackId, (WorkflowGatewayEntity)prev);
+                    }
+                }
+                else if (prev is WorkflowActivityEntity act && act.BoundaryTimers.Any(bt => bt.Type == WorkflowEventType.BoundaryForkTimer))
+                {
+                    if (IsParallelGateway(next, WorkflowGatewayDirection.Join))
+                        newTrackId = prevTrackId;
+                    else
+                    {
+                        if (conn.From is WorkflowEventEntity ev && ev.Type == WorkflowEventType.BoundaryForkTimer)
                         {
                             newTrackId = TrackCreatedBy.Count + 1;
-                            TrackCreatedBy.Add(newTrackId, (WorkflowGatewayEntity)prev);
-                        }
-                    }
-                    else
-                    {
-                        if (IsParallelGateway(next, WorkflowGatewayDirection.Join))
-                        {
-                            var split = TrackCreatedBy.TryGetC(prevTrackId);
-                            if (split == null)
-                            {
-                                errors.Add(WorkflowValidationMessage._0CanNotBeConnectedToAParallelJoinBecauseHasNoPreviousParallelSplit.NiceToString(prev));
-                                return false;
-                            }
-                            
-                            ParallelWorkflowPairs[split] = (WorkflowGatewayEntity)next;
-
-                            newTrackId =  TrackId.GetOrThrow(split);
+                            TrackCreatedBy.Add(newTrackId, act);
                         }
                         else
-                            newTrackId = prevTrackId;
+                        {
+                            var mainTrackId = NextConnections(act)
+                                .Concat(act.BoundaryTimers.Where(a => a.Type == WorkflowEventType.BoundaryInterruptingTimer).SelectMany(we => NextConnections(we)))
+                                .Select(c => TrackId.TryGetS(c.To))
+                                .Where(c => c != null)
+                                .Distinct()
+                                .SingleOrDefaultEx();
+
+                            if (mainTrackId.HasValue)
+                            {
+                                newTrackId = mainTrackId.Value;
+                            }
+                            else
+                            {
+                                newTrackId = TrackCreatedBy.Count + 1;
+                                TrackCreatedBy.Add(newTrackId, act);
+                            }
+                        }
+                            
                     }
-
-                    if (TrackId.ContainsKey(next))
+                }
+                else if (IsParallelGateway(next, WorkflowGatewayDirection.Join))
+                {
+                    var split = TrackCreatedBy.TryGetC(prevTrackId);
+                    if (split == null)
                     {
-                        if (TrackId[next] != newTrackId)
-                            errors.Add(WorkflowValidationMessage._0Track1CanNotBeConnectedTo2Track3InsteadOfTrack4.NiceToString(prev, prevTrackId, next, TrackId[next], newTrackId));
-
+                        errors.Add(WorkflowValidationMessage._0CanNotBeConnectedToAParallelJoinBecauseHasNoPreviousParallelSplit.NiceToString(prev));
                         return false;
                     }
-                    else
-                    {
-                        TrackId[next] = newTrackId;
-                        return true;
-                    }
-                })
-            );
+
+
+                    var join = (WorkflowGatewayEntity)next;
+                    var splitType = split is WorkflowGatewayEntity wg ? wg.Type : 
+                        split is WorkflowActivityEntity ? WorkflowGatewayType.Inclusive : 
+                        throw new UnexpectedValueException(split);
+
+                    if (join.Type != splitType)
+                        errors.Add(WorkflowValidationMessage.Join0OfType1DoesNotMatchWithItsPairTheSplit2OfType3.NiceToString(join, join.Type, split, splitType));
+
+                    newTrackId = TrackId.GetOrThrow(split);
+                }
+                else
+                    newTrackId = prevTrackId;
+
+
+                if (TrackId.ContainsKey(next))
+                {
+                    if (TrackId[next] != newTrackId)
+                        errors.Add(WorkflowValidationMessage._0Track1CanNotBeConnectedTo2Track3InsteadOfTrack4.NiceToString(prev, prevTrackId, next, TrackId[next], newTrackId));
+
+                    return false;
+                }
+                else
+                {
+                    TrackId[next] = newTrackId;
+                    return true;
+                }
+            }
+            
 
             foreach (var wa in Activities.Values)
             {
@@ -337,7 +400,6 @@ namespace Signum.Engine.Workflow
             {
                 this.TrackCreatedBy = null;
                 this.TrackId = null;
-                this.ParallelWorkflowPairs = null;
             }
 
             return errors;
