@@ -39,7 +39,7 @@ namespace Signum.Engine.Dynamic
                         e.Name,
                         e.EntityType,
                         e.PropertyRoute,
-                        e.Eval,
+                        e.Eval.Script,
                     });
                 DynamicValidations = sb.GlobalLazy(() => Database.Query<DynamicValidationEntity>()
                         .SelectCatch(dv => new DynamicValidationPair { Validation = dv, PropertyRoute = dv.PropertyRoute.ToPropertyRoute() })
