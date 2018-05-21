@@ -74,21 +74,13 @@ namespace Signum.Engine.Workflow
             return IsFreshNewExpression.Evaluate(entity);
         }
   
-
-        static Expression<Func<WorkflowActivityEntity, IQueryable<CaseActivityEntity>>> CaseActivitiesFromWorkflowActivityExpression =
+        
+        static Expression<Func<IWorkflowNodeEntity, IQueryable<CaseActivityEntity>>> CaseActivitiesExpression =
             e => Database.Query<CaseActivityEntity>().Where(a => a.WorkflowActivity == e);
         [ExpressionField]
-        public static IQueryable<CaseActivityEntity> CaseActivities(this WorkflowActivityEntity e)
+        public static IQueryable<CaseActivityEntity> CaseActivities(this IWorkflowNodeEntity e)
         {
-            return CaseActivitiesFromWorkflowActivityExpression.Evaluate(e);
-        }
-
-        static Expression<Func<WorkflowEventEntity, IQueryable<CaseActivityEntity>>> CaseActivitiesFromWorkflowEventExpression =
-            e => Database.Query<CaseActivityEntity>().Where(a => a.WorkflowActivity == e);
-        [ExpressionField]
-        public static IQueryable<CaseActivityEntity> CaseActivities(this WorkflowEventEntity e)
-        {
-            return CaseActivitiesFromWorkflowEventExpression.Evaluate(e);
+            return CaseActivitiesExpression.Evaluate(e);
         }
 
         static Expression<Func<WorkflowActivityEntity, double?>> AverageDurationActivityExpression =
@@ -251,17 +243,18 @@ namespace Signum.Engine.Workflow
                      where we.Type == WorkflowEventType.IntermediateTimer
                      select new { Activity = ca, Event = we }).ToList();
 
-                    var conditions = boundaryCandidates.Concat(intermediateCandidates).Select(a => a.Event.Timer.Condition).Distinct().ToList();
+                    var candidates = boundaryCandidates.Concat(intermediateCandidates).Distinct().ToList();
+                    var conditions = candidates.Select(a => a.Event.Timer.Condition).Distinct().ToList();
 
                     var now = TimeZoneManager.Now;
                     var activities = conditions.SelectMany(cond =>
                     {
                         if (cond == null)
-                            return boundaryCandidates.Where(a => a.Event.Timer.Duration != null && a.Event.Timer.Duration.Add(a.Activity.StartDate) < now).Select(a => a.Activity.ToLite()).ToList();
+                            return candidates.Where(a => a.Event.Timer.Duration != null && a.Event.Timer.Duration.Add(a.Activity.StartDate) < now).Select(a => a.Activity.ToLite()).ToList();
 
-                        var condExpr = cond.RetrieveFromCache().Eval.Algorithm.GetTimerCondition();
+                        var condEval = cond.RetrieveFromCache().Eval.Algorithm;
 
-                        return boundaryCandidates.Where(a => a.Event.Timer.Condition == cond).Select(a => condExpr.Evaluate(a.Activity, now) ? a.Activity.ToLite() : null).ToList().NotNull().ToList();
+                        return candidates.Where(a => a.Event.Timer.Condition.Is(cond) && condEval.EvaluateUntyped(a.Activity, now)).Select(a => a.Activity.ToLite()).ToList();
                     }).Distinct().ToList();
 
                     if (!activities.Any())
@@ -475,7 +468,7 @@ namespace Signum.Engine.Workflow
             return ca;
         }
 
-        static void InsertCaseActivityNotifications(CaseActivityEntity caseActivity)
+        public static void InsertCaseActivityNotifications(CaseActivityEntity caseActivity)
         {
             if (caseActivity.WorkflowActivity is WorkflowActivityEntity wa && 
                 (wa.Type == WorkflowActivityType.Task ||  
@@ -690,17 +683,24 @@ namespace Signum.Engine.Workflow
                             if (t.Timer.Duration != null)
                                 return t.Timer.Duration.Add(ca.StartDate) < now;
 
-                            return t.Timer.Condition.RetrieveFromCache().Eval.Algorithm.GetTimerCondition().Evaluate(ca, now);
+                            return t.Timer.Condition.RetrieveFromCache().Eval.Algorithm.EvaluateUntyped(ca, now);
                         });
                         
                         if (timer == null)
                             throw new InvalidOperationException(WorkflowActivityMessage.NoActiveTimerFound.NiceToString());
 
-
-                        if (timer.Type == WorkflowEventType.BoundaryInterruptingTimer)
-                            ExecuteStep(ca, DoneType.Timeout, timer.NextConnectionsFromCache(ConnectionType.Normal).SingleEx());
-                        else
-                            ExecuteTimerFork(ca, timer);
+                        switch (timer.Type)
+                        {
+                            case WorkflowEventType.BoundaryForkTimer:
+                                ExecuteTimerFork(ca, timer);
+                                break;
+                            case WorkflowEventType.BoundaryInterruptingTimer:
+                            case WorkflowEventType.IntermediateTimer:
+                                ExecuteStep(ca, DoneType.Timeout, timer.NextConnectionsFromCache(ConnectionType.Normal).SingleEx());
+                                break;
+                            default:
+                                throw new InvalidOperationException("Unexpected Timer Type " + timer.Type);
+                        }
                     },
                 }.Register();
 
@@ -1087,7 +1087,10 @@ namespace Signum.Engine.Workflow
                             if (gateway.Direction == WorkflowGatewayDirection.Split)
                             {
                                 var applicable = gateway.NextConnectionsFromCache(null)
-                                     .Where(a => a.Type == ConnectionType.Approve || a.Type == ConnectionType.Decline || a.Type == ConnectionType.Normal)
+                                     .Where(a => 
+                                     a.Type == ConnectionType.Approve || 
+                                     a.Type == ConnectionType.Decline || 
+                                     a.Type == ConnectionType.Normal && (gateway.Type == WorkflowGatewayType.Parallel || a.Condition != null))
                                      .Where(c =>
                                      {
                                          var app = c.Applicable(ctx);
@@ -1098,8 +1101,16 @@ namespace Signum.Engine.Workflow
 
                                 if (applicable.IsEmpty())
                                 {
-                                    var join = WorkflowLogic.GetWorkflowNodeGraph(gateway.Lane.Pool.Workflow.ToLite()).ParallelWorkflowPairs.GetOrThrow(gateway);
-                                    return FindNext(join, ctx);
+                                    if (gateway.Type == WorkflowGatewayType.Parallel)
+                                        throw new InvalidOperationException(WorkflowValidationMessage.ParallelSplit0ShouldHaveAtLeastOneConnection.NiceToString(gateway));
+                                    else
+                                    {
+                                        var fallback = gateway.NextConnectionsFromCache(null).SingleOrDefaultEx(a => a.Condition == null && a.Type == ConnectionType.Normal);
+                                        if (fallback == null)
+                                            throw new InvalidOperationException(WorkflowValidationMessage.InclusiveGateway0ShouldHaveOneConnectionWithoutCondition.NiceToString(gateway));
+
+                                        return FindNext(fallback, ctx);
+                                    }
                                 }
                                 else
                                 {
@@ -1126,17 +1137,13 @@ namespace Signum.Engine.Workflow
             
             private static bool FindPrevious(int depth, IWorkflowNodeEntity node, WorkflowExecuteStepContext ctx)
             {
-                if (node is WorkflowEventEntity)
+                if (node is WorkflowActivityEntity || node is WorkflowEventEntity we && we.Type == WorkflowEventType.IntermediateTimer)
                 {
-                    throw new InvalidOperationException($"Unexpected {nameof(WorkflowEventEntity)} in {nameof(FindPrevious)}");
-                }
-                else if (node is WorkflowActivityEntity wa)
-                {
-                    if (wa.Is(ctx.CaseActivity.WorkflowActivity))
+                    if (node.Is(ctx.CaseActivity.WorkflowActivity))
                         return true;
 
                     // Parallel gateways always have CaseActivity but for Inclusive gateways maybe not be created because of conditions
-                    var last = ctx.Case.CaseActivities().Where(a => a.WorkflowActivity == wa).OrderBy(a => a.StartDate).LastOrDefault();
+                    var last = ctx.Case.CaseActivities().Where(a => a.WorkflowActivity.Is(node)).OrderBy(a => a.StartDate).LastOrDefault();
                     if (last != null)
                         return (last.DoneDate.HasValue);
                     else
@@ -1148,7 +1155,8 @@ namespace Signum.Engine.Workflow
                 }
                 else if (node is WorkflowGatewayEntity g)
                 {
-                    if (g.Type != WorkflowGatewayType.Exclusive)
+                    if (g.Type == WorkflowGatewayType.Parallel || 
+                        g.Type == WorkflowGatewayType.Inclusive)
                     {
                         depth += (g.Direction == WorkflowGatewayDirection.Split ? -1 : 1);
                         if (depth == 0)
@@ -1172,7 +1180,7 @@ namespace Signum.Engine.Workflow
                             throw new InvalidOperationException();
                     }
                 }
-                throw new InvalidOperationException();
+                throw new InvalidOperationException($"Unexpected {node} in {nameof(FindPrevious)}");
             }
         }
     }

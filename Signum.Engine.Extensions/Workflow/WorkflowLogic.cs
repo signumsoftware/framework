@@ -93,7 +93,7 @@ namespace Signum.Engine.Workflow
 
         public static IEnumerable<WorkflowConnectionEntity> WorkflowConnectionsFromCache(this WorkflowEntity e)
         {
-            return GetWorkflowNodeGraph(e.ToLite()).NextGraph.EdgesWithValue.Select(edge => edge.Value);
+            return GetWorkflowNodeGraph(e.ToLite()).NextGraph.EdgesWithValue.SelectMany(edge => edge.Value);
         }
 
         static Expression<Func<WorkflowEntity, IQueryable<WorkflowConnectionEntity>>> WorkflowMessageConnectionsExpression =
@@ -154,7 +154,7 @@ namespace Signum.Engine.Workflow
 
         public static IEnumerable<WorkflowConnectionEntity> NextConnectionsFromCache(this IWorkflowNodeEntity e, ConnectionType? type)
         {
-            var result = GetWorkflowNodeGraph(e.Lane.Pool.Workflow.ToLite()).NextGraph.RelatedTo(e).Values;
+            var result = GetWorkflowNodeGraph(e.Lane.Pool.Workflow.ToLite()).NextConnections(e);
 
             if (type == null)
                 return result;
@@ -172,7 +172,7 @@ namespace Signum.Engine.Workflow
 
         public static IEnumerable<WorkflowConnectionEntity> PreviousConnectionsFromCache(this IWorkflowNodeEntity e)
         {
-            return GetWorkflowNodeGraph(e.Lane.Pool.Workflow.ToLite()).PreviousGraph.RelatedTo(e).Values;
+            return GetWorkflowNodeGraph(e.Lane.Pool.Workflow.ToLite()).PreviousConnections(e);
         }
 
 
@@ -194,7 +194,7 @@ namespace Signum.Engine.Workflow
                 if (graph.TrackId != null)
                     return graph;
 
-                var errors = graph.Validate((g, newDirection)=>
+                var errors = graph.Validate((g, newDirection) =>
                 {
                     throw new InvalidOperationException($"Unexpected direction of gateway '{g}' (Should be '{newDirection.NiceToString()}'). Consider saving Workflow '{workflow}'.");
                 });
@@ -255,7 +255,7 @@ namespace Signum.Engine.Workflow
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
-                PermissionAuthLogic.RegisterPermissions(WorkflowScriptRunnerPanelPermission.ViewWorkflowScriptRunnerPanel);
+                PermissionAuthLogic.RegisterPermissions(WorkflowPanelPermission.ViewWorkflowPanel);
 
                 WorkflowLogic.getConfiguration = getConfiguration;
 

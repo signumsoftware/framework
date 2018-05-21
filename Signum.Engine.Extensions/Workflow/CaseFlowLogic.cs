@@ -43,6 +43,36 @@ namespace Signum.Engine.Workflow
 
             var gr = WorkflowLogic.GetWorkflowNodeGraph(@case.Workflow.ToLite());
 
+            IEnumerable<CaseConnectionStats> GetSyncPaths(CaseActivityStats prev, IWorkflowNodeEntity from, IWorkflowNodeEntity to)
+            {
+                if (prev.DoneType == DoneType.Timeout)
+                {
+                    if (from is WorkflowActivityEntity wa)
+                    {
+                        var conns = wa.BoundaryTimers.Where(a => a.Type == WorkflowEventType.BoundaryInterruptingTimer)
+                        .SelectMany(e => GetAllConnections(gr, e, to, path => path.All(a => a.Type == ConnectionType.Normal)));
+                        if (conns.Any())
+                            return conns.Select(c => new CaseConnectionStats().WithConnection(c).WithDone(prev));
+                    }
+                    else if (from is WorkflowEventEntity we)
+                    {
+                        var conns = GetAllConnections(gr, we, to, path => path.All(a => a.Type == ConnectionType.Normal)); ;
+                        if (conns.Any())
+                            return conns.Select(c => new CaseConnectionStats().WithConnection(c).WithDone(prev));
+                    }
+                }
+                else
+                {
+                    var conns = GetAllConnections(gr, from, to, path => IsValidPath(prev.DoneType.Value, path));
+
+                    if (conns.Any())
+                        return conns.Select(c => new CaseConnectionStats().WithConnection(c).WithDone(prev));
+                }
+
+                return null;
+            }
+
+
             var connections = caseActivities.Values
                 .Where(cs => cs.PreviousActivity != null && caseActivities.ContainsKey(cs.PreviousActivity))
                 .SelectMany(cs =>
@@ -50,26 +80,19 @@ namespace Signum.Engine.Workflow
                     var prev = caseActivities.GetOrThrow(cs.PreviousActivity);
                     var from = gr.GetNode(prev.WorkflowActivity);
                     var to = gr.GetNode(cs.WorkflowActivity);
-                    if (IsNormal(prev.DoneType.Value))
+
+                    if (prev.DoneType.HasValue)
                     {
-                        var conns = GetAllConnections(gr, from, to);
+                        var res = GetSyncPaths(prev, from, to);
+                        if (res != null)
+                            return res;
+                    }
+
+                    if (from is WorkflowActivityEntity waFork)
+                    {
+                        var conns = waFork.BoundaryTimers.Where(a => a.Type == WorkflowEventType.BoundaryForkTimer).SelectMany(e => GetAllConnections(gr, e, to, path => path.All(a => a.Type == ConnectionType.Normal)));
                         if (conns.Any())
                             return conns.Select(c => new CaseConnectionStats().WithConnection(c).WithDone(prev));
-                    }
-                    else if (prev.DoneType == DoneType.Timeout)
-                    {
-                        if (from is WorkflowActivityEntity wa)
-                        {
-                            var conns = wa.BoundaryTimers.SelectMany(e => GetAllConnections(gr, e, to));
-                            if (conns.Any())
-                                return conns.Select(c => new CaseConnectionStats().WithConnection(c).WithDone(prev));
-                        }
-                        else if (from is WorkflowEventEntity we)
-                        {
-                            var conns = GetAllConnections(gr, we, to);
-                            if (conns.Any())
-                                return conns.Select(c => new CaseConnectionStats().WithConnection(c).WithDone(prev));
-                        }
                     }
 
                     return new[]
@@ -89,7 +112,9 @@ namespace Signum.Engine.Workflow
             foreach (var f in firsts)
             {
                 WorkflowEventEntity start = GetStartEvent(@case, f.CaseActivity, gr);
-                connections.AddRange(GetAllConnections(gr, start, gr.GetNode(f.WorkflowActivity)).Select(c => new CaseConnectionStats().WithConnection(c).WithDone(f)));
+                if (start != null)
+                    connections.AddRange(GetAllConnections(gr, start, gr.GetNode(f.WorkflowActivity), path => path.All(a => a.Type == ConnectionType.Normal))
+                        .Select(c => new CaseConnectionStats().WithConnection(c).WithDone(f)));
             }
 
             if(@case.FinishDate != null)
@@ -99,9 +124,12 @@ namespace Signum.Engine.Workflow
                 var ends = gr.Events.Values.Where(a => a.Type == WorkflowEventType.Finish);
                 foreach (var last in lasts)
                 {
+                    var from = gr.GetNode(last.WorkflowActivity);
                     foreach (var end in ends)
                     {
-                        connections.AddRange(GetAllConnections(gr, gr.GetNode(last.WorkflowActivity), end).Select(c => new CaseConnectionStats().WithConnection(c).WithDone(last)));
+                        var paths = GetSyncPaths(last, from, end);
+                        if (paths != null)
+                            connections.AddRange(paths);
                     }
                 }
             }
@@ -114,15 +142,26 @@ namespace Signum.Engine.Workflow
                 AllNodes = connections.Select(a => a.FromBpmnElementId).Union(connections.Select(a => a.ToBpmnElementId)).ToList()
             };
         }
-        
-        private static bool IsNormal(DoneType type)
+
+        private static bool IsValidPath(DoneType doneType, Stack<WorkflowConnectionEntity> path)
         {
-            return
-                type == DoneType.Approve ||
-                type == DoneType.Decline ||
-                type == DoneType.Next || 
-                type == DoneType.ScriptSuccess;
+            switch (doneType)
+            {
+                case DoneType.Next: 
+                case DoneType.ScriptSuccess:
+                case DoneType.Recompose:
+                    return path.All(a => a.Type == ConnectionType.Normal);
+                case DoneType.Approve: return path.All(a => a.Type == ConnectionType.Normal || a.Type == ConnectionType.Approve);
+                case DoneType.Decline: return path.All(a => a.Type == ConnectionType.Normal || a.Type == ConnectionType.Decline);
+                case DoneType.Jump: return path.All(a => a == path.FirstEx() ? a.Type == ConnectionType.Jump : a.Type == ConnectionType.Normal);
+                case DoneType.ScriptFailure: return path.All(a => a == path.FirstEx() ? a.Type == ConnectionType.ScriptException : a.Type == ConnectionType.Normal);
+                case DoneType.Timeout:
+                default:
+                    throw new InvalidOperationException();
+            }
+
         }
+        
 
         private static WorkflowEventEntity GetStartEvent(CaseEntity @case, Lite<CaseActivityEntity> firstActivity, WorkflowNodeGraph gr)
         {
@@ -147,7 +186,7 @@ namespace Signum.Engine.Workflow
             return gr.Events.Values.Where(a => a.Type.IsStart()).Only();
         }
 
-        private static HashSet<WorkflowConnectionEntity> GetAllConnections(WorkflowNodeGraph gr, IWorkflowNodeEntity from, IWorkflowNodeEntity to)
+        private static HashSet<WorkflowConnectionEntity> GetAllConnections(WorkflowNodeGraph gr, IWorkflowNodeEntity from, IWorkflowNodeEntity to, Func<Stack<WorkflowConnectionEntity>, bool> isValidPath)
         {
             HashSet<WorkflowConnectionEntity> result = new HashSet<WorkflowConnectionEntity>(); 
 
@@ -157,21 +196,25 @@ namespace Signum.Engine.Workflow
             flood = node =>
             {
                 if (node.Is(to))
-                    result.AddRange(partialPath);
+                {
+                    if (isValidPath(partialPath))
+                        result.AddRange(partialPath);
+                    return;
+                }
 
                 if (node is WorkflowActivityEntity && !node.Is(from))
                     return;
 
                 
-                foreach (var kvp in gr.NextGraph.RelatedTo(node).ToList())
+                foreach (var con in gr.NextConnections(node).ToList())
                 {
-                    if (!visited.Contains(kvp.Key))
+                    if (!visited.Contains(con.To))
                     {
-                        visited.Add(kvp.Key);
-                        partialPath.Push(kvp.Value);
-                        flood(kvp.Key);
+                        visited.Add(con.To);
+                        partialPath.Push(con);
+                        flood(con.To);
                         partialPath.Pop();
-                        visited.Remove(kvp.Key);
+                        visited.Remove(con.To);
                     }
                 }
             };
@@ -216,15 +259,15 @@ namespace Signum.Engine.Workflow
         public CaseConnectionStats WithDone(CaseActivityStats activity)
         {
             this.DoneBy = activity.DoneBy;
-            this.DoneDate = activity.DoneDate.Value;
-            this.DoneType = activity.DoneType.Value;
+            this.DoneDate = activity.DoneDate;
+            this.DoneType = activity.DoneType;
             return this;
         }
 
         public Lite<WorkflowConnectionEntity> Connection;
-        public DateTime DoneDate;
+        public DateTime? DoneDate;
         public Lite<IUserEntity> DoneBy;
-        public DoneType DoneType;
+        public DoneType? DoneType;
 
         public string BpmnElementId { get; internal set; }
         public string FromBpmnElementId { get; internal set; }

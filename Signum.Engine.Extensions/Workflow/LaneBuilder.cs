@@ -67,7 +67,10 @@ namespace Signum.Engine.Workflow
                        if (!locator.ExistDiagram(id))
                        {
                            this.events.Remove(id);
-                           oe.Entity.Delete(WorkflowEventOperation.Delete);
+                           if (oe.Entity.Type == WorkflowEventType.IntermediateTimer)
+                               MoveCasesAndDelete(oe.Entity, locator);
+                           else
+                               oe.Entity.Delete(WorkflowEventOperation.Delete);
                        };
                    },
                    (id, e, oe) =>
@@ -245,7 +248,7 @@ namespace Signum.Engine.Workflow
                     e.Entity.Type == WorkflowEventType.BoundaryForkTimer ? new XAttribute("cancelActivity", false) : null,
                     e.Entity.Name.HasText() ? new XAttribute("name", e.Entity.Name) : null,
                     e.Entity.Type.IsScheduledStart() || e.Entity.Type.IsTimer() ? 
-                        new XElement(bpmn + ((((WorkflowEventModel)e.Entity.GetModel()).Task?.TriggeredOn == TriggeredOn.Always || e.Entity.Type.IsTimer()) ? 
+                        new XElement(bpmn + ((((WorkflowEventModel)e.Entity.GetModel()).Task?.TriggeredOn == TriggeredOn.Always || (e.Entity.Type.IsTimer() && e.Entity.Timer.Duration != null)) ? 
                             "timerEventDefinition" : "conditionalEventDefinition")) : null, 
                     GetConnections(e.Entity.ToLite()));
             }
@@ -284,7 +287,19 @@ namespace Signum.Engine.Workflow
 
                 foreach (var e in events.Values.Select(a => a.Entity))
                 {
-                    e.Delete(WorkflowEventOperation.Delete);
+                    if (e.Type == WorkflowEventType.IntermediateTimer)
+                    {
+                        if (locator != null)
+                            MoveCasesAndDelete(e, locator);
+                        else
+                        {
+                            DeleteCaseActivities(e, c => true);
+                            e.Delete(WorkflowEventOperation.Delete);
+                        }
+
+                    }
+                    else
+                        e.Delete(WorkflowEventOperation.Delete);
                 }
 
                 foreach (var g in gateways.Values.Select(a => a.Entity))
@@ -312,51 +327,73 @@ namespace Signum.Engine.Workflow
                     DeleteCaseActivities(ac, filter);
             }
 
-            private static void DeleteCaseActivities(WorkflowActivityEntity ac, Expression<Func<CaseEntity, bool>> filter)
+            private static void DeleteCaseActivities(IWorkflowNodeEntity node, Expression<Func<CaseEntity, bool>> filter)
             {
-                if (ac.Type == WorkflowActivityType.DecompositionWorkflow || ac.Type == WorkflowActivityType.CallWorkflow)
+                if (node is WorkflowActivityEntity wa && (wa.Type == WorkflowActivityType.DecompositionWorkflow || wa.Type == WorkflowActivityType.CallWorkflow))
                 {
-                    var sw = ac.SubWorkflow.Workflow;
+                    var sw = wa.SubWorkflow.Workflow;
                     var wb = new WorkflowBuilder(sw);
-                    wb.DeleteCases(c => filter.Evaluate(c.ParentCase) && c.ParentCase.Workflow == ac.Lane.Pool.Workflow);
+                    wb.DeleteCases(c => filter.Evaluate(c.ParentCase) && c.ParentCase.Workflow == wa.Lane.Pool.Workflow);
                 }
 
-                var caseActivities = ac.CaseActivities().Where(ca => filter.Evaluate(ca.Case));
+                var caseActivities = node.CaseActivities().Where(ca => filter.Evaluate(ca.Case));
                 if (caseActivities.Any())
                 {
-                    var notifications = caseActivities.SelectMany(a => a.Notifications());
-
-                    if (notifications.Any())
-                        notifications.UnsafeDelete();
+                    caseActivities.SelectMany(a => a.Notifications()).UnsafeDelete();
 
                     Database.Query<CaseActivityEntity>()
-                        .Where(ca => ca.Previous.Entity.WorkflowActivity.Is(ac) && filter.Evaluate(ca.Previous.Entity.Case))
+                        .Where(ca => ca.Previous.Entity.WorkflowActivity.Is(node) && filter.Evaluate(ca.Previous.Entity.Case))
                         .UnsafeUpdate()
-                        .Set(ca => ca.Previous, ca => null)
+                        .Set(ca => ca.Previous, ca => ca.Previous.Entity.Previous)
                         .Execute();
+
+                    var running = caseActivities.Where(a => a.State == CaseActivityState.PendingDecision || a.State == CaseActivityState.PendingNext).ToList();
+
+                    running.ForEach(a => {
+                        if (a.Previous == null)
+                            throw new ApplicationException(CaseActivityMessage.ImpossibleToDeleteCaseActivity0OnWorkflowActivity1BecauseHasNoPreviousActivity.NiceToString(a.Id, a.WorkflowActivity));
+
+                        a.Previous.ExecuteLite(CaseActivityOperation.Undo);
+                    });
 
                     caseActivities.UnsafeDelete();
                 }
             }
 
-            private static void MoveCasesAndDelete(WorkflowActivityEntity wa, Locator locator)
+            private static void MoveCasesAndDelete(IWorkflowNodeEntity node, Locator locator)
             {
-                if (wa.CaseActivities().Any())
+                if (node.CaseActivities().Any())
                 {
-                    if (locator.HasReplacement(wa.ToLite()))
+                    if (locator.HasReplacement(node.ToLite()))
                     {
-                        wa.CaseActivities()
+                        var replacement = locator.GetReplacement(node.ToLite());
+
+                        node.CaseActivities()
+                            .Where(a => a.State == CaseActivityState.Done)
                             .UnsafeUpdate()
-                            .Set(ca => ca.WorkflowActivity, ca => locator.GetReplacement(wa.ToLite()))
+                            .Set(ca => ca.WorkflowActivity, ca => replacement)
                             .Execute();
+
+                        var running = node.CaseActivities().Where(a => a.State == CaseActivityState.PendingDecision || a.State == CaseActivityState.PendingNext).ToList();
+
+                        running.ForEach(a =>
+                        {
+                            a.Notifications().UnsafeDelete();
+                            a.WorkflowActivity = replacement;
+                            a.Save();
+                            CaseActivityLogic.InsertCaseActivityNotifications(a);
+                        });
                     }
                     else
                     {
-                        DeleteCaseActivities(wa, a => true);
+                        DeleteCaseActivities(node, a => true);
                     }
                 }
 
-                wa.Delete(WorkflowActivityOperation.Delete);
+                if (node is WorkflowActivityEntity wa)
+                    wa.Delete(WorkflowActivityOperation.Delete);
+                else
+                    ((WorkflowEventEntity)node).Delete(WorkflowEventOperation.Delete);
             }
 
             internal void Clone(WorkflowPoolEntity pool, Dictionary<IWorkflowNodeEntity, IWorkflowNodeEntity> nodes)

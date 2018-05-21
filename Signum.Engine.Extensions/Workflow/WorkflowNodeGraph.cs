@@ -8,14 +8,15 @@ using Signum.Utilities.DataStructures;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Collections.Concurrent;
 
 namespace Signum.Engine.Workflow
 {
     public class WorkflowNodeGraph
     {
         public WorkflowEntity Workflow { get; internal set; }
-        public DirectedEdgedGraph<IWorkflowNodeEntity, WorkflowConnectionEntity> NextGraph { get; internal set; }
-        public DirectedEdgedGraph<IWorkflowNodeEntity, WorkflowConnectionEntity> PreviousGraph { get; internal set; }
+        public DirectedEdgedGraph<IWorkflowNodeEntity, HashSet<WorkflowConnectionEntity>> NextGraph { get; internal set; }
+        public DirectedEdgedGraph<IWorkflowNodeEntity, HashSet<WorkflowConnectionEntity>> PreviousGraph { get; internal set; }
 
         public Dictionary<Lite<WorkflowEventEntity>, WorkflowEventEntity> Events { get; internal set; }
         public Dictionary<Lite<WorkflowActivityEntity>, WorkflowActivityEntity> Activities { get; internal set; }
@@ -55,12 +56,13 @@ namespace Signum.Engine.Workflow
 
         internal void FillGraphs()
         {
-            var graph = new DirectedEdgedGraph<IWorkflowNodeEntity, WorkflowConnectionEntity>();
+            var graph = new DirectedEdgedGraph<IWorkflowNodeEntity, HashSet<WorkflowConnectionEntity>>();
 
             foreach (var e in this.Events.Values) graph.Add(e);
             foreach (var a in this.Activities.Values) graph.Add(a);
             foreach (var g in this.Gateways.Values) graph.Add(g);
-            foreach (var c in this.Connections.Values) graph.Add(c.From, c.To, c);
+            foreach (var c in this.Connections.Values)
+                graph.GetOrCreate(c.From, c.To).Add(c);
 
             this.NextGraph = graph;
             this.PreviousGraph = graph.Inverse();
@@ -70,6 +72,15 @@ namespace Signum.Engine.Workflow
         public Dictionary<WorkflowGatewayEntity, WorkflowGatewayEntity> ParallelWorkflowPairs;
         public Dictionary<IWorkflowNodeEntity, int> TrackId;
         public Dictionary<int, WorkflowGatewayEntity> TrackCreatedBy;
+        public IEnumerable<WorkflowConnectionEntity> NextConnections(IWorkflowNodeEntity node)
+        {
+            return NextGraph.RelatedTo(node).SelectMany(a => a.Value);
+        }
+
+        public IEnumerable<WorkflowConnectionEntity> PreviousConnections(IWorkflowNodeEntity node)
+        {
+            return PreviousGraph.RelatedTo(node).SelectMany(a => a.Value);
+        }
 
         public List<string> Validate(Action<WorkflowGatewayEntity, WorkflowGatewayDirection> changeDirection)
         {
@@ -81,8 +92,8 @@ namespace Signum.Engine.Workflow
             if (Workflow.MainEntityStrategy != WorkflowMainEntityStrategy.CreateNew)
                 if (Events.Count(a => a.Value.Type == WorkflowEventType.Start) == 0)
                     errors.Add(WorkflowValidationMessage.NormalStartEventIsRequiredWhenThe0Are1Or2.NiceToString(
-                        Workflow.MainEntityStrategy.GetType().NiceName(), 
-                        WorkflowMainEntityStrategy.SelectByUser.NiceToString(), 
+                        Workflow.MainEntityStrategy.GetType().NiceName(),
+                        WorkflowMainEntityStrategy.SelectByUser.NiceToString(),
                         WorkflowMainEntityStrategy.Both.NiceToString()));
 
             if (Events.Count(a => a.Value.Type == WorkflowEventType.Start) > 1)
@@ -94,8 +105,8 @@ namespace Signum.Engine.Workflow
 
             Events.Values.ToList().ForEach(e =>
             {
-                var fanIn = PreviousGraph.RelatedTo(e).Count;
-                var fanOut = NextGraph.RelatedTo(e).Count;
+                var fanIn = PreviousConnections(e).Count();
+                var fanOut = NextConnections(e).Count();
 
                 if (e.Type.IsStart())
                 {
@@ -108,7 +119,7 @@ namespace Signum.Engine.Workflow
 
                     if (fanOut == 1)
                     {
-                        var nextConn = NextGraph.RelatedTo(e).Single().Value;
+                        var nextConn = NextConnections(e).SingleEx();
 
                         if (e.Type == WorkflowEventType.Start && !(nextConn.To is WorkflowActivityEntity))
                             errors.Add(WorkflowValidationMessage.StartEventNextNodeShouldBeAnActivity.NiceToString());
@@ -143,16 +154,16 @@ namespace Signum.Engine.Workflow
 
                 if (e.Type.IsTimer())
                 {
-                    var boundaryOutput = NextGraph.RelatedTo(e).Where(c => c.Value.Type == ConnectionType.Normal).Only().Value;
+                    var boundaryOutput = NextConnections(e).Only();
 
-                    if (boundaryOutput == null)
+                    if (boundaryOutput == null || boundaryOutput.Type != ConnectionType.Normal)
                     {
                         if (e.Type == WorkflowEventType.IntermediateTimer)
                             errors.Add(WorkflowValidationMessage.IntermediateTimer0ShouldHaveOneOutputOfType1.NiceToString(e, ConnectionType.Normal.NiceToString()));
                         else
                         {
-                            var wa = Activities.Values.Where(a => a.BoundaryTimers.Contains(e)).SingleEx();
-                            errors.Add(WorkflowValidationMessage.BoundaryTimer0OfActivity1ShouldHaveExactlyOneConnectionOfType2.NiceToString(e, wa, ConnectionType.Normal.NiceToString()));
+                            var parentActivity = Activities.Values.Where(a => a.BoundaryTimers.Contains(e)).SingleEx();
+                            errors.Add(WorkflowValidationMessage.BoundaryTimer0OfActivity1ShouldHaveExactlyOneConnectionOfType2.NiceToString(e, parentActivity, ConnectionType.Normal.NiceToString()));
                         }
                     }
                 }
@@ -160,8 +171,8 @@ namespace Signum.Engine.Workflow
 
             Gateways.Values.ToList().ForEach(g =>
             {
-                var fanIn = PreviousGraph.RelatedTo(g).Count;
-                var fanOut = NextGraph.RelatedTo(g).Count;
+                var fanIn = PreviousConnections(g).Count();
+                var fanOut = NextConnections(g).Count();
                 if (fanIn == 0)
                     errors.Add(WorkflowValidationMessage._0HasNoInputs.NiceToString(g));
                 if (fanOut == 0)
@@ -170,7 +181,7 @@ namespace Signum.Engine.Workflow
                 if (fanIn == 1 && fanOut == 1)
                     errors.Add(WorkflowValidationMessage._0HasJustOneInputAndOneOutput.NiceToString(g));
 
-                var newDirection =  fanOut == 1 ? WorkflowGatewayDirection.Join : WorkflowGatewayDirection.Split;
+                var newDirection = fanOut == 1 ? WorkflowGatewayDirection.Join : WorkflowGatewayDirection.Split;
                 if (g.Direction != newDirection)
                     changeDirection(g, newDirection);
 
@@ -178,7 +189,7 @@ namespace Signum.Engine.Workflow
                 {
                     if (g.Type == WorkflowGatewayType.Exclusive || g.Type == WorkflowGatewayType.Inclusive)
                     {
-                        if (NextGraph.RelatedTo(g).Any(c => IsDecision(c.Value.Type)))
+                        if (NextConnections(g).Any(c => IsDecision(c.Type)))
                         {
                             List<WorkflowActivityEntity> previousActivities = new List<WorkflowActivityEntity>();
 
@@ -198,11 +209,31 @@ namespace Signum.Engine.Workflow
                         }
                     }
 
-                    if (g.Type == WorkflowGatewayType.Exclusive && NextGraph.RelatedTo(g).OrderByDescending(a => a.Value.Order).Skip(1).Any(c => !IsDecision(c.Value.Type) && c.Value.Condition == null))
-                        errors.Add(WorkflowValidationMessage.Gateway0ShouldHasConditionOrDecisionOnEachOutputExceptTheLast.NiceToString(g));
+                    switch (g.Type)
+                    {
+                        case WorkflowGatewayType.Exclusive:
+                            if (NextConnections(g).OrderByDescending(a => a.Order).Skip(1).Any(c => c.Type == ConnectionType.Normal && c.Condition == null))
+                                errors.Add(WorkflowValidationMessage.Gateway0ShouldHasConditionOrDecisionOnEachOutputExceptTheLast.NiceToString(g));
+                            break;
+                        case WorkflowGatewayType.Inclusive:
+                            if (NextConnections(g).Count(c => c.Type == ConnectionType.Normal && c.Condition == null) != 1)
+                                errors.Add(WorkflowValidationMessage.InclusiveGateway0ShouldHaveOneConnectionWithoutCondition.NiceToString(g));
 
-                    if (g.Type == WorkflowGatewayType.Inclusive && NextGraph.RelatedTo(g).Any(c => !IsDecision(c.Value.Type) && c.Value.Condition == null))
-                        errors.Add(WorkflowValidationMessage.Gateway0ShouldHasConditionOnEachOutput.NiceToString(g));
+                            break;
+                        case WorkflowGatewayType.Parallel:
+                            if (NextConnections(g).Count() == 0)
+                                errors.Add(WorkflowValidationMessage.ParallelSplit0ShouldHaveAtLeastOneConnection.NiceToString(g));
+
+                            if (NextConnections(g).Any(a => a.Type != ConnectionType.Normal || a.Condition != null))
+                                errors.Add(WorkflowValidationMessage.ParallelSplit0ShouldHaveOnlyNormalConnectionsWithoutConditions.NiceToString(g));
+                            break;
+                        default:
+                            break;
+                    }
+
+
+
+
                 }
             });
 
@@ -265,8 +296,8 @@ namespace Signum.Engine.Workflow
 
             foreach (var wa in Activities.Values)
             {
-                var fanIn = PreviousGraph.RelatedTo(wa).Count(a=> IsNormalOrDecision(a.Value.Type));
-                var fanOut = NextGraph.RelatedTo(wa).Count(a => IsNormalOrDecision(a.Value.Type));
+                var fanIn = PreviousConnections(wa).Count();
+                var fanOut = NextConnections(wa).Count(v => IsNormalOrDecision(v.Type));
 
                 if (fanIn == 0)
                     errors.Add(WorkflowValidationMessage._0HasNoInputs.NiceToString(wa));
@@ -277,22 +308,27 @@ namespace Signum.Engine.Workflow
 
                 if (fanOut == 1 && wa.Type == WorkflowActivityType.Decision)
                 {
-                    var nextConn = NextGraph.RelatedTo(wa).Single().Value;
+                    var nextConn = NextConnections(wa).SingleEx();
                     if (!(nextConn.To is WorkflowGatewayEntity) || ((WorkflowGatewayEntity)nextConn.To).Type == WorkflowGatewayType.Parallel)
                         errors.Add(WorkflowValidationMessage.Activity0WithDecisionTypeShouldGoToAnExclusiveOrInclusiveGateways.NiceToString(wa));
-                }   
-                
+                }
+
                 if (wa.Type == WorkflowActivityType.Script)
                 {
-                    var scriptException = NextGraph.RelatedTo(wa).Where(a => a.Value.Type == ConnectionType.ScriptException).Only().Value;
+                    var scriptException = NextConnections(wa).Where(a => a.Type == ConnectionType.ScriptException).Only();
 
-                    if(scriptException == null)
+                    if (scriptException == null)
                         errors.Add(WorkflowValidationMessage.Activity0OfType1ShouldHaveExactlyOneConnectionOfType2.NiceToString(wa, wa.Type.NiceToString(), ConnectionType.ScriptException.NiceToString()));
+                }
+                else
+                {
+                    if (NextConnections(wa).Any(a => a.Type == ConnectionType.ScriptException))
+                        errors.Add(WorkflowValidationMessage.Activity0OfType1CanNotHaveConnectionsOfType2.NiceToString(wa, wa.Type.NiceToString(), ConnectionType.ScriptException.NiceToString()));
                 }
 
                 if (wa.Type == WorkflowActivityType.CallWorkflow || wa.Type == WorkflowActivityType.DecompositionWorkflow)
                 {
-                    if (NextGraph.RelatedTo(wa).Any(a => a.Value.Type != ConnectionType.Normal))
+                    if (NextConnections(wa).Any(a => a.Type != ConnectionType.Normal))
                         errors.Add(WorkflowValidationMessage.Activity0OfType1ShouldHaveExactlyOneConnectionOfType2.NiceToString(wa, wa.Type.NiceToString(), ConnectionType.Normal.NiceToString()));
                 }
             }
