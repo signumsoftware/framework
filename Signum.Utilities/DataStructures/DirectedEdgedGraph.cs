@@ -282,23 +282,6 @@ namespace Signum.Utilities.DataStructures
             }
         }
 
-        public void BreadthExploreConnections(T root, Func<T, E, T, bool> condition)
-        {
-            Queue<T> queue = new Queue<T>();
-            queue.Enqueue(root);
-
-            while (queue.Count > 0)
-            {
-                T node = queue.Dequeue();
-
-                foreach (var kvp in RelatedTo(node))
-                {
-                    if (condition(node, kvp.Value, kvp.Key))
-                        queue.Enqueue(kvp.Key);
-                }
-            }
-        }
-
         public DirectedEdgedGraph<T, E> Inverse()
         {
             DirectedEdgedGraph<T, E> result = new DirectedEdgedGraph<T, E>(Comparer);
@@ -622,5 +605,21 @@ namespace Signum.Utilities.DataStructures
         {
             return "{0}-{1}->{2}".FormatWith(From, Value, To);
         }
-    };
+    }
+
+    public static class DirectedEdgedGraphExtensions
+    {
+        public static E GetOrCreate<T, E>(this DirectedEdgedGraph<T, E> graph, T from, T to)
+            where E : new()
+        {
+            var dic = graph.TryRelatedTo(from);
+
+            if (dic != null)
+                return dic.GetOrCreate(to);
+            
+            E newEdge = new E();
+            graph.Add(from, to, newEdge);
+            return newEdge;
+        }
+    }
 }

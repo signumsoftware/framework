@@ -183,7 +183,7 @@ namespace Signum.Engine.Maps
         public Func<T, IRetriever, M> ValueFunction { get; set; }
         LambdaExpression IAdditionalBinding.ValueExpression => ValueExpression;
 
-        Action<T, M> _setter;
+        Action<T, M, IRetriever> _setter;
 
         public void SetInMemory(Entity entity, IRetriever retriever) => SetInMemory((T)entity, retriever);
         void SetInMemory(T entity, IRetriever retriever)
@@ -198,16 +198,16 @@ namespace Signum.Engine.Maps
 
             var value = ValueFunction(entity, retriever);
 
-            setter(entity, value);
+            setter(entity, value, retriever);
         }
 
-        Action<T, M> CreateSetter()
+        Action<T, M, IRetriever> CreateSetter()
         {
             if (PropertyRoute.Type.IsMList())
             {
                 var partGetter = PropertyRoute.GetLambdaExpression<T, M>(true).Compile();
 
-                return (e, value) =>
+                return (e, value, retriever) =>
                 {
                     var mlist = partGetter(e);
 
@@ -215,17 +215,23 @@ namespace Signum.Engine.Maps
                         return;
 
                     ((IMListPrivate)mlist).AssignAndPostRetrieving((IMListPrivate)value);
+
+                    retriever.ModifiablePostRetrieving((Modifiable)(object)mlist);
                 };
             }
             else if (PropertyRoute.Parent.PropertyRouteType == PropertyRouteType.Root)
-                return ReflectionTools.CreateSetter<T, M>(PropertyRoute.PropertyInfo);
+            {
+                var setter = ReflectionTools.CreateSetter<T, M>(PropertyRoute.PropertyInfo);
+
+                return (e, value, retriever) => setter(e, value);
+            }
             else
             {
                 var partGetter = PropertyRoute.Parent.GetLambdaExpression<T, ModifiableEntity>(true).Compile();
 
                 var setter = ReflectionTools.CreateSetter<ModifiableEntity, M>(PropertyRoute.PropertyInfo);
 
-                return (e, value) =>
+                return (e, value, retriever) =>
                 {
                     var part = partGetter(e);
                     if (part == null)

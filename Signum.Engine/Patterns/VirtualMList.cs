@@ -129,7 +129,10 @@ namespace Signum.Engine
                 sb.Schema.EntityEvents<T>().RegisterBinding<MList<L>>(mListField,
                      shouldSet: () => !lazyRetrieve.Value && !VirtualMList.ShouldAvoidMListType(typeof(L)),
                      valueExpression: e => Database.Query<L>().Where(line => backReference.Evaluate(line) == e.ToLite()).ExpandLite(line => backReference.Evaluate(line), ExpandLite.ToStringLazy).ToVirtualMListWithOrder(),
-                     valueFunction: (e, retriever) => Schema.Current.CacheController<L>().RequestByBackReference<T>(retriever, backReference, e.ToLite()).ToVirtualMListWithOrder()
+                     valueFunction: (e, retriever) => Schema.Current.CacheController<L>().Enabled ? 
+                     Schema.Current.CacheController<L>().RequestByBackReference<T>(retriever, backReference, e.ToLite()).ToVirtualMListWithOrder():
+                     Database.Query<L>().Where(line => backReference.Evaluate(line) == e.ToLite()).ExpandLite(line => backReference.Evaluate(line), ExpandLite.ToStringLazy).ToVirtualMListWithOrder()
+
                 );
             }
             else
@@ -137,7 +140,9 @@ namespace Signum.Engine
                 sb.Schema.EntityEvents<T>().RegisterBinding(mListField,
                     shouldSet: () => !lazyRetrieve.Value && !VirtualMList.ShouldAvoidMListType(typeof(L)),
                     valueExpression: e => Database.Query<L>().Where(line => backReference.Evaluate(line) == e.ToLite()).ExpandLite(line => backReference.Evaluate(line), ExpandLite.ToStringLazy).ToVirtualMList(),
-                    valueFunction: (e, retriever) => Schema.Current.CacheController<L>().RequestByBackReference<T>(retriever, backReference, e.ToLite()).ToVirtualMList()
+                    valueFunction: (e, retriever) => Schema.Current.CacheController<L>().Enabled ? 
+                    Schema.Current.CacheController<L>().RequestByBackReference<T>(retriever, backReference, e.ToLite()).ToVirtualMList() :
+                    Database.Query<L>().Where(line => backReference.Evaluate(line) == e.ToLite()).ExpandLite(line => backReference.Evaluate(line), ExpandLite.ToStringLazy).ToVirtualMList()
                 );
             }
 
@@ -196,7 +201,7 @@ namespace Signum.Engine
                     if(onRemove == null)
                         query.Where(p => !oldElements.Contains(p)).UnsafeDelete();
                     else
-                        query.ToList().ForEach(line => onRemove(line, e));
+                        query.Where(p => !oldElements.Contains(p)).ToList().ForEach(line => onRemove(line, e));
                 }
 
                 if (mlist != null)

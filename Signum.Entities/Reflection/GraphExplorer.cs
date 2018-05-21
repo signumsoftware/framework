@@ -328,7 +328,7 @@ namespace Signum.Entities.Reflection
 
         public static bool HasChanges(Modifiable mod)
         {
-            return GraphExplorer.FromRoot(mod).Any(a => a.Modified == ModifiedState.SelfModified);
+            return GraphExplorer.FromRootVirtual(mod).Any(a => a.Modified == ModifiedState.SelfModified);
         }
 
         public static void SetValidationErrors(DirectedGraph<Modifiable> directedGraph, IntegrityCheckException e)
