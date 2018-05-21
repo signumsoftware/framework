@@ -1,4 +1,5 @@
 ﻿using Signum.Entities;
+using Signum.Entities.Authorization;
 using Signum.Entities.Basics;
 using Signum.Utilities;
 using System;
@@ -137,11 +138,12 @@ namespace Signum.Entities.Workflow
     public class WorkflowReplacementItemEmbedded : EmbeddedEntity
     {
         [NotNullValidator, InTypeScript(Undefined = false, Null= false)]
-        public Lite<WorkflowActivityEntity> OldTask { get; set; }
-        
+        [ImplementedBy(typeof(WorkflowActivityEntity), typeof(WorkflowEventEntity))]
+        public Lite<IWorkflowNodeEntity> OldNode { get; set; }
+
         public Lite<WorkflowEntity> SubWorkflow { get; set; }
        
-        public string NewTask { get; set; }
+        public string NewNode { get; set; }
     }
 
     public class WorkflowTransitionContext
@@ -198,8 +200,8 @@ namespace Signum.Entities.Workflow
         StartEventNextNodeShouldBeAnActivity,
         ParallelGatewaysShouldPair,
         TimerOrConditionalStartEventsCanNotGoToJoinGateways,
-        [Description("Gateway '{0}' should has condition on each output.")]
-        Gateway0ShouldHasConditionOnEachOutput,
+        [Description("Inclusive Gateway '{0}' should have one default connection without condition.")]
+        InclusiveGateway0ShouldHaveOneConnectionWithoutCondition,
         [Description("Gateway '{0}' should has condition or decision on each output except the last one.")]
         Gateway0ShouldHasConditionOrDecisionOnEachOutputExceptTheLast,
         [Description("'{0}' can not be connected to a parallel join because has no previous parallel split.")]
@@ -217,10 +219,16 @@ namespace Signum.Entities.Workflow
         DelayActivitiesShouldHaveExactlyOneInterruptingTimer,
         [Description("Activity '{0}' of type '{1}' should have exactly one connection of type '{2}'.")]
         Activity0OfType1ShouldHaveExactlyOneConnectionOfType2,
+        [Description("Activity '{0}' of type '{1}' can not have connections of type '{2}'.")]
+        Activity0OfType1CanNotHaveConnectionsOfType2,
         [Description("Boundary timer '{0}' of activity '{1}' should have exactly one connection of type '{2}'.")]
         BoundaryTimer0OfActivity1ShouldHaveExactlyOneConnectionOfType2,
         [Description("Intermediate timer '{0}' should have one output of type '{1}'.")]
         IntermediateTimer0ShouldHaveOneOutputOfType1,
+        [Description("Parallel Split '{0}' should have at least one connection.")]
+        ParallelSplit0ShouldHaveAtLeastOneConnection,
+        [Description("Parallel Split '{0}' should have only normal connections without conditions.")]
+        ParallelSplit0ShouldHaveOnlyNormalConnectionsWithoutConditions,
     }
 
     public enum WorkflowActivityMonitorMessage
@@ -231,5 +239,11 @@ namespace Signum.Entities.Workflow
         Find, 
         Filters, 
         Columns
+    }
+
+    [AutoInit]
+    public static class WorkflowPanelPermission
+    {
+        public static PermissionSymbol ViewWorkflowPanel;
     }
 }

@@ -367,7 +367,7 @@
     <TypeScriptCompile Include="Workflow\Workflow\WorkflowEventModel.tsx" />
     <TypeScriptCompile Include="Workflow\Workflow\WorkflowEventTaskActionComponent.tsx" />
     <TypeScriptCompile Include="Workflow\Workflow\WorkflowEventTaskConditionComponent.tsx" />
-    <TypeScriptCompile Include="Workflow\Workflow\WorkflowScriptRunnerPanelPage.tsx" />
+    <TypeScriptCompile Include="Workflow\Workflow\WorkflowPanelPage.tsx" />
     <TypeScriptCompile Include="Workflow\Workflow\Workflow.tsx" />
     <TypeScriptCompile Include="Workflow\Workflow\WorkflowScript.tsx" />
     <TypeScriptCompile Include="Workflow\Workflow\WorkflowConnectionModel.tsx" />
@@ -378,6 +378,7 @@
     <TypeScriptCompile Include="Workflow\Workflow\WorkflowDropdown.tsx" />
     <TypeScriptCompile Include="Workflow\Workflow\WorkflowReplacementComponent.tsx" />
     <TypeScriptCompile Include="Workflow\WorkflowClient.tsx" />
+    <TypeScriptCompile Include="Workflow\Workflow\WorkflowTimerCondition.tsx" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Authorization\Admin\AuthAdmin.css" />

@@ -24,7 +24,7 @@ export class CustomRenderer extends BpmnRenderer {
                 ct == "Approve" ? "#0c9c01" :
                     ct == "Decline" ? "#c71a01" :
                         ct == "Jump" ? "blue" :
-                            ct == "ScriptException" ? "mangenta" :
+                            ct == "ScriptException" ? "magenta" :
                                 "gray");
             
         return result;

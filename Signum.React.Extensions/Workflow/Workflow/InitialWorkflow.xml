@@ -14,16 +14,16 @@
     <bpmndi:BPMNDiagram id="BPMNDiagram_1">
         <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Collaboration_1mmkp9y">
             <bpmndi:BPMNShape id="Participant_0wlysub_di" bpmnElement="Participant_0wlysub">
-                <dc:Bounds x="231" y="-51" width="600" height="370" />
+                <dc:Bounds x="250" y="62" width="600" height="370" />
             </bpmndi:BPMNShape>
             <bpmndi:BPMNShape id="_BPMNShape_StartEvent_2" bpmnElement="StartEvent_1">
-                <dc:Bounds x="328" y="120" width="36" height="36" />
+                <dc:Bounds x="347" y="233" width="36" height="36" />
                 <bpmndi:BPMNLabel>
-                    <dc:Bounds x="301" y="156" width="90" height="20" />
+                    <dc:Bounds x="353" y="269" width="24" height="13" />
                 </bpmndi:BPMNLabel>
             </bpmndi:BPMNShape>
             <bpmndi:BPMNShape id="Lane_0n1kycp_di" bpmnElement="Lane_0n1kycp">
-                <dc:Bounds x="261" y="-51" width="570" height="370" />
+                <dc:Bounds x="280" y="62" width="570" height="370" />
             </bpmndi:BPMNShape>
         </bpmndi:BPMNPlane>
     </bpmndi:BPMNDiagram>

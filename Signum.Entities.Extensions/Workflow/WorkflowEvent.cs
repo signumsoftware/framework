@@ -98,9 +98,11 @@ namespace Signum.Entities.Workflow
         protected override string PropertyValidation(PropertyInfo pi)
         {
             if (pi.Name == nameof(Duration) && Duration == null && Condition == null)
-            {
                 return ValidationMessage._0IsMandatoryWhen1IsNotSet.NiceToString(pi.NiceName(), NicePropertyName(() => Condition));
-            }
+
+            if (pi.Name == nameof(Duration) && Duration != null && Condition != null)
+                return ValidationMessage._0ShouldBeNullWhen1IsSet.NiceToString(NicePropertyName(() => Condition), pi.NiceName());
+
             return base.PropertyValidation(pi);
         }
     }
