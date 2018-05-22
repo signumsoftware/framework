@@ -43,7 +43,22 @@ namespace Signum.Engine.Workflow
                  },
                  (id, sf, osf) =>
                  {
-                     osf.Entity.ApplyXml(sf, locator);
+
+                     var newFrom = locator.FindEntity(sf.Attribute("sourceRef").Value);
+                     var newTo = locator.FindEntity(sf.Attribute("targetRef").Value);
+
+                     if(!newFrom.Is(osf.Entity.From)  ||
+                     !newTo.Is(osf.Entity.To))
+                     {
+                         osf.Entity.InDB().UnsafeUpdate()
+                         .Set(a => a.From, a => newFrom)
+                         .Set(a => a.To, a => newTo)
+                         .Execute();
+
+                         osf.Entity.From = newFrom;
+                         osf.Entity.To = newTo;
+                         osf.Entity.SetCleanModified(false);
+                     }
                  });
 
                 var oldLanes = this.lanes.Values.ToDictionaryEx(a => a.lane.bpmnElementId, "lanes");
