@@ -66,7 +66,7 @@ export default class PaginationSelector extends React.Component<PaginationSelect
                     <span>{SearchMessage._01of2Results_N.niceToString().forGenderAndNumber(resultTable.totalElements).formatHtml(
                         <span className={"sf-pagination-strong"} key={1}>{format(PaginateMath.startElementIndex(pagination))}</span>,
                         <span className={"sf-pagination-strong"} key={2}>{format(PaginateMath.endElementIndex(pagination, resultTable.rows.length))}</span>,
-                        <span className={"sf-pagination-strong"} key={3}>{format(resultTable.totalElements)}</span>)
+                        <span className={"sf-pagination-strong"} key={3}>{resultTable.totalElements && format(resultTable.totalElements)}</span>)
                     }</span>
                 );
             default:
