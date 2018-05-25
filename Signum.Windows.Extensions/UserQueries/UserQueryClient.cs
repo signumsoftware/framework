@@ -140,7 +140,7 @@ namespace Signum.Windows.UserQueries
 
         internal static void ToSearchControl(UserQueryEntity uq, SearchControl searchControl)
         {
-            var filters = uq.WithoutFilters ? searchControl.FilterOptions.ToList() :
+            var filters = uq.AppendFilters ? searchControl.FilterOptions.ToList() :
                  searchControl.FilterOptions.Where(f => f.Frozen).Concat(uq.Filters.Select(qf => new FilterOption
              {
                  ColumnName = qf.Token.Token.FullKey(),
@@ -167,7 +167,7 @@ namespace Signum.Windows.UserQueries
 
         internal static void ToCountSearchControl(UserQueryEntity uq, CountSearchControl countSearchControl)
         {
-            var filters = uq.WithoutFilters ? countSearchControl.FilterOptions.ToList() :
+            var filters = uq.AppendFilters ? countSearchControl.FilterOptions.ToList() :
                 countSearchControl.FilterOptions.Where(f => f.Frozen).Concat(uq.Filters.Select(qf => new FilterOption
                 {
                     ColumnName = qf.Token.Token.FullKey(),

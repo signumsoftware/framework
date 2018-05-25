@@ -16,6 +16,7 @@ import * as QueryString from 'query-string'
 
 import "./Files.css"
 import { Type } from '../../../Framework/Signum.React/Scripts/Reflection';
+import { isLite } from '../../../Framework/Signum.React/Scripts/Signum.Entities';
 
 
 export type DownloadBehaviour = "SaveAs" | "View" | "None";
@@ -48,15 +49,13 @@ export default class FileDownloader extends React.Component<FileDownloaderProps>
                 .done();
     }
 
-   
+
 
     render() {
 
         const entityOrLite = this.props.entityOrLite;
 
-        const entity = (entityOrLite as Lite<IFile & Entity>).EntityType ?
-            (entityOrLite as Lite<IFile & Entity>).entity :
-            (entityOrLite as IFile & Entity);
+        const entity = isLite(entityOrLite) ? entityOrLite.entity : entityOrLite;
 
         if (!entity)
             return <span {...this.props.htmlAttributes}>{JavascriptMessage.loading.niceToString()}</span>;
@@ -64,13 +63,25 @@ export default class FileDownloader extends React.Component<FileDownloaderProps>
 
         const configuration = this.props.configuration || FileDownloader.configurtions[entity.Type];
         if (!configuration)
-            throw new Error("No configuration registered in FileDownloader.configurations for "); 
+            throw new Error("No configuration registered in FileDownloader.configurations for ");
 
         return (
             <a
                 href="#"
-                onClick={e => entity.binaryFile ? downloadBase64(e, entity.binaryFile, entity.fileName!) : configuration.downloadClick(e, entity)}
-                download={this.props.download == "View" ? undefined : entity.fileName }
+                onClick={e => {
+                    if (this.props.download == "SaveAs") {
+                        if (entity.binaryFile)
+                            downloadBase64(e, entity.binaryFile, entity.fileName!);
+                        else
+                            configuration.downloadClick(e, entity);
+                    } else {
+                        if (entity.binaryFile)
+                            viewBase64(e, entity.binaryFile, entity.fileName!);
+                        else
+                            configuration.viewClick(e, entity);
+                    }
+                }}
+                download={this.props.download == "View" ? undefined : entity.fileName}
                 title={entity.fileName || undefined}
                 target="_blank"
                 {...this.props.htmlAttributes}>
@@ -81,28 +92,35 @@ export default class FileDownloader extends React.Component<FileDownloaderProps>
     }
 }
 
-
 export interface FileDownloaderConfiguration<T extends IFile> {
     downloadClick: (event: React.MouseEvent<any>, file: T) => void;
+    viewClick: (event: React.MouseEvent<any>, file: T) => void;
 }
 
 FileDownloader.registerConfiguration(FileEntity, {
-    downloadClick: (event, file) => downloadUrl(event, Navigator.toAbsoluteUrl("~/api/files/downloadFile/" + file.id.toString()))
+    downloadClick: (event, file) => downloadUrl(event, Navigator.toAbsoluteUrl("~/api/files/downloadFile/" + file.id.toString())),
+    viewClick: (event, file) => viewUrl(event, Navigator.toAbsoluteUrl("~/api/files/downloadFile/" + file.id.toString()))
 });
 
 FileDownloader.registerConfiguration(FilePathEntity, {
-    downloadClick: (event, file) => downloadUrl(event, Navigator.toAbsoluteUrl("~/api/files/downloadFilePath/" + file.id.toString()))
+    downloadClick: (event, file) => downloadUrl(event, Navigator.toAbsoluteUrl("~/api/files/downloadFilePath/" + file.id.toString())),
+    viewClick: (event, file) => viewUrl(event, Navigator.toAbsoluteUrl("~/api/files/downloadFilePath/" + file.id.toString()))
 });
 
 FileDownloader.registerConfiguration(FileEmbedded, {
-    downloadClick: (event, file) => downloadBase64(event, file.binaryFile!, file.fileName!)
+    downloadClick: (event, file) => downloadBase64(event, file.binaryFile!, file.fileName!),
+    viewClick: (event, file) => viewBase64(event, file.binaryFile!, file.fileName!)
 });
 
 FileDownloader.registerConfiguration(FilePathEmbedded, {
-    downloadClick: (event, file) => downloadUrl(event,
-        Navigator.toAbsoluteUrl(`~/api/files/downloadEmbeddedFilePath/${file.fileType!.key}?` + 
-            QueryString.stringify({ suffix: file.suffix, fileName: file.fileName })))
+    downloadClick: (event, file) => downloadUrl(event, getFilePathEmbeddedUrl(file)),
+    viewClick: (event, file) => viewUrl(event, getFilePathEmbeddedUrl(file)),
 });
+
+function getFilePathEmbeddedUrl(file: FilePathEmbedded) {
+    return Navigator.toAbsoluteUrl(`~/api/files/downloadEmbeddedFilePath/${file.fileType!.key}?` +
+        QueryString.stringify({ suffix: file.suffix, fileName: file.fileName }));
+}
 
 function downloadUrl(e: React.MouseEvent<any>, url: string) {
     
@@ -112,11 +130,38 @@ function downloadUrl(e: React.MouseEvent<any>, url: string) {
         .done();
 };
 
+function viewUrl(e: React.MouseEvent<any>, url: string) {
+
+    e.preventDefault();
+    const win = window.open();
+    if (!win)
+        return;
+
+    Services.ajaxGetRaw({ url: url })
+        .then(resp => resp.blob())
+        .then(blob => {
+            const url = URL.createObjectURL(blob);
+            win.location.assign(url);
+        })
+        .done();
+
+}
+
 function downloadBase64(e: React.MouseEvent<any>, binaryFile: string, fileName: string) {
     e.preventDefault();
 
-    var blob = Services.b64toBlob(binaryFile);
+    const blob = Services.b64toBlob(binaryFile);
 
     Services.saveFileBlob(blob, fileName);
+};
+
+function viewBase64(e: React.MouseEvent<any>, binaryFile: string, fileName: string) {
+    e.preventDefault();
+
+    const blob = Services.b64toBlob(binaryFile);
+
+    const url = URL.createObjectURL(blob);
+
+    window.open(url);
 };
 

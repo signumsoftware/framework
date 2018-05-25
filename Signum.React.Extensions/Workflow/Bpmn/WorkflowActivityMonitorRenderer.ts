@@ -3,7 +3,7 @@ import * as Modeler from "bpmn-js/lib/Modeler"
 import * as BpmnRenderer from "bpmn-js/lib/draw/BpmnRenderer"
 import * as moment from 'moment'
 import {
-    WorkflowConditionEntity, WorkflowActionEntity, DecisionResult, CaseActivityEntity,
+    WorkflowConditionEntity, WorkflowActionEntity, CaseActivityEntity,
     CaseNotificationEntity, DoneType, WorkflowActivityEntity, CaseFlowColor, WorkflowModel,
     WorkflowActivityModel
 } from '../Signum.Entities.Workflow'

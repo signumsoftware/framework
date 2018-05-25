@@ -10,7 +10,7 @@ import { EntityPack, Entity, Lite, JavascriptMessage, NormalWindowMessage, entit
 import { renderWidgets, renderEmbeddedWidgets, WidgetContext } from '../../../../Framework/Signum.React/Scripts/Frames/Widgets'
 import ValidationErrors from '../../../../Framework/Signum.React/Scripts/Frames/ValidationErrors'
 import ButtonBar from '../../../../Framework/Signum.React/Scripts/Frames/ButtonBar'
-import { CaseActivityEntity, WorkflowEntity, ICaseMainEntity, CaseActivityOperation } from '../Signum.Entities.Workflow'
+import { CaseActivityEntity, WorkflowEntity, ICaseMainEntity, CaseActivityOperation, WorkflowActivityEntity } from '../Signum.Entities.Workflow'
 import * as WorkflowClient from '../WorkflowClient'
 import CaseFromSenderInfo from './CaseFromSenderInfo'
 import CaseButtonBar from './CaseButtonBar'
@@ -77,9 +77,10 @@ export default class CaseFrameModal extends React.Component<CaseFrameModalProps,
     }
 
     loadComponent(): Promise<void> {
-        const a = this.state.pack!.activity;
+        const ca = this.state.pack!.activity;
+        const wa = ca.workflowActivity as WorkflowActivityEntity;
 
-        return Navigator.viewDispatcher.getViewPromise(a.case.mainEntity, a.workflowActivity!.viewName || undefined).promise
+        return Navigator.viewDispatcher.getViewPromise(ca.case.mainEntity, wa.viewName || undefined).promise
             .then(c => this.setState({ getComponent: c }));
     }
 

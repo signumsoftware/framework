@@ -15,30 +15,56 @@ import {
    OperationLogEntity
 } from '../../../../Framework/Signum.React/Scripts/Signum.Entities.Basics'
 import { API, WorkflowScriptRunnerState } from '../WorkflowClient'
-import { CaseActivityEntity, WorkflowActivityType, DoneType, WorkflowScriptRunnerPanelPermission, CaseActivityOperation } from '../Signum.Entities.Workflow'
+import { CaseActivityEntity, WorkflowActivityType, DoneType, WorkflowPanelPermission, CaseActivityOperation } from '../Signum.Entities.Workflow'
 import * as AuthClient from '../../Authorization/AuthClient'
 import { UncontrolledTabs, Tab } from '../../../../Framework/Signum.React/Scripts/Components/Tabs';
 
 
-interface WorkflowScriptRunnerPanelPageProps extends RouteComponentProps<{}> {
+interface WorkflowPanelPageProps extends RouteComponentProps<{}> {
 
 }
 
-export default class WorkflowScriptRunnerPanelPage extends React.Component<WorkflowScriptRunnerPanelPageProps, WorkflowScriptRunnerState> {
+export default class WorkflowPanelPage extends React.Component<WorkflowPanelPageProps, {  }> {
 
     componentWillMount() {
-        this.loadState().done();
-        AuthClient.asserPermissionAuthorized(WorkflowScriptRunnerPanelPermission.ViewWorkflowScriptRunnerPanel);
-        Navigator.setTitle("WorkflowScriptRunner State");
+        AuthClient.asserPermissionAuthorized(WorkflowPanelPermission.ViewWorkflowPanel);
+        Navigator.setTitle("WorkflowPanel State");
     }
 
     componentWillUnmount() {
         Navigator.setTitle();
     }
 
+    render() {
+        
+        return (
+            <div>
+                <h2 className="display-6">Workflow Panel</h2>
+              
+                <UncontrolledTabs>
+                    <Tab title="Script Runner" eventKey="scriptRunner">
+                        <WorkflowScriptRunnerTab  />
+                    </Tab>
+                    <Tab title="Timers" eventKey="timers">
+                        <a href="#" className="sf-button btn btn-link" onClick={e => { e.preventDefault(); window.open(Navigator.toAbsoluteUrl("~/scheduler/view")); }}>Open Scheduler Panel</a>
+                    </Tab>
+                </UncontrolledTabs>
+           </div>
+        );
+    }
+}
+
+
+export class WorkflowScriptRunnerTab extends React.Component<{}, { scriptRunerState: WorkflowScriptRunnerState }> {
+
+    componentWillMount() {
+        this.loadState().done();
+        AuthClient.asserPermissionAuthorized(WorkflowPanelPermission.ViewWorkflowPanel);
+    }
+
     loadState() {
         return API.view()
-            .then(s => this.setState(s));
+            .then(s => this.setState({ scriptRunerState: s }));
     }
 
     handleStop = (e: React.MouseEvent<any>) => {
@@ -57,49 +83,49 @@ export default class WorkflowScriptRunnerPanelPage extends React.Component<Workf
         var title = "WorkflowScriptRunner State";
 
         if (this.state == undefined)
-            return <h2>{title} (loading...) </h2>;
+            return <h4>{title} (loading...) </h4>;
 
-        const s = this.state;
+        const srs = this.state.scriptRunerState;
 
         return (
             <div>
-                <h2>{title}</h2>
+                <h4>{title}</h4>
                 <div className="btn-toolbar">
-                    {s.Running && <a href="#" className="sf-button btn btn-light active" style={{ color: "red" }} onClick={this.handleStop}>Stop</a> }
-                    {!s.Running && <a href="#" className="sf-button btn btn-light" style={{ color: "green" }} onClick={this.handleStart}>Start</a> }
+                    {srs.Running && <a href="#" className="sf-button btn btn-light active" style={{ color: "red" }} onClick={this.handleStop}>Stop</a>}
+                    {!srs.Running && <a href="#" className="sf-button btn btn-light" style={{ color: "green" }} onClick={this.handleStart}>Start</a>}
                 </div >
 
                 <div>
                     <br />
-                        State: <strong>
-                            {s.Running ?
-                                <span style={{ color: "Green" }}> RUNNING </span> :
-                                <span style={{ color: "Red" }}> STOPPED </span>
-                            }</strong>
+                    State: <strong>
+                        {srs.Running ?
+                            <span style={{ color: "Green" }}> RUNNING </span> :
+                            <span style={{ color: "Red" }}> STOPPED </span>
+                        }</strong>
                     <br />
-                    CurrentProcessIdentifier: { s.CurrentProcessIdentifier }
+                    CurrentProcessIdentifier: {srs.CurrentProcessIdentifier}
                     <br />
-                    ScriptRunnerPeriod: {s.ScriptRunnerPeriod} sec
+                    ScriptRunnerPeriod: {srs.ScriptRunnerPeriod} sec
                     <br />
-                    NextPlannedExecution: {s.NextPlannedExecution} ({s.NextPlannedExecution == undefined ? "-None-" : moment(s.NextPlannedExecution).fromNow()})
+                    NextPlannedExecution: {srs.NextPlannedExecution} ({srs.NextPlannedExecution == undefined ? "-None-" : moment(srs.NextPlannedExecution).fromNow()})
                     <br />
-                    IsCancelationRequested: { s.IsCancelationRequested }
+                    IsCancelationRequested: {srs.IsCancelationRequested}
                     <br />
-                    QueuedItems: { s.QueuedItems }
+                    QueuedItems: {srs.QueuedItems}
                 </div>
                 <br />
-                <h3>Next activities to execute</h3>
+                <h4>Next activities to execute</h4>
                 <SearchControl findOptions={{
                     queryName: CaseActivityEntity,
                     filterOptions: [
-                        { columnName: "Entity.WorkflowActivity.Type", operation: "EqualTo", value: WorkflowActivityType.value("Script") },
+                        { columnName: "Entity.WorkflowActivity.(WorkflowActivity).Type", operation: "EqualTo", value: WorkflowActivityType.value("Script") },
                         { columnName: "Entity.DoneDate", operation: "EqualTo", value: null }
                     ],
                     columnOptionsMode: "Replace",
                     columnOptions: [
                         { columnName: "Id" },
                         { columnName: "StartDate" },
-                        { columnName: "WorkflowActivity.Lane.Pool.Workflow" },
+                        { columnName: "WorkflowActivity.(WorkflowActivity).Lane.Pool.Workflow" },
                         { columnName: "WorkflowActivity" },
                         { columnName: "Case" },
                         { columnName: "Entity.ScriptExecution.NextExecution" },
@@ -130,14 +156,14 @@ export default class WorkflowScriptRunnerPanelPage extends React.Component<Workf
                         <SearchControl findOptions={{
                             queryName: CaseActivityEntity,
                             filterOptions: [
-                                { columnName: "Entity.WorkflowActivity.Type", operation: "EqualTo", value: WorkflowActivityType.value("Script") },
+                                { columnName: "Entity.WorkflowActivity.(WorkflowActivity).Type", operation: "EqualTo", value: WorkflowActivityType.value("Script") },
                                 { columnName: "Entity.DoneDate", operation: "DistinctTo", value: null }
                             ],
                             columnOptionsMode: "Replace",
                             columnOptions: [
                                 { columnName: "Id" },
                                 { columnName: "StartDate" },
-                                { columnName: "WorkflowActivity.Lane.Pool.Workflow" },
+                                { columnName: "WorkflowActivity.(WorkflowActivity).Lane.Pool.Workflow" },
                                 { columnName: "WorkflowActivity" },
                                 { columnName: "Case" },
                                 { columnName: "Entity.DoneDate" },
@@ -152,10 +178,11 @@ export default class WorkflowScriptRunnerPanelPage extends React.Component<Workf
                         }} />
                     </Tab>
                 </UncontrolledTabs>
-           </div>
+            </div>
         );
     }
 }
+
 
 
 

@@ -29,6 +29,7 @@ import { MessageKey } from "../../../Framework/Signum.React/Scripts/Reflection";
 import { ifError } from "../../../Framework/Signum.React/Scripts/Globals";
 import { DisabledMixin } from "../Basics/Signum.Entities.Basics";
 import { tryGetMixin } from "../../../Framework/Signum.React/Scripts/Signum.Entities";
+import { is } from '../../../Framework/Signum.React/Scripts/Signum.Entities';
 
 export function start(options: { routes: JSX.Element[] }) {
     options.routes.push(<ImportRoute path="~/tree/:typeName" onImportModule={() => import("./TreePage")} />);
@@ -198,24 +199,25 @@ export interface TreeNode {
     nodeState: TreeNodeState;
 }
 
-export function fixState(node: TreeNode) {
+export function fixState(node: TreeNode, expandedNodes?: Lite<TreeEntity>[]) {
 
     node.nodeState = node.childrenCount == 0 ? "Leaf" :
         node.loadedChildren.length == 0 ? "Collapsed" :
-            node.childrenCount == node.loadedChildren.length ? "Expanded" : "Filtered";
+            expandedNodes && !expandedNodes.some(a => is(a, node.lite)) ? "Collapsed" :
+                node.childrenCount == node.loadedChildren.length ? "Expanded" : "Filtered";
 
-    node.loadedChildren.forEach(n => fixState(n));
+    node.loadedChildren.forEach(n => fixState(n, expandedNodes));
 }
 
-function fixNodes(nodes: Array<TreeNode>) {
-    nodes.forEach(n => fixState(n));
+function fixNodes(nodes: Array<TreeNode>, expandedNodes: Lite<TreeEntity>[]) {
+    nodes.forEach(n => fixState(n, expandedNodes))
     return nodes;
 }
 
 
 export namespace API {
     export function findNodes(typeName: string, request: FindNodesRequest): Promise<Array<TreeNode>> {
-        return ajaxPost<Array<TreeNode>>({ url: `~/api/tree/findNodes/${typeName}` }, request).then(ns => fixNodes(ns));
+        return ajaxPost<Array<TreeNode>>({ url: `~/api/tree/findNodes/${typeName}` }, request).then(ns => fixNodes(ns, request.expandedNodes));
     }
 
     export interface FindNodesRequest {

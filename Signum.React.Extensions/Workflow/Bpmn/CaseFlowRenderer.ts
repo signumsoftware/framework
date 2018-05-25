@@ -2,7 +2,7 @@
 import * as Modeler from "bpmn-js/lib/Modeler"
 import * as BpmnRenderer from "bpmn-js/lib/draw/BpmnRenderer"
 import * as moment from 'moment'
-import { WorkflowConditionEntity, WorkflowActionEntity, DecisionResult, CaseActivityEntity, CaseNotificationEntity, DoneType, WorkflowActivityEntity, CaseFlowColor } from '../Signum.Entities.Workflow'
+import { WorkflowConditionEntity, WorkflowActionEntity, CaseActivityEntity, CaseNotificationEntity, DoneType, WorkflowActivityEntity, CaseFlowColor } from '../Signum.Entities.Workflow'
 import { Lite, liteKey } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
 import { CustomRenderer } from './CustomRenderer'
 import { Color, Gradient } from '../../Basics/Color'
@@ -167,7 +167,6 @@ export class CaseFlowRenderer extends CustomRenderer {
 function getDoneColor(doneType: DoneType) {
     switch (doneType) {
         case "Jump": return "#ff7504";
-        case "Rejected": return "red";
         case "Timeout": return "gold";
         case "ScriptSuccess": return "green";
         case "ScriptFailure": return "violet";

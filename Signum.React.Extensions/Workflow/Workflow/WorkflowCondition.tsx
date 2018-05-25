@@ -3,7 +3,7 @@ import { ValueLine, EntityLine, TypeContext, FormGroup, ValueLineType, LiteAutoc
 import { PropertyRoute, Binding } from '../../../../Framework/Signum.React/Scripts/Reflection'
 import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
 import CSharpCodeMirror from '../../Codemirror/CSharpCodeMirror'
-import { WorkflowConditionEntity, ICaseMainEntity, DecisionResult } from '../Signum.Entities.Workflow'
+import { WorkflowConditionEntity, ICaseMainEntity } from '../Signum.Entities.Workflow'
 import { WorkflowConditionTestResponse, API, DecisionResultValues, showWorkflowTransitionContextCodeHelp } from '../WorkflowClient'
 import TypeHelpComponent from '../../TypeHelp/TypeHelpComponent'
 import ValueLineModal from '../../../../Framework/Signum.React/Scripts/ValueLineModal'
@@ -14,7 +14,6 @@ interface WorkflowConditionComponentProps {
 
 interface WorkflowConditionComponentState {
     exampleEntity?: ICaseMainEntity;
-    decisionResult: DecisionResult;
     response?: WorkflowConditionTestResponse;
 }
 
@@ -22,14 +21,13 @@ export default class WorkflowConditionComponent extends React.Component<Workflow
 
     constructor(props: WorkflowConditionComponentProps) {
         super(props);
-        this.state = { decisionResult: "Approve" };
+        this.state = {  };
     }
 
     handleMainEntityTypeChange = () => {
         this.props.ctx.value.eval!.script = "";
         this.setState({
             exampleEntity: undefined,
-            decisionResult: "Approve",
             response: undefined
         });
     }
@@ -98,7 +96,6 @@ export default class WorkflowConditionComponent extends React.Component<Workflow
             API.conditionTest({
                 workflowCondition: this.props.ctx.value,
                 exampleEntity: this.state.exampleEntity,
-                decisionResult: this.state.decisionResult
             })
                 .then(r => this.setState({ response: r }))
                 .done();
@@ -112,12 +109,6 @@ export default class WorkflowConditionComponent extends React.Component<Workflow
             <fieldset>
                 <legend>TEST</legend>
                 {this.renderExampleEntity(ctx.value.mainEntityType!.cleanName)}
-
-                <FormGroup ctx={ctx} labelText="Decision Result">
-                    <select value={this.state.decisionResult} className="form-control" onChange={this.handleDecisionResultChange}>
-                        {DecisionResultValues.map((v, i) => <option key={i} value={v}>{v}</option>)}
-                    </select>
-                </FormGroup>
                 <br />
                 {res && this.renderMessage(res)}
             </fieldset>
@@ -132,12 +123,7 @@ export default class WorkflowConditionComponent extends React.Component<Workflow
                 type={{ name: typeName }} labelText="Example Entity" />
         );
     }
-
-    handleDecisionResultChange = (e: React.SyntheticEvent<HTMLSelectElement>) => {
-        this.setState({ decisionResult: e.currentTarget.value as DecisionResult }, () =>
-            this.handleEvaluate());
-    }
-
+    
     handleOnView = (exampleEntity: ICaseMainEntity) => {
         return Navigator.view(exampleEntity, { requiresSaveOperation: false });
     }
