@@ -393,21 +393,21 @@ export namespace API {
         args: any[]
     }
 
-    interface ConstructOperationRequest {
+    export interface ConstructOperationRequest {
         operationKey: string;
         type?: string;
         args: any[];
     }
 
 
-    interface EntityOperationRequest {
+    export interface EntityOperationRequest {
         operationKey: string;
         entity: Entity;
         type?: string;
         args: any[];
     }
 
-    interface LiteOperationRequest {
+    export interface LiteOperationRequest {
         operationKey: string;
         lite: Lite<Entity>;
         type?: string;
