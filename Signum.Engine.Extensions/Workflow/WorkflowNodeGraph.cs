@@ -87,26 +87,30 @@ namespace Signum.Engine.Workflow
             return PreviousGraph.RelatedTo(node).SelectMany(a => a.Value);
         }
 
-        public List<string> Validate(Action<WorkflowGatewayEntity, WorkflowGatewayDirection> changeDirection)
+
+
+        public void Validate(List<WorkflowIssue> issuesContainer, Action<WorkflowGatewayEntity, WorkflowGatewayDirection> changeDirection)
         {
-            List<string> errors = new List<string>();
+            List<WorkflowIssue> issues = issuesContainer;
 
             if (Events.Count(a => a.Value.Type.IsStart()) == 0)
-                errors.Add(WorkflowValidationMessage.SomeStartEventIsRequired.NiceToString());
+                issues.AddError(null, WorkflowValidationMessage.SomeStartEventIsRequired.NiceToString());
 
             if (Workflow.MainEntityStrategy != WorkflowMainEntityStrategy.CreateNew)
                 if (Events.Count(a => a.Value.Type == WorkflowEventType.Start) == 0)
-                    errors.Add(WorkflowValidationMessage.NormalStartEventIsRequiredWhenThe0Are1Or2.NiceToString(
+                    issues.AddError(null,
+                        WorkflowValidationMessage.NormalStartEventIsRequiredWhenThe0Are1Or2.NiceToString(
                         Workflow.MainEntityStrategy.GetType().NiceName(),
                         WorkflowMainEntityStrategy.SelectByUser.NiceToString(),
                         WorkflowMainEntityStrategy.Both.NiceToString()));
 
             if (Events.Count(a => a.Value.Type == WorkflowEventType.Start) > 1)
-                errors.Add(WorkflowValidationMessage.MultipleStartEventsAreNotAllowed.NiceToString());
+                foreach (var e in Events.Where(a => a.Value.Type == WorkflowEventType.Start))
+                    issues.AddError(e.Value, WorkflowValidationMessage.MultipleStartEventsAreNotAllowed.NiceToString());
 
             var finishEventCount = Events.Count(a => a.Value.Type.IsFinish());
             if (finishEventCount == 0)
-                errors.Add(WorkflowValidationMessage.FinishEventIsRequired.NiceToString());
+                issues.AddError(null, WorkflowValidationMessage.FinishEventIsRequired.NiceToString());
 
             Events.Values.ToList().ForEach(e =>
             {
@@ -116,27 +120,27 @@ namespace Signum.Engine.Workflow
                 if (e.Type.IsStart())
                 {
                     if (fanIn > 0)
-                        errors.Add(WorkflowValidationMessage._0HasInputs.NiceToString(e));
+                        issues.AddError(e, WorkflowValidationMessage._0HasInputs.NiceToString(e));
                     if (fanOut == 0)
-                        errors.Add(WorkflowValidationMessage._0HasNoOutputs.NiceToString(e));
+                        issues.AddError(e, WorkflowValidationMessage._0HasNoOutputs.NiceToString(e));
                     if (fanOut > 1)
-                        errors.Add(WorkflowValidationMessage._0HasMultipleOutputs.NiceToString(e));
+                        issues.AddError(e, WorkflowValidationMessage._0HasMultipleOutputs.NiceToString(e));
 
                     if (fanOut == 1)
                     {
                         var nextConn = NextConnections(e).SingleEx();
 
                         if (e.Type == WorkflowEventType.Start && !(nextConn.To is WorkflowActivityEntity))
-                            errors.Add(WorkflowValidationMessage.StartEventNextNodeShouldBeAnActivity.NiceToString());
+                            issues.AddError(e, WorkflowValidationMessage.StartEventNextNodeShouldBeAnActivity.NiceToString());
                     }
                 }
 
                 if (e.Type.IsFinish())
                 {
                     if (fanIn == 0)
-                        errors.Add(WorkflowValidationMessage._0HasNoInputs.NiceToString(e));
+                        issues.AddError(e, WorkflowValidationMessage._0HasNoInputs.NiceToString(e));
                     if (fanOut > 0)
-                        errors.Add(WorkflowValidationMessage._0HasOutputs.NiceToString(e));
+                        issues.AddError(e, WorkflowValidationMessage._0HasOutputs.NiceToString(e));
                 }
 
                 if (e.Type.IsScheduledStart())
@@ -144,16 +148,16 @@ namespace Signum.Engine.Workflow
                     var schedule = e.ScheduledTask();
 
                     if (schedule == null)
-                        errors.Add(WorkflowValidationMessage._0IsTimerStartAndSchedulerIsMandatory.NiceToString(e));
+                        issues.AddError(e, WorkflowValidationMessage._0IsTimerStartAndSchedulerIsMandatory.NiceToString(e));
 
                     var wet = e.WorkflowEventTask();
 
                     if (wet == null)
-                        errors.Add(WorkflowValidationMessage._0IsTimerStartAndTaskIsMandatory.NiceToString(e));
+                        issues.AddError(e, WorkflowValidationMessage._0IsTimerStartAndTaskIsMandatory.NiceToString(e));
                     else if (wet.TriggeredOn != TriggeredOn.Always)
                     {
                         if (wet.Condition?.Script == null || !wet.Condition.Script.Trim().HasText())
-                            errors.Add(WorkflowValidationMessage._0IsConditionalStartAndTaskConditionIsMandatory.NiceToString(e));
+                            issues.AddError(e, WorkflowValidationMessage._0IsConditionalStartAndTaskConditionIsMandatory.NiceToString(e));
                     }
                 }
 
@@ -164,11 +168,11 @@ namespace Signum.Engine.Workflow
                     if (boundaryOutput == null || boundaryOutput.Type != ConnectionType.Normal)
                     {
                         if (e.Type == WorkflowEventType.IntermediateTimer)
-                            errors.Add(WorkflowValidationMessage.IntermediateTimer0ShouldHaveOneOutputOfType1.NiceToString(e, ConnectionType.Normal.NiceToString()));
+                            issues.AddError(e, WorkflowValidationMessage.IntermediateTimer0ShouldHaveOneOutputOfType1.NiceToString(e, ConnectionType.Normal.NiceToString()));
                         else
                         {
                             var parentActivity = Activities.Values.Where(a => a.BoundaryTimers.Contains(e)).SingleEx();
-                            errors.Add(WorkflowValidationMessage.BoundaryTimer0OfActivity1ShouldHaveExactlyOneConnectionOfType2.NiceToString(e, parentActivity, ConnectionType.Normal.NiceToString()));
+                            issues.AddError(e, WorkflowValidationMessage.BoundaryTimer0OfActivity1ShouldHaveExactlyOneConnectionOfType2.NiceToString(e, parentActivity, ConnectionType.Normal.NiceToString()));
                         }
                     }
                 }
@@ -179,12 +183,12 @@ namespace Signum.Engine.Workflow
                 var fanIn = PreviousConnections(g).Count();
                 var fanOut = NextConnections(g).Count();
                 if (fanIn == 0)
-                    errors.Add(WorkflowValidationMessage._0HasNoInputs.NiceToString(g));
+                    issues.AddError(g, WorkflowValidationMessage._0HasNoInputs.NiceToString(g));
                 if (fanOut == 0)
-                    errors.Add(WorkflowValidationMessage._0HasNoOutputs.NiceToString(g));
+                    issues.AddError(g, WorkflowValidationMessage._0HasNoOutputs.NiceToString(g));
 
                 if (fanIn == 1 && fanOut == 1)
-                    errors.Add(WorkflowValidationMessage._0HasJustOneInputAndOneOutput.NiceToString(g));
+                    issues.AddError(g, WorkflowValidationMessage._0HasJustOneInputAndOneOutput.NiceToString(g));
 
                 var newDirection = fanOut == 1 ? WorkflowGatewayDirection.Join : WorkflowGatewayDirection.Split;
                 if (g.Direction != newDirection)
@@ -210,7 +214,7 @@ namespace Signum.Engine.Workflow
                             });
 
                             foreach (var act in previousActivities.Where(a => a.Type != WorkflowActivityType.Decision))
-                                errors.Add(WorkflowValidationMessage.Activity0ShouldBeDecision.NiceToString(act));
+                                issues.AddError(act, WorkflowValidationMessage.Activity0ShouldBeDecision.NiceToString(act));
                         }
                     }
 
@@ -218,27 +222,23 @@ namespace Signum.Engine.Workflow
                     {
                         case WorkflowGatewayType.Exclusive:
                             if (NextConnections(g).OrderByDescending(a => a.Order).Skip(1).Any(c => c.Type == ConnectionType.Normal && c.Condition == null))
-                                errors.Add(WorkflowValidationMessage.Gateway0ShouldHasConditionOrDecisionOnEachOutputExceptTheLast.NiceToString(g));
+                                issues.AddError(g, WorkflowValidationMessage.Gateway0ShouldHasConditionOrDecisionOnEachOutputExceptTheLast.NiceToString(g));
                             break;
                         case WorkflowGatewayType.Inclusive:
                             if (NextConnections(g).Count(c => c.Type == ConnectionType.Normal && c.Condition == null) != 1)
-                                errors.Add(WorkflowValidationMessage.InclusiveGateway0ShouldHaveOneConnectionWithoutCondition.NiceToString(g));
+                                issues.AddError(g, WorkflowValidationMessage.InclusiveGateway0ShouldHaveOneConnectionWithoutCondition.NiceToString(g));
 
                             break;
                         case WorkflowGatewayType.Parallel:
                             if (NextConnections(g).Count() == 0)
-                                errors.Add(WorkflowValidationMessage.ParallelSplit0ShouldHaveAtLeastOneConnection.NiceToString(g));
+                                issues.AddError(g, WorkflowValidationMessage.ParallelSplit0ShouldHaveAtLeastOneConnection.NiceToString(g));
 
                             if (NextConnections(g).Any(a => a.Type != ConnectionType.Normal || a.Condition != null))
-                                errors.Add(WorkflowValidationMessage.ParallelSplit0ShouldHaveOnlyNormalConnectionsWithoutConditions.NiceToString(g));
+                                issues.AddError(g, WorkflowValidationMessage.ParallelSplit0ShouldHaveOnlyNormalConnectionsWithoutConditions.NiceToString(g));
                             break;
                         default:
                             break;
                     }
-
-
-
-
                 }
             });
 
@@ -275,7 +275,7 @@ namespace Signum.Engine.Workflow
                 var prevTrackId = TrackId.GetOrThrow(prev);
                 int newTrackId;
 
-                if (IsParallelGateway(prev, WorkflowGatewayDirection.Split)) 
+                if (IsParallelGateway(prev, WorkflowGatewayDirection.Split))
                 {
                     if (IsParallelGateway(next, WorkflowGatewayDirection.Join))
                         newTrackId = prevTrackId;
@@ -315,7 +315,7 @@ namespace Signum.Engine.Workflow
                                 TrackCreatedBy.Add(newTrackId, act);
                             }
                         }
-                            
+
                     }
                 }
                 else if (IsParallelGateway(next, WorkflowGatewayDirection.Join))
@@ -323,18 +323,22 @@ namespace Signum.Engine.Workflow
                     var split = TrackCreatedBy.TryGetC(prevTrackId);
                     if (split == null)
                     {
-                        errors.Add(WorkflowValidationMessage._0CanNotBeConnectedToAParallelJoinBecauseHasNoPreviousParallelSplit.NiceToString(prev));
+                        issues.Add(new WorkflowIssue(WorkflowIssueType.Warning, conn.BpmnElementId, WorkflowValidationMessage._0CanNotBeConnectedToAParallelJoinBecauseHasNoPreviousParallelSplit.NiceToString(prev)));
                         return false;
                     }
 
 
                     var join = (WorkflowGatewayEntity)next;
-                    var splitType = split is WorkflowGatewayEntity wg ? wg.Type : 
-                        split is WorkflowActivityEntity ? WorkflowGatewayType.Inclusive : 
+                    var splitType = split is WorkflowGatewayEntity wg ? wg.Type :
+                        split is WorkflowActivityEntity ? WorkflowGatewayType.Inclusive :
                         throw new UnexpectedValueException(split);
 
                     if (join.Type != splitType)
-                        errors.Add(WorkflowValidationMessage.Join0OfType1DoesNotMatchWithItsPairTheSplit2OfType3.NiceToString(join, join.Type, split, splitType));
+                    {
+                        string message = WorkflowValidationMessage.Join0OfType1DoesNotMatchWithItsPairTheSplit2OfType3.NiceToString(join, join.Type, split, splitType);
+                        issues.AddError(split, message);
+                        issues.AddError(join, message);
+                    }
 
                     newTrackId = TrackId.GetOrThrow(split);
                 }
@@ -345,7 +349,7 @@ namespace Signum.Engine.Workflow
                 if (TrackId.ContainsKey(next))
                 {
                     if (TrackId[next] != newTrackId)
-                        errors.Add(WorkflowValidationMessage._0Track1CanNotBeConnectedTo2Track3InsteadOfTrack4.NiceToString(prev, prevTrackId, next, TrackId[next], newTrackId));
+                        issues.Add(new WorkflowIssue(WorkflowIssueType.Warning, conn.BpmnElementId, WorkflowValidationMessage._0Track1CanNotBeConnectedTo2Track3InsteadOfTrack4.NiceToString(prev, prevTrackId, next, TrackId[next], newTrackId)));
 
                     return false;
                 }
@@ -355,7 +359,7 @@ namespace Signum.Engine.Workflow
                     return true;
                 }
             }
-            
+
 
             foreach (var wa in Activities.Values)
             {
@@ -363,17 +367,17 @@ namespace Signum.Engine.Workflow
                 var fanOut = NextConnections(wa).Count(v => IsNormalOrDecision(v.Type));
 
                 if (fanIn == 0)
-                    errors.Add(WorkflowValidationMessage._0HasNoInputs.NiceToString(wa));
+                    issues.AddError(wa, WorkflowValidationMessage._0HasNoInputs.NiceToString(wa));
                 if (fanOut == 0)
-                    errors.Add(WorkflowValidationMessage._0HasNoOutputs.NiceToString(wa));
+                    issues.AddError(wa, WorkflowValidationMessage._0HasNoOutputs.NiceToString(wa));
                 if (fanOut > 1)
-                    errors.Add(WorkflowValidationMessage._0HasMultipleOutputs.NiceToString(wa));
+                    issues.AddError(wa, WorkflowValidationMessage._0HasMultipleOutputs.NiceToString(wa));
 
                 if (fanOut == 1 && wa.Type == WorkflowActivityType.Decision)
                 {
                     var nextConn = NextConnections(wa).SingleEx();
                     if (!(nextConn.To is WorkflowGatewayEntity) || ((WorkflowGatewayEntity)nextConn.To).Type == WorkflowGatewayType.Parallel)
-                        errors.Add(WorkflowValidationMessage.Activity0WithDecisionTypeShouldGoToAnExclusiveOrInclusiveGateways.NiceToString(wa));
+                        issues.AddError(wa, WorkflowValidationMessage.Activity0WithDecisionTypeShouldGoToAnExclusiveOrInclusiveGateways.NiceToString(wa));
                 }
 
                 if (wa.Type == WorkflowActivityType.Script)
@@ -381,28 +385,26 @@ namespace Signum.Engine.Workflow
                     var scriptException = NextConnections(wa).Where(a => a.Type == ConnectionType.ScriptException).Only();
 
                     if (scriptException == null)
-                        errors.Add(WorkflowValidationMessage.Activity0OfType1ShouldHaveExactlyOneConnectionOfType2.NiceToString(wa, wa.Type.NiceToString(), ConnectionType.ScriptException.NiceToString()));
+                        issues.AddError(wa, WorkflowValidationMessage.Activity0OfType1ShouldHaveExactlyOneConnectionOfType2.NiceToString(wa, wa.Type.NiceToString(), ConnectionType.ScriptException.NiceToString()));
                 }
                 else
                 {
                     if (NextConnections(wa).Any(a => a.Type == ConnectionType.ScriptException))
-                        errors.Add(WorkflowValidationMessage.Activity0OfType1CanNotHaveConnectionsOfType2.NiceToString(wa, wa.Type.NiceToString(), ConnectionType.ScriptException.NiceToString()));
+                        issues.AddError(wa, WorkflowValidationMessage.Activity0OfType1CanNotHaveConnectionsOfType2.NiceToString(wa, wa.Type.NiceToString(), ConnectionType.ScriptException.NiceToString()));
                 }
 
                 if (wa.Type == WorkflowActivityType.CallWorkflow || wa.Type == WorkflowActivityType.DecompositionWorkflow)
                 {
                     if (NextConnections(wa).Any(a => a.Type != ConnectionType.Normal))
-                        errors.Add(WorkflowValidationMessage.Activity0OfType1ShouldHaveExactlyOneConnectionOfType2.NiceToString(wa, wa.Type.NiceToString(), ConnectionType.Normal.NiceToString()));
+                        issues.AddError(wa, WorkflowValidationMessage.Activity0OfType1ShouldHaveExactlyOneConnectionOfType2.NiceToString(wa, wa.Type.NiceToString(), ConnectionType.Normal.NiceToString()));
                 }
             }
 
-            if (errors.HasItems())
+            if (issues.Any(a => a.Type == WorkflowIssueType.Error))
             {
                 this.TrackCreatedBy = null;
                 this.TrackId = null;
             }
-
-            return errors;
         }
 
         private bool IsNormalOrDecision(ConnectionType type)
@@ -423,5 +425,33 @@ namespace Signum.Engine.Workflow
         }
     }
 
+  
 
+    public class WorkflowIssue
+    {
+        public WorkflowIssueType Type;
+        public string BpmnElementId;
+        public string Message;
+
+        public WorkflowIssue(WorkflowIssueType type, string bpmnElementId, string message)
+        {
+            this.Type = type;
+            this.BpmnElementId = bpmnElementId;
+            this.Message = message;
+        }
+
+        public override string ToString()
+        {
+            return $"{Type}({BpmnElementId}): {Message}";
+        }
+    }
+
+    public static class WorkflowIssuesExtensions
+    {
+
+        public static void AddError(this List<WorkflowIssue> issues, IWorkflowNodeEntity node, string message)
+        {
+            issues.Add(new WorkflowIssue(WorkflowIssueType.Error, node?.BpmnElementId, message));
+        }
+    }
 }

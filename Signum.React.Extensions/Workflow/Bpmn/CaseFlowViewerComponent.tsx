@@ -53,8 +53,8 @@ export default class CaseFlowViewerComponent extends React.Component<CaseFlowVie
         else {
 
             if (this.props.caseActivity) {
-                var sp = this.viewer.get("searchPad") as any;
-                sp._search((this.props.caseActivity.workflowActivity as (WorkflowEventEntity | WorkflowActivityEntity)).bpmnElementId);
+                var selection = this.viewer.get("selection") as any;
+                selection.select((this.props.caseActivity.workflowActivity as (WorkflowEventEntity | WorkflowActivityEntity)).bpmnElementId);
             }
         }
     }

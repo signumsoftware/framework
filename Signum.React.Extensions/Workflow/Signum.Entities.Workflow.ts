@@ -549,6 +549,11 @@ export type WorkflowGatewayType =
     "Inclusive" |
     "Parallel";
 
+export const WorkflowIssueType = new EnumType<WorkflowIssueType>("WorkflowIssueType");
+export type WorkflowIssueType =
+    "Warning" |
+    "Error";
+
 export const WorkflowLaneActorsEval = new Type<WorkflowLaneActorsEval>("WorkflowLaneActorsEval");
 export interface WorkflowLaneActorsEval extends Dynamic.EvalEmbedded<IWorkflowLaneActorsEvaluator> {
     Type: "WorkflowLaneActorsEval";

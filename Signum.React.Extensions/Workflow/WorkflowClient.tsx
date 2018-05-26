@@ -29,7 +29,7 @@ import TypeHelpButtonBarComponent from '../TypeHelp/TypeHelpButtonBarComponent'
 import { ValueLine, EntityLine, EntityCombo, EntityList, EntityDetail, EntityStrip, EntityRepeater } from '../../../Framework/Signum.React/Scripts/Lines'
 import {
     WorkflowConditionEval, WorkflowTimerConditionEval, WorkflowActionEval, WorkflowMessage, WorkflowActivityMonitorMessage,
-    ConnectionType, WorkflowTimerConditionEntity
+    ConnectionType, WorkflowTimerConditionEntity, WorkflowIssueType
 } from './Signum.Entities.Workflow'
 
 import ActivityWithRemarks from './Case/ActivityWithRemarks'
@@ -58,6 +58,7 @@ import WorkflowHelpComponent from './Workflow/WorkflowHelpComponent';
 import { globalModules } from '../Dynamic/View/GlobalModules';
 import { FilterRequest, ColumnRequest } from '../../../Framework/Signum.React/Scripts/FindOptions';
 import { BsColor } from '../../../Framework/Signum.React/Scripts/Components/Basic';
+import { GraphExplorer } from '../../../Framework/Signum.React/Scripts/Reflection';
 
 export function start(options: { routes: JSX.Element[] }) {
 
@@ -326,6 +327,29 @@ export function executeCaseActivity(eoc: Operations.EntityOperationContext<CaseA
 
 export function executeWorkflowSave(eoc: Operations.EntityOperationContext<WorkflowEntity>) {
 
+
+    function saveAndSetErrors(entity: WorkflowEntity, model: WorkflowModel, replacementModel: WorkflowReplacementModel | undefined) {
+        API.saveWorkflow(entity, model, replacementModel)
+            .then(packWithIssues => {
+                eoc.frame.onReload(packWithIssues.entityPack);
+                (eoc.frame.entityComponent as any).setIssues(packWithIssues.issues);
+                notifySuccess();
+                if (eoc.closeRequested)
+                    eoc.frame.onClose(true);
+            })
+            .catch(ifError(ValidationError, e => {
+
+                var issuesString = e.modelState["workflowIssues"];
+                if (issuesString) {
+                    (eoc.frame.entityComponent as any).setIssues(JSON.parse(issuesString[0]));
+                    delete e.modelState["workflowIssues"];
+                }
+                eoc.frame.setError(e.modelState, "request.entity");
+
+            }))
+            .done();
+    }
+
     let wf = eoc.frame.entityComponent as Workflow;
     wf.getXml()
         .then(xml => {
@@ -343,16 +367,19 @@ export function executeWorkflowSave(eoc: Operations.EntityOperationContext<Workf
 
             promise.then(pr => {
                 if (!pr || pr.Model.replacements.length == 0)
-                    eoc.defaultClick(model);
+                    saveAndSetErrors(eoc.entity, model, undefined);
                 else
                     Navigator.view(pr.Model, { extraComponentProps: { previewTasks: pr.NewTasks } }).then(replacementModel => {
                         if (!replacementModel)
                             return;
 
-                        eoc.defaultClick(model, replacementModel);
+                        saveAndSetErrors(eoc.entity, model, replacementModel);
                     }).done();
             }).done();
         }).done();
+
+
+
 }
 
 export function executeWorkflowJumpContextual(coc: Operations.ContextualOperationContext<CaseActivityEntity>) {
@@ -479,12 +506,33 @@ export namespace API {
         return ajaxGet<Array<WorkflowEntity>>({ url: `~/api/workflow/starts` });
     }
 
-    export function getWorkflowModel(workflow: Lite<WorkflowEntity>): Promise<WorkflowModel> {
-        return ajaxGet<WorkflowModel>({ url: `~/api/workflow/workflowModel/${workflow.id} ` });
+    export function getWorkflowModel(workflow: Lite<WorkflowEntity>): Promise<WorkflowModelAndIssues> {
+        return ajaxGet<WorkflowModelAndIssues>({ url: `~/api/workflow/workflowModel/${workflow.id}` });
+    }
+
+    interface WorkflowModelAndIssues {
+        model: WorkflowModel;
+        issues: Array<WorkflowIssue>;
     }
 
     export function previewChanges(workflow: Lite<WorkflowEntity>, model: WorkflowModel): Promise<PreviewResult> {
         return ajaxPost<PreviewResult>({ url: `~/api/workflow/previewChanges/${workflow.id} ` }, model);
+    }
+
+    export function saveWorkflow(entity: WorkflowEntity, model: WorkflowModel, replacementModel: WorkflowReplacementModel | undefined): Promise<EntityPackWithIssues> {
+        GraphExplorer.propagateAll(entity, model, replacementModel);
+        return ajaxPost<EntityPackWithIssues>({ url: "~/api/workflow/save" }, { entity: entity, operationKey: WorkflowOperation.Save.key, args: [model, replacementModel] } as Operations.API.EntityOperationRequest);
+    }
+
+    interface EntityPackWithIssues {
+        entityPack: EntityPack<WorkflowEntity>;
+        issues: Array<WorkflowIssue>;
+    }
+
+    export interface WorkflowIssue {
+        Type: WorkflowIssueType;
+        BpmnElementId: string;
+        Message: string;
     }
 
     export function findMainEntityType(request: { subString: string, count: number }, abortController?: FetchAbortController): Promise<Lite<TypeEntity>[]> {

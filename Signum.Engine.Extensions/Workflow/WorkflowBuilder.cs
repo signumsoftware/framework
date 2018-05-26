@@ -365,7 +365,7 @@ namespace Signum.Engine.Workflow
             return this.messageFlows.Concat(this.pools.Values.SelectMany(p => p.GetSequenceFlows()));
         }
 
-        internal void ValidateGraph()
+        public void ValidateGraph(List<WorkflowIssue> issuesContainer)
         {
             WorkflowNodeGraph wg = new WorkflowNodeGraph
             {
@@ -377,15 +377,15 @@ namespace Signum.Engine.Workflow
             };
             
             wg.FillGraphs();
-            var errors = wg.Validate((g, newDirection) =>
+            wg.Validate(issuesContainer, (g, newDirection) =>
             {
                 g.Direction = newDirection;
                 g.Execute(WorkflowGatewayOperation.Save);
             });
-
-            var error =  errors.ToString("\r\n").DefaultText(null);
+            
+            var error = issuesContainer.Where(a=>a.Type == WorkflowIssueType.Error).ToString("\r\n").DefaultText(null);
             if (error != null)
-                throw new ApplicationException(error);
+                throw new IntegrityCheckException(new Dictionary<Guid, IntegrityCheck>());
         }
     }
 

@@ -19,6 +19,9 @@ using Signum.Engine.Authorization;
 using Newtonsoft.Json;
 using Signum.Utilities;
 using Signum.React.ApiControllers;
+using Signum.React.Filters;
+using static Signum.React.ApiControllers.OperationController;
+using Signum.Entities.Reflection;
 
 namespace Signum.React.Workflow
 {
@@ -69,12 +72,25 @@ namespace Signum.React.Workflow
         }
 
         [Route("api/workflow/workflowModel/{workflowId}"), HttpGet]
-        public WorkflowModel GetWorkflowModel(string workflowId)
+        public WorkflowModelAndIssues GetWorkflowModel(string workflowId)
         {
             var id = PrimaryKey.Parse(workflowId, typeof(WorkflowEntity));
             var wf = Database.Retrieve<WorkflowEntity>(id);
-            var res = WorkflowLogic.GetWorkflowModel(wf);
-            return res;
+            var model = WorkflowLogic.GetWorkflowModel(wf);
+            var wb = new WorkflowBuilder(wf);
+            List<WorkflowIssue> issues = new List<WorkflowIssue>();
+            wb.ValidateGraph(issues);
+            return new WorkflowModelAndIssues
+            {
+                model = model,
+                issues = issues,
+            };
+        }
+
+        public class WorkflowModelAndIssues
+        {
+            public WorkflowModel model;
+            public List<WorkflowIssue> issues;
         }
 
         [Route("api/workflow/previewChanges/{workflowId}"), HttpPost]
@@ -83,6 +99,33 @@ namespace Signum.React.Workflow
             var id = PrimaryKey.Parse(workflowId, typeof(WorkflowEntity));
             var wf = Database.Retrieve<WorkflowEntity>(id);
             return WorkflowLogic.PreviewChanges(wf, model);
+        }
+
+
+        [Route("api/workflow/save"), HttpPost, ValidateModelFilter]
+        public EntityPackWithIssues SaveWorkflow(EntityOperationRequest request)
+        {
+            WorkflowEntity entity;
+            List<WorkflowIssue> issuesContainer = new List<WorkflowIssue>();
+            try
+            {
+                entity = ((WorkflowEntity)request.entity).Execute(WorkflowOperation.Save, request.args.And(issuesContainer).ToArray());
+            }
+            catch (IntegrityCheckException ex)
+            {
+                GraphExplorer.SetValidationErrors(GraphExplorer.FromRoot(request.entity), ex);
+                this.Validate(request, "request");
+                this.ModelState.AddModelError("workflowIssues", JsonConvert.SerializeObject(issuesContainer, GlobalConfiguration.Configuration.Formatters.JsonFormatter.SerializerSettings));
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, this.ModelState));
+            }
+
+            return new EntityPackWithIssues { entityPack = SignumServer.GetEntityPack(entity), issues = issuesContainer };
+        }
+
+        public class EntityPackWithIssues
+        {
+            public EntityPackTS entityPack;
+            public List<WorkflowIssue> issues;
         }
 
         [Route("api/workflow/findMainEntityType"), HttpGet]

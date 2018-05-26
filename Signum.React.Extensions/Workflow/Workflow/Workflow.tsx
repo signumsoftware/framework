@@ -1,5 +1,5 @@
 ﻿import * as React from 'react'
-import { WorkflowEntity, WorkflowModel, WorkflowEntitiesDictionary, BpmnEntityPairEmbedded, WorkflowOperation, WorkflowMessage } from '../Signum.Entities.Workflow'
+import { WorkflowEntity, WorkflowModel, WorkflowEntitiesDictionary, BpmnEntityPairEmbedded, WorkflowOperation, WorkflowMessage, WorkflowIssueType } from '../Signum.Entities.Workflow'
 import { TypeContext, ValueLine, EntityLine, LiteAutocompleteConfig } from '../../../../Framework/Signum.React/Scripts/Lines'
 import { is, JavascriptMessage, toLite, ModifiableEntity, Lite, Entity } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
 import * as Entities from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
@@ -15,6 +15,7 @@ interface WorkflowProps {
 interface WorkflowState {
     initialXmlDiagram?: string;
     entities?: WorkflowEntitiesDictionary;
+    issues?: Array<API.WorkflowIssue>;
 }
 
 export default class Workflow extends React.Component<WorkflowProps, WorkflowState> {
@@ -51,6 +52,10 @@ export default class Workflow extends React.Component<WorkflowProps, WorkflowSta
         });
     }
 
+    setIssues(issues: Array<API.WorkflowIssue>) {
+        this.setState({ issues: issues });
+    }
+
     loadXml(w: WorkflowEntity) {
         if (w.isNew) {
             require(["raw-loader!./InitialWorkflow.xml"], (xml) =>
@@ -61,8 +66,17 @@ export default class Workflow extends React.Component<WorkflowProps, WorkflowSta
         }
         else
             API.getWorkflowModel(toLite(w))
-                .then(model => this.updateState(model))
+                .then(pair => {
+                    this.updateState(pair.model);
+                    this.setIssues(pair.issues);
+                })
                 .done();
+    }
+
+    handleHighlightClick = (e: React.MouseEvent<HTMLAnchorElement>, issue: API.WorkflowIssue) => {
+        e.preventDefault();
+        if (this.bpmnModelerComponent)
+            this.bpmnModelerComponent.focusElement(issue.BpmnElementId);
     }
 
     render() {
@@ -76,6 +90,7 @@ export default class Workflow extends React.Component<WorkflowProps, WorkflowSta
                     onRemove={this.handleMainEntityTypeChange} />
 
                 <ValueLine ctx={ctx.subCtx(d => d.mainEntityStrategy)} />
+                {this.renderIssues()}
                 <fieldset>
                     {this.state.initialXmlDiagram ?
                         <div className="code-container">
@@ -87,6 +102,41 @@ export default class Workflow extends React.Component<WorkflowProps, WorkflowSta
                         <h3>{JavascriptMessage.loading.niceToString()}</h3>}
 
                 </fieldset>
+            </div>
+        );
+    }
+
+    renderIssues() {
+
+        if (this.state.issues == null)
+            return null;
+
+        var color = this.state.issues.length == 0 ? "success" :
+            this.state.issues.some(a => a.Type == "Error") ? "danger" : "warning";
+
+        return (
+            <div className={`card border-${color}`} role="alert">
+                <h5 className={`card-header border-${color} text-${color}`}>Worflow Issues</h5>
+                <ul style={{ listStyleType: "none", marginBottom: "0px" }} className="card-body">
+
+                    {this.state.issues.length == 0 ?
+                        <li>
+                            <i className="fa fa-check text-success mr-1" aria-hidden="true" />
+                            {"-- No issues --"}
+                        </li> : 
+                        this.state.issues.map((issue, i) =>
+
+                        <li key={i}>
+                            {issue.Type == "Error" ?
+                                <i className="fa fa-times-circle text-danger mr-1" aria-hidden="true" /> :
+                                <i className="fa fa-exclamation-triangle text-warning mr-1" aria-hidden="true" />}
+
+                            {issue.BpmnElementId && <span className="mr-1">(in <a href="#" onClick={e => this.handleHighlightClick(e, issue)}>{issue.BpmnElementId}</a>)</span>}
+                            {issue.Message}
+
+                        </li>
+                    )}
+                </ul>
             </div>
         );
     }
