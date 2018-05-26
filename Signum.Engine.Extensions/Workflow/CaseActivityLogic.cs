@@ -884,6 +884,9 @@ namespace Signum.Engine.Workflow
                     if (ctx.ToActivities.Any() || ctx.ToIntermediateEvents.Any())
                         throw new InvalidOperationException("ToActivities and ToIntermediateEvents should be empty when finishing");
 
+                    if (@case.CaseActivities().Any(a => a.State == CaseActivityState.PendingNext || a.State == CaseActivityState.PendingDecision))
+                        return;
+
                     @case.FinishDate = ca.DoneDate.Value;
                     @case.Save();
 
