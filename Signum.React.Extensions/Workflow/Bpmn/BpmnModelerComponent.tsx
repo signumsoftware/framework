@@ -73,8 +73,8 @@ export default class BpmnModelerComponent extends React.Component<BpmnModelerCom
 
     focusElement(bpmnElementId: string) {
         debugger;
-        var selection = this.modeler.get<any>("selection");
-        selection.select(bpmnElementId);
+        var element = this.elementRegistry.get(bpmnElementId);
+        this.modeler._emit('element.click', { element: [element] });
     }
 
     existsMainEntityTypeRelatedNodes(): boolean {
