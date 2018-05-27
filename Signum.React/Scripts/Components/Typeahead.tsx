@@ -82,11 +82,6 @@ export class Typeahead extends React.Component<TypeaheadProps, TypeaheadState>
         }
     }
 
-    componentWillUnmount() {
-        if (this.handle != undefined)
-            clearTimeout(this.handle);
-    }
-
     populate() {
 
         if (this.props.minLength == null || this.input.value.length < this.props.minLength) {
@@ -281,6 +276,13 @@ export class Typeahead extends React.Component<TypeaheadProps, TypeaheadState>
 
     componentDidMount() {
         this.toggleEvents(this.state.shown);
+    }
+
+    componentWillUnmount() {
+        if (this.handle != undefined)
+            clearTimeout(this.handle);
+
+        this.toggleEvents(false);
     }
 
     componentWillUpdate(nextProps: TypeaheadProps, nextState: TypeaheadState) {
