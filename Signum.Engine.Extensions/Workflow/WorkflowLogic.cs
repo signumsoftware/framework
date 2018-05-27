@@ -20,6 +20,7 @@ using Signum.Entities.Dynamic;
 using System.CodeDom.Compiler;
 using System.Text.RegularExpressions;
 using System.Xml;
+using Signum.Entities.Reflection;
 
 namespace Signum.Engine.Workflow
 {
@@ -194,11 +195,13 @@ namespace Signum.Engine.Workflow
                 if (graph.TrackId != null)
                     return graph;
 
-                var errors = graph.Validate((g, newDirection) =>
+                var issues = new List<WorkflowIssue>();
+                graph.Validate(issues, (g, newDirection) =>
                 {
                     throw new InvalidOperationException($"Unexpected direction of gateway '{g}' (Should be '{newDirection.NiceToString()}'). Consider saving Workflow '{workflow}'.");
                 });
 
+                var errors = issues.Where(a => a.Type == WorkflowIssueType.Error);
                 if (errors.HasItems())
                     throw new ApplicationException("Errors in Workflow '" + workflow + "':\r\n" + errors.ToString("\r\n").Indent(4));
 
@@ -564,7 +567,6 @@ namespace Signum.Engine.Workflow
                 new InvalidateWith(typeof(WorkflowConditionEntity)));
         }
 
-
         public static ResetLazy<Dictionary<Lite<WorkflowScriptEntity>, WorkflowScriptEntity>> Scripts;
         public static WorkflowScriptEntity RetrieveFromCache(this Lite<WorkflowScriptEntity> ws)=> Scripts.Value.GetOrThrow(ws);
         private static void StartWorkflowScript(SchemaBuilder sb, DynamicQueryManager dqm)
@@ -601,8 +603,6 @@ namespace Signum.Engine.Workflow
                     e.Rule
                 });
         }
-
-     
 
         private static void ThrowConnectionError(IQueryable<WorkflowConnectionEntity> queryable, Entity toDelete)
         {
@@ -643,7 +643,7 @@ namespace Signum.Engine.Workflow
                     Lite = false,
                     Execute = (e, args) =>
                     {
-                        WorkflowLogic.ApplyDocument(e, args.GetArg<WorkflowModel>(), args.TryGetArgC<WorkflowReplacementModel>());
+                        WorkflowLogic.ApplyDocument(e, args.GetArg<WorkflowModel>(), args.TryGetArgC<WorkflowReplacementModel>(), args.TryGetArgC<List<WorkflowIssue>>() ?? new List<WorkflowIssue>());
                     }
                 }.Register();
 
@@ -683,8 +683,6 @@ namespace Signum.Engine.Workflow
             }
         }
 
-
-
         public static Expression<Func<UserEntity, Lite<Entity>, bool>> IsUserConstantActor = (userConstant, actor) =>
          actor.RefersTo(userConstant) ||
           (actor is Lite<RoleEntity> && AuthLogic.IndirectlyRelated(userConstant.Role).Contains((Lite<RoleEntity>)actor));
@@ -719,24 +717,26 @@ namespace Signum.Engine.Workflow
             return wb.PreviewChanges(document, model);
         }
 
-        public static void ApplyDocument(WorkflowEntity workflow, WorkflowModel model, WorkflowReplacementModel replacements)
+        public static  void ApplyDocument(WorkflowEntity workflow, WorkflowModel model, WorkflowReplacementModel replacements, List<WorkflowIssue> issuesContainer)
         {
+            if (issuesContainer.Any())
+                throw new InvalidOperationException("issuesContainer should be empty");
+
             if (model == null)
                 throw new ArgumentNullException(nameof(model));
-
-
+            
             var wb = new WorkflowBuilder(workflow);
             if (workflow.IsNew)
                 workflow.Save();
 
             wb.ApplyChanges(model, replacements);
-            wb.ValidateGraph();
+            wb.ValidateGraph(issuesContainer);
+
+            if (issuesContainer.Any(a => a.Type == WorkflowIssueType.Error))
+                throw new IntegrityCheckException(new Dictionary<Guid, IntegrityCheck>());
+
             workflow.FullDiagramXml = new WorkflowXmlEmbedded { DiagramXml = wb.GetXDocument().ToString() };
             workflow.Save();
         }
-
-       
     }
-
-   
 }

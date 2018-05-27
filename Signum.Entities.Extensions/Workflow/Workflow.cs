@@ -54,6 +54,13 @@ namespace Signum.Entities.Workflow
         Both
     }
 
+    [InTypeScript(true), DescriptionOptions(DescriptionOptions.Members)]
+    public enum WorkflowIssueType
+    {
+        Warning,
+        Error,
+    }
+
     [Serializable, InTypeScript(Undefined = false)]
     public class WorkflowModel : ModelEntity
     {

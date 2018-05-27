@@ -28,7 +28,10 @@ namespace Signum.React.Authorization
             UserEntity user = null;
             try
             {
-                user = AuthLogic.Login(data.userName, Security.EncodePassword(data.password));
+                if (AuthLogic.Authorizer == null)
+                    user = AuthLogic.Login(data.userName, Security.EncodePassword(data.password));
+                else
+                    user = AuthLogic.Authorizer.Login(data.userName, data.password);
             }
             catch (Exception e) when (e is IncorrectUsernameException || e is IncorrectPasswordException)
             {
