@@ -22,7 +22,7 @@
     <ProjectReference Include="..\Signum.Utilities\Signum.Utilities.csproj" />
   </ItemGroup>
 
-  <Target Name="SignumAfterCompile" AfterTargets="Build" DependsOnTargets="CoreCompile">
+  <Target Name="SignumAfterCompile" AfterTargets="AfterCompile" Outputs="$(TargetPath)">
     <WriteLinesToFile File="$(BaseIntermediateOutputPath)SignumReferences.txt" Lines="@(ReferencePath)" Overwrite="true" Encoding="Unicode" />
     <Exec command="dotnet &quot;..\Signum.MSBuildTask\Binaries\netcoreapp2.1\Signum.MSBuildTask.dll&quot; &quot;@(IntermediateAssembly)&quot; &quot;$(BaseIntermediateOutputPath)SignumReferences.txt&quot;" ConsoleToMSBuild="false">
       <Output TaskParameter="ConsoleOutput" PropertyName="OutputOfExec" />
