@@ -28,74 +28,26 @@ namespace Signum.Entities.Dynamic
             "System.Reflection",
             "System.Collections.Generic",
             "System.Linq.Expressions",
-            "Signum.Engine",
-            "Signum.Entities",
-            "Signum.Entities.Basics",
-            "Signum.Engine.DynamicQuery",
-            "Signum.Engine.Maps",
-            "Signum.Engine.Basics",
-            "Signum.Engine.Operations",
-            "Signum.Engine.Workflow",
             "Signum.Utilities",
-            "Signum.Engine.Authorization",
-            "Signum.Engine.Notes",
-            "Signum.Engine.Alerts",
-            "Signum.Engine.Cache",
-            "Signum.Engine.Chart",
-            "Signum.Engine.Dashboard",
-            "Signum.Engine.DiffLog",
-            "Signum.Engine.Dynamic",
-            "Signum.Engine.Excel",
-            "Signum.Engine.Files",
-            "Signum.Engine.Mailing",
-            "Signum.Engine.Map",
-            "Signum.Engine.Migrations",
-            "Signum.Engine.Processes",
-            "Signum.Engine.Profiler",
-            "Signum.Engine.Scheduler",
-            "Signum.Engine.Toolbar",
-            "Signum.Engine.Translation",
-            "Signum.Engine.UserQueries",
-            "Signum.Engine.ViewLog",
-            "Signum.Engine.Word",
-            "Signum.Engine.Tree",
-            "Signum.Entities.Authorization",
-            "Signum.Entities.Notes",
-            "Signum.Entities.Alerts",
-            "Signum.Entities.Chart",
-            "Signum.Entities.Dashboard",
-            "Signum.Entities.Dynamic",
-            "Signum.Entities.Excel",
-            "Signum.Entities.Files",
-            "Signum.Entities.Mailing",
-            "Signum.Entities.Migrations",
-            "Signum.Entities.Processes",
-            "Signum.Entities.Scheduler",
-            "Signum.Entities.Toolbar",
-            "Signum.Entities.Translation",
-            "Signum.Entities.UserQueries",
-            "Signum.Entities.ViewLog",
-            "Signum.Entities.Word",
-            "Signum.Entities.Workflow",
-            "Signum.Entities.Tree",
         };
 
         public static HashSet<Type> AssemblyTypes = new HashSet<Type>
         {   
             typeof(object),
-            typeof(Csv), //  "Signum.Utilities.dll",
-            typeof(Entity), //"Signum.Entities.dll",
-            typeof(UserEntity), //"Signum.Entities.Extensions.dll",
-            typeof(JsonConvert), //"Newtonsoft.Json.dll",
+            typeof(System.Attribute),
+            typeof(System.Runtime.ConstrainedExecution.PrePrepareMethodAttribute), 
+            typeof(System.Linq.Enumerable),
+            typeof(System.Linq.Expressions.Expression),
+            typeof(Signum.Utilities.Csv), //  "Signum.Utilities.dll",
+            typeof(Newtonsoft.Json.JsonConvert), //"Newtonsoft.Json.dll",
         };
 
         public static IEnumerable<MetadataReference> GetMetadataReferences()
         {
             return DynamicCode.AssemblyTypes
                 .Select(type => MetadataReference.CreateFromFile(type.Assembly.Location))
-                .And(MetadataReference.CreateFromFile(DynamicCode.CodeGenAssemblyPath))
-                .NotNull()
-                .EmptyIfNull();
+                .And(DynamicCode.CodeGenAssemblyPath?.Let(s => MetadataReference.CreateFromFile(s)))
+                .NotNull();
         }
 
         public static string GetUsingNamespaces()

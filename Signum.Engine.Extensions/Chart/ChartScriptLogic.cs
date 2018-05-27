@@ -106,7 +106,7 @@ namespace Signum.Engine.Chart
             }
         }
 
-        public static string DefaultFolderDevelopment = @"..\..\..\Extensions\Signum.Engine.Extensions\Chart\ChartScripts";
+        public static string DefaultFolderDevelopment = @"..\..\..\..\Extensions\Signum.Engine.Extensions\Chart\ChartScripts";
         public static string DefaultFolderProduction = @"ChartScripts";
         private static string GetDefaultFolderName()
         {

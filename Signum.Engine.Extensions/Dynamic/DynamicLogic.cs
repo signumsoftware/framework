@@ -155,6 +155,12 @@ namespace Signum.Engine.Dynamic
             public string ErrorNumber;
             public string ErrorText;
             public string FileContent;
+
+            public override string ToString()
+            {
+                //CodeGen\CodeGenStarter.cs(58, 12): error CS0012: The type 'Attribute' is defined in an assembly that is not referenced. You must add a reference to assembly 'System.Runtime, Version=4.2.1.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a'.
+                return $"{FileName}({Line}:{Column}): error {ErrorNumber}: {ErrorText}";
+            }
         }
 
         public static CompilationResult Compile(Dictionary<string, CodeFile> codeFiles, bool inMemory)
@@ -164,13 +170,16 @@ namespace Signum.Engine.Dynamic
                 Directory.CreateDirectory(DynamicCode.CodeGenDirectory);
                 Directory.EnumerateFiles(DynamicCode.CodeGenDirectory).Where(a => !inMemory || a != DynamicCode.CodeGenAssemblyPath).ToList().ForEach(a => File.Delete(a));
 
-                codeFiles.Values.ToList().ForEach(a => File.WriteAllText(Path.Combine(DynamicCode.CodeGenDirectory, a.FileName), a.FileContent));
+                var utf8 = Encoding.UTF8;
+
+                codeFiles.Values.ToList().ForEach(a => File.WriteAllText(Path.Combine(DynamicCode.CodeGenDirectory, a.FileName), a.FileContent, utf8));
 
                 var compilation = CSharpCompilation.Create(DynamicCode.CodeGenAssembly)
                       .WithOptions(new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary))
-                      .AddReferences(DynamicCode.GetMetadataReferences());
+                      .AddReferences(DynamicCode.GetMetadataReferences())
+                      .AddSyntaxTrees(codeFiles.Values.Select(v => CSharpSyntaxTree.ParseText(v.FileContent, path: Path.Combine(DynamicCode.CodeGenDirectory, v.FileName))));
 
-                var outputAssembly = inMemory ? Path.Combine(DynamicCode.CodeGenDirectory, DynamicCode.CodeGenAssembly) : null;
+                var outputAssembly = inMemory ? null : Path.Combine(DynamicCode.CodeGenDirectory, DynamicCode.CodeGenAssembly);
 
                 using (var stream = inMemory ? (Stream)new MemoryStream() : File.Create(outputAssembly))
                 {
@@ -185,9 +194,9 @@ namespace Signum.Engine.Dynamic
                             Column = d.Location.GetLineSpan().StartLinePosition.Character,
                             Line = d.Location.GetLineSpan().StartLinePosition.Line,
                             FileContent = d.Location.SourceTree.ToString(),
-                            FileName = null,
+                            FileName = d.Location.SourceTree.FilePath,
                             ErrorNumber = d.Descriptor.Id,
-                            ErrorText = d.Descriptor.Description.ToString()
+                            ErrorText = d.GetMessage(null)
                         })
                         .ToList()
                     };

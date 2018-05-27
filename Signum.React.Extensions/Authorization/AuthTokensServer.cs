@@ -19,6 +19,9 @@ using Microsoft.AspNetCore.Mvc;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Runtime.Serialization.Formatters.Binary;
+using Microsoft.AspNetCore.Mvc.Filters;
+using Microsoft.AspNetCore.Mvc.Controllers;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Signum.React.Authorization
 {
@@ -31,75 +34,53 @@ namespace Signum.React.Authorization
             Configuration = tokenConfig;
             CryptoKey = new MD5CryptoServiceProvider().Using(p => p.ComputeHash(UTF8Encoding.UTF8.GetBytes(hashableEncryptionKey)));
 
-            //SignumAuthenticationFilterAttribute.Authenticators.Add(TokenAuthenticator);
-            //SignumAuthenticationFilterAttribute.Authenticators.Add(AnonymousAuthenticator);
-            //SignumAuthenticationFilterAttribute.Authenticators.Add(InvalidAuthenticator);
+            SignumAuthenticationFilter.Authenticators.Add(TokenAuthenticator);
+            SignumAuthenticationFilter.Authenticators.Add(AnonymousAuthenticator);
+            SignumAuthenticationFilter.Authenticators.Add(InvalidAuthenticator);
         }
 
-        //public static SignumAuthenticationResult InvalidAuthenticator(HttpActionContext actionContext)
-        //{
-        //    throw new AuthenticationException("No authentication information found!");
-        //}
-
-        //public static SignumAuthenticationResult AnonymousAuthenticator(HttpActionContext actionContext)
-        //{
-        //    var r = actionContext.ActionDescriptor as ReflectedHttpActionDescriptor;
-        //    if (r.GetCustomAttributes<AllowAnonymousAttribute>().Any() || r.ControllerDescriptor.ControllerType.HasAttribute<AllowAnonymousAttribute>())
-        //        return new SignumAuthenticationResult();
-            
-        //    return null;
-        //}
-
-        //static SignumAuthenticationResult TokenAuthenticator(HttpActionContext ctx)
-        //{
-        //    var tokenString = ctx.Request.Headers.Authorization?.Parameter;
-        //    if (tokenString == null)
-        //    {
-        //        return null;
-        //    }
-
-        //    var token = DeserializeToken(tokenString);
-
-        //    var c = Configuration();
-
-        //    bool requiresRefresh = token.CreationDate.AddMinutes(c.RefreshTokenEvery) < TimeZoneManager.Now ||
-        //        c.RefreshAnyTokenPreviousTo.HasValue && token.CreationDate < c.RefreshAnyTokenPreviousTo;
-
-        //    if (requiresRefresh)
-        //    {
-        //        return new SignumAuthenticationResult { ErrorResult = new UpgradeTokenResult(ctx.RequestContext.Configuration.Formatters.JsonFormatter) };
-        //    }
-
-        //    return new SignumAuthenticationResult { User = token.User };
-        //}
-
-        //internal class UpgradeTokenResult : IHttpActionResult
-        //{
-        //    private JsonMediaTypeFormatter jsonFormatter;
-
-        //    public UpgradeTokenResult(JsonMediaTypeFormatter jsonFormatter)
-        //    {
-        //        this.jsonFormatter = jsonFormatter;
-        //    }
-
-        //    public Task<HttpResponseMessage> ExecuteAsync(CancellationToken cancellationToken)
-        //    {
-        //        var error = new HttpError(new NewTokenRequiredException("Please upgrade the token to continue using the service"), includeErrorDetail: true); //Avoid annoying exception
-                
-        //        var message = new HttpResponseMessage(HttpStatusCode.UpgradeRequired)
-        //        {
-        //            Content = new ObjectContent<HttpError>(error, jsonFormatter),
-        //        };
-
-        //        return Task.FromResult(message); 
-        //    }
-        //}
-
-        public static string RefreshToken(string oldToken, out UserEntity newUser)
+        public static SignumAuthenticationResult InvalidAuthenticator(FilterContext actionContext)
         {
-            AuthToken token = DeserializeToken(oldToken);
+            throw new AuthenticationException("No authentication information found!");
+        }
 
-            newUser = AuthLogic.Disable().Using(_ => Database.Query<UserEntity>().SingleOrDefaultEx(u => u.Id == token.User.Id));
+        public static SignumAuthenticationResult AnonymousAuthenticator(FilterContext actionContext)
+        {
+            var cad = actionContext.ActionDescriptor as ControllerActionDescriptor;
+            if (cad.MethodInfo.HasAttribute<AllowAnonymousAttribute>() || 
+                cad.ControllerTypeInfo.HasAttribute<AllowAnonymousAttribute>())
+                return new SignumAuthenticationResult();
+
+            return null;
+        }
+
+        static SignumAuthenticationResult TokenAuthenticator(FilterContext ctx)
+        {
+            var tokenString = ctx.HttpContext.Request.Headers["Authorization"].FirstOrDefault();
+            if (tokenString == null)
+            {
+                return null;
+            }
+
+            var token = DeserializeToken(tokenString.After("Bearer "));
+
+            var c = Configuration();
+
+            bool requiresRefresh = token.CreationDate.AddMinutes(c.RefreshTokenEvery) < TimeZoneManager.Now ||
+                c.RefreshAnyTokenPreviousTo.HasValue && token.CreationDate < c.RefreshAnyTokenPreviousTo;
+
+            if (requiresRefresh)
+            {
+                ctx.HttpContext.Response.Headers["New_Token"] = RefreshToken(token, out var newUser);
+                return new SignumAuthenticationResult { User = token.User };
+            }
+
+            return new SignumAuthenticationResult { User = token.User };
+        }
+
+        static string RefreshToken(AuthToken oldToken, out UserEntity newUser)
+        {
+            newUser = AuthLogic.Disable().Using(_ => Database.Query<UserEntity>().SingleOrDefaultEx(u => u.Id == oldToken.User.Id));
 
             if (newUser == null)
                 throw new AuthenticationException(AuthMessage.TheUserIsNotLongerInTheDatabase.NiceToString());
@@ -107,10 +88,10 @@ namespace Signum.React.Authorization
             if (newUser.State == UserState.Disabled)
                 throw new AuthenticationException(AuthMessage.User0IsDisabled.NiceToString(newUser));
 
-            if (newUser.UserName != token.User.UserName)
+            if (newUser.UserName != oldToken.User.UserName)
                 throw new AuthenticationException(AuthMessage.InvalidUsername.NiceToString());
 
-            if (!newUser.PasswordHash.SequenceEqual(token.User.PasswordHash))
+            if (!newUser.PasswordHash.SequenceEqual(oldToken.User.PasswordHash))
                 throw new AuthenticationException(AuthMessage.InvalidPassword.NiceToString());
 
             AuthToken newToken = new AuthToken
@@ -229,13 +210,13 @@ namespace Signum.React.Authorization
 
     }
 
+    [Serializable]
     public class AuthToken
     {
         public UserEntity User { get; set; }
 
         public DateTime CreationDate { get; set; }
     }
-
 
     [Serializable]
     public class NewTokenRequiredException : Exception

@@ -113,14 +113,6 @@ namespace Signum.React.Authorization
             UserTicketServer.RemoveCookie(this.ActionContext);
         }
 
-        [Route("api/auth/refreshToken"), HttpPost, AllowAnonymous]
-        public LoginResponse RefreshToken([FromBody]string oldToken)
-        {
-            var newToken = AuthTokenServer.RefreshToken(oldToken, out UserEntity user);
-
-            return new LoginResponse { message = null, userEntity = user, token = newToken };
-        }
-
         [Route("api/auth/ChangePassword"), HttpPost]
         public ActionResult<LoginResponse> ChangePassword(ChangePasswordRequest request)
         {

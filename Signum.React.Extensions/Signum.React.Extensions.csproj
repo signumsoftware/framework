@@ -6,6 +6,7 @@
     <ApplicationIcon />
     <OutputType>Library</OutputType>
     <StartupObject />
+    <RootNamespace>Signum.React</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
