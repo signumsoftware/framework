@@ -20,6 +20,7 @@ using Signum.Entities.Dynamic;
 using System.CodeDom.Compiler;
 using System.Text.RegularExpressions;
 using System.Xml;
+using Signum.Entities.Reflection;
 
 namespace Signum.Engine.Workflow
 {
@@ -566,7 +567,6 @@ namespace Signum.Engine.Workflow
                 new InvalidateWith(typeof(WorkflowConditionEntity)));
         }
 
-
         public static ResetLazy<Dictionary<Lite<WorkflowScriptEntity>, WorkflowScriptEntity>> Scripts;
         public static WorkflowScriptEntity RetrieveFromCache(this Lite<WorkflowScriptEntity> ws)=> Scripts.Value.GetOrThrow(ws);
         private static void StartWorkflowScript(SchemaBuilder sb, DynamicQueryManager dqm)
@@ -603,8 +603,6 @@ namespace Signum.Engine.Workflow
                     e.Rule
                 });
         }
-
-     
 
         private static void ThrowConnectionError(IQueryable<WorkflowConnectionEntity> queryable, Entity toDelete)
         {
@@ -685,8 +683,6 @@ namespace Signum.Engine.Workflow
             }
         }
 
-
-
         public static Expression<Func<UserEntity, Lite<Entity>, bool>> IsUserConstantActor = (userConstant, actor) =>
          actor.RefersTo(userConstant) ||
           (actor is Lite<RoleEntity> && AuthLogic.IndirectlyRelated(userConstant.Role).Contains((Lite<RoleEntity>)actor));
@@ -735,12 +731,12 @@ namespace Signum.Engine.Workflow
 
             wb.ApplyChanges(model, replacements);
             wb.ValidateGraph(issuesContainer);
+
+            if (issuesContainer.Any(a => a.Type == WorkflowIssueType.Error))
+                throw new IntegrityCheckException(new Dictionary<Guid, IntegrityCheck>());
+
             workflow.FullDiagramXml = new WorkflowXmlEmbedded { DiagramXml = wb.GetXDocument().ToString() };
             workflow.Save();
         }
-
-       
     }
-
-   
 }

@@ -382,10 +382,6 @@ namespace Signum.Engine.Workflow
                 g.Direction = newDirection;
                 g.Execute(WorkflowGatewayOperation.Save);
             });
-            
-            var error = issuesContainer.Where(a=>a.Type == WorkflowIssueType.Error).ToString("\r\n").DefaultText(null);
-            if (error != null)
-                throw new IntegrityCheckException(new Dictionary<Guid, IntegrityCheck>());
         }
     }
 
