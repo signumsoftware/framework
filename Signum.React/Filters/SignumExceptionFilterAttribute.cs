@@ -1,4 +1,10 @@
-﻿using Signum.Engine;
+﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.Extensions;
+using Microsoft.AspNetCore.Http.Features;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Controllers;
+using Microsoft.AspNetCore.Mvc.Filters;
+using Signum.Engine;
 using Signum.Engine.Basics;
 using Signum.Entities;
 using Signum.Entities.Basics;
@@ -10,135 +16,95 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Security.Authentication;
+using System.Text;
 using System.Web;
 
 namespace Signum.React.Filters
 {
-    //public class SignumExceptionFilterAttribute : ExceptionFilterAttribute
-    //{
-    //    static Func<HttpActionExecutedContext, bool> IncludeErrorDetails = ctx => true;
+    public class SignumExceptionFilterAttribute : IExceptionFilter
+    {
+        static Func<ExceptionContext, bool> IncludeErrorDetails = ctx => true;
 
-    //    public static readonly List<Type> IgnoreExceptions = new List<Type> { typeof(OperationCanceledException) };
+        public static readonly List<Type> IgnoreExceptions = new List<Type> { typeof(OperationCanceledException) };
 
-    //    public override void OnException(HttpActionExecutedContext ctx)
-    //    {
-    //        if (!IgnoreExceptions.Contains(ctx.Exception.GetType()))
-    //        {
-    //            var statusCode = GetStatus(ctx.Exception.GetType());
-
-    //            var error = new HttpError(ctx.Exception, IncludeErrorDetails(ctx));
-
-    //            var req = ctx.Request;
-
-    //            var exLog = ctx.Exception.LogException(e =>
-    //            {
-    //                e.ActionName = ctx.ActionContext.ActionDescriptor.ActionName;
-    //                e.ControllerName = ctx.ActionContext.ActionDescriptor.ControllerDescriptor.ControllerName;
-    //                e.UserAgent = req.Headers.UserAgent.ToString();
-    //                e.RequestUrl = req.RequestUri.ToString();
-    //                e.UrlReferer = req.Headers.Referrer?.ToString();
-    //                e.UserHostAddress = GetClientIp(req);
-    //                e.UserHostName = GetClientName(req);
-    //                e.User = (UserHolder.Current ?? (IUserEntity)GetProp(req, SignumAuthenticationFilterAttribute.UserKey))?.ToLite();
-    //                e.QueryString = ExceptionEntity.Dump(req.RequestUri.ParseQueryString());
-    //                e.Form =  (string)GetProp(req, SignumAuthenticationFilterAttribute.SavedRequestKey);
-    //                e.Session = GetSession(req);
-    //            });
-
-    //            error["ExceptionID"] = exLog.Id.ToString();
-
-    //            ctx.Response = ctx.Request.CreateResponse<HttpError>(statusCode, error);
-    //        }
-
-    //        base.OnException(ctx);
-    //    }
-
-     
-
-    //    private object GetProp(HttpRequestMessage req, string key)
-    //    {
-    //        object result = null;
-    //        req.Properties.TryGetValue(key, out result);
-    //        return result;
-    //    }
-
-    //    private HttpStatusCode GetStatus(Type type)
-    //    {
-    //        if (type == typeof(UnauthorizedAccessException))
-    //            return HttpStatusCode.Forbidden;
-
-    //        if (type == typeof(AuthenticationException))
-    //            return HttpStatusCode.Unauthorized;
-
-    //        if (type == typeof(EntityNotFoundException))
-    //            return HttpStatusCode.NotFound;
-
-    //        if (type == typeof(IntegrityCheckException))
-    //            return HttpStatusCode.BadRequest;
-
-    //        return HttpStatusCode.InternalServerError;
-    //    }
-
-    //    public static string GetClientIp(HttpRequestMessage request)
-    //    {
-    //        if (request.Properties.ContainsKey("MS_HttpContext"))
-    //        {
-    //            return ((HttpContextWrapper)request.Properties["MS_HttpContext"]).Request.UserHostAddress;
-    //        }
-    //        else if (request.Properties.ContainsKey(RemoteEndpointMessageProperty.Name))
-    //        {
-    //            RemoteEndpointMessageProperty prop = (RemoteEndpointMessageProperty)request.Properties[RemoteEndpointMessageProperty.Name];
-    //            return prop.Address;
-    //        }
-    //        else if (HttpContext.Current != null)
-    //        {
-    //            return HttpContext.Current.Request.UserHostAddress;
-    //        }
-    //        else
-    //        {
-    //            return null;
-    //        }
-    //    }
-
-    //    public static string GetClientName(HttpRequestMessage request)
-    //    {
-    //        if (request.Properties.ContainsKey("MS_HttpContext"))
-    //        {
-    //            return ((HttpContextWrapper)request.Properties["MS_HttpContext"]).Request.UserHostName;
-    //        }
-    //        else if (request.Properties.ContainsKey(RemoteEndpointMessageProperty.Name))
-    //        {
-    //            RemoteEndpointMessageProperty prop = (RemoteEndpointMessageProperty)request.Properties[RemoteEndpointMessageProperty.Name];
-    //            return prop.Address;
-    //        }
-    //        else if (HttpContext.Current != null)
-    //        {
-    //            return HttpContext.Current.Request.UserHostName;
-    //        }
-    //        else
-    //        {
-    //            return null;
-    //        }
-    //    }
+        public void OnException(ExceptionContext context)
+        {
+            if (!IgnoreExceptions.Contains(context.Exception.GetType()))
+            {
+                var statusCode = GetStatus(context.Exception.GetType());
 
 
-    //    private string GetSession(HttpRequestMessage request)
-    //    {
-    //        if (request.Properties.ContainsKey("MS_HttpContext"))
-    //        {
-    //            var ses = ((HttpContextWrapper)request.Properties["MS_HttpContext"]).Session;
-    //            return ses == null ? "[No Session]" : ses.Cast<string>().ToString(key => key + ": " + ses[key].Dump(), "\r\n");
-    //        }
-    //        else if (HttpContext.Current != null)
-    //        {
-    //            var ses = HttpContext.Current.Session;
-    //            return ses == null ? "[No Session]" : ses.Cast<string>().ToString(key => key + ": " + ses[key].Dump(), "\r\n");
-    //        }
-    //        else
-    //        {
-    //            return null;
-    //        }
-    //    }
+                var req = context.HttpContext.Request;
 
-    //}
+                var connFeature = context.HttpContext.Features.Get<IHttpConnectionFeature>();
+                
+                var exLog = context.Exception.LogException(e =>
+                {
+                    e.ActionName = (context.ActionDescriptor as ControllerActionDescriptor)?.ActionName;
+                    e.ControllerName = (context.ActionDescriptor as ControllerActionDescriptor)?.ControllerName;
+                    e.UserAgent = req.Headers["User-Agent"].FirstOrDefault();
+                    e.RequestUrl = req.GetDisplayUrl();
+                    e.UrlReferer = req.Headers["Referer"].ToString();
+                    e.UserHostAddress = connFeature.RemoteIpAddress.ToString();
+                    e.UserHostName = Dns.GetHostEntry(connFeature.RemoteIpAddress).HostName;
+                    e.User = UserHolder.Current?.ToLite();
+                    e.QueryString = req.QueryString.ToString();
+                    e.Form = ReadAllBody(context.HttpContext);
+                    e.Session = null;
+                });
+
+                var error = new HttpError(context.Exception);
+                context.HttpContext.Response.StatusCode = (int)statusCode;
+                context.Result = new JsonResult(error);
+            }
+        }
+
+        public string ReadAllBody(HttpContext httpContext)
+        {
+            httpContext.Request.Body.Seek(0, System.IO.SeekOrigin.Begin);
+            return Encoding.UTF8.GetString(httpContext.Request.Body.ReadAllBytes());
+        }
+
+        private object TryGetProp(HttpContext context, string key)
+        {
+            object result = null;
+            context.Items.TryGetValue(key, out result);
+            return result;
+        }
+
+        private HttpStatusCode GetStatus(Type type)
+        {
+            if (type == typeof(UnauthorizedAccessException))
+                return HttpStatusCode.Forbidden;
+
+            if (type == typeof(AuthenticationException))
+                return HttpStatusCode.Unauthorized;
+
+            if (type == typeof(EntityNotFoundException))
+                return HttpStatusCode.NotFound;
+
+            if (type == typeof(IntegrityCheckException))
+                return HttpStatusCode.BadRequest;
+
+            return HttpStatusCode.InternalServerError;
+        }
+    }
+
+    public class HttpError
+    {
+        public HttpError(Exception e)
+        {
+            this.ExceptionMessage = e.Message;
+            this.ExceptionType = e.GetType().FullName;
+            this.StackTrace = e.StackTrace;
+            this.ExceptionId = e.GetExceptionEntity()?.Id.ToString();
+            this.InnerException = e.InnerException == null ? null : new HttpError(e.InnerException);
+        }
+
+        public string ExceptionId;
+        public string ExceptionMessage;
+        public string ExceptionType;
+        public string StackTrace;
+        public HttpError InnerException;
+    }
 }

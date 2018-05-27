@@ -1,4 +1,6 @@
-﻿using Signum.Engine;
+﻿using Microsoft.AspNetCore.Mvc.Controllers;
+using Microsoft.AspNetCore.Mvc.Filters;
+using Signum.Engine;
 using Signum.Engine.Basics;
 using Signum.Entities;
 using Signum.Entities.Basics;
@@ -33,24 +35,25 @@ namespace Signum.React.Filters
             get { return requestKey; }
         }
 
-        //public static string GetActionDescription(HttpActionContext actionContext)
-        //{
-        //    var action = actionContext.ActionDescriptor.ControllerDescriptor.ControllerName + "." + actionContext.ActionDescriptor.ActionName;
+        public static string GetActionDescription(FilterContext actionContext)
+        {
+            var cad = (ControllerActionDescriptor)actionContext.ActionDescriptor;
 
-        //    var rad = actionContext.ActionDescriptor as ReflectedHttpActionDescriptor;
-        //    if (rad == null)
-        //    {
-        //        var attr = rad.MethodInfo.GetCustomAttributes(true).OfType<ProfilerActionSplitterAttribute>().FirstOrDefault();
-        //        if (attr != null)
-        //        {
-        //            var obj = attr.RequestKey == null ? actionContext.ActionArguments.Values.Single() : actionContext.ActionArguments.GetOrThrow(attr.RequestKey, "Argument '{0}' not found in: " + rad.MethodInfo.MethodSignature());
+            var action = cad.ControllerName + "." + cad.ActionName;
 
-        //            if (obj != null)
-        //                action += " " + obj.ToString();
-        //        }
-        //    }
+            if (cad == null)
+            {
+                var attr = cad.MethodInfo.GetCustomAttributes(true).OfType<ProfilerActionSplitterAttribute>().FirstOrDefault();
+                if (attr != null)
+                {
+                    var obj = attr.RequestKey == null ? null : actionContext.ActionDescriptor.RouteValues.GetOrThrow(attr.RequestKey, "Argument '{0}' not found in: " + cad.MethodInfo.MethodSignature());
 
-        //    return action;
-        //}
+                    if (obj != null)
+                        action += " " + obj.ToString();
+                }
+            }
+
+            return action;
+        }
     }
 }

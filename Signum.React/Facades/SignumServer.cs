@@ -39,37 +39,42 @@ namespace Signum.React.Facades
             });
         }
 
-        //public static void Start(IApplicationBuilder app, IHostingEnvironment hostingEnvironment, Assembly mainAsembly)
-        //{
-        //    Schema.Current.ApplicationName = hostingEnvironment.ContentRootPath;
+        public static void AddSignumGlobalFilters(this MvcOptions options)
+        {
+            options.Filters.Add(new SignumEnableBufferingFilter());
+            options.Filters.Add(new SignumTimesTrackerFilter());
+            options.Filters.Add(new SignumHeavyProfilerFilter());
+            options.Filters.Add(new SignumAuthenticationFilter());
+            options.Filters.Add(new SignumCultureSelectorFilter());
+            options.Filters.Add(new SignumExceptionFilterAttribute());
+            options.Filters.Add(new VersionFilterAttribute());
+        }
 
-        //    config.IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always;
-        //    config.Services.Replace(typeof(IHttpControllerSelector), new SignumControllerFactory(config, mainAsembly));
+        public static void Start(IApplicationBuilder app, IHostingEnvironment hostingEnvironment, Assembly mainAsembly)
+        {
+            Schema.Current.ApplicationName = hostingEnvironment.ContentRootPath;
 
-        //    SignumControllerFactory.RegisterArea(typeof(EntitiesController));
+            //app.Services.Replace(typeof(IHttpControllerSelector), new SignumControllerFactory(config, mainAsembly));
 
-
-        //    SignumControllerFactory.RegisterArea(MethodInfo.GetCurrentMethod());
-
-
-        //    // Web API configuration and services
-        //    var appXmlType = config.Formatters.XmlFormatter.SupportedMediaTypes.FirstOrDefault(t => t.MediaType == "application/xml");
-        //    config.Formatters.XmlFormatter.SupportedMediaTypes.Remove(appXmlType);
+            SignumControllerFactory.RegisterArea(typeof(EntitiesController));
 
 
-        //    // Web API routes
-        //    config.MapHttpAttributeRoutes();
+            SignumControllerFactory.RegisterArea(MethodInfo.GetCurrentMethod());
 
-        //    config.Services.Replace(typeof(IBodyModelValidator), new SignumBodyModelValidator());
 
-        //    config.Filters.Add(new SignumAuthenticationFilterAttribute());
-        //    config.Filters.Add(new SignumAuthorizationFilterAttribute());
-        //    config.Filters.Add(new SignumExceptionFilterAttribute());
-        //    config.Filters.Add(new VersionFilterAttribute());
+            //// Web API configuration and services
+            //var appXmlType = app.Formatters.XmlFormatter.SupportedMediaTypes.FirstOrDefault(t => t.MediaType == "application/xml");
+            //app.Formatters.XmlFormatter.SupportedMediaTypes.Remove(appXmlType);
 
-        //    ReflectionServer.Start();
-        //}
 
+            //// Web API routes
+            //app.MapHttpAttributeRoutes();
+
+            //app.Services.Replace(typeof(IBodyModelValidator), new SignumBodyModelValidator());
+
+            
+            ReflectionServer.Start();
+        }
 
         public static EntityPackTS GetEntityPack(Entity entity)
         {
