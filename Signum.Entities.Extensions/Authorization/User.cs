@@ -150,4 +150,16 @@ namespace Signum.Entities.Authorization
             : base(info, context)
         { }
     }
+
+    [Serializable]
+    public class AuthenticationFailedException : ApplicationException
+    {
+        public AuthenticationFailedException() { }
+        public AuthenticationFailedException(string message) : base(message) { }
+        protected AuthenticationFailedException(
+          System.Runtime.Serialization.SerializationInfo info,
+          System.Runtime.Serialization.StreamingContext context)
+            : base(info, context)
+        { }
+    }
 }
