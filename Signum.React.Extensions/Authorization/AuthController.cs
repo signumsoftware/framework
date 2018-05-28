@@ -33,13 +33,15 @@ namespace Signum.React.Authorization
                 else
                     user = AuthLogic.Authorizer.Login(data.userName, data.password);
             }
-            catch (Exception e) when (e is IncorrectUsernameException || e is IncorrectPasswordException)
+            catch (Exception e) when (e is IncorrectUsernameException || e is IncorrectPasswordException || e is AuthenticationFailedException)
             {
-                if (AuthServer.MergeInvalidUsernameAndPasswordMessages)
+                if (e is AuthenticationFailedException)
                 {
-                    ModelState.AddModelError("userName", AuthMessage.InvalidUsernameOrPassword.NiceToString());
-                    ModelState.AddModelError("password", AuthMessage.InvalidUsernameOrPassword.NiceToString());
-                    throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, this.ModelState));
+                    throw ModelException("login", e.Message);
+                }
+                else if (AuthServer.MergeInvalidUsernameAndPasswordMessages)
+                {
+                    throw ModelException("login", AuthMessage.InvalidUsernameOrPassword.NiceToString());
                 }
                 else if (e is IncorrectUsernameException)
                 {
@@ -49,12 +51,6 @@ namespace Signum.React.Authorization
                 {
                     throw ModelException("password", AuthMessage.InvalidPassword.NiceToString());
                 }
-            }
-            catch (IncorrectPasswordException)
-            {
-                throw ModelException("password", AuthServer.MergeInvalidUsernameAndPasswordMessages ?
-                    AuthMessage.InvalidUsernameOrPassword.NiceToString() :
-                    AuthMessage.InvalidPassword.NiceToString());
             }
 
             using (UserHolder.UserSession(user))
