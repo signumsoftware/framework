@@ -48,7 +48,7 @@ namespace Signum.Entities.Authorization
             }
         }
 
-        static Expression<Func<RoleEntity, string>> ToStringExpression = e => e.Name;
+        public static Expression<Func<RoleEntity, string>> ToStringExpression = e => e.Name;
         [ExpressionField]
         public override string ToString()
         {
