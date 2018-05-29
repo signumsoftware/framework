@@ -13,7 +13,7 @@ namespace Signum.Entities.DynamicQuery
     [Serializable]
     public class NetPropertyToken : QueryToken
     {
-        public PropertyInfo PropertyInfo { get; private set; }
+        public MemberInfo MemberInfo { get; private set; }
         public Func<string> DisplayName { get; private set; }
 
         internal NetPropertyToken(QueryToken parent, Expression<Func<object>> pi, Func<string> displayName) :
@@ -22,7 +22,7 @@ namespace Signum.Entities.DynamicQuery
 
         }
 
-        internal NetPropertyToken(QueryToken parent, PropertyInfo pi, Func<string> displayName)
+        internal NetPropertyToken(QueryToken parent, MemberInfo pi, Func<string> displayName)
             : base(parent)
         {
             if (parent == null)
@@ -35,12 +35,18 @@ namespace Signum.Entities.DynamicQuery
                 throw new ArgumentNullException("displayName");
 
             this.DisplayName = displayName;
-            this.PropertyInfo = pi;
+            this.MemberInfo = pi;
         }
 
         public override Type Type
         {
-            get { return PropertyInfo.PropertyType.Nullify(); }
+            get
+            {
+                return
+                    MemberInfo is PropertyInfo pi ? pi.PropertyType.Nullify() :
+                    MemberInfo is MethodInfo mi ? mi.ReturnType.Nullify() :
+                    throw new UnexpectedValueException(MemberInfo);
+            }
         }
 
         public override string ToString()
@@ -50,7 +56,7 @@ namespace Signum.Entities.DynamicQuery
 
         public override string Key
         {
-            get { return PropertyInfo.Name; }
+            get { return MemberInfo.Name; }
         }
 
         public static MethodInfo miInSql = ReflectionTools.GetMethodInfo(() => (1).InSql()).GetGenericMethodDefinition();
@@ -59,7 +65,10 @@ namespace Signum.Entities.DynamicQuery
         {   
             var result = Parent.BuildExpression(context);
 
-            var prop = Expression.Property(result.UnNullify(), PropertyInfo);
+            var prop =
+                MemberInfo is PropertyInfo pi ? (Expression)Expression.Property(result.UnNullify(), pi) :
+                MemberInfo is MethodInfo mi ? (mi.IsStatic ? Expression.Call(null, mi, result.UnNullify()) : Expression.Call(result.UnNullify(), mi)) :
+                throw new UnexpectedValueException(MemberInfo);
 
             return Expression.Call(miInSql.MakeGenericMethod(prop.Type), prop).Nullify();
         }
@@ -101,7 +110,7 @@ namespace Signum.Entities.DynamicQuery
 
         public override QueryToken Clone()
         {
-            return new NetPropertyToken(Parent.Clone(), PropertyInfo, DisplayName);
+            return new NetPropertyToken(Parent.Clone(), MemberInfo, DisplayName);
         }
     }
 

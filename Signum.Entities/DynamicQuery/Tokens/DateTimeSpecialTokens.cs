@@ -25,6 +25,7 @@ namespace Signum.Entities.DynamicQuery
         {
             return 
                 name == QueryTokenMessage.MonthStart ? miMonthStart :
+                name == QueryTokenMessage.QuarterStart ? miQuarterStart :
                 name == QueryTokenMessage.WeekStart ? miWeekStart :
                 name == QueryTokenMessage.HourStart ? miHourStart :
                 name == QueryTokenMessage.MinuteStart ? miMinuteStart :
@@ -48,6 +49,7 @@ namespace Signum.Entities.DynamicQuery
             {
                 return
                     Name == QueryTokenMessage.MonthStart ? "Y" :
+                    Name == QueryTokenMessage.QuarterStart ? "d" :
                     Name == QueryTokenMessage.WeekStart ? "d" :
                     Name == QueryTokenMessage.HourStart ? "g" :
                     Name == QueryTokenMessage.MinuteStart ? "g":
@@ -77,6 +79,7 @@ namespace Signum.Entities.DynamicQuery
         }
 
         public static MethodInfo miMonthStart = ReflectionTools.GetMethodInfo(() => DateTimeExtensions.MonthStart(DateTime.MinValue));
+        public static MethodInfo miQuarterStart = ReflectionTools.GetMethodInfo(() => DateTimeExtensions.QuarterStart(DateTime.MinValue));
         public static MethodInfo miWeekStart = ReflectionTools.GetMethodInfo(() => DateTimeExtensions.WeekStart(DateTime.MinValue));
         public static MethodInfo miHourStart = ReflectionTools.GetMethodInfo(() => DateTimeExtensions.HourStart(DateTime.MinValue));
         public static MethodInfo miMinuteStart = ReflectionTools.GetMethodInfo(() => DateTimeExtensions.MinuteStart(DateTime.MinValue));

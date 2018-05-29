@@ -237,6 +237,8 @@ namespace Signum.Entities.DynamicQuery
             return new List<QueryToken>
             {
                 new NetPropertyToken(parent, ReflectionTools.GetPropertyInfo((DateTime dt)=>dt.Year), () => utc + QueryTokenMessage.Year.NiceToString()),
+                new NetPropertyToken(parent, ReflectionTools.GetMethodInfo((DateTime dt ) => dt.Quarter()), ()=> utc + QueryTokenMessage.Quarter.NiceToString()),
+                new DatePartStartToken(parent, QueryTokenMessage.QuarterStart),
                 new NetPropertyToken(parent, ReflectionTools.GetPropertyInfo((DateTime dt)=>dt.Month),() => utc + QueryTokenMessage.Month.NiceToString()),
                 new DatePartStartToken(parent, QueryTokenMessage.MonthStart),
                 new WeekNumberToken(parent),
@@ -470,6 +472,10 @@ namespace Signum.Entities.DynamicQuery
         Month,
         [Description("Month Start")]
         MonthStart,
+        [Description("Quarter")]
+        Quarter,
+        [Description("Quarter Start")]
+        QuarterStart,
         [Description("Week Start")]
         WeekStart,
         [Description("Hour Start")]
