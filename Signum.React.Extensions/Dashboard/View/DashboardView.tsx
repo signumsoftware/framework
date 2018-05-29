@@ -17,6 +17,7 @@ import { DashboardEntity, PanelPartEmbedded, IPartEntity } from '../Signum.Entit
 
 
 import "../Dashboard.css"
+import { ErrorBoundary } from '../../../../Framework/Signum.React/Scripts/Components';
 
 
 export default class DashboardView extends React.Component<{ dashboard: DashboardEntity, entity?: Entity }> {
@@ -256,13 +257,15 @@ export class PanelPart extends React.Component<PanelPartProps, PanelPartState>{
 
                 </div>
                 <div className="card-body">
+                    <ErrorBoundary>
                     {
                         React.createElement(this.state.component, {
                             partEmbedded: p,
                             part: content,
                             entity: lite,
                         } as DashboardClient.PanelPartContentProps<IPartEntity>)
-                    }
+                        }
+                    </ErrorBoundary>
                 </div>
             </div>
         );
