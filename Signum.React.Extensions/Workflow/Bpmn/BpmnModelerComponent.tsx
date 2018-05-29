@@ -71,6 +71,12 @@ export default class BpmnModelerComponent extends React.Component<BpmnModelerCom
         this.modeler.importXML(this.props.diagramXML, this.handleOnModelError)
     }
 
+    focusElement(bpmnElementId: string) {
+        debugger;
+        var element = this.elementRegistry.get(bpmnElementId);
+        this.modeler._emit('element.click', { element: [element] });
+    }
+
     existsMainEntityTypeRelatedNodes(): boolean {
 
         var entities = this.props.entities;
