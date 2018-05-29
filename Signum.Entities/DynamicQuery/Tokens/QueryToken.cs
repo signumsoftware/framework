@@ -138,7 +138,7 @@ namespace Signum.Entities.DynamicQuery
 
             string allowed = result.IsAllowed();
             if (allowed != null)
-                throw new UnauthorizedAccessException($"Access to token '{key}' in '{this.FullKey()}' for query '{QueryUtils.GetKey(this.QueryName)}' is not allowed because: {allowed}");
+                throw new UnauthorizedAccessException($"Access to token '{this.FullKey()}.{key}' in query '{QueryUtils.GetKey(this.QueryName)}' is not allowed because: {allowed}");
 
             return result;
         }
