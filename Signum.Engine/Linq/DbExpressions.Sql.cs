@@ -610,6 +610,7 @@ namespace Signum.Engine.Linq
     {
         year,
         month,
+        quarter,
         day,
         week,
         weekday,
