@@ -7,6 +7,7 @@ import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator
 import * as connectionIcons from './ConnectionIcons'
 import * as customRenderer from './CustomRenderer'
 import * as customPopupMenu from './CustomPopupMenu'
+import * as customContextPad from './CustomContextPad'
 import * as BpmnUtils from './BpmnUtils'
 
 import "bpmn-js/dist/assets/bpmn-font/css/bpmn-embedded.css"
@@ -29,7 +30,7 @@ class CustomModeler extends Modeler {
 }
 
 CustomModeler.prototype._modules =
-    CustomModeler.prototype._modules.concat([customRenderer, customPopupMenu]);
+    CustomModeler.prototype._modules.concat([customRenderer, customPopupMenu, customContextPad]);
 
 export default class BpmnModelerComponent extends React.Component<BpmnModelerComponentProps> {
 
