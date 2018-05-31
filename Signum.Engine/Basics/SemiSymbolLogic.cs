@@ -50,10 +50,10 @@ namespace Signum.Engine.Extensions.Basics
                           getSemiSymbols(),
                           c => c.Key,
                           s => s.Key,
-                          (c, s) => { s.SetIdAndName((c.Id, c.Name)); return s; },
+                          (c, s) => { s.SetIdAndProps(c); return s; },
                           "caching " + typeof(T).Name);
 
-                        SemiSymbol.SetSemiSymbolIdsAndNames<T>(current.ToDictionary(a => a.Key, a => (a.Id, a.Name)));
+                        SemiSymbol.SetFromDatabase<T>(current.ToDictionary(a => a.Key));
                         return result.ToDictionary(a => a.Key);
                     }
                 }, 

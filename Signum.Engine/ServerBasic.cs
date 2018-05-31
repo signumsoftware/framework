@@ -172,10 +172,10 @@ namespace Signum.Services
                  () => Symbol.GetSymbolIds(type));
         }
 
-        public Dictionary<string, (PrimaryKey id, string name)> GetSemiSymbolIdsAndNames(Type type)
+        public Dictionary<string, SemiSymbol> GetSemiSymbolFromDatabase(Type type)
         {
             return Return(MethodInfo.GetCurrentMethod(),
-                 () => SemiSymbol.GetSemiSymbolIdsAndNames(type));
+                 () => SemiSymbol.GetFromDatabase(type));
         }
 
         public Dictionary<Type, Type> ImportPrimaryKeyDefinitions()
