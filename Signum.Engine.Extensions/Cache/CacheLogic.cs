@@ -204,10 +204,11 @@ namespace Signum.Engine.Cache
             }
             else
             {
-                using (var dr = preCommand.UnsafeExecuteDataReader())
+                using (var p = preCommand.UnsafeExecuteDataReader())
+                using (DbLog.LogCommand(p.Command))
                 {
-                    FieldReader reader = new FieldReader(dr);
-                    while (dr.Read())
+                    FieldReader reader = new FieldReader(p.Reader);
+                    while (p.Reader.Read())
                         forEach(reader);
                 }
             }
