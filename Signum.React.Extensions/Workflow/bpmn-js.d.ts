@@ -268,6 +268,19 @@ declare module 'bpmn-js/lib/features/popup-menu/ReplaceMenuProvider' {
     export = BpmnReplaceMenuProvider
 }
 
+declare module 'bpmn-js/lib/features/context-pad/ContextPadProvider' {
+
+    class BpmnContextPadProvider {
+        constructor(config: any, injector: any, eventBus: any, contextPad: any, modeling: any, elementFactory: any, connect: any, create: any, popupMenu: any, canvas: any, rules: any, translate: any);
+
+
+        getContextPadEntries(element: BPMN.DiElement): any;
+    }
+
+    namespace BpmnContextPadProvider { }
+    export = BpmnContextPadProvider
+}
+
 declare module 'bpmn-js/lib/features/search' {
     var a : {};
     export = a;
