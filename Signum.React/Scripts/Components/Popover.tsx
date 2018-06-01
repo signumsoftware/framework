@@ -101,7 +101,7 @@ export class Popover extends React.Component<PopoverProps> {
         this._hideTimeout = undefined;
     }
 
-    handleDocumentClick = (e: MouseEvent | /*Touch*/Event) => {
+    handleDocumentClick = (e: MouseEvent | TouchEvent) => {
         if (e.target !== this._target && !this._target!.contains(e.target as HTMLElement) &&
             e.target !== this._popover && !(this._popover && this._popover.contains(e.target as HTMLElement))) {
             if (this._hideTimeout) {
