@@ -334,6 +334,7 @@
     <TypeScriptCompile Include="Word\Templates\WordTemplate.tsx" />
     <TypeScriptCompile Include="Word\WordClient.tsx" />
     <TypeScriptCompile Include="Workflow\bpmn-js.d.ts" />
+    <TypeScriptCompile Include="Workflow\Bpmn\CustomContextPad.ts" />
     <TypeScriptCompile Include="Workflow\Bpmn\WorkflowActivityMonitorViewerComponent.tsx" />
     <TypeScriptCompile Include="Workflow\Bpmn\WorkflowActivityMonitorRenderer.ts" />
     <TypeScriptCompile Include="Workflow\Bpmn\CustomPopupMenu.ts" />
