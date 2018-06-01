@@ -228,7 +228,9 @@ namespace Signum.Engine.MachineLearning.CNTK
             var inputVar = calculatedOutputs.Inputs.SingleEx(i => i.Name == "input");
             var inputDic = new Dictionary<Variable, Value> { { inputVar, inputValue } };
             var outputDic = new Dictionary<Variable, Value> { { calculatedOutputs, null } };
-            calculatedOutputs.Evaluate(inputDic, outputDic, device);
+
+            lock (calculatedOutputs) //https://docs.microsoft.com/en-us/cognitive-toolkit/cntk-library-evaluation-on-windows#evaluation-of-multiple-requests-in-parallel
+                calculatedOutputs.Evaluate(inputDic, outputDic, device);
 
             Value output = outputDic[calculatedOutputs];
             float[] values = output.GetDenseData<float>(calculatedOutputs).SingleEx().ToArray();
