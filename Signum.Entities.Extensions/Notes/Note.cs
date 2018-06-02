@@ -65,13 +65,13 @@ namespace Signum.Entities.Notes
     [Serializable, EntityKind(EntityKind.String, EntityData.Master)]
     public class NoteTypeEntity : SemiSymbol
     {
-        [MethodImpl(MethodImplOptions.NoInlining)]
-        public NoteTypeEntity MakeSymbol([CallerMemberName]string memberName = null)
+        public NoteTypeEntity()
         {
-            base.MakeSymbol(new StackFrame(1, false), memberName);
-            return this;
         }
 
+        public NoteTypeEntity(Type declaringType, string fieldName) : base(declaringType, fieldName)
+        {
+        }
     }
 
     [AutoInit]
