@@ -6,10 +6,10 @@ import {
 import { JavascriptMessage } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
 import { Dic } from '../../../../Framework/Signum.React/Scripts/Globals'
 import { CaseFlow } from '../WorkflowClient'
-import * as NavigatedViewer from "bpmn-js/lib/NavigatedViewer"
+import NavigatedViewer from "bpmn-js/lib/NavigatedViewer"
 import * as caseFlowRenderer from './CaseFlowRenderer'
 import * as connectionIcons from './ConnectionIcons'
-import * as searchPad from 'bpmn-js/lib/features/search'
+import searchPad from 'bpmn-js/lib/features/search'
 import * as BpmnUtils from './BpmnUtils'
 import CaseActivityStatsModal from "../Case/CaseActivityStatsModal"
 import "bpmn-js/dist/assets/bpmn-font/css/bpmn-embedded.css"

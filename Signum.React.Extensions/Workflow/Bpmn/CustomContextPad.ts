@@ -1,6 +1,6 @@
 ﻿/// <reference path="../bpmn-js.d.ts" />
-import * as Modeler from "bpmn-js/lib/Modeler"
-import * as BpmnContextPadProvider from "bpmn-js/lib/features/context-pad/ContextPadProvider"
+import Modeler from "bpmn-js/lib/Modeler"
+import BpmnContextPadProvider from "bpmn-js/lib/features/context-pad/ContextPadProvider"
 import * as BpmnUtils from './BpmnUtils'
 import { Lite, liteKey } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
 
