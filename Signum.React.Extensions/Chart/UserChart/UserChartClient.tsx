@@ -120,8 +120,8 @@ export module Converter {
                         displayName: mle.element.displayName,
 
                         token: t && QueryTokenEmbedded.New({
-                            token: t!.token,
-                            tokenString: t!.tokenString
+                            token: UserAssetsClient.getToken(t),
+                            tokenString: t.tokenString
                         })
                     })
                 })
@@ -137,6 +137,7 @@ export module Converter {
             return cr;
         });
     }
+
 
     export function toChartRequest(uq: UserChartEntity, entity?: Lite<Entity>): Promise<ChartRequest> {
         const cs = ChartRequest.New({ queryKey: uq.query!.key }); 

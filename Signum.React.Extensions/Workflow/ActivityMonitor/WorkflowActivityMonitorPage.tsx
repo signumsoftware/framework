@@ -67,8 +67,8 @@ export default class WorkflowActivityMonitorPage extends React.Component<Workflo
             .done();
 
         API.getWorkflowModel(workflow)
-            .then(model => this.setState({
-                workflowModel: model,
+            .then(pair => this.setState({
+                workflowModel: pair.model,
             }))
             .done();
     }

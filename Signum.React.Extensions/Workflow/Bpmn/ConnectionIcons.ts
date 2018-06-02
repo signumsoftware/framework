@@ -1,5 +1,5 @@
 ﻿/// <reference path="../bpmn-js.d.ts" />
-import * as Modeler from "bpmn-js/lib/Modeler"
+import Modeler from "bpmn-js/lib/Modeler"
 import { WorkflowConditionEntity, WorkflowActionEntity } from '../Signum.Entities.Workflow'
 import { Lite, liteKey } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
 

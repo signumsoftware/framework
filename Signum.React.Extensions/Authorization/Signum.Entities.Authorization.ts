@@ -14,6 +14,16 @@ export interface UserEntity {
 	newPassword: string;
 }
 
+export module ActiveDirectoryAuthorizerMessage {
+    export const ActiveDirectoryUser0IsNotAssociatedWithAUserInThisApplication = new MessageKey("ActiveDirectoryAuthorizerMessage", "ActiveDirectoryUser0IsNotAssociatedWithAUserInThisApplication");
+}
+
+export const ActiveDirectoryConfigurationEmbedded = new Type<ActiveDirectoryConfigurationEmbedded>("ActiveDirectoryConfigurationEmbedded");
+export interface ActiveDirectoryConfigurationEmbedded extends Entities.EmbeddedEntity {
+    Type: "ActiveDirectoryConfigurationEmbedded";
+    domainName?: string | null;
+}
+
 export interface AllowedRule<R, A> extends Entities.ModelEntity {
     allowedBase: A;
     allowed: A;

@@ -28,7 +28,7 @@
     <UseGlobalApplicationHostFile />
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
-    <TypeScriptToolsVersion>2.8</TypeScriptToolsVersion>
+    <TypeScriptToolsVersion>2.9</TypeScriptToolsVersion>
     <Use64BitIISExpress />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
@@ -334,6 +334,7 @@
     <TypeScriptCompile Include="Word\Templates\WordTemplate.tsx" />
     <TypeScriptCompile Include="Word\WordClient.tsx" />
     <TypeScriptCompile Include="Workflow\bpmn-js.d.ts" />
+    <TypeScriptCompile Include="Workflow\Bpmn\CustomContextPad.ts" />
     <TypeScriptCompile Include="Workflow\Bpmn\WorkflowActivityMonitorViewerComponent.tsx" />
     <TypeScriptCompile Include="Workflow\Bpmn\WorkflowActivityMonitorRenderer.ts" />
     <TypeScriptCompile Include="Workflow\Bpmn\CustomPopupMenu.ts" />
@@ -367,7 +368,7 @@
     <TypeScriptCompile Include="Workflow\Workflow\WorkflowEventModel.tsx" />
     <TypeScriptCompile Include="Workflow\Workflow\WorkflowEventTaskActionComponent.tsx" />
     <TypeScriptCompile Include="Workflow\Workflow\WorkflowEventTaskConditionComponent.tsx" />
-    <TypeScriptCompile Include="Workflow\Workflow\WorkflowScriptRunnerPanelPage.tsx" />
+    <TypeScriptCompile Include="Workflow\Workflow\WorkflowPanelPage.tsx" />
     <TypeScriptCompile Include="Workflow\Workflow\Workflow.tsx" />
     <TypeScriptCompile Include="Workflow\Workflow\WorkflowScript.tsx" />
     <TypeScriptCompile Include="Workflow\Workflow\WorkflowConnectionModel.tsx" />
@@ -378,6 +379,7 @@
     <TypeScriptCompile Include="Workflow\Workflow\WorkflowDropdown.tsx" />
     <TypeScriptCompile Include="Workflow\Workflow\WorkflowReplacementComponent.tsx" />
     <TypeScriptCompile Include="Workflow\WorkflowClient.tsx" />
+    <TypeScriptCompile Include="Workflow\Workflow\WorkflowTimerCondition.tsx" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Authorization\Admin\AuthAdmin.css" />
