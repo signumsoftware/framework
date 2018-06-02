@@ -1,6 +1,6 @@
 ﻿/// <reference path="../bpmn-js.d.ts" />
-import * as Modeler from "bpmn-js/lib/Modeler"
-import * as BpmnRenderer from "bpmn-js/lib/draw/BpmnRenderer"
+import Modeler from "bpmn-js/lib/Modeler"
+import BpmnRenderer from "bpmn-js/lib/draw/BpmnRenderer"
 import * as moment from 'moment'
 import {
     WorkflowConditionEntity, WorkflowActionEntity, CaseActivityEntity,
@@ -13,7 +13,7 @@ import { CustomRenderer } from './CustomRenderer'
 import { WorkflowActivityStats, WorkflowActivityMonitor } from '../WorkflowClient'
 import * as BpmnUtils from './BpmnUtils'
 import { calculatePoint, Rectangle } from "../../Map/Utils"
-import * as NavigatedViewer from "bpmn-js/lib/NavigatedViewer"
+import NavigatedViewer from "bpmn-js/lib/NavigatedViewer"
 import "moment-duration-format"
 import { WorkflowActivityMonitorConfig } from "../ActivityMonitor/WorkflowActivityMonitorPage";
 import { QueryToken } from "../../../../Framework/Signum.React/Scripts/FindOptions";

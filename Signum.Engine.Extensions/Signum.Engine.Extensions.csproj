@@ -78,6 +78,8 @@
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
+    <Reference Include="System.DirectoryServices" />
+    <Reference Include="System.DirectoryServices.AccountManagement" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.IO.FileSystem.Primitives, Version=4.0.2.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <HintPath>..\..\packages\System.IO.FileSystem.Primitives.4.3.0\lib\net46\System.IO.FileSystem.Primitives.dll</HintPath>
@@ -108,6 +110,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Alerts\AlertLogic.cs" />
+    <Compile Include="Authorization\ActiveDirectoryAuthorizer.cs" />
     <Compile Include="Authorization\AuthCache.cs" />
     <Compile Include="Authorization\Impersonator.cs" />
     <Compile Include="Authorization\SessionLogLogic.cs" />

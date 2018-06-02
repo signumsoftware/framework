@@ -1,6 +1,7 @@
 ﻿/// <reference path="../bpmn-js.d.ts" />
-import * as Modeler from "bpmn-js/lib/Modeler"
-import * as BpmnRenderer from "bpmn-js/lib/draw/BpmnRenderer"
+import Modeler from "bpmn-js/lib/Modeler"
+import BpmnRenderer from "bpmn-js/lib/draw/BpmnRenderer"
+import NavigatedViewer from "bpmn-js/lib/NavigatedViewer"
 import * as moment from 'moment'
 import { WorkflowConditionEntity, WorkflowActionEntity, CaseActivityEntity, CaseNotificationEntity, DoneType, WorkflowActivityEntity, CaseFlowColor } from '../Signum.Entities.Workflow'
 import { Lite, liteKey } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
@@ -9,13 +10,13 @@ import { Color, Gradient } from '../../Basics/Color'
 import { CaseFlow, CaseConnectionStats, CaseActivityStats  } from '../WorkflowClient'
 import * as BpmnUtils from './BpmnUtils'
 import { calculatePoint, Rectangle } from "../../Map/Utils"
-import * as NavigatedViewer from "bpmn-js/lib/NavigatedViewer"
 import "moment-duration-format"
 
 export class CaseFlowRenderer extends CustomRenderer {
 
-    constructor(eventBus: BPMN.EventBus, styles: any, pathMap: any, canvas: any, priority: number) {
-        super(eventBus, styles, pathMap, canvas, 1200);
+    static $inject = ['config.bpmnRenderer', 'eventBus', 'styles', 'pathMap', 'canvas', 'textRenderer'];
+    constructor(config: any, eventBus: BPMN.EventBus, styles: any, pathMap: any, canvas: any, textRenderer: any, priority: number) {
+        super(config, eventBus, styles, pathMap, canvas, textRenderer, 1200);
     }
 
     caseFlow!: CaseFlow;

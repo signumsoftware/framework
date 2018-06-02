@@ -1,7 +1,7 @@
 ﻿/// <reference path="../bpmn-js.d.ts" />
 import * as React from 'react'
 import { WorkflowEntitiesDictionary, WorkflowActivityModel, WorkflowActivityType, WorkflowPoolModel, WorkflowLaneModel, WorkflowConnectionModel, WorkflowEventModel, WorkflowEntity, IWorkflowNodeEntity, WorkflowMessage, WorkflowEventTaskModel, WorkflowTimerEmbedded, WorkflowGatewayModel } from '../Signum.Entities.Workflow'
-import * as Modeler from "bpmn-js/lib/Modeler"
+import Modeler from "bpmn-js/lib/Modeler"
 import { ModelEntity, ValidationMessage, parseLite } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
 import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
 import * as connectionIcons from './ConnectionIcons'

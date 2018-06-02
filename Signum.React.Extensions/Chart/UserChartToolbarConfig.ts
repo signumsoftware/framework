@@ -16,7 +16,8 @@ import { UserChartEntity  } from './Signum.Entities.Chart'
 export default class UserChartToolbarConfig extends ToolbarConfig<UserChartEntity> {
 
     constructor() {
-        super(UserChartEntity);
+        var type = UserChartEntity;
+        super(type);
     }
 
     getIcon(element: ToolbarResponse<UserChartEntity>) {
