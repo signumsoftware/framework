@@ -117,7 +117,6 @@ export default class ChartRenderer extends React.Component<ChartRendererProps> {
             const rule = ChartUtils.rule;
             const ellipsis = ChartUtils.ellipsis;
             __baseLineNumber__ = new Error().lineNumber;
-            console.log("Redraw");
             this.lastChartRequestPath = ChartClient.Encoder.chartPath(this.props.chartRequest);
             func = eval("(" + this.props.chartRequest.chartScript.script + ")");
         } catch (e) {

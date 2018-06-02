@@ -2,6 +2,7 @@
 import { Dic, classes } from '../../../Framework/Signum.React/Scripts/Globals'
 
 import "./Sidebar.css"
+import { ErrorBoundary } from '../../../Framework/Signum.React/Scripts/Components';
 
 interface SidebarContainerProps {
     sidebarVisible: boolean | undefined;
@@ -16,7 +17,9 @@ export default class SidebarContainer extends React.Component<SidebarContainerPr
             <div className="sidebar-container">
                 {visible && this.renderSideBar()}
                 <div className="container-fluid" style={{ paddingTop: "10px" }}>
-                    {this.props.children}
+                    <ErrorBoundary>
+                        {this.props.children}
+                    </ErrorBoundary>
                 </div>
             </div>
         );
