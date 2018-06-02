@@ -13,203 +13,237 @@ using System.Web;
 
 namespace Signum.React.Json
 {
-    ///// <summary>
-    ///// The default implementation of <see cref="IObjectModelValidator"/>.
-    ///// </summary>
-    //public class DefaultObjectValidator : IObjectModelValidator
-    //{
-    //    private readonly IModelMetadataProvider _modelMetadataProvider;
-    //    private readonly ValidatorCache _validatorCache;
-    //    private readonly IModelValidatorProvider _validatorProvider;
+    public class SignumObjectModelValidator : IObjectModelValidator
+    {
+        private readonly IModelMetadataProvider _modelMetadataProvider;
+        private readonly ValidatorCache _validatorCache;
+        private readonly CompositeModelValidatorProvider _validatorProvider;
 
-    //    /// <summary>
-    //    /// Initializes a new instance of <see cref="DefaultObjectValidator"/>.
-    //    /// </summary>
-    //    /// <param name="modelMetadataProvider">The <see cref="IModelMetadataProvider"/>.</param>
-    //    /// <param name="validatorProviders">The list of <see cref="IModelValidatorProvider"/>.</param>
-    //    public DefaultObjectValidator(
-    //        IModelMetadataProvider modelMetadataProvider,
-    //        IList<IModelValidatorProvider> validatorProviders)
-    //    {
-    //        if (modelMetadataProvider == null)
-    //        {
-    //            throw new ArgumentNullException(nameof(modelMetadataProvider));
-    //        }
+        /// <summary>
+        /// Initializes a new instance of <see cref="ObjectModelValidator"/>.
+        /// </summary>
+        /// <param name="modelMetadataProvider">The <see cref="IModelMetadataProvider"/>.</param>
+        /// <param name="validatorProviders">The list of <see cref="IModelValidatorProvider"/>.</param>
+        public SignumObjectModelValidator(
+            IModelMetadataProvider modelMetadataProvider,
+            IList<IModelValidatorProvider> validatorProviders)
+        {
+            if (modelMetadataProvider == null)
+            {
+                throw new ArgumentNullException(nameof(modelMetadataProvider));
+            }
 
-    //        if (validatorProviders == null)
-    //        {
-    //            throw new ArgumentNullException(nameof(validatorProviders));
-    //        }
+            if (validatorProviders == null)
+            {
+                throw new ArgumentNullException(nameof(validatorProviders));
+            }
 
-    //        _modelMetadataProvider = modelMetadataProvider;
-    //        _validatorCache = new ValidatorCache();
+            _modelMetadataProvider = modelMetadataProvider;
+            _validatorCache = new ValidatorCache();
 
-    //        _validatorProvider = new CompositeModelValidatorProvider(validatorProviders);
-    //    }
+            _validatorProvider = new CompositeModelValidatorProvider(validatorProviders);
+        }
 
-    //    /// <inheritdoc />
-    //    public void Validate(
-    //        ActionContext actionContext,
-    //        ValidationStateDictionary validationState,
-    //        string prefix,
-    //        object model)
-    //    {
-    //        if (actionContext == null)
-    //        {
-    //            throw new ArgumentNullException(nameof(actionContext));
-    //        }
+        /// <inheritdoc />
+        public virtual void Validate(
+            ActionContext actionContext,
+            ValidationStateDictionary validationState,
+            string prefix,
+            object model)
+        {
+            var visitor = GetValidationVisitor(
+                actionContext,
+                _validatorProvider,
+                _validatorCache,
+                _modelMetadataProvider,
+                validationState);
 
-    //        var visitor = new ValidationVisitor(
-    //            actionContext,
-    //            _validatorProvider,
-    //            _validatorCache,
-    //            _modelMetadataProvider,
-    //            validationState);
+            var metadata = model == null ? null : _modelMetadataProvider.GetMetadataForType(model.GetType());
+            visitor.Validate(metadata, prefix, model, alwaysValidateAtTopLevel: false);
+        }
 
-    //        var metadata = model == null ? null : _modelMetadataProvider.GetMetadataForType(model.GetType());
-    //        visitor.Validate(metadata, prefix, model);
-    //    }
-    //}
+        /// <summary>
+        /// Validates the provided object model.
+        /// If <paramref name="model"/> is <see langword="null"/> and the <paramref name="metadata"/>'s
+        /// <see cref="ModelMetadata.IsRequired"/> is <see langword="true"/>, will add one or more
+        /// model state errors that <see cref="Validate(ActionContext, ValidationStateDictionary, string, object)"/>
+        /// would not.
+        /// </summary>
+        /// <param name="actionContext">The <see cref="ActionContext"/>.</param>
+        /// <param name="validationState">The <see cref="ValidationStateDictionary"/>.</param>
+        /// <param name="prefix">The model prefix key.</param>
+        /// <param name="model">The model object.</param>
+        /// <param name="metadata">The <see cref="ModelMetadata"/>.</param>
+        public virtual void Validate(
+            ActionContext actionContext,
+            ValidationStateDictionary validationState,
+            string prefix,
+            object model,
+            ModelMetadata metadata)
+        {
+            var visitor = GetValidationVisitor(
+                actionContext,
+                _validatorProvider,
+                _validatorCache,
+                _modelMetadataProvider,
+                validationState);
 
-    //public class SignumObjectModelValidator : IObjectModelValidator
-    //{
-    //    protected override bool? CustomValidation(ModelMetadata metadata, ValidationContext validationContext, object model)
-    //    {
-    //        validationContext.Visited.Remove(model); //comes already visited when jumping to SignumBodyModelValidator
+            visitor.Validate(metadata, prefix, model, alwaysValidateAtTopLevel: metadata.IsRequired);
+        }
 
-    //        var result = SignumValidate(validationContext, model);
+        /// <summary>
+        /// Gets a <see cref="ValidationVisitor"/> that traverses the object model graph and performs validation.
+        /// </summary>
+        /// <param name="actionContext">The <see cref="ActionContext"/>.</param>
+        /// <param name="validatorProvider">The <see cref="IModelValidatorProvider"/>.</param>
+        /// <param name="validatorCache">The <see cref="ValidatorCache"/>.</param>
+        /// <param name="metadataProvider">The <see cref="IModelMetadataProvider"/>.</param>
+        /// <param name="validationState">The <see cref="ValidationStateDictionary"/>.</param>
+        /// <returns>A <see cref="ValidationVisitor"/> which traverses the object model graph.</returns>
+        public ValidationVisitor GetValidationVisitor(
+             ActionContext actionContext,
+             IModelValidatorProvider validatorProvider,
+             ValidatorCache validatorCache,
+             IModelMetadataProvider metadataProvider,
+             ValidationStateDictionary validationState)
+        {
+            return new SignumValidationVisitor(
+                actionContext,
+                validatorProvider,
+                validatorCache,
+                metadataProvider,
+                validationState);
+        }
+    }
+    
+    public class SignumValidationVisitor : Signum.React.ValidationVisitor
+    {
+        public SignumValidationVisitor(
+            ActionContext actionContext, 
+            IModelValidatorProvider validatorProvider, 
+            ValidatorCache validatorCache, 
+            IModelMetadataProvider metadataProvider, 
+            ValidationStateDictionary validationState) : 
+            base(
+                actionContext, 
+                validatorProvider, 
+                validatorCache, 
+                metadataProvider, 
+                validationState)
+        {
+        }
 
-    //        validationContext.Visited.Add(model);
+        protected override bool VisitComplexType(IValidationStrategy defaultStrategy)
+        {
+            bool? customValidate = SignumValidate();
 
-    //        return result;
-    //    }
+            if (customValidate.HasValue)
+                return customValidate.Value;
 
-    //    private bool? SignumValidate(ValidationContext validationContext, object model)
-    //    {
-    //        if (model is Lite<Entity> lite)
-    //            return ValidateLite(validationContext, lite);
+            return base.VisitComplexType(defaultStrategy);
+        }
+        
+        private bool? SignumValidate()
+        {
+            if (this.Model is Lite<Entity> lite)
+                return ValidateLite(lite);
 
-    //        if (model is ModifiableEntity mod)
-    //            return ValidateModifiableEntity(validationContext, mod);
+            if (this.Model is ModifiableEntity mod)
+                return ValidateModifiableEntity(mod);
 
-    //        if (model is IMListPrivate mlist)
-    //            return ValidateMList(validationContext, mlist);
+            if (this.Model is IMListPrivate mlist)
+                return ValidateMList(mlist);
 
-    //        return null;
-    //    }
+            return null;
+        }
 
-    //    private bool ValidateModifiableEntity(ValidationContext validationContext, ModifiableEntity mod)
-    //    {
-    //        using (Validator.ModelBinderScope())
-    //        {
-    //            if (mod is Entity && validationContext.Visited.Contains(mod))
-    //                return true;
+        private bool ValidateLite(Lite<Entity> lite)
+        {
+            if (lite.EntityOrNull == null)
+                return true;
 
-    //            validationContext.Visited.Add(mod);
+            using (StateManager.Recurse(this, "entity", null, lite.EntityOrNull, null))
+            {
+                return this.ValidateModifiableEntity(lite.EntityOrNull);
+            }
+        }
 
-    //            bool isValid = true;
-    //            PropertyScope propertyScope = new PropertyScope();
-    //            validationContext.KeyBuilders.Push(propertyScope);
+        private bool ValidateMList(IMListPrivate mlist)
+        {
+            bool isValid = true;
+            Type elementType = mlist.GetType().ElementType();
+            
+            int i = 0;
+            foreach (object element in (IEnumerable)mlist)
+            {
+                using (StateManager.Recurse(this, "[" + (i++) + "].element", null, element, null))
+                {
+                    if (element is ModifiableEntity me)
+                        isValid &= ValidateModifiableEntity(me);
+                    else if (element is Lite<Entity> lite)
+                        isValid &= ValidateLite(lite);
+                    else
+                        isValid &= true;
+                }
+            }
 
-    //            var entity = mod as Entity;
-    //            using (entity == null ? null : entity.Mixins.OfType<CorruptMixin>().Any(c => c.Corrupt) ? Corruption.AllowScope() : Corruption.DenyScope())
-    //            {
-    //                foreach (var kvp in PropertyConverter.GetPropertyConverters(mod.GetType()))
-    //                {
-    //                    if (kvp.Value.AvoidValidate)
-    //                        continue;
+            return isValid;
+        }
 
-    //                    propertyScope.PropertyName = kvp.Key;
-    //                    if (SignumValidate(validationContext, kvp.Value.GetValue(mod)) ?? true)
-    //                    {
-    //                        isValid = false;
-    //                    }
+        HashSet<ModifiableEntity> VisitedEntities = new HashSet<ModifiableEntity>();
 
-    //                    string error = kvp.Value.PropertyValidator.PropertyCheck(mod);
+        private bool ValidateModifiableEntity(ModifiableEntity mod)
+        {
+            using (Validator.ModelBinderScope())
+            {
+                if (mod is Entity && VisitedEntities.Contains(mod))
+                    return true;
 
-    //                    if (error != null)
-    //                    {
-    //                        string key = CalculateKey(validationContext);
-    //                        if (validationContext.ModelState.IsValidField(key))
-    //                        {
-    //                            isValid = false;
-    //                            validationContext.ModelState.AddModelError(key, error);
-    //                        }
-    //                    }
-    //                }
-    //            }
+                VisitedEntities.Add(mod);
 
-    //            if (entity != null && entity.Mixins.Any())
-    //            {
-    //                propertyScope.PropertyName = "mixins";
-    //                PropertyScope mixinScope = new PropertyScope();
-    //                validationContext.KeyBuilders.Push(mixinScope);
-    //                foreach (var mixin in entity.Mixins)
-    //                {
-    //                    mixinScope.PropertyName = mixin.GetType().Name;
-    //                    if (!ValidateModifiableEntity(validationContext, mixin))
-    //                        isValid = false;
-    //                }
-    //                validationContext.KeyBuilders.Pop();
-    //            }
+                bool isValid = true;
 
-    //            validationContext.KeyBuilders.Pop();
+                var entity = mod as Entity;
+                using (entity == null ? null : entity.Mixins.OfType<CorruptMixin>().Any(c => c.Corrupt) ? Corruption.AllowScope() : Corruption.DenyScope())
+                {
+                    foreach (var kvp in PropertyConverter.GetPropertyConverters(mod.GetType()))
+                    {
+                        if (kvp.Value.AvoidValidate)
+                            continue;
 
-    //            validationContext.Visited.Remove(mod);
-    //            return isValid;
-    //        }
-    //    }
+                        var val = kvp.Value.GetValue(mod);
+                        using (StateManager.Recurse(this, kvp.Key, null, val, null))
+                        {
+                            if (this.SignumValidate() == false)
+                            {
+                                isValid = false;
+                            }
 
-    //    private bool ValidateLite(ValidationContext validationContext, Lite<Entity> lite)
-    //    {
-    //        if (lite.EntityOrNull == null)
-    //            return true;
+                            string error = kvp.Value.PropertyValidator.PropertyCheck(mod);
 
-    //        PropertyScope propertyScope = new PropertyScope { PropertyName = "entity" };
-    //        validationContext.KeyBuilders.Push(propertyScope);
-    //        var isValid = ValidateModifiableEntity(validationContext, lite.Entity);
-    //        validationContext.KeyBuilders.Pop();
-    //        return isValid;
-    //    }
+                            if (error != null)
+                            {
+                                isValid = false;
+                                ModelState.AddModelError(this.Key, error);
+                            }
+                        }
+                    }
+                }
 
-    //    private bool ValidateMList(ValidationContext validationContext, IMListPrivate mlist)
-    //    {
-    //        bool isValid = true;
-    //        Type elementType = mlist.GetType().ElementType();
-    //        ModelMetadata elementMetadata = validationContext.MetadataProvider.GetMetadataForType(null, elementType);
-
-    //        ElementScope elementScope = new ElementScope() { Index = 0 };
-    //        validationContext.KeyBuilders.Push(elementScope);
-
-    //        PropertyScope property = new PropertyScope { PropertyName = "element" };
-    //        validationContext.KeyBuilders.Push(property);
-
-    //        foreach (object element in (IEnumerable)mlist)
-    //        {
-    //            elementMetadata.Model = element;
-    //            if (!ValidateNodeAndChildren(elementMetadata, validationContext, mlist))
-    //            {
-    //                isValid = false;
-    //            }
-    //            elementScope.Index++;
-    //        }
-    //        validationContext.KeyBuilders.Pop();
-
-    //        validationContext.KeyBuilders.Pop();
-    //        return isValid;
-    //    }
-    //}
-
-    //public class SignumValidationVisitor : ValidationVisitor
-    //{
-    //    public SignumValidationVisitor(
-    //        ActionContext actionContext, 
-    //        IModelValidatorProvider validatorProvider, 
-    //        ValidatorCache validatorCache, 
-    //        IModelMetadataProvider metadataProvider, 
-    //        ValidationStateDictionary validationState)
-    //        :base(actionContext, validatorProvider, validatorCache, metadataProvider, validationState)
-    //    {
-    //    }
-    //}
+                if (entity != null && entity.Mixins.Any())
+                {
+                    foreach (var mixin in entity.Mixins)
+                    {
+                        using (StateManager.Recurse(this, "mixins[" + mixin.GetType().Name + "].element", null, mixin, null))
+                        {
+                            isValid &= ValidateModifiableEntity(mixin);
+                        }
+                    }
+                }
+                
+                VisitedEntities.Remove(mod);
+                return isValid;
+            }
+        }
+    }
 }

@@ -12,17 +12,18 @@ using Microsoft.AspNetCore.Mvc.Controllers;
 
 namespace Signum.React
 {
-  
 
-    public class SignumControllerFactory // : DefaultHttpControllerSelector
+
+    public class SignumControllerFactory : IApplicationFeatureProvider<ControllerFeature>
     {
         public static HashSet<Type> AllowedControllers { get; private set; } = new HashSet<Type>();
+        public static Dictionary<Assembly, List<string>> AllowedAreas { get; private set; } = new Dictionary<Assembly, List<string>>();
         public Assembly MainAssembly { get; set; }
 
-        //public SignumControllerFactory(IApplicationBuilder appuration, Assembly mainAssembly) : base(configuration)
-        //{
-        //    this.MainAssembly = mainAssembly;
-        //}
+        public SignumControllerFactory(Assembly mainAssembly) : base()
+        {
+            this.MainAssembly = mainAssembly;
+        }
 
         public static void RegisterController<T>()
         {
@@ -40,15 +41,13 @@ namespace Signum.React
                 .Where(c => (c.Namespace ?? "").StartsWith(type.Namespace) && typeof(ApiController).IsAssignableFrom(c)));
         }
 
-        //public override IDictionary<string, HttpControllerDescriptor> GetControllerMapping()
-        //{
-        //    var dic = base.GetControllerMapping();
+        public void PopulateFeature(IEnumerable<ApplicationPart> parts, ControllerFeature feature)
+        {
+            var allowed = feature.Controllers.Where(ti => ti.Assembly == MainAssembly ||
+            (AllowedAreas.TryGetC(ti.Assembly)?.Any(ns => ti.Namespace.StartsWith(ns)) ?? false) ||
+            AllowedControllers.Contains(ti.AsType()));
 
-        //    var result = dic.Where(a => a.Value.ControllerType.Assembly == MainAssembly || AllowedControllers.Contains(a.Value.ControllerType)).ToDictionary();
-
-        //    var removedControllers = dic.Keys.Except(result.Keys);//Just for debugging
-
-        //    return result;
-        //}
+            feature.Controllers.RemoveAll(ti => !allowed.Contains(ti));
+        }
     }
 }

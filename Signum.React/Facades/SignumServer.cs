@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ApplicationParts;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Signum.Engine.Maps;
@@ -49,7 +50,7 @@ namespace Signum.React.Facades
             options.Filters.Add(new SignumExceptionFilterAttribute());
             options.Filters.Add(new VersionFilterAttribute());
         }
-
+        
         public static void Start(IApplicationBuilder app, IHostingEnvironment hostingEnvironment, Assembly mainAsembly)
         {
             Schema.Current.ApplicationName = hostingEnvironment.ContentRootPath;
@@ -57,8 +58,6 @@ namespace Signum.React.Facades
             //app.Services.Replace(typeof(IHttpControllerSelector), new SignumControllerFactory(config, mainAsembly));
 
             SignumControllerFactory.RegisterArea(typeof(EntitiesController));
-
-
             SignumControllerFactory.RegisterArea(MethodInfo.GetCurrentMethod());
 
 
