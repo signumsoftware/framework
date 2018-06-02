@@ -122,6 +122,7 @@ namespace Signum.Engine
         {
             using (SqlConnection con = EnsureConnection())
             using (SqlCommand cmd = NewCommand(preCommand, con, commandType))
+            using (DbLog.LogCommand(cmd))
             using (HeavyProfiler.Log("SQL", () => preCommand.sp_executesql()))
             {
                 try
@@ -148,6 +149,7 @@ namespace Signum.Engine
         {
             using (SqlConnection con = EnsureConnection())
             using (SqlCommand cmd = NewCommand(preCommand, con, commandType))
+            using (DbLog.LogCommand(cmd))
             using (HeavyProfiler.Log("SQL", () => preCommand.sp_executesql()))
             {
                 try
@@ -174,6 +176,7 @@ namespace Signum.Engine
             {
                 using (SqlConnection con = EnsureConnection())
                 using (SqlCommand cmd = NewCommand(preCommand, con, commandType))
+                using (DbLog.LogCommand(cmd))
                 using (HeavyProfiler.Log("SQL-Dependency"))
                 using (HeavyProfiler.Log("SQL", () => preCommand.sp_executesql()))
                 {
@@ -231,13 +234,15 @@ namespace Signum.Engine
             }
         }
 
-        protected internal override DbDataReader UnsafeExecuteDataReader(SqlPreCommandSimple preCommand, CommandType commandType)
+        protected internal override DbDataReaderWithCommand UnsafeExecuteDataReader(SqlPreCommandSimple preCommand, CommandType commandType)
         {
             try
             {
-                SqlCommand cmd = NewCommand(preCommand, null, commandType);
+                var cmd = NewCommand(preCommand, null, commandType);
 
-                return cmd.ExecuteReader();
+                var reader =  cmd.ExecuteReader();
+
+                return new DbDataReaderWithCommand(cmd, reader);
             }
             catch (Exception ex)
             {
@@ -249,13 +254,15 @@ namespace Signum.Engine
             }
         }
 
-        protected internal override async Task<DbDataReader> UnsafeExecuteDataReaderAsync(SqlPreCommandSimple preCommand, CommandType commandType, CancellationToken token)
+        protected internal override async Task<DbDataReaderWithCommand> UnsafeExecuteDataReaderAsync(SqlPreCommandSimple preCommand, CommandType commandType, CancellationToken token)
         {
             try
             {
-                SqlCommand cmd = NewCommand(preCommand, null, commandType);
+                var cmd = NewCommand(preCommand, null, commandType);
 
-                return await cmd.ExecuteReaderAsync(token);
+                var reader =  await cmd.ExecuteReaderAsync(token);
+
+                return new DbDataReaderWithCommand(cmd, reader);
             }
             catch (Exception ex)
             {
@@ -271,6 +278,7 @@ namespace Signum.Engine
         {
             using (SqlConnection con = EnsureConnection())
             using (SqlCommand cmd = NewCommand(preCommand, con, commandType))
+            using (DbLog.LogCommand(cmd))
             using (HeavyProfiler.Log("SQL", () => preCommand.sp_executesql()))
             {
                 try
@@ -296,6 +304,7 @@ namespace Signum.Engine
         {
             using (SqlConnection con = EnsureConnection())
             using (SqlCommand cmd = NewCommand(preCommand, con, commandType))
+            using (DbLog.LogCommand(cmd))
             using (HeavyProfiler.Log("SQL", () => preCommand.sp_executesql()))
             {
                 try
@@ -680,5 +689,40 @@ deallocate cur";
             return Connector.Current.ShrinkDatabase(schemaName);
 
         }
+    }
+
+    public static class DbLog
+    {
+        public static List<LogRecord> records = new List<LogRecord>();
+
+        
+
+        public static IDisposable LogCommand(DbCommand cmd)
+        {
+            var record = new LogRecord
+            {
+                Start = DateTime.Now,
+                ThreadId = Thread.CurrentThread.ManagedThreadId,
+                ConnectionHash = cmd.Connection.GetHashCode(),
+                TransactionHash = cmd.Transaction?.GetHashCode(),
+                StackTrace = Environment.StackTrace,
+            };
+
+            lock (records)
+                records.Add(record);
+
+            return new Disposable(() => record.End = DateTime.Now);
+        }
+        
+    }
+
+    public class LogRecord
+    {
+        public DateTime Start;
+        public DateTime? End;
+        public int ThreadId;
+        public int ConnectionHash;
+        public int? TransactionHash;
+        public string StackTrace; 
     }
 }

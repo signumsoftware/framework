@@ -93,8 +93,8 @@ namespace Signum.Engine
         protected internal abstract object ExecuteScalar(SqlPreCommandSimple preCommand, CommandType commandType);
         protected internal abstract int ExecuteNonQuery(SqlPreCommandSimple preCommand, CommandType commandType);
         protected internal abstract DataTable ExecuteDataTable(SqlPreCommandSimple command, CommandType commandType);
-        protected internal abstract DbDataReader UnsafeExecuteDataReader(SqlPreCommandSimple sqlPreCommandSimple, CommandType commandType);
-        protected internal abstract Task<DbDataReader> UnsafeExecuteDataReaderAsync(SqlPreCommandSimple preCommand, CommandType commandType, CancellationToken token);
+        protected internal abstract DbDataReaderWithCommand UnsafeExecuteDataReader(SqlPreCommandSimple sqlPreCommandSimple, CommandType commandType);
+        protected internal abstract Task<DbDataReaderWithCommand> UnsafeExecuteDataReaderAsync(SqlPreCommandSimple preCommand, CommandType commandType, CancellationToken token);
         protected internal abstract DataSet ExecuteDataSet(SqlPreCommandSimple sqlPreCommandSimple, CommandType commandType);
         protected internal abstract void BulkCopy(DataTable dt, ObjectName destinationTable, SqlBulkCopyOptions options, int? timeout);
 
@@ -203,6 +203,23 @@ namespace Signum.Engine
                 throw new InvalidOperationException("Attempt to use a non-Utc date in the database");
 
             return dateTime;
+        }
+    }
+
+    public class DbDataReaderWithCommand : IDisposable
+    {
+        public DbDataReaderWithCommand(DbCommand command, DbDataReader reader)
+        {
+            Command = command;
+            Reader = reader;
+        }
+
+        public DbCommand Command { get; private set; }
+        public DbDataReader Reader { get; private set; }
+
+        public void Dispose()
+        {
+            Reader.Dispose();
         }
     }
 }

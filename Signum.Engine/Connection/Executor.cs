@@ -39,27 +39,26 @@ namespace Signum.Engine
         }
 
 
-        public static DbDataReader UnsafeExecuteDataReader(string sql, List<DbParameter> parameters = null, CommandType commandType = CommandType.Text)
+        public static DbDataReaderWithCommand UnsafeExecuteDataReader(string sql, List<DbParameter> parameters = null, CommandType commandType = CommandType.Text)
         {
             return Connector.Current.UnsafeExecuteDataReader(new SqlPreCommandSimple(sql, parameters), commandType);
         }
-
-        public static DbDataReader UnsafeExecuteDataReader(this SqlPreCommandSimple preCommand, CommandType commandType = CommandType.Text)
+        
+        public static DbDataReaderWithCommand UnsafeExecuteDataReader(this SqlPreCommandSimple preCommand, CommandType commandType = CommandType.Text)
         {
             return Connector.Current.UnsafeExecuteDataReader(preCommand, commandType);
         }
 
-        public static Task<DbDataReader> UnsafeExecuteDataReaderAsync(string sql, List<DbParameter> parameters = null, CommandType commandType = CommandType.Text, CancellationToken token = default(CancellationToken))
+        public static Task<DbDataReaderWithCommand> UnsafeExecuteDataReaderAsync(string sql, List<DbParameter> parameters = null, CommandType commandType = CommandType.Text, CancellationToken token = default(CancellationToken))
         {
             return Connector.Current.UnsafeExecuteDataReaderAsync(new SqlPreCommandSimple(sql, parameters), commandType, token);
         }
 
-        public static Task<DbDataReader> UnsafeExecuteDataReaderAsync(this SqlPreCommandSimple preCommand, CommandType commandType = CommandType.Text, CancellationToken token = default(CancellationToken))
+        public static Task<DbDataReaderWithCommand> UnsafeExecuteDataReaderAsync(this SqlPreCommandSimple preCommand, CommandType commandType = CommandType.Text, CancellationToken token = default(CancellationToken))
         {
             return Connector.Current.UnsafeExecuteDataReaderAsync(preCommand, commandType, token);
         }
-
-
+        
         public static DataTable ExecuteDataTable(string sql, List<DbParameter> parameters = null, CommandType commandType = CommandType.Text)
         {
             return Connector.Current.ExecuteDataTable(new SqlPreCommandSimple(sql, parameters), commandType);
