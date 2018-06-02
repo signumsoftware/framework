@@ -63,7 +63,7 @@ namespace Signum.Entities.Basics
             internal set { fieldInfo = value; }
         }
 
-        [UniqueIndex]
+        [UniqueIndex(AllowMultipleNulls = true)]
         [StringLengthValidator(AllowNulls = true, Min = 3, Max = 200)]
         public string Key { get; set; }
 
