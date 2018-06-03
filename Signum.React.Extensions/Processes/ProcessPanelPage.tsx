@@ -103,7 +103,7 @@ export default class ProcessPanelPage extends React.Component<ProcessPanelProps,
                                 <tr key={i}>
                                     <td> <EntityLink lite={item.Process} inSearch={true} /> </td>
                                     <td> { item.State } </td>
-                                    <td> { numbro(item.Progress).format("0 %") } </td>
+                                    <td> { numbro(item.Progress).format("0.00 %") } </td>
                                     <td> { item.MachineName } </td>
                                     <td> { item.ApplicationName } </td>
                                     <td> { item.IsCancellationRequested } </td>

@@ -17,7 +17,7 @@ namespace Signum.React.Authorization
         public static Func<string> OnCookieName = () => "sfUser";
         public static string CookieName { get { return OnCookieName(); } }
 
-        public static bool LoginFromCookie(ActionContext ac)
+        public static bool LoginFromCookie(ApiController controller)
         {
             using (AuthLogic.Disable())
             {
@@ -30,7 +30,7 @@ namespace Signum.React.Authorization
 
                     UserEntity user = UserTicketLogic.UpdateTicket(httpConnection.RemoteIpAddress.ToString(), ref ticketText);
 
-                    AuthServer.OnUserPreLogin(null, user);
+                    AuthServer.OnUserPreLogin(controller, user);
 
                     ac.HttpContext.Response.Cookies.Append(CookieName, ticketText, new CookieOptions
                     {
@@ -38,7 +38,7 @@ namespace Signum.React.Authorization
                         Domain = ac.HttpContext.Request.Host.ToString(),
                     });
 
-                    AuthServer.AddUserSession(user);
+                    AuthServer.AddUserSession(controller, user);
                     return true;
                 }
                 catch

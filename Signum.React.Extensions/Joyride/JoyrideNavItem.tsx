@@ -27,7 +27,9 @@ export default class JoyrideNavItem extends React.Component<JoyrideNavItemProps,
     render() {
         return (
             <NavItem id="help-nav-item" onClick={this.onClick}>
-                <i className="fa fa-question-circle-o" aria-hidden="true"></i>
+                <a className="nav-link">
+                    <i className="fa fa-question-circle-o" aria-hidden="true"></i>
+                </a>
             </NavItem>
         );
     }

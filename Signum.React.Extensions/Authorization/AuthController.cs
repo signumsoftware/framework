@@ -30,15 +30,16 @@ namespace Signum.React.Authorization
             UserEntity user = null;
             try
             {
-                user = AuthLogic.Login(data.userName, Security.EncodePassword(data.password));
+                if (AuthLogic.Authorizer == null)
+                    user = AuthLogic.Login(data.userName, Security.EncodePassword(data.password));
+                else
+                    user = AuthLogic.Authorizer.Login(data.userName, data.password);
             }
             catch (Exception e) when (e is IncorrectUsernameException || e is IncorrectPasswordException)
             {
                 if (AuthServer.MergeInvalidUsernameAndPasswordMessages)
                 {
-                    ActionContext.ModelState.AddModelError("userName", AuthMessage.InvalidUsernameOrPassword.NiceToString());
-                    ActionContext.ModelState.AddModelError("password", AuthMessage.InvalidUsernameOrPassword.NiceToString());
-                    return new BadRequestObjectResult(ActionContext.ModelState);
+                    return ModelError("login", AuthMessage.InvalidUsernameOrPassword.NiceToString());
                 }
                 else if (e is IncorrectUsernameException)
                 {
@@ -49,11 +50,9 @@ namespace Signum.React.Authorization
                     return ModelError("password", AuthMessage.InvalidPassword.NiceToString());
                 }
             }
-            catch (IncorrectPasswordException)
+            catch (Exception e)
             {
-                return ModelError("password", AuthServer.MergeInvalidUsernameAndPasswordMessages ?
-                    AuthMessage.InvalidUsernameOrPassword.NiceToString() :
-                    AuthMessage.InvalidPassword.NiceToString());
+                return ModelError("login", e.Message);
             }
 
             using (UserHolder.UserSession(user))
@@ -63,7 +62,9 @@ namespace Signum.React.Authorization
                     UserTicketServer.SaveCookie(this.ActionContext);
                 }
 
-                AuthServer.AddUserSession(user);
+                AuthServer.OnUserPreLogin(this, user);
+
+                AuthServer.AddUserSession(this, user);
 
                 string message = AuthLogic.OnLoginMessage();
 
@@ -88,7 +89,7 @@ namespace Signum.React.Authorization
         {
             using (ScopeSessionFactory.OverrideSession())
             {
-                if (!UserTicketServer.LoginFromCookie(this.ActionContext))
+                if (!UserTicketServer.LoginFromCookie(this))
                     return null;
 
                 string message = AuthLogic.OnLoginMessage();

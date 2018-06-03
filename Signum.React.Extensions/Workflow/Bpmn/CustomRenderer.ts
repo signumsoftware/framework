@@ -1,26 +1,32 @@
 ﻿/// <reference path="../bpmn-js.d.ts" />
-import * as Modeler from "bpmn-js/lib/Modeler"
-import * as BpmnRenderer from "bpmn-js/lib/draw/BpmnRenderer"
-import { WorkflowConditionEntity, WorkflowActionEntity, DecisionResult } from '../Signum.Entities.Workflow'
+import Modeler from "bpmn-js/lib/Modeler"
+import BpmnRenderer from "bpmn-js/lib/draw/BpmnRenderer"
+import { WorkflowConditionEntity, WorkflowActionEntity, ConnectionType } from '../Signum.Entities.Workflow'
 import { Lite, liteKey } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
 import * as BpmnUtils from './BpmnUtils'
 
 export class CustomRenderer extends BpmnRenderer {
 
-    constructor(eventBus: BPMN.EventBus, styles: any, pathMap: any, canvas: any, priority: number) {
-        super(eventBus, styles, pathMap, canvas, 1200);
+    static $inject = ['config.bpmnRenderer', 'eventBus', 'styles', 'pathMap', 'canvas', 'textRenderer'];
+    constructor(config: any, eventBus: BPMN.EventBus, styles: any, pathMap: any, canvas: any, textRenderer: any, priority: number) {
+        super(config, eventBus, styles, pathMap, canvas, textRenderer, 1200);
     }
 
-    getDecisionResult!: (element: BPMN.DiElement) => DecisionResult | undefined; 
+    getConnectionType!: (element: BPMN.DiElement) => ConnectionType | undefined; 
 
     drawConnection(visuals: any, element: BPMN.DiElement) {
 
         var result = super.drawConnection(visuals, element);
-        
-        var dr = this.getDecisionResult && this.getDecisionResult(element);
 
-        if (dr)
-            result.style.setProperty('stroke', dr == "Approve" ? "#0c9c01" : "#c71a01");
+        var ct = this.getConnectionType && this.getConnectionType(element);
+
+        if (ct && ct != "Normal")
+            result.style.setProperty('stroke',
+                ct == "Approve" ? "#0c9c01" :
+                    ct == "Decline" ? "#c71a01" :
+                        ct == "Jump" ? "blue" :
+                            ct == "ScriptException" ? "magenta" :
+                                "gray");
             
         return result;
     }
@@ -32,15 +38,15 @@ export class CustomRenderer extends BpmnRenderer {
         var strokeColor: string = "";
         var fillColor: string = "";
 
-        if (BpmnUtils.isStartEvent(element.type)) {
+        if (element.type == "bpmn:StartEvent") {
             strokeColor = "#62A716";
             fillColor = "#E6FF97";
         }
-        else if (BpmnUtils.isEndEvent(element.type)) {
+        else if (element.type == "bpmn:EndEvent") {
             strokeColor = "#990000";
             fillColor = "#EEAAAA";
         }
-        else if (BpmnUtils.isIntermediateThrowEvent(element.type)) {
+        else if (element.type == "bpmn:IntermediateThrowEvent" || element.type == "bpmn:IntermediateCatchEvent") {
             strokeColor = "#A09B58";
             fillColor = "#FEFAEF";
         }
@@ -52,7 +58,7 @@ export class CustomRenderer extends BpmnRenderer {
             strokeColor = "#ACAC28";
             fillColor = "#FFFFCC";
         }
-        else if (BpmnUtils.isTextAnnotation(element.type) || BpmnUtils.isDataObjectReference(element.type) || BpmnUtils.isDataStoreReference(element.type)) {
+        else if (element.type == "bpmn:TextAnnotation" || element.type == "bpmn:DataObjectReference" || element.type == "bpmn:DataStoreReference") {
             strokeColor = "#666666";
             fillColor = "#F0F0F0";
         };

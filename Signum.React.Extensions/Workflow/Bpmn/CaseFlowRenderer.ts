@@ -1,21 +1,22 @@
 ﻿/// <reference path="../bpmn-js.d.ts" />
-import * as Modeler from "bpmn-js/lib/Modeler"
-import * as BpmnRenderer from "bpmn-js/lib/draw/BpmnRenderer"
+import Modeler from "bpmn-js/lib/Modeler"
+import BpmnRenderer from "bpmn-js/lib/draw/BpmnRenderer"
+import NavigatedViewer from "bpmn-js/lib/NavigatedViewer"
 import * as moment from 'moment'
-import { WorkflowConditionEntity, WorkflowActionEntity, DecisionResult, CaseActivityEntity, CaseNotificationEntity, DoneType, WorkflowActivityEntity, CaseFlowColor } from '../Signum.Entities.Workflow'
+import { WorkflowConditionEntity, WorkflowActionEntity, CaseActivityEntity, CaseNotificationEntity, DoneType, WorkflowActivityEntity, CaseFlowColor } from '../Signum.Entities.Workflow'
 import { Lite, liteKey } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
 import { CustomRenderer } from './CustomRenderer'
 import { Color, Gradient } from '../../Basics/Color'
 import { CaseFlow, CaseConnectionStats, CaseActivityStats  } from '../WorkflowClient'
 import * as BpmnUtils from './BpmnUtils'
 import { calculatePoint, Rectangle } from "../../Map/Utils"
-import * as NavigatedViewer from "bpmn-js/lib/NavigatedViewer"
 import "moment-duration-format"
 
 export class CaseFlowRenderer extends CustomRenderer {
 
-    constructor(eventBus: BPMN.EventBus, styles: any, pathMap: any, canvas: any, priority: number) {
-        super(eventBus, styles, pathMap, canvas, 1200);
+    static $inject = ['config.bpmnRenderer', 'eventBus', 'styles', 'pathMap', 'canvas', 'textRenderer'];
+    constructor(config: any, eventBus: BPMN.EventBus, styles: any, pathMap: any, canvas: any, textRenderer: any, priority: number) {
+        super(config, eventBus, styles, pathMap, canvas, textRenderer, 1200);
     }
 
     caseFlow!: CaseFlow;
@@ -50,13 +51,13 @@ export class CaseFlowRenderer extends CustomRenderer {
         
         const result = super.drawShape(visuals, element);
 
-        if (BpmnUtils.isLabel(element.type)) {
+        if (element.type == "label") {
             if (!this.caseFlow.AllNodes.contains(element.businessObject.id) &&
                 !this.caseFlow.Connections[element.businessObject.id])
                 result.style.setProperty('fill', "gray");
         }
-        else if (BpmnUtils.isStartEvent(element.type) ||
-            BpmnUtils.isEndEvent(element.type) ||
+        else if (element.type == "bpmn:StartEvent" ||
+            element.type == "bpmn:EndEvent" ||
             BpmnUtils.isGatewayAnyKind(element.type)) {
 
             if (!this.caseFlow.AllNodes.contains(element.id)) {
@@ -167,7 +168,6 @@ export class CaseFlowRenderer extends CustomRenderer {
 function getDoneColor(doneType: DoneType) {
     switch (doneType) {
         case "Jump": return "#ff7504";
-        case "Rejected": return "red";
         case "Timeout": return "gold";
         case "ScriptSuccess": return "green";
         case "ScriptFailure": return "violet";
