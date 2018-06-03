@@ -48,7 +48,7 @@ export default class EmailMessage extends React.Component<{ ctx: TypeContext<Ema
                     </fieldset>
 
 
-                    <div className="form-inline repeater-inline">
+                    <div className="form-inline">
                         <EntityDetail ctx={e.subCtx(f => f.from)} />
                         <EntityRepeater ctx={e.subCtx(f => f.recipients)} />
                         <EntityRepeater ctx={e.subCtx(f => f.attachments)} getComponent={this.renderAttachment} />
