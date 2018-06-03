@@ -33,6 +33,14 @@ namespace Signum.Utilities
             return collection.SingleEx();
         }
 
+
+        public static Dictionary<K, List<V>> GroupToDictionary<V, K>(this IEnumerable<KeyValuePair<K, V>> collection)
+        {
+            return collection
+                .GroupBy(kvp => kvp.Key)
+                .ToDictionaryEx(g => g.Key, g => g.Select(kvp => kvp.Value).ToList());
+        }
+
         public static Dictionary<K, List<T>> GroupToDictionary<T, K>(this IEnumerable<T> collection, Func<T, K> keySelector)
         {
             return collection
