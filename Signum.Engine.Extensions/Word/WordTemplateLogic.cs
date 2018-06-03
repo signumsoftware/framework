@@ -130,17 +130,16 @@ namespace Signum.Engine.Word
 
                 TemplatesByQueryName = sb.GlobalLazy(() =>
                 {
-                    return WordTemplatesLazy.Value.Values.GroupToDictionary(a => a.Query.ToQueryName());
+                    return WordTemplatesLazy.Value.Values.SelectCatch(w => KVP.Create(w.Query.ToQueryName(), w)).GroupToDictionary();
                 }, new InvalidateWith(typeof(WordTemplateEntity)));
 
                 TemplatesByEntityType = sb.GlobalLazy(() =>
                 {
-                    return (from wr in WordTemplatesLazy.Value.Values
-                            let imp = DynamicQueryManager.Current.GetEntityImplementations(wr.Query.ToQueryName())
-                            where !imp.IsByAll
-                            from t in imp.Types
-                            select KVP.Create(t, wr))
-                            .GroupToDictionary(a => a.Key, a => a.Value);
+                    return (from pair in WordTemplatesLazy.Value.Values.SelectCatch(wr => new { wr, imp = DynamicQueryManager.Current.GetEntityImplementations(wr.Query.ToQueryName()) })
+                            where !pair.imp.IsByAll
+                            from t in pair.imp.Types
+                            select KVP.Create(t, pair.wr))
+                            .GroupToDictionary();
                 }, new InvalidateWith(typeof(WordTemplateEntity)));
 
                 Schema.Current.Synchronizing += Schema_Synchronize_Tokens;

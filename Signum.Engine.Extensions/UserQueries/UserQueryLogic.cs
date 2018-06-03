@@ -56,10 +56,10 @@ namespace Signum.Engine.UserQueries
                 UserQueries = sb.GlobalLazy(() => Database.Query<UserQueryEntity>().ToDictionary(a => a.ToLite()),
                     new InvalidateWith(typeof(UserQueryEntity)));
 
-                UserQueriesByQuery = sb.GlobalLazy(() => UserQueries.Value.Values.Where(a => a.EntityType == null).GroupToDictionary(a => a.Query.ToQueryName(), a => a.ToLite()),
+                UserQueriesByQuery = sb.GlobalLazy(() => UserQueries.Value.Values.Where(a => a.EntityType == null).SelectCatch(uq => KVP.Create(uq.Query.ToQueryName(), uq.ToLite())).GroupToDictionary(),
                     new InvalidateWith(typeof(UserQueryEntity)));
 
-                UserQueriesByTypeForQuickLinks = sb.GlobalLazy(() => UserQueries.Value.Values.Where(a => a.EntityType != null && !a.HideQuickLink).GroupToDictionary(a => TypeLogic.IdToType.GetOrThrow(a.EntityType.Id), a => a.ToLite()),
+                UserQueriesByTypeForQuickLinks = sb.GlobalLazy(() => UserQueries.Value.Values.Where(a => a.EntityType != null && !a.HideQuickLink).SelectCatch(uq => KVP.Create(TypeLogic.IdToType.GetOrThrow(uq.EntityType.Id), uq.ToLite())).GroupToDictionary(),
                     new InvalidateWith(typeof(UserQueryEntity)));
             }
         }
