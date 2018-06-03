@@ -252,7 +252,6 @@ export abstract class EntityBase<T extends EntityBaseProps, S extends EntityBase
         } as any;
     }
 
-
     defaultFind(): Promise<ModifiableEntity | Lite<Entity> | undefined> {
 
         if (this.state.findOptions) {
@@ -263,6 +262,7 @@ export abstract class EntityBase<T extends EntityBaseProps, S extends EntityBase
             .then<ModifiableEntity | Lite<Entity> | undefined>(qn =>
                 qn == undefined ? undefined : Finder.find({ queryName: qn } as FindOptions));
     }
+
     handleFindClick = (event: React.SyntheticEvent<any>) => {
 
         event.preventDefault();

@@ -56,11 +56,6 @@ namespace Signum.Entities
             }
         }
 
-        private static bool IsStaticClass(Type type)
-        {
-            return type.IsAbstract && type.IsSealed;
-        }
-
         [Ignore]
         FieldInfo fieldInfo;
         [HiddenProperty]

@@ -76,6 +76,8 @@ export module QueryTokenMessage {
     export const Minute = new MessageKey("QueryTokenMessage", "Minute");
     export const Month = new MessageKey("QueryTokenMessage", "Month");
     export const MonthStart = new MessageKey("QueryTokenMessage", "MonthStart");
+    export const Quarter = new MessageKey("QueryTokenMessage", "Quarter");
+    export const QuarterStart = new MessageKey("QueryTokenMessage", "QuarterStart");
     export const WeekStart = new MessageKey("QueryTokenMessage", "WeekStart");
     export const HourStart = new MessageKey("QueryTokenMessage", "HourStart");
     export const MinuteStart = new MessageKey("QueryTokenMessage", "MinuteStart");

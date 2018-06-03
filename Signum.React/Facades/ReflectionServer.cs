@@ -19,6 +19,7 @@ using Signum.Utilities.Reflection;
 using Signum.Engine.Operations;
 using Signum.Engine.DynamicQuery;
 using Signum.Engine;
+using Signum.Entities.Basics;
 
 namespace Signum.React.Facades
 {
@@ -273,14 +274,14 @@ namespace Signum.React.Facades
                               Kind = KindOfType.SymbolContainer,
                               FullName = type.FullName,
                               Members = type.GetFields(staticFlags)
-                                  .Select(f => GetSymbol(f))
+                                  .Select(f => GetSymbolInfo(f))
                                   .Where(s =>
                                   s.FieldInfo != null && /*Duplicated like in Dynamic*/
                                   s.IdOrNull.HasValue /*Not registered*/)
                                   .ToDictionary(s => s.FieldInfo.Name, s => OnAddFieldInfoExtension(new MemberInfoTS
                                   {
                                       NiceName = s.FieldInfo.NiceName(),
-                                      Id = s.Id.Object
+                                      Id = s.IdOrNull.Value.Object
                                   }, s.FieldInfo))
                           }, type)))
                           .Where(a => a.Value.Members.Any())
@@ -289,16 +290,19 @@ namespace Signum.React.Facades
             return result;
         }
 
-        private static Symbol GetSymbol(FieldInfo m)
+        private static (FieldInfo FieldInfo, PrimaryKey? IdOrNull) GetSymbolInfo(FieldInfo m)
         {
             object v = m.GetValue(null);
-            if (v is IOperationSymbolContainer)
-                v = ((IOperationSymbolContainer)v).Symbol;
+            if (v is IOperationSymbolContainer osc)
+                v = osc.Symbol;
+            
+            if (v is Symbol s)
+                return (s.FieldInfo, s.IdOrNull);
 
-            var s = ((Symbol)v);
+            if(v is SemiSymbol semiS)
+                return (semiS.FieldInfo, semiS.IdOrNull);
 
-            return s;
-
+            throw new InvalidOperationException();
         }
 
 

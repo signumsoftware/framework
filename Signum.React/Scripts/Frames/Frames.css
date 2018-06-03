@@ -114,8 +114,8 @@ a.expand-window:hover {
 .btn-toolbar > .btn-group,
 .btn-toolbar > .input-group,
 .btn-toolbar > .dropdown {
-    margin-bottom: 5px;
-    margin-right: 10px;
+    margin-bottom: 3px;
+    margin-right: 2px;
 }
 
 .code-container {
