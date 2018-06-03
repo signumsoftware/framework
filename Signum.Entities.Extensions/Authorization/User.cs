@@ -81,7 +81,7 @@ namespace Signum.Entities.Authorization
             return base.PropertyValidation(pi);
         }
 
-        static Expression<Func<UserEntity, string>> ToStringExpression = e => e.UserName;
+        public static Expression<Func<UserEntity, string>> ToStringExpression = e => e.UserName;
         [ExpressionField]
         public override string ToString()
         {

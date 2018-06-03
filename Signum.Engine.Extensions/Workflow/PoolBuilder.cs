@@ -43,57 +43,67 @@ namespace Signum.Engine.Workflow
                  },
                  (id, sf, osf) =>
                  {
-                     osf.Entity.ApplyXml(sf, locator);
+
+                     var newFrom = locator.FindEntity(sf.Attribute("sourceRef").Value);
+                     var newTo = locator.FindEntity(sf.Attribute("targetRef").Value);
+
+                     if(!newFrom.Is(osf.Entity.From)  ||
+                     !newTo.Is(osf.Entity.To))
+                     {
+                         osf.Entity.InDB().UnsafeUpdate()
+                         .Set(a => a.From, a => newFrom)
+                         .Set(a => a.To, a => newTo)
+                         .Execute();
+
+                         osf.Entity.From = newFrom;
+                         osf.Entity.To = newTo;
+                         osf.Entity.SetCleanModified(false);
+                     }
                  });
 
                 var oldLanes = this.lanes.Values.ToDictionaryEx(a => a.lane.bpmnElementId, "lanes");
                 var lanes = processElement.Element(bpmn + "laneSet").Elements(bpmn + "lane").ToDictionaryEx(a => a.Attribute("id").Value);
-                
+
                 Synchronizer.Synchronize(lanes, oldLanes,
-                    (id, l) =>
+                    createNew: (id, l) =>
                     {
                         var wl = new WorkflowLaneEntity { Xml = new WorkflowXmlEmbedded(), Pool = this.pool.Entity }.ApplyXml(l, locator);
-                        var lb = new LaneBuilder(wl, 
-                            Enumerable.Empty<WorkflowActivityEntity>(), 
-                            Enumerable.Empty<WorkflowEventEntity>(), 
-                            Enumerable.Empty<WorkflowGatewayEntity>(), 
+                        var lb = new LaneBuilder(wl,
+                            Enumerable.Empty<WorkflowActivityEntity>(),
+                            Enumerable.Empty<WorkflowEventEntity>(),
+                            Enumerable.Empty<WorkflowGatewayEntity>(),
                             Enumerable.Empty<XmlEntity<WorkflowConnectionEntity>>());
                         lb.ApplyChanges(processElement, l, locator);
 
-                        if (lb.IsEmpty())
-                            wl.Delete(WorkflowLaneOperation.Delete);
-                        else
-                          this.lanes.Add(wl.ToLite(), lb);
-
+                        this.lanes.Add(wl.ToLite(), lb);
                     },
-                    (id, ol) =>
-                    {
-                        this.lanes.Remove(ol.lane.Entity.ToLite());
-                        ol.DeleteAll(locator);
-                    },
-                    (id, l, ol) =>
+                    removeOld: null,
+                    merge: (id, l, ol) =>
                     {
                         var wl = ol.lane.Entity.ApplyXml(l, locator);
                         ol.ApplyChanges(processElement, l, locator);
+                    });
 
-                        if (ol.IsEmpty())
-                        {
-                            this.lanes.Remove(wl.ToLite());
-                            wl.Delete(WorkflowLaneOperation.Delete);
-                        }
-                    });
-                
+                Synchronizer.Synchronize(lanes, oldLanes,
+                       createNew: null,
+                       removeOld: (id, ol) =>
+                       {
+                           this.lanes.Remove(ol.lane.Entity.ToLite());
+                           ol.lane.Entity.Delete(WorkflowLaneOperation.Delete);
+                       },
+                       merge: null);
+
                 Synchronizer.Synchronize(sequenceFlows, oldSequenceFlows,
-                    (id, sf) =>
-                    {
-                        var wc = new WorkflowConnectionEntity { Xml = new WorkflowXmlEmbedded() }.ApplyXml(sf, locator);
-                        this.sequenceFlows.Add(new XmlEntity<WorkflowConnectionEntity>(wc));
-                    },
-                    null,
-                    (id, sf, osf) =>
-                    {
-                        osf.Entity.ApplyXml(sf, locator);
-                    });
+                       (id, sf) =>
+                       {
+                           var wc = new WorkflowConnectionEntity { Xml = new WorkflowXmlEmbedded() }.ApplyXml(sf, locator);
+                           this.sequenceFlows.Add(new XmlEntity<WorkflowConnectionEntity>(wc));
+                       },
+                       null,
+                       (id, sf, osf) =>
+                       {
+                           osf.Entity.ApplyXml(sf, locator);
+                       });
             }
 
             public IWorkflowNodeEntity FindEntity(string bpmElementId)
@@ -165,7 +175,8 @@ namespace Signum.Engine.Workflow
                 return this.lanes.Values.SelectMany(la => la.GetActivities());
             }
 
-            internal List<LaneBuilder> GetLanes() {
+            internal List<LaneBuilder> GetLanes()
+            {
                 return this.lanes.Values.ToList();
             }
 

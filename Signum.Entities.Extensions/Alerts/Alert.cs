@@ -134,11 +134,11 @@ namespace Signum.Entities.Alerts
     [Serializable, EntityKind(EntityKind.String, EntityData.Master)]
     public class AlertTypeEntity : SemiSymbol
     {
-        [MethodImpl(MethodImplOptions.NoInlining)]
-        public AlertTypeEntity MakeSymbol([CallerMemberName]string memberName = null)
+        private AlertTypeEntity() { }
+
+        private AlertTypeEntity(Type declaringType, string fieldName)
+            : base(declaringType, fieldName)
         {
-            base.MakeSymbol(new StackFrame(1, false), memberName);
-            return this;
         }
     }
 

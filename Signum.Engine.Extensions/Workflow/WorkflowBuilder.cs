@@ -43,6 +43,8 @@ namespace Signum.Engine.Workflow
                 List<WorkflowEventEntity> events;
                 List<WorkflowActivityEntity> activities;
                 List<WorkflowGatewayEntity> gateways;
+                List<WorkflowLaneEntity> lanes;
+                List<WorkflowPoolEntity> poolEntities;
 
                 if (wf.IsNew)
                 {
@@ -50,6 +52,8 @@ namespace Signum.Engine.Workflow
                     events = new List<WorkflowEventEntity>();
                     activities = new List<WorkflowActivityEntity>();
                     gateways = new List<WorkflowGatewayEntity>();
+                    lanes = new List<WorkflowLaneEntity>();
+                    poolEntities = new List<WorkflowPoolEntity>();
                 }
                 else
                 {
@@ -57,21 +61,26 @@ namespace Signum.Engine.Workflow
                     events = wf.WorkflowEvents().ToList();
                     activities = wf.WorkflowActivities().ToList();
                     gateways = wf.WorkflowGateways().ToList();
+                    lanes = wf.WorkflowPools().SelectMany(a => a.WorkflowLanes()).ToList();
+                    poolEntities = wf.WorkflowPools().ToList();
                 }
 
                 var xmlConnections = connections.Select(a => new XmlEntity<WorkflowConnectionEntity>(a)).ToList();
                 var nodes = events.Cast<IWorkflowNodeEntity>().Concat(activities).Concat(gateways).ToList();
 
-                this.pools = (from n in nodes
-                              group n by n.Lane into grLane
-                              select new LaneBuilder(grLane.Key,
-                              grLane.OfType<WorkflowActivityEntity>(),
-                              grLane.OfType<WorkflowEventEntity>(),
-                              grLane.OfType<WorkflowGatewayEntity>(),
-                              xmlConnections.Where(c => c.Entity.From.Lane.Is(grLane.Key) || c.Entity.To.Lane.Is(grLane.Key))) into lb
-                              group lb by lb.lane.Entity.Pool into grPool
-                              select new PoolBuilder(grPool.Key, grPool, xmlConnections.Where(c => c.Entity.From.Lane.Pool.Is(grPool.Key) && c.Entity.To.Lane.Pool.Is(grPool.Key))))
-                             .ToDictionary(pb => pb.pool.Entity.ToLite());
+                this.pools = (from pool in poolEntities
+                              let laneBuilders = (from lane in lanes
+                                                  where lane.Pool.Is(pool)
+                                                  select new LaneBuilder(lane,
+                                                  activities.Where(a => a.Lane.Is(lane)),
+                                                  events.Where(a => a.Lane.Is(lane)),
+                                                  gateways.Where(a => a.Lane.Is(lane)),
+                                                  xmlConnections.Where(c => c.Entity.From.Lane.Is(lane) || c.Entity.To.Lane.Is(lane))))
+
+                              let sequenceFlows = xmlConnections.Where(c => c.Entity.From.Lane.Pool.Is(pool) && c.Entity.To.Lane.Pool.Is(pool))
+
+                              select new PoolBuilder(pool, laneBuilders, sequenceFlows))
+                              .ToDictionary(a=>a.pool.Entity.ToLite());
 
                 this.messageFlows = xmlConnections.Where(c => !c.Entity.From.Lane.Pool.Is(c.Entity.To.Lane.Pool)).ToList();
 
@@ -92,7 +101,7 @@ namespace Signum.Engine.Workflow
             dic.AddRange(lanes.SelectMany(lb => lb.GetActivities()).Select(a => a.ToModelKVP()));
 
             // Only Start events because end event has no model and extra properties for now
-            dic.AddRange(lanes.SelectMany(lb => lb.GetEvents().Where(e => e.Entity.Type.IsStart())).Select(a => a.ToModelKVP()));
+            dic.AddRange(lanes.SelectMany(lb => lb.GetEvents().Where(e => e.Entity.Type.IsStart() || e.Entity.Type == WorkflowEventType.IntermediateTimer)).Select(a => a.ToModelKVP()));
 
             dic.AddRange(this.messageFlows.Select(mf => mf.ToModelKVP()));
             dic.AddRange(this.pools.Values.SelectMany(pb => pb.GetSequenceFlows()).Select(sf => sf.ToModelKVP()));
@@ -171,6 +180,7 @@ namespace Signum.Engine.Workflow
         {
             var document =  WorkflowBuilder.ParseDocument(model.DiagramXml);
 
+
             var participants = document.Descendants(bpmn + "collaboration").Elements(bpmn + "participant").ToDictionaryEx(a => a.Attribute("id").Value);
             var processElements = document.Descendants(bpmn + "process").ToDictionaryEx(a => a.Attribute("id").Value);
             var diagramElements = document.Descendants(bpmndi + "BPMNPlane").Elements().ToDictionaryEx(a => a.Attribute("bpmnElement").Value, "bpmnElement");
@@ -179,41 +189,55 @@ namespace Signum.Engine.Workflow
                 throw new InvalidOperationException(WorkflowValidationMessage.ParticipantsAndProcessesAreNotSynchronized.NiceToString());
 
             Locator locator = new Workflow.Locator(this, diagramElements, model, replacements);
-            var oldPools = this.pools.Values.ToDictionaryEx(a => a.pool.bpmnElementId, "pools");
+            
+            var messageFlows = document.Descendants(bpmn + "collaboration").Elements(bpmn + "messageFlow").ToDictionaryEx(a => a.Attribute("id").Value);
+            var oldMessageFlows = this.messageFlows.ToDictionaryEx(a => a.bpmnElementId, "messageFlows");
 
+            Synchronizer.Synchronize(messageFlows, oldMessageFlows,
+               null,
+               (id, omf) =>
+               {
+                   this.messageFlows.Remove(omf);
+                   omf.Entity.Delete(WorkflowConnectionOperation.Delete);
+               },
+               (id, mf, omf) =>
+               {
+                   omf.Entity.ApplyXml(mf, locator);
+               });
+
+            var oldPools = this.pools.Values.ToDictionaryEx(a => a.pool.bpmnElementId, "pools");
             Synchronizer.Synchronize(participants, oldPools,
-                (id, pa) =>
+                createNew: (id, pa) =>
                 {
                     var wp = new WorkflowPoolEntity { Xml = new WorkflowXmlEmbedded(), Workflow = this.workflow }.ApplyXml(pa, locator);
                     var pb = new PoolBuilder(wp, Enumerable.Empty<LaneBuilder>(), Enumerable.Empty<XmlEntity<WorkflowConnectionEntity>>());
                     this.pools.Add(wp.ToLite(), pb);
                     pb.ApplyChanges(processElements.GetOrThrow(pa.Attribute("processRef").Value), locator);
                 },
-                (id, pb) =>
-                {
-                    this.pools.Remove(pb.pool.Entity.ToLite());
-                    pb.DeleteAll(locator);
-                },
-                (id, pa, pb) =>
+                removeOld: null,
+                merge: (id, pa, pb) =>
                 {
                     var wp = pb.pool.Entity.ApplyXml(pa, locator);
                     pb.ApplyChanges(processElements.GetOrThrow(pa.Attribute("processRef").Value), locator);
                 });
 
-            var messageFlows = document.Descendants(bpmn + "collaboration").Elements(bpmn + "messageFlow").ToDictionaryEx(a => a.Attribute("id").Value);
-            var oldMessageFlows = this.messageFlows.ToDictionaryEx(a => a.bpmnElementId, "messageFlows");
+            Synchronizer.Synchronize(participants, oldPools, 
+                createNew: null, 
+                removeOld: (id, pb) =>
+                {
+                    this.pools.Remove(pb.pool.Entity.ToLite());
+                    pb.pool.Entity.Delete(WorkflowPoolOperation.Delete);
+                }, 
+                merge: null);
 
+          
             Synchronizer.Synchronize(messageFlows, oldMessageFlows,
                 (id, mf) =>
                 {
                     var wc = new WorkflowConnectionEntity { Xml = new WorkflowXmlEmbedded() }.ApplyXml(mf, locator);
                     this.messageFlows.Add(new XmlEntity<WorkflowConnectionEntity>(wc));
                 },
-                (id, omf) =>
-                {
-                    this.messageFlows.Remove(omf);
-                    omf.Entity.Delete(WorkflowConnectionOperation.Delete);
-                },
+                null,
                 (id, mf, omf) =>
                 {
                     omf.Entity.ApplyXml(mf, locator);
@@ -237,10 +261,11 @@ namespace Signum.Engine.Workflow
 
         public PreviewResult PreviewChanges(XDocument document, WorkflowModel model)
         {
-            var oldTasks = this.pools.Values.SelectMany(p => p.GetAllActivities())
-                .ToDictionary(a => a.bpmnElementId);
+            var oldTasks = this.pools.Values.SelectMany(p => p.GetAllActivities()).Select(a=>a.Entity);
+            var oldIntermediateEvents = this.pools.Values.SelectMany(p => p.GetLanes().SelectMany(l => l.GetEvents().Where(e => e.Entity.Type == WorkflowEventType.IntermediateTimer))).Select(a => a.Entity);
+            var oldNodes = oldTasks.Cast<IWorkflowNodeEntity>().Concat(oldIntermediateEvents.Cast<IWorkflowNodeEntity>()).ToDictionary(node => node.BpmnElementId);
 
-            var newElements = document.Descendants().Where(a => LaneBuilder.WorkflowActivityTypes.Values.Contains(a.Name.LocalName))
+            var newNodes = document.Descendants().Where(a => LaneBuilder.WorkflowActivityTypes.Values.Contains(a.Name.LocalName) || a.Name.LocalName == LaneBuilder.WorkflowEventTypes[WorkflowEventType.IntermediateTimer])
                 .ToDictionary(a => a.Attribute("id").Value);
 
             var entities = model.Entities.ToDictionaryEx(a => a.BpmnElementId);
@@ -249,20 +274,19 @@ namespace Signum.Engine.Workflow
             {
                 Model = new WorkflowReplacementModel
                 {
-                    Replacements = oldTasks.Where(kvp => !newElements.ContainsKey(kvp.Key) && kvp.Value.Entity.CaseActivities().Any())
+                    Replacements = oldNodes.Where(kvp => !newNodes.ContainsKey(kvp.Key) && kvp.Value.CaseActivities().Any())
                     .Select(a => new WorkflowReplacementItemEmbedded
                     {
-                        OldTask = a.Value.Entity.ToLite(),
-                        SubWorkflow = a.Value.Entity.SubWorkflow?.Workflow.ToLite()
+                        OldNode = a.Value.ToLite(),
+                        SubWorkflow = (a.Value as WorkflowActivityEntity)?.SubWorkflow?.Workflow.ToLite()
                     })
                     .ToMList(),
-
                 },
-                NewTasks = newElements.Select(kvp => new PreviewTask
+                NewTasks = newNodes.Select(kvp => new PreviewTask
                 {
                     BpmnId = kvp.Key,
                     Name = kvp.Value.Attribute("name")?.Value,
-                    SubWorkflow = ((WorkflowActivityModel)entities.GetOrThrow(kvp.Key).Model).SubWorkflow?.Workflow.ToLite()
+                    SubWorkflow = (entities.GetOrThrow(kvp.Key).Model as WorkflowActivityModel)?.SubWorkflow?.Workflow.ToLite()
                 }).ToList(),
             };
         }
@@ -300,7 +324,7 @@ namespace Signum.Engine.Workflow
                     BpmnElementId = c.bpmnElementId,
                     Action = c.Entity.Action,
                     Condition = c.Entity.Condition,
-                    DecisonResult = c.Entity.DecisonResult,
+                    Type = c.Entity.Type,
                     Order = c.Entity.Order,
                     Xml = c.Entity.Xml,
                     From = nodes.GetOrThrow(c.Entity.From),
@@ -309,7 +333,7 @@ namespace Signum.Engine.Workflow
             }
 
             
-            foreach (var item in nodes.Where(a => a.Key is WorkflowEventEntity e && e.Type.IsTimerStart()))
+            foreach (var item in nodes.Where(a => a.Key is WorkflowEventEntity e && e.Type.IsScheduledStart()))
             {
                 WorkflowEventTaskLogic.CloneScheduledTasks((WorkflowEventEntity)item.Key, (WorkflowEventEntity)item.Value);
             }
@@ -341,7 +365,7 @@ namespace Signum.Engine.Workflow
             return this.messageFlows.Concat(this.pools.Values.SelectMany(p => p.GetSequenceFlows()));
         }
 
-        internal void ValidateGraph()
+        public void ValidateGraph(List<WorkflowIssue> issuesContainer)
         {
             WorkflowNodeGraph wg = new WorkflowNodeGraph
             {
@@ -353,15 +377,11 @@ namespace Signum.Engine.Workflow
             };
             
             wg.FillGraphs();
-            var errors = wg.Validate((g, newDirection) =>
+            wg.Validate(issuesContainer, (g, newDirection) =>
             {
                 g.Direction = newDirection;
                 g.Execute(WorkflowGatewayOperation.Save);
             });
-
-            var error =  errors.ToString("\r\n").DefaultText(null);
-            if (error != null)
-                throw new ApplicationException(error);
         }
     }
 
@@ -388,7 +408,7 @@ namespace Signum.Engine.Workflow
         {
             this.wb = wb;
             this.diagramElements = diagramElements;
-            this.Replacements = (replacements?.Replacements).EmptyIfNull().ToDictionary(a => a.OldTask, a => a.NewTask);
+            this.Replacements = (replacements?.Replacements).EmptyIfNull().ToDictionary(a => a.OldNode, a => a.NewNode);
             this.entitiesFromModel = model.Entities.ToDictionary(a => a.BpmnElementId, a => a.Model);
         }
 
@@ -413,11 +433,11 @@ namespace Signum.Engine.Workflow
         }
 
 
-        public Dictionary<Lite<WorkflowActivityEntity>, string> Replacements; 
-        public WorkflowActivityEntity GetReplacement(Lite<WorkflowActivityEntity> lite)
+        public Dictionary<Lite<IWorkflowNodeEntity>, string> Replacements; 
+        public IWorkflowNodeEntity GetReplacement(Lite<IWorkflowNodeEntity> lite)
         {
             string bpmnElementId = Replacements.GetOrThrow(lite);
-            return (WorkflowActivityEntity)this.FindEntity(bpmnElementId);
+            return this.FindEntity(bpmnElementId);
         }
 
         internal T GetModelEntity<T>(string bpmnElementId)
@@ -426,7 +446,7 @@ namespace Signum.Engine.Workflow
             return (T)this.entitiesFromModel.TryGetC(bpmnElementId);
         }
 
-        internal bool HasReplacement(Lite<WorkflowActivityEntity> lite)
+        internal bool HasReplacement(Lite<IWorkflowNodeEntity> lite)
         {
             return Replacements.GetOrThrow(lite).HasText();
         }
@@ -487,12 +507,45 @@ namespace Signum.Engine.Workflow
             return we;
         }
 
-        public static WorkflowActivityEntity ApplyXml(this WorkflowActivityEntity wa, XElement activity, Locator locator)
+        public static WorkflowActivityEntity ApplyXml(this WorkflowActivityEntity wa, XElement activity, Locator locator, Dictionary<string, XmlEntity<WorkflowEventEntity>> currentEvents)
         {
             var bpmnElementId = activity.Attribute("id").Value;
             var model = locator.GetModelEntity<WorkflowActivityModel>(bpmnElementId);
             if (model != null)
+            {
                 wa.SetModel(model);
+
+                var oldTimers = wa.BoundaryTimers.ToDictionaryEx(a => a.BpmnElementId, "oldTimers");
+                var timers = model.BoundaryTimers.ToDictionaryEx(a => a.BpmnElementId, "newTimers");
+
+                Synchronizer.Synchronize(timers, oldTimers,
+                    (id, m) =>
+                    {
+                        var we = new WorkflowEventEntity()
+                        {
+                            Name = m.Name,
+                            Lane = wa.Lane,
+                            BpmnElementId = id,
+                            Xml = new WorkflowXmlEmbedded() { DiagramXml = locator.GetDiagram(id).ToString() },
+                            Type = m.Type,
+                            Timer = m.Timer,
+                        };
+                        wa.BoundaryTimers.Add(we);
+                        currentEvents.Add(id, new XmlEntity<WorkflowEventEntity>(we));
+                    },
+
+                    (id, e) =>
+                    {
+                        wa.BoundaryTimers.Remove(e);
+                        currentEvents.Remove(id);
+                    },
+
+                    (id, m,  e) =>
+                    {
+                        e.Xml.DiagramXml = locator.GetDiagram(id).ToString();
+                        e.SetModel(m);
+                    });
+            }
             wa.BpmnElementId = bpmnElementId;
             wa.Name = activity.Attribute("name")?.Value ?? bpmnElementId;
             wa.Xml.DiagramXml = locator.GetDiagram(bpmnElementId).ToString();
@@ -527,7 +580,8 @@ namespace Signum.Engine.Workflow
             wc.BpmnElementId = bpmnElementId;
 
             var name = flow.Attribute("name")?.Value;
-            name = (name.TryBeforeLast(":") ?? name);
+            if (name != null)
+                name = (name.TryBeforeLast(":") ?? name);
 
             if (model != null && model.Order.HasValue)
                 name = name + ": " + model.Order.ToString();
@@ -539,7 +593,6 @@ namespace Signum.Engine.Workflow
 
             if (gateway == null || gateway.Type != WorkflowGatewayType.Exclusive)
             {
-                wc.DecisonResult = null;
                 wc.Order = null;
             };
 

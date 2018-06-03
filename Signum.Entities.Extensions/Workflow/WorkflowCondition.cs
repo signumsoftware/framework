@@ -19,6 +19,7 @@ namespace Signum.Entities.Workflow
         [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
         public string Name { get; set; }
 
+        [NotNullValidator]
         public TypeEntity MainEntityType { get; set; }
 
         [NotNullValidator, NotifyChildProperty]

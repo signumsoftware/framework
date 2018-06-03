@@ -74,7 +74,7 @@ export default class TimeMachinePage extends React.Component<TimeMachinePageProp
                     <span className="display-5">{TimeMachineMessage.TimeMachine.niceToString()}</span>
                     <br />
                     <small className="sf-type-nice-name">
-                        {NormalWindowMessage.Type0Id1.niceToString().formatWith(getTypeInfo(lite.EntityType).niceName, lite.id)}
+                        <EntityLink lite={lite}>{NormalWindowMessage.Type0Id1.niceToString().formatWith(getTypeInfo(lite.EntityType).niceName, lite.id)}</EntityLink>
                         &nbsp;
                         <span style={{ color: "#aaa" }}>{lite.toStr}</span>
                     </small>

@@ -221,21 +221,23 @@ namespace Signum.Engine.MachineLearning.CNTK
             var nnSettings = (NeuralNetworkSettingsEntity)ctx.Predictor.AlgorithmSettings;
             Function calculatedOutputs = (Function)ctx.Model;
 
-            var device = GetDevice(nnSettings);
+            lock (calculatedOutputs) //https://docs.microsoft.com/en-us/cognitive-toolkit/cntk-library-evaluation-on-windows#evaluation-of-multiple-requests-in-parallel
+            {
+                var device = GetDevice(nnSettings);
+                Value inputValue = GetValue(ctx, input, device);
 
-            Value inputValue = GetValue(ctx, input, device);
+                var inputVar = calculatedOutputs.Inputs.SingleEx(i => i.Name == "input");
+                var inputDic = new Dictionary<Variable, Value> { { inputVar, inputValue } };
+                var outputDic = new Dictionary<Variable, Value> { { calculatedOutputs, null } };
 
-            var inputVar = calculatedOutputs.Inputs.SingleEx(i => i.Name == "input");
-            var inputDic = new Dictionary<Variable, Value> { { inputVar, inputValue } };
-            var outputDic = new Dictionary<Variable, Value> { { calculatedOutputs, null } };
-            calculatedOutputs.Evaluate(inputDic, outputDic, device);
 
-            Value output = outputDic[calculatedOutputs];
-            float[] values = output.GetDenseData<float>(calculatedOutputs).SingleEx().ToArray();
+                calculatedOutputs.Evaluate(inputDic, outputDic, device);
 
-            var result = GetPredictionDictionary(values, ctx);
-
-            return result;
+                Value output = outputDic[calculatedOutputs];
+                float[] values = output.GetDenseData<float>(calculatedOutputs).SingleEx().ToArray();
+                var result = GetPredictionDictionary(values, ctx);
+                return result;
+            }
         }
 
         private PredictDictionary GetPredictionDictionary(float[] outputValues, PredictorPredictContext ctx)

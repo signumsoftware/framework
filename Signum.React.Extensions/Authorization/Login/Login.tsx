@@ -107,6 +107,7 @@ export default class Login extends React.Component<{}, { modelState?: ModelState
                         <div className="col-md-3"></div>
                         <div className="col-md-6">
                             <button type="submit" id="login" className="btn btn-success"><i className="fa fa-sign-in"></i> {AuthMessage.Login.niceToString()}</button>
+                            {this.error("login") && <span className="help-block" style={{ color: "red" }}>{this.error("login")}</span>}
                             {AuthClient.resetPassword &&
                                 <span>
                                     &nbsp;

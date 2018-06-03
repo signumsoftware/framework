@@ -71,15 +71,21 @@ namespace Signum.React.Selenium
 
             IWebElement textOrTextArea = this.Element.TryFindElement(By.CssSelector("input[type=text], textarea"));
             if (textOrTextArea != null)
-                return textOrTextArea.GetAttribute("value");
+            {
+                var isReadonly = textOrTextArea.GetAttribute("readonly") != null;
+
+                var dataValue = textOrTextArea.GetAttribute("data-value");
+
+                return (isReadonly == true && dataValue != null) ? textOrTextArea.GetAttribute("data-value") : textOrTextArea.GetAttribute("value");
+            }
 
             IWebElement select = this.Element.TryFindElement(By.CssSelector("select"));
             if (select != null)
                 return select.SelectElement().SelectedOption.GetAttribute("value").ToString();
 
-            IWebElement readonlyField =  
-                this.Element.TryFindElement(By.CssSelector("div.form-control")) ??  
-                this.Element.TryFindElement(By.CssSelector("div.form-control-plaintext"));
+            IWebElement readonlyField =
+                this.Element.TryFindElement(By.CssSelector("input.form-control")) ??
+                this.Element.TryFindElement(By.CssSelector("p.form-control-plaintext"));
             if (readonlyField != null)
                 return readonlyField.GetAttribute("data-value") ?? readonlyField.Text;
 
@@ -103,6 +109,7 @@ namespace Signum.React.Selenium
         {
             get { return this.Element.WithLocator(By.CssSelector("input, textarea, select")); }
         }
+
 
         public object GetValue()
         {

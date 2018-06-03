@@ -25,10 +25,12 @@ namespace Signum.Entities.Workflow
 
         [NotNullValidator]
         public WorkflowLaneEntity Lane { get; set; }
-
         
         public WorkflowEventType Type { get; set; }
 
+        public WorkflowTimerEmbedded Timer { get; set; }
+
+        public Lite<WorkflowActivityEntity> BoundaryOf { get; set; }
 
         [NotNullValidator]
         public WorkflowXmlEmbedded Xml { get; set; }
@@ -47,7 +49,8 @@ namespace Signum.Entities.Workflow
                 MainEntityType = this.Lane.Pool.Workflow.MainEntityType,
                 Name = this.Name,
                 Type = this.Type,
-                Task = WorkflowEventTaskModel.GetModel(this)
+                Task = WorkflowEventTaskModel.GetModel(this),
+                Timer = this.Timer,
             };
             return model;
         }
@@ -57,15 +60,61 @@ namespace Signum.Entities.Workflow
             var wModel = (WorkflowEventModel)model;
             this.Name = wModel.Name;
             this.Type = wModel.Type;
+            this.Timer = wModel.Timer;
             //WorkflowEventTaskModel.ApplyModel(this, wModel.Task);
+        }
+
+        protected override string PropertyValidation(PropertyInfo pi)
+        {
+            if (pi.Name == nameof(Timer))
+            {
+                if (Timer == null && this.Type.IsTimer())
+                    return ValidationMessage._0IsMandatoryWhen1IsSetTo2.NiceToString(pi.NiceName(), NicePropertyName(() => Type), Type.NiceToString());
+
+                if (Timer != null && !this.Type.IsTimer())
+                    return ValidationMessage._0ShouldBeNullWhen1IsSetTo2.NiceToString(pi.NiceName(), NicePropertyName(() => Type), Type.NiceToString());
+            }
+
+            if (pi.Name == nameof(BoundaryOf))
+            {
+                if (BoundaryOf == null && this.Type.IsBoundaryTimer())
+                    return ValidationMessage._0IsMandatoryWhen1IsSetTo2.NiceToString(pi.NiceName(), NicePropertyName(() => Type), Type.NiceToString());
+
+                if (BoundaryOf != null && !this.Type.IsBoundaryTimer())
+                    return ValidationMessage._0ShouldBeNullWhen1IsSetTo2.NiceToString(pi.NiceName(), NicePropertyName(() => Type), Type.NiceToString());
+            }
+
+            return base.PropertyValidation(pi);
+        }
+    }
+
+    [Serializable]
+    public class WorkflowTimerEmbedded : EmbeddedEntity
+    {
+        public TimeSpanEmbedded Duration { get; set; }
+
+        public Lite<WorkflowTimerConditionEntity> Condition { get; set; }
+
+        protected override string PropertyValidation(PropertyInfo pi)
+        {
+            if (pi.Name == nameof(Duration) && Duration == null && Condition == null)
+                return ValidationMessage._0IsMandatoryWhen1IsNotSet.NiceToString(pi.NiceName(), NicePropertyName(() => Condition));
+
+            if (pi.Name == nameof(Duration) && Duration != null && Condition != null)
+                return ValidationMessage._0ShouldBeNullWhen1IsSet.NiceToString(NicePropertyName(() => Condition), pi.NiceName());
+
+            return base.PropertyValidation(pi);
         }
     }
 
     public enum WorkflowEventType
     {
         Start,
-        TimerStart,
-        Finish
+        ScheduledStart,
+        Finish,
+        BoundaryForkTimer,
+        BoundaryInterruptingTimer,
+        IntermediateTimer,
     }
 
 
@@ -73,13 +122,22 @@ namespace Signum.Entities.Workflow
     {
         public static bool IsStart(this WorkflowEventType type) =>
             type == WorkflowEventType.Start ||
-            type == WorkflowEventType.TimerStart;
+            type == WorkflowEventType.ScheduledStart;
 
-        public static bool IsTimerStart(this WorkflowEventType type) =>
-            type == WorkflowEventType.TimerStart;
+        public static bool IsScheduledStart(this WorkflowEventType type) =>
+            type == WorkflowEventType.ScheduledStart;
 
         public static bool IsFinish(this WorkflowEventType type) =>
             type == WorkflowEventType.Finish;
+
+        public static bool IsTimer(this WorkflowEventType type) =>
+            type == WorkflowEventType.BoundaryForkTimer ||
+            type == WorkflowEventType.BoundaryInterruptingTimer ||
+            type == WorkflowEventType.IntermediateTimer;
+
+        public static bool IsBoundaryTimer(this WorkflowEventType type) =>
+            type == WorkflowEventType.BoundaryForkTimer ||
+            type == WorkflowEventType.BoundaryInterruptingTimer;
     }
 
     [AutoInit]
@@ -101,5 +159,9 @@ namespace Signum.Entities.Workflow
         public WorkflowEventType Type { get; set; }
         
         public WorkflowEventTaskModel Task { get; set; }
+
+        public WorkflowTimerEmbedded Timer { get; set; }
+
+        public string BpmnElementId { get; set; }
     }
 }

@@ -20,6 +20,7 @@ namespace Signum.Entities.Workflow
         [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
         public string Name { get; set; }
 
+        [NotNullValidator]
         public TypeEntity MainEntityType { get; set; }
 
         [NotNullValidator, NotifyChildProperty]
@@ -87,11 +88,4 @@ namespace Signum.Entities.Workflow
         public CaseActivityEntity CaseActivity { get; internal set; }
         public int RetryCount { get; internal set; }
     }
-
-    [AutoInit]
-    public static class WorkflowScriptRunnerPanelPermission
-    {
-        public static PermissionSymbol ViewWorkflowScriptRunnerPanel;
-    }
-
 }
