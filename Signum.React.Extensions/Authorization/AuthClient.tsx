@@ -222,27 +222,20 @@ export function addAuthToken(options: Services.AjaxOptions, makeCall: () => Prom
     options.headers["Authorization"] = "Bearer " + token;   
 
     return makeCall()
-        .catch(ifError(ServiceError, e => {
-            if (e.status == 426 && e.httpError.ExceptionType.endsWith(".NewTokenRequiredException")) {
-
-                if (token != getAuthToken())
-                    return makeCall();
-
-                return API.refreshToken(token).then(resp => {
-                    setAuthToken(resp.token);
-                    setCurrentUser(resp.userEntity)
-                    
-                    options.headers!["Authorization"] = "Bearer " + resp.token;
-
-                    return makeCall();
-                }, e2 => {
-                    setAuthToken(undefined);
-                    Navigator.history.push("~/auth/login");
-                    throw e;
-                });
+        .then(r => {
+            var newToken = r.headers.get("New_Token");
+            if (newToken) {
+                setAuthToken(newToken);
+                API.fetchCurrentUser()
+                    .then(cu => setCurrentUser(cu))
+                    .done();
             }
 
-            if (e.httpError.ExceptionType && e.httpError.ExceptionType.endsWith(".AuthenticationException")) {
+            return r;
+
+        }, ifError<ServiceError, Response>(ServiceError, e => {
+            
+            if (e.httpError.exceptionType && e.httpError.exceptionType.endsWith(".AuthenticationException")) {
                 setAuthToken(undefined);
                 Navigator.history.push("~/auth/login");
             }
