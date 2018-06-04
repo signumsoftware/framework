@@ -126,6 +126,8 @@
     <Compile Include="Dynamic\DynamicCode.cs" />
     <Compile Include="Dynamic\Dynamic.cs" />
     <Compile Include="Dynamic\DynamicMixinConnection.cs" />
+    <Compile Include="Files\FilePathUtils.cs" />
+    <Compile Include="Files\FileTypeSymbol.cs" />
     <Compile Include="Joyride\Joyride.cs" />
     <Compile Include="Joyride\JoyrideMessage.cs" />
     <Compile Include="Joyride\JoyrideStepStyle.cs" />
