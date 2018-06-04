@@ -76,7 +76,7 @@ export default class Workflow extends React.Component<WorkflowProps, WorkflowSta
     handleHighlightClick = (e: React.MouseEvent<HTMLAnchorElement>, issue: API.WorkflowIssue) => {
         e.preventDefault();
         if (this.bpmnModelerComponent)
-            this.bpmnModelerComponent.focusElement(issue.BpmnElementId);
+            this.bpmnModelerComponent.focusElement(issue.bpmnElementId);
     }
 
     render() {
@@ -112,7 +112,7 @@ export default class Workflow extends React.Component<WorkflowProps, WorkflowSta
             return null;
 
         var color = this.state.issues.length == 0 ? "success" :
-            this.state.issues.some(a => a.Type == "Error") ? "danger" : "warning";
+            this.state.issues.some(a => a.type == "Error") ? "danger" : "warning";
 
         return (
             <div className={`card border-${color}`} role="alert">
@@ -127,12 +127,12 @@ export default class Workflow extends React.Component<WorkflowProps, WorkflowSta
                         this.state.issues.map((issue, i) =>
 
                         <li key={i}>
-                            {issue.Type == "Error" ?
+                            {issue.type == "Error" ?
                                 <i className="fa fa-times-circle text-danger mr-1" aria-hidden="true" /> :
                                 <i className="fa fa-exclamation-triangle text-warning mr-1" aria-hidden="true" />}
 
-                            {issue.BpmnElementId && <span className="mr-1">(in <a href="#" onClick={e => this.handleHighlightClick(e, issue)}>{issue.BpmnElementId}</a>)</span>}
-                            {issue.Message}
+                            {issue.bpmnElementId && <span className="mr-1">(in <a href="#" onClick={e => this.handleHighlightClick(e, issue)}>{issue.bpmnElementId}</a>)</span>}
+                            {issue.message}
 
                         </li>
                     )}

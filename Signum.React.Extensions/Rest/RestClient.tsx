@@ -53,6 +53,6 @@ export interface RestLogDiff {
 }
 
 export interface DiffPair<T> {
-    Action: "Equal" | "Added" | "Removed";
-    Value: T ;
+    action: "Equal" | "Added" | "Removed";
+    value: T ;
 }

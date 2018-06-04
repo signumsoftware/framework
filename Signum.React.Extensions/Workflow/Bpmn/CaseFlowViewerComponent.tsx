@@ -80,7 +80,7 @@ export default class CaseFlowViewerComponent extends React.Component<CaseFlowVie
 
     handleElementDoubleClick = (obj: BPMN.DoubleClickEvent) => {
 
-        const stats = this.props.caseFlow.Activities[obj.element.id];
+        const stats = this.props.caseFlow.activities[obj.element.id];
         if (stats) {
             obj.preventDefault();
             obj.stopPropagation();
@@ -121,7 +121,7 @@ export default class CaseFlowViewerComponent extends React.Component<CaseFlowVie
 
         caseFlowRenderer.viewer = this.viewer;
         caseFlowRenderer.caseFlow = this.props.caseFlow;
-        caseFlowRenderer.maxDuration = Dic.getValues(this.props.caseFlow.Activities).map(a => a.map(a => a.Duration || 0).sum()).max()!;
+        caseFlowRenderer.maxDuration = Dic.getValues(this.props.caseFlow.activities).map(a => a.map(a => a.duration || 0).sum()).max()!;
         caseFlowRenderer.caseFlowColor = this.state.caseFlowColor;
 
 

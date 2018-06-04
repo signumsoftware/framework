@@ -24,28 +24,28 @@ export default class EntityOmniboxProvider extends OmniboxProvider<EntityOmnibox
 
         array.push(this.icon());
 
-        this.renderMatch(result.TypeMatch, array)
+        this.renderMatch(result.typeMatch, array)
         array.push(<span> </span>);
 
-        if (result.Id == undefined && result.ToStr == undefined) {
+        if (result.id == undefined && result.toStr == undefined) {
             throw Error("Invalid EntityOmniboxProvider result");
         } else {
 
-            if (result.Id != undefined) {
-                array.push(`${result.Id}: `);
+            if (result.id != undefined) {
+                array.push(`${result.id}: `);
 
-                if (result.Lite == undefined) {
+                if (result.lite == undefined) {
                     array.push(this.coloredSpan(OmniboxMessage.NotFound.niceToString(), "gray"));
                 } else {
-                    array.push(result.Lite.toStr!);
+                    array.push(result.lite.toStr!);
                 }
             } else {
-                if (result.Lite == undefined) {
-                    array.push(`'${result.ToStr}': `);
+                if (result.lite == undefined) {
+                    array.push(`'${result.toStr}': `);
                     array.push(this.coloredSpan(OmniboxMessage.NotFound.niceToString(), "gray"));
                 } else {
-                    array.push(`${result.Lite.id}: `);
-                    this.renderMatch(result.ToStrMatch, array);
+                    array.push(`${result.lite.id}: `);
+                    this.renderMatch(result.toStrMatch, array);
                 }
             }
         }
@@ -56,28 +56,28 @@ export default class EntityOmniboxProvider extends OmniboxProvider<EntityOmnibox
 
     navigateTo(result: EntityOmniboxResult) {
 
-        if (result.Lite == undefined)
+        if (result.lite == undefined)
             return undefined;
 
-        return Promise.resolve(Navigator.navigateRoute(result.Lite));
+        return Promise.resolve(Navigator.navigateRoute(result.lite));
     }
 
     toString(result: EntityOmniboxResult) {
-        if (result.Id)
-            return `${result.TypeMatch.Text} ${result.Id}`;
+        if (result.id)
+            return `${result.typeMatch.text} ${result.id}`;
 
-        if (result.ToStr)
-            return `${result.TypeMatch.Text} "${result.ToStr}"`;
+        if (result.toStr)
+            return `${result.typeMatch.text} "${result.toStr}"`;
 
-        return result.TypeMatch.Text;
+        return result.typeMatch.text;
     }
 }
 
 interface EntityOmniboxResult extends OmniboxResult {
-    TypeMatch: OmniboxMatch;
-    Id: any;
-    ToStr: string;
-    ToStrMatch: OmniboxMatch;
+    typeMatch: OmniboxMatch;
+    id: any;
+    toStr: string;
+    toStrMatch: OmniboxMatch;
 
-    Lite: Lite<Entity>
+    lite: Lite<Entity>
 }

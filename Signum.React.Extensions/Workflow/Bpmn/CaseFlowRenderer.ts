@@ -28,14 +28,14 @@ export class CaseFlowRenderer extends CustomRenderer {
 
         const path = super.drawConnection(visuals, element);
 
-        const stats = this.caseFlow.Connections[element.id];
+        const stats = this.caseFlow.connections[element.id];
 
         if (!stats)
             path.style.setProperty('stroke', "lightgray");
         else {
             const pathGroup = (path.parentNode as SVGGElement).parentNode as SVGGElement;
             const title = (Array.toArray(pathGroup.childNodes) as SVGElement[]).filter(a => a.nodeName == "title").firstOrNull() || pathGroup.appendChild(document.createElementNS("http://www.w3.org/2000/svg", "title"));
-            title.textContent = stats.filter(con => con.DoneDate != null).map(con => `${DoneType.niceToString(con.DoneType)} (${con.DoneBy.toStr} ${moment(con.DoneDate).fromNow()})`).join("\n");
+            title.textContent = stats.filter(con => con.doneDate != null).map(con => `${DoneType.niceToString(con.doneType)} (${con.doneBy.toStr} ${moment(con.doneDate).fromNow()})`).join("\n");
         }
 
         return path;
@@ -52,15 +52,15 @@ export class CaseFlowRenderer extends CustomRenderer {
         const result = super.drawShape(visuals, element);
 
         if (element.type == "label") {
-            if (!this.caseFlow.AllNodes.contains(element.businessObject.id) &&
-                !this.caseFlow.Connections[element.businessObject.id])
+            if (!this.caseFlow.allNodes.contains(element.businessObject.id) &&
+                !this.caseFlow.connections[element.businessObject.id])
                 result.style.setProperty('fill', "gray");
         }
         else if (element.type == "bpmn:StartEvent" ||
             element.type == "bpmn:EndEvent" ||
             BpmnUtils.isGatewayAnyKind(element.type)) {
 
-            if (!this.caseFlow.AllNodes.contains(element.id)) {
+            if (!this.caseFlow.allNodes.contains(element.id)) {
                 result.style.setProperty('stroke', "lightgray");
                 result.style.setProperty('fill', "#eee");
 
@@ -69,17 +69,17 @@ export class CaseFlowRenderer extends CustomRenderer {
         }
         else if (BpmnUtils.isTaskAnyKind(element.type)) {
 
-            const stats = this.caseFlow.Activities[element.id];
+            const stats = this.caseFlow.activities[element.id];
             if (!stats) {
                 result.style.setProperty('stroke', "lightgray");
                 result.style.setProperty('fill', "#eee");
             } else {
                 const compare =
-                    this.caseFlowColor == "AverageDuration" ? (stats[0].AverageDuration == undefined ? undefined : stats[0].AverageDuration! * 2) :
-                        this.caseFlowColor == "EstimatedDuration" ? (stats[0].EstimatedDuration == undefined ? undefined : stats[0].EstimatedDuration! * 2) :
+                    this.caseFlowColor == "AverageDuration" ? (stats[0].averageDuration == undefined ? undefined : stats[0].averageDuration! * 2) :
+                        this.caseFlowColor == "EstimatedDuration" ? (stats[0].estimatedDuration == undefined ? undefined : stats[0].estimatedDuration! * 2) :
                             this.caseFlowColor == "CaseMaxDuration" ? this.maxDuration : undefined;
 
-                const sumDuration = stats.map(a => a.Duration || 0).sum();          
+                const sumDuration = stats.map(a => a.duration || 0).sum();          
 
                 if (compare != null && sumDuration > 0) {
                     const color = this.gradient.getColor(sumDuration / compare);
@@ -96,7 +96,7 @@ export class CaseFlowRenderer extends CustomRenderer {
                 const ggParent = gParent.parentNode as SVGGElement;
 
                 const pathGroups = (Array.toArray(ggParent.childNodes) as SVGPathElement[]).filter(a => a.nodeName == "g" && a.className== "jump-group");
-                const jumps = this.caseFlow.Jumps.filter(j => j.FromBpmnElementId == element.id);
+                const jumps = this.caseFlow.jumps.filter(j => j.fromBpmnElementId == element.id);
                 
                 const toCenteredRectangle = (bounds: BPMN.BoundsElement) => ({
                     x: bounds.x + bounds.width / 2,
@@ -118,7 +118,7 @@ export class CaseFlowRenderer extends CustomRenderer {
                         const pathGroup = pathGroups[i] || ggParent.appendChild(document.createElementNS("http://www.w3.org/2000/svg", "g"));
                         pathGroup.classList.add("jump-group");
                         const path = Array.toArray(pathGroup.childNodes).filter(a => a.nodeName == "path").singleOrNull() as SVGPathElement || pathGroup.appendChild(document.createElementNS("http://www.w3.org/2000/svg", "path"));
-                        const toModdle = moddleElements.filter(a => a.id == (jump.ToBpmnElementId + "_di")).single();
+                        const toModdle = moddleElements.filter(a => a.id == (jump.toBpmnElementId + "_di")).single();
 
                         if (toModdle.id != fromModdle.id) {
                             const toRec: Rectangle = toCenteredRectangle(toModdle.bounds);
@@ -147,7 +147,7 @@ export class CaseFlowRenderer extends CustomRenderer {
                         }
                         path.style.setProperty("fill", "transparent");
                         path.style.setProperty("stroke-width", "2px");
-                        path.style.setProperty("stroke", getDoneColor(jump.DoneType));
+                        path.style.setProperty("stroke", getDoneColor(jump.doneType));
                         path.style.setProperty("stroke-linejoin", "round");
                         path.style.setProperty("stroke-dasharray", "5 5");
                         path.style.setProperty("marker-end", "url(#sequenceflow-end-white-black)");
@@ -155,7 +155,7 @@ export class CaseFlowRenderer extends CustomRenderer {
                         const title = (Array.toArray(pathGroup.childNodes) as SVGElement[]).filter(a => a.nodeName == "title").firstOrNull() ||
                             pathGroup.appendChild(document.createElementNS("http://www.w3.org/2000/svg", "title"));
 
-                        title.textContent = `${DoneType.niceToString(jump.DoneType)} (${jump.DoneBy.toStr} ${moment(jump.DoneDate).fromNow()})`;
+                        title.textContent = `${DoneType.niceToString(jump.doneType)} (${jump.doneBy.toStr} ${moment(jump.doneDate).fromNow()})`;
                     });
                 }
             }
@@ -179,18 +179,18 @@ function getDoneColor(doneType: DoneType) {
 }
 
 function getTitle(stats: CaseActivityStats) {
-    let result = `${stats.WorkflowActivity.toStr} (${CaseNotificationEntity.nicePluralName()} ${stats.Notifications})
-${CaseActivityEntity.nicePropertyName(a => a.startDate)}: ${moment(stats.StartDate).format("L LT")} (${moment(stats.StartDate).fromNow()})`;
+    let result = `${stats.workflowActivity.toStr} (${CaseNotificationEntity.nicePluralName()} ${stats.notifications})
+${CaseActivityEntity.nicePropertyName(a => a.startDate)}: ${moment(stats.startDate).format("L LT")} (${moment(stats.startDate).fromNow()})`;
 
-    if (stats.DoneDate != null)
+    if (stats.doneDate != null)
         result += `
-${CaseActivityEntity.nicePropertyName(a => a.doneDate)}: ${moment(stats.DoneDate).format("L LT")} (${moment(stats.DoneDate).fromNow()})
-${CaseActivityEntity.nicePropertyName(a => a.doneBy)}: ${stats.DoneBy && stats.DoneBy.toStr} (${DoneType.niceToString(stats.DoneType!)})
-${CaseActivityEntity.nicePropertyName(a => a.duration)}: ${formatDuration(stats.Duration)}`;
+${CaseActivityEntity.nicePropertyName(a => a.doneDate)}: ${moment(stats.doneDate).format("L LT")} (${moment(stats.doneDate).fromNow()})
+${CaseActivityEntity.nicePropertyName(a => a.doneBy)}: ${stats.doneBy && stats.doneBy.toStr} (${DoneType.niceToString(stats.doneType!)})
+${CaseActivityEntity.nicePropertyName(a => a.duration)}: ${formatDuration(stats.duration)}`;
 
     result += `
-${CaseFlowColor.niceToString("AverageDuration")}: ${formatDuration(stats.AverageDuration)}
-${CaseFlowColor.niceToString("EstimatedDuration")}: ${formatDuration(stats.EstimatedDuration)}`;
+${CaseFlowColor.niceToString("AverageDuration")}: ${formatDuration(stats.averageDuration)}
+${CaseFlowColor.niceToString("EstimatedDuration")}: ${formatDuration(stats.estimatedDuration)}`;
 
     return result;
 }

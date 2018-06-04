@@ -63,21 +63,21 @@ export default class SchedulerPanelPage extends React.Component<SchedulerPanelPr
             <div>
                 <h2 className="display-6">SchedulerLogic state</h2>
                 <div className="btn-toolbar">
-                    {s.Running && <a href="#" className="sf-button btn btn-light active" style={{ color: "red" }} onClick={this.handleStop}>Stop</a>}
-                    {!s.Running && <a href="#" className="sf-button btn btn-light" style={{ color: "green" }} onClick={this.handleStart}>Start</a>}
+                    {s.running && <a href="#" className="sf-button btn btn-light active" style={{ color: "red" }} onClick={this.handleStop}>Stop</a>}
+                    {!s.running && <a href="#" className="sf-button btn btn-light" style={{ color: "green" }} onClick={this.handleStart}>Start</a>}
                     <a href="#" className="sf-button btn btn-light" onClick={this.handleUpdate}>Update</a>
                 </div >
                 <div id="processMainDiv">
                     <br />
                     State: <strong>
-                        {s.Running ?
+                        {s.running ?
                             <span style={{ color: "Green" }}> RUNNING </span> :
                             <span style={{ color: "Red" }}> STOPPED </span>
                         }</strong>
                     <br />
-                    SchedulerMargin: {s.SchedulerMargin}
+                    SchedulerMargin: {s.schedulerMargin}
                     <br />
-                    NextExecution: {s.NextExecution} ({s.NextExecution == undefined ? "-None-" : moment(s.NextExecution).fromNow()})
+                    NextExecution: {s.nextExecution} ({s.nextExecution == undefined ? "-None-" : moment(s.nextExecution).fromNow()})
                     <br />
                     {this.renderInMemoryQueue()}
                     {this.renderRunningTasks()}
@@ -111,7 +111,7 @@ export default class SchedulerPanelPage extends React.Component<SchedulerPanelPr
         return (
             <div>
                 <h4>In Memory Queue</h4>
-                {s.Queue.length == 0 ? <p> -- There is no active ScheduledTask -- </p> :
+                {s.queue.length == 0 ? <p> -- There is no active ScheduledTask -- </p> :
                     <table className="sf-search-results sf-stats-table">
                         <thead>
                             <tr>
@@ -121,11 +121,11 @@ export default class SchedulerPanelPage extends React.Component<SchedulerPanelPr
                             </tr>
                         </thead>
                         <tbody>
-                            {s.Queue.map((item, i) =>
+                            {s.queue.map((item, i) =>
                                 <tr key={i}>
-                                    <td><EntityLink lite={item.ScheduledTask} inSearch={true} onNavigated={() => this.loadState().done()} /></td>
-                                    <td>{item.Rule} </td>
-                                    <td>{item.NextDate} ({moment(item.NextDate).fromNow()})</td>
+                                    <td><EntityLink lite={item.scheduledTask} inSearch={true} onNavigated={() => this.loadState().done()} /></td>
+                                    <td>{item.rule} </td>
+                                    <td>{item.nextDate} ({moment(item.nextDate).fromNow()})</td>
                                 </tr>)
                             }
                         </tbody>
@@ -147,7 +147,7 @@ export default class SchedulerPanelPage extends React.Component<SchedulerPanelPr
         return (
             <div>
                 <h4>Running Tasks</h4>
-                {s.RunningTask.length == 0 ? <p> -- There are not tasks running --</p> :
+                {s.runningTask.length == 0 ? <p> -- There are not tasks running --</p> :
                     <table className="sf-search-results sf-stats-table">
                         <thead>
                             <tr>
@@ -158,12 +158,12 @@ export default class SchedulerPanelPage extends React.Component<SchedulerPanelPr
                             </tr>
                         </thead>
                         <tbody>
-                            {s.RunningTask.map((item, i) =>
+                            {s.runningTask.map((item, i) =>
                                 <tr key={i}>
-                                    <td><EntityLink lite={item.SchedulerTaskLog} inSearch={true} onNavigated={() => this.loadState().done()} /></td>
-                                    <td>{item.StartTime} ({moment(item.StartTime).fromNow()})</td>
-                                    <td><pre>{item.Remarks}</pre></td>
-                                    <td><button className="btn btn-light btn-xs btn-danger" type="button" onClick={e => this.handleCancelClick(e, item.SchedulerTaskLog)}>Cancel</button></td>
+                                    <td><EntityLink lite={item.schedulerTaskLog} inSearch={true} onNavigated={() => this.loadState().done()} /></td>
+                                    <td>{item.startTime} ({moment(item.startTime).fromNow()})</td>
+                                    <td><pre>{item.remarks}</pre></td>
+                                    <td><button className="btn btn-light btn-xs btn-danger" type="button" onClick={e => this.handleCancelClick(e, item.schedulerTaskLog)}>Cancel</button></td>
                                 </tr>)
                             }
                         </tbody>

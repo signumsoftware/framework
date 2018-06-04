@@ -336,7 +336,7 @@ export class TrainingProgressComponent extends React.Component<TrainingProgressC
             .then(p => {
                 var prev = this.state.trainingProgress;
                 this.setState({ trainingProgress: p });
-                if (prev != null && prev.State != p.State)
+                if (prev != null && prev.state != p.state)
                     this.props.onStateChanged();
                 else
                     this.timeoutHandler = setTimeout(() => this.loadData(this.props), this.refreshInterval);
@@ -350,10 +350,10 @@ export class TrainingProgressComponent extends React.Component<TrainingProgressC
 
         return (
             <div>
-                {tp && tp.EpochProgressesParsed && <LineChart height={200} series={getSeries(tp.EpochProgressesParsed, this.props.ctx.value)} />}
-                <ProgressBar color={tp == null || tp.Running == false ? "warning" : null}
-                    value={tp && tp.Progress}
-                    message={tp == null ? PredictorMessage.StartingTraining.niceToString() : tp.Message}
+                {tp && tp.epochProgressesParsed && <LineChart height={200} series={getSeries(tp.epochProgressesParsed, this.props.ctx.value)} />}
+                <ProgressBar color={tp == null || tp.running == false ? "warning" : null}
+                    value={tp && tp.progress}
+                    message={tp == null ? PredictorMessage.StartingTraining.niceToString() : tp.message}
                 />
             </div>
         );
@@ -413,13 +413,13 @@ function getSeries(eps: Array<PredictorClient.EpochProgress>, predictor: Predict
 
     const isClassification = NeuralNetworkSettingsEntity.isInstance(algSet) && algSet.predictionType == "Classification";
 
-    var totalMax = isClassification ? undefined : eps.flatMap(a => [a.LossTraining, a.LossValidation]).filter(a => a != null).max();
+    var totalMax = isClassification ? undefined : eps.flatMap(a => [a.lossTraining, a.lossValidation]).filter(a => a != null).max();
 
     return [
         {
             color: "black",
             name: PredictorEpochProgressEntity.nicePropertyName(a => a.lossTraining),
-            values: eps.filter(a => a.LossTraining != null).map(ep => ({ x: ep.TrainingExamples, y: ep.LossTraining })),
+            values: eps.filter(a => a.lossTraining != null).map(ep => ({ x: ep.trainingExamples, y: ep.lossTraining })),
             minValue: 0,
             maxValue: totalMax,
             strokeWidth: "2px",
@@ -427,7 +427,7 @@ function getSeries(eps: Array<PredictorClient.EpochProgress>, predictor: Predict
         {
             color: "darkgray",
             name: PredictorEpochProgressEntity.nicePropertyName(a => a.evaluationTraining),
-            values: eps.filter(a => a.EvaluationTraining != null).map(ep => ({ x: ep.TrainingExamples, y: ep.EvaluationTraining })),
+            values: eps.filter(a => a.evaluationTraining != null).map(ep => ({ x: ep.trainingExamples, y: ep.evaluationTraining })),
             minValue: 0,
             maxValue: isClassification ? 1 : totalMax,
             strokeWidth: "1px",
@@ -435,7 +435,7 @@ function getSeries(eps: Array<PredictorClient.EpochProgress>, predictor: Predict
         {
             color: "red",
             name: PredictorEpochProgressEntity.nicePropertyName(a => a.lossValidation),
-            values: eps.filter(a => a.LossValidation != null).map(ep => ({ x: ep.TrainingExamples, y: ep.LossValidation! })),
+            values: eps.filter(a => a.lossValidation != null).map(ep => ({ x: ep.trainingExamples, y: ep.lossValidation! })),
             minValue: 0,
             maxValue: totalMax,
             strokeWidth: "2px",
@@ -443,7 +443,7 @@ function getSeries(eps: Array<PredictorClient.EpochProgress>, predictor: Predict
         {
             color: "pink",
             name: PredictorEpochProgressEntity.nicePropertyName(a => a.evaluationValidation),
-            values: eps.filter(a => a.EvaluationValidation != null).map(ep => ({ x: ep.TrainingExamples, y: ep.EvaluationValidation! })),
+            values: eps.filter(a => a.evaluationValidation != null).map(ep => ({ x: ep.trainingExamples, y: ep.evaluationValidation! })),
             minValue: 0,
             maxValue: isClassification ? 1 : totalMax,
             strokeWidth: "1px",

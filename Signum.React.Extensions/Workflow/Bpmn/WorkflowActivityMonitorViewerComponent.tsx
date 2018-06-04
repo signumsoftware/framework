@@ -71,7 +71,7 @@ export default class WorkflowActivityMonitorViewerComponent extends React.Compon
         if (mle && WorkflowActivityModel.isInstance(mle.element.model)) {
             var actMod = mle.element.model;
 
-            const stats = this.props.workflowActivityMonitor.Activities.singleOrNull(a => is(a.WorkflowActivity, actMod.workflowActivity));
+            const stats = this.props.workflowActivityMonitor.activities.singleOrNull(a => is(a.workflowActivity, actMod.workflowActivity));
             if (stats) {
                 WorkflowActivityStatsModal.show(stats, this.props.workflowConfig, actMod);
             }

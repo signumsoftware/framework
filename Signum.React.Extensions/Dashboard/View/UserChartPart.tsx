@@ -107,9 +107,7 @@ export default class UserChartPart extends React.Component<UserChartPartProps, U
 
         return (
             <div>
-                {se.httpError.Message && <p className="text-danger">{se.httpError.Message}</p>}
-                {se.httpError.ExceptionMessage && <p className="text-danger">{se.httpError.ExceptionMessage}</p>}
-                {se.httpError.MessageDetail && <p className="text-danger">{se.httpError.MessageDetail}</p>}
+                {se.httpError.exceptionMessage && <p className="text-danger">{se.httpError.exceptionMessage}</p>}
             </div>
         );
 

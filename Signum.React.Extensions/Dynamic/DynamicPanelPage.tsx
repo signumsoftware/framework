@@ -274,12 +274,12 @@ export class ErrorBlock extends React.Component<{ error: WebApiHttpError }, { sh
         return (
             <div className="alert alert-danger error-block" style={{ marginTop: "20px" }}>
                 <div >
-                    <h3>{he.ExceptionType}</h3>
-                    {textDanger(he.ExceptionMessage)}
+                    <h3>{he.exceptionType}</h3>
+                    {textDanger(he.exceptionMessage)}
                 </div >
                 <div>
                     <a href="#" onClick={this.handleShowStackTrace}>StackTrace</a>
-                    {this.state.showDetails && <pre>{he.StackTrace}</pre>}
+                    {this.state.showDetails && <pre>{he.stackTrace}</pre>}
                 </div>
             </div>
 

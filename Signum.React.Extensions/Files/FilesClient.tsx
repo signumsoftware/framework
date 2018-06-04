@@ -30,14 +30,14 @@ export function start(options: { routes: JSX.Element[] }) {
         name: "WebDownload",
         isApplicable: col => col.token!.type.name === "WebDownload",
         formatter: col => new CellFormatter((cell: WebDownload) =>
-            !cell ? undefined : <a href={cell.FullWebPath} download={cell.FileName}>{cell.FileName}</a>)
+            !cell ? undefined : <a href={cell.fullWebPath} download={cell.fileName}>{cell.fileName}</a>)
     });
 
     Finder.formatRules.push({
         name: "WebImage",
         isApplicable: col => col.token!.type.name === "WebImage",
         formatter: col => new CellFormatter((cell: WebImage) =>
-            !cell ? undefined : <img src={cell.FullWebPath}/>)
+            !cell ? undefined : <img src={cell.fullWebPath}/>)
     });
 }
 
@@ -53,11 +53,11 @@ function registerAutoFileLine(type: Type<IFile & ModifiableEntity>) {
 
 
 export interface WebDownload {
-    FileName: string;
-    FullWebPath: string;
+    fileName: string;
+    fullWebPath: string;
 }
 
 export interface WebImage {
-    FullWebPath: string;
+    fullWebPath: string;
 }
  

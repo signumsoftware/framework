@@ -63,22 +63,22 @@ export module API {
 
 export interface SchedulerState
 {
-    Running: boolean;
-    SchedulerMargin: string;
-    NextExecution: string;
-    Queue: SchedulerItemState[];
-    RunningTask: SchedulerRunningTaskState[];
+    running: boolean;
+    schedulerMargin: string;
+    nextExecution: string;
+    queue: SchedulerItemState[];
+    runningTask: SchedulerRunningTaskState[];
 }
 
 export interface SchedulerItemState
 {
-    ScheduledTask: Lite<ScheduledTaskEntity>;
-    Rule: string;
-    NextDate: string;
+    scheduledTask: Lite<ScheduledTaskEntity>;
+    rule: string;
+    nextDate: string;
 }
 
 export interface SchedulerRunningTaskState {
-    SchedulerTaskLog: Lite<ScheduledTaskLogEntity>;
-    StartTime: string;
-    Remarks: string;
+    schedulerTaskLog: Lite<ScheduledTaskLogEntity>;
+    startTime: string;
+    remarks: string;
 }

@@ -144,8 +144,8 @@ export default class HeavyList extends React.Component<HeavyListProps, { enabled
         let height = (fontSize + (2 * fontPadding)) * (data.length);
         this.chartContainer.style.height = height + "px";
 
-        let minStart = data.map(a => a.BeforeStart).min();
-        let maxEnd = data.map(a => a.End).max();
+        let minStart = data.map(a => a.beforeStart).min();
+        let maxEnd = data.map(a => a.end).max();
 
         let x = d3.scaleLinear()
             .domain([minStart, maxEnd])
@@ -164,7 +164,7 @@ export default class HeavyList extends React.Component<HeavyListProps, { enabled
 
         let groups = chart.selectAll("g.entry").data(data).enter()
             .append('svg:g').attr('class', 'entry')
-            .attr('data-full-index', function (v) { return v.FullIndex; });
+            .attr('data-full-index', function (v) { return v.fullIndex; });
 
         groups.append('svg:rect').attr('class', 'left-background')
             .attr('x', 0)
@@ -178,7 +178,7 @@ export default class HeavyList extends React.Component<HeavyListProps, { enabled
             .attr('dy', function (v, i) { return y(i); })
             .attr('y', fontPadding + fontSize)
             .attr('fill', '#000')
-            .text(function (v) { return v.Role + " " + v.AdditionalData; });
+            .text(function (v) { return v.role + " " + v.additionalData; });
 
         groups.append('svg:rect').attr('class', 'right-background')
             .attr('x', labelWidth)
@@ -189,25 +189,23 @@ export default class HeavyList extends React.Component<HeavyListProps, { enabled
             .attr('stroke', '#ddd');
 
         let rectangles = groups.append('svg:rect').attr('class', 'shape')
-            .attr('x', function (v) { return x(v.Start); })
+            .attr('x', function (v) { return x(v.start); })
             .attr('y', function (v, i) { return y(i); })
-            .attr('width', function (v) { return x(v.End) - x(v.Start); })
+            .attr('width', function (v) { return x(v.end) - x(v.start); })
             .attr('height', entryHeight)
-            .attr('fill', function (v) { return v.Color; });
+            .attr('fill', function (v) { return v.color; });
 
         let labelsRight = groups.append('svg:text').attr('class', 'label label-right')
-            .attr('dx', function (v) { return x(v.End) + 3; })
+            .attr('dx', function (v) { return x(v.end) + 3; })
             .attr('dy', function (v, i) { return y(i); })
             .attr('y', fontPadding + fontSize)
             .attr('fill', '#000')
-            .text(function (v) { return v.Elapsed; });
+            .text(function (v) { return v.elapsed; });
 
-        groups.append('svg:title').text(function (v) { return v.Elapsed + " - " + v.AdditionalData; });
-        //labelsLeft.append('svg:title').text(function (v) { return v.Elapsed + " - " + v.AdditionalData; });
-        //labelsRight.append('svg:title').text(function (v) { return v.Elapsed + " - " + v.AdditionalData; });
+        groups.append('svg:title').text(function (v) { return v.elapsed + " - " + v.additionalData; });
 
         groups.on("click", e => {
-            let url = "~/profiler/heavy/entry/" + e.FullIndex;
+            let url = "~/profiler/heavy/entry/" + e.fullIndex;
 
             if (d3.event.ctrlKey) {
                 window.open(Navigator.toAbsoluteUrl(url));

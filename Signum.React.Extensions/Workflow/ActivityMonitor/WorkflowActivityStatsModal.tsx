@@ -52,14 +52,14 @@ export default class WorkflowActivityStatsModal extends React.Component<Workflow
         var stats = this.props.stats;
         return <Modal size="lg" onHide={this.handleCloseClicked} show={this.state.show} onExited={this.handleOnExited}>
             <ModalHeaderButtons onClose={this.handleCloseClicked}>
-                {stats.WorkflowActivity.toStr}
+                {stats.workflowActivity.toStr}
             </ModalHeaderButtons>
             <div className="modal-body">
                 {
                     <div>
-                        <FormGroup ctx={ctx} labelText={CaseActivityEntity.nicePluralName()}><FormControlReadonly ctx={ctx}>{stats.CaseActivityCount}</FormControlReadonly></FormGroup>
+                        <FormGroup ctx={ctx} labelText={CaseActivityEntity.nicePluralName()}><FormControlReadonly ctx={ctx}>{stats.caseActivityCount}</FormControlReadonly></FormGroup>
                         {config.columns.map((col, i) =>
-                            <FormGroup ctx={ctx} labelText={col.displayName || col.token!.niceName}><FormControlReadonly ctx={ctx}>{stats.CustomValues[i]}</FormControlReadonly></FormGroup>
+                            <FormGroup ctx={ctx} labelText={col.displayName || col.token!.niceName}><FormControlReadonly ctx={ctx}>{stats.customValues[i]}</FormControlReadonly></FormGroup>
                         )}
                         {activity.type == "CallWorkflow" || activity.type == "DecompositionWorkflow" ?
                             this.renderSubWorkflowExtra(ctx) :
@@ -87,7 +87,7 @@ export default class WorkflowActivityStatsModal extends React.Component<Workflow
                     findOptions={{
                         queryName: CaseActivityEntity,
                         parentColumn: "Entity.WorkflowActivity",
-                        parentValue: stats.WorkflowActivity,
+                        parentValue: stats.workflowActivity,
                         filterOptions: this.props.config.filters
                             .filter(f => f.token && f.token.queryTokenType != "Aggregate")
                             .map(a => ({ columnName: a.token!.fullKey, operation: a.operation, value: a.value, frozen: true }) as FilterOption),
@@ -115,7 +115,7 @@ export default class WorkflowActivityStatsModal extends React.Component<Workflow
     handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
         e.preventDefault();
 
-        Navigator.API.fetchAndForget(this.props.stats.WorkflowActivity)
+        Navigator.API.fetchAndForget(this.props.stats.workflowActivity)
             .then(wa => window.open(WorkflowClient.workflowActivityMonitorUrl(toLite(wa.subWorkflow!.workflow!))))
             .done();
     }

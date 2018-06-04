@@ -94,28 +94,28 @@ export module API {
 }
 
 export interface StackTraceTS {
-    Color: string;
-    FileName: string;
-    LineNumber: number;
-    Method: string;
-    Type: string;
-    Namespace: string;
+    color: string;
+    fileName: string;
+    lineNumber: number;
+    method: string;
+    type: string;
+    namespace: string;
 }
 
 export interface HeavyProfilerEntry {
-    BeforeStart: number;
-    Start: number;
-    End: number;
-    Elapsed: string;
-    IsFinished: boolean;
-    Role: string;
-    Color: string;
-    Depth: number;
-    AsyncDepth: number;
-    AdditionalData: string;
-    FullIndex: string;
-    StackTrace: string;
-    Entries: HeavyProfilerEntry[];
+    beforeStart: number;
+    start: number;
+    end: number;
+    elapsed: string;
+    isFinished: boolean;
+    role: string;
+    color: string;
+    depth: number;
+    asyncDepth: number;
+    additionalData: string;
+    fullIndex: string;
+    stackTrace: string;
+    entries: HeavyProfilerEntry[];
 }
 
 export interface TimeTrackerEntry {

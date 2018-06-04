@@ -35,7 +35,7 @@ export class DiffDocument extends React.Component<{ diff: Array<DiffPair<Array<D
         var margin = DiffDocument.marginLines;
 
         var indices = margin == null ? Array.range(0, diff.length) :
-            expandNumbers(diff.map((a, i) => a.Action != "Equal" || a.Value.length != 1 ? i : null).filter(n => n != null) as number[], diff.length);
+            expandNumbers(diff.map((a, i) => a.action != "Equal" || a.value.length != 1 ? i : null).filter(n => n != null) as number[], diff.length);
         
         const result =
             indices
@@ -45,20 +45,20 @@ export class DiffDocument extends React.Component<{ diff: Array<DiffPair<Array<D
 
                     var line = diff[ix];
 
-                    if (line.Action == "Removed") {
-                        return [<span style={{ backgroundColor: "#FFD1D1" }}>{this.renderDiffLine(line.Value)}</span>];
+                    if (line.action == "Removed") {
+                        return [<span style={{ backgroundColor: "#FFD1D1" }}>{this.renderDiffLine(line.value)}</span>];
                     }
-                    if (line.Action == "Added") {
-                        return [<span style={{ backgroundColor: "#CEF3CE" }}>{this.renderDiffLine(line.Value)}</span>];
+                    if (line.action == "Added") {
+                        return [<span style={{ backgroundColor: "#CEF3CE" }}>{this.renderDiffLine(line.value)}</span>];
                     }
-                    else if (line.Action == "Equal") {
-                        if (line.Value.length == 1) {
-                            return [<span>{this.renderDiffLine(line.Value)}</span>];
+                    else if (line.action == "Equal") {
+                        if (line.value.length == 1) {
+                            return [<span>{this.renderDiffLine(line.value)}</span>];
                         }
                         else {
                             return [
-                                <span style={{ backgroundColor: "#FFD1D1" }}>{this.renderDiffLine(line.Value.filter(a => a.Action == "Removed" || a.Action == "Equal"))}</span>,
-                                <span style={{ backgroundColor: "#CEF3CE" }}>{this.renderDiffLine(line.Value.filter(a => a.Action == "Added" || a.Action == "Equal"))}</span>
+                                <span style={{ backgroundColor: "#FFD1D1" }}>{this.renderDiffLine(line.value.filter(a => a.action == "Removed" || a.action == "Equal"))}</span>,
+                                <span style={{ backgroundColor: "#CEF3CE" }}>{this.renderDiffLine(line.value.filter(a => a.action == "Added" || a.action == "Equal"))}</span>
                             ];
                         }
                     }
@@ -72,12 +72,12 @@ export class DiffDocument extends React.Component<{ diff: Array<DiffPair<Array<D
 
     renderDiffLine(list: Array<DiffPair<string>>): Array<React.ReactElement<any>> {
         const result = list.map((a, i) => {
-            if (a.Action == "Equal")
-                return <span key={i}>{a.Value}</span>;
-            else if (a.Action == "Added")
-                return <span key={i} style={{ backgroundColor: "#72F272" }}>{a.Value}</span>;
-            else if (a.Action == "Removed")
-                return <span key={i} style={{ backgroundColor: "#FF8B8B" }}>{a.Value}</span>;
+            if (a.action == "Equal")
+                return <span key={i}>{a.value}</span>;
+            else if (a.action == "Added")
+                return <span key={i} style={{ backgroundColor: "#72F272" }}>{a.value}</span>;
+            else if (a.action == "Removed")
+                return <span key={i} style={{ backgroundColor: "#FF8B8B" }}>{a.value}</span>;
             else
                 throw Error("");
         });

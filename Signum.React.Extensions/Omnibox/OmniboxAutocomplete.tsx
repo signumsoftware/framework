@@ -4,7 +4,7 @@ import { Route } from 'react-router'
 import { Dic } from '../../../Framework/Signum.React/Scripts/Globals';
 import { ajaxPost, ajaxGet, AbortableRequest } from '../../../Framework/Signum.React/Scripts/Services';
 import * as Navigator from '../../../Framework/Signum.React/Scripts/Navigator'
-import { Typeahead } from '../../../Framework/Signum.React/Scripts/Components'
+import { Typeahead, ErrorBoundary } from '../../../Framework/Signum.React/Scripts/Components'
 import * as OmniboxClient from './OmniboxClient'
 import { OmniboxMessage } from './Signum.Entities.Omnibox'
 import '../../../Framework/Signum.React/Scripts/Frames/MenuIcons.css'
@@ -46,16 +46,15 @@ export default class OmniboxAutocomplete extends React.Component<OmniboxAutocomp
 
         let inputAttr = { tabIndex: -1, placeholder: OmniboxMessage.Search.niceToString(), ...this.props.inputAttrs };
         
-        const result = (
-            <Typeahead ref={ta => this.typeahead = ta!} getItems={str => this.abortRequest.getData(str)} 
-                renderItem={OmniboxClient.renderItem}
-                onSelect={this.handleOnSelect}
-                inputAttrs={inputAttr}
-                minLength={0}
-                ></Typeahead>  
+        return (
+            <ErrorBoundary>
+                <Typeahead ref={ta => this.typeahead = ta!} getItems={str => this.abortRequest.getData(str)}
+                    renderItem={OmniboxClient.renderItem}
+                    onSelect={this.handleOnSelect}
+                    inputAttrs={inputAttr}
+                    minLength={0} />
+            </ErrorBoundary>
         );
-
-        return result;
     }
 }
 

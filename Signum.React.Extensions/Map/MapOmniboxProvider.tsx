@@ -26,34 +26,34 @@ export default class MapOmniboxProvider extends OmniboxProvider<MapOmniboxResult
 
         array.push(this.icon());
 
-        this.renderMatch(result.KeywordMatch, array);
+        this.renderMatch(result.keywordMatch, array);
         array.push("\u0020");
 
-        if (result.TypeMatch != undefined)
-            this.renderMatch(result.TypeMatch, array);
+        if (result.typeMatch != undefined)
+            this.renderMatch(result.typeMatch, array);
         
         return array;
     }
 
     navigateTo(result: MapOmniboxResult) {
 
-        if (result.KeywordMatch == undefined)
+        if (result.keywordMatch == undefined)
             return undefined;
 
-        return Promise.resolve("~/Map" + (result.TypeName ? "/" + result.TypeName : ""));
+        return Promise.resolve("~/Map" + (result.typeName ? "/" + result.typeName : ""));
     }
 
     toString(result: MapOmniboxResult) {
-        if (result.TypeMatch == undefined)
-            return result.KeywordMatch.Text;
+        if (result.typeMatch == undefined)
+            return result.keywordMatch.text;
 
-        return "{0} {1}".formatWith(result.KeywordMatch.Text, result.TypeMatch.Text);
+        return "{0} {1}".formatWith(result.keywordMatch.text, result.typeMatch.text);
     }
 }
 
 interface MapOmniboxResult extends OmniboxResult {
-    KeywordMatch: OmniboxMatch;
+    keywordMatch: OmniboxMatch;
 
-    TypeName: string;
-    TypeMatch: OmniboxMatch;
+    typeName: string;
+    typeMatch: OmniboxMatch;
 }

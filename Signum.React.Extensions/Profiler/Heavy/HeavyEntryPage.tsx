@@ -35,7 +35,7 @@ export default class HeavyEntry extends React.Component<HeavyEntryProps, { entri
     }
 
     componentWillReceiveProps(newProps: HeavyEntryProps) {
-        if (this.state.entries == undefined || !this.state.entries.some(a => a.FullIndex == newProps.match.params.selectedIndex))
+        if (this.state.entries == undefined || !this.state.entries.some(a => a.fullIndex == newProps.match.params.selectedIndex))
             this.loadEntries(newProps);
 
         this.loadStackTrace(newProps);
@@ -76,7 +76,7 @@ export default class HeavyEntry extends React.Component<HeavyEntryProps, { entri
         if (this.state.entries == undefined)
             return <h3>Heavy Profiler > Entry {index} (loading...) </h3>;
 
-        let current = this.state.entries.filter(a => a.FullIndex == this.props.match.params.selectedIndex).single();
+        let current = this.state.entries.filter(a => a.fullIndex == this.props.match.params.selectedIndex).single();
         return (
             <div>
                 <h2><Link to="~/profiler/heavy">Heavy Profiler</Link> > Entry {index}</h2>
@@ -88,17 +88,17 @@ export default class HeavyEntry extends React.Component<HeavyEntryProps, { entri
                     <tbody>
                         <tr>
                             <th>Role</th>
-                            <td>{current.Role}</td>
+                            <td>{current.role}</td>
                         </tr>
                         <tr>
                             <th>Time</th>
-                            <td>{current.Elapsed}</td>
+                            <td>{current.elapsed}</td>
                         </tr>
                         <tr>
                             <td colSpan={2}>
                                 <div className="btn-toolbar">
                                     <button onClick={this.handleDownload} className="btn btn-info">Download</button>
-                                    {!current.IsFinished && <button onClick={this.handleUpdate} className="btn btn-light">Update</button>}
+                                    {!current.isFinished && <button onClick={this.handleUpdate} className="btn btn-light">Update</button>}
                                 </div>
                             </td>
                         </tr>
@@ -106,7 +106,7 @@ export default class HeavyEntry extends React.Component<HeavyEntryProps, { entri
                 </table>
                 <br />
                 <h3>Aditional Data</h3>
-                <pre style={{ maxWidth: "1000px", overflowY: "scroll" }}><code>{current.AdditionalData}</code></pre>
+                <pre style={{ maxWidth: "1000px", overflowY: "scroll" }}><code>{current.additionalData}</code></pre>
                 <br />
                 <h3>StackTrace</h3>
                 {
@@ -143,16 +143,16 @@ export class StackFrameTable extends React.Component<{ stackTrace: StackTraceTS[
                     {this.props.stackTrace.map((sf, i) =>
                         <tr key={i}>
                             <td>
-                                {sf.Namespace && <span style={{ color: sf.Color }}>{sf.Namespace}</span>}
+                                {sf.namespace && <span style={{ color: sf.color }}>{sf.namespace}</span>}
                             </td>
                             <td>
-                                {sf.Type && <span style={{ color: sf.Color }}>{sf.Type}</span>}
+                                {sf.type && <span style={{ color: sf.color }}>{sf.type}</span>}
                             </td>
                             <td>
-                                {sf.Method}
+                                {sf.method}
                             </td>
                             <td>
-                                {sf.FileName} {sf.LineNumber > 0 && "(" + sf.LineNumber + ")"}
+                                {sf.fileName} {sf.lineNumber > 0 && "(" + sf.lineNumber + ")"}
                             </td>
                         </tr>
                     )}
@@ -190,8 +190,8 @@ export class HeavyProfilerDetailsD3 extends React.Component<HeavyProfilerDetails
 
     resetZoom(current: HeavyProfilerEntry) {
         this.setState({
-            min: lerp(current.BeforeStart, -0.1, current.End),
-            max: lerp(current.BeforeStart, 1.1, current.End)
+            min: lerp(current.beforeStart, -0.1, current.end),
+            max: lerp(current.beforeStart, 1.1, current.end)
         });
     }
 
@@ -256,8 +256,8 @@ export class HeavyProfilerDetailsD3 extends React.Component<HeavyProfilerDetails
             throw new Error("no entries");
 
         var getDepth = props.asyncDepth ?
-            (e: HeavyProfilerEntry) => e.AsyncDepth :
-            (e: HeavyProfilerEntry) => e.Depth;
+            (e: HeavyProfilerEntry) => e.asyncDepth :
+            (e: HeavyProfilerEntry) => e.depth;
 
         let fontSize = 12;
         let fontPadding = 3;
@@ -287,21 +287,21 @@ export class HeavyProfilerDetailsD3 extends React.Component<HeavyProfilerDetails
                 .domain([min, max])
                 .range([0, width]);
 
-            var filteredData = data.filter(a => a.End > min && a.BeforeStart < max && (x(a.End) - x(a.BeforeStart)) > 1);
+            var filteredData = data.filter(a => a.end > min && a.beforeStart < max && (x(a.end) - x(a.beforeStart)) > 1);
 
-            const selection = chart.selectAll<SVGGElement, any>("g.entry").data(filteredData, a => (a as HeavyProfilerEntry).FullIndex);
+            const selection = chart.selectAll<SVGGElement, any>("g.entry").data(filteredData, a => (a as HeavyProfilerEntry).fullIndex);
 
             selection.exit().remove();
 
             var newGroups = selection.enter()
                 .append<SVGGElement>('svg:g')
                 .attr('class', 'entry')
-                .attr('data-key', a => a.FullIndex);
+                .attr('data-key', a => a.fullIndex);
 
             newGroups.append<SVGRectElement>('svg:rect').attr('class', 'shape')
                 .attr('y', v => y(getDepth(v)))
                 .attr('height', entryHeight - 1)
-                .attr('fill', v => v.Color);
+                .attr('fill', v => v.color);
 
             newGroups.append<SVGRectElement>('svg:rect').attr('class', 'shape-before')
                 .attr('y', v => y(getDepth(v)) + 1)
@@ -311,14 +311,14 @@ export class HeavyProfilerDetailsD3 extends React.Component<HeavyProfilerDetails
             newGroups.append<SVGTextElement>('svg:text').attr('class', 'label label-top')
                 .attr('dy', v => y(getDepth(v)))
                 .attr('y', fontPadding + fontSize)
-                .text(v => v.Elapsed);
+                .text(v => v.elapsed);
 
             newGroups.append<SVGTextElement>('svg:text').attr('class', 'label label-bottom')
                 .attr('dy', v => y(getDepth(v)))
                 .attr('y', (2 * fontPadding) + (2 * fontSize))
-                .text(v => v.Role + (v.AdditionalData ? (" - " + v.AdditionalData.etc(30)) : ""));
+                .text(v => v.role + (v.additionalData ? (" - " + v.additionalData.etc(30)) : ""));
 
-            newGroups.append('svg:title').text(v => v.Role + v.Elapsed);
+            newGroups.append('svg:title').text(v => v.role + v.elapsed);
 
             newGroups.on("click", e => {
 
@@ -326,7 +326,7 @@ export class HeavyProfilerDetailsD3 extends React.Component<HeavyProfilerDetails
 
                 }
                 else {
-                    let url = "~/profiler/heavy/entry/" + e.FullIndex;
+                    let url = "~/profiler/heavy/entry/" + e.fullIndex;
 
                     if (d3.event.ctrlKey) {
                         window.open(Navigator.toAbsoluteUrl(url));
@@ -346,20 +346,20 @@ export class HeavyProfilerDetailsD3 extends React.Component<HeavyProfilerDetails
             var updateGroups = newGroups.merge(selection);
 
             updateGroups.select<SVGRectElement>("rect.shape")
-                .attr('x', v => x(Math.max(min, v.BeforeStart)))
-                .attr('width', v => Math.max(0, x(Math.min(max, v.End)) - x(Math.max(min, v.BeforeStart))))
+                .attr('x', v => x(Math.max(min, v.beforeStart)))
+                .attr('width', v => Math.max(0, x(Math.min(max, v.end)) - x(Math.max(min, v.beforeStart))))
                 .attr('stroke', v => v == sel ? '#000' : '#ccc');
 
             updateGroups.select<SVGRectElement>("rect.shape-before")
-                .attr('x', v => x(Math.max(min, v.BeforeStart)))
-                .attr('width', v => Math.max(0, x(Math.min(max, v.Start)) - x(Math.max(min, v.BeforeStart))));
+                .attr('x', v => x(Math.max(min, v.beforeStart)))
+                .attr('width', v => Math.max(0, x(Math.min(max, v.start)) - x(Math.max(min, v.beforeStart))));
 
             updateGroups.select<SVGTextElement>("text.label.label-top")
-                .attr('dx', v => x(Math.max(min, v.Start)) + 3)
+                .attr('dx', v => x(Math.max(min, v.start)) + 3)
                 .attr('fill', v => v == sel ? '#000' : '#fff');
 
             updateGroups.select<SVGTextElement>("text.label.label-bottom")
-                .attr('dx', v => x(Math.max(min, v.Start)) + 3)
+                .attr('dx', v => x(Math.max(min, v.start)) + 3)
                 .attr('fill', v => v == sel ? '#000' : '#fff');
         };
 

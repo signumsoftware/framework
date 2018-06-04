@@ -91,27 +91,27 @@ export class WorkflowScriptRunnerTab extends React.Component<{}, { scriptRunerSt
             <div>
                 <h4>{title}</h4>
                 <div className="btn-toolbar">
-                    {srs.Running && <a href="#" className="sf-button btn btn-light active" style={{ color: "red" }} onClick={this.handleStop}>Stop</a>}
-                    {!srs.Running && <a href="#" className="sf-button btn btn-light" style={{ color: "green" }} onClick={this.handleStart}>Start</a>}
+                    {srs.running && <a href="#" className="sf-button btn btn-light active" style={{ color: "red" }} onClick={this.handleStop}>Stop</a>}
+                    {!srs.running && <a href="#" className="sf-button btn btn-light" style={{ color: "green" }} onClick={this.handleStart}>Start</a>}
                 </div >
 
                 <div>
                     <br />
                     State: <strong>
-                        {srs.Running ?
+                        {srs.running ?
                             <span style={{ color: "Green" }}> RUNNING </span> :
                             <span style={{ color: "Red" }}> STOPPED </span>
                         }</strong>
                     <br />
-                    CurrentProcessIdentifier: {srs.CurrentProcessIdentifier}
+                    CurrentProcessIdentifier: {srs.currentProcessIdentifier}
                     <br />
-                    ScriptRunnerPeriod: {srs.ScriptRunnerPeriod} sec
+                    ScriptRunnerPeriod: {srs.scriptRunnerPeriod} sec
                     <br />
-                    NextPlannedExecution: {srs.NextPlannedExecution} ({srs.NextPlannedExecution == undefined ? "-None-" : moment(srs.NextPlannedExecution).fromNow()})
+                    NextPlannedExecution: {srs.nextPlannedExecution} ({srs.nextPlannedExecution == undefined ? "-None-" : moment(srs.nextPlannedExecution).fromNow()})
                     <br />
-                    IsCancelationRequested: {srs.IsCancelationRequested}
+                    IsCancelationRequested: {srs.isCancelationRequested}
                     <br />
-                    QueuedItems: {srs.QueuedItems}
+                    QueuedItems: {srs.queuedItems}
                 </div>
                 <br />
                 <h4>Next activities to execute</h4>

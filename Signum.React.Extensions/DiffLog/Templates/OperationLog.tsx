@@ -203,7 +203,7 @@ export class DiffMixinTabs extends React.Component<{ ctx: TypeContext<OperationL
 }
 
 function isEqual(diff: Array<DiffPair<Array<DiffPair<string>>>>) {
-    return diff.every(a => a.Action == "Equal" && a.Value.every(b => b.Action == "Equal"));
+    return diff.every(a => a.action == "Equal" && a.value.every(b => b.action == "Equal"));
 }
 
 

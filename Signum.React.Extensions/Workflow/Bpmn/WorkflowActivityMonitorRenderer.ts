@@ -43,21 +43,21 @@ export class WorkflowActivityMonitorRenderer extends CustomRenderer {
 
             var actMod = mle && (mle.element.model as WorkflowActivityModel);
 
-            const stats = actMod && this.workflowActivityMonitor.Activities.singleOrNull(ac => is(ac.WorkflowActivity, actMod!.workflowActivity));
+            const stats = actMod && this.workflowActivityMonitor.activities.singleOrNull(ac => is(ac.workflowActivity, actMod!.workflowActivity));
             
             if (!stats) {
                 result.style.setProperty('stroke', "lightgray");
                 result.style.setProperty('fill', "#eee");
             }
             else if (this.workflowConfig.columns.length == 0) {
-                var max = Math.max(1, this.workflowActivityMonitor.Activities.max(a => a.CaseActivityCount));
-                const color = this.gradient.getColor(stats.CaseActivityCount / max);
+                var max = Math.max(1, this.workflowActivityMonitor.activities.max(a => a.caseActivityCount));
+                const color = this.gradient.getColor(stats.caseActivityCount / max);
                 result.style.setProperty('stroke', color.lerp(0.5, Color.Black).toString());
                 result.style.setProperty('fill', color.toString());
 
             } else {
-                var max = Math.max(0.01, this.workflowActivityMonitor.Activities.max(a => a.CustomValues[0]));
-                const color = this.gradient.getColor((stats.CustomValues[0] || 0) / max);
+                var max = Math.max(0.01, this.workflowActivityMonitor.activities.max(a => a.customValues[0]));
+                const color = this.gradient.getColor((stats.customValues[0] || 0) / max);
                 result.style.setProperty('stroke', color.lerp(0.5, Color.Black).toString());
                 result.style.setProperty('fill', color.toString());
             }
@@ -73,11 +73,11 @@ export class WorkflowActivityMonitorRenderer extends CustomRenderer {
 }
 
 function getTitle(stats: WorkflowActivityStats, config: WorkflowActivityMonitorConfig) {
-    let result = `${stats.WorkflowActivity.toStr} (${stats.CaseActivityCount})`;
+    let result = `${stats.workflowActivity.toStr} (${stats.caseActivityCount})`;
 
     if (config.columns.length) {
         result += "\n" + config.columns.map((col, i) =>
-            `${col.displayName || col.token!.niceName}: ${formatDuration(stats.CustomValues[i], col.token!)}`).join("\n");
+            `${col.displayName || col.token!.niceName}: ${formatDuration(stats.customValues[i], col.token!)}`).join("\n");
     }
     return result;
 }

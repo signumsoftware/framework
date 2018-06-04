@@ -204,12 +204,12 @@ export module API {
 
 
 export interface AsyncEmailSenderState {
-    AsyncSenderPeriod: number;
-    Running: boolean;
-    IsCancelationRequested: boolean;
-    NextPlannedExecution: string;
-    QueuedItems: number;
-    CurrentProcessIdentifier: string;
+    asyncSenderPeriod: number;
+    running: boolean;
+    isCancelationRequested: boolean;
+    nextPlannedExecution: string;
+    queuedItems: number;
+    currentProcessIdentifier: string;
 }
 
 declare module '../../../Framework/Signum.React/Scripts/FindOptions' {

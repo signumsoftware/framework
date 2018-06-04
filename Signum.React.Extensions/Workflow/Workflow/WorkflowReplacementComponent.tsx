@@ -60,8 +60,8 @@ export class WorkflowReplacementItemCombo extends React.Component<{ ctx: TypeCon
         return (
             <select value={ctx.value.newNode || ""} className="form-control form-control-sm" onChange={this.handleChange}>
                 <option value=""> - {symbolNiceName(WorkflowOperation.Delete).toUpperCase()} - </option>
-                {this.props.previewTasks.filter(pt => is(pt.SubWorkflow, ctx.value.subWorkflow))
-                    .map(pt => <option value={pt.BpmnId}>{pt.Name}</option>)}
+                {this.props.previewTasks.filter(pt => is(pt.subWorkflow, ctx.value.subWorkflow))
+                    .map(pt => <option value={pt.bpmnId}>{pt.name}</option>)}
             </select>
         );
     }

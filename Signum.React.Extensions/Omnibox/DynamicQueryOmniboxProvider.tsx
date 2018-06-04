@@ -25,41 +25,41 @@ export default class DynamicQueryOmniboxProvider extends OmniboxProvider<Dynamic
 
         array.push(this.icon());
 
-        this.renderMatch(result.QueryNameMatch, array);
+        this.renderMatch(result.queryNameMatch, array);
 
-        result.Filters.forEach(f => {
+        result.filters.forEach(f => {
             array.push(<span> </span>);
 
             let last: string | undefined = undefined;
-            if (f.QueryTokenMatches)
-                f.QueryTokenMatches.map(m => {
+            if (f.queryTokenMatches)
+                f.queryTokenMatches.map(m => {
                     if (last != undefined)
                         array.push(<span>.</span>);
                     this.renderMatch(m, array);
-                    last = m.Text;
+                    last = m.text;
                 });
 
-            if (f.QueryToken.niceName != last) {
+            if (f.queryToken.niceName != last) {
                 if (last != undefined)
                     array.push(<span>.</span>);
 
-                array.push(this.coloredSpan(f.QueryTokenOmniboxPascal.tryAfterLast(".") || f.QueryTokenOmniboxPascal, "gray"));
+                array.push(this.coloredSpan(f.queryTokenOmniboxPascal.tryAfterLast(".") || f.queryTokenOmniboxPascal, "gray"));
             }
 
-            if (f.CanFilter && f.CanFilter.length)
-                array.push(this.coloredSpan(f.CanFilter, "red"));
-            else if (f.Operation != undefined) {
+            if (f.canFilter && f.canFilter.length)
+                array.push(this.coloredSpan(f.canFilter, "red"));
+            else if (f.operation != undefined) {
 
-                array.push(<strong>{f.OperationToString}</strong>);
+                array.push(<strong>{f.operationToString}</strong>);
 
-                if (f.Value == UNKNOWN)
+                if (f.value == UNKNOWN)
                     array.push(this.coloredSpan(OmniboxMessage.Unknown.niceToString(), "red"));
-                else if (f.ValueMatch != undefined)
-                    this.renderMatch(f.ValueMatch, array);
-                else if (f.Syntax != undefined && f.Syntax.Completion == FilterSyntaxCompletion.Complete)
-                    array.push(<b>{f.ValueToString}</b>);
+                else if (f.valueMatch != undefined)
+                    this.renderMatch(f.valueMatch, array);
+                else if (f.syntax != undefined && f.syntax.completion == FilterSyntaxCompletion.Complete)
+                    array.push(<b>{f.valueToString}</b>);
                 else
-                    array.push(this.coloredSpan(f.ValueToString, "gray"));
+                    array.push(this.coloredSpan(f.valueToString, "gray"));
             }   
         });
 
@@ -69,15 +69,15 @@ export default class DynamicQueryOmniboxProvider extends OmniboxProvider<Dynamic
     navigateTo(result: DynamicQueryOmniboxResult) {
 
         const fo: FindOptions = {
-            queryName: result.QueryName,
+            queryName: result.queryName,
             filterOptions :[]
         };
 
-        result.Filters.forEach(f => {
+        result.filters.forEach(f => {
             fo.filterOptions!.push({
-                columnName: f.QueryToken.fullKey,
-                operation: f.Operation,
-                value: f.Value,
+                columnName: f.queryToken.fullKey,
+                operation: f.operation,
+                value: f.value,
             });
         });
 
@@ -85,22 +85,22 @@ export default class DynamicQueryOmniboxProvider extends OmniboxProvider<Dynamic
     }
 
     toString(result: DynamicQueryOmniboxResult) {
-        const queryName = result.QueryNameMatch.Text;
+        const queryName = result.queryNameMatch.text;
 
-        const filters = result.Filters.map(f => {
+        const filters = result.filters.map(f => {
 
-            const token = f.QueryTokenOmniboxPascal;
+            const token = f.queryTokenOmniboxPascal;
 
-            if (f.Syntax == undefined || f.Syntax.Completion == FilterSyntaxCompletion.Token || f.CanFilter && f.CanFilter.length > 1)
+            if (f.syntax == undefined || f.syntax.completion == FilterSyntaxCompletion.Token || f.canFilter && f.canFilter.length > 1)
                 return token;
 
-            const oper = f.OperationToString;
+            const oper = f.operationToString;
 
-            if (f.Syntax.Completion == FilterSyntaxCompletion.Operation && f.Value == undefined ||
-                (f.Value == UNKNOWN))
+            if (f.syntax.completion == FilterSyntaxCompletion.Operation && f.value == undefined ||
+                (f.value == UNKNOWN))
                 return token + oper;
 
-            return token + oper + f.ValueToString;
+            return token + oper + f.valueToString;
         }).join(" ");
 
         return filters.length ? queryName + " " + filters : queryName;
@@ -108,31 +108,31 @@ export default class DynamicQueryOmniboxProvider extends OmniboxProvider<Dynamic
 }
 
 interface DynamicQueryOmniboxResult extends OmniboxResult {
-    QueryName: string;
-    QueryNameMatch: OmniboxMatch;
-    Filters: OmniboxFilterResult[];
+    queryName: string;
+    queryNameMatch: OmniboxMatch;
+    filters: OmniboxFilterResult[];
 }
 
 interface OmniboxFilterResult {
 
-    Distance: number;
-    Syntax: FilterSyntax;
-    QueryToken: QueryToken;
-    QueryTokenOmniboxPascal: string;
-    QueryTokenMatches: OmniboxMatch[]
-    Operation: FilterOperation;
-    OperationToString: string;
-    Value: any
-    ValueMatch: OmniboxMatch;
-    ValueToString: string;
-    CanFilter: string;
+    distance: number;
+    syntax: FilterSyntax;
+    queryToken: QueryToken;
+    queryTokenOmniboxPascal: string;
+    queryTokenMatches: OmniboxMatch[]
+    operation: FilterOperation;
+    operationToString: string;
+    value: any
+    valueMatch: OmniboxMatch;
+    valueToString: string;
+    canFilter: string;
 }
 
 interface FilterSyntax {
-    Index: number;
-    TokenLength: number;
-    Length: number;
-    Completion: FilterSyntaxCompletion;
+    index: number;
+    tokenLength: number;
+    length: number;
+    completion: FilterSyntaxCompletion;
 }
 
 enum FilterSyntaxCompletion {

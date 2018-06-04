@@ -25,27 +25,27 @@ export default class DashboardOmniboxProvider extends OmniboxProvider<DashboardO
 
         array.push(this.icon());
 
-        this.renderMatch(result.ToStrMatch, array);
+        this.renderMatch(result.toStrMatch, array);
 
         return array;
     }
 
     navigateTo(result: DashboardOmniboxResult) {
 
-        if (result.Dashboard == undefined)
+        if (result.dashboard == undefined)
             return undefined;
 
-        return Promise.resolve(DashboardClient.dashboardUrl(result.Dashboard));
+        return Promise.resolve(DashboardClient.dashboardUrl(result.dashboard));
     }
 
     toString(result: DashboardOmniboxResult) {
-        return "\"{0}\"".formatWith(result.ToStrMatch.Text);
+        return "\"{0}\"".formatWith(result.toStrMatch.text);
     }
 }
 
 interface DashboardOmniboxResult extends OmniboxResult {
-    ToStr: string;
-    ToStrMatch: OmniboxMatch;
+    toStr: string;
+    toStrMatch: OmniboxMatch;
     
-    Dashboard: Lite<DashboardEntity>;
+    dashboard: Lite<DashboardEntity>;
 }

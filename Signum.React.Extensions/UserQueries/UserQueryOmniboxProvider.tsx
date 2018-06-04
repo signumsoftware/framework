@@ -27,29 +27,29 @@ export default class UserQueryOmniboxProvider extends OmniboxProvider<UserQueryO
 
         array.push(this.icon());
 
-        this.renderMatch(result.ToStrMatch, array);
+        this.renderMatch(result.toStrMatch, array);
 
         return array;
     }
 
     navigateTo(result: UserQueryOmniboxResult) {
 
-        if (result.UserQuery == undefined)
+        if (result.userQuery == undefined)
             return undefined;
 
-        return Navigator.API.fetchAndForget(result.UserQuery)
+        return Navigator.API.fetchAndForget(result.userQuery)
             .then(uq => UserQueryClient.Converter.toFindOptions(uq, undefined))
-            .then(fo => Finder.findOptionsPath(fo, { userQuery: liteKey(result.UserQuery) }));
+            .then(fo => Finder.findOptionsPath(fo, { userQuery: liteKey(result.userQuery) }));
     }
 
     toString(result: UserQueryOmniboxResult) {
-        return "\"{0}\"".formatWith(result.ToStrMatch.Text);
+        return "\"{0}\"".formatWith(result.toStrMatch.text);
     }
 }
 
 interface UserQueryOmniboxResult extends OmniboxResult {
-    ToStr: string;
-    ToStrMatch: OmniboxMatch;
+    toStr: string;
+    toStrMatch: OmniboxMatch;
 
-    UserQuery: Lite<UserQueryEntity>;
+    userQuery: Lite<UserQueryEntity>;
 }

@@ -27,11 +27,11 @@ export default class ChartOmniboxProvider extends OmniboxProvider<ChartOmniboxRe
 
         array.push(this.icon());
 
-        this.renderMatch(result.KeywordMatch, array);
+        this.renderMatch(result.keywordMatch, array);
         array.push("\u0020");
 
-        if (result.QueryNameMatch != undefined)
-            this.renderMatch(result.QueryNameMatch, array);
+        if (result.queryNameMatch != undefined)
+            this.renderMatch(result.queryNameMatch, array);
         else
             array.push(this.coloredSpan(OmniboxMessage.Omnibox_Query.niceToString() + "...", "lightgray"));
 
@@ -40,11 +40,11 @@ export default class ChartOmniboxProvider extends OmniboxProvider<ChartOmniboxRe
 
     navigateTo(result: ChartOmniboxResult) {
 
-        if (result.QueryNameMatch == undefined)
+        if (result.queryNameMatch == undefined)
             return undefined;
 
         var cr = ChartRequest.New({
-            queryKey: getQueryKey(result.QueryName),
+            queryKey: getQueryKey(result.queryName),
             orderOptions: [],
             filterOptions: [],
         });
@@ -55,16 +55,16 @@ export default class ChartOmniboxProvider extends OmniboxProvider<ChartOmniboxRe
     }
 
     toString(result: ChartOmniboxResult) {
-        if (result.QueryNameMatch == undefined)
-            return result.KeywordMatch.Text;
+        if (result.queryNameMatch == undefined)
+            return result.keywordMatch.text;
 
-        return "{0} {1}".formatWith(result.KeywordMatch.Text, result.QueryNameMatch.Text);
+        return "{0} {1}".formatWith(result.keywordMatch.text, result.queryNameMatch.text);
     }
 }
 
 interface ChartOmniboxResult extends OmniboxResult {
-    KeywordMatch: OmniboxMatch;
+    keywordMatch: OmniboxMatch;
 
-    QueryName: string;
-    QueryNameMatch: OmniboxMatch;
+    queryName: string;
+    queryNameMatch: OmniboxMatch;
 }

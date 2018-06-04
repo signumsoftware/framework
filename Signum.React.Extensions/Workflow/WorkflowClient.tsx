@@ -366,10 +366,10 @@ export function executeWorkflowSave(eoc: Operations.EntityOperationContext<Workf
                 API.previewChanges(toLite(eoc.entity), model);
 
             promise.then(pr => {
-                if (!pr || pr.Model.replacements.length == 0)
+                if (!pr || pr.model.replacements.length == 0)
                     saveAndSetErrors(eoc.entity, model, undefined);
                 else
-                    Navigator.view(pr.Model, { extraComponentProps: { previewTasks: pr.NewTasks } }).then(replacementModel => {
+                    Navigator.view(pr.model, { extraComponentProps: { previewTasks: pr.newTasks } }).then(replacementModel => {
                         if (!replacementModel)
                             return;
 
@@ -530,9 +530,9 @@ export namespace API {
     }
 
     export interface WorkflowIssue {
-        Type: WorkflowIssueType;
-        BpmnElementId: string;
-        Message: string;
+        type: WorkflowIssueType;
+        bpmnElementId: string;
+        message: string;
     }
 
     export function findMainEntityType(request: { subString: string, count: number }, abortController?: FetchAbortController): Promise<Lite<TypeEntity>[]> {
@@ -601,14 +601,14 @@ export interface WorkflowConditionTestResponse {
 export const DecisionResultValues = ["Approve", "Decline"];
 
 export interface PreviewResult {
-    Model: WorkflowReplacementModel;
-    NewTasks: PreviewTask[];
+    model: WorkflowReplacementModel;
+    newTasks: PreviewTask[];
 }
 
 export interface PreviewTask {
-    BpmnId: string;
-    Name: string;
-    SubWorkflow: Lite<WorkflowEntity>;
+    bpmnId: string;
+    name: string;
+    subWorkflow: Lite<WorkflowEntity>;
 }
 
 export interface CaseEntityPack {
@@ -618,46 +618,46 @@ export interface CaseEntityPack {
 }
 
 export interface WorkflowScriptRunnerState {
-    ScriptRunnerPeriod: number;
-    Running: boolean;
-    IsCancelationRequested: boolean;
-    NextPlannedExecution: string;
-    QueuedItems: number;
-    CurrentProcessIdentifier: string;
+    scriptRunnerPeriod: number;
+    running: boolean;
+    isCancelationRequested: boolean;
+    nextPlannedExecution: string;
+    queuedItems: number;
+    currentProcessIdentifier: string;
 }
 
 export interface CaseActivityStats {
-    CaseActivity: Lite<CaseActivityEntity>;
-    PreviousActivity: Lite<CaseActivityEntity>;
-    WorkflowActivity: Lite<WorkflowActivityEntity>;
-    WorkflowActivityType: WorkflowActivityType;
-    SubWorkflow: Lite<WorkflowEntity>;
-    Notifications: number;
-    StartDate: string;
-    DoneDate?: string;
-    DoneType?: DoneType;
-    DoneBy: Lite<IUserEntity>;
-    Duration?: number;
-    AverageDuration?: number;
-    EstimatedDuration?: number;
+    caseActivity: Lite<CaseActivityEntity>;
+    previousActivity: Lite<CaseActivityEntity>;
+    workflowActivity: Lite<WorkflowActivityEntity>;
+    workflowActivityType: WorkflowActivityType;
+    subWorkflow: Lite<WorkflowEntity>;
+    notifications: number;
+    startDate: string;
+    doneDate?: string;
+    doneType?: DoneType;
+    doneBy: Lite<IUserEntity>;
+    duration?: number;
+    averageDuration?: number;
+    estimatedDuration?: number;
 
 }
 export interface CaseConnectionStats {
-    Connection?: Lite<WorkflowConnectionEntity>;
-    DoneDate: string;
-    DoneBy: Lite<IUserEntity>;
-    DoneType: DoneType;
+    connection?: Lite<WorkflowConnectionEntity>;
+    doneDate: string;
+    doneBy: Lite<IUserEntity>;
+    doneType: DoneType;
 
-    BpmnElementId?: string;
-    FromBpmnElementId: string;
-    ToBpmnElementId: string;
+    bpmnElementId?: string;
+    fromBpmnElementId: string;
+    toBpmnElementId: string;
 }
 
 export interface CaseFlow {
-    Activities: { [bpmnElementId: string]: CaseActivityStats[] };
-    Connections: { [bpmnElementId: string]: CaseConnectionStats[] };
-    Jumps: CaseConnectionStats[];
-    AllNodes: string[];
+    activities: { [bpmnElementId: string]: CaseActivityStats[] };
+    connections: { [bpmnElementId: string]: CaseConnectionStats[] };
+    jumps: CaseConnectionStats[];
+    allNodes: string[];
 }
 
 export interface WorkflowActivityMonitorRequest {
@@ -667,14 +667,14 @@ export interface WorkflowActivityMonitorRequest {
 }
     
 export interface WorkflowActivityStats {
-    WorkflowActivity: Lite<WorkflowActivityEntity>;
-    CaseActivityCount: number;
-    CustomValues: any[];
+    workflowActivity: Lite<WorkflowActivityEntity>;
+    caseActivityCount: number;
+    customValues: any[];
 }
 
 export interface WorkflowActivityMonitor {
-    Workflow: Lite<WorkflowEntity>;
-    CustomColumns: string[];
-    Activities: WorkflowActivityStats[];
+    workflow: Lite<WorkflowEntity>;
+    customColumns: string[];
+    activities: WorkflowActivityStats[];
 }
 

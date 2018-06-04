@@ -164,20 +164,20 @@ export module API {
 
 
 export interface ProcessLogicState {
-    MaxDegreeOfParallelism: number;
-    InitialDelayMiliseconds: number;
-    Running: boolean;
-    MachineName: string;
-    JustMyProcesses: boolean;
-    NextPlannedExecution: string;
-    Executing: ExecutionState[];
+    maxDegreeOfParallelism: number;
+    initialDelayMiliseconds: number;
+    running: boolean;
+    machineName: string;
+    justMyProcesses: boolean;
+    nextPlannedExecution: string;
+    executing: ExecutionState[];
 }
 
 export interface ExecutionState {
-    Process: Lite<ProcessEntity>;
-    State: ProcessState;
-    IsCancellationRequested: boolean;
-    Progress: number;
-    MachineName: string;
-    ApplicationName: string;
+    process: Lite<ProcessEntity>;
+    state: ProcessState;
+    isCancellationRequested: boolean;
+    progress: number;
+    machineName: string;
+    applicationName: string;
 }

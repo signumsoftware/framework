@@ -94,8 +94,8 @@ export interface DiffLogResult {
 export type DiffBlock = Array<DiffPair<Array<DiffPair<string>>>>;
 
 export interface DiffPair<T> {
-    Action: "Equal" | "Added" | "Removed";
-    Value: T ;
+    action: "Equal" | "Added" | "Removed";
+    value: T ;
 }
 
 export interface TimeMachineLinkProps extends React.HTMLAttributes<HTMLAnchorElement>, React.Props<EntityLink> {

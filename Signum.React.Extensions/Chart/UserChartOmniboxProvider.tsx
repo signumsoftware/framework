@@ -28,29 +28,29 @@ export default class UserChartOmniboxProvider extends OmniboxProvider<UserChartO
 
         array.push(this.icon());
 
-        this.renderMatch(result.ToStrMatch, array);
+        this.renderMatch(result.toStrMatch, array);
 
         return array;
     }
 
     navigateTo(result: UserChartOmniboxResult) {
 
-        if (result.UserChart == undefined)
+        if (result.userChart == undefined)
             return undefined;
 
-        return Navigator.API.fetchAndForget(result.UserChart)
+        return Navigator.API.fetchAndForget(result.userChart)
             .then(a => UserChartClient.Converter.toChartRequest(a, undefined))
-            .then(cr => ChartClient.Encoder.chartPath(cr, result.UserChart));
+            .then(cr => ChartClient.Encoder.chartPath(cr, result.userChart));
     }
 
     toString(result: UserChartOmniboxResult) {
-        return "\"{0}\"".formatWith(result.ToStrMatch.Text);
+        return "\"{0}\"".formatWith(result.toStrMatch.text);
     }
 }
 
 interface UserChartOmniboxResult extends OmniboxResult {
-    ToStr: string;
-    ToStrMatch: OmniboxMatch;
+    toStr: string;
+    toStrMatch: OmniboxMatch;
     
-    UserChart: Lite<UserChartEntity>;
+    userChart: Lite<UserChartEntity>;
 }

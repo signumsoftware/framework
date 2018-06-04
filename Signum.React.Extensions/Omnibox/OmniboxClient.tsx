@@ -41,15 +41,15 @@ export interface SpecialOmniboxAction {
 
 
 export interface HelpOmniboxResult extends OmniboxResult {
-    Text: string;
-    ReferencedTypeName: string;
+    text: string;
+    referencedTypeName: string;
 }
 
 
 export function renderItem(result: OmniboxResult): React.ReactChild {
-    const items = result.ResultTypeName == "HelpOmniboxResult" ?
+    const items = result.resultTypeName == "HelpOmniboxResult" ?
         renderHelpItem(result as HelpOmniboxResult) :
-        getProvider(result.ResultTypeName).renderItem(result);
+        getProvider(result.resultTypeName).renderItem(result);
     return React.createElement("span", undefined, ...items);
 }
 
@@ -57,10 +57,10 @@ function renderHelpItem(help: HelpOmniboxResult): React.ReactNode[] {
 
     const result: React.ReactNode[] = [];
 
-    if (help.ReferencedTypeName)
-        result.push(getProvider(help.ReferencedTypeName).icon());
+    if (help.referencedTypeName)
+        result.push(getProvider(help.referencedTypeName).icon());
 
-    const str = help.Text
+    const str = help.text
         .replaceAll("(", "<strong>")
         .replaceAll(")", "</strong>");
 
@@ -71,14 +71,14 @@ function renderHelpItem(help: HelpOmniboxResult): React.ReactNode[] {
 
 export function navigateTo(result: OmniboxResult) {
 
-    if (result.ResultTypeName == "HelpOmniboxResult")
+    if (result.resultTypeName == "HelpOmniboxResult")
         return undefined;
 
-    return getProvider(result.ResultTypeName).navigateTo(result);
+    return getProvider(result.resultTypeName).navigateTo(result);
 }
 
 export function toString(result: OmniboxResult): string {
-    return getProvider(result.ResultTypeName).toString(result);
+    return getProvider(result.resultTypeName).toString(result);
 }
 
 function getProvider(resultTypeName: string) {
@@ -113,17 +113,17 @@ export abstract class OmniboxProvider<T extends OmniboxResult> {
 
         let last = 0;
         let m: RegExpExecArray;
-        while (m = regex.exec(match.BoldMask)!) {
+        while (m = regex.exec(match.boldMask)!) {
             if (m.index > last)
-                array.push(<span>{match.Text.substr(last, m.index - last) }</span>);
+                array.push(<span>{match.text.substr(last, m.index - last) }</span>);
 
-            array.push(<strong>{match.Text.substr(m.index, m[0].length) }</strong>)
+            array.push(<strong>{match.text.substr(m.index, m[0].length) }</strong>)
 
             last = m.index + m[0].length;
         }
 
-        if (last < match.Text.length)
-            array.push(<span>{match.Text.substr(last) }</span>);
+        if (last < match.text.length)
+            array.push(<span>{match.text.substr(last) }</span>);
     }
 
     coloredSpan(text: string, colorName: string): React.ReactChild {
@@ -137,14 +137,14 @@ export abstract class OmniboxProvider<T extends OmniboxResult> {
 
 
 export interface OmniboxResult {
-    ResultTypeName: string;
-    Distance: number;
+    resultTypeName: string;
+    distance: number;
 }
 
 export interface OmniboxMatch {
-    Distance: number;
-    Text: string;
-    BoldMask: string;
+    distance: number;
+    text: string;
+    boldMask: string;
 }
 
 

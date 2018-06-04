@@ -163,8 +163,8 @@ export namespace API {
 
     export function getTrainingState(lite: Lite<PredictorEntity>): Promise<TrainingProgress> {
         return ajaxGet<TrainingProgress>({ url: `~/api/predictor/trainingProgress/${lite.id}` }).then(tp => {
-            if (tp.EpochProgresses)
-                tp.EpochProgressesParsed = tp.EpochProgresses.map(p => fromObjectArray(p));
+            if (tp.epochProgresses)
+                tp.epochProgressesParsed = tp.epochProgresses.map(p => fromObjectArray(p));
             return tp;
         });
     }
@@ -187,34 +187,34 @@ export namespace API {
 }
 
 export interface TrainingProgress {
-    Message?: string;
-    Progress?: number;
-    State: PredictorState;
-    Running: boolean;
+    message?: string;
+    progress?: number;
+    state: PredictorState;
+    running: boolean;
 
-    EpochProgresses?: Array<(number | undefined)[]>;
-    EpochProgressesParsed?: Array<EpochProgress>;
+    epochProgresses?: Array<(number | undefined)[]>;
+    epochProgressesParsed?: Array<EpochProgress>;
 }
 
 export interface EpochProgress {
-    Ellapsed: number;
-    TrainingExamples: number;
-    Epoch: number;
-    LossTraining: number;
-    EvaluationTraining: number;
-    LossValidation?: number;
-    EvaluationValidation?: number;
+    ellapsed: number;
+    trainingExamples: number;
+    epoch: number;
+    lossTraining: number;
+    evaluationTraining: number;
+    lossValidation?: number;
+    evaluationValidation?: number;
 }
 
 function fromObjectArray(array: (number | undefined)[]): EpochProgress {
     return {
-        Ellapsed: array[0]!,
-        TrainingExamples: array[1]!,
-        Epoch: array[2]!,
-        LossTraining: array[3]!,
-        EvaluationTraining: array[4]!,
-        LossValidation: array[5],
-        EvaluationValidation: array[6],
+        ellapsed: array[0]!,
+        trainingExamples: array[1]!,
+        epoch: array[2]!,
+        lossTraining: array[3]!,
+        evaluationTraining: array[4]!,
+        lossValidation: array[5],
+        evaluationValidation: array[6],
     }
 }
 

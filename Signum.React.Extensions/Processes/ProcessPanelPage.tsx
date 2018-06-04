@@ -56,24 +56,24 @@ export default class ProcessPanelPage extends React.Component<ProcessPanelProps,
             <div>
                 <h2>ProcessLogic state</h2>
                 <div className="btn-toolbar">
-                    {s.Running && <a href="#" className="sf-button btn btn-light active" style={{ color: "red" }} onClick={this.handleStop}>Stop</a> }
-                    {!s.Running && <a href="#" className="sf-button btn btn-light" style={{ color: "green" }} onClick={this.handleStart}>Start</a> }
+                    {s.running && <a href="#" className="sf-button btn btn-light active" style={{ color: "red" }} onClick={this.handleStop}>Stop</a> }
+                    {!s.running && <a href="#" className="sf-button btn btn-light" style={{ color: "green" }} onClick={this.handleStart}>Start</a> }
                 </div >
                 <div id="processMainDiv">
                     <br />
                     State: <strong>
-                        {s.Running ?
+                        {s.running ?
                             <span style={{ color: "Green" }}> RUNNING </span> :
                             <span style={{ color: "Red" }}> STOPPED </span>
                         }</strong>
                     <br />
-                    JustMyProcesses: {s.JustMyProcesses.toString()}
+                    JustMyProcesses: {s.justMyProcesses.toString()}
                     <br />
-                    MaxDegreeOfParallelism: { s.MaxDegreeOfParallelism}
+                    MaxDegreeOfParallelism: { s.maxDegreeOfParallelism}
                     <br />
-                    InitialDelayMiliseconds: { s.InitialDelayMiliseconds }
+                    InitialDelayMiliseconds: { s.initialDelayMiliseconds }
                     <br />
-                    NextPlannedExecution: { s.NextPlannedExecution || "-None-" }
+                    NextPlannedExecution: { s.nextPlannedExecution || "-None-" }
                     <br />
                     <table className="table">
                         <thead>
@@ -96,17 +96,17 @@ export default class ProcessPanelPage extends React.Component<ProcessPanelProps,
                         <tbody>
                             <tr>
                                 <td colSpan={4}>
-                                    <b> { s.Executing.length } processes executing in { s.MachineName }</b>
+                                    <b> { s.executing.length } processes executing in { s.machineName }</b>
                                 </td>
                             </tr>
-                            { s.Executing.map((item, i) =>
+                            { s.executing.map((item, i) =>
                                 <tr key={i}>
-                                    <td> <EntityLink lite={item.Process} inSearch={true} /> </td>
-                                    <td> { item.State } </td>
-                                    <td> { numbro(item.Progress).format("0.00 %") } </td>
-                                    <td> { item.MachineName } </td>
-                                    <td> { item.ApplicationName } </td>
-                                    <td> { item.IsCancellationRequested } </td>
+                                    <td> <EntityLink lite={item.process} inSearch={true} /> </td>
+                                    <td> { item.state } </td>
+                                    <td> { numbro(item.progress).format("0.00 %") } </td>
+                                    <td> { item.machineName } </td>
+                                    <td> { item.applicationName } </td>
+                                    <td> { item.isCancellationRequested } </td>
                                 </tr>
                             ) }
                         </tbody>
