@@ -17,7 +17,7 @@ export default class ValueUserQueryListPart extends React.Component<{ ctx: TypeC
         const ctx = this.props.ctx.subCtx({ formGroupStyle: "SrOnly", placeholderLabels: true });
         
         return (
-            <div className="form-inline repeater-inline">
+            <div className="form-inline">
                 <EntityRepeater ctx={ctx.subCtx(p => p.userQueries)} getComponent={ctx => this.renderUserQuery(ctx as TypeContext<ValueUserQueryElementEmbedded>)} />
             </div>
         );
@@ -25,7 +25,7 @@ export default class ValueUserQueryListPart extends React.Component<{ ctx: TypeC
 
     renderUserQuery = (tc: TypeContext<ValueUserQueryElementEmbedded>) => {
         return (
-            <div className="form-inline repeater-inline">
+            <div className="form-inline">
                 <ValueLine ctx={tc.subCtx(cuq => cuq.label) }  />
                 &nbsp;
                 <EntityLine ctx={tc.subCtx(cuq => cuq.userQuery) }  formGroupHtmlAttributes={{ style: { maxWidth: "300px" } }} />

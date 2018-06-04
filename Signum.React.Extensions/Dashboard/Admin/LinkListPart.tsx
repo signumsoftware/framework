@@ -18,7 +18,7 @@ export default class ValueSearchControlPart extends React.Component<{ ctx: TypeC
         const ctx = this.props.ctx.subCtx({ formGroupStyle: "SrOnly", placeholderLabels: true });
         
         return (
-            <div className="form-inline repeater-inline">
+            <div className="form-inline">
                 <EntityRepeater ctx={ctx.subCtx(p => p.links) } getComponent={this.renderLink}/>
             </div>
         );

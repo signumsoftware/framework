@@ -134,10 +134,11 @@ namespace Signum.Entities.Alerts
     [Serializable, EntityKind(EntityKind.String, EntityData.Master)]
     public class AlertTypeEntity : SemiSymbol
     {
-        private AlertTypeEntity() { }
+        public AlertTypeEntity()
+        {
+        }
 
-        private AlertTypeEntity(Type declaringType, string fieldName)
-            : base(declaringType, fieldName)
+        public AlertTypeEntity(Type declaringType, string fieldName) : base(declaringType, fieldName)
         {
         }
     }
