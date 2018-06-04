@@ -23,7 +23,7 @@ namespace Signum.React.Dynamic
     public class DynamicTypeConditionController : ApiController
     {
         [Route("api/dynamic/typeCondition/test"), HttpPost]
-        public DynamicTypeConditionTestResponse Test(DynamicTypeConditionTestRequest request)
+        public DynamicTypeConditionTestResponse Test([FromBody]DynamicTypeConditionTestRequest request)
         {
             IDynamicTypeConditionEvaluator evaluator;
             try

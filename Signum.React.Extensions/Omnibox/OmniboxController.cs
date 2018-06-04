@@ -20,7 +20,7 @@ namespace Signum.React.Omnibox
     public class OmniboxController : ApiController
     {
         [Route("api/omnibox"), HttpPost]
-        public List<OmniboxResult> OmniboxResults(OmniboxRequest request)
+        public List<OmniboxResult> OmniboxResults([FromBody]OmniboxRequest request)
         {
             ReactSpecialOmniboxGenerator.ClientGenerator = new SpecialOmniboxGenerator<ReactSpecialOmniboxAction>()
             {

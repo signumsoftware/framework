@@ -34,7 +34,7 @@ namespace Signum.React.Word
     public class WordController : ApiController
     {
         [Route("api/word/createReport"), HttpPost]
-        public HttpResponseMessage View(CreateWordReportRequest request)
+        public HttpResponseMessage View([FromBody]CreateWordReportRequest request)
         {
             var template = request.template.Retrieve();
             var model = request.entity ?? request.lite.Retrieve();
@@ -54,7 +54,7 @@ namespace Signum.React.Word
 #pragma warning restore IDE1006 // Naming Styles
 
         [Route("api/word/constructorType"), HttpPost]
-        public string GetConstructorType(SystemWordTemplateEntity systemWordTemplate)
+        public string GetConstructorType([FromBody]SystemWordTemplateEntity systemWordTemplate)
         {
             var type = SystemWordTemplateLogic.GetEntityType(systemWordTemplate.ToType());
 
@@ -62,7 +62,7 @@ namespace Signum.React.Word
         }
 
         [Route("api/word/wordTemplates"), HttpPost]
-        public List<Lite<WordTemplateEntity>> GetWordTemplates(string queryKey, WordTemplateVisibleOn visibleOn, Lite<Entity> lite)
+        public List<Lite<WordTemplateEntity>> GetWordTemplates(string queryKey, WordTemplateVisibleOn visibleOn, [FromBody]Lite<Entity> lite)
         {
             object type = QueryLogic.ToQueryName(queryKey);
 

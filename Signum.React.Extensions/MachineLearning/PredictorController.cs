@@ -95,7 +95,7 @@ namespace Signum.React.MachineLearning
         }
 
         [Route("api/predict/get/{predictorId}"), HttpPost]
-        public PredictRequestTS GetPredict(string predictorId, Dictionary<string, object> mainKeys)
+        public PredictRequestTS GetPredict(string predictorId, [FromBody]Dictionary<string, object> mainKeys)
         {
             var p = Lite.ParsePrimaryKey<PredictorEntity>(predictorId);
 
@@ -113,7 +113,7 @@ namespace Signum.React.MachineLearning
         }
 
         [Route("api/predict/update"), HttpPost]
-        public PredictRequestTS UpdatePredict(PredictRequestTS request)
+        public PredictRequestTS UpdatePredict([FromBody]PredictRequestTS request)
         {
             PredictorPredictContext pctx = PredictorPredictLogic.GetPredictContext(request.predictor);
 

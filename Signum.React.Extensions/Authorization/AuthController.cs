@@ -115,7 +115,7 @@ namespace Signum.React.Authorization
         }
 
         [Route("api/auth/ChangePassword"), HttpPost]
-        public ActionResult<LoginResponse> ChangePassword(ChangePasswordRequest request)
+        public ActionResult<LoginResponse> ChangePassword([FromBody]ChangePasswordRequest request)
         {
             if (string.IsNullOrEmpty(request.oldPassword))
                 return ModelError("oldPassword", AuthMessage.PasswordMustHaveAValue.NiceToString());

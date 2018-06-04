@@ -38,7 +38,7 @@ namespace Signum.React.UserQueries
         }
 
         [Route("api/userQueries/fromQueryRequest"), HttpPost]
-        public UserQueryEntity FromQueryRequest(CreateRequest request)
+        public UserQueryEntity FromQueryRequest([FromBody]CreateRequest request)
         {
             var qr = request.queryRequest.ToQueryRequest();
             var qd = DynamicQueryManager.Current.QueryDescription(qr.QueryName);

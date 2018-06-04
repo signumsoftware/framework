@@ -311,7 +311,7 @@ namespace Signum.React.Translation
 
 
         [Route("api/translation/save"), HttpPost]
-        public void SaveTypes(string assembly, string culture, AssemblyResultTS result)
+        public void SaveTypes(string assembly, string culture, [FromBody]AssemblyResultTS result)
         {
             var currentAssembly = AssembliesToLocalize().Single(a => a.GetName().Name == assembly);
 

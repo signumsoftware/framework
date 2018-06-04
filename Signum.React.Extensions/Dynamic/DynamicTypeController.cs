@@ -24,7 +24,7 @@ namespace Signum.React.Dynamic
     public class DynamicTypeController : ApiController
     {
         [Route("api/dynamic/type/propertyType"), HttpPost]
-        public string CodePropertyType(DynamicProperty property)
+        public string CodePropertyType([FromBody]DynamicProperty property)
         {
             return DynamicTypeLogic.GetPropertyType(property);
           

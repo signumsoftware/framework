@@ -23,13 +23,13 @@ namespace Signum.React.Dynamic
     public class DynamicValidationController : ApiController
     {
         [Route("api/dynamic/validation/parentType"), HttpPost]
-        public string ParentType(PropertyRouteEntity pr)
+        public string ParentType([FromBody]PropertyRouteEntity pr)
         {
             return pr.ToPropertyRoute().Parent.Type.Name;
         }
 
         [Route("api/dynamic/validation/test"), HttpPost]
-        public DynamicValidationTestResponse Test(DynamicValidationTestRequest request)
+        public DynamicValidationTestResponse Test([FromBody]DynamicValidationTestRequest request)
         {
             IDynamicValidationEvaluator evaluator;
             try

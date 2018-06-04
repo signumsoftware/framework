@@ -29,7 +29,7 @@ namespace Signum.React.UserAssets
     public class UserAssetController : ApiController
     {
         [Route("api/userAssets/parseFilters"), HttpPost]
-        public List<FilterTS> ParseFilters(ParseFiltersRequest request)
+        public List<FilterTS> ParseFilters([FromBody]ParseFiltersRequest request)
         {
             var queryName = QueryLogic.ToQueryName(request.queryKey);
             var qd = DynamicQueryManager.Current.QueryDescription(queryName);

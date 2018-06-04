@@ -22,7 +22,7 @@ namespace Signum.React.Processes
         }
 
         [Route("api/printing/createProcess"), HttpPost]
-        public ProcessEntity Stats(FileTypeSymbol fileType)
+        public ProcessEntity Stats([FromBody]FileTypeSymbol fileType)
         {
             return PrintingLogic.CreateProcess(fileType);
         }

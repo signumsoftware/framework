@@ -46,7 +46,7 @@ namespace Signum.React.Translation
         }
 
         [Route("api/culture/currentCulture"), HttpPost, AllowAnonymous]
-        public void SetCurrentCulture(Lite<CultureInfoEntity> culture)
+        public void SetCurrentCulture([FromBody]Lite<CultureInfoEntity> culture)
         {
             var ci = ExecutionMode.Global().Using(_ => culture.Retrieve().ToCultureInfo());
 

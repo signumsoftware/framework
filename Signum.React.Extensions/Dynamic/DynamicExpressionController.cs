@@ -28,7 +28,7 @@ namespace Signum.React.Dynamic
     public class DynamicExpressionController : ApiController
     {
         [Route("api/dynamic/expression/test"), HttpPost]
-        public DynamicExpressionTestResponse Test(DynamicExpressionTestRequest request)
+        public DynamicExpressionTestResponse Test([FromBody]DynamicExpressionTestRequest request)
         {
             IDynamicExpressionEvaluator evaluator;
             var de = request.dynamicExpression;

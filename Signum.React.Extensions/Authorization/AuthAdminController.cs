@@ -36,7 +36,7 @@ namespace Signum.React.Authorization
         }
 
         [Route("api/authAdmin/permissionRules"), HttpPost, ValidateModelFilter]
-        public void SetPermissionRules(PermissionRulePack rules)
+        public void SetPermissionRules([FromBody]PermissionRulePack rules)
         {
             BasicPermission.AdminRules.AssertAuthorized();
             PermissionAuthLogic.SetPermissionRules(rules);
@@ -54,7 +54,7 @@ namespace Signum.React.Authorization
         }
 
         [Route("api/authAdmin/typeRules"), HttpPost, ValidateModelFilter]
-        public void SetTypeRules(TypeRulePack rules)
+        public void SetTypeRules([FromBody]TypeRulePack rules)
         {
             BasicPermission.AdminRules.AssertAuthorized();
             TypeAuthLogic.SetTypeRules(rules);
@@ -72,7 +72,7 @@ namespace Signum.React.Authorization
         }
 
         [Route("api/authAdmin/operationRules"), HttpPost, ValidateModelFilter]
-        public void SetOperationRules(OperationRulePack rules)
+        public void SetOperationRules([FromBody]OperationRulePack rules)
         {
             BasicPermission.AdminRules.AssertAuthorized();
             OperationAuthLogic.SetOperationRules(rules);
@@ -90,7 +90,7 @@ namespace Signum.React.Authorization
         }
 
         [Route("api/authAdmin/propertyRules"), HttpPost, ValidateModelFilter]
-        public void SetPropertyRule(PropertyRulePack rules)
+        public void SetPropertyRule([FromBody]PropertyRulePack rules)
         {
             BasicPermission.AdminRules.AssertAuthorized();
             PropertyAuthLogic.SetPropertyRules(rules);
@@ -108,7 +108,7 @@ namespace Signum.React.Authorization
         }
 
         [Route("api/authAdmin/queryRules"), HttpPost, ValidateModelFilter]
-        public void SetQueryRules(QueryRulePack rules)
+        public void SetQueryRules([FromBody]QueryRulePack rules)
         {
             BasicPermission.AdminRules.AssertAuthorized();
             QueryAuthLogic.SetQueryRules(rules);

@@ -26,7 +26,7 @@ namespace Signum.React.TypeHelp
     {
 
         [Route("api/typeHelp/autocompleteEntityCleanType"), HttpPost]
-        public List<string> AutocompleteEntityCleanType(AutocompleteEntityCleanTypeRequest request)
+        public List<string> AutocompleteEntityCleanType([FromBody]AutocompleteEntityCleanTypeRequest request)
         {
             Schema s = Schema.Current;
             var types = TypeLogic.NameToType
@@ -45,7 +45,7 @@ namespace Signum.React.TypeHelp
         }
 
         [Route("api/typeHelp/autocompleteType"), HttpPost]
-        public List<string> AutocompleteType(AutocompleteTypeRequest request) //Not comprehensive, just useful
+        public List<string> AutocompleteType([FromBody]AutocompleteTypeRequest request) //Not comprehensive, just useful
         {
             var types = GetTypes(request);
 

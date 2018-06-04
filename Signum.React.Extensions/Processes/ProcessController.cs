@@ -13,7 +13,7 @@ namespace Signum.React.Processes
     public class ProcessController : ApiController
     {
         [Route("api/processes/constructFromMany"), HttpPost, ValidateModelFilter]
-        public EntityPackTS ConstructFromMany(OperationController.MultiOperationRequest request)
+        public EntityPackTS ConstructFromMany([FromBody]OperationController.MultiOperationRequest request)
         {
             var type = request.type == null ? null : TypeLogic.GetType(request.type);
 

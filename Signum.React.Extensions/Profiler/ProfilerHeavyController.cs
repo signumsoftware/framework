@@ -141,7 +141,7 @@ namespace Signum.React.Profiler
         }
 
         [Route("api/profilerHeavy/upload"), HttpPost]
-        public void Upload(FileUpload file)
+        public void Upload([FromBody]FileUpload file)
         {
             using (MemoryStream sr = new MemoryStream(file.content))
             {
