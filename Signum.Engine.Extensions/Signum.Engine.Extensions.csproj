@@ -293,6 +293,7 @@
     <Content Include="Chart\ChartScripts\MultiColumns.xml" />
     <Content Include="Chart\ChartScripts\MultiLines.xml" />
     <Content Include="Chart\ChartScripts\ParallelCordiantes.xml" />
+    <Content Include="Chart\ChartScripts\Heatmap.xml" />
     <Content Include="Chart\ChartScripts\Pie.xml" />
     <Content Include="Chart\ChartScripts\Punchcard.xml" />
     <Content Include="Chart\ChartScripts\Scatterplot.xml" />
