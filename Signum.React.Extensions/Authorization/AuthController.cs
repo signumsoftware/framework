@@ -62,9 +62,9 @@ namespace Signum.React.Authorization
                     UserTicketServer.SaveCookie(this.ActionContext);
                 }
 
-                AuthServer.OnUserPreLogin(this, user);
+                AuthServer.OnUserPreLogin(this.ActionContext, user);
 
-                AuthServer.AddUserSession(this, user);
+                AuthServer.AddUserSession(this.ActionContext, user);
 
                 string message = AuthLogic.OnLoginMessage();
 
@@ -89,7 +89,7 @@ namespace Signum.React.Authorization
         {
             using (ScopeSessionFactory.OverrideSession())
             {
-                if (!UserTicketServer.LoginFromCookie(this))
+                if (!UserTicketServer.LoginFromCookie(this.ActionContext))
                     return null;
 
                 string message = AuthLogic.OnLoginMessage();

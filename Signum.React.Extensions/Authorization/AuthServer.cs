@@ -27,8 +27,8 @@ namespace Signum.React.Authorization
     {
         public static bool MergeInvalidUsernameAndPasswordMessages = false;
 
-        public static Action<Controller, UserEntity> UserPreLogin;
-        public static Action<ApiController, UserEntity> UserLogged;
+        public static Action<ActionContext, UserEntity> UserPreLogin;
+        public static Action<ActionContext, UserEntity> UserLogged;
         public static Action UserLoggingOut;
         
 
@@ -148,26 +148,27 @@ namespace Signum.React.Authorization
                 Omnibox.OmniboxServer.IsNavigable += type => TypeAuthLogic.GetAllowed(type).MaxUI() >= TypeAllowedBasic.Read;
 
             if (SessionLogLogic.IsStarted)
-                AuthServer.UserLogged +=  (ApiController controller, UserEntity user) =>
+                AuthServer.UserLogged +=  (ActionContext ac, UserEntity user) =>
                 {
+                    Microsoft.AspNetCore.Http.HttpRequest re = ac.HttpContext.Request;
                     SessionLogLogic.SessionStart(
-                        controller.Request.Headers.Host,
-                        controller.Request.Headers.UserAgent.ToString());
+                        re.Host.ToString(),
+                        re.Headers["User-Agent"].FirstOrDefault());
                 };
             
             SchemaMap.GetColorProviders += GetMapColors;
         }
         
-        public static void OnUserPreLogin(Controller controller, UserEntity user)
+        public static void OnUserPreLogin(ActionContext ac, UserEntity user)
         {
-            AuthServer.UserPreLogin?.Invoke(controller, user);
+            AuthServer.UserPreLogin?.Invoke(ac, user);
         }
 
-        public static void AddUserSession(ApiController controller, UserEntity user)
+        public static void AddUserSession(ActionContext ac, UserEntity user)
         {
             UserEntity.Current = user;
 
-            AuthServer.UserLogged?.Invoke(controller, user);
+            AuthServer.UserLogged?.Invoke(ac, user);
         }
 
         static MapColorProvider[] GetMapColors()

@@ -9,6 +9,7 @@ using Signum.React.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Http;
+using Signum.React.ApiControllers;
 
 namespace Signum.React.Authorization
 {
@@ -17,7 +18,7 @@ namespace Signum.React.Authorization
         public static Func<string> OnCookieName = () => "sfUser";
         public static string CookieName { get { return OnCookieName(); } }
 
-        public static bool LoginFromCookie(ApiController controller)
+        public static bool LoginFromCookie(ActionContext ac)
         {
             using (AuthLogic.Disable())
             {
@@ -30,7 +31,7 @@ namespace Signum.React.Authorization
 
                     UserEntity user = UserTicketLogic.UpdateTicket(httpConnection.RemoteIpAddress.ToString(), ref ticketText);
 
-                    AuthServer.OnUserPreLogin(controller, user);
+                    AuthServer.OnUserPreLogin(ac, user);
 
                     ac.HttpContext.Response.Cookies.Append(CookieName, ticketText, new CookieOptions
                     {
@@ -38,7 +39,7 @@ namespace Signum.React.Authorization
                         Domain = ac.HttpContext.Request.Host.ToString(),
                     });
 
-                    AuthServer.AddUserSession(controller, user);
+                    AuthServer.AddUserSession(ac, user);
                     return true;
                 }
                 catch

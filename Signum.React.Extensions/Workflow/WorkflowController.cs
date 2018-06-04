@@ -25,7 +25,7 @@ using Signum.Entities.Reflection;
 
 namespace Signum.React.Workflow
 {
-    public class WorkflowController : ApiController
+    public class WorkflowController : Controller
     {
         [Route("api/workflow/fetchForViewing/{caseActivityId}"), HttpGet]
         public EntityPackWorkflow GetEntity(string caseActivityId)
@@ -103,7 +103,7 @@ namespace Signum.React.Workflow
 
 
         [Route("api/workflow/save"), HttpPost, ValidateModelFilter]
-        public EntityPackWithIssues SaveWorkflow(EntityOperationRequest request)
+        public ActionResult<EntityPackWithIssues> SaveWorkflow(EntityOperationRequest request)
         {
             WorkflowEntity entity;
             List<WorkflowIssue> issuesContainer = new List<WorkflowIssue>();
@@ -114,9 +114,9 @@ namespace Signum.React.Workflow
             catch (IntegrityCheckException ex)
             {
                 GraphExplorer.SetValidationErrors(GraphExplorer.FromRoot(request.entity), ex);
-                this.Validate(request, "request");
-                this.ModelState.AddModelError("workflowIssues", JsonConvert.SerializeObject(issuesContainer, GlobalConfiguration.Configuration.Formatters.JsonFormatter.SerializerSettings));
-                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, this.ModelState));
+                this.TryValidateModel(request, "request");
+                this.ModelState.AddModelError("workflowIssues", JsonConvert.SerializeObject(issuesContainer, SignumServer.JsonSerializerSettings));
+                return BadRequest(this.ModelState);
             }
 
             return new EntityPackWithIssues { entityPack = SignumServer.GetEntityPack(entity), issues = issuesContainer };
