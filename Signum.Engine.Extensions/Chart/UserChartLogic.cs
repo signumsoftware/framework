@@ -56,12 +56,12 @@ namespace Signum.Engine.Chart
                 UserCharts = sb.GlobalLazy(() => Database.Query<UserChartEntity>().ToDictionary(a => a.ToLite()),
                  new InvalidateWith(typeof(UserChartEntity)));
 
-                UserChartsByQuery = sb.GlobalLazy(() => UserCharts.Value.Values.Where(a => a.EntityType == null).GroupToDictionary(a => a.Query.ToQueryName(), a => a.ToLite()),
+                UserChartsByQuery = sb.GlobalLazy(() => UserCharts.Value.Values.Where(a => a.EntityType == null).SelectCatch(uc => KVP.Create(uc.Query.ToQueryName(), uc.ToLite())).GroupToDictionary(),
                     new InvalidateWith(typeof(UserChartEntity)));
 
                 UserChartsByTypeForQuickLinks = sb.GlobalLazy(() => UserCharts.Value.Values.Where(a => a.EntityType != null && !a.HideQuickLink)
-                .SelectCatch(a => new { Type = TypeLogic.IdToType.GetOrThrow(a.EntityType.Id), Lite = a.ToLite() })
-                .GroupToDictionary(a => a.Type, a => a.Lite),
+                .SelectCatch(a => KVP.Create(TypeLogic.IdToType.GetOrThrow(a.EntityType.Id), a.ToLite()))
+                .GroupToDictionary(),
                     new InvalidateWith(typeof(UserChartEntity)));
             }
         }

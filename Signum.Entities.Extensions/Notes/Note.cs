@@ -65,10 +65,11 @@ namespace Signum.Entities.Notes
     [Serializable, EntityKind(EntityKind.String, EntityData.Master)]
     public class NoteTypeEntity : SemiSymbol
     {
-        private NoteTypeEntity() { }
+        public NoteTypeEntity()
+        {
+        }
 
-        private NoteTypeEntity(Type declaringType, string fieldName)
-            : base(declaringType, fieldName)
+        public NoteTypeEntity(Type declaringType, string fieldName) : base(declaringType, fieldName)
         {
         }
     }

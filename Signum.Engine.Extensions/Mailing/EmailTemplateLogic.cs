@@ -104,7 +104,7 @@ namespace Signum.Engine.Mailing
                 
                 TemplatesByQueryName = sb.GlobalLazy(() =>
                 {
-                    return EmailTemplatesLazy.Value.Values.GroupToDictionary(a => a.Query.ToQueryName());
+                    return EmailTemplatesLazy.Value.Values.SelectCatch(et => KVP.Create(et.Query.ToQueryName(), et)).GroupToDictionary();
                 }, new InvalidateWith(typeof(EmailTemplateEntity)));
                 
                 SystemEmailLogic.Start(sb, dqm);
