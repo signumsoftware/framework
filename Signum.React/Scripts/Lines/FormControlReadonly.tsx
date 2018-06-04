@@ -26,7 +26,7 @@ export class FormControlReadonly extends React.Component<FormControlReadonlyProp
 
         } else {
             return (
-                <input type="text" style={{ pointerEvents: "none" }} readOnly {...attrs} className={classes(ctx.formControlClass, attrs && attrs.className, this.props.className)}
+                <input type="text" readOnly {...attrs} className={classes(ctx.formControlClass, attrs && attrs.className, this.props.className)}
                     value={React.Children.toArray(this.props.children)[0] as string || ""} />
             );
         }
