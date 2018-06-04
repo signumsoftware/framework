@@ -41,13 +41,13 @@ namespace Signum.React.ApiControllers
         }
 
         [Route("api/entityPackEntity"), HttpPost]
-        public EntityPackTS GetEntityPackEntity(Entity entity)
+        public EntityPackTS GetEntityPackEntity([FromBody]Entity entity)
         { 
             return SignumServer.GetEntityPack(entity);
         }
 
         [Route("api/entityToStrings"), HttpPost]
-        public string[] EntityToStrings(Lite<Entity>[] lites)
+        public string[] EntityToStrings([FromBody]Lite<Entity>[] lites)
         {
             if (lites == null || lites.Length == 0)
                 throw new ArgumentNullException(nameof(lites));
@@ -69,7 +69,7 @@ namespace Signum.React.ApiControllers
         }
 
         [Route("api/validateEntity"), HttpPost, ValidateModelFilter]
-        public void ValidateEntity(ModifiableEntity entity)
+        public void ValidateEntity([FromBody]ModifiableEntity entity)
         {
             return;
         }

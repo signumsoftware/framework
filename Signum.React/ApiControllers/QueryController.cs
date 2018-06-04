@@ -34,7 +34,7 @@ namespace Signum.React.ApiControllers
         }
 
         [Route("api/query/findLiteLikeWithFilters"), HttpPost, ProfilerActionSplitter("types")]
-        public async Task<List<Lite<Entity>>> FindLiteLikeWithFilters(AutocompleteQueryRequestTS request, CancellationToken token)
+        public async Task<List<Lite<Entity>>> FindLiteLikeWithFilters([FromBody]AutocompleteQueryRequestTS request, CancellationToken token)
         {
             var qn = QueryLogic.ToQueryName(request.queryKey);
             var qd = DynamicQueryManager.Current.QueryDescription(qn);
@@ -78,7 +78,7 @@ namespace Signum.React.ApiControllers
         }
 
         [Route("api/query/parseTokens"), HttpPost]
-        public List<QueryTokenTS> ParseTokens(ParseTokensRequest request)
+        public List<QueryTokenTS> ParseTokens([FromBody]ParseTokensRequest request)
         {
             var qn = QueryLogic.ToQueryName(request.queryKey);
             var qd = DynamicQueryManager.Current.QueryDescription(qn);
@@ -102,7 +102,7 @@ namespace Signum.React.ApiControllers
         }
 
         [Route("api/query/subTokens"), HttpPost]
-        public List<QueryTokenTS> SubTokens(SubTokensRequest request)
+        public List<QueryTokenTS> SubTokens([FromBody]SubTokensRequest request)
         {
             var qn = QueryLogic.ToQueryName(request.queryKey);
             var qd = DynamicQueryManager.Current.QueryDescription(qn);
@@ -123,14 +123,14 @@ namespace Signum.React.ApiControllers
         }
 
         [Route("api/query/executeQuery"), HttpPost, ProfilerActionSplitter]
-        public async Task<ResultTable> ExecuteQuery(QueryRequestTS request, CancellationToken token)
+        public async Task<ResultTable> ExecuteQuery([FromBody]QueryRequestTS request, CancellationToken token)
         {
             var result = await DynamicQueryManager.Current.ExecuteQueryAsync(request.ToQueryRequest(), token);
             return result;
         }
 
         [Route("api/query/entitiesWithFilter"), HttpPost, ProfilerActionSplitter]
-        public async Task<List<Lite<Entity>>> GetEntitiesWithFilter(QueryEntitiesRequestTS request, CancellationToken token)
+        public async Task<List<Lite<Entity>>> GetEntitiesWithFilter([FromBody]QueryEntitiesRequestTS request, CancellationToken token)
         {
             var qn = QueryLogic.ToQueryName(request.queryKey);
             var qd = DynamicQueryManager.Current.QueryDescription(qn);
@@ -145,7 +145,7 @@ namespace Signum.React.ApiControllers
         }
 
         [Route("api/query/queryCount"), HttpPost, ProfilerActionSplitter]
-        public async Task<object> QueryCount(QueryValueRequestTS request, CancellationToken token)
+        public async Task<object> QueryCount([FromBody]QueryValueRequestTS request, CancellationToken token)
         {
             return await DynamicQueryManager.Current.ExecuteQueryCountAsync(request.ToQueryCountRequest(), token);
         }

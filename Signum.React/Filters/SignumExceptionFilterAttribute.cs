@@ -56,6 +56,7 @@ namespace Signum.React.Filters
                 var error = new HttpError(context.Exception);
                 context.HttpContext.Response.StatusCode = (int)statusCode;
                 context.Result = new JsonResult(error);
+                context.ExceptionHandled = true;
             }
         }
 

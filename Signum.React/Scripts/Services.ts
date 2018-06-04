@@ -167,13 +167,14 @@ export module ThrowErrorFilter {
         return makeCall().then(response => {
             if (response.status >= 200 && response.status < 300) {
                 return response;
+            } else if (response.status == 400) {
+                return response.json().then<Response>((modelState: ModelState) => {
+                    throw new ValidationError(modelState);
+                });
             } else {
-                return response.json().then((json: WebApiHttpError) => {
-                    if (json.ModelState)
-                        throw new ValidationError(response.statusText, json);
-                    else if (json.Message)
-                        throw new ServiceError(response.statusText, response.status, json);
-                }) as any;
+                return response.json().then<Response>((error: WebApiHttpError) => {
+                    throw new ServiceError(error);
+                });
             }
         });
     }
@@ -236,13 +237,11 @@ export function b64toBlob(b64Data: string, contentType: string = "", sliceSize =
 
 export class ServiceError {
     constructor(
-        public statusText: string,
-        public status: number,
         public httpError: WebApiHttpError) {
     }
 
     get defaultIcon() {
-        switch (this.httpError.ExceptionType) {
+        switch (this.httpError.exceptionType) {
             case "UnauthorizedAccessException": return "glyphicon-lock";
             case "EntityNotFoundException": return "glyphicon-trash";
             case "UniqueKeyException": return "glyphicon-duplicate";
@@ -251,31 +250,23 @@ export class ServiceError {
     }
 
     toString() {
-        return this.httpError.Message;
+        return this.httpError.exceptionMessage;
     }
 }
 
 export interface WebApiHttpError {
-    Message: string;
-    ModelState?: { [member: string]: string[] }
-    ExceptionMessage?: string;
-    ExceptionType: string;
-    StackTrace?: string;
-    MessageDetail?: string;
-    ExceptionID?: string;
+    exceptionType: string;
+    exceptionMessage: string | null;
+    stackTrace: string | null;
+    exceptionId: string | null;
+    innerException: WebApiHttpError | null;
 }
 
 export class ValidationError  {
     modelState: ModelState;
-    message: string;
 
-    constructor(public statusText: string, json: WebApiHttpError) {
-        this.message = json.Message || "";
-        this.modelState = json.ModelState!;
-    }
-
-    toString() {
-        return this.statusText + "\r\n" + this.message;
+    constructor(modelState: ModelState) {
+        this.modelState = modelState;
     }
 }
 

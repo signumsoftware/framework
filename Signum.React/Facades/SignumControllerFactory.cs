@@ -16,8 +16,6 @@ namespace Signum.React
 
     public class SignumControllerFactory : IApplicationFeatureProvider<ControllerFeature>
     {
-        public static HashSet<Type> AllowedControllers { get; private set; } = new HashSet<Type>();
-        public static Dictionary<Assembly, List<string>> AllowedAreas { get; private set; } = new Dictionary<Assembly, List<string>>();
         public Assembly MainAssembly { get; set; }
 
         public SignumControllerFactory(Assembly mainAssembly) : base()
@@ -25,20 +23,17 @@ namespace Signum.React
             this.MainAssembly = mainAssembly;
         }
 
+        public static HashSet<Type> AllowedControllers { get; private set; } = new HashSet<Type>();
         public static void RegisterController<T>()
         {
             AllowedControllers.Add(typeof(T));
         }
-
-        public static void RegisterArea(MethodBase mb)
-        {
-            RegisterArea(mb.DeclaringType);
-        }
-
+        
+        public static Dictionary<Assembly, HashSet<string>> AllowedAreas { get; private set; } = new Dictionary<Assembly, HashSet<string>>();
+        public static void RegisterArea(MethodBase mb) => RegisterArea(mb.DeclaringType);
         public static void RegisterArea(Type type)
         {
-            AllowedControllers.AddRange(type.Assembly.ExportedTypes
-                .Where(c => (c.Namespace ?? "").StartsWith(type.Namespace) && typeof(ApiController).IsAssignableFrom(c)));
+            AllowedAreas.GetOrCreate(type.Assembly).Add(type.Namespace);
         }
 
         public void PopulateFeature(IEnumerable<ApplicationPart> parts, ControllerFeature feature)
@@ -47,7 +42,9 @@ namespace Signum.React
             (AllowedAreas.TryGetC(ti.Assembly)?.Any(ns => ti.Namespace.StartsWith(ns)) ?? false) ||
             AllowedControllers.Contains(ti.AsType()));
 
-            feature.Controllers.RemoveAll(ti => !allowed.Contains(ti));
+            var toRemove = feature.Controllers.Where(ti => !allowed.Contains(ti));
+
+            feature.Controllers.RemoveAll(ti => toRemove.Contains(ti));
         }
     }
 }
