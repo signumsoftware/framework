@@ -237,13 +237,15 @@ namespace Signum.Entities.DynamicQuery
             return new List<QueryToken>
             {
                 new NetPropertyToken(parent, ReflectionTools.GetPropertyInfo((DateTime dt)=>dt.Year), () => utc + QueryTokenMessage.Year.NiceToString()),
+                new NetPropertyToken(parent, ReflectionTools.GetMethodInfo((DateTime dt ) => dt.Quarter()), ()=> utc + QueryTokenMessage.Quarter.NiceToString()),
+                new DatePartStartToken(parent, QueryTokenMessage.QuarterStart),
                 new NetPropertyToken(parent, ReflectionTools.GetPropertyInfo((DateTime dt)=>dt.Month),() => utc + QueryTokenMessage.Month.NiceToString()),
                 new DatePartStartToken(parent, QueryTokenMessage.MonthStart),
-                new WeekNumberToken(parent),
+                new NetPropertyToken(parent, ReflectionTools.GetMethodInfo((DateTime dt ) => dt.WeekNumber()), ()=> utc + QueryTokenMessage.WeekNumber.NiceToString()),
                 new DatePartStartToken(parent, QueryTokenMessage.WeekStart),
                 new NetPropertyToken(parent, ReflectionTools.GetPropertyInfo((DateTime dt)=>dt.Day), () => utc + QueryTokenMessage.Day.NiceToString()),
-                new DayOfYearToken(parent),
-                new DayOfWeekToken(parent),
+                new NetPropertyToken(parent, ReflectionTools.GetPropertyInfo((DateTime dt)=>dt.DayOfYear), () => utc + QueryTokenMessage.DayOfYear.NiceToString()),
+                new NetPropertyToken(parent, ReflectionTools.GetPropertyInfo((DateTime dt)=>dt.DayOfWeek), () => utc + QueryTokenMessage.DayOfWeek.NiceToString()),
                 new DateToken(parent),
                 precission < DateTimePrecision.Hours ? null: new NetPropertyToken(parent, ReflectionTools.GetPropertyInfo((DateTime dt)=>dt.Hour), () => utc + QueryTokenMessage.Hour.NiceToString()),
                 precission < DateTimePrecision.Hours ? null: new DatePartStartToken(parent, QueryTokenMessage.HourStart),
@@ -470,6 +472,10 @@ namespace Signum.Entities.DynamicQuery
         Month,
         [Description("Month Start")]
         MonthStart,
+        [Description("Quarter")]
+        Quarter,
+        [Description("Quarter Start")]
+        QuarterStart,
         [Description("Week Start")]
         WeekStart,
         [Description("Hour Start")]
