@@ -160,6 +160,7 @@
     <Compile Include="Dynamic\DynamicViewController.cs" />
     <Compile Include="Dynamic\DynamicServer.cs" />
     <TypeScriptCompile Include="Basics\Templates\ScrollPanel.tsx" />
+    <TypeScriptCompile Include="Chart\Templates\GoogleMapStyles.ts" />
     <TypeScriptCompile Include="DiffLog\Templates\DiffDocument.tsx" />
     <TypeScriptCompile Include="DiffLog\Templates\TimeMachinePage.tsx" />
     <TypeScriptCompile Include="MachineLearning\Signum.Entities.MachineLearning.ts" />

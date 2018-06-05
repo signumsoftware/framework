@@ -1,7 +1,20 @@
 ﻿import * as d3 from "d3"
 import * as d3sc from "d3-scale-chromatic";
 import { ChartValue, ChartTable, ChartColumn, ChartRow } from "../ChartClient"
+import googleMapStyles from "./GoogleMapStyles"
 
+export function getMapStyles() {
+    return googleMapStyles;
+}
+
+export function getScript(source: string, onload?: () => void) {
+    var script = document.createElement('script');
+    var prior = document.getElementsByTagName('script')[0];
+    script.async = true;
+    script.src = source;
+    script.onload = onload || null;
+    prior.parentNode!.insertBefore(script, prior);
+}
 
 ((d3.select(document) as any).__proto__ as d3.Selection<any, any, any, any>).enterData = function (this: d3.Selection<any, any, any, any>, data: any, tag: string, cssClass: string) {
     return this.selectAll(tag + "." + cssClass).data(data)
@@ -608,3 +621,4 @@ interface PivotValue {
     value: ChartValue;
     valueTitle: string;
 }
+

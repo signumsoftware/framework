@@ -288,6 +288,7 @@
     <Content Include="Chart\ChartScripts\CalendarStream.xml" />
     <Content Include="Chart\ChartScripts\Columns.xml" />
     <Content Include="Chart\ChartScripts\Force graph.xml" />
+    <Content Include="Chart\ChartScripts\Markermap.xml" />
     <Content Include="Chart\ChartScripts\Line.xml" />
     <Content Include="Chart\ChartScripts\MultiBars.xml" />
     <Content Include="Chart\ChartScripts\MultiColumns.xml" />
