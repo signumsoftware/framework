@@ -1043,6 +1043,7 @@
     }
 
     map.fitBounds(bounds);
+    map.panToBounds(bounds);
 
     var heatmap = new google.maps.visualization.HeatmapLayer({
         data: coords,
