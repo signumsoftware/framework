@@ -2,6 +2,18 @@
 import * as d3sc from "d3-scale-chromatic";
 import { ChartValue, ChartTable, ChartColumn, ChartRow } from "../ChartClient"
 import googleMapStyles from "./GoogleMapStyles"
+import { parseLite } from "../../../../Framework/Signum.React/Scripts/Signum.Entities"
+import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
+
+export function getNavigateRoute(liteData: string) {
+    var lite = parseLite(liteData);
+    return Navigator.navigateRoute(lite);
+}
+
+export function navigateEntity(liteData: string) {
+    var lite = parseLite(liteData);
+    window.open(Navigator.navigateRoute(lite));
+}
 
 export function getMapStyles() {
     return googleMapStyles;

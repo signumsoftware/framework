@@ -13,7 +13,11 @@
 		<Parameter Name="MapStyle" Type="Enum" ValueDefinition="Standard | Silver | Retro | Dark | Night | Aubergine" />
 		<Parameter Name="AnimateDrop" Type="Enum" ValueDefinition="Yes | No" />
 		<Parameter Name="AnimateOnClick" Type="Enum" ValueDefinition="Yes | No" />
+		<Parameter Name="InfoLinkPosition" Type="Enum" ValueDefinition="Inline | Below" />
 		<Parameter Name="ClusterMap" Type="Enum" ValueDefinition="Yes | No" />
+		<Parameter Name="ColorScale" Type="Enum" ValueDefinition="ZeroMax | MinMax | Sqrt  | Log" />
+		<Parameter Name="ColorSet" Type="Enum" ValueDefinition="YlGn|YlGnBu|GnBu|BuGn|PuBuGn|PuBu|BuPu|RdPu|PuRd|OrRd|YlOrRd|YlOrBr|Purples|Blues|Greens|Oranges|Reds|Greys|PuOr|BrBG|PRGn|PiYG|RdBu|RdGy|RdYlBu|Spectral|RdYlGn" />
+		<Parameter Name="ColorCategory" Type="Enum" ValueDefinition="category10 | category20 | category20b | category20c | accent | paired | pastel1 | pastel2 | set1 | set2 | set3" />
 	</Parameters>
 	<Icon FileName="markermap.png"><![CDATA[iVBORw0KGgoAAAANSUhEUgAAACgAAAAoCAYAAACM/rhtAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAABFVJREFUeNrMmF9oHEUcx2dnZv/cZndvL3f5d0krXqtB6INV8V/tQy2tYvDFF8GC4ItoaK1C8SGt9EFFKGoRqQiCgviiFSwlUAURsRUFaSOkFitNiU00l7tm925vb/du/8w6e0nba3rVSHa3+XHzMrBz3/n9Zn/z+S4TBAFYy4GjXOylN4+CcMO25wDE8orACTvFlPQwRFhymvY5u2F922jaZxumDiAh4NN3dicrkGEgIMQDAt81ksn0vMux/J2uT+hcACRJALKUBoZZfW/erOynO6mvZE0YpUDT0GjmuF39vUPjDIMHy7r2Sl2fGmpWzqma/vejRt3+LpPO7h3IF47Rg5VKvMR+QApqpu9Dx3WN0vzFbQ/kp8/cn6/cJyCSmzGF77+5WNherd3xWVrN7Wo2rf30kQOJZlDN5fdynCAVy8U3Huo9f+bJ4YUj67P4lz6VP3HPoHv28aHJDZZ2fo/daOqZ7v7RxEssS+oOx/UAz5hfbhqwhgWeHyUBQzNL/wiyG+7Kw7F1Ulk36vVTCGElcYEIoQwJCOB5ZIs8UgIq7kqE3QwjmOORD3zft8KpxAWSILA4jEDVwg9OXvImAuJMIMgA+gMMIMCw/Y/mLBVIonhvAAIvcYG2bf0KGQYoSvbgDzPruYkZvN1qNN/yfPfjWc0ZOf5737gRrNstpYSNvufqib/Fmjb3iSynn1IV5W4DbT72+YX+F28vV8Z45IK5ugx0N/dyX2/2EAMhqFUrXyUu0KpVTtTN6o+SpG6RRWFHir9tsuQMnfYdYgldeGOexQWaYOC6Tq2qzR9OXCBG2NcXivtEUT7J0E5Nz19KTrGPXHtRSOu2uVyefd22zAu34C1mQcM2f67opUMQwiVRwdURztm2eapmaIcRZkHiAn2vCQLig/Lc9MFqVTsJIWq7p2k/JMQuFS+9AAHj0WwnL1AUlcXRpXiWqT/neU45FLakECyU/9oX+N5vLMuBlQqM9AxKstrWE8kULeWzabXnOL01WFr2L2hmP2gJZphbw4OU+a5v3MT/uhoEY4IoP7NQmnleEMT/Ja6V+CSIejUgi0ECsRqQhUkIXA3I4jj9RBQgi+P0E8tB9s/Z6Ve3UJAdGTaP8Bw/ylDG6Um7U4wz+djRP8gejt30xBLIHrihxHH4iShAFsfpJ9pB1r8GsrmbgqxzI8jCOP1EFCAL4/QTUYAsjqIMcYIsXl6G4mIZxgfT/gRC/Oaw9VxXBmXlfiIKkIVx+onlIEvv5tbGroCs2sXvFFhUCEE2jE4gi+P0E51ANpsbGKO2E7QzwL+BLI7TT7SDbBghyGKW36oo3VtpNjuCLINQZ4Fx+Il2kF1aowWyoij9RDtBTyuLIciWZq+C7E2JOg4/0Q6y4ZCVbkB7bQtk6ZouFQmMyuUWyFp1A5hmpTU63ySrKEOcIIujKMN/xfuvPd1p+u3FsW1lyB+Hn4j0G3UcfiISGl/rX/khWOPxjwADAK4TItgaMJOaAAAAAElFTkSuQmCC]]></Icon>
 	<Script>
@@ -141,15 +145,27 @@
 										title: hasTitle && e.c4.key != null ? e.c4.key.toString() : null
 								});
 
-								if (hasInfo && e.c5.key != null) {
+								if (hasInfo && e.c5.key != null) {									
 										var infow = new google.maps.InfoWindow({
-												content: e.c5.key.toString()
+												content: "<div>" + e.c5.key.toString() +
+														data.parameters["InfoLinkPosition"] == "Below" ? "<br/>" : "" + 
+														"<a href='" + 
+																ChartUtils.getNavigateRoute(e.entity.key) + 
+																"' target='_blank'" + 
+																data.parameters["InfoLinkPosition"] == "Inline" ? " style='margin-left: 10px;'" : "" +
+																"><span class='fa fa-external-link'></span></a></div>"
 										});
 
 										marker.addListener("click", function () {
 												infow.open(map, marker);
-										})
+										});
 								}
+								else {
+										marker.addListener("click", function () {
+												ChartUtils.navigateEntity(e.entity.key);
+										});
+								}
+								
 
 								if (animateOnClick) {
 										marker.addListener("click", function () {
@@ -165,7 +181,7 @@
 				map.panToBounds(bounds);
 
 				if (!clusterMap) {
-						if (data.parameters["AnimateDrop"] == "Yes") {
+						if (data.parameters["AnimateDrop"] == "Yes" && markers.length <= 25) {
 								function addMarkerDropTimeout(marker, timeout) {
 										window.setTimeout(function () {
 												marker.setAnimation(google.maps.Animation.DROP);
