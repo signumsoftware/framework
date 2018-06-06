@@ -351,7 +351,7 @@ namespace Signum.Engine.Word
                 obj is IFormattable ? ((IFormattable)obj).ToString(Format ?? ValueProvider.Format, p.Culture) :
                 obj?.ToString();
 
-            if (text.Contains('\n'))
+            if (text != null && text.Contains('\n'))
             {
                 var replacements = text.Lines().Select((line, i) => this.NodeProvider.NewRun((OpenXmlCompositeElement)this.RunProperties?.CloneNode(true), line, initialBr: i > 0));
 
