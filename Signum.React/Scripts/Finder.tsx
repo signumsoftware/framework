@@ -1016,7 +1016,14 @@ export const formatRules: FormatRule[] = [
     {
         name: "Enum",
         isApplicable: col => col.token!.filterType == "Enum",
-        formatter: col => new CellFormatter(cell => cell == undefined ? undefined : <span>{getEnumInfo(col.token!.type.name, cell).niceName}</span>)
+        formatter: col => new CellFormatter(cell => {
+            if (cell == undefined)
+                return undefined;
+
+            var ei = getEnumInfo(col.token!.type.name, cell);
+
+            return <span>{ei ? ei.niceName : cell}</span>
+        })
     },
     {
         name: "Lite",
