@@ -359,7 +359,12 @@ export function setFilters(e: Entity, filterOptionsParsed: FilterOptionParsed[])
 
         const mi = getMemberForToken(ti, fo.token!.fullKey);
 
-        if (mi && (e as any)[mi.name.firstLower()] == null) {
+        if (!mi)
+            return null;
+
+        var val = (e as any)[mi.name.firstLower()];
+
+        if(val == null ||val == 0) {
             const promise = Navigator.tryConvert(fo.value, mi.type);
 
             if (promise == null)
@@ -369,6 +374,7 @@ export function setFilters(e: Entity, filterOptionsParsed: FilterOptionParsed[])
         }
 
         return null;
+
     }).filter(p => !!p)).then(() => e);
 }
 
