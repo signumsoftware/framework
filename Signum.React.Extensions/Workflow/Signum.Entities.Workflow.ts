@@ -432,6 +432,7 @@ export interface WorkflowEntity extends Entities.Entity {
     name?: string | null;
     mainEntityType?: Basics.TypeEntity | null;
     mainEntityStrategy?: WorkflowMainEntityStrategy;
+    expirationDate?: string | null;
 }
 
 export const WorkflowEventEntity = new Type<WorkflowEventEntity>("WorkflowEvent");
@@ -600,6 +601,11 @@ export module WorkflowMessage {
     export const ToUse0YouSouldSetTheWorkflow1 = new MessageKey("WorkflowMessage", "ToUse0YouSouldSetTheWorkflow1");
     export const ChangeWorkflowMainEntityTypeIsNotAllowedBecauseWeHaveNodesThatUseIt = new MessageKey("WorkflowMessage", "ChangeWorkflowMainEntityTypeIsNotAllowedBecauseWeHaveNodesThatUseIt");
     export const WorkflowUsedIn0ForDecompositionOrCallWorkflow = new MessageKey("WorkflowMessage", "WorkflowUsedIn0ForDecompositionOrCallWorkflow");
+    export const Workflow0AlreadyActivated = new MessageKey("WorkflowMessage", "Workflow0AlreadyActivated");
+    export const Workflow0HasExpiredOn1 = new MessageKey("WorkflowMessage", "Workflow0HasExpiredOn1");
+    export const HasExpired = new MessageKey("WorkflowMessage", "HasExpired");
+    export const DeactivateWorkflow = new MessageKey("WorkflowMessage", "DeactivateWorkflow");
+    export const PleaseChooseExpirationDate = new MessageKey("WorkflowMessage", "PleaseChooseExpirationDate");
     export const ResetZoom = new MessageKey("WorkflowMessage", "ResetZoom");
     export const Color = new MessageKey("WorkflowMessage", "Color");
 }
@@ -615,6 +621,8 @@ export module WorkflowOperation {
     export const Clone : Entities.ConstructSymbol_From<WorkflowEntity, WorkflowEntity> = registerSymbol("Operation", "WorkflowOperation.Clone");
     export const Save : Entities.ExecuteSymbol<WorkflowEntity> = registerSymbol("Operation", "WorkflowOperation.Save");
     export const Delete : Entities.DeleteSymbol<WorkflowEntity> = registerSymbol("Operation", "WorkflowOperation.Delete");
+    export const Activate : Entities.ExecuteSymbol<WorkflowEntity> = registerSymbol("Operation", "WorkflowOperation.Activate");
+    export const Deactivate : Entities.ExecuteSymbol<WorkflowEntity> = registerSymbol("Operation", "WorkflowOperation.Deactivate");
 }
 
 export module WorkflowPanelPermission {

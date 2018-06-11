@@ -509,6 +509,9 @@ namespace Signum.Engine.Workflow
                     ToStates = { CaseActivityState.New},
                     Construct = (w, args) =>
                     {
+                        if (w.HasExpired())
+                            throw new InvalidOperationException(WorkflowMessage.Workflow0HasExpiredOn1.NiceToString(w, w.ExpirationDate.Value.ToString()));
+
                         var mainEntity = args.TryGetArgC<ICaseMainEntity>() ?? CaseActivityLogic.Options.GetOrThrow(w.MainEntityType.ToType()).Constructor();
 
                         var @case = new CaseEntity

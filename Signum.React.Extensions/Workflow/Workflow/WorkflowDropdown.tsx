@@ -2,7 +2,7 @@
 import * as React from 'react'
 import { Dic } from '../../../../Framework/Signum.React/Scripts/Globals'
 import { TypeContext, StyleOptions, EntityFrame } from '../../../../Framework/Signum.React/Scripts/TypeContext'
-import { TypeInfo, getTypeInfo, parseId, GraphExplorer, PropertyRoute, ReadonlyBinding, } from '../../../../Framework/Signum.React/Scripts/Reflection'
+import { TypeInfo, getTypeInfo, parseId, GraphExplorer, PropertyRoute, ReadonlyBinding } from '../../../../Framework/Signum.React/Scripts/Reflection'
 import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
 import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
 import * as Operations from '../../../../Framework/Signum.React/Scripts/Operations'
@@ -20,7 +20,7 @@ export default class WorkflowDropdown extends React.Component<{}, { starts: Arra
     constructor(props: any) {
         super(props);
         this.state = { starts: [] };
-    }
+    } 
 
     componentWillMount() {
         WorkflowClient.API.starts()
@@ -41,24 +41,28 @@ export default class WorkflowDropdown extends React.Component<{}, { starts: Arra
                     <LinkContainer exact to={inboxUrl}><DropdownItem>{CaseActivityQuery.Inbox.niceName()}</DropdownItem></LinkContainer>
                     {this.state.starts.length > 0 && <DropdownItem divider />}
                     {this.state.starts.length > 0 && <DropdownItem disabled>{JavascriptMessage.create.niceToString()}</DropdownItem>}
-                    {this.getStarts().map((val, i) =>
-                        <LinkContainer key={i} to={`~/workflow/new/${val.workflow.id}/${val.mainEntityStrategy}`}>
-                            <DropdownItem>{val.workflow.toStr}{val.mainEntityStrategy == "SelectByUser" ? `(${WorkflowMainEntityStrategy.niceToString(val.mainEntityStrategy)})` : ""}</DropdownItem>
-                        </LinkContainer>
-                    )}
+                    {this.getStarts().flatMap((kvp, i) => [
+                        <DropdownItem key={i} disabled>{kvp.elements[0].typeInfo.niceName}</DropdownItem>,
+                        ...kvp.elements.map((val, i) =>
+                            <LinkContainer key={i} to={`~/workflow/new/${val.workflow.id}/${val.mainEntityStrategy}`}>
+                                <DropdownItem>{val.workflow.toStr}{val.mainEntityStrategy == "SelectByUser" ? `(${WorkflowMainEntityStrategy.niceToString(val.mainEntityStrategy)})` : ""}</DropdownItem>
+                            </LinkContainer>)
+                    ])}
                 </DropdownMenu>
             </UncontrolledDropdown>
         );
-    }
-
+            }
+        
     getStarts() {
-        return this.state.starts.flatMap((w, i) => {
+        return this.state.starts.flatMap(w => {
+            const typeInfo = getTypeInfo(w.mainEntityType!.cleanName);
+
             if (w.mainEntityStrategy != "Both")
-                return [({ workflow: w, mainEntityStrategy: w.mainEntityStrategy! })]
+                return [({ workflow: w, typeInfo, mainEntityStrategy: w.mainEntityStrategy! })]
             else
-                return [({ workflow: w, mainEntityStrategy: ("CreateNew" as WorkflowMainEntityStrategy) })]
-                    .concat([({ workflow: w, mainEntityStrategy: ("SelectByUser" as WorkflowMainEntityStrategy) })]);
-        })
+                return [({ workflow: w, typeInfo, mainEntityStrategy: ("CreateNew" as WorkflowMainEntityStrategy) })]
+                    .concat([({ workflow: w, typeInfo, mainEntityStrategy: ("SelectByUser" as WorkflowMainEntityStrategy) })]);
+        }).groupBy(kvp => kvp.typeInfo.name);
     }
 }
 
