@@ -25,6 +25,7 @@ namespace Signum.Entities.Workflow
 
         public WorkflowMainEntityStrategy MainEntityStrategy { get; set; }
 
+        public DateTime? ExpirationDate { get; set; }
         /// <summary>
         /// REDUNDANT! Only for diff logging
         /// </summary>
@@ -45,6 +46,8 @@ namespace Signum.Entities.Workflow
         public static readonly ConstructSymbol<WorkflowEntity>.From<WorkflowEntity> Clone;
         public static readonly ExecuteSymbol<WorkflowEntity> Save;
         public static readonly DeleteSymbol<WorkflowEntity> Delete;
+        public static readonly ExecuteSymbol<WorkflowEntity> Activate;
+        public static readonly ExecuteSymbol<WorkflowEntity> Deactivate;
     }
 
     public enum WorkflowMainEntityStrategy
@@ -111,6 +114,13 @@ namespace Signum.Entities.Workflow
         ChangeWorkflowMainEntityTypeIsNotAllowedBecauseWeHaveNodesThatUseIt,
         [Description("Workflow uses in {0} for decomposition or call workflow.")]
         WorkflowUsedIn0ForDecompositionOrCallWorkflow,
+        [Description("Workflow '{0}' already activated.")]
+        Workflow0AlreadyActivated,
+        [Description("Workflow '{0}' has expired on '{1}'.")]
+        Workflow0HasExpiredOn1,
+        HasExpired,
+        DeactivateWorkflow,
+        PleaseChooseExpirationDate,
         ResetZoom,
         [Description("Color: ")]
         Color,
