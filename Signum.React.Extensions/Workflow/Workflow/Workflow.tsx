@@ -85,7 +85,7 @@ export default class Workflow extends React.Component<WorkflowProps, WorkflowSta
             <div>
                 <ValueLine ctx={ctx.subCtx(d => d.name)} />
                 <EntityLine ctx={ctx.subCtx(d => d.mainEntityType)}
-                    autoComplete={new LiteAutocompleteConfig((abortController, str) => API.findMainEntityType({ subString: str, count: 5 }), false)}
+                    autoComplete={new LiteAutocompleteConfig((abortController, str) => API.findMainEntityType({ subString: str, count: 5 }), false, false)}
                     find={false}
                     onRemove={this.handleMainEntityTypeChange} />
 
