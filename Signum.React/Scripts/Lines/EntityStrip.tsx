@@ -21,6 +21,7 @@ export interface EntityStripProps extends EntityListBaseProps {
     iconStart?: boolean;
     autoComplete?: AutocompleteConfig<any> | null;
     onRenderItem?: (item: Lite<Entity> | ModifiableEntity) => React.ReactNode;
+    showType?: boolean;
     onItemHtmlAttributes?: (item: Lite<Entity> | ModifiableEntity) => React.HTMLAttributes<HTMLSpanElement | HTMLAnchorElement>;
     extraButtons?: () => (React.ReactElement<any> | null | undefined | false)[];
 }
@@ -39,7 +40,7 @@ export class EntityStrip extends EntityListBase<EntityStripProps, EntityStripPro
         super.overrideProps(state, overridenProps);
         if (state.autoComplete === undefined) {
             const type = state.type!;
-            state.autoComplete = Navigator.getAutoComplete(type, state.findOptions);
+            state.autoComplete = Navigator.getAutoComplete(type, state.findOptions, state.showType);
         }
     }
     renderInternal() {
