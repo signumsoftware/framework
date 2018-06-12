@@ -1,6 +1,6 @@
 ﻿import * as React from 'react'
 import { classes, Dic } from '../Globals'
-import { ModifiableEntity, Lite, Entity, EntityControlMessage, JavascriptMessage, toLite, is, liteKey } from '../Signum.Entities'
+import { ModifiableEntity, Lite, Entity, EntityControlMessage, JavascriptMessage, toLite, is, liteKey, getToString } from '../Signum.Entities'
 import * as Navigator from '../Navigator'
 import * as Constructor from '../Constructor'
 import * as Finder from '../Finder'
@@ -17,12 +17,8 @@ export interface EntityListProps extends EntityListBaseProps {
     size?: number;
 }
 
-export interface EntityListState extends EntityListProps {
-    selectedIndex?: number;
-}
 
-
-export abstract class EntityList extends EntityListBase<EntityListProps, EntityListState>
+export abstract class EntityList extends EntityListBase<EntityListProps, EntityListProps>
 {
     static defaultProps: EntityListProps = {
         size: 5,
@@ -31,20 +27,39 @@ export abstract class EntityList extends EntityListBase<EntityListProps, EntityL
 
     moveUp(index: number) {
         super.moveUp(index);
-        this.state.selectedIndex = this.state.selectedIndex! - 1;
         this.forceUpdate();
     }
 
     moveDown(index: number) {
         super.moveDown(index);
-        this.state.selectedIndex = this.state.selectedIndex! + 1;
         this.forceUpdate();
     }
 
     handleOnSelect = (e: React.FormEvent<HTMLSelectElement>) => {
-
-        this.state.selectedIndex = (e.currentTarget as HTMLSelectElement).selectedIndex;
         this.forceUpdate();
+    }
+
+
+    selectElement?: HTMLSelectElement | null;
+    handleSelectLoad = (sel: HTMLSelectElement | null) => {
+        let refresh = this.selectElement == undefined && sel;
+
+        this.selectElement = sel;
+
+        if (refresh)
+            this.forceUpdate();
+    }
+
+    getSelectedIndex(): number | undefined {
+        if (this.selectElement == null || this.selectElement.selectedIndex == -1)
+            return undefined;
+
+
+        var list = this.state.ctx.value;
+        if (list.length <= this.selectElement.selectedIndex)
+            return undefined;
+
+        return this.selectElement.selectedIndex;
     }
 
     renderInternal() {
@@ -52,7 +67,7 @@ export abstract class EntityList extends EntityListBase<EntityListProps, EntityL
         const s = this.state;
         const list = this.state.ctx.value!;
 
-        const hasSelected = s.selectedIndex != undefined;
+        const selectedIndex = this.getSelectedIndex();
 
         return (
             <FormGroup ctx={s.ctx} labelText={s.labelText}
@@ -60,16 +75,16 @@ export abstract class EntityList extends EntityListBase<EntityListProps, EntityL
                 labelHtmlAttributes={s.labelHtmlAttributes}>
                 <div className="SF-entity-line">
                     <div className={s.ctx.inputGroupClass}>
-                        <select className={s.ctx.formControlClass} size={this.props.size} onChange={this.handleOnSelect}>
-                            {list.map((e, i) => <option  key={i} title={this.getTitle(e.element)} {...EntityListBase.entityHtmlAttributes(e.element) }>{e.element.toStr}</option>)}
+                        <select className={s.ctx.formControlClass} size={this.props.size} onChange={this.handleOnSelect} ref={this.handleSelectLoad}>
+                            {list.map((e, i) => <option  key={i} title={this.getTitle(e.element)} {...EntityListBase.entityHtmlAttributes(e.element) }>{getToString(e.element)}</option>)}
                         </select>
                         <span className="input-group-append input-group-vertical">
                             {this.renderCreateButton(true)}
                             {this.renderFindButton(true)}
-                            {hasSelected && this.renderViewButton(true, list[s.selectedIndex!].element)}
-                            {hasSelected && this.renderRemoveButton(true, list[s.selectedIndex!].element)}
-                            {hasSelected && this.state.move && s.selectedIndex != null && s.selectedIndex > 0 && this.renderMoveUp(true, s.selectedIndex!)}
-                            {hasSelected && this.state.move && s.selectedIndex != null && s.selectedIndex < list.length - 1 && this.renderMoveDown(true, s.selectedIndex!)}
+                            {selectedIndex != undefined && this.renderViewButton(true, list[selectedIndex].element)}
+                            {selectedIndex != undefined && this.renderRemoveButton(true, list[selectedIndex].element)}
+                            {selectedIndex != undefined && this.state.move && selectedIndex != null && selectedIndex > 0 && this.renderMoveUp(true, selectedIndex!)}
+                            {selectedIndex != undefined && this.state.move && selectedIndex != null && selectedIndex < list.length - 1 && this.renderMoveDown(true, selectedIndex!)}
                         </span>
                     </div>
                 </div>
@@ -85,17 +100,14 @@ export abstract class EntityList extends EntityListBase<EntityListProps, EntityL
 
         var list = s.ctx.value!;
 
-        (s.onRemove ? s.onRemove(list[s.selectedIndex!].element) : Promise.resolve(true))
+        var selectedIndex = this.getSelectedIndex()!;
+
+        (s.onRemove ? s.onRemove(list[selectedIndex].element) : Promise.resolve(true))
             .then(result => {
                 if (result == false)
                     return;
 
-                list.removeAt(s.selectedIndex!);
-                if (list.length == s.selectedIndex)
-                    s.selectedIndex--;
-
-                if (s.selectedIndex == -1)
-                    s.selectedIndex = undefined;
+                list.removeAt(selectedIndex!);
 
                 this.setValue(list);
             })
@@ -107,7 +119,7 @@ export abstract class EntityList extends EntityListBase<EntityListProps, EntityL
         event.preventDefault();
 
         const ctx = this.state.ctx;
-        const selectedIndex = this.state.selectedIndex!;
+        const selectedIndex = this.getSelectedIndex()!;
         const list = ctx.value!;
         const entity = list[selectedIndex].element;
 
