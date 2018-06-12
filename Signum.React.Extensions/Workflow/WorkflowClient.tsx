@@ -153,6 +153,23 @@ export function start(options: { routes: JSX.Element[] }) {
 
     Operations.addSettings(new EntityOperationSettings(WorkflowOperation.Save, { color: "primary", onClick: executeWorkflowSave }));
     Operations.addSettings(new EntityOperationSettings(WorkflowOperation.Delete, { contextualFromMany: { isVisible: ctx => false } }));
+    Operations.addSettings(new EntityOperationSettings(WorkflowOperation.Activate, {
+        contextual: { icon: "fa fa-heartbeat", iconColor: "red" },
+        contextualFromMany: { icon: "fa fa-heartbeat", iconColor: "red" },
+    }));
+    Operations.addSettings(new EntityOperationSettings(WorkflowOperation.Deactivate, {
+        onClick: eoc => chooseWorkflowExpirationDate([toLite(eoc.entity)]).then(val => val && eoc.defaultClick(val)).done(),
+        contextual: {
+            onClick: coc => chooseWorkflowExpirationDate(coc.context.lites).then(val => val && coc.defaultContextualClick(val)).done(),
+            icon: "fa fa-heart-o",
+            iconColor: "gray"
+        },
+        contextualFromMany: {
+            onClick: coc => chooseWorkflowExpirationDate(coc.context.lites).then(val => val && coc.defaultContextualClick(val)).done(),
+            icon: "fa fa-heart-o",
+            iconColor: "gray"
+        },
+    }));
     Navigator.addSettings(new EntitySettings(WorkflowEntity, w => import('./Workflow/Workflow'), { avoidPopup: true }));
 
     hide(WorkflowPoolEntity);
@@ -186,6 +203,20 @@ export function start(options: { routes: JSX.Element[] }) {
         element: <WorkflowHelpComponent typeName={props.typeName} mode={props.mode} />,
         order: 0,
     })]);
+}
+
+function chooseWorkflowExpirationDate(workflows: Lite<WorkflowEntity>[]): Promise<string | undefined> {
+    return ValueLineModal.show({
+        type: { name: "string" },
+        valueLineType: "DateTime",
+        modalSize: "md",
+        title: WorkflowMessage.DeactivateWorkflow.niceToString(),
+        message:
+            <div>
+                <strong>{WorkflowMessage.PleaseChooseExpirationDate.niceToString()}</strong>
+                <ul>{workflows.map((w, i) => <li key={i}>{w.toStr}</li>)}</ul>
+            </div>
+    });
 }
 
 export function workflowActivityMonitorUrl

@@ -29,6 +29,14 @@ namespace Signum.Engine.Workflow
     {
         public static Action<ICaseMainEntity, WorkflowTransitionContext> OnTransition;
 
+        static Expression<Func<WorkflowEntity, bool>> WorkflowHasExpiredExpression =
+            e => e.ExpirationDate.HasValue && e.ExpirationDate.Value < TimeZoneManager.Now;
+        [ExpressionField]
+        public static bool HasExpired(this WorkflowEntity entity)
+        {
+            return WorkflowHasExpiredExpression.Evaluate(entity);
+        }
+
         static Expression<Func<WorkflowEntity, IQueryable<WorkflowPoolEntity>>> WorkflowPoolsExpression =
             e => Database.Query<WorkflowPoolEntity>().Where(a => a.Workflow == e);
         [ExpressionField]
@@ -263,17 +271,23 @@ namespace Signum.Engine.Workflow
                 WorkflowLogic.getConfiguration = getConfiguration;
 
                 sb.Include<WorkflowEntity>()
-                    .WithQuery(dqm, () => e => new
+                    .WithQuery(dqm, () => DynamicQueryCore.Auto(
+                    from e in Database.Query<WorkflowEntity>()
+                    select new
                     {
                         Entity = e,
                         e.Id,
                         e.Name,
                         e.MainEntityType,
                         e.MainEntityStrategy,
-                    });
+                        HasExpired = e.HasExpired(),
+                        e.ExpirationDate,
+                    })
+                    .ColumnDisplayName(a => a.HasExpired, () => WorkflowMessage.HasExpired.NiceToString()));
 
                 WorkflowGraph.Register();
                 dqm.RegisterExpression((WorkflowEntity wf) => wf.WorkflowStartEvent());
+                dqm.RegisterExpression((WorkflowEntity wf) => wf.HasExpired(), () => WorkflowMessage.HasExpired.NiceToString());
 
                 DynamicCode.GetCustomErrors += GetCustomErrors;
 
@@ -680,6 +694,26 @@ namespace Signum.Engine.Workflow
                         wb.Delete();
                     }
                 }.Register();
+
+                new Execute(WorkflowOperation.Activate)
+                {
+                    CanExecute = w => w.HasExpired() ? null : WorkflowMessage.Workflow0AlreadyActivated.NiceToString(w), 
+                    Execute = (w, _) =>
+                    {
+                        w.ExpirationDate = null;
+                        w.Save();
+                    }
+                }.Register();
+
+                new Execute(WorkflowOperation.Deactivate)
+                {
+                    CanExecute = w => w.HasExpired() ? WorkflowMessage.Workflow0HasExpiredOn1.NiceToString(w, w.ExpirationDate.Value.ToString()) : null,
+                    Execute = (w, args) =>
+                    {
+                        w.ExpirationDate = args.GetArg<DateTime>();
+                        w.Save();
+                    }
+                }.Register();
             }
         }
 
@@ -697,7 +731,7 @@ namespace Signum.Engine.Workflow
             return (from w in Database.Query<WorkflowEntity>()
                     let s = w.WorkflowEvents().Single(a => a.Type == WorkflowEventType.Start)
                     let a = (WorkflowActivityEntity)s.NextConnections().Single().To
-                    where a.Lane.Actors.Any(a => IsUserConstantActor.Evaluate(UserEntity.Current, a))
+                    where !w.HasExpired() && a.Lane.Actors.Any(a => IsUserConstantActor.Evaluate(UserEntity.Current, a))
                     select w).ToList();
         }
 
