@@ -285,7 +285,14 @@ namespace Signum.Engine.Mailing
 
                 new Delete(EmailTemplateOperation.Delete)
                 {
-                    Delete = (t, _) => t.Delete()
+                    Delete = (t, _) =>
+                    {
+                        var attachments = t.Attachments.Select(a => a.ToLite()).ToList();
+
+                        t.Delete();
+                        attachments.ForEach(at => at.Delete());
+
+                    }
                 }.Register();
 
                 registered = true;
