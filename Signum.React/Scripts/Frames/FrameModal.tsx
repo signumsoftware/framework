@@ -139,6 +139,7 @@ export default class FrameModal extends React.Component<FrameModalProps, FrameMo
             }).done();
         }
         else {
+
             if (!this.props.validate) {
 
                 this.okClicked = true;
@@ -185,7 +186,10 @@ export default class FrameModal extends React.Component<FrameModalProps, FrameMo
         if (hc && hc.componentHasChanges)
             return hc.componentHasChanges();
 
-        const entity = this.state.pack!.entity;
+        if (this.state.pack == null)
+            return false;
+
+        const entity = this.state.pack.entity;
 
         GraphExplorer.propagateAll(entity);
 
