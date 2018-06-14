@@ -91,11 +91,11 @@ export default class HeavyList extends React.Component<HeavyListProps, { enabled
 
     render() {
         if (this.state.entries == undefined)
-            return <h3>Heavy Profiler (loading...) </h3>;
+            return <h3 className="display-6">Heavy Profiler (loading...) </h3>;
 
         return (
             <div>
-                <h2>Heavy Profiler</h2>
+                <h2 className="display-6">Heavy Profiler</h2>
                 <br />
                 <div className="btn-toolbar" style={{ float: "right" }}>
                     <input key={this.state.fileVer} type="file" className="form-control" onChange={this.handleInputChange} style={{ display: "inline", float: "left", width: "inherit" }} />
