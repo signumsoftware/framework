@@ -364,6 +364,12 @@ namespace Signum.Entities
             return ReflectionTools.GetPropertyInfo(property).NiceName();
         }
 
+        [ForceEagerEvaluation]
+        protected static string NicePropertyName<E, R>(Expression<Func<E, R>> property)
+        {
+            return ReflectionTools.GetPropertyInfo(property).NiceName();
+        }
+
         #endregion
 
         #region ICloneable Members

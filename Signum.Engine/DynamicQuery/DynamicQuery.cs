@@ -24,7 +24,7 @@ namespace Signum.Engine.DynamicQuery
 {
     public class DynamicQueryBucket
     {
-        public Lazy<IDynamicQueryCore> Core { get; private set; }
+        public ResetLazy<IDynamicQueryCore> Core { get; private set; }
 
         public object QueryName { get; private set; }
 
@@ -38,7 +38,7 @@ namespace Signum.Engine.DynamicQuery
             this.QueryName = queryName ?? throw new ArgumentNullException("queryName");
             this.EntityImplementations = entityImplementations;
 
-            this.Core = new Lazy<IDynamicQueryCore>(() =>
+            this.Core = new ResetLazy<IDynamicQueryCore>(() =>
             {
                 var core = lazyQueryCore();
 

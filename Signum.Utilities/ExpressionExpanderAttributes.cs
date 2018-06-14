@@ -48,9 +48,15 @@ namespace Signum.Utilities
     }
 
     [System.AttributeUsage(AttributeTargets.Method, Inherited = false, AllowMultiple = true)]
-    public class AvoidEagerEvaluationAttribute : Attribute
+    public class ForceEagerEvaluationAttribute : Attribute
     {
       
+    }
+
+    [System.AttributeUsage(AttributeTargets.Method, Inherited = false, AllowMultiple = true)]
+    public class AvoidEagerEvaluationAttribute : Attribute
+    {
+
     }
 
     //The member is polymorphic and should be expanded in a latter stage
