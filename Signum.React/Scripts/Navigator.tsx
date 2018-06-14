@@ -761,8 +761,6 @@ export class EntitySettings<T extends ModifiableEntity> {
 
     avoidPopup!: boolean;
 
-    getToString!: (entity: T) => string;
-
     getViewPromise?: (entity: T) => ViewPromise<T>;
 
     viewOverrides?: Array<ViewOverride<T>>;

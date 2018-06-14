@@ -1085,7 +1085,18 @@ export class PropertyRoute {
         }
     }
 
+
+
     addLambdaMember(member: LambdaMember): PropertyRoute {
+
+        function toCSharp(name: string) {
+            var result = name.firstUpper();
+
+            if (result == name)
+                throw new Error(`Name '${name}' should start by lowercase`);
+
+            return result;
+        }
 
         if (member.type == "Member") {
 
@@ -1103,7 +1114,8 @@ export class PropertyRoute {
 
                 const ti = getTypeInfos(ref).single("Ambiguity due to multiple Implementations"); //[undefined]
                 if (ti) {
-                    const memberName = member.name.firstUpper();
+                    
+                    const memberName = toCSharp(member.name);
                     const m = ti.members[memberName];
                     if (!m)
                         throw new Error(`member '${memberName}' not found`);
@@ -1114,9 +1126,9 @@ export class PropertyRoute {
                 }
             }
 
-            const memberName = this.propertyRouteType == "Root" ? member.name.firstUpper() :
-                this.propertyRouteType == "MListItem" ? this.propertyPath() + member.name.firstUpper() :
-                    this.propertyPath() + "." + member.name.firstUpper();
+            const memberName = this.propertyRouteType == "Root" ? toCSharp(member.name) :
+                this.propertyRouteType == "MListItem" ? this.propertyPath() + toCSharp(member.name) :
+                    this.propertyPath() + "." + toCSharp(member.name);
 
             const m = this.findRootType().members[memberName];
             if (!m)
