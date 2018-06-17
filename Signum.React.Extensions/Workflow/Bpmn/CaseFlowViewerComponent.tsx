@@ -80,13 +80,15 @@ export default class CaseFlowViewerComponent extends React.Component<CaseFlowVie
 
     handleElementDoubleClick = (obj: BPMN.DoubleClickEvent) => {
 
-        const stats = this.props.caseFlow.Activities[obj.element.id];
-        if (stats) {
-            obj.preventDefault();
-            obj.stopPropagation();
+        obj.preventDefault();
+        obj.stopPropagation();
+        this.showCaseActivityStatsModal(obj.element.id);
+    }
 
+    showCaseActivityStatsModal(bpmnElementId: string) {
+        const stats = this.props.caseFlow.Activities[bpmnElementId];
+        if (stats)
             CaseActivityStatsModal.show(this.props.case, stats);
-        }
     }
 
     componentWillUnmount() {
@@ -175,6 +177,11 @@ export default class CaseFlowViewerComponent extends React.Component<CaseFlowVie
         );
     }
 
+    focusElement(bpmnElementId: string) {
+        var searchPad = this.viewer.get<any>("searchPad");
+        searchPad._search(bpmnElementId);
+        searchPad._resetOverlay();
+    }
 
     menuItem(color: CaseFlowColor) {
         return (
