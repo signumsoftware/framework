@@ -36,10 +36,10 @@ namespace Signum.Entities.Scheduler
             return candidate;
         }
         
+        [NumberIsValidator(ComparisonType.GreaterThan, 0)]
         public int EachMinutes { get; set; }
 
-        public bool IsAligned => EachMinutes < 60 && (60 % EachMinutes == 0);
-        
+        public bool IsAligned => EachMinutes > 0 && EachMinutes < 60 && (60 % EachMinutes == 0);
 
         public override string ToString()
         {

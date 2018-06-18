@@ -307,8 +307,9 @@ namespace Signum.Entities.Workflow
         AverageDuration,
         [Description("Activity Is")]
         ActivityIs,
-        BehavesLikeParallelGateway,
-        BehavesLikeExclusiveGateway,
         NoActiveTimerFound,
+        InprogressWorkflowActivities,
+        OpenCaseActivityStats,
+        LocateWorkflowActivityInDiagram,
     }
 }

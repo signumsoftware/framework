@@ -322,9 +322,10 @@ export module WorkflowActivityMessage {
     export const CaseFlow = new MessageKey("WorkflowActivityMessage", "CaseFlow");
     export const AverageDuration = new MessageKey("WorkflowActivityMessage", "AverageDuration");
     export const ActivityIs = new MessageKey("WorkflowActivityMessage", "ActivityIs");
-    export const BehavesLikeParallelGateway = new MessageKey("WorkflowActivityMessage", "BehavesLikeParallelGateway");
-    export const BehavesLikeExclusiveGateway = new MessageKey("WorkflowActivityMessage", "BehavesLikeExclusiveGateway");
     export const NoActiveTimerFound = new MessageKey("WorkflowActivityMessage", "NoActiveTimerFound");
+    export const InprogressWorkflowActivities = new MessageKey("WorkflowActivityMessage", "InprogressWorkflowActivities");
+    export const OpenCaseActivityStats = new MessageKey("WorkflowActivityMessage", "OpenCaseActivityStats");
+    export const LocateWorkflowActivityInDiagram = new MessageKey("WorkflowActivityMessage", "LocateWorkflowActivityInDiagram");
 }
 
 export const WorkflowActivityModel = new Type<WorkflowActivityModel>("WorkflowActivityModel");
