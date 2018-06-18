@@ -23,20 +23,20 @@ namespace Signum.Engine
 
     public abstract class Connector
     {
-        static readonly Variable<Connector> currentConnection = Statics.ThreadVariable<Connector>("connection");
+        static readonly Variable<Connector> currentConnector = Statics.ThreadVariable<Connector>("connection");
 
-        public static IDisposable Override(Connector connection)
+        public static IDisposable Override(Connector connector)
         {
-            Connector oldConnection = currentConnection.Value;
+            Connector oldConnection = currentConnector.Value;
 
-            currentConnection.Value = connection;
+            currentConnector.Value = connector;
 
-            return new Disposable(() => currentConnection.Value = oldConnection);
+            return new Disposable(() => currentConnector.Value = oldConnection);
         }
 
         public static Connector Current
         {
-            get { return currentConnection.Value ?? Default; }
+            get { return currentConnector.Value ?? Default; }
         }
 
         static Connector @default;
