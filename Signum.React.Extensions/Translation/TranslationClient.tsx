@@ -79,7 +79,11 @@ export interface AssemblyResult {
     cultures: {
         [cultureName: string]: {
             name: string;
-            pronoms: { Gender: string; Singular: string; Plural: string }[];
+            pronoms: {
+                gender: string;
+                singular: string;
+                plural: string
+            }[];
         }
     }
     types: { [typeName: string]: LocalizableType };

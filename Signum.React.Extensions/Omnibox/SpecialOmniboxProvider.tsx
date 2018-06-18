@@ -26,21 +26,21 @@ export default class SpecialOmniboxProvider extends OmniboxProvider<SpecialOmnib
 
         array.push("!");
 
-        this.renderMatch(result.Match, array)
+        this.renderMatch(result.match, array)
      
         return array;
     }
 
     navigateTo(result: SpecialOmniboxResult) {
-        return specialActions[result.Key].onClick();
+        return specialActions[result.key].onClick();
     }
 
     toString(result: SpecialOmniboxResult) {
-        return "!" + result.Key;
+        return "!" + result.key;
     }
 }
 
 interface SpecialOmniboxResult extends OmniboxResult {
-    Match: OmniboxMatch;
-    Key: string;
+    match: OmniboxMatch;
+    key: string;
 }

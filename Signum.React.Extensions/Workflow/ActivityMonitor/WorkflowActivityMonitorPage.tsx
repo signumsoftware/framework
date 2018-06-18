@@ -42,7 +42,7 @@ export default class WorkflowActivityMonitorPage extends React.Component<Workflo
         this.state = {};
     }
 
-    WorkflowActvityMonitorViewerComponent?: WorkflowActivityMonitorViewerComponent | null;
+    workflowActvityMonitorViewerComponent?: WorkflowActivityMonitorViewerComponent | null;
 
     loadState(props: WorkflowActivityMonitorPageProps) {
         var workflow = newLite(WorkflowEntity, props.match.params.workflowId);
@@ -106,7 +106,7 @@ export default class WorkflowActivityMonitorPage extends React.Component<Workflo
                 {!this.state.workflowModel || !this.state.workflowActivityMonitor || !this.state.lastConfig ?
                     <h3>{JavascriptMessage.loading.niceToString()}</h3> :
                     <div className="code-container">
-                        <WorkflowActivityMonitorViewerComponent ref={m => this.WorkflowActvityMonitorViewerComponent = m}
+                        <WorkflowActivityMonitorViewerComponent ref={m => this.workflowActvityMonitorViewerComponent = m}
                             onDraw={this.handleDraw}
                             workflowModel={this.state.workflowModel}
                             workflowActivityMonitor={this.state.workflowActivityMonitor}

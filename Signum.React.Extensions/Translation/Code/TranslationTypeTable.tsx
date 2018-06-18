@@ -144,9 +144,9 @@ export class TranslationTypeDescription extends React.Component<{ type: Localiza
                     {type.hasGender && (edit ?
                         <select value={td.gender || ""} onChange={(e) => { td.gender = e.currentTarget.value; this.forceUpdate(); }}>
                             {initialElementIf(td.gender == undefined).concat(
-                                pronoms.map(a => <option key={a.Gender} value={a.Gender}>{a.Singular}</option>))}
+                                pronoms.map(a => <option key={a.gender} value={a.gender}>{a.singular}</option>))}
                         </select> :
-                        (pronoms.filter(a => a.Gender == td.gender).map(a => a.Singular).singleOrNull()))
+                        (pronoms.filter(a => a.gender == td.gender).map(a => a.singular).singleOrNull()))
                     }
                 </th>
                 <th className="monospaceCell">
@@ -155,7 +155,7 @@ export class TranslationTypeDescription extends React.Component<{ type: Localiza
                 </th>
                 <th className="smallCell">
                     {type.hasPluralDescription && type.hasGender &&
-                        pronoms.filter(a => a.Gender == td.gender).map(a => a.Plural).singleOrNull()
+                        pronoms.filter(a => a.gender == td.gender).map(a => a.plural).singleOrNull()
                     }
                 </th>
                 <th className="monospaceCell">
