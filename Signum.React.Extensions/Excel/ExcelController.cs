@@ -37,7 +37,7 @@ namespace Signum.React.Excel
     public class MachineLearningController : ApiController
     {
         [Route("api/excel/plain"), HttpPost]
-        public async Task<HttpResponseMessage> ToPlainExcel([FromBody]QueryRequestTS request, CancellationToken token)
+        public async Task<FileStreamResult> ToPlainExcel([FromBody]QueryRequestTS request, CancellationToken token)
         {
             var queryRequest = request.ToQueryRequest();
 
@@ -46,7 +46,7 @@ namespace Signum.React.Excel
 
             var fileName = request.queryKey + TimeZoneManager.Now.ToString("yyyyMMdd-HHmmss") + ".xlsx";
 
-            return FilesController.GetHttpReponseMessage(new MemoryStream(binaryFile), fileName);            
+            return FilesController.GetFileStreamResult(new MemoryStream(binaryFile), fileName);            
         }
 
         [Route("api/excel/reportsFor/{queryKey}"), HttpGet]
@@ -56,13 +56,13 @@ namespace Signum.React.Excel
         }
 
         [Route("api/excel/excelReport"), HttpPost]
-        public HttpResponseMessage GenerateExcelReport([FromBody]ExcelReportRequest request)
+        public FileStreamResult GenerateExcelReport([FromBody]ExcelReportRequest request)
         {
             byte[] file = ExcelLogic.ExecuteExcelReport(request.excelReport, request.queryRequest.ToQueryRequest());
 
             var fileName = request.excelReport.ToString() + "-" + TimeZoneManager.Now.ToString("yyyyMMdd-HHmmss") + ".xlsx";
 
-            return FilesController.GetHttpReponseMessage(new MemoryStream(file),  fileName);
+            return FilesController.GetFileStreamResult(new MemoryStream(file),  fileName);
         }
 
         public class ExcelReportRequest

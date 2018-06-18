@@ -71,7 +71,7 @@ namespace Signum.React.Mailing
 #pragma warning restore IDE1006 // Naming Styles
 
         [Route("api/email/constructorType"), HttpPost]
-        public string GetConstructorType(SystemEmailEntity systemEmailTemplate)
+        public string GetConstructorType([FromBody]SystemEmailEntity systemEmailTemplate)
         {
             var type = SystemEmailLogic.GetEntityType(systemEmailTemplate.ToType());
 

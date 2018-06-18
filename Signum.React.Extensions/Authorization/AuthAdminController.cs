@@ -116,7 +116,7 @@ namespace Signum.React.Authorization
 
 
         [Route("api/authAdmin/downloadAuthRules"), HttpGet]
-        public HttpResponseMessage DowloadAuthRules()
+        public FileStreamResult DowloadAuthRules()
         {
             BasicPermission.AdminRules.AssertAuthorized();
 
@@ -124,7 +124,7 @@ namespace Signum.React.Authorization
             {
                 AuthLogic.ExportRules().Save(ms);
 
-                return FilesController.GetHttpReponseMessage(new MemoryStream(ms.ToArray()), "AuthRules.xml");
+                return FilesController.GetFileStreamResult(new MemoryStream(ms.ToArray()), "AuthRules.xml");
             }
         }
         

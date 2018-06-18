@@ -26,12 +26,12 @@ namespace Signum.React.MachineLearning
     public class PredictorController : ApiController
     {
         [Route("api/predictor/csv/{id}"), HttpGet]
-        public HttpResponseMessage DownloadCsvById(int id)
+        public FileStreamResult DownloadCsvById(int id)
         {
             var predictor = Database.Query<PredictorEntity>().SingleEx(p => p.Id == id);
             byte[] content = predictor.GetCsv();
 
-            return FilesController.GetHttpReponseMessage(new MemoryStream(content), $"{predictor.Name}.csv");
+            return FilesController.GetFileStreamResult(new MemoryStream(content), $"{predictor.Name}.csv");
         }
 
 
@@ -45,21 +45,21 @@ namespace Signum.React.MachineLearning
         }
 
         [Route("api/predictor/tsv/{id}"), HttpGet]
-        public HttpResponseMessage DownloadTsvById(int id)
+        public FileStreamResult DownloadTsvById(int id)
         {
             var predictor = Database.Query<PredictorEntity>().SingleEx(p => p.Id == id);
             byte[] content = predictor.GetTsv();
 
-            return FilesController.GetHttpReponseMessage(new MemoryStream(content), $"{predictor.Name}.tsv");
+            return FilesController.GetFileStreamResult(new MemoryStream(content), $"{predictor.Name}.tsv");
         }
 
         [Route("api/predictor/tsv/{id}/metadata"), HttpGet]
-        public HttpResponseMessage DownloadTsvMetadataById(int id)
+        public FileStreamResult DownloadTsvMetadataById(int id)
         {
             var predictor = Database.Query<PredictorEntity>().SingleEx(p => p.Id == id);
             byte[] content = predictor.GetTsvMetadata();
 
-            return FilesController.GetHttpReponseMessage(new MemoryStream(content), $"{predictor.Name}.metadata.tsv");
+            return FilesController.GetFileStreamResult(new MemoryStream(content), $"{predictor.Name}.metadata.tsv");
         }
 
         [Route("api/predictor/trainingProgress/{id}"), HttpGet]

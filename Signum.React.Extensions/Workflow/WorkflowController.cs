@@ -94,7 +94,7 @@ namespace Signum.React.Workflow
         }
 
         [Route("api/workflow/previewChanges/{workflowId}"), HttpPost]
-        public PreviewResult PreviewChanges(string workflowId, WorkflowModel model)
+        public PreviewResult PreviewChanges(string workflowId, [FromBody]WorkflowModel model)
         {
             var id = PrimaryKey.Parse(workflowId, typeof(WorkflowEntity));
             var wf = Database.Retrieve<WorkflowEntity>(id);
@@ -103,7 +103,7 @@ namespace Signum.React.Workflow
 
 
         [Route("api/workflow/save"), HttpPost, ValidateModelFilter]
-        public ActionResult<EntityPackWithIssues> SaveWorkflow(EntityOperationRequest request)
+        public ActionResult<EntityPackWithIssues> SaveWorkflow([FromBody]EntityOperationRequest request)
         {
             WorkflowEntity entity;
             List<WorkflowIssue> issuesContainer = new List<WorkflowIssue>();
@@ -139,7 +139,7 @@ namespace Signum.React.Workflow
         }
 
         [Route("api/workflow/findNode"), HttpPost]
-        public List<Lite<IWorkflowNodeEntity>> FindNode(WorkflowFindNodeRequest request)
+        public List<Lite<IWorkflowNodeEntity>> FindNode([FromBody]WorkflowFindNodeRequest request)
         {
             var workflow = Lite.Create<WorkflowEntity>(request.workflowId);
 
@@ -155,7 +155,7 @@ namespace Signum.React.Workflow
         }
 
         [Route("api/workflow/condition/test"), HttpPost]
-        public WorkflowConditionTestResponse Test(WorkflowConditionTestRequest request)
+        public WorkflowConditionTestResponse Test([FromBody]WorkflowConditionTestRequest request)
         {
             IWorkflowConditionEvaluator evaluator;
             try
@@ -238,13 +238,13 @@ namespace Signum.React.Workflow
         }
 
         [Route("api/workflow/activityMonitor"), HttpPost]
-        public WorkflowActivityMonitor GetWorkflowActivityMonitor(WorkflowActivityMonitorRequestTS request)
+        public WorkflowActivityMonitor GetWorkflowActivityMonitor([FromBody]WorkflowActivityMonitorRequestTS request)
         {
             return WorkflowActivityMonitorLogic.GetWorkflowActivityMonitor(request.ToRequest());
         }
 
         [Route("api/workflow/nextConnections"), HttpPost]
-        public List<Lite<IWorkflowNodeEntity>> GetNextJumps(NextConnectionsRequest request)
+        public List<Lite<IWorkflowNodeEntity>> GetNextJumps([FromBody]NextConnectionsRequest request)
         {
             return request.workflowActivity.RetrieveAndForget()
                 .NextConnectionsFromCache(request.connectionType)

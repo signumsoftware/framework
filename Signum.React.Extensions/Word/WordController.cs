@@ -34,14 +34,14 @@ namespace Signum.React.Word
     public class WordController : ApiController
     {
         [Route("api/word/createReport"), HttpPost]
-        public HttpResponseMessage View([FromBody]CreateWordReportRequest request)
+        public FileStreamResult View([FromBody]CreateWordReportRequest request)
         {
             var template = request.template.Retrieve();
             var model = request.entity ?? request.lite.Retrieve();
 
             var bytes = template.CreateReport(model);
             
-            return FilesController.GetHttpReponseMessage(new MemoryStream(bytes), template.FileName);            
+            return FilesController.GetFileStreamResult(new MemoryStream(bytes), template.FileName);            
         }
 
 #pragma warning disable IDE1006 // Naming Styles

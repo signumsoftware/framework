@@ -124,7 +124,7 @@ namespace Signum.React.Profiler
         }
 
         [Route("api/profilerHeavy/download"), HttpGet]
-        public HttpResponseMessage Download(string indices = null)
+        public FileStreamResult Download(string indices = null)
         {
             XDocument doc = indices == null ?
              HeavyProfiler.ExportXml() :
@@ -136,7 +136,7 @@ namespace Signum.React.Profiler
 
                 string fileName = "Profile-{0}.xml".FormatWith(DateTime.Now.ToString("o").Replace(":", "."));
 
-                return FilesController.GetHttpReponseMessage(new MemoryStream(ms.ToArray()), fileName);
+                return FilesController.GetFileStreamResult(new MemoryStream(ms.ToArray()), fileName);
             }
         }
 

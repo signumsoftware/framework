@@ -28,24 +28,24 @@ namespace Signum.React.Files
     public class FilesController : ApiController
     {
         [Route("api/files/downloadFile/{fileId}"), HttpGet]
-        public HttpResponseMessage DownloadFile(string fileId)
+        public FileStreamResult DownloadFile(string fileId)
         {
             var file = Database.Retrieve<FileEntity>(PrimaryKey.Parse(fileId, typeof(FileEntity)));
             
-            return GetHttpReponseMessage(new System.IO.MemoryStream(file.BinaryFile), file.FileName);
+            return GetFileStreamResult(new System.IO.MemoryStream(file.BinaryFile), file.FileName);
 
         }
 
         [Route("api/files/downloadFilePath/{filePathId}"), HttpGet]
-        public HttpResponseMessage DownloadFilePath(string filePathId)
+        public FileStreamResult DownloadFilePath(string filePathId)
         {
             var filePath = Database.Retrieve<FilePathEntity>(PrimaryKey.Parse(filePathId, typeof(FilePathEntity)));
 
-            return GetHttpReponseMessage(filePath.OpenRead(), filePath.FileName);
+            return GetFileStreamResult(filePath.OpenRead(), filePath.FileName);
         }
 
         [Route("api/files/downloadEmbeddedFilePath/{fileTypeKey}"), HttpGet]
-        public HttpResponseMessage DownloadFilePathEmbedded(string fileTypeKey, string suffix, string fileName)
+        public FileStreamResult DownloadFilePathEmbedded(string fileTypeKey, string suffix, string fileName)
         {
             var fileType = SymbolLogic<FileTypeSymbol>.ToSymbol(fileTypeKey);
 
@@ -55,30 +55,18 @@ namespace Signum.React.Files
                 FileName = fileName,
             };
             
-            return GetHttpReponseMessage(virtualFile.OpenRead(), virtualFile.FileName);
+            return GetFileStreamResult(virtualFile.OpenRead(), virtualFile.FileName);
         }
 
         
         /// <param name="stream">No need to close</param
-        public static HttpResponseMessage GetHttpReponseMessage(Stream stream, string fileName, bool forDownload = true)
+        public static FileStreamResult GetFileStreamResult(Stream stream, string fileName, bool forDownload = true)
         {
-            var response = new HttpResponseMessage(HttpStatusCode.OK)
-            {
-                Content = new StreamContent(stream)
-            };
-            if (forDownload)
-            {
-                response.Content.Headers.ContentDisposition = new ContentDispositionHeaderValue("attachment")
-                {
-                    FileName = Path.GetFileName(fileName)
-                };
-            }
-
-            var mimeConverter = new FileExtensionContentTypeProvider();
-
             var mime = MimeMapping.GetMimeType(fileName);
-            response.Content.Headers.ContentType = new MediaTypeHeaderValue(mime);
-            return response;
+            return new FileStreamResult(stream, mime)
+            {
+                FileDownloadName = forDownload ? Path.GetFileName(fileName) : null
+            };
         }
     }
 }

@@ -66,21 +66,21 @@ namespace Signum.React.UserAssets
         }
 
         [Route("api/userAssets/export"), HttpPost]
-        public HttpResponseMessage Export(Lite<IUserAssetEntity> lite)
+        public FileStreamResult Export([FromBody]Lite<IUserAssetEntity> lite)
         {
             var bytes = UserAssetsExporter.ToXml(lite.Retrieve());
             
-            return FilesController.GetHttpReponseMessage(new MemoryStream(bytes), "{0}{1}.xml".FormatWith(lite.EntityType.Name, lite.Id));
+            return FilesController.GetFileStreamResult(new MemoryStream(bytes), "{0}{1}.xml".FormatWith(lite.EntityType.Name, lite.Id));
         }
 
         [Route("api/userAssets/importPreview"), HttpPost]
-        public UserAssetPreviewModel ImportPreview(FileUpload file)
+        public UserAssetPreviewModel ImportPreview([FromBody]FileUpload file)
         {
             return UserAssetsImporter.Preview(file.content);
         }
 
         [Route("api/userAssets/import"), HttpPost]
-        public void Import(FileUploadWithModel file)
+        public void Import([FromBody]FileUploadWithModel file)
         {
             UserAssetsImporter.Import(file.file.content, file.model);
         }
