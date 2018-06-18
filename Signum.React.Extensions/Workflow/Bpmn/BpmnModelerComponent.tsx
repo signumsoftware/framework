@@ -73,8 +73,9 @@ export default class BpmnModelerComponent extends React.Component<BpmnModelerCom
     }
 
     focusElement(bpmnElementId: string) {
-        var element = this.elementRegistry.get(bpmnElementId);
-        this.modeler._emit('element.click', { element: [element] });
+        var searchPad = this.modeler.get<any>("searchPad");
+        searchPad._search(bpmnElementId);
+        searchPad._resetOverlay();
     }
 
     existsMainEntityTypeRelatedNodes(): boolean {
