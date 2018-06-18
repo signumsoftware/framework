@@ -162,7 +162,10 @@ namespace Signum.React.Json
             if (lite.EntityOrNull == null)
                 return true;
 
-            using (StateManager.Recurse(this, "entity", null, lite.EntityOrNull, null))
+            if (this.CurrentPath.Push(lite.EntityOrNull))
+                return true;
+
+            using (StateManager.Recurse(this, this.Key + ".entity", null, lite.EntityOrNull, null))
             {
                 return this.ValidateModifiableEntity(lite.EntityOrNull);
             }
@@ -176,31 +179,29 @@ namespace Signum.React.Json
             int i = 0;
             foreach (object element in (IEnumerable)mlist)
             {
-                using (StateManager.Recurse(this, "[" + (i++) + "].element", null, element, null))
+
+                if (this.CurrentPath.Push(element))
                 {
-                    if (element is ModifiableEntity me)
-                        isValid &= ValidateModifiableEntity(me);
-                    else if (element is Lite<Entity> lite)
-                        isValid &= ValidateLite(lite);
-                    else
-                        isValid &= true;
+                    using (StateManager.Recurse(this, this.Key + "[" + (i++) + "].element", null, element, null))
+                    {
+                        if (element is ModifiableEntity me)
+                            isValid &= ValidateModifiableEntity(me);
+                        else if (element is Lite<Entity> lite)
+                            isValid &= ValidateLite(lite);
+                        else
+                            isValid &= true;
+                    }
                 }
             }
 
             return isValid;
         }
 
-        HashSet<ModifiableEntity> VisitedEntities = new HashSet<ModifiableEntity>();
 
         private bool ValidateModifiableEntity(ModifiableEntity mod)
         {
             using (Validator.ModelBinderScope())
             {
-                if (mod is Entity && VisitedEntities.Contains(mod))
-                    return true;
-
-                VisitedEntities.Add(mod);
-
                 bool isValid = true;
 
                 var entity = mod as Entity;
@@ -211,20 +212,23 @@ namespace Signum.React.Json
                         if (kvp.Value.AvoidValidate)
                             continue;
 
-                        var val = kvp.Value.GetValue(mod);
-                        using (StateManager.Recurse(this, kvp.Key, null, val, null))
+                        string error = kvp.Value.PropertyValidator.PropertyCheck(mod);
+
+                        if (error != null)
                         {
-                            if (this.SignumValidate() == false)
-                            {
-                                isValid = false;
-                            }
+                            isValid = false;
+                            ModelState.AddModelError(this.Key + "." + kvp.Key, error);
+                        }
 
-                            string error = kvp.Value.PropertyValidator.PropertyCheck(mod);
-
-                            if (error != null)
+                        var val = kvp.Value.GetValue(mod);
+                        if (this.CurrentPath.Push(val))
+                        {
+                            using (StateManager.Recurse(this, this.Key + "." + kvp.Key, null, val, null))
                             {
-                                isValid = false;
-                                ModelState.AddModelError(this.Key, error);
+                                if (this.SignumValidate() == false)
+                                {
+                                    isValid = false;
+                                }
                             }
                         }
                     }
@@ -234,14 +238,16 @@ namespace Signum.React.Json
                 {
                     foreach (var mixin in entity.Mixins)
                     {
-                        using (StateManager.Recurse(this, "mixins[" + mixin.GetType().Name + "].element", null, mixin, null))
+                        if (this.CurrentPath.Push(mixin))
                         {
-                            isValid &= ValidateModifiableEntity(mixin);
+                            using (StateManager.Recurse(this, "mixins[" + mixin.GetType().Name + "].element", null, mixin, null))
+                            {
+                                isValid &= ValidateModifiableEntity(mixin);
+                            }
                         }
                     }
                 }
-                
-                VisitedEntities.Remove(mod);
+
                 return isValid;
             }
         }
