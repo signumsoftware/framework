@@ -577,7 +577,11 @@ namespace Signum.Engine
             finally
             {
                 if (coreTransaction.Parent == null)
+                {
                     currents.Value.Remove(Connector.Current);
+                    if (currents.Value.Count == 0)
+                        currents.Value = null;
+                }
                 else
                     currents.Value[Connector.Current] = coreTransaction.Parent;
             }
