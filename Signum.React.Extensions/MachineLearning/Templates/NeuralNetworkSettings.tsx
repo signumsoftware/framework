@@ -103,6 +103,7 @@ export default class NeuralNetworkSettings extends React.Component<{ ctx: TypeCo
             case "MomentumSGD": return "";
             case "RMSProp": return "";
             case "SGD": return "";
+            default: throw new Error("Unexpected " + learner)
         }
     }
 
