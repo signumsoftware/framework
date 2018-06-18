@@ -42,12 +42,13 @@ namespace Signum.React.Facades
 
         public static void AddSignumGlobalFilters(this MvcOptions options)
         {
+            options.Filters.Add(new SignumExceptionFilterAttribute());
+            options.Filters.Add(new CleanThreadContextAndAssertFilter());
             options.Filters.Add(new SignumEnableBufferingFilter());
             options.Filters.Add(new SignumTimesTrackerFilter());
             options.Filters.Add(new SignumHeavyProfilerFilter());
             options.Filters.Add(new SignumAuthenticationFilter());
             options.Filters.Add(new SignumCultureSelectorFilter());
-            options.Filters.Add(new SignumExceptionFilterAttribute());
             options.Filters.Add(new VersionFilterAttribute());
         }
         

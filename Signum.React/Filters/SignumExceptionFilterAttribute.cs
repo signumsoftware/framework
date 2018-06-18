@@ -4,11 +4,13 @@ using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Controllers;
 using Microsoft.AspNetCore.Mvc.Filters;
+using Newtonsoft.Json;
 using Signum.Engine;
 using Signum.Engine.Basics;
 using Signum.Entities;
 using Signum.Entities.Basics;
 using Signum.Entities.Reflection;
+using Signum.React.Facades;
 using Signum.Utilities;
 using System;
 using System.Collections.Generic;
@@ -17,46 +19,59 @@ using System.Net;
 using System.Net.Http;
 using System.Security.Authentication;
 using System.Text;
+using System.Threading.Tasks;
 using System.Web;
 
 namespace Signum.React.Filters
 {
-    public class SignumExceptionFilterAttribute : IExceptionFilter
+    public class SignumExceptionFilterAttribute : IAsyncResourceFilter
     {
         static Func<ExceptionContext, bool> IncludeErrorDetails = ctx => true;
 
         public static readonly List<Type> IgnoreExceptions = new List<Type> { typeof(OperationCanceledException) };
 
-        public void OnException(ExceptionContext context)
+
+        public async Task OnResourceExecutionAsync(ResourceExecutingContext precontext, ResourceExecutionDelegate next)
         {
-            if (!IgnoreExceptions.Contains(context.Exception.GetType()))
+            var context = await next();
+
+            if (context.Exception != null)
             {
-                var statusCode = GetStatus(context.Exception.GetType());
-
-
-                var req = context.HttpContext.Request;
-
-                var connFeature = context.HttpContext.Features.Get<IHttpConnectionFeature>();
-                
-                var exLog = context.Exception.LogException(e =>
+                if (!IgnoreExceptions.Contains(context.Exception.GetType()))
                 {
-                    e.ActionName = (context.ActionDescriptor as ControllerActionDescriptor)?.ActionName;
-                    e.ControllerName = (context.ActionDescriptor as ControllerActionDescriptor)?.ControllerName;
-                    e.UserAgent = req.Headers["User-Agent"].FirstOrDefault();
-                    e.RequestUrl = req.GetDisplayUrl();
-                    e.UrlReferer = req.Headers["Referer"].ToString();
-                    e.UserHostAddress = connFeature.RemoteIpAddress.ToString();
-                    e.UserHostName = Dns.GetHostEntry(connFeature.RemoteIpAddress).HostName;
-                    e.User = UserHolder.Current?.ToLite();
-                    e.QueryString = req.QueryString.ToString();
-                    e.Form = ReadAllBody(context.HttpContext);
-                    e.Session = null;
-                });
+                    var statusCode = GetStatus(context.Exception.GetType());
 
-                var error = new HttpError(context.Exception);
-                context.HttpContext.Response.StatusCode = (int)statusCode;
-                context.Result = new JsonResult(error);
-                context.ExceptionHandled = true;
+
+                    var req = context.HttpContext.Request;
+
+                    var connFeature = context.HttpContext.Features.Get<IHttpConnectionFeature>();
+
+                    var exLog = context.Exception.LogException(e =>
+                    {
+                        e.ActionName = (context.ActionDescriptor as ControllerActionDescriptor)?.ActionName;
+                        e.ControllerName = (context.ActionDescriptor as ControllerActionDescriptor)?.ControllerName;
+                        e.UserAgent = req.Headers["User-Agent"].FirstOrDefault();
+                        e.RequestUrl = req.GetDisplayUrl();
+                        e.UrlReferer = req.Headers["Referer"].ToString();
+                        e.UserHostAddress = connFeature.RemoteIpAddress.ToString();
+                        e.UserHostName = Dns.GetHostEntry(connFeature.RemoteIpAddress).HostName;
+                        e.User = UserHolder.Current?.ToLite();
+                        e.QueryString = req.QueryString.ToString();
+                        e.Form = ReadAllBody(context.HttpContext);
+                        e.Session = null;
+                    });
+
+                    if (context.HttpContext.Request.ContentType == "application/json")
+                    {
+                        var error = new HttpError(context.Exception);
+
+                        var response = context.HttpContext.Response;
+                        response.StatusCode = (int)statusCode;
+                        response.ContentType = "application/json";
+                        await response.WriteAsync(JsonConvert.SerializeObject(error, SignumServer.JsonSerializerSettings));
+                        context.ExceptionHandled = true;
+                    }
+                }
             }
         }
 
@@ -89,6 +104,8 @@ namespace Signum.React.Filters
 
             return HttpStatusCode.InternalServerError;
         }
+
+       
     }
 
     public class HttpError

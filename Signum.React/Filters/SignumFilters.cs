@@ -33,7 +33,18 @@ namespace Signum.React.Filters
         {
         }
 
-        
+    }
+
+    public class CleanThreadContextAndAssertFilter : IResourceFilter
+    {
+        public void OnResourceExecuting(ResourceExecutingContext context)
+        {
+        }
+
+        public void OnResourceExecuted(ResourceExecutedContext context)
+        {
+            Statics.CleanThreadContextAndAssert();
+        }
     }
 
     public class SignumAuthenticationFilter : SignumDisposableResourceFilter
@@ -65,18 +76,29 @@ namespace Signum.React.Filters
         }
     }
 
-    public class SignumCultureSelectorFilter : SignumDisposableResourceFilter
+    public class SignumCultureSelectorFilter : IResourceFilter
     {
         public static Func<ResourceExecutingContext, CultureInfo> GetCurrentCultures;
 
-        public SignumCultureSelectorFilter() : base("Signum_Cultures")
-        {
-        }
-
-        public override IDisposable GetResource(ResourceExecutingContext context)
+        const string Culture_Key = "OldCulture";
+        const string UICulture_Key = "OldUICulture";
+        public void OnResourceExecuting(ResourceExecutingContext context)
         {
             var culture = (CultureInfo)GetCurrentCultures?.Invoke(context);
-            return culture != null ? CultureInfoUtils.ChangeBothCultures(culture) : null;
+            if (culture != null)
+            {
+                context.HttpContext.Items[Culture_Key] = CultureInfo.CurrentCulture;
+                context.HttpContext.Items[UICulture_Key] = CultureInfo.CurrentUICulture;
+
+                CultureInfo.CurrentCulture = culture;
+                CultureInfo.CurrentUICulture = culture;
+            }
+        }
+
+        public void OnResourceExecuted(ResourceExecutedContext context)
+        {
+            CultureInfo.CurrentUICulture = context.HttpContext.Items[UICulture_Key] as CultureInfo ?? CultureInfo.CurrentUICulture;
+            CultureInfo.CurrentCulture = context.HttpContext.Items[Culture_Key] as CultureInfo ?? CultureInfo.CurrentCulture;
         }
     }
 
