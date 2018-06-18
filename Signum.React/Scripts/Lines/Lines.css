@@ -531,3 +531,16 @@ table.sf-multi-value {
         padding:0px;
         padding-bottom: 2px;
     }
+
+
+.sf-type-badge {
+    border: 1px solid gray;
+    color: gray;
+    display: inline-block;
+    padding: 0.3em 0.4em 0.1em 0.4em;
+    font-size: 75%;
+    font-weight: 700;
+    line-height: 1;
+    border-radius: 0.25rem;
+    background-color: #efefef;
+}

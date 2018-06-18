@@ -50,16 +50,28 @@ namespace Signum.Test.Environment
         {
             SchemaBuilder sb = new SchemaBuilder(true);
             DynamicQueryManager dqm = new DynamicQueryManager();
-           
+
             //Connector.Default = new SqlCeConnector(@"Data Source=C:\BaseDatos.sdf", sb.Schema, dqm);
+
+            var sqlVersion = SqlServerVersionDetector.Detect(connectionString);
+
+            Connector.Default = new SqlConnector(connectionString, sb.Schema, dqm, sqlVersion ?? SqlServerVersion.SqlServer2017);
             
-            Connector.Default = new SqlConnector(connectionString, sb.Schema, dqm, SqlServerVersion.SqlServer2016);
-
-
             sb.Schema.Version = typeof(MusicStarter).Assembly.GetName().Version;
 
             sb.Schema.Settings.FieldAttributes((OperationLogEntity ol) => ol.User).Add(new ImplementedByAttribute());
             sb.Schema.Settings.FieldAttributes((ExceptionEntity e) => e.User).Add(new ImplementedByAttribute());
+
+            if(Connector.Current.SupportsTemporalTables)
+            {
+                sb.Schema.Settings.TypeAttributes<FolderEntity>().Add(new SystemVersionedAttribute());
+            }
+
+            if (!Schema.Current.Settings.TypeValues.ContainsKey(typeof(TimeSpan)))
+            {
+                sb.Settings.FieldAttributes((AlbumEntity a) => a.Songs[0].Duration).Add(new Signum.Entities.IgnoreAttribute());
+                sb.Settings.FieldAttributes((AlbumEntity a) => a.BonusTrack.Duration).Add(new Signum.Entities.IgnoreAttribute());
+            }
 
             Validator.PropertyValidator((OperationLogEntity e) => e.User).Validators.Clear();
             

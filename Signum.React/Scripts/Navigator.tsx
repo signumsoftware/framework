@@ -505,7 +505,7 @@ export function defaultFindOptions(type: TypeReference): FindOptions | undefined
     return undefined;
 }
 
-export function getAutoComplete(type: TypeReference, findOptions: FindOptions | undefined): AutocompleteConfig<any> | null {
+export function getAutoComplete(type: TypeReference, findOptions: FindOptions | undefined, showType?: boolean): AutocompleteConfig<any> | null {
     if (type.isEmbedded || type.name == IsByAll)
         return null;
 
@@ -534,7 +534,7 @@ export function getAutoComplete(type: TypeReference, findOptions: FindOptions | 
             types: type.name,
             subString: subStr,
             count: 5
-        }, ac), false);
+        }, ac), false, showType == null ? type.name.contains(",") : showType);
     }
 
     if (!config.getItemsDelay) {
@@ -760,8 +760,6 @@ export class EntitySettings<T extends ModifiableEntity> {
     typeName: string;
 
     avoidPopup!: boolean;
-
-    getToString!: (entity: T) => string;
 
     getViewPromise?: (entity: T) => ViewPromise<T>;
 

@@ -18,7 +18,8 @@ export interface EntityLineProps extends EntityBaseProps {
 
     ctx: TypeContext<ModifiableEntity | Lite<Entity> | undefined | null>;
     autoComplete?: AutocompleteConfig<any> | null;
-    renderItem?: React.ReactNode; 
+    renderItem?: React.ReactNode;
+    showType?: boolean;
     itemHtmlAttributes?: React.HTMLAttributes<HTMLSpanElement | HTMLAnchorElement>;
     extraButtons?: () => (React.ReactElement<any> | null | undefined | false)[];
 }
@@ -33,7 +34,7 @@ export class EntityLine extends EntityBase<EntityLineProps, EntityLineState> {
         super.overrideProps(state, overridenProps);
         if (state.autoComplete === undefined) {
             const type = state.type!;
-            state.autoComplete = Navigator.getAutoComplete(type, state.findOptions);
+            state.autoComplete = Navigator.getAutoComplete(type, state.findOptions, state.showType);
         }
 
         if (!state.currentItem) {

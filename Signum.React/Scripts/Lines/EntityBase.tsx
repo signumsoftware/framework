@@ -104,7 +104,6 @@ export abstract class EntityBase<T extends EntityBaseProps, S extends EntityBase
 
 
     defaultView(value: ModifiableEntity | Lite<Entity>, propertyRoute: PropertyRoute): Promise<ModifiableEntity | undefined> { 
-        debugger;
         return Navigator.view(value, {
             propertyRoute: propertyRoute,
             getViewPromise: this.getGetViewPromise(value) 

@@ -91,6 +91,14 @@ namespace Signum.Utilities.ExpressionTrees
 
             return node;
         }
+
+        protected override Expression VisitMethodCall(MethodCallExpression node)
+        {
+            if (node.Method.HasAttribute<ForceEagerEvaluationAttribute>())
+                return node;
+
+            return base.VisitMethodCall(node);
+        }
     }
 
     public static class LinqHints

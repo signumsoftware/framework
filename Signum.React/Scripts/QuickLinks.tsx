@@ -155,7 +155,7 @@ export class QuickLinkWidget extends React.Component<QuickLinkWidgetProps, { lin
                         {links ? "\u00A0" + links.length : "…"}
                     </a >
                 </DropdownToggle>
-                <DropdownMenu right={true}>
+                <DropdownMenu right>
                     {!links ? [] : links.orderBy(a => a.order).map((a, i) => React.cloneElement(a.toDropDownItem(), { key: i }))}
                 </DropdownMenu>
             </UncontrolledDropdown>

@@ -28,11 +28,7 @@ namespace Signum.Test.Environment
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
-                if (!Schema.Current.Settings.TypeValues.ContainsKey(typeof(TimeSpan)))
-                {
-                    sb.Settings.FieldAttributes((AlbumEntity a) => a.Songs[0].Duration).Add(new Signum.Entities.IgnoreAttribute());
-                    sb.Settings.FieldAttributes((AlbumEntity a) => a.BonusTrack.Duration).Add(new Signum.Entities.IgnoreAttribute());
-                }
+
 
                 sb.Include<AlbumEntity>()
                     .WithExpressionFrom(dqm, (IAuthorEntity au) => au.Albums())

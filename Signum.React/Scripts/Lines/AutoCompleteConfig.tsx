@@ -27,7 +27,8 @@ export class LiteAutocompleteConfig<T extends Entity> implements AutocompleteCon
 
     constructor(
         public getItemsFunction: (abortController: FetchAbortController, subStr: string) => Promise<Lite<T>[]>,
-        public withCustomToString: boolean) {
+        public withCustomToString: boolean,
+        public showType: boolean) {
     }
 
     abortableRequest = new AbortableRequest((abortController, subStr: string) => this.getItemsFunction(abortController, subStr));
@@ -41,7 +42,12 @@ export class LiteAutocompleteConfig<T extends Entity> implements AutocompleteCon
     }
 
     renderItem(item: Lite<T>, subStr: string) {
-        return Typeahead.highlightedText(item.toStr || "", subStr)
+        var text = Typeahead.highlightedText(item.toStr || "", subStr);
+
+        if (this.showType)
+            return <span><span className="sf-type-badge">{getTypeInfo(item.EntityType).niceName}</span> {text}</span>;
+        else
+            return text;
     }
 
     getEntityFromItem(item: Lite<T>) {
@@ -86,7 +92,9 @@ export class FindOptionsAutocompleteConfig implements AutocompleteConfig<Lite<En
     constructor(
         public findOptions: FindOptions,
         public count: number = 5,
-        public withCustomToString: boolean = false) {
+        public withCustomToString: boolean = false,
+        public showType: boolean = false,
+    ) {
 
         Finder.expandParentColumn(this.findOptions);
     }
@@ -133,7 +141,12 @@ export class FindOptionsAutocompleteConfig implements AutocompleteConfig<Lite<En
     }
 
     renderItem(item: Lite<Entity>, subStr: string) {
-        return Typeahead.highlightedText(item.toStr || "", subStr)
+        var text = Typeahead.highlightedText(item.toStr || "", subStr);
+
+        if (this.showType)
+            return <span><span className="sf-type-badge">{getTypeInfo(item.EntityType).niceName}</span> {text}</span>;
+        else
+            return text;
     }
 
     getEntityFromItem(item: Lite<Entity>) {

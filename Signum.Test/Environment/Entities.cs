@@ -440,7 +440,7 @@ END");
 
 
 
-    [Serializable, EntityKind(EntityKind.System, EntityData.Transactional), SystemVersioned]
+    [Serializable, EntityKind(EntityKind.System, EntityData.Transactional)]
     public class FolderEntity : Entity
     {
         [UniqueIndex]

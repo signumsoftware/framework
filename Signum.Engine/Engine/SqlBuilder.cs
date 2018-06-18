@@ -477,7 +477,7 @@ FROM {1} as [table]".FormatWith(
             return new SqlPreCommandSimple("ALTER INDEX [{0}] ON {1} DISABLE".FormatWith(indexName, tableName));
         }
 
-        public static SqlPreCommandSimple EnableIndex(ObjectName tableName, string indexName)
+        public static SqlPreCommandSimple RebuildIndex(ObjectName tableName, string indexName)
         {
             return new SqlPreCommandSimple("ALTER INDEX [{0}] ON {1} REBUILD".FormatWith(indexName, tableName));
         }

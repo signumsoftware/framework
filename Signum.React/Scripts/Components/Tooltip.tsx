@@ -129,7 +129,7 @@ export class Tooltip extends React.Component<TooltipProps> {
                 this.clearHideTimeout();
             }
 
-            if (!this.props.isOpen) {
+            if (this.props.isOpen) {
                 this.toggle();
             }
         }
