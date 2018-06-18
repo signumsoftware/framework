@@ -122,7 +122,6 @@ namespace Signum.Engine
         {
             using (SqlConnection con = EnsureConnection())
             using (SqlCommand cmd = NewCommand(preCommand, con, commandType))
-            using (DbLog.LogCommand(cmd))
             using (HeavyProfiler.Log("SQL", () => preCommand.sp_executesql()))
             {
                 try
@@ -149,7 +148,6 @@ namespace Signum.Engine
         {
             using (SqlConnection con = EnsureConnection())
             using (SqlCommand cmd = NewCommand(preCommand, con, commandType))
-            using (DbLog.LogCommand(cmd))
             using (HeavyProfiler.Log("SQL", () => preCommand.sp_executesql()))
             {
                 try
@@ -176,7 +174,6 @@ namespace Signum.Engine
             {
                 using (SqlConnection con = EnsureConnection())
                 using (SqlCommand cmd = NewCommand(preCommand, con, commandType))
-                using (DbLog.LogCommand(cmd))
                 using (HeavyProfiler.Log("SQL-Dependency"))
                 using (HeavyProfiler.Log("SQL", () => preCommand.sp_executesql()))
                 {
@@ -278,7 +275,6 @@ namespace Signum.Engine
         {
             using (SqlConnection con = EnsureConnection())
             using (SqlCommand cmd = NewCommand(preCommand, con, commandType))
-            using (DbLog.LogCommand(cmd))
             using (HeavyProfiler.Log("SQL", () => preCommand.sp_executesql()))
             {
                 try
@@ -304,7 +300,6 @@ namespace Signum.Engine
         {
             using (SqlConnection con = EnsureConnection())
             using (SqlCommand cmd = NewCommand(preCommand, con, commandType))
-            using (DbLog.LogCommand(cmd))
             using (HeavyProfiler.Log("SQL", () => preCommand.sp_executesql()))
             {
                 try
@@ -689,40 +684,5 @@ deallocate cur";
             return Connector.Current.ShrinkDatabase(schemaName);
 
         }
-    }
-
-    public static class DbLog
-    {
-        public static List<LogRecord> records = new List<LogRecord>();
-
-        
-
-        public static IDisposable LogCommand(DbCommand cmd)
-        {
-            var record = new LogRecord
-            {
-                Start = DateTime.Now,
-                ThreadId = Thread.CurrentThread.ManagedThreadId,
-                ConnectionHash = cmd.Connection.GetHashCode(),
-                TransactionHash = cmd.Transaction?.GetHashCode(),
-                StackTrace = Environment.StackTrace,
-            };
-
-            lock (records)
-                records.Add(record);
-
-            return new Disposable(() => record.End = DateTime.Now);
-        }
-        
-    }
-
-    public class LogRecord
-    {
-        public DateTime Start;
-        public DateTime? End;
-        public int ThreadId;
-        public int ConnectionHash;
-        public int? TransactionHash;
-        public string StackTrace; 
     }
 }
