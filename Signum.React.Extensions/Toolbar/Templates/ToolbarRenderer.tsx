@@ -29,7 +29,6 @@ export interface ToolbarRendererState {
     response?: ToolbarClient.ToolbarResponse<any>;
     expanded: ToolbarClient.ToolbarResponse<any>[];
     avoidCollapse: ToolbarClient.ToolbarResponse<any>[];
-    isRtl: boolean;
 }
 
 export default class ToolbarRenderer extends React.Component<ToolbarRendererProps, ToolbarRendererState>
@@ -41,7 +40,6 @@ export default class ToolbarRenderer extends React.Component<ToolbarRendererProp
         this.state = {
             expanded: [],
             avoidCollapse: [],
-            isRtl: document.body.classList.contains("rtl-mode")
         };
     }
 
@@ -110,7 +108,7 @@ export default class ToolbarRenderer extends React.Component<ToolbarRendererProp
                             {!icon ? title : (<span>{icon}{title}</span>)}
                         </DropdownToggle>
                         <DropdownMenu>
-                            {res.elements && res.elements.flatMap(sr => this.renderDropdownItem(sr, 0, res)).map((sr, i) => withKey(sr, i))}
+                            {res.elements && res.elements.flatMap(sr => this.renderDropdownItem(sr, 1, res)).map((sr, i) => withKey(sr, i))}
                         </DropdownMenu>
                     </Dropdown>
                 );
