@@ -51,7 +51,6 @@ namespace Signum.Engine.Linq
         {
             using (HeavyProfiler.Log("SQL", () => Command.sp_executesql()))
             using (var reader = Executor.UnsafeExecuteDataReader(Command))
-            using (DbLog.LogCommand(reader.Command))
             {
                 ProjectionRowEnumerator<KeyValuePair<K, V>> enumerator = new ProjectionRowEnumerator<KeyValuePair<K, V>>(reader.Reader, ProjectorExpression, lookups, retriever, CancellationToken.None);
 
@@ -78,7 +77,6 @@ namespace Signum.Engine.Linq
         {
             using (HeavyProfiler.Log("SQL", () => Command.sp_executesql()))
             using (var reader = await Executor.UnsafeExecuteDataReaderAsync(Command, token: token))
-            using (DbLog.LogCommand(reader.Command))
             {
                 ProjectionRowEnumerator<KeyValuePair<K, V>> enumerator = new ProjectionRowEnumerator<KeyValuePair<K, V>>(reader.Reader, ProjectorExpression, lookups, retriever, token);
 
@@ -124,7 +122,6 @@ namespace Signum.Engine.Linq
 
             using (HeavyProfiler.Log("SQL", () => Command.sp_executesql()))
             using (var reader = Executor.UnsafeExecuteDataReader(Command))
-            using (DbLog.LogCommand(reader.Command))
             {
                 ProjectionRowEnumerator<KeyValuePair<K, MList<V>.RowIdElement>> enumerator = new ProjectionRowEnumerator<KeyValuePair<K, MList<V>.RowIdElement>>(reader.Reader, ProjectorExpression, lookups, retriever, CancellationToken.None);
 
@@ -163,7 +160,6 @@ namespace Signum.Engine.Linq
 
             using (HeavyProfiler.Log("SQL", () => Command.sp_executesql()))
             using (var reader = await Executor.UnsafeExecuteDataReaderAsync(Command, token: token))
-            using (DbLog.LogCommand(reader.Command))
             {
                 ProjectionRowEnumerator<KeyValuePair<K, MList<V>.RowIdElement>> enumerator = new ProjectionRowEnumerator<KeyValuePair<K, MList<V>.RowIdElement>>(reader.Reader, ProjectorExpression, lookups, retriever, token);
 
@@ -227,7 +223,6 @@ namespace Signum.Engine.Linq
 
                     using (HeavyProfiler.Log("SQL", () => MainCommand.sp_executesql()))
                     using (var reader = Executor.UnsafeExecuteDataReader(MainCommand))
-                    using (DbLog.LogCommand(reader.Command))
                     {
                         ProjectionRowEnumerator<T> enumerator = new ProjectionRowEnumerator<T>(reader.Reader, ProjectorExpression, lookups, retriever, CancellationToken.None);
 
@@ -276,7 +271,6 @@ namespace Signum.Engine.Linq
 
                     using (HeavyProfiler.Log("SQL", () => MainCommand.sp_executesql()))
                     using (var reader = await Executor.UnsafeExecuteDataReaderAsync(MainCommand, token: token))
-                    using (DbLog.LogCommand(reader.Command))
                     {
                         ProjectionRowEnumerator<T> enumerator = new ProjectionRowEnumerator<T>(reader.Reader, ProjectorExpression, lookups, retriever, token);
 
