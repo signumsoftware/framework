@@ -1088,6 +1088,8 @@ namespace Signum.Entities
         _0ShouldNotBeOfType1,
         [Description("{0} and {1} can not be set at the same time")]
         _0And1CanNotBeSetAtTheSameTime,
+        [Description("{0} or {1} should be set")]
+        _0Or1ShouldBeSet,
         [Description("{0} and {1} and {2} can not be set at the same time")]
         _0And1And2CanNotBeSetAtTheSameTime,
         [Description("{0} have {1} elements, but allowed only {2}")]

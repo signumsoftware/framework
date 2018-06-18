@@ -81,7 +81,6 @@ export default class SystemTimeEditor extends React.Component<SystemTimeEditorPr
 
     handlePreviousOperationClicked = () => {
         var fop = this.props.findOptions;
-        debugger;
         if (this.isPreviousOperationChecked()) {
             fop.columnOptions.extract(a => a.token != null && a.token.fullKey.startsWith("Entity.PreviousOperationLog"));
             this.props.onChanged();

@@ -31,6 +31,22 @@ namespace Signum.Engine.Maps
             this.SchemaBuilder.AddIndex<T>(fields, where, includeFields);
             return this;
         }
+
+        public FluentInclude<T> WithUniqueIndexMList<M>(Expression<Func<T, MList<M>>> mlist, Expression<Func<MListElement<T, M>, object>> fields = null, Expression<Func<MListElement<T, M>, bool>> where = null, Expression<Func<MListElement<T, M>, object>> includeFields = null)
+        {
+            if (fields == null)
+                fields = mle => new { mle.Parent, mle.Element };
+
+            this.SchemaBuilder.AddUniqueIndexMList<T, M>(mlist, fields, where, includeFields);
+            return this;
+        }
+
+        public FluentInclude<T> WithIndexMList<M>(Expression<Func<T, MList<M>>> mlist, Expression<Func<MListElement<T, M>, object>> fields, Expression<Func<MListElement<T, M>, bool>> where = null, Expression<Func<MListElement<T, M>, object>> includeFields = null)
+        {
+            this.SchemaBuilder.AddIndexMList<T, M>(mlist, fields, where, includeFields);
+            return this;
+        }
+
     }
 
 }
