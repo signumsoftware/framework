@@ -344,7 +344,7 @@ export function executeWorkflowSave(eoc: Operations.EntityOperationContext<Workf
                     (eoc.frame.entityComponent as any).setIssues(JSON.parse(issuesString[0]));
                     delete e.modelState["workflowIssues"];
                 }
-                eoc.frame.setError(e.modelState, "request.entity");
+                eoc.frame.setError(e.modelState, "entity");
 
             }))
             .done();
@@ -421,7 +421,7 @@ export function executeAndClose(eoc: Operations.EntityOperationContext<CaseActiv
 
         Operations.API.executeEntity(eoc.entity, eoc.operationInfo.key)
             .then(pack => { eoc.frame.onClose(); return notifySuccess(); })
-            .catch(ifError(ValidationError, e => eoc.frame.setError(e.modelState, "request.entity")))
+            .catch(ifError(ValidationError, e => eoc.frame.setError(e.modelState, "entity")))
             .done();
     });
 }

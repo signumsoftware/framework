@@ -54,7 +54,7 @@ export function start(options: { routes: JSX.Element[] }) {
                         }).done();
                     }
                 })
-                .catch(ifError(ValidationError, e => eoc.frame.setError(e.modelState, "request.entity")))
+                .catch(ifError(ValidationError, e => eoc.frame.setError(e.modelState, "entity")))
                 .done();
         }
     }));
