@@ -375,7 +375,7 @@ namespace Signum.Engine.Workflow
 
                 if (fanOut == 1 && wa.Type == WorkflowActivityType.Decision)
                 {
-                    var nextConn = NextConnections(wa).SingleEx();
+                    var nextConn = NextConnections(wa).Where(c => c.Type == ConnectionType.Normal).SingleEx();
                     if (!(nextConn.To is WorkflowGatewayEntity) || ((WorkflowGatewayEntity)nextConn.To).Type == WorkflowGatewayType.Parallel)
                         issues.AddError(wa, WorkflowValidationMessage.Activity0WithDecisionTypeShouldGoToAnExclusiveOrInclusiveGateways.NiceToString(wa));
                 }
