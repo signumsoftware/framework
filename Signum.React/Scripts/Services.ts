@@ -32,7 +32,8 @@ export function baseUrl(options: AjaxOptions): string {
 
 export function ajaxGet<T>(options: AjaxOptions): Promise<T> {
     return ajaxGetRaw(options)
-        .then(a => a.status == 204 ? undefined as any : a.json().then(a => a as T));
+        .then(res => res.text())
+        .then(text => text.length ? JSON.parse(text) : undefined);
 }
 
 export function ajaxGetRaw(options: AjaxOptions) : Promise<Response> {
@@ -52,7 +53,8 @@ export function ajaxGetRaw(options: AjaxOptions) : Promise<Response> {
 
 export function ajaxPost<T>(options: AjaxOptions, data: any): Promise<T> {
     return ajaxPostRaw(options, data)
-        .then(a => a.status == 204 ? undefined as any : a.json().then(a => a as T));
+        .then(res => res.text())
+        .then(text => text.length ? JSON.parse(text) : undefined);
 }
 
 
