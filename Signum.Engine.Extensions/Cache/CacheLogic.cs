@@ -205,7 +205,6 @@ namespace Signum.Engine.Cache
             else
             {
                 using (var p = preCommand.UnsafeExecuteDataReader())
-                using (DbLog.LogCommand(p.Command))
                 {
                     FieldReader reader = new FieldReader(p.Reader);
                     while (p.Reader.Read())
