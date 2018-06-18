@@ -80,7 +80,7 @@ export default class Workflow extends React.Component<WorkflowProps, WorkflowSta
     }
 
     render() {
-        var ctx = this.props.ctx;
+        var ctx = this.props.ctx.subCtx({ labelColumns: 4 });
         return (
             <div>
                 <div className="row">
@@ -92,8 +92,8 @@ export default class Workflow extends React.Component<WorkflowProps, WorkflowSta
                             onRemove={this.handleMainEntityTypeChange} />
                     </div>
                     <div className="col-sm-6">
-                        <ValueLine ctx={ctx.subCtx(d => d.mainEntityStrategy)} valueColumns={3} />
-                        <ValueLine ctx={ctx.subCtx(d => d.expirationDate)} valueColumns={3} />
+                        <ValueLine ctx={ctx.subCtx(d => d.mainEntityStrategy)} />
+                        <ValueLine ctx={ctx.subCtx(d => d.expirationDate)} />
                     </div>
                 </div>
                 {this.renderIssues()}
