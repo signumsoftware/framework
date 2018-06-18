@@ -63,8 +63,6 @@ export class CaseFlowRenderer extends CustomRenderer {
             if (!this.caseFlow.allNodes.contains(element.id)) {
                 result.style.setProperty('stroke', "lightgray");
                 result.style.setProperty('fill', "#eee");
-
-                //debugger;
             }
         }
         else if (BpmnUtils.isTaskAnyKind(element.type)) {

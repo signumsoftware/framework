@@ -94,7 +94,7 @@ namespace Signum.Engine.Migrations
                 ClassName = action.Method.DeclaringType.FullName,
                 MethodName = action.Method.Name,
                 Description = description,
-            };
+            }.Save();
 
             try
             {

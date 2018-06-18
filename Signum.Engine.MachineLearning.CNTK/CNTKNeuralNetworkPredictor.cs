@@ -22,6 +22,9 @@ namespace Signum.Engine.MachineLearning.CNTK
     {
         public void InitialSetup()
         {
+            if (!Environment.Is64BitProcess)
+                throw new InvalidOperationException("CNTK only works with starting projects compiled for x64");
+            
             /// This is a workaround to load unmanaged CNTK dlls from the applications \bin directory.
             var dir = AppDomain.CurrentDomain.BaseDirectory;
 

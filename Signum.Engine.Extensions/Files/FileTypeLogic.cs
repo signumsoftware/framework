@@ -75,7 +75,7 @@ namespace Signum.Engine.Files
         PrefixPair GetPrefixPair(IFilePath efp);
     }
 
-    public static class SufixGenerators
+    public static class SuffixGenerators
     {
         //No GUID, use only for icons or public domain files
         public static class UNSAFE
@@ -102,7 +102,7 @@ namespace Signum.Engine.Files
     public class FileTypeAlgorithm : IFileTypeAlgorithm
     {
         public Func<IFilePath, PrefixPair> GetPrefixPair { get; set; }
-        public Func<IFilePath, string> CalculateSufix { get; set; }
+        public Func<IFilePath, string> CalculateSuffix { get; set; }
 
         public bool RenameOnCollision { get; set; }
         public bool WeakFileReference { get; set; }
@@ -112,7 +112,7 @@ namespace Signum.Engine.Files
         public FileTypeAlgorithm()
         {
             WeakFileReference = false;
-            CalculateSufix = SufixGenerators.Safe.YearMonth_Guid_Filename;
+            CalculateSuffix = SuffixGenerators.Safe.YearMonth_Guid_Filename;
 
             RenameOnCollision = true;
             RenameAlgorithm = DefaultRenameAlgorithm;
@@ -130,7 +130,7 @@ namespace Signum.Engine.Files
             if (GetPrefixPair == null)
                 error = "GetPrefixPair";
 
-            if (!WeakFileReference && CalculateSufix == null)
+            if (!WeakFileReference && CalculateSuffix == null)
                 error = ", ".CombineIfNotEmpty(error, "CalculateSufix");
 
             if (RenameOnCollision && RenameAlgorithm == null)
@@ -149,7 +149,7 @@ namespace Signum.Engine.Files
                 if (WeakFileReference)
                     return;
 
-                string sufix = CalculateSufix(fp);
+                string sufix = CalculateSuffix(fp);
                 if (!sufix.HasText())
                     throw new InvalidOperationException("Sufix not set");
 

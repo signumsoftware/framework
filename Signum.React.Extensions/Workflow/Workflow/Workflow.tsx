@@ -80,16 +80,22 @@ export default class Workflow extends React.Component<WorkflowProps, WorkflowSta
     }
 
     render() {
-        var ctx = this.props.ctx;
+        var ctx = this.props.ctx.subCtx({ labelColumns: 4 });
         return (
             <div>
+                <div className="row">
+                    <div className="col-sm-6">
                 <ValueLine ctx={ctx.subCtx(d => d.name)} />
                 <EntityLine ctx={ctx.subCtx(d => d.mainEntityType)}
-                    autoComplete={new LiteAutocompleteConfig((abortController, str) => API.findMainEntityType({ subString: str, count: 5 }), false)}
+                    autoComplete={new LiteAutocompleteConfig((abortController, str) => API.findMainEntityType({ subString: str, count: 5 }), false, false)}
                     find={false}
                     onRemove={this.handleMainEntityTypeChange} />
-
-                <ValueLine ctx={ctx.subCtx(d => d.mainEntityStrategy)} />
+                    </div>
+                    <div className="col-sm-6">
+                        <ValueLine ctx={ctx.subCtx(d => d.mainEntityStrategy)} />
+                        <ValueLine ctx={ctx.subCtx(d => d.expirationDate)} />
+                    </div>
+                </div>
                 {this.renderIssues()}
                 <fieldset>
                     {this.state.initialXmlDiagram ?

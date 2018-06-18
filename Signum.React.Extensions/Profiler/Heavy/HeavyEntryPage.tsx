@@ -74,12 +74,12 @@ export default class HeavyEntry extends React.Component<HeavyEntryProps, { entri
         const index = this.props.match.params.selectedIndex;
         Navigator.setTitle("Heavy Profiler > Entry " + index);
         if (this.state.entries == undefined)
-            return <h3>Heavy Profiler > Entry {index} (loading...) </h3>;
+            return <h3 className="display-6">Heavy Profiler > Entry {index} (loading...) </h3>;
 
         let current = this.state.entries.filter(a => a.fullIndex == this.props.match.params.selectedIndex).single();
         return (
             <div>
-                <h2><Link to="~/profiler/heavy">Heavy Profiler</Link> > Entry {index}</h2>
+                <h2 className="display-6"><Link to="~/profiler/heavy">Heavy Profiler</Link> > Entry {index}</h2>
                 <label><input type="checkbox" checked={this.state.asyncDepth} onChange={a => this.setState({ asyncDepth: a.currentTarget.checked })} />Async Stack</label>
                 <br />
                 {this.state.entries && <HeavyProfilerDetailsD3 entries={this.state.entries} selected={current} asyncDepth={this.state.asyncDepth} />}
