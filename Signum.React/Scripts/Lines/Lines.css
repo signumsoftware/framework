@@ -535,6 +535,7 @@ table.sf-multi-value {
 
 .sf-type-badge {
     border: 1px solid gray;
+    color: gray;
     display: inline-block;
     padding: 0.3em 0.4em 0.1em 0.4em;
     font-size: 75%;
