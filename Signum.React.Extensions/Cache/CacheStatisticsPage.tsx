@@ -58,9 +58,9 @@ export default class CacheStatisticsPage extends React.Component<CacheStatistics
             <div>
                 <h2>Cache Statistics</h2>
                 <div className="btn-toolbar">
-                    {this.state.isEnabled == true && <a href="#" onClick={this.handleDisabled} className="sf-button btn btn-light" style={{ color: "red" }}>Disable</a>}
-                    {this.state.isEnabled == false && <a href="#" onClick={this.handleEnabled} className="sf-button btn btn-light" style={{ color: "green" }}>Enabled</a>}
-                    {<a href="#" onClick={this.handleClear} className="sf-button btn btn-light" style={{ color: "blue" }}>Clear</a>}
+                    {this.state.isEnabled == true && <button onClick={this.handleDisabled} className="sf-button btn btn-light" style={{ color: "red" }}>Disable</button>}
+                    {this.state.isEnabled == false && <button onClick={this.handleEnabled} className="sf-button btn btn-light" style={{ color: "green" }}>Enabled</button>}
+                    {<button onClick={this.handleClear} className="sf-button btn btn-light" style={{ color: "blue" }}>Clear</button>}
                 </div >
                 <UncontrolledTabs id="tabs">
                     {this.state.tables &&
