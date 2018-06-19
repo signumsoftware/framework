@@ -237,6 +237,7 @@ namespace Signum.Engine
             }
         }
 
+
         public static void SaveListDisableIdentity<T>(IEnumerable<T> entities)
             where T : Entity
         {
@@ -403,7 +404,7 @@ namespace Signum.Engine
                     onDispose += () =>
                     {
                         SafeConsole.WriteColor(ConsoleColor.DarkMagenta, " REBUILD Multiple Indexes");
-                        multiIndexes.Select(i => SqlBuilder.EnableIndex(table.Name, i)).Combine(Spacing.Simple).ExecuteLeaves();
+                        multiIndexes.Select(i => SqlBuilder.RebuildIndex(table.Name, i)).Combine(Spacing.Simple).ExecuteLeaves();
                     };
                 }
             }
@@ -419,7 +420,7 @@ namespace Signum.Engine
                     onDispose += () =>
                     {
                         SafeConsole.WriteColor(ConsoleColor.DarkMagenta, " REBUILD Unique Indexes");
-                        uniqueIndexes.Select(i => SqlBuilder.EnableIndex(table.Name, i)).Combine(Spacing.Simple).ExecuteLeaves();
+                        uniqueIndexes.Select(i => SqlBuilder.RebuildIndex(table.Name, i)).Combine(Spacing.Simple).ExecuteLeaves();
                     };
                 }
             }
@@ -428,6 +429,17 @@ namespace Signum.Engine
             onDispose += () => Console.WriteLine();
 
             return new Disposable(onDispose);
+        }
+        
+        public static IDisposable DisableUniqueIndex(UniqueIndex index)
+        {
+            SafeConsole.WriteLineColor(ConsoleColor.DarkMagenta, " DISABLE Unique Index "  + index.IndexName);
+            SqlBuilder.DisableIndex(index.Table.Name, index.IndexName).ExecuteLeaves();
+            return new Disposable(() =>
+            {
+                SafeConsole.WriteLineColor(ConsoleColor.DarkMagenta, " REBUILD Unique Index " + index.IndexName);
+                SqlBuilder.RebuildIndex(index.Table.Name, index.IndexName).ExecuteLeaves();
+            });
         }
 
         public static List<string> GetIndixesNames(this ITable table, bool unique)

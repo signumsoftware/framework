@@ -914,7 +914,7 @@ namespace Signum.Engine
             using (Transaction tr = new Transaction())
             {
                 var dic = lites.AgGroupToDictionary(a => a.EntityType, gr =>
-                    RetrieveList(gr.Key, gr.Select(a => a.Id).ToList(), message).ToDictionary(a => a.Id));
+                    RetrieveList(gr.Key, gr.Select(a => a.Id).Distinct().ToList(), message).ToDictionaryEx(a => a.Id));
 
                 var result = lites.Select(l => (T)(object)dic[l.EntityType][l.Id]).ToList(); // keep same order
 

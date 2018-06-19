@@ -118,6 +118,8 @@ export default class SearchModal extends React.Component<SearchModalProps, { sho
         return openModal<void>(<SearchModal findOptions={findOptions}
             findMode={"Explore"}
             isMany={true}
-            title={modalOptions && modalOptions.title || getQueryNiceName(findOptions.queryName) } />);
+            title={modalOptions && modalOptions.title || getQueryNiceName(findOptions.queryName)}
+            searchControlProps={modalOptions && modalOptions.searchControlProps}
+        />);
     }
 }
