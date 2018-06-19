@@ -265,9 +265,8 @@ namespace Signum.Engine
                     .FormatWith(objectName.Schema.Database.ToString().SqlEscape(), indexName.SqlEscape(), objectName.OnDatabase(null).ToString()));
         }
 
-        public static SqlPreCommand CreateIndex(Index index)
+        public static SqlPreCommand CreateIndex(Index index, bool checkForUnique)
         {
-
             if (index is PrimaryClusteredIndex)
             {
                 var columns = index.Columns.ToString(c => c.Name.SqlEscape(), ", ");
@@ -275,24 +274,65 @@ namespace Signum.Engine
                 return new SqlPreCommandSimple($"ALTER TABLE {index.Table.Name} ADD CONSTRAINT {index.IndexName} PRIMARY KEY CLUSTERED({columns})");
             }
 
-            if (index is UniqueIndex uIndex && uIndex.ViewName != null)
+            if (index is UniqueIndex uIndex)
             {
-                ObjectName viewName = new ObjectName(uIndex.Table.Name.Schema, uIndex.ViewName);
+                if (uIndex.ViewName != null)
+                {
+                    ObjectName viewName = new ObjectName(uIndex.Table.Name.Schema, uIndex.ViewName);
 
-                var columns = index.Columns.ToString(c => c.Name.SqlEscape(), ", ");
+                    var columns = index.Columns.ToString(c => c.Name.SqlEscape(), ", ");
 
+                    SqlPreCommandSimple viewSql = new SqlPreCommandSimple($"CREATE VIEW {viewName} WITH SCHEMABINDING AS SELECT {columns} FROM {uIndex.Table.Name.ToString()} WHERE {uIndex.Where}")
+                    { GoBefore = true, GoAfter = true };
 
-                SqlPreCommandSimple viewSql = new SqlPreCommandSimple($"CREATE VIEW {viewName} WITH SCHEMABINDING AS SELECT {columns} FROM {uIndex.Table.Name.ToString()} WHERE {uIndex.Where}")
-                { GoBefore = true, GoAfter = true };
+                    SqlPreCommandSimple indexSql = new SqlPreCommandSimple($"CREATE UNIQUE CLUSTERED INDEX {uIndex.IndexName} ON {viewName}({columns})");
 
-                SqlPreCommandSimple indexSql = new SqlPreCommandSimple($"CREATE UNIQUE CLUSTERED INDEX {uIndex.IndexName} ON {viewName}({columns})");
-
-                return SqlPreCommand.Combine(Spacing.Simple, viewSql, indexSql);
+                    return SqlPreCommand.Combine(Spacing.Simple, RemoveDuplicatesIfNecessary(uIndex), viewSql, indexSql);
+                }
+                else
+                {
+                    return SqlPreCommand.Combine(Spacing.Double, 
+                        RemoveDuplicatesIfNecessary(uIndex), 
+                        CreateIndexBasic(index, false));
+                }
             }
-            else
+            else 
             {
                 return CreateIndexBasic(index, forHistoryTable: false);
             }
+        }
+
+        public static SqlPreCommand RemoveDuplicatesIfNecessary(UniqueIndex uniqueIndex)
+        {
+            var primaryKey = uniqueIndex.Table.Columns.Values.Where(a => a.PrimaryKey).Only();
+
+            if (primaryKey == null)
+                return null;
+
+            var columns = uniqueIndex.Columns.ToString(c => c.Name.SqlEscape(), ", ");
+
+            var count = (int)Executor.ExecuteScalar(
+                $@"SELECT Count(*) FROM {uniqueIndex.Table.Name} 
+WHERE {primaryKey.Name} NOT IN
+(
+    SELECT MIN({primaryKey.Name})
+    FROM {uniqueIndex.Table.Name}
+    GROUP BY {columns}
+)");
+
+            if (count == 0)
+                return null;
+
+            if (SafeConsole.Ask($"There are {count} rows in {uniqueIndex.Table.Name} with the same {columns}. Generate DELETE duplicates script?"))
+                return new SqlPreCommandSimple($@"DELETE {uniqueIndex.Table.Name} 
+WHERE {primaryKey.Name} NOT IN
+(
+    SELECT MIN({primaryKey.Name})
+    FROM {uniqueIndex.Table.Name}
+    GROUP BY {columns}
+)");
+
+            return null;
         }
 
         public static SqlPreCommand CreateIndexBasic(Index index, bool forHistoryTable)

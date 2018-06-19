@@ -358,7 +358,7 @@ namespace Signum.Engine
 
                 SqlPreCommand addIndices =
                     Synchronizer.SynchronizeScript(Spacing.Double, modelTables, databaseTables,
-                    createNew: (tn, tab) => modelIndices[tab].Values.Where(a => !(a is PrimaryClusteredIndex)).Select(SqlBuilder.CreateIndex).Combine(Spacing.Simple),
+                    createNew: (tn, tab) => modelIndices[tab].Values.Where(a => !(a is PrimaryClusteredIndex)).Select(index => SqlBuilder.CreateIndex(index, checkForUnique: false)).Combine(Spacing.Simple),
                     removeOld: null,
                     mergeBoth: (tn, tab, dif) =>
                     {
@@ -369,9 +369,9 @@ namespace Signum.Engine
                         Dictionary<string, Index> modelIxs = modelIndices[tab];
 
                         var controlledIndexes = Synchronizer.SynchronizeScript(Spacing.Simple, modelIxs, dif.Indices, 
-                            createNew: (i, mix) => mix is UniqueIndex || mix.Columns.Any(isNew) || SafeConsole.Ask(ref createMissingFreeIndexes, "Create missing non-unique index {0} in {1}?".FormatWith(mix.IndexName, tab.Name)) ? SqlBuilder.CreateIndex(mix) : null,
+                            createNew: (i, mix) => mix is UniqueIndex || mix.Columns.Any(isNew) || SafeConsole.Ask(ref createMissingFreeIndexes, "Create missing non-unique index {0} in {1}?".FormatWith(mix.IndexName, tab.Name)) ? SqlBuilder.CreateIndex(mix, checkForUnique: true) : null,
                             removeOld: null,
-                            mergeBoth: (i, mix, dix) => !dix.IndexEquals(dif, mix) ? SqlBuilder.CreateIndex(mix) :
+                            mergeBoth: (i, mix, dix) => !dix.IndexEquals(dif, mix) ? SqlBuilder.CreateIndex(mix, checkForUnique: true) :
                                 mix.IndexName != dix.IndexName ? SqlBuilder.RenameIndex(tab.Name, dix.IndexName, mix.IndexName) : null);
 
                         return SqlPreCommand.Combine(Spacing.Simple, controlledIndexes);
