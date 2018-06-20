@@ -319,7 +319,7 @@ namespace Signum.Engine.Word
 
         public abstract override OpenXmlElement CloneNode(bool deep);
 
-        public abstract void Synchronize(SyncronizationContext sc);
+        public abstract void Synchronize(SynchronizationContext sc);
     }
 
     public class TokenNode : BaseNode
@@ -384,7 +384,7 @@ namespace Signum.Engine.Word
             return new TokenNode(this);
         }
 
-        public override void Synchronize(SyncronizationContext sc)
+        public override void Synchronize(SynchronizationContext sc)
         {
             ValueProvider.Synchronize(sc, "@");
 
@@ -448,7 +448,7 @@ namespace Signum.Engine.Word
             ValueProvider.Declare(variables);
         }
 
-        public override void Synchronize(SyncronizationContext sc)
+        public override void Synchronize(SynchronizationContext sc)
         {
             ValueProvider.Synchronize(sc, "@declare");
         }
@@ -500,7 +500,7 @@ namespace Signum.Engine.Word
             }
         }
 
-        public override void Synchronize(SyncronizationContext sc)
+        public override void Synchronize(SynchronizationContext sc)
         {
             foreach (var item in this.Descendants<BaseNode>().ToList())
             {
@@ -698,7 +698,7 @@ namespace Signum.Engine.Word
 
         }
 
-        public override void Synchronize(SyncronizationContext sc)
+        public override void Synchronize(SynchronizationContext sc)
         {
             ValueProvider.Synchronize(sc, "@foreach");
 
@@ -881,7 +881,7 @@ namespace Signum.Engine.Word
             }
         }
 
-        public override void Synchronize(SyncronizationContext sc)
+        public override void Synchronize(SynchronizationContext sc)
         {
             this.Condition.Synchronize(sc, "@any");
             
@@ -1044,7 +1044,7 @@ namespace Signum.Engine.Word
                 this.Parent.RemoveChild(this);
         }
 
-        public override void Synchronize(SyncronizationContext sc)
+        public override void Synchronize(SynchronizationContext sc)
         {
             this.Condition.Synchronize(sc, "@if");
             

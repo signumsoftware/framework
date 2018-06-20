@@ -264,7 +264,7 @@ namespace Signum.Engine.Mailing
 
 
 
-        private static string Synchronize(string text, SyncronizationContext sc)
+        private static string Synchronize(string text, SynchronizationContext sc)
         {
             BlockNode node = new TemplateWalker(text, sc.QueryDescription, sc.ModelType).ParseSync();
 
@@ -325,7 +325,7 @@ namespace Signum.Engine.Mailing
 
                     foreach (var item in et.Messages)
                     {
-                        SyncronizationContext sc = new SyncronizationContext
+                        SynchronizationContext sc = new SynchronizationContext
                         {
                             ModelType = et.SystemEmail.ToType(),
                             QueryDescription = qd,

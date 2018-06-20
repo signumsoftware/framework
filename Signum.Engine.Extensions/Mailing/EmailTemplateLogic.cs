@@ -125,8 +125,8 @@ namespace Signum.Engine.Mailing
                 GlobalValueProvider.RegisterGlobalVariable("Now", _ => TimeZoneManager.Now);
                 GlobalValueProvider.RegisterGlobalVariable("Today", _ => TimeZoneManager.Now.Date, "d");
 
-                sb.Schema.Synchronizing += Schema_Synchronize_Tokens;
-                sb.Schema.Synchronizing += Schema_Syncronize_DefaultTemplates;
+                sb.Schema.Synchronizing += Schema_Synchronizing_Tokens;
+                sb.Schema.Synchronizing += Schema_Synchronizing_DefaultTemplates;
 
                 sb.Schema.Table<SystemEmailEntity>().PreDeleteSqlSync += EmailTemplateLogic_PreDeleteSqlSync;
 
@@ -299,7 +299,7 @@ namespace Signum.Engine.Mailing
             }
         }
 
-        static SqlPreCommand Schema_Synchronize_Tokens(Replacements replacements)
+        static SqlPreCommand Schema_Synchronizing_Tokens(Replacements replacements)
         {
             if (AvoidSynchronizeTokens)
                 return null;
@@ -315,7 +315,7 @@ namespace Signum.Engine.Mailing
             return cmd;
         }
 
-        static SqlPreCommand Schema_Syncronize_DefaultTemplates(Replacements replacements)
+        static SqlPreCommand Schema_Synchronizing_DefaultTemplates(Replacements replacements)
         {
             if (AvoidSynchronizeDefaultTemplates)
                 return null;

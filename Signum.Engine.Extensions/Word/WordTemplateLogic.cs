@@ -373,7 +373,7 @@ namespace Signum.Engine.Word
 
                 try
                 {
-                    SyncronizationContext sc = new SyncronizationContext
+                    SynchronizationContext sc = new SynchronizationContext
                     {
                         ModelType = template.SystemWordTemplate.ToType(),
                         QueryDescription = qd,

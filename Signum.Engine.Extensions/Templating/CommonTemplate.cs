@@ -218,7 +218,7 @@ namespace Signum.Engine.Templating
         }
     }
 
-    public class SyncronizationContext
+    public class SynchronizationContext
     {
         public ScopedDictionary<string, ValueProviderBase> Variables;
         public Type ModelType;
