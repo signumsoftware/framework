@@ -82,9 +82,16 @@ interface BigValueBadgeProps {
     iconColor?: string;
 }
 
-export class BigValueSearchCounter extends React.Component<BigValueBadgeProps> {
+export class BigValueSearchCounter extends React.Component<BigValueBadgeProps, { isRTL: boolean; }> {
+
+    constructor(props: BigValueBadgeProps) {
+        super(props);
+
+        this.state = { isRTL: document.body.classList.contains("rtl") };
+    }
 
     vsc!: ValueSearchControl;
+
     render() {
 
         return (
@@ -99,7 +106,7 @@ export class BigValueSearchCounter extends React.Component<BigValueBadgeProps> {
                         <div className="col-3">
                             <i className={classes(this.props.iconName, "fa-4x")} style={{ color: this.props.iconColor }}></i>
                         </div>
-                        <div className="col-9 flip text-right">
+                        <div className={classes("col-9 flip", this.state.isRTL ? "text-left" : "text-right")}>
                             <h1>
                                 <ValueSearchControl
                                     ref={vsc => {
@@ -111,7 +118,7 @@ export class BigValueSearchCounter extends React.Component<BigValueBadgeProps> {
                             </h1>
                         </div>
                     </div>
-                    <div className="flip text-right">
+                    <div className={classes("flip", this.state.isRTL ? "text-left" : "text-right")}>
                         <h6 className="large">{this.props.text || getQueryNiceName(this.props.findOptions.queryName)}</h6>
                     </div>
                 </div>
