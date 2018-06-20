@@ -230,7 +230,7 @@ namespace Signum.Entities.MachineLearning
         [NotNullValidator]
         public QueryTokenEmbedded Token { get; set; }
 
-        public PredictorColumnEncoding Encoding { get; set; }
+        public PredictorColumnEncodingSymbol Encoding { get; set; }
 
         public PredictorColumnNullHandling NullHandling { get; set; }
 
@@ -277,19 +277,32 @@ namespace Signum.Entities.MachineLearning
         Max,
     }
 
-    public enum PredictorColumnEncoding
+    [Serializable]
+    public class PredictorColumnEncodingSymbol : Symbol
     {
-        None,
-        OneHot,
-        Codified,
+        private PredictorColumnEncodingSymbol() { }
+
+        public PredictorColumnEncodingSymbol(Type declaringType, string fieldName) :
+            base(declaringType, fieldName)
+        {
+        }
+    }
+
+    [AutoInit]
+    public static class StandartEncodings
+    {
+        public static PredictorColumnEncodingSymbol None;
+        public static PredictorColumnEncodingSymbol OneHot;
+        public static PredictorColumnEncodingSymbol Codified;
+
         [Description("Normalize Z-Score")]
-        NormalizeZScore,
+        public static PredictorColumnEncodingSymbol NormalizeZScore;
 
         [Description("Normalize Min-Max")]
-        NormalizeMinMax,
+        public static PredictorColumnEncodingSymbol NormalizeMinMax;
 
         [Description("Normalize Log")]
-        NormalizeLog,
+        public static PredictorColumnEncodingSymbol NormalizeLog; 
     }
 
     public enum PredictorState
@@ -373,7 +386,7 @@ namespace Signum.Entities.MachineLearning
         [NotNullValidator]
         public QueryTokenEmbedded Token { get; set; }
 
-        public PredictorColumnEncoding? Encoding { get; set; }
+        public PredictorColumnEncodingSymbol Encoding { get; set; }
 
         public PredictorColumnNullHandling? NullHandling { get; set; }
 

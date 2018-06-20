@@ -110,46 +110,6 @@ namespace Signum.Engine.MachineLearning
             ctx.SetColums(columns.ToArray());
         }
 
-        private static List<PredictorCodification> ExpandColumns(PredictorColumnEncoding encoding, ResultColumn rc, Func<PredictorCodification> factory)
-        {
-            switch (encoding)
-            {
-                case PredictorColumnEncoding.None:
-                    return new List<PredictorCodification>
-                    {
-                        factory()
-                    };
-                case PredictorColumnEncoding.OneHot:
-                    return rc.Values.Cast<object>().NotNull().Distinct().Select(v =>
-                    {
-                        var pc = factory();
-                        pc.IsValue = v;
-                        return pc;
-                    }).ToList();
-                case PredictorColumnEncoding.Codified:
-                    {
-                        var pc = factory();
-                        pc.CodedValues = rc.Values.Cast<object>().Distinct().ToArray();
-                        pc.ValuesToIndex = pc.CodedValues.Select((v, i) => KVP.Create(v, i)).ToDictionary();
-                        return new List<PredictorCodification> { pc };
-                    }
-                case PredictorColumnEncoding.NormalizeZScore:
-                case PredictorColumnEncoding.NormalizeMinMax:
-                case PredictorColumnEncoding.NormalizeLog:
-                    {
-                        var values = rc.Values.Cast<object>().NotNull().Select(a => Convert.ToSingle(a)).ToList();
-                        var pc = factory();
-                        pc.Average = values.Count == 0 ? 0 : values.Average();
-                        pc.StdDev = values.Count == 0 ? 1 : values.StdDev();
-                        pc.Min = values.Count == 0 ? 0 : values.Min();
-                        pc.Max = values.Count == 0 ? 1 : values.Max();
-                        return new List<PredictorCodification> { pc };
-                    };
-                default:
-                    throw new InvalidOperationException("Unexcpected Encoding");
-            }
-        }
-
         static QueryRequest GetMainQueryRequest(PredictorMainQueryEmbedded mq)
         {
             return new QueryRequest
@@ -258,7 +218,7 @@ namespace Signum.Engine.MachineLearning
 
         public QueryToken Token => PredictorColumn?.Token.Token ?? PredictorSubQueryColumn.Token.Token;
         public PredictorColumnNullHandling NullHandling => PredictorColumn?.NullHandling ?? PredictorSubQueryColumn.NullHandling.Value; 
-        public PredictorColumnEncoding Encoding => PredictorColumn?.Encoding ?? PredictorSubQueryColumn.Encoding.Value;
+        public PredictorColumnEncodingSymbol Encoding => PredictorColumn?.Encoding ?? PredictorSubQueryColumn.Encoding;
         public PredictorColumnUsage Usage => PredictorColumn?.Usage ?? PredictorSubQueryColumn.Usage.ToPredictorColumnUsage();
 
         public override string ToString()
@@ -272,20 +232,6 @@ namespace Signum.Engine.MachineLearning
                 IsValue == null ? null : $"(IsValue={IsValue})",
                 CodedValues == null ? null : $"(Values={CodedValues.Length})",
             }.NotNull().ToString(" ");
-        }
-
-        public float Denormalize(float value)
-        {
-            if (Encoding == PredictorColumnEncoding.NormalizeZScore)
-                return Average.Value + (StdDev.Value * value);
-
-            if (Encoding == PredictorColumnEncoding.NormalizeMinMax)
-                return Min.Value + ((Max.Value - Min.Value) * value);
-
-            if (Encoding == PredictorColumnEncoding.NormalizeLog)
-                return (float)Math.Exp((double)value);
-
-            throw new InvalidOperationException();
         }
     }
 

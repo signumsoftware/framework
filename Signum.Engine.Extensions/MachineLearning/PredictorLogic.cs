@@ -295,7 +295,7 @@ namespace Signum.Engine.MachineLearning
 
             var algorithm = Algorithms.GetOrThrow(p.Algorithm);
             var usage = column.Usage == PredictorSubQueryColumnUsage.Input ? PredictorColumnUsage.Input : PredictorColumnUsage.Output;
-            return algorithm.ValidateEncodingProperty(p, sq, column.Encoding.Value, usage, column.Token);
+            return algorithm.ValidateEncodingProperty(p, sq, column.Encoding, usage, column.Token);
         }
 
         public static void TrainSync(this PredictorEntity p, bool autoReset = true, Action<string, decimal?> onReportProgres = null, CancellationToken? cancellationToken = null)
