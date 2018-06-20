@@ -36,31 +36,37 @@ namespace Signum.Engine.Authorization
 
                 if (config.DomainName.HasText() && (domainName == null || config.DomainName.ToLower() == domainName?.ToLower()))
                 {
-                    using (PrincipalContext pc = new PrincipalContext(ContextType.Domain, config.DomainName))
+                    try
                     {
-                        if (pc.ValidateCredentials(localName + "@" + config.DomainName, password))
+                        using (PrincipalContext pc = new PrincipalContext(ContextType.Domain, config.DomainName))
                         {
-                            user = AuthLogic.RetrieveUser(userName);
-
-                            if (user == null)
+                            if (pc.ValidateCredentials(localName + "@" + config.DomainName, password))
                             {
-                                if (this.AutoCreateUser != null)
+                                user = AuthLogic.RetrieveUser(userName);
+
+                                if (user == null)
                                 {
-                                    user = this.AutoCreateUser(pc);
+                                    if (this.AutoCreateUser != null)
+                                    {
+                                        user = this.AutoCreateUser(pc);
+                                    }
+                                }
+
+                                if (user != null)
+                                {
+                                    AuthLogic.OnUserLogingIn(user);
+                                    return user;
+                                }
+                                else
+                                {
+                                    throw new InvalidOperationException(ActiveDirectoryAuthorizerMessage.ActiveDirectoryUser0IsNotAssociatedWithAUserInThisApplication.NiceToString(localName));
                                 }
                             }
-
-                            if (user != null)
-                            {
-                                AuthLogic.OnUserLogingIn(user);
-                                return user;
-                            }
-                            else
-                            {
-                                throw new InvalidOperationException(ActiveDirectoryAuthorizerMessage.ActiveDirectoryUser0IsNotAssociatedWithAUserInThisApplication.NiceToString(localName));
-                            }
                         }
-
+                    }
+                    catch (PrincipalServerDownException)
+                    {
+                        // Do nothing for this kind of Active Directory exception
                     }
                 }
 
