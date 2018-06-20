@@ -46,7 +46,7 @@ export default class CollapsableCard extends React.Component<CollapsableCardProp
 
         this.state = {
             isOpen: this.props.defaultOpen == true,
-            isRTL: document.body.classList.contains("rtl-mode"),
+            isRTL: document.body.classList.contains("rtl"),
         };
     }
 

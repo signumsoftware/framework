@@ -3,7 +3,7 @@ import { WorkflowEntity, WorkflowModel, WorkflowEntitiesDictionary, BpmnEntityPa
 import { TypeContext, ValueLine, EntityLine, LiteAutocompleteConfig } from '../../../../Framework/Signum.React/Scripts/Lines'
 import { is, JavascriptMessage, toLite, ModifiableEntity, Lite, Entity } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
 import * as Entities from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
-import { Dic } from '../../../../Framework/Signum.React/Scripts/Globals';
+import { Dic, classes } from '../../../../Framework/Signum.React/Scripts/Globals';
 import { API, executeWorkflowSave } from '../WorkflowClient'
 import BpmnModelerComponent from '../Bpmn/BpmnModelerComponent'
 import MessageModal from "../../../../Framework/Signum.React/Scripts/Modals/MessageModal";
@@ -80,7 +80,7 @@ export default class Workflow extends React.Component<WorkflowProps, WorkflowSta
     }
 
     render() {
-        var ctx = this.props.ctx;
+        var ctx = this.props.ctx.subCtx({ labelColumns: 4 });
         return (
             <div>
                 <div className="row">
@@ -92,14 +92,14 @@ export default class Workflow extends React.Component<WorkflowProps, WorkflowSta
                     onRemove={this.handleMainEntityTypeChange} />
                     </div>
                     <div className="col-sm-6">
-                        <ValueLine ctx={ctx.subCtx(d => d.mainEntityStrategy)} valueColumns={3} />
-                        <ValueLine ctx={ctx.subCtx(d => d.expirationDate)} valueColumns={3} />
+                        <ValueLine ctx={ctx.subCtx(d => d.mainEntityStrategy)} />
+                        <ValueLine ctx={ctx.subCtx(d => d.expirationDate)} />
                     </div>
                 </div>
                 {this.renderIssues()}
                 <fieldset>
                     {this.state.initialXmlDiagram ?
-                        <div className="code-container">
+                        <div>
                             <BpmnModelerComponent ref={m => this.bpmnModelerComponent = m}
                                 workflow={ctx.value}
                                 diagramXML={this.state.initialXmlDiagram}
@@ -121,7 +121,7 @@ export default class Workflow extends React.Component<WorkflowProps, WorkflowSta
             this.state.issues.some(a => a.Type == "Error") ? "danger" : "warning";
 
         return (
-            <div className={`card border-${color}`} role="alert">
+            <div className={classes(`card border-${color}`, "code-container")} role="alert">
                 <h5 className={`card-header border-${color} text-${color}`}>Worflow Issues</h5>
                 <ul style={{ listStyleType: "none", marginBottom: "0px" }} className="card-body">
 
