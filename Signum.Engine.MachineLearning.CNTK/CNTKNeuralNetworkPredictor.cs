@@ -28,9 +28,7 @@ namespace Signum.Engine.MachineLearning.CNTK
             { DefaultColumnEncodings.NormalizeMinMax, new NormalizeMinMaxCNTKEncoding() },
             { DefaultColumnEncodings.NormalizeLog, new NormalizeLogCNTKEncoding() },
         };
-
-
-
+        
         public void InitialSetup()
         {
             if (!Environment.Is64BitProcess)
@@ -56,9 +54,9 @@ namespace Signum.Engine.MachineLearning.CNTK
             return Encodings.GetOrThrow(encoding).ValidateEncodingProperty(predictor, subQuery, encoding, usage, token);
         }
 
-        public List<PredictorCodification> ExpandColumns(PredictorColumnEncodingSymbol encoding, ResultColumn resultColumn)
+        public List<PredictorCodification> ExpandColumns(PredictorColumnEncodingSymbol encoding, ResultColumn resultColumn, PredictorColumnBase column)
         {
-            return Encodings.GetOrThrow(encoding).ExpandColumns(resultColumn);
+            return Encodings.GetOrThrow(encoding).ExpandColumns(resultColumn, column);
         }
 
         public IEnumerable<PredictorColumnEncodingSymbol> GetRegisteredSymbols()
@@ -93,15 +91,15 @@ namespace Signum.Engine.MachineLearning.CNTK
             var nn = (NeuralNetworkSettingsEntity)p.AlgorithmSettings;
 
             DeviceDescriptor device = GetDevice(nn);
-            Variable inputVariable = Variable.InputVariable(new[] { ctx.InputColumns.Count }, DataType.Float, "input");
-            Variable outputVariable = Variable.InputVariable(new[] { ctx.OutputColumns.Count }, DataType.Float, "output");
+            Variable inputVariable = Variable.InputVariable(new[] { ctx.InputCodifications.Count }, DataType.Float, "input");
+            Variable outputVariable = Variable.InputVariable(new[] { ctx.OutputCodifications.Count }, DataType.Float, "output");
 
             Variable currentVar = inputVariable;
             nn.HiddenLayers.ForEach((layer, i) =>
             {
                 currentVar = NetworkBuilder.DenseLayer(currentVar, layer.Size, device, layer.Activation, layer.Initializer, p.Settings.Seed ?? 0, "hidden" + i);
             });
-            Function calculatedOutputs = NetworkBuilder.DenseLayer(currentVar, ctx.OutputColumns.Count, device, nn.OutputActivation, nn.OutputInitializer, p.Settings.Seed ?? 0, "output");
+            Function calculatedOutputs = NetworkBuilder.DenseLayer(currentVar, ctx.OutputCodifications.Count, device, nn.OutputActivation, nn.OutputInitializer, p.Settings.Seed ?? 0, "output");
 
             Function loss = NetworkBuilder.GetEvalFunction(nn.LossFunction, calculatedOutputs, outputVariable);
             Function evalError = NetworkBuilder.GetEvalFunction(nn.EvalErrorFunction, calculatedOutputs, outputVariable);
@@ -127,8 +125,8 @@ namespace Signum.Engine.MachineLearning.CNTK
                 ctx.ReportProgress("Training Minibatches", (i + 1) / (decimal)numMinibatches);
                 {
                     var trainMinibatch = 0.To(minibachtSize).Select(_ => rand.NextElement(training)).ToList();
-                    using (Value inputValue = CreateValue(ctx, trainMinibatch, ctx.InputColumns, device))
-                    using (Value outputValue = CreateValue(ctx, trainMinibatch, ctx.OutputColumns, device))
+                    using (Value inputValue = CreateValue(ctx, trainMinibatch, ctx.InputCodifications, device))
+                    using (Value outputValue = CreateValue(ctx, trainMinibatch, ctx.OutputCodifications, device))
                     {
                         trainer.TrainMinibatch(new Dictionary<Variable, Value>()
                         {
@@ -160,8 +158,8 @@ namespace Signum.Engine.MachineLearning.CNTK
                     if (isLast || (i % nn.SaveValidationProgressEvery) == 0 || ctx.StopTraining)
                     {
                         var validateMinibatch = 0.To(minibachtSize).Select(_ => rand.NextElement(validation)).ToList();
-                        using (Value inputValValue = CreateValue(ctx, validateMinibatch, ctx.InputColumns, device))
-                        using (Value outputValValue = CreateValue(ctx, validateMinibatch, ctx.OutputColumns, device))
+                        using (Value inputValValue = CreateValue(ctx, validateMinibatch, ctx.InputCodifications, device))
+                        using (Value outputValValue = CreateValue(ctx, validateMinibatch, ctx.OutputCodifications, device))
                         {
                             var inputs = new Dictionary<Variable, Value>()
                             {
@@ -225,16 +223,22 @@ namespace Signum.Engine.MachineLearning.CNTK
                     PredictorCodification c = codifications[j];
 
                     object value;
-                    if (c.SubQuery == null)
-                        value = mainRow[c.PredictorColumnIndex];
+                    if (c.Column is PredictorColumnMain pcm)
+                    {
+                        value = mainRow[pcm.PredictorColumnIndex];
+                    }
+                    else if (c.Column is PredictorColumnSubQuery pcsq)
+                    {
+                        var sq = ctx.SubQueries.GetOrThrow(pcsq.SubQuery);
+                        var rowValues = sq.GroupedValues.TryGetC(mainKey)?.TryGetC(pcsq.Keys);
+                        value = rowValues == null ? null : rowValues[sq.ColumnIndexToValueIndex[pcsq.PredictorColumnIndex]];
+                    }
                     else
                     {
-                        var sq = ctx.SubQueries.GetOrThrow(c.SubQuery);
-                        var rowValues = sq.GroupedValues.TryGetC(mainKey)?.TryGetC(c.Keys);
-                        value = rowValues == null ? null : rowValues[sq.ColumnIndexToValueIndex[c.PredictorColumnIndex]];
+                        throw new UnexpectedValueException(c.Column);
                     }
 
-                    var enc = Encodings.GetOrThrow(c.Encoding);
+                    var enc = Encodings.GetOrThrow(c.Column.Encoding);
 
                     values[i * codifications.Count + j] = enc.EncodeValue(value, c);
                 }
@@ -295,20 +299,24 @@ namespace Signum.Engine.MachineLearning.CNTK
             {
                 var c = ctx.InputColumns[i];
                 object value;
-                if (c.SubQuery != null)
+                if (c.Column is PredictorColumnMain pcm)
                 {
-                    var sq = input.SubQueries.GetOrThrow(c.SubQuery);
+                    value = input.MainQueryValues.GetOrThrow(pcm.PredictorColumn);
+                }
+                else if (c.Column is PredictorColumnSubQuery pcsq)
+                {
+                    var sq = input.SubQueries.GetOrThrow(pcsq.SubQuery);
 
-                    var dic = sq.SubQueryGroups.TryGetC(c.Keys);
+                    var dic = sq.SubQueryGroups.TryGetC(pcsq.Keys);
 
-                    value = dic == null ? null : dic.GetOrThrow(c.PredictorSubQueryColumn);
+                    value = dic == null ? null : dic.GetOrThrow(pcsq.PredictorSubQueryColumn);
                 }
                 else
                 {
-                    value = input.MainQueryValues.GetOrThrow(c.PredictorColumn);
+                    throw new UnexpectedValueException(c.Column);
                 }
 
-                var enc = Encodings.GetOrThrow(c.Encoding);
+                var enc = Encodings.GetOrThrow(c.Column.Encoding);
                  
                 values[i] = enc.EncodeValue(value, c);
             }

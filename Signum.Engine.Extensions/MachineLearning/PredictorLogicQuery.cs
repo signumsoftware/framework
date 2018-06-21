@@ -78,13 +78,13 @@ namespace Signum.Engine.MachineLearning
             for (int i = 0; i < mainResult.Columns.Length; i++)
             {
                 var col = ctx.Predictor.MainQuery.Columns[i];
-                var list = algorithm.ExpandColumns(col.Encoding, mainResult.Columns[i]);
-                list.ForEach(p => 
+                var mainCol = new PredictorColumnMain
                 {
-                    p.PredictorColumnIndex = i;
-                    p.PredictorColumn = col;
-                });
-                columns.AddRange(list);
+                    PredictorColumn = col,
+                    PredictorColumnIndex = i,
+                };
+                var mainCodifications = algorithm.ExpandColumns(col.Encoding, mainResult.Columns[i], mainCol);
+                columns.AddRange(mainCodifications);
             }
             
             foreach (var sq in ctx.SubQueries.Values)
@@ -98,20 +98,20 @@ namespace Signum.Engine.MachineLearning
                     foreach (var vc in sq.ValueColumns)
                     {
                         var col = sq.SubQueryEntity.Columns[vc.Index];
-                        var list = algorithm.ExpandColumns(col.Encoding, vc);
-                        list.ForEach(p =>
+                        var subCol = new PredictorColumnSubQuery
                         {
-                            p.PredictorColumnIndex = vc.Index;
-                            p.PredictorSubQueryColumn = col;
-                            p.SubQuery = sq.SubQueryEntity;
-                            p.Keys = k;
-                        });
-                        columns.AddRange(list);
+                            PredictorColumnIndex = vc.Index,
+                            PredictorSubQueryColumn = col,
+                            SubQuery = sq.SubQueryEntity,
+                            Keys = k,
+                        };
+                        var subQueryCodifications = algorithm.ExpandColumns(col.Encoding, vc, subCol);
+                        columns.AddRange(subQueryCodifications);
                     }
                 }
             }
             
-            ctx.SetColums(columns.ToArray());
+            ctx.SetCodifications(columns.ToArray());
         }
 
         static QueryRequest GetMainQueryRequest(PredictorMainQueryEmbedded mq)
@@ -189,50 +189,72 @@ namespace Signum.Engine.MachineLearning
 
     }
 
-    
-
-    public class PredictorCodification
+    public abstract class PredictorColumnBase
     {
-        public int Index;
-
         //Index of PredictorColumn in the MainQuery/SubQuery
         public int PredictorColumnIndex;
 
-        //Only for MainQuery
+        public abstract PredictorColumnUsage Usage { get; }
+        public abstract QueryToken Token { get; }
+        public abstract PredictorColumnNullHandling NullHandling { get; }
+        public abstract PredictorColumnEncodingSymbol Encoding { get; }
+    }
+
+    public class PredictorColumnMain : PredictorColumnBase
+    {
         public PredictorColumnEmbedded PredictorColumn;
-        
-        //Only for sub queries (values inside of collections)
+
+        public override PredictorColumnUsage Usage => PredictorColumn.Usage;
+        public override QueryToken Token => PredictorColumn.Token.Token;
+        public override PredictorColumnNullHandling NullHandling => PredictorColumn.NullHandling;
+        public override PredictorColumnEncodingSymbol Encoding => PredictorColumn.Encoding;
+
+        public override string ToString()
+        {
+            return $"{Usage} {Token}";
+        }
+    }
+
+    public class PredictorColumnSubQuery : PredictorColumnBase
+    {
         public PredictorSubQueryColumnEmbedded PredictorSubQueryColumn;
         public PredictorSubQueryEntity SubQuery;
         public object[] Keys;
+
+        public override PredictorColumnUsage Usage => PredictorSubQueryColumn.Usage.ToPredictorColumnUsage();
+        public override QueryToken Token => PredictorSubQueryColumn.Token.Token;
+        public override PredictorColumnNullHandling NullHandling => PredictorSubQueryColumn.NullHandling.Value;
+        public override PredictorColumnEncodingSymbol Encoding => PredictorSubQueryColumn.Encoding;
+
+        public override string ToString()
+        {
+            return $"{Usage} {Token}{(Keys == null ? null : $" (Keys={Keys.ToString(", ")})")}";
+        }
+    }
+
+    public class PredictorCodification
+    {
+        public PredictorCodification(PredictorColumnBase column)
+        {
+            this.Column = column;
+        }
+
+        public int Index;
+
+        public PredictorColumnBase Column;
         
         //Only for 1-hot encoding in the column (i.e: Neuronal Networks)
         public object IsValue;
-
-        //Serves as Codification (i.e: Bayes)
-        public Dictionary<object, int> ValuesToIndex;
-
+        
         public float? Average;
         public float? StdDev;
 
         public float? Min;
         public float? Max;
 
-        public QueryToken Token => PredictorColumn?.Token.Token ?? PredictorSubQueryColumn.Token.Token;
-        public PredictorColumnNullHandling NullHandling => PredictorColumn?.NullHandling ?? PredictorSubQueryColumn.NullHandling.Value; 
-        public PredictorColumnEncodingSymbol Encoding => PredictorColumn?.Encoding ?? PredictorSubQueryColumn.Encoding;
-        public PredictorColumnUsage Usage => PredictorColumn?.Usage ?? PredictorSubQueryColumn.Usage.ToPredictorColumnUsage();
-
         public override string ToString()
         {
-            return new[]
-            {
-                Usage.ToString(),
-                Index.ToString(),
-                Token.ToString(),
-                Keys == null ? null : $"(Key={Keys.ToString(", ")})",
-                IsValue == null ? null : $"(IsValue={IsValue})",
-            }.NotNull().ToString(" ");
+            return $"{Index} {Column}{(IsValue == null ? null : $" (IsValue={IsValue})")}";
         }
     }
 

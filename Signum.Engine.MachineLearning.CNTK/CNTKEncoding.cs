@@ -14,7 +14,7 @@ namespace Signum.Engine.MachineLearning.CNTK
     public interface ICNTKEncoding
     {
         string ValidateEncodingProperty(PredictorEntity predictor, PredictorSubQueryEntity subQuery, PredictorColumnEncodingSymbol encoding, PredictorColumnUsage usage, QueryTokenEmbedded token);
-        List<PredictorCodification> ExpandColumns(ResultColumn rc);
+        List<PredictorCodification> ExpandColumns(ResultColumn rc, PredictorColumnBase column);
         float EncodeValue(object value, PredictorCodification c);
         object DecodeValue(QueryToken token, List<PredictorCodification> cols, float[] outputValues);
     }
@@ -23,14 +23,14 @@ namespace Signum.Engine.MachineLearning.CNTK
     {
         public static object GetDefaultValue(PredictorCodification c)
         {
-            switch (c.NullHandling)
+            switch (c.Column.NullHandling)
             {
                 case PredictorColumnNullHandling.Zero: return 0;
-                case PredictorColumnNullHandling.Error: throw new Exception($"Null found on {c.Token} of {c.SubQuery?.ToString() ?? "MainQuery"}");
+                case PredictorColumnNullHandling.Error: throw new Exception($"Null found on {c.Column.Token} of {(c.Column is PredictorColumnSubQuery pcsq ? pcsq.SubQuery.ToString() : "MainQuery")}");
                 case PredictorColumnNullHandling.Average: return c.Average;
                 case PredictorColumnNullHandling.Min: return c.Min;
                 case PredictorColumnNullHandling.Max: return c.Max;
-                default: throw new NotImplementedException("Unexpected NullHanndling " + c.NullHandling);
+                default: throw new UnexpectedValueException(c.Column.NullHandling);
             }
         }
     }
@@ -49,9 +49,9 @@ namespace Signum.Engine.MachineLearning.CNTK
             return null;
         }
 
-        public List<PredictorCodification> ExpandColumns(ResultColumn rc)
+        public List<PredictorCodification> ExpandColumns(ResultColumn rc, PredictorColumnBase column)
         {
-            return new List<PredictorCodification> { new PredictorCodification() };
+            return new List<PredictorCodification> { new PredictorCodification(column) };
         }
 
         public float EncodeValue(object value, PredictorCodification c)
@@ -82,9 +82,9 @@ namespace Signum.Engine.MachineLearning.CNTK
             return null;
         }
 
-        public List<PredictorCodification> ExpandColumns(ResultColumn rc)
+        public List<PredictorCodification> ExpandColumns(ResultColumn rc, PredictorColumnBase column)
         {
-            return rc.Values.Cast<object>().NotNull().Distinct().Select(v => new PredictorCodification { IsValue = v }).ToList();
+            return rc.Values.Cast<object>().NotNull().Distinct().Select(v => new PredictorCodification(column) { IsValue = v }).ToList();
         }
 
         public float EncodeValue(object value, PredictorCodification c)
@@ -106,12 +106,12 @@ namespace Signum.Engine.MachineLearning.CNTK
             return null;
         }
 
-        public List<PredictorCodification> ExpandColumns(ResultColumn rc)
+        public List<PredictorCodification> ExpandColumns(ResultColumn rc, PredictorColumnBase column)
         {
             var values = rc.Values.Cast<object>().NotNull().Select(a => Convert.ToSingle(a)).ToList();
             return new List<PredictorCodification>
             {
-                new PredictorCodification
+                new PredictorCodification(column)
                 {
                     Average = values.Count == 0 ? 0 : values.Average(),
                     StdDev = values.Count == 0 ? 1 : values.StdDev(),

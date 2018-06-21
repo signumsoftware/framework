@@ -84,12 +84,13 @@ namespace Signum.Engine.MachineLearning
             Predictor = predictor;
             Algorithm = algorithm;
             Columns = columns;
-            InputColumns = columns.Where(a => a.Usage == PredictorColumnUsage.Input).ToList();
-            MainQueryOutputColumn = columns.Where(a => a.SubQuery == null && a.PredictorColumn.Usage == PredictorColumnUsage.Output).GroupToDictionary(a => a.PredictorColumn);
-            SubQueryOutputColumn = columns.Where(a => a.SubQuery != null).AgGroupToDictionary(a => a.SubQuery, sqGroup => new PredictorPredictSubQueryContext
+            InputColumns = columns.Where(a => a.Column.Usage == PredictorColumnUsage.Input).ToList();
+            MainQueryOutputColumn = columns.Where(a => a.Column is PredictorColumnMain m && m.Usage == PredictorColumnUsage.Output).GroupToDictionary(a => ((PredictorColumnMain)a.Column).PredictorColumn);
+            SubQueryOutputColumn = columns.Where(a => a.Column is PredictorColumnSubQuery).AgGroupToDictionary(a => ((PredictorColumnSubQuery)a.Column).SubQuery, sqGroup => new PredictorPredictSubQueryContext
             {
                 SubQuery = sqGroup.Key,
-                Groups = sqGroup.AgGroupToDictionary(a => a.Keys, keysGroup => keysGroup.GroupToDictionary(a => a.PredictorSubQueryColumn), ObjectArrayComparer.Instance)
+                Groups = sqGroup.AgGroupToDictionary(a => ((PredictorColumnSubQuery)a.Column).Keys, 
+                    keysGroup => keysGroup.GroupToDictionary(a => ((PredictorColumnSubQuery)a.Column).PredictorSubQueryColumn), ObjectArrayComparer.Instance)
             });
         }
     }
@@ -109,9 +110,9 @@ namespace Signum.Engine.MachineLearning
         public string Message { get; set; }
         public decimal? Progress { get; set; }
 
-        public List<PredictorCodification> Columns { get; private set; }
-        public List<PredictorCodification> InputColumns { get; private set; }
-        public List<PredictorCodification> OutputColumns { get; private set; }
+        public List<PredictorCodification> Codifications { get; private set; }
+        public List<PredictorCodification> InputCodifications { get; private set; }
+        public List<PredictorCodification> OutputCodifications { get; private set; }
 
         public List<ResultRow> Validation { get; internal set; }
 
@@ -138,20 +139,20 @@ namespace Signum.Engine.MachineLearning
         }
 
 
-        public void SetColums(PredictorCodification[] columns)
+        public void SetCodifications(PredictorCodification[] codifications)
         {
-            this.Columns = columns.ToList();
+            this.Codifications = codifications.ToList();
 
-            this.InputColumns = columns.Where(a => a.Usage == PredictorColumnUsage.Input).ToList();
-            for (int i = 0; i < this.InputColumns.Count; i++)
+            this.InputCodifications = codifications.Where(a => a.Column.Usage == PredictorColumnUsage.Input).ToList();
+            for (int i = 0; i < this.InputCodifications.Count; i++)
             {
-                this.InputColumns[i].Index = i;
+                this.InputCodifications[i].Index = i;
             }
 
-            this.OutputColumns = columns.Where(a => a.Usage == PredictorColumnUsage.Output).ToList();
-            for (int i = 0; i < this.OutputColumns.Count; i++)
+            this.OutputCodifications = codifications.Where(a => a.Column.Usage == PredictorColumnUsage.Output).ToList();
+            for (int i = 0; i < this.OutputCodifications.Count; i++)
             {
-                this.OutputColumns[i].Index = i;
+                this.OutputCodifications[i].Index = i;
             }
         }
 
@@ -212,7 +213,7 @@ namespace Signum.Engine.MachineLearning
         void LoadModel(PredictorPredictContext predictor);
         PredictDictionary Predict(PredictorPredictContext ctx, PredictDictionary input);
         string[] GetAvailableDevices();
-        List<PredictorCodification> ExpandColumns(PredictorColumnEncodingSymbol encoding, ResultColumn resultColumn);
+        List<PredictorCodification> ExpandColumns(PredictorColumnEncodingSymbol encoding, ResultColumn resultColumn, PredictorColumnBase column);
         IEnumerable<PredictorColumnEncodingSymbol> GetRegisteredSymbols(); 
     }
 

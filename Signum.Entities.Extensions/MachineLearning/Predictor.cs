@@ -277,7 +277,7 @@ namespace Signum.Entities.MachineLearning
         Max,
     }
 
-    [Serializable]
+    [Serializable, EntityKind(EntityKind.SystemString, EntityData.Master, IsLowPopulation = true)]
     public class PredictorColumnEncodingSymbol : Symbol
     {
         private PredictorColumnEncodingSymbol() { }
