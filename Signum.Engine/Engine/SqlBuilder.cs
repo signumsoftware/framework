@@ -265,7 +265,7 @@ namespace Signum.Engine
                     .FormatWith(objectName.Schema.Database.ToString().SqlEscape(), indexName.SqlEscape(), objectName.OnDatabase(null).ToString()));
         }
 
-        public static SqlPreCommand CreateIndex(Index index, bool checkForUnique)
+        public static SqlPreCommand CreateIndex(Index index, Replacements checkUnique)
         {
             if (index is PrimaryClusteredIndex)
             {
@@ -287,12 +287,12 @@ namespace Signum.Engine
 
                     SqlPreCommandSimple indexSql = new SqlPreCommandSimple($"CREATE UNIQUE CLUSTERED INDEX {uIndex.IndexName} ON {viewName}({columns})");
 
-                    return SqlPreCommand.Combine(Spacing.Simple, RemoveDuplicatesIfNecessary(uIndex), viewSql, indexSql);
+                    return SqlPreCommand.Combine(Spacing.Simple, checkUnique!=null ? RemoveDuplicatesIfNecessary(uIndex, checkUnique) : null, viewSql, indexSql);
                 }
                 else
                 {
-                    return SqlPreCommand.Combine(Spacing.Double, 
-                        RemoveDuplicatesIfNecessary(uIndex), 
+                    return SqlPreCommand.Combine(Spacing.Double,
+                        checkUnique != null ? RemoveDuplicatesIfNecessary(uIndex, checkUnique) : null, 
                         CreateIndexBasic(index, false));
                 }
             }
@@ -302,37 +302,69 @@ namespace Signum.Engine
             }
         }
 
-        public static SqlPreCommand RemoveDuplicatesIfNecessary(UniqueIndex uniqueIndex)
+        public static int DuplicateCount(UniqueIndex uniqueIndex, Replacements rep)
         {
             var primaryKey = uniqueIndex.Table.Columns.Values.Where(a => a.PrimaryKey).Only();
 
             if (primaryKey == null)
-                return null;
+                throw new InvalidOperationException("No primary key found"); ;
 
-            var columns = uniqueIndex.Columns.ToString(c => c.Name.SqlEscape(), ", ");
+            var oldTableName = rep.Apply(Replacements.KeyTablesInverse, uniqueIndex.Table.Name.ToString());
 
-            var count = (int)Executor.ExecuteScalar(
-                $@"SELECT Count(*) FROM {uniqueIndex.Table.Name} 
+            var columnReplacement = rep.TryGetC(Replacements.KeyColumnsForTable(uniqueIndex.Table.Name.ToString()))?.Inverse() ?? new Dictionary<string, string>();
+
+            var oldColumns = uniqueIndex.Columns.ToString(c => (columnReplacement.TryGetC(c.Name) ?? c.Name).SqlEscape(), ", ");
+
+            var oldPrimaryKey = columnReplacement.TryGetC(primaryKey.Name) ?? primaryKey.Name;
+
+            return (int)Executor.ExecuteScalar(
+$@"SELECT Count(*) FROM {oldTableName} 
+WHERE {oldPrimaryKey} NOT IN
+(
+    SELECT MIN({oldPrimaryKey})
+    FROM {oldTableName}
+    {uniqueIndex.Where.Replace(columnReplacement)}
+    GROUP BY {oldColumns}
+)");
+        }
+
+        public static SqlPreCommand RemoveDuplicatesIfNecessary(UniqueIndex uniqueIndex, Replacements rep)
+        {
+            try
+            {
+                var primaryKey = uniqueIndex.Table.Columns.Values.Where(a => a.PrimaryKey).Only();
+
+                if (primaryKey == null)
+                    return null;
+
+
+                int count = DuplicateCount(uniqueIndex, rep);
+
+                if (count == 0)
+                    return null;
+
+                var columns = uniqueIndex.Columns.ToString(c => c.Name.SqlEscape(), ", ");
+
+
+                if (SafeConsole.Ask($"There are {count} rows in {uniqueIndex.Table.Name} with the same {columns}. Generate DELETE duplicates script?"))
+                {
+                    return new SqlPreCommandSimple($@"DELETE {uniqueIndex.Table.Name} 
 WHERE {primaryKey.Name} NOT IN
 (
     SELECT MIN({primaryKey.Name})
     FROM {uniqueIndex.Table.Name}
     GROUP BY {columns}
 )");
+                }
 
-            if (count == 0)
                 return null;
 
-            if (SafeConsole.Ask($"There are {count} rows in {uniqueIndex.Table.Name} with the same {columns}. Generate DELETE duplicates script?"))
-                return new SqlPreCommandSimple($@"DELETE {uniqueIndex.Table.Name} 
-WHERE {primaryKey.Name} NOT IN
-(
-    SELECT MIN({primaryKey.Name})
-    FROM {uniqueIndex.Table.Name}
-    GROUP BY {columns}
-)");
+            }
+            catch (Exception e)
+            {
+                return new SqlPreCommandSimple($"-- Impossible to determine duplicates in new index {uniqueIndex.IndexName}");
 
-            return null;
+            }
         }
 
         public static SqlPreCommand CreateIndexBasic(Index index, bool forHistoryTable)
