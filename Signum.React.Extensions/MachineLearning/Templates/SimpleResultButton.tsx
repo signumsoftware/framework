@@ -2,7 +2,7 @@
 import { classes } from '../../../../Framework/Signum.React/Scripts/Globals'
 import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
 import * as numbro from 'numbro';
-import { PredictorEntity, PredictSimpleResultEntity, PredictorColumnEmbedded } from '../Signum.Entities.MachineLearning';
+import { PredictorEntity, PredictSimpleResultEntity, PredictorColumnEmbedded, DefaultColumnEncodings } from '../Signum.Entities.MachineLearning';
 import * as ChartClient from '../../Chart/ChartClient'
 import { ChartRequest } from '../../Chart/Signum.Entities.Chart'
 import { SubTokensOptions } from '../../../../Framework/Signum.React/Scripts/FindOptions';
@@ -13,6 +13,7 @@ import { TypeContext } from '../../../../Framework/Signum.React/Scripts/Lines';
 import { FilterOptionParsed, FilterOption } from '../../../../Framework/Signum.React/Scripts/Search';
 import { ChartOptions } from '../../Chart/ChartClient';
 import { QueryToken } from '../../../../Framework/Signum.React/Scripts/FindOptions';
+import { is } from '../../../../Framework/Signum.React/Scripts/Signum.Entities';
 
 interface SimpleResultButtonProps {
     ctx: TypeContext<PredictorEntity>;
@@ -29,7 +30,7 @@ export default class SimpleResultButton extends React.Component<SimpleResultButt
             <div>
                 <a href="#" className="btn btn-sm btn-info" onClick={this.handleOnClick} >
                     <i className="fa fa-line-chart" />&nbsp;
-                    {col.element.encoding == "OneHot" ? "Confusion matrix" : "Regression Scatterplot"}
+                    {is(col.element.encoding, DefaultColumnEncodings.OneHot) ? "Confusion matrix" : "Regression Scatterplot"}
                 </a>
             </div>
         );
@@ -50,8 +51,8 @@ export default class SimpleResultButton extends React.Component<SimpleResultButt
         var outToken = outCol.token!.token!;
 
         var qdb = await Finder.getQueryDescription(predictor.mainQuery.query!.key);
-        
-        if (isCategorical(outCol))
+
+        if (is(outCol.encoding, DefaultColumnEncodings.OneHot))
             return ChartClient.Encoder.chartPath({
                 queryName: PredictSimpleResultEntity,
                 filterOptions: [{ columnName: "Predictor", value: predictor }],
@@ -74,8 +75,4 @@ export default class SimpleResultButton extends React.Component<SimpleResultButt
                 ],
             });
     }
-}
-
-function isCategorical(column: PredictorColumnEmbedded) {
-    return column.encoding == "Codified" || column.encoding == "OneHot";
 }

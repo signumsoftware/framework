@@ -11,12 +11,12 @@ using Signum.Utilities.Reflection;
 
 namespace Signum.Engine.MachineLearning.CNTK
 {
-    interface ICNTKEncoding
+    public interface ICNTKEncoding
     {
         string ValidateEncodingProperty(PredictorEntity predictor, PredictorSubQueryEntity subQuery, PredictorColumnEncodingSymbol encoding, PredictorColumnUsage usage, QueryTokenEmbedded token);
         List<PredictorCodification> ExpandColumns(ResultColumn rc);
-        float GetFloat(object value, PredictorCodification c);
-        object FloatToValue(QueryToken token, List<PredictorCodification> cols, float[] outputValues);
+        float EncodeValue(object value, PredictorCodification c);
+        object DecodeValue(QueryToken token, List<PredictorCodification> cols, float[] outputValues);
     }
 
     public static class CNTKDefault
@@ -35,13 +35,13 @@ namespace Signum.Engine.MachineLearning.CNTK
         }
     }
 
-    class NoneCNTKEncoding : ICNTKEncoding
+    public class NoneCNTKEncoding : ICNTKEncoding
     {
         public string ValidateEncodingProperty(PredictorEntity predictor, PredictorSubQueryEntity subQuery, PredictorColumnEncodingSymbol encoding, PredictorColumnUsage usage, QueryTokenEmbedded token)
         {
             var nn = (NeuralNetworkSettingsEntity)predictor.AlgorithmSettings;
             if (!ReflectionTools.IsNumber(token.Token.Type) && token.Token.Type.UnNullify() != typeof(bool))
-                return PredictorMessage._0IsRequiredFor1.NiceToString(StandartEncodings.OneHot.NiceToString(), token.Token.NiceTypeName);
+                return PredictorMessage._0IsRequiredFor1.NiceToString(DefaultColumnEncodings.OneHot.NiceToString(), token.Token.NiceTypeName);
 
             if (usage == PredictorColumnUsage.Output && (nn.PredictionType == PredictionType.Classification || nn.PredictionType == PredictionType.MultiClassification))
                 return PredictorMessage._0NotSuportedFor1.NiceToString(encoding.NiceToString(), nn.PredictionType.NiceToString());
@@ -54,13 +54,13 @@ namespace Signum.Engine.MachineLearning.CNTK
             return new List<PredictorCodification> { new PredictorCodification() };
         }
 
-        public float GetFloat(object value, PredictorCodification c)
+        public float EncodeValue(object value, PredictorCodification c)
         {
             var valueDefault = value ?? CNTKDefault.GetDefaultValue(c);
             return Convert.ToSingle(valueDefault);
         }
 
-        public object FloatToValue(QueryToken token, List<PredictorCodification> cols, float[] outputValues)
+        public object DecodeValue(QueryToken token, List<PredictorCodification> cols, float[] outputValues)
         {
             var c = cols.SingleEx();
             return ReflectionTools.ChangeType(outputValues[c.Index], token.Type);
@@ -68,7 +68,7 @@ namespace Signum.Engine.MachineLearning.CNTK
  
     }
 
-    class OneHotCNTKEncoding : ICNTKEncoding
+    public class OneHotCNTKEncoding : ICNTKEncoding
     {
         public string ValidateEncodingProperty(PredictorEntity predictor, PredictorSubQueryEntity subQuery, PredictorColumnEncodingSymbol encoding, PredictorColumnUsage usage, QueryTokenEmbedded token)
         {
@@ -87,19 +87,19 @@ namespace Signum.Engine.MachineLearning.CNTK
             return rc.Values.Cast<object>().NotNull().Distinct().Select(v => new PredictorCodification { IsValue = v }).ToList();
         }
 
-        public float GetFloat(object value, PredictorCodification c)
+        public float EncodeValue(object value, PredictorCodification c)
         {
             var valueDefault = value ?? CNTKDefault.GetDefaultValue(c);
             return Object.Equals(valueDefault, c.IsValue) ? 1 : 0;
         }
 
-        public object FloatToValue(QueryToken token, List<PredictorCodification> cols, float[] outputValues)
+        public object DecodeValue(QueryToken token, List<PredictorCodification> cols, float[] outputValues)
         {
             return cols.WithMax(c => outputValues[c.Index]).IsValue;
         }
     }
-    
-    class NormalizeZScoreCNTKEncoding : ICNTKEncoding
+
+    public abstract class BaseNormalizeCNTKEncoding : ICNTKEncoding
     {
         public string ValidateEncodingProperty(PredictorEntity predictor, PredictorSubQueryEntity subQuery, PredictorColumnEncodingSymbol encoding, PredictorColumnUsage usage, QueryTokenEmbedded token)
         {
@@ -109,21 +109,32 @@ namespace Signum.Engine.MachineLearning.CNTK
         public List<PredictorCodification> ExpandColumns(ResultColumn rc)
         {
             var values = rc.Values.Cast<object>().NotNull().Select(a => Convert.ToSingle(a)).ToList();
-            var pc = factory();
-            pc.Average = values.Count == 0 ? 0 : values.Average();
-            pc.StdDev = values.Count == 0 ? 1 : values.StdDev();
-            pc.Min = values.Count == 0 ? 0 : values.Min();
-            pc.Max = values.Count == 0 ? 1 : values.Max();
-            return new List<PredictorCodification> { pc };
+            return new List<PredictorCodification>
+            {
+                new PredictorCodification
+                {
+                    Average = values.Count == 0 ? 0 : values.Average(),
+                    StdDev = values.Count == 0 ? 1 : values.StdDev(),
+                    Min = values.Count == 0 ? 0 : values.Min(),
+                    Max = values.Count == 0 ? 1 : values.Max(),
+                }
+            };
         }
 
-        public float GetFloat(object value, PredictorCodification c)
+        public abstract float EncodeValue(object value, PredictorCodification c);
+
+        public abstract object DecodeValue(QueryToken token, List<PredictorCodification> cols, float[] outputValues);
+    }
+
+    public class NormalizeZScoreCNTKEncoding : BaseNormalizeCNTKEncoding
+    {
+        public override float EncodeValue(object value, PredictorCodification c)
         {
             var valueDefault = value ?? CNTKDefault.GetDefaultValue(c);
             return (Convert.ToSingle(valueDefault) - c.Average.Value) / c.StdDev.Value;
         }
 
-        public object FloatToValue(QueryToken token, List<PredictorCodification> cols, float[] outputValues)
+        public override object DecodeValue(QueryToken token, List<PredictorCodification> cols, float[] outputValues)
         {
             var c = cols.SingleEx();
             var value = outputValues[c.Index];
@@ -132,20 +143,15 @@ namespace Signum.Engine.MachineLearning.CNTK
         }
     }
 
-    class NormalizeMinMaxCNTKEncoding : ICNTKEncoding
+    public class NormalizeMinMaxCNTKEncoding : BaseNormalizeCNTKEncoding
     {
-        public string ValidateEncodingProperty(PredictorEntity predictor, PredictorSubQueryEntity subQuery, PredictorColumnEncodingSymbol encoding, PredictorColumnUsage usage, QueryTokenEmbedded token)
-        {
-            return null;
-        }
-
-        public float GetFloat(object value, PredictorCodification c)
+        public override float EncodeValue(object value, PredictorCodification c)
         {
             var valueDefault = value ?? CNTKDefault.GetDefaultValue(c);
             return (Convert.ToSingle(valueDefault) - c.Min.Value) / (c.Max.Value - c.Min.Value);
         }
 
-        public object FloatToValue(QueryToken token, List<PredictorCodification> cols, float[] outputValues)
+        public override object DecodeValue(QueryToken token, List<PredictorCodification> cols, float[] outputValues)
         {
             var c = cols.SingleEx();
             var value = outputValues[c.Index];
@@ -154,22 +160,18 @@ namespace Signum.Engine.MachineLearning.CNTK
         }
     }
 
-    class NormalizeLogCNTKEncoding : ICNTKEncoding
+    class NormalizeLogCNTKEncoding : BaseNormalizeCNTKEncoding
     {
         public float MinLog = -5;
-        public string ValidateEncodingProperty(PredictorEntity predictor, PredictorSubQueryEntity subQuery, PredictorColumnEncodingSymbol encoding, PredictorColumnUsage usage, QueryTokenEmbedded token)
-        {
-            return null;
-        }
 
-        public float GetFloat(object value, PredictorCodification c)
+        public override float EncodeValue(object value, PredictorCodification c)
         {
             var valueDefault = value ?? CNTKDefault.GetDefaultValue(c);
             var val = Convert.ToDouble(valueDefault);
             return (val <= 0 ? MinLog : Math.Max(MinLog, (float)Math.Log(val)));
         }
 
-        public object FloatToValue(QueryToken token, List<PredictorCodification> cols, float[] outputValues)
+        public override object DecodeValue(QueryToken token, List<PredictorCodification> cols, float[] outputValues)
         {
             var c = cols.SingleEx();
             var value = outputValues[c.Index];

@@ -34,7 +34,7 @@ namespace Signum.Engine.MachineLearning
         {
             var p = ctx.Predictor.ToLite();
             var outputColumn = AssertOnlyOutput(ctx.Predictor);
-            var isCategorical = outputColumn.Encoding == PredictorColumnEncoding.OneHot || outputColumn.Encoding == PredictorColumnEncoding.Codified;
+            var isCategorical = outputColumn.Encoding.Is(DefaultColumnEncodings.OneHot);
 
             var keys = !ctx.Predictor.MainQuery.GroupResults ? null : ctx.Predictor.MainQuery.Columns.Where(c => !(c.Token.Token is AggregateToken)).ToList();
             var key0 = keys?.ElementAtOrDefault(0);

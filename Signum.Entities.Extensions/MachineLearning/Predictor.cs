@@ -289,11 +289,10 @@ namespace Signum.Entities.MachineLearning
     }
 
     [AutoInit]
-    public static class StandartEncodings
+    public static class DefaultColumnEncodings
     {
         public static PredictorColumnEncodingSymbol None;
         public static PredictorColumnEncodingSymbol OneHot;
-        public static PredictorColumnEncodingSymbol Codified;
 
         [Description("Normalize Z-Score")]
         public static PredictorColumnEncodingSymbol NormalizeZScore;

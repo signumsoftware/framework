@@ -75,15 +75,14 @@ namespace Signum.Entities.MachineLearning
 
             if (pi.Name == nameof(OutputActivation))
             {
-                if (OutputActivation == NeuralNetworkActivation.ReLU ||
-                    OutputActivation == NeuralNetworkActivation.Sigmoid)
+                if (OutputActivation == NeuralNetworkActivation.ReLU || OutputActivation == NeuralNetworkActivation.Sigmoid)
                 {
                     var p = this.GetParentEntity() as PredictorEntity;
-                    var errors = p.MainQuery.Columns.Where(a => a.Usage == PredictorColumnUsage.Output && a.Encoding == PredictorColumnEncoding.NormalizeZScore).Select(a => a.Token).ToList();
-                    errors.AddRange(p.SubQueries.SelectMany(sq => sq.Columns).Where(a => a.Usage == PredictorSubQueryColumnUsage.Output && a.Encoding == PredictorColumnEncoding.NormalizeZScore).Select(a => a.Token).ToList());
+                    var errors = p.MainQuery.Columns.Where(a => a.Usage == PredictorColumnUsage.Output && a.Encoding.Is(DefaultColumnEncodings.NormalizeZScore)).Select(a => a.Token).ToList();
+                    errors.AddRange(p.SubQueries.SelectMany(sq => sq.Columns).Where(a => a.Usage == PredictorSubQueryColumnUsage.Output && a.Encoding.Is(DefaultColumnEncodings.NormalizeZScore)).Select(a => a.Token).ToList());
 
                     if (errors.Any())
-                        return PredictorMessage._0CanNotBe1Because2Use3.NiceToString(pi.NiceName(), OutputActivation.NiceToString(), errors.CommaAnd(), PredictorColumnEncoding.NormalizeZScore.NiceToString());
+                        return PredictorMessage._0CanNotBe1Because2Use3.NiceToString(pi.NiceName(), OutputActivation.NiceToString(), errors.CommaAnd(), DefaultColumnEncodings.NormalizeZScore.NiceToString());
                 }
             }
 

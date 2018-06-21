@@ -74,7 +74,7 @@ namespace Signum.Engine.Migrations
 
                 foreach (var i in table.GeneratAllIndexes())
                 {
-                    SqlBuilder.CreateIndex(i, false).ExecuteLeaves();
+                    SqlBuilder.CreateIndex(i, checkUnique: null).ExecuteLeaves();
                 }
 
                 SafeConsole.WriteLineColor(ConsoleColor.White, "Table " + table.Name + " auto-generated...");

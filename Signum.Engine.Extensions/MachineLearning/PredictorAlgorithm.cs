@@ -212,6 +212,8 @@ namespace Signum.Engine.MachineLearning
         void LoadModel(PredictorPredictContext predictor);
         PredictDictionary Predict(PredictorPredictContext ctx, PredictDictionary input);
         string[] GetAvailableDevices();
+        List<PredictorCodification> ExpandColumns(PredictorColumnEncodingSymbol encoding, ResultColumn resultColumn);
+        IEnumerable<PredictorColumnEncodingSymbol> GetRegisteredSymbols(); 
     }
 
     public interface IPredictorResultSaver

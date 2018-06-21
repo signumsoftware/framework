@@ -37,7 +37,9 @@ namespace Signum.Engine.MachineLearning
                 var rcs = mainResult.Columns.Where(a => !(a.Column.Token is AggregateToken)).ToArray();
                 ctx.MainQuery.GetParentKey = (ResultRow row) => row.GetValues(rcs);
             }
-            
+
+            var algorithm = PredictorLogic.Algorithms.GetOrThrow(ctx.Predictor.Algorithm);
+
             ctx.SubQueries = new Dictionary<PredictorSubQueryEntity, SubQuery>();
             foreach (var sqe in ctx.Predictor.SubQueries)
             {
@@ -76,10 +78,11 @@ namespace Signum.Engine.MachineLearning
             for (int i = 0; i < mainResult.Columns.Length; i++)
             {
                 var col = ctx.Predictor.MainQuery.Columns[i];
-                var list = ExpandColumns(col.Encoding, mainResult.Columns[i], () => new PredictorCodification
+                var list = algorithm.ExpandColumns(col.Encoding, mainResult.Columns[i]);
+                list.ForEach(p => 
                 {
-                    PredictorColumnIndex = i,
-                    PredictorColumn = col
+                    p.PredictorColumnIndex = i;
+                    p.PredictorColumn = col;
                 });
                 columns.AddRange(list);
             }
@@ -95,12 +98,13 @@ namespace Signum.Engine.MachineLearning
                     foreach (var vc in sq.ValueColumns)
                     {
                         var col = sq.SubQueryEntity.Columns[vc.Index];
-                        var list = ExpandColumns(col.Encoding.Value, vc, () => new PredictorCodification
+                        var list = algorithm.ExpandColumns(col.Encoding, vc);
+                        list.ForEach(p =>
                         {
-                            PredictorColumnIndex = vc.Index,
-                            PredictorSubQueryColumn = col,
-                            SubQuery = sq.SubQueryEntity,
-                            Keys = k
+                            p.PredictorColumnIndex = vc.Index;
+                            p.PredictorSubQueryColumn = col;
+                            p.SubQuery = sq.SubQueryEntity;
+                            p.Keys = k;
                         });
                         columns.AddRange(list);
                     }
@@ -214,8 +218,6 @@ namespace Signum.Engine.MachineLearning
         public float? Min;
         public float? Max;
 
-        public object[] CodedValues;
-
         public QueryToken Token => PredictorColumn?.Token.Token ?? PredictorSubQueryColumn.Token.Token;
         public PredictorColumnNullHandling NullHandling => PredictorColumn?.NullHandling ?? PredictorSubQueryColumn.NullHandling.Value; 
         public PredictorColumnEncodingSymbol Encoding => PredictorColumn?.Encoding ?? PredictorSubQueryColumn.Encoding;
@@ -230,7 +232,6 @@ namespace Signum.Engine.MachineLearning
                 Token.ToString(),
                 Keys == null ? null : $"(Key={Keys.ToString(", ")})",
                 IsValue == null ? null : $"(IsValue={IsValue})",
-                CodedValues == null ? null : $"(Values={CodedValues.Length})",
             }.NotNull().ToString(" ");
         }
     }

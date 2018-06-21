@@ -17,7 +17,6 @@ namespace Signum.Engine.MachineLearning
         public static void CreatePredictorCodifications(PredictorTrainingContext ctx)
         {
             var isValueSize = ((FieldValue)Schema.Current.Field((PredictorCodificationEntity e) => e.IsValue)).Size.Value;
-            var valueSize = ((FieldValue)Schema.Current.Field((PredictorCodificationEntity e) => e.CodedValues[0])).Size.Value;
             var groupKey0Size = ((FieldValue)Schema.Current.Field((PredictorCodificationEntity e) => e.SplitKey0)).Size.Value;
             var groupKey1Size = ((FieldValue)Schema.Current.Field((PredictorCodificationEntity e) => e.SplitKey1)).Size.Value;
             var groupKey2Size = ((FieldValue)Schema.Current.Field((PredictorCodificationEntity e) => e.SplitKey2)).Size.Value;
@@ -60,8 +59,7 @@ namespace Signum.Engine.MachineLearning
                     SplitKey0 = GetSplitpKey(0, groupKey0Size),
                     SplitKey1 = GetSplitpKey(1, groupKey1Size),
                     SplitKey2 = GetSplitpKey(2, groupKey2Size),
-                    IsValue = ToStringValue(valueToken, pc.IsValue, valueSize),
-                    CodedValues = pc.CodedValues.EmptyIfNull().Select(v => ToStringValue(valueToken, v, valueSize)).ToMList(),
+                    IsValue = ToStringValue(valueToken, pc.IsValue, isValueSize),
                     Average = pc.Average,
                     StdDev = pc.StdDev,
                     Min = pc.Min,
@@ -122,8 +120,7 @@ namespace Signum.Engine.MachineLearning
                     Index = cod.Index,
                     SubQuery = null,
                     Keys = null,
-                    IsValue = col.Encoding == PredictorColumnEncoding.OneHot ? ParseValue(cod.IsValue, col.Token.Token) : null,
-                    CodedValues = col.Encoding == PredictorColumnEncoding.Codified ? cod.CodedValues.Select(a => ParseValue(a, col.Token.Token)).ToArray() : null,
+                    IsValue = col.Encoding.Is(DefaultColumnEncodings.OneHot) ? ParseValue(cod.IsValue, col.Token.Token) : null,
                     Average = cod.Average,
                     StdDev = cod.StdDev,
                     Min = cod.Min,
@@ -146,8 +143,7 @@ namespace Signum.Engine.MachineLearning
                     Index = cod.Index,
                     SubQuery = sq,
                     Keys = GetKeys(cod, sq.Columns.Where(a=>a.Usage == PredictorSubQueryColumnUsage.SplitBy).ToList()),
-                    IsValue = col.Encoding.Value == PredictorColumnEncoding.OneHot ? ParseValue(cod.IsValue, col.Token.Token) : null,
-                    CodedValues = col.Encoding.Value == PredictorColumnEncoding.Codified ? cod.CodedValues.Select(a => ParseValue(a, col.Token.Token)).ToArray() : null,
+                    IsValue = col.Encoding.Is(DefaultColumnEncodings.OneHot) ? ParseValue(cod.IsValue, col.Token.Token) : null,
                     Average = cod.Average,
                     StdDev = cod.StdDev,
                     Min = cod.Min,

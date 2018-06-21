@@ -7,7 +7,7 @@ import { FormGroup, FormControlReadonly, ValueLine, ValueLineType, EntityLine, E
 import { SearchControl, FilterOption, ColumnOption, FindOptions } from '../../../../Framework/Signum.React/Scripts/Search'
 import { TypeContext, FormGroupStyle, ButtonsContext } from '../../../../Framework/Signum.React/Scripts/TypeContext'
 import FileLine from '../../Files/FileLine'
-import { PredictorEntity, PredictorColumnEmbedded, PredictorMessage, PredictorSubQueryEntity, PredictorFileType, PredictorCodificationEntity, PredictorSubQueryColumnEmbedded, PredictorEpochProgressEntity, NeuralNetworkSettingsEntity } from '../Signum.Entities.MachineLearning'
+import { PredictorEntity, PredictorColumnEmbedded, PredictorMessage, PredictorSubQueryEntity, PredictorFileType, PredictorCodificationEntity, PredictorSubQueryColumnEmbedded, PredictorEpochProgressEntity, NeuralNetworkSettingsEntity, DefaultColumnEncodings } from '../Signum.Entities.MachineLearning'
 import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
 import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
 import { getQueryNiceName } from '../../../../Framework/Signum.React/Scripts/Reflection'
@@ -288,9 +288,9 @@ export function initializeColumn(p: PredictorEntity, pc: PredictorColumnEmbedded
     var token = pc.token && pc.token.token;
     if (token) {
         pc.encoding =
-            token.type.name == "number" || token.type.name == "decimal" ? "NormalizeZScore" :
-                NeuralNetworkSettingsEntity.isInstance(p.algorithmSettings) ? (token.type.name == "boolean" ? "None" : "OneHot") :
-                    "Codified";
+            token.type.name == "number" || token.type.name == "decimal" ? DefaultColumnEncodings.NormalizeZScore :
+                token.type.name == "boolean" ? DefaultColumnEncodings.None :
+                    DefaultColumnEncodings.OneHot;
 
         pc.nullHandling = "Zero";
     }

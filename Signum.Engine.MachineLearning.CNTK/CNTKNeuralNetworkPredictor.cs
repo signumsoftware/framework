@@ -20,6 +20,17 @@ namespace Signum.Engine.MachineLearning.CNTK
 {
     public class CNTKNeuralNetworkPredictorAlgorithm : IPredictorAlgorithm
     {
+        public Dictionary<PredictorColumnEncodingSymbol, ICNTKEncoding> Encodings = new Dictionary<PredictorColumnEncodingSymbol, ICNTKEncoding>
+        {
+            { DefaultColumnEncodings.None, new NoneCNTKEncoding() },
+            { DefaultColumnEncodings.OneHot, new OneHotCNTKEncoding() },
+            { DefaultColumnEncodings.NormalizeZScore, new NormalizeZScoreCNTKEncoding() },
+            { DefaultColumnEncodings.NormalizeMinMax, new NormalizeMinMaxCNTKEncoding() },
+            { DefaultColumnEncodings.NormalizeLog, new NormalizeLogCNTKEncoding() },
+        };
+
+
+
         public void InitialSetup()
         {
             if (!Environment.Is64BitProcess)
@@ -40,11 +51,21 @@ namespace Signum.Engine.MachineLearning.CNTK
                 Environment.SetEnvironmentVariable("Path", dir + ";" + oldPath, EnvironmentVariableTarget.Process);
         }
 
-        public string ValidateEncodingProperty(PredictorEntity predictor, PredictorSubQueryEntity subQuery, PredictorColumnEncoding encoding, PredictorColumnUsage usage, QueryTokenEmbedded token)
+        public string ValidateEncodingProperty(PredictorEntity predictor, PredictorSubQueryEntity subQuery, PredictorColumnEncodingSymbol encoding, PredictorColumnUsage usage, QueryTokenEmbedded token)
         {
-            return CNTKEncoding.ValidateEncodingProperty(predictor, subQuery, encoding, usage, token);
+            return Encodings.GetOrThrow(encoding).ValidateEncodingProperty(predictor, subQuery, encoding, usage, token);
         }
-        
+
+        public List<PredictorCodification> ExpandColumns(PredictorColumnEncodingSymbol encoding, ResultColumn resultColumn)
+        {
+            return Encodings.GetOrThrow(encoding).ExpandColumns(resultColumn);
+        }
+
+        public IEnumerable<PredictorColumnEncodingSymbol> GetRegisteredSymbols()
+        {
+            return Encodings.Keys;
+        }
+
         public string[] GetAvailableDevices()
         {
             InitialSetup();
@@ -191,7 +212,7 @@ namespace Signum.Engine.MachineLearning.CNTK
             public PredictorMetricsEmbedded ResultValidation;
         }
  
-        static Value CreateValue(PredictorTrainingContext ctx, List<ResultRow> rows, List<PredictorCodification> codifications, DeviceDescriptor device)
+        Value CreateValue(PredictorTrainingContext ctx, List<ResultRow> rows, List<PredictorCodification> codifications, DeviceDescriptor device)
         {
             float[] values = new float[rows.Count * codifications.Count];
             for (int i = 0; i < rows.Count; i++)
@@ -202,6 +223,7 @@ namespace Signum.Engine.MachineLearning.CNTK
                 for (int j = 0; j < codifications.Count; j++)
                 {
                     PredictorCodification c = codifications[j];
+
                     object value;
                     if (c.SubQuery == null)
                         value = mainRow[c.PredictorColumnIndex];
@@ -212,7 +234,9 @@ namespace Signum.Engine.MachineLearning.CNTK
                         value = rowValues == null ? null : rowValues[sq.ColumnIndexToValueIndex[c.PredictorColumnIndex]];
                     }
 
-                    values[i * codifications.Count + j] = CNTKEncoding.GetFloat(value, c);
+                    var enc = Encodings.GetOrThrow(c.Encoding);
+
+                    values[i * codifications.Count + j] = enc.EncodeValue(value, c);
                 }
             }
 
@@ -227,7 +251,7 @@ namespace Signum.Engine.MachineLearning.CNTK
             lock (calculatedOutputs) //https://docs.microsoft.com/en-us/cognitive-toolkit/cntk-library-evaluation-on-windows#evaluation-of-multiple-requests-in-parallel
             {
                 var device = GetDevice(nnSettings);
-                Value inputValue = GetValue(ctx, input, device);
+                Value inputValue = GetValueForPredict(ctx, input, device);
 
                 var inputVar = calculatedOutputs.Inputs.SingleEx(i => i.Name == "input");
                 var inputDic = new Dictionary<Variable, Value> { { inputVar, inputValue } };
@@ -247,21 +271,21 @@ namespace Signum.Engine.MachineLearning.CNTK
         {
             return new PredictDictionary(ctx.Predictor)
             {
-                MainQueryValues = ctx.MainQueryOutputColumn.SelectDictionary(col => col, (col, list) => CNTKEncoding.FloatToValue(col.Encoding, col.Token.Token, list, outputValues)),
+                MainQueryValues = ctx.MainQueryOutputColumn.SelectDictionary(col => col, (col, list) => Encodings.GetOrThrow(col.Encoding).DecodeValue(col.Token.Token, list, outputValues)),
                 SubQueries = ctx.Predictor.SubQueries.ToDictionary(sq => sq, sq => new PredictSubQueryDictionary(sq)
                 {
                     SubQueryGroups = ctx.SubQueryOutputColumn.TryGetC(sq)?.Groups.ToDictionary(
                         kvp => kvp.Key, 
                         kvp => kvp.Value
                         .Where(a => a.Key.Usage ==  PredictorSubQueryColumnUsage.Output)
-                        .ToDictionary(a => a.Key, a => CNTKEncoding.FloatToValue(a.Key.Encoding.Value, a.Key.Token.Token, a.Value, outputValues)), 
+                        .ToDictionary(a => a.Key, a => Encodings.GetOrThrow(a.Key.Encoding).DecodeValue(a.Key.Token.Token, a.Value, outputValues)), 
                         ObjectArrayComparer.Instance
                     ) ?? new Dictionary<object[], Dictionary<PredictorSubQueryColumnEmbedded, object>>(ObjectArrayComparer.Instance),
                 })
             };
         }
 
-        private Value GetValue(PredictorPredictContext ctx, PredictDictionary input, DeviceDescriptor device)
+        private Value GetValueForPredict(PredictorPredictContext ctx, PredictDictionary input, DeviceDescriptor device)
         {
             if (input.SubQueries.Values.Any(a => a.SubQueryGroups.Comparer != ObjectArrayComparer.Instance))
                 throw new Exception("Unexpected dictionary comparer");
@@ -284,7 +308,9 @@ namespace Signum.Engine.MachineLearning.CNTK
                     value = input.MainQueryValues.GetOrThrow(c.PredictorColumn);
                 }
 
-                values[i] = CNTKEncoding.GetFloat(value, c);
+                var enc = Encodings.GetOrThrow(c.Encoding);
+                 
+                values[i] = enc.EncodeValue(value, c);
             }
 
 
@@ -299,5 +325,7 @@ namespace Signum.Engine.MachineLearning.CNTK
 
             ctx.Model = Function.Load(ctx.Predictor.Files.SingleEx().GetByteArray(), GetDevice(nnSettings));
         }
+
+       
     }
 }
