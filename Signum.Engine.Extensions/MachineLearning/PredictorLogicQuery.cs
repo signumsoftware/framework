@@ -83,7 +83,7 @@ namespace Signum.Engine.MachineLearning
                     PredictorColumn = col,
                     PredictorColumnIndex = i,
                 };
-                var mainCodifications = algorithm.ExpandColumns(col.Encoding, mainResult.Columns[i], mainCol);
+                var mainCodifications = algorithm.GenerateCodifications(col.Encoding, mainResult.Columns[i], mainCol);
                 columns.AddRange(mainCodifications);
             }
             
@@ -105,7 +105,7 @@ namespace Signum.Engine.MachineLearning
                             SubQuery = sq.SubQueryEntity,
                             Keys = k,
                         };
-                        var subQueryCodifications = algorithm.ExpandColumns(col.Encoding, vc, subCol);
+                        var subQueryCodifications = algorithm.GenerateCodifications(col.Encoding, vc, subCol);
                         columns.AddRange(subQueryCodifications);
                     }
                 }
@@ -193,6 +193,7 @@ namespace Signum.Engine.MachineLearning
     {
         //Index of PredictorColumn in the MainQuery/SubQuery
         public int PredictorColumnIndex;
+        public object ColumnModel;
 
         public abstract PredictorColumnUsage Usage { get; }
         public abstract QueryToken Token { get; }

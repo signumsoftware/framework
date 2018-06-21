@@ -277,16 +277,7 @@ namespace Signum.Entities.MachineLearning
         Max,
     }
 
-    [Serializable, EntityKind(EntityKind.SystemString, EntityData.Master, IsLowPopulation = true)]
-    public class PredictorColumnEncodingSymbol : Symbol
-    {
-        private PredictorColumnEncodingSymbol() { }
-
-        public PredictorColumnEncodingSymbol(Type declaringType, string fieldName) :
-            base(declaringType, fieldName)
-        {
-        }
-    }
+  
 
     [AutoInit]
     public static class DefaultColumnEncodings
@@ -301,7 +292,10 @@ namespace Signum.Entities.MachineLearning
         public static PredictorColumnEncodingSymbol NormalizeMinMax;
 
         [Description("Normalize Log")]
-        public static PredictorColumnEncodingSymbol NormalizeLog; 
+        public static PredictorColumnEncodingSymbol NormalizeLog;
+
+        [Description("Split Words")]
+        public static PredictorColumnEncodingSymbol SplitWords;
     }
 
     public enum PredictorState
@@ -452,7 +446,7 @@ namespace Signum.Entities.MachineLearning
         }
     }
 
-    [Serializable]
+    [Serializable, EntityKind(EntityKind.SystemString, EntityData.Master, IsLowPopulation = true)]
     public class PredictorPublicationSymbol : Symbol
     {
         private PredictorPublicationSymbol() { }
@@ -463,7 +457,7 @@ namespace Signum.Entities.MachineLearning
         }
     }
 
-    [Serializable]
+    [Serializable, EntityKind(EntityKind.SystemString, EntityData.Master, IsLowPopulation = true)]
     public class PredictorAlgorithmSymbol : Symbol
     {
         private PredictorAlgorithmSymbol() { }
@@ -474,7 +468,7 @@ namespace Signum.Entities.MachineLearning
         }
     }
 
-    [Serializable]
+    [Serializable, EntityKind(EntityKind.SystemString, EntityData.Master, IsLowPopulation = true)]
     public class PredictorResultSaverSymbol : Symbol
     {
         private PredictorResultSaverSymbol() { }
@@ -485,16 +479,21 @@ namespace Signum.Entities.MachineLearning
         }
     }
 
+    [Serializable, EntityKind(EntityKind.SystemString, EntityData.Master, IsLowPopulation = true)]
+    public class PredictorColumnEncodingSymbol : Symbol
+    {
+        private PredictorColumnEncodingSymbol() { }
+
+        public PredictorColumnEncodingSymbol(Type declaringType, string fieldName) :
+            base(declaringType, fieldName)
+        {
+        }
+    }
+
     [AutoInit]
     public static class PredictorProcessAlgorithm
     {
         public static ProcessAlgorithmSymbol AutoconfigureNeuralNetwork;
-    }
-
-    [AutoInit]
-    public static class AccordPredictorAlgorithm
-    {
-        public static PredictorAlgorithmSymbol DiscreteNaiveBayes;
     }
 
     [AutoInit]

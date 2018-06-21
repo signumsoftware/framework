@@ -77,8 +77,6 @@ namespace Signum.Engine.MachineLearning
             ResultSavers.Add(symbol, algorithm);
         }
 
-        
-
         public static Dictionary<PredictorPublicationSymbol, PublicationSettings> Publications = new Dictionary<PredictorPublicationSymbol, PublicationSettings>();
         public static void RegisterPublication(PredictorPublicationSymbol publication, PublicationSettings settings)
         {
@@ -156,6 +154,7 @@ namespace Signum.Engine.MachineLearning
                 FileTypeLogic.Register(PredictorFileType.PredictorFile, predictorFileAlgorithm());
 
                 SymbolLogic<PredictorAlgorithmSymbol>.Start(sb, dqm, () => Algorithms.Keys);
+                SymbolLogic<PredictorColumnEncodingSymbol>.Start(sb, dqm, () => Algorithms.Values.SelectMany(a => a.GetRegisteredEncodingSymbols()).Distinct());
                 SymbolLogic<PredictorResultSaverSymbol>.Start(sb, dqm, () => ResultSavers.Keys);
                 SymbolLogic<PredictorPublicationSymbol>.Start(sb, dqm, () => Publications.Keys);
 

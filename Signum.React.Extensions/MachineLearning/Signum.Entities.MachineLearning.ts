@@ -11,10 +11,6 @@ import * as UserQueries from '../UserQueries/Signum.Entities.UserQueries'
 import * as UserAssets from '../UserAssets/Signum.Entities.UserAssets'
 
 
-export module AccordPredictorAlgorithm {
-    export const DiscreteNaiveBayes : PredictorAlgorithmSymbol = registerSymbol("PredictorAlgorithm", "AccordPredictorAlgorithm.DiscreteNaiveBayes");
-}
-
 export const AutoconfigureNeuralNetworkEntity = new Type<AutoconfigureNeuralNetworkEntity>("AutoconfigureNeuralNetwork");
 export interface AutoconfigureNeuralNetworkEntity extends Entities.Entity, Processes.IProcessDataEntity {
     Type: "AutoconfigureNeuralNetwork";
@@ -44,15 +40,10 @@ export module DefaultColumnEncodings {
     export const NormalizeZScore : PredictorColumnEncodingSymbol = registerSymbol("PredictorColumnEncoding", "DefaultColumnEncodings.NormalizeZScore");
     export const NormalizeMinMax : PredictorColumnEncodingSymbol = registerSymbol("PredictorColumnEncoding", "DefaultColumnEncodings.NormalizeMinMax");
     export const NormalizeLog : PredictorColumnEncodingSymbol = registerSymbol("PredictorColumnEncoding", "DefaultColumnEncodings.NormalizeLog");
+    export const SplitWords : PredictorColumnEncodingSymbol = registerSymbol("PredictorColumnEncoding", "DefaultColumnEncodings.SplitWords");
 }
 
 export interface IPredictorAlgorithmSettings extends Entities.Entity {
-}
-
-export const NaiveBayesSettingsEntity = new Type<NaiveBayesSettingsEntity>("NaiveBayesSettings");
-export interface NaiveBayesSettingsEntity extends Entities.Entity, IPredictorAlgorithmSettings {
-    Type: "NaiveBayesSettings";
-    empirical?: boolean;
 }
 
 export const NeuralNetworkActivation = new EnumType<NeuralNetworkActivation>("NeuralNetworkActivation");
