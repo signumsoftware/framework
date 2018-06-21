@@ -1,6 +1,7 @@
 ﻿using Signum.Utilities;
 using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
@@ -14,17 +15,22 @@ namespace Signum.Engine.Translation
     public class AzureTranslator : ITranslator
     {
         public string AzureKey;
-        public AzureTranslator(string azureKey)
+
+        public AzureTranslator(string azureKey, string proxy = null)
         {
             this.AzureKey = azureKey;
+            this.Proxy = proxy;
         }
+
+        public string Proxy { get; }
 
         static readonly XNamespace Ns = XNamespace.Get("http://schemas.datacontract.org/2004/07/Microsoft.MT.Web.Service.V2");
         static readonly XNamespace ArrayNs = XNamespace.Get("http://schemas.microsoft.com/2003/10/Serialization/Arrays");
+        
 
         public async Task<List<string>> TranslateBatchAsync(List<string> list, string from, string to)
         {
-            string authToken = await AzureAccessToken.GetAccessTokenAsync(AzureKey);
+            string authToken = await AzureAccessToken.GetAccessTokenAsync(AzureKey, Proxy);
             
             var body =
                 new XElement("TranslateArrayRequest",
@@ -39,7 +45,7 @@ namespace Signum.Engine.Translation
                     new XElement("To", to)
                 );
 
-            using (var client = new HttpClient())
+            using (var client = ExtendedHttpClient.GetClientWithProxy(Proxy))
             using (var request = new HttpRequestMessage())
             {
                 request.Method = HttpMethod.Post;
@@ -72,12 +78,17 @@ namespace Signum.Engine.Translation
 
     public static class AzureAccessToken
     {
-        public static async Task<string> GetAccessTokenAsync(string subscriptionKey)
+        
+
+        public static async Task<string> GetAccessTokenAsync(string subscriptionKey, string proxy)
         {
-            using (var client = new HttpClient() { Timeout = TimeSpan.FromSeconds(2) })
+            
+
+            using (var client = ExtendedHttpClient.GetClientWithProxy(proxy))
             using (var request = new HttpRequestMessage())
             {
-                request.Method =  HttpMethod.Post;
+
+                request.Method = HttpMethod.Post;
                 request.RequestUri = new Uri("https://api.cognitive.microsoft.com/sts/v1.0/issueToken");
                 request.Content = new StringContent(string.Empty);
                 request.Headers.TryAddWithoutValidation("Ocp-Apim-Subscription-Key", subscriptionKey);
@@ -86,6 +97,27 @@ namespace Signum.Engine.Translation
                 var token = await response.Content.ReadAsStringAsync();
                 return "Bearer " + token;
             }
+        }
+
+        
+    }
+
+    public static class ExtendedHttpClient
+    {
+        public static HttpClient GetClientWithProxy(string proxy)
+        {
+            HttpClient client;
+            if (!String.IsNullOrEmpty(proxy))
+            {
+                HttpClientHandler handler = new HttpClientHandler() { Proxy = new WebProxy() { Address = new Uri(proxy) } };
+                client = new HttpClient(handler) { Timeout = TimeSpan.FromSeconds(2) };
+            }
+            else
+            {
+                client = new HttpClient() { Timeout = TimeSpan.FromSeconds(2) };
+            }
+
+            return client;
         }
     }
 }
