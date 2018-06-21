@@ -185,7 +185,7 @@ namespace Signum.React.Facades
                               EntityData = type.IsIEntity() ? EntityKindCache.GetEntityData(type) : (EntityData?)null,
                               IsLowPopulation = type.IsIEntity() ? EntityKindCache.IsLowPopulation(type) : false,
                               IsSystemVersioned = type.IsIEntity() ? schema.Table(type).SystemVersioned != null : false,
-                              ToStringFunction = LambdaToJavascriptConverter.ToJavascript(ExpressionCleaner.GetFieldExpansion(type, miToString)),
+                              ToStringFunction = typeof(Symbol).IsAssignableFrom(type) ? null : LambdaToJavascriptConverter.ToJavascript(ExpressionCleaner.GetFieldExpansion(type, miToString)),
                               QueryDefined = dqm.QueryDefined(type),
                               Members = PropertyRoute.GenerateRoutes(type).Where(pr => InTypeScript(pr))
                                 .ToDictionary(p => p.PropertyString(), p =>

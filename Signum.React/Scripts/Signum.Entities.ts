@@ -85,10 +85,10 @@ export function registerToString<T extends ModifiableEntity>(type: Type<T>, toSt
 
 import * as Reflection from './Reflection' 
 
-function getOrCreateToStringFunction(type: string)  {
+function getOrCreateToStringFunction(type: string) {
     let f = toStringDictionary[type];
     if (f || f === null)
-        return f; 
+        return f;
 
     const ti = Reflection.getTypeInfo(type);
 
@@ -116,13 +116,23 @@ export function getToString(entityOrLite: ModifiableEntity | Lite<Entity> | unde
         return "";
 
     const lite = entityOrLite as Lite<Entity>;
-    if (lite.EntityType)
-        return lite.entity ? getToString(lite.entity) : (lite.toStr || lite.EntityType);
+    if (lite.EntityType) {
+        if (lite.entity)
+            return getToString(lite.entity);
+
+        if (Reflection.isLowPopulationSymbol(lite.EntityType))
+            return Reflection.symbolNiceName(lite as Lite<Entity & Reflection.ISymbol>);
+
+        return lite.toStr || lite.EntityType;
+    }
 
     const entity = entityOrLite as ModifiableEntity;
-    const toStr = getOrCreateToStringFunction(entity.Type);
-    if (toStr)
-        return toStr(entity);
+    const toStrFunc = getOrCreateToStringFunction(entity.Type);
+    if (toStrFunc)
+        return toStrFunc(entity);
+
+    if (Reflection.isLowPopulationSymbol(entity.Type))
+        return Reflection.symbolNiceName(entity as Entity & Reflection.ISymbol);
 
     return entity.toStr || entity.Type;
 }
