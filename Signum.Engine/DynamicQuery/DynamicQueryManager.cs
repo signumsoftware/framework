@@ -483,10 +483,22 @@ namespace Signum.Engine.DynamicQuery
         }
 
         /// <summary>
+        /// Prefer WithExpressionFrom to keep dependencies between modules clean!. Uses NiceName as niceName. 
+        /// </summary>
+        public static FluentInclude<F> WithExpressionTo<F, T>(this FluentInclude<F> fi, DynamicQueryManager dqm, Expression<Func<F, Lite<T>>> lambdaToMethodOrProperty)
+            where F : Entity
+            where T : Entity
+        {
+            dqm.RegisterExpression(lambdaToMethodOrProperty, () => typeof(T).NiceName());
+            return fi;
+        }
+
+        /// <summary>
         /// Prefer WithExpressionFrom to keep dependencies between modules clean!.
         /// </summary>
-        public static FluentInclude<F> WithExpressionTo<F, T>(this FluentInclude<F> fi, DynamicQueryManager dqm, Expression<Func<F, T>> lambdaToMethodOrProperty, Func<string> niceName)
+        public static FluentInclude<F> WithExpressionTo<F, T>(this FluentInclude<F> fi, DynamicQueryManager dqm, Expression<Func<F, Lite<T>>> lambdaToMethodOrProperty, Func<string> niceName)
             where F : Entity
+            where T : Entity
         {
             dqm.RegisterExpression(lambdaToMethodOrProperty, niceName);
             return fi;
