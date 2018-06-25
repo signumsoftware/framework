@@ -47,6 +47,7 @@ namespace Signum.Utilities
             WriteColor(color, string.Format(format, parameters));
         }
 
+        public static void WriteColor(ConsoleColor color, char c) => WriteColor(color, c.ToString());
         public static void WriteColor(ConsoleColor color, string str)
         {
             ConsoleColor old = Console.ForegroundColor;
@@ -54,6 +55,8 @@ namespace Signum.Utilities
             Console.Write(str);
             Console.ForegroundColor = old;
         }
+
+
 
         public static void WriteLineColor(ConsoleColor color, string format, params object[] parameters)
         {
