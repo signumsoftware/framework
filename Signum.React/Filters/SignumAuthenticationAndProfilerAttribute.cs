@@ -92,7 +92,7 @@ namespace Signum.React.Filters
                         var user = (IUserEntity)GetProp(actionContext, SignumAuthenticationFilterAttribute.UserKey);
                         using (user != null ? UserHolder.UserSession(user) : null)
                         {
-                            var culture = (CultureInfo)SignumAuthenticationFilterAttribute.GetCurrentCultures?.Invoke(actionContext);
+                            var culture = SignumAuthenticationFilterAttribute.GetCurrentCultures?.Invoke(actionContext);
                             using (culture != null ? CultureInfoUtils.ChangeBothCultures(culture) : null)
                             {
                                 var result =  await continuation();
