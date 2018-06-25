@@ -217,10 +217,13 @@ namespace Signum.React.Facades
 
         public static bool InTypeScript(PropertyRoute pr)
         {
-            return (pr.Parent == null || InTypeScript(pr.Parent)) && (pr.PropertyInfo == null || pr.PropertyInfo.GetCustomAttribute<InTypeScriptAttribute>()?.GetInTypeScript() != false);
+            return (pr.Parent == null || InTypeScript(pr.Parent)) && (pr.PropertyInfo == null || (pr.PropertyInfo.GetCustomAttribute<InTypeScriptAttribute>()?.GetInTypeScript() ?? !IsExpression(pr.Parent.Type, pr.PropertyInfo)));
         }
 
-
+        private static bool IsExpression(Type type, PropertyInfo propertyInfo)
+        {
+            return propertyInfo.SetMethod == null && ExpressionCleaner.HasExpansions(type, propertyInfo);
+        }
 
         static string GetTypeNiceName(Type type)
         {
