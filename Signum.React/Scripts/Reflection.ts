@@ -948,7 +948,7 @@ function getMember(key: string): MemberInfo | undefined {
 
 export function symbolNiceName(symbol: Entity & ISymbol | Lite<Entity & ISymbol>) {
     if ((symbol as Entity).Type != null) //Don't use isEntity to avoid cycle
-        return getMember((symbol as Entity).toStr)!.niceName;
+        return getMember((symbol as Entity & ISymbol).key)!.niceName;
     else
         return getMember(symbol.toStr!)!.niceName;
 }
