@@ -17,101 +17,118 @@ namespace Signum.Engine.MachineLearning
     {
         public static void RetrieveData(PredictorTrainingContext ctx)
         {
-            ctx.ReportProgress($"Executing MainQuery for {ctx.Predictor}");
-            QueryRequest mainQueryRequest = GetMainQueryRequest(ctx.Predictor.MainQuery);
-            ResultTable mainResult = DynamicQueryManager.Current.ExecuteQuery(mainQueryRequest);
-
-            ctx.MainQuery = new MainQuery
+            using (HeavyProfiler.Log("RetrieveData"))
             {
-                QueryRequest = mainQueryRequest,
-                ResultTable = mainResult,
-            };
+                ctx.ReportProgress($"Executing MainQuery for {ctx.Predictor}");
+                QueryRequest mainQueryRequest = GetMainQueryRequest(ctx.Predictor.MainQuery);
+                ResultTable mainResult = DynamicQueryManager.Current.ExecuteQuery(mainQueryRequest);
 
-            if (!mainQueryRequest.GroupResults)
-            {
-                ctx.MainQuery.GetParentKey = (ResultRow row) => new object[] { row.Entity };
-            }
-            else
-            {
-
-                var rcs = mainResult.Columns.Where(a => !(a.Column.Token is AggregateToken)).ToArray();
-                ctx.MainQuery.GetParentKey = (ResultRow row) => row.GetValues(rcs);
-            }
-
-            var algorithm = PredictorLogic.Algorithms.GetOrThrow(ctx.Predictor.Algorithm);
-
-            ctx.SubQueries = new Dictionary<PredictorSubQueryEntity, SubQuery>();
-            foreach (var sqe in ctx.Predictor.SubQueries)
-            {
-                ctx.ReportProgress($"Executing SubQuery {sqe}");
-                QueryRequest queryGroupRequest = ToMultiColumnQuery(ctx.Predictor.MainQuery, sqe);
-                ResultTable groupResult = DynamicQueryManager.Current.ExecuteQuery(queryGroupRequest);
-
-                var pairs = groupResult.Columns.Zip(sqe.Columns, (rc, sqc) => (rc, sqc)).ToList();
-
-                var parentKeys = pairs.Extract(a => a.sqc.Usage == PredictorSubQueryColumnUsage.ParentKey).Select(a => a.rc).ToArray();
-                var splitKeys = pairs.Extract(a => a.sqc.Usage == PredictorSubQueryColumnUsage.SplitBy).Select(a => a.rc).ToArray();
-                var values = pairs.Select(a=>a.rc).ToArray();
-
-                var groupedValues = groupResult.Rows.AgGroupToDictionary(
-                    row => row.GetValues(parentKeys),
-                    gr => gr.ToDictionaryEx(
-                        row => row.GetValues(splitKeys),
-                        row => row.GetValues(values),
-                        ObjectArrayComparer.Instance));
-
-                ctx.SubQueries.Add(sqe, new SubQuery
+                ctx.MainQuery = new MainQuery
                 {
-                    SubQueryEntity = sqe,
-                    QueryGroupRequest = queryGroupRequest,
-                    ResultTable = groupResult,
-                    GroupedValues = groupedValues,
-                    SplitBy = splitKeys,
-                    ValueColumns = values,
-                    ColumnIndexToValueIndex = values.Select((r, i) => KVP.Create(r.Index, i)).ToDictionary()
-                });
-            }
-
-            ctx.ReportProgress($"Creating Columns");
-            var columns = new List<PredictorCodification>();
-
-            for (int i = 0; i < mainResult.Columns.Length; i++)
-            {
-                var col = ctx.Predictor.MainQuery.Columns[i];
-                var mainCol = new PredictorColumnMain
-                {
-                    PredictorColumn = col,
-                    PredictorColumnIndex = i,
+                    QueryRequest = mainQueryRequest,
+                    ResultTable = mainResult,
                 };
-                var mainCodifications = algorithm.GenerateCodifications(col.Encoding, mainResult.Columns[i], mainCol);
-                columns.AddRange(mainCodifications);
-            }
-            
-            foreach (var sq in ctx.SubQueries.Values)
-            {
-                var distinctKeys = sq.GroupedValues.SelectMany(a => a.Value.Keys).Distinct(ObjectArrayComparer.Instance).ToList();
 
-                distinctKeys.Sort(ObjectArrayComparer.Instance);
-
-                foreach (var k in distinctKeys)
+                if (!mainQueryRequest.GroupResults)
                 {
-                    foreach (var vc in sq.ValueColumns)
+                    ctx.MainQuery.GetParentKey = (ResultRow row) => new object[] { row.Entity };
+                }
+                else
+                {
+                    var rcs = mainResult.Columns.Where(a => !(a.Column.Token is AggregateToken)).ToArray();
+                    ctx.MainQuery.GetParentKey = (ResultRow row) => row.GetValues(rcs);
+                }
+
+                var algorithm = PredictorLogic.Algorithms.GetOrThrow(ctx.Predictor.Algorithm);
+
+                ctx.SubQueries = new Dictionary<PredictorSubQueryEntity, SubQuery>();
+                foreach (var sqe in ctx.Predictor.SubQueries)
+                {
+                    ctx.ReportProgress($"Executing SubQuery {sqe}");
+                    QueryRequest queryGroupRequest = ToMultiColumnQuery(ctx.Predictor.MainQuery, sqe);
+                    ResultTable groupResult = DynamicQueryManager.Current.ExecuteQuery(queryGroupRequest);
+
+                    var pairs = groupResult.Columns.Zip(sqe.Columns, (rc, sqc) => (rc, sqc)).ToList();
+
+                    var parentKeys = pairs.Extract(a => a.sqc.Usage == PredictorSubQueryColumnUsage.ParentKey).Select(a => a.rc).ToArray();
+                    var splitKeys = pairs.Extract(a => a.sqc.Usage == PredictorSubQueryColumnUsage.SplitBy).Select(a => a.rc).ToArray();
+                    var values = pairs.Select(a => a.rc).ToArray();
+
+                    var groupedValues = groupResult.Rows.AgGroupToDictionary(
+                        row => row.GetValues(parentKeys),
+                        gr => gr.ToDictionaryEx(
+                            row => row.GetValues(splitKeys),
+                            row => row.GetValues(values),
+                            ObjectArrayComparer.Instance));
+
+                    ctx.SubQueries.Add(sqe, new SubQuery
                     {
-                        var col = sq.SubQueryEntity.Columns[vc.Index];
-                        var subCol = new PredictorColumnSubQuery
+                        SubQueryEntity = sqe,
+                        QueryGroupRequest = queryGroupRequest,
+                        ResultTable = groupResult,
+                        GroupedValues = groupedValues,
+                        SplitBy = splitKeys,
+                        ValueColumns = values,
+                        ColumnIndexToValueIndex = values.Select((r, i) => KVP.Create(r.Index, i)).ToDictionary()
+                    });
+                }
+
+                ctx.ReportProgress($"Creating Columns");
+                var codifications = new List<PredictorCodification>();
+
+                using (HeavyProfiler.Log("MainQuery"))
+                {
+                    for (int i = 0; i < mainResult.Columns.Length; i++)
+                    {
+                        var col = ctx.Predictor.MainQuery.Columns[i];
+                        using (HeavyProfiler.Log("Columns", () => col.Token.Token.ToString()))
                         {
-                            PredictorColumnIndex = vc.Index,
-                            PredictorSubQueryColumn = col,
-                            SubQuery = sq.SubQueryEntity,
-                            Keys = k,
-                        };
-                        var subQueryCodifications = algorithm.GenerateCodifications(col.Encoding, vc, subCol);
-                        columns.AddRange(subQueryCodifications);
+                            var mainCol = new PredictorColumnMain
+                            {
+                                PredictorColumn = col,
+                                PredictorColumnIndex = i,
+                            };
+                            var mainCodifications = algorithm.GenerateCodifications(col.Encoding, mainResult.Columns[i], mainCol);
+                            codifications.AddRange(mainCodifications);
+                        }
                     }
                 }
+
+                foreach (var sq in ctx.SubQueries.Values)
+                {
+                    using (HeavyProfiler.Log("SubQuery", () => sq.ToString()))
+                    {
+                        var distinctKeys = sq.GroupedValues.SelectMany(a => a.Value.Keys).Distinct(ObjectArrayComparer.Instance).ToList();
+
+                        distinctKeys.Sort(ObjectArrayComparer.Instance);
+
+                        foreach (var ks in distinctKeys)
+                        {
+                            using (HeavyProfiler.Log("Keys", () => ks.ToString(k => k?.ToString(), ", ")))
+                            {
+                                foreach (var vc in sq.ValueColumns)
+                                {
+                                    var col = sq.SubQueryEntity.Columns[vc.Index];
+                                    using (HeavyProfiler.Log("Columns", () => col.Token.Token.ToString()))
+                                    {
+                                        var subCol = new PredictorColumnSubQuery
+                                        {
+                                            PredictorColumnIndex = vc.Index,
+                                            PredictorSubQueryColumn = col,
+                                            SubQuery = sq.SubQueryEntity,
+                                            Keys = ks,
+                                        };
+                                        var subQueryCodifications = algorithm.GenerateCodifications(col.Encoding, vc, subCol);
+                                        codifications.AddRange(subQueryCodifications);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                ctx.SetCodifications(codifications.ToArray());
             }
-            
-            ctx.SetCodifications(columns.ToArray());
         }
 
         static QueryRequest GetMainQueryRequest(PredictorMainQueryEmbedded mq)

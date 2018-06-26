@@ -23,7 +23,6 @@ namespace Signum.Engine.MachineLearning
 
             ctx.ReportProgress($"Saving Codifications");
 
-
             ctx.Codifications.Select(pc =>
             {
                 string ToStringValue(QueryToken token, object obj, int limit)

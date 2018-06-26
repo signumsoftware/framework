@@ -75,6 +75,8 @@ namespace Signum.Engine.MachineLearning
         public List<PredictorCodification> Codifications { get; }
         public List<PredictorCodification> InputCodifications { get; }
         public Dictionary<PredictorColumnBase, List<PredictorCodification>> InputCodificationsByColumn { get; }
+
+        public List<PredictorCodification> OutputCodifications { get; }
         public Dictionary<PredictorColumnEmbedded, List<PredictorCodification>> MainOutputCodifications { get; }
         public Dictionary<PredictorSubQueryEntity, PredictorPredictSubQueryContext> SubQueryOutputCodifications { get; }
 
@@ -85,10 +87,13 @@ namespace Signum.Engine.MachineLearning
             Predictor = predictor;
             Algorithm = algorithm;
             Codifications = codifications;
+
             InputCodifications = codifications.Where(a => a.Column.Usage == PredictorColumnUsage.Input).ToList();
             InputCodificationsByColumn = InputCodifications.GroupToDictionary(a => a.Column);
-            MainOutputCodifications = codifications.Where(a => a.Column is PredictorColumnMain m && m.Usage == PredictorColumnUsage.Output).GroupToDictionary(a => ((PredictorColumnMain)a.Column).PredictorColumn);
-            SubQueryOutputCodifications = codifications.Where(a => a.Column is PredictorColumnSubQuery).AgGroupToDictionary(a => ((PredictorColumnSubQuery)a.Column).SubQuery, sqGroup => new PredictorPredictSubQueryContext
+
+            OutputCodifications = codifications.Where(a => a.Column.Usage == PredictorColumnUsage.Output).ToList();
+            MainOutputCodifications = OutputCodifications.Where(a => a.Column is PredictorColumnMain m).GroupToDictionary(a => ((PredictorColumnMain)a.Column).PredictorColumn);
+            SubQueryOutputCodifications = OutputCodifications.Where(a => a.Column is PredictorColumnSubQuery).AgGroupToDictionary(a => ((PredictorColumnSubQuery)a.Column).SubQuery, sqGroup => new PredictorPredictSubQueryContext
             {
                 SubQuery = sqGroup.Key,
                 Groups = sqGroup.AgGroupToDictionary(a => ((PredictorColumnSubQuery)a.Column).Keys, 
@@ -221,6 +226,7 @@ namespace Signum.Engine.MachineLearning
         void Train(PredictorTrainingContext ctx);
         void LoadModel(PredictorPredictContext predictor);
         PredictDictionary Predict(PredictorPredictContext ctx, PredictDictionary input);
+        List<PredictDictionary> PredictMultiple(PredictorPredictContext ctx, List<PredictDictionary> inputs);
         string[] GetAvailableDevices();
         List<PredictorCodification> GenerateCodifications(PredictorColumnEncodingSymbol encoding, ResultColumn resultColumn, PredictorColumnBase column);
         IEnumerable<PredictorColumnEncodingSymbol> GetRegisteredEncodingSymbols(); 

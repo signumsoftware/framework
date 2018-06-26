@@ -371,46 +371,54 @@ namespace Signum.Engine.MachineLearning
 
         static void DoTraining(PredictorTrainingContext ctx)
         {
-            try
+            using (HeavyProfiler.Log("DoTraining"))
             {
-                if (ctx.Predictor.ResultSaver != null)
+                try
                 {
-                    var saver = ResultSavers.GetOrThrow(ctx.Predictor.ResultSaver);
-                    saver.AssertValid(ctx.Predictor);
+                    if (ctx.Predictor.ResultSaver != null)
+                    {
+                        var saver = ResultSavers.GetOrThrow(ctx.Predictor.ResultSaver);
+                        saver.AssertValid(ctx.Predictor);
+                    }
+
+                    PredictorLogicQuery.RetrieveData(ctx);
+                    PredictorCodificationLogic.CreatePredictorCodifications(ctx);
+
+                    var algorithm = Algorithms.GetOrThrow(ctx.Predictor.Algorithm);
+                    using (HeavyProfiler.Log("Train"))
+                        algorithm.Train(ctx);
+
+                    if (ctx.Predictor.ResultSaver != null)
+                    {
+                        using (HeavyProfiler.Log("ResultSaver"))
+                        {
+                            var saver = ResultSavers.GetOrThrow(ctx.Predictor.ResultSaver);
+                            saver.SavePredictions(ctx);
+                        }
+                    }
+
+                    ctx.Predictor.State = PredictorState.Trained;
+                    using (OperationLogic.AllowSave<PredictorEntity>())
+                        ctx.Predictor.Save();
                 }
-
-                PredictorLogicQuery.RetrieveData(ctx);
-                PredictorCodificationLogic.CreatePredictorCodifications(ctx);
-                var algorithm = Algorithms.GetOrThrow(ctx.Predictor.Algorithm);
-                algorithm.Train(ctx);
-
-                if(ctx.Predictor.ResultSaver != null)
+                catch (OperationCanceledException)
                 {
-                    var saver = ResultSavers.GetOrThrow(ctx.Predictor.ResultSaver);
-                    saver.SavePredictions(ctx);
+                    var p = ctx.Predictor.ToLite().RetrieveAndForget();
+                    CleanTrained(p);
+                    p.State = PredictorState.Draft;
+                    using (OperationLogic.AllowSave<PredictorEntity>())
+                        p.Save();
                 }
-
-                ctx.Predictor.State = PredictorState.Trained;
-                using (OperationLogic.AllowSave<PredictorEntity>())
-                    ctx.Predictor.Save();
-            }
-            catch (OperationCanceledException)
-            {
-                var p = ctx.Predictor.ToLite().RetrieveAndForget();
-                CleanTrained(p);
-                p.State = PredictorState.Draft;
-                using (OperationLogic.AllowSave<PredictorEntity>())
-                    p.Save();
-            }
-            catch (Exception ex)
-            {
-                ex.Data["entity"] = ctx.Predictor;
-                var e = ex.LogException();
-                var p = ctx.Predictor.ToLite().RetrieveAndForget();
-                p.State = PredictorState.Error;
-                p.TrainingException = e.ToLite();
-                using (OperationLogic.AllowSave<PredictorEntity>())
-                    p.Save();
+                catch (Exception ex)
+                {
+                    ex.Data["entity"] = ctx.Predictor;
+                    var e = ex.LogException();
+                    var p = ctx.Predictor.ToLite().RetrieveAndForget();
+                    p.State = PredictorState.Error;
+                    p.TrainingException = e.ToLite();
+                    using (OperationLogic.AllowSave<PredictorEntity>())
+                        p.Save();
+                }
             }
         }
 

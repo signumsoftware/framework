@@ -123,72 +123,84 @@ namespace Signum.Engine.MachineLearning.CNTK
             List<FinalCandidate> candidate = new List<FinalCandidate>();
             for (int i = 0; i < numMinibatches; i++)
             {
-                ctx.ReportProgress("Training Minibatches", (i + 1) / (decimal)numMinibatches);
+                using (HeavyProfiler.Log("MiniBatch", () => i.ToString()))
                 {
-                    var trainMinibatch = 0.To(minibachtSize).Select(_ => rand.NextElement(training)).ToList();
-                    using (Value inputValue = CreateValue(ctx, trainMinibatch, ctx.InputCodifications.Count, ctx.InputCodificationsByColumn, device))
-                    using (Value outputValue = CreateValue(ctx, trainMinibatch, ctx.OutputCodifications.Count, ctx.OutputCodificationsByColumn, device))
+                    ctx.ReportProgress("Training Minibatches", (i + 1) / (decimal)numMinibatches);
+
                     {
-                        trainer.TrainMinibatch(new Dictionary<Variable, Value>()
+                        var trainMinibatch = 0.To(minibachtSize).Select(_ => rand.NextElement(training)).ToList();
+                        using (Value inputValue = CreateValue(ctx, trainMinibatch, ctx.InputCodifications.Count, ctx.InputCodificationsByColumn, device))
+                        using (Value outputValue = CreateValue(ctx, trainMinibatch, ctx.OutputCodifications.Count, ctx.OutputCodificationsByColumn, device))
                         {
-                            { inputVariable, inputValue },
-                            { outputVariable, outputValue },
-                        }, false, device);
-                    }
-                }
-
-                var ep = new EpochProgress
-                {
-                    Ellapsed = sw.ElapsedMilliseconds,
-                    Epoch = i,
-                    TrainingExamples = (int)trainer.TotalNumberOfSamplesSeen(),
-                    LossTraining = trainer.PreviousMinibatchLossAverage(),
-                    EvaluationTraining = trainer.PreviousMinibatchEvaluationAverage(),
-                    LossValidation = null,
-                    EvaluationValidation = null,
-                };
-
-                ctx.Progresses.Add(ep);
-                
-                if (ctx.StopTraining)
-                    p = ctx.Predictor = ctx.Predictor.ToLite().Retrieve();
-
-                var isLast = numMinibatches - nn.BestResultFromLast <= i;
-                if (isLast || (i % nn.SaveProgressEvery) == 0 || ctx.StopTraining)
-                {
-                    if (isLast || (i % nn.SaveValidationProgressEvery) == 0 || ctx.StopTraining)
-                    {
-                        var validateMinibatch = 0.To(minibachtSize).Select(_ => rand.NextElement(validation)).ToList();
-                        using (Value inputValValue = CreateValue(ctx, validateMinibatch, ctx.InputCodifications.Count, ctx.InputCodificationsByColumn, device))
-                        using (Value outputValValue = CreateValue(ctx, validateMinibatch, ctx.OutputCodifications.Count, ctx.OutputCodificationsByColumn, device))
-                        {
-                            var inputs = new Dictionary<Variable, Value>()
-                            {
-                                { inputVariable, inputValValue },
-                                { outputVariable, outputValValue },
-                            };
-
-                            ep.LossValidation = loss.EvaluateAvg(inputs, device);
-                            ep.EvaluationValidation = evalError.EvaluateAvg(inputs, device);
+                            using (HeavyProfiler.Log("TrainMinibatch", () => i.ToString()))
+                                trainer.TrainMinibatch(new Dictionary<Variable, Value>()
+                                {
+                                    { inputVariable, inputValue },
+                                    { outputVariable, outputValue },
+                                }, false, device);
                         }
                     }
 
-                    var progress = ep.SaveEntity(ctx.Predictor);
-
-                    if (isLast || ctx.StopTraining)
+                    var ep = new EpochProgress
                     {
-                        candidate.Add(new FinalCandidate
+                        Ellapsed = sw.ElapsedMilliseconds,
+                        Epoch = i,
+                        TrainingExamples = (int)trainer.TotalNumberOfSamplesSeen(),
+                        LossTraining = trainer.PreviousMinibatchLossAverage(),
+                        EvaluationTraining = trainer.PreviousMinibatchEvaluationAverage(),
+                        LossValidation = null,
+                        EvaluationValidation = null,
+                    };
+
+                    ctx.Progresses.Add(ep);
+
+                    if (ctx.StopTraining)
+                        p = ctx.Predictor = ctx.Predictor.ToLite().Retrieve();
+
+                    var isLast = numMinibatches - nn.BestResultFromLast <= i;
+                    if (isLast || (i % nn.SaveProgressEvery) == 0 || ctx.StopTraining)
+                    {
+                        if (isLast || (i % nn.SaveValidationProgressEvery) == 0 || ctx.StopTraining)
                         {
-                            Model = calculatedOutputs.Save(),
+                            using (HeavyProfiler.LogNoStackTrace("Validation"))
+                            {
+                                var validateMinibatch = 0.To(minibachtSize).Select(_ => rand.NextElement(validation)).ToList();
 
-                            ResultTraining = new PredictorMetricsEmbedded { Evaluation = progress.EvaluationTraining, Loss = progress.LossTraining },
-                            ResultValidation = new PredictorMetricsEmbedded { Evaluation = progress.EvaluationValidation, Loss = progress.LossValidation },
-                        });
+                                using (Value inputValValue = CreateValue(ctx, validateMinibatch, ctx.InputCodifications.Count, ctx.InputCodificationsByColumn, device))
+                                using (Value outputValValue = CreateValue(ctx, validateMinibatch, ctx.OutputCodifications.Count, ctx.OutputCodificationsByColumn, device))
+                                {
+                                    var inputs = new Dictionary<Variable, Value>()
+                                    {
+                                        { inputVariable, inputValValue },
+                                        { outputVariable, outputValValue },
+                                    };
+
+                                    ep.LossValidation = loss.EvaluateAvg(inputs, device);
+                                    ep.EvaluationValidation = evalError.EvaluateAvg(inputs, device);
+                                }
+                            }
+                        }
+
+                        var progress = ep.SaveEntity(ctx.Predictor);
+
+                        if (isLast || ctx.StopTraining)
+                        {
+                            using (HeavyProfiler.LogNoStackTrace("FinalCandidate"))
+                            {
+                                candidate.Add(new FinalCandidate
+                                {
+                                    Model = calculatedOutputs.Save(),
+
+                                    ResultTraining = new PredictorMetricsEmbedded { Evaluation = progress.EvaluationTraining, Loss = progress.LossTraining },
+                                    ResultValidation = new PredictorMetricsEmbedded { Evaluation = progress.EvaluationValidation, Loss = progress.LossValidation },
+                                });
+                            }
+                        }
                     }
-                }
 
-                if (ctx.StopTraining)
-                    break;
+                    if (ctx.StopTraining)
+                        break;
+                }
             }
 
             var best = candidate.WithMin(a => a.ResultValidation.Loss.Value);
@@ -213,121 +225,150 @@ namespace Signum.Engine.MachineLearning.CNTK
  
         Value CreateValue(PredictorTrainingContext ctx, List<ResultRow> rows, int codificationCount, Dictionary<PredictorColumnBase, List<PredictorCodification>> codificationByColumn, DeviceDescriptor device)
         {
-            float[] inputValues = new float[rows.Count * codificationCount];
-            for (int i = 0; i < rows.Count; i++)
+            using (HeavyProfiler.Log("CreateValue", () => $"Rows {rows.Count} Codifications {codificationCount}"))
             {
-                ResultRow mainRow = rows[i];
-                var mainKey = ctx.MainQuery.GetParentKey(mainRow);
-
-                int offset = i * codificationCount;
-
-                foreach (var kvp in codificationByColumn)
+                float[] inputValues = new float[rows.Count * codificationCount];
+                for (int i = 0; i < rows.Count; i++)
                 {
-                    PredictorColumnBase col = kvp.Key;
-                    object value;
-                    if (col is PredictorColumnMain pcm)
-                    {
-                        value = mainRow[pcm.PredictorColumnIndex];
-                    }
-                    else if (col is PredictorColumnSubQuery pcsq)
-                    {
-                        SubQuery sq = ctx.SubQueries.GetOrThrow(pcsq.SubQuery);
-                        object[] rowValues = sq.GroupedValues.TryGetC(mainKey)?.TryGetC(pcsq.Keys);
-                        value = rowValues == null ? null : rowValues[sq.ColumnIndexToValueIndex[pcsq.PredictorColumnIndex]];
-                    }
-                    else
-                    {
-                        throw new UnexpectedValueException(col);
-                    }
+                    ResultRow mainRow = rows[i];
+                    var mainKey = ctx.MainQuery.GetParentKey(mainRow);
 
-                    ICNTKEncoding encoding = Encodings.GetOrThrow(col.Encoding);
+                    int offset = i * codificationCount;
 
-                    encoding.EncodeValue(value ?? CNTKDefault.GetDefaultValue(kvp.Value.FirstOrDefault()), col, kvp.Value, inputValues, offset);
+                    foreach (var kvp in codificationByColumn)
+                    {
+                        PredictorColumnBase col = kvp.Key;
+                        object value;
+                        if (col is PredictorColumnMain pcm)
+                        {
+                            value = mainRow[pcm.PredictorColumnIndex];
+                        }
+                        else if (col is PredictorColumnSubQuery pcsq)
+                        {
+                            SubQuery sq = ctx.SubQueries.GetOrThrow(pcsq.SubQuery);
+                            object[] rowValues = sq.GroupedValues.TryGetC(mainKey)?.TryGetC(pcsq.Keys);
+                            value = rowValues == null ? null : rowValues[sq.ColumnIndexToValueIndex[pcsq.PredictorColumnIndex]];
+                        }
+                        else
+                        {
+                            throw new UnexpectedValueException(col);
+                        }
+
+                        using (HeavyProfiler.LogNoStackTrace("EncodeValue"))
+                        {
+                            ICNTKEncoding encoding = Encodings.GetOrThrow(col.Encoding);
+
+                            encoding.EncodeValue(value ?? CNTKDefault.GetDefaultValue(kvp.Value.FirstOrDefault()), col, kvp.Value, inputValues, offset);
+                        }
+                    }
                 }
-            }
 
-            return Value.CreateBatch<float>(new int[] { codificationCount }, inputValues, device);
+                using (HeavyProfiler.LogNoStackTrace("CreateBatch"))
+                    return Value.CreateBatch<float>(new int[] { codificationCount }, inputValues, device);
+            }
         }
 
         public PredictDictionary Predict(PredictorPredictContext ctx, PredictDictionary input)
         {
-            var nnSettings = (NeuralNetworkSettingsEntity)ctx.Predictor.AlgorithmSettings;
-            Function calculatedOutputs = (Function)ctx.Model;
+            return PredictMultiple(ctx, new List<PredictDictionary> { input }).SingleEx();
+        }
 
-            lock (calculatedOutputs) //https://docs.microsoft.com/en-us/cognitive-toolkit/cntk-library-evaluation-on-windows#evaluation-of-multiple-requests-in-parallel
+        public List<PredictDictionary> PredictMultiple(PredictorPredictContext ctx, List<PredictDictionary> inputs)
+        {
+            using (HeavyProfiler.LogNoStackTrace("PredictMultiple"))
             {
-                var device = GetDevice(nnSettings);
-                Value inputValue = GetValueForPredict(ctx, input, device);
+                var nnSettings = (NeuralNetworkSettingsEntity)ctx.Predictor.AlgorithmSettings;
+                Function calculatedOutputs = (Function)ctx.Model;
 
-                var inputVar = calculatedOutputs.Inputs.SingleEx(i => i.Name == "input");
-                var inputDic = new Dictionary<Variable, Value> { { inputVar, inputValue } };
-                var outputDic = new Dictionary<Variable, Value> { { calculatedOutputs, null } };
+                lock (calculatedOutputs) //https://docs.microsoft.com/en-us/cognitive-toolkit/cntk-library-evaluation-on-windows#evaluation-of-multiple-requests-in-parallel
+                {
+                    var device = GetDevice(nnSettings);
+                    Value inputValue = GetValueForPredict(ctx, inputs, device);
 
+                    var inputVar = calculatedOutputs.Inputs.SingleEx(i => i.Name == "input");
+                    var inputDic = new Dictionary<Variable, Value> { { inputVar, inputValue } };
+                    var outputDic = new Dictionary<Variable, Value> { { calculatedOutputs, null } };
 
-                calculatedOutputs.Evaluate(inputDic, outputDic, device);
+                    calculatedOutputs.Evaluate(inputDic, outputDic, device);
 
-                Value output = outputDic[calculatedOutputs];
-                float[] values = output.GetDenseData<float>(calculatedOutputs).SingleEx().ToArray();
-                var result = GetPredictionDictionary(values, ctx);
-                return result;
+                    Value output = outputDic[calculatedOutputs];
+                    float[] values = output.GetDenseData<float>(calculatedOutputs).SingleEx().ToArray();
+                    var result = inputs.Select((imp, i) => GetPredictionDictionary(values, ctx, offset: ctx.OutputCodifications.Count * i)).ToList();
+                    return result;
+                }
             }
         }
 
-        private PredictDictionary GetPredictionDictionary(float[] outputValues, PredictorPredictContext ctx)
+        private PredictDictionary GetPredictionDictionary(float[] outputValues, PredictorPredictContext ctx, int offset)
         {
-            return new PredictDictionary(ctx.Predictor)
+            using (HeavyProfiler.LogNoStackTrace("GetPredictionDictionary"))
             {
-                MainQueryValues = ctx.MainOutputCodifications.SelectDictionary(col => col, 
-                    (col, list) => Encodings.GetOrThrow(col.Encoding).DecodeValue(list.First().Column, list, outputValues)),
-
-                SubQueries = ctx.Predictor.SubQueries.ToDictionary(sq => sq, sq => new PredictSubQueryDictionary(sq)
+                return new PredictDictionary(ctx.Predictor)
                 {
-                    SubQueryGroups = ctx.SubQueryOutputCodifications.TryGetC(sq)?.Groups.ToDictionary(
-                        kvp => kvp.Key, 
-                        kvp => kvp.Value
-                        .Where(a => a.Key.Usage ==  PredictorSubQueryColumnUsage.Output)
-                        .ToDictionary(a => a.Key, a => Encodings.GetOrThrow(a.Key.Encoding).DecodeValue(a.Value.FirstEx().Column, a.Value, outputValues)), 
-                        ObjectArrayComparer.Instance
-                    ) ?? new Dictionary<object[], Dictionary<PredictorSubQueryColumnEmbedded, object>>(ObjectArrayComparer.Instance),
+                    MainQueryValues = ctx.MainOutputCodifications.SelectDictionary(col => col,
+                    (col, list) => Encodings.GetOrThrow(col.Encoding).DecodeValue(list.First().Column, list, outputValues, offset)),
 
-                })
-            };
+                    SubQueries = ctx.Predictor.SubQueries.ToDictionary(sq => sq, sq => new PredictSubQueryDictionary(sq)
+                    {
+                        SubQueryGroups = ctx.SubQueryOutputCodifications.TryGetC(sq)?.Groups.ToDictionary(
+                            kvp => kvp.Key,
+                            kvp => kvp.Value
+                            .Where(a => a.Key.Usage == PredictorSubQueryColumnUsage.Output)
+                            .ToDictionary(a => a.Key, a => Encodings.GetOrThrow(a.Key.Encoding).DecodeValue(a.Value.FirstEx().Column, a.Value, outputValues, offset)),
+                            ObjectArrayComparer.Instance
+                        ) ?? new Dictionary<object[], Dictionary<PredictorSubQueryColumnEmbedded, object>>(ObjectArrayComparer.Instance),
+
+                    })
+                };
+            }
         }
 
-        private Value GetValueForPredict(PredictorPredictContext ctx, PredictDictionary input, DeviceDescriptor device)
+        private Value GetValueForPredict(PredictorPredictContext ctx, List<PredictDictionary> inputs, DeviceDescriptor device)
         {
-            if (input.SubQueries.Values.Any(a => a.SubQueryGroups.Comparer != ObjectArrayComparer.Instance))
-                throw new Exception("Unexpected dictionary comparer");
-
-            float[] inputValues = new float[ctx.InputCodifications.Count];
-            var groups = ctx.InputCodifications.GroupToDictionary(a => a.Column);
-            foreach (var kvp in groups)
+            using (HeavyProfiler.Log("GetValueForPredict", () => $"Inputs {inputs.Count} Codifications {ctx.InputCodifications.Count}"))
             {
-                PredictorColumnBase col = kvp.Key;
-                object value;
-                if (col is PredictorColumnMain pcm)
-                {
-                    value = input.MainQueryValues.GetOrThrow(pcm.PredictorColumn);
-                }
-                else if (col is PredictorColumnSubQuery pcsq)
-                {
-                    var sq = input.SubQueries.GetOrThrow(pcsq.SubQuery);
+                if (inputs.First().SubQueries.Values.Any(a => a.SubQueryGroups.Comparer != ObjectArrayComparer.Instance))
+                    throw new Exception("Unexpected dictionary comparer");
 
-                    var dic = sq.SubQueryGroups.TryGetC(pcsq.Keys);
-
-                    value = dic == null ? null : dic.GetOrThrow(pcsq.PredictorSubQueryColumn);
-                }
-                else
+                float[] inputValues = new float[inputs.Count * ctx.InputCodifications.Count];
+                var groups = ctx.InputCodificationsByColumn;
+                for (int i = 0; i < inputs.Count; i++)
                 {
-                    throw new UnexpectedValueException(col);
-                }
+                    PredictDictionary input = inputs[i];
+                    int offset = i * ctx.InputCodifications.Count;
 
-                var enc = Encodings.GetOrThrow(col.Encoding);
+                    foreach (var kvp in groups)
+                    {
+                        PredictorColumnBase col = kvp.Key;
+                        object value;
+                        if (col is PredictorColumnMain pcm)
+                        {
+                            value = input.MainQueryValues.GetOrThrow(pcm.PredictorColumn);
+                        }
+                        else if (col is PredictorColumnSubQuery pcsq)
+                        {
+                            var sq = input.SubQueries.GetOrThrow(pcsq.SubQuery);
+
+                            var dic = sq.SubQueryGroups.TryGetC(pcsq.Keys);
+
+                            value = dic == null ? null : dic.GetOrThrow(pcsq.PredictorSubQueryColumn);
+                        }
+                        else
+                        {
+                            throw new UnexpectedValueException(col);
+                        }
+
+                        using (HeavyProfiler.LogNoStackTrace("EncodeValue"))
+                        {
+                            var enc = Encodings.GetOrThrow(col.Encoding);
+                            enc.EncodeValue(value ?? CNTKDefault.GetDefaultValue(kvp.Value.FirstOrDefault()), col, kvp.Value, inputValues, 0);
+                        }
+                    }
+                }
                 
-                enc.EncodeValue(value ?? CNTKDefault.GetDefaultValue(kvp.Value.FirstOrDefault()), col, kvp.Value, inputValues, 0);
+                using (HeavyProfiler.LogNoStackTrace("CreateBatch"))
+                    return Value.CreateBatch<float>(new int[] { ctx.InputCodifications.Count }, inputValues, device);
             }
-
-            return Value.CreateBatch<float>(new int[] { ctx.InputCodifications.Count }, inputValues, device);
         }
 
         public void LoadModel(PredictorPredictContext ctx)

@@ -15,7 +15,7 @@ namespace Signum.Engine.MachineLearning.CNTK
     {
         string ValidateEncodingProperty(PredictorEntity predictor, PredictorSubQueryEntity subQuery, PredictorColumnEncodingSymbol encoding, PredictorColumnUsage usage, QueryTokenEmbedded token);
         List<PredictorCodification> GenerateCodifications(ResultColumn rc, PredictorColumnBase column);
-        object DecodeValue(PredictorColumnBase column, List<PredictorCodification> codifications, float[] outputValues);
+        object DecodeValue(PredictorColumnBase column, List<PredictorCodification> codifications, float[] outputValues, int offset);
         void EncodeValue(object value, PredictorColumnBase column, List<PredictorCodification> codifications, float[] inputValues, int offset); //Span<T>
     }
 
@@ -44,10 +44,10 @@ namespace Signum.Engine.MachineLearning.CNTK
             inputValues[offset + c.Index]  = Convert.ToSingle(value);
         }
 
-        public object DecodeValue(PredictorColumnBase column, List<PredictorCodification> codifications, float[] outputValues)
+        public object DecodeValue(PredictorColumnBase column, List<PredictorCodification> codifications, float[] outputValues, int offset)
         {
             var c = codifications.SingleEx();
-            return ReflectionTools.ChangeType(outputValues[c.Index], column.Token.Type);
+            return ReflectionTools.ChangeType(outputValues[offset + c.Index], column.Token.Type);
         }
     }
 
@@ -82,12 +82,24 @@ namespace Signum.Engine.MachineLearning.CNTK
             if (column.ColumnModel != null)
                 return (Dictionary<object, int>)column.ColumnModel;
 
-            return codifications.ToDictionary(a => a.IsValue, a => a.Index);
+            column.ColumnModel = codifications.ToDictionary(a => a.IsValue, a => a.Index);
+
+            return (Dictionary<object, int>)column.ColumnModel;
         }
 
-        public object DecodeValue(PredictorColumnBase column, List<PredictorCodification> codifications, float[] outputValues)
+        public object DecodeValue(PredictorColumnBase column, List<PredictorCodification> codifications, float[] outputValues, int offset)
         {
-            return codifications.WithMax(c => outputValues[c.Index]).IsValue;
+            var max = float.MinValue;
+            PredictorCodification best = null;
+            foreach (var c in codifications)
+            {
+                if(max < outputValues[offset + c.Index])
+                {
+                    best = c;
+                    max = outputValues[offset + c.Index];
+                }
+            }
+            return best?.IsValue;
         }
     }
 
@@ -124,10 +136,10 @@ namespace Signum.Engine.MachineLearning.CNTK
         }
 
         public abstract object DecodeSingleValue(float value, PredictorCodification c);
-        public object DecodeValue(PredictorColumnBase column, List<PredictorCodification> codifications, float[] outputValues)
+        public object DecodeValue(PredictorColumnBase column, List<PredictorCodification> codifications, float[] outputValues, int offset)
         {
             PredictorCodification cod = codifications.SingleEx();
-            float value = outputValues[cod.Index];
+            float value = outputValues[offset + cod.Index];
             return DecodeSingleValue(value, cod);
         }
     }
@@ -200,9 +212,11 @@ namespace Signum.Engine.MachineLearning.CNTK
             return allWords.Select(v => new PredictorCodification(column) { IsValue = v }).ToList();
         }
 
-        public virtual IEnumerable<string> SplitWords(string str)
+        public char[] separators = new[] { '.', ',', ' ', '-', '(', ')', '/', '\\', ';', ':' };
+
+        public virtual string[] SplitWords(string str)
         {
-            return str.SplitNoEmpty('.', ',', ' ', '-', '(', ')');
+            return str.SplitNoEmpty(separators);
         }
 
         public void EncodeValue(object value, PredictorColumnBase column, List<PredictorCodification> codifications, float[] inputValues, int offset)
@@ -221,11 +235,11 @@ namespace Signum.Engine.MachineLearning.CNTK
         public int MaxDecodedWords = 5;
         public float MinDecodedWordValue = 0.1f;
 
-        public object DecodeValue(PredictorColumnBase column, List<PredictorCodification> codifications, float[] outputValues)
+        public object DecodeValue(PredictorColumnBase column, List<PredictorCodification> codifications, float[] outputValues, int offset)
         {
-            var bestCodifications =  codifications
-                .Where(c => outputValues[c.Index] > MinDecodedWordValue)
-                .OrderByDescending(a => outputValues[a.Index])
+            var bestCodifications = codifications
+                .Where(c => outputValues[offset + c.Index] > MinDecodedWordValue)
+                .OrderByDescending(a => outputValues[offset + a.Index])
                 .Take(MaxDecodedWords)
                 .ToList();
 
@@ -237,7 +251,9 @@ namespace Signum.Engine.MachineLearning.CNTK
             if (column.ColumnModel != null)
                 return (Dictionary<string, int>)column.ColumnModel;
 
-            return codifications.ToDictionaryEx(a => (string)a.IsValue, a => a.Index, StringComparer.CurrentCultureIgnoreCase);
+            column.ColumnModel = codifications.ToDictionaryEx(a => (string)a.IsValue, a => a.Index, StringComparer.CurrentCultureIgnoreCase);
+
+            return (Dictionary<string, int>)column.ColumnModel;
         }
     }
 }
