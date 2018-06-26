@@ -150,7 +150,7 @@ namespace Signum.Engine.MachineLearning
                     select new PredictorCodification(col)
                     {
                         Index = cod.Index,
-                        IsValue = col.Encoding.Is(DefaultColumnEncodings.OneHot) ? ParseValue(cod.IsValue, col.Token) : null,
+                        IsValue = cod.IsValue != null ? ParseValue(cod.IsValue, col.Token) : null,
                         Average = cod.Average,
                         StdDev = cod.StdDev,
                         Min = cod.Min,

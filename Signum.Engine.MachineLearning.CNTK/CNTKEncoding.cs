@@ -195,7 +195,7 @@ namespace Signum.Engine.MachineLearning.CNTK
         {
             var distinctStrings = rc.Values.Cast<string>().NotNull().Distinct();
 
-            var allWords = distinctStrings.SelectMany(str => SplitWords(str)).Distinct().ToList();
+            var allWords = distinctStrings.SelectMany(str => SplitWords(str)).Distinct(StringComparer.CurrentCultureIgnoreCase).ToList();
 
             return allWords.Select(v => new PredictorCodification(column) { IsValue = v }).ToList();
         }
@@ -237,7 +237,7 @@ namespace Signum.Engine.MachineLearning.CNTK
             if (column.ColumnModel != null)
                 return (Dictionary<string, int>)column.ColumnModel;
 
-            return codifications.ToDictionary(a => (string)a.IsValue, a => a.Index, StringComparer.CurrentCultureIgnoreCase);
+            return codifications.ToDictionaryEx(a => (string)a.IsValue, a => a.Index, StringComparer.CurrentCultureIgnoreCase);
         }
     }
 }
