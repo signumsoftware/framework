@@ -617,6 +617,8 @@ JOIN {3} {4} ON {2}.{0} = {4}.Id".FormatWith(tabCol.Name,
 
             foreach (var db in databases)
             {
+                SafeConsole.WriteColor(ConsoleColor.Cyan, '.');
+
                 using (Administrator.OverrideDatabaseInSysViews(db))
                 {
                     var databaseName = db == null ? Connector.Current.DatabaseName() : db.Name;
@@ -769,6 +771,8 @@ JOIN {3} {4} ON {2}.{0} = {4}.Id".FormatWith(tabCol.Name,
                 Type enumType = EnumEntity.Extract(table.Type);
                 if (enumType != null)
                 {
+                    Console.Write(".");
+
                     IEnumerable<Entity> should = EnumEntity.GetEntities(enumType);
                     Dictionary<string, Entity> shouldByName = should.ToDictionary(a => a.ToString());
 
