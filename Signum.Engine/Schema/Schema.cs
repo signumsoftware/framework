@@ -409,10 +409,24 @@ namespace Signum.Engine.Maps
                     {
                         try
                         {
-                            return e(replacements);
+                            SafeConsole.WriteColor(ConsoleColor.White, e.Method.DeclaringType.TypeName());
+                            Console.Write(".");
+                            SafeConsole.WriteColor(ConsoleColor.DarkGray, e.Method.MethodName());
+                            Console.Write("...");
+
+                            var result = e(replacements);
+
+                            if (result == null)
+                                SafeConsole.WriteLineColor(ConsoleColor.Green, "OK");
+                            else
+                                SafeConsole.WriteLineColor(ConsoleColor.Yellow, "Changes");
+
+                            return result;
                         }
                         catch (Exception ex)
                         {
+                            SafeConsole.WriteLineColor(ConsoleColor.Red, "Error");
+
                             return new SqlPreCommandSimple("-- Exception on {0}.{1}\r\n{2}".FormatWith(e.Method.DeclaringType.Name, e.Method.Name, ex.Message.Indent(2, '-')));
                         }
                     })

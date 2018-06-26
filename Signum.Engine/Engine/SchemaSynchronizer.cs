@@ -92,6 +92,10 @@ namespace Signum.Engine
                     }
                 }
             });
+            
+            var tableReplacements = replacements.TryGetC(Replacements.KeyTables);
+            if (tableReplacements != null)
+                replacements[Replacements.KeyTablesInverse] = tableReplacements.Inverse();
 
             var columnsByFKTarget = databaseTables.Values.SelectMany(a => a.Columns.Values).Where(a => a.ForeignKey != null).GroupToDictionary(a => a.ForeignKey.TargetTable);
 
@@ -112,6 +116,8 @@ namespace Signum.Engine
 
                 return modelTables.TryGetC(name)?.Name ?? objectName;
             };
+
+
 
 
             Func<ObjectName, SqlPreCommand> DeleteAllForeignKey = tableName =>
@@ -308,10 +314,6 @@ namespace Signum.Engine
                 if (tables != null)
                     tables.GoAfter = true;
 
-                var tableReplacements = replacements.TryGetC(Replacements.KeyTables);
-                if (tableReplacements != null)
-                    replacements[Replacements.KeyTablesInverse] = tableReplacements.Inverse();
-
                 SqlPreCommand syncEnums;
 
                 try
@@ -358,7 +360,7 @@ namespace Signum.Engine
 
                 SqlPreCommand addIndices =
                     Synchronizer.SynchronizeScript(Spacing.Double, modelTables, databaseTables,
-                    createNew: (tn, tab) => modelIndices[tab].Values.Where(a => !(a is PrimaryClusteredIndex)).Select(SqlBuilder.CreateIndex).Combine(Spacing.Simple),
+                    createNew: (tn, tab) => modelIndices[tab].Values.Where(a => !(a is PrimaryClusteredIndex)).Select(index => SqlBuilder.CreateIndex(index, null)).Combine(Spacing.Simple),
                     removeOld: null,
                     mergeBoth: (tn, tab, dif) =>
                     {
@@ -369,9 +371,9 @@ namespace Signum.Engine
                         Dictionary<string, Index> modelIxs = modelIndices[tab];
 
                         var controlledIndexes = Synchronizer.SynchronizeScript(Spacing.Simple, modelIxs, dif.Indices, 
-                            createNew: (i, mix) => mix is UniqueIndex || mix.Columns.Any(isNew) || SafeConsole.Ask(ref createMissingFreeIndexes, "Create missing non-unique index {0} in {1}?".FormatWith(mix.IndexName, tab.Name)) ? SqlBuilder.CreateIndex(mix) : null,
+                            createNew: (i, mix) => mix is UniqueIndex || mix.Columns.Any(isNew) || SafeConsole.Ask(ref createMissingFreeIndexes, "Create missing non-unique index {0} in {1}?".FormatWith(mix.IndexName, tab.Name)) ? SqlBuilder.CreateIndex(mix, checkUnique: replacements) : null,
                             removeOld: null,
-                            mergeBoth: (i, mix, dix) => !dix.IndexEquals(dif, mix) ? SqlBuilder.CreateIndex(mix) :
+                            mergeBoth: (i, mix, dix) => !dix.IndexEquals(dif, mix) ? SqlBuilder.CreateIndex(mix, checkUnique: replacements) :
                                 mix.IndexName != dix.IndexName ? SqlBuilder.RenameIndex(tab.Name, dix.IndexName, mix.IndexName) : null);
 
                         return SqlPreCommand.Combine(Spacing.Simple, controlledIndexes);
@@ -482,11 +484,11 @@ WHERE {where}"));
         internal static SqlPreCommand CopyData(ITable newTable, DiffTable oldTable, Replacements rep)
         {
             var selectColumns = newTable.Columns
-                .Select(col => oldTable.Columns.TryGetC(col.Key)?.Name ?? GetDefaultValue(newTable, col.Value, rep, forNewColumn: true))
+                .Select(col => oldTable.Columns.TryGetC(col.Key)?.Name.SqlEscape() ?? GetDefaultValue(newTable, col.Value, rep, forNewColumn: true))
                 .ToString(", ");
 
             var insertSelect = new SqlPreCommandSimple(
-$@"INSERT INTO {newTable.Name} ({newTable.Columns.Values.ToString(a => a.Name, ", ")})
+$@"INSERT INTO {newTable.Name} ({newTable.Columns.Values.ToString(a => a.Name.SqlEscape(), ", ")})
 SELECT {selectColumns}
 FROM {oldTable.Name}");
 
@@ -615,6 +617,8 @@ JOIN {3} {4} ON {2}.{0} = {4}.Id".FormatWith(tabCol.Name,
 
             foreach (var db in databases)
             {
+                SafeConsole.WriteColor(ConsoleColor.Cyan, '.');
+
                 using (Administrator.OverrideDatabaseInSysViews(db))
                 {
                     var databaseName = db == null ? Connector.Current.DatabaseName() : db.Name;
@@ -767,6 +771,8 @@ JOIN {3} {4} ON {2}.{0} = {4}.Id".FormatWith(tabCol.Name,
                 Type enumType = EnumEntity.Extract(table.Type);
                 if (enumType != null)
                 {
+                    Console.Write(".");
+
                     IEnumerable<Entity> should = EnumEntity.GetEntities(enumType);
                     Dictionary<string, Entity> shouldByName = should.ToDictionary(a => a.ToString());
 

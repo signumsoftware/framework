@@ -92,6 +92,24 @@ Use this method only with constant expressions stored in static fields.".FormatW
         }
 
         /// <summary>
+        /// Evaluate expression (compile & invoke). If you want to be able to expand
+        /// call to expression you have to use this method for invocation.
+        /// </summary>
+        public static T Evaluate<A0, A1, A2, A3, A4, T>(this Expression<Func<A0, A1, A2, A3, A4, T>> expr, A0 a0, A1 a1, A2 a2, A3 a3, A4 a4)
+        {
+            return expr.CompileAndStore()(a0, a1, a2, a3, a4);
+        }
+
+        /// <summary>
+        /// Evaluate expression (compile & invoke). If you want to be able to expand
+        /// call to expression you have to use this method for invocation.
+        /// </summary>
+        public static T Evaluate<A0, A1, A2, A3, A4, A5, T>(this Expression<Func<A0, A1, A2, A3, A4, A5, T>> expr, A0 a0, A1 a1, A2 a2, A3 a3, A4 a4, A5 a5)
+        {
+            return expr.CompileAndStore()(a0, a1, a2, a3, a4, a5);
+        }
+
+        /// <summary>
         /// Returns wrapper that automatically expands expressions in LINQ queries
         /// </summary>
         public static IQueryable<T> ToExpandable<T>(this IQueryable<T> q)

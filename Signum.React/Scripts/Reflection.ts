@@ -1,7 +1,7 @@
 ﻿import * as moment from 'moment';
 import * as numbro from 'numbro';
 import { Dic } from './Globals';
-import { ModifiableEntity, Entity, Lite, MListElement, ModelState, MixinEntity } from './Signum.Entities';
+import { ModifiableEntity, Entity, Lite, MListElement, ModelState, MixinEntity } from './Signum.Entities'; //ONLY TYPES!
 import {ajaxPost, ajaxGet} from './Services';
 import { MList } from "./Signum.Entities";
 
@@ -274,6 +274,13 @@ export function getTypeInfo(type: PseudoType): TypeInfo {
         return _types[(type as string).toLowerCase()];
 
     throw new Error("Unexpected type: " + type);
+}
+
+export function isLowPopulationSymbol(type: PseudoType) {
+
+    var ti = getTypeInfo(type);
+
+    return ti != null && ti.kind == "Entity" && ti.fullName.endsWith("Symbol") && ti.isLowPopulation;
 }
 
 export function parseId(ti: TypeInfo, id: string): string | number {
@@ -919,7 +926,7 @@ export class QueryKey {
     }
 }
 
-interface ISymbol {
+export interface ISymbol {
     Type: string; 
     key: string;
     id?: any;
@@ -939,8 +946,11 @@ function getMember(key: string): MemberInfo | undefined {
     return member;
 }
 
-export function symbolNiceName(symbol: ISymbol) {
-    return getMember(symbol.key) !.niceName;
+export function symbolNiceName(symbol: Entity & ISymbol | Lite<Entity & ISymbol>) {
+    if ((symbol as Entity).Type != null) //Don't use isEntity to avoid cycle
+        return getMember((symbol as Entity & ISymbol).key)!.niceName;
+    else
+        return getMember(symbol.toStr!)!.niceName;
 }
 
 export function registerSymbol(type: string, key: string): any /*ISymbol*/ {

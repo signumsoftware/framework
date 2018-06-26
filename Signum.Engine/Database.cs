@@ -1412,7 +1412,7 @@ namespace Signum.Engine
         public static int Execute(this IUpdateable update, string message = null)
         {
             if (message != null)
-                return SafeConsole.WaitRows(message == "auto" ? UnsafeMessage(update) : message,
+                return SafeConsole.WaitRows(message == "auto" ? $"Updating { update.EntityType.TypeName()}" : message,
                     () => update.Execute(message: null));
 
             using (HeavyProfiler.Log("DBUnsafeUpdate", () => update.EntityType.TypeName()))
@@ -1448,14 +1448,6 @@ namespace Signum.Engine
                     Thread.Sleep(pauseMilliseconds.Value);
             }
             return total;
-        }
-
-        static string UnsafeMessage(IUpdateable update)
-        {
-            if (update.PartSelector == null)
-                return $"Updating { update.EntityType.TypeName()}";
-            else
-                return $"Updating MList<{update.GetType().GetGenericArguments()[1].TypeName()}> in {update.EntityType.TypeName()}";
         }
         #endregion
 

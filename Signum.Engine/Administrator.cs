@@ -120,7 +120,7 @@ namespace Signum.Engine
 
             var index = new Index(view, columns);
 
-            SqlBuilder.CreateIndex(index).ExecuteLeaves();
+            SqlBuilder.CreateIndex(index, checkUnique: null).ExecuteLeaves();
         }
 
 
