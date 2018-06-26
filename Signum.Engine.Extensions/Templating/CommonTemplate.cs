@@ -218,7 +218,7 @@ namespace Signum.Engine.Templating
         }
     }
 
-    public class SyncronizationContext
+    public class SynchronizationContext
     {
         public ScopedDictionary<string, ValueProviderBase> Variables;
         public Type ModelType;
@@ -230,12 +230,7 @@ namespace Signum.Engine.Templating
 
         internal void SynchronizeToken(ParsedToken parsedToken, string remainingText)
         {
-            if (parsedToken.QueryToken != null)
-            {
-                SafeConsole.WriteColor(parsedToken.QueryToken != null ? ConsoleColor.Gray : ConsoleColor.Red, "  " + parsedToken.QueryToken.FullKey());
-                Console.WriteLine(" " + remainingText);
-            }
-            else
+            if (parsedToken.QueryToken == null)
             {
                 string tokenString = parsedToken.String;
 

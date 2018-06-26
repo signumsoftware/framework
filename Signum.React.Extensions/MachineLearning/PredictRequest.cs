@@ -163,7 +163,7 @@ namespace Signum.React.MachineLearning
                     {
                         subQuery = sq.ToLite(),
                         columnHeaders = columnHeaders,
-                        rows = pctx.SubQueryOutputColumn[sq].Groups.Select(kvp => CreateRow(splitKeys, values, kvp.Key, inputsSQ, originalOutputsSQ, predictedOutputsSQ)).ToList()
+                        rows = pctx.SubQueryOutputCodifications[sq].Groups.Select(kvp => CreateRow(splitKeys, values, kvp.Key, inputsSQ, originalOutputsSQ, predictedOutputsSQ)).ToList()
                     };
                 }).ToList()
             };
@@ -206,7 +206,7 @@ namespace Signum.React.MachineLearning
                 predict.columns[i].value = FixValue(predict.columns[i].value, ctx.Predictor.MainQuery.Columns[i].Token.Token, serializer);
             }
 
-            foreach (var tuple in ctx.SubQueryOutputColumn.Values.ZipStrict(predict.subQueries, (sqCtx, table) => (sqCtx, table)))
+            foreach (var tuple in ctx.SubQueryOutputCodifications.Values.ZipStrict(predict.subQueries, (sqCtx, table) => (sqCtx, table)))
             {
                 var sq = tuple.sqCtx.SubQuery;
 

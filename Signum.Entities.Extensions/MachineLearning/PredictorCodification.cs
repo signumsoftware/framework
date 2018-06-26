@@ -31,12 +31,6 @@ namespace Signum.Entities.MachineLearning
         [SqlDbType(Size = 100)]
         public string IsValue { get; set; }
 
-
-        //For encoding values
-        [PreserveOrder]
-        [NotNullValidator, NoRepeatValidator, SqlDbType(Size = 100)]
-        public MList<string> CodedValues { get; set; } = new MList<string>();
-
         public float? Average { get; set; }
         public float? StdDev { get; set; }
 

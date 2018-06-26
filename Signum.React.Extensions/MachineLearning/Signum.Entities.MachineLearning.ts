@@ -11,10 +11,6 @@ import * as UserQueries from '../UserQueries/Signum.Entities.UserQueries'
 import * as UserAssets from '../UserAssets/Signum.Entities.UserAssets'
 
 
-export module AccordPredictorAlgorithm {
-    export const DiscreteNaiveBayes : PredictorAlgorithmSymbol = registerSymbol("PredictorAlgorithm", "AccordPredictorAlgorithm.DiscreteNaiveBayes");
-}
-
 export const AutoconfigureNeuralNetworkEntity = new Type<AutoconfigureNeuralNetworkEntity>("AutoconfigureNeuralNetwork");
 export interface AutoconfigureNeuralNetworkEntity extends Entities.Entity, Processes.IProcessDataEntity {
     Type: "AutoconfigureNeuralNetwork";
@@ -38,13 +34,16 @@ export module CNTKPredictorAlgorithm {
     export const NeuralNetwork : PredictorAlgorithmSymbol = registerSymbol("PredictorAlgorithm", "CNTKPredictorAlgorithm.NeuralNetwork");
 }
 
-export interface IPredictorAlgorithmSettings extends Entities.Entity {
+export module DefaultColumnEncodings {
+    export const None : PredictorColumnEncodingSymbol = registerSymbol("PredictorColumnEncoding", "DefaultColumnEncodings.None");
+    export const OneHot : PredictorColumnEncodingSymbol = registerSymbol("PredictorColumnEncoding", "DefaultColumnEncodings.OneHot");
+    export const NormalizeZScore : PredictorColumnEncodingSymbol = registerSymbol("PredictorColumnEncoding", "DefaultColumnEncodings.NormalizeZScore");
+    export const NormalizeMinMax : PredictorColumnEncodingSymbol = registerSymbol("PredictorColumnEncoding", "DefaultColumnEncodings.NormalizeMinMax");
+    export const NormalizeLog : PredictorColumnEncodingSymbol = registerSymbol("PredictorColumnEncoding", "DefaultColumnEncodings.NormalizeLog");
+    export const SplitWords : PredictorColumnEncodingSymbol = registerSymbol("PredictorColumnEncoding", "DefaultColumnEncodings.SplitWords");
 }
 
-export const NaiveBayesSettingsEntity = new Type<NaiveBayesSettingsEntity>("NaiveBayesSettings");
-export interface NaiveBayesSettingsEntity extends Entities.Entity, IPredictorAlgorithmSettings {
-    Type: "NaiveBayesSettings";
-    empirical?: boolean;
+export interface IPredictorAlgorithmSettings extends Entities.Entity {
 }
 
 export const NeuralNetworkActivation = new EnumType<NeuralNetworkActivation>("NeuralNetworkActivation");
@@ -151,7 +150,6 @@ export interface PredictorCodificationEntity extends Entities.Entity {
     splitKey1?: string | null;
     splitKey2?: string | null;
     isValue?: string | null;
-    codedValues: Entities.MList<string>;
     average?: number | null;
     stdDev?: number | null;
     min?: number | null;
@@ -163,18 +161,14 @@ export interface PredictorColumnEmbedded extends Entities.EmbeddedEntity {
     Type: "PredictorColumnEmbedded";
     usage?: PredictorColumnUsage;
     token?: UserAssets.QueryTokenEmbedded | null;
-    encoding?: PredictorColumnEncoding;
+    encoding?: PredictorColumnEncodingSymbol | null;
     nullHandling?: PredictorColumnNullHandling;
 }
 
-export const PredictorColumnEncoding = new EnumType<PredictorColumnEncoding>("PredictorColumnEncoding");
-export type PredictorColumnEncoding =
-    "None" |
-    "OneHot" |
-    "Codified" |
-    "NormalizeZScore" |
-    "NormalizeMinMax" |
-    "NormalizeLog";
+export const PredictorColumnEncodingSymbol = new Type<PredictorColumnEncodingSymbol>("PredictorColumnEncoding");
+export interface PredictorColumnEncodingSymbol extends Entities.Symbol {
+    Type: "PredictorColumnEncoding";
+}
 
 export const PredictorColumnNullHandling = new EnumType<PredictorColumnNullHandling>("PredictorColumnNullHandling");
 export type PredictorColumnNullHandling =
@@ -335,7 +329,7 @@ export interface PredictorSubQueryColumnEmbedded extends Entities.EmbeddedEntity
     Type: "PredictorSubQueryColumnEmbedded";
     usage?: PredictorSubQueryColumnUsage;
     token?: UserAssets.QueryTokenEmbedded | null;
-    encoding?: PredictorColumnEncoding | null;
+    encoding?: PredictorColumnEncodingSymbol | null;
     nullHandling?: PredictorColumnNullHandling | null;
 }
 
