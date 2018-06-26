@@ -280,7 +280,7 @@ export function isLowPopulationSymbol(type: PseudoType) {
 
     var ti = getTypeInfo(type);
 
-    return ti.kind == "Entity" && ti.fullName.endsWith("Symbol") && ti.isLowPopulation;
+    return ti != null && ti.kind == "Entity" && ti.fullName.endsWith("Symbol") && ti.isLowPopulation;
 }
 
 export function parseId(ti: TypeInfo, id: string): string | number {
