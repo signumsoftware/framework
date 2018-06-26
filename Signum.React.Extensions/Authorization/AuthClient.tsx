@@ -12,7 +12,7 @@ import * as QuickLinks from '../../../Framework/Signum.React/Scripts/QuickLinks'
 import { EntityOperationSettings } from '../../../Framework/Signum.React/Scripts/Operations'
 import { PropertyRouteEntity } from '../../../Framework/Signum.React/Scripts/Signum.Entities.Basics'
 import ButtonBar from '../../../Framework/Signum.React/Scripts/Frames/ButtonBar'
-import { PseudoType, QueryKey, getTypeInfo, PropertyRouteType, OperationInfo, isQueryDefined, getQueryInfo, GraphExplorer } from '../../../Framework/Signum.React/Scripts/Reflection'
+import { PseudoType, QueryKey, getTypeInfo, PropertyRouteType, OperationInfo, isQueryDefined, getQueryInfo, GraphExplorer, PropertyRoute } from '../../../Framework/Signum.React/Scripts/Reflection'
 import * as Operations from '../../../Framework/Signum.React/Scripts/Operations'
 import { UserEntity, RoleEntity, UserOperation, PermissionSymbol, PropertyAllowed, TypeAllowedBasic, AuthAdminMessage, BasicPermission } from './Signum.Entities.Authorization'
 import { PermissionRulePack, TypeRulePack, OperationRulePack, PropertyRulePack, QueryRulePack, QueryAllowed} from './Signum.Entities.Authorization'
@@ -131,6 +131,14 @@ export function start(options: { routes: JSX.Element[], types: boolean; properti
         key: "DownloadAuthRules",
         onClick: () => { API.downloadAuthRules(); return Promise.resolve(undefined); }
     });
+
+    PropertyRoute.prototype.canRead = function () {
+       return this.member != null && this.member.propertyAllowed != "None"
+    }
+
+    PropertyRoute.prototype.canModify = function () {
+       return this.member != null && this.member.propertyAllowed == "Modify"
+    }
 }
 
 export function queryIsFindable(queryKey: string, fullScreen: boolean) {
@@ -483,6 +491,11 @@ declare module '../../../Framework/Signum.React/Scripts/Reflection' {
 
     export interface OperationInfo {
         operationAllowed: boolean;
+    }
+
+    export interface PropertyRoute {
+        canRead(): boolean;
+        canModify(): boolean;
     }
 }
 
