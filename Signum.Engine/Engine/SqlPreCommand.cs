@@ -109,7 +109,13 @@ namespace Signum.Engine
 
             Thread.Sleep(1000);
 
-            Process.Start(fileName);
+            new Process
+            {
+                StartInfo = new ProcessStartInfo(Path.Combine(Directory.GetCurrentDirectory(), fileName))
+                {
+                    UseShellExecute = true
+                }
+            }.Start();
 
             return fileName;
         }

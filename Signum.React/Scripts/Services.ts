@@ -188,10 +188,9 @@ a.style.display = "none";
 
 
 export function saveFile(response: Response) {
-    let fileName = "file.dat";
-    let match = /attachment; filename=(.+)/.exec(response.headers.get("Content-Disposition")!);
-    if (match)
-        fileName = match[1].trimEnd("\"").trimStart("\"");
+    const contentDisposition = response.headers.get("Content-Disposition")!;
+    const fileNamePart = contentDisposition.split(";").filter(a => a.trim().startsWith("filename=")).singleOrNull();
+    const fileName = fileNamePart ? fileNamePart.trim().after("filename=") : "file.dat";
 
     response.blob().then(blob => {
         saveFileBlob(blob, fileName);
