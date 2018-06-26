@@ -276,87 +276,85 @@ namespace Signum.Engine.Mailing
 
         internal static SqlPreCommand ProcessEmailTemplate( Replacements replacements, Table table, EmailTemplateEntity et, StringDistance sd)
         {
+            Console.Write(".");
             try
             {
                 var queryName = QueryLogic.ToQueryName(et.Query.Key);
 
                 QueryDescription qd = DynamicQueryManager.Current.QueryDescription(queryName);
 
-                Console.Clear();
-
-                SafeConsole.WriteLineColor(ConsoleColor.White, "EmailTemplate: " + et.Name);
-                Console.WriteLine(" Query: " + et.Query.Key);
-
-                if (et.From != null && et.From.Token != null)
+                using (DelayedConsole.Delay(() => SafeConsole.WriteLineColor(ConsoleColor.White, "EmailTemplate: " + et.Name)))
+                using (DelayedConsole.Delay(() => Console.WriteLine(" Query: " + et.Query.Key)))
                 {
-                    QueryTokenEmbedded token = et.From.Token;
-                    switch (QueryTokenSynchronizer.FixToken(replacements, ref token, qd, SubTokensOptions.CanElement, " From", allowRemoveToken: false, allowReCreate: et.SystemEmail != null))
+                    if (et.From != null && et.From.Token != null)
                     {
-                        case FixTokenResult.Nothing: break;
-                        case FixTokenResult.DeleteEntity: return table.DeleteSqlSync(et, e => e.Name == et.Name);
-                        case FixTokenResult.SkipEntity: return null;
-                        case FixTokenResult.Fix: et.From.Token = token; break;
-                        case FixTokenResult.ReGenerateEntity: return Regenerate(et, replacements, table);
-                        default: break;
-                    }
-                }
-
-                if (et.Recipients.Any(a=>a.Token != null))
-                {
-                    Console.WriteLine(" Recipients:");
-                    foreach (var item in et.Recipients.Where(a => a.Token != null).ToList())
-                    {
-                        QueryTokenEmbedded token = item.Token;
-                        switch (QueryTokenSynchronizer.FixToken(replacements, ref token, qd, SubTokensOptions.CanElement, " Recipient", allowRemoveToken: false, allowReCreate: et.SystemEmail != null))
+                        QueryTokenEmbedded token = et.From.Token;
+                        switch (QueryTokenSynchronizer.FixToken(replacements, ref token, qd, SubTokensOptions.CanElement, " From", allowRemoveToken: false, allowReCreate: et.SystemEmail != null))
                         {
                             case FixTokenResult.Nothing: break;
                             case FixTokenResult.DeleteEntity: return table.DeleteSqlSync(et, e => e.Name == et.Name);
-                            case FixTokenResult.RemoveToken: et.Recipients.Remove(item); break;
                             case FixTokenResult.SkipEntity: return null;
-                            case FixTokenResult.Fix: item.Token = token; break;
+                            case FixTokenResult.Fix: et.From.Token = token; break;
                             case FixTokenResult.ReGenerateEntity: return Regenerate(et, replacements, table);
                             default: break;
                         }
                     }
-                }
 
-                try
-                {
-
-                    foreach (var item in et.Messages)
+                    if (et.Recipients.Any(a => a.Token != null))
                     {
-                        SynchronizationContext sc = new SynchronizationContext
+                        using (DelayedConsole.Delay(() => Console.WriteLine(" Recipients:")))
                         {
-                            ModelType = et.SystemEmail.ToType(),
-                            QueryDescription = qd,
-                            Replacements = replacements,
-                            StringDistance = sd,
-                            Variables = new ScopedDictionary<string, ValueProviderBase>(null)
-                        };
-
-                        item.Subject = Synchronize(item.Subject, sc);
-                        item.Text = Synchronize(item.Text, sc);
+                            foreach (var item in et.Recipients.Where(a => a.Token != null).ToList())
+                            {
+                                QueryTokenEmbedded token = item.Token;
+                                switch (QueryTokenSynchronizer.FixToken(replacements, ref token, qd, SubTokensOptions.CanElement, " Recipient", allowRemoveToken: false, allowReCreate: et.SystemEmail != null))
+                                {
+                                    case FixTokenResult.Nothing: break;
+                                    case FixTokenResult.DeleteEntity: return table.DeleteSqlSync(et, e => e.Name == et.Name);
+                                    case FixTokenResult.RemoveToken: et.Recipients.Remove(item); break;
+                                    case FixTokenResult.SkipEntity: return null;
+                                    case FixTokenResult.Fix: item.Token = token; break;
+                                    case FixTokenResult.ReGenerateEntity: return Regenerate(et, replacements, table);
+                                    default: break;
+                                }
+                            }
+                        }
                     }
 
-                    using (replacements.WithReplacedDatabaseName())
-                        return table.UpdateSqlSync(et, e => e.Name == et.Name, includeCollections: true, comment: "EmailTemplate: " + et.Name);
-                }
-                catch (TemplateSyncException ex)
-                {
-                    if (ex.Result == FixTokenResult.SkipEntity)
-                        return null;
+                    try
+                    {
 
-                    if (ex.Result == FixTokenResult.DeleteEntity)
-                        return table.DeleteSqlSync(et, e => e.Name == et.Name);
+                        foreach (var item in et.Messages)
+                        {
+                            SynchronizationContext sc = new SynchronizationContext
+                            {
+                                ModelType = et.SystemEmail.ToType(),
+                                QueryDescription = qd,
+                                Replacements = replacements,
+                                StringDistance = sd,
+                                Variables = new ScopedDictionary<string, ValueProviderBase>(null)
+                            };
 
-                    if (ex.Result == FixTokenResult.ReGenerateEntity)
-                        return Regenerate(et, replacements, table);
+                            item.Subject = Synchronize(item.Subject, sc);
+                            item.Text = Synchronize(item.Text, sc);
+                        }
 
-                    throw new InvalidOperationException("Unexcpected {0}".FormatWith(ex.Result));
-                }
-                finally
-                {
-                    Console.Clear();
+                        using (replacements.WithReplacedDatabaseName())
+                            return table.UpdateSqlSync(et, e => e.Name == et.Name, includeCollections: true, comment: "EmailTemplate: " + et.Name);
+                    }
+                    catch (TemplateSyncException ex)
+                    {
+                        if (ex.Result == FixTokenResult.SkipEntity)
+                            return null;
+
+                        if (ex.Result == FixTokenResult.DeleteEntity)
+                            return table.DeleteSqlSync(et, e => e.Name == et.Name);
+
+                        if (ex.Result == FixTokenResult.ReGenerateEntity)
+                            return Regenerate(et, replacements, table);
+
+                        throw new UnexpectedValueException(ex.Result);
+                    }
                 }
             }
             catch (Exception e)
