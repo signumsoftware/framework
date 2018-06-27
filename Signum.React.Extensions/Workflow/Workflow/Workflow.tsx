@@ -135,7 +135,7 @@ export default class Workflow extends React.Component<WorkflowProps, WorkflowSta
                             <i className="fa fa-check text-success mr-1" aria-hidden="true" />
                             {"-- No issues --"}
                         </li> :
-                        this.state.issues.map((issue, i) =>
+                        this.state.issues.orderBy(a => a.Type).map((issue, i) =>
 
                             <li key={i}>
                                 {issue.Type == "Error" ?
@@ -159,7 +159,7 @@ export default class Workflow extends React.Component<WorkflowProps, WorkflowSta
 
         return (
             <div>
-                <span className="display-7">Workflow Issues &nbsp;</span>
+                <span className="display-7">{WorkflowMessage.WorkflowIssues.niceToString()}&nbsp;</span>
                 {errorCount > 0 && <span className="fa fa-times-circle text-danger mr-1" />}
                 {errorCount > 0 && errorCount}
                 {warningCount > 0 && <span className="fa fa-exclamation-triangle text-warning mr-1" />}
