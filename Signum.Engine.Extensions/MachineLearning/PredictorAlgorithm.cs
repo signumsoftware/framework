@@ -247,9 +247,22 @@ namespace Signum.Engine.MachineLearning
 
         public Lite<Entity> Entity { get; set; } //Optional
 
+        public PredictionOptions Options { get; set; }
+
         public PredictorEntity Predictor { get; set; }
         public Dictionary<PredictorColumnEmbedded, object> MainQueryValues { get; set; } = new Dictionary<PredictorColumnEmbedded, object>();
         public Dictionary<PredictorSubQueryEntity, PredictSubQueryDictionary> SubQueries { get; set; } = new Dictionary<PredictorSubQueryEntity, PredictSubQueryDictionary>();
+    }
+
+    public class PredictionOptions
+    {
+        public int? AlternativeCount;
+    }
+
+    public class AlternativePrediction
+    {
+        public float Probability { get; set; }
+        public object Value { get; set; }
     }
 
     public class PredictSubQueryDictionary

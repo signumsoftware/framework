@@ -27,7 +27,7 @@ export default class PredictSimpleResult extends React.Component<{ ctx: TypeCont
         Navigator.API.fetchAndForget(psr.predictor!).then(p => {
 
             if (!p.mainQuery.groupResults) {
-                predict(toLite(p), { "Entity": psr.target }).done();
+                predict(p, { "Entity": psr.target }).done();
             } else {
 
                 var fullKeys = p.mainQuery.columns.map(mle => mle.element.token!.tokenString!);
@@ -36,7 +36,7 @@ export default class PredictSimpleResult extends React.Component<{ ctx: TypeCont
 
                 var obj = fullKeys.map((fk, i) => ({ tokenString: fk, value: values[i] })).toObject(a => a.tokenString, a => a.value);
 
-                predict(toLite(p), obj).done();
+                predict(p, obj).done();
             };
         });
     }

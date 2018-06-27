@@ -15,7 +15,7 @@ namespace Signum.Engine.MachineLearning.CNTK
     {
         string ValidateEncodingProperty(PredictorEntity predictor, PredictorSubQueryEntity subQuery, PredictorColumnEncodingSymbol encoding, PredictorColumnUsage usage, QueryTokenEmbedded token);
         List<PredictorCodification> GenerateCodifications(ResultColumn rc, PredictorColumnBase column);
-        object DecodeValue(PredictorColumnBase column, List<PredictorCodification> codifications, float[] outputValues);
+        object DecodeValue(PredictorColumnBase column, List<PredictorCodification> codifications, float[] outputValues, PredictionOptions options);
         void EncodeValue(object value, PredictorColumnBase column, List<PredictorCodification> codifications, float[] inputValues, int offset); //Span<T>
     }
 
@@ -44,7 +44,7 @@ namespace Signum.Engine.MachineLearning.CNTK
             inputValues[offset + c.Index]  = Convert.ToSingle(value);
         }
 
-        public object DecodeValue(PredictorColumnBase column, List<PredictorCodification> codifications, float[] outputValues)
+        public object DecodeValue(PredictorColumnBase column, List<PredictorCodification> codifications, float[] outputValues, PredictionOptions options)
         {
             var c = codifications.SingleEx();
             return ReflectionTools.ChangeType(outputValues[c.Index], column.Token.Type);
@@ -87,19 +87,33 @@ namespace Signum.Engine.MachineLearning.CNTK
             return (Dictionary<object, int>)column.ColumnModel;
         }
 
-        public object DecodeValue(PredictorColumnBase column, List<PredictorCodification> codifications, float[] outputValues)
+        public object DecodeValue(PredictorColumnBase column, List<PredictorCodification> codifications, float[] outputValues, PredictionOptions options)
         {
-            var max = float.MinValue;
-            PredictorCodification best = null;
-            foreach (var c in codifications)
+            if (options?.AlternativeCount == null)
             {
-                if(max < outputValues[c.Index])
+                var max = float.MinValue;
+                PredictorCodification best = null;
+                foreach (var c in codifications)
                 {
-                    best = c;
-                    max = outputValues[c.Index];
+                    if (max < outputValues[c.Index])
+                    {
+                        best = c;
+                        max = outputValues[c.Index];
+                    }
                 }
+                return best?.IsValue;
             }
-            return best?.IsValue;
+            else
+            {
+                //Softmax
+                var sum = codifications.Sum(cod => Math.Exp(outputValues[cod.Index]));
+
+                return codifications.OrderByDescending(c => outputValues[c.Index]).Take(options.AlternativeCount.Value).Select(c => new AlternativePrediction
+                {
+                    Value = c.IsValue,
+                    Probability = (float)(Math.Exp(outputValues[c.Index]) / sum),
+                }).ToList();
+            }
         }
     }
 
@@ -136,7 +150,7 @@ namespace Signum.Engine.MachineLearning.CNTK
         }
 
         public abstract object DecodeSingleValue(float value, PredictorCodification c);
-        public object DecodeValue(PredictorColumnBase column, List<PredictorCodification> codifications, float[] outputValues)
+        public object DecodeValue(PredictorColumnBase column, List<PredictorCodification> codifications, float[] outputValues, PredictionOptions options)
         {
             PredictorCodification cod = codifications.SingleEx();
             float value = outputValues[cod.Index];
@@ -221,7 +235,7 @@ namespace Signum.Engine.MachineLearning.CNTK
 
         public void EncodeValue(object value, PredictorColumnBase column, List<PredictorCodification> codifications, float[] inputValues, int offset)
         {
-            var words = SplitWords((string)value);
+            var words = SplitWords((string)value ?? "");
 
             var dic = GetCodificationDictionary(column, codifications);
 
@@ -235,7 +249,7 @@ namespace Signum.Engine.MachineLearning.CNTK
         public int MaxDecodedWords = 5;
         public float MinDecodedWordValue = 0.1f;
 
-        public object DecodeValue(PredictorColumnBase column, List<PredictorCodification> codifications, float[] outputValues)
+        public object DecodeValue(PredictorColumnBase column, List<PredictorCodification> codifications, float[] outputValues, PredictionOptions options)
         {
             var bestCodifications = codifications
                 .Where(c => outputValues[c.Index] > MinDecodedWordValue)

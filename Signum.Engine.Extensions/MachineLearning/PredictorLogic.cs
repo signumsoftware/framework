@@ -29,7 +29,7 @@ namespace Signum.Engine.MachineLearning
 {
     public class PredictorTrainingState
     {
-        public CancellationTokenSource CancellationTokenSource;
+        internal CancellationTokenSource CancellationTokenSource;
         public PredictorTrainingContext Context; 
     }
 
@@ -66,6 +66,8 @@ namespace Signum.Engine.MachineLearning
         }
 
         public static Dictionary<PredictorAlgorithmSymbol, IPredictorAlgorithm> Algorithms = new Dictionary<PredictorAlgorithmSymbol, IPredictorAlgorithm>();
+
+
         public static void RegisterAlgorithm(PredictorAlgorithmSymbol symbol, IPredictorAlgorithm algorithm)
         {
             Algorithms.Add(symbol, algorithm);
@@ -84,7 +86,13 @@ namespace Signum.Engine.MachineLearning
         }
 
         public static ConcurrentDictionary<Lite<PredictorEntity>, PredictorTrainingState> Trainings = new ConcurrentDictionary<Lite<PredictorEntity>, PredictorTrainingState>();
-        
+
+
+        public static PredictorTrainingContext GetTrainingContext(Lite<PredictorEntity> lite)
+        {
+            return Trainings.TryGetC(lite)?.Context;
+        }
+
         public static void Start(SchemaBuilder sb, DynamicQueryManager dqm, Func<IFileTypeAlgorithm> predictorFileAlgorithm)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
@@ -146,8 +154,8 @@ namespace Signum.Engine.MachineLearning
                         e.Epoch,
                         e.Ellapsed,
                         e.LossTraining,
-                        e.LossValidation,
                         e.EvaluationTraining,
+                        e.LossValidation,
                         e.EvaluationValidation,
                     });
 
@@ -179,8 +187,8 @@ namespace Signum.Engine.MachineLearning
                         e.PredictedCategory,
                     });
 
-                RegisterResultSaver(PredictorSimpleResultSaver.StatisticsOnly, new PredictorSimpleSaver { SaveSimpleResults = true });
-                RegisterResultSaver(PredictorSimpleResultSaver.Full, new PredictorSimpleSaver { SaveSimpleResults = true });
+                RegisterResultSaver(PredictorSimpleResultSaver.StatisticsOnly, new PredictorSimpleSaver { SaveAllResults = false });
+                RegisterResultSaver(PredictorSimpleResultSaver.Full, new PredictorSimpleSaver { SaveAllResults = true });
 
                 sb.Schema.EntityEvents<PredictorEntity>().PreUnsafeDelete += query =>
                 {

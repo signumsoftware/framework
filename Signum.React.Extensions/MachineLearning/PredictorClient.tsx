@@ -1,4 +1,5 @@
 ﻿import * as React from 'react'
+import * as numbro from 'numbro'
 import { Route } from 'react-router'
 import { Dic, classes } from '../../../Framework/Signum.React/Scripts/Globals';
 import * as Constructor from '../../../Framework/Signum.React/Scripts/Constructor';
@@ -17,7 +18,7 @@ import {
     PredictorAlgorithmSymbol, CNTKPredictorAlgorithm,
     PredictorResultSaverSymbol, PredictorSimpleResultSaver,
     NeuralNetworkSettingsEntity, PredictorSettingsEmbedded, PredictorState, PredictorRegressionMetricsEmbedded,
-    PredictorClassificationMetricsEmbedded, PredictorMainQueryEmbedded, PredictorColumnUsage, PredictorOperation, PredictSimpleResultEntity, PredictorPublicationSymbol, PredictorColumnEncodingSymbol
+    PredictorClassificationMetricsEmbedded, PredictorMainQueryEmbedded, PredictorColumnUsage, PredictorOperation, PredictSimpleResultEntity, PredictorPublicationSymbol, PredictorColumnEncodingSymbol, PredictorEpochProgressEntity
 } from './Signum.Entities.MachineLearning'
 import * as OmniboxClient from '../Omnibox/OmniboxClient'
 
@@ -26,6 +27,7 @@ import { QueryToken } from '../../../Framework/Signum.React/Scripts/FindOptions'
 import { ImportComponent } from '../../../Framework/Signum.React/Scripts/AsyncImport';
 import { TypeContext } from '../../../Framework/Signum.React/Scripts/Lines';
 import SelectorModal from '../../../Framework/Signum.React/Scripts/SelectorModal';
+import { CellFormatter } from '../../../Framework/Signum.React/Scripts/Finder';
 
 export function start(options: { routes: JSX.Element[] }) {
 
@@ -33,6 +35,15 @@ export function start(options: { routes: JSX.Element[] }) {
     Navigator.addSettings(new EntitySettings(PredictorSubQueryEntity, e => import('./Templates/PredictorSubQuery')));
     Navigator.addSettings(new EntitySettings(NeuralNetworkSettingsEntity, e => import('./Templates/NeuralNetworkSettings')));
     Navigator.addSettings(new EntitySettings(PredictSimpleResultEntity, e => import('./Templates/PredictSimpleResult')));
+
+    function numbericCellFormatter(color: string) {
+        return new CellFormatter((cell: number) => cell == undefined ? "" : <span style={{color: color }}>{numbro(cell).format("0.000")}</span>, "numeric-cell");
+    }
+
+    Finder.registerPropertyFormatter(PredictorEpochProgressEntity.propertyRoute(a => a.lossTraining), numbericCellFormatter("#1A5276"));
+    Finder.registerPropertyFormatter(PredictorEpochProgressEntity.propertyRoute(a => a.evaluationTraining), numbericCellFormatter("#5DADE2"));
+    Finder.registerPropertyFormatter(PredictorEpochProgressEntity.propertyRoute(a => a.lossValidation), numbericCellFormatter("#7B241C"));
+    Finder.registerPropertyFormatter(PredictorEpochProgressEntity.propertyRoute(a => a.evaluationValidation), numbericCellFormatter("#D98880"));
 
     QuickLinks.registerQuickLink(PredictorEntity, ctx => new QuickLinks.QuickLinkAction(
         PredictorMessage.DownloadCsv.niceToString(),
@@ -107,12 +118,14 @@ export function start(options: { routes: JSX.Element[] }) {
     );
 }
 
-export async function predict(predictor: Lite<PredictorEntity>, mainKeys: { [queryToken: string]: any } | undefined): Promise<void> {
-    var predictRequest = await API.getPredict(predictor, mainKeys);
+export async function predict(predictor: PredictorEntity, mainKeys: { [queryToken: string]: any } | undefined): Promise<void> {
+    var predictRequest = await API.getPredict(toLite(predictor), mainKeys);
 
     var modal = await import("./Templates/PredictModal");
 
-    return modal.PredictModal.show(predictRequest, mainKeys && mainKeys["Entity"]);
+    var isClassification = NeuralNetworkSettingsEntity.isInstance(predictor.algorithmSettings) && predictor.algorithmSettings.predictionType == "Classification";
+
+    return modal.PredictModal.show(predictRequest, mainKeys && mainKeys["Entity"], isClassification);
 }
 
 export const initializers: { [key: string]: (pred: PredictorEntity) => void } = {};
@@ -219,6 +232,7 @@ function fromObjectArray(array: (number | undefined)[]): EpochProgress {
 
 export interface PredictRequest {
     hasOriginal: boolean;
+    alternativesCount: number | null;
     predictor: Lite<PredictorEntity>;
     columns: PredictColumn[]
     subQueries: PredictSubQueryTable[]
@@ -228,6 +242,11 @@ export interface PredictColumn {
     token: QueryToken;
     usage: PredictorColumnUsage;
     value: object;
+}
+
+export interface AlternativePrediction {
+    Probability: number;
+    Value: any;
 }
 
 export interface PredictSubQueryTable {

@@ -14,7 +14,7 @@ namespace Signum.Engine.MachineLearning
 {
     public class PredictorSimpleSaver : IPredictorResultSaver
     {
-        public bool SaveSimpleResults = false;
+        public bool SaveAllResults = false;
 
         public void AssertValid(PredictorEntity predictor)
         {
@@ -117,7 +117,7 @@ namespace Signum.Engine.MachineLearning
                         using (OperationLogic.AllowSave<PredictorEntity>())
                             ctx.Predictor.Save();
 
-                        if (SaveSimpleResults)
+                        if (SaveAllResults)
                         {
                             var groups = toInsert.GroupsOf(PredictionBatchSize).ToList();
                             foreach (var iter in groups.Iterate())
@@ -163,8 +163,8 @@ namespace Signum.Engine.MachineLearning
         {
             return new PredictorClassificationMetricsEmbedded
             {
-                MissRate = list.Count(a => a.OriginalCategory != a.PredictedCategory),
                 TotalCount = list.Count,
+                MissCount = list.Count(a => a.OriginalCategory != a.PredictedCategory),
             };
         }
     }

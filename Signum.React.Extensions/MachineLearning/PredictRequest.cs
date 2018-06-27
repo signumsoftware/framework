@@ -243,6 +243,13 @@ namespace Signum.React.MachineLearning
                 };
             }
 
+            if(jt is JArray ja)
+            {
+                var list = ja.ToObject<List<AlternativePrediction>>();
+                var result = list.Select(val => ReflectionTools.ChangeType(val, token.Type));
+                return result;
+            }
+
             return jt.ToObject(token.Type, serializer);
         }
     }
@@ -252,6 +259,7 @@ namespace Signum.React.MachineLearning
     public class PredictRequestTS
     {
         public bool hasOriginal { get; set; }
+        public int? alternativesCount { get; set; }
         public Lite<PredictorEntity> predictor { get; set; }
         public List<PredictColumnTS> columns { get; set; }
         public List<PredictSubQueryTableTS> subQueries { get; set; }
