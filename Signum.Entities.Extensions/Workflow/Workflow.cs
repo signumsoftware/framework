@@ -124,6 +124,8 @@ namespace Signum.Entities.Workflow
         ResetZoom,
         [Description("Color: ")]
         Color,
+        [Description("Workflow Issues")]
+        WorkflowIssues,
     }
 
     [Serializable]
