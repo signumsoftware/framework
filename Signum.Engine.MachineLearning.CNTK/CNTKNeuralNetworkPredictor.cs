@@ -292,21 +292,21 @@ namespace Signum.Engine.MachineLearning.CNTK
                     calculatedOutputs.Evaluate(inputDic, outputDic, device);
 
                     Value output = outputDic[calculatedOutputs];
-                    float[] values = output.GetDenseData<float>(calculatedOutputs).SingleEx().ToArray();
-                    var result = inputs.Select((imp, i) => GetPredictionDictionary(values, ctx, offset: ctx.OutputCodifications.Count * i)).ToList();
+                    IList<IList<float>> values = output.GetDenseData<float>(calculatedOutputs);
+                    var result = values.Select(val => GetPredictionDictionary(val.ToArray(), ctx)).ToList();
                     return result;
                 }
             }
         }
 
-        private PredictDictionary GetPredictionDictionary(float[] outputValues, PredictorPredictContext ctx, int offset)
+        private PredictDictionary GetPredictionDictionary(float[] outputValues, PredictorPredictContext ctx)
         {
             using (HeavyProfiler.LogNoStackTrace("GetPredictionDictionary"))
             {
                 return new PredictDictionary(ctx.Predictor)
                 {
                     MainQueryValues = ctx.MainOutputCodifications.SelectDictionary(col => col,
-                    (col, list) => Encodings.GetOrThrow(col.Encoding).DecodeValue(list.First().Column, list, outputValues, offset)),
+                    (col, list) => Encodings.GetOrThrow(col.Encoding).DecodeValue(list.First().Column, list, outputValues)),
 
                     SubQueries = ctx.Predictor.SubQueries.ToDictionary(sq => sq, sq => new PredictSubQueryDictionary(sq)
                     {
@@ -314,7 +314,7 @@ namespace Signum.Engine.MachineLearning.CNTK
                             kvp => kvp.Key,
                             kvp => kvp.Value
                             .Where(a => a.Key.Usage == PredictorSubQueryColumnUsage.Output)
-                            .ToDictionary(a => a.Key, a => Encodings.GetOrThrow(a.Key.Encoding).DecodeValue(a.Value.FirstEx().Column, a.Value, outputValues, offset)),
+                            .ToDictionary(a => a.Key, a => Encodings.GetOrThrow(a.Key.Encoding).DecodeValue(a.Value.FirstEx().Column, a.Value, outputValues)),
                             ObjectArrayComparer.Instance
                         ) ?? new Dictionary<object[], Dictionary<PredictorSubQueryColumnEmbedded, object>>(ObjectArrayComparer.Instance),
 
