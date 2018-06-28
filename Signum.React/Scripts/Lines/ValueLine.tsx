@@ -483,10 +483,6 @@ export class NumericTextBox extends React.Component<NumericTextBoxProps, { text?
                 value += "%";
         }
 
-        /*temporary hack*/
-        if (value && !value.contains(","))
-            value += ",00";
-
         const result = value == undefined || value.length == 0 ? null : numbro.unformat(value, this.props.format);
         this.setState({ text: undefined });
         this.props.onChange(result);
