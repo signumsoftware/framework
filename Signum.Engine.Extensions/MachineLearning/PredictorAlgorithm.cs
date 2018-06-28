@@ -252,6 +252,19 @@ namespace Signum.Engine.MachineLearning
         public PredictorEntity Predictor { get; set; }
         public Dictionary<PredictorColumnEmbedded, object> MainQueryValues { get; set; } = new Dictionary<PredictorColumnEmbedded, object>();
         public Dictionary<PredictorSubQueryEntity, PredictSubQueryDictionary> SubQueries { get; set; } = new Dictionary<PredictorSubQueryEntity, PredictSubQueryDictionary>();
+
+        public PredictDictionary Clone()
+        {
+            var result = new PredictDictionary(Predictor)
+            {
+                Entity = this.Entity,
+                Options = this.Options,
+            };
+
+            result.MainQueryValues.AddRange(MainQueryValues.ToDictionaryEx());
+            result.SubQueries.AddRange(SubQueries, kvp => kvp.Key, kvp => kvp.Value.Clone());
+            return result;
+        }
     }
 
     public class PredictionOptions
@@ -274,5 +287,12 @@ namespace Signum.Engine.MachineLearning
 
         public PredictorSubQueryEntity SubQuery { get; set; }
         public Dictionary<object[], Dictionary<PredictorSubQueryColumnEmbedded, object>> SubQueryGroups { get; set; } = new Dictionary<object[], Dictionary<PredictorSubQueryColumnEmbedded, object>>();
+
+        public PredictSubQueryDictionary Clone()
+        {
+            var result = new PredictSubQueryDictionary(SubQuery);
+            result.SubQueryGroups.AddRange(this.SubQueryGroups, kvp => kvp.Key, kvp => kvp.Value.ToDictionary());
+            return result;
+        }
     }
 }
