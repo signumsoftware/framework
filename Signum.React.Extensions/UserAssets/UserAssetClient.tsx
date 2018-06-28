@@ -46,11 +46,18 @@ export function registerExportAssertLink(type: Type<IUserAssetEntity>) {
     });
 }
 
-export function toQueryTokenEmbedded(token: QueryToken) {
+export function toQueryTokenEmbedded(token: QueryToken): QueryTokenEmbedded {
     return QueryTokenEmbedded.New({
         token: token,
         tokenString: token.fullKey,
     });
+}
+
+export function getToken(token: QueryTokenEmbedded)  : QueryToken {
+    if (token.parseException)
+        throw new Error(token.parseException);
+
+    return token.token!;
 }
 
 export module API {

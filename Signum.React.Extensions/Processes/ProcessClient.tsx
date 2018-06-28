@@ -81,7 +81,8 @@ function monkeyPatchCreateContextualMenuItem(){
         coc.entityOperationSettings && coc.entityOperationSettings.text ? coc.entityOperationSettings.text() :
             coc.operationInfo.niceName;
 
-        const bsColor = coc.settings && coc.settings.color || Operations.autoColorFunction(coc.operationInfo);
+        const color = coc.settings && coc.settings.color || coc.entityOperationSettings && coc.entityOperationSettings.color || Operations.autoColorFunction(coc.operationInfo);
+        const icon = coc.settings && coc.settings.icon;
 
         const disabled = !!coc.canExecute;
 
@@ -104,7 +105,9 @@ function monkeyPatchCreateContextualMenuItem(){
                 className={disabled ? "disabled" : undefined}
                 onClick={disabled ? undefined : onClick}
                 data-operation={coc.operationInfo.key}>
-                {bsColor && <span className={"icon empty-icon btn-" + bsColor}></span>}
+                {icon ? <span className={classes("icon", icon)} style={{ color: coc.settings && coc.settings.iconColor }}></span> :
+                    color ? <span className={classes("icon", "empty-icon", "btn-" + color)}></span> : undefined}
+                {(icon || color) && " "}
                 {text}
                 <span className="fa fa-cog process-contextual-icon" aria-hidden={true} onClick={processOnClick}></span>
 

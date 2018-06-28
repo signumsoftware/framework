@@ -1049,7 +1049,7 @@ function autoFix(p: DynamicProperty) {
 }
 
 function allowsSize(type: string) {
-    return isString(type) || isDecimal(type);
+    return isString(type) || isReal(type);
 }
 
 
@@ -1258,10 +1258,16 @@ function isInteger(type: string) {
     );
 }
 
-function isDecimal(type: string) {
+function isReal(type: string) {
     return (
         type == "float" || type == "System.Single" ||
         type == "double" || type == "System.Double" ||
+        type == "decimal" || type == "System.Decimal"
+    );
+}
+
+function isDecimal(type: string) {
+    return (
         type == "decimal" || type == "System.Decimal"
     );
 }
@@ -1357,7 +1363,7 @@ registerValidator<Validators.TimeSpanPrecision>({
 
 registerValidator<Validators.Decimals>({
     name: "Decimals",
-    allowed: p => !p.isMList && isDecimal(p.type),
+    allowed: p => !p.isMList && isReal(p.type),
     render: (val, dc) =>
         <div>
             <ValueComponent dc={dc} binding={Binding.create(val, v => v.decimalPlaces)} type="number" defaultValue={null} />

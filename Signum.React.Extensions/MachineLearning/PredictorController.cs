@@ -65,15 +65,15 @@ namespace Signum.React.MachineLearning
         [Route("api/predictor/trainingProgress/{id}"), HttpGet]
         public TrainingProgress GetTrainingState(int id)
         {
-            var state = PredictorLogic.Trainings.TryGetC(Lite.Create<PredictorEntity>(id));
+            var ptc = PredictorLogic.GetTrainingContext(Lite.Create<PredictorEntity>(id));
 
             return new TrainingProgress
             {
-                Running = state != null,
-                State = state?.Context.Predictor.State ?? Database.Query<PredictorEntity>().Where(a => a.Id == id).Select(a => a.State).SingleEx(),
-                Message = state?.Context.Message,
-                Progress = state?.Context.Progress,
-                EpochProgresses = state?.Context.GetProgessArray(),
+                Running = ptc != null,
+                State = ptc?.Predictor.State ?? Database.Query<PredictorEntity>().Where(a => a.Id == id).Select(a => a.State).SingleEx(),
+                Message = ptc?.Message,
+                Progress = ptc?.Progress,
+                EpochProgresses = ptc?.GetProgessArray(),
             };
         }
 
@@ -118,6 +118,9 @@ namespace Signum.React.MachineLearning
             PredictorPredictContext pctx = PredictorPredictLogic.GetPredictContext(request.predictor);
 
             PredictDictionary inputs = pctx.GetInputsFromRequest(request);
+
+            if (request.alternativesCount != null)
+                inputs.Options = new PredictionOptions { AlternativeCount = request.alternativesCount };
 
             PredictDictionary predictedOutputs = inputs != null ? inputs.PredictBasic() : null;
 

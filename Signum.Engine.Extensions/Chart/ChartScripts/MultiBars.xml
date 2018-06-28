@@ -131,7 +131,7 @@
       .attr('stroke', ySubscale.bandwidth() > 4 ? '#fff' : null)
       .attr('fill', function (r) { return s.color || color(s.key); })
       .attr('y', function (r) { return ySubscale(s.key); })
-      .attr('transform', function (r) { debugger; return 'translate(0, ' + y(r.rowValue) + ')'; })
+      .attr('transform', function (r) { return 'translate(0, ' + y(r.rowValue) + ')'; })
       .attr('height', ySubscale.bandwidth())
       .attr('width', function (r) { return x(r.values[s.key] && r.values[s.key].value); })
       .attr('data-click', function (v) { return getClickKeys(v.values[s.key].rowClick, data.columns); })

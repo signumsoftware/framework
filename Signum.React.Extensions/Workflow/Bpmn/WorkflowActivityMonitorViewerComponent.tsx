@@ -8,9 +8,9 @@ import { WorkflowActivityMonitor, API } from '../WorkflowClient'
 import { JavascriptMessage, toLite } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
 import { Dic } from '../../../../Framework/Signum.React/Scripts/Globals'
 import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
-import * as NavigatedViewer from "bpmn-js/lib/NavigatedViewer"
+import NavigatedViewer from "bpmn-js/lib/NavigatedViewer"
+import searchPad from 'bpmn-js/lib/features/search'
 import * as WorkflowActivityMonitorRenderer from './WorkflowActivityMonitorRenderer'
-import * as searchPad from 'bpmn-js/lib/features/search'
 import * as BpmnUtils from './BpmnUtils'
 import WorkflowActivityStatsModal from '../ActivityMonitor/WorkflowActivityStatsModal';
 import SelectorModal from '../../../../Framework/Signum.React/Scripts/SelectorModal';

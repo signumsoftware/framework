@@ -1,6 +1,39 @@
 ﻿
 declare namespace BPMN {
 
+    type ElementType =
+        "bpmn:Participant" |
+        "bpmn:Lane" |
+
+        "bpmn:StartEvent" |
+        "bpmn:EndEvent" |
+
+        "bpmn:IntermediateThrowEvent" |
+        "bpmn:BoundaryEvent" | 
+        "bpmn:IntermediateCatchEvent" | 
+
+        "bpmn:Task" |
+        "bpmn:UserTask" |
+        "bpmn:CallActivity" |
+        "bpmn:ScriptTask" |
+
+        "bpmn:ExclusiveGateway" |
+        "bpmn:InclusiveGateway" |
+        "bpmn:ParallelGateway" |
+
+        "bpmn:SequenceFlow" |
+        "bpmn:MessageFlow" |
+
+        "label" |
+        "bpmn:TextAnnotation" |
+        "bpmn:DataObjectReference" |
+        "bpmn:DataStoreReference";
+
+
+    type EventDefinitionType =
+        "bpmn:TimerEventDefinition" |
+        "bpmn:ConditionalEventDefinition";
+
     interface Options {
         container?: HTMLElement;
         width?: number | string;
@@ -22,7 +55,7 @@ declare namespace BPMN {
     }
 
     interface Event {
-
+        type: string;
     }
 
     interface DoubleClickEvent extends Event {
@@ -30,18 +63,22 @@ declare namespace BPMN {
         gfx: SVGElement;
         originalEvent: MouseEvent;
 
-        type: string;
         stopPropagation(): void;
         preventDefault(): void;
     }
 
-    interface AddClickEvent extends Event {
+    interface ElementEvent extends Event {
         element: DiElement;
     }
 
     interface PasteEvent extends Event {
         createdElements: { [oldId: string]: CreatedElement };
         descriptor: Descriptor;
+    }
+    
+    interface DeletePostExecutedEvent extends Event {
+        command: string;
+        context: { elements: DiElement[] };
     }
 
     interface CreatedElement {
@@ -55,12 +92,23 @@ declare namespace BPMN {
         type: string;
     }
 
+    interface EndedEvent extends Event {
+        context: {
+            shape: DiElement;
+            target: DiElement;
+        }
+    }
+
+    interface AutoPlaceEndEvent extends Event {
+        shape: DiElement;
+    }
+
     interface DiElement {
         attachers: any[];
         businessObject: ModdleElement;
-        type: string;
+        type: ElementType;
         id: string;
-        host: any;
+        host: DiElement;
         parent: DiElement;
         label: DiElement;
         colapsed: boolean;
@@ -82,7 +130,7 @@ declare namespace BPMN {
         parent: ModdleElement;
         di: DiElement;
         name: string;
-        $type: string;
+        $type: ElementType;
         bounds: BoundsElement;
         lanes: ModdleElement[];
         eventDefinitions?: ModdleElement[];
@@ -115,6 +163,15 @@ declare namespace BPMN {
         create(type: string, attrs: any): ModdleElement;
     }
 
+    interface BpmnReplace {
+        replaceElement(element: BPMN.DiElement, target: BpmnReplaceTarget, hints?: any): BPMN.DiElement;
+    }
+
+    interface BpmnReplaceTarget {
+        type: ElementType;
+        eventDefinitionType: EventDefinitionType;
+    }
+
     interface EventBus {
         on(event: string, callback: (obj: BPMN.Event) => void, target?: BPMN.DiElement): void;
         on(event: string, priority: number, callback: (obj: BPMN.Event) => void, target?: BPMN.DiElement): void;
@@ -141,7 +198,7 @@ declare namespace BPMN {
 
 declare module 'bpmn-js/lib/Viewer' {
 
-    class Viewer {
+    export default class Viewer {
         _modules: any[];
         constructor(options: BPMN.Options)
         importXML(xml: string, done: (error: string, warning: string[]) => void): void;
@@ -156,64 +213,60 @@ declare module 'bpmn-js/lib/Viewer' {
         get<T>(module: string): T;
         _emit(event: string, element: Object): void;
     }
-    namespace Viewer { }
-    export = Viewer;
 }
 
 declare module 'bpmn-js/lib/NavigatedViewer' {
 
-    import Viewer = require("bpmn-js/lib/Viewer");
+    import Viewer from "bpmn-js/lib/Viewer";
 
-    class NavigatedViewer extends Viewer {
+    export default class NavigatedViewer extends Viewer {
       
     }
-
-    namespace NavigatedViewer { }
-    export = NavigatedViewer;
 }
 
 
 
 declare module 'bpmn-js/lib/Modeler' {
-    import Viewer = require("bpmn-js/lib/Viewer");
+    import Viewer from "bpmn-js/lib/Viewer";
 
-    class Modeler extends Viewer {
+    export default class Modeler extends Viewer {
         createDiagram(done: (error: string, warning: string[]) => void): void;
     }
-
-    namespace Modeler { }
-    export = Modeler
 }
 
 declare module 'bpmn-js/lib/draw/BpmnRenderer' {
 
-    class BpmnRenderer {
-        constructor(eventBus: BPMN.EventBus, styles: any, pathMap: any, canvas: any, priority: number);
+    export default class BpmnRenderer {
+        constructor(config: any, eventBus: BPMN.EventBus, styles: any, pathMap: any, canvas: any, textRenderer: any, priority: number);
 
         drawShape(visuals: any, element: BPMN.DiElement): SVGElement;
         drawConnection(visuals: any, element: BPMN.DiElement): SVGElement;
     }
-
-    namespace BpmnRenderer { }
-    export = BpmnRenderer
 }
 
 declare module 'bpmn-js/lib/features/popup-menu/ReplaceMenuProvider' {
 
-    class BpmnReplaceMenuProvider {
+    export default class BpmnReplaceMenuProvider {
         constructor(popupMenu: any, modeling: any, moddle: BPMN.ModdleElement, bpmnReplace: any, rules: any, translate: any);
 
         _createMenuEntry(definition: any, element: BPMN.DiElement, action: any): any;
         _createEntries(element: BPMN.DiElement, replaceOptions: any): any;
     }
+}
 
-    namespace BpmnReplaceMenuProvider { }
-    export = BpmnReplaceMenuProvider
+declare module 'bpmn-js/lib/features/context-pad/ContextPadProvider' {
+
+    export default class BpmnContextPadProvider {
+        constructor(config: any, injector: any, eventBus: any, contextPad: any, modeling: any, elementFactory: any, connect: any, create: any, popupMenu: any, canvas: any, rules: any, translate: any);
+
+
+        getContextPadEntries(element: BPMN.DiElement): any;
+    }
 }
 
 declare module 'bpmn-js/lib/features/search' {
     var a : {};
-    export = a;
+    export default a;
 }
 
 

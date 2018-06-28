@@ -110,7 +110,7 @@ namespace Signum.Engine.Workflow
 
                 WorkflowEventTaskModel.GetModel = (@event) =>
                 {
-                    if (!@event.Type.IsTimerStart())
+                    if (!@event.Type.IsScheduledStart())
                         return null;
 
                     var schedule = @event.ScheduledTask();
@@ -131,7 +131,7 @@ namespace Signum.Engine.Workflow
                 {
                     var schedule = @event.IsNew ? null : @event.ScheduledTask();
 
-                    if (!@event.Type.IsTimerStart())
+                    if (!@event.Type.IsScheduledStart())
                     {
                         if (schedule != null)
                             DeleteWorkflowEventScheduledTask(schedule);

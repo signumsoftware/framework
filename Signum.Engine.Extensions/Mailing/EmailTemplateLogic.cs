@@ -77,9 +77,9 @@ namespace Signum.Engine.Mailing
         }
 
 
-        public static Func<EmailTemplateEntity, SmtpConfigurationEntity> GetSmtpConfiguration;
+        public static Func<EmailTemplateEntity, ModifiableEntity, SmtpConfigurationEntity> GetSmtpConfiguration;
 
-        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm, Func<EmailTemplateEntity, SmtpConfigurationEntity> getSmtpConfiguration)
+        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm, Func<EmailTemplateEntity, ModifiableEntity, SmtpConfigurationEntity> getSmtpConfiguration)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
@@ -104,7 +104,7 @@ namespace Signum.Engine.Mailing
                 
                 TemplatesByQueryName = sb.GlobalLazy(() =>
                 {
-                    return EmailTemplatesLazy.Value.Values.GroupToDictionary(a => a.Query.ToQueryName());
+                    return EmailTemplatesLazy.Value.Values.SelectCatch(et => KVP.Create(et.Query.ToQueryName(), et)).GroupToDictionary();
                 }, new InvalidateWith(typeof(EmailTemplateEntity)));
                 
                 SystemEmailLogic.Start(sb, dqm);
@@ -125,8 +125,8 @@ namespace Signum.Engine.Mailing
                 GlobalValueProvider.RegisterGlobalVariable("Now", _ => TimeZoneManager.Now);
                 GlobalValueProvider.RegisterGlobalVariable("Today", _ => TimeZoneManager.Now.Date, "d");
 
-                sb.Schema.Synchronizing += Schema_Synchronize_Tokens;
-                sb.Schema.Synchronizing += Schema_Syncronize_DefaultTemplates;
+                sb.Schema.Synchronizing += Schema_Synchronizing_Tokens;
+                sb.Schema.Synchronizing += Schema_Synchronizing_DefaultTemplates;
 
                 sb.Schema.Table<SystemEmailEntity>().PreDeleteSqlSync += EmailTemplateLogic_PreDeleteSqlSync;
 
@@ -285,14 +285,21 @@ namespace Signum.Engine.Mailing
 
                 new Delete(EmailTemplateOperation.Delete)
                 {
-                    Delete = (t, _) => t.Delete()
+                    Delete = (t, _) =>
+                    {
+                        var attachments = t.Attachments.Select(a => a.ToLite()).ToList();
+
+                        t.Delete();
+                        attachments.ForEach(at => at.Delete());
+
+                    }
                 }.Register();
 
                 registered = true;
             }
         }
 
-        static SqlPreCommand Schema_Synchronize_Tokens(Replacements replacements)
+        static SqlPreCommand Schema_Synchronizing_Tokens(Replacements replacements)
         {
             if (AvoidSynchronizeTokens)
                 return null;
@@ -308,7 +315,7 @@ namespace Signum.Engine.Mailing
             return cmd;
         }
 
-        static SqlPreCommand Schema_Syncronize_DefaultTemplates(Replacements replacements)
+        static SqlPreCommand Schema_Synchronizing_DefaultTemplates(Replacements replacements)
         {
             if (AvoidSynchronizeDefaultTemplates)
                 return null;

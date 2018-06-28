@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using Signum.Entities;
 using System.IO;
 using Signum.Entities.Basics;
@@ -115,7 +114,7 @@ namespace Signum.Entities.Files
         {
             var pp = this.GetPrefixPair();
 
-            return Path.Combine(pp.PhysicalPrefix, Suffix);
+            return FilePathUtils.SafeCombine(pp.PhysicalPrefix, Suffix);
         }
 
         public string FullWebPath()
@@ -125,7 +124,7 @@ namespace Signum.Entities.Files
             if (string.IsNullOrEmpty(pp.WebPrefix))
                 return null;
 
-            var result = pp.WebPrefix + "/" + HttpFilePathUtils.UrlPathEncode(Suffix.Replace("\\", "/"));
+            var result = pp.WebPrefix + "/" + FilePathUtils.UrlPathEncode(Suffix.Replace("\\", "/"));
 
             if (result.StartsWith("http"))
                 return result;
@@ -159,141 +158,11 @@ namespace Signum.Entities.Files
         public string WebPrefix;
     }
 
-    [Serializable]
-    public class FileTypeSymbol : Symbol
-    {
-        private FileTypeSymbol() { }
-
-        public FileTypeSymbol(Type declaringType, string fieldName) :
-            base(declaringType, fieldName)
-        {
-        }
-    }
-
 
 
     [AutoInit]
     public static class FilePathOperation
     {
         public static ExecuteSymbol<FilePathEntity> Save;
-    }
-
-
-    public class HttpFilePathUtils
-    {
-        public static string UrlPathEncode(string value)
-        {
-            if (string.IsNullOrEmpty(value))
-            {
-                return value;
-            }
-            int index = value.IndexOf('?');
-            if (index >= 0)
-            {
-                return (UrlPathEncode(value.Substring(0, index)) + value.Substring(index));
-            }
-            return UrlEncodeSpaces(UrlEncodeNonAscii(value, Encoding.UTF8));
-        }
-
-        static string UrlEncodeSpaces(string str)
-        {
-            if ((str != null) && (str.IndexOf(' ') >= 0))
-            {
-                str = str.Replace(" ", "%20");
-            }
-            return str;
-        }
-
-        static string UrlEncodeNonAscii(string str, Encoding e)
-        {
-            if (string.IsNullOrEmpty(str))
-            {
-                return str;
-            }
-            if (e == null)
-            {
-                e = Encoding.UTF8;
-            }
-            byte[] bytes = e.GetBytes(str);
-            byte[] buffer2 = UrlEncodeNonAscii(bytes, 0, bytes.Length, false);
-            return Encoding.ASCII.GetString(buffer2);
-        }
-
-        static byte[] UrlEncodeNonAscii(byte[] bytes, int offset, int count, bool alwaysCreateNewReturnValue)
-        {
-            if (!ValidateUrlEncodingParameters(bytes, offset, count))
-            {
-                return null;
-            }
-            int num = 0;
-            for (int i = 0; i < count; i++)
-            {
-                if (IsNonAsciiByte(bytes[offset + i]))
-                {
-                    num++;
-                }
-            }
-            if (!alwaysCreateNewReturnValue && (num == 0))
-            {
-                return bytes;
-            }
-            byte[] buffer = new byte[count + (num * 2)];
-            int num3 = 0;
-            for (int j = 0; j < count; j++)
-            {
-                byte b = bytes[offset + j];
-                if (IsNonAsciiByte(b))
-                {
-                    buffer[num3++] = 0x25;
-                    buffer[num3++] = (byte)IntToHex((b >> 4) & 15);
-                    buffer[num3++] = (byte)IntToHex(b & 15);
-                }
-                else
-                {
-                    buffer[num3++] = b;
-                }
-            }
-            return buffer;
-        }
-
-
-        static bool ValidateUrlEncodingParameters(byte[] bytes, int offset, int count)
-        {
-            if ((bytes == null) && (count == 0))
-            {
-                return false;
-            }
-            if (bytes == null)
-            {
-                throw new ArgumentNullException("bytes");
-            }
-            if ((offset < 0) || (offset > bytes.Length))
-            {
-                throw new ArgumentOutOfRangeException("offset");
-            }
-            if ((count < 0) || ((offset + count) > bytes.Length))
-            {
-                throw new ArgumentOutOfRangeException("count");
-            }
-            return true;
-        }
-
-        static char IntToHex(int n)
-        {
-            if (n <= 9)
-            {
-                return (char)(n + 0x30);
-            }
-            return (char)((n - 10) + 0x61);
-        }
-
-        static bool IsNonAsciiByte(byte b)
-        {
-            if (b < 0x7f)
-            {
-                return (b < 0x20);
-            }
-            return true;
-        }
     }
 }

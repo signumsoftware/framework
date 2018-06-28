@@ -8,19 +8,34 @@ using Signum.Utilities.DataStructures;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Collections.Concurrent;
 
 namespace Signum.Engine.Workflow
 {
     public class WorkflowNodeGraph
     {
         public WorkflowEntity Workflow { get; internal set; }
-        public DirectedEdgedGraph<IWorkflowNodeEntity, WorkflowConnectionEntity> NextGraph { get; internal set; }
-        public DirectedEdgedGraph<IWorkflowNodeEntity, WorkflowConnectionEntity> PreviousGraph { get; internal set; }
+        public DirectedEdgedGraph<IWorkflowNodeEntity, HashSet<WorkflowConnectionEntity>> NextGraph { get; internal set; }
+        public DirectedEdgedGraph<IWorkflowNodeEntity, HashSet<WorkflowConnectionEntity>> PreviousGraph { get; internal set; }
 
         public Dictionary<Lite<WorkflowEventEntity>, WorkflowEventEntity> Events { get; internal set; }
         public Dictionary<Lite<WorkflowActivityEntity>, WorkflowActivityEntity> Activities { get; internal set; }
         public Dictionary<Lite<WorkflowGatewayEntity>, WorkflowGatewayEntity> Gateways { get; internal set; }
         public Dictionary<Lite<WorkflowConnectionEntity>, WorkflowConnectionEntity> Connections { get; internal set; }
+
+        public IWorkflowNodeEntity GetNode(Lite<IWorkflowNodeEntity> lite)
+        {
+            if (lite is Lite<WorkflowEventEntity> we)
+                return Events.GetOrThrow(we);
+
+            if (lite is Lite<WorkflowActivityEntity> wa)
+                return Activities.GetOrThrow(wa);
+
+            if (lite is Lite<WorkflowGatewayEntity> wg)
+                return Gateways.GetOrThrow(wg);
+
+            throw new InvalidOperationException("Unexpected " + lite.EntityType);
+        }
 
         internal List<Lite<IWorkflowNodeEntity>> Autocomplete(string subString, int count, List<Lite<IWorkflowNodeEntity>> excludes)
         {
@@ -41,106 +56,141 @@ namespace Signum.Engine.Workflow
 
         internal void FillGraphs()
         {
-            var graph = new DirectedEdgedGraph<IWorkflowNodeEntity, WorkflowConnectionEntity>();
+            var graph = new DirectedEdgedGraph<IWorkflowNodeEntity, HashSet<WorkflowConnectionEntity>>();
 
             foreach (var e in this.Events.Values) graph.Add(e);
             foreach (var a in this.Activities.Values) graph.Add(a);
             foreach (var g in this.Gateways.Values) graph.Add(g);
-            foreach (var c in this.Connections.Values) graph.Add(c.From, c.To, c);
+            foreach (var c in this.Connections.Values)
+                graph.GetOrCreate(c.From, c.To).Add(c);
 
             this.NextGraph = graph;
             this.PreviousGraph = graph.Inverse();
         }
 
-        //Split -> Join
-        public Dictionary<WorkflowGatewayEntity, WorkflowGatewayEntity> ParallelWorkflowPairs;
         public Dictionary<IWorkflowNodeEntity, int> TrackId;
-        public Dictionary<int, WorkflowGatewayEntity> TrackCreatedBy;
+        public Dictionary<int, IWorkflowNodeEntity> TrackCreatedBy;
 
-        public List<string> Validate(Action<WorkflowGatewayEntity, WorkflowGatewayDirection> changeDirection)
+        public IWorkflowNodeEntity GetSplit(WorkflowGatewayEntity entity)
         {
-            List<string> errors = new List<string>();
+            return PreviousConnections(entity).Select(a => TrackCreatedBy.GetOrThrow(TrackId.GetOrThrow(a.From))).Distinct().SingleEx();
+        }
+
+
+        public IEnumerable<WorkflowConnectionEntity> NextConnections(IWorkflowNodeEntity node)
+        {
+            return NextGraph.RelatedTo(node).SelectMany(a => a.Value);
+        }
+
+        public IEnumerable<WorkflowConnectionEntity> PreviousConnections(IWorkflowNodeEntity node)
+        {
+            return PreviousGraph.RelatedTo(node).SelectMany(a => a.Value);
+        }
+
+
+
+        public void Validate(List<WorkflowIssue> issuesContainer, Action<WorkflowGatewayEntity, WorkflowGatewayDirection> changeDirection)
+        {
+            List<WorkflowIssue> issues = issuesContainer;
 
             if (Events.Count(a => a.Value.Type.IsStart()) == 0)
-                errors.Add(WorkflowValidationMessage.SomeStartEventIsRequired.NiceToString());
+                issues.AddError(null, WorkflowValidationMessage.SomeStartEventIsRequired.NiceToString());
 
             if (Workflow.MainEntityStrategy != WorkflowMainEntityStrategy.CreateNew)
                 if (Events.Count(a => a.Value.Type == WorkflowEventType.Start) == 0)
-                    errors.Add(WorkflowValidationMessage.NormalStartEventIsRequiredWhenThe0Are1Or2.NiceToString(
-                        Workflow.MainEntityStrategy.GetType().NiceName(), 
-                        WorkflowMainEntityStrategy.SelectByUser.NiceToString(), 
+                    issues.AddError(null,
+                        WorkflowValidationMessage.NormalStartEventIsRequiredWhenThe0Are1Or2.NiceToString(
+                        Workflow.MainEntityStrategy.GetType().NiceName(),
+                        WorkflowMainEntityStrategy.SelectByUser.NiceToString(),
                         WorkflowMainEntityStrategy.Both.NiceToString()));
 
             if (Events.Count(a => a.Value.Type == WorkflowEventType.Start) > 1)
-                errors.Add(WorkflowValidationMessage.MultipleStartEventsAreNotAllowed.NiceToString());
+                foreach (var e in Events.Where(a => a.Value.Type == WorkflowEventType.Start))
+                    issues.AddError(e.Value, WorkflowValidationMessage.MultipleStartEventsAreNotAllowed.NiceToString());
 
             var finishEventCount = Events.Count(a => a.Value.Type.IsFinish());
             if (finishEventCount == 0)
-                errors.Add(WorkflowValidationMessage.FinishEventIsRequired.NiceToString());
+                issues.AddError(null, WorkflowValidationMessage.FinishEventIsRequired.NiceToString());
 
             Events.Values.ToList().ForEach(e =>
             {
-                var fanIn = PreviousGraph.RelatedTo(e).Count;
-                var fanOut = NextGraph.RelatedTo(e).Count;
+                var fanIn = PreviousConnections(e).Count();
+                var fanOut = NextConnections(e).Count();
 
                 if (e.Type.IsStart())
                 {
                     if (fanIn > 0)
-                        errors.Add(WorkflowValidationMessage._0HasInputs.NiceToString(e));
+                        issues.AddError(e, WorkflowValidationMessage._0HasInputs.NiceToString(e));
                     if (fanOut == 0)
-                        errors.Add(WorkflowValidationMessage._0HasNoOutputs.NiceToString(e));
+                        issues.AddError(e, WorkflowValidationMessage._0HasNoOutputs.NiceToString(e));
                     if (fanOut > 1)
-                        errors.Add(WorkflowValidationMessage._0HasMultipleOutputs.NiceToString(e));
+                        issues.AddError(e, WorkflowValidationMessage._0HasMultipleOutputs.NiceToString(e));
 
                     if (fanOut == 1)
                     {
-                        var nextConn = NextGraph.RelatedTo(e).Single().Value;
+                        var nextConn = NextConnections(e).SingleEx();
 
                         if (e.Type == WorkflowEventType.Start && !(nextConn.To is WorkflowActivityEntity))
-                            errors.Add(WorkflowValidationMessage.StartEventNextNodeShouldBeAnActivity.NiceToString());
+                            issues.AddError(e, WorkflowValidationMessage.StartEventNextNodeShouldBeAnActivity.NiceToString());
                     }
                 }
 
                 if (e.Type.IsFinish())
                 {
                     if (fanIn == 0)
-                        errors.Add(WorkflowValidationMessage._0HasNoInputs.NiceToString(e));
+                        issues.AddError(e, WorkflowValidationMessage._0HasNoInputs.NiceToString(e));
                     if (fanOut > 0)
-                        errors.Add(WorkflowValidationMessage._0HasOutputs.NiceToString(e));
+                        issues.AddError(e, WorkflowValidationMessage._0HasOutputs.NiceToString(e));
                 }
 
-                if (e.Type.IsTimerStart())
+                if (e.Type.IsScheduledStart())
                 {
                     var schedule = e.ScheduledTask();
 
                     if (schedule == null)
-                        errors.Add(WorkflowValidationMessage._0IsTimerStartAndSchedulerIsMandatory.NiceToString(e));
+                        issues.AddError(e, WorkflowValidationMessage._0IsTimerStartAndSchedulerIsMandatory.NiceToString(e));
 
                     var wet = e.WorkflowEventTask();
 
                     if (wet == null)
-                        errors.Add(WorkflowValidationMessage._0IsTimerStartAndTaskIsMandatory.NiceToString(e));
+                        issues.AddError(e, WorkflowValidationMessage._0IsTimerStartAndTaskIsMandatory.NiceToString(e));
                     else if (wet.TriggeredOn != TriggeredOn.Always)
                     {
                         if (wet.Condition?.Script == null || !wet.Condition.Script.Trim().HasText())
-                            errors.Add(WorkflowValidationMessage._0IsConditionalStartAndTaskConditionIsMandatory.NiceToString(e));
+                            issues.AddError(e, WorkflowValidationMessage._0IsConditionalStartAndTaskConditionIsMandatory.NiceToString(e));
+                    }
+                }
+
+                if (e.Type.IsTimer())
+                {
+                    var boundaryOutput = NextConnections(e).Only();
+
+                    if (boundaryOutput == null || boundaryOutput.Type != ConnectionType.Normal)
+                    {
+                        if (e.Type == WorkflowEventType.IntermediateTimer)
+                            issues.AddError(e, WorkflowValidationMessage.IntermediateTimer0ShouldHaveOneOutputOfType1.NiceToString(e, ConnectionType.Normal.NiceToString()));
+                        else
+                        {
+                            var parentActivity = Activities.Values.Where(a => a.BoundaryTimers.Contains(e)).SingleEx();
+                            issues.AddError(e, WorkflowValidationMessage.BoundaryTimer0OfActivity1ShouldHaveExactlyOneConnectionOfType2.NiceToString(e, parentActivity, ConnectionType.Normal.NiceToString()));
+                        }
                     }
                 }
             });
 
             Gateways.Values.ToList().ForEach(g =>
             {
-                var fanIn = PreviousGraph.RelatedTo(g).Count;
-                var fanOut = NextGraph.RelatedTo(g).Count;
+                var fanIn = PreviousConnections(g).Count();
+                var fanOut = NextConnections(g).Count();
                 if (fanIn == 0)
-                    errors.Add(WorkflowValidationMessage._0HasNoInputs.NiceToString(g));
+                    issues.AddError(g, WorkflowValidationMessage._0HasNoInputs.NiceToString(g));
                 if (fanOut == 0)
-                    errors.Add(WorkflowValidationMessage._0HasNoOutputs.NiceToString(g));
+                    issues.AddError(g, WorkflowValidationMessage._0HasNoOutputs.NiceToString(g));
 
                 if (fanIn == 1 && fanOut == 1)
-                    errors.Add(WorkflowValidationMessage._0HasJustOneInputAndOneOutput.NiceToString(g));
+                    issues.AddError(g, WorkflowValidationMessage._0HasJustOneInputAndOneOutput.NiceToString(g));
 
-                var newDirection =  fanOut == 1 ? WorkflowGatewayDirection.Join : WorkflowGatewayDirection.Split;
+                var newDirection = fanOut == 1 ? WorkflowGatewayDirection.Join : WorkflowGatewayDirection.Split;
                 if (g.Direction != newDirection)
                     changeDirection(g, newDirection);
 
@@ -148,7 +198,7 @@ namespace Signum.Engine.Workflow
                 {
                     if (g.Type == WorkflowGatewayType.Exclusive || g.Type == WorkflowGatewayType.Inclusive)
                     {
-                        if (NextGraph.RelatedTo(g).OrderByDescending(a => a.Value.Order).Any(c => c.Value.DecisonResult != null))
+                        if (NextConnections(g).Any(c => IsDecision(c.Type)))
                         {
                             List<WorkflowActivityEntity> previousActivities = new List<WorkflowActivityEntity>();
 
@@ -164,151 +214,207 @@ namespace Signum.Engine.Workflow
                             });
 
                             foreach (var act in previousActivities.Where(a => a.Type != WorkflowActivityType.Decision))
-                                errors.Add(WorkflowValidationMessage.Activity0ShouldBeDecision.NiceToString(act));
+                                issues.AddError(act, WorkflowValidationMessage.Activity0ShouldBeDecision.NiceToString(act));
                         }
                     }
 
-                    if (g.Type == WorkflowGatewayType.Exclusive && NextGraph.RelatedTo(g).OrderByDescending(a => a.Value.Order).Skip(1).Any(c => c.Value.DecisonResult == null && c.Value.Condition == null))
-                        errors.Add(WorkflowValidationMessage.Gateway0ShouldHasConditionOrDecisionOnEachOutputExceptTheLast.NiceToString(g));
+                    switch (g.Type)
+                    {
+                        case WorkflowGatewayType.Exclusive:
+                            if (NextConnections(g).OrderByDescending(a => a.Order).Skip(1).Any(c => c.Type == ConnectionType.Normal && c.Condition == null))
+                                issues.AddError(g, WorkflowValidationMessage.Gateway0ShouldHasConditionOrDecisionOnEachOutputExceptTheLast.NiceToString(g));
+                            break;
+                        case WorkflowGatewayType.Inclusive:
+                            if (NextConnections(g).Count(c => c.Type == ConnectionType.Normal && c.Condition == null) != 1)
+                                issues.AddError(g, WorkflowValidationMessage.InclusiveGateway0ShouldHaveOneConnectionWithoutCondition.NiceToString(g));
 
-                    if (g.Type == WorkflowGatewayType.Inclusive && NextGraph.RelatedTo(g).Any(c => c.Value.DecisonResult == null && c.Value.Condition == null))
-                        errors.Add(WorkflowValidationMessage.Gateway0ShouldHasConditionOnEachOutput.NiceToString(g));
+                            break;
+                        case WorkflowGatewayType.Parallel:
+                            if (NextConnections(g).Count() == 0)
+                                issues.AddError(g, WorkflowValidationMessage.ParallelSplit0ShouldHaveAtLeastOneConnection.NiceToString(g));
+
+                            if (NextConnections(g).Any(a => a.Type != ConnectionType.Normal || a.Condition != null))
+                                issues.AddError(g, WorkflowValidationMessage.ParallelSplit0ShouldHaveOnlyNormalConnectionsWithoutConditions.NiceToString(g));
+                            break;
+                        default:
+                            break;
+                    }
                 }
             });
 
             var starts = Events.Values.Where(a => a.Type.IsStart()).ToList();
             TrackId = starts.ToDictionary(a => (IWorkflowNodeEntity)a, a => 0);
-            TrackCreatedBy = new Dictionary<int, WorkflowGatewayEntity> { { 0, null } };
+            TrackCreatedBy = new Dictionary<int, IWorkflowNodeEntity> { { 0, null } };
 
-            ParallelWorkflowPairs = new Dictionary<WorkflowGatewayEntity, WorkflowGatewayEntity>();
 
-            starts.ForEach(st =>
-               NextGraph.BreadthExploreConnections(st,
-                (prev, conn, next) =>
+            Queue<IWorkflowNodeEntity> queue = new Queue<IWorkflowNodeEntity>();
+            queue.EnqueueRange(starts);
+            while (queue.Count > 0)
+            {
+                IWorkflowNodeEntity node = queue.Dequeue();
+
+                var nextConns = NextConnections(node).ToList(); //Clone;
+                if (node is WorkflowActivityEntity wa && wa.BoundaryTimers.Any())
                 {
-                    var prevTrackId = TrackId.GetOrThrow(prev);
-                    int newTrackId;
-
-                    if (IsParallelGateway(prev, WorkflowGatewayDirection.Split))
+                    foreach (var bt in wa.BoundaryTimers)
                     {
-                        if (IsParallelGateway(next, WorkflowGatewayDirection.Join))
-                            newTrackId = prevTrackId;
-                        else
+                        nextConns.AddRange(NextConnections(bt));
+                    }
+                }
+
+                foreach (var con in nextConns)
+                {
+                    if (ContinueExplore(node, con, con.To))
+                        queue.Enqueue(con.To);
+                }
+            }
+
+
+            bool ContinueExplore(IWorkflowNodeEntity prev, WorkflowConnectionEntity conn, IWorkflowNodeEntity next)
+            {
+                var prevTrackId = TrackId.GetOrThrow(prev);
+                int newTrackId;
+
+                if (IsParallelGateway(prev, WorkflowGatewayDirection.Split))
+                {
+                    if (IsParallelGateway(next, WorkflowGatewayDirection.Join))
+                        newTrackId = prevTrackId;
+                    else
+                    {
+                        newTrackId = TrackCreatedBy.Count + 1;
+                        TrackCreatedBy.Add(newTrackId, (WorkflowGatewayEntity)prev);
+                    }
+                }
+                else if (prev is WorkflowActivityEntity act && act.BoundaryTimers.Any(bt => bt.Type == WorkflowEventType.BoundaryForkTimer))
+                {
+                    if (IsParallelGateway(next, WorkflowGatewayDirection.Join))
+                        newTrackId = prevTrackId;
+                    else
+                    {
+                        if (conn.From is WorkflowEventEntity ev && ev.Type == WorkflowEventType.BoundaryForkTimer)
                         {
                             newTrackId = TrackCreatedBy.Count + 1;
-                            TrackCreatedBy.Add(newTrackId, (WorkflowGatewayEntity)prev);
-                        }
-                    }
-                    else
-                    {
-                        if (IsParallelGateway(next, WorkflowGatewayDirection.Join))
-                        {
-                            var split = TrackCreatedBy.TryGetC(prevTrackId);
-                            if (split == null)
-                            {
-                                errors.Add(WorkflowValidationMessage._0CanNotBeConnectedToAParallelJoinBecauseHasNoPreviousParallelSplit.NiceToString(prev));
-                                return false;
-                            }
-                            
-                            ParallelWorkflowPairs[split] = (WorkflowGatewayEntity)next;
-
-                            newTrackId =  TrackId.GetOrThrow(split);
+                            TrackCreatedBy.Add(newTrackId, act);
                         }
                         else
-                            newTrackId = prevTrackId;
+                        {
+                            var mainTrackId = NextConnections(act)
+                                .Concat(act.BoundaryTimers.Where(a => a.Type == WorkflowEventType.BoundaryInterruptingTimer).SelectMany(we => NextConnections(we)))
+                                .Select(c => TrackId.TryGetS(c.To))
+                                .Where(c => c != null)
+                                .Distinct()
+                                .SingleOrDefaultEx();
+
+                            if (mainTrackId.HasValue)
+                            {
+                                newTrackId = mainTrackId.Value;
+                            }
+                            else
+                            {
+                                newTrackId = TrackCreatedBy.Count + 1;
+                                TrackCreatedBy.Add(newTrackId, act);
+                            }
+                        }
+
                     }
-
-                    if (TrackId.ContainsKey(next))
+                }
+                else if (IsParallelGateway(next, WorkflowGatewayDirection.Join))
+                {
+                    var split = TrackCreatedBy.TryGetC(prevTrackId);
+                    if (split == null)
                     {
-                        if (TrackId[next] != newTrackId)
-                            errors.Add(WorkflowValidationMessage._0Track1CanNotBeConnectedTo2Track3InsteadOfTrack4.NiceToString(prev, prevTrackId, next, TrackId[next], newTrackId));
-
+                        issues.Add(new WorkflowIssue(WorkflowIssueType.Warning, conn.BpmnElementId, WorkflowValidationMessage._0CanNotBeConnectedToAParallelJoinBecauseHasNoPreviousParallelSplit.NiceToString(prev)));
                         return false;
                     }
-                    else
+
+
+                    var join = (WorkflowGatewayEntity)next;
+                    var splitType = split is WorkflowGatewayEntity wg ? wg.Type :
+                        split is WorkflowActivityEntity ? WorkflowGatewayType.Inclusive :
+                        throw new UnexpectedValueException(split);
+
+                    if (join.Type != splitType)
                     {
-                        TrackId[next] = newTrackId;
-                        return true;
+                        string message = WorkflowValidationMessage.Join0OfType1DoesNotMatchWithItsPairTheSplit2OfType3.NiceToString(join, join.Type, split, splitType);
+                        issues.AddError(split, message);
+                        issues.AddError(join, message);
                     }
-                })
-            );
 
-            Action<WorkflowActivityEntity, IWorkflowTransitionTo> ValidateTransition = (WorkflowActivityEntity wa, IWorkflowTransitionTo item) =>
-            {
-                var activity0CanNotXTo1Because2 = (item is WorkflowJumpEmbedded || item is WorkflowScriptPartEmbedded) ?
-                    WorkflowValidationMessage.Activity0CanNotJumpTo1Because2 :
-                    WorkflowValidationMessage.Activity0CanNotTimeoutTo1Because2;
+                    newTrackId = TrackId.GetOrThrow(split);
+                }
+                else
+                    newTrackId = prevTrackId;
 
-                var to =
-                    item.To is Lite<WorkflowActivityEntity> ? (IWorkflowNodeEntity)Activities.TryGetC((Lite<WorkflowActivityEntity>)item.To) :
-                    item.To is Lite<WorkflowGatewayEntity> ? (IWorkflowNodeEntity)Gateways.TryGetC((Lite<WorkflowGatewayEntity>)item.To) :
-                    item.To is Lite<WorkflowEventEntity> ? (IWorkflowNodeEntity)Events.TryGetC((Lite<WorkflowEventEntity>)item.To) : null;
 
-                if (to == null)
-                    errors.Add(activity0CanNotXTo1Because2.NiceToString(wa, item.To, WorkflowValidationMessage.IsNotInWorkflow.NiceToString()));
+                if (TrackId.ContainsKey(next))
+                {
+                    if (TrackId[next] != newTrackId)
+                        issues.Add(new WorkflowIssue(WorkflowIssueType.Warning, conn.BpmnElementId, WorkflowValidationMessage._0Track1CanNotBeConnectedTo2Track3InsteadOfTrack4.NiceToString(prev, prevTrackId, next, TrackId[next], newTrackId)));
 
-                if (to is WorkflowEventEntity && ((WorkflowEventEntity)to).Type.IsStart())
-                    errors.Add(activity0CanNotXTo1Because2.NiceToString(wa, item.To, WorkflowValidationMessage.IsStart.NiceToString()));
-
-                if (to is WorkflowActivityEntity && to == wa)
-                    errors.Add(activity0CanNotXTo1Because2.NiceToString(wa, item.To, WorkflowValidationMessage.IsSelfJumping.NiceToString()));
-
-                if (TrackId.GetOrThrow(to) != TrackId.GetOrThrow(wa))
-                    errors.Add(activity0CanNotXTo1Because2.NiceToString(wa, item.To, WorkflowValidationMessage.IsInDifferentParallelTrack.NiceToString()));
-            };
+                    return false;
+                }
+                else
+                {
+                    TrackId[next] = newTrackId;
+                    return true;
+                }
+            }
 
 
             foreach (var wa in Activities.Values)
             {
-                var fanIn = PreviousGraph.RelatedTo(wa).Count;
-                var fanOut = NextGraph.RelatedTo(wa).Count;
+                var fanIn = PreviousConnections(wa).Count();
+                var fanOut = NextConnections(wa).Count(v => IsNormalOrDecision(v.Type));
 
                 if (fanIn == 0)
-                    errors.Add(WorkflowValidationMessage._0HasNoInputs.NiceToString(wa));
+                    issues.AddError(wa, WorkflowValidationMessage._0HasNoInputs.NiceToString(wa));
                 if (fanOut == 0)
-                    errors.Add(WorkflowValidationMessage._0HasNoOutputs.NiceToString(wa));
+                    issues.AddError(wa, WorkflowValidationMessage._0HasNoOutputs.NiceToString(wa));
                 if (fanOut > 1)
-                    errors.Add(WorkflowValidationMessage._0HasMultipleOutputs.NiceToString(wa));
+                    issues.AddError(wa, WorkflowValidationMessage._0HasMultipleOutputs.NiceToString(wa));
 
                 if (fanOut == 1 && wa.Type == WorkflowActivityType.Decision)
                 {
-                    var nextConn = NextGraph.RelatedTo(wa).Single().Value;
+                    var nextConn = NextConnections(wa).Where(c => c.Type == ConnectionType.Normal).SingleEx();
                     if (!(nextConn.To is WorkflowGatewayEntity) || ((WorkflowGatewayEntity)nextConn.To).Type == WorkflowGatewayType.Parallel)
-                        errors.Add(WorkflowValidationMessage.Activity0WithDecisionTypeShouldGoToAnExclusiveOrInclusiveGateways.NiceToString(wa));
+                        issues.AddError(wa, WorkflowValidationMessage.Activity0WithDecisionTypeShouldGoToAnExclusiveOrInclusiveGateways.NiceToString(wa));
                 }
 
-                if (wa.Reject != null)
+                if (wa.Type == WorkflowActivityType.Script)
                 {
-                    var prevs = PreviousGraph.IndirectlyRelatedTo(wa, kvp => !(kvp.Key is WorkflowActivityEntity));
-                    if (prevs.Any(a => a is WorkflowEventEntity && ((WorkflowEventEntity)a).Type.IsStart()))
-                        errors.Add(WorkflowValidationMessage.Activity0CanNotRejectToStart.NiceToString(wa));
+                    var scriptException = NextConnections(wa).Where(a => a.Type == ConnectionType.ScriptException).Only();
 
-                    if (prevs.Any(a => IsParallelGateway(a)))
-                        errors.Add(WorkflowValidationMessage.Activity0CanNotRejectToParallelGateway.NiceToString(wa));
+                    if (scriptException == null)
+                        issues.AddError(wa, WorkflowValidationMessage.Activity0OfType1ShouldHaveExactlyOneConnectionOfType2.NiceToString(wa, wa.Type.NiceToString(), ConnectionType.ScriptException.NiceToString()));
+                }
+                else
+                {
+                    if (NextConnections(wa).Any(a => a.Type == ConnectionType.ScriptException))
+                        issues.AddError(wa, WorkflowValidationMessage.Activity0OfType1CanNotHaveConnectionsOfType2.NiceToString(wa, wa.Type.NiceToString(), ConnectionType.ScriptException.NiceToString()));
                 }
 
-                foreach (var timer in wa.Timers)
+                if (wa.Type == WorkflowActivityType.CallWorkflow || wa.Type == WorkflowActivityType.DecompositionWorkflow)
                 {
-                    ValidateTransition(wa, timer);
-                } 
-
-                if (wa.Script != null)
-                    ValidateTransition(wa, wa.Script);
-
-                foreach (var item in wa.Jumps)
-                {
-                    ValidateTransition(wa, item);
+                    if (NextConnections(wa).Any(a => a.Type != ConnectionType.Normal))
+                        issues.AddError(wa, WorkflowValidationMessage.Activity0OfType1ShouldHaveExactlyOneConnectionOfType2.NiceToString(wa, wa.Type.NiceToString(), ConnectionType.Normal.NiceToString()));
                 }
             }
 
-            if (errors.HasItems())
+            if (issues.Any(a => a.Type == WorkflowIssueType.Error))
             {
                 this.TrackCreatedBy = null;
                 this.TrackId = null;
-                this.ParallelWorkflowPairs = null;
             }
+        }
 
-            return errors;
+        private bool IsNormalOrDecision(ConnectionType type)
+        {
+            return type == ConnectionType.Normal || IsDecision(type);
+        }
+
+        private bool IsDecision(ConnectionType type)
+        {
+            return type == ConnectionType.Approve || type == ConnectionType.Decline;
         }
 
         private bool IsParallelGateway(IWorkflowNodeEntity a, WorkflowGatewayDirection? direction = null)
@@ -319,5 +425,33 @@ namespace Signum.Engine.Workflow
         }
     }
 
+  
 
+    public class WorkflowIssue
+    {
+        public WorkflowIssueType Type;
+        public string BpmnElementId;
+        public string Message;
+
+        public WorkflowIssue(WorkflowIssueType type, string bpmnElementId, string message)
+        {
+            this.Type = type;
+            this.BpmnElementId = bpmnElementId;
+            this.Message = message;
+        }
+
+        public override string ToString()
+        {
+            return $"{Type}({BpmnElementId}): {Message}";
+        }
+    }
+
+    public static class WorkflowIssuesExtensions
+    {
+
+        public static void AddError(this List<WorkflowIssue> issues, IWorkflowNodeEntity node, string message)
+        {
+            issues.Add(new WorkflowIssue(WorkflowIssueType.Error, node?.BpmnElementId, message));
+        }
+    }
 }

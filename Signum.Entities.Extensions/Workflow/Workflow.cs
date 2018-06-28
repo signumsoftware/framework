@@ -1,4 +1,5 @@
 ﻿using Signum.Entities;
+using Signum.Entities.Authorization;
 using Signum.Entities.Basics;
 using Signum.Utilities;
 using System;
@@ -24,6 +25,7 @@ namespace Signum.Entities.Workflow
 
         public WorkflowMainEntityStrategy MainEntityStrategy { get; set; }
 
+        public DateTime? ExpirationDate { get; set; }
         /// <summary>
         /// REDUNDANT! Only for diff logging
         /// </summary>
@@ -44,6 +46,8 @@ namespace Signum.Entities.Workflow
         public static readonly ConstructSymbol<WorkflowEntity>.From<WorkflowEntity> Clone;
         public static readonly ExecuteSymbol<WorkflowEntity> Save;
         public static readonly DeleteSymbol<WorkflowEntity> Delete;
+        public static readonly ExecuteSymbol<WorkflowEntity> Activate;
+        public static readonly ExecuteSymbol<WorkflowEntity> Deactivate;
     }
 
     public enum WorkflowMainEntityStrategy
@@ -51,6 +55,13 @@ namespace Signum.Entities.Workflow
         CreateNew,
         SelectByUser,
         Both
+    }
+
+    [InTypeScript(true), DescriptionOptions(DescriptionOptions.Members)]
+    public enum WorkflowIssueType
+    {
+        Warning,
+        Error,
     }
 
     [Serializable, InTypeScript(Undefined = false)]
@@ -103,9 +114,18 @@ namespace Signum.Entities.Workflow
         ChangeWorkflowMainEntityTypeIsNotAllowedBecauseWeHaveNodesThatUseIt,
         [Description("Workflow uses in {0} for decomposition or call workflow.")]
         WorkflowUsedIn0ForDecompositionOrCallWorkflow,
+        [Description("Workflow '{0}' already activated.")]
+        Workflow0AlreadyActivated,
+        [Description("Workflow '{0}' has expired on '{1}'.")]
+        Workflow0HasExpiredOn1,
+        HasExpired,
+        DeactivateWorkflow,
+        PleaseChooseExpirationDate,
         ResetZoom,
         [Description("Color: ")]
         Color,
+        [Description("Workflow Issues")]
+        WorkflowIssues,
     }
 
     [Serializable]
@@ -127,18 +147,6 @@ namespace Signum.Entities.Workflow
         WorkflowLaneEntity Lane { get; set; }
     }
 
-    public interface IWorkflowTransition
-    {
-        Lite<WorkflowConditionEntity> Condition { get; }
-
-        Lite<WorkflowActionEntity> Action { get; }
-    }
-
-    public interface IWorkflowTransitionTo : IWorkflowTransition
-    {
-        Lite<IWorkflowNodeEntity> To { get; }
-    }
-
     [Serializable]
     public class WorkflowReplacementModel: ModelEntity
     {
@@ -149,26 +157,25 @@ namespace Signum.Entities.Workflow
     public class WorkflowReplacementItemEmbedded : EmbeddedEntity
     {
         [NotNullValidator, InTypeScript(Undefined = false, Null= false)]
-        public Lite<WorkflowActivityEntity> OldTask { get; set; }
-        
+        [ImplementedBy(typeof(WorkflowActivityEntity), typeof(WorkflowEventEntity))]
+        public Lite<IWorkflowNodeEntity> OldNode { get; set; }
+
         public Lite<WorkflowEntity> SubWorkflow { get; set; }
        
-        public string NewTask { get; set; }
+        public string NewNode { get; set; }
     }
 
     public class WorkflowTransitionContext
     {
-        public WorkflowTransitionContext(CaseEntity @case, CaseActivityEntity previous, IWorkflowTransition conn, DecisionResult? dr)
+        public WorkflowTransitionContext(CaseEntity @case, CaseActivityEntity previous, WorkflowConnectionEntity conn)
         {
             this.Case = @case;
             this.PreviousCaseActivity = previous;
             this.Connection = conn;
-            this.DecisionResult = dr;
         }
 
         public CaseActivityEntity PreviousCaseActivity { get; internal set; }
-        public DecisionResult? DecisionResult { get; internal set; }
-        public IWorkflowTransition Connection { get; internal set; }
+        public WorkflowConnectionEntity Connection { get; internal set; }
         public CaseEntity Case { get; set; }
     }
 
@@ -187,8 +194,6 @@ namespace Signum.Entities.Workflow
         [Description("The following tasks are going to be deleted :")]
         TheFollowingTasksAreGoingToBeDeleted,
         FinishEventIsRequired,
-        [Description("Activity '{0}' can not reject to start.")]
-        Activity0CanNotRejectToStart,
         [Description("'{0}' has inputs.")]
         _0HasInputs,
         [Description("'{0}' has outputs.")]
@@ -201,8 +206,6 @@ namespace Signum.Entities.Workflow
         _0HasJustOneInputAndOneOutput,
         [Description("'{0}' has multiple outputs.")]
         _0HasMultipleOutputs,
-        [Description("Activity '{0}' can not reject to parallel gateways.")]
-        Activity0CanNotRejectToParallelGateway,
         IsNotInWorkflow,
         [Description("Activity '{0}' can not jump to '{1}' because '{2}'.")]
         Activity0CanNotJumpTo1Because2,
@@ -216,8 +219,8 @@ namespace Signum.Entities.Workflow
         StartEventNextNodeShouldBeAnActivity,
         ParallelGatewaysShouldPair,
         TimerOrConditionalStartEventsCanNotGoToJoinGateways,
-        [Description("Gateway '{0}' should has condition on each output.")]
-        Gateway0ShouldHasConditionOnEachOutput,
+        [Description("Inclusive Gateway '{0}' should have one default connection without condition.")]
+        InclusiveGateway0ShouldHaveOneConnectionWithoutCondition,
         [Description("Gateway '{0}' should has condition or decision on each output except the last one.")]
         Gateway0ShouldHasConditionOrDecisionOnEachOutputExceptTheLast,
         [Description("'{0}' can not be connected to a parallel join because has no previous parallel split.")]
@@ -232,7 +235,21 @@ namespace Signum.Entities.Workflow
         _0IsTimerStartAndTaskIsMandatory,
         [Description("'{0}' is conditional start and condition is mandatory.")]
         _0IsConditionalStartAndTaskConditionIsMandatory,
-        DelayActivitiesShouldHaveExactlyOneInterruptingTimer
+        DelayActivitiesShouldHaveExactlyOneInterruptingTimer,
+        [Description("Activity '{0}' of type '{1}' should have exactly one connection of type '{2}'.")]
+        Activity0OfType1ShouldHaveExactlyOneConnectionOfType2,
+        [Description("Activity '{0}' of type '{1}' can not have connections of type '{2}'.")]
+        Activity0OfType1CanNotHaveConnectionsOfType2,
+        [Description("Boundary timer '{0}' of activity '{1}' should have exactly one connection of type '{2}'.")]
+        BoundaryTimer0OfActivity1ShouldHaveExactlyOneConnectionOfType2,
+        [Description("Intermediate timer '{0}' should have one output of type '{1}'.")]
+        IntermediateTimer0ShouldHaveOneOutputOfType1,
+        [Description("Parallel Split '{0}' should have at least one connection.")]
+        ParallelSplit0ShouldHaveAtLeastOneConnection,
+        [Description("Parallel Split '{0}' should have only normal connections without conditions.")]
+        ParallelSplit0ShouldHaveOnlyNormalConnectionsWithoutConditions,
+        [Description("Join '{0}' (of type {1}) does not match with its pair, the Split '{2}' (of type {3})")]
+        Join0OfType1DoesNotMatchWithItsPairTheSplit2OfType3,
     }
 
     public enum WorkflowActivityMonitorMessage
@@ -243,5 +260,11 @@ namespace Signum.Entities.Workflow
         Find, 
         Filters, 
         Columns
+    }
+
+    [AutoInit]
+    public static class WorkflowPanelPermission
+    {
+        public static PermissionSymbol ViewWorkflowPanel;
     }
 }

@@ -1,15 +1,15 @@
 ﻿import * as React from 'react'
 import {
     WorkflowEntitiesDictionary, WorkflowActivityModel, WorkflowActivityType, WorkflowPoolModel, WorkflowLaneModel, WorkflowConnectionModel, WorkflowEventModel, WorkflowEntity,
-    IWorkflowNodeEntity, CaseFlowColor, CaseActivityEntity, CaseEntity, WorkflowMessage
+    IWorkflowNodeEntity, CaseFlowColor, CaseActivityEntity, CaseEntity, WorkflowMessage, WorkflowEventEntity, WorkflowActivityEntity
 } from '../Signum.Entities.Workflow'
 import { JavascriptMessage } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
 import { Dic } from '../../../../Framework/Signum.React/Scripts/Globals'
 import { CaseFlow } from '../WorkflowClient'
-import * as NavigatedViewer from "bpmn-js/lib/NavigatedViewer"
+import NavigatedViewer from "bpmn-js/lib/NavigatedViewer"
 import * as caseFlowRenderer from './CaseFlowRenderer'
 import * as connectionIcons from './ConnectionIcons'
-import * as searchPad from 'bpmn-js/lib/features/search'
+import searchPad from 'bpmn-js/lib/features/search'
 import * as BpmnUtils from './BpmnUtils'
 import CaseActivityStatsModal from "../Case/CaseActivityStatsModal"
 import "bpmn-js/dist/assets/bpmn-font/css/bpmn-embedded.css"
@@ -53,8 +53,8 @@ export default class CaseFlowViewerComponent extends React.Component<CaseFlowVie
         else {
 
             if (this.props.caseActivity) {
-                var sp = this.viewer.get("searchPad") as any;
-                sp._search(this.props.caseActivity.workflowActivity.bpmnElementId);
+                var selection = this.viewer.get("selection") as any;
+                selection.select((this.props.caseActivity.workflowActivity as (WorkflowEventEntity | WorkflowActivityEntity)).bpmnElementId);
             }
         }
     }
@@ -80,13 +80,15 @@ export default class CaseFlowViewerComponent extends React.Component<CaseFlowVie
 
     handleElementDoubleClick = (obj: BPMN.DoubleClickEvent) => {
 
-        const stats = this.props.caseFlow.Activities[obj.element.id];
-        if (stats) {
-            obj.preventDefault();
-            obj.stopPropagation();
+        obj.preventDefault();
+        obj.stopPropagation();
+        this.showCaseActivityStatsModal(obj.element.id);
+    }
 
+    showCaseActivityStatsModal(bpmnElementId: string) {
+        const stats = this.props.caseFlow.Activities[bpmnElementId];
+        if (stats)
             CaseActivityStatsModal.show(this.props.case, stats);
-        }
     }
 
     componentWillUnmount() {
@@ -114,9 +116,9 @@ export default class CaseFlowViewerComponent extends React.Component<CaseFlowVie
         };
 
         var caseFlowRenderer = this.viewer.get<caseFlowRenderer.CaseFlowRenderer>('caseFlowRenderer');
-        caseFlowRenderer.getDecisionResult = con => {
+        caseFlowRenderer.getConnectionType = con => {
             var mod = this.props.entities[con.id] as (WorkflowConnectionModel | undefined);
-            return mod && mod.decisonResult || undefined;
+            return mod && mod.type || undefined;
         }
 
         caseFlowRenderer.viewer = this.viewer;
@@ -175,6 +177,11 @@ export default class CaseFlowViewerComponent extends React.Component<CaseFlowVie
         );
     }
 
+    focusElement(bpmnElementId: string) {
+        var searchPad = this.viewer.get<any>("searchPad");
+        searchPad._search(bpmnElementId);
+        searchPad._resetOverlay();
+    }
 
     menuItem(color: CaseFlowColor) {
         return (

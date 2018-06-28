@@ -48,7 +48,7 @@ export const CaseActivityEntity = new Type<CaseActivityEntity>("CaseActivity");
 export interface CaseActivityEntity extends Entities.Entity {
     Type: "CaseActivity";
     case: CaseEntity;
-    workflowActivity: WorkflowActivityEntity;
+    workflowActivity: IWorkflowNodeEntity | null;
     originalWorkflowActivityName: string;
     startDate: string;
     previous: Entities.Lite<CaseActivityEntity> | null;
@@ -65,7 +65,7 @@ export interface CaseActivityExecutedTimerEntity extends Entities.Entity {
     Type: "CaseActivityExecutedTimer";
     creationDate?: string;
     caseActivity?: Entities.Lite<CaseActivityEntity> | null;
-    bpmnElementId?: string | null;
+    boundaryEvent?: Entities.Lite<WorkflowEventEntity> | null;
 }
 
 export module CaseActivityMessage {
@@ -81,11 +81,12 @@ export module CaseActivityMessage {
     export const NextActivityOfDecompositionSurrogateAlreadyInProgress = new MessageKey("CaseActivityMessage", "NextActivityOfDecompositionSurrogateAlreadyInProgress");
     export const Only0CanUndoThisOperation = new MessageKey("CaseActivityMessage", "Only0CanUndoThisOperation");
     export const Activity0HasNoJumps = new MessageKey("CaseActivityMessage", "Activity0HasNoJumps");
-    export const Activity0HasNoReject = new MessageKey("CaseActivityMessage", "Activity0HasNoReject");
     export const Activity0HasNoTimers = new MessageKey("CaseActivityMessage", "Activity0HasNoTimers");
     export const ThereIsNoPreviousActivity = new MessageKey("CaseActivityMessage", "ThereIsNoPreviousActivity");
     export const OnlyForScriptWorkflowActivities = new MessageKey("CaseActivityMessage", "OnlyForScriptWorkflowActivities");
     export const Pending = new MessageKey("CaseActivityMessage", "Pending");
+    export const NoWorkflowActivity = new MessageKey("CaseActivityMessage", "NoWorkflowActivity");
+    export const ImpossibleToDeleteCaseActivity0OnWorkflowActivity1BecauseHasNoPreviousActivity = new MessageKey("CaseActivityMessage", "ImpossibleToDeleteCaseActivity0OnWorkflowActivity1BecauseHasNoPreviousActivity");
 }
 
 export module CaseActivityOperation {
@@ -97,7 +98,6 @@ export module CaseActivityOperation {
     export const Approve : Entities.ExecuteSymbol<CaseActivityEntity> = registerSymbol("Operation", "CaseActivityOperation.Approve");
     export const Decline : Entities.ExecuteSymbol<CaseActivityEntity> = registerSymbol("Operation", "CaseActivityOperation.Decline");
     export const Jump : Entities.ExecuteSymbol<CaseActivityEntity> = registerSymbol("Operation", "CaseActivityOperation.Jump");
-    export const Reject : Entities.ExecuteSymbol<CaseActivityEntity> = registerSymbol("Operation", "CaseActivityOperation.Reject");
     export const Timer : Entities.ExecuteSymbol<CaseActivityEntity> = registerSymbol("Operation", "CaseActivityOperation.Timer");
     export const MarkAsUnread : Entities.ExecuteSymbol<CaseActivityEntity> = registerSymbol("Operation", "CaseActivityOperation.MarkAsUnread");
     export const Undo : Entities.ExecuteSymbol<CaseActivityEntity> = registerSymbol("Operation", "CaseActivityOperation.Undo");
@@ -197,6 +197,14 @@ export module CaseTagTypeOperation {
     export const Save : Entities.ExecuteSymbol<CaseTagTypeEntity> = registerSymbol("Operation", "CaseTagTypeOperation.Save");
 }
 
+export const ConnectionType = new EnumType<ConnectionType>("ConnectionType");
+export type ConnectionType =
+    "Normal" |
+    "Approve" |
+    "Decline" |
+    "Jump" |
+    "ScriptException";
+
 export const DateFilterRange = new EnumType<DateFilterRange>("DateFilterRange");
 export type DateFilterRange =
     "All" |
@@ -204,21 +212,16 @@ export type DateFilterRange =
     "LastMonth" |
     "CurrentYear";
 
-export const DecisionResult = new EnumType<DecisionResult>("DecisionResult");
-export type DecisionResult =
-    "Approve" |
-    "Decline";
-
 export const DoneType = new EnumType<DoneType>("DoneType");
 export type DoneType =
     "Next" |
     "Approve" |
     "Decline" |
     "Jump" |
-    "Rejected" |
     "Timeout" |
     "ScriptSuccess" |
-    "ScriptFailure";
+    "ScriptFailure" |
+    "Recompose";
 
 export interface ICaseMainEntity extends Entities.Entity {
 }
@@ -304,11 +307,9 @@ export interface WorkflowActivityEntity extends Entities.Entity, IWorkflowNodeEn
     comments?: string | null;
     type?: WorkflowActivityType;
     requiresOpen?: boolean;
-    reject?: WorkflowRejectEmbedded | null;
-    timers: Entities.MList<WorkflowTimerEmbedded>;
+    boundaryTimers: Entities.MList<WorkflowEventEntity>;
     estimatedDuration?: number | null;
     viewName?: string | null;
-    jumps: Entities.MList<WorkflowJumpEmbedded>;
     script?: WorkflowScriptPartEmbedded | null;
     xml?: WorkflowXmlEmbedded | null;
     subWorkflow?: SubWorkflowEmbedded | null;
@@ -321,9 +322,10 @@ export module WorkflowActivityMessage {
     export const CaseFlow = new MessageKey("WorkflowActivityMessage", "CaseFlow");
     export const AverageDuration = new MessageKey("WorkflowActivityMessage", "AverageDuration");
     export const ActivityIs = new MessageKey("WorkflowActivityMessage", "ActivityIs");
-    export const BehavesLikeParallelGateway = new MessageKey("WorkflowActivityMessage", "BehavesLikeParallelGateway");
-    export const BehavesLikeExclusiveGateway = new MessageKey("WorkflowActivityMessage", "BehavesLikeExclusiveGateway");
     export const NoActiveTimerFound = new MessageKey("WorkflowActivityMessage", "NoActiveTimerFound");
+    export const InprogressWorkflowActivities = new MessageKey("WorkflowActivityMessage", "InprogressWorkflowActivities");
+    export const OpenCaseActivityStats = new MessageKey("WorkflowActivityMessage", "OpenCaseActivityStats");
+    export const LocateWorkflowActivityInDiagram = new MessageKey("WorkflowActivityMessage", "LocateWorkflowActivityInDiagram");
 }
 
 export const WorkflowActivityModel = new Type<WorkflowActivityModel>("WorkflowActivityModel");
@@ -335,10 +337,8 @@ export interface WorkflowActivityModel extends Entities.ModelEntity {
     name?: string | null;
     type?: WorkflowActivityType;
     requiresOpen?: boolean;
-    reject?: WorkflowRejectEmbedded | null;
-    timers: Entities.MList<WorkflowTimerEmbedded>;
+    boundaryTimers: Entities.MList<WorkflowEventModel>;
     estimatedDuration?: number | null;
-    jumps: Entities.MList<WorkflowJumpEmbedded>;
     script?: WorkflowScriptPartEmbedded | null;
     viewName?: string | null;
     comments?: string | null;
@@ -366,8 +366,7 @@ export type WorkflowActivityType =
     "Decision" |
     "DecompositionWorkflow" |
     "CallWorkflow" |
-    "Script" |
-    "Delay";
+    "Script";
 
 export const WorkflowConditionEntity = new Type<WorkflowConditionEntity>("WorkflowCondition");
 export interface WorkflowConditionEntity extends Entities.Entity {
@@ -403,7 +402,7 @@ export interface WorkflowConnectionEntity extends Entities.Entity, IWorkflowObje
     to?: IWorkflowNodeEntity | null;
     name?: string | null;
     bpmnElementId?: string | null;
-    decisonResult?: DecisionResult | null;
+    type?: ConnectionType;
     condition?: Entities.Lite<WorkflowConditionEntity> | null;
     action?: Entities.Lite<WorkflowActionEntity> | null;
     order?: number | null;
@@ -415,10 +414,9 @@ export interface WorkflowConnectionModel extends Entities.ModelEntity {
     Type: "WorkflowConnectionModel";
     mainEntityType: Basics.TypeEntity;
     name?: string | null;
-    needDecisonResult?: boolean;
     needCondition?: boolean;
     needOrder?: boolean;
-    decisonResult?: DecisionResult | null;
+    type?: ConnectionType;
     condition?: Entities.Lite<WorkflowConditionEntity> | null;
     action?: Entities.Lite<WorkflowActionEntity> | null;
     order?: number | null;
@@ -435,6 +433,7 @@ export interface WorkflowEntity extends Entities.Entity {
     name?: string | null;
     mainEntityType?: Basics.TypeEntity | null;
     mainEntityStrategy?: WorkflowMainEntityStrategy;
+    expirationDate?: string | null;
 }
 
 export const WorkflowEventEntity = new Type<WorkflowEventEntity>("WorkflowEvent");
@@ -444,6 +443,8 @@ export interface WorkflowEventEntity extends Entities.Entity, IWorkflowNodeEntit
     bpmnElementId?: string | null;
     lane?: WorkflowLaneEntity | null;
     type?: WorkflowEventType;
+    timer?: WorkflowTimerEmbedded | null;
+    boundaryOf?: Entities.Lite<WorkflowActivityEntity> | null;
     xml?: WorkflowXmlEmbedded | null;
 }
 
@@ -454,6 +455,8 @@ export interface WorkflowEventModel extends Entities.ModelEntity {
     name?: string | null;
     type?: WorkflowEventType;
     task?: WorkflowEventTaskModel | null;
+    timer?: WorkflowTimerEmbedded | null;
+    bpmnElementId?: string | null;
 }
 
 export module WorkflowEventOperation {
@@ -507,8 +510,11 @@ export module WorkflowEventTaskOperation {
 export const WorkflowEventType = new EnumType<WorkflowEventType>("WorkflowEventType");
 export type WorkflowEventType =
     "Start" |
-    "TimerStart" |
-    "Finish";
+    "ScheduledStart" |
+    "Finish" |
+    "BoundaryForkTimer" |
+    "BoundaryInterruptingTimer" |
+    "IntermediateTimer";
 
 export const WorkflowGatewayDirection = new EnumType<WorkflowGatewayDirection>("WorkflowGatewayDirection");
 export type WorkflowGatewayDirection =
@@ -545,13 +551,10 @@ export type WorkflowGatewayType =
     "Inclusive" |
     "Parallel";
 
-export const WorkflowJumpEmbedded = new Type<WorkflowJumpEmbedded>("WorkflowJumpEmbedded");
-export interface WorkflowJumpEmbedded extends Entities.EmbeddedEntity {
-    Type: "WorkflowJumpEmbedded";
-    to?: Entities.Lite<IWorkflowNodeEntity> | null;
-    condition?: Entities.Lite<WorkflowConditionEntity> | null;
-    action?: Entities.Lite<WorkflowActionEntity> | null;
-}
+export const WorkflowIssueType = new EnumType<WorkflowIssueType>("WorkflowIssueType");
+export type WorkflowIssueType =
+    "Warning" |
+    "Error";
 
 export const WorkflowLaneActorsEval = new Type<WorkflowLaneActorsEval>("WorkflowLaneActorsEval");
 export interface WorkflowLaneActorsEval extends Dynamic.EvalEmbedded<IWorkflowLaneActorsEvaluator> {
@@ -599,8 +602,14 @@ export module WorkflowMessage {
     export const ToUse0YouSouldSetTheWorkflow1 = new MessageKey("WorkflowMessage", "ToUse0YouSouldSetTheWorkflow1");
     export const ChangeWorkflowMainEntityTypeIsNotAllowedBecauseWeHaveNodesThatUseIt = new MessageKey("WorkflowMessage", "ChangeWorkflowMainEntityTypeIsNotAllowedBecauseWeHaveNodesThatUseIt");
     export const WorkflowUsedIn0ForDecompositionOrCallWorkflow = new MessageKey("WorkflowMessage", "WorkflowUsedIn0ForDecompositionOrCallWorkflow");
+    export const Workflow0AlreadyActivated = new MessageKey("WorkflowMessage", "Workflow0AlreadyActivated");
+    export const Workflow0HasExpiredOn1 = new MessageKey("WorkflowMessage", "Workflow0HasExpiredOn1");
+    export const HasExpired = new MessageKey("WorkflowMessage", "HasExpired");
+    export const DeactivateWorkflow = new MessageKey("WorkflowMessage", "DeactivateWorkflow");
+    export const PleaseChooseExpirationDate = new MessageKey("WorkflowMessage", "PleaseChooseExpirationDate");
     export const ResetZoom = new MessageKey("WorkflowMessage", "ResetZoom");
     export const Color = new MessageKey("WorkflowMessage", "Color");
+    export const WorkflowIssues = new MessageKey("WorkflowMessage", "WorkflowIssues");
 }
 
 export const WorkflowModel = new Type<WorkflowModel>("WorkflowModel");
@@ -614,6 +623,12 @@ export module WorkflowOperation {
     export const Clone : Entities.ConstructSymbol_From<WorkflowEntity, WorkflowEntity> = registerSymbol("Operation", "WorkflowOperation.Clone");
     export const Save : Entities.ExecuteSymbol<WorkflowEntity> = registerSymbol("Operation", "WorkflowOperation.Save");
     export const Delete : Entities.DeleteSymbol<WorkflowEntity> = registerSymbol("Operation", "WorkflowOperation.Delete");
+    export const Activate : Entities.ExecuteSymbol<WorkflowEntity> = registerSymbol("Operation", "WorkflowOperation.Activate");
+    export const Deactivate : Entities.ExecuteSymbol<WorkflowEntity> = registerSymbol("Operation", "WorkflowOperation.Deactivate");
+}
+
+export module WorkflowPanelPermission {
+    export const ViewWorkflowPanel : Authorization.PermissionSymbol = registerSymbol("Permission", "WorkflowPanelPermission.ViewWorkflowPanel");
 }
 
 export const WorkflowPoolEntity = new Type<WorkflowPoolEntity>("WorkflowPool");
@@ -636,19 +651,12 @@ export module WorkflowPoolOperation {
     export const Delete : Entities.DeleteSymbol<WorkflowPoolEntity> = registerSymbol("Operation", "WorkflowPoolOperation.Delete");
 }
 
-export const WorkflowRejectEmbedded = new Type<WorkflowRejectEmbedded>("WorkflowRejectEmbedded");
-export interface WorkflowRejectEmbedded extends Entities.EmbeddedEntity {
-    Type: "WorkflowRejectEmbedded";
-    condition?: Entities.Lite<WorkflowConditionEntity> | null;
-    action?: Entities.Lite<WorkflowActionEntity> | null;
-}
-
 export const WorkflowReplacementItemEmbedded = new Type<WorkflowReplacementItemEmbedded>("WorkflowReplacementItemEmbedded");
 export interface WorkflowReplacementItemEmbedded extends Entities.EmbeddedEntity {
     Type: "WorkflowReplacementItemEmbedded";
-    oldTask: Entities.Lite<WorkflowActivityEntity>;
+    oldNode: Entities.Lite<IWorkflowNodeEntity>;
     subWorkflow?: Entities.Lite<WorkflowEntity> | null;
-    newTask?: string | null;
+    newNode?: string | null;
 }
 
 export const WorkflowReplacementModel = new Type<WorkflowReplacementModel>("WorkflowReplacementModel");
@@ -681,7 +689,6 @@ export interface WorkflowScriptPartEmbedded extends Entities.EmbeddedEntity {
     Type: "WorkflowScriptPartEmbedded";
     script?: Entities.Lite<WorkflowScriptEntity> | null;
     retryStrategy?: WorkflowScriptRetryStrategyEntity | null;
-    onFailureJump?: Entities.Lite<IWorkflowNodeEntity> | null;
 }
 
 export const WorkflowScriptRetryStrategyEntity = new Type<WorkflowScriptRetryStrategyEntity>("WorkflowScriptRetryStrategy");
@@ -693,10 +700,6 @@ export interface WorkflowScriptRetryStrategyEntity extends Entities.Entity {
 export module WorkflowScriptRetryStrategyOperation {
     export const Save : Entities.ExecuteSymbol<WorkflowScriptRetryStrategyEntity> = registerSymbol("Operation", "WorkflowScriptRetryStrategyOperation.Save");
     export const Delete : Entities.DeleteSymbol<WorkflowScriptRetryStrategyEntity> = registerSymbol("Operation", "WorkflowScriptRetryStrategyOperation.Delete");
-}
-
-export module WorkflowScriptRunnerPanelPermission {
-    export const ViewWorkflowScriptRunnerPanel : Authorization.PermissionSymbol = registerSymbol("Permission", "WorkflowScriptRunnerPanelPermission.ViewWorkflowScriptRunnerPanel");
 }
 
 export const WorkflowTimerConditionEntity = new Type<WorkflowTimerConditionEntity>("WorkflowTimerCondition");
@@ -723,10 +726,6 @@ export interface WorkflowTimerEmbedded extends Entities.EmbeddedEntity {
     Type: "WorkflowTimerEmbedded";
     duration?: Signum.TimeSpanEmbedded | null;
     condition?: Entities.Lite<WorkflowTimerConditionEntity> | null;
-    bpmnElementId?: string | null;
-    to?: Entities.Lite<IWorkflowNodeEntity> | null;
-    action?: Entities.Lite<WorkflowActionEntity> | null;
-    interrupting?: boolean;
 }
 
 export module WorkflowValidationMessage {
@@ -737,14 +736,12 @@ export module WorkflowValidationMessage {
     export const NormalStartEventIsRequiredWhenThe0Are1Or2 = new MessageKey("WorkflowValidationMessage", "NormalStartEventIsRequiredWhenThe0Are1Or2");
     export const TheFollowingTasksAreGoingToBeDeleted = new MessageKey("WorkflowValidationMessage", "TheFollowingTasksAreGoingToBeDeleted");
     export const FinishEventIsRequired = new MessageKey("WorkflowValidationMessage", "FinishEventIsRequired");
-    export const Activity0CanNotRejectToStart = new MessageKey("WorkflowValidationMessage", "Activity0CanNotRejectToStart");
     export const _0HasInputs = new MessageKey("WorkflowValidationMessage", "_0HasInputs");
     export const _0HasOutputs = new MessageKey("WorkflowValidationMessage", "_0HasOutputs");
     export const _0HasNoInputs = new MessageKey("WorkflowValidationMessage", "_0HasNoInputs");
     export const _0HasNoOutputs = new MessageKey("WorkflowValidationMessage", "_0HasNoOutputs");
     export const _0HasJustOneInputAndOneOutput = new MessageKey("WorkflowValidationMessage", "_0HasJustOneInputAndOneOutput");
     export const _0HasMultipleOutputs = new MessageKey("WorkflowValidationMessage", "_0HasMultipleOutputs");
-    export const Activity0CanNotRejectToParallelGateway = new MessageKey("WorkflowValidationMessage", "Activity0CanNotRejectToParallelGateway");
     export const IsNotInWorkflow = new MessageKey("WorkflowValidationMessage", "IsNotInWorkflow");
     export const Activity0CanNotJumpTo1Because2 = new MessageKey("WorkflowValidationMessage", "Activity0CanNotJumpTo1Because2");
     export const Activity0CanNotTimeoutTo1Because2 = new MessageKey("WorkflowValidationMessage", "Activity0CanNotTimeoutTo1Because2");
@@ -755,7 +752,7 @@ export module WorkflowValidationMessage {
     export const StartEventNextNodeShouldBeAnActivity = new MessageKey("WorkflowValidationMessage", "StartEventNextNodeShouldBeAnActivity");
     export const ParallelGatewaysShouldPair = new MessageKey("WorkflowValidationMessage", "ParallelGatewaysShouldPair");
     export const TimerOrConditionalStartEventsCanNotGoToJoinGateways = new MessageKey("WorkflowValidationMessage", "TimerOrConditionalStartEventsCanNotGoToJoinGateways");
-    export const Gateway0ShouldHasConditionOnEachOutput = new MessageKey("WorkflowValidationMessage", "Gateway0ShouldHasConditionOnEachOutput");
+    export const InclusiveGateway0ShouldHaveOneConnectionWithoutCondition = new MessageKey("WorkflowValidationMessage", "InclusiveGateway0ShouldHaveOneConnectionWithoutCondition");
     export const Gateway0ShouldHasConditionOrDecisionOnEachOutputExceptTheLast = new MessageKey("WorkflowValidationMessage", "Gateway0ShouldHasConditionOrDecisionOnEachOutputExceptTheLast");
     export const _0CanNotBeConnectedToAParallelJoinBecauseHasNoPreviousParallelSplit = new MessageKey("WorkflowValidationMessage", "_0CanNotBeConnectedToAParallelJoinBecauseHasNoPreviousParallelSplit");
     export const Activity0WithDecisionTypeShouldGoToAnExclusiveOrInclusiveGateways = new MessageKey("WorkflowValidationMessage", "Activity0WithDecisionTypeShouldGoToAnExclusiveOrInclusiveGateways");
@@ -764,6 +761,13 @@ export module WorkflowValidationMessage {
     export const _0IsTimerStartAndTaskIsMandatory = new MessageKey("WorkflowValidationMessage", "_0IsTimerStartAndTaskIsMandatory");
     export const _0IsConditionalStartAndTaskConditionIsMandatory = new MessageKey("WorkflowValidationMessage", "_0IsConditionalStartAndTaskConditionIsMandatory");
     export const DelayActivitiesShouldHaveExactlyOneInterruptingTimer = new MessageKey("WorkflowValidationMessage", "DelayActivitiesShouldHaveExactlyOneInterruptingTimer");
+    export const Activity0OfType1ShouldHaveExactlyOneConnectionOfType2 = new MessageKey("WorkflowValidationMessage", "Activity0OfType1ShouldHaveExactlyOneConnectionOfType2");
+    export const Activity0OfType1CanNotHaveConnectionsOfType2 = new MessageKey("WorkflowValidationMessage", "Activity0OfType1CanNotHaveConnectionsOfType2");
+    export const BoundaryTimer0OfActivity1ShouldHaveExactlyOneConnectionOfType2 = new MessageKey("WorkflowValidationMessage", "BoundaryTimer0OfActivity1ShouldHaveExactlyOneConnectionOfType2");
+    export const IntermediateTimer0ShouldHaveOneOutputOfType1 = new MessageKey("WorkflowValidationMessage", "IntermediateTimer0ShouldHaveOneOutputOfType1");
+    export const ParallelSplit0ShouldHaveAtLeastOneConnection = new MessageKey("WorkflowValidationMessage", "ParallelSplit0ShouldHaveAtLeastOneConnection");
+    export const ParallelSplit0ShouldHaveOnlyNormalConnectionsWithoutConditions = new MessageKey("WorkflowValidationMessage", "ParallelSplit0ShouldHaveOnlyNormalConnectionsWithoutConditions");
+    export const Join0OfType1DoesNotMatchWithItsPairTheSplit2OfType3 = new MessageKey("WorkflowValidationMessage", "Join0OfType1DoesNotMatchWithItsPairTheSplit2OfType3");
 }
 
 export const WorkflowXmlEmbedded = new Type<WorkflowXmlEmbedded>("WorkflowXmlEmbedded");

@@ -13,7 +13,7 @@ namespace Signum.Entities.Workflow
 {
 
     [Serializable, EntityKind(EntityKind.Main, EntityData.Master)]
-    public class WorkflowConnectionEntity : Entity, IWorkflowObjectEntity, IWithModel, IWorkflowTransition
+    public class WorkflowConnectionEntity : Entity, IWorkflowObjectEntity, IWithModel
     {
         [ImplementedBy(typeof(WorkflowActivityEntity), typeof(WorkflowEventEntity), typeof(WorkflowGatewayEntity))]
         //[NotNullValidator] needs to be disabled temporally
@@ -29,7 +29,7 @@ namespace Signum.Entities.Workflow
         [StringLengthValidator(AllowNulls = false, Min = 1, Max = 100)]
         public string BpmnElementId { get; set; }
 
-        public DecisionResult? DecisonResult { get; set; }
+        public ConnectionType Type { get; set; }
 
         public Lite<WorkflowConditionEntity> Condition { get; set; }
 
@@ -46,7 +46,7 @@ namespace Signum.Entities.Workflow
             {
                 MainEntityType = this.From.Lane.Pool.Workflow.MainEntityType,
                 Name = this.Name,
-                DecisonResult = this.DecisonResult,
+                Type = this.Type,
                 Condition = this.Condition,
                 Action = this.Action,
                 Order = this.Order
@@ -58,7 +58,7 @@ namespace Signum.Entities.Workflow
         {
             var wModel = (WorkflowConnectionModel)model;
             this.Name = wModel.Name;
-            this.DecisonResult = wModel.DecisonResult;
+            this.Type = wModel.Type;
             this.Condition = wModel.Condition;
             this.Action = wModel.Action;
             this.Order = wModel.Order;
@@ -73,12 +73,15 @@ namespace Signum.Entities.Workflow
         }
     }
 
-    public enum DecisionResult
+    public enum ConnectionType
     {
+        Normal,
         Approve,
-        Decline
+        Decline,
+        Jump,
+        ScriptException,
     }
-
+    
     [AutoInit]
     public static class WorkflowConnectionOperation
     {
@@ -95,11 +98,10 @@ namespace Signum.Entities.Workflow
         [StringLengthValidator(AllowNulls = true, Min = 3, Max = 100)]
         public string Name { get; set; }
 
-        public bool NeedDecisonResult { get; set; }
         public bool NeedCondition { get; set; }
         public bool NeedOrder { get; set; }
 
-        public DecisionResult? DecisonResult { get; set; }
+        public ConnectionType Type { get; set; }
 
         public Lite<WorkflowConditionEntity> Condition { get; set; }
 

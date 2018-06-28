@@ -52,7 +52,7 @@ export default class WorkflowEventTaskComponent extends React.Component<Workflow
                             parentValue: ctx.value.workflow,
                             filterOptions: [
                                 {
-                                    columnName: "Type", operation: "EqualTo", value: WorkflowEventType.value("TimerStart")
+                                    columnName: "Type", operation: "EqualTo", value: WorkflowEventType.value("ScheduledStart")
                                 }
                             ]
                         }} />

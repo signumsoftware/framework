@@ -20,7 +20,7 @@ namespace Signum.Engine.Word
     public interface INodeProvider
     {
         OpenXmlLeafTextElement NewText(string text);
-        OpenXmlCompositeElement NewRun(OpenXmlCompositeElement runProps, string text, SpaceProcessingModeValues spaceMode = SpaceProcessingModeValues.Default);
+        OpenXmlCompositeElement NewRun(OpenXmlCompositeElement runProps, string text, SpaceProcessingModeValues spaceMode = SpaceProcessingModeValues.Default, bool initialBr = false);
         bool IsRun(OpenXmlElement element);
         bool IsText(OpenXmlElement element);
         string GetText(OpenXmlElement run);
@@ -38,9 +38,14 @@ namespace Signum.Engine.Word
             return (W.Run)element;
         }
 
-        public OpenXmlCompositeElement NewRun(OpenXmlCompositeElement runProps, string text, SpaceProcessingModeValues spaceMode)
+        public OpenXmlCompositeElement NewRun(OpenXmlCompositeElement runProps, string text, SpaceProcessingModeValues spaceMode, bool initialBr)
         {
-            return new W.Run(runProps, new W.Text(text) {  Space = spaceMode});
+            var result = new W.Run(runProps, new W.Text(text) { Space = spaceMode });
+
+            if (initialBr)
+                result.InsertAt(new W.Break(), 0);
+
+            return result;
         }
 
         public string GetText(OpenXmlElement run)
@@ -91,9 +96,14 @@ namespace Signum.Engine.Word
             return (D.Run)element;
         }
 
-        public OpenXmlCompositeElement NewRun(OpenXmlCompositeElement runProps, string text, SpaceProcessingModeValues spaceMode)
+        public OpenXmlCompositeElement NewRun(OpenXmlCompositeElement runProps, string text, SpaceProcessingModeValues spaceMode, bool initialBr)
         {
-            return new D.Run(runProps, new D.Text(text));
+            var result = new D.Run(runProps, new D.Text(text));
+            
+            if (initialBr)
+                result.InsertAt(new D.Break(), 0);
+
+            return result;
         }
 
         public OpenXmlLeafTextElement NewText(string text)
@@ -144,9 +154,14 @@ namespace Signum.Engine.Word
             return (S.Run)element;
         }
 
-        public OpenXmlCompositeElement NewRun(OpenXmlCompositeElement runProps, string text, SpaceProcessingModeValues spaceMode)
+        public OpenXmlCompositeElement NewRun(OpenXmlCompositeElement runProps, string text, SpaceProcessingModeValues spaceMode, bool initialBr)
         {
-            return new S.Run(runProps, new S.Text(text));
+            var result = new S.Run(runProps, new S.Text(text));
+            
+            if (initialBr)
+                result.InsertAt(new S.Break(), 0);
+
+            return result;
         }
 
         public OpenXmlLeafTextElement NewText(string text)
@@ -304,7 +319,7 @@ namespace Signum.Engine.Word
 
         public abstract override OpenXmlElement CloneNode(bool deep);
 
-        public abstract void Synchronize(SyncronizationContext sc);
+        public abstract void Synchronize(SynchronizationContext sc);
     }
 
     public class TokenNode : BaseNode
@@ -336,7 +351,16 @@ namespace Signum.Engine.Word
                 obj is IFormattable ? ((IFormattable)obj).ToString(Format ?? ValueProvider.Format, p.Culture) :
                 obj?.ToString();
 
-            this.ReplaceBy(this.NodeProvider.NewRun((OpenXmlCompositeElement)this.RunProperties?.CloneNode(true), text));
+            if (text != null && text.Contains('\n'))
+            {
+                var replacements = text.Lines().Select((line, i) => this.NodeProvider.NewRun((OpenXmlCompositeElement)this.RunProperties?.CloneNode(true), line, initialBr: i > 0));
+
+                this.ReplaceBy(replacements);
+            }
+            else
+            {
+                this.ReplaceBy(this.NodeProvider.NewRun((OpenXmlCompositeElement)this.RunProperties?.CloneNode(true), text));
+            }
         }
 
         protected internal override void RenderTemplate(ScopedDictionary<string, ValueProviderBase> variables)
@@ -360,7 +384,7 @@ namespace Signum.Engine.Word
             return new TokenNode(this);
         }
 
-        public override void Synchronize(SyncronizationContext sc)
+        public override void Synchronize(SynchronizationContext sc)
         {
             ValueProvider.Synchronize(sc, "@");
 
@@ -424,7 +448,7 @@ namespace Signum.Engine.Word
             ValueProvider.Declare(variables);
         }
 
-        public override void Synchronize(SyncronizationContext sc)
+        public override void Synchronize(SynchronizationContext sc)
         {
             ValueProvider.Synchronize(sc, "@declare");
         }
@@ -476,7 +500,7 @@ namespace Signum.Engine.Word
             }
         }
 
-        public override void Synchronize(SyncronizationContext sc)
+        public override void Synchronize(SynchronizationContext sc)
         {
             foreach (var item in this.Descendants<BaseNode>().ToList())
             {
@@ -674,7 +698,7 @@ namespace Signum.Engine.Word
 
         }
 
-        public override void Synchronize(SyncronizationContext sc)
+        public override void Synchronize(SynchronizationContext sc)
         {
             ValueProvider.Synchronize(sc, "@foreach");
 
@@ -857,7 +881,7 @@ namespace Signum.Engine.Word
             }
         }
 
-        public override void Synchronize(SyncronizationContext sc)
+        public override void Synchronize(SynchronizationContext sc)
         {
             this.Condition.Synchronize(sc, "@any");
             
@@ -1020,7 +1044,7 @@ namespace Signum.Engine.Word
                 this.Parent.RemoveChild(this);
         }
 
-        public override void Synchronize(SyncronizationContext sc)
+        public override void Synchronize(SynchronizationContext sc)
         {
             this.Condition.Synchronize(sc, "@if");
             
@@ -1079,6 +1103,16 @@ namespace Signum.Engine.Word
         public static void ReplaceBy(this OpenXmlElement element, OpenXmlElement replacement)
         {
             element.Parent.ReplaceChild(replacement, element);
+        }
+
+        public static void ReplaceBy(this OpenXmlElement element, IEnumerable<OpenXmlElement> replacements)
+        {
+            foreach (var r in replacements)
+            {
+                element.Parent.InsertBefore(r, element);
+            }
+
+            element.Parent.RemoveChild(element);
         }
 
         public static void MoveChilds(this OpenXmlElement target, IEnumerable<OpenXmlElement> childs)

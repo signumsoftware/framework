@@ -54,12 +54,19 @@ namespace Signum.Engine.Mailing
 
         public static Func<EmailMessageEntity, SmtpClient> GetSmtpClient;
         
-        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm, Func<EmailConfigurationEmbedded> getConfiguration, Func<EmailTemplateEntity, SmtpConfigurationEntity> getSmtpConfiguration,  Func<EmailMessageEntity, SmtpClient> getSmtpClient = null, IFileTypeAlgorithm attachment = null)
+        public static void Start(
+            SchemaBuilder sb, 
+            DynamicQueryManager dqm, 
+            Func<EmailConfigurationEmbedded> getConfiguration, 
+            Func<EmailTemplateEntity, ModifiableEntity, SmtpConfigurationEntity> getSmtpConfiguration,  
+            Func<EmailMessageEntity, SmtpClient> getSmtpClient = null, 
+            IFileTypeAlgorithm attachment = null)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {   
                 if (getSmtpClient == null && getSmtpConfiguration != null)
-                    getSmtpClient = message => getSmtpConfiguration(message.Template?.Let(EmailTemplateLogic.EmailTemplatesLazy.Value.GetOrThrow)).GenerateSmtpClient();
+                    getSmtpClient = message => getSmtpConfiguration(message.Template?.Let(EmailTemplateLogic.EmailTemplatesLazy.Value.GetOrThrow), message.Target.Retrieve()).GenerateSmtpClient();
+
                 FilePathEmbeddedLogic.AssertStarted(sb);
                 CultureInfoLogic.AssertStarted(sb);
                 EmailLogic.getConfiguration = getConfiguration;
@@ -98,7 +105,7 @@ namespace Signum.Engine.Mailing
                 SenderManager.Send(email);
         }
 
-        public static void SendMail(this Lite<EmailTemplateEntity> template, ModelEntity entity)
+        public static void SendMail(this Lite<EmailTemplateEntity> template, ModifiableEntity entity)
         {
             foreach (var email in template.CreateEmailMessage(entity))
                 SenderManager.Send(email);
@@ -115,7 +122,7 @@ namespace Signum.Engine.Mailing
                 email.SendMailAsync();
         }
 
-        public static void SendMailAsync(this Lite<EmailTemplateEntity> template, ModelEntity entity)
+        public static void SendMailAsync(this Lite<EmailTemplateEntity> template, ModifiableEntity entity)
         {
             foreach (var email in template.CreateEmailMessage(entity))
                 email.SendMailAsync();

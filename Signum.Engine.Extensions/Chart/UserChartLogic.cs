@@ -56,12 +56,12 @@ namespace Signum.Engine.Chart
                 UserCharts = sb.GlobalLazy(() => Database.Query<UserChartEntity>().ToDictionary(a => a.ToLite()),
                  new InvalidateWith(typeof(UserChartEntity)));
 
-                UserChartsByQuery = sb.GlobalLazy(() => UserCharts.Value.Values.Where(a => a.EntityType == null).GroupToDictionary(a => a.Query.ToQueryName(), a => a.ToLite()),
+                UserChartsByQuery = sb.GlobalLazy(() => UserCharts.Value.Values.Where(a => a.EntityType == null).SelectCatch(uc => KVP.Create(uc.Query.ToQueryName(), uc.ToLite())).GroupToDictionary(),
                     new InvalidateWith(typeof(UserChartEntity)));
 
                 UserChartsByTypeForQuickLinks = sb.GlobalLazy(() => UserCharts.Value.Values.Where(a => a.EntityType != null && !a.HideQuickLink)
-                .SelectCatch(a => new { Type = TypeLogic.IdToType.GetOrThrow(a.EntityType.Id), Lite = a.ToLite() })
-                .GroupToDictionary(a => a.Type, a => a.Lite),
+                .SelectCatch(a => KVP.Create(TypeLogic.IdToType.GetOrThrow(a.EntityType.Id), a.ToLite()))
+                .GroupToDictionary(),
                     new InvalidateWith(typeof(UserChartEntity)));
             }
         }
@@ -198,150 +198,151 @@ namespace Signum.Engine.Chart
 
         static SqlPreCommand ProcessUserChart(Replacements replacements, Table table, UserChartEntity uc)
         {
-            try
+            Console.Write(".");
+            using (DelayedConsole.Delay(() => SafeConsole.WriteLineColor(ConsoleColor.White, "UserChart: " + uc.DisplayName)))
+            using (DelayedConsole.Delay(() => Console.WriteLine(" ChartScript: " + uc.ChartScript.ToString())))
+            using (DelayedConsole.Delay(() => Console.WriteLine(" Query: " + uc.Query.Key)))
             {
-                Console.Clear();
-
-                SafeConsole.WriteLineColor(ConsoleColor.White, "UserChart: " + uc.DisplayName);
-                Console.WriteLine(" ChartScript: " + uc.ChartScript.ToString());
-                Console.WriteLine(" Query: " + uc.Query.Key);
-
-                if (uc.Filters.Any(a => a.Token.ParseException != null) ||
-                   uc.Columns.Any(a => a.Token != null && a.Token.ParseException != null) ||
-                   uc.Orders.Any(a => a.Token.ParseException != null))
-                {
-                    QueryDescription qd = DynamicQueryManager.Current.QueryDescription(uc.Query.ToQueryName());
-
-                    SubTokensOptions canAggregate = uc.GroupResults ? SubTokensOptions.CanAggregate : 0;
-
-                    if (uc.Filters.Any())
-                    {
-                        Console.WriteLine(" Filters:");
-                        foreach (var item in uc.Filters.ToList())
-                        {
-                            QueryTokenEmbedded token = item.Token;
-                            switch (QueryTokenSynchronizer.FixToken(replacements, ref token, qd, SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement | canAggregate, "{0} {1}".FormatWith(item.Operation, item.ValueString), allowRemoveToken: true, allowReCreate: false))
-                            {
-                                case FixTokenResult.Nothing: break;
-                                case FixTokenResult.DeleteEntity: return table.DeleteSqlSync(uc, u => u.Guid == uc.Guid);
-                                case FixTokenResult.RemoveToken: uc.Filters.Remove(item); break;
-                                case FixTokenResult.SkipEntity: return null;
-                                case FixTokenResult.Fix: item.Token = token; break;
-                                default: break;
-                            }
-                        }
-                    }
-
-                    if (uc.Columns.Any())
-                    {
-                        Console.WriteLine(" Columns:");
-                        foreach (var item in uc.Columns.ToList())
-                        {
-                            QueryTokenEmbedded token = item.Token;
-                            if (item.Token == null)
-                                continue;
-
-                            switch (QueryTokenSynchronizer.FixToken(replacements, ref token, qd, SubTokensOptions.CanElement | canAggregate, item.ScriptColumn.DisplayName, allowRemoveToken: item.ScriptColumn.IsOptional, allowReCreate: false))
-                            {
-                                case FixTokenResult.Nothing: break;
-                                case FixTokenResult.DeleteEntity: return table.DeleteSqlSync(uc, u => u.Guid == uc.Guid);
-                                case FixTokenResult.RemoveToken: item.Token = null; break;
-                                case FixTokenResult.SkipEntity: return null;
-                                case FixTokenResult.Fix: item.Token = token; break;
-                                default: break;
-                            }
-                        }
-                    }
-
-                    if (uc.Orders.Any())
-                    {
-                        Console.WriteLine(" Orders:");
-                        foreach (var item in uc.Orders.ToList())
-                        {
-                            QueryTokenEmbedded token = item.Token;
-                            switch (QueryTokenSynchronizer.FixToken(replacements, ref token, qd, SubTokensOptions.CanElement | canAggregate, item.OrderType.ToString(), allowRemoveToken: true, allowReCreate: false))
-                            {
-                                case FixTokenResult.Nothing: break;
-                                case FixTokenResult.DeleteEntity: return table.DeleteSqlSync(uc, u => u.Guid == uc.Guid);
-                                case FixTokenResult.RemoveToken: uc.Orders.Remove(item); break;
-                                case FixTokenResult.SkipEntity: return null;
-                                case FixTokenResult.Fix: item.Token = token; break;
-                                default: break;
-                            }
-                        }
-                    }
-                }
-
-                foreach (var item in uc.Filters.ToList())
-                {
-                    string val = item.ValueString;
-                    switch (QueryTokenSynchronizer.FixValue(replacements, item.Token.Token.Type, ref val, allowRemoveToken: true, isList: item.Operation.IsList()))
-                    {
-                        case FixTokenResult.Nothing: break;
-                        case FixTokenResult.DeleteEntity: return table.DeleteSqlSync(uc, u => u.Guid == uc.Guid);
-                        case FixTokenResult.RemoveToken: uc.Filters.Remove(item); break;
-                        case FixTokenResult.SkipEntity: return null;
-                        case FixTokenResult.Fix: item.ValueString = val; break;
-                    }
-                }
-
-                foreach (var item in uc.Columns)
-                {
-                    uc.FixParameters(item);
-                }
-
-                foreach (var item in uc.Parameters)
-                {
-                    string val = item.Value;
-                retry:
-                    switch (FixParameter(item, ref val))
-                    {
-                        case FixTokenResult.Nothing: break;
-                        case FixTokenResult.DeleteEntity: return table.DeleteSqlSync(uc, u => u.Guid == uc.Guid);
-                        case FixTokenResult.RemoveToken: uc.Parameters.Remove(item); break;
-                        case FixTokenResult.SkipEntity: return null;
-                        case FixTokenResult.Fix: { item.Value = val; goto retry; }
-                    }
-                }
-
-
                 try
                 {
-                    return table.UpdateSqlSync(uc, u => u.Guid == uc.Guid, includeCollections: true);
+                    if (uc.Filters.Any(a => a.Token.ParseException != null) ||
+                       uc.Columns.Any(a => a.Token != null && a.Token.ParseException != null) ||
+                       uc.Orders.Any(a => a.Token.ParseException != null))
+                    {
+                        QueryDescription qd = DynamicQueryManager.Current.QueryDescription(uc.Query.ToQueryName());
+
+                        SubTokensOptions canAggregate = uc.GroupResults ? SubTokensOptions.CanAggregate : 0;
+
+                        if (uc.Filters.Any())
+                        {
+                            using (DelayedConsole.Delay(() => Console.WriteLine(" Filters:")))
+                            {
+                                foreach (var item in uc.Filters.ToList())
+                                {
+                                    QueryTokenEmbedded token = item.Token;
+                                    switch (QueryTokenSynchronizer.FixToken(replacements, ref token, qd, SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement | canAggregate, "{0} {1}".FormatWith(item.Operation, item.ValueString), allowRemoveToken: true, allowReCreate: false))
+                                    {
+                                        case FixTokenResult.Nothing: break;
+                                        case FixTokenResult.DeleteEntity: return table.DeleteSqlSync(uc, u => u.Guid == uc.Guid);
+                                        case FixTokenResult.RemoveToken: uc.Filters.Remove(item); break;
+                                        case FixTokenResult.SkipEntity: return null;
+                                        case FixTokenResult.Fix: item.Token = token; break;
+                                        default: break;
+                                    }
+                                }
+                            }
+                        }
+
+                        if (uc.Columns.Any())
+                        {
+                            using (DelayedConsole.Delay(() => Console.WriteLine(" Columns:")))
+                            {
+                                foreach (var item in uc.Columns.ToList())
+                                {
+                                    QueryTokenEmbedded token = item.Token;
+                                    if (item.Token == null)
+                                        continue;
+
+                                    switch (QueryTokenSynchronizer.FixToken(replacements, ref token, qd, SubTokensOptions.CanElement | canAggregate, item.ScriptColumn.DisplayName, allowRemoveToken: item.ScriptColumn.IsOptional, allowReCreate: false))
+                                    {
+                                        case FixTokenResult.Nothing: break;
+                                        case FixTokenResult.DeleteEntity: return table.DeleteSqlSync(uc, u => u.Guid == uc.Guid);
+                                        case FixTokenResult.RemoveToken: item.Token = null; break;
+                                        case FixTokenResult.SkipEntity: return null;
+                                        case FixTokenResult.Fix: item.Token = token; break;
+                                        default: break;
+                                    }
+                                }
+                            }
+                        }
+
+                        if (uc.Orders.Any())
+                        {
+                            using (DelayedConsole.Delay(() => Console.WriteLine(" Orders:")))
+                            {
+                                foreach (var item in uc.Orders.ToList())
+                                {
+                                    QueryTokenEmbedded token = item.Token;
+                                    switch (QueryTokenSynchronizer.FixToken(replacements, ref token, qd, SubTokensOptions.CanElement | canAggregate, item.OrderType.ToString(), allowRemoveToken: true, allowReCreate: false))
+                                    {
+                                        case FixTokenResult.Nothing: break;
+                                        case FixTokenResult.DeleteEntity: return table.DeleteSqlSync(uc, u => u.Guid == uc.Guid);
+                                        case FixTokenResult.RemoveToken: uc.Orders.Remove(item); break;
+                                        case FixTokenResult.SkipEntity: return null;
+                                        case FixTokenResult.Fix: item.Token = token; break;
+                                        default: break;
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    foreach (var item in uc.Filters.ToList())
+                    {
+                        string val = item.ValueString;
+                        switch (QueryTokenSynchronizer.FixValue(replacements, item.Token.Token.Type, ref val, allowRemoveToken: true, isList: item.Operation.IsList()))
+                        {
+                            case FixTokenResult.Nothing: break;
+                            case FixTokenResult.DeleteEntity: return table.DeleteSqlSync(uc, u => u.Guid == uc.Guid);
+                            case FixTokenResult.RemoveToken: uc.Filters.Remove(item); break;
+                            case FixTokenResult.SkipEntity: return null;
+                            case FixTokenResult.Fix: item.ValueString = val; break;
+                        }
+                    }
+
+                    foreach (var item in uc.Columns)
+                    {
+                        uc.FixParameters(item);
+                    }
+
+                    foreach (var item in uc.Parameters)
+                    {
+                        string val = item.Value;
+                        retry:
+                        switch (FixParameter(item, ref val))
+                        {
+                            case FixTokenResult.Nothing: break;
+                            case FixTokenResult.DeleteEntity: return table.DeleteSqlSync(uc, u => u.Guid == uc.Guid);
+                            case FixTokenResult.RemoveToken: uc.Parameters.Remove(item); break;
+                            case FixTokenResult.SkipEntity: return null;
+                            case FixTokenResult.Fix: { item.Value = val; goto retry; }
+                        }
+                    }
+
+
+                    try
+                    {
+                        return table.UpdateSqlSync(uc, u => u.Guid == uc.Guid, includeCollections: true);
+                    }
+                    catch (Exception e)
+                    {
+                        DelayedConsole.Flush();
+                        Console.WriteLine("Integrity Error:");
+                        SafeConsole.WriteLineColor(ConsoleColor.DarkRed, e.Message);
+                        while (true)
+                        {
+                            SafeConsole.WriteLineColor(ConsoleColor.Yellow, "- s: Skip entity");
+                            SafeConsole.WriteLineColor(ConsoleColor.Red, "- d: Delete entity");
+
+                            string answer = Console.ReadLine();
+
+                            if (answer == null)
+                                throw new InvalidOperationException("Impossible to synchronize interactively without Console");
+
+                            answer = answer.ToLower();
+
+                            if (answer == "s")
+                                return null;
+
+                            if (answer == "d")
+                                return table.DeleteSqlSync(uc, u => u.Guid == uc.Guid);
+                        }
+                    }
                 }
                 catch (Exception e)
                 {
-                    Console.WriteLine("Integrity Error:");
-                    SafeConsole.WriteLineColor(ConsoleColor.DarkRed, e.Message);
-                    while (true)
-                    {
-                        SafeConsole.WriteLineColor(ConsoleColor.Yellow, "- s: Skip entity");
-                        SafeConsole.WriteLineColor(ConsoleColor.Red, "- d: Delete entity");
-
-                        string answer = Console.ReadLine();
-
-                        if (answer == null)
-                            throw new InvalidOperationException("Impossible to synchronize interactively without Console");
-
-                        answer = answer.ToLower();
-
-                        if (answer == "s")
-                            return null;
-
-                        if (answer == "d")
-                            return table.DeleteSqlSync(uc, u => u.Guid == uc.Guid);
-                    }
+                    return new SqlPreCommandSimple("-- Exception in {0}: {1}".FormatWith(uc.BaseToString(), e.Message));
                 }
-
-
-            }
-            catch (Exception e)
-            {
-                return new SqlPreCommandSimple("-- Exception in {0}: {1}".FormatWith(uc.BaseToString(), e.Message));
-            }
-            finally
-            {
-                Console.Clear();
             }
         }
 
@@ -350,6 +351,8 @@ namespace Signum.Engine.Chart
             var error = item.PropertyCheck(nameof(item.Value));
             if (error == null)
                 return FixTokenResult.Nothing;
+
+            DelayedConsole.Flush();
 
             SafeConsole.WriteLineColor(ConsoleColor.White, "Parameter Name: {0}".FormatWith(item.ScriptParameter.Name));
             SafeConsole.WriteLineColor(ConsoleColor.White, "Parameter Definition: {0}".FormatWith(item.ScriptParameter.ValueDefinition));

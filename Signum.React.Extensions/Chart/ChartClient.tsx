@@ -268,7 +268,7 @@ export function synchronizeColumns(chart: IChartBase) {
     if (chart.Type == ChartRequest.typeName) {
         const cr = chart as ChartRequest;
 
-        const keys = chart.columns.filter((a, i) => a.element.token && chartScript.columns![i].element.isGroupKey).map(a => a.element.token!.token!.fullKey);
+        const keys = chart.columns.filter((a, i) => a.element.token && chartScript.columns![i].element.isGroupKey).map(a => a.element.token!.tokenString);
 
         cr.orderOptions = cr.orderOptions!.filter(o => {
             if (chart.groupResults)

@@ -19,6 +19,7 @@ namespace Signum.Entities.Workflow
         [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
         public string Name { get; set; }
 
+        [NotNullValidator]
         public TypeEntity MainEntityType { get; set; }
 
         [NotNullValidator, NotifyChildProperty]
@@ -45,7 +46,7 @@ namespace Signum.Entities.Workflow
     {
         protected override CompilationResult Compile()
         {
-            var parent = (WorkflowConditionEntity)this.GetParentEntity();
+            var parent = (WorkflowTimerConditionEntity)this.GetParentEntity();
 
             var script = this.Script.Trim();
             script = script.Contains(';') ? script : ("return " + script + ";");
@@ -56,14 +57,18 @@ namespace Signum.Entities.Workflow
                     @"
                     namespace Signum.Entities.Workflow
                     {
-                        class MyWorkflowTimeCondition : IWorkflowTimerConditionEvaluator
+                        class MyWorkflowTimerConditionEvaluator : IWorkflowTimerConditionEvaluator
                         {
-                            public Expression<Func<CaseActivityEntity, DateTime, bool>> GetTimerCondition()
+
+                            public bool EvaluateUntyped(CaseActivityEntity ca, DateTime now)
                             {
-                                return (ca, now) => CustomCondition.Evaluate(ca, (" + WorkflowEntityTypeName + @")ca.Case.MainEntity, now);
+                                return this.Evaluate(ca, (" + WorkflowEntityTypeName + @")ca.Case.MainEntity, now);
                             }
 
-                            Expression<Func<CaseActivityEntity, " + WorkflowEntityTypeName + @", DateTime, bool>> CustomCondition = (ca, m, now) => " + script + @";
+                            bool Evaluate(CaseActivityEntity ca, " + WorkflowEntityTypeName + @" e, DateTime now)
+                            {
+                                " + script + @"
+                            }
                         }                  
                     }");
         }
@@ -71,6 +76,6 @@ namespace Signum.Entities.Workflow
 
     public interface IWorkflowTimerConditionEvaluator
     {
-        Expression<Func<CaseActivityEntity, DateTime, bool>> GetTimerCondition();
+        bool EvaluateUntyped(CaseActivityEntity ca, DateTime now);
     }
 }

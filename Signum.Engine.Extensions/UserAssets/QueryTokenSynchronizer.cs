@@ -14,8 +14,32 @@ using Signum.Utilities.ExpressionTrees;
 
 namespace Signum.Engine.UserAssets
 {
+    static class DelayedConsole
+    {
+        static List<Action> ToWrite = new List<Action>();
+        public static IDisposable Delay(Action action)
+        {
+            ToWrite.Add(action);
+
+            return new Disposable(() => ToWrite.Remove(action));
+        }
+
+        public static void Flush()
+        {
+            foreach (var item in ToWrite)
+            {
+                item();
+            }
+
+            ToWrite.Clear();
+        }
+    }
+
     public static class QueryTokenSynchronizer
     {
+       
+
+
         static void Remember(Replacements replacements, string tokenString, QueryToken token)
         {
             List<QueryToken> tokenList = token.Follow(a => a.Parent).Reverse().ToList();
@@ -160,6 +184,8 @@ namespace Signum.Engine.UserAssets
             if (res is Result<object>.Success)
                 return FixTokenResult.Nothing;
 
+            DelayedConsole.Flush();
+
             if (isList && valueString.Contains('|'))
             {
                 List<string> changes = new List<string>();
@@ -296,18 +322,20 @@ namespace Signum.Engine.UserAssets
 
         public static FixTokenResult FixToken(Replacements replacements, ref QueryTokenEmbedded token, QueryDescription qd, SubTokensOptions options, string remainingText, bool allowRemoveToken, bool allowReCreate)
         {
-            SafeConsole.WriteColor(token.ParseException == null ? ConsoleColor.Gray : ConsoleColor.Red, "  " + token.TokenString);
-            Console.WriteLine(" " + remainingText);
+            var t = token;
+            using (DelayedConsole.Delay(() => { SafeConsole.WriteColor(t.ParseException == null ? ConsoleColor.Gray : ConsoleColor.Red, "  " + t.TokenString); Console.WriteLine(" " + remainingText); }))
+            {
+                if (token.ParseException == null)
+                    return FixTokenResult.Nothing;
 
-            if (token.ParseException == null)
-                return FixTokenResult.Nothing;
+                DelayedConsole.Flush();
+                FixTokenResult result = FixToken(replacements, token.TokenString, out QueryToken resultToken, qd, options, remainingText, allowRemoveToken, allowReCreate);
 
-            FixTokenResult result = FixToken(replacements, token.TokenString, out QueryToken resultToken, qd, options, remainingText, allowRemoveToken, allowReCreate);
+                if (result == FixTokenResult.Fix)
+                    token = new QueryTokenEmbedded(resultToken);
 
-            if (result == FixTokenResult.Fix)
-                token = new QueryTokenEmbedded(resultToken);
-
-            return result;
+                return result;
+            }
         }
 
         public static FixTokenResult FixToken(Replacements replacements, string original, out QueryToken token, QueryDescription qd, SubTokensOptions options, string remainingText, bool allowRemoveToken, bool allowReGenerate)

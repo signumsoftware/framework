@@ -29,7 +29,7 @@ namespace Signum.Engine.MachineLearning
 {
     public class PredictorTrainingState
     {
-        public CancellationTokenSource CancellationTokenSource;
+        internal CancellationTokenSource CancellationTokenSource;
         public PredictorTrainingContext Context; 
     }
 
@@ -66,6 +66,8 @@ namespace Signum.Engine.MachineLearning
         }
 
         public static Dictionary<PredictorAlgorithmSymbol, IPredictorAlgorithm> Algorithms = new Dictionary<PredictorAlgorithmSymbol, IPredictorAlgorithm>();
+
+
         public static void RegisterAlgorithm(PredictorAlgorithmSymbol symbol, IPredictorAlgorithm algorithm)
         {
             Algorithms.Add(symbol, algorithm);
@@ -77,8 +79,6 @@ namespace Signum.Engine.MachineLearning
             ResultSavers.Add(symbol, algorithm);
         }
 
-        
-
         public static Dictionary<PredictorPublicationSymbol, PublicationSettings> Publications = new Dictionary<PredictorPublicationSymbol, PublicationSettings>();
         public static void RegisterPublication(PredictorPublicationSymbol publication, PublicationSettings settings)
         {
@@ -86,7 +86,13 @@ namespace Signum.Engine.MachineLearning
         }
 
         public static ConcurrentDictionary<Lite<PredictorEntity>, PredictorTrainingState> Trainings = new ConcurrentDictionary<Lite<PredictorEntity>, PredictorTrainingState>();
-        
+
+
+        public static PredictorTrainingContext GetTrainingContext(Lite<PredictorEntity> lite)
+        {
+            return Trainings.TryGetC(lite)?.Context;
+        }
+
         public static void Start(SchemaBuilder sb, DynamicQueryManager dqm, Func<IFileTypeAlgorithm> predictorFileAlgorithm)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
@@ -148,14 +154,15 @@ namespace Signum.Engine.MachineLearning
                         e.Epoch,
                         e.Ellapsed,
                         e.LossTraining,
-                        e.LossValidation,
                         e.EvaluationTraining,
+                        e.LossValidation,
                         e.EvaluationValidation,
                     });
 
                 FileTypeLogic.Register(PredictorFileType.PredictorFile, predictorFileAlgorithm());
 
                 SymbolLogic<PredictorAlgorithmSymbol>.Start(sb, dqm, () => Algorithms.Keys);
+                SymbolLogic<PredictorColumnEncodingSymbol>.Start(sb, dqm, () => Algorithms.Values.SelectMany(a => a.GetRegisteredEncodingSymbols()).Distinct());
                 SymbolLogic<PredictorResultSaverSymbol>.Start(sb, dqm, () => ResultSavers.Keys);
                 SymbolLogic<PredictorPublicationSymbol>.Start(sb, dqm, () => Publications.Keys);
 
@@ -180,8 +187,8 @@ namespace Signum.Engine.MachineLearning
                         e.PredictedCategory,
                     });
 
-                RegisterResultSaver(PredictorSimpleResultSaver.StatisticsOnly, new PredictorSimpleSaver { SaveSimpleResults = true });
-                RegisterResultSaver(PredictorSimpleResultSaver.Full, new PredictorSimpleSaver { SaveSimpleResults = true });
+                RegisterResultSaver(PredictorSimpleResultSaver.StatisticsOnly, new PredictorSimpleSaver { SaveAllResults = false });
+                RegisterResultSaver(PredictorSimpleResultSaver.Full, new PredictorSimpleSaver { SaveAllResults = true });
 
                 sb.Schema.EntityEvents<PredictorEntity>().PreUnsafeDelete += query =>
                 {
@@ -295,7 +302,7 @@ namespace Signum.Engine.MachineLearning
 
             var algorithm = Algorithms.GetOrThrow(p.Algorithm);
             var usage = column.Usage == PredictorSubQueryColumnUsage.Input ? PredictorColumnUsage.Input : PredictorColumnUsage.Output;
-            return algorithm.ValidateEncodingProperty(p, sq, column.Encoding.Value, usage, column.Token);
+            return algorithm.ValidateEncodingProperty(p, sq, column.Encoding, usage, column.Token);
         }
 
         public static void TrainSync(this PredictorEntity p, bool autoReset = true, Action<string, decimal?> onReportProgres = null, CancellationToken? cancellationToken = null)
@@ -372,46 +379,54 @@ namespace Signum.Engine.MachineLearning
 
         static void DoTraining(PredictorTrainingContext ctx)
         {
-            try
+            using (HeavyProfiler.Log("DoTraining"))
             {
-                if (ctx.Predictor.ResultSaver != null)
+                try
                 {
-                    var saver = ResultSavers.GetOrThrow(ctx.Predictor.ResultSaver);
-                    saver.AssertValid(ctx.Predictor);
+                    if (ctx.Predictor.ResultSaver != null)
+                    {
+                        var saver = ResultSavers.GetOrThrow(ctx.Predictor.ResultSaver);
+                        saver.AssertValid(ctx.Predictor);
+                    }
+
+                    PredictorLogicQuery.RetrieveData(ctx);
+                    PredictorCodificationLogic.CreatePredictorCodifications(ctx);
+
+                    var algorithm = Algorithms.GetOrThrow(ctx.Predictor.Algorithm);
+                    using (HeavyProfiler.Log("Train"))
+                        algorithm.Train(ctx);
+
+                    if (ctx.Predictor.ResultSaver != null)
+                    {
+                        using (HeavyProfiler.Log("ResultSaver"))
+                        {
+                            var saver = ResultSavers.GetOrThrow(ctx.Predictor.ResultSaver);
+                            saver.SavePredictions(ctx);
+                        }
+                    }
+
+                    ctx.Predictor.State = PredictorState.Trained;
+                    using (OperationLogic.AllowSave<PredictorEntity>())
+                        ctx.Predictor.Save();
                 }
-
-                PredictorLogicQuery.RetrieveData(ctx);
-                PredictorCodificationLogic.CreatePredictorCodifications(ctx);
-                var algorithm = Algorithms.GetOrThrow(ctx.Predictor.Algorithm);
-                algorithm.Train(ctx);
-
-                if(ctx.Predictor.ResultSaver != null)
+                catch (OperationCanceledException)
                 {
-                    var saver = ResultSavers.GetOrThrow(ctx.Predictor.ResultSaver);
-                    saver.SavePredictions(ctx);
+                    var p = ctx.Predictor.ToLite().RetrieveAndForget();
+                    CleanTrained(p);
+                    p.State = PredictorState.Draft;
+                    using (OperationLogic.AllowSave<PredictorEntity>())
+                        p.Save();
                 }
-
-                ctx.Predictor.State = PredictorState.Trained;
-                using (OperationLogic.AllowSave<PredictorEntity>())
-                    ctx.Predictor.Save();
-            }
-            catch (OperationCanceledException)
-            {
-                var p = ctx.Predictor.ToLite().RetrieveAndForget();
-                CleanTrained(p);
-                p.State = PredictorState.Draft;
-                using (OperationLogic.AllowSave<PredictorEntity>())
-                    p.Save();
-            }
-            catch (Exception ex)
-            {
-                ex.Data["entity"] = ctx.Predictor;
-                var e = ex.LogException();
-                var p = ctx.Predictor.ToLite().RetrieveAndForget();
-                p.State = PredictorState.Error;
-                p.TrainingException = e.ToLite();
-                using (OperationLogic.AllowSave<PredictorEntity>())
-                    p.Save();
+                catch (Exception ex)
+                {
+                    ex.Data["entity"] = ctx.Predictor;
+                    var e = ex.LogException();
+                    var p = ctx.Predictor.ToLite().RetrieveAndForget();
+                    p.State = PredictorState.Error;
+                    p.TrainingException = e.ToLite();
+                    using (OperationLogic.AllowSave<PredictorEntity>())
+                        p.Save();
+                }
             }
         }
 

@@ -72,11 +72,11 @@ export default class DynamicValidation extends React.Component<DynamicValidation
 
         return (
             <div>
+                <ValueLine ctx={ctx.subCtx(d => d.name)} />
                 <EntityLine ctx={ctx.subCtx(d => d.entityType)} onChange={this.handleEntityTypeChange} />
                 <FormGroup ctx={ctx.subCtx(d => d.propertyRoute)}>
                     {ctx.value.entityType && <PropertyRouteCombo ctx={ctx.subCtx(d => d.propertyRoute)} type={ctx.value.entityType} onChange={this.handlePropertyRouteChange} />}
                 </FormGroup>
-                <ValueLine ctx={ctx.subCtx(d => d.name)} />
                 {ctx.value.propertyRoute &&
                     <div>
                         <br />

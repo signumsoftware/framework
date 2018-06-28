@@ -123,7 +123,8 @@ namespace Signum.Engine.Dashboard
                     new InvalidateWith(typeof(DashboardEntity)));
 
                 DashboardsByType = sb.GlobalLazy(() => Dashboards.Value.Values.Where(a => a.EntityType != null)
-                .GroupToDictionary(a => TypeLogic.IdToType.GetOrThrow(a.EntityType.Id), a => a.ToLite()),
+                .SelectCatch(d => KVP.Create(TypeLogic.IdToType.GetOrThrow(d.EntityType.Id), d.ToLite()))
+                .GroupToDictionary(),
                     new InvalidateWith(typeof(DashboardEntity)));
             }
         }

@@ -32,6 +32,7 @@ namespace Signum.Engine.Authorization
     {
         public static event Action<UserEntity> UserLogingIn;
         public static event Func<string> LoginMessage;
+        public static ICustomAuthorizer Authorizer;
 
         public static string SystemUserName { get; private set; }
         static ResetLazy<UserEntity> systemUserLazy = GlobalLazy.WithoutInvalidations(() => SystemUserName == null ? null :
@@ -280,10 +281,15 @@ namespace Signum.Engine.Authorization
             {
                 UserEntity user = RetrieveUser(username, passwordHash);
 
-                UserLogingIn?.Invoke(user);
+                OnUserLogingIn(user);
 
                 return user;
             }
+        }
+
+        public static void OnUserLogingIn(UserEntity user)
+        {
+            UserLogingIn?.Invoke(user);
         }
 
         public static UserEntity RetrieveUser(string username, byte[] passwordHash)
@@ -660,6 +666,11 @@ namespace Signum.Engine.Authorization
 
             return 0;
         }
+    }
+
+    public interface ICustomAuthorizer
+    {
+        UserEntity Login(string userName, string password);
     }
 
     [Serializable]

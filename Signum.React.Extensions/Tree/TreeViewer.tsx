@@ -272,7 +272,6 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
 
     search(clearExpanded: boolean) {
         this.getFilterOptionsWithSFB().then(filters => {
-
             let expandedNodes = clearExpanded || !this.state.treeNodes ? [] :
                 this.state.treeNodes!.flatMap(allNodes).filter(a => a.nodeState == "Expanded").map(a => a.lite);
 
@@ -281,9 +280,7 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
             const userFilters = validFilters.filter(fo => fo.frozen == false).map(fo => ({ token: fo.token!.fullKey, operation: fo.operation!, value: fo.value }) as FilterRequest);
             const frozenFilters = validFilters.filter(fo => fo.frozen == true).map(fo => ({ token: fo.token!.fullKey, operation: fo.operation!, value: fo.value }) as FilterRequest);
 
-            const newLastFilters = JSON.stringify(userFilters);
-
-            if (userFilters.length == 0 && frozenFilters.length == 0)
+            if (userFilters.length == 0)
                 userFilters.push({ token: "Entity.Level", operation: "EqualTo", value: 1 });
 
             return API.findNodes(this.props.typeName, { userFilters, frozenFilters, expandedNodes });
