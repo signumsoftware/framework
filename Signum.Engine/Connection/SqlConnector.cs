@@ -27,7 +27,59 @@ namespace Signum.Engine
         SqlServer2012,
         SqlServer2014,
         SqlServer2016,
+        SqlServer2017,
         AzureSQL,
+    }
+
+    public static class SqlServerVersionDetector
+    {
+        public enum EngineEdition
+        {
+            Personal = 1,
+            Standard = 2,
+            Enterprise = 3,
+            Express = 4,
+            Azure = 5,
+        }
+
+        public static SqlServerVersion? Detect(string connectionString)
+        {
+            using(SqlConnection con = new SqlConnection(connectionString))
+            {
+                var sql =
+@"SELECT 
+    SERVERPROPERTY ('ProductVersion') as ProductVersion,
+    SERVERPROPERTY('ProductLevel') as ProductLevel, 
+    SERVERPROPERTY('Edition') as Edition, 
+    SERVERPROPERTY('EngineEdition') as EngineEdition";
+
+                using (SqlCommand cmd = new SqlCommand(sql, con))
+                {
+                    SqlDataAdapter da = new SqlDataAdapter(cmd);
+
+                    DataTable result = new DataTable();
+                    da.Fill(result);
+
+                    if (result.Rows[0].Field<int>("EngineEdition") == (int)EngineEdition.Azure)
+                        return SqlServerVersion.AzureSQL;
+
+                    var version = result.Rows[0].Field<string>("ProductVersion");
+
+                    switch (version.Before("."))
+                    {
+                        case "8": throw new InvalidOperationException("SQL Server 2000 is not supported");
+                        case "9": return SqlServerVersion.SqlServer2005;
+                        case "10": return SqlServerVersion.SqlServer2008;
+                        case "11": return SqlServerVersion.SqlServer2012;
+                        case "12": return SqlServerVersion.SqlServer2014;
+                        case "13": return SqlServerVersion.SqlServer2016;
+                        case "14": return SqlServerVersion.SqlServer2017;
+                        default: return null;
+                    }
+
+                }
+            }
+        }
     }
 
     public class SqlConnector : Connector
@@ -517,7 +569,7 @@ namespace Signum.Engine
 
         public override MemberInitExpression ParameterFactory(Expression parameterName, SqlDbType sqlType, string udtTypeName, bool nullable, Expression value)
         {
-            Expression valueExpr = Expression.Convert(IsDate(sqlType) ? Expression.Call(miAsserDateTime, value.Nullify()) : value, typeof(object));
+            Expression valueExpr = Expression.Convert(IsDate(sqlType) ? Expression.Call(miAsserDateTime, Expression.Convert(value, typeof(DateTime?))) : value, typeof(object));
 
             if (nullable)
                 valueExpr = Expression.Condition(Expression.Equal(value, Expression.Constant(null, value.Type)),

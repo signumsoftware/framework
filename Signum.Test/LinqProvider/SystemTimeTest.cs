@@ -9,6 +9,7 @@ using Signum.Entities;
 using Signum.Utilities.ExpressionTrees;
 using Signum.Test.Environment;
 using Signum.Utilities.DataStructures;
+using Signum.Engine.Maps;
 
 namespace Signum.Test.LinqProvider
 {
@@ -31,6 +32,9 @@ namespace Signum.Test.LinqProvider
         [TestMethod]
         public void TimePresent()
         {
+            if (!Connector.Current.SupportsTemporalTables)
+                return;
+
             var list = (from f in Database.Query<FolderEntity>()
                         where f.Parent != null
                         select new { f.Name, Parent = f.Parent.Entity.Name }).ToList();
@@ -42,6 +46,9 @@ namespace Signum.Test.LinqProvider
         [TestMethod]
         public void TimeAll()
         {
+            if (!Connector.Current.SupportsTemporalTables)
+                return;
+
             using (SystemTime.Override(new SystemTime.All()))
             {
                 var list = (from f in Database.Query<FolderEntity>()
@@ -62,6 +69,9 @@ namespace Signum.Test.LinqProvider
         [TestMethod]
         public void TimeBetween()
         {
+            if (!Connector.Current.SupportsTemporalTables)
+                return;
+
             Interval<DateTime> period;
             using (SystemTime.Override(new SystemTime.All()))
             {
@@ -82,10 +92,6 @@ namespace Signum.Test.LinqProvider
             {
                 var b = Database.Query<FolderEntity>().Where(f2 => f2.Name == "X2").ToList();
             }
-
         }
-
-
-
     }
 }

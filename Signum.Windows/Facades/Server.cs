@@ -57,7 +57,7 @@ namespace Signum.Windows
             if (OfflineMode)
                 return;
 
-            SemiSymbol.SetSemiSymbolIdsAndNames<S>(Server.Return((IBaseServer s) => s.GetSemiSymbolIdsAndNames(typeof(S))));
+            SemiSymbol.SetFromDatabase<S>(Server.Return((IBaseServer s) => s.GetSemiSymbolFromDatabase(typeof(S))).ToDictionary(a => a.Key, a => (S)a.Value));
         }
 
         public static void SetNewServerCallback(Func<IBaseServer> server)

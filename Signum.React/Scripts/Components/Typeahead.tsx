@@ -82,11 +82,6 @@ export class Typeahead extends React.Component<TypeaheadProps, TypeaheadState>
         }
     }
 
-    componentWillUnmount() {
-        if (this.handle != undefined)
-            clearTimeout(this.handle);
-    }
-
     populate() {
 
         if (this.props.minLength == null || this.input.value.length < this.props.minLength) {
@@ -216,7 +211,7 @@ export class Typeahead extends React.Component<TypeaheadProps, TypeaheadState>
     }
 
 
-    handleMenuClick = (e: React.MouseEvent<any>, index: number) => {
+    handleMenuMouseUp = (e: React.MouseEvent<any>, index: number) => {
         e.preventDefault();
         e.persist();
         this.setState({
@@ -250,7 +245,6 @@ export class Typeahead extends React.Component<TypeaheadProps, TypeaheadState>
     }
 
     render() {
-
         return (
             <Manager tag={false}>
                 <Target innerRef={inp => this.input = inp as HTMLInputElement}>
@@ -266,7 +260,6 @@ export class Typeahead extends React.Component<TypeaheadProps, TypeaheadState>
                 </Target>
                 {this.state.shown && <Popper placement={this.rtl ? "bottom-end" : "bottom-start"} style={{ zIndex: 1000 }}>{this.props.renderList ? this.props.renderList(this) : this.renderDefaultList()}</Popper>}
             </Manager>
-
         );
     }
 
@@ -285,17 +278,23 @@ export class Typeahead extends React.Component<TypeaheadProps, TypeaheadState>
         this.toggleEvents(this.state.shown);
     }
 
+    componentWillUnmount() {
+        if (this.handle != undefined)
+            clearTimeout(this.handle);
+
+        this.toggleEvents(false);
+    }
+
     componentWillUpdate(nextProps: TypeaheadProps, nextState: TypeaheadState) {
         if (nextState.shown != this.state.shown)
             this.toggleEvents(nextState.shown);
     }
 
-    handleDocumentClick = (e: MouseEvent | /*Touch*/Event) => {
-        console.log(e);
+    handleDocumentClick = (e: MouseEvent | TouchEvent) => {
         if ((e as TouchEvent).which === 3)
             return;
 
-        const container = ReactDOM.findDOMNode(this);
+        const container = ReactDOM.findDOMNode(this) as HTMLElement;
         if (container.contains(e.target as Node) &&
             container !== e.target) {
             return;
@@ -313,7 +312,7 @@ export class Typeahead extends React.Component<TypeaheadProps, TypeaheadState>
                             className={classes("dropdown-item", i == this.state.selectedIndex ? "active" : undefined)}
                             onMouseEnter={e => this.handleElementMouseEnter(e, i)}
                             onMouseLeave={e => this.handleElementMouseLeave(e, i)}
-                            onMouseUp={e => this.handleMenuClick(e, i)}
+                            onMouseUp={e => this.handleMenuMouseUp(e, i)}
                             {...this.props.itemAttrs && this.props.itemAttrs(item)}>                            
                             {this.props.renderItem!(item, this.state.query!)}
                         </button>)

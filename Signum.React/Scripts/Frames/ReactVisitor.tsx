@@ -125,7 +125,7 @@ export class ViewReplacer<T extends ModifiableEntity> {
         return this;
     }
 
-    insertAfterElement(filter: (e: React.ReactElement<any>) => boolean, newElements: (e: React.ReactElement<any>) => (React.ReactElement<any> | undefined)[]): this {
+    insertAfterElement(filter: (e: React.ReactElement<any>) => boolean, newElements: (e: React.ReactElement<any>) => (React.ReactElement<any> | undefined | false | null)[]): this {
 
         this.result = new ReplaceVisitor(
             e => filter(e),
@@ -135,7 +135,7 @@ export class ViewReplacer<T extends ModifiableEntity> {
         return this;
     }
 
-    insertBeforeElement(filter: (e: React.ReactElement<any>) => boolean, newElements: (e: React.ReactElement<any>) => (React.ReactElement<any> | undefined)[]): this {
+    insertBeforeElement(filter: (e: React.ReactElement<any>) => boolean, newElements: (e: React.ReactElement<any>) => (React.ReactElement<any> | undefined | false | null)[]): this {
 
         this.result = new ReplaceVisitor(
             e => filter(e),
@@ -145,7 +145,7 @@ export class ViewReplacer<T extends ModifiableEntity> {
         return this;
     }
 
-    replaceElement(filter: (e: React.ReactElement<any>) => boolean, newElements: (e: React.ReactElement<any>) => (React.ReactElement<any> | undefined)[]): this {
+    replaceElement(filter: (e: React.ReactElement<any>) => boolean, newElements: (e: React.ReactElement<any>) => (React.ReactElement<any> | undefined | false | null)[]): this {
 
         this.result = new ReplaceVisitor(
             e => filter(e),
@@ -182,7 +182,7 @@ export class ViewReplacer<T extends ModifiableEntity> {
 
 
 
-    insertAfterLine(propertyRoute: (entity: T) => any, newElements: (ctx: TypeContext<T>) => (React.ReactElement<any> | undefined)[]): this {
+    insertAfterLine(propertyRoute: (entity: T) => any, newElements: (ctx: TypeContext<T>) => (React.ReactElement<any> | undefined | false | null)[]): this {
 
         var pr = this.ctx.propertyRoute.add(propertyRoute);
 
@@ -236,7 +236,7 @@ export class ViewReplacer<T extends ModifiableEntity> {
         return this;
     }
 
-    insertTabAfter(tabId: string | number, ...newTabs: Tab[]): this {
+    insertTabAfter(tabId: string | number, ...newTabs: (Tab | undefined | false | null)[]): this {
         this.result = new ReplaceVisitor(
             e => e.type == Tab && e.props.eventKey == tabId,
             e => [e, ...newTabs])
@@ -245,7 +245,7 @@ export class ViewReplacer<T extends ModifiableEntity> {
         return this;
     }
 
-    insertTabBefore(tabId: string | number, ...newTabs: Tab[]): this {
+    insertTabBefore(tabId: string | number, ...newTabs: (Tab | undefined | false | null)[]): this {
         this.result = new ReplaceVisitor(
             e => e.type == Tab && e.props.eventKey == tabId,
             e => [...newTabs, e])

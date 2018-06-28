@@ -72,7 +72,7 @@ export class Dropdown extends React.Component<DropdownProps> {
     }
 
     getContainer() {
-        return ReactDOM.findDOMNode(this);
+        return ReactDOM.findDOMNode(this) as HTMLElement;
     }
 
     addEvents = () => {
@@ -88,7 +88,7 @@ export class Dropdown extends React.Component<DropdownProps> {
         document.removeEventListener("keyup", this.handleDocumentKeyUp);
     }
 
-    handleDocumentClick = (e: MouseEvent | /*Touch*/Event) => {
+    handleDocumentClick = (e: MouseEvent | TouchEvent) => {
 
         if ((e as TouchEvent).which == 3)
             return;
@@ -175,7 +175,7 @@ export class Dropdown extends React.Component<DropdownProps> {
         }
     }
 
-    toggle = (e: KeyboardEvent | MouseEvent | /*Touch*/Event | React.KeyboardEvent<any>) => {
+    toggle = (e: KeyboardEvent | MouseEvent | TouchEvent | React.KeyboardEvent<any>) => {
         if (this.props.disabled) {
             return e && e.preventDefault();
         }

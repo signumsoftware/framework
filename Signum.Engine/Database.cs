@@ -914,7 +914,7 @@ namespace Signum.Engine
             using (Transaction tr = new Transaction())
             {
                 var dic = lites.AgGroupToDictionary(a => a.EntityType, gr =>
-                    RetrieveList(gr.Key, gr.Select(a => a.Id).ToList(), message).ToDictionary(a => a.Id));
+                    RetrieveList(gr.Key, gr.Select(a => a.Id).Distinct().ToList(), message).ToDictionaryEx(a => a.Id));
 
                 var result = lites.Select(l => (T)(object)dic[l.EntityType][l.Id]).ToList(); // keep same order
 
@@ -1412,7 +1412,7 @@ namespace Signum.Engine
         public static int Execute(this IUpdateable update, string message = null)
         {
             if (message != null)
-                return SafeConsole.WaitRows(message == "auto" ? UnsafeMessage(update) : message,
+                return SafeConsole.WaitRows(message == "auto" ? $"Updating { update.EntityType.TypeName()}" : message,
                     () => update.Execute(message: null));
 
             using (HeavyProfiler.Log("DBUnsafeUpdate", () => update.EntityType.TypeName()))
@@ -1448,14 +1448,6 @@ namespace Signum.Engine
                     Thread.Sleep(pauseMilliseconds.Value);
             }
             return total;
-        }
-
-        static string UnsafeMessage(IUpdateable update)
-        {
-            if (update.PartSelector == null)
-                return $"Updating { update.EntityType.TypeName()}";
-            else
-                return $"Updating MList<{update.GetType().GetGenericArguments()[1].TypeName()}> in {update.EntityType.TypeName()}";
         }
         #endregion
 

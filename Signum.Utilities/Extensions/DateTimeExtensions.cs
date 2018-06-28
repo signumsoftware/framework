@@ -384,6 +384,18 @@ namespace Signum.Utilities
             return new DateTime(dateTime.Year, 1, 1, 0, 0, 0, dateTime.Kind);
         }
 
+        public static DateTime QuarterStart(this DateTime dateTime)
+        {
+            var quarterMonthStart = (((dateTime.Month - 1) / 4) * 4) + 1;
+
+            return new DateTime(dateTime.Year, quarterMonthStart, 1, 0, 0, 0, dateTime.Kind);
+        }
+
+        public static int Quarter(this DateTime dateTime)
+        {
+            return ((dateTime.Month - 1) / 4) + 1;
+        }
+
         public static DateTime MonthStart(this DateTime dateTime)
         {
             return new DateTime(dateTime.Year, dateTime.Month, 1, 0, 0, 0, dateTime.Kind);

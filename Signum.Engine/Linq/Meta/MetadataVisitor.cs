@@ -186,6 +186,9 @@ namespace Signum.Engine.Linq
             if (m.Method.DeclaringType == typeof(LinqHints) || m.Method.DeclaringType == typeof(LinqHintEntities))
                 return Visit(m.Arguments[0]);
 
+            if (m.Method.DeclaringType == typeof(StringExtensions) && m.Method.Name == nameof(StringExtensions.Etc))
+                return Visit(m.Arguments[0]);
+
             if (m.Method.DeclaringType == typeof(Lite) && m.Method.Name == "ToLite")
                 return MakeCleanMeta(m.Type, Visit(m.Arguments[0]));
 

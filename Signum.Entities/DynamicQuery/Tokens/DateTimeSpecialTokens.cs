@@ -23,8 +23,9 @@ namespace Signum.Entities.DynamicQuery
 
         private static MethodInfo GetMethodInfo(QueryTokenMessage name)
         {
-            return 
+            return
                 name == QueryTokenMessage.MonthStart ? miMonthStart :
+                name == QueryTokenMessage.QuarterStart ? miQuarterStart :
                 name == QueryTokenMessage.WeekStart ? miWeekStart :
                 name == QueryTokenMessage.HourStart ? miHourStart :
                 name == QueryTokenMessage.MinuteStart ? miMinuteStart :
@@ -48,9 +49,10 @@ namespace Signum.Entities.DynamicQuery
             {
                 return
                     Name == QueryTokenMessage.MonthStart ? "Y" :
+                    Name == QueryTokenMessage.QuarterStart ? "d" :
                     Name == QueryTokenMessage.WeekStart ? "d" :
                     Name == QueryTokenMessage.HourStart ? "g" :
-                    Name == QueryTokenMessage.MinuteStart ? "g":
+                    Name == QueryTokenMessage.MinuteStart ? "g" :
                     Name == QueryTokenMessage.SecondStart ? "G" :
                     throw new InvalidOperationException("Unexpected name");
             }
@@ -77,6 +79,7 @@ namespace Signum.Entities.DynamicQuery
         }
 
         public static MethodInfo miMonthStart = ReflectionTools.GetMethodInfo(() => DateTimeExtensions.MonthStart(DateTime.MinValue));
+        public static MethodInfo miQuarterStart = ReflectionTools.GetMethodInfo(() => DateTimeExtensions.QuarterStart(DateTime.MinValue));
         public static MethodInfo miWeekStart = ReflectionTools.GetMethodInfo(() => DateTimeExtensions.WeekStart(DateTime.MinValue));
         public static MethodInfo miHourStart = ReflectionTools.GetMethodInfo(() => DateTimeExtensions.HourStart(DateTime.MinValue));
         public static MethodInfo miMinuteStart = ReflectionTools.GetMethodInfo(() => DateTimeExtensions.MinuteStart(DateTime.MinValue));
@@ -95,7 +98,7 @@ namespace Signum.Entities.DynamicQuery
         }
 
         public override Implementations? GetImplementations()
-        {  
+        {
             return null;
         }
 
@@ -114,227 +117,4 @@ namespace Signum.Entities.DynamicQuery
             get { return true; }
         }
     }
-
-    [Serializable]
-    public class DayOfYearToken : QueryToken
-    {
-        internal DayOfYearToken(QueryToken parent)
-            : base(parent)
-        {
-        }
-
-        public override string ToString()
-        {
-            return QueryTokenMessage.DayOfYear.NiceToString();
-        }
-
-        public override string NiceName()
-        {
-            return QueryTokenMessage.DayOfYear.NiceToString() + QueryTokenMessage.Of.NiceToString() + Parent.ToString();
-        }
-
-        public override string Format
-        {
-            get { return null; }
-        }
-
-        public override string Unit
-        {
-            get { return null; }
-        }
-
-        public override Type Type
-        {
-            get { return typeof(int?); }
-        }
-
-        public override string Key
-        {
-            get { return "DayOfYear"; }
-        }
-
-        protected override List<QueryToken> SubTokensOverride(SubTokensOptions options)
-        {
-            return new List<QueryToken>();
-        }
-
-        static PropertyInfo piDayOfYear = ReflectionTools.GetPropertyInfo(() => DateTime.MinValue.DayOfYear);
-
-        protected override Expression BuildExpressionInternal(BuildExpressionContext context)
-        {
-            var exp = Parent.BuildExpression(context);
-
-            return Expression.Property(exp.UnNullify(), piDayOfYear).Nullify();
-        }
-
-        public override PropertyRoute GetPropertyRoute()
-        {
-            return Parent.GetPropertyRoute();
-        }
-
-        public override Implementations? GetImplementations()
-        {
-            return null;
-        }
-
-        public override string IsAllowed()
-        {
-            return Parent.IsAllowed();
-        }
-
-        public override QueryToken Clone()
-        {
-            return new DayOfYearToken(Parent.Clone());
-        }
-    }
-
-
-
-    [Serializable]
-    public class DayOfWeekToken : QueryToken
-    {
-        internal DayOfWeekToken(QueryToken parent)
-            : base(parent)
-        {
-        }
-
-        public override string ToString()
-        {
-
-            return QueryTokenMessage.DayOfWeek.NiceToString();
-        }
-
-        public override string NiceName()
-        {
-            return QueryTokenMessage.DayOfWeek.NiceToString() + QueryTokenMessage.Of.NiceToString() + Parent.ToString();
-        }
-
-        public override string Format
-        {
-            get { return null; }
-        }
-
-        public override string Unit
-        {
-            get { return null; }
-        }
-
-        public override Type Type
-        {
-            get { return typeof(DayOfWeek?); }
-        }
-
-        public override string Key
-        {
-            get { return "DayOfWeek"; }
-        }
-
-        protected override List<QueryToken> SubTokensOverride(SubTokensOptions options)
-        {
-            return new List<QueryToken>();
-        }
-
-        static PropertyInfo piDayOfWeek = ReflectionTools.GetPropertyInfo(() => DateTime.MinValue.DayOfWeek);
-
-        protected override Expression BuildExpressionInternal(BuildExpressionContext context)
-        {
-            var exp = Parent.BuildExpression(context);
-
-            return Expression.Property(exp.UnNullify(), piDayOfWeek).Nullify();
-        }
-
-        public override PropertyRoute GetPropertyRoute()
-        {
-            return Parent.GetPropertyRoute();
-        }
-
-        public override Implementations? GetImplementations()
-        {
-            return null;
-        }
-
-        public override string IsAllowed()
-        {
-            return Parent.IsAllowed();
-        }
-
-        public override QueryToken Clone()
-        {
-            return new DayOfWeekToken(Parent.Clone());
-        }
-    }
-
-
-    [Serializable]
-    public class WeekNumberToken : QueryToken
-    {
-        internal WeekNumberToken(QueryToken parent)
-            : base(parent)
-        {
-        }
-
-        public override string ToString()
-        {
-            return QueryTokenMessage.WeekNumber.NiceToString();
-        }
-
-        public override string NiceName()
-        {
-            return QueryTokenMessage.WeekNumber.NiceToString() + QueryTokenMessage.Of.NiceToString() + Parent.ToString();
-        }
-
-        public override string Format
-        {
-            get { return null; }
-        }
-
-        public override string Unit
-        {
-            get { return null; }
-        }
-
-        public override Type Type
-        {
-            get { return typeof(int?); }
-        }
-
-        public override string Key
-        {
-            get { return "WeekNumber"; }
-        }
-
-        protected override List<QueryToken> SubTokensOverride(SubTokensOptions options)
-        {
-            return new List<QueryToken>();
-        }
-
-        static MethodInfo miWeekNumber = ReflectionTools.GetMethodInfo(() => DateTime.MinValue.WeekNumber());
-
-        protected override Expression BuildExpressionInternal(BuildExpressionContext context)
-        {
-            var exp = Parent.BuildExpression(context);
-
-            return Expression.Call(miWeekNumber, exp.UnNullify()).Nullify();
-        }
-
-        public override PropertyRoute GetPropertyRoute()
-        {
-            return Parent.GetPropertyRoute();
-        }
-
-        public override Implementations? GetImplementations()
-        {
-            return null;
-        }
-
-        public override string IsAllowed()
-        {
-            return Parent.IsAllowed();
-        }
-
-        public override QueryToken Clone()
-        {
-            return new WeekNumberToken(Parent.Clone());
-        }
-    }   
 }

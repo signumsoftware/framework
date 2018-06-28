@@ -104,7 +104,6 @@ export abstract class EntityBase<T extends EntityBaseProps, S extends EntityBase
 
 
     defaultView(value: ModifiableEntity | Lite<Entity>, propertyRoute: PropertyRoute): Promise<ModifiableEntity | undefined> { 
-        debugger;
         return Navigator.view(value, {
             propertyRoute: propertyRoute,
             getViewPromise: this.getGetViewPromise(value) 
@@ -252,7 +251,6 @@ export abstract class EntityBase<T extends EntityBaseProps, S extends EntityBase
         } as any;
     }
 
-
     defaultFind(): Promise<ModifiableEntity | Lite<Entity> | undefined> {
 
         if (this.state.findOptions) {
@@ -263,6 +261,7 @@ export abstract class EntityBase<T extends EntityBaseProps, S extends EntityBase
             .then<ModifiableEntity | Lite<Entity> | undefined>(qn =>
                 qn == undefined ? undefined : Finder.find({ queryName: qn } as FindOptions));
     }
+
     handleFindClick = (event: React.SyntheticEvent<any>) => {
 
         event.preventDefault();

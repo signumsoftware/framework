@@ -265,9 +265,8 @@ namespace Signum.Engine
                     .FormatWith(objectName.Schema.Database.ToString().SqlEscape(), indexName.SqlEscape(), objectName.OnDatabase(null).ToString()));
         }
 
-        public static SqlPreCommand CreateIndex(Index index)
+        public static SqlPreCommand CreateIndex(Index index, Replacements checkUnique)
         {
-
             if (index is PrimaryClusteredIndex)
             {
                 var columns = index.Columns.ToString(c => c.Name.SqlEscape(), ", ");
@@ -275,23 +274,96 @@ namespace Signum.Engine
                 return new SqlPreCommandSimple($"ALTER TABLE {index.Table.Name} ADD CONSTRAINT {index.IndexName} PRIMARY KEY CLUSTERED({columns})");
             }
 
-            if (index is UniqueIndex uIndex && uIndex.ViewName != null)
+            if (index is UniqueIndex uIndex)
             {
-                ObjectName viewName = new ObjectName(uIndex.Table.Name.Schema, uIndex.ViewName);
+                if (uIndex.ViewName != null)
+                {
+                    ObjectName viewName = new ObjectName(uIndex.Table.Name.Schema, uIndex.ViewName);
 
-                var columns = index.Columns.ToString(c => c.Name.SqlEscape(), ", ");
+                    var columns = index.Columns.ToString(c => c.Name.SqlEscape(), ", ");
 
+                    SqlPreCommandSimple viewSql = new SqlPreCommandSimple($"CREATE VIEW {viewName} WITH SCHEMABINDING AS SELECT {columns} FROM {uIndex.Table.Name.ToString()} WHERE {uIndex.Where}")
+                    { GoBefore = true, GoAfter = true };
 
-                SqlPreCommandSimple viewSql = new SqlPreCommandSimple($"CREATE VIEW {viewName} WITH SCHEMABINDING AS SELECT {columns} FROM {uIndex.Table.Name.ToString()} WHERE {uIndex.Where}")
-                { GoBefore = true, GoAfter = true };
+                    SqlPreCommandSimple indexSql = new SqlPreCommandSimple($"CREATE UNIQUE CLUSTERED INDEX {uIndex.IndexName} ON {viewName}({columns})");
 
-                SqlPreCommandSimple indexSql = new SqlPreCommandSimple($"CREATE UNIQUE CLUSTERED INDEX {uIndex.IndexName} ON {viewName}({columns})");
-
-                return SqlPreCommand.Combine(Spacing.Simple, viewSql, indexSql);
+                    return SqlPreCommand.Combine(Spacing.Simple, checkUnique!=null ? RemoveDuplicatesIfNecessary(uIndex, checkUnique) : null, viewSql, indexSql);
+                }
+                else
+                {
+                    return SqlPreCommand.Combine(Spacing.Double,
+                        checkUnique != null ? RemoveDuplicatesIfNecessary(uIndex, checkUnique) : null, 
+                        CreateIndexBasic(index, false));
+                }
             }
-            else
+            else 
             {
                 return CreateIndexBasic(index, forHistoryTable: false);
+            }
+        }
+
+        public static int DuplicateCount(UniqueIndex uniqueIndex, Replacements rep)
+        {
+            var primaryKey = uniqueIndex.Table.Columns.Values.Where(a => a.PrimaryKey).Only();
+
+            if (primaryKey == null)
+                throw new InvalidOperationException("No primary key found"); ;
+
+            var oldTableName = rep.Apply(Replacements.KeyTablesInverse, uniqueIndex.Table.Name.ToString());
+
+            var columnReplacement = rep.TryGetC(Replacements.KeyColumnsForTable(uniqueIndex.Table.Name.ToString()))?.Inverse() ?? new Dictionary<string, string>();
+
+            var oldColumns = uniqueIndex.Columns.ToString(c => (columnReplacement.TryGetC(c.Name) ?? c.Name).SqlEscape(), ", ");
+
+            var oldPrimaryKey = columnReplacement.TryGetC(primaryKey.Name) ?? primaryKey.Name;
+
+            return (int)Executor.ExecuteScalar(
+$@"SELECT Count(*) FROM {oldTableName} 
+WHERE {oldPrimaryKey} NOT IN
+(
+    SELECT MIN({oldPrimaryKey})
+    FROM {oldTableName}
+    {uniqueIndex.Where.Replace(columnReplacement)}
+    GROUP BY {oldColumns}
+)");
+        }
+
+        public static SqlPreCommand RemoveDuplicatesIfNecessary(UniqueIndex uniqueIndex, Replacements rep)
+        {
+            try
+            {
+                var primaryKey = uniqueIndex.Table.Columns.Values.Where(a => a.PrimaryKey).Only();
+
+                if (primaryKey == null)
+                    return null;
+
+
+                int count = DuplicateCount(uniqueIndex, rep);
+
+                if (count == 0)
+                    return null;
+
+                var columns = uniqueIndex.Columns.ToString(c => c.Name.SqlEscape(), ", ");
+
+
+                if (SafeConsole.Ask($"There are {count} rows in {uniqueIndex.Table.Name} with the same {columns}. Generate DELETE duplicates script?"))
+                {
+                    return new SqlPreCommandSimple($@"DELETE {uniqueIndex.Table.Name} 
+WHERE {primaryKey.Name} NOT IN
+(
+    SELECT MIN({primaryKey.Name})
+    FROM {uniqueIndex.Table.Name}
+    GROUP BY {columns}
+)");
+                }
+
+                return null;
+
+            }
+            catch (Exception e)
+            {
+                return new SqlPreCommandSimple($"-- Impossible to determine duplicates in new index {uniqueIndex.IndexName}");
+
             }
         }
 
@@ -477,7 +549,7 @@ FROM {1} as [table]".FormatWith(
             return new SqlPreCommandSimple("ALTER INDEX [{0}] ON {1} DISABLE".FormatWith(indexName, tableName));
         }
 
-        public static SqlPreCommandSimple EnableIndex(ObjectName tableName, string indexName)
+        public static SqlPreCommandSimple RebuildIndex(ObjectName tableName, string indexName)
         {
             return new SqlPreCommandSimple("ALTER INDEX [{0}] ON {1} REBUILD".FormatWith(indexName, tableName));
         }

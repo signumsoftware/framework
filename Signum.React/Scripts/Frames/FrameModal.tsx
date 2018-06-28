@@ -36,6 +36,7 @@ interface FrameModalProps extends React.Props<FrameModal>, IModalProps {
 
 interface FrameModalState {
     pack?: EntityPack<ModifiableEntity>;
+    lastEntity?: string;
     getComponent?: (ctx: TypeContext<ModifiableEntity>) => React.ReactElement<any>;
     propertyRoute?: PropertyRoute;
     show: boolean;
@@ -107,7 +108,8 @@ export default class FrameModal extends React.Component<FrameModalProps, FrameMo
     setPack(pack: EntityPack<ModifiableEntity>): void {
         this.setState({
             pack: pack,
-            refreshCount: this.state.refreshCount + 1
+            refreshCount: this.state.refreshCount + 1,
+            lastEntity: JSON.stringify(pack.entity)
         });
     }
 
@@ -137,6 +139,7 @@ export default class FrameModal extends React.Component<FrameModalProps, FrameMo
             }).done();
         }
         else {
+
             if (!this.props.validate) {
 
                 this.okClicked = true;
@@ -183,11 +186,14 @@ export default class FrameModal extends React.Component<FrameModalProps, FrameMo
         if (hc && hc.componentHasChanges)
             return hc.componentHasChanges();
 
-        const entity = this.state.pack!.entity;
+        if (this.state.pack == null)
+            return false;
+
+        const entity = this.state.pack.entity;
 
         GraphExplorer.propagateAll(entity);
 
-        return entity.modified;
+        return entity.modified && JSON.stringify(entity) != this.state.lastEntity;
     }
 
     handleOnExited = () => {

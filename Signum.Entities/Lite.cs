@@ -487,7 +487,7 @@ namespace Signum.Entities
 
         public static XDocument EntityDGML(this Entity entity)
         {
-            return GraphExplorer.FromRoot(entity).EntityDGML(); 
+            return GraphExplorer.FromRootVirtual(entity).EntityDGML(); 
         }
 
 

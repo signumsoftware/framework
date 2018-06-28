@@ -58,7 +58,7 @@ export class ValueLine extends LineBase<ValueLineProps, ValueLineProps> {
         state.valueLineType = ValueLine.getValueLineType(state.type!);
 
         if (state.valueLineType == undefined)
-            throw new Error(`No ValueLine found for '${state.type!.name}' (property route = ${state.ctx.propertyRoute ? state.ctx.propertyRoute.propertyPath() : "??"})`);
+            throw new Error(`No ValueLineType found for type '${state.type!.name}' (property route = ${state.ctx.propertyRoute ? state.ctx.propertyRoute.propertyPath() : "??"})`);
     }
 
     inputElement?: HTMLElement | null;
@@ -440,7 +440,7 @@ function numericTextBox(vl: ValueLine, validateKey: React.KeyboardEventHandler<a
 }
 
 export interface NumericTextBoxProps {
-    value: number;
+    value: number | null;
     onChange: (newValue: number | null) => void;
     validateKey: React.KeyboardEventHandler<any>;
     format?: string;
@@ -473,6 +473,9 @@ export class NumericTextBox extends React.Component<NumericTextBoxProps, { text?
         const input = e.currentTarget as HTMLInputElement;
 
         let value = ValueLine.autoFixString(input.value, false);
+
+        if (numbro.languageData().delimiters.decimal == ',' && !value.contains(",")) //Numbro transforms 1.000 to 1,0 in spanish or german 
+            value = value + ",00";
 
         if (this.props.format && this.props.format.endsWith("%"))
         {

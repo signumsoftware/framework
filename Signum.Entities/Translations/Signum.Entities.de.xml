@@ -252,7 +252,7 @@
     <Member Name="PleaseConfirmYouDLikeToDelete0FromTheSystem" Description="Bitte bestätigen Sie, dass Sie {0} aus dem System löschen möchten" />
     <Member Name="PleaseConfirmYouDLikeToDeleteTheEntityFromTheSystem" Description="Bitte bestätigen Sie, dass Sie die Entität aus dem System löschen möchten" />
     <Member Name="PleaseConfirmYouDLikeToDeleteTheSelectedEntitiesFromTheSystem" Description="Bitte bestätigen Sie, dass Sie die ausgewählten Elemente aus dem System löschen möchten" />
-    <Member Name="StateShouldBe0InsteadOf1" Description="Status sollte {0}  sein (statt {1})." />
+    <Member Name="StateShouldBe0InsteadOf1" Description="Status sollte {0} (statt {1}) sein" />
     <Member Name="TheOperation0DidNotReturnAnEntity" Description="{0} hat keine Enität zurückgegeben" />
   </Type>
   <Type Name="OperationSymbol" Description="Operation" />
@@ -390,6 +390,8 @@
     <Member Name="EndOfSyncScript" Description="--- ENDE DES SYNCHRONISIERUNGSSKRIPTS" />
     <Member Name="StartOfSyncScriptGeneratedOn0" Description="--- ANFANG DES SYNCHRONISATIONSSKRIPTS GENERIERT AUF {0}" />
   </Type>
+  <Type Name="SystemTimeMode" />
+  <Type Name="SystemTimeProperty" />
   <Type Name="TypeEntity" Description="Typ">
     <Member Name="ClassName" Description="Klassen Name" />
     <Member Name="CleanName" Description="Clean Name" />
@@ -418,15 +420,17 @@
     <Member Name="_0IsNotAllowedOnState1" Description="{0} ist im Status {1} nicht zulässig" />
     <Member Name="_0IsNotSet" Description="{0} ist nicht festgesetzt" />
     <Member Name="_0IsSet" Description="{0} wird gesetzt" />
-    <Member Name="_0ShouldBe12" Description="{0} sollte {1} {2}" />
+    <Member Name="_0ShouldBe12" Description="{0} sollte {1} {2} sein" />
     <Member Name="_0ShouldBeADateInThePast" Description="{0} sollte ein Datum in der Vergangenheit sein" />
-    <Member Name="_0ShouldBeGreaterThan1" Description="{0} sollte größer sein als {1}" />
-    <Member Name="_0ShouldBeGreaterThanOrEqual1" Description="{0} sollte größer oder gleich {1}" />
-    <Member Name="_0ShouldBeLessThan1" Description="{0} sollte kleiner als {1}" />
-    <Member Name="_0ShouldBeLessThanOrEqual1" Description="{0} sollte kleiner oder gleich {1}" />
+    <Member Name="_0ShouldBeGreaterThan1" Description="{0} sollte größer als {1} sein" />
+    <Member Name="_0ShouldBeGreaterThanOrEqual1" Description="{0} sollte größer oder gleich {1} sein" />
+    <Member Name="_0ShouldBeLessThan1" Description="{0} sollte kleiner als {1} sein" />
+    <Member Name="_0ShouldBeLessThanOrEqual1" Description="{0} sollte kleiner oder gleich {1} sein" />
     <Member Name="_0ShouldBeNull" Description="{0} sollte leer sein" />
     <Member Name="_0ShouldBeNullWhen1IsNotSet" Description="{0} sollte leer sein, wenn {1} nicht festgesetzt ist" />
+    <Member Name="_0ShouldBeNullWhen1IsNotSetTo2" Description="{0} sollte leer sein, wenn {1} nicht auf {2} festgesetzt ist" />
     <Member Name="_0ShouldBeNullWhen1IsSet" Description="{0} sollte leer sein, wenn {1} festgesetzt ist" />
+    <Member Name="_0ShouldBeNullWhen1IsSetTo2" Description="{0} sollte null sein wenn {1} auf {2} gesetzt ist" />
     <Member Name="_0ShouldBeOfType1" Description="{0} sollte vom Typ {1} sein" />
     <Member Name="_0ShouldHaveJustOneLine" Description="{0} darf nur aus einer Zeile bestehen" />
     <Member Name="_0ShouldNotBeOfType1" Description="{0} sollte nicht vom Typ {1} sein" />

@@ -1,6 +1,6 @@
 ﻿import * as React from 'react'
 import * as moment from 'moment'
-import { ModifiableEntity, Lite, Entity, EntityControlMessage, JavascriptMessage, toLite, is, liteKey } from '../Signum.Entities'
+import { ModifiableEntity, Lite, Entity, EntityControlMessage, JavascriptMessage, toLite, is, liteKey, getToString } from '../Signum.Entities'
 import { Dic, classes } from '../Globals'
 import * as Navigator from '../Navigator'
 import * as Constructor from '../Constructor'
@@ -121,7 +121,7 @@ class EntityComboSelect extends React.Component<EntityComboSelectProps, { data?:
         const ctx = this.props.ctx;
 
         if (ctx.readOnly)
-            return <FormControlReadonly ctx={ctx}>{ctx.value && ctx.value.toStr}</FormControlReadonly>;
+            return <FormControlReadonly ctx={ctx}>{ctx.value && getToString(ctx.value)}</FormControlReadonly>;
 
         return (
             <select className={ctx.formControlClass} onChange={this.handleOnChange} value={lite ? liteKey(lite) : ""} disabled={ctx.readOnly} >
@@ -173,7 +173,7 @@ class EntityComboSelect extends React.Component<EntityComboSelectProps, { data?:
             elements.insertAt(1, lite);
 
         return (
-            elements.map((e, i) => <option key={i} value={e ? liteKey(e) : ""}>{e ? e.toStr : " - "}</option>)
+            elements.map((e, i) => <option key={i} value={e ? liteKey(e) : ""}>{e ? getToString(e) : " - "}</option>)
         );
     }
 
@@ -188,7 +188,7 @@ class EntityComboSelect extends React.Component<EntityComboSelectProps, { data?:
         }
         else
             Finder.API.fetchAllLites({ types: this.props.type!.name })
-                .then(data => this.setState({ data: data.orderBy(a => a.toStr) } as any))
+                .then(data => this.setState({ data: data.orderBy(a => a) } as any))
                 .done();
     }
 }

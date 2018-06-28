@@ -55,6 +55,7 @@ namespace Signum.Engine.DynamicQuery
                 {
                     Format = GetFormat(propertyRoutes);
                     Unit = GetUnit(propertyRoutes);
+                    Implementations = propertyRoutes.FirstOrDefault().TryGetImplementations();
                     processedType = null;
                 }
             }

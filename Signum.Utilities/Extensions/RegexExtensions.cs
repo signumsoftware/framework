@@ -62,5 +62,28 @@ namespace Signum.Utilities
                 yield return resultSelector(tuple.Item1, tuple.Item2, kvp.Value);
             }
         }
+
+        public static IEnumerable<(Match match, string after)> SplitAfter(this Regex regex, string input)
+        {
+            var matches = regex.Matches(input).Cast<Match>().ToList();
+
+            if (matches.IsEmpty())
+            {
+                yield return (null, input);
+            }
+            else
+            {
+                yield return (null, input.Substring(0, matches.FirstOrDefault().Index));
+
+                for (int i = 0; i < matches.Count; i++)
+                {
+                    var from = matches[i].EndIndex();
+                    var to = i < matches.Count - 1 ? matches[i + 1].Index : input.Length;
+
+                    var str = input.Substring(from, to - from);
+                    yield return (matches[i], input.Substring(from, to - from));
+                }
+            }
+        }
     }
 }

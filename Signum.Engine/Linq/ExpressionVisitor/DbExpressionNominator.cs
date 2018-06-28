@@ -1323,6 +1323,7 @@ namespace Signum.Engine.Linq
 
                 //dateadd(month, datediff(month, 0, SomeDate),0);
                 case "DateTimeExtensions.MonthStart": return TrySqlStartOf(m.GetArgument("dateTime"), SqlEnums.month);
+                case "DateTimeExtensions.QuarterStart": return TrySqlStartOf(m.GetArgument("dateTime"), SqlEnums.quarter);
                 case "DateTimeExtensions.WeekStart": return TrySqlStartOf(m.GetArgument("dateTime"), SqlEnums.week);
                 case "DateTimeExtensions.HourStart": return TrySqlStartOf(m.GetArgument("dateTime"), SqlEnums.hour);
                 case "DateTimeExtensions.MinuteStart": return TrySqlStartOf(m.GetArgument("dateTime"), SqlEnums.minute);
@@ -1330,6 +1331,7 @@ namespace Signum.Engine.Linq
                 case "DateTimeExtensions.YearsTo": return TryDatePartTo(new SqlEnumExpression(SqlEnums.year), m.GetArgument("start"), m.GetArgument("end"));
                 case "DateTimeExtensions.MonthsTo": return TryDatePartTo(new SqlEnumExpression(SqlEnums.month), m.GetArgument("start"), m.GetArgument("end"));
 
+                case "DateTimeExtensions.Quarter": return TrySqlFunction(null, SqlFunction.DATEPART, m.Type, new SqlEnumExpression(SqlEnums.quarter), m.Arguments.Single());
                 case "DateTimeExtensions.WeekNumber": return TrySqlFunction(null, SqlFunction.DATEPART, m.Type, new SqlEnumExpression(SqlEnums.week), m.Arguments.Single());
 
                 case "Math.Sign": return TrySqlFunction(null, SqlFunction.SIGN, m.Type, m.GetArgument("value"));

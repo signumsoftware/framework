@@ -19,6 +19,7 @@ using Signum.Utilities.Reflection;
 using Signum.Engine.Operations;
 using Signum.Engine.DynamicQuery;
 using Signum.Engine;
+using Signum.Entities.Basics;
 
 namespace Signum.React.Facades
 {
@@ -184,7 +185,7 @@ namespace Signum.React.Facades
                               EntityData = type.IsIEntity() ? EntityKindCache.GetEntityData(type) : (EntityData?)null,
                               IsLowPopulation = type.IsIEntity() ? EntityKindCache.IsLowPopulation(type) : false,
                               IsSystemVersioned = type.IsIEntity() ? schema.Table(type).SystemVersioned != null : false,
-                              ToStringFunction = LambdaToJavascriptConverter.ToJavascript(ExpressionCleaner.GetFieldExpansion(type, miToString)),
+                              ToStringFunction = typeof(Symbol).IsAssignableFrom(type) ? null : LambdaToJavascriptConverter.ToJavascript(ExpressionCleaner.GetFieldExpansion(type, miToString)),
                               QueryDefined = dqm.QueryDefined(type),
                               Members = PropertyRoute.GenerateRoutes(type).Where(pr => InTypeScript(pr))
                                 .ToDictionary(p => p.PropertyString(), p =>
@@ -216,10 +217,13 @@ namespace Signum.React.Facades
 
         public static bool InTypeScript(PropertyRoute pr)
         {
-            return (pr.Parent == null || InTypeScript(pr.Parent)) && (pr.PropertyInfo == null || pr.PropertyInfo.GetCustomAttribute<InTypeScriptAttribute>()?.GetInTypeScript() != false);
+            return (pr.Parent == null || InTypeScript(pr.Parent)) && (pr.PropertyInfo == null || (pr.PropertyInfo.GetCustomAttribute<InTypeScriptAttribute>()?.GetInTypeScript() ?? !IsExpression(pr.Parent.Type, pr.PropertyInfo)));
         }
 
-
+        private static bool IsExpression(Type type, PropertyInfo propertyInfo)
+        {
+            return propertyInfo.SetMethod == null && ExpressionCleaner.HasExpansions(type, propertyInfo);
+        }
 
         static string GetTypeNiceName(Type type)
         {
@@ -273,14 +277,14 @@ namespace Signum.React.Facades
                               Kind = KindOfType.SymbolContainer,
                               FullName = type.FullName,
                               Members = type.GetFields(staticFlags)
-                                  .Select(f => GetSymbol(f))
+                                  .Select(f => GetSymbolInfo(f))
                                   .Where(s =>
                                   s.FieldInfo != null && /*Duplicated like in Dynamic*/
                                   s.IdOrNull.HasValue /*Not registered*/)
                                   .ToDictionary(s => s.FieldInfo.Name, s => OnAddFieldInfoExtension(new MemberInfoTS
                                   {
                                       NiceName = s.FieldInfo.NiceName(),
-                                      Id = s.Id.Object
+                                      Id = s.IdOrNull.Value.Object
                                   }, s.FieldInfo))
                           }, type)))
                           .Where(a => a.Value.Members.Any())
@@ -289,16 +293,19 @@ namespace Signum.React.Facades
             return result;
         }
 
-        private static Symbol GetSymbol(FieldInfo m)
+        private static (FieldInfo FieldInfo, PrimaryKey? IdOrNull) GetSymbolInfo(FieldInfo m)
         {
             object v = m.GetValue(null);
-            if (v is IOperationSymbolContainer)
-                v = ((IOperationSymbolContainer)v).Symbol;
+            if (v is IOperationSymbolContainer osc)
+                v = osc.Symbol;
+            
+            if (v is Symbol s)
+                return (s.FieldInfo, s.IdOrNull);
 
-            var s = ((Symbol)v);
+            if(v is SemiSymbol semiS)
+                return (semiS.FieldInfo, semiS.IdOrNull);
 
-            return s;
-
+            throw new InvalidOperationException();
         }
 
 
