@@ -85,11 +85,11 @@ namespace Signum.Engine.MachineLearning
                                 {
                                     for (int i = 0; i < inputs.Count; i++)
                                     {
-                                        var input = inputs[i];
-                                        var output = outputs[i];
+                                        PredictDictionary input = inputs[i];
+                                        PredictDictionary output = outputs[i];
 
-                                        var inValue = input.MainQueryValues.GetOrThrow(outputColumn);
-                                        var outValue = output.MainQueryValues.GetOrThrow(outputColumn);
+                                        object inValue = input.MainQueryValues.GetOrThrow(outputColumn);
+                                        object outValue = output.MainQueryValues.GetOrThrow(outputColumn);
 
                                         toInsert.Add(new PredictSimpleResultEntity
                                         {
