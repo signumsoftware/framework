@@ -152,7 +152,7 @@ namespace Signum.Engine.MachineLearning.CNTK
                         EvaluationValidation = null,
                     };
 
-                    ctx.Progresses.Add(ep);
+                    ctx.Progresses.Enqueue(ep);
 
                     if (ctx.StopTraining)
                         p = ctx.Predictor = ctx.Predictor.ToLite().Retrieve();
@@ -293,7 +293,7 @@ namespace Signum.Engine.MachineLearning.CNTK
 
                     Value output = outputDic[calculatedOutputs];
                     IList<IList<float>> values = output.GetDenseData<float>(calculatedOutputs);
-                    var result = values.Select((val,i) => GetPredictionDictionary(val.ToArray(), ctx, inputs[i].Options)).ToList();
+                    var result = values.Select((val, i) => GetPredictionDictionary(val.ToArray(), ctx, inputs[i].Options)).ToList();
                     return result;
                 }
             }
@@ -361,7 +361,7 @@ namespace Signum.Engine.MachineLearning.CNTK
                         using (HeavyProfiler.LogNoStackTrace("EncodeValue"))
                         {
                             var enc = Encodings.GetOrThrow(col.Encoding);
-                            enc.EncodeValue(value ?? CNTKDefault.GetDefaultValue(kvp.Value.FirstOrDefault()), col, kvp.Value, inputValues, 0);
+                            enc.EncodeValue(value ?? CNTKDefault.GetDefaultValue(kvp.Value.FirstOrDefault()), col, kvp.Value, inputValues, offset);
                         }
                     }
                 }
