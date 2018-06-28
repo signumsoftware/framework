@@ -25,6 +25,8 @@ namespace Signum.Engine.MachineLearning
             return predictor;
         }
 
+        public static PredictorPredictContext GetPredictContext(this PredictorPublicationSymbol publication) => GetCurrentPredictor(publication).GetPredictContext();
+
         public static PredictorPredictContext GetPredictContext(this Lite<PredictorEntity> predictor)
         {
             lock (TrainedPredictorCache)
