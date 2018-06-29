@@ -440,7 +440,7 @@ function numericTextBox(vl: ValueLine, validateKey: React.KeyboardEventHandler<a
 }
 
 export interface NumericTextBoxProps {
-    value: number;
+    value: number | null;
     onChange: (newValue: number | null) => void;
     validateKey: React.KeyboardEventHandler<any>;
     format?: string;
