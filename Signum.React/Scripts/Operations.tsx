@@ -59,6 +59,11 @@ export function isOperationAllowed(operation: OperationSymbol | string, type: Ps
     return isOperationInfoAllowed(getOperationInfo(operation, type));
 }
 
+export function isSomeOperationAllowed(operations: (OperationSymbol|string)[], type:PseudoType) : boolean{
+      return operations.some(a => isOperationAllowed(a, type))
+    
+}
+
 export function getOperationInfo(operation: OperationSymbol | string, type: PseudoType): OperationInfo {
     let operationKey = typeof operation == "string" ? operation : operation.key;
     
