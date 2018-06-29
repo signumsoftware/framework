@@ -913,7 +913,7 @@ export module DomUtils {
         context = context || document;
         // guard against orphans
         while (!matches(element, selector)) {
-            if (element == context)
+            if (element == context || element == undefined)
                 return undefined;
 
             element = element.parentNode as HTMLElement;
