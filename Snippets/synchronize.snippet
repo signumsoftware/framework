@@ -1,0 +1,55 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<CodeSnippets xmlns="http://schemas.microsoft.com/VisualStudio/2005/CodeSnippet">
+  <CodeSnippet Format="1.0.0">
+    <Header>
+      <Title>Synchronize</Title>
+      <Shortcut>synchronize</Shortcut>
+      <Description>Syncronizes a collection with a set of entities the database</Description>
+      <Author>Signum Software</Author>
+      <SnippetTypes>
+        <SnippetType>Expansion</SnippetType>
+      </SnippetTypes>
+    </Header>
+    <Snippet>
+      <Imports>
+        <Import>
+          <Namespace>Signum.Engine</Namespace>
+        </Import>
+        <Import>
+          <Namespace>Signum.Entities</Namespace>
+        </Import>
+        <Import>
+          <Namespace>Signum.Utilities</Namespace>
+        </Import>
+      </Imports>
+      <Code Language="csharp" Delimiter="$">
+        <![CDATA[                    
+        var newEntities = new List<T>();
+        Synchronizer.Synchronize(
+              newDictionary: should.ToDictionaryEx(n => n.Key),
+              oldDictionary: current.ToDictionaryEx(o => o.Key),
+              createNew: (k, n) =>
+              {
+                  newEntities.Add(n);
+                  SafeConsole.WriteColor(ConsoleColor.Green, '.');
+              },
+              removeOld: (k, o) =>
+              {
+                  o.Delete();
+                  SafeConsole.WriteColor(ConsoleColor.Red, '.');
+              },
+              merge: (k, n, o) =>
+              {
+                  o.Name = n.Name;
+
+                  if (GraphExplorer.IsGraphModified(o))
+                  {
+                      o.Save();
+                      SafeConsole.WriteColor(ConsoleColor.Yellow, '.');
+                  }
+              });
+              
+            BulkInserter.BulkInsertQueryIds(newEntities, n => n.Key);]]></Code>
+    </Snippet>
+  </CodeSnippet>
+</CodeSnippets>
