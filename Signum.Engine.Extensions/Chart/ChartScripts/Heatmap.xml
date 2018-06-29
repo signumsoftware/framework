@@ -9,12 +9,11 @@
     <Parameter Name="MapType" Type="Enum" ValueDefinition="Roadmap | Satellite" />
     <Parameter Name="Opacity" Type="Enum" ValueDefinition="1|0.9|0.8|0.7|0.6|0.5|0.4|0.3|0.2|0.1" />
     <Parameter Name="Radius(px)" Type="Number" ValueDefinition="10" />
-    <Paremeter Name="ColorGradient" Type="Enum" ValueDefinition="Default | Blue-Red | Purple-Blue | Orange-Red | Fire | Emerald | Cobalt | Purples | Greys" />
+    <Parameter Name="ColorGradient" Type="Enum" ValueDefinition="Default | Blue-Red | Purple-Blue | Orange-Red | Fire | Emerald | Cobalt | Purples | Greys" />
     <Parameter Name="MapStyle" Type="Enum" ValueDefinition="Standard | Silver | Retro | Dark | Night | Aubergine" />
   </Parameters>
   <Icon FileName="heatmap.png"><![CDATA[iVBORw0KGgoAAAANSUhEUgAAACgAAAAoCAYAAACM/rhtAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAA1VJREFUeNrsWVtIVFEU3fPwldqU5rOSjEAcMAohrIQgDIMoKHphnxHRhxiKURBFkSAGQT/1UdFPP/bjVxkIgRCVRVhZhhhOCZPPfI6Mr3Fa+3JmuI4zc8917ugELlhez7nnutfdd5+z9zmavF4vxTLMFONYE7gmcE2gBqz849aj9zEp7uaFkv/Eg8tEBngcLAbzRHsI7AU/gU2izf3V4BkwX/V8hxhzHxwxUmA2RwV4HrSEGfcAbAQPCZGBKBJk8VfAh0YIPAk+BVMkxrL4ColxKeJlCsDLUgKrCp8v6bv/43QtLg1RDLcqsCvQk1KTBOIqoizOh4bAcLBKiOPAfixrYZ11mrISRynZ6qap+SQamN5IVpOHDmS1U35qnzLGMZlDrQO7aWIuOdjnZk9e1xODd8AkrUEm8tL+zK+0K62bLKYFf7/Ha6Z5r4USzHP+vu2pf2hT4jg96ymnuYUlEo6pBZo1vJcnlgdNlOV+pOL0rkXilJmCtlqcD+vjpshu+xXsT9nBeNkYPKKxlCjYmjwYylhYbIifDDX7U2QFHpYxZLc5ljUjxmZTg3V7wHFZgQUyhtISJnSL4wnSOb4t2K2fQqTUJEmSMTbjidMlrmcyV5nFQSYIifQnvczMyhjsc6crcaiFD8OF9G6oSMueroW6V0Zgx+iOUN7wg+/zOA3UBdrUEtgiI9CFBbnZuVdZ74KB+/k+jwsD/rS39VbUL2TjyuHKoUZHGXVPbPEL4Su3uZ/vh4BHeO6E7moGRUMHFus3+LVURuTwjI1eOvfJvtOQ8No9USToqwchLEMUo52yAiVxlkMHLz+isqWrorbggau43lCnHINQD2GNkZT8LKgZPBiFUqoJ4q5Fuu2sjpK4evCUEZumSwYL481TDTzXasSuLk/Qn1/Lc9vIFu+i9r8F1DZsD3yWa7bN4B5x5c1UP+jkpCE+aUukb2gNlXdLM79QJipjRknGN/o9lU397rRF3oGAupU8+nCqqwgzeZdUzMtJg0YKdIGvfY23SOq+jPB9LF8pCFTogvc6V+NkoQZs4889iM3Ok+6joVJT5WqdbvFxxDnQHSZvVhoR/JGczXB+3AnWih1Wtjg7eQXeBT+HS00rdXjEZfdFwVWFKdb/DfFPgAEAvPH5L9HZAa0AAAAASUVORK5CYII=]]></Icon>
-  <Script>
-    <![CDATA[function DrawChart(chart, data) {
+  <Script><![CDATA[function DrawChart(chart, data) {
 
 
     if (!(typeof google === 'object' && typeof google.maps === 'object')) {
