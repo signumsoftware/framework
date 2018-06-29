@@ -110,9 +110,10 @@ namespace Signum.Engine.DynamicQuery
 
             if (meta != null)
             {
+                if (meta is CleanMeta cm)
+                    PropertyRoutes = cm.PropertyRoutes;
+
                 Implementations = meta.Implementations;
-                if (meta is CleanMeta)
-                    PropertyRoutes = ((CleanMeta)meta).PropertyRoutes;
             }
 
         }
