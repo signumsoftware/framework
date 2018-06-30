@@ -1,6 +1,6 @@
 ﻿import * as React from 'react'
 import * as moment from 'moment'
-import { Binding, LambdaMemberType } from '../../../../Framework/Signum.React/Scripts/Reflection'
+import { Binding, MemberType } from '../../../../Framework/Signum.React/Scripts/Reflection'
 import { Dic } from '../../../../Framework/Signum.React/Scripts/Globals'
 import { newMListElement } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
 import { InboxFilterModel, InboxMessage, CaseNotificationState } from '../Signum.Entities.Workflow'
