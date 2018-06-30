@@ -5,7 +5,7 @@ import * as Constructor from '../Constructor'
 import * as Finder from '../Finder'
 import { FindOptions } from '../FindOptions'
 import { TypeContext, StyleContext, StyleOptions, FormGroupStyle, mlistItemContext, EntityFrame } from '../TypeContext'
-import { PropertyRoute, PropertyRouteType, MemberInfo, getTypeInfo, getTypeInfos, TypeInfo, IsByAll, ReadonlyBinding, LambdaMemberType, Type } from '../Reflection'
+import { PropertyRoute, PropertyRouteType, MemberInfo, getTypeInfo, getTypeInfos, TypeInfo, IsByAll, ReadonlyBinding, MemberType, Type } from '../Reflection'
 import { LineBase, LineBaseProps, runTasks, } from '../Lines/LineBase'
 import { ModifiableEntity, Lite, Entity, MList, MListElement, EntityControlMessage, JavascriptMessage, toLite, is, liteKey, getToString } from '../Signum.Entities'
 import { EntityBase } from './EntityBase'
@@ -57,7 +57,7 @@ export class EntityTable extends EntityListBase<EntityTableProps, EntityTablePro
         super.overrideProps(state, overridenProps);
 
         if (!state.columns) {
-            var elementPr = state.ctx.propertyRoute.add(a => a[0].element);
+            var elementPr = state.ctx.propertyRoute.addLambda(a => a[0].element);
 
             state.columns = Dic.getKeys(elementPr.subMembers())
                 .filter(a => a != "Id")
@@ -121,7 +121,7 @@ export class EntityTable extends EntityListBase<EntityTableProps, EntityTablePro
     renderTable(ctx: TypeContext<MList<ModifiableEntity>>) {
 
         const readOnly = ctx.readOnly;
-        const elementPr = ctx.propertyRoute.add(a => a[0].element);
+        const elementPr = ctx.propertyRoute.addLambda(a => a[0].element);
 
         return (
             <div ref={d => this.containerDiv = d}
@@ -135,7 +135,7 @@ export class EntityTable extends EntityListBase<EntityTableProps, EntityTablePro
                                 <th></th>
                                 {
                                     this.state.columns!.map((c, i) => <th key={i} {...c.headerHtmlAttributes}>
-                                        {c.header === undefined && c.property ? elementPr.add(c.property).member!.niceName : c.header}
+                                        {c.header === undefined && c.property ? elementPr.addLambda(c.property).member!.niceName : c.header}
                                     </th>)
                                 }
                             </tr>
@@ -241,8 +241,9 @@ export class EntityTableRow extends React.Component<EntityTableRowProps, { rowSt
             throw new Error("Column has no property and no template");
 
         if (typeof col.property == "string")
-            return DynamicComponent.getAppropiateComponent(this.props.ctx.subCtx(col.property));
+            return DynamicComponent.getAppropiateComponent(this.props.ctx.subCtx(col.property)); /*string overload*/
         else
-            return DynamicComponent.getAppropiateComponent(this.props.ctx.subCtx(col.property));
+            return DynamicComponent.getAppropiateComponent(this.props.ctx.subCtx(col.property)); /*lambda overload*/
+
     }
 }

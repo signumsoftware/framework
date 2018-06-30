@@ -96,7 +96,7 @@ export abstract class EntityListBase<T extends EntityListBaseProps, S extends En
                 if (!this.state.viewOnCreate)
                     return Promise.resolve(e);
 
-                const pr = this.state.ctx.propertyRoute.add(a => a[0]);
+                const pr = this.state.ctx.propertyRoute.addLambda(a => a[0]);
 
                 return this.state.onView ?
                     this.state.onView(e, pr) :
