@@ -28,7 +28,7 @@ import { ISimpleFilterBuilder } from './SearchControl'
 import "./Search.css"
 import { FilterOperation } from '../Signum.Entities.DynamicQuery';
 import SystemTimeEditor from './SystemTimeEditor';
-import { MaxHeightProperty } from 'csstype';
+import { MaxHeightProperty, MaxWidthProperty } from 'csstype';
 
 export interface ShowBarExtensionOption { }
 
@@ -393,7 +393,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
                     subTokensOptions={SubTokensOptions.CanElement | canAggregate}
                     close={this.handleColumnClose} />}
                 <div ref={d => this.containerDiv = d}
-                    className="sf-search-results-container table-responsive"
+                    className="sf-scroll-table-container table-responsive"
                     style={{ maxHeight: this.props.maxResultsHeight }}>
                     <table className="sf-search-results table table-hover table-sm" onContextMenu={this.props.showContextMenu != false ? this.handleOnContextMenu : undefined} >
                         <thead ref={th => this.thead = th}>
