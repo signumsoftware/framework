@@ -953,6 +953,20 @@ export function symbolNiceName(symbol: Entity & ISymbol | Lite<Entity & ISymbol>
         return getMember(symbol.toStr!)!.niceName;
 }
 
+export function getSymbol<T extends Entity & ISymbol>(type: Type<T>, key: string) { //Unsafe Type!
+
+    const mi = getMember(key);
+    if (mi == null)
+        throw new Error(`No Symbol with key '${key}' found`);
+
+    var symbol = {
+        Type: type.typeName,
+        id: mi.id,
+        key: key
+    } as T;
+    return symbol as T
+}
+
 export function registerSymbol(type: string, key: string): any /*ISymbol*/ {
 
     const mi = getMember(key);
