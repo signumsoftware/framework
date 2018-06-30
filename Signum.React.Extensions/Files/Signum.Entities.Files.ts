@@ -54,7 +54,9 @@ export module FileMessage {
     export const ViewFile = new MessageKey("FileMessage", "ViewFile");
     export const ViewingHasNotDefaultImplementationFor0 = new MessageKey("FileMessage", "ViewingHasNotDefaultImplementationFor0");
     export const OnlyOneFileIsSupported = new MessageKey("FileMessage", "OnlyOneFileIsSupported");
-    export const DragAndDropHere = new MessageKey("FileMessage", "DragAndDropHere");
+    export const OrDragAFileHere = new MessageKey("FileMessage", "OrDragAFileHere");
+    export const TheFile0IsNotA1 = new MessageKey("FileMessage", "TheFile0IsNotA1");
+    export const TheFile0ShouldBeSmallerThan1 = new MessageKey("FileMessage", "TheFile0ShouldBeSmallerThan1");
 }
 
 export const FilePathEmbedded = new Type<FilePathEmbedded>("FilePathEmbedded");
