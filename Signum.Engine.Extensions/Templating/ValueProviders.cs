@@ -271,9 +271,12 @@ namespace Signum.Engine.Templating
         public TranslateInstanceValueProvider(ParsedToken token, bool isExplicit, Action<bool, string> addError)
         {
             this.ParsedToken = token;
-            this.Route = token.QueryToken.GetPropertyRoute();
             this.IsExplicit = isExplicit;
-            this.EntityToken = DeterminEntityToken(token.QueryToken, addError);
+            if (token.QueryToken != null)
+            {
+                this.Route = token.QueryToken.GetPropertyRoute();
+                this.EntityToken = DeterminEntityToken(token.QueryToken, addError);
+            }
         }
 
         public override object GetValue(TemplateParameters p)
