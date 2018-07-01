@@ -15,8 +15,12 @@
     border-radius: 7px;
     cursor: default;    
 }
-.sf-file-drop-over
-{
+
+.sf-file-drop .sf-upload{
+    margin-top: -5px;
+    margin-bottom: -5px;
+}
+.sf-file-drop-over {
     color: #f00;
     border-color: #f00;
     border-style: solid;
@@ -32,6 +36,26 @@
     overflow: hidden;
     text-overflow: ellipsis;
 }
+
+
+.sf-file-image-container {
+    position: relative;
+}
+
+    .sf-file-image-container img {
+        width: 100%;
+    }
+
+    .sf-file-image-container .sf-remove {
+        position: absolute;
+        right: 2px;
+        top: 2px;
+        padding: 0.2rem;
+        font-size: 0.875rem;
+        line-height: 1.5;
+        border-radius: 0.2rem;
+    }
+
 
 /*Upload file*/
 .sf-upload {
