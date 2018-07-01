@@ -56,7 +56,7 @@ export module FileMessage {
     export const OnlyOneFileIsSupported = new MessageKey("FileMessage", "OnlyOneFileIsSupported");
     export const OrDragAFileHere = new MessageKey("FileMessage", "OrDragAFileHere");
     export const TheFile0IsNotA1 = new MessageKey("FileMessage", "TheFile0IsNotA1");
-    export const _0TheFileSizeShouldBeSmallerThan1 = new MessageKey("FileMessage", "_0TheFileSizeShouldBeSmallerThan1");
+    export const File0IsTooBigTheMaximumSizeIs1 = new MessageKey("FileMessage", "File0IsTooBigTheMaximumSizeIs1");
 }
 
 export const FilePathEmbedded = new Type<FilePathEmbedded>("FilePathEmbedded");

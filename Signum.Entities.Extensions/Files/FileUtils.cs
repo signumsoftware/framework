@@ -55,8 +55,8 @@ namespace Signum.Entities.Files
         OrDragAFileHere,
         [Description("The file {0} is not a {1}")]
         TheFile0IsNotA1,
-        [Description("'{0}', The file size should be smaller than {1}")]
-        _0TheFileSizeShouldBeSmallerThan1,
+        [Description("File '{0}' is too big, the maximum size is {1}")]
+        File0IsTooBigTheMaximumSizeIs1,
     }
 
 

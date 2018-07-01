@@ -103,7 +103,7 @@ export default class FileUploader extends React.Component<FileUploaderProps, Fil
                 }
 
                 if (this.props.maxSizeInBytes != null && this.props.maxSizeInBytes < file.size) {
-                    this.setError(FileMessage._0TheFileSizeShouldBeSmallerThan1.niceToString(file.name, bytesToSize(this.props.maxSizeInBytes)));
+                    this.setError(FileMessage.File0IsTooBigTheMaximumSizeIs1.niceToString(file.name, bytesToSize(this.props.maxSizeInBytes)));
                     return resolve();
                 }
             }

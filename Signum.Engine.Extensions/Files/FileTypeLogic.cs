@@ -242,7 +242,7 @@ namespace Signum.Engine.Files
             if(MaxSizeInBytes != null)
             {
                 if(fp.BinaryFile.Length > MaxSizeInBytes)
-                    throw new ApplicationException(FileMessage._0TheFileSizeShouldBeSmallerThan1.NiceToString(fp.FileName, ((long)fp.BinaryFile.Length).ToComputerSize()));
+                    throw new ApplicationException(FileMessage.File0IsTooBigTheMaximumSizeIs1.NiceToString(fp.FileName, ((long)fp.BinaryFile.Length).ToComputerSize()));
             }
         }
     }
