@@ -123,7 +123,7 @@ export abstract class EntityList extends EntityListBase<EntityListProps, EntityL
         const list = ctx.value!;
         const entity = list[selectedIndex].element;
 
-        const pr = ctx.propertyRoute.add(a => a[0]);
+        const pr = ctx.propertyRoute.addLambda(a => a[0]);
 
         const openWindow = (event.button == 1 || event.ctrlKey) && !this.state.type!.isEmbedded;
 

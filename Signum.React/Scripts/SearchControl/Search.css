@@ -131,13 +131,22 @@ td.centered-cell{
     text-align: center
 }
 
-.sf-search-results-container {
+.sf-scroll-table-container {
     overflow-x: auto;
 }
 
-.sf-popup-fullscreen {
-    font-size: 18px;
-}
+    /*Avoid EntityLines to get on top of sticky headers*/
+    .sf-scroll-table-container .form-control,
+    .sf-scroll-table-container .input-group,
+    .sf-scroll-table-container .input-group-prepend .btn,
+    .sf-scroll-table-container .input-group-append .btn {
+        position: static !important;
+        z-index: initial !important;
+    }
+
+    .sf-popup-fullscreen {
+        font-size: 18px;
+    }
 
 .table-hover > tbody > tr:hover.sf-search-footer > td {
     background-color: transparent;

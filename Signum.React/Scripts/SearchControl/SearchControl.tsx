@@ -82,7 +82,8 @@ export default class SearchControl extends React.Component<SearchControlProps, S
 
     static defaultProps = {
         allowSelection: true,
-        avoidFullScreenButton: false
+        avoidFullScreenButton: false,
+        maxResultsHeight: "400px"
     };
 
     constructor(props: SearchControlProps) {
