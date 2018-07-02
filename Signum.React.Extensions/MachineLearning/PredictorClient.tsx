@@ -10,7 +10,7 @@ import * as Finder from '../../../Framework/Signum.React/Scripts/Finder'
 import { QueryRequest } from '../../../Framework/Signum.React/Scripts/FindOptions'
 import { Lite, Entity, EntityPack, ExecuteSymbol, DeleteSymbol, ConstructSymbol_From, registerToString, JavascriptMessage, toLite } from '../../../Framework/Signum.React/Scripts/Signum.Entities'
 import { EntityOperationSettings } from '../../../Framework/Signum.React/Scripts/Operations'
-import { PseudoType, QueryKey, GraphExplorer, OperationType, Type, getTypeName } from '../../../Framework/Signum.React/Scripts/Reflection'
+import { PseudoType, QueryKey, GraphExplorer, OperationType, Type, getTypeName, symbolNiceName } from '../../../Framework/Signum.React/Scripts/Reflection'
 import * as Operations from '../../../Framework/Signum.React/Scripts/Operations'
 import * as ContextualOperations from '../../../Framework/Signum.React/Scripts/Operations/ContextualOperations'
 import {
@@ -74,7 +74,7 @@ export function start(options: { routes: JSX.Element[] }) {
         hideOnCanExecute: true,
         onClick: eoc => {
             API.publications(eoc.entity.mainQuery.query!.key)
-                .then(pubs => SelectorModal.chooseElement(pubs))
+                .then(pubs => SelectorModal.chooseElement(pubs, { buttonDisplay: a => symbolNiceName(a), buttonName: a => a.key }))
                 .then(pps => pps && eoc.defaultClick(pps))
                 .done();
         },
@@ -82,7 +82,7 @@ export function start(options: { routes: JSX.Element[] }) {
             onClick: coc => {
                 Navigator.API.fetchAndForget(coc.context.lites[0])
                     .then(p => API.publications(p.mainQuery.query!.key))
-                    .then(pubs => SelectorModal.chooseElement(pubs))
+                    .then(pubs => SelectorModal.chooseElement(pubs, { buttonDisplay: a => symbolNiceName(a), buttonName: a => a.key }))
                     .then(pps => pps && coc.defaultContextualClick(pps))
                     .done();
             }
