@@ -73,7 +73,7 @@ namespace Signum.Engine.MachineLearning.CNTK
         public void EncodeValue(object value, PredictorColumnBase column, List<PredictorCodification> codifications, float[] inputValues, int offset)
         {
             var dic = GetCodificationDictionary(column, codifications);
-            if (dic.TryGetValue(value, out int index))
+            if (value != null && dic.TryGetValue(value, out int index))
                 inputValues[offset + index] = 1;
         }
 

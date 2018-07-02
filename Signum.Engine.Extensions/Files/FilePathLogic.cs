@@ -140,7 +140,9 @@ namespace Signum.Engine.Files
         {
             if (fp.IsNew && !unsafeMode.Value)
             {
-                fp.FileType.GetAlgorithm().SaveFile(fp);
+                var alg = fp.FileType.GetAlgorithm();
+                alg.ValidateFile(fp);
+                alg.SaveFile(fp);
             }
         }
 

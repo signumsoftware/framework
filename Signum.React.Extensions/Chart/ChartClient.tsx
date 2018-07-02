@@ -26,6 +26,7 @@ import {
 import { QueryTokenEmbedded } from '../UserAssets/Signum.Entities.UserAssets'
 import ChartButton from './ChartButton'
 import ChartRequestView from './Templates/ChartRequestView'
+import * as ChartUtils from './Templates/ChartUtils'
 import * as UserChartClient from './UserChart/UserChartClient'
 import { ImportRoute } from "../../../Framework/Signum.React/Scripts/AsyncImport";
 import { ColumnRequest } from '../../../Framework/Signum.React/Scripts/FindOptions';

@@ -12,6 +12,7 @@ using System.Reflection;
 using System.Security;
 using System.Text;
 using System.Threading.Tasks;
+using System.Web;
 
 namespace Signum.Engine.Files
 {
@@ -66,7 +67,10 @@ namespace Signum.Engine.Files
 
     public interface IFileTypeAlgorithm
     {
+        bool OnlyImages { get; set; }
+        int? MaxSizeInBytes { get; set; }
         void SaveFile(IFilePath fp);
+        void ValidateFile(IFilePath fp);
         void DeleteFiles(IEnumerable<IFilePath> files);
         byte[] ReadAllBytes(IFilePath fp);
         Stream OpenRead(IFilePath fp);
@@ -220,6 +224,28 @@ namespace Signum.Engine.Files
         PrefixPair IFileTypeAlgorithm.GetPrefixPair(IFilePath efp)
         {
             return this.GetPrefixPair(efp);
+        }
+
+        public Action<IFilePath> OnValidateFile { get; set; }
+        public int? MaxSizeInBytes { get; set; }
+        public bool OnlyImages { get; set; }
+
+        public void ValidateFile(IFilePath fp)
+        {
+            if (OnlyImages)
+            {
+                var mime = MimeMapping.GetMimeMapping(fp.FileName);
+                if (mime == null || !mime.StartsWith("image/"))
+                    throw new ApplicationException(FileMessage.TheFile0IsNotA1.NiceToString(fp.FileName, "image/*"));
+            }
+
+            if (MaxSizeInBytes != null)
+            {
+                if (fp.BinaryFile.Length > MaxSizeInBytes)
+                    throw new ApplicationException(FileMessage.File0IsTooBigTheMaximumSizeIs1.NiceToString(fp.FileName, ((long)fp.BinaryFile.Length).ToComputerSize()));
+            }
+
+            OnValidateFile?.Invoke(fp);
         }
     }
 }
