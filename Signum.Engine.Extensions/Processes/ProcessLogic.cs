@@ -238,7 +238,7 @@ namespace Signum.Engine.Processes
 
                 new Execute(ProcessOperation.Cancel)
                 {
-                    FromStates = { ProcessState.Planned, ProcessState.Created, ProcessState.Suspended, ProcessState.Queued },
+                    FromStates = { ProcessState.Planned, ProcessState.Created, ProcessState.Suspended, ProcessState.Queued, ProcessState.Executing, ProcessState.Suspending },
                     ToStates = { ProcessState.Canceled },
                     Execute = (p, _) =>
                     {
