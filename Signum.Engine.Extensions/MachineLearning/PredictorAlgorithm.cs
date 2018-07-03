@@ -4,6 +4,7 @@ using Signum.Entities.MachineLearning;
 using Signum.Entities.UserAssets;
 using Signum.Utilities;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -63,13 +64,13 @@ namespace Signum.Engine.MachineLearning
             }.Save();
         }
 
-        
+
     }
 
     public class PredictorPredictContext
     {
         public IPredictorAlgorithm Algorithm { get; }
-        
+
         public PredictorEntity Predictor { get; }
 
         public List<PredictorCodification> Codifications { get; }
@@ -96,7 +97,7 @@ namespace Signum.Engine.MachineLearning
             SubQueryOutputCodifications = OutputCodifications.Where(a => a.Column is PredictorColumnSubQuery).AgGroupToDictionary(a => ((PredictorColumnSubQuery)a.Column).SubQuery, sqGroup => new PredictorPredictSubQueryContext
             {
                 SubQuery = sqGroup.Key,
-                Groups = sqGroup.AgGroupToDictionary(a => ((PredictorColumnSubQuery)a.Column).Keys, 
+                Groups = sqGroup.AgGroupToDictionary(a => ((PredictorColumnSubQuery)a.Column).Keys,
                     keysGroup => keysGroup.GroupToDictionary(a => ((PredictorColumnSubQuery)a.Column).PredictorSubQueryColumn), ObjectArrayComparer.Instance)
             });
         }
@@ -130,7 +131,7 @@ namespace Signum.Engine.MachineLearning
         public MainQuery MainQuery { get; internal set; }
         public Dictionary<PredictorSubQueryEntity, SubQuery> SubQueries { get; internal set; }
 
-        public List<EpochProgress> Progresses = new List<EpochProgress>();
+        public ConcurrentQueue<EpochProgress> Progresses = new ConcurrentQueue<EpochProgress>();
 
         public PredictorTrainingContext(PredictorEntity predictor, CancellationToken cancellationToken)
         {
@@ -190,12 +191,7 @@ namespace Signum.Engine.MachineLearning
 
         public List<object[]> GetProgessArray()
         {
-            var list = new List<object[]>(Progresses.Count);
-            for (int i = 0; i < Progresses.Count; i++) //Using a for to avoid collection modified protection
-            {
-                list.Add(Progresses[i].ToObjectArray());
-            }
-            return list;
+            return Progresses.Select(a => a.ToObjectArray()).ToList();
         }
     }
 
@@ -229,7 +225,7 @@ namespace Signum.Engine.MachineLearning
         List<PredictDictionary> PredictMultiple(PredictorPredictContext ctx, List<PredictDictionary> inputs);
         string[] GetAvailableDevices();
         List<PredictorCodification> GenerateCodifications(PredictorColumnEncodingSymbol encoding, ResultColumn resultColumn, PredictorColumnBase column);
-        IEnumerable<PredictorColumnEncodingSymbol> GetRegisteredEncodingSymbols(); 
+        IEnumerable<PredictorColumnEncodingSymbol> GetRegisteredEncodingSymbols();
     }
 
     public interface IPredictorResultSaver
@@ -247,9 +243,35 @@ namespace Signum.Engine.MachineLearning
 
         public Lite<Entity> Entity { get; set; } //Optional
 
+        public PredictionOptions Options { get; set; }
+
         public PredictorEntity Predictor { get; set; }
         public Dictionary<PredictorColumnEmbedded, object> MainQueryValues { get; set; } = new Dictionary<PredictorColumnEmbedded, object>();
         public Dictionary<PredictorSubQueryEntity, PredictSubQueryDictionary> SubQueries { get; set; } = new Dictionary<PredictorSubQueryEntity, PredictSubQueryDictionary>();
+
+        public PredictDictionary Clone()
+        {
+            var result = new PredictDictionary(Predictor)
+            {
+                Entity = this.Entity,
+                Options = this.Options,
+            };
+
+            result.MainQueryValues.AddRange(MainQueryValues.ToDictionaryEx());
+            result.SubQueries.AddRange(SubQueries, kvp => kvp.Key, kvp => kvp.Value.Clone());
+            return result;
+        }
+    }
+
+    public class PredictionOptions
+    {
+        public int? AlternativeCount;
+    }
+
+    public class AlternativePrediction
+    {
+        public float Probability { get; set; }
+        public object Value { get; set; }
     }
 
     public class PredictSubQueryDictionary
@@ -261,5 +283,12 @@ namespace Signum.Engine.MachineLearning
 
         public PredictorSubQueryEntity SubQuery { get; set; }
         public Dictionary<object[], Dictionary<PredictorSubQueryColumnEmbedded, object>> SubQueryGroups { get; set; } = new Dictionary<object[], Dictionary<PredictorSubQueryColumnEmbedded, object>>();
+
+        public PredictSubQueryDictionary Clone()
+        {
+            var result = new PredictSubQueryDictionary(SubQuery);
+            result.SubQueryGroups.AddRange(this.SubQueryGroups, kvp => kvp.Key, kvp => kvp.Value.ToDictionary());
+            return result;
+        }
     }
 }

@@ -264,7 +264,7 @@ export class DesignerNode<N extends BaseNode> {
         var route = this.fixRoute()
         const lbn = node as any as { field: string };
         if (lbn.field && route)
-            route = route.tryAddMember({ name: lbn.field, type: "Member" });
+            route = route.tryAddMember("Member", lbn.field);
 
         var res = new DesignerNode<T>(this, this.context, node, route);
       
@@ -301,7 +301,7 @@ export class DesignerNode<N extends BaseNode> {
         }
 
         if (options.hasCollection)
-            res = res.tryAddMember({ name: "", type: "Indexer" });
+            res = res.tryAddMember("Indexer", "");
 
         if (!res)
             return undefined;
@@ -310,7 +310,7 @@ export class DesignerNode<N extends BaseNode> {
         {
             const tr = res.typeReference();
             if (tr.isLite)
-                res = res.tryAddMember({ name: "entity", type: "Member" });
+                res = res.tryAddMember("Member", "Entity");
         }
         return res;
     }
@@ -622,23 +622,6 @@ export function validateField(dn: DesignerNode<LineBaseNode>): string | undefine
 
     return undefined;
 }
-
-export function validateTableColumnProperty(dn: DesignerNode<EntityTableColumnNode>) {
-
-    const parentRoute = dn.parent!.fixRoute();
-
-    if (parentRoute == undefined)
-        return undefined;
-
-    const m = parentRoute.subMembers()[dn.node.property!]
-    const DVVM = DynamicViewValidationMessage;
-
-    if ( m.type.isCollection)
-        return DVVM._0RequiresA1.niceToString(dn.node.kind, DVVM.EntityOrValue.niceToString());
-
-    return undefined;
-}
-
 
 export function validateFindOptions(foe: FindOptionsExpr, parentCtx: TypeContext<ModifiableEntity> | undefined) : string | undefined {
     if (!foe.queryName)

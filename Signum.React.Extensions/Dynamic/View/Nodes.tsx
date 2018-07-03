@@ -32,6 +32,8 @@ import FileLine from "../../Files/FileLine";
 import { DownloadBehaviour } from "../../Files/FileDownloader";
 import { registerSymbol } from "../../../../Framework/Signum.React/Scripts/Reflection";
 import { Tabs, Tab, UncontrolledTabs } from '../../../../Framework/Signum.React/Scripts/Components/Tabs';
+import FileImageLine from '../../Files/FileImageLine';
+import { FileEntity, FilePathEntity, FileEmbedded, FilePathEmbedded } from '../../Files/Signum.Entities.Files';
 
 export interface BaseNode {
     kind: string;
@@ -279,6 +281,27 @@ NodeUtils.register<TextNode>({
         <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.tagName)} type="string" defaultValue={"p"} options={["p", "span", "div", "pre", "code", "strong", "em", "del", "sub", "sup", "ins", "h1", "h2", "h3", "h4", "h5"]} />
         <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.message)} type="textArea" defaultValue={null} />
         <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.breakLines)} type="boolean" defaultValue={false} />
+        <HtmlAttributesLine dn={dn} binding={Binding.create(dn.node, n => n.htmlAttributes)} />
+    </div>),
+});
+
+
+export interface ImageNode extends BaseNode {
+    kind: "Image",
+    htmlAttributes?: HtmlAttributesExpression;
+    src?: ExpressionOrValue<string>;
+}
+
+NodeUtils.register<ImageNode >({
+    kind: "Image",
+    group: "Container",
+    order: 5,
+    initialize: dn => { dn.src = "~/images/logo.png"; },
+    renderTreeNode: dn => <span><small>{dn.node.kind}:</small> <strong>{dn.node.src ? (typeof dn.node.src == "string" ? dn.node.src : (dn.node.src.__code__ || "")).etc(20) : ""}</strong></span>,
+    renderCode: (node, cc) => cc.elementCode("img", node.htmlAttributes && { src: node.src }),
+    render: (dn, ctx) => <img {...toHtmlAttributes(ctx, dn.node.htmlAttributes)} src={Navigator.toAbsoluteUrl(NodeUtils.evaluateAndValidate(ctx, dn.node, n => n.src, NodeUtils.isString) as string)}/>,
+    renderDesigner: dn => (<div>
+        <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.src)} type="string" defaultValue={null} />
         <HtmlAttributesLine dn={dn} binding={Binding.create(dn.node, n => n.htmlAttributes)} />
     </div>),
 });
@@ -555,6 +578,7 @@ export interface FileLineNode extends EntityBaseNode {
     dragAndDropMessage?: ExpressionOrValue<string>;
     fileType?: ExpressionOrValue<string>;
     accept?: ExpressionOrValue<string>;
+    maxSizeInBytes?: ExpressionOrValue<number>;
 }
 
 const DownloadBehaviours: DownloadBehaviour[] = ["SaveAs", "View", "None"];
@@ -580,6 +604,7 @@ NodeUtils.register<FileLineNode>({
         dragAndDropMessage: node.dragAndDropMessage,
         fileType: bindExpr(key => registerSymbol("FileType", key), node.fileType),
         accept: node.accept,
+        maxSizeInBytes: node.maxSizeInBytes,
         onChange: node.onChange
     }),
     render: (dn, parentCtx) => (<FileLine
@@ -595,6 +620,7 @@ NodeUtils.register<FileLineNode>({
         dragAndDropMessage={NodeUtils.evaluateAndValidate(parentCtx, dn.node, n => n.dragAndDropMessage, NodeUtils.isStringOrNull)}
         fileType={toFileTypeSymbol(NodeUtils.evaluateAndValidate(parentCtx, dn.node, n => n.fileType, NodeUtils.isStringOrNull))}
         accept={NodeUtils.evaluateAndValidate(parentCtx, dn.node, n => n.accept, NodeUtils.isStringOrNull)}
+        maxSizeInBytes={NodeUtils.evaluateAndValidate(parentCtx, dn.node, n => n.maxSizeInBytes, NodeUtils.isStringOrNull)}
         onChange={NodeUtils.evaluateAndValidate(parentCtx, dn.node, n => n.onChange, NodeUtils.isFunctionOrNull)}
     />),
     renderDesigner: dn => {
@@ -613,6 +639,81 @@ NodeUtils.register<FileLineNode>({
                 <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.dragAndDropMessage)} type="string" defaultValue={null} />
                 <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.fileType)} type="string" defaultValue={null} options={getFileTypes()} />
                 <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.accept)} type="string" defaultValue={null} />
+                <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.maxSizeInBytes)} type="number" defaultValue={null} />
+                <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.onChange)} type={null} defaultValue={null} exampleExpression={"() => this.forceUpdate()"} />
+            </div>
+        );
+    }
+});
+
+export interface FileImageLineNode extends EntityBaseNode {
+    kind: "FileImageLine",
+    download?: ExpressionOrValue<DownloadBehaviour>;
+    dragAndDrop?: ExpressionOrValue<boolean>;
+    dragAndDropMessage?: ExpressionOrValue<string>;
+    fileType?: ExpressionOrValue<string>;
+    accept?: ExpressionOrValue<string>;
+    maxSizeInBytes?: ExpressionOrValue<number>;
+    imageHtmlAttributes?: HtmlAttributesExpression;
+}
+
+NodeUtils.register<FileImageLineNode>({
+    kind: "FileImageLine",
+    group: "Property",
+    order: 5,
+    isContainer: false,
+    hasEntity: true,
+    validate: (dn, ctx) => NodeUtils.validateFieldMandatory(dn),
+    renderTreeNode: NodeUtils.treeNodeKindField,
+    renderCode: (node, cc) => cc.elementCode("FileImageLine", {
+        ctx: cc.subCtxCode(node.field, node.styleOptions),
+        labelText: node.labelText,
+        labelHtmlAttributes: node.labelHtmlAttributes,
+        formGroupHtmlAttributes: node.formGroupHtmlAttributes,
+        visible: node.visible,
+        readOnly: node.readOnly,
+        remove: node.remove,
+        dragAndDrop: node.dragAndDrop,
+        dragAndDropMessage: node.dragAndDropMessage,
+        fileType: bindExpr(key => registerSymbol("FileType", key), node.fileType),
+        accept: node.accept,
+        maxSizeInBytes: node.maxSizeInBytes,
+        onChange: node.onChange
+    }),
+    render: (dn, parentCtx) => (<FileImageLine
+        ctx={parentCtx.subCtx(dn.node.field, toStyleOptions(parentCtx, dn.node.styleOptions))}
+        labelText={NodeUtils.evaluateAndValidate(parentCtx, dn.node, n => n.labelText, NodeUtils.isStringOrNull)}
+        labelHtmlAttributes={toHtmlAttributes(parentCtx, dn.node.labelHtmlAttributes)}
+        formGroupHtmlAttributes={toHtmlAttributes(parentCtx, dn.node.formGroupHtmlAttributes)}
+        imageHtmlAttributes={toHtmlAttributes(parentCtx, dn.node.imageHtmlAttributes)}
+        visible={NodeUtils.evaluateAndValidate(parentCtx, dn.node, n => n.visible, NodeUtils.isBooleanOrNull)}
+        readOnly={NodeUtils.evaluateAndValidate(parentCtx, dn.node, n => n.readOnly, NodeUtils.isBooleanOrNull)}
+        remove={NodeUtils.evaluateAndValidate(parentCtx, dn.node, n => n.remove, NodeUtils.isBooleanOrNull)}
+        dragAndDrop={NodeUtils.evaluateAndValidate(parentCtx, dn.node, n => n.dragAndDrop, NodeUtils.isBooleanOrNull)}
+        dragAndDropMessage={NodeUtils.evaluateAndValidate(parentCtx, dn.node, n => n.dragAndDropMessage, NodeUtils.isStringOrNull)}
+        fileType={toFileTypeSymbol(NodeUtils.evaluateAndValidate(parentCtx, dn.node, n => n.fileType, NodeUtils.isStringOrNull))}
+        accept={NodeUtils.evaluateAndValidate(parentCtx, dn.node, n => n.accept, NodeUtils.isStringOrNull)}
+        maxSizeInBytes={NodeUtils.evaluateAndValidate(parentCtx, dn.node, n => n.maxSizeInBytes, NodeUtils.isStringOrNull)}
+        onChange={NodeUtils.evaluateAndValidate(parentCtx, dn.node, n => n.onChange, NodeUtils.isFunctionOrNull)}
+    />),
+    renderDesigner: dn => {
+        const m = dn.route && dn.route.member;
+        return (
+            <div>
+                <FieldComponent dn={dn} binding={Binding.create(dn.node, n => n.field)} />
+                <StyleOptionsLine dn={dn} binding={Binding.create(dn.node, n => n.styleOptions)} />
+                <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.labelText)} type="string" defaultValue={m && m.niceName || ""} />
+                <HtmlAttributesLine dn={dn} binding={Binding.create(dn.node, n => n.labelHtmlAttributes)} />
+                <HtmlAttributesLine dn={dn} binding={Binding.create(dn.node, n => n.formGroupHtmlAttributes)} />
+                <HtmlAttributesLine dn={dn} binding={Binding.create(dn.node, n => n.imageHtmlAttributes)} />
+                <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.readOnly)} type="boolean" defaultValue={null} />
+                <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.remove)} type="boolean" defaultValue={null} />
+                <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.download)} type="string" defaultValue={null} options={DownloadBehaviours} />
+                <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.dragAndDrop)} type="boolean" defaultValue={null} />
+                <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.dragAndDropMessage)} type="string" defaultValue={null} />
+                <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.fileType)} type="string" defaultValue={null} options={getFileTypes()} />
+                <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.accept)} type="string" defaultValue={null} />
+                <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.maxSizeInBytes)} type="number" defaultValue={null} />
                 <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.onChange)} type={null} defaultValue={null} exampleExpression={"() => this.forceUpdate()"} />
             </div>
         );
@@ -819,6 +920,7 @@ NodeUtils.register<EntityTabRepeaterNode>({
 export interface EntityTableNode extends EntityListBaseNode {
     kind: "EntityTable",
     avoidFieldSet?: ExpressionOrValue<boolean>;
+    maxResultsHeight?: Expression<number | string>;
 }
 
 NodeUtils.register<EntityTableNode>({
@@ -834,17 +936,21 @@ NodeUtils.register<EntityTableNode>({
     renderCode: (node, cc) => cc.elementCode("EntityTable", {
         ...cc.getEntityBasePropsEx(node, { showMove: true, avoidGetComponent: true }),
         avoidFieldSet: node.avoidFieldSet,
+        maxResultsHeight: node.maxResultsHeight,
         columns: ({ __code__: "EntityTable.typedColumns<YourEntityHere>(" + cc.stringifyObject(node.children.map(col => ({ __code__: NodeUtils.renderCode(col as EntityTableColumnNode, cc) }))) + ")" })
     }),
     render: (dn, ctx) => (<EntityTable
         columns={dn.node.children.length == 0 ? undefined : dn.node.children.filter(c => NodeUtils.validate(dn.createChild(c), ctx) == null).map(col => NodeUtils.render(dn.createChild(col as EntityTableColumnNode), ctx) as any)}
         {...NodeUtils.getEntityBaseProps(dn, ctx, { showMove: true, avoidGetComponent: true }) }
-        avoidFieldSet={NodeUtils.evaluateAndValidate(ctx, dn.node, n => n.avoidFieldSet, NodeUtils.isBooleanOrNull)} />),
+        avoidFieldSet={NodeUtils.evaluateAndValidate(ctx, dn.node, n => n.avoidFieldSet, NodeUtils.isBooleanOrNull)}
+        maxResultsHeight={NodeUtils.evaluateAndValidate(ctx, dn.node, n => n.maxResultsHeight, NodeUtils.isNumberOrStringOrNull)}
+    />),
 
     renderDesigner: dn =>
         <div>
             {NodeUtils.designEntityBase(dn, { isCreable: true, isFindable: true, isViewable: false, showAutoComplete: false, showMove: true })}
-            <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.avoidFieldSet)} type="boolean" defaultValue={false} allowsExpression={false} />
+            <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.avoidFieldSet)} type="boolean" defaultValue={false}  />
+            <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.maxResultsHeight)} type={null} defaultValue={null}  />
         </div>
 });
 
@@ -863,7 +969,7 @@ NodeUtils.register<EntityTableColumnNode>({
     isContainer: true,
     avoidHighlight: true,
     validParent: "EntityTable",
-    validate: (dn) => dn.node.property ? NodeUtils.validateTableColumnProperty(dn) : NodeUtils.mandatory(dn, n => n.header),
+    validate: (dn) => dn.node.property ? undefined : NodeUtils.mandatory(dn, n => n.header),
     renderTreeNode: NodeUtils.treeNodeTableColumnProperty,
     renderCode: (node, cc) => cc.stringifyObject({
         property: node.property && { __code__: "a => a." + node.property },
@@ -901,6 +1007,7 @@ export interface SearchControlNode extends BaseNode {
     create?: ExpressionOrValue<boolean>;
     navigate?: ExpressionOrValue<boolean>;
     refreshKey?: Expression<number | string | undefined>;
+    maxResultsHeight?: Expression<number | string>;
     onSearch?: Expression<(fo: FindOptionsParsed, dataChange: boolean) => void>;
     onResult?: Expression<(table: ResultTable, dataChange: boolean) => void>;
 }
@@ -922,6 +1029,7 @@ NodeUtils.register<SearchControlNode>({
         create: node.create,
         navigate: node.navigate,
         refreshKey: node.refreshKey,
+        maxResultsHeight: node.maxResultsHeight,
         onSearch: node.onSearch,
         onResult: node.onResult,
     }),
@@ -937,6 +1045,7 @@ NodeUtils.register<SearchControlNode>({
         create={NodeUtils.evaluateAndValidate(ctx, dn.node, f => f.create, NodeUtils.isBooleanOrNull)}
         navigate={NodeUtils.evaluateAndValidate(ctx, dn.node, f => f.navigate, NodeUtils.isBooleanOrNull)}
         refreshKey={NodeUtils.evaluateAndValidate(ctx, dn.node, f => f.refreshKey, NodeUtils.isNumberOrStringOrNull)}
+        maxResultsHeight={NodeUtils.evaluateAndValidate(ctx, dn.node, f => f.maxResultsHeight, NodeUtils.isNumberOrStringOrNull)}
         onSearch={NodeUtils.evaluateAndValidate(ctx, dn.node, f => f.onSearch, NodeUtils.isFunctionOrNull)}
         onResult={NodeUtils.evaluateAndValidate(ctx, dn.node, f => f.onResult, NodeUtils.isFunctionOrNull)}
     />,
@@ -956,6 +1065,7 @@ NodeUtils.register<SearchControlNode>({
         <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, f => f.create)} type="boolean" defaultValue={null} />
         <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, f => f.navigate)} type="boolean" defaultValue={null} />
         <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, f => f.refreshKey)} type={null} defaultValue={null} exampleExpression={"ctx.frame.refreshCount"} />
+        <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, f => f.maxResultsHeight)} type={null} defaultValue={null} />
         <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, f => f.onSearch)} type={null} defaultValue={null} exampleExpression={"(fop, dataChange) => {}"}/>
         <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, f => f.onResult)} type={null} defaultValue={null} exampleExpression={"(table, dataChange) => dataChange && ctx.frame.onReload()"} />
     </div>
@@ -1114,6 +1224,12 @@ export namespace NodeConstructor {
         if (ti) {
             if (ti.kind == "Enum")
                 return { kind: "ValueLine", field } as ValueLineNode;
+            
+            if (tr.name == FilePathEntity.typeName && mi.defaultFileTypeInfo && mi.defaultFileTypeInfo.onlyImages)
+                return { kind: "FileImageLine", field } as FileImageLineNode;
+
+            if (ti.name == FileEntity.typeName && ti.name == FilePathEntity.typeName)
+                return { kind: "FileLine", field } as FileLineNode;
 
             if (ti.entityKind == "Part" || ti.entityKind == "SharedPart")
                 return { kind: "EntityDetail", field, children: [] } as EntityDetailNode;
@@ -1124,8 +1240,16 @@ export namespace NodeConstructor {
             return { kind: "EntityLine", field, children: [] } as EntityLineNode;
         }
 
-        if (tr.isEmbedded)
+        if (tr.isEmbedded) {
+
+            if (tr.name == FilePathEmbedded.typeName && mi.defaultFileTypeInfo && mi.defaultFileTypeInfo.onlyImages)
+                return { kind: "FileImageLine", field } as FileImageLineNode;
+
+            if (tr.name == FileEmbedded.typeName || tr.name == FilePathEmbedded.typeName)
+                return { kind: "FileLine", field } as FileLineNode;
+
             return { kind: "EntityDetail", field, children: [] } as EntityDetailNode;
+        }
 
         if (ValueLine.getValueLineType(tr) != undefined)
             return { kind: "ValueLine", field } as ValueLineNode;

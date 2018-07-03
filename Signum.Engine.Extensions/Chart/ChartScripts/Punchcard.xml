@@ -93,17 +93,14 @@
       .domain(dim1)
       .range([0, yRule.size('content')]);
   
- 
+ debugger;
+  
   var color = null;
   if(data.columns.c3.token != null)
   {
-    var scaleFunc = scaleFor(data.columns.c3, data.rows.map(function(r){return r.c3;}), 0, 100, data.parameters["ColorScale"]);
-    
-    var colorQuantizer = d3.scale.quantize()
-        .domain([0, 100])
-        .range(colorbrewer[data.parameters["ColorInterpolate"]][9]);
-    
-    color = function(v){return colorQuantizer(scaleFunc(v)); }
+    var scaleFunc = scaleFor(data.columns.c3, data.rows.map(function(r){return r.c3;}), 0, 1, data.parameters["ColorScale"]);
+    var colorInterpolator = ChartUtils.getColorInterpolation(data.parameters["ColorInterpolate"]);
+    color = function(v){return colorInterpolator(scaleFunc(v)); }
   }
   
   var opacity = null;
@@ -120,12 +117,14 @@
   	innerSize = scaleFor(data.columns.c5, data.rows.map(function(r){return r.c5;}), 0, 100, data.parameters["OpacityScale"]);
   }
   
+  if(data.parameters["VerticalLineColor"]){
   chart.append('svg:g').attr('class', 'x-line').attr('transform',  translate(xRule.start('content') + x.bandwidth() / (shape == "ProgressBar" ? 1 : 2), yRule.start('content')))
     .enterData(dim0, 'line', 'y-line')
      .attr('y2',  yRule.size('content'))
       .attr('x1', function (d) { return x(d); })
       .attr('x2', function (d) { return x(d); })
     .style('stroke', data.parameters["VerticalLineColor"]);
+  }
   
   chart.append('svg:g').attr('class', 'x-tick').attr('transform', translate(xRule.start('content') + x.bandwidth() / (shape == "ProgressBar" ? 1 : 2), yRule.start('ticks')))
     .enterData(dim0, 'line', 'x-tick')
@@ -153,13 +152,14 @@
     .text(data.columns.c0.title);
   
 
-  
+  if(data.parameters["HorizontalLineColor"]){
   chart.append('svg:g').attr('class', 'y-line').attr('transform', translate(xRule.start('content'), yRule.end('content') - y.bandwidth() / (shape == "ProgressBar" ? 1 : 2)))
     .enterData(dim1, 'line', 'y-line')
     .attr('x2', xRule.size('content'))
     .attr('y1', function (t) { return -y(t); })
     .attr('y2', function (t) { return -y(t); })
     .style('stroke', data.parameters["HorizontalLineColor"]);
+  }
   
   chart.append('svg:g').attr('class', 'y-tick').attr('transform', translate(xRule.start('ticks'), yRule.end('content') - y.bandwidth() / 2))
     .enterData(dim1, 'line', 'y-tick')

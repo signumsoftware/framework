@@ -14,7 +14,7 @@ namespace Signum.Engine.MachineLearning
 {
     public class PredictorSimpleSaver : IPredictorResultSaver
     {
-        public bool SaveSimpleResults = false;
+        public bool SaveAllResults = false;
 
         public void AssertValid(PredictorEntity predictor)
         {
@@ -85,11 +85,11 @@ namespace Signum.Engine.MachineLearning
                                 {
                                     for (int i = 0; i < inputs.Count; i++)
                                     {
-                                        var input = inputs[i];
-                                        var output = outputs[i];
+                                        PredictDictionary input = inputs[i];
+                                        PredictDictionary output = outputs[i];
 
-                                        var inValue = input.MainQueryValues.GetOrThrow(outputColumn);
-                                        var outValue = output.MainQueryValues.GetOrThrow(outputColumn);
+                                        object inValue = input.MainQueryValues.GetOrThrow(outputColumn);
+                                        object outValue = output.MainQueryValues.GetOrThrow(outputColumn);
 
                                         toInsert.Add(new PredictSimpleResultEntity
                                         {
@@ -117,7 +117,7 @@ namespace Signum.Engine.MachineLearning
                         using (OperationLogic.AllowSave<PredictorEntity>())
                             ctx.Predictor.Save();
 
-                        if (SaveSimpleResults)
+                        if (SaveAllResults)
                         {
                             var groups = toInsert.GroupsOf(PredictionBatchSize).ToList();
                             foreach (var iter in groups.Iterate())
@@ -163,8 +163,8 @@ namespace Signum.Engine.MachineLearning
         {
             return new PredictorClassificationMetricsEmbedded
             {
-                MissRate = list.Count(a => a.OriginalCategory != a.PredictedCategory),
                 TotalCount = list.Count,
+                MissCount = list.Count(a => a.OriginalCategory != a.PredictedCategory),
             };
         }
     }

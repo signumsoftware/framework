@@ -30,6 +30,7 @@ import { QueryToken } from '../../../../Framework/Signum.React/Scripts/FindOptio
 import PredictorMetrics from './PredictorMetrics';
 import PredictorClassificationMetrics from './PredictorClassificationMetrics';
 import PredictorRegressionMetrics from './PredictorRegressionMetrics';
+import { CellFormatter } from '../../../../Framework/Signum.React/Scripts/Finder';
 
 export default class Predictor extends React.Component<{ ctx: TypeContext<PredictorEntity> }, { queryDescription?: QueryDescription }> implements IRenderButtons {
 
@@ -44,7 +45,7 @@ export default class Predictor extends React.Component<{ ctx: TypeContext<Predic
                 columnOptionsMode: "Add",
                 columnOptions: p.mainQuery.columns.map(mle => ({ columnName: mle.element.token && mle.element.token.token!.fullKey }) as ColumnOption)
             })
-                .then(lite => PredictorClient.predict(toLite(p), lite && { "Entity": lite }))
+                .then(lite => PredictorClient.predict(p, lite && { "Entity": lite }))
                 .done();
 
         } else {
@@ -57,7 +58,7 @@ export default class Predictor extends React.Component<{ ctx: TypeContext<Predic
                 columnOptionsMode: "Replace",
                 columnOptions: fullKeys.map(fk => ({ columnName: fk }) as ColumnOption)
             }, { searchControlProps: { allowChangeColumns: false, showGroupButton: false } })
-                .then(row => PredictorClient.predict(toLite(p), row && fullKeys.map((fk, i) => ({ tokenString: fk, value: row!.columns[i] })).toObject(a => a.tokenString, a => a.value)))
+                .then(row => PredictorClient.predict(p, row && fullKeys.map((fk, i) => ({ tokenString: fk, value: row!.columns[i] })).toObject(a => a.tokenString, a => a.value)))
                 .done();
         }
     }
@@ -413,39 +414,40 @@ function getSeries(eps: Array<PredictorClient.EpochProgress>, predictor: Predict
 
     const isClassification = NeuralNetworkSettingsEntity.isInstance(algSet) && algSet.predictionType == "Classification";
 
-    var totalMax = isClassification ? undefined : eps.flatMap(a => [a.LossTraining, a.LossValidation]).filter(a => a != null).max();
+    var maxLoss = eps.flatMap(a => [a.LossTraining, a.LossValidation]).filter(a => a != null).max();
+    var maxEvaluation = eps.flatMap(a => [a.EvaluationTraining, a.EvaluationValidation]).filter(a => a != null).max();
 
     return [
         {
-            color: "black",
             name: PredictorEpochProgressEntity.nicePropertyName(a => a.lossTraining),
+            color: "#1A5276",
             values: eps.filter(a => a.LossTraining != null).map(ep => ({ x: ep.TrainingExamples, y: ep.LossTraining })),
             minValue: 0,
-            maxValue: totalMax,
+            maxValue: maxLoss,
             strokeWidth: "2px",
         },
         {
-            color: "darkgray",
             name: PredictorEpochProgressEntity.nicePropertyName(a => a.evaluationTraining),
+            color: "#5DADE2",
             values: eps.filter(a => a.EvaluationTraining != null).map(ep => ({ x: ep.TrainingExamples, y: ep.EvaluationTraining })),
             minValue: 0,
-            maxValue: isClassification ? 1 : totalMax,
+            maxValue: maxEvaluation,
             strokeWidth: "1px",
         },
         {
-            color: "red",
             name: PredictorEpochProgressEntity.nicePropertyName(a => a.lossValidation),
+            color: "#7B241C",
             values: eps.filter(a => a.LossValidation != null).map(ep => ({ x: ep.TrainingExamples, y: ep.LossValidation! })),
             minValue: 0,
-            maxValue: totalMax,
+            maxValue: maxLoss,
             strokeWidth: "2px",
         },
         {
-            color: "pink",
             name: PredictorEpochProgressEntity.nicePropertyName(a => a.evaluationValidation),
+            color: "#D98880",
             values: eps.filter(a => a.EvaluationValidation != null).map(ep => ({ x: ep.TrainingExamples, y: ep.EvaluationValidation! })),
             minValue: 0,
-            maxValue: isClassification ? 1 : totalMax,
+            maxValue: maxEvaluation,
             strokeWidth: "1px",
         }
     ];

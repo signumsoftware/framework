@@ -609,6 +609,7 @@ export module WorkflowMessage {
     export const PleaseChooseExpirationDate = new MessageKey("WorkflowMessage", "PleaseChooseExpirationDate");
     export const ResetZoom = new MessageKey("WorkflowMessage", "ResetZoom");
     export const Color = new MessageKey("WorkflowMessage", "Color");
+    export const WorkflowIssues = new MessageKey("WorkflowMessage", "WorkflowIssues");
 }
 
 export const WorkflowModel = new Type<WorkflowModel>("WorkflowModel");

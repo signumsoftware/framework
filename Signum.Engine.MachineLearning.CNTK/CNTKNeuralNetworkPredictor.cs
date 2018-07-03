@@ -152,7 +152,7 @@ namespace Signum.Engine.MachineLearning.CNTK
                         EvaluationValidation = null,
                     };
 
-                    ctx.Progresses.Add(ep);
+                    ctx.Progresses.Enqueue(ep);
 
                     if (ctx.StopTraining)
                         p = ctx.Predictor = ctx.Predictor.ToLite().Retrieve();
@@ -293,20 +293,20 @@ namespace Signum.Engine.MachineLearning.CNTK
 
                     Value output = outputDic[calculatedOutputs];
                     IList<IList<float>> values = output.GetDenseData<float>(calculatedOutputs);
-                    var result = values.Select(val => GetPredictionDictionary(val.ToArray(), ctx)).ToList();
+                    var result = values.Select((val, i) => GetPredictionDictionary(val.ToArray(), ctx, inputs[i].Options)).ToList();
                     return result;
                 }
             }
         }
 
-        private PredictDictionary GetPredictionDictionary(float[] outputValues, PredictorPredictContext ctx)
+        private PredictDictionary GetPredictionDictionary(float[] outputValues, PredictorPredictContext ctx, PredictionOptions options)
         {
             using (HeavyProfiler.LogNoStackTrace("GetPredictionDictionary"))
             {
                 return new PredictDictionary(ctx.Predictor)
                 {
                     MainQueryValues = ctx.MainOutputCodifications.SelectDictionary(col => col,
-                    (col, list) => Encodings.GetOrThrow(col.Encoding).DecodeValue(list.First().Column, list, outputValues)),
+                    (col, list) => Encodings.GetOrThrow(col.Encoding).DecodeValue(list.First().Column, list, outputValues, options)),
 
                     SubQueries = ctx.Predictor.SubQueries.ToDictionary(sq => sq, sq => new PredictSubQueryDictionary(sq)
                     {
@@ -314,7 +314,7 @@ namespace Signum.Engine.MachineLearning.CNTK
                             kvp => kvp.Key,
                             kvp => kvp.Value
                             .Where(a => a.Key.Usage == PredictorSubQueryColumnUsage.Output)
-                            .ToDictionary(a => a.Key, a => Encodings.GetOrThrow(a.Key.Encoding).DecodeValue(a.Value.FirstEx().Column, a.Value, outputValues)),
+                            .ToDictionary(a => a.Key, a => Encodings.GetOrThrow(a.Key.Encoding).DecodeValue(a.Value.FirstEx().Column, a.Value, outputValues, options)),
                             ObjectArrayComparer.Instance
                         ) ?? new Dictionary<object[], Dictionary<PredictorSubQueryColumnEmbedded, object>>(ObjectArrayComparer.Instance),
 
@@ -361,7 +361,7 @@ namespace Signum.Engine.MachineLearning.CNTK
                         using (HeavyProfiler.LogNoStackTrace("EncodeValue"))
                         {
                             var enc = Encodings.GetOrThrow(col.Encoding);
-                            enc.EncodeValue(value ?? CNTKDefault.GetDefaultValue(kvp.Value.FirstOrDefault()), col, kvp.Value, inputValues, 0);
+                            enc.EncodeValue(value ?? CNTKDefault.GetDefaultValue(kvp.Value.FirstOrDefault()), col, kvp.Value, inputValues, offset);
                         }
                     }
                 }

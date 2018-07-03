@@ -138,8 +138,7 @@ namespace Signum.Entities.MachineLearning
         public int TotalCount { get; set; }
         public int MissCount { get; set; }
         [Format("p2")]
-
-        public double? MissRate { get; set; }
+        public double? MissRate { get; private set; }
         
         protected override void PreSaving(PreSavingContext ctx)
         {
