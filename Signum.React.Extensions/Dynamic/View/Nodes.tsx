@@ -11,7 +11,7 @@ import { SubTokensOptions } from '../../../../Framework/Signum.React/Scripts/Fin
 import { FindOptions, SearchControl, ValueSearchControlLine, FindOptionsParsed, ResultTable } from '../../../../Framework/Signum.React/Scripts/Search'
 import {
     getQueryNiceName, TypeInfo, MemberInfo, getTypeInfo, EntityData, EntityKind, getTypeInfos, KindOfType,
-    PropertyRoute, PropertyRouteType, LambdaMemberType, isTypeEntity, Binding, IsByAll, getAllTypes
+    PropertyRoute, PropertyRouteType, MemberType, isTypeEntity, Binding, IsByAll, getAllTypes
 } from '../../../../Framework/Signum.React/Scripts/Reflection'
 import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
 import { TypeContext, FormGroupStyle } from '../../../../Framework/Signum.React/Scripts/TypeContext'

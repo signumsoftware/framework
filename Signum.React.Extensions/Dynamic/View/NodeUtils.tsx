@@ -8,7 +8,7 @@ import { ViewReplacer } from '../../../../Framework/Signum.React/Scripts/Frames/
 import { FindOptions } from '../../../../Framework/Signum.React/Scripts/FindOptions'
 import {
     getQueryNiceName, TypeInfo, MemberInfo, getTypeInfo, EntityData, EntityKind, getTypeInfos, Binding, EnumType,
-    KindOfType, PropertyRoute, PropertyRouteType, LambdaMemberType, isTypeEntity, isTypeModel, isTypeModifiableEntity
+    KindOfType, PropertyRoute, PropertyRouteType, MemberType, isTypeEntity, isTypeModel, isTypeModifiableEntity
 } from '../../../../Framework/Signum.React/Scripts/Reflection'
 import { TypeContext, StyleOptions, FormGroupStyle } from '../../../../Framework/Signum.React/Scripts/TypeContext'
 import { EntityBase, EntityBaseProps } from '../../../../Framework/Signum.React/Scripts/Lines/EntityBase'
