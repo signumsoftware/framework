@@ -621,8 +621,7 @@ namespace Signum.Engine.Linq
             if (liteExp is UnaryExpression ue && (ue.NodeType == ExpressionType.Convert || ue.NodeType == ExpressionType.ConvertChecked))
                 liteExp = ue.Operand;
 
-            var liteReference = liteExp as LiteReferenceExpression;
-            if (liteReference == null)
+            if (!(liteExp is LiteReferenceExpression liteReference))
                 throw new InvalidCastException("Impossible to convert expression to Lite: {0}".FormatWith(liteExp.ToString()));
 
             return liteReference.Reference;
