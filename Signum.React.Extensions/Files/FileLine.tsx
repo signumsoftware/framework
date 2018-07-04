@@ -1,4 +1,5 @@
-﻿import * as React from 'react'
+﻿/// <reference path="filesclient.tsx" />
+import * as React from 'react'
 import { classes, Dic } from '../../../Framework/Signum.React/Scripts/Globals'
 import * as Services from '../../../Framework/Signum.React/Scripts/Services'
 import * as Navigator from '../../../Framework/Signum.React/Scripts/Navigator'

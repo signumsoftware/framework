@@ -150,13 +150,13 @@ export default class PredictLine extends React.Component<PredictLineProps> {
             }
             else {
                 const ctx = new TypeContext<any>(this.props.sctx, { readOnly: true }, undefined as any, p.binding);
-                return this.renderValueOrMultivalue(ctx, null)
-                return (<PredictValue token={p.token} ctx={ctx} label={<i className="fa fa-lightbulb-o"></i>} />);
+                return this.renderValueOrMultivalue(ctx, null);
+
             }
         } else if (p.usage == "Input") {
             const ctx = new TypeContext<any>(this.props.sctx, undefined, undefined as any, p.binding);
-            return (<PredictValue token={p.token} ctx={ctx} onChange={this.props.onChange} />);
-        }
+            return (<PredictValue token={p.token} ctx={ctx} onChange={this.props.onChange}/>);
+        } else throw new Error("unexpected Usage");
     }
 
     renderValueOrMultivalue(pctx: TypeContext<any>, originalValue: any) {
