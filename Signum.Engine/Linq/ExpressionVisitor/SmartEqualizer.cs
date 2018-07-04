@@ -610,19 +610,21 @@ namespace Signum.Engine.Linq
 
             return null;
         }
-        
-        private static Expression GetEntity(Expression exp)
+
+        private static Expression GetEntity(Expression liteExp)
         {
-            exp = ConstantToLite(exp) ?? exp;
+            liteExp = ConstantToLite(liteExp) ?? liteExp;
 
-            if (exp.IsNull())
-                return Expression.Constant(null, exp.Type.CleanType()); 
+            if (liteExp.IsNull())
+                return Expression.Constant(null, liteExp.Type.CleanType());
 
-            var liteExp = exp as LiteReferenceExpression;
-            if (liteExp == null)
-                throw new InvalidCastException("Impossible to convert expression to Lite: {0}".FormatWith(exp.ToString()));
+            if (liteExp is UnaryExpression ue && (ue.NodeType == ExpressionType.Convert || ue.NodeType == ExpressionType.ConvertChecked))
+                liteExp = ue.Operand;
 
-            return liteExp.Reference; 
+            if (!(liteExp is LiteReferenceExpression liteReference))
+                throw new InvalidCastException("Impossible to convert expression to Lite: {0}".FormatWith(liteExp.ToString()));
+
+            return liteReference.Reference;
         }
 
         public static Expression EntityEquals(Expression e1, Expression e2)
