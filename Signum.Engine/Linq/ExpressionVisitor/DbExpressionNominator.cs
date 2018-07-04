@@ -196,7 +196,7 @@ namespace Signum.Engine.Linq
                 return Add(typeIba.TypeColumn);
 
             return base.VisitTypeImplementedByAll(typeIba);
-        } 
+        }
         #endregion
 
 
@@ -359,7 +359,7 @@ namespace Signum.Engine.Linq
             var culture = m.TryGetArgument("culture")?.Let(e => (CultureInfo)((ConstantExpression)Visit(e)).Value) ?? CultureInfo.CurrentCulture;
 
             string format = m.TryGetArgument("format")?.Let(e => (string)((ConstantExpression)Visit(e)).Value) ?? defaultFormat;
-            
+
             var obj = Visit(m.Object);
 
             if (!culture.IsReadOnly && obj.Type.UnNullify() == typeof(DateTime))
@@ -409,7 +409,7 @@ namespace Signum.Engine.Linq
 
             expression = expression.RemoveUnNullify();
 
-            if(expression is BinaryExpression be && be.NodeType == ExpressionType.Subtract)
+            if (expression is BinaryExpression be && be.NodeType == ExpressionType.Subtract)
                 return TrySqlDifference(sqlEnums, type, be.Left, be.Right);
 
             if (expression is MethodCallExpression mc && mc.Method.Name == nameof(DateTime.Subtract))
@@ -454,7 +454,7 @@ namespace Signum.Engine.Linq
                    )));
         }
 
-      
+
         private Expression TrySqlTime(Expression expression)
         {
             Expression expr = Visit(expression);
@@ -941,8 +941,8 @@ namespace Signum.Engine.Linq
                     var untu = u.Type.UnNullify();
                     var optu = operand.Type.UnNullify();
 
-                    if ((optu == typeof(bool) || optu == typeof(int) || optu == typeof(long)) &&
-                        (untu == typeof(double) || untu == typeof(float) || untu == typeof(decimal)))
+                    if ((optu == typeof(bool) || ReflectionTools.IsNumber(optu)) &&
+                        (untu == typeof(bool) || ReflectionTools.IsNumber(untu)))
                         return Add(new SqlCastExpression(u.Type, operand));
 
                     if (optu == typeof(bool) &&
@@ -1168,14 +1168,14 @@ namespace Signum.Engine.Linq
                 case "DateTime.DayOfWeek": return TrySqlDayOftheWeek(m.Expression);
 
                 case "TimeSpan.Days":
-                {
-                    var diff = TrySqlDifference(SqlEnums.day, m.Type, m.Expression);
-                    if (diff == null)
-                        return null;
+                    {
+                        var diff = TrySqlDifference(SqlEnums.day, m.Type, m.Expression);
+                        if (diff == null)
+                            return null;
 
-                    return Add(new SqlCastExpression(typeof(int?),
-                        TrySqlFunction(null, SqlFunction.FLOOR, typeof(double?), diff)));
-                }
+                        return Add(new SqlCastExpression(typeof(int?),
+                            TrySqlFunction(null, SqlFunction.FLOOR, typeof(double?), diff)));
+                    }
                 case "TimeSpan.Hours": return TrySqlFunction(null, SqlFunction.DATEPART, m.Type, new SqlEnumExpression(SqlEnums.hour), m.Expression);
                 case "TimeSpan.Minutes": return TrySqlFunction(null, SqlFunction.DATEPART, m.Type, new SqlEnumExpression(SqlEnums.minute), m.Expression);
                 case "TimeSpan.Seconds": return TrySqlFunction(null, SqlFunction.DATEPART, m.Type, new SqlEnumExpression(SqlEnums.second), m.Expression);
@@ -1202,7 +1202,7 @@ namespace Signum.Engine.Linq
                 default: return null;
             }
         }
-        
+
         protected override Expression VisitMethodCall(MethodCallExpression m)
         {
             Expression result = HardCodedMethods(m);
@@ -1217,7 +1217,8 @@ namespace Signum.Engine.Linq
             return base.VisitMethodCall(m);
         }
 
-        private Expression GetDateTimeToStringSqlFunction(MethodCallExpression m, string defaultFormat = null) {
+        private Expression GetDateTimeToStringSqlFunction(MethodCallExpression m, string defaultFormat = null)
+        {
             return Connector.Current.SupportsFormat ? GetFormatToString(m, defaultFormat) : TrySqlToString(m);
         }
 
@@ -1231,9 +1232,9 @@ namespace Signum.Engine.Linq
                 var obj = m.Object;
                 var arg = m.Arguments.SingleEx();
 
-                if(obj.Type != arg.Type)
+                if (obj.Type != arg.Type)
                 {
-                    if(arg.Type == typeof(object))
+                    if (arg.Type == typeof(object))
                     {
                         if (arg is ConstantExpression c)
                             arg = Expression.Constant(c.Value);
@@ -1245,7 +1246,7 @@ namespace Signum.Engine.Linq
 
                 return VisitBinary(Expression.Equal(obj, arg));
             }
-                
+
             switch (m.Method.DeclaringType.TypeName() + "." + m.Method.Name)
             {
                 case "string.IndexOf":
@@ -1297,7 +1298,7 @@ namespace Signum.Engine.Linq
                     return TrySqlFunction(null, SqlFunction.REVERSE, m.Type, m.GetArgument("str"));
                 case "StringExtensions.Like":
                     return TryLike(m.GetArgument("str"), m.GetArgument("pattern"));
-                case "StringExtensions.Etc": 
+                case "StringExtensions.Etc":
                     return TryEtc(m.GetArgument("str"), m.GetArgument("max"), m.TryGetArgument("etcString"));
 
                 case "DateTime.Add":
@@ -1385,10 +1386,10 @@ namespace Signum.Engine.Linq
                 return null;
 
             var format = (m.Object ?? m.GetArgument("format")) as ConstantExpression;
-            
+
             var args = m.TryGetArgument("args")?.Let(a => ((NewArrayExpression)a).Expressions) ??
                 new[] { m.TryGetArgument("arg0"), m.TryGetArgument("arg1"), m.TryGetArgument("arg2"), m.TryGetArgument("arg3") }.NotNull().ToReadOnly();
-            
+
             var strFormat = (string)format.Value;
 
             var matches = Regex.Matches(strFormat, @"\{(?<index>\d+)(?<format>:[^}]*)?\}").Cast<Match>().ToList();
@@ -1411,7 +1412,7 @@ namespace Signum.Engine.Linq
                 var exp = Visit(args[index]);
                 if (!Has(exp))
                     return null;
-                
+
                 acum = acum == null ? exp : Expression.Add(acum, exp, miSimpleConcat);
 
                 var nextStr = i == matches.Count - 1 ?
@@ -1420,7 +1421,7 @@ namespace Signum.Engine.Linq
 
                 acum = string.IsNullOrEmpty(nextStr) ? acum : Expression.Add(acum, new SqlConstantExpression(nextStr), miSimpleConcat);
             }
-            
+
             return Add(acum);
         }
 
