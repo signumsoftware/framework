@@ -231,6 +231,9 @@ export namespace MenuItemConstructor { //To allow monkey patching
     }
 }
 
+export function notifySuccess() {
+    Notify.singletone.notifyTimeout({ text: JavascriptMessage.executed.niceToString(), type: "success" });
+}
 
 export function defaultContextualClick(coc: ContextualOperationContext<any>, ...args: any[]) {
 
@@ -245,24 +248,34 @@ export function defaultContextualClick(coc: ContextualOperationContext<any>, ...
                 if (coc.context.lites.length == 1) {
                     API.constructFromLite(coc.context.lites[0], coc.operationInfo.key, ...args)
                         .then(coc.onConstructFromSuccess || (pack => {
+                            notifySuccess();
                             coc.context.markRows({});
                             Navigator.createNavigateOrTab(pack, coc.event!);
                         }))
                         .done();
                 } else {
                     API.constructFromMultiple(coc.context.lites, coc.operationInfo.key, ...args)
-                        .then(coc.onContextualSuccess || (report => coc.context.markRows(report.errors)))
+                        .then(coc.onContextualSuccess || (report => {
+                            notifySuccess();
+                            coc.context.markRows(report.errors);
+                        }))
                         .done();
                 }
                 break;
             case OperationType.Execute:
                 API.executeMultiple(coc.context.lites, coc.operationInfo.key, ...args)
-                    .then(coc.onContextualSuccess || (report => coc.context.markRows(report.errors)))
+                    .then(coc.onContextualSuccess || (report => {
+                        notifySuccess();
+                        coc.context.markRows(report.errors);
+                    }))
                     .done();
                 break;
             case OperationType.Delete:
                 API.deleteMultiple(coc.context.lites, coc.operationInfo.key, ...args)
-                    .then(coc.onContextualSuccess || (report => coc.context.markRows(report.errors)))
+                    .then(coc.onContextualSuccess || (report => {
+                        notifySuccess();
+                        coc.context.markRows(report.errors);
+                    }))
                     .done();
                 break;
         }
