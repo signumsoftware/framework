@@ -54,7 +54,7 @@ export default class SearchPage extends React.Component<SearchPageProps, SearchP
 
             var maxHeight = (window.innerHeight - (marginTop + SearchPage.marginDown));
 
-            containerDiv.style.maxHeight = maxHeight < SearchPage.minHeight ? null : (maxHeight + "px");
+            containerDiv.style.maxHeight = Math.max(maxHeight, SearchPage.minHeight) + "px";
         }
     }
 
@@ -116,6 +116,7 @@ export default class SearchPage extends React.Component<SearchPageProps, SearchP
                     showFilters={true}
                     showGroupButton={true}
                     avoidChangeUrl={false}
+                    maxResultsHeight={"none"}
 
                     onHeighChanged={this.onResize}
                     onSearch={result => this.changeUrl()}

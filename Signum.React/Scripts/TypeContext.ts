@@ -1,5 +1,5 @@
 ﻿import * as React from 'react'
-import { PropertyRoute, PropertyRouteType, getLambdaMembers, IBinding, ReadonlyBinding, createBinding, LambdaMemberType, Type, PseudoType, getTypeName, Binding, getFieldMembers, LambdaMember, IType, isType } from './Reflection'
+import { PropertyRoute, PropertyRouteType, getLambdaMembers, IBinding, ReadonlyBinding, createBinding, MemberType, Type, PseudoType, getTypeName, Binding, getFieldMembers, LambdaMember, IType, isType } from './Reflection'
 import { ModelState, MList, ModifiableEntity, EntityPack, Entity, MixinEntity } from './Signum.Entities'
 import { EntityOperationContext } from './Operations'
 import { MListElementBinding } from "./Reflection";
@@ -320,7 +320,7 @@ export class TypeContext<T> extends StyleContext {
         if (property == undefined)
             return this.propertyRoute.member!.niceName;
 
-        return this.propertyRoute.add(property).member!.niceName;
+        return this.propertyRoute.addLambda(property).member!.niceName;
     }
 
     compose(suffix: string): string {
@@ -432,7 +432,7 @@ export function mlistItemContext<T>(ctx: TypeContext<MList<T>>): TypeContext<T>[
     
     return ctx.value!.map((mle, i) =>
         new TypeContext<T>(ctx, undefined,
-            ctx.propertyRoute.addLambdaMember({ name: "", type: "Indexer" }),
+            ctx.propertyRoute.addMember("Indexer", ""),
             new MListElementBinding<T>(ctx.binding, i)));
 }
 
