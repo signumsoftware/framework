@@ -941,8 +941,13 @@ namespace Signum.Engine.Linq
                     var untu = u.Type.UnNullify();
                     var optu = operand.Type.UnNullify();
 
+                    //Only from smaller to bigger, SQL Cast to Decimal could remove decimal places!
                     if ((optu == typeof(bool) || optu == typeof(int) || optu == typeof(long)) &&
                         (untu == typeof(double) || untu == typeof(float) || untu == typeof(decimal)))
+                        return Add(new SqlCastExpression(u.Type, operand));
+
+                    if ((optu == typeof(float)) &&
+                        (untu == typeof(double)))
                         return Add(new SqlCastExpression(u.Type, operand));
 
                     if (isFullNominate || isGroupKey && optu == untu)

@@ -29,8 +29,8 @@ namespace Signum.Test.LinqProvider
         public void Initialize()
         {
             Connector.CurrentLogger = new DebugTextWriter();
-        }      
-     
+        }
+
         [TestMethod]
         public void Select()
         {
@@ -40,7 +40,7 @@ namespace Signum.Test.LinqProvider
         [TestMethod]
         public void SelectIndex()
         {
-            var list = Database.Query<AlbumEntity>().Select((a, i) =>  a.Name + i).ToList();
+            var list = Database.Query<AlbumEntity>().Select((a, i) => a.Name + i).ToList();
         }
 
         [TestMethod]
@@ -86,7 +86,7 @@ namespace Signum.Test.LinqProvider
         [TestMethod]
         public void SelectWhereExpansion()
         {
-            var list = Database.Query<AlbumEntity>().Where(a=>a.Label != null).Select(a => a.Label.Name).ToList();
+            var list = Database.Query<AlbumEntity>().Where(a => a.Label != null).Select(a => a.Label.Name).ToList();
         }
 
         [TestMethod]
@@ -120,7 +120,7 @@ namespace Signum.Test.LinqProvider
         }
 
 
-      
+
         [TestMethod]
         public void SelectBool()
         {
@@ -170,7 +170,7 @@ namespace Signum.Test.LinqProvider
         public void SelectCoallesceMember()
         {
             var list = (from l in Database.Query<LabelEntity>()
-                        select (l.Owner.Entity ?? l ).Name).ToList();
+                        select (l.Owner.Entity ?? l).Name).ToList();
 
         }
 
@@ -178,7 +178,7 @@ namespace Signum.Test.LinqProvider
         public void SelectCoallesceToLite()
         {
             var list = (from l in Database.Query<LabelEntity>()
-                        select (l.Owner.Entity ?? l ).ToLite()).ToList();
+                        select (l.Owner.Entity ?? l).ToLite()).ToList();
 
         }
 
@@ -202,7 +202,7 @@ namespace Signum.Test.LinqProvider
         {
             ArtistEntity michael = Database.Query<ArtistEntity>().SingleEx(a => a.Dead);
 
-            var list = Database.Query<AlbumEntity>().Select(a => a.Author == michael).ToList(); 
+            var list = Database.Query<AlbumEntity>().Select(a => a.Author == michael).ToList();
         }
 
         [TestMethod]
@@ -252,7 +252,7 @@ namespace Signum.Test.LinqProvider
         [TestMethod]
         public void SelectPolyExpressionMethodManual()
         {
-            var list = Database.Query<AlbumEntity>().Select(a => a.Author is BandEntity ? ((BandEntity)a.Author).Lonely(): ((ArtistEntity)a.Author).Lonely()).ToArray();
+            var list = Database.Query<AlbumEntity>().Select(a => a.Author is BandEntity ? ((BandEntity)a.Author).Lonely() : ((ArtistEntity)a.Author).Lonely()).ToArray();
         }
 
         [TestMethod]
@@ -268,7 +268,7 @@ namespace Signum.Test.LinqProvider
             Assert2.Throws<FieldReaderException>(() =>
                 Database.Query<AlbumEntity>().Select(a => ((ArtistEntity)a.Author).Dead).ToArray());
         }
-        
+
         [TestMethod]
         public void SelectThrowEnumNullable()
         {
@@ -310,7 +310,7 @@ namespace Signum.Test.LinqProvider
         [TestMethod]
         public void SelectThrowaIntSumNullableCasting()
         {
-            Assert2.Throws<FieldReaderException>(() => 
+            Assert2.Throws<FieldReaderException>(() =>
                 Database.Query<AlbumEntity>().Select(a => (int?)((int)a.Id + (int)((ArtistEntity)a.Author).Id)).ToArray());
         }
 
@@ -392,10 +392,10 @@ namespace Signum.Test.LinqProvider
             var durations =
                 (from a in Database.Query<AlbumEntity>()
                  select new
-                {
-                    a.Name,
-                    Value = 3,
-                }).ToList();
+                 {
+                     a.Name,
+                     Value = 3,
+                 }).ToList();
         }
 
         [TestMethod]
@@ -436,13 +436,13 @@ namespace Signum.Test.LinqProvider
             {
                 Lite = a.ToLite(),
                 Memory = artist,
-            }).ToList(); 
+            }).ToList();
         }
 
         [TestMethod]
         public void SelectMemoryLite()
         {
-            var artist = Database.Query<ArtistEntity>().Select(a=>a.ToLite()).FirstEx();
+            var artist = Database.Query<ArtistEntity>().Select(a => a.ToLite()).FirstEx();
 
             var songs = Database.Query<AlbumEntity>().Select(a => new
             {
@@ -566,8 +566,8 @@ namespace Signum.Test.LinqProvider
         public void SelectConditionEnum()
         {
             var results = from b in Database.Query<BandEntity>()
-                      let ga = (GrammyAwardEntity)b.LastAward
-                      select (AwardResult?)(ga.Result < ga.Result ? (int)ga.Result : (int)ga.Result).InSql();
+                          let ga = (GrammyAwardEntity)b.LastAward
+                          select (AwardResult?)(ga.Result < ga.Result ? (int)ga.Result : (int)ga.Result).InSql();
 
             results.ToList();
         }
@@ -598,7 +598,7 @@ namespace Signum.Test.LinqProvider
         public void SelectEmbeddedListElementNotNullableNull()
         {
             var list = (from a in Database.Query<AlbumEntity>()
-                        from s in a.MListElements(_=>_.Songs).Where(s => s.Element.Seconds < 0).DefaultIfEmpty()
+                        from s in a.MListElements(_ => _.Songs).Where(s => s.Element.Seconds < 0).DefaultIfEmpty()
                         select new { a, s }).ToList();
 
             Assert.IsTrue(list.All(p => p.s == null));
@@ -608,7 +608,7 @@ namespace Signum.Test.LinqProvider
         public void SelectWhereExpressionInSelectMany()
         {
             var max = 0;
-            Expression<Func<AlbumEntity, bool>> blas = a=>a.Id > max;
+            Expression<Func<AlbumEntity, bool>> blas = a => a.Id > max;
 
             var list = (from a in Database.Query<AlbumEntity>()
                         from s in Database.Query<AlbumEntity>().Where(blas)
@@ -662,6 +662,18 @@ namespace Signum.Test.LinqProvider
             var list = Database.Query<ArtistEntity>().ToList();
 
             Assert.IsTrue(!Database.Query<ArtistEntity>().QueryText().Contains("DISTINCT"));
+        }
+
+        [TestMethod]
+        public void AvoidDecimalCastinInSql()
+        {
+            var list = Database.Query<ArtistEntity>()
+                .Select(a => ((int)a.Id / 10m))
+                .Select(a => ((decimal?)a).InSql()) //Avoid Cast( as decimal) in SQL because of https://stackoverflow.com/questions/4169520/casting-as-decimal-and-rounding
+                .ToList();
+
+            Assert.IsTrue(list.Any(a => a.Value != Math.Round(a.Value))); //Decimal places are preserved
+
         }
     }
 
