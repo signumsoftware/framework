@@ -35,7 +35,7 @@ namespace Signum.Engine.Mailing
 
             this.queryName = QueryLogic.ToQueryName(template.Query.Key);
             this.qd = DynamicQueryManager.Current.QueryDescription(queryName);
-            this.smtpConfig = EmailTemplateLogic.GetSmtpConfiguration == null ? null : EmailTemplateLogic.GetSmtpConfiguration(template, (systemEmail.UntypedEntity as ModifiableEntity) );
+            this.smtpConfig = EmailTemplateLogic.GetSmtpConfiguration == null ? null : EmailTemplateLogic.GetSmtpConfiguration(template, systemEmail?.UntypedEntity ?? entity);
         }
 
         ResultTable table;
