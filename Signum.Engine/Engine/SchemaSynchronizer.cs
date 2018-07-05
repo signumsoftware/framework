@@ -611,6 +611,8 @@ JOIN {3} {4} ON {2}.{0} = {4}.Id".FormatWith(tabCol.Name,
                 tabCol.ReferenceTable.Name.Name));
         }
 
+        public static List<string> TablesToIgnore = new List<string>();
+
         public static Dictionary<string, DiffTable> DefaultGetDatabaseDescription(List<DatabaseName> databases)
         {
             List<DiffTable> allTables = new List<DiffTable>();
@@ -629,7 +631,9 @@ JOIN {3} {4} ON {2}.{0} = {4}.Id".FormatWith(tabCol.Name,
 
                     var tables =
                         (from s in Database.View<SysSchemas>()
-                         from t in s.Tables().Where(t => !t.ExtendedProperties().Any(a => a.name == "microsoft_database_tools_support")) //IntelliSense bug
+                         from t in s.Tables().Where(t => 
+                            !TablesToIgnore.Contains(t.name) &&
+                            !t.ExtendedProperties().Any(a => a.name == "microsoft_database_tools_support")) //IntelliSense bug
                          select new DiffTable
                          {
                              Name = new ObjectName(new SchemaName(db, s.name), t.name),
