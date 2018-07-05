@@ -941,12 +941,8 @@ namespace Signum.Engine.Linq
                     var untu = u.Type.UnNullify();
                     var optu = operand.Type.UnNullify();
 
-                    if ((optu == typeof(bool) || ReflectionTools.IsNumber(optu)) &&
-                        (untu == typeof(bool) || ReflectionTools.IsNumber(untu)))
-                        return Add(new SqlCastExpression(u.Type, operand));
-
-                    if (optu == typeof(bool) &&
-                       (untu == typeof(int) || untu == typeof(long)))
+                    if ((optu == typeof(bool) || optu == typeof(int) || optu == typeof(long)) &&
+                        (untu == typeof(double) || untu == typeof(float) || untu == typeof(decimal)))
                         return Add(new SqlCastExpression(u.Type, operand));
 
                     if (isFullNominate || isGroupKey && optu == untu)
