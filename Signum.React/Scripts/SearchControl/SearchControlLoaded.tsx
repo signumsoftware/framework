@@ -1183,7 +1183,7 @@ function removeAggregates(array: { token?: QueryToken, displayName?: string }[],
                 a.token = qd.columns["Id"] ? toQueryToken(qd.columns["Id"]) : undefined;
             }
 
-            if (a.displayName)
+            if (a.displayName && a.token)
                 a.displayName = a.token!.niceName;
         }
     });

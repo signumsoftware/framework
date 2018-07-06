@@ -80,6 +80,7 @@ export default class SearchModal extends React.Component<SearchModalProps, { sho
             var maxHeight = (window.innerHeight - SearchModal.marginVertical);
 
             containerDiv.style.maxHeight = Math.max(maxHeight, SearchModal.minHeight) + "px";
+            containerDiv.scrollTo({ top: 0 });
         }
     }
 
