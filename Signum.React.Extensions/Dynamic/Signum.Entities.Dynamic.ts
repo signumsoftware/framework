@@ -154,7 +154,9 @@ export interface DynamicValidationEval extends EvalEmbedded<IDynamicValidationEv
 }
 
 export module DynamicValidationOperation {
+    export const Clone : Entities.ConstructSymbol_From<DynamicValidationEntity, DynamicValidationEntity> = registerSymbol("Operation", "DynamicValidationOperation.Clone");
     export const Save : Entities.ExecuteSymbol<DynamicValidationEntity> = registerSymbol("Operation", "DynamicValidationOperation.Save");
+    export const Delete : Entities.DeleteSymbol<DynamicValidationEntity> = registerSymbol("Operation", "DynamicValidationOperation.Delete");
 }
 
 export const DynamicViewEntity = new Type<DynamicViewEntity>("DynamicView");

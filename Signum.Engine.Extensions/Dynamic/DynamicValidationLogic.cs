@@ -32,6 +32,7 @@ namespace Signum.Engine.Dynamic
             {
                 sb.Include<DynamicValidationEntity>()
                     .WithSave(DynamicValidationOperation.Save)
+                    .WithDelete(DynamicValidationOperation.Delete)
                     .WithQuery(dqm, () => e => new
                     {
                         Entity = e,
@@ -41,6 +42,18 @@ namespace Signum.Engine.Dynamic
                         e.PropertyRoute,
                         e.Eval.Script,
                     });
+
+                new Graph<DynamicValidationEntity>.ConstructFrom<DynamicValidationEntity>(DynamicValidationOperation.Clone)
+                {
+                    Construct = (dv, _) => new DynamicValidationEntity() {
+                        Name = dv.Name,
+                        EntityType = dv.EntityType,
+                        PropertyRoute = dv.PropertyRoute,
+                        Eval = new DynamicValidationEval() {  Script = dv.Eval.Script },
+                    }
+                }.Register();
+
+
                 DynamicValidations = sb.GlobalLazy(() => Database.Query<DynamicValidationEntity>()
                         .SelectCatch(dv => new DynamicValidationPair { Validation = dv, PropertyRoute = dv.PropertyRoute.ToPropertyRoute() })
                         .GroupToDictionary(a => a.PropertyRoute.PropertyInfo),
