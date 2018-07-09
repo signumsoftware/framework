@@ -248,7 +248,7 @@ export function defaultOnClick<T extends Entity>(eoc: EntityOperationContext<T>,
 }
 
 export function notifySuccess() {
-    Notify.singletone.notifyTimeout({ text: JavascriptMessage.executed.niceToString(), type: "success" });
+    Notify.singleton.notifyTimeout({ text: JavascriptMessage.executed.niceToString(), type: "success" });
 }
 
 export function defaultConstructFromEntity<T extends Entity>(eoc: EntityOperationContext<T>, ...args: any[]) {
