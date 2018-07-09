@@ -24,13 +24,13 @@ interface NotifyState {
 
 export default class Notify extends React.Component<{}, NotifyState>{
 
-    static singletone: Notify;
+    static singleton: Notify;
 
     constructor(props: {}) {
         super(props);
         this.state = { text: undefined, type: undefined };
 
-        Notify.singletone = this;
+        Notify.singleton = this;
     }
 
     _isMounted: boolean = false;
