@@ -195,6 +195,7 @@ export class Dropdown extends React.Component<DropdownProps> {
             toggle,
             disabled,
             inNavbar,
+            children,
             ...attrs
         } = this.props;
 
@@ -210,7 +211,13 @@ export class Dropdown extends React.Component<DropdownProps> {
             direction && `drop${direction}`,
             nav && 'nav-item'
         );
-        return <Manager {...attrs} className={clss} onKeyDown={this.handleKeyDown} />;
+        return (
+            <div {...attrs} className={clss} onKeyDown={this.handleKeyDown}>
+                <Manager>
+                    {children}
+                </Manager>
+            </div>
+            );
     }
 }
 

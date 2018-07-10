@@ -14,15 +14,15 @@ export default class VersionChangedAlert extends React.Component<{ blink?: boole
         location.reload(true);
     }
 
-    static singletone: VersionChangedAlert | undefined;
+    static singleton: VersionChangedAlert | undefined;
 
     componentWillMount() {
-        VersionChangedAlert.singletone = this;
+        VersionChangedAlert.singleton = this;
     }
 
     componentWillUnmount() {
-        if (VersionChangedAlert.singletone == this)
-            VersionChangedAlert.singletone = undefined;
+        if (VersionChangedAlert.singleton == this)
+            VersionChangedAlert.singleton = undefined;
     }
 
     render() {

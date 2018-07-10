@@ -1,9 +1,10 @@
 ﻿import * as React from 'react';
 import * as PropTypes from 'prop-types';
-import { Target } from 'react-popper';
+import { Reference, ReferenceChildrenProps, PopperChildrenProps, RefHandler } from 'react-popper';
 import { classes } from '../Globals';
 import { Button, ButtonProps } from './Button';
 import { BsColor } from '.';
+import { color } from 'd3';
 
 interface DropdownToggleProps extends React.AnchorHTMLAttributes<any> {
     caret?: boolean;
@@ -23,14 +24,14 @@ export class DropdownToggle extends React.Component<DropdownToggleProps> {
         'aria-haspopup': true,
         color: 'secondary',
     };
-    
+
     constructor(props: DropdownToggleProps) {
         super(props);
 
         this.onClick = this.onClick.bind(this);
     }
 
-    static  contextTypes = {
+    static contextTypes = {
         isOpen: PropTypes.bool.isRequired,
         toggle: PropTypes.func.isRequired,
         inNavbar: PropTypes.bool.isRequired,
@@ -54,48 +55,49 @@ export class DropdownToggle extends React.Component<DropdownToggleProps> {
     }
 
     render() {
-        const { className, color, caret, split, nav, tag, ...props } = this.props;
-        const clss = classes(
-            className,
-            (caret || split) && 'dropdown-toggle',
-            split && 'dropdown-toggle-split',
-            nav && 'nav-link'
+
+        if (this.context.inNavbar)
+            return this.renderContent(this.props, undefined);
+        
+        return (
+            <Reference>
+                {p => this.renderContent(this.props, p.ref)}
+            </Reference>
         );
-        const children = props.children || <span className="sr-only">Toggle Dropdown</span>;
+    }
 
-        let Tag = tag!;
-      
-        if (nav && !tag) {
-            Tag = 'a';
-            props.href = '#';
-        } else if (!tag) {
-            Tag = Button;
-            (props as ButtonProps).color = color;
-        } else {
-            Tag = tag;
-        }
+    renderContent(p: DropdownToggleProps, ref: RefHandler | undefined) {
 
-        if (this.context.inNavbar) {
+        const clss = classes(
+            p.className,
+            (p.caret || p.split) && 'dropdown-toggle',
+            p.split && 'dropdown-toggle-split',
+            p.nav && 'nav-link'
+        );
+
+
+        const children = p.children || <span className="sr-only">Toggle Dropdown</span>;
+
+        if (p.nav && !p.tag) {
             return (
-                <Tag
-                    {...props}
-                    className={clss}
-                    onClick={this.onClick}
-                    aria-expanded={this.context.isOpen}
-                    children={children}
-                />
+                <a href="#" ref={ref} className={clss} aria-expanded={this.context.isOpen} onClick={this.onClick}>
+                    {children}
+                </a>
+            );
+        } else if (!p.tag) {
+            return (
+                <Button color={p.color} className={clss} innerRef={ref} aria-expanded={this.context.isOpen} onClick={this.onClick}>
+                    {children}
+                </Button>
+            );
+        } else {
+            const Tag = p.tag;
+
+            return (
+                <Tag ref={ref} className={clss} aria-expanded={this.context.isOpen} onClick={this.onClick}>
+                    {children}
+                </Tag>
             );
         }
-
-        return (
-            <Target
-                {...props}
-                className={clss}
-                component={Tag}
-                onClick={this.onClick}
-                aria-expanded={this.context.isOpen}
-                children={children}
-            />
-        );
     }
 }
