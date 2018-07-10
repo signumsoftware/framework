@@ -1,10 +1,10 @@
 ﻿import * as React from 'react'
 import * as ReactDOM from 'react-dom'
 import { classes, Dic } from '../Globals'
-import { Popper, Manager, Target } from 'react-popper';
+import { Popper, Manager, Reference } from 'react-popper';
 
 
-
+debugger;
 export interface TypeaheadProps {
     value?: string;
     onChange?: (newValue: string) => void;
@@ -246,19 +246,26 @@ export class Typeahead extends React.Component<TypeaheadProps, TypeaheadState>
 
     render() {
         return (
-            <Manager tag={false}>
-                <Target innerRef={inp => this.input = inp as HTMLInputElement}>
-                    {({ targetProps }) => <input type="text" autoComplete="off" {...this.props.inputAttrs} {...targetProps as any}
+            <Manager>
+                <Reference innerRef={inp => this.input = inp as HTMLInputElement}>
+                    {({ ref }) => <input type="text" autoComplete="off" {...this.props.inputAttrs}
+                        ref={ref}
                         value={this.props.value}
                         onFocus={this.handleFocus}
                         onBlur={this.handleBlur}
                         onKeyUp={this.handleKeyUp}
                         onKeyDown={this.handleKeyDown}
                         onChange={this.handleOnChange}
-                    />
+                    />}
+                </Reference>
+                {this.state.shown && <Popper placement={this.rtl ? "bottom-end" : "bottom-start"}>
+                    {({ ref, style, placement, arrowProps }) => (
+                        <div ref={ref} style={{ zIndex: 1000, ...style }} data-placement={placement}>
+                            {this.props.renderList ? this.props.renderList(this) : this.renderDefaultList()}
+                            <div ref={arrowProps.ref} style={arrowProps.style} />
+                        </div>)
                     }
-                </Target>
-                {this.state.shown && <Popper placement={this.rtl ? "bottom-end" : "bottom-start"} style={{ zIndex: 1000 }}>{this.props.renderList ? this.props.renderList(this) : this.renderDefaultList()}</Popper>}
+                </Popper>}
             </Manager>
         );
     }
@@ -303,7 +310,7 @@ export class Typeahead extends React.Component<TypeaheadProps, TypeaheadState>
         this.setState({ shown: false });
     }
 
-    renderDefaultList() {
+    renderDefaultList(): React.ReactNode {
         return (
             <div className={classes("typeahead dropdown-menu show", this.rtl && "dropdown-menu-right")} >
                 {
@@ -313,7 +320,7 @@ export class Typeahead extends React.Component<TypeaheadProps, TypeaheadState>
                             onMouseEnter={e => this.handleElementMouseEnter(e, i)}
                             onMouseLeave={e => this.handleElementMouseLeave(e, i)}
                             onMouseUp={e => this.handleMenuMouseUp(e, i)}
-                            {...this.props.itemAttrs && this.props.itemAttrs(item)}>                            
+                            {...this.props.itemAttrs && this.props.itemAttrs(item)}>
                             {this.props.renderItem!(item, this.state.query!)}
                         </button>)
                 }
