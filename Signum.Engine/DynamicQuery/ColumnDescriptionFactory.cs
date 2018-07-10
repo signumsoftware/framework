@@ -55,7 +55,8 @@ namespace Signum.Engine.DynamicQuery
                 {
                     Format = GetFormat(propertyRoutes);
                     Unit = GetUnit(propertyRoutes);
-                    Implementations = propertyRoutes.FirstOrDefault().TryGetImplementations();
+                    if (Implementations == null)
+                        Implementations = propertyRoutes.FirstOrDefault().TryGetImplementations();
                     processedType = null;
                 }
             }
@@ -110,12 +111,11 @@ namespace Signum.Engine.DynamicQuery
 
             if (meta != null)
             {
+                Implementations = meta.Implementations;
+
                 if (meta is CleanMeta cm)
                     PropertyRoutes = cm.PropertyRoutes;
-
-                Implementations = meta.Implementations;
             }
-
         }
 
         public string DisplayName()
