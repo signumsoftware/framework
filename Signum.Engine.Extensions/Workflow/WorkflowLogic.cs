@@ -595,6 +595,14 @@ namespace Signum.Engine.Workflow
                   s.MainEntityType,
               });
 
+            new Graph<WorkflowScriptEntity>.ConstructFrom<WorkflowScriptEntity>(WorkflowScriptOperation.Clone)
+            {
+                Construct = (s, _) => new WorkflowScriptEntity() {
+                    MainEntityType = s.MainEntityType,
+                    Eval = new WorkflowScriptEval() { Script = s.Eval.Script }
+                }
+            }.Register();
+
             new Graph<WorkflowScriptEntity>.Delete(WorkflowScriptOperation.Delete)
             {
                 Delete = (s, _) =>

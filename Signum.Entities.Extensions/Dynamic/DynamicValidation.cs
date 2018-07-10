@@ -41,7 +41,9 @@ namespace Signum.Entities.Dynamic
     [AutoInit]
     public static class DynamicValidationOperation
     {
+        public static readonly ConstructSymbol<DynamicValidationEntity>.From<DynamicValidationEntity> Clone;
         public static readonly ExecuteSymbol<DynamicValidationEntity> Save;
+        public static readonly DeleteSymbol<DynamicValidationEntity> Delete;
     }
 
     public class DynamicValidationEval : EvalEmbedded<IDynamicValidationEvaluator>
