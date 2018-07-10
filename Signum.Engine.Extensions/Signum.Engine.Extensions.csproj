@@ -144,7 +144,6 @@
     <Compile Include="Disconnected\ImportManager.cs" />
     <Compile Include="Disconnected\DisconnectedLogic.cs" />
     <Compile Include="Disconnected\ExportManager.cs" />
-    <Compile Include="Dynamic\CheckRoslyn.cs" />
     <Compile Include="Dynamic\DynamicLogic.cs" />
     <Compile Include="Dynamic\DynamicMixinConnectionLogic.cs" />
     <Compile Include="Joyride\JoyrideLogic.cs" />
