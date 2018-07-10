@@ -23,7 +23,7 @@ namespace Signum.React.Selenium
         {
             this.Selenium = element.GetDriver();
             this.Element = element;
-            this.Results = new ResultTableProxy(this.Element.FindElement(By.ClassName("sf-search-results-container")), this);
+            this.Results = new ResultTableProxy(this.Element.FindElement(By.ClassName("sf-scroll-table-container")), this);
         }
 
         public WebElementLocator SearchButton
