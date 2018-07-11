@@ -55,7 +55,6 @@ export default class SearchPage extends React.Component<SearchPageProps, SearchP
             var maxHeight = (window.innerHeight - (marginTop + SearchPage.marginDown));
 
             containerDiv.style.maxHeight = Math.max(maxHeight, SearchPage.minHeight) + "px";
-            containerDiv.scrollTo({ top: 0 });
         }
     }
 

@@ -222,6 +222,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
                     markedRows: undefined,
                     searchCount: (this.state.searchCount || 0) + 1
                 }, () => {
+                    this.fixScroll();
                     if (this.props.onResult)
                         this.props.onResult(rt, dataChanged || false);
                     this.notifySelectedRowsChanged();
@@ -343,9 +344,27 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
     componentDidMount() {
         this.containerDiv!.addEventListener("scroll", (e) => {
+
+            var table = this.thead!.parentElement!;            
             var translate = "translate(0," + this.containerDiv!.scrollTop + "px)";
             this.thead!.style.transform = translate;
         });
+    }
+
+    fixScroll() {
+        if (this.containerDiv) {
+            var table = this.containerDiv.firstChild! as HTMLElement;
+            if (this.containerDiv.scrollTop > table.clientHeight) {
+                //var translate = "translate(0,0)";
+                //this.thead!.style.transform = translate;
+                this.containerDiv.scrollTo({ top: 0 });
+                this.containerDiv.style.overflowY = "hidden";
+                setTimeout(() => {
+                    this.containerDiv!.style.overflowY = null;
+                }, 10);
+              
+            }
+        }
     }
 
 
