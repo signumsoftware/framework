@@ -69,7 +69,7 @@ namespace Signum.React.Selenium.ModalProxies
             if (element == null)
                  return null;
 
-            return new MessageModalProxy(element);
+            return new MessageModalProxy(element.GetParent());
         }
 
         public static void CloseMessageModal(this RemoteWebDriver selenium, MessageModalButton button)

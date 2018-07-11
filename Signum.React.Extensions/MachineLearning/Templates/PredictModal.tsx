@@ -1,4 +1,4 @@
-﻿import { PredictorEntity } from "../Signum.Entities.MachineLearning";
+﻿import { PredictorEntity, PredictorState } from "../Signum.Entities.MachineLearning";
 import * as React from "react";
 import * as numbro from "numbro";
 import * as Navigator from "../../../../Framework/Signum.React/Scripts/Navigator";
@@ -17,6 +17,7 @@ import { isLite } from "../../../../Framework/Signum.React/Scripts/Signum.Entiti
 import { Modal } from "../../../../Framework/Signum.React/Scripts/Components";
 import { ModalHeaderButtons } from "../../../../Framework/Signum.React/Scripts/Components/Modal";
 import { NumericTextBox } from "../../../../Framework/Signum.React/Scripts/Lines/ValueLine";
+import { AbortableRequest } from "../../../../Framework/Signum.React/Scripts/Services";
 
 
 interface PredictModalProps extends IModalProps {
@@ -46,11 +47,19 @@ export class PredictModal extends React.Component<PredictModalProps, PredictModa
         this.props.onExited!(undefined);
     }
 
+    abortableUpdateRequest = new AbortableRequest((abortController, request: PredictRequest) => API.updatePredict(request));
+
     hangleOnChange = () => {
         this.setState({ hasChanged: true });
-        API.updatePredict(this.state.predict)
-            .then(predict => this.setState({ predict: predict }))
+        this.abortableUpdateRequest.getData(this.state.predict)
+            .then(predict => {
+                this.setState({ predict: predict });
+            })
             .done();
+    }
+
+    componentWillUnmount() {
+        this.abortableUpdateRequest.abort();
     }
 
     render() {

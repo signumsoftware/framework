@@ -680,6 +680,7 @@ export interface WorkflowScriptEval extends Dynamic.EvalEmbedded<IWorkflowScript
 }
 
 export module WorkflowScriptOperation {
+    export const Clone : Entities.ConstructSymbol_From<WorkflowScriptEntity, WorkflowScriptEntity> = registerSymbol("Operation", "WorkflowScriptOperation.Clone");
     export const Save : Entities.ExecuteSymbol<WorkflowScriptEntity> = registerSymbol("Operation", "WorkflowScriptOperation.Save");
     export const Delete : Entities.DeleteSymbol<WorkflowScriptEntity> = registerSymbol("Operation", "WorkflowScriptOperation.Delete");
 }
