@@ -73,12 +73,12 @@ export default class FileDownloader extends React.Component<FileDownloaderProps>
                         if (entity.binaryFile)
                             downloadBase64(e, entity.binaryFile, entity.fileName!);
                         else
-                            configuration.downloadClick(e, entity);
+                            configuration.downloadClick ? configuration.downloadClick(e, entity) : downloadUrl(e, configuration.fileUrl!(entity));
                     } else {
                         if (entity.binaryFile)
                             viewBase64(e, entity.binaryFile, entity.fileName!);
                         else
-                            configuration.viewClick(e, entity);
+                            configuration.viewClick ? configuration.viewClick(e, entity) : viewUrl(e, configuration.fileUrl!(entity));
                     }
                 }}
                 download={this.props.download == "View" ? undefined : entity.fileName}
@@ -93,18 +93,18 @@ export default class FileDownloader extends React.Component<FileDownloaderProps>
 }
 
 export interface FileDownloaderConfiguration<T extends IFile> {
-    downloadClick: (event: React.MouseEvent<any>, file: T) => void;
-    viewClick: (event: React.MouseEvent<any>, file: T) => void;
+    fileUrl?: (file: T) => string;
+    downloadClick?: (event: React.MouseEvent<any>, file: T) => void;
+    viewClick?: (event: React.MouseEvent<any>, file: T) => void;
 }
 
 FileDownloader.registerConfiguration(FileEntity, {
-    downloadClick: (event, file) => downloadUrl(event, Navigator.toAbsoluteUrl("~/api/files/downloadFile/" + file.id.toString())),
+    fileUrl: file => Navigator.toAbsoluteUrl("~/api/files/downloadFile/" + file.id.toString()),
     viewClick: (event, file) => viewUrl(event, Navigator.toAbsoluteUrl("~/api/files/downloadFile/" + file.id.toString()))
 });
 
 FileDownloader.registerConfiguration(FilePathEntity, {
-    downloadClick: (event, file) => downloadUrl(event, Navigator.toAbsoluteUrl("~/api/files/downloadFilePath/" + file.id.toString())),
-    viewClick: (event, file) => viewUrl(event, Navigator.toAbsoluteUrl("~/api/files/downloadFilePath/" + file.id.toString()))
+    fileUrl: file => Navigator.toAbsoluteUrl("~/api/files/downloadFilePath/" + file.id.toString()),
 });
 
 FileDownloader.registerConfiguration(FileEmbedded, {
@@ -113,14 +113,8 @@ FileDownloader.registerConfiguration(FileEmbedded, {
 });
 
 FileDownloader.registerConfiguration(FilePathEmbedded, {
-    downloadClick: (event, file) => downloadUrl(event, getFilePathEmbeddedUrl(file)),
-    viewClick: (event, file) => viewUrl(event, getFilePathEmbeddedUrl(file)),
+    fileUrl: file => Navigator.toAbsoluteUrl(`~/api/files/downloadEmbeddedFilePath/${file.fileType!.key}?` + QueryString.stringify({ suffix: file.suffix, fileName: file.fileName }))
 });
-
-function getFilePathEmbeddedUrl(file: FilePathEmbedded) {
-    return Navigator.toAbsoluteUrl(`~/api/files/downloadEmbeddedFilePath/${file.fileType!.key}?` +
-        QueryString.stringify({ suffix: file.suffix, fileName: file.fileName }));
-}
 
 function downloadUrl(e: React.MouseEvent<any>, url: string) {
     
