@@ -131,8 +131,8 @@ namespace Signum.Entities.Mailing
                 throw new NotImplementedException("Attachments are not yet exportable");
             }
             XElement recipients = new XElement("Recipients", Recipients.Select(i => 
-                new XElement("Recipient", new XAttribute("DisplayName", i.DisplayName),
-                     new XAttribute("EmailAddress", i.EmailAddress),
+                new XElement("Recipient", new XAttribute("DisplayName", i.DisplayName ?? ""),
+                     new XAttribute("EmailAddress", i.EmailAddress ?? ""),
                      new XAttribute("Kind", i.Kind),
                      i.Token != null ? new XAttribute("Token",   i.Token?.Token.FullKey()): null
                     )
