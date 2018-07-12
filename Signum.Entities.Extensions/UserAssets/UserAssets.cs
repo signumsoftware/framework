@@ -7,6 +7,7 @@ using Signum.Entities.Authorization;
 using Signum.Entities.Basics;
 using Signum.Entities.Chart;
 using Signum.Entities.Dashboard;
+using Signum.Entities.Mailing;
 using Signum.Utilities;
 
 namespace Signum.Entities.UserAssets
@@ -89,6 +90,8 @@ namespace Signum.Entities.UserAssets
         IPartEntity GetPart(IPartEntity old, XElement element);
 
         DynamicQuery.QueryDescription GetQueryDescription(QueryEntity Query);
+
+        SystemEmailEntity GetSystemEmail(string fullClassName);
     }
 
     public interface IUserAssetEntity : IEntity

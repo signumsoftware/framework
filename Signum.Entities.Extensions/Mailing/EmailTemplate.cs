@@ -17,16 +17,23 @@ using Signum.Entities.UserAssets;
 using Signum.Utilities.ExpressionTrees;
 using Signum.Entities;
 using Signum.Entities.Templating;
+using System.Xml.Linq;
+using Signum.Entities.Mailing;
+using Signum.Engine.Basics;
+using Signum.Engine;
 
 namespace Signum.Entities.Mailing
 {
     [Serializable, EntityKind(EntityKind.Main, EntityData.Master)]
-    public class EmailTemplateEntity : Entity
+    public class EmailTemplateEntity : Entity, IUserAssetEntity
     {
         public EmailTemplateEntity()
         {
             RebindEvents();
         }
+
+        [UniqueIndex]
+        public Guid Guid { get; set; } = Guid.NewGuid();
 
         public EmailTemplateEntity(object queryName) : this()
         {
@@ -70,6 +77,7 @@ namespace Signum.Entities.Mailing
         [NotifyChildProperty]
         public TemplateApplicableEval Applicable { get; set; }
         
+
         protected override string PropertyValidation(System.Reflection.PropertyInfo pi)
         {
             if (pi.Name == nameof(Messages))
@@ -115,7 +123,89 @@ namespace Signum.Entities.Mailing
                 throw new ApplicationException($"Error evaluating Applicable for EmailTemplate '{Name}' with entity '{entity}': " + e.Message, e);
             }
         }
-    }
+
+        public XElement ToXml(IToXmlContext ctx)
+        {
+            if(this.Attachments != null)
+            {
+                throw new NotImplementedException("Attachments are not yet exportable");
+            }
+            XElement recipients = new XElement("Recipients", Recipients.Select(i => 
+                new XElement("Recipient", new XAttribute("DisplayName", i.DisplayName),
+                     new XAttribute("EmailAddress", i.EmailAddress),
+                     new XAttribute("Kind", i.Kind),
+                     i.Token != null ? new XAttribute("Token",   i.Token?.Token.FullKey()): null
+                    )
+                ));
+
+            XElement messages = new XElement("Messages", Messages.Select(x => new XElement("Message",
+                 new XAttribute("Subject", x.Subject),
+                    new XAttribute("Text", x.Text),
+                    new XAttribute("CultureInfo", x.CultureInfo.Id)
+                )));
+            
+            return new XElement("EmailTemplate",
+                new XAttribute("Guid", Guid),
+                new XAttribute("Query", Query.Key),
+                new XAttribute("EditableMessage", EditableMessage),
+                new XAttribute("SystemEmail", SystemEmail.FullClassName),
+                new XAttribute("SendDifferentMessages", SendDifferentMessages),
+                new XElement("From",
+                    From.DisplayName != null ? new XAttribute("DisplayName", From.DisplayName) : null,
+                    From.EmailAddress != null ? new XAttribute("EmailAddress", From.EmailAddress) : null,
+                    From.Token != null ? new XAttribute("Token", From.Token.Token.FullKey()) : null),
+                recipients,
+                messages,
+                new XAttribute("MasterTemplate", MasterTemplate.IdOrNull),
+                new XAttribute("IsBodyHtml", IsBodyHtml),
+                this.Applicable.Script != null ? new XAttribute("Applicable", this.Applicable.Script) : null
+                );
+
+        }
+
+        public void FromXml(XElement element, IFromXmlContext ctx)
+        {
+            Recipients = element.Elements("Recipients").Select(x =>
+            {
+                var elem = x.Element("Recipient");
+                return new EmailTemplateRecipientEntity
+                {
+                    DisplayName = elem.Attribute("DisplayName").Value,
+                    EmailAddress = elem.Attribute("EmailAddress").Value,
+                    Kind = (EmailRecipientKind)Enum.Parse(typeof(EmailRecipientKind),elem.Attribute("Kind").Value),
+                    Token = elem.Attribute("Token") != null ? new QueryTokenEmbedded(elem.Attribute("Token").Value) : null
+                };
+            }).ToMList();
+
+            Messages = element.Elements("Messages").Select(x =>
+                {
+                    var elem = x.Element("Message");
+                    return new EmailTemplateMessageEmbedded(elem.Attribute("CultureInfo")?.Let(a => Lite.ParsePrimaryKey<CultureInfoEntity>(a.Value).RetrieveAndForget()))
+                    {
+                        Subject = elem.Attribute("Subject").Value,
+                        Text = elem.Attribute("Text").Value
+                    };
+                }).ToMList();
+
+            Guid = Guid.Parse(element.Attribute("Guid").Value);
+            Query = ctx.GetQuery(element.Attribute("Query").Value);
+            EditableMessage = bool.Parse(element.Attribute("EditableMessage").Value);
+            SystemEmail = ctx.GetSystemEmail(element.Attribute("SystemEmail").Value);
+            SendDifferentMessages = bool.Parse(element.Attribute("SendDifferentMessages").Value);
+            var from = element.Element("From");
+            From = new EmailTemplateContactEmbedded
+            {
+                DisplayName = from.Attribute("DisplayName").Value,
+                EmailAddress = from.Attribute("EmailAddress").Value,
+                Token = from.Attribute("Token") != null ? new QueryTokenEmbedded(from.Attribute("Token").Value) : null,
+            };
+            MasterTemplate = Lite.ParsePrimaryKey<EmailMasterTemplateEntity>(element.Attribute("MasterTemplate").Value);
+            IsBodyHtml = bool.Parse(element.Attribute("IsBodyHtml").Value);
+            Applicable = new TemplateApplicableEval { Script = element.Attribute("Applicable") != null ? element.Attribute("Applicable").Value : null };
+            ParseData(ctx.GetQueryDescription(Query));
+        }
+
+    } 
 
     [Serializable]
     public class EmailTemplateContactEmbedded : EmbeddedEntity
@@ -208,7 +298,8 @@ namespace Signum.Entities.Mailing
         {
             return CultureInfo?.ToString() ?? EmailTemplateMessage.NewCulture.NiceToString();
         }
-    }
+     }
+    
 
     public interface IAttachmentGeneratorEntity : IEntity
     {

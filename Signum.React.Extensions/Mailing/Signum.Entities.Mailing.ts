@@ -199,8 +199,9 @@ export interface EmailTemplateContactEmbedded extends Entities.EmbeddedEntity {
 }
 
 export const EmailTemplateEntity = new Type<EmailTemplateEntity>("EmailTemplate");
-export interface EmailTemplateEntity extends Entities.Entity {
+export interface EmailTemplateEntity extends Entities.Entity, UserAssets.IUserAssetEntity {
     Type: "EmailTemplate";
+    guid?: string;
     name?: string | null;
     editableMessage?: boolean;
     disableAuthorization?: boolean;
