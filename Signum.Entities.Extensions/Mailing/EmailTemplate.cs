@@ -145,7 +145,9 @@ namespace Signum.Entities.Mailing
                 )));
             
             return new XElement("EmailTemplate",
+                new XAttribute("Name", Name),
                 new XAttribute("Guid", Guid),
+                new XAttribute("DisableAuthorization",DisableAuthorization),
                 new XAttribute("Query", Query.Key),
                 new XAttribute("EditableMessage", EditableMessage),
                 new XAttribute("SystemEmail", SystemEmail.FullClassName),
@@ -188,6 +190,9 @@ namespace Signum.Entities.Mailing
                 }).ToMList();
 
             Guid = Guid.Parse(element.Attribute("Guid").Value);
+            Name = element.Attribute("Name").Value;
+            DisableAuthorization = element.Attribute("DisableAuthorization") != null ? bool.Parse(element.Attribute("DisableAuthorization").Value) : false;
+
             Query = ctx.GetQuery(element.Attribute("Query").Value);
             EditableMessage = bool.Parse(element.Attribute("EditableMessage").Value);
             SystemEmail = ctx.GetSystemEmail(element.Attribute("SystemEmail").Value);
@@ -201,7 +206,7 @@ namespace Signum.Entities.Mailing
             };
             MasterTemplate = Lite.ParsePrimaryKey<EmailMasterTemplateEntity>(element.Attribute("MasterTemplate").Value);
             IsBodyHtml = bool.Parse(element.Attribute("IsBodyHtml").Value);
-            Applicable = new TemplateApplicableEval { Script = element.Attribute("Applicable") != null ? element.Attribute("Applicable").Value : null };
+            Applicable = element.Attribute("Applicable") != null  ?  new TemplateApplicableEval { Script =  element.Attribute("Applicable").Value } : null;
             ParseData(ctx.GetQueryDescription(Query));
         }
 
