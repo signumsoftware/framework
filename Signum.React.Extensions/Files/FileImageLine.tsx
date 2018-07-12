@@ -56,7 +56,6 @@ export default class FileImageLine extends EntityBase<FileImageLineProps, FileIm
     }
     
     handleFileLoaded = (file: IFile & ModifiableEntity) => {
-
         this.convert(file)
             .then(f => this.setValue(f))
             .done();
@@ -99,7 +98,7 @@ export default class FileImageLine extends EntityBase<FileImageLineProps, FileIm
 
         var content = ctx.propertyRoute.typeReference().isLite ?
             Retrieve.create(val as Lite<IFile & Entity>, file => <FileImage file={file} {...this.props.imageHtmlAttributes} />) :
-            <FileImage file={val as IFile} {...this.props.imageHtmlAttributes} /> 
+            <FileImage file={val as IFile & ModifiableEntity} {...this.props.imageHtmlAttributes} /> 
 
         const removeButton = this.renderRemoveButton(true, val);
 
