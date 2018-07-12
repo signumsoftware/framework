@@ -126,7 +126,7 @@ namespace Signum.Entities.Mailing
 
         public XElement ToXml(IToXmlContext ctx)
         {
-            if(this.Attachments != null)
+            if(this.Attachments != null && this.Attachments.Count() > 0)
             {
                 throw new NotImplementedException("Attachments are not yet exportable");
             }
@@ -158,7 +158,7 @@ namespace Signum.Entities.Mailing
                 messages,
                 new XAttribute("MasterTemplate", MasterTemplate.IdOrNull),
                 new XAttribute("IsBodyHtml", IsBodyHtml),
-                this.Applicable.Script != null ? new XAttribute("Applicable", this.Applicable.Script) : null
+                this.Applicable != null &&  this.Applicable.Script != null ? new XAttribute("Applicable", this.Applicable.Script) : null
                 );
 
         }
