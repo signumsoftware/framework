@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using Signum.Engine;
 using Signum.Engine.Basics;
 using Signum.Engine.Maps;
 using Signum.Entities;
@@ -159,8 +160,11 @@ namespace Signum.React.Json
 
         private static Type GetRowIdTypeFromAttribute(PropertyRoute route)
         {
-            var att = Schema.Current.Settings.FieldAttribute<PrimaryKeyAttribute>(route) ?? Schema.Current.Settings.DefaultPrimaryKeyAttribute;
-            
+            var settings = Schema.Current.Settings;
+            var att = settings.FieldAttribute<PrimaryKeyAttribute>(route) ??
+                (route.IsVirtualMList() ? settings.TypeAttribute<PrimaryKeyAttribute>(route.Type.ElementType()) : null) ??
+                settings.DefaultPrimaryKeyAttribute;
+
             return att.Type;
         }
 
