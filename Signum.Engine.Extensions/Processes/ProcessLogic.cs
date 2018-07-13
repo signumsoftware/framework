@@ -390,7 +390,6 @@ namespace Signum.Engine.Processes
                         tr.Commit();
                     }
                 }, status);
-
             }
         }
 

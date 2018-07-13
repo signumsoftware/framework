@@ -36,7 +36,7 @@ namespace Signum.Engine.MachineLearning
     public class PublicationSettings
     {
         public object QueryName;
-        public Action<PredictorEntity> OnPublicate;
+        public Func<PredictorEntity, Entity> OnPublicate;
     }
 
     public static class PredictorLogic
@@ -599,11 +599,17 @@ namespace Signum.Engine.MachineLearning
 
                         e.Publication = publication;
                         e.Save();
-
-                        Publications.GetOrThrow(publication).OnPublicate?.Invoke(e);
                     },
                 }.Register();
 
+                new Graph<Entity>.ConstructFrom<PredictorEntity>(PredictorOperation.AfterPublishProcess)
+                {
+                    CanConstruct = p => p.Publication == null ? ValidationMessage._0IsNotSet.NiceToString(ReflectionTools.GetPropertyInfo(() => p.Publication)) :
+                    Publications.GetOrThrow(p.Publication).OnPublicate == null ? PredictorMessage.NoPublicationsProcessRegisteredFor0.NiceToString(p.Publication) :
+                    null,
+                    Construct = (p, _) => Publications.GetOrThrow(p.Publication).OnPublicate(p)
+                }.Register();
+                
                 new Delete(PredictorOperation.Delete)
                 {
                     FromStates = { PredictorState.Draft, PredictorState.Trained },
