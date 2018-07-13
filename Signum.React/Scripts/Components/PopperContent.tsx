@@ -1,7 +1,7 @@
 ﻿import * as React from 'react';
 import * as PropTypes from 'prop-types';
 import * as ReactDOM from 'react-dom';
-import { Popper } from 'react-popper';
+import { Popper } from './Popper';
 import { Placement, Modifiers, Data } from 'popper.js';
 import { classes } from '../Globals';
 

@@ -4,7 +4,7 @@
 import * as React from 'react';
 import * as PropTypes from 'prop-types';
 import * as ReactDOM from 'react-dom';
-import { Manager } from 'react-popper';
+import { Manager } from './Popper';
 import { BsSize, KeyCodes } from './Basic';
 import { classes } from '../Globals';
 

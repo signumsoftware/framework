@@ -1,10 +1,9 @@
 ﻿import * as React from 'react'
 import * as ReactDOM from 'react-dom'
 import { classes, Dic } from '../Globals'
-import { Popper, Manager, Reference } from 'react-popper';
+import { Popper, Manager, Reference } from './Popper';
 
 
-debugger;
 export interface TypeaheadProps {
     value?: string;
     onChange?: (newValue: string) => void;
