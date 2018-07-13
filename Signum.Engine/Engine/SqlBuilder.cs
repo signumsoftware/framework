@@ -53,6 +53,18 @@ namespace Signum.Engine
             return new SqlPreCommandSimple($"CREATE TABLE {t.Name}(\r\n{columns}\r\n)" + systemVersioning);
         }
 
+        public static SqlPreCommand DropTable(DiffTable diffTable)
+        {
+            if (diffTable.TemporalTableName == null)
+                return DropTable(diffTable.Name);
+
+            return SqlPreCommandConcat.Combine(Spacing.Simple,
+                AlterTableDisableSystemVersioning(diffTable.Name),
+                DropTable(diffTable.Name),
+                DropTable(diffTable.TemporalTableName)
+            );
+        }
+
         public static SqlPreCommand DropTable(ObjectName tableName)
         {
             return new SqlPreCommandSimple("DROP TABLE {0}".FormatWith(tableName));
@@ -94,9 +106,9 @@ namespace Signum.Engine
             return new SqlPreCommandSimple($"ALTER TABLE {table.Name} SET (SYSTEM_VERSIONING = ON (HISTORY_TABLE = {table.SystemVersioned.TableName}))");
         }
 
-        public static SqlPreCommand AlterTableDisableSystemVersioning(ITable table)
+        public static SqlPreCommand AlterTableDisableSystemVersioning(ObjectName tableName)
         {
-            return new SqlPreCommandSimple($"ALTER TABLE {table.Name} SET (SYSTEM_VERSIONING = OFF)");
+            return new SqlPreCommandSimple($"ALTER TABLE {tableName} SET (SYSTEM_VERSIONING = OFF)");
         }
 
         public static SqlPreCommand AlterTableDropColumn(ITable table, string columnName)
@@ -449,7 +461,7 @@ WHERE {primaryKey.Name} NOT IN
             return SqlPreCommand.Combine(Spacing.Simple,
                 CreateTableSql(newTable),
                 MoveRows(oldTable.Name, newTable.Name, newTable.Columns.Keys),
-                DropTable(oldTable.Name));
+                DropTable(oldTable));
         }
 
         public static SqlPreCommand MoveRows(ObjectName oldTable, ObjectName newTable, IEnumerable<string> columnNames)

@@ -23,6 +23,7 @@ export interface EntityTableProps extends EntityListBaseProps {
     avoidFieldSet?: boolean;
     avoidEmptyTable?: boolean;
     maxResultsHeight?: MaxHeightProperty<string | number> | any;
+    scrollable?: boolean;
 }
 
 export interface EntityTableColumn<T, RS> {
@@ -36,7 +37,8 @@ export interface EntityTableColumn<T, RS> {
 export class EntityTable extends EntityListBase<EntityTableProps, EntityTableProps> {
 
     static defaultProps = {
-        maxResultsHeight: "400px"
+        maxResultsHeight: "400px",
+        scrollable: false
     };
 
     static typedColumns<T extends ModifiableEntity>(columns: (EntityTableColumn<T, any> | null | undefined)[]): EntityTableColumn<ModifiableEntity, any>[] {
@@ -125,8 +127,8 @@ export class EntityTable extends EntityListBase<EntityTableProps, EntityTablePro
 
         return (
             <div ref={d => this.containerDiv = d}
-                className="sf-scroll-table-container table-responsive"
-                style={{ maxHeight: this.props.maxResultsHeight }}>
+                className={this.props.scrollable ? "sf-scroll-table-container table-responsive" : undefined}
+                style={{ maxHeight: this.props.scrollable ? this.props.maxResultsHeight : undefined }}>
                 <table className="table table-sm sf-table">
                     {
                         (!this.props.avoidEmptyTable || ctx.value.length > 0) &&
