@@ -50,6 +50,12 @@ namespace Signum.Entities.Rest
         [NotNullable, SqlDbType(Size = 100)]
         public string Action { get; set; }
 
+        [SqlDbType(Size = 100)]
+        public string MachineName { get; set; }
+
+        [SqlDbType(Size = 100)]
+        public string ApplicationName { get; set; }
+
         public Lite<ExceptionEntity> Exception { get; set; }
 
         [SqlDbType(Size = MaxValue)]

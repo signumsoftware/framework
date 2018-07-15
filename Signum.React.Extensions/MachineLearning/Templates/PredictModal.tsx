@@ -1,4 +1,4 @@
-﻿import { PredictorEntity } from "../Signum.Entities.MachineLearning";
+﻿import { PredictorEntity, PredictorState } from "../Signum.Entities.MachineLearning";
 import * as React from "react";
 import * as numbro from "numbro";
 import * as Navigator from "../../../../Framework/Signum.React/Scripts/Navigator";
@@ -17,6 +17,7 @@ import { isLite } from "../../../../Framework/Signum.React/Scripts/Signum.Entiti
 import { Modal } from "../../../../Framework/Signum.React/Scripts/Components";
 import { ModalHeaderButtons } from "../../../../Framework/Signum.React/Scripts/Components/Modal";
 import { NumericTextBox } from "../../../../Framework/Signum.React/Scripts/Lines/ValueLine";
+import { AbortableRequest } from "../../../../Framework/Signum.React/Scripts/Services";
 
 
 interface PredictModalProps extends IModalProps {
@@ -46,11 +47,19 @@ export class PredictModal extends React.Component<PredictModalProps, PredictModa
         this.props.onExited!(undefined);
     }
 
+    abortableUpdateRequest = new AbortableRequest((abortController, request: PredictRequest) => API.updatePredict(request));
+
     hangleOnChange = () => {
         this.setState({ hasChanged: true });
-        API.updatePredict(this.state.predict)
-            .then(predict => this.setState({ predict: predict }))
+        this.abortableUpdateRequest.getData(this.state.predict)
+            .then(predict => {
+                this.setState({ predict: predict });
+            })
             .done();
+    }
+
+    componentWillUnmount() {
+        this.abortableUpdateRequest.abort();
     }
 
     render() {
@@ -150,13 +159,13 @@ export default class PredictLine extends React.Component<PredictLineProps> {
             }
             else {
                 const ctx = new TypeContext<any>(this.props.sctx, { readOnly: true }, undefined as any, p.binding);
-                return this.renderValueOrMultivalue(ctx, null)
-                return (<PredictValue token={p.token} ctx={ctx} label={<i className="fa fa-lightbulb-o"></i>} />);
+                return this.renderValueOrMultivalue(ctx, null);
+
             }
         } else if (p.usage == "Input") {
             const ctx = new TypeContext<any>(this.props.sctx, undefined, undefined as any, p.binding);
-            return (<PredictValue token={p.token} ctx={ctx} onChange={this.props.onChange} />);
-        }
+            return (<PredictValue token={p.token} ctx={ctx} onChange={this.props.onChange}/>);
+        } else throw new Error("unexpected Usage");
     }
 
     renderValueOrMultivalue(pctx: TypeContext<any>, originalValue: any) {
@@ -167,9 +176,11 @@ export default class PredictLine extends React.Component<PredictLineProps> {
 
             return (
                 <div>
-                    {predictions.map((a, i) => <PredictValue token={this.props.token}
+                    {predictions.map((a, i) => <PredictValue key={i} token={this.props.token}
                         ctx={new TypeContext<any>(this.props.sctx, { readOnly: true }, undefined as any, new ReadonlyBinding(a.Value, this.props.sctx + "_" + i))}
-                        label={<i style={{ color: this.getColor(a.Value, originalValue) }}>{numbro(a.Probability).format("0.000")}</i>} />)}
+                        label={<i style={{ color: this.getColor(a.Value, originalValue) }}>{numbro(a.Probability).format("0.00 %")}</i>}
+                        labelHtmlAttributes={{ style: { textAlign: "right" } }}
+                    />)}
                 </div>
             );
         }
@@ -247,6 +258,7 @@ interface PredictValueProps {
     ctx: TypeContext<any>;
     onChange?: () => void;
     label?: React.ReactElement<any>;
+    labelHtmlAttributes?: React.LabelHTMLAttributes<HTMLLabelElement>;
 }
 
 export class PredictValue extends React.Component<PredictValueProps> {
@@ -261,21 +273,22 @@ export class PredictValue extends React.Component<PredictValueProps> {
         const ctx = this.props.ctx.subCtx({ labelColumns: 1 });
         const token = this.props.token;
         const label = this.props.label;
+        const lha = this.props.labelHtmlAttributes;
 
         switch (token.filterType) {
             case "Lite":
                 if (token.type.name == IsByAll || getTypeInfos(token.type).some(ti => !ti.isLowPopulation))
-                    return <EntityLine ctx={ctx} type={token.type} create={false} labelText={label} onChange={this.handleValueChange} />;
+                    return <EntityLine ctx={ctx} type={token.type} create={false} labelText={label} labelHtmlAttributes={lha} onChange={this.handleValueChange} />;
                 else
-                    return <EntityCombo ctx={ctx} type={token.type} create={false} labelText={label} onChange={this.handleValueChange} />
+                    return <EntityCombo ctx={ctx} type={token.type} create={false} labelText={label} labelHtmlAttributes={lha} onChange={this.handleValueChange} />
             case "Enum":
                 const ti = getTypeInfos(token.type).single();
                 if (!ti)
                     throw new Error(`EnumType ${token.type.name} not found`);
                 const members = Dic.getValues(ti.members).filter(a => !a.isIgnoredEnum);
-                return <ValueLine ctx={ctx} type={token.type} formatText={token.format} unitText={token.unit} comboBoxItems={members} labelText={label} onChange={this.handleValueChange} />;
+                return <ValueLine ctx={ctx} type={token.type} formatText={token.format} unitText={token.unit} labelHtmlAttributes={lha} labelText={label} onChange={this.handleValueChange} comboBoxItems={members} />;
             default:
-                return <ValueLine ctx={ctx} type={token.type} formatText={token.format} unitText={token.unit} labelText={label} onChange={this.handleValueChange} />;
+                return <ValueLine ctx={ctx} type={token.type} formatText={token.format} unitText={token.unit} labelHtmlAttributes={lha} labelText={label} onChange={this.handleValueChange} />;
         }
     }
 }

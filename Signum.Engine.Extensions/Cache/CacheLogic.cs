@@ -97,7 +97,7 @@ namespace Signum.Engine.Cache
             {
                 if (controllers.ContainsKey(type))
                 {
-                    foreach (var rType in VirtualMList.RegisteredVirtualMLists.GetOrThrow(type))
+                    foreach (var rType in VirtualMList.RegisteredVirtualMLists.GetOrThrow(type).Keys)
                     {
                         TryCacheTable(sb, rType);
 

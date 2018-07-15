@@ -232,18 +232,20 @@ namespace Signum.Engine.Files
 
         public void ValidateFile(IFilePath fp)
         {
-            if(OnlyImages)
+            if (OnlyImages)
             {
                 var mime = MimeMapping.GetMimeMapping(fp.FileName);
                 if (mime == null || !mime.StartsWith("image/"))
                     throw new ApplicationException(FileMessage.TheFile0IsNotA1.NiceToString(fp.FileName, "image/*"));
             }
 
-            if(MaxSizeInBytes != null)
+            if (MaxSizeInBytes != null)
             {
-                if(fp.BinaryFile.Length > MaxSizeInBytes)
+                if (fp.BinaryFile.Length > MaxSizeInBytes)
                     throw new ApplicationException(FileMessage.File0IsTooBigTheMaximumSizeIs1.NiceToString(fp.FileName, ((long)fp.BinaryFile.Length).ToComputerSize()));
             }
+
+            OnValidateFile?.Invoke(fp);
         }
     }
 }

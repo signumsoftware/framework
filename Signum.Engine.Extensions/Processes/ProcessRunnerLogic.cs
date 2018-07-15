@@ -20,6 +20,7 @@ using Signum.Engine.Maps;
 using System.Linq.Expressions;
 using Signum.Entities.Basics;
 using Signum.Engine.Scheduler;
+using Signum.Entities.Reflection;
 
 namespace Signum.Engine.Processes
 {
@@ -425,6 +426,10 @@ namespace Signum.Engine.Processes
             {
                 CurrentProcess.Progress = progress;
                 CurrentProcess.Status = status;
+                var ic = CurrentProcess.FullIntegrityCheck();
+                if (ic != null)
+                    throw new IntegrityCheckException(ic);
+
                 CurrentProcess.InDB()
                     .UnsafeUpdate()
                     .Set(a => a.Progress, a => progress)
