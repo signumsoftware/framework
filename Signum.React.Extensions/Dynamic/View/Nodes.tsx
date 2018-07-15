@@ -22,7 +22,7 @@ import { ExpressionOrValueComponent, FieldComponent } from './Designer'
 import { ExpressionOrValue, Expression, bindExpr, toCodeEx, withClassNameEx} from './NodeUtils'
 import { FindOptionsLine, QueryTokenLine, ViewNameComponent, FetchQueryDescription } from './FindOptionsComponent'
 import { HtmlAttributesLine } from './HtmlAttributesComponent'
-import { StyleOptionsLine } from './StyleOptionsComponent'
+import { StyleOptionsLine, StyleOptionsComponent } from './StyleOptionsComponent'
 import * as NodeUtils from './NodeUtils'
 import { registeredCustomContexts } from '../DynamicViewClient'
 import { toFindOptions, FindOptionsExpr } from './FindOptionsExpression'
@@ -192,7 +192,7 @@ NodeUtils.register<TabNode>({
         n.title = "My Tab " + index;
         n.eventKey = "tab" + index;
     },
-    renderTreeNode: dn => <span><small>{dn.node.kind}:</small> <strong>{dn.node.title}</strong></span>,
+    renderTreeNode: dn => <span><small>{dn.node.kind}:</small> <strong>{typeof dn.node.title == "string" ? dn.node.title : dn.node.eventKey}</strong></span>,
     validate: dn => NodeUtils.mandatory(dn, n => n.eventKey),
     renderCode: (node, cc) => cc.elementCodeWithChildrenSubCtx("Tab", {
         title: node.title,
@@ -309,7 +309,7 @@ NodeUtils.register<ImageNode >({
 
 export interface RenderEntityNode extends ContainerNode {
     kind: "RenderEntity";
-    field: string;
+    field?: string;
     viewName?: ExpressionOrValue<string | ((mod: ModifiableEntity) => string)>;
     styleOptions?: StyleOptionsExpression;
 }
@@ -322,14 +322,15 @@ NodeUtils.register<RenderEntityNode>({
     isContainer: true,
     hasEntity: true,
     validate: (dn, ctx) => NodeUtils.validateField(dn),
-    renderTreeNode: NodeUtils.treeNodeKindField,
+    renderTreeNode: dn => <span><small>{dn.node.kind}:</small> <strong>{dn.node.field || (typeof dn.node.viewName == "string" ? dn.node.viewName : "")}</strong></span>,
     renderCode: (node, cc) => cc.elementCode("RenderEntity", {
         ctx: cc.subCtxCode(node.field, node.styleOptions),
         getComponent: cc.getGetComponentEx(node, true),
         getViewName: NodeUtils.toStringFunctionCode(node.viewName),
     }),
     render: (dn, ctx) => {
-        var sctx = ctx.subCtx(dn.node.field, toStyleOptions(ctx, dn.node.styleOptions));
+        var styleOptions = toStyleOptions(ctx, dn.node.styleOptions);
+        var sctx = dn.node.field ? ctx.subCtx(dn.node.field, styleOptions) : ctx.subCtx(styleOptions);
         return (
             <RenderEntity
                 ctx={sctx}
@@ -506,13 +507,13 @@ NodeUtils.register<ValueLineNode>({
 
 export interface EntityBaseNode extends LineBaseNode, ContainerNode {
     create?: ExpressionOrValue<boolean>;
-    onCreate?: Expression<() => Promise<ModifiableEntity | Lite<Entity> | undefined> | undefined>
+    onCreate?: Expression<() => Promise<ModifiableEntity | Lite<Entity> | undefined> | undefined>;
     find?: ExpressionOrValue<boolean>;
-    onFind?: Expression<() => Promise<ModifiableEntity | Lite<Entity> | undefined> | undefined>
-    remove?: ExpressionOrValue<boolean | ((item: ModifiableEntity | Lite<Entity>) => boolean)>
-    onRemove?: Expression<(remove: ModifiableEntity | Lite<Entity>) => Promise<boolean>>
-    view?: ExpressionOrValue<boolean | ((item: ModifiableEntity | Lite<Entity>) => boolean)>
-    onView?: Expression<(entity: ModifiableEntity | Lite<Entity>, pr: PropertyRoute) => Promise<ModifiableEntity | undefined> | undefined>
+    onFind?: Expression<() => Promise<ModifiableEntity | Lite<Entity> | undefined> | undefined>;
+    remove?: ExpressionOrValue<boolean | ((item: ModifiableEntity | Lite<Entity>) => boolean)>;
+    onRemove?: Expression<(remove: ModifiableEntity | Lite<Entity>) => Promise<boolean>>;
+    view?: ExpressionOrValue<boolean | ((item: ModifiableEntity | Lite<Entity>) => boolean)>;
+    onView?: Expression<(entity: ModifiableEntity | Lite<Entity>, pr: PropertyRoute) => Promise<ModifiableEntity | undefined> | undefined>;
     viewOnCreate?: ExpressionOrValue<boolean>;
     findOptions?: FindOptionsExpr;
     viewName?: ExpressionOrValue<string | ((mod: ModifiableEntity) => string)>;
@@ -533,7 +534,7 @@ NodeUtils.register<EntityLineNode>({
     renderTreeNode: NodeUtils.treeNodeKindField,
     renderCode: (node, cc) => cc.elementCode("EntityLine", cc.getEntityBasePropsEx(node, { showAutoComplete: true })),
     render: (dn, ctx) => (<EntityLine {...NodeUtils.getEntityBaseProps(dn, ctx, { showAutoComplete: true }) } />),
-    renderDesigner: dn => NodeUtils.designEntityBase(dn, { isCreable: true, isFindable: true, isViewable: true, showAutoComplete: true }),
+    renderDesigner: dn => NodeUtils.designEntityBase(dn, { showAutoComplete: true }),
 });
 
 
@@ -551,7 +552,7 @@ NodeUtils.register<EntityComboNode>({
     renderTreeNode: NodeUtils.treeNodeKindField,
     renderCode: (node, cc) => cc.elementCode("EntityCombo", cc.getEntityBasePropsEx(node, { })),
     render: (dn, ctx) => (<EntityCombo {...NodeUtils.getEntityBaseProps(dn, ctx, {}) } />),
-    renderDesigner: dn => NodeUtils.designEntityBase(dn, { isCreable: false, isFindable: false, isViewable: false, showAutoComplete: false }),
+    renderDesigner: dn => NodeUtils.designEntityBase(dn, { }),
 });
 
 export interface EntityDetailNode extends EntityBaseNode, ContainerNode {
@@ -568,7 +569,7 @@ NodeUtils.register<EntityDetailNode>({
     renderTreeNode: NodeUtils.treeNodeKindField,
     renderCode: (node, cc) => cc.elementCode("EntityDetail", cc.getEntityBasePropsEx(node, {})),
     render: (dn, ctx) => (<EntityDetail {...NodeUtils.getEntityBaseProps(dn, ctx, {}) } />),
-    renderDesigner: dn => NodeUtils.designEntityBase(dn, { isCreable: true, isFindable: true, isViewable: false, showAutoComplete: false }),
+    renderDesigner: dn => NodeUtils.designEntityBase(dn, { }),
 });
 
 export interface FileLineNode extends EntityBaseNode {
@@ -782,6 +783,7 @@ NodeUtils.register<EnumCheckboxListNode>({
 
 export interface EntityListBaseNode extends EntityBaseNode {
     move?: ExpressionOrValue<boolean | ((item: ModifiableEntity | Lite<Entity>) => boolean)>;
+    onFindMany?: Expression<() => Promise<(ModifiableEntity | Lite<Entity>)[] | undefined> | undefined>;
 }
 
 export interface EntityCheckboxListNode extends EntityListBaseNode {
@@ -810,7 +812,7 @@ NodeUtils.register<EntityCheckboxListNode>({
         avoidFieldSet={NodeUtils.evaluateAndValidate(ctx, dn.node, n => n.avoidFieldSet, NodeUtils.isBooleanOrNull)}
         />),
     renderDesigner: dn => <div>
-        {NodeUtils.designEntityBase(dn, { isCreable: false, isFindable: false, isViewable: false, showAutoComplete: false, showMove: false })}
+        {NodeUtils.designEntityBase(dn, {  })}
         <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.columnCount)} type="number" defaultValue={null} />
         <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.columnWidth)} type="number" defaultValue={200} />
         <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.avoidFieldSet)} type="boolean" defaultValue={false} allowsExpression={false} />
@@ -830,9 +832,9 @@ NodeUtils.register<EntityListNode>({
     hasCollection: true,
     validate: (dn, ctx) => NodeUtils.validateEntityBase(dn, ctx),
     renderTreeNode: NodeUtils.treeNodeKindField,
-    renderCode: (node, cc) => cc.elementCode("EntityList",cc.getEntityBasePropsEx(node, { showMove: true })),
-    render: (dn, ctx) => (<EntityList {...NodeUtils.getEntityBaseProps(dn, ctx, { showMove: true }) } />),
-    renderDesigner: dn => NodeUtils.designEntityBase(dn, { isCreable: true, isFindable: true, isViewable: true, showAutoComplete: false, showMove: true })
+    renderCode: (node, cc) => cc.elementCode("EntityList", cc.getEntityBasePropsEx(node, { findMany: true, showMove: true })),
+    render: (dn, ctx) => (<EntityList {...NodeUtils.getEntityBaseProps(dn, ctx, { findMany: true, showMove: true })} />),
+    renderDesigner: dn => NodeUtils.designEntityBase(dn, { findMany: true, showMove: true })
 });
 
 
@@ -851,16 +853,17 @@ NodeUtils.register<EntityStripNode>({
     hasCollection: true,
     validate: (dn, ctx) => NodeUtils.validateEntityBase(dn, ctx),
     renderTreeNode: NodeUtils.treeNodeKindField,
-    renderCode: (node, cc) => cc.elementCode("EntityStrip", {...cc.getEntityBasePropsEx(node, { showAutoComplete: true, showMove: false }),
+    renderCode: (node, cc) => cc.elementCode("EntityStrip", {
+        ...cc.getEntityBasePropsEx(node, { showAutoComplete: true, findMany: true, showMove: true }),
         vertical: node.vertical,
     }),
     render: (dn, ctx) => (<EntityStrip
-        {...NodeUtils.getEntityBaseProps(dn, ctx, { showAutoComplete: true, showMove: false }) }
+        {...NodeUtils.getEntityBaseProps(dn, ctx, { showAutoComplete: true, findMany: true, showMove: true }) }
         vertical={NodeUtils.evaluateAndValidate(ctx, dn.node, n => n.vertical, NodeUtils.isBooleanOrNull)}
         />),
     renderDesigner: dn =>
         <div>
-            {NodeUtils.designEntityBase(dn, { isCreable: false, isFindable: false, isViewable: true, showAutoComplete: true, showMove: false })}
+            {NodeUtils.designEntityBase(dn, { showAutoComplete: true, findMany: true, showMove: true })}
             <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.vertical)} type="boolean" defaultValue={false} />
         </div>
 });
@@ -880,14 +883,14 @@ NodeUtils.register<EntityRepeaterNode>({
     hasCollection: true,
     validate: (dn, ctx) => NodeUtils.validateEntityBase(dn, ctx),
     renderTreeNode: NodeUtils.treeNodeKindField,
-    renderCode: (node, cc) => cc.elementCode("EntityRepeater", { ...cc.getEntityBasePropsEx(node, { showMove: true }), avoidFieldSet: node.avoidFieldSet }),
+    renderCode: (node, cc) => cc.elementCode("EntityRepeater", { ...cc.getEntityBasePropsEx(node, { findMany: true, showMove: true }), avoidFieldSet: node.avoidFieldSet }),
     render: (dn, ctx) => (<EntityRepeater
-        {...NodeUtils.getEntityBaseProps(dn, ctx, { showMove: true }) }
+        {...NodeUtils.getEntityBaseProps(dn, ctx, { findMany: true, showMove: true }) }
         avoidFieldSet={NodeUtils.evaluateAndValidate(ctx, dn.node, n => n.avoidFieldSet, NodeUtils.isBooleanOrNull)}
     />),
     renderDesigner: dn =>
         <div>
-            {NodeUtils.designEntityBase(dn, { isCreable: true, isFindable: true, isViewable: false, showAutoComplete: false, showMove: true })}
+            {NodeUtils.designEntityBase(dn, { findMany: true, showMove: true })}
             <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.avoidFieldSet)} type="boolean" defaultValue={false} allowsExpression={false} />
         </div>
 });
@@ -906,13 +909,13 @@ NodeUtils.register<EntityTabRepeaterNode>({
     hasCollection: true,
     validate: (dn, ctx) => NodeUtils.validateEntityBase(dn, ctx),
     renderTreeNode: NodeUtils.treeNodeKindField,
-    renderCode: (node, cc) => cc.elementCode("EntityTabRepeater", { ...cc.getEntityBasePropsEx(node, { showMove: true }), avoidFieldSet: node.avoidFieldSet }),
+    renderCode: (node, cc) => cc.elementCode("EntityTabRepeater", { ...cc.getEntityBasePropsEx(node, { findMany: true, showMove: true }), avoidFieldSet: node.avoidFieldSet }),
     render: (dn, ctx) => (<EntityTabRepeater
-        {...NodeUtils.getEntityBaseProps(dn, ctx, { showMove: true }) }
+        {...NodeUtils.getEntityBaseProps(dn, ctx, { findMany: true, showMove: true }) }
         avoidFieldSet={NodeUtils.evaluateAndValidate(ctx, dn.node, n => n.avoidFieldSet, NodeUtils.isBooleanOrNull)} />),
     renderDesigner: dn =>
         <div>
-            {NodeUtils.designEntityBase(dn, { isCreable: true, isFindable: true, isViewable: false, showAutoComplete: false, showMove: true })}
+            {NodeUtils.designEntityBase(dn, { findMany: true, showMove: true })}
             <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.avoidFieldSet)} type="boolean" defaultValue={false} allowsExpression={false} />
         </div>
 });
@@ -934,21 +937,21 @@ NodeUtils.register<EntityTableNode>({
     validate: (dn, ctx) => NodeUtils.validateEntityBase(dn, ctx),
     renderTreeNode: NodeUtils.treeNodeKindField,
     renderCode: (node, cc) => cc.elementCode("EntityTable", {
-        ...cc.getEntityBasePropsEx(node, { showMove: true, avoidGetComponent: true }),
+        ...cc.getEntityBasePropsEx(node, { findMany: true, showMove: true, avoidGetComponent: true }),
         avoidFieldSet: node.avoidFieldSet,
         maxResultsHeight: node.maxResultsHeight,
         columns: ({ __code__: "EntityTable.typedColumns<YourEntityHere>(" + cc.stringifyObject(node.children.map(col => ({ __code__: NodeUtils.renderCode(col as EntityTableColumnNode, cc) }))) + ")" })
     }),
     render: (dn, ctx) => (<EntityTable
         columns={dn.node.children.length == 0 ? undefined : dn.node.children.filter(c => NodeUtils.validate(dn.createChild(c), ctx) == null).map(col => NodeUtils.render(dn.createChild(col as EntityTableColumnNode), ctx) as any)}
-        {...NodeUtils.getEntityBaseProps(dn, ctx, { showMove: true, avoidGetComponent: true }) }
+        {...NodeUtils.getEntityBaseProps(dn, ctx, { findMany: true, showMove: true, avoidGetComponent: true }) }
         avoidFieldSet={NodeUtils.evaluateAndValidate(ctx, dn.node, n => n.avoidFieldSet, NodeUtils.isBooleanOrNull)}
         maxResultsHeight={NodeUtils.evaluateAndValidate(ctx, dn.node, n => n.maxResultsHeight, NodeUtils.isNumberOrStringOrNull)}
     />),
 
     renderDesigner: dn =>
         <div>
-            {NodeUtils.designEntityBase(dn, { isCreable: true, isFindable: true, isViewable: false, showAutoComplete: false, showMove: true })}
+            {NodeUtils.designEntityBase(dn, { findMany: true, showMove: true })}
             <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.avoidFieldSet)} type="boolean" defaultValue={false}  />
             <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.maxResultsHeight)} type={null} defaultValue={null}  />
         </div>
