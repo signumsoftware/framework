@@ -182,6 +182,11 @@ namespace Signum.Engine.UserAssets
             {
                 return SystemEmailLogic.GetSystemEmailEntity(fullClassName);
             }
+
+            public CultureInfoEntity GetCultureInfoEntity(string cultureName)
+            {
+                return CultureInfoLogic.GetCultureInfoEntity(cultureName);
+            }
         }
 
         public static UserAssetPreviewModel Preview(byte[] doc)
@@ -289,6 +294,11 @@ namespace Signum.Engine.UserAssets
             public PermissionSymbol TryPermission(string permissionKey)
             {
                 return SymbolLogic<PermissionSymbol>.TryToSymbol(permissionKey);
+            }
+
+            public CultureInfoEntity GetCultureInfoEntity(string cultureName)
+            {
+                return CultureInfoLogic.GetCultureInfoEntity(cultureName);
             }
         }
 

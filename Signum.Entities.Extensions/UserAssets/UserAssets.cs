@@ -92,6 +92,7 @@ namespace Signum.Entities.UserAssets
         DynamicQuery.QueryDescription GetQueryDescription(QueryEntity Query);
 
         SystemEmailEntity GetSystemEmail(string fullClassName);
+        CultureInfoEntity GetCultureInfoEntity(string cultureName);
     }
 
     public interface IUserAssetEntity : IEntity
