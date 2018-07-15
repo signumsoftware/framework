@@ -1175,6 +1175,23 @@ export class PropertyRoute {
         throw new Error("not implemented");
     }
 
+    static generateAll(type: PseudoType): PropertyRoute[] {
+        var ti = getTypeInfo(type);
+        var mixins: string[] = [];
+        return Dic.getValues(ti.members).flatMap(mi => {
+            const pr = PropertyRoute.parse(ti, mi.name);
+            if (pr.typeReference().isCollection)
+                return [pr, PropertyRoute.mlistItem(pr)];
+            return [pr];
+        }).flatMap(pr => {
+            if (pr.parent && pr.parent.propertyRouteType == "Mixin" && !mixins.contains(pr.parent.propertyPath())) {
+                mixins.push(pr.parent.propertyPath());
+                return [pr.parent, pr];
+            } else
+                return [pr];
+            });
+    }
+
     subMembers(): { [subMemberName: string]: MemberInfo } {
 
         function simpleMembersAfter(type: TypeInfo, path: string) {
@@ -1204,7 +1221,7 @@ export class PropertyRoute {
                 ...simpleMembersAfter(this.findRootType(), ""),
                 ...mixinMembers(this.findRootType())
             };
-            case "Mixin": return simpleMembersAfter(this.findRootType(), this.propertyPath());                
+            case "Mixin": return simpleMembersAfter(this.findRootType(), this.propertyPath() + ".");                
             case "LiteEntity": return simpleMembersAfter(this.typeReferenceInfo(), "");
             case "Field":
             case "MListItem": 
