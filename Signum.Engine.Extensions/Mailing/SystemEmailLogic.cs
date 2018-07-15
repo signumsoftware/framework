@@ -15,6 +15,7 @@ using Signum.Utilities.ExpressionTrees;
 using Signum.Entities.Isolation;
 using Signum.Engine.Isolation;
 using Signum.Entities.Templating;
+using Signum.Engine.UserAssets;
 
 namespace Signum.Engine.Mailing
 {
@@ -152,6 +153,9 @@ namespace Signum.Engine.Mailing
                         se.FullClassName,
                     });
 
+                UserAssetsImporter.RegisterName<EmailTemplateEntity>("EmailTemplate");
+
+
                 new Graph<EmailTemplateEntity>.ConstructFrom<SystemEmailEntity>(EmailTemplateOperation.CreateEmailTemplateFromSystemEmail)
                 {
                     Construct = (se, _) => CreateDefaultTemplate(se)
@@ -265,6 +269,11 @@ namespace Signum.Engine.Mailing
         public static SystemEmailEntity GetSystemEmailEntity<T>() where T : ISystemEmail
         {
             return ToSystemEmailEntity(typeof(T));
+        }
+
+        public static SystemEmailEntity GetSystemEmailEntity(string fullClassName)
+        {
+            return systemEmailToEntity.Value.Where(x => x.Key.FullName == fullClassName).FirstOrDefault().Value;
         }
 
         public static SystemEmailEntity ToSystemEmailEntity(Type type)

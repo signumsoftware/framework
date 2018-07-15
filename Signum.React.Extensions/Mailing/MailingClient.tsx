@@ -25,6 +25,8 @@ import MailingMenu from "./MailingMenu";
 
 import "./Mailing.css";
 import { DropdownItem } from '../../../Framework/Signum.React/Scripts/Components';
+import { registerExportAssertLink } from '../../../Extensions/Signum.React.Extensions/UserAssets/UserAssetClient';
+
 
 export function start(options: {
     routes: JSX.Element[], smtpConfig: boolean,
@@ -108,6 +110,8 @@ export function start(options: {
 
             return <MailingMenu searchControl={ctx.searchControl} />;
         });
+    registerExportAssertLink(EmailTemplateEntity);
+    registerExportAssertLink(EmailMasterTemplateEntity);
 
 }
 
@@ -181,7 +185,7 @@ export module API {
     export function stop(): Promise<void> {
         return ajaxPost<void>({ url: "~/api/asyncEmailSender/stop" }, undefined);
     }
-
+     
     export function view(): Promise<AsyncEmailSenderState> {
         return ajaxGet<AsyncEmailSenderState>({ url: "~/api/asyncEmailSender/view" });
     }
