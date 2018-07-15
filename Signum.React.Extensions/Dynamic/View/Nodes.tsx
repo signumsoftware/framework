@@ -19,7 +19,7 @@ import { EntityBase, EntityBaseProps } from '../../../../Framework/Signum.React/
 import { EntityTableColumn } from '../../../../Framework/Signum.React/Scripts/Lines/EntityTable'
 import { DynamicViewValidationMessage } from '../Signum.Entities.Dynamic'
 import { ExpressionOrValueComponent, FieldComponent } from './Designer'
-import { ExpressionOrValue, Expression, bindExpr, toCodeEx, withClassNameEx} from './NodeUtils'
+import { ExpressionOrValue, Expression, bindExpr, toCodeEx, withClassNameEx, DesignerNode} from './NodeUtils'
 import { FindOptionsLine, QueryTokenLine, ViewNameComponent, FetchQueryDescription } from './FindOptionsComponent'
 import { HtmlAttributesLine } from './HtmlAttributesComponent'
 import { StyleOptionsLine, StyleOptionsComponent } from './StyleOptionsComponent'
@@ -321,7 +321,7 @@ NodeUtils.register<RenderEntityNode>({
     order: 5,
     isContainer: true,
     hasEntity: true,
-    validate: (dn, ctx) => NodeUtils.validateField(dn),
+    validate: (dn, ctx) => dn.node.field && NodeUtils.validateField(dn as DesignerNode<LineBaseNode>),
     renderTreeNode: dn => <span><small>{dn.node.kind}:</small> <strong>{dn.node.field || (typeof dn.node.viewName == "string" ? dn.node.viewName : "")}</strong></span>,
     renderCode: (node, cc) => cc.elementCode("RenderEntity", {
         ctx: cc.subCtxCode(node.field, node.styleOptions),
@@ -330,7 +330,8 @@ NodeUtils.register<RenderEntityNode>({
     }),
     render: (dn, ctx) => {
         var styleOptions = toStyleOptions(ctx, dn.node.styleOptions);
-        var sctx = dn.node.field ? ctx.subCtx(dn.node.field, styleOptions) : ctx.subCtx(styleOptions);
+        var sctx = dn.node.field ? ctx.subCtx(dn.node.field, styleOptions) :
+            styleOptions ? ctx.subCtx(styleOptions) : ctx;
         return (
             <RenderEntity
                 ctx={sctx}
@@ -342,7 +343,7 @@ NodeUtils.register<RenderEntityNode>({
     renderDesigner: dn => <div>
         <FieldComponent dn={dn} binding={Binding.create(dn.node, n => n.field)} />
         <StyleOptionsLine dn={dn} binding={Binding.create(dn.node, n => n.styleOptions)} />
-        <ViewNameComponent dn={dn} binding={Binding.create(dn.node, n => n.viewName)} typeName={dn.route && dn.route.member && dn.route.member.type.name} />
+        <ViewNameComponent dn={dn} binding={Binding.create(dn.node, n => n.viewName)} typeName={dn.route && dn.route.typeReference().name} />
     </div>,
 });
 
