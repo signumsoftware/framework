@@ -21,10 +21,10 @@ namespace Signum.React.Dynamic
 {
     public class DynamicValidationController : ApiController
     {
-        [Route("api/dynamic/validation/parentType"), HttpPost]
-        public string ParentType(PropertyRouteEntity pr)
+        [Route("api/dynamic/validation/routeTypeName"), HttpPost]
+        public string RouteTypeName(PropertyRouteEntity pr)
         {
-            return pr.ToPropertyRoute().Parent.Type.Name;
+            return pr.ToPropertyRoute().Type.Name;
         }
 
         [Route("api/dynamic/validation/test"), HttpPost]
@@ -44,16 +44,24 @@ namespace Signum.React.Dynamic
             }
 
 
-            var pr = request.dynamicValidation.PropertyRoute.ToPropertyRoute();
+            var pr = request.dynamicValidation.SubEntity?.ToPropertyRoute() ?? PropertyRoute.Root(TypeLogic.EntityToType.GetOrThrow(request.dynamicValidation.EntityType));
             var candidates = GraphExplorer.FromRootEntity(request.exampleEntity)
-                .Where(a => a.GetType() == pr.Parent.Type && pr.MatchesProperty((ModifiableEntity)a, pr.PropertyInfo) == true)
+                .Where(a => a is ModifiableEntity me && pr.MatchesEntity(me) == true)
                 .Cast<ModifiableEntity>();
+
+            var properties = Validator.GetPropertyValidators(pr.Type).Values.Select(a => a.PropertyInfo).ToList();
 
             try
             {
                 return new DynamicValidationTestResponse
                 {
-                    validationResult = candidates.Select(me => evaluator.EvaluateUntyped(me, pr.PropertyInfo)).ToArray()
+                    validationResult = candidates
+                    .SelectMany(me => properties.Select(pi => new DynamicValidationResult
+                    {
+                        propertyName = pi.NiceName(),
+                        validationResult = evaluator.EvaluateUntyped(me, pi),
+                    }))
+                    .ToArray()
                 };
             }
             catch (Exception e)
@@ -75,7 +83,12 @@ namespace Signum.React.Dynamic
         {
             public string compileError;
             public string validationException;
-            public string[] validationResult;
+            public DynamicValidationResult[] validationResult;
+        }
+
+        public class DynamicValidationResult {
+            public string propertyName;
+            public string validationResult;
         }
     }
 }

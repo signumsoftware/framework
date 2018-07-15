@@ -7,6 +7,7 @@ using Signum.Entities;
 using Signum.Entities.Dynamic;
 using Signum.React.Facades;
 using Signum.Utilities;
+using Signum.Utilities.DataStructures;
 using Signum.Utilities.ExpressionTrees;
 using System;
 using System.CodeDom.Compiler;
@@ -60,10 +61,15 @@ namespace Signum.React.Dynamic
         [Route("api/dynamic/startErrors"), HttpGet]
         public List<HttpError> GetStartErrors()
         {
-            return StartParameters.IgnoredCodeErrors.EmptyIfNull()
-                .PreAnd(DynamicLogic.CodeGenError).NotNull()
-                .Select(e => new HttpError(e, true))
-                .ToList();
+            return new Sequence<Exception>
+            {
+                DynamicLogic.CodeGenError,
+                StartParameters.IgnoredCodeErrors.EmptyIfNull(),
+                StartParameters.IgnoredDatabaseMismatches.EmptyIfNull(),
+            }
+            .NotNull()
+            .Select(e => new HttpError(e, true))
+            .ToList();
         }
     }
 }

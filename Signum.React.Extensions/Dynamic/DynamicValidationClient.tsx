@@ -15,7 +15,6 @@ import { ValueLine, EntityLine, EntityCombo, EntityList, EntityDetail, EntityStr
 import { DynamicValidationEntity, DynamicValidationOperation, DynamicValidationEval } from './Signum.Entities.Dynamic'
 
 export function start(options: { routes: JSX.Element[] }) {
-
     Navigator.addSettings(new EntitySettings(DynamicValidationEntity, w => import('./Validation/DynamicValidation')));
     Constructor.registerConstructor(DynamicValidationEntity, () => DynamicValidationEntity.New({ eval: DynamicValidationEval.New() }));
 
@@ -28,8 +27,8 @@ export namespace API {
         return ajaxPost<DynamicValidationTestResponse>({ url: `~/api/dynamic/validation/test` }, request);
     }
 
-    export function parentType(request: PropertyRouteEntity): Promise<string> {
-        return ajaxPost<string>({ url: `~/api/dynamic/validation/parentType` }, request);
+    export function routeTypeName(request: PropertyRouteEntity): Promise<string> {
+        return ajaxPost<string>({ url: `~/api/dynamic/validation/routeTypeName` }, request);
     }
 }
 
@@ -42,6 +41,10 @@ export interface DynamicValidationTestRequest {
 export interface DynamicValidationTestResponse {
     compileError?: string;
     validationException?: string;
-    validationResult?: string[];
+    validationResult?: DynamicValidationResult[];
 }
 
+export interface DynamicValidationResult {
+    propertyName: string;
+    validationResult: string;
+}

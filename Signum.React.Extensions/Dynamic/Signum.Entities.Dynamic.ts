@@ -144,13 +144,17 @@ export interface DynamicValidationEntity extends Entities.Entity {
     Type: "DynamicValidation";
     name?: string | null;
     entityType?: Basics.TypeEntity | null;
-    propertyRoute?: Basics.PropertyRouteEntity | null;
+    subEntity?: Basics.PropertyRouteEntity | null;
     eval: DynamicValidationEval;
 }
 
 export const DynamicValidationEval = new Type<DynamicValidationEval>("DynamicValidationEval");
 export interface DynamicValidationEval extends EvalEmbedded<IDynamicValidationEvaluator> {
     Type: "DynamicValidationEval";
+}
+
+export module DynamicValidationMessage {
+    export const PropertyIs = new MessageKey("DynamicValidationMessage", "PropertyIs");
 }
 
 export module DynamicValidationOperation {
