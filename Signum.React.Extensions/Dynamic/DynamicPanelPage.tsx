@@ -62,10 +62,8 @@ export default class DynamicPanelPage extends React.Component<DynamicPanelProps,
             <div>
                 {errors && errors.length > 0 &&
                     <div role="alert" className="alert alert-danger" style={{ marginTop: "20px" }}>
-                        <p>
                         <span className="fa fa-exclamation-triangle"></span>
                         {" "}The server started, but there {errors.length > 1 ? "are" : "is"} <a href="#" onClick={this.handleErrorClick}>{errors.length} {errors.length > 1 ? "errors" : "error"}</a>.
-                        </p>
                     </div>
                 }
                 <Tabs activeEventKey={step || "compile"} id="dynamicPanelTabs" style={{ marginTop: "20px" }} toggle={this.handleSelect}>
