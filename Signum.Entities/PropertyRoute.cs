@@ -633,7 +633,7 @@ namespace Signum.Entities
             return this.Parent.MatchesEntity(entity);
         }
 
-        private bool? MatchesEntity(ModifiableEntity entity)
+        public bool? MatchesEntity(ModifiableEntity entity)
         {
             if (this.Type != entity.GetType())
                 return false;
@@ -649,6 +649,9 @@ namespace Signum.Entities
                 case PropertyRouteType.FieldOrProperty:
                     {
                         var parentEntity = entity.GetParentEntity();
+
+                        if (parentEntity == null)
+                            return null;
 
                         var result = this.Parent.MatchesEntity(parentEntity);
                         if (result != true)
@@ -671,6 +674,9 @@ namespace Signum.Entities
                 case PropertyRouteType.MListItems:
                     {
                         var parentEntity = entity.GetParentEntity();
+
+                        if (parentEntity == null)
+                            return null;
 
                         var result = this.Parent.Parent.MatchesEntity(parentEntity);
                         if (result != true)
