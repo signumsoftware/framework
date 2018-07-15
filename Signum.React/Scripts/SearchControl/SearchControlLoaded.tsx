@@ -187,6 +187,8 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
         if (fo.pagination.mode == "Paginate")
             fo.pagination.currentPage = 1;
 
+        this.containerDiv && this.containerDiv.scrollTo({ top: 0 });
+
         this.doSearch().done();
     };
 
@@ -264,8 +266,12 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
         this.props.findOptions.pagination = p;
         this.setState({ resultTable: undefined, resultFindOptions: undefined });
 
-        if (this.props.findOptions.pagination.mode != "All")
+        if (this.props.findOptions.pagination.mode != "All") {
+
+            this.containerDiv && this.containerDiv.scrollTo({ top: 0 });
+
             this.doSearch().done();
+        }
     }
 
 

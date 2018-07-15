@@ -357,26 +357,34 @@ WHERE {oldPrimaryKey} NOT IN
 
                 var columns = uniqueIndex.Columns.ToString(c => c.Name.SqlEscape(), ", ");
 
-
-                if (SafeConsole.Ask($"There are {count} rows in {uniqueIndex.Table.Name} with the same {columns}. Generate DELETE duplicates script?"))
+                if (rep.Interactive)
                 {
-                    return new SqlPreCommandSimple($@"DELETE {uniqueIndex.Table.Name} 
+                    if (SafeConsole.Ask($"There are {count} rows in {uniqueIndex.Table.Name} with the same {columns}. Generate DELETE duplicates script?"))
+                        return RemoveDuplicates(uniqueIndex, primaryKey, columns, commentedOut: false);
+
+                    return null;
+                }
+                else
+                {
+                    return RemoveDuplicates(uniqueIndex, primaryKey, columns, commentedOut: true);
+                }
+            }
+            catch (Exception)
+            {
+                return new SqlPreCommandSimple($"-- Impossible to determine duplicates in new index {uniqueIndex.IndexName}");
+
+            }
+        }
+
+        private static SqlPreCommand RemoveDuplicates(UniqueIndex uniqueIndex, IColumn primaryKey, string columns, bool commentedOut)
+        {
+            return new SqlPreCommandSimple($@"DELETE {uniqueIndex.Table.Name} 
 WHERE {primaryKey.Name} NOT IN
 (
     SELECT MIN({primaryKey.Name})
     FROM {uniqueIndex.Table.Name}
     GROUP BY {columns}
-)");
-                }
-
-                return null;
-
-            }
-            catch (Exception e)
-            {
-                return new SqlPreCommandSimple($"-- Impossible to determine duplicates in new index {uniqueIndex.IndexName}");
-
-            }
+)".Let(txt => commentedOut ? txt.Indent(2, '-') : txt));
         }
 
         public static SqlPreCommand CreateIndexBasic(Index index, bool forHistoryTable)

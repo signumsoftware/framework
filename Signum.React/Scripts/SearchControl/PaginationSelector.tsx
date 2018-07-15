@@ -89,12 +89,21 @@ export default class PaginationSelector extends React.Component<PaginationSelect
     }
 
     handleElementsPerPage = (e: React.ChangeEvent<HTMLSelectElement>) => {
-        const p: Pagination = { ...this.props.pagination, elementsPerPage: parseInt(e.currentTarget.value) };
+        const mode = this.props.pagination.mode;
+        const p: Pagination = {
+            mode: mode,
+            elementsPerPage: parseInt(e.currentTarget.value),
+            currentPage: mode == "Paginate" ? 1 : undefined,
+        };
         this.props.onPagination(p);
     }
 
     handlePageClick = (page: number) => {
-        const p: Pagination = { ...this.props.pagination, currentPage: page };
+
+        const p: Pagination = {
+            ...this.props.pagination,
+            currentPage: page
+        };
         this.props.onPagination(p);
     }
 
