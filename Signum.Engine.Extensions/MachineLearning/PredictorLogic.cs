@@ -198,6 +198,7 @@ namespace Signum.Engine.MachineLearning
 
                 sb.Schema.WhenIncluded<ProcessEntity>(() =>
                 {
+                    sb.Schema.Settings.AssertImplementedBy((ProcessEntity p) => p.Data, typeof(PredictorEntity));
                     sb.Schema.Settings.AssertImplementedBy((ProcessEntity p) => p.Data, typeof(AutoconfigureNeuralNetworkEntity));
                     ProcessLogic.Register(PredictorProcessAlgorithm.AutoconfigureNeuralNetwork, new AutoconfigureNeuralNetworkAlgorithm());
 
@@ -445,32 +446,6 @@ namespace Signum.Engine.MachineLearning
             e.Files.Clear();
             e.Codifications().UnsafeDelete();
             e.EpochProgresses().UnsafeDelete();
-        }
-
-       
-
-        public static byte[] GetTsvMetadata(this PredictorEntity predictor)
-        {
-            return null;
-            //var ctx = new PredictorTrainingContext(predictor, CancellationToken.None);
-            //PredictorLogicQuery.RetrieveData(ctx);
-            //return Tsv.ToTsvBytes(ctx.AllRows.Rows.Take(1).ToArray());
-        }
-
-        public static byte[] GetTsv(this PredictorEntity predictor)
-        {
-            return null;
-            //var ctx = new PredictorTrainingContext(predictor, CancellationToken.None);
-            //PredictorLogicQuery.RetrieveData(ctx);
-            //return Tsv.ToTsvBytes(ctx.AllRows.Rows);
-        }
-
-        public static byte[] GetCsv(this PredictorEntity predictor)
-        {
-            return null;
-            //var ctx = new PredictorTrainingContext(predictor, CancellationToken.None);
-            //PredictorLogicQuery.RetrieveData(ctx);
-            //return Csv.ToCsvBytes(ctx.AllRows.Rows);
         }
 
         public static PredictorEntity ParseData(this PredictorEntity predictor)
