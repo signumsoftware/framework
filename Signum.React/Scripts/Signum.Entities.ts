@@ -537,6 +537,7 @@ export module ValidationMessage {
     export const _0Or1ShouldBeSet = new MessageKey("ValidationMessage", "_0Or1ShouldBeSet");
     export const _0And1And2CanNotBeSetAtTheSameTime = new MessageKey("ValidationMessage", "_0And1And2CanNotBeSetAtTheSameTime");
     export const _0Have1ElementsButAllowedOnly2 = new MessageKey("ValidationMessage", "_0Have1ElementsButAllowedOnly2");
+    export const _0IsEmpty = new MessageKey("ValidationMessage", "_0IsEmpty");
 }
 
 export module VoidEnumMessage {
