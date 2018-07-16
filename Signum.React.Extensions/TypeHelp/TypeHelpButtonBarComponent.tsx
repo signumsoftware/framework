@@ -5,10 +5,10 @@ import { TypeHelpMode } from './TypeHelpClient';
 import { ModifiableEntity } from '../../../Framework/Signum.React/Scripts/Signum.Entities';
 import { TypeContext } from '../../../Framework/Signum.React/Scripts/Lines';
 
-
 interface TypeHelpButtonBarComponentProps {
     typeName: string;
     mode: TypeHelpMode;
+    extraButtons?: React.ReactNode;
     ctx?: TypeContext<any>;
 }
 
@@ -18,7 +18,8 @@ export default class TypeHelpButtonBarComponent extends React.Component<TypeHelp
 
     render() {
         return (
-            <div>
+            <div className="btn-toolbar">
+                {this.props.extraButtons}
                 {
                     TypeHelpButtonBarComponent.getTypeHelpButtons
                     .flatMap(f => f(this.props))

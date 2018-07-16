@@ -10,18 +10,24 @@ using System.Text;
 using System.Text.RegularExpressions;
 using Signum.Entities.Basics;
 using Signum.Utilities.ExpressionTrees;
+using Signum.Entities.UserAssets;
+using System.Xml.Linq;
 
 namespace Signum.Entities.Mailing
 {
     [Serializable, EntityKind(EntityKind.Main, EntityData.Master)]
-    public class EmailMasterTemplateEntity : Entity
+    public class EmailMasterTemplateEntity : Entity , IUserAssetEntity
     {
         [UniqueIndex]
         [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
         public string Name { get; set; }
 
-        [NotifyCollectionChanged, NotNullValidator]
+        [NotifyCollectionChanged, NotNullValidator, NotifyChildProperty]
         public MList<EmailMasterTemplateMessageEmbedded> Messages { get; set; } = new MList<EmailMasterTemplateMessageEmbedded>();
+
+        [UniqueIndex]
+        public Guid Guid { get; set; } = Guid.NewGuid();
+
 
         public static readonly Regex MasterTemplateContentRegex = new Regex(@"\@\[content\]");
 
@@ -45,26 +51,31 @@ namespace Signum.Entities.Mailing
 
             return base.PropertyValidation(pi);
         }
-
-        protected override void ChildCollectionChanged(object sender, NotifyCollectionChangedEventArgs args)
+        
+        public XElement ToXml(IToXmlContext ctx)
         {
-            if (sender == Messages)
-            {
-                if (args.OldItems != null)
-                    foreach (var item in args.OldItems.Cast<EmailMasterTemplateMessageEmbedded>())
-                        item.MasterTemplate = null;
 
-                if (args.NewItems != null)
-                    foreach (var item in args.NewItems.Cast<EmailMasterTemplateMessageEmbedded>())
-                        item.MasterTemplate = this;
-            }
+            return new XElement("EmailMasterTemplate",
+                new XAttribute("Name", this.Name ?? ""),
+                new XAttribute("Guid", this.Guid),
+
+                new XElement("Messages", this.Messages.Select(x =>
+                    new XElement("Message",
+                        new XAttribute("CultureInfo", x.CultureInfo.Name),
+                        new XCData(x.Text)
+                ))));
         }
 
-        protected override void PreSaving(PreSavingContext ctx)
+        public void FromXml(XElement element, IFromXmlContext ctx)
         {
-            base.PreSaving(ctx);
+            Name = element.Attribute("Name").Value;
+            Guid = Guid.Parse(element.Attribute("Guid").Value);
+            Messages = new MList<EmailMasterTemplateMessageEmbedded>();
+            Messages = element.Element("Messages").Elements("Message").Select(elem => new EmailMasterTemplateMessageEmbedded(ctx.GetCultureInfoEntity(elem.Attribute("CultureInfo").Value))
+            {
+                Text = elem.Value
+            }).ToMList();
 
-            Messages.ForEach(e => e.MasterTemplate = this);
         }
     }
 
@@ -84,15 +95,7 @@ namespace Signum.Entities.Mailing
         {
             this.CultureInfo = culture;
         }
-
-        [Ignore]
-        internal EmailMasterTemplateEntity masterTemplate;
-        [InTypeScript(false)]
-        public EmailMasterTemplateEntity MasterTemplate
-        {
-            get { return masterTemplate; }
-            set { masterTemplate = value; }
-        }
+        
 
         [NotNullValidator]
         public CultureInfoEntity CultureInfo { get; set; }

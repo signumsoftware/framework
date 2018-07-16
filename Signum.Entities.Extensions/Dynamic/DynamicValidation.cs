@@ -22,15 +22,14 @@ namespace Signum.Entities.Dynamic
         [NotNullValidator]
         public TypeEntity EntityType { get; set; }
 
-        [NotNullValidator]
-        public PropertyRouteEntity PropertyRoute { get; set; }
+        public PropertyRouteEntity SubEntity { get; set; }
 
         public static Func<DynamicValidationEntity, Type> GetMainType; 
 
         [NotNullValidator, NotifyChildProperty, InTypeScript(Undefined = false, Null = false)]
         public DynamicValidationEval Eval { get; set; }
 
-        static Expression<Func<DynamicValidationEntity, string>> ToStringExpression = @this => @this.PropertyRoute + ": " + @this.Name;
+        static Expression<Func<DynamicValidationEntity, string>> ToStringExpression = @this =>@this.EntityType + (@this.SubEntity == null ? null : (" " + @this.SubEntity))+ ": " + @this.Name;
         [ExpressionField]
         public override string ToString()
         {
@@ -78,5 +77,10 @@ namespace Signum.Entities.Dynamic
     public interface IDynamicValidationEvaluator
     {
         string EvaluateUntyped(ModifiableEntity c, PropertyInfo pi);
+    }
+
+    public enum DynamicValidationMessage
+    {
+        PropertyIs
     }
 }

@@ -137,7 +137,10 @@ export function overrideOnFind(ti: TypeInfo) {
     var qs = getQuerySetting(ti.name);
 
     if (!qs.onFind)
-      qs.onFind = (fo, mo) => openTree(ti.name, fo.filterOptions, { title: mo && mo.title });
+        qs.onFind = (fo, mo) => openTree(ti.name, fo.filterOptions, { title: mo && mo.title });
+
+    if (!qs.onFindMany)
+        qs.onFindMany = (fo, mo) => openTree(ti.name, fo.filterOptions, { title: mo && mo.title }).then(lite => lite && [lite]);
 }
 
 export function overrideDefaultOrder(ti: TypeInfo) {

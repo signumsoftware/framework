@@ -549,9 +549,9 @@ namespace Signum.Engine.Dynamic
 
             string result = SimplifyType(property.Type);
 
-            var t = TryResolveType(property.Type);
+         
             
-            if (property.IsNullable != Entities.Dynamic.IsNullable.No && t?.IsValueType == true)
+            if (property.IsNullable != Entities.Dynamic.IsNullable.No && IsValueType(property))
                 result = result + "?";
 
             if (property.IsLite)
@@ -561,6 +561,23 @@ namespace Signum.Engine.Dynamic
                 result = "MList<" + result + ">";
 
             return result;
+        }
+
+        private bool IsValueType(DynamicProperty property)
+        {
+            var t = TryResolveType(property.Type);
+            if (t != null)
+                return t.IsValueType;
+
+            var tn = property.Type;
+            if (tn.EndsWith("Embedded") || tn.EndsWith("Entity") || tn.EndsWith("Mixin") || tn.EndsWith("Symbol"))
+            {
+                return false;
+            }
+            else
+            {
+                return true; // Assume Enum
+            }
         }
 
         private string SimplifyType(string type)
@@ -604,7 +621,7 @@ namespace Signum.Engine.Dynamic
 
             var type = TypeLogic.TryGetType(typeName);
             if (type != null)
-                return type;
+                return EnumEntity.Extract(type) ?? type;
 
             return null;
         }
