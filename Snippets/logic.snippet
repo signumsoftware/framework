@@ -51,7 +51,7 @@
     {
         public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
         {
-            if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
+            if (sb.NotDefined(MethodBase.GetCurrentMethod()))
             {
                 sb.Include<$entityName$Entity>()
                     .WithSave($entityName$Operation.Save)
