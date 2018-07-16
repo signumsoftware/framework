@@ -26,9 +26,9 @@ export class FormControlReadonly extends React.Component<FormControlReadonlyProp
 
         } else {
             return (
-                <span {...attrs} {...{ readOnly: true }} className={classes(ctx.formControlClass, attrs && attrs.className, this.props.className)}>
-                    {this.props.children}
-                </span>
+                <div {...attrs} {...{ readOnly: true }} className={classes(ctx.formControlClass, attrs && attrs.className, this.props.className)}>
+                    {this.props.children || <span>&nbsp;</span>}
+                </div>
             );
         }
     }
