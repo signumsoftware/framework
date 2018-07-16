@@ -30,10 +30,11 @@ namespace Signum.React.Authorization
         public static void Start(Func<AuthTokenConfigurationEmbedded> tokenConfig, string hashableEncryptionKey)
         {
             Configuration = tokenConfig;
-            CryptoKey = new MD5CryptoServiceProvider().Using(p => p.ComputeHash(UTF8Encoding.UTF8.GetBytes(hashableEncryptionKey)));
+            CryptoKey = new MD5CryptoServiceProvider().Using(p => p.ComputeHash(Encoding.UTF8.GetBytes(hashableEncryptionKey)));
 
             SignumAuthenticationFilterAttribute.Authenticators.Add(TokenAuthenticator);
-            SignumAuthenticationFilterAttribute.Authenticators.Add(AnonymousAuthenticator);
+            SignumAuthenticationFilterAttribute.Authenticators.Add(AnonymousUserAuthenticator);
+            SignumAuthenticationFilterAttribute.Authenticators.Add(AllowAnonymousAuthenticator);
             SignumAuthenticationFilterAttribute.Authenticators.Add(InvalidAuthenticator);
         }
 
@@ -42,7 +43,15 @@ namespace Signum.React.Authorization
             throw new AuthenticationException("No authentication information found!");
         }
 
-        public static SignumAuthenticationResult AnonymousAuthenticator(HttpActionContext actionContext)
+        public static SignumAuthenticationResult AnonymousUserAuthenticator(HttpActionContext actionContext)
+        {
+            if (AuthLogic.AnonymousUser != null)
+                return new SignumAuthenticationResult { User = AuthLogic.AnonymousUser };
+
+            return null;
+        }
+
+        public static SignumAuthenticationResult AllowAnonymousAuthenticator(HttpActionContext actionContext)
         {
             var r = actionContext.ActionDescriptor as ReflectedHttpActionDescriptor;
             if (r.GetCustomAttributes<AllowAnonymousAttribute>().Any() || r.ControllerDescriptor.ControllerType.HasAttribute<AllowAnonymousAttribute>())
@@ -51,7 +60,7 @@ namespace Signum.React.Authorization
             return null;
         }
 
-        static SignumAuthenticationResult TokenAuthenticator(HttpActionContext ctx)
+        public static SignumAuthenticationResult TokenAuthenticator(HttpActionContext ctx)
         {
             var tokenString = ctx.Request.Headers.Authorization?.Parameter;
             if (tokenString == null)

@@ -22,6 +22,8 @@ namespace Signum.Entities.Rest
 
         public DateTime StartDate { get; set; }
 
+        public DateTime EndDate { get; set; }
+
         public DateTime? ReplayDate { get; set; }
 
         [NotNullable, SqlDbType(Size = MaxValue)]
@@ -61,7 +63,6 @@ namespace Signum.Entities.Rest
         [SqlDbType(Size = MaxValue)]
         public string ResponseBody { get; set; }
 
-        public DateTime EndDate { get; set; }
 
         public RestLogReplayState? ReplayState { get; set; }
 
