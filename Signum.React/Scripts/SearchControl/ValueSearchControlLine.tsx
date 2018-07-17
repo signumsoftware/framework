@@ -14,6 +14,7 @@ import { LineBase, LineBaseProps, runTasks } from '../Lines/LineBase'
 import { FormGroup } from '../Lines/FormGroup'
 import { FormControlReadonly } from '../Lines/FormControlReadonly'
 import { SearchControlProps } from "./SearchControl";
+import { BsColor } from '../Components';
 
 export interface ValueSearchControlLineProps extends React.Props<ValueSearchControlLine> {
     ctx: StyleContext;
@@ -25,6 +26,7 @@ export interface ValueSearchControlLineProps extends React.Props<ValueSearchCont
     initialValue?: any;
     isLink?: boolean;
     isBadge?: boolean | "MoreThanZero";
+    badgeColor?: BsColor;
     isFormControl?: boolean;
     findButton?: boolean;
     onViewEntity?: (entity: Lite<Entity>) => void;
@@ -126,6 +128,7 @@ export default class ValueSearchControlLine extends React.Component<ValueSearchC
                         findOptions={fo}
                         initialValue={this.props.initialValue}
                         isBadge={isBadge}
+                        badgeColor={this.props.badgeColor}
                         isLink={this.props.isLink}
                         formControlClass={isFormControl ? this.props.ctx.formControlClass : undefined}
                         valueToken={this.props.valueToken}

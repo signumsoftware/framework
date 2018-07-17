@@ -1,6 +1,6 @@
 ﻿import * as React from 'react';
 import * as PropTypes from 'prop-types';
-import { Reference, ReferenceChildrenProps, PopperChildrenProps, RefHandler } from 'react-popper';
+import { Reference, ReferenceChildrenProps, PopperChildrenProps } from './Popper';
 import { classes } from '../Globals';
 import { Button, ButtonProps } from './Button';
 import { BsColor } from '.';
@@ -58,7 +58,7 @@ export class DropdownToggle extends React.Component<DropdownToggleProps> {
 
         if (this.context.inNavbar)
             return this.renderContent(this.props, undefined);
-        
+
         return (
             <Reference>
                 {p => this.renderContent(this.props, p.ref)}
@@ -66,7 +66,7 @@ export class DropdownToggle extends React.Component<DropdownToggleProps> {
         );
     }
 
-    renderContent(p: DropdownToggleProps, ref: RefHandler | undefined) {
+    renderContent(p: DropdownToggleProps, ref: ((e: HTMLElement | null) => void) | undefined) {
 
         const clss = classes(
             p.className,

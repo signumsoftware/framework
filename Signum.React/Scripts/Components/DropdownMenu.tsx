@@ -1,6 +1,6 @@
 ﻿import * as React from 'react';
 import * as PropTypes from 'prop-types';
-import { Popper } from 'react-popper';
+import { Popper } from './Popper';
 import { classes } from '../Globals';
 
 export interface DropdownMenuProps extends React.HTMLAttributes<any> {

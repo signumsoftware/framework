@@ -14,6 +14,7 @@ import { StyleContext } from '../Typecontext'
 import { LineBase, LineBaseProps } from '../Lines/LineBase'
 import { AbortableRequest } from "../Services";
 import { SearchControlProps } from "./SearchControl";
+import { BsColor } from '../Components';
 
 
 
@@ -22,6 +23,7 @@ export interface ValueSearchControlProps extends React.Props<ValueSearchControl>
     findOptions: FindOptions;
     isLink?: boolean;
     isBadge?: boolean | "MoreThanZero";
+    badgeColor?: BsColor;
     formControlClass?: string;
     avoidAutoRefresh?: boolean;
     onValueChange?: (value: any) => void;
@@ -157,7 +159,7 @@ export default class ValueSearchControl extends React.Component<ValueSearchContr
             p.valueToken == undefined && this.state.value > 0 ? "count-with-results" : "count-no-results",
             p.formControlClass,
             p.formControlClass && this.isNumeric() && "numeric",
-            p.isBadge == true || (p.isBadge == "MoreThanZero" && this.state.value > 0) ? "badge badge-pill badge-secondary" : "",
+            p.isBadge == true || (p.isBadge == "MoreThanZero" && this.state.value > 0) ? "badge badge-pill badge-" + (this.props.badgeColor || "secondary") : "",
             p.customClass
         );
 
