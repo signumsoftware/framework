@@ -180,8 +180,7 @@ function getConfirmMessage(coc: ContextualOperationContext<Entity>) {
 
     if (coc.settings && coc.settings.confirmMessage != undefined)
         return coc.settings.confirmMessage(coc);
-
-    //eoc.settings.confirmMessage === undefined
+    
     if (coc.operationInfo.operationType == OperationType.Delete)
         return coc.context.lites.length > 1 ?
             OperationMessage.PleaseConfirmYouDLikeToDeleteTheSelectedEntitiesFromTheSystem.niceToString() :

@@ -153,7 +153,7 @@ export class ContextualOperationSettings<T extends Entity> extends OperationSett
 
     isVisible?: (ctx: ContextualOperationContext<T>) => boolean;
     hideOnCanExecute?: boolean;
-    confirmMessage?: (ctx: ContextualOperationContext<T>) => string;
+    confirmMessage?: (ctx: ContextualOperationContext<T>) => string | undefined;
     onClick?: (ctx: ContextualOperationContext<T>) => void;
     color?: BsColor;
     icon?: string;
@@ -171,7 +171,7 @@ export interface ContextualOperationOptions<T extends Entity> {
     text?: () => string;
     isVisible?: (ctx: ContextualOperationContext<T>) => boolean;
     hideOnCanExecute?: boolean;
-    confirmMessage?: (ctx: ContextualOperationContext<T>) => string;
+    confirmMessage?: (ctx: ContextualOperationContext<T>) => string | undefined;
     onClick?: (ctx: ContextualOperationContext<T>) => void;
     color?: BsColor;
     icon?: string;
@@ -246,7 +246,7 @@ export class EntityOperationSettings<T extends Entity> extends OperationSettings
     contextualFromMany?: ContextualOperationSettings<T>;
 
     isVisible?: (ctx: EntityOperationContext<T>) => boolean;
-    confirmMessage?: (ctx: EntityOperationContext<T>) => string;
+    confirmMessage?: (ctx: EntityOperationContext<T>) => string | undefined;
     onClick?: (ctx: EntityOperationContext<T>) => void;
     hideOnCanExecute?: boolean;
     group?: EntityOperationGroup | null;
@@ -272,7 +272,7 @@ export interface EntityOperationOptions<T extends Entity> {
 
     text?: () => string;
     isVisible?: (ctx: EntityOperationContext<T>) => boolean;
-    confirmMessage?: (ctx: EntityOperationContext<T>) => string;
+    confirmMessage?: (ctx: EntityOperationContext<T>) => string | undefined;
     onClick?: (ctx: EntityOperationContext<T>) => void;
     hideOnCanExecute?: boolean;
     group?: EntityOperationGroup | null;
