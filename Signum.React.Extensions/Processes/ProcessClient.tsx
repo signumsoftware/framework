@@ -10,7 +10,7 @@ import { EntityOperationSettings } from '../../../Framework/Signum.React/Scripts
 import { PseudoType, QueryKey, GraphExplorer, OperationType  } from '../../../Framework/Signum.React/Scripts/Reflection'
 import * as Operations from '../../../Framework/Signum.React/Scripts/Operations'
 import * as ContextualOperations from '../../../Framework/Signum.React/Scripts/Operations/ContextualOperations'
-import { ProcessState, ProcessEntity, ProcessPermission, PackageLineEntity, PackageEntity, PackageOperationEntity } from './Signum.Entities.Processes'
+import { ProcessState, ProcessEntity, ProcessPermission, PackageLineEntity, PackageEntity, PackageOperationEntity, ProcessOperation, ProcessMessage } from './Signum.Entities.Processes'
 import * as OmniboxClient from '../Omnibox/OmniboxClient'
 import * as AuthClient from '../Authorization/AuthClient'
 import { ImportRoute } from "../../../Framework/Signum.React/Scripts/AsyncImport";
@@ -42,8 +42,12 @@ export function start(options: { routes: JSX.Element[], packages: boolean, packa
         onClick: () => Promise.resolve("~/processes/view")
     });
 
-    monkeyPatchCreateContextualMenuItem()
+    monkeyPatchCreateContextualMenuItem();
 
+    Operations.addSettings(new EntityOperationSettings(ProcessOperation.Cancel, {
+        confirmMessage: ctx => ctx.entity.state == "Executing" || ctx.entity.state == "Suspending" ? ProcessMessage.SuspendIsTheSaferWayOfStoppingARunningProcessCancelAnyway.niceToString() : undefined,
+        color: "warning"
+    }));
 }
 
 export const processOperationSettings :{ [key: string]: Operations.ContextualOperationSettings<any> } = {}; 
