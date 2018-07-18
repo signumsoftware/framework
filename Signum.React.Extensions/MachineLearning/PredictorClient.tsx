@@ -68,7 +68,10 @@ export function start(options: { routes: JSX.Element[] }) {
     Operations.addSettings(new EntityOperationSettings(PredictorOperation.StopTraining, { hideOnCanExecute: true }));
     Operations.addSettings(new EntityOperationSettings(PredictorOperation.CancelTraining, { hideOnCanExecute: true }));
     Operations.addSettings(new EntityOperationSettings(PredictorOperation.Train, { hideOnCanExecute: true }));
-    Operations.addSettings(new EntityOperationSettings(PredictorOperation.Untrain, { hideOnCanExecute: true }));
+    Operations.addSettings(new EntityOperationSettings(PredictorOperation.Untrain, {
+        hideOnCanExecute: true,
+        confirmMessage: ctx => ctx.entity.publication && PredictorMessage.PredictorIsPublishedUntrainAnyway.niceToString(),
+    }));
     
     Operations.addSettings(new EntityOperationSettings(PredictorOperation.Publish, {
         hideOnCanExecute: true,
@@ -87,10 +90,6 @@ export function start(options: { routes: JSX.Element[] }) {
                     .done();
             }
         }
-    }));
-
-    Operations.addSettings(new EntityOperationSettings(PredictorOperation.Untrain, {
-        confirmMessage: ctx => ctx.entity.publication && PredictorMessage.PredictorIsPublishedUntrainAnyway.niceToString(),
     }));
 
     Operations.addSettings(new EntityOperationSettings(PredictorOperation.AfterPublishProcess, {
