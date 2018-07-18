@@ -89,6 +89,15 @@ export function start(options: { routes: JSX.Element[] }) {
         }
     }));
 
+    Operations.addSettings(new EntityOperationSettings(PredictorOperation.Untrain, {
+        confirmMessage: ctx => ctx.entity.publication && PredictorMessage.PredictorIsPublishedUntrainAnyway.niceToString(),
+    }));
+
+    Operations.addSettings(new EntityOperationSettings(PredictorOperation.AfterPublishProcess, {
+        hideOnCanExecute: true,
+        group: null,
+    }));
+
     Constructor.registerConstructor(PredictorEntity, () => PredictorEntity.New({
         mainQuery: PredictorMainQueryEmbedded.New(),
         settings: PredictorSettingsEmbedded.New(),

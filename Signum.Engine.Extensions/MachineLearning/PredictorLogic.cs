@@ -579,7 +579,8 @@ namespace Signum.Engine.MachineLearning
 
                 new Graph<Entity>.ConstructFrom<PredictorEntity>(PredictorOperation.AfterPublishProcess)
                 {
-                    CanConstruct = p => p.Publication == null ? ValidationMessage._0IsNotSet.NiceToString(ReflectionTools.GetPropertyInfo(() => p.Publication)) :
+                    CanConstruct = p => 
+                    p.State != PredictorState.Trained ? ValidationMessage._0Or1ShouldBeSet.NiceToString(ReflectionTools.GetPropertyInfo(() => p.State),  p.State.NiceToString()) :                    p.Publication == null ? ValidationMessage._0IsNotSet.NiceToString(ReflectionTools.GetPropertyInfo(() => p.Publication)) :
                     Publications.GetOrThrow(p.Publication).OnPublicate == null ? PredictorMessage.NoPublicationsProcessRegisteredFor0.NiceToString(p.Publication) :
                     null,
                     Construct = (p, _) => Publications.GetOrThrow(p.Publication).OnPublicate(p)

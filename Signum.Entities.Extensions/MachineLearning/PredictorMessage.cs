@@ -45,6 +45,8 @@ namespace Signum.Entities.MachineLearning
         [Description("No publications for query {0} registered")]
         NoPublicationsForQuery0Registered,
         [Description("No publications process registered for {0}")]
-        NoPublicationsProcessRegisteredFor0
+        NoPublicationsProcessRegisteredFor0,
+        [Description("Predictor is published. Untrain anyway?")]
+        PredictorIsPublishedUntrainAnyway
     }
 }

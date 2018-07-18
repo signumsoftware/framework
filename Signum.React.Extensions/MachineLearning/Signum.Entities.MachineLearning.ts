@@ -260,6 +260,7 @@ export module PredictorMessage {
     export const _0IsNotCompatibleWith12 = new MessageKey("PredictorMessage", "_0IsNotCompatibleWith12");
     export const NoPublicationsForQuery0Registered = new MessageKey("PredictorMessage", "NoPublicationsForQuery0Registered");
     export const NoPublicationsProcessRegisteredFor0 = new MessageKey("PredictorMessage", "NoPublicationsProcessRegisteredFor0");
+    export const PredictorIsPublishedUntrainAnyway = new MessageKey("PredictorMessage", "PredictorIsPublishedUntrainAnyway");
 }
 
 export const PredictorMetricsEmbedded = new Type<PredictorMetricsEmbedded>("PredictorMetricsEmbedded");
