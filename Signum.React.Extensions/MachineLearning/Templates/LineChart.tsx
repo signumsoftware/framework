@@ -9,6 +9,7 @@ export interface Point {
 export interface LineChartSerie {
     color: string;
     name: string;
+    title?: string;
     values: Point[];
     minValue?: number;
     maxValue?: number;
@@ -67,7 +68,12 @@ export default class LineChart extends React.Component<LineChartProps, { width?:
             <svg width={width} height={height}>
                 {series.map((s, i) => this.renderSerie(scaleX, height, s, i))}
                 <line x1={0} x2={width} y1={height - 20} y2={height - 20} stroke="black" strokeWidth={1} />
-                {series.map((s, i) => <text x={(i / series.length) * width} y={height - 4} style={{ fill: s.color }}>{s.name}</text>)}
+                {series.map((s, i) => (
+                    <g key={i}>
+                        {s.title && <title>{s.title}</title>}
+                        <text x={(i / series.length) * width} y={height - 4} style={{ fill: s.color }}>{s.name}</text>
+                    </g>)
+                )}
             </svg>
         );
     }
@@ -91,8 +97,8 @@ export default class LineChart extends React.Component<LineChartProps, { width?:
                 <path className="line" fill="none" d={line(s.values) || undefined} style={{
                     stroke: s.color, strokeWidth: s.strokeWidth
                 }}>
-                    <title>{s.name}</title>
                 </path>
+                <title>{`${s.name} (${s.title || " - "})`}</title>
             </g>
         );
     }

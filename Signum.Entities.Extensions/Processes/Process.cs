@@ -212,7 +212,9 @@ namespace Signum.Entities.Processes
         ProcessStartIsNullButProcessEndIsNot,
         Lines,
         LastProcess,
-        ExceptionLines
+        ExceptionLines,
+        [Description("Suspend in the safer way of stoping a running process. Cancel anyway?")]
+        SuspendIsTheSaferWayOfStoppingARunningProcessCancelAnyway
     }
 
     [Serializable, EntityKind(EntityKind.System, EntityData.Transactional)]

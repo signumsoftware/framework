@@ -36,7 +36,7 @@ namespace Signum.Engine.MachineLearning
     public class PublicationSettings
     {
         public object QueryName;
-        public Action<PredictorEntity> OnPublicate;
+        public Func<PredictorEntity, Entity> OnPublicate;
     }
 
     public static class PredictorLogic
@@ -198,6 +198,7 @@ namespace Signum.Engine.MachineLearning
 
                 sb.Schema.WhenIncluded<ProcessEntity>(() =>
                 {
+                    sb.Schema.Settings.AssertImplementedBy((ProcessEntity p) => p.Data, typeof(PredictorEntity));
                     sb.Schema.Settings.AssertImplementedBy((ProcessEntity p) => p.Data, typeof(AutoconfigureNeuralNetworkEntity));
                     ProcessLogic.Register(PredictorProcessAlgorithm.AutoconfigureNeuralNetwork, new AutoconfigureNeuralNetworkAlgorithm());
 
@@ -447,32 +448,6 @@ namespace Signum.Engine.MachineLearning
             e.EpochProgresses().UnsafeDelete();
         }
 
-       
-
-        public static byte[] GetTsvMetadata(this PredictorEntity predictor)
-        {
-            return null;
-            //var ctx = new PredictorTrainingContext(predictor, CancellationToken.None);
-            //PredictorLogicQuery.RetrieveData(ctx);
-            //return Tsv.ToTsvBytes(ctx.AllRows.Rows.Take(1).ToArray());
-        }
-
-        public static byte[] GetTsv(this PredictorEntity predictor)
-        {
-            return null;
-            //var ctx = new PredictorTrainingContext(predictor, CancellationToken.None);
-            //PredictorLogicQuery.RetrieveData(ctx);
-            //return Tsv.ToTsvBytes(ctx.AllRows.Rows);
-        }
-
-        public static byte[] GetCsv(this PredictorEntity predictor)
-        {
-            return null;
-            //var ctx = new PredictorTrainingContext(predictor, CancellationToken.None);
-            //PredictorLogicQuery.RetrieveData(ctx);
-            //return Csv.ToCsvBytes(ctx.AllRows.Rows);
-        }
-
         public static PredictorEntity ParseData(this PredictorEntity predictor)
         {
             predictor.MainQuery.ParseData();
@@ -599,11 +574,18 @@ namespace Signum.Engine.MachineLearning
 
                         e.Publication = publication;
                         e.Save();
-
-                        Publications.GetOrThrow(publication).OnPublicate?.Invoke(e);
                     },
                 }.Register();
 
+                new Graph<Entity>.ConstructFrom<PredictorEntity>(PredictorOperation.AfterPublishProcess)
+                {
+                    CanConstruct = p => 
+                    p.State != PredictorState.Trained ? ValidationMessage._0Or1ShouldBeSet.NiceToString(ReflectionTools.GetPropertyInfo(() => p.State),  p.State.NiceToString()) :                    p.Publication == null ? ValidationMessage._0IsNotSet.NiceToString(ReflectionTools.GetPropertyInfo(() => p.Publication)) :
+                    Publications.GetOrThrow(p.Publication).OnPublicate == null ? PredictorMessage.NoPublicationsProcessRegisteredFor0.NiceToString(p.Publication) :
+                    null,
+                    Construct = (p, _) => Publications.GetOrThrow(p.Publication).OnPublicate(p)
+                }.Register();
+                
                 new Delete(PredictorOperation.Delete)
                 {
                     FromStates = { PredictorState.Draft, PredictorState.Trained },

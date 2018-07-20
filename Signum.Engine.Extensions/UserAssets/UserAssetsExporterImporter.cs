@@ -23,6 +23,8 @@ using Signum.Entities.UserAssets;
 using Signum.Entities.UserQueries;
 using Signum.Engine.Authorization;
 using Signum.Entities.Authorization;
+using Signum.Entities.Mailing;
+using Signum.Engine.Mailing;
 
 namespace Signum.Engine.UserAssets
 {
@@ -175,6 +177,16 @@ namespace Signum.Engine.UserAssets
             {
                 return SymbolLogic<PermissionSymbol>.TryToSymbol(permissionKey);
             }
+
+            public SystemEmailEntity GetSystemEmail(string fullClassName)
+            {
+                return SystemEmailLogic.GetSystemEmailEntity(fullClassName);
+            }
+
+            public CultureInfoEntity GetCultureInfoEntity(string cultureName)
+            {
+                return CultureInfoLogic.GetCultureInfoEntity(cultureName);
+            }
         }
 
         public static UserAssetPreviewModel Preview(byte[] doc)
@@ -245,6 +257,11 @@ namespace Signum.Engine.UserAssets
                 return TypeLogic.TypeToEntity.GetOrThrow(TypeLogic.GetType(cleanName)).ToLite();
             }
 
+            public SystemEmailEntity GetSystemEmail(string fullClassName)
+            {
+                return SystemEmailLogic.GetSystemEmailEntity(fullClassName);
+            }
+
             public IPartEntity GetPart(IPartEntity old, XElement element)
             {
                 Type type = PartNames.GetOrThrow(element.Name.ToString());
@@ -277,6 +294,11 @@ namespace Signum.Engine.UserAssets
             public PermissionSymbol TryPermission(string permissionKey)
             {
                 return SymbolLogic<PermissionSymbol>.TryToSymbol(permissionKey);
+            }
+
+            public CultureInfoEntity GetCultureInfoEntity(string cultureName)
+            {
+                return CultureInfoLogic.GetCultureInfoEntity(cultureName);
             }
         }
 

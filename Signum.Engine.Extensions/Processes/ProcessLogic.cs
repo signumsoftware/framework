@@ -390,7 +390,6 @@ namespace Signum.Engine.Processes
                         tr.Commit();
                     }
                 }, status);
-
             }
         }
 
@@ -585,7 +584,7 @@ namespace Signum.Engine.Processes
 
         public ActionProcessAlgorithm(Action<ExecutingProcess> action)
         {
-            this.Action = action ?? throw new ArgumentNullException(nameof(action));
+            Action = action ?? throw new ArgumentNullException(nameof(action));
         }
         
         public void Execute(ExecutingProcess executingProcess) => Action(executingProcess);

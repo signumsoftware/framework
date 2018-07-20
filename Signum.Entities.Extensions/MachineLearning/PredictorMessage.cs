@@ -43,6 +43,10 @@ namespace Signum.Entities.MachineLearning
         [Description("{0} is not compatible with {1} {2}")]
         _0IsNotCompatibleWith12,
         [Description("No publications for query {0} registered")]
-        NoPublicationsForQuery0Registered
+        NoPublicationsForQuery0Registered,
+        [Description("No publications process registered for {0}")]
+        NoPublicationsProcessRegisteredFor0,
+        [Description("Predictor is published. Untrain anyway?")]
+        PredictorIsPublishedUntrainAnyway
     }
 }
