@@ -369,7 +369,7 @@ namespace Signum.Engine.Word
                 using (DelayedConsole.Delay(() => Console.WriteLine(" Query: " + template.Query.Key)))
                 {
                     var file = template.Template.Retrieve();
-
+                    var oldHash = file.Hash;
                     try
                     {
                         SynchronizationContext sc = new SynchronizationContext
@@ -422,7 +422,7 @@ namespace Signum.Engine.Word
                         file.BinaryFile = bytes;
 
                         using (replacements.WithReplacedDatabaseName())
-                            return Schema.Current.Table<FileEntity>().UpdateSqlSync(file, f => f.Hash == file.Hash, comment: "WordTemplate: " + template.Name);
+                            return Schema.Current.Table<FileEntity>().UpdateSqlSync(file, f => f.Hash == oldHash, comment: "WordTemplate: " + template.Name);
                     }
                     catch (TemplateSyncException ex)
                     {
