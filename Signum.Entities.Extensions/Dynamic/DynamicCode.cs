@@ -1,5 +1,5 @@
-﻿using Signum.Utilities;
-using System;
+﻿using System;
+using Signum.Utilities;
 using System.CodeDom.Compiler;
 using System.Collections.Generic;
 using System.IO;
@@ -26,6 +26,7 @@ namespace Signum.Entities.Dynamic
             "System.Collections.Generic",
             "System.Linq.Expressions",
             "System.ComponentModel",
+            "System.Globalization",
             "Signum.Engine",
             "Signum.Entities",
             "Signum.Entities.Basics",
