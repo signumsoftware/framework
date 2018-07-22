@@ -949,7 +949,9 @@ export class PropertyComponent extends React.Component<PropertyComponentProps>{
                         </div>}
                     </div>
                 </div >
-                <ValueComponent dc={this.props.dc} labelColumns={2} binding={Binding.create(p, d => d.customAttributes)} type="string" defaultValue={null} onBlur={this.handleAutoFix} />
+                <br />
+                <ValueComponent dc={this.props.dc} labelColumns={3} binding={Binding.create(p, d => d.customFieldAttributes)} type="string" defaultValue={null} onBlur={this.handleAutoFix} />
+                <ValueComponent dc={this.props.dc} labelColumns={3} binding={Binding.create(p, d => d.customPropertyAttributes)} type="string" defaultValue={null} onBlur={this.handleAutoFix} />
                 <ValidatorRepeaterComponent dc={this.props.dc} property={this.props.property} />
             </div>
         );

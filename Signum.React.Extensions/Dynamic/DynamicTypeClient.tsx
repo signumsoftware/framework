@@ -123,7 +123,8 @@ export interface DynamicProperty {
     scale?: number;
     _propertyType_?: string;
     validators?: Validators.DynamicValidator[];
-    customAttributes?: string;
+    customFieldAttributes?: string;
+    customPropertyAttributes?: string;
 }
 
 export interface DynamicTypePrimaryKeyDefinition {
