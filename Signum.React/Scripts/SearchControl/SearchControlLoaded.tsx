@@ -352,7 +352,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
         this.containerDiv!.addEventListener("scroll", (e) => {
 
             var table = this.thead!.parentElement!;            
-            var translate = "translate(0," + this.containerDiv!.scrollTop + "px)";
+            var translate = "translate(0," + (this.containerDiv!.scrollTop - 1) + "px)";
             this.thead!.style.transform = translate;
         });
     }
@@ -408,9 +408,9 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
                     </div>
                 }
                 {p.showHeader && this.renderToolBar()}
-                {<MultipliedMessage findOptions={fo} mainType={this.entityColumn().type} />}
-                {fo.groupResults && <GroupByMessage findOptions={fo} mainType={this.entityColumn().type} />}
-                {fo.systemTime && <SystemTimeEditor findOptions={fo} queryDescription={qd} onChanged={() => this.forceUpdate()} />}
+                {p.showHeader && <MultipliedMessage findOptions={fo} mainType={this.entityColumn().type} />}
+                {p.showHeader && fo.groupResults && <GroupByMessage findOptions={fo} mainType={this.entityColumn().type} />}
+                {p.showHeader && fo.systemTime && <SystemTimeEditor findOptions={fo} queryDescription={qd} onChanged={() => this.forceUpdate()} />}
                 {this.state.editingColumn && <ColumnEditor
                     columnOption={this.state.editingColumn}
                     onChange={this.handleColumnChanged}

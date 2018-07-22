@@ -864,6 +864,10 @@ export class Type<T extends ModifiableEntity> implements IType {
     isInstance(obj: any): obj is T {
         return obj && (obj as ModifiableEntity).Type == this.typeName;
     }
+
+    isLite(obj: any): obj is Lite<T & Entity> {
+        return obj && (obj as Lite<Entity>).EntityType == this.typeName;
+    }
 }
 
 export class EnumType<T extends string> {

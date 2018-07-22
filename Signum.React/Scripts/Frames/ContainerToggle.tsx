@@ -24,7 +24,7 @@ export default class ContainerToggleComponent extends React.Component<React.Prop
 
     render() {
         return (
-            <div className={this.state.fluid ? "container-fluid" : "container"}>
+            <div className={classes(this.state.fluid ? "container-fluid" : "container", "mt-3")}>
                 <a className="expand-window" onClick={this.handleExpandToggle} href="#">
                     <span className={classes("fa", this.state.fluid ? "fa-compress" : "fa-expand")} />
                 </a> 

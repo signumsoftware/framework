@@ -142,9 +142,9 @@ namespace Signum.Engine.DynamicQuery
         public ResultTable ExecuteQuery(QueryRequest request)
         {
             if (!request.GroupResults)
-                return Execute(ExecuteType.ExecuteGroupQuery, request.QueryName, request, dqb => dqb.Core.Value.ExecuteQueryGroup(request));
-            else
                 return Execute(ExecuteType.ExecuteQuery, request.QueryName, request, dqb => dqb.Core.Value.ExecuteQuery(request));
+            else
+                return Execute(ExecuteType.ExecuteGroupQuery, request.QueryName, request, dqb => dqb.Core.Value.ExecuteQueryGroup(request));
         }
 
         public Task<ResultTable> ExecuteQueryAsync(QueryRequest request, CancellationToken token)
