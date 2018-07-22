@@ -132,16 +132,11 @@ namespace Signum.React.ApiControllers
         [Route("api/query/entitiesWithFilter"), HttpPost, ProfilerActionSplitter]
         public async Task<List<Lite<Entity>>> GetEntitiesWithFilter(QueryEntitiesRequestTS request, CancellationToken token)
         {
-            var qn = QueryLogic.ToQueryName(request.queryKey);
-            var qd = DynamicQueryManager.Current.QueryDescription(qn);
-            
-            return await DynamicQueryManager.Current.GetEntities(new QueryEntitiesRequest
-            {
-                QueryName = qn,
-                Count = request.count,
-                Filters = request.filters.EmptyIfNull().Select(f => f.ToFilter(qd, canAggregate: false)).ToList(),
-                Orders = request.orders.EmptyIfNull().Select(f => f.ToOrder(qd, canAggregate: false)).ToList(),
-            }).ToListAsync();
+     
+
+
+
+            return await DynamicQueryManager.Current.GetEntities(request.ToQueryEntitiesRequest()).ToListAsync();
         }
 
         [Route("api/query/queryCount"), HttpPost, ProfilerActionSplitter]
@@ -224,6 +219,19 @@ namespace Signum.React.ApiControllers
         public int count;
 
         public override string ToString() => queryKey;
+
+        public QueryEntitiesRequest ToQueryEntitiesRequest()
+        {
+            var qn = QueryLogic.ToQueryName(queryKey);
+            var qd = DynamicQueryManager.Current.QueryDescription(qn);
+            return new QueryEntitiesRequest
+            {
+                QueryName = qn,
+                Count = count,
+                Filters = filters.EmptyIfNull().Select(f => f.ToFilter(qd, canAggregate: false)).ToList(),
+                Orders = orders.EmptyIfNull().Select(f => f.ToOrder(qd, canAggregate: false)).ToList(),
+            };
+        }
     }
 
     public class OrderTS
