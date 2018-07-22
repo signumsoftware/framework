@@ -453,7 +453,12 @@ namespace Signum.Engine.Dynamic
 
         private IEnumerable<string> GetPropertyAttributes(DynamicProperty property)
         {
-            return property.Validators.EmptyIfNull().Select(v => GetValidatorAttribute(v));
+            var atts = property.Validators.EmptyIfNull().Select(v => GetValidatorAttribute(v)).ToList();
+
+            if (property.CustomPropertyAttributes.HasText())
+                atts.Add(property.CustomPropertyAttributes);
+
+            return atts;
         }
 
         private string GetValidatorAttribute(DynamicValidator v)
@@ -521,8 +526,8 @@ namespace Signum.Engine.Dynamic
                     atts.Add($"BackReferenceColumnName({Literal(mlist.BackReferenceName)})");
             }
 
-            if (property.CustomAttributes.HasText())
-                atts.Add(property.CustomAttributes);
+            if (property.CustomFieldAttributes.HasText())
+                atts.Add(property.CustomFieldAttributes);
 
 
             return atts;

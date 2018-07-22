@@ -280,8 +280,11 @@ namespace Signum.Entities.Dynamic
         [JsonProperty(PropertyName = "validators", NullValueHandling = NullValueHandling.Ignore)]
         public List<DynamicValidator> Validators;
 
-        [JsonProperty(PropertyName = "customAttributes", NullValueHandling = NullValueHandling.Ignore)]
-        public string CustomAttributes;
+        [JsonProperty(PropertyName = "customFieldAttributes", NullValueHandling = NullValueHandling.Ignore)]
+        public string CustomFieldAttributes;
+
+        [JsonProperty(PropertyName = "customPropertyAttributes", NullValueHandling = NullValueHandling.Ignore)]
+        public string CustomPropertyAttributes;
     }
 
 

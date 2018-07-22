@@ -10,7 +10,7 @@ import * as Operations from '../../../Framework/Signum.React/Scripts/Operations'
 import { Entity } from '../../../Framework/Signum.React/Scripts/Signum.Entities'
 import { PropertyRouteEntity } from '../../../Framework/Signum.React/Scripts/Signum.Entities.Basics'
 import * as Constructor from '../../../Framework/Signum.React/Scripts/Constructor'
-import * as DynamicClient from './DynamicClient'
+import * as DynamicClientOptions from './DynamicClientOptions'
 import { ValueLine, EntityLine, EntityCombo, EntityList, EntityDetail, EntityStrip, EntityRepeater } from '../../../Framework/Signum.React/Scripts/Lines'
 import { DynamicValidationEntity, DynamicValidationOperation, DynamicValidationEval } from './Signum.Entities.Dynamic'
 
@@ -18,8 +18,8 @@ export function start(options: { routes: JSX.Element[] }) {
     Navigator.addSettings(new EntitySettings(DynamicValidationEntity, w => import('./Validation/DynamicValidation')));
     Constructor.registerConstructor(DynamicValidationEntity, () => DynamicValidationEntity.New({ eval: DynamicValidationEval.New() }));
 
-    DynamicClient.Options.onGetDynamicLineForPanel.push(ctx => <ValueSearchControlLine ctx={ctx} findOptions={{ queryName: DynamicValidationEntity }} />);
-    DynamicClient.Options.onGetDynamicLineForType.push((ctx, type) => <ValueSearchControlLine ctx={ctx} findOptions={{ queryName: DynamicValidationEntity, parentColumn: "EntityType.CleanName", parentValue: type }} />);
+    DynamicClientOptions.Options.checkEvalFindOptions.push({ queryName: DynamicValidationEntity });
+    DynamicClientOptions.Options.onGetDynamicLineForType.push((ctx, type) => <ValueSearchControlLine ctx={ctx} findOptions={{ queryName: DynamicValidationEntity, parentColumn: "EntityType.CleanName", parentValue: type }} />);
 }
 
 export namespace API {

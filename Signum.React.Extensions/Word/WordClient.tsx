@@ -25,9 +25,12 @@ import WordSearchMenu from "./WordSearchMenu";
 import WordEntityMenu from "./WordEntityMenu";
 import { ButtonsContext } from "../../../Framework/Signum.React/Scripts/TypeContext";
 import { DropdownItem } from '../../../Framework/Signum.React/Scripts/Components';
+import * as DynamicClientOptions from '../Dynamic/DynamicClientOptions';
+
 
 export function start(options: { routes: JSX.Element[], contextual: boolean, queryButton: boolean, entityButton: boolean  }) {
-    
+
+    DynamicClientOptions.Options.checkEvalFindOptions.push({ queryName: WordTemplateEntity });
     register(QueryModel, {
         createFromTemplate: wt => Navigator.view(QueryModel.New({ queryKey: wt.query!.key })),
         createFromEntities: (wt, lites) => {

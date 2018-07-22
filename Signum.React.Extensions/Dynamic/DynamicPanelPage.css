@@ -7,3 +7,11 @@
     margin-top: 0px;
     color: black;
 }
+
+.mini-alert {
+    margin: 0 5px;
+    padding: 0 5px;
+    border-width: 1px;
+    border-style: solid;
+    border-radius: 3px;
+}
