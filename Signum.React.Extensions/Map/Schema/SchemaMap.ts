@@ -136,7 +136,7 @@ export class SchemaMapD3 {
 
 
         const drag = d3.drag<SVGGElement, ITableInfo>()
-            .on("start", d => {
+            .on("initial", d => {
                 if (!d3.event.active)
                     this.simulation.alphaTarget(0.3).restart();
 

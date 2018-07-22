@@ -122,6 +122,8 @@ namespace Signum.Entities.Dynamic
 
         public static Func<string, List<CompilerError>> GetCustomErrors;
 
+        public static Action OnInvalidated { get; internal set; }
+
         public static void AddFullAssembly(Assembly assembly)
         {
             Namespaces.AddRange(assembly.ExportedTypes.Select(a => a.Namespace));

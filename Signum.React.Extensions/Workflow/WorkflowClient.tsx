@@ -29,7 +29,7 @@ import TypeHelpButtonBarComponent from '../TypeHelp/TypeHelpButtonBarComponent'
 import { ValueLine, EntityLine, EntityCombo, EntityList, EntityDetail, EntityStrip, EntityRepeater } from '../../../Framework/Signum.React/Scripts/Lines'
 import {
     WorkflowConditionEval, WorkflowTimerConditionEval, WorkflowActionEval, WorkflowMessage, WorkflowActivityMonitorMessage,
-    ConnectionType, WorkflowTimerConditionEntity, WorkflowIssueType
+    ConnectionType, WorkflowTimerConditionEntity, WorkflowIssueType, WorkflowLaneActorsEval
 } from './Signum.Entities.Workflow'
 
 import ActivityWithRemarks from './Case/ActivityWithRemarks'
@@ -56,6 +56,7 @@ import { SearchControl } from "../../../Framework/Signum.React/Scripts/Search";
 import { getTypeInfo } from "../../../Framework/Signum.React/Scripts/Reflection";
 import WorkflowHelpComponent from './Workflow/WorkflowHelpComponent';
 import { globalModules } from '../Dynamic/View/GlobalModules';
+import * as DynamicClientOptions from '../Dynamic/DynamicClientOptions';
 import { FilterRequest, ColumnRequest } from '../../../Framework/Signum.React/Scripts/FindOptions';
 import { BsColor } from '../../../Framework/Signum.React/Scripts/Components/Basic';
 import { GraphExplorer } from '../../../Framework/Signum.React/Scripts/Reflection';
@@ -68,6 +69,13 @@ export function start(options: { routes: JSX.Element[] }) {
         <ImportRoute path="~/workflow/panel" onImportModule={() => import("./Workflow/WorkflowPanelPage")} />,
         <ImportRoute path="~/workflow/activityMonitor/:workflowId" onImportModule={() => import("./ActivityMonitor/WorkflowActivityMonitorPage")} />,
     );
+
+    DynamicClientOptions.Options.checkEvalFindOptions.push({ queryName: WorkflowLaneEntity, filterOptions: [{ columnName: "Entity.ActorsEval", operation: "DistinctTo", value: null }] });
+    DynamicClientOptions.Options.checkEvalFindOptions.push({ queryName: WorkflowConditionEntity });
+    DynamicClientOptions.Options.checkEvalFindOptions.push({ queryName: WorkflowScriptEntity });
+    DynamicClientOptions.Options.checkEvalFindOptions.push({ queryName: WorkflowActivityEntity, filterOptions: [{ columnName: "Entity.SubWorkflow", operation: "DistinctTo", value: null }] });
+    DynamicClientOptions.Options.checkEvalFindOptions.push({ queryName: WorkflowActionEntity });
+    DynamicClientOptions.Options.checkEvalFindOptions.push({ queryName: WorkflowTimerConditionEntity });
 
     QuickLinks.registerQuickLink(CaseActivityEntity, ctx => [
         new QuickLinks.QuickLinkAction("caseFlow", WorkflowActivityMessage.CaseFlow.niceToString(), e => {

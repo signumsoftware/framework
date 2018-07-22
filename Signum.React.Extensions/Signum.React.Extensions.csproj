@@ -230,6 +230,7 @@
     <TypeScriptCompile Include="Chart\Templates\GoogleMapStyles.ts" />
     <TypeScriptCompile Include="DiffLog\Templates\DiffDocument.tsx" />
     <TypeScriptCompile Include="DiffLog\Templates\TimeMachinePage.tsx" />
+    <TypeScriptCompile Include="Dynamic\DynamicClientOptions.tsx" />
     <TypeScriptCompile Include="Files\FileImageLine.tsx" />
     <TypeScriptCompile Include="Files\FileImage.tsx" />
     <TypeScriptCompile Include="MachineLearning\Signum.Entities.MachineLearning.ts" />

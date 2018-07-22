@@ -67,6 +67,11 @@ namespace Signum.Entities.Dynamic
         static ConcurrentDictionary<string, CompilationResult> resultCache = new ConcurrentDictionary<string, CompilationResult>();
 
 
+        static EvalEmbedded()
+        {
+            DynamicCode.OnInvalidated += () => resultCache.Clear();
+        }
+
         public static CompilationResult Compile(IEnumerable<string> assemblies, string code)
         {
             return resultCache.GetOrAdd(code, _ =>

@@ -4,10 +4,10 @@ import { Route } from 'react-router'
 import { ajaxPost, ajaxGet, WebApiHttpError } from '../../../Framework/Signum.React/Scripts/Services';
 import { EntitySettings, ViewPromise } from '../../../Framework/Signum.React/Scripts/Navigator'
 import * as Navigator from '../../../Framework/Signum.React/Scripts/Navigator'
-import { EntityData, EntityKind } from '../../../Framework/Signum.React/Scripts/Reflection'
+import { EntityData, EntityKind, PseudoType } from '../../../Framework/Signum.React/Scripts/Reflection'
 import { EntityOperationSettings } from '../../../Framework/Signum.React/Scripts/Operations'
 import * as Operations from '../../../Framework/Signum.React/Scripts/Operations'
-import { Entity } from '../../../Framework/Signum.React/Scripts/Signum.Entities'
+import { Entity, Lite } from '../../../Framework/Signum.React/Scripts/Signum.Entities'
 import * as Constructor from '../../../Framework/Signum.React/Scripts/Constructor'
 import { StyleContext } from '../../../Framework/Signum.React/Scripts/TypeContext'
 
@@ -16,6 +16,7 @@ import { DynamicTypeEntity, DynamicTypeOperation, DynamicPanelPermission, Dynami
 import * as AuthClient from '../Authorization/AuthClient'
 import * as OmniboxClient from '../Omnibox/OmniboxClient'
 import { ImportRoute } from "../../../Framework/Signum.React/Scripts/AsyncImport";
+import { QueryRequest, QueryEntitiesRequest } from '../../../Framework/Signum.React/Scripts/FindOptions';
 
 export function start(options: { routes: JSX.Element[] }) {
     options.routes.push(<ImportRoute path="~/dynamic/panel" onImportModule={() => import("./DynamicPanelPage")} />);
@@ -26,13 +27,6 @@ export function start(options: { routes: JSX.Element[] }) {
         key: "DynamicPanel",
         onClick: () => Promise.resolve("~/dynamic/panel")
     });
-}
-
-export namespace Options {
-    //export let onGetDynamicLineForPanel: ({ line: (ctx: StyleContext) => React.ReactNode, needsCompiling: boolean })[] = [];
-    export let onGetDynamicLineForPanel: ((ctx: StyleContext) => React.ReactNode)[] = [];
-    export let onGetDynamicLineForType: ((ctx: StyleContext, type: string) => React.ReactNode)[] = [];
-    export let getDynaicMigrationsStep: (() => React.ReactElement<any>) | undefined = undefined;
 }
 
 export interface CompilationError {
@@ -56,8 +50,16 @@ export namespace API {
     export function getStartErrors(): Promise<WebApiHttpError[]> {
         return ajaxGet<WebApiHttpError[]>({ url: `~/api/dynamic/startErrors` });
     }
-    
 
+    export function getEvalErrors(request: QueryEntitiesRequest): Promise<EvalEntityError[]> {
+        return ajaxPost<EvalEntityError[]>({ url: `~/api/dynamic/evalErrors` }, request);
+    }
 }
+
+export interface EvalEntityError {
+    lite: Lite<Entity>;
+    error: string;
+}
+
 
 
