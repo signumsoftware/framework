@@ -12,6 +12,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using Signum.Engine.Basics;
+using Signum.Engine.UserAssets;
 
 namespace Signum.Engine.Mailing
 {
@@ -37,14 +38,16 @@ namespace Signum.Engine.Mailing
                     });
                 
                 EmailMasterTemplateGraph.Register();
-
                 Validator.PropertyValidator<EmailMasterTemplateEntity>(et => et.Messages).StaticPropertyValidation += (et, pi) =>
                 {
                     if (!et.Messages.Any(m => m.CultureInfo.Is(EmailLogic.Configuration.DefaultCulture)))
                         return EmailTemplateMessage.ThereMustBeAMessageFor0.NiceToString().FormatWith(EmailLogic.Configuration.DefaultCulture.EnglishName);
 
                     return null;
-                }; 
+                };
+
+                UserAssetsImporter.RegisterName<EmailMasterTemplateEntity>("EmailMasterTemplate");
+
             }
         }
 

@@ -412,7 +412,7 @@ function getSeries(eps: Array<PredictorClient.EpochProgress>, predictor: Predict
 
     const algSet = predictor.algorithmSettings;
 
-    const isClassification = NeuralNetworkSettingsEntity.isInstance(algSet) && algSet.predictionType == "Classification";
+    const nns = NeuralNetworkSettingsEntity.isInstance(algSet) ? algSet : undefined;
 
     var maxLoss = eps.flatMap(a => [a.LossTraining, a.LossValidation]).filter(a => a != null).max();
     var maxEvaluation = eps.flatMap(a => [a.EvaluationTraining, a.EvaluationValidation]).filter(a => a != null).max();
@@ -420,6 +420,7 @@ function getSeries(eps: Array<PredictorClient.EpochProgress>, predictor: Predict
     return [
         {
             name: PredictorEpochProgressEntity.nicePropertyName(a => a.lossTraining),
+            title: nns && nns!.lossFunction,
             color: "#1A5276",
             values: eps.filter(a => a.LossTraining != null).map(ep => ({ x: ep.TrainingExamples, y: ep.LossTraining })),
             minValue: 0,
@@ -427,24 +428,27 @@ function getSeries(eps: Array<PredictorClient.EpochProgress>, predictor: Predict
             strokeWidth: "2px",
         },
         {
-            name: PredictorEpochProgressEntity.nicePropertyName(a => a.evaluationTraining),
-            color: "#5DADE2",
-            values: eps.filter(a => a.EvaluationTraining != null).map(ep => ({ x: ep.TrainingExamples, y: ep.EvaluationTraining })),
-            minValue: 0,
-            maxValue: maxEvaluation,
-            strokeWidth: "1px",
-        },
-        {
             name: PredictorEpochProgressEntity.nicePropertyName(a => a.lossValidation),
-            color: "#7B241C",
+            title: nns && nns!.lossFunction,
+            color: "#5DADE2",
             values: eps.filter(a => a.LossValidation != null).map(ep => ({ x: ep.TrainingExamples, y: ep.LossValidation! })),
             minValue: 0,
             maxValue: maxLoss,
             strokeWidth: "2px",
         },
         {
+            name: PredictorEpochProgressEntity.nicePropertyName(a => a.evaluationTraining),
+            title: nns && nns!.evalErrorFunction,
+            color: "#731c7b",
+            values: eps.filter(a => a.EvaluationTraining != null).map(ep => ({ x: ep.TrainingExamples, y: ep.EvaluationTraining })),
+            minValue: 0,
+            maxValue: maxEvaluation,
+            strokeWidth: "1px",
+        },
+        {
             name: PredictorEpochProgressEntity.nicePropertyName(a => a.evaluationValidation),
-            color: "#D98880",
+            title: nns && nns!.evalErrorFunction,
+            color: "#d980d9",
             values: eps.filter(a => a.EvaluationValidation != null).map(ep => ({ x: ep.TrainingExamples, y: ep.EvaluationValidation! })),
             minValue: 0,
             maxValue: maxEvaluation,

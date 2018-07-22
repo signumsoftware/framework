@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Reflection;
@@ -19,7 +18,7 @@ namespace Signum.Engine.Rest
     {
         public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
         {
-            if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
+            if (sb.NotDefined(MethodBase.GetCurrentMethod()))
             {
                 sb.Include<RestLogEntity>()
                     .WithIndex(a => a.StartDate)
@@ -75,9 +74,9 @@ namespace Signum.Engine.Rest
                         ? new Uri(requestUriAbsoluteUri.Before("apiKey=") + requestUriAbsoluteUri.After("apiKey=").After('&'))
                         : new Uri(requestUriAbsoluteUri.Before("apiKey="));
                 }
-
                 result.current = await restClient.SendAsync(request).Result.Content.ReadAsStringAsync();
             }
+
             return RestDiffLog(result);
         }
 
@@ -91,10 +90,7 @@ namespace Signum.Engine.Rest
                 result.diff = diff;
             }
 
-            
-            
             return result;
         }
-
     }
 }

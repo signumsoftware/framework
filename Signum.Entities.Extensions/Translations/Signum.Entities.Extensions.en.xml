@@ -247,6 +247,7 @@
   <Type Name="PackageLineEntity" />
   <Type Name="PackageOperationEntity" />
   <Type Name="PackageOperationProcess" />
+  <Type Name="PackageQuery" />
   <Type Name="PanelPartEmbedded" />
   <Type Name="PanelStyle" />
   <Type Name="PasswordExpiresIntervalEntity" />
