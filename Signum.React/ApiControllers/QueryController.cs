@@ -447,7 +447,7 @@ namespace Signum.React.ApiControllers
             this.type = new TypeReferenceTS(qt.Type, qt.GetImplementations());
             this.filterType = QueryUtils.TryGetFilterType(qt.Type);
             this.format = qt.Format;
-            this.unit = qt.Unit;
+            this.unit = UnitAttribute.GetTranslation(qt.Unit);
             this.typeColor = qt.TypeColor;
             this.niceTypeName = qt.NiceTypeName;
             this.queryTokenType = GetQueryTokenType(qt);
