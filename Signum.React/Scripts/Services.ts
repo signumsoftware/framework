@@ -122,7 +122,7 @@ export module VersionFilter {
     export let initialVersion: string | undefined;
     export let latestVersion: string | undefined;
 
-    export let versionChanged: () => void = () => console.warn("New Server version detected, handle VersionFilter.versionChanged to inform user");
+    export let versionHasChanged: () => void = () => console.warn("New Server version detected, handle VersionFilter.versionHasChanged to inform user");
 
     export function onVersionFilter(makeCall: () => Promise<Response>): Promise<Response> {
 
@@ -139,8 +139,8 @@ export module VersionFilter {
 
             if (latestVersion != ver) {
                 latestVersion = ver;
-                if (versionChanged)
-                    versionChanged();
+                if (versionHasChanged)
+                    versionHasChanged();
             }
         }
 

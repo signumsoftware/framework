@@ -59,7 +59,7 @@ namespace Signum.Engine
 
                     DataTable result = new DataTable();
                     da.Fill(result);
-
+                    
                     if ((int)result.Rows[0]["EngineEdition"] == (int)EngineEdition.Azure)
                         return SqlServerVersion.AzureSQL;
 

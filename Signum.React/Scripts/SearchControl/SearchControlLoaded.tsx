@@ -28,7 +28,7 @@ import { ISimpleFilterBuilder } from './SearchControl'
 import "./Search.css"
 import { FilterOperation } from '../Signum.Entities.DynamicQuery';
 import SystemTimeEditor from './SystemTimeEditor';
-import { MaxHeightProperty } from 'csstype';
+import { MaxHeightProperty, MaxWidthProperty } from 'csstype';
 
 export interface ShowBarExtensionOption { }
 
@@ -187,6 +187,8 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
         if (fo.pagination.mode == "Paginate")
             fo.pagination.currentPage = 1;
 
+        this.containerDiv && this.containerDiv.scrollTo({ top: 0 });
+
         this.doSearch().done();
     };
 
@@ -222,6 +224,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
                     markedRows: undefined,
                     searchCount: (this.state.searchCount || 0) + 1
                 }, () => {
+                    this.fixScroll();
                     if (this.props.onResult)
                         this.props.onResult(rt, dataChanged || false);
                     this.notifySelectedRowsChanged();
@@ -263,8 +266,12 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
         this.props.findOptions.pagination = p;
         this.setState({ resultTable: undefined, resultFindOptions: undefined });
 
-        if (this.props.findOptions.pagination.mode != "All")
+        if (this.props.findOptions.pagination.mode != "All") {
+
+            this.containerDiv && this.containerDiv.scrollTo({ top: 0 });
+
             this.doSearch().done();
+        }
     }
 
 
@@ -343,9 +350,27 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
     componentDidMount() {
         this.containerDiv!.addEventListener("scroll", (e) => {
-            var translate = "translate(0," + this.containerDiv!.scrollTop + "px)";
+
+            var table = this.thead!.parentElement!;            
+            var translate = "translate(0," + (this.containerDiv!.scrollTop - 1) + "px)";
             this.thead!.style.transform = translate;
         });
+    }
+
+    fixScroll() {
+        if (this.containerDiv) {
+            var table = this.containerDiv.firstChild! as HTMLElement;
+            if (this.containerDiv.scrollTop > table.clientHeight) {
+                //var translate = "translate(0,0)";
+                //this.thead!.style.transform = translate;
+                this.containerDiv.scrollTo({ top: 0 });
+                this.containerDiv.style.overflowY = "hidden";
+                setTimeout(() => {
+                    this.containerDiv!.style.overflowY = null;
+                }, 10);
+              
+            }
+        }
     }
 
 
@@ -383,9 +408,9 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
                     </div>
                 }
                 {p.showHeader && this.renderToolBar()}
-                {<MultipliedMessage findOptions={fo} mainType={this.entityColumn().type} />}
-                {fo.groupResults && <GroupByMessage findOptions={fo} mainType={this.entityColumn().type} />}
-                {fo.systemTime && <SystemTimeEditor findOptions={fo} queryDescription={qd} onChanged={() => this.forceUpdate()} />}
+                {p.showHeader && <MultipliedMessage findOptions={fo} mainType={this.entityColumn().type} />}
+                {p.showHeader && fo.groupResults && <GroupByMessage findOptions={fo} mainType={this.entityColumn().type} />}
+                {p.showHeader && fo.systemTime && <SystemTimeEditor findOptions={fo} queryDescription={qd} onChanged={() => this.forceUpdate()} />}
                 {this.state.editingColumn && <ColumnEditor
                     columnOption={this.state.editingColumn}
                     onChange={this.handleColumnChanged}
@@ -393,7 +418,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
                     subTokensOptions={SubTokensOptions.CanElement | canAggregate}
                     close={this.handleColumnClose} />}
                 <div ref={d => this.containerDiv = d}
-                    className="sf-search-results-container table-responsive"
+                    className="sf-scroll-table-container table-responsive"
                     style={{ maxHeight: this.props.maxResultsHeight }}>
                     <table className="sf-search-results table table-hover table-sm" onContextMenu={this.props.showContextMenu != false ? this.handleOnContextMenu : undefined} >
                         <thead ref={th => this.thead = th}>
@@ -1183,7 +1208,7 @@ function removeAggregates(array: { token?: QueryToken, displayName?: string }[],
                 a.token = qd.columns["Id"] ? toQueryToken(qd.columns["Id"]) : undefined;
             }
 
-            if (a.displayName)
+            if (a.displayName && a.token)
                 a.displayName = a.token!.niceName;
         }
     });

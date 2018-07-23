@@ -59,6 +59,11 @@ export function isOperationAllowed(operation: OperationSymbol | string, type: Ps
     return isOperationInfoAllowed(getOperationInfo(operation, type));
 }
 
+export function isSomeOperationAllowed(operations: (OperationSymbol|string)[], type:PseudoType) : boolean{
+      return operations.some(a => isOperationAllowed(a, type))
+    
+}
+
 export function getOperationInfo(operation: OperationSymbol | string, type: PseudoType): OperationInfo {
     let operationKey = typeof operation == "string" ? operation : operation.key;
     
@@ -148,7 +153,7 @@ export class ContextualOperationSettings<T extends Entity> extends OperationSett
 
     isVisible?: (ctx: ContextualOperationContext<T>) => boolean;
     hideOnCanExecute?: boolean;
-    confirmMessage?: (ctx: ContextualOperationContext<T>) => string;
+    confirmMessage?: (ctx: ContextualOperationContext<T>) => string | undefined | null;
     onClick?: (ctx: ContextualOperationContext<T>) => void;
     color?: BsColor;
     icon?: string;
@@ -166,7 +171,7 @@ export interface ContextualOperationOptions<T extends Entity> {
     text?: () => string;
     isVisible?: (ctx: ContextualOperationContext<T>) => boolean;
     hideOnCanExecute?: boolean;
-    confirmMessage?: (ctx: ContextualOperationContext<T>) => string;
+    confirmMessage?: (ctx: ContextualOperationContext<T>) => string | undefined | null;
     onClick?: (ctx: ContextualOperationContext<T>) => void;
     color?: BsColor;
     icon?: string;
@@ -241,7 +246,7 @@ export class EntityOperationSettings<T extends Entity> extends OperationSettings
     contextualFromMany?: ContextualOperationSettings<T>;
 
     isVisible?: (ctx: EntityOperationContext<T>) => boolean;
-    confirmMessage?: (ctx: EntityOperationContext<T>) => string;
+    confirmMessage?: (ctx: EntityOperationContext<T>) => string | undefined | null;
     onClick?: (ctx: EntityOperationContext<T>) => void;
     hideOnCanExecute?: boolean;
     group?: EntityOperationGroup | null;
@@ -267,7 +272,7 @@ export interface EntityOperationOptions<T extends Entity> {
 
     text?: () => string;
     isVisible?: (ctx: EntityOperationContext<T>) => boolean;
-    confirmMessage?: (ctx: EntityOperationContext<T>) => string;
+    confirmMessage?: (ctx: EntityOperationContext<T>) => string | undefined | null;
     onClick?: (ctx: EntityOperationContext<T>) => void;
     hideOnCanExecute?: boolean;
     group?: EntityOperationGroup | null;

@@ -157,7 +157,7 @@ export class ViewReplacer<T extends ModifiableEntity> {
 
     removeLine(propertyRoute: (entity: T) => any): this {
 
-        var pr = this.ctx.propertyRoute.add(propertyRoute);
+        var pr = this.ctx.propertyRoute.addLambda(propertyRoute);
 
         this.result = new ReplaceVisitor(
             e => hasPropertyRoute(e, pr),
@@ -184,7 +184,7 @@ export class ViewReplacer<T extends ModifiableEntity> {
 
     insertAfterLine(propertyRoute: (entity: T) => any, newElements: (ctx: TypeContext<T>) => (React.ReactElement<any> | undefined | false | null)[]): this {
 
-        var pr = this.ctx.propertyRoute.add(propertyRoute);
+        var pr = this.ctx.propertyRoute.addLambda(propertyRoute);
 
         this.result = new ReplaceVisitor(
             e => hasPropertyRoute(e, pr),
@@ -196,7 +196,7 @@ export class ViewReplacer<T extends ModifiableEntity> {
 
     insertBeforeLine(propertyRoute: (entity: T) => any, newElements: (ctx: TypeContext<T>) => (React.ReactElement<any> | undefined)[]): this {
 
-        var pr = this.ctx.propertyRoute.add(propertyRoute);
+        var pr = this.ctx.propertyRoute.addLambda(propertyRoute);
 
         this.result = new ReplaceVisitor(
             e => hasPropertyRoute(e, pr),
@@ -215,7 +215,7 @@ export class ViewReplacer<T extends ModifiableEntity> {
     }
 
     replaceLine(propertyRoute: (entity: T) => any, newElements: (e: React.ReactElement<any>) => (React.ReactElement<any> | undefined)[]) {
-        var pr = this.ctx.propertyRoute.add(propertyRoute);
+        var pr = this.ctx.propertyRoute.addLambda(propertyRoute);
 
         this.result = new ReplaceVisitor(
             e => hasPropertyRoute(e, pr),

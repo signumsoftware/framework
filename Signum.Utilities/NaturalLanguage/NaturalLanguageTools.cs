@@ -155,7 +155,7 @@ namespace Signum.Utilities
                 return CharKind.StartOfWord;
             }
 
-            if (!char.IsUpper(pascalStr[i + 1]))
+            if (char.IsLower(pascalStr[i + 1]))
                 return CharKind.StartOfWord;  // Xb
 
             if (!char.IsUpper(pascalStr[i - 1]))

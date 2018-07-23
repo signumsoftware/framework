@@ -204,19 +204,19 @@ export function is<T extends Entity>(a: Lite<T> | T | null | undefined, b: Lite<
 }
 
 export function isLite(obj: any): obj is Lite<Entity> {
-    return (obj as Lite<Entity>).EntityType != undefined;
+    return obj != null && (obj as Lite<Entity>).EntityType != undefined;
 }
 
 export function isModifiableEntity(obj: any): obj is ModifiableEntity {
-    return (obj as ModifiableEntity).Type != undefined;
+    return obj != null && (obj as ModifiableEntity).Type != undefined;
 }
 
 export function isEntity(obj: any): obj is Entity {
-    return (obj as Entity).Type != undefined;
+    return obj != null && (obj as Entity).Type != undefined;
 }
 
 export function isEntityPack(obj: any): obj is EntityPack<ModifiableEntity>{
-    return (obj as EntityPack<ModifiableEntity>).entity != undefined &&
+    return obj != null && (obj as EntityPack<ModifiableEntity>).entity != undefined &&
         (obj as EntityPack<ModifiableEntity>).canExecute !== undefined;
 }
 
@@ -537,6 +537,7 @@ export module ValidationMessage {
     export const _0Or1ShouldBeSet = new MessageKey("ValidationMessage", "_0Or1ShouldBeSet");
     export const _0And1And2CanNotBeSetAtTheSameTime = new MessageKey("ValidationMessage", "_0And1And2CanNotBeSetAtTheSameTime");
     export const _0Have1ElementsButAllowedOnly2 = new MessageKey("ValidationMessage", "_0Have1ElementsButAllowedOnly2");
+    export const _0IsEmpty = new MessageKey("ValidationMessage", "_0IsEmpty");
 }
 
 export module VoidEnumMessage {

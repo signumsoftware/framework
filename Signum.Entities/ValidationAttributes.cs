@@ -1094,5 +1094,7 @@ namespace Signum.Entities
         _0And1And2CanNotBeSetAtTheSameTime,
         [Description("{0} have {1} elements, but allowed only {2}")]
         _0Have1ElementsButAllowedOnly2,
+        [Description("{0} is empty")]
+        _0IsEmpty,
     }
 }
