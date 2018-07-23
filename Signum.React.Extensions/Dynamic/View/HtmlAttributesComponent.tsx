@@ -133,7 +133,7 @@ const htmlAttributeList = ["accept", "accept-charset", "accesskey", "action", "a
     "headers", "height", "hidden", "high", "href", "hreflang", "http-equiv", "icon", "id", "ismap", "itemprop", "keytype", "kind", "label", "lang", "language", "list",
     "loop", "low", "manifest", "max", "maxlength", "media", "method", "min", "multiple", "muted", "name", "novalidate", "open", "optimum", "pattern", "ping", "placeholder",
     "poster", "preload", "radiogroup", "readonly", "rel", "required", "reversed", "rows", "rowspan", "sandbox", "scope", "scoped", "seamless", "selected", "shape", "size",
-    "sizes", "span", "spellcheck", "src", "srcdoc", "srclang", "srcset", "start", "step", "style", "summary", "tabindex", "target", "title", "type", "usemap", "value", "width",
+    "sizes", "span", "spellcheck", "src", "srcdoc", "srclang", "srcset", "initial", "step", "style", "summary", "tabindex", "target", "title", "type", "usemap", "value", "width",
     "wrap"].sort();
 
 const cssPropertyList = ["color", "opacity", "background", "background-attachment", "background-blend-mode", "background-color", "background-image", "background-position",

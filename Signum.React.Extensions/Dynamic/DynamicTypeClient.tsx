@@ -20,7 +20,7 @@ import { StyleContext } from '../../../Framework/Signum.React/Scripts/TypeContex
 import { ValueLine, EntityLine, EntityCombo, EntityList, EntityDetail, EntityStrip, EntityRepeater } from '../../../Framework/Signum.React/Scripts/Lines'
 import { DynamicTypeEntity, DynamicMixinConnectionEntity, DynamicTypeOperation, DynamicSqlMigrationEntity, DynamicRenameEntity, DynamicTypeMessage, DynamicPanelPermission } from './Signum.Entities.Dynamic'
 import DynamicTypeComponent from './Type/DynamicType' //typings only
-import * as DynamicClient from './DynamicClient'
+import * as DynamicClientOptions from './DynamicClientOptions'
 import * as AuthClient from '../Authorization/AuthClient'
 import { Tab } from '../../../Framework/Signum.React/Scripts/Components/Tabs';
 
@@ -66,9 +66,9 @@ export function start(options: { routes: JSX.Element[] }) {
             iconColor: "purple",
         }));
 
-    DynamicClient.Options.onGetDynamicLineForPanel.push(ctx => <ValueSearchControlLine ctx={ctx} findOptions={{ queryName: DynamicTypeEntity }} />);
-    DynamicClient.Options.onGetDynamicLineForPanel.push(ctx => <ValueSearchControlLine ctx={ctx} findOptions={{ queryName: DynamicMixinConnectionEntity }} />);
-    DynamicClient.Options.getDynaicMigrationsStep = () =>
+    DynamicClientOptions.Options.onGetDynamicLineForPanel.push(ctx => <ValueSearchControlLine ctx={ctx} findOptions={{ queryName: DynamicTypeEntity }} />);
+    DynamicClientOptions.Options.onGetDynamicLineForPanel.push(ctx => <ValueSearchControlLine ctx={ctx} findOptions={{ queryName: DynamicMixinConnectionEntity }} />);
+    DynamicClientOptions.Options.getDynaicMigrationsStep = () =>
         <Tab eventKey="migrations" title="Migrations" >
             <h3>{DynamicSqlMigrationEntity.nicePluralName()}</h3>
             <SearchControl findOptions={{ queryName: DynamicSqlMigrationEntity }} />
@@ -123,7 +123,8 @@ export interface DynamicProperty {
     scale?: number;
     _propertyType_?: string;
     validators?: Validators.DynamicValidator[];
-    customAttributes?: string;
+    customFieldAttributes?: string;
+    customPropertyAttributes?: string;
 }
 
 export interface DynamicTypePrimaryKeyDefinition {

@@ -22,6 +22,8 @@ using Signum.Engine.Authorization;
 using Signum.Engine.Maps;
 using Microsoft.AspNetCore.Builder;
 using Signum.Entities.Files;
+using Signum.Engine;
+using Signum.Engine.Files;
 
 namespace Signum.React.Files
 {
@@ -36,7 +38,7 @@ namespace Signum.React.Files
                 CustomWriteJsonProperty = ctx =>
                 {
                     var csp = (FilePathEmbedded)ctx.Entity;
-                    
+
                     ctx.JsonWriter.WritePropertyName(ctx.LowerCaseName);
                     ctx.JsonSerializer.Serialize(ctx.JsonWriter, csp.FullWebPath());
                 },
@@ -47,6 +49,33 @@ namespace Signum.React.Files
                     //Discard
                 }
             });
+
+            var s = Schema.Current.Settings;
+            ReflectionServer.AddPropertyRouteExtension += (mi, pr) =>
+            {
+                var dft = s.FieldAttributes(pr)?.OfType<DefaultFileTypeAttribute>().SingleOrDefaultEx();
+                if (dft != null)
+                {
+                    if (dft.FileTypeSymbol == null)
+                    {
+                        dft.FileTypeSymbol = SymbolLogic<FileTypeSymbol>.Symbols
+                        .Where(a => a.Key.After(".") == dft.SymbolName && (dft.SymbolContainer == null || dft.SymbolContainer == a.Key.Before(".")))
+                        .SingleEx(
+                            () => $"No FileTypeSymbol with name {dft.SymbolName} is registered",
+                            () => $"More than one FileTypeSymbol with name {dft.SymbolName} are registered. Consider desambiguating using symbolContainer argument in {pr}"
+                        );
+                    }
+
+                    var alg = FileTypeLogic.GetAlgorithm(dft.FileTypeSymbol);
+
+                    mi.Extension.Add("defaultFileTypeInfo", new
+                    {
+                        key = dft.FileTypeSymbol.Key,
+                        onlyImages = alg.OnlyImages,
+                        maxSizeInBytes = alg.MaxSizeInBytes,
+                    });
+                }
+            };
         }
     }
 }

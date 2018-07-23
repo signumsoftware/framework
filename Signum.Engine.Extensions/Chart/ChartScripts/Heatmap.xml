@@ -1,0 +1,227 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<ChartScript GroupBy="Never">
+  <Columns>
+    <Column DisplayName="Latitude" ColumnType="Magnitude" />
+    <Column DisplayName="Longitude" ColumnType="Magnitude" />
+    <Column DisplayName="Weight" ColumnType="Magnitude" IsOptional="true" />
+  </Columns>
+  <Parameters>
+    <Parameter Name="MapType" Type="Enum" ValueDefinition="Roadmap | Satellite" />
+    <Parameter Name="Opacity" Type="Enum" ValueDefinition="1|0.9|0.8|0.7|0.6|0.5|0.4|0.3|0.2|0.1" />
+    <Parameter Name="Radius(px)" Type="Number" ValueDefinition="10" />
+    <Parameter Name="ColorGradient" Type="Enum" ValueDefinition="Default | Blue-Red | Purple-Blue | Orange-Red | Fire | Emerald | Cobalt | Purples | Greys" />
+    <Parameter Name="MapStyle" Type="Enum" ValueDefinition="Standard | Silver | Retro | Dark | Night | Aubergine" />
+  </Parameters>
+  <Icon FileName="heatmap.png"><![CDATA[iVBORw0KGgoAAAANSUhEUgAAACgAAAAoCAYAAACM/rhtAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAA1VJREFUeNrsWVtIVFEU3fPwldqU5rOSjEAcMAohrIQgDIMoKHphnxHRhxiKURBFkSAGQT/1UdFPP/bjVxkIgRCVRVhZhhhOCZPPfI6Mr3Fa+3JmuI4zc8917ugELlhez7nnutfdd5+z9zmavF4vxTLMFONYE7gmcE2gBqz849aj9zEp7uaFkv/Eg8tEBngcLAbzRHsI7AU/gU2izf3V4BkwX/V8hxhzHxwxUmA2RwV4HrSEGfcAbAQPCZGBKBJk8VfAh0YIPAk+BVMkxrL4ColxKeJlCsDLUgKrCp8v6bv/43QtLg1RDLcqsCvQk1KTBOIqoizOh4bAcLBKiOPAfixrYZ11mrISRynZ6qap+SQamN5IVpOHDmS1U35qnzLGMZlDrQO7aWIuOdjnZk9e1xODd8AkrUEm8tL+zK+0K62bLKYFf7/Ha6Z5r4USzHP+vu2pf2hT4jg96ymnuYUlEo6pBZo1vJcnlgdNlOV+pOL0rkXilJmCtlqcD+vjpshu+xXsT9nBeNkYPKKxlCjYmjwYylhYbIifDDX7U2QFHpYxZLc5ljUjxmZTg3V7wHFZgQUyhtISJnSL4wnSOb4t2K2fQqTUJEmSMTbjidMlrmcyV5nFQSYIifQnvczMyhjsc6crcaiFD8OF9G6oSMueroW6V0Zgx+iOUN7wg+/zOA3UBdrUEtgiI9CFBbnZuVdZ74KB+/k+jwsD/rS39VbUL2TjyuHKoUZHGXVPbPEL4Su3uZ/vh4BHeO6E7moGRUMHFus3+LVURuTwjI1eOvfJvtOQ8No9USToqwchLEMUo52yAiVxlkMHLz+isqWrorbggau43lCnHINQD2GNkZT8LKgZPBiFUqoJ4q5Fuu2sjpK4evCUEZumSwYL481TDTzXasSuLk/Qn1/Lc9vIFu+i9r8F1DZsD3yWa7bN4B5x5c1UP+jkpCE+aUukb2gNlXdLM79QJipjRknGN/o9lU397rRF3oGAupU8+nCqqwgzeZdUzMtJg0YKdIGvfY23SOq+jPB9LF8pCFTogvc6V+NkoQZs4889iM3Ok+6joVJT5WqdbvFxxDnQHSZvVhoR/JGczXB+3AnWih1Wtjg7eQXeBT+HS00rdXjEZfdFwVWFKdb/DfFPgAEAvPH5L9HZAa0AAAAASUVORK5CYII=]]></Icon>
+  <Script><![CDATA[function DrawChart(chart, data) {
+
+
+    if (!(typeof google === 'object' && typeof google.maps === 'object')) {
+
+        if (window.__google_api_key == null)
+            throw Error("You need to set window.__google_api_key to use this map");  
+
+        var oldFunction = window.googleMapsCallback;
+        window.googleMapsCallback = function () {
+            if (oldFunction)
+                oldFunction();
+
+            drawMap();
+        };
+
+        ChartUtils.getScript("https://maps.googleapis.com/maps/api/js?key=" + window.__google_api_key + "&libraries=visualization&callback=window.googleMapsCallback");
+    } else {
+        drawMap();
+    }
+
+
+    function drawMap() {
+
+        var parentDiv = chart._groups[0][0].parentElement;
+
+        var bounds = new google.maps.LatLngBounds();
+
+        var isWeighted = data.columns.c2.token != null;
+
+        var coords = [];
+
+        data.rows.forEach(function (e) {
+            if (e.c0.key != null && e.c1.key != null) {
+                var position = new google.maps.LatLng(e.c0.key, e.c1.key);
+                bounds.extend(position);
+                coords.push(isWeighted && e.c2.key != null ? { location: position, weight: e.c2.key } : position);
+            }
+        });
+
+        var mapType = data.parameters["MapType"] == "Roadmap" ? google.maps.MapTypeId.ROADMAP : google.maps.MapTypeId.SATELLITE;
+
+        var mapOptions = {
+            center: new google.maps.LatLng(coords[0].lat, coords[0].lng),
+            zoom: 2,
+            mapTypeControlOptions: {
+                mapTypeIds: ["roadmap", "satellite", "hybrid", "terrain",
+                    "styled_map"]
+            },
+            mapTypeId: mapType
+        }
+
+        var map = new google.maps.Map(parentDiv, mapOptions);
+
+        if (data.parameters["MapStyle"] != null &&
+            data.parameters["MapStyle"] != "Standard") {
+
+            var json = ChartUtils.getMapStyles()[data.parameters["MapStyle"]];
+
+            if (json != null) {
+                map.mapTypes.set("styled_map", new google.maps.StyledMapType(json, { name: 'Styled Map' }));
+                map.setMapTypeId("styled_map");
+            }
+        }
+
+        map.fitBounds(bounds);
+        map.panToBounds(bounds);
+
+        var heatmap = new google.maps.visualization.HeatmapLayer({
+            data: coords,
+            map: map
+        });
+
+        if (data.parameters["Opacity"] != null) {
+            heatmap.set("opacity", parseFloat(data.parameters["Opacity"]));
+        }
+
+        if (data.parameters["Radius(px)"] != null) {
+            heatmap.set("radius", parseFloat(data.parameters["Radius(px)"]));
+        }
+
+        if (data.parameters["ColorGradient"] != null &&
+            data.parameters["ColorGradient"] != "Default") {
+            var gradient;
+
+            switch (data.parameters["ColorGradient"]) {
+                case "Blue-Red":
+                    gradient = [
+                        "rgba(0, 255, 255, 0)",
+                        "rgba(0, 255, 255, 1)",
+                        "rgba(0, 191, 255, 1)",
+                        "rgba(0, 127, 255, 1)",
+                        "rgba(0, 63, 255, 1)",
+                        "rgba(0, 0, 255, 1)",
+                        "rgba(0, 0, 223, 1)",
+                        "rgba(0, 0, 191, 1)",
+                        "rgba(0, 0, 159, 1)",
+                        "rgba(0, 0, 127, 1)",
+                        "rgba(63, 0, 91, 1)",
+                        "rgba(127, 0, 63, 1)",
+                        "rgba(191, 0, 31, 1)",
+                        "rgba(255, 0, 0, 1)"
+                    ];
+                    break;
+                case "Fire":
+                    gradient = [
+                        "rgba(255, 29, 29, 0)",
+                        "rgba(255, 29, 29, 1)",
+                        "rgba(255, 74, 29, 1)",
+                        "rgba(255, 89, 29, 1)",
+                        "rgba(255, 93, 29, 1)",
+                        "rgba(255, 104, 29, 1)",
+                        "rgba(255, 111, 29, 1)",
+                        "rgba(255, 153, 29, 1)",
+                        "rgba(255, 202, 29, 1)",
+                        "rgba(255, 255, 29, 1)",
+                        "rgba(255, 249, 147, 1)",
+                        "rgba(255, 255, 255, 1)"
+                    ];
+                    break;
+                case "Emerald":
+                    gradient = [
+                        "rgba(83, 255, 83, 0)",
+                        "rgba(83, 255, 83, 1)",
+                        "rgba(104, 255, 104, 1)",
+                        "rgba(117, 255, 117, 1)",
+                        "rgba(160, 255, 163, 1)",
+                        "rgba(216, 255, 218, 1)",
+                        "rgba(244, 255, 245, 1)",
+                        "rgba(252, 252, 252, 1)"
+                    ];
+                    break;
+                case "Cobalt":
+                    gradient = [
+                        "rgba(3, 5, 255, 0)",
+                        "rgba(3, 5, 255, 1)",
+                        "rgba(2, 158, 225, 1)",
+                        "rgba(90, 255, 255, 1)",
+                        "rgba(127, 255, 255, 1)",
+                        "rgba(170, 255, 255, 1)",
+                        "rgba(211, 255, 255, 1)",
+                        "rgba(255, 255, 255, 1)"
+                    ];
+                    break;
+                case "Purple-Blue":
+                    gradient = [
+                        "rgba(255, 247, 251, 0)",
+                        "#fff7fb",
+                        "#ece2f0",
+                        "#d0d1e6",
+                        "#a6bddb",
+                        "#67a9cf",
+                        "#3690c0",
+                        "#02818a",
+                        "#016c59",
+                        "#014636"
+                    ];
+                    break;
+                case "Orange-Red":
+                    gradient = [
+                        "rgba(255, 255, 229, 0)",
+                        "#ffffe5",
+                        "#fff7bc",
+                        "#fee391",
+                        "#fec44f",
+                        "#fe9929",
+                        "#ec7014",
+                        "#cc4c02",
+                        "#993404",
+                        "#662506"
+                    ];
+                    break;
+                case "Purples":
+                    gradient = [
+                        "rgba(252, 251, 253, 0)",
+                        "#fcfbfd",
+                        "#efedf5",
+                        "#dadaeb",
+                        "#bcbddc",
+                        "#9e9ac8",
+                        "#807dba",
+                        "#6a51a3",
+                        "#54278f",
+                        "#3f007d"
+                    ];
+                    break;
+                case "Greys":
+                    gradient = [
+                        "rgba(255, 255, 255, 0)",
+                        "#ffffff",
+                        "#f0f0f0",
+                        "#d9d9d9",
+                        "#bdbdbd",
+                        "#969696",
+                        "#737373",
+                        "#525252",
+                        "#252525",
+                        "#000000"
+                    ];
+                    break;
+                default:
+                    gradient = null;
+            }
+
+            if (gradient != null) {
+                heatmap.set("gradient", gradient);
+            }
+        }
+    }
+}
+]]></Script>
+</ChartScript>

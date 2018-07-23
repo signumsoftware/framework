@@ -32,17 +32,27 @@ namespace Signum.React.Authorization
         public static void Start(Func<AuthTokenConfigurationEmbedded> tokenConfig, string hashableEncryptionKey)
         {
             Configuration = tokenConfig;
-            CryptoKey = new MD5CryptoServiceProvider().Using(p => p.ComputeHash(UTF8Encoding.UTF8.GetBytes(hashableEncryptionKey)));
+            CryptoKey = new MD5CryptoServiceProvider().Using(p => p.ComputeHash(Encoding.UTF8.GetBytes(hashableEncryptionKey)));
 
             SignumAuthenticationFilter.Authenticators.Add(TokenAuthenticator);
             SignumAuthenticationFilter.Authenticators.Add(AnonymousAuthenticator);
+            SignumAuthenticationFilter.Authenticators.Add(AllowAnonymousAuthenticator);
             SignumAuthenticationFilter.Authenticators.Add(InvalidAuthenticator);
         }
 
         public static SignumAuthenticationResult InvalidAuthenticator(FilterContext actionContext)
         {
-            throw new AuthenticationException("No authentication information found!");
+            throw new AuthenticationException("No authentication information found!"); 
         }
+
+        public static SignumAuthenticationResult AnonymousUserAuthenticator(HttpActionContext actionContext)
+        {
+            if (AuthLogic.AnonymousUser != null)
+                return new SignumAuthenticationResult { User = AuthLogic.AnonymousUser };
+
+            return null;
+        }
+ 
 
         public static SignumAuthenticationResult AnonymousAuthenticator(FilterContext actionContext)
         {

@@ -172,7 +172,7 @@ export default class ChartRequestView extends React.Component<ChartRequestViewPr
                         <button className="btn btn-light" onMouseUp={this.handleExplore} ><i className="fa fa-search"></i> &nbsp; {SearchMessage.Explore.niceToString()}</button>
                     </div>
                     <br />
-                    <div className="sf-search-results-container" >
+                    <div className="sf-scroll-table-container" >
                         {!s.chartResult || !s.lastChartRequest ? JavascriptMessage.searchForResults.niceToString() :
                             <UncontrolledTabs id="chartResultTabs">
                                 <Tab eventKey="chart" title={ChartMessage.Chart.niceToString()}>

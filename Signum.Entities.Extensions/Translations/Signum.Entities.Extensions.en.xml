@@ -1,6 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <Translations>
-  <Type Name="AccordPredictorAlgorithm" />
+  <Type Name="ActiveDirectoryAuthorizerMessage" />
+  <Type Name="ActiveDirectoryConfigurationEmbedded" />
   <Type Name="ActivityWithRemarks" />
   <Type Name="AlertCurrentState" />
   <Type Name="AlertEntity" />
@@ -25,6 +26,7 @@
   <Type Name="BpmnEntityPairEmbedded" />
   <Type Name="CachePermission" />
   <Type Name="CaseActivityEntity" />
+  <Type Name="CaseActivityExecutedTimerEntity" />
   <Type Name="CaseActivityMessage" />
   <Type Name="CaseActivityOperation" />
   <Type Name="CaseActivityProcessAlgorithm" />
@@ -60,6 +62,7 @@
   <Type Name="ChartScriptParameterEmbedded" />
   <Type Name="ClientCertificationFileEmbedded" />
   <Type Name="CNTKPredictorAlgorithm" />
+  <Type Name="ConnectionType" />
   <Type Name="CSharpMigrationEntity" />
   <Type Name="CultureInfoEntity" />
   <Type Name="CultureInfoOperation" />
@@ -70,7 +73,7 @@
   <Type Name="DashboardPermission" />
   <Type Name="DateFilterRange" />
   <Type Name="DateSpanEmbedded" />
-  <Type Name="DecisionResult" />
+  <Type Name="DefaultColumnEncodings" />
   <Type Name="DefaultState" />
   <Type Name="DelayOption" />
   <Type Name="DiffLogMessage" />
@@ -216,7 +219,6 @@
   <Type Name="MoveTreeModel" />
   <Type Name="MultiEntityModel" />
   <Type Name="MultipleSMSModel" />
-  <Type Name="NaiveBayesSettingsEntity" />
   <Type Name="NamespaceHelpEntity" />
   <Type Name="NamespaceHelpOperation" />
   <Type Name="NeuralNetworkActivation" />
@@ -245,6 +247,7 @@
   <Type Name="PackageLineEntity" />
   <Type Name="PackageOperationEntity" />
   <Type Name="PackageOperationProcess" />
+  <Type Name="PackageQuery" />
   <Type Name="PanelPartEmbedded" />
   <Type Name="PanelStyle" />
   <Type Name="PasswordExpiresIntervalEntity" />
@@ -263,7 +266,7 @@
   <Type Name="PredictorClassificationMetricsEmbedded" />
   <Type Name="PredictorCodificationEntity" />
   <Type Name="PredictorColumnEmbedded" />
-  <Type Name="PredictorColumnEncoding" />
+  <Type Name="PredictorColumnEncodingSymbol" />
   <Type Name="PredictorColumnNullHandling" />
   <Type Name="PredictorColumnUsage" />
   <Type Name="PredictorEntity" />
@@ -371,6 +374,7 @@
   <Type Name="SystemWordTemplateEntity" />
   <Type Name="TemplateApplicableEval" />
   <Type Name="TemplateTokenMessage" />
+  <Type Name="TimeMachineMessage" />
   <Type Name="TimeSpanEmbedded" />
   <Type Name="ToolbarElementEmbedded" />
   <Type Name="ToolbarElementType" />
@@ -460,7 +464,7 @@
   <Type Name="WorkflowGatewayModel" />
   <Type Name="WorkflowGatewayOperation" />
   <Type Name="WorkflowGatewayType" />
-  <Type Name="WorkflowJumpEmbedded" />
+  <Type Name="WorkflowIssueType" />
   <Type Name="WorkflowLaneActorsEval" />
   <Type Name="WorkflowLaneEntity" />
   <Type Name="WorkflowLaneModel" />
@@ -469,10 +473,10 @@
   <Type Name="WorkflowMessage" />
   <Type Name="WorkflowModel" />
   <Type Name="WorkflowOperation" />
+  <Type Name="WorkflowPanelPermission" />
   <Type Name="WorkflowPoolEntity" />
   <Type Name="WorkflowPoolModel" />
   <Type Name="WorkflowPoolOperation" />
-  <Type Name="WorkflowRejectEmbedded" />
   <Type Name="WorkflowReplacementItemEmbedded" />
   <Type Name="WorkflowReplacementModel" />
   <Type Name="WorkflowScriptEntity" />
@@ -481,8 +485,10 @@
   <Type Name="WorkflowScriptPartEmbedded" />
   <Type Name="WorkflowScriptRetryStrategyEntity" />
   <Type Name="WorkflowScriptRetryStrategyOperation" />
-  <Type Name="WorkflowScriptRunnerPanelPermission" />
-  <Type Name="WorkflowTimeoutEmbedded" />
+  <Type Name="WorkflowTimerConditionEntity" />
+  <Type Name="WorkflowTimerConditionEval" />
+  <Type Name="WorkflowTimerConditionOperation" />
+  <Type Name="WorkflowTimerEmbedded" />
   <Type Name="WorkflowValidationMessage" />
   <Type Name="WorkflowXmlEmbedded" />
 </Translations>

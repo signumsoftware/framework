@@ -40,10 +40,12 @@ namespace Signum.Engine.Word
 
         public OpenXmlCompositeElement NewRun(OpenXmlCompositeElement runProps, string text, SpaceProcessingModeValues spaceMode, bool initialBr)
         {
-            var result = new W.Run(runProps, new W.Text(text) { Space = spaceMode });
+            var textNode = new W.Text(text) {Space = spaceMode};
+
+            var result = new W.Run(runProps, textNode);
 
             if (initialBr)
-                result.InsertAt(new W.Break(), 0);
+                result.InsertBefore(new W.Break(), textNode);
 
             return result;
         }
@@ -98,10 +100,12 @@ namespace Signum.Engine.Word
 
         public OpenXmlCompositeElement NewRun(OpenXmlCompositeElement runProps, string text, SpaceProcessingModeValues spaceMode, bool initialBr)
         {
-            var result = new D.Run(runProps, new D.Text(text));
+            var textElement = new D.Text(text);
+
+            var result = new D.Run(runProps, textElement);
             
             if (initialBr)
-                result.InsertAt(new D.Break(), 0);
+                result.InsertBefore(new D.Break(), textElement);
 
             return result;
         }
@@ -156,10 +160,11 @@ namespace Signum.Engine.Word
 
         public OpenXmlCompositeElement NewRun(OpenXmlCompositeElement runProps, string text, SpaceProcessingModeValues spaceMode, bool initialBr)
         {
-            var result = new S.Run(runProps, new S.Text(text));
+            var textElement = new S.Text(text);
+            var result = new S.Run(runProps, textElement);
             
             if (initialBr)
-                result.InsertAt(new S.Break(), 0);
+                result.InsertBefore(new S.Break(), textElement);
 
             return result;
         }
@@ -319,7 +324,7 @@ namespace Signum.Engine.Word
 
         public abstract override OpenXmlElement CloneNode(bool deep);
 
-        public abstract void Synchronize(SyncronizationContext sc);
+        public abstract void Synchronize(SynchronizationContext sc);
     }
 
     public class TokenNode : BaseNode
@@ -384,7 +389,7 @@ namespace Signum.Engine.Word
             return new TokenNode(this);
         }
 
-        public override void Synchronize(SyncronizationContext sc)
+        public override void Synchronize(SynchronizationContext sc)
         {
             ValueProvider.Synchronize(sc, "@");
 
@@ -448,7 +453,7 @@ namespace Signum.Engine.Word
             ValueProvider.Declare(variables);
         }
 
-        public override void Synchronize(SyncronizationContext sc)
+        public override void Synchronize(SynchronizationContext sc)
         {
             ValueProvider.Synchronize(sc, "@declare");
         }
@@ -500,7 +505,7 @@ namespace Signum.Engine.Word
             }
         }
 
-        public override void Synchronize(SyncronizationContext sc)
+        public override void Synchronize(SynchronizationContext sc)
         {
             foreach (var item in this.Descendants<BaseNode>().ToList())
             {
@@ -698,7 +703,7 @@ namespace Signum.Engine.Word
 
         }
 
-        public override void Synchronize(SyncronizationContext sc)
+        public override void Synchronize(SynchronizationContext sc)
         {
             ValueProvider.Synchronize(sc, "@foreach");
 
@@ -881,7 +886,7 @@ namespace Signum.Engine.Word
             }
         }
 
-        public override void Synchronize(SyncronizationContext sc)
+        public override void Synchronize(SynchronizationContext sc)
         {
             this.Condition.Synchronize(sc, "@any");
             
@@ -1044,7 +1049,7 @@ namespace Signum.Engine.Word
                 this.Parent.RemoveChild(this);
         }
 
-        public override void Synchronize(SyncronizationContext sc)
+        public override void Synchronize(SynchronizationContext sc)
         {
             this.Condition.Synchronize(sc, "@if");
             

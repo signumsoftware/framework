@@ -609,6 +609,7 @@ export module WorkflowMessage {
     export const PleaseChooseExpirationDate = new MessageKey("WorkflowMessage", "PleaseChooseExpirationDate");
     export const ResetZoom = new MessageKey("WorkflowMessage", "ResetZoom");
     export const Color = new MessageKey("WorkflowMessage", "Color");
+    export const WorkflowIssues = new MessageKey("WorkflowMessage", "WorkflowIssues");
 }
 
 export const WorkflowModel = new Type<WorkflowModel>("WorkflowModel");
@@ -679,6 +680,7 @@ export interface WorkflowScriptEval extends Dynamic.EvalEmbedded<IWorkflowScript
 }
 
 export module WorkflowScriptOperation {
+    export const Clone : Entities.ConstructSymbol_From<WorkflowScriptEntity, WorkflowScriptEntity> = registerSymbol("Operation", "WorkflowScriptOperation.Clone");
     export const Save : Entities.ExecuteSymbol<WorkflowScriptEntity> = registerSymbol("Operation", "WorkflowScriptOperation.Save");
     export const Delete : Entities.DeleteSymbol<WorkflowScriptEntity> = registerSymbol("Operation", "WorkflowScriptOperation.Delete");
 }

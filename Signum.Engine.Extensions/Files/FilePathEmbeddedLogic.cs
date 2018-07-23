@@ -83,7 +83,9 @@ namespace Signum.Engine.Files
 
         public static FilePathEmbedded SaveFile(this FilePathEmbedded efp)
         {
-            efp.FileType.GetAlgorithm().SaveFile(efp);
+            var alg = efp.FileType.GetAlgorithm();
+            alg.ValidateFile(efp);
+            alg.SaveFile(efp);
             efp.BinaryFile = null;
             return efp;
         }

@@ -69,7 +69,7 @@ namespace Signum.Engine.Templating
 
         public override string ToString() => ToString(new ScopedDictionary<string, ValueProviderBase>(null), null);
 
-        public abstract void Synchronize(SyncronizationContext sc, string remainingText);
+        public abstract void Synchronize(SynchronizationContext sc, string remainingText);
 
         public virtual void Declare(ScopedDictionary<string, ValueProviderBase> variables)
         {
@@ -247,7 +247,7 @@ namespace Signum.Engine.Templating
             sb.Append(this.ParsedToken.ToString(variables));
         }
 
-        public override void Synchronize(SyncronizationContext sc, string remainingText)
+        public override void Synchronize(SynchronizationContext sc, string remainingText)
         {
             sc.SynchronizeToken(ParsedToken, remainingText);
 
@@ -271,9 +271,12 @@ namespace Signum.Engine.Templating
         public TranslateInstanceValueProvider(ParsedToken token, bool isExplicit, Action<bool, string> addError)
         {
             this.ParsedToken = token;
-            this.Route = token.QueryToken.GetPropertyRoute();
             this.IsExplicit = isExplicit;
-            this.EntityToken = DeterminEntityToken(token.QueryToken, addError);
+            if (token.QueryToken != null)
+            {
+                this.Route = token.QueryToken.GetPropertyRoute();
+                this.EntityToken = DeterminEntityToken(token.QueryToken, addError);
+            }
         }
 
         public override object GetValue(TemplateParameters p)
@@ -336,7 +339,7 @@ namespace Signum.Engine.Templating
             sb.Append(this.ParsedToken.ToString(variables));
         }
 
-        public override void Synchronize(SyncronizationContext sc, string remainingText)
+        public override void Synchronize(SynchronizationContext sc, string remainingText)
         {
             sc.SynchronizeToken(ParsedToken, remainingText);
 
@@ -492,7 +495,7 @@ namespace Signum.Engine.Templating
             sb.Append(Members == null ? fieldOrPropertyChain : Members.ToString(a => a.Name, "."));
         }
 
-        public override void Synchronize(SyncronizationContext sc, string remainingText)
+        public override void Synchronize(SynchronizationContext sc, string remainingText)
         {
             if (Members == null)
             {
@@ -602,7 +605,7 @@ namespace Signum.Engine.Templating
             }
         }
 
-        public override void Synchronize(SyncronizationContext sc, string remainingText)
+        public override void Synchronize(SynchronizationContext sc, string remainingText)
         {
             globalKey = sc.Replacements.SelectInteractive(globalKey, GlobalVariables.Keys, "Globals", sc.StringDistance) ?? globalKey;
 
@@ -652,7 +655,7 @@ namespace Signum.Engine.Templating
             sb.Append(TemplateUtils.ScapeColon(this.dateTimeExpression));
         }
 
-        public override void Synchronize(SyncronizationContext sc, string remainingText)
+        public override void Synchronize(SynchronizationContext sc, string remainingText)
         { 
 
 
@@ -737,7 +740,7 @@ namespace Signum.Engine.Templating
             sb.Append(Members == null ? fieldOrPropertyChain : Members.ToString(a => a.Name, "."));
         }
 
-        public override void Synchronize(SyncronizationContext sc, string remainingText)
+        public override void Synchronize(SynchronizationContext sc, string remainingText)
         {
             if (Members == null)
             {

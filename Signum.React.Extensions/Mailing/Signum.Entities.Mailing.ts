@@ -8,10 +8,13 @@ import * as Signum from '../../../Framework/Signum.React/Scripts/Signum.Entities
 import * as Basics from '../Basics/Signum.Entities.Basics'
 import * as Processes from '../Processes/Signum.Entities.Processes'
 import * as Files from '../Files/Signum.Entities.Files'
+import * as UserAssets from '../UserAssets/Signum.Entities.UserAssets'
 import * as Templating from '../Templating/Signum.Entities.Templating'
 import * as UserAssets from '../UserAssets/Signum.Entities.UserAssets'
 import * as Scheduler from '../Scheduler/Signum.Entities.Scheduler'
 import * as UserQueries from '../UserQueries/Signum.Entities.UserQueries'
+import * as Templating from '../Templating/Signum.Entities.Templating'
+import * as Processes from '../Processes/Signum.Entities.Processes'
 import * as Authorization from '../Authorization/Signum.Entities.Authorization'
 
 
@@ -73,10 +76,11 @@ export module EmailFileType {
 }
 
 export const EmailMasterTemplateEntity = new Type<EmailMasterTemplateEntity>("EmailMasterTemplate");
-export interface EmailMasterTemplateEntity extends Entities.Entity {
+export interface EmailMasterTemplateEntity extends Entities.Entity, UserAssets.IUserAssetEntity {
     Type: "EmailMasterTemplate";
     name?: string | null;
     messages: Entities.MList<EmailMasterTemplateMessageEmbedded>;
+    guid?: string;
 }
 
 export const EmailMasterTemplateMessageEmbedded = new Type<EmailMasterTemplateMessageEmbedded>("EmailMasterTemplateMessageEmbedded");
@@ -199,8 +203,9 @@ export interface EmailTemplateContactEmbedded extends Entities.EmbeddedEntity {
 }
 
 export const EmailTemplateEntity = new Type<EmailTemplateEntity>("EmailTemplate");
-export interface EmailTemplateEntity extends Entities.Entity {
+export interface EmailTemplateEntity extends Entities.Entity, UserAssets.IUserAssetEntity {
     Type: "EmailTemplate";
+    guid?: string;
     name?: string | null;
     editableMessage?: boolean;
     disableAuthorization?: boolean;

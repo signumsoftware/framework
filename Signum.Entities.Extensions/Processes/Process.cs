@@ -126,7 +126,7 @@ namespace Signum.Entities.Processes
        {ProcessState.Executing, null,           null,                   true,              true,                  false,               false,              true,        null,         false,               false,          true,          true },
        {ProcessState.Suspending,null,           null,                   true,              true,                  false,               true,               true,        null,         false,               false,          true,          true },
        {ProcessState.Suspended, null,           null,                   true,              true,                  false,               true,               true,        null,         false,               false,          null,          null },
-       {ProcessState.Finished,  null,           null,                   true,              true,                  true,                false,              false,       null,        false,               false,          null,          null },
+       {ProcessState.Finished,  null,           null,                   true,              true,                  true,                false,              false,       null,         false,               false,          null,          null },
        {ProcessState.Error,     null,           null,                   null,              null,                  null,                null,               null,        null,         true,                true ,          null,          null },
         };
 
@@ -212,7 +212,9 @@ namespace Signum.Entities.Processes
         ProcessStartIsNullButProcessEndIsNot,
         Lines,
         LastProcess,
-        ExceptionLines
+        ExceptionLines,
+        [Description("Suspend in the safer way of stoping a running process. Cancel anyway?")]
+        SuspendIsTheSaferWayOfStoppingARunningProcessCancelAnyway
     }
 
     [Serializable, EntityKind(EntityKind.System, EntityData.Transactional)]

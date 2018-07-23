@@ -1,4 +1,5 @@
-﻿import * as React from 'react'
+﻿/// <reference path="filesclient.tsx" />
+import * as React from 'react'
 import { classes, Dic } from '../../../Framework/Signum.React/Scripts/Globals'
 import * as Services from '../../../Framework/Signum.React/Scripts/Services'
 import * as Navigator from '../../../Framework/Signum.React/Scripts/Navigator'
@@ -6,7 +7,7 @@ import * as Constructor from '../../../Framework/Signum.React/Scripts/Constructo
 import * as Finder from '../../../Framework/Signum.React/Scripts/Finder'
 import { FindOptions } from '../../../Framework/Signum.React/Scripts/FindOptions'
 import { TypeContext, StyleContext, StyleOptions, FormGroupStyle } from '../../../Framework/Signum.React/Scripts/TypeContext'
-import { PropertyRoute, PropertyRouteType, MemberInfo, getTypeInfo, getTypeInfos, TypeInfo, IsByAll, New } from '../../../Framework/Signum.React/Scripts/Reflection'
+import { PropertyRoute, PropertyRouteType, MemberInfo, getTypeInfo, getTypeInfos, TypeInfo, IsByAll, New, getSymbol } from '../../../Framework/Signum.React/Scripts/Reflection'
 import { LineBase, LineBaseProps } from '../../../Framework/Signum.React/Scripts/Lines/LineBase'
 import { FormGroup } from '../../../Framework/Signum.React/Scripts/Lines/FormGroup'
 import { ModifiableEntity, Lite, Entity, EntityControlMessage, JavascriptMessage, toLite, is, liteKey, getToString, } from '../../../Framework/Signum.React/Scripts/Signum.Entities'
@@ -28,6 +29,7 @@ export interface FileLineProps extends EntityBaseProps {
     accept?: string;
     configuration?: FileDownloaderConfiguration<IFile>;
     helpText?: React.ReactChild;
+    maxSizeInBytes?: number;
 }
 
 
@@ -39,7 +41,22 @@ export default class FileLine extends EntityBase<FileLineProps, FileLineProps> {
     }
    
     calculateDefaultState(state: FileLineProps) {
+        
         super.calculateDefaultState(state);
+        
+        const m = state.ctx.propertyRoute.member;
+        if (m && m.defaultFileTypeInfo) {
+
+            if (state.fileType == null)
+                state.fileType = getSymbol(FileTypeSymbol, m.defaultFileTypeInfo.key)
+
+
+            if (state.accept == null && m.defaultFileTypeInfo.onlyImages)
+                state.accept = "images/*";
+
+            if (state.maxSizeInBytes == null && m.defaultFileTypeInfo.maxSizeInBytes)
+                state.maxSizeInBytes = m.defaultFileTypeInfo.maxSizeInBytes;
+        }
     }
 
     handleFileLoaded = (file: IFile & ModifiableEntity) => {
@@ -63,7 +80,8 @@ export default class FileLine extends EntityBase<FileLineProps, FileLineProps> {
                 helpText={this.props.helpText}>
                 {hasValue ? this.renderFile() : s.ctx.readOnly ? undefined :
                     <FileUploader
-                        accept={this.props.accept}
+                        accept={s.accept}
+                        maxSizeInBytes={s.maxSizeInBytes}
                         dragAndDrop={this.props.dragAndDrop}
                         dragAndDropMessage={this.props.dragAndDropMessage}
                         fileType={this.props.fileType}

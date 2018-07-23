@@ -72,11 +72,7 @@ namespace Signum.React.Selenium
             IWebElement textOrTextArea = this.Element.TryFindElement(By.CssSelector("input[type=text], textarea"));
             if (textOrTextArea != null)
             {
-                var isReadonly = textOrTextArea.GetAttribute("readonly") != null;
-
-                var dataValue = textOrTextArea.GetAttribute("data-value");
-
-                return (isReadonly == true && dataValue != null) ? textOrTextArea.GetAttribute("data-value") : textOrTextArea.GetAttribute("value");
+                return textOrTextArea.GetAttribute("data-value")  ?? textOrTextArea.GetAttribute("value");
             }
 
             IWebElement select = this.Element.TryFindElement(By.CssSelector("select"));
@@ -85,9 +81,12 @@ namespace Signum.React.Selenium
 
             IWebElement readonlyField =
                 this.Element.TryFindElement(By.CssSelector("input.form-control")) ??
-                this.Element.TryFindElement(By.CssSelector("p.form-control-plaintext"));
+                this.Element.TryFindElement(By.CssSelector("div.form-control")) ??
+                this.Element.TryFindElement(By.CssSelector("input.form-control-plaintext")) ??
+                this.Element.TryFindElement(By.CssSelector("div.form-control-plaintext"));
+
             if (readonlyField != null)
-                return readonlyField.GetAttribute("data-value") ?? readonlyField.Text;
+                return readonlyField.GetAttribute("data-value") ?? readonlyField.GetAttribute("value") ?? readonlyField.Text;
 
             throw new InvalidOperationException("Element {0} not found".FormatWith(Route.PropertyString()));
         }

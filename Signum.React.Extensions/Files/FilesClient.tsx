@@ -15,15 +15,15 @@ import { FileEntity, FilePathEntity, FileEmbedded, FilePathEmbedded, IFile } fro
 import FileLine from './FileLine'
 import CellFormatter = Finder.CellFormatter;
 import { Lite, Entity, ModifiableEntity } from "../../../Framework/Signum.React/Scripts/Signum.Entities";
+import FileImageLine from './FileImageLine';
 
 export function start(options: { routes: JSX.Element[] }) {
 
     registerAutoFileLine(FileEntity);
     registerAutoFileLine(FileEmbedded);
 
-    //Requires FileType
-    //registerAutoFileLine(FilePathEntity);
-    //registerAutoFileLine(FilePathEmbedded);
+    registerAutoFileLine(FilePathEntity);
+    registerAutoFileLine(FilePathEmbedded);
 
 
     Finder.formatRules.push({
@@ -47,6 +47,11 @@ function registerAutoFileLine(type: Type<IFile & ModifiableEntity>) {
         const tr = ctx.propertyRoute.typeReference();
         if (tr.isCollection)
             return "continue";
+
+        var m = ctx.propertyRoute.member;
+        if (m && m.defaultFileTypeInfo && m.defaultFileTypeInfo.onlyImages)
+            return <FileImageLine ctx={ctx} />;
+
         return <FileLine ctx={ctx}/>;
     };
 }
@@ -60,4 +65,15 @@ export interface WebDownload {
 export interface WebImage {
     fullWebPath: string;
 }
- 
+
+
+declare module '../../../Framework/Signum.React/Scripts/Reflection' {
+
+    export interface MemberInfo {
+        defaultFileTypeInfo?: {
+            key: string,
+            onlyImages: boolean,
+            maxSizeInBytes: number | null,
+        };
+    }
+}

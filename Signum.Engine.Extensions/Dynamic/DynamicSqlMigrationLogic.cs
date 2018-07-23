@@ -138,7 +138,7 @@ namespace Signum.Engine.Dynamic
                         {
                             CurrentLog = new StringBuilder();
                             LastLog = null;
-                            Console.SetOut(new SyncronizedStringWriter(CurrentLog));
+                            Console.SetOut(new SynchronizedStringWriter(CurrentLog));
 
                             string title = e.CreationDate + (e.Comment.HasText() ? " ({0})".FormatWith(e.Comment) : null);
 
@@ -299,11 +299,11 @@ namespace Signum.Engine.Dynamic
             return null;
         }
 
-        internal class SyncronizedStringWriter : TextWriter
+        internal class SynchronizedStringWriter : TextWriter
         {
             private StringBuilder stringBuilder;
 
-            public SyncronizedStringWriter(StringBuilder currentLog)
+            public SynchronizedStringWriter(StringBuilder currentLog)
             {
                 this.stringBuilder = currentLog;
             }

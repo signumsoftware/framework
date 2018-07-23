@@ -90,7 +90,7 @@ export default class CaseComponent extends React.Component<CaseComponentProps, C
                 <Tabs id="caseTabs" hideOnly={true} activeEventKey={this.state.activeEventKey} toggle={this.handleToggle}>
                     <Tab eventKey={"CaseFlow" as CaseTab} title={WorkflowActivityMessage.CaseFlow.niceToString()}>
                         {this.state.initialXmlDiagram && this.state.entities && this.state.caseFlow ?
-                            <div className="code-container">
+                            <div>
                                 <CaseFlowViewerComponent ref={m => this.caseFlowViewerComponent = m}
                                     diagramXML={this.state.initialXmlDiagram}
                                     entities={this.state.entities}

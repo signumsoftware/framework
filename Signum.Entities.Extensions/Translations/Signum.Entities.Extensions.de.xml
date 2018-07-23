@@ -1,6 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <Translations>
-  <Type Name="AccordPredictorAlgorithm" />
+  <Type Name="ActiveDirectoryAuthorizerMessage" />
+  <Type Name="ActiveDirectoryConfigurationEmbedded" />
   <Type Name="ActivityWithRemarks" Description="Aktivität mit Bemerkungen">
     <Member Name="alerts" Description="Warnungen" />
     <Member Name="case" Description="Vorgang" />
@@ -236,10 +237,9 @@
     <Member Name="State" Description="Zustand" />
     <Member Name="WorkflowActivity" Description="Workflow-Aktivität" />
   </Type>
+  <Type Name="CaseActivityExecutedTimerEntity" />
   <Type Name="CaseActivityMessage">
     <Member Name="Activity0HasNoJumps" Description="Aktivität &quot;{0}&quot; hat keine Sprünge" />
-    <Member Name="Activity0HasNoReject" Description="Aktivität &quot;{0}&quot; ist keine Ablehnung." />
-    <Member Name="Activity0HasNoTimeout" Description="Aktivität &quot;{0}&quot; hat keinen Timeout" />
     <Member Name="CaseContainsOtherActivities" Description="Fall enthält andere Aktivitäten" />
     <Member Name="CaseIsADecompositionOf0" Description="Vorgang ist eine Zersetzung von {0}" />
     <Member Name="DoneBy0On1" Description="Abgeschlossen von {0} auf {1}" />
@@ -266,11 +266,9 @@
     <Member Name="MarkAsUnread" Description="Als ungelesen markieren" />
     <Member Name="Next" Description="Nächstes" />
     <Member Name="Register" Description="Anlegen" />
-    <Member Name="Reject" Description="Ablehnen" />
     <Member Name="ScriptExecute" Description="Skript ausführen" />
     <Member Name="ScriptFailureJump" Description="Skript Fehler springen" />
     <Member Name="ScriptScheduleRetry" Description="Skript-Zeitplan wiederholen" />
-    <Member Name="Timeout" Description="Timeout" />
     <Member Name="Undo" Description="Rückgängig" />
   </Type>
   <Type Name="CaseActivityProcessAlgorithm">
@@ -461,6 +459,7 @@
     <Member Name="FullFilePath" Description="Vollständiger Pfad" />
   </Type>
   <Type Name="CNTKPredictorAlgorithm" />
+  <Type Name="ConnectionType" />
   <Type Name="CSharpMigrationEntity" Description="C-sharp-Migration">
     <Member Name="ExecutionDate" Description="Ausführungsdatum" />
     <Member Name="UniqueName" Description="Einzigartiger Name" />
@@ -520,10 +519,7 @@
     <Member Name="Months" Description="Monate" />
     <Member Name="Years" Description="Jahre" />
   </Type>
-  <Type Name="DecisionResult" Description="Ergebnis der Entscheidung">
-    <Member Name="Approve" Description="Genehmigen" />
-    <Member Name="Decline" Description="Rückgang" />
-  </Type>
+  <Type Name="DefaultColumnEncodings" />
   <Type Name="DefaultState">
     <Member Name="All" Description="Alle" />
     <Member Name="End" Description="Ende" />
@@ -657,7 +653,6 @@
     <Member Name="Decline" Description="Rückgang" />
     <Member Name="Jump" Description="Springen" />
     <Member Name="Next" Description="Nächstes" />
-    <Member Name="Rejected" Description="Abgelehnt" />
     <Member Name="ScriptFailure" Description="Skriptfehler" />
     <Member Name="ScriptSuccess" Description="Skript-Erfolgreich" />
     <Member Name="Timeout" Description="Timeout" />
@@ -1065,12 +1060,12 @@
   </Type>
   <Type Name="FileMessage">
     <Member Name="DownloadFile" Description="Datei downloaden" />
-    <Member Name="DragAndDropHere" Description="Hier eine Datei ablegen" />
     <Member Name="ErrorSavingFile" Description="Fehler beim Speichern der Datei" />
     <Member Name="FileTypes" Description="Filetypen" />
     <Member Name="OnlyOneFileIsSupported" Description="Nur eine Datei wird unterstützt" />
     <Member Name="Open" Description="Öffnen" />
     <Member Name="OpeningHasNotDefaultImplementationFor0" Description="Das Öffnen hat keine Standardimplementierung für {0}" />
+    <Member Name="OrDragAFileHere" Description="oder in dieses Feld ziehen" />
     <Member Name="Remove" Description="Entfernen" />
     <Member Name="SavingHasNotDefaultImplementationFor0" Description="Das Speichern hat keine Standardimplementierung für {0}" />
     <Member Name="SelectFile" Description="Datei auswählen" />
@@ -1374,9 +1369,11 @@
     <Member Name="Press0ToExploreEachTable" Description="Drücken Sie {0}, um jede Tabelle zu erkunden" />
     <Member Name="Press0ToExploreStatesAndOperations" Description="Drücken Sie {0}, um Status und Operationen zu erkunden" />
     <Member Name="Rows" Description="Zeilen" />
+    <Member Name="RowsHistory" Description="Zeilen Historie" />
     <Member Name="State" Description="Status" />
     <Member Name="StateColor" Description="Statusfarbe" />
     <Member Name="TableSize" Description="Tabellengröße" />
+    <Member Name="TableSizeHistory" Description="Tabelle-Historie" />
   </Type>
   <Type Name="MapPermission">
     <Member Name="ViewMap" Description="Karte anzeigen" />
@@ -1404,7 +1401,6 @@
     <Member Name="From" Description="Von" />
     <Member Name="Message" Description="Nachricht" />
   </Type>
-  <Type Name="NaiveBayesSettingsEntity" />
   <Type Name="NamespaceHelpEntity" Description="Namespacehilfe" PluralDescription="Namespacehilfen" Gender="f">
     <Member Name="Culture" Description="Kultur" />
     <Member Name="Description" Description="Beschreibung" />
@@ -1529,6 +1525,7 @@
   <Type Name="PackageOperationProcess">
     <Member Name="PackageOperation" Description="Paket-Operation" />
   </Type>
+  <Type Name="PackageQuery" />
   <Type Name="PanelPartEmbedded" Description="Dashboardteil">
     <Member Name="Columns" Description="Spalten" />
     <Member Name="Content" Description="Inhalt" />
@@ -1594,7 +1591,7 @@
   <Type Name="PredictorClassificationMetricsEmbedded" />
   <Type Name="PredictorCodificationEntity" />
   <Type Name="PredictorColumnEmbedded" />
-  <Type Name="PredictorColumnEncoding" />
+  <Type Name="PredictorColumnEncodingSymbol" />
   <Type Name="PredictorColumnNullHandling" />
   <Type Name="PredictorColumnUsage" />
   <Type Name="PredictorEntity" />
@@ -2110,6 +2107,7 @@
     <Member Name="YouCanOnlyAddForeachBlocksWithCollectionFields" Description="Sie können nur Foreach-Blöcke mit Collection-Feldern hinzufügen" />
     <Member Name="YouHaveToAddTheElementTokenToUseForeachOnCollectionFields" Description="Sie müssen das Element Token zur Verwendung von Foreach in einem Collection-Feld hinzufügen" />
   </Type>
+  <Type Name="TimeMachineMessage" />
   <Type Name="TimeSpanEmbedded" Description="Zeitspanne">
     <Member Name="Days" Description="Tage" />
     <Member Name="Hours" Description="Stunden" />
@@ -2379,7 +2377,6 @@
     <Member Name="Query" Description="Abfrage" />
     <Member Name="SearchOnLoad" Description="Beim laden suchen " />
     <Member Name="ShowFilterButton" Description="Filter Button anzeigen" />
-    <Member Name="WithoutFilters" Description="Ohne Filter" />
   </Type>
   <Type Name="UserQueryMessage">
     <Member Name="_0IsNotFilterable" Description="{0} ist nicht filterbar" />
@@ -2532,7 +2529,6 @@
   <Type Name="WorkflowConfigurationEmbedded" />
   <Type Name="WorkflowConnectionEntity" Description="Workflow-Verbindung">
     <Member Name="Condition" Description="Bedingung" />
-    <Member Name="DecisonResult" Description="Beschluß-Ergebnis" />
     <Member Name="From" Description="Von" />
     <Member Name="Name" Description="Name" />
     <Member Name="Order" Description="Bestellung" />
@@ -2541,7 +2537,6 @@
   </Type>
   <Type Name="WorkflowConnectionModel" Description="Workflow-Verbindung">
     <Member Name="Condition" Description="Bedingung" />
-    <Member Name="DecisonResult" Description="Beschluß-Ergebnis" />
     <Member Name="Name" Description="Name" />
     <Member Name="Order" Description="Bestellung" />
   </Type>
@@ -2604,7 +2599,7 @@
     <Member Name="Inclusive" Description="Inklusive" />
     <Member Name="Parallel" Description="Parallel" />
   </Type>
-  <Type Name="WorkflowJumpEmbedded" />
+  <Type Name="WorkflowIssueType" />
   <Type Name="WorkflowLaneActorsEval" />
   <Type Name="WorkflowLaneEntity" Description="Workflowstrasse">
     <Member Name="Actors" Description="Schauspieler" />
@@ -2628,7 +2623,6 @@
   </Type>
   <Type Name="WorkflowMessage">
     <Member Name="_0BelongsToADifferentWorkflow" Description="{0} gehört zu  einem anderem Arbeitsablauf" />
-    <Member Name="ChangeWorkflowMainEntityTypeIsNotAllowedBecausueWeHaveNodesThatUseIt" Description="Die Änderung der Arbeitsablauf Hauptentitätentypen ist nicht erlaubt, da wir Knoten haben die diese benutzen." />
     <Member Name="Color" Description="Farbe:" />
     <Member Name="Condition0IsDefinedFor1Not2" Description="Zustand {0} ist für {1} definiert, nicht für {2}" />
     <Member Name="JumpsToSameActivityNotAllowed" Description="Sprünge für dieselbe Tätigkeit sind nicht erlaubt" />
@@ -2648,6 +2642,7 @@
     <Member Name="Delete" Description="Löschen" />
     <Member Name="Save" Description="Speichern" />
   </Type>
+  <Type Name="WorkflowPanelPermission" />
   <Type Name="WorkflowPoolEntity" Description="Workflow-pool">
     <Member Name="Name" Description="Name" />
     <Member Name="Workflow" Description="Workflow" />
@@ -2660,10 +2655,7 @@
     <Member Name="Delete" Description="Löschen" />
     <Member Name="Save" Description="Speichern" />
   </Type>
-  <Type Name="WorkflowRejectEmbedded" />
   <Type Name="WorkflowReplacementItemEmbedded" Description="Arbeitsablaufs Austauschposition ">
-    <Member Name="NewTask" Description="Neuer Task" />
-    <Member Name="OldTask" Description="Alter Task" />
     <Member Name="SubWorkflow" Description="Unter Arbeitsablauf" />
   </Type>
   <Type Name="WorkflowReplacementModel" Description="Workflow-Ersatz">
@@ -2675,8 +2667,10 @@
   <Type Name="WorkflowScriptPartEmbedded" />
   <Type Name="WorkflowScriptRetryStrategyEntity" />
   <Type Name="WorkflowScriptRetryStrategyOperation" />
-  <Type Name="WorkflowScriptRunnerPanelPermission" />
-  <Type Name="WorkflowTimeoutEmbedded" />
+  <Type Name="WorkflowTimerConditionEntity" />
+  <Type Name="WorkflowTimerConditionEval" />
+  <Type Name="WorkflowTimerConditionOperation" />
+  <Type Name="WorkflowTimerEmbedded" />
   <Type Name="WorkflowValidationMessage" />
   <Type Name="WorkflowXmlEmbedded" Description="Arbeitsablauf XML">
     <Member Name="DiagramXml" Description="Diagram XML" />

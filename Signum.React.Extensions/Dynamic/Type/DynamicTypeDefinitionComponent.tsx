@@ -15,7 +15,7 @@ import { FilterOperation, PaginationMode } from '../../../../Framework/Signum.Re
 import SelectorModal from '../../../../Framework/Signum.React/Scripts/SelectorModal';
 import MessageModal from '../../../../Framework/Signum.React/Scripts/Modals/MessageModal'
 import * as DynamicTypeClient from '../DynamicTypeClient';
-import * as DynamicClient from '../DynamicClient';
+import * as DynamicClientOptions from '../DynamicClientOptions';
 import * as TypeHelpClient from '../../TypeHelp/TypeHelpClient';
 import { DynamicTypeMessage, DynamicTypeEntity, DynamicMixinConnectionEntity } from '../Signum.Entities.Dynamic';
 import { Validators, DynamicTypeDefinition, DynamicProperty } from '../DynamicTypeClient';
@@ -333,7 +333,7 @@ export class DynamicTypeDefinitionComponent extends React.Component<DynamicTypeD
 
     renderOthers() {
         var ctx = new StyleContext(undefined, { labelColumns: 3 });
-        return React.createElement("div", {}, ...DynamicClient.Options.onGetDynamicLineForType.map(f => f(ctx, this.props.dynamicType.typeName!)));
+        return React.createElement("div", {}, ...DynamicClientOptions.Options.onGetDynamicLineForType.map(f => f(ctx, this.props.dynamicType.typeName!)));
     }
 }
 
@@ -949,7 +949,9 @@ export class PropertyComponent extends React.Component<PropertyComponentProps>{
                         </div>}
                     </div>
                 </div >
-                <ValueComponent dc={this.props.dc} labelColumns={2} binding={Binding.create(p, d => d.customAttributes)} type="string" defaultValue={null} onBlur={this.handleAutoFix} />
+                <br />
+                <ValueComponent dc={this.props.dc} labelColumns={3} binding={Binding.create(p, d => d.customFieldAttributes)} type="string" defaultValue={null} onBlur={this.handleAutoFix} />
+                <ValueComponent dc={this.props.dc} labelColumns={3} binding={Binding.create(p, d => d.customPropertyAttributes)} type="string" defaultValue={null} onBlur={this.handleAutoFix} />
                 <ValidatorRepeaterComponent dc={this.props.dc} property={this.props.property} />
             </div>
         );

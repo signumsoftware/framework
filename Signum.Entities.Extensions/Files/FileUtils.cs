@@ -51,8 +51,12 @@ namespace Signum.Entities.Files
         [Description("Viewing has no default implementation for {0}")]
         ViewingHasNotDefaultImplementationFor0,
         OnlyOneFileIsSupported,
-        [Description("drag a file here")]
-        DragAndDropHere, 
+        [Description("or drag a file here")]
+        OrDragAFileHere,
+        [Description("The file {0} is not a {1}")]
+        TheFile0IsNotA1,
+        [Description("File '{0}' is too big, the maximum size is {1}")]
+        File0IsTooBigTheMaximumSizeIs1,
     }
 
 

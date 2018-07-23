@@ -17,15 +17,13 @@ namespace Signum.Engine.MachineLearning
         public static void CreatePredictorCodifications(PredictorTrainingContext ctx)
         {
             var isValueSize = ((FieldValue)Schema.Current.Field((PredictorCodificationEntity e) => e.IsValue)).Size.Value;
-            var valueSize = ((FieldValue)Schema.Current.Field((PredictorCodificationEntity e) => e.CodedValues[0])).Size.Value;
             var groupKey0Size = ((FieldValue)Schema.Current.Field((PredictorCodificationEntity e) => e.SplitKey0)).Size.Value;
             var groupKey1Size = ((FieldValue)Schema.Current.Field((PredictorCodificationEntity e) => e.SplitKey1)).Size.Value;
             var groupKey2Size = ((FieldValue)Schema.Current.Field((PredictorCodificationEntity e) => e.SplitKey2)).Size.Value;
 
             ctx.ReportProgress($"Saving Codifications");
 
-
-            ctx.Columns.Select(pc =>
+            ctx.Codifications.Select(pc =>
             {
                 string ToStringValue(QueryToken token, object obj, int limit)
                 {
@@ -38,35 +36,38 @@ namespace Signum.Engine.MachineLearning
                     return FilterValueConverter.ToString(obj, token.Type, allowSmart: false).TryStart(limit);
                 }
 
-                string GetSplitpKey(int index, int limit)
-                {
-                    if (pc.SubQuery == null)
-                        return null;
 
-                    var token = ctx.SubQueries[pc.SubQuery].SplitBy?.ElementAtOrDefault(index)?.Column.Token;
-                    var obj = pc.Keys?.ElementAtOrDefault(index);
-                    return ToStringValue(token, obj, limit);
-                }
-
-                var valueToken = pc.Token;
-
-                return new PredictorCodificationEntity
+                var valueToken = pc.Column.Token;
+                
+                var result = new PredictorCodificationEntity
                 {
                     Predictor = ctx.Predictor.ToLite(),
                     Index = pc.Index,
-                    Usage = pc.Usage,
-                    SubQueryIndex = pc.SubQuery == null ? (int?)null : ctx.Predictor.SubQueries.IndexOf(pc.SubQuery),
-                    OriginalColumnIndex = pc.PredictorColumnIndex,
-                    SplitKey0 = GetSplitpKey(0, groupKey0Size),
-                    SplitKey1 = GetSplitpKey(1, groupKey1Size),
-                    SplitKey2 = GetSplitpKey(2, groupKey2Size),
-                    IsValue = ToStringValue(valueToken, pc.IsValue, valueSize),
-                    CodedValues = pc.CodedValues.EmptyIfNull().Select(v => ToStringValue(valueToken, v, valueSize)).ToMList(),
+                    Usage = pc.Column.Usage,
+                    OriginalColumnIndex = pc.Column.PredictorColumnIndex,
+                    IsValue = ToStringValue(valueToken, pc.IsValue, isValueSize),
                     Average = pc.Average,
                     StdDev = pc.StdDev,
                     Min = pc.Min,
                     Max = pc.Max,
                 };
+
+                if (pc.Column is PredictorColumnSubQuery pcsq)
+                {
+                    string GetSplitpKey(int index, int limit)
+                    {
+                        var token = ctx.SubQueries[pcsq.SubQuery].SplitBy?.ElementAtOrDefault(index)?.Column.Token;
+                        var obj = pcsq.Keys?.ElementAtOrDefault(index);
+                        return ToStringValue(token, obj, limit);
+                    }
+
+                    result.SubQueryIndex = ctx.Predictor.SubQueries.IndexOf(pcsq.SubQuery);
+                    result.SplitKey0 = GetSplitpKey(0, groupKey0Size);
+                    result.SplitKey1 = GetSplitpKey(1, groupKey1Size);
+                    result.SplitKey2 = GetSplitpKey(2, groupKey2Size);
+                }
+
+                return result;
 
             }).BulkInsertQueryIds(a => new { a.Index, a.Usage }, a => a.Predictor == ctx.Predictor.ToLite());
         }
@@ -111,52 +112,49 @@ namespace Signum.Engine.MachineLearning
                 }
             }
 
-            PredictorCodification MainColumnCodification(PredictorCodificationEntity cod)
+            Dictionary<int, PredictorColumnMain> mainColumns = new Dictionary<int, PredictorColumnMain>();
+            PredictorColumnMain GetPredictorColumnMain(PredictorCodificationEntity cod)
             {
-                var col = predictor.MainQuery.Columns[cod.OriginalColumnIndex];
-                return new PredictorCodification
+                return mainColumns.GetOrCreate(cod.OriginalColumnIndex, () => new PredictorColumnMain
                 {
                     PredictorColumnIndex = cod.OriginalColumnIndex,
-                    PredictorColumn = col,
-                    PredictorSubQueryColumn = null,
-                    Index = cod.Index,
-                    SubQuery = null,
-                    Keys = null,
-                    IsValue = col.Encoding == PredictorColumnEncoding.OneHot ? ParseValue(cod.IsValue, col.Token.Token) : null,
-                    CodedValues = col.Encoding == PredictorColumnEncoding.Codified ? cod.CodedValues.Select(a => ParseValue(a, col.Token.Token)).ToArray() : null,
-                    Average = cod.Average,
-                    StdDev = cod.StdDev,
-                    Min = cod.Min,
-                    Max = cod.Max,
-                };
+                    PredictorColumn = predictor.MainQuery.Columns[cod.OriginalColumnIndex]
+                });
             }
 
-            PredictorCodification SubQueryColumnCodification(PredictorCodificationEntity cod)
+            Dictionary<int, Dictionary<int, PredictorColumnSubQuery>> subColumns = new Dictionary<int, Dictionary<int, PredictorColumnSubQuery>>();
+            PredictorColumnSubQuery GetPredictorColumnSubQuery(PredictorCodificationEntity cod)
             {
-                var sq = predictor.SubQueries[cod.SubQueryIndex.Value];
-                var col = sq.Columns[cod.OriginalColumnIndex];
-                if (col.Usage == PredictorSubQueryColumnUsage.SplitBy || col.Usage == PredictorSubQueryColumnUsage.ParentKey)
-                    throw new InvalidOperationException("Unexpected codification usage");
+                return subColumns.GetOrCreate(cod.SubQueryIndex.Value).GetOrCreate(cod.OriginalColumnIndex, () => {
 
-                return new PredictorCodification
-                {
-                    PredictorColumnIndex = cod.OriginalColumnIndex,
-                    PredictorColumn = null,
-                    PredictorSubQueryColumn = col ,
-                    Index = cod.Index,
-                    SubQuery = sq,
-                    Keys = GetKeys(cod, sq.Columns.Where(a=>a.Usage == PredictorSubQueryColumnUsage.SplitBy).ToList()),
-                    IsValue = col.Encoding.Value == PredictorColumnEncoding.OneHot ? ParseValue(cod.IsValue, col.Token.Token) : null,
-                    CodedValues = col.Encoding.Value == PredictorColumnEncoding.Codified ? cod.CodedValues.Select(a => ParseValue(a, col.Token.Token)).ToArray() : null,
-                    Average = cod.Average,
-                    StdDev = cod.StdDev,
-                    Min = cod.Min,
-                    Max = cod.Max,
-                };
+                    var sq = predictor.SubQueries[cod.SubQueryIndex.Value];
+                    var col = sq.Columns[cod.OriginalColumnIndex];
+                    if (col.Usage == PredictorSubQueryColumnUsage.SplitBy || col.Usage == PredictorSubQueryColumnUsage.ParentKey)
+                        throw new InvalidOperationException("Unexpected codification usage");
+
+                    return new PredictorColumnSubQuery
+                    {
+                        PredictorColumnIndex = cod.OriginalColumnIndex,
+                        PredictorSubQueryColumn = col,
+                        SubQuery = sq,
+                        Keys = GetKeys(cod, sq.Columns.Where(a => a.Usage == PredictorSubQueryColumnUsage.SplitBy).ToList())
+                    };
+                });
             }
 
             return (from cod in list
-                    select cod.SubQueryIndex == null ? MainColumnCodification(cod) : SubQueryColumnCodification(cod))
+                    let col = cod.SubQueryIndex == null ?
+                        (PredictorColumnBase)GetPredictorColumnMain(cod) :
+                        (PredictorColumnBase)GetPredictorColumnSubQuery(cod)
+                    select new PredictorCodification(col)
+                    {
+                        Index = cod.Index,
+                        IsValue = cod.IsValue != null ? ParseValue(cod.IsValue, col.Token) : null,
+                        Average = cod.Average,
+                        StdDev = cod.StdDev,
+                        Min = cod.Min,
+                        Max = cod.Max,
+                    })
                     .ToList();
         }
 

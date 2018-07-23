@@ -355,6 +355,7 @@ namespace Signum.Engine.Word
 
         internal static SqlPreCommand SynchronizeWordTemplate(Replacements replacements, WordTemplateEntity template, StringDistance sd)
         {
+            Console.Write(".");
             try
             {
                 if (template.Template == null || !replacements.Interactive)
@@ -364,85 +365,80 @@ namespace Signum.Engine.Word
 
                 QueryDescription qd = DynamicQueryManager.Current.QueryDescription(queryName);
 
-                Console.Clear();
-
-                SafeConsole.WriteLineColor(ConsoleColor.White, "WordTemplate: " + template.Name);
-                Console.WriteLine(" Query: " + template.Query.Key);
-
-                var file = template.Template.Retrieve();
-
-                try
+                using (DelayedConsole.Delay(() => SafeConsole.WriteLineColor(ConsoleColor.White, "WordTemplate: " + template.Name)))
+                using (DelayedConsole.Delay(() => Console.WriteLine(" Query: " + template.Query.Key)))
                 {
-                    SyncronizationContext sc = new SyncronizationContext
+                    var file = template.Template.Retrieve();
+                    var oldHash = file.Hash;
+                    try
                     {
-                        ModelType = template.SystemWordTemplate.ToType(),
-                        QueryDescription = qd,
-                        Replacements = replacements,
-                        StringDistance = sd,
-                        HasChanges = false,
-                        Variables = new ScopedDictionary<string, ValueProviderBase>(null),
-                    };
-
-                    var bytes = template.ProcessOpenXmlPackage(document =>
-                    {
-                        Dump(document, "0.Original.txt");
-
-                        var parser = new TemplateParser(document, qd, template.SystemWordTemplate.ToType(), template);
-                        parser.ParseDocument(); Dump(document, "1.Match.txt");
-                        parser.CreateNodes(); Dump(document, "2.BaseNode.txt");
-                        parser.AssertClean();
-
-                        foreach (var root in document.AllRootElements())
+                        SynchronizationContext sc = new SynchronizationContext
                         {
-                            foreach (var node in root.Descendants<BaseNode>().ToList())
-                            {
-                                node.Synchronize(sc);
-                            }
-                        }
+                            ModelType = template.SystemWordTemplate.ToType(),
+                            QueryDescription = qd,
+                            Replacements = replacements,
+                            StringDistance = sd,
+                            HasChanges = false,
+                            Variables = new ScopedDictionary<string, ValueProviderBase>(null),
+                        };
 
-                        if (sc.HasChanges)
+                        var bytes = template.ProcessOpenXmlPackage(document =>
                         {
-                            Dump(document, "3.Synchronized.txt");
-                            var variables = new ScopedDictionary<string, ValueProviderBase>(null);
+                            Dump(document, "0.Original.txt");
+
+                            var parser = new TemplateParser(document, qd, template.SystemWordTemplate.ToType(), template);
+                            parser.ParseDocument(); Dump(document, "1.Match.txt");
+                            parser.CreateNodes(); Dump(document, "2.BaseNode.txt");
+                            parser.AssertClean();
+
                             foreach (var root in document.AllRootElements())
                             {
                                 foreach (var node in root.Descendants<BaseNode>().ToList())
                                 {
-                                    node.RenderTemplate(variables);
+                                    node.Synchronize(sc);
                                 }
                             }
 
-                            Dump(document, "4.Rendered.txt");
-                        }
-                    });
+                            if (sc.HasChanges)
+                            {
+                                Dump(document, "3.Synchronized.txt");
+                                var variables = new ScopedDictionary<string, ValueProviderBase>(null);
+                                foreach (var root in document.AllRootElements())
+                                {
+                                    foreach (var node in root.Descendants<BaseNode>().ToList())
+                                    {
+                                        node.RenderTemplate(variables);
+                                    }
+                                }
 
-                    if (!sc.HasChanges)
-                        return null;
+                                Dump(document, "4.Rendered.txt");
+                            }
+                        });
 
-                    file.AllowChange = true;
-                    file.BinaryFile = bytes;
+                        if (!sc.HasChanges)
+                            return null;
 
-                    using (replacements.WithReplacedDatabaseName())
-                        return Schema.Current.Table<FileEntity>().UpdateSqlSync(file, f => f.Hash == file.Hash, comment: "WordTemplate: " + template.Name);
-                }
-                catch (TemplateSyncException ex)
-                {
-                    if (ex.Result == FixTokenResult.SkipEntity)
-                        return null;
+                        file.AllowChange = true;
+                        file.BinaryFile = bytes;
 
-                    if (ex.Result == FixTokenResult.DeleteEntity)
-                        return SqlPreCommandConcat.Combine(Spacing.Simple,
-                            Schema.Current.Table<WordTemplateEntity>().DeleteSqlSync(template, wt => wt.Name == template.Name),
-                            Schema.Current.Table<FileEntity>().DeleteSqlSync(file, f => f.Hash == file.Hash));
+                        using (replacements.WithReplacedDatabaseName())
+                            return Schema.Current.Table<FileEntity>().UpdateSqlSync(file, f => f.Hash == oldHash, comment: "WordTemplate: " + template.Name);
+                    }
+                    catch (TemplateSyncException ex)
+                    {
+                        if (ex.Result == FixTokenResult.SkipEntity)
+                            return null;
 
-                    if (ex.Result == FixTokenResult.ReGenerateEntity)
-                        return Regenerate(template, replacements);
+                        if (ex.Result == FixTokenResult.DeleteEntity)
+                            return SqlPreCommandConcat.Combine(Spacing.Simple,
+                                Schema.Current.Table<WordTemplateEntity>().DeleteSqlSync(template, wt => wt.Name == template.Name),
+                                Schema.Current.Table<FileEntity>().DeleteSqlSync(file, f => f.Hash == file.Hash));
 
-                    throw new InvalidOperationException("Unexcpected {0}".FormatWith(ex.Result));
-                }
-                finally
-                {
-                    Console.Clear();
+                        if (ex.Result == FixTokenResult.ReGenerateEntity)
+                            return Regenerate(template, replacements);
+
+                        throw new InvalidOperationException("Unexcpected {0}".FormatWith(ex.Result));
+                    }
                 }
             }
             catch (Exception e)

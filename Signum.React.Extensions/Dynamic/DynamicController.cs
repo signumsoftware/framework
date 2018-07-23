@@ -1,12 +1,16 @@
-﻿using Signum.Engine.Basics;
+﻿using Signum.Engine;
+using Signum.Engine.Basics;
 using Signum.Engine.Dynamic;
 using Signum.Engine.DynamicQuery;
 using Signum.Engine.Maps;
 using Signum.Engine.Scheduler;
 using Signum.Entities;
 using Signum.Entities.Dynamic;
+using Signum.Entities.Reflection;
+using Signum.React.ApiControllers;
 using Signum.React.Facades;
 using Signum.Utilities;
+using Signum.Utilities.DataStructures;
 using Signum.Utilities.ExpressionTrees;
 using System;
 using System.CodeDom.Compiler;
@@ -68,10 +72,40 @@ namespace Signum.React.Dynamic
         [Route("api/dynamic/startErrors"), HttpGet]
         public List<Exception> GetStartErrors()
         {
-            return StartParameters.IgnoredCodeErrors.EmptyIfNull()
-                .PreAnd(DynamicLogic.CodeGenError).NotNull()
-                .Select(e => e)
-                .ToList();
+            return new Sequence<Exception>
+            {
+                DynamicLogic.CodeGenError,
+                StartParameters.IgnoredCodeErrors.EmptyIfNull(),
+                StartParameters.IgnoredDatabaseMismatches.EmptyIfNull(),
+            }
+            .NotNull()
+            .Select(e => new HttpError(e, true))
+            .ToList();
         }
+
+        [Route("api/dynamic/evalErrors"), HttpPost]
+        public async Task<List<EvalEntityError>> GetEvalErrors([FromBody]QueryEntitiesRequestTS request)
+        {
+            var allEntities = await DynamicQueryManager.Current.GetEntities(request.ToQueryEntitiesRequest()).Select(a => a.Entity).ToListAsync();
+
+            return allEntities.Select(entity =>
+            {
+                GraphExplorer.PreSaving(() => GraphExplorer.FromRoot(entity));
+
+                return new EvalEntityError
+                {
+                    lite = entity.ToLite(),
+                    error = entity.FullIntegrityCheck().EmptyIfNull().Select(a => a.Value).SelectMany(a => a.Errors.Values).ToString("\n")
+                };
+            })
+            .Where(ee => ee.error.HasText())
+            .ToList();
+        }
+    }
+
+    public class EvalEntityError
+    {
+        public Lite<Entity> lite;
+        public string error; 
     }
 }
