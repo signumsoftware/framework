@@ -135,7 +135,7 @@ export default class Workflow extends React.Component<WorkflowProps, WorkflowSta
                             <i className="fa fa-check text-success mr-1" aria-hidden="true" />
                             {"-- No issues --"}
                         </li> :
-                        this.state.issues.orderBy(a => a.Type).map((issue, i) =>
+                        this.state.issues.orderBy(a => a.type).map((issue, i) =>
 
                             <li key={i}>
                                 {issue.type == "Error" ?

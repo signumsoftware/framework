@@ -1,4 +1,5 @@
 ﻿using Signum.Engine.DynamicQuery;
+using Signum.Engine.Mailing;
 using Signum.Engine.Maps;
 using Signum.Entities;
 using Signum.Entities.Files;
@@ -234,7 +235,7 @@ namespace Signum.Engine.Files
         {
             if (OnlyImages)
             {
-                var mime = MimeMapping.GetMimeMapping(fp.FileName);
+                var mime = MimeMapping.GetMimeType(fp.FileName);
                 if (mime == null || !mime.StartsWith("image/"))
                     throw new ApplicationException(FileMessage.TheFile0IsNotA1.NiceToString(fp.FileName, "image/*"));
             }

@@ -35,7 +35,7 @@ namespace Signum.React.Authorization
             CryptoKey = new MD5CryptoServiceProvider().Using(p => p.ComputeHash(Encoding.UTF8.GetBytes(hashableEncryptionKey)));
 
             SignumAuthenticationFilter.Authenticators.Add(TokenAuthenticator);
-            SignumAuthenticationFilter.Authenticators.Add(AnonymousAuthenticator);
+            SignumAuthenticationFilter.Authenticators.Add(AnonymousUserAuthenticator);
             SignumAuthenticationFilter.Authenticators.Add(AllowAnonymousAuthenticator);
             SignumAuthenticationFilter.Authenticators.Add(InvalidAuthenticator);
         }
@@ -45,7 +45,7 @@ namespace Signum.React.Authorization
             throw new AuthenticationException("No authentication information found!"); 
         }
 
-        public static SignumAuthenticationResult AnonymousUserAuthenticator(HttpActionContext actionContext)
+        public static SignumAuthenticationResult AnonymousUserAuthenticator(FilterContext actionContext)
         {
             if (AuthLogic.AnonymousUser != null)
                 return new SignumAuthenticationResult { User = AuthLogic.AnonymousUser };
@@ -54,7 +54,7 @@ namespace Signum.React.Authorization
         }
  
 
-        public static SignumAuthenticationResult AnonymousAuthenticator(FilterContext actionContext)
+        public static SignumAuthenticationResult AllowAnonymousAuthenticator(FilterContext actionContext)
         {
             var cad = actionContext.ActionDescriptor as ControllerActionDescriptor;
             if (cad.MethodInfo.HasAttribute<AllowAnonymousAttribute>() || 

@@ -414,15 +414,15 @@ function getSeries(eps: Array<PredictorClient.EpochProgress>, predictor: Predict
 
     const nns = NeuralNetworkSettingsEntity.isInstance(algSet) ? algSet : undefined;
 
-    var maxLoss = eps.flatMap(a => [a.LossTraining, a.LossValidation]).filter(a => a != null).max();
-    var maxEvaluation = eps.flatMap(a => [a.EvaluationTraining, a.EvaluationValidation]).filter(a => a != null).max();
+    var maxLoss = eps.flatMap(a => [a.lossTraining, a.lossValidation]).filter(a => a != null).max();
+    var maxEvaluation = eps.flatMap(a => [a.evaluationTraining, a.evaluationValidation]).filter(a => a != null).max();
 
     return [
         {
             name: PredictorEpochProgressEntity.nicePropertyName(a => a.lossTraining),
             title: nns && nns!.lossFunction,
             color: "#1A5276",
-            values: eps.filter(a => a.LossTraining != null).map(ep => ({ x: ep.TrainingExamples, y: ep.LossTraining })),
+            values: eps.filter(a => a.lossTraining != null).map(ep => ({ x: ep.trainingExamples, y: ep.lossTraining })),
             minValue: 0,
             maxValue: maxLoss,
             strokeWidth: "2px",
@@ -431,7 +431,7 @@ function getSeries(eps: Array<PredictorClient.EpochProgress>, predictor: Predict
             name: PredictorEpochProgressEntity.nicePropertyName(a => a.lossValidation),
             title: nns && nns!.lossFunction,
             color: "#5DADE2",
-            values: eps.filter(a => a.LossValidation != null).map(ep => ({ x: ep.TrainingExamples, y: ep.LossValidation! })),
+            values: eps.filter(a => a.lossValidation != null).map(ep => ({ x: ep.trainingExamples, y: ep.lossValidation! })),
             minValue: 0,
             maxValue: maxLoss,
             strokeWidth: "2px",
@@ -440,7 +440,7 @@ function getSeries(eps: Array<PredictorClient.EpochProgress>, predictor: Predict
             name: PredictorEpochProgressEntity.nicePropertyName(a => a.evaluationTraining),
             title: nns && nns!.evalErrorFunction,
             color: "#731c7b",
-            values: eps.filter(a => a.EvaluationTraining != null).map(ep => ({ x: ep.TrainingExamples, y: ep.EvaluationTraining })),
+            values: eps.filter(a => a.evaluationTraining != null).map(ep => ({ x: ep.trainingExamples, y: ep.evaluationTraining })),
             minValue: 0,
             maxValue: maxEvaluation,
             strokeWidth: "1px",
@@ -449,7 +449,7 @@ function getSeries(eps: Array<PredictorClient.EpochProgress>, predictor: Predict
             name: PredictorEpochProgressEntity.nicePropertyName(a => a.evaluationValidation),
             title: nns && nns!.evalErrorFunction,
             color: "#d980d9",
-            values: eps.filter(a => a.EvaluationValidation != null).map(ep => ({ x: ep.TrainingExamples, y: ep.EvaluationValidation! })),
+            values: eps.filter(a => a.evaluationValidation != null).map(ep => ({ x: ep.trainingExamples, y: ep.evaluationValidation! })),
             minValue: 0,
             maxValue: maxEvaluation,
             strokeWidth: "1px",

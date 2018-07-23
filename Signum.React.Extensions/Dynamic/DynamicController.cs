@@ -22,6 +22,8 @@ using System.Net.Http;
 using Microsoft.AspNetCore.Mvc;
 using Signum.React.ApiControllers;
 using Microsoft.AspNetCore.Hosting;
+using System.Threading.Tasks;
+using Signum.React.Filters;
 
 namespace Signum.React.Dynamic
 {
@@ -70,7 +72,7 @@ namespace Signum.React.Dynamic
         }
 
         [Route("api/dynamic/startErrors"), HttpGet]
-        public List<Exception> GetStartErrors()
+        public List<HttpError> GetStartErrors()
         {
             return new Sequence<Exception>
             {
@@ -79,7 +81,7 @@ namespace Signum.React.Dynamic
                 StartParameters.IgnoredDatabaseMismatches.EmptyIfNull(),
             }
             .NotNull()
-            .Select(e => new HttpError(e, true))
+            .Select(e => new HttpError(e))
             .ToList();
         }
 

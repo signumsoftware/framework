@@ -6,15 +6,12 @@ import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from '../../../F
 import * as Entities from '../../../Framework/Signum.React/Scripts/Signum.Entities'
 import * as Signum from '../../../Framework/Signum.React/Scripts/Signum.Entities.Basics'
 import * as Basics from '../Basics/Signum.Entities.Basics'
+import * as UserAssets from '../UserAssets/Signum.Entities.UserAssets'
 import * as Processes from '../Processes/Signum.Entities.Processes'
 import * as Files from '../Files/Signum.Entities.Files'
-import * as UserAssets from '../UserAssets/Signum.Entities.UserAssets'
 import * as Templating from '../Templating/Signum.Entities.Templating'
-import * as UserAssets from '../UserAssets/Signum.Entities.UserAssets'
 import * as Scheduler from '../Scheduler/Signum.Entities.Scheduler'
 import * as UserQueries from '../UserQueries/Signum.Entities.UserQueries'
-import * as Templating from '../Templating/Signum.Entities.Templating'
-import * as Processes from '../Processes/Signum.Entities.Processes'
 import * as Authorization from '../Authorization/Signum.Entities.Authorization'
 
 
