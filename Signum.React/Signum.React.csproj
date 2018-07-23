@@ -1,120 +1,14 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="..\..\packages\Microsoft.Net.Compilers.2.8.2\build\Microsoft.Net.Compilers.props" Condition="Exists('..\..\packages\Microsoft.Net.Compilers.2.8.2\build\Microsoft.Net.Compilers.props')" />
-  <Import Project="..\..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.1.0.8\build\net45\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props" Condition="Exists('..\..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.1.0.8\build\net45\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props')" />
-  <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\TypeScript\Microsoft.TypeScript.Default.props" Condition="Exists('$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\TypeScript\Microsoft.TypeScript.Default.props')" />
-  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
-﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="..\..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.2.0.0\build\net46\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props" Condition="Exists('..\..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.2.0.0\build\net46\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props')" />
-  <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\TypeScript\Microsoft.TypeScript.Default.props" Condition="Exists('$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\TypeScript\Microsoft.TypeScript.Default.props')" />
-  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
     <TargetFramework>netcoreapp2.1</TargetFramework>
-    <TypeScriptToolsVersion>2.8</TypeScriptToolsVersion>
+    <TypeScriptToolsVersion>2.9</TypeScriptToolsVersion>
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="Scripts\AppRelativeRoutes.tsx" />
-    <None Remove="Scripts\AsyncImport.tsx" />
-    <None Remove="Scripts\Components\Basic.tsx" />
-    <None Remove="Scripts\Components\Button.tsx" />
-    <None Remove="Scripts\Components\Collapse.tsx" />
-    <None Remove="Scripts\Components\Dropdown.tsx" />
-    <None Remove="Scripts\Components\DropdownItem.tsx" />
-    <None Remove="Scripts\Components\DropdownMenu.tsx" />
-    <None Remove="Scripts\Components\DropdownToggle.tsx" />
-    <None Remove="Scripts\Components\ErrorBoundary.tsx" />
-    <None Remove="Scripts\Components\Fade.tsx" />
-    <None Remove="Scripts\Components\index.tsx" />
-    <None Remove="Scripts\Components\LinkContainer.tsx" />
-    <None Remove="Scripts\Components\Modal.tsx" />
-    <None Remove="Scripts\Components\ModalFade.tsx" />
-    <None Remove="Scripts\Components\NavItem.tsx" />
-    <None Remove="Scripts\Components\Popover.tsx" />
-    <None Remove="Scripts\Components\PopperContent.tsx" />
-    <None Remove="Scripts\Components\Tabs.tsx" />
-    <None Remove="Scripts\Components\Tooltip.tsx" />
-    <None Remove="Scripts\Components\Typeahead.tsx" />
-    <None Remove="Scripts\ConfigureReactWidgets.ts" />
-    <None Remove="Scripts\Constructor.tsx" />
-    <None Remove="Scripts\Exceptions\Exception.tsx" />
-    <None Remove="Scripts\Exceptions\ExceptionClient.tsx" />
-    <None Remove="Scripts\Finder.tsx" />
-    <None Remove="Scripts\FindOptions.ts" />
-    <None Remove="Scripts\Frames\ButtonBar.tsx" />
-    <None Remove="Scripts\Frames\ContainerToggle.tsx" />
-    <None Remove="Scripts\Frames\FrameModal.tsx" />
-    <None Remove="Scripts\Frames\FramePage.tsx" />
-    <None Remove="Scripts\Frames\Notify.tsx" />
-    <None Remove="Scripts\Frames\OrderUtils.tsx" />
-    <None Remove="Scripts\Frames\ReactVisitor.tsx" />
-    <None Remove="Scripts\Frames\ValidationErrors.tsx" />
-    <None Remove="Scripts\Frames\VersionChangedAlert.tsx" />
-    <None Remove="Scripts\Frames\Widgets.tsx" />
-    <None Remove="Scripts\Globals.d.ts" />
-    <None Remove="Scripts\Globals.ts" />
-    <None Remove="Scripts\Lines.tsx" />
-    <None Remove="Scripts\Lines\AutoCompleteConfig.tsx" />
-    <None Remove="Scripts\Lines\DynamicComponent.tsx" />
-    <None Remove="Scripts\Lines\EntityBase.tsx" />
-    <None Remove="Scripts\Lines\EntityCheckboxList.tsx" />
-    <None Remove="Scripts\Lines\EntityCombo.tsx" />
-    <None Remove="Scripts\Lines\EntityDetail.tsx" />
-    <None Remove="Scripts\Lines\EntityLine.tsx" />
-    <None Remove="Scripts\Lines\EntityList.tsx" />
-    <None Remove="Scripts\Lines\EntityListBase.tsx" />
-    <None Remove="Scripts\Lines\EntityRepeater.tsx" />
-    <None Remove="Scripts\Lines\EntityStrip.tsx" />
-    <None Remove="Scripts\Lines\EntityTable.tsx" />
-    <None Remove="Scripts\Lines\EntityTabRepeater.tsx" />
-    <None Remove="Scripts\Lines\EnumCheckboxList.tsx" />
-    <None Remove="Scripts\Lines\FormControlReadonly.tsx" />
-    <None Remove="Scripts\Lines\FormGroup.tsx" />
-    <None Remove="Scripts\Lines\LineBase.tsx" />
-    <None Remove="Scripts\Lines\MultiValueLine.tsx" />
-    <None Remove="Scripts\Lines\RenderEntity.tsx" />
-    <None Remove="Scripts\Lines\ValueLine.tsx" />
-    <None Remove="Scripts\Modals.tsx" />
-    <None Remove="Scripts\Modals\ErrorModal.tsx" />
-    <None Remove="Scripts\Modals\MessageModal.tsx" />
-    <None Remove="Scripts\Navigator.tsx" />
-    <None Remove="Scripts\Operations.tsx" />
-    <None Remove="Scripts\Operations\ContextualOperations.tsx" />
-    <None Remove="Scripts\Operations\EntityOperations.tsx" />
-    <None Remove="Scripts\QuickLinks.tsx" />
-    <None Remove="Scripts\Reflection.ts" />
-    <None Remove="Scripts\Retrieve.tsx" />
-    <None Remove="Scripts\Search.tsx" />
-    <None Remove="Scripts\SearchControl\ColumnBuilder.tsx" />
-    <None Remove="Scripts\SearchControl\ColumnEditor.tsx" />
-    <None Remove="Scripts\SearchControl\ContextMenu.tsx" />
-    <None Remove="Scripts\SearchControl\ContextualItems.tsx" />
-    <None Remove="Scripts\SearchControl\EntityLink.tsx" />
-    <None Remove="Scripts\SearchControl\FilterBuilder.tsx" />
-    <None Remove="Scripts\SearchControl\GroupByMessage.tsx" />
-    <None Remove="Scripts\SearchControl\MultipliedMessage.tsx" />
-    <None Remove="Scripts\SearchControl\PaginationSelector.tsx" />
-    <None Remove="Scripts\SearchControl\QueryTokenBuilder.tsx" />
-    <None Remove="Scripts\SearchControl\SearchControl.tsx" />
-    <None Remove="Scripts\SearchControl\SearchControlLoaded.tsx" />
-    <None Remove="Scripts\SearchControl\SearchModal.tsx" />
-    <None Remove="Scripts\SearchControl\SearchPage.tsx" />
-    <None Remove="Scripts\SearchControl\SystemTimeEditor.tsx" />
-    <None Remove="Scripts\SearchControl\ValueSearchControl.tsx" />
-    <None Remove="Scripts\SearchControl\ValueSearchControlLine.tsx" />
-    <None Remove="Scripts\SelectorModal.tsx" />
-    <None Remove="Scripts\Services.ts" />
-    <None Remove="Scripts\Signum.Entities.Basics.ts" />
-    <None Remove="Scripts\Signum.Entities.DynamicQuery.ts" />
-    <None Remove="Scripts\Signum.Entities.Patterns.ts" />
-    <None Remove="Scripts\Signum.Entities.ts" />
-    <None Remove="Scripts\TypeContext.ts" />
-    <None Remove="Scripts\ValueLineModal.tsx" />
+    <None Remove="node_modules\**" />
   </ItemGroup>
-
+  
   <ItemGroup>
     <Analyzer Include="..\Signum.Analyzer\Binaries\Signum.Analyzer.dll" />
   </ItemGroup>
@@ -124,113 +18,13 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.All" Version="2.1.0" />
+    <PackageReference Include="Microsoft.AspNetCore.All" Version="2.1.2" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Signum.Engine\Signum.Engine.csproj" />
     <ProjectReference Include="..\Signum.Entities\Signum.Entities.csproj" />
     <ProjectReference Include="..\Signum.Utilities\Signum.Utilities.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <TypeScriptCompile Include="Scripts\AppRelativeRoutes.tsx" />
-    <TypeScriptCompile Include="Scripts\AsyncImport.tsx" />
-    <TypeScriptCompile Include="Scripts\Components\Basic.tsx" />
-    <TypeScriptCompile Include="Scripts\Components\Button.tsx" />
-    <TypeScriptCompile Include="Scripts\Components\Popper.tsx" />
-    <TypeScriptCompile Include="Scripts\Components\Collapse.tsx" />
-    <TypeScriptCompile Include="Scripts\Components\Dropdown.tsx" />
-    <TypeScriptCompile Include="Scripts\Components\DropdownItem.tsx" />
-    <TypeScriptCompile Include="Scripts\Components\DropdownMenu.tsx" />
-    <TypeScriptCompile Include="Scripts\Components\DropdownToggle.tsx" />
-    <TypeScriptCompile Include="Scripts\Components\ErrorBoundary.tsx" />
-    <TypeScriptCompile Include="Scripts\Components\Fade.tsx" />
-    <TypeScriptCompile Include="Scripts\Components\index.tsx" />
-    <TypeScriptCompile Include="Scripts\Components\LinkContainer.tsx" />
-    <TypeScriptCompile Include="Scripts\Components\Modal.tsx" />
-    <TypeScriptCompile Include="Scripts\Components\ModalFade.tsx" />
-    <TypeScriptCompile Include="Scripts\Components\NavItem.tsx" />
-    <TypeScriptCompile Include="Scripts\Components\Popover.tsx" />
-    <TypeScriptCompile Include="Scripts\Components\PopperContent.tsx" />
-    <TypeScriptCompile Include="Scripts\Components\Tabs.tsx" />
-    <TypeScriptCompile Include="Scripts\Components\Tooltip.tsx" />
-    <TypeScriptCompile Include="Scripts\Components\Typeahead.tsx" />
-    <TypeScriptCompile Include="Scripts\ConfigureReactWidgets.ts" />
-    <TypeScriptCompile Include="Scripts\Constructor.tsx" />
-    <TypeScriptCompile Include="Scripts\Exceptions\Exception.tsx" />
-    <TypeScriptCompile Include="Scripts\Exceptions\ExceptionClient.tsx" />
-    <TypeScriptCompile Include="Scripts\Finder.tsx" />
-    <TypeScriptCompile Include="Scripts\FindOptions.ts" />
-    <TypeScriptCompile Include="Scripts\Frames\ButtonBar.tsx" />
-    <TypeScriptCompile Include="Scripts\Frames\ContainerToggle.tsx" />
-    <TypeScriptCompile Include="Scripts\Frames\FrameModal.tsx" />
-    <TypeScriptCompile Include="Scripts\Frames\FramePage.tsx" />
-    <TypeScriptCompile Include="Scripts\Frames\Notify.tsx" />
-    <TypeScriptCompile Include="Scripts\Frames\OrderUtils.tsx" />
-    <TypeScriptCompile Include="Scripts\Frames\ReactVisitor.tsx" />
-    <TypeScriptCompile Include="Scripts\Frames\ValidationErrors.tsx" />
-    <TypeScriptCompile Include="Scripts\Frames\VersionChangedAlert.tsx" />
-    <TypeScriptCompile Include="Scripts\Frames\Widgets.tsx" />
-    <TypeScriptCompile Include="Scripts\Globals.d.ts" />
-    <TypeScriptCompile Include="Scripts\Globals.ts" />
-    <TypeScriptCompile Include="Scripts\Lines.tsx" />
-    <TypeScriptCompile Include="Scripts\Lines\AutoCompleteConfig.tsx" />
-    <TypeScriptCompile Include="Scripts\Lines\DynamicComponent.tsx" />
-    <TypeScriptCompile Include="Scripts\Lines\EntityBase.tsx" />
-    <TypeScriptCompile Include="Scripts\Lines\EntityCheckboxList.tsx" />
-    <TypeScriptCompile Include="Scripts\Lines\EntityCombo.tsx" />
-    <TypeScriptCompile Include="Scripts\Lines\EntityDetail.tsx" />
-    <TypeScriptCompile Include="Scripts\Lines\EntityLine.tsx" />
-    <TypeScriptCompile Include="Scripts\Lines\EntityList.tsx" />
-    <TypeScriptCompile Include="Scripts\Lines\EntityListBase.tsx" />
-    <TypeScriptCompile Include="Scripts\Lines\EntityRepeater.tsx" />
-    <TypeScriptCompile Include="Scripts\Lines\EntityStrip.tsx" />
-    <TypeScriptCompile Include="Scripts\Lines\EntityTable.tsx" />
-    <TypeScriptCompile Include="Scripts\Lines\EntityTabRepeater.tsx" />
-    <TypeScriptCompile Include="Scripts\Lines\EnumCheckboxList.tsx" />
-    <TypeScriptCompile Include="Scripts\Lines\FormControlReadonly.tsx" />
-    <TypeScriptCompile Include="Scripts\Lines\FormGroup.tsx" />
-    <TypeScriptCompile Include="Scripts\Lines\LineBase.tsx" />
-    <TypeScriptCompile Include="Scripts\Lines\MultiValueLine.tsx" />
-    <TypeScriptCompile Include="Scripts\Lines\RenderEntity.tsx" />
-    <TypeScriptCompile Include="Scripts\Lines\ValueLine.tsx" />
-    <TypeScriptCompile Include="Scripts\Modals.tsx" />
-    <TypeScriptCompile Include="Scripts\Modals\ErrorModal.tsx" />
-    <TypeScriptCompile Include="Scripts\Modals\MessageModal.tsx" />
-    <TypeScriptCompile Include="Scripts\Navigator.tsx" />
-    <TypeScriptCompile Include="Scripts\Operations.tsx" />
-    <TypeScriptCompile Include="Scripts\Operations\ContextualOperations.tsx" />
-    <TypeScriptCompile Include="Scripts\Operations\EntityOperations.tsx" />
-    <TypeScriptCompile Include="Scripts\QuickLinks.tsx" />
-    <TypeScriptCompile Include="Scripts\Reflection.ts" />
-    <TypeScriptCompile Include="Scripts\Retrieve.tsx" />
-    <TypeScriptCompile Include="Scripts\Search.tsx" />
-    <TypeScriptCompile Include="Scripts\SearchControl\ColumnBuilder.tsx" />
-    <TypeScriptCompile Include="Scripts\SearchControl\ColumnEditor.tsx" />
-    <TypeScriptCompile Include="Scripts\SearchControl\ContextMenu.tsx" />
-    <TypeScriptCompile Include="Scripts\SearchControl\ContextualItems.tsx" />
-    <TypeScriptCompile Include="Scripts\SearchControl\EntityLink.tsx" />
-    <TypeScriptCompile Include="Scripts\SearchControl\FilterBuilder.tsx" />
-    <TypeScriptCompile Include="Scripts\SearchControl\GroupByMessage.tsx" />
-    <TypeScriptCompile Include="Scripts\SearchControl\MultipliedMessage.tsx" />
-    <TypeScriptCompile Include="Scripts\SearchControl\PaginationSelector.tsx" />
-    <TypeScriptCompile Include="Scripts\SearchControl\QueryTokenBuilder.tsx" />
-    <TypeScriptCompile Include="Scripts\SearchControl\SearchControl.tsx" />
-    <TypeScriptCompile Include="Scripts\SearchControl\SearchControlLoaded.tsx" />
-    <TypeScriptCompile Include="Scripts\SearchControl\SearchModal.tsx" />
-    <TypeScriptCompile Include="Scripts\SearchControl\SearchPage.tsx" />
-    <TypeScriptCompile Include="Scripts\SearchControl\SystemTimeEditor.tsx" />
-    <TypeScriptCompile Include="Scripts\SearchControl\ValueSearchControl.tsx" />
-    <TypeScriptCompile Include="Scripts\SearchControl\ValueSearchControlLine.tsx" />
-    <TypeScriptCompile Include="Scripts\SelectorModal.tsx" />
-    <TypeScriptCompile Include="Scripts\Services.ts" />
-    <TypeScriptCompile Include="Scripts\Signum.Entities.Basics.ts" />
-    <TypeScriptCompile Include="Scripts\Signum.Entities.DynamicQuery.ts" />
-    <TypeScriptCompile Include="Scripts\Signum.Entities.Patterns.ts" />
-    <TypeScriptCompile Include="Scripts\Signum.Entities.ts" />
-    <TypeScriptCompile Include="Scripts\TypeContext.ts" />
-    <TypeScriptCompile Include="Scripts\ValueLineModal.tsx" />
   </ItemGroup>
 
   <Target Name="GenerateSignumTS">
