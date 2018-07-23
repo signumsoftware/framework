@@ -246,7 +246,7 @@ ul.nav-tabs {
     cursor: move;
 }
 
-.form-group.row > label {
+body.rtl .form-group.row > label {
     text-align: end;
 }
 

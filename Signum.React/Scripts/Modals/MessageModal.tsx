@@ -7,7 +7,7 @@ import { classes, Dic } from '../Globals';
 import { SearchMessage, JavascriptMessage, Lite, Entity, NormalWindowMessage, BooleanEnum } from '../Signum.Entities'
 
 import "./Modals.css"
-import { Modal } from '../Components';
+import { Modal, BsSize } from '../Components';
 
 export type MessageModalStyle = "success" | "info" | "warning" | "error";
 
@@ -24,6 +24,7 @@ interface MessageModalProps extends React.Props<MessageModal>, IModalProps {
     buttons: MessageModalButtons;
     icon?: MessageModalIcon;
     customIcon?: string;
+    size?: BsSize;
 }
 
 export default class MessageModal extends React.Component<MessageModalProps, { show: boolean }> {
@@ -159,7 +160,11 @@ export default class MessageModal extends React.Component<MessageModalProps, { s
 
     render() {
         return (
-            <Modal show={this.state.show} onExited={this.handleOnExited} className="message-modal" onHide={this.handleCancelClicked} autoFocus={true}>
+            <Modal show={this.state.show} onExited={this.handleOnExited}
+                dialogClassName={classes("message-modal",
+                    this.props.size && "modal-" + this.props.size /*temporary hack*/)}
+                size={this.props.size}
+                onHide={this.handleCancelClicked} autoFocus={true}>
                 <div className={classes("modal-header", dialogHeaderClass(this.props.style))}>
                     {this.renderTitle()}
                 </div>

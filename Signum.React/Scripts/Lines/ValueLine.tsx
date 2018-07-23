@@ -440,7 +440,7 @@ function numericTextBox(vl: ValueLine, validateKey: React.KeyboardEventHandler<a
 }
 
 export interface NumericTextBoxProps {
-    value: number;
+    value: number | null;
     onChange: (newValue: number | null) => void;
     validateKey: React.KeyboardEventHandler<any>;
     format?: string;
@@ -473,6 +473,9 @@ export class NumericTextBox extends React.Component<NumericTextBoxProps, { text?
         const input = e.currentTarget as HTMLInputElement;
 
         let value = ValueLine.autoFixString(input.value, false);
+
+        if (numbro.languageData().delimiters.decimal == ',' && !value.contains(",") && value.trim().length > 0) //Numbro transforms 1.000 to 1,0 in spanish or german 
+            value = value + ",00";
 
         if (this.props.format && this.props.format.endsWith("%"))
         {

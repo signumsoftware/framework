@@ -50,7 +50,7 @@ export default class PaginationSelector extends React.Component<PaginationSelect
             case "All":
                 return (
                     <span>{SearchMessage._0Results_N.niceToString().forGenderAndNumber(resultTable.totalElements).formatHtml(
-                        <span className="sf-pagination-strong" key={1}>{format(resultTable.totalElements)}</span>)
+                        <span className="sf-pagination-strong" key={1}>{resultTable.totalElements && format(resultTable.totalElements)}</span>)
                     }</span>
                 );
 
@@ -66,7 +66,7 @@ export default class PaginationSelector extends React.Component<PaginationSelect
                     <span>{SearchMessage._01of2Results_N.niceToString().forGenderAndNumber(resultTable.totalElements).formatHtml(
                         <span className={"sf-pagination-strong"} key={1}>{format(PaginateMath.startElementIndex(pagination))}</span>,
                         <span className={"sf-pagination-strong"} key={2}>{format(PaginateMath.endElementIndex(pagination, resultTable.rows.length))}</span>,
-                        <span className={"sf-pagination-strong"} key={3}>{format(resultTable.totalElements)}</span>)
+                        <span className={"sf-pagination-strong"} key={3}>{resultTable.totalElements && format(resultTable.totalElements)}</span>)
                     }</span>
                 );
             default:
@@ -89,12 +89,21 @@ export default class PaginationSelector extends React.Component<PaginationSelect
     }
 
     handleElementsPerPage = (e: React.ChangeEvent<HTMLSelectElement>) => {
-        const p: Pagination = { ...this.props.pagination, elementsPerPage: parseInt(e.currentTarget.value) };
+        const mode = this.props.pagination.mode;
+        const p: Pagination = {
+            mode: mode,
+            elementsPerPage: parseInt(e.currentTarget.value),
+            currentPage: mode == "Paginate" ? 1 : undefined,
+        };
         this.props.onPagination(p);
     }
 
     handlePageClick = (page: number) => {
-        const p: Pagination = { ...this.props.pagination, currentPage: page };
+
+        const p: Pagination = {
+            ...this.props.pagination,
+            currentPage: page
+        };
         this.props.onPagination(p);
     }
 

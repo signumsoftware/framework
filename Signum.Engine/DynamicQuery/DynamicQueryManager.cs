@@ -142,9 +142,9 @@ namespace Signum.Engine.DynamicQuery
         public ResultTable ExecuteQuery(QueryRequest request)
         {
             if (!request.GroupResults)
-                return Execute(ExecuteType.ExecuteGroupQuery, request.QueryName, request, dqb => dqb.Core.Value.ExecuteQueryGroup(request));
-            else
                 return Execute(ExecuteType.ExecuteQuery, request.QueryName, request, dqb => dqb.Core.Value.ExecuteQuery(request));
+            else
+                return Execute(ExecuteType.ExecuteGroupQuery, request.QueryName, request, dqb => dqb.Core.Value.ExecuteQueryGroup(request));
         }
 
         public Task<ResultTable> ExecuteQueryAsync(QueryRequest request, CancellationToken token)
@@ -434,16 +434,70 @@ namespace Signum.Engine.DynamicQuery
         }
 
         /// <summary>
-        /// Uses NicePluralName as niceName
+        /// Uses NiceName as niceName
         /// </summary>
         public static FluentInclude<T> WithExpressionFrom<T, F>(this FluentInclude<T> fi, DynamicQueryManager dqm, Expression<Func<F, T>> lambdaToMethodOrProperty)
+            where T : Entity
+        {
+            dqm.RegisterExpression(lambdaToMethodOrProperty, () => typeof(T).NiceName());
+            return fi;
+        }
+
+        public static FluentInclude<T> WithExpressionFrom<T, F>(this FluentInclude<T> fi, DynamicQueryManager dqm, Expression<Func<F, T>> lambdaToMethodOrProperty, Func<string> niceName)
+            where T : Entity
+        {
+            dqm.RegisterExpression(lambdaToMethodOrProperty, niceName);
+            return fi;
+        }
+
+        /// <summary>
+        /// Prefer WithExpressionFrom to keep dependencies between modules clean!. Uses NicePluralName as niceName. 
+        /// </summary>
+        public static FluentInclude<F> WithExpressionTo<F, T>(this FluentInclude<F> fi, DynamicQueryManager dqm, Expression<Func<F, IQueryable<T>>> lambdaToMethodOrProperty)
+            where F : Entity
             where T : Entity
         {
             dqm.RegisterExpression(lambdaToMethodOrProperty, () => typeof(T).NicePluralName());
             return fi;
         }
 
-        public static FluentInclude<T> WithExpressionFrom<T, F>(this FluentInclude<T> fi, DynamicQueryManager dqm, Expression<Func<F, T>> lambdaToMethodOrProperty, Func<string> niceName)
+        /// <summary>
+        /// Prefer WithExpressionFrom to keep dependencies between modules clean!.
+        /// </summary>
+        public static FluentInclude<F> WithExpressionTo<F, T>(this FluentInclude<F> fi, DynamicQueryManager dqm, Expression<Func<F, IQueryable<T>>> lambdaToMethodOrProperty, Func<string> niceName)
+            where F : Entity
+        {
+            dqm.RegisterExpression(lambdaToMethodOrProperty, niceName);
+            return fi;
+        }
+
+        /// <summary>
+        /// Prefer WithExpressionFrom to keep dependencies between modules clean!. Uses NiceName as niceName. 
+        /// </summary>
+        public static FluentInclude<F> WithExpressionTo<F, T>(this FluentInclude<F> fi, DynamicQueryManager dqm, Expression<Func<F, T>> lambdaToMethodOrProperty)
+            where F : Entity
+            where T : Entity
+        {
+            dqm.RegisterExpression(lambdaToMethodOrProperty, () => typeof(T).NiceName());
+            return fi;
+        }
+
+        /// <summary>
+        /// Prefer WithExpressionFrom to keep dependencies between modules clean!. Uses NiceName as niceName. 
+        /// </summary>
+        public static FluentInclude<F> WithExpressionTo<F, T>(this FluentInclude<F> fi, DynamicQueryManager dqm, Expression<Func<F, Lite<T>>> lambdaToMethodOrProperty)
+            where F : Entity
+            where T : Entity
+        {
+            dqm.RegisterExpression(lambdaToMethodOrProperty, () => typeof(T).NiceName());
+            return fi;
+        }
+
+        /// <summary>
+        /// Prefer WithExpressionFrom to keep dependencies between modules clean!.
+        /// </summary>
+        public static FluentInclude<F> WithExpressionTo<F, T>(this FluentInclude<F> fi, DynamicQueryManager dqm, Expression<Func<F, Lite<T>>> lambdaToMethodOrProperty, Func<string> niceName)
+            where F : Entity
             where T : Entity
         {
             dqm.RegisterExpression(lambdaToMethodOrProperty, niceName);

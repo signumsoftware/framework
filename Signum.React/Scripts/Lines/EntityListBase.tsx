@@ -13,7 +13,7 @@ import { EntityBase, EntityBaseProps } from './EntityBase'
 
 export interface EntityListBaseProps extends EntityBaseProps {
     move?: boolean | ((item: ModifiableEntity | Lite<Entity>) => boolean);
-    onFindMany?: () => Promise<(ModifiableEntity | Lite<Entity>)[] | undefined>;
+    onFindMany?: () => Promise<(ModifiableEntity | Lite<Entity>)[] | undefined> | undefined;
 
     ctx: TypeContext<MList<any /*Lite<Entity> | ModifiableEntity*/>>;
 }
@@ -96,7 +96,7 @@ export abstract class EntityListBase<T extends EntityListBaseProps, S extends En
                 if (!this.state.viewOnCreate)
                     return Promise.resolve(e);
 
-                const pr = this.state.ctx.propertyRoute.add(a => a[0]);
+                const pr = this.state.ctx.propertyRoute.addLambda(a => a[0]);
 
                 return this.state.onView ?
                     this.state.onView(e, pr) :
@@ -138,9 +138,12 @@ export abstract class EntityListBase<T extends EntityListBaseProps, S extends En
 
         event.preventDefault();
 
-        const result = this.state.onFindMany ? this.state.onFindMany() : this.defaultFindMany();
+        const promise = this.state.onFindMany ? this.state.onFindMany() : this.defaultFindMany();
 
-        result.then(lites => {
+        if (promise == null)
+            return;
+
+        promise.then(lites => {
             if (!lites)
                 return;
 

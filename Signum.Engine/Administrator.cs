@@ -111,18 +111,19 @@ namespace Signum.Engine
             SqlBuilder.CreateTableSql(view).ExecuteNonQuery();
         }
 
-        public static void CreateTemporaryIndex<T>(Expression<Func<T, object>> fields)
+        public static void CreateTemporaryIndex<T>(Expression<Func<T, object>> fields, bool unique = false)
              where T : IView
         {
             var view = Schema.Current.View<T>();
 
             IColumn[] columns = IndexKeyColumns.Split(view, fields);
 
-            var index = new Index(view, columns);
+            var index = unique ?
+                new UniqueIndex(view, columns) :
+                new Index(view, columns);
 
-            SqlBuilder.CreateIndex(index).ExecuteLeaves();
+            SqlBuilder.CreateIndex(index, checkUnique: null).ExecuteLeaves();
         }
-
 
         internal static readonly ThreadVariable<DatabaseName> sysViewDatabase = Statics.ThreadVariable<DatabaseName>("viewDatabase");
         public static IDisposable OverrideDatabaseInSysViews(DatabaseName database)

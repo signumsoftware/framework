@@ -131,6 +131,7 @@ namespace Signum.Engine.Linq
                 case DbExpressionType.Projection:
                 case DbExpressionType.Case:
                 case DbExpressionType.SqlConstant:
+                case DbExpressionType.SqlCast:
                     return false;
             }
 

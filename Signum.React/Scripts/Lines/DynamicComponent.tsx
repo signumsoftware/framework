@@ -1,6 +1,6 @@
 ﻿import * as React from 'react'
 import { Dic } from '../Globals'
-import { Binding, LambdaMemberType, getTypeInfos, EntityKind, KindOfType } from '../Reflection'
+import { Binding, MemberType, getTypeInfos, EntityKind, KindOfType } from '../Reflection'
 import { ModifiableEntity } from '../Signum.Entities'
 import * as Navigator from '../Navigator'
 import { ViewReplacer } from '../Frames/ReactVisitor'

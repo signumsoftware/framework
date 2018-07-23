@@ -5,7 +5,7 @@ import * as Constructor from '../Constructor'
 import * as Finder from '../Finder'
 import { FindOptions } from '../FindOptions'
 import { TypeContext, StyleContext, StyleOptions, FormGroupStyle, mlistItemContext, EntityFrame } from '../TypeContext'
-import { PropertyRoute, PropertyRouteType, MemberInfo, getTypeInfo, getTypeInfos, TypeInfo, IsByAll, ReadonlyBinding, LambdaMemberType } from '../Reflection'
+import { PropertyRoute, PropertyRouteType, MemberInfo, getTypeInfo, getTypeInfos, TypeInfo, IsByAll, ReadonlyBinding, MemberType } from '../Reflection'
 import { LineBase, LineBaseProps, runTasks, } from '../Lines/LineBase'
 import { FormGroup } from '../Lines/FormGroup'
 import { FormControlReadonly } from '../Lines/FormControlReadonly'
@@ -23,7 +23,7 @@ export interface EntityStripProps extends EntityListBaseProps {
     onRenderItem?: (item: Lite<Entity> | ModifiableEntity) => React.ReactNode;
     showType?: boolean;
     onItemHtmlAttributes?: (item: Lite<Entity> | ModifiableEntity) => React.HTMLAttributes<HTMLSpanElement | HTMLAnchorElement>;
-    extraButtons?: () => (React.ReactElement<any> | null | undefined | false)[];
+    extraButtons?: (es: EntityStrip) => (React.ReactElement<any> | null | undefined | false)[];
 }
 
 export class EntityStrip extends EntityListBase<EntityStripProps, EntityStripProps> {
@@ -73,7 +73,7 @@ export class EntityStrip extends EntityListBase<EntityStripProps, EntityStripPro
                             <span>
                                 {this.renderCreateButton(false)}
                                 {this.renderFindButton(false)}
-                                {this.props.extraButtons && this.props.extraButtons().map((btn, i) => {
+                                {this.props.extraButtons && this.props.extraButtons(this).map((btn, i) => {
                                     return btn && React.cloneElement(btn, { key: i });
                                 })}
                             </span>
@@ -109,7 +109,7 @@ export class EntityStrip extends EntityListBase<EntityStripProps, EntityStripPro
             window.open(route);
         }
         else {
-            const pr = ctx.propertyRoute.add(a => a[0]);
+            const pr = ctx.propertyRoute.addLambda(a => a[0]);
 
             const promise = this.props.onView ?
                 this.props.onView(entity, pr) :

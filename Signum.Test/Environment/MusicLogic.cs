@@ -123,35 +123,35 @@ namespace Signum.Test.Environment
 
                 RegisterAwards(sb, dqm);
 
-                dqm.RegisterQuery(typeof(IAuthorEntity), () => DynamicQueryCore.Manual(async (request, descriptions, token) =>
+                dqm.RegisterQuery(typeof(IAuthorEntity), () => DynamicQueryCore.Manual(async (request, description, cancellationToken) =>
                 {
-                    var one = (from a in Database.Query<ArtistEntity>()
-                               select new
-                               {
-                                   Entity = (IAuthorEntity)a,
-                                   a.Id,
-                                   Type = "Artist",
-                                   a.Name,
-                                   Lonely = a.Lonely(),
-                                   LastAward = a.LastAward
-                               })
-                               .ToDQueryable(descriptions)
-                               .AllQueryOperationsAsync(request, token);
+                    var one = await (from a in Database.Query<ArtistEntity>()
+                                     select new
+                                     {
+                                         Entity = (IAuthorEntity)a,
+                                         a.Id,
+                                         Type = "Artist",
+                                         a.Name,
+                                         Lonely = a.Lonely(),
+                                         LastAward = a.LastAward
+                                     })
+                                   .ToDQueryable(description)
+                                   .AllQueryOperationsAsync(request, cancellationToken);
 
-                    var two = (from a in Database.Query<BandEntity>()
-                               select new
-                               {
-                                   Entity = (IAuthorEntity)a,
-                                   a.Id,
-                                   Type = "Band",
-                                   a.Name,
-                                   Lonely = a.Lonely(),
-                                   LastAward = a.LastAward
-                               })
-                               .ToDQueryable(descriptions)
-                               .AllQueryOperationsAsync(request, token);
+                    var two = await (from a in Database.Query<BandEntity>()
+                                     select new
+                                     {
+                                         Entity = (IAuthorEntity)a,
+                                         a.Id,
+                                         Type = "Band",
+                                         a.Name,
+                                         Lonely = a.Lonely(),
+                                         LastAward = a.LastAward
+                                     })
+                                   .ToDQueryable(description)
+                                   .AllQueryOperationsAsync(request, cancellationToken);
 
-                    return (await one).Concat(await two).OrderBy(request.Orders).TryPaginate(request.Pagination);
+                    return one.Concat(two).OrderBy(request.Orders).TryPaginate(request.Pagination);
 
                 })
                     .Column(a => a.LastAward, cl => cl.Implementations = Implementations.ByAll)

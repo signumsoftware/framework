@@ -1,7 +1,7 @@
 ﻿import * as moment from 'moment';
 import * as numbro from 'numbro';
 import { Dic } from './Globals';
-import { ModifiableEntity, Entity, Lite, MListElement, ModelState, MixinEntity } from './Signum.Entities';
+import { ModifiableEntity, Entity, Lite, MListElement, ModelState, MixinEntity } from './Signum.Entities'; //ONLY TYPES!
 import {ajaxPost, ajaxGet} from './Services';
 import { MList } from "./Signum.Entities";
 
@@ -274,6 +274,13 @@ export function getTypeInfo(type: PseudoType): TypeInfo {
         return _types[(type as string).toLowerCase()];
 
     throw new Error("Unexpected type: " + type);
+}
+
+export function isLowPopulationSymbol(type: PseudoType) {
+
+    var ti = getTypeInfo(type);
+
+    return ti != null && ti.kind == "Entity" && ti.fullName.endsWith("Symbol") && ti.isLowPopulation;
 }
 
 export function parseId(ti: TypeInfo, id: string): string | number {
@@ -711,10 +718,10 @@ export function getFieldMembers(field: string): LambdaMember[]{
 
 export interface LambdaMember {
     name: string;
-    type: LambdaMemberType
+    type: MemberType
 }
 
-export type LambdaMemberType = "Member" | "Mixin" | "Indexer";
+export type MemberType = "Member" | "Mixin" | "Indexer";
 
 export function New(type: PseudoType, props?: any): ModifiableEntity {
 
@@ -816,11 +823,11 @@ export class Type<T extends ModifiableEntity> implements IType {
     }
 
     propertyRoute(lambdaToProperty: (v: T) => any): PropertyRoute {
-        return PropertyRoute.root(this.typeInfo()).add(lambdaToProperty);
+        return PropertyRoute.root(this.typeInfo()).addLambda(lambdaToProperty);
     }
 
     mixinPropertyRoute<M extends MixinEntity>(mixinType: Type<M>, lambdaToProperty: (v: M) => any): PropertyRoute {
-        return PropertyRoute.root(this.typeInfo()).addLambdaMember({ type: "Mixin", name: mixinType.typeName }).add(lambdaToProperty);
+        return PropertyRoute.root(this.typeInfo()).addMember("Mixin", mixinType.typeName).addLambda(lambdaToProperty);
     }
 
     niceName(): string {
@@ -856,6 +863,10 @@ export class Type<T extends ModifiableEntity> implements IType {
 
     isInstance(obj: any): obj is T {
         return obj && (obj as ModifiableEntity).Type == this.typeName;
+    }
+
+    isLite(obj: any): obj is Lite<T & Entity> {
+        return obj && (obj as Lite<Entity>).EntityType == this.typeName;
     }
 }
 
@@ -919,7 +930,7 @@ export class QueryKey {
     }
 }
 
-interface ISymbol {
+export interface ISymbol {
     Type: string; 
     key: string;
     id?: any;
@@ -939,8 +950,25 @@ function getMember(key: string): MemberInfo | undefined {
     return member;
 }
 
-export function symbolNiceName(symbol: ISymbol) {
-    return getMember(symbol.key) !.niceName;
+export function symbolNiceName(symbol: Entity & ISymbol | Lite<Entity & ISymbol>) {
+    if ((symbol as Entity).Type != null) //Don't use isEntity to avoid cycle
+        return getMember((symbol as Entity & ISymbol).key)!.niceName;
+    else
+        return getMember(symbol.toStr!)!.niceName;
+}
+
+export function getSymbol<T extends Entity & ISymbol>(type: Type<T>, key: string) { //Unsafe Type!
+
+    const mi = getMember(key);
+    if (mi == null)
+        throw new Error(`No Symbol with key '${key}' found`);
+
+    var symbol = {
+        Type: type.typeName,
+        id: mi.id,
+        key: key
+    } as T;
+    return symbol as T
 }
 
 export function registerSymbol(type: string, key: string): any /*ISymbol*/ {
@@ -998,7 +1026,7 @@ export class PropertyRoute {
 
     static parse(rootType: PseudoType, propertyString: string): PropertyRoute {
         let result = PropertyRoute.root(rootType);
-        const parts = propertyString.replaceAll("/", ".&&.").trimEnd(".").split(".").map((p): LambdaMember =>
+        const parts = propertyString.replaceAll("/", ".&&.").trimEnd(".").split(".").map((p): { type: MemberType, name: string } =>
         {
             if (p == "&&")
                 return { type: "Indexer", name: "0" };
@@ -1010,7 +1038,7 @@ export class PropertyRoute {
             return { type: "Member", name: p };
         });
 
-        parts.forEach(p => result = result.addLambdaMember(p));
+        parts.forEach(m => result = result.addMember(m.type, m.name));
 
         return result;
     }
@@ -1029,15 +1057,14 @@ export class PropertyRoute {
         this.mixinName = mixinName;
     }
 
-    add(property: ((val: any) => any) | string): PropertyRoute {
-        const members = typeof property == "function" ?
+    addLambda(property: ((val: any) => any) | string): PropertyRoute {
+        const lambdaMembers = typeof property == "function" ?
             getLambdaMembers(property) :
             getFieldMembers(property);
 
-        let current: PropertyRoute = this;
-        members.forEach(m=> current = current.addLambdaMember(m));
+        let result: PropertyRoute = lambdaMembers.reduce<PropertyRoute>((pr, m) => pr.addLambdaMember(m), this)
 
-        return current;
+        return result;
     }
 
     typeReference(): TypeReference {
@@ -1077,28 +1104,23 @@ export class PropertyRoute {
         }
     }
 
-    tryAddMember(member: LambdaMember): PropertyRoute | undefined {
+    tryAddMember(memberType: MemberType, memberName: string): PropertyRoute | undefined {
         try {
-            return this.addLambdaMember(member);
+            return this.addMember(memberType, memberName);
         } catch (e) {
             return undefined;
         }
     }
 
 
+    addLambdaMember(lm: LambdaMember): PropertyRoute {
+        return this.addMember(lm.type, lm.type == "Member" ? toCSharp(lm.name) : lm.name)
+    }
 
-    addLambdaMember(member: LambdaMember): PropertyRoute {
 
-        function toCSharp(name: string) {
-            var result = name.firstUpper();
-
-            if (result == name)
-                throw new Error(`Name '${name}' should start by lowercase`);
-
-            return result;
-        }
-
-        if (member.type == "Member") {
+    addMember(memberType: MemberType, memberName: string): PropertyRoute {
+        
+        if (memberType == "Member") {
 
             if (this.propertyRouteType == "Field"  ||
                 this.propertyRouteType == "MListItem" ||
@@ -1106,7 +1128,7 @@ export class PropertyRoute {
                 const ref = this.typeReference();
 
                 if (ref.isLite) {
-                    if (member.name != "entity")
+                    if (memberName != "Entity")
                         throw new Error("Entity expected");
 
                     return PropertyRoute.liteEntity(this);
@@ -1115,7 +1137,6 @@ export class PropertyRoute {
                 const ti = getTypeInfos(ref).single("Ambiguity due to multiple Implementations"); //[undefined]
                 if (ti) {
                     
-                    const memberName = toCSharp(member.name);
                     const m = ti.members[memberName];
                     if (!m)
                         throw new Error(`member '${memberName}' not found`);
@@ -1126,25 +1147,25 @@ export class PropertyRoute {
                 }
             }
 
-            const memberName = this.propertyRouteType == "Root" ? toCSharp(member.name) :
-                this.propertyRouteType == "MListItem" ? this.propertyPath() + toCSharp(member.name) :
-                    this.propertyPath() + "." + toCSharp(member.name);
+            const fullMemberName = this.propertyRouteType == "Root" ? memberName :
+                this.propertyRouteType == "MListItem" ? this.propertyPath() + memberName :
+                    this.propertyPath() + "." + memberName;
 
-            const m = this.findRootType().members[memberName];
+            const m = this.findRootType().members[fullMemberName];
             if (!m)
-                throw new Error(`member '${memberName}' not found`)
+                throw new Error(`member '${fullMemberName}' not found`)
 
             return PropertyRoute.member(this, m);
         }
 
-        if (member.type == "Mixin") {
+        if (memberType == "Mixin") {
             if (this.propertyRouteType != "Root")
                 throw new Error("invalid mixin at this stage");
 
-            return PropertyRoute.mixin(this, member.name);
+            return PropertyRoute.mixin(this, memberName);
         }
 
-        if (member.type == "Indexer") {
+        if (memberType == "Indexer") {
             if (this.propertyRouteType != "Field")
                 throw new Error("invalid indexer at this stage");
 
@@ -1156,6 +1177,23 @@ export class PropertyRoute {
         }
 
         throw new Error("not implemented");
+    }
+
+    static generateAll(type: PseudoType): PropertyRoute[] {
+        var ti = getTypeInfo(type);
+        var mixins: string[] = [];
+        return Dic.getValues(ti.members).flatMap(mi => {
+            const pr = PropertyRoute.parse(ti, mi.name);
+            if (pr.typeReference().isCollection)
+                return [pr, PropertyRoute.mlistItem(pr)];
+            return [pr];
+        }).flatMap(pr => {
+            if (pr.parent && pr.parent.propertyRouteType == "Mixin" && !mixins.contains(pr.parent.propertyPath())) {
+                mixins.push(pr.parent.propertyPath());
+                return [pr.parent, pr];
+            } else
+                return [pr];
+            });
     }
 
     subMembers(): { [subMemberName: string]: MemberInfo } {
@@ -1187,7 +1225,7 @@ export class PropertyRoute {
                 ...simpleMembersAfter(this.findRootType(), ""),
                 ...mixinMembers(this.findRootType())
             };
-            case "Mixin": return simpleMembersAfter(this.findRootType(), this.propertyPath());                
+            case "Mixin": return simpleMembersAfter(this.findRootType(), this.propertyPath() + ".");                
             case "LiteEntity": return simpleMembersAfter(this.typeReferenceInfo(), "");
             case "Field":
             case "MListItem": 
@@ -1209,6 +1247,15 @@ export class PropertyRoute {
 
         return `(${this.findRootType().name}).${this.propertyPath()}`;
     }
+}
+
+function toCSharp(name: string) {
+    var result = name.firstUpper();
+
+    if (result == name)
+        throw new Error(`Name '${name}' should start by lowercase`);
+
+    return result;
 }
 
 export type PropertyRouteType = "Root" | "Field" | "Mixin" | "LiteEntity" | "MListItem";

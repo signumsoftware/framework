@@ -21,6 +21,9 @@ interface SearchModalProps extends React.Props<SearchModal>, IModalProps {
 
 export default class SearchModal extends React.Component<SearchModalProps, { show: boolean; }>  {
 
+    static marginVertical = 300;
+    static minHeight = 600;
+
     constructor(props: SearchModalProps) {
         super(props);
 
@@ -58,6 +61,28 @@ export default class SearchModal extends React.Component<SearchModalProps, { sho
 
     searchControl?: SearchControl;
 
+
+    componentWillMount() {
+        window.addEventListener('resize', this.onResize);
+    }
+
+
+    componentWillUnmount() {
+        window.removeEventListener('resize', this.onResize);
+    }
+
+    onResize = () => {
+        var sc = this.searchControl;
+        var scl = sc && sc.searchControlLoaded;
+        var containerDiv = scl && scl.containerDiv;
+        if (containerDiv) {
+
+            var maxHeight = (window.innerHeight - SearchModal.marginVertical);
+
+            containerDiv.style.maxHeight = Math.max(maxHeight, SearchModal.minHeight) + "px";
+        }
+    }
+
     render() {
 
         const okEnabled = this.props.isMany ? this.selectedRows.length > 0 : this.selectedRows.length == 1;
@@ -83,6 +108,8 @@ export default class SearchModal extends React.Component<SearchModalProps, { sho
                         findOptions={this.props.findOptions}
                         onSelectionChanged={this.handleSelectionChanged}
                         largeToolbarButtons={true}
+                        maxResultsHeight={"none"}
+                        onHeighChanged={this.onResize}
                         onDoubleClick={this.props.findMode == "Find" ? this.handleDoubleClick : undefined}
                         {...this.props.searchControlProps}
                         />
@@ -118,6 +145,8 @@ export default class SearchModal extends React.Component<SearchModalProps, { sho
         return openModal<void>(<SearchModal findOptions={findOptions}
             findMode={"Explore"}
             isMany={true}
-            title={modalOptions && modalOptions.title || getQueryNiceName(findOptions.queryName) } />);
+            title={modalOptions && modalOptions.title || getQueryNiceName(findOptions.queryName)}
+            searchControlProps={modalOptions && modalOptions.searchControlProps}
+        />);
     }
 }

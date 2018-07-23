@@ -47,6 +47,7 @@ namespace Signum.Utilities
             WriteColor(color, string.Format(format, parameters));
         }
 
+        public static void WriteColor(ConsoleColor color, char c) => WriteColor(color, c.ToString());
         public static void WriteColor(ConsoleColor color, string str)
         {
             ConsoleColor old = Console.ForegroundColor;
@@ -54,6 +55,8 @@ namespace Signum.Utilities
             Console.Write(str);
             Console.ForegroundColor = old;
         }
+
+
 
         public static void WriteLineColor(ConsoleColor color, string format, params object[] parameters)
         {
@@ -98,7 +101,6 @@ namespace Signum.Utilities
 
         public static string Ask(string question, params string[] answers)
         {
-
             Console.Write(question + " ({0}) ".FormatWith(answers.ToString("/")));
             do
             {
@@ -108,6 +110,31 @@ namespace Signum.Utilities
                     return result;
 
                 Console.Write("Possible answers: {0} ".FormatWith(answers.ToString("/")));
+            } while (true);
+        }
+
+        public static string AskMultiLine(string question, params string[] answers)
+        {
+            Console.WriteLine(question);
+
+            foreach (var item in answers)
+            {
+                Console.WriteLine(" - " + item);
+            }
+
+            do
+            {
+                var userAnswer = Console.ReadLine().ToLower();
+                var result = answers.FirstOrDefault(a => a.StartsWith(userAnswer, StringComparison.CurrentCultureIgnoreCase));
+                if (result != null)
+                    return result;
+
+                Console.WriteLine("Possible answers:");
+
+                foreach (var item in answers)
+                {
+                    Console.WriteLine(" - " + item);
+                }
             } while (true);
         }
 
