@@ -16,7 +16,8 @@ interface ImportComponentProps {
 interface ImportComponentState {
     module?: ComponentModule;
 }
-b
+
+
 export class ImportComponent extends React.Component<ImportComponentProps, ImportComponentState> {
 
     constructor(props: ImportComponentProps) {

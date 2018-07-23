@@ -1,9 +1,13 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
     <TargetFramework>netcoreapp2.1</TargetFramework>
     <TypeScriptToolsVersion>2.9</TypeScriptToolsVersion>
   </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
 
   <ItemGroup>
     <None Remove="node_modules\**" />
@@ -18,13 +22,14 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.All" Version="2.1.2" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\Signum.Engine\Signum.Engine.csproj" />
     <ProjectReference Include="..\Signum.Entities\Signum.Entities.csproj" />
     <ProjectReference Include="..\Signum.Utilities\Signum.Utilities.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <TypeScriptCompile Include="**\*.tsx" />
+    <TypeScriptCompile Include="**\*.ts" />
   </ItemGroup>
 
   <Target Name="GenerateSignumTS">
