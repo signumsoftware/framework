@@ -360,7 +360,7 @@ WHERE {primaryKey.Name} NOT IN
                 return null;
 
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 return new SqlPreCommandSimple($"-- Impossible to determine duplicates in new index {uniqueIndex.IndexName}");
 
