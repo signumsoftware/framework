@@ -1,6 +1,7 @@
 ﻿using Signum.Engine;
 using Signum.Engine.Authorization;
 using Signum.Engine.Operations;
+using Signum.Entities;
 using Signum.Entities.Authorization;
 using Signum.Entities.Basics;
 using Signum.Services;
@@ -103,7 +104,8 @@ namespace Signum.React.Authorization
         [Route("api/auth/currentUser")]
         public UserEntity GetCurrentUser()
         {
-            return UserEntity.Current;
+            var result = UserEntity.Current;
+            return result.Is(AuthLogic.AnonymousUser) ? null : result;
         }
 
         [Route("api/auth/logout"), HttpPost]

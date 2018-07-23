@@ -9,7 +9,7 @@ import { EntityOperationSettings, OperationSettings } from '../../../Framework/S
 import * as Operations from '../../../Framework/Signum.React/Scripts/Operations'
 import { Entity } from '../../../Framework/Signum.React/Scripts/Signum.Entities'
 import * as Constructor from '../../../Framework/Signum.React/Scripts/Constructor'
-import * as DynamicClient from './DynamicClient'
+import * as DynamicClientOptions from './DynamicClientOptions'
 
 import { ValueLine, EntityLine, EntityCombo, EntityList, EntityDetail, EntityStrip, EntityRepeater } from '../../../Framework/Signum.React/Scripts/Lines'
 import { DynamicTypeConditionEntity, DynamicTypeConditionEval, DynamicTypeConditionOperation } from './Signum.Entities.Dynamic'
@@ -23,8 +23,8 @@ export function start(options: { routes: JSX.Element[] }) {
     }))
 
     Constructor.registerConstructor(DynamicTypeConditionEntity, () => DynamicTypeConditionEntity.New({ eval: DynamicTypeConditionEval.New() }));
-    DynamicClient.Options.onGetDynamicLineForPanel.push(ctx => <ValueSearchControlLine ctx={ctx} findOptions={{ queryName: DynamicTypeConditionEntity }} />);
-    DynamicClient.Options.onGetDynamicLineForType.push((ctx, type) => <ValueSearchControlLine ctx={ctx} findOptions={{ queryName: DynamicTypeConditionEntity, parentColumn: "EntityType.CleanName", parentValue: type }} />);
+    DynamicClientOptions.Options.onGetDynamicLineForPanel.push(ctx => <ValueSearchControlLine ctx={ctx} findOptions={{ queryName: DynamicTypeConditionEntity }} />);
+    DynamicClientOptions.Options.onGetDynamicLineForType.push((ctx, type) => <ValueSearchControlLine ctx={ctx} findOptions={{ queryName: DynamicTypeConditionEntity, parentColumn: "EntityType.CleanName", parentValue: type }} />);
 }
 
 export namespace API {

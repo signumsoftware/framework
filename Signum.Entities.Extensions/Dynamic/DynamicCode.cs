@@ -1,5 +1,5 @@
-﻿using Signum.Utilities;
-using System;
+﻿using System;
+using Signum.Utilities;
 using System.CodeDom.Compiler;
 using System.Collections.Generic;
 using System.IO;
@@ -70,6 +70,8 @@ namespace Signum.Entities.Dynamic
         }
 
         public static Func<string, List<CustomCompilerError>> GetCustomErrors;
+
+        public static Action OnInvalidated { get; internal set; }
 
         public static void AddFullAssembly(Type type)
         {

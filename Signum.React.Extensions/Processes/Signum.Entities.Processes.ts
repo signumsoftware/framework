@@ -39,6 +39,12 @@ export module PackageOperationProcess {
     export const PackageOperation : ProcessAlgorithmSymbol = registerSymbol("ProcessAlgorithm", "PackageOperationProcess.PackageOperation");
 }
 
+export module PackageQuery {
+    export const PackageLineLastProcess = new QueryKey("PackageQuery", "PackageLineLastProcess");
+    export const PackageLastProcess = new QueryKey("PackageQuery", "PackageLastProcess");
+    export const PackageOperationLastProcess = new QueryKey("PackageQuery", "PackageOperationLastProcess");
+}
+
 export const ProcessAlgorithmSymbol = new Type<ProcessAlgorithmSymbol>("ProcessAlgorithm");
 export interface ProcessAlgorithmSymbol extends Entities.Symbol {
     Type: "ProcessAlgorithm";
@@ -82,6 +88,7 @@ export module ProcessMessage {
     export const Lines = new MessageKey("ProcessMessage", "Lines");
     export const LastProcess = new MessageKey("ProcessMessage", "LastProcess");
     export const ExceptionLines = new MessageKey("ProcessMessage", "ExceptionLines");
+    export const SuspendIsTheSaferWayOfStoppingARunningProcessCancelAnyway = new MessageKey("ProcessMessage", "SuspendIsTheSaferWayOfStoppingARunningProcessCancelAnyway");
 }
 
 export module ProcessOperation {

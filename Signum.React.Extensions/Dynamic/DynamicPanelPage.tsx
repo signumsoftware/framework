@@ -7,12 +7,13 @@ import { ajaxPost } from '../../../Framework/Signum.React/Scripts/Services'
 import * as Finder from '../../../Framework/Signum.React/Scripts/Finder'
 import * as Navigator from '../../../Framework/Signum.React/Scripts/Navigator'
 import { WebApiHttpError } from '../../../Framework/Signum.React/Scripts/Services'
-import { ValueSearchControl, SearchControl } from '../../../Framework/Signum.React/Scripts/Search'
+import { ValueSearchControl, SearchControl, FindOptions } from '../../../Framework/Signum.React/Scripts/Search'
 import EntityLink from '../../../Framework/Signum.React/Scripts/SearchControl/EntityLink'
-import { QueryDescription, SubTokensOptions } from '../../../Framework/Signum.React/Scripts/FindOptions'
-import { getQueryNiceName, PropertyRoute, getTypeInfos } from '../../../Framework/Signum.React/Scripts/Reflection'
-import { ModifiableEntity, EntityControlMessage, Entity, parseLite, getToString, JavascriptMessage } from '../../../Framework/Signum.React/Scripts/Signum.Entities'
-import { API, Options, CompilationError } from './DynamicClient'
+import { QueryDescription, SubTokensOptions, QueryEntitiesRequest } from '../../../Framework/Signum.React/Scripts/FindOptions'
+import { getQueryNiceName, PropertyRoute, getTypeInfos, PseudoType, getTypeInfo, TypeInfo, getQueryKey } from '../../../Framework/Signum.React/Scripts/Reflection'
+import { ModifiableEntity, EntityControlMessage, Entity, parseLite, getToString, JavascriptMessage, Lite } from '../../../Framework/Signum.React/Scripts/Signum.Entities'
+import { API, CompilationError, EvalEntityError } from './DynamicClient'
+import { Options } from './DynamicClientOptions'
 import CSharpCodeMirror from '../Codemirror/CSharpCodeMirror'
 import * as AuthClient from '../Authorization/AuthClient'
 import { DynamicPanelPermission, DynamicTypeMessage } from './Signum.Entities.Dynamic'
@@ -21,6 +22,7 @@ import * as QueryString from 'query-string';
 
 import "./DynamicPanelPage.css"
 import { Tab, Tabs } from '../../../Framework/Signum.React/Scripts/Components/Tabs';
+import { FormGroup } from '../../../Framework/Signum.React/Scripts/Lines';
 
 interface DynamicPanelProps extends RouteComponentProps<{}> {
 }
@@ -28,6 +30,8 @@ interface DynamicPanelProps extends RouteComponentProps<{}> {
 interface DynamicPanelState {
     startErrors?: WebApiHttpError[];
 }
+
+type DynamicPanelTab = "compile" | "restartServerApp" | "migrations" | "checkEvals" | "refreshClients";
 
 export default class DynamicPanelPage extends React.Component<DynamicPanelProps, DynamicPanelState> {
 
@@ -55,17 +59,15 @@ export default class DynamicPanelPage extends React.Component<DynamicPanelProps,
     render() {
         AuthClient.asserPermissionAuthorized(DynamicPanelPermission.ViewDynamicPanel);
 
-        let step = QueryString.parse(this.props.location.search).step as "compile" | "restartServerApp" | "migrations" | "refreshClients" | undefined;
+        let step = QueryString.parse(this.props.location.search).step as DynamicPanelTab | undefined;
 
         const errors = this.state.startErrors
         return (
             <div>
                 {errors && errors.length > 0 &&
                     <div role="alert" className="alert alert-danger" style={{ marginTop: "20px" }}>
-                        <p>
                         <span className="fa fa-exclamation-triangle"></span>
                         {" "}The server started, but there {errors.length > 1 ? "are" : "is"} <a href="#" onClick={this.handleErrorClick}>{errors.length} {errors.length > 1 ? "errors" : "error"}</a>.
-                        </p>
                     </div>
                 }
                 <Tabs activeEventKey={step || "compile"} id="dynamicPanelTabs" style={{ marginTop: "20px" }} toggle={this.handleSelect}>
@@ -85,7 +87,11 @@ export default class DynamicPanelPage extends React.Component<DynamicPanelProps,
                             {Options.getDynaicMigrationsStep()}
                         </Tab>
                     }
-                    <Tab eventKey="refreshClients" title={(Options.getDynaicMigrationsStep ? "4." : "3.") + " Refresh Clients"}>
+                    <Tab eventKey="checkEvals" title={(Options.getDynaicMigrationsStep ? "4." : "3.") + " Check Evals"}>
+                        <CheckEvalsStep />
+                    </Tab>
+
+                    <Tab eventKey="refreshClients" title={(Options.getDynaicMigrationsStep ? "5." : "6.") + " Refresh Clients"}>
                         <RefreshClientsStep />
                     </Tab>
                 </Tabs>
@@ -294,6 +300,122 @@ function textDanger(message: string | null | undefined): React.ReactFragment | n
 
     return message;
 }
+
+
+
+interface CheckEvalsStepState {
+    autoStart: number | undefined;
+}
+
+export class CheckEvalsStep extends React.Component<{}, CheckEvalsStepState>{
+
+    constructor(props: CheckEvalsStepState) {
+        super(props);
+        this.state = { autoStart: undefined };
+    }
+
+    handleOnClick = (e: React.MouseEvent<any>) => {
+        e.preventDefault();
+        this.setState(s => ({ autoStart: (s.autoStart || 0) + 1 }));
+    }
+
+
+    render() {
+        var ctx = new StyleContext(undefined, {});
+        return (
+            <div>
+                {Options.checkEvalFindOptions.map((fo, i) => <CheckEvalType key={i} ctx={ctx} findOptions={fo} autoStart={this.state.autoStart} />)}
+                <button className="btn btn-success" onClick={this.handleOnClick}> <i className="fa fa-refresh" aria-hidden="true" /> Refresh all</button>
+            </div>
+        );
+    }
+}
+
+
+interface CheckEvalTypeProps {
+    findOptions: FindOptions;
+    autoStart?: number;
+    ctx: StyleContext;
+}
+
+interface CheckEvalTypeState {
+    state: "initial" | "loading" | "success" | "failed";
+    errors?: EvalEntityError[];
+}
+
+
+export class CheckEvalType extends React.Component<CheckEvalTypeProps, CheckEvalTypeState> {
+
+    constructor(props: CheckEvalTypeProps) {
+        super(props);
+        this.state = { state: "initial" };
+    }
+
+    componentWillMount() {
+        if (this.props.autoStart != null)
+            this.loadData(this.props);
+    }
+
+    componentWillReceiveProps(newProps: CheckEvalTypeProps) {
+        if (newProps.autoStart != null && newProps.autoStart != this.props.autoStart)
+            this.loadData(newProps);
+    }
+
+    loadData(props: CheckEvalTypeProps) {
+        this.setState({ state: "loading" }, () => {
+            var fo = this.props.findOptions;
+            var request = {
+                queryKey: getQueryKey(fo.queryName),
+                filters: (fo.filterOptions || []).map(fo => ({ token: fo.columnName, operation: fo.operation!, value: fo.value })),
+                orders: [{ token: "Entity.Id", orderType: "Ascending" }],
+                count: 10000,
+            } as QueryEntitiesRequest;
+            API.getEvalErrors(request)
+                .then(errors => this.setState({ state: "success", errors: errors }),
+                    e => {
+                        this.setState({ state: "failed", errors: undefined });
+                        throw e;
+                    }).done();
+        });
+    }
+
+    render() {
+        return (
+                <FormGroup ctx={this.props.ctx} labelText={getQueryNiceName(this.props.findOptions.queryName)}>
+                    <ValueSearchControl findOptions={this.props.findOptions} isLink={true} />
+                    {
+                        this.state.state == "loading" ?
+                            <i className="fa fa-refresh fa-spin fa-fw" /> :
+                            <i style={{ cursor: "pointer" }} className="sf-line-button fa fa-refresh" aria-hidden="true" onClick={e => { e.preventDefault(); this.loadData(this.props); }} />
+                    }
+
+                    {
+                        this.state.state == "failed" ? <span className="mini-alert alert-danger" role="alert"><i className="fa fa-exclamation-triangle" aria-hidden="true"></i> Exception checking {getQueryNiceName(this.props.findOptions.queryName)}</span> :
+                            this.state.errors && this.state.errors.length > 0 ? <span className="mini-alert alert-danger" role="alert"><strong>{this.state.errors.length}</strong> {this.state.errors.length == 1 ? "Error" : "Errors"} found</span> :
+                                this.state.errors && this.state.errors.length == 0 ? <span className="mini-alert alert-success" role="alert">No errors found!</span> :
+                                    undefined
+                }
+                {
+                    this.state.errors && this.state.errors.length > 0 &&
+                    <div className="table-responsive">
+                        <table className="table table-sm">
+                            <tbody>
+                                {this.state.errors.map((e, i) => <tr key={i}>
+                                    <td><EntityLink lite={e.lite} /></td>
+                                    <td className="text-danger">{e.error.split("\n").map((line, i) => <p key={i}>{line}</p>)}</td>
+                                </tr>
+                                )}
+                            </tbody>
+                        </table>
+                    </div>
+
+                }
+                </FormGroup>
+               
+        );
+    }
+}
+
 
 interface RefreshClientsStepState {
 

@@ -9,7 +9,7 @@ import { EntityOperationSettings } from '../../../Framework/Signum.React/Scripts
 import * as Operations from '../../../Framework/Signum.React/Scripts/Operations'
 import { Entity } from '../../../Framework/Signum.React/Scripts/Signum.Entities'
 import * as Constructor from '../../../Framework/Signum.React/Scripts/Constructor'
-import * as DynamicClient from './DynamicClient'
+import * as DynamicClientOptions from './DynamicClientOptions'
 
 import { ValueLine, EntityLine, EntityCombo, EntityList, EntityDetail, EntityStrip, EntityRepeater } from '../../../Framework/Signum.React/Scripts/Lines'
 import { DynamicExpressionEntity } from './Signum.Entities.Dynamic'
@@ -17,8 +17,8 @@ import { DynamicExpressionEntity } from './Signum.Entities.Dynamic'
 export function start(options: { routes: JSX.Element[] }) {
 
     Navigator.addSettings(new EntitySettings(DynamicExpressionEntity, w => import('./Expression/DynamicExpression')));
-    DynamicClient.Options.onGetDynamicLineForPanel.push(ctx => <ValueSearchControlLine ctx={ctx} findOptions={{ queryName: DynamicExpressionEntity }} />);
-    DynamicClient.Options.onGetDynamicLineForType.push((ctx, type) => <ValueSearchControlLine ctx={ctx} findOptions={{ queryName: DynamicExpressionEntity, parentColumn: "FromType", parentValue: type + "Entity" }} />);
+    DynamicClientOptions.Options.onGetDynamicLineForPanel.push(ctx => <ValueSearchControlLine ctx={ctx} findOptions={{ queryName: DynamicExpressionEntity }} />);
+    DynamicClientOptions.Options.onGetDynamicLineForType.push((ctx, type) => <ValueSearchControlLine ctx={ctx} findOptions={{ queryName: DynamicExpressionEntity, parentColumn: "FromType", parentValue: type + "Entity" }} />);
 }
 
 export namespace API {

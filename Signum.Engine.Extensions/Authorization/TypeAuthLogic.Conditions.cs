@@ -602,20 +602,28 @@ namespace Signum.Engine.Authorization
             }
         }
 
-        public static DynamicQueryCore<T> ToDynamicDisableAutoFilter<T>(this IQueryable<T> query)
+        public static DynamicQueryCore<T> ToDynamicDisableAuth<T>(this IQueryable<T> query, bool disableQueryFilter = false, bool authDisable = true)
         {
-            return new AutoDynamicQueryNoFilterCore<T>(query);
+            return new AutoDynamicQueryNoFilterCore<T>(query)
+            {
+                DisableQueryFilter = disableQueryFilter,
+                AuthDisable = authDisable,
+            };
         }
 
         internal class AutoDynamicQueryNoFilterCore<T> : AutoDynamicQueryCore<T>
         {
+            public bool DisableQueryFilter { get; internal set; }
+            public bool AuthDisable { get; internal set; }
+
             public AutoDynamicQueryNoFilterCore(IQueryable<T> query)
                 : base(query)
             { }
 
             public override async Task<ResultTable> ExecuteQueryAsync(QueryRequest request, CancellationToken token)
             {
-                using (TypeAuthLogic.DisableQueryFilter())
+                using (this.AuthDisable ? AuthLogic.Disable(): null)
+                using (this.DisableQueryFilter ? TypeAuthLogic.DisableQueryFilter(): null)
                 {
                     return await base.ExecuteQueryAsync(request, token);
                 }
@@ -623,7 +631,8 @@ namespace Signum.Engine.Authorization
 
             public override async Task<Lite<Entity>> ExecuteUniqueEntityAsync(UniqueEntityRequest request, CancellationToken token)
             {
-                using (TypeAuthLogic.DisableQueryFilter())
+                using (this.AuthDisable ? AuthLogic.Disable() : null)
+                using (this.DisableQueryFilter ? TypeAuthLogic.DisableQueryFilter() : null)
                 {
                     return await base.ExecuteUniqueEntityAsync(request, token);
                 }
@@ -631,7 +640,8 @@ namespace Signum.Engine.Authorization
 
             public override async Task<object> ExecuteQueryValueAsync(QueryValueRequest request, CancellationToken token)
             {
-                using (TypeAuthLogic.DisableQueryFilter())
+                using (this.AuthDisable ? AuthLogic.Disable() : null)
+                using (this.DisableQueryFilter ? TypeAuthLogic.DisableQueryFilter() : null)
                 {
                     return await base.ExecuteQueryValueAsync(request, token);
                 }

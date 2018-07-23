@@ -144,7 +144,7 @@ export interface DynamicValidationEntity extends Entities.Entity {
     Type: "DynamicValidation";
     name?: string | null;
     entityType?: Basics.TypeEntity | null;
-    propertyRoute?: Basics.PropertyRouteEntity | null;
+    subEntity?: Basics.PropertyRouteEntity | null;
     eval: DynamicValidationEval;
 }
 
@@ -153,8 +153,14 @@ export interface DynamicValidationEval extends EvalEmbedded<IDynamicValidationEv
     Type: "DynamicValidationEval";
 }
 
+export module DynamicValidationMessage {
+    export const PropertyIs = new MessageKey("DynamicValidationMessage", "PropertyIs");
+}
+
 export module DynamicValidationOperation {
+    export const Clone : Entities.ConstructSymbol_From<DynamicValidationEntity, DynamicValidationEntity> = registerSymbol("Operation", "DynamicValidationOperation.Clone");
     export const Save : Entities.ExecuteSymbol<DynamicValidationEntity> = registerSymbol("Operation", "DynamicValidationOperation.Save");
+    export const Delete : Entities.DeleteSymbol<DynamicValidationEntity> = registerSymbol("Operation", "DynamicValidationOperation.Delete");
 }
 
 export const DynamicViewEntity = new Type<DynamicViewEntity>("DynamicView");

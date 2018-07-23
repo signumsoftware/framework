@@ -9,6 +9,7 @@ import * as Reflection from '../../../../Framework/Signum.React/Scripts/Reflecti
 import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
 import * as Components from '../../../../Framework/Signum.React/Scripts/Components'
 import * as AuthClient from '../../Authorization/AuthClient'
+import * as TreeClient from '../../Tree/TreeClient'
 
 
 export const globalModules: any = {
@@ -23,4 +24,5 @@ export const globalModules: any = {
     Entities,
     AuthClient,
     Operations,
+    TreeClient,
 };

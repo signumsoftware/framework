@@ -8,7 +8,7 @@ import { ViewReplacer } from '../../../../Framework/Signum.React/Scripts/Frames/
 import { FindOptions } from '../../../../Framework/Signum.React/Scripts/FindOptions'
 import {
     getQueryNiceName, TypeInfo, MemberInfo, getTypeInfo, EntityData, EntityKind, getTypeInfos, Binding, EnumType,
-    KindOfType, PropertyRoute, PropertyRouteType, LambdaMemberType, isTypeEntity, isTypeModel, isTypeModifiableEntity
+    KindOfType, PropertyRoute, PropertyRouteType, MemberType, isTypeEntity, isTypeModel, isTypeModifiableEntity
 } from '../../../../Framework/Signum.React/Scripts/Reflection'
 import { TypeContext, StyleOptions, FormGroupStyle } from '../../../../Framework/Signum.React/Scripts/TypeContext'
 import { EntityBase, EntityBaseProps } from '../../../../Framework/Signum.React/Scripts/Lines/EntityBase'
@@ -24,6 +24,7 @@ import { HtmlAttributesLine } from './HtmlAttributesComponent'
 import { StyleOptionsLine } from './StyleOptionsComponent'
 import TypeHelpComponent from '../../TypeHelp/TypeHelpComponent'
 import { registeredCustomContexts } from '../DynamicViewClient'
+import { findMany } from '../../../../Framework/Signum.React/Scripts/Finder';
 
 
 export type ExpressionOrValue<T> = T | Expression<T>;
@@ -155,9 +156,9 @@ ${childrenString}
         return { __code__: this.ctxName + ".subCtx(" + (propStr || "") + (propStr && optionsStr ? ", " : "") + (optionsStr || "") + ")" };
     }
 
-    getEntityBasePropsEx(node: EntityBaseNode, options: { showAutoComplete?: boolean, showMove?: boolean, avoidGetComponent?: boolean }): any/*: EntityBaseProps Expr*/ {
+    getEntityBasePropsEx(node: EntityBaseNode, options: { showAutoComplete?: boolean, findMany?: boolean, showMove?: boolean, avoidGetComponent?: boolean }): any/*: EntityBaseProps Expr*/ {
 
-        var result : any /*EntityBaseProps*/ = {
+        var result: any /*EntityBaseProps*/ = {
             ctx: this.subCtxCode(node.field, node.styleOptions),
             labelText: node.labelText,
             labelHtmlAttributes: node.labelHtmlAttributes,
@@ -169,7 +170,7 @@ ${childrenString}
             remove: node.remove,
             onRemove: node.onRemove,
             find: node.find,
-            onFind: node.onFind,
+            ...(findMany ? { onFindMany: (node as EntityListBaseNode).onFindMany } : { onFind: node.onFind }),
             view: node.view,
             onView: node.onView,
             viewOnCreate: node.viewOnCreate,
@@ -264,7 +265,7 @@ export class DesignerNode<N extends BaseNode> {
         var route = this.fixRoute()
         const lbn = node as any as { field: string };
         if (lbn.field && route)
-            route = route.tryAddMember({ name: lbn.field, type: "Member" });
+            route = route.tryAddMember("Member", lbn.field);
 
         var res = new DesignerNode<T>(this, this.context, node, route);
       
@@ -301,7 +302,7 @@ export class DesignerNode<N extends BaseNode> {
         }
 
         if (options.hasCollection)
-            res = res.tryAddMember({ name: "", type: "Indexer" });
+            res = res.tryAddMember("Indexer", "");
 
         if (!res)
             return undefined;
@@ -310,7 +311,7 @@ export class DesignerNode<N extends BaseNode> {
         {
             const tr = res.typeReference();
             if (tr.isLite)
-                res = res.tryAddMember({ name: "entity", type: "Member" });
+                res = res.tryAddMember("Member", "Entity");
         }
         return res;
     }
@@ -623,23 +624,6 @@ export function validateField(dn: DesignerNode<LineBaseNode>): string | undefine
     return undefined;
 }
 
-export function validateTableColumnProperty(dn: DesignerNode<EntityTableColumnNode>) {
-
-    const parentRoute = dn.parent!.fixRoute();
-
-    if (parentRoute == undefined)
-        return undefined;
-
-    const m = parentRoute.subMembers()[dn.node.property!]
-    const DVVM = DynamicViewValidationMessage;
-
-    if ( m.type.isCollection)
-        return DVVM._0RequiresA1.niceToString(dn.node.kind, DVVM.EntityOrValue.niceToString());
-
-    return undefined;
-}
-
-
 export function validateFindOptions(foe: FindOptionsExpr, parentCtx: TypeContext<ModifiableEntity> | undefined) : string | undefined {
     if (!foe.queryName)
         return DynamicViewValidationMessage._0RequiresA1.niceToString("findOptions", "queryKey");
@@ -666,7 +650,7 @@ export function addBreakLines(breakLines: boolean, message: string): React.React
     return message.split("\n").flatMap((e, i) => i == 0 ? [e] : [<br />, e]);
 }
 
-export function getEntityBaseProps(dn: DesignerNode<EntityBaseNode>, parentCtx: TypeContext<ModifiableEntity>, options: { showAutoComplete?: boolean, showMove?: boolean, avoidGetComponent?: boolean }): EntityBaseProps {
+export function getEntityBaseProps(dn: DesignerNode<EntityBaseNode>, parentCtx: TypeContext<ModifiableEntity>, options: { showAutoComplete?: boolean, findMany?: boolean, showMove?: boolean, avoidGetComponent?: boolean }): EntityBaseProps {
 
     var result: EntityBaseProps = {
         ctx: parentCtx.subCtx(dn.node.field, toStyleOptions(parentCtx, dn.node.styleOptions)),
@@ -680,7 +664,10 @@ export function getEntityBaseProps(dn: DesignerNode<EntityBaseNode>, parentCtx: 
         remove: evaluateAndValidate(parentCtx, dn.node, n => n.remove, isBooleanOrFunctionOrNull),
         onRemove: evaluateAndValidate(parentCtx, dn.node, n => n.onRemove, isFunctionOrNull),
         find: evaluateAndValidate(parentCtx, dn.node, n => n.find, isBooleanOrNull),
-        onFind: evaluateAndValidate(parentCtx, dn.node, n => n.onFind, isFunctionOrNull),
+        ...(options.findMany ?
+            { onFindMany: evaluateAndValidate(parentCtx, dn.node, (n: EntityListBaseNode) => n.onFindMany, isFunctionOrNull) } as any :
+            { onFind: evaluateAndValidate(parentCtx, dn.node, n => n.onFind, isFunctionOrNull) }
+        ),
         view: evaluateAndValidate(parentCtx, dn.node, n => n.view, isBooleanOrFunctionOrNull),
         onView: evaluateAndValidate(parentCtx, dn.node, n => n.onView, isFunctionOrNull),
         viewOnCreate: evaluateAndValidate(parentCtx, dn.node, n => n.viewOnCreate, isBooleanOrNull),
@@ -709,7 +696,7 @@ export function getGetComponent(dn: DesignerNode<ContainerNode>) {
     return (ctxe: TypeContext<ModifiableEntity>) => withChildrens(dn, ctxe, <div />);
 }
 
-export function designEntityBase(dn: DesignerNode<EntityBaseNode>, options: { isCreable: boolean; isFindable: boolean; isViewable: boolean; showAutoComplete: boolean, showMove?: boolean }) {
+export function designEntityBase(dn: DesignerNode<EntityBaseNode>, options: { showAutoComplete?: boolean, findMany?: boolean, showMove?: boolean }) {
   
     const m = dn.route && dn.route.member;
 
@@ -729,7 +716,8 @@ export function designEntityBase(dn: DesignerNode<EntityBaseNode>, options: { is
             <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.remove)} type="boolean" defaultValue={null} />
             <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.onRemove)} type={null} defaultValue={null} exampleExpression={"() => Promise.resolve(true)"}/>
             <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.find)} type="boolean" defaultValue={null} />
-            <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.onFind)} type={null} defaultValue={null} exampleExpression={"e => modules.Finder.find('" + typeName + "')"} />
+            {!options.findMany && <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.onFind)} type={null} defaultValue={null} exampleExpression={"e => modules.Finder.find('" + typeName + "')"} />}
+            {options.findMany && <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, (n: EntityListBaseNode) => n.onFindMany)} type={null} defaultValue={null} exampleExpression={"e => modules.Finder.findMany('" + typeName + "')"} />}
             <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.view)} type="boolean" defaultValue={null} />
             <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.onView)} type={null} defaultValue={null} exampleExpression={"e => modules.Navigator.view(e)"}/>
             <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.viewOnCreate)} type="boolean" defaultValue={null} />

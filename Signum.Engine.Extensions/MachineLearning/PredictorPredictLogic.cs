@@ -25,6 +25,8 @@ namespace Signum.Engine.MachineLearning
             return predictor;
         }
 
+        public static PredictorPredictContext GetPredictContext(this PredictorPublicationSymbol publication) => GetCurrentPredictor(publication).GetPredictContext();
+
         public static PredictorPredictContext GetPredictContext(this Lite<PredictorEntity> predictor)
         {
             lock (TrainedPredictorCache)
@@ -51,16 +53,16 @@ namespace Signum.Engine.MachineLearning
             return ppc;
         }
 
-        public static PredictDictionary GetInputsFromEntity(this PredictorPredictContext ctx, Lite<Entity> entity)
+        public static PredictDictionary GetInputsFromEntity(this PredictorPredictContext ctx, Lite<Entity> entity, PredictionOptions options = null)
         {
             var qd = DynamicQueryManager.Current.QueryDescription(ctx.Predictor.MainQuery.Query.ToQueryName());
 
             var entityToken = QueryUtils.Parse("Entity", qd, 0);
 
-            return ctx.FromFilters(new List<Filter> { new Filter(entityToken, FilterOperation.EqualTo, entity) }).SingleEx();
+            return ctx.FromFilters(new List<Filter> { new Filter(entityToken, FilterOperation.EqualTo, entity) }, options).SingleEx();
         }
 
-        public static PredictDictionary GetInputsFromParentKeys(this PredictorPredictContext ctx, Dictionary<QueryToken, object> parentKeyValues)
+        public static PredictDictionary GetInputsFromParentKeys(this PredictorPredictContext ctx, Dictionary<QueryToken, object> parentKeyValues, PredictionOptions options = null)
         {
             if (!ctx.Predictor.MainQuery.GroupResults)
             {
@@ -71,7 +73,7 @@ namespace Signum.Engine.MachineLearning
 
                 var filters = new List<Filter> { new Filter(kvp.Key, FilterOperation.EqualTo, kvp.Value) };
 
-                return ctx.FromFilters(filters).SingleEx(); ;
+                return ctx.FromFilters(filters, options).SingleEx();
             }
             else
             {
@@ -81,14 +83,15 @@ namespace Signum.Engine.MachineLearning
                     .Select(t => new Filter(t, FilterOperation.EqualTo, parentKeyValues.GetOrThrow(t)))
                     .ToList();
 
-                return ctx.FromFilters(filters).SingleEx();
+                return ctx.FromFilters(filters, options).SingleEx();
             }
         }
 
-        public static PredictDictionary GetInputsEmpty(this PredictorPredictContext ctx)
+        public static PredictDictionary GetInputsEmpty(this PredictorPredictContext ctx, PredictionOptions options = null)
         {
             var result = new PredictDictionary(ctx.Predictor)
             {
+                Options = options,
                 MainQueryValues = ctx.Predictor.MainQuery.Columns.Select((c, i) => KVP.Create(c, (object)null)).ToDictionaryEx(),
                 SubQueries = ctx.Predictor.SubQueries.ToDictionary(sq => sq, sq => new PredictSubQueryDictionary(sq)
                 {
@@ -99,7 +102,7 @@ namespace Signum.Engine.MachineLearning
             return result;
         }
 
-        public static List<PredictDictionary> FromFilters(this PredictorPredictContext ctx, List<Filter> filters)
+        public static List<PredictDictionary> FromFilters(this PredictorPredictContext ctx, List<Filter> filters, PredictionOptions options = null)
         {
             var qd = DynamicQueryManager.Current.QueryDescription(ctx.Predictor.MainQuery.Query.ToQueryName());
             
@@ -160,6 +163,7 @@ namespace Signum.Engine.MachineLearning
 
             var result = rt.Rows.Select(row => new PredictDictionary(ctx.Predictor)
             {
+                Options = options,
                 Entity = row.TryEntity,
                 MainQueryValues = ctx.Predictor.MainQuery.Columns.Select((c, i) => KVP.Create(c, row[i])).ToDictionaryEx(),
                 SubQueries = ctx.Predictor.SubQueries.ToDictionary(sq => sq, sq => new PredictSubQueryDictionary(sq)
@@ -172,7 +176,7 @@ namespace Signum.Engine.MachineLearning
             return result;
         }
 
-        public static Dictionary<ResultRow, PredictDictionary> ToPredictDictionaries(this PredictorTrainingContext ctx)
+        public static Dictionary<ResultRow, PredictDictionary> ToPredictDictionaries(this PredictorTrainingContext ctx, PredictionOptions options = null)
         {   
             var subQueryResults = ctx.Predictor.SubQueries.ToDictionaryEx(sq => sq, sqe =>
             {
@@ -195,6 +199,8 @@ namespace Signum.Engine.MachineLearning
 
             var result = ctx.MainQuery.ResultTable.Rows.ToDictionaryEx(row => row, row => new PredictDictionary(ctx.Predictor)
             {
+                Options = options,
+                Entity = row.TryEntity,
                 MainQueryValues = ctx.Predictor.MainQuery.Columns.Select((c, i) => KVP.Create(c, row[i])).ToDictionaryEx(),
                 SubQueries = ctx.Predictor.SubQueries.ToDictionary(sq => sq, sq => new PredictSubQueryDictionary(sq)
                 {

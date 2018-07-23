@@ -1,6 +1,6 @@
 ﻿import * as React from 'react'
 import * as moment from 'moment'
-import { Binding, LambdaMemberType } from '../../../../Framework/Signum.React/Scripts/Reflection'
+import { Binding, MemberType } from '../../../../Framework/Signum.React/Scripts/Reflection'
 import { Dic, classes } from '../../../../Framework/Signum.React/Scripts/Globals'
 import { newMListElement, Lite, liteKey, Entity, is } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
 import {

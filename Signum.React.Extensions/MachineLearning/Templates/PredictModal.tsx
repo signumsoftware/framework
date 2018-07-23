@@ -1,12 +1,13 @@
-﻿import { PredictorEntity } from "../Signum.Entities.MachineLearning";
+﻿import { PredictorEntity, PredictorState } from "../Signum.Entities.MachineLearning";
 import * as React from "react";
+import * as numbro from "numbro";
 import * as Navigator from "../../../../Framework/Signum.React/Scripts/Navigator";
 import { IModalProps, openModal } from "../../../../Framework/Signum.React/Scripts/Modals";
-import { API, PredictRequest, PredictColumn, PredictOutputTuple, PredictSubQueryHeader, PredictSubQueryTable } from "../PredictorClient";
+import { API, PredictRequest, PredictColumn, PredictOutputTuple, PredictSubQueryHeader, PredictSubQueryTable, AlternativePrediction } from "../PredictorClient";
 import { Lite, Entity, NormalControlMessage, EntityControlMessage } from "../../../../Framework/Signum.React/Scripts/Signum.Entities";
 import { StyleContext, FormGroup, TypeContext, EntityLine, EntityCombo, ValueLine } from "../../../../Framework/Signum.React/Scripts/Lines";
 import { QueryToken } from "../../../../Framework/Signum.React/Scripts/FindOptions";
-import { getTypeInfos } from "../../../../Framework/Signum.React/Scripts/Reflection";
+import { getTypeInfos, ReadonlyBinding } from "../../../../Framework/Signum.React/Scripts/Reflection";
 import { IsByAll } from "../../../../Framework/Signum.React/Scripts/Reflection";
 import { Dic } from "../../../../Framework/Signum.React/Scripts/Globals";
 import { PropertyRoute } from "../../../../Framework/Signum.React/Scripts/Reflection";
@@ -15,10 +16,13 @@ import { is } from "../../../../Framework/Signum.React/Scripts/Signum.Entities";
 import { isLite } from "../../../../Framework/Signum.React/Scripts/Signum.Entities";
 import { Modal } from "../../../../Framework/Signum.React/Scripts/Components";
 import { ModalHeaderButtons } from "../../../../Framework/Signum.React/Scripts/Components/Modal";
+import { NumericTextBox } from "../../../../Framework/Signum.React/Scripts/Lines/ValueLine";
+import { AbortableRequest } from "../../../../Framework/Signum.React/Scripts/Services";
 
 
 interface PredictModalProps extends IModalProps {
     initialPredict: PredictRequest;
+    isClassification: boolean;
     entity?: Lite<Entity>;
 }
 
@@ -43,24 +47,32 @@ export class PredictModal extends React.Component<PredictModalProps, PredictModa
         this.props.onExited!(undefined);
     }
 
+    abortableUpdateRequest = new AbortableRequest((abortController, request: PredictRequest) => API.updatePredict(request));
+
     hangleOnChange = () => {
         this.setState({ hasChanged: true });
-        API.updatePredict(this.state.predict)
-            .then(predict => this.setState({ predict: predict }))
+        this.abortableUpdateRequest.getData(this.state.predict)
+            .then(predict => {
+                this.setState({ predict: predict });
+            })
             .done();
+    }
+
+    componentWillUnmount() {
+        this.abortableUpdateRequest.abort();
     }
 
     render() {
 
         const p = this.state.predict;
         var e = this.props.entity;
-
+   
         const hasChanged = this.state.hasChanged;
 
         var sctx = new StyleContext(undefined, {});
 
         return (
-            <Modal onHide={this.handleOnClose} onExited={this.handleOnExited} show={this.state.show} className="message-modal">
+            <Modal onHide={this.handleOnClose} onExited={this.handleOnExited} show={this.state.show} className="message-modal" size="lg">
                 <ModalHeaderButtons onClose={this.handleOnClose}>
                     <h4 className={"modal-title"}>
                         {e && (<a href={Navigator.navigateRoute(e)} target="_blank" style={{ float: "right", marginRight: "20px" }}>{e.toStr}</a>)}
@@ -78,15 +90,33 @@ export class PredictModal extends React.Component<PredictModalProps, PredictModa
                         {p.columns.filter(c => c.usage == "Output").map((col, i) =>
                             <PredictLine key={i} sctx={sctx} hasOriginal={p.hasOriginal} hasChanged={hasChanged} binding={Binding.create(col, c => c.value)} usage={col.usage} token={col.token} onChange={this.hangleOnChange} />)}
                     </div>
+                    {this.props.isClassification && <AlternativesCheckBox binding={Binding.create(p, p2 => p2.alternativesCount)} onChange={this.hangleOnChange} />}
                 </div>
             </Modal>
         );
     }
 
-    static show(predict: PredictRequest, entity: Lite<Entity> | undefined): Promise<void> {
-        return openModal<undefined>(<PredictModal initialPredict={predict} entity={entity} />);
+    static show(predict: PredictRequest, entity: Lite<Entity> | undefined, isClassification: boolean): Promise<void> {
+        return openModal<undefined>(<PredictModal initialPredict={predict} entity={entity} isClassification={isClassification} />);
     }
 }
+
+
+export class AlternativesCheckBox extends React.Component<{ binding: Binding<number | null>, onChange : ()=> void }> {
+    render() {
+        var val = this.props.binding.getValue();
+        return (
+            <label><input type="checkbox" checked={val != null} onChange={() => this.setValue(val == null ? 5 : null)} /> Show <NumericTextBox value={val} onChange={n => this.setValue(n)} validateKey={ValueLine.isNumber} /> alternative predictions </label>
+        );
+    }
+
+    setValue(val: number | null) {
+        this.props.binding.setValue(val);
+        this.props.onChange();
+    }
+}
+
+
 
 interface PredictLineProps {
     binding: Binding<any>;
@@ -99,33 +129,66 @@ interface PredictLineProps {
 }
 
 export default class PredictLine extends React.Component<PredictLineProps> {
+
     render() {
         const p = this.props;
-        if (p.usage == "Output" && this.props.hasOriginal) {
+        return (
+            <FormGroup ctx={this.props.sctx} labelText={p.token.niceName} labelHtmlAttributes={{ title: fullNiceName(p.token) }}>
+                {this.renderValue()}
+            </FormGroup>
+        );
+    }
 
-            var tuple = p.binding.getValue() as PredictOutputTuple;
+    renderValue() {
+        const p = this.props;
+        if (p.usage == "Output") {
+            if (this.props.hasOriginal) {
+                var tuple = p.binding.getValue() as PredictOutputTuple;
 
-            const pctx = new TypeContext<any>(this.props.sctx, { readOnly: true }, undefined as any, Binding.create(tuple, a => a.predicted));
-            const octx = new TypeContext<any>(this.props.sctx, { readOnly: true }, undefined as any, Binding.create(tuple, a => a.original));
-
-            var color = pctx.value == octx.value || isLite(pctx.value) && isLite(octx.value) && is(pctx.value, octx.value) ? "green" : "red";
-
-            return (
-                <FormGroup ctx={this.props.sctx} labelText={p.token.niceName} labelHtmlAttributes={{ title: fullNiceName(p.token) }}>
-                    <PredictValue token={p.token} ctx={pctx} label={<i className="fa fa-lightbulb-o" style={{ color }}></i>} />
-                    <div style={{ opacity: this.props.hasChanged ? 0.5 : 1 }}>
-                        <PredictValue token={p.token} ctx={octx} label={<i className="fa fa-bullseye" style={{ color }}></i>} />
+                const octx = new TypeContext<any>(this.props.sctx, { readOnly: true }, undefined as any, Binding.create(tuple, a => a.original));
+                const pctx = new TypeContext<any>(this.props.sctx, { readOnly: true }, undefined as any, Binding.create(tuple, a => a.predicted));
+                
+                return (
+                    <div>
+                        <div style={{ opacity: this.props.hasChanged ? 0.5 : 1 }}>
+                            <PredictValue token={p.token} ctx={octx} label={<i className="fa fa-bullseye"></i>} />
+                        </div>
+                        {this.renderValueOrMultivalue(pctx, octx.value)}
                     </div>
-                </FormGroup>
-            );
+                );
+            }
+            else {
+                const ctx = new TypeContext<any>(this.props.sctx, { readOnly: true }, undefined as any, p.binding);
+                return this.renderValueOrMultivalue(ctx, null);
+
+            }
+        } else if (p.usage == "Input") {
+            const ctx = new TypeContext<any>(this.props.sctx, undefined, undefined as any, p.binding);
+            return (<PredictValue token={p.token} ctx={ctx} onChange={this.props.onChange}/>);
+        } else throw new Error("unexpected Usage");
+    }
+
+    renderValueOrMultivalue(pctx: TypeContext<any>, originalValue: any) {
+        if (!Array.isArray(pctx.value)) {
+            return <PredictValue token={this.props.token} ctx={pctx} label={<i className="fa fa-lightbulb-o" style={{ color: this.getColor(pctx.value, originalValue) }}></i>} />
         } else {
-            const ctx = new TypeContext<any>(this.props.sctx, { readOnly: p.usage != "Input" }, undefined as any, p.binding);
+            const predictions = pctx.value as AlternativePrediction[];
+
             return (
-                <FormGroup ctx={ctx} labelText={p.token.niceName} labelHtmlAttributes={{ title: fullNiceName(p.token) }}>
-                    <PredictValue token={p.token} ctx={ctx} label={p.usage == "Output" ? <i className="fa fa-lightbulb-o"></i> : undefined} onChange={this.props.onChange} />
-                </FormGroup>
+                <div>
+                    {predictions.map((a, i) => <PredictValue key={i} token={this.props.token}
+                        ctx={new TypeContext<any>(this.props.sctx, { readOnly: true }, undefined as any, new ReadonlyBinding(a.Value, this.props.sctx + "_" + i))}
+                        label={<i style={{ color: this.getColor(a.Value, originalValue) }}>{numbro(a.Probability).format("0.00 %")}</i>}
+                        labelHtmlAttributes={{ style: { textAlign: "right" } }}
+                    />)}
+                </div>
             );
         }
+    }
+
+    getColor(predicted: any, original : any) {
+        return !this.props.hasOriginal ? undefined :
+            predicted == original || isLite(predicted) && isLite(original) && is(predicted, original) ? "green" : "red";
     }
 }
 
@@ -195,6 +258,7 @@ interface PredictValueProps {
     ctx: TypeContext<any>;
     onChange?: () => void;
     label?: React.ReactElement<any>;
+    labelHtmlAttributes?: React.LabelHTMLAttributes<HTMLLabelElement>;
 }
 
 export class PredictValue extends React.Component<PredictValueProps> {
@@ -209,21 +273,22 @@ export class PredictValue extends React.Component<PredictValueProps> {
         const ctx = this.props.ctx.subCtx({ labelColumns: 1 });
         const token = this.props.token;
         const label = this.props.label;
+        const lha = this.props.labelHtmlAttributes;
 
         switch (token.filterType) {
             case "Lite":
                 if (token.type.name == IsByAll || getTypeInfos(token.type).some(ti => !ti.isLowPopulation))
-                    return <EntityLine ctx={ctx} type={token.type} create={false} labelText={label} onChange={this.handleValueChange} />;
+                    return <EntityLine ctx={ctx} type={token.type} create={false} labelText={label} labelHtmlAttributes={lha} onChange={this.handleValueChange} />;
                 else
-                    return <EntityCombo ctx={ctx} type={token.type} create={false} labelText={label} onChange={this.handleValueChange} />
+                    return <EntityCombo ctx={ctx} type={token.type} create={false} labelText={label} labelHtmlAttributes={lha} onChange={this.handleValueChange} />
             case "Enum":
                 const ti = getTypeInfos(token.type).single();
                 if (!ti)
                     throw new Error(`EnumType ${token.type.name} not found`);
                 const members = Dic.getValues(ti.members).filter(a => !a.isIgnoredEnum);
-                return <ValueLine ctx={ctx} type={token.type} formatText={token.format} unitText={token.unit} comboBoxItems={members} labelText={label} onChange={this.handleValueChange} />;
+                return <ValueLine ctx={ctx} type={token.type} formatText={token.format} unitText={token.unit} labelHtmlAttributes={lha} labelText={label} onChange={this.handleValueChange} comboBoxItems={members} />;
             default:
-                return <ValueLine ctx={ctx} type={token.type} formatText={token.format} unitText={token.unit} labelText={label} onChange={this.handleValueChange} />;
+                return <ValueLine ctx={ctx} type={token.type} formatText={token.format} unitText={token.unit} labelHtmlAttributes={lha} labelText={label} onChange={this.handleValueChange} />;
         }
     }
 }

@@ -22,9 +22,12 @@ import { ModelEntity } from "../../../Framework/Signum.React/Scripts/Signum.Enti
 import { QueryRequest } from "../../../Framework/Signum.React/Scripts/FindOptions";
 import * as ContexualItems from '../../../Framework/Signum.React/Scripts/SearchControl/ContextualItems'
 import MailingMenu from "./MailingMenu";
+import * as DynamicClientOptions from '../Dynamic/DynamicClientOptions';
 
 import "./Mailing.css";
 import { DropdownItem } from '../../../Framework/Signum.React/Scripts/Components';
+import { registerExportAssertLink } from '../../../Extensions/Signum.React.Extensions/UserAssets/UserAssetClient';
+
 
 export function start(options: {
     routes: JSX.Element[], smtpConfig: boolean,
@@ -35,6 +38,8 @@ export function start(options: {
     queryButton: boolean,
     quickLinksFrom: PseudoType[] | undefined
 }) {
+    DynamicClientOptions.Options.checkEvalFindOptions.push({ queryName: EmailTemplateEntity });
+
     options.routes.push(<ImportRoute path="~/asyncEmailSender/view" onImportModule={() => import("./AsyncEmailSenderPage")} />);
 
     OmniboxClient.registerSpecialAction({
@@ -108,6 +113,8 @@ export function start(options: {
 
             return <MailingMenu searchControl={ctx.searchControl} />;
         });
+    registerExportAssertLink(EmailTemplateEntity);
+    registerExportAssertLink(EmailMasterTemplateEntity);
 
 }
 
@@ -181,7 +188,7 @@ export module API {
     export function stop(): Promise<void> {
         return ajaxPost<void>({ url: "~/api/asyncEmailSender/stop" }, undefined);
     }
-
+     
     export function view(): Promise<AsyncEmailSenderState> {
         return ajaxGet<AsyncEmailSenderState>({ url: "~/api/asyncEmailSender/view" });
     }

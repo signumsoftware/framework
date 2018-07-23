@@ -434,6 +434,7 @@ namespace Signum.Engine.Workflow
                         return result;
                     }
                 }, new InvalidateWith(typeof(WorkflowConnectionEntity)));
+                WorkflowGraphLazy.OnReset += (e, args) => DynamicCode.OnInvalidated?.Invoke();
 
                 Validator.PropertyValidator((WorkflowConnectionEntity c) => c.Condition).StaticPropertyValidation = (e, pi) =>
                 {
@@ -595,6 +596,14 @@ namespace Signum.Engine.Workflow
                   s.MainEntityType,
               });
 
+            new Graph<WorkflowScriptEntity>.ConstructFrom<WorkflowScriptEntity>(WorkflowScriptOperation.Clone)
+            {
+                Construct = (s, _) => new WorkflowScriptEntity() {
+                    MainEntityType = s.MainEntityType,
+                    Eval = new WorkflowScriptEval() { Script = s.Eval.Script }
+                }
+            }.Register();
+
             new Graph<WorkflowScriptEntity>.Delete(WorkflowScriptOperation.Delete)
             {
                 Delete = (s, _) =>
@@ -658,6 +667,7 @@ namespace Signum.Engine.Workflow
                     Execute = (e, args) =>
                     {
                         WorkflowLogic.ApplyDocument(e, args.GetArg<WorkflowModel>(), args.TryGetArgC<WorkflowReplacementModel>(), args.TryGetArgC<List<WorkflowIssue>>() ?? new List<WorkflowIssue>());
+                        DynamicCode.OnInvalidated?.Invoke();
                     }
                 }.Register();
 
@@ -692,6 +702,7 @@ namespace Signum.Engine.Workflow
                     {
                         var wb = new WorkflowBuilder(w);
                         wb.Delete();
+                        DynamicCode.OnInvalidated?.Invoke();
                     }
                 }.Register();
 
