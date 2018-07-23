@@ -637,7 +637,6 @@
     <TypeScriptCompile Include="Workflow\Workflow\WorkflowLaneModel.tsx" />
     <TypeScriptCompile Include="Workflow\Workflow\WorkflowReplacementComponent.tsx" />
     <TypeScriptCompile Include="Workflow\Workflow\WorkflowScript.tsx" />
-    <TypeScriptCompile Include="Workflow\Workflow\WorkflowScriptRunnerPanelPage.tsx" />
   </ItemGroup>
 
   <ItemGroup>
@@ -645,7 +644,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.All" Version="2.1.0" />
+    <PackageReference Include="Microsoft.AspNetCore.All" Version="2.1.1" />
   </ItemGroup>
 
   <!--<Target Name="GenerateSignumTS">

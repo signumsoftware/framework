@@ -154,8 +154,8 @@ export default class Workflow extends React.Component<WorkflowProps, WorkflowSta
 
     renderIssuesHeader = (): React.ReactNode => {
 
-        const errorCount = (this.state.issues && this.state.issues.filter(a => a.Type == "Error").length) || 0;
-        const warningCount = (this.state.issues && this.state.issues.filter(a => a.Type == "Warning").length) || 0;
+        const errorCount = (this.state.issues && this.state.issues.filter(a => a.type == "Error").length) || 0;
+        const warningCount = (this.state.issues && this.state.issues.filter(a => a.type == "Warning").length) || 0;
 
         return (
             <div>
