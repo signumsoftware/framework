@@ -40,9 +40,6 @@ export class PopperContent extends React.Component<PopperContentProps, PopperCon
     constructor(props: PopperContentProps) {
         super(props);
 
-        this.handlePlacementChange = this.handlePlacementChange.bind(this);
-        this.setTargetNode = this.setTargetNode.bind(this);
-        this.getTargetNode = this.getTargetNode.bind(this);
         this.state = {
             isRTL: document.body.classList.contains("rtl"),
         };
