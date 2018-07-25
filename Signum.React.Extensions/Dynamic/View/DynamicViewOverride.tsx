@@ -1,4 +1,5 @@
 ﻿import * as React from 'react'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { classes } from '../../../../Framework/Signum.React/Scripts/Globals'
 import * as Constructor from '../../../../Framework/Signum.React/Scripts/Constructor'
 import { DynamicViewOverrideEntity, DynamicViewMessage } from '../Signum.Entities.Dynamic'
@@ -108,9 +109,9 @@ export default class DynamicViewOverrideComponent extends React.Component<Dynami
             <DropdownItem>
                 <DropdownItem header>{pr.propertyPath()}</DropdownItem>
                 <DropdownItem divider />
-                <DropdownItem onClick={() => this.handleRemoveClick(lambda)}><i className="fa fa-trash" aria-hidden="true" />&nbsp; Remove</DropdownItem>
-                <DropdownItem onClick={() => this.handleInsertBeforeClick(lambda)}><i className="fa fa-arrow-up" aria-hidden="true" />&nbsp; Insert Before</DropdownItem>
-                <DropdownItem onClick={() => this.handleInsertAfterClick(lambda)}><i className="fa fa-arrow-down" aria-hidden="true" />&nbsp; Insert After</DropdownItem>
+                <DropdownItem onClick={() => this.handleRemoveClick(lambda)}><FontAwesomeIcon icon="trash"/>&nbsp; Remove</DropdownItem>
+                <DropdownItem onClick={() => this.handleInsertBeforeClick(lambda)}><FontAwesomeIcon icon="arrow-up"/>&nbsp; Insert Before</DropdownItem>
+                <DropdownItem onClick={() => this.handleInsertAfterClick(lambda)}><FontAwesomeIcon icon="arrow-down"/>&nbsp; Insert After</DropdownItem>
             </DropdownItem>
         );
     }

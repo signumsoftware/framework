@@ -16,7 +16,7 @@ export default class TreeOmniboxProvider extends OmniboxProvider<TreeOmniboxResu
     }
 
     icon() {
-        return this.coloredIcon("fa fa-sitemap", "gold");
+        return this.coloredIcon("sitemap", "gold");
     }
 
     renderItem(result: TreeOmniboxResult): React.ReactChild[] {

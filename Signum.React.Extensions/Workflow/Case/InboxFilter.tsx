@@ -61,7 +61,6 @@ export default class InboxFilter extends React.Component<{ ctx: TypeContext<Inbo
     }
 
     getFilters(): FilterOption[] {
-
         var result: FilterOption[] = [];
 
         var val = this.props.ctx.value;

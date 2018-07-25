@@ -1,6 +1,7 @@
 ﻿import * as React from 'react'
 import * as numbro from 'numbro';
 import * as OrderUtils from '../../../../Framework/Signum.React/Scripts/Frames/OrderUtils'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { classes } from '../../../../Framework/Signum.React/Scripts/Globals'
 import { Tab, Tabs, UncontrolledTabs } from '../../../../Framework/Signum.React/Scripts/Components/Tabs'
 import { FormGroup, FormControlReadonly, ValueLine, ValueLineType, EntityLine, EntityDetail, EntityCombo, EntityList, EntityRepeater, EntityTable, IRenderButtons, EntityTabRepeater } from '../../../../Framework/Signum.React/Scripts/Lines'
@@ -65,7 +66,7 @@ export default class Predictor extends React.Component<{ ctx: TypeContext<Predic
 
     renderButtons(ctx: ButtonsContext): (React.ReactElement<any> | undefined)[] {
         if ((ctx.pack.entity as PredictorEntity).state == "Trained") {
-            return [OrderUtils.setOrder(10000, <button className="btn btn-info" onClick={this.handleClick}><i className="fa fa-lightbulb-o"></i>&nbsp;{PredictorMessage.Predict.niceToString()}</button >)];
+            return [OrderUtils.setOrder(10000, <button className="btn btn-info" onClick={this.handleClick}><FontAwesomeIcon icon={["far", "lightbulb"]} />&nbsp;{PredictorMessage.Predict.niceToString()}</button >)];
         } else {
             return [];
         }

@@ -1,5 +1,5 @@
-﻿
-import * as React from 'react'
+﻿import * as React from 'react'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { RouteComponentProps } from 'react-router'
 import { Dic, classes } from '../../../Framework/Signum.React/Scripts/Globals'
 import * as Finder from '../../../Framework/Signum.React/Scripts/Finder'
@@ -17,7 +17,6 @@ export interface MailingMenuProps {
 }
 
 export default class MailingMenu extends React.Component<MailingMenuProps> {
-
     handleClick = (et: Lite<EmailTemplateEntity>) => {
 
         Navigator.API.fetchAndForget(et)
@@ -44,7 +43,7 @@ export default class MailingMenu extends React.Component<MailingMenuProps> {
         if (!emailTemplates || !emailTemplates.length)
             return null;
 
-        const label = <span><i className="fa fa-envelope-o"></i> &nbsp; {EmailMessageEntity.nicePluralName()}</span>;
+        const label = <span><FontAwesomeIcon icon={["far", "envelope"]} /> &nbsp; {EmailMessageEntity.nicePluralName()}</span>;
 
         return (
             <UncontrolledDropdown id="mailingDropDown" className="sf-mailing-dropdown">
@@ -61,7 +60,6 @@ export default class MailingMenu extends React.Component<MailingMenuProps> {
             </UncontrolledDropdown>
         );
     }
-
 }
 
 

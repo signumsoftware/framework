@@ -1,5 +1,5 @@
-﻿
-import * as React from 'react'
+﻿import * as React from 'react'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Dic } from '../../../../Framework/Signum.React/Scripts/Globals'
 import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
 import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
@@ -66,7 +66,7 @@ export default class UserQueryPage extends React.Component<UserQueryPageProps, {
                 <h2>
                     <span className="sf-entity-title">{getQueryNiceName(fo.queryName) }</span>&nbsp;
                     <a className="sf-popup-fullscreen" href="#" onClick={(e) => this.searchControl.handleFullScreenClick(e) }>
-                        <span className="fa fa-external-link"></span>
+                        <FontAwesomeIcon icon="external-link-alt" />
                     </a>
                 </h2>
                 <SearchControl ref={(e: SearchControl) => this.searchControl = e}

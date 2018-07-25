@@ -1,5 +1,6 @@
-﻿
-import * as React from 'react'
+﻿import * as React from 'react'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+
 import { Link } from 'react-router-dom'
 import { FormGroup, FormControlReadonly, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityList, EntityRepeater, RenderEntity } from '../../../../Framework/Signum.React/Scripts/Lines'
 import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
@@ -15,7 +16,6 @@ import { DashboardEntity, PanelPartEmbedded, IPartEntity } from '../Signum.Entit
 import DashboardView from './DashboardView'
 import { RouteComponentProps } from "react-router";
 import * as QueryString from 'query-string'
-
 
 import "../Dashboard.css"
 
@@ -33,7 +33,6 @@ function getQueryEntity(props: DashboardPageProps): string {
 }
 
 export default class DashboardPage extends React.Component<DashboardPageProps, DashboardPageState> {
-
     state = { dashboard: undefined, entity: undefined } as DashboardPageState;
 
     componentWillMount() {
@@ -94,7 +93,7 @@ export default class DashboardPage extends React.Component<DashboardPageProps, D
                 {!dashboard ? <h2 className="display-5">{JavascriptMessage.loading.niceToString()}</h2> :
                     <div className="sf-show-hover">
                         {Navigator.isNavigable({ entity: dashboard, canExecute: {} } as EntityPack<Entity>) &&
-                            <Link className="sf-hide pull-right flip mt-3" style={{ textDecoration: "none" }} to={Navigator.navigateRoute(dashboard)}><span className="fa fa-edit"></span>&nbsp;Edit</Link>
+                            <Link className="sf-hide pull-right flip mt-3" style={{ textDecoration: "none" }} to={Navigator.navigateRoute(dashboard)}><FontAwesomeIcon icon="edit" />&nbsp;Edit</Link>
                         }
                         <h2 className="display-5">{getToString(dashboard)}</h2>
                     </div>}

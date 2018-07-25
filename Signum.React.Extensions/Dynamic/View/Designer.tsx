@@ -1,4 +1,5 @@
 ﻿import * as React from 'react'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { FormGroup, FormControlReadonly, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityList, EntityRepeater } from '../../../../Framework/Signum.React/Scripts/Lines'
 import { ModifiableEntity, External, JavascriptMessage, EntityControlMessage } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
 import { classes, Dic } from '../../../../Framework/Signum.React/Scripts/Globals'
@@ -91,7 +92,7 @@ export class ExpressionOrValueComponent extends React.Component<ExpressionOrValu
         
         const expr = value instanceof Object && (value as Object).hasOwnProperty("__code__") ? value as Expression<any> : null;
 
-        const expressionIcon = this.props.allowsExpression != false && < i className={classes("fa fa-calculator fa-1 formula", expr && "active")} onClick={this.handleToggleExpression}></i>;
+        const expressionIcon = this.props.allowsExpression != false && <span className={classes("formula", expr && "active")} onClick={this.handleToggleExpression}><FontAwesomeIcon icon="calculator" size="1x"/></span>;
 
 
         if (!expr && p.type == "boolean") {
@@ -237,12 +238,19 @@ interface NullableCheckBoxProps {
 }
 
 export class NullableCheckBox extends React.Component<NullableCheckBoxProps>{
-
     getIcon() {
         switch (this.props.value) {
-            case true: return "fa fa-check design-changed";
-            case false: return "fa fa-remove design-changed";
-            case undefined: return "fa fa-minus design-default"
+            case true: return "check";
+            case false: return "times";
+            case undefined: return "minus"
+        }
+    }
+
+    getClass() {
+        switch (this.props.value) {
+            case true: return "design-changed";
+            case false: return "design-changed";
+            case undefined: return "design-default"
         }
     }
 
@@ -258,7 +266,7 @@ export class NullableCheckBox extends React.Component<NullableCheckBoxProps>{
     render() {
         return (
             <a href="#" onClick={this.handleClick}>
-                <span className={this.getIcon()}/>
+                <FontAwesomeIcon icon={this.getIcon()} className={this.getClass()} />
                 {" "}
                 {this.props.label}
             </a>

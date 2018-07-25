@@ -45,7 +45,7 @@ export function start(options: { routes: JSX.Element[] }) {
         return promise.then(uqs =>
             uqs.map(uq => new QuickLinks.QuickLinkAction(liteKey(uq), uq.toStr || "", e => {
                 window.open(Navigator.toAbsoluteUrl(`~/userQuery/${uq.id}/${liteKey(ctx.lite)}`));
-            }, { icon: "fa fa-list-alt", iconColor: "dodgerblue" })));
+            }, { icon: ["far", "list-alt"], iconColor: "dodgerblue" })));
     });
 
     QuickLinks.registerQuickLink(UserQueryEntity, ctx => new QuickLinks.QuickLinkAction("preview", UserQueryMessage.Preview.niceToString(),

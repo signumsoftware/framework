@@ -1,4 +1,5 @@
 ﻿import * as React from 'react'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { classes } from '../../../../Framework/Signum.React/Scripts/Globals'
 import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
 import * as Constructor from '../../../../Framework/Signum.React/Scripts/Constructor'
@@ -25,7 +26,6 @@ export interface EntityGridRepeaterProps extends EntityListBaseProps {
     move?: boolean;
     resize?: boolean;
 }
-
 
 export interface EntityGridRepaterState extends EntityGridRepeaterProps {
     dragMode?: string;
@@ -326,7 +326,7 @@ export class EntityGridItem extends React.Component<EntityGridItemProps>{
                     {this.props.onRemove &&
                         <a href="#" className="sf-line-button sf-remove pull-right" onClick={this.props.onRemove}
                             title={EntityControlMessage.Remove.niceToString()}>
-                            <span className="fa fa-remove"></span>
+                            <FontAwesomeIcon icon="times" />
                         </a>
                     }
                     {this.props.title}

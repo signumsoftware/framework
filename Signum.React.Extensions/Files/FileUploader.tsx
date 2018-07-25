@@ -1,4 +1,6 @@
 ﻿import * as React from 'react'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { IconProp } from '@fortawesome/fontawesome-svg-core'
 import { classes, Dic, bytesToSize } from '../../../Framework/Signum.React/Scripts/Globals'
 import * as Services from '../../../Framework/Signum.React/Scripts/Services'
 import * as Navigator from '../../../Framework/Signum.React/Scripts/Navigator'
@@ -137,14 +139,14 @@ export default class FileUploader extends React.Component<FileUploaderProps, Fil
                         onDrop={this.handleDrop}
                     >
                         <div className={classes("sf-upload btn btn-light", this.props.buttonCss)}>
-                            <i className="fa fa-upload" />
+                            <FontAwesomeIcon icon="upload"/>
                             {FileMessage.SelectFile.niceToString()}
                             <input type='file' accept={this.props.accept} onChange={this.handleFileChange} multiple={this.props.multiple} />
                         </div>
                         &nbsp;{this.props.dragAndDropMessage || FileMessage.OrDragAFileHere.niceToString()}
                     </div> :
                         <div className={classes("sf-upload btn btn-light", this.props.buttonCss)}>
-                            <i className="fa fa-upload" />
+                            <FontAwesomeIcon icon="upload"/>
                             {FileMessage.SelectFile.niceToString()}
                             <input type='file' accept={this.props.accept} onChange={this.handleFileChange} multiple={this.props.multiple} />
                         </div>

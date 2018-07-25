@@ -1,6 +1,7 @@
 ﻿import * as React from 'react'
 import * as numbro from 'numbro'
 import * as moment from 'moment'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { classes } from '../../../Framework/Signum.React/Scripts/Globals'
 import { StyleContext } from '../../../Framework/Signum.React/Scripts/TypeContext'
 import { ajaxPost } from '../../../Framework/Signum.React/Scripts/Services'
@@ -66,7 +67,7 @@ export default class DynamicPanelPage extends React.Component<DynamicPanelProps,
             <div>
                 {errors && errors.length > 0 &&
                     <div role="alert" className="alert alert-danger" style={{ marginTop: "20px" }}>
-                        <span className="fa fa-exclamation-triangle"></span>
+                        <FontAwesomeIcon icon="exclamation-triangle" />
                         {" "}The server started, but there {errors.length > 1 ? "are" : "is"} <a href="#" onClick={this.handleErrorClick}>{errors.length} {errors.length > 1 ? "errors" : "error"}</a>.
                     </div>
                 }
@@ -121,7 +122,6 @@ export class CompileStep extends React.Component<{}, DynamicCompileStepState>{
     }
 
     render() {
-
         var sc = new StyleContext(undefined, { labelColumns: { sm: 3 } });
 
         const lines = Options.onGetDynamicLineForPanel.map(f => f(sc));

@@ -1,4 +1,5 @@
 ﻿import * as React from 'react'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { RouteComponentProps } from 'react-router'
 import * as numbro from 'numbro'
 import * as moment from 'moment'
@@ -125,7 +126,7 @@ export default class ImportAssetsPage extends React.Component<ImportAssetsPagePr
                         }
                     </tbody>
                 </table>
-                <button onClick={this.handleImport} className="btn btn-info"><span className="fa fa-cloud-upload" aria-hidden="true"></span> Import</button>
+                <button onClick={this.handleImport} className="btn btn-info"><FontAwesomeIcon icon="cloud-upload"/> Import</button>
             </div>
         );
     }

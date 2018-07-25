@@ -17,7 +17,7 @@ export default class MapOmniboxProvider extends OmniboxProvider<MapOmniboxResult
     }
 
     icon() {
-        return this.coloredIcon("fa fa-map", "green");
+        return this.coloredIcon("map", "green");
     }
 
     renderItem(result: MapOmniboxResult): React.ReactChild[] {

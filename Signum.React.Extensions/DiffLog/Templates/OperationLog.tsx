@@ -1,4 +1,6 @@
 ﻿import * as React from 'react'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+
 import { classes } from '../../../../Framework/Signum.React/Scripts/Globals'
 import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
 import { FormGroup, FormControlReadonly, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityList, EntityRepeater } from '../../../../Framework/Signum.React/Scripts/Lines'
@@ -91,7 +93,7 @@ export class DiffMixinTabs extends React.Component<{ ctx: TypeContext<OperationL
                     <span title={DiffLogMessage.NavigatesToThePreviousOperationLog.niceToString() }>
                         {DiffLogMessage.PreviousLog.niceToString() }
                         &nbsp;
-                        <span className="fa fa-external-link"></span>
+                        <FontAwesomeIcon icon="external-link-alt" />
                     </span>
                 </LinkContainer> as any
             }>
@@ -180,7 +182,7 @@ export class DiffMixinTabs extends React.Component<{ ctx: TypeContext<OperationL
                     <span title={DiffLogMessage.NavigatesToTheNextOperationLog.niceToString() }>
                         {DiffLogMessage.NextLog.niceToString() }
                         &nbsp;
-                        <span className="fa fa-external-link"></span>
+                        <FontAwesomeIcon icon="external-link-alt" />
                     </span>
                 </LinkContainer> as any}>
             </Tab>
@@ -194,7 +196,7 @@ export class DiffMixinTabs extends React.Component<{ ctx: TypeContext<OperationL
                     <span title={DiffLogMessage.NavigatesToTheCurrentEntity.niceToString() }>
                         {DiffLogMessage.CurrentEntity.niceToString() }
                         &nbsp;
-                        <span className="fa fa-external-link"></span>
+                        <FontAwesomeIcon icon="external-link-alt" />
                     </span>
                 </LinkContainer> as any}>
             </Tab>

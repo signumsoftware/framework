@@ -2,6 +2,7 @@
 import * as OrderUtils from '../../../../Framework/Signum.React/Scripts/Frames/OrderUtils'
 import { classes } from '../../../../Framework/Signum.React/Scripts/Globals'
 import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { FormGroup, FormControlReadonly, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityList, EntityRepeater, EntityTable, EntityDetail, IRenderButtons } from '../../../../Framework/Signum.React/Scripts/Lines'
 import { SearchControl } from '../../../../Framework/Signum.React/Scripts/Search'
 import { TypeContext, FormGroupStyle, ButtonsContext } from '../../../../Framework/Signum.React/Scripts/TypeContext'
@@ -61,6 +62,6 @@ export default class PredictSimpleResult extends React.Component<{ ctx: TypeCont
     }
 
     renderButtons(ctx: ButtonsContext): (React.ReactElement<any> | undefined)[] {
-        return [OrderUtils.setOrder(10000, <button className="btn btn-info" onClick={this.handleClick}><i className="fa fa-lightbulb-o"></i>&nbsp;{PredictorMessage.Predict.niceToString()}</button >)];
+        return [OrderUtils.setOrder(10000, <button className="btn btn-info" onClick={this.handleClick}><FontAwesomeIcon icon={["far", "lightbulb"]} />&nbsp;{PredictorMessage.Predict.niceToString()}</button >)];
     }
 }

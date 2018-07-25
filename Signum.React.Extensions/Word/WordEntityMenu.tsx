@@ -1,5 +1,5 @@
-﻿
-import * as React from 'react'
+﻿import * as React from 'react'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { RouteComponentProps } from 'react-router'
 import { Dic, classes } from '../../../Framework/Signum.React/Scripts/Globals'
 import * as Finder from '../../../Framework/Signum.React/Scripts/Finder'
@@ -43,7 +43,7 @@ export default class WordEntityMenu extends React.Component<WordEntityMenuProps>
 
     render() {
 
-        const label = <span><i className="fa fa-file-word-o"></i>&nbsp;{WordTemplateMessage.WordReport.niceToString()}</span>;
+        const label = <span><FontAwesomeIcon icon={["far", "file-word"]} />&nbsp;{WordTemplateMessage.WordReport.niceToString()}</span>;
 
         return (
             <UncontrolledDropdown id="wordMenu" className="sf-word-dropdown">

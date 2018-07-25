@@ -1,4 +1,5 @@
 ﻿import * as React from 'react'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Dic, classes } from '../../../../Framework/Signum.React/Scripts/Globals'
 import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
 import * as Operations from '../../../../Framework/Signum.React/Scripts/Operations'
@@ -60,7 +61,7 @@ export default class InlineCaseTags extends React.Component<InlineCaseTagsProps,
         return (
             <a href="#" onClick={this.handleTagsClick} className={classes("case-icon", this.state.tags.length == 0 && "case-icon-ghost")}>
                 {
-                    this.state.tags.length == 0 ? <span className={"fa fa-tags"} /> :
+                    this.state.tags.length == 0 ? <FontAwesomeIcon icon={"tags"} /> :
                         this.state.tags.map((t, i) => <Tag key={i} tag={t} />)
                 }
             </a>

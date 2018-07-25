@@ -1,6 +1,7 @@
 ﻿import * as moment from 'moment'
 import * as numbro from 'numbro'
 import * as React from 'react'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { openModal, IModalProps } from '../../../../Framework/Signum.React/Scripts/Modals';
 import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder';
 import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator';
@@ -106,7 +107,7 @@ export default class WorkflowActivityStatsModal extends React.Component<Workflow
         return (
             <FormGroup ctx={ctx}>
                 <button className="btn btn-default" onClick={this.handleClick}>
-                    <i className="fa fa-tachometer" style={{ color: "green" }} /> {WorkflowActivityMonitorMessage.WorkflowActivityMonitor.niceToString()}
+                    <FontAwesomeIcon icon="tachometer" color="green"/> {WorkflowActivityMonitorMessage.WorkflowActivityMonitor.niceToString()}
                 </button>
             </FormGroup>
         );

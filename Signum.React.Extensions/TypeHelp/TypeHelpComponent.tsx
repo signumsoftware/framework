@@ -1,4 +1,5 @@
 ﻿import * as React from 'react'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Route } from 'react-router'
 import { classes } from '../../../Framework/Signum.React/Scripts/Globals'
 import { ajaxPost, ajaxGet } from '../../../Framework/Signum.React/Scripts/Services';
@@ -168,11 +169,11 @@ export default class TypeHelpComponent extends React.Component<TypeHelpComponent
                     <span className="input-group-prepend">
                         <button className="btn input-group-text" disabled={!this.canBack()}
                             onClick={e => this.handleGoHistory(e, this.state.historyIndex - 1)} type="button">
-                            <span className="fa fa-arrow-circle-left" />
+                            <FontAwesomeIcon icon="arrow-circle-left" />
                         </button>
                         <button className="btn input-group-text" disabled={!this.canForth()}
                             onClick={e => this.handleGoHistory(e, this.state.historyIndex + 1)} type="button">
-                            <span className="fa fa-arrow-circle-right" />
+                            <FontAwesomeIcon icon="arrow-circle-right" />
                         </button>
                     </span>
                     <Typeahead

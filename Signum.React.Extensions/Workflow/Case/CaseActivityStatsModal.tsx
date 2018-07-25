@@ -1,6 +1,7 @@
 ﻿import * as moment from 'moment'
 import * as numbro from 'numbro'
 import * as React from 'react'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { openModal, IModalProps } from '../../../../Framework/Signum.React/Scripts/Modals';
 import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder';
 import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator';
@@ -156,7 +157,7 @@ export class CaseActivityStatsComponent extends React.Component<CaseActivityStat
         return (
             <FormGroup ctx={ctx}>
                 <button className="btn btn-light" onClick={this.handleClick}>
-                    <i className="fa fa-random" style={{ color: "green" }} /> {WorkflowActivityMessage.CaseFlow.niceToString()}
+                    <FontAwesomeIcon icon="random" color="green"/> {WorkflowActivityMessage.CaseFlow.niceToString()}
                 </button>
             </FormGroup>
         );

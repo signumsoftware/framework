@@ -103,7 +103,8 @@ export function openDialog(e: Event) {
     Navigator.navigatePopup(Entities.EntityHtml.withoutType("New"),
         {
             controllerUrl: $this.attr("href"),
-            onPopupLoaded: div => coloredRadios(div)
+            onPopupLoaded: div =>
+                coloredRadios(div)
         }).then(() => {
             $this.closest("div").css("opacity", 0.5);
             $this.find(".sf-auth-thumb").css("opacity", 0.5);

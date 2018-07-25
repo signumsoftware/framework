@@ -1,4 +1,5 @@
 ﻿import * as React from 'react'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { FormGroup, FormControlReadonly, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityList, EntityRepeater } from '../../../../Framework/Signum.React/Scripts/Lines'
 import { classes, Dic } from '../../../../Framework/Signum.React/Scripts/Globals'
 import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
@@ -80,7 +81,7 @@ export class StyleOptionsLine extends React.Component<StyleOptionsLineProps>{
                     {val && <a href="#" className={classes("sf-line-button", "sf-remove")}
                         onClick={this.handleRemove}
                         title={EntityControlMessage.Remove.niceToString()}>
-                        <span className="fa fa-remove" />
+                        <FontAwesomeIcon icon="times" />
                     </a>}
                 </label>
                 <div>
@@ -90,7 +91,7 @@ export class StyleOptionsLine extends React.Component<StyleOptionsLineProps>{
                         <a href="#" title={EntityControlMessage.Create.niceToString()}
                             className="sf-line-button sf-create"
                             onClick={this.handleCreate}>
-                            <span className="fa fa-plus sf-create" />&nbsp;{EntityControlMessage.Create.niceToString()}
+                            <FontAwesomeIcon icon="plus" className="sf-create"/>&nbsp;{EntityControlMessage.Create.niceToString()}
                         </a>}
                 </div>
             </div>

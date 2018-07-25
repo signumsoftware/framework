@@ -1,5 +1,6 @@
 ﻿import * as React from 'react'
 import * as moment from 'moment'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Binding, MemberType } from '../../../../Framework/Signum.React/Scripts/Reflection'
 import { Dic, classes } from '../../../../Framework/Signum.React/Scripts/Globals'
 import { newMListElement, Lite, liteKey, Entity, is } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
@@ -69,12 +70,11 @@ export default class ActivityWithRemarksComponent extends React.Component<Activi
                 <a href="#" onClick={this.handleRemarksClick} className={classes(
                         "case-icon",
                         !this.state.remarks && "case-icon-ghost")}>
-                    <span className={classes(
-                        this.state.remarks ? "fa fa-comment" : "fa fa-comment-o")} />
+                    <FontAwesomeIcon icon={this.state.remarks ? "comment-dots" : ["far", "comment"]} />
                 </a>
                 {this.state.alerts > 0 && " "}
                 {this.state.alerts > 0 && <a href="#" onClick={this.handleAlertsClick} style={{ color: "orange" }}>
-                    <span className={"fa fa-bell"} />
+                    <FontAwesomeIcon icon={"bell"} />
                 </a>}
                 &nbsp;
                <InlineCaseTags case={this.props.data.case} defaultTags={this.state.tags} />

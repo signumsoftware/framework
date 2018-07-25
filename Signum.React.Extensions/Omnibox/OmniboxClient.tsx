@@ -1,5 +1,7 @@
 ﻿
 import * as React from 'react'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { IconProp, IconPrefix } from '@fortawesome/fontawesome-svg-core';
 import { Route } from 'react-router'
 
 import { Dic } from '../../../Framework/Signum.React/Scripts/Globals';
@@ -130,8 +132,8 @@ export abstract class OmniboxProvider<T extends OmniboxResult> {
         return <span style={{ color: colorName, lineHeight: "1.6em" }}>{text}</span>;
     }
 
-    coloredIcon(className: string, color: string): React.ReactChild {
-        return <span className={"icon " + className} style={{ color: color, }}/>;
+    coloredIcon(icon: IconProp, color: string): React.ReactChild {
+        return <FontAwesomeIcon icon={icon}  color={color} className="icon" />;
     }
 }
 

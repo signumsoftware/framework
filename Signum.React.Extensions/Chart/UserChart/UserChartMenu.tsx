@@ -1,5 +1,5 @@
-﻿
-import * as React from 'react'
+﻿import * as React from 'react'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Dic, classes } from '../../../../Framework/Signum.React/Scripts/Globals'
 import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
 import { Lite, toLite } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
@@ -106,7 +106,7 @@ export default class UserChartMenu extends React.Component<UserChartMenuProps, U
         const crView = this.props.chartRequestView;
         const labelText = !crView.props.userChart ? UserChartEntity.nicePluralName() : crView.props.userChart.toStr
 
-        const label = <span><i className="fa fa-bar-chart"></i> &nbsp; {labelText}</span>;
+        const label = <span><FontAwesomeIcon icon="chart-bar" /> &nbsp; {labelText}</span>;
         return (
             <Dropdown id="userQueriesDropDown" className="sf-userquery-dropdown"
                 toggle={this.handleSelectedToggle} isOpen={this.state.isOpen}>

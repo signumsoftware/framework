@@ -1,4 +1,6 @@
 ﻿import * as React from 'react'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { IconProp } from '@fortawesome/fontawesome-svg-core'
 import { Route } from 'react-router'
 import { Dic, classes } from '../../../Framework/Signum.React/Scripts/Globals';
 import { ajaxPost, ajaxPostRaw, ajaxGet, saveFile } from '../../../Framework/Signum.React/Scripts/Services';
@@ -38,14 +40,14 @@ export abstract class ToolbarConfig<T extends Entity> {
     }
 
     getIcon(element: ToolbarResponse<T>) {
-        return ToolbarConfig.coloredIcon(element.iconName, element.iconColor);
+        return ToolbarConfig.coloredIcon(element.icon, element.iconColor);
     }
 
-    static coloredIcon(className: string | null | undefined, color: string | null | undefined): React.ReactChild | null {
-        if (!className || className.toLowerCase() == "none")
+    static coloredIcon(icon: IconProp | undefined, color: string | undefined): React.ReactChild | null {
+        if (!icon)
             return null;
 
-        return <span className={"icon " + className} style={{ color: color || undefined }} />;
+        return <FontAwesomeIcon icon={icon} className={"icon"} color={color} />;
     }
 
     getLabel(element: ToolbarResponse<T>) {
@@ -80,7 +82,7 @@ export namespace API {
 
 export interface ToolbarResponse<T extends Entity> {
     type: ToolbarElementType;
-    iconName?: string;
+    icon?: IconProp;
     iconColor?: string;
     label?: string;
     content?: Lite<T>;

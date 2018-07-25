@@ -1,5 +1,7 @@
 ﻿
 import * as React from 'react'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+
 import { Route } from 'react-router'
 import { Dic, classes } from '../../../Framework/Signum.React/Scripts/Globals';
 import { ajaxPost, ajaxGet } from '../../../Framework/Signum.React/Scripts/Services';
@@ -109,11 +111,11 @@ function monkeyPatchCreateContextualMenuItem(){
                 className={disabled ? "disabled" : undefined}
                 onClick={disabled ? undefined : onClick}
                 data-operation={coc.operationInfo.key}>
-                {icon ? <span className={classes("icon", icon)} style={{ color: coc.settings && coc.settings.iconColor }}></span> :
+                {icon ? <FontAwesomeIcon icon={icon} className="icon" color={coc.settings && coc.settings.iconColor}/> :
                     color ? <span className={classes("icon", "empty-icon", "btn-" + color)}></span> : undefined}
                 {(icon || color) && " "}
                 {text}
-                <span className="fa fa-cog process-contextual-icon" aria-hidden={true} onClick={processOnClick}></span>
+                <span className="process-contextual-icon" onClick={processOnClick}><FontAwesomeIcon icon="cog"/></span>
 
             </DropdownItem>,
             coc.canExecute ? <UncontrolledTooltip target={() => innerRef!} placement="right">{coc.canExecute}</UncontrolledTooltip> : undefined

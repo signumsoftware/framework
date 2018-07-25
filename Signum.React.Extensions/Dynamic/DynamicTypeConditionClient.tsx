@@ -19,7 +19,7 @@ export function start(options: { routes: JSX.Element[] }) {
     Navigator.addSettings(new EntitySettings(DynamicTypeConditionEntity, w => import('./TypeCondition/DynamicTypeCondition')));
 
     Operations.addSettings(new EntityOperationSettings(DynamicTypeConditionOperation.Clone, {
-        contextual: { icon: "fa fa-clone", iconColor: "black" },
+        contextual: { icon: "clone", iconColor: "black" },
     }))
 
     Constructor.registerConstructor(DynamicTypeConditionEntity, () => DynamicTypeConditionEntity.New({ eval: DynamicTypeConditionEval.New() }));

@@ -1,5 +1,5 @@
-﻿
-import * as React from 'react'
+﻿import * as React from 'react'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { FormGroup, FormControlReadonly, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityList, EntityRepeater, RenderEntity } from '../../../../Framework/Signum.React/Scripts/Lines'
 import { classes } from '../../../../Framework/Signum.React/Scripts/Globals'
 import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
@@ -13,15 +13,11 @@ import QueryTokenEntityBuilder from '../../UserAssets/Templates/QueryTokenEntity
 import FileLine, { FileTypeSymbol } from '../../Files/FileLine'
 import * as DashboardClient from '../DashboardClient'
 import { DashboardEntity, PanelPartEmbedded, IPartEntity } from '../Signum.Entities.Dashboard'
-
-
-
 import "../Dashboard.css"
 import { ErrorBoundary } from '../../../../Framework/Signum.React/Scripts/Components';
-
+import { parseIcon } from '../Admin/Dashboard';
 
 export default class DashboardView extends React.Component<{ dashboard: DashboardEntity, entity?: Entity }> {
-
     render() {
         if (this.props.dashboard.combineSimilarRows)
             return this.renderCombinedRows();
@@ -230,13 +226,13 @@ export class PanelPart extends React.Component<PanelPartProps, PanelPartState>{
         }
 
         const titleText = p.title || getToString(content);
-        const iconColor = renderer.defaultIcon(content);
-        const icon = p.iconName || iconColor && iconColor.iconName;
-        const color = p.iconName || iconColor && iconColor.iconColor;
+        const defaultIcon = renderer.defaultIcon(content);
+        const icon = p.iconName ? parseIcon(p.iconName) : defaultIcon && defaultIcon.icon;
+        const color = p.iconColor || defaultIcon && defaultIcon.iconColor;
         
         const title = !icon ? titleText :
             <span>
-                <span className={icon} style={{ color: color }} />&nbsp;{titleText}
+                <FontAwesomeIcon icon={icon} color={color} />&nbsp;{titleText}
             </span>;
 
         var style = p.style == undefined || p.style == "Default" ? undefined : p.style.toLowerCase();
@@ -249,7 +245,7 @@ export class PanelPart extends React.Component<PanelPartProps, PanelPartState>{
                 )}>
                     {renderer.handleEditClick &&
                         <a className="sf-pointer pull-right flip sf-hide" onMouseUp={e => renderer.handleEditClick!(content, lite, e)}>
-                            <span className="fa fa-edit"></span>&nbsp;Edit
+                            <FontAwesomeIcon icon="edit" />&nbsp;Edit
                         </a>}
                     &nbsp;
                     {renderer.handleTitleClick == undefined ? title :

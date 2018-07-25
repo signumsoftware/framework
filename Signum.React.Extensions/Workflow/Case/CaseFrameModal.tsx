@@ -1,4 +1,5 @@
 ﻿import * as React from 'react'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Dic } from '../../../../Framework/Signum.React/Scripts/Globals'
 import { openModal, IModalProps } from '../../../../Framework/Signum.React/Scripts/Modals'
 import { TypeContext, StyleOptions, EntityFrame } from '../../../../Framework/Signum.React/Scripts/TypeContext'
@@ -307,7 +308,7 @@ export default class CaseFrameModal extends React.Component<CaseFrameModalProps,
 
         return (
             <a href="#" className="sf-popup-fullscreen" onClick={this.handlePopupFullScreen}>
-                <span className="fa fa-external-link"></span>
+                <FontAwesomeIcon icon="external-link-alt" />
             </a>
         );
     }

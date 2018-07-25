@@ -1,5 +1,5 @@
-﻿
-import * as React from 'react'
+﻿import * as React from 'react'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { RouteComponentProps } from 'react-router'
 import { Dic, classes } from '../../../Framework/Signum.React/Scripts/Globals'
 import * as Finder from '../../../Framework/Signum.React/Scripts/Finder'
@@ -95,7 +95,7 @@ export default class UserQueryMenu extends React.Component<UserQueryMenuProps, U
     }
 
     render() {
-        const label = <span><i className="fa fa-list-alt"></i>&nbsp;{this.props.searchControl.props.largeToolbarButtons == true ? " " + UserQueryMessage.UserQueries_UserQueries.niceToString() : undefined}</span>;
+        const label = <span><FontAwesomeIcon icon={["far", "list-alt"]} />&nbsp;{this.props.searchControl.props.largeToolbarButtons == true ? " " + UserQueryMessage.UserQueries_UserQueries.niceToString() : undefined}</span>;
         const userQueries = this.state.userQueries;
         return (
             <Dropdown id="userQueriesDropDown" className="sf-userquery-dropdown" color="light"

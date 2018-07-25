@@ -1,4 +1,5 @@
 ﻿import * as React from 'react'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import * as Combobox from 'react-widgets/lib/Combobox'
 import { FormGroup, FormControlReadonly, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityList, EntityRepeater } from '../../../../Framework/Signum.React/Scripts/Lines'
 import { classes, Dic } from '../../../../Framework/Signum.React/Scripts/Globals'
@@ -838,7 +839,7 @@ export class PropertyRepeaterComponent extends React.Component<PropertyRepeaterC
                 <a href="#" title="Create Property"
                     className="sf-line-button sf-create"
                     onClick={this.handleCreateClick}>
-                    <span className="fa fa-plus sf-create" />&nbsp;Create Property
+                    <FontAwesomeIcon icon="plus" className="sf-create" />&nbsp;Create Property
                 </a>
             </div>
         );
@@ -852,19 +853,19 @@ export class PropertyRepeaterComponent extends React.Component<PropertyRepeaterC
                     <a href="#" className={classes("sf-line-button", "sf-remove")}
                         onClick={e => this.handleOnRemove(e, i)}
                         title={EntityControlMessage.Remove.niceToString()}>
-                        <span className="fa fa-remove" />
+                        <FontAwesomeIcon icon="times" />
                     </a>
 
                     <a href="#" className={classes("sf-line-button", "move-up")}
                         onClick={e => this.handleOnMoveUp(e, i)}
                         title={EntityControlMessage.MoveUp.niceToString()}>
-                        <span className="fa fa-chevron-up" />
+                        <FontAwesomeIcon icon="chevron-up" />
                     </a>
 
                     <a href="#" className={classes("sf-line-button", "move-down")}
                         onClick={e => this.handleOnMoveDown(e, i)}
                         title={EntityControlMessage.MoveDown.niceToString()}>
-                        <span className="fa fa-chevron-down" />
+                        <FontAwesomeIcon icon="chevron-down" />
                     </a>
                 </span>
                 {" " + (p._propertyType_ || "") + " " + p.name}
@@ -1108,7 +1109,7 @@ export class ComboBoxRepeaterComponent extends React.Component<ComboBoxRepeaterC
                                 <a href="#" title="Create Query Column"
                                     className="sf-line-button sf-create"
                                     onClick={this.handleCreateClick}>
-                                    <span className="fa fa-plus sf-create" />&nbsp;Create Query Column
+                                    <FontAwesomeIcon icon="plus" className="sf-create" />&nbsp;Create Query Column
                                 </a>
                             </td>
                         </tr>
@@ -1126,19 +1127,19 @@ export class ComboBoxRepeaterComponent extends React.Component<ComboBoxRepeaterC
                         <a href="#" className={classes("sf-line-button", "sf-remove")}
                             onClick={e => this.handleOnRemove(e, i)}
                             title={EntityControlMessage.Remove.niceToString()}>
-                            <span className="fa fa-remove" />
+                            <FontAwesomeIcon icon="times" />
                         </a>
 
                         <a href="#" className={classes("sf-line-button", "move-up")}
                             onClick={e => this.handleOnMoveUp(e, i)}
                             title={EntityControlMessage.MoveUp.niceToString()}>
-                            <span className="fa fa-chevron-up" />
+                            <FontAwesomeIcon icon="chevron-up" />
                         </a>
 
                         <a href="#" className={classes("sf-line-button", "move-down")}
                             onClick={e => this.handleOnMoveDown(e, i)}
                             title={EntityControlMessage.MoveDown.niceToString()}>
-                            <span className="fa fa-chevron-down" />
+                            <FontAwesomeIcon icon="chevron-down" />
                         </a>
                     </span>
                 </td>
@@ -1208,7 +1209,7 @@ export class ValidatorRepeaterComponent extends React.Component<ValidatorRepeate
                 <a href="#" title="Create Validator"
                     className="sf-line-button sf-create"
                     onClick={this.handleCreateClick}>
-                    <span className="fa fa-plus sf-create" />&nbsp;Create Validator
+                    <FontAwesomeIcon icon="plus" className="sf-create"/>&nbsp;Create Validator
                 </a>
             </div>
         );
@@ -1221,7 +1222,7 @@ export class ValidatorRepeaterComponent extends React.Component<ValidatorRepeate
                     <a href="#" className={classes("sf-line-button", "sf-remove")}
                         onClick={e => this.handleOnRemove(e, i)}
                         title={EntityControlMessage.Remove.niceToString()}>
-                        <span className="fa fa-remove" />
+                        <FontAwesomeIcon icon="times" />
                     </a>
                 </span>
                 {" "}

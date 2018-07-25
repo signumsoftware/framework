@@ -2,6 +2,7 @@
 import { classes } from '../../../../Framework/Signum.React/Scripts/Globals'
 import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
 import * as numbro from 'numbro';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { PredictorEntity, PredictSimpleResultEntity, PredictorColumnEmbedded, DefaultColumnEncodings } from '../Signum.Entities.MachineLearning';
 import * as ChartClient from '../../Chart/ChartClient'
 import { ChartRequest } from '../../Chart/Signum.Entities.Chart'
@@ -29,7 +30,7 @@ export default class SimpleResultButton extends React.Component<SimpleResultButt
         return (
             <div>
                 <a href="#" className="btn btn-sm btn-info" onClick={this.handleOnClick} >
-                    <i className="fa fa-line-chart" />&nbsp;
+                    <FontAwesomeIcon icon="chart-line"/>&nbsp;
                     {is(col.element.encoding, DefaultColumnEncodings.OneHot) ? "Confusion matrix" : "Regression Scatterplot"}
                 </a>
             </div>

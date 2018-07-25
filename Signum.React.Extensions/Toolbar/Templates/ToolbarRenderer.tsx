@@ -17,7 +17,7 @@ import { PermissionSymbol } from "../../Authorization/Signum.Entities.Authorizat
 import * as PropTypes from "prop-types";
 import { Dropdown, DropdownToggle, DropdownMenu, DropdownItem, NavItem } from '../../../../Framework/Signum.React/Scripts/Components';
 import { NavLink } from '../../../../Framework/Signum.React/Scripts/Components/NavItem';
-
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 
 export interface ToolbarRendererProps {
     location?: ToolbarLocation;
@@ -128,7 +128,7 @@ export default class ToolbarRenderer extends React.Component<ToolbarRendererProp
                     return (
                         <NavItem>
                             <NavLink onClick={e => Navigator.pushOrOpenInTab(res.url!, e)}>
-                                {ToolbarConfig.coloredIcon(res.iconName, res.iconColor)}{res.label}
+                                {ToolbarConfig.coloredIcon(res.icon, res.iconColor)}{res.label}
                             </NavLink>
                         </NavItem>
                     );
@@ -185,7 +185,7 @@ export default class ToolbarRenderer extends React.Component<ToolbarRendererProp
                 return [
                     <DropdownItem onClick={e => this.handleClick(e, res, topRes)}
                         className={classes(menuItemN, this.state.expanded.contains(res) && "active")}>
-                        {this.icon(res)}{res.label || res.content!.toStr}<span className={classes("fa", this.state.expanded.contains(res) ? "fa-chevron-down" : "fa-chevron-left", "arrow-align")} />
+                        {this.icon(res)}{res.label || res.content!.toStr}<FontAwesomeIcon icon={this.state.expanded.contains(res) ? "chevron-down" : "chevron-left"} className="arrow-align" />
                     </DropdownItem>
                 ].concat(res.elements && res.elements.length && this.state.expanded.contains(res) ? res.elements.flatMap(r => this.renderDropdownItem(r, indent + 1, topRes)) : []);
             case "Header":
@@ -202,7 +202,7 @@ export default class ToolbarRenderer extends React.Component<ToolbarRendererProp
                 if (res.url) {
                     return [
                         <DropdownItem onClick={e => Navigator.pushOrOpenInTab(res.url!, e)} className={menuItemN}>
-                            {ToolbarConfig.coloredIcon(res.iconName, res.iconColor)}{res.label}
+                            {ToolbarConfig.coloredIcon(res.icon, res.iconColor)}{res.label}
                         </DropdownItem>
                     ];
 
@@ -227,10 +227,10 @@ export default class ToolbarRenderer extends React.Component<ToolbarRendererProp
 
     icon(res: ToolbarClient.ToolbarResponse<any>) {
 
-        if (res.iconName == null)
+        if (res.icon == null)
             return null;
 
-        return <span className={"icon " + res.iconName} style={{ color: res.iconColor }} />
+        return <FontAwesomeIcon icon={res.icon} className={"icon"} color={res.iconColor} />
     }
 }
 

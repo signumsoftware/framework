@@ -1,4 +1,5 @@
 ﻿import * as React from 'react'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Route } from 'react-router'
 import { Dic, classes } from '../../../Framework/Signum.React/Scripts/Globals';
 import { ajaxPost, ajaxPostRaw, ajaxGet, saveFile } from '../../../Framework/Signum.React/Scripts/Services';
@@ -41,7 +42,7 @@ export function start(options: { routes: JSX.Element[], plainExcel: boolean, exc
                 <button
                     className="sf-query-button sf-chart-script-edit btn btn-light"
                     onClick={() => { API.generatePlanExcel(ChartClient.API.getRequest(ctx.chartRequest)); }}>
-                    <i className="fa fa-file-excel-o"></i> &nbsp; {ExcelMessage.ExcelReport.niceToString()}
+                    <FontAwesomeIcon icon={["far", "file-excel"]} /> &nbsp; {ExcelMessage.ExcelReport.niceToString()}
                 </button>
             );
         });

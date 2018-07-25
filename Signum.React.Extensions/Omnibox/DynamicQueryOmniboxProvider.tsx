@@ -15,7 +15,7 @@ export default class DynamicQueryOmniboxProvider extends OmniboxProvider<Dynamic
     }
 
     icon() {
-        return this.coloredIcon("fa fa-search", "orange");
+        return this.coloredIcon("search", "orange");
     }
 
 

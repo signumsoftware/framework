@@ -1,4 +1,5 @@
 ﻿import * as React from 'react'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { ValueLine, EntityLine, TypeContext, FormGroup, ValueLineType } from '../../../../Framework/Signum.React/Scripts/Lines'
 import { PropertyRoute, Binding, isTypeEntity } from '../../../../Framework/Signum.React/Scripts/Reflection'
 import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
@@ -76,7 +77,7 @@ export default class DynamicExpressionComponent extends React.Component<DynamicE
                 <br />
                 <div className="row">
                     <div className="col-sm-7">
-                        {this.state.exampleEntity && <button className="btn btn-success" onClick={this.handleEvaluate}><i className="fa fa-play" aria-hidden="true"></i> Evaluate</button>}
+                        {this.state.exampleEntity && <button className="btn btn-success" onClick={this.handleEvaluate}><FontAwesomeIcon icon="play"></FontAwesomeIcon> Evaluate</button>}
                         <div className="code-container">
                             <pre style={{ border: "0px", margin: "0px", overflow: "visible" }}>
                                 {this.renderTypeAutocomplete(ctx.subCtx(dt => dt.returnType))} {this.renderInput(ctx.subCtx(dt => dt.name))}({this.renderTypeAutocomplete(ctx.subCtx(dt => dt.fromType))}e) =>

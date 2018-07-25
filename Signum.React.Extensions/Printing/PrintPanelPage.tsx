@@ -1,4 +1,5 @@
 ﻿import * as React from 'react'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import * as numbro from 'numbro'
 import * as Finder from '../../../Framework/Signum.React/Scripts/Finder'
 import EntityLink from '../../../Framework/Signum.React/Scripts/SearchControl/EntityLink'
@@ -14,8 +15,6 @@ import { PrintPackageEntity, PrintLineState, PrintLineEntity, PrintPackageProces
 import { FileTypeSymbol } from '../Files/Signum.Entities.Files'
 import { ProcessEntity } from '../Processes/Signum.Entities.Processes'
 import { Type } from '../../../Framework/Signum.React/Scripts/Reflection'
-
-
 
 export interface PrintPanelPageState {
     stats: PrintStat[];
@@ -77,7 +76,7 @@ export default class PrintPanelPage extends React.Component<{}, PrintPanelPageSt
 
         return (
             <a href="#" className="sf-line-button" title="Print" onClick={e => this.handlePrintClick(e, fileType, vsc)}>
-                <span className="fa fa-print"></span>
+                <FontAwesomeIcon icon="print" />
             </a>
         );
     }
@@ -89,5 +88,4 @@ export default class PrintPanelPage extends React.Component<{}, PrintPanelPageSt
             .then(p => vsc.refreshValue())
             .done();
     }
-
 }

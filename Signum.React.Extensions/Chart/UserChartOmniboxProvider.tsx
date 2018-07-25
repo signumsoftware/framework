@@ -19,7 +19,7 @@ export default class UserChartOmniboxProvider extends OmniboxProvider<UserChartO
     }
 
     icon() {
-        return this.coloredIcon("fa fa-bar-chart", "darkviolet");
+        return this.coloredIcon("chart-bar", "darkviolet");
     }
 
     renderItem(result: UserChartOmniboxResult): React.ReactChild[] {

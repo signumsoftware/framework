@@ -83,12 +83,12 @@ export function start(options: { routes: JSX.Element[] }) {
                 .then(ca => Navigator.navigate(ca.case, { extraComponentProps: { caseActivity: ca } }))
                 .then(() => ctx.contextualContext && ctx.contextualContext.markRows({}))
                 .done();
-        }, { icon: "fa fa-random", iconColor: "green" })
+        }, { icon: "random", iconColor: "green" })
     ]);
 
     QuickLinks.registerQuickLink(WorkflowEntity, ctx => [
         new QuickLinks.QuickLinkExplore({ queryName: CaseEntity, parentColumn: "Workflow", parentValue: ctx.lite },
-            { icon: "fa fa-tasks", iconColor: "blue" })
+            { icon: "tasks", iconColor: "blue" })
     ]);
     
     OmniboxClient.registerSpecialAction({
@@ -157,24 +157,24 @@ export function start(options: { routes: JSX.Element[] }) {
     QuickLinks.registerQuickLink(WorkflowEntity, ctx => new QuickLinks.QuickLinkLink("bam",
         WorkflowActivityMonitorMessage.WorkflowActivityMonitor.niceToString(),
         workflowActivityMonitorUrl(ctx.lite),
-        { icon: "fa fa-tachometer", iconColor: "green" }));
+        { icon: "tachometer", iconColor: "green" }));
 
     Operations.addSettings(new EntityOperationSettings(WorkflowOperation.Save, { color: "primary", onClick: executeWorkflowSave }));
     Operations.addSettings(new EntityOperationSettings(WorkflowOperation.Delete, { contextualFromMany: { isVisible: ctx => false } }));
     Operations.addSettings(new EntityOperationSettings(WorkflowOperation.Activate, {
-        contextual: { icon: "fa fa-heartbeat", iconColor: "red" },
-        contextualFromMany: { icon: "fa fa-heartbeat", iconColor: "red" },
+        contextual: { icon: "heartbeat", iconColor: "red" },
+        contextualFromMany: { icon: "heartbeat", iconColor: "red" },
     }));
     Operations.addSettings(new EntityOperationSettings(WorkflowOperation.Deactivate, {
         onClick: eoc => chooseWorkflowExpirationDate([toLite(eoc.entity)]).then(val => val && eoc.defaultClick(val)).done(),
         contextual: {
             onClick: coc => chooseWorkflowExpirationDate(coc.context.lites).then(val => val && coc.defaultContextualClick(val)).done(),
-            icon: "fa fa-heart-o",
+            icon: ["far", "heart"],
             iconColor: "gray"
         },
         contextualFromMany: {
             onClick: coc => chooseWorkflowExpirationDate(coc.context.lites).then(val => val && coc.defaultContextualClick(val)).done(),
-            icon: "fa fa-heart-o",
+            icon: ["far", "heart"],
             iconColor: "gray"
         },
     }));

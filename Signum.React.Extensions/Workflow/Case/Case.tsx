@@ -1,4 +1,5 @@
 ﻿import * as React from 'react'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Dic, classes } from '../../../../Framework/Signum.React/Scripts/Globals'
 import { getMixin, toLite, JavascriptMessage, is } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
 import { ColorTypeaheadLine } from '../../Basics/Templates/ColorTypeahead'
@@ -168,7 +169,7 @@ class CaseActivityStatsButtonComponent extends React.Component<CaseActivityButto
                 <div ref={comp => Div = comp}>
                     <a className={classes("sf-line-button btn btn-light", enabled ? undefined : "disabled")}
                         onClick={() => this.handleOnClick(sc.state.selectedRows![0])}>
-                        <span className="fa fa-list" />
+                        <FontAwesomeIcon icon="list" />
                     </a>
                 </div>,
                 <UncontrolledTooltip placement="top" key="tooltip" target={() => Div!}>
@@ -203,7 +204,7 @@ class WorkflowActivityLocateButtonComponent extends React.Component<WorkflowActi
                 <div ref={comp => Div = comp}>
                     <a className={classes("sf-line-button btn btn-light", enabled ? undefined : "disabled")}
                         onClick={() => this.handleOnClick(sc.state.selectedRows![0])}>
-                        <span className="fa fa-map-marker" />
+                        <FontAwesomeIcon icon="map-marker" />
                     </a>
                 </div>,
                 <UncontrolledTooltip placement="top" key="tooltip" target={() => Div!}>

@@ -2,7 +2,7 @@
 import { classes } from '../../../../Framework/Signum.React/Scripts/Globals'
 import { BsColor } from '../../../../Framework/Signum.React/Scripts/Components/Basic';
 import { Collapse } from '../../../../Framework/Signum.React/Scripts/Components';
-
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 export interface CollapsableCardProps {
     color?: BsColor;
@@ -79,9 +79,10 @@ export default class CollapsableCard extends React.Component<CollapsableCardProp
                 <div className={classes("card-header", cardStyleClasses(this.props.headerStyle))} style={{ cursor: "pointer" }} onClick={this.handleToggle}>
                     {(this.props.collapsable == undefined || this.props.collapsable == true) &&
                         <span
-                            className={classes(this.state.isRTL ? "pull-left" : "pull-right", "fa", isOpen ? "fa-chevron-up" : "fa-chevron-down")}
+                            className={this.state.isRTL ? "pull-left" : "pull-right"}
                             style={{ cursor: "pointer", margin: "4px" }}
                             onClick={this.handleToggle}>
+                            <FontAwesomeIcon icon={isOpen ? "chevron-up" : "chevron-down"} />
                         </span>
                     }
                     {this.props.header}

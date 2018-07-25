@@ -1,4 +1,5 @@
 ﻿import * as React from 'react'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Dic, classes, ifError } from '../../../../Framework/Signum.React/Scripts/Globals'
 import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
 import { ValidationError, AbortableRequest } from '../../../../Framework/Signum.React/Scripts/Services'
@@ -19,8 +20,6 @@ import { ChartColumn, ChartColumnInfo }from './ChartColumn'
 import ChartBuilder from './ChartBuilder'
 import ChartTable from './ChartTable'
 import ChartRenderer from './ChartRenderer'
-
-
 import "../Chart.css"
 import "../../../../Framework/Signum.React/Scripts/SearchControl/Search.css"
 import { Tab, Tabs, UncontrolledTabs } from '../../../../Framework/Signum.React/Scripts/Components/Tabs';
@@ -147,7 +146,7 @@ export default class ChartRequestView extends React.Component<ChartRequestViewPr
                 <h2>
                     <span className="sf-entity-title">{getQueryNiceName(cr.queryKey) }</span>&nbsp;
                     <a className ="sf-popup-fullscreen" href="#" onClick={this.handleOnFullScreen}>
-                        <span className="fa fa-external-link"></span>
+                        <FontAwesomeIcon icon="external-link-alt" />
                     </a>
                 </h2 >
                 <ValidationErrors entity={cr}/>
@@ -167,9 +166,9 @@ export default class ChartRequestView extends React.Component<ChartRequestViewPr
                     </div >
                     <div className="sf-query-button-bar btn-toolbar">
                         <button type="submit" className="sf-query-button sf-chart-draw btn btn-primary" onClick={this.handleOnDrawClick}>{ChartMessage.DrawChart.niceToString()}</button>
-                        <button className="sf-query-button sf-chart-script-edit btn btn-light" onClick={this.handleEditScript}><i className="fa fa-pencil" aria-hidden="true"/> &nbsp; {ChartMessage.EditScript.niceToString()}</button>
+                        <button className="sf-query-button sf-chart-script-edit btn btn-light" onClick={this.handleEditScript}><FontAwesomeIcon icon="pencil"/> &nbsp; {ChartMessage.EditScript.niceToString()}</button>
                         {ChartClient.ButtonBarChart.getButtonBarElements({ chartRequest: cr, chartRequestView: this }).map((a, i) => React.cloneElement(a, { key: i }))}
-                        <button className="btn btn-light" onMouseUp={this.handleExplore} ><i className="fa fa-search"></i> &nbsp; {SearchMessage.Explore.niceToString()}</button>
+                        <button className="btn btn-light" onMouseUp={this.handleExplore} ><FontAwesomeIcon icon="search" /> &nbsp; {SearchMessage.Explore.niceToString()}</button>
                     </div>
                     <br />
                     <div className="sf-scroll-table-container" >

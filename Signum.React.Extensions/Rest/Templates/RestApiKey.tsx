@@ -1,5 +1,6 @@
 ﻿import * as React from 'react'
 import * as moment from 'moment'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { RestApiKeyEntity } from '../Signum.Entities.Rest'
 import { TypeContext, ValueLine, ValueLineType, EntityLine, EntityRepeater } from "../../../../Framework/Signum.React/Scripts/Lines";
 import { classes } from "../../../../Framework/Signum.React/Scripts/Globals";
@@ -19,7 +20,7 @@ export default class RestApiKeyComponent extends React.Component<{ ctx: TypeCont
                     extraButtons={vl =>
                         <a href="#" className={classes("sf-line-button", "sf-view", "btn btn-light")}
                             onClick={this.generateApiKey}>
-                            <span className="fa fa-key" />
+                            <FontAwesomeIcon icon="key" />
                         </a>} />
             </div>
         );

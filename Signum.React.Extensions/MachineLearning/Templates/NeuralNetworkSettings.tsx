@@ -1,5 +1,6 @@
 ﻿import * as React from 'react'
 import { classes } from '../../../../Framework/Signum.React/Scripts/Globals'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { FormGroup, FormControlReadonly, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityList, EntityRepeater, EntityTable, StyleContext, OptionItem, LineBaseProps } from '../../../../Framework/Signum.React/Scripts/Lines'
 import { SearchControl, ValueSearchControl } from '../../../../Framework/Signum.React/Scripts/Search'
 import { TypeContext, FormGroupStyle } from '../../../../Framework/Signum.React/Scripts/TypeContext'
@@ -203,7 +204,7 @@ export class LabelWithHelp extends React.Component<LabelWithHelpProps, LabelWith
         const ctx = this.props.ctx;
         return [
             <span ref={r => this.span = r} onClick={this.toggle} key="s">
-                {ctx.niceName()} <i className="fa fa-question-circle" aria-hidden="true" />
+                {ctx.niceName()} <FontAwesomeIcon icon="question-circle"/>
             </span>,
             <Popover placement="auto" target={() => this.span!} toggle={this.toggle} isOpen={this.state.isOpen} key="p">
                 <h3 className="popover-header">{ctx.niceName()}</h3>

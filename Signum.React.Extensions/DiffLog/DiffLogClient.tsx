@@ -34,7 +34,7 @@ export function start(options: { routes: JSX.Element[], timeMachine: boolean }) 
         QuickLinks.registerGlobalQuickLink(ctx => getTypeInfo(ctx.lite.EntityType).isSystemVersioned ? new QuickLinks.QuickLinkLink("TimeMachine",
             TimeMachineMessage.TimeMachine.niceToString(),
             timeMachineRoute(ctx.lite), {
-            icon: "fa fa-history",
+            icon: "history",
             iconColor: "blue"
         }) : undefined);
 

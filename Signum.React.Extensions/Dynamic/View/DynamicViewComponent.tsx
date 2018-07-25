@@ -1,4 +1,5 @@
 ﻿import * as React from 'react'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { FormGroup, FormControlReadonly, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityList, EntityRepeater } from '../../../../Framework/Signum.React/Scripts/Lines'
 import { ModifiableEntity, OperationSymbol, JavascriptMessage, NormalWindowMessage, is } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
 import { classes } from '../../../../Framework/Signum.React/Scripts/Globals'
@@ -108,7 +109,7 @@ export default class DynamicViewComponent extends React.Component<DynamicViewCom
         return (<div className="design-main">
             <div className={classes("design-left", this.state.isDesignerOpen && "open")}>
                 {!this.state.isDesignerOpen ?
-                    <i className="fa fa-pencil-square-o design-open-icon" aria-hidden="true" onClick={this.handleOpen}></i> :
+                    <span onClick={this.handleOpen}><FontAwesomeIcon icon={["far", "pen-square"]} className="design-open-icon"/></span> :
                     <DynamicViewDesigner
                         rootNode={rootNode}
                         dynamicView={this.state.dynamicView}

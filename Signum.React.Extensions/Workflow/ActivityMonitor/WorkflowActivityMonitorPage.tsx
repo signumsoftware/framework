@@ -1,4 +1,5 @@
 ﻿import * as React from 'react'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Dic } from '../../../../Framework/Signum.React/Scripts/Globals'
 import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
 import { getMixin, toLite, JavascriptMessage, is, Lite } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
@@ -97,7 +98,7 @@ export default class WorkflowActivityMonitorPage extends React.Component<Workflo
                 <h3 className="modal-title">
                     {!this.state.config ? JavascriptMessage.loading.niceToString() : this.state.config.workflow.toStr}
                     {this.state.config && Navigator.isViewable(WorkflowEntity) &&
-                        <small>&nbsp;<a href={Navigator.navigateRoute(this.state.config.workflow)} target="blank"><i className="fa fa-pencil" aria-hidden="true"></i></a></small>}
+                        <small>&nbsp;<a href={Navigator.navigateRoute(this.state.config.workflow)} target="blank"><FontAwesomeIcon icon="pencil"/></a></small>}
                     <br />
                     <small>{WorkflowActivityMonitorMessage.WorkflowActivityMonitor.niceToString()}</small>
                 </h3>

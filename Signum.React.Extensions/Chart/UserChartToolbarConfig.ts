@@ -21,7 +21,7 @@ export default class UserChartToolbarConfig extends ToolbarConfig<UserChartEntit
     }
 
     getIcon(element: ToolbarResponse<UserChartEntity>) {
-        return ToolbarConfig.coloredIcon(element.iconName || "glyphicon glyphicon-stats", element.iconColor || "darkviolet");
+        return ToolbarConfig.coloredIcon(element.icon || "chart-bar", element.iconColor || "darkviolet");
     }
     
     navigateTo(element: ToolbarResponse<UserChartEntity>): Promise<string> {

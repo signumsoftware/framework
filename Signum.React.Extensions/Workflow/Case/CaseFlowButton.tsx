@@ -1,6 +1,6 @@
-﻿
-import * as React from 'react'
+﻿import * as React from 'react'
 import * as moment from 'moment'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Dic } from '../../../../Framework/Signum.React/Scripts/Globals'
 import { openModal, IModalProps } from '../../../../Framework/Signum.React/Scripts/Modals'
 import { TypeContext, StyleOptions, EntityFrame } from '../../../../Framework/Signum.React/Scripts/TypeContext'
@@ -31,7 +31,7 @@ export default class CaseFlowButton extends React.Component <CaseFlowButtonProps
     render() {
         return (
             <button className="btn btn-light pull-right flip" onClick={this.handleClick}>
-                <i className="fa fa-random" style={{ color: "green" }} /> {WorkflowActivityMessage.CaseFlow.niceToString()}
+                <FontAwesomeIcon icon="random" color="green" /> {WorkflowActivityMessage.CaseFlow.niceToString()}
             </button>
         );
     }

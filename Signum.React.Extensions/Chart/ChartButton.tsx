@@ -1,5 +1,5 @@
-﻿
-import * as React from 'react'
+﻿import * as React from 'react'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Dic, classes } from '../../../Framework/Signum.React/Scripts/Globals'
 import { getQueryKey } from '../../../Framework/Signum.React/Scripts/Reflection'
 import * as Finder from '../../../Framework/Signum.React/Scripts/Finder'
@@ -37,7 +37,7 @@ export default class ChartButton extends React.Component<ChartButtonProps> {
     render() {
         var label = this.props.searchControl.props.largeToolbarButtons == true ? " " + ChartMessage.Chart.niceToString() : undefined;
         return (
-            <Button onMouseUp={this.handleOnMouseUp} color="light"><i className="fa fa-bar-chart"></i>&nbsp;{label}</Button>
+            <Button onMouseUp={this.handleOnMouseUp} color="light"><FontAwesomeIcon icon="chart-bar" />&nbsp;{label}</Button>
         );
     }
  

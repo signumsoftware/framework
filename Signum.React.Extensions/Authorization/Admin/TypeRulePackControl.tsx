@@ -1,5 +1,7 @@
 ﻿import * as React from 'react'
 import * as numbro from 'numbro'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { IconProp } from '@fortawesome/fontawesome-svg-core'
 import { classes } from '../../../../Framework/Signum.React/Scripts/Globals'
 import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
 import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
@@ -229,8 +231,11 @@ export default class TypesRulesPackControl extends React.Component<{ ctx: TypeCo
         return [
             <tr key={ctx.value.resource.namespace + "." + ctx.value.resource.className} className={classes("sf-auth-type", ctx.value.allowed.conditions.length > 0 && "sf-auth-with-conditions")}>
                 <td>
-                    { remaining.length > 0 ? <a className="fa fa-plus-circle sf-condition-icon" aria-hidden="true" onClick={() => this.handleAddConditionClick(remaining, ctx.value.allowed) }></a> :
-                        <i className="fa fa-circle sf-placeholder-icon" aria-hidden="true"></i> }
+                    {remaining.length > 0 ?
+                        <span className="sf-condition-icon" onClick={() => this.handleAddConditionClick(remaining, ctx.value.allowed)}>
+                            <FontAwesomeIcon icon="plus-circle" />
+                        </span> :
+                        <FontAwesomeIcon icon="circle" className="sf-placeholder-icon"></FontAwesomeIcon>}
                     &nbsp;
                     {typeInfo.niceName} {typeInfo.entityData && <small title={typeInfo.entityData}>{typeInfo.entityData[0]}</small>}
                 </td>
@@ -254,20 +259,20 @@ export default class TypesRulesPackControl extends React.Component<{ ctx: TypeCo
                     }} />
                 </td>
                 {properties && <td style={{ textAlign: "center" }}>
-                    {this.link("fa fa-pencil-square-o", ctx.value.modified ? "Invalidated" : ctx.value.properties,
+                    {this.link("edit", ctx.value.modified ? "Invalidated" : ctx.value.properties,
                         () => API.fetchPropertyRulePack(ctx.value.resource.cleanName, roleId),
                         m => ctx.value.properties = m.rules.every(a => a.element.allowed == "None") ? "None" :
                             m.rules.every(a => a.element.allowed == "Modify") ? "All" : "Mix"
                     )}
                 </td>}
                 {operations && <td style={{ textAlign: "center" }}>
-                    {this.link("fa fa-bolt", ctx.value.modified ? "Invalidated" :  ctx.value.operations,
+                    {this.link("bolt", ctx.value.modified ? "Invalidated" :  ctx.value.operations,
                         () => API.fetchOperationRulePack(ctx.value.resource.cleanName, roleId),
                         m => ctx.value.operations = m.rules.every(a => a.element.allowed == "None") ? "None" :
                             m.rules.every(a => a.element.allowed == "Allow") ? "All" : "Mix")}
                 </td>}
                 {queries && <td style={{ textAlign: "center" }}>
-                    {this.link("fa fa-search", ctx.value.modified ? "Invalidated" : ctx.value.queries,
+                    {this.link("search", ctx.value.modified ? "Invalidated" : ctx.value.queries,
                         () => API.fetchQueryRulePack(ctx.value.resource.cleanName, roleId),
                         m => ctx.value.queries = m.rules.every(a => a.element.allowed == "None") ? "None" :
                             m.rules.every(a => a.element.allowed == "Allow") ? "All" : "Mix")}
@@ -278,8 +283,8 @@ export default class TypesRulesPackControl extends React.Component<{ ctx: TypeCo
             return (
                 <tr key={ctx.value.resource.namespace + "." + ctx.value.resource.className + "_" + c.typeCondition.id} className= "sf-auth-condition" >
                     <td>
-                        {"\u00A0 \u00A0".repeat(i + 1)} 
-                        <a className="fa fa-minus-circle sf-condition-icon" aria-hidden="true" onClick={() => this.handleRemoveConditionClick(ctx.value.allowed, c) }></a>
+                        {"\u00A0 \u00A0".repeat(i + 1)}
+                        <span className="sf-condition-icon" onClick={() => this.handleRemoveConditionClick(ctx.value.allowed, c)}><FontAwesomeIcon icon="minus-circle"/></span>
                         &nbsp;
                         <small>{ c.typeCondition.toStr.tryAfter(".") || c.typeCondition.toStr }</small>
                     </td>
@@ -316,8 +321,8 @@ export default class TypesRulesPackControl extends React.Component<{ ctx: TypeCo
 
         const icon = !allowed ? null :
             getDB(allowed) == getUI(allowed) && getUI(allowed) == basicAllowed ? null :
-                getDB(allowed) == basicAllowed ? "fa fa-database" :
-                    getUI(allowed) == basicAllowed ? "fa fa-window-restore" :
+                getDB(allowed) == basicAllowed ? "database" :
+                    getUI(allowed) == basicAllowed ? "window-restore" :
                         null;
 
         return <ColorRadio
@@ -329,8 +334,7 @@ export default class TypesRulesPackControl extends React.Component<{ ctx: TypeCo
         />;
     }
 
-    link<T extends ModelEntity>(icon: string, allowed: AuthThumbnail | null | "Invalidated", action: () => Promise<T>, setNewValue: (model: T) => void) {
-        
+    link<T extends ModelEntity>(icon: IconProp, allowed: AuthThumbnail | null | "Invalidated", action: () => Promise<T>, setNewValue: (model: T) => void) {      
         if (!allowed)
             return undefined;
 
@@ -360,13 +364,13 @@ export default class TypesRulesPackControl extends React.Component<{ ctx: TypeCo
         };
 
         return (
-            <a onClick={onClick} title={allowed}
-                className={classes("sf-auth-link", icon)}
-                style={{
-                    color: allowed == "Invalidated" ? "gray" :
+            
+            <a onClick={onClick} title={allowed}>
+                <FontAwesomeIcon icon={icon}
+                    className="sf-auth-link"
+                    color={allowed == "Invalidated" ? "gray" :
                         allowed == "All" ? "green" :
-                            allowed == "Mix" ? "#FFAD00" : "red"
-                }}>
+                        allowed == "Mix" ? "#FFAD00" : "red"} />
             </a>
         );
     }

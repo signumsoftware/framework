@@ -1,4 +1,5 @@
 ﻿import * as React from 'react'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Route } from 'react-router'
 import { Dic, classes } from '../../../Framework/Signum.React/Scripts/Globals';
 import { ajaxPost, ajaxGet } from '../../../Framework/Signum.React/Scripts/Services';
@@ -144,7 +145,7 @@ export function getEmailTemplates(ctx: ContextualItemsContext<Entity>): Promise<
                 header: EmailTemplateEntity.nicePluralName(),
                 menuItems: wts.map(wt =>
                     <DropdownItem data-operation={wt.EntityType} onClick={() => handleMenuClick(wt, ctx)}>
-                        <span className={classes("icon", "fa fa-envelope-o")}></span>
+                        <FontAwesomeIcon icon={["far", "envelope"]} className="icon"/>
                         {wt.toStr}
                     </DropdownItem>
                 )

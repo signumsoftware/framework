@@ -1,4 +1,5 @@
 ﻿import * as React from 'react'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Dic, classes } from '../../../Framework/Signum.React/Scripts/Globals'
 import { getQueryKey } from '../../../Framework/Signum.React/Scripts/Reflection'
 import * as Finder from '../../../Framework/Signum.React/Scripts/Finder'
@@ -32,7 +33,7 @@ export default class TreeButton extends React.Component<TreeButtonProps> {
     render() {
         var label = this.props.searchControl.props.largeToolbarButtons == true ? " " + TreeMessage.Tree.niceToString() : undefined;
         return (
-            <Button onClick={this.handleClick} color="light"><i className="fa fa-sitemap"></i>&nbsp;{label}</Button>
+            <Button onClick={this.handleClick} color="light"><FontAwesomeIcon icon="sitemap" />&nbsp;{label}</Button>
         );
     }
 }

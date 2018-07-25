@@ -1,4 +1,5 @@
 ﻿import * as React from 'react'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Dic } from '../../../../Framework/Signum.React/Scripts/Globals'
 import { MemberInfo, getTypeInfo, PropertyRoute, Binding, TypeInfo } from '../../../../Framework/Signum.React/Scripts/Reflection'
 import { DynamicValidationEntity, DynamicValidationMessage, DynamicViewMessage } from '../Signum.Entities.Dynamic'
@@ -88,7 +89,7 @@ export default class DynamicValidation extends React.Component<DynamicValidation
                         <br />
                         <div className="row">
                             <div className="col-sm-7">
-                                {this.state.exampleEntity && <button className="btn btn-success" onClick={this.handleEvaluate}><i className="fa fa-play" aria-hidden="true"></i> Evaluate</button>}
+                                {this.state.exampleEntity && <button className="btn btn-success" onClick={this.handleEvaluate}><FontAwesomeIcon icon="play"/> Evaluate</button>}
                                 <div className="code-container">
                                     <TypeHelpButtonBarComponent typeName={ctx.value.entityType.cleanName} mode="CSharp" ctx={ctx} extraButtons={
                                         <PropertyIsHelpComponent route={this.getCurrentRoute(ctx.value.entityType.cleanName)} />

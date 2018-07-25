@@ -23,10 +23,10 @@ export default class UserQueryToolbarConfig extends ToolbarConfig<UserQueryEntit
     countIcon?: CountUserQueryIcon | null;
     getIcon(element: ToolbarResponse<UserQueryEntity>) {
 
-        if (element.iconName == "count")
+        if (element.icon == "count")
             return <CountUserQueryIcon ref={ci => this.countIcon = ci} userQuery={element.content!} color={element.iconColor || "red"} autoRefreshPeriod={element.autoRefreshPeriod} />;
 
-        return ToolbarConfig.coloredIcon(element.iconName || "fa fa-list-alt", element.iconColor || "dodgerblue");
+        return ToolbarConfig.coloredIcon(element.icon || ["far", "list-alt"], element.iconColor || "dodgerblue");
     }
 
     handleNavigateClick(e: React.MouseEvent<any>, res: ToolbarResponse<any>) {

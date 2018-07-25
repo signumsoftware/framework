@@ -57,11 +57,11 @@ export class IconTypeahead extends React.Component<IconTypeaheadProps>{
 
     handleGetItems = (query: string) => {
         if (!query)
-            return Promise.resolve(([] as string[]).concat(this.props.extraIcons || []).concat(["fa fa-"]));
+            return Promise.resolve(([] as string[]).concat(this.props.extraIcons || []).concat(["FontAwesome icon name"]));
 
         const result = this.icons
             .filter(k => k.toLowerCase().contains(query.toLowerCase()))
-            .orderBy(a => a.trimStart("fa fa-").length)
+            .orderBy(a => a.length)
             .filter((k, i) => i < 5);
 
         return Promise.resolve(result);

@@ -1,4 +1,5 @@
 ﻿import * as React from 'react'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Route } from 'react-router'
 import { Dic, classes } from '../../../Framework/Signum.React/Scripts/Globals';
 import { ajaxPost, ajaxPostRaw, ajaxGet, saveFile } from '../../../Framework/Signum.React/Scripts/Services';
@@ -143,7 +144,7 @@ export function getWordTemplates(ctx: ContextualItemsContext<Entity>): Promise<M
                 header: WordTemplateEntity.nicePluralName(),
                 menuItems: wts.map(wt =>
                     <DropdownItem data-operation={wt.EntityType} onClick={() => handleMenuClick(wt, ctx)}>
-                        <span className={classes("icon", "fa fa-file-word-o")}></span>
+                        <FontAwesomeIcon icon={["far", "file-word"]} className="icon"/>
                         {wt.toStr}
                     </DropdownItem>
                 )

@@ -1,4 +1,5 @@
 ﻿import * as React from 'react'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Dic } from '../../../../Framework/Signum.React/Scripts/Globals'
 import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
 import { notifySuccess } from '../../../../Framework/Signum.React/Scripts/Operations/EntityOperations'
@@ -107,7 +108,7 @@ export class TranslateSearchBox extends React.Component<{ search: (newValue: str
                     placeholder={ TranslationMessage.Search.niceToString() }  value={ this.state.filter} onChange={this.handleChange}/>
                 <div className="input-group-append">
                     <button className="btn btn-light" type="submit" title={ TranslationMessage.Search.niceToString() }>
-                        <i className="fa fa-search"></i>
+                        <FontAwesomeIcon icon="search" />
                     </button>
                 </div>
             </form>

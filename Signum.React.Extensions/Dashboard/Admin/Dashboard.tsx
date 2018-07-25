@@ -1,5 +1,8 @@
 ﻿
 import * as React from 'react'
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { IconName, IconProp, IconPrefix } from "@fortawesome/fontawesome-svg-core";
+
 import { FormGroup, FormControlReadonly, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityList, EntityRepeater, RenderEntity } from '../../../../Framework/Signum.React/Scripts/Lines'
 import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
 import { QueryDescription, SubTokensOptions } from '../../../../Framework/Signum.React/Scripts/FindOptions'
@@ -80,12 +83,13 @@ export default class Dashboard extends React.Component<{ ctx: TypeContext<Dashbo
 
                 return PanelPartEmbedded.New({
                     content: part,
-                    iconName: icon.iconName,
+                    iconName: iconToString(icon.icon),
                     iconColor: icon.iconColor,
                     style: "Default"
                 });
             });
     }
+
 
     renderPart = (tc: TypeContext<PanelPartEmbedded>) => {
 
@@ -95,7 +99,7 @@ export default class Dashboard extends React.Component<{ ctx: TypeContext<Dashbo
             <div> 
                 <div className="row">
                     <div className="col-sm-1">
-                        <span className={tc.value.iconName || undefined} style={{ color: tc.value.iconColor || undefined, fontSize: "25px", marginTop: "17px" }} />
+                        {tc.value.iconName && <FontAwesomeIcon icon={parseIcon(tc.value.iconName)} style={{ color: tc.value.iconColor || undefined, fontSize: "25px", marginTop: "17px" }} />}
                     </div>
                     <div className="col-sm-11">
                         <ValueLine ctx={tcs.subCtx(pp => pp.title)} />
@@ -123,3 +127,20 @@ export default class Dashboard extends React.Component<{ ctx: TypeContext<Dashbo
         );
     }
 }
+
+
+export function iconToString(icon: IconProp) {
+    return typeof icon == "string" ? icon :
+        Array.isArray(icon) ? icon[0] + " " + icon[1] :
+            icon.prefix + " " + icon.iconName;
+}
+
+export function parseIcon(iconName: string): IconProp {
+    return !iconName.contains(" ") ? iconName as IconName :
+        {
+            prefix: iconName.before(" ") as IconPrefix,
+            iconName: iconName.before(" ") as IconName,
+        };
+}
+
+
