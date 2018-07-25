@@ -58,7 +58,7 @@ span.design-default {
 }
 
 
-i.formula {
+.formula {
     margin-right: 5px;
     color: #ccc;
 }
@@ -67,11 +67,11 @@ input[type=checkbox].design-check-box {
     margin-right: 5px;
 }
 
-i.formula:hover {
+.formula:hover {
     color: #aaa;
 }
 
-i.formula.active {
+.formula.active {
     color: black;
 }
 

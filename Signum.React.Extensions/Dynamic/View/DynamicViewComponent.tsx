@@ -109,7 +109,7 @@ export default class DynamicViewComponent extends React.Component<DynamicViewCom
         return (<div className="design-main">
             <div className={classes("design-left", this.state.isDesignerOpen && "open")}>
                 {!this.state.isDesignerOpen ?
-                    <span onClick={this.handleOpen}><FontAwesomeIcon icon={["far", "pen-square"]} className="design-open-icon"/></span> :
+                    <span onClick={this.handleOpen}><FontAwesomeIcon icon={["fas", "edit"]} className="design-open-icon"/></span> :
                     <DynamicViewDesigner
                         rootNode={rootNode}
                         dynamicView={this.state.dynamicView}
