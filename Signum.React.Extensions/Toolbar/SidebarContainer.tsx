@@ -1,8 +1,8 @@
 ﻿import * as React from 'react'
-import { Dic, classes } from '../../../Framework/Signum.React/Scripts/Globals'
+import { Dic, classes } from '@framework/Globals'
 
 import "./Sidebar.css"
-import { ErrorBoundary } from '../../../Framework/Signum.React/Scripts/Components';
+import { ErrorBoundary } from '@framework/Components';
 
 interface SidebarContainerProps {
     sidebarVisible: boolean | undefined;

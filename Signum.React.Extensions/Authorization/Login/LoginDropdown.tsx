@@ -2,7 +2,7 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { AuthMessage, UserEntity } from '../Signum.Entities.Authorization'
 import * as AuthClient from '../AuthClient'
-import { DropdownToggle, NavItem, UncontrolledDropdown, DropdownMenu, DropdownItem, NavLink, LinkContainer } from '../../../../Framework/Signum.React/Scripts/Components';
+import { DropdownToggle, NavItem, UncontrolledDropdown, DropdownMenu, DropdownItem, NavLink, LinkContainer } from '@framework/Components';
 
 
 export default class LoginDropdown extends React.Component<{}, { user: UserEntity }> {

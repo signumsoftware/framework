@@ -1,8 +1,8 @@
 ﻿import * as React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { AuthMessage, UserEntity } from '../Signum.Entities.Authorization'
-import { Binding } from '../../../../Framework/Signum.React/Scripts/Reflection'
-import { ValueLine, ValueLineType, EntityLine, EntityCombo, FormGroup, TypeContext } from '../../../../Framework/Signum.React/Scripts/Lines'
+import { Binding } from '@framework/Reflection'
+import { ValueLine, ValueLineType, EntityLine, EntityCombo, FormGroup, TypeContext } from '@framework/Lines'
 
 
 export default class User extends React.Component<{ ctx: TypeContext<UserEntity> }, { withPassword: boolean }> {

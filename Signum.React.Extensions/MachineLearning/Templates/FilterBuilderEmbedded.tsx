@@ -1,22 +1,22 @@
 ﻿import * as React from 'react'
 import * as moment from 'moment'
-import { classes } from '../../../../Framework/Signum.React/Scripts/Globals'
-import { FormGroup, FormControlReadonly, ValueLine, ValueLineType, EntityLine, EntityDetail, EntityCombo, EntityList, EntityRepeater, EntityTable, IRenderButtons } from '../../../../Framework/Signum.React/Scripts/Lines'
-import { SearchControl, FilterOptionParsed } from '../../../../Framework/Signum.React/Scripts/Search'
-import { TypeContext, FormGroupStyle, ButtonsContext } from '../../../../Framework/Signum.React/Scripts/TypeContext'
+import { classes } from '@framework/Globals'
+import { FormGroup, FormControlReadonly, ValueLine, ValueLineType, EntityLine, EntityDetail, EntityCombo, EntityList, EntityRepeater, EntityTable, IRenderButtons } from '@framework/Lines'
+import { SearchControl, FilterOptionParsed } from '@framework/Search'
+import { TypeContext, FormGroupStyle, ButtonsContext } from '@framework/TypeContext'
 import FileLine from '../../../../Extensions/Signum.React.Extensions/Files/FileLine'
 import { PredictorEntity, PredictorColumnEmbedded, PredictorMessage, PredictorSubQueryEntity } from '../Signum.Entities.MachineLearning'
-import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
-import { getQueryNiceName } from '../../../../Framework/Signum.React/Scripts/Reflection'
+import * as Finder from '@framework/Finder'
+import { getQueryNiceName } from '@framework/Reflection'
 import QueryTokenEntityBuilder from '../../UserAssets/Templates/QueryTokenEntityBuilder'
 import { QueryTokenEmbedded} from '../../UserAssets/Signum.Entities.UserAssets'
 import { QueryFilterEmbedded } from '../../UserQueries/Signum.Entities.UserQueries'
-import { QueryDescription, SubTokensOptions } from '../../../../Framework/Signum.React/Scripts/FindOptions'
+import { QueryDescription, SubTokensOptions } from '@framework/FindOptions'
 import { API, initializers } from '../PredictorClient';
-import { toLite } from "../../../../Framework/Signum.React/Scripts/Signum.Entities";
-import FilterBuilder from '../../../../Framework/Signum.React/Scripts/SearchControl/FilterBuilder';
-import { MList, newMListElement } from '../../../../Framework/Signum.React/Scripts/Signum.Entities';
-import { TokenCompleter } from '../../../../Framework/Signum.React/Scripts/Finder';
+import { toLite } from "@framework/Signum.Entities";
+import FilterBuilder from '@framework/SearchControl/FilterBuilder';
+import { MList, newMListElement } from '@framework/Signum.Entities';
+import { TokenCompleter } from '@framework/Finder';
 
 
 interface FilterBuilderEmbeddedProps {

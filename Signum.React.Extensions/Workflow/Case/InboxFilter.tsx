@@ -1,14 +1,14 @@
 ﻿import * as React from 'react'
 import * as moment from 'moment'
-import { Binding, MemberType } from '../../../../Framework/Signum.React/Scripts/Reflection'
-import { Dic } from '../../../../Framework/Signum.React/Scripts/Globals'
-import { newMListElement } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
+import { Binding, MemberType } from '@framework/Reflection'
+import { Dic } from '@framework/Globals'
+import { newMListElement } from '@framework/Signum.Entities'
 import { InboxFilterModel, InboxMessage, CaseNotificationState } from '../Signum.Entities.Workflow'
-import { TypeContext, ValueLine, EntityLine, EntityCombo, EntityList, EntityDetail, EntityStrip, EntityRepeater, EnumCheckboxList, FormGroup, FormGroupStyle, StyleContext } from '../../../../Framework/Signum.React/Scripts/Lines'
-import { SearchControl, ValueSearchControl, FilterOperation, OrderType, PaginationMode, ISimpleFilterBuilder, extractFilterValue, FilterOption, FindOptionsParsed } from '../../../../Framework/Signum.React/Scripts/Search'
-import { FilterOptionParsed } from "../../../../Framework/Signum.React/Scripts/FindOptions";
+import { TypeContext, ValueLine, EntityLine, EntityCombo, EntityList, EntityDetail, EntityStrip, EntityRepeater, EnumCheckboxList, FormGroup, FormGroupStyle, StyleContext } from '@framework/Lines'
+import { SearchControl, ValueSearchControl, FilterOperation, OrderType, PaginationMode, ISimpleFilterBuilder, extractFilterValue, FilterOption, FindOptionsParsed } from '@framework/Search'
+import { FilterOptionParsed } from "@framework/FindOptions";
 import CollapsableCard from "../../Basics/Templates/CollapsableCard";
-import { Button } from '../../../../Framework/Signum.React/Scripts/Components';
+import { Button } from '@framework/Components';
 
 export default class InboxFilter extends React.Component<{ ctx: TypeContext<InboxFilterModel> }> implements ISimpleFilterBuilder {
 

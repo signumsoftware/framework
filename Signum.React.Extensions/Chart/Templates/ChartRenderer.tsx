@@ -1,12 +1,12 @@
 ﻿import * as React from 'react'
 import * as ReactDOM from 'react-dom'
 import * as D3 from 'd3'
-import { DomUtils } from '../../../../Framework/Signum.React/Scripts/Globals'
-import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
-import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
-import { is, SearchMessage, parseLite } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
+import { DomUtils } from '@framework/Globals'
+import * as Finder from '@framework/Finder'
+import * as Navigator from '@framework/Navigator'
+import { is, SearchMessage, parseLite } from '@framework/Signum.Entities'
 import * as ChartUtils_Mod from "./ChartUtils"
-import { ResultTable, FindOptions, FilterOptionParsed, FilterOption, QueryDescription, SubTokensOptions, QueryToken, QueryTokenType, ColumnOption, hasAggregate } from '../../../../Framework/Signum.React/Scripts/FindOptions'
+import { ResultTable, FindOptions, FilterOptionParsed, FilterOption, QueryDescription, SubTokensOptions, QueryToken, QueryTokenType, ColumnOption, hasAggregate } from '@framework/FindOptions'
 import {
     ChartColumnEmbedded, ChartScriptColumnEmbedded, ChartScriptParameterEmbedded, ChartRequest, GroupByChart, ChartMessage,
    ChartColorEntity, ChartScriptEntity, ChartParameterEmbedded, ChartParameterType } from '../Signum.Entities.Chart'

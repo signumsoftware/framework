@@ -1,6 +1,6 @@
 ﻿import * as React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { classes } from '../../../../Framework/Signum.React/Scripts/Globals'
+import { classes } from '@framework/Globals'
 
 export interface ScrollPanelsProps {
     children: React.ReactElement<ScrollPanelProps>[];

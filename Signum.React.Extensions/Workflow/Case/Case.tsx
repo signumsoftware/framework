@@ -1,7 +1,7 @@
 ﻿import * as React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { Dic, classes } from '../../../../Framework/Signum.React/Scripts/Globals'
-import { getMixin, toLite, JavascriptMessage, is } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
+import { Dic, classes } from '@framework/Globals'
+import { getMixin, toLite, JavascriptMessage, is } from '@framework/Signum.Entities'
 import { ColorTypeaheadLine } from '../../Basics/Templates/ColorTypeahead'
 import {
     CaseEntity, WorkflowEntity, WorkflowEntitiesDictionary, CaseActivityEntity, WorkflowActivityMessage, WorkflowActivityEntity,
@@ -10,16 +10,16 @@ import {
 import {
     ValueLine, EntityLine, RenderEntity, EntityCombo, EntityList, EntityDetail, EntityStrip,
     EntityRepeater, EntityCheckboxList, EntityTabRepeater, TypeContext, EntityTable
-} from '../../../../Framework/Signum.React/Scripts/Lines'
+} from '@framework/Lines'
 import { API, CaseFlow } from '../WorkflowClient'
-import * as OrderUtils from '../../../../Framework/Signum.React/Scripts/Frames/OrderUtils'
+import * as OrderUtils from '@framework/Frames/OrderUtils'
 import CaseFlowViewerComponent from '../Bpmn/CaseFlowViewerComponent'
 import InlineCaseTags from "../Case/InlineCaseTags";
-import { SearchControl, SearchControlLoaded } from "../../../../Framework/Signum.React/Scripts/Search";
-import * as Navigator from "../../../../Framework/Signum.React/Scripts/Navigator";
-import { Tab, Tabs, UncontrolledTabs } from '../../../../Framework/Signum.React/Scripts/Components/Tabs';
-import { UncontrolledTooltip, Button } from "../../../../Framework/Signum.React/Scripts/Components";
-import { ResultRow } from '../../../../Framework/Signum.React/Scripts/FindOptions';
+import { SearchControl, SearchControlLoaded } from "@framework/Search";
+import * as Navigator from "@framework/Navigator";
+import { Tab, Tabs, UncontrolledTabs } from '@framework/Components/Tabs';
+import { UncontrolledTooltip, Button } from "@framework/Components";
+import { ResultRow } from '@framework/FindOptions';
 
 type CaseTab = "CaseFlow" | "CaseActivities" | "InprogressCaseActivities";
 

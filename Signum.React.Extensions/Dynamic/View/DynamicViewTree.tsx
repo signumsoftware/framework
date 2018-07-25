@@ -1,16 +1,16 @@
 ﻿import * as React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { FormGroup, FormControlReadonly, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityList, EntityRepeater } from '../../../../Framework/Signum.React/Scripts/Lines'
-import { ModifiableEntity } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
-import { classes, DomUtils, Dic } from '../../../../Framework/Signum.React/Scripts/Globals'
-import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
-import { FindOptions } from '../../../../Framework/Signum.React/Scripts/FindOptions'
-import { getQueryNiceName } from '../../../../Framework/Signum.React/Scripts/Reflection'
-import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
-import { TypeContext, FormGroupStyle } from '../../../../Framework/Signum.React/Scripts/TypeContext'
-import ContextMenu from '../../../../Framework/Signum.React/Scripts/SearchControl/ContextMenu'
-import { ContextMenuPosition } from '../../../../Framework/Signum.React/Scripts/SearchControl/ContextMenu'
-import SelectorModal from '../../../../Framework/Signum.React/Scripts/SelectorModal'
+import { FormGroup, FormControlReadonly, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityList, EntityRepeater } from '@framework/Lines'
+import { ModifiableEntity } from '@framework/Signum.Entities'
+import { classes, DomUtils, Dic } from '@framework/Globals'
+import * as Finder from '@framework/Finder'
+import { FindOptions } from '@framework/FindOptions'
+import { getQueryNiceName } from '@framework/Reflection'
+import * as Navigator from '@framework/Navigator'
+import { TypeContext, FormGroupStyle } from '@framework/TypeContext'
+import ContextMenu from '@framework/SearchControl/ContextMenu'
+import { ContextMenuPosition } from '@framework/SearchControl/ContextMenu'
+import SelectorModal from '@framework/SelectorModal'
 
 import * as NodeUtils from './NodeUtils'
 import NodeSelectorModal from './NodeSelectorModal'
@@ -19,7 +19,7 @@ import { BaseNode, ContainerNode, LineBaseNode, NodeConstructor, EntityTableNode
 import { DynamicViewEntity, DynamicViewMessage } from '../Signum.Entities.Dynamic'
 
 import "./DynamicViewTree.css"
-import { DropdownItem } from '../../../../Framework/Signum.React/Scripts/Components';
+import { DropdownItem } from '@framework/Components';
 
 export interface DynamicViewTreeProps {
     rootNode: DesignerNode<BaseNode>;

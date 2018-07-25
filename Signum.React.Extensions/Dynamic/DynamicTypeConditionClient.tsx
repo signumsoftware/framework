@@ -1,17 +1,17 @@
 
 import * as React from 'react'
 import { Route } from 'react-router'
-import { ajaxPost, ajaxGet } from '../../../Framework/Signum.React/Scripts/Services';
-import { ValueSearchControlLine } from '../../../Framework/Signum.React/Scripts/Search'
-import { EntitySettings, ViewPromise } from '../../../Framework/Signum.React/Scripts/Navigator'
-import * as Navigator from '../../../Framework/Signum.React/Scripts/Navigator'
-import { EntityOperationSettings, OperationSettings } from '../../../Framework/Signum.React/Scripts/Operations'
-import * as Operations from '../../../Framework/Signum.React/Scripts/Operations'
-import { Entity } from '../../../Framework/Signum.React/Scripts/Signum.Entities'
-import * as Constructor from '../../../Framework/Signum.React/Scripts/Constructor'
+import { ajaxPost, ajaxGet } from '@framework/Services';
+import { ValueSearchControlLine } from '@framework/Search'
+import { EntitySettings, ViewPromise } from '@framework/Navigator'
+import * as Navigator from '@framework/Navigator'
+import { EntityOperationSettings, OperationSettings } from '@framework/Operations'
+import * as Operations from '@framework/Operations'
+import { Entity } from '@framework/Signum.Entities'
+import * as Constructor from '@framework/Constructor'
 import * as DynamicClientOptions from './DynamicClientOptions'
 
-import { ValueLine, EntityLine, EntityCombo, EntityList, EntityDetail, EntityStrip, EntityRepeater } from '../../../Framework/Signum.React/Scripts/Lines'
+import { ValueLine, EntityLine, EntityCombo, EntityList, EntityDetail, EntityStrip, EntityRepeater } from '@framework/Lines'
 import { DynamicTypeConditionEntity, DynamicTypeConditionEval, DynamicTypeConditionOperation } from './Signum.Entities.Dynamic'
 
 export function start(options: { routes: JSX.Element[] }) {

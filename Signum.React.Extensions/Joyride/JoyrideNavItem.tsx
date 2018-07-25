@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import JoyrideComponent from "./JoyrideComponent";
-import { NavItem } from '../../../Framework/Signum.React/Scripts/Components';
+import { NavItem } from '@framework/Components';
 
 export interface JoyrideNavItemProps {
     getJoyrideComponent: () => JoyrideComponent;

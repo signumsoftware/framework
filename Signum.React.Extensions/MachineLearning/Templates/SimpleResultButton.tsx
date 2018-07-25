@@ -1,20 +1,20 @@
 ﻿import * as React from 'react'
-import { classes } from '../../../../Framework/Signum.React/Scripts/Globals'
-import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
+import { classes } from '@framework/Globals'
+import * as Finder from '@framework/Finder'
 import * as numbro from 'numbro';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { PredictorEntity, PredictSimpleResultEntity, PredictorColumnEmbedded, DefaultColumnEncodings } from '../Signum.Entities.MachineLearning';
 import * as ChartClient from '../../Chart/ChartClient'
 import { ChartRequest } from '../../Chart/Signum.Entities.Chart'
-import { SubTokensOptions } from '../../../../Framework/Signum.React/Scripts/FindOptions';
+import { SubTokensOptions } from '@framework/FindOptions';
 import FilterBuilderEmbedded from './FilterBuilderEmbedded';
 import { toQueryTokenEmbedded } from '../../UserAssets/UserAssetClient';
-import { TypeReference } from '../../../../Framework/Signum.React/Scripts/Reflection';
-import { TypeContext } from '../../../../Framework/Signum.React/Scripts/Lines';
-import { FilterOptionParsed, FilterOption } from '../../../../Framework/Signum.React/Scripts/Search';
+import { TypeReference } from '@framework/Reflection';
+import { TypeContext } from '@framework/Lines';
+import { FilterOptionParsed, FilterOption } from '@framework/Search';
 import { ChartOptions } from '../../Chart/ChartClient';
-import { QueryToken } from '../../../../Framework/Signum.React/Scripts/FindOptions';
-import { is } from '../../../../Framework/Signum.React/Scripts/Signum.Entities';
+import { QueryToken } from '@framework/FindOptions';
+import { is } from '@framework/Signum.Entities';
 
 interface SimpleResultButtonProps {
     ctx: TypeContext<PredictorEntity>;

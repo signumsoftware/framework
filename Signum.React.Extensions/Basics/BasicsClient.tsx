@@ -1,19 +1,19 @@
 ﻿import * as React from 'react'
 import { Route } from 'react-router'
-import { Dic, classes } from '../../../Framework/Signum.React/Scripts/Globals';
-import { ajaxPost, ajaxPostRaw, ajaxGet, saveFile } from '../../../Framework/Signum.React/Scripts/Services';
-import { EntitySettings, ViewPromise } from '../../../Framework/Signum.React/Scripts/Navigator'
-import * as Constructor from '../../../Framework/Signum.React/Scripts/Constructor'
-import * as Navigator from '../../../Framework/Signum.React/Scripts/Navigator'
-import * as Finder from '../../../Framework/Signum.React/Scripts/Finder'
-import { Lite, Entity, EntityPack, ExecuteSymbol, DeleteSymbol, ConstructSymbol_From, registerToString, JavascriptMessage, toLite } from '../../../Framework/Signum.React/Scripts/Signum.Entities'
-import { EntityOperationSettings } from '../../../Framework/Signum.React/Scripts/Operations'
-import { PseudoType, QueryKey, GraphExplorer, OperationType, Type, getTypeName } from '../../../Framework/Signum.React/Scripts/Reflection'
-import * as Operations from '../../../Framework/Signum.React/Scripts/Operations'
+import { Dic, classes } from '@framework/Globals';
+import { ajaxPost, ajaxPostRaw, ajaxGet, saveFile } from '@framework/Services';
+import { EntitySettings, ViewPromise } from '@framework/Navigator'
+import * as Constructor from '@framework/Constructor'
+import * as Navigator from '@framework/Navigator'
+import * as Finder from '@framework/Finder'
+import { Lite, Entity, EntityPack, ExecuteSymbol, DeleteSymbol, ConstructSymbol_From, registerToString, JavascriptMessage, toLite } from '@framework/Signum.Entities'
+import { EntityOperationSettings } from '@framework/Operations'
+import { PseudoType, QueryKey, GraphExplorer, OperationType, Type, getTypeName } from '@framework/Reflection'
+import * as Operations from '@framework/Operations'
 import { TimeSpanEmbedded, DateSpanEmbedded } from './Signum.Entities.Basics'
 import * as OmniboxClient from '../Omnibox/OmniboxClient'
 import * as AuthClient from '../Authorization/AuthClient'
-import * as QuickLinks from '../../../Framework/Signum.React/Scripts/QuickLinks'
+import * as QuickLinks from '@framework/QuickLinks'
 
 export function start(options: { routes: JSX.Element[] }) {
     Navigator.addSettings(new EntitySettings(TimeSpanEmbedded, e => import('./Templates/TimeSpan')));

@@ -1,16 +1,16 @@
 ﻿import * as React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { RouteComponentProps } from 'react-router'
-import { Dic, classes } from '../../../Framework/Signum.React/Scripts/Globals'
-import * as Finder from '../../../Framework/Signum.React/Scripts/Finder'
-import { ResultTable, FindOptions, FilterOption, QueryDescription } from '../../../Framework/Signum.React/Scripts/FindOptions'
-import { SearchMessage, JavascriptMessage, parseLite, is, Lite, toLite } from '../../../Framework/Signum.React/Scripts/Signum.Entities'
-import * as Navigator from '../../../Framework/Signum.React/Scripts/Navigator'
-import SearchControlLoaded from '../../../Framework/Signum.React/Scripts/SearchControl/SearchControlLoaded'
+import { Dic, classes } from '@framework/Globals'
+import * as Finder from '@framework/Finder'
+import { ResultTable, FindOptions, FilterOption, QueryDescription } from '@framework/FindOptions'
+import { SearchMessage, JavascriptMessage, parseLite, is, Lite, toLite } from '@framework/Signum.Entities'
+import * as Navigator from '@framework/Navigator'
+import SearchControlLoaded from '@framework/SearchControl/SearchControlLoaded'
 import { EmailTemplateEntity, EmailMessageEntity } from './Signum.Entities.Mailing'
 import * as MailingClient from './MailingClient'
-import { saveFile } from "../../../Framework/Signum.React/Scripts/Services";
-import { UncontrolledDropdown, DropdownMenu, DropdownItem, DropdownToggle } from '../../../Framework/Signum.React/Scripts/Components';
+import { saveFile } from "@framework/Services";
+import { UncontrolledDropdown, DropdownMenu, DropdownItem, DropdownToggle } from '@framework/Components';
 
 export interface MailingMenuProps {
     searchControl: SearchControlLoaded;

@@ -1,30 +1,30 @@
 ﻿import * as React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { API, TreeNode, TreeNodeState, fixState } from './TreeClient'
-import { Dic, classes, DomUtils } from '../../../Framework/Signum.React/Scripts/Globals'
-import * as Navigator from '../../../Framework/Signum.React/Scripts/Navigator'
-import * as Finder from '../../../Framework/Signum.React/Scripts/Finder'
-import ContextMenu from '../../../Framework/Signum.React/Scripts/SearchControl/ContextMenu'
-import { ContextMenuPosition } from '../../../Framework/Signum.React/Scripts/SearchControl/ContextMenu'
-import * as Operations from '../../../Framework/Signum.React/Scripts/Operations'
-import * as EntityOperations from '../../../Framework/Signum.React/Scripts/Operations/EntityOperations'
-import { SearchMessage, JavascriptMessage, EntityControlMessage, toLite, liteKey, ExecuteSymbol, ConstructSymbol_From, ConstructSymbol_Simple, DeleteSymbol, OperationMessage } from '../../../Framework/Signum.React/Scripts/Signum.Entities'
+import { Dic, classes, DomUtils } from '@framework/Globals'
+import * as Navigator from '@framework/Navigator'
+import * as Finder from '@framework/Finder'
+import ContextMenu from '@framework/SearchControl/ContextMenu'
+import { ContextMenuPosition } from '@framework/SearchControl/ContextMenu'
+import * as Operations from '@framework/Operations'
+import * as EntityOperations from '@framework/Operations/EntityOperations'
+import { SearchMessage, JavascriptMessage, EntityControlMessage, toLite, liteKey, ExecuteSymbol, ConstructSymbol_From, ConstructSymbol_Simple, DeleteSymbol, OperationMessage } from '@framework/Signum.Entities'
 import { TreeViewerMessage, TreeEntity, TreeOperation, MoveTreeModel } from './Signum.Entities.Tree'
 import * as TreeClient from './TreeClient'
-import { FilterOptionParsed, QueryDescription, FilterRequest, SubTokensOptions, FilterOption } from "../../../Framework/Signum.React/Scripts/FindOptions";
-import FilterBuilder from "../../../Framework/Signum.React/Scripts/SearchControl/FilterBuilder";
-import { ISimpleFilterBuilder } from "../../../Framework/Signum.React/Scripts/Search";
-import { is } from "../../../Framework/Signum.React/Scripts/Signum.Entities";
-import MessageModal from "../../../Framework/Signum.React/Scripts/Modals/MessageModal";
-import { ContextualItemsContext, renderContextualItems } from "../../../Framework/Signum.React/Scripts/SearchControl/ContextualItems";
-import { Entity } from "../../../Framework/Signum.React/Scripts/Signum.Entities";
-import { Lite } from "../../../Framework/Signum.React/Scripts/Signum.Entities";
+import { FilterOptionParsed, QueryDescription, FilterRequest, SubTokensOptions, FilterOption } from "@framework/FindOptions";
+import FilterBuilder from "@framework/SearchControl/FilterBuilder";
+import { ISimpleFilterBuilder } from "@framework/Search";
+import { is } from "@framework/Signum.Entities";
+import MessageModal from "@framework/Modals/MessageModal";
+import { ContextualItemsContext, renderContextualItems } from "@framework/SearchControl/ContextualItems";
+import { Entity } from "@framework/Signum.Entities";
+import { Lite } from "@framework/Signum.Entities";
 import { DisabledMixin } from "../Basics/Signum.Entities.Basics";
-import { getMixin } from "../../../Framework/Signum.React/Scripts/Signum.Entities";
-import { tryGetMixin } from "../../../Framework/Signum.React/Scripts/Signum.Entities";
+import { getMixin } from "@framework/Signum.Entities";
+import { tryGetMixin } from "@framework/Signum.Entities";
 
 import "./TreeViewer.css"
-import { DropdownToggle, Dropdown, DropdownItem, DropdownMenu } from '../../../Framework/Signum.React/Scripts/Components';
+import { DropdownToggle, Dropdown, DropdownItem, DropdownMenu } from '@framework/Components';
 
 interface TreeViewerProps {
     typeName: string;

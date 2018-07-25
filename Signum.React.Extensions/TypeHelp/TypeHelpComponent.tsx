@@ -1,22 +1,22 @@
 ﻿import * as React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Route } from 'react-router'
-import { classes } from '../../../Framework/Signum.React/Scripts/Globals'
-import { ajaxPost, ajaxGet } from '../../../Framework/Signum.React/Scripts/Services';
-import { EntitySettings, ViewPromise } from '../../../Framework/Signum.React/Scripts/Navigator'
-import * as Navigator from '../../../Framework/Signum.React/Scripts/Navigator'
-import { EntityData, EntityKind, isTypeEnum, PropertyRoute } from '../../../Framework/Signum.React/Scripts/Reflection'
-import { EntityOperationSettings } from '../../../Framework/Signum.React/Scripts/Operations'
-import * as Operations from '../../../Framework/Signum.React/Scripts/Operations'
-import { Entity } from '../../../Framework/Signum.React/Scripts/Signum.Entities'
-import * as Constructor from '../../../Framework/Signum.React/Scripts/Constructor'
-import { StyleContext } from '../../../Framework/Signum.React/Scripts/TypeContext'
+import { classes } from '@framework/Globals'
+import { ajaxPost, ajaxGet } from '@framework/Services';
+import { EntitySettings, ViewPromise } from '@framework/Navigator'
+import * as Navigator from '@framework/Navigator'
+import { EntityData, EntityKind, isTypeEnum, PropertyRoute } from '@framework/Reflection'
+import { EntityOperationSettings } from '@framework/Operations'
+import * as Operations from '@framework/Operations'
+import { Entity } from '@framework/Signum.Entities'
+import * as Constructor from '@framework/Constructor'
+import { StyleContext } from '@framework/TypeContext'
 
-import { Typeahead } from '../../../Framework/Signum.React/Scripts/Components'
-import { ValueLine, EntityLine, EntityCombo, EntityList, EntityDetail, EntityStrip, EntityRepeater } from '../../../Framework/Signum.React/Scripts/Lines'
+import { Typeahead } from '@framework/Components'
+import { ValueLine, EntityLine, EntityCombo, EntityList, EntityDetail, EntityStrip, EntityRepeater } from '@framework/Lines'
 import * as TypeHelpClient from './TypeHelpClient'
-import ContextMenu from '../../../Framework/Signum.React/Scripts/SearchControl/ContextMenu'
-import { ContextMenuPosition } from '../../../Framework/Signum.React/Scripts/SearchControl/ContextMenu'
+import ContextMenu from '@framework/SearchControl/ContextMenu'
+import { ContextMenuPosition } from '@framework/SearchControl/ContextMenu'
 
 import "./TypeHelpComponent.css"
 

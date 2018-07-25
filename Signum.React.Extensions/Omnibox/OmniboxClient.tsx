@@ -4,12 +4,12 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { IconProp, IconPrefix } from '@fortawesome/fontawesome-svg-core';
 import { Route } from 'react-router'
 
-import { Dic } from '../../../Framework/Signum.React/Scripts/Globals';
-import { ajaxPost, ajaxGet } from '../../../Framework/Signum.React/Scripts/Services';
-import { EntitySettings, ViewPromise } from '../../../Framework/Signum.React/Scripts/Navigator'
-import * as Navigator from '../../../Framework/Signum.React/Scripts/Navigator'
-import { EntityOperationSettings } from '../../../Framework/Signum.React/Scripts/Operations'
-import * as Operations from '../../../Framework/Signum.React/Scripts/Operations'
+import { Dic } from '@framework/Globals';
+import { ajaxPost, ajaxGet } from '@framework/Services';
+import { EntitySettings, ViewPromise } from '@framework/Navigator'
+import * as Navigator from '@framework/Navigator'
+import { EntityOperationSettings } from '@framework/Operations'
+import * as Operations from '@framework/Operations'
 import { OmniboxMessage } from './Signum.Entities.Omnibox'
 
 

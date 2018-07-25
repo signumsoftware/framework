@@ -1,5 +1,5 @@
 ﻿import * as React from 'react'
-import { classes } from '../../../../Framework/Signum.React/Scripts/Globals'
+import { classes } from '@framework/Globals'
 import CollapsableCard, { CollapsableCardProps } from './CollapsableCard';
 
 export interface AccordionProps {

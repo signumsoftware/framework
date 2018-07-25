@@ -1,13 +1,13 @@
 ﻿import * as React from 'react'
-import { classes } from '../../../../Framework/Signum.React/Scripts/Globals'
-import { FormGroup, FormControlReadonly, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityList, EntityRepeater, EntityTabRepeater, EntityDetail} from '../../../../Framework/Signum.React/Scripts/Lines'
-import { SearchControl, ValueSearchControl }  from '../../../../Framework/Signum.React/Scripts/Search'
-import { getToString }  from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
-import { ExceptionEntity }  from '../../../../Framework/Signum.React/Scripts/Signum.Entities.Basics'
-import { TypeContext, FormGroupStyle } from '../../../../Framework/Signum.React/Scripts/TypeContext'
+import { classes } from '@framework/Globals'
+import { FormGroup, FormControlReadonly, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityList, EntityRepeater, EntityTabRepeater, EntityDetail} from '@framework/Lines'
+import { SearchControl, ValueSearchControl }  from '@framework/Search'
+import { getToString }  from '@framework/Signum.Entities'
+import { ExceptionEntity }  from '@framework/Signum.Entities.Basics'
+import { TypeContext, FormGroupStyle } from '@framework/TypeContext'
 import { NewsletterEntity } from '../Signum.Entities.Mailing'
 import TemplateControls from '../../Templating/TemplateControls'
-import { Tabs, Tab } from '../../../../Framework/Signum.React/Scripts/Components/Tabs';
+import { Tabs, Tab } from '@framework/Components/Tabs';
 
 export default class Newsletter extends React.Component<{ ctx: TypeContext<NewsletterEntity> }> {
 

@@ -1,20 +1,20 @@
 ﻿import * as React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import * as Combobox from 'react-widgets/lib/Combobox'
-import { FormGroup, FormControlReadonly, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityList, EntityRepeater } from '../../../../Framework/Signum.React/Scripts/Lines'
-import { classes, Dic } from '../../../../Framework/Signum.React/Scripts/Globals'
-import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
-import { QueryDescription, SubTokensOptions, QueryToken, filterOperations, OrderType, ColumnOptionsMode } from '../../../../Framework/Signum.React/Scripts/FindOptions'
-import { getQueryNiceName, Binding, EntityDataValues, EntityKindValues, EntityKind, PropertyRoute } from '../../../../Framework/Signum.React/Scripts/Reflection'
-import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
-import { SearchControl } from '../../../../Framework/Signum.React/Scripts/Search'
-import { StyleContext, FormGroupStyle } from '../../../../Framework/Signum.React/Scripts/TypeContext'
-import QueryTokenBuilder from '../../../../Framework/Signum.React/Scripts/SearchControl/QueryTokenBuilder'
-import { ModifiableEntity, JavascriptMessage, EntityControlMessage, is, Lite, Entity, toLite } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
-import { QueryEntity, TypeEntity } from '../../../../Framework/Signum.React/Scripts/Signum.Entities.Basics'
-import { FilterOperation, PaginationMode } from '../../../../Framework/Signum.React/Scripts/Signum.Entities.DynamicQuery'
-import SelectorModal from '../../../../Framework/Signum.React/Scripts/SelectorModal';
-import MessageModal from '../../../../Framework/Signum.React/Scripts/Modals/MessageModal'
+import { FormGroup, FormControlReadonly, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityList, EntityRepeater } from '@framework/Lines'
+import { classes, Dic } from '@framework/Globals'
+import * as Finder from '@framework/Finder'
+import { QueryDescription, SubTokensOptions, QueryToken, filterOperations, OrderType, ColumnOptionsMode } from '@framework/FindOptions'
+import { getQueryNiceName, Binding, EntityDataValues, EntityKindValues, EntityKind, PropertyRoute } from '@framework/Reflection'
+import * as Navigator from '@framework/Navigator'
+import { SearchControl } from '@framework/Search'
+import { StyleContext, FormGroupStyle } from '@framework/TypeContext'
+import QueryTokenBuilder from '@framework/SearchControl/QueryTokenBuilder'
+import { ModifiableEntity, JavascriptMessage, EntityControlMessage, is, Lite, Entity, toLite } from '@framework/Signum.Entities'
+import { QueryEntity, TypeEntity } from '@framework/Signum.Entities.Basics'
+import { FilterOperation, PaginationMode } from '@framework/Signum.Entities.DynamicQuery'
+import SelectorModal from '@framework/SelectorModal';
+import MessageModal from '@framework/Modals/MessageModal'
 import * as DynamicTypeClient from '../DynamicTypeClient';
 import * as DynamicClientOptions from '../DynamicClientOptions';
 import * as TypeHelpClient from '../../TypeHelp/TypeHelpClient';
@@ -23,14 +23,14 @@ import { Validators, DynamicTypeDefinition, DynamicProperty } from '../DynamicTy
 import ValueComponent from './ValueComponent';
 import TypeHelpComponent from '../../TypeHelp/TypeHelpComponent'
 import CSharpCodeMirror from '../../Codemirror/CSharpCodeMirror';
-import ContextMenu from '../../../../Framework/Signum.React/Scripts/SearchControl/ContextMenu'
-import { ContextMenuPosition } from '../../../../Framework/Signum.React/Scripts/SearchControl/ContextMenu'
-import ValueLineModal from '../../../../Framework/Signum.React/Scripts/ValueLineModal'
+import ContextMenu from '@framework/SearchControl/ContextMenu'
+import { ContextMenuPosition } from '@framework/SearchControl/ContextMenu'
+import ValueLineModal from '@framework/ValueLineModal'
 
 import "./DynamicType.css"
-import { Tabs, Tab, UncontrolledTabs } from '../../../../Framework/Signum.React/Scripts/Components/Tabs';
+import { Tabs, Tab, UncontrolledTabs } from '@framework/Components/Tabs';
 import CollapsableCard from '../../Basics/Templates/CollapsableCard';
-import { Typeahead } from '../../../../Framework/Signum.React/Scripts/Components';
+import { Typeahead } from '@framework/Components';
 
 export interface DynamicTypeDesignContext {
     refreshView: () => void;

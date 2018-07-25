@@ -1,16 +1,16 @@
 ﻿import * as React from 'react'
 import { Route } from 'react-router'
-import { ajaxPost, ajaxGet } from '../../../../Framework/Signum.React/Scripts/Services';
-import { EntitySettings, ViewPromise } from '../../../../Framework/Signum.React/Scripts/Navigator'
-import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
-import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
-import { getQueryKey } from '../../../../Framework/Signum.React/Scripts/Reflection'
-import { EntityOperationSettings } from '../../../../Framework/Signum.React/Scripts/Operations'
-import { Entity, Lite, liteKey } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
-import * as Constructor from '../../../../Framework/Signum.React/Scripts/Constructor'
-import * as Operations from '../../../../Framework/Signum.React/Scripts/Operations'
-import * as QuickLinks from '../../../../Framework/Signum.React/Scripts/QuickLinks'
-import { FindOptions, QueryToken, FilterOption, FilterOptionParsed, FilterOperation, OrderOption, OrderOptionParsed, ColumnOption, FilterRequest, QueryRequest, Pagination, SubTokensOptions } from '../../../../Framework/Signum.React/Scripts/FindOptions'
+import { ajaxPost, ajaxGet } from '@framework/Services';
+import { EntitySettings, ViewPromise } from '@framework/Navigator'
+import * as Navigator from '@framework/Navigator'
+import * as Finder from '@framework/Finder'
+import { getQueryKey } from '@framework/Reflection'
+import { EntityOperationSettings } from '@framework/Operations'
+import { Entity, Lite, liteKey } from '@framework/Signum.Entities'
+import * as Constructor from '@framework/Constructor'
+import * as Operations from '@framework/Operations'
+import * as QuickLinks from '@framework/QuickLinks'
+import { FindOptions, QueryToken, FilterOption, FilterOptionParsed, FilterOperation, OrderOption, OrderOptionParsed, ColumnOption, FilterRequest, QueryRequest, Pagination, SubTokensOptions } from '@framework/FindOptions'
 import * as AuthClient from '../../Authorization/AuthClient'
 import { UserChartEntity, ChartPermission, ChartMessage, ChartRequest, ChartParameterEmbedded, ChartColumnEmbedded } from '../Signum.Entities.Chart'
 import { QueryFilterEmbedded, QueryOrderEmbedded } from '../../UserQueries/Signum.Entities.UserQueries'
@@ -18,8 +18,8 @@ import { QueryTokenEmbedded } from '../../UserAssets/Signum.Entities.UserAssets'
 import UserChartMenu from './UserChartMenu'
 import * as ChartClient from '../ChartClient'
 import * as UserAssetsClient from '../../UserAssets/UserAssetClient'
-import { ImportRoute } from "../../../../Framework/Signum.React/Scripts/AsyncImport";
-import { OrderRequest } from '../../../../Framework/Signum.React/Scripts/FindOptions';
+import { ImportRoute } from "@framework/AsyncImport";
+import { OrderRequest } from '@framework/FindOptions';
 
 
 export function start(options: { routes: JSX.Element[] }) {
@@ -177,7 +177,7 @@ export module API {
     }
 }
 
-declare module '../../../../Framework/Signum.React/Scripts/Signum.Entities' {
+declare module '@framework/Signum.Entities' {
 
     export interface EntityPack<T extends ModifiableEntity> {
         userCharts?: Array<Lite<UserChartEntity>>;

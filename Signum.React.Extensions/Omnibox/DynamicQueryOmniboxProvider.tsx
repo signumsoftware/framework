@@ -1,10 +1,9 @@
 ﻿import * as React from 'react'
 import { OmniboxMessage } from './Signum.Entities.Omnibox'
 import { OmniboxResult, OmniboxMatch, OmniboxProvider } from './OmniboxClient'
-import { QueryToken, FilterOperation, FindOptions, FilterOption } from '../../../Framework/Signum.React/Scripts/FindOptions'
-import * as Navigator from '../../../Framework/Signum.React/Scripts/Navigator'
-import * as Finder from '../../../Framework/Signum.React/Scripts/Finder'
-
+import { QueryToken, FilterOperation, FindOptions, FilterOption } from '@framework/FindOptions'
+import * as Navigator from '@framework/Navigator'
+import * as Finder from '@framework/Finder'
 
 const UNKNOWN = "??UNKNOWN??";
 

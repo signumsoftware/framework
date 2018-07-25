@@ -1,10 +1,10 @@
 ﻿import * as React from 'react'
-import { classes } from '../../../../Framework/Signum.React/Scripts/Globals'
-import { FormGroup, FormControlReadonly, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityDetail, EntityList, EntityRepeater, EntityTabRepeater } from '../../../../Framework/Signum.React/Scripts/Lines'
-import { SubTokensOptions, QueryToken, QueryTokenType, hasAnyOrAll } from '../../../../Framework/Signum.React/Scripts/FindOptions'
-import { SearchControl } from '../../../../Framework/Signum.React/Scripts/Search'
-import { getToString, getMixin } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
-import { TypeContext, FormGroupStyle } from '../../../../Framework/Signum.React/Scripts/TypeContext'
+import { classes } from '@framework/Globals'
+import { FormGroup, FormControlReadonly, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityDetail, EntityList, EntityRepeater, EntityTabRepeater } from '@framework/Lines'
+import { SubTokensOptions, QueryToken, QueryTokenType, hasAnyOrAll } from '@framework/FindOptions'
+import { SearchControl } from '@framework/Search'
+import { getToString, getMixin } from '@framework/Signum.Entities'
+import { TypeContext, FormGroupStyle } from '@framework/TypeContext'
 import { ToolbarMenuEntity } from '../Signum.Entities.Toolbar'
 
 export default class ToolbarMenu extends React.Component<{ ctx: TypeContext<ToolbarMenuEntity> }> {

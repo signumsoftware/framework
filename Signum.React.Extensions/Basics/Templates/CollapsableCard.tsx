@@ -1,7 +1,7 @@
 ﻿import * as React from 'react'
-import { classes } from '../../../../Framework/Signum.React/Scripts/Globals'
-import { BsColor } from '../../../../Framework/Signum.React/Scripts/Components/Basic';
-import { Collapse } from '../../../../Framework/Signum.React/Scripts/Components';
+import { classes } from '@framework/Globals'
+import { BsColor } from '@framework/Components/Basic';
+import { Collapse } from '@framework/Components';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 export interface CollapsableCardProps {

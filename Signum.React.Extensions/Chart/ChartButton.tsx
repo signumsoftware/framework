@@ -1,16 +1,16 @@
 ﻿import * as React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { Dic, classes } from '../../../Framework/Signum.React/Scripts/Globals'
-import { getQueryKey } from '../../../Framework/Signum.React/Scripts/Reflection'
-import * as Finder from '../../../Framework/Signum.React/Scripts/Finder'
-import { Lite, toLite } from '../../../Framework/Signum.React/Scripts/Signum.Entities'
-import { ResultTable, FindOptions, FilterOption, QueryDescription } from '../../../Framework/Signum.React/Scripts/FindOptions'
-import { SearchMessage, JavascriptMessage, parseLite, is } from '../../../Framework/Signum.React/Scripts/Signum.Entities'
-import * as Navigator from '../../../Framework/Signum.React/Scripts/Navigator'
-import { default as SearchControlLoaded } from '../../../Framework/Signum.React/Scripts/SearchControl/SearchControlLoaded'
+import { Dic, classes } from '@framework/Globals'
+import { getQueryKey } from '@framework/Reflection'
+import * as Finder from '@framework/Finder'
+import { Lite, toLite } from '@framework/Signum.Entities'
+import { ResultTable, FindOptions, FilterOption, QueryDescription } from '@framework/FindOptions'
+import { SearchMessage, JavascriptMessage, parseLite, is } from '@framework/Signum.Entities'
+import * as Navigator from '@framework/Navigator'
+import { default as SearchControlLoaded } from '@framework/SearchControl/SearchControlLoaded'
 import { ChartMessage, ChartRequest } from './Signum.Entities.Chart'
 import * as ChartClient from './ChartClient'
-import { Button } from '../../../Framework/Signum.React/Scripts/Components';
+import { Button } from '@framework/Components';
 
 export interface ChartButtonProps {
     searchControl: SearchControlLoaded;

@@ -3,21 +3,21 @@ import { Route } from 'react-router'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 
 import * as moment from 'moment'
-import { Dic, classes } from '../../../Framework/Signum.React/Scripts/Globals';
-import { ajaxPost, ajaxPostRaw, ajaxGet, saveFile } from '../../../Framework/Signum.React/Scripts/Services';
-import { EntitySettings, ViewPromise } from '../../../Framework/Signum.React/Scripts/Navigator'
-import * as Navigator from '../../../Framework/Signum.React/Scripts/Navigator'
-import * as Finder from '../../../Framework/Signum.React/Scripts/Finder'
-import { Lite, Entity, EntityPack, ExecuteSymbol, DeleteSymbol, ConstructSymbol_From, registerToString, JavascriptMessage, toLite } from '../../../Framework/Signum.React/Scripts/Signum.Entities'
-import { EntityOperationSettings } from '../../../Framework/Signum.React/Scripts/Operations'
-import { PseudoType, QueryKey, GraphExplorer, OperationType, Type, getTypeName, getTypeInfo } from '../../../Framework/Signum.React/Scripts/Reflection'
-import * as Operations from '../../../Framework/Signum.React/Scripts/Operations'
-import SelectorModal from '../../../Framework/Signum.React/Scripts/SelectorModal'
-import ValueLineModal from '../../../Framework/Signum.React/Scripts/ValueLineModal'
+import { Dic, classes } from '@framework/Globals';
+import { ajaxPost, ajaxPostRaw, ajaxGet, saveFile } from '@framework/Services';
+import { EntitySettings, ViewPromise } from '@framework/Navigator'
+import * as Navigator from '@framework/Navigator'
+import * as Finder from '@framework/Finder'
+import { Lite, Entity, EntityPack, ExecuteSymbol, DeleteSymbol, ConstructSymbol_From, registerToString, JavascriptMessage, toLite } from '@framework/Signum.Entities'
+import { EntityOperationSettings } from '@framework/Operations'
+import { PseudoType, QueryKey, GraphExplorer, OperationType, Type, getTypeName, getTypeInfo } from '@framework/Reflection'
+import * as Operations from '@framework/Operations'
+import SelectorModal from '@framework/SelectorModal'
+import ValueLineModal from '@framework/ValueLineModal'
 import { AlertEntity, AlertTypeEntity, AlertOperation, DelayOption, AlertMessage } from './Signum.Entities.Alerts'
 import * as OmniboxClient from '../Omnibox/OmniboxClient'
 import * as AuthClient from '../Authorization/AuthClient'
-import * as QuickLinks from '../../../Framework/Signum.React/Scripts/QuickLinks'
+import * as QuickLinks from '@framework/QuickLinks'
 
 export function start(options: { routes: JSX.Element[], couldHaveAlerts?: (typeName: string) => boolean }) {
     Navigator.addSettings(new EntitySettings(AlertEntity, e => import('./Templates/Alert')));

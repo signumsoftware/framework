@@ -2,20 +2,20 @@
 import * as numbro from 'numbro'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { IconProp } from '@fortawesome/fontawesome-svg-core'
-import { classes } from '../../../../Framework/Signum.React/Scripts/Globals'
-import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
-import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
-import { TypeEntity } from '../../../../Framework/Signum.React/Scripts/Signum.Entities.Basics'
-import { notifySuccess }from '../../../../Framework/Signum.React/Scripts/Operations/EntityOperations'
-import EntityLink from '../../../../Framework/Signum.React/Scripts/SearchControl/EntityLink'
-import { TypeContext, ButtonsContext, IRenderButtons, EntityFrame } from '../../../../Framework/Signum.React/Scripts/TypeContext'
-import { EntityLine, ValueLine } from '../../../../Framework/Signum.React/Scripts/Lines'
-import SelectorModal from '../../../../Framework/Signum.React/Scripts/SelectorModal'
-import MessageModal from '../../../../Framework/Signum.React/Scripts/Modals/MessageModal'
+import { classes } from '@framework/Globals'
+import * as Finder from '@framework/Finder'
+import * as Navigator from '@framework/Navigator'
+import { TypeEntity } from '@framework/Signum.Entities.Basics'
+import { notifySuccess }from '@framework/Operations/EntityOperations'
+import EntityLink from '@framework/SearchControl/EntityLink'
+import { TypeContext, ButtonsContext, IRenderButtons, EntityFrame } from '@framework/TypeContext'
+import { EntityLine, ValueLine } from '@framework/Lines'
+import SelectorModal from '@framework/SelectorModal'
+import MessageModal from '@framework/Modals/MessageModal'
 
-import { QueryDescription, SubTokensOptions } from '../../../../Framework/Signum.React/Scripts/FindOptions'
-import { getQueryNiceName, PropertyRoute, getTypeInfo, Binding, GraphExplorer } from '../../../../Framework/Signum.React/Scripts/Reflection'
-import { ModifiableEntity, EntityControlMessage, Entity, parseLite, getToString, JavascriptMessage, OperationSymbol, ModelEntity, newMListElement, NormalControlMessage } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
+import { QueryDescription, SubTokensOptions } from '@framework/FindOptions'
+import { getQueryNiceName, PropertyRoute, getTypeInfo, Binding, GraphExplorer } from '@framework/Reflection'
+import { ModifiableEntity, EntityControlMessage, Entity, parseLite, getToString, JavascriptMessage, OperationSymbol, ModelEntity, newMListElement, NormalControlMessage } from '@framework/Signum.Entities'
 import { API, properties, queries, operations } from '../AuthClient'
 import {
     TypeRulePack, AuthAdminMessage, PermissionSymbol, AuthMessage, TypeAllowed, TypeAllowedRule,
@@ -23,12 +23,12 @@ import {
 } from '../Signum.Entities.Authorization'
 import { ColorRadio, GrayCheckbox } from './ColoredRadios'
 import { TypeConditionSymbol } from '../../Basics/Signum.Entities.Basics'
-import { QueryEntity, PropertyRouteEntity } from '../../../../Framework/Signum.React/Scripts/Signum.Entities.Basics'
+import { QueryEntity, PropertyRouteEntity } from '@framework/Signum.Entities.Basics'
 
 
 import "./AuthAdmin.css"
-import { Button } from '../../../../Framework/Signum.React/Scripts/Components';
-import { is } from '../../../../Framework/Signum.React/Scripts/Signum.Entities';
+import { Button } from '@framework/Components';
+import { is } from '@framework/Signum.Entities';
 
 export default class TypesRulesPackControl extends React.Component<{ ctx: TypeContext<TypeRulePack> }, { filter: string }> implements IRenderButtons {
 

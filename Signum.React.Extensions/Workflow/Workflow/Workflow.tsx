@@ -1,15 +1,15 @@
 ﻿import * as React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { WorkflowEntity, WorkflowModel, WorkflowEntitiesDictionary, BpmnEntityPairEmbedded, WorkflowOperation, WorkflowMessage, WorkflowIssueType } from '../Signum.Entities.Workflow'
-import { TypeContext, ValueLine, EntityLine, LiteAutocompleteConfig } from '../../../../Framework/Signum.React/Scripts/Lines'
-import { is, JavascriptMessage, toLite, ModifiableEntity, Lite, Entity } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
-import * as Entities from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
-import { Dic, classes } from '../../../../Framework/Signum.React/Scripts/Globals';
+import { TypeContext, ValueLine, EntityLine, LiteAutocompleteConfig } from '@framework/Lines'
+import { is, JavascriptMessage, toLite, ModifiableEntity, Lite, Entity } from '@framework/Signum.Entities'
+import * as Entities from '@framework/Signum.Entities'
+import { Dic, classes } from '@framework/Globals';
 import { API, executeWorkflowSave } from '../WorkflowClient'
 import BpmnModelerComponent from '../Bpmn/BpmnModelerComponent'
-import MessageModal from "../../../../Framework/Signum.React/Scripts/Modals/MessageModal";
+import MessageModal from "@framework/Modals/MessageModal";
 import CollapsableCard from '../../Basics/Templates/CollapsableCard';
-import { BsColor } from '../../../../Framework/Signum.React/Scripts/Components';
+import { BsColor } from '@framework/Components';
 
 interface WorkflowProps {
     ctx: TypeContext<WorkflowEntity>;

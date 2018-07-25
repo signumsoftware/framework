@@ -1,22 +1,22 @@
 ﻿import * as React from 'react'
 import { Link } from 'react-router-dom'
-import { classes, Dic } from '../../../Framework/Signum.React/Scripts/Globals'
-import * as Services from '../../../Framework/Signum.React/Scripts/Services'
-import * as Navigator from '../../../Framework/Signum.React/Scripts/Navigator'
-import * as Constructor from '../../../Framework/Signum.React/Scripts/Constructor'
-import * as Finder from '../../../Framework/Signum.React/Scripts/Finder'
-import { FindOptions } from '../../../Framework/Signum.React/Scripts/FindOptions'
-import { TypeContext, StyleContext, StyleOptions, FormGroupStyle } from '../../../Framework/Signum.React/Scripts/TypeContext'
-import { PropertyRoute, PropertyRouteType, MemberInfo, getTypeInfo, getTypeInfos, TypeInfo, IsByAll, New, getTypeName } from '../../../Framework/Signum.React/Scripts/Reflection'
-import { LineBase, LineBaseProps } from '../../../Framework/Signum.React/Scripts/Lines/LineBase'
-import { ModifiableEntity, Lite, Entity, EntityControlMessage, JavascriptMessage, toLite, is, liteKey, getToString } from '../../../Framework/Signum.React/Scripts/Signum.Entities'
+import { classes, Dic } from '@framework/Globals'
+import * as Services from '@framework/Services'
+import * as Navigator from '@framework/Navigator'
+import * as Constructor from '@framework/Constructor'
+import * as Finder from '@framework/Finder'
+import { FindOptions } from '@framework/FindOptions'
+import { TypeContext, StyleContext, StyleOptions, FormGroupStyle } from '@framework/TypeContext'
+import { PropertyRoute, PropertyRouteType, MemberInfo, getTypeInfo, getTypeInfos, TypeInfo, IsByAll, New, getTypeName } from '@framework/Reflection'
+import { LineBase, LineBaseProps } from '@framework/Lines/LineBase'
+import { ModifiableEntity, Lite, Entity, EntityControlMessage, JavascriptMessage, toLite, is, liteKey, getToString } from '@framework/Signum.Entities'
 import { IFile, IFilePath, FileMessage, FileTypeSymbol, FileEntity, FilePathEntity, FileEmbedded, FilePathEmbedded } from './Signum.Entities.Files'
-import { EntityBase, EntityBaseProps } from '../../../Framework/Signum.React/Scripts/Lines/EntityBase'
+import { EntityBase, EntityBaseProps } from '@framework/Lines/EntityBase'
 import * as QueryString from 'query-string'
 
 import "./Files.css"
-import { Type } from '../../../Framework/Signum.React/Scripts/Reflection';
-import { isLite } from '../../../Framework/Signum.React/Scripts/Signum.Entities';
+import { Type } from '@framework/Reflection';
+import { isLite } from '@framework/Signum.Entities';
 
 
 export type DownloadBehaviour = "SaveAs" | "View" | "None";

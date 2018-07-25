@@ -1,18 +1,18 @@
 ﻿import * as React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 
-import { classes } from '../../../../Framework/Signum.React/Scripts/Globals'
-import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
-import { FormGroup, FormControlReadonly, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityList, EntityRepeater } from '../../../../Framework/Signum.React/Scripts/Lines'
-import { Entity, getMixin, is, JavascriptMessage, Lite } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
-import { OperationLogEntity } from '../../../../Framework/Signum.React/Scripts/Signum.Entities.Basics'
+import { classes } from '@framework/Globals'
+import * as Navigator from '@framework/Navigator'
+import { FormGroup, FormControlReadonly, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityList, EntityRepeater } from '@framework/Lines'
+import { Entity, getMixin, is, JavascriptMessage, Lite } from '@framework/Signum.Entities'
+import { OperationLogEntity } from '@framework/Signum.Entities.Basics'
 import { DiffLogMixin, DiffLogMessage } from '../Signum.Entities.DiffLog'
 import { API, DiffLogResult, DiffPair } from '../DiffLogClient'
-import {SearchControl }  from '../../../../Framework/Signum.React/Scripts/Search'
-import { TypeContext, FormGroupStyle } from '../../../../Framework/Signum.React/Scripts/TypeContext'
+import {SearchControl }  from '@framework/Search'
+import { TypeContext, FormGroupStyle } from '@framework/TypeContext'
 import { DiffDocument } from './DiffDocument'
 import "./DiffLog.css"
-import { UncontrolledTabs, Tab, LinkContainer } from '../../../../Framework/Signum.React/Scripts/Components';
+import { UncontrolledTabs, Tab, LinkContainer } from '@framework/Components';
 
 export default class OperationLog extends React.Component<{ ctx: TypeContext<OperationLogEntity> }> {
 

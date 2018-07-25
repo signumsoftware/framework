@@ -1,22 +1,22 @@
 ﻿import * as React from 'react'
 import { Route } from 'react-router'
-import { ajaxPost, ajaxGet } from '../../../Framework/Signum.React/Scripts/Services';
-import { EntitySettings, ViewPromise } from '../../../Framework/Signum.React/Scripts/Navigator'
-import * as Navigator from '../../../Framework/Signum.React/Scripts/Navigator'
-import * as Finder from '../../../Framework/Signum.React/Scripts/Finder'
-import { EntityOperationSettings } from '../../../Framework/Signum.React/Scripts/Operations'
-import { Entity, Lite, liteKey } from '../../../Framework/Signum.React/Scripts/Signum.Entities'
-import * as Constructor from '../../../Framework/Signum.React/Scripts/Constructor'
-import * as Operations from '../../../Framework/Signum.React/Scripts/Operations'
-import * as QuickLinks from '../../../Framework/Signum.React/Scripts/QuickLinks'
-import { FindOptionsParsed, FindOptions, FilterOption, FilterOperation, OrderOption, ColumnOption, FilterRequest, QueryRequest, Pagination } from '../../../Framework/Signum.React/Scripts/FindOptions'
+import { ajaxPost, ajaxGet } from '@framework/Services';
+import { EntitySettings, ViewPromise } from '@framework/Navigator'
+import * as Navigator from '@framework/Navigator'
+import * as Finder from '@framework/Finder'
+import { EntityOperationSettings } from '@framework/Operations'
+import { Entity, Lite, liteKey } from '@framework/Signum.Entities'
+import * as Constructor from '@framework/Constructor'
+import * as Operations from '@framework/Operations'
+import * as QuickLinks from '@framework/QuickLinks'
+import { FindOptionsParsed, FindOptions, FilterOption, FilterOperation, OrderOption, ColumnOption, FilterRequest, QueryRequest, Pagination } from '@framework/FindOptions'
 import * as AuthClient  from '../Authorization/AuthClient'
 import { UserQueryEntity, UserQueryPermission, UserQueryMessage,
     QueryFilterEmbedded, QueryColumnEmbedded, QueryOrderEmbedded } from './Signum.Entities.UserQueries'
 import { QueryTokenEmbedded } from '../UserAssets/Signum.Entities.UserAssets'
 import UserQueryMenu from './UserQueryMenu'
 import * as UserAssetsClient from '../UserAssets/UserAssetClient'
-import { ImportRoute } from "../../../Framework/Signum.React/Scripts/AsyncImport";
+import { ImportRoute } from "@framework/AsyncImport";
 
 export function start(options: { routes: JSX.Element[] }) {
 
@@ -159,14 +159,14 @@ export module API {
     }
 }
 
-declare module '../../../Framework/Signum.React/Scripts/Signum.Entities' {
+declare module '@framework/Signum.Entities' {
 
     export interface EntityPack<T extends ModifiableEntity> {
         userQueries?: Array<Lite<UserQueryEntity>>;
     }
 }
 
-declare module '../../../Framework/Signum.React/Scripts/SearchControl/SearchControlLoaded' {
+declare module '@framework/SearchControl/SearchControlLoaded' {
 
     export interface ShowBarExtensionOption {
         showUserQuery?: boolean;

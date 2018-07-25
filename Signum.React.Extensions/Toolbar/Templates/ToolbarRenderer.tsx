@@ -1,22 +1,22 @@
 ﻿import * as React from 'react'
-import { Dic, classes } from '../../../../Framework/Signum.React/Scripts/Globals'
-import { TypeContext, StyleOptions, EntityFrame } from '../../../../Framework/Signum.React/Scripts/TypeContext'
-import { TypeInfo, getTypeInfo, parseId, GraphExplorer, PropertyRoute, ReadonlyBinding, } from '../../../../Framework/Signum.React/Scripts/Reflection'
-import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
-import * as Operations from '../../../../Framework/Signum.React/Scripts/Operations'
-import { EntityPack, Entity, Lite, JavascriptMessage, entityInfo, getToString } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
-import { renderWidgets, renderEmbeddedWidgets, WidgetContext } from '../../../../Framework/Signum.React/Scripts/Frames/Widgets'
-import ValidationErrors from '../../../../Framework/Signum.React/Scripts/Frames/ValidationErrors'
-import ButtonBar from '../../../../Framework/Signum.React/Scripts/Frames/ButtonBar'
+import { Dic, classes } from '@framework/Globals'
+import { TypeContext, StyleOptions, EntityFrame } from '@framework/TypeContext'
+import { TypeInfo, getTypeInfo, parseId, GraphExplorer, PropertyRoute, ReadonlyBinding, } from '@framework/Reflection'
+import * as Navigator from '@framework/Navigator'
+import * as Operations from '@framework/Operations'
+import { EntityPack, Entity, Lite, JavascriptMessage, entityInfo, getToString } from '@framework/Signum.Entities'
+import { renderWidgets, renderEmbeddedWidgets, WidgetContext } from '@framework/Frames/Widgets'
+import ValidationErrors from '@framework/Frames/ValidationErrors'
+import ButtonBar from '@framework/Frames/ButtonBar'
 import { ToolbarElementEmbedded, ToolbarElementType, ToolbarMenuEntity, ToolbarLocation } from '../Signum.Entities.Toolbar'
 import * as ToolbarClient from '../ToolbarClient'
 import { ToolbarConfig } from "../ToolbarClient";
-import '../../../../Framework/Signum.React/Scripts/Frames/MenuIcons.css'
+import '@framework/Frames/MenuIcons.css'
 import './Toolbar.css'
 import { PermissionSymbol } from "../../Authorization/Signum.Entities.Authorization";
 import * as PropTypes from "prop-types";
-import { Dropdown, DropdownToggle, DropdownMenu, DropdownItem, NavItem } from '../../../../Framework/Signum.React/Scripts/Components';
-import { NavLink } from '../../../../Framework/Signum.React/Scripts/Components/NavItem';
+import { Dropdown, DropdownToggle, DropdownMenu, DropdownItem, NavItem } from '@framework/Components';
+import { NavLink } from '@framework/Components/NavItem';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 
 export interface ToolbarRendererProps {

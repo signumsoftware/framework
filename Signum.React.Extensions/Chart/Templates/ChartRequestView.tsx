@@ -1,17 +1,17 @@
 ﻿import * as React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { Dic, classes, ifError } from '../../../../Framework/Signum.React/Scripts/Globals'
-import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
-import { ValidationError, AbortableRequest } from '../../../../Framework/Signum.React/Scripts/Services'
-import { Lite, toLite } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
-import { ResultTable, FindOptions, FilterOption, QueryDescription, SubTokensOptions, QueryToken, QueryTokenType, ColumnOption } from '../../../../Framework/Signum.React/Scripts/FindOptions'
-import { TypeContext, FormGroupStyle, StyleOptions, StyleContext, mlistItemContext } from '../../../../Framework/Signum.React/Scripts/TypeContext'
-import { SearchMessage, JavascriptMessage, parseLite, is, liteKey } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
-import { PropertyRoute, getQueryNiceName, getTypeInfo, ReadonlyBinding, GraphExplorer }  from '../../../../Framework/Signum.React/Scripts/Reflection'
-import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
-import FilterBuilder from '../../../../Framework/Signum.React/Scripts/SearchControl/FilterBuilder'
-import ValidationErrors from '../../../../Framework/Signum.React/Scripts/Frames/ValidationErrors'
-import { ValueLine, FormGroup, ValueLineProps, ValueLineType } from '../../../../Framework/Signum.React/Scripts/Lines'
+import { Dic, classes, ifError } from '@framework/Globals'
+import * as Finder from '@framework/Finder'
+import { ValidationError, AbortableRequest } from '@framework/Services'
+import { Lite, toLite } from '@framework/Signum.Entities'
+import { ResultTable, FindOptions, FilterOption, QueryDescription, SubTokensOptions, QueryToken, QueryTokenType, ColumnOption } from '@framework/FindOptions'
+import { TypeContext, FormGroupStyle, StyleOptions, StyleContext, mlistItemContext } from '@framework/TypeContext'
+import { SearchMessage, JavascriptMessage, parseLite, is, liteKey } from '@framework/Signum.Entities'
+import { PropertyRoute, getQueryNiceName, getTypeInfo, ReadonlyBinding, GraphExplorer }  from '@framework/Reflection'
+import * as Navigator from '@framework/Navigator'
+import FilterBuilder from '@framework/SearchControl/FilterBuilder'
+import ValidationErrors from '@framework/Frames/ValidationErrors'
+import { ValueLine, FormGroup, ValueLineProps, ValueLineType } from '@framework/Lines'
 import { ChartColumnEmbedded, ChartScriptColumnEmbedded, ChartScriptParameterEmbedded, ChartRequest, GroupByChart, ChartMessage,
     ChartColorEntity, ChartScriptEntity, ChartParameterEmbedded, ChartParameterType, UserChartEntity } from '../Signum.Entities.Chart'
 import * as ChartClient from '../ChartClient'
@@ -21,8 +21,8 @@ import ChartBuilder from './ChartBuilder'
 import ChartTable from './ChartTable'
 import ChartRenderer from './ChartRenderer'
 import "../Chart.css"
-import "../../../../Framework/Signum.React/Scripts/SearchControl/Search.css"
-import { Tab, Tabs, UncontrolledTabs } from '../../../../Framework/Signum.React/Scripts/Components/Tabs';
+import "@framework/SearchControl/Search.css"
+import { Tab, Tabs, UncontrolledTabs } from '@framework/Components/Tabs';
 
 
 interface ChartRequestViewProps {

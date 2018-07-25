@@ -1,23 +1,23 @@
 ﻿import * as React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { Dic } from '../../../../Framework/Signum.React/Scripts/Globals'
-import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
-import { getMixin, toLite, JavascriptMessage, is, Lite } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
+import { Dic } from '@framework/Globals'
+import * as Finder from '@framework/Finder'
+import { getMixin, toLite, JavascriptMessage, is, Lite } from '@framework/Signum.Entities'
 import { WorkflowEntity, WorkflowEntitiesDictionary, WorkflowActivityMessage, WorkflowActivityEntity, WorkflowOperation, WorkflowModel, WorkflowActivityMonitorMessage, CaseActivityEntity } from '../Signum.Entities.Workflow'
 import {
     ValueLine, EntityLine, RenderEntity, EntityCombo, EntityList, EntityDetail, EntityStrip,
     EntityRepeater, EntityCheckboxList, EntityTabRepeater, TypeContext, EntityTable
-} from '../../../../Framework/Signum.React/Scripts/Lines'
-import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
+} from '@framework/Lines'
+import * as Navigator from '@framework/Navigator'
 import { API, WorkflowActivityMonitor, WorkflowActivityMonitorRequest } from '../WorkflowClient'
 import WorkflowActivityMonitorViewerComponent from '../Bpmn/WorkflowActivityMonitorViewerComponent'
-import { SearchControl } from "../../../../Framework/Signum.React/Scripts/Search";
-import { ColumnOptionParsed, FilterOptionParsed, SubTokensOptions, QueryDescription, FilterRequest, ColumnRequest } from '../../../../Framework/Signum.React/Scripts/FindOptions';
+import { SearchControl } from "@framework/Search";
+import { ColumnOptionParsed, FilterOptionParsed, SubTokensOptions, QueryDescription, FilterRequest, ColumnRequest } from '@framework/FindOptions';
 import { RouteComponentProps } from "react-router";
-import { newLite } from '../../../../Framework/Signum.React/Scripts/Reflection';
+import { newLite } from '@framework/Reflection';
 import * as WorkflowClient from '../WorkflowClient';
-import FilterBuilder from '../../../../Framework/Signum.React/Scripts/SearchControl/FilterBuilder';
-import ColumnBuilder from '../../../../Framework/Signum.React/Scripts/SearchControl/ColumnBuilder';
+import FilterBuilder from '@framework/SearchControl/FilterBuilder';
+import ColumnBuilder from '@framework/SearchControl/ColumnBuilder';
 
 export interface WorkflowActivityMonitorConfig {
     workflow: Lite<WorkflowEntity>;

@@ -1,15 +1,15 @@
 ﻿import * as React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { RouteComponentProps } from 'react-router'
-import { Dic, classes } from '../../../Framework/Signum.React/Scripts/Globals'
-import * as Finder from '../../../Framework/Signum.React/Scripts/Finder'
-import { ResultTable, FindOptions, FilterOption, QueryDescription } from '../../../Framework/Signum.React/Scripts/FindOptions'
-import { SearchMessage, JavascriptMessage, parseLite, is, Lite, toLite } from '../../../Framework/Signum.React/Scripts/Signum.Entities'
-import * as Navigator from '../../../Framework/Signum.React/Scripts/Navigator'
-import SearchControlLoaded from '../../../Framework/Signum.React/Scripts/SearchControl/SearchControlLoaded'
+import { Dic, classes } from '@framework/Globals'
+import * as Finder from '@framework/Finder'
+import { ResultTable, FindOptions, FilterOption, QueryDescription } from '@framework/FindOptions'
+import { SearchMessage, JavascriptMessage, parseLite, is, Lite, toLite } from '@framework/Signum.Entities'
+import * as Navigator from '@framework/Navigator'
+import SearchControlLoaded from '@framework/SearchControl/SearchControlLoaded'
 import { ExcelReportEntity, ExcelMessage } from './Signum.Entities.Excel'
 import * as ExcelClient from './ExcelClient'
-import { DropdownMenu, DropdownToggle, Dropdown, DropdownItem } from '../../../Framework/Signum.React/Scripts/Components';
+import { DropdownMenu, DropdownToggle, Dropdown, DropdownItem } from '@framework/Components';
 
 export interface ExcelMenuProps {
     searchControl: SearchControlLoaded;

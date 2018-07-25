@@ -2,8 +2,8 @@
 import * as moment from 'moment'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { RestApiKeyEntity } from '../Signum.Entities.Rest'
-import { TypeContext, ValueLine, ValueLineType, EntityLine, EntityRepeater } from "../../../../Framework/Signum.React/Scripts/Lines";
-import { classes } from "../../../../Framework/Signum.React/Scripts/Globals";
+import { TypeContext, ValueLine, ValueLineType, EntityLine, EntityRepeater } from "@framework/Lines";
+import { classes } from "@framework/Globals";
 import { API } from "../RestClient";
 
 export default class RestApiKeyComponent extends React.Component<{ ctx: TypeContext<RestApiKeyEntity> }> {

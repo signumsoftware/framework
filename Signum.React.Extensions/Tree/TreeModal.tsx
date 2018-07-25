@@ -1,16 +1,16 @@
 ﻿import * as React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import * as Finder from '../../../Framework/Signum.React/Scripts/Finder'
-import { openModal, IModalProps } from '../../../Framework/Signum.React/Scripts/Modals';
-import { SearchMessage, JavascriptMessage, Lite, Entity } from '../../../Framework/Signum.React/Scripts/Signum.Entities'
-import { getTypeInfo, Type } from '../../../Framework/Signum.React/Scripts/Reflection'
+import * as Finder from '@framework/Finder'
+import { openModal, IModalProps } from '@framework/Modals';
+import { SearchMessage, JavascriptMessage, Lite, Entity } from '@framework/Signum.Entities'
+import { getTypeInfo, Type } from '@framework/Reflection'
 import { TreeViewerMessage, TreeEntity } from './Signum.Entities.Tree'
 import * as TreeClient from './TreeClient'
 import { TreeNode } from './TreeClient'
 import { TreeViewer } from './TreeViewer'
-import { FilterOption } from "../../../Framework/Signum.React/Scripts/FindOptions";
-import { Modal } from '../../../Framework/Signum.React/Scripts/Components';
-import { ModalHeaderButtons } from '../../../Framework/Signum.React/Scripts/Components/Modal';
+import { FilterOption } from "@framework/FindOptions";
+import { Modal } from '@framework/Components';
+import { ModalHeaderButtons } from '@framework/Components/Modal';
 
 interface TreeModalProps extends React.Props<TreeModal>, IModalProps {
     typeName: string;

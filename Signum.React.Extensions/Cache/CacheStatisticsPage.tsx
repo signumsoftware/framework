@@ -1,12 +1,12 @@
 ﻿
 import * as React from 'react'
 import { Link, RouteComponentProps } from 'react-router-dom'
-import * as Finder from '../../../Framework/Signum.React/Scripts/Finder'
-import { QueryDescription, SubTokensOptions } from '../../../Framework/Signum.React/Scripts/FindOptions'
-import { getQueryNiceName, PropertyRoute, getTypeInfos } from '../../../Framework/Signum.React/Scripts/Reflection'
-import { ModifiableEntity, EntityControlMessage, Entity, parseLite, getToString, JavascriptMessage } from '../../../Framework/Signum.React/Scripts/Signum.Entities'
+import * as Finder from '@framework/Finder'
+import { QueryDescription, SubTokensOptions } from '@framework/FindOptions'
+import { getQueryNiceName, PropertyRoute, getTypeInfos } from '@framework/Reflection'
+import { ModifiableEntity, EntityControlMessage, Entity, parseLite, getToString, JavascriptMessage } from '@framework/Signum.Entities'
 import { API, CacheTableStats, ResetLazyStats, CacheState } from './CacheClient'
-import { Tabs, Tab, UncontrolledTabs } from '../../../Framework/Signum.React/Scripts/Components/Tabs';
+import { Tabs, Tab, UncontrolledTabs } from '@framework/Components/Tabs';
 
 
 interface CacheStatisticsPageProps extends RouteComponentProps<{}> {

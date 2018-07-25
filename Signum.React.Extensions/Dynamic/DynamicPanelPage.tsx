@@ -2,17 +2,17 @@
 import * as numbro from 'numbro'
 import * as moment from 'moment'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { classes } from '../../../Framework/Signum.React/Scripts/Globals'
-import { StyleContext } from '../../../Framework/Signum.React/Scripts/TypeContext'
-import { ajaxPost } from '../../../Framework/Signum.React/Scripts/Services'
-import * as Finder from '../../../Framework/Signum.React/Scripts/Finder'
-import * as Navigator from '../../../Framework/Signum.React/Scripts/Navigator'
-import { WebApiHttpError } from '../../../Framework/Signum.React/Scripts/Services'
-import { ValueSearchControl, SearchControl, FindOptions } from '../../../Framework/Signum.React/Scripts/Search'
-import EntityLink from '../../../Framework/Signum.React/Scripts/SearchControl/EntityLink'
-import { QueryDescription, SubTokensOptions, QueryEntitiesRequest } from '../../../Framework/Signum.React/Scripts/FindOptions'
-import { getQueryNiceName, PropertyRoute, getTypeInfos, PseudoType, getTypeInfo, TypeInfo, getQueryKey } from '../../../Framework/Signum.React/Scripts/Reflection'
-import { ModifiableEntity, EntityControlMessage, Entity, parseLite, getToString, JavascriptMessage, Lite } from '../../../Framework/Signum.React/Scripts/Signum.Entities'
+import { classes } from '@framework/Globals'
+import { StyleContext } from '@framework/TypeContext'
+import { ajaxPost } from '@framework/Services'
+import * as Finder from '@framework/Finder'
+import * as Navigator from '@framework/Navigator'
+import { WebApiHttpError } from '@framework/Services'
+import { ValueSearchControl, SearchControl, FindOptions } from '@framework/Search'
+import EntityLink from '@framework/SearchControl/EntityLink'
+import { QueryDescription, SubTokensOptions, QueryEntitiesRequest } from '@framework/FindOptions'
+import { getQueryNiceName, PropertyRoute, getTypeInfos, PseudoType, getTypeInfo, TypeInfo, getQueryKey } from '@framework/Reflection'
+import { ModifiableEntity, EntityControlMessage, Entity, parseLite, getToString, JavascriptMessage, Lite } from '@framework/Signum.Entities'
 import { API, CompilationError, EvalEntityError } from './DynamicClient'
 import { Options } from './DynamicClientOptions'
 import CSharpCodeMirror from '../Codemirror/CSharpCodeMirror'
@@ -22,8 +22,8 @@ import { RouteComponentProps } from "react-router";
 import * as QueryString from 'query-string';
 
 import "./DynamicPanelPage.css"
-import { Tab, Tabs } from '../../../Framework/Signum.React/Scripts/Components/Tabs';
-import { FormGroup } from '../../../Framework/Signum.React/Scripts/Lines';
+import { Tab, Tabs } from '@framework/Components/Tabs';
+import { FormGroup } from '@framework/Lines';
 
 interface DynamicPanelProps extends RouteComponentProps<{}> {
 }

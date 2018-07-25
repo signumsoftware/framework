@@ -1,23 +1,23 @@
 ﻿import * as React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { FormGroup, FormControlReadonly, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityList, EntityRepeater } from '../../../../Framework/Signum.React/Scripts/Lines'
-import { ModifiableEntity, External, JavascriptMessage, EntityControlMessage } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
-import { classes, Dic } from '../../../../Framework/Signum.React/Scripts/Globals'
-import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
-import { FindOptions } from '../../../../Framework/Signum.React/Scripts/FindOptions'
-import { getQueryNiceName, MemberInfo, PropertyRoute, Binding } from '../../../../Framework/Signum.React/Scripts/Reflection'
-import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
-import { TypeContext, FormGroupStyle } from '../../../../Framework/Signum.React/Scripts/TypeContext'
+import { FormGroup, FormControlReadonly, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityList, EntityRepeater } from '@framework/Lines'
+import { ModifiableEntity, External, JavascriptMessage, EntityControlMessage } from '@framework/Signum.Entities'
+import { classes, Dic } from '@framework/Globals'
+import * as Finder from '@framework/Finder'
+import { FindOptions } from '@framework/FindOptions'
+import { getQueryNiceName, MemberInfo, PropertyRoute, Binding } from '@framework/Reflection'
+import * as Navigator from '@framework/Navigator'
+import { TypeContext, FormGroupStyle } from '@framework/TypeContext'
 import { Expression, ExpressionOrValue, DesignerContext, DesignerNode } from './NodeUtils'
 import { BaseNode, LineBaseNode } from './Nodes'
 import * as NodeUtils from './NodeUtils'
 import JavascriptCodeMirror from '../../Codemirror/JavascriptCodeMirror'
 import { DynamicViewEntity, DynamicViewMessage } from '../Signum.Entities.Dynamic'
-import { openModal, IModalProps } from '../../../../Framework/Signum.React/Scripts/Modals';
+import { openModal, IModalProps } from '@framework/Modals';
 import TypeHelpComponent from '../../TypeHelp/TypeHelpComponent'
-import ValueLineModal from '../../../../Framework/Signum.React/Scripts/ValueLineModal'
-import { Button, Modal, Typeahead } from '../../../../Framework/Signum.React/Scripts/Components';
-import { ModalHeaderButtons } from '../../../../Framework/Signum.React/Scripts/Components/Modal';
+import ValueLineModal from '@framework/ValueLineModal'
+import { Button, Modal, Typeahead } from '@framework/Components';
+import { ModalHeaderButtons } from '@framework/Components/Modal';
 
 export interface ExpressionOrValueProps {
     binding: Binding<any>;
