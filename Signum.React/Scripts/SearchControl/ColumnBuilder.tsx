@@ -13,6 +13,7 @@ import { TypeContext, FormGroupStyle } from '../TypeContext'
 import QueryTokenBuilder from './QueryTokenBuilder'
 
 import "./ColumnBuilder.css"
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 export interface ColumnsBuilderProps {
     queryDescription: QueryDescription;
@@ -80,7 +81,7 @@ export default class ColumnsBuilder extends React.Component<ColumnsBuilderProps>
                                         <a title={SearchMessage.AddColumn.niceToString()}
                                             className="sf-line-button sf-create"
                                             onClick={this.handlerNewColumn}>
-                                            <span className="fa fa-plus sf-create" />&nbsp;{SearchMessage.AddColumn.niceToString()}
+                                            <FontAwesomeIcon icon="plus" className="sf-create" />&nbsp;{SearchMessage.AddColumn.niceToString()}
                                         </a>
                                     </td>
                                 </tr>
@@ -135,8 +136,8 @@ export class ColumnComponent extends React.Component<ColumnComponentProps>{
                     {!readonly &&
                         <a title={JavascriptMessage.removeColumn.niceToString()}
                             className="sf-line-button sf-remove"
-                            onClick={this.handleDeleteColumn}>
-                            <span className="fa fa-times" />
+                        onClick={this.handleDeleteColumn}>
+                        <FontAwesomeIcon icon="times" />
                         </a>}
                 </td>
                 <td>

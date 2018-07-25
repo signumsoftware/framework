@@ -19,6 +19,7 @@ import { getEntityOperationButtons, defaultOnClick } from './Operations/EntityOp
 import { getConstructFromManyContextualItems, getEntityOperationsContextualItems, defaultContextualClick } from './Operations/ContextualOperations';
 import { ContextualItemsContext } from './SearchControl/ContextualItems';
 import { BsColor } from "./Components/Basic";
+import { IconProp } from "@fortawesome/fontawesome-svg-core";
 
 export function start() {
     ButtonBar.onButtonBarRender.push(getEntityOperationButtons);
@@ -32,7 +33,7 @@ export function start() {
     },
         {
             isVisible: getTypeInfo(ctx.lite.EntityType) && getTypeInfo(ctx.lite.EntityType).requiresSaveOperation && Finder.isFindable(OperationLogEntity, false),
-            icon: "fa fa-history",
+            icon: "history",
             iconColor: "green"
         }));
 }
@@ -156,7 +157,7 @@ export class ContextualOperationSettings<T extends Entity> extends OperationSett
     confirmMessage?: (ctx: ContextualOperationContext<T>) => string | undefined | null;
     onClick?: (ctx: ContextualOperationContext<T>) => void;
     color?: BsColor;
-    icon?: string;
+    icon?: IconProp;
     iconColor?: string;
     order?: number;
 
@@ -174,7 +175,7 @@ export interface ContextualOperationOptions<T extends Entity> {
     confirmMessage?: (ctx: ContextualOperationContext<T>) => string | undefined | null;
     onClick?: (ctx: ContextualOperationContext<T>) => void;
     color?: BsColor;
-    icon?: string;
+    icon?: IconProp;
     iconColor?: string;
     order?: number;
 }

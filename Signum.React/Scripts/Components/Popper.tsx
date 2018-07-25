@@ -134,7 +134,6 @@ export class InnerPopper extends React.Component<PopperProps, PopperState> {
     } as PopperJS.PopperOptions);
 
     getPopperStyle = () => {
-        debugger;
         return !this.state.popperNode || !this.state.data ? initialStyle :
             {
                 position: this.state.data.offsets.popper.position,
@@ -145,7 +144,6 @@ export class InnerPopper extends React.Component<PopperProps, PopperState> {
     getPopperPlacement = () => !this.state.data ? undefined : this.state.data.placement;
 
     getArrowStyle = () => {
-        debugger;
         return !this.state.arrowNode || !this.state.data ? initialArrowStyle : (this.state.data as any).arrowStyles;
     }
 

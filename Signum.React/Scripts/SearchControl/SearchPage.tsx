@@ -1,4 +1,5 @@
 ﻿import * as React from 'react'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { RouteComponentProps } from 'react-router'
 import { Dic } from '../Globals'
 import * as Finder from '../Finder'
@@ -102,7 +103,7 @@ export default class SearchPage extends React.Component<SearchPageProps, SearchP
                     <span>{getQueryNiceName(fo.queryName)}</span>
                     &nbsp;
                     <a className="sf-popup-fullscreen" href="#" onClick={(e) => this.searchControl.handleFullScreenClick(e) }>
-                        <span className="fa fa-external-link"></span>
+                        <FontAwesomeIcon icon="external-link-alt" />
                     </a>
                 </h3>
                 <SearchControl ref={e => this.searchControl = e!}

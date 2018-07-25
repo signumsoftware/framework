@@ -13,6 +13,7 @@ import { TypeContext, FormGroupStyle } from '../TypeContext'
 import QueryTokenBuilder from './QueryTokenBuilder'
 
 import "./FilterBuilder.css"
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 interface FilterBuilderProps {
     filterOptions: FilterOptionParsed[];
@@ -93,7 +94,7 @@ export default class FilterBuilder extends React.Component<FilterBuilderProps>{
                                         <a href="#" title={SearchMessage.AddFilter.niceToString()}
                                             className="sf-line-button sf-create"
                                             onClick={this.handlerNewFilter}>
-                                            <span className="fa fa-plus sf-create" />&nbsp;{SearchMessage.AddFilter.niceToString()}
+                                            <FontAwesomeIcon icon="plus" className="sf-create" />&nbsp;{SearchMessage.AddFilter.niceToString()}
                                         </a>
                                     </td>
                                 </tr>
@@ -187,7 +188,7 @@ export class FilterComponent extends React.Component<FilterComponentProps>{
                         <a href="#" title={SearchMessage.DeleteFilter.niceToString()}
                             className="sf-line-button sf-remove"
                             onClick={this.handleDeleteFilter}>
-                            <span className="fa fa-remove" />
+                            <FontAwesomeIcon icon="times" />
                         </a>}
                 </td>
                 <td>
@@ -294,7 +295,7 @@ export class MultiValue extends React.Component<MultiValueProps> {
                                         <a href="#" title={SearchMessage.DeleteFilter.niceToString()}
                                             className="sf-line-button sf-remove"
                                             onClick={e => this.handleDeleteValue(e, i)}>
-                                            <span className="fa fa-remove" />
+                                            <FontAwesomeIcon icon="times" />
                                         </a>}
                                 </td>
                                 <td>
@@ -315,8 +316,8 @@ export class MultiValue extends React.Component<MultiValueProps> {
                                 <a href="#" title={SearchMessage.AddValue.niceToString()}
                                     className="sf-line-button sf-create"
                                     onClick={this.handleAddValue}>
-                                    <span className="fa fa-plus sf-create" />&nbsp;{SearchMessage.AddValue.niceToString()}
-                            </a>}
+                                    <FontAwesomeIcon icon="plus" className="sf-create" />&nbsp;{SearchMessage.AddValue.niceToString()}
+                                </a>}
                         </td>
                     </tr>
                 </tbody>

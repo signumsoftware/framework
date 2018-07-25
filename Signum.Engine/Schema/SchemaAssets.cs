@@ -31,7 +31,7 @@ namespace Signum.Engine.Maps
         {
             return command.Replace("\r", "").Trim(' ', '\n', ';');
         }
-
+        
         #region Views
         public class View
         {

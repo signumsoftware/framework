@@ -1,5 +1,5 @@
-﻿
-import * as React from 'react'
+﻿import * as React from 'react'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import * as Finder from '../Finder'
 import { openModal, IModalProps } from '../Modals';
 import { ResultTable, FindOptions, FindMode, FilterOption, QueryDescription, ResultRow, ModalFindOptions } from '../FindOptions'
@@ -8,7 +8,6 @@ import { getQueryNiceName } from '../Reflection'
 import SearchControl, { SearchControlProps} from './SearchControl'
 import { Modal } from '../Components';
 import { ModalHeaderButtons } from '../Components/Modal';
-
 
 interface SearchModalProps extends React.Props<SearchModal>, IModalProps {
     findOptions: FindOptions;
@@ -96,9 +95,9 @@ export default class SearchModal extends React.Component<SearchModalProps, { sho
                     okDisabled={!okEnabled}>
                     <span className="sf-entity-title"> {this.props.title}</span>
                     &nbsp;
-                        <a className="sf-popup-fullscreen pointer" onMouseUp={(e) => this.searchControl && this.searchControl.handleFullScreenClick(e)}>
-                        <span className="fa fa-external-link"></span>
-                        </a>
+                    <a className="sf-popup-fullscreen pointer" onMouseUp={(e) => this.searchControl && this.searchControl.handleFullScreenClick(e)}>
+                        <FontAwesomeIcon icon="external-link-alt" />
+                    </a>
                 </ModalHeaderButtons>
                 <div className="modal-body">
                     <SearchControl
@@ -112,7 +111,7 @@ export default class SearchModal extends React.Component<SearchModalProps, { sho
                         onHeighChanged={this.onResize}
                         onDoubleClick={this.props.findMode == "Find" ? this.handleDoubleClick : undefined}
                         {...this.props.searchControlProps}
-                        />
+                    />
                 </div>
             </Modal>
         );
