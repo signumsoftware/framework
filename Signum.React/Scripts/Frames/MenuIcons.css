@@ -16,23 +16,23 @@ body.rtl .dropdown-item .arrow-align {
     margin-top: 3px;
 }
 
-.dropdown-menu span.icon {
+.dropdown-menu .icon {
     display: inline-block;
     margin-left: -8px;
     margin-right: 8px;
 }
 
-.rtl .dropdown-menu span.icon {
+.rtl .dropdown-menu .icon {
     margin-left: 8px;
     margin-right: -8px;
 }
 
-.sidebar-nav .dropdown-menu span.icon {
+.sidebar-nav .dropdown-menu .icon {
     margin-left: 0px;
     margin-right: 8px;
 }
 
-.rtl .sidebar-nav li a span.icon {
+.rtl .sidebar-nav li a .icon {
     margin-left: 8px;
     margin-right: 0px;
 }
