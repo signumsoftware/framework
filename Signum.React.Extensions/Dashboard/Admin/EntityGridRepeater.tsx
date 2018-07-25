@@ -28,7 +28,7 @@ export interface EntityGridRepeaterProps extends EntityListBaseProps {
 }
 
 export interface EntityGridRepaterState extends EntityGridRepeaterProps {
-    dragMode?: string;
+    dragMode?: "move" | "left" | "right";
     initialPageX?: number;
     originalStartColumn?: number;
     currentItem?: TypeContext<ModifiableEntity & IGridEntity>;
@@ -83,6 +83,7 @@ export class EntityGridRepeater extends EntityListBase<EntityGridRepeaterProps, 
                                         item = React.cloneElement(item, {
                                             onResizerDragStart: p.ctx.readOnly || !s.resize ? undefined : (resizer, e) => this.handleResizeDragStart(resizer, e, p.ctx),
                                             onTitleDragStart: p.ctx.readOnly || !s.move ? undefined : (e) => this.handleMoveDragStart(e, p.ctx),
+                                            onTitleDragEnd: p.ctx.readOnly || !s.move ? undefined : (e) => this.handleMoveDragEnd(e, p.ctx),
                                             onRemove: p.ctx.readOnly || !s.remove ? undefined : (e) => this.handleRemoveElementClick(e, p.index),
                                         } as EntityGridItemProps);
 
@@ -201,7 +202,6 @@ export class EntityGridRepeater extends EntityListBase<EntityGridRepeaterProps, 
     }
 
 
-
     handleResizeDragStart = (resizer: "left" | "right", e: React.DragEvent<any>, mlec: TypeContext<ModifiableEntity & IGridEntity>) => {
         e.dataTransfer.effectAllowed = "move";
         const de = e.nativeEvent as DragEvent;
@@ -228,6 +228,19 @@ export class EntityGridRepeater extends EntityListBase<EntityGridRepeaterProps, 
         this.forceUpdate();
     }
 
+    handleMoveDragEnd = (e: React.DragEvent<any>, mlec: TypeContext<ModifiableEntity & IGridEntity>) => {
+        e.dataTransfer.effectAllowed = "move";
+        const de = e.nativeEvent as DragEvent;
+
+        const s = this.state;
+        s.dragMode = undefined;
+        s.initialPageX = undefined;
+        s.originalStartColumn = undefined;
+        s.currentItem = undefined;
+        s.currentRow = undefined;
+        this.forceUpdate();
+    }
+
     handleItemsRowDragOver = (e: React.DragEvent<any>, row: number) => {
         e.preventDefault();
         e.dataTransfer.dropEffect = "move";
@@ -236,8 +249,6 @@ export class EntityGridRepeater extends EntityListBase<EntityGridRepeaterProps, 
         const list = s.ctx.value!.map(a => a.element as ModifiableEntity & IGridEntity);
         const c = s.currentItem!.value;
         const rect = (e.currentTarget as HTMLDivElement).getBoundingClientRect();
-
-
 
         if (s.dragMode == "move") {
             const offset = de.pageX - s.initialPageX!;
@@ -306,6 +317,7 @@ export interface EntityGridItemProps {
 
     onResizerDragStart?: (resizer: "left" | "right", e: React.DragEvent<any>) => void;
     onTitleDragStart?: (e: React.DragEvent<any>) => void;
+    onTitleDragEnd?: (e: React.DragEvent<any>) => void;
     onRemove?: (e: React.MouseEvent<any>) => void;
 }
 
@@ -322,7 +334,8 @@ export class EntityGridItem extends React.Component<EntityGridItemProps>{
                     style && style != "light" && "text-white",
                     style && ("bg-" + style)
                 )} draggable={!!this.props.onTitleDragStart}
-                    onDragStart={this.props.onTitleDragStart} >
+                    onDragStart={this.props.onTitleDragStart}
+                    onDragEnd={this.props.onTitleDragEnd} >
                     {this.props.onRemove &&
                         <a href="#" className="sf-line-button sf-remove pull-right" onClick={this.props.onRemove}
                             title={EntityControlMessage.Remove.niceToString()}>
