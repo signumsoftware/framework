@@ -157,7 +157,7 @@ export function start(options: { routes: JSX.Element[] }) {
     QuickLinks.registerQuickLink(WorkflowEntity, ctx => new QuickLinks.QuickLinkLink("bam",
         WorkflowActivityMonitorMessage.WorkflowActivityMonitor.niceToString(),
         workflowActivityMonitorUrl(ctx.lite),
-        { icon: "tachometer", iconColor: "green" }));
+        { icon: "tachometer-alt", iconColor: "green" }));
 
     Operations.addSettings(new EntityOperationSettings(WorkflowOperation.Save, { color: "primary", onClick: executeWorkflowSave }));
     Operations.addSettings(new EntityOperationSettings(WorkflowOperation.Delete, { contextualFromMany: { isVisible: ctx => false } }));

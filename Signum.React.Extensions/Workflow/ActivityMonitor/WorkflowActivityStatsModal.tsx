@@ -107,7 +107,7 @@ export default class WorkflowActivityStatsModal extends React.Component<Workflow
         return (
             <FormGroup ctx={ctx}>
                 <button className="btn btn-default" onClick={this.handleClick}>
-                    <FontAwesomeIcon icon="tachometer" color="green"/> {WorkflowActivityMonitorMessage.WorkflowActivityMonitor.niceToString()}
+                    <FontAwesomeIcon icon="tachometer-alt" color="green"/> {WorkflowActivityMonitorMessage.WorkflowActivityMonitor.niceToString()}
                 </button>
             </FormGroup>
         );

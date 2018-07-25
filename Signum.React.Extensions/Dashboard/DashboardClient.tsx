@@ -126,7 +126,7 @@ export function start(options: { routes: JSX.Element[] }) {
         return promise.then(das =>
             das.map(d => new QuickLinks.QuickLinkAction(liteKey(d), d.toStr || "", e => {
                 Navigator.pushOrOpenInTab(dashboardUrl(d, ctx.lite), e)
-            }, { icon: "tachometer", iconColor: "darkslateblue" })));
+            }, { icon: "tachometer-alt", iconColor: "darkslateblue" })));
     });
 
     QuickLinks.registerQuickLink(DashboardEntity, ctx => new QuickLinks.QuickLinkAction("preview", DashboardMessage.Preview.niceToString(),

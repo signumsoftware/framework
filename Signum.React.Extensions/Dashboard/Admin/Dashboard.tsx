@@ -130,17 +130,16 @@ export default class Dashboard extends React.Component<{ ctx: TypeContext<Dashbo
 
 
 export function iconToString(icon: IconProp) {
-    return typeof icon == "string" ? icon :
-        Array.isArray(icon) ? icon[0] + " " + icon[1] :
-            icon.prefix + " " + icon.iconName;
+    return typeof icon == "string" ? "fas fa-" +  icon :
+        Array.isArray(icon) ? icon[0] + " fa-" + icon[1] :
+            icon.prefix + " fa-" + icon.iconName;
 }
 
 export function parseIcon(iconName: string): IconProp {
-    return !iconName.contains(" ") ? iconName as IconName :
-        {
-            prefix: iconName.before(" ") as IconPrefix,
-            iconName: iconName.before(" ") as IconName,
-        };
+    return {
+        prefix: iconName.tryBefore(" ") as IconPrefix,
+        iconName: iconName.tryAfter(" fa-") as IconName,
+    };
 }
 
 
