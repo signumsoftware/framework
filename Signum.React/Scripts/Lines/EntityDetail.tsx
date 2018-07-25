@@ -58,7 +58,7 @@ export class EntityDetail extends EntityBase<EntityDetailProps, EntityDetailProp
         const hasValue = !!s.ctx.value;
 
         const buttons = (
-            <span className="pull-right">
+            <span className="float-right">
                 {!hasValue && this.renderCreateButton(false)}
                 {!hasValue && this.renderFindButton(false)}
                 {hasValue && this.renderViewButton(false, s.ctx.value!)}

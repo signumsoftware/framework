@@ -68,7 +68,7 @@ export class EntityTabRepeater extends EntityListBase<EntityTabRepeaterProps, En
 
     renderButtons() {
         const buttons = (
-            <span className="pull-right">
+            <span className="float-right">
                 {this.renderCreateButton(false)}
                 {this.renderFindButton(false)}
             </span>

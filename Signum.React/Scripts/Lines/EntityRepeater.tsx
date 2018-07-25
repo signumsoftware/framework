@@ -55,7 +55,7 @@ export class EntityRepeater extends EntityListBase<EntityRepeaterProps, EntityRe
 
     renderButtons() {
         const buttons = (
-            <span className="pull-right">
+            <span className="float-right">
                 {this.state.createAsLink == false && this.renderCreateButton(false)}
                 {this.renderFindButton(false)}
             </span>
