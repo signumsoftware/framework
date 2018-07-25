@@ -8,6 +8,8 @@ import { SearchMessage, JavascriptMessage, Lite, Entity, NormalWindowMessage, Bo
 
 import "./Modals.css"
 import { Modal, BsSize } from '../Components';
+import { IconProp } from '@fortawesome/fontawesome-svg-core';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 export type MessageModalStyle = "success" | "info" | "warning" | "error";
 
@@ -23,7 +25,7 @@ interface MessageModalProps extends React.Props<MessageModal>, IModalProps {
     style?: MessageModalStyle;
     buttons: MessageModalButtons;
     icon?: MessageModalIcon;
-    customIcon?: string;
+    customIcon?: IconProp;
     size?: BsSize;
 }
 
@@ -118,7 +120,7 @@ export default class MessageModal extends React.Component<MessageModalProps, { s
     }
 
     getIcon = () => {
-        var icon: string | undefined;
+        var icon: IconProp | undefined;
 
         if (this.props.customIcon)
             icon = this.props.customIcon;
@@ -126,19 +128,19 @@ export default class MessageModal extends React.Component<MessageModalProps, { s
         if (this.props.icon) {
             switch (this.props.icon) {
                 case "info":
-                    icon = "fa fa-info-circle";
+                    icon = "info-circle";
                     break;
                 case "error":
-                    icon = "fa fa-exclamation-circle";
+                    icon = "exclamation-circle";
                     break;
                 case "question":
-                    icon = "fa fa-question-circle";
+                    icon = "question-circle";
                     break;
                 case "success":
-                    icon = "fa fa-check-circle";
+                    icon = "check-circle";
                     break;
                 case "warning":
-                    icon = "fa fa-exclamation-triangle";
+                    icon = "exclamation-triangle";
                     break;
             }
         }
@@ -149,7 +151,7 @@ export default class MessageModal extends React.Component<MessageModalProps, { s
     renderTitle = () => {
         var icon = this.getIcon();
 
-        var iconSpan = icon && <span className={icon}></span>;
+        var iconSpan = icon && <FontAwesomeIcon icon={icon}/>;
 
         return (
             <span>

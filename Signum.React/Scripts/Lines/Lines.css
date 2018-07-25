@@ -166,14 +166,6 @@ fieldset.sf-repeater-element {
             margin-right: 5px;
         }
 
-
-body.rtl .fa-arrow-right:before {
-    content: "\F060";
-}
-
-body.rtl .fa-arrow-left:before {
-    content: "\F061";
-}
 /*EntityStrip*/
 
 ul.sf-strip-horizontal > li {

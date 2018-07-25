@@ -13,6 +13,7 @@ import { RenderEntity } from './RenderEntity'
 import { Tab, UncontrolledTabs, Tabs } from '../Components/Tabs';
 import { newMListElement } from '../Signum.Entities';
 import { isLite } from '../Signum.Entities';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 export interface EntityTabRepeaterProps extends EntityListBaseProps {
     createAsLink?: boolean;
@@ -101,7 +102,7 @@ export class EntityTabRepeater extends EntityListBase<EntityTabRepeaterProps, En
                                         <span className={classes("sf-line-button", "sf-create")}
                                             onClick={e => { e.stopPropagation(); this.handleRemoveElementClick(e, i) } }
                                             title={EntityControlMessage.Remove.niceToString()}>
-                                            <span className="fa fa-remove" />
+                                            <FontAwesomeIcon icon="times" />
                                         </span>
                                     }
                                     &nbsp;
@@ -110,7 +111,7 @@ export class EntityTabRepeater extends EntityListBase<EntityTabRepeaterProps, En
                                         onDragStart={drag.onDragStart}
                                         onDragEnd={drag.onDragEnd}
                                         title={EntityControlMessage.Move.niceToString()}>
-                                        <span className="fa fa-bars" />
+                                        <FontAwesomeIcon icon="bars" />
                                     </span>}
                                 </div> as any
                             }>

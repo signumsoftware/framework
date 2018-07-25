@@ -18,6 +18,7 @@ import "./Frames.css"
 import { ViewPromise } from "../Navigator";
 import { BsSize, Modal, ErrorBoundary } from '../Components';
 import { ModalHeaderButtons } from '../Components/Modal';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 
 interface FrameModalProps extends React.Props<FrameModal>, IModalProps {
     title?: string;
@@ -298,7 +299,7 @@ export default class FrameModal extends React.Component<FrameModalProps, FrameMo
 
         return (
             <a className="sf-popup-fullscreen sf-pointer" href="#" onClick={this.handlePopupFullScreen}>
-                <span className="fa fa-external-link"></span>
+                <FontAwesomeIcon icon="external-link-alt" />
             </a>
         );
     }

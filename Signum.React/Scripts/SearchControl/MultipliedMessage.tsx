@@ -7,6 +7,7 @@ import { FindOptionsParsed, QueryToken, getTokenParents, QueryTokenType } from '
 import { SearchMessage, JavascriptMessage, ValidationMessage, Lite, Entity, External } from '../Signum.Entities'
 import { Binding, IsByAll, getTypeInfos, TypeReference } from '../Reflection'
 import { TypeContext, FormGroupStyle } from '../TypeContext'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 
 export default class MultipliedMessage extends React.Component<{ findOptions: FindOptionsParsed, mainType : TypeReference }>{
@@ -33,7 +34,7 @@ export default class MultipliedMessage extends React.Component<{ findOptions: Fi
 
         return (
             <div className="sf-search-message alert alert-warning">
-                <span className="fa fa-exclamation-triangle" />&nbsp;{message}
+                <FontAwesomeIcon icon="exclamation-triangle" />&nbsp;{message}
             </div>
         );
     }

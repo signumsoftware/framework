@@ -6,6 +6,7 @@ import { Entity, Lite, is, toLite, LiteMessage, getToString, EntityPack, ModelSt
 import { TypeContext, StyleOptions, EntityFrame } from '../TypeContext'
 import { getTypeInfo, TypeInfo, PropertyRoute, ReadonlyBinding, getTypeInfos } from '../Reflection'
 import { ErrorBoundary } from "../Components/ErrorBoundary";
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 export default class ContainerToggleComponent extends React.Component<{}, { fluid: boolean }>{
 
@@ -26,7 +27,7 @@ export default class ContainerToggleComponent extends React.Component<{}, { flui
         return (
             <div className={classes(this.state.fluid ? "container-fluid" : "container", "mt-3")}>
                 <a className="expand-window d-none d-md-block" onClick={this.handleExpandToggle} href="#" >
-                    <span className={classes("fa", this.state.fluid ? "fa-compress" : "fa-expand")} />
+                    <FontAwesomeIcon icon={this.state.fluid ? "compress" : "expand"}/>
                 </a> 
                 <ErrorBoundary>
                     {this.props.children}
