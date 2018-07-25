@@ -325,7 +325,7 @@ export class CheckEvalsStep extends React.Component<{}, CheckEvalsStepState>{
         return (
             <div>
                 {Options.checkEvalFindOptions.map((fo, i) => <CheckEvalType key={i} ctx={ctx} findOptions={fo} autoStart={this.state.autoStart} />)}
-                <button className="btn btn-success" onClick={this.handleOnClick}> <i className="fa fa-refresh" aria-hidden="true" /> Refresh all</button>
+                <button className="btn btn-success" onClick={this.handleOnClick}><FontAwesomeIcon icon="sync" /> Refresh all</button>
             </div>
         );
     }
@@ -381,19 +381,19 @@ export class CheckEvalType extends React.Component<CheckEvalTypeProps, CheckEval
 
     render() {
         return (
-                <FormGroup ctx={this.props.ctx} labelText={getQueryNiceName(this.props.findOptions.queryName)}>
-                    <ValueSearchControl findOptions={this.props.findOptions} isLink={true} />
-                    {
-                        this.state.state == "loading" ?
-                            <i className="fa fa-refresh fa-spin fa-fw" /> :
-                            <i style={{ cursor: "pointer" }} className="sf-line-button fa fa-refresh" aria-hidden="true" onClick={e => { e.preventDefault(); this.loadData(this.props); }} />
-                    }
+            <FormGroup ctx={this.props.ctx} labelText={getQueryNiceName(this.props.findOptions.queryName)}>
+                <ValueSearchControl findOptions={this.props.findOptions} isLink={true} />
+                {
+                    this.state.state == "loading" ?
+                        <FontAwesomeIcon icon="sync" spin={true} /> :
+                        <span onClick={e => { e.preventDefault(); this.loadData(this.props); }} style={{ cursor: "pointer" }}><FontAwesomeIcon icon="sync" className="sf-line-button" /></span>
+                }
 
-                    {
-                        this.state.state == "failed" ? <span className="mini-alert alert-danger" role="alert"><i className="fa fa-exclamation-triangle" aria-hidden="true"></i> Exception checking {getQueryNiceName(this.props.findOptions.queryName)}</span> :
-                            this.state.errors && this.state.errors.length > 0 ? <span className="mini-alert alert-danger" role="alert"><strong>{this.state.errors.length}</strong> {this.state.errors.length == 1 ? "Error" : "Errors"} found</span> :
-                                this.state.errors && this.state.errors.length == 0 ? <span className="mini-alert alert-success" role="alert">No errors found!</span> :
-                                    undefined
+                {
+                    this.state.state == "failed" ? <span className="mini-alert alert-danger" role="alert"><FontAwesomeIcon icon="exclamation-triangle" /> Exception checking {getQueryNiceName(this.props.findOptions.queryName)}</span> :
+                        this.state.errors && this.state.errors.length > 0 ? <span className="mini-alert alert-danger" role="alert"><strong>{this.state.errors.length}</strong> {this.state.errors.length == 1 ? "Error" : "Errors"} found</span> :
+                            this.state.errors && this.state.errors.length == 0 ? <span className="mini-alert alert-success" role="alert">No errors found!</span> :
+                                undefined
                 }
                 {
                     this.state.errors && this.state.errors.length > 0 &&
@@ -410,8 +410,8 @@ export class CheckEvalType extends React.Component<CheckEvalTypeProps, CheckEval
                     </div>
 
                 }
-                </FormGroup>
-               
+            </FormGroup>
+
         );
     }
 }

@@ -244,7 +244,7 @@ export class PanelPart extends React.Component<PanelPartProps, PanelPartState>{
                     style && ("bg-" + style)
                 )}>
                     {renderer.handleEditClick &&
-                        <a className="sf-pointer pull-right flip sf-hide" onMouseUp={e => renderer.handleEditClick!(content, lite, e)}>
+                        <a className="sf-pointer float-right flip sf-hide" onMouseUp={e => renderer.handleEditClick!(content, lite, e)}>
                             <FontAwesomeIcon icon="edit" />&nbsp;Edit
                         </a>}
                     &nbsp;

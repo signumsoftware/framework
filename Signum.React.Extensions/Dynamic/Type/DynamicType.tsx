@@ -81,7 +81,7 @@ export default class DynamicTypeComponent extends React.Component<DynamicTypeCom
                         <ValueLine ctx={ctx.subCtx(dt => dt.typeName)} labelColumns={3} onChange={() => this.forceUpdate()} unitText={suffix} />
                     </div>
                     <div className="col-sm-4">
-                        <button className={classes("btn btn-xs btn-success pull-right", this.state.showDatabaseMapping && "active")}
+                        <button className={classes("btn btn-xs btn-success float-right", this.state.showDatabaseMapping && "active")}
                             onClick={() => this.setState({ showDatabaseMapping: !this.state.showDatabaseMapping })}>
                             Show Database Mapping
                         </button>

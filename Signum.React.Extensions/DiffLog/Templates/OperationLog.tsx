@@ -106,9 +106,9 @@ export class DiffMixinTabs extends React.Component<{ ctx: TypeContext<OperationL
         const eq = isEqual(diffPrev);
 
         const title =  (
-            <span title={ DiffLogMessage.DifferenceBetweenFinalStateOfPreviousLogAndTheInitialState.niceToString()}>
-                <span className={`fa fa-fast-backward colorIcon red ${eq ? "mini" : ""}`}></span>
-                <span className={`fa fa-step-backward colorIcon green ${eq ? "mini" : ""}`}></span>
+            <span title={DiffLogMessage.DifferenceBetweenFinalStateOfPreviousLogAndTheInitialState.niceToString()}>
+                <FontAwesomeIcon icon="fast-backward" className={`colorIcon red ${eq ? "mini" : ""}`} />
+                <FontAwesomeIcon icon="step-backward" className={`colorIcon green ${eq ? "mini" : ""}`} />
             </span>
         );
 
@@ -136,9 +136,9 @@ export class DiffMixinTabs extends React.Component<{ ctx: TypeContext<OperationL
         const eq = !this.state.result.diff || isEqual(this.state.result.diff);
 
         const title = (
-            <span title={ DiffLogMessage.DifferenceBetweenInitialStateAndFinalState.niceToString() }>
-                <span className={`fa fa-step-backward colorIcon red ${eq ? "mini" : ""}`}></span>
-                <span className={`fa fa-step-forward colorIcon green ${eq ? "mini" : ""}`}></span>
+            <span title={DiffLogMessage.DifferenceBetweenInitialStateAndFinalState.niceToString()}>
+                <FontAwesomeIcon icon="step-backward" className={`colorIcon red ${eq ? "mini" : ""}`} />
+                <FontAwesomeIcon icon="step-forward" className={`colorIcon green ${eq ? "mini" : ""}`} />
             </span>
         );
 
@@ -162,9 +162,10 @@ export class DiffMixinTabs extends React.Component<{ ctx: TypeContext<OperationL
         const eq = isEqual(diffNext);
 
         const title = (
-            <span title={ DiffLogMessage.DifferenceBetweenFinalStateAndTheInitialStateOfNextLog.niceToString() }>
-                <span className={`fa fa-step-forward colorIcon red ${eq ? "mini" : ""}`}></span>
-                <span className={`fa fa-fast-forward colorIcon green ${eq ? "mini" : ""}`}></span>
+            <span title={DiffLogMessage.DifferenceBetweenFinalStateAndTheInitialStateOfNextLog.niceToString()}>
+
+                <FontAwesomeIcon icon="step-forward" className={`colorIcon red ${eq ? "mini" : ""}`} />
+                <FontAwesomeIcon icon="fast-forward" className={`colorIcon green ${eq ? "mini" : ""}`} />
             </span>
         );
 

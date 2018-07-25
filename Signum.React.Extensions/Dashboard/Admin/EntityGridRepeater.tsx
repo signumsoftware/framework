@@ -52,7 +52,7 @@ export class EntityGridRepeater extends EntityListBase<EntityGridRepeaterProps, 
                 <legend>
                     <div>
                         <span>{this.state.labelText}</span>
-                        <span className="pull-right">
+                        <span className="float-right">
                             {this.renderCreateButton(false)}
                             {this.renderFindButton(false)}
                         </span>
@@ -337,7 +337,7 @@ export class EntityGridItem extends React.Component<EntityGridItemProps>{
                     onDragStart={this.props.onTitleDragStart}
                     onDragEnd={this.props.onTitleDragEnd} >
                     {this.props.onRemove &&
-                        <a href="#" className="sf-line-button sf-remove pull-right" onClick={this.props.onRemove}
+                        <a href="#" className="sf-line-button sf-remove float-right" onClick={this.props.onRemove}
                             title={EntityControlMessage.Remove.niceToString()}>
                             <FontAwesomeIcon icon="times" />
                         </a>

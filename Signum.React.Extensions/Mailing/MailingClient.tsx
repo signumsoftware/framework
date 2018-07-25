@@ -27,7 +27,7 @@ import * as DynamicClientOptions from '../Dynamic/DynamicClientOptions';
 
 import "./Mailing.css";
 import { DropdownItem } from '@framework/Components';
-import { registerExportAssertLink } from '../../../Extensions/Signum.React.Extensions/UserAssets/UserAssetClient';
+import { registerExportAssertLink } from '../UserAssets/UserAssetClient';
 
 
 export function start(options: {

@@ -112,7 +112,7 @@ export class OperationMapD3 {
     initStates(svg: d3.Selection<SVGElement, any, any, any>) {
 
         const drag = d3.drag<SVGGElement, MapState>()
-            .on("initial", d => {
+            .on("start", d => {
                 if (!d3.event.active)
                     this.simulation.alphaTarget(0.3).restart();
 
@@ -191,7 +191,7 @@ export class OperationMapD3 {
     initOperations(svg: d3.Selection<SVGElement, any, any, any>) {
 
         const drag = d3.drag<SVGGElement, MapOperation>()
-            .on("initial", d => {
+            .on("start", d => {
                 if (!d3.event.active)
                     this.simulation.alphaTarget(0.3).restart();
 

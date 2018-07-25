@@ -15,6 +15,7 @@ import * as Operations from '@framework/Operations'
 import { ToolbarEntity, ToolbarMenuEntity, ToolbarElementEmbedded, ToolbarElementType, ToolbarLocation } from './Signum.Entities.Toolbar'
 import * as Constructor from '@framework/Constructor'
 import * as UserAssetClient from '../UserAssets/UserAssetClient'
+import { parseIcon } from '../Dashboard/Admin/Dashboard';
 
 export function start(options: { routes: JSX.Element[] }, ...configs: ToolbarConfig<any>[]) {
     Navigator.addSettings(new EntitySettings(ToolbarEntity, t => import('./Templates/Toolbar')));
@@ -40,7 +41,7 @@ export abstract class ToolbarConfig<T extends Entity> {
     }
 
     getIcon(element: ToolbarResponse<T>) {
-        return ToolbarConfig.coloredIcon(element.icon, element.iconColor);
+        return ToolbarConfig.coloredIcon(element.iconName == null ? undefined : parseIcon(element.iconName), element.iconColor);
     }
 
     static coloredIcon(icon: IconProp | undefined, color: string | undefined): React.ReactChild | null {
@@ -82,7 +83,7 @@ export namespace API {
 
 export interface ToolbarResponse<T extends Entity> {
     type: ToolbarElementType;
-    icon?: IconProp;
+    iconName?: string;
     iconColor?: string;
     label?: string;
     content?: Lite<T>;
