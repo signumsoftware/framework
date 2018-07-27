@@ -443,6 +443,15 @@ namespace Signum.Engine
             return new Transaction(parent => new NamedTransaction(parent, savePointName));
         }
 
+
+
+        public static T ForceNew<T>(Func<T> func)
+        {
+
+            using (Transaction tr = Transaction.ForceNew())
+                return tr.Commit(func.Invoke());
+        }
+
         public static Transaction ForceNew()
         {
             return new Transaction(parent => inTestTransaction.Value ?
