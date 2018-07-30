@@ -1,6 +1,6 @@
 ﻿import * as React from 'react'
 import { JoyrideStepStyleEntity } from '../Signum.Entities.Joyride'
-import { ValueLine, EntityLine, EntityCombo, EntityList, EntityDetail, EntityStrip, EntityRepeater, TypeContext, RenderEntity } from '../../../../Framework/Signum.React/Scripts/Lines'
+import { ValueLine, EntityLine, EntityCombo, EntityList, EntityDetail, EntityStrip, EntityRepeater, TypeContext, RenderEntity } from '@framework/Lines'
 import { ColorTypeaheadLine } from '../../Basics/Templates/ColorTypeahead';
 
 export default class JoyrideStepStyle extends React.Component<{ ctx: TypeContext<JoyrideStepStyleEntity> }> {

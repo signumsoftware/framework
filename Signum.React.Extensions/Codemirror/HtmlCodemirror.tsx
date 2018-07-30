@@ -1,7 +1,7 @@
 ﻿import * as React from 'react'
-import { getQueryNiceName } from '../../../Framework/Signum.React/Scripts/Reflection'
-import * as Navigator from '../../../Framework/Signum.React/Scripts/Navigator'
-import { TypeContext, FormGroupStyle } from '../../../Framework/Signum.React/Scripts/TypeContext'
+import { getQueryNiceName } from '@framework/Reflection'
+import * as Navigator from '@framework/Navigator'
+import { TypeContext, FormGroupStyle } from '@framework/TypeContext'
 import CodeMirrorComponent from '../Codemirror/CodeMirrorComponent'
 import * as CodeMirror from 'codemirror'
 

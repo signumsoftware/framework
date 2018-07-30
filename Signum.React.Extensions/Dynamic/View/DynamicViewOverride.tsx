@@ -1,21 +1,22 @@
 ﻿import * as React from 'react'
-import { classes } from '../../../../Framework/Signum.React/Scripts/Globals'
-import * as Constructor from '../../../../Framework/Signum.React/Scripts/Constructor'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { classes } from '@framework/Globals'
+import * as Constructor from '@framework/Constructor'
 import { DynamicViewOverrideEntity, DynamicViewMessage } from '../Signum.Entities.Dynamic'
-import { EntityLine, TypeContext, ValueLineType, ValueLine, FormGroup } from '../../../../Framework/Signum.React/Scripts/Lines'
-import { Entity, JavascriptMessage, NormalWindowMessage, is } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
-import { getTypeInfo, Binding, PropertyRoute, ReadonlyBinding, getTypeInfos } from '../../../../Framework/Signum.React/Scripts/Reflection'
+import { EntityLine, TypeContext, ValueLineType, ValueLine, FormGroup } from '@framework/Lines'
+import { Entity, JavascriptMessage, NormalWindowMessage, is } from '@framework/Signum.Entities'
+import { getTypeInfo, Binding, PropertyRoute, ReadonlyBinding, getTypeInfos } from '@framework/Reflection'
 import JavascriptCodeMirror from '../../Codemirror/JavascriptCodeMirror'
 import * as DynamicViewClient from '../DynamicViewClient'
-import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
-import { ViewReplacer } from '../../../../Framework/Signum.React/Scripts/Frames/ReactVisitor';
+import * as Navigator from '@framework/Navigator'
+import { ViewReplacer } from '@framework/Frames/ReactVisitor';
 import * as TypeHelpClient from '../../TypeHelp/TypeHelpClient'
 import TypeHelpComponent from '../../TypeHelp/TypeHelpComponent'
 import TypeHelpButtonBarComponent from '../../TypeHelp/TypeHelpButtonBarComponent'
-import ValueLineModal from '../../../../Framework/Signum.React/Scripts/ValueLineModal'
-import MessageModal from '../../../../Framework/Signum.React/Scripts/Modals/MessageModal'
+import ValueLineModal from '@framework/ValueLineModal'
+import MessageModal from '@framework/Modals/MessageModal'
 import * as Nodes from '../../Dynamic/View/Nodes';
-import { DropdownItem, Dropdown, DropdownMenu, DropdownToggle, UncontrolledDropdown } from '../../../../Framework/Signum.React/Scripts/Components';
+import { DropdownItem, Dropdown, DropdownMenu, DropdownToggle, UncontrolledDropdown } from '@framework/Components';
 
 
 interface DynamicViewOverrideComponentProps {
@@ -108,9 +109,9 @@ export default class DynamicViewOverrideComponent extends React.Component<Dynami
             <DropdownItem>
                 <DropdownItem header>{pr.propertyPath()}</DropdownItem>
                 <DropdownItem divider />
-                <DropdownItem onClick={() => this.handleRemoveClick(lambda)}><i className="fa fa-trash" aria-hidden="true" />&nbsp; Remove</DropdownItem>
-                <DropdownItem onClick={() => this.handleInsertBeforeClick(lambda)}><i className="fa fa-arrow-up" aria-hidden="true" />&nbsp; Insert Before</DropdownItem>
-                <DropdownItem onClick={() => this.handleInsertAfterClick(lambda)}><i className="fa fa-arrow-down" aria-hidden="true" />&nbsp; Insert After</DropdownItem>
+                <DropdownItem onClick={() => this.handleRemoveClick(lambda)}><FontAwesomeIcon icon="trash"/>&nbsp; Remove</DropdownItem>
+                <DropdownItem onClick={() => this.handleInsertBeforeClick(lambda)}><FontAwesomeIcon icon="arrow-up"/>&nbsp; Insert Before</DropdownItem>
+                <DropdownItem onClick={() => this.handleInsertAfterClick(lambda)}><FontAwesomeIcon icon="arrow-down"/>&nbsp; Insert After</DropdownItem>
             </DropdownItem>
         );
     }

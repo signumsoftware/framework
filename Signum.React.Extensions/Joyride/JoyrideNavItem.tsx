@@ -1,6 +1,7 @@
 import * as React from 'react'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import JoyrideComponent from "./JoyrideComponent";
-import { NavItem } from '../../../Framework/Signum.React/Scripts/Components';
+import { NavItem } from '@framework/Components';
 
 export interface JoyrideNavItemProps {
     getJoyrideComponent: () => JoyrideComponent;
@@ -11,7 +12,6 @@ export interface JoyrideNavItemState {
 }
 
 export default class JoyrideNavItem extends React.Component<JoyrideNavItemProps, JoyrideNavItemState> {
-
     constructor(props: JoyrideNavItemProps) {
         super(props);
         this.state = { };
@@ -28,7 +28,7 @@ export default class JoyrideNavItem extends React.Component<JoyrideNavItemProps,
         return (
             <NavItem id="help-nav-item" onClick={this.onClick}>
                 <a className="nav-link">
-                    <i className="fa fa-question-circle-o" aria-hidden="true"></i>
+                    <FontAwesomeIcon icon={["far", "question-circle"]}/>
                 </a>
             </NavItem>
         );

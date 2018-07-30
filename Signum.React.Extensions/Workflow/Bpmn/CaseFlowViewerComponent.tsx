@@ -3,8 +3,8 @@ import {
     WorkflowEntitiesDictionary, WorkflowActivityModel, WorkflowActivityType, WorkflowPoolModel, WorkflowLaneModel, WorkflowConnectionModel, WorkflowEventModel, WorkflowEntity,
     IWorkflowNodeEntity, CaseFlowColor, CaseActivityEntity, CaseEntity, WorkflowMessage, WorkflowEventEntity, WorkflowActivityEntity
 } from '../Signum.Entities.Workflow'
-import { JavascriptMessage } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
-import { Dic } from '../../../../Framework/Signum.React/Scripts/Globals'
+import { JavascriptMessage } from '@framework/Signum.Entities'
+import { Dic } from '@framework/Globals'
 import { CaseFlow } from '../WorkflowClient'
 import NavigatedViewer from "bpmn-js/lib/NavigatedViewer"
 import * as caseFlowRenderer from './CaseFlowRenderer'
@@ -15,7 +15,7 @@ import CaseActivityStatsModal from "../Case/CaseActivityStatsModal"
 import "bpmn-js/dist/assets/bpmn-font/css/bpmn-embedded.css"
 import "diagram-js/assets/diagram-js.css"
 import "./Bpmn.css"
-import { Button, UncontrolledDropdown, DropdownToggle, DropdownMenu, DropdownItem } from '../../../../Framework/Signum.React/Scripts/Components';
+import { Button, UncontrolledDropdown, DropdownToggle, DropdownMenu, DropdownItem } from '@framework/Components';
 
 export interface CaseFlowViewerComponentProps {
     diagramXML?: string;

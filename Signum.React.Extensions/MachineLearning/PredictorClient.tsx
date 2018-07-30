@@ -1,18 +1,18 @@
 ﻿import * as React from 'react'
 import * as numbro from 'numbro'
 import { Route } from 'react-router'
-import { Dic, classes } from '../../../Framework/Signum.React/Scripts/Globals';
-import * as Constructor from '../../../Framework/Signum.React/Scripts/Constructor';
-import { ajaxPost, ajaxPostRaw, ajaxGet, saveFile, ajaxGetRaw } from '../../../Framework/Signum.React/Scripts/Services';
-import { EntitySettings, ViewPromise } from '../../../Framework/Signum.React/Scripts/Navigator'
-import * as Navigator from '../../../Framework/Signum.React/Scripts/Navigator'
-import * as Finder from '../../../Framework/Signum.React/Scripts/Finder'
-import { QueryRequest } from '../../../Framework/Signum.React/Scripts/FindOptions'
-import { Lite, Entity, EntityPack, ExecuteSymbol, DeleteSymbol, ConstructSymbol_From, registerToString, JavascriptMessage, toLite } from '../../../Framework/Signum.React/Scripts/Signum.Entities'
-import { EntityOperationSettings } from '../../../Framework/Signum.React/Scripts/Operations'
-import { PseudoType, QueryKey, GraphExplorer, OperationType, Type, getTypeName, symbolNiceName } from '../../../Framework/Signum.React/Scripts/Reflection'
-import * as Operations from '../../../Framework/Signum.React/Scripts/Operations'
-import * as ContextualOperations from '../../../Framework/Signum.React/Scripts/Operations/ContextualOperations'
+import { Dic, classes } from '@framework/Globals';
+import * as Constructor from '@framework/Constructor';
+import { ajaxPost, ajaxPostRaw, ajaxGet, saveFile, ajaxGetRaw } from '@framework/Services';
+import { EntitySettings, ViewPromise } from '@framework/Navigator'
+import * as Navigator from '@framework/Navigator'
+import * as Finder from '@framework/Finder'
+import { QueryRequest } from '@framework/FindOptions'
+import { Lite, Entity, EntityPack, ExecuteSymbol, DeleteSymbol, ConstructSymbol_From, registerToString, JavascriptMessage, toLite } from '@framework/Signum.Entities'
+import { EntityOperationSettings } from '@framework/Operations'
+import { PseudoType, QueryKey, GraphExplorer, OperationType, Type, getTypeName, symbolNiceName } from '@framework/Reflection'
+import * as Operations from '@framework/Operations'
+import * as ContextualOperations from '@framework/Operations/ContextualOperations'
 import {
     PredictorEntity, PredictorSubQueryEntity, PredictorMessage,
     PredictorAlgorithmSymbol, CNTKPredictorAlgorithm,
@@ -22,12 +22,12 @@ import {
 } from './Signum.Entities.MachineLearning'
 import * as OmniboxClient from '../Omnibox/OmniboxClient'
 
-import * as QuickLinks from '../../../Framework/Signum.React/Scripts/QuickLinks'
-import { QueryToken } from '../../../Framework/Signum.React/Scripts/FindOptions';
-import { ImportComponent } from '../../../Framework/Signum.React/Scripts/AsyncImport';
-import { TypeContext } from '../../../Framework/Signum.React/Scripts/Lines';
-import SelectorModal from '../../../Framework/Signum.React/Scripts/SelectorModal';
-import { CellFormatter } from '../../../Framework/Signum.React/Scripts/Finder';
+import * as QuickLinks from '@framework/QuickLinks'
+import { QueryToken } from '@framework/FindOptions';
+import { ImportComponent } from '@framework/AsyncImport';
+import { TypeContext } from '@framework/Lines';
+import SelectorModal from '@framework/SelectorModal';
+import { CellFormatter } from '@framework/Finder';
 
 export function start(options: { routes: JSX.Element[] }) {
 

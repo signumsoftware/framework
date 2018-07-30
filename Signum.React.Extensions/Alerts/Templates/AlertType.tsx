@@ -1,15 +1,15 @@
 ﻿import * as React from 'react'
-import { classes } from '../../../../Framework/Signum.React/Scripts/Globals'
-import { FormGroup, FormControlReadonly, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityDetail, EntityList, EntityRepeater, EntityTabRepeater } from '../../../../Framework/Signum.React/Scripts/Lines'
-import { SearchControl } from '../../../../Framework/Signum.React/Scripts/Search'
-import { getToString, getMixin } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
-import { TypeContext, FormGroupStyle } from '../../../../Framework/Signum.React/Scripts/TypeContext'
+import { classes } from '@framework/Globals'
+import { FormGroup, FormControlReadonly, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityDetail, EntityList, EntityRepeater, EntityTabRepeater } from '@framework/Lines'
+import { SearchControl } from '@framework/Search'
+import { getToString, getMixin } from '@framework/Signum.Entities'
+import { TypeContext, FormGroupStyle } from '@framework/TypeContext'
 import { AlertTypeEntity } from '../Signum.Entities.Alerts'
 import { TemplateTokenMessage } from '../../Templating/Signum.Entities.Templating'
 import FileLine from '../../Files/FileLine'
 import QueryTokenEntityBuilder from '../../UserAssets/Templates/QueryTokenEntityBuilder'
 import TemplateControls from '../../Templating/TemplateControls'
-import ValueLineModal from '../../../../Framework/Signum.React/Scripts/ValueLineModal'
+import ValueLineModal from '@framework/ValueLineModal'
 
 export default class AlertType extends React.Component<{ ctx: TypeContext<AlertTypeEntity> }> {
 

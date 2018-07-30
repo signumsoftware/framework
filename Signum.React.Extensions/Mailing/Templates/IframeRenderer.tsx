@@ -1,11 +1,11 @@
 ﻿import * as React from 'react'
-import { classes, Dic } from '../../../../Framework/Signum.React/Scripts/Globals'
-import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
-import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
-import { FormGroup, FormControlReadonly, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityList, EntityRepeater, EntityTabRepeater, EntityDetail } from '../../../../Framework/Signum.React/Scripts/Lines'
-import { SearchControl }  from '../../../../Framework/Signum.React/Scripts/Search'
-import { getToString, Lite, is }  from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
-import { TypeContext, FormGroupStyle } from '../../../../Framework/Signum.React/Scripts/TypeContext'
+import { classes, Dic } from '@framework/Globals'
+import * as Navigator from '@framework/Navigator'
+import * as Finder from '@framework/Finder'
+import { FormGroup, FormControlReadonly, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityList, EntityRepeater, EntityTabRepeater, EntityDetail } from '@framework/Lines'
+import { SearchControl }  from '@framework/Search'
+import { getToString, Lite, is }  from '@framework/Signum.Entities'
+import { TypeContext, FormGroupStyle } from '@framework/TypeContext'
 import { SendEmailTaskEntity, EmailTemplateEntity } from '../Signum.Entities.Mailing'
 
 export interface IFrameRendererProps extends React.HTMLAttributes<HTMLIFrameElement> {

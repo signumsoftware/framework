@@ -1,16 +1,17 @@
 ﻿import * as React from 'react'
-import { Dic, classes, ifError } from '../../../../Framework/Signum.React/Scripts/Globals'
-import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
-import { ValidationError, AbortableRequest } from '../../../../Framework/Signum.React/Scripts/Services'
-import { Lite, toLite } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
-import { ResultTable, FindOptions, FilterOption, QueryDescription, SubTokensOptions, QueryToken, QueryTokenType, ColumnOption } from '../../../../Framework/Signum.React/Scripts/FindOptions'
-import { TypeContext, FormGroupStyle, StyleOptions, StyleContext, mlistItemContext } from '../../../../Framework/Signum.React/Scripts/TypeContext'
-import { SearchMessage, JavascriptMessage, parseLite, is, liteKey } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
-import { PropertyRoute, getQueryNiceName, getTypeInfo, ReadonlyBinding, GraphExplorer }  from '../../../../Framework/Signum.React/Scripts/Reflection'
-import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
-import FilterBuilder from '../../../../Framework/Signum.React/Scripts/SearchControl/FilterBuilder'
-import ValidationErrors from '../../../../Framework/Signum.React/Scripts/Frames/ValidationErrors'
-import { ValueLine, FormGroup, ValueLineProps, ValueLineType } from '../../../../Framework/Signum.React/Scripts/Lines'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { Dic, classes, ifError } from '@framework/Globals'
+import * as Finder from '@framework/Finder'
+import { ValidationError, AbortableRequest } from '@framework/Services'
+import { Lite, toLite } from '@framework/Signum.Entities'
+import { ResultTable, FindOptions, FilterOption, QueryDescription, SubTokensOptions, QueryToken, QueryTokenType, ColumnOption } from '@framework/FindOptions'
+import { TypeContext, FormGroupStyle, StyleOptions, StyleContext, mlistItemContext } from '@framework/TypeContext'
+import { SearchMessage, JavascriptMessage, parseLite, is, liteKey } from '@framework/Signum.Entities'
+import { PropertyRoute, getQueryNiceName, getTypeInfo, ReadonlyBinding, GraphExplorer }  from '@framework/Reflection'
+import * as Navigator from '@framework/Navigator'
+import FilterBuilder from '@framework/SearchControl/FilterBuilder'
+import ValidationErrors from '@framework/Frames/ValidationErrors'
+import { ValueLine, FormGroup, ValueLineProps, ValueLineType } from '@framework/Lines'
 import { ChartColumnEmbedded, ChartScriptColumnEmbedded, ChartScriptParameterEmbedded, ChartRequest, GroupByChart, ChartMessage,
     ChartColorEntity, ChartScriptEntity, ChartParameterEmbedded, ChartParameterType, UserChartEntity } from '../Signum.Entities.Chart'
 import * as ChartClient from '../ChartClient'
@@ -19,11 +20,9 @@ import { ChartColumn, ChartColumnInfo }from './ChartColumn'
 import ChartBuilder from './ChartBuilder'
 import ChartTable from './ChartTable'
 import ChartRenderer from './ChartRenderer'
-
-
 import "../Chart.css"
-import "../../../../Framework/Signum.React/Scripts/SearchControl/Search.css"
-import { Tab, Tabs, UncontrolledTabs } from '../../../../Framework/Signum.React/Scripts/Components/Tabs';
+import "@framework/SearchControl/Search.css"
+import { Tab, Tabs, UncontrolledTabs } from '@framework/Components/Tabs';
 
 
 interface ChartRequestViewProps {
@@ -147,7 +146,7 @@ export default class ChartRequestView extends React.Component<ChartRequestViewPr
                 <h2>
                     <span className="sf-entity-title">{getQueryNiceName(cr.queryKey) }</span>&nbsp;
                     <a className ="sf-popup-fullscreen" href="#" onClick={this.handleOnFullScreen}>
-                        <span className="fa fa-external-link"></span>
+                        <FontAwesomeIcon icon="external-link-alt" />
                     </a>
                 </h2 >
                 <ValidationErrors entity={cr}/>
@@ -167,9 +166,9 @@ export default class ChartRequestView extends React.Component<ChartRequestViewPr
                     </div >
                     <div className="sf-query-button-bar btn-toolbar">
                         <button type="submit" className="sf-query-button sf-chart-draw btn btn-primary" onClick={this.handleOnDrawClick}>{ChartMessage.DrawChart.niceToString()}</button>
-                        <button className="sf-query-button sf-chart-script-edit btn btn-light" onClick={this.handleEditScript}><i className="fa fa-pencil" aria-hidden="true"/> &nbsp; {ChartMessage.EditScript.niceToString()}</button>
+                        <button className="sf-query-button sf-chart-script-edit btn btn-light" onClick={this.handleEditScript}><FontAwesomeIcon icon="pencil"/> &nbsp; {ChartMessage.EditScript.niceToString()}</button>
                         {ChartClient.ButtonBarChart.getButtonBarElements({ chartRequest: cr, chartRequestView: this }).map((a, i) => React.cloneElement(a, { key: i }))}
-                        <button className="btn btn-light" onMouseUp={this.handleExplore} ><i className="fa fa-search"></i> &nbsp; {SearchMessage.Explore.niceToString()}</button>
+                        <button className="btn btn-light" onMouseUp={this.handleExplore} ><FontAwesomeIcon icon="search" /> &nbsp; {SearchMessage.Explore.niceToString()}</button>
                     </div>
                     <br />
                     <div className="sf-scroll-table-container" >

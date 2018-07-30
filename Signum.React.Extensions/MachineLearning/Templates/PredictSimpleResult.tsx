@@ -1,22 +1,23 @@
 ﻿import * as React from 'react'
-import * as OrderUtils from '../../../../Framework/Signum.React/Scripts/Frames/OrderUtils'
-import { classes } from '../../../../Framework/Signum.React/Scripts/Globals'
-import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
-import { FormGroup, FormControlReadonly, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityList, EntityRepeater, EntityTable, EntityDetail, IRenderButtons } from '../../../../Framework/Signum.React/Scripts/Lines'
-import { SearchControl } from '../../../../Framework/Signum.React/Scripts/Search'
-import { TypeContext, FormGroupStyle, ButtonsContext } from '../../../../Framework/Signum.React/Scripts/TypeContext'
+import * as OrderUtils from '@framework/Frames/OrderUtils'
+import { classes } from '@framework/Globals'
+import * as Navigator from '@framework/Navigator'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { FormGroup, FormControlReadonly, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityList, EntityRepeater, EntityTable, EntityDetail, IRenderButtons } from '@framework/Lines'
+import { SearchControl } from '@framework/Search'
+import { TypeContext, FormGroupStyle, ButtonsContext } from '@framework/TypeContext'
 import FileLine from '../../Files/FileLine'
 import { PredictSimpleResultEntity, PredictorMessage } from '../Signum.Entities.MachineLearning'
-import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
-import { getQueryNiceName } from '../../../../Framework/Signum.React/Scripts/Reflection'
+import * as Finder from '@framework/Finder'
+import { getQueryNiceName } from '@framework/Reflection'
 import QueryTokenEntityBuilder from '../../UserAssets/Templates/QueryTokenEntityBuilder'
 import { QueryTokenEmbedded } from '../../UserAssets/Signum.Entities.UserAssets'
 import { QueryFilterEmbedded } from '../../UserQueries/Signum.Entities.UserQueries'
-import { QueryDescription, SubTokensOptions } from '../../../../Framework/Signum.React/Scripts/FindOptions'
+import { QueryDescription, SubTokensOptions } from '@framework/FindOptions'
 import { API, predict } from '../PredictorClient';
 import FilterBuilderEmbedded from './FilterBuilderEmbedded';
-import { TypeReference } from '../../../../Framework/Signum.React/Scripts/Reflection';
-import { toLite } from '../../../../Framework/Signum.React/Scripts/Signum.Entities';
+import { TypeReference } from '@framework/Reflection';
+import { toLite } from '@framework/Signum.Entities';
 
 export default class PredictSimpleResult extends React.Component<{ ctx: TypeContext<PredictSimpleResultEntity> }> implements IRenderButtons {
 
@@ -61,6 +62,6 @@ export default class PredictSimpleResult extends React.Component<{ ctx: TypeCont
     }
 
     renderButtons(ctx: ButtonsContext): (React.ReactElement<any> | undefined)[] {
-        return [OrderUtils.setOrder(10000, <button className="btn btn-info" onClick={this.handleClick}><i className="fa fa-lightbulb-o"></i>&nbsp;{PredictorMessage.Predict.niceToString()}</button >)];
+        return [OrderUtils.setOrder(10000, <button className="btn btn-info" onClick={this.handleClick}><FontAwesomeIcon icon={["far", "lightbulb"]} />&nbsp;{PredictorMessage.Predict.niceToString()}</button >)];
     }
 }

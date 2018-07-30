@@ -1,12 +1,12 @@
 ﻿import * as React from 'react'
-import { ValueLine, EntityLine, TypeContext, FormGroup, EntityStrip, EntityDetail, RenderEntity } from '../../../../Framework/Signum.React/Scripts/Lines'
+import { ValueLine, EntityLine, TypeContext, FormGroup, EntityStrip, EntityDetail, RenderEntity } from '@framework/Lines'
 import { ScheduledTaskEntity } from '../../Scheduler/Signum.Entities.Scheduler'
-import { is } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
+import { is } from '@framework/Signum.Entities'
 import { WorkflowEventModel, WorkflowEventTaskModel, WorkflowEventTaskActionEval, WorkflowEventTaskConditionEval, WorkflowMessage, WorkflowEventType, TriggeredOn, WorkflowTimerEmbedded } from '../Signum.Entities.Workflow'
 import WorkflowEventTaskConditionComponent from './WorkflowEventTaskConditionComponent'
 import WorkflowEventTaskActionComponent from './WorkflowEventTaskActionComponent'
-import MessageModal from "../../../../Framework/Signum.React/Scripts/Modals/MessageModal";
-import { NormalWindowMessage } from "../../../../Framework/Signum.React/Scripts/Signum.Entities";
+import MessageModal from "@framework/Modals/MessageModal";
+import { NormalWindowMessage } from "@framework/Signum.Entities";
 
 
 interface WorkflowEventModelComponentProps {

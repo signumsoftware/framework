@@ -2,18 +2,18 @@
 import { RouteComponentProps } from 'react-router'
 import * as numbro from 'numbro'
 import * as moment from 'moment'
-import * as Navigator from '../../../Framework/Signum.React/Scripts/Navigator'
-import * as Finder from '../../../Framework/Signum.React/Scripts/Finder'
-import { ValueSearchControl, SearchControl, ValueSearchControlLine } from '../../../Framework/Signum.React/Scripts/Search'
-import EntityLink from '../../../Framework/Signum.React/Scripts/SearchControl/EntityLink'
-import * as Operations from '../../../Framework/Signum.React/Scripts/Operations'
-import { QueryDescription, SubTokensOptions } from '../../../Framework/Signum.React/Scripts/FindOptions'
-import { getQueryNiceName, PropertyRoute, getTypeInfos } from '../../../Framework/Signum.React/Scripts/Reflection'
-import { ModifiableEntity, EntityControlMessage, Entity, parseLite, getToString, JavascriptMessage } from '../../../Framework/Signum.React/Scripts/Signum.Entities'
+import * as Navigator from '@framework/Navigator'
+import * as Finder from '@framework/Finder'
+import { ValueSearchControl, SearchControl, ValueSearchControlLine } from '@framework/Search'
+import EntityLink from '@framework/SearchControl/EntityLink'
+import * as Operations from '@framework/Operations'
+import { QueryDescription, SubTokensOptions } from '@framework/FindOptions'
+import { getQueryNiceName, PropertyRoute, getTypeInfos } from '@framework/Reflection'
+import { ModifiableEntity, EntityControlMessage, Entity, parseLite, getToString, JavascriptMessage } from '@framework/Signum.Entities'
 import { API, SchedulerState } from './SchedulerClient'
 import { ScheduledTaskLogEntity, ScheduledTaskEntity, ScheduledTaskLogOperation } from './Signum.Entities.Scheduler'
-import { Lite } from "../../../Framework/Signum.React/Scripts/Signum.Entities";
-import { StyleContext } from "../../../Framework/Signum.React/Scripts/Lines";
+import { Lite } from "@framework/Signum.Entities";
+import { StyleContext } from "@framework/Lines";
 
 interface SchedulerPanelProps extends RouteComponentProps<{}> {
 

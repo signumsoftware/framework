@@ -11,6 +11,7 @@ import { ToolbarEntity, ToolbarMenuEntity, ToolbarElementEmbedded, ToolbarElemen
 import { ToolbarConfig, ToolbarResponse } from '../Toolbar/ToolbarClient'
 import * as DashboardClient from './DashboardClient'
 import { DashboardEntity } from './Signum.Entities.Dashboard'
+import { parseIcon } from './Admin/Dashboard';
 
 export default class DashboardToolbarConfig extends ToolbarConfig<DashboardEntity> {
 
@@ -20,7 +21,7 @@ export default class DashboardToolbarConfig extends ToolbarConfig<DashboardEntit
     }
 
     getIcon(element: ToolbarResponse<DashboardEntity>) {
-        return ToolbarConfig.coloredIcon(element.iconName || "glyphicon glyphicon-th-large", element.iconColor || "darkslateblue");
+        return ToolbarConfig.coloredIcon(element.iconName ? parseIcon(element.iconName) : "th-large", element.iconColor || "darkslateblue");
     }
 
     navigateTo(element: ToolbarResponse<DashboardEntity>): Promise<string> {

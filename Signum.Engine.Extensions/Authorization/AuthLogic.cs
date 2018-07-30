@@ -552,7 +552,7 @@ namespace Signum.Engine.Authorization
         public static void AutomaticImportAuthRules(string fileName)
         {
             Schema.Current.Initialize();
-            var script = AuthLogic.ImportRulesScript(XDocument.Load(fileName), interactive: false);
+            var script = AuthLogic.ImportRulesScript(XDocument.Load(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, fileName)), interactive: false);
             if (script == null)
             {
                 SafeConsole.WriteColor(ConsoleColor.Green, "AuthRules already synchronized");

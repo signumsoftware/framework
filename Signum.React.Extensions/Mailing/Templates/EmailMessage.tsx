@@ -1,9 +1,9 @@
 ﻿import * as React from 'react'
-import { classes } from '../../../../Framework/Signum.React/Scripts/Globals'
-import { FormGroup, FormControlReadonly, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityDetail, EntityList, EntityRepeater, EntityTabRepeater } from '../../../../Framework/Signum.React/Scripts/Lines'
-import { SearchControl } from '../../../../Framework/Signum.React/Scripts/Search'
-import { getToString, getMixin } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
-import { TypeContext, FormGroupStyle } from '../../../../Framework/Signum.React/Scripts/TypeContext'
+import { classes } from '@framework/Globals'
+import { FormGroup, FormControlReadonly, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityDetail, EntityList, EntityRepeater, EntityTabRepeater } from '@framework/Lines'
+import { SearchControl } from '@framework/Search'
+import { getToString, getMixin } from '@framework/Signum.Entities'
+import { TypeContext, FormGroupStyle } from '@framework/TypeContext'
 import {
     EmailMessageEntity, EmailAddressEmbedded, EmailRecipientEntity, EmailAttachmentEmbedded,
     EmailReceptionMixin, EmailFileType
@@ -12,8 +12,8 @@ import { EmailTemplateEntity, EmailTemplateContactEmbedded, EmailTemplateRecipie
 import FileLine from '../../Files/FileLine'
 import IFrameRenderer from './IFrameRenderer'
 import HtmlCodemirror from '../../Codemirror/HtmlCodemirror'
-import { tryGetMixin } from "../../../../Framework/Signum.React/Scripts/Signum.Entities";
-import { UncontrolledTabs, Tab } from '../../../../Framework/Signum.React/Scripts/Components';
+import { tryGetMixin } from "@framework/Signum.Entities";
+import { UncontrolledTabs, Tab } from '@framework/Components';
 
 
 export default class EmailMessage extends React.Component<{ ctx: TypeContext<EmailMessageEntity> }> {

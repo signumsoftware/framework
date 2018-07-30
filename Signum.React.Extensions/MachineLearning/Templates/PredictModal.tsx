@@ -1,23 +1,24 @@
 ﻿import { PredictorEntity, PredictorState } from "../Signum.Entities.MachineLearning";
 import * as React from "react";
 import * as numbro from "numbro";
-import * as Navigator from "../../../../Framework/Signum.React/Scripts/Navigator";
-import { IModalProps, openModal } from "../../../../Framework/Signum.React/Scripts/Modals";
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import * as Navigator from "@framework/Navigator";
+import { IModalProps, openModal } from "@framework/Modals";
 import { API, PredictRequest, PredictColumn, PredictOutputTuple, PredictSubQueryHeader, PredictSubQueryTable, AlternativePrediction } from "../PredictorClient";
-import { Lite, Entity, NormalControlMessage, EntityControlMessage } from "../../../../Framework/Signum.React/Scripts/Signum.Entities";
-import { StyleContext, FormGroup, TypeContext, EntityLine, EntityCombo, ValueLine } from "../../../../Framework/Signum.React/Scripts/Lines";
-import { QueryToken } from "../../../../Framework/Signum.React/Scripts/FindOptions";
-import { getTypeInfos, ReadonlyBinding } from "../../../../Framework/Signum.React/Scripts/Reflection";
-import { IsByAll } from "../../../../Framework/Signum.React/Scripts/Reflection";
-import { Dic } from "../../../../Framework/Signum.React/Scripts/Globals";
-import { PropertyRoute } from "../../../../Framework/Signum.React/Scripts/Reflection";
-import { Binding } from "../../../../Framework/Signum.React/Scripts/Reflection";
-import { is } from "../../../../Framework/Signum.React/Scripts/Signum.Entities";
-import { isLite } from "../../../../Framework/Signum.React/Scripts/Signum.Entities";
-import { Modal } from "../../../../Framework/Signum.React/Scripts/Components";
-import { ModalHeaderButtons } from "../../../../Framework/Signum.React/Scripts/Components/Modal";
-import { NumericTextBox } from "../../../../Framework/Signum.React/Scripts/Lines/ValueLine";
-import { AbortableRequest } from "../../../../Framework/Signum.React/Scripts/Services";
+import { Lite, Entity, NormalControlMessage, EntityControlMessage } from "@framework/Signum.Entities";
+import { StyleContext, FormGroup, TypeContext, EntityLine, EntityCombo, ValueLine } from "@framework/Lines";
+import { QueryToken } from "@framework/FindOptions";
+import { getTypeInfos, ReadonlyBinding } from "@framework/Reflection";
+import { IsByAll } from "@framework/Reflection";
+import { Dic } from "@framework/Globals";
+import { PropertyRoute } from "@framework/Reflection";
+import { Binding } from "@framework/Reflection";
+import { is } from "@framework/Signum.Entities";
+import { isLite } from "@framework/Signum.Entities";
+import { Modal } from "@framework/Components";
+import { ModalHeaderButtons } from "@framework/Components/Modal";
+import { NumericTextBox } from "@framework/Lines/ValueLine";
+import { AbortableRequest } from "@framework/Services";
 
 
 interface PredictModalProps extends IModalProps {
@@ -151,7 +152,7 @@ export default class PredictLine extends React.Component<PredictLineProps> {
                 return (
                     <div>
                         <div style={{ opacity: this.props.hasChanged ? 0.5 : 1 }}>
-                            <PredictValue token={p.token} ctx={octx} label={<i className="fa fa-bullseye"></i>} />
+                            <PredictValue token={p.token} ctx={octx} label={<FontAwesomeIcon icon="bullseye" />} />
                         </div>
                         {this.renderValueOrMultivalue(pctx, octx.value)}
                     </div>
@@ -170,7 +171,7 @@ export default class PredictLine extends React.Component<PredictLineProps> {
 
     renderValueOrMultivalue(pctx: TypeContext<any>, originalValue: any) {
         if (!Array.isArray(pctx.value)) {
-            return <PredictValue token={this.props.token} ctx={pctx} label={<i className="fa fa-lightbulb-o" style={{ color: this.getColor(pctx.value, originalValue) }}></i>} />
+            return <PredictValue token={this.props.token} ctx={pctx} label={<FontAwesomeIcon icon={["far", "lightbulb"]} color={this.getColor(pctx.value, originalValue)}/>} />
         } else {
             const predictions = pctx.value as AlternativePrediction[];
 
@@ -215,7 +216,7 @@ export class PredictTable extends React.Component<PredictTableProps> {
                             <tr >
                                 {
                                     columnHeaders.map((he, i) => <th key={i} className={"header-" + he.headerType.toLowerCase()} title={fullNiceName(he.token)}>
-                                        {he.headerType == "Key" && <i className="fa fa-key" style={{ marginRight: "10px" }}></i>}
+                                        {he.headerType == "Key" && <FontAwesomeIcon icon="key" style={{ marginRight: "10px" }}/>}
                                         {he.token.niceName}
                                     </th>)
                                 }

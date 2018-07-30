@@ -1,13 +1,13 @@
 ﻿
 import * as React from 'react'
 import { Route } from 'react-router'
-import { Dic } from '../../../Framework/Signum.React/Scripts/Globals';
-import { ajaxPost, ajaxGet, AbortableRequest } from '../../../Framework/Signum.React/Scripts/Services';
-import * as Navigator from '../../../Framework/Signum.React/Scripts/Navigator'
-import { Typeahead } from '../../../Framework/Signum.React/Scripts/Components'
+import { Dic } from '@framework/Globals';
+import { ajaxPost, ajaxGet, AbortableRequest } from '@framework/Services';
+import * as Navigator from '@framework/Navigator'
+import { Typeahead } from '@framework/Components'
 import * as OmniboxClient from './OmniboxClient'
 import { OmniboxMessage } from './Signum.Entities.Omnibox'
-import '../../../Framework/Signum.React/Scripts/Frames/MenuIcons.css'
+import '@framework/Frames/MenuIcons.css'
 
 export interface OmniboxAutocompleteProps {
     inputAttrs?: React.HTMLAttributes<HTMLInputElement>;

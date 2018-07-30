@@ -1,8 +1,8 @@
 ﻿import * as React from 'react'
-import { classes, Dic } from '../../../../Framework/Signum.React/Scripts/Globals'
-import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
-import { ModelState } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
-import { ValidationError } from '../../../../Framework/Signum.React/Scripts/Services'
+import { classes, Dic } from '@framework/Globals'
+import * as Navigator from '@framework/Navigator'
+import { ModelState } from '@framework/Signum.Entities'
+import { ValidationError } from '@framework/Services'
 import { AuthMessage } from '../Signum.Entities.Authorization'
 import * as AuthClient from '../AuthClient'
 

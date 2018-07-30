@@ -1,27 +1,23 @@
-﻿
-import * as React from 'react'
-import { FormGroup, FormControlReadonly, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityList, EntityRepeater, RenderEntity } from '../../../../Framework/Signum.React/Scripts/Lines'
-import { classes } from '../../../../Framework/Signum.React/Scripts/Globals'
-import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
-import { QueryDescription, SubTokensOptions } from '../../../../Framework/Signum.React/Scripts/FindOptions'
-import { getQueryNiceName, PropertyRoute, getTypeInfos } from '../../../../Framework/Signum.React/Scripts/Reflection'
-import { ModifiableEntity, EntityControlMessage, Entity, parseLite, getToString, Lite, toLite } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
-import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
-import * as Constructor from '../../../../Framework/Signum.React/Scripts/Constructor'
-import { TypeContext, FormGroupStyle, mlistItemContext } from '../../../../Framework/Signum.React/Scripts/TypeContext'
+﻿import * as React from 'react'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { FormGroup, FormControlReadonly, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityList, EntityRepeater, RenderEntity } from '@framework/Lines'
+import { classes } from '@framework/Globals'
+import * as Finder from '@framework/Finder'
+import { QueryDescription, SubTokensOptions } from '@framework/FindOptions'
+import { getQueryNiceName, PropertyRoute, getTypeInfos } from '@framework/Reflection'
+import { ModifiableEntity, EntityControlMessage, Entity, parseLite, getToString, Lite, toLite } from '@framework/Signum.Entities'
+import * as Navigator from '@framework/Navigator'
+import * as Constructor from '@framework/Constructor'
+import { TypeContext, FormGroupStyle, mlistItemContext } from '@framework/TypeContext'
 import QueryTokenEntityBuilder from '../../UserAssets/Templates/QueryTokenEntityBuilder'
 import FileLine, { FileTypeSymbol } from '../../Files/FileLine'
 import * as DashboardClient from '../DashboardClient'
 import { DashboardEntity, PanelPartEmbedded, IPartEntity } from '../Signum.Entities.Dashboard'
-
-
-
 import "../Dashboard.css"
-import { ErrorBoundary } from '../../../../Framework/Signum.React/Scripts/Components';
-
+import { ErrorBoundary } from '@framework/Components';
+import { parseIcon } from '../Admin/Dashboard';
 
 export default class DashboardView extends React.Component<{ dashboard: DashboardEntity, entity?: Entity }> {
-
     render() {
         if (this.props.dashboard.combineSimilarRows)
             return this.renderCombinedRows();
@@ -230,13 +226,13 @@ export class PanelPart extends React.Component<PanelPartProps, PanelPartState>{
         }
 
         const titleText = p.title || getToString(content);
-        const iconColor = renderer.defaultIcon(content);
-        const icon = p.iconName || iconColor && iconColor.iconName;
-        const color = p.iconName || iconColor && iconColor.iconColor;
+        const defaultIcon = renderer.defaultIcon(content);
+        const icon = p.iconName ? parseIcon(p.iconName) : defaultIcon && defaultIcon.icon;
+        const color = p.iconColor || defaultIcon && defaultIcon.iconColor;
         
         const title = !icon ? titleText :
             <span>
-                <span className={icon} style={{ color: color }} />&nbsp;{titleText}
+                <FontAwesomeIcon icon={icon} color={color} />&nbsp;{titleText}
             </span>;
 
         var style = p.style == undefined || p.style == "Default" ? undefined : p.style.toLowerCase();
@@ -248,8 +244,8 @@ export class PanelPart extends React.Component<PanelPartProps, PanelPartState>{
                     style && ("bg-" + style)
                 )}>
                     {renderer.handleEditClick &&
-                        <a className="sf-pointer pull-right flip sf-hide" onMouseUp={e => renderer.handleEditClick!(content, lite, e)}>
-                            <span className="fa fa-edit"></span>&nbsp;Edit
+                        <a className="sf-pointer float-right flip sf-hide" onMouseUp={e => renderer.handleEditClick!(content, lite, e)}>
+                            <FontAwesomeIcon icon="edit" />&nbsp;Edit
                         </a>}
                     &nbsp;
                     {renderer.handleTitleClick == undefined ? title :

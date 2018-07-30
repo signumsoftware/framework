@@ -1,13 +1,14 @@
 ﻿import * as React from 'react'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import * as ReactDOM from 'react-dom'
 import * as d3 from 'd3'
 import * as QueryString from "query-string"
 import { RouteComponentProps } from 'react-router'
-import { DomUtils, Dic } from '../../../../Framework/Signum.React/Scripts/Globals'
-import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
-import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
-import { is, JavascriptMessage } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
-import { ResultTable, FindOptions, FilterOption, QueryDescription, SubTokensOptions, QueryToken, QueryTokenType, ColumnOption } from '../../../../Framework/Signum.React/Scripts/FindOptions'
+import { DomUtils, Dic } from '@framework/Globals'
+import * as Finder from '@framework/Finder'
+import * as Navigator from '@framework/Navigator'
+import { is, JavascriptMessage } from '@framework/Signum.Entities'
+import { ResultTable, FindOptions, FilterOption, QueryDescription, SubTokensOptions, QueryToken, QueryTokenType, ColumnOption } from '@framework/FindOptions'
 import { MapMessage } from '../Signum.Entities.Map'
 import * as MapClient from '../MapClient'
 import { OperationMapInfo, OperationMapD3, ForceNode, ForceLink, Transition} from './OperationMap'
@@ -32,13 +33,10 @@ interface ParsedQueryString {
 }
 
 export default class OperationMapPage extends React.Component<OperationMapPageProps, OperationMapPropsState> {
-
     state = { filter: "", color: "" } as OperationMapPropsState;
-
     wasExpanded!: boolean;
 
     componentWillMount() {
-
         this.wasExpanded = Navigator.Expander.setExpanded(true);
 
         MapClient.API.operations(this.props.match.params.type)
@@ -53,15 +51,11 @@ export default class OperationMapPage extends React.Component<OperationMapPagePr
             }).done();
     }
 
-
     componentWillUnmount() {
         Navigator.Expander.setExpanded(this.wasExpanded);
     }
 
-
-
     getParsedQuery(): ParsedQueryString {
-    
         const result: ParsedQueryString = { nodes: {} };
 
         const query = QueryString.parse(this.props.location.search) as { [name: string]: string };
@@ -85,7 +79,6 @@ export default class OperationMapPage extends React.Component<OperationMapPagePr
 
     div!: HTMLDivElement;
     handleSetInitialSize = (div: HTMLDivElement) => {
-
         if (this.div)
             return;
 
@@ -94,9 +87,7 @@ export default class OperationMapPage extends React.Component<OperationMapPagePr
         this.setState({ width: rect.width, height: window.innerHeight - 200 });
     }
 
-
     render() {
-
         if (Navigator.Expander.onGetExpanded && !Navigator.Expander.onGetExpanded())
             return null;
 
@@ -156,13 +147,11 @@ export default class OperationMapPage extends React.Component<OperationMapPagePr
                 </span>
                 &nbsp;
                 <a id="sfFullScreen" className="sf-popup-fullscreen" onClick={this.handleFullscreenClick} href="#">
-                    <span className="fa fa-external-link"></span>
+                    <FontAwesomeIcon icon="external-link-alt" />
                 </a>
             </div>
         );
-
     }
-
 }
 
 export interface OperationMapRendererProps {
@@ -229,7 +218,6 @@ export class OperationMapRenderer extends React.Component<OperationMapRendererPr
     }
 
     componentWillReceiveProps(newProps: OperationMapRendererProps) {
-
         if (newProps.color != this.props.color)
             this.state.mapD3.setColor(newProps.color);
     }
@@ -241,7 +229,6 @@ export class OperationMapRenderer extends React.Component<OperationMapRendererPr
     svg!: SVGElement;
 
     render() {
-
         return (
             <div id="map" style={{ backgroundColor: "transparent", width: "100%", height: this.props.height + "px" }}>
                 <svg id="svgMap" ref={svg => this.svg = svg!}>

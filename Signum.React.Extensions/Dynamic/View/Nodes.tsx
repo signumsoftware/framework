@@ -2,21 +2,21 @@
 import {
     FormGroup, FormControlReadonly, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityList, EntityRepeater, EntityTabRepeater, EntityTable,
     EntityCheckboxList, EnumCheckboxList, EntityDetail, EntityStrip, RenderEntity
-} from '../../../../Framework/Signum.React/Scripts/Lines'
+} from '@framework/Lines'
 
-import { ModifiableEntity, Entity, Lite, isEntity } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
-import { classes, Dic } from '../../../../Framework/Signum.React/Scripts/Globals'
-import * as Finder from '../../../../Framework/Signum.React/Scripts/Reflection'
-import { SubTokensOptions } from '../../../../Framework/Signum.React/Scripts/FindOptions'
-import { FindOptions, SearchControl, ValueSearchControlLine, FindOptionsParsed, ResultTable } from '../../../../Framework/Signum.React/Scripts/Search'
+import { ModifiableEntity, Entity, Lite, isEntity } from '@framework/Signum.Entities'
+import { classes, Dic } from '@framework/Globals'
+import * as Finder from '@framework/Reflection'
+import { SubTokensOptions } from '@framework/FindOptions'
+import { FindOptions, SearchControl, ValueSearchControlLine, FindOptionsParsed, ResultTable } from '@framework/Search'
 import {
     getQueryNiceName, TypeInfo, MemberInfo, getTypeInfo, EntityData, EntityKind, getTypeInfos, KindOfType,
     PropertyRoute, PropertyRouteType, MemberType, isTypeEntity, Binding, IsByAll, getAllTypes
-} from '../../../../Framework/Signum.React/Scripts/Reflection'
-import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
-import { TypeContext, FormGroupStyle } from '../../../../Framework/Signum.React/Scripts/TypeContext'
-import { EntityBase, EntityBaseProps } from '../../../../Framework/Signum.React/Scripts/Lines/EntityBase'
-import { EntityTableColumn } from '../../../../Framework/Signum.React/Scripts/Lines/EntityTable'
+} from '@framework/Reflection'
+import * as Navigator from '@framework/Navigator'
+import { TypeContext, FormGroupStyle } from '@framework/TypeContext'
+import { EntityBase, EntityBaseProps } from '@framework/Lines/EntityBase'
+import { EntityTableColumn } from '@framework/Lines/EntityTable'
 import { DynamicViewValidationMessage } from '../Signum.Entities.Dynamic'
 import { ExpressionOrValueComponent, FieldComponent } from './Designer'
 import { ExpressionOrValue, Expression, bindExpr, toCodeEx, withClassNameEx, DesignerNode} from './NodeUtils'
@@ -30,8 +30,8 @@ import { toHtmlAttributes, HtmlAttributesExpression, withClassName } from './Htm
 import { toStyleOptions, subCtx, StyleOptionsExpression } from './StyleOptionsExpression'
 import FileLine from "../../Files/FileLine";
 import { DownloadBehaviour } from "../../Files/FileDownloader";
-import { registerSymbol } from "../../../../Framework/Signum.React/Scripts/Reflection";
-import { Tabs, Tab, UncontrolledTabs } from '../../../../Framework/Signum.React/Scripts/Components/Tabs';
+import { registerSymbol } from "@framework/Reflection";
+import { Tabs, Tab, UncontrolledTabs } from '@framework/Components/Tabs';
 import FileImageLine from '../../Files/FileImageLine';
 import { FileEntity, FilePathEntity, FileEmbedded, FilePathEmbedded } from '../../Files/Signum.Entities.Files';
 

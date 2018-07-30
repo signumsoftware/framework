@@ -1,27 +1,27 @@
 ﻿   
 import * as React from 'react'
 import { Route, } from 'react-router'
-import { Dic, classes } from '../../../Framework/Signum.React/Scripts/Globals';
-import { ajaxPost, ajaxGet } from '../../../Framework/Signum.React/Scripts/Services';
-import { EntitySettings, ViewPromise } from '../../../Framework/Signum.React/Scripts/Navigator'
-import * as Navigator from '../../../Framework/Signum.React/Scripts/Navigator'
-import * as Finder from '../../../Framework/Signum.React/Scripts/Finder'
-import { EntityOperationSettings } from '../../../Framework/Signum.React/Scripts/Operations'
-import { Entity, Lite, liteKey, MList, toLite, is, EntityPack } from '../../../Framework/Signum.React/Scripts/Signum.Entities'
-import * as Constructor from '../../../Framework/Signum.React/Scripts/Constructor'
-import * as Operations from '../../../Framework/Signum.React/Scripts/Operations'
-import * as QuickLinks from '../../../Framework/Signum.React/Scripts/QuickLinks'
-import { PseudoType, QueryKey, getQueryKey, Type, EntityData, EntityKind } from '../../../Framework/Signum.React/Scripts/Reflection'
-import { TypeContext } from '../../../Framework/Signum.React/Scripts/TypeContext'
-import { WidgetContext, onEmbeddedWidgets, EmbeddedWidgetPosition } from '../../../Framework/Signum.React/Scripts/Frames/Widgets'
+import { Dic, classes } from '@framework/Globals';
+import { ajaxPost, ajaxGet } from '@framework/Services';
+import { EntitySettings, ViewPromise } from '@framework/Navigator'
+import * as Navigator from '@framework/Navigator'
+import * as Finder from '@framework/Finder'
+import { EntityOperationSettings } from '@framework/Operations'
+import { Entity, Lite, liteKey, MList, toLite, is, EntityPack } from '@framework/Signum.Entities'
+import * as Constructor from '@framework/Constructor'
+import * as Operations from '@framework/Operations'
+import * as QuickLinks from '@framework/QuickLinks'
+import { PseudoType, QueryKey, getQueryKey, Type, EntityData, EntityKind } from '@framework/Reflection'
+import { TypeContext } from '@framework/TypeContext'
+import { WidgetContext, onEmbeddedWidgets, EmbeddedWidgetPosition } from '@framework/Frames/Widgets'
 import { FindOptions, FilterOption, FilterOperation, OrderOption, ColumnOption,
-    FilterRequest, QueryRequest, Pagination, QueryTokenType, QueryToken, FilterType, SubTokensOptions, ResultTable, OrderRequest } from '../../../Framework/Signum.React/Scripts/FindOptions'
+    FilterRequest, QueryRequest, Pagination, QueryTokenType, QueryToken, FilterType, SubTokensOptions, ResultTable, OrderRequest } from '@framework/FindOptions'
 import * as AuthClient  from '../Authorization/AuthClient'
 import { SchemaMapInfo, ClientColorProvider } from './Schema/SchemaMap'
 import { OperationMapInfo } from './Operation/OperationMap'
 
 import { } from './Signum.Entities.Map'
-import { ImportRoute } from "../../../Framework/Signum.React/Scripts/AsyncImport";
+import { ImportRoute } from "@framework/AsyncImport";
 
 
 export const getProviders: Array<(info: SchemaMapInfo) => Promise<ClientColorProvider[]>> = []; 

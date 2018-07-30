@@ -3,20 +3,20 @@ import { Route } from 'react-router'
 import * as moment from 'moment'
 import * as numbro from 'numbro'
 import * as QueryString from 'query-string'
-import { Dic } from '../../../Framework/Signum.React/Scripts/Globals';
-import { ajaxPost, ajaxGet } from '../../../Framework/Signum.React/Scripts/Services';
-import { EntitySettings, ViewPromise } from '../../../Framework/Signum.React/Scripts/Navigator'
-import * as Navigator from '../../../Framework/Signum.React/Scripts/Navigator'
-import * as Finder from '../../../Framework/Signum.React/Scripts/Finder'
-import { EntityOperationSettings } from '../../../Framework/Signum.React/Scripts/Operations'
-import { Entity, Lite, liteKey, MList } from '../../../Framework/Signum.React/Scripts/Signum.Entities'
-import * as Constructor from '../../../Framework/Signum.React/Scripts/Constructor'
-import * as Operations from '../../../Framework/Signum.React/Scripts/Operations'
-import * as QuickLinks from '../../../Framework/Signum.React/Scripts/QuickLinks'
-import { PseudoType, QueryKey, getQueryKey } from '../../../Framework/Signum.React/Scripts/Reflection'
+import { Dic } from '@framework/Globals';
+import { ajaxPost, ajaxGet } from '@framework/Services';
+import { EntitySettings, ViewPromise } from '@framework/Navigator'
+import * as Navigator from '@framework/Navigator'
+import * as Finder from '@framework/Finder'
+import { EntityOperationSettings } from '@framework/Operations'
+import { Entity, Lite, liteKey, MList } from '@framework/Signum.Entities'
+import * as Constructor from '@framework/Constructor'
+import * as Operations from '@framework/Operations'
+import * as QuickLinks from '@framework/QuickLinks'
+import { PseudoType, QueryKey, getQueryKey } from '@framework/Reflection'
 import {
     FindOptions, FilterOption, FilterOptionParsed, FilterOperation, OrderOption, OrderOptionParsed, ColumnOption,
-    FilterRequest, QueryRequest, Pagination, QueryTokenType, QueryToken, FilterType, SubTokensOptions, ResultTable, OrderRequest } from '../../../Framework/Signum.React/Scripts/FindOptions'
+    FilterRequest, QueryRequest, Pagination, QueryTokenType, QueryToken, FilterType, SubTokensOptions, ResultTable, OrderRequest } from '@framework/FindOptions'
 import * as AuthClient  from '../Authorization/AuthClient'
 import { QueryFilterEmbedded, QueryColumnEmbedded, QueryOrderEmbedded} from '../UserQueries/Signum.Entities.UserQueries'
 
@@ -28,10 +28,10 @@ import ChartButton from './ChartButton'
 import ChartRequestView from './Templates/ChartRequestView'
 import * as ChartUtils from './Templates/ChartUtils'
 import * as UserChartClient from './UserChart/UserChartClient'
-import { ImportRoute } from "../../../Framework/Signum.React/Scripts/AsyncImport";
-import { ColumnRequest } from '../../../Framework/Signum.React/Scripts/FindOptions';
-import { toMomentFormat } from '../../../Framework/Signum.React/Scripts/Reflection';
-import { toNumbroFormat } from '../../../Framework/Signum.React/Scripts/Reflection';
+import { ImportRoute } from "@framework/AsyncImport";
+import { ColumnRequest } from '@framework/FindOptions';
+import { toMomentFormat } from '@framework/Reflection';
+import { toNumbroFormat } from '@framework/Reflection';
 
 export function start(options: { routes: JSX.Element[] }) {
 
@@ -651,7 +651,7 @@ export interface ChartColumn {
     type?: string;
 }
 
-declare module '../../../Framework/Signum.React/Scripts/SearchControl/SearchControlLoaded' {
+declare module '@framework/SearchControl/SearchControlLoaded' {
 
     export interface ShowBarExtensionOption {
         showChartButton?: boolean;

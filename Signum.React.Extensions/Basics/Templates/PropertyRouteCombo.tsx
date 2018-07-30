@@ -1,8 +1,8 @@
 ﻿import * as React from 'react'
-import { Dic } from '../../../../Framework/Signum.React/Scripts/Globals'
-import { TypeEntity, PropertyRouteEntity } from '../../../../Framework/Signum.React/Scripts/Signum.Entities.Basics'
-import { ValueLine, EntityLine, RenderEntity, EntityCombo, EntityList, EntityDetail, EntityStrip, EntityRepeater, EntityCheckboxList, EntityTabRepeater, TypeContext, ValueLineType, FormGroup } from '../../../../Framework/Signum.React/Scripts/Lines'
-import { getTypeInfo, MemberInfo, PropertyRoute } from "../../../../Framework/Signum.React/Scripts/Reflection";
+import { Dic } from '@framework/Globals'
+import { TypeEntity, PropertyRouteEntity } from '@framework/Signum.Entities.Basics'
+import { ValueLine, EntityLine, RenderEntity, EntityCombo, EntityList, EntityDetail, EntityStrip, EntityRepeater, EntityCheckboxList, EntityTabRepeater, TypeContext, ValueLineType, FormGroup } from '@framework/Lines'
+import { getTypeInfo, MemberInfo, PropertyRoute } from "@framework/Reflection";
 
 
 export interface PropertyRouteComboProps {

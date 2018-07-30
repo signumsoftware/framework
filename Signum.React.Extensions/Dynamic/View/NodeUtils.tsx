@@ -1,18 +1,18 @@
 ﻿import * as React from 'react'
 import { globalModules } from './GlobalModules'
-import { FormGroup, FormControlReadonly, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityList, EntityRepeater, EntityDetail, EntityStrip } from '../../../../Framework/Signum.React/Scripts/Lines'
-import { ModifiableEntity, isLite, isEntity, External } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
-import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
-import { classes, Dic } from '../../../../Framework/Signum.React/Scripts/Globals'
-import { ViewReplacer } from '../../../../Framework/Signum.React/Scripts/Frames/ReactVisitor'
-import { FindOptions } from '../../../../Framework/Signum.React/Scripts/FindOptions'
+import { FormGroup, FormControlReadonly, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityList, EntityRepeater, EntityDetail, EntityStrip } from '@framework/Lines'
+import { ModifiableEntity, isLite, isEntity, External } from '@framework/Signum.Entities'
+import * as Navigator from '@framework/Navigator'
+import { classes, Dic } from '@framework/Globals'
+import { ViewReplacer } from '@framework/Frames/ReactVisitor'
+import { FindOptions } from '@framework/FindOptions'
 import {
     getQueryNiceName, TypeInfo, MemberInfo, getTypeInfo, EntityData, EntityKind, getTypeInfos, Binding, EnumType,
     KindOfType, PropertyRoute, PropertyRouteType, MemberType, isTypeEntity, isTypeModel, isTypeModifiableEntity
-} from '../../../../Framework/Signum.React/Scripts/Reflection'
-import { TypeContext, StyleOptions, FormGroupStyle } from '../../../../Framework/Signum.React/Scripts/TypeContext'
-import { EntityBase, EntityBaseProps } from '../../../../Framework/Signum.React/Scripts/Lines/EntityBase'
-import { EntityListBase, EntityListBaseProps } from '../../../../Framework/Signum.React/Scripts/Lines/EntityListBase'
+} from '@framework/Reflection'
+import { TypeContext, StyleOptions, FormGroupStyle } from '@framework/TypeContext'
+import { EntityBase, EntityBaseProps } from '@framework/Lines/EntityBase'
+import { EntityListBase, EntityListBaseProps } from '@framework/Lines/EntityListBase'
 import { DynamicViewValidationMessage } from '../Signum.Entities.Dynamic'
 import { ExpressionOrValueComponent, FieldComponent } from './Designer'
 import { FindOptionsLine, ViewNameComponent } from './FindOptionsComponent'
@@ -24,7 +24,7 @@ import { HtmlAttributesLine } from './HtmlAttributesComponent'
 import { StyleOptionsLine } from './StyleOptionsComponent'
 import TypeHelpComponent from '../../TypeHelp/TypeHelpComponent'
 import { registeredCustomContexts } from '../DynamicViewClient'
-import { findMany } from '../../../../Framework/Signum.React/Scripts/Finder';
+import { findMany } from '@framework/Finder';
 
 
 export type ExpressionOrValue<T> = T | Expression<T>;
