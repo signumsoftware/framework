@@ -778,7 +778,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
                 menuItems.push(<DropdownItem divider />);
 
             menuItems.push(<DropdownItem className="sf-insert-header" onClick={this.handleInsertColumn}><FontAwesomeIcon icon="plus-circle" className="icon" />&nbsp;{JavascriptMessage.insertColumn.niceToString()}</DropdownItem>);
-            menuItems.push(<DropdownItem className="sf-edit-header" onClick={this.handleEditColumn}><FontAwesomeIcon icon="pencil" className="icon" />&nbsp;{JavascriptMessage.editColumn.niceToString()}</DropdownItem>);
+            menuItems.push(<DropdownItem className="sf-edit-header" onClick={this.handleEditColumn}><FontAwesomeIcon icon="pencil-alt" className="icon" />&nbsp;{JavascriptMessage.editColumn.niceToString()}</DropdownItem>);
             menuItems.push(<DropdownItem className="sf-remove-header" onClick={this.handleRemoveColumn}><FontAwesomeIcon icon="minus-circle" className="icon" />&nbsp;{JavascriptMessage.removeColumn.niceToString()}</DropdownItem>);
         }
 
