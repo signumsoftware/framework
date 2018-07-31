@@ -1009,6 +1009,7 @@ export interface SearchControlNode extends BaseNode {
     showGroupButton?: ExpressionOrValue<boolean>;
     allowChangeColumns?: ExpressionOrValue<boolean>;
     create?: ExpressionOrValue<boolean>;
+    onCreate?: Expression<() => void>;
     navigate?: ExpressionOrValue<boolean>;
     refreshKey?: Expression<number | string | undefined>;
     maxResultsHeight?: Expression<number | string>;
@@ -1031,6 +1032,7 @@ NodeUtils.register<SearchControlNode>({
         showGroupButton: node.showGroupButton,
         allowChangeColumns: node.allowChangeColumns,
         create: node.create,
+        onCreate: node.onCreate,
         navigate: node.navigate,
         refreshKey: node.refreshKey,
         maxResultsHeight: node.maxResultsHeight,
@@ -1047,6 +1049,7 @@ NodeUtils.register<SearchControlNode>({
         showGroupButton={NodeUtils.evaluateAndValidate(ctx, dn.node, f => f.showGroupButton, NodeUtils.isBooleanOrNull)}
         allowChangeColumns={NodeUtils.evaluateAndValidate(ctx, dn.node, f => f.allowChangeColumns, NodeUtils.isBooleanOrNull)}
         create={NodeUtils.evaluateAndValidate(ctx, dn.node, f => f.create, NodeUtils.isBooleanOrNull)}
+        onCreate={NodeUtils.evaluateAndValidate(ctx, dn.node, f => f.onCreate, NodeUtils.isFunctionOrNull)}
         navigate={NodeUtils.evaluateAndValidate(ctx, dn.node, f => f.navigate, NodeUtils.isBooleanOrNull)}
         refreshKey={NodeUtils.evaluateAndValidate(ctx, dn.node, f => f.refreshKey, NodeUtils.isNumberOrStringOrNull)}
         maxResultsHeight={NodeUtils.evaluateAndValidate(ctx, dn.node, f => f.maxResultsHeight, NodeUtils.isNumberOrStringOrNull)}
@@ -1067,6 +1070,15 @@ NodeUtils.register<SearchControlNode>({
         <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, f => f.showGroupButton)} type="boolean" defaultValue={null} />
         <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, f => f.allowChangeColumns)} type="boolean" defaultValue={null} />
         <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, f => f.create)} type="boolean" defaultValue={null} />
+        <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, f => f.onCreate)} type={null} defaultValue={null} exampleExpression={`() => 
+{ 
+    modules.Constructor.construct("YourTypeHere").then(e => { 
+        if (e == undefined) 
+            return; 
+        /* Set entity properties here... */
+        modules.Navigator.navigate(e).done(); 
+    }).done();
+}`} />
         <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, f => f.navigate)} type="boolean" defaultValue={null} />
         <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, f => f.refreshKey)} type={null} defaultValue={null} exampleExpression={"ctx.frame.refreshCount"} />
         <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, f => f.maxResultsHeight)} type={null} defaultValue={null} />
