@@ -3,6 +3,7 @@ import * as numbro from 'numbro'
 import * as moment from 'moment'
 import * as Entities from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
 import * as Operations from '../../../../Framework/Signum.React/Scripts/Operations'
+import * as Constructor from '../../../../Framework/Signum.React/Scripts/Constructor'
 import * as Globals from '../../../../Framework/Signum.React/Scripts/Globals'
 import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
 import * as Reflection from '../../../../Framework/Signum.React/Scripts/Reflection'
@@ -24,5 +25,6 @@ export const globalModules: any = {
     Entities,
     AuthClient,
     Operations,
+    Constructor,
     TreeClient,
 };
