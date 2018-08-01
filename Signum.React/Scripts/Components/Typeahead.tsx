@@ -291,7 +291,7 @@ export class Typeahead extends React.Component<TypeaheadProps, TypeaheadState>
     }
 
     handleDocumentClick = (e: MouseEvent | TouchEvent) => {
-        if ((e as TouchEvent).which === 3)
+        if ((e as MouseEvent).which === 3)
             return;
 
         const container = ReactDOM.findDOMNode(this) as HTMLElement;

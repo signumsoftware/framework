@@ -27,7 +27,7 @@
     <UseGlobalApplicationHostFile />
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
-    <TypeScriptToolsVersion>2.9</TypeScriptToolsVersion>
+    <TypeScriptToolsVersion>3.0</TypeScriptToolsVersion>
     <Use64BitIISExpress />
     <DockerComposeProjectPath>..\..\docker-compose.dcproj</DockerComposeProjectPath>
   </PropertyGroup>
