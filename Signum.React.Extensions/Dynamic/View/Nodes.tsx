@@ -1007,6 +1007,11 @@ export interface SearchControlNode extends BaseNode {
     showFilterButton?: ExpressionOrValue<boolean>;
     showFooter?: ExpressionOrValue<boolean>;
     showGroupButton?: ExpressionOrValue<boolean>;
+    showBarExtension?: ExpressionOrValue<boolean>;
+    showChartButton?: ExpressionOrValue<boolean>;
+    showExcelMenu?: ExpressionOrValue<boolean>;
+    showUserQuery?: ExpressionOrValue<boolean>;
+    showWordReport?: ExpressionOrValue<boolean>;
     allowChangeColumns?: ExpressionOrValue<boolean>;
     create?: ExpressionOrValue<boolean>;
     onCreate?: Expression<() => void>;
@@ -1030,6 +1035,11 @@ NodeUtils.register<SearchControlNode>({
         showFilterButton: node.showFilterButton,
         showFooter: node.showFooter,
         showGroupButton: node.showGroupButton,
+        showBarExtension: node.showBarExtension,
+        showChartButton: node.showChartButton,
+        showExcelMenu: node.showExcelMenu,
+        showUserQuery: node.showUserQuery,
+        showWordReport: node.showWordReport, 
         allowChangeColumns: node.allowChangeColumns,
         create: node.create,
         onCreate: node.onCreate,
@@ -1047,6 +1057,13 @@ NodeUtils.register<SearchControlNode>({
         showFilterButton={NodeUtils.evaluateAndValidate(ctx, dn.node, f => f.showFilterButton, NodeUtils.isBooleanOrNull)}
         showFooter={NodeUtils.evaluateAndValidate(ctx, dn.node, f => f.showFooter, NodeUtils.isBooleanOrNull)}
         showGroupButton={NodeUtils.evaluateAndValidate(ctx, dn.node, f => f.showGroupButton, NodeUtils.isBooleanOrNull)}
+        showBarExtension={NodeUtils.evaluateAndValidate(ctx, dn.node, f => f.showBarExtension, NodeUtils.isBooleanOrNull)}
+        showBarExtensionOption={{
+            showChartButton: NodeUtils.evaluateAndValidate(ctx, dn.node, f => f.showChartButton, NodeUtils.isBooleanOrNull),
+            showExcelMenu: NodeUtils.evaluateAndValidate(ctx, dn.node, f => f.showExcelMenu, NodeUtils.isBooleanOrNull),
+            showUserQuery: NodeUtils.evaluateAndValidate(ctx, dn.node, f => f.showUserQuery, NodeUtils.isBooleanOrNull),
+            showWordReport: NodeUtils.evaluateAndValidate(ctx, dn.node, f => f.showWordReport, NodeUtils.isBooleanOrNull),
+        }}
         allowChangeColumns={NodeUtils.evaluateAndValidate(ctx, dn.node, f => f.allowChangeColumns, NodeUtils.isBooleanOrNull)}
         create={NodeUtils.evaluateAndValidate(ctx, dn.node, f => f.create, NodeUtils.isBooleanOrNull)}
         onCreate={NodeUtils.evaluateAndValidate(ctx, dn.node, f => f.onCreate, NodeUtils.isFunctionOrNull)}
@@ -1068,6 +1085,11 @@ NodeUtils.register<SearchControlNode>({
         <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, f => f.showFilterButton)} type="boolean" defaultValue={null} />
         <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, f => f.showFooter)} type="boolean" defaultValue={null} />
         <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, f => f.showGroupButton)} type="boolean" defaultValue={null} />
+        <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, f => f.showBarExtension)} type="boolean" defaultValue={null} />
+        <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, f => f.showChartButton)} type="boolean" defaultValue={null} />
+        <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, f => f.showExcelMenu)} type="boolean" defaultValue={null} />
+        <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, f => f.showUserQuery)} type="boolean" defaultValue={null} />
+        <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, f => f.showWordReport)} type="boolean" defaultValue={null} />
         <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, f => f.allowChangeColumns)} type="boolean" defaultValue={null} />
         <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, f => f.create)} type="boolean" defaultValue={null} />
         <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, f => f.onCreate)} type={null} defaultValue={null} exampleExpression={`() => 
