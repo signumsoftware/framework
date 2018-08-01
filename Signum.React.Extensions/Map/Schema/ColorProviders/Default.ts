@@ -2,9 +2,9 @@
 import * as numbro from 'numbro'
 import { ClientColorProvider, SchemaMapInfo  } from '../SchemaMap'
 import { colorScale, colorScaleLog  } from '../../Utils'
-import { EntityData, EntityKind } from '../../../../../Framework/Signum.React/Scripts/Reflection'
+import { EntityData, EntityKind } from '@framework/Reflection'
 import { MapMessage } from '../../Signum.Entities.Map'
-import { bytesToSize } from '../../../../../Framework/Signum.React/Scripts/Globals'
+import { bytesToSize } from '@framework/Globals'
 
 export default function getDefaultProviders(info: SchemaMapInfo): ClientColorProvider[] {
 
