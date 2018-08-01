@@ -42,7 +42,7 @@ export default class WorkflowDropdown extends React.Component<{}, { starts: Arra
                     {this.state.starts.length > 0 && <DropdownItem divider />}
                     {this.state.starts.length > 0 && <DropdownItem disabled>{JavascriptMessage.create.niceToString()}</DropdownItem>}
                     {this.getStarts().flatMap((kvp, i) => [
-                        <DropdownItem key={i} disabled>{kvp.elements[0].typeInfo.niceName}</DropdownItem>,
+                        (kvp.elements.length > 1 && <DropdownItem key={i} disabled>{kvp.elements[0].typeInfo.niceName}</DropdownItem>),
                         ...kvp.elements.map((val, j) =>
                             <LinkContainer key={i + "-" + j} to={`~/workflow/new/${val.workflow.id}/${val.mainEntityStrategy}`}>
                                 <DropdownItem>{val.workflow.toStr}{val.mainEntityStrategy == "SelectByUser" ? `(${WorkflowMainEntityStrategy.niceToString(val.mainEntityStrategy)})` : ""}</DropdownItem>
