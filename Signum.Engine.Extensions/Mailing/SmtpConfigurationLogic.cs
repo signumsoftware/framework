@@ -40,8 +40,8 @@ namespace Signum.Engine.Mailing
 
                 new Graph<SmtpConfigurationEntity>.Execute(SmtpConfigurationOperation.Save)
                 {
-                    AllowsNew = true,
-                    Lite = false,
+                    CanBeNew = true,
+                    CanBeModified = true,
                     Execute = (sc, _) => { },
                 }.Register();
             }

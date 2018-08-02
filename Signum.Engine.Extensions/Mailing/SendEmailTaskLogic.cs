@@ -77,8 +77,8 @@ namespace Signum.Engine.Mailing
 
                 new Graph<SendEmailTaskEntity>.Execute(SendEmailTaskOperation.Save)
                 {
-                    AllowsNew = true,
-                    Lite = false,
+                    CanBeNew = true,
+                    CanBeModified = true,
                     Execute = (e, _) => { }
                 }.Register();
 

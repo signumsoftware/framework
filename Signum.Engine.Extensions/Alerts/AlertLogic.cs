@@ -205,8 +205,8 @@ namespace Signum.Engine.Alerts
             {
                 FromStates = { AlertState.Saved, AlertState.New },
                 ToStates = { AlertState.Saved },
-                AllowsNew = true,
-                Lite = false,
+                CanBeNew = true,
+                CanBeModified = true,
                 Execute = (a, _) => { a.State = AlertState.Saved; }
             }.Register();
 

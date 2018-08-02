@@ -216,8 +216,8 @@ namespace Signum.Engine.Printing
 
             new Execute(PrintLineOperation.SaveTest)
             {
-                AllowsNew = true,
-                Lite = false,
+                CanBeNew = true,
+                CanBeModified = true,
                 FromStates = { PrintLineState.NewTest },
                 ToStates = { PrintLineState.ReadyToPrint },
                 Execute = (e, _) => { e.State = PrintLineState.ReadyToPrint; }

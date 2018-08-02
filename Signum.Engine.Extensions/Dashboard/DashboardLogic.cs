@@ -140,8 +140,8 @@ namespace Signum.Engine.Dashboard
 
                 new Execute(DashboardOperation.Save)
                 {
-                    AllowsNew = true,
-                    Lite = false,
+                    CanBeNew = true,
+                    CanBeModified = true,
                     Execute = (cp, _) => { }
                 }.Register();
 

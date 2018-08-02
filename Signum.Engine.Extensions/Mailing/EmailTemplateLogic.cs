@@ -278,8 +278,8 @@ namespace Signum.Engine.Mailing
 
                 new Execute(EmailTemplateOperation.Save)
                 {
-                    AllowsNew = true,
-                    Lite = false,
+                    CanBeNew = true,
+                    CanBeModified = true,
                     Execute = (t, _) => { }
                 }.Register();
 

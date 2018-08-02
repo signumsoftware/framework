@@ -148,8 +148,8 @@ namespace Signum.Engine.Mailing
 
             new Execute(NewsletterOperation.Save)
             {
-                AllowsNew = true,
-                Lite = false,
+                CanBeNew = true,
+                CanBeModified = true,
                 FromStates = { NewsletterState.Created, NewsletterState.Saved },
                 ToStates = { NewsletterState.Saved },
                 Execute = (n, _) => n.State = NewsletterState.Saved

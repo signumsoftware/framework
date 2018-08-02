@@ -214,8 +214,8 @@ namespace Signum.Engine.Processes
                 {
                     FromStates = { ProcessState.Created },
                     ToStates = { ProcessState.Created },
-                    AllowsNew = true,
-                    Lite = false,
+                    CanBeNew = true,
+                    CanBeModified = true,
                     Execute = (p, args) =>
                     {
                         p.Save();

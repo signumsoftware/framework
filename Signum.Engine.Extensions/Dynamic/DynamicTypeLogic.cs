@@ -77,8 +77,8 @@ namespace Signum.Engine.Dynamic
 
                 new Execute(DynamicTypeOperation.Save)
                 {
-                    AllowsNew = true,
-                    Lite = false,
+                    CanBeNew = true,
+                    CanBeModified = true,
                     Execute = (e, _) => {
 
                         if (!e.IsNew)
@@ -827,7 +827,7 @@ namespace Signum.Engine.Dynamic
                     sb.AppendLine($"    CanExecute = e => {operationCanExecute},");
 
                 sb.AppendLine("    AllowsNew = true,");
-                sb.AppendLine("    Lite = false,");
+                sb.AppendLine("    CanBeModified = true,");
                 sb.AppendLine("    Execute = (e, args) => {\r\n" + operationExecute?.Indent(8) + "\r\n}");
                 sb.AppendLine("}." + (this.IsTreeEntity ? "Register(replace: true)" : "Register()") + ";");
             }

@@ -222,7 +222,6 @@ namespace Signum.Engine.Mailing
 
                 new ConstructFrom<EmailTemplateEntity>(EmailMessageOperation.CreateEmailFromTemplate)
                 {
-                    AllowsNew = false,
                     ToStates = { EmailMessageState.Created },
                     CanConstruct = et => 
                     {
@@ -244,8 +243,8 @@ namespace Signum.Engine.Mailing
 
                 new Execute(EmailMessageOperation.Save)
                 {
-                    AllowsNew = true,
-                    Lite = false,
+                    CanBeNew = true,
+                    CanBeModified = true,
                     FromStates = { EmailMessageState.Created, EmailMessageState.Outdated },
                     ToStates = { EmailMessageState.Draft },
                     Execute = (m, _) => { m.State = EmailMessageState.Draft; }
@@ -253,8 +252,8 @@ namespace Signum.Engine.Mailing
 
                 new Execute(EmailMessageOperation.ReadyToSend)
                 {
-                    AllowsNew = true,
-                    Lite = false,
+                    CanBeNew = true,
+                    CanBeModified = true,
                     FromStates = { EmailMessageState.Created, EmailMessageState.Draft, EmailMessageState.SentException, EmailMessageState.RecruitedForSending, EmailMessageState.Outdated },
                     ToStates = { EmailMessageState.ReadyToSend },
                     Execute = (m, _) =>
@@ -269,8 +268,8 @@ namespace Signum.Engine.Mailing
                     CanExecute = m => m.State == EmailMessageState.Created || m.State == EmailMessageState.Draft ||
                          m.State == EmailMessageState.ReadyToSend || m.State == EmailMessageState.RecruitedForSending ||
                          m.State == EmailMessageState.Outdated ? null : EmailMessageMessage.TheEmailMessageCannotBeSentFromState0.NiceToString().FormatWith(m.State.NiceToString()),
-                    AllowsNew = true,
-                    Lite = false,
+                    CanBeNew = true,
+                    CanBeModified = true,
                     FromStates = { EmailMessageState.Created, EmailMessageState.Draft, EmailMessageState.ReadyToSend, EmailMessageState.Outdated },
                     ToStates = { EmailMessageState.Sent },
                     Execute = (m, _) => EmailLogic.SenderManager.Send(m)
@@ -278,7 +277,6 @@ namespace Signum.Engine.Mailing
 
                 new ConstructFrom<EmailMessageEntity>(EmailMessageOperation.ReSend)
                 {
-                    AllowsNew = false,
                     ToStates = { EmailMessageState.Created },
                     Construct = (m, _) => new EmailMessageEntity
                     {

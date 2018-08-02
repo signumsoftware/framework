@@ -130,8 +130,8 @@ namespace Signum.Engine.Mailing.Pop3
 
                 new Graph<Pop3ReceptionEntity>.ConstructFrom<Pop3ConfigurationEntity>(Pop3ConfigurationOperation.ReceiveEmails)
                 {
-                    AllowsNew = true,
-                    Lite = false,
+                    CanBeNew = true,
+                    CanBeModified = true,
                     Construct = (e, _) =>
                     {
                         using (Transaction tr = Transaction.None())

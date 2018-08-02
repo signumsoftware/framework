@@ -567,8 +567,8 @@ namespace Signum.Engine.Workflow
                     CanExecute = ca => !(ca.WorkflowActivity is WorkflowActivityEntity) ? CaseActivityMessage.NoWorkflowActivity.NiceToString() : null,
                     FromStates = {  CaseActivityState.New },
                     ToStates = {  CaseActivityState.PendingNext, CaseActivityState.PendingDecision},
-                    AllowsNew = true,
-                    Lite = false,
+                    CanBeNew = true,
+                    CanBeModified = true,
                     Execute = (ca, _) =>
                     {
                         SaveEntity(ca.Case.MainEntity);
@@ -614,7 +614,7 @@ namespace Signum.Engine.Workflow
                     CanExecute = ca => !(ca.WorkflowActivity is WorkflowActivityEntity) ? CaseActivityMessage.NoWorkflowActivity.NiceToString() : null,
                     FromStates = {  CaseActivityState.PendingDecision },
                     ToStates = {  CaseActivityState.Done },
-                    Lite = false,
+                    CanBeModified = true,
                     Execute = (ca, _) =>
                     {
                         CheckRequiresOpen(ca);
@@ -627,7 +627,7 @@ namespace Signum.Engine.Workflow
                     CanExecute = ca => !(ca.WorkflowActivity is WorkflowActivityEntity) ? CaseActivityMessage.NoWorkflowActivity.NiceToString() : null,
                     FromStates = { CaseActivityState.PendingDecision },
                     ToStates = { CaseActivityState.Done },
-                    Lite = false,
+                    CanBeModified = true,
                     Execute = (ca, _) =>
                     {
                         CheckRequiresOpen(ca);
@@ -640,7 +640,7 @@ namespace Signum.Engine.Workflow
                     CanExecute = ca => !(ca.WorkflowActivity is WorkflowActivityEntity) ? CaseActivityMessage.NoWorkflowActivity.NiceToString() : null,
                     FromStates = { CaseActivityState.PendingNext },
                     ToStates = { CaseActivityState.Done },
-                    Lite = false,
+                    CanBeModified = true,
                     Execute = (ca, args) =>
                     {
                         CheckRequiresOpen(ca);
@@ -656,7 +656,7 @@ namespace Signum.Engine.Workflow
                     ca.WorkflowActivity.NextConnectionsFromCache(ConnectionType.Jump).IsEmpty() ? CaseActivityMessage.Activity0HasNoJumps.NiceToString(ca.WorkflowActivity) : null,
                     FromStates = { CaseActivityState.PendingNext, CaseActivityState.PendingDecision },
                     ToStates = { CaseActivityState.Done },
-                    Lite = false,
+                    CanBeModified = true,
                     Execute = (ca, args) =>
                     {
                         CheckRequiresOpen(ca);

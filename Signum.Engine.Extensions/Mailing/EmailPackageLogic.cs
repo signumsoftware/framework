@@ -16,6 +16,7 @@ using Signum.Engine.Scheduler;
 using Signum.Engine.Authorization;
 using Signum.Utilities.ExpressionTrees;
 using Signum.Entities.Templating;
+using Signum.Engine.Basics;
 
 namespace Signum.Engine.Mailing
 {

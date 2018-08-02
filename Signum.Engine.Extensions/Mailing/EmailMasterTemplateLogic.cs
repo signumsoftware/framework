@@ -64,8 +64,8 @@ namespace Signum.Engine.Mailing
 
                 new Execute(EmailMasterTemplateOperation.Save)
                 {
-                    AllowsNew = true,
-                    Lite = false,
+                    CanBeNew = true,
+                    CanBeModified = true,
                     Execute = (t, _) => { }
                 }.Register();
             }

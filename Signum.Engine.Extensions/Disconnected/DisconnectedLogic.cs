@@ -162,8 +162,8 @@ namespace Signum.Engine.Disconnected
                 {
                     FromStates = { DisconnectedMachineState.Connected },
                     ToStates = { DisconnectedMachineState.Connected },
-                    AllowsNew = true,
-                    Lite = false,
+                    CanBeNew = true,
+                    CanBeModified = true,
                     Execute = (dm, _) =>
                     {
 

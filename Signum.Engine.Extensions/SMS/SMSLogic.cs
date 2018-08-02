@@ -565,8 +565,8 @@ namespace Signum.Engine.SMS
 
             new Execute(SMSMessageOperation.Send)
             {
-                AllowsNew = true,
-                Lite = false,
+                CanBeNew = true,
+                CanBeModified = true,
                 FromStates = { SMSMessageState.Created },
                 ToStates = { SMSMessageState.Sent },
                 Execute = (m, _) =>

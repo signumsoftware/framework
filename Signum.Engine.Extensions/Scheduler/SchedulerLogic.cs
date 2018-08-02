@@ -161,8 +161,8 @@ namespace Signum.Engine.Scheduler
 
                 new Graph<HolidayCalendarEntity>.Execute(HolidayCalendarOperation.Save)
                 {
-                    AllowsNew = true,
-                    Lite = false,
+                    CanBeNew = true,
+                    CanBeModified = true,
                     Execute = (c, _) => { },
                 }.Register();
 
@@ -173,8 +173,8 @@ namespace Signum.Engine.Scheduler
 
                 new Graph<ScheduledTaskEntity>.Execute(ScheduledTaskOperation.Save)
                 {
-                    AllowsNew = true,
-                    Lite = false,
+                    CanBeNew = true,
+                    CanBeModified = true,
                     Execute = (st, _) => { },
                 }.Register();
 

@@ -489,8 +489,8 @@ namespace Signum.Engine.MachineLearning
                 {
                     FromStates = { PredictorState.Draft, PredictorState.Error, PredictorState.Trained },
                     ToStates = { PredictorState.Draft, PredictorState.Error, PredictorState.Trained },
-                    AllowsNew = true,
-                    Lite = false,
+                    CanBeNew = true,
+                    CanBeModified = true,
                     Execute = (e, _) => { },
                 }.Register();
 
@@ -498,8 +498,8 @@ namespace Signum.Engine.MachineLearning
                 {
                     FromStates = { PredictorState.Draft },
                     ToStates = { PredictorState.Training },
-                    AllowsNew = true,
-                    Lite = false,
+                    CanBeNew = true,
+                    CanBeModified = true,
                     Execute = (p, _) =>
                     {
                         p.User = UserHolder.Current.ToLite();

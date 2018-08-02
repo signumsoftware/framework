@@ -277,8 +277,8 @@ namespace Signum.Engine.Tree
 
             new Graph<T>.Execute(TreeOperation.Save)
             {
-                AllowsNew = true,
-                Lite = false,
+                CanBeNew = true,
+                CanBeModified = true,
                 Execute = (t, _) =>
                 {
                     if (t.IsNew)

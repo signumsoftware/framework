@@ -65,8 +65,8 @@ namespace Signum.Engine.Files
                 
                 new Graph<FilePathEntity>.Execute(FilePathOperation.Save)
                 {
-                    AllowsNew = true,
-                    Lite = false,
+                    CanBeNew = true,
+                    CanBeModified = true,
                     Execute = (fp, _) =>
                     {
                         if (!fp.IsNew)

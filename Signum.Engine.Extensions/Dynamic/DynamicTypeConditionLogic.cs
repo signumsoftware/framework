@@ -55,8 +55,8 @@ namespace Signum.Engine.Dynamic
 
                 new Graph<DynamicTypeConditionSymbolEntity>.Execute(DynamicTypeConditionSymbolOperation.Save)
                 {
-                    Lite = false,
-                    AllowsNew = true,
+                    CanBeModified = true,
+                    CanBeNew = true,
                     Execute = (e, _) =>
                     {
                         if (!e.IsNew)

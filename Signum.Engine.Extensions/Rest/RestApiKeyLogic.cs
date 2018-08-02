@@ -38,8 +38,8 @@ namespace Signum.Engine.Rest
 
                 new Graph<RestApiKeyEntity>.Execute(RestApiKeyOperation.Save)
                 {
-                    AllowsNew = true,
-                    Lite = false,
+                    CanBeNew = true,
+                    CanBeModified = true,
                     Execute = (e, _) => { },
                 }.Register();
 
