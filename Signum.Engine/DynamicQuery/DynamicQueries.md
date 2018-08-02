@@ -5,9 +5,9 @@ The Dynamic query system is a layer, on top of the LINQ provider, that allows a 
 This system is not meant to be used directly from client code, but used as a service from the Windows or Web `SearchControl`, `CounSearchControl`, or Email, Reporting and Chart module.
 
 
-## DynamicQueryManager
+## QueryLogic
 
-The `DynamicQueryManager` is the main facade of the dynamic query system, and is usually passed as a parameter, along with the `SchemaBuilder`, to the `Start` method of each module. 
+The `QueryLogic` is the main facade of the dynamic query system. 
 
 This class is responsible of: 
 * Registering queries 
@@ -16,20 +16,16 @@ This class is responsible of:
 
 ## Registering queries
 
-`RegisterQuery` method is used to add a query to the pool of queries that will be available to the `SearchControl` in the user interface. This queries will only be the starting point, since the `SearchControl` is able to change order, add filters and add or remove columns.
-
-There are two variants: 
+`.Queries.Register` method is used to add a query to the pool of queries that will be available to the `SearchControl` in the user interface. This queries will only be the starting point, since the `SearchControl` is able to change order, add filters and add or remove columns.
 
 ```C#
-public class DynamicQueryManager
-{
-    public void RegisterQuery<T>(object queryName, Func<IQueryable<T>> lazyQuery, Implementations? entityImplementations = null)
+    public void Register<T>(object queryName, Func<IQueryable<T>> lazyQuery, Implementations? entityImplementations = null)
 ```
 
 Example in `OrderLogic.Start`: 
 
 ```C#
-dqm.RegisterQuery(typeof(OrderEntity), () =>
+QueryLogic.Queries.Register(typeof(OrderEntity), () =>
     from o in Database.Query<OrderEntity>()
     select new
     {
@@ -44,7 +40,7 @@ dqm.RegisterQuery(typeof(OrderEntity), () =>
         o.ShipVia,
     });
 
-dqm.RegisterQuery(OrderQuery.OrderLines, () =>
+QueryLogic.Queries.Register(OrderQuery.OrderLines, () =>
     from o in Database.Query<OrderEntity>()
     from od in o.Details
     select new
@@ -64,7 +60,7 @@ Some interesting points:
 * **QueryName**: This object is the key that will be used to access the query. By convention, the default query for a entity of type `T` will be `typeof(T)`, but enums can also be used for alternative non-default views. 
 * **Lazy init**: Instead of a `IQueryable<T>`, `RegisterQuery` requires a `Func<IQueryable<T>>`. The only reason is to avoid creating thousands of expression trees every time the application starts, but the lambda will be called just once. 
 * **Entity property**: The first property, `Entity`, is mandatory and represents the entity that will be 'behind' each row in the result. The one that will be opened when double-click / view button and the one that will receive the contextual operations. 
-* **Lite is optional**: While calling `ToLite` has important performance consequences when using the LINQ provider directly, here the registered queries will be always manipulated by the `DynamicQueryManager`, and one of this changes is adding `ToLite` to every column of type entity automatically.
+* **Lite is optional**: While calling `ToLite` has important performance consequences when using the LINQ provider directly, here the registered queries will be always manipulated by `QueryLogic.Queries`, and one of this changes is adding `ToLite` to every column of type entity automatically.
 
 ### Metadata
 Additionally, the query will be processed not only to be translated to the database, also to get some metadata. This metadata is used to inherit some information from the property/ies used in each column expression:
@@ -74,19 +70,16 @@ Additionally, the query will be processed not only to be translated to the datab
 * **Unit** and **Format** to show the results properly.
 * The **PropertyRoute** itself to allow removing any unauthorized column. 
 
-This meta-data can be overriden using a different variation of `RegisterQuery`:
+This meta-data can be overriden using a different variation of `QueryLogic.Queries.Register`:
 
 ```C#
-public class DynamicQueryManager
-{
-    public void RegisterQuery<T>(object queryName, Func<DynamicQueryCore<T>> lazyQueryCore, Implementations? entityImplementations = null)
-}
+public void RegisterQuery<T>(object queryName, Func<DynamicQueryCore<T>> lazyQueryCore, Implementations? entityImplementations = null)
 ```
 
 And using `Column` method (or `ColumnDisplayName`) to override each column meta-data like this:
 
 ```C#
-dqm.RegisterQuery(typeof(OrderEntity), () =>DynamicQueryCore.Auto(
+QueryLogic.Queries.Register(typeof(OrderEntity), () =>DynamicQueryCore.Auto(
     from o in Database.Query<OrderEntity>()
     select new
     {
@@ -116,7 +109,7 @@ public static ManualDynamicQueryCore<T> Manual<T>(Func<QueryRequest, QueryDescri
 Example: 
 
 ```C#
-dqm.RegisterQuery(typeof(CustomerEntity), () => DynamicQuery.Manual((QueryRequest request, QueryDescription descriptions) =>
+QueryLogic.Queries.Register(typeof(CustomerEntity), () => DynamicQuery.Manual((QueryRequest request, QueryDescription descriptions) =>
 {
     var persons = Database.Query<PersonEntity>().Select(p => new
     {
@@ -172,18 +165,15 @@ Finally, note how manual queries have no way to inherit the matadata, and all th
 
 ## Registering expressions
 
-The other main usage of `DynamicQueryManager` is to call `RegisterExpression`, that let any of our `expressionMethod` to be available for the user as a query token that he can use in the `SearchControl` for adding filters, columns or use it in any other extension (chart, word and email templates, etc...).
+The other main usage of `QueryLogic` is to call `Expressions.Register`, that let any of our `expressionMethod` to be available for the user as a query token that he can use in the `SearchControl` for adding filters, columns or use it in any other extension (chart, word and email templates, etc...).
 
 There are many overloads: 
 
 ```C#
-public class DynamicQueryManager
-{
-    public ExtensionInfo RegisterExpression<E, S>(Expression<Func<E, S>> lambdaToMethodOrProperty)
-    public ExtensionInfo RegisterExpression<E, S>(Expression<Func<E, S>> lambdaToMethodOrProperty, Func<string> niceName)
-    public ExtensionInfo RegisterExpression<E, S>(Expression<Func<E, S>> extensionLambda, Func<string> niceName, string key)
-    public ExtensionInfo RegisterExpression(ExtensionInfo extension)
-}
+public ExtensionInfo RegisterExpression<E, S>(Expression<Func<E, S>> lambdaToMethodOrProperty)
+public ExtensionInfo RegisterExpression<E, S>(Expression<Func<E, S>> lambdaToMethodOrProperty, Func<string> niceName)
+public ExtensionInfo RegisterExpression<E, S>(Expression<Func<E, S>> extensionLambda, Func<string> niceName, string key)
+public ExtensionInfo RegisterExpression(ExtensionInfo extension)
 
 public class ExtensionInfo
 {
@@ -210,11 +200,11 @@ This `expressionMethod` let's us simplify queries like this one:
 Database.Query<RegionEntity>().Where(r => !r.Territories().Any()).UnsafeDelete();
 ```
 
-But `Territories` is a concept that is only available for programmers, without `RegisterExpression` the user is not able to take advantage of it in the SearchControl. Let's do it then: 
+But `Territories` is a concept that is only available for programmers, without `QueryLogic.Expression.Register` the user is not able to take advantage of it in the SearchControl. Let's do it then: 
 
 ```C#
 //In TerritoryLogic.Start
-dqm.RegisterExpression((RegionEntity r) => r.Territories());
+QueryLogic.Expression.Register((RegionEntity r) => r.Territories());
 ```
 
 Now, the a new expression with key `"Territories"` has been registered on `RegionEntity` and returns an `IQueryable<TerritoryEntity>`. 
@@ -225,22 +215,19 @@ Let's fix that re-using the `NicePluralName` of `TerritoryEntity`:
 
 ```C#
 //In TerritoryLogic.Start
-dqm.RegisterExpression((RegionEntity r) => r.Territories(), () => typeof(TerritoryEntity).NiceName());
+QueryLogic.Expression.Register((RegionEntity r) => r.Territories(), () => typeof(TerritoryEntity).NiceName());
 ```
 
 ## Executing queries (Advanced)
 
-`DynamicQueryManager` also has a bunch of method that are used as a service by the `SearchControl`, `CountSearchControl`, etc... You shoudn't need to know about them if you're not doing internal plumbing.
+`QueryLogic.Queries` also has a bunch of method that are used as a service by the `SearchControl`, `CountSearchControl`, etc... You shoudn't need to know about them if you're not doing internal plumbing.
 
 ```C#
-public class DynamicQueryManager
-{
    public QueryDescription QueryDescription(object queryName)
    public ResultTable ExecuteQuery(QueryRequest request)
    public int ExecuteQueryCount(QueryCountRequest request)
    public ResultTable ExecuteGroupQuery(QueryGroupRequest request)
    public Lite<IdentifiableEntity> ExecuteUniqueEntity(UniqueEntityRequest request)
-}
 ```
 
 * `QueryDescription`: Returns all the registered metadata of a query to configure the `SearchControl`, already filtered and localized for a particular user. 

@@ -165,7 +165,7 @@ namespace Signum.React.Facades
                           where typeof(ModelEntity).IsAssignableFrom(type) && !type.IsAbstract
                           select type).ToList();
 
-            var dqm = QueryLogic.Queries;
+            var queries = QueryLogic.Queries;
 
             var schema = Schema.Current;
             var settings = Schema.Current.Settings;
@@ -186,7 +186,7 @@ namespace Signum.React.Facades
                               IsLowPopulation = type.IsIEntity() ? EntityKindCache.IsLowPopulation(type) : false,
                               IsSystemVersioned = type.IsIEntity() ? schema.Table(type).SystemVersioned != null : false,
                               ToStringFunction = typeof(Symbol).IsAssignableFrom(type) ? null : LambdaToJavascriptConverter.ToJavascript(ExpressionCleaner.GetFieldExpansion(type, miToString)),
-                              QueryDefined = dqm.QueryDefined(type),
+                              QueryDefined = queries.QueryDefined(type),
                               Members = PropertyRoute.GenerateRoutes(type).Where(pr => InTypeScript(pr))
                                 .ToDictionary(p => p.PropertyString(), p =>
                                 {
@@ -241,7 +241,7 @@ namespace Signum.React.Facades
 
         public static Dictionary<string, TypeInfoTS> GetEnums(IEnumerable<Type> allTypes)
         {
-            var dqm = QueryLogic.Queries;
+            var queries = QueryLogic.Queries;
 
             var result = (from type in allTypes
                           where type.IsEnum
@@ -255,7 +255,7 @@ namespace Signum.React.Facades
                               FullName = type.FullName,
                               NiceName = descOptions.HasFlag(DescriptionOptions.Description) ? type.NiceName() : null,
                               Members = type.GetFields(staticFlags)
-                              .Where(fi => kind != KindOfType.Query || dqm.QueryDefined(fi.GetValue(null)))
+                              .Where(fi => kind != KindOfType.Query || queries.QueryDefined(fi.GetValue(null)))
                               .ToDictionary(fi => fi.Name, fi => OnAddFieldInfoExtension(new MemberInfoTS
                               {
                                   NiceName = fi.NiceName(),

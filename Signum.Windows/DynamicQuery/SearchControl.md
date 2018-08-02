@@ -1,8 +1,8 @@
 ﻿# SearchControl
 
-We have already seen how to register queries and extensions in the [`DynamicQueryManager`](../../Signum.Engines/DynamicQuery/DynamicQueries.md) and how to open `SearchWindows` using [`Finder`](../Facades/Finder.md).
+We have already seen how to register queries and extensions in [`QueryLogic.Queries`](../../Signum.Engines/DynamicQuery/DynamicQueries.md) and how to open `SearchWindows` using [`Finder`](../Facades/Finder.md).
 
-`SearchControl` is a complex control that, using the services of the `DynamicQueryManager`, let's the used manipulate a query by adding and removing columns, filters, order columns an control pagination. 
+`SearchControl` is a complex control that, using the services of `QueryLogic.Queries`, let's the used manipulate a query by adding and removing columns, filters, order columns an control pagination. 
 
 `SearchControl` is also the main control contained in `SearchWindows`, but you can also embed this control in the custom control of your entities. 
 
