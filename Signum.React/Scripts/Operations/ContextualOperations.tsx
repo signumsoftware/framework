@@ -98,7 +98,7 @@ export function getEntityOperationsContextualItems(ctx: ContextualItemsContext<E
             coc.settings = cos;
             coc.entityOperationSettings = eos;
 
-            const visibleByDefault = oi.lite && (ctx.lites.length == 1 || oi.operationType != OperationType.ConstructorFrom)
+            const visibleByDefault = !oi.canBeModified && (ctx.lites.length == 1 || oi.operationType != OperationType.ConstructorFrom)
 
             if (eos == undefined ? visibleByDefault :
                 cos == undefined || cos.isVisible == undefined ? (visibleByDefault && eos.isVisible == undefined && (eos.onClick == undefined || cos != undefined && cos.onClick != undefined)) :

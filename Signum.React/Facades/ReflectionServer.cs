@@ -390,25 +390,25 @@ namespace Signum.React.Facades
     {
         [JsonProperty(PropertyName = "operationType")]
         private OperationType OperationType;
-        [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, NullValueHandling = NullValueHandling.Ignore, PropertyName = "allowsNew")]
-        private bool? AllowsNew;
+        [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, NullValueHandling = NullValueHandling.Ignore, PropertyName = "canBeNew")]
+        private bool? CanBeNew;
         [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, NullValueHandling = NullValueHandling.Ignore, PropertyName = "hasCanExecute")]
         private bool? HasCanExecute;
         [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, NullValueHandling = NullValueHandling.Ignore, PropertyName = "hasStates")]
         private bool? HasStates;
-        [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, NullValueHandling = NullValueHandling.Ignore, PropertyName = "lite")]
-        private bool? Lite;
+        [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, NullValueHandling = NullValueHandling.Ignore, PropertyName = "canBeModified")]
+        private bool? CanBeModified;
 
         [JsonExtensionData]
         public Dictionary<string, object> Extension { get; set; } = new Dictionary<string, object>();
 
         public OperationInfoTS(OperationInfo oper)
         {
-            this.AllowsNew = oper.AllowsNew;
+            this.CanBeNew = oper.CanBeNew;
             this.HasCanExecute = oper.HasCanExecute;
             this.HasStates = oper.HasStates;
             this.OperationType = oper.OperationType;
-            this.Lite = oper.Lite;
+            this.CanBeModified = oper.CanBeModified;
         }
     }
 

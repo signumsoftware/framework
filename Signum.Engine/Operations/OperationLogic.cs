@@ -179,7 +179,7 @@ namespace Signum.Engine.Operations
 
                 var errors = (from t in Schema.Current.Tables.Keys
                               let attr = EntityKindCache.GetAttribute(t)
-                              where attr.RequiresSaveOperation && !HasExecuteNoLite(t)
+                              where attr.RequiresSaveOperation && !HasSaveLike(t)
                               select attr.IsRequiresSaveOperationOverriden ?
                                 "'{0}' has '{1}' set to true, but no operation for saving has been implemented.".FormatWith(t.TypeName(), nameof(attr.RequiresSaveOperation)) :
                                 "'{0}' is 'EntityKind.{1}', but no operation for saving has been implemented.".FormatWith(t.TypeName(), attr.EntityKind)).ToList();
@@ -187,7 +187,7 @@ namespace Signum.Engine.Operations
                 if (errors.Any())
                     throw new InvalidOperationException(errors.ToString("\r\n") + @"
 Consider the following options:
-    * Implement an operation for saving using 'save' snippet.
+    * Implement an operation for saving using 'save' snippet or .WithSave() method.
     * Change the EntityKind to a more appropiated one. 
     * Exceptionally, override the property EntityTypeAttribute.RequiresSaveOperation for your particular entity.");
             }
@@ -216,7 +216,7 @@ Consider the following options:
                 throw new InvalidOperationException("Saving '{0}' is controlled by the operations. Use OperationLogic.AllowSave<{0}>() or execute {1}".FormatWith(
                     ident.GetType().Name,
                     operations.GetValue(ident.GetType()).Values
-                    .Where(IsExecuteNoLite)
+                    .Where(IsSaveLike)
                     .CommaOr(o => o.OperationSymbol.Key)));
         }
 
@@ -273,14 +273,14 @@ Consider the following options:
             operationsFromKey.Reset();
         }
 
-        private static bool HasExecuteNoLite(Type entityType)
+        private static bool HasSaveLike(Type entityType)
         {
-            return TypeOperations(entityType).Any(IsExecuteNoLite);
+            return TypeOperations(entityType).Any(IsSaveLike);
         }
 
-        private static bool IsExecuteNoLite(IOperation operation)
+        private static bool IsSaveLike(IOperation operation)
         {
-            return operation is IExecuteOperation && ((IEntityOperation)operation).Lite == false;
+            return operation is IExecuteOperation && ((IEntityOperation)operation).CanBeModified == true;
         }
 
         public static List<OperationInfo> ServiceGetOperationInfos(Type entityType)
@@ -323,13 +323,13 @@ Consider the following options:
             return new OperationInfo
             {
                 OperationSymbol = oper.OperationSymbol,
-                Lite = (oper as IEntityOperation)?.Lite,
+                CanBeModified = (oper as IEntityOperation)?.CanBeModified,
                 Returns = oper.Returns,
                 OperationType = oper.OperationType,
                 ReturnType = oper.ReturnType,
                 HasStates = (oper as IGraphHasFromStatesOperation)?.HasFromStates,
                 HasCanExecute = (oper as IEntityOperation)?.HasCanExecute,
-                AllowsNew = (oper as IEntityOperation)?.AllowsNew,
+                CanBeNew = (oper as IEntityOperation)?.CanBeNew,
                 BaseType = (oper as IEntityOperation)?.BaseType ?? (oper as IConstructorFromManyOperation)?.BaseType
             };
         }
@@ -342,7 +342,7 @@ Consider the following options:
 
                 return (from o in TypeOperations(entityType)
                         let eo = o as IEntityOperation
-                        where eo != null && (eo.AllowsNew || !entity.IsNew) && OperationAllowed(o.OperationSymbol, entityType, true)
+                        where eo != null && (eo.CanBeNew || !entity.IsNew) && OperationAllowed(o.OperationSymbol, entityType, true)
                         select KVP.Create(eo.OperationSymbol, eo.CanExecute(entity))).ToDictionary();
             }
             catch(Exception e)
@@ -560,7 +560,7 @@ Consider the following options:
         static T AssertLite<T>(this T result)
              where T : IEntityOperation
         {
-            if (!result.Lite)
+            if (result.CanBeModified)
                 throw new InvalidOperationException("Operation {0} is not allowed for Lites".FormatWith(result.OperationSymbol));
 
             return result;
@@ -569,7 +569,7 @@ Consider the following options:
         static T AssertEntity<T>(this T result, Entity entity)
             where T : IEntityOperation
         {
-            if (result.Lite)
+            if (!result.CanBeModified)
             {
                 var list = GraphExplorer.FromRoot(entity).Where(a => a.Modified == ModifiedState.SelfModified);
                 if (list.Any())
@@ -578,16 +578,6 @@ Consider the following options:
             }
 
             return result;
-        }
-
-        public static bool IsLite(OperationSymbol operationSymbol)
-        {
-            return operationsFromKey.Value.TryGetC(operationSymbol)
-                .EmptyIfNull()
-                .Select(t => FindOperation(t, operationSymbol))
-                .OfType<IEntityOperation>()
-                .Select(a => a.Lite)
-                .FirstOrDefault();
         }
 
         public static IEnumerable<IOperation> TypeOperations(Type type)
@@ -720,10 +710,11 @@ Consider the following options:
         {
             new Graph<T>.Execute(saveOperation)
             {
-                AllowsNew = true,
-                Lite = false,
+                CanBeNew = true,
+                CanBeModified = true,
                 Execute = (e, _) => { }
             }.Register();
+
             return fi;
         }
 
@@ -774,8 +765,8 @@ Consider the following options:
 
     public interface IEntityOperation : IOperation
     {
-        bool Lite { get; }
-        bool AllowsNew { get; }
+        bool CanBeModified { get; }
+        bool CanBeNew { get; }
         string CanExecute(IEntity entity);
         bool HasCanExecute { get; }
         Type BaseType { get; }

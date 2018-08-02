@@ -1,4 +1,4 @@
-﻿# FluentInclude
+# FluentInclude
 
 At the beginning of a Signum Framework application the `Starter` class calls the `Start` methods of the different modules used in the applications. 
 
@@ -37,7 +37,7 @@ public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
 		new Graph<ProjectEntity>.Execute(ProjectOperation.Save)
 		{
 		    AllowsNew = true, 
-			Lite = false,
+			CanBeModified = true,
 			Execute = (p, _) => {}
 		}.Register();
 
@@ -129,7 +129,7 @@ Internally calls DynamicQueryManager.RegisterExpression;
 
 ### WithSave / WithDelete
 
-Register trivial implementations of `Save` (AllowsNew = true, Lite = false with no body) and Delete (just `e.Delete()` in the body).
+Register trivial implementations of `Save` (CanBeNew = true, CanBeModified = true with no body) and Delete (just `e.Delete()` in the body).
 
 ```C#
 public static FluentInclude<T> WithSave<T>(this FluentInclude<T> fi, ExecuteSymbol<T> saveOperation) where T : Entity

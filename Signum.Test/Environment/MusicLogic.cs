@@ -1,4 +1,5 @@
 ﻿using Signum.Engine;
+using Signum.Engine.Basics;
 using Signum.Engine.DynamicQuery;
 using Signum.Engine.Maps;
 using Signum.Engine.Operations;
@@ -75,8 +76,6 @@ namespace Signum.Test.Environment
 
                 new Graph<ArtistEntity>.Execute(ArtistOperation.AssignPersonalAward)
                 {
-                    Lite = true,
-                    AllowsNew = false,
                     CanExecute = a => a.LastAward != null ? "Artist already has an award" : null,
                     Execute = (a, para) => a.LastAward = new PersonalAwardEntity() { Category = "Best Artist", Year = DateTime.Now.Year, Result = AwardResult.Won }.Execute(AwardOperation.Save)
                 }.Register();
@@ -92,8 +91,8 @@ namespace Signum.Test.Environment
 
                 new Graph<BandEntity>.Execute(BandOperation.Save)
                 {
-                    AllowsNew = true,
-                    Lite = false,
+                    CanBeNew = true,
+                    CanBeModified = true,
                     Execute = (b, _) =>
                     {
                         using (OperationLogic.AllowSave<ArtistEntity>())
@@ -167,8 +166,8 @@ namespace Signum.Test.Environment
         {
             new Graph<AwardEntity>.Execute(AwardOperation.Save)
             {
-                AllowsNew = true,
-                Lite = false,
+                CanBeNew = true,
+                CanBeModified = true,
                 Execute = (a, _) => { }
             }.Register();
 
@@ -224,8 +223,8 @@ namespace Signum.Test.Environment
             {
                 FromStates = { AlbumState.New },
                 ToStates = { AlbumState.Saved },
-                AllowsNew = true,
-                Lite = false,
+                CanBeNew = true,
+                CanBeModified = true,
                 Execute = (album, _) => { album.State = AlbumState.Saved; album.Save(); },
             }.Register();
 
@@ -233,16 +232,13 @@ namespace Signum.Test.Environment
             {
                 FromStates = { AlbumState.Saved },
                 ToStates = { AlbumState.Saved },
-                AllowsNew = false,
-                Lite = false,
+                CanBeModified = true,
                 Execute = (album, _) => { },
             }.Register();
 
             new ConstructFrom<BandEntity>(AlbumOperation.CreateAlbumFromBand)
             {
                 ToStates = { AlbumState.Saved },
-                AllowsNew = false,
-                Lite = true,
                 Construct = (BandEntity band, object[] args) =>
                     new AlbumEntity
                     {
@@ -257,8 +253,6 @@ namespace Signum.Test.Environment
             new ConstructFrom<AlbumEntity>(AlbumOperation.Clone)
             {
                 ToStates = { AlbumState.New },
-                AllowsNew = false,
-                Lite = true,
                 Construct = (g, args) =>
                 {
                     return new AlbumEntity

@@ -525,8 +525,8 @@ public static IQueryable<{to}> {Method}(this {from} e)
             sb.AppendLine("{");
             if (IsSave(oper))
             {
-                sb.AppendLine("    AllowsNew = true,");
-                sb.AppendLine("    Lite = false,");
+                sb.AppendLine("    CanBeNew = true,");
+                sb.AppendLine("    CanBeModified = true,");
             }
             sb.AppendLine("    Execute = ({0}, _) => {{ }}".FormatWith(v));
             sb.AppendLine("}.Register();");
