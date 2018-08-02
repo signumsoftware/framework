@@ -111,19 +111,25 @@ export default class EmailTemplate extends React.Component<{ ctx: TypeContext<Em
                             <ValueLine ctx={sc.subCtx(c => c.kind)} />
                         </label>
                     </div>
-                    <div className="col-sm-5">
-                        <ValueLine ctx={sc.subCtx(c => c.emailAddress)} />
-                    </div>
-                    <div className="col-sm-5">
-                        <ValueLine ctx={sc.subCtx(c => c.displayName)} />
+                    <div className="col-sm-10 ">
+                        {this.props.ctx.value.query && <QueryTokenEntityBuilder
+                            ctx={ec.subCtx(a => a.token)}
+                            queryKey={this.props.ctx.value.query.key}
+                            subTokenOptions={SubTokensOptions.CanElement} />
+                        }
                     </div>
                 </div>
-                {this.props.ctx.value.query &&
-                    <QueryTokenEntityBuilder
-                        ctx={ec.subCtx(a => a.token)}
-                        queryKey={this.props.ctx.value.query.key}
-                        subTokenOptions={SubTokensOptions.CanElement} />
-                }
+
+                <div className="row">
+                    <div className="col-sm-2">
+                    </div>
+                    <div className="col-sm-5 offset-sm-2">
+                        <ValueLine ctx={sc.subCtx(c => c.emailAddress)} helpText="Hardcoded E-Mail address" />
+                    </div>
+                    <div className="col-sm-5">
+                        <ValueLine ctx={sc.subCtx(c => c.displayName)} helpText="Hardcoded display name"  />
+                    </div>
+                </div>
             </div>
         );
     };
