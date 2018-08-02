@@ -40,7 +40,7 @@ export class ScrollPanel extends React.Component<ScrollPanelProps> {
     render() {
         return (
             <div>
-                <h3 id={this.props.id}>{this.props.title}&nbsp;{this.props.backId && <Scrollchor to={this.props.backId} className="pull-right flip"><small><FontAwesomeIcon icon="level-up"/></small></Scrollchor>}</h3>
+                <h3 id={this.props.id}>{this.props.title}&nbsp;{this.props.backId && <Scrollchor to={this.props.backId} className="float-right flip"><small><FontAwesomeIcon icon="level-up"/></small></Scrollchor>}</h3>
                 {this.props.children}
             </div>
         );

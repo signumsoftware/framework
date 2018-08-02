@@ -447,7 +447,7 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
 
 
     handleDragStart = (node: TreeNode, e: React.DragEvent<any>) => {
-        e.dataTransfer.setData('text', "initial"); //cannot be empty string
+        e.dataTransfer.setData('text', "start"); //cannot be empty string
 
         var isCopy = e.ctrlKey || e.shiftKey || e.altKey;
         e.dataTransfer.effectAllowed = isCopy ? "copy" : "move";

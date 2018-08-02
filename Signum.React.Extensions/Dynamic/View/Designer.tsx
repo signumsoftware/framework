@@ -92,7 +92,7 @@ export class ExpressionOrValueComponent extends React.Component<ExpressionOrValu
         
         const expr = value instanceof Object && (value as Object).hasOwnProperty("__code__") ? value as Expression<any> : null;
 
-        const expressionIcon = this.props.allowsExpression != false && <span className={classes("formula", expr && "active")} onClick={this.handleToggleExpression}><FontAwesomeIcon icon="calculator" size="1x"/></span>;
+        const expressionIcon = this.props.allowsExpression != false && <span className={classes("formula", expr && "active")} onClick={this.handleToggleExpression}><FontAwesomeIcon icon="calculator" /></span>;
 
 
         if (!expr && p.type == "boolean") {

@@ -222,7 +222,7 @@ export class DynamicViewNode extends React.Component<DynamicViewNodeProps, { isO
     }
         
     handleDragStart = (e: React.DragEvent<any>) => {
-        e.dataTransfer.setData('text', "initial"); //cannot be empty string
+        e.dataTransfer.setData('text', "start"); //cannot be empty string
         e.dataTransfer.effectAllowed = "move";
         this.props.dynamicTreeView.setState({ draggedNode: this.props.node });
     }

@@ -7,7 +7,7 @@ import {
     CaseNotificationEntity, DoneType, WorkflowActivityEntity, CaseFlowColor, WorkflowModel,
     WorkflowActivityModel
 } from '../Signum.Entities.Workflow'
-import { Lite, liteKey } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
+import { Lite, liteKey } from '@framework/Signum.Entities'
 import { Color, Gradient } from '../../Basics/Color'
 import { CustomRenderer } from './CustomRenderer'
 import { WorkflowActivityStats, WorkflowActivityMonitor } from '../WorkflowClient'
@@ -16,8 +16,8 @@ import { calculatePoint, Rectangle } from "../../Map/Utils"
 import NavigatedViewer from "bpmn-js/lib/NavigatedViewer"
 import "moment-duration-format"
 import { WorkflowActivityMonitorConfig } from "../ActivityMonitor/WorkflowActivityMonitorPage";
-import { QueryToken } from "../../../../Framework/Signum.React/Scripts/FindOptions";
-import { is } from "../../../../Framework/Signum.React/Scripts/Signum.Entities";
+import { QueryToken } from "@framework/FindOptions";
+import { is } from "@framework/Signum.Entities";
 
 export class WorkflowActivityMonitorRenderer extends CustomRenderer {
 

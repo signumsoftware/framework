@@ -18,6 +18,7 @@ import * as PropTypes from "prop-types";
 import { Dropdown, DropdownToggle, DropdownMenu, DropdownItem, NavItem } from '@framework/Components';
 import { NavLink } from '@framework/Components/NavItem';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { parseIcon } from '../../Dashboard/Admin/Dashboard';
 
 export interface ToolbarRendererProps {
     location?: ToolbarLocation;
@@ -128,7 +129,7 @@ export default class ToolbarRenderer extends React.Component<ToolbarRendererProp
                     return (
                         <NavItem>
                             <NavLink onClick={e => Navigator.pushOrOpenInTab(res.url!, e)}>
-                                {ToolbarConfig.coloredIcon(res.icon, res.iconColor)}{res.label}
+                                {ToolbarConfig.coloredIcon(res.iconName ? parseIcon(res.iconName) : undefined, res.iconColor)}{res.label}
                             </NavLink>
                         </NavItem>
                     );
@@ -202,7 +203,7 @@ export default class ToolbarRenderer extends React.Component<ToolbarRendererProp
                 if (res.url) {
                     return [
                         <DropdownItem onClick={e => Navigator.pushOrOpenInTab(res.url!, e)} className={menuItemN}>
-                            {ToolbarConfig.coloredIcon(res.icon, res.iconColor)}{res.label}
+                            {ToolbarConfig.coloredIcon(res.iconName ? parseIcon(res.iconName) : undefined, res.iconColor)}{res.label}
                         </DropdownItem>
                     ];
 
@@ -227,10 +228,10 @@ export default class ToolbarRenderer extends React.Component<ToolbarRendererProp
 
     icon(res: ToolbarClient.ToolbarResponse<any>) {
 
-        if (res.icon == null)
+        if (res.iconName == null)
             return null;
 
-        return <FontAwesomeIcon icon={res.icon} className={"icon"} color={res.iconColor} />
+        return <FontAwesomeIcon icon={parseIcon(res.iconName)} className={"icon"} color={res.iconColor} />
     }
 }
 
