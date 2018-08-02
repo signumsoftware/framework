@@ -4,7 +4,7 @@ import BpmnRenderer from "bpmn-js/lib/draw/BpmnRenderer"
 import NavigatedViewer from "bpmn-js/lib/NavigatedViewer"
 import * as moment from 'moment'
 import { WorkflowConditionEntity, WorkflowActionEntity, CaseActivityEntity, CaseNotificationEntity, DoneType, WorkflowActivityEntity, CaseFlowColor } from '../Signum.Entities.Workflow'
-import { Lite, liteKey } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
+import { Lite, liteKey } from '@framework/Signum.Entities'
 import { CustomRenderer } from './CustomRenderer'
 import { Color, Gradient } from '../../Basics/Color'
 import { CaseFlow, CaseConnectionStats, CaseActivityStats  } from '../WorkflowClient'

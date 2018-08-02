@@ -1,18 +1,18 @@
 ﻿import * as React from 'react'
-import { Dic } from '../../../../Framework/Signum.React/Scripts/Globals'
-import { MemberInfo, getTypeInfo, PropertyRoute, Binding, TypeInfo } from '../../../../Framework/Signum.React/Scripts/Reflection'
-import { ValueLine, EntityLine, RenderEntity, EntityCombo, EntityList, EntityDetail, EntityStrip, EntityRepeater, EntityCheckboxList, EntityTabRepeater, TypeContext, ValueLineType, FormGroup } from '../../../../Framework/Signum.React/Scripts/Lines'
-import { Entity } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
-import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
-import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
+import { Dic } from '@framework/Globals'
+import { MemberInfo, getTypeInfo, PropertyRoute, Binding, TypeInfo } from '@framework/Reflection'
+import { ValueLine, EntityLine, RenderEntity, EntityCombo, EntityList, EntityDetail, EntityStrip, EntityRepeater, EntityCheckboxList, EntityTabRepeater, TypeContext, ValueLineType, FormGroup } from '@framework/Lines'
+import { Entity } from '@framework/Signum.Entities'
+import * as Navigator from '@framework/Navigator'
+import * as Finder from '@framework/Finder'
 import CSharpCodeMirror from '../../Codemirror/CSharpCodeMirror'
 import TypeHelpComponent from '../../TypeHelp/TypeHelpComponent'
 import TypeHelpButtonBarComponent from '../../TypeHelp/TypeHelpButtonBarComponent'
-import ValueLineModal from '../../../../Framework/Signum.React/Scripts/ValueLineModal'
-import { ContextMenuPosition } from '../../../../Framework/Signum.React/Scripts/SearchControl/ContextMenu'
+import ValueLineModal from '@framework/ValueLineModal'
+import { ContextMenuPosition } from '@framework/SearchControl/ContextMenu'
 import PropertyRouteCombo from "../../Basics/Templates/PropertyRouteCombo";
 import { TemplateApplicableEval } from "../Signum.Entities.Templating";
-import { QueryEntity } from "../../../../Framework/Signum.React/Scripts/Signum.Entities.Basics";
+import { QueryEntity } from "@framework/Signum.Entities.Basics";
 
 interface TemplateApplicableProps {
     ctx: TypeContext<TemplateApplicableEval>;

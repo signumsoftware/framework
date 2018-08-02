@@ -3,23 +3,23 @@ import * as React from 'react'
 import { Route } from 'react-router'
 import * as QueryString from 'query-string'
 import { globalModules} from './View/GlobalModules'
-import { ajaxPost, ajaxGet } from '../../../Framework/Signum.React/Scripts/Services';
-import * as Search from '../../../Framework/Signum.React/Scripts/Search'
-import { ValueSearchControlLine } from '../../../Framework/Signum.React/Scripts/Search'
-import { EntitySettings, ViewPromise } from '../../../Framework/Signum.React/Scripts/Navigator'
-import * as Navigator from '../../../Framework/Signum.React/Scripts/Navigator'
-import { EntityOperationSettings } from '../../../Framework/Signum.React/Scripts/Operations'
-import * as Operations from '../../../Framework/Signum.React/Scripts/Operations'
-import { TypeContext } from '../../../Framework/Signum.React/Scripts/TypeContext'
-import { isTypeEntity, getTypeInfo, PropertyRoute } from '../../../Framework/Signum.React/Scripts/Reflection'
-import { Entity, ModifiableEntity } from '../../../Framework/Signum.React/Scripts/Signum.Entities'
-import { TypeEntity } from '../../../Framework/Signum.React/Scripts/Signum.Entities.Basics'
-import * as Constructor from '../../../Framework/Signum.React/Scripts/Constructor'
-import SelectorModal from '../../../Framework/Signum.React/Scripts/SelectorModal'
-import { ViewReplacer } from '../../../Framework/Signum.React/Scripts/Frames/ReactVisitor';
-import * as Lines from '../../../Framework/Signum.React/Scripts/Lines'
+import { ajaxPost, ajaxGet } from '@framework/Services';
+import * as Search from '@framework/Search'
+import { ValueSearchControlLine } from '@framework/Search'
+import { EntitySettings, ViewPromise } from '@framework/Navigator'
+import * as Navigator from '@framework/Navigator'
+import { EntityOperationSettings } from '@framework/Operations'
+import * as Operations from '@framework/Operations'
+import { TypeContext } from '@framework/TypeContext'
+import { isTypeEntity, getTypeInfo, PropertyRoute } from '@framework/Reflection'
+import { Entity, ModifiableEntity } from '@framework/Signum.Entities'
+import { TypeEntity } from '@framework/Signum.Entities.Basics'
+import * as Constructor from '@framework/Constructor'
+import SelectorModal from '@framework/SelectorModal'
+import { ViewReplacer } from '@framework/Frames/ReactVisitor';
+import * as Lines from '@framework/Lines'
 import * as FileLineModule from '../Files/FileLine'
-import { ValueLine, EntityLine, EntityCombo, EntityList, EntityDetail, EntityStrip, EntityRepeater } from '../../../Framework/Signum.React/Scripts/Lines'
+import { ValueLine, EntityLine, EntityCombo, EntityList, EntityDetail, EntityStrip, EntityRepeater } from '@framework/Lines'
 import { DynamicViewEntity, DynamicViewSelectorEntity, DynamicViewOverrideEntity, DynamicViewMessage, DynamicViewOperation, DynamicViewSelectorOperation } from './Signum.Entities.Dynamic'
 import DynamicViewEntityComponent from './View/DynamicView' //Just Typing
 import * as DynamicClientOptions from './DynamicClientOptions'
@@ -28,9 +28,9 @@ import * as DynamicViewComponent from './View/DynamicViewComponent'
 import { DynamicViewComponentProps } from './View/DynamicViewComponent'
 import * as Nodes from './View/Nodes' //Typings-only
 import * as NodeUtils from './View/NodeUtils' //Typings-only
-import MessageModal from "../../../Framework/Signum.React/Scripts/Modals/MessageModal";
-import { Dic } from "../../../Framework/Signum.React/Scripts/Globals";
-import * as Components from "../../../Framework/Signum.React/Scripts/Components";
+import MessageModal from "@framework/Modals/MessageModal";
+import { Dic } from "@framework/Globals";
+import * as Components from "@framework/Components";
 
 
 export function start(options: { routes: JSX.Element[] }) {
@@ -179,7 +179,7 @@ export class DynamicViewViewDispatcher implements Navigator.ViewDispatcher {
         if (!settings || !settings.getViewPromise) {
 
             if (!isTypeEntity(entity.Type))
-                return new ViewPromise(import('../../../Framework/Signum.React/Scripts/Lines/DynamicComponent'));
+                return new ViewPromise(import('@framework/Lines/DynamicComponent'));
 
             return this.chooseViewName(entity, true);
         }

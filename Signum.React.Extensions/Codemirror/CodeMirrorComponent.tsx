@@ -1,7 +1,7 @@
 ﻿/// <reference path="codemirror.d.ts" />
 import * as React from 'react'
 import * as CodeMirror from 'codemirror'
-import { Dic, classes } from '../../../Framework/Signum.React/Scripts/Globals'
+import { Dic, classes } from '@framework/Globals'
 
 import "codemirror/lib/codemirror.css"
 

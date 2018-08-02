@@ -1,8 +1,8 @@
 
 import * as React from 'react'
-import { EntityData, EntityKind, PseudoType } from '../../../Framework/Signum.React/Scripts/Reflection'
-import { StyleContext } from '../../../Framework/Signum.React/Scripts/TypeContext'
-import { FindOptions } from '../../../Framework/Signum.React/Scripts/FindOptions';
+import { EntityData, EntityKind, PseudoType } from '@framework/Reflection'
+import { StyleContext } from '@framework/TypeContext'
+import { FindOptions } from '@framework/FindOptions';
 
 export namespace Options {
     //export let onGetDynamicLineForPanel: ({ line: (ctx: StyleContext) => React.ReactNode, needsCompiling: boolean })[] = [];

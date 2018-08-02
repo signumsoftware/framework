@@ -1,11 +1,11 @@
 ﻿import * as React from 'react'
 import * as QueryString from 'query-string'
 import { RestLogEntity, RestApiKeyEntity } from './Signum.Entities.Rest'
-import { EntitySettings, ViewPromise } from "../../../Framework/Signum.React/Scripts/Navigator";
-import * as Navigator from "../../../Framework/Signum.React/Scripts/Navigator";
-import { ajaxGet } from "../../../Framework/Signum.React/Scripts/Services";
+import { EntitySettings, ViewPromise } from "@framework/Navigator";
+import * as Navigator from "@framework/Navigator";
+import { ajaxGet } from "@framework/Services";
 import * as AuthClient from "../Authorization/AuthClient";
-import * as  QuickLink  from '../../../Framework/Signum.React/Scripts/QuickLinks';
+import * as  QuickLink  from '@framework/QuickLinks';
 
 export function registerAuthenticator() {
     AuthClient.authenticators.insertAt(0, loginFromApiKey);

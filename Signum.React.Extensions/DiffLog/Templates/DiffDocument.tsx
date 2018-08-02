@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { DiffPair } from '../DiffLogClient';
-import { NumericTextBox, ValueLine } from '../../../../Framework/Signum.React/Scripts/Lines/ValueLine';
+import { NumericTextBox, ValueLine } from '@framework/Lines/ValueLine';
 
 export class DiffDocument extends React.Component<{ diff: Array<DiffPair<Array<DiffPair<string>>>> }>
 {

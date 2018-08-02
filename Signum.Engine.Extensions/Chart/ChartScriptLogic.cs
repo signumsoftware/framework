@@ -20,13 +20,13 @@ namespace Signum.Engine.Chart
     {
         public static ResetLazy<Dictionary<string, ChartScriptEntity>> Scripts { get; private set; }
 
-        internal static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
+        internal static void Start(SchemaBuilder sb)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
                 sb.Include<ChartScriptEntity>()
                     .WithSave(ChartScriptOperation.Save)
-                    .WithQuery(dqm, () => uq => new
+                    .WithQuery(() => uq => new
                     {
                         Entity = uq,
                         uq.Id,

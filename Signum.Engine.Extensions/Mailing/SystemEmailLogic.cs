@@ -139,14 +139,14 @@ namespace Signum.Engine.Mailing
         static ResetLazy<Dictionary<Type, SystemEmailEntity>> systemEmailToEntity;
         static ResetLazy<Dictionary<SystemEmailEntity, Type>> systemEmailToType;
 
-        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
+        public static void Start(SchemaBuilder sb)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
                 sb.Schema.Generating += Schema_Generating;
                 sb.Schema.Synchronizing += Schema_Synchronizing;
                 sb.Include<SystemEmailEntity>()
-                    .WithQuery(dqm, () => se => new
+                    .WithQuery(() => se => new
                     {
                         Entity = se,
                         se.Id,
@@ -343,7 +343,7 @@ namespace Signum.Engine.Mailing
             template.SystemEmail = systemEmail;
             template.Query = QueryLogic.GetQueryEntity(info.QueryName);
 
-            template.ParseData(DynamicQueryManager.Current.QueryDescription(info.QueryName));
+            template.ParseData(QueryLogic.Queries.QueryDescription(info.QueryName));
 
             return template;
         }

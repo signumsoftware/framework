@@ -69,7 +69,7 @@ namespace Signum.Engine.Mailing.Pop3
 
         public static Action<Pop3ReceptionEntity> ReceptionComunication;
 
-        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm, Func<Pop3ConfigurationEntity, IPop3Client> getPop3Client)
+        public static void Start(SchemaBuilder sb, Func<Pop3ConfigurationEntity, IPop3Client> getPop3Client)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
@@ -79,7 +79,7 @@ namespace Signum.Engine.Mailing.Pop3
 
                 sb.Include<Pop3ConfigurationEntity>()
                     .WithSave(Pop3ConfigurationOperation.Save)
-                    .WithQuery(dqm, () => s => new
+                    .WithQuery(() => s => new
                     {
                         Entity = s,
                         s.Id,
@@ -92,7 +92,7 @@ namespace Signum.Engine.Mailing.Pop3
                 sb.Include<Pop3ReceptionExceptionEntity>();
 
                 sb.Include<EmailMessageEntity>()
-                    .WithQuery(dqm, () => e => new
+                    .WithQuery(() => e => new
                     {
                         Entity = e,
                         e.Id,
@@ -106,7 +106,7 @@ namespace Signum.Engine.Mailing.Pop3
                         e.Exception,
                     });
 
-                dqm.RegisterQuery(typeof(Pop3ReceptionEntity), () => DynamicQueryCore.Auto(
+                QueryLogic.Queries.Register(typeof(Pop3ReceptionEntity), () => DynamicQueryCore.Auto(
                 from s in Database.Query<Pop3ReceptionEntity>()
                 select new
                 {
@@ -123,15 +123,15 @@ namespace Signum.Engine.Mailing.Pop3
                 .ColumnDisplayName(a => a.EmailMessages, () => typeof(EmailMessageEntity).NicePluralName())
                 .ColumnDisplayName(a => a.Exceptions, () => typeof(ExceptionEntity).NicePluralName()));
 
-                dqm.RegisterExpression((Pop3ConfigurationEntity c) => c.Receptions(), () => typeof(Pop3ReceptionEntity).NicePluralName());
-                dqm.RegisterExpression((Pop3ReceptionEntity r) => r.EmailMessages(), () => typeof(EmailMessageEntity).NicePluralName());
-                dqm.RegisterExpression((Pop3ReceptionEntity r) => r.Exceptions(), () => typeof(ExceptionEntity).NicePluralName());
-                dqm.RegisterExpression((ExceptionEntity r) => r.Pop3Reception(), () => typeof(Pop3ReceptionEntity).NiceName());
+                QueryLogic.Expressions.Register((Pop3ConfigurationEntity c) => c.Receptions(), () => typeof(Pop3ReceptionEntity).NicePluralName());
+                QueryLogic.Expressions.Register((Pop3ReceptionEntity r) => r.EmailMessages(), () => typeof(EmailMessageEntity).NicePluralName());
+                QueryLogic.Expressions.Register((Pop3ReceptionEntity r) => r.Exceptions(), () => typeof(ExceptionEntity).NicePluralName());
+                QueryLogic.Expressions.Register((ExceptionEntity r) => r.Pop3Reception(), () => typeof(Pop3ReceptionEntity).NiceName());
 
                 new Graph<Pop3ReceptionEntity>.ConstructFrom<Pop3ConfigurationEntity>(Pop3ConfigurationOperation.ReceiveEmails)
                 {
-                    AllowsNew = true,
-                    Lite = false,
+                    CanBeNew = true,
+                    CanBeModified = true,
                     Construct = (e, _) =>
                     {
                         using (Transaction tr = Transaction.None())

@@ -1,16 +1,16 @@
-﻿
-import * as React from 'react'
+﻿import * as React from 'react'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { RouteComponentProps } from 'react-router'
-import { Dic, classes } from '../../../Framework/Signum.React/Scripts/Globals'
-import * as Finder from '../../../Framework/Signum.React/Scripts/Finder'
-import { ResultTable, FindOptions, FilterOption, QueryDescription } from '../../../Framework/Signum.React/Scripts/FindOptions'
-import { SearchMessage, JavascriptMessage, parseLite, is, Lite, toLite } from '../../../Framework/Signum.React/Scripts/Signum.Entities'
-import * as Navigator from '../../../Framework/Signum.React/Scripts/Navigator'
-import SearchControlLoaded from '../../../Framework/Signum.React/Scripts/SearchControl/SearchControlLoaded'
+import { Dic, classes } from '@framework/Globals'
+import * as Finder from '@framework/Finder'
+import { ResultTable, FindOptions, FilterOption, QueryDescription } from '@framework/FindOptions'
+import { SearchMessage, JavascriptMessage, parseLite, is, Lite, toLite } from '@framework/Signum.Entities'
+import * as Navigator from '@framework/Navigator'
+import SearchControlLoaded from '@framework/SearchControl/SearchControlLoaded'
 import { WordTemplateEntity, WordTemplateMessage } from './Signum.Entities.Word'
 import * as WordClient from './WordClient'
-import { saveFile } from "../../../Framework/Signum.React/Scripts/Services";
-import { UncontrolledDropdown, DropdownToggle, DropdownItem, DropdownMenu } from '../../../Framework/Signum.React/Scripts/Components';
+import { saveFile } from "@framework/Services";
+import { UncontrolledDropdown, DropdownToggle, DropdownItem, DropdownMenu } from '@framework/Components';
 
 export interface WordSearchMenuProps {
     searchControl: SearchControlLoaded;
@@ -46,7 +46,7 @@ export default class WordSearchMenu extends React.Component<WordSearchMenuProps>
             (this.props.searchControl.props.showBarExtensionOption && this.props.searchControl.props.showBarExtensionOption.showWordReport == false))
             return null;
 
-        const label = <span><i className="fa fa-file-word-o"></i>&nbsp;{this.props.searchControl.props.largeToolbarButtons == true ? " " + WordTemplateMessage.WordReport.niceToString() : undefined}</span>;
+        const label = <span><FontAwesomeIcon icon={["far", "file-word"]} />&nbsp;{this.props.searchControl.props.largeToolbarButtons == true ? " " + WordTemplateMessage.WordReport.niceToString() : undefined}</span>;
 
         return (
             <UncontrolledDropdown id="wordTemplateDropDown" className="sf-word-dropdown">
@@ -66,7 +66,7 @@ export default class WordSearchMenu extends React.Component<WordSearchMenuProps>
 
 }
 
-declare module '../../../Framework/Signum.React/Scripts/SearchControl/SearchControlLoaded' {
+declare module '@framework/SearchControl/SearchControlLoaded' {
 
     export interface ShowBarExtensionOption {
         showWordReport?: boolean;

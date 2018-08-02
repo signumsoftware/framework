@@ -1,16 +1,17 @@
 ﻿import * as React from 'react'
-import { FormGroup, FormControlReadonly, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityList, EntityRepeater } from '../../../../Framework/Signum.React/Scripts/Lines'
-import { classes, Dic } from '../../../../Framework/Signum.React/Scripts/Globals'
-import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
-import { QueryDescription, SubTokensOptions, QueryToken, filterOperations, OrderType, ColumnOptionsMode } from '../../../../Framework/Signum.React/Scripts/FindOptions'
-import { getQueryNiceName, getTypeInfo, isTypeEntity, Binding } from '../../../../Framework/Signum.React/Scripts/Reflection'
-import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
-import { TypeContext, FormGroupStyle } from '../../../../Framework/Signum.React/Scripts/TypeContext'
-import { Typeahead } from '../../../../Framework/Signum.React/Scripts/Components'
-import QueryTokenBuilder from '../../../../Framework/Signum.React/Scripts/SearchControl/QueryTokenBuilder'
-import { ModifiableEntity, JavascriptMessage, EntityControlMessage } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
-import { QueryEntity } from '../../../../Framework/Signum.React/Scripts/Signum.Entities.Basics'
-import { FilterOperation, PaginationMode } from '../../../../Framework/Signum.React/Scripts/Signum.Entities.DynamicQuery'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { FormGroup, FormControlReadonly, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityList, EntityRepeater } from '@framework/Lines'
+import { classes, Dic } from '@framework/Globals'
+import * as Finder from '@framework/Finder'
+import { QueryDescription, SubTokensOptions, QueryToken, filterOperations, OrderType, ColumnOptionsMode } from '@framework/FindOptions'
+import { getQueryNiceName, getTypeInfo, isTypeEntity, Binding } from '@framework/Reflection'
+import * as Navigator from '@framework/Navigator'
+import { TypeContext, FormGroupStyle } from '@framework/TypeContext'
+import { Typeahead } from '@framework/Components'
+import QueryTokenBuilder from '@framework/SearchControl/QueryTokenBuilder'
+import { ModifiableEntity, JavascriptMessage, EntityControlMessage } from '@framework/Signum.Entities'
+import { QueryEntity } from '@framework/Signum.Entities.Basics'
+import { FilterOperation, PaginationMode } from '@framework/Signum.Entities.DynamicQuery'
 import { ExpressionOrValueComponent, FieldComponent, DesignerModal } from './Designer'
 import * as Nodes from './Nodes'
 import * as NodeUtils from './NodeUtils'
@@ -19,9 +20,9 @@ import { BaseNode, SearchControlNode } from './Nodes'
 import { FindOptionsExpr, FilterOptionExpr, OrderOptionExpr, ColumnOptionExpr } from './FindOptionsExpression'
 import * as DynamicViewClient from '../DynamicViewClient'
 import { DynamicViewMessage, DynamicViewValidationMessage } from '../Signum.Entities.Dynamic'
-import SelectorModal from '../../../../Framework/Signum.React/Scripts/SelectorModal';
-import { getTypeInfos } from '../../../../Framework/Signum.React/Scripts/Reflection';
-import { TypeInfo } from '../../../../Framework/Signum.React/Scripts/Reflection';
+import SelectorModal from '@framework/SelectorModal';
+import { getTypeInfos } from '@framework/Reflection';
+import { TypeInfo } from '@framework/Reflection';
 
 
 interface FindOptionsLineProps {
@@ -105,12 +106,12 @@ export class FindOptionsLine extends React.Component<FindOptionsLineProps>{
                         <a href="#" className={classes("sf-line-button", "sf-remove")}
                             onClick={this.handleRemove}
                             title={EntityControlMessage.Remove.niceToString()}>
-                            <span className="fa fa-remove" />
+                            <FontAwesomeIcon icon="times" />
                         </a></div> :
                         <a href="#" title={EntityControlMessage.Create.niceToString()}
                             className="sf-line-button sf-create"
                             onClick={this.handleCreate}>
-                            <span className="fa fa-plus sf-create sf-create-label" />{EntityControlMessage.Create.niceToString()}
+                            <FontAwesomeIcon icon="plus" className="sf-create sf-create-label" />{EntityControlMessage.Create.niceToString()}
                         </a>}
                 </div>
             </div>
@@ -391,7 +392,7 @@ export class QueryKeyLine extends React.Component<{ queryKey: string | undefined
                     <a href="#" className={classes("sf-line-button", "sf-remove btn btn-light")}
                         onClick={() => this.props.onChange(undefined)}
                         title={EntityControlMessage.Remove.niceToString()}>
-                        <span className="fa fa-remove" />
+                        <FontAwesomeIcon icon="times" />
                     </a>
                 </span>
             </div>
@@ -506,19 +507,19 @@ abstract class BaseOptionsComponent<T> extends React.Component<BaseOptionsCompon
             <a href="#" className={classes("sf-line-button", "sf-remove")}
                 onClick={e => this.handleOnRemove(e, index)}
                 title={EntityControlMessage.Remove.niceToString()}>
-                <span className="fa fa-remove" />
+                <FontAwesomeIcon icon="times" />
             </a>
 
             <a href="#" className={classes("sf-line-button", "move-up")}
                 onClick={e => this.handleOnMoveUp(e, index)}
                 title={EntityControlMessage.MoveUp.niceToString()}>
-                <span className="fa fa-chevron-up" />
+                <FontAwesomeIcon icon="chevron-up" />
             </a>
 
             <a href="#" className={classes("sf-line-button", "move-down")}
                 onClick={e => this.handleOnMoveDown(e, index)}
                 title={EntityControlMessage.MoveDown.niceToString()}>
-                <span className="fa fa-chevron-down" />
+                <FontAwesomeIcon icon="chevron-down" />
             </a>
         </div>);
     }
@@ -549,7 +550,7 @@ abstract class BaseOptionsComponent<T> extends React.Component<BaseOptionsCompon
                             <a title={EntityControlMessage.Create.niceToString()}
                                 className="sf-line-button sf-create"
                                 onClick={this.handleCreateClick}>
-                                <span className="fa fa-plus sf-create" />&nbsp;{EntityControlMessage.Create.niceToString()}
+                                <FontAwesomeIcon icon="plus" className="sf-create" />&nbsp;{EntityControlMessage.Create.niceToString()}
                             </a>
                         </td>
                     </tr>

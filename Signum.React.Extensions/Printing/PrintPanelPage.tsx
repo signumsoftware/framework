@@ -1,21 +1,20 @@
 ﻿import * as React from 'react'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import * as numbro from 'numbro'
-import * as Finder from '../../../Framework/Signum.React/Scripts/Finder'
-import EntityLink from '../../../Framework/Signum.React/Scripts/SearchControl/EntityLink'
-import { ValueSearchControl, SearchControl, ValueSearchControlLine } from '../../../Framework/Signum.React/Scripts/Search'
-import { QueryDescription, SubTokensOptions } from '../../../Framework/Signum.React/Scripts/FindOptions'
-import { StyleContext } from '../../../Framework/Signum.React/Scripts/Lines'
-import { getQueryNiceName, PropertyRoute, getTypeInfos } from '../../../Framework/Signum.React/Scripts/Reflection'
-import { ModifiableEntity, EntityControlMessage, Entity, parseLite, getToString, JavascriptMessage } from '../../../Framework/Signum.React/Scripts/Signum.Entities'
+import * as Finder from '@framework/Finder'
+import EntityLink from '@framework/SearchControl/EntityLink'
+import { ValueSearchControl, SearchControl, ValueSearchControlLine } from '@framework/Search'
+import { QueryDescription, SubTokensOptions } from '@framework/FindOptions'
+import { StyleContext } from '@framework/Lines'
+import { getQueryNiceName, PropertyRoute, getTypeInfos } from '@framework/Reflection'
+import { ModifiableEntity, EntityControlMessage, Entity, parseLite, getToString, JavascriptMessage } from '@framework/Signum.Entities'
 import { API, PrintStat } from './PrintClient'
-import * as Operations from '../../../Framework/Signum.React/Scripts/Operations'
-import * as Navigator from '../../../Framework/Signum.React/Scripts/Navigator'
+import * as Operations from '@framework/Operations'
+import * as Navigator from '@framework/Navigator'
 import { PrintPackageEntity, PrintLineState, PrintLineEntity, PrintPackageProcess, } from './Signum.Entities.Printing'
 import { FileTypeSymbol } from '../Files/Signum.Entities.Files'
 import { ProcessEntity } from '../Processes/Signum.Entities.Processes'
-import { Type } from '../../../Framework/Signum.React/Scripts/Reflection'
-
-
+import { Type } from '@framework/Reflection'
 
 export interface PrintPanelPageState {
     stats: PrintStat[];
@@ -77,7 +76,7 @@ export default class PrintPanelPage extends React.Component<{}, PrintPanelPageSt
 
         return (
             <a href="#" className="sf-line-button" title="Print" onClick={e => this.handlePrintClick(e, fileType, vsc)}>
-                <span className="fa fa-print"></span>
+                <FontAwesomeIcon icon="print" />
             </a>
         );
     }
@@ -89,5 +88,4 @@ export default class PrintPanelPage extends React.Component<{}, PrintPanelPageSt
             .then(p => vsc.refreshValue())
             .done();
     }
-
 }

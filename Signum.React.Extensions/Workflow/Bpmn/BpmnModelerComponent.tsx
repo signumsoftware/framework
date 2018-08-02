@@ -2,8 +2,8 @@
 import * as React from 'react'
 import { WorkflowEntitiesDictionary, WorkflowActivityModel, WorkflowActivityType, WorkflowPoolModel, WorkflowLaneModel, WorkflowConnectionModel, WorkflowEventModel, WorkflowEntity, IWorkflowNodeEntity, WorkflowMessage, WorkflowEventTaskModel, WorkflowTimerEmbedded, WorkflowGatewayModel } from '../Signum.Entities.Workflow'
 import Modeler from "bpmn-js/lib/Modeler"
-import { ModelEntity, ValidationMessage, parseLite } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
-import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
+import { ModelEntity, ValidationMessage, parseLite } from '@framework/Signum.Entities'
+import * as Navigator from '@framework/Navigator'
 import * as connectionIcons from './ConnectionIcons'
 import * as customRenderer from './CustomRenderer'
 import * as customPopupMenu from './CustomPopupMenu'
@@ -13,11 +13,11 @@ import * as BpmnUtils from './BpmnUtils'
 import "bpmn-js/dist/assets/bpmn-font/css/bpmn-embedded.css"
 import "diagram-js/assets/diagram-js.css"
 import "./Bpmn.css"
-import { Button } from '../../../../Framework/Signum.React/Scripts/Components';
-import { TypeEntity } from '../../../../Framework/Signum.React/Scripts/Signum.Entities.Basics';
-import { newMListElement } from '../../../../Framework/Signum.React/Scripts/Signum.Entities';
+import { Button } from '@framework/Components';
+import { TypeEntity } from '@framework/Signum.Entities.Basics';
+import { newMListElement } from '@framework/Signum.Entities';
 import { TimeSpanEmbedded } from '../../Basics/Signum.Entities.Basics';
-import { Dic } from '../../../../Framework/Signum.React/Scripts/Globals';
+import { Dic } from '@framework/Globals';
 
 export interface BpmnModelerComponentProps {
     workflow: WorkflowEntity;

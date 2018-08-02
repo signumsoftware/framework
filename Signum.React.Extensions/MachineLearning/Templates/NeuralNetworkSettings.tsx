@@ -1,21 +1,22 @@
 ﻿import * as React from 'react'
-import { classes } from '../../../../Framework/Signum.React/Scripts/Globals'
-import { FormGroup, FormControlReadonly, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityList, EntityRepeater, EntityTable, StyleContext, OptionItem, LineBaseProps } from '../../../../Framework/Signum.React/Scripts/Lines'
-import { SearchControl, ValueSearchControl } from '../../../../Framework/Signum.React/Scripts/Search'
-import { TypeContext, FormGroupStyle } from '../../../../Framework/Signum.React/Scripts/TypeContext'
+import { classes } from '@framework/Globals'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { FormGroup, FormControlReadonly, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityList, EntityRepeater, EntityTable, StyleContext, OptionItem, LineBaseProps } from '@framework/Lines'
+import { SearchControl, ValueSearchControl } from '@framework/Search'
+import { TypeContext, FormGroupStyle } from '@framework/TypeContext'
 import FileLine from '../../Files/FileLine'
 import { NeuralNetworkSettingsEntity, PredictorEntity, PredictorColumnUsage, PredictorCodificationEntity, NeuralNetworkHidenLayerEmbedded, PredictorAlgorithmSymbol, NeuralNetworkLearner } from '../Signum.Entities.MachineLearning'
-import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
-import { getQueryNiceName } from '../../../../Framework/Signum.React/Scripts/Reflection'
+import * as Finder from '@framework/Finder'
+import { getQueryNiceName } from '@framework/Reflection'
 import QueryTokenEntityBuilder from '../../UserAssets/Templates/QueryTokenEntityBuilder'
 import { QueryTokenEmbedded } from '../../UserAssets/Signum.Entities.UserAssets'
 import { QueryFilterEmbedded } from '../../UserQueries/Signum.Entities.UserQueries'
-import { QueryDescription, SubTokensOptions } from '../../../../Framework/Signum.React/Scripts/FindOptions'
+import { QueryDescription, SubTokensOptions } from '@framework/FindOptions'
 import { API } from '../PredictorClient';
 import FilterBuilderEmbedded from './FilterBuilderEmbedded';
-import { TypeReference } from '../../../../Framework/Signum.React/Scripts/Reflection';
-import { is } from '../../../../Framework/Signum.React/Scripts/Signum.Entities';
-import { Popover } from '../../../../Framework/Signum.React/Scripts/Components';
+import { TypeReference } from '@framework/Reflection';
+import { is } from '@framework/Signum.Entities';
+import { Popover } from '@framework/Components';
 
 export default class NeuralNetworkSettings extends React.Component<{ ctx: TypeContext<NeuralNetworkSettingsEntity> }> {
 
@@ -203,7 +204,7 @@ export class LabelWithHelp extends React.Component<LabelWithHelpProps, LabelWith
         const ctx = this.props.ctx;
         return [
             <span ref={r => this.span = r} onClick={this.toggle} key="s">
-                {ctx.niceName()} <i className="fa fa-question-circle" aria-hidden="true" />
+                {ctx.niceName()} <FontAwesomeIcon icon="question-circle"/>
             </span>,
             <Popover placement="auto" target={() => this.span!} toggle={this.toggle} isOpen={this.state.isOpen} key="p">
                 <h3 className="popover-header">{ctx.niceName()}</h3>

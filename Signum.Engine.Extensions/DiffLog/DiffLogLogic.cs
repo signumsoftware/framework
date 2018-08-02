@@ -20,7 +20,7 @@ namespace Signum.Engine.DiffLog
     {
         public static Polymorphic<Func<IEntity, IOperation, bool>> ShouldLog = new Polymorphic<Func<IEntity, IOperation, bool>>(minimumType: typeof(Entity));
 
-        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm, bool registerAll)
+        public static void Start(SchemaBuilder sb, bool registerAll)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
@@ -44,7 +44,7 @@ namespace Signum.Engine.DiffLog
         {
             if (entity != null && ShouldLog.Invoke(entity, operation))
             {
-                if (operation.OperationType == OperationType.Execute && !entity.IsNew && !((IEntityOperation)operation).Lite)
+                if (operation.OperationType == OperationType.Execute && !entity.IsNew && ((IEntityOperation)operation).CanBeModified)
                     entity = RetrieveFresh(entity);
 
                 using (CultureInfoUtils.ChangeBothCultures(Schema.Current.ForceCultureInfo))

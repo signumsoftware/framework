@@ -96,7 +96,7 @@ namespace Signum.React.Word
 
                     var cr = (QueryModel)ctx.Entity;
 
-                    var qd = DynamicQueryManager.Current.QueryDescription(cr.QueryName);
+                    var qd = QueryLogic.Queries.QueryDescription(cr.QueryName);
 
                     cr.Filters = list.Select(l => l.ToFilter(qd, canAggregate: true)).ToList();
                 },
@@ -123,7 +123,7 @@ namespace Signum.React.Word
 
                     var cr = (QueryModel)ctx.Entity;
 
-                    var qd = DynamicQueryManager.Current.QueryDescription(cr.QueryName);
+                    var qd = QueryLogic.Queries.QueryDescription(cr.QueryName);
 
                     cr.Orders = list.Select(l => l.ToOrder(qd, canAggregate: true)).ToList();
                 },

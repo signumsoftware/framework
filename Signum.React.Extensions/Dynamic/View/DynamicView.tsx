@@ -1,22 +1,22 @@
 ﻿import * as React from 'react'
-import { Dic, classes } from '../../../../Framework/Signum.React/Scripts/Globals'
-import * as Constructor from '../../../../Framework/Signum.React/Scripts/Constructor'
-import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
-import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
+import { Dic, classes } from '@framework/Globals'
+import * as Constructor from '@framework/Constructor'
+import * as Finder from '@framework/Finder'
+import * as Navigator from '@framework/Navigator'
 import { DynamicViewEntity, DynamicViewMessage } from '../Signum.Entities.Dynamic'
-import { ValueLine, EntityLine, TypeContext } from '../../../../Framework/Signum.React/Scripts/Lines'
+import { ValueLine, EntityLine, TypeContext } from '@framework/Lines'
 
-import { ModifiableEntity, Entity, Lite, JavascriptMessage, NormalWindowMessage } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
-import { getTypeInfo, Binding, PropertyRoute } from '../../../../Framework/Signum.React/Scripts/Reflection'
-import SelectorModal from '../../../../Framework/Signum.React/Scripts/SelectorModal'
-import MessageModal from '../../../../Framework/Signum.React/Scripts/Modals/MessageModal'
+import { ModifiableEntity, Entity, Lite, JavascriptMessage, NormalWindowMessage } from '@framework/Signum.Entities'
+import { getTypeInfo, Binding, PropertyRoute } from '@framework/Reflection'
+import SelectorModal from '@framework/SelectorModal'
+import MessageModal from '@framework/Modals/MessageModal'
 import { DynamicViewTree } from './DynamicViewTree'
 import { DynamicViewInspector, CollapsableTypeHelp } from './Designer'
 import { NodeConstructor, BaseNode } from './Nodes'
 import { DesignerNode, DesignerContext } from './NodeUtils'
 import * as NodeUtils from './NodeUtils'
 import ShowCodeModal from './ShowCodeModal'
-import { ButtonsContext, IRenderButtons } from '../../../../Framework/Signum.React/Scripts/TypeContext'
+import { ButtonsContext, IRenderButtons } from '@framework/TypeContext'
 
 import "./DynamicView.css"
 
@@ -44,7 +44,7 @@ export default class DynamicViewEntityComponent extends React.Component<DynamicV
 
     renderButtons(bc: ButtonsContext) {
         return [
-            <button key="showCode" type="button" className="btn btn-success pull-right" disabled={!this.state.rootNode} onClick={this.handleShowCode}>Show code</button>
+            <button key="showCode" type="button" className="btn btn-success float-right" disabled={!this.state.rootNode} onClick={this.handleShowCode}>Show code</button>
         ];
     }
 

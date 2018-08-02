@@ -67,11 +67,11 @@ namespace Signum.Engine.Basics
             get { return infos.Keys; }
         }
 
-        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
+        public static void Start(SchemaBuilder sb)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
-                SymbolLogic<TypeConditionSymbol>.Start(sb, dqm, () => infos.SelectMany(a => a.Value.Keys).ToHashSet());
+                SymbolLogic<TypeConditionSymbol>.Start(sb, () => infos.SelectMany(a => a.Value.Keys).ToHashSet());
             }
         }
 

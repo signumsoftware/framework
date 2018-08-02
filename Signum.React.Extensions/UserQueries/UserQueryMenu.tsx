@@ -1,15 +1,15 @@
-﻿
-import * as React from 'react'
+﻿import * as React from 'react'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { RouteComponentProps } from 'react-router'
-import { Dic, classes } from '../../../Framework/Signum.React/Scripts/Globals'
-import * as Finder from '../../../Framework/Signum.React/Scripts/Finder'
-import { ResultTable, FindOptions, FilterOption, QueryDescription } from '../../../Framework/Signum.React/Scripts/FindOptions'
-import { SearchMessage, JavascriptMessage, parseLite, is, Lite, toLite } from '../../../Framework/Signum.React/Scripts/Signum.Entities'
-import * as Navigator from '../../../Framework/Signum.React/Scripts/Navigator'
-import SearchControlLoaded from '../../../Framework/Signum.React/Scripts/SearchControl/SearchControlLoaded'
+import { Dic, classes } from '@framework/Globals'
+import * as Finder from '@framework/Finder'
+import { ResultTable, FindOptions, FilterOption, QueryDescription } from '@framework/FindOptions'
+import { SearchMessage, JavascriptMessage, parseLite, is, Lite, toLite } from '@framework/Signum.Entities'
+import * as Navigator from '@framework/Navigator'
+import SearchControlLoaded from '@framework/SearchControl/SearchControlLoaded'
 import { UserQueryEntity, UserQueryMessage } from './Signum.Entities.UserQueries'
 import * as UserQueryClient from './UserQueryClient'
-import { DropdownMenu, DropdownItem, Dropdown, DropdownToggle } from '../../../Framework/Signum.React/Scripts/Components';
+import { DropdownMenu, DropdownItem, Dropdown, DropdownToggle } from '@framework/Components';
 
 export interface UserQueryMenuProps {
     searchControl: SearchControlLoaded;
@@ -95,7 +95,7 @@ export default class UserQueryMenu extends React.Component<UserQueryMenuProps, U
     }
 
     render() {
-        const label = <span><i className="fa fa-list-alt"></i>&nbsp;{this.props.searchControl.props.largeToolbarButtons == true ? " " + UserQueryMessage.UserQueries_UserQueries.niceToString() : undefined}</span>;
+        const label = <span><FontAwesomeIcon icon={["far", "list-alt"]} />&nbsp;{this.props.searchControl.props.largeToolbarButtons == true ? " " + UserQueryMessage.UserQueries_UserQueries.niceToString() : undefined}</span>;
         const userQueries = this.state.userQueries;
         return (
             <Dropdown id="userQueriesDropDown" className="sf-userquery-dropdown" color="light"

@@ -1,9 +1,10 @@
 ﻿import * as React from 'react'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Link } from 'react-router-dom'
-import { classes } from '../../../../Framework/Signum.React/Scripts/Globals'
-import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
-import { ModelState } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
-import { ValidationError } from '../../../../Framework/Signum.React/Scripts/Services'
+import { classes } from '@framework/Globals'
+import * as Navigator from '@framework/Navigator'
+import { ModelState } from '@framework/Signum.Entities'
+import { ValidationError } from '@framework/Services'
 import { AuthMessage } from '../Signum.Entities.Authorization'
 import * as AuthClient from '../AuthClient'
 
@@ -67,7 +68,7 @@ export default class Login extends React.Component<{}, { modelState?: ModelState
                                 <label className="sr-only" htmlFor="userName">{AuthMessage.Username.niceToString()}</label>
                                 <div className="input-group mb-2 mr-sm-2 mb-sm-0">
                                     <div className="input-group-prepend">
-                                        <div className="input-group-text"><i className="fa fa-user" style={{ width: "16px" }}></i></div>
+                                        <div className="input-group-text"><FontAwesomeIcon icon="user" style={{ width: "16px" }}/></div>
                                     </div>
                                     <input type="text" className="form-control" id="userName" ref={r => this.userName = r!} placeholder={AuthMessage.Username.niceToString()} />
                                 </div>
@@ -82,7 +83,7 @@ export default class Login extends React.Component<{}, { modelState?: ModelState
                                 <label className="sr-only" htmlFor="password">Password</label>
                                 <div className="input-group mb-2 mr-sm-2 mb-sm-0">
                                     <div className="input-group-prepend">
-                                        <div className="input-group-text"><i className="fa fa-key" style={{ width: "16px" }}></i></div>
+                                        <div className="input-group-text"><FontAwesomeIcon icon="key" style={{ width: "16px" }}/></div>
                                     </div>
                                     <input ref={r => this.password = r!} type="password" name="password" className="form-control" id="password" placeholder="Password" />
                                 </div>
@@ -106,7 +107,7 @@ export default class Login extends React.Component<{}, { modelState?: ModelState
                     <div className="row" style={{ paddingTop: "1rem" }}>
                         <div className="col-md-3"></div>
                         <div className="col-md-6">
-                            <button type="submit" id="login" className="btn btn-success"><i className="fa fa-sign-in"></i> {AuthMessage.Login.niceToString()}</button>
+                            <button type="submit" id="login" className="btn btn-success"><FontAwesomeIcon icon="sign-in" /> {AuthMessage.Login.niceToString()}</button>
                             {this.error("login") && <span className="help-block" style={{ color: "red" }}>{this.error("login")}</span>}
                             {AuthClient.resetPassword &&
                                 <span>

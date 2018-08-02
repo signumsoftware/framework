@@ -2,7 +2,7 @@
 import Modeler from "bpmn-js/lib/Modeler"
 import BpmnRenderer from "bpmn-js/lib/draw/BpmnRenderer"
 import { WorkflowConditionEntity, WorkflowActionEntity, ConnectionType } from '../Signum.Entities.Workflow'
-import { Lite, liteKey } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
+import { Lite, liteKey } from '@framework/Signum.Entities'
 import * as BpmnUtils from './BpmnUtils'
 
 export class CustomRenderer extends BpmnRenderer {

@@ -34,13 +34,13 @@ namespace Signum.Engine.Notes
         static HashSet<NoteTypeEntity> SystemNoteTypes = new HashSet<NoteTypeEntity>();
         static bool started = false;
 
-        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm, params Type[] registerExpressionsFor)
+        public static void Start(SchemaBuilder sb, params Type[] registerExpressionsFor)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
                 sb.Include<NoteEntity>()
                     .WithSave(NoteOperation.Save)
-                    .WithQuery(dqm, () => n => new
+                    .WithQuery(() => n => new
                     {
                         Entity = n,
                         n.Id,
@@ -58,7 +58,7 @@ namespace Signum.Engine.Notes
 
                 sb.Include<NoteTypeEntity>()
                     .WithSave(NoteTypeOperation.Save)
-                    .WithQuery(dqm, () => t => new
+                    .WithQuery(() => t => new
                     {
                         Entity = t,
                         t.Id,
@@ -72,7 +72,7 @@ namespace Signum.Engine.Notes
                 {
                     var exp = Signum.Utilities.ExpressionTrees.Linq.Expr((Entity ident) => ident.Notes());
                     foreach (var type in registerExpressionsFor)
-                        dqm.RegisterExpression(new ExtensionInfo(type, exp, exp.Body.Type, "Notes", () => typeof(NoteEntity).NicePluralName()));
+                        QueryLogic.Expressions.Register(new ExtensionInfo(type, exp, exp.Body.Type, "Notes", () => typeof(NoteEntity).NicePluralName()));
                 }
 
                 started = true;

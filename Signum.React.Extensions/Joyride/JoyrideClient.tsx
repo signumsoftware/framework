@@ -1,9 +1,9 @@
 ﻿import * as React from 'react'
 import { Route } from 'react-router'
 import * as moment from 'moment'
-import { ajaxPost, ajaxGet } from '../../../Framework/Signum.React/Scripts/Services';
-import { EntitySettings } from '../../../Framework/Signum.React/Scripts/Navigator'
-import * as Navigator from '../../../Framework/Signum.React/Scripts/Navigator'
+import { ajaxPost, ajaxGet } from '@framework/Services';
+import { EntitySettings } from '@framework/Navigator'
+import * as Navigator from '@framework/Navigator'
 import { JoyrideEntity, JoyrideStepEntity, JoyrideStepStyleEntity } from './Signum.Entities.Joyride'
 import * as UserAssetClient from '../UserAssets/UserAssetClient'
 

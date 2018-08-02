@@ -1,12 +1,12 @@
 ﻿import * as React from 'react'
-import { ValueLine, EntityLine, TypeContext, FormGroup, ValueLineType, LiteAutocompleteConfig } from '../../../../Framework/Signum.React/Scripts/Lines'
-import { PropertyRoute, Binding } from '../../../../Framework/Signum.React/Scripts/Reflection'
-import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
+import { ValueLine, EntityLine, TypeContext, FormGroup, ValueLineType, LiteAutocompleteConfig } from '@framework/Lines'
+import { PropertyRoute, Binding } from '@framework/Reflection'
+import * as Navigator from '@framework/Navigator'
 import CSharpCodeMirror from '../../Codemirror/CSharpCodeMirror'
 import { WorkflowTimerConditionEntity, ICaseMainEntity } from '../Signum.Entities.Workflow'
 import { API } from '../WorkflowClient'
 import TypeHelpComponent from '../../TypeHelp/TypeHelpComponent'
-import ValueLineModal from '../../../../Framework/Signum.React/Scripts/ValueLineModal'
+import ValueLineModal from '@framework/ValueLineModal'
 
 interface WorkflowTimerConditionComponentProps {
     ctx: TypeContext<WorkflowTimerConditionEntity>;

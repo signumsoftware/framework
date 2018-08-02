@@ -1,32 +1,33 @@
 ﻿import * as React from 'react'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Route } from 'react-router'
-import { Dic, classes } from '../../../Framework/Signum.React/Scripts/Globals';
-import { ajaxPost, ajaxGet } from '../../../Framework/Signum.React/Scripts/Services';
-import { EntitySettings, ViewPromise } from '../../../Framework/Signum.React/Scripts/Navigator'
-import * as Navigator from '../../../Framework/Signum.React/Scripts/Navigator'
-import * as Finder from '../../../Framework/Signum.React/Scripts/Finder'
-import { Lite, Entity, EntityPack, ExecuteSymbol, DeleteSymbol, ConstructSymbol_From, registerToString, JavascriptMessage } from '../../../Framework/Signum.React/Scripts/Signum.Entities'
-import { EntityOperationSettings } from '../../../Framework/Signum.React/Scripts/Operations'
-import { PseudoType, QueryKey, GraphExplorer, OperationType, Type, getTypeName  } from '../../../Framework/Signum.React/Scripts/Reflection'
-import * as Operations from '../../../Framework/Signum.React/Scripts/Operations'
+import { Dic, classes } from '@framework/Globals';
+import { ajaxPost, ajaxGet } from '@framework/Services';
+import { EntitySettings, ViewPromise } from '@framework/Navigator'
+import * as Navigator from '@framework/Navigator'
+import * as Finder from '@framework/Finder'
+import { Lite, Entity, EntityPack, ExecuteSymbol, DeleteSymbol, ConstructSymbol_From, registerToString, JavascriptMessage } from '@framework/Signum.Entities'
+import { EntityOperationSettings } from '@framework/Operations'
+import { PseudoType, QueryKey, GraphExplorer, OperationType, Type, getTypeName  } from '@framework/Reflection'
+import * as Operations from '@framework/Operations'
 import { EmailMessageEntity, EmailTemplateMessageEmbedded, EmailMasterTemplateEntity, EmailMasterTemplateMessageEmbedded, EmailMessageOperation, EmailPackageEntity, EmailRecipientEntity, EmailConfigurationEmbedded, EmailTemplateEntity, AsyncEmailSenderPermission } from './Signum.Entities.Mailing'
 import { SmtpConfigurationEntity, Pop3ConfigurationEntity, Pop3ReceptionEntity, Pop3ReceptionExceptionEntity, EmailAddressEmbedded } from './Signum.Entities.Mailing'
 import { NewsletterEntity, NewsletterDeliveryEntity, SendEmailTaskEntity, SystemEmailEntity, EmailTemplateVisibleOn } from './Signum.Entities.Mailing'
 import * as OmniboxClient from '../Omnibox/OmniboxClient'
 import * as AuthClient from '../Authorization/AuthClient'
-import * as QuickLinks from '../../../Framework/Signum.React/Scripts/QuickLinks'
-import { ImportRoute } from "../../../Framework/Signum.React/Scripts/AsyncImport";
-import { ModifiableEntity } from "../../../Framework/Signum.React/Scripts/Signum.Entities";
-import { ContextualItemsContext, MenuItemBlock } from "../../../Framework/Signum.React/Scripts/SearchControl/ContextualItems";
-import { ModelEntity } from "../../../Framework/Signum.React/Scripts/Signum.Entities";
-import { QueryRequest } from "../../../Framework/Signum.React/Scripts/FindOptions";
-import * as ContexualItems from '../../../Framework/Signum.React/Scripts/SearchControl/ContextualItems'
+import * as QuickLinks from '@framework/QuickLinks'
+import { ImportRoute } from "@framework/AsyncImport";
+import { ModifiableEntity } from "@framework/Signum.Entities";
+import { ContextualItemsContext, MenuItemBlock } from "@framework/SearchControl/ContextualItems";
+import { ModelEntity } from "@framework/Signum.Entities";
+import { QueryRequest } from "@framework/FindOptions";
+import * as ContexualItems from '@framework/SearchControl/ContextualItems'
 import MailingMenu from "./MailingMenu";
 import * as DynamicClientOptions from '../Dynamic/DynamicClientOptions';
 
 import "./Mailing.css";
-import { DropdownItem } from '../../../Framework/Signum.React/Scripts/Components';
-import { registerExportAssertLink } from '../../../Extensions/Signum.React.Extensions/UserAssets/UserAssetClient';
+import { DropdownItem } from '@framework/Components';
+import { registerExportAssertLink } from '../UserAssets/UserAssetClient';
 
 
 export function start(options: {
@@ -144,7 +145,7 @@ export function getEmailTemplates(ctx: ContextualItemsContext<Entity>): Promise<
                 header: EmailTemplateEntity.nicePluralName(),
                 menuItems: wts.map(wt =>
                     <DropdownItem data-operation={wt.EntityType} onClick={() => handleMenuClick(wt, ctx)}>
-                        <span className={classes("icon", "fa fa-envelope-o")}></span>
+                        <FontAwesomeIcon icon={["far", "envelope"]} className="icon"/>
                         {wt.toStr}
                     </DropdownItem>
                 )
@@ -219,7 +220,7 @@ export interface AsyncEmailSenderState {
     currentProcessIdentifier: string;
 }
 
-declare module '../../../Framework/Signum.React/Scripts/FindOptions' {
+declare module '@framework/FindOptions' {
 
     export interface QueryDescription {
         emailTemplates?: Array<Lite<EmailTemplateEntity>>;

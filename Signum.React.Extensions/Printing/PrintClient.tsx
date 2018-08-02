@@ -1,19 +1,19 @@
 ﻿import * as React from 'react'
 import { Route } from 'react-router'
-import { Dic, classes } from '../../../Framework/Signum.React/Scripts/Globals';
-import { ajaxPost, ajaxGet } from '../../../Framework/Signum.React/Scripts/Services';
-import { EntitySettings, ViewPromise } from '../../../Framework/Signum.React/Scripts/Navigator'
-import * as Navigator from '../../../Framework/Signum.React/Scripts/Navigator'
-import { Lite, Entity, EntityPack, ExecuteSymbol, DeleteSymbol, ConstructSymbol_From } from '../../../Framework/Signum.React/Scripts/Signum.Entities'
-import { EntityOperationSettings } from '../../../Framework/Signum.React/Scripts/Operations'
-import { PseudoType, QueryKey, GraphExplorer, OperationType, IType, Type, KindOfType } from '../../../Framework/Signum.React/Scripts/Reflection'
-import * as Operations from '../../../Framework/Signum.React/Scripts/Operations'
+import { Dic, classes } from '@framework/Globals';
+import { ajaxPost, ajaxGet } from '@framework/Services';
+import { EntitySettings, ViewPromise } from '@framework/Navigator'
+import * as Navigator from '@framework/Navigator'
+import { Lite, Entity, EntityPack, ExecuteSymbol, DeleteSymbol, ConstructSymbol_From } from '@framework/Signum.Entities'
+import { EntityOperationSettings } from '@framework/Operations'
+import { PseudoType, QueryKey, GraphExplorer, OperationType, IType, Type, KindOfType } from '@framework/Reflection'
+import * as Operations from '@framework/Operations'
 import { PrintLineEntity, PrintLineState, PrintPackageEntity, PrintPermission, PrintPackageProcess, PrintLineOperation } from './Signum.Entities.Printing'
 import { ProcessEntity } from '../Processes/Signum.Entities.Processes'
 import { FileTypeSymbol } from '../Files/Signum.Entities.Files'
 import * as OmniboxClient from '../Omnibox/OmniboxClient'
 import * as AuthClient from '../Authorization/AuthClient'
-import { ImportRoute } from "../../../Framework/Signum.React/Scripts/AsyncImport";
+import { ImportRoute } from "@framework/AsyncImport";
 
 export function start(options: { routes: JSX.Element[],}) {
 

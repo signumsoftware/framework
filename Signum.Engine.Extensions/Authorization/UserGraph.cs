@@ -29,17 +29,17 @@ namespace Signum.Engine.Authorization
             {
                 FromStates = { UserState.New },
                 ToStates = { UserState.Saved },
-                Execute = (u, _) => { u.State = UserState.Saved; },
-                AllowsNew = true,
-                Lite = false
+                CanBeNew = true,
+                CanBeModified = true,
+                Execute = (u, _) => { u.State = UserState.Saved; }
             }.Register();
 
             new Execute(UserOperation.Save)
             {
                 FromStates = { UserState.Saved },
                 ToStates = { UserState.Saved },
+                CanBeModified = true,
                 Execute = (u, _) => { },
-                Lite = false
             }.Register();
 
             new Execute(UserOperation.Disable)
@@ -51,8 +51,6 @@ namespace Signum.Engine.Authorization
                     u.AnulationDate = TimeZoneManager.Now;
                     u.State = UserState.Disabled;
                 },
-                AllowsNew = false,
-                Lite = true
             }.Register();
 
             new Execute(UserOperation.Enable)
@@ -64,13 +62,10 @@ namespace Signum.Engine.Authorization
                     u.AnulationDate = null;
                     u.State = UserState.Saved;
                 },
-                AllowsNew = false,
-                Lite = true
             }.Register();
 
             new Graph<UserEntity>.Execute(UserOperation.SetPassword)
             {
-                Lite = true,
                 Execute = (u, args) =>
                 {
                     byte[] passwordHash = args.GetArg<byte[]>();

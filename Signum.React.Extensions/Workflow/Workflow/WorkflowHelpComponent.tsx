@@ -1,12 +1,12 @@
 ﻿import * as React from 'react'
-import { classes } from '../../../../Framework/Signum.React/Scripts/Globals'
-import { Lite } from '../../../../Framework/Signum.React/Scripts/Signum.Entities';
-import { StyleContext } from '../../../../Framework/Signum.React/Scripts/TypeContext'
+import { classes } from '@framework/Globals'
+import { Lite } from '@framework/Signum.Entities';
+import { StyleContext } from '@framework/TypeContext'
 import { WorkflowEntity, WorkflowActivityEntity, WorkflowActivityMessage } from '../Signum.Entities.Workflow';
-import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
+import * as Finder from '@framework/Finder'
 import * as WorkflowClient from '../WorkflowClient'
 import { TypeHelpMode } from '../../TypeHelp/TypeHelpClient'
-import ValueLineModal from '../../../../Framework/Signum.React/Scripts/ValueLineModal';
+import ValueLineModal from '@framework/ValueLineModal';
 
 interface WorkflowHelpComponentProps {
     typeName: string;

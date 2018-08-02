@@ -275,8 +275,8 @@ namespace Signum.Engine.Help
         {
             QueryName = queryName;
             Culture = ci;
-            Info = HelpGenerator.GetQueryHelp(DynamicQueryManager.Current.GetQuery(queryName).Core.Value);
-            Columns = DynamicQueryManager.Current.GetQuery(queryName).Core.Value.StaticColumns.ToDictionary(
+            Info = HelpGenerator.GetQueryHelp(QueryLogic.Queries.GetQuery(queryName).Core.Value);
+            Columns = QueryLogic.Queries.GetQuery(queryName).Core.Value.StaticColumns.ToDictionary(
                             cf => cf.Name,
                             cf => new QueryColumnHelp(cf, cf.DisplayName(), HelpGenerator.GetQueryColumnHelp(cf)));
 
@@ -302,7 +302,7 @@ namespace Signum.Engine.Help
                     };
 
                 entity.Columns.AddRange(
-                     DynamicQueryManager.Current.GetQuery(this.QueryName).Core.Value.StaticColumns.Select(a => a.Name)
+                     QueryLogic.Queries.GetQuery(this.QueryName).Core.Value.StaticColumns.Select(a => a.Name)
                      .Except(entity.Columns.Select(a => a.ColumnName))
                      .Select(pr => new QueryColumnHelpEmbedded
                      {
@@ -321,7 +321,7 @@ namespace Signum.Engine.Help
 
         public override string IsAllowed()
         {
-            return DynamicQueryManager.Current.QueryAllowed(this.QueryName, false) ? null :
+            return QueryLogic.Queries.QueryAllowed(this.QueryName, false) ? null :
                 "Access to query {0} not allowed".FormatWith(QueryUtils.GetKey(this.QueryName)); 
         }
     }

@@ -1,13 +1,13 @@
 ﻿import * as React from 'react'
-import { Dic } from '../../../../Framework/Signum.React/Scripts/Globals';
-import { openModal, IModalProps } from '../../../../Framework/Signum.React/Scripts/Modals';
-import { SelectorMessage } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
-import { TypeInfo } from '../../../../Framework/Signum.React/Scripts/Reflection'
+import { Dic } from '@framework/Globals';
+import { openModal, IModalProps } from '@framework/Modals';
+import { SelectorMessage } from '@framework/Signum.Entities'
+import { TypeInfo } from '@framework/Reflection'
 import { DynamicViewMessage } from '../Signum.Entities.Dynamic'
 import * as NodeUtils from './NodeUtils'
 import { BaseNode } from './Nodes'
-import { Modal } from '../../../../Framework/Signum.React/Scripts/Components';
-import { ModalHeaderButtons } from '../../../../Framework/Signum.React/Scripts/Components/Modal';
+import { Modal } from '@framework/Components';
+import { ModalHeaderButtons } from '@framework/Components/Modal';
 
 
 interface NodeSelectorModalProps extends React.Props<NodeSelectorModal>, IModalProps {

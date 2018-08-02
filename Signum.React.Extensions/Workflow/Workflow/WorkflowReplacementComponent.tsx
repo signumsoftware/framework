@@ -1,10 +1,10 @@
 ﻿import * as React from 'react'
 import { WorkflowReplacementModel, WorkflowReplacementItemEmbedded, CaseActivityEntity, WorkflowOperation, WorkflowEntity } from '../Signum.Entities.Workflow'
-import { TypeContext, ValueLine, PropertyRoute } from '../../../../Framework/Signum.React/Scripts/Lines'
-import { SearchControl, ValueSearchControlLine } from '../../../../Framework/Signum.React/Scripts/Search'
-import { symbolNiceName } from '../../../../Framework/Signum.React/Scripts/Reflection'
+import { TypeContext, ValueLine, PropertyRoute } from '@framework/Lines'
+import { SearchControl, ValueSearchControlLine } from '@framework/Search'
+import { symbolNiceName } from '@framework/Reflection'
 import { PreviewTask } from '../WorkflowClient'
-import { is } from "../../../../Framework/Signum.React/Scripts/Signum.Entities";
+import { is } from "@framework/Signum.Entities";
 
 export default class WorkflowReplacementComponent extends React.Component<{ ctx: TypeContext<WorkflowReplacementModel>, previewTasks: PreviewTask[] }> {
 

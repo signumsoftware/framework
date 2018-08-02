@@ -1,23 +1,23 @@
 ﻿import * as React from 'react'
 import * as moment from 'moment'
 import { RouteComponentProps } from 'react-router'
-import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
-import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
-import EntityLink from '../../../../Framework/Signum.React/Scripts/SearchControl/EntityLink'
-import {ValueSearchControl, SearchControl, OrderType } from '../../../../Framework/Signum.React/Scripts/Search'
-import { QueryDescription, SubTokensOptions } from '../../../../Framework/Signum.React/Scripts/FindOptions'
-import { getQueryNiceName, PropertyRoute, getTypeInfos } from '../../../../Framework/Signum.React/Scripts/Reflection'
+import * as Navigator from '@framework/Navigator'
+import * as Finder from '@framework/Finder'
+import EntityLink from '@framework/SearchControl/EntityLink'
+import {ValueSearchControl, SearchControl, OrderType } from '@framework/Search'
+import { QueryDescription, SubTokensOptions } from '@framework/FindOptions'
+import { getQueryNiceName, PropertyRoute, getTypeInfos } from '@framework/Reflection'
 import {
     ModifiableEntity, EntityControlMessage, Entity,
     parseLite, getToString, JavascriptMessage
-} from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
+} from '@framework/Signum.Entities'
 import {
    OperationLogEntity
-} from '../../../../Framework/Signum.React/Scripts/Signum.Entities.Basics'
+} from '@framework/Signum.Entities.Basics'
 import { API, WorkflowScriptRunnerState } from '../WorkflowClient'
 import { CaseActivityEntity, WorkflowActivityType, DoneType, WorkflowPanelPermission, CaseActivityOperation } from '../Signum.Entities.Workflow'
 import * as AuthClient from '../../Authorization/AuthClient'
-import { UncontrolledTabs, Tab } from '../../../../Framework/Signum.React/Scripts/Components/Tabs';
+import { UncontrolledTabs, Tab } from '@framework/Components/Tabs';
 
 
 interface WorkflowPanelPageProps extends RouteComponentProps<{}> {

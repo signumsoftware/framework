@@ -18,14 +18,14 @@ namespace Signum.Engine.Authorization
     {
         public static bool IsStarted { get; private set; }
 
-        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
+        public static void Start(SchemaBuilder sb)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
                 AuthLogic.AssertStarted(sb);
 
                 sb.Include<SessionLogEntity>()
-                    .WithQuery(dqm, () => sl => new
+                    .WithQuery(() => sl => new
                     {
                         Entity = sl,
                         sl.Id,

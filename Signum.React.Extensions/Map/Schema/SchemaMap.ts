@@ -1,7 +1,7 @@
 ﻿import * as d3 from "d3"
 import * as React from "react"
-import { EntityData, EntityKind } from '../../../../Framework/Signum.React/Scripts/Reflection'
-import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
+import { EntityData, EntityKind } from '@framework/Reflection'
+import * as Finder from '@framework/Finder'
 import { Point, Rectangle, calculatePoint, wrap, forceBoundingBox } from '../Utils'
 
 export interface TableInfo extends ITableInfo {
@@ -136,7 +136,7 @@ export class SchemaMapD3 {
 
 
         const drag = d3.drag<SVGGElement, ITableInfo>()
-            .on("initial", d => {
+            .on("start", d => {
                 if (!d3.event.active)
                     this.simulation.alphaTarget(0.3).restart();
 

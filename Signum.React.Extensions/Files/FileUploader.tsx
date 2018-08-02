@@ -1,16 +1,18 @@
 ﻿import * as React from 'react'
-import { classes, Dic, bytesToSize } from '../../../Framework/Signum.React/Scripts/Globals'
-import * as Services from '../../../Framework/Signum.React/Scripts/Services'
-import * as Navigator from '../../../Framework/Signum.React/Scripts/Navigator'
-import * as Constructor from '../../../Framework/Signum.React/Scripts/Constructor'
-import * as Finder from '../../../Framework/Signum.React/Scripts/Finder'
-import { FindOptions } from '../../../Framework/Signum.React/Scripts/FindOptions'
-import { TypeContext, StyleContext, StyleOptions, FormGroupStyle } from '../../../Framework/Signum.React/Scripts/TypeContext'
-import { PropertyRoute, PropertyRouteType, MemberInfo, getTypeInfo, getTypeInfos, TypeInfo, IsByAll, New, getTypeName } from '../../../Framework/Signum.React/Scripts/Reflection'
-import { LineBase, LineBaseProps } from '../../../Framework/Signum.React/Scripts/Lines/LineBase'
-import { ModifiableEntity, Lite, Entity, EntityControlMessage, JavascriptMessage, toLite, is, liteKey, getToString } from '../../../Framework/Signum.React/Scripts/Signum.Entities'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { IconProp } from '@fortawesome/fontawesome-svg-core'
+import { classes, Dic, bytesToSize } from '@framework/Globals'
+import * as Services from '@framework/Services'
+import * as Navigator from '@framework/Navigator'
+import * as Constructor from '@framework/Constructor'
+import * as Finder from '@framework/Finder'
+import { FindOptions } from '@framework/FindOptions'
+import { TypeContext, StyleContext, StyleOptions, FormGroupStyle } from '@framework/TypeContext'
+import { PropertyRoute, PropertyRouteType, MemberInfo, getTypeInfo, getTypeInfos, TypeInfo, IsByAll, New, getTypeName } from '@framework/Reflection'
+import { LineBase, LineBaseProps } from '@framework/Lines/LineBase'
+import { ModifiableEntity, Lite, Entity, EntityControlMessage, JavascriptMessage, toLite, is, liteKey, getToString } from '@framework/Signum.Entities'
 import { IFile, IFilePath, FileMessage, FileTypeSymbol, FileEntity, FilePathEntity, FileEmbedded, FilePathEmbedded } from './Signum.Entities.Files'
-import { EntityBase, EntityBaseProps } from '../../../Framework/Signum.React/Scripts/Lines/EntityBase'
+import { EntityBase, EntityBaseProps } from '@framework/Lines/EntityBase'
 
 import "./Files.css"
 
@@ -137,14 +139,14 @@ export default class FileUploader extends React.Component<FileUploaderProps, Fil
                         onDrop={this.handleDrop}
                     >
                         <div className={classes("sf-upload btn btn-light", this.props.buttonCss)}>
-                            <i className="fa fa-upload" />
+                            <FontAwesomeIcon icon="upload"/>
                             {FileMessage.SelectFile.niceToString()}
                             <input type='file' accept={this.props.accept} onChange={this.handleFileChange} multiple={this.props.multiple} />
                         </div>
                         &nbsp;{this.props.dragAndDropMessage || FileMessage.OrDragAFileHere.niceToString()}
                     </div> :
                         <div className={classes("sf-upload btn btn-light", this.props.buttonCss)}>
-                            <i className="fa fa-upload" />
+                            <FontAwesomeIcon icon="upload"/>
                             {FileMessage.SelectFile.niceToString()}
                             <input type='file' accept={this.props.accept} onChange={this.handleFileChange} multiple={this.props.multiple} />
                         </div>

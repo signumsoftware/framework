@@ -32,14 +32,14 @@ namespace Signum.Engine.Toolbar
         public static ResetLazy<Dictionary<Lite<ToolbarEntity>, ToolbarEntity>> Toolbars;
         public static ResetLazy<Dictionary<Lite<ToolbarMenuEntity>, ToolbarMenuEntity>> ToolbarMenus;
 
-        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
+        public static void Start(SchemaBuilder sb)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
                 sb.Include<ToolbarEntity>()
                     .WithSave(ToolbarOperation.Save)
                     .WithDelete(ToolbarOperation.Delete)
-                    .WithQuery(dqm, () => e => new
+                    .WithQuery(() => e => new
                     {
                         Entity = e,
                         e.Id,
@@ -52,7 +52,7 @@ namespace Signum.Engine.Toolbar
                 sb.Include<ToolbarMenuEntity>()
                     .WithSave(ToolbarMenuOperation.Save)
                     .WithDelete(ToolbarMenuOperation.Delete)
-                    .WithQuery(dqm, () => e => new
+                    .WithQuery(() => e => new
                     {
                         Entity = e,
                         e.Id,
@@ -236,7 +236,7 @@ namespace Signum.Engine.Toolbar
         {
             try
             {
-                return DynamicQueryManager.Current.QueryAllowed(QueryLogic.QueryNames.GetOrThrow(query.ToString()), true);
+                return QueryLogic.Queries.QueryAllowed(QueryLogic.QueryNames.GetOrThrow(query.ToString()), true);
             }
             catch (Exception e) when (StartParameters.IgnoredDatabaseMismatches != null)
             {

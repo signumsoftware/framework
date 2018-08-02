@@ -21,7 +21,7 @@ namespace Signum.Engine.MachineLearning
             {
                 ctx.ReportProgress($"Executing MainQuery for {ctx.Predictor}");
                 QueryRequest mainQueryRequest = GetMainQueryRequest(ctx.Predictor.MainQuery);
-                ResultTable mainResult = DynamicQueryManager.Current.ExecuteQuery(mainQueryRequest);
+                ResultTable mainResult = QueryLogic.Queries.ExecuteQuery(mainQueryRequest);
 
                 ctx.MainQuery = new MainQuery
                 {
@@ -46,7 +46,7 @@ namespace Signum.Engine.MachineLearning
                 {
                     ctx.ReportProgress($"Executing SubQuery {sqe}");
                     QueryRequest queryGroupRequest = ToMultiColumnQuery(ctx.Predictor.MainQuery, sqe);
-                    ResultTable groupResult = DynamicQueryManager.Current.ExecuteQuery(queryGroupRequest);
+                    ResultTable groupResult = QueryLogic.Queries.ExecuteQuery(queryGroupRequest);
 
                     var pairs = groupResult.Columns.Zip(sqe.Columns, (rc, sqc) => (rc, sqc)).ToList();
 

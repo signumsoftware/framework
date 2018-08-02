@@ -1,17 +1,18 @@
 ﻿import * as React from 'react'
 import * as numbro from 'numbro'
 import * as moment from 'moment'
-import { classes } from '../../../Framework/Signum.React/Scripts/Globals'
-import { StyleContext } from '../../../Framework/Signum.React/Scripts/TypeContext'
-import { ajaxPost } from '../../../Framework/Signum.React/Scripts/Services'
-import * as Finder from '../../../Framework/Signum.React/Scripts/Finder'
-import * as Navigator from '../../../Framework/Signum.React/Scripts/Navigator'
-import { WebApiHttpError } from '../../../Framework/Signum.React/Scripts/Services'
-import { ValueSearchControl, SearchControl, FindOptions } from '../../../Framework/Signum.React/Scripts/Search'
-import EntityLink from '../../../Framework/Signum.React/Scripts/SearchControl/EntityLink'
-import { QueryDescription, SubTokensOptions, QueryEntitiesRequest } from '../../../Framework/Signum.React/Scripts/FindOptions'
-import { getQueryNiceName, PropertyRoute, getTypeInfos, PseudoType, getTypeInfo, TypeInfo, getQueryKey } from '../../../Framework/Signum.React/Scripts/Reflection'
-import { ModifiableEntity, EntityControlMessage, Entity, parseLite, getToString, JavascriptMessage, Lite } from '../../../Framework/Signum.React/Scripts/Signum.Entities'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { classes } from '@framework/Globals'
+import { StyleContext } from '@framework/TypeContext'
+import { ajaxPost } from '@framework/Services'
+import * as Finder from '@framework/Finder'
+import * as Navigator from '@framework/Navigator'
+import { WebApiHttpError } from '@framework/Services'
+import { ValueSearchControl, SearchControl, FindOptions } from '@framework/Search'
+import EntityLink from '@framework/SearchControl/EntityLink'
+import { QueryDescription, SubTokensOptions, QueryEntitiesRequest } from '@framework/FindOptions'
+import { getQueryNiceName, PropertyRoute, getTypeInfos, PseudoType, getTypeInfo, TypeInfo, getQueryKey } from '@framework/Reflection'
+import { ModifiableEntity, EntityControlMessage, Entity, parseLite, getToString, JavascriptMessage, Lite } from '@framework/Signum.Entities'
 import { API, CompilationError, EvalEntityError } from './DynamicClient'
 import { Options } from './DynamicClientOptions'
 import CSharpCodeMirror from '../Codemirror/CSharpCodeMirror'
@@ -21,8 +22,8 @@ import { RouteComponentProps } from "react-router";
 import * as QueryString from 'query-string';
 
 import "./DynamicPanelPage.css"
-import { Tab, Tabs } from '../../../Framework/Signum.React/Scripts/Components/Tabs';
-import { FormGroup } from '../../../Framework/Signum.React/Scripts/Lines';
+import { Tab, Tabs } from '@framework/Components/Tabs';
+import { FormGroup } from '@framework/Lines';
 
 interface DynamicPanelProps extends RouteComponentProps<{}> {
 }
@@ -66,7 +67,7 @@ export default class DynamicPanelPage extends React.Component<DynamicPanelProps,
             <div>
                 {errors && errors.length > 0 &&
                     <div role="alert" className="alert alert-danger" style={{ marginTop: "20px" }}>
-                        <span className="fa fa-exclamation-triangle"></span>
+                        <FontAwesomeIcon icon="exclamation-triangle" />
                         {" "}The server started, but there {errors.length > 1 ? "are" : "is"} <a href="#" onClick={this.handleErrorClick}>{errors.length} {errors.length > 1 ? "errors" : "error"}</a>.
                     </div>
                 }
@@ -121,7 +122,6 @@ export class CompileStep extends React.Component<{}, DynamicCompileStepState>{
     }
 
     render() {
-
         var sc = new StyleContext(undefined, { labelColumns: { sm: 3 } });
 
         const lines = Options.onGetDynamicLineForPanel.map(f => f(sc));
@@ -325,7 +325,7 @@ export class CheckEvalsStep extends React.Component<{}, CheckEvalsStepState>{
         return (
             <div>
                 {Options.checkEvalFindOptions.map((fo, i) => <CheckEvalType key={i} ctx={ctx} findOptions={fo} autoStart={this.state.autoStart} />)}
-                <button className="btn btn-success" onClick={this.handleOnClick}> <i className="fa fa-refresh" aria-hidden="true" /> Refresh all</button>
+                <button className="btn btn-success" onClick={this.handleOnClick}><FontAwesomeIcon icon="sync" /> Refresh all</button>
             </div>
         );
     }
@@ -381,19 +381,19 @@ export class CheckEvalType extends React.Component<CheckEvalTypeProps, CheckEval
 
     render() {
         return (
-                <FormGroup ctx={this.props.ctx} labelText={getQueryNiceName(this.props.findOptions.queryName)}>
-                    <ValueSearchControl findOptions={this.props.findOptions} isLink={true} />
-                    {
-                        this.state.state == "loading" ?
-                            <i className="fa fa-refresh fa-spin fa-fw" /> :
-                            <i style={{ cursor: "pointer" }} className="sf-line-button fa fa-refresh" aria-hidden="true" onClick={e => { e.preventDefault(); this.loadData(this.props); }} />
-                    }
+            <FormGroup ctx={this.props.ctx} labelText={getQueryNiceName(this.props.findOptions.queryName)}>
+                <ValueSearchControl findOptions={this.props.findOptions} isLink={true} />
+                {
+                    this.state.state == "loading" ?
+                        <FontAwesomeIcon icon="sync" spin={true} /> :
+                        <span onClick={e => { e.preventDefault(); this.loadData(this.props); }} style={{ cursor: "pointer" }}><FontAwesomeIcon icon="sync" className="sf-line-button" /></span>
+                }
 
-                    {
-                        this.state.state == "failed" ? <span className="mini-alert alert-danger" role="alert"><i className="fa fa-exclamation-triangle" aria-hidden="true"></i> Exception checking {getQueryNiceName(this.props.findOptions.queryName)}</span> :
-                            this.state.errors && this.state.errors.length > 0 ? <span className="mini-alert alert-danger" role="alert"><strong>{this.state.errors.length}</strong> {this.state.errors.length == 1 ? "Error" : "Errors"} found</span> :
-                                this.state.errors && this.state.errors.length == 0 ? <span className="mini-alert alert-success" role="alert">No errors found!</span> :
-                                    undefined
+                {
+                    this.state.state == "failed" ? <span className="mini-alert alert-danger" role="alert"><FontAwesomeIcon icon="exclamation-triangle" /> Exception checking {getQueryNiceName(this.props.findOptions.queryName)}</span> :
+                        this.state.errors && this.state.errors.length > 0 ? <span className="mini-alert alert-danger" role="alert"><strong>{this.state.errors.length}</strong> {this.state.errors.length == 1 ? "Error" : "Errors"} found</span> :
+                            this.state.errors && this.state.errors.length == 0 ? <span className="mini-alert alert-success" role="alert">No errors found!</span> :
+                                undefined
                 }
                 {
                     this.state.errors && this.state.errors.length > 0 &&
@@ -410,8 +410,8 @@ export class CheckEvalType extends React.Component<CheckEvalTypeProps, CheckEval
                     </div>
 
                 }
-                </FormGroup>
-               
+            </FormGroup>
+
         );
     }
 }

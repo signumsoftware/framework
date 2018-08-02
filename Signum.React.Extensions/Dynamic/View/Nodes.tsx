@@ -2,21 +2,21 @@
 import {
     FormGroup, FormControlReadonly, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityList, EntityRepeater, EntityTabRepeater, EntityTable,
     EntityCheckboxList, EnumCheckboxList, EntityDetail, EntityStrip, RenderEntity
-} from '../../../../Framework/Signum.React/Scripts/Lines'
+} from '@framework/Lines'
 
-import { ModifiableEntity, Entity, Lite, isEntity } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
-import { classes, Dic } from '../../../../Framework/Signum.React/Scripts/Globals'
-import * as Finder from '../../../../Framework/Signum.React/Scripts/Reflection'
-import { SubTokensOptions } from '../../../../Framework/Signum.React/Scripts/FindOptions'
-import { FindOptions, SearchControl, ValueSearchControlLine, FindOptionsParsed, ResultTable } from '../../../../Framework/Signum.React/Scripts/Search'
+import { ModifiableEntity, Entity, Lite, isEntity } from '@framework/Signum.Entities'
+import { classes, Dic } from '@framework/Globals'
+import * as Finder from '@framework/Reflection'
+import { SubTokensOptions } from '@framework/FindOptions'
+import { FindOptions, SearchControl, ValueSearchControlLine, FindOptionsParsed, ResultTable } from '@framework/Search'
 import {
     getQueryNiceName, TypeInfo, MemberInfo, getTypeInfo, EntityData, EntityKind, getTypeInfos, KindOfType,
     PropertyRoute, PropertyRouteType, MemberType, isTypeEntity, Binding, IsByAll, getAllTypes
-} from '../../../../Framework/Signum.React/Scripts/Reflection'
-import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
-import { TypeContext, FormGroupStyle } from '../../../../Framework/Signum.React/Scripts/TypeContext'
-import { EntityBase, EntityBaseProps } from '../../../../Framework/Signum.React/Scripts/Lines/EntityBase'
-import { EntityTableColumn } from '../../../../Framework/Signum.React/Scripts/Lines/EntityTable'
+} from '@framework/Reflection'
+import * as Navigator from '@framework/Navigator'
+import { TypeContext, FormGroupStyle } from '@framework/TypeContext'
+import { EntityBase, EntityBaseProps } from '@framework/Lines/EntityBase'
+import { EntityTableColumn } from '@framework/Lines/EntityTable'
 import { DynamicViewValidationMessage } from '../Signum.Entities.Dynamic'
 import { ExpressionOrValueComponent, FieldComponent } from './Designer'
 import { ExpressionOrValue, Expression, bindExpr, toCodeEx, withClassNameEx, DesignerNode} from './NodeUtils'
@@ -30,8 +30,8 @@ import { toHtmlAttributes, HtmlAttributesExpression, withClassName } from './Htm
 import { toStyleOptions, subCtx, StyleOptionsExpression } from './StyleOptionsExpression'
 import FileLine from "../../Files/FileLine";
 import { DownloadBehaviour } from "../../Files/FileDownloader";
-import { registerSymbol } from "../../../../Framework/Signum.React/Scripts/Reflection";
-import { Tabs, Tab, UncontrolledTabs } from '../../../../Framework/Signum.React/Scripts/Components/Tabs';
+import { registerSymbol } from "@framework/Reflection";
+import { Tabs, Tab, UncontrolledTabs } from '@framework/Components/Tabs';
 import FileImageLine from '../../Files/FileImageLine';
 import { FileEntity, FilePathEntity, FileEmbedded, FilePathEmbedded } from '../../Files/Signum.Entities.Files';
 
@@ -1007,8 +1007,14 @@ export interface SearchControlNode extends BaseNode {
     showFilterButton?: ExpressionOrValue<boolean>;
     showFooter?: ExpressionOrValue<boolean>;
     showGroupButton?: ExpressionOrValue<boolean>;
+    showBarExtension?: ExpressionOrValue<boolean>;
+    showChartButton?: ExpressionOrValue<boolean>;
+    showExcelMenu?: ExpressionOrValue<boolean>;
+    showUserQuery?: ExpressionOrValue<boolean>;
+    showWordReport?: ExpressionOrValue<boolean>;
     allowChangeColumns?: ExpressionOrValue<boolean>;
     create?: ExpressionOrValue<boolean>;
+    onCreate?: Expression<() => void>;
     navigate?: ExpressionOrValue<boolean>;
     refreshKey?: Expression<number | string | undefined>;
     maxResultsHeight?: Expression<number | string>;
@@ -1029,8 +1035,14 @@ NodeUtils.register<SearchControlNode>({
         showFilterButton: node.showFilterButton,
         showFooter: node.showFooter,
         showGroupButton: node.showGroupButton,
+        showBarExtension: node.showBarExtension,
+        showChartButton: node.showChartButton,
+        showExcelMenu: node.showExcelMenu,
+        showUserQuery: node.showUserQuery,
+        showWordReport: node.showWordReport, 
         allowChangeColumns: node.allowChangeColumns,
         create: node.create,
+        onCreate: node.onCreate,
         navigate: node.navigate,
         refreshKey: node.refreshKey,
         maxResultsHeight: node.maxResultsHeight,
@@ -1045,8 +1057,16 @@ NodeUtils.register<SearchControlNode>({
         showFilterButton={NodeUtils.evaluateAndValidate(ctx, dn.node, f => f.showFilterButton, NodeUtils.isBooleanOrNull)}
         showFooter={NodeUtils.evaluateAndValidate(ctx, dn.node, f => f.showFooter, NodeUtils.isBooleanOrNull)}
         showGroupButton={NodeUtils.evaluateAndValidate(ctx, dn.node, f => f.showGroupButton, NodeUtils.isBooleanOrNull)}
+        showBarExtension={NodeUtils.evaluateAndValidate(ctx, dn.node, f => f.showBarExtension, NodeUtils.isBooleanOrNull)}
+        showBarExtensionOption={{
+            showChartButton: NodeUtils.evaluateAndValidate(ctx, dn.node, f => f.showChartButton, NodeUtils.isBooleanOrNull),
+            showExcelMenu: NodeUtils.evaluateAndValidate(ctx, dn.node, f => f.showExcelMenu, NodeUtils.isBooleanOrNull),
+            showUserQuery: NodeUtils.evaluateAndValidate(ctx, dn.node, f => f.showUserQuery, NodeUtils.isBooleanOrNull),
+            showWordReport: NodeUtils.evaluateAndValidate(ctx, dn.node, f => f.showWordReport, NodeUtils.isBooleanOrNull),
+        }}
         allowChangeColumns={NodeUtils.evaluateAndValidate(ctx, dn.node, f => f.allowChangeColumns, NodeUtils.isBooleanOrNull)}
         create={NodeUtils.evaluateAndValidate(ctx, dn.node, f => f.create, NodeUtils.isBooleanOrNull)}
+        onCreate={NodeUtils.evaluateAndValidate(ctx, dn.node, f => f.onCreate, NodeUtils.isFunctionOrNull)}
         navigate={NodeUtils.evaluateAndValidate(ctx, dn.node, f => f.navigate, NodeUtils.isBooleanOrNull)}
         refreshKey={NodeUtils.evaluateAndValidate(ctx, dn.node, f => f.refreshKey, NodeUtils.isNumberOrStringOrNull)}
         maxResultsHeight={NodeUtils.evaluateAndValidate(ctx, dn.node, f => f.maxResultsHeight, NodeUtils.isNumberOrStringOrNull)}
@@ -1065,8 +1085,22 @@ NodeUtils.register<SearchControlNode>({
         <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, f => f.showFilterButton)} type="boolean" defaultValue={null} />
         <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, f => f.showFooter)} type="boolean" defaultValue={null} />
         <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, f => f.showGroupButton)} type="boolean" defaultValue={null} />
+        <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, f => f.showBarExtension)} type="boolean" defaultValue={null} />
+        <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, f => f.showChartButton)} type="boolean" defaultValue={null} />
+        <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, f => f.showExcelMenu)} type="boolean" defaultValue={null} />
+        <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, f => f.showUserQuery)} type="boolean" defaultValue={null} />
+        <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, f => f.showWordReport)} type="boolean" defaultValue={null} />
         <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, f => f.allowChangeColumns)} type="boolean" defaultValue={null} />
         <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, f => f.create)} type="boolean" defaultValue={null} />
+        <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, f => f.onCreate)} type={null} defaultValue={null} exampleExpression={`() => 
+{ 
+    modules.Constructor.construct("YourTypeHere").then(e => { 
+        if (e == undefined) 
+            return; 
+        /* Set entity properties here... */
+        modules.Navigator.navigate(e).done(); 
+    }).done();
+}`} />
         <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, f => f.navigate)} type="boolean" defaultValue={null} />
         <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, f => f.refreshKey)} type={null} defaultValue={null} exampleExpression={"ctx.frame.refreshCount"} />
         <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, f => f.maxResultsHeight)} type={null} defaultValue={null} />

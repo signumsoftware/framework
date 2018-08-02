@@ -25,7 +25,7 @@ namespace Signum.Engine.Chart
         public static ResetLazy<Dictionary<Type, List<Lite<UserChartEntity>>>> UserChartsByTypeForQuickLinks;
         public static ResetLazy<Dictionary<object, List<Lite<UserChartEntity>>>> UserChartsByQuery;
 
-        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
+        public static void Start(SchemaBuilder sb)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
@@ -36,7 +36,7 @@ namespace Signum.Engine.Chart
                 sb.Include<UserChartEntity>()
                     .WithSave(UserChartOperation.Save)
                     .WithDelete(UserChartOperation.Delete)
-                    .WithQuery(dqm, () => uq => new
+                    .WithQuery(() => uq => new
                     {
                         Entity = uq,
                         uq.Id,
@@ -73,7 +73,7 @@ namespace Signum.Engine.Chart
 
             userChart.Query = QueryLogic.GetQueryEntity(userChart.queryName);
 
-            QueryDescription description = DynamicQueryManager.Current.QueryDescription(userChart.queryName);
+            QueryDescription description = QueryLogic.Queries.QueryDescription(userChart.queryName);
 
             userChart.ParseData(description);
 
@@ -94,7 +94,7 @@ namespace Signum.Engine.Chart
                 return;
             }
 
-            QueryDescription description = DynamicQueryManager.Current.QueryDescription(queryName);
+            QueryDescription description = QueryLogic.Queries.QueryDescription(queryName);
 
             foreach (var item in userChart.Columns)
             {
@@ -209,7 +209,7 @@ namespace Signum.Engine.Chart
                        uc.Columns.Any(a => a.Token != null && a.Token.ParseException != null) ||
                        uc.Orders.Any(a => a.Token.ParseException != null))
                     {
-                        QueryDescription qd = DynamicQueryManager.Current.QueryDescription(uc.Query.ToQueryName());
+                        QueryDescription qd = QueryLogic.Queries.QueryDescription(uc.Query.ToQueryName());
 
                         SubTokensOptions canAggregate = uc.GroupResults ? SubTokensOptions.CanAggregate : 0;
 

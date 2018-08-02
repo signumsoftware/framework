@@ -1,8 +1,8 @@
 ﻿import * as React from 'react'
 import { IFile, IFilePath } from "./Signum.Entities.Files";
 import FileDownloader from "./FileDownloader";
-import { ModifiableEntity } from '../../../Framework/Signum.React/Scripts/Signum.Entities';
-import * as Services from '../../../Framework/Signum.React/Scripts/Services'
+import { ModifiableEntity } from '@framework/Signum.Entities';
+import * as Services from '@framework/Services'
 
 
 interface FileImageProps extends React.ImgHTMLAttributes<HTMLImageElement>{

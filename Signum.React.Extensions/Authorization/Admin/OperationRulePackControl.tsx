@@ -1,21 +1,21 @@
 ﻿import * as React from 'react'
 import * as numbro from 'numbro'
-import { classes } from '../../../../Framework/Signum.React/Scripts/Globals'
-import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
-import { notifySuccess }from '../../../../Framework/Signum.React/Scripts/Operations/EntityOperations'
-import EntityLink from '../../../../Framework/Signum.React/Scripts/SearchControl/EntityLink'
-import { TypeContext, ButtonsContext, IRenderButtons } from '../../../../Framework/Signum.React/Scripts/TypeContext'
-import { EntityLine, ValueLine } from '../../../../Framework/Signum.React/Scripts/Lines'
+import { classes } from '@framework/Globals'
+import * as Finder from '@framework/Finder'
+import { notifySuccess }from '@framework/Operations/EntityOperations'
+import EntityLink from '@framework/SearchControl/EntityLink'
+import { TypeContext, ButtonsContext, IRenderButtons } from '@framework/TypeContext'
+import { EntityLine, ValueLine } from '@framework/Lines'
 
-import { QueryDescription, SubTokensOptions } from '../../../../Framework/Signum.React/Scripts/FindOptions'
-import { getQueryNiceName, PropertyRoute, getTypeInfos } from '../../../../Framework/Signum.React/Scripts/Reflection'
-import { ModifiableEntity, EntityControlMessage, Entity, parseLite, getToString, JavascriptMessage, OperationSymbol } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
+import { QueryDescription, SubTokensOptions } from '@framework/FindOptions'
+import { getQueryNiceName, PropertyRoute, getTypeInfos } from '@framework/Reflection'
+import { ModifiableEntity, EntityControlMessage, Entity, parseLite, getToString, JavascriptMessage, OperationSymbol } from '@framework/Signum.Entities'
 import { API } from '../AuthClient'
 import { OperationRulePack, OperationAllowed, OperationAllowedRule, AuthAdminMessage, PermissionSymbol, AuthMessage } from '../Signum.Entities.Authorization'
 import { ColorRadio, GrayCheckbox } from './ColoredRadios'
 
 import "./AuthAdmin.css"
-import { Button } from '../../../../Framework/Signum.React/Scripts/Components';
+import { Button } from '@framework/Components';
 
 export default class OperationRulePackControl extends React.Component<{ ctx: TypeContext<OperationRulePack> }> implements IRenderButtons {
 

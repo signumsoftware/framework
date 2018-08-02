@@ -31,7 +31,7 @@ namespace Signum.Engine.Help
 
             if (Reflector.IsIEntity(pr.Type))
             {
-                Implementations imp = Schema.Current.FindImplementations(pr); 
+                Implementations imp = Schema.Current.FindImplementations(pr);
 
                 return EntityProperty(pr, pr.Type, imp.TypeLinks(pr.Type)) + validations;
             }
@@ -39,7 +39,7 @@ namespace Signum.Engine.Help
             {
                 Type cleanType = Lite.Extract(pr.Type);
 
-                Implementations imp = Schema.Current.FindImplementations(pr); 
+                Implementations imp = Schema.Current.FindImplementations(pr);
 
                 return EntityProperty(pr, cleanType, imp.TypeLinks(cleanType)) + validations;
             }
@@ -53,12 +53,12 @@ namespace Signum.Engine.Help
 
                 if (elemType.IsIEntity())
                 {
-                    Implementations imp = Schema.Current.FindImplementations(pr.Add("Item")); 
+                    Implementations imp = Schema.Current.FindImplementations(pr.Add("Item"));
 
                     return HelpMessage._0IsACollectionOfElements1.NiceToString(pr.PropertyInfo.NiceName(), imp.TypeLinks(elemType)) + validations;
                 }
                 else if (elemType.IsLite())
-                {   
+                {
                     Implementations imp = Schema.Current.FindImplementations(pr.Add("Item"));
 
                     return HelpMessage._0IsACollectionOfElements1.NiceToString(pr.PropertyInfo.NiceName(), imp.TypeLinks(Lite.Extract(elemType))) + validations;
@@ -183,19 +183,23 @@ namespace Signum.Engine.Help
 
             switch (operationInfo.OperationType)
             {
-                case OperationType.Execute: return HelpMessage.Call0Over1OfThe2.NiceToString().ForGenderAndNumber(type.GetGender()).FormatWith(
-                    operationInfo.OperationSymbol.NiceToString(),
-                    operationInfo.Lite.Value ? HelpMessage.TheDatabaseVersion.NiceToString() : HelpMessage.YourVersion.NiceToString(), 
-                    type.NiceName());
+                case OperationType.Execute:
+                    return HelpMessage.Call0Over1OfThe2.NiceToString().ForGenderAndNumber(type.GetGender()).FormatWith(
+operationInfo.OperationSymbol.NiceToString(),
+operationInfo.CanBeModified.Value ? HelpMessage.TheDatabaseVersion.NiceToString() : HelpMessage.YourVersion.NiceToString(),
+type.NiceName());
                 case OperationType.Delete: return HelpMessage.RemovesThe0FromTheDatabase.NiceToString(type.NiceName());
-                case OperationType.Constructor: return
-                    HelpMessage.ConstructsANew0.NiceToString().ForGenderAndNumber(type.GetGender()).FormatWith(type.NiceName());
-                case OperationType.ConstructorFrom: return
-                    HelpMessage.ConstructsANew0.NiceToString().ForGenderAndNumber(operationInfo.ReturnType.GetGender()).FormatWith(operationInfo.ReturnType.NiceName()) + " " +
-                    HelpMessage.From0OfThe1.NiceToString().ForGenderAndNumber(type.GetGender()).FormatWith(operationInfo.Lite.Value ? HelpMessage.TheDatabaseVersion.NiceToString() : HelpMessage.YourVersion.NiceToString(), type.NiceName());
-                case OperationType.ConstructorFromMany: return
-                    HelpMessage.ConstructsANew0.NiceToString().ForGenderAndNumber(operationInfo.ReturnType.GetGender()).FormatWith(operationInfo.ReturnType.NiceName()) + " " +
-                    HelpMessage.FromMany0.NiceToString().ForGenderAndNumber(type.GetGender()).FormatWith(type.NicePluralName());
+                case OperationType.Constructor:
+                    return
+HelpMessage.ConstructsANew0.NiceToString().ForGenderAndNumber(type.GetGender()).FormatWith(type.NiceName());
+                case OperationType.ConstructorFrom:
+                    return
+HelpMessage.ConstructsANew0.NiceToString().ForGenderAndNumber(operationInfo.ReturnType.GetGender()).FormatWith(operationInfo.ReturnType.NiceName()) + " " +
+HelpMessage.From0OfThe1.NiceToString().ForGenderAndNumber(type.GetGender()).FormatWith(operationInfo.CanBeModified.Value ? HelpMessage.YourVersion.NiceToString() : HelpMessage.TheDatabaseVersion.NiceToString(), type.NiceName());
+                case OperationType.ConstructorFromMany:
+                    return
+HelpMessage.ConstructsANew0.NiceToString().ForGenderAndNumber(operationInfo.ReturnType.GetGender()).FormatWith(operationInfo.ReturnType.NiceName()) + " " +
+HelpMessage.FromMany0.NiceToString().ForGenderAndNumber(type.GetGender()).FormatWith(type.NicePluralName());
             }
 
             return "";
@@ -215,7 +219,7 @@ namespace Signum.Engine.Help
             if (kvp.PropertyRoutes != null)
                 return HelpMessage._0IsA1AndShows2.NiceToString(kvp.DisplayName(), typeDesc, kvp.PropertyRoutes.CommaAnd(pr =>
                     pr.PropertyRouteType == PropertyRouteType.Root ? TypeLink(pr.RootType) :
-                    HelpMessage.TheProperty0.NiceToString(PropertyLink(pr.PropertyRouteType == PropertyRouteType.LiteEntity ? pr.Parent: pr))));
+                    HelpMessage.TheProperty0.NiceToString(PropertyLink(pr.PropertyRouteType == PropertyRouteType.LiteEntity ? pr.Parent : pr))));
             else
                 return HelpMessage._0IsACalculated1.NiceToString(kvp.DisplayName(), typeDesc);
         }
@@ -244,14 +248,12 @@ namespace Signum.Engine.Help
 
             string kind = HelpKindMessage.HisMainFunctionIsTo0.NiceToString(GetEntityKindMessage(EntityKindCache.GetEntityKind(type), EntityKindCache.GetEntityData(type), type.GetGender()));
 
-            return typeIs + ". " + kind + "."; 
+            return typeIs + ". " + kind + ".";
         }
-
-    
-
+        
         private static string GetEntityKindMessage(EntityKind entityKind, EntityData entityData, char? gender)
         {
-            var data = 
+            var data =
                 entityData == EntityData.Master ? HelpKindMessage.AndIsRarelyCreatedOrModified.NiceToString().ForGenderAndNumber(gender) :
                 HelpKindMessage.AndAreFrequentlyCreatedOrModified.NiceToString().ForGenderAndNumber(gender);
 

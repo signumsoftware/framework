@@ -1,12 +1,12 @@
 ﻿import * as React from 'react'
-import { Dic } from '../../../../Framework/Signum.React/Scripts/Globals'
-import { getMixin } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
+import { Dic } from '@framework/Globals'
+import { getMixin } from '@framework/Signum.Entities'
 import { WorkflowConnectionModel, WorkflowConditionEntity, WorkflowActionEntity, WorkflowMessage } from '../Signum.Entities.Workflow'
 import {
     ValueLine, EntityLine, RenderEntity, EntityCombo, EntityList, EntityDetail, EntityStrip,
     EntityRepeater, EntityCheckboxList, EntityTabRepeater, TypeContext, EntityTable
-} from '../../../../Framework/Signum.React/Scripts/Lines'
-import { SearchControl, ValueSearchControl } from '../../../../Framework/Signum.React/Scripts/Search'
+} from '@framework/Lines'
+import { SearchControl, ValueSearchControl } from '@framework/Search'
 
 export default class WorkflowConnectionModelComponent extends React.Component<{ ctx: TypeContext<WorkflowConnectionModel> }> {
 
