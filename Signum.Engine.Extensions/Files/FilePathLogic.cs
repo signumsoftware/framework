@@ -40,17 +40,17 @@ namespace Signum.Engine.Files
 
         public static void AssertStarted(SchemaBuilder sb)
         {
-            sb.AssertDefined(ReflectionTools.GetMethodInfo(() => FilePathLogic.Start(null, null)));
+            sb.AssertDefined(ReflectionTools.GetMethodInfo(() => FilePathLogic.Start(null)));
         }
 
-        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
+        public static void Start(SchemaBuilder sb)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
-                FileTypeLogic.Start(sb, dqm);
+                FileTypeLogic.Start(sb);
 
                 sb.Include<FilePathEntity>()
-                    .WithQuery(dqm, () => p => new
+                    .WithQuery(() => p => new
                     {
                         Entity = p,
                         p.Id,
@@ -90,8 +90,8 @@ namespace Signum.Engine.Files
 
                 sb.AddUniqueIndex<FilePathEntity>(f => new { f.Suffix, f.FileType }); //With mixins, add AttachToUniqueIndexes to field
 
-                dqm.RegisterExpression((FilePathEntity fp) => fp.WebImage(), () => typeof(WebImage).NiceName(), "Image");
-                dqm.RegisterExpression((FilePathEntity fp) => fp.WebDownload(), () => typeof(WebDownload).NiceName(), "Download");
+                QueryLogic.Expressions.Register((FilePathEntity fp) => fp.WebImage(), () => typeof(WebImage).NiceName(), "Image");
+                QueryLogic.Expressions.Register((FilePathEntity fp) => fp.WebDownload(), () => typeof(WebDownload).NiceName(), "Download");
             }
         }
 

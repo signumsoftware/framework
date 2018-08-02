@@ -33,10 +33,10 @@ namespace Signum.Engine.Processes
 
         public static void AssertStarted(SchemaBuilder sb)
         {
-            sb.AssertDefined(ReflectionTools.GetMethodInfo(() => Start(null, null, true, true)));
+            sb.AssertDefined(ReflectionTools.GetMethodInfo(() => Start(null, true, true)));
         }
 
-        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm, bool packages, bool packageOperations)
+        public static void Start(SchemaBuilder sb, bool packages, bool packageOperations)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
@@ -45,7 +45,7 @@ namespace Signum.Engine.Processes
                 sb.Settings.AssertImplementedBy((ProcessExceptionLineEntity pel) => pel.Line, typeof(PackageLineEntity));
 
                 sb.Include<PackageLineEntity>()
-                    .WithQuery(dqm, () => pl => new
+                    .WithQuery(() => pl => new
                     {
                         Entity = pl,
                         pl.Package,
@@ -55,7 +55,7 @@ namespace Signum.Engine.Processes
                         pl.FinishTime,
                     });
 
-                dqm.RegisterQuery(PackageQuery.PackageLineLastProcess, () =>
+                QueryLogic.Queries.Register(PackageQuery.PackageLineLastProcess, () =>
                     from pl in Database.Query<PackageLineEntity>()
                     let p = pl.Package.Entity.LastProcess()
                     select new
@@ -71,7 +71,7 @@ namespace Signum.Engine.Processes
                     });
                 
                 
-                dqm.RegisterExpression((PackageEntity p) => p.Lines(), () => ProcessMessage.Lines.NiceToString());
+                QueryLogic.Expressions.Register((PackageEntity p) => p.Lines(), () => ProcessMessage.Lines.NiceToString());
 
                 if (packages)
                 {
@@ -79,14 +79,14 @@ namespace Signum.Engine.Processes
                     sb.Settings.AssertImplementedBy((ProcessEntity pe) => pe.Data, typeof(PackageEntity));
 
                     sb.Include<PackageEntity>()
-                        .WithQuery(dqm, () => pk => new
+                        .WithQuery(() => pk => new
                         {
                             Entity = pk,
                             pk.Id,
                             pk.Name,
                         });
 
-                    dqm.RegisterQuery(PackageQuery.PackageLastProcess, () =>
+                    QueryLogic.Queries.Register(PackageQuery.PackageLastProcess, () =>
                         from pk in Database.Query<PackageEntity>()
                         let pe = pk.LastProcess()
                         select new
@@ -108,7 +108,7 @@ namespace Signum.Engine.Processes
                     sb.Settings.AssertImplementedBy((ProcessEntity pe) => pe.Data, typeof(PackageOperationEntity));
 
                     sb.Include<PackageOperationEntity>()
-                          .WithQuery(dqm, () => pk => new
+                          .WithQuery(() => pk => new
                           {
                               Entity = pk,
                               pk.Id,
@@ -116,7 +116,7 @@ namespace Signum.Engine.Processes
                               pk.Operation,
                           });
 
-                    dqm.RegisterQuery(PackageQuery.PackageOperationLastProcess, () =>
+                    QueryLogic.Queries.Register(PackageQuery.PackageOperationLastProcess, () =>
                         from p in Database.Query<PackageOperationEntity>()
                         let pe = p.LastProcess()
                         select new

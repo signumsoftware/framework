@@ -93,13 +93,13 @@ namespace Signum.Engine.MachineLearning
             return Trainings.TryGetC(lite)?.Context;
         }
 
-        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm, Func<IFileTypeAlgorithm> predictorFileAlgorithm)
+        public static void Start(SchemaBuilder sb, Func<IFileTypeAlgorithm> predictorFileAlgorithm)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
                 sb.Include<PredictorEntity>()
                     .WithVirtualMList(p => p.SubQueries, mc => mc.Predictor)
-                    .WithQuery(dqm, () => e => new
+                    .WithQuery(() => e => new
                     {
                         Entity = e,
                         e.Id,
@@ -113,7 +113,7 @@ namespace Signum.Engine.MachineLearning
                 PredictorGraph.Register();
 
                 sb.Include<PredictorSubQueryEntity>()
-                    .WithQuery(dqm, () => e => new
+                    .WithQuery(() => e => new
                     {
                         Entity = e,
                         e.Id,
@@ -124,8 +124,8 @@ namespace Signum.Engine.MachineLearning
 
                 sb.Include<PredictorCodificationEntity>()
                     .WithUniqueIndex(pc => new { pc.Predictor, pc.Index, pc.Usage })
-                    .WithExpressionFrom(dqm, (PredictorEntity e) => e.Codifications())
-                    .WithQuery(dqm, () => e => new
+                    .WithExpressionFrom((PredictorEntity e) => e.Codifications())
+                    .WithQuery(() => e => new
                     {
                         Entity = e,
                         e.Id,
@@ -145,8 +145,8 @@ namespace Signum.Engine.MachineLearning
                     });
 
                 sb.Include<PredictorEpochProgressEntity>()
-                    .WithExpressionFrom(dqm, (PredictorEntity e) => e.EpochProgresses())
-                    .WithQuery(dqm, () => e => new
+                    .WithExpressionFrom((PredictorEntity e) => e.EpochProgresses())
+                    .WithQuery(() => e => new
                     {
                         Entity = e,
                         e.Predictor,
@@ -161,10 +161,10 @@ namespace Signum.Engine.MachineLearning
 
                 FileTypeLogic.Register(PredictorFileType.PredictorFile, predictorFileAlgorithm());
 
-                SymbolLogic<PredictorAlgorithmSymbol>.Start(sb, dqm, () => Algorithms.Keys);
-                SymbolLogic<PredictorColumnEncodingSymbol>.Start(sb, dqm, () => Algorithms.Values.SelectMany(a => a.GetRegisteredEncodingSymbols()).Distinct());
-                SymbolLogic<PredictorResultSaverSymbol>.Start(sb, dqm, () => ResultSavers.Keys);
-                SymbolLogic<PredictorPublicationSymbol>.Start(sb, dqm, () => Publications.Keys);
+                SymbolLogic<PredictorAlgorithmSymbol>.Start(sb, () => Algorithms.Keys);
+                SymbolLogic<PredictorColumnEncodingSymbol>.Start(sb, () => Algorithms.Values.SelectMany(a => a.GetRegisteredEncodingSymbols()).Distinct());
+                SymbolLogic<PredictorResultSaverSymbol>.Start(sb, () => ResultSavers.Keys);
+                SymbolLogic<PredictorPublicationSymbol>.Start(sb, () => Publications.Keys);
 
                 sb.Schema.EntityEvents<PredictorEntity>().Retrieved += PredictorEntity_Retrieved;
                 sb.Schema.EntityEvents<PredictorSubQueryEntity>().Retrieved += PredictorMultiColumnEntity_Retrieved;
@@ -174,7 +174,7 @@ namespace Signum.Engine.MachineLearning
                 Validator.PropertyValidator((PredictorSubQueryEntity c) => c.Columns).StaticPropertyValidation += SubQueryColumns_StaticPropertyValidation;
 
                 sb.Include<PredictSimpleResultEntity>()
-                    .WithQuery(dqm, () => e => new
+                    .WithQuery(() => e => new
                     {
                         Entity = e,
                         e.Id,
@@ -259,7 +259,7 @@ namespace Signum.Engine.MachineLearning
             if (mainQuery.GroupResults)
                 return mainQuery.Columns.Select(a => a.Token.Token).Where(t => !(t is AggregateToken)).ToList();
 
-            var qd = DynamicQueryManager.Current.QueryDescription(mainQuery.Query.ToQueryName());
+            var qd = QueryLogic.Queries.QueryDescription(mainQuery.Query.ToQueryName());
             return new List<QueryToken> { QueryUtils.Parse("Entity", qd, 0) };
         }
 
@@ -457,7 +457,7 @@ namespace Signum.Engine.MachineLearning
 
         public static void ParseData(this PredictorMainQueryEmbedded mainQuery)
         {
-            QueryDescription description = DynamicQueryManager.Current.QueryDescription(mainQuery.Query.ToQueryName());
+            QueryDescription description = QueryLogic.Queries.QueryDescription(mainQuery.Query.ToQueryName());
             mainQuery.ParseData(description);
         }
 
@@ -468,7 +468,7 @@ namespace Signum.Engine.MachineLearning
 
         public static void ParseData(this PredictorSubQueryEntity subQuery)
         {
-            QueryDescription description = DynamicQueryManager.Current.QueryDescription(subQuery.Query.ToQueryName());
+            QueryDescription description = QueryLogic.Queries.QueryDescription(subQuery.Query.ToQueryName());
 
             subQuery.ParseData(description);
         }

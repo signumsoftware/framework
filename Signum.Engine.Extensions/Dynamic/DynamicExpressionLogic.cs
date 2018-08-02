@@ -22,7 +22,7 @@ namespace Signum.Engine.Dynamic
 {
     public static class DynamicExpressionLogic
     {
-        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
+        public static void Start(SchemaBuilder sb)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
@@ -30,7 +30,7 @@ namespace Signum.Engine.Dynamic
                     .WithUniqueIndex(a => new { a.FromType, a.Name })
                     .WithSave(DynamicExpressionOperation.Save)
                     .WithDelete(DynamicExpressionOperation.Delete)
-                    .WithQuery(dqm, () => e => new
+                    .WithQuery(() => e => new
                     {
                         Entity = e,
                         e.Id,
@@ -100,7 +100,7 @@ namespace Signum.Engine.Dynamic
 
         public static void WriteDynamicStarter(StringBuilder sb, int indent) {
 
-            sb.AppendLine("CodeGenExpressionStarter.Start(sb, dqm);".Indent(indent));
+            sb.AppendLine("CodeGenExpressionStarter.Start(sb);".Indent(indent));
         }
 
         public static List<CodeFile> GetCodeFiles()
@@ -203,7 +203,7 @@ namespace Signum.Engine.Dynamic
                 sb.AppendLine("");
             }
 
-            sb.AppendLine("    public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)");
+            sb.AppendLine("    public static void Start(SchemaBuilder sb)");
             sb.AppendLine("    {");
 
             foreach (var kvp in fieldNames)
@@ -211,7 +211,7 @@ namespace Signum.Engine.Dynamic
                 var entity = kvp.Value;
                 var varName = $"{entity.Name}{entity.FromType.BeforeLast("Entity")}".FirstLower();
 
-                sb.AppendLine($"        var {varName} = dqm.RegisterExpression(({entity.FromType} e) => e.{entity.Name}(){GetNiceNameCode(entity)});");
+                sb.AppendLine($"        var {varName} = QueryLogic.Expressions.Register(({entity.FromType} e) => e.{entity.Name}(){GetNiceNameCode(entity)});");
                 if(entity.Format.HasText()) 
                     sb.AppendLine($"        {varName}.ForceFormat = {CSharpRenderer.Value(entity.Format, typeof(string), new string[0])};");
                 if (entity.Unit.HasText())  

@@ -34,7 +34,7 @@ namespace Signum.Engine.Mailing
             this.systemEmail = systemEmail;
 
             this.queryName = QueryLogic.ToQueryName(template.Query.Key);
-            this.qd = DynamicQueryManager.Current.QueryDescription(queryName);
+            this.qd = QueryLogic.Queries.QueryDescription(queryName);
             this.smtpConfig = EmailTemplateLogic.GetSmtpConfiguration == null ? null : EmailTemplateLogic.GetSmtpConfiguration(template, systemEmail?.UntypedEntity ?? entity);
         }
 
@@ -311,7 +311,7 @@ namespace Signum.Engine.Mailing
                 var filters = systemEmail != null ? systemEmail.GetFilters(qd) :
                     new List<Filter> { new Filter(QueryUtils.Parse("Entity", qd, 0), FilterOperation.EqualTo, entity.ToLite()) };
 
-                this.table = DynamicQueryManager.Current.ExecuteQuery(new QueryRequest
+                this.table = QueryLogic.Queries.ExecuteQuery(new QueryRequest
                 {
                     QueryName = queryName,
                     Columns = columns,

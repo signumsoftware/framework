@@ -22,13 +22,13 @@ namespace Signum.Engine.Rest
         public static ResetLazy<Dictionary<string, RestApiKeyEntity>> RestApiKeyCache;
         public static Func<string> GenerateRestApiKey = () => DefaultGenerateRestApiKey();
 
-        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
+        public static void Start(SchemaBuilder sb)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
                 sb.Include<RestApiKeyEntity>()
                     .WithDelete(RestApiKeyOperation.Delete)
-                    .WithQuery(dqm, () => e => new
+                    .WithQuery(() => e => new
                     {
                         Entity = e,
                         e.Id,

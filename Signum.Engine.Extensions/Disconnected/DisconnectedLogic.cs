@@ -1,4 +1,5 @@
-﻿using Signum.Engine.DynamicQuery;
+﻿using Signum.Engine.Basics;
+using Signum.Engine.DynamicQuery;
 using Signum.Engine.Maps;
 using Signum.Engine.Operations;
 using Signum.Entities;
@@ -46,14 +47,14 @@ namespace Signum.Engine.Disconnected
 
         public static long ServerSeed;
 
-        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm, long serverSeed = 1000000000)
+        public static void Start(SchemaBuilder sb, long serverSeed = 1000000000)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
                 ServerSeed = serverSeed;
 
                 sb.Include<DisconnectedMachineEntity>()
-                    .WithQuery(dqm, () => dm => new
+                    .WithQuery(() => dm => new
                     {
                         Entity = dm,
                         dm.MachineName,
@@ -63,7 +64,7 @@ namespace Signum.Engine.Disconnected
                     });
 
                 sb.Include<DisconnectedExportEntity>()
-                    .WithQuery(dqm, () => dm => new
+                    .WithQuery(() => dm => new
                     {
                         Entity = dm,
                         dm.CreationDate,
@@ -74,7 +75,7 @@ namespace Signum.Engine.Disconnected
                     });
 
                 sb.Include<DisconnectedImportEntity>()
-                    .WithQuery(dqm, () => dm => new
+                    .WithQuery(() => dm => new
                     {
                         Entity = dm,
                         dm.CreationDate,
@@ -84,8 +85,8 @@ namespace Signum.Engine.Disconnected
                         dm.Exception,
                     });
                 
-                dqm.RegisterExpression((DisconnectedMachineEntity dm) => dm.Imports(), () => DisconnectedMessage.Imports.NiceToString());
-                dqm.RegisterExpression((DisconnectedMachineEntity dm) => dm.Exports(), () => DisconnectedMessage.Exports.NiceToString());
+                QueryLogic.Expressions.Register((DisconnectedMachineEntity dm) => dm.Imports(), () => DisconnectedMessage.Imports.NiceToString());
+                QueryLogic.Expressions.Register((DisconnectedMachineEntity dm) => dm.Exports(), () => DisconnectedMessage.Exports.NiceToString());
 
                 MachineGraph.Register();
 

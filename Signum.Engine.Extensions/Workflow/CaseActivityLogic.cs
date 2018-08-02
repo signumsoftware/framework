@@ -133,13 +133,13 @@ namespace Signum.Engine.Workflow
             return ExecutedTimersExpression.Evaluate(e);
         }
 
-        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
+        public static void Start(SchemaBuilder sb)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
                 sb.Include<CaseEntity>()
-                    .WithExpressionFrom(dqm, (WorkflowEntity w) => w.Cases())
-                    .WithQuery(dqm, () => e => new
+                    .WithExpressionFrom((WorkflowEntity w) => w.Cases())
+                    .WithQuery(() => e => new
                     {
                         Entity = e,
                         e.Id,
@@ -150,7 +150,7 @@ namespace Signum.Engine.Workflow
 
                 sb.Include<CaseTagTypeEntity>()
                     .WithSave(CaseTagTypeOperation.Save)
-                    .WithQuery(dqm, () => e => new
+                    .WithQuery(() => e => new
                     {
                         Entity = e,
                         e.Id,
@@ -160,8 +160,8 @@ namespace Signum.Engine.Workflow
 
 
                 sb.Include<CaseTagEntity>()
-                    .WithExpressionFrom(dqm, (CaseEntity ce) => ce.Tags())
-                    .WithQuery(dqm, () => e => new
+                    .WithExpressionFrom((CaseEntity ce) => ce.Tags())
+                    .WithQuery(() => e => new
                     {
                         Entity = e,
                         e.Id,
@@ -195,10 +195,10 @@ namespace Signum.Engine.Workflow
                 sb.Include<CaseActivityEntity>()
                     .WithIndex(a => new { a.ScriptExecution.ProcessIdentifier }, a => a.DoneDate == null)
                     .WithIndex(a => new { a.ScriptExecution.NextExecution }, a => a.DoneDate == null)
-                    .WithExpressionFrom(dqm, (WorkflowActivityEntity c) => c.CaseActivities())
-                    .WithExpressionFrom(dqm, (CaseEntity c) => c.CaseActivities())
-                    .WithExpressionFrom(dqm, (CaseActivityEntity c) => c.NextActivities())
-                    .WithQuery(dqm, () => e => new
+                    .WithExpressionFrom((WorkflowActivityEntity c) => c.CaseActivities())
+                    .WithExpressionFrom((CaseEntity c) => c.CaseActivities())
+                    .WithExpressionFrom((CaseActivityEntity c) => c.NextActivities())
+                    .WithQuery(() => e => new
                     {
                         Entity = e,
                         e.Id,
@@ -212,8 +212,8 @@ namespace Signum.Engine.Workflow
 
 
                 sb.Include<CaseActivityExecutedTimerEntity>()
-                    .WithExpressionFrom(dqm, (CaseActivityEntity ca) => ca.ExecutedTimers())
-                    .WithQuery(dqm, () => e => new
+                    .WithExpressionFrom((CaseActivityEntity ca) => ca.ExecutedTimers())
+                    .WithQuery(() => e => new
                     {
                         Entity = e,
                         e.Id,
@@ -222,7 +222,7 @@ namespace Signum.Engine.Workflow
                         e.BoundaryEvent,
                     });
 
-                dqm.RegisterExpression((WorkflowActivityEntity a) => a.AverageDuration(), () => WorkflowActivityMessage.AverageDuration.NiceToString());
+                QueryLogic.Expressions.Register((WorkflowActivityEntity a) => a.AverageDuration(), () => WorkflowActivityMessage.AverageDuration.NiceToString());
 
                 SimpleTaskLogic.Register(CaseActivityTask.Timeout, (ScheduledTaskContext ctx) =>
                 {
@@ -266,11 +266,11 @@ namespace Signum.Engine.Workflow
                 });
                 ProcessLogic.Register(CaseActivityProcessAlgorithm.Timeout, new PackageExecuteAlgorithm<CaseActivityEntity>(CaseActivityOperation.Timer));
 
-                dqm.RegisterExpression((CaseEntity c) => c.DecompositionSurrogateActivity());
+                QueryLogic.Expressions.Register((CaseEntity c) => c.DecompositionSurrogateActivity());
 
                 sb.Include<CaseNotificationEntity>()
-                    .WithExpressionFrom(dqm, (CaseActivityEntity c) => c.Notifications())
-                    .WithQuery(dqm, () => e => new
+                    .WithExpressionFrom((CaseActivityEntity c) => c.Notifications())
+                    .WithQuery(() => e => new
                     {
                         Entity = e,
                         e.Id,
@@ -290,7 +290,7 @@ namespace Signum.Engine.Workflow
                 }.Register();
 
 
-                dqm.RegisterQuery(CaseActivityQuery.Inbox, () => DynamicQueryCore.Auto(
+                QueryLogic.Queries.Register(CaseActivityQuery.Inbox, () => DynamicQueryCore.Auto(
                         from cn in Database.Query<CaseNotificationEntity>()
                         where cn.User == UserEntity.Current.ToLite()
                         let ca = cn.CaseActivity.Entity

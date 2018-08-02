@@ -24,7 +24,7 @@ namespace Signum.Engine.Dashboard
         public static ResetLazy<Dictionary<Lite<DashboardEntity>, DashboardEntity>> Dashboards;
         public static ResetLazy<Dictionary<Type, List<Lite<DashboardEntity>>>> DashboardsByType;
 
-        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
+        public static void Start(SchemaBuilder sb)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
@@ -44,7 +44,7 @@ namespace Signum.Engine.Dashboard
                 });
 
                 sb.Include<DashboardEntity>()
-                    .WithQuery(dqm, () => cp => new
+                    .WithQuery(() => cp => new
                     {
                         Entity = cp,
                         cp.Id,
@@ -55,7 +55,7 @@ namespace Signum.Engine.Dashboard
                     });
 
                 sb.Include<LinkListPartEntity>()
-                    .WithQuery(dqm, () => cp => new
+                    .WithQuery(() => cp => new
                     {
                         Entity = cp,
                         ToStr = cp.ToString(),
@@ -63,7 +63,7 @@ namespace Signum.Engine.Dashboard
                     });
                 
                 sb.Include<ValueUserQueryListPartEntity>()
-                    .WithQuery(dqm, () => cp => new
+                    .WithQuery(() => cp => new
                     {
                         Entity = cp,
                         ToStr = cp.ToString(),

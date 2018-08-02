@@ -49,12 +49,12 @@ namespace Signum.Engine.Alerts
             sb.AssertDefined(ReflectionTools.GetMethodInfo(() => Start(null, null, null)));
         }
 
-        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm, params Type[] registerExpressionsFor)
+        public static void Start(SchemaBuilder sb, params Type[] registerExpressionsFor)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
                 sb.Include<AlertEntity>()
-                    .WithQuery(dqm, () => a => new
+                    .WithQuery(() => a => new
                     {
                         Entity = a,
                         a.Id,
@@ -73,7 +73,7 @@ namespace Signum.Engine.Alerts
 
                 sb.Include<AlertTypeEntity>()
                     .WithSave(AlertTypeOperation.Save)
-                    .WithQuery(dqm, () => t => new
+                    .WithQuery(() => t => new
                     {
                         Entity = t,
                         t.Id,
@@ -89,8 +89,8 @@ namespace Signum.Engine.Alerts
                     var myActiveAlerts = Signum.Utilities.ExpressionTrees.Linq.Expr((Entity ident) => ident.MyActiveAlerts());
                     foreach (var type in registerExpressionsFor)
                     {
-                        dqm.RegisterExpression(new ExtensionInfo(type, alerts, alerts.Body.Type, "Alerts", () => typeof(AlertEntity).NicePluralName()));
-                        dqm.RegisterExpression(new ExtensionInfo(type, myActiveAlerts, myActiveAlerts.Body.Type, "MyActiveAlerts", () => AlertMessage.MyActiveAlerts.NiceToString()));
+                        QueryLogic.Expressions.Register(new ExtensionInfo(type, alerts, alerts.Body.Type, "Alerts", () => typeof(AlertEntity).NicePluralName()));
+                        QueryLogic.Expressions.Register(new ExtensionInfo(type, myActiveAlerts, myActiveAlerts.Body.Type, "MyActiveAlerts", () => AlertMessage.MyActiveAlerts.NiceToString()));
                     }
                 }
 

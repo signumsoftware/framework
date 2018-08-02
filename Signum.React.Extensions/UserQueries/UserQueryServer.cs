@@ -30,7 +30,7 @@ namespace Signum.React.UserQueries
             {
                 if (uq.Query != null)
                 {
-                    var qd = DynamicQueryManager.Current.QueryDescription(uq.Query.ToQueryName());
+                    var qd = QueryLogic.Queries.QueryDescription(uq.Query.ToQueryName());
                     uq.ParseData(qd);
                 }
             });

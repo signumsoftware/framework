@@ -31,13 +31,13 @@ namespace Signum.Engine.Files
             FileTypes.Add(fileTypeSymbol, algorithm);
         }
 
-        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
+        public static void Start(SchemaBuilder sb)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
-                SymbolLogic<FileTypeSymbol>.Start(sb,dqm, () => FileTypes.Keys.ToHashSet());
+                SymbolLogic<FileTypeSymbol>.Start(sb,() => FileTypes.Keys.ToHashSet());
                 sb.Include<FileTypeSymbol>()
-                    .WithQuery(dqm, () => f => new
+                    .WithQuery(() => f => new
                     {
                         Entity = f,
                         f.Key

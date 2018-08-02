@@ -49,14 +49,13 @@ namespace Signum.Engine.Mailing
 
         internal static void AssertStarted(SchemaBuilder sb)
         {
-            sb.AssertDefined(ReflectionTools.GetMethodInfo(() => EmailLogic.Start(null, null, null, null, null, null)));
+            sb.AssertDefined(ReflectionTools.GetMethodInfo(() => EmailLogic.Start(null, null, null, null, null)));
         }
 
         public static Func<EmailMessageEntity, SmtpClient> GetSmtpClient;
         
         public static void Start(
-            SchemaBuilder sb, 
-            DynamicQueryManager dqm, 
+            SchemaBuilder sb,  
             Func<EmailConfigurationEmbedded> getConfiguration, 
             Func<EmailTemplateEntity, ModifiableEntity, SmtpConfigurationEntity> getSmtpConfiguration,  
             Func<EmailMessageEntity, SmtpClient> getSmtpClient = null, 
@@ -71,14 +70,14 @@ namespace Signum.Engine.Mailing
                 CultureInfoLogic.AssertStarted(sb);
                 EmailLogic.getConfiguration = getConfiguration;
                 EmailLogic.GetSmtpClient = getSmtpClient ?? throw new ArgumentNullException("getSmtpClient");
-                EmailTemplateLogic.Start(sb, dqm, getSmtpConfiguration);
+                EmailTemplateLogic.Start(sb, getSmtpConfiguration);
                 if (attachment != null)
                     FileTypeLogic.Register(EmailFileType.Attachment, attachment);
 
-                Schema.Current.WhenIncluded<ProcessEntity>(() => EmailPackageLogic.Start(sb, dqm));
+                Schema.Current.WhenIncluded<ProcessEntity>(() => EmailPackageLogic.Start(sb));
 
                 sb.Include<EmailMessageEntity>()
-                    .WithQuery(dqm, () => e => new
+                    .WithQuery(() => e => new
                     {
                         Entity = e,
                         e.Id,

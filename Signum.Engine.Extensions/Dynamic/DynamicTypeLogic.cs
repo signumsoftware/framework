@@ -26,12 +26,12 @@ namespace Signum.Engine.Dynamic
     {
         public static ResetLazy<HashSet<Type>> AvailableEmbeddedEntities;
 
-        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
+        public static void Start(SchemaBuilder sb)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
                 sb.Include<DynamicTypeEntity>()
-                    .WithQuery(dqm, () => e => new
+                    .WithQuery(() => e => new
                     {
                         Entity = e,
                         e.Id,
@@ -164,7 +164,7 @@ namespace Signum.Engine.Dynamic
 
             var types = GetTypes();
             foreach (var item in types)
-                sb.AppendLine($"{item}Logic.Start(sb, dqm);".Indent(indent));
+                sb.AppendLine($"{item}Logic.Start(sb);".Indent(indent));
         }
 
         public static Func<Dictionary<string, Dictionary<string, string>>> GetAlreadyTranslatedExpressions;
@@ -677,7 +677,7 @@ namespace Signum.Engine.Dynamic
 
             sb.AppendLine($"    public static class {this.TypeName}Logic");
             sb.AppendLine($"    {{");
-            sb.AppendLine($"        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)");
+            sb.AppendLine($"        public static void Start(SchemaBuilder sb)");
             sb.AppendLine($"        {{");
             sb.AppendLine($"            if (sb.NotDefined(MethodInfo.GetCurrentMethod()))");
             sb.AppendLine($"            {{");
@@ -736,7 +736,7 @@ namespace Signum.Engine.Dynamic
             {
                 var lines = new[] { "Entity = e" }.Concat(queryFields);
 
-                sb.AppendLine($@"    .WithQuery(dqm, () => e => new 
+                sb.AppendLine($@"    .WithQuery(() => e => new 
     {{ 
 { lines.ToString(",\r\n").Indent(8)}
     }})");
@@ -770,7 +770,7 @@ namespace Signum.Engine.Dynamic
 
             var lines = new[] { "Entity = e" }.Concat(this.Def.QueryFields);
 
-            sb.AppendLine($@"dqm.RegisterQuery(typeof({this.TypeName}Entity), () => DynamicQueryCore.Auto(
+            sb.AppendLine($@"QueryLogic.Queries.Register(typeof({this.TypeName}Entity), () => DynamicQueryCore.Auto(
     from e in Database.Query<{this.TypeName}Entity>()
     select new
     {{

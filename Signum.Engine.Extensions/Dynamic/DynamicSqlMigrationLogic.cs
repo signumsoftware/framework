@@ -35,12 +35,12 @@ namespace Signum.Engine.Dynamic
         public static StringBuilder CurrentLog = null;
         public static string LastLog;
 
-        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
+        public static void Start(SchemaBuilder sb)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
                 sb.Include<DynamicRenameEntity>()
-                      .WithQuery(dqm, () => e => new
+                      .WithQuery(() => e => new
                       {
                           Entity = e,
                           e.Id,
@@ -52,7 +52,7 @@ namespace Signum.Engine.Dynamic
                       });
 
                 sb.Include<DynamicSqlMigrationEntity>()
-                    .WithQuery(dqm, () => e => new
+                    .WithQuery(() => e => new
                     {
                         Entity = e,
                         e.Id,

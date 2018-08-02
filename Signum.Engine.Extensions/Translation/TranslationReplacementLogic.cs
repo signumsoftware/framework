@@ -18,14 +18,14 @@ namespace Signum.Engine.Translation
     {
         public static ResetLazy<Dictionary<CultureInfo, TranslationReplacementPack>> ReplacementsLazy;
 
-        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
+        public static void Start(SchemaBuilder sb)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
                 sb.Include<TranslationReplacementEntity>()
                     .WithSave(TranslationReplacementOperation.Save)
                     .WithDelete(TranslationReplacementOperation.Delete)
-                    .WithQuery(dqm, () => e => new
+                    .WithQuery(() => e => new
                     {
                         Entity = e,
                         e.Id,

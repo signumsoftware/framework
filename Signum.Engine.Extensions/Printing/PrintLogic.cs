@@ -39,14 +39,14 @@ namespace Signum.Engine.Printing
 
         public static FileTypeSymbol TestFileType; 
 
-        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm, FileTypeSymbol testFileType = null)
+        public static void Start(SchemaBuilder sb, FileTypeSymbol testFileType = null)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
                 TestFileType = testFileType;
 
                 sb.Include<PrintLineEntity>()
-                    .WithQuery(dqm, () => p => new
+                    .WithQuery(() => p => new
                     {
                         Entity = p,
                         p.CreationDate,
@@ -58,7 +58,7 @@ namespace Signum.Engine.Printing
                     });
                 
                 sb.Include<PrintPackageEntity>()
-                    .WithQuery(dqm, () => e => new
+                    .WithQuery(() => e => new
                     {
                         Entity = e,
                         e.Id,

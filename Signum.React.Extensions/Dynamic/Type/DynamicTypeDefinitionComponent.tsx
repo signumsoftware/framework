@@ -407,7 +407,7 @@ export class CustomCodeTab extends React.Component<{ definition: DynamicTypeDefi
                                         <input type="button" className="btn btn-danger btn-xs sf-button" value="Register Expressions" onClick={this.handleRegisterExpressionsClick} />
                                     </div>}
                                 <div className="code-container">
-                                    <pre style={{ border: "0px", margin: "0px" }}>{`SchemaBuilder sb, DynamicQueryManager dqm, FluentInclude<${entityName}> fi`}</pre>
+                                    <pre style={{ border: "0px", margin: "0px" }}>{`SchemaBuilder sb, FluentInclude<${entityName}> fi`}</pre>
                                     <CSharpExpressionCodeMirror binding={Binding.create(e, d => d.code)} />
                                 </div>
                             </div>
@@ -537,7 +537,7 @@ save: e => ${os ? `e.Execute(${entityName}Operation.Save)` : "e.Save()"}
     }
 
     handleWithTreeClick = () => {
-        this.popupCodeSnippet(`fi.WithTree(dqm);`);
+        this.popupCodeSnippet(`fi.WithTree();`);
     }
 
     handleRegisterOperationsClick = () => {
@@ -566,7 +566,7 @@ new Graph<${entityName}Entity>.Execute(${entityName}Operation.Save)
     handleRegisterExpressionsClick = () => {
 
         let entityName = this.props.dynamicType.typeName!;
-        this.popupCodeSnippet(`dqm.RegisterExpression((${entityName}Entity e) => e.[Expression Name]());`);
+        this.popupCodeSnippet(`QueryLogic.Expression.Register((${entityName}Entity e) => e.[Expression Name]());`);
     }
 
     handleQueryExpressionClick = () => {

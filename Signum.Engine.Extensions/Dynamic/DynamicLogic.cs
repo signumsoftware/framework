@@ -22,7 +22,7 @@ namespace Signum.Engine.Dynamic
 {
     public static class DynamicLogic
     {
-        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
+        public static void Start(SchemaBuilder sb)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
@@ -115,7 +115,7 @@ namespace Signum.Engine.Dynamic
             }
         }
 
-        public static void StartDynamicModules(SchemaBuilder sb, DynamicQueryManager dqm)
+        public static void StartDynamicModules(SchemaBuilder sb)
         {
             if (CodeGenError != null)
                 return;
@@ -125,7 +125,7 @@ namespace Signum.Engine.Dynamic
                 Assembly assembly = Assembly.LoadFrom(DynamicCode.CodeGenAssemblyPath);
                 Type type = assembly.GetTypes().Where(a => a.Name == "CodeGenStarter").SingleEx();
                 MethodInfo mi = type.GetMethod("Start", BindingFlags.Public | BindingFlags.Static);
-                mi.Invoke(null, new object[] { sb, dqm });
+                mi.Invoke(null, new object[] { sb });
             }
             catch (Exception e)
             {
@@ -221,7 +221,7 @@ namespace Signum.Engine.Dynamic
 
                 sb.AppendLine($"public static class CodeGenStarter");
                 sb.AppendLine("{");
-                sb.AppendLine("    public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)");
+                sb.AppendLine("    public static void Start(SchemaBuilder sb)");
                 sb.AppendLine("    {");
                 DynamicLogic.OnWriteDynamicStarter(sb, 8);
                 sb.AppendLine("    }");

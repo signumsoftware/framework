@@ -25,12 +25,12 @@ namespace Signum.Engine.Mailing
 
         public static Func<EmailMasterTemplateEntity> CreateDefaultMasterTemplate;
 
-        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
+        public static void Start(SchemaBuilder sb)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
                 sb.Include<EmailMasterTemplateEntity>()
-                    .WithQuery(dqm, () => t => new
+                    .WithQuery(() => t => new
                     {
                         Entity = t,
                         t.Id,
