@@ -88,15 +88,15 @@ namespace Signum.Engine.Operations
 
         public static void AssertStarted(SchemaBuilder sb)
         {
-            sb.AssertDefined(ReflectionTools.GetMethodInfo(() => Start(null, null)));
+            sb.AssertDefined(ReflectionTools.GetMethodInfo(() => Start(null)));
         }
 
-        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
+        public static void Start(SchemaBuilder sb)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
                 sb.Include<OperationLogEntity>()
-                    .WithQuery(dqm, () => lo => new
+                    .WithQuery(() => lo => new
                     {
                         Entity = lo,
                         lo.Id,
@@ -108,18 +108,18 @@ namespace Signum.Engine.Operations
                         lo.Exception
                     });
 
-                SymbolLogic<OperationSymbol>.Start(sb, dqm, () => RegisteredOperations);
+                SymbolLogic<OperationSymbol>.Start(sb, () => RegisteredOperations);
 
                 sb.Include<OperationSymbol>()
-                    .WithQuery(dqm, () => os => new
+                    .WithQuery(() => os => new
                     {
                         Entity = os,
                         os.Id,
                         os.Key
                     });
 
-                dqm.RegisterExpression((OperationSymbol o) => o.Logs(), () => OperationMessage.Logs.NiceToString());
-                dqm.RegisterExpression((Entity o) => o.OperationLogs(), () => typeof(OperationLogEntity).NicePluralName());
+                QueryLogic.Expressions.Register((OperationSymbol o) => o.Logs(), () => OperationMessage.Logs.NiceToString());
+                QueryLogic.Expressions.Register((Entity o) => o.OperationLogs(), () => typeof(OperationLogEntity).NicePluralName());
              
 
                 sb.Schema.EntityEventsGlobal.Saving += EntityEventsGlobal_Saving;
@@ -128,28 +128,28 @@ namespace Signum.Engine.Operations
                 sb.Schema.Table<TypeEntity>().PreDeleteSqlSync += new Func<Entity, SqlPreCommand>(Type_PreDeleteSqlSync);
 
                 sb.Schema.SchemaCompleted += OperationLogic_Initializing;
-                sb.Schema.SchemaCompleted += () => RegisterCurrentLogs(sb.Schema, dqm);
+                sb.Schema.SchemaCompleted += () => RegisterCurrentLogs(sb.Schema);
                 
                 ExceptionLogic.DeleteLogs += ExceptionLogic_DeleteLogs;
             }
         }
 
-        private static void RegisterCurrentLogs(Schema schema, DynamicQueryManager dqm)
+        private static void RegisterCurrentLogs(Schema schema)
         {
             var s = Schema.Current;
             foreach (var t in s.Tables.Values.Where(t => t.SystemVersioned != null))
             {
-                giRegisterExpression.GetInvoker(t.Type)(dqm);
+                giRegisterExpression.GetInvoker(t.Type)();
             }
         }
 
-        static GenericInvoker<Action<DynamicQueryManager>> giRegisterExpression =
-            new GenericInvoker<Action<DynamicQueryManager>>((dqm) => RegisterPreviousLog<Entity>(dqm));
+        static GenericInvoker<Action> giRegisterExpression =
+            new GenericInvoker<Action>(() => RegisterPreviousLog<Entity>());
 
-        public static void RegisterPreviousLog<T>(DynamicQueryManager dqm)
+        public static void RegisterPreviousLog<T>()
             where T : Entity
         {
-            dqm.RegisterExpression(
+            QueryLogic.Expressions.Register(
                 (T entity) => entity.PreviousOperationLog(),
                 () => OperationMessage.PreviousOperationLog.NiceToString());
         }

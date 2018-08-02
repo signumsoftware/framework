@@ -165,7 +165,7 @@ namespace Signum.React.Facades
                           where typeof(ModelEntity).IsAssignableFrom(type) && !type.IsAbstract
                           select type).ToList();
 
-            var dqm = DynamicQueryManager.Current;
+            var dqm = QueryLogic.Queries;
 
             var schema = Schema.Current;
             var settings = Schema.Current.Settings;
@@ -241,7 +241,7 @@ namespace Signum.React.Facades
 
         public static Dictionary<string, TypeInfoTS> GetEnums(IEnumerable<Type> allTypes)
         {
-            var dqm = DynamicQueryManager.Current;
+            var dqm = QueryLogic.Queries;
 
             var result = (from type in allTypes
                           where type.IsEnum

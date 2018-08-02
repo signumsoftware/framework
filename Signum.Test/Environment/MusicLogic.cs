@@ -24,15 +24,15 @@ namespace Signum.Test.Environment
             return AlbumsExpression.Evaluate(e);
         }
 
-        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
+        public static void Start(SchemaBuilder sb)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
 
 
                 sb.Include<AlbumEntity>()
-                    .WithExpressionFrom(dqm, (IAuthorEntity au) => au.Albums())
-                    .WithQuery(dqm, () => a => new
+                    .WithExpressionFrom((IAuthorEntity au) => au.Albums())
+                    .WithQuery(() => a => new
                     {
                         Entity = a,
                         a.Id,
@@ -46,7 +46,7 @@ namespace Signum.Test.Environment
 
                 sb.Include<NoteWithDateEntity>()
                     .WithSave(NoteWithDateOperation.Save)
-                    .WithQuery(dqm, () => a => new
+                    .WithQuery(() => a => new
                     {
                         Entity = a,
                         a.Id,
@@ -62,7 +62,7 @@ namespace Signum.Test.Environment
                 sb.Include<ArtistEntity>()
                     .WithSave(ArtistOperation.Save)
                     .WithVirtualMList(a => a.Nominations, n => (Lite<ArtistEntity>)n.Author)
-                    .WithQuery(dqm, () => a => new
+                    .WithQuery(() => a => new
                     {
                         Entity = a,
                         a.Id,
@@ -82,7 +82,7 @@ namespace Signum.Test.Environment
                 }.Register();
 
                 sb.Include<BandEntity>()
-                    .WithQuery(dqm, () => a => new
+                    .WithQuery(() => a => new
                     {
                         Entity = a,
                         a.Id,
@@ -105,7 +105,7 @@ namespace Signum.Test.Environment
 
                 sb.Include<LabelEntity>()
                     .WithSave(LabelOperation.Save)
-                    .WithQuery(dqm, () => a => new
+                    .WithQuery(() => a => new
                     {
                         Entity = a,
                         a.Id,
@@ -114,16 +114,16 @@ namespace Signum.Test.Environment
 
 
                 sb.Include<FolderEntity>()
-                    .WithQuery(dqm, () => e => new
+                    .WithQuery(() => e => new
                     {
                         Entity = e,
                         e.Id,
                         e.Name
                     });
 
-                RegisterAwards(sb, dqm);
+                RegisterAwards(sb);
 
-                dqm.RegisterQuery(typeof(IAuthorEntity), () => DynamicQueryCore.Manual(async (request, description, cancellationToken) =>
+                QueryLogic.Queries.Register(typeof(IAuthorEntity), () => DynamicQueryCore.Manual(async (request, description, cancellationToken) =>
                 {
                     var one = await (from a in Database.Query<ArtistEntity>()
                                      select new
@@ -163,7 +163,7 @@ namespace Signum.Test.Environment
             }
         }
 
-        private static void RegisterAwards(SchemaBuilder sb, DynamicQueryManager dqm)
+        private static void RegisterAwards(SchemaBuilder sb)
         {
             new Graph<AwardEntity>.Execute(AwardOperation.Save)
             {
@@ -174,7 +174,7 @@ namespace Signum.Test.Environment
 
 
             sb.Include<AmericanMusicAwardEntity>()
-                .WithQuery(dqm, () => a => new
+                .WithQuery(() => a => new
                 {
                     Entity = a,
                     a.Id,
@@ -184,7 +184,7 @@ namespace Signum.Test.Environment
                 });
 
             sb.Include<GrammyAwardEntity>()
-                .WithQuery(dqm, () => a => new
+                .WithQuery(() => a => new
                 {
                     Entity = a,
                     a.Id,
@@ -194,7 +194,7 @@ namespace Signum.Test.Environment
                 });
 
             sb.Include<PersonalAwardEntity>()
-                .WithQuery(dqm, () => a => new
+                .WithQuery(() => a => new
                 {
                     Entity = a,
                     a.Id,
@@ -204,7 +204,7 @@ namespace Signum.Test.Environment
                 });
 
             sb.Include<AwardNominationEntity>()
-                .WithQuery(dqm, () => a => new
+                .WithQuery(() => a => new
                 {
                     Entity = a,
                     a.Id,

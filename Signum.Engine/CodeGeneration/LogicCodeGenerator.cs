@@ -156,7 +156,7 @@ namespace Signum.Engine.CodeGeneration
             var allExpressions = expressions.ToList();
 
             StringBuilder sb = new StringBuilder();
-            sb.AppendLine("public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)");
+            sb.AppendLine("public static void Start(SchemaBuilder sb)");
             sb.AppendLine("{");
             sb.AppendLine("    if (sb.NotDefined(MethodInfo.GetCurrentMethod()))");
             sb.AppendLine("    {");
@@ -206,7 +206,7 @@ namespace Signum.Engine.CodeGeneration
 
         protected virtual string GetRegisterExpression(ExpressionInfo ei)
         {
-            return "dqm.RegisterExpression(({from} {f}) => {f}.{name}(), () => typeof({to}).{NiceName}());"
+            return "QueryLogic.Expressions.Register(({from} {f}) => {f}.{name}(), () => typeof({to}).{NiceName}());"
                 .Replace("{from}", ei.FromType.Name)
                 .Replace("{to}", ei.ToType.Name)
                 .Replace("{f}", GetVariableName(ei.FromType))
@@ -229,8 +229,8 @@ namespace Signum.Engine.CodeGeneration
                 GetWithVirtualMLists(type),
                 save != null && ShouldWriteSimpleOperations(save) ? ("   .WithSave(" + save.Symbol.ToString() + ")") : null,
                 delete != null && ShouldWriteSimpleOperations(delete) ? ("   .WithDelete(" + delete.Symbol.ToString() + ")") : null,
-                simpleExpressions.HasItems() ? simpleExpressions.ToString(e => $"   .WithExpressionFrom(dqm, ({e.FromType.Name} {GetVariableName(e.FromType)}) => {GetVariableName(e.FromType)}.{e.Name}())", "\r\n") : null,
-                p == null ? null : $"   .WithQuery(dqm, () => {p} => {WriteQueryConstructor(type, p)})"
+                simpleExpressions.HasItems() ? simpleExpressions.ToString(e => $"   .WithExpressionFrom(({e.FromType.Name} {GetVariableName(e.FromType)}) => {GetVariableName(e.FromType)}.{e.Name}())", "\r\n") : null,
+                p == null ? null : $"   .WithQuery(() => {p} => {WriteQueryConstructor(type, p)})"
             }.NotNull().ToString("\r\n") + ";";
         }
 
@@ -249,7 +249,7 @@ namespace Signum.Engine.CodeGeneration
             var v = GetVariableName(type);
 
             StringBuilder sb = new StringBuilder();
-            sb.AppendLine("dqm.RegisterQuery(typeof({0}), () =>".FormatWith(typeName));
+            sb.AppendLine("QueryLogic.Queries.Register(typeof({0}), () =>".FormatWith(typeName));
             sb.AppendLine("    from {0} in Database.Query<{1}>()".FormatWith(v, typeName));
             sb.AppendLine("    select " + WriteQueryConstructor(type, v) + ");");
             return sb.ToString();
@@ -413,7 +413,7 @@ public static IQueryable<{to}> {Method}(this {from} e)
 
             var cast = p.DeclaringType == bp.PropertyType.CleanType() ? "" : $"(Lite<{p.DeclaringType.Name}>)";
 
-            return $"   .WithVirtualMList(dqm, {p1} => {p1}.{p.Name}, {p2} => {cast}{p2}.{bp.Name})";
+            return $"   .WithVirtualMList({p1} => {p1}.{p.Name}, {p2} => {cast}{p2}.{bp.Name})";
         }
 
         protected virtual PropertyInfo GetVirtualMListBackReference(PropertyInfo pi)
