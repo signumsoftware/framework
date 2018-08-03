@@ -23,6 +23,7 @@ using System.Reflection;
 using Signum.Engine.Templating;
 using Signum.Entities.Word;
 using System.Threading;
+using Signum.Engine.Basics;
 
 namespace Signum.Engine.Word
 {
@@ -296,7 +297,7 @@ namespace Signum.Engine.Word
             using (CurrentEntityConverter.SetCurrentEntity(context.Entity))
             {
                 var request = UserQueryLogic.ToQueryRequest(userQuery);
-                ResultTable resultTable = DynamicQueryManager.Current.ExecuteQuery(request);
+                ResultTable resultTable = QueryLogic.Queries.ExecuteQuery(request);
                 var dataTable = resultTable.ToDataTable();
                 return dataTable;
             }

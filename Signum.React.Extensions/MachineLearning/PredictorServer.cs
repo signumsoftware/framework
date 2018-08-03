@@ -40,7 +40,7 @@ namespace Signum.React.MachineLearning
             {
                 if (mc.Query != null)
                 {
-                    var qd = DynamicQueryManager.Current.QueryDescription(mc.Query.ToQueryName());
+                    var qd = QueryLogic.Queries.QueryDescription(mc.Query.ToQueryName());
                     mc.ParseData(qd);
                 }
             });

@@ -21,11 +21,11 @@ namespace Signum.Engine.Scheduler
     {
         static Dictionary<SimpleTaskSymbol, Func<ScheduledTaskContext, Lite<IEntity>>> tasks = new Dictionary<SimpleTaskSymbol, Func<ScheduledTaskContext, Lite<IEntity>>>();
 
-        internal static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
+        internal static void Start(SchemaBuilder sb)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
-                SymbolLogic<SimpleTaskSymbol>.Start(sb, dqm, () => tasks.Keys.ToHashSet());
+                SymbolLogic<SimpleTaskSymbol>.Start(sb, () => tasks.Keys.ToHashSet());
 
                 SchedulerLogic.ExecuteTask.Register((SimpleTaskSymbol st, ScheduledTaskContext ctx) =>
                 {
@@ -34,7 +34,7 @@ namespace Signum.Engine.Scheduler
                 });
 
                 sb.Include<SimpleTaskSymbol>()
-                    .WithQuery(dqm, () => ct => new
+                    .WithQuery(() => ct => new
                     {
                         Entity = ct,
                         ct.Id,

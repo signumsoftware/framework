@@ -23,7 +23,7 @@ namespace Signum.Engine.Disconnected
 
             csb.InitialCatalog = "";
 
-            using (SqlConnector.Override(new SqlConnector(csb.ToString(), null, null, SqlServerVersion.SqlServer2012)))
+            using (SqlConnector.Override(new SqlConnector(csb.ToString(), null, SqlServerVersion.SqlServer2012)))
             {
                 DropIfExists(databaseName);
 

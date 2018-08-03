@@ -198,7 +198,7 @@ namespace Signum.Services
         public HashSet<object> AllowedQueries()
         {
             return Return(MethodInfo.GetCurrentMethod(),
-            () => DynamicQueryManager.Current.GetAllowedQueryNames(false).ToHashSet());
+            () => QueryLogic.Queries.GetAllowedQueryNames(false).ToHashSet());
         }
 
         #endregion

@@ -26,14 +26,14 @@ namespace Signum.Engine.Dynamic
 
         static ResetLazy<Dictionary<Type, List<DynamicValidationPair>>> DynamicValidations; 
 
-        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
+        public static void Start(SchemaBuilder sb)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
                 sb.Include<DynamicValidationEntity>()
                     .WithSave(DynamicValidationOperation.Save)
                     .WithDelete(DynamicValidationOperation.Delete)
-                    .WithQuery(dqm, () => e => new
+                    .WithQuery(() => e => new
                     {
                         Entity = e,
                         e.Id,

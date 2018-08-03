@@ -81,8 +81,8 @@ namespace Signum.Windows.Processes
                           where oi.IsEntityOperation
                           let os = OperationClient.Manager.GetSettings<EntityOperationSettingsBase>(type, oi.OperationSymbol)
                           let coc = newContextualOperationContext.GetInvoker(os?.OverridenType ?? type)(sc, oi, os?.ContextualFromManyUntyped)
-                          where os == null ? oi.Lite == true && oi.OperationType != OperationType.ConstructorFrom :
-                              !os.ContextualFromManyUntyped.HasIsVisible ? (oi.Lite == true && !os.HasIsVisible && oi.OperationType != OperationType.ConstructorFrom && (!os.HasClick || os.ContextualFromManyUntyped.HasClick)) :
+                          where os == null ? oi.CanBeModified == true && oi.OperationType != OperationType.ConstructorFrom :
+                              !os.ContextualFromManyUntyped.HasIsVisible ? (oi.CanBeModified == true && !os.HasIsVisible && oi.OperationType != OperationType.ConstructorFrom && (!os.HasClick || os.ContextualFromManyUntyped.HasClick)) :
                               os.ContextualFromManyUntyped.OnIsVisible(coc)
                           select coc).ToList();
 

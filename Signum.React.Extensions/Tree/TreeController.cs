@@ -45,15 +45,15 @@ namespace Signum.React.Tree
         static List<TreeInfo> FindNodesGeneric<T>(FindNodesRequest request)
             where T : TreeEntity
         {
-            var qd = DynamicQueryManager.Current.QueryDescription(typeof(T));
+            var qd = QueryLogic.Queries.QueryDescription(typeof(T));
             var userFilters = request.userFilters.Select(f => f.ToFilter(qd, false)).ToList();
             var frozenFilters = request.frozenFilters.Select(f => f.ToFilter(qd, false)).ToList();
 
 
-            var frozenQuery = DynamicQueryManager.Current.GetEntities(new QueryEntitiesRequest { QueryName = typeof(T), Filters = frozenFilters, Orders = new List<Order>() })
+            var frozenQuery = QueryLogic.Queries.GetEntities(new QueryEntitiesRequest { QueryName = typeof(T), Filters = frozenFilters, Orders = new List<Order>() })
                             .Select(a => (T)a.Entity);
 
-            var filteredQuery = DynamicQueryManager.Current.GetEntities(new QueryEntitiesRequest { QueryName = typeof(T), Filters = userFilters.Concat(frozenFilters).ToList(), Orders = new List<Order>() })
+            var filteredQuery = QueryLogic.Queries.GetEntities(new QueryEntitiesRequest { QueryName = typeof(T), Filters = userFilters.Concat(frozenFilters).ToList(), Orders = new List<Order>() })
                             .Select(a => (T)a.Entity);
 
             var disabledMixin = MixinDeclarations.IsDeclared(typeof(T), typeof(DisabledMixin));

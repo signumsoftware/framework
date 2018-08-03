@@ -27,18 +27,18 @@ namespace Signum.Engine.Excel
 {
     public static class ExcelLogic
     {
-        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm, bool excelReport)
+        public static void Start(SchemaBuilder sb, bool excelReport)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
                 if (excelReport)
                 {
-                    QueryLogic.Start(sb, dqm);
+                    QueryLogic.Start(sb);
 
                     sb.Include<ExcelReportEntity>()
                         .WithSave(ExcelReportOperation.Save)
                         .WithDelete(ExcelReportOperation.Delete)
-                        .WithQuery(dqm, () => s => new
+                        .WithQuery(() => s => new
                         {
                             Entity = s,
                             s.Id,
@@ -60,7 +60,7 @@ namespace Signum.Engine.Excel
 
         public static async Task<byte[]> ExecuteExcelReportAsync(Lite<ExcelReportEntity> excelReport, QueryRequest request, CancellationToken token)
         {
-            ResultTable queryResult = await DynamicQueryManager.Current.ExecuteQueryAsync(request, token);
+            ResultTable queryResult = await QueryLogic.Queries.ExecuteQueryAsync(request, token);
 
             ExcelReportEntity report = excelReport.RetrieveAndForget();
             AsserExtension(report);
@@ -77,7 +77,7 @@ namespace Signum.Engine.Excel
 
         public static byte[] ExecuteExcelReport(Lite<ExcelReportEntity> excelReport, QueryRequest request)
         {
-            ResultTable queryResult = DynamicQueryManager.Current.ExecuteQuery(request);
+            ResultTable queryResult = QueryLogic.Queries.ExecuteQuery(request);
 
             ExcelReportEntity report = excelReport.RetrieveAndForget();
             AsserExtension(report);
@@ -87,14 +87,14 @@ namespace Signum.Engine.Excel
 
         public static async Task<byte[]> ExecutePlainExcelAsync(QueryRequest request, string title, CancellationToken token)
         {
-            ResultTable queryResult = await DynamicQueryManager.Current.ExecuteQueryAsync(request, token);
+            ResultTable queryResult = await QueryLogic.Queries.ExecuteQueryAsync(request, token);
 
             return PlainExcelGenerator.WritePlainExcel(queryResult, title);
         }
 
         public static byte[] ExecutePlainExcel(QueryRequest request, string title)
         {
-            ResultTable queryResult = DynamicQueryManager.Current.ExecuteQuery(request);
+            ResultTable queryResult = QueryLogic.Queries.ExecuteQuery(request);
 
             return PlainExcelGenerator.WritePlainExcel(queryResult, title);
         }

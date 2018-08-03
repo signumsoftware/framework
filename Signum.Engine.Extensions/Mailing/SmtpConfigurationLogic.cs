@@ -20,12 +20,12 @@ namespace Signum.Engine.Mailing
     {
         public static ResetLazy<Dictionary<Lite<SmtpConfigurationEntity>, SmtpConfigurationEntity>> SmtpConfigCache;
 
-        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
+        public static void Start(SchemaBuilder sb)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
                 sb.Include<SmtpConfigurationEntity>()
-                    .WithQuery(dqm, () => s => new
+                    .WithQuery(() => s => new
                     {
                         Entity = s,
                         s.Id,
@@ -40,8 +40,8 @@ namespace Signum.Engine.Mailing
 
                 new Graph<SmtpConfigurationEntity>.Execute(SmtpConfigurationOperation.Save)
                 {
-                    AllowsNew = true,
-                    Lite = false,
+                    CanBeNew = true,
+                    CanBeModified = true,
                     Execute = (sc, _) => { },
                 }.Register();
             }

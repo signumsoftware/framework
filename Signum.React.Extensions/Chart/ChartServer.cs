@@ -58,7 +58,7 @@ namespace Signum.React.Chart
 
                 if (cr.QueryName != null)
                 {
-                    var qd = DynamicQueryManager.Current.QueryDescription(cr.QueryName);
+                    var qd = QueryLogic.Queries.QueryDescription(cr.QueryName);
 
                     if (cr.Columns != null)
                         foreach (var c in cr.Columns)
@@ -73,7 +73,7 @@ namespace Signum.React.Chart
 
                 if (uc.Query != null)
                 {
-                    var qd = DynamicQueryManager.Current.QueryDescription(uc.Query.ToQueryName());
+                    var qd = QueryLogic.Queries.QueryDescription(uc.Query.ToQueryName());
                     uc.ParseData(qd);
                 }
             });
@@ -124,7 +124,7 @@ namespace Signum.React.Chart
 
                     var cr = (ChartRequest)ctx.Entity;
 
-                    var qd = DynamicQueryManager.Current.QueryDescription(cr.QueryName);
+                    var qd = QueryLogic.Queries.QueryDescription(cr.QueryName);
 
                     cr.Filters = list.Select(l => l.ToFilter(qd, canAggregate: true)).ToList();
                 },
@@ -151,7 +151,7 @@ namespace Signum.React.Chart
 
                     var cr = (ChartRequest)ctx.Entity;
 
-                    var qd = DynamicQueryManager.Current.QueryDescription(cr.QueryName);
+                    var qd = QueryLogic.Queries.QueryDescription(cr.QueryName);
 
                     cr.Orders = list.Select(l => l.ToOrder(qd, canAggregate: true)).ToList();
                 },

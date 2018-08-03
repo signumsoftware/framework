@@ -16,12 +16,12 @@ namespace Signum.Engine.Mailing
 {
     public static class ImageAttachmentLogic
     {
-        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
+        public static void Start(SchemaBuilder sb)
         {
             sb.Settings.AssertImplementedBy((EmailTemplateEntity e) => e.Attachments.First(), typeof(ImageAttachmentEntity));
 
             sb.Include<ImageAttachmentEntity>()
-                .WithQuery(dqm, () => s => new
+                .WithQuery(() => s => new
                 {
                     Entity = s,
                     s.Id,

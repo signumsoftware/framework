@@ -27,8 +27,8 @@ namespace Signum.Engine.SMS
 
             new Execute(SMSTemplateOperation.Save)
             {
-                Lite = false,
-                AllowsNew = true,
+                CanBeModified = true,
+                CanBeNew = true,
                 Execute = (t, _) => {}
             }.Register();
         }

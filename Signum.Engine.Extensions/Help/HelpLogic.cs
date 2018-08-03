@@ -43,10 +43,10 @@ namespace Signum.Engine.Help
 
         public static Lazy<Dictionary<Type, List<object>>> TypeToQuery = new Lazy<Dictionary<Type, List<object>>>(() =>
         {
-            var dqm = DynamicQueryManager.Current;
+            var queries = QueryLogic.Queries;
 
-            return (from qn in dqm.GetQueryNames()
-                    let imp = dqm.GetEntityImplementations(qn)
+            return (from qn in queries.GetQueryNames()
+                    let imp = queries.GetEntityImplementations(qn)
                     where !imp.IsByAll
                     from t in imp.Types
                     group qn by t into g
@@ -174,11 +174,11 @@ namespace Signum.Engine.Help
         public static List<object> AllQueries()
         {
             return (from type in AllTypes()
-                    from key in DynamicQueryManager.Current.GetTypeQueries(type).Keys
+                    from key in QueryLogic.Queries.GetTypeQueries(type).Keys
                     select key).Distinct().ToList();
         }
 
-        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
+        public static void Start(SchemaBuilder sb)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
@@ -209,7 +209,7 @@ namespace Signum.Engine.Help
 
                 sb.Include<EntityHelpEntity>()
                     .WithSave(EntityHelpOperation.Save)
-                    .WithQuery(dqm, () => e => new
+                    .WithQuery(() => e => new
                     {
                         Entity = e,
                         e.Id,
@@ -219,7 +219,7 @@ namespace Signum.Engine.Help
 
                 sb.Include<NamespaceHelpEntity>()
                     .WithSave(NamespaceHelpOperation.Save)
-                    .WithQuery(dqm, () => n => new
+                    .WithQuery(() => n => new
                     {
                         Entity = n,
                         n.Id,
@@ -230,7 +230,7 @@ namespace Signum.Engine.Help
                 
                 sb.Include<AppendixHelpEntity>()
                 .WithSave(AppendixHelpOperation.Save)
-                .WithQuery(dqm, () => a => new
+                .WithQuery(() => a => new
                 {
                     Entity = a,
                     a.Id,
@@ -242,7 +242,7 @@ namespace Signum.Engine.Help
 
                 sb.Include<QueryHelpEntity>()
                     .WithSave(QueryHelpOperation.Save)
-                    .WithQuery(dqm, () => q => new
+                    .WithQuery(() => q => new
                     {
                         Entity = q,
                         q.Id,
@@ -309,7 +309,7 @@ namespace Signum.Engine.Help
             if (dic.IsEmpty())
                 return null;
 
-            var queryKeys = DynamicQueryManager.Current.GetQueryNames().ToDictionary(a => QueryUtils.GetKey(a));
+            var queryKeys = QueryLogic.Queries.GetQueryNames().ToDictionary(a => QueryUtils.GetKey(a));
 
             var table = Schema.Current.Table<QueryHelpEntity>();
 
@@ -324,7 +324,7 @@ namespace Signum.Engine.Help
 
                 if (qh.Columns.Any())
                 {
-                    var columns = DynamicQueryManager.Current.GetQuery(queryName).Core.Value.StaticColumns;
+                    var columns = QueryLogic.Queries.GetQuery(queryName).Core.Value.StaticColumns;
 
                     Synchronizer.SynchronizeReplacing(replacements, "ColumnsOfQuery:" + QueryUtils.GetKey(queryName),
                         columns.ToDictionary(a => a.Name),

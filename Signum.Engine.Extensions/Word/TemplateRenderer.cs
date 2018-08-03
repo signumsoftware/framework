@@ -14,6 +14,7 @@ using System.Data;
 using Signum.Entities.Word;
 using DocumentFormat.OpenXml;
 using System.Threading;
+using Signum.Engine.Basics;
 
 namespace Signum.Engine.Word
 {
@@ -57,7 +58,7 @@ namespace Signum.Engine.Word
                 entity != null ? new List<Filter> { new Filter(QueryUtils.Parse("Entity", this.queryDescription, 0), FilterOperation.EqualTo, this.entity.ToLite()) } :
                 throw new InvalidOperationException($"Impossible to create a Word report if '{nameof(entity)}' and '{nameof(systemWordTemplate)}' are both null");
 
-            this.table = DynamicQueryManager.Current.ExecuteQuery(new QueryRequest
+            this.table = QueryLogic.Queries.ExecuteQuery(new QueryRequest
             {
                 QueryName = this.queryDescription.QueryName,
                 Columns = columns,

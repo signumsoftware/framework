@@ -25,23 +25,23 @@ namespace Signum.Engine.Chart
 {
     public static class ChartLogic
     {
-        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
+        public static void Start(SchemaBuilder sb)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
-                QueryLogic.Start(sb, dqm);
+                QueryLogic.Start(sb);
 
                 PermissionAuthLogic.RegisterTypes(typeof(ChartPermission));
 
-                ChartColorLogic.Start(sb, dqm);
-                ChartScriptLogic.Start(sb, dqm);
-                UserChartLogic.Start(sb, dqm);
+                ChartColorLogic.Start(sb);
+                ChartScriptLogic.Start(sb);
+                UserChartLogic.Start(sb);
             }
         }
 
         public static Task<ResultTable> ExecuteChartAsync(ChartRequest request, CancellationToken token)
         {
-            IDynamicQueryCore core = DynamicQueryManager.Current.TryGetQuery(request.QueryName).Core.Value;
+            IDynamicQueryCore core = QueryLogic.Queries.TryGetQuery(request.QueryName).Core.Value;
 
             return miExecuteChartAsync.GetInvoker(core.GetType().GetGenericArguments()[0])(request, core, token);
         }
@@ -69,7 +69,7 @@ namespace Signum.Engine.Chart
 
         public static ResultTable ExecuteChart(ChartRequest request)
         {
-            IDynamicQueryCore core = DynamicQueryManager.Current.TryGetQuery(request.QueryName).Core.Value;
+            IDynamicQueryCore core = QueryLogic.Queries.TryGetQuery(request.QueryName).Core.Value;
 
             return miExecuteChart.GetInvoker(core.GetType().GetGenericArguments()[0])(request, core);
         }

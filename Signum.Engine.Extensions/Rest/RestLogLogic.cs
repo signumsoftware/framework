@@ -16,7 +16,7 @@ namespace Signum.Engine.Rest
 {
     public class RestLogLogic
     {
-        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
+        public static void Start(SchemaBuilder sb)
         {
             if (sb.NotDefined(MethodBase.GetCurrentMethod()))
             {
@@ -25,7 +25,7 @@ namespace Signum.Engine.Rest
                     .WithIndex(a => a.EndDate)
                     .WithIndex(a => a.Controller)
                     .WithIndex(a => a.Action)
-                    .WithQuery(dqm, () => e => new
+                    .WithQuery(() => e => new
                     {
                         Entity = e,
                         e.Id,

@@ -135,7 +135,7 @@ namespace Signum.Engine.Disconnected
 
                             string connectionString = GetImportConnectionString(machine);
 
-                            var newDatabase = new SqlConnector(connectionString, Schema.Current, DynamicQueryManager.Current, ((SqlConnector)Connector.Current).Version);
+                            var newDatabase = new SqlConnector(connectionString, Schema.Current, ((SqlConnector)Connector.Current).Version);
 
                             using (token.MeasureTime(l => import.InDB().UnsafeUpdate().Set(s => s.SynchronizeSchema, s => l).Execute()))
                             using (Connector.Override(newDatabase))

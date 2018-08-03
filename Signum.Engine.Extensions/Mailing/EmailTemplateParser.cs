@@ -281,7 +281,7 @@ namespace Signum.Engine.Mailing
             {
                 var queryName = QueryLogic.ToQueryName(et.Query.Key);
 
-                QueryDescription qd = DynamicQueryManager.Current.QueryDescription(queryName);
+                QueryDescription qd = QueryLogic.Queries.QueryDescription(queryName);
 
                 using (DelayedConsole.Delay(() => SafeConsole.WriteLineColor(ConsoleColor.White, "EmailTemplate: " + et.Name)))
                 using (DelayedConsole.Delay(() => Console.WriteLine(" Query: " + et.Query.Key)))
