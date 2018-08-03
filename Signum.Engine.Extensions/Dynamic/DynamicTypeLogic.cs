@@ -826,7 +826,7 @@ namespace Signum.Engine.Dynamic
                 if (!string.IsNullOrWhiteSpace(operationCanExecute))
                     sb.AppendLine($"    CanExecute = e => {operationCanExecute},");
 
-                sb.AppendLine("    AllowsNew = true,");
+                sb.AppendLine("    CanBeNew = true,");
                 sb.AppendLine("    CanBeModified = true,");
                 sb.AppendLine("    Execute = (e, args) => {\r\n" + operationExecute?.Indent(8) + "\r\n}");
                 sb.AppendLine("}." + (this.IsTreeEntity ? "Register(replace: true)" : "Register()") + ";");
