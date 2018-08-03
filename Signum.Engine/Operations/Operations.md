@@ -232,7 +232,7 @@ public class OrderGraph : Graph<OrderEntity, OrderState>
 		{
 		    FromStates = { OrderState.New }, //The operation can only be executed for new entities
 		    ToStates = { OrderState.Ordered }, //After the execution, Ordered state will be asserted
-		    AllowsNew = true, //Can be executed for new entities
+		    CanBeNew = true, //Can be executed for new entities
 		    CanBeModified = true, //The whole entity will be sent, and can be dirty
 		    Execute = (o, args) =>
 		    {
