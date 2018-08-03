@@ -40,10 +40,10 @@ namespace Signum.Engine.Basics
 
         public static void AssertStarted(SchemaBuilder sb)
         {
-            sb.AssertDefined(ReflectionTools.GetMethodInfo(() => Start(null, null)));
+            sb.AssertDefined(ReflectionTools.GetMethodInfo(() => Start(null)));
         }
 
-        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
+        public static void Start(SchemaBuilder sb)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
@@ -69,7 +69,7 @@ namespace Signum.Engine.Basics
                     Schema.Current.InvalidateMetadata);
 
                 sb.Include<TypeEntity>()
-                    .WithQuery(dqm, () => t => new
+                    .WithQuery(() => t => new
                     {
                         Entity = t,
                         t.Id,

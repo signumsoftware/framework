@@ -56,15 +56,13 @@ namespace Signum.Engine
             return new Disposable(() => scopeTimeout.Value = old);
         }
 
-        public Connector(Schema schema, DynamicQueryManager dqm)
+        public Connector(Schema schema)
         {
             this.Schema = schema;
-            this.DynamicQueryManager = dqm;
             this.IsolationLevel = IsolationLevel.Unspecified;
         }
 
         public Schema Schema { get; private set; }
-        public DynamicQueryManager DynamicQueryManager { get; private set; }
 
         static readonly Variable<TextWriter> logger = Statics.ThreadVariable<TextWriter>("connectionlogger");
         public static TextWriter CurrentLogger

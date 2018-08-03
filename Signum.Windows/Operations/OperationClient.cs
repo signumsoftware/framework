@@ -126,8 +126,8 @@ namespace Signum.Windows.Operations
 
         public List<OperationColor> BackgroundColors = new List<OperationColor>
         {
-            new OperationColor(a => a.OperationType == OperationType.Execute && a.Lite == false) { Color = Colors.Blue}, 
-            new OperationColor(a => a.OperationType == OperationType.Execute && a.Lite == true) { Color = Colors.Yellow}, 
+            new OperationColor(a => a.OperationType == OperationType.Execute && a.CanBeModified == true) { Color = Colors.Blue}, 
+            new OperationColor(a => a.OperationType == OperationType.Execute && a.CanBeModified == false) { Color = Colors.Yellow}, 
             new OperationColor(e => e.OperationType == OperationType.Delete ) { Color = Colors.Red }, 
         };
 
@@ -175,7 +175,7 @@ namespace Signum.Windows.Operations
             Type type = ident.GetType();
 
             var operations = (from oi in OperationInfos(type)
-                              where oi.IsEntityOperation && (oi.AllowsNew.Value || !ident.IsNew)
+                              where oi.IsEntityOperation && (oi.CanBeNew.Value || !ident.IsNew)
                               let os = GetSettings<EntityOperationSettingsBase>(type, oi.OperationSymbol)
                               let eoc = newEntityOperationContext.GetInvoker(os?.OverridenType ?? type)(ident, oi, ctx, os)
                               where (os != null && os.HasIsVisible) ? os.OnIsVisible(eoc) : ctx.ShowOperations
@@ -357,9 +357,9 @@ namespace Signum.Windows.Operations
                               where oi.IsEntityOperation
                               let os = GetSettings<EntityOperationSettingsBase>(type, oi.OperationSymbol)
                               let coc = newContextualOperationContext.GetInvoker(os?.OverridenType ?? sc.SelectedItem.EntityType)(sc, oi, os?.ContextualUntyped)
-                              where os == null ? oi.Lite == true :
+                              where os == null ? oi.CanBeModified == false :
                                    os.ContextualUntyped.HasIsVisible ? os.ContextualUntyped.OnIsVisible(coc) :
-                                   oi.Lite == true && !os.HasIsVisible && (!os.HasClick || os.ContextualUntyped.HasClick)
+                                   oi.CanBeModified == false && !os.HasIsVisible && (!os.HasClick || os.ContextualUntyped.HasClick)
                               select coc).ToList();
 
             if (operations.IsEmpty())

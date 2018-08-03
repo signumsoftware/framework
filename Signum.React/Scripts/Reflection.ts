@@ -58,8 +58,8 @@ export interface OperationInfo {
     key: string,
     niceName: string;
     operationType: OperationType;
-    allowsNew: boolean;
-    lite: boolean;
+    canBeNew: boolean;
+    canBeModified: boolean;
     hasCanExecute: boolean;
     hasStates: boolean;
 }

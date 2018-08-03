@@ -7,7 +7,7 @@ The great benefit of Signum.Windows is that it provides controls that allow work
 There are other useful contracts:
 
 * **IBaseServer:** Support for saving and retrieving entities, as well as other basic plumbing stuff like `FindAllMixins`,  `ServerTypes`, etc..
-* **IDynamicQueryServer:** Supports the `SearchControl` and `DynamicQueryManager` requirements:  `GetQueryDescription`, `ExecuteQuery`, etc.. 
+* **IDynamicQueryServer:** Supports the `SearchControl`:  `GetQueryDescription`, `ExecuteQuery`, etc.. 
 * **IOperationServer:** Supports the remote execution of operations: `GetCanExecuteAll`,  `ExecuteOperation`, `Construct`, etc...
 
 Additionally, many modules add their own interfaces. 
