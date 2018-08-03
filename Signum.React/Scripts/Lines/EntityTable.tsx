@@ -13,6 +13,7 @@ import { EntityListBase, EntityListBaseProps, DragConfig } from './EntityListBas
 import DynamicComponent from './DynamicComponent'
 import { RenderEntity } from './RenderEntity'
 import { MaxHeightProperty } from 'csstype';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 export interface EntityTableProps extends EntityListBaseProps {
     createAsLink?: boolean | ((er: EntityTable) => React.ReactElement<any>);
@@ -100,7 +101,7 @@ export class EntityTable extends EntityListBase<EntityTableProps, EntityTablePro
 
     renderButtons() {
         const buttons = (
-            <span className="pull-right">
+            <span className="float-right">
                 {this.state.createAsLink == false && this.renderCreateButton(false)}
                 {this.renderFindButton(false)}
             </span>
@@ -163,7 +164,7 @@ export class EntityTable extends EntityListBase<EntityTableProps, EntityTablePro
                                         <a href="#" title={EntityControlMessage.Create.niceToString()}
                                             className="sf-line-button sf-create"
                                             onClick={this.handleCreateClick}>
-                                            <span className="fa fa-plus sf-create" />&nbsp;{EntityControlMessage.Create.niceToString()}
+                                            <FontAwesomeIcon icon="plus" className="sf-create" />&nbsp;{EntityControlMessage.Create.niceToString()}
                                         </a>}
                                 </td>
                             </tr>
@@ -213,7 +214,7 @@ export class EntityTableRow extends React.Component<EntityTableRowProps, { rowSt
                         {this.props.onRemove && <a href="#" className={classes("sf-line-button", "sf-remove")}
                             onClick={this.props.onRemove}
                             title={EntityControlMessage.Remove.niceToString()}>
-                            <span className="fa fa-remove"/>
+                            <FontAwesomeIcon icon="times" />
                         </a>}
                         &nbsp;
                         {drag && <a href="#" className={classes("sf-line-button", "sf-move")}
@@ -221,7 +222,7 @@ export class EntityTableRow extends React.Component<EntityTableRowProps, { rowSt
                             onDragStart={drag.onDragStart}
                             onDragEnd={drag.onDragEnd}
                             title={EntityControlMessage.Move.niceToString()}>
-                            <span className="fa fa-bars"/>
+                            <FontAwesomeIcon icon="bars" />
                         </a>}
                     </div>
                 </td>

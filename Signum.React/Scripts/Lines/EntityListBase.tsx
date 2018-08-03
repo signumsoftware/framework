@@ -9,6 +9,7 @@ import { TypeContext, StyleContext, StyleOptions, FormGroupStyle } from '../Type
 import { PropertyRoute, PropertyRouteType, MemberInfo, getTypeInfo, getTypeInfos, TypeInfo, IsByAll, getTypeName } from '../Reflection'
 import { LineBase, LineBaseProps, runTasks } from '../Lines/LineBase'
 import { EntityBase, EntityBaseProps } from './EntityBase'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 
 export interface EntityListBaseProps extends EntityBaseProps {
@@ -52,8 +53,8 @@ export abstract class EntityListBase<T extends EntityListBaseProps, S extends En
         return (
             <a href="#" className={classes("sf-line-button", "sf-move", btn ? "btn btn-light" : undefined)}
                 onClick={e => { e.preventDefault(); this.moveUp(index); }}
-                title={EntityControlMessage.MoveUp.niceToString() }>
-                <span className="fa fa-chevron-up"/>
+                title={EntityControlMessage.MoveUp.niceToString()}>
+                <FontAwesomeIcon icon="chevron-up" />
             </a>
         );
     }
@@ -72,7 +73,7 @@ export abstract class EntityListBase<T extends EntityListBaseProps, S extends En
             <a href="#" className={classes("sf-line-button", "sf-move", btn ? "btn btn-light" : undefined)}
                 onClick={e => { e.preventDefault(); this.moveDown(index); }}
                 title={EntityControlMessage.MoveUp.niceToString() }>
-                <span className="fa fa-chevron-down"/>
+                <FontAwesomeIcon icon="chevron-down"/>
             </a>);
     }
 

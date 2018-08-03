@@ -7,9 +7,9 @@ import { classes, Dic } from '../Globals';
 import { ServiceError, WebApiHttpError, ValidationError } from '../Services';
 import { SearchMessage, JavascriptMessage, Lite, Entity, NormalWindowMessage } from '../Signum.Entities'
 import { ExceptionEntity } from '../Signum.Entities.Basics'
-
 import "./Modals.css"
 import { Modal } from '../Components';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 //http://codepen.io/m-e-conroy/pen/ALsdF
 interface ErrorModalProps extends IModalProps {
@@ -82,14 +82,14 @@ export default class ErrorModal extends React.Component<ErrorModalProps, { showD
 
     renderTitle(e: any) {
         return (
-            <span><span className="fa fa-exclamation-triangle"></span> Error </span>
+            <span><FontAwesomeIcon icon="exclamation-triangle"/> Error </span>
         );
     }
 
     renderServiceTitle(se: ServiceError) {
         return (
             <span>
-                <span className={classes("fa", se.defaultIcon)}></span>&nbsp; <span>{se.httpError.exceptionType}</span>
+                <FontAwesomeIcon icon={se.defaultIcon} />&nbsp; <span>{se.httpError.exceptionType}</span>
                 ({
                     Navigator.isViewable(ExceptionEntity) ?
                         <a href={Navigator.navigateRoute(ExceptionEntity, se.httpError.exceptionId!)}>{se.httpError.exceptionId}</a> :
@@ -103,7 +103,7 @@ export default class ErrorModal extends React.Component<ErrorModalProps, { showD
     renderValidationTitle(ve: ValidationError) {
         return (
             <span>
-                <span className="fa fa-exclamation-triangle"></span> {NormalWindowMessage.ThereAreErrors.niceToString()}
+                <FontAwesomeIcon icon="exclamation-triangle"/> {NormalWindowMessage.ThereAreErrors.niceToString()}
             </span>
         );
     }

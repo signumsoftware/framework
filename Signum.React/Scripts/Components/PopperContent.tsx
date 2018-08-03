@@ -1,28 +1,28 @@
 ﻿import * as React from 'react';
 import * as PropTypes from 'prop-types';
 import * as ReactDOM from 'react-dom';
-import { Popper } from './Popper';
-import { Placement, Modifiers, Data } from 'popper.js';
+import { Arrow, Popper as ReactPopper, } from 'react-popper';
+import PopperJS from 'popper.js';
 import { classes } from '../Globals';
 
 interface PopperContentProps {
     children: React.ReactElement<any>;
     className?: string;
-    placement?: Placement;
+    placement?: PopperJS.Placement;
     placementPrefix?: string,
     hideArrow?: boolean;
+    tag?: string,
     isOpen: boolean;
     offset?: string | number;
     fallbackPlacement?: string | string[];
     flip?: boolean;
     container?: string | (() => HTMLElement) | HTMLElement;
     target: string | (() => HTMLElement) | HTMLElement;
-    modifiers?: Modifiers;
+    modifiers?: PopperJS.Modifiers;
 }
 
 interface PopperContentState {
-    placement?: Placement;
-    isRTL: boolean;
+    placement?: PopperJS.Placement;
 }
 
 export class PopperContent extends React.Component<PopperContentProps, PopperContentState> {
@@ -43,9 +43,7 @@ export class PopperContent extends React.Component<PopperContentProps, PopperCon
         this.handlePlacementChange = this.handlePlacementChange.bind(this);
         this.setTargetNode = this.setTargetNode.bind(this);
         this.getTargetNode = this.getTargetNode.bind(this);
-        this.state = {
-            isRTL: document.body.classList.contains("rtl"),
-        };
+        this.state = {};
     }
 
     static childContextTypes = {
@@ -93,7 +91,7 @@ export class PopperContent extends React.Component<PopperContentProps, PopperCon
         return getTarget(this.props.container!);
     }
 
-    handlePlacementChange = (data: Data) => {
+    handlePlacementChange = (data: PopperJS.Data) => {
         if (this.state.placement !== data.placement) {
             this.setState({ placement: data.placement });
         }
@@ -148,21 +146,16 @@ export class PopperContent extends React.Component<PopperContentProps, PopperCon
             fallbackPlacement,
             placementPrefix,
             className,
+            tag,
             container,
             modifiers,
-            hideArrow,
-            placement,
+            hideArrow, 
             ...attrs
         } = this.props;
-
-        const culturePlacement = !this.state.isRTL ? placement :
-            placement && placement.replace(/right|left/, str => str == "right" ? "left" : "right") as Placement;
-
-        const placementSuffix = (this.state.placement || culturePlacement)!.split('-')[0];
-        
+        const placement = (this.state.placement || attrs.placement)!.split('-')[0];
         const popperClassName = classes(
             className,
-            placementPrefix ? `${placementPrefix}-${placementSuffix}` : placementSuffix
+            placementPrefix ? `${placementPrefix}-${placement}` : placement
         );
 
         const extendedModifiers = {
@@ -174,17 +167,13 @@ export class PopperContent extends React.Component<PopperContentProps, PopperCon
                 fn: this.handlePlacementChange,
             },
             ...modifiers,
-        } as Modifiers;
+        } as PopperJS.Modifiers;
 
         return (
-            <Popper modifiers={extendedModifiers} {...attrs} placement={culturePlacement}>
-                {({ ref, style, placement, arrowProps }) => (
-                    <div ref={ref} style={style} data-placement={placement}>
-                        {children}
-                        {!hideArrow && <div ref={arrowProps.ref} style={arrowProps.style} />}
-                    </div>
-                )}
-            </Popper>
+            <ReactPopper modifiers={extendedModifiers} {...attrs} component={tag} className={popperClassName} >
+                {children}
+                {!hideArrow && < Arrow className={"arrow"} />}
+            </ReactPopper>
         );
     }
 

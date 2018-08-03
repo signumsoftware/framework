@@ -228,7 +228,7 @@ namespace Signum.Engine
                                          })
                                          select mle).ToList();
 
-                    return BulkInsertMListTable(mlistElements, mListProperty, copyOptions, timeout, message);
+                    return BulkInsertMListTable(mlistElements, mListProperty, copyOptions, timeout, updateParentTicks: false, message: message);
                 }
                 catch (InvalidOperationException e) when (e.Message.Contains("has no Id"))
                 {
@@ -244,6 +244,7 @@ namespace Signum.Engine
             Expression<Func<E, MList<V>>> mListProperty,
             SqlBulkCopyOptions copyOptions = SqlBulkCopyOptions.Default,
             int? timeout = null,
+            bool? updateParentTicks = null, /*Needed for concurrency and Temporal tables*/
             string message = null)
             where E : Entity
         {
@@ -251,30 +252,51 @@ namespace Signum.Engine
             {
                 if (message != null)
                     return SafeConsole.WaitRows(message == "auto" ? $"BulkInsering MList<{ typeof(V).TypeName()}> in { typeof(E).TypeName()}" : message,
-                        () => BulkInsertMListTable(mlistElements, mListProperty, copyOptions, timeout, message: null));
+                        () => BulkInsertMListTable(mlistElements, mListProperty, copyOptions, timeout, updateParentTicks, message: null));
 
                 if (copyOptions.HasFlag(SqlBulkCopyOptions.UseInternalTransaction))
                     throw new InvalidOperationException("BulkInsertDisableIdentity not compatible with UseInternalTransaction");
 
+                var mlistTable = ((FieldMList)Schema.Current.Field(mListProperty)).TableMList;
+
+                if (updateParentTicks == null)
+                {
+                    updateParentTicks = mlistTable.PrimaryKey.Type != typeof(Guid) && mlistTable.BackReference.ReferenceTable.Ticks != null;
+                }
+
+                var maxRowId = updateParentTicks.Value ? Database.MListQuery(mListProperty).Max(a => (PrimaryKey?)a.RowId) : null;
+
                 DataTable dt = new DataTable();
-                var t = ((FieldMList)Schema.Current.Field(mListProperty)).TableMList;
-                foreach (var c in t.Columns.Values.Where(c => !(c is SystemVersionedInfo.Column) && !c.IdentityBehaviour))
+             
+                foreach (var c in mlistTable.Columns.Values.Where(c => !(c is SystemVersionedInfo.Column) && !c.IdentityBehaviour))
                     dt.Columns.Add(new DataColumn(c.Name, c.Type.UnNullify()));
 
                 var list = mlistElements.ToList();
 
                 foreach (var e in list)
                 {
-                    dt.Rows.Add(t.BulkInsertDataRow(e.Parent, e.Element, e.Order));
+                    dt.Rows.Add(mlistTable.BulkInsertDataRow(e.Parent, e.Element, e.Order));
                 }
 
                 using (Transaction tr = new Transaction())
                 {
                     Schema.Current.OnPreBulkInsert(typeof(E), inMListTable: true);
 
-                    Executor.BulkCopy(dt, t.Name, copyOptions, timeout);
+                    Executor.BulkCopy(dt, mlistTable.Name, copyOptions, timeout);
 
-                    return tr.Commit(list.Count);
+                    var result = list.Count;
+
+                    if (updateParentTicks.Value)
+                    {
+                        Database.MListQuery(mListProperty)
+                            .Where(a => maxRowId == null || a.RowId > maxRowId)
+                            .Select(a => a.Parent)
+                            .UnsafeUpdate()
+                            .Set(e => e.Ticks, a => TimeZoneManager.Now.Ticks)
+                            .Execute();
+                    }
+
+                    return tr.Commit(result);
                 }
             }
         }

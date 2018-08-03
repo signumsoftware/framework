@@ -216,8 +216,8 @@ namespace Signum.Entities
         public OperationSymbol OperationSymbol { get; internal set; }
         public OperationType OperationType { get; internal set; }
 
-        public bool? Lite { get; internal set; }
-        public bool? AllowsNew { get; internal set; }
+        public bool? CanBeModified { get; internal set; }
+        public bool? CanBeNew { get; internal set; }
         public bool? HasStates { get; internal set; }
         public bool? HasCanExecute { get; internal set; }
 
@@ -227,7 +227,7 @@ namespace Signum.Entities
 
         public override string ToString()
         {
-            return "{0} ({1}) Lite = {2}, Returns {3}".FormatWith(OperationSymbol, OperationType, Lite, Returns);
+            return "{0} ({1})".FormatWith(OperationSymbol, OperationType);
         }
 
         public bool IsEntityOperation

@@ -60,7 +60,7 @@ export class EntityCheckboxList extends EntityListBase<EntityCheckboxListProps, 
 
     renderButtons() {
         return (
-            <span className="pull-right">
+            <span className="float-right">
                 {this.renderCreateButton(false)}
                 {this.renderFindButton(false)}
             </span>

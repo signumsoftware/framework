@@ -14,7 +14,7 @@ public static void Start(string connectionString)
 {
     SchemaBuilder sb = new SchemaBuilder();
     sb.Include<CustomerEntity>();
-    Connector.Default = new SqlConnector(connectionString, sb.Schema, dqm);
+    Connector.Default = new SqlConnector(connectionString, sb.Schema);
 }
 ```
 
