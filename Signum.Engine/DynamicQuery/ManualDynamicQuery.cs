@@ -133,5 +133,10 @@ namespace Signum.Engine.DynamicQuery
         {
             throw new NotImplementedException();
         }
+
+        public override DQueryable<object> GetDQueryable(DQueryableRequest request)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

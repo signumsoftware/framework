@@ -225,16 +225,15 @@ namespace Signum.Engine.DynamicQuery
             }
         }
 
-        public static List<Lite<Entity>> AutocompleteUntyped(this IQueryable<Lite<Entity>> query, string subString, int count, Type type)
+        public static List<T> AutocompleteUntyped<T>(this IQueryable<T> query, Expression<Func<T, Lite<Entity>>> entitySelector, string subString, int count, Type type)
         {
             using (ExecutionMode.UserInterface())
             {
-
-                List<Lite<Entity>> results = new List<Lite<Entity>>();
+                List<T> results = new List<T>();
 
                 if (PrimaryKey.TryParse(subString, type, out PrimaryKey id))
                 {
-                    Lite<Entity> entity = query.SingleOrDefaultEx(e => e.Id == id);
+                    T entity = query.SingleOrDefaultEx(r => entitySelector.Evaluate(r).Id == id);
 
                     if (entity != null)
                         results.Add(entity);
@@ -245,23 +244,27 @@ namespace Signum.Engine.DynamicQuery
 
                 var parts = subString.Trim('\'', '"').SplitNoEmpty(' ');
 
-                results.AddRange(query.Where(a => a.ToString().ContainsAll(parts))
-                    .OrderBy(a => a.ToString().Length)
-                    .Take(count - results.Count));
+                var list = query
+                    .Where(r => entitySelector.Evaluate(r).ToString().ContainsAll(parts))
+                    .OrderBy(r => entitySelector.Evaluate(r).ToString().Length)
+                    .Take(count - results.Count)
+                    .ToList(); 
+
+                results.AddRange(list);
 
                 return results;
             }
         }
 
-        public static async Task<List<Lite<Entity>>> AutocompleteUntypedAsync(this IQueryable<Lite<Entity>> query, string subString, int count, Type type, CancellationToken token)
+        public static async Task<List<T>> AutocompleteUntypedAsync<T>(this IQueryable<T> query, Expression<Func<T, Lite<Entity>>> entitySelector, string subString, int count, Type type, CancellationToken token)
         {
             using (ExecutionMode.UserInterface())
             {
-                List<Lite<Entity>> results = new List<Lite<Entity>>();
+                List<T> results = new List<T>();
 
                 if (PrimaryKey.TryParse(subString, type, out PrimaryKey id))
                 {
-                    Lite<Entity> entity = await query.SingleOrDefaultAsync(e => e.Id == id, token);
+                    T entity = await query.SingleOrDefaultAsync(r => entitySelector.Evaluate(r).Id == id);
 
                     if (entity != null)
                         results.Add(entity);
@@ -272,10 +275,10 @@ namespace Signum.Engine.DynamicQuery
 
                 var parts = subString.Trim('\'', '"').SplitNoEmpty(' ');
 
-                var list = await query.Where(a => a.ToString().ContainsAll(parts))
-                    .OrderBy(a => a.ToString().Length)
+                var list = await query.Where(r => entitySelector.Evaluate(r).ToString().ContainsAll(parts))
+                    .OrderBy(r => entitySelector.Evaluate(r).ToString().Length)
                     .Take(count - results.Count)
-                    .ToListAsync(token);
+                    .ToListAsync();
 
                 results.AddRange(list);
 
