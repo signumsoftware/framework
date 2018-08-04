@@ -11,7 +11,7 @@ import {
     QueryDescription, QueryCountRequest, QueryRequest, QueryEntitiesRequest, FindOptions,
     FindOptionsParsed, FilterOption, FilterOptionParsed, OrderOptionParsed, CountOptionsParsed,
     QueryToken, ColumnDescription, ColumnOption, ColumnOptionParsed, Pagination, ResultColumn,
-    ResultTable, ResultRow, OrderOption, SubTokensOptions, toQueryToken, isList, ColumnOptionsMode, FilterRequest, ModalFindOptions, OrderRequest
+    ResultTable, ResultRow, OrderOption, SubTokensOptions, toQueryToken, isList, ColumnOptionsMode, FilterRequest, ModalFindOptions, OrderRequest, ColumnRequest
 } from './FindOptions';
 
 import { PaginationMode, OrderType, FilterOperation, FilterType, UniqueType, QueryTokenMessage } from './Signum.Entities.DynamicQuery';
@@ -801,8 +801,8 @@ export module API {
         count: number;
     }
 
-    export function findLiteLikeWithFilters(request: AutocompleteQueryRequest, abortController?: FetchAbortController): Promise<Lite<Entity>[]> {
-        return ajaxPost<Lite<Entity>[]>({ url: "~/api/query/findLiteLikeWithFilters", abortController }, request);
+    export function FindRowsLike(request: AutocompleteQueryRequest, abortController?: FetchAbortController): Promise<ResultTable> {
+        return ajaxPost<ResultTable>({ url: "~/api/query/findRowsLike", abortController }, request);
     }
 
     export function parseTokens(queryKey: string, tokens: { token: string, options: SubTokensOptions }[]): Promise<QueryToken[]> {
@@ -826,6 +826,7 @@ export module API {
     export interface AutocompleteQueryRequest {
         queryKey: string;
         filters: FilterRequest[];
+        columns: ColumnRequest[];
         orders: OrderRequest[];
         subString: string;
         count: number;

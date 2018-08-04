@@ -230,14 +230,14 @@ namespace Signum.Engine
                             SqlBuilder.CreateTableSql(tab),
                             copyDataFrom.ContainsKey(tab.Name) ? CopyData(tab, databaseTables.GetOrThrow(copyDataFrom.GetOrThrow(tab.Name).ToString()), replacements).Do(a => a.GoBefore = true) : null
                         ),
-                        removeOld: (tn, dif) => SqlBuilder.DropTable(dif.Name),
+                        removeOld: (tn, dif) => SqlBuilder.DropTable(dif),
                         mergeBoth: (tn, tab, dif) =>
                         {
                             var rename = !object.Equals(dif.Name, tab.Name) ? SqlBuilder.RenameOrMove(dif, tab) : null;
 
                             var disableSystemVersioning = (dif.TemporalType != SysTableTemporalType.None && (
                                 tab.SystemVersioned == null || !dif.TemporalTableName.Equals(tab.SystemVersioned.TableName)) ?
-                                SqlBuilder.AlterTableDisableSystemVersioning(tab) : null);
+                                SqlBuilder.AlterTableDisableSystemVersioning(tab.Name) : null);
 
                             var dropPeriod = (dif.Period != null &&
                                 (tab.SystemVersioned == null || !dif.Period.PeriodEquals(tab.SystemVersioned)) ?

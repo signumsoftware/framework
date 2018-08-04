@@ -189,6 +189,8 @@
     <Member Name="selectOnlyOneElement" Description="Wählen Sie nur ein Element" />
     <Member Name="selectToken" Description="Wählen Sie einen Token" />
     <Member Name="showFilters" Description="Filter anzeigen" />
+    <Member Name="showPeriod" Description="Zeit zeigen" />
+    <Member Name="showPreviousOperation" Description="Vorherige Operation zeigen" />
     <Member Name="ungroupResults" Description="Resultate der Gruppierung aufheben" />
     <Member Name="view" Description="Ansicht" />
   </Type>
@@ -355,7 +357,7 @@
     <Member Name="Operations" Description="Operationen" />
     <Member Name="Query0IsNotAllowed" Description="Abfrage {0} ist nicht zulässig." />
     <Member Name="Query0NotAllowed" Description="Abfrage {0} ist nicht zulässig." />
-    <Member Name="Query0NotRegistered" Description="Abfrage {0} ist nicht in der DynamicQueryManager registriert." />
+    <Member Name="Query0NotRegistered" Description="Abfrage {0} ist nicht in der QueryLogic.Queries registriert." />
     <Member Name="Rename" Description="Umbenennen" />
     <Member Name="Search" Description="Suche" />
     <Member Name="SearchControl_Pagination_All" Description="Alle" />
@@ -412,7 +414,9 @@
     <Member Name="_0HasToBeUppercase" Description="{0} muss großgeschrieben sein" />
     <Member Name="_0Have1ElementsButAllowedOnly2" Description="{0} hat {1} Elemente, erlaubt sind aber nur {2}" />
     <Member Name="_0IsMandatoryWhen1IsNotSet" Description="{0} ist obligatorisch, wenn {1} nicht festgesetzt ist" />
+    <Member Name="_0IsMandatoryWhen1IsNotSetTo2" Description="{0} ist pflicht, wenn {1} nicht auf {2} gesetzt ist." />
     <Member Name="_0IsMandatoryWhen1IsSet" Description="{0} ist obligatorisch, wenn {1} festgesetzt ist" />
+    <Member Name="_0IsMandatoryWhen1IsSetTo2" Description="{0} ist pflicht, wenn {1} auf {2} gesetzt ist." />
     <Member Name="_0IsNecessary" Description="{0} ist notwendig" />
     <Member Name="_0IsNecessaryOnState1" Description="{0} ist notwendig im Status {1}" />
     <Member Name="_0IsNotA1_G" Description="{0} ist kei[m:n|f:ne|n:n] {1}" />
@@ -420,6 +424,7 @@
     <Member Name="_0IsNotAllowedOnState1" Description="{0} ist im Status {1} nicht zulässig" />
     <Member Name="_0IsNotSet" Description="{0} ist nicht festgesetzt" />
     <Member Name="_0IsSet" Description="{0} wird gesetzt" />
+    <Member Name="_0Or1ShouldBeSet" Description="{0} oder {1} sollten gesetzt sein" />
     <Member Name="_0ShouldBe12" Description="{0} sollte {1} {2} sein" />
     <Member Name="_0ShouldBeADateInThePast" Description="{0} sollte ein Datum in der Vergangenheit sein" />
     <Member Name="_0ShouldBeGreaterThan1" Description="{0} sollte größer als {1} sein" />

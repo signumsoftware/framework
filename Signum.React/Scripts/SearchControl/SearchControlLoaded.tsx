@@ -24,11 +24,11 @@ import ContextMenu from './ContextMenu'
 import { ContextMenuPosition } from './ContextMenu'
 import SelectorModal from '../SelectorModal'
 import { ISimpleFilterBuilder } from './SearchControl'
-
 import "./Search.css"
 import { FilterOperation } from '../Signum.Entities.DynamicQuery';
 import SystemTimeEditor from './SystemTimeEditor';
 import { MaxHeightProperty, MaxWidthProperty } from 'csstype';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 export interface ShowBarExtensionOption { }
 
@@ -187,6 +187,8 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
         if (fo.pagination.mode == "Paginate")
             fo.pagination.currentPage = 1;
 
+        this.containerDiv && this.containerDiv.scrollTo({ top: 0 });
+
         this.doSearch().done();
     };
 
@@ -222,6 +224,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
                     markedRows: undefined,
                     searchCount: (this.state.searchCount || 0) + 1
                 }, () => {
+                    this.fixScroll();
                     if (this.props.onResult)
                         this.props.onResult(rt, dataChanged || false);
                     this.notifySelectedRowsChanged();
@@ -263,8 +266,12 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
         this.props.findOptions.pagination = p;
         this.setState({ resultTable: undefined, resultFindOptions: undefined });
 
-        if (this.props.findOptions.pagination.mode != "All")
+        if (this.props.findOptions.pagination.mode != "All") {
+
+            this.containerDiv && this.containerDiv.scrollTo({ top: 0 });
+
             this.doSearch().done();
+        }
     }
 
 
@@ -343,9 +350,27 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
     componentDidMount() {
         this.containerDiv!.addEventListener("scroll", (e) => {
-            var translate = "translate(0," + this.containerDiv!.scrollTop + "px)";
+
+            var table = this.thead!.parentElement!;            
+            var translate = "translate(0," + (this.containerDiv!.scrollTop - 1) + "px)";
             this.thead!.style.transform = translate;
         });
+    }
+
+    fixScroll() {
+        if (this.containerDiv) {
+            var table = this.containerDiv.firstChild! as HTMLElement;
+            if (this.containerDiv.scrollTop > table.clientHeight) {
+                //var translate = "translate(0,0)";
+                //this.thead!.style.transform = translate;
+                this.containerDiv.scrollTo({ top: 0 });
+                this.containerDiv.style.overflowY = "hidden";
+                setTimeout(() => {
+                    this.containerDiv!.style.overflowY = null;
+                }, 10);
+              
+            }
+        }
     }
 
 
@@ -383,9 +408,9 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
                     </div>
                 }
                 {p.showHeader && this.renderToolBar()}
-                {<MultipliedMessage findOptions={fo} mainType={this.entityColumn().type} />}
-                {fo.groupResults && <GroupByMessage findOptions={fo} mainType={this.entityColumn().type} />}
-                {fo.systemTime && <SystemTimeEditor findOptions={fo} queryDescription={qd} onChanged={() => this.forceUpdate()} />}
+                {p.showHeader && <MultipliedMessage findOptions={fo} mainType={this.entityColumn().type} />}
+                {p.showHeader && fo.groupResults && <GroupByMessage findOptions={fo} mainType={this.entityColumn().type} />}
+                {p.showHeader && fo.systemTime && <SystemTimeEditor findOptions={fo} queryDescription={qd} onChanged={() => this.forceUpdate()} />}
                 {this.state.editingColumn && <ColumnEditor
                     columnOption={this.state.editingColumn}
                     onChange={this.handleColumnChanged}
@@ -490,7 +515,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
                 className={"sf-query-button sf-filters-header btn btn-light" + (s.showFilters ? " active" : "")}
                 onClick={this.handleToggleFilters}
                 title={s.showFilters ? JavascriptMessage.hideFilters.niceToString() : JavascriptMessage.showFilters.niceToString()}>
-                <span className="fa fa-filter"/>
+                <FontAwesomeIcon icon="filter" />
             </button>),
 
             p.showGroupButton && OrderUtils.setOrder(-4, <button
@@ -504,13 +529,13 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
                 className={"sf-query-button btn " + (p.findOptions.systemTime ? "alert-primary" : "btn-light")}
                 onClick={this.handleSystemTimeClick}
                 title={p.findOptions.systemTime ? JavascriptMessage.deactivateTimeMachine.niceToString() : JavascriptMessage.activateTimeMachine.niceToString()}>
-                <i className="fa fa-history" />
+                <FontAwesomeIcon icon="history" />
             </button>),
 
             OrderUtils.setOrder(-3, <button className={classes("sf-query-button sf-search btn", p.findOptions.pagination.mode == "All" ? "btn-danger" : "btn-primary")} onClick={this.handleSearchClick}>{SearchMessage.Search.niceToString()} </button>),
 
             p.create && OrderUtils.setOrder(-2, <button className="sf-query-button btn btn-light sf-search-button sf-create" title={this.createTitle()} onClick={this.handleCreate}>
-                <span className="fa fa-plus sf-create" />
+                <FontAwesomeIcon icon="plus" className="sf-create" />
             </button>),
 
             this.props.showContextMenu != false && this.renderSelectedButton(),
@@ -521,7 +546,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
             !this.props.hideFullScreenButton && Finder.isFindable(p.findOptions.queryKey, true) &&
             <button className="sf-query-button btn btn-light" onClick={this.handleFullScreenClick} >
-                <span className="fa fa-external-link" />
+                <FontAwesomeIcon icon="external-link-alt" />
             </button>
         ]
             .filter(a => a)
@@ -745,16 +770,16 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
         const menuItems: React.ReactElement<any>[] = [];
         if (this.canFilter() && cm.columnIndex != undefined)
-            menuItems.push(<DropdownItem className="sf-quickfilter-header" onClick={this.handleQuickFilter}><span className="icon fa fa-filter"/>&nbsp;{JavascriptMessage.addFilter.niceToString()}</DropdownItem>);
+            menuItems.push(<DropdownItem className="sf-quickfilter-header" onClick={this.handleQuickFilter}><FontAwesomeIcon icon="filter" className="icon" />&nbsp;{JavascriptMessage.addFilter.niceToString()}</DropdownItem>);
 
         if (cm.rowIndex == undefined && p.allowChangeColumns) {
 
             if (menuItems.length)
                 menuItems.push(<DropdownItem divider />);
 
-            menuItems.push(<DropdownItem className="sf-insert-header" onClick={this.handleInsertColumn}><span className="icon fa fa-plus-circle" />&nbsp;{JavascriptMessage.insertColumn.niceToString()}</DropdownItem>);
-            menuItems.push(<DropdownItem className="sf-edit-header" onClick={this.handleEditColumn}><span className="icon fa fa-pencil" />&nbsp;{JavascriptMessage.editColumn.niceToString()}</DropdownItem>);
-            menuItems.push(<DropdownItem className="sf-remove-header" onClick={this.handleRemoveColumn}><span className="icon fa fa-minus-circle" />&nbsp;{JavascriptMessage.removeColumn.niceToString()}</DropdownItem>);
+            menuItems.push(<DropdownItem className="sf-insert-header" onClick={this.handleInsertColumn}><FontAwesomeIcon icon="plus-circle" className="icon" />&nbsp;{JavascriptMessage.insertColumn.niceToString()}</DropdownItem>);
+            menuItems.push(<DropdownItem className="sf-edit-header" onClick={this.handleEditColumn}><FontAwesomeIcon icon="pencil-alt" className="icon" />&nbsp;{JavascriptMessage.editColumn.niceToString()}</DropdownItem>);
+            menuItems.push(<DropdownItem className="sf-remove-header" onClick={this.handleRemoveColumn}><FontAwesomeIcon icon="minus-circle" className="icon" />&nbsp;{JavascriptMessage.removeColumn.niceToString()}</DropdownItem>);
         }
 
         if (cm.rowIndex != undefined) {
@@ -923,7 +948,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
                         onDragEnter={e => this.handlerHeaderDragOver(e, i)}
                         onDrop={this.handleHeaderDrop}>
                         <span className={"sf-header-sort " + this.orderClassName(co)} />
-                        {this.props.findOptions.groupResults && co.token && co.token.queryTokenType != "Aggregate" && <span> <i className="fa fa-key" /></span>}
+                        {this.props.findOptions.groupResults && co.token && co.token.queryTokenType != "Aggregate" && <span> <FontAwesomeIcon icon="key"/></span>}
                         <span> {co.displayName}</span></th>
                 )}
             </tr>
@@ -1183,7 +1208,7 @@ function removeAggregates(array: { token?: QueryToken, displayName?: string }[],
                 a.token = qd.columns["Id"] ? toQueryToken(qd.columns["Id"]) : undefined;
             }
 
-            if (a.displayName)
+            if (a.displayName && a.token)
                 a.displayName = a.token!.niceName;
         }
     });

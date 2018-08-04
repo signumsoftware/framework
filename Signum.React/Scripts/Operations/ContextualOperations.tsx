@@ -1,4 +1,5 @@
 ﻿import * as React from "react"
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Router, Route, Redirect } from "react-router"
 import {
     Lite, Entity, ModifiableEntity, EmbeddedEntity, LiteMessage, EntityPack, toLite, JavascriptMessage,
@@ -97,7 +98,7 @@ export function getEntityOperationsContextualItems(ctx: ContextualItemsContext<E
             coc.settings = cos;
             coc.entityOperationSettings = eos;
 
-            const visibleByDefault = oi.lite && (ctx.lites.length == 1 || oi.operationType != OperationType.ConstructorFrom)
+            const visibleByDefault = !oi.canBeModified && (ctx.lites.length == 1 || oi.operationType != OperationType.ConstructorFrom)
 
             if (eos == undefined ? visibleByDefault :
                 cos == undefined || cos.isVisible == undefined ? (visibleByDefault && eos.isVisible == undefined && (eos.onClick == undefined || cos != undefined && cos.onClick != undefined)) :
@@ -180,8 +181,7 @@ function getConfirmMessage(coc: ContextualOperationContext<Entity>) {
 
     if (coc.settings && coc.settings.confirmMessage != undefined)
         return coc.settings.confirmMessage(coc);
-
-    //eoc.settings.confirmMessage === undefined
+    
     if (coc.operationInfo.operationType == OperationType.Delete)
         return coc.context.lites.length > 1 ?
             OperationMessage.PleaseConfirmYouDLikeToDeleteTheSelectedEntitiesFromTheSystem.niceToString() :
@@ -221,7 +221,7 @@ export namespace MenuItemConstructor { //To allow monkey patching
                 onClick={disabled ? undefined : onClick}
                 disabled={disabled}
                 data-operation={coc.operationInfo.key}>
-                {icon ? <span className={classes("icon", icon)} style={{ color: coc.settings && coc.settings.iconColor }}></span> :
+                {icon ? <FontAwesomeIcon icon={icon} className="icon" color={coc.settings && coc.settings.iconColor}/> :
                     color ? <span className={classes("icon", "empty-icon", "btn-" + color)}></span> : undefined}
                 {(icon || color) && " "}
                 {text}
@@ -231,6 +231,9 @@ export namespace MenuItemConstructor { //To allow monkey patching
     }
 }
 
+export function notifySuccess() {
+    Notify.singleton.notifyTimeout({ text: JavascriptMessage.executed.niceToString(), type: "success" });
+}
 
 export function defaultContextualClick(coc: ContextualOperationContext<any>, ...args: any[]) {
 
@@ -245,24 +248,34 @@ export function defaultContextualClick(coc: ContextualOperationContext<any>, ...
                 if (coc.context.lites.length == 1) {
                     API.constructFromLite(coc.context.lites[0], coc.operationInfo.key, ...args)
                         .then(coc.onConstructFromSuccess || (pack => {
+                            notifySuccess();
                             coc.context.markRows({});
                             Navigator.createNavigateOrTab(pack, coc.event!);
                         }))
                         .done();
                 } else {
                     API.constructFromMultiple(coc.context.lites, coc.operationInfo.key, ...args)
-                        .then(coc.onContextualSuccess || (report => coc.context.markRows(report.errors)))
+                        .then(coc.onContextualSuccess || (report => {
+                            notifySuccess();
+                            coc.context.markRows(report.errors);
+                        }))
                         .done();
                 }
                 break;
             case OperationType.Execute:
                 API.executeMultiple(coc.context.lites, coc.operationInfo.key, ...args)
-                    .then(coc.onContextualSuccess || (report => coc.context.markRows(report.errors)))
+                    .then(coc.onContextualSuccess || (report => {
+                        notifySuccess();
+                        coc.context.markRows(report.errors);
+                    }))
                     .done();
                 break;
             case OperationType.Delete:
                 API.deleteMultiple(coc.context.lites, coc.operationInfo.key, ...args)
-                    .then(coc.onContextualSuccess || (report => coc.context.markRows(report.errors)))
+                    .then(coc.onContextualSuccess || (report => {
+                        notifySuccess();
+                        coc.context.markRows(report.errors);
+                    }))
                     .done();
                 break;
         }

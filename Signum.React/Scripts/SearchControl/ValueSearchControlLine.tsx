@@ -14,6 +14,8 @@ import { LineBase, LineBaseProps, runTasks } from '../Lines/LineBase'
 import { FormGroup } from '../Lines/FormGroup'
 import { FormControlReadonly } from '../Lines/FormControlReadonly'
 import { SearchControlProps } from "./SearchControl";
+import { BsColor } from '../Components';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 export interface ValueSearchControlLineProps extends React.Props<ValueSearchControlLine> {
     ctx: StyleContext;
@@ -25,6 +27,7 @@ export interface ValueSearchControlLineProps extends React.Props<ValueSearchCont
     initialValue?: any;
     isLink?: boolean;
     isBadge?: boolean | "MoreThanZero";
+    badgeColor?: BsColor;
     isFormControl?: boolean;
     findButton?: boolean;
     onViewEntity?: (entity: Lite<Entity>) => void;
@@ -102,7 +105,7 @@ export default class ValueSearchControlLine extends React.Component<ValueSearchC
             <a href="#" className={classes("sf-line-button", "sf-find", isFormControl ? "btn btn-light" : undefined)}
                 onClick={this.valueSearchControl!.handleClick}
                 title={EntityControlMessage.Find.niceToString()}>
-                <span className="fa fa-search" />
+                <FontAwesomeIcon icon="search" />
             </a>;
 
 
@@ -110,7 +113,7 @@ export default class ValueSearchControlLine extends React.Component<ValueSearchC
             <a href="#" className={classes("sf-line-button", "sf-view", isFormControl ? "btn btn-light" : undefined)}
                 onClick={this.handleViewEntityClick}
                 title={EntityControlMessage.View.niceToString()}>
-                <span className="fa fa-arrow-right" />
+                <FontAwesomeIcon icon="arrow-right" />
             </a>
 
         let extra = this.valueSearchControl && this.props.extraButtons && this.props.extraButtons(this.valueSearchControl);
@@ -126,6 +129,7 @@ export default class ValueSearchControlLine extends React.Component<ValueSearchC
                         findOptions={fo}
                         initialValue={this.props.initialValue}
                         isBadge={isBadge}
+                        badgeColor={this.props.badgeColor}
                         isLink={this.props.isLink}
                         formControlClass={isFormControl ? this.props.ctx.formControlClass : undefined}
                         valueToken={this.props.valueToken}

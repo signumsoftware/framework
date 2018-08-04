@@ -13,6 +13,7 @@ import { EntityListBase, EntityListBaseProps, DragConfig } from './EntityListBas
 import DynamicComponent from './DynamicComponent'
 import { RenderEntity } from './RenderEntity'
 import { MaxHeightProperty } from 'csstype';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 export interface EntityTableProps extends EntityListBaseProps {
     createAsLink?: boolean | ((er: EntityTable) => React.ReactElement<any>);
@@ -23,6 +24,7 @@ export interface EntityTableProps extends EntityListBaseProps {
     avoidFieldSet?: boolean;
     avoidEmptyTable?: boolean;
     maxResultsHeight?: MaxHeightProperty<string | number> | any;
+    scrollable?: boolean;
 }
 
 export interface EntityTableColumn<T, RS> {
@@ -36,7 +38,8 @@ export interface EntityTableColumn<T, RS> {
 export class EntityTable extends EntityListBase<EntityTableProps, EntityTableProps> {
 
     static defaultProps = {
-        maxResultsHeight: "400px"
+        maxResultsHeight: "400px",
+        scrollable: false
     };
 
     static typedColumns<T extends ModifiableEntity>(columns: (EntityTableColumn<T, any> | null | undefined)[]): EntityTableColumn<ModifiableEntity, any>[] {
@@ -98,7 +101,7 @@ export class EntityTable extends EntityListBase<EntityTableProps, EntityTablePro
 
     renderButtons() {
         const buttons = (
-            <span className="pull-right">
+            <span className="float-right">
                 {this.state.createAsLink == false && this.renderCreateButton(false)}
                 {this.renderFindButton(false)}
             </span>
@@ -125,8 +128,8 @@ export class EntityTable extends EntityListBase<EntityTableProps, EntityTablePro
 
         return (
             <div ref={d => this.containerDiv = d}
-                className="sf-scroll-table-container table-responsive"
-                style={{ maxHeight: this.props.maxResultsHeight }}>
+                className={this.props.scrollable ? "sf-scroll-table-container table-responsive" : undefined}
+                style={{ maxHeight: this.props.scrollable ? this.props.maxResultsHeight : undefined }}>
                 <table className="table table-sm sf-table">
                     {
                         (!this.props.avoidEmptyTable || ctx.value.length > 0) &&
@@ -161,7 +164,7 @@ export class EntityTable extends EntityListBase<EntityTableProps, EntityTablePro
                                         <a href="#" title={EntityControlMessage.Create.niceToString()}
                                             className="sf-line-button sf-create"
                                             onClick={this.handleCreateClick}>
-                                            <span className="fa fa-plus sf-create" />&nbsp;{EntityControlMessage.Create.niceToString()}
+                                            <FontAwesomeIcon icon="plus" className="sf-create" />&nbsp;{EntityControlMessage.Create.niceToString()}
                                         </a>}
                                 </td>
                             </tr>
@@ -211,7 +214,7 @@ export class EntityTableRow extends React.Component<EntityTableRowProps, { rowSt
                         {this.props.onRemove && <a href="#" className={classes("sf-line-button", "sf-remove")}
                             onClick={this.props.onRemove}
                             title={EntityControlMessage.Remove.niceToString()}>
-                            <span className="fa fa-remove"/>
+                            <FontAwesomeIcon icon="times" />
                         </a>}
                         &nbsp;
                         {drag && <a href="#" className={classes("sf-line-button", "sf-move")}
@@ -219,7 +222,7 @@ export class EntityTableRow extends React.Component<EntityTableRowProps, { rowSt
                             onDragStart={drag.onDragStart}
                             onDragEnd={drag.onDragEnd}
                             title={EntityControlMessage.Move.niceToString()}>
-                            <span className="fa fa-bars"/>
+                            <FontAwesomeIcon icon="bars" />
                         </a>}
                     </div>
                 </td>

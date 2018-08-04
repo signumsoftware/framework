@@ -132,7 +132,7 @@ namespace Signum.Windows.Operations
                 Entity ident = (Entity)(IEntity)eoc.Entity;
                 if (eoc.OperationInfo.OperationType == OperationType.Execute)
                 {
-                    if (eoc.OperationInfo.Lite.Value)
+                    if (!eoc.OperationInfo.CanBeModified.Value)
                     {
                         if (eoc.EntityControl.LooseChangesIfAny())
                         {
@@ -170,7 +170,7 @@ namespace Signum.Windows.Operations
                 }
                 else if (eoc.OperationInfo.OperationType == OperationType.ConstructorFrom)
                 {
-                    if (eoc.OperationInfo.Lite.Value && !eoc.EntityControl.LooseChangesIfAny())
+                    if (!eoc.OperationInfo.CanBeModified.Value && !eoc.EntityControl.LooseChangesIfAny())
                         return;
 
                     if (!eoc.ConfirmMessage())
@@ -180,7 +180,7 @@ namespace Signum.Windows.Operations
                     {
                         Entity r;
 
-                        if (eoc.OperationInfo.Lite.Value)
+                        if (!eoc.OperationInfo.CanBeModified.Value)
                         {
                             r = Server.Return((IOperationServer s) => s.ConstructFromLite(ident.ToLite(), eoc.OperationInfo.OperationSymbol, null));
                         }

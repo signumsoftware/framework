@@ -59,7 +59,7 @@ Before generating the entities, makes sense that we comment out any module that 
 In `Start` method of `Starter` class, comment out every line between
 
 ```
-OperationLogic.Start(sb, dqm);
+OperationLogic.Start(sb);
 ```
 to the line 
 
@@ -321,12 +321,12 @@ Just as we did before, include all the generated files in `AdventureWorks.Logic`
 Also, in the `Start` method, after the commented out region, call the newly generated logic classes so they became part of the in-memory representation of the database schema, like this: 
 
 ```C#
-InternalsLogic.Start(sb, dqm);
-ProductionLogic.Start(sb, dqm);
-PersonLogic.Start(sb, dqm);
-HumanResourcesLogic.Start(sb, dqm);
-PurchasingLogic.Start(sb, dqm);
-SalesLogic.Start(sb, dqm);
+InternalsLogic.Start(sb);
+ProductionLogic.Start(sb);
+PersonLogic.Start(sb);
+HumanResourcesLogic.Start(sb);
+PurchasingLogic.Start(sb);
+SalesLogic.Start(sb);
 ```
 
 You'll need to include the namespaces to make it compile. 

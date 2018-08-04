@@ -8,6 +8,8 @@ import { getTypeInfo, TypeInfo, PropertyRoute, ReadonlyBinding, getTypeInfos } f
 import { Transition } from 'react-transition-group'
 
 import "./Notify.css"
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { IconProp } from '@fortawesome/fontawesome-svg-core';
 
 type NotifyType = "warning" | "error" | "success" | "loading";
 
@@ -24,13 +26,13 @@ interface NotifyState {
 
 export default class Notify extends React.Component<{}, NotifyState>{
 
-    static singletone: Notify;
+    static singleton: Notify;
 
     constructor(props: {}) {
         super(props);
         this.state = { text: undefined, type: undefined };
 
-        Notify.singletone = this;
+        Notify.singleton = this;
     }
 
     _isMounted: boolean = false;
@@ -81,24 +83,24 @@ export default class Notify extends React.Component<{}, NotifyState>{
             return undefined;
         }
 
-        var icon: string | undefined;
+        var icon: IconProp | undefined;
         switch (this.state.type) {
             case "loading":
-                icon = "fa fa-cog fa-spin fa-fw";
+                icon = "spinner";
                 break;
             case "error":
             case "warning":
-                icon = "fa fa-exclamation fa-fw";
+                icon = "exclamation";
                 break;
             case "success":
-                icon = "fa fa-check fa-fw";
+                icon = "check";
                 break;
             default:
                 break;
         }
 
         if (icon) {
-            return <span className={icon} style={{ fontSize: "large" }}> </span>
+            return <FontAwesomeIcon icon={icon} fixedWidth style={{ fontSize: "large" }} pulse={this.state.type === "loading"} />
         }
         else {
             return undefined;

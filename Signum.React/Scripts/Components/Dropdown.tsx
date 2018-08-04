@@ -90,7 +90,7 @@ export class Dropdown extends React.Component<DropdownProps> {
 
     handleDocumentClick = (e: MouseEvent | TouchEvent) => {
 
-        if ((e as TouchEvent).which == 3)
+        if ((e as MouseEvent).which == 3)
             return;
 
         const container = this.getContainer();

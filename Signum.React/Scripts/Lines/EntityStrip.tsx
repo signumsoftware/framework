@@ -13,6 +13,7 @@ import { ModifiableEntity, Lite, Entity, MList, MListElement, EntityControlMessa
 import { Typeahead } from '../Components'
 import { EntityListBase, EntityListBaseProps, DragConfig } from './EntityListBase'
 import { AutocompleteConfig } from './AutocompleteConfig'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 
 
@@ -256,24 +257,24 @@ export class EntityStripElement extends React.Component<EntityStripElementProps,
 
     removeIcon() {
         return this.props.onRemove &&
-                        <span>
-                            <a className="sf-line-button sf-remove"
-                                onClick={this.props.onRemove}
-                                href="#"
-                                title={EntityControlMessage.Remove.niceToString()}>
-                                <span className="fa fa-remove"></span>
-                            </a>
-                        </span>
-                    }
+            <span>
+                <a className="sf-line-button sf-remove"
+                    onClick={this.props.onRemove}
+                    href="#"
+                    title={EntityControlMessage.Remove.niceToString()}>
+                    <FontAwesomeIcon icon="times" />
+                </a>
+            </span>
+    }
 
     dragIcon() {
         var drag = this.props.drag;
         return drag && <span className={classes("sf-line-button", "sf-move")}
-                        draggable={true}
-                        onDragStart={drag.onDragStart}
-                        onDragEnd={drag.onDragEnd}
-                        title={EntityControlMessage.Move.niceToString()}>
-                        <span className="fa fa-bars" />
+            draggable={true}
+            onDragStart={drag.onDragStart}
+            onDragEnd={drag.onDragEnd}
+            title={EntityControlMessage.Move.niceToString()}>
+            <FontAwesomeIcon icon="bars" />
         </span>;
     }
 }

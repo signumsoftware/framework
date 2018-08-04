@@ -21,6 +21,11 @@
   },
   "homepage": "https://github.com/signumsoftware/framework#readme",
   "dependencies": {
+    "@fortawesome/fontawesome-svg-core": "^1.2.2",
+    "@fortawesome/free-brands-svg-icons": "^5.2.0",
+    "@fortawesome/free-regular-svg-icons": "^5.2.0",
+    "@fortawesome/free-solid-svg-icons": "^5.2.0",
+    "@fortawesome/react-fontawesome": "^0.1.0",
     "@types/d3": "^5.0.0",
     "@types/d3-scale-chromatic": "^1.2.0",
     "@types/history": "^4.6.2",

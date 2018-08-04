@@ -415,7 +415,7 @@ namespace Signum.Utilities.Reflection
             if (type == typeof(string))
                 return (object)value;
 
-            if (value == null || value == "")
+            if (value == null || value == "" || value == " ")
                 return (object)null;
 
             Type utype = type.UnNullify();

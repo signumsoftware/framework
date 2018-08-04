@@ -18,7 +18,7 @@ namespace Signum.Engine
 
     public static class VirtualMList
     {
-        public static Dictionary<Type, HashSet<Type>> RegisteredVirtualMLists = new Dictionary<Type, HashSet<Type>>();
+        public static Dictionary<Type, Dictionary<Type, PropertyRoute>> RegisteredVirtualMLists = new Dictionary<Type, Dictionary<Type, PropertyRoute>>();
 
         static readonly Variable<ImmutableStack<Type>> avoidTypes = Statics.ThreadVariable<ImmutableStack<Type>>("avoidVirtualMList");
 
@@ -26,6 +26,11 @@ namespace Signum.Engine
         {
             var stack = avoidTypes.Value;
             return (stack != null && (stack.Contains(elementType) || stack.Contains(null)));
+        }
+
+        public static bool IsVirtualMList(this PropertyRoute pr)
+        {
+            return pr.Type.IsMList() && (RegisteredVirtualMLists.TryGetC(pr.RootType)?.TryGetC(pr.Type.ElementType())?.Equals(pr) ?? false);
         }
 
         /// <param name="elementType">Use null for every type</param>
@@ -82,7 +87,8 @@ namespace Signum.Engine
             where T : Entity
             where L : Entity
         {
-            RegisteredVirtualMLists.GetOrCreate(typeof(T)).Add(typeof(L));
+            var mListPropertRoute = PropertyRoute.Construct(mListField);
+            RegisteredVirtualMLists.GetOrCreate(typeof(T)).Add(typeof(L), mListPropertRoute);
             
             if (lazyRetrieve == null)
                 lazyRetrieve = (typeof(L) == typeof(T));
@@ -92,7 +98,7 @@ namespace Signum.Engine
 
             Func<T, MList<L>> getMList = GetAccessor(mListField);
             Action<L, Lite<T>> setter = null;
-            bool preserveOrder = fi.SchemaBuilder.Settings.FieldAttributes(mListField)
+            bool preserveOrder = fi.SchemaBuilder.Settings.FieldAttributes(mListPropertRoute)
                 .OfType<PreserveOrderAttribute>()
                 .Any();
 

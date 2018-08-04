@@ -4,6 +4,7 @@ import { SearchMessage, MList, newMListElement } from "../Signum.Entities";
 import * as Constructor from "../Constructor";
 import { Binding, New } from "../Reflection";
 import { mlistItemContext } from "../TypeContext";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 
 
@@ -74,7 +75,7 @@ export class MultiValueLine extends LineBase<MultiValueLineProps, MultiValueLine
                                             <a href="#" title={SearchMessage.DeleteFilter.niceToString()}
                                                 className="sf-line-button sf-remove"
                                                 onClick={e => { e.preventDefault(); this.handleDeleteValue(i); }}>
-                                                <span className="fa fa-remove" />
+                                                <FontAwesomeIcon icon="times" />
                                             </a>}
                                     </td>
                                     <td>
@@ -88,7 +89,7 @@ export class MultiValueLine extends LineBase<MultiValueLineProps, MultiValueLine
                                     <a href="#" title={this.props.addValueText || SearchMessage.AddValue.niceToString()}
                                         className="sf-line-button sf-create"
                                         onClick={this.handleAddValue}>
-                                        <span className="fa fa-plus sf-create" />&nbsp;{this.props.addValueText || SearchMessage.AddValue.niceToString()}
+                                        <FontAwesomeIcon icon="plus" className="sf-create" />&nbsp;{this.props.addValueText || SearchMessage.AddValue.niceToString()}
                                     </a>}
                             </td>
                         </tr>

@@ -19,6 +19,7 @@ import { getEntityOperationButtons, defaultOnClick } from './Operations/EntityOp
 import { getConstructFromManyContextualItems, getEntityOperationsContextualItems, defaultContextualClick } from './Operations/ContextualOperations';
 import { ContextualItemsContext } from './SearchControl/ContextualItems';
 import { BsColor } from "./Components/Basic";
+import { IconProp } from "@fortawesome/fontawesome-svg-core";
 
 export function start() {
     ButtonBar.onButtonBarRender.push(getEntityOperationButtons);
@@ -32,7 +33,7 @@ export function start() {
     },
         {
             isVisible: getTypeInfo(ctx.lite.EntityType) && getTypeInfo(ctx.lite.EntityType).requiresSaveOperation && Finder.isFindable(OperationLogEntity, false),
-            icon: "fa fa-history",
+            icon: "history",
             iconColor: "green"
         }));
 }
@@ -153,10 +154,10 @@ export class ContextualOperationSettings<T extends Entity> extends OperationSett
 
     isVisible?: (ctx: ContextualOperationContext<T>) => boolean;
     hideOnCanExecute?: boolean;
-    confirmMessage?: (ctx: ContextualOperationContext<T>) => string;
+    confirmMessage?: (ctx: ContextualOperationContext<T>) => string | undefined | null;
     onClick?: (ctx: ContextualOperationContext<T>) => void;
     color?: BsColor;
-    icon?: string;
+    icon?: IconProp;
     iconColor?: string;
     order?: number;
 
@@ -171,10 +172,10 @@ export interface ContextualOperationOptions<T extends Entity> {
     text?: () => string;
     isVisible?: (ctx: ContextualOperationContext<T>) => boolean;
     hideOnCanExecute?: boolean;
-    confirmMessage?: (ctx: ContextualOperationContext<T>) => string;
+    confirmMessage?: (ctx: ContextualOperationContext<T>) => string | undefined | null;
     onClick?: (ctx: ContextualOperationContext<T>) => void;
     color?: BsColor;
-    icon?: string;
+    icon?: IconProp;
     iconColor?: string;
     order?: number;
 }
@@ -246,7 +247,7 @@ export class EntityOperationSettings<T extends Entity> extends OperationSettings
     contextualFromMany?: ContextualOperationSettings<T>;
 
     isVisible?: (ctx: EntityOperationContext<T>) => boolean;
-    confirmMessage?: (ctx: EntityOperationContext<T>) => string;
+    confirmMessage?: (ctx: EntityOperationContext<T>) => string | undefined | null;
     onClick?: (ctx: EntityOperationContext<T>) => void;
     hideOnCanExecute?: boolean;
     group?: EntityOperationGroup | null;
@@ -272,7 +273,7 @@ export interface EntityOperationOptions<T extends Entity> {
 
     text?: () => string;
     isVisible?: (ctx: EntityOperationContext<T>) => boolean;
-    confirmMessage?: (ctx: EntityOperationContext<T>) => string;
+    confirmMessage?: (ctx: EntityOperationContext<T>) => string | undefined | null;
     onClick?: (ctx: EntityOperationContext<T>) => void;
     hideOnCanExecute?: boolean;
     group?: EntityOperationGroup | null;

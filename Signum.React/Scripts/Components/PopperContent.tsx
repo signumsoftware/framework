@@ -2,9 +2,8 @@
 import * as PropTypes from 'prop-types';
 import * as ReactDOM from 'react-dom';
 import { Arrow, Popper as ReactPopper, } from 'react-popper';
-import PopperJS, { Placement } from 'popper.js';
+import PopperJS from 'popper.js';
 import { classes } from '../Globals';
-import Popper from 'popper.js';
 
 interface PopperContentProps {
     children: React.ReactElement<any>;
@@ -24,7 +23,6 @@ interface PopperContentProps {
 
 interface PopperContentState {
     placement?: PopperJS.Placement;
-    isRTL: boolean;
 }
 
 export class PopperContent extends React.Component<PopperContentProps, PopperContentState> {
@@ -45,9 +43,7 @@ export class PopperContent extends React.Component<PopperContentProps, PopperCon
         this.handlePlacementChange = this.handlePlacementChange.bind(this);
         this.setTargetNode = this.setTargetNode.bind(this);
         this.getTargetNode = this.getTargetNode.bind(this);
-        this.state = {
-            isRTL: document.body.classList.contains("rtl"),
-        };
+        this.state = {};
     }
 
     static childContextTypes = {
@@ -153,19 +149,13 @@ export class PopperContent extends React.Component<PopperContentProps, PopperCon
             tag,
             container,
             modifiers,
-            hideArrow,
-            placement,
+            hideArrow, 
             ...attrs
         } = this.props;
-
-        const culturePlacement = !this.state.isRTL ? placement :
-            placement && placement.replace(/right|left/, str => str == "right" ? "left" : "right") as Popper.Placement;
-
-        const placementSuffix = (this.state.placement || culturePlacement)!.split('-')[0];
-        
+        const placement = (this.state.placement || attrs.placement)!.split('-')[0];
         const popperClassName = classes(
             className,
-            placementPrefix ? `${placementPrefix}-${placementSuffix}` : placementSuffix
+            placementPrefix ? `${placementPrefix}-${placement}` : placement
         );
 
         const extendedModifiers = {
@@ -180,7 +170,7 @@ export class PopperContent extends React.Component<PopperContentProps, PopperCon
         } as PopperJS.Modifiers;
 
         return (
-            <ReactPopper modifiers={extendedModifiers} {...attrs} placement={culturePlacement} component={tag} className={popperClassName} >
+            <ReactPopper modifiers={extendedModifiers} {...attrs} component={tag} className={popperClassName} >
                 {children}
                 {!hideArrow && < Arrow className={"arrow"} />}
             </ReactPopper>
