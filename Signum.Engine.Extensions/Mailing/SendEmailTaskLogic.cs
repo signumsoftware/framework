@@ -27,12 +27,12 @@ namespace Signum.Engine.Mailing
 
     public static class SendEmailTaskLogic
     {
-        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
+        public static void Start(SchemaBuilder sb)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
                 sb.Include<SendEmailTaskEntity>()
-                    .WithQuery(dqm, () => e => new
+                    .WithQuery(() => e => new
                     {
                         Entity = e,
                         e.Id,
@@ -77,8 +77,8 @@ namespace Signum.Engine.Mailing
 
                 new Graph<SendEmailTaskEntity>.Execute(SendEmailTaskOperation.Save)
                 {
-                    AllowsNew = true,
-                    Lite = false,
+                    CanBeNew = true,
+                    CanBeModified = true,
                     Execute = (e, _) => { }
                 }.Register();
 
@@ -103,7 +103,7 @@ namespace Signum.Engine.Mailing
                     {
                         var qr = er.TargetsFromUserQuery.Retrieve().ToQueryRequest();
                         qr.Columns.Clear();
-                        var result = DynamicQueryManager.Current.ExecuteQuery(qr);
+                        var result = QueryLogic.Queries.ExecuteQuery(qr);
 
                         var entities = result.Rows.Select(a => a.Entity).ToList();
                         if (entities.IsEmpty())
@@ -125,7 +125,7 @@ namespace Signum.Engine.Mailing
             if (queryName == null)
                 return null;
 
-            var entityColumn = DynamicQueryManager.Current.QueryDescription(queryName).Columns.Single(a => a.IsEntity);
+            var entityColumn = QueryLogic.Queries.QueryDescription(queryName).Columns.Single(a => a.IsEntity);
             var implementations = entityColumn.Implementations.Value;
 
             if (implementations.IsByAll)

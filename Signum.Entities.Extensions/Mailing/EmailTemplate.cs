@@ -17,16 +17,21 @@ using Signum.Entities.UserAssets;
 using Signum.Utilities.ExpressionTrees;
 using Signum.Entities;
 using Signum.Entities.Templating;
+using System.Xml.Linq;
+using Signum.Entities.Mailing;
 
 namespace Signum.Entities.Mailing
 {
     [Serializable, EntityKind(EntityKind.Main, EntityData.Master)]
-    public class EmailTemplateEntity : Entity
+    public class EmailTemplateEntity : Entity, IUserAssetEntity
     {
         public EmailTemplateEntity()
         {
             RebindEvents();
         }
+
+        [UniqueIndex]
+        public Guid Guid { get; set; } = Guid.NewGuid();
 
         public EmailTemplateEntity(object queryName) : this()
         {
@@ -70,6 +75,7 @@ namespace Signum.Entities.Mailing
         [NotifyChildProperty]
         public TemplateApplicableEval Applicable { get; set; }
         
+
         protected override string PropertyValidation(System.Reflection.PropertyInfo pi)
         {
             if (pi.Name == nameof(Messages))
@@ -115,7 +121,86 @@ namespace Signum.Entities.Mailing
                 throw new ApplicationException($"Error evaluating Applicable for EmailTemplate '{Name}' with entity '{entity}': " + e.Message, e);
             }
         }
-    }
+
+        public XElement ToXml(IToXmlContext ctx)
+        {
+            if(this.Attachments != null && this.Attachments.Count() > 0)
+            {
+                throw new NotImplementedException("Attachments are not yet exportable");
+            }
+            
+            return new XElement("EmailTemplate",
+                new XAttribute("Name", Name),
+                new XAttribute("Guid", Guid),
+                new XAttribute("DisableAuthorization", DisableAuthorization),
+                new XAttribute("Query", Query.Key),
+                new XAttribute("EditableMessage", EditableMessage),
+                new XAttribute("SystemEmail", SystemEmail.FullClassName),
+                new XAttribute("SendDifferentMessages", SendDifferentMessages),
+                new XAttribute("MasterTemplate", MasterTemplate.IdOrNull),
+                new XAttribute("IsBodyHtml", IsBodyHtml),
+                new XElement("From",
+                    From.DisplayName != null ? new XAttribute("DisplayName", From.DisplayName) : null,
+                    From.EmailAddress != null ? new XAttribute("EmailAddress", From.EmailAddress) : null,
+                    From.Token != null ? new XAttribute("Token", From.Token.Token.FullKey()) : null),
+                new XElement("Recipients", Recipients.Select(rec =>
+                    new XElement("Recipient", new XAttribute("DisplayName", rec.DisplayName ?? ""),
+                         new XAttribute("EmailAddress", rec.EmailAddress ?? ""),
+                         new XAttribute("Kind", rec.Kind),
+                         rec.Token != null ? new XAttribute("Token", rec.Token?.Token.FullKey()) : null
+                        )
+                    )),
+                new XElement("Messages", Messages.Select(x =>
+                    new XElement("Message",
+                        new XAttribute("CultureInfo", x.CultureInfo.Name),
+                        new XAttribute("Subject", x.Subject),
+                        new XCData(x.Text)
+                    ))),
+
+                this.Applicable?.Let(app => new XElement("Applicable", new XCData(app.Script)))
+                );
+        }
+
+        public void FromXml(XElement element, IFromXmlContext ctx)
+        {  
+            Guid = Guid.Parse(element.Attribute("Guid").Value);
+            Name = element.Attribute("Name").Value;
+            DisableAuthorization = element.Attribute("DisableAuthorization")?.Let(a => bool.Parse(a.Value)) ?? false;
+
+            Query = ctx.GetQuery(element.Attribute("Query").Value);
+            EditableMessage = bool.Parse(element.Attribute("EditableMessage").Value);
+            SystemEmail = ctx.GetSystemEmail(element.Attribute("SystemEmail").Value);
+            SendDifferentMessages = bool.Parse(element.Attribute("SendDifferentMessages").Value);
+
+            MasterTemplate = Lite.ParsePrimaryKey<EmailMasterTemplateEntity>(element.Attribute("MasterTemplate").Value);
+            IsBodyHtml = bool.Parse(element.Attribute("IsBodyHtml").Value);
+
+            From = element.Element("From")?.Let(from =>  new EmailTemplateContactEmbedded
+            {
+                DisplayName = from.Attribute("DisplayName").Value,
+                EmailAddress = from.Attribute("EmailAddress").Value,
+                Token = from.Attribute("Token")?.Let(t => new QueryTokenEmbedded(t.Value)),
+            });
+
+            Recipients = element.Element("Recipients").Elements("Recipient").Select(rep => new EmailTemplateRecipientEntity
+            {
+                DisplayName = rep.Attribute("DisplayName").Value,
+                EmailAddress = rep.Attribute("EmailAddress").Value,
+                Kind = rep.Attribute("Kind").Value.ToEnum<EmailRecipientKind>(),
+                Token = rep.Attribute("Token") != null ? new QueryTokenEmbedded(rep.Attribute("Token").Value) : null
+            }).ToMList();
+
+            Messages = element.Element("Messages").Elements("Message").Select(elem => new EmailTemplateMessageEmbedded(ctx.GetCultureInfoEntity(elem.Attribute("CultureInfo").Value))
+            {
+                Subject = elem.Attribute("Subject").Value,
+                Text = elem.Value
+            }).ToMList();
+
+            Applicable = element.Element("Applicable")?.Let(app => new TemplateApplicableEval { Script =  app.Value});
+            ParseData(ctx.GetQueryDescription(Query));
+        }
+
+    } 
 
     [Serializable]
     public class EmailTemplateContactEmbedded : EmbeddedEntity
@@ -208,7 +293,8 @@ namespace Signum.Entities.Mailing
         {
             return CultureInfo?.ToString() ?? EmailTemplateMessage.NewCulture.NiceToString();
         }
-    }
+     }
+    
 
     public interface IAttachmentGeneratorEntity : IEntity
     {

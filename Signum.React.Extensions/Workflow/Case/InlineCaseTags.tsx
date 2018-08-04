@@ -1,15 +1,16 @@
 ﻿import * as React from 'react'
-import { Dic, classes } from '../../../../Framework/Signum.React/Scripts/Globals'
-import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
-import * as Operations from '../../../../Framework/Signum.React/Scripts/Operations'
-import { getMixin, Lite, newMListElement, is } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { Dic, classes } from '@framework/Globals'
+import * as Navigator from '@framework/Navigator'
+import * as Operations from '@framework/Operations'
+import { getMixin, Lite, newMListElement, is } from '@framework/Signum.Entities'
 import { ColorTypeaheadLine } from '../../Basics/Templates/ColorTypeahead'
 import { CaseTagTypeEntity, CaseEntity, CaseTagsModel, CaseOperation } from '../Signum.Entities.Workflow'
 import {
     ValueLine, EntityLine, RenderEntity, EntityCombo, EntityList, EntityDetail, EntityStrip,
     EntityRepeater, EntityCheckboxList, EntityTabRepeater, TypeContext, EntityTable
-} from '../../../../Framework/Signum.React/Scripts/Lines'
-import { SearchControl, ValueSearchControl } from '../../../../Framework/Signum.React/Scripts/Search'
+} from '@framework/Lines'
+import { SearchControl, ValueSearchControl } from '@framework/Search'
 import { Color } from '../../Basics/Color'
 import Tag from './Tag'
 import * as WorkflowClient from '../WorkflowClient'
@@ -60,7 +61,7 @@ export default class InlineCaseTags extends React.Component<InlineCaseTagsProps,
         return (
             <a href="#" onClick={this.handleTagsClick} className={classes("case-icon", this.state.tags.length == 0 && "case-icon-ghost")}>
                 {
-                    this.state.tags.length == 0 ? <span className={"fa fa-tags"} /> :
+                    this.state.tags.length == 0 ? <FontAwesomeIcon icon={"tags"} /> :
                         this.state.tags.map((t, i) => <Tag key={i} tag={t} />)
                 }
             </a>

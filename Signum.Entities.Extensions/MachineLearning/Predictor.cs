@@ -20,7 +20,7 @@ using System.ComponentModel;
 namespace Signum.Entities.MachineLearning
 {
     [Serializable, EntityKind(EntityKind.Main, EntityData.Transactional)]
-    public class PredictorEntity : Entity
+    public class PredictorEntity : Entity, IProcessDataEntity
     {
         public PredictorEntity()
         {
@@ -216,6 +216,7 @@ namespace Signum.Entities.MachineLearning
         public static readonly ExecuteSymbol<PredictorEntity> StopTraining;
         public static readonly ExecuteSymbol<PredictorEntity> Untrain;
         public static readonly ExecuteSymbol<PredictorEntity> Publish;
+        public static readonly ConstructSymbol<Entity>.From<PredictorEntity> AfterPublishProcess;
         public static readonly DeleteSymbol<PredictorEntity> Delete;
         public static readonly ConstructSymbol<PredictorEntity>.From<PredictorEntity> Clone;
         public static readonly ConstructSymbol<ProcessEntity>.From<PredictorEntity> AutoconfigureNetwork;

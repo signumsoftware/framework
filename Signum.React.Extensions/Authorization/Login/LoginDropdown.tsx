@@ -1,7 +1,8 @@
 ﻿import * as React from 'react'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { AuthMessage, UserEntity } from '../Signum.Entities.Authorization'
 import * as AuthClient from '../AuthClient'
-import { DropdownToggle, NavItem, UncontrolledDropdown, DropdownMenu, DropdownItem, NavLink, LinkContainer } from '../../../../Framework/Signum.React/Scripts/Components';
+import { DropdownToggle, NavItem, UncontrolledDropdown, DropdownMenu, DropdownItem, NavLink, LinkContainer } from '@framework/Components';
 
 
 export default class LoginDropdown extends React.Component<{}, { user: UserEntity }> {
@@ -24,11 +25,11 @@ export default class LoginDropdown extends React.Component<{}, { user: UserEntit
                 </DropdownToggle>
                 <DropdownMenu right style={{ minWidth: "200px" }}>
                     <LinkContainer to="~/auth/changePassword">
-                        <DropdownItem><i className="fa fa-key fa-fw"></i> {AuthMessage.ChangePassword.niceToString()}</DropdownItem>
+                        <DropdownItem><FontAwesomeIcon icon="key" fixedWidth /> {AuthMessage.ChangePassword.niceToString()}</DropdownItem>
                     </LinkContainer>
                     <DropdownItem divider />
-                    <LinkContainer to="~/auth/login"><DropdownItem><i className="fa fa-user-plus"></i> {AuthMessage.SwitchUser.niceToString()}</DropdownItem></LinkContainer>
-                    <DropdownItem id="sf-auth-logout" onClick={() => AuthClient.logout()}><i className="fa fa-sign-out fa-fw"></i> {AuthMessage.Logout.niceToString()}</DropdownItem>
+                    <LinkContainer to="~/auth/login"><DropdownItem><FontAwesomeIcon icon="user-plus" /> {AuthMessage.SwitchUser.niceToString()}</DropdownItem></LinkContainer>
+                    <DropdownItem id="sf-auth-logout" onClick={() => AuthClient.logout()}><FontAwesomeIcon icon="sign-out-alt" fixedWidth /> {AuthMessage.Logout.niceToString()}</DropdownItem>
                 </DropdownMenu>
             </UncontrolledDropdown>
         );

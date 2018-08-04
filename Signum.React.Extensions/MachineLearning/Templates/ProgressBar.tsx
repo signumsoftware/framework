@@ -1,6 +1,6 @@
 ﻿import * as React from 'react'
-import { BsColor } from '../../../../Framework/Signum.React/Scripts/Components/Basic';
-import { classes } from '../../../../Framework/Signum.React/Scripts/Globals'
+import { BsColor } from '@framework/Components/Basic';
+import { classes } from '@framework/Globals'
 import * as numbro from 'numbro';
 
 interface ProgressBarProps {

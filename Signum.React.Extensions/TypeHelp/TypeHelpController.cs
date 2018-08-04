@@ -153,7 +153,7 @@ namespace Signum.React.TypeHelp
 
                 if (mode == TypeHelpMode.CSharp)
                 {
-                    var expressions = DynamicQueryManager.Current.RegisteredExtensions.GetValue(type);
+                    var expressions = QueryLogic.Expressions.RegisteredExtensions.GetValue(type);
 
                     members.AddRange(expressions.Values.Select(ex => new TypeMemberHelpTS(ex)));
                 }

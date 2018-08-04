@@ -141,14 +141,14 @@ namespace Signum.Engine.Word
         public static ResetLazy<Dictionary<Type, SystemWordTemplateEntity>> TypeToSystemWordTemplate;
         public static ResetLazy<Dictionary<SystemWordTemplateEntity, Type>> SystemWordTemplateToType;
 
-        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
+        public static void Start(SchemaBuilder sb)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
                 sb.Schema.Generating += Schema_Generating;
                 sb.Schema.Synchronizing += Schema_Synchronizing;
                 sb.Include<SystemWordTemplateEntity>()
-                    .WithQuery(dqm, () => se => new
+                    .WithQuery(() => se => new
                     {
                         Entity = se,
                         se.Id,

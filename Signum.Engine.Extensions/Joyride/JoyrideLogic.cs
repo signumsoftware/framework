@@ -10,13 +10,13 @@ namespace Signum.Logic.Joyride
 {
     public static class JoyrideLogic
     {
-        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
+        public static void Start(SchemaBuilder sb)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
                 sb.Include<JoyrideEntity>()
                     .WithSave(JoyrideOperation.Save)
-                    .WithQuery(dqm, () => e => new
+                    .WithQuery(() => e => new
                     {
                         Entity = e,
                         e.Id,
@@ -26,7 +26,7 @@ namespace Signum.Logic.Joyride
 
                 sb.Include<JoyrideStepEntity>()
                     .WithSave(JoyrideStepOperation.Save)
-                    .WithQuery(dqm, () => e => new
+                    .WithQuery(() => e => new
                     {
                         Entity = e,
                         e.Id,
@@ -39,7 +39,7 @@ namespace Signum.Logic.Joyride
 
                 sb.Include<JoyrideStepStyleEntity>()
                   .WithSave(JoyrideStepStyleOperation.Save)
-                  .WithQuery(dqm, () => e => new
+                  .WithQuery(() => e => new
                   {
                       Entity = e,
                       e.Id,

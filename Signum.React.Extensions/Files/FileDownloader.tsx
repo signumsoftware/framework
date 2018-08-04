@@ -1,22 +1,22 @@
 ﻿import * as React from 'react'
 import { Link } from 'react-router-dom'
-import { classes, Dic } from '../../../Framework/Signum.React/Scripts/Globals'
-import * as Services from '../../../Framework/Signum.React/Scripts/Services'
-import * as Navigator from '../../../Framework/Signum.React/Scripts/Navigator'
-import * as Constructor from '../../../Framework/Signum.React/Scripts/Constructor'
-import * as Finder from '../../../Framework/Signum.React/Scripts/Finder'
-import { FindOptions } from '../../../Framework/Signum.React/Scripts/FindOptions'
-import { TypeContext, StyleContext, StyleOptions, FormGroupStyle } from '../../../Framework/Signum.React/Scripts/TypeContext'
-import { PropertyRoute, PropertyRouteType, MemberInfo, getTypeInfo, getTypeInfos, TypeInfo, IsByAll, New, getTypeName } from '../../../Framework/Signum.React/Scripts/Reflection'
-import { LineBase, LineBaseProps } from '../../../Framework/Signum.React/Scripts/Lines/LineBase'
-import { ModifiableEntity, Lite, Entity, EntityControlMessage, JavascriptMessage, toLite, is, liteKey, getToString } from '../../../Framework/Signum.React/Scripts/Signum.Entities'
+import { classes, Dic } from '@framework/Globals'
+import * as Services from '@framework/Services'
+import * as Navigator from '@framework/Navigator'
+import * as Constructor from '@framework/Constructor'
+import * as Finder from '@framework/Finder'
+import { FindOptions } from '@framework/FindOptions'
+import { TypeContext, StyleContext, StyleOptions, FormGroupStyle } from '@framework/TypeContext'
+import { PropertyRoute, PropertyRouteType, MemberInfo, getTypeInfo, getTypeInfos, TypeInfo, IsByAll, New, getTypeName } from '@framework/Reflection'
+import { LineBase, LineBaseProps } from '@framework/Lines/LineBase'
+import { ModifiableEntity, Lite, Entity, EntityControlMessage, JavascriptMessage, toLite, is, liteKey, getToString } from '@framework/Signum.Entities'
 import { IFile, IFilePath, FileMessage, FileTypeSymbol, FileEntity, FilePathEntity, FileEmbedded, FilePathEmbedded } from './Signum.Entities.Files'
-import { EntityBase, EntityBaseProps } from '../../../Framework/Signum.React/Scripts/Lines/EntityBase'
+import { EntityBase, EntityBaseProps } from '@framework/Lines/EntityBase'
 import * as QueryString from 'query-string'
 
 import "./Files.css"
-import { Type } from '../../../Framework/Signum.React/Scripts/Reflection';
-import { isLite } from '../../../Framework/Signum.React/Scripts/Signum.Entities';
+import { Type } from '@framework/Reflection';
+import { isLite } from '@framework/Signum.Entities';
 
 
 export type DownloadBehaviour = "SaveAs" | "View" | "None";
@@ -73,12 +73,12 @@ export default class FileDownloader extends React.Component<FileDownloaderProps>
                         if (entity.binaryFile)
                             downloadBase64(e, entity.binaryFile, entity.fileName!);
                         else
-                            configuration.downloadClick(e, entity);
+                            configuration.downloadClick ? configuration.downloadClick(e, entity) : downloadUrl(e, configuration.fileUrl!(entity));
                     } else {
                         if (entity.binaryFile)
                             viewBase64(e, entity.binaryFile, entity.fileName!);
                         else
-                            configuration.viewClick(e, entity);
+                            configuration.viewClick ? configuration.viewClick(e, entity) : viewUrl(e, configuration.fileUrl!(entity));
                     }
                 }}
                 download={this.props.download == "View" ? undefined : entity.fileName}
@@ -93,18 +93,18 @@ export default class FileDownloader extends React.Component<FileDownloaderProps>
 }
 
 export interface FileDownloaderConfiguration<T extends IFile> {
-    downloadClick: (event: React.MouseEvent<any>, file: T) => void;
-    viewClick: (event: React.MouseEvent<any>, file: T) => void;
+    fileUrl?: (file: T) => string;
+    downloadClick?: (event: React.MouseEvent<any>, file: T) => void;
+    viewClick?: (event: React.MouseEvent<any>, file: T) => void;
 }
 
 FileDownloader.registerConfiguration(FileEntity, {
-    downloadClick: (event, file) => downloadUrl(event, Navigator.toAbsoluteUrl("~/api/files/downloadFile/" + file.id.toString())),
+    fileUrl: file => Navigator.toAbsoluteUrl("~/api/files/downloadFile/" + file.id.toString()),
     viewClick: (event, file) => viewUrl(event, Navigator.toAbsoluteUrl("~/api/files/downloadFile/" + file.id.toString()))
 });
 
 FileDownloader.registerConfiguration(FilePathEntity, {
-    downloadClick: (event, file) => downloadUrl(event, Navigator.toAbsoluteUrl("~/api/files/downloadFilePath/" + file.id.toString())),
-    viewClick: (event, file) => viewUrl(event, Navigator.toAbsoluteUrl("~/api/files/downloadFilePath/" + file.id.toString()))
+    fileUrl: file => Navigator.toAbsoluteUrl("~/api/files/downloadFilePath/" + file.id.toString()),
 });
 
 FileDownloader.registerConfiguration(FileEmbedded, {
@@ -113,14 +113,8 @@ FileDownloader.registerConfiguration(FileEmbedded, {
 });
 
 FileDownloader.registerConfiguration(FilePathEmbedded, {
-    downloadClick: (event, file) => downloadUrl(event, getFilePathEmbeddedUrl(file)),
-    viewClick: (event, file) => viewUrl(event, getFilePathEmbeddedUrl(file)),
+    fileUrl: file => Navigator.toAbsoluteUrl(`~/api/files/downloadEmbeddedFilePath/${file.fileType!.key}?` + QueryString.stringify({ suffix: file.suffix, fileName: file.fileName }))
 });
-
-function getFilePathEmbeddedUrl(file: FilePathEmbedded) {
-    return Navigator.toAbsoluteUrl(`~/api/files/downloadEmbeddedFilePath/${file.fileType!.key}?` +
-        QueryString.stringify({ suffix: file.suffix, fileName: file.fileName }));
-}
 
 function downloadUrl(e: React.MouseEvent<any>, url: string) {
     

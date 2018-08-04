@@ -12,6 +12,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using Signum.Engine.Basics;
+using Signum.Engine.UserAssets;
 
 namespace Signum.Engine.Mailing
 {
@@ -24,12 +25,12 @@ namespace Signum.Engine.Mailing
 
         public static Func<EmailMasterTemplateEntity> CreateDefaultMasterTemplate;
 
-        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
+        public static void Start(SchemaBuilder sb)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
                 sb.Include<EmailMasterTemplateEntity>()
-                    .WithQuery(dqm, () => t => new
+                    .WithQuery(() => t => new
                     {
                         Entity = t,
                         t.Id,
@@ -37,14 +38,16 @@ namespace Signum.Engine.Mailing
                     });
                 
                 EmailMasterTemplateGraph.Register();
-
                 Validator.PropertyValidator<EmailMasterTemplateEntity>(et => et.Messages).StaticPropertyValidation += (et, pi) =>
                 {
                     if (!et.Messages.Any(m => m.CultureInfo.Is(EmailLogic.Configuration.DefaultCulture)))
                         return EmailTemplateMessage.ThereMustBeAMessageFor0.NiceToString().FormatWith(EmailLogic.Configuration.DefaultCulture.EnglishName);
 
                     return null;
-                }; 
+                };
+
+                UserAssetsImporter.RegisterName<EmailMasterTemplateEntity>("EmailMasterTemplate");
+
             }
         }
 
@@ -61,8 +64,8 @@ namespace Signum.Engine.Mailing
 
                 new Execute(EmailMasterTemplateOperation.Save)
                 {
-                    AllowsNew = true,
-                    Lite = false,
+                    CanBeNew = true,
+                    CanBeModified = true,
                     Execute = (t, _) => { }
                 }.Register();
             }

@@ -1,15 +1,16 @@
 ﻿import * as React from 'react'
-import { FormGroup, FormControlReadonly, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityList, EntityRepeater } from '../../../../Framework/Signum.React/Scripts/Lines'
-import { ModifiableEntity } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
-import { classes, DomUtils, Dic } from '../../../../Framework/Signum.React/Scripts/Globals'
-import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
-import { FindOptions } from '../../../../Framework/Signum.React/Scripts/FindOptions'
-import { getQueryNiceName } from '../../../../Framework/Signum.React/Scripts/Reflection'
-import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
-import { TypeContext, FormGroupStyle } from '../../../../Framework/Signum.React/Scripts/TypeContext'
-import ContextMenu from '../../../../Framework/Signum.React/Scripts/SearchControl/ContextMenu'
-import { ContextMenuPosition } from '../../../../Framework/Signum.React/Scripts/SearchControl/ContextMenu'
-import SelectorModal from '../../../../Framework/Signum.React/Scripts/SelectorModal'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { FormGroup, FormControlReadonly, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityList, EntityRepeater } from '@framework/Lines'
+import { ModifiableEntity } from '@framework/Signum.Entities'
+import { classes, DomUtils, Dic } from '@framework/Globals'
+import * as Finder from '@framework/Finder'
+import { FindOptions } from '@framework/FindOptions'
+import { getQueryNiceName } from '@framework/Reflection'
+import * as Navigator from '@framework/Navigator'
+import { TypeContext, FormGroupStyle } from '@framework/TypeContext'
+import ContextMenu from '@framework/SearchControl/ContextMenu'
+import { ContextMenuPosition } from '@framework/SearchControl/ContextMenu'
+import SelectorModal from '@framework/SelectorModal'
 
 import * as NodeUtils from './NodeUtils'
 import NodeSelectorModal from './NodeSelectorModal'
@@ -18,7 +19,7 @@ import { BaseNode, ContainerNode, LineBaseNode, NodeConstructor, EntityTableNode
 import { DynamicViewEntity, DynamicViewMessage } from '../Signum.Entities.Dynamic'
 
 import "./DynamicViewTree.css"
-import { DropdownItem } from '../../../../Framework/Signum.React/Scripts/Components';
+import { DropdownItem } from '@framework/Components';
 
 export interface DynamicViewTreeProps {
     rootNode: DesignerNode<BaseNode>;
@@ -40,7 +41,6 @@ export interface DnamicViewTreeState {
 }
 
 export class DynamicViewTree extends React.Component<DynamicViewTreeProps, DnamicViewTreeState>{
-
     constructor(props: DynamicViewTreeProps) {
         super(props);
         this.state = {};
@@ -49,8 +49,6 @@ export class DynamicViewTree extends React.Component<DynamicViewTreeProps, Dnami
     handleNodeTextContextMenu = (n: DesignerNode<BaseNode>, e: React.MouseEvent<any>) => {
         e.preventDefault();
         e.stopPropagation();
-
-       
 
         this.props.rootNode.context.setSelectedNode(n);
         this.setState({
@@ -88,20 +86,20 @@ export class DynamicViewTree extends React.Component<DynamicViewTreeProps, Dnami
         const cn = dn.node as ContainerNode;
 
         const isRoot = (dn.node == this.props.rootNode.node);
-        
+
         return (
-                <ContextMenu position={cm.position} onHide={this.handleContextOnHide}>
-                    {no.isContainer && <DropdownItem onClick={this.handleAddChildren}><i className="fa fa-arrow-right" aria-hidden="true"></i>&nbsp; {DynamicViewMessage.AddChild.niceToString()}</DropdownItem>}
-                    {!isRoot && <DropdownItem onClick={this.handleAddSibling}><i className="fa fa-arrow-down" aria-hidden="true"></i>&nbsp; {DynamicViewMessage.AddSibling.niceToString()}</DropdownItem>}
+            <ContextMenu position={cm.position} onHide={this.handleContextOnHide}>
+                {no.isContainer && <DropdownItem onClick={this.handleAddChildren}><FontAwesomeIcon icon="arrow-right" />&nbsp; {DynamicViewMessage.AddChild.niceToString()}</DropdownItem>}
+                {!isRoot && <DropdownItem onClick={this.handleAddSibling}><FontAwesomeIcon icon="arrow-down" />>&nbsp; {DynamicViewMessage.AddSibling.niceToString()}</DropdownItem>}
 
-                    {no.isContainer && <DropdownItem divider={true} />}
+                {no.isContainer && <DropdownItem divider={true} />}
 
-                    {no.isContainer && cn.children.length == 0 && dn.route && <DropdownItem onClick={this.handleGenerateChildren}><i className="fa fa-bolt" aria-hidden="true"></i>&nbsp; {DynamicViewMessage.GenerateChildren.niceToString()}</DropdownItem>}
-                    {no.isContainer && cn.children.length > 0 && <DropdownItem onClick={this.handleClearChildren} color="danger"><i className="fa fa-trash" aria-hidden="true"></i>&nbsp; {DynamicViewMessage.ClearChildren.niceToString()}</DropdownItem>}
+                {no.isContainer && cn.children.length == 0 && dn.route && <DropdownItem onClick={this.handleGenerateChildren}><FontAwesomeIcon icon="bolt" />&nbsp; {DynamicViewMessage.GenerateChildren.niceToString()}</DropdownItem>}
+                {no.isContainer && cn.children.length > 0 && <DropdownItem onClick={this.handleClearChildren} color="danger"><FontAwesomeIcon icon="trash" />&nbsp; {DynamicViewMessage.ClearChildren.niceToString()}</DropdownItem>}
 
-                    {!isRoot && <DropdownItem divider={true} />}
-                    {!isRoot && <DropdownItem onClick={this.handleRemove} color="danger"><i className="fa fa-times" aria-hidden="true"></i>&nbsp; {DynamicViewMessage.Remove.niceToString()}</DropdownItem>}
-                </ContextMenu>
+                {!isRoot && <DropdownItem divider={true} />}
+                {!isRoot && <DropdownItem onClick={this.handleRemove} color="danger"><FontAwesomeIcon icon="times" />&nbsp; {DynamicViewMessage.Remove.niceToString()}</DropdownItem>}
+            </ContextMenu>
         );
     }
 
@@ -209,12 +207,20 @@ export class DynamicViewNode extends React.Component<DynamicViewNodeProps, { isO
         if (!c.children || c.children.length == 0)
             return <span className="place-holder" />;
 
-        if (this.state.isOpened) 
-            return <span onClick={this.handleIconClick} className="tree-icon fa fa-minus-square-o" />;
-         else 
-            return <span onClick={this.handleIconClick} className="tree-icon fa fa-plus-square-o" />;
+        if (this.state.isOpened) {
+            return (
+                <span onClick={this.handleIconClick} className="tree-icon">
+                    <FontAwesomeIcon icon={["far", "minus-square"]} />
+                </span>);
+        }
+        else {
+            return (
+                <span onClick={this.handleIconClick} className="tree-icon">
+                    <FontAwesomeIcon icon={["far", "plus-square"]} />
+                </span>);
+        }
     }
-
+        
     handleDragStart = (e: React.DragEvent<any>) => {
         e.dataTransfer.setData('text', "start"); //cannot be empty string
         e.dataTransfer.effectAllowed = "move";

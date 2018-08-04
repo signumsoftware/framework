@@ -1,7 +1,7 @@
 ﻿import * as React from 'react'
 import { TranslationMessage } from '../Signum.Entities.Translation'
 import { API, AssemblyResult, LocalizedType, LocalizableType, LocalizedMember } from '../TranslationClient'
-import { Dic } from '../../../../Framework/Signum.React/Scripts/Globals'
+import { Dic } from '@framework/Globals'
 
 export class TranslationTypeTable extends React.Component<{ type: LocalizableType, result: AssemblyResult, currentCulture: string }>{
     render() {

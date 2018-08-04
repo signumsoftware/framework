@@ -28,13 +28,13 @@ namespace Signum.Engine.Authorization
 
         public static bool IsStarted { get { return cache != null; } }
 
-        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
+        public static void Start(SchemaBuilder sb)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
                 TypeLogic.AssertStarted(sb);
                 AuthLogic.AssertStarted(sb);
-                TypeConditionLogic.Start(sb, dqm);
+                TypeConditionLogic.Start(sb);
 
                 sb.Schema.EntityEventsGlobal.Saving += Schema_Saving; //because we need Modifications propagated
                 sb.Schema.EntityEventsGlobal.Retrieved += EntityEventsGlobal_Retrieved;
@@ -67,7 +67,7 @@ namespace Signum.Engine.Authorization
 
         public static void AssertStarted(SchemaBuilder sb)
         {
-            sb.AssertDefined(ReflectionTools.GetMethodInfo(() => TypeAuthLogic.Start(null, null)));
+            sb.AssertDefined(ReflectionTools.GetMethodInfo(() => TypeAuthLogic.Start(null)));
         }
 
         static string Schema_IsAllowedCallback(Type type, bool inUserInterface)

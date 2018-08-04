@@ -1,33 +1,37 @@
 ﻿import * as React from 'react'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Route } from 'react-router'
-import { Dic, classes } from '../../../Framework/Signum.React/Scripts/Globals';
-import { ajaxPost, ajaxPostRaw, ajaxGet, saveFile } from '../../../Framework/Signum.React/Scripts/Services';
-import { EntitySettings, ViewPromise } from '../../../Framework/Signum.React/Scripts/Navigator'
-import * as Navigator from '../../../Framework/Signum.React/Scripts/Navigator'
-import * as Finder from '../../../Framework/Signum.React/Scripts/Finder'
-import { Lite, Entity, EntityPack, ExecuteSymbol, DeleteSymbol, ConstructSymbol_From, registerToString, JavascriptMessage, toLite, ModifiableEntity, toMList } from '../../../Framework/Signum.React/Scripts/Signum.Entities'
-import { EntityOperationSettings } from '../../../Framework/Signum.React/Scripts/Operations'
-import { PseudoType, QueryKey, GraphExplorer, OperationType, Type, getTypeName, isTypeEntity, getTypeInfos } from '../../../Framework/Signum.React/Scripts/Reflection'
-import * as Operations from '../../../Framework/Signum.React/Scripts/Operations'
-import SelectorModal from '../../../Framework/Signum.React/Scripts/SelectorModal'
-import * as Constructor from '../../../Framework/Signum.React/Scripts/Constructor'
+import { Dic, classes } from '@framework/Globals';
+import { ajaxPost, ajaxPostRaw, ajaxGet, saveFile } from '@framework/Services';
+import { EntitySettings, ViewPromise } from '@framework/Navigator'
+import * as Navigator from '@framework/Navigator'
+import * as Finder from '@framework/Finder'
+import { Lite, Entity, EntityPack, ExecuteSymbol, DeleteSymbol, ConstructSymbol_From, registerToString, JavascriptMessage, toLite, ModifiableEntity, toMList } from '@framework/Signum.Entities'
+import { EntityOperationSettings } from '@framework/Operations'
+import { PseudoType, QueryKey, GraphExplorer, OperationType, Type, getTypeName, isTypeEntity, getTypeInfos } from '@framework/Reflection'
+import * as Operations from '@framework/Operations'
+import SelectorModal from '@framework/SelectorModal'
+import * as Constructor from '@framework/Constructor'
 import { WordTemplateEntity, WordTemplateOperation, SystemWordTemplateEntity, WordTemplateVisibleOn, WordTemplatePermission } from './Signum.Entities.Word'
 import { QueryModel, MultiEntityModel } from '../Templating/Signum.Entities.Templating'
 import * as OmniboxClient from '../Omnibox/OmniboxClient'
 import * as AuthClient from '../Authorization/AuthClient'
-import ButtonBar from '../../../Framework/Signum.React/Scripts/Frames/ButtonBar';
-import * as QuickLinks from '../../../Framework/Signum.React/Scripts/QuickLinks'
-import * as ContexualItems from '../../../Framework/Signum.React/Scripts/SearchControl/ContextualItems'
-import { ContextualItemsContext, MenuItemBlock } from "../../../Framework/Signum.React/Scripts/SearchControl/ContextualItems";
-import { ModelEntity } from "../../../Framework/Signum.React/Scripts/Signum.Entities";
-import { QueryRequest, FilterRequest } from "../../../Framework/Signum.React/Scripts/FindOptions";
+import ButtonBar from '@framework/Frames/ButtonBar';
+import * as QuickLinks from '@framework/QuickLinks'
+import * as ContexualItems from '@framework/SearchControl/ContextualItems'
+import { ContextualItemsContext, MenuItemBlock } from "@framework/SearchControl/ContextualItems";
+import { ModelEntity } from "@framework/Signum.Entities";
+import { QueryRequest, FilterRequest } from "@framework/FindOptions";
 import WordSearchMenu from "./WordSearchMenu";
 import WordEntityMenu from "./WordEntityMenu";
-import { ButtonsContext } from "../../../Framework/Signum.React/Scripts/TypeContext";
-import { DropdownItem } from '../../../Framework/Signum.React/Scripts/Components';
+import { ButtonsContext } from "@framework/TypeContext";
+import { DropdownItem } from '@framework/Components';
+import * as DynamicClientOptions from '../Dynamic/DynamicClientOptions';
+
 
 export function start(options: { routes: JSX.Element[], contextual: boolean, queryButton: boolean, entityButton: boolean  }) {
-    
+
+    DynamicClientOptions.Options.checkEvalFindOptions.push({ queryName: WordTemplateEntity });
     register(QueryModel, {
         createFromTemplate: wt => Navigator.view(QueryModel.New({ queryKey: wt.query!.key })),
         createFromEntities: (wt, lites) => {
@@ -140,7 +144,7 @@ export function getWordTemplates(ctx: ContextualItemsContext<Entity>): Promise<M
                 header: WordTemplateEntity.nicePluralName(),
                 menuItems: wts.map(wt =>
                     <DropdownItem data-operation={wt.EntityType} onClick={() => handleMenuClick(wt, ctx)}>
-                        <span className={classes("icon", "fa fa-file-word-o")}></span>
+                        <FontAwesomeIcon icon={["far", "file-word"]} className="icon"/>
                         {wt.toStr}
                     </DropdownItem>
                 )
@@ -191,14 +195,14 @@ export namespace API {
     }
 }
 
-declare module '../../../Framework/Signum.React/Scripts/Signum.Entities' {
+declare module '@framework/Signum.Entities' {
 
     export interface EntityPack<T extends ModifiableEntity> {
         wordTemplates?: Array<Lite<WordTemplateEntity>>;
     }
 }
 
-declare module '../../../Framework/Signum.React/Scripts/FindOptions' {
+declare module '@framework/FindOptions' {
 
     export interface QueryDescription {
         wordTemplates?: Array<Lite<WordTemplateEntity>>;

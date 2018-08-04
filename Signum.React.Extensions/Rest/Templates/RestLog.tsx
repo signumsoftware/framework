@@ -1,13 +1,13 @@
 ﻿import * as React from 'react'
 import * as moment from 'moment'
 import { RestLogEntity } from '../Signum.Entities.Rest'
-import { TypeContext, ValueLine, ValueLineType, EntityLine, EntityRepeater } from "../../../../Framework/Signum.React/Scripts/Lines";
-import { } from "../../../../Framework/Signum.React/Scripts/ConfigureReactWidgets";
+import { TypeContext, ValueLine, ValueLineType, EntityLine, EntityRepeater } from "@framework/Lines";
+import { } from "@framework/ConfigureReactWidgets";
 import { RestLogDiff, API } from '../RestClient'
 import { DiffDocument } from '../../DiffLog/Templates/DiffDocument';
-import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
-import { Tab, UncontrolledTabs } from '../../../../Framework/Signum.React/Scripts/Components/Tabs'
-import { Button } from '../../../../Framework/Signum.React/Scripts/Components';
+import * as Navigator from '@framework/Navigator'
+import { Tab, UncontrolledTabs } from '@framework/Components/Tabs'
+import { Button } from '@framework/Components';
 
 export interface RestLogState {
     diff?: RestLogDiff,
@@ -27,6 +27,8 @@ export default class RestLog extends React.Component<{ ctx: TypeContext<RestLogE
 
     render() {
         const ctx = this.props.ctx;
+        const ctx4 = ctx.subCtx({ labelColumns: 4 });
+        
         return (
             <div>
                 <ValueLine ctx={ctx.subCtx(f => f.startDate)} unitText={moment(ctx.value.startDate).toUserInterface().fromNow()} />
@@ -34,11 +36,31 @@ export default class RestLog extends React.Component<{ ctx: TypeContext<RestLogE
 
                 <EntityLine ctx={ctx.subCtx(f => f.user)} />
                 <ValueLine ctx={ctx.subCtx(f => f.url)} unitText={ctx.value.httpMethod!} />
-                <ValueLine ctx={ctx.subCtx(f => f.controller)} />
-                <ValueLine ctx={ctx.subCtx(f => f.action)} />
-
-                <ValueLine ctx={ctx.subCtx(f => f.userHostAddress)} />
-                <ValueLine ctx={ctx.subCtx(f => f.userHostName)} />
+                <div className="row">
+                    <div className="col-sm-6">
+                        <ValueLine ctx={ctx4.subCtx(f => f.controller)} />
+                    </div>
+                    <div className="col-sm-6">
+                        <ValueLine ctx={ctx4.subCtx(f => f.action)} />
+                    </div>
+                </div>
+                <div className="row">
+                    <div className="col-sm-6">
+                        <ValueLine ctx={ctx4.subCtx(f => f.machineName)} />
+                    </div>
+                    <div className="col-sm-6">
+                        <ValueLine ctx={ctx4.subCtx(f => f.applicationName)} />
+                    </div>
+                </div>
+                <div className="row">
+                    <div className="col-sm-6">
+                        <ValueLine ctx={ctx4.subCtx(f => f.userHostAddress)} />
+                    </div>
+                    <div className="col-sm-6">
+                        <ValueLine ctx={ctx4.subCtx(f => f.userHostName)} />
+                    </div>
+                </div>
+                
                 <ValueLine ctx={ctx.subCtx(f => f.referrer)} />
 
                 <EntityLine ctx={ctx.subCtx(f => f.exception)} />
@@ -59,7 +81,7 @@ export default class RestLog extends React.Component<{ ctx: TypeContext<RestLogE
                     <legend>{ctx.subCtx(f => f.responseBody).niceName()}</legend>
                     <UncontrolledTabs defaultEventKey="prev">
                         <Tab title="prev" eventKey="prev" className="linkTab">{this.renderPre(ctx.subCtx(f => f.responseBody).value!)}</Tab>
-                        {this.state.diff && <Tab title="diff" eventKey="diff" className="linkTab">{this.renderDiff()}</Tab>}
+                        {this.state.diff && <Tab title="diff" eventKey="diff" className="linkTab">{this.state.diff.diff && <DiffDocument diff={this.state.diff.diff} />}</Tab>}
                         {this.state.diff && this.state.diff.current && <Tab title="curr" eventKey="curr" className="linkTab">{this.renderPre(this.state.diff.current)}</Tab>}
                     </UncontrolledTabs>
                 </fieldset>
@@ -76,11 +98,9 @@ export default class RestLog extends React.Component<{ ctx: TypeContext<RestLogE
         );
 
     }
+
     renderPre(text: string) {
         return <pre><code>{text}</code></pre>
-    }
-    renderDiff(): any {
-        return <DiffDocument diff={this.state.diff!.diff} />
     }
 }
 

@@ -171,6 +171,9 @@ namespace Signum.Engine.Migrations
                 }
                 else
                 {
+                    SafeConsole.WriteLineColor(ConsoleColor.Yellow, "Some changes found, here is the script:");
+                    Console.WriteLine();
+
                     SafeConsole.WriteLineColor(ConsoleColor.DarkGray, script.ToString().Indent(4));
 
                     Console.WriteLine();

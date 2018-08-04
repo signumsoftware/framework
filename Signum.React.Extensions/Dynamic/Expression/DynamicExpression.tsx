@@ -1,17 +1,18 @@
 ﻿import * as React from 'react'
-import { ValueLine, EntityLine, TypeContext, FormGroup, ValueLineType } from '../../../../Framework/Signum.React/Scripts/Lines'
-import { PropertyRoute, Binding, isTypeEntity } from '../../../../Framework/Signum.React/Scripts/Reflection'
-import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { ValueLine, EntityLine, TypeContext, FormGroup, ValueLineType } from '@framework/Lines'
+import { PropertyRoute, Binding, isTypeEntity } from '@framework/Reflection'
+import * as Navigator from '@framework/Navigator'
 import CSharpCodeMirror from '../../Codemirror/CSharpCodeMirror'
-import { Entity } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
+import { Entity } from '@framework/Signum.Entities'
 import { DynamicExpressionEntity } from '../Signum.Entities.Dynamic'
 import { DynamicExpressionTestResponse, API } from '../DynamicExpressionClient'
 import * as TypeHelpClient from '../../TypeHelp/TypeHelpClient';
 import TypeHelpComponent from '../../TypeHelp/TypeHelpComponent'
-import ValueLineModal from '../../../../Framework/Signum.React/Scripts/ValueLineModal'
-import { ModifiableEntity } from '../../../../Framework/Signum.React/Scripts/Signum.Entities';
-import { Lite } from '../../../../Framework/Signum.React/Scripts/Signum.Entities';
-import { Typeahead } from '../../../../Framework/Signum.React/Scripts/Components';
+import ValueLineModal from '@framework/ValueLineModal'
+import { ModifiableEntity } from '@framework/Signum.Entities';
+import { Lite } from '@framework/Signum.Entities';
+import { Typeahead } from '@framework/Components';
 
 interface DynamicExpressionComponentProps {
     ctx: TypeContext<DynamicExpressionEntity>;
@@ -76,7 +77,7 @@ export default class DynamicExpressionComponent extends React.Component<DynamicE
                 <br />
                 <div className="row">
                     <div className="col-sm-7">
-                        {this.state.exampleEntity && <button className="btn btn-success" onClick={this.handleEvaluate}><i className="fa fa-play" aria-hidden="true"></i> Evaluate</button>}
+                        {this.state.exampleEntity && <button className="btn btn-success" onClick={this.handleEvaluate}><FontAwesomeIcon icon="play"></FontAwesomeIcon> Evaluate</button>}
                         <div className="code-container">
                             <pre style={{ border: "0px", margin: "0px", overflow: "visible" }}>
                                 {this.renderTypeAutocomplete(ctx.subCtx(dt => dt.returnType))} {this.renderInput(ctx.subCtx(dt => dt.name))}({this.renderTypeAutocomplete(ctx.subCtx(dt => dt.fromType))}e) =>

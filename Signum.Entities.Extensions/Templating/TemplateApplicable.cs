@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Signum.Entities.Mailing;
 
 namespace Signum.Entities.Templating
 {
@@ -16,7 +17,12 @@ namespace Signum.Entities.Templating
         {
             var script = this.Script.Trim();
             script = script.Contains(';') ? script : ("return " + script + ";");
-            var entityTypeName = (QueryEntity.GetEntityImplementations(((WordTemplateEntity)this.GetParentEntity()).Query).Types.Only() ?? typeof(Entity)).Name;
+            var parentEntity = this.GetParentEntity();
+            var query = parentEntity is WordTemplateEntity wt ? wt.Query :
+                parentEntity is EmailTemplateEntity et ? et.Query :
+                throw new UnexpectedValueException(parentEntity);
+
+            var entityTypeName = (QueryEntity.GetEntityImplementations(query).Types.Only() ?? typeof(Entity)).Name;
 
             return Compile(DynamicCode.GetAssemblies(),
                 DynamicCode.GetUsingNamespaces() +

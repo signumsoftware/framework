@@ -50,7 +50,6 @@ namespace Signum.React.Authorization
             {
                 ReflectionServer.AddTypeExtension += (ti, t) =>
                 {
-
                     if (typeof(Entity).IsAssignableFrom(t))
                     {
                         var ta = UserEntity.Current != null ? TypeAuthLogic.GetAllowed(t) : null;

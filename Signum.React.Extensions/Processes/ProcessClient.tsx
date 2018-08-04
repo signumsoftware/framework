@@ -1,22 +1,24 @@
 ﻿
 import * as React from 'react'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+
 import { Route } from 'react-router'
-import { Dic, classes } from '../../../Framework/Signum.React/Scripts/Globals';
-import { ajaxPost, ajaxGet } from '../../../Framework/Signum.React/Scripts/Services';
-import { EntitySettings, ViewPromise } from '../../../Framework/Signum.React/Scripts/Navigator'
-import * as Navigator from '../../../Framework/Signum.React/Scripts/Navigator'
-import { Lite, Entity, EntityPack, ExecuteSymbol, DeleteSymbol, ConstructSymbol_From } from '../../../Framework/Signum.React/Scripts/Signum.Entities'
-import { EntityOperationSettings } from '../../../Framework/Signum.React/Scripts/Operations'
-import { PseudoType, QueryKey, GraphExplorer, OperationType  } from '../../../Framework/Signum.React/Scripts/Reflection'
-import * as Operations from '../../../Framework/Signum.React/Scripts/Operations'
-import * as ContextualOperations from '../../../Framework/Signum.React/Scripts/Operations/ContextualOperations'
-import { ProcessState, ProcessEntity, ProcessPermission, PackageLineEntity, PackageEntity, PackageOperationEntity } from './Signum.Entities.Processes'
+import { Dic, classes } from '@framework/Globals';
+import { ajaxPost, ajaxGet } from '@framework/Services';
+import { EntitySettings, ViewPromise } from '@framework/Navigator'
+import * as Navigator from '@framework/Navigator'
+import { Lite, Entity, EntityPack, ExecuteSymbol, DeleteSymbol, ConstructSymbol_From } from '@framework/Signum.Entities'
+import { EntityOperationSettings } from '@framework/Operations'
+import { PseudoType, QueryKey, GraphExplorer, OperationType  } from '@framework/Reflection'
+import * as Operations from '@framework/Operations'
+import * as ContextualOperations from '@framework/Operations/ContextualOperations'
+import { ProcessState, ProcessEntity, ProcessPermission, PackageLineEntity, PackageEntity, PackageOperationEntity, ProcessOperation, ProcessMessage } from './Signum.Entities.Processes'
 import * as OmniboxClient from '../Omnibox/OmniboxClient'
 import * as AuthClient from '../Authorization/AuthClient'
-import { ImportRoute } from "../../../Framework/Signum.React/Scripts/AsyncImport";
+import { ImportRoute } from "@framework/AsyncImport";
 
 import "./Processes.css"
-import { DropdownItem, UncontrolledTooltip } from '../../../Framework/Signum.React/Scripts/Components';
+import { DropdownItem, UncontrolledTooltip } from '@framework/Components';
 
 export function start(options: { routes: JSX.Element[], packages: boolean, packageOperations: boolean }) {
 
@@ -42,8 +44,12 @@ export function start(options: { routes: JSX.Element[], packages: boolean, packa
         onClick: () => Promise.resolve("~/processes/view")
     });
 
-    monkeyPatchCreateContextualMenuItem()
+    monkeyPatchCreateContextualMenuItem();
 
+    Operations.addSettings(new EntityOperationSettings(ProcessOperation.Cancel, {
+        confirmMessage: ctx => ctx.entity.state == "Executing" || ctx.entity.state == "Suspending" ? ProcessMessage.SuspendIsTheSaferWayOfStoppingARunningProcessCancelAnyway.niceToString() : undefined,
+        color: "warning"
+    }));
 }
 
 export const processOperationSettings :{ [key: string]: Operations.ContextualOperationSettings<any> } = {}; 
@@ -105,11 +111,11 @@ function monkeyPatchCreateContextualMenuItem(){
                 className={disabled ? "disabled" : undefined}
                 onClick={disabled ? undefined : onClick}
                 data-operation={coc.operationInfo.key}>
-                {icon ? <span className={classes("icon", icon)} style={{ color: coc.settings && coc.settings.iconColor }}></span> :
+                {icon ? <FontAwesomeIcon icon={icon} className="icon" color={coc.settings && coc.settings.iconColor}/> :
                     color ? <span className={classes("icon", "empty-icon", "btn-" + color)}></span> : undefined}
                 {(icon || color) && " "}
                 {text}
-                <span className="fa fa-cog process-contextual-icon" aria-hidden={true} onClick={processOnClick}></span>
+                <span className="process-contextual-icon" onClick={processOnClick}><FontAwesomeIcon icon="cog"/></span>
 
             </DropdownItem>,
             coc.canExecute ? <UncontrolledTooltip target={() => innerRef!} placement="right">{coc.canExecute}</UncontrolledTooltip> : undefined

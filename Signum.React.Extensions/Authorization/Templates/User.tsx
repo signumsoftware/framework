@@ -1,7 +1,8 @@
 ﻿import * as React from 'react'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { AuthMessage, UserEntity } from '../Signum.Entities.Authorization'
-import { Binding } from '../../../../Framework/Signum.React/Scripts/Reflection'
-import { ValueLine, ValueLineType, EntityLine, EntityCombo, FormGroup, TypeContext } from '../../../../Framework/Signum.React/Scripts/Lines'
+import { Binding } from '@framework/Reflection'
+import { ValueLine, ValueLineType, EntityLine, EntityCombo, FormGroup, TypeContext } from '@framework/Lines'
 
 
 export default class User extends React.Component<{ ctx: TypeContext<UserEntity> }, { withPassword: boolean }> {
@@ -36,7 +37,7 @@ export default class User extends React.Component<{ ctx: TypeContext<UserEntity>
         return (
             <FormGroup labelText={AuthMessage.NewPassword.niceToString()} ctx={ctx}>
                 <a className="btn btn-light btn-sm" onClick={() => this.setState({ withPassword: true }) }>
-                    <i className="fa fa-key"></i> {AuthMessage.ChangePassword.niceToString() }
+                    <FontAwesomeIcon icon="key" /> {AuthMessage.ChangePassword.niceToString() }
                 </a>
             </FormGroup>
         );

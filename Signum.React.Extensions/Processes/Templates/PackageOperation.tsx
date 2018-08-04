@@ -1,9 +1,9 @@
 ﻿import * as React from 'react'
-import { classes } from '../../../../Framework/Signum.React/Scripts/Globals'
-import { FormGroup, FormControlReadonly, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityList, EntityRepeater} from '../../../../Framework/Signum.React/Scripts/Lines'
-import {SearchControl }  from '../../../../Framework/Signum.React/Scripts/Search'
-import { TypeContext, FormGroupStyle } from '../../../../Framework/Signum.React/Scripts/TypeContext'
-import { PackageOperationEntity, PackageLineEntity } from '../Signum.Entities.Processes'
+import { classes } from '@framework/Globals'
+import { FormGroup, FormControlReadonly, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityList, EntityRepeater} from '@framework/Lines'
+import {SearchControl }  from '@framework/Search'
+import { TypeContext, FormGroupStyle } from '@framework/TypeContext'
+import { PackageOperationEntity, PackageLineEntity, PackageQuery } from '../Signum.Entities.Processes'
 
 export default class PackageOperation extends React.Component<{ ctx: TypeContext<PackageOperationEntity> }> {
 
@@ -17,7 +17,7 @@ export default class PackageOperation extends React.Component<{ ctx: TypeContext
                 <EntityLine ctx={e.subCtx(f => f.operation)} readOnly={true} />
                 <fieldset>
                     <legend>{ PackageLineEntity.nicePluralName() }</legend>
-                    <SearchControl findOptions={{ queryName: PackageLineEntity, parentColumn: "Package", parentValue : e.value}}  />
+                    <SearchControl findOptions={{ queryName: PackageQuery.PackageLineLastProcess, parentColumn: "Package", parentValue : e.value}}  />
                 </fieldset>
             </div>
         );

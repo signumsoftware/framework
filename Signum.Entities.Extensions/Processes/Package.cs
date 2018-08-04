@@ -64,4 +64,11 @@ namespace Signum.Entities.Processes
 
         public DateTime? FinishTime { get; set; }
     }
+
+    public enum PackageQuery
+    {
+        PackageLineLastProcess,
+        PackageLastProcess,
+        PackageOperationLastProcess,
+    }
 }

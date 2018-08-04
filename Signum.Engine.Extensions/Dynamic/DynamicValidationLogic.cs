@@ -24,29 +24,42 @@ namespace Signum.Engine.Dynamic
             public DynamicValidationEntity Validation;
         }
 
-        static ResetLazy<Dictionary<PropertyInfo, List<DynamicValidationPair>>> DynamicValidations; 
+        static ResetLazy<Dictionary<Type, List<DynamicValidationPair>>> DynamicValidations; 
 
-        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
+        public static void Start(SchemaBuilder sb)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
                 sb.Include<DynamicValidationEntity>()
                     .WithSave(DynamicValidationOperation.Save)
-                    .WithQuery(dqm, () => e => new
+                    .WithDelete(DynamicValidationOperation.Delete)
+                    .WithQuery(() => e => new
                     {
                         Entity = e,
                         e.Id,
                         e.Name,
                         e.EntityType,
-                        e.PropertyRoute,
+                        e.SubEntity,
                         e.Eval.Script,
                     });
+
+                new Graph<DynamicValidationEntity>.ConstructFrom<DynamicValidationEntity>(DynamicValidationOperation.Clone)
+                {
+                    Construct = (dv, _) => new DynamicValidationEntity() {
+                        Name = dv.Name,
+                        EntityType = dv.EntityType,
+                        SubEntity = dv.SubEntity,
+                        Eval = new DynamicValidationEval() {  Script = dv.Eval.Script },
+                    }
+                }.Register();
+
+
                 DynamicValidations = sb.GlobalLazy(() => Database.Query<DynamicValidationEntity>()
-                        .SelectCatch(dv => new DynamicValidationPair { Validation = dv, PropertyRoute = dv.PropertyRoute.ToPropertyRoute() })
-                        .GroupToDictionary(a => a.PropertyRoute.PropertyInfo),
+                        .SelectCatch(dv => new DynamicValidationPair { Validation = dv, PropertyRoute = dv.SubEntity?.ToPropertyRoute() ?? PropertyRoute.Root(TypeLogic.EntityToType.GetOrThrow(dv.EntityType)) })
+                        .GroupToDictionary(a => a.PropertyRoute.Type),
                 new InvalidateWith(typeof(DynamicValidationEntity)));
 
-                DynamicValidationEntity.GetMainType = dve => dve.PropertyRoute?.ToPropertyRoute().Parent.Type;
+                DynamicValidationEntity.GetMainType = dve => dve.SubEntity?.ToPropertyRoute().Type ?? TypeLogic.EntityToType.GetOrThrow(dve.EntityType);
 
                 sb.Schema.Initializing += () => { initialized = true; };
 
@@ -61,13 +74,13 @@ namespace Signum.Engine.Dynamic
             if (!initialized)
                 return null;
 
-            var candidates = DynamicValidations.Value.TryGetC(pi);
+            var candidates = DynamicValidations.Value.TryGetC(mod.GetType());
             if (candidates == null)
                 return null;
 
             foreach (var pair in candidates)
             {
-                if (pair.PropertyRoute.MatchesProperty(mod, pi) == true)
+                if (pair.PropertyRoute.MatchesEntity(mod) == true)
                 {
                     var val = pair.Validation;
 

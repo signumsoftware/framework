@@ -19,11 +19,11 @@ namespace Signum.Engine.Templating
     {
         public static Dictionary<ModelConverterSymbol, Func<ModifiableEntity, ModifiableEntity>> Converters = new Dictionary<ModelConverterSymbol, Func<ModifiableEntity, ModifiableEntity>>();
 
-        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
+        public static void Start(SchemaBuilder sb)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
-                SymbolLogic<ModelConverterSymbol>.Start(sb, dqm, () => Converters.Keys);
+                SymbolLogic<ModelConverterSymbol>.Start(sb, () => Converters.Keys);
             }
         }
 

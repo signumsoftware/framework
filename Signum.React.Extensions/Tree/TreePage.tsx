@@ -1,14 +1,14 @@
 ﻿import * as React from 'react'
-import { getTypeInfo } from '../../../Framework/Signum.React/Scripts/Reflection'
-import * as Finder from '../../../Framework/Signum.React/Scripts/Finder'
-import * as Navigator from '../../../Framework/Signum.React/Scripts/Navigator'
-import * as Operations from '../../../Framework/Signum.React/Scripts/Operations'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { getTypeInfo } from '@framework/Reflection'
+import * as Finder from '@framework/Finder'
+import * as Navigator from '@framework/Navigator'
+import * as Operations from '@framework/Operations'
 import { TreeViewer } from './TreeViewer'
 import { RouteComponentProps } from "react-router";
-import { FilterOption } from "../../../Framework/Signum.React/Scripts/FindOptions";
+import { FilterOption } from "@framework/FindOptions";
 import * as QueryString from 'query-string'
 import { TreeOperation } from "./Signum.Entities.Tree";
-
 
 interface TreePageProps extends RouteComponentProps<{ typeName: string }> {
 
@@ -57,7 +57,7 @@ export default class TreePage extends React.Component<TreePageProps, TreePageSta
                     <span className="sf-entity-title">{ti.nicePluralName}</span>
                     &nbsp;
                     <a className="sf-popup-fullscreen" href="#" onClick={(e) => this.treeView!.handleFullScreenClick(e)}>
-                        <span className="fa fa-external-link"></span>
+                        <FontAwesomeIcon icon="external-link-alt" />
                     </a>
                 </h2>
                 <TreeViewer ref={tv => this.treeView = tv!}

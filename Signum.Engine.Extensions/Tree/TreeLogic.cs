@@ -1,5 +1,6 @@
 ﻿using Microsoft.SqlServer.Types;
 using Signum.Engine;
+using Signum.Engine.Basics;
 using Signum.Engine.DynamicQuery;
 using Signum.Engine.Maps;
 using Signum.Engine.Operations;
@@ -219,22 +220,22 @@ namespace Signum.Engine.Tree
             throw new InvalidOperationException("Unexpected InsertPlace " + model.InsertPlace);
         }
 
-        public static FluentInclude<T> WithTree<T>(this FluentInclude<T> include, DynamicQueryManager dqm, Func<T, MoveTreeModel, T> copy = null) where T : TreeEntity, new()
+        public static FluentInclude<T> WithTree<T>(this FluentInclude<T> include, Func<T, MoveTreeModel, T> copy = null) where T : TreeEntity, new()
         {
-            RegisterExpressions<T>(dqm);
+            RegisterExpressions<T>();
             RegisterOperations<T>(copy);
             include.WithUniqueIndex(n => new { n.ParentRoute, n.Name });
             return include;
         }
 
-        public static void RegisterExpressions<T>(DynamicQueryManager dqm)
+        public static void RegisterExpressions<T>()
             where T : TreeEntity
         {
-            dqm.RegisterExpression((T c) => c.Children(), () => TreeMessage.Children.NiceToString());
-            dqm.RegisterExpression((T c) => c.Parent(), () => TreeMessage.Parent.NiceToString());
-            dqm.RegisterExpression((T c) => c.Descendants(), () => TreeMessage.Descendants.NiceToString());
-            dqm.RegisterExpression((T c) => c.Ascendants(), () => TreeMessage.Ascendants.NiceToString());
-            dqm.RegisterExpression((T c) => c.Level(), () => TreeMessage.Level.NiceToString());
+            QueryLogic.Expressions.Register((T c) => c.Children(), () => TreeMessage.Children.NiceToString());
+            QueryLogic.Expressions.Register((T c) => c.Parent(), () => TreeMessage.Parent.NiceToString());
+            QueryLogic.Expressions.Register((T c) => c.Descendants(), () => TreeMessage.Descendants.NiceToString());
+            QueryLogic.Expressions.Register((T c) => c.Ascendants(), () => TreeMessage.Ascendants.NiceToString());
+            QueryLogic.Expressions.Register((T c) => c.Level(), () => TreeMessage.Level.NiceToString());
         }
 
         public static void RegisterOperations<T>(Func<T, MoveTreeModel, T> copy) where T : TreeEntity, new()
@@ -276,8 +277,8 @@ namespace Signum.Engine.Tree
 
             new Graph<T>.Execute(TreeOperation.Save)
             {
-                AllowsNew = true,
-                Lite = false,
+                CanBeNew = true,
+                CanBeModified = true,
                 Execute = (t, _) =>
                 {
                     if (t.IsNew)

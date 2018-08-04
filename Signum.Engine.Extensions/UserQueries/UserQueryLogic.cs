@@ -25,11 +25,11 @@ namespace Signum.Engine.UserQueries
         public static ResetLazy<Dictionary<Type, List<Lite<UserQueryEntity>>>> UserQueriesByTypeForQuickLinks;
         public static ResetLazy<Dictionary<object, List<Lite<UserQueryEntity>>>> UserQueriesByQuery;
 
-        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
+        public static void Start(SchemaBuilder sb)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
-                QueryLogic.Start(sb, dqm);
+                QueryLogic.Start(sb);
 
                 PermissionAuthLogic.RegisterPermissions(UserQueryPermission.ViewUserQuery);
 
@@ -42,7 +42,7 @@ namespace Signum.Engine.UserQueries
                 sb.Include<UserQueryEntity>()
                     .WithSave(UserQueryOperation.Save)
                     .WithDelete(UserQueryOperation.Delete)
-                    .WithQuery(dqm, () => uq => new
+                    .WithQuery(() => uq => new
                     {
                         Entity = uq,
                         uq.Id,
@@ -86,7 +86,7 @@ namespace Signum.Engine.UserQueries
 
         static List<Column> MergeColumns(UserQueryEntity uq)
         {
-            QueryDescription qd = DynamicQueryManager.Current.QueryDescription(uq.Query.ToQueryName());
+            QueryDescription qd = QueryLogic.Queries.QueryDescription(uq.Query.ToQueryName());
 
             switch (uq.ColumnsMode)
             {
@@ -113,7 +113,7 @@ namespace Signum.Engine.UserQueries
 
             userQuery.Query = QueryLogic.GetQueryEntity(userQuery.queryName);
 
-            QueryDescription description = DynamicQueryManager.Current.QueryDescription(userQuery.queryName);
+            QueryDescription description = QueryLogic.Queries.QueryDescription(userQuery.queryName);
 
             userQuery.ParseData(description);
 
@@ -135,7 +135,7 @@ namespace Signum.Engine.UserQueries
                 return;
             }
 
-            QueryDescription description = DynamicQueryManager.Current.QueryDescription(queryName);
+            QueryDescription description = QueryLogic.Queries.QueryDescription(queryName);
 
             userQuery.ParseData(description);
         }
@@ -223,7 +223,7 @@ namespace Signum.Engine.UserQueries
                        uq.Orders.Any(a => a.Token.ParseException != null))
                     {
 
-                        QueryDescription qd = DynamicQueryManager.Current.QueryDescription(uq.Query.ToQueryName());
+                        QueryDescription qd = QueryLogic.Queries.QueryDescription(uq.Query.ToQueryName());
 
                         if (uq.Filters.Any())
                         {

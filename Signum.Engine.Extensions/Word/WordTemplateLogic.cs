@@ -63,7 +63,7 @@ namespace Signum.Engine.Word
             return WordTemplatesExpression.Evaluate(e);
         }
 
-        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
+        public static void Start(SchemaBuilder sb)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
@@ -71,7 +71,7 @@ namespace Signum.Engine.Word
                 sb.Include<WordTemplateEntity>()
                     .WithSave(WordTemplateOperation.Save)
                     .WithDelete(WordTemplateOperation.Delete)
-                    .WithQuery(dqm, () => e => new
+                    .WithQuery(() => e => new
                     {
                         Entity = e,
                         e.Id,
@@ -83,20 +83,20 @@ namespace Signum.Engine.Word
 
                 PermissionAuthLogic.RegisterPermissions(WordTemplatePermission.GenerateReport);
 
-                SystemWordTemplateLogic.Start(sb, dqm);
+                SystemWordTemplateLogic.Start(sb);
 
-                SymbolLogic<WordTransformerSymbol>.Start(sb, dqm, () => Transformers.Keys.ToHashSet());
-                SymbolLogic<WordConverterSymbol>.Start(sb, dqm, () => Converters.Keys.ToHashSet());
+                SymbolLogic<WordTransformerSymbol>.Start(sb, () => Transformers.Keys.ToHashSet());
+                SymbolLogic<WordConverterSymbol>.Start(sb, () => Converters.Keys.ToHashSet());
 
                 sb.Include<WordTransformerSymbol>()
-                .WithQuery(dqm, () => f => new
+                .WithQuery(() => f => new
                 {
                     Entity = f,
                     f.Key
                 });
 
                 sb.Include<WordConverterSymbol>()
-                    .WithQuery(dqm, () => f => new
+                    .WithQuery(() => f => new
                     {
                         Entity = f,
                         f.Key
@@ -107,7 +107,7 @@ namespace Signum.Engine.Word
                 ToDataTableProviders.Add("UserQuery", new UserQueryDataTableProvider());
                 ToDataTableProviders.Add("UserChart", new UserChartDataTableProvider());
 
-                dqm.RegisterExpression((SystemWordTemplateEntity e) => e.WordTemplates(), () => typeof(WordTemplateEntity).NiceName());
+                QueryLogic.Expressions.Register((SystemWordTemplateEntity e) => e.WordTemplates(), () => typeof(WordTemplateEntity).NiceName());
 
                 
                 new Graph<WordTemplateEntity>.Execute(WordTemplateOperation.CreateWordReport)
@@ -135,7 +135,7 @@ namespace Signum.Engine.Word
 
                 TemplatesByEntityType = sb.GlobalLazy(() =>
                 {
-                    return (from pair in WordTemplatesLazy.Value.Values.SelectCatch(wr => new { wr, imp = DynamicQueryManager.Current.GetEntityImplementations(wr.Query.ToQueryName()) })
+                    return (from pair in WordTemplatesLazy.Value.Values.SelectCatch(wr => new { wr, imp = QueryLogic.Queries.GetEntityImplementations(wr.Query.ToQueryName()) })
                             where !pair.imp.IsByAll
                             from t in pair.imp.Types
                             select KVP.Create(t, pair.wr))
@@ -215,7 +215,7 @@ namespace Signum.Engine.Word
 
             using (template.DisableAuthorization ? ExecutionMode.Global() : null)
             {
-                QueryDescription qd = DynamicQueryManager.Current.QueryDescription(template.Query.ToQueryName());
+                QueryDescription qd = QueryLogic.Queries.QueryDescription(template.Query.ToQueryName());
 
                 string error = null;
                 template.ProcessOpenXmlPackage(document =>
@@ -269,7 +269,7 @@ namespace Signum.Engine.Word
             using (template.DisableAuthorization ? ExecutionMode.Global() : null)
             using (CultureInfoUtils.ChangeBothCultures(template.Culture.ToCultureInfo()))
             {
-                QueryDescription qd = DynamicQueryManager.Current.QueryDescription(template.Query.ToQueryName());
+                QueryDescription qd = QueryLogic.Queries.QueryDescription(template.Query.ToQueryName());
 
                 var array = template.ProcessOpenXmlPackage(document =>
                 {
@@ -363,13 +363,13 @@ namespace Signum.Engine.Word
 
                 var queryName = QueryLogic.ToQueryName(template.Query.Key);
 
-                QueryDescription qd = DynamicQueryManager.Current.QueryDescription(queryName);
+                QueryDescription qd = QueryLogic.Queries.QueryDescription(queryName);
 
                 using (DelayedConsole.Delay(() => SafeConsole.WriteLineColor(ConsoleColor.White, "WordTemplate: " + template.Name)))
                 using (DelayedConsole.Delay(() => Console.WriteLine(" Query: " + template.Query.Key)))
                 {
                     var file = template.Template.Retrieve();
-
+                    var oldHash = file.Hash;
                     try
                     {
                         SynchronizationContext sc = new SynchronizationContext
@@ -422,7 +422,7 @@ namespace Signum.Engine.Word
                         file.BinaryFile = bytes;
 
                         using (replacements.WithReplacedDatabaseName())
-                            return Schema.Current.Table<FileEntity>().UpdateSqlSync(file, f => f.Hash == file.Hash, comment: "WordTemplate: " + template.Name);
+                            return Schema.Current.Table<FileEntity>().UpdateSqlSync(file, f => f.Hash == oldHash, comment: "WordTemplate: " + template.Name);
                     }
                     catch (TemplateSyncException ex)
                     {

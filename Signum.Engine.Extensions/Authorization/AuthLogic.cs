@@ -65,10 +65,10 @@ namespace Signum.Engine.Authorization
 
         public static void AssertStarted(SchemaBuilder sb)
         {
-            sb.AssertDefined(ReflectionTools.GetMethodInfo(() => AuthLogic.Start(null, null, null, null)));
+            sb.AssertDefined(ReflectionTools.GetMethodInfo(() => AuthLogic.Start(null, null, null)));
         }
 
-        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm, string systemUserName, string anonymousUserName)
+        public static void Start(SchemaBuilder sb, string systemUserName, string anonymousUserName)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
@@ -82,7 +82,7 @@ namespace Signum.Engine.Authorization
                 sb.Include<RoleEntity>()
                     .WithSave(RoleOperation.Save)
                     .WithDelete(RoleOperation.Delete)
-                    .WithQuery(dqm, () => r => new
+                    .WithQuery(() => r => new
                     {
                         Entity = r,
                         r.Id,
@@ -116,7 +116,7 @@ namespace Signum.Engine.Authorization
 
                 sb.Schema.EntityEvents<RoleEntity>().Saving += Schema_Saving;
                 
-                dqm.RegisterQuery(RoleQuery.RolesReferedBy, () =>
+                QueryLogic.Queries.Register(RoleQuery.RolesReferedBy, () =>
                     from r in Database.Query<RoleEntity>()
                     from rc in r.Roles
                     select new
@@ -127,7 +127,7 @@ namespace Signum.Engine.Authorization
                         Refered = rc,
                     });
                 sb.Include<UserEntity>()
-                    .WithQuery(dqm, () => e => new
+                    .WithQuery(() => e => new
                     {
                         Entity = e,
                         e.Id,
@@ -325,13 +325,13 @@ namespace Signum.Engine.Authorization
                 userEntity.Execute(UserOperation.Save);
         }
 
-        public static void StartAllModules(SchemaBuilder sb, DynamicQueryManager dqm)
+        public static void StartAllModules(SchemaBuilder sb)
         {
-            TypeAuthLogic.Start(sb, dqm);
+            TypeAuthLogic.Start(sb);
             PropertyAuthLogic.Start(sb);
-            QueryAuthLogic.Start(sb, dqm);
+            QueryAuthLogic.Start(sb);
             OperationAuthLogic.Start(sb);
-            PermissionAuthLogic.Start(sb, dqm);
+            PermissionAuthLogic.Start(sb);
         }
 
         public static HashSet<Lite<RoleEntity>> CurrentRoles()
@@ -552,7 +552,7 @@ namespace Signum.Engine.Authorization
         public static void AutomaticImportAuthRules(string fileName)
         {
             Schema.Current.Initialize();
-            var script = AuthLogic.ImportRulesScript(XDocument.Load(fileName), interactive: false);
+            var script = AuthLogic.ImportRulesScript(XDocument.Load(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, fileName)), interactive: false);
             if (script == null)
             {
                 SafeConsole.WriteColor(ConsoleColor.Green, "AuthRules already synchronized");

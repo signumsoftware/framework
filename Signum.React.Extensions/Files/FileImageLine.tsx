@@ -1,14 +1,14 @@
 ﻿import * as React from 'react'
-import { classes, Dic } from '../../../Framework/Signum.React/Scripts/Globals'
-import { Retrieve } from '../../../Framework/Signum.React/Scripts/Retrieve'
-import { FindOptions } from '../../../Framework/Signum.React/Scripts/FindOptions'
-import { TypeContext, StyleContext, StyleOptions, FormGroupStyle } from '../../../Framework/Signum.React/Scripts/TypeContext'
-import { PropertyRoute, PropertyRouteType, MemberInfo, getTypeInfo, getTypeInfos, TypeInfo, IsByAll, New, getSymbol } from '../../../Framework/Signum.React/Scripts/Reflection'
-import { LineBase, LineBaseProps } from '../../../Framework/Signum.React/Scripts/Lines/LineBase'
-import { FormGroup } from '../../../Framework/Signum.React/Scripts/Lines/FormGroup'
-import { ModifiableEntity, Lite, Entity, EntityControlMessage, JavascriptMessage, toLite, is, liteKey, getToString, } from '../../../Framework/Signum.React/Scripts/Signum.Entities'
+import { classes, Dic } from '@framework/Globals'
+import { Retrieve } from '@framework/Retrieve'
+import { FindOptions } from '@framework/FindOptions'
+import { TypeContext, StyleContext, StyleOptions, FormGroupStyle } from '@framework/TypeContext'
+import { PropertyRoute, PropertyRouteType, MemberInfo, getTypeInfo, getTypeInfos, TypeInfo, IsByAll, New, getSymbol } from '@framework/Reflection'
+import { LineBase, LineBaseProps } from '@framework/Lines/LineBase'
+import { FormGroup } from '@framework/Lines/FormGroup'
+import { ModifiableEntity, Lite, Entity, EntityControlMessage, JavascriptMessage, toLite, is, liteKey, getToString, } from '@framework/Signum.Entities'
 import { IFile, IFilePath, FileMessage, FileTypeSymbol, FileEntity, FilePathEntity, FileEmbedded, FilePathEmbedded } from './Signum.Entities.Files'
-import { EntityBase, EntityBaseProps } from '../../../Framework/Signum.React/Scripts/Lines/EntityBase'
+import { EntityBase, EntityBaseProps } from '@framework/Lines/EntityBase'
 import { default as FileDownloader, FileDownloaderConfiguration, DownloadBehaviour } from './FileDownloader'
 import FileUploader from './FileUploader'
 
@@ -56,7 +56,6 @@ export default class FileImageLine extends EntityBase<FileImageLineProps, FileIm
     }
     
     handleFileLoaded = (file: IFile & ModifiableEntity) => {
-
         this.convert(file)
             .then(f => this.setValue(f))
             .done();
@@ -99,7 +98,7 @@ export default class FileImageLine extends EntityBase<FileImageLineProps, FileIm
 
         var content = ctx.propertyRoute.typeReference().isLite ?
             Retrieve.create(val as Lite<IFile & Entity>, file => <FileImage file={file} {...this.props.imageHtmlAttributes} />) :
-            <FileImage file={val as IFile} {...this.props.imageHtmlAttributes} /> 
+            <FileImage file={val as IFile & ModifiableEntity} {...this.props.imageHtmlAttributes} /> 
 
         const removeButton = this.renderRemoveButton(true, val);
 

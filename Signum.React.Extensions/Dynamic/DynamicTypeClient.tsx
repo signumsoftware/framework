@@ -1,28 +1,28 @@
 
 import * as React from 'react'
 import { Route } from 'react-router'
-import { ifError } from '../../../Framework/Signum.React/Scripts/Globals';
-import { ajaxPost, ajaxGet, ValidationError } from '../../../Framework/Signum.React/Scripts/Services';
-import { SearchControl, ValueSearchControlLine } from '../../../Framework/Signum.React/Scripts/Search'
-import { EntitySettings, ViewPromise } from '../../../Framework/Signum.React/Scripts/Navigator'
-import * as Navigator from '../../../Framework/Signum.React/Scripts/Navigator'
-import MessageModal from '../../../Framework/Signum.React/Scripts/Modals/MessageModal'
-import { EntityData, EntityKind, symbolNiceName } from '../../../Framework/Signum.React/Scripts/Reflection'
-import { EntityOperationSettings } from '../../../Framework/Signum.React/Scripts/Operations'
-import * as Operations from '../../../Framework/Signum.React/Scripts/Operations'
-import * as EntityOperations from '../../../Framework/Signum.React/Scripts/Operations/EntityOperations'
-import { Entity, NormalControlMessage, NormalWindowMessage } from '../../../Framework/Signum.React/Scripts/Signum.Entities'
-import * as Constructor from '../../../Framework/Signum.React/Scripts/Constructor'
-import * as QuickLink from '../../../Framework/Signum.React/Scripts/QuickLinks'
-import { StyleContext } from '../../../Framework/Signum.React/Scripts/TypeContext'
+import { ifError } from '@framework/Globals';
+import { ajaxPost, ajaxGet, ValidationError } from '@framework/Services';
+import { SearchControl, ValueSearchControlLine } from '@framework/Search'
+import { EntitySettings, ViewPromise } from '@framework/Navigator'
+import * as Navigator from '@framework/Navigator'
+import MessageModal from '@framework/Modals/MessageModal'
+import { EntityData, EntityKind, symbolNiceName } from '@framework/Reflection'
+import { EntityOperationSettings } from '@framework/Operations'
+import * as Operations from '@framework/Operations'
+import * as EntityOperations from '@framework/Operations/EntityOperations'
+import { Entity, NormalControlMessage, NormalWindowMessage } from '@framework/Signum.Entities'
+import * as Constructor from '@framework/Constructor'
+import * as QuickLink from '@framework/QuickLinks'
+import { StyleContext } from '@framework/TypeContext'
 
 
-import { ValueLine, EntityLine, EntityCombo, EntityList, EntityDetail, EntityStrip, EntityRepeater } from '../../../Framework/Signum.React/Scripts/Lines'
+import { ValueLine, EntityLine, EntityCombo, EntityList, EntityDetail, EntityStrip, EntityRepeater } from '@framework/Lines'
 import { DynamicTypeEntity, DynamicMixinConnectionEntity, DynamicTypeOperation, DynamicSqlMigrationEntity, DynamicRenameEntity, DynamicTypeMessage, DynamicPanelPermission } from './Signum.Entities.Dynamic'
 import DynamicTypeComponent from './Type/DynamicType' //typings only
-import * as DynamicClient from './DynamicClient'
+import * as DynamicClientOptions from './DynamicClientOptions'
 import * as AuthClient from '../Authorization/AuthClient'
-import { Tab } from '../../../Framework/Signum.React/Scripts/Components/Tabs';
+import { Tab } from '@framework/Components/Tabs';
 
 export function start(options: { routes: JSX.Element[] }) {
 
@@ -31,7 +31,7 @@ export function start(options: { routes: JSX.Element[] }) {
     Navigator.addSettings(new EntitySettings(DynamicSqlMigrationEntity, w => import('./Type/DynamicSqlMigration')));
 
     Operations.addSettings(new EntityOperationSettings(DynamicTypeOperation.Clone, {
-        contextual: { icon: "fa fa-clone", iconColor: "black" },
+        contextual: { icon: "clone", iconColor: "black" },
     }));
 
     Operations.addSettings(new EntityOperationSettings(DynamicTypeOperation.Save, {
@@ -62,13 +62,13 @@ export function start(options: { routes: JSX.Element[] }) {
     QuickLink.registerQuickLink(DynamicTypeEntity, ctx => new QuickLink.QuickLinkLink("ViewDynamicPanel",
         symbolNiceName(DynamicPanelPermission.ViewDynamicPanel), "~/dynamic/panel", {
             isVisible: AuthClient.isPermissionAuthorized(DynamicPanelPermission.ViewDynamicPanel),
-            icon: "fa fa-arrows-alt",
+            icon: "arrows-alt",
             iconColor: "purple",
         }));
 
-    DynamicClient.Options.onGetDynamicLineForPanel.push(ctx => <ValueSearchControlLine ctx={ctx} findOptions={{ queryName: DynamicTypeEntity }} />);
-    DynamicClient.Options.onGetDynamicLineForPanel.push(ctx => <ValueSearchControlLine ctx={ctx} findOptions={{ queryName: DynamicMixinConnectionEntity }} />);
-    DynamicClient.Options.getDynaicMigrationsStep = () =>
+    DynamicClientOptions.Options.onGetDynamicLineForPanel.push(ctx => <ValueSearchControlLine ctx={ctx} findOptions={{ queryName: DynamicTypeEntity }} />);
+    DynamicClientOptions.Options.onGetDynamicLineForPanel.push(ctx => <ValueSearchControlLine ctx={ctx} findOptions={{ queryName: DynamicMixinConnectionEntity }} />);
+    DynamicClientOptions.Options.getDynaicMigrationsStep = () =>
         <Tab eventKey="migrations" title="Migrations" >
             <h3>{DynamicSqlMigrationEntity.nicePluralName()}</h3>
             <SearchControl findOptions={{ queryName: DynamicSqlMigrationEntity }} />
@@ -123,7 +123,8 @@ export interface DynamicProperty {
     scale?: number;
     _propertyType_?: string;
     validators?: Validators.DynamicValidator[];
-    customAttributes?: string;
+    customFieldAttributes?: string;
+    customPropertyAttributes?: string;
 }
 
 export interface DynamicTypePrimaryKeyDefinition {

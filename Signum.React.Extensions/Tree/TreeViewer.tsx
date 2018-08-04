@@ -1,29 +1,30 @@
 ﻿import * as React from 'react'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { API, TreeNode, TreeNodeState, fixState } from './TreeClient'
-import { Dic, classes, DomUtils } from '../../../Framework/Signum.React/Scripts/Globals'
-import * as Navigator from '../../../Framework/Signum.React/Scripts/Navigator'
-import * as Finder from '../../../Framework/Signum.React/Scripts/Finder'
-import ContextMenu from '../../../Framework/Signum.React/Scripts/SearchControl/ContextMenu'
-import { ContextMenuPosition } from '../../../Framework/Signum.React/Scripts/SearchControl/ContextMenu'
-import * as Operations from '../../../Framework/Signum.React/Scripts/Operations'
-import * as EntityOperations from '../../../Framework/Signum.React/Scripts/Operations/EntityOperations'
-import { SearchMessage, JavascriptMessage, EntityControlMessage, toLite, liteKey, ExecuteSymbol, ConstructSymbol_From, ConstructSymbol_Simple, DeleteSymbol, OperationMessage } from '../../../Framework/Signum.React/Scripts/Signum.Entities'
+import { Dic, classes, DomUtils } from '@framework/Globals'
+import * as Navigator from '@framework/Navigator'
+import * as Finder from '@framework/Finder'
+import ContextMenu from '@framework/SearchControl/ContextMenu'
+import { ContextMenuPosition } from '@framework/SearchControl/ContextMenu'
+import * as Operations from '@framework/Operations'
+import * as EntityOperations from '@framework/Operations/EntityOperations'
+import { SearchMessage, JavascriptMessage, EntityControlMessage, toLite, liteKey, ExecuteSymbol, ConstructSymbol_From, ConstructSymbol_Simple, DeleteSymbol, OperationMessage } from '@framework/Signum.Entities'
 import { TreeViewerMessage, TreeEntity, TreeOperation, MoveTreeModel } from './Signum.Entities.Tree'
 import * as TreeClient from './TreeClient'
-import { FilterOptionParsed, QueryDescription, FilterRequest, SubTokensOptions, FilterOption } from "../../../Framework/Signum.React/Scripts/FindOptions";
-import FilterBuilder from "../../../Framework/Signum.React/Scripts/SearchControl/FilterBuilder";
-import { ISimpleFilterBuilder } from "../../../Framework/Signum.React/Scripts/Search";
-import { is } from "../../../Framework/Signum.React/Scripts/Signum.Entities";
-import MessageModal from "../../../Framework/Signum.React/Scripts/Modals/MessageModal";
-import { ContextualItemsContext, renderContextualItems } from "../../../Framework/Signum.React/Scripts/SearchControl/ContextualItems";
-import { Entity } from "../../../Framework/Signum.React/Scripts/Signum.Entities";
-import { Lite } from "../../../Framework/Signum.React/Scripts/Signum.Entities";
+import { FilterOptionParsed, QueryDescription, FilterRequest, SubTokensOptions, FilterOption } from "@framework/FindOptions";
+import FilterBuilder from "@framework/SearchControl/FilterBuilder";
+import { ISimpleFilterBuilder } from "@framework/Search";
+import { is } from "@framework/Signum.Entities";
+import MessageModal from "@framework/Modals/MessageModal";
+import { ContextualItemsContext, renderContextualItems } from "@framework/SearchControl/ContextualItems";
+import { Entity } from "@framework/Signum.Entities";
+import { Lite } from "@framework/Signum.Entities";
 import { DisabledMixin } from "../Basics/Signum.Entities.Basics";
-import { getMixin } from "../../../Framework/Signum.React/Scripts/Signum.Entities";
-import { tryGetMixin } from "../../../Framework/Signum.React/Scripts/Signum.Entities";
+import { getMixin } from "@framework/Signum.Entities";
+import { tryGetMixin } from "@framework/Signum.Entities";
 
 import "./TreeViewer.css"
-import { DropdownToggle, Dropdown, DropdownItem, DropdownMenu } from '../../../Framework/Signum.React/Scripts/Components';
+import { DropdownToggle, Dropdown, DropdownItem, DropdownMenu } from '@framework/Components';
 
 interface TreeViewerProps {
     typeName: string;
@@ -245,9 +246,9 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
         let type = this.props.typeName;
 
         var menuItems = [
-            Navigator.isNavigable(type, undefined, true) && <DropdownItem onClick={this.handleNavigate} className="btn-danger"><i className="fa fa-arrow-right" aria-hidden="true"></i>&nbsp;{EntityControlMessage.View.niceToString()}</DropdownItem >,
-            Operations.isOperationAllowed(TreeOperation.CreateChild, type) && <DropdownItem onClick={this.handleAddChildren}><i className="fa fa-caret-square-o-right" aria-hidden="true"></i>&nbsp;{TreeViewerMessage.AddChild.niceToString()}</DropdownItem>,
-            Operations.isOperationAllowed(TreeOperation.CreateNextSibling, type) && <DropdownItem onClick={this.handleAddSibling}><i className="fa fa-caret-square-o-down" aria-hidden="true"></i>&nbsp;{TreeViewerMessage.AddSibling.niceToString()}</DropdownItem>,
+            Navigator.isNavigable(type, undefined, true) && <DropdownItem onClick={this.handleNavigate} className="btn-danger"><FontAwesomeIcon icon="arrow-right"/>&nbsp;{EntityControlMessage.View.niceToString()}</DropdownItem >,
+            Operations.isOperationAllowed(TreeOperation.CreateChild, type) && <DropdownItem onClick={this.handleAddChildren}><FontAwesomeIcon icon="caret-square-right"/>&nbsp;{TreeViewerMessage.AddChild.niceToString()}</DropdownItem>,
+            Operations.isOperationAllowed(TreeOperation.CreateNextSibling, type) && <DropdownItem onClick={this.handleAddSibling}><FontAwesomeIcon icon="caret-square-down" />&nbsp;{TreeViewerMessage.AddSibling.niceToString()}</DropdownItem>,
         ].filter(a => a != false) as React.ReactElement<any>[];
 
         if (this.state.currentMenuItems == undefined) {
@@ -394,9 +395,9 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
             <div className="btn-toolbar">
                 <a className={"sf-query-button sf-filters-header btn btn-light" + (s.showFilters ? " active" : "")}
                     onClick={this.handleToggleFilters}
-                    title={s.showFilters ? JavascriptMessage.hideFilters.niceToString() : JavascriptMessage.showFilters.niceToString()}><span className="fa fa-filter"></span></a>
+                    title={s.showFilters ? JavascriptMessage.hideFilters.niceToString() : JavascriptMessage.showFilters.niceToString()}><FontAwesomeIcon icon="filter" /></a>
                 <button className="btn btn-primary" onClick={this.handleSearchSubmit}>{JavascriptMessage.search.niceToString()}</button>
-                {Operations.isOperationAllowed(TreeOperation.CreateRoot, this.props.typeName) && <button className="btn btn-light" onClick={this.handleAddRoot} disabled={s.treeNodes == null} > <i className="fa fa-star" aria-hidden="true"></i>&nbsp;{TreeViewerMessage.AddRoot.niceToString()}</button>}
+                {Operations.isOperationAllowed(TreeOperation.CreateRoot, this.props.typeName) && <button className="btn btn-light" onClick={this.handleAddRoot} disabled={s.treeNodes == null} > <FontAwesomeIcon icon="star"/>&nbsp;{TreeViewerMessage.AddRoot.niceToString()}</button>}
                 <Dropdown id="selectedButton"
                     className="sf-query-button sf-tm-selected"
                     toggle={this.handleSelectedToggle}
@@ -411,7 +412,7 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
                                 menuItems.map((e, i) => React.cloneElement(e, { key: i }))}
                     </DropdownMenu>
                 </Dropdown>
-                <button className="btn btn-light" onClick={this.handleExplore} ><i className="fa fa-search"></i> &nbsp; {SearchMessage.Explore.niceToString()}</button>
+                <button className="btn btn-light" onClick={this.handleExplore} ><FontAwesomeIcon icon="search" /> &nbsp; {SearchMessage.Explore.niceToString()}</button>
             </div>
         );
     }
@@ -586,12 +587,18 @@ class TreeNodeControl extends React.Component<TreeNodeControlProps> {
         var node = this.props.treeNode;
         const tv = this.props.treeViewer;
         switch (nodeState) {
-            case "Collapsed": return <span onClick={() => tv.handleNodeIconClick(node)} className="tree-icon fa fa-plus-square-o" />;
-            case "Expanded": return <span onClick={() => tv.handleNodeIconClick(node)} className="tree-icon fa fa-minus-square-o" />;
+            case "Collapsed": return (
+                <span onClick={() => tv.handleNodeIconClick(node)} className="tree-icon" >
+                    <FontAwesomeIcon icon={["far", "plus-square"]} />;
+                </span>);
+            case "Expanded": return (
+                <span onClick={() => tv.handleNodeIconClick(node)} className="tree-icon" >
+                    <FontAwesomeIcon icon={["far", "minus-square"]} />;
+                </span>);
             case "Filtered": return (
-                <span onClick={() => tv.handleNodeIconClick(node)} className="tree-icon fa-stack fa-sm" >
-                    <i className="fa fa-square-o fa-stack-2x"></i>
-                    <i className="fa fa-filter fa-stack-1x"></i>
+                <span onClick={() => tv.handleNodeIconClick(node)} className="tree-icon fa-layers fa-fw" >
+                    <FontAwesomeIcon icon="square"/>
+                    <FontAwesomeIcon icon="filter" inverse transform="shrink-2" />
                 </span>);
             default: return <span className="place-holder" />;
         }

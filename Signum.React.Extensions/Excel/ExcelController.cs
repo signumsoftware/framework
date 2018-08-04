@@ -41,7 +41,7 @@ namespace Signum.React.Excel
         {
             var queryRequest = request.ToQueryRequest();
 
-            ResultTable queryResult = await DynamicQueryManager.Current.ExecuteQueryAsync(queryRequest, token);
+            ResultTable queryResult = await QueryLogic.Queries.ExecuteQueryAsync(queryRequest, token);
             byte[] binaryFile = PlainExcelGenerator.WritePlainExcel(queryResult, QueryUtils.GetNiceName(queryRequest.QueryName));
 
             var fileName = request.queryKey + TimeZoneManager.Now.ToString("yyyyMMdd-HHmmss") + ".xlsx";

@@ -20,7 +20,7 @@ namespace Signum.Engine.Basics
 {
     public static class DisableLogic
     {
-        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
+        public static void Start(SchemaBuilder sb)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {

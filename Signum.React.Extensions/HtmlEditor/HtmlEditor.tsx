@@ -1,7 +1,7 @@
 ﻿/// <reference path="react-rte.d.ts" />
 import * as React from 'react'
 import RichTextEditor, { EditorValue } from 'react-rte';
-import { IBinding } from '../../../Framework/Signum.React/Scripts/Reflection';
+import { IBinding } from '@framework/Reflection';
 
 export interface HtmlEditorProps {
     binding: IBinding<string | null | undefined>;

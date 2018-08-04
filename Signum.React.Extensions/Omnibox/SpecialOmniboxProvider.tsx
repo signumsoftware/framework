@@ -1,10 +1,10 @@
 ﻿import * as React from 'react'
-import { Lite, Entity } from '../../../Framework/Signum.React/Scripts/Signum.Entities'
+import { Lite, Entity } from '@framework/Signum.Entities'
 import { OmniboxMessage } from './Signum.Entities.Omnibox'
 import { OmniboxResult, OmniboxMatch, OmniboxProvider, specialActions } from './OmniboxClient'
-import { QueryToken, FilterOperation, FindOptions, FilterOption } from '../../../Framework/Signum.React/Scripts/FindOptions'
-import * as Navigator from '../../../Framework/Signum.React/Scripts/Navigator'
-import * as Finder from '../../../Framework/Signum.React/Scripts/Finder'
+import { QueryToken, FilterOperation, FindOptions, FilterOption } from '@framework/FindOptions'
+import * as Navigator from '@framework/Navigator'
+import * as Finder from '@framework/Finder'
 
 
 
@@ -15,7 +15,7 @@ export default class SpecialOmniboxProvider extends OmniboxProvider<SpecialOmnib
     }
 
     icon() {
-        return this.coloredIcon("fa fa-cog", "limegreen");
+        return this.coloredIcon("cog", "limegreen");
     }
 
     renderItem(result: SpecialOmniboxResult): React.ReactChild[] {

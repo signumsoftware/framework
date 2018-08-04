@@ -1,24 +1,24 @@
 import * as React from 'react'
 import { Route } from 'react-router'
 import * as QueryString from 'query-string';
-import { ifError, Dic } from '../../../Framework/Signum.React/Scripts/Globals';
-import { ajaxPost, ajaxGet, ValidationError } from '../../../Framework/Signum.React/Scripts/Services';
-import { EntitySettings, ViewPromise, ViewModule } from '../../../Framework/Signum.React/Scripts/Navigator'
+import { ifError, Dic } from '@framework/Globals';
+import { ajaxPost, ajaxGet, ValidationError } from '@framework/Services';
+import { EntitySettings, ViewPromise, ViewModule } from '@framework/Navigator'
 import {
     EntityPack, Lite, toLite, MListElement, JavascriptMessage, EntityControlMessage,
     newMListElement, liteKey, getMixin, Entity, ExecuteSymbol, isEntityPack, isEntity
-} from '../../../Framework/Signum.React/Scripts/Signum.Entities'
-import { TypeEntity, IUserEntity } from '../../../Framework/Signum.React/Scripts/Signum.Entities.Basics'
-import { Type, PropertyRoute } from '../../../Framework/Signum.React/Scripts/Reflection'
-import { EntityFrame, TypeContext } from '../../../Framework/Signum.React/Scripts/TypeContext'
-import * as Navigator from '../../../Framework/Signum.React/Scripts/Navigator'
-import * as Finder from '../../../Framework/Signum.React/Scripts/Finder'
-import { EntityOperationSettings, addSettings, EntityOperationContext } from '../../../Framework/Signum.React/Scripts/Operations'
-import * as Operations from '../../../Framework/Signum.React/Scripts/Operations'
-import { confirmInNecessary, notifySuccess } from '../../../Framework/Signum.React/Scripts/Operations/EntityOperations'
+} from '@framework/Signum.Entities'
+import { TypeEntity, IUserEntity } from '@framework/Signum.Entities.Basics'
+import { Type, PropertyRoute } from '@framework/Reflection'
+import { EntityFrame, TypeContext } from '@framework/TypeContext'
+import * as Navigator from '@framework/Navigator'
+import * as Finder from '@framework/Finder'
+import { EntityOperationSettings, addSettings, EntityOperationContext } from '@framework/Operations'
+import * as Operations from '@framework/Operations'
+import { confirmInNecessary, notifySuccess } from '@framework/Operations/EntityOperations'
 
-import * as EntityOperations from '../../../Framework/Signum.React/Scripts/Operations/EntityOperations'
-import * as ContextualOperations from '../../../Framework/Signum.React/Scripts/Operations/ContextualOperations'
+import * as EntityOperations from '@framework/Operations/EntityOperations'
+import * as ContextualOperations from '@framework/Operations/ContextualOperations'
 
 import { UserEntity } from '../Authorization/Signum.Entities.Authorization'
 import * as DynamicViewClient from '../Dynamic/DynamicViewClient'
@@ -26,17 +26,17 @@ import { CodeContext } from '../Dynamic/View/NodeUtils'
 import { TimeSpanEmbedded } from '../Basics/Signum.Entities.Basics'
 import TypeHelpButtonBarComponent from '../TypeHelp/TypeHelpButtonBarComponent'
 
-import { ValueLine, EntityLine, EntityCombo, EntityList, EntityDetail, EntityStrip, EntityRepeater } from '../../../Framework/Signum.React/Scripts/Lines'
+import { ValueLine, EntityLine, EntityCombo, EntityList, EntityDetail, EntityStrip, EntityRepeater } from '@framework/Lines'
 import {
     WorkflowConditionEval, WorkflowTimerConditionEval, WorkflowActionEval, WorkflowMessage, WorkflowActivityMonitorMessage,
-    ConnectionType, WorkflowTimerConditionEntity, WorkflowIssueType
+    ConnectionType, WorkflowTimerConditionEntity, WorkflowIssueType, WorkflowLaneActorsEval
 } from './Signum.Entities.Workflow'
 
 import ActivityWithRemarks from './Case/ActivityWithRemarks'
-import * as QuickLinks from '../../../Framework/Signum.React/Scripts/QuickLinks'
-import * as Constructor from '../../../Framework/Signum.React/Scripts/Constructor'
-import SelectorModal from '../../../Framework/Signum.React/Scripts/SelectorModal'
-import ValueLineModal from '../../../Framework/Signum.React/Scripts/ValueLineModal'
+import * as QuickLinks from '@framework/QuickLinks'
+import * as Constructor from '@framework/Constructor'
+import SelectorModal from '@framework/SelectorModal'
+import ValueLineModal from '@framework/ValueLineModal'
 import {
     WorkflowEntity, WorkflowLaneEntity, WorkflowActivityEntity, WorkflowConnectionEntity, WorkflowConditionEntity, WorkflowActionEntity, CaseActivityQuery, CaseActivityEntity,
     CaseActivityOperation, CaseEntity, CaseNotificationEntity, CaseNotificationState, InboxFilterModel, WorkflowOperation, WorkflowPoolEntity, WorkflowScriptEntity, WorkflowScriptEval,
@@ -50,15 +50,16 @@ import Workflow from './Workflow/Workflow'
 import * as AuthClient from '../Authorization/AuthClient'
 import * as OmniboxClient from '../Omnibox/OmniboxClient'
 
-import { ImportRoute } from "../../../Framework/Signum.React/Scripts/AsyncImport";
+import { ImportRoute } from "@framework/AsyncImport";
 
-import { SearchControl } from "../../../Framework/Signum.React/Scripts/Search";
-import { getTypeInfo } from "../../../Framework/Signum.React/Scripts/Reflection";
+import { SearchControl } from "@framework/Search";
+import { getTypeInfo } from "@framework/Reflection";
 import WorkflowHelpComponent from './Workflow/WorkflowHelpComponent';
 import { globalModules } from '../Dynamic/View/GlobalModules';
-import { FilterRequest, ColumnRequest } from '../../../Framework/Signum.React/Scripts/FindOptions';
-import { BsColor } from '../../../Framework/Signum.React/Scripts/Components/Basic';
-import { GraphExplorer } from '../../../Framework/Signum.React/Scripts/Reflection';
+import * as DynamicClientOptions from '../Dynamic/DynamicClientOptions';
+import { FilterRequest, ColumnRequest } from '@framework/FindOptions';
+import { BsColor } from '@framework/Components/Basic';
+import { GraphExplorer } from '@framework/Reflection';
 
 export function start(options: { routes: JSX.Element[] }) {
 
@@ -69,18 +70,25 @@ export function start(options: { routes: JSX.Element[] }) {
         <ImportRoute path="~/workflow/activityMonitor/:workflowId" onImportModule={() => import("./ActivityMonitor/WorkflowActivityMonitorPage")} />,
     );
 
+    DynamicClientOptions.Options.checkEvalFindOptions.push({ queryName: WorkflowLaneEntity, filterOptions: [{ columnName: "Entity.ActorsEval", operation: "DistinctTo", value: null }] });
+    DynamicClientOptions.Options.checkEvalFindOptions.push({ queryName: WorkflowConditionEntity });
+    DynamicClientOptions.Options.checkEvalFindOptions.push({ queryName: WorkflowScriptEntity });
+    DynamicClientOptions.Options.checkEvalFindOptions.push({ queryName: WorkflowActivityEntity, filterOptions: [{ columnName: "Entity.SubWorkflow", operation: "DistinctTo", value: null }] });
+    DynamicClientOptions.Options.checkEvalFindOptions.push({ queryName: WorkflowActionEntity });
+    DynamicClientOptions.Options.checkEvalFindOptions.push({ queryName: WorkflowTimerConditionEntity });
+
     QuickLinks.registerQuickLink(CaseActivityEntity, ctx => [
         new QuickLinks.QuickLinkAction("caseFlow", WorkflowActivityMessage.CaseFlow.niceToString(), e => {
             Navigator.API.fetchAndForget(ctx.lite)
                 .then(ca => Navigator.navigate(ca.case, { extraComponentProps: { caseActivity: ca } }))
                 .then(() => ctx.contextualContext && ctx.contextualContext.markRows({}))
                 .done();
-        }, { icon: "fa fa-random", iconColor: "green" })
+        }, { icon: "random", iconColor: "green" })
     ]);
 
     QuickLinks.registerQuickLink(WorkflowEntity, ctx => [
         new QuickLinks.QuickLinkExplore({ queryName: CaseEntity, parentColumn: "Workflow", parentValue: ctx.lite },
-            { icon: "fa fa-tasks", iconColor: "blue" })
+            { icon: "tasks", iconColor: "blue" })
     ]);
     
     OmniboxClient.registerSpecialAction({
@@ -149,24 +157,24 @@ export function start(options: { routes: JSX.Element[] }) {
     QuickLinks.registerQuickLink(WorkflowEntity, ctx => new QuickLinks.QuickLinkLink("bam",
         WorkflowActivityMonitorMessage.WorkflowActivityMonitor.niceToString(),
         workflowActivityMonitorUrl(ctx.lite),
-        { icon: "fa fa-tachometer", iconColor: "green" }));
+        { icon: "tachometer-alt", iconColor: "green" }));
 
     Operations.addSettings(new EntityOperationSettings(WorkflowOperation.Save, { color: "primary", onClick: executeWorkflowSave }));
     Operations.addSettings(new EntityOperationSettings(WorkflowOperation.Delete, { contextualFromMany: { isVisible: ctx => false } }));
     Operations.addSettings(new EntityOperationSettings(WorkflowOperation.Activate, {
-        contextual: { icon: "fa fa-heartbeat", iconColor: "red" },
-        contextualFromMany: { icon: "fa fa-heartbeat", iconColor: "red" },
+        contextual: { icon: "heartbeat", iconColor: "red" },
+        contextualFromMany: { icon: "heartbeat", iconColor: "red" },
     }));
     Operations.addSettings(new EntityOperationSettings(WorkflowOperation.Deactivate, {
         onClick: eoc => chooseWorkflowExpirationDate([toLite(eoc.entity)]).then(val => val && eoc.defaultClick(val)).done(),
         contextual: {
             onClick: coc => chooseWorkflowExpirationDate(coc.context.lites).then(val => val && coc.defaultContextualClick(val)).done(),
-            icon: "fa fa-heart-o",
+            icon: ["far", "heart"],
             iconColor: "gray"
         },
         contextualFromMany: {
             onClick: coc => chooseWorkflowExpirationDate(coc.context.lites).then(val => val && coc.defaultContextualClick(val)).done(),
-            icon: "fa fa-heart-o",
+            icon: ["far", "heart"],
             iconColor: "gray"
         },
     }));

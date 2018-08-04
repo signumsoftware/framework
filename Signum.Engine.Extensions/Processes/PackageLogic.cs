@@ -33,10 +33,10 @@ namespace Signum.Engine.Processes
 
         public static void AssertStarted(SchemaBuilder sb)
         {
-            sb.AssertDefined(ReflectionTools.GetMethodInfo(() => Start(null, null, true, true)));
+            sb.AssertDefined(ReflectionTools.GetMethodInfo(() => Start(null, true, true)));
         }
 
-        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm, bool packages, bool packageOperations)
+        public static void Start(SchemaBuilder sb, bool packages, bool packageOperations)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
@@ -44,8 +44,18 @@ namespace Signum.Engine.Processes
 
                 sb.Settings.AssertImplementedBy((ProcessExceptionLineEntity pel) => pel.Line, typeof(PackageLineEntity));
 
-                sb.Include<PackageLineEntity>();
-                dqm.RegisterQuery(typeof(PackageLineEntity), () =>
+                sb.Include<PackageLineEntity>()
+                    .WithQuery(() => pl => new
+                    {
+                        Entity = pl,
+                        pl.Package,
+                        pl.Id,
+                        pl.Target,
+                        pl.Result,
+                        pl.FinishTime,
+                    });
+
+                QueryLogic.Queries.Register(PackageQuery.PackageLineLastProcess, () =>
                     from pl in Database.Query<PackageLineEntity>()
                     let p = pl.Package.Entity.LastProcess()
                     select new
@@ -59,18 +69,24 @@ namespace Signum.Engine.Processes
                         LastProcess = p,
                         Exception = pl.Exception(p),
                     });
-
-
-                dqm.RegisterExpression((PackageEntity p) => p.Lines(), () => ProcessMessage.Lines.NiceToString());
+                
+                
+                QueryLogic.Expressions.Register((PackageEntity p) => p.Lines(), () => ProcessMessage.Lines.NiceToString());
 
                 if (packages)
                 {
                     sb.Settings.AssertImplementedBy((PackageLineEntity pl) => pl.Package, typeof(PackageEntity));
                     sb.Settings.AssertImplementedBy((ProcessEntity pe) => pe.Data, typeof(PackageEntity));
 
-                    sb.Include<PackageEntity>();
+                    sb.Include<PackageEntity>()
+                        .WithQuery(() => pk => new
+                        {
+                            Entity = pk,
+                            pk.Id,
+                            pk.Name,
+                        });
 
-                    dqm.RegisterQuery(typeof(PackageEntity), () =>
+                    QueryLogic.Queries.Register(PackageQuery.PackageLastProcess, () =>
                         from pk in Database.Query<PackageEntity>()
                         let pe = pk.LastProcess()
                         select new
@@ -82,6 +98,8 @@ namespace Signum.Engine.Processes
                             LastProcess = pe,
                             NumErrors = pk.Lines().Count(l => l.Exception(pe) != null),
                         });
+
+                    ExceptionLogic.DeleteLogs += ExceptionLogic_DeletePackages<PackageEntity>;
                 }
 
                 if (packageOperations)
@@ -89,9 +107,16 @@ namespace Signum.Engine.Processes
                     sb.Settings.AssertImplementedBy((PackageLineEntity pl) => pl.Package, typeof(PackageOperationEntity));
                     sb.Settings.AssertImplementedBy((ProcessEntity pe) => pe.Data, typeof(PackageOperationEntity));
 
-                    sb.Include<PackageOperationEntity>();
+                    sb.Include<PackageOperationEntity>()
+                          .WithQuery(() => pk => new
+                          {
+                              Entity = pk,
+                              pk.Id,
+                              pk.Name,
+                              pk.Operation,
+                          });
 
-                    dqm.RegisterQuery(typeof(PackageOperationEntity), () =>
+                    QueryLogic.Queries.Register(PackageQuery.PackageOperationLastProcess, () =>
                         from p in Database.Query<PackageOperationEntity>()
                         let pe = p.LastProcess()
                         select new
@@ -106,19 +131,18 @@ namespace Signum.Engine.Processes
                         });
 
                     ProcessLogic.Register(PackageOperationProcess.PackageOperation, new PackageOperationAlgorithm());
+                    ExceptionLogic.DeleteLogs += ExceptionLogic_DeletePackages<PackageOperationEntity>;
                 }
 
-                ExceptionLogic.DeleteLogs += ExceptionLogic_DeleteLogs;
             }
         }
 
-        public static void ExceptionLogic_DeleteLogs(DeleteLogParametersEmbedded parameters, StringBuilder sb, CancellationToken token)
+        public static void ExceptionLogic_DeletePackages<T>(DeleteLogParametersEmbedded parameters, StringBuilder sb, CancellationToken token) where T : PackageEntity
         {
-            var usedDatas = Database.Query<ProcessEntity>().Select(a => a.Data);
+            var toDelete = Database.Query<T>().Where(pack => !Database.Query<ProcessEntity>().Any(pr => pr.Data == pack));
 
-            Database.Query<PackageLineEntity>().Where(line => !usedDatas.Contains(line.Package.Entity)).UnsafeDeleteChunksLog(parameters, sb, token);
-            Database.Query<PackageOperationEntity>().Where(po => !usedDatas.Contains(po)).UnsafeDeleteChunksLog(parameters, sb, token);
-            Database.Query<PackageEntity>().Where(po => !usedDatas.Contains(po)).UnsafeDeleteChunksLog(parameters, sb, token);
+            toDelete.SelectMany(a => a.Lines()).UnsafeDeleteChunksLog(parameters, sb, token);
+            toDelete.UnsafeDeleteChunksLog(parameters, sb, token);
         }
 
         public static PackageEntity CreateLines(this PackageEntity package, IEnumerable<Lite<IEntity>> lites)

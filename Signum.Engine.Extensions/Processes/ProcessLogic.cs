@@ -96,15 +96,15 @@ namespace Signum.Engine.Processes
 
         public static void AssertStarted(SchemaBuilder sb)
         {
-            sb.AssertDefined(ReflectionTools.GetMethodInfo(() => ProcessLogic.Start(null, null)));
+            sb.AssertDefined(ReflectionTools.GetMethodInfo(() => ProcessLogic.Start(null)));
         }
 
-        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
+        public static void Start(SchemaBuilder sb)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
                 sb.Include<ProcessAlgorithmSymbol>()
-                    .WithQuery(dqm, () => pa => new
+                    .WithQuery(() => pa => new
                     {
                         Entity = pa,
                         pa.Id,
@@ -112,7 +112,7 @@ namespace Signum.Engine.Processes
                     });
 
                 sb.Include<ProcessEntity>()
-                    .WithQuery(dqm, () => p => new
+                    .WithQuery(() => p => new
                     {
                         Entity = p,
                         p.Id,
@@ -132,7 +132,7 @@ namespace Signum.Engine.Processes
                     });
 
                 sb.Include<ProcessExceptionLineEntity>()
-                    .WithQuery(dqm, () => p => new
+                    .WithQuery(() => p => new
                     {
                         Entity = p,
                         p.Line,
@@ -142,20 +142,20 @@ namespace Signum.Engine.Processes
 
                 PermissionAuthLogic.RegisterPermissions(ProcessPermission.ViewProcessPanel);
 
-                SymbolLogic<ProcessAlgorithmSymbol>.Start(sb, dqm, () => registeredProcesses.Keys.ToHashSet());
+                SymbolLogic<ProcessAlgorithmSymbol>.Start(sb, () => registeredProcesses.Keys.ToHashSet());
 
                 OperationLogic.AssertStarted(sb);
 
                 ProcessGraph.Register();
 
-                dqm.RegisterExpression((ProcessAlgorithmSymbol p) => p.Processes(), () => typeof(ProcessEntity).NicePluralName());
-                dqm.RegisterExpression((ProcessAlgorithmSymbol p) => p.LastProcess(), () => ProcessMessage.LastProcess.NiceToString());
+                QueryLogic.Expressions.Register((ProcessAlgorithmSymbol p) => p.Processes(), () => typeof(ProcessEntity).NicePluralName());
+                QueryLogic.Expressions.Register((ProcessAlgorithmSymbol p) => p.LastProcess(), () => ProcessMessage.LastProcess.NiceToString());
 
-                dqm.RegisterExpression((IProcessDataEntity p) => p.Processes(), () => typeof(ProcessEntity).NicePluralName());
-                dqm.RegisterExpression((IProcessDataEntity p) => p.LastProcess(), () => ProcessMessage.LastProcess.NiceToString());
+                QueryLogic.Expressions.Register((IProcessDataEntity p) => p.Processes(), () => typeof(ProcessEntity).NicePluralName());
+                QueryLogic.Expressions.Register((IProcessDataEntity p) => p.LastProcess(), () => ProcessMessage.LastProcess.NiceToString());
 
-                dqm.RegisterExpression((ProcessEntity p) => p.ExceptionLines(), () => ProcessMessage.ExceptionLines.NiceToString());
-                dqm.RegisterExpression((IProcessLineDataEntity p) => p.ExceptionLines(), () => ProcessMessage.ExceptionLines.NiceToString());
+                QueryLogic.Expressions.Register((ProcessEntity p) => p.ExceptionLines(), () => ProcessMessage.ExceptionLines.NiceToString());
+                QueryLogic.Expressions.Register((IProcessLineDataEntity p) => p.ExceptionLines(), () => ProcessMessage.ExceptionLines.NiceToString());
 
                 PropertyAuthLogic.SetMaxAutomaticUpgrade(PropertyRoute.Construct((ProcessEntity p) => p.User), PropertyAllowed.Read);
 
@@ -214,8 +214,8 @@ namespace Signum.Engine.Processes
                 {
                     FromStates = { ProcessState.Created },
                     ToStates = { ProcessState.Created },
-                    AllowsNew = true,
-                    Lite = false,
+                    CanBeNew = true,
+                    CanBeModified = true,
                     Execute = (p, args) =>
                     {
                         p.Save();
@@ -390,7 +390,6 @@ namespace Signum.Engine.Processes
                         tr.Commit();
                     }
                 }, status);
-
             }
         }
 
@@ -585,7 +584,7 @@ namespace Signum.Engine.Processes
 
         public ActionProcessAlgorithm(Action<ExecutingProcess> action)
         {
-            this.Action = action ?? throw new ArgumentNullException(nameof(action));
+            Action = action ?? throw new ArgumentNullException(nameof(action));
         }
         
         public void Execute(ExecutingProcess executingProcess) => Action(executingProcess);
