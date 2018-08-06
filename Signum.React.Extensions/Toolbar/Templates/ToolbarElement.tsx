@@ -8,6 +8,10 @@ import { TypeContext, FormGroupStyle } from '@framework/TypeContext'
 import { ToolbarElementEmbedded } from '../Signum.Entities.Toolbar'
 import { ColorTypeaheadLine } from '../../Basics/Templates/ColorTypeahead'
 import { IconTypeaheadLine } from '../../Basics/Templates/IconTypeahead'
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { IconName, IconProp, IconPrefix } from "@fortawesome/fontawesome-svg-core";
+import * as Dashboard from '../../Dashboard/Admin/Dashboard'
+
 
 export default class ToolbarElement extends React.Component<{ ctx: TypeContext<ToolbarElementEmbedded> }> {
 
@@ -47,8 +51,8 @@ export default class ToolbarElement extends React.Component<{ ctx: TypeContext<T
                             <IconTypeaheadLine ctx={ctx4.subCtx(t => t.iconName)} onChange={() => this.forceUpdate()} extraIcons={["none"].concat(content && content.EntityType == "UserQuery" ? ["count"] : [] as string[])} />
                             <ColorTypeaheadLine ctx={ctx4.subCtx(t => t.iconColor)} onChange={() => this.forceUpdate()} />
                         </div>
-                        <div className="col-sm-1">
-                            {ctx4.value.iconName && <span className={ctx4.value.iconName} style={{ backgroundColor: bgColor, color: ctx4.value.iconColor || undefined, fontSize: "25px", marginTop: "17px" }} />}
+                    <div className="col-sm-1">
+                        {ctx4.value.iconName && <FontAwesomeIcon icon={Dashboard.parseIcon(ctx4.value.iconName)} style={{ backgroundColor: bgColor, color: ctx4.value.iconColor || undefined, fontSize: "25px", marginTop: "17px" }} /> }
                         </div>
                         <div className="col-sm-5">
                             <ValueLine ctx={ctx2.subCtx(t => t.label)} valueHtmlAttributes={{ placeholder: content && content.toStr || undefined }} />
