@@ -143,10 +143,6 @@ namespace Signum.React.ApiControllers
         [Route("api/query/entitiesWithFilter"), HttpPost, ProfilerActionSplitter]
         public async Task<List<Lite<Entity>>> GetEntitiesWithFilter(QueryEntitiesRequestTS request, CancellationToken token)
         {
-     
-
-
-
             return await QueryLogic.Queries.GetEntities(request.ToQueryEntitiesRequest()).ToListAsync();
         }
 
