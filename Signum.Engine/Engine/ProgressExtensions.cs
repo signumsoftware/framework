@@ -10,11 +10,20 @@ using System.Threading.Tasks;
 
 namespace Signum.Engine
 {
+
+    [Serializable]
+    public class StopProgressForeachException : Exception
+    {
+        public StopProgressForeachException() { }
+        public StopProgressForeachException(string message) : base(message) { }
+        public StopProgressForeachException(string message, Exception inner) : base(message, inner) { }
+    }
+
     public delegate bool StopOnExceptionDelegate(string id, Exception exception);
 
     public static class ProgressExtensions
     {
-        public static StopOnExceptionDelegate StopOnException = null;
+        public static StopOnExceptionDelegate StopOnException = (id, exception) => exception is StopProgressForeachException;
 
         public static List<R> ProgressSelect<T, R>(this IEnumerable<T> collection, 
             Func<T, R> selector,
