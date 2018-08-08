@@ -28,7 +28,6 @@ export interface TypeaheadState {
     selectedIndex?: number;
 }
 
-
 export class Typeahead extends React.Component<TypeaheadProps, TypeaheadState>
 {
     constructor(props: TypeaheadProps) {

@@ -86,8 +86,11 @@ export class EntityStrip extends EntityListBase<EntityStripProps, EntityStripPro
 
     }
 
-    handleOnSelect = (lite: Lite<Entity>, event: React.SyntheticEvent<any>) => {
-        this.convert(lite)
+    handleOnSelect = (item: any, event: React.SyntheticEvent<any>) => {
+
+        var entity = this.state.autoComplete!.getEntityFromItem(item);
+
+        this.convert(entity)
             .then(e => this.addElement(e))
             .done();
         return "";
