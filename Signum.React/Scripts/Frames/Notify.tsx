@@ -111,7 +111,7 @@ export default class Notify extends React.Component<{}, NotifyState>{
         return (
             <div id="sfNotify">
                 <Transition in={this.state.text != undefined} timeout={200}>
-                    {(state: string) => <span className={classes(this.state.type, "notify", state == "entering" || state == "entered" ? "in" : undefined)}>{this.getIcon()}{this.state.text}</span>}
+                    {(state: string) => <span className={classes(this.state.type, "notify", state == "entering" || state == "entered" ? "in" : undefined)}>{this.getIcon()}&nbsp;{this.state.text}</span>}
                 </Transition>
             </div>
         );

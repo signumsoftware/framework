@@ -35,7 +35,7 @@
         </Literal>
       </Declarations>
       <Code Language="csharp">
-        <![CDATA[dqm.RegisterQuery(typeof($entityName$Entity), () =>
+        <![CDATA[QueryLogic.Queries.Register(typeof($entityName$Entity), () =>
                     from $entityParam$ in Database.Query<$entityName$Entity>()
                     select new
                     {

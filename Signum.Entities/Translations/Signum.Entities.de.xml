@@ -413,10 +413,10 @@
     <Member Name="_0HasToBeLowercase" Description="{0} muss kleingeschrieben sein" />
     <Member Name="_0HasToBeUppercase" Description="{0} muss großgeschrieben sein" />
     <Member Name="_0Have1ElementsButAllowedOnly2" Description="{0} hat {1} Elemente, erlaubt sind aber nur {2}" />
-    <Member Name="_0IsMandatoryWhen1IsNotSet" Description="{0} ist obligatorisch, wenn {1} nicht festgesetzt ist" />
-    <Member Name="_0IsMandatoryWhen1IsNotSetTo2" Description="{0} ist pflicht, wenn {1} nicht auf {2} gesetzt ist." />
-    <Member Name="_0IsMandatoryWhen1IsSet" Description="{0} ist obligatorisch, wenn {1} festgesetzt ist" />
-    <Member Name="_0IsMandatoryWhen1IsSetTo2" Description="{0} ist pflicht, wenn {1} auf {2} gesetzt ist." />
+    <Member Name="_0IsMandatoryWhen1IsNotSet" Description="{0} ist Pflicht, wenn {1} nicht festgesetzt ist" />
+    <Member Name="_0IsMandatoryWhen1IsNotSetTo2" Description="{0} ist Pflicht, wenn {1} nicht auf {2} gesetzt ist." />
+    <Member Name="_0IsMandatoryWhen1IsSet" Description="{0} ist Pflicht, wenn {1} festgesetzt ist" />
+    <Member Name="_0IsMandatoryWhen1IsSetTo2" Description="{0} ist Pflicht, wenn {1} auf {2} gesetzt ist." />
     <Member Name="_0IsNecessary" Description="{0} ist notwendig" />
     <Member Name="_0IsNecessaryOnState1" Description="{0} ist notwendig im Status {1}" />
     <Member Name="_0IsNotA1_G" Description="{0} ist kei[m:n|f:ne|n:n] {1}" />

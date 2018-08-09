@@ -36,7 +36,7 @@ public static void Start(SchemaBuilder sb)
 
 		new Graph<ProjectEntity>.Execute(ProjectOperation.Save)
 		{
-		    AllowsNew = true, 
+		    CanBeNew = true, 
 			CanBeModified = true,
 			Execute = (p, _) => {}
 		}.Register();

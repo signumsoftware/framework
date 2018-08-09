@@ -19,6 +19,9 @@
         -webkit-transition: opacity 200ms linear;
         -o-transition: opacity 200ms linear;
         transition: opacity 200ms linear;
+        display: flex;
+        font-size: 14px;
+        align-items: center;
     }
 
         #sfNotify span.notify.in {
