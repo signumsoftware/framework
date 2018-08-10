@@ -180,7 +180,7 @@ export class EntityLine extends EntityBase<EntityLineProps, EntityLineState> {
 
         const str =
             s.renderItem ? s.renderItem :
-            s.currentItem && s.currentItem.item && s.autoComplete ? s.autoComplete.renderItem(s.currentItem.item) :
+            s.currentItem && s.currentItem.item && s.autoComplete ? s.autoComplete.renderItem(s.currentItem) :
                     getToString(value);
 
         if (s.ctx.readOnly)
