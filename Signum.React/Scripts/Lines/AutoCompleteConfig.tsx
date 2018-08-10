@@ -42,7 +42,7 @@ export class LiteAutocompleteConfig<T extends Entity> implements AutocompleteCon
     }
 
     renderItem(item: Lite<T>, subStr: string) {
-        var text = Typeahead.highlightedText(item.toStr || "", subStr);
+        var text = Typeahead.highlightedText(item.toStr || item.entity!.toStr || "", subStr);
 
         if (this.showType)
             return <span><span className="sf-type-badge">{getTypeInfo(item.EntityType).niceName}</span> {text}</span>;
