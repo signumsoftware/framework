@@ -107,7 +107,7 @@ export default class Login extends React.Component<{}, { modelState?: ModelState
                     <div className="row" style={{ paddingTop: "1rem" }}>
                         <div className="col-md-3"></div>
                         <div className="col-md-6">
-                            <button type="submit" id="login" className="btn btn-success"><FontAwesomeIcon icon="sign-in" /> {AuthMessage.Login.niceToString()}</button>
+                            <button type="submit" id="login" className="btn btn-success"><FontAwesomeIcon icon="sign-in-alt" /> {AuthMessage.Login.niceToString()}</button>
                             {this.error("login") && <span className="help-block" style={{ color: "red" }}>{this.error("login")}</span>}
                             {AuthClient.resetPassword &&
                                 <span>
@@ -118,7 +118,6 @@ export default class Login extends React.Component<{}, { modelState?: ModelState
                             }
                         </div>
                     </div>
-
                 </form>
             </div>
         );
