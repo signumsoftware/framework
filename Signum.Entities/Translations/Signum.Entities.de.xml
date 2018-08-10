@@ -441,6 +441,7 @@
     <Member Name="_0ShouldNotBeOfType1" Description="{0} sollte nicht vom Typ {1} sein" />
     <Member Name="_0ShouldNotHaveFinalSpaces" Description="{0} darf keine abschließenden Leerzeichen haben" />
     <Member Name="_0ShouldNotHaveInitialSpaces" Description="{0} sollte keine Leerzeichen an erster stelle haben" />
+    <Member Name="_AtLeastOneValueIsNeeded" Description="Es wird mindestens ein Wert benötigt." />
     <Member Name="Be" Description="sein " />
     <Member Name="BeA0_G" Description="ei[m:n|f:ne|n:n] {0} sein" />
     <Member Name="BeBetween0And1" Description="zwischen {0} und {1} sein" />
