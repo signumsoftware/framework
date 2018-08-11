@@ -299,6 +299,7 @@ namespace Signum.Engine.Workflow
                         {
                             Entity = cn.CaseActivity,
                             ca.StartDate,
+                            Workflow = ca.Case.Workflow.ToLite(),
                             Activity = new ActivityWithRemarks
                             {
                                 workflowActivity = ((WorkflowActivityEntity)ca.WorkflowActivity).ToLite(),
