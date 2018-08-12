@@ -182,7 +182,7 @@ export interface EntityStripElementProps {
 }
 
 export interface EntityStripElementState {
-    currentItem?: { entity: ModifiableEntity | Lite<Entity>, item?: any };
+    currentItem?: { entity: ModifiableEntity | Lite<Entity>, item?: unknown };
 }
 
 export class EntityStripElement extends React.Component<EntityStripElementProps, EntityStripElementState>
@@ -206,6 +206,20 @@ export class EntityStripElement extends React.Component<EntityStripElementProps,
             if (!this.state.currentItem || this.state.currentItem.entity !== newEntity) {
                 var ci = { entity: newEntity!, item: undefined }
                 this.setState({ currentItem: ci });
+                var fillItem = (newEntity: ModifiableEntity | Lite<Entity>) => {
+                    const autocomplete = this.props.autoComplete;
+                    autocomplete && autocomplete.getItemFromEntity(newEntity)
+                        .then(item => {
+                            if (autocomplete == this.props.autoComplete) {
+                                ci.item = item;
+                                this.forceUpdate();
+                            } else {
+                                fillItem(newEntity);
+                            }
+                        })
+                        .done();
+                };
+                fillItem(newEntity);
                 this.props.autoComplete.getItemFromEntity(newEntity)
                     .then(item => {
                         ci.item = item;
