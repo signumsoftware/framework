@@ -114,8 +114,10 @@ export default class BpmnModelerComponent extends React.Component<BpmnModelerCom
     private handleOnModelError = (err : string) => {
         if (err)
             throw new Error('Error rendering the model ' + err);
-        else
+        else {
             this.modeler.get<connectionIcons.ConnectionIcons>('connectionIcons').show();
+            this.resetZoom();
+        }
     }
 
     configureModules() {
@@ -496,6 +498,10 @@ export default class BpmnModelerComponent extends React.Component<BpmnModelerCom
     }
 
     handleZoomClick = (e: React.MouseEvent<any>) => {
+        this.resetZoom();
+    }
+
+    resetZoom() {
         var zoomScroll = this.modeler.get<any>("zoomScroll");
         zoomScroll.reset();
     }
