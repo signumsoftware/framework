@@ -34,6 +34,8 @@ export default class ToolbarElement extends React.Component<{ ctx: TypeContext<T
 
         var content = ctx2.value.content;
 
+        var icon = Dashboard.parseIcon(ctx4.value.iconName);
+
         return (
             <div>
                 <div className="row">
@@ -52,7 +54,7 @@ export default class ToolbarElement extends React.Component<{ ctx: TypeContext<T
                             <ColorTypeaheadLine ctx={ctx4.subCtx(t => t.iconColor)} onChange={() => this.forceUpdate()} />
                         </div>
                     <div className="col-sm-1">
-                        {ctx4.value.iconName && <FontAwesomeIcon icon={Dashboard.parseIcon(ctx4.value.iconName)} style={{ backgroundColor: bgColor, color: ctx4.value.iconColor || undefined, fontSize: "25px", marginTop: "17px" }} /> }
+                        {icon && <FontAwesomeIcon icon={icon} style={{ backgroundColor: bgColor, color: ctx4.value.iconColor || undefined, fontSize: "25px", marginTop: "17px" }} /> }
                         </div>
                         <div className="col-sm-5">
                             <ValueLine ctx={ctx2.subCtx(t => t.label)} valueHtmlAttributes={{ placeholder: content && content.toStr || undefined }} />
