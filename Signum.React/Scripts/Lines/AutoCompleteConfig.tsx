@@ -42,7 +42,7 @@ export class LiteAutocompleteConfig<T extends Entity> implements AutocompleteCon
     }
 
     renderItem(item: Lite<T>, subStr: string) {
-        var text = Typeahead.highlightedText(item.toStr || "", subStr);
+        var text = Typeahead.highlightedText(getToString(item), subStr);
 
         if (this.showType)
             return <span><span className="sf-type-badge">{getTypeInfo(item.EntityType).niceName}</span> {text}</span>;
@@ -152,7 +152,7 @@ export class FindOptionsAutocompleteConfig implements AutocompleteConfig<ResultR
     }
 
     renderItem(item: ResultRow, subStr: string) {
-        var text = Typeahead.highlightedText(item.entity!.toStr || "", subStr);
+        var text = Typeahead.highlightedText(getToString(item.entity!), subStr);
 
         if (this.showType)
             return <span><span className="sf-type-badge">{getTypeInfo(item.entity!.EntityType).niceName}</span> {text}</span>;
