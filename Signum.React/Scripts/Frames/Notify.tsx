@@ -100,7 +100,7 @@ export default class Notify extends React.Component<{}, NotifyState>{
         }
 
         if (icon) {
-            return <FontAwesomeIcon icon={icon} fixedWidth style={{ fontSize: "larger" }} pulse={this.state.type === "loading"} />
+            return <FontAwesomeIcon icon={icon} fixedWidth style={{ fontSize: "larger" }} spin={this.state.type === "loading"} />
         }
         else {
             return undefined;
