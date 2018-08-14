@@ -335,7 +335,7 @@ WHERE {oldPrimaryKey} NOT IN
 (
     SELECT MIN({oldPrimaryKey})
     FROM {oldTableName}
-    WHERE {uniqueIndex.Where.Replace(columnReplacement)}
+    {(string.IsNullOrWhiteSpace(uniqueIndex.Where) ? "" : "WHERE " + uniqueIndex.Where.Replace(columnReplacement))}
     GROUP BY {oldColumns}
 )");
         }
