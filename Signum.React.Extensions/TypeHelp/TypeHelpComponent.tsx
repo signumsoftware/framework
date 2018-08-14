@@ -144,10 +144,10 @@ export default class TypeHelpComponent extends React.Component<TypeHelpComponent
         });
     }
 
-    handleSelect = (item: string) => {
+    handleSelect = (item: unknown) => {
         this.setState({ tempQuery: undefined });
-        this.goTo(item);
-        return item;
+        this.goTo(item as string);
+        return item as string;
     }
 
     currentType(): string {

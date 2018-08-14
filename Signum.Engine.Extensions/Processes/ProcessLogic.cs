@@ -543,7 +543,7 @@ namespace Signum.Engine.Processes
         {
 
             if (ep == null)
-                Synchronizer.SynchronizeProgressForeach(newDictionary, oldDictionary, createNew, removeOld, merge);
+                Synchronizer.SynchronizeProgressForeach(newDictionary, oldDictionary, createNew, removeOld, merge, transactional: false);
             else
             {
                 HashSet<K> keys = new HashSet<K>();

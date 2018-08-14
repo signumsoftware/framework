@@ -44,9 +44,14 @@ export default class ToolbarRenderer extends React.Component<ToolbarRendererProp
         };
     }
 
+    isAlive = true;
+    componentWillUnmount() {
+        this.isAlive = false;
+    }
+
     componentWillMount() {
         ToolbarClient.API.getCurrentToolbar(this.props.location!)
-            .then(res => this.setState({ response: res }))
+            .then(res => this.isAlive && this.setState({ response: res }))
             .done();
     }
 
@@ -228,10 +233,9 @@ export default class ToolbarRenderer extends React.Component<ToolbarRendererProp
 
     icon(res: ToolbarClient.ToolbarResponse<any>) {
 
-        if (res.iconName == null)
-            return null;
+        var icon = parseIcon(res.iconName);
 
-        return <FontAwesomeIcon icon={parseIcon(res.iconName)} className={"icon"} color={res.iconColor} />
+        return icon && <FontAwesomeIcon icon={icon} className={"icon"} color={res.iconColor} />
     }
 }
 

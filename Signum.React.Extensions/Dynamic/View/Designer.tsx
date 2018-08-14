@@ -60,9 +60,9 @@ export class ExpressionOrValueComponent extends React.Component<ExpressionOrValu
         this.updateValue(sender.value);
     }
 
-    handleTypeaheadSelect = (item: string) => {
-        this.updateValue(item);
-        return item;
+    handleTypeaheadSelect = (item: unknown) => {
+        this.updateValue(item as string);
+        return item as string;
     }
 
     handleToggleExpression = (e: React.MouseEvent<any>) => {
