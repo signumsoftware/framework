@@ -13,6 +13,8 @@ import QueryTokenEntityBuilder from '../../UserAssets/Templates/QueryTokenEntity
 import * as UserQueryClient from '../../UserQueries/UserQueryClient'
 import { UserQueryPartEntity, PanelPartEmbedded, PanelStyle } from '../Signum.Entities.Dashboard'
 import { classes } from '@framework/Globals';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { parseIcon } from '../Admin/Dashboard';
 
 
 export interface UserQueryPartProps {
@@ -104,7 +106,8 @@ export class BigValueSearchCounter extends React.Component<BigValueBadgeProps, {
                 <div className={classes("card-body", "bg-" + this.props.style.toLowerCase())} onClick={e => this.vsc.handleClick(e)} style={{ cursor: "pointer" }}>
                     <div className="row">
                         <div className="col-3">
-                            <i className={classes(this.props.iconName, "fa-4x")} style={{ color: this.props.iconColor }}></i>
+                            {this.props.iconName &&
+                                <FontAwesomeIcon icon={parseIcon(this.props.iconName)} color={this.props.iconColor} size="4x" />}
                         </div>
                         <div className={classes("col-9 flip", this.state.isRTL ? "text-left" : "text-right")}>
                             <h1>
