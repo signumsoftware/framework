@@ -27,7 +27,7 @@ export function getEntityOperationButtons(ctx: ButtonsContext): Array<React.Reac
         return undefined;
 
     const operations = operationInfos(ti)
-        .filter(oi => isEntityOperation(oi.operationType) && (oi.allowsNew || !ctx.pack.entity.isNew))
+        .filter(oi => isEntityOperation(oi.operationType) && (oi.canBeNew || !ctx.pack.entity.isNew))
         .map(oi => {
             const eos = getSettings(oi.key) as EntityOperationSettings<Entity>;
 
@@ -230,7 +230,7 @@ export class OperationButton extends React.Component<OperationButtonProps> {
 
 
 export function defaultOnClick<T extends Entity>(eoc: EntityOperationContext<T>, ...args: any[]) {
-    if (eoc.operationInfo.lite) {
+    if (!eoc.operationInfo.canBeModified) {
         switch (eoc.operationInfo.operationType) {
             case OperationType.ConstructorFrom: defaultConstructFromLite(eoc, ...args); return;
             case OperationType.Execute: defaultExecuteLite(eoc, ...args); return;
@@ -355,7 +355,7 @@ export function defaultDeleteLite<T extends Entity>(eoc: EntityOperationContext<
 
 export function confirmInNecessary<T extends Entity>(eoc: EntityOperationContext<T>, checkLite = true): Promise<boolean> {
 
-    if (eoc.operationInfo.lite) {
+    if (!eoc.operationInfo.canBeModified) {
         GraphExplorer.propagateAll(eoc.entity);
 
         if (eoc.entity.modified)

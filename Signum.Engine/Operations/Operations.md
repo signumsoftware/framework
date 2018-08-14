@@ -110,7 +110,7 @@ Simple example in `OrderLogic.Start` instantiating inner classes directly:
 ```C#
 new Graph<OrderEntity>.Execute(OrderOperation.Save)
 {
-    Lite = false,
+    CanBeModified = true,
     Execute = (o, _) =>
     {
     }
@@ -134,7 +134,7 @@ public class OrderGraph : Graph<OrderEntity>
     { 
         new Execute(OrderOperation.Save)
 		{
-		    Lite = false,
+		    CanBeModified = true,
 		    Execute = (o, _) =>
 		    {
 		    }
@@ -180,7 +180,7 @@ public class OrderGraph : Graph<OrderEntity, OrderState>
         {
             FromStates = { OrderState.Ordered }, //New property
             ToStates = { OrderState.Ordered },
-            Lite = false,
+            CanBeModified = true,
             Execute = (o, _) =>
             {
             }
@@ -232,8 +232,8 @@ public class OrderGraph : Graph<OrderEntity, OrderState>
 		{
 		    FromStates = { OrderState.New }, //The operation can only be executed for new entities
 		    ToStates = { OrderState.Ordered }, //After the execution, Ordered state will be asserted
-		    AllowsNew = true, //Can be executed for new entities
-		    Lite = false, //The whole entity will be sent, and can be dirty
+		    CanBeNew = true, //Can be executed for new entities
+		    CanBeModified = true, //The whole entity will be sent, and can be dirty
 		    Execute = (o, args) =>
 		    {
 		        o.OrderDate = DateTime.Now;
@@ -245,7 +245,7 @@ public class OrderGraph : Graph<OrderEntity, OrderState>
 		{
 		    FromStates = { OrderState.Ordered },
 		    ToStates = { OrderState.Ordered },
-		    Lite = false, //The whole entity will be sent, and can be dirty
+		    CanBeModified = true, //The whole entity will be sent, and can be dirty
 		    Execute = (o, _) =>
 		    {
 		    }
@@ -543,7 +543,7 @@ And implement it in two different ways:
 ```C#
 new Graph<AnimalEntity>.Execute(AnimalOperation.Eat)
 {
-    Lite = false,
+    CanBeModified = true,
     Execute = (o, _) =>
     {
          o.State = "just eating like an animal"
@@ -552,7 +552,7 @@ new Graph<AnimalEntity>.Execute(AnimalOperation.Eat)
 
 new Graph<LionEntity>.Execute(AnimalOperation.Eat)
 {
-    Lite = false,
+    CanBeModified = true,
     Execute = (lion, _) =>
     {
          lion.State = "Eating like a LION!!!"

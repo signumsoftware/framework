@@ -39,12 +39,12 @@ namespace Signum.Engine
             return new Disposable(() => avoidCache = old);
         }
 
-        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm, Func<IEnumerable<T>> getSymbols)
+        public static void Start(SchemaBuilder sb, Func<IEnumerable<T>> getSymbols)
         {
             if (sb.NotDefined(typeof(SymbolLogic<T>).GetMethod("Start")))
             {
                 sb.Include<T>()
-                    .WithQuery(dqm, () => t => new
+                    .WithQuery(() => t => new
                     {
                         Entity = t,
                         t.Id,

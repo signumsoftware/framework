@@ -17,7 +17,7 @@ import { AutocompleteConfig } from './AutocompleteConfig'
 export interface EntityLineProps extends EntityBaseProps {
 
     ctx: TypeContext<ModifiableEntity | Lite<Entity> | undefined | null>;
-    autoComplete?: AutocompleteConfig<any> | null;
+    autoComplete?: AutocompleteConfig<unknown> | null;
     renderItem?: React.ReactNode;
     showType?: boolean;
     itemHtmlAttributes?: React.HTMLAttributes<HTMLSpanElement | HTMLAnchorElement>;
@@ -25,7 +25,7 @@ export interface EntityLineProps extends EntityBaseProps {
 }
 
 export interface EntityLineState extends EntityLineProps {
-    currentItem?: { entity: ModifiableEntity | Lite<Entity>, item?: any };
+    currentItem?: { entity: ModifiableEntity | Lite<Entity>, item?: unknown };
 }
 
 export class EntityLine extends EntityBase<EntityLineProps, EntityLineState> {
@@ -67,14 +67,23 @@ export class EntityLine extends EntityBase<EntityLineProps, EntityLineState> {
                     this.setState({ currentItem: undefined });
             } else {
                 if (!this.state.currentItem || this.state.currentItem.entity !== newEntity) {
-                    var ci = { entity: newEntity!, item: undefined }
+                    var ci = { entity: newEntity!, item: undefined as unknown }
                     this.setState({ currentItem: ci });
-                    this.state.autoComplete.getItemFromEntity(newEntity)
-                        .then(item => {
-                            ci.item = item;
-                            this.forceUpdate()
-                        })
-                        .done();
+                    var fillItem = (newEntity: ModifiableEntity | Lite<Entity>) => {
+                        const autocomplete = this.state.autoComplete;
+                        autocomplete && autocomplete.getItemFromEntity(newEntity)
+                            .then(item => {
+                                if (autocomplete == this.state.autoComplete) {
+                                    ci.item = item;
+                                    this.forceUpdate();
+                                } else {
+                                    fillItem(newEntity);
+                                }
+                            })
+                            .done();
+                    };
+                    fillItem(newEntity);
+
                 }
             }
         }
@@ -180,7 +189,7 @@ export class EntityLine extends EntityBase<EntityLineProps, EntityLineState> {
 
         const str =
             s.renderItem ? s.renderItem :
-            s.currentItem && s.currentItem.item && s.autoComplete ? s.autoComplete.renderItem(s.currentItem.item) :
+                s.currentItem && s.currentItem.item && s.autoComplete ? s.autoComplete.renderItem(s.currentItem.item) :
                     getToString(value);
 
         if (s.ctx.readOnly)

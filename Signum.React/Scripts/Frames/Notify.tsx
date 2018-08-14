@@ -86,7 +86,7 @@ export default class Notify extends React.Component<{}, NotifyState>{
         var icon: IconProp | undefined;
         switch (this.state.type) {
             case "loading":
-                icon = "spinner";
+                icon = "cog";
                 break;
             case "error":
             case "warning":
@@ -100,7 +100,7 @@ export default class Notify extends React.Component<{}, NotifyState>{
         }
 
         if (icon) {
-            return <FontAwesomeIcon icon={icon} fixedWidth style={{ fontSize: "large" }} pulse={this.state.type === "loading"} />
+            return <FontAwesomeIcon icon={icon} fixedWidth style={{ fontSize: "larger" }} spin={this.state.type === "loading"} />
         }
         else {
             return undefined;
@@ -111,7 +111,7 @@ export default class Notify extends React.Component<{}, NotifyState>{
         return (
             <div id="sfNotify">
                 <Transition in={this.state.text != undefined} timeout={200}>
-                    {(state: string) => <span className={classes(this.state.type, "notify", state == "entering" || state == "entered" ? "in" : undefined)}>{this.getIcon()}{this.state.text}</span>}
+                    {(state: string) => <span className={classes(this.state.type, "notify", state == "entering" || state == "entered" ? "in" : undefined)}>{this.getIcon()}&nbsp;{this.state.text}</span>}
                 </Transition>
             </div>
         );

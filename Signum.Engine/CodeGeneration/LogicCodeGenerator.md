@@ -3,10 +3,10 @@
 Reads all the `System.Type` in the main entities assembly that inherit from `Entity` and are non-abstract, and, after grouping by module name, generates logic files that include: 
 
 * The `sb.Include<T>()` instructions to include each entity types in the database schema. 
-* The `dqm.RegisterQuery(key, query)` instructions to register the default query for each type. 
+* The `QueryLogic.Queries.Register(key, query)` instructions to register the default query for each type. 
 * The `new Graph<T>.Execute(key) {}.Register()` instructions to register the operations declared for the type.
 
-Additionally, the module is also able to declare expression queries to simplify navigating relationships backwards in the business logic, or also register them in the `DynamicQueryManager` to let end users do the same in the `SearchControl`.
+Additionally, the module is also able to declare expression queries to simplify navigating relationships backwards in the business logic, or also register them in `QueryLogic.Queries` to let end users do the same in the `SearchControl`.
 
 ### Call Tree
 

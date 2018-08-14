@@ -22,7 +22,7 @@ namespace Signum.Entities.DynamicQuery
 
             if (shouldHaveImplementations && implementations == null)
                 throw new ArgumentException(@"Impossible to determine automatically the implementations for extension token '{0}' (of type {1}) registered on type {2}.  
-Consider using dqm.RegisterExpression(({2} e) => e.{0}).ForceImplementations = Implementations.By(typeof({1}));".FormatWith(key, type.TypeName(), parent.Type.CleanType().TypeName()));
+Consider using QueryLogic.Expressions.Register(({2} e) => e.{0}).ForceImplementations = Implementations.By(typeof({1}));".FormatWith(key, type.TypeName(), parent.Type.CleanType().TypeName()));
 
             this.key= key;
             this.type = type;

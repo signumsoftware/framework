@@ -106,10 +106,10 @@ Sometimes you just want to factor out some code locally in your queries (to use 
 
 Example: 
 ```C#
-public static void Start(SchemaBuilder sb, DynamicQueryManager dqm) 
+public static void Start(SchemaBuilder sb) 
 {
    (...)
-   dqm.RegisterQuery(PeopleQueries.NotMarried, ()=>
+   QueryLogic.Queries.Register(PeopleQueries.NotMarried, ()=>
      from p in Database.Query<PersonEntity>()
      where p.State == MaritalStatus.Single || p.State == MaritalStatus.Divorced
      select new 
@@ -120,7 +120,7 @@ public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
          p.Sex
      });
 
-    dqm.RegisterQuery(PeopleQueries.NotMarriedAlive, ()=>
+   QueryLogic.Queries.Register(PeopleQueries.NotMarriedAlive, ()=>
      from p in Database.Query<PersonEntity>()
      where (p.State == MaritalStatus.Single || p.State == MaritalStatus.Divorced) && p.Alive
      select new 
@@ -136,13 +136,13 @@ public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
 As you see, the 'not married' predicate is redundant on the two queries, in order to avoid this redundancy you could just do: 
 
 ```C#
-public static void Start(SchemaBuilder sb, DynamicQueryManager dqm) 
+public static void Start(SchemaBuilder sb) 
 {
    (...)
 
    Expression<Func<PersonEntity,bool>> notMarried = p => p.State == MaritalStatus.Single || p.State == MaritalStatus.Divorced;
 
-    dqm.RegisterQuery(PeopleQueries.NotMarried, ()=>
+     QueryLogic.Queries.Register(PeopleQueries.NotMarried, ()=>
        from p in Database.Query<PersonEntity>()
        where notMarried.Evaluate(p) 
        select new 
@@ -153,7 +153,7 @@ public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
            p.Sex
        });
 
-    dqm.RegisterQuery(PeopleQueries.NotMarriedAlive, ()=>
+     QueryLogic.Queries.Register(PeopleQueries.NotMarriedAlive, ()=>
         from p in Database.Query<PersonEntity>()
         where notMarried.Evaluate(p)  && p.Alive
         select new 
@@ -215,7 +215,7 @@ By calling `Linq.Expr` we tell the compiler that we want to generate an Expressi
 So finally our code will be like this: 
 
 ```C#
-public static void Start(SchemaBuilder sb, DynamicQueryManager dqm) 
+public static void Start(SchemaBuilder sb) 
 {
    (...)
 
@@ -228,12 +228,12 @@ public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
          p.Sex
      });
  
-   dqm[PeopleQueries.NotMarried] = 
+   QueryLogic.Queries.Register(PeopleQueries.NotMarried, ()=> 
      from p in Database.Query<PersonEntity>()
      where notMarried.Evaluate(p)
      select selector.Evaluate(p)
 
-    dqm[PeopleQueries.NotMarriedAlive] = 
+   QueryLogic.Queries.Registerdqm(PeopleQueries.NotMarriedAlive, ()=> 
      from p in Database.Query<PersonEntity>()
      where notMarried.Evaluate(p) && p.Alive
      select selector.Evaluate(p)
@@ -243,12 +243,12 @@ public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
 **Note** This example illustrates the usage of Evaluate to expand your expression trees, but in this case we could make the code simpler avoiding query syntax like this: 
 
 ```C#
-dqm.RegisterQuery(PeopleQueries.NotMarried, ()=>
+QueryLogic.Queries.Register(PeopleQueries.NotMarried, ()=>
     Database.Query<PersonEntity>() 
     .Where(notMarried)
     .Select(selector);
 
-dqm.RegisterQuery(PeopleQueries.NotMarriedAlive, ()=>
+QueryLogic.Queries.Register(PeopleQueries.NotMarriedAlive, ()=>
     Database.Query<PersonEntity>()
     .Where(p=>notMarried.Evaluate(p) && p.Alive) //Here Evaluate is really necessary
     .Select(selector);

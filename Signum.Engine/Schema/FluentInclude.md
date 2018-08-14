@@ -1,4 +1,4 @@
-﻿# FluentInclude
+# FluentInclude
 
 At the beginning of a Signum Framework application the `Starter` class calls the `Start` methods of the different modules used in the applications. 
 
@@ -6,8 +6,8 @@ This different `Start` methods tipically:
 
 * Include some necessary tables in the database using `SchemaBuilder.Include` method
 * Maybe include some indexes. 
-* Register some queries in DynamicQueryManager.
-* Register some expressions in DynamicQueryManager.
+* Register some queries in QueryLogic.Queries.
+* Register some expressions in QueryLogic.Expression.
 * Register some operations in OperationLogic using Graph<T>, tipically save and optionally delete.
 
 There are of course a lot of other stuff, like registering processes, permission, ResetLazy, etc... but this actions are the bread and butter of most of the `Start` methods. 
@@ -15,7 +15,7 @@ There are of course a lot of other stuff, like registering processes, permission
 Example: 
 
 ```C#
-public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
+public static void Start(SchemaBuilder sb)
 {
     if(sb.NotIncluded(MethodInfo.GetCurrentMethod()))
 	{
@@ -23,7 +23,7 @@ public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
 
 		sb.AddUniqueIndex((ProjectEntity p) => new { p.Name, p.Year });
 
-		dqm.RegisterQuery(typeof(ProjectEntity), ()=> 
+		QueryLogic.Queries.Register(typeof(ProjectEntity), ()=> 
 			from p in Database.Query<ProjectEntity>()
 			select new 
 			{
@@ -32,12 +32,12 @@ public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
 				p.Name 
 			});
 
-		dqm.RegisterExpression((ClientEntity c) => c.Projects())
+		QueryLogic.Expression.Register((ClientEntity c) => c.Projects())
 
 		new Graph<ProjectEntity>.Execute(ProjectOperation.Save)
 		{
-		    AllowsNew = true, 
-			Lite = false,
+		    CanBeNew = true, 
+			CanBeModified = true,
 			Execute = (p, _) => {}
 		}.Register();
 
@@ -68,7 +68,7 @@ Other the other side it helps in removing the syntactic noise and leting you con
 Example: 
 
 ```C#
-public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
+public static void Start(SchemaBuilder sb)
 {
     if(sb.NotIncluded(MethodInfo.GetCurrentMethod()))
 	{
@@ -101,13 +101,13 @@ Internally calls `SchemaBuilder.AddUniqueIndex`.
 
 ### WithQuery
 
-Extension method that registers a simple query in the DynamicQueryManager using `typeof(T)` as `queryName`, with no filters, joins or column customizations, and just using the provided `simpleQuerySelector` as the `selector` of the only `Select` operator. 
+Extension method that registers a simple query in QueryLogic.Queeries using `typeof(T)` as `queryName`, with no filters, joins or column customizations, and just using the provided `simpleQuerySelector` as the `selector` of the only `Select` operator. 
 
 ```C#
-public static FluentInclude<T> WithQuery<T, Q>(this FluentInclude<T> fi, DynamicQueryManager dqm, Expression<Func<T, Q>> simpleQuerySelector) where T : Entity
+public static FluentInclude<T> WithQuery<T, Q>(this FluentInclude<T> fi, Expression<Func<T, Q>> simpleQuerySelector) where T : Entity
 ```
 
-Internally calls `DynamicQueryManager.RegisterQuery`.
+Internally calls `QueryLogic.Queries.Register`.
 
 ### WithExpresssionFrom
 
@@ -116,8 +116,8 @@ Register expressions from another type (`F`) that returns an `IQueryable<T>`, op
 
 
 ```C#
-public static FluentInclude<T> WithExpressionFrom<T, F>(this FluentInclude<T> fi, DynamicQueryManager dqm, Expression<Func<F, IQueryable<T>>> lambdaToMethodOrProperty) where T : Entity
-public static FluentInclude<T> WithExpressionFrom<T, F>(this FluentInclude<T> fi, DynamicQueryManager dqm, Expression<Func<F, IQueryable<T>>> lambdaToMethodOrProperty, Func<string> niceName) where T : Entity
+public static FluentInclude<T> WithExpressionFrom<T, F>(this FluentInclude<T> fi, Expression<Func<F, IQueryable<T>>> lambdaToMethodOrProperty) where T : Entity
+public static FluentInclude<T> WithExpressionFrom<T, F>(this FluentInclude<T> fi, Expression<Func<F, IQueryable<T>>> lambdaToMethodOrProperty, Func<string> niceName) where T : Entity
         
 ```
 
@@ -125,11 +125,11 @@ public static FluentInclude<T> WithExpressionFrom<T, F>(this FluentInclude<T> fi
 > Signum Framework encourages you to register it on `ProjectLogic` to keep `ClientLogic` clean of dependencies and more reusable, that's why `WithExpressionFrom`takes an
 > Expression from `F` (a `ClientEntity`) to `IQueryable<T>` (a query of `ProjectEntity`). 
 
-Internally calls DynamicQueryManager.RegisterExpression;
+Internally calls QueryLogic.Queries.Register;
 
 ### WithSave / WithDelete
 
-Register trivial implementations of `Save` (AllowsNew = true, Lite = false with no body) and Delete (just `e.Delete()` in the body).
+Register trivial implementations of `Save` (CanBeNew = true, CanBeModified = true with no body) and Delete (just `e.Delete()` in the body).
 
 ```C#
 public static FluentInclude<T> WithSave<T>(this FluentInclude<T> fi, ExecuteSymbol<T> saveOperation) where T : Entity

@@ -27,7 +27,7 @@ You can also think of Connector class as a abstract factory of Connections:
 
 Typically, you application has just one main `Connector` and is set using `Connector.Default`. 
 
-`Connector.Default = new SqlConnector(connectionString, sb.Schema, dqm);`
+`Connector.Default = new SqlConnector(connectionString, sb.Schema);`
 
 `Connector` class has a static `Override` method that returns a `IDisposable` and let you switch `Connector.Current` to be something different to `Connector.Default` in a region of code. 
 

@@ -48,8 +48,8 @@
             {
                 FromStates = { $entityName$State.New },
                 ToStates = { $entityName$State.Saved },
-                AllowsNew = true,
-                Lite = false,
+                CanBeNew = true,
+                CanBeModified = true,
                 Execute = ($entityParam$, _) => { },
             }.Register();
         }
