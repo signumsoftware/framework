@@ -12,7 +12,7 @@ import * as Authorization from '../Authorization/Signum.Entities.Authorization'
 
 
 
-import { FilterOptionParsed, OrderOptionParsed, FilterRequest, OrderRequest } from '../../../Framework/Signum.React/Scripts/FindOptions' 
+import { FilterOptionParsed, OrderOptionParsed, FilterRequest, OrderRequest } from '@framework/FindOptions' 
 
 //Partial
 export interface ChartRequest {

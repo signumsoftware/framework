@@ -25,12 +25,12 @@ namespace Signum.Engine.Scheduler
     {
         public static bool Started = false;
 
-        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
+        public static void Start(SchemaBuilder sb)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
                 sb.Include<SystemEventLogEntity>()
-                    .WithQuery(dqm, () => s => new
+                    .WithQuery(() => s => new
                     {
                         Entity = s,
                         s.Id,

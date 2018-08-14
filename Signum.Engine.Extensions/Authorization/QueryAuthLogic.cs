@@ -27,14 +27,14 @@ namespace Signum.Engine.Authorization
 
         public readonly static Dictionary<object, QueryAllowed> MaxAutomaticUpgrade = new Dictionary<object, QueryAllowed>();
 
-        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
+        public static void Start(SchemaBuilder sb)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
                 AuthLogic.AssertStarted(sb);
-                QueryLogic.Start(sb, dqm);
+                QueryLogic.Start(sb);
 
-                dqm.AllowQuery += new Func<object, bool, bool>(dqm_AllowQuery);
+                QueryLogic.Queries.AllowQuery += new Func<object, bool, bool>(dqm_AllowQuery);
 
                 sb.Include<RuleQueryEntity>()
                     .WithUniqueIndex(rt => new { rt.Resource, rt.Role });
@@ -123,7 +123,7 @@ namespace Signum.Engine.Authorization
 
         public static void SetQueryRules(QueryRulePack rules)
         {
-            string[] queryKeys = DynamicQueryManager.Current.GetTypeQueries(TypeLogic.EntityToType[rules.Type]).Keys.Select(qn => QueryUtils.GetKey(qn)).ToArray();
+            string[] queryKeys = QueryLogic.Queries.GetTypeQueries(TypeLogic.EntityToType[rules.Type]).Keys.Select(qn => QueryUtils.GetKey(qn)).ToArray();
 
             cache.SetRules(rules, r => queryKeys.Contains(r.Key));
         }
@@ -143,7 +143,7 @@ namespace Signum.Engine.Authorization
 
         public static AuthThumbnail? GetAllowedThumbnail(Lite<RoleEntity> role, Type entityType)
         {
-            return DynamicQueryManager.Current.GetTypeQueries(entityType).Keys.Select(qn => cache.GetAllowed(role, qn)).Collapse(); 
+            return QueryLogic.Queries.GetTypeQueries(entityType).Keys.Select(qn => cache.GetAllowed(role, qn)).Collapse(); 
         }
 
         internal static bool AllCanRead(this Implementations implementations, Func<Type, TypeAllowedAndConditions> getAllowed)
@@ -229,7 +229,7 @@ namespace Signum.Engine.Authorization
 
         QueryAllowed GetDefault(object key, Lite<RoleEntity> role)
         {
-            return DynamicQueryManager.Current.GetEntityImplementations(key).AllCanRead(t => TypeAuthLogic.GetAllowed(role, t)) ? QueryAllowed.Allow : QueryAllowed.None;
+            return QueryLogic.Queries.GetEntityImplementations(key).AllCanRead(t => TypeAuthLogic.GetAllowed(role, t)) ? QueryAllowed.Allow : QueryAllowed.None;
         }
     }
 
@@ -248,7 +248,7 @@ namespace Signum.Engine.Authorization
                 if (allowed == QueryAllowed.None)
                     return allowed;
 
-                var implementations = DynamicQueryManager.Current.GetEntityImplementations(queryName);
+                var implementations = QueryLogic.Queries.GetEntityImplementations(queryName);
 
                 return implementations.AllCanRead(t => TypeAuthLogic.GetAllowed(role, t)) ? allowed : QueryAllowed.None;
             };
@@ -261,7 +261,7 @@ namespace Signum.Engine.Authorization
                 if (allowed == QueryAllowed.None)
                     return allowed;
 
-                var implementations = DynamicQueryManager.Current.GetEntityImplementations(queryName);
+                var implementations = QueryLogic.Queries.GetEntityImplementations(queryName);
 
                 return implementations.AllCanRead(t => TypeAuthLogic.Manual.GetAllowed(role, t)) ? allowed : QueryAllowed.None;
             };

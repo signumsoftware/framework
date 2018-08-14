@@ -53,7 +53,7 @@ namespace Signum.Engine.Help
 
         public static Type GetQueryType(object query)
         {
-            return DynamicQueryManager.Current.GetQuery(query).Core.Value.EntityColumnFactory().Implementations.Value.Types.FirstEx();
+            return QueryLogic.Queries.GetQuery(query).Core.Value.EntityColumnFactory().Implementations.Value.Types.FirstEx();
         }
     }
 }

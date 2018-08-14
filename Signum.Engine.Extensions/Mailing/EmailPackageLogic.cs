@@ -16,6 +16,7 @@ using Signum.Engine.Scheduler;
 using Signum.Engine.Authorization;
 using Signum.Utilities.ExpressionTrees;
 using Signum.Entities.Templating;
+using Signum.Engine.Basics;
 
 namespace Signum.Engine.Mailing
 {
@@ -46,22 +47,22 @@ namespace Signum.Engine.Mailing
         }
 
 
-        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
+        public static void Start(SchemaBuilder sb)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
                 sb.Schema.Settings.AssertImplementedBy((ProcessEntity p) => p.Data, typeof(EmailPackageEntity));
                 sb.Include<EmailPackageEntity>()
-                    .WithQuery(dqm, () => e => new
+                    .WithQuery(() => e => new
                     {
                         Entity = e,
                         e.Id,
                         e.Name,
                     });
 
-                dqm.RegisterExpression((EmailPackageEntity ep) => ep.Messages(), () => EmailMessageMessage.Messages.NiceToString());
-                dqm.RegisterExpression((EmailPackageEntity ep) => ep.RemainingMessages(), () => EmailMessageMessage.RemainingMessages.NiceToString());
-                dqm.RegisterExpression((EmailPackageEntity ep) => ep.ExceptionMessages(), () => EmailMessageMessage.ExceptionMessages.NiceToString());
+                QueryLogic.Expressions.Register((EmailPackageEntity ep) => ep.Messages(), () => EmailMessageMessage.Messages.NiceToString());
+                QueryLogic.Expressions.Register((EmailPackageEntity ep) => ep.RemainingMessages(), () => EmailMessageMessage.RemainingMessages.NiceToString());
+                QueryLogic.Expressions.Register((EmailPackageEntity ep) => ep.ExceptionMessages(), () => EmailMessageMessage.ExceptionMessages.NiceToString());
 
                 ProcessLogic.AssertStarted(sb);
                 ProcessLogic.Register(EmailMessageProcess.CreateEmailsSendAsync, new CreateEmailsSendAsyncProcessAlgorithm());

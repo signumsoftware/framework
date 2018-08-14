@@ -10,6 +10,7 @@ using System.Linq.Expressions;
 using Signum.Utilities.ExpressionTrees;
 using Signum.Entities;
 using Signum.Utilities;
+using Signum.Engine.Basics;
 
 namespace Signum.Engine.Files
 {
@@ -33,20 +34,20 @@ namespace Signum.Engine.Files
             return new WebDownload { FullWebPath = DownloadFileUrl(f?.ToLite()) };
         }
 
-        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
+        public static void Start(SchemaBuilder sb)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
                 sb.Include<FileEntity>()
-                    .WithQuery(dqm, () => a => new
+                    .WithQuery(() => a => new
                     {
                         Entity = a,
                         a.Id,
                         a.FileName,
                     });
                 
-                dqm.RegisterExpression((FileEntity f) => f.WebImage(), () => typeof(WebImage).NiceName(), "Image");
-                dqm.RegisterExpression((FileEntity f) => f.WebDownload(), () => typeof(WebDownload).NiceName(), "Download");
+                QueryLogic.Expressions.Register((FileEntity f) => f.WebImage(), () => typeof(WebImage).NiceName(), "Image");
+                QueryLogic.Expressions.Register((FileEntity f) => f.WebDownload(), () => typeof(WebDownload).NiceName(), "Download");
             }
         }
     }

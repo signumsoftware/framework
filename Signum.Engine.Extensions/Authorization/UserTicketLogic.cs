@@ -13,6 +13,7 @@ using Signum.Utilities;
 using System.IO;
 using Signum.Engine.Operations;
 using Signum.Utilities.ExpressionTrees;
+using Signum.Engine.Basics;
 
 namespace Signum.Engine.Authorization
 {
@@ -23,7 +24,7 @@ namespace Signum.Engine.Authorization
 
         public static bool IsStarted { get; private set; }
 
-        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
+        public static void Start(SchemaBuilder sb)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
@@ -31,7 +32,7 @@ namespace Signum.Engine.Authorization
 
                 AuthLogic.AssertStarted(sb);
                 sb.Include<UserTicketEntity>()
-                    .WithQuery(dqm, () => ut => new
+                    .WithQuery(() => ut => new
                     {
                         Entity = ut,
                         ut.Id,
@@ -41,7 +42,7 @@ namespace Signum.Engine.Authorization
                         ut.Device,
                     });
 
-                dqm.RegisterExpression((UserEntity u) => u.UserTickets(), () => typeof(UserTicketEntity).NicePluralName());
+                QueryLogic.Expressions.Register((UserEntity u) => u.UserTickets(), () => typeof(UserTicketEntity).NicePluralName());
 
                 sb.Schema.EntityEvents<UserEntity>().Saving += UserTicketLogic_Saving;
             }

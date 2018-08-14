@@ -340,8 +340,6 @@ namespace Signum.Entities.Mailing
 
     public interface IEmailOwnerEntity : IEntity
     {
-        [InTypeScript(false)]
-        EmailOwnerData EmailOwnerData { get; }
     }
 
     [DescriptionOptions(DescriptionOptions.Description | DescriptionOptions.Members)]

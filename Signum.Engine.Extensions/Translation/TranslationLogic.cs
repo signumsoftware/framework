@@ -30,7 +30,7 @@ namespace Signum.Engine.Translation
 
 
 
-        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm, bool countLocalizationHits)
+        public static void Start(SchemaBuilder sb, bool countLocalizationHits)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {

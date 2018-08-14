@@ -62,18 +62,18 @@ export class ColorTypeahead extends React.Component<ColorTypeaheadProps>{
         return Promise.resolve(result);
     }
 
-    handleSelect = (item: string) => {
-        this.props.onChange(item);
+    handleSelect = (item: unknown | string) => {
+        this.props.onChange(item as string);
         this.forceUpdate();
-        return item;
+        return item as string;
     }
 
-    handleRenderItem = (item: string, query: string) => {
+    handleRenderItem = (item: unknown, query: string) => {
 
         return (
             <span>
-                <FontAwesomeIcon icon="square" className="icon" color={item} />
-                {Typeahead.highlightedText(item, query)}
+                <FontAwesomeIcon icon="square" className="icon" color={item as string} />
+                {Typeahead.highlightedText(item as string, query)}
             </span>
         );
     }

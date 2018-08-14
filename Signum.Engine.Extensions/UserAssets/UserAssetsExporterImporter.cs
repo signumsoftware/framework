@@ -170,7 +170,7 @@ namespace Signum.Engine.UserAssets
 
             public QueryDescription GetQueryDescription(QueryEntity Query)
             {
-                return DynamicQueryManager.Current.QueryDescription(QueryLogic.QueryNames.GetOrThrow(Query.Key));
+                return QueryLogic.Queries.QueryDescription(QueryLogic.QueryNames.GetOrThrow(Query.Key));
             }
 
             public PermissionSymbol TryPermission(string permissionKey)
@@ -288,7 +288,7 @@ namespace Signum.Engine.UserAssets
 
             public QueryDescription GetQueryDescription(QueryEntity Query)
             {
-                return DynamicQueryManager.Current.QueryDescription(QueryLogic.QueryNames.GetOrThrow(Query.Key));
+                return QueryLogic.Queries.QueryDescription(QueryLogic.QueryNames.GetOrThrow(Query.Key));
             }
 
             public PermissionSymbol TryPermission(string permissionKey)

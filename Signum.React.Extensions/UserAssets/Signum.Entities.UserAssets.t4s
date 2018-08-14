@@ -1,5 +1,5 @@
 ﻿
-import { QueryToken } from '../../../Framework/Signum.React/Scripts/FindOptions' 
+import { QueryToken } from '@framework/FindOptions' 
 
 export interface QueryTokenEmbedded {
     token?: QueryToken;

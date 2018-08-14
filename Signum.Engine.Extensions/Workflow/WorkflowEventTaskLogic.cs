@@ -56,7 +56,7 @@ namespace Signum.Engine.Workflow
         }
 
 
-        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
+        public static void Start(SchemaBuilder sb)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
@@ -65,7 +65,7 @@ namespace Signum.Engine.Workflow
 
                 sb.Include<WorkflowEventTaskEntity>()
                     .WithDelete(WorkflowEventTaskOperation.Delete)
-                    .WithQuery(dqm, () => e => new
+                    .WithQuery(() => e => new
                     {
                         Entity = e,
                         e.Id,
@@ -76,8 +76,8 @@ namespace Signum.Engine.Workflow
 
                 new Graph<WorkflowEventTaskEntity>.Execute(WorkflowEventTaskOperation.Save)
                 {
-                    AllowsNew = true,
-                    Lite = false,
+                    CanBeNew = true,
+                    CanBeModified = true,
                     Execute = (e, _) => {
 
                         if (e.TriggeredOn == TriggeredOn.Always)
@@ -96,7 +96,7 @@ namespace Signum.Engine.Workflow
                 ExceptionLogic.DeleteLogs += ExceptionLogic_DeleteLogs;
 
                 sb.Include<WorkflowEventTaskConditionResultEntity>()
-                    .WithQuery(dqm, () => e => new
+                    .WithQuery(() => e => new
                     {
                         Entity = e,
                         e.Id,

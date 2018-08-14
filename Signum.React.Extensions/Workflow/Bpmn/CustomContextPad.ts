@@ -2,7 +2,7 @@
 import Modeler from "bpmn-js/lib/Modeler"
 import BpmnContextPadProvider from "bpmn-js/lib/features/context-pad/ContextPadProvider"
 import * as BpmnUtils from './BpmnUtils'
-import { Lite, liteKey } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
+import { Lite, liteKey } from '@framework/Signum.Entities'
 
 export class CustomContextPadProvider extends BpmnContextPadProvider {
 

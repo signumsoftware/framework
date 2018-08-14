@@ -21,10 +21,10 @@ namespace Signum.Engine.Excel
 {
     public class ExcelAttachmentLogic
     {
-        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
+        public static void Start(SchemaBuilder sb)
         {
             sb.Include<ExcelAttachmentEntity>()
-                .WithQuery(dqm, () => s => new
+                .WithQuery(() => s => new
                 {
                     Entity = s,
                     s.Id,

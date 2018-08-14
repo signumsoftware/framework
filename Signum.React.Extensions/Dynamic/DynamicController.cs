@@ -79,7 +79,7 @@ namespace Signum.React.Dynamic
         [Route("api/dynamic/evalErrors"), HttpPost]
         public async Task<List<EvalEntityError>> GetEvalErrors(QueryEntitiesRequestTS request)
         {
-            var allEntities = await DynamicQueryManager.Current.GetEntities(request.ToQueryEntitiesRequest()).Select(a => a.Entity).ToListAsync();
+            var allEntities = await QueryLogic.Queries.GetEntities(request.ToQueryEntitiesRequest()).Select(a => a.Entity).ToListAsync();
 
             return allEntities.Select(entity =>
             {

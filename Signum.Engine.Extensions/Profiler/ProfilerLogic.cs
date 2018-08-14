@@ -20,7 +20,7 @@ namespace Signum.Engine.Profiler
             set { SessionTimeoutVariable.Value = value; }
         }
 
-        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm, bool timeTracker, bool heavyProfiler, bool overrideSessionTimeout)
+        public static void Start(SchemaBuilder sb, bool timeTracker, bool heavyProfiler, bool overrideSessionTimeout)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {

@@ -1,7 +1,7 @@
 ﻿import * as d3 from "d3"
 import * as React from "react"
-import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
-import { OperationLogEntity } from '../../../../Framework/Signum.React/Scripts/Signum.Entities.Basics'
+import * as Finder from '@framework/Finder'
+import { OperationLogEntity } from '@framework/Signum.Entities.Basics'
 import { Point, Rectangle, calculatePoint, wrap, colorScale, forceBoundingBox } from '../Utils'
 
 export interface OperationMapInfo {

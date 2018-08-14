@@ -32,13 +32,13 @@ namespace Signum.Engine.Translation
             = new Dictionary<Type, Dictionary<PropertyRoute, TranslateableRouteType>>();
         static ResetLazy<Dictionary<CultureInfo, Dictionary<LocalizedInstanceKey, TranslatedInstanceEntity>>> LocalizationCache;
 
-        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm, Func<CultureInfo> defaultCulture)
+        public static void Start(SchemaBuilder sb, Func<CultureInfo> defaultCulture)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
                 sb.Include<TranslatedInstanceEntity>()
                     .WithUniqueIndex(ti => new { ti.Culture, ti.PropertyRoute, ti.Instance, ti.RowId })
-                    .WithQuery(dqm, () => e => new
+                    .WithQuery(() => e => new
                     {
                         Entity = e,
                         e.Id,

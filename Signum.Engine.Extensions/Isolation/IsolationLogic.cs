@@ -40,13 +40,13 @@ namespace Signum.Engine.Isolation
 
         internal static Dictionary<Type, IsolationStrategy> strategies = new Dictionary<Type, IsolationStrategy>();
 
-        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
+        public static void Start(SchemaBuilder sb)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
                 sb.Include<IsolationEntity>()
                     .WithSave(IsolationOperation.Save)
-                    .WithQuery(dqm, () => iso => new
+                    .WithQuery(() => iso => new
                     {
                         Entity = iso,
                         iso.Id,

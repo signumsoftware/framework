@@ -41,7 +41,7 @@ namespace Signum.React.UserQueries
         public UserQueryEntity FromQueryRequest(CreateRequest request)
         {
             var qr = request.queryRequest.ToQueryRequest();
-            var qd = DynamicQueryManager.Current.QueryDescription(qr.QueryName);
+            var qd = QueryLogic.Queries.QueryDescription(qr.QueryName);
             return qr.ToUserQuery(qd, QueryLogic.GetQueryEntity(qd.QueryName), request.defaultPagination.ToPagination(), withoutFilters: false);
         }
 

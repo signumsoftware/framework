@@ -49,36 +49,35 @@ namespace Signum.Engine.Mailing
 
         internal static void AssertStarted(SchemaBuilder sb)
         {
-            sb.AssertDefined(ReflectionTools.GetMethodInfo(() => EmailLogic.Start(null, null, null, null, null, null)));
+            sb.AssertDefined(ReflectionTools.GetMethodInfo(() => EmailLogic.Start(null, null, null, null, null)));
         }
 
         public static Func<EmailMessageEntity, SmtpClient> GetSmtpClient;
         
         public static void Start(
-            SchemaBuilder sb, 
-            DynamicQueryManager dqm, 
+            SchemaBuilder sb,  
             Func<EmailConfigurationEmbedded> getConfiguration, 
-            Func<EmailTemplateEntity, ModifiableEntity, SmtpConfigurationEntity> getSmtpConfiguration,  
+            Func<EmailTemplateEntity, Lite<Entity>, SmtpConfigurationEntity> getSmtpConfiguration,  
             Func<EmailMessageEntity, SmtpClient> getSmtpClient = null, 
             IFileTypeAlgorithm attachment = null)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {   
                 if (getSmtpClient == null && getSmtpConfiguration != null)
-                    getSmtpClient = message => getSmtpConfiguration(message.Template?.Let(EmailTemplateLogic.EmailTemplatesLazy.Value.GetOrThrow), message.Target?.Retrieve()).GenerateSmtpClient();
+                    getSmtpClient = message => getSmtpConfiguration(message.Template?.Let(EmailTemplateLogic.EmailTemplatesLazy.Value.GetOrThrow), message.Target).GenerateSmtpClient();
 
                 FilePathEmbeddedLogic.AssertStarted(sb);
                 CultureInfoLogic.AssertStarted(sb);
                 EmailLogic.getConfiguration = getConfiguration;
                 EmailLogic.GetSmtpClient = getSmtpClient ?? throw new ArgumentNullException("getSmtpClient");
-                EmailTemplateLogic.Start(sb, dqm, getSmtpConfiguration);
+                EmailTemplateLogic.Start(sb, getSmtpConfiguration);
                 if (attachment != null)
                     FileTypeLogic.Register(EmailFileType.Attachment, attachment);
 
-                Schema.Current.WhenIncluded<ProcessEntity>(() => EmailPackageLogic.Start(sb, dqm));
+                Schema.Current.WhenIncluded<ProcessEntity>(() => EmailPackageLogic.Start(sb));
 
                 sb.Include<EmailMessageEntity>()
-                    .WithQuery(dqm, () => e => new
+                    .WithQuery(() => e => new
                     {
                         Entity = e,
                         e.Id,
@@ -223,7 +222,6 @@ namespace Signum.Engine.Mailing
 
                 new ConstructFrom<EmailTemplateEntity>(EmailMessageOperation.CreateEmailFromTemplate)
                 {
-                    AllowsNew = false,
                     ToStates = { EmailMessageState.Created },
                     CanConstruct = et => 
                     {
@@ -245,8 +243,8 @@ namespace Signum.Engine.Mailing
 
                 new Execute(EmailMessageOperation.Save)
                 {
-                    AllowsNew = true,
-                    Lite = false,
+                    CanBeNew = true,
+                    CanBeModified = true,
                     FromStates = { EmailMessageState.Created, EmailMessageState.Outdated },
                     ToStates = { EmailMessageState.Draft },
                     Execute = (m, _) => { m.State = EmailMessageState.Draft; }
@@ -254,8 +252,8 @@ namespace Signum.Engine.Mailing
 
                 new Execute(EmailMessageOperation.ReadyToSend)
                 {
-                    AllowsNew = true,
-                    Lite = false,
+                    CanBeNew = true,
+                    CanBeModified = true,
                     FromStates = { EmailMessageState.Created, EmailMessageState.Draft, EmailMessageState.SentException, EmailMessageState.RecruitedForSending, EmailMessageState.Outdated },
                     ToStates = { EmailMessageState.ReadyToSend },
                     Execute = (m, _) =>
@@ -270,8 +268,8 @@ namespace Signum.Engine.Mailing
                     CanExecute = m => m.State == EmailMessageState.Created || m.State == EmailMessageState.Draft ||
                          m.State == EmailMessageState.ReadyToSend || m.State == EmailMessageState.RecruitedForSending ||
                          m.State == EmailMessageState.Outdated ? null : EmailMessageMessage.TheEmailMessageCannotBeSentFromState0.NiceToString().FormatWith(m.State.NiceToString()),
-                    AllowsNew = true,
-                    Lite = false,
+                    CanBeNew = true,
+                    CanBeModified = true,
                     FromStates = { EmailMessageState.Created, EmailMessageState.Draft, EmailMessageState.ReadyToSend, EmailMessageState.Outdated },
                     ToStates = { EmailMessageState.Sent },
                     Execute = (m, _) => EmailLogic.SenderManager.Send(m)
@@ -279,7 +277,6 @@ namespace Signum.Engine.Mailing
 
                 new ConstructFrom<EmailMessageEntity>(EmailMessageOperation.ReSend)
                 {
-                    AllowsNew = false,
                     ToStates = { EmailMessageState.Created },
                     Construct = (m, _) => new EmailMessageEntity
                     {

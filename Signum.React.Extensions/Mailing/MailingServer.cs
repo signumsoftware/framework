@@ -40,7 +40,7 @@ namespace Signum.React.Mailing
             {
                 if (et.Query != null)
                 {
-                    var qd = DynamicQueryManager.Current.QueryDescription(et.Query.ToQueryName());
+                    var qd = QueryLogic.Queries.QueryDescription(et.Query.ToQueryName());
                     et.ParseData(qd);
                 }
             });
