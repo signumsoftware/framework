@@ -107,7 +107,7 @@ export class BigValueSearchCounter extends React.Component<BigValueBadgeProps, {
                     <div className="row">
                         <div className="col-3">
                             {this.props.iconName &&
-                                <FontAwesomeIcon icon={parseIcon(this.props.iconName)} color={this.props.iconColor} size="4x" />}
+                                <FontAwesomeIcon icon={parseIcon(this.props.iconName)!} color={this.props.iconColor} size="4x" />}
                         </div>
                         <div className={classes("col-9 flip", this.state.isRTL ? "text-left" : "text-right")}>
                             <h1>
