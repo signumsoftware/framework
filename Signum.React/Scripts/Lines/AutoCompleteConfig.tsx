@@ -3,7 +3,7 @@ import * as Finder from '../Finder'
 import { AbortableRequest } from '../Services'
 import { FindOptions, FilterOptionParsed, FilterRequest, OrderOptionParsed, OrderRequest, ResultRow, ColumnOptionParsed, ColumnRequest } from '../FindOptions'
 import { getTypeInfo, getQueryKey } from '../Reflection'
-import { ModifiableEntity, Lite, Entity, toLite, is, isLite, isEntity } from '../Signum.Entities'
+import { ModifiableEntity, Lite, Entity, toLite, is, isLite, isEntity, getToString } from '../Signum.Entities'
 import { Typeahead } from '../Components'
 
 export interface AutoCompleteConfig<T> {
@@ -126,7 +126,7 @@ export class FindOptionsAutoCompleteConfig implements AutoCompleteConfig<ResultR
             .then(columns => this.parsedColumns = columns);
     }
 
-    abortableRequest = new AbortableRequest((abortController, request: Finder.API.AutocompleteQueryRequest) => Finder.API.FindRowsLike(request, abortController));
+    abortableRequest = new AbortableRequest((abortController, request: Finder.API.AutoCompleteQueryRequest) => Finder.API.FindRowsLike(request, abortController));
 
     getItems(subStr: string): Promise<ResultRow[]> {
         return this.getParsedFilters().then(filters =>
