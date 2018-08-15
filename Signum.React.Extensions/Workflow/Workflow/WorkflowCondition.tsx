@@ -1,11 +1,11 @@
 ﻿import * as React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { ValueLine, EntityLine, TypeContext, FormGroup, ValueLineType, LiteAutocompleteConfig } from '@framework/Lines'
+import { ValueLine, EntityLine, TypeContext, LiteAutoCompleteConfig } from '@framework/Lines'
 import { PropertyRoute, Binding } from '@framework/Reflection'
 import * as Navigator from '@framework/Navigator'
 import CSharpCodeMirror from '../../Codemirror/CSharpCodeMirror'
 import { WorkflowConditionEntity, ICaseMainEntity } from '../Signum.Entities.Workflow'
-import { WorkflowConditionTestResponse, API, DecisionResultValues, showWorkflowTransitionContextCodeHelp } from '../WorkflowClient'
+import { WorkflowConditionTestResponse, API, showWorkflowTransitionContextCodeHelp } from '../WorkflowClient'
 import TypeHelpComponent from '../../TypeHelp/TypeHelpComponent'
 import ValueLineModal from '@framework/ValueLineModal'
 
@@ -48,7 +48,7 @@ export default class WorkflowConditionComponent extends React.Component<Workflow
                 <ValueLine ctx={ctx.subCtx(wc => wc.name)} />
                 <EntityLine ctx={ctx.subCtx(wc => wc.mainEntityType)}
                     onChange={this.handleMainEntityTypeChange}
-                    autoComplete={new LiteAutocompleteConfig((ac, str) => API.findMainEntityType({ subString: str, count: 5 }, ac), false, false)}
+                    autoComplete={new LiteAutoCompleteConfig((ac, str) => API.findMainEntityType({ subString: str, count: 5 }, ac), false, false)}
                     find={false} />
                 {ctx.value.mainEntityType &&
                     <div>

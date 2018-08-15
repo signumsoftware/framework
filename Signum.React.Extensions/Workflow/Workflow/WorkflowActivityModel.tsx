@@ -1,23 +1,14 @@
 ﻿import * as React from 'react'
 import {
-    WorkflowActivityEntity, WorkflowActivityModel, WorkflowMessage, WorkflowActivityMessage, WorkflowConditionEntity, WorkflowActionEntity,
-    WorkflowTimerEmbedded, IWorkflowNodeEntity, SubWorkflowEmbedded, SubEntitiesEval, WorkflowScriptEntity, WorkflowScriptPartEmbedded, WorkflowScriptEval, WorkflowEntity, WorkflowActivityType
+    WorkflowActivityModel, WorkflowMessage, SubWorkflowEmbedded, SubEntitiesEval, WorkflowScriptEntity, WorkflowScriptPartEmbedded, WorkflowEntity
 } from '../Signum.Entities.Workflow'
-import * as WorkflowClient from '../WorkflowClient'
-import * as DynamicViewClient from '../../Dynamic/DynamicViewClient'
-import { TypeContext, ValueLine, ValueLineType, EntityLine, EntityTable, EntityDetail, FormGroup, LiteAutocompleteConfig, RenderEntity, EntityRepeater } from '@framework/Lines'
-import { is, JavascriptMessage, Lite } from '@framework/Signum.Entities'
+import { TypeContext, ValueLine, EntityLine, FormGroup, EntityRepeater } from '@framework/Lines'
 import { TypeEntity } from '@framework/Signum.Entities.Basics'
-import { DynamicValidationEntity } from '../../Dynamic/Signum.Entities.Dynamic'
-import { Dic } from '@framework/Globals';
 import { Binding } from '@framework/Reflection';
 import CSharpCodeMirror from '../../Codemirror/CSharpCodeMirror'
 import TypeHelpComponent from "../../TypeHelp/TypeHelpComponent";
 import HtmlEditor from '../../HtmlEditor/HtmlEditor'
 import * as Navigator from '@framework/Navigator'
-import { API } from '../WorkflowClient'
-import { newMListElement } from '@framework/Signum.Entities';
-import { TimeSpanEmbedded } from '../../Basics/Signum.Entities.Basics';
 
 interface WorkflowActivityModelComponentProps {
     ctx: TypeContext<WorkflowActivityModel>;
