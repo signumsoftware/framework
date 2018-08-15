@@ -1,10 +1,10 @@
 ﻿import * as React from 'react'
 import { Dic } from '../Globals'
-import { Binding, MemberType, getTypeInfos, EntityKind, KindOfType } from '../Reflection'
+import { getTypeInfos } from '../Reflection'
 import { ModifiableEntity } from '../Signum.Entities'
 import * as Navigator from '../Navigator'
 import { ViewReplacer } from '../Frames/ReactVisitor'
-import { ValueLine, EntityLine, EntityCombo, EntityList, EntityDetail, EntityStrip, EntityRepeater, TypeContext, EntityCheckboxList, EnumCheckboxList, EntityTable } from '../Lines'
+import { ValueLine, EntityLine, EntityCombo, EntityDetail, EntityStrip, TypeContext, EntityCheckboxList, EnumCheckboxList, EntityTable } from '../Lines'
 import { Type } from '../Reflection';
 
 export default class DynamicComponent extends React.Component<{ ctx: TypeContext<ModifiableEntity>, viewName?: string }> {
@@ -128,7 +128,6 @@ export default class DynamicComponent extends React.Component<{ ctx: TypeContext
             return undefined;
         }
     }
-
 }
 
 

@@ -1,23 +1,18 @@
 ﻿import * as React from 'react'
 import * as Navigator from '../Navigator'
-import * as Constructor from '../Constructor'
-import * as Finder from '../Finder'
-import { Dic, classes } from '../Globals'
-import { FindOptions, QueryDescription, FilterOptionParsed, FilterRequest } from '../FindOptions'
-import { TypeContext, StyleContext, StyleOptions, FormGroupStyle } from '../TypeContext'
-import { PropertyRoute, PropertyRouteType, MemberInfo, getTypeInfo, getTypeInfos, TypeInfo, IsByAll, getQueryKey } from '../Reflection'
-import { LineBase, LineBaseProps, runTasks } from '../Lines/LineBase'
+import { classes } from '../Globals'
+import { TypeContext } from '../TypeContext'
 import { FormGroup } from '../Lines/FormGroup'
 import { FormControlReadonly } from '../Lines/FormControlReadonly'
-import { ModifiableEntity, Lite, Entity, EntityControlMessage, JavascriptMessage, toLite, is, liteKey, getToString, isLite, isEntity, isModifiableEntity } from '../Signum.Entities'
+import { ModifiableEntity, Lite, Entity, JavascriptMessage, toLite, is, liteKey, getToString, isLite } from '../Signum.Entities'
 import { Typeahead } from '../Components'
 import { EntityBase, EntityBaseProps } from './EntityBase'
-import { AutocompleteConfig } from './AutocompleteConfig'
+import { AutoCompleteConfig } from './AutocompleteConfig'
 
 export interface EntityLineProps extends EntityBaseProps {
 
     ctx: TypeContext<ModifiableEntity | Lite<Entity> | undefined | null>;
-    autoComplete?: AutocompleteConfig<unknown> | null;
+    autoComplete?: AutoCompleteConfig<unknown> | null;
     renderItem?: React.ReactNode;
     showType?: boolean;
     itemHtmlAttributes?: React.HTMLAttributes<HTMLSpanElement | HTMLAnchorElement>;
@@ -29,7 +24,6 @@ export interface EntityLineState extends EntityLineProps {
 }
 
 export class EntityLine extends EntityBase<EntityLineProps, EntityLineState> {
-
     overrideProps(state: EntityLineState, overridenProps: EntityLineProps) {
         super.overrideProps(state, overridenProps);
         if (state.autoComplete === undefined) {

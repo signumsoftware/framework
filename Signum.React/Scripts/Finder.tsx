@@ -791,17 +791,17 @@ export module API {
         });
     }
 
-    export function findLiteLike(request: AutocompleteRequest, abortController?: FetchAbortController): Promise<Lite<Entity>[]> {
+    export function findLiteLike(request: AutoCompleteRequest, abortController?: FetchAbortController): Promise<Lite<Entity>[]> {
         return ajaxGet<Lite<Entity>[]>({ url: "~/api/query/findLiteLike?" + QueryString.stringify(request), abortController });
     }
 
-    export interface AutocompleteRequest {
+    export interface AutoCompleteRequest {
         types: string;
         subString: string;
         count: number;
     }
 
-    export function FindRowsLike(request: AutocompleteQueryRequest, abortController?: FetchAbortController): Promise<ResultTable> {
+    export function FindRowsLike(request: AutoCompleteQueryRequest, abortController?: FetchAbortController): Promise<ResultTable> {
         return ajaxPost<ResultTable>({ url: "~/api/query/findRowsLike", abortController }, request);
     }
 
@@ -823,7 +823,7 @@ export module API {
         });
     }
 
-    export interface AutocompleteQueryRequest {
+    export interface AutoCompleteQueryRequest {
         queryKey: string;
         filters: FilterRequest[];
         columns: ColumnRequest[];

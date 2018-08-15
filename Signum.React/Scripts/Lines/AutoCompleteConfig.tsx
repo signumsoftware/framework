@@ -1,18 +1,12 @@
 ﻿import * as React from 'react'
-import * as Navigator from '../Navigator'
-import * as Constructor from '../Constructor'
 import * as Finder from '../Finder'
-import { Dic } from '../Globals'
 import { AbortableRequest } from '../Services'
-import { FindOptions, QueryDescription, FilterOptionParsed, FilterRequest, OrderOptionParsed, OrderRequest, ResultRow, ColumnOptionParsed, ResultTable, ColumnRequest } from '../FindOptions'
-import { TypeContext, StyleContext, StyleOptions, FormGroupStyle } from '../TypeContext'
-import { PropertyRoute, PropertyRouteType, MemberInfo, getTypeInfo, getTypeInfos, TypeInfo, IsByAll, getQueryKey } from '../Reflection'
-import { LineBase, LineBaseProps, runTasks } from '../Lines/LineBase'
-import { ModifiableEntity, Lite, Entity, EntityControlMessage, JavascriptMessage, toLite, is, liteKey, getToString, isLite, isEntity } from '../Signum.Entities'
+import { FindOptions, FilterOptionParsed, FilterRequest, OrderOptionParsed, OrderRequest, ResultRow, ColumnOptionParsed, ColumnRequest } from '../FindOptions'
+import { getTypeInfo, getQueryKey } from '../Reflection'
+import { ModifiableEntity, Lite, Entity, toLite, is, isLite, isEntity } from '../Signum.Entities'
 import { Typeahead } from '../Components'
-import { EntityBase, EntityBaseProps} from './EntityBase'
 
-export interface AutocompleteConfig<T> {
+export interface AutoCompleteConfig<T> {
     getItems: (subStr: string) => Promise<T[]>;
     getItemsDelay?: number;
     minLength?: number;
@@ -23,7 +17,7 @@ export interface AutocompleteConfig<T> {
     abort(): void;
 }
 
-export class LiteAutocompleteConfig<T extends Entity> implements AutocompleteConfig<Lite<T>>{
+export class LiteAutoCompleteConfig<T extends Entity> implements AutoCompleteConfig<Lite<T>>{
 
     constructor(
         public getItemsFunction: (abortController: FetchAbortController, subStr: string) => Promise<Lite<T>[]>,
@@ -87,7 +81,7 @@ export class LiteAutocompleteConfig<T extends Entity> implements AutocompleteCon
     }
 }
 
-export class FindOptionsAutocompleteConfig implements AutocompleteConfig<ResultRow>{
+export class FindOptionsAutoCompleteConfig implements AutoCompleteConfig<ResultRow>{
 
     constructor(
         public findOptions: FindOptions,
@@ -205,7 +199,3 @@ export class FindOptionsAutocompleteConfig implements AutocompleteConfig<ResultR
         throw new Error("Impossible to convert to Lite");
     }
 }
-
-
-
-

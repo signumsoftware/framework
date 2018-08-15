@@ -1,18 +1,12 @@
 ﻿import * as React from 'react'
-import { classes, Dic } from '../Globals'
+import { classes } from '../Globals'
 import * as Navigator from '../Navigator'
-import * as Constructor from '../Constructor'
-import * as Finder from '../Finder'
-import { FindOptions } from '../FindOptions'
-import { TypeContext, StyleContext, StyleOptions, FormGroupStyle, mlistItemContext, EntityFrame } from '../TypeContext'
-import { PropertyRoute, PropertyRouteType, MemberInfo, getTypeInfo, getTypeInfos, TypeInfo, IsByAll, ReadonlyBinding, MemberType } from '../Reflection'
-import { LineBase, LineBaseProps, runTasks, } from '../Lines/LineBase'
+import { TypeContext, mlistItemContext } from '../TypeContext'
 import { FormGroup } from '../Lines/FormGroup'
-import { FormControlReadonly } from '../Lines/FormControlReadonly'
-import { ModifiableEntity, Lite, Entity, MList, MListElement, EntityControlMessage, JavascriptMessage, toLite, is, liteKey, getToString, isEntity, isLite } from '../Signum.Entities'
+import { ModifiableEntity, Lite, Entity, EntityControlMessage, toLite, is, liteKey, getToString, isEntity, isLite } from '../Signum.Entities'
 import { Typeahead } from '../Components'
 import { EntityListBase, EntityListBaseProps, DragConfig } from './EntityListBase'
-import { AutocompleteConfig } from './AutocompleteConfig'
+import { AutoCompleteConfig } from './AutoCompleteConfig'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 
@@ -20,7 +14,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 export interface EntityStripProps extends EntityListBaseProps {
     vertical?: boolean;
     iconStart?: boolean;
-    autoComplete?: AutocompleteConfig<any> | null;
+    autoComplete?: AutoCompleteConfig<any> | null;
     onRenderItem?: (item: Lite<Entity> | ModifiableEntity) => React.ReactNode;
     showType?: boolean;
     onItemHtmlAttributes?: (item: Lite<Entity> | ModifiableEntity) => React.HTMLAttributes<HTMLSpanElement | HTMLAnchorElement>;
@@ -175,7 +169,7 @@ export interface EntityStripElementProps {
     onRemove?: (event: React.MouseEvent<any>) => void;
     onView?: (event: React.MouseEvent<any>) => void;
     ctx: TypeContext<Lite<Entity> | ModifiableEntity>;
-    autoComplete?: AutocompleteConfig<any> | null;
+    autoComplete?: AutoCompleteConfig<any> | null;
     onRenderItem?: (item: Lite<Entity> | ModifiableEntity) => React.ReactNode;
     onItemHtmlAttributes?: (item: Lite<Entity> | ModifiableEntity) => React.HTMLAttributes<HTMLSpanElement | HTMLAnchorElement>;
     drag?: DragConfig;

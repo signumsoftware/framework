@@ -1,18 +1,16 @@
 ﻿import * as React from "react"
 import * as H from "history"
-import { Router, Route, Redirect, RouterChildContext, RouteProps, Switch, match, matchPath } from "react-router"
+import { Route, Switch } from "react-router"
 import { Dic, } from './Globals';
 import { ajaxGet, ajaxPost } from './Services';
-import { openModal } from './Modals';
-import { Lite, Entity, ModifiableEntity, EmbeddedEntity, ModelEntity, LiteMessage, EntityPack, isEntity, isLite, isEntityPack, toLite } from './Signum.Entities';
+import { Lite, Entity, ModifiableEntity, EntityPack, isEntity, isLite, isEntityPack, toLite } from './Signum.Entities';
 import { IUserEntity, TypeEntity } from './Signum.Entities.Basics';
-import { PropertyRoute, PseudoType, EntityKind, TypeInfo, IType, Type, getTypeInfo, getTypeInfos, getTypeName, isTypeEmbeddedOrValue, isTypeModel, KindOfType, OperationType, TypeReference, IsByAll } from './Reflection';
+import { PropertyRoute, PseudoType, Type, getTypeInfo, getTypeInfos, getTypeName, isTypeEmbeddedOrValue, isTypeModel, OperationType, TypeReference, IsByAll } from './Reflection';
 import { TypeContext } from './TypeContext';
 import * as Finder from './Finder';
 import * as Operations from './Operations';
-import FrameModal from './Frames/FrameModal';
 import { ViewReplacer } from './Frames/ReactVisitor'
-import { AutocompleteConfig, FindOptionsAutocompleteConfig, LiteAutocompleteConfig } from './Lines/AutocompleteConfig'
+import { AutoCompleteConfig, FindOptionsAutoCompleteConfig, LiteAutoCompleteConfig } from './Lines/AutoCompleteConfig'
 import { FindOptions } from './FindOptions'
 import { ImportRoute } from "./AsyncImport";
 import * as AppRelativeRoutes from "./AppRelativeRoutes";
@@ -505,14 +503,14 @@ export function defaultFindOptions(type: TypeReference): FindOptions | undefined
     return undefined;
 }
 
-export function getAutoComplete(type: TypeReference, findOptions: FindOptions | undefined, showType?: boolean): AutocompleteConfig<any> | null {
+export function getAutoComplete(type: TypeReference, findOptions: FindOptions | undefined, showType?: boolean): AutoCompleteConfig<any> | null {
     if (type.isEmbedded || type.name == IsByAll)
         return null;
 
-    var config: AutocompleteConfig<any> | null = null;
+    var config: AutoCompleteConfig<any> | null = null;
 
     if (findOptions)
-        config = new FindOptionsAutocompleteConfig(findOptions);
+        config = new FindOptionsAutoCompleteConfig(findOptions);
 
     const types = getTypeInfos(type);
     var delay: number | undefined;
@@ -530,7 +528,7 @@ export function getAutoComplete(type: TypeReference, findOptions: FindOptions | 
     }
 
     if(!config) {
-        config = new LiteAutocompleteConfig((ac, subStr: string) => Finder.API.findLiteLike({
+        config = new LiteAutoCompleteConfig((ac, subStr: string) => Finder.API.findLiteLike({
             types: type.name,
             subString: subStr,
             count: 5
@@ -742,7 +740,7 @@ export interface EntitySettingsOptions<T extends ModifiableEntity> {
     isNavigable?: EntityWhen;
     isReadOnly?: boolean;
     avoidPopup?: boolean;
-    autocomplete?: AutocompleteConfig<any>;
+    autocomplete?: AutoCompleteConfig<any>;
     autocompleteDelay?: number;
     getViewPromise?: (entity: T) => ViewPromise<T>;
     onNavigateRoute?: (typeName: string, id: string | number) => string;
@@ -770,7 +768,7 @@ export class EntitySettings<T extends ModifiableEntity> {
     isViewable?: boolean;
     isNavigable?: EntityWhen;
     isReadOnly?: boolean;
-    autocomplete?: AutocompleteConfig<any>;
+    autocomplete?: AutoCompleteConfig<any>;
     autocompleteDelay?: number;
     findOptions?: FindOptions;
     onNavigate?: (entityOrPack: Lite<Entity & T> | T | EntityPack<T>, navigateOptions?: NavigateOptions) => Promise<void>;
