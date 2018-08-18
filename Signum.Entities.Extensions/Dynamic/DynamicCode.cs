@@ -21,6 +21,7 @@ namespace Signum.Entities.Dynamic
         public static HashSet<string> Namespaces = new HashSet<string>
         {
             "System",
+            "System.IO",
             "System.Linq",
             "System.Reflection",
             "System.Collections.Generic",
