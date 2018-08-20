@@ -27,7 +27,7 @@ export { RenderEntity } from  './Lines/RenderEntity'
 import { EntityBase } from  './Lines/EntityBase'
 export { EntityBase }
 
-export { AutoCompleteConfig, FindOptionsAutoCompleteConfig, LiteAutoCompleteConfig } from './Lines/AutoCompleteConfig'
+export { AutocompleteConfig, FindOptionsAutocompleteConfig, LiteAutocompleteConfig } from './Lines/AutoCompleteConfig'
 
 export { EntityLine } from './Lines/EntityLine'
 

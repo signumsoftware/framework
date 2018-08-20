@@ -10,7 +10,7 @@ import { TypeContext } from './TypeContext';
 import * as Finder from './Finder';
 import * as Operations from './Operations';
 import { ViewReplacer } from './Frames/ReactVisitor'
-import { AutoCompleteConfig, FindOptionsAutoCompleteConfig, LiteAutoCompleteConfig } from './Lines/AutoCompleteConfig'
+import { AutocompleteConfig, FindOptionsAutocompleteConfig, LiteAutocompleteConfig } from './Lines/AutoCompleteConfig'
 import { FindOptions } from './FindOptions'
 import { ImportRoute } from "./AsyncImport";
 import * as AppRelativeRoutes from "./AppRelativeRoutes";
@@ -503,14 +503,14 @@ export function defaultFindOptions(type: TypeReference): FindOptions | undefined
     return undefined;
 }
 
-export function getAutoComplete(type: TypeReference, findOptions: FindOptions | undefined, showType?: boolean): AutoCompleteConfig<any> | null {
+export function getAutoComplete(type: TypeReference, findOptions: FindOptions | undefined, showType?: boolean): AutocompleteConfig<any> | null {
     if (type.isEmbedded || type.name == IsByAll)
         return null;
 
-    var config: AutoCompleteConfig<any> | null = null;
+    var config: AutocompleteConfig<any> | null = null;
 
     if (findOptions)
-        config = new FindOptionsAutoCompleteConfig(findOptions);
+        config = new FindOptionsAutocompleteConfig(findOptions);
 
     const types = getTypeInfos(type);
     var delay: number | undefined;
@@ -528,7 +528,7 @@ export function getAutoComplete(type: TypeReference, findOptions: FindOptions | 
     }
 
     if(!config) {
-        config = new LiteAutoCompleteConfig((ac, subStr: string) => Finder.API.findLiteLike({
+        config = new LiteAutocompleteConfig((ac, subStr: string) => Finder.API.findLiteLike({
             types: type.name,
             subString: subStr,
             count: 5
@@ -740,7 +740,7 @@ export interface EntitySettingsOptions<T extends ModifiableEntity> {
     isNavigable?: EntityWhen;
     isReadOnly?: boolean;
     avoidPopup?: boolean;
-    autocomplete?: AutoCompleteConfig<any>;
+    autocomplete?: AutocompleteConfig<any>;
     autocompleteDelay?: number;
     getViewPromise?: (entity: T) => ViewPromise<T>;
     onNavigateRoute?: (typeName: string, id: string | number) => string;
@@ -768,7 +768,7 @@ export class EntitySettings<T extends ModifiableEntity> {
     isViewable?: boolean;
     isNavigable?: EntityWhen;
     isReadOnly?: boolean;
-    autocomplete?: AutoCompleteConfig<any>;
+    autocomplete?: AutocompleteConfig<any>;
     autocompleteDelay?: number;
     findOptions?: FindOptions;
     onNavigate?: (entityOrPack: Lite<Entity & T> | T | EntityPack<T>, navigateOptions?: NavigateOptions) => Promise<void>;

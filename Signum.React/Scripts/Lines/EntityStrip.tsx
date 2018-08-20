@@ -6,7 +6,7 @@ import { FormGroup } from '../Lines/FormGroup'
 import { ModifiableEntity, Lite, Entity, EntityControlMessage, toLite, is, liteKey, getToString, isEntity, isLite } from '../Signum.Entities'
 import { Typeahead } from '../Components'
 import { EntityListBase, EntityListBaseProps, DragConfig } from './EntityListBase'
-import { AutoCompleteConfig } from './AutoCompleteConfig'
+import { AutocompleteConfig } from './AutoCompleteConfig'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 
@@ -14,7 +14,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 export interface EntityStripProps extends EntityListBaseProps {
     vertical?: boolean;
     iconStart?: boolean;
-    autoComplete?: AutoCompleteConfig<any> | null;
+    autocomplete?: AutocompleteConfig<any> | null;
     onRenderItem?: (item: Lite<Entity> | ModifiableEntity) => React.ReactNode;
     showType?: boolean;
     onItemHtmlAttributes?: (item: Lite<Entity> | ModifiableEntity) => React.HTMLAttributes<HTMLSpanElement | HTMLAnchorElement>;
@@ -28,14 +28,14 @@ export class EntityStrip extends EntityListBase<EntityStripProps, EntityStripPro
     }
 
     componentWillUnmount() {
-        this.state.autoComplete && this.state.autoComplete.abort();
+        this.state.autocomplete && this.state.autocomplete.abort();
     }
 
     overrideProps(state: EntityStripProps, overridenProps: EntityStripProps) {
         super.overrideProps(state, overridenProps);
-        if (state.autoComplete === undefined) {
+        if (state.autocomplete === undefined) {
             const type = state.type!;
-            state.autoComplete = Navigator.getAutoComplete(type, state.findOptions, state.showType);
+            state.autocomplete = Navigator.getAutoComplete(type, state.findOptions, state.showType);
         }
     }
     renderInternal() {
@@ -55,7 +55,7 @@ export class EntityStrip extends EntityListBase<EntityStripProps, EntityStripPro
                                 (<EntityStripElement key={i}
                                     ctx={mlec}
                                     iconStart={s.iconStart}
-                                    autoComplete={s.autoComplete}
+                                    autoComplete={s.autocomplete}
                                     onRenderItem={s.onRenderItem}
                                     drag={this.canMove(mlec.value) && !readOnly ? this.getDragConfig(i, this.props.vertical ? "v" : "h") : undefined}
                                     onItemHtmlAttributes={s.onItemHtmlAttributes}
@@ -82,7 +82,7 @@ export class EntityStrip extends EntityListBase<EntityStripProps, EntityStripPro
 
     handleOnSelect = (item: any, event: React.SyntheticEvent<any>) => {
 
-        var entity = this.state.autoComplete!.getEntityFromItem(item);
+        var entity = this.state.autocomplete!.getEntityFromItem(item);
 
         this.convert(entity)
             .then(e => this.addElement(e))
@@ -139,7 +139,7 @@ export class EntityStrip extends EntityListBase<EntityStripProps, EntityStripPro
 
     renderAutoComplete() {
 
-        var ac = this.state.autoComplete;
+        var ac = this.state.autocomplete;
 
         if (!ac || this.state.ctx!.readOnly)
             return undefined;
@@ -169,7 +169,7 @@ export interface EntityStripElementProps {
     onRemove?: (event: React.MouseEvent<any>) => void;
     onView?: (event: React.MouseEvent<any>) => void;
     ctx: TypeContext<Lite<Entity> | ModifiableEntity>;
-    autoComplete?: AutoCompleteConfig<any> | null;
+    autoComplete?: AutocompleteConfig<any> | null;
     onRenderItem?: (item: Lite<Entity> | ModifiableEntity) => React.ReactNode;
     onItemHtmlAttributes?: (item: Lite<Entity> | ModifiableEntity) => React.HTMLAttributes<HTMLSpanElement | HTMLAnchorElement>;
     drag?: DragConfig;

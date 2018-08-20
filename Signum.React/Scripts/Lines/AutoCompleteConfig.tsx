@@ -6,7 +6,7 @@ import { getTypeInfo, getQueryKey } from '../Reflection'
 import { ModifiableEntity, Lite, Entity, toLite, is, isLite, isEntity, getToString } from '../Signum.Entities'
 import { Typeahead } from '../Components'
 
-export interface AutoCompleteConfig<T> {
+export interface AutocompleteConfig<T> {
     getItems: (subStr: string) => Promise<T[]>;
     getItemsDelay?: number;
     minLength?: number;
@@ -17,7 +17,7 @@ export interface AutoCompleteConfig<T> {
     abort(): void;
 }
 
-export class LiteAutoCompleteConfig<T extends Entity> implements AutoCompleteConfig<Lite<T>>{
+export class LiteAutocompleteConfig<T extends Entity> implements AutocompleteConfig<Lite<T>>{
 
     constructor(
         public getItemsFunction: (abortController: FetchAbortController, subStr: string) => Promise<Lite<T>[]>,
@@ -81,7 +81,7 @@ export class LiteAutoCompleteConfig<T extends Entity> implements AutoCompleteCon
     }
 }
 
-export class FindOptionsAutoCompleteConfig implements AutoCompleteConfig<ResultRow>{
+export class FindOptionsAutocompleteConfig implements AutocompleteConfig<ResultRow>{
 
     constructor(
         public findOptions: FindOptions,
@@ -126,7 +126,7 @@ export class FindOptionsAutoCompleteConfig implements AutoCompleteConfig<ResultR
             .then(columns => this.parsedColumns = columns);
     }
 
-    abortableRequest = new AbortableRequest((abortController, request: Finder.API.AutoCompleteQueryRequest) => Finder.API.FindRowsLike(request, abortController));
+    abortableRequest = new AbortableRequest((abortController, request: Finder.API.AutocompleteQueryRequest) => Finder.API.FindRowsLike(request, abortController));
 
     getItems(subStr: string): Promise<ResultRow[]> {
         return this.getParsedFilters().then(filters =>

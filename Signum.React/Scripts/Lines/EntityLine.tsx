@@ -7,12 +7,12 @@ import { FormControlReadonly } from '../Lines/FormControlReadonly'
 import { ModifiableEntity, Lite, Entity, JavascriptMessage, toLite, is, liteKey, getToString, isLite } from '../Signum.Entities'
 import { Typeahead } from '../Components'
 import { EntityBase, EntityBaseProps } from './EntityBase'
-import { AutoCompleteConfig } from './AutocompleteConfig'
+import { AutocompleteConfig } from './AutocompleteConfig'
 
 export interface EntityLineProps extends EntityBaseProps {
 
     ctx: TypeContext<ModifiableEntity | Lite<Entity> | undefined | null>;
-    autoComplete?: AutoCompleteConfig<unknown> | null;
+    autocomplete?: AutocompleteConfig<unknown> | null;
     renderItem?: React.ReactNode;
     showType?: boolean;
     itemHtmlAttributes?: React.HTMLAttributes<HTMLSpanElement | HTMLAnchorElement>;
@@ -26,9 +26,9 @@ export interface EntityLineState extends EntityLineProps {
 export class EntityLine extends EntityBase<EntityLineProps, EntityLineState> {
     overrideProps(state: EntityLineState, overridenProps: EntityLineProps) {
         super.overrideProps(state, overridenProps);
-        if (state.autoComplete === undefined) {
+        if (state.autocomplete === undefined) {
             const type = state.type!;
-            state.autoComplete = Navigator.getAutoComplete(type, state.findOptions, state.showType);
+            state.autocomplete = Navigator.getAutoComplete(type, state.findOptions, state.showType);
         }
 
         if (!state.currentItem) {
@@ -38,7 +38,7 @@ export class EntityLine extends EntityBase<EntityLineProps, EntityLineState> {
     }
 
     componentWillUnmount() {
-        this.state.autoComplete && this.state.autoComplete.abort();
+        this.state.autocomplete && this.state.autocomplete.abort();
     }
     
     componentWillMount() {
@@ -53,7 +53,7 @@ export class EntityLine extends EntityBase<EntityLineProps, EntityLineState> {
     }
 
     refreshItem(props: EntityLineProps) {
-        if (this.state.autoComplete) {
+        if (this.state.autocomplete) {
             var newEntity = props.ctx.value;
 
             if (newEntity == null) {
@@ -64,10 +64,10 @@ export class EntityLine extends EntityBase<EntityLineProps, EntityLineState> {
                     var ci = { entity: newEntity!, item: undefined as unknown }
                     this.setState({ currentItem: ci });
                     var fillItem = (newEntity: ModifiableEntity | Lite<Entity>) => {
-                        const autocomplete = this.state.autoComplete;
+                        const autocomplete = this.state.autocomplete;
                         autocomplete && autocomplete.getItemFromEntity(newEntity)
                             .then(item => {
-                                if (autocomplete == this.state.autoComplete) {
+                                if (autocomplete == this.state.autocomplete) {
                                     ci.item = item;
                                     this.forceUpdate();
                                 } else {
@@ -91,7 +91,7 @@ export class EntityLine extends EntityBase<EntityLineProps, EntityLineState> {
 
     handleOnSelect = (item: any, event: React.SyntheticEvent<any>) => {
 
-        var entity = this.state.autoComplete!.getEntityFromItem(item);
+        var entity = this.state.autocomplete!.getEntityFromItem(item);
 
         this.convert(entity)
             .then(entity => {
@@ -150,7 +150,7 @@ export class EntityLine extends EntityBase<EntityLineProps, EntityLineState> {
 
         const ctx = this.state.ctx;
 
-        var ac = this.state.autoComplete;
+        var ac = this.state.autocomplete;
 
         if (ac == null || ctx.readOnly)
             return <FormControlReadonly ctx={ctx}>{ctx.value && ctx.value.toStr}</FormControlReadonly>;
@@ -183,7 +183,7 @@ export class EntityLine extends EntityBase<EntityLineProps, EntityLineState> {
 
         const str =
             s.renderItem ? s.renderItem :
-                s.currentItem && s.currentItem.item && s.autoComplete ? s.autoComplete.renderItem(s.currentItem.item) :
+                s.currentItem && s.currentItem.item && s.autocomplete ? s.autocomplete.renderItem(s.currentItem.item) :
                     getToString(value);
 
         if (s.ctx.readOnly)
