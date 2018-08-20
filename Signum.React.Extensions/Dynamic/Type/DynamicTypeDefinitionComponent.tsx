@@ -917,6 +917,15 @@ export class PropertyComponent extends React.Component<PropertyComponentProps>{
                             <ValueComponent dc={this.props.dc} labelColumns={4} binding={Binding.create(p, d => d.columnType)} type="string" defaultValue={null} labelClass="database-mapping" />
                         }
                         <ValueComponent dc={this.props.dc} labelColumns={4} binding={Binding.create(p, d => d.isNullable)} type="string" defaultValue={null} options={DynamicTypeClient.IsNullableValues} onChange={this.handleAutoFix} />
+                        {allowUnit(p.type) &&
+                            <ValueComponent dc={this.props.dc} labelColumns={4} binding={Binding.create(p, d => d.unit)} type="string" defaultValue={null} />
+                        }
+                        {allowFormat(p.type) &&
+                            <ValueComponent dc={this.props.dc} labelColumns={4} binding={Binding.create(p, d => d.format)} type="string" defaultValue={null} />
+                        }
+                        {(p.isMList || isEmbedded(p.type)) &&
+                            <ValueComponent dc={this.props.dc} labelColumns={4} binding={Binding.create(p, d => d.notifyChildProperty)} type="boolean" defaultValue={null} />
+                        }
                     </div>
                     <div className="col-sm-6">
                         <IsMListFieldsetComponent
@@ -1275,8 +1284,24 @@ function isDecimal(type: string) {
     );
 }
 
+function allowUnit(type: string) {
+    return isInteger(type) ||
+        isDecimal(type) ||
+        isReal(type);
+}
+
+function allowFormat(type: string) {
+    return allowUnit(type) ||
+        isDateTime(type) ||
+        isTimeSpan(type);
+}
+
 function isEntity(type: string) {
     return type.endsWith("Entity");
+}
+
+function isEmbedded(type: string) {
+    return type.endsWith("Embedded");
 }
 
 export interface ValidatorOptions<T extends Validators.DynamicValidator> {

@@ -69,7 +69,7 @@ namespace Signum.Engine.Dynamic
                     Construct = (e, _) => {
 
                         var def = e.GetDefinition();
-                        var result = new DynamicTypeEntity { TypeName = null };
+                        var result = new DynamicTypeEntity { TypeName = null, BaseType = e.BaseType };
                         result.SetDefinition(def);
                         return result;
                     },
@@ -454,6 +454,15 @@ namespace Signum.Engine.Dynamic
         private IEnumerable<string> GetPropertyAttributes(DynamicProperty property)
         {
             var atts = property.Validators.EmptyIfNull().Select(v => GetValidatorAttribute(v)).ToList();
+
+            if (property.Unit != null)
+                atts.Add($"Unit(\"{property.Unit}\")");
+
+            if (property.Format != null)
+                atts.Add($"Format(\"{property.Format}\")");
+
+            if (property.NotifyChildProperty == true)
+                atts.Add("NotifyChildProperty");
 
             if (property.CustomPropertyAttributes.HasText())
                 atts.Add(property.CustomPropertyAttributes);
