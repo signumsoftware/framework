@@ -1,7 +1,7 @@
 ﻿import * as React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { WorkflowEntity, WorkflowModel, WorkflowEntitiesDictionary, WorkflowMessage } from '../Signum.Entities.Workflow'
-import { TypeContext, ValueLine, EntityLine, LiteAutoCompleteConfig } from '@framework/Lines'
+import { TypeContext, ValueLine, EntityLine, LiteAutocompleteConfig } from '@framework/Lines'
 import { is, JavascriptMessage, toLite, ModifiableEntity, Lite, Entity } from '@framework/Signum.Entities'
 import { API } from '../WorkflowClient'
 import BpmnModelerComponent from '../Bpmn/BpmnModelerComponent'
@@ -88,7 +88,7 @@ export default class Workflow extends React.Component<WorkflowProps, WorkflowSta
                     <div className="col-sm-6">
                 <ValueLine ctx={ctx.subCtx(d => d.name)} />
                 <EntityLine ctx={ctx.subCtx(d => d.mainEntityType)}
-                    autoComplete={new LiteAutoCompleteConfig((abortController, str) => API.findMainEntityType({ subString: str, count: 5 }), false, false)}
+                    autocomplete={new LiteAutocompleteConfig((abortController, str) => API.findMainEntityType({ subString: str, count: 5 }), false, false)}
                     find={false}
                     onRemove={this.handleMainEntityTypeChange} />
                     </div>

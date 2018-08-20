@@ -1,6 +1,6 @@
 ﻿import * as React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { ValueLine, EntityLine, TypeContext, LiteAutoCompleteConfig } from '@framework/Lines'
+import { ValueLine, EntityLine, TypeContext, LiteAutocompleteConfig } from '@framework/Lines'
 import { PropertyRoute, Binding } from '@framework/Reflection'
 import * as Navigator from '@framework/Navigator'
 import CSharpCodeMirror from '../../Codemirror/CSharpCodeMirror'
@@ -48,7 +48,7 @@ export default class WorkflowConditionComponent extends React.Component<Workflow
                 <ValueLine ctx={ctx.subCtx(wc => wc.name)} />
                 <EntityLine ctx={ctx.subCtx(wc => wc.mainEntityType)}
                     onChange={this.handleMainEntityTypeChange}
-                    autoComplete={new LiteAutoCompleteConfig((ac, str) => API.findMainEntityType({ subString: str, count: 5 }, ac), false, false)}
+                    autocomplete={new LiteAutocompleteConfig((ac, str) => API.findMainEntityType({ subString: str, count: 5 }, ac), false, false)}
                     find={false} />
                 {ctx.value.mainEntityType &&
                     <div>
