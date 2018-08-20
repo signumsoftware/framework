@@ -522,7 +522,7 @@ export class CustomCodeTab extends React.Component<{ definition: DynamicTypeDefi
     }
  
     return base.PropertyValidation(pi);
-};`);
+}`);
     }
 
     handleWithWorkflowClick = () => {
@@ -566,7 +566,7 @@ new Graph<${entityName}Entity>.Execute(${entityName}Operation.Save)
     handleRegisterExpressionsClick = () => {
 
         let entityName = this.props.dynamicType.typeName!;
-        this.popupCodeSnippet(`QueryLogic.Expression.Register((${entityName}Entity e) => e.[Expression Name]());`);
+        this.popupCodeSnippet(`QueryLogic.Expressions.Register((${entityName}Entity e) => e.[Expression Name]());`);
     }
 
     handleQueryExpressionClick = () => {

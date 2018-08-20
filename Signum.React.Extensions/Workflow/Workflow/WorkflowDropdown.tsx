@@ -28,9 +28,11 @@ export default class WorkflowDropdown extends React.Component<{}, { starts: Arra
             .done();
     }
 
-    render() {
+    static getInboxUrl(): string {
+        return WorkflowClient.getDefaultInboxUrl();
+    }
 
-        const inboxUrl = WorkflowClient.getDefaultInboxUrl();
+    render() {
 
         return (
             <UncontrolledDropdown className="sf-workflow" id="workflowDropdown" nav inNavbar>
@@ -38,7 +40,7 @@ export default class WorkflowDropdown extends React.Component<{}, { starts: Arra
                     {WorkflowEntity.nicePluralName()}
                 </DropdownToggle>
                 <DropdownMenu style={{ minWidth: "200px" }}>
-                    <LinkContainer exact to={inboxUrl}><DropdownItem>{CaseActivityQuery.Inbox.niceName()}</DropdownItem></LinkContainer>
+                    <LinkContainer exact to={WorkflowDropdown.getInboxUrl()}><DropdownItem>{CaseActivityQuery.Inbox.niceName()}</DropdownItem></LinkContainer>
                     {this.state.starts.length > 0 && <DropdownItem divider />}
                     {this.state.starts.length > 0 && <DropdownItem disabled>{JavascriptMessage.create.niceToString()}</DropdownItem>}
                     {this.getStarts().flatMap((kvp, i) => [
