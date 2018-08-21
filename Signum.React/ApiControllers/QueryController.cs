@@ -20,6 +20,7 @@ using Signum.Engine.Maps;
 using System.Threading;
 using System.Threading.Tasks;
 using Signum.Utilities.ExpressionTrees;
+using Signum.React.Json;
 
 namespace Signum.React.ApiControllers
 {
@@ -247,13 +248,40 @@ namespace Signum.React.ApiControllers
         public override string ToString() => $"{token} {orderType}";
     }
 
-    public class FilterTS
+    [JsonConverter(typeof(FilterJsonConverter))]
+    public abstract class FilterTS
+    {
+        public abstract Filter ToFilter(QueryDescription qd, bool canAggregate);
+
+        public static FilterTS FromFilter(Filter filter)
+        {
+            if (filter is FilterCondition fc)
+                return new FilterConditionTS
+                {
+                    token = fc.Token.FullKey(),
+                    operation = fc.Operation,
+                    value = fc.Value
+                };
+
+            if (filter is FilterGroup fg)
+                return new FilterGroupTS
+                {
+                    token = fg.Token.FullKey(),
+                    groupOperation = fg.GroupOperation,
+                    filters = fg.Filters.Select(f => FromFilter(f)).ToList(),
+                };
+
+            throw new UnexpectedValueException(filter);
+        }
+    }
+
+    public class FilterConditionTS : FilterTS
     {
         public string token;
         public FilterOperation operation;
         public object value;
 
-        public Filter ToFilter(QueryDescription qd, bool canAggregate)
+        public override Filter ToFilter(QueryDescription qd, bool canAggregate)
         {
             var options = SubTokensOptions.CanElement | SubTokensOptions.CanAnyAll | (canAggregate ? SubTokensOptions.CanAggregate : 0);
             var parsedToken = QueryUtils.Parse(token, qd, options);
@@ -263,10 +291,27 @@ namespace Signum.React.ApiControllers
                  ((JToken)value).ToObject(expectedValueType, JsonSerializer.Create(GlobalConfiguration.Configuration.Formatters.JsonFormatter.SerializerSettings)) :
                  value;
 
-            return new Filter(parsedToken, operation, val);
+            return new FilterCondition(parsedToken, operation, val);
         }
 
         public override string ToString() => $"{token} {operation} {value}";
+    }
+
+    public class FilterGroupTS : FilterTS
+    {
+        public FilterGroupOperation groupOperation;
+        public string token;
+        public List<FilterTS> filters; 
+
+        public override Filter ToFilter(QueryDescription qd, bool canAggregate)
+        {
+            var options = SubTokensOptions.CanElement | SubTokensOptions.CanAnyAll | (canAggregate ? SubTokensOptions.CanAggregate : 0);
+            var parsedToken = QueryUtils.Parse(token, qd, options);
+
+            var parsedFilters = filters.Select(f => f.ToFilter(qd, canAggregate)).ToList();
+
+            return new FilterGroup(groupOperation, parsedToken, parsedFilters);
+        }
     }
 
     public class ColumnTS

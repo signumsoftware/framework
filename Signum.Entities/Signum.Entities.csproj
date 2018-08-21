@@ -95,6 +95,7 @@
     <Compile Include="Basics\QueryEntity.cs" />
     <Compile Include="Basics\SemiSymbol.cs" />
     <Compile Include="DynamicQuery\Tokens\AggregateToken.cs" />
+    <Compile Include="DynamicQuery\Tokens\CollectionAnyAllToken.cs" />
     <Compile Include="DynamicQuery\Tokens\SystemTimeToken.cs" />
     <Compile Include="DynamicQuery\Tokens\ExtensionDictionaryToken.cs" />
     <Compile Include="DynamicQuery\Tokens\HasValueToken.cs" />

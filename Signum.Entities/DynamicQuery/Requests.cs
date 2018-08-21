@@ -47,7 +47,7 @@ namespace Signum.Entities.DynamicQuery
             var allTokens = Columns.Select(a => a.Token).ToList();
 
             if (Filters != null)
-                allTokens.AddRange(Filters.Select(a => a.Token));
+                allTokens.AddRange(Filters.SelectMany(a => a.GetFilterConditions()).Select(a => a.Token));
 
             if (Orders != null)
                 allTokens.AddRange(Orders.Select(a => a.Token));
@@ -199,7 +199,15 @@ namespace Signum.Entities.DynamicQuery
 
         public List<CollectionElementToken> Multiplications
         {
-            get { return CollectionElementToken.GetElements(Filters.Select(a => a.Token).PreAnd(ValueToken).NotNull().ToHashSet()); }
+            get
+            {
+                return CollectionElementToken.GetElements(Filters
+                  .SelectMany(a => a.GetFilterConditions())
+                  .Select(fc => fc.Token)
+                  .PreAnd(ValueToken)
+                  .NotNull()
+                  .ToHashSet());
+            }
         }
     }
 
@@ -224,8 +232,11 @@ namespace Signum.Entities.DynamicQuery
         {
             get
             {
-                HashSet<QueryToken> allTokens = Filters.Select(a => a.Token)
-                    .Concat(Orders.Select(a => a.Token)).ToHashSet();
+                HashSet<QueryToken> allTokens = Filters
+                    .SelectMany(a => a.GetFilterConditions())
+                    .Select(a => a.Token)
+                    .Concat(Orders.Select(a => a.Token))
+                    .ToHashSet();
 
                 return CollectionElementToken.GetElements(allTokens);
             }
@@ -246,7 +257,7 @@ namespace Signum.Entities.DynamicQuery
         {
             get
             {
-                HashSet<QueryToken> allTokens = Filters.Select(a => a.Token)
+                HashSet<QueryToken> allTokens = Filters.SelectMany(a=>a.GetFilterConditions()).Select(a => a.Token)
                     .Concat(Orders.Select(a => a.Token)).ToHashSet();
 
                 return CollectionElementToken.GetElements(allTokens);

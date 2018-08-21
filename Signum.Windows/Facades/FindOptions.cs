@@ -245,7 +245,7 @@ namespace Signum.Windows
 
         public Filter ToFilter()
         {
-            return new Filter(Token, Operation, RealValue);
+            return new FilterCondition(Token, Operation, RealValue);
         }
 
         protected override Freezable CreateInstanceCore()

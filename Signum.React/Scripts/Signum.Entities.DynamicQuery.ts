@@ -12,6 +12,11 @@ export type ColumnOptionsMode =
     "Remove" |
     "Replace";
 
+export const FilterGroupOperation = new EnumType<FilterGroupOperation>("FilterGroupOperation");
+export type FilterGroupOperation =
+    "And" |
+    "Or";
+
 export const FilterOperation = new EnumType<FilterOperation>("FilterOperation");
 export type FilterOperation =
     "EqualTo" |

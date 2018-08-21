@@ -282,9 +282,11 @@ namespace Signum.Entities.DynamicQuery
 
             List<QueryToken> tokens = new List<QueryToken>() { new CountToken(parent) };
 
-            tokens.AddRange(from cet in EnumExtensions.GetValues<CollectionElementType>()
-                            where (options & (cet.IsElement() ? SubTokensOptions.CanElement : SubTokensOptions.CanAnyAll)) != 0
-                            select new CollectionElementToken(parent, cet));
+            if ((options & SubTokensOptions.CanElement) == SubTokensOptions.CanElement)
+                tokens.AddRange(EnumExtensions.GetValues<CollectionElementType>().Select(cet => new CollectionElementToken(parent, cet)));
+
+            if ((options & SubTokensOptions.CanAnyAll) == SubTokensOptions.CanAnyAll)
+                tokens.AddRange(EnumExtensions.GetValues<CollectionAnyAllType>().Select(caat => new CollectionAnyAllToken(parent, caat)));
 
             return tokens;
         }

@@ -1,31 +1,28 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Linq.Expressions;
-using Signum.Utilities;
 using System.Reflection;
+using Signum.Utilities;
 using Signum.Utilities.ExpressionTrees;
 using Signum.Utilities.Reflection;
-using Signum.Entities.Reflection;
-using System.ComponentModel;
 
 namespace Signum.Entities.DynamicQuery
 {
     [Serializable]
-    public class CollectionElementToken : QueryToken
+    public class CollectionAnyAllToken : QueryToken
     {
-        public CollectionElementType CollectionElementType { get; private set; }
+        public CollectionAnyAllType CollectionAnyAllType { get; private set; }
 
         Type elementType;
-        internal CollectionElementToken(QueryToken parent, CollectionElementType type)
+        internal CollectionAnyAllToken(QueryToken parent, CollectionAnyAllType type)
             : base(parent)
         {
             elementType = parent.Type.ElementType();
             if (elementType == null)
                 throw new InvalidOperationException("not a collection");
 
-            this.CollectionElementType = type;
+            this.CollectionAnyAllType = type;
         }
 
         public override Type Type
@@ -35,12 +32,12 @@ namespace Signum.Entities.DynamicQuery
 
         public override string ToString()
         {
-            return CollectionElementType.NiceToString();
+            return CollectionAnyAllType.NiceToString();
         }
 
         public override string Key
         {
-            get { return CollectionElementType.ToString(); }
+            get { return CollectionAnyAllType.ToString(); }
         }
 
         protected override List<QueryToken> SubTokensOverride(SubTokensOptions options)
@@ -82,21 +79,7 @@ namespace Signum.Entities.DynamicQuery
             return Parent.IsAllowed();
         }
 
-        public override bool HasAllOrAny()
-        {
-            return 
-                CollectionElementType != CollectionElementType.Element &&
-                CollectionElementType != CollectionElementType.Element2 &&
-                CollectionElementType != CollectionElementType.Element3;
-        }
-
-        public override bool HasElement()
-        {
-            return base.HasElement() ||
-                CollectionElementType == CollectionElementType.Element ||
-                CollectionElementType == CollectionElementType.Element2 ||
-                CollectionElementType == CollectionElementType.Element3;
-        }
+        public override bool HasAllOrAny() => true;
 
         public override PropertyRoute GetPropertyRoute()
         {
@@ -112,17 +95,12 @@ namespace Signum.Entities.DynamicQuery
 
         public override string NiceName()
         {
-            Type parentElement = elementType.CleanType();
-
-            if (parentElement.IsModifiableEntity())
-                return parentElement.NiceName();
-
-            return "Element of " + Parent.NiceName();
+            return null;
         }
 
         public override QueryToken Clone()
         {
-            return new CollectionElementToken(Parent.Clone(), CollectionElementType);
+            return new CollectionAnyAllToken(Parent.Clone(), this.CollectionAnyAllType);
         }
 
         protected override Expression BuildExpressionInternal(BuildExpressionContext context)
@@ -141,38 +119,43 @@ namespace Signum.Entities.DynamicQuery
             return parameter.BuildLite().Nullify();
         }
 
-        public static List<CollectionElementToken> GetElements(HashSet<QueryToken> allTokens)
-        {
-            return allTokens
-                .SelectMany(t => t.Follow(tt => tt.Parent))
-                .OfType<CollectionElementToken>()
-                .Distinct()
-                .OrderBy(a => a.FullKey().Length)
-                .ToList();
-        }
-
-        public static string MultipliedMessage(List<CollectionElementToken> elements, Type entityType)
-        {
-            if (elements.IsEmpty())
-                return null;
-
-            return ValidationMessage.TheNumberOf0IsBeingMultipliedBy1.NiceToString().FormatWith(entityType.NiceName(), elements.CommaAnd(a => a.Parent.ToString()));
-        }
-
         public override string TypeColor
         {
             get { return "#0000FF"; }
         }
+
+        static MethodInfo miAnyE = ReflectionTools.GetMethodInfo((IEnumerable<string> col) => col.Any(null)).GetGenericMethodDefinition();
+        static MethodInfo miAllE = ReflectionTools.GetMethodInfo((IEnumerable<string> col) => col.All(null)).GetGenericMethodDefinition();
+        static MethodInfo miAnyQ = ReflectionTools.GetMethodInfo((IQueryable<string> col) => col.Any(null)).GetGenericMethodDefinition();
+        static MethodInfo miAllQ = ReflectionTools.GetMethodInfo((IQueryable<string> col) => col.All(null)).GetGenericMethodDefinition();
+
+        public Expression BuildAnyAll(Expression collection, ParameterExpression param, Expression body)
+        {
+            if (this.CollectionAnyAllType == CollectionAnyAllType.AnyNo)
+                body = Expression.Not(body);
+
+            var lambda = Expression.Lambda(body, param);
+            
+            MethodInfo mi = typeof(IQueryable).IsAssignableFrom(collection.Type) ?
+                 (this.CollectionAnyAllType == CollectionAnyAllType.All ? miAllQ : miAnyQ) :
+                 (this.CollectionAnyAllType == CollectionAnyAllType.All ? miAllE : miAnyE);
+
+            var result = Expression.Call(mi.MakeGenericMethod(param.Type), collection, lambda);
+
+            if (this.CollectionAnyAllType == CollectionAnyAllType.NoOne)
+                return Expression.Not(result);
+
+            return result;
+        }
     }
 
+
     [DescriptionOptions(DescriptionOptions.Members)]
-    public enum CollectionElementType
+    public enum CollectionAnyAllType
     {
-        Element,
-        [Description("Element (2)")]
-        Element2,
-        [Description("Element (3)")]
-        Element3,
+        Any,
+        All,
+        NoOne,
+        AnyNo,
     }
-    
 }
