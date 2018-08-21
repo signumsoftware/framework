@@ -431,7 +431,41 @@ namespace Signum.Engine
 
             return new Disposable(onDispose);
         }
-        
+
+        public static void TruncateTable<T>() where T : Entity => TruncateTable(typeof(T));
+        public static void TruncateTable(Type type)
+        {
+            var table = Schema.Current.Table(type);
+            table.TablesMList().ToList().ForEach(mlist => {    
+                SqlBuilder.TruncateTable(mlist.Name).ExecuteLeaves();
+            });
+
+            using (DropAndCreateForeignKeys(table))
+                SqlBuilder.TruncateTable(table.Name).ExecuteLeaves();
+        }
+
+        private static IDisposable DropAndCreateForeignKeys(Table table)
+        {
+            var foreignKeys = Administrator.OverrideDatabaseInSysViews(table.Name.Schema.Database).Using(_ =>
+            (from targetTable in Database.View<SysTables>()
+             where targetTable.name == table.Name.Name && targetTable.Schema().name == table.Name.Schema.Name
+             from ifk in targetTable.IncommingForeignKeys()
+             let parentTable = ifk.ParentTable()
+             select new
+             {
+                 Name = ifk.name,
+                 ParentTable = new ObjectName(new SchemaName(table.Name.Schema.Database, parentTable.Schema().name), parentTable.name),
+                 ParentColumn = parentTable.Columns().SingleEx(c => c.column_id == ifk.ForeignKeyColumns().SingleEx().parent_column_id).name,
+             }).ToList());
+
+            foreignKeys.ForEach(fk => SqlBuilder.AlterTableDropConstraint(fk.ParentTable, fk.Name).ExecuteLeaves());
+
+            return new Disposable(() =>
+            {
+                foreignKeys.ToList().ForEach(fk => SqlBuilder.AlterTableAddConstraintForeignKey(fk.ParentTable, fk.ParentColumn, table.Name, table.PrimaryKey.Name).ExecuteLeaves());
+            });
+        }
+
         public static IDisposable DisableUniqueIndex(UniqueIndex index)
         {
             SafeConsole.WriteLineColor(ConsoleColor.DarkMagenta, " DISABLE Unique Index "  + index.IndexName);
