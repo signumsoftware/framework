@@ -26,7 +26,7 @@ export interface ModalFindOptions {
 export interface FindOptions {
     queryName: PseudoType | QueryKey;
     groupResults?: boolean;
-    parentColumn?: string;
+    parentToken?: string;
     parentValue?: any;
 
     filterOptions?: FilterOption[];
@@ -49,7 +49,7 @@ export interface FindOptionsParsed {
 
 
 export interface FilterOption {
-    columnName: string;
+    token: string;
     frozen?: boolean;
     operation?: FilterOperation;
     value: any;
@@ -63,7 +63,7 @@ export interface FilterOptionParsed {
 }
 
 export interface OrderOption {
-    columnName: string;
+    token: string;
     orderType: OrderType;
 }
 
@@ -73,7 +73,7 @@ export interface OrderOptionParsed {
 }
 
 export interface ColumnOption {
-    columnName: string;
+    token: string;
     displayName?: string;
 }
 

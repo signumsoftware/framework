@@ -62,7 +62,7 @@ export default class ValueSearchControlLine extends React.Component<ValueSearchC
         if (isEntity(ctx.value))
             return {
                 queryName: ctx.value.Type,
-                parentColumn: "Entity",
+                parentToken: "Entity",
                 parentValue: ctx.value
             };
 

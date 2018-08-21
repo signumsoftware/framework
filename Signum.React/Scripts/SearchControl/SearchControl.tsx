@@ -31,7 +31,7 @@ export interface SimpleFilterBuilderProps {
 export interface SearchControlProps extends React.Props<SearchControl> {
     findOptions: FindOptions;
 
-    formatters?: { [columnName: string]: CellFormatter };
+    formatters?: { [token: string]: CellFormatter };
     rowAttributes?: (row: ResultRow, columns: string[]) => React.HTMLAttributes<HTMLTableRowElement> | undefined;
     entityFormatter?: EntityFormatter;
     extraButtons?: (searchControl: SearchControlLoaded) => (React.ReactElement<any> | null | undefined | false)[];

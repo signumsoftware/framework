@@ -261,11 +261,11 @@ export function cloneFindOptions(fo: FindOptions): FindOptions{
     return {
         queryName: fo.queryName,
         groupResults: fo.groupResults,
-        parentColumn: fo.parentColumn,
+        parentToken: fo.parentToken,
         parentValue: fo.parentValue,
-        filterOptions: fo.filterOptions && fo.filterOptions.map(f => ({ columnName: f.columnName, operation: f.operation, value: f.value, frozen: f.frozen } as FilterOption)),
-        orderOptions: fo.orderOptions && fo.orderOptions.map(o => ({ columnName: o.columnName, orderType: o.orderType } as OrderOption)),
-        columnOptions: fo.columnOptions && fo.columnOptions.map(m => ({ columnName: m.columnName, displayName: m.displayName } as ColumnOption)),
+        filterOptions: fo.filterOptions && fo.filterOptions.map(f => ({ token: f.token, operation: f.operation, value: f.value, frozen: f.frozen } as FilterOption)),
+        orderOptions: fo.orderOptions && fo.orderOptions.map(o => ({ token: o.token, orderType: o.orderType } as OrderOption)),
+        columnOptions: fo.columnOptions && fo.columnOptions.map(m => ({ token: m.token, displayName: m.displayName } as ColumnOption)),
         columnOptionsMode: fo.columnOptionsMode,
         pagination: pa && { mode: pa.mode, elementsPerPage: pa.elementsPerPage, currentPage: pa.currentPage, } as Pagination,
     };

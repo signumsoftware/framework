@@ -237,12 +237,12 @@ export function mergeColumns(columnDescriptions: ColumnDescription[], mode: Colu
 
     switch (mode) {
         case "Add":
-            return columnDescriptions.filter(cd => cd.name != "Entity").map(cd => ({ columnName: cd.name, displayName: cd.displayName }) as ColumnOption)
+            return columnDescriptions.filter(cd => cd.name != "Entity").map(cd => ({ token: cd.name, displayName: cd.displayName }) as ColumnOption)
                 .concat(columnOptions);
 
         case "Remove":
-            return columnDescriptions.filter(cd => cd.name != "Entity" && !columnOptions.some(a => a.columnName == cd.name))
-                .map(cd => ({ columnName: cd.name, displayName: cd.displayName }) as ColumnOption);
+            return columnDescriptions.filter(cd => cd.name != "Entity" && !columnOptions.some(a => a.token == cd.name))
+                .map(cd => ({ token: cd.name, displayName: cd.displayName }) as ColumnOption);
 
         case "Replace":
             return columnOptions;
@@ -268,7 +268,7 @@ export function smartColumns(current: ColumnOptionParsed[], ideal: ColumnDescrip
             if (j < current.length && similar(current[j], ideal[i]))
                 j++;
             else
-                toRemove.push({ columnName: ideal[i].name, });
+                toRemove.push({ token: ideal[i].name, });
         }
         if (toRemove.length + current.length == ideal.length) {
             return {
@@ -280,13 +280,13 @@ export function smartColumns(current: ColumnOptionParsed[], ideal: ColumnDescrip
     else if (current.every((c, i) => i >= ideal.length || similar(c, ideal[i]))) {
         return {
             mode: "Add",
-            columns: current.slice(ideal.length).map(c => ({ columnName: c.token!.fullKey, displayName: c.displayName }) as ColumnOption)
+            columns: current.slice(ideal.length).map(c => ({ token: c.token!.fullKey, displayName: c.displayName }) as ColumnOption)
         };
     }
 
     return {
         mode: "Replace",
-        columns: current.map(c => ({ columnName: c.token!.fullKey, displayName: c.displayName }) as ColumnOption),
+        columns: current.map(c => ({ token: c.token!.fullKey, displayName: c.displayName }) as ColumnOption),
     };
 }
 
@@ -304,11 +304,11 @@ export function parseFilterOptions(fos: FilterOption[], groupResults: boolean, q
 
     const completer = new TokenCompleter(qd);
     var sto = SubTokensOptions.CanElement | SubTokensOptions.CanAnyAll | (groupResults ? SubTokensOptions.CanAggregate : 0);
-    fos.forEach(a => completer.request(a.columnName, sto));
+    fos.forEach(a => completer.request(a.token, sto));
 
     return completer.finished()
         .then(() => fos.map(fo => ({
-            token: completer.get(fo.columnName),
+            token: completer.get(fo.token),
             operation: fo.operation || "EqualTo",
             value: fo.value,
             frozen: fo.frozen || false,
@@ -320,11 +320,11 @@ export function parseOrderOptions(orderOptions: OrderOption[], groupResults: boo
 
     const completer = new TokenCompleter(qd);
     var sto = SubTokensOptions.CanElement | (groupResults ? SubTokensOptions.CanAggregate : 0);
-    orderOptions.forEach(a => completer.request(a.columnName, sto));
+    orderOptions.forEach(a => completer.request(a.token, sto));
 
     return completer.finished()
         .then(() => orderOptions.map(oo => ({
-            token: completer.get(oo.columnName),
+            token: completer.get(oo.token),
             orderType: oo.orderType || "Ascending",
         }) as OrderOptionParsed));
 }
@@ -333,12 +333,12 @@ export function parseColumnOptions(columnOptions: ColumnOption[], groupResults: 
 
     const completer = new TokenCompleter(qd);
     var sto = SubTokensOptions.CanElement | (groupResults ? SubTokensOptions.CanAggregate : 0);
-    columnOptions.forEach(a => completer.request(a.columnName, sto));
+    columnOptions.forEach(a => completer.request(a.token, sto));
 
     return completer.finished()
         .then(() => columnOptions.map(co => ({
-            token: completer.get(co.columnName),
-            displayName: co.displayName || completer.get(co.columnName).niceName,
+            token: completer.get(co.token),
+            displayName: co.displayName || completer.get(co.token).niceName,
         }) as ColumnOptionParsed));
 }
 
@@ -393,8 +393,8 @@ export function toFindOptions(fo: FindOptionsParsed, qd: QueryDescription): Find
     var findOptions = {
         queryName: fo.queryKey,
         groupResults: fo.groupResults ? true : undefined,
-        filterOptions: fo.filterOptions.filter(a => !!a.token).map(f => ({ columnName: f.token!.fullKey, operation: f.operation, value: f.value, frozen: f.frozen }) as FilterOption),
-        orderOptions: fo.orderOptions.filter(a => !!a.token).map(o => ({ columnName: o.token.fullKey, orderType: o.orderType }) as OrderOption),
+        filterOptions: fo.filterOptions.filter(a => !!a.token).map(f => ({ token: f.token!.fullKey, operation: f.operation, value: f.value, frozen: f.frozen }) as FilterOption),
+        orderOptions: fo.orderOptions.filter(a => !!a.token).map(o => ({ token: o.token.fullKey, orderType: o.orderType }) as OrderOption),
         columnOptions: pair.columns,
         columnOptionsMode: pair.mode,
         pagination: fo.pagination && !equalsPagination(fo.pagination, defPagination) ? fo.pagination : undefined,
@@ -405,7 +405,7 @@ export function toFindOptions(fo: FindOptionsParsed, qd: QueryDescription): Find
         var onlyOrder = findOptions.orderOptions[0]
         var defaultOrder = getDefaultOrder(qd, qs);
 
-        if (defaultOrder && onlyOrder.columnName == defaultOrder.columnName && onlyOrder.orderType == defaultOrder.orderType)
+        if (defaultOrder && onlyOrder.token == defaultOrder.token && onlyOrder.orderType == defaultOrder.orderType)
             findOptions.orderOptions.remove(onlyOrder);
     }
 
@@ -422,7 +422,7 @@ export function getDefaultOrder(qd: QueryDescription, qs: QuerySettings): OrderO
         return undefined;
 
     return {
-        columnName: defaultOrder,
+        token: defaultOrder,
         orderType: qs && qs.defaultOrderType || (tis.some(a => a.entityData == "Transactional") ? "Descending" as OrderType : "Ascending" as OrderType)
     } as OrderOption;
 }
@@ -430,7 +430,7 @@ export function getDefaultOrder(qd: QueryDescription, qs: QuerySettings): OrderO
 export function toFilterOptions(filterOptionsParsed: FilterOptionParsed[]) {
     return filterOptionsParsed
         .filter(f => !!f.token)
-        .map(f => ({ columnName: f.token!.fullKey, operation: f.operation, value: f.value, frozen: f.frozen }) as FilterOption);
+        .map(f => ({ token: f.token!.fullKey, operation: f.operation, value: f.value, frozen: f.frozen }) as FilterOption);
 }
 
 export function parseFindOptions(findOptions: FindOptions, qd: QueryDescription): Promise<FindOptionsParsed> {
@@ -455,13 +455,13 @@ export function parseFindOptions(findOptions: FindOptions, qd: QueryDescription)
     var canAggregate = (findOptions ? SubTokensOptions.CanAggregate : 0);
     const completer = new TokenCompleter(qd);
     if (fo.filterOptions)
-        fo.filterOptions.forEach(a => completer.request(a.columnName, SubTokensOptions.CanElement | SubTokensOptions.CanAnyAll | canAggregate));
+        fo.filterOptions.forEach(a => completer.request(a.token, SubTokensOptions.CanElement | SubTokensOptions.CanAnyAll | canAggregate));
 
     if (fo.orderOptions)
-        fo.orderOptions.forEach(a => completer.request(a.columnName, SubTokensOptions.CanElement | canAggregate));
+        fo.orderOptions.forEach(a => completer.request(a.token, SubTokensOptions.CanElement | canAggregate));
 
     if (fo.columnOptions)
-        fo.columnOptions.forEach(a => completer.request(a.columnName, SubTokensOptions.CanElement | canAggregate));
+        fo.columnOptions.forEach(a => completer.request(a.token, SubTokensOptions.CanElement | canAggregate));
 
     return completer.finished().then(() => {
 
@@ -472,17 +472,17 @@ export function parseFindOptions(findOptions: FindOptions, qd: QueryDescription)
             systemTime: fo.systemTime,
 
             columnOptions: (fo.columnOptions || []).map(co => ({
-                token: completer.get(co.columnName),
-                displayName: co.displayName || completer.get(co.columnName).niceName
+                token: completer.get(co.token),
+                displayName: co.displayName || completer.get(co.token).niceName
             }) as ColumnOptionParsed),
 
             orderOptions: (fo.orderOptions || []).map(oo => ({
-                token: completer.get(oo.columnName),
+                token: completer.get(oo.token),
                 orderType: oo.orderType,
             }) as OrderOptionParsed),
 
             filterOptions: (fo.filterOptions || []).map(fo => ({
-                token: completer.get(fo.columnName),
+                token: completer.get(fo.token),
                 operation: fo.operation || "EqualTo",
                 value: fo.value,
                 frozen: fo.frozen || false,
@@ -577,24 +577,24 @@ export function fetchEntitiesWithFilters(queryName: PseudoType | QueryKey, filte
 
 export function expandParentColumn(fo: FindOptions): FindOptions {
 
-    if (!fo.parentColumn)
+    if (!fo.parentToken)
         return fo;
 
     fo.filterOptions = [
-        { columnName: fo.parentColumn, operation: "EqualTo", value: fo.parentValue, frozen: true },
+        { token: fo.parentToken, operation: "EqualTo", value: fo.parentValue, frozen: true },
         ...(fo.filterOptions || [])
     ];
 
-    if (!fo.parentColumn.contains(".") && (fo.columnOptionsMode == undefined || fo.columnOptionsMode == "Remove")) {
+    if (!fo.parentToken.contains(".") && (fo.columnOptionsMode == undefined || fo.columnOptionsMode == "Remove")) {
         fo.columnOptions = [
-            { columnName: fo.parentColumn },
+            { token: fo.parentToken },
             ...(fo.columnOptions || [])
         ];
 
         fo.columnOptionsMode = "Remove";
     }
     
-    fo.parentColumn = undefined;
+    fo.parentToken = undefined;
     fo.parentValue = undefined;
 
     return fo;
@@ -840,17 +840,17 @@ export module Encoder {
 
     export function encodeFilters(query: any, filterOptions?: FilterOption[]) {
         if (filterOptions)
-            filterOptions.forEach((fo, i) => query["filter" + i] = getTokenString(fo) + "~" + (fo.operation || "EqualTo") + "~" + stringValue(fo.value));
+            filterOptions.forEach((fo, i) => query["filter" + i] = fo.token + "~" + (fo.operation || "EqualTo") + "~" + stringValue(fo.value));
     }
 
     export function encodeOrders(query: any, orderOptions?: OrderOption[]) {
         if (orderOptions)
-            orderOptions.forEach((oo, i) => query["order" + i] = (oo.orderType == "Descending" ? "-" : "") + getTokenString(oo));
+            orderOptions.forEach((oo, i) => query["order" + i] = (oo.orderType == "Descending" ? "-" : "") + oo.token);
     }
 
     export function encodeColumns(query: any, columnOptions?: ColumnOption[]) {
         if (columnOptions)
-            columnOptions.forEach((co, i) => query["column" + i] = getTokenString(co) + (co.displayName ? ("~" + scapeTilde(co.displayName)) : ""));
+            columnOptions.forEach((co, i) => query["column" + i] = co.token + (co.displayName ? ("~" + scapeTilde(co.displayName)) : ""));
     }
 
     export function stringValue(value: any): string {
@@ -876,10 +876,6 @@ export module Encoder {
 
         return str.replace("~", "#|#");
     }
-
-    export function getTokenString(tokenContainer: { columnName: string, token?: QueryToken }) {
-        return tokenContainer.token ? tokenContainer.token.fullKey : tokenContainer.columnName;
-    }
 }
 
 
@@ -898,7 +894,7 @@ export module Decoder {
             const parts = val.split("~");
 
             return {
-                columnName: parts[0],
+                token: parts[0],
                 operation: parts[1] as FilterOperation,
                 value: parts.length == 3 ? unscapeTildes(parts[2]) :
                     parts.slice(2).map(a => unscapeTildes(a))
@@ -916,14 +912,14 @@ export module Decoder {
     export function decodeOrders(query: any): OrderOption[] {
         return valuesInOrder(query, "order").map(val => ({
             orderType: val[0] == "-" ? "Descending" : "Ascending",
-            columnName: val[0] == "-" ? val.tryAfter("-") : val
+            token: val[0] == "-" ? val.tryAfter("-") : val
         } as OrderOption));
     }
 
     export function decodeColumns(query: any): ColumnOption[] {
 
         return valuesInOrder(query, "column").map(val => ({
-            columnName: val.tryBefore("~") || val,
+            token: val.tryBefore("~") || val,
             displayName: unscapeTildes(val.tryAfter("~"))
         }) as ColumnOption);
     }
@@ -960,7 +956,7 @@ export interface QuerySettings {
     defaultOrderColumn?: string;
     defaultOrderType?: OrderType;
     hiddenColumns?: ColumnOption[];
-    formatters?: { [columnName: string]: CellFormatter };
+    formatters?: { [token: string]: CellFormatter };
     rowAttributes?: (row: ResultRow, columns: string[]) => React.HTMLAttributes<HTMLTableRowElement> | undefined;
     entityFormatter?: EntityFormatter;
     onDoubleClick?: (e: React.MouseEvent<any>, row: ResultRow) => void;
