@@ -43,7 +43,7 @@ export default class WorkflowConditionComponent extends React.Component<Workflow
                             <div className="col-sm-7">
                                 <div className="code-container">
                                     <div className="btn-group" style={{ marginBottom: "3px" }}>
-                                        <input type="button" className="btn btn-success btn-xs sf-button" value="ctx" onClick={() => showWorkflowTransitionContextCodeHelp()} />
+                                        <input type="button" className="btn btn-success btn-sm sf-button" value="ctx" onClick={() => showWorkflowTransitionContextCodeHelp()} />
                                     </div>
                                     <pre style={{ border: "0px", margin: "0px" }}>{"void Action(" + ctx.value.mainEntityType.cleanName + "Entity e, WorkflowTransitionContext ctx)\n{"}</pre>
                                     <CSharpCodeMirror script={ctx.value.eval!.script || ""} onChange={this.handleCodeChange} />
