@@ -123,7 +123,7 @@ export interface DynamicProperty {
     scale?: number;
     unit?: string;
     format?: string;
-    notifyChildProperty?: boolean;
+    notifyChanges?: boolean;
     _propertyType_?: string;
     validators?: Validators.DynamicValidator[];
     customFieldAttributes?: string;

@@ -286,8 +286,8 @@ namespace Signum.Entities.Dynamic
         [JsonProperty(PropertyName = "format", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public string Format;
 
-        [JsonProperty(PropertyName = "notifyChildProperty", DefaultValueHandling = DefaultValueHandling.Ignore)]
-        public bool NotifyChildProperty;
+        [JsonProperty(PropertyName = "notifyChanges", DefaultValueHandling = DefaultValueHandling.Ignore)]
+        public bool NotifyChanges;
 
         [JsonProperty(PropertyName = "validators", NullValueHandling = NullValueHandling.Ignore)]
         public List<DynamicValidator> Validators;

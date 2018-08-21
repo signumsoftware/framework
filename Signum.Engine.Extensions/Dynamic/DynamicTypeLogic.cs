@@ -461,8 +461,16 @@ namespace Signum.Engine.Dynamic
             if (property.Format != null)
                 atts.Add($"Format(\"{property.Format}\")");
 
-            if (property.NotifyChildProperty == true)
-                atts.Add("NotifyChildProperty");
+            if (property.NotifyChanges == true)
+            {
+                if (property.IsMList != null)
+                {
+                    atts.Add("NotifyCollectionChanged");
+                    atts.Add("NotifyChildProperty");
+                }
+                else if (property.Type.EndsWith("Embedded"))
+                    atts.Add("NotifyChildProperty");
+            }
 
             if (property.CustomPropertyAttributes.HasText())
                 atts.Add(property.CustomPropertyAttributes);

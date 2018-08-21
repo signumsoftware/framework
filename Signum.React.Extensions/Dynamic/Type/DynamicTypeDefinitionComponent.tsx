@@ -924,7 +924,7 @@ export class PropertyComponent extends React.Component<PropertyComponentProps>{
                             <ValueComponent dc={this.props.dc} labelColumns={4} binding={Binding.create(p, d => d.format)} type="string" defaultValue={null} />
                         }
                         {(p.isMList || isEmbedded(p.type)) &&
-                            <ValueComponent dc={this.props.dc} labelColumns={4} binding={Binding.create(p, d => d.notifyChildProperty)} type="boolean" defaultValue={null} />
+                            <ValueComponent dc={this.props.dc} labelColumns={4} binding={Binding.create(p, d => d.notifyChanges)} type="boolean" defaultValue={null} />
                         }
                     </div>
                     <div className="col-sm-6">
@@ -1058,6 +1058,17 @@ function autoFix(p: DynamicProperty) {
 
     if (p.validators.length == 0)
         delete p.validators;
+
+    if (p.unit != undefined && !allowUnit(p.type))
+        p.unit = undefined;
+
+    if (p.format != undefined && !allowFormat(p.type))
+        p.format = undefined;
+
+    if (p.isMList || isEmbedded(p.type))
+        p.notifyChanges = true;
+    else
+        p.notifyChanges = undefined;
 }
 
 function allowsSize(type: string) {
@@ -1291,7 +1302,9 @@ function allowUnit(type: string) {
 }
 
 function allowFormat(type: string) {
-    return allowUnit(type) ||
+    return isInteger(type) ||
+        isDecimal(type) ||
+        isReal(type) ||
         isDateTime(type) ||
         isTimeSpan(type);
 }
