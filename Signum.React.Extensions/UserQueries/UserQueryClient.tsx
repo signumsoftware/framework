@@ -96,7 +96,7 @@ export module Converter {
         return convertedFilters.then(filters => {
 
             fo.filterOptions = filters.map(f => ({
-                columnName: f.token,
+                token: f.token,
                 operation: f.operation,
                 value: f.value,
                 frozen: false
@@ -105,12 +105,12 @@ export module Converter {
             fo.columnOptionsMode = uq.columnsMode;
 
             fo.columnOptions = (uq.columns || []).map(f => ({
-                columnName: f.element.token!.tokenString,
+                token: f.element.token!.tokenString,
                 displayName: f.element.displayName
             }) as ColumnOption);
 
             fo.orderOptions = (uq.orders || []).map(f => ({
-                columnName: f.element.token!.tokenString,
+                token: f.element.token!.tokenString,
                 orderType: f.element.orderType
             }) as OrderOption);
 

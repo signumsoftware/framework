@@ -24,7 +24,7 @@ export default class Pop3Configuration extends React.Component<{ ctx: TypeContex
                 <ValueLine ctx={sc.subCtx(s => s.readTimeout)}  />
                 <ValueLine ctx={sc.subCtx(s => s.deleteMessagesAfter)}  />
                 <EntityRepeater ctx={sc.subCtx(s => s.clientCertificationFiles)}  />
-                {sc.value.isNew && <ValueSearchControlLine ctx={sc} findOptions={{queryName: Pop3ConfigurationEntity, parentColumn: "Pop3Configuration", parentValue: sc.value}}/> }
+                {sc.value.isNew && <ValueSearchControlLine ctx={sc} findOptions={{queryName: Pop3ConfigurationEntity, parentToken: "Pop3Configuration", parentValue: sc.value}}/> }
             </div>
         );
     }

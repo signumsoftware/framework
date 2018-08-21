@@ -51,8 +51,8 @@ export default class PrintPanelPage extends React.Component<{}, PrintPanelPageSt
                                 findOptions={{
                                     queryName: PrintLineEntity,
                                     filterOptions: [
-                                        { columnName: "State", value: "ReadyToPrint" as PrintLineState },
-                                        { columnName: "File.FileType", value: s.fileType },
+                                        { token: "State", value: "ReadyToPrint" as PrintLineState },
+                                        { token: "File.FileType", value: s.fileType },
                                     ]
                                 }} />)
                         }
@@ -62,7 +62,7 @@ export default class PrintPanelPage extends React.Component<{}, PrintPanelPageSt
                 <h3>{ProcessEntity.nicePluralName()}</h3>
                 <SearchControl findOptions={{
                         queryName: ProcessEntity,
-                        filterOptions: [{ columnName: "Entity.Data.(PrintPackage)", operation: "DistinctTo", value: undefined }],
+                        filterOptions: [{ token: "Entity.Data.(PrintPackage)", operation: "DistinctTo", value: undefined }],
                         pagination: { elementsPerPage: 10, mode: "Paginate", currentPage: 1 },
                     }}
                 />

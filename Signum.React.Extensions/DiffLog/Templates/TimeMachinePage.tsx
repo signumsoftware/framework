@@ -85,13 +85,13 @@ export default class TimeMachinePage extends React.Component<TimeMachinePageProp
                 {   
                     this.state.queryDescription && <SearchControl ref={sc => this.searchControl = sc} findOptions={{
                         queryName: lite.EntityType,
-                        filterOptions: [{ columnName: "Entity", operation: "EqualTo", value: lite }],
+                        filterOptions: [{ token: "Entity", operation: "EqualTo", value: lite }],
                         columnOptions: [
-                            { columnName: "Entity.SystemValidFrom" },
-                            ...Dic.getValues(this.state.queryDescription.columns).map(c => ({ columnName: c.name }) as ColumnOption)
+                            { token: "Entity.SystemValidFrom" },
+                            ...Dic.getValues(this.state.queryDescription.columns).map(c => ({ token: c.name }) as ColumnOption)
                         ],
                         columnOptionsMode: "Replace",
-                        orderOptions: [{ columnName: "Entity.SystemValidFrom", orderType: "Ascending" }],
+                        orderOptions: [{ token: "Entity.SystemValidFrom", orderType: "Ascending" }],
                         systemTime: { mode: "All" }
                     }}
                         onSelectionChanged={() => this.forceUpdate()}

@@ -122,7 +122,7 @@ export default class ChartTable extends React.Component<{ resultTable: ResultTab
 
                     if (col.parent)
                         columns.push({
-                            columnName: col.fullKey
+                            token: col.fullKey
                         });
                 }
             });
@@ -130,7 +130,7 @@ export default class ChartTable extends React.Component<{ resultTable: ResultTab
             window.open(Finder.findOptionsPath({
                 queryName: lcr.queryKey,
                 filterOptions: filters.map(fop => ({
-                    columnName: fop.token!.fullKey,
+                    token: fop.token!.fullKey,
                     operation: fop.operation,
                     value: fop.value,
                     frozen: fop.frozen,

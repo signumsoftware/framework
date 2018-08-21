@@ -22,7 +22,7 @@ export default class WorkflowConnectionModelComponent extends React.Component<{ 
                         <EntityLine ctx={ctx.subCtx(e => e.condition)} findOptions={{
                             queryName: WorkflowConditionEntity,
                             filterOptions: [
-                                { columnName: "Entity.MainEntityType", operation: "EqualTo", value: ctx.value.mainEntityType }
+                                { token: "Entity.MainEntityType", operation: "EqualTo", value: ctx.value.mainEntityType }
                             ]
                         }} /> : <div className="alert alert-warning">{WorkflowMessage.ToUse0YouSouldSetTheWorkflow1.niceToString(ctx.niceName(e => e.condition), ctx.niceName(e => e.mainEntityType))}</div>
                     : undefined}
@@ -31,7 +31,7 @@ export default class WorkflowConnectionModelComponent extends React.Component<{ 
                     <EntityLine ctx={ctx.subCtx(e => e.action)} findOptions={{
                         queryName: WorkflowActionEntity,
                         filterOptions: [
-                            { columnName: "Entity.MainEntityType", operation: "EqualTo", value: ctx.value.mainEntityType }
+                            { token: "Entity.MainEntityType", operation: "EqualTo", value: ctx.value.mainEntityType }
                         ]
                     }} />
                     : <div className="alert alert-warning">{WorkflowMessage.ToUse0YouSouldSetTheWorkflow1.niceToString(ctx.niceName(e => e.action), ctx.niceName(e => e.mainEntityType))}</div>}                        

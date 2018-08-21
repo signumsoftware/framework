@@ -40,12 +40,12 @@ export default class PredictorSubQuery extends React.Component<{ ctx: TypeContex
                         queryName: sq.query!.key,
                         groupResults: true,
                         filterOptions: filters.map(f => ({
-                            columnName: f.token!.fullKey,
+                            token: f.token!.fullKey,
                             operation: f.operation,
                             value: f.value
                         }) as FilterOption),
-                        columnOptions: [{ columnName: "Count" } as ColumnOption]
-                            .concat(sq.columns.map(mle => ({ columnName: mle.element.token && mle.element.token.tokenString, } as ColumnOption))),
+                        columnOptions: [{ token: "Count" } as ColumnOption]
+                            .concat(sq.columns.map(mle => ({ token: mle.element.token && mle.element.token.tokenString, } as ColumnOption))),
                         columnOptionsMode: "Replace",
                     };
 

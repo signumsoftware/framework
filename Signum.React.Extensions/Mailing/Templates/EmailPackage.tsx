@@ -19,7 +19,7 @@ export default class EmailPackage extends React.Component<{ ctx: TypeContext<Ema
                     <legend>{EmailMessageEntity.nicePluralName()}</legend>
                     <SearchControl findOptions={{
                         queryName: EmailMessageEntity,
-                        parentColumn: "package",
+                        parentToken: "package",
                         parentValue: e.value
                     }}/>
                 </fieldset>

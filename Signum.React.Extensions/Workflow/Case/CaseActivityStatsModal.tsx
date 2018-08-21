@@ -124,7 +124,7 @@ export class CaseActivityStatsComponent extends React.Component<CaseActivityStat
         return (
             <div>
                 <h3>{CaseNotificationEntity.nicePluralName()}</h3>
-                <SearchControl findOptions={{ queryName: CaseNotificationEntity, parentColumn: "CaseActivity", parentValue: stats.CaseActivity }} />
+                <SearchControl findOptions={{ queryName: CaseNotificationEntity, parentToken: "CaseActivity", parentValue: stats.CaseActivity }} />
             </div>
         );
     }
@@ -135,7 +135,7 @@ export class CaseActivityStatsComponent extends React.Component<CaseActivityStat
         return (
             <div>
                 <h3>{OperationLogEntity.nicePluralName()}</h3>
-                <SearchControl findOptions={{ queryName: OperationLogEntity, parentColumn: "Target", parentValue: stats.CaseActivity }} />
+                <SearchControl findOptions={{ queryName: OperationLogEntity, parentToken: "Target", parentValue: stats.CaseActivity }} />
             </div>
         );
     }
@@ -145,7 +145,7 @@ export class CaseActivityStatsComponent extends React.Component<CaseActivityStat
 
         Finder.find<CaseEntity>({
             queryName: CaseEntity,
-            filterOptions: [{ columnName: "Entity.DecompositionSurrogateActivity", value: this.props.stats.CaseActivity, frozen: true }]
+            filterOptions: [{ token: "Entity.DecompositionSurrogateActivity", value: this.props.stats.CaseActivity, frozen: true }]
         }, { autoSelectIfOne: true })
             .then(c => c && Navigator.navigate(c))
             .done();

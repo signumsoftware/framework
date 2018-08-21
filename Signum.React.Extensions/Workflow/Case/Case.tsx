@@ -105,10 +105,10 @@ export default class CaseComponent extends React.Component<CaseComponentProps, C
                         <SearchControl
                             findOptions={{
                                 queryName: CaseActivityEntity,
-                                parentColumn: "Case",
+                                parentToken: "Case",
                                 parentValue: ctx.value,
                                 orderOptions: [{
-                                    columnName: "StartDate",
+                                    token: "StartDate",
                                     orderType: "Ascending",
                                 }]
                             }}
@@ -122,11 +122,11 @@ export default class CaseComponent extends React.Component<CaseComponentProps, C
                         <SearchControl
                             findOptions={{
                                 queryName: CaseActivityEntity,
-                                parentColumn: "Case",
+                                parentToken: "Case",
                                 parentValue: ctx.value,
-                                filterOptions: [{ columnName: "DoneDate", operation: "EqualTo", value: null, frozen: true }],
+                                filterOptions: [{ token: "DoneDate", operation: "EqualTo", value: null, frozen: true }],
                                 orderOptions: [{
-                                    columnName: "StartDate",
+                                    token: "StartDate",
                                     orderType: "Descending",
                                 }]
                             }}

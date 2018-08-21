@@ -129,9 +129,11 @@ namespace Signum.Engine.MachineLearning
             {
                 List<QueryToken> parentKeys = sqe.Columns.Where(a => a.Usage == PredictorSubQueryColumnUsage.ParentKey).Select(a => a.Token.Token).ToList();
 
+                QueryDescription sqd = QueryLogic.Queries.QueryDescription(sqe.Query.ToQueryName());
+
                 Dictionary<string, string> tokenReplacements = mainQueryKeys.ZipStrict(parentKeys, (m, p) => KVP.Create(m.FullKey(), p.FullKey())).ToDictionaryEx();
 
-                Filter[] mainFilters = filters.Select(f => Replace(f, tokenReplacements)).ToArray();
+                Filter[] mainFilters = filters.Select(f => Replace(f, tokenReplacements, sqd)).ToArray();
 
                 List<Filter> additionalFilters = sqe.Filters.ToFilterList(false);
 
@@ -188,6 +190,8 @@ namespace Signum.Engine.MachineLearning
 
             if (filter is FilterCondition fc)
                 return new FilterCondition(Replace(fc.Token, tokenReplacements, qd), fc.Operation, fc.Value);
+
+            throw new UnexpectedValueException(filter);
         }
 
         private static QueryToken Replace(QueryToken token, Dictionary<string, string> tokenReplacements, QueryDescription qd)
@@ -201,7 +205,7 @@ namespace Signum.Engine.MachineLearning
             var newToken = bestKey == tokenFullKey ? tokenReplacements.GetOrThrow(bestKey) :
                 tokenReplacements.GetOrThrow(bestKey) + tokenFullKey.After(bestKey);
 
-            return QueryUtils.Parse(newToken)
+            return QueryUtils.Parse(newToken, qd, SubTokensOptions.CanAggregate | SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement);
 
         }
 

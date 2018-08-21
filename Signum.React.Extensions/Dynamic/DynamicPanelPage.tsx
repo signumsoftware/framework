@@ -366,7 +366,7 @@ export class CheckEvalType extends React.Component<CheckEvalTypeProps, CheckEval
             var fo = this.props.findOptions;
             var request = {
                 queryKey: getQueryKey(fo.queryName),
-                filters: (fo.filterOptions || []).map(fo => ({ token: fo.columnName, operation: fo.operation!, value: fo.value })),
+                filters: (fo.filterOptions || []).map(fo => ({ token: fo.token, operation: fo.operation!, value: fo.value })),
                 orders: [{ token: "Entity.Id", orderType: "Ascending" }],
                 count: 10000,
             } as QueryEntitiesRequest;

@@ -184,7 +184,7 @@ export default class ChartRenderer extends React.Component<ChartRendererProps> {
 
                         if (col.parent)
                             columns.push({
-                                columnName: col.fullKey
+                                token: col.fullKey
                             });
                     }
                 });
@@ -192,7 +192,7 @@ export default class ChartRenderer extends React.Component<ChartRendererProps> {
                 window.open(Finder.findOptionsPath({
                     queryName: cr.queryKey,
                     filterOptions: filters.map(fop => ({
-                        columnName: fop.token!.fullKey,
+                        token: fop.token!.fullKey,
                         operation: fop.operation,
                         value: fop.value,
                         frozen: fop.frozen,

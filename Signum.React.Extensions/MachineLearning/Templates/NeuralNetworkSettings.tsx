@@ -159,10 +159,10 @@ export default class NeuralNetworkSettings extends React.Component<{ ctx: TypeCo
             <FormGroup ctx={ctx} labelText={PredictorColumnUsage.niceToString(usage) + " columns"}>
                 {p.state != "Trained" ? <FormControlReadonly ctx={ctx}>?</FormControlReadonly> : <ValueSearchControl isBadge={true} isLink={true} findOptions={{
                     queryName: PredictorCodificationEntity,
-                    parentColumn: "Predictor",
+                    parentToken: "Predictor",
                     parentValue: p,
                     filterOptions: [
-                        { columnName: "Usage", value: usage }
+                        { token: "Usage", value: usage }
                     ]
                 }} />}
             </FormGroup>

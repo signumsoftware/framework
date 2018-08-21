@@ -29,7 +29,7 @@ export default class WorkflowHelpComponent extends React.Component<WorkflowHelpC
 
         Finder.find<WorkflowEntity>({
             queryName: WorkflowEntity,
-            parentColumn: "Entity.MainEntityType.CleanName",
+            parentToken: "Entity.MainEntityType.CleanName",
             parentValue: this.props.typeName,
         }).then(w => {
 
@@ -38,7 +38,7 @@ export default class WorkflowHelpComponent extends React.Component<WorkflowHelpC
 
             Finder.findMany<WorkflowActivityEntity>({
                 queryName: WorkflowActivityEntity,
-                parentColumn: "Workflow",
+                parentToken: "Workflow",
                 parentValue: w
             }).then(acts => {
 

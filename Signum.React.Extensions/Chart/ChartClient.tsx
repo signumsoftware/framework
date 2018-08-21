@@ -16,13 +16,15 @@ import * as QuickLinks from '@framework/QuickLinks'
 import { PseudoType, QueryKey, getQueryKey } from '@framework/Reflection'
 import {
     FindOptions, FilterOption, FilterOptionParsed, FilterOperation, OrderOption, OrderOptionParsed, ColumnOption,
-    FilterRequest, QueryRequest, Pagination, QueryTokenType, QueryToken, FilterType, SubTokensOptions, ResultTable, OrderRequest } from '@framework/FindOptions'
-import * as AuthClient  from '../Authorization/AuthClient'
-import { QueryFilterEmbedded, QueryColumnEmbedded, QueryOrderEmbedded} from '../UserQueries/Signum.Entities.UserQueries'
+    FilterRequest, QueryRequest, Pagination, QueryTokenType, QueryToken, FilterType, SubTokensOptions, ResultTable, OrderRequest
+} from '@framework/FindOptions'
+import * as AuthClient from '../Authorization/AuthClient'
+import { QueryFilterEmbedded, QueryColumnEmbedded, QueryOrderEmbedded } from '../UserQueries/Signum.Entities.UserQueries'
 
 import {
     UserChartEntity, ChartPermission, ChartMessage, ChartColumnEmbedded, ChartParameterEmbedded, ChartScriptEntity, ChartScriptParameterEmbedded, ChartRequest,
-    GroupByChart, ChartColumnType, IChartBase } from './Signum.Entities.Chart'
+    GroupByChart, ChartColumnType, IChartBase
+} from './Signum.Entities.Chart'
 import { QueryTokenEmbedded } from '../UserAssets/Signum.Entities.UserAssets'
 import ChartButton from './ChartButton'
 import ChartRequestView from './Templates/ChartRequestView'
@@ -43,7 +45,7 @@ export function start(options: { routes: JSX.Element[] }) {
             (ctx.searchControl.props.showBarExtensionOption && ctx.searchControl.props.showBarExtensionOption.showChartButton == false))
             return undefined;
 
-        return <ChartButton searchControl={ctx.searchControl}/>;
+        return <ChartButton searchControl={ctx.searchControl} />;
     });
 
     Navigator.addSettings(new EntitySettings(ChartScriptEntity, e => import('./ChartScript/ChartScript')));
@@ -257,8 +259,8 @@ export function synchronizeColumns(chart: IChartBase) {
             if (chart.groupResults == false || sc && sc.element.isGroupKey) {
                 const parentToken = cc.token.token!.parent;
                 cc.token = parentToken == undefined ? undefined : QueryTokenEmbedded.New({
-                    tokenString : parentToken && parentToken.fullKey,
-                    token : parentToken
+                    tokenString: parentToken && parentToken.fullKey,
+                    token: parentToken
                 });
                 cc.modified = true;
             }
@@ -290,7 +292,7 @@ function isValidParameterValue(value: string | null | undefined, scrptParameter:
 
 }
 
-function defaultParameterValue(scriptParameter: ChartScriptParameterEmbedded, relatedColumn: QueryToken | null |  undefined) {
+function defaultParameterValue(scriptParameter: ChartScriptParameterEmbedded, relatedColumn: QueryToken | null | undefined) {
 
     switch (scriptParameter.type) {
         case "Enum": return scriptParameter.enumValues.filter(a => a.typeFilter == undefined || relatedColumn == undefined || isChartColumnType(relatedColumn, a.typeFilter)).first().name;
@@ -313,7 +315,7 @@ export interface ChartOptions {
 }
 
 export interface ChartColumnOption {
-    columnName?: string;
+    token?: string;
     displayName?: string;
 }
 
@@ -329,9 +331,9 @@ export module Encoder {
             queryName: cr.queryKey,
             chartScript: cr.chartScript && cr.chartScript.name || undefined,
             groupResults: cr.groupResults,
-            filterOptions: cr.filterOptions.map(fo => ({ columnName: fo.token!.fullKey, operation: fo.operation, value: fo.value, frozen: fo.frozen } as FilterOption)),
-            orderOptions: cr.orderOptions.map(oo => ({ columnName: oo.token!.fullKey, orderType: oo.orderType } as OrderOption)),
-            columnOptions: cr.columns.map(co => ({ columnName: co.element.token && co.element.token.tokenString, displayName: co.element.displayName }) as ChartColumnOption),
+            filterOptions: cr.filterOptions.map(fo => ({ token: fo.token!.fullKey, operation: fo.operation, value: fo.value, frozen: fo.frozen } as FilterOption)),
+            orderOptions: cr.orderOptions.map(oo => ({ token: oo.token!.fullKey, orderType: oo.orderType } as OrderOption)),
+            columnOptions: cr.columns.map(co => ({ token: co.element.token && co.element.token.tokenString, displayName: co.element.displayName }) as ChartColumnOption),
             parameters: cr.parameters.map(p => ({ name: p.element.name, value: p.element.value }) as ChartParameterOption)
         };
     }
@@ -339,7 +341,7 @@ export module Encoder {
     export function chartPath(cr: ChartOptions | ChartRequest, userChart?: Lite<UserChartEntity>): string {
 
         var co = ChartRequest.isInstance(cr) ? toChartOptions(cr) : cr;
-        
+
         const query = {
             script: co.chartScript,
             groupResults: co.groupResults,
@@ -359,7 +361,7 @@ export module Encoder {
 
     export function encodeColumn(query: any, columns: ChartColumnOption[] | undefined) {
         if (columns)
-            columns.forEach((co, i) => query["column" + i] = (co.columnName || "") + (co.displayName ? ("~" + scapeTilde(co.displayName)) : ""));
+            columns.forEach((co, i) => query["column" + i] = (co.token || "") + (co.displayName ? ("~" + scapeTilde(co.displayName)) : ""));
     }
 
     export function encodeParameters(query: any, parameters: ChartParameterOption[] | undefined) {
@@ -371,34 +373,34 @@ export module Encoder {
 export module Decoder {
 
     export function parseChartRequest(queryName: string, query: any): Promise<ChartRequest> {
-        
+
         return getChartScripts().then(scripts => {
             return Finder.getQueryDescription(queryName).then(qd => {
 
                 const completer = new Finder.TokenCompleter(qd);
 
                 const fos = Finder.Decoder.decodeFilters(query);
-                fos.forEach(fo => completer.request(fo.columnName, SubTokensOptions.CanElement | SubTokensOptions.CanAnyAll | SubTokensOptions.CanAggregate));
+                fos.forEach(fo => completer.request(fo.token, SubTokensOptions.CanElement | SubTokensOptions.CanAnyAll | SubTokensOptions.CanAggregate));
 
                 const oos = Finder.Decoder.decodeOrders(query);
-                oos.forEach(oo => completer.request(oo.columnName, SubTokensOptions.CanElement | SubTokensOptions.CanAggregate));
+                oos.forEach(oo => completer.request(oo.token, SubTokensOptions.CanElement | SubTokensOptions.CanAggregate));
 
                 const cols = Decoder.decodeColumns(query);
-                cols.map(a => a.element.token).filter(te => te != undefined).forEach(te =>completer.request(te!.tokenString!, SubTokensOptions.CanAggregate | SubTokensOptions.CanElement));
+                cols.map(a => a.element.token).filter(te => te != undefined).forEach(te => completer.request(te!.tokenString!, SubTokensOptions.CanAggregate | SubTokensOptions.CanElement));
 
                 return completer.finished().then(() => {
 
                     cols.filter(a => a.element.token != null).forEach(a => a.element.token!.token = completer.get(a.element.token!.tokenString));
 
                     const chartRequest = ChartRequest.New({
-                        chartScript : query.script == undefined ? scripts.first("ChartScript").first() :
+                        chartScript: query.script == undefined ? scripts.first("ChartScript").first() :
                             scripts.flatMap(a => a).filter(cs => cs.name == query.script).single(`ChartScript '${query.queryKey}'`),
-                        queryKey : getQueryKey(queryName),
-                        groupResults : query.groupResults == "true",
-                        filterOptions : fos.map(fo => ({ token: completer.get(fo.columnName), operation: fo.operation, value: fo.value, frozen: fo.frozen }) as FilterOptionParsed),
-                        orderOptions : oos.map(oo => ({ token: completer.get(oo.columnName), orderType: oo.orderType }) as OrderOptionParsed),
-                        columns : cols,
-                        parameters : Decoder.decodeParameters(query),
+                        queryKey: getQueryKey(queryName),
+                        groupResults: query.groupResults == "true",
+                        filterOptions: fos.map(fo => ({ token: completer.get(fo.token), operation: fo.operation, value: fo.value, frozen: fo.frozen }) as FilterOptionParsed),
+                        orderOptions: oos.map(oo => ({ token: completer.get(oo.token), orderType: oo.orderType }) as OrderOptionParsed),
+                        columns: cols,
+                        parameters: Decoder.decodeParameters(query),
                     });
 
                     return Finder.parseFilterValues(chartRequest.filterOptions)
@@ -432,8 +434,8 @@ export module Decoder {
         return valuesInOrder(query, "param").map(val => ({
             rowId: null,
             element: ChartParameterEmbedded.New({
-                name : unscapeTildes(val.before("~")),
-                value : unscapeTildes(val.after("~")),
+                name: unscapeTildes(val.before("~")),
+                value: unscapeTildes(val.after("~")),
             })
         }));
     }
@@ -441,7 +443,7 @@ export module Decoder {
 
 
 export module API {
-    
+
     export function getRequest(request: ChartRequest): QueryRequest {
 
         return {
@@ -454,7 +456,7 @@ export module API {
         };
     }
 
-    export function toChartColumnType(token: QueryToken): ChartColumnType | null{
+    export function toChartColumnType(token: QueryToken): ChartColumnType | null {
         switch (token.filterType) {
             case "Lite": return "Lite";
             case "Boolean":
@@ -502,7 +504,7 @@ export module API {
                     toStr: date && moment(date).format(format),
                 };
             };
-        
+
         if (token.format && (token.filterType == "Decimal" || token.filterType == "Integer"))
             return v => {
                 var number = v as number | undefined;
@@ -538,14 +540,14 @@ export module API {
 
         var index = 0;
         var converters = request.columns.map(mle => {
-            var conv = getConverter(mle.element.token && mle.element.token.token); 
+            var conv = getConverter(mle.element.token && mle.element.token.token);
 
             if (conv == null)
                 return null;
 
             return {
                 conv,
-                index : index++
+                index: index++
             }
         });
 
@@ -593,12 +595,12 @@ export module API {
 
         return {
             resultTable: rt,
-            chartTable: chartTable,            
+            chartTable: chartTable,
         };
-    } 
+    }
 
     export function executeChart(request: ChartRequest, abortController?: FetchAbortController): Promise<ExecuteChartResult> {
-        
+
         const queryRequest = getRequest(request);
 
         return Finder.API.executeQuery(queryRequest, abortController).then(rt => toChartResult(request, rt));

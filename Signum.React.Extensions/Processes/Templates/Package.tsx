@@ -16,7 +16,7 @@ export default class Package extends React.Component<{ ctx: TypeContext<PackageE
                 <ValueLine ctx={e.subCtx(f => f.name)}  />
                 <fieldset>
                     <legend>{PackageLineEntity.nicePluralName()}</legend>
-                    <SearchControl findOptions={{ queryName: PackageQuery.PackageLineLastProcess, parentColumn: "Package", parentValue: e.value }} />
+                    <SearchControl findOptions={{ queryName: PackageQuery.PackageLineLastProcess, parentToken: "Package", parentValue: e.value }} />
                 </fieldset>
             </div>
         );

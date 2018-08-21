@@ -87,15 +87,15 @@ export default class WorkflowActivityStatsModal extends React.Component<Workflow
                     showGroupButton={true}
                     findOptions={{
                         queryName: CaseActivityEntity,
-                        parentColumn: "Entity.WorkflowActivity",
+                        parentToken: "Entity.WorkflowActivity",
                         parentValue: stats.WorkflowActivity,
                         filterOptions: this.props.config.filters
                             .filter(f => f.token && f.token.queryTokenType != "Aggregate")
-                            .map(a => ({ columnName: a.token!.fullKey, operation: a.operation, value: a.value, frozen: true }) as FilterOption),
+                            .map(a => ({ token: a.token!.fullKey, operation: a.operation, value: a.value, frozen: true }) as FilterOption),
                         columnOptionsMode: "Add",
                         columnOptions: this.props.config.columns
                             .filter(c => c.token && c.token.fullKey.contains("."))
-                            .map(c => ({ columnName: c.token!.fullKey.beforeLast(".") }) as ColumnOption),
+                            .map(c => ({ token: c.token!.fullKey.beforeLast(".") }) as ColumnOption),
                     }} />
             </div>
         );
