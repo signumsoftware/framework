@@ -37,17 +37,38 @@ namespace Signum.React.UserAssets
 
             using (request.entity != null ? CurrentEntityConverter.SetCurrentEntity(request.entity.Retrieve()) : null)
             {
-                var result = request.filters
-                        .Select(f => new FilterTS
-                        {
-                            token = f.tokenString,
-                            operation = f.operation,
-                            value = FilterValueConverter.Parse(f.valueString, QueryUtils.Parse(f.tokenString, qd, options).Type, f.operation.IsList(), allowSmart: true)
-                        })
-                        .ToList();
+                var result = ToFilterList(request.filters, qd, options, allowSmart: true).Select(f => FilterTS.FromFilter(f)).ToList();
 
                 return result;
             }
+        }
+
+        public static List<Filter> ToFilterList(IEnumerable<ParseFilterRequest> filters, QueryDescription qd, SubTokensOptions options, bool allowSmart, int indent = 0)
+        {
+            return filters.GroupWhen(filter => filter.identation == indent).Select(gr =>
+            {
+                if (!gr.Key.isGroup)
+                {
+                    if (gr.Count() != 0)
+                        throw new InvalidOperationException("Unexpected childrens of condition");
+
+                    var filter = gr.Key;
+
+                    var token = QueryUtils.Parse(filter.tokenString, qd, options);
+
+                    var value = FilterValueConverter.Parse(filter.valueString, token.Type, filter.operation.Value.IsList(), allowSmart: true);
+
+                    return (Filter)new FilterCondition(token, filter.operation.Value, value);
+                }
+                else
+                {
+                    var group = gr.Key;
+
+                    var token = group.tokenString == null ? null : QueryUtils.Parse(group.tokenString, qd, options);
+
+                    return (Filter)new FilterGroup(group.groupOperation.Value, token, ToFilterList(gr, qd, options, allowSmart, indent + 1).ToList());
+                }
+            }).ToList();
         }
 
         public class ParseFiltersRequest
@@ -60,9 +81,12 @@ namespace Signum.React.UserAssets
 
         public class ParseFilterRequest
         {
+            public bool isGroup;
             public string tokenString;
-            public FilterOperation operation;
+            public FilterOperation? operation;
             public string valueString;
+            public FilterGroupOperation? groupOperation;
+            public int identation;
         }
 
         [Route("api/userAssets/export"), HttpPost]

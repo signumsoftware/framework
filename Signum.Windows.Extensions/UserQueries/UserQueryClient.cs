@@ -134,8 +134,7 @@ namespace Signum.Windows.UserQueries
 
             return searchControl.GetQueryRequest(true).ToUserQuery(description, 
                 QueryClient.GetQuery(searchControl.QueryName), 
-                FindOptions.DefaultPagination, 
-                searchControl.SimpleFilterBuilder != null);
+                FindOptions.DefaultPagination);
         }
 
         internal static void ToSearchControl(UserQueryEntity uq, SearchControl searchControl)
@@ -144,8 +143,8 @@ namespace Signum.Windows.UserQueries
                  searchControl.FilterOptions.Where(f => f.Frozen).Concat(uq.Filters.Select(qf => new FilterOption
              {
                  ColumnName = qf.Token.Token.FullKey(),
-                 Operation = qf.Operation,
-                 Value = Signum.Entities.UserAssets.FilterValueConverter.Parse(qf.ValueString, qf.Token.Token.Type, isList: qf.Operation.IsList(), allowSmart: true)
+                 Operation = qf.Operation.Value,
+                 Value = Signum.Entities.UserAssets.FilterValueConverter.Parse(qf.ValueString, qf.Token.Token.Type, isList: qf.Operation.Value.IsList(), allowSmart: true)
              })).ToList();
 
             var columns = uq.Columns.Select(qc => new ColumnOption
@@ -171,8 +170,8 @@ namespace Signum.Windows.UserQueries
                 countSearchControl.FilterOptions.Where(f => f.Frozen).Concat(uq.Filters.Select(qf => new FilterOption
                 {
                     ColumnName = qf.Token.Token.FullKey(),
-                    Operation = qf.Operation,
-                    Value = Signum.Entities.UserAssets.FilterValueConverter.Parse(qf.ValueString, qf.Token.Token.Type, isList: qf.Operation.IsList(), allowSmart: true)
+                    Operation = qf.Operation.Value,
+                    Value = Signum.Entities.UserAssets.FilterValueConverter.Parse(qf.ValueString, qf.Token.Token.Type, isList: qf.Operation.Value.IsList(), allowSmart: true)
                 })).ToList();
 
             var columns = uq.Columns.Select(qc => new ColumnOption

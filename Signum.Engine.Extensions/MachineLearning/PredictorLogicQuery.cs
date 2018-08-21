@@ -139,7 +139,7 @@ namespace Signum.Engine.MachineLearning
 
                 GroupResults = mq.GroupResults,
 
-                Filters = mq.Filters.Select(f => ToFilter(f)).ToList(),
+                Filters = mq.Filters.ToFilterList(allowSmart: false),
 
                 Columns = mq.Columns.Select(c => new Column(c.Token.Token, null)).ToList(),
 
@@ -152,10 +152,10 @@ namespace Signum.Engine.MachineLearning
         {
             var parentKey = sq.Columns.SingleEx(a => a.Usage == PredictorSubQueryColumnUsage.ParentKey);
 
-            var mainFilters = mainQuery.Query.Is(sq.Query) ?
-                    mainQuery.Filters.Select(f => ToFilter(f)) :
-                    mainQuery.Filters.Select(f => ToFilterAppend(f, parentKey.Token.Token));
-            var additionalFilters = sq.Filters.Select(f => ToFilter(f)).ToList();
+            var filterList = mainQuery.Filters.ToFilterList(allowSmart: false);
+
+            var mainFilters = mainQuery.Query.Is(sq.Query) ? filterList : filterList.Select(f => PrependToken(f, parentKey.Token.Token)).ToList();
+            var additionalFilters = sq.Filters.ToFilterList(allowSmart: false);
 
             var columns = sq.Columns.Select(c => new Column(c.Token.Token, null)).ToList();
 
@@ -170,18 +170,16 @@ namespace Signum.Engine.MachineLearning
             };
         }
 
-        internal static Filter ToFilter(QueryFilterEmbedded f)
+        internal static Filter PrependToken(Filter filter, QueryToken prefix)
         {
-            return new Filter(f.Token.Token, f.Operation,
-                FilterValueConverter.Parse(f.ValueString, f.Token.Token.Type,  f.Operation.IsList(), allowSmart: false));
-        }
+            if (filter is FilterCondition fc)
+                return new FilterCondition(prefix.Append(fc.Token), fc.Operation, fc.Value);
 
-        static Filter ToFilterAppend(QueryFilterEmbedded f, QueryToken mainQueryKey)
-        {
-            QueryToken token = mainQueryKey.Append(f.Token.Token);
+            if (filter is FilterGroup fg)
+                return new FilterGroup(fg.GroupOperation, fg.Token == null ? null : prefix.Append(fg.Token),
+                    fg.Filters.Select(f => PrependToken(f, prefix)).ToList());
 
-            return new Filter(token, f.Operation,
-                FilterValueConverter.Parse(f.ValueString, token.Type, f.Operation.IsList(), allowSmart: false));
+            throw new UnexpectedValueException(filter);
         }
 
         static QueryToken Append(this QueryToken baseToken, QueryToken suffix)

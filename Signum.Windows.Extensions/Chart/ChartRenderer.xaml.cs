@@ -136,7 +136,7 @@ namespace Signum.Windows.Chart
             if (Request.GroupResults)
             {
                 //so the values don't get affected till next SetResults
-                var filters = Request.Filters.Select(f => new FilterOption { ColumnName = f.Token.FullKey(), Value = f.Value, Operation = f.Operation }).ToList();
+                var filters = Request.Filters.Cast<FilterCondition>().Select(f => new FilterOption { ColumnName = f.Token.FullKey(), Value = f.Value, Operation = f.Operation }).ToList();
                 var keyColunns = Request.Columns
                     .Zip(ResultTable.Columns, (t, c) => new { t.Token, Column = c })
                     .Where(a => !(a.Token.Token is AggregateToken)).ToArray();
@@ -147,7 +147,7 @@ namespace Signum.Windows.Chart
                     .Where(a => a.Value.ScriptColumn.IsGroupKey)
                     .Select(a => new KeyColumn { Position = a.Position, Token = a.Value.Token?.Token })
                     .ToList(),
-                    Filters = Request.Filters.Where(a => !(a.Token is AggregateToken)).Select(f => new FilterOption
+                    Filters = Request.Filters.Cast<FilterCondition>().Where(a => !(a.Token is AggregateToken)).Select(f => new FilterOption
                     {
                         Token = f.Token,
                         Operation = f.Operation,
@@ -199,7 +199,7 @@ namespace Signum.Windows.Chart
         {
             FilterOptions.Clear();
             if (Request.Filters != null)
-                FilterOptions.AddRange(Request.Filters.Select(f => new FilterOption
+                FilterOptions.AddRange(Request.Filters.Cast<FilterCondition>().Select(f => new FilterOption
                 {
                     Token = f.Token,
                     Operation = f.Operation,

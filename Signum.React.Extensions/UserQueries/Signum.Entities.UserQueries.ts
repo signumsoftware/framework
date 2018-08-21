@@ -21,8 +21,11 @@ export const QueryFilterEmbedded = new Type<QueryFilterEmbedded>("QueryFilterEmb
 export interface QueryFilterEmbedded extends Entities.EmbeddedEntity {
     Type: "QueryFilterEmbedded";
     token?: UserAssets.QueryTokenEmbedded | null;
-    operation?: DynamicQuery.FilterOperation;
+    isGroup?: boolean;
+    groupOperation?: DynamicQuery.FilterGroupOperation | null;
+    operation?: DynamicQuery.FilterOperation | null;
     valueString?: string | null;
+    indentation?: number;
 }
 
 export const QueryOrderEmbedded = new Type<QueryOrderEmbedded>("QueryOrderEmbedded");

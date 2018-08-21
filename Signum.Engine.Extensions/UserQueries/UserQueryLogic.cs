@@ -72,8 +72,7 @@ namespace Signum.Engine.UserQueries
             };
             if (!userQuery.AppendFilters)
             {
-                qr.Filters = userQuery.Filters.Select(qf =>
-                    new Filter(qf.Token.Token, qf.Operation, FilterValueConverter.Parse(qf.ValueString, qf.Token.Token.Type, qf.Operation.IsList(), allowSmart: true))).ToList();
+                qr.Filters = userQuery.Filters.ToFilterList(allowSmart: true);
             }
 
             qr.Columns = MergeColumns(userQuery);
@@ -286,11 +285,11 @@ namespace Signum.Engine.UserQueries
                         }
                     }
 
-                    foreach (var item in uq.Filters.ToList())
+                    foreach (var item in uq.Filters.Where(f => !f.IsGroup).ToList())
                     {
                         retry:
                         string val = item.ValueString;
-                        switch (QueryTokenSynchronizer.FixValue(replacements, item.Token.Token.Type, ref val, allowRemoveToken: true, isList: item.Operation.IsList()))
+                        switch (QueryTokenSynchronizer.FixValue(replacements, item.Token.Token.Type, ref val, allowRemoveToken: true, isList: item.Operation.Value.IsList()))
                         {
                             case FixTokenResult.Nothing: break;
                             case FixTokenResult.DeleteEntity: return table.DeleteSqlSync(uq, u => u.Guid == uq.Guid);

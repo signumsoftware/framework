@@ -23,7 +23,7 @@ namespace Signum.Engine.Workflow
 
             var filters = new List<Filter>
             {
-                new Filter(QueryUtils.Parse($"Entity.{nameof(CaseActivityEntity.Case)}.{nameof(CaseEntity.Workflow)}", qd, 0), FilterOperation.EqualTo, request.Workflow)
+                new FilterCondition(QueryUtils.Parse($"Entity.{nameof(CaseActivityEntity.Case)}.{nameof(CaseEntity.Workflow)}", qd, 0), FilterOperation.EqualTo, request.Workflow)
             };
             filters.AddRange(request.Filters);
             
