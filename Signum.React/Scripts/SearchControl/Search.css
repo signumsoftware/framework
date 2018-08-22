@@ -2,18 +2,18 @@
     min-height: 50px;
 }
 
-    body:not(.rtl) .sf-search-footer > div {
-        float: left;
-        width: 33%;
-    }
+body:not(.rtl) .sf-search-footer > div {
+    float: left;
+    width: 33%;
+}
 
-    body.rtl .sf-search-footer > div {
-        float: right;
-        width: 33%;
-    }
+body.rtl .sf-search-footer > div {
+    float: right;
+    width: 33%;
+}
 
 
-.btn-toolbar-small .btn{
+.btn-toolbar-small .btn {
     padding-top: 1px;
     padding-bottom: 1px;
 }
@@ -68,9 +68,9 @@ table.sf-search-results > tbody > tr > td {
     background-color: #f8f8f8;
 }
 
-.sf-search-results > thead > tr > th.noOrder{
-    cursor:default;
-}
+    .sf-search-results > thead > tr > th.noOrder {
+        cursor: default;
+    }
 
     .sf-search-results > thead > tr > th > span {
         white-space: pre;
@@ -100,10 +100,9 @@ table.sf-search-results > tbody > tr > td {
     border-radius: 4px;
 }
 
-.sf-column-editor.error
-{
-    background: #f2dede;
-}
+    .sf-column-editor.error {
+        background: #f2dede;
+    }
 
 .sf-system-time-editor {
     padding: 4px 8px;
@@ -118,16 +117,16 @@ table.sf-search-results th.sf-current-column {
     border-bottom: 2px solid #aaa;
 }
 
-table.sf-search-results th.sf-current-column.error {
-    background-color: #f2dede;
-    border-bottom: 2px solid #a94442;
-}
+    table.sf-search-results th.sf-current-column.error {
+        background-color: #f2dede;
+        border-bottom: 2px solid #a94442;
+    }
 
-td.numeric-cell{
+td.numeric-cell {
     text-align: right
 }
 
-td.centered-cell{
+td.centered-cell {
     text-align: center
 }
 
@@ -144,9 +143,10 @@ td.centered-cell{
         z-index: initial !important;
     }
 
-    .sf-popup-fullscreen {
-        font-size: 18px;
-    }
+.sf-popup-fullscreen {
+    font-size: 18px;
+    vertical-align: super;
+}
 
 .table-hover > tbody > tr:hover.sf-search-footer > td {
     background-color: transparent;
@@ -217,7 +217,7 @@ td.centered-cell{
 }
 
 .tooltip.error-tooltip .tooltip-arrow {
-   border-bottom-color: #ebcccc;
+    border-bottom-color: #ebcccc;
 }
 
 /*  Search Popup */
@@ -263,6 +263,7 @@ span.guid {
 tr.sf-entity-ctxmenu-success {
     opacity: .5;
 }
+
 span.sf-search-entity-error {
     border: 1px solid red;
     /* color: red; */
@@ -292,4 +293,4 @@ ul.sf-context-menu li a:not([disabled]) {
 
 .sf-query-token-part .rw-list-empty, .rw-list-option, .rw-list-optgroup {
     padding: 0 .5em;
-}    
+}

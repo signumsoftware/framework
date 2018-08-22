@@ -17,12 +17,12 @@ namespace Signum.Engine.Basics
 	{
 		public static Func<string> GetCurrentVersion;
 
-		public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
+		public static void Start(SchemaBuilder sb)
 		{
 			if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
 			{
                 sb.Include<ExceptionEntity>()
-                    .WithQuery(dqm, () => e => new
+                    .WithQuery(() => e => new
                     {
                         Entity = e,
                         e.Id,

@@ -1,6 +1,6 @@
 ﻿import * as React from 'react';
 import * as PropTypes from 'prop-types';
-import { Popper } from './Popper';
+import { Popper } from 'react-popper';
 import { classes } from '../Globals';
 
 export interface DropdownMenuProps extends React.HTMLAttributes<any> {
@@ -56,15 +56,15 @@ export class DropdownMenu extends React.Component<DropdownMenuProps> {
         
         let Tag = tag!;
 
-        //if (context.isOpen && !context.inNavbar) {
-        //    Tag = Popper;
+        if (context.isOpen && !context.inNavbar) {
+            Tag = Popper;
 
-        //    const position1 = directionPositionMap[context.direction] || 'bottom';
-        //    const position2 = right ? 'end' : 'start';
-        //    (attrs as any).placement = `${position1}-${position2}`;
-        //    (attrs as any).component = tag;
-        //    (attrs as any).modifiers = !flip ? noFlipModifier : undefined;
-        //}
+            const position1 = directionPositionMap[context.direction] || 'bottom';
+            const position2 = right ? 'end' : 'start';
+            (attrs as any).placement = `${position1}-${position2}`;
+            (attrs as any).component = tag;
+            (attrs as any).modifiers = !flip ? noFlipModifier : undefined;
+        }
 
         return (
             <Tag

@@ -152,7 +152,7 @@ namespace Signum.Engine.Operations
             IEnumerable<Enum> IOperation.UntypedToStates { get { return Enumerable.Empty<Enum>(); } }
             Type IOperation.StateType { get { return null; } }
 
-            public bool Lite { get; set; } = true;
+            public bool CanBeModified { get; set; }
             public bool LogAlsoIfNotSaved { get; set; }
 
             bool IOperation.Returns { get { return true; } }
@@ -162,7 +162,7 @@ namespace Signum.Engine.Operations
             Type IEntityOperation.BaseType { get { return baseType; } }
             bool IEntityOperation.HasCanExecute { get { return CanConstruct != null; } }
 
-            public bool AllowsNew { get; set; }
+            public bool CanBeNew { get; set; }
 
             public Func<F, string> CanConstruct { get; set; }
 
@@ -207,7 +207,7 @@ namespace Signum.Engine.Operations
 
             string OnCanConstruct(IEntity entity)
             {
-                if (entity.IsNew && !AllowsNew)
+                if (entity.IsNew && !CanBeNew)
                     return EngineMessage.TheEntity0IsNew.NiceToString().FormatWith(entity);
 
                 if (CanConstruct != null)
@@ -456,7 +456,7 @@ namespace Signum.Engine.Operations
             OperationSymbol IOperation.OperationSymbol { get { return Symbol.Symbol; } }
             Type IOperation.OverridenType { get { return typeof(T); } }
             OperationType IOperation.OperationType { get { return OperationType.Execute; } }
-            public bool Lite { get; set; }
+            public bool CanBeModified { get; set; }
             bool IOperation.Returns { get { return true; } }
             Type IOperation.ReturnType { get { return null; } }
             Type IOperation.StateType { get { return null; } }
@@ -466,7 +466,7 @@ namespace Signum.Engine.Operations
             IEnumerable<Enum> IOperation.UntypedFromStates { get { return Enumerable.Empty<Enum>(); } }
             IEnumerable<Enum> IOperation.UntypedToStates { get { return Enumerable.Empty<Enum>(); } }
 
-            public bool AllowsNew { get; set; }
+            public bool CanBeNew { get; set; }
 
             //public Action<T, object[]> Execute { get; set; } (inherited)
             public Func<T, string> CanExecute { get; set; }
@@ -485,7 +485,6 @@ namespace Signum.Engine.Operations
             public Execute(ExecuteSymbol<T> symbol)
             {
                 this.Symbol = symbol ?? throw AutoInitAttribute.ArgumentNullException(typeof(ExecuteSymbol<T>), nameof(symbol));
-                this.Lite = true;
             }
 
             string IEntityOperation.CanExecute(IEntity entity)
@@ -495,7 +494,7 @@ namespace Signum.Engine.Operations
 
             protected virtual string OnCanExecute(T entity)
             {
-                if (entity.IsNew && !AllowsNew)
+                if (entity.IsNew && !CanBeNew)
                     return EngineMessage.TheEntity0IsNew.NiceToString().FormatWith(entity);
 
                 if (CanExecute != null)
@@ -595,14 +594,14 @@ namespace Signum.Engine.Operations
             OperationSymbol IOperation.OperationSymbol { get { return Symbol.Symbol; } }
             Type IOperation.OverridenType { get { return typeof(T); } }
             OperationType IOperation.OperationType { get { return OperationType.Delete; } }
-            public bool Lite { get; set; }
+            public bool CanBeModified { get; set; }
             bool IOperation.Returns { get { return false; } }
             Type IOperation.ReturnType { get { return null; } }
             IEnumerable<Enum> IOperation.UntypedFromStates { get { return Enumerable.Empty<Enum>(); } }
             IEnumerable<Enum> IOperation.UntypedToStates { get { return null; } }
             Type IOperation.StateType { get { return null; } }
 
-            public bool AllowsNew { get { return false; } }
+            public bool CanBeNew { get { return false; } }
 
             Type IEntityOperation.BaseType { get { return Symbol.BaseType; } }
             bool IEntityOperation.HasCanExecute { get { return CanDelete != null; } }
@@ -624,7 +623,6 @@ namespace Signum.Engine.Operations
             public Delete(DeleteSymbol<T> symbol)
             {
                 this.Symbol = symbol ?? throw AutoInitAttribute.ArgumentNullException(typeof(DeleteSymbol<T>), nameof(symbol));
-                this.Lite = true;
             }
 
             string IEntityOperation.CanExecute(IEntity entity)

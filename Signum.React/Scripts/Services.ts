@@ -11,7 +11,6 @@ export interface AjaxOptions {
     avoidGraphExplorer?: boolean;
     avoidAuthToken?: boolean;
     avoidVersionCheck?: boolean;
-
     
     headers?: { [index: string]: string };
     mode?: string;
@@ -19,7 +18,6 @@ export interface AjaxOptions {
     cache?: string;
     abortController?: FetchAbortController;
 }
-
 
 export function baseUrl(options: AjaxOptions): string {
     const baseUrl = window.__baseUrl;
@@ -243,10 +241,10 @@ export class ServiceError {
 
     get defaultIcon() {
         switch (this.httpError.exceptionType) {
-            case "UnauthorizedAccessException": return "glyphicon-lock";
-            case "EntityNotFoundException": return "glyphicon-trash";
-            case "UniqueKeyException": return "glyphicon-duplicate";
-            default: return "glyphicon-alert";
+            case "UnauthorizedAccessException": return "lock";
+            case "EntityNotFoundException": return "trash";
+            case "UniqueKeyException": return "clone";
+            default: return "exclamation-triangle";
         }
     }
 

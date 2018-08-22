@@ -20,6 +20,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Signum.Utilities.ExpressionTrees;
 using Microsoft.AspNetCore.Mvc;
+using System.Linq.Expressions;
 
 namespace Signum.React.ApiControllers
 {
@@ -33,21 +34,31 @@ namespace Signum.React.ApiControllers
             return await AutocompleteUtils.FindLiteLikeAsync(implementations, subString, count, token);
         }
 
-        [Route("api/query/findLiteLikeWithFilters"), HttpPost, ProfilerActionSplitter("types")]
-        public async Task<List<Lite<Entity>>> FindLiteLikeWithFilters([FromBody]AutocompleteQueryRequestTS request, CancellationToken token)
+        [Route("api/query/findRowsLike"), HttpPost, ProfilerActionSplitter("types")]
+        public async Task<ResultTable> FindRowsLike([FromBody]AutocompleteQueryRequestTS request, CancellationToken token)
         {
             var qn = QueryLogic.ToQueryName(request.queryKey);
-            var qd = DynamicQueryManager.Current.QueryDescription(qn);
+            var qd = QueryLogic.Queries.QueryDescription(qn);
 
-            var entitiesQuery = DynamicQueryManager.Current.GetEntities(new QueryEntitiesRequest
+            var dqRequest = new DQueryableRequest
             {
                 QueryName = qn,
+                Columns = request.columns.EmptyIfNull().Select(a => a.ToColumn(qd, false)).ToList(),
                 Filters = request.filters.EmptyIfNull().Select(a => a.ToFilter(qd, false)).ToList(),
-                Orders = request.orders.EmptyIfNull().Select(a=>a.ToOrder(qd, false)).ToList()
-            });
+                Orders = request.orders.EmptyIfNull().Select(a => a.ToOrder(qd, false)).ToList()
+            };
+            
+            var dqueryable = QueryLogic.Queries.GetDQueryable(dqRequest);
             var entityType = qd.Columns.Single(a => a.IsEntity).Implementations.Value.Types.SingleEx();
 
-            return await entitiesQuery.AutocompleteUntypedAsync(request.subString, request.count, entityType, token);
+            var result = await dqueryable.Query.AutocompleteUntypedAsync(dqueryable.Context.GetEntitySelector(), request.subString, request.count, entityType, token);
+
+            var columnAccessors = dqRequest.Columns.Select(c => (
+                column: c,
+                lambda: Expression.Lambda(c.Token.BuildExpression(dqueryable.Context), dqueryable.Context.Parameter)
+            )).ToList();
+
+            return DQueryable.ToResultTable(result.ToArray(), columnAccessors, null, new Pagination.Firsts(request.count));
         }
 
         [Route("api/query/allLites"), HttpGet, ProfilerActionSplitter("types")]
@@ -67,7 +78,7 @@ namespace Signum.React.ApiControllers
         public QueryDescriptionTS GetQueryDescription(string queryName)
         {
             var qn = QueryLogic.ToQueryName(queryName);
-            return new QueryDescriptionTS(DynamicQueryManager.Current.QueryDescription(qn));
+            return new QueryDescriptionTS(QueryLogic.Queries.QueryDescription(qn));
         }
 
         [Route("api/query/queryEntity/{queryName}"), ProfilerActionSplitter("queryName")]
@@ -81,7 +92,7 @@ namespace Signum.React.ApiControllers
         public List<QueryTokenTS> ParseTokens([FromBody]ParseTokensRequest request)
         {
             var qn = QueryLogic.ToQueryName(request.queryKey);
-            var qd = DynamicQueryManager.Current.QueryDescription(qn);
+            var qd = QueryLogic.Queries.QueryDescription(qn);
 
             var tokens = request.tokens.Select(tr => QueryUtils.Parse(tr.token, qd, tr.options)).ToList();
 
@@ -105,7 +116,7 @@ namespace Signum.React.ApiControllers
         public List<QueryTokenTS> SubTokens([FromBody]SubTokensRequest request)
         {
             var qn = QueryLogic.ToQueryName(request.queryKey);
-            var qd = DynamicQueryManager.Current.QueryDescription(qn);
+            var qd = QueryLogic.Queries.QueryDescription(qn);
 
             var token = request.token == null ? null: QueryUtils.Parse(request.token, qd, request.options);
 
@@ -125,24 +136,20 @@ namespace Signum.React.ApiControllers
         [Route("api/query/executeQuery"), HttpPost, ProfilerActionSplitter]
         public async Task<ResultTable> ExecuteQuery([FromBody]QueryRequestTS request, CancellationToken token)
         {
-            var result = await DynamicQueryManager.Current.ExecuteQueryAsync(request.ToQueryRequest(), token);
+            var result = await QueryLogic.Queries.ExecuteQueryAsync(request.ToQueryRequest(), token);
             return result;
         }
 
         [Route("api/query/entitiesWithFilter"), HttpPost, ProfilerActionSplitter]
         public async Task<List<Lite<Entity>>> GetEntitiesWithFilter([FromBody]QueryEntitiesRequestTS request, CancellationToken token)
         {
-     
-
-
-
-            return await DynamicQueryManager.Current.GetEntities(request.ToQueryEntitiesRequest()).ToListAsync();
+            return await QueryLogic.Queries.GetEntities(request.ToQueryEntitiesRequest()).ToListAsync();
         }
 
         [Route("api/query/queryCount"), HttpPost, ProfilerActionSplitter]
         public async Task<object> QueryCount([FromBody]QueryValueRequestTS request, CancellationToken token)
         {
-            return await DynamicQueryManager.Current.ExecuteQueryCountAsync(request.ToQueryCountRequest(), token);
+            return await QueryLogic.Queries.ExecuteQueryCountAsync(request.ToQueryCountRequest(), token);
         }
     }
 
@@ -155,7 +162,7 @@ namespace Signum.React.ApiControllers
         public QueryValueRequest ToQueryCountRequest()
         {
             var qn = QueryLogic.ToQueryName(this.querykey);
-            var qd = DynamicQueryManager.Current.QueryDescription(qn);
+            var qd = QueryLogic.Queries.QueryDescription(qn);
 
             var value = valueToken.HasText() ? QueryUtils.Parse(valueToken, qd, SubTokensOptions.CanAggregate | SubTokensOptions.CanElement) : null;
 
@@ -174,6 +181,7 @@ namespace Signum.React.ApiControllers
     {
         public string queryKey;
         public List<FilterTS> filters;
+        public List<ColumnTS> columns;
         public List<OrderTS> orders;
         public string subString;
         public int count;
@@ -193,7 +201,7 @@ namespace Signum.React.ApiControllers
         public QueryRequest ToQueryRequest()
         {
             var qn = QueryLogic.ToQueryName(this.queryKey);
-            var qd = DynamicQueryManager.Current.QueryDescription(qn);
+            var qd = QueryLogic.Queries.QueryDescription(qn);
 
             return new QueryRequest
             {
@@ -223,7 +231,7 @@ namespace Signum.React.ApiControllers
         public QueryEntitiesRequest ToQueryEntitiesRequest()
         {
             var qn = QueryLogic.ToQueryName(queryKey);
-            var qd = DynamicQueryManager.Current.QueryDescription(qn);
+            var qd = QueryLogic.Queries.QueryDescription(qn);
             return new QueryEntitiesRequest
             {
                 QueryName = qn,

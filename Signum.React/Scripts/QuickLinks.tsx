@@ -1,4 +1,6 @@
 ﻿import * as React from 'react'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { IconProp } from '@fortawesome/fontawesome-svg-core'
 import { TypeContext, StyleContext, StyleOptions, FormGroupStyle } from './TypeContext'
 import { PropertyRouteType, MemberInfo, getTypeInfo, TypeInfo, getQueryNiceName, getQueryKey, PseudoType, getTypeName, Type } from './Reflection'
 import { classes, Dic } from './Globals'
@@ -135,7 +137,6 @@ export class QuickLinkWidget extends React.Component<QuickLinkWidgetProps, { lin
     }
 
     render() {
-
         const links = this.state.links;
 
         if (links != undefined && links.length == 0)
@@ -151,15 +152,14 @@ export class QuickLinkWidget extends React.Component<QuickLinkWidgetProps, { lin
                         href="#"
                         data-toggle="dropdown"
                         onClick={e => e.preventDefault()} >
-                        {links && <span className="fa fa-star"></span>}
+                        {links && <FontAwesomeIcon icon="star" />}
                         {links ? "\u00A0" + links.length : "…"}
-                    </a >
+                    </a>
                 </DropdownToggle>
                 <DropdownMenu right>
                     {!links ? [] : links.orderBy(a => a.order).map((a, i) => React.cloneElement(a.toDropDownItem(), { key: i }))}
                 </DropdownMenu>
             </UncontrolledDropdown>
-
         );
     }
 }
@@ -169,7 +169,7 @@ export interface QuickLinkOptions {
     isVisible?: boolean;
     text?: string;
     order?: number;
-    icon?: string;
+    icon?: IconProp;
     iconColor?: string;
 }
 
@@ -178,7 +178,7 @@ export abstract class QuickLink {
     text!: string;
     order!: number;
     name: string;
-    icon?: string;
+    icon?: IconProp;
     iconColor?: string;
 
     constructor(name: string, options?: QuickLinkOptions) {
@@ -194,10 +194,7 @@ export abstract class QuickLink {
             return undefined;
 
         return (
-            <span
-                className={classes("icon", this.icon)}
-                style={{ color: this.iconColor }}>
-            </span>
+            <FontAwesomeIcon icon={this.icon} className="icon" color={this.iconColor}/>
         );
     }
 }

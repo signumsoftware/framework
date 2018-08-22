@@ -611,6 +611,8 @@ JOIN {3} {4} ON {2}.{0} = {4}.Id".FormatWith(tabCol.Name,
                 tabCol.ReferenceTable.Name.Name));
         }
 
+        public static Func<DiffTable, bool> IgnoreTable = null;
+
         public static Dictionary<string, DiffTable> DefaultGetDatabaseDescription(List<DatabaseName> databases)
         {
             List<DiffTable> allTables = new List<DiffTable>();
@@ -738,6 +740,9 @@ JOIN {3} {4} ON {2}.{0} = {4}.Id".FormatWith(tabCol.Name,
                                       }).ToList(),
 
                          }).ToList();
+
+                    if (IgnoreTable != null)
+                        tables.RemoveAll(IgnoreTable);
 
                     tables.ForEach(t => t.ForeignKeysToColumns());
 

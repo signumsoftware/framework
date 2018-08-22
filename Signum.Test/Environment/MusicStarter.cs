@@ -49,13 +49,12 @@ namespace Signum.Test.Environment
         public static void Start(string connectionString)
         {
             SchemaBuilder sb = new SchemaBuilder(true);
-            DynamicQueryManager dqm = new DynamicQueryManager();
 
-            //Connector.Default = new SqlCeConnector(@"Data Source=C:\BaseDatos.sdf", sb.Schema, dqm);
+            //Connector.Default = new SqlCeConnector(@"Data Source=C:\BaseDatos.sdf", sb.Schema);
 
             var sqlVersion = SqlServerVersionDetector.Detect(connectionString);
 
-            Connector.Default = new SqlConnector(connectionString, sb.Schema, dqm, sqlVersion ?? SqlServerVersion.SqlServer2017);
+            Connector.Default = new SqlConnector(connectionString, sb.Schema, sqlVersion ?? SqlServerVersion.SqlServer2017);
             
             sb.Schema.Version = typeof(MusicStarter).Assembly.GetName().Version;
 
@@ -75,12 +74,12 @@ namespace Signum.Test.Environment
 
             Validator.PropertyValidator((OperationLogEntity e) => e.User).Validators.Clear();
             
-            TypeLogic.Start(sb, dqm);
+            TypeLogic.Start(sb);
 
-            OperationLogic.Start(sb, dqm);
-            ExceptionLogic.Start(sb, dqm);
+            OperationLogic.Start(sb);
+            ExceptionLogic.Start(sb);
 
-            MusicLogic.Start(sb, dqm);
+            MusicLogic.Start(sb);
 
             sb.Schema.OnSchemaCompleted();
         }

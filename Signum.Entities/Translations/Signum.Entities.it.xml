@@ -309,7 +309,7 @@
     <Member Name="Operations" Description="Operazioni" />
     <Member Name="Query0IsNotAllowed" Description="Query {0} non è consentita" />
     <Member Name="Query0NotAllowed" Description="Query {0} non è consentita" />
-    <Member Name="Query0NotRegistered" Description="Query {0} non è registrato nella DynamicQueryManager" />
+    <Member Name="Query0NotRegistered" Description="Query {0} non è registrato nella QueryLogic.Queries" />
     <Member Name="Rename" Description="Rinominare" />
     <Member Name="Search" Description="Cerca" />
     <Member Name="SearchControl_Pagination_All" Description="Tutti" />

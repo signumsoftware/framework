@@ -1,21 +1,23 @@
 ﻿import * as React from 'react'
 import * as ReactDOM from 'react-dom'
 import { classes, Dic } from '../Globals'
-import { Popper, Manager, Reference } from './Popper';
+import { Popper, Manager, Target } from 'react-popper';
+
+
 
 export interface TypeaheadProps {
     value?: string;
     onChange?: (newValue: string) => void;
     onBlur?: () => void;
-    getItems: (query: string) => Promise<any[]>;
+    getItems: (query: string) => Promise<unknown[]>;
     getItemsDelay?: number;
     minLength?: number;
     renderList?: (typeAhead: Typeahead) => React.ReactNode;
-    renderItem?: (item: any, query: string) => React.ReactNode;
-    onSelect?: (item: any, e: React.KeyboardEvent<any> | React.MouseEvent<any>) => string | null;
+    renderItem?: (item: unknown, query: string) => React.ReactNode;
+    onSelect?: (item: unknown, e: React.KeyboardEvent<any> | React.MouseEvent<any>) => string | null;
     scrollHeight?: number;
     inputAttrs?: React.InputHTMLAttributes<HTMLInputElement>;
-    itemAttrs?: (item: any) => React.LiHTMLAttributes<HTMLButtonElement>;
+    itemAttrs?: (item: unknown) => React.LiHTMLAttributes<HTMLButtonElement>;
     noResultsMessage?: string;
 }
 
@@ -25,7 +27,6 @@ export interface TypeaheadState {
     query?: string;
     selectedIndex?: number;
 }
-
 
 export class Typeahead extends React.Component<TypeaheadProps, TypeaheadState>
 {
@@ -60,8 +61,8 @@ export class Typeahead extends React.Component<TypeaheadProps, TypeaheadState>
         getItems: undefined as any,
         getItemsDelay: 200,
         minLength: 1,
-        renderItem: Typeahead.highlightedText,
-        onSelect: (elem, event) => elem,
+        renderItem: (item, query) => Typeahead.highlightedText(item as string, query),
+        onSelect: (elem, event) => (elem as string),
         scrollHeight: 0,
         noResultsMessage: " - No results -",
     };
@@ -244,26 +245,19 @@ export class Typeahead extends React.Component<TypeaheadProps, TypeaheadState>
 
     render() {
         return (
-            <Manager>
-                <Reference innerRef={inp => this.input = inp as HTMLInputElement}>
-                    {({ ref }) => <input type="text" autoComplete="off" {...this.props.inputAttrs}
-                        ref={ref}
+            <Manager tag={false}>
+                <Target innerRef={inp => this.input = inp as HTMLInputElement}>
+                    {({ targetProps }) => <input type="text" autoComplete="off" {...this.props.inputAttrs} {...targetProps as any}
                         value={this.props.value}
                         onFocus={this.handleFocus}
                         onBlur={this.handleBlur}
                         onKeyUp={this.handleKeyUp}
                         onKeyDown={this.handleKeyDown}
                         onChange={this.handleOnChange}
-                    />}
-                </Reference>
-                {this.state.shown && <Popper placement={this.rtl ? "bottom-end" : "bottom-start"}>
-                    {({ ref, style, placement, arrowProps }) => (
-                        <div ref={ref} style={{ zIndex: 1000, ...style }} data-placement={placement}>
-                            {this.props.renderList ? this.props.renderList(this) : this.renderDefaultList()}
-                            <div ref={arrowProps.ref} style={arrowProps.style} />
-                        </div>)
+                    />
                     }
-                </Popper>}
+                </Target>
+                {this.state.shown && <Popper placement={this.rtl ? "bottom-end" : "bottom-start"} style={{ zIndex: 1000 }}>{this.props.renderList ? this.props.renderList(this) : this.renderDefaultList()}</Popper>}
             </Manager>
         );
     }
@@ -296,7 +290,7 @@ export class Typeahead extends React.Component<TypeaheadProps, TypeaheadState>
     }
 
     handleDocumentClick = (e: MouseEvent | TouchEvent) => {
-        if ((e as TouchEvent).which === 3)
+        if ((e as MouseEvent).which === 3)
             return;
 
         const container = ReactDOM.findDOMNode(this) as HTMLElement;
@@ -308,7 +302,7 @@ export class Typeahead extends React.Component<TypeaheadProps, TypeaheadState>
         this.setState({ shown: false });
     }
 
-    renderDefaultList(): React.ReactNode {
+    renderDefaultList() {
         return (
             <div className={classes("typeahead dropdown-menu show", this.rtl && "dropdown-menu-right")} >
                 {
@@ -318,7 +312,7 @@ export class Typeahead extends React.Component<TypeaheadProps, TypeaheadState>
                             onMouseEnter={e => this.handleElementMouseEnter(e, i)}
                             onMouseLeave={e => this.handleElementMouseLeave(e, i)}
                             onMouseUp={e => this.handleMenuMouseUp(e, i)}
-                            {...this.props.itemAttrs && this.props.itemAttrs(item)}>
+                            {...this.props.itemAttrs && this.props.itemAttrs(item)}>                            
                             {this.props.renderItem!(item, this.state.query!)}
                         </button>)
                 }

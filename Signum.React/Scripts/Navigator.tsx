@@ -1,18 +1,16 @@
 ﻿import * as React from "react"
 import * as H from "history"
-import { Router, Route, Redirect, RouterChildContext, RouteProps, Switch, match, matchPath } from "react-router"
+import { Route, Switch } from "react-router"
 import { Dic, } from './Globals';
 import { ajaxGet, ajaxPost } from './Services';
-import { openModal } from './Modals';
-import { Lite, Entity, ModifiableEntity, EmbeddedEntity, ModelEntity, LiteMessage, EntityPack, isEntity, isLite, isEntityPack, toLite } from './Signum.Entities';
+import { Lite, Entity, ModifiableEntity, EntityPack, isEntity, isLite, isEntityPack, toLite } from './Signum.Entities';
 import { IUserEntity, TypeEntity } from './Signum.Entities.Basics';
-import { PropertyRoute, PseudoType, EntityKind, TypeInfo, IType, Type, getTypeInfo, getTypeInfos, getTypeName, isTypeEmbeddedOrValue, isTypeModel, KindOfType, OperationType, TypeReference, IsByAll } from './Reflection';
+import { PropertyRoute, PseudoType, Type, getTypeInfo, getTypeInfos, getTypeName, isTypeEmbeddedOrValue, isTypeModel, OperationType, TypeReference, IsByAll } from './Reflection';
 import { TypeContext } from './TypeContext';
 import * as Finder from './Finder';
 import * as Operations from './Operations';
-import FrameModal from './Frames/FrameModal';
 import { ViewReplacer } from './Frames/ReactVisitor'
-import { AutocompleteConfig, FindOptionsAutocompleteConfig, LiteAutocompleteConfig } from './Lines/AutocompleteConfig'
+import { AutocompleteConfig, FindOptionsAutocompleteConfig, LiteAutocompleteConfig } from './Lines/AutoCompleteConfig'
 import { FindOptions } from './FindOptions'
 import { ImportRoute } from "./AsyncImport";
 import * as AppRelativeRoutes from "./AppRelativeRoutes";
@@ -864,15 +862,14 @@ export class ViewPromise<T extends ModifiableEntity> {
     }
 
     applyViewOverrides(typeName: string, viewName?: string): ViewPromise<T> {
-        
         this.promise = this.promise.then(func =>
             viewDispatcher.getViewOverrides(typeName, viewName).then(vos => {
-            return (ctx: TypeContext<T>) => {
-                var result = func(ctx);
-                var component = result.type as React.ComponentClass<{ ctx: TypeContext<T> }>;
-                    monkeyPatchComponent(component, vos!);
-                return result;
-            };
+                return (ctx: TypeContext<T>) => {
+                    var result = func(ctx);
+                    var component = result.type as React.ComponentClass<{ ctx: TypeContext<T> }>;
+                    monkeyPatchComponent<T>(component, vos!);
+                    return result;
+                };
             }));
 
         return this;

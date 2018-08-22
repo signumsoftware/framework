@@ -89,8 +89,7 @@ namespace Signum.Engine
 
         public SqlServerVersion Version { get; set; }
 
-        public SqlConnector(string connectionString, Schema schema, DynamicQueryManager dqm, SqlServerVersion version)
-            : base(schema, dqm)
+        public SqlConnector(string connectionString, Schema schema, SqlServerVersion version) : base(schema)
         {
             this.connectionString = connectionString;
             this.ParameterBuilder = new SqlParameterBuilder();
@@ -481,7 +480,7 @@ namespace Signum.Engine
             if (database == null)
                 return this;
 
-            return new SqlConnector(Replace(connectionString, database), this.Schema, this.DynamicQueryManager, this.Version);
+            return new SqlConnector(Replace(connectionString, database), this.Schema, this.Version);
         }
 
         private static string Replace(string connectionString, DatabaseName item)

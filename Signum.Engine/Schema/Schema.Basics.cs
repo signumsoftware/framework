@@ -916,7 +916,7 @@ namespace Signum.Engine.Maps
             yield return KVP.Create(ColumnType.ReferenceTable, new RelationInfo
             {
                  IsNullable = this.ColumnType.Nullable.ToBool(),
-                IsLite = true,
+                 IsLite = this.IsLite,
                  IsImplementedByAll = true,
             });
         }

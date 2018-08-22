@@ -8,33 +8,55 @@ using Signum.Utilities;
 using System.Reflection;
 using Signum.Entities.DynamicQuery;
 using Signum.Utilities.Reflection;
+using Signum.Entities;
 
 namespace Signum.Engine.Basics
 {
     public static class QueryLogic
     {
         static ResetLazy<Dictionary<string, object>> queryNamesLazy;
-        public static Dictionary<string, object> QueryNames 
-        { 
-            get { return queryNamesLazy.Value; } 
-        }
+        public static Dictionary<string, object> QueryNames => queryNamesLazy.Value; 
 
         static ResetLazy<Dictionary<object, QueryEntity>> queryNameToEntityLazy;
-        public static Dictionary<object, QueryEntity> QueryNameToEntity 
+        public static Dictionary<object, QueryEntity> QueryNameToEntity => queryNameToEntityLazy.Value;
+
+        public static DynamicQueryContainer Queries { get; } = new DynamicQueryContainer();
+        public static ExpressionContainer Expressions { get; } = new ExpressionContainer();
+
+        static QueryLogic()
         {
-            get { return queryNameToEntityLazy.Value; }
+            QueryToken.EntityExtensions = parent => Expressions.GetExtensions(parent);
+            ExtensionToken.BuildExtension = (parentType, key, parentExpression) => Expressions.BuildExtension(parentType, key, parentExpression);
+            QueryToken.ImplementedByAllSubTokens = GetImplementedByAllSubTokens;
+            QueryToken.IsSystemVersioned = IsSystemVersioned;
         }
+
+        static bool IsSystemVersioned(Type type)
+        {
+            var table = Schema.Current.Tables.TryGetC(type);
+            return table != null && table.SystemVersioned != null;
+        }
+
+        static List<QueryToken> GetImplementedByAllSubTokens(QueryToken queryToken, Type type, SubTokensOptions options)
+        {
+            var cleanType = type.CleanType();
+            return Schema.Current.Tables.Keys
+                .Where(t => cleanType.IsAssignableFrom(t))
+                .Select(t => (QueryToken)new AsTypeToken(queryToken, t))
+                .ToList();
+        }
+
 
         public static void AssertStarted(SchemaBuilder sb)
         {
-            sb.AssertDefined(ReflectionTools.GetMethodInfo(() => Start(sb, null)));
+            sb.AssertDefined(ReflectionTools.GetMethodInfo(() => Start(sb)));
         }
 
-        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
+        public static void Start(SchemaBuilder sb)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
-                QueryEntity.GetEntityImplementations = query => dqm.GetEntityImplementations(query.ToQueryName());
+                QueryEntity.GetEntityImplementations = query => Queries.GetEntityImplementations(query.ToQueryName());
                 
                 // QueryManagers = queryManagers;
                 sb.Schema.Initializing += () =>
@@ -45,7 +67,7 @@ namespace Signum.Engine.Basics
                 };
 
                 sb.Include<QueryEntity>()
-                    .WithQuery(dqm, () => q => new
+                    .WithQuery(() => q => new
                     {
                         Entity = q,
                         q.Key,
@@ -89,12 +111,12 @@ namespace Signum.Engine.Basics
 
         private static Dictionary<string, object> CreateQueryNames()
         {
-            return DynamicQueryManager.Current.GetQueryNames().ToDictionaryEx(qn => QueryUtils.GetKey(qn), "queryName");
+            return Queries.GetQueryNames().ToDictionaryEx(qn => QueryUtils.GetKey(qn), "queryName");
         }
 
         static IEnumerable<QueryEntity> GenerateQueries()
         {
-            return DynamicQueryManager.Current.GetQueryNames()
+            return Queries.GetQueryNames()
                 .Select(qn => new QueryEntity
                 {
                     Key = QueryUtils.GetKey(qn)
@@ -105,7 +127,7 @@ namespace Signum.Engine.Basics
         {
             Type type = TypeLogic.GetType(typeEntity.CleanName);
 
-            return DynamicQueryManager.Current.GetTypeQueries(type).Keys.Select(GetQueryEntity).ToList();
+            return Queries.GetTypeQueries(type).Keys.Select(GetQueryEntity).ToList();
         }
 
 

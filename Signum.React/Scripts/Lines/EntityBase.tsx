@@ -12,6 +12,7 @@ import { FormGroup } from './FormGroup'
 import { FormControlReadonly } from './FormControlReadonly'
 import SelectorModal from '../SelectorModal'
 import { TypeEntity } from "../Signum.Entities.Basics";
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 
 export interface EntityBaseProps extends LineBaseProps {
@@ -161,8 +162,8 @@ export abstract class EntityBase<T extends EntityBaseProps, S extends EntityBase
         return (
             <a href="#" className={classes("sf-line-button", "sf-view", btn ? "btn input-group-text" : undefined)}
                 onClick={this.handleViewClick}
-                title={EntityControlMessage.View.niceToString() }>
-                <span className="fa fa-arrow-right"/>
+                title={EntityControlMessage.View.niceToString()}>
+                <FontAwesomeIcon icon="arrow-right" />
             </a>
         );
     }
@@ -238,8 +239,8 @@ export abstract class EntityBase<T extends EntityBaseProps, S extends EntityBase
         return (
             <a href="#" className={classes("sf-line-button", "sf-create", btn ? "btn input-group-text" : undefined) }
                 onClick={this.handleCreateClick}
-                title={EntityControlMessage.Create.niceToString() }>
-                <span className="fa fa-plus sf-create"/>
+                title={EntityControlMessage.Create.niceToString()}>
+                <FontAwesomeIcon icon="plus" className="sf-create" />
             </a>
         );
     }
@@ -285,8 +286,8 @@ export abstract class EntityBase<T extends EntityBaseProps, S extends EntityBase
         return (
             <a href="#" className={classes("sf-line-button", "sf-find", btn ? "btn input-group-text" : undefined) }
                 onClick={this.handleFindClick}
-                title={EntityControlMessage.Find.niceToString() }>
-                <span className="fa fa-search"/>
+                title={EntityControlMessage.Find.niceToString()}>
+                <FontAwesomeIcon icon="search" />
             </a>
         );
     }
@@ -311,8 +312,8 @@ export abstract class EntityBase<T extends EntityBaseProps, S extends EntityBase
         return (
             <a href="#" className={classes("sf-line-button", "sf-remove", btn ? "btn input-group-text" : undefined) }
                 onClick={this.handleRemoveClick}
-                title={EntityControlMessage.Remove.niceToString() }>
-                <span className="fa fa-remove"/>
+                title={EntityControlMessage.Remove.niceToString()}>
+                <FontAwesomeIcon icon="times" />
             </a>
         );
     }

@@ -8,6 +8,8 @@ import { getTypeInfo, TypeInfo, PropertyRoute, ReadonlyBinding, getTypeInfos } f
 import { Transition } from 'react-transition-group'
 
 import "./Notify.css"
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { IconProp } from '@fortawesome/fontawesome-svg-core';
 
 type NotifyType = "warning" | "error" | "success" | "loading";
 
@@ -81,24 +83,24 @@ export default class Notify extends React.Component<{}, NotifyState>{
             return undefined;
         }
 
-        var icon: string | undefined;
+        var icon: IconProp | undefined;
         switch (this.state.type) {
             case "loading":
-                icon = "fa fa-cog fa-spin fa-fw";
+                icon = "cog";
                 break;
             case "error":
             case "warning":
-                icon = "fa fa-exclamation fa-fw";
+                icon = "exclamation";
                 break;
             case "success":
-                icon = "fa fa-check fa-fw";
+                icon = "check";
                 break;
             default:
                 break;
         }
 
         if (icon) {
-            return <span className={icon} style={{ fontSize: "large" }}> </span>
+            return <FontAwesomeIcon icon={icon} fixedWidth style={{ fontSize: "larger" }} spin={this.state.type === "loading"} />
         }
         else {
             return undefined;
@@ -109,7 +111,7 @@ export default class Notify extends React.Component<{}, NotifyState>{
         return (
             <div id="sfNotify">
                 <Transition in={this.state.text != undefined} timeout={200}>
-                    {(state: string) => <span className={classes(this.state.type, "notify", state == "entering" || state == "entered" ? "in" : undefined)}>{this.getIcon()}{this.state.text}</span>}
+                    {(state: string) => <span className={classes(this.state.type, "notify", state == "entering" || state == "entered" ? "in" : undefined)}>{this.getIcon()}&nbsp;{this.state.text}</span>}
                 </Transition>
             </div>
         );

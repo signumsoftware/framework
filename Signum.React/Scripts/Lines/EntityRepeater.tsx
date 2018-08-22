@@ -11,6 +11,7 @@ import { ModifiableEntity, Lite, Entity, MList, MListElement, EntityControlMessa
 import { EntityBase } from './EntityBase'
 import { EntityListBase, EntityListBaseProps, DragConfig } from './EntityListBase'
 import { RenderEntity } from './RenderEntity'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 export interface EntityRepeaterProps extends EntityListBaseProps {
     createAsLink?: boolean | ((er: EntityRepeater) => React.ReactElement<any>);
@@ -54,7 +55,7 @@ export class EntityRepeater extends EntityListBase<EntityRepeaterProps, EntityRe
 
     renderButtons() {
         const buttons = (
-            <span className="pull-right">
+            <span className="float-right">
                 {this.state.createAsLink == false && this.renderCreateButton(false)}
                 {this.renderFindButton(false)}
             </span>
@@ -83,7 +84,7 @@ export class EntityRepeater extends EntityListBase<EntityRepeaterProps, EntityRe
                         <a href="#" title={EntityControlMessage.Create.niceToString()}
                             className="sf-line-button sf-create"
                             onClick={this.handleCreateClick}>
-                            <span className="fa fa-plus sf-create" />&nbsp;{EntityControlMessage.Create.niceToString()}
+                            <FontAwesomeIcon icon="plus" className="sf-create" />&nbsp;{EntityControlMessage.Create.niceToString()}
                         </a>)
                 }
             </div>
@@ -118,7 +119,7 @@ export class EntityRepeaterElement extends React.Component<EntityRepeaterElement
                             {this.props.onRemove && <a href="#" className={classes("sf-line-button", "sf-remove")}
                                 onClick={this.props.onRemove}
                                 title={EntityControlMessage.Remove.niceToString()}>
-                                <span className="fa fa-remove" />
+                                <FontAwesomeIcon icon="times" />
                             </a>}
                             &nbsp;
                         {drag && <a href="#" className={classes("sf-line-button", "sf-move")}
@@ -126,7 +127,7 @@ export class EntityRepeaterElement extends React.Component<EntityRepeaterElement
                                 onDragStart={drag.onDragStart}
                                 onDragEnd={drag.onDragEnd}
                                 title={EntityControlMessage.Move.niceToString()}>
-                                <span className="fa fa-bars" />
+                                <FontAwesomeIcon icon="bars" />
                             </a>}
                         </div>
                     </legend>

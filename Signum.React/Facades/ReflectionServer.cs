@@ -165,7 +165,7 @@ namespace Signum.React.Facades
                           where typeof(ModelEntity).IsAssignableFrom(type) && !type.IsAbstract
                           select type).ToList();
 
-            var dqm = DynamicQueryManager.Current;
+            var queries = QueryLogic.Queries;
 
             var schema = Schema.Current;
             var settings = Schema.Current.Settings;
@@ -186,7 +186,7 @@ namespace Signum.React.Facades
                               IsLowPopulation = type.IsIEntity() ? EntityKindCache.IsLowPopulation(type) : false,
                               IsSystemVersioned = type.IsIEntity() ? schema.Table(type).SystemVersioned != null : false,
                               ToStringFunction = typeof(Symbol).IsAssignableFrom(type) ? null : LambdaToJavascriptConverter.ToJavascript(ExpressionCleaner.GetFieldExpansion(type, miToString)),
-                              QueryDefined = dqm.QueryDefined(type),
+                              QueryDefined = queries.QueryDefined(type),
                               Members = PropertyRoute.GenerateRoutes(type).Where(pr => InTypeScript(pr))
                                 .ToDictionary(p => p.PropertyString(), p =>
                                 {
@@ -241,7 +241,7 @@ namespace Signum.React.Facades
 
         public static Dictionary<string, TypeInfoTS> GetEnums(IEnumerable<Type> allTypes)
         {
-            var dqm = DynamicQueryManager.Current;
+            var queries = QueryLogic.Queries;
 
             var result = (from type in allTypes
                           where type.IsEnum
@@ -255,7 +255,7 @@ namespace Signum.React.Facades
                               FullName = type.FullName,
                               NiceName = descOptions.HasFlag(DescriptionOptions.Description) ? type.NiceName() : null,
                               Members = type.GetFields(staticFlags)
-                              .Where(fi => kind != KindOfType.Query || dqm.QueryDefined(fi.GetValue(null)))
+                              .Where(fi => kind != KindOfType.Query || queries.QueryDefined(fi.GetValue(null)))
                               .ToDictionary(fi => fi.Name, fi => OnAddFieldInfoExtension(new MemberInfoTS
                               {
                                   NiceName = fi.NiceName(),
@@ -390,25 +390,25 @@ namespace Signum.React.Facades
     {
         [JsonProperty(PropertyName = "operationType")]
         private OperationType OperationType;
-        [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, NullValueHandling = NullValueHandling.Ignore, PropertyName = "allowsNew")]
-        private bool? AllowsNew;
+        [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, NullValueHandling = NullValueHandling.Ignore, PropertyName = "canBeNew")]
+        private bool? CanBeNew;
         [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, NullValueHandling = NullValueHandling.Ignore, PropertyName = "hasCanExecute")]
         private bool? HasCanExecute;
         [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, NullValueHandling = NullValueHandling.Ignore, PropertyName = "hasStates")]
         private bool? HasStates;
-        [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, NullValueHandling = NullValueHandling.Ignore, PropertyName = "lite")]
-        private bool? Lite;
+        [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, NullValueHandling = NullValueHandling.Ignore, PropertyName = "canBeModified")]
+        private bool? CanBeModified;
 
         [JsonExtensionData]
         public Dictionary<string, object> Extension { get; set; } = new Dictionary<string, object>();
 
         public OperationInfoTS(OperationInfo oper)
         {
-            this.AllowsNew = oper.AllowsNew;
+            this.CanBeNew = oper.CanBeNew;
             this.HasCanExecute = oper.HasCanExecute;
             this.HasStates = oper.HasStates;
             this.OperationType = oper.OperationType;
-            this.Lite = oper.Lite;
+            this.CanBeModified = oper.CanBeModified;
         }
     }
 
