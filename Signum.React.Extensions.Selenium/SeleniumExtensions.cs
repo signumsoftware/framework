@@ -365,6 +365,7 @@ namespace Signum.React.Selenium
 
             try
             {
+                button.ScrollTo();
                 button.Click();
             }
             catch (InvalidOperationException e)
