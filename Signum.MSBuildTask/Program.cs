@@ -28,6 +28,12 @@ namespace Signum.MSBuildTask
 
             var log = Console.Out;
 
+            if(!File.Exists(intermediateAssembly))
+            {
+                log.WriteLine("Signum.MSBuildTask skipped (File not found): {0}", intermediateAssembly);
+                return 0;
+            }
+
             log.WriteLine("Signum.MSBuildTask starting: {0}", intermediateAssembly);
             try
             {
