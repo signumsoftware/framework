@@ -8,6 +8,8 @@ import { SearchControl } from '@framework/Search'
 import { getToString, getMixin } from '@framework/Signum.Entities'
 import { TypeContext, FormGroupStyle } from '@framework/TypeContext'
 import { library } from '@fortawesome/fontawesome-svg-core'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { parseIcon } from '../../Dashboard/Admin/Dashboard';
 
 export interface IconTypeaheadLineProps {
     ctx: TypeContext<string | null | undefined>;
@@ -75,18 +77,20 @@ export class IconTypeahead extends React.Component<IconTypeaheadProps>{
         return Promise.resolve(result);
     }
 
-    handleSelect = (item: string) => {
-        this.props.onChange(item);
+    handleSelect = (item: string | unknown) => {
+        this.props.onChange(item as string);
         this.forceUpdate();
-        return item;
+        return item as string;
     }
 
-    handleRenderItem = (item: string, query: string) => {
+    handleRenderItem = (item: unknown, query: string) => {
 
+        var icon = parseIcon(item as string);
+        
         return (
             <span>
-                <span className={classes("icon", item)} style={{ width: "12px", height: "12px" }} />
-                {Typeahead.highlightedText(item, query)}
+                {icon && <FontAwesomeIcon icon={icon} className="icon" style={{ width: "12px", height: "12px" }} />}
+                {Typeahead.highlightedText(item as string, query)}
             </span>
         );
     }

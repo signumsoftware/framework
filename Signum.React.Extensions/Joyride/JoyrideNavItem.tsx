@@ -28,7 +28,7 @@ export default class JoyrideNavItem extends React.Component<JoyrideNavItemProps,
         return (
             <NavItem id="help-nav-item" onClick={this.onClick}>
                 <a className="nav-link">
-                    <FontAwesomeIcon icon={["far", "question-circle"]}/>
+                    <FontAwesomeIcon icon={"question-circle"}/>
                 </a>
             </NavItem>
         );

@@ -24,5 +24,5 @@ export const globalModules: any = {
     Entities,
     AuthClient,
     Operations,
-    Constructor,
+    Constructor
 };

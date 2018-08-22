@@ -48,10 +48,10 @@ export default class OmniboxAutocomplete extends React.Component<OmniboxAutocomp
         
         return (
             <ErrorBoundary>
-                <Typeahead ref={ta => this.typeahead = ta!} getItems={str => this.abortRequest.getData(str)}
-                    renderItem={OmniboxClient.renderItem}
-                    onSelect={this.handleOnSelect}
-                    inputAttrs={inputAttr}
+            <Typeahead ref={ta => this.typeahead = ta!} getItems={str => this.abortRequest.getData(str)} 
+                renderItem={item => OmniboxClient.renderItem(item as OmniboxClient.OmniboxResult)}
+                onSelect={(item, e) => this.handleOnSelect(item as OmniboxClient.OmniboxResult, e)}
+                inputAttrs={inputAttr}
                     minLength={0} />
             </ErrorBoundary>
         );

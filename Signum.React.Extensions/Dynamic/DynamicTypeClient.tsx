@@ -121,6 +121,9 @@ export interface DynamicProperty {
     isMList?: DynamicTypeBackMListDefinition;
     size?: number;
     scale?: number;
+    unit?: string;
+    format?: string;
+    notifyChanges?: boolean;
     _propertyType_?: string;
     validators?: Validators.DynamicValidator[];
     customFieldAttributes?: string;

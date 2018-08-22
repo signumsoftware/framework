@@ -352,13 +352,12 @@ export default class TypesRulesPackControl extends React.Component<{ ctx: TypeCo
             }
             else {
                 action()
-                    .then(m => Navigator.view(m))
+                    .then(m => Navigator.navigate(m))
+                    .then(() => action())
                     .then(m => {
-                       if (m) {
-                          setNewValue(m);
-                          this.updateFrame();
-                       }
-                     })
+                        setNewValue(m);
+                        this.updateFrame();
+                    })
                     .done();
             }
         };

@@ -6,7 +6,7 @@ import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from '../../../F
 import * as Entities from '../../../Framework/Signum.React/Scripts/Signum.Entities'
 import * as Dynamic from '../Dynamic/Signum.Entities.Dynamic'
 
-import { FilterOptionParsed, OrderOptionParsed, FilterRequest, OrderRequest, Pagination } from '../../../Framework/Signum.React/Scripts/FindOptions' 
+import { FilterOptionParsed, OrderOptionParsed, FilterRequest, OrderRequest, Pagination } from '@framework/FindOptions' 
 
 //Partial
 export interface QueryModel {

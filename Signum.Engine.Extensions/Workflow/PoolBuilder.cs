@@ -88,6 +88,7 @@ namespace Signum.Engine.Workflow
                        createNew: null,
                        removeOld: (id, ol) =>
                        {
+                           ol.ApplyChanges(processElement, ol.lane.Element, locator);
                            this.lanes.Remove(ol.lane.Entity.ToLite());
                            ol.lane.Entity.Delete(WorkflowLaneOperation.Delete);
                        },

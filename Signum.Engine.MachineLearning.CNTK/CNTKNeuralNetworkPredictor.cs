@@ -280,10 +280,9 @@ namespace Signum.Engine.MachineLearning.CNTK
             using (HeavyProfiler.LogNoStackTrace("PredictMultiple"))
             {
                 var nnSettings = (NeuralNetworkSettingsEntity)ctx.Predictor.AlgorithmSettings;
-                Function calculatedOutputs = (Function)ctx.Model;
-
-                lock (calculatedOutputs) //https://docs.microsoft.com/en-us/cognitive-toolkit/cntk-library-evaluation-on-windows#evaluation-of-multiple-requests-in-parallel
+                lock (lockKey) //https://docs.microsoft.com/en-us/cognitive-toolkit/cntk-library-evaluation-on-windows#evaluation-of-multiple-requests-in-parallel
                 {
+                    Function calculatedOutputs = (Function)ctx.Model;
                     var device = GetDevice(nnSettings);
                     Value inputValue = GetValueForPredict(ctx, inputs, device);
 
@@ -373,15 +372,18 @@ namespace Signum.Engine.MachineLearning.CNTK
             }
         }
 
+        static object lockKey = new object();
+
         public void LoadModel(PredictorPredictContext ctx)
         {
-            this.InitialSetup();
+            lock (lockKey)
+            {
+                this.InitialSetup();
 
-            var nnSettings = (NeuralNetworkSettingsEntity)ctx.Predictor.AlgorithmSettings;
+                var nnSettings = (NeuralNetworkSettingsEntity)ctx.Predictor.AlgorithmSettings;
 
-            ctx.Model = Function.Load(ctx.Predictor.Files.SingleEx().GetByteArray(), GetDevice(nnSettings));
+                ctx.Model = Function.Load(ctx.Predictor.Files.SingleEx().GetByteArray(), GetDevice(nnSettings));
+            }
         }
-
-       
     }
 }

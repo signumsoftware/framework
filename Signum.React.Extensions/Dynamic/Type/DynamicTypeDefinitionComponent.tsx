@@ -359,10 +359,10 @@ export class CustomCodeTab extends React.Component<{ definition: DynamicTypeDefi
                             <div>
                                 <div className="btn-group" style={{ marginBottom: "3px" }}>
                                     {dt.baseType == "Entity" && CustomCodeTab.suggestWorkflow &&
-                                        <input type="button" className="btn btn-success btn-xs sf-button" value="Workflow" onClick={this.handleWorkflowCustomInheritanceClick} />}
+                                        <input type="button" className="btn btn-success btn-sm sf-button" value="Workflow" onClick={this.handleWorkflowCustomInheritanceClick} />}
 
                                     {dt.baseType == "Entity" && CustomCodeTab.suggestTree &&
-                                        <input type="button" className="btn btn-warning btn-xs sf-button" value="Tree" onClick={this.handleTreeCustomInheritanceClick} />}
+                                        <input type="button" className="btn btn-warning btn-sm sf-button" value="Tree" onClick={this.handleTreeCustomInheritanceClick} />}
                                 </div>
                                 <div className="code-container">
                                     <pre style={{ border: "0px", margin: "0px" }}>{`public class ${entityName}:`}</pre>
@@ -379,9 +379,9 @@ export class CustomCodeTab extends React.Component<{ definition: DynamicTypeDefi
                         renderContent={e =>
                             <div>
                                 <div className="btn-group" style={{ marginBottom: "3px" }}>
-                                    <input type="button" className="btn btn-warning btn-xs sf-button" value="PreSaving" onClick={this.handlePreSavingClick} />
-                                    <input type="button" className="btn btn-success btn-xs sf-button" value="PostRetrieved" onClick={this.handlePostRetrievedClick} />
-                                    <input type="button" className="btn btn-danger btn-xs sf-button" value="Property Validator" onClick={this.handlePropertyValidatorClick} />
+                                    <input type="button" className="btn btn-warning btn-sm sf-button" value="PreSaving" onClick={this.handlePreSavingClick} />
+                                    <input type="button" className="btn btn-success btn-sm sf-button" value="PostRetrieved" onClick={this.handlePostRetrievedClick} />
+                                    <input type="button" className="btn btn-danger btn-sm sf-button" value="Property Validator" onClick={this.handlePropertyValidatorClick} />
                                 </div>
                                 <div className="code-container">
                                     <pre style={{ border: "0px", margin: "0px" }}>{`public class ${entityName}
@@ -401,10 +401,10 @@ export class CustomCodeTab extends React.Component<{ definition: DynamicTypeDefi
                             <div>
                                 {dt.baseType == "Entity" &&
                                     <div className="btn-group" style={{ marginBottom: "3px" }}>
-                                        {CustomCodeTab.suggestWorkflow && < input type="button" className="btn btn-success btn-xs sf-button" value="Workflow" onClick={this.handleWithWorkflowClick} />}
-                                        {CustomCodeTab.suggestTree && < input type="button" className="btn btn-info btn-xs sf-button" value="Tree" onClick={this.handleWithTreeClick} />}
-                                        <input type="button" className="btn btn-warning btn-xs sf-button" value="Register Operations" onClick={this.handleRegisterOperationsClick} />
-                                        <input type="button" className="btn btn-danger btn-xs sf-button" value="Register Expressions" onClick={this.handleRegisterExpressionsClick} />
+                                        {CustomCodeTab.suggestWorkflow && < input type="button" className="btn btn-success btn-sm sf-button" value="Workflow" onClick={this.handleWithWorkflowClick} />}
+                                        {CustomCodeTab.suggestTree && < input type="button" className="btn btn-info btn-sm sf-button" value="Tree" onClick={this.handleWithTreeClick} />}
+                                        <input type="button" className="btn btn-warning btn-sm sf-button" value="Register Operations" onClick={this.handleRegisterOperationsClick} />
+                                        <input type="button" className="btn btn-danger btn-sm sf-button" value="Register Expressions" onClick={this.handleRegisterExpressionsClick} />
                                     </div>}
                                 <div className="code-container">
                                     <pre style={{ border: "0px", margin: "0px" }}>{`SchemaBuilder sb, FluentInclude<${entityName}> fi`}</pre>
@@ -420,8 +420,8 @@ export class CustomCodeTab extends React.Component<{ definition: DynamicTypeDefi
                         renderContent={e =>
                             <div>
                                 <div className="btn-group" style={{ marginBottom: "3px" }}>
-                                    {dt.baseType == "Entity" && <input type="button" className="btn btn-success btn-xs sf-button" value="Query Expression" onClick={this.handleQueryExpressionClick} />}
-                                    {dt.baseType == "Entity" || dt.baseType == "EmbeddedEntity" && <input type="button" className="btn btn-warning btn-xs sf-button" value="Scalar Expression" onClick={this.handleScalarExpressionClick} />}
+                                    {dt.baseType == "Entity" && <input type="button" className="btn btn-success btn-sm sf-button" value="Query Expression" onClick={this.handleQueryExpressionClick} />}
+                                    {dt.baseType == "Entity" || dt.baseType == "EmbeddedEntity" && <input type="button" className="btn btn-warning btn-sm sf-button" value="Scalar Expression" onClick={this.handleScalarExpressionClick} />}
                                 </div>
                                 <div className="code-container">
                                     <pre style={{ border: "0px", margin: "0px" }}>{`public static class ${dt.typeName}Logic
@@ -440,8 +440,8 @@ export class CustomCodeTab extends React.Component<{ definition: DynamicTypeDefi
                         renderContent={e =>
                             <div>
                                 <div className="btn-group" style={{ marginBottom: "3px" }}>
-                                    <input type="button" className="btn btn-success btn-xs sf-button" value="Enum" onClick={this.handleEnumClick} />
-                                    {dt.baseType == "Entity" && <input type="button" className="btn btn-warning btn-xs sf-button" value="Operation" onClick={this.handleOperationClick} />}
+                                    <input type="button" className="btn btn-success btn-sm sf-button" value="Enum" onClick={this.handleEnumClick} />
+                                    {dt.baseType == "Entity" && <input type="button" className="btn btn-warning btn-sm sf-button" value="Operation" onClick={this.handleOperationClick} />}
                                 </div>
                                 <div className="code-container">
                                     <pre style={{ border: "0px", margin: "0px" }}>{`public namespace Signum.Entities.CodeGen
@@ -461,7 +461,7 @@ export class CustomCodeTab extends React.Component<{ definition: DynamicTypeDefi
                         renderContent={e =>
                             <div>
                                 <div className="btn-group" style={{ marginBottom: "3px" }}>
-                                    <input type="button" className="btn btn-success btn-xs sf-button" value="Override" onClick={this.handleOverrideClick} />
+                                    <input type="button" className="btn btn-success btn-sm sf-button" value="Override" onClick={this.handleOverrideClick} />
                                 </div>
                                 <div className="code-container">
                                     <pre style={{ border: "0px", margin: "0px" }}>{`public void OverrideSchema(SchemaBuilder sb)
@@ -522,7 +522,7 @@ export class CustomCodeTab extends React.Component<{ definition: DynamicTypeDefi
     }
  
     return base.PropertyValidation(pi);
-};`);
+}`);
     }
 
     handleWithWorkflowClick = () => {
@@ -566,7 +566,7 @@ new Graph<${entityName}Entity>.Execute(${entityName}Operation.Save)
     handleRegisterExpressionsClick = () => {
 
         let entityName = this.props.dynamicType.typeName!;
-        this.popupCodeSnippet(`QueryLogic.Expression.Register((${entityName}Entity e) => e.[Expression Name]());`);
+        this.popupCodeSnippet(`QueryLogic.Expressions.Register((${entityName}Entity e) => e.[Expression Name]());`);
     }
 
     handleQueryExpressionClick = () => {
@@ -917,6 +917,15 @@ export class PropertyComponent extends React.Component<PropertyComponentProps>{
                             <ValueComponent dc={this.props.dc} labelColumns={4} binding={Binding.create(p, d => d.columnType)} type="string" defaultValue={null} labelClass="database-mapping" />
                         }
                         <ValueComponent dc={this.props.dc} labelColumns={4} binding={Binding.create(p, d => d.isNullable)} type="string" defaultValue={null} options={DynamicTypeClient.IsNullableValues} onChange={this.handleAutoFix} />
+                        {allowUnit(p.type) &&
+                            <ValueComponent dc={this.props.dc} labelColumns={4} binding={Binding.create(p, d => d.unit)} type="string" defaultValue={null} />
+                        }
+                        {allowFormat(p.type) &&
+                            <ValueComponent dc={this.props.dc} labelColumns={4} binding={Binding.create(p, d => d.format)} type="string" defaultValue={null} />
+                        }
+                        {(p.isMList || isEmbedded(p.type)) &&
+                            <ValueComponent dc={this.props.dc} labelColumns={4} binding={Binding.create(p, d => d.notifyChanges)} type="boolean" defaultValue={null} />
+                        }
                     </div>
                     <div className="col-sm-6">
                         <IsMListFieldsetComponent
@@ -1049,6 +1058,17 @@ function autoFix(p: DynamicProperty) {
 
     if (p.validators.length == 0)
         delete p.validators;
+
+    if (p.unit != undefined && !allowUnit(p.type))
+        p.unit = undefined;
+
+    if (p.format != undefined && !allowFormat(p.type))
+        p.format = undefined;
+
+    if (p.isMList || isEmbedded(p.type))
+        p.notifyChanges = true;
+    else
+        p.notifyChanges = undefined;
 }
 
 function allowsSize(type: string) {
@@ -1275,8 +1295,26 @@ function isDecimal(type: string) {
     );
 }
 
+function allowUnit(type: string) {
+    return isInteger(type) ||
+        isDecimal(type) ||
+        isReal(type);
+}
+
+function allowFormat(type: string) {
+    return isInteger(type) ||
+        isDecimal(type) ||
+        isReal(type) ||
+        isDateTime(type) ||
+        isTimeSpan(type);
+}
+
 function isEntity(type: string) {
     return type.endsWith("Entity");
+}
+
+function isEmbedded(type: string) {
+    return type.endsWith("Embedded");
 }
 
 export interface ValidatorOptions<T extends Validators.DynamicValidator> {

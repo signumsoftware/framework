@@ -76,9 +76,9 @@ namespace Signum.Engine.Mailing
         }
 
 
-        public static Func<EmailTemplateEntity, ModifiableEntity, SmtpConfigurationEntity> GetSmtpConfiguration;
+        public static Func<EmailTemplateEntity, Lite<Entity>, SmtpConfigurationEntity> GetSmtpConfiguration;
 
-        public static void Start(SchemaBuilder sb, Func<EmailTemplateEntity, ModifiableEntity, SmtpConfigurationEntity> getSmtpConfiguration)
+        public static void Start(SchemaBuilder sb, Func<EmailTemplateEntity, Lite<Entity>, SmtpConfigurationEntity> getSmtpConfiguration)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {

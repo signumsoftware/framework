@@ -51,7 +51,7 @@ export default class CaseFlowViewerComponent extends React.Component<CaseFlowVie
         if (err)
             throw new Error('Error rendering the model ' + err);
         else {
-
+            this.resetZoom();
             if (this.props.caseActivity) {
                 var selection = this.viewer.get("selection") as any;
                 selection.select((this.props.caseActivity.workflowActivity as (WorkflowEventEntity | WorkflowActivityEntity)).bpmnElementId);
@@ -151,6 +151,10 @@ export default class CaseFlowViewerComponent extends React.Component<CaseFlowVie
     }
 
     handleZoomClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+        this.resetZoom();
+    }
+
+    resetZoom() {
         var zoomScroll = this.viewer.get<any>("zoomScroll");
         zoomScroll.reset();
     }

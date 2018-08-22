@@ -118,7 +118,6 @@ export default class Login extends React.Component<{}, { modelState?: ModelState
                             }
                         </div>
                     </div>
-
                 </form>
             </div>
         );

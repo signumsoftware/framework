@@ -236,8 +236,8 @@ export class ExpressionOrValueStrip extends React.Component<ExpressionOrValueStr
         return Promise.resolve(result);
     }
 
-    handleSelect = (item: string) => {
-        this.props.object[item] = undefined;
+    handleSelect = (item: unknown) => {
+        this.props.object[item as string] = undefined;
         this.forceUpdate();
         return "";
     }

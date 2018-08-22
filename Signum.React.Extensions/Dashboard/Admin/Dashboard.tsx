@@ -94,12 +94,14 @@ export default class Dashboard extends React.Component<{ ctx: TypeContext<Dashbo
     renderPart = (tc: TypeContext<PanelPartEmbedded>) => {
 
         const tcs = tc.subCtx({ formGroupStyle: "Basic", formSize: "ExtraSmall", placeholderLabels: true });
-        
+
+        var icon = parseIcon(tc.value.iconName);
+
         const title = (
             <div> 
                 <div className="row">
                     <div className="col-sm-1">
-                        {tc.value.iconName && <FontAwesomeIcon icon={parseIcon(tc.value.iconName)} style={{ color: tc.value.iconColor || undefined, fontSize: "25px", marginTop: "17px" }} />}
+                        {icon && <FontAwesomeIcon icon={icon} style={{ color: tc.value.iconColor || undefined, fontSize: "25px", marginTop: "17px" }} />}
                     </div>
                     <div className="col-sm-11">
                         <ValueLine ctx={tcs.subCtx(pp => pp.title)} />
@@ -135,11 +137,17 @@ export function iconToString(icon: IconProp) {
             icon.prefix + " fa-" + icon.iconName;
 }
 
-export function parseIcon(iconName: string): IconProp {
-    return {
+export function parseIcon(iconName: string | undefined |null): IconProp | undefined {
+
+    if (iconName == null)
+        return undefined;
+
+    var result = {
         prefix: iconName.tryBefore(" ") as IconPrefix,
         iconName: iconName.tryAfter(" fa-") as IconName,
     };
+
+    return result.iconName && result.prefix && result;
 }
 
 
