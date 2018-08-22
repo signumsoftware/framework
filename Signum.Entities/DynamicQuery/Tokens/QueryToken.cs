@@ -434,6 +434,11 @@ namespace Signum.Entities.DynamicQuery
         public readonly Type TupleType;
         public readonly ParameterExpression Parameter;
         public readonly Dictionary<QueryToken, Expression> Replacemens;
+
+        public Expression<Func<object, Lite<Entity>>> GetEntitySelector()
+        {
+            return Expression.Lambda<Func<object, Lite<Entity>>>(Replacemens.Single(a=>a.Key.FullKey() == "Entity").Value, Parameter);
+        }
     }
 
 

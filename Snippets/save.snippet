@@ -40,8 +40,8 @@
       <Code Language="csharp">
         <![CDATA[new Graph<$entityName$Entity>.Execute($entityName$Operation.Save)
                 {
-                    AllowsNew = true,
-                    Lite = false,
+                    CanBeNew = true,
+                    CanBeModified = true,
                     Execute = ($entityParam$, _) => { },
                 }.Register();]]>
       </Code>

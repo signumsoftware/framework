@@ -49,7 +49,7 @@
 			<Code Language="csharp">
 				<![CDATA[sb.Include<$entityName$Entity>()
 					    .WithSave($entityName$Operation.Save)
-					    .WithQuery(dqm, () => $entityParam$ => new
+					    .WithQuery(() => $entityParam$ => new
 							{
 									Entity = $entityParam$,
 									$entityParam$.Id,

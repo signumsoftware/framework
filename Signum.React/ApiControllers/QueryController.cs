@@ -20,6 +20,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Signum.Utilities.ExpressionTrees;
 using Microsoft.AspNetCore.Mvc;
+using System.Linq.Expressions;
 
 namespace Signum.React.ApiControllers
 {
@@ -33,21 +34,31 @@ namespace Signum.React.ApiControllers
             return await AutocompleteUtils.FindLiteLikeAsync(implementations, subString, count, token);
         }
 
-        [Route("api/query/findLiteLikeWithFilters"), HttpPost, ProfilerActionSplitter("types")]
-        public async Task<List<Lite<Entity>>> FindLiteLikeWithFilters([FromBody]AutocompleteQueryRequestTS request, CancellationToken token)
+        [Route("api/query/findRowsLike"), HttpPost, ProfilerActionSplitter("types")]
+        public async Task<ResultTable> FindRowsLike([FromBody]AutocompleteQueryRequestTS request, CancellationToken token)
         {
             var qn = QueryLogic.ToQueryName(request.queryKey);
             var qd = QueryLogic.Queries.QueryDescription(qn);
 
-            var entitiesQuery = QueryLogic.Queries.GetEntities(new QueryEntitiesRequest
+            var dqRequest = new DQueryableRequest
             {
                 QueryName = qn,
+                Columns = request.columns.EmptyIfNull().Select(a => a.ToColumn(qd, false)).ToList(),
                 Filters = request.filters.EmptyIfNull().Select(a => a.ToFilter(qd, false)).ToList(),
-                Orders = request.orders.EmptyIfNull().Select(a=>a.ToOrder(qd, false)).ToList()
-            });
+                Orders = request.orders.EmptyIfNull().Select(a => a.ToOrder(qd, false)).ToList()
+            };
+            
+            var dqueryable = QueryLogic.Queries.GetDQueryable(dqRequest);
             var entityType = qd.Columns.Single(a => a.IsEntity).Implementations.Value.Types.SingleEx();
 
-            return await entitiesQuery.AutocompleteUntypedAsync(request.subString, request.count, entityType, token);
+            var result = await dqueryable.Query.AutocompleteUntypedAsync(dqueryable.Context.GetEntitySelector(), request.subString, request.count, entityType, token);
+
+            var columnAccessors = dqRequest.Columns.Select(c => (
+                column: c,
+                lambda: Expression.Lambda(c.Token.BuildExpression(dqueryable.Context), dqueryable.Context.Parameter)
+            )).ToList();
+
+            return DQueryable.ToResultTable(result.ToArray(), columnAccessors, null, new Pagination.Firsts(request.count));
         }
 
         [Route("api/query/allLites"), HttpGet, ProfilerActionSplitter("types")]
@@ -132,10 +143,6 @@ namespace Signum.React.ApiControllers
         [Route("api/query/entitiesWithFilter"), HttpPost, ProfilerActionSplitter]
         public async Task<List<Lite<Entity>>> GetEntitiesWithFilter([FromBody]QueryEntitiesRequestTS request, CancellationToken token)
         {
-     
-
-
-
             return await QueryLogic.Queries.GetEntities(request.ToQueryEntitiesRequest()).ToListAsync();
         }
 
@@ -174,6 +181,7 @@ namespace Signum.React.ApiControllers
     {
         public string queryKey;
         public List<FilterTS> filters;
+        public List<ColumnTS> columns;
         public List<OrderTS> orders;
         public string subString;
         public int count;

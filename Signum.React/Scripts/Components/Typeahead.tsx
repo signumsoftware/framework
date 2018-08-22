@@ -9,15 +9,15 @@ export interface TypeaheadProps {
     value?: string;
     onChange?: (newValue: string) => void;
     onBlur?: () => void;
-    getItems: (query: string) => Promise<any[]>;
+    getItems: (query: string) => Promise<unknown[]>;
     getItemsDelay?: number;
     minLength?: number;
     renderList?: (typeAhead: Typeahead) => React.ReactNode;
-    renderItem?: (item: any, query: string) => React.ReactNode;
-    onSelect?: (item: any, e: React.KeyboardEvent<any> | React.MouseEvent<any>) => string | null;
+    renderItem?: (item: unknown, query: string) => React.ReactNode;
+    onSelect?: (item: unknown, e: React.KeyboardEvent<any> | React.MouseEvent<any>) => string | null;
     scrollHeight?: number;
     inputAttrs?: React.InputHTMLAttributes<HTMLInputElement>;
-    itemAttrs?: (item: any) => React.LiHTMLAttributes<HTMLButtonElement>;
+    itemAttrs?: (item: unknown) => React.LiHTMLAttributes<HTMLButtonElement>;
     noResultsMessage?: string;
 }
 
@@ -27,7 +27,6 @@ export interface TypeaheadState {
     query?: string;
     selectedIndex?: number;
 }
-
 
 export class Typeahead extends React.Component<TypeaheadProps, TypeaheadState>
 {
@@ -62,8 +61,8 @@ export class Typeahead extends React.Component<TypeaheadProps, TypeaheadState>
         getItems: undefined as any,
         getItemsDelay: 200,
         minLength: 1,
-        renderItem: Typeahead.highlightedText,
-        onSelect: (elem, event) => elem,
+        renderItem: (item, query) => Typeahead.highlightedText(item as string, query),
+        onSelect: (elem, event) => (elem as string),
         scrollHeight: 0,
         noResultsMessage: " - No results -",
     };
