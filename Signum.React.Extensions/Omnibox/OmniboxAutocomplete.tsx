@@ -4,7 +4,7 @@ import { Route } from 'react-router'
 import { Dic } from '@framework/Globals';
 import { ajaxPost, ajaxGet, AbortableRequest } from '@framework/Services';
 import * as Navigator from '@framework/Navigator'
-import { Typeahead } from '@framework/Components'
+import { Typeahead, ErrorBoundary } from '@framework/Components'
 import * as OmniboxClient from './OmniboxClient'
 import { OmniboxMessage } from './Signum.Entities.Omnibox'
 import '@framework/Frames/MenuIcons.css'

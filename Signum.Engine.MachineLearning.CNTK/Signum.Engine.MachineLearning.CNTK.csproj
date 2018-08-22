@@ -16,6 +16,7 @@
     <ProjectReference Include="..\..\Framework\Signum.Engine\Signum.Engine.csproj" />
     <ProjectReference Include="..\..\Framework\Signum.Entities\Signum.Entities.csproj" />
     <ProjectReference Include="..\..\Framework\Signum.Utilities\Signum.Utilities.csproj" />
+    <ProjectReference Include="..\Signum.Engine.Extensions\Signum.Engine.Extensions.csproj" />
     <ProjectReference Include="..\Signum.Entities.Extensions\Signum.Entities.Extensions.csproj" />
   </ItemGroup>
 
@@ -24,7 +25,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="CNTK.CPUOnly" Version="2.6.0-rc0.dev20180510" />
+    <PackageReference Include="CNTK.CPUOnly" Version="2.6.0-rc0.dev20180821" />
   </ItemGroup>
 
   <Target Name="SignumAfterCompile" AfterTargets="Build" DependsOnTargets="CoreCompile">
