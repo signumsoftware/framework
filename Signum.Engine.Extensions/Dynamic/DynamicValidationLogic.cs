@@ -40,7 +40,7 @@ namespace Signum.Engine.Dynamic
                         e.Name,
                         e.EntityType,
                         e.SubEntity,
-                        e.Eval.Script,
+                        Script = e.Eval.Script.Etc(75),
                     });
 
                 new Graph<DynamicValidationEntity>.ConstructFrom<DynamicValidationEntity>(DynamicValidationOperation.Clone)

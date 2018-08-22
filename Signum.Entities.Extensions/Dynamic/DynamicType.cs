@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
 using Signum.Entities;
 using Signum.Entities.Basics;
@@ -140,9 +141,11 @@ namespace Signum.Entities.Dynamic
     public class DynamicTypeDefinition
     {
         [JsonProperty(PropertyName = "entityKind", NullValueHandling = NullValueHandling.Ignore)]
+        [JsonConverter(typeof(StringEnumConverter))]
         public EntityKind? EntityKind;
 
         [JsonProperty(PropertyName = "entityData", NullValueHandling = NullValueHandling.Ignore)]
+        [JsonConverter(typeof(StringEnumConverter))]
         public EntityData? EntityData;
 
         [JsonProperty(PropertyName = "tableName", NullValueHandling = NullValueHandling.Ignore)]
@@ -276,7 +279,16 @@ namespace Signum.Entities.Dynamic
 
         [JsonProperty(PropertyName = "scale", NullValueHandling = NullValueHandling.Ignore)]
         public int? Scale;
-        
+
+        [JsonProperty(PropertyName = "unit", DefaultValueHandling = DefaultValueHandling.Ignore)]
+        public string Unit;
+
+        [JsonProperty(PropertyName = "format", DefaultValueHandling = DefaultValueHandling.Ignore)]
+        public string Format;
+
+        [JsonProperty(PropertyName = "notifyChanges", DefaultValueHandling = DefaultValueHandling.Ignore)]
+        public bool NotifyChanges;
+
         [JsonProperty(PropertyName = "validators", NullValueHandling = NullValueHandling.Ignore)]
         public List<DynamicValidator> Validators;
 
