@@ -2,7 +2,7 @@
 import * as numbro from 'numbro'
 import * as moment from 'moment'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { classes } from '@framework/Globals'
+import { classes, ifError } from '@framework/Globals'
 import { StyleContext } from '@framework/TypeContext'
 import { ajaxPost } from '@framework/Services'
 import * as Finder from '@framework/Finder'
@@ -218,18 +218,34 @@ export class RestartServerAppStep extends React.Component<RestartServerAppStepPr
             .then(() => {
                 this.setState({ serverRestarting: moment() });
                 this.props.setStartErrors(undefined);
-                API.getStartErrors()
-                    .then(errors => {
-                        this.props.setStartErrors(errors);
-                        this.setState({ serverRestarting: undefined });
-                    })
-                    .catch(error => {
-                        this.setState({ serverRestarting: undefined });
-                        throw error;
-                    })
-                    .done();
+                return Promise.all([this.refreshScreen(), this.reconnectWithServer()]);
             })
             .done();
+    }
+
+    refreshScreen = async () => {
+        while (this.state.serverRestarting) {
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            this.forceUpdate();
+        }
+    }
+
+    reconnectWithServer = async () => {
+        while(true) {
+            try {
+                var errors = await API.getStartErrors();
+                this.props.setStartErrors(errors);
+                this.setState({ serverRestarting: undefined });
+                return;
+            } catch (e) {
+                if (e instanceof SyntaxError) {
+                    await new Promise(resolve => setTimeout(resolve, 500));
+                }
+                else {
+                    throw e;
+                }
+            }
+        }
     }
 
     render() {
@@ -253,7 +269,7 @@ export class RestartServerAppStep extends React.Component<RestartServerAppStepPr
         return (
             <div className="progress">
                 <div className="progress-bar progress-bar-striped bg-warning active" role="progressbar" style={{ width: "100%" }}>
-                    <span>Restarting...</span>
+                    <span>Restarting...({moment().diff(since, "s")}s)</span>
                 </div>
             </div>
         );

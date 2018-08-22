@@ -16,6 +16,7 @@ using Signum.Engine.Operations;
 using Signum.Entities.UserAssets;
 using System.IO;
 
+
 namespace Signum.Engine.MachineLearning.CNTK
 {
     public class CNTKNeuralNetworkPredictorAlgorithm : IPredictorAlgorithm
@@ -34,6 +35,7 @@ namespace Signum.Engine.MachineLearning.CNTK
         {
             if (!Environment.Is64BitProcess)
                 throw new InvalidOperationException("CNTK only works with starting projects compiled for x64");
+            
             
             /// This is a workaround to load unmanaged CNTK dlls from the applications \bin directory.
             var dir = AppDomain.CurrentDomain.BaseDirectory;
