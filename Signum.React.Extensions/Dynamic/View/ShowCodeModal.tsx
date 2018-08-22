@@ -1,14 +1,10 @@
-﻿
+
 import * as React from 'react'
-import { Dic } from '../../../../Framework/Signum.React/Scripts/Globals';
-import { openModal, IModalProps } from '../../../../Framework/Signum.React/Scripts/Modals';
-import { SelectorMessage } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
-import { TypeInfo } from '../../../../Framework/Signum.React/Scripts/Reflection'
-import { TypeContext, StyleContext } from '../../../../Framework/Signum.React/Scripts/TypeContext'
-import { DynamicViewMessage } from '../Signum.Entities.Dynamic'
+import { Dic } from '@framework/Globals';
+import { openModal, IModalProps } from '@framework/Modals';
 import * as NodeUtils from './NodeUtils'
 import { BaseNode } from './Nodes'
-import { Modal } from '../../../../Framework/Signum.React/Scripts/Components';
+import { Modal } from '@framework/Components';
 
 
 interface ShowCodeModalProps extends React.Props<ShowCodeModal>, IModalProps {
@@ -66,12 +62,12 @@ function renderFile(typeName: string, node: BaseNode): string {
     return (
         `
 import * as React from 'react'
-import { Dic } from '../../../../Framework/Signum.React/Scripts/Globals'
-import { getMixin } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
+import { Dic } from '@framework/Globals'
+import { getMixin } from '@framework/Signum.Entities'
 import { ${typeName}Entity } from '../[your namespace]'
 import { ValueLine, EntityLine, RenderEntity, EntityCombo, EntityList, EntityDetail, EntityStrip, 
-         EntityRepeater, EntityCheckboxList, EntityTabRepeater, TypeContext, EntityTable } from '../../../../Framework/Signum.React/Scripts/Lines'
-import { SearchControl, ValueSearchControl } from '../../../../Framework/Signum.React/Scripts/Search'
+         EntityRepeater, EntityCheckboxList, EntityTabRepeater, TypeContext, EntityTable } from '@framework/Lines'
+import { SearchControl, ValueSearchControl } from '@framework/Search'
 ${Dic.getValues(cc.imports.toObjectDistinct(a => a)).join("\n")}
 
 export default class ${typeName}Component extends React.Component<{ ctx: TypeContext<${typeName}Entity> }> {

@@ -68,10 +68,10 @@ namespace Signum.Engine.SMS
 
         public static void AssertStarted(SchemaBuilder sb)
         {
-            sb.AssertDefined(ReflectionTools.GetMethodInfo(() => Start(null, null, null, null)));
+            sb.AssertDefined(ReflectionTools.GetMethodInfo(() => Start(null, null, null)));
         }
 
-        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm, ISMSProvider provider, Func<SMSConfigurationEmbedded> getConfiguration)
+        public static void Start(SchemaBuilder sb, ISMSProvider provider, Func<SMSConfigurationEmbedded> getConfiguration)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
@@ -81,7 +81,7 @@ namespace Signum.Engine.SMS
                 SMSLogic.Provider = provider;
 
                 sb.Include<SMSMessageEntity>()
-                    .WithQuery(dqm, () => m => new
+                    .WithQuery(() => m => new
                     {
                         Entity = m,
                         m.Id,
@@ -93,7 +93,7 @@ namespace Signum.Engine.SMS
                     });
 
                 sb.Include<SMSTemplateEntity>()
-                    .WithQuery(dqm, () => t => new
+                    .WithQuery(() => t => new
                     {
                         Entity = t,
                         t.Id,
@@ -385,7 +385,7 @@ namespace Signum.Engine.SMS
         
         #region processes
 
-        public static void StartProcesses(SchemaBuilder sb, DynamicQueryManager dqm)
+        public static void StartProcesses(SchemaBuilder sb)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
@@ -401,7 +401,7 @@ namespace Signum.Engine.SMS
                     Construct = (messages, _) => UpdateMessages(messages.RetrieveFromListOfLite())
                 }.Register();
 
-                dqm.RegisterQuery(typeof(SMSSendPackageEntity), () =>
+                QueryLogic.Queries.Register(typeof(SMSSendPackageEntity), () =>
                     from e in Database.Query<SMSSendPackageEntity>()
                     let p = e.LastProcess()
                     select new
@@ -414,7 +414,7 @@ namespace Signum.Engine.SMS
                         NumErrors = e.SMSMessages().Count(s => s.Exception(p) != null),
                     });
 
-                dqm.RegisterQuery(typeof(SMSUpdatePackageEntity), () =>
+                QueryLogic.Queries.Register(typeof(SMSUpdatePackageEntity), () =>
                     from e in Database.Query<SMSUpdatePackageEntity>()
                     let p = e.LastProcess()
                     select new
@@ -552,8 +552,8 @@ namespace Signum.Engine.SMS
 
             new Execute(SMSMessageOperation.Send)
             {
-                AllowsNew = true,
-                Lite = false,
+                CanBeNew = true,
+                CanBeModified = true,
                 FromStates = { SMSMessageState.Created },
                 ToStates = { SMSMessageState.Sent },
                 Execute = (m, _) =>

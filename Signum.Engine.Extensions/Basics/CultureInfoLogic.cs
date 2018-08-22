@@ -28,7 +28,7 @@ namespace Signum.Engine.Basics
 
         internal static void AssertStarted(SchemaBuilder sb)
         {
-            sb.AssertDefined(ReflectionTools.GetMethodInfo(() => CultureInfoLogic.Start(null, null)));
+            sb.AssertDefined(ReflectionTools.GetMethodInfo(() => CultureInfoLogic.Start(null)));
         }
 
         public static Func<CultureInfo, CultureInfo> CultureInfoModifier = ci => ci;
@@ -36,13 +36,13 @@ namespace Signum.Engine.Basics
         public static ResetLazy<Dictionary<string, CultureInfoEntity>> CultureInfoToEntity;
         public static ResetLazy<Dictionary<CultureInfoEntity, CultureInfo>> EntityToCultureInfo;
 
-        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
+        public static void Start(SchemaBuilder sb)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
                 sb.Include<CultureInfoEntity>()
                     .WithSave(CultureInfoOperation.Save)
-                    .WithQuery(dqm, () => c => new
+                    .WithQuery(() => c => new
                     {
                         Entity = c,
                         c.Id,

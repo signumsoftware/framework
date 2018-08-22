@@ -1,28 +1,29 @@
 ﻿import * as React from 'react'
-import { Dic } from '../../../../Framework/Signum.React/Scripts/Globals'
-import { openModal, IModalProps } from '../../../../Framework/Signum.React/Scripts/Modals'
-import { TypeContext, StyleOptions, EntityFrame } from '../../../../Framework/Signum.React/Scripts/TypeContext'
-import { TypeInfo, getTypeInfo, parseId, GraphExplorer, PropertyRoute, ReadonlyBinding, } from '../../../../Framework/Signum.React/Scripts/Reflection'
-import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
-import MessageModal from '../../../../Framework/Signum.React/Scripts/Modals/MessageModal'
-import * as Operations from '../../../../Framework/Signum.React/Scripts/Operations'
-import { EntityPack, Entity, Lite, JavascriptMessage, NormalWindowMessage, entityInfo, getToString, toLite } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
-import { renderWidgets, renderEmbeddedWidgets, WidgetContext } from '../../../../Framework/Signum.React/Scripts/Frames/Widgets'
-import ValidationErrors from '../../../../Framework/Signum.React/Scripts/Frames/ValidationErrors'
-import ButtonBar from '../../../../Framework/Signum.React/Scripts/Frames/ButtonBar'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { Dic } from '@framework/Globals'
+import { openModal, IModalProps } from '@framework/Modals'
+import { TypeContext, StyleOptions, EntityFrame } from '@framework/TypeContext'
+import { TypeInfo, getTypeInfo, parseId, GraphExplorer, PropertyRoute, ReadonlyBinding, } from '@framework/Reflection'
+import * as Navigator from '@framework/Navigator'
+import MessageModal from '@framework/Modals/MessageModal'
+import * as Operations from '@framework/Operations'
+import { EntityPack, Entity, Lite, JavascriptMessage, NormalWindowMessage, entityInfo, getToString, toLite } from '@framework/Signum.Entities'
+import { renderWidgets, renderEmbeddedWidgets, WidgetContext } from '@framework/Frames/Widgets'
+import ValidationErrors from '@framework/Frames/ValidationErrors'
+import ButtonBar from '@framework/Frames/ButtonBar'
 import { CaseActivityEntity, WorkflowEntity, ICaseMainEntity, CaseActivityOperation, WorkflowActivityEntity } from '../Signum.Entities.Workflow'
 import * as WorkflowClient from '../WorkflowClient'
 import CaseFromSenderInfo from './CaseFromSenderInfo'
 import CaseButtonBar from './CaseButtonBar'
 import CaseFlowButton from './CaseFlowButton'
 import InlineCaseTags from './InlineCaseTags'
-import { OperationMessage } from "../../../../Framework/Signum.React/Scripts/Signum.Entities";
+import { OperationMessage } from "@framework/Signum.Entities";
 
-import "../../../../Framework/Signum.React/Scripts/Frames/Frames.css"
+import "@framework/Frames/Frames.css"
 import "./CaseAct.css"
 import { IHasCaseActivity } from '../WorkflowClient';
-import { Modal, ErrorBoundary } from '../../../../Framework/Signum.React/Scripts/Components';
-import { ModalHeaderButtons } from '../../../../Framework/Signum.React/Scripts/Components/Modal';
+import { Modal, ErrorBoundary } from '@framework/Components';
+import { ModalHeaderButtons } from '@framework/Components/Modal';
 
 interface CaseFrameModalProps extends React.Props<CaseFrameModal>, IModalProps {
     title?: string;
@@ -307,7 +308,7 @@ export default class CaseFrameModal extends React.Component<CaseFrameModalProps,
 
         return (
             <a href="#" className="sf-popup-fullscreen" onClick={this.handlePopupFullScreen}>
-                <span className="fa fa-external-link"></span>
+                <FontAwesomeIcon icon="external-link-alt" />
             </a>
         );
     }

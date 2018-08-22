@@ -1,14 +1,13 @@
 ﻿import * as React from 'react'
-import { WorkflowEntity, WorkflowModel, WorkflowEntitiesDictionary, BpmnEntityPairEmbedded, WorkflowOperation, WorkflowMessage, WorkflowIssueType } from '../Signum.Entities.Workflow'
-import { TypeContext, ValueLine, EntityLine, LiteAutocompleteConfig } from '../../../../Framework/Signum.React/Scripts/Lines'
-import { is, JavascriptMessage, toLite, ModifiableEntity, Lite, Entity } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
-import * as Entities from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
-import { Dic, classes } from '../../../../Framework/Signum.React/Scripts/Globals';
-import { API, executeWorkflowSave } from '../WorkflowClient'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { WorkflowEntity, WorkflowModel, WorkflowEntitiesDictionary, WorkflowMessage } from '../Signum.Entities.Workflow'
+import { TypeContext, ValueLine, EntityLine, LiteAutocompleteConfig } from '@framework/Lines'
+import { is, JavascriptMessage, toLite, ModifiableEntity, Lite, Entity } from '@framework/Signum.Entities'
+import { API } from '../WorkflowClient'
 import BpmnModelerComponent from '../Bpmn/BpmnModelerComponent'
-import MessageModal from "../../../../Framework/Signum.React/Scripts/Modals/MessageModal";
+import MessageModal from "@framework/Modals/MessageModal";
 import CollapsableCard from '../../Basics/Templates/CollapsableCard';
-import { BsColor } from '../../../../Framework/Signum.React/Scripts/Components';
+import { BsColor } from '@framework/Components';
 
 interface WorkflowProps {
     ctx: TypeContext<WorkflowEntity>;
@@ -89,7 +88,7 @@ export default class Workflow extends React.Component<WorkflowProps, WorkflowSta
                     <div className="col-sm-6">
                 <ValueLine ctx={ctx.subCtx(d => d.name)} />
                 <EntityLine ctx={ctx.subCtx(d => d.mainEntityType)}
-                    autoComplete={new LiteAutocompleteConfig((abortController, str) => API.findMainEntityType({ subString: str, count: 5 }), false, false)}
+                    autocomplete={new LiteAutocompleteConfig((abortController, str) => API.findMainEntityType({ subString: str, count: 5 }), false, false)}
                     find={false}
                     onRemove={this.handleMainEntityTypeChange} />
                     </div>
@@ -132,15 +131,15 @@ export default class Workflow extends React.Component<WorkflowProps, WorkflowSta
 
                     {this.state.issues.length == 0 ?
                         <li>
-                            <i className="fa fa-check text-success mr-1" aria-hidden="true" />
+                            <FontAwesomeIcon icon="check" className="text-success mr-1"/>
                             {"-- No issues --"}
                         </li> :
                         this.state.issues.orderBy(a => a.type).map((issue, i) =>
 
                             <li key={i}>
                                 {issue.type == "Error" ?
-                                    <i className="fa fa-times-circle text-danger mr-1" aria-hidden="true" /> :
-                                    <i className="fa fa-exclamation-triangle text-warning mr-1" aria-hidden="true" />}
+                                    <FontAwesomeIcon icon="times-circle" className="text-danger mr-1"/> :
+                                    <FontAwesomeIcon icon="exclamation-triangle" className="text-warning mr-1"/>}
 
                                 {issue.bpmnElementId && <span className="mr-1">(in <a href="#" onClick={e => this.handleHighlightClick(e, issue)}>{issue.bpmnElementId}</a>)</span>}
                                 {issue.message}
@@ -160,9 +159,9 @@ export default class Workflow extends React.Component<WorkflowProps, WorkflowSta
         return (
             <div>
                 <span className="display-7">{WorkflowMessage.WorkflowIssues.niceToString()}&nbsp;</span>
-                {errorCount > 0 && <span className="fa fa-times-circle text-danger mr-1" />}
+                {errorCount > 0 && <FontAwesomeIcon icon="times-circle" className="text-danger mr-1" />}
                 {errorCount > 0 && errorCount}
-                {warningCount > 0 && <span className="fa fa-exclamation-triangle text-warning mr-1" />}
+                {warningCount > 0 && <FontAwesomeIcon icon="exclamation-triangle" className="text-warning mr-1" />}
                 {warningCount > 0 && warningCount}
             </div>
         );

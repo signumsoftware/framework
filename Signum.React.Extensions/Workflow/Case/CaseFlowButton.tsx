@@ -1,16 +1,16 @@
-﻿
-import * as React from 'react'
+﻿import * as React from 'react'
 import * as moment from 'moment'
-import { Dic } from '../../../../Framework/Signum.React/Scripts/Globals'
-import { openModal, IModalProps } from '../../../../Framework/Signum.React/Scripts/Modals'
-import { TypeContext, StyleOptions, EntityFrame } from '../../../../Framework/Signum.React/Scripts/TypeContext'
-import { TypeInfo, getTypeInfo, parseId, GraphExplorer, PropertyRoute, ReadonlyBinding, } from '../../../../Framework/Signum.React/Scripts/Reflection'
-import { ValueLine } from '../../../../Framework/Signum.React/Scripts/Lines'
-import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
-import * as Operations from '../../../../Framework/Signum.React/Scripts/Operations'
-import { EntityPack, Entity, Lite, JavascriptMessage, NormalWindowMessage, entityInfo, getToString, is } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
-import ValidationErrors from '../../../../Framework/Signum.React/Scripts/Frames/ValidationErrors'
-import ButtonBar from '../../../../Framework/Signum.React/Scripts/Frames/ButtonBar'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { Dic } from '@framework/Globals'
+import { openModal, IModalProps } from '@framework/Modals'
+import { TypeContext, StyleOptions, EntityFrame } from '@framework/TypeContext'
+import { TypeInfo, getTypeInfo, parseId, GraphExplorer, PropertyRoute, ReadonlyBinding, } from '@framework/Reflection'
+import { ValueLine } from '@framework/Lines'
+import * as Navigator from '@framework/Navigator'
+import * as Operations from '@framework/Operations'
+import { EntityPack, Entity, Lite, JavascriptMessage, NormalWindowMessage, entityInfo, getToString, is } from '@framework/Signum.Entities'
+import ValidationErrors from '@framework/Frames/ValidationErrors'
+import ButtonBar from '@framework/Frames/ButtonBar'
 import { CaseActivityEntity, WorkflowEntity, ICaseMainEntity, CaseActivityOperation, CaseActivityMessage, WorkflowActivityEntity, WorkflowActivityMessage } from '../Signum.Entities.Workflow'
 import * as WorkflowClient from '../WorkflowClient'
 import { DynamicViewMessage } from '../../Dynamic/Signum.Entities.Dynamic'
@@ -30,8 +30,8 @@ export default class CaseFlowButton extends React.Component <CaseFlowButtonProps
 
     render() {
         return (
-            <button className="btn btn-light pull-right flip" onClick={this.handleClick}>
-                <i className="fa fa-random" style={{ color: "green" }} /> {WorkflowActivityMessage.CaseFlow.niceToString()}
+            <button className="btn btn-light float-right flip" onClick={this.handleClick}>
+                <FontAwesomeIcon icon="random" color="green" /> {WorkflowActivityMessage.CaseFlow.niceToString()}
             </button>
         );
     }

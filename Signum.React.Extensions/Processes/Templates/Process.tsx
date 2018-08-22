@@ -1,13 +1,13 @@
 ﻿import * as React from 'react'
-import { classes } from '../../../../Framework/Signum.React/Scripts/Globals'
-import { FormGroup, FormControlReadonly, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityList, EntityRepeater} from '../../../../Framework/Signum.React/Scripts/Lines'
-import { ValueSearchControlLine }  from '../../../../Framework/Signum.React/Scripts/Search'
-import { toLite }  from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
-import * as Navigator  from '../../../../Framework/Signum.React/Scripts/Navigator'
-import { TypeContext, FormGroupStyle } from '../../../../Framework/Signum.React/Scripts/TypeContext'
+import { classes } from '@framework/Globals'
+import { FormGroup, FormControlReadonly, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityList, EntityRepeater} from '@framework/Lines'
+import { ValueSearchControlLine }  from '@framework/Search'
+import { toLite }  from '@framework/Signum.Entities'
+import * as Navigator  from '@framework/Navigator'
+import { TypeContext, FormGroupStyle } from '@framework/TypeContext'
 import { ProcessEntity, ProcessState, ProcessExceptionLineEntity } from '../Signum.Entities.Processes'
 import ProgressBar from '../../MachineLearning/Templates/ProgressBar';
-import { BsColor } from '../../../../Framework/Signum.React/Scripts/Components';
+import { BsColor } from '@framework/Components';
 
 export default class Process extends React.Component<{ ctx: TypeContext<ProcessEntity> }> {
 

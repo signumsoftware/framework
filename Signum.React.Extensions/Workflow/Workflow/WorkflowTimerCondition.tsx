@@ -1,12 +1,11 @@
 ﻿import * as React from 'react'
-import { ValueLine, EntityLine, TypeContext, FormGroup, ValueLineType, LiteAutocompleteConfig } from '../../../../Framework/Signum.React/Scripts/Lines'
-import { PropertyRoute, Binding } from '../../../../Framework/Signum.React/Scripts/Reflection'
-import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
+import { ValueLine, EntityLine, TypeContext, LiteAutocompleteConfig } from '@framework/Lines'
+import { PropertyRoute } from '@framework/Reflection'
 import CSharpCodeMirror from '../../Codemirror/CSharpCodeMirror'
-import { WorkflowTimerConditionEntity, ICaseMainEntity } from '../Signum.Entities.Workflow'
+import { WorkflowTimerConditionEntity } from '../Signum.Entities.Workflow'
 import { API } from '../WorkflowClient'
 import TypeHelpComponent from '../../TypeHelp/TypeHelpComponent'
-import ValueLineModal from '../../../../Framework/Signum.React/Scripts/ValueLineModal'
+import ValueLineModal from '@framework/ValueLineModal'
 
 interface WorkflowTimerConditionComponentProps {
     ctx: TypeContext<WorkflowTimerConditionEntity>;
@@ -34,7 +33,7 @@ export default class WorkflowTimerConditionComponent extends React.Component<Wor
                 <ValueLine ctx={ctx.subCtx(wc => wc.name)} />
                 <EntityLine ctx={ctx.subCtx(wc => wc.mainEntityType)}
                     onChange={this.handleMainEntityTypeChange}
-                    autoComplete={new LiteAutocompleteConfig((ac, str) => API.findMainEntityType({ subString: str, count: 5 }, ac), false, false)}
+                    autocomplete={new LiteAutocompleteConfig((ac, str) => API.findMainEntityType({ subString: str, count: 5 }, ac), false, false)}
                     find={false} />
                 {ctx.value.mainEntityType &&
                     <div>

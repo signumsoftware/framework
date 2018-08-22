@@ -25,7 +25,7 @@ namespace Signum.React.MachineLearning
             Dictionary<QueryToken, object> filters = new Dictionary<QueryToken, object>();
 
             var serializer = JsonSerializer.Create(SignumServer.JsonSerializerSettings);
-            var qd = DynamicQueryManager.Current.QueryDescription(pctx.Predictor.MainQuery.Query.ToQueryName());
+            var qd = QueryLogic.Queries.QueryDescription(pctx.Predictor.MainQuery.Query.ToQueryName());
             foreach (var kvp in mainKeys)
             {
                 var qt = QueryUtils.Parse(kvp.Key, qd, SubTokensOptions.CanElement | SubTokensOptions.CanAggregate);

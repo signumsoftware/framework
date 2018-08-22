@@ -1,14 +1,14 @@
 ﻿import * as React from 'react'
-import { Dic, classes } from '../../../../Framework/Signum.React/Scripts/Globals'
-import * as Constructor from '../../../../Framework/Signum.React/Scripts/Constructor'
-import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
-import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
+import { Dic, classes } from '@framework/Globals'
+import * as Constructor from '@framework/Constructor'
+import * as Finder from '@framework/Finder'
+import * as Navigator from '@framework/Navigator'
 import { DynamicTypeEntity, DynamicTypeMessage, DynamicSqlMigrationMessage, DynamicPanelPermission } from '../Signum.Entities.Dynamic'
-import { IHasChanges } from '../../../../Framework/Signum.React/Scripts/TypeContext'
-import { ValueLine, EntityLine, TypeContext } from '../../../../Framework/Signum.React/Scripts/Lines'
-import { ModifiableEntity, Entity, Lite, JavascriptMessage } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
-import { getTypeInfo, Binding, PropertyRoute, symbolNiceName, GraphExplorer } from '../../../../Framework/Signum.React/Scripts/Reflection'
-import SelectorModal from '../../../../Framework/Signum.React/Scripts/SelectorModal'
+import { IHasChanges } from '@framework/TypeContext'
+import { ValueLine, EntityLine, TypeContext } from '@framework/Lines'
+import { ModifiableEntity, Entity, Lite, JavascriptMessage } from '@framework/Signum.Entities'
+import { getTypeInfo, Binding, PropertyRoute, symbolNiceName, GraphExplorer } from '@framework/Reflection'
+import SelectorModal from '@framework/SelectorModal'
 import * as DynamicTypeClient from '../DynamicTypeClient'
 import { DynamicTypeDefinitionComponent, PropertyRepeaterComponent } from './DynamicTypeDefinitionComponent'
 
@@ -81,7 +81,7 @@ export default class DynamicTypeComponent extends React.Component<DynamicTypeCom
                         <ValueLine ctx={ctx.subCtx(dt => dt.typeName)} labelColumns={3} onChange={() => this.forceUpdate()} unitText={suffix} />
                     </div>
                     <div className="col-sm-4">
-                        <button className={classes("btn btn-xs btn-success pull-right", this.state.showDatabaseMapping && "active")}
+                        <button className={classes("btn btn-xs btn-success float-right", this.state.showDatabaseMapping && "active")}
                             onClick={() => this.setState({ showDatabaseMapping: !this.state.showDatabaseMapping })}>
                             Show Database Mapping
                         </button>

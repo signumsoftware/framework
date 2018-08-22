@@ -17,11 +17,11 @@ namespace Signum.Engine.Workflow
 
     public static class WorkflowLogicStarter
     {
-        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm, Func<WorkflowConfigurationEmbedded> getConfiguration)
+        public static void Start(SchemaBuilder sb, Func<WorkflowConfigurationEmbedded> getConfiguration)
         {
-            WorkflowLogic.Start(sb, dqm, getConfiguration);
-            CaseActivityLogic.Start(sb, dqm);
-            WorkflowEventTaskLogic.Start(sb, dqm);
+            WorkflowLogic.Start(sb, getConfiguration);
+            CaseActivityLogic.Start(sb);
+            WorkflowEventTaskLogic.Start(sb);
         }
     }
 }

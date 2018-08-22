@@ -1,9 +1,9 @@
 ﻿import * as React from 'react'
 import { Route } from 'react-router'
-import { Entity } from '../../../Framework/Signum.React/Scripts/Signum.Entities';
+import { Entity } from '@framework/Signum.Entities';
 import { TypeHelpMode } from './TypeHelpClient';
-import { ModifiableEntity } from '../../../Framework/Signum.React/Scripts/Signum.Entities';
-import { TypeContext } from '../../../Framework/Signum.React/Scripts/Lines';
+import { ModifiableEntity } from '@framework/Signum.Entities';
+import { TypeContext } from '@framework/Lines';
 
 interface TypeHelpButtonBarComponentProps {
     typeName: string;

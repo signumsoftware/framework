@@ -1,20 +1,22 @@
 ﻿import * as React from 'react'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { IconProp} from '@fortawesome/fontawesome-svg-core'
 import { Route } from 'react-router'
-import { Dic, classes } from '../../../Framework/Signum.React/Scripts/Globals';
-import { ajaxPost, ajaxGet } from '../../../Framework/Signum.React/Scripts/Services';
-import { EntitySettings, ViewPromise } from '../../../Framework/Signum.React/Scripts/Navigator'
-import * as Navigator from '../../../Framework/Signum.React/Scripts/Navigator'
-import * as Finder from '../../../Framework/Signum.React/Scripts/Finder'
-import { EntityOperationSettings } from '../../../Framework/Signum.React/Scripts/Operations'
-import { Entity, Lite, liteKey, MList, toLite, is, EntityPack } from '../../../Framework/Signum.React/Scripts/Signum.Entities'
-import * as Constructor from '../../../Framework/Signum.React/Scripts/Constructor'
-import * as Operations from '../../../Framework/Signum.React/Scripts/Operations'
-import * as QuickLinks from '../../../Framework/Signum.React/Scripts/QuickLinks'
-import { PseudoType, QueryKey, getQueryKey, Type, isTypeEntity } from '../../../Framework/Signum.React/Scripts/Reflection'
-import { TypeContext } from '../../../Framework/Signum.React/Scripts/TypeContext'
-import { WidgetContext, onEmbeddedWidgets, EmbeddedWidgetPosition } from '../../../Framework/Signum.React/Scripts/Frames/Widgets'
+import { Dic, classes } from '@framework/Globals';
+import { ajaxPost, ajaxGet } from '@framework/Services';
+import { EntitySettings, ViewPromise } from '@framework/Navigator'
+import * as Navigator from '@framework/Navigator'
+import * as Finder from '@framework/Finder'
+import { EntityOperationSettings } from '@framework/Operations'
+import { Entity, Lite, liteKey, MList, toLite, is, EntityPack } from '@framework/Signum.Entities'
+import * as Constructor from '@framework/Constructor'
+import * as Operations from '@framework/Operations'
+import * as QuickLinks from '@framework/QuickLinks'
+import { PseudoType, QueryKey, getQueryKey, Type, isTypeEntity } from '@framework/Reflection'
+import { TypeContext } from '@framework/TypeContext'
+import { WidgetContext, onEmbeddedWidgets, EmbeddedWidgetPosition } from '@framework/Frames/Widgets'
 import { FindOptions, FilterOption, FilterOperation, OrderOption, ColumnOption,
-    FilterRequest, QueryRequest, Pagination, QueryTokenType, QueryToken, FilterType, SubTokensOptions, ResultTable, OrderRequest } from '../../../Framework/Signum.React/Scripts/FindOptions'
+    FilterRequest, QueryRequest, Pagination, QueryTokenType, QueryToken, FilterType, SubTokensOptions, ResultTable, OrderRequest } from '@framework/FindOptions'
 import * as AuthClient  from '../Authorization/AuthClient'
 import * as ChartClient from '../Chart/ChartClient'
 import * as UserChartClient from '../Chart/UserChart/UserChartClient'
@@ -24,8 +26,8 @@ import { QueryFilterEmbedded, QueryColumnEmbedded, QueryOrderEmbedded } from '..
 import { DashboardPermission, DashboardEntity, ValueUserQueryListPartEntity, LinkListPartEntity, UserChartPartEntity, UserQueryPartEntity, IPartEntity, DashboardMessage, DashboardEmbedededInEntity } from './Signum.Entities.Dashboard'
 import { QueryTokenEmbedded } from '../UserAssets/Signum.Entities.UserAssets'
 import * as UserAssetClient from '../UserAssets/UserAssetClient'
-import { ImportRoute, ComponentModule } from "../../../Framework/Signum.React/Scripts/AsyncImport";
-import { ModifiableEntity } from "../../../Framework/Signum.React/Scripts/Signum.Entities";
+import { ImportRoute, ComponentModule } from "@framework/AsyncImport";
+import { ModifiableEntity } from "@framework/Signum.Entities";
 
 
 export interface PanelPartContentProps<T extends IPartEntity> {
@@ -34,7 +36,7 @@ export interface PanelPartContentProps<T extends IPartEntity> {
 }
 
 interface IconColor {
-    iconName: string;
+    icon: IconProp;
     iconColor: string;
 }
 
@@ -67,15 +69,15 @@ export function start(options: { routes: JSX.Element[] }) {
 
     registerRenderer(ValueUserQueryListPartEntity, {
         component: () => import('./View/ValueUserQueryListPart').then(a => a.default),
-        defaultIcon: () => ({ iconName: "fa fa-list-alt", iconColor: "lightblue" })
+        defaultIcon: () => ({ icon: ["far", "list-alt"], iconColor: "lightblue" })
     });
     registerRenderer(LinkListPartEntity, {
         component: () => import('./View/LinkListPart').then(a => a.default),
-        defaultIcon: () => ({ iconName: "fa fa-list-alt", iconColor: "forestgreen" })
+        defaultIcon: () => ({ icon: ["far", "list-alt"], iconColor: "forestgreen" })
     });
     registerRenderer(UserChartPartEntity, {
         component: () => import('./View/UserChartPart').then(a => a.default),
-        defaultIcon: () => ({ iconName: "fa fa-bar-chart", iconColor: "violet" }),
+        defaultIcon: () => ({ icon: "chart-bar", iconColor: "violet" }),
         handleEditClick: (p, e, ev) => {
             ev.preventDefault();
             Navigator.pushOrOpenInTab(Navigator.navigateRoute(p.userChart!), ev);
@@ -92,7 +94,7 @@ export function start(options: { routes: JSX.Element[] }) {
     
     registerRenderer(UserQueryPartEntity, {
         component: () => import('./View/UserQueryPart').then((a: any) => a.default),
-        defaultIcon: () => ({ iconName: "fa fa-list-alt", iconColor: "dodgerblue" }),
+        defaultIcon: () => ({ icon: ["far", "list-alt"], iconColor: "dodgerblue" }),
         withPanel: p => p.renderMode != "BigValue",
         handleEditClick: (p, e, ev) => {
             ev.preventDefault();
@@ -124,7 +126,7 @@ export function start(options: { routes: JSX.Element[] }) {
         return promise.then(das =>
             das.map(d => new QuickLinks.QuickLinkAction(liteKey(d), d.toStr || "", e => {
                 Navigator.pushOrOpenInTab(dashboardUrl(d, ctx.lite), e)
-            }, { icon: "fa fa-tachometer", iconColor: "darkslateblue" })));
+            }, { icon: "tachometer-alt", iconColor: "darkslateblue" })));
     });
 
     QuickLinks.registerQuickLink(DashboardEntity, ctx => new QuickLinks.QuickLinkAction("preview", DashboardMessage.Preview.niceToString(),
@@ -166,7 +168,7 @@ export module API {
     }
 }
 
-declare module '../../../Framework/Signum.React/Scripts/Signum.Entities' {
+declare module '@framework/Signum.Entities' {
 
     export interface EntityPack<T extends ModifiableEntity> {
         dashboards?: Array<Lite<DashboardEntity>>;

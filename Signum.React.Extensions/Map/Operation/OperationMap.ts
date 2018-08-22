@@ -1,7 +1,7 @@
 ﻿import * as d3 from "d3"
 import * as React from "react"
-import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
-import { OperationLogEntity } from '../../../../Framework/Signum.React/Scripts/Signum.Entities.Basics'
+import * as Finder from '@framework/Finder'
+import { OperationLogEntity } from '@framework/Signum.Entities.Basics'
 import { Point, Rectangle, calculatePoint, wrap, colorScale, forceBoundingBox } from '../Utils'
 
 export interface OperationMapInfo {
@@ -112,7 +112,7 @@ export class OperationMapD3 {
     initStates(svg: d3.Selection<SVGElement, any, any, any>) {
 
         const drag = d3.drag<SVGGElement, MapState>()
-            .on("initial", d => {
+            .on("start", d => {
                 if (!d3.event.active)
                     this.simulation.alphaTarget(0.3).restart();
 
@@ -191,7 +191,7 @@ export class OperationMapD3 {
     initOperations(svg: d3.Selection<SVGElement, any, any, any>) {
 
         const drag = d3.drag<SVGGElement, MapOperation>()
-            .on("initial", d => {
+            .on("start", d => {
                 if (!d3.event.active)
                     this.simulation.alphaTarget(0.3).restart();
 

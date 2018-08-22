@@ -58,7 +58,7 @@ namespace Signum.React.Omnibox
 
         public override bool AllowedQuery(object queryName)
         {
-            return DynamicQueryManager.Current.QueryAllowed(queryName, true);
+            return QueryLogic.Queries.QueryAllowed(queryName, true);
         }
 
         public override Lite<Entity> RetrieveLite(Type type, PrimaryKey id)
@@ -70,7 +70,7 @@ namespace Signum.React.Omnibox
 
         public override QueryDescription GetDescription(object queryName)
         {
-            return DynamicQueryManager.Current.QueryDescription(queryName);
+            return QueryLogic.Queries.QueryDescription(queryName);
         }
 
         public override List<Lite<Entity>> Autocomplete(Implementations implementations, string subString, int count)
@@ -83,7 +83,7 @@ namespace Signum.React.Omnibox
 
         protected override IEnumerable<object> GetAllQueryNames()
         {
-            return DynamicQueryManager.Current.GetQueryNames();
+            return QueryLogic.Queries.GetQueryNames();
         }
 
         protected override IEnumerable<Type> GetAllTypes()

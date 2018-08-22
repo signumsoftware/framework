@@ -1,21 +1,22 @@
 ﻿import * as React from 'react'
-import { Dic } from '../../../../Framework/Signum.React/Scripts/Globals'
-import { MemberInfo, getTypeInfo, PropertyRoute, Binding, TypeInfo } from '../../../../Framework/Signum.React/Scripts/Reflection'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { Dic } from '@framework/Globals'
+import { MemberInfo, getTypeInfo, PropertyRoute, Binding, TypeInfo } from '@framework/Reflection'
 import { DynamicValidationEntity, DynamicValidationMessage, DynamicViewMessage } from '../Signum.Entities.Dynamic'
-import { ValueLine, EntityLine, RenderEntity, EntityCombo, EntityList, EntityDetail, EntityStrip, EntityRepeater, EntityCheckboxList, EntityTabRepeater, TypeContext, ValueLineType, FormGroup } from '../../../../Framework/Signum.React/Scripts/Lines'
-import { Entity } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
-import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
+import { ValueLine, EntityLine, RenderEntity, EntityCombo, EntityList, EntityDetail, EntityStrip, EntityRepeater, EntityCheckboxList, EntityTabRepeater, TypeContext, ValueLineType, FormGroup } from '@framework/Lines'
+import { Entity } from '@framework/Signum.Entities'
+import * as Navigator from '@framework/Navigator'
 import { API, DynamicValidationTestResponse } from '../DynamicValidationClient'
 import CSharpCodeMirror from '../../Codemirror/CSharpCodeMirror'
 import TypeHelpComponent from '../../TypeHelp/TypeHelpComponent'
 import TypeHelpButtonBarComponent from '../../TypeHelp/TypeHelpButtonBarComponent'
-import ValueLineModal from '../../../../Framework/Signum.React/Scripts/ValueLineModal'
-import { ContextMenuPosition } from '../../../../Framework/Signum.React/Scripts/SearchControl/ContextMenu'
+import ValueLineModal from '@framework/ValueLineModal'
+import { ContextMenuPosition } from '@framework/SearchControl/ContextMenu'
 import PropertyRouteCombo from "../../Basics/Templates/PropertyRouteCombo";
-import { ModifiableEntity } from '../../../../Framework/Signum.React/Scripts/Signum.Entities';
-import { Lite } from '../../../../Framework/Signum.React/Scripts/Signum.Entities';
-import { PropertyRouteEntity } from '../../../../Framework/Signum.React/Scripts/Signum.Entities.Basics';
-import { UncontrolledDropdown, DropdownToggle, DropdownMenu, DropdownItem } from '../../../../Framework/Signum.React/Scripts/Components';
+import { ModifiableEntity } from '@framework/Signum.Entities';
+import { Lite } from '@framework/Signum.Entities';
+import { PropertyRouteEntity } from '@framework/Signum.Entities.Basics';
+import { UncontrolledDropdown, DropdownToggle, DropdownMenu, DropdownItem } from '@framework/Components';
 
 interface DynamicValidationProps {
     ctx: TypeContext<DynamicValidationEntity>;
@@ -88,7 +89,7 @@ export default class DynamicValidation extends React.Component<DynamicValidation
                         <br />
                         <div className="row">
                             <div className="col-sm-7">
-                                {this.state.exampleEntity && <button className="btn btn-success" onClick={this.handleEvaluate}><i className="fa fa-play" aria-hidden="true"></i> Evaluate</button>}
+                                {this.state.exampleEntity && <button className="btn btn-success" onClick={this.handleEvaluate}><FontAwesomeIcon icon="play"/> Evaluate</button>}
                                 <div className="code-container">
                                     <TypeHelpButtonBarComponent typeName={ctx.value.entityType.cleanName} mode="CSharp" ctx={ctx} extraButtons={
                                         <PropertyIsHelpComponent route={this.getCurrentRoute(ctx.value.entityType.cleanName)} />

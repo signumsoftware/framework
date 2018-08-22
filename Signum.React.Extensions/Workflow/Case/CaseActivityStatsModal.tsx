@@ -1,22 +1,23 @@
 ﻿import * as moment from 'moment'
 import * as numbro from 'numbro'
 import * as React from 'react'
-import { openModal, IModalProps } from '../../../../Framework/Signum.React/Scripts/Modals';
-import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder';
-import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator';
-import { Dic } from '../../../../Framework/Signum.React/Scripts/Globals';
-import { SelectorMessage, JavascriptMessage } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
-import { TypeInfo, TypeReference, Binding } from '../../../../Framework/Signum.React/Scripts/Reflection'
-import { FormGroupStyle, TypeContext } from '../../../../Framework/Signum.React/Scripts/TypeContext'
-import { ValueLineType, ValueLine } from '../../../../Framework/Signum.React/Scripts/Lines/ValueLine'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { openModal, IModalProps } from '@framework/Modals';
+import * as Finder from '@framework/Finder';
+import * as Navigator from '@framework/Navigator';
+import { Dic } from '@framework/Globals';
+import { SelectorMessage, JavascriptMessage } from '@framework/Signum.Entities'
+import { TypeInfo, TypeReference, Binding } from '@framework/Reflection'
+import { FormGroupStyle, TypeContext } from '@framework/TypeContext'
+import { ValueLineType, ValueLine } from '@framework/Lines/ValueLine'
 import { CaseActivityStats } from "../WorkflowClient";
-import { FormGroup, StyleContext } from "../../../../Framework/Signum.React/Scripts/Lines";
+import { FormGroup, StyleContext } from "@framework/Lines";
 import { CaseActivityEntity, WorkflowActivityEntity, WorkflowActivityMessage, DoneType, CaseNotificationEntity, CaseActivityMessage, WorkflowActivityType, CaseEntity } from "../Signum.Entities.Workflow";
-import { EntityLink, SearchControl } from "../../../../Framework/Signum.React/Scripts/Search";
-import { OperationLogEntity } from "../../../../Framework/Signum.React/Scripts/Signum.Entities.Basics";
-import { Tab, Tabs, UncontrolledTabs } from '../../../../Framework/Signum.React/Scripts/Components/Tabs';
-import { Modal } from '../../../../Framework/Signum.React/Scripts/Components';
-import * as SelectorModal from "../../../../Framework/Signum.React/Scripts/SelectorModal";
+import { EntityLink, SearchControl } from "@framework/Search";
+import { OperationLogEntity } from "@framework/Signum.Entities.Basics";
+import { Tab, Tabs, UncontrolledTabs } from '@framework/Components/Tabs';
+import { Modal } from '@framework/Components';
+import * as SelectorModal from "@framework/SelectorModal";
 
 
 interface CaseActivityStatsModalProps extends React.Props<CaseActivityStatsModal>, IModalProps {
@@ -156,7 +157,7 @@ export class CaseActivityStatsComponent extends React.Component<CaseActivityStat
         return (
             <FormGroup ctx={ctx}>
                 <button className="btn btn-light" onClick={this.handleClick}>
-                    <i className="fa fa-random" style={{ color: "green" }} /> {WorkflowActivityMessage.CaseFlow.niceToString()}
+                    <FontAwesomeIcon icon="random" color="green"/> {WorkflowActivityMessage.CaseFlow.niceToString()}
                 </button>
             </FormGroup>
         );

@@ -1,12 +1,13 @@
 ﻿
 import * as React from 'react'
-import { classes, Dic } from '../../../../Framework/Signum.React/Scripts/Globals'
-import { FormGroup, FormControlReadonly, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityDetail, EntityList, EntityRepeater, EntityTabRepeater } from '../../../../Framework/Signum.React/Scripts/Lines'
-import { SubTokensOptions, QueryToken, QueryTokenType, hasAnyOrAll } from '../../../../Framework/Signum.React/Scripts/FindOptions'
-import { Typeahead } from '../../../../Framework/Signum.React/Scripts/Components'
-import { SearchControl } from '../../../../Framework/Signum.React/Scripts/Search'
-import { getToString, getMixin } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
-import { TypeContext, FormGroupStyle } from '../../../../Framework/Signum.React/Scripts/TypeContext'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { classes, Dic } from '@framework/Globals'
+import { FormGroup, FormControlReadonly, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityDetail, EntityList, EntityRepeater, EntityTabRepeater } from '@framework/Lines'
+import { SubTokensOptions, QueryToken, QueryTokenType, hasAnyOrAll } from '@framework/FindOptions'
+import { Typeahead } from '@framework/Components'
+import { SearchControl } from '@framework/Search'
+import { getToString, getMixin } from '@framework/Signum.Entities'
+import { TypeContext, FormGroupStyle } from '@framework/TypeContext'
 import { namedColors } from '../Color'
 
 
@@ -61,18 +62,18 @@ export class ColorTypeahead extends React.Component<ColorTypeaheadProps>{
         return Promise.resolve(result);
     }
 
-    handleSelect = (item: string) => {
-        this.props.onChange(item);
+    handleSelect = (item: unknown | string) => {
+        this.props.onChange(item as string);
         this.forceUpdate();
-        return item;
+        return item as string;
     }
 
-    handleRenderItem = (item: string, query: string) => {
+    handleRenderItem = (item: unknown, query: string) => {
 
         return (
             <span>
-                <span className="icon fa fa-square" style={{ color: item }} />
-                {Typeahead.highlightedText(item, query)}
+                <FontAwesomeIcon icon="square" className="icon" color={item as string} />
+                {Typeahead.highlightedText(item as string, query)}
             </span>
         );
     }

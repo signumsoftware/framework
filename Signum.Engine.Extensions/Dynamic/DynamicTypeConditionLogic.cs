@@ -21,12 +21,12 @@ namespace Signum.Engine.Dynamic
 {
     public static class DynamicTypeConditionLogic
     {
-        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
+        public static void Start(SchemaBuilder sb)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
                 sb.Include<DynamicTypeConditionSymbolEntity>()
-                    .WithQuery(dqm, () => e => new
+                    .WithQuery(() => e => new
                     {
                         Entity = e,
                         e.Id,
@@ -35,7 +35,7 @@ namespace Signum.Engine.Dynamic
 
                 sb.Include<DynamicTypeConditionEntity>()
                     .WithSave(DynamicTypeConditionOperation.Save)
-                    .WithQuery(dqm, () => e => new
+                    .WithQuery(() => e => new
                     {
                         Entity = e,
                         e.Id,
@@ -55,8 +55,8 @@ namespace Signum.Engine.Dynamic
 
                 new Graph<DynamicTypeConditionSymbolEntity>.Execute(DynamicTypeConditionSymbolOperation.Save)
                 {
-                    Lite = false,
-                    AllowsNew = true,
+                    CanBeModified = true,
+                    CanBeNew = true,
                     Execute = (e, _) =>
                     {
                         if (!e.IsNew)
@@ -81,7 +81,7 @@ namespace Signum.Engine.Dynamic
 
         public static void WriteDynamicStarter(StringBuilder sb, int indent) {
 
-            sb.AppendLine("CodeGenTypeConditionStarter.Start(sb, dqm);".Indent(indent));
+            sb.AppendLine("CodeGenTypeConditionStarter.Start(sb);".Indent(indent));
         }
 
         public static List<CodeFile> GetCodeFiles()
@@ -150,7 +150,7 @@ namespace Signum.Engine.Dynamic
 
             sb.AppendLine($"public static class CodeGenTypeConditionStarter");
             sb.AppendLine("{");
-            sb.AppendLine("    public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)");
+            sb.AppendLine("    public static void Start(SchemaBuilder sb)");
             sb.AppendLine("    {");
             foreach (var item in this.TypeConditions)
             {

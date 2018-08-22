@@ -1,36 +1,37 @@
 ﻿import * as React from 'react'
 import * as numbro from 'numbro';
-import * as OrderUtils from '../../../../Framework/Signum.React/Scripts/Frames/OrderUtils'
-import { classes } from '../../../../Framework/Signum.React/Scripts/Globals'
-import { Tab, Tabs, UncontrolledTabs } from '../../../../Framework/Signum.React/Scripts/Components/Tabs'
-import { FormGroup, FormControlReadonly, ValueLine, ValueLineType, EntityLine, EntityDetail, EntityCombo, EntityList, EntityRepeater, EntityTable, IRenderButtons, EntityTabRepeater } from '../../../../Framework/Signum.React/Scripts/Lines'
-import { SearchControl, FilterOption, ColumnOption, FindOptions } from '../../../../Framework/Signum.React/Scripts/Search'
-import { TypeContext, FormGroupStyle, ButtonsContext } from '../../../../Framework/Signum.React/Scripts/TypeContext'
+import * as OrderUtils from '@framework/Frames/OrderUtils'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { classes } from '@framework/Globals'
+import { Tab, Tabs, UncontrolledTabs } from '@framework/Components/Tabs'
+import { FormGroup, FormControlReadonly, ValueLine, ValueLineType, EntityLine, EntityDetail, EntityCombo, EntityList, EntityRepeater, EntityTable, IRenderButtons, EntityTabRepeater } from '@framework/Lines'
+import { SearchControl, FilterOption, ColumnOption, FindOptions } from '@framework/Search'
+import { TypeContext, FormGroupStyle, ButtonsContext } from '@framework/TypeContext'
 import FileLine from '../../Files/FileLine'
 import { PredictorEntity, PredictorColumnEmbedded, PredictorMessage, PredictorSubQueryEntity, PredictorFileType, PredictorCodificationEntity, PredictorSubQueryColumnEmbedded, PredictorEpochProgressEntity, NeuralNetworkSettingsEntity, DefaultColumnEncodings } from '../Signum.Entities.MachineLearning'
-import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
-import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
-import { getQueryNiceName } from '../../../../Framework/Signum.React/Scripts/Reflection'
+import * as Finder from '@framework/Finder'
+import * as Navigator from '@framework/Navigator'
+import { getQueryNiceName } from '@framework/Reflection'
 import QueryTokenEntityBuilder from '../../UserAssets/Templates/QueryTokenEntityBuilder'
 import { QueryFilterEmbedded } from '../../UserQueries/Signum.Entities.UserQueries'
-import { QueryDescription, SubTokensOptions } from '../../../../Framework/Signum.React/Scripts/FindOptions'
+import { QueryDescription, SubTokensOptions } from '@framework/FindOptions'
 import * as PredictorClient from '../PredictorClient';
-import { toLite } from "../../../../Framework/Signum.React/Scripts/Signum.Entities";
-import FilterBuilder from '../../../../Framework/Signum.React/Scripts/SearchControl/FilterBuilder';
-import { MList, newMListElement } from '../../../../Framework/Signum.React/Scripts/Signum.Entities';
+import { toLite } from "@framework/Signum.Entities";
+import FilterBuilder from '@framework/SearchControl/FilterBuilder';
+import { MList, newMListElement } from '@framework/Signum.Entities';
 import FilterBuilderEmbedded from './FilterBuilderEmbedded';
 import PredictorSubQuery from './PredictorSubQuery';
 import { QueryTokenEmbedded } from '../../UserAssets/Signum.Entities.UserAssets';
-import { QueryEntity } from '../../../../Framework/Signum.React/Scripts/Signum.Entities.Basics';
+import { QueryEntity } from '@framework/Signum.Entities.Basics';
 import { FilePathEmbedded } from '../../Files/Signum.Entities.Files';
-import { is } from '../../../../Framework/Signum.React/Scripts/Signum.Entities';
+import { is } from '@framework/Signum.Entities';
 import ProgressBar from './ProgressBar'
 import LineChart, { LineChartSerie } from './LineChart'
-import { QueryToken } from '../../../../Framework/Signum.React/Scripts/FindOptions';
+import { QueryToken } from '@framework/FindOptions';
 import PredictorMetrics from './PredictorMetrics';
 import PredictorClassificationMetrics from './PredictorClassificationMetrics';
 import PredictorRegressionMetrics from './PredictorRegressionMetrics';
-import { CellFormatter } from '../../../../Framework/Signum.React/Scripts/Finder';
+import { CellFormatter } from '@framework/Finder';
 
 export default class Predictor extends React.Component<{ ctx: TypeContext<PredictorEntity> }, { queryDescription?: QueryDescription }> implements IRenderButtons {
 
@@ -65,7 +66,7 @@ export default class Predictor extends React.Component<{ ctx: TypeContext<Predic
 
     renderButtons(ctx: ButtonsContext): (React.ReactElement<any> | undefined)[] {
         if ((ctx.pack.entity as PredictorEntity).state == "Trained") {
-            return [OrderUtils.setOrder(10000, <button className="btn btn-info" onClick={this.handleClick}><i className="fa fa-lightbulb-o"></i>&nbsp;{PredictorMessage.Predict.niceToString()}</button >)];
+            return [OrderUtils.setOrder(10000, <button className="btn btn-info" onClick={this.handleClick}><FontAwesomeIcon icon={["far", "lightbulb"]} />&nbsp;{PredictorMessage.Predict.niceToString()}</button >)];
         } else {
             return [];
         }

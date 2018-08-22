@@ -1,23 +1,14 @@
 ﻿import * as React from 'react'
 import {
-    WorkflowActivityEntity, WorkflowActivityModel, WorkflowMessage, WorkflowActivityMessage, WorkflowConditionEntity, WorkflowActionEntity,
-    WorkflowTimerEmbedded, IWorkflowNodeEntity, SubWorkflowEmbedded, SubEntitiesEval, WorkflowScriptEntity, WorkflowScriptPartEmbedded, WorkflowScriptEval, WorkflowEntity, WorkflowActivityType
+    WorkflowActivityModel, WorkflowMessage, SubWorkflowEmbedded, SubEntitiesEval, WorkflowScriptEntity, WorkflowScriptPartEmbedded, WorkflowEntity
 } from '../Signum.Entities.Workflow'
-import * as WorkflowClient from '../WorkflowClient'
-import * as DynamicViewClient from '../../Dynamic/DynamicViewClient'
-import { TypeContext, ValueLine, ValueLineType, EntityLine, EntityTable, EntityDetail, FormGroup, LiteAutocompleteConfig, RenderEntity, EntityRepeater } from '../../../../Framework/Signum.React/Scripts/Lines'
-import { is, JavascriptMessage, Lite } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
-import { TypeEntity } from '../../../../Framework/Signum.React/Scripts/Signum.Entities.Basics'
-import { DynamicValidationEntity } from '../../Dynamic/Signum.Entities.Dynamic'
-import { Dic } from '../../../../Framework/Signum.React/Scripts/Globals';
-import { Binding } from '../../../../Framework/Signum.React/Scripts/Reflection';
+import { TypeContext, ValueLine, EntityLine, FormGroup, EntityRepeater } from '@framework/Lines'
+import { TypeEntity } from '@framework/Signum.Entities.Basics'
+import { Binding } from '@framework/Reflection';
 import CSharpCodeMirror from '../../Codemirror/CSharpCodeMirror'
 import TypeHelpComponent from "../../TypeHelp/TypeHelpComponent";
 import HtmlEditor from '../../HtmlEditor/HtmlEditor'
-import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
-import { API } from '../WorkflowClient'
-import { newMListElement } from '../../../../Framework/Signum.React/Scripts/Signum.Entities';
-import { TimeSpanEmbedded } from '../../Basics/Signum.Entities.Basics';
+import * as Navigator from '@framework/Navigator'
 
 interface WorkflowActivityModelComponentProps {
     ctx: TypeContext<WorkflowActivityModel>;

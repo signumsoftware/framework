@@ -1,13 +1,13 @@
 ﻿import * as React from 'react'
 import * as moment from 'moment'
 import { RestLogEntity } from '../Signum.Entities.Rest'
-import { TypeContext, ValueLine, ValueLineType, EntityLine, EntityRepeater } from "../../../../Framework/Signum.React/Scripts/Lines";
-import { } from "../../../../Framework/Signum.React/Scripts/ConfigureReactWidgets";
+import { TypeContext, ValueLine, ValueLineType, EntityLine, EntityRepeater } from "@framework/Lines";
+import { } from "@framework/ConfigureReactWidgets";
 import { RestLogDiff, API } from '../RestClient'
 import { DiffDocument } from '../../DiffLog/Templates/DiffDocument';
-import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
-import { Tab, UncontrolledTabs } from '../../../../Framework/Signum.React/Scripts/Components/Tabs'
-import { Button } from '../../../../Framework/Signum.React/Scripts/Components';
+import * as Navigator from '@framework/Navigator'
+import { Tab, UncontrolledTabs } from '@framework/Components/Tabs'
+import { Button } from '@framework/Components';
 
 export interface RestLogState {
     diff?: RestLogDiff,

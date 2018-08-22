@@ -268,7 +268,7 @@ namespace Signum.React.Workflow
 
         public WorkflowActivityMonitorRequest ToRequest()
         {
-            var qd = DynamicQueryManager.Current.QueryDescription(typeof(CaseActivityEntity));
+            var qd = QueryLogic.Queries.QueryDescription(typeof(CaseActivityEntity));
             return new WorkflowActivityMonitorRequest
             {
                 Workflow = workflow,

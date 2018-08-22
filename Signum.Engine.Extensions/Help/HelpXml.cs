@@ -176,7 +176,7 @@ namespace Signum.Engine.Help
                 var cols = element.Element(_Columns);
                 if (cols != null)
                 {
-                    var queryColumns = DynamicQueryManager.Current.GetQuery(queryName).Core.Value.StaticColumns.Select(a => a.Name).ToDictionary(a => a);
+                    var queryColumns = QueryLogic.Queries.GetQuery(queryName).Core.Value.StaticColumns.Select(a => a.Name).ToDictionary(a => a);
 
                     foreach (var item in cols.Elements(_Column))
                     {

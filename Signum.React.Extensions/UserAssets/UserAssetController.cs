@@ -32,7 +32,7 @@ namespace Signum.React.UserAssets
         public List<FilterTS> ParseFilters([FromBody]ParseFiltersRequest request)
         {
             var queryName = QueryLogic.ToQueryName(request.queryKey);
-            var qd = DynamicQueryManager.Current.QueryDescription(queryName);
+            var qd = QueryLogic.Queries.QueryDescription(queryName);
             var options = SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement | (request.canAggregate ? SubTokensOptions.CanAggregate : 0);
 
             using (request.entity != null ? CurrentEntityConverter.SetCurrentEntity(request.entity.Retrieve()) : null)

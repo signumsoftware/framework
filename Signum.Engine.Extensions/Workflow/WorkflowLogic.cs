@@ -21,6 +21,7 @@ using System.CodeDom.Compiler;
 using System.Text.RegularExpressions;
 using System.Xml;
 using Signum.Entities.Reflection;
+using Signum.Engine.Basics;
 
 namespace Signum.Engine.Workflow
 {
@@ -262,7 +263,7 @@ namespace Signum.Engine.Workflow
             throw new InvalidOperationException("Line not found");
         }
 
-        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm, Func<WorkflowConfigurationEmbedded> getConfiguration)
+        public static void Start(SchemaBuilder sb, Func<WorkflowConfigurationEmbedded> getConfiguration)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
@@ -271,7 +272,7 @@ namespace Signum.Engine.Workflow
                 WorkflowLogic.getConfiguration = getConfiguration;
 
                 sb.Include<WorkflowEntity>()
-                    .WithQuery(dqm, () => DynamicQueryCore.Auto(
+                    .WithQuery(() => DynamicQueryCore.Auto(
                     from e in Database.Query<WorkflowEntity>()
                     select new
                     {
@@ -286,8 +287,8 @@ namespace Signum.Engine.Workflow
                     .ColumnDisplayName(a => a.HasExpired, () => WorkflowMessage.HasExpired.NiceToString()));
 
                 WorkflowGraph.Register();
-                dqm.RegisterExpression((WorkflowEntity wf) => wf.WorkflowStartEvent());
-                dqm.RegisterExpression((WorkflowEntity wf) => wf.HasExpired(), () => WorkflowMessage.HasExpired.NiceToString());
+                QueryLogic.Expressions.Register((WorkflowEntity wf) => wf.WorkflowStartEvent());
+                QueryLogic.Expressions.Register((WorkflowEntity wf) => wf.HasExpired(), () => WorkflowMessage.HasExpired.NiceToString());
 
                 DynamicCode.GetCustomErrors += GetCustomErrors;
 
@@ -296,8 +297,8 @@ namespace Signum.Engine.Workflow
                     .WithUniqueIndex(wp => new { wp.Workflow, wp.Name })
                     .WithSave(WorkflowPoolOperation.Save)
                     .WithDelete(WorkflowPoolOperation.Delete)
-                    .WithExpressionFrom(dqm, (WorkflowEntity p) => p.WorkflowPools())
-                    .WithQuery(dqm, () => e => new
+                    .WithExpressionFrom((WorkflowEntity p) => p.WorkflowPools())
+                    .WithQuery(() => e => new
                     {
                         Entity = e,
                         e.Id,
@@ -310,8 +311,8 @@ namespace Signum.Engine.Workflow
                     .WithUniqueIndex(wp => new { wp.Pool, wp.Name })
                     .WithSave(WorkflowLaneOperation.Save)
                     .WithDelete(WorkflowLaneOperation.Delete)
-                    .WithExpressionFrom(dqm, (WorkflowPoolEntity p) => p.WorkflowLanes())
-                    .WithQuery(dqm, () => e => new
+                    .WithExpressionFrom((WorkflowPoolEntity p) => p.WorkflowLanes())
+                    .WithQuery(() => e => new
                     {
                         Entity = e,
                         e.Id,
@@ -325,10 +326,10 @@ namespace Signum.Engine.Workflow
                     .WithUniqueIndex(w => new { w.Lane, w.Name })
                     .WithSave(WorkflowActivityOperation.Save)
                     .WithDelete(WorkflowActivityOperation.Delete)
-                    .WithExpressionFrom(dqm, (WorkflowEntity p) => p.WorkflowActivities())
-                    .WithExpressionFrom(dqm, (WorkflowLaneEntity p) => p.WorkflowActivities())
+                    .WithExpressionFrom((WorkflowEntity p) => p.WorkflowActivities())
+                    .WithExpressionFrom((WorkflowLaneEntity p) => p.WorkflowActivities())
                     .WithVirtualMList(wa => wa.BoundaryTimers, e => e.BoundaryOf, WorkflowEventOperation.Save, WorkflowEventOperation.Delete)
-                    .WithQuery(dqm, () => e => new
+                    .WithQuery(() => e => new
                     {
                         Entity = e,
                         e.Id,
@@ -341,9 +342,9 @@ namespace Signum.Engine.Workflow
 
                 sb.Include<WorkflowEventEntity>()
                     .WithSave(WorkflowEventOperation.Save)
-                    .WithExpressionFrom(dqm, (WorkflowEntity p) => p.WorkflowEvents())
-                    .WithExpressionFrom(dqm, (WorkflowLaneEntity p) => p.WorkflowEvents())
-                    .WithQuery(dqm, () => e => new
+                    .WithExpressionFrom((WorkflowEntity p) => p.WorkflowEvents())
+                    .WithExpressionFrom((WorkflowLaneEntity p) => p.WorkflowEvents())
+                    .WithQuery(() => e => new
                     {
                         Entity = e,
                         e.Id,
@@ -373,9 +374,9 @@ namespace Signum.Engine.Workflow
                 sb.Include<WorkflowGatewayEntity>()
                     .WithSave(WorkflowGatewayOperation.Save)
                     .WithDelete(WorkflowGatewayOperation.Delete)
-                    .WithExpressionFrom(dqm, (WorkflowEntity p) => p.WorkflowGateways())
-                    .WithExpressionFrom(dqm, (WorkflowLaneEntity p) => p.WorkflowGateways())
-                    .WithQuery(dqm, () => e => new
+                    .WithExpressionFrom((WorkflowEntity p) => p.WorkflowGateways())
+                    .WithExpressionFrom((WorkflowLaneEntity p) => p.WorkflowGateways())
+                    .WithQuery(() => e => new
                     {
                         Entity = e,
                         e.Id,
@@ -389,12 +390,12 @@ namespace Signum.Engine.Workflow
                 sb.Include<WorkflowConnectionEntity>()
                     .WithSave(WorkflowConnectionOperation.Save)
                     .WithDelete(WorkflowConnectionOperation.Delete)
-                    .WithExpressionFrom(dqm, (WorkflowEntity p) => p.WorkflowConnections())
-                    .WithExpressionFrom(dqm, (WorkflowEntity p) => p.WorkflowMessageConnections(), null)
-                    .WithExpressionFrom(dqm, (WorkflowPoolEntity p) => p.WorkflowConnections())
-                    .WithExpressionFrom(dqm, (IWorkflowNodeEntity p) => p.NextConnections(), null)
-                    .WithExpressionFrom(dqm, (IWorkflowNodeEntity p) => p.PreviousConnections(), null)
-                    .WithQuery(dqm, () => e => new
+                    .WithExpressionFrom((WorkflowEntity p) => p.WorkflowConnections())
+                    .WithExpressionFrom((WorkflowEntity p) => p.WorkflowMessageConnections(), null)
+                    .WithExpressionFrom((WorkflowPoolEntity p) => p.WorkflowConnections())
+                    .WithExpressionFrom((IWorkflowNodeEntity p) => p.NextConnections(), null)
+                    .WithExpressionFrom((IWorkflowNodeEntity p) => p.PreviousConnections(), null)
+                    .WithQuery(() => e => new
                     {
                         Entity = e,
                         e.Id,
@@ -450,24 +451,24 @@ namespace Signum.Engine.Workflow
                     return null;
                 };
 
-                StartWorkflowConditions(sb, dqm);
+                StartWorkflowConditions(sb);
 
-                StartWorkflowTimerConditions(sb, dqm);
+                StartWorkflowTimerConditions(sb);
               
-                StartWorkflowActions(sb, dqm);
+                StartWorkflowActions(sb);
                 
-                StartWorkflowScript(sb, dqm);
+                StartWorkflowScript(sb);
             }
         }
 
 
         public static ResetLazy<Dictionary<Lite<WorkflowTimerConditionEntity>, WorkflowTimerConditionEntity>> TimerConditions;
         public static WorkflowTimerConditionEntity RetrieveFromCache(this Lite<WorkflowTimerConditionEntity> wc) => TimerConditions.Value.GetOrThrow(wc);
-        private static void StartWorkflowTimerConditions(SchemaBuilder sb, DynamicQueryManager dqm)
+        private static void StartWorkflowTimerConditions(SchemaBuilder sb)
         {
             sb.Include<WorkflowTimerConditionEntity>()
                .WithSave(WorkflowTimerConditionOperation.Save)
-               .WithQuery(dqm, () => e => new
+               .WithQuery(() => e => new
                {
                    Entity = e,
                    e.Id,
@@ -503,11 +504,11 @@ namespace Signum.Engine.Workflow
 
         public static ResetLazy<Dictionary<Lite<WorkflowActionEntity>, WorkflowActionEntity>> Actions;
         public static WorkflowActionEntity RetrieveFromCache(this Lite<WorkflowActionEntity> wa) => Actions.Value.GetOrThrow(wa);
-        private static void StartWorkflowActions(SchemaBuilder sb, DynamicQueryManager dqm)
+        private static void StartWorkflowActions(SchemaBuilder sb)
         {
             sb.Include<WorkflowActionEntity>()
                .WithSave(WorkflowActionOperation.Save)
-               .WithQuery(dqm, () => e => new
+               .WithQuery(() => e => new
                {
                    Entity = e,
                    e.Id,
@@ -543,11 +544,11 @@ namespace Signum.Engine.Workflow
 
         public static ResetLazy<Dictionary<Lite<WorkflowConditionEntity>, WorkflowConditionEntity>> Conditions;
         public static WorkflowConditionEntity RetrieveFromCache(this Lite<WorkflowConditionEntity> wc) => Conditions.Value.GetOrThrow(wc);
-        private static void StartWorkflowConditions(SchemaBuilder sb, DynamicQueryManager dqm)
+        private static void StartWorkflowConditions(SchemaBuilder sb)
         {
             sb.Include<WorkflowConditionEntity>()
                .WithSave(WorkflowConditionOperation.Save)
-               .WithQuery(dqm, () => e => new
+               .WithQuery(() => e => new
                {
                    Entity = e,
                    e.Id,
@@ -584,11 +585,11 @@ namespace Signum.Engine.Workflow
 
         public static ResetLazy<Dictionary<Lite<WorkflowScriptEntity>, WorkflowScriptEntity>> Scripts;
         public static WorkflowScriptEntity RetrieveFromCache(this Lite<WorkflowScriptEntity> ws)=> Scripts.Value.GetOrThrow(ws);
-        private static void StartWorkflowScript(SchemaBuilder sb, DynamicQueryManager dqm)
+        private static void StartWorkflowScript(SchemaBuilder sb)
         {
             sb.Include<WorkflowScriptEntity>()
               .WithSave(WorkflowScriptOperation.Save)
-              .WithQuery(dqm, () => s => new
+              .WithQuery(() => s => new
               {
                   Entity = s,
                   s.Id,
@@ -619,7 +620,7 @@ namespace Signum.Engine.Workflow
             sb.Include<WorkflowScriptRetryStrategyEntity>()
                 .WithSave(WorkflowScriptRetryStrategyOperation.Save)
                 .WithDelete(WorkflowScriptRetryStrategyOperation.Delete)
-                .WithQuery(dqm, () => e => new
+                .WithQuery(() => e => new
                 {
                     Entity = e,
                     e.Id,
@@ -662,8 +663,8 @@ namespace Signum.Engine.Workflow
             {
                 new Execute(WorkflowOperation.Save)
                 {
-                    AllowsNew = true,
-                    Lite = false,
+                    CanBeNew = true,
+                    CanBeModified = true,
                     Execute = (e, args) =>
                     {
                         WorkflowLogic.ApplyDocument(e, args.GetArg<WorkflowModel>(), args.TryGetArgC<WorkflowReplacementModel>(), args.TryGetArgC<List<WorkflowIssue>>() ?? new List<WorkflowIssue>());

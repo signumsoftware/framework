@@ -55,7 +55,7 @@ namespace Signum.Engine.MachineLearning
 
         public static PredictDictionary GetInputsFromEntity(this PredictorPredictContext ctx, Lite<Entity> entity, PredictionOptions options = null)
         {
-            var qd = DynamicQueryManager.Current.QueryDescription(ctx.Predictor.MainQuery.Query.ToQueryName());
+            var qd = QueryLogic.Queries.QueryDescription(ctx.Predictor.MainQuery.Query.ToQueryName());
 
             var entityToken = QueryUtils.Parse("Entity", qd, 0);
 
@@ -104,7 +104,7 @@ namespace Signum.Engine.MachineLearning
 
         public static List<PredictDictionary> FromFilters(this PredictorPredictContext ctx, List<Filter> filters, PredictionOptions options = null)
         {
-            var qd = DynamicQueryManager.Current.QueryDescription(ctx.Predictor.MainQuery.Query.ToQueryName());
+            var qd = QueryLogic.Queries.QueryDescription(ctx.Predictor.MainQuery.Query.ToQueryName());
             
             var qr = new QueryRequest
             {
@@ -120,7 +120,7 @@ namespace Signum.Engine.MachineLearning
                 Orders = Enumerable.Empty<Order>().ToList(),
             };
 
-            var rt = DynamicQueryManager.Current.ExecuteQuery(qr);
+            var rt = QueryLogic.Queries.ExecuteQuery(qr);
 
             var subQueryResults = ctx.Predictor.SubQueries.ToDictionaryEx(sq => sq, sqe =>
             {
@@ -142,7 +142,7 @@ namespace Signum.Engine.MachineLearning
                     Pagination = new Pagination.All(),
                 };
 
-                ResultTable resultTable = DynamicQueryManager.Current.ExecuteQuery(qgr);
+                ResultTable resultTable = QueryLogic.Queries.ExecuteQuery(qgr);
 
                 var tuples = sqe.Columns.Zip(resultTable.Columns, (sqc, rc) => (sqc: sqc, rc: rc)).ToList();
                 ResultColumn[] entityGroupKey = tuples.Extract(t => t.sqc.Usage == PredictorSubQueryColumnUsage.ParentKey).Select(a=>a.rc).ToArray();

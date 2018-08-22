@@ -23,7 +23,7 @@ namespace Signum.Engine.Dynamic
         public static ResetLazy<Dictionary<Type, DynamicViewSelectorEntity>> DynamicViewSelectors;
         public static ResetLazy<Dictionary<Type, List<DynamicViewOverrideEntity>>> DynamicViewOverrides;
 
-        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
+        public static void Start(SchemaBuilder sb)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
@@ -31,7 +31,7 @@ namespace Signum.Engine.Dynamic
                     .WithUniqueIndex(a => new { a.ViewName, a.EntityType })
                     .WithSave(DynamicViewOperation.Save)
                     .WithDelete(DynamicViewOperation.Delete)
-                    .WithQuery(dqm, () => e => new
+                    .WithQuery(() => e => new
                     {
                         Entity = e,
                         e.Id,
@@ -62,7 +62,7 @@ namespace Signum.Engine.Dynamic
                 sb.Include<DynamicViewSelectorEntity>()
                     .WithSave(DynamicViewSelectorOperation.Save)
                     .WithDelete(DynamicViewSelectorOperation.Delete)
-                    .WithQuery(dqm, () => e => new
+                    .WithQuery(() => e => new
                     {
                         Entity = e,
                         e.Id,
@@ -76,7 +76,7 @@ namespace Signum.Engine.Dynamic
                 sb.Include<DynamicViewOverrideEntity>()
                    .WithSave(DynamicViewOverrideOperation.Save)
                    .WithDelete(DynamicViewOverrideOperation.Delete)
-                   .WithQuery(dqm, () => e => new
+                   .WithQuery(() => e => new
                    {
                        Entity = e,
                        e.Id,
@@ -97,7 +97,7 @@ namespace Signum.Engine.Dynamic
         public static List<SuggestedFindOptions> GetSuggestedFindOptions(Type type)
         {
             var schema = Schema.Current;
-            var dqm = DynamicQueryManager.Current;
+            var queries = QueryLogic.Queries;
 
             var table = schema.Tables.TryGetC(type);
 
@@ -107,7 +107,7 @@ namespace Signum.Engine.Dynamic
             return (from t in Schema.Current.Tables.Values
                     from c in t.Columns.Values
                     where c.ReferenceTable == table
-                    where dqm.TryGetQuery(t.Type) != null
+                    where queries.TryGetQuery(t.Type) != null
                     let parentColumn = GetParentColumnExpression(t.Fields, c)?.Let(s => "Entity." + s)
                     where parentColumn != null
                     select new SuggestedFindOptions

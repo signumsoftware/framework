@@ -1,15 +1,16 @@
 ﻿import * as React from 'react'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { RouteComponentProps } from 'react-router'
 import * as numbro from 'numbro'
 import * as moment from 'moment'
-import * as Navigator from '../../../Framework/Signum.React/Scripts/Navigator'
-import * as Finder from '../../../Framework/Signum.React/Scripts/Finder'
-import { TypeContext } from '../../../Framework/Signum.React/Scripts/TypeContext'
-import { ValueSearchControl, SearchControl } from '../../../Framework/Signum.React/Scripts/Search'
-import EntityLink from '../../../Framework/Signum.React/Scripts/SearchControl/EntityLink'
-import { QueryDescription, SubTokensOptions } from '../../../Framework/Signum.React/Scripts/FindOptions'
-import { getQueryNiceName, PropertyRoute, getTypeInfo } from '../../../Framework/Signum.React/Scripts/Reflection'
-import { ModifiableEntity, EntityControlMessage, Entity, parseLite, getToString, JavascriptMessage } from '../../../Framework/Signum.React/Scripts/Signum.Entities'
+import * as Navigator from '@framework/Navigator'
+import * as Finder from '@framework/Finder'
+import { TypeContext } from '@framework/TypeContext'
+import { ValueSearchControl, SearchControl } from '@framework/Search'
+import EntityLink from '@framework/SearchControl/EntityLink'
+import { QueryDescription, SubTokensOptions } from '@framework/FindOptions'
+import { getQueryNiceName, PropertyRoute, getTypeInfo } from '@framework/Reflection'
+import { ModifiableEntity, EntityControlMessage, Entity, parseLite, getToString, JavascriptMessage } from '@framework/Signum.Entities'
 import { API } from './UserAssetClient'
 import { UserAssetMessage, UserAssetPreviewModel, UserAssetPreviewLineEmbedded, IUserAssetEntity, EntityAction } from './Signum.Entities.UserAssets'
 
@@ -125,7 +126,7 @@ export default class ImportAssetsPage extends React.Component<ImportAssetsPagePr
                         }
                     </tbody>
                 </table>
-                <button onClick={this.handleImport} className="btn btn-info"><span className="fa fa-cloud-upload" aria-hidden="true"></span> Import</button>
+                <button onClick={this.handleImport} className="btn btn-info"><FontAwesomeIcon icon="cloud-upload"/> Import</button>
             </div>
         );
     }

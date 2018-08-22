@@ -1,16 +1,16 @@
-﻿
-import * as React from 'react'
-import { Dic, classes } from '../../../../Framework/Signum.React/Scripts/Globals'
-import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
-import { Lite, toLite } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
-import { ResultTable, FindOptions, FilterOption, QueryDescription } from '../../../../Framework/Signum.React/Scripts/FindOptions'
-import { SearchMessage, JavascriptMessage, parseLite, is } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
-import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
-import SearchControl from '../../../../Framework/Signum.React/Scripts/SearchControl/SearchControl'
+﻿import * as React from 'react'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { Dic, classes } from '@framework/Globals'
+import * as Finder from '@framework/Finder'
+import { Lite, toLite } from '@framework/Signum.Entities'
+import { ResultTable, FindOptions, FilterOption, QueryDescription } from '@framework/FindOptions'
+import { SearchMessage, JavascriptMessage, parseLite, is } from '@framework/Signum.Entities'
+import * as Navigator from '@framework/Navigator'
+import SearchControl from '@framework/SearchControl/SearchControl'
 import { UserChartEntity, ChartRequest, ChartMessage } from '../Signum.Entities.Chart'
 import * as UserChartClient from './UserChartClient'
 import ChartRequestView from '../Templates/ChartRequestView'
-import { Dropdown, DropdownToggle, DropdownMenu, DropdownItem } from '../../../../Framework/Signum.React/Scripts/Components';
+import { Dropdown, DropdownToggle, DropdownMenu, DropdownItem } from '@framework/Components';
 
 export interface UserChartMenuProps {
     chartRequestView: ChartRequestView;
@@ -106,7 +106,7 @@ export default class UserChartMenu extends React.Component<UserChartMenuProps, U
         const crView = this.props.chartRequestView;
         const labelText = !crView.props.userChart ? UserChartEntity.nicePluralName() : crView.props.userChart.toStr
 
-        const label = <span><i className="fa fa-bar-chart"></i> &nbsp; {labelText}</span>;
+        const label = <span><FontAwesomeIcon icon="chart-bar" /> &nbsp; {labelText}</span>;
         return (
             <Dropdown id="userQueriesDropDown" className="sf-userquery-dropdown"
                 toggle={this.handleSelectedToggle} isOpen={this.state.isOpen}>

@@ -1,19 +1,20 @@
 ﻿import * as React from 'react'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import * as Combobox from 'react-widgets/lib/Combobox'
-import { FormGroup, FormControlReadonly, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityList, EntityRepeater } from '../../../../Framework/Signum.React/Scripts/Lines'
-import { classes, Dic } from '../../../../Framework/Signum.React/Scripts/Globals'
-import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
-import { QueryDescription, SubTokensOptions, QueryToken, filterOperations, OrderType, ColumnOptionsMode } from '../../../../Framework/Signum.React/Scripts/FindOptions'
-import { getQueryNiceName, Binding, EntityDataValues, EntityKindValues, EntityKind, PropertyRoute } from '../../../../Framework/Signum.React/Scripts/Reflection'
-import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
-import { SearchControl } from '../../../../Framework/Signum.React/Scripts/Search'
-import { StyleContext, FormGroupStyle } from '../../../../Framework/Signum.React/Scripts/TypeContext'
-import QueryTokenBuilder from '../../../../Framework/Signum.React/Scripts/SearchControl/QueryTokenBuilder'
-import { ModifiableEntity, JavascriptMessage, EntityControlMessage, is, Lite, Entity, toLite } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
-import { QueryEntity, TypeEntity } from '../../../../Framework/Signum.React/Scripts/Signum.Entities.Basics'
-import { FilterOperation, PaginationMode } from '../../../../Framework/Signum.React/Scripts/Signum.Entities.DynamicQuery'
-import SelectorModal from '../../../../Framework/Signum.React/Scripts/SelectorModal';
-import MessageModal from '../../../../Framework/Signum.React/Scripts/Modals/MessageModal'
+import { FormGroup, FormControlReadonly, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityList, EntityRepeater } from '@framework/Lines'
+import { classes, Dic } from '@framework/Globals'
+import * as Finder from '@framework/Finder'
+import { QueryDescription, SubTokensOptions, QueryToken, filterOperations, OrderType, ColumnOptionsMode } from '@framework/FindOptions'
+import { getQueryNiceName, Binding, EntityDataValues, EntityKindValues, EntityKind, PropertyRoute } from '@framework/Reflection'
+import * as Navigator from '@framework/Navigator'
+import { SearchControl } from '@framework/Search'
+import { StyleContext, FormGroupStyle } from '@framework/TypeContext'
+import QueryTokenBuilder from '@framework/SearchControl/QueryTokenBuilder'
+import { ModifiableEntity, JavascriptMessage, EntityControlMessage, is, Lite, Entity, toLite } from '@framework/Signum.Entities'
+import { QueryEntity, TypeEntity } from '@framework/Signum.Entities.Basics'
+import { FilterOperation, PaginationMode } from '@framework/Signum.Entities.DynamicQuery'
+import SelectorModal from '@framework/SelectorModal';
+import MessageModal from '@framework/Modals/MessageModal'
 import * as DynamicTypeClient from '../DynamicTypeClient';
 import * as DynamicClientOptions from '../DynamicClientOptions';
 import * as TypeHelpClient from '../../TypeHelp/TypeHelpClient';
@@ -22,14 +23,14 @@ import { Validators, DynamicTypeDefinition, DynamicProperty } from '../DynamicTy
 import ValueComponent from './ValueComponent';
 import TypeHelpComponent from '../../TypeHelp/TypeHelpComponent'
 import CSharpCodeMirror from '../../Codemirror/CSharpCodeMirror';
-import ContextMenu from '../../../../Framework/Signum.React/Scripts/SearchControl/ContextMenu'
-import { ContextMenuPosition } from '../../../../Framework/Signum.React/Scripts/SearchControl/ContextMenu'
-import ValueLineModal from '../../../../Framework/Signum.React/Scripts/ValueLineModal'
+import ContextMenu from '@framework/SearchControl/ContextMenu'
+import { ContextMenuPosition } from '@framework/SearchControl/ContextMenu'
+import ValueLineModal from '@framework/ValueLineModal'
 
 import "./DynamicType.css"
-import { Tabs, Tab, UncontrolledTabs } from '../../../../Framework/Signum.React/Scripts/Components/Tabs';
+import { Tabs, Tab, UncontrolledTabs } from '@framework/Components/Tabs';
 import CollapsableCard from '../../Basics/Templates/CollapsableCard';
-import { Typeahead } from '../../../../Framework/Signum.React/Scripts/Components';
+import { Typeahead } from '@framework/Components';
 
 export interface DynamicTypeDesignContext {
     refreshView: () => void;
@@ -406,7 +407,7 @@ export class CustomCodeTab extends React.Component<{ definition: DynamicTypeDefi
                                         <input type="button" className="btn btn-danger btn-xs sf-button" value="Register Expressions" onClick={this.handleRegisterExpressionsClick} />
                                     </div>}
                                 <div className="code-container">
-                                    <pre style={{ border: "0px", margin: "0px" }}>{`SchemaBuilder sb, DynamicQueryManager dqm, FluentInclude<${entityName}> fi`}</pre>
+                                    <pre style={{ border: "0px", margin: "0px" }}>{`SchemaBuilder sb, FluentInclude<${entityName}> fi`}</pre>
                                     <CSharpExpressionCodeMirror binding={Binding.create(e, d => d.code)} />
                                 </div>
                             </div>
@@ -521,7 +522,7 @@ export class CustomCodeTab extends React.Component<{ definition: DynamicTypeDefi
     }
  
     return base.PropertyValidation(pi);
-};`);
+}`);
     }
 
     handleWithWorkflowClick = () => {
@@ -536,7 +537,7 @@ save: e => ${os ? `e.Execute(${entityName}Operation.Save)` : "e.Save()"}
     }
 
     handleWithTreeClick = () => {
-        this.popupCodeSnippet(`fi.WithTree(dqm);`);
+        this.popupCodeSnippet(`fi.WithTree();`);
     }
 
     handleRegisterOperationsClick = () => {
@@ -565,7 +566,7 @@ new Graph<${entityName}Entity>.Execute(${entityName}Operation.Save)
     handleRegisterExpressionsClick = () => {
 
         let entityName = this.props.dynamicType.typeName!;
-        this.popupCodeSnippet(`dqm.RegisterExpression((${entityName}Entity e) => e.[Expression Name]());`);
+        this.popupCodeSnippet(`QueryLogic.Expressions.Register((${entityName}Entity e) => e.[Expression Name]());`);
     }
 
     handleQueryExpressionClick = () => {
@@ -838,7 +839,7 @@ export class PropertyRepeaterComponent extends React.Component<PropertyRepeaterC
                 <a href="#" title="Create Property"
                     className="sf-line-button sf-create"
                     onClick={this.handleCreateClick}>
-                    <span className="fa fa-plus sf-create" />&nbsp;Create Property
+                    <FontAwesomeIcon icon="plus" className="sf-create" />&nbsp;Create Property
                 </a>
             </div>
         );
@@ -852,19 +853,19 @@ export class PropertyRepeaterComponent extends React.Component<PropertyRepeaterC
                     <a href="#" className={classes("sf-line-button", "sf-remove")}
                         onClick={e => this.handleOnRemove(e, i)}
                         title={EntityControlMessage.Remove.niceToString()}>
-                        <span className="fa fa-remove" />
+                        <FontAwesomeIcon icon="times" />
                     </a>
 
                     <a href="#" className={classes("sf-line-button", "move-up")}
                         onClick={e => this.handleOnMoveUp(e, i)}
                         title={EntityControlMessage.MoveUp.niceToString()}>
-                        <span className="fa fa-chevron-up" />
+                        <FontAwesomeIcon icon="chevron-up" />
                     </a>
 
                     <a href="#" className={classes("sf-line-button", "move-down")}
                         onClick={e => this.handleOnMoveDown(e, i)}
                         title={EntityControlMessage.MoveDown.niceToString()}>
-                        <span className="fa fa-chevron-down" />
+                        <FontAwesomeIcon icon="chevron-down" />
                     </a>
                 </span>
                 {" " + (p._propertyType_ || "") + " " + p.name}
@@ -1108,7 +1109,7 @@ export class ComboBoxRepeaterComponent extends React.Component<ComboBoxRepeaterC
                                 <a href="#" title="Create Query Column"
                                     className="sf-line-button sf-create"
                                     onClick={this.handleCreateClick}>
-                                    <span className="fa fa-plus sf-create" />&nbsp;Create Query Column
+                                    <FontAwesomeIcon icon="plus" className="sf-create" />&nbsp;Create Query Column
                                 </a>
                             </td>
                         </tr>
@@ -1126,19 +1127,19 @@ export class ComboBoxRepeaterComponent extends React.Component<ComboBoxRepeaterC
                         <a href="#" className={classes("sf-line-button", "sf-remove")}
                             onClick={e => this.handleOnRemove(e, i)}
                             title={EntityControlMessage.Remove.niceToString()}>
-                            <span className="fa fa-remove" />
+                            <FontAwesomeIcon icon="times" />
                         </a>
 
                         <a href="#" className={classes("sf-line-button", "move-up")}
                             onClick={e => this.handleOnMoveUp(e, i)}
                             title={EntityControlMessage.MoveUp.niceToString()}>
-                            <span className="fa fa-chevron-up" />
+                            <FontAwesomeIcon icon="chevron-up" />
                         </a>
 
                         <a href="#" className={classes("sf-line-button", "move-down")}
                             onClick={e => this.handleOnMoveDown(e, i)}
                             title={EntityControlMessage.MoveDown.niceToString()}>
-                            <span className="fa fa-chevron-down" />
+                            <FontAwesomeIcon icon="chevron-down" />
                         </a>
                     </span>
                 </td>
@@ -1208,7 +1209,7 @@ export class ValidatorRepeaterComponent extends React.Component<ValidatorRepeate
                 <a href="#" title="Create Validator"
                     className="sf-line-button sf-create"
                     onClick={this.handleCreateClick}>
-                    <span className="fa fa-plus sf-create" />&nbsp;Create Validator
+                    <FontAwesomeIcon icon="plus" className="sf-create"/>&nbsp;Create Validator
                 </a>
             </div>
         );
@@ -1221,7 +1222,7 @@ export class ValidatorRepeaterComponent extends React.Component<ValidatorRepeate
                     <a href="#" className={classes("sf-line-button", "sf-remove")}
                         onClick={e => this.handleOnRemove(e, i)}
                         title={EntityControlMessage.Remove.niceToString()}>
-                        <span className="fa fa-remove" />
+                        <FontAwesomeIcon icon="times" />
                     </a>
                 </span>
                 {" "}

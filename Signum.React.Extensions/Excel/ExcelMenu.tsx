@@ -1,15 +1,15 @@
-﻿
-import * as React from 'react'
+﻿import * as React from 'react'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { RouteComponentProps } from 'react-router'
-import { Dic, classes } from '../../../Framework/Signum.React/Scripts/Globals'
-import * as Finder from '../../../Framework/Signum.React/Scripts/Finder'
-import { ResultTable, FindOptions, FilterOption, QueryDescription } from '../../../Framework/Signum.React/Scripts/FindOptions'
-import { SearchMessage, JavascriptMessage, parseLite, is, Lite, toLite } from '../../../Framework/Signum.React/Scripts/Signum.Entities'
-import * as Navigator from '../../../Framework/Signum.React/Scripts/Navigator'
-import SearchControlLoaded from '../../../Framework/Signum.React/Scripts/SearchControl/SearchControlLoaded'
+import { Dic, classes } from '@framework/Globals'
+import * as Finder from '@framework/Finder'
+import { ResultTable, FindOptions, FilterOption, QueryDescription } from '@framework/FindOptions'
+import { SearchMessage, JavascriptMessage, parseLite, is, Lite, toLite } from '@framework/Signum.Entities'
+import * as Navigator from '@framework/Navigator'
+import SearchControlLoaded from '@framework/SearchControl/SearchControlLoaded'
 import { ExcelReportEntity, ExcelMessage } from './Signum.Entities.Excel'
 import * as ExcelClient from './ExcelClient'
-import { DropdownMenu, DropdownToggle, Dropdown, DropdownItem } from '../../../Framework/Signum.React/Scripts/Components';
+import { DropdownMenu, DropdownToggle, Dropdown, DropdownItem } from '@framework/Components';
 
 export interface ExcelMenuProps {
     searchControl: SearchControlLoaded;
@@ -62,7 +62,7 @@ export default class ExcelMenu extends React.Component<ExcelMenuProps, { excelRe
     }
 
     render() {
-        const label = <span><i className="fa fa-file-excel-o"></i>&nbsp;{this.props.searchControl.props.largeToolbarButtons == true ? " " + ExcelMessage.ExcelReport.niceToString() : undefined}</span>;
+        const label = <span><FontAwesomeIcon icon={["far", "file-excel"]} />&nbsp;{this.props.searchControl.props.largeToolbarButtons == true ? " " + ExcelMessage.ExcelReport.niceToString() : undefined}</span>;
 
         if (this.props.plainExcel && !this.props.excelReport)
             return <button className={"sf-query-button sf-search btn btn-light"} onClick={this.handlePlainExcel}>{label} </button>;
@@ -75,7 +75,7 @@ export default class ExcelMenu extends React.Component<ExcelMenuProps, { excelRe
                     {label as any}
                 </DropdownToggle>
                 <DropdownMenu>
-                    {this.props.plainExcel && <DropdownItem onClick={this.handlePlainExcel} ><span><i className="fa fa-file-excel-o"></i>&nbsp; {ExcelMessage.ExcelReport.niceToString()}</span></DropdownItem>}
+                    {this.props.plainExcel && <DropdownItem onClick={this.handlePlainExcel} ><span><FontAwesomeIcon icon={["far", "file-excel"]} />&nbsp; {ExcelMessage.ExcelReport.niceToString()}</span></DropdownItem>}
                     {this.props.plainExcel && excelReports && excelReports.length > 0 && <DropdownItem divider />}
                     {
                         excelReports && excelReports.map((uq, i) =>

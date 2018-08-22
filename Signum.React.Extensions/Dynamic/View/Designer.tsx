@@ -1,22 +1,23 @@
 ﻿import * as React from 'react'
-import { FormGroup, FormControlReadonly, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityList, EntityRepeater } from '../../../../Framework/Signum.React/Scripts/Lines'
-import { ModifiableEntity, External, JavascriptMessage, EntityControlMessage } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
-import { classes, Dic } from '../../../../Framework/Signum.React/Scripts/Globals'
-import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
-import { FindOptions } from '../../../../Framework/Signum.React/Scripts/FindOptions'
-import { getQueryNiceName, MemberInfo, PropertyRoute, Binding } from '../../../../Framework/Signum.React/Scripts/Reflection'
-import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
-import { TypeContext, FormGroupStyle } from '../../../../Framework/Signum.React/Scripts/TypeContext'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { FormGroup, FormControlReadonly, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityList, EntityRepeater } from '@framework/Lines'
+import { ModifiableEntity, External, JavascriptMessage, EntityControlMessage } from '@framework/Signum.Entities'
+import { classes, Dic } from '@framework/Globals'
+import * as Finder from '@framework/Finder'
+import { FindOptions } from '@framework/FindOptions'
+import { getQueryNiceName, MemberInfo, PropertyRoute, Binding } from '@framework/Reflection'
+import * as Navigator from '@framework/Navigator'
+import { TypeContext, FormGroupStyle } from '@framework/TypeContext'
 import { Expression, ExpressionOrValue, DesignerContext, DesignerNode } from './NodeUtils'
 import { BaseNode, LineBaseNode } from './Nodes'
 import * as NodeUtils from './NodeUtils'
 import JavascriptCodeMirror from '../../Codemirror/JavascriptCodeMirror'
 import { DynamicViewEntity, DynamicViewMessage } from '../Signum.Entities.Dynamic'
-import { openModal, IModalProps } from '../../../../Framework/Signum.React/Scripts/Modals';
+import { openModal, IModalProps } from '@framework/Modals';
 import TypeHelpComponent from '../../TypeHelp/TypeHelpComponent'
-import ValueLineModal from '../../../../Framework/Signum.React/Scripts/ValueLineModal'
-import { Button, Modal, Typeahead } from '../../../../Framework/Signum.React/Scripts/Components';
-import { ModalHeaderButtons } from '../../../../Framework/Signum.React/Scripts/Components/Modal';
+import ValueLineModal from '@framework/ValueLineModal'
+import { Button, Modal, Typeahead } from '@framework/Components';
+import { ModalHeaderButtons } from '@framework/Components/Modal';
 
 export interface ExpressionOrValueProps {
     binding: Binding<any>;
@@ -59,9 +60,9 @@ export class ExpressionOrValueComponent extends React.Component<ExpressionOrValu
         this.updateValue(sender.value);
     }
 
-    handleTypeaheadSelect = (item: string) => {
-        this.updateValue(item);
-        return item;
+    handleTypeaheadSelect = (item: unknown) => {
+        this.updateValue(item as string);
+        return item as string;
     }
 
     handleToggleExpression = (e: React.MouseEvent<any>) => {
@@ -91,7 +92,7 @@ export class ExpressionOrValueComponent extends React.Component<ExpressionOrValu
         
         const expr = value instanceof Object && (value as Object).hasOwnProperty("__code__") ? value as Expression<any> : null;
 
-        const expressionIcon = this.props.allowsExpression != false && < i className={classes("fa fa-calculator fa-1 formula", expr && "active")} onClick={this.handleToggleExpression}></i>;
+        const expressionIcon = this.props.allowsExpression != false && <span className={classes("formula", expr && "active")} onClick={this.handleToggleExpression}><FontAwesomeIcon icon="calculator" /></span>;
 
 
         if (!expr && p.type == "boolean") {
@@ -237,12 +238,19 @@ interface NullableCheckBoxProps {
 }
 
 export class NullableCheckBox extends React.Component<NullableCheckBoxProps>{
-
     getIcon() {
         switch (this.props.value) {
-            case true: return "fa fa-check design-changed";
-            case false: return "fa fa-remove design-changed";
-            case undefined: return "fa fa-minus design-default"
+            case true: return "check";
+            case false: return "times";
+            case undefined: return "minus"
+        }
+    }
+
+    getClass() {
+        switch (this.props.value) {
+            case true: return "design-changed";
+            case false: return "design-changed";
+            case undefined: return "design-default"
         }
     }
 
@@ -258,7 +266,7 @@ export class NullableCheckBox extends React.Component<NullableCheckBoxProps>{
     render() {
         return (
             <a href="#" onClick={this.handleClick}>
-                <span className={this.getIcon()}/>
+                <FontAwesomeIcon icon={this.getIcon()} className={this.getClass()} />
                 {" "}
                 {this.props.label}
             </a>

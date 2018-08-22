@@ -76,20 +76,20 @@ namespace Signum.Engine.Mailing
         }
 
 
-        public static Func<EmailTemplateEntity, ModifiableEntity, SmtpConfigurationEntity> GetSmtpConfiguration;
+        public static Func<EmailTemplateEntity, Lite<Entity>, SmtpConfigurationEntity> GetSmtpConfiguration;
 
-        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm, Func<EmailTemplateEntity, ModifiableEntity, SmtpConfigurationEntity> getSmtpConfiguration)
+        public static void Start(SchemaBuilder sb, Func<EmailTemplateEntity, Lite<Entity>, SmtpConfigurationEntity> getSmtpConfiguration)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
                 CultureInfoLogic.AssertStarted(sb);
-                TemplatingLogic.Start(sb, dqm);
+                TemplatingLogic.Start(sb);
 
 
                 GetSmtpConfiguration = getSmtpConfiguration;
 
                 sb.Include<EmailTemplateEntity>()
-                    .WithQuery(dqm, () => t => new
+                    .WithQuery(() => t => new
                     {
                         Entity = t,
                         t.Id,
@@ -106,8 +106,8 @@ namespace Signum.Engine.Mailing
                     return EmailTemplatesLazy.Value.Values.SelectCatch(et => KVP.Create(et.Query.ToQueryName(), et)).GroupToDictionary();
                 }, new InvalidateWith(typeof(EmailTemplateEntity)));
                 
-                SystemEmailLogic.Start(sb, dqm);
-                EmailMasterTemplateLogic.Start(sb, dqm);
+                SystemEmailLogic.Start(sb);
+                EmailMasterTemplateLogic.Start(sb);
                 
                 sb.Schema.EntityEvents<EmailTemplateEntity>().PreSaving += new PreSavingEventHandler<EmailTemplateEntity>(EmailTemplate_PreSaving);
                 sb.Schema.EntityEvents<EmailTemplateEntity>().Retrieved += EmailTemplateLogic_Retrieved;
@@ -155,7 +155,7 @@ namespace Signum.Engine.Mailing
 
             emailTemplate.Query = QueryLogic.GetQueryEntity(emailTemplate.queryName);
 
-            QueryDescription description = DynamicQueryManager.Current.QueryDescription(emailTemplate.queryName);
+            QueryDescription description = QueryLogic.Queries.QueryDescription(emailTemplate.queryName);
 
             emailTemplate.ParseData(description);
 
@@ -167,7 +167,7 @@ namespace Signum.Engine.Mailing
             using (emailTemplate.DisableAuthorization ? ExecutionMode.Global() : null)
             {
                 object queryName = QueryLogic.ToQueryName(emailTemplate.Query.Key);
-                QueryDescription description = DynamicQueryManager.Current.QueryDescription(queryName);
+                QueryDescription description = QueryLogic.Queries.QueryDescription(queryName);
 
                 using (emailTemplate.DisableAuthorization ? ExecutionMode.Global() : null)
                     emailTemplate.ParseData(description);
@@ -215,7 +215,7 @@ namespace Signum.Engine.Mailing
             using (template.DisableAuthorization ? ExecutionMode.Global() : null)
             {
                 object queryName = QueryLogic.ToQueryName(template.Query.Key);
-                QueryDescription qd = DynamicQueryManager.Current.QueryDescription(queryName);
+                QueryDescription qd = QueryLogic.Queries.QueryDescription(queryName);
 
                 List<QueryToken> list = new List<QueryToken>();
                 return EmailTemplateParser.TryParse(text, qd, template.SystemEmail.ToType(), out errorMessage);
@@ -227,7 +227,7 @@ namespace Signum.Engine.Mailing
             using (template.DisableAuthorization ? ExecutionMode.Global() : null)
             {
                 var queryName = QueryLogic.ToQueryName(template.Query.Key);
-                QueryDescription qd = DynamicQueryManager.Current.QueryDescription(queryName);
+                QueryDescription qd = QueryLogic.Queries.QueryDescription(queryName);
 
                 List<QueryToken> list = new List<QueryToken>();
 
@@ -277,8 +277,8 @@ namespace Signum.Engine.Mailing
 
                 new Execute(EmailTemplateOperation.Save)
                 {
-                    AllowsNew = true,
-                    Lite = false,
+                    CanBeNew = true,
+                    CanBeModified = true,
                     Execute = (t, _) => { }
                 }.Register();
 

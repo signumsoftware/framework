@@ -22,12 +22,12 @@ namespace Signum.Engine.Chart
 
         public static readonly int Limit = 360;
 
-        internal static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
+        internal static void Start(SchemaBuilder sb)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
                 sb.Include<ChartColorEntity>()
-                    .WithQuery(dqm, () => cc => new
+                    .WithQuery(() => cc => new
                     {
                         Entity = cc,
                         cc.Related,

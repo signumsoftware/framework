@@ -222,7 +222,7 @@ namespace Signum.Engine.Migrations
 
         }
 
-        public static int Timeout = 5 * 60; 
+        public static int Timeout = 20 * 60; 
 
         private static void Execute(MigrationInfo mi)
         {

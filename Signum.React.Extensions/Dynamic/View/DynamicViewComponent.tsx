@@ -1,15 +1,16 @@
 ﻿import * as React from 'react'
-import { FormGroup, FormControlReadonly, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityList, EntityRepeater } from '../../../../Framework/Signum.React/Scripts/Lines'
-import { ModifiableEntity, OperationSymbol, JavascriptMessage, NormalWindowMessage, is } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
-import { classes } from '../../../../Framework/Signum.React/Scripts/Globals'
-import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
-import { FindOptions } from '../../../../Framework/Signum.React/Scripts/FindOptions'
-import { getQueryNiceName, PropertyRoute, getTypeInfo } from '../../../../Framework/Signum.React/Scripts/Reflection'
-import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
-import MessageModal from '../../../../Framework/Signum.React/Scripts/Modals/MessageModal'
-import { TypeContext, FormGroupStyle } from '../../../../Framework/Signum.React/Scripts/TypeContext'
-import * as Operations from '../../../../Framework/Signum.React/Scripts/Operations'
-import * as EntityOperations from '../../../../Framework/Signum.React/Scripts/Operations/EntityOperations'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { FormGroup, FormControlReadonly, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityList, EntityRepeater } from '@framework/Lines'
+import { ModifiableEntity, OperationSymbol, JavascriptMessage, NormalWindowMessage, is } from '@framework/Signum.Entities'
+import { classes } from '@framework/Globals'
+import * as Finder from '@framework/Finder'
+import { FindOptions } from '@framework/FindOptions'
+import { getQueryNiceName, PropertyRoute, getTypeInfo } from '@framework/Reflection'
+import * as Navigator from '@framework/Navigator'
+import MessageModal from '@framework/Modals/MessageModal'
+import { TypeContext, FormGroupStyle } from '@framework/TypeContext'
+import * as Operations from '@framework/Operations'
+import * as EntityOperations from '@framework/Operations/EntityOperations'
 import { BaseNode } from './Nodes'
 import { DesignerContext, DesignerNode } from './NodeUtils'
 import * as NodeUtils from './NodeUtils'
@@ -20,7 +21,7 @@ import ShowCodeModal from './ShowCodeModal'
 import { DynamicViewEntity, DynamicViewOperation, DynamicViewMessage } from '../Signum.Entities.Dynamic'
 
 import "./DynamicView.css"
-import { Dropdown, DropdownItem, DropdownToggle, DropdownMenu } from '../../../../Framework/Signum.React/Scripts/Components';
+import { Dropdown, DropdownItem, DropdownToggle, DropdownMenu } from '@framework/Components';
 
 export interface DynamicViewComponentProps {
     ctx: TypeContext<ModifiableEntity>;
@@ -108,7 +109,7 @@ export default class DynamicViewComponent extends React.Component<DynamicViewCom
         return (<div className="design-main">
             <div className={classes("design-left", this.state.isDesignerOpen && "open")}>
                 {!this.state.isDesignerOpen ?
-                    <i className="fa fa-pencil-square-o design-open-icon" aria-hidden="true" onClick={this.handleOpen}></i> :
+                    <span onClick={this.handleOpen}><FontAwesomeIcon icon={["fas", "edit"]} className="design-open-icon"/></span> :
                     <DynamicViewDesigner
                         rootNode={rootNode}
                         dynamicView={this.state.dynamicView}

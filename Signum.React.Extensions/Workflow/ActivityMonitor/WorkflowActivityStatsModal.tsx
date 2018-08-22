@@ -1,23 +1,24 @@
 ﻿import * as moment from 'moment'
 import * as numbro from 'numbro'
 import * as React from 'react'
-import { openModal, IModalProps } from '../../../../Framework/Signum.React/Scripts/Modals';
-import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder';
-import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator';
-import * as Operations from '../../../../Framework/Signum.React/Scripts/Operations';
-import { Dic } from '../../../../Framework/Signum.React/Scripts/Globals';
-import { JavascriptMessage, toLite } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
-import { TypeInfo, TypeReference, Binding } from '../../../../Framework/Signum.React/Scripts/Reflection'
-import { FormGroupStyle, TypeContext } from '../../../../Framework/Signum.React/Scripts/TypeContext'
-import { ValueLineType, ValueLine } from '../../../../Framework/Signum.React/Scripts/Lines/ValueLine'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { openModal, IModalProps } from '@framework/Modals';
+import * as Finder from '@framework/Finder';
+import * as Navigator from '@framework/Navigator';
+import * as Operations from '@framework/Operations';
+import { Dic } from '@framework/Globals';
+import { JavascriptMessage, toLite } from '@framework/Signum.Entities'
+import { TypeInfo, TypeReference, Binding } from '@framework/Reflection'
+import { FormGroupStyle, TypeContext } from '@framework/TypeContext'
+import { ValueLineType, ValueLine } from '@framework/Lines/ValueLine'
 import { WorkflowActivityStats } from "../WorkflowClient";
-import { FormGroup, StyleContext, FormControlReadonly } from "../../../../Framework/Signum.React/Scripts/Lines";
+import { FormGroup, StyleContext, FormControlReadonly } from "@framework/Lines";
 import { WorkflowActivityEntity, WorkflowActivityMessage, CaseNotificationEntity, WorkflowActivityType, WorkflowOperation, WorkflowEntity, WorkflowActivityModel, WorkflowActivityMonitorMessage, CaseActivityEntity } from "../Signum.Entities.Workflow";
-import { SearchControl, ColumnOption, FilterOption } from "../../../../Framework/Signum.React/Scripts/Search";
+import { SearchControl, ColumnOption, FilterOption } from "@framework/Search";
 import * as WorkflowClient from '../WorkflowClient';
 import { WorkflowActivityMonitorConfig } from './WorkflowActivityMonitorPage';
-import { Modal } from '../../../../Framework/Signum.React/Scripts/Components';
-import { ModalHeaderButtons } from '../../../../Framework/Signum.React/Scripts/Components/Modal';
+import { Modal } from '@framework/Components';
+import { ModalHeaderButtons } from '@framework/Components/Modal';
 
 
 interface WorkflowActivityStatsModalProps extends React.Props<WorkflowActivityStatsModal>, IModalProps {
@@ -106,7 +107,7 @@ export default class WorkflowActivityStatsModal extends React.Component<Workflow
         return (
             <FormGroup ctx={ctx}>
                 <button className="btn btn-default" onClick={this.handleClick}>
-                    <i className="fa fa-tachometer" style={{ color: "green" }} /> {WorkflowActivityMonitorMessage.WorkflowActivityMonitor.niceToString()}
+                    <FontAwesomeIcon icon="tachometer-alt" color="green"/> {WorkflowActivityMonitorMessage.WorkflowActivityMonitor.niceToString()}
                 </button>
             </FormGroup>
         );
