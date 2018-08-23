@@ -20,7 +20,6 @@ using Signum.React.Files;
 using System.IO;
 using Signum.React.Filters;
 using Signum.React.ApiControllers;
-using Microsoft.AspNetCore.Mvc;
 
 namespace Signum.React.Authorization
 {
