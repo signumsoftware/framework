@@ -39,15 +39,10 @@ namespace Signum.Utilities
         {
             dictionary.AddOrThrow(key.ToString(), new WithDescription<V>(value, description), "Key {0} already in ConsoleSwitch");
         }
-
+        
         public V Choose(int? numberOfOptions = null)
         {
-            return Choose(ConsoleMessage.EnterYourSelection.NiceToString(), numberOfOptions);
-        }
-
-        public V Choose(string endMessage, int? numberOfOptions = null)
-        {
-            var tuple = ChooseTuple(endMessage, numberOfOptions);
+            var tuple = ChooseTuple(numberOfOptions);
 
             if (tuple == null)
                 return null;
@@ -57,13 +52,8 @@ namespace Signum.Utilities
 
         public WithDescription<V> ChooseTuple(int? numberOfOptions = null)
         {
-            return ChooseTuple(ConsoleMessage.EnterYourSelection.NiceToString(), numberOfOptions);
-        }
-
-        public WithDescription<V> ChooseTuple(string endMessage, int? numberOfOptions = null)
-        {
             Console.WriteLine(welcomeMessage);
-            var noOfOptsPerScreen = numberOfOptions.GetValueOrDefault(Console.WindowHeight - 10);
+            var noOfOptsPerScreen = numberOfOptions ?? dictionary.Count;
             PrintOptions(0, noOfOptsPerScreen);
             var noOfOptsPrinted = noOfOptsPerScreen;
             do

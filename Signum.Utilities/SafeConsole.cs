@@ -27,7 +27,7 @@ namespace Signum.Utilities
 
             Console.WriteLine(str);
 
-            Console.SetCursorPosition(Console.CursorLeft, Console.CursorTop==0? 0: Console.CursorTop - 1);
+            Console.SetCursorPosition(Console.CursorLeft, Console.CursorTop == 0 ? 0: Console.CursorTop - 1);
             needToClear = true;
         }
 
@@ -185,12 +185,12 @@ namespace Signum.Utilities
 
         public static string AskSwitch(string question, List<string> options)
         {
-            var cs = new ConsoleSwitch<int, string>();
+            var cs = new ConsoleSwitch<int, string>(question);
 
             for (int i = 0; i < options.Count; i++)
                 cs.Add(i, options[i]);
 
-            return cs.Choose(question);
+            return cs.Choose();
         }
 
         public static int WaitRows(string startingText, Func<int> updateOrDelete)
