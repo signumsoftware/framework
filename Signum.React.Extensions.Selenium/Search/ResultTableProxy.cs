@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using OpenQA.Selenium;
+using OpenQA.Selenium.Interactions;
 using OpenQA.Selenium.Remote;
 using Signum.Entities;
 using Signum.Entities.DynamicQuery;
@@ -149,11 +150,13 @@ namespace Signum.React.Selenium
             {
                 SearchControl.WaitSearchCompleted(() =>
                 {
+                    Actions action = new Actions(Selenium);
+
                     if (thenBy)
-                        Selenium.Keyboard.PressKey(Keys.Shift);
+                        action.KeyDown(Keys.Shift);
                     HeaderCellElement(token).Find().Click();
                     if (thenBy)
-                        Selenium.Keyboard.ReleaseKey(Keys.Shift);
+                        action.KeyUp(Keys.Shift);
                 });
             }
             while (!HeaderCellElement(token).CombineCss(SortSpan(orderType)).IsPresent());
