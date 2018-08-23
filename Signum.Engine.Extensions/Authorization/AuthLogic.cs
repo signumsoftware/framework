@@ -615,7 +615,7 @@ namespace Signum.Engine.Authorization
                 Console.WriteLine("Sucesfully exported to {0}".FormatWith(fileName));
 
                 if (SafeConsole.Ask("Publish to Load?"))
-                    File.Copy(fileName, "../../" + Path.GetFileName(fileName), overwrite: true);
+                    File.Copy(fileName, "../../../" + Path.GetFileName(fileName), overwrite: true);
             };
 
             syncRoles = () =>
