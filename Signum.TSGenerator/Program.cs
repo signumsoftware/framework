@@ -21,7 +21,7 @@ namespace Signum.TSGenerator
 
             var obj = new ProxyGenerator();
 
-            log.WriteLine("Starting SigumTSGenerator");
+            log.WriteLine("Starting SignumTSGenerator");
 
             var currentDir = Directory.GetCurrentDirectory();
             var files = content
@@ -56,7 +56,7 @@ namespace Signum.TSGenerator
                 }
             }
 
-            log.WriteLine("Finish SigumTSGenerator");
+            log.WriteLine("Finish SignumTSGenerator");
 
             return hasErrors ? -1 : 0;
         }
