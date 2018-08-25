@@ -589,11 +589,11 @@ class TreeNodeControl extends React.Component<TreeNodeControlProps> {
         switch (nodeState) {
             case "Collapsed": return (
                 <span onClick={() => tv.handleNodeIconClick(node)} className="tree-icon" >
-                    <FontAwesomeIcon icon={["far", "plus-square"]} />;
+                    <FontAwesomeIcon icon={["far", "plus-square"]} />
                 </span>);
             case "Expanded": return (
                 <span onClick={() => tv.handleNodeIconClick(node)} className="tree-icon" >
-                    <FontAwesomeIcon icon={["far", "minus-square"]} />;
+                    <FontAwesomeIcon icon={["far", "minus-square"]} />
                 </span>);
             case "Filtered": return (
                 <span onClick={() => tv.handleNodeIconClick(node)} className="tree-icon fa-layers fa-fw" >
