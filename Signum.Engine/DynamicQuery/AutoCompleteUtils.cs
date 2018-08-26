@@ -59,13 +59,12 @@ namespace Signum.Engine.DynamicQuery
 
         private static bool TryParsePrimaryKey(string value, Type type, out PrimaryKey id)
         {
-            if (!Regex.IsMatch(value, "^id[:]?", RegexOptions.IgnoreCase))
-            {
-                id = default(PrimaryKey);
-                return false;
-            }
+            var match = Regex.Match(value, "^id[:]?(.*)", RegexOptions.IgnoreCase);
+            if (match.Success)
+                return PrimaryKey.TryParse(match.Groups[1].ToString(), type, out id);
 
-            return PrimaryKey.TryParse(Regex.Match(value, "^id[:]?(.*)", RegexOptions.IgnoreCase).Groups[1].ToString(), type, out id);
+            id = default(PrimaryKey);
+            return false;
         }
 
         static List<Lite<Entity>> FindLiteLike(IEnumerable<Type> types, string subString, int count)
