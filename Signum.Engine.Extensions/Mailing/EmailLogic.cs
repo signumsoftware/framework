@@ -236,8 +236,13 @@ namespace Signum.Engine.Mailing
                     Construct = (et, args) =>
                     {
                         var entity = args.TryGetArgC<ModifiableEntity>() ?? args.GetArg<Lite<Entity>>().Retrieve();
-                        
-                        return et.ToLite().CreateEmailMessage(entity).FirstEx();
+
+                        var emailMessageEntity = et.ToLite().CreateEmailMessage(entity).FirstOrDefault();
+                        if (emailMessageEntity == null)
+                        {
+                            throw new InvalidOperationException("No suitable recipients were found");
+                        }
+                        return emailMessageEntity;
                     }
                 }.Register();
 

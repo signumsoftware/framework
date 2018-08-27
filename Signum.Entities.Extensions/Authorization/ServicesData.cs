@@ -188,16 +188,16 @@ namespace Signum.Entities.Authorization
         {
         }
 
-        public TypeAllowedAndConditions(TypeAllowed? fallback, MList<TypeConditionRuleEmbedded> conditions)
+        public TypeAllowedAndConditions(TypeAllowed? fallback, IEnumerable<TypeConditionRuleEmbedded> conditions)
         {
             this.fallback = fallback;
-            this.Conditions = conditions;
+            this.Conditions.AddRange(conditions);
         }
 
         public TypeAllowedAndConditions(TypeAllowed? fallback, params TypeConditionRuleEmbedded[] conditions)
         {
             this.fallback = fallback;
-            this.Conditions = conditions.ToMList();
+            this.Conditions.AddRange(conditions);
         }
 
         TypeAllowed? fallback;

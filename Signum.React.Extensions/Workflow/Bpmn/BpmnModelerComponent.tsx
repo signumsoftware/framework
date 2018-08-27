@@ -67,10 +67,11 @@ export default class BpmnModelerComponent extends React.Component<BpmnModelerCom
         this.modeler.on('autoPlace.end', 1500, this.handleCreateEnded as (obj: BPMN.Event) => void);
         this.modeler.on('shape.add', 1500, this.handleAddShapeOrConnection as (obj: BPMN.Event) => void);
         this.modeler.on('commandStack.elements.delete.postExecuted', 1500, this.handleElementDeletePostExecuted as (obj: BPMN.Event) => void);
+        this.modeler.on('commandStack.elements.move.canExecute', 1500, this.handleElementMoveCanExecute as (obj: BPMN.Event) => void);
         this.modeler.on('connection.add', 1500, this.handleAddShapeOrConnection as (obj: BPMN.Event) => void);
-        this.modeler.on('label.add', 1500, () => this.lastPasted = undefined);
+        this.modeler.on('label.add', 1500, () => this.lastPasted = undefined); 
         this.modeler.importXML(this.props.diagramXML, this.handleOnModelError)
-    }
+     }
 
     focusElement(bpmnElementId: string) {
         var searchPad = this.modeler.get<any>("searchPad");
@@ -389,7 +390,6 @@ export default class BpmnModelerComponent extends React.Component<BpmnModelerCom
     }
 
     handleCreateEnded = (e: BPMN.EndedEvent | BPMN.AutoPlaceEndEvent) => {
-
         let shape = (e as BPMN.EndedEvent).context ?
             (e as BPMN.EndedEvent).context.shape :
             (e as BPMN.AutoPlaceEndEvent).shape;
@@ -429,7 +429,6 @@ export default class BpmnModelerComponent extends React.Component<BpmnModelerCom
     }
 
     handleElementDeletePostExecuted = (e: BPMN.DeletePostExecutedEvent) => {
-
         e.context.elements.forEach(element => {
             if (element.type == "bpmn:BoundaryEvent") {
 
@@ -446,6 +445,14 @@ export default class BpmnModelerComponent extends React.Component<BpmnModelerCom
                     delete this.props.entities[element.id];
             };
         });
+    }
+
+    handleElementMoveCanExecute = (e: BPMN.CanMoveElementEvent) => {
+        // Exception on moving lanes, "Cannot read property 'source' of undefined"
+        // Lanes can not move, maybe it is a bpmn-js bug, maybe it is related to our current implemented events
+        // It is a temporal solution to investigate more later
+        if (!e.context.shapes.some(a => a.type != "bpmn:Lane"))
+            return false;
     }
 
     handleAddShapeOrConnection = (e: BPMN.ElementEvent) => {
