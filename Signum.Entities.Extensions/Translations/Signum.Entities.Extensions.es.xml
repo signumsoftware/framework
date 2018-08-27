@@ -963,13 +963,17 @@
     <Member Name="DownloadFile" Description="Descargar archivo" />
     <Member Name="DragAndDropHere" Description="arrastrar un archivo aquí" />
     <Member Name="ErrorSavingFile" Description="Error guardadndo el archivo" />
+    <Member Name="File0IsTooBigTheMaximumSizeIs1" Description="El archivo '{0}' es demasiado grande, el tamaño máximo es {1}" />
     <Member Name="FileTypes" Description="Tipos de archivo" />
     <Member Name="OnlyOneFileIsSupported" Description="Se admite un único fichero" />
     <Member Name="Open" Description="Abrir" />
     <Member Name="OpeningHasNotDefaultImplementationFor0" Description="Abrir no tiene una implementación por defecto para {0}" />
+    <Member Name="OrDragAFileHere" Description="o arrastra un archivo aquí" />
     <Member Name="Remove" Description="Quitar" />
     <Member Name="SavingHasNotDefaultImplementationFor0" Description="Guardar no tiene ninguna implementación predeterminada para {0}" />
     <Member Name="SelectFile" Description="Seleccione archivo" />
+    <Member Name="TheFile0IsNotA1" Description="El archivo {0} no es un {1}" />
+    <Member Name="TheNameOfTheFileMustNotContainPercentSymbol" Description="El nombre del archivo no debe contener '%'" />
     <Member Name="ViewFile" Description="Ver archivo" />
     <Member Name="ViewingHasNotDefaultImplementationFor0" Description="Ver no tiene ninguna implementación predeterminada para {0}" />
     <Member Name="WebDownload" Description="Descargar" />
