@@ -75,8 +75,7 @@ namespace Signum.Engine.Dynamic
                 return null;
 
             var candidates = DynamicValidations.Value.TryGetC(mod.GetType()).EmptyIfNull()
-                .Where(pair => !MixinDeclarations.IsDeclared(typeof(DynamicValidationEntity), typeof(DisabledMixin)) ||
-                                pair.Validation.Mixin<DisabledMixin>().IsDisabled == false)
+                .Where(pair => pair.Validation.Mixin<DisabledMixin>().IsDisabled == false)
                 .ToList();
 
             if (candidates.IsEmpty())
