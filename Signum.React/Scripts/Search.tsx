@@ -1,7 +1,7 @@
 ﻿import * as React from 'react'
 
 
-import { FindOptions, ColumnOption, ColumnOptionsMode, FilterOption, FilterOperation, FilterOptionParsed, FindOptionsParsed, OrderOption, OrderType, Pagination, PaginationMode, ResultTable } from './FindOptions'
+import { FindOptions, ColumnOption, ColumnOptionsMode, FilterOption, FilterOperation, FilterOptionParsed, FindOptionsParsed, OrderOption, OrderType, Pagination, PaginationMode, ResultTable, isFilterGroupOption, isFilterGroupOptionParsed, FilterConditionOptionParsed } from './FindOptions'
 export { FindOptions, ColumnOption, ColumnOptionsMode, FilterOption, FilterOperation, FilterOptionParsed, FindOptionsParsed, OrderOption, OrderType, Pagination, PaginationMode, ResultTable };
 
 import EntityLink, { EntityLinkProps } from  './SearchControl/EntityLink'
@@ -20,7 +20,7 @@ import ValueSearchControlLine, { ValueSearchControlLineProps } from './SearchCon
 export { ValueSearchControlLine, ValueSearchControlLineProps };
 
 export function extractFilterValue(filters: FilterOptionParsed[], token: string, operation: FilterOperation): any {
-    var f = filters.filter(f => f.token!.fullKey == token && f.operation == operation).firstOrNull();
+    var f = filters.filter(f => !isFilterGroupOptionParsed(f) && f.token!.fullKey == token && f.operation == operation).firstOrNull() as FilterConditionOptionParsed | undefined;
     if (!f)
         return null;
 

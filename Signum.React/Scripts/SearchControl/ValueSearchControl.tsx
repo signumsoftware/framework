@@ -15,6 +15,7 @@ import { LineBase, LineBaseProps } from '../Lines/LineBase'
 import { AbortableRequest } from "../Services";
 import { SearchControlProps } from "./SearchControl";
 import { BsColor } from '../Components';
+import { toFilterRequests } from '../Finder';
 
 
 
@@ -59,7 +60,7 @@ export default class ValueSearchControl extends React.Component<ValueSearchContr
 
         return {
             queryKey: fo.queryKey,
-            filters: fo.filterOptions.map(fo => ({ token: fo.token!.fullKey, operation: fo.operation!, value: fo.value })),
+            filters: toFilterRequests(fo.filterOptions),
             valueToken: this.props.valueToken
         };
     }

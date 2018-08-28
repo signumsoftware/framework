@@ -1,23 +1,28 @@
 ﻿
 import * as React from 'react'
-import { classes, Dic } from '../Globals'
-import * as Finder from '../Finder'
-import { openModal, IModalProps } from '../Modals';
-import { FindOptionsParsed, QueryToken, getTokenParents, QueryTokenType } from '../FindOptions'
-import { SearchMessage, JavascriptMessage, ValidationMessage, Lite, Entity, External } from '../Signum.Entities'
-import { Binding, IsByAll, getTypeInfos, TypeReference } from '../Reflection'
-import { TypeContext, FormGroupStyle } from '../TypeContext'
+import { Dic } from '../Globals'
+import { FindOptionsParsed, QueryToken, getTokenParents, isFilterGroupOptionParsed } from '../FindOptions'
+import { ValidationMessage, External } from '../Signum.Entities'
+import { getTypeInfos, TypeReference } from '../Reflection'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { FilterOptionParsed } from '../Search';
 
 
 export default class MultipliedMessage extends React.Component<{ findOptions: FindOptionsParsed, mainType : TypeReference }>{
 
     render() {
-        const fo = this.props.findOptions;
+        const fops = this.props.findOptions;
 
-        const tokensObj = fo.columnOptions.map(a=> a.token)
-            .concat(fo.filterOptions.filter(a=> a.operation != undefined).map(a=> a.token))
-            .concat(fo.orderOptions.map(a=> a.token))
+        function getFilterTokens(fop: FilterOptionParsed): (QueryToken | undefined)[] {
+            if (isFilterGroupOptionParsed(fop))
+                return [fop.token, ...fop.filters.flatMap(f => getFilterTokens(f))];
+            else
+                return [fop.operation == undefined ? undefined : fop.token]
+        }
+
+        const tokensObj = fops.columnOptions.map(a => a.token)
+            .concat(fops.filterOptions.flatMap(fo => getFilterTokens(fo)))
+            .concat(fops.orderOptions.map(a=> a.token))
             .filter(a=> a != undefined)
             .flatMap(a=> getTokenParents(a))
             .filter(a=> a.queryTokenType == "Element")

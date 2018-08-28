@@ -3,7 +3,7 @@ import * as moment from 'moment'
 import { Dropdown, DropdownItem, UncontrolledTooltip, DropdownMenu, DropdownToggle } from '../Components'
 import { Dic, DomUtils, classes } from '../Globals'
 import * as Finder from '../Finder'
-import { CellFormatter, EntityFormatter } from '../Finder'
+import { CellFormatter, EntityFormatter, toFilterRequest, toFilterRequests, toFindOptions, toFilterOptions } from '../Finder'
 import * as OrderUtils from '../Frames/OrderUtils'
 import {
     ResultTable, ResultRow, FindOptionsParsed, FindOptions, FilterOption, FilterOptionParsed, QueryDescription, ColumnOption, ColumnOptionParsed, ColumnOptionsMode, ColumnDescription,
@@ -171,7 +171,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
         return {
             queryKey: fo.queryKey,
             groupResults: fo.groupResults,
-            filters: fo.filterOptions.filter(a => a.token != undefined && a.token.filterType != undefined && a.operation != undefined).map(fo => ({ token: fo.token!.fullKey, operation: fo.operation!, value: fo.value })),
+            filters: toFilterRequests(fo.filterOptions),
             columns: fo.columnOptions.filter(a => a.token != undefined).map(co => ({ token: co.token!.fullKey, displayName: co.displayName! }))
                 .concat((!fo.groupResults && qs && qs.hiddenColumns || []).map(co => ({ token: co.token, displayName: "" }))),
             orders: fo.orderOptions.filter(a => a.token != undefined).map(oo => ({ token: oo.token.fullKey, orderType: oo.orderType })),
@@ -1039,16 +1039,15 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
                 .map((col, i) => ({ col, value: row.columns[i] }))
                 .filter(a => a.col.token && a.col.token.queryTokenType != "Aggregate")
                 .map(a => ({ token: a.col.token!.fullKey, operation: "EqualTo", value: a.value }) as FilterOption);
-            
-            var nonAggregateFilters = resFo.filterOptions.filter(fo => fo.token != null && fo.token.queryTokenType != "Aggregate")
-                .map(fo => ({ token: fo.token!.fullKey, operation: fo.operation, value: fo.value }) as FilterOption);
+
+            var originalFilters = toFilterOptions(resFo.filterOptions);
 
             var extraColumns = resFo.columnOptions.filter(a => a.token && a.token.queryTokenType == "Aggregate" && a.token.parent)
                 .map(a => ({ token: a.token!.parent!.fullKey }) as ColumnOption);
 
             Finder.explore({
                 queryName: resFo.queryKey,
-                filterOptions: nonAggregateFilters.concat(keyFilters),
+                filterOptions: originalFilters.concat(keyFilters),
                 columnOptions: extraColumns,
                 columnOptionsMode: "Add",
                 systemTime: resFo.systemTime && { ...resFo.systemTime },

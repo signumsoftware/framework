@@ -11,6 +11,7 @@ import { LineBase, LineBaseProps, runTasks } from '../Lines/LineBase'
 import { ModifiableEntity, Lite, Entity, EntityControlMessage, JavascriptMessage, toLite, is, liteKey, getToString, isLite, isEntity } from '../Signum.Entities'
 import { Typeahead } from '../Components'
 import { EntityBase, EntityBaseProps} from './EntityBase'
+import { toFilterRequest, toFilterRequests } from '../Finder';
 
 export interface AutocompleteConfig<T> {
     getItems: (subStr: string) => Promise<T[]>;
@@ -131,7 +132,7 @@ export class FindOptionsAutocompleteConfig implements AutocompleteConfig<Lite<En
                 this.getParsedOrders().then(orders =>
                     this.abortableRequest.getData({
                         queryKey: getQueryKey(this.findOptions.queryName),
-                        filters: filters.map(f => ({ token: f.token!.fullKey, operation: f.operation, value: f.value }) as FilterRequest),
+                        filters: toFilterRequests(filters),
                         orders: orders.map(f => ({ token: f.token!.fullKey, orderType: f.orderType }) as OrderRequest),
                         count: this.count,
                         subString: subStr

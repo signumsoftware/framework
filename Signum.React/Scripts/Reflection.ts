@@ -885,6 +885,13 @@ export class EnumType<T extends string> {
         return typeof val == "string" && this.typeInfo().members[val] != null
     }
 
+    assertDefined(val: any): T {
+        if (this.isDefined(val))
+            return val;
+
+        throw new Error(`'${val}' is not a valid ${this.type}`)
+    }
+
     value(val: T): T {
         return val;
     }

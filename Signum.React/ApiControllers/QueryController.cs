@@ -133,10 +133,6 @@ namespace Signum.React.ApiControllers
         [Route("api/query/entitiesWithFilter"), HttpPost, ProfilerActionSplitter]
         public async Task<List<Lite<Entity>>> GetEntitiesWithFilter(QueryEntitiesRequestTS request, CancellationToken token)
         {
-     
-
-
-
             return await QueryLogic.Queries.GetEntities(request.ToQueryEntitiesRequest()).ToListAsync();
         }
 
@@ -306,7 +302,7 @@ namespace Signum.React.ApiControllers
         public override Filter ToFilter(QueryDescription qd, bool canAggregate)
         {
             var options = SubTokensOptions.CanElement | SubTokensOptions.CanAnyAll | (canAggregate ? SubTokensOptions.CanAggregate : 0);
-            var parsedToken = QueryUtils.Parse(token, qd, options);
+            var parsedToken = token == null ? null : QueryUtils.Parse(token, qd, options);
 
             var parsedFilters = filters.Select(f => f.ToFilter(qd, canAggregate)).ToList();
 
@@ -515,17 +511,10 @@ namespace Signum.React.ApiControllers
                 return QueryTokenType.Aggregate;
 
             if (qt is CollectionElementToken ce)
-            {
-                switch (ce.CollectionElementType)
-                {
-                    case CollectionElementType.Element:
-                    case CollectionElementType.Element2:
-                    case CollectionElementType.Element3:
-                        return QueryTokenType.Element;
-                    default:
-                        return QueryTokenType.AnyOrAll;
-                }
-            }
+                return QueryTokenType.Element;
+
+            if (qt is CollectionAnyAllToken caat)
+                return QueryTokenType.AnyOrAll;
 
             return null;
         }
