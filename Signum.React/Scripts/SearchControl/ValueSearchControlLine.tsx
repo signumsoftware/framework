@@ -3,7 +3,7 @@ import { Dic, DomUtils, classes } from '../Globals'
 import * as Finder from '../Finder'
 import {
     ResultTable, ResultRow, FindOptions, FindOptionsParsed, FilterOption, QueryDescription, ColumnOption, ColumnOptionsMode, ColumnDescription,
-    toQueryToken, Pagination, PaginationMode, OrderType, OrderOption, SubTokensOptions, filterOperations, QueryToken, QueryCountRequest, QueryRequest, QueryTokenType
+    toQueryToken, Pagination, PaginationMode, OrderType, OrderOption, SubTokensOptions, filterOperations, QueryToken, QueryValueRequest, QueryRequest, QueryTokenType
 } from '../FindOptions'
 import { SearchMessage, JavascriptMessage, Lite, liteKey, is, Entity, isEntity, EntityControlMessage, isLite } from '../Signum.Entities'
 import { getTypeInfos, IsByAll, getQueryKey, TypeInfo, EntityData, getQueryNiceName  } from '../Reflection'

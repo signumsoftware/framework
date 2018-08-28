@@ -6,12 +6,12 @@ import { SearchControlProps } from "./Search";
 
 export { PaginationMode, OrderType, FilterOperation, FilterType, ColumnOptionsMode, UniqueType };
 
-export interface CountOptions {
+export interface ValueFindOptions {
     queryName: PseudoType | QueryKey;
     filterOptions?: FilterOption[];
 }
 
-export interface CountOptionsParsed {
+export interface ValueFindOptionsParsed {
     queryKey: string;
     filterOptions: FilterOptionParsed; 
 }

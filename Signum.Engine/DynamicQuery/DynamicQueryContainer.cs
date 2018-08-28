@@ -117,7 +117,7 @@ namespace Signum.Engine.DynamicQuery
         public enum ExecuteType
         {
             ExecuteQuery,
-            ExecuteQueryCount,
+            ExecuteQueryValue,
             ExecuteGroupQuery,
             ExecuteUniqueEntity,
             QueryDescription,
@@ -140,14 +140,14 @@ namespace Signum.Engine.DynamicQuery
                 return ExecuteAsync(ExecuteType.ExecuteGroupQuery, request.QueryName, request, dqb => dqb.Core.Value.ExecuteQueryGroupAsync(request, token));
         }
 
-        public object ExecuteQueryCount(QueryValueRequest request)
+        public object ExecuteQueryValue(QueryValueRequest request)
         {
-            return Execute(ExecuteType.ExecuteQueryCount, request.QueryName, request, dqb => dqb.Core.Value.ExecuteQueryValue(request));
+            return Execute(ExecuteType.ExecuteQueryValue, request.QueryName, request, dqb => dqb.Core.Value.ExecuteQueryValue(request));
         }
 
-        public Task<object> ExecuteQueryCountAsync(QueryValueRequest request, CancellationToken token)
+        public Task<object> ExecuteQueryValueAsync(QueryValueRequest request, CancellationToken token)
         {
-            return ExecuteAsync(ExecuteType.ExecuteQueryCount, request.QueryName, request, dqb => dqb.Core.Value.ExecuteQueryValueAsync(request, token));
+            return ExecuteAsync(ExecuteType.ExecuteQueryValue, request.QueryName, request, dqb => dqb.Core.Value.ExecuteQueryValueAsync(request, token));
         }
 
         public Lite<Entity> ExecuteUniqueEntity(UniqueEntityRequest request)
@@ -221,7 +221,7 @@ namespace Signum.Engine.DynamicQuery
             return Task.WhenAll<object>(requests.Select<BaseQueryRequest, Task<object>>(r =>
             {
                 if (r is QueryValueRequest)
-                    return ExecuteQueryCountAsync((QueryValueRequest)r, token);
+                    return ExecuteQueryValueAsync((QueryValueRequest)r, token);
 
                 if (r is QueryRequest)
                     return ExecuteQueryAsync((QueryRequest)r, token).ContinueWith(a => (object)a.Result);

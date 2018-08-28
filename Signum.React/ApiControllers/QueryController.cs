@@ -140,10 +140,10 @@ namespace Signum.React.ApiControllers
             return await QueryLogic.Queries.GetEntities(request.ToQueryEntitiesRequest()).ToListAsync();
         }
 
-        [Route("api/query/queryCount"), HttpPost, ProfilerActionSplitter]
-        public async Task<object> QueryCount(QueryValueRequestTS request, CancellationToken token)
+        [Route("api/query/queryValue"), HttpPost, ProfilerActionSplitter]
+        public async Task<object> QueryValue(QueryValueRequestTS request, CancellationToken token)
         {
-            return await QueryLogic.Queries.ExecuteQueryCountAsync(request.ToQueryCountRequest(), token);
+            return await QueryLogic.Queries.ExecuteQueryValueAsync(request.ToQueryCountRequest(), token);
         }
     }
 

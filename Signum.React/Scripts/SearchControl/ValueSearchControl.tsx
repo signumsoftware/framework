@@ -5,7 +5,7 @@ import { Dic, DomUtils, classes } from '../Globals'
 import * as Finder from '../Finder'
 import {
     ResultTable, ResultRow, FindOptions, FindOptionsParsed, FilterOption, QueryDescription, ColumnOption, ColumnOptionsMode, ColumnDescription,
-    toQueryToken, Pagination, PaginationMode, OrderType, OrderOption, SubTokensOptions, filterOperations, QueryToken, QueryCountRequest, QueryRequest
+    toQueryToken, Pagination, PaginationMode, OrderType, OrderOption, SubTokensOptions, filterOperations, QueryToken, QueryValueRequest, QueryRequest
 } from '../FindOptions'
 import { SearchMessage, JavascriptMessage, Lite, liteKey, is, Entity, getToString, EmbeddedEntity } from '../Signum.Entities'
 import { getTypeInfos, IsByAll, getQueryKey, TypeInfo, EntityData, getQueryNiceName, toNumbroFormat, toMomentFormat, getEnumInfo } from '../Reflection'
@@ -55,7 +55,7 @@ export default class ValueSearchControl extends React.Component<ValueSearchContr
         this.state = { value: props.initialValue };
     }
 
-    getQueryRequest(fo: FindOptionsParsed): QueryCountRequest {
+    getQueryRequest(fo: FindOptionsParsed): QueryValueRequest {
 
         return {
             queryKey: fo.queryKey,
@@ -105,8 +105,8 @@ export default class ValueSearchControl extends React.Component<ValueSearchContr
         this.abortableQuery.abort();
     }
 
-    abortableQuery = new AbortableRequest<{ request: QueryCountRequest; avoidNotify: boolean | undefined }, number>(
-        (abortController, a) => Finder.API.queryCount(a.request, a.avoidNotify, abortController));
+    abortableQuery = new AbortableRequest<{ request: QueryValueRequest; avoidNotify: boolean | undefined }, number>(
+        (abortController, a) => Finder.API.queryValue(a.request, a.avoidNotify, abortController));
 
     refreshValue(props?: ValueSearchControlProps) {
         if (!props)

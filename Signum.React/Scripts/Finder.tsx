@@ -8,8 +8,8 @@ import { Dic } from './Globals'
 import { ajaxGet, ajaxPost } from './Services';
 
 import {
-    QueryDescription, QueryCountRequest, QueryRequest, QueryEntitiesRequest, FindOptions,
-    FindOptionsParsed, FilterOption, FilterOptionParsed, OrderOptionParsed, CountOptionsParsed,
+    QueryDescription, QueryValueRequest, QueryRequest, QueryEntitiesRequest, FindOptions,
+    FindOptionsParsed, FilterOption, FilterOptionParsed, OrderOptionParsed, ValueFindOptionsParsed,
     QueryToken, ColumnDescription, ColumnOption, ColumnOptionParsed, Pagination, ResultColumn,
     ResultTable, ResultRow, OrderOption, SubTokensOptions, toQueryToken, isList, ColumnOptionsMode, FilterRequest, ModalFindOptions, OrderRequest
 } from './FindOptions';
@@ -771,8 +771,8 @@ export module API {
         return ajaxPost<ResultTable>({ url: "~/api/query/executeQuery", abortController }, request);
     }
 
-    export function queryCount(request: QueryCountRequest, avoidNotifyPendingRequest: boolean | undefined = undefined, abortController?: FetchAbortController): Promise<number> {
-        return ajaxPost<number>({ url: "~/api/query/queryCount", avoidNotifyPendingRequests: avoidNotifyPendingRequest, abortController }, request);
+    export function queryValue(request: QueryValueRequest, avoidNotifyPendingRequest: boolean | undefined = undefined, abortController?: FetchAbortController): Promise<any> {
+        return ajaxPost<number>({ url: "~/api/query/queryValue", avoidNotifyPendingRequests: avoidNotifyPendingRequest, abortController }, request);
     }
 
     export function fetchEntitiesWithFilters(request: QueryEntitiesRequest): Promise<Lite<Entity>[]> {
