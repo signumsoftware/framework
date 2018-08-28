@@ -17,6 +17,7 @@ import { TypeReference } from '@framework/Reflection';
 import { initializeColumn } from './Predictor';
 import { newMListElement } from '@framework/Signum.Entities';
 import { is } from '@framework/Signum.Entities';
+import { toFilterOptions } from '@framework/Finder';
 
 export default class PredictorSubQuery extends React.Component<{ ctx: TypeContext<PredictorSubQueryEntity>, mainQuery: PredictorMainQueryEmbedded, mainQueryDescription: QueryDescription }> {
 
@@ -39,11 +40,7 @@ export default class PredictorSubQuery extends React.Component<{ ctx: TypeContex
                     var fo: FindOptions = {
                         queryName: sq.query!.key,
                         groupResults: true,
-                        filterOptions: filters.map(f => ({
-                            token: f.token!.fullKey,
-                            operation: f.operation,
-                            value: f.value
-                        }) as FilterOption),
+                        filterOptions: toFilterOptions(filters),
                         columnOptions: [{ token: "Count" } as ColumnOption]
                             .concat(sq.columns.map(mle => ({ token: mle.element.token && mle.element.token.tokenString, } as ColumnOption))),
                         columnOptionsMode: "Replace",

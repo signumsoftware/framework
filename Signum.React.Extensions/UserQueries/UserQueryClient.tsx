@@ -9,7 +9,7 @@ import { Entity, Lite, liteKey } from '@framework/Signum.Entities'
 import * as Constructor from '@framework/Constructor'
 import * as Operations from '@framework/Operations'
 import * as QuickLinks from '@framework/QuickLinks'
-import { FindOptionsParsed, FindOptions, FilterOption, FilterOperation, OrderOption, ColumnOption, FilterRequest, QueryRequest, Pagination } from '@framework/FindOptions'
+import { FindOptionsParsed, FindOptions, FilterOption, FilterOperation, OrderOption, ColumnOption, FilterRequest, QueryRequest, Pagination, isFilterGroupOption, isFilterGroupRequest, FilterGroupOptionParsed, FilterGroupOption, FilterConditionOption } from '@framework/FindOptions'
 import * as AuthClient  from '../Authorization/AuthClient'
 import { UserQueryEntity, UserQueryPermission, UserQueryMessage,
     QueryFilterEmbedded, QueryColumnEmbedded, QueryOrderEmbedded } from './Signum.Entities.UserQueries'
@@ -76,6 +76,21 @@ export function start(options: { routes: JSX.Element[] }) {
 
 export module Converter {
 
+    function toFilterOption(fr: UserAssetsClient.API.FilterResponse): FilterOption {
+        if (UserAssetsClient.API.isFilterGroupResponse(fr))
+            return ({
+                token: fr.token && fr.token.fullKey,
+                groupOperation: fr.groupOperation,
+                filters: fr.filters.map(f => toFilterOption(f)),
+            } as FilterGroupOption);
+        else
+            return ({
+                token: fr.token.fullKey,
+                operation: fr.operation || "EqualTo",
+                value: fr.value,
+            } as FilterConditionOption);
+    }
+    
     export function toFindOptions(uq: UserQueryEntity, entity: Lite<Entity> | undefined): Promise<FindOptions> {
 
         var query = uq.query!;
@@ -95,12 +110,7 @@ export module Converter {
 
         return convertedFilters.then(filters => {
 
-            fo.filterOptions = filters.map(f => ({
-                token: f.token,
-                operation: f.operation,
-                value: f.value,
-                frozen: false
-            }) as FilterOption);
+            fo.filterOptions = filters.map(f => toFilterOption(f));
 
             fo.columnOptionsMode = uq.columnsMode;
 

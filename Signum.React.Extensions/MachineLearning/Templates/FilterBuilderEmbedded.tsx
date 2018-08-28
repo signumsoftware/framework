@@ -11,7 +11,7 @@ import { getQueryNiceName } from '@framework/Reflection'
 import QueryTokenEntityBuilder from '../../UserAssets/Templates/QueryTokenEntityBuilder'
 import { QueryTokenEmbedded} from '../../UserAssets/Signum.Entities.UserAssets'
 import { QueryFilterEmbedded } from '../../UserQueries/Signum.Entities.UserQueries'
-import { QueryDescription, SubTokensOptions } from '@framework/FindOptions'
+import { QueryDescription, SubTokensOptions, isFilterGroupOptionParsed } from '@framework/FindOptions'
 import { API, initializers } from '../PredictorClient';
 import { toLite } from "@framework/Signum.Entities";
 import FilterBuilder from '@framework/SearchControl/FilterBuilder';
@@ -113,15 +113,30 @@ export default class FilterBuilderEmbedded extends React.Component<FilterBuilder
 
         ctx.value.clear();
 
-        ctx.value.push(...this.state.filterOptions!.filter(a => a.token != null).map(a => {
-            const valueString = Finder.Encoder.stringValue(a.token && a.token.filterType == "DateTime" ? moment(a.value).format(serverFormat) : a.value);
 
-            return newMListElement(QueryFilterEmbedded.New({
-                token: a.token && QueryTokenEmbedded.New({ token: a.token, tokenString: a.token.fullKey }),
-                operation: a.operation,
-                valueString: valueString,
-            }));
-        }));
+        function pushFilter(fo: FilterOptionParsed, identation: number) {
+            if (isFilterGroupOptionParsed(fo)) {
+                ctx.value.push(newMListElement(QueryFilterEmbedded.New({
+                    isGroup: true,
+                    indentation: identation,
+                    groupOperation: fo.groupOperation,
+                    token: fo.token && QueryTokenEmbedded.New({ token: fo.token, tokenString: fo.token.fullKey })
+                })));
+
+                fo.filters.forEach(f => pushFilter(f, identation + 1));
+            } else {
+
+                const valueString = Finder.Encoder.stringValue(fo.token && fo.token.filterType == "DateTime" ? moment(fo.value).format(serverFormat) : fo.value);
+
+                ctx.value.push(newMListElement(QueryFilterEmbedded.New({
+                    token: fo.token && QueryTokenEmbedded.New({ token: fo.token, tokenString: fo.token.fullKey }),
+                    operation: fo.operation,
+                    valueString: valueString,
+                })));
+            }
+        }
+
+        this.state.filterOptions!.forEach(fo => pushFilter(fo, 0))
 
         ctx.binding.setValue(ctx.value); //force change 
 

@@ -4,6 +4,7 @@ import * as Navigator from '@framework/Navigator'
 import { ResultTable, FindOptions, FilterOption, QueryDescription, SubTokensOptions, QueryToken, QueryTokenType, ColumnOptionParsed, OrderOptionParsed, OrderType, ResultRow, hasAggregate, ColumnOption, FilterOptionParsed } from '@framework/FindOptions'
 import { ChartColumnEmbedded, ChartScriptColumnEmbedded, ChartScriptParameterEmbedded, ChartRequest, GroupByChart, ChartMessage,
    ChartColorEntity, ChartScriptEntity, ChartParameterEmbedded, ChartParameterType } from '../Signum.Entities.Chart'
+import { toFilterOptions } from '@framework/Finder';
 
 export default class ChartTable extends React.Component<{ resultTable: ResultTable; chartRequest: ChartRequest; lastChartRequest: ChartRequest; onRedraw: () => void }> {
 
@@ -129,12 +130,7 @@ export default class ChartTable extends React.Component<{ resultTable: ResultTab
 
             window.open(Finder.findOptionsPath({
                 queryName: lcr.queryKey,
-                filterOptions: filters.map(fop => ({
-                    token: fop.token!.fullKey,
-                    operation: fop.operation,
-                    value: fop.value,
-                    frozen: fop.frozen,
-                }) as FilterOption),
+                filterOptions: toFilterOptions(filters),
                 columnOptions: columns,
             }));
         }

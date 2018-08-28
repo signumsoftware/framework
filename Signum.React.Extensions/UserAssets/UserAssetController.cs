@@ -29,7 +29,7 @@ namespace Signum.React.UserAssets
     public class UserAssetController : ApiController
     {
         [Route("api/userAssets/parseFilters"), HttpPost]
-        public List<FilterTS> ParseFilters(ParseFiltersRequest request)
+        public List<FilterResponse> ParseFilters(ParseFiltersRequest request)
         {
             var queryName = QueryLogic.ToQueryName(request.queryKey);
             var qd = QueryLogic.Queries.QueryDescription(queryName);
@@ -37,13 +37,13 @@ namespace Signum.React.UserAssets
 
             using (request.entity != null ? CurrentEntityConverter.SetCurrentEntity(request.entity.Retrieve()) : null)
             {
-                var result = ToFilterList(request.filters, qd, options, allowSmart: true).Select(f => FilterTS.FromFilter(f)).ToList();
+                var result = ToFilterList(request.filters, qd, options, allowSmart: true).ToList();
 
                 return result;
             }
         }
 
-        public static List<Filter> ToFilterList(IEnumerable<ParseFilterRequest> filters, QueryDescription qd, SubTokensOptions options, bool allowSmart, int indent = 0)
+        public static List<FilterResponse> ToFilterList(IEnumerable<ParseFilterRequest> filters, QueryDescription qd, SubTokensOptions options, bool allowSmart, int indent = 0)
         {
             return filters.GroupWhen(filter => filter.identation == indent).Select(gr =>
             {
@@ -58,7 +58,7 @@ namespace Signum.React.UserAssets
 
                     var value = FilterValueConverter.Parse(filter.valueString, token.Type, filter.operation.Value.IsList(), allowSmart: true);
 
-                    return (Filter)new FilterCondition(token, filter.operation.Value, value);
+                    return (FilterResponse)new FilterConditionResponse { token = token, operation = filter.operation.Value, value = value };
                 }
                 else
                 {
@@ -66,7 +66,7 @@ namespace Signum.React.UserAssets
 
                     var token = group.tokenString == null ? null : QueryUtils.Parse(group.tokenString, qd, options);
 
-                    return (Filter)new FilterGroup(group.groupOperation.Value, token, ToFilterList(gr, qd, options, allowSmart, indent + 1).ToList());
+                    return (FilterResponse)new FilterGroupResponse { groupOperation = group.groupOperation.Value, token = token, filters = ToFilterList(gr, qd, options, allowSmart, indent + 1).ToList() };
                 }
             }).ToList();
         }
@@ -87,6 +87,25 @@ namespace Signum.React.UserAssets
             public string valueString;
             public FilterGroupOperation? groupOperation;
             public int identation;
+        }
+
+        public class FilterResponse
+        {
+        }
+
+        public class FilterConditionResponse : FilterResponse
+        {
+            public QueryToken token;
+            public FilterOperation operation;
+            public object value;
+
+        }
+
+        public class FilterGroupResponse : FilterResponse
+        {
+            public FilterGroupOperation groupOperation;
+            public QueryToken token;
+            public List<FilterResponse> filters;
         }
 
         [Route("api/userAssets/export"), HttpPost]

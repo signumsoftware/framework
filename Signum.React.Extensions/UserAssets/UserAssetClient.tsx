@@ -16,6 +16,7 @@ import { IUserAssetEntity, UserAssetMessage, UserAssetPreviewModel, UserAssetPer
 import * as OmniboxClient from '../Omnibox/OmniboxClient'
 import { ImportRoute } from "@framework/AsyncImport";
 import { QueryToken } from '@framework/FindOptions';
+import { FilterGroupOperation } from '@framework/Signum.Entities.DynamicQuery';
 
 
 let started = false;
@@ -62,8 +63,8 @@ export function getToken(token: QueryTokenEmbedded)  : QueryToken {
 
 export module API {
 
-    export function parseFilters(request: ParseFiltersRequest): Promise<FilterRequest[]> {
-        return ajaxPost<FilterRequest[]>({ url: "~/api/userAssets/parseFilters/" }, request);
+    export function parseFilters(request: ParseFiltersRequest): Promise<FilterResponse[]> {
+        return ajaxPost<FilterResponse[]>({ url: "~/api/userAssets/parseFilters/" }, request);
     }
 
     export interface ParseFiltersRequest {
@@ -73,16 +74,39 @@ export module API {
         canAggregate: boolean
     }
 
+    export interface ParseFilterRequest {
+        isGroup: boolean;
+        tokenString: string;
+        operation?: FilterOperation;
+        valueString: string;
+        groupOperation?: FilterGroupOperation;
+        identation: number;
+    }
+
+
+    export type FilterResponse = FilterConditionResponse | FilterGroupResponse;
+
+    export function isFilterGroupResponse(fr: FilterResponse): fr is FilterGroupResponse {
+        return (fr as FilterGroupResponse).groupOperation != null;
+    }
+
+    export interface FilterGroupResponse {
+        groupOperation: FilterGroupOperation;
+        token?: QueryToken;
+        filters: FilterResponse[];
+    }
+
+    export interface FilterConditionResponse {
+        token: QueryToken;
+        operation: FilterOperation;
+        value: any;
+    }
+
+
     export function exportAsset(entity: Lite<IUserAssetEntity>) {
         ajaxPostRaw({ url: "~/api/userAssets/export" }, entity)
             .then(resp => saveFile(resp))
             .done();
-    }
-
-    export interface ParseFilterRequest {
-        tokenString: string;
-        operation: FilterOperation;
-        valueString: string;
     }
 
 

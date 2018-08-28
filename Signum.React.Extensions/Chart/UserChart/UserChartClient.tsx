@@ -10,7 +10,7 @@ import { Entity, Lite, liteKey } from '@framework/Signum.Entities'
 import * as Constructor from '@framework/Constructor'
 import * as Operations from '@framework/Operations'
 import * as QuickLinks from '@framework/QuickLinks'
-import { FindOptions, QueryToken, FilterOption, FilterOptionParsed, FilterOperation, OrderOption, OrderOptionParsed, ColumnOption, FilterRequest, QueryRequest, Pagination, SubTokensOptions } from '@framework/FindOptions'
+import { FindOptions, QueryToken, FilterOption, FilterOptionParsed, FilterOperation, OrderOption, OrderOptionParsed, ColumnOption, FilterRequest, QueryRequest, Pagination, SubTokensOptions, FilterGroupOptionParsed, FilterConditionOptionParsed } from '@framework/FindOptions'
 import * as AuthClient from '../../Authorization/AuthClient'
 import { UserChartEntity, ChartPermission, ChartMessage, ChartRequest, ChartParameterEmbedded, ChartColumnEmbedded } from '../Signum.Entities.Chart'
 import { QueryFilterEmbedded, QueryOrderEmbedded } from '../../UserQueries/Signum.Entities.UserQueries'
@@ -20,6 +20,7 @@ import * as ChartClient from '../ChartClient'
 import * as UserAssetsClient from '../../UserAssets/UserAssetClient'
 import { ImportRoute } from "@framework/AsyncImport";
 import { OrderRequest } from '@framework/FindOptions';
+import { toFilterRequests, TokenCompleter } from '@framework/Finder';
 
 
 export function start(options: { routes: JSX.Element[] }) {
@@ -76,6 +77,22 @@ export function start(options: { routes: JSX.Element[] }) {
 
 export module Converter {
 
+    function toFilterOptionParsed(fr: UserAssetsClient.API.FilterResponse): FilterOptionParsed {
+        if (UserAssetsClient.API.isFilterGroupResponse(fr))
+            return ({
+                token: fr.token,
+                groupOperation: fr.groupOperation,
+                filters: fr.filters.map(f => toFilterOptionParsed(f)),
+            } as FilterGroupOptionParsed);
+        else
+            return ({
+                token: fr.token,
+                operation: fr.operation || "EqualTo",
+                value: fr.value,
+                frozen: true,
+            } as FilterConditionOptionParsed);
+    }
+
     export function applyUserChart(cr: ChartRequest, uq: UserChartEntity, entity?: Lite<Entity>): Promise<ChartRequest> {
 
         cr.chartScript = uq.chartScript;
@@ -85,23 +102,23 @@ export module Converter {
             canAggregate: uq.groupResults,
             entity: entity,
             filters: uq.filters!.map(mle => mle.element).map(f => ({
+                isGroup: f.isGroup,
+                identation: f.indentation,
                 tokenString: f.token!.tokenString,
                 operation: f.operation,
-                valueString: f.valueString
+                valueString: f.valueString,
+                groupOperation: f.groupOperation,
             }) as UserAssetsClient.API.ParseFilterRequest)
         });
 
+        
         return promise.then(filters => {
 
             cr.groupResults = uq.groupResults;
 
             cr.filterOptions = (cr.filterOptions || []).filter(f => f.frozen);
-            cr.filterOptions.push(...uq.filters.map((f, i) => ({
-                token: f.element.token!.token,
-                operation: f.element.operation!,
-                value: filters[i].value,
-                frozen: false,
-            }) as FilterOptionParsed));
+
+            cr.filterOptions.push(...filters.map(f => toFilterOptionParsed(f)));
             
             cr.parameters = uq.parameters!.map(mle => ({
                 rowId: null,
@@ -131,9 +148,7 @@ export module Converter {
                 token: f.element.token!.token,
                 orderType: f.element.orderType
             }) as OrderOptionParsed);
-
-
-
+            
             return cr;
         });
     }
@@ -161,9 +176,7 @@ export module API {
             .map(oo => ({ token: oo.token.fullKey, orderType: oo.orderType }) as OrderRequest);
         delete clone.orderOptions;
 
-        clone.filters = clone.filterOptions!
-            .filter(a => a.token != null)
-            .map(fo => ({ token: fo.token!.fullKey, operation: fo.operation, value: fo.value }) as FilterRequest);
+        clone.filters = toFilterRequests(clone.filterOptions);
         delete clone.filterOptions;
 
         return clone;

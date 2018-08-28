@@ -34,6 +34,7 @@ import { ImportRoute } from "@framework/AsyncImport";
 import { ColumnRequest } from '@framework/FindOptions';
 import { toMomentFormat } from '@framework/Reflection';
 import { toNumbroFormat } from '@framework/Reflection';
+import { toFilterRequests, toFilterOptions } from '@framework/Finder';
 
 export function start(options: { routes: JSX.Element[] }) {
 
@@ -331,7 +332,7 @@ export module Encoder {
             queryName: cr.queryKey,
             chartScript: cr.chartScript && cr.chartScript.name || undefined,
             groupResults: cr.groupResults,
-            filterOptions: cr.filterOptions.map(fo => ({ token: fo.token!.fullKey, operation: fo.operation, value: fo.value, frozen: fo.frozen } as FilterOption)),
+            filterOptions: toFilterOptions(cr.filterOptions),
             orderOptions: cr.orderOptions.map(oo => ({ token: oo.token!.fullKey, orderType: oo.orderType } as OrderOption)),
             columnOptions: cr.columns.map(co => ({ token: co.element.token && co.element.token.tokenString, displayName: co.element.displayName }) as ChartColumnOption),
             parameters: cr.parameters.map(p => ({ name: p.element.name, value: p.element.value }) as ChartParameterOption)
@@ -380,7 +381,7 @@ export module Decoder {
                 const completer = new Finder.TokenCompleter(qd);
 
                 const fos = Finder.Decoder.decodeFilters(query);
-                fos.forEach(fo => completer.request(fo.token, SubTokensOptions.CanElement | SubTokensOptions.CanAnyAll | SubTokensOptions.CanAggregate));
+                fos.forEach(fo => completer.requestFilter(fo, SubTokensOptions.CanElement | SubTokensOptions.CanAnyAll | SubTokensOptions.CanAggregate));
 
                 const oos = Finder.Decoder.decodeOrders(query);
                 oos.forEach(oo => completer.request(oo.token, SubTokensOptions.CanElement | SubTokensOptions.CanAggregate));
@@ -397,7 +398,7 @@ export module Decoder {
                             scripts.flatMap(a => a).filter(cs => cs.name == query.script).single(`ChartScript '${query.queryKey}'`),
                         queryKey: getQueryKey(queryName),
                         groupResults: query.groupResults == "true",
-                        filterOptions: fos.map(fo => ({ token: completer.get(fo.token), operation: fo.operation, value: fo.value, frozen: fo.frozen }) as FilterOptionParsed),
+                        filterOptions: fos.map(fo => completer.toFilterOptionParsed(fo)),
                         orderOptions: oos.map(oo => ({ token: completer.get(oo.token), orderType: oo.orderType }) as OrderOptionParsed),
                         columns: cols,
                         parameters: Decoder.decodeParameters(query),
@@ -449,7 +450,7 @@ export module API {
         return {
             queryKey: request.queryKey,
             groupResults: request.groupResults,
-            filters: request.filterOptions!.filter(a => a.token != null).map(fo => ({ token: fo.token!.fullKey, operation: fo.operation, value: fo.value }) as FilterRequest),
+            filters: toFilterRequests(request.filterOptions),
             columns: request.columns.map(mle => mle.element).filter(cce => cce.token != null).map(co => ({ token: co.token!.token!.fullKey }) as ColumnRequest),
             orders: request.orderOptions.map(oo => ({ token: oo.token.fullKey, orderType: oo.orderType }) as OrderRequest),
             pagination: { mode: "All" }

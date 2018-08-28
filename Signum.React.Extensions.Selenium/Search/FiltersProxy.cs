@@ -20,13 +20,13 @@ namespace Signum.React.Selenium
             return Element.FindElements(By.CssSelector("table.sf-filter-table > tbody > tr"));
         }
 
-        public FilterOptionProxy GetNewFilter(Action action)
+        public FilterConditionOptionProxy GetNewFilter(Action action)
         {
             var oldFilters = this.Filters();
             action();
             var newFilter = this.Element.GetDriver().Wait(() => this.Filters().Except(oldFilters).SingleOrDefault(), () => "new filter to appear");
 
-            return new FilterOptionProxy(newFilter);
+            return new FilterConditionOptionProxy(newFilter);
         }
 
         public WebElementLocator AddFilterButton
@@ -34,7 +34,7 @@ namespace Signum.React.Selenium
             get { return this.Element.WithLocator(By.ClassName("sf-line-button sf-create")); }
         }
 
-        public FilterOptionProxy AddFilter()
+        public FilterConditionOptionProxy AddFilter()
         {
             return GetNewFilter(() => this.AddFilterButton.Find().Click());
         }
@@ -52,9 +52,9 @@ namespace Signum.React.Selenium
             get { return this.AddFilterButton.CombineCss(":not([disabled])").IsPresent(); }
         }
 
-        public FilterOptionProxy GetFilter(int index)
+        public FilterConditionOptionProxy GetFilter(int index)
         {
-            return new FilterOptionProxy(this.Filters().ElementAt(index));
+            return new FilterConditionOptionProxy(this.Filters().ElementAt(index));
         }
 
 

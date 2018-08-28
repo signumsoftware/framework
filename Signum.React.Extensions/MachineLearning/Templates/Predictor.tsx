@@ -31,7 +31,7 @@ import { QueryToken } from '@framework/FindOptions';
 import PredictorMetrics from './PredictorMetrics';
 import PredictorClassificationMetrics from './PredictorClassificationMetrics';
 import PredictorRegressionMetrics from './PredictorRegressionMetrics';
-import { CellFormatter } from '@framework/Finder';
+import { CellFormatter, toFilterOptions } from '@framework/Finder';
 
 export default class Predictor extends React.Component<{ ctx: TypeContext<PredictorEntity> }, { queryDescription?: QueryDescription }> implements IRenderButtons {
 
@@ -170,11 +170,7 @@ export default class Predictor extends React.Component<{ ctx: TypeContext<Predic
                 var fo: FindOptions = {
                     queryName: mq.query!.key,
                     groupResults: mq.groupResults,
-                    filterOptions: filters.map(f => ({
-                        token: f.token!.fullKey,
-                        operation: f.operation,
-                        value: f.value
-                    }) as FilterOption),
+                    filterOptions: toFilterOptions(filters),
                     columnOptions: mq.columns.orderBy(mle => mle.element.usage == "Input" ? 0 : 1).map(mle => ({
                         token: mle.element.token && mle.element.token.tokenString,
                     } as ColumnOption)),

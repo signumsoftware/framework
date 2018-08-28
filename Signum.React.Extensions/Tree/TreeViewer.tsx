@@ -11,7 +11,7 @@ import * as EntityOperations from '@framework/Operations/EntityOperations'
 import { SearchMessage, JavascriptMessage, EntityControlMessage, toLite, liteKey, ExecuteSymbol, ConstructSymbol_From, ConstructSymbol_Simple, DeleteSymbol, OperationMessage } from '@framework/Signum.Entities'
 import { TreeViewerMessage, TreeEntity, TreeOperation, MoveTreeModel } from './Signum.Entities.Tree'
 import * as TreeClient from './TreeClient'
-import { FilterOptionParsed, QueryDescription, FilterRequest, SubTokensOptions, FilterOption } from "@framework/FindOptions";
+import { FilterOptionParsed, QueryDescription, FilterRequest, SubTokensOptions, FilterOption, isFilterGroupOptionParsed } from "@framework/FindOptions";
 import FilterBuilder from "@framework/SearchControl/FilterBuilder";
 import { ISimpleFilterBuilder } from "@framework/Search";
 import { is } from "@framework/Signum.Entities";
@@ -25,6 +25,7 @@ import { tryGetMixin } from "@framework/Signum.Entities";
 
 import "./TreeViewer.css"
 import { DropdownToggle, Dropdown, DropdownItem, DropdownMenu } from '@framework/Components';
+import { toFilterRequest, toFilterRequests } from '@framework/Finder';
 
 interface TreeViewerProps {
     typeName: string;
@@ -276,10 +277,9 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
             let expandedNodes = clearExpanded || !this.state.treeNodes ? [] :
                 this.state.treeNodes!.flatMap(allNodes).filter(a => a.nodeState == "Expanded").map(a => a.lite);
 
-            const validFilters = filters.filter(fo => fo.token != undefined && fo.operation != undefined);
 
-            const userFilters = validFilters.filter(fo => fo.frozen == false).map(fo => ({ token: fo.token!.fullKey, operation: fo.operation!, value: fo.value }) as FilterRequest);
-            const frozenFilters = validFilters.filter(fo => fo.frozen == true).map(fo => ({ token: fo.token!.fullKey, operation: fo.operation!, value: fo.value }) as FilterRequest);
+            const userFilters = toFilterRequests(filters.filter(fo => fo.frozen == false));
+            const frozenFilters = toFilterRequests(filters.filter(fo => fo.frozen == true));
 
             if (userFilters.length == 0)
                 userFilters.push({ token: "Entity.Level", operation: "EqualTo", value: 1 });
