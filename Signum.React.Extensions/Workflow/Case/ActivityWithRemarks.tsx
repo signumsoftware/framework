@@ -98,7 +98,7 @@ export default class ActivityWithRemarksComponent extends React.Component<Activi
         }; 
 
         Finder.exploreOrNavigate(fo)
-            .then(() => Finder.getCount(fo.queryName, fo.filterOptions!))
+            .then(() => Finder.getQueryValue(fo.queryName, fo.filterOptions!))
             .then(alerts => this.setState({ alerts: alerts }))
             .done();
     }
