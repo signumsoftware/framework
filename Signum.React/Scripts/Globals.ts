@@ -457,8 +457,8 @@ Array.repeat = function (count: number, val: any) : any[] {
     return result;
 }
 
-Array.toArray = function (arrayish: { length: number;[index: number]: any }) {
-    var result = [];
+Array.toArray = function (arrayish: { length: number;[index: number]: any }) : any[] {
+    var result : any[] = [];
     for (var i = 0; i < arrayish.length; i++)
         result.push(arrayish[i]);
     return result;
