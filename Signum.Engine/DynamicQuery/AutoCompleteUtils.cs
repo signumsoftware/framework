@@ -17,6 +17,7 @@ using Signum.Entities.Basics;
 using System.Globalization;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Text.RegularExpressions;
 
 namespace Signum.Engine.DynamicQuery
 {
@@ -56,6 +57,15 @@ namespace Signum.Engine.DynamicQuery
             }
         }
 
+        private static bool TryParsePrimaryKey(string value, Type type, out PrimaryKey id)
+        {
+            var match = Regex.Match(value, "^id[:]?(.*)", RegexOptions.IgnoreCase);
+            if (match.Success)
+                return PrimaryKey.TryParse(match.Groups[1].ToString(), type, out id);
+
+            id = default(PrimaryKey);
+            return false;
+        }
 
         static List<Lite<Entity>> FindLiteLike(IEnumerable<Type> types, string subString, int count)
         {
@@ -68,7 +78,7 @@ namespace Signum.Engine.DynamicQuery
           
             foreach (var t in types)
             {
-                if (PrimaryKey.TryParse(subString, t, out PrimaryKey id))
+                if (TryParsePrimaryKey(subString, t, out PrimaryKey id))
                 {
                     var lite = giLiteById.GetInvoker(t).Invoke(id);
                     if (lite != null)
@@ -84,9 +94,9 @@ namespace Signum.Engine.DynamicQuery
 
             foreach (var t in types)
             {
-                if (!PrimaryKey.TryParse(subString, t, out PrimaryKey id))
+                if (!TryParsePrimaryKey(subString, t, out PrimaryKey id))
                 {
-                    var parts = subString.Trim('\'', '"').SplitNoEmpty(' ');
+                    var parts = subString.Trim().SplitNoEmpty(' ');
 
                     results.AddRange(giLiteContaining.GetInvoker(t)(parts, count - results.Count));
 
@@ -109,7 +119,7 @@ namespace Signum.Engine.DynamicQuery
 
             foreach (var t in types)
             {
-                if (PrimaryKey.TryParse(subString, t, out PrimaryKey id))
+                if (TryParsePrimaryKey(subString, t, out PrimaryKey id))
                 {
                     var lite = await giLiteByIdAsync.GetInvoker(t).Invoke(id, cancellationToken);
                     if (lite != null)
@@ -124,9 +134,9 @@ namespace Signum.Engine.DynamicQuery
 
             foreach (var t in types)
             {
-                if (!PrimaryKey.TryParse(subString, t, out PrimaryKey id))
+                if (!TryParsePrimaryKey(subString, t, out PrimaryKey id))
                 {
-                    var parts = subString.Trim('\'', '"').SplitNoEmpty(' ');
+                    var parts = subString.Trim().SplitNoEmpty(' ');
 
                     var list = await giLiteContainingAsync.GetInvoker(t)(parts, count - results.Count, cancellationToken);
                     results.AddRange(list);
@@ -231,7 +241,7 @@ namespace Signum.Engine.DynamicQuery
             {
                 List<T> results = new List<T>();
 
-                if (PrimaryKey.TryParse(subString, type, out PrimaryKey id))
+                if (TryParsePrimaryKey(subString, type, out PrimaryKey id))
                 {
                     T entity = query.SingleOrDefaultEx(r => entitySelector.Evaluate(r).Id == id);
 
@@ -242,13 +252,13 @@ namespace Signum.Engine.DynamicQuery
                         return results;
                 }
 
-                var parts = subString.Trim('\'', '"').SplitNoEmpty(' ');
+                var parts = subString.Trim().SplitNoEmpty(' ');
 
                 var list = query
                     .Where(r => entitySelector.Evaluate(r).ToString().ContainsAll(parts))
                     .OrderBy(r => entitySelector.Evaluate(r).ToString().Length)
                     .Take(count - results.Count)
-                    .ToList(); 
+                    .ToList();
 
                 results.AddRange(list);
 
@@ -262,7 +272,7 @@ namespace Signum.Engine.DynamicQuery
             {
                 List<T> results = new List<T>();
 
-                if (PrimaryKey.TryParse(subString, type, out PrimaryKey id))
+                if (TryParsePrimaryKey(subString, type, out PrimaryKey id))
                 {
                     T entity = await query.SingleOrDefaultAsync(r => entitySelector.Evaluate(r).Id == id);
 
@@ -273,7 +283,7 @@ namespace Signum.Engine.DynamicQuery
                         return results;
                 }
 
-                var parts = subString.Trim('\'', '"').SplitNoEmpty(' ');
+                var parts = subString.Trim().SplitNoEmpty(' ');
 
                 var list = await query.Where(r => entitySelector.Evaluate(r).ToString().ContainsAll(parts))
                     .OrderBy(r => entitySelector.Evaluate(r).ToString().Length)
@@ -294,7 +304,7 @@ namespace Signum.Engine.DynamicQuery
 
                 List<Lite<T>> results = new List<Lite<T>>();
 
-                if (PrimaryKey.TryParse(subString, typeof(T), out PrimaryKey id))
+                if (TryParsePrimaryKey(subString, typeof(T), out PrimaryKey id))
                 {
                     Lite<T> entity = query.SingleOrDefaultEx(e => e.Id == id);
 
@@ -305,7 +315,7 @@ namespace Signum.Engine.DynamicQuery
                         return results;
                 }
 
-                var parts = subString.Trim('\'', '"').SplitNoEmpty(' ');
+                var parts = subString.Trim().SplitNoEmpty(' ');
 
                 results.AddRange(query.Where(a => a.ToString().ContainsAll(parts))
                     .OrderBy(a => a.ToString().Length)
@@ -322,7 +332,7 @@ namespace Signum.Engine.DynamicQuery
             {
                 List<Lite<T>> results = new List<Lite<T>>();
 
-                if (PrimaryKey.TryParse(subString, typeof(T), out PrimaryKey id))
+                if (TryParsePrimaryKey(subString, typeof(T), out PrimaryKey id))
                 {
                     Lite<T> entity = await query.SingleOrDefaultAsync(e => e.Id == id, token);
 
@@ -333,7 +343,7 @@ namespace Signum.Engine.DynamicQuery
                         return results;
                 }
 
-                var parts = subString.Trim('\'', '"').SplitNoEmpty(' ');
+                var parts = subString.Trim().SplitNoEmpty(' ');
 
                 var list = await query.Where(a => a.ToString().ContainsAll(parts))
                     .OrderBy(a => a.ToString().Length)
@@ -353,7 +363,7 @@ namespace Signum.Engine.DynamicQuery
             {
                 List<Lite<T>> results = new List<Lite<T>>();
 
-                if (PrimaryKey.TryParse(subString, typeof(T), out PrimaryKey id))
+                if (TryParsePrimaryKey(subString, typeof(T), out PrimaryKey id))
                 {
                     Lite<T> entity = collection.SingleOrDefaultEx(e => e.Id == id);
 
@@ -364,7 +374,7 @@ namespace Signum.Engine.DynamicQuery
                         return results;
                 }
 
-                var parts = subString.Trim('\'', '"').SplitNoEmpty(' ');
+                var parts = subString.Trim().SplitNoEmpty(' ');
 
                 var list = collection.Where(a => a.ToString().ContainsAll(parts))
                     .OrderBy(a => a.ToString().Length)
