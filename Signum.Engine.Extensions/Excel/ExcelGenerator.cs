@@ -52,6 +52,12 @@ namespace Signum.Engine.Excel
 
                 WorkbookPart workbookPart = document.WorkbookPart;
 
+                if (workbookPart.CalculationChainPart != null)
+                {
+                    workbookPart.Workbook.CalculationProperties.ForceFullCalculation = true;
+                    workbookPart.Workbook.CalculationProperties.FullCalculationOnLoad = true;
+                }
+
                 WorksheetPart worksheetPart = document.GetWorksheetPartByName(ExcelMessage.Data.NiceToString());
                 
                 CellBuilder cb = PlainExcelGenerator.CellBuilder;
