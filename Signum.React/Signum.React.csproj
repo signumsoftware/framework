@@ -4,6 +4,8 @@
     <TargetFramework>netcoreapp2.1</TargetFramework>
     <TypeScriptToolsVersion>3.0</TypeScriptToolsVersion>
     <LangVersion>latest</LangVersion>
+    <OutputType>Library</OutputType>
+    <StartupObject></StartupObject>
   </PropertyGroup>
 
   <ItemGroup>
@@ -51,8 +53,6 @@
       $(CompileTypeScriptDependsOn);
     </CompileTypeScriptDependsOn>
     <ApplicationIcon />
-    <OutputType>Library</OutputType>
-    <StartupObject></StartupObject>
   </PropertyGroup>
 
 </Project>
