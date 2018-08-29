@@ -22,34 +22,12 @@ namespace Signum.React.Translation
     {
         public static ITranslator Translator;
 
-        public static void Start(IApplicationBuilder app, ITranslator translator, bool copyNewTranslationsToRootFolder = true)
+        public static void Start(IApplicationBuilder app, ITranslator translator)
         {
             ReflectionServer.RegisterLike(typeof(TranslationMessage));
 
             SignumControllerFactory.RegisterArea(MethodInfo.GetCurrentMethod());
             Translator = translator;
-
-            if (copyNewTranslationsToRootFolder)
-            {
-                string path = Path.Combine(Path.GetDirectoryName(Path.GetDirectoryName(new Uri(typeof(DescriptionManager).Assembly.CodeBase).LocalPath)), "Translations");
-
-                if (!Directory.Exists(path))
-                    Directory.CreateDirectory(path);
-
-                var existingFiles = Directory.GetFiles(path).ToHashSet();
-
-                foreach (string fromFile in Directory.GetFiles(DescriptionManager.TranslationDirectory))
-                {
-                    string toFile = Path.Combine(path, Path.GetFileName(fromFile));
-
-                    if (!existingFiles.Contains(toFile) || File.GetLastWriteTime(toFile) < File.GetLastWriteTime(fromFile))
-                    {
-                        File.Copy(fromFile, toFile, overwrite: true);
-                    }
-                }
-
-                DescriptionManager.TranslationDirectory = path;
-            }
         }
 
         public static CultureInfo GetCultureRequest(ActionContext actionContext)
