@@ -275,10 +275,10 @@ namespace Signum.Utilities
 
         static string DefaultDescription(object value)
         {
-            if (value is Delegate)
-                return ((Delegate)value).Method.Name.SpacePascal(true);
-            if (value is Enum)
-                return ((Enum)value).NiceToString();
+            if (value is Delegate d)
+                return d.Method.Name.SpacePascal(true);
+            if (value is Enum e)
+                return e.NiceToString();
             if (value == null)
                 return "[No Name]";
             return value.ToString();
