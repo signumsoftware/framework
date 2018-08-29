@@ -79,7 +79,7 @@ namespace Signum.React.Mailing
         }
 
         [Route("api/email/emailTemplates"), HttpGet]
-        public List<Lite<EmailTemplateEntity>> GetWordTemplates(string queryKey, EmailTemplateVisibleOn visibleOn, Lite<Entity> lite)
+        public List<Lite<EmailTemplateEntity>> GetWordTemplates(string queryKey, EmailTemplateVisibleOn visibleOn, [FromBody]Lite<Entity> lite)
         {
             object queryName = QueryLogic.ToQueryName(queryKey);
 

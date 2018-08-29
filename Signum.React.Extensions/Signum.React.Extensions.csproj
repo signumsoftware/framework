@@ -4,10 +4,16 @@
     <TargetFramework>netcoreapp2.1</TargetFramework>
     <TypeScriptToolsVersion>3.0</TypeScriptToolsVersion>
     <LangVersion>latest</LangVersion>
+    <OutputType>Library</OutputType>
+    <StartupObject></StartupObject>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.App" />
+    <PackageReference Include="Microsoft.TypeScript.MSBuild" Version="3.0.0">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
   </ItemGroup>
 
   <ItemGroup>
@@ -50,8 +56,6 @@
       $(CompileTypeScriptDependsOn);
     </CompileTypeScriptDependsOn>
     <ApplicationIcon />
-    <OutputType>Library</OutputType>
-    <StartupObject></StartupObject>
   </PropertyGroup>
 
 </Project>
