@@ -516,7 +516,7 @@ export default class BpmnModelerComponent extends React.Component<BpmnModelerCom
     render() {
         return (
             <div>
-                <Button style={{ marginLeft: "20px" }} onClick={this.handleZoomClick}>{WorkflowMessage.ResetZoom.niceToString()}</Button>
+                <Button className="btn btn-sm btn-secondary" style={{ marginLeft: "20px" }} onClick={this.handleZoomClick}>{WorkflowMessage.ResetZoom.niceToString()}</Button>
                 <div ref={this.setDiv} />
             </div>
         );
