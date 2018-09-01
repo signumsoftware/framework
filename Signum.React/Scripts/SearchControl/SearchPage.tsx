@@ -91,7 +91,7 @@ export default class SearchPage extends React.Component<SearchPageProps, SearchP
             return (
                 <div id="divSearchPage">
                     <h3>
-                        <span className="display-6">{getQueryNiceName(fo.queryName)}</span>
+                        <span className="display-6 sf-query-title">{getQueryNiceName(fo.queryName)}</span>
                         <small>Error: Query not allowed in full screen</small>
                     </h3>
                 </div>
@@ -99,7 +99,7 @@ export default class SearchPage extends React.Component<SearchPageProps, SearchP
 
         return (
             <div id="divSearchPage">
-                <h3 className="display-6">
+                <h3 className="display-6 sf-query-title">
                     <span>{getQueryNiceName(fo.queryName)}</span>
                     &nbsp;
                     <a className="sf-popup-fullscreen" href="#" onClick={(e) => this.searchControl.handleFullScreenClick(e) }>
