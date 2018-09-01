@@ -202,12 +202,12 @@ namespace Signum.Engine.Workflow
                     {
                         Entity = e,
                         e.Id,
+                        e.WorkflowActivity,
                         e.StartDate,
                         e.DoneDate,
                         e.DoneBy,
                         e.Previous,
                         e.Case,
-                        e.WorkflowActivity,
                     });
 
 
