@@ -43,7 +43,7 @@ export default class WorkflowDropdown extends React.Component<{}, { starts: Arra
                     <LinkContainer exact to={WorkflowDropdown.getInboxUrl()}><DropdownItem>{CaseActivityQuery.Inbox.niceName()}</DropdownItem></LinkContainer>
                     {this.state.starts.length > 0 && <DropdownItem divider />}
                     {this.state.starts.length > 0 && <DropdownItem disabled>{JavascriptMessage.create.niceToString()}</DropdownItem>}
-                    {this.getStarts().flatMap((kvp, i) => [
+                    {this.state.starts.length > 0 && this.getStarts().flatMap((kvp, i) => [
                         (kvp.elements.length > 1 && <DropdownItem key={i} disabled>{kvp.elements[0].typeInfo.niceName}</DropdownItem>),
                         ...kvp.elements.map((val, j) =>
                             <LinkContainer key={i + "-" + j} to={`~/workflow/new/${val.workflow.id}/${val.mainEntityStrategy}`}>
@@ -64,7 +64,8 @@ export default class WorkflowDropdown extends React.Component<{}, { starts: Arra
             else
                 return [({ workflow: w, typeInfo, mainEntityStrategy: ("CreateNew" as WorkflowMainEntityStrategy) })]
                     .concat([({ workflow: w, typeInfo, mainEntityStrategy: ("SelectByUser" as WorkflowMainEntityStrategy) })]);
-        }).groupBy(kvp => kvp.typeInfo.name);
+        }).filter(kvp => !!kvp.typeInfo)
+            .groupBy(kvp => kvp.typeInfo.name);
     }
 }
 
