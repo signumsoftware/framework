@@ -21,7 +21,7 @@ export interface EntityLineProps extends EntityBaseProps {
     renderItem?: React.ReactNode;
     showType?: boolean;
     itemHtmlAttributes?: React.HTMLAttributes<HTMLSpanElement | HTMLAnchorElement>;
-    extraButtons?: () => (React.ReactElement<any> | null | undefined | false)[];
+    extraButtons?: (el: EntityLine) => React.ReactNode;
 }
 
 export interface EntityLineState extends EntityLineProps {
@@ -117,9 +117,7 @@ export class EntityLine extends EntityBase<EntityLineProps, EntityLineState> {
                 {!hasValue && this.renderFindButton(true)}
                 {hasValue && this.renderViewButton(true, s.ctx.value!)}
                 {hasValue && this.renderRemoveButton(true, s.ctx.value!)}
-                {this.props.extraButtons && this.props.extraButtons().map((btn, i) => {
-                    return btn && React.cloneElement(btn, { key: i });
-                })}
+                {this.props.extraButtons && this.props.extraButtons(this)}
             </span>
         );
 
