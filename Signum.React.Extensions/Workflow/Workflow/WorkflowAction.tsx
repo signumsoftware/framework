@@ -1,10 +1,9 @@
 ﻿import * as React from 'react'
-import { ValueLine, EntityLine, TypeContext, FormGroup, ValueLineType, LiteAutocompleteConfig } from '@framework/Lines'
-import { PropertyRoute, Binding } from '@framework/Reflection'
-import * as Navigator from '@framework/Navigator'
+import { ValueLine, EntityLine, TypeContext, LiteAutocompleteConfig } from '@framework/Lines'
+import { PropertyRoute } from '@framework/Reflection'
 import CSharpCodeMirror from '../../Codemirror/CSharpCodeMirror'
 import { WorkflowActionEntity } from '../Signum.Entities.Workflow'
-import { WorkflowConditionTestResponse, API, DecisionResultValues, showWorkflowTransitionContextCodeHelp } from '../WorkflowClient'
+import { API, showWorkflowTransitionContextCodeHelp } from '../WorkflowClient'
 import TypeHelpComponent from "../../TypeHelp/TypeHelpComponent";
 import ValueLineModal from '@framework/ValueLineModal'
 
@@ -34,7 +33,7 @@ export default class WorkflowConditionComponent extends React.Component<Workflow
                 <ValueLine ctx={ctx.subCtx(wc => wc.name)} />
                 <EntityLine ctx={ctx.subCtx(wc => wc.mainEntityType)}
                     onChange={this.handleMainEntityTypeChange}
-                    autoComplete={new LiteAutocompleteConfig((ac, str) => API.findMainEntityType({ subString: str, count: 5 }, ac), false, false)}
+                    autocomplete={new LiteAutocompleteConfig((ac, str) => API.findMainEntityType({ subString: str, count: 5 }, ac), false, false)}
                     find={false} />
                 {ctx.value.mainEntityType &&
                     <div>
@@ -43,7 +42,7 @@ export default class WorkflowConditionComponent extends React.Component<Workflow
                             <div className="col-sm-7">
                                 <div className="code-container">
                                     <div className="btn-group" style={{ marginBottom: "3px" }}>
-                                        <input type="button" className="btn btn-success btn-xs sf-button" value="ctx" onClick={() => showWorkflowTransitionContextCodeHelp()} />
+                                        <input type="button" className="btn btn-success btn-sm sf-button" value="ctx" onClick={() => showWorkflowTransitionContextCodeHelp()} />
                                     </div>
                                     <pre style={{ border: "0px", margin: "0px" }}>{"void Action(" + ctx.value.mainEntityType.cleanName + "Entity e, WorkflowTransitionContext ctx)\n{"}</pre>
                                     <CSharpCodeMirror script={ctx.value.eval!.script || ""} onChange={this.handleCodeChange} />

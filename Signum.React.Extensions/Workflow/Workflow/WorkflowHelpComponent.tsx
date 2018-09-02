@@ -18,7 +18,7 @@ export default class WorkflowHelpComponent extends React.Component<WorkflowHelpC
     render() {
         return (
             <input type="button"
-                className="btn btn-success btn-xs sf-button"
+                className="btn btn-success btn-sm sf-button"
                 style={{ marginBottom: "3px" }}
                 value={WorkflowActivityMessage.ActivityIs.niceToString()}
                 onClick={() => this.handleActivityIsClick()} />

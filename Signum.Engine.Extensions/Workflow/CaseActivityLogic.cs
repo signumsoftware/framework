@@ -202,12 +202,12 @@ namespace Signum.Engine.Workflow
                     {
                         Entity = e,
                         e.Id,
+                        e.WorkflowActivity,
                         e.StartDate,
                         e.DoneDate,
                         e.DoneBy,
                         e.Previous,
                         e.Case,
-                        e.WorkflowActivity,
                     });
 
 
@@ -299,6 +299,7 @@ namespace Signum.Engine.Workflow
                         {
                             Entity = cn.CaseActivity,
                             ca.StartDate,
+                            Workflow = ca.Case.Workflow.ToLite(),
                             Activity = new ActivityWithRemarks
                             {
                                 workflowActivity = ((WorkflowActivityEntity)ca.WorkflowActivity).ToLite(),

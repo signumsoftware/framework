@@ -666,7 +666,7 @@ namespace Signum.Engine.Authorization
         public static TypeAllowedAndConditions ToTypeAllowedAndConditions(this RuleTypeEntity rule)
         {
             return new TypeAllowedAndConditions(rule.Allowed,
-                rule.Conditions.Select(c => new TypeConditionRuleEmbedded(c.Condition, c.Allowed)).ToMList());
+                rule.Conditions.Select(c => new TypeConditionRuleEmbedded(c.Condition, c.Allowed)));
         }
 
         static SqlPreCommand Schema_Synchronizing(Replacements rep)

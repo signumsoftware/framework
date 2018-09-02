@@ -81,6 +81,11 @@ declare namespace BPMN {
         context: { elements: DiElement[] };
     }
 
+    interface CanMoveElementEvent extends Event {
+        command: string;
+        context: { shapes: DiElement[] };
+    }
+
     interface CreatedElement {
         descriptor: Descriptor;
         element: DiElement;

@@ -40,7 +40,7 @@ namespace Signum.Engine.Dynamic
                         e.Name,
                         e.EntityType,
                         e.SubEntity,
-                        e.Eval.Script,
+                        Script = e.Eval.Script.Etc(75),
                     });
 
                 new Graph<DynamicValidationEntity>.ConstructFrom<DynamicValidationEntity>(DynamicValidationOperation.Clone)
@@ -74,8 +74,11 @@ namespace Signum.Engine.Dynamic
             if (!initialized)
                 return null;
 
-            var candidates = DynamicValidations.Value.TryGetC(mod.GetType());
-            if (candidates == null)
+            var candidates = DynamicValidations.Value.TryGetC(mod.GetType()).EmptyIfNull()
+                .Where(pair => pair.Validation.Mixin<DisabledMixin>().IsDisabled == false)
+                .ToList();
+
+            if (candidates.IsEmpty())
                 return null;
 
             foreach (var pair in candidates)

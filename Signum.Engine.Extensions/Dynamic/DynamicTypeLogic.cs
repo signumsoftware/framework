@@ -69,7 +69,7 @@ namespace Signum.Engine.Dynamic
                     Construct = (e, _) => {
 
                         var def = e.GetDefinition();
-                        var result = new DynamicTypeEntity { TypeName = null };
+                        var result = new DynamicTypeEntity { TypeName = null, BaseType = e.BaseType };
                         result.SetDefinition(def);
                         return result;
                     },
@@ -455,6 +455,23 @@ namespace Signum.Engine.Dynamic
         {
             var atts = property.Validators.EmptyIfNull().Select(v => GetValidatorAttribute(v)).ToList();
 
+            if (property.Unit != null)
+                atts.Add($"Unit(\"{property.Unit}\")");
+
+            if (property.Format != null)
+                atts.Add($"Format(\"{property.Format}\")");
+
+            if (property.NotifyChanges == true)
+            {
+                if (property.IsMList != null)
+                {
+                    atts.Add("NotifyCollectionChanged");
+                    atts.Add("NotifyChildProperty");
+                }
+                else if (property.Type.EndsWith("Embedded"))
+                    atts.Add("NotifyChildProperty");
+            }
+
             if (property.CustomPropertyAttributes.HasText())
                 atts.Add(property.CustomPropertyAttributes);
 
@@ -826,7 +843,7 @@ namespace Signum.Engine.Dynamic
                 if (!string.IsNullOrWhiteSpace(operationCanExecute))
                     sb.AppendLine($"    CanExecute = e => {operationCanExecute},");
 
-                sb.AppendLine("    AllowsNew = true,");
+                sb.AppendLine("    CanBeNew = true,");
                 sb.AppendLine("    CanBeModified = true,");
                 sb.AppendLine("    Execute = (e, args) => {\r\n" + operationExecute?.Indent(8) + "\r\n}");
                 sb.AppendLine("}." + (this.IsTreeEntity ? "Register(replace: true)" : "Register()") + ";");

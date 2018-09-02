@@ -108,7 +108,7 @@ export default class HeavyList extends React.Component<HeavyListProps, { enabled
                     }
                     <button onClick={this.handleUpdate} className="btn btn-light">Update</button>
                     <button onClick={this.handleClear} className="btn btn-light">Clear</button>
-                    <button onClick={this.handleDownload} className="btn btn-info"><FontAwesomeIcon icon="cloud-download"/> Download</button>
+                    <button onClick={this.handleDownload} className="btn btn-info"><FontAwesomeIcon icon="cloud-download-alt"/> Download</button>
                 </div>
                 <br/>
                 <p className="help-block">Upload previous runs to compare performance.</p>

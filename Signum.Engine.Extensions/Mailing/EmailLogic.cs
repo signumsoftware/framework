@@ -57,14 +57,14 @@ namespace Signum.Engine.Mailing
         public static void Start(
             SchemaBuilder sb,  
             Func<EmailConfigurationEmbedded> getConfiguration, 
-            Func<EmailTemplateEntity, ModifiableEntity, SmtpConfigurationEntity> getSmtpConfiguration,  
+            Func<EmailTemplateEntity, Lite<Entity>, SmtpConfigurationEntity> getSmtpConfiguration,  
             Func<EmailMessageEntity, SmtpClient> getSmtpClient = null, 
             IFileTypeAlgorithm attachment = null)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {   
                 if (getSmtpClient == null && getSmtpConfiguration != null)
-                    getSmtpClient = message => getSmtpConfiguration(message.Template?.Let(EmailTemplateLogic.EmailTemplatesLazy.Value.GetOrThrow), message.Target?.Retrieve()).GenerateSmtpClient();
+                    getSmtpClient = message => getSmtpConfiguration(message.Template?.Let(EmailTemplateLogic.EmailTemplatesLazy.Value.GetOrThrow), message.Target).GenerateSmtpClient();
 
                 FilePathEmbeddedLogic.AssertStarted(sb);
                 CultureInfoLogic.AssertStarted(sb);
@@ -236,8 +236,13 @@ namespace Signum.Engine.Mailing
                     Construct = (et, args) =>
                     {
                         var entity = args.TryGetArgC<ModifiableEntity>() ?? args.GetArg<Lite<Entity>>().Retrieve();
-                        
-                        return et.ToLite().CreateEmailMessage(entity).FirstEx();
+
+                        var emailMessageEntity = et.ToLite().CreateEmailMessage(entity).FirstOrDefault();
+                        if (emailMessageEntity == null)
+                        {
+                            throw new InvalidOperationException("No suitable recipients were found");
+                        }
+                        return emailMessageEntity;
                     }
                 }.Register();
 
