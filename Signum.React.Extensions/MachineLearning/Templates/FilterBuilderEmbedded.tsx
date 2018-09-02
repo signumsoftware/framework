@@ -283,7 +283,7 @@ export class EntityLineOrExpression extends React.Component<EntityLineOrExpressi
                 return <EntityCombo ctx={ctx} type={type} create={false} onChange={handleChangeValue} extraButtons={() => this.getSwitchModelButton(true)} />;
         }
         else if (this.props.filterType == "Embedded") {
-            return <EntityLine ctx={ctx} type={type} create={false} autoComplete={null} onChange={handleChangeValue} extraButtons={() => this.getSwitchModelButton(true)} />;
+            return <EntityLine ctx={ctx} type={type} create={false} autocomplete={null} onChange={handleChangeValue} extraButtons={() => this.getSwitchModelButton(true)} />;
         }
     }
 
