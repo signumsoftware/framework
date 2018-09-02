@@ -290,8 +290,8 @@ namespace Signum.Entities.DynamicQuery
         {
             get
             {
-                HashSet<QueryToken> allTokens = 
-                    Filters.Select(a => a.Token)
+                HashSet<QueryToken> allTokens =
+                    Filters.SelectMany(a => a.GetFilterConditions()).Select(a => a.Token)
                     .Concat(Columns.Select(a => a.Token))
                     .Concat(Orders.Select(a => a.Token)).ToHashSet();
 
