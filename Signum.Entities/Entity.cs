@@ -231,31 +231,31 @@ namespace Signum.Entities
 
     public static class UnsafeEntityExtensions
     {
-        public static T SetId<T>(this T ident, PrimaryKey? id)
+        public static T SetId<T>(this T entity, PrimaryKey? id)
         where T : Entity
         {
-            ident.id = id;
-            return ident;
+            entity.id = id;
+            return entity;
         }
 
-        public static T SetReadonly<T, V>(this T ident, Expression<Func<T, V>> readonlyProperty, V value)
+        public static T SetReadonly<T, V>(this T entity, Expression<Func<T, V>> readonlyProperty, V value)
              where T : ModifiableEntity
         {
-            return SetReadonly(ident, readonlyProperty, value, true);
+            return SetReadonly(entity, readonlyProperty, value, true);
         }
 
-        public static T SetReadonly<T, V>(this T ident, Expression<Func<T, V>> readonlyProperty, V value, bool setSelfModified)
+        public static T SetReadonly<T, V>(this T entity, Expression<Func<T, V>> readonlyProperty, V value, bool setSelfModified)
              where T : ModifiableEntity
         {
             var pi = ReflectionTools.BasePropertyInfo(readonlyProperty);
 
             Action<T, V> setter = ReadonlySetterCache<T>.Setter<V>(pi);
 
-            setter(ident, value);
+            setter(entity, value);
             if (setSelfModified)
-                ident.SetSelfModified();
+                entity.SetSelfModified();
 
-            return ident;
+            return entity;
         }
 
         static class ReadonlySetterCache<T> where T : ModifiableEntity
@@ -268,43 +268,43 @@ namespace Signum.Entities
             }
         }
 
-        public static T SetIsNew<T>(this T ident, bool isNew = true)
+        public static T SetIsNew<T>(this T entity, bool isNew = true)
             where T : Entity
         {
-            ident.IsNew = isNew;
-            ident.SetSelfModified();
-            return ident;
+            entity.IsNew = isNew;
+            entity.SetSelfModified();
+            return entity;
         }
 
-        public static T SetNotModified<T>(this T ident)
+        public static T SetNotModified<T>(this T mod)
             where T : Modifiable
         {
-            if (ident is Entity)
-                ((Entity)(Modifiable)ident).IsNew = false;
-            ident.Modified = ModifiedState.Clean;
-            return ident;
+            if (mod is Entity e)
+                e.IsNew = false;
+            mod.Modified = ModifiedState.Clean;
+            return mod;
         }
 
-        public static T SetModified<T>(this T ident)
+        public static T SetModified<T>(this T entity)
             where T : Modifiable
         {
-            ident.Modified = ModifiedState.Modified;
-            return ident;
+            entity.Modified = ModifiedState.Modified;
+            return entity;
         }
 
-        public static T SetNotModifiedGraph<T>(this T ident, PrimaryKey id)
+        public static T SetNotModifiedGraph<T>(this T entity, PrimaryKey id)
             where T : Entity
         {
-            foreach (var item in GraphExplorer.FromRoot(ident).Where(a => a.Modified != ModifiedState.Sealed))
+            foreach (var item in GraphExplorer.FromRoot(entity).Where(a => a.Modified != ModifiedState.Sealed))
             {
                 item.SetNotModified();
-                if (item is Entity)
-                    ((Entity)item).SetId(new PrimaryKey("invalidId"));
+                if (item is Entity e)
+                    e.SetId(new PrimaryKey("invalidId"));
             }
 
-            ident.SetId(id);
+            entity.SetId(id);
 
-            return ident;
+            return entity;
         }
     }
 

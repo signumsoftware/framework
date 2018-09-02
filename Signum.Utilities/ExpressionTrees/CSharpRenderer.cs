@@ -107,9 +107,9 @@ namespace Signum.Utilities.ExpressionTrees
 
         public static string MemberName(this MemberInfo mi)
         {
-            return mi is PropertyInfo ? ((PropertyInfo)mi).PropertyName() :
-             mi is FieldInfo ? ((FieldInfo)mi).FieldName() :
-             mi is MethodInfo ? ((MethodInfo)mi).MethodName() :
+            return mi is PropertyInfo pi ? pi.PropertyName() :
+             mi is FieldInfo fi ? fi.FieldName() :
+             mi is MethodInfo mti ? mti.MethodName() :
              throw new InvalidOperationException("MethodInfo mi should be a PropertyInfo, FieldInfo or MethodInfo");
         }
 

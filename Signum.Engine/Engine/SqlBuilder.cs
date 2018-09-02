@@ -335,7 +335,7 @@ WHERE {oldPrimaryKey} NOT IN
 (
     SELECT MIN({oldPrimaryKey})
     FROM {oldTableName}
-    {uniqueIndex.Where.Replace(columnReplacement)}
+    {(string.IsNullOrWhiteSpace(uniqueIndex.Where) ? "" : "WHERE " + uniqueIndex.Where.Replace(columnReplacement))}
     GROUP BY {oldColumns}
 )");
         }
@@ -421,15 +421,20 @@ WHERE {primaryKey.Name} NOT IN
 
         public static SqlPreCommand AlterTableAddConstraintForeignKey(ITable table, string fieldName, ITable foreignTable)
         {
-            if(!object.Equals(table.Name.Schema.Database, foreignTable.Name.Schema.Database))
+            return AlterTableAddConstraintForeignKey(table.Name, fieldName, foreignTable.Name, foreignTable.PrimaryKey.Name);
+        }
+
+        public static SqlPreCommand AlterTableAddConstraintForeignKey(ObjectName parentTable, string parentColumn, ObjectName targetTable, string targetPrimaryKey)
+        {
+            if (!object.Equals(parentTable.Schema.Database, targetTable.Schema.Database))
                 return null;
 
             return new SqlPreCommandSimple("ALTER TABLE {0} ADD CONSTRAINT {1} FOREIGN KEY ({2}) REFERENCES {3}({4})".FormatWith(
-                table.Name,
-                ForeignKeyName(table.Name.Name, fieldName),
-                fieldName.SqlEscape(),
-                foreignTable.Name,
-                foreignTable.PrimaryKey.Name.SqlEscape()));
+               parentTable,
+               ForeignKeyName(parentTable.Name, parentColumn),
+               parentColumn.SqlEscape(),
+               targetTable,
+               targetPrimaryKey.SqlEscape()));
         }
 
         public static string ForeignKeyName(string table, string fieldName)
@@ -606,7 +611,6 @@ EXEC DB.dbo.sp_executesql @sql"
         }
 
      
-
-      
+        public static SqlPreCommand TruncateTable(ObjectName tableName) => new SqlPreCommandSimple($"TRUNCATE TABLE {tableName}");
     }
 }

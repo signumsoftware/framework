@@ -84,6 +84,7 @@ namespace Signum.Engine.DynamicQuery
         Task<Lite<Entity>> ExecuteUniqueEntityAsync(UniqueEntityRequest request, CancellationToken cancellationToken);
 
         IQueryable<Lite<Entity>> GetEntities(QueryEntitiesRequest request);
+        DQueryable<object> GetDQueryable(DQueryableRequest request);
     }
 
 
@@ -143,6 +144,7 @@ namespace Signum.Engine.DynamicQuery
         public abstract Task<Lite<Entity>> ExecuteUniqueEntityAsync(UniqueEntityRequest request, CancellationToken cancellationToken);
         
         public abstract IQueryable<Lite<Entity>> GetEntities(QueryEntitiesRequest request);
+        public abstract DQueryable<object> GetDQueryable(DQueryableRequest request);
 
 
         protected virtual ColumnDescriptionFactory[] InitializeColumns()
@@ -994,7 +996,7 @@ namespace Signum.Engine.DynamicQuery
             return ToResultTable(array, columnAccesors, collection.TotalElements, req.Pagination);
         }
 
-        public static ResultTable ToResultTable(this object[] result, List<(Column column, LambdaExpression lambda)> columnAccesors, int? totalElements,  Pagination pagination)
+        public static ResultTable ToResultTable(object[] result, List<(Column column, LambdaExpression lambda)> columnAccesors, int? totalElements,  Pagination pagination)
         {
             var columnValues = columnAccesors.Select(c => new ResultColumn( 
                 c.column,

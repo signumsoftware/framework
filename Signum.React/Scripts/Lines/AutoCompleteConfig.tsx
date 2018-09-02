@@ -1,16 +1,10 @@
 ﻿import * as React from 'react'
-import * as Navigator from '../Navigator'
-import * as Constructor from '../Constructor'
 import * as Finder from '../Finder'
-import { Dic } from '../Globals'
 import { AbortableRequest } from '../Services'
-import { FindOptions, QueryDescription, FilterOptionParsed, FilterRequest, OrderOptionParsed, OrderRequest } from '../FindOptions'
-import { TypeContext, StyleContext, StyleOptions, FormGroupStyle } from '../TypeContext'
-import { PropertyRoute, PropertyRouteType, MemberInfo, getTypeInfo, getTypeInfos, TypeInfo, IsByAll, getQueryKey } from '../Reflection'
-import { LineBase, LineBaseProps, runTasks } from '../Lines/LineBase'
-import { ModifiableEntity, Lite, Entity, EntityControlMessage, JavascriptMessage, toLite, is, liteKey, getToString, isLite, isEntity } from '../Signum.Entities'
+import { FindOptions, FilterOptionParsed, FilterRequest, OrderOptionParsed, OrderRequest, ResultRow, ColumnOptionParsed, ColumnRequest } from '../FindOptions'
+import { getTypeInfo, getQueryKey } from '../Reflection'
+import { ModifiableEntity, Lite, Entity, toLite, is, isLite, isEntity, getToString } from '../Signum.Entities'
 import { Typeahead } from '../Components'
-import { EntityBase, EntityBaseProps} from './EntityBase'
 import { toFilterRequest, toFilterRequests } from '../Finder';
 
 export interface AutocompleteConfig<T> {
@@ -28,7 +22,7 @@ export class LiteAutocompleteConfig<T extends Entity> implements AutocompleteCon
 
     constructor(
         public getItemsFunction: (abortController: FetchAbortController, subStr: string) => Promise<Lite<T>[]>,
-        public withCustomToString: boolean,
+        public requiresInitialLoad: boolean,
         public showType: boolean) {
     }
 
@@ -43,7 +37,7 @@ export class LiteAutocompleteConfig<T extends Entity> implements AutocompleteCon
     }
 
     renderItem(item: Lite<T>, subStr: string) {
-        var text = Typeahead.highlightedText(item.toStr || "", subStr);
+        var text = Typeahead.highlightedText(getToString(item), subStr);
 
         if (this.showType)
             return <span><span className="sf-type-badge">{getTypeInfo(item.EntityType).niceName}</span> {text}</span>;
@@ -59,7 +53,7 @@ export class LiteAutocompleteConfig<T extends Entity> implements AutocompleteCon
 
         var lite = this.convertToLite(entity);;
 
-        if (!this.withCustomToString)
+        if (!this.requiresInitialLoad)
             return Promise.resolve(lite);
 
         if (lite.id == undefined)
@@ -88,15 +82,14 @@ export class LiteAutocompleteConfig<T extends Entity> implements AutocompleteCon
     }
 }
 
-export class FindOptionsAutocompleteConfig implements AutocompleteConfig<Lite<Entity>>{
+export class FindOptionsAutocompleteConfig implements AutocompleteConfig<ResultRow>{
 
     constructor(
         public findOptions: FindOptions,
         public count: number = 5,
-        public withCustomToString: boolean = false,
+        public requiresInitialLoad: boolean = false,
         public showType: boolean = false,
     ) {
-
         Finder.expandParentColumn(this.findOptions);
     }
 
@@ -124,61 +117,76 @@ export class FindOptionsAutocompleteConfig implements AutocompleteConfig<Lite<En
             .then(orders => this.parsedOrders = orders);
     }
 
-    abortableRequest = new AbortableRequest((abortController, request: Finder.API.AutocompleteQueryRequest) => Finder.API.findLiteLikeWithFilters(request, abortController));
+    parsedColumns?: ColumnOptionParsed[];
+    getParsedColumns(): Promise<ColumnOptionParsed[]> {
+        if (this.parsedColumns)
+            return Promise.resolve(this.parsedColumns);
 
-    getItems(subStr: string): Promise<Lite<Entity>[]> {
-        return this.getParsedFilters()
-            .then(filters =>
-                this.getParsedOrders().then(orders =>
-                    this.abortableRequest.getData({
-                        queryKey: getQueryKey(this.findOptions.queryName),
-                        filters: toFilterRequests(filters),
-                        orders: orders.map(f => ({ token: f.token!.fullKey, orderType: f.orderType }) as OrderRequest),
-                        count: this.count,
-                        subString: subStr
-                    })
-                )
-            );
+        return Finder.getQueryDescription(this.findOptions.queryName)
+            .then(qd => Finder.parseColumnOptions(this.findOptions.columnOptions || [], false, qd))
+            .then(columns => this.parsedColumns = columns);
     }
 
-    renderItem(item: Lite<Entity>, subStr: string) {
-        var text = Typeahead.highlightedText(item.toStr || "", subStr);
+    abortableRequest = new AbortableRequest((abortController, request: Finder.API.AutocompleteQueryRequest) => Finder.API.FindRowsLike(request, abortController));
+
+    getItems(subStr: string): Promise<ResultRow[]> {
+        return this.getParsedFilters().then(filters =>
+            this.getParsedOrders().then(orders =>
+                this.getParsedColumns().then(columns =>
+                    this.abortableRequest.getData({
+                        queryKey: getQueryKey(this.findOptions.queryName),
+                        columns: columns.map(c => ({ token: c.token!.fullKey, displayName: c.displayName }) as ColumnRequest),
+                        filters: toFilterRequests(filters),
+                        orders: orders.map(o => ({ token: o.token!.fullKey, orderType: o.orderType }) as OrderRequest),
+                        count: this.count,
+                        subString: subStr
+                    }).then(rt => rt.rows)
+                )
+            )
+        );
+    }
+
+    renderItem(item: ResultRow, subStr: string) {
+        var text = Typeahead.highlightedText(getToString(item.entity!), subStr);
 
         if (this.showType)
-            return <span><span className="sf-type-badge">{getTypeInfo(item.EntityType).niceName}</span> {text}</span>;
+            return <span><span className="sf-type-badge">{getTypeInfo(item.entity!.EntityType).niceName}</span> {text}</span>;
         else
             return text;
     }
 
-    getEntityFromItem(item: Lite<Entity>) {
-        return item;
+    getEntityFromItem(item: ResultRow): Lite<Entity> | ModifiableEntity {
+        return item.entity!;
     }
 
-    getItemFromEntity(entity: Lite<Entity> | ModifiableEntity): Promise<Lite<Entity>> {
+    getItemFromEntity(entity: Lite<Entity> | ModifiableEntity): Promise<ResultRow> {
 
         var lite = this.convertToLite(entity);;
 
-        if (!this.withCustomToString)
-            return Promise.resolve(lite);
+        if (!this.requiresInitialLoad)
+            return Promise.resolve({ entity: lite } as ResultRow);
 
         if (lite.id == undefined)
-            return Promise.resolve(lite);
+            return Promise.resolve({ entity: lite } as ResultRow);
 
-        return Finder.API.findLiteLikeWithFilters({
-            queryKey: getQueryKey(this.findOptions.queryName),
-            filters: [{ token: "Entity.Id", operation: "EqualTo", value: lite.id }],
-            orders: [],
-            count: 1,
-            subString: ""
-        }).then(lites => {
+        return this.getParsedColumns().then(columns =>
 
-            const result = lites.filter(a => is(a, lite)).firstOrNull();
+            Finder.API.FindRowsLike({
+                queryKey: getQueryKey(this.findOptions.queryName),
+                columns: columns.map(c => ({ token: c.token!.fullKey, displayName: c.displayName }) as ColumnRequest),
+                filters: [{ token: "Entity.Id", operation: "EqualTo", value: lite.id }],
+                orders: [],
+                count: 1,
+                subString: ""
+            }).then(rt => {
+                const result = rt.rows.filter(row => is(row.entity, lite)).firstOrNull();
 
-            if (!result)
-                throw new Error("Impossible to getInitialItem with the current implementation of getItems");
+                if (!result)
+                    throw new Error("Impossible to getInitialItem with the current implementation of getItems");
 
-            return result;
-        });
+                return result;
+            })
+        );
     }
 
     convertToLite(entity: Lite<Entity> | ModifiableEntity) {
@@ -192,7 +200,3 @@ export class FindOptionsAutocompleteConfig implements AutocompleteConfig<Lite<En
         throw new Error("Impossible to convert to Lite");
     }
 }
-
-
-
-

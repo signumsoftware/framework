@@ -417,7 +417,7 @@ export class FilterConditionComponent extends React.Component<FilterConditionCom
                 else
                     return <EntityCombo ctx={ctx} type={token.type} create={false} onChange={this.handleValueChange} />
             case "Embedded":
-                return <EntityLine ctx={ctx} type={token.type} create={false} autoComplete={null} onChange={this.handleValueChange} />;
+                return <EntityLine ctx={ctx} type={token.type} create={false} autocomplete={null} onChange={this.handleValueChange} />;
             case "Enum":
                 const ti = getTypeInfos(token.type).single();
                 if (!ti)

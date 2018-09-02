@@ -1,5 +1,4 @@
-﻿import * as React from 'react'
-import { TypeContext, StyleContext, StyleOptions, FormGroupStyle, FormSize, IRenderButtons } from './TypeContext'
+﻿import { TypeContext, StyleContext, StyleOptions, FormGroupStyle, FormSize, IRenderButtons } from './TypeContext'
 export { TypeContext, StyleContext, StyleOptions, FormGroupStyle, FormSize, IRenderButtons };
 
 import { PropertyRouteType, MemberInfo, getTypeInfo, TypeInfo, PropertyRoute, Binding, ReadonlyBinding } from './Reflection'
@@ -28,7 +27,7 @@ export { RenderEntity } from  './Lines/RenderEntity'
 import { EntityBase } from  './Lines/EntityBase'
 export { EntityBase }
 
-export { AutocompleteConfig, FindOptionsAutocompleteConfig, LiteAutocompleteConfig } from './Lines/AutocompleteConfig'
+export { AutocompleteConfig, FindOptionsAutocompleteConfig, LiteAutocompleteConfig } from './Lines/AutoCompleteConfig'
 
 export { EntityLine } from './Lines/EntityLine'
 
