@@ -2,7 +2,7 @@
 import * as React from 'react'
 import * as moment from 'moment'
 import { Dic, areEqual, classes } from '../Globals'
-import { FilterOptionParsed, QueryDescription, QueryToken, SubTokensOptions, filterOperations, isList, FilterOperation, FilterConditionOptionParsed, FilterGroupOptionParsed, isFilterGroupOptionParsed, hasAnyOrAll, getTokenParents, isPrefix } from '../FindOptions'
+import { FilterOptionParsed, QueryDescription, QueryToken, SubTokensOptions, filterOperations, isList, FilterOperation, FilterConditionOptionParsed, FilterGroupOptionParsed, isFilterGroupOptionParsed, hasAnyOrAll, getTokenParents, isPrefix, FilterConditionOption } from '../FindOptions'
 import { SearchMessage } from '../Signum.Entities'
 import { ValueLine, EntityLine, EntityCombo } from '../Lines'
 import { Binding, IsByAll, getTypeInfos, toMomentFormat } from '../Reflection'
@@ -23,6 +23,7 @@ interface FilterBuilderProps {
     onHeightChanged?: () => void;
     readOnly?: boolean;
     title?: React.ReactNode;
+    renderValue?: (fc: FilterConditionComponent) => React.ReactElement<any> | undefined; 
 }
 
 export default class FilterBuilder extends React.Component<FilterBuilderProps>{
@@ -92,11 +93,11 @@ export default class FilterBuilder extends React.Component<FilterBuilderProps>{
                                     prefixToken={undefined}
                                     subTokensOptions={this.props.subTokensOptions} queryDescription={this.props.queryDescription}
                                     onTokenChanged={this.props.onTokenChanged} onFilterChanged={this.handleFilterChanged}
-                                    lastToken={this.props.lastToken} onHeightChanged={this.handleHeightChanged} /> :
+                                    lastToken={this.props.lastToken} onHeightChanged={this.handleHeightChanged} renderValue={this.props.renderValue} /> :
                                 <FilterConditionComponent key={i} filter={f} readOnly={Boolean(this.props.readOnly)} onDeleteFilter={this.handlerDeleteFilter}
                                     prefixToken={undefined}
                                     subTokensOptions={this.props.subTokensOptions} queryDescription={this.props.queryDescription}
-                                    onTokenChanged={this.props.onTokenChanged} onFilterChanged={this.handleFilterChanged} />
+                                    onTokenChanged={this.props.onTokenChanged} onFilterChanged={this.handleFilterChanged} renderValue={this.props.renderValue} />
                             )}
                             {!this.props.readOnly &&
                                 <tr >
@@ -133,6 +134,7 @@ export interface FilterGroupComponentsProps extends React.Props<FilterConditionC
     onFilterChanged: () => void;
     onHeightChanged: () => void;
     lastToken: QueryToken | undefined;
+    renderValue?: (fc: FilterConditionComponent) => React.ReactElement<any> | undefined; 
 }
 
 
@@ -245,12 +247,12 @@ export class FilterGroupComponent extends React.Component<FilterGroupComponentsP
                                         prefixToken={fg.token}
                                         subTokensOptions={this.props.subTokensOptions} queryDescription={this.props.queryDescription}
                                         onTokenChanged={this.props.onTokenChanged} onFilterChanged={this.props.onFilterChanged}
-                                        lastToken={this.props.lastToken} onHeightChanged={this.props.onHeightChanged} /> :
+                                        lastToken={this.props.lastToken} onHeightChanged={this.props.onHeightChanged} renderValue={this.props.renderValue}/> :
 
                                     <FilterConditionComponent key={i} filter={f} readOnly={Boolean(this.props.readOnly)} onDeleteFilter={this.handlerDeleteFilter}
                                         prefixToken={fg.token}
                                         subTokensOptions={this.props.subTokensOptions} queryDescription={this.props.queryDescription}
-                                        onTokenChanged={this.props.onTokenChanged} onFilterChanged={this.props.onFilterChanged} />
+                                        onTokenChanged={this.props.onTokenChanged} onFilterChanged={this.props.onFilterChanged} renderValue={this.props.renderValue}/>
                                 )}
                                 {!this.props.readOnly &&
                                     <tr >
@@ -289,6 +291,7 @@ export interface FilterConditionComponentProps extends React.Props<FilterConditi
     subTokensOptions: SubTokensOptions;
     onTokenChanged?: (token: QueryToken | undefined) => void;
     onFilterChanged: (filter: FilterConditionOptionParsed) => void;
+    renderValue?: (fc: FilterConditionComponent) => React.ReactElement<any> | undefined; 
 }
 
 export class FilterConditionComponent extends React.Component<FilterConditionComponentProps>{
@@ -383,13 +386,14 @@ export class FilterConditionComponent extends React.Component<FilterConditionCom
                 </td>
 
                 <td className="sf-filter-value">
-                    {f.token && f.token.filterType && f.operation && this.renderValue()}
+                    {f.token && f.token.filterType && f.operation && (this.props.renderValue ? this.props.renderValue(this) : this.renderValue())}
                 </td>
             </tr>
         );
     }
 
     renderValue() {
+        
         const f = this.props.filter;
 
         const readOnly = this.props.readOnly || f.frozen;
