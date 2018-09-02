@@ -144,7 +144,7 @@ namespace Signum.Windows.UserQueries
              {
                  ColumnName = qf.Token.Token.FullKey(),
                  Operation = qf.Operation.Value,
-                 Value = Signum.Entities.UserAssets.FilterValueConverter.Parse(qf.ValueString, qf.Token.Token.Type, isList: qf.Operation.Value.IsList(), allowSmart: true)
+                 Value = Signum.Entities.UserAssets.FilterValueConverter.Parse(qf.ValueString, qf.Token.Token.Type, isList: qf.Operation.Value.IsList())
              })).ToList();
 
             var columns = uq.Columns.Select(qc => new ColumnOption
@@ -171,7 +171,7 @@ namespace Signum.Windows.UserQueries
                 {
                     ColumnName = qf.Token.Token.FullKey(),
                     Operation = qf.Operation.Value,
-                    Value = Signum.Entities.UserAssets.FilterValueConverter.Parse(qf.ValueString, qf.Token.Token.Type, isList: qf.Operation.Value.IsList(), allowSmart: true)
+                    Value = Signum.Entities.UserAssets.FilterValueConverter.Parse(qf.ValueString, qf.Token.Token.Type, isList: qf.Operation.Value.IsList())
                 })).ToList();
 
             var columns = uq.Columns.Select(qc => new ColumnOption

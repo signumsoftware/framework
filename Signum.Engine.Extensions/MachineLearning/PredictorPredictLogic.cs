@@ -135,7 +135,7 @@ namespace Signum.Engine.MachineLearning
 
                 Filter[] mainFilters = filters.Select(f => Replace(f, tokenReplacements, sqd)).ToArray();
 
-                List<Filter> additionalFilters = sqe.Filters.ToFilterList(false);
+                List<Filter> additionalFilters = sqe.Filters.ToFilterList();
 
                 List<Column> allColumns = sqe.Columns.Select(c => new Column(c.Token.Token, null)).ToList();
 

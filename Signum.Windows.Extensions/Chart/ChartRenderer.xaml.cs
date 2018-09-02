@@ -363,7 +363,7 @@ namespace Signum.Windows.Chart
 
             if (!lastRequest.GroupResults)
             {
-                Lite<Entity> lite = (Lite<Entity>)FilterValueConverter.Parse(dic["entity"], this.Description.Columns.Single(a => a.IsEntity).Type, isList: false, allowSmart: true);
+                Lite<Entity> lite = (Lite<Entity>)FilterValueConverter.Parse(dic["entity"], this.Description.Columns.Single(a => a.IsEntity).Type, isList: false);
 
                 if (Navigator.IsNavigable(lite.EntityType, isSearch: true))
                     Navigator.NavigateUntyped(lite, new NavigateOptions());
@@ -371,7 +371,7 @@ namespace Signum.Windows.Chart
             else
             {
                 var subFilters = lastRequest.KeyColumns.Select(t => 
-                    new FilterOption(t.Token.FullKey(), FilterValueConverter.Parse(dic["c" + t.Position], t.Token.Type, isList: false, allowSmart: true)));
+                    new FilterOption(t.Token.FullKey(), FilterValueConverter.Parse(dic["c" + t.Position], t.Token.Type, isList: false)));
 
                 Finder.Explore(new ExploreOptions(Request.QueryName)
                 {

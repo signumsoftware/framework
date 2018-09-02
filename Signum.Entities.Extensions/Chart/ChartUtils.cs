@@ -179,7 +179,7 @@ namespace Signum.Entities.Chart
                 GroupResults = request.GroupResults,
                 ChartScript = request.ChartScript,
 
-                Filters = request.Filters.SelectMany(f => f.ToQueryFiltersEmbedded(allowSmart: true)).ToMList(),
+                Filters = request.Filters.SelectMany(f => f.ToQueryFiltersEmbedded()).ToMList(),
 
                 Orders = request.Orders.Select(o => new QueryOrderEmbedded
                 {
@@ -208,7 +208,7 @@ namespace Signum.Entities.Chart
             {
                 GroupResults = uq.GroupResults,
                 ChartScript = uq.ChartScript,
-                Filters = uq.Filters.ToFilterList(allowSmart: true),
+                Filters = uq.Filters.ToFilterList(),
                 Orders = uq.Orders.Select(o => new Order(o.Token.Token, o.OrderType)).ToList(),
             };
 

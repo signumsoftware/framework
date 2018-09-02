@@ -25,17 +25,17 @@ namespace Signum.Entities.UserAssets
             { FilterType.Lite, new List<IFilterValueConverter>{ new CurrentUserConverter(), new CurrentEntityConverter(), new LiteFilterValueConverter() } },
         };
 
-        public static string ToString(object value, Type type, bool allowSmart)
+        public static string ToString(object value, Type type)
         {
             if (value is IList)
-                return ((IList)value).Cast<object>().ToString(o => ToStringElement(o, type, allowSmart), "|");
+                return ((IList)value).Cast<object>().ToString(o => ToStringElement(o, type), "|");
 
-            return ToStringElement(value, type, allowSmart);
+            return ToStringElement(value, type);
         }
 
-        static string ToStringElement(object value, Type type, bool allowSmart)
+        static string ToStringElement(object value, Type type)
         {
-            var result = TryToStringElement(value, type, allowSmart);
+            var result = TryToStringElement(value, type);
 
             if (result is Result<string>.Success s)
                 return s.Value;
@@ -43,7 +43,7 @@ namespace Signum.Entities.UserAssets
             throw new InvalidOperationException((result as Result<string>.Error).ErrorText);
         }
 
-        static Result<string> TryToStringElement(object value, Type type, bool allowSmart)
+        static Result<string> TryToStringElement(object value, Type type)
         {
             FilterType filterType = QueryUtils.GetFilterType(type);
 
@@ -53,7 +53,7 @@ namespace Signum.Entities.UserAssets
             {
                 foreach (var fvc in converters)
                 {
-                    var r = fvc.TryToStringValue(value, type, allowSmart);
+                    var r = fvc.TryToStringValue(value, type);
                     if (r != null)
                         return r;
                 }
@@ -67,23 +67,23 @@ namespace Signum.Entities.UserAssets
             return new Result<string>.Success(result);
         }
 
-        public static object Parse(string stringValue, Type type,  bool isList, bool allowSmart)
+        public static object Parse(string stringValue, Type type, bool isList)
         {
-            var result = TryParse(stringValue, type, isList, allowSmart);
+            var result = TryParse(stringValue, type, isList);
             if (result is Result<object>.Error e)
                 throw new FormatException(e.ErrorText);
 
             return ((Result<object>.Success)result).Value;
         }
 
-        public static Result<object> TryParse(string stringValue, Type type, bool isList, bool allowSmart)
+        public static Result<object> TryParse(string stringValue, Type type, bool isList)
         {
             if (isList && stringValue != null && stringValue.Contains('|'))
             {
                 IList list = (IList)Activator.CreateInstance(typeof(ObservableCollection<>).MakeGenericType(type));
                 foreach (var item in stringValue.Split('|'))
                 {
-                    var result = TryParseInternal(item.Trim(), type, allowSmart);
+                    var result = TryParseInternal(item.Trim(), type);
                     if (result is Result<object>.Error e)
                         return new Result<object>.Error(e.ErrorText);
 
@@ -93,11 +93,11 @@ namespace Signum.Entities.UserAssets
             }
             else
             {
-                return TryParseInternal(stringValue, type, allowSmart);
+                return TryParseInternal(stringValue, type);
             }
         }
 
-        private static Result<object> TryParseInternal(string stringValue, Type type, bool allowSmart)
+        private static Result<object> TryParseInternal(string stringValue, Type type)
         {
             FilterType filterType = QueryUtils.GetFilterType(type);
 
@@ -107,7 +107,7 @@ namespace Signum.Entities.UserAssets
             {
                 foreach (var fvc in converters)
                 {
-                    var res = fvc.TryParseValue(stringValue, type, allowSmart);
+                    var res = fvc.TryParseValue(stringValue, type);
                     if (res != null)
                         return res;
                 }
@@ -172,8 +172,8 @@ namespace Signum.Entities.UserAssets
 
     public interface IFilterValueConverter
     {
-        Result<string> TryToStringValue(object value, Type type, bool allowSmart);
-        Result<object> TryParseValue(string value, Type type, bool allowSmart);
+        Result<string> TryToStringValue(object value, Type type);
+        Result<object> TryParseValue(string value, Type type);
     }
 
     public abstract class Result<T>
@@ -212,7 +212,7 @@ namespace Signum.Entities.UserAssets
             public string Minute;
             public string Second;
 
-            public static Result<SmartDateTimeSpan> TryParse(string str, bool allowSmart)
+            public static Result<SmartDateTimeSpan> TryParse(string str)
             {
                 if (string.IsNullOrEmpty(str))
                 {
@@ -406,23 +406,21 @@ namespace Signum.Entities.UserAssets
          
         }
 
-        public Result<string> TryToStringValue(object value, Type type, bool allowSmart)
+        public Result<string> TryToStringValue(object value, Type type)
         {
             if (value == null)
                 return null;
 
             DateTime dateTime = (DateTime)value;
 
-            SmartDateTimeSpan ss = allowSmart ? 
-                SmartDateTimeSpan.Substract(dateTime, TimeZoneManager.Now) :
-                SmartDateTimeSpan.Simple(dateTime);
+            SmartDateTimeSpan ss = SmartDateTimeSpan.Substract(dateTime, TimeZoneManager.Now);
 
             return new Result<string>.Success(ss.ToString());
         }
 
-        public Result<object> TryParseValue(string value, Type type, bool allowSmart)
+        public Result<object> TryParseValue(string value, Type type)
         {
-            var res = SmartDateTimeSpan.TryParse(value, allowSmart);
+            var res = SmartDateTimeSpan.TryParse(value);
             if (res == null)
                 return null;
 
@@ -435,7 +433,7 @@ namespace Signum.Entities.UserAssets
 
     public class LiteFilterValueConverter : IFilterValueConverter
     {
-        public Result<string> TryToStringValue(object value, Type type, bool allowSmart)
+        public Result<string> TryToStringValue(object value, Type type)
         {
             if (!(value is Lite<Entity> lite))
             {
@@ -445,7 +443,7 @@ namespace Signum.Entities.UserAssets
             return new Result<string>.Success(lite.Key());
         }
 
-        public Result<object> TryParseValue(string value, Type type, bool allowSmart)
+        public Result<object> TryParseValue(string value, Type type)
         {
             if (string.IsNullOrEmpty(value))
                 return null;
@@ -477,7 +475,7 @@ namespace Signum.Entities.UserAssets
             return new Disposable(() => currentEntityVariable.Value = old);
         }
 
-        public Result<string> TryToStringValue(object value, Type type, bool allowSmart)
+        public Result<string> TryToStringValue(object value, Type type)
         {
             if (value is Lite<Entity> lite && lite.RefersTo(currentEntityVariable.Value))
             {
@@ -487,7 +485,7 @@ namespace Signum.Entities.UserAssets
             return null;
         }
 
-        public Result<object> TryParseValue(string value, Type type, bool allowSmart)
+        public Result<object> TryParseValue(string value, Type type)
         {
             if (value.HasText() && value.StartsWith(CurrentEntityKey))
             {
@@ -527,12 +525,8 @@ namespace Signum.Entities.UserAssets
     {
         static string CurrentUserKey = "[CurrentUser]";
 
-        public Result<string> TryToStringValue(object value, Type type, bool allowSmart)
+        public Result<string> TryToStringValue(object value, Type type)
         {
-            if (!allowSmart)
-                return null;
-
-
             if (value is Lite<UserEntity> lu && lu.EntityType == typeof(UserEntity) && lu.IdOrNull == UserEntity.Current.Id)
             {
                 return new Result<string>.Success(CurrentUserKey);
@@ -542,7 +536,7 @@ namespace Signum.Entities.UserAssets
             
         }
 
-        public Result<object> TryParseValue(string value, Type type, bool allowSmart)
+        public Result<object> TryParseValue(string value, Type type)
         {
             if (value == CurrentUserKey)
             {

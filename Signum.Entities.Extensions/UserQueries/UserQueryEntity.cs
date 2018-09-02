@@ -350,7 +350,7 @@ namespace Signum.Entities.UserQueries
 
                     if (pi.Name == nameof(ValueString))
                     {
-                        var result = FilterValueConverter.TryParse(ValueString, Token.Token.Type, Operation.Value.IsList(), allowSmart: true);
+                        var result = FilterValueConverter.TryParse(ValueString, Token.Token.Type, Operation.Value.IsList());
                         return result is Result<object>.Error e ? e.ErrorText : null;
                     }
                 }
@@ -411,7 +411,7 @@ namespace Signum.Entities.UserQueries
                 Query = query,
                 Owner = DefaultOwner(),
                 GroupResults = request.GroupResults,
-                Filters = request.Filters.SelectMany(f => f.ToQueryFiltersEmbedded(allowSmart: true)).ToMList(),
+                Filters = request.Filters.SelectMany(f => f.ToQueryFiltersEmbedded()).ToMList(),
                 ColumnsMode = tuple.mode,
                 Columns = tuple.columns,
                 Orders = request.Orders.Select(oo => new QueryOrderEmbedded
@@ -424,7 +424,7 @@ namespace Signum.Entities.UserQueries
             };
         }
 
-        public static IEnumerable<QueryFilterEmbedded> ToQueryFiltersEmbedded(this Filter filter, bool allowSmart, int ident = 0)
+        public static IEnumerable<QueryFilterEmbedded> ToQueryFiltersEmbedded(this Filter filter, int ident = 0)
         {
             if(filter is FilterCondition fc)
             {
@@ -432,7 +432,7 @@ namespace Signum.Entities.UserQueries
                 {
                     Token = new QueryTokenEmbedded(fc.Token),
                     Operation = fc.Operation,
-                    ValueString = FilterValueConverter.ToString(fc.Value, fc.Token.Type, allowSmart),
+                    ValueString = FilterValueConverter.ToString(fc.Value, fc.Token.Type),
                     Indentation = ident,
                 };
             }
@@ -448,7 +448,7 @@ namespace Signum.Entities.UserQueries
 
                 foreach (var f in fg.Filters)
                 {
-                    foreach (var fe in ToQueryFiltersEmbedded(f, allowSmart, ident + 1))
+                    foreach (var fe in ToQueryFiltersEmbedded(f, ident + 1))
                     {
                         yield return fe;
                     }
@@ -456,7 +456,7 @@ namespace Signum.Entities.UserQueries
             }
         }
 
-        public static List<Filter> ToFilterList(this IEnumerable<QueryFilterEmbedded> filters, bool allowSmart, int indent = 0)
+        public static List<Filter> ToFilterList(this IEnumerable<QueryFilterEmbedded> filters, int indent = 0)
         {
             return filters.GroupWhen(filter => filter.Indentation == indent).Select(gr =>
             {
@@ -467,7 +467,7 @@ namespace Signum.Entities.UserQueries
 
                     var filter = gr.Key;
                     
-                    var value = FilterValueConverter.Parse(filter.ValueString, filter.Token.Token.Type, filter.Operation.Value.IsList(), allowSmart: true);
+                    var value = FilterValueConverter.Parse(filter.ValueString, filter.Token.Token.Type, filter.Operation.Value.IsList());
 
                     return (Filter)new FilterCondition(filter.Token.Token, filter.Operation.Value, value);
                 }
@@ -475,7 +475,7 @@ namespace Signum.Entities.UserQueries
                 {
                     var group = gr.Key;
                     
-                    return (Filter)new FilterGroup(group.GroupOperation.Value, group.Token?.Token, gr.ToFilterList(allowSmart, indent + 1).ToList());
+                    return (Filter)new FilterGroup(group.GroupOperation.Value, group.Token?.Token, gr.ToFilterList(indent + 1).ToList());
                 }
             }).ToList();
         }

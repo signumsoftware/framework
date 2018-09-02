@@ -72,7 +72,7 @@ namespace Signum.Engine.UserQueries
             };
             if (!userQuery.AppendFilters)
             {
-                qr.Filters = userQuery.Filters.ToFilterList(allowSmart: true);
+                qr.Filters = userQuery.Filters.ToFilterList();
             }
 
             qr.Columns = MergeColumns(userQuery);

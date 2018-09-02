@@ -202,7 +202,7 @@ namespace Signum.Engine.Templating
 
                 Expression token = Expression.Constant(obj, type);
 
-                Expression value = Expression.Constant(FilterValueConverter.Parse(Value, type, Operation.Value.IsList(), allowSmart: true), type);
+                Expression value = Expression.Constant(FilterValueConverter.Parse(Value, type, Operation.Value.IsList()), type);
 
                 Expression newBody = QueryUtils.GetCompareExpression(Operation.Value, token, value, inMemory: true);
                 var lambda = Expression.Lambda<Func<bool>>(newBody).Compile();
@@ -282,7 +282,7 @@ namespace Signum.Engine.Templating
             {
                 var type = this.ValueProvider.Type;
 
-                object val = FilterValueConverter.Parse(Value, type, Operation.Value.IsList(), allowSmart: true);
+                object val = FilterValueConverter.Parse(Value, type, Operation.Value.IsList());
 
                 Expression value = Expression.Constant(val, type);
 

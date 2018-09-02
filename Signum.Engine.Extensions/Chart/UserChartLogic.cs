@@ -148,7 +148,7 @@ namespace Signum.Engine.Chart
             var cr = new ChartRequest(userChart.Query.ToQueryName())
             {
                 ChartScript = userChart.ChartScript,
-                Filters = userChart.Filters.ToFilterList(allowSmart: true),
+                Filters = userChart.Filters.ToFilterList(),
                 GroupResults = userChart.GroupResults,
                 Orders = userChart.Orders.Select(qo => new Order(qo.Token.Token, qo.OrderType)).ToList(),
                 Parameters = userChart.Parameters.ToMList(),

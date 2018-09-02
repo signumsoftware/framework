@@ -37,13 +37,13 @@ namespace Signum.React.UserAssets
 
             using (request.entity != null ? CurrentEntityConverter.SetCurrentEntity(request.entity.Retrieve()) : null)
             {
-                var result = ToFilterList(request.filters, qd, options, allowSmart: true).ToList();
+                var result = ToFilterList(request.filters, qd, options, 0).ToList();
 
                 return result;
             }
         }
 
-        public static List<FilterResponse> ToFilterList(IEnumerable<ParseFilterRequest> filters, QueryDescription qd, SubTokensOptions options, bool allowSmart, int indent = 0)
+        public static List<FilterResponse> ToFilterList(IEnumerable<ParseFilterRequest> filters, QueryDescription qd, SubTokensOptions options, int indent)
         {
             return filters.GroupWhen(filter => filter.identation == indent).Select(gr =>
             {
@@ -56,7 +56,7 @@ namespace Signum.React.UserAssets
 
                     var token = QueryUtils.Parse(filter.tokenString, qd, options);
 
-                    var value = FilterValueConverter.Parse(filter.valueString, token.Type, filter.operation.Value.IsList(), allowSmart: true);
+                    var value = FilterValueConverter.Parse(filter.valueString, token.Type, filter.operation.Value.IsList());
 
                     return (FilterResponse)new FilterConditionResponse { token = token, operation = filter.operation.Value, value = value };
                 }
@@ -66,7 +66,7 @@ namespace Signum.React.UserAssets
 
                     var token = group.tokenString == null ? null : QueryUtils.Parse(group.tokenString, qd, options);
 
-                    return (FilterResponse)new FilterGroupResponse { groupOperation = group.groupOperation.Value, token = token, filters = ToFilterList(gr, qd, options, allowSmart, indent + 1).ToList() };
+                    return (FilterResponse)new FilterGroupResponse { groupOperation = group.groupOperation.Value, token = token, filters = ToFilterList(gr, qd, options, indent + 1).ToList() };
                 }
             }).ToList();
         }

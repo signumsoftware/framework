@@ -139,7 +139,7 @@ namespace Signum.Engine.MachineLearning
 
                 GroupResults = mq.GroupResults,
 
-                Filters = mq.Filters.ToFilterList(allowSmart: false),
+                Filters = mq.Filters.ToFilterList(),
 
                 Columns = mq.Columns.Select(c => new Column(c.Token.Token, null)).ToList(),
 
@@ -152,10 +152,10 @@ namespace Signum.Engine.MachineLearning
         {
             var parentKey = sq.Columns.SingleEx(a => a.Usage == PredictorSubQueryColumnUsage.ParentKey);
 
-            var filterList = mainQuery.Filters.ToFilterList(allowSmart: false);
+            var filterList = mainQuery.Filters.ToFilterList();
 
             var mainFilters = mainQuery.Query.Is(sq.Query) ? filterList : filterList.Select(f => PrependToken(f, parentKey.Token.Token)).ToList();
-            var additionalFilters = sq.Filters.ToFilterList(allowSmart: false);
+            var additionalFilters = sq.Filters.ToFilterList();
 
             var columns = sq.Columns.Select(c => new Column(c.Token.Token, null)).ToList();
 
