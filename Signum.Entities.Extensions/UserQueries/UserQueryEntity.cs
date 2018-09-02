@@ -275,7 +275,6 @@ namespace Signum.Entities.UserQueries
         public QueryFilterEmbedded() { }
 
         QueryTokenEmbedded token;
-        [NotNullValidator]
         public QueryTokenEmbedded Token
         {
             get { return token; }
@@ -303,7 +302,7 @@ namespace Signum.Entities.UserQueries
 
         public void ParseData(ModifiableEntity context, QueryDescription description, SubTokensOptions options)
         {
-            token.ParseData(context, description, options);
+            token?.ParseData(context, description, options);
         }
 
         protected override string PropertyValidation(PropertyInfo pi)

@@ -45,7 +45,7 @@ namespace Signum.React.UserAssets
 
         public static List<FilterResponse> ToFilterList(IEnumerable<ParseFilterRequest> filters, QueryDescription qd, SubTokensOptions options, int indent)
         {
-            return filters.GroupWhen(filter => filter.identation == indent).Select(gr =>
+            return filters.GroupWhen(filter => filter.indentation == indent).Select(gr =>
             {
                 if (!gr.Key.isGroup)
                 {
@@ -86,7 +86,7 @@ namespace Signum.React.UserAssets
             public FilterOperation? operation;
             public string valueString;
             public FilterGroupOperation? groupOperation;
-            public int identation;
+            public int indentation;
         }
 
         public class FilterResponse

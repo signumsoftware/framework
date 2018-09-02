@@ -77,22 +77,7 @@ export function start(options: { routes: JSX.Element[] }) {
 
 export module Converter {
 
-    function toFilterOptionParsed(fr: UserAssetsClient.API.FilterResponse): FilterOptionParsed {
-        if (UserAssetsClient.API.isFilterGroupResponse(fr))
-            return ({
-                token: fr.token,
-                groupOperation: fr.groupOperation,
-                filters: fr.filters.map(f => toFilterOptionParsed(f)),
-            } as FilterGroupOptionParsed);
-        else
-            return ({
-                token: fr.token,
-                operation: fr.operation || "EqualTo",
-                value: fr.value,
-                frozen: true,
-            } as FilterConditionOptionParsed);
-    }
-
+   
     export function applyUserChart(cr: ChartRequest, uq: UserChartEntity, entity?: Lite<Entity>): Promise<ChartRequest> {
 
         cr.chartScript = uq.chartScript;
@@ -103,7 +88,7 @@ export module Converter {
             entity: entity,
             filters: uq.filters!.map(mle => mle.element).map(f => ({
                 isGroup: f.isGroup,
-                identation: f.indentation,
+                indentation: f.indentation,
                 tokenString: f.token!.tokenString,
                 operation: f.operation,
                 valueString: f.valueString,
@@ -118,7 +103,7 @@ export module Converter {
 
             cr.filterOptions = (cr.filterOptions || []).filter(f => f.frozen);
 
-            cr.filterOptions.push(...filters.map(f => toFilterOptionParsed(f)));
+            cr.filterOptions.push(...filters.map(f => UserAssetsClient.Converter.toFilterOptionParsed(f)));
             
             cr.parameters = uq.parameters!.map(mle => ({
                 rowId: null,

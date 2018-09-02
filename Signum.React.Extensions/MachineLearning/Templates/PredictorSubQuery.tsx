@@ -10,6 +10,7 @@ import { getQueryNiceName } from '@framework/Reflection'
 import QueryTokenEntityBuilder from '../../UserAssets/Templates/QueryTokenEntityBuilder'
 import { QueryTokenEmbedded } from '../../UserAssets/Signum.Entities.UserAssets'
 import { QueryFilterEmbedded } from '../../UserQueries/Signum.Entities.UserQueries'
+import * as UserAssetsClient from '../../UserAssets/UserAssetClient'
 import { QueryDescription, SubTokensOptions } from '@framework/FindOptions'
 import { API } from '../PredictorClient';
 import FilterBuilderEmbedded from './FilterBuilderEmbedded';
@@ -35,12 +36,20 @@ export default class PredictorSubQuery extends React.Component<{ ctx: TypeContex
         var sq = this.props.ctx.value;
 
         Finder.getQueryDescription(sq.query!.key).then(sqd =>
-            FilterBuilderEmbedded.toFilterOptionParsed(sqd!, (this.getMainFilters(sqd) || []).concat(sq.filters), SubTokensOptions.CanElement | SubTokensOptions.CanAggregate)
-                .then(filters => {
+            UserAssetsClient.API.parseFilters({
+                queryKey: sqd.queryKey,
+                canAggregate: true,
+                entity: undefined,
+                filters: (this.getMainFilters(sqd) || []).concat(sq.filters).map(mle => mle.element).map(f => ({
+                    tokenString: f.token!.tokenString,
+                    operation: f.operation,
+                    valueString: f.valueString
+                }) as UserAssetsClient.API.ParseFilterRequest)
+            }).then(filters => {
                     var fo: FindOptions = {
                         queryName: sq.query!.key,
                         groupResults: true,
-                        filterOptions: toFilterOptions(filters),
+                        filterOptions: filters.map(f => UserAssetsClient.Converter.toFilterOption(f)),
                         columnOptions: [{ token: "Count" } as ColumnOption]
                             .concat(sq.columns.map(mle => ({ token: mle.element.token && mle.element.token.tokenString, } as ColumnOption))),
                         columnOptionsMode: "Replace",

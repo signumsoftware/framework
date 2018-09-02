@@ -75,21 +75,6 @@ export function start(options: { routes: JSX.Element[] }) {
 
 
 export module Converter {
-
-    function toFilterOption(fr: UserAssetsClient.API.FilterResponse): FilterOption {
-        if (UserAssetsClient.API.isFilterGroupResponse(fr))
-            return ({
-                token: fr.token && fr.token.fullKey,
-                groupOperation: fr.groupOperation,
-                filters: fr.filters.map(f => toFilterOption(f)),
-            } as FilterGroupOption);
-        else
-            return ({
-                token: fr.token.fullKey,
-                operation: fr.operation || "EqualTo",
-                value: fr.value,
-            } as FilterConditionOption);
-    }
     
     export function toFindOptions(uq: UserQueryEntity, entity: Lite<Entity> | undefined): Promise<FindOptions> {
 
@@ -110,7 +95,7 @@ export module Converter {
 
         return convertedFilters.then(filters => {
 
-            fo.filterOptions = filters.map(f => toFilterOption(f));
+            fo.filterOptions = filters.map(f => UserAssetsClient.Converter.toFilterOption(f));
 
             fo.columnOptionsMode = uq.columnsMode;
 
