@@ -299,7 +299,7 @@ namespace Signum.Utilities.ExpressionTrees
         #endregion
 
         #region Colecciones
-        const int IdentationSpaces = 4;
+        const int IndentationSpaces = 4;
 
         string Line<T>(ReadOnlyCollection<T> collection, Func<T, string> func)
         {
@@ -313,7 +313,7 @@ namespace Signum.Utilities.ExpressionTrees
             if(collapse)
                 return "{{ {0} }}".FormatWith(collection.ToString(func, ", "));
 
-            return "\r\n{{\r\n{0}\r\n}}".FormatWith(collection.ToString(func, ",\r\n").Indent(IdentationSpaces));
+            return "\r\n{{\r\n{0}\r\n}}".FormatWith(collection.ToString(func, ",\r\n").Indent(IndentationSpaces));
         }
         #endregion
         
