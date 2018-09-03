@@ -847,7 +847,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
         this.forceUpdate();
 
-        if (fo.pagination.mode != "All")
+        if (fo.pagination.mode != "All" || !this.props.showHeader)
             this.doSearchPage1();
     }
 
