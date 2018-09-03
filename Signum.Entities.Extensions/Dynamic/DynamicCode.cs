@@ -96,6 +96,7 @@ namespace Signum.Entities.Dynamic
             "Newtonsoft.Json.dll",
             "Microsoft.CodeDom.Providers.DotNetCompilerPlatform.dll",
             "DocumentFormat.OpenXml.dll",
+            "WindowsBase.dll",
 
         };
 
