@@ -201,7 +201,7 @@ namespace Signum.Services
         public virtual int ExecuteQueryCount(QueryValueRequest request)
         {
             return Return(MethodInfo.GetCurrentMethod(), request.QueryName.ToString(),
-                () => (int)QueryLogic.Queries.ExecuteQueryCount(request));
+                () => (int)QueryLogic.Queries.ExecuteQueryValue(request));
         }
 
         public virtual Lite<Entity> ExecuteUniqueEntity(UniqueEntityRequest request)

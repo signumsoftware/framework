@@ -141,6 +141,7 @@
     <Compile Include="Filters\SignumExceptionFilterAttribute.cs" />
     <Compile Include="Filters\ValidateModelFilterAttribute.cs" />
     <Compile Include="Filters\VersionFilterAttribute.cs" />
+    <Compile Include="JsonConverters\FilterJsonConverter.cs" />
     <Compile Include="JsonConverters\EntityJsonConverter.cs" />
     <Compile Include="JsonConverters\JsonSerializerExtensions.cs" />
     <Compile Include="JsonConverters\ArgsJsonConverter.cs" />

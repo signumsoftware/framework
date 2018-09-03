@@ -93,8 +93,8 @@ namespace Signum.Engine.DynamicQuery
             }
             else
             {
-                var simpleFilters = request.Filters.Where(f => !(f.Token is AggregateToken)).ToList();
-                var aggregateFilters = request.Filters.Where(f => f.Token is AggregateToken).ToList();
+                var simpleFilters = request.Filters.Where(f => !f.IsAggregate()).ToList();
+                var aggregateFilters = request.Filters.Where(f => f.IsAggregate()).ToList();
 
                 var keys = request.Columns.Select(t => t.Token).Where(t => !(t is AggregateToken)).ToHashSet();
 

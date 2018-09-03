@@ -1,17 +1,18 @@
 ﻿import { TypeReference, PropertyRoute, PseudoType, QueryKey } from './Reflection';
 import { Dic } from './Globals';
 import { Lite, Entity } from './Signum.Entities';
-import { PaginationMode, OrderType, FilterOperation, FilterType, ColumnOptionsMode, UniqueType, SystemTimeMode } from './Signum.Entities.DynamicQuery';
+import { PaginationMode, OrderType, FilterOperation, FilterType, ColumnOptionsMode, UniqueType, SystemTimeMode, FilterGroupOperation } from './Signum.Entities.DynamicQuery';
 import { SearchControlProps } from "./Search";
+import { func } from 'prop-types';
 
 export { PaginationMode, OrderType, FilterOperation, FilterType, ColumnOptionsMode, UniqueType };
 
-export interface CountOptions {
+export interface ValueFindOptions {
     queryName: PseudoType | QueryKey;
     filterOptions?: FilterOption[];
 }
 
-export interface CountOptionsParsed {
+export interface ValueFindOptionsParsed {
     queryKey: string;
     filterOptions: FilterOptionParsed; 
 }
@@ -26,7 +27,7 @@ export interface ModalFindOptions {
 export interface FindOptions {
     queryName: PseudoType | QueryKey;
     groupResults?: boolean;
-    parentColumn?: string;
+    parentToken?: string;
     parentValue?: any;
 
     filterOptions?: FilterOption[];
@@ -48,22 +49,47 @@ export interface FindOptionsParsed {
 }
 
 
-export interface FilterOption {
-    columnName: string;
+export type FilterOption = FilterConditionOption | FilterGroupOption;
+
+export function isFilterGroupOption(fo: FilterOption): fo is FilterGroupOption{
+    return (fo as FilterGroupOption).groupOperation != undefined;
+}
+
+export interface FilterConditionOption {
+    token: string;
     frozen?: boolean;
     operation?: FilterOperation;
     value: any;
 }
 
-export interface FilterOptionParsed {
+export interface FilterGroupOption {
+    token: string;
+    groupOperation: FilterGroupOperation;
+    filters: FilterOption[];
+}
+
+export type FilterOptionParsed = FilterConditionOptionParsed | FilterGroupOptionParsed;
+
+export function isFilterGroupOptionParsed(fo: FilterOptionParsed): fo is FilterGroupOptionParsed {
+    return (fo as FilterGroupOptionParsed).groupOperation != undefined;
+}
+
+export interface FilterConditionOptionParsed {
     token?: QueryToken;
     frozen: boolean;
     operation?: FilterOperation;
     value: any;
 }
 
+export interface FilterGroupOptionParsed {
+    groupOperation: FilterGroupOperation;
+    frozen: boolean;
+    token?: QueryToken;
+    filters: FilterOptionParsed[];
+}
+
 export interface OrderOption {
-    columnName: string;
+    token: string;
     orderType: OrderType;
 }
 
@@ -73,7 +99,7 @@ export interface OrderOptionParsed {
 }
 
 export interface ColumnOption {
-    columnName: string;
+    token: string;
     displayName?: string;
 }
 
@@ -128,6 +154,10 @@ export function hasAnyOrAll(token: QueryToken | undefined) : boolean {
     return hasAnyOrAll(token.parent);
 }
 
+export function isPrefix(prefix: QueryToken, token: QueryToken): boolean {
+    return prefix.fullKey == token.fullKey || token.fullKey.startsWith(prefix.fullKey + ".");
+}
+
 export function hasAggregate(token: QueryToken | undefined): boolean {
     if (token == undefined)
         return false;
@@ -166,7 +196,19 @@ export function toQueryToken(cd: ColumnDescription): QueryToken {
     };
 }
 
-export interface FilterRequest {
+export type FilterRequest = FilterConditionRequest | FilterGroupRequest; 
+
+export function isFilterGroupRequest(fr: FilterRequest): fr is FilterGroupRequest {
+    return (fr as FilterGroupRequest).groupOperation != null;
+}
+
+export interface FilterGroupRequest {
+    groupOperation: FilterGroupOperation;
+    token?: string;
+    filters: FilterRequest[];
+}
+
+export interface FilterConditionRequest {
     token: string;
     operation: FilterOperation;
     value: any;
@@ -201,7 +243,7 @@ export interface QueryRequest {
 
 export type AggregateType = "Count" | "Average" | "Sum" | "Min" | "Max";
 
-export interface QueryCountRequest {
+export interface QueryValueRequest {
     queryKey: string;
     filters: FilterRequest[];
     valueToken?: string;

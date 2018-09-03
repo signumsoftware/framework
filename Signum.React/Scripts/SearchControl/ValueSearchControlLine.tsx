@@ -3,7 +3,7 @@ import { Dic, DomUtils, classes } from '../Globals'
 import * as Finder from '../Finder'
 import {
     ResultTable, ResultRow, FindOptions, FindOptionsParsed, FilterOption, QueryDescription, ColumnOption, ColumnOptionsMode, ColumnDescription,
-    toQueryToken, Pagination, PaginationMode, OrderType, OrderOption, SubTokensOptions, filterOperations, QueryToken, QueryCountRequest, QueryRequest, QueryTokenType
+    toQueryToken, Pagination, PaginationMode, OrderType, OrderOption, SubTokensOptions, filterOperations, QueryToken, QueryValueRequest, QueryRequest, QueryTokenType
 } from '../FindOptions'
 import { SearchMessage, JavascriptMessage, Lite, liteKey, is, Entity, isEntity, EntityControlMessage, isLite } from '../Signum.Entities'
 import { getTypeInfos, IsByAll, getQueryKey, TypeInfo, EntityData, getQueryNiceName  } from '../Reflection'
@@ -35,7 +35,7 @@ export interface ValueSearchControlLineProps extends React.Props<ValueSearchCont
     viewEntityButton?: boolean;
     avoidAutoRefresh?: boolean;
     refreshKey?: string | number;
-    extraButtons?: (valueSearchControl: ValueSearchControl) => React.ReactNode | undefined;
+    extraButtons?: (valueSearchControl: ValueSearchControl) => React.ReactNode;
     searchControlProps?: Partial<SearchControlProps>;
 }
 
@@ -62,7 +62,7 @@ export default class ValueSearchControlLine extends React.Component<ValueSearchC
         if (isEntity(ctx.value))
             return {
                 queryName: ctx.value.Type,
-                parentColumn: "Entity",
+                parentToken: "Entity",
                 parentValue: ctx.value
             };
 
