@@ -360,17 +360,31 @@ namespace Signum.Entities.UserQueries
 
         public XElement ToXml(IToXmlContext ctx)
         {
-            return new XElement("Filter",
-                new XAttribute("Token", Token.Token.FullKey()),
-                new XAttribute("Operation", Operation),
-                new XAttribute("Value", ValueString ?? ""));
+            if (this.GroupOperation.HasValue)
+            {
+                return new XElement("Filter",
+                   new XAttribute("Indentation", Indentation),
+                   new XAttribute("GroupOperation", GroupOperation),
+                   Token == null ? null : new XAttribute("Token", Token.Token.FullKey()));
+
+            }
+            else
+            {
+                return new XElement("Filter",
+                    new XAttribute("Indentation", Indentation),
+                    new XAttribute("Token", Token.Token.FullKey()),
+                    new XAttribute("Operation", Operation),
+                    new XAttribute("Value", ValueString ?? ""));
+            }
         }
 
         public void FromXml(XElement element, IFromXmlContext ctx)
         {
-            Token = new QueryTokenEmbedded(element.Attribute("Token").Value);
-            Operation = element.Attribute("Operation").Value.ToEnum<FilterOperation>();
-            ValueString = element.Attribute("Value").Value;
+            IsGroup = element.Attribute("GroupOperation") != null;
+            GroupOperation = element.Attribute("GroupOperation")?.Value.ToEnum<FilterGroupOperation>();
+            Operation = element.Attribute("Operation")?.Value.ToEnum<FilterOperation>();
+            Token = element.Attribute("Token")?.Let(t => new QueryTokenEmbedded(t.Value));
+            ValueString = element.Attribute("Value")?.Value;
         }
 
         public override string ToString()
