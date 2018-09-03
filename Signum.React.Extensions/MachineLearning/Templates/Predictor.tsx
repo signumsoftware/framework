@@ -19,7 +19,7 @@ import * as PredictorClient from '../PredictorClient';
 import { toLite } from "@framework/Signum.Entities";
 import FilterBuilder from '@framework/SearchControl/FilterBuilder';
 import { MList, newMListElement } from '@framework/Signum.Entities';
-import FilterBuilderEmbedded from './FilterBuilderEmbedded';
+import FilterBuilderEmbedded from '../../UserAssets/Templates/FilterBuilderEmbedded';
 import PredictorSubQuery from './PredictorSubQuery';
 import { QueryTokenEmbedded } from '../../UserAssets/Signum.Entities.UserAssets';
 import { QueryEntity } from '@framework/Signum.Entities.Basics';

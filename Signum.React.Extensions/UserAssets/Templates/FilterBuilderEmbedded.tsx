@@ -1,24 +1,19 @@
 ﻿import * as React from 'react'
-import * as numbro from 'numbro'
 import * as moment from 'moment'
 import { classes, Dic } from '@framework/Globals'
-import { FormGroup, FormControlReadonly, ValueLine, ValueLineType, EntityLine, EntityDetail, EntityCombo, EntityList, EntityRepeater, EntityTable, IRenderButtons } from '@framework/Lines'
-import { SearchControl, FilterOptionParsed } from '@framework/Search'
-import { TypeContext, FormGroupStyle, ButtonsContext } from '@framework/TypeContext'
-import FileLine from '../../Files/FileLine'
-import { PredictorEntity, PredictorColumnEmbedded, PredictorMessage, PredictorSubQueryEntity } from '../Signum.Entities.MachineLearning'
+import { ValueLine, EntityLine, EntityCombo } from '@framework/Lines'
+import { FilterOptionParsed } from '@framework/Search'
+import { TypeContext } from '@framework/TypeContext'
 import * as Finder from '@framework/Finder'
-import { getQueryNiceName, Binding, IsByAll, getTypeInfos, TypeReference } from '@framework/Reflection'
-import { QueryTokenEmbedded, UserAssetMessage } from '../../UserAssets/Signum.Entities.UserAssets'
+import { Binding, IsByAll, getTypeInfos, TypeReference } from '@framework/Reflection'
+import { QueryTokenEmbedded, UserAssetMessage } from '../Signum.Entities.UserAssets'
 import { QueryFilterEmbedded } from '../../UserQueries/Signum.Entities.UserQueries'
 import { QueryDescription, SubTokensOptions, isFilterGroupOptionParsed, FilterConditionOptionParsed, isList, FilterType, FilterGroupOptionParsed } from '@framework/FindOptions'
-import { API, initializers } from '../PredictorClient';
-import { toLite, Lite, Entity, parseLite, EntityControlMessage, liteKey } from "@framework/Signum.Entities";
+import { Lite, Entity, parseLite, liteKey } from "@framework/Signum.Entities";
 import * as Navigator from "@framework/Navigator";
 import FilterBuilder, { MultiValue, FilterConditionComponent } from '@framework/SearchControl/FilterBuilder';
 import { MList, newMListElement } from '@framework/Signum.Entities';
 import { TokenCompleter } from '@framework/Finder';
-import { EntityComboProps } from '@framework/Lines/EntityCombo';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 
@@ -68,7 +63,7 @@ export default class FilterBuilderEmbedded extends React.Component<FilterBuilder
         const completer = new TokenCompleter(qd);
 
         allFilters.forEach(mle => {
-            if (mle.element.token != null && mle.element.token.token == null)
+            if (mle.element.token && mle.element.token.tokenString)
                 completer.request(mle.element.token.tokenString, subTokenOptions);
         });
 
@@ -263,7 +258,7 @@ export class EntityLineOrExpression extends React.Component<EntityLineOrExpressi
     render() {
 
         if (this.state.lite === undefined)
-            return <ValueLine ctx={this.props.ctx} type={{ name: "string" }} onChange={this.props.onChange} extraButtons={vl => this.getSwitchModelButton(false)} />;
+            return <ValueLine ctx={this.props.ctx} type={{ name: "string" }} onChange={this.props.onChange} extraButtons={() => this.getSwitchModelButton(false)} />;
         
         const ctx = new TypeContext<any>(undefined, { formGroupStyle: "None", readOnly: this.props.ctx.readOnly, formSize: "ExtraSmall" }, undefined as any, Binding.create(this.state, a => a.lite));
 
@@ -334,7 +329,7 @@ export class ValueLineOrExpression extends React.Component<ValueLineOrExpression
     render() {
 
         if (this.state.value === undefined)
-            return <ValueLine ctx={this.props.ctx} type={{ name: "string" }} onChange={this.props.onChange} extraButtons={vl => this.getSwitchModelButton(false)} />;
+            return <ValueLine ctx={this.props.ctx} type={{ name: "string" }} onChange={this.props.onChange} extraButtons={() => this.getSwitchModelButton(false)} />;
 
         const ctx = new TypeContext<any>(undefined, { formGroupStyle: "None", readOnly: this.props.ctx.readOnly, formSize: "ExtraSmall" }, undefined as any, Binding.create(this.state, a => a.value));
 

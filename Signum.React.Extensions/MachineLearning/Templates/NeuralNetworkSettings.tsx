@@ -1,20 +1,10 @@
 ﻿import * as React from 'react'
-import { classes } from '@framework/Globals'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { FormGroup, FormControlReadonly, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityList, EntityRepeater, EntityTable, StyleContext, OptionItem, LineBaseProps } from '@framework/Lines'
-import { SearchControl, ValueSearchControl } from '@framework/Search'
-import { TypeContext, FormGroupStyle } from '@framework/TypeContext'
-import FileLine from '../../Files/FileLine'
+import { FormGroup, FormControlReadonly, ValueLine, EntityTable, StyleContext, OptionItem, LineBaseProps } from '@framework/Lines'
+import { ValueSearchControl } from '@framework/Search'
+import { TypeContext } from '@framework/TypeContext'
 import { NeuralNetworkSettingsEntity, PredictorEntity, PredictorColumnUsage, PredictorCodificationEntity, NeuralNetworkHidenLayerEmbedded, PredictorAlgorithmSymbol, NeuralNetworkLearner } from '../Signum.Entities.MachineLearning'
-import * as Finder from '@framework/Finder'
-import { getQueryNiceName } from '@framework/Reflection'
-import QueryTokenEntityBuilder from '../../UserAssets/Templates/QueryTokenEntityBuilder'
-import { QueryTokenEmbedded } from '../../UserAssets/Signum.Entities.UserAssets'
-import { QueryFilterEmbedded } from '../../UserQueries/Signum.Entities.UserQueries'
-import { QueryDescription, SubTokensOptions } from '@framework/FindOptions'
 import { API } from '../PredictorClient';
-import FilterBuilderEmbedded from './FilterBuilderEmbedded';
-import { TypeReference } from '@framework/Reflection';
 import { is } from '@framework/Signum.Entities';
 import { Popover } from '@framework/Components';
 
@@ -235,15 +225,15 @@ export class DeviceLine extends React.Component<DeviceLineProps, DeviceLineState
     }
 
     componentWillMount() {
-        this.loadData(this.props);
+        this.loadData();
     }
 
     componentWillReceiveProps(newProps: DeviceLineProps) {
         if (!is(newProps.algorithm, this.props.algorithm))
-            this.loadData(newProps);
+            this.loadData();
     }
 
-    loadData(props: DeviceLineProps) {
+    loadData() {
         API.availableDevices(this.props.algorithm)
             .then(devices => this.setState({ devices }))
             .done();

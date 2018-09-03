@@ -8,7 +8,7 @@ import { QueryDescription, SubTokensOptions } from '@framework/FindOptions'
 import { getQueryNiceName } from '@framework/Reflection'
 import { TypeContext, FormGroupStyle } from '@framework/TypeContext'
 import QueryTokenEntityBuilder from '../../UserAssets/Templates/QueryTokenEntityBuilder'
-import FilterBuilderEmbedded from '../../MachineLearning/Templates/FilterBuilderEmbedded';
+import FilterBuilderEmbedded from '../../UserAssets/Templates/FilterBuilderEmbedded';
 
 import "../Chart.css"
 

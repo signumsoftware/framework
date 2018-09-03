@@ -58,7 +58,12 @@ namespace Signum.React.UserAssets
 
                     var value = FilterValueConverter.Parse(filter.valueString, token.Type, filter.operation.Value.IsList());
 
-                    return (FilterResponse)new FilterConditionResponse { token = token, operation = filter.operation.Value, value = value };
+                    return (FilterResponse)new FilterConditionResponse
+                    {
+                        token = new QueryTokenTS(token, true),
+                        operation = filter.operation.Value,
+                        value = value
+                    };
                 }
                 else
                 {
@@ -66,7 +71,12 @@ namespace Signum.React.UserAssets
 
                     var token = group.tokenString == null ? null : QueryUtils.Parse(group.tokenString, qd, options);
 
-                    return (FilterResponse)new FilterGroupResponse { groupOperation = group.groupOperation.Value, token = token, filters = ToFilterList(gr, qd, options, indent + 1).ToList() };
+                    return (FilterResponse)new FilterGroupResponse
+                    {
+                        groupOperation = group.groupOperation.Value,
+                        token = token == null ? null : new QueryTokenTS(token, true),
+                        filters = ToFilterList(gr, qd, options, indent + 1).ToList()
+                    };
                 }
             }).ToList();
         }
@@ -95,7 +105,7 @@ namespace Signum.React.UserAssets
 
         public class FilterConditionResponse : FilterResponse
         {
-            public QueryToken token;
+            public QueryTokenTS token;
             public FilterOperation operation;
             public object value;
 
@@ -104,7 +114,7 @@ namespace Signum.React.UserAssets
         public class FilterGroupResponse : FilterResponse
         {
             public FilterGroupOperation groupOperation;
-            public QueryToken token;
+            public QueryTokenTS token;
             public List<FilterResponse> filters;
         }
 

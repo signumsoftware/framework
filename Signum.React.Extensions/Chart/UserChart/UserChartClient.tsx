@@ -87,12 +87,12 @@ export module Converter {
             canAggregate: uq.groupResults,
             entity: entity,
             filters: uq.filters!.map(mle => mle.element).map(f => ({
-                isGroup: f.isGroup,
                 indentation: f.indentation,
-                tokenString: f.token!.tokenString,
+                isGroup: f.isGroup,
                 operation: f.operation,
-                valueString: f.valueString,
                 groupOperation: f.groupOperation,
+                tokenString: f.token!.tokenString,
+                valueString: f.valueString,
             }) as UserAssetsClient.API.ParseFilterRequest)
         });
 

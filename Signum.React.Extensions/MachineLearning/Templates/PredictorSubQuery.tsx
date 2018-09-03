@@ -1,24 +1,18 @@
 ﻿import * as React from 'react'
-import { classes } from '@framework/Globals'
-import { FormGroup, FormControlReadonly, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityList, EntityRepeater, EntityTable } from '@framework/Lines'
-import { SearchControl, FindOptions, FilterOption, ColumnOption } from '@framework/Search'
-import { TypeContext, FormGroupStyle } from '@framework/TypeContext'
-import FileLine from '../../Files/FileLine'
+import { ValueLine, EntityLine, EntityTable } from '@framework/Lines'
+import { FindOptions, ColumnOption } from '@framework/Search'
+import { TypeContext } from '@framework/TypeContext'
 import { PredictorSubQueryEntity, PredictorSubQueryColumnEmbedded, PredictorEntity, PredictorMainQueryEmbedded, PredictorMessage, PredictorSubQueryColumnUsage } from '../Signum.Entities.MachineLearning'
 import * as Finder from '@framework/Finder'
-import { getQueryNiceName } from '@framework/Reflection'
 import QueryTokenEntityBuilder from '../../UserAssets/Templates/QueryTokenEntityBuilder'
+import FilterBuilderEmbedded from '../../UserAssets/Templates/FilterBuilderEmbedded';
 import { QueryTokenEmbedded } from '../../UserAssets/Signum.Entities.UserAssets'
 import { QueryFilterEmbedded } from '../../UserQueries/Signum.Entities.UserQueries'
 import * as UserAssetsClient from '../../UserAssets/UserAssetClient'
 import { QueryDescription, SubTokensOptions } from '@framework/FindOptions'
-import { API } from '../PredictorClient';
-import FilterBuilderEmbedded from './FilterBuilderEmbedded';
-import { TypeReference } from '@framework/Reflection';
 import { initializeColumn } from './Predictor';
 import { newMListElement } from '@framework/Signum.Entities';
 import { is } from '@framework/Signum.Entities';
-import { toFilterOptions } from '@framework/Finder';
 
 export default class PredictorSubQuery extends React.Component<{ ctx: TypeContext<PredictorSubQueryEntity>, mainQuery: PredictorMainQueryEmbedded, mainQueryDescription: QueryDescription }> {
 
@@ -40,10 +34,13 @@ export default class PredictorSubQuery extends React.Component<{ ctx: TypeContex
                 queryKey: sqd.queryKey,
                 canAggregate: true,
                 entity: undefined,
-                filters: (this.getMainFilters(sqd) || []).concat(sq.filters).map(mle => mle.element).map(f => ({
-                    tokenString: f.token!.tokenString,
+                filters: (this.getMainFilters() || []).concat(sq.filters).map(mle => mle.element).map(f => ({
+                    indentation: f.indentation,
+                    isGroup: f.isGroup,
                     operation: f.operation,
-                    valueString: f.valueString
+                    groupOperation: f.groupOperation,
+                    tokenString: f.token!.tokenString,
+                    valueString: f.valueString,
                 }) as UserAssetsClient.API.ParseFilterRequest)
             }).then(filters => {
                     var fo: FindOptions = {
@@ -60,7 +57,7 @@ export default class PredictorSubQuery extends React.Component<{ ctx: TypeContex
             .done();
     }
 
-    getMainFilters(sqd: QueryDescription) {
+    getMainFilters() {
         const mq = this.props.mainQuery;
         const sq = this.props.ctx.value;
         if (is(mq.query, this.props.ctx.value.query))
@@ -104,7 +101,6 @@ export default class PredictorSubQuery extends React.Component<{ ctx: TypeContex
         const ctxxs = ctx.subCtx({ formSize: "ExtraSmall" });
         const entity = ctx.value;
         const queryKey = entity.query && entity.query.key;
-        const targetType = this.props.mainQueryDescription.columns["Entity"].type;
 
         const parentCtx = ctx.findParentCtx(PredictorEntity);
 

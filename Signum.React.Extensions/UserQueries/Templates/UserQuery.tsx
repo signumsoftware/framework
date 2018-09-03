@@ -6,9 +6,9 @@ import { QueryDescription, SubTokensOptions } from '@framework/FindOptions'
 import { getQueryNiceName } from '@framework/Reflection'
 import { TypeContext, FormGroupStyle } from '@framework/TypeContext'
 import QueryTokenEntityBuilder from '../../UserAssets/Templates/QueryTokenEntityBuilder'
+import FilterBuilderEmbedded from '../../UserAssets/Templates/FilterBuilderEmbedded';
 import { MList } from '@framework/Signum.Entities';
 import { QueryEntity } from '@framework/Signum.Entities.Basics';
-import FilterBuilderEmbedded from '../../MachineLearning/Templates/FilterBuilderEmbedded';
 
 const CurrentEntityKey = "[CurrentEntity]";
 export default class UserQuery extends React.Component<{ ctx: TypeContext<UserQueryEntity> }> {
