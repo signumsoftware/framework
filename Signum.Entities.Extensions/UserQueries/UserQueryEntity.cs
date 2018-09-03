@@ -381,6 +381,7 @@ namespace Signum.Entities.UserQueries
         public void FromXml(XElement element, IFromXmlContext ctx)
         {
             IsGroup = element.Attribute("GroupOperation") != null;
+            Indentation = element.Attribute("Indentation")?.Value.ToInt() ?? 0;
             GroupOperation = element.Attribute("GroupOperation")?.Value.ToEnum<FilterGroupOperation>();
             Operation = element.Attribute("Operation")?.Value.ToEnum<FilterOperation>();
             Token = element.Attribute("Token")?.Let(t => new QueryTokenEmbedded(t.Value));
