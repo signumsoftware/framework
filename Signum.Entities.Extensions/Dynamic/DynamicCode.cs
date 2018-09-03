@@ -22,6 +22,7 @@ namespace Signum.Entities.Dynamic
         {
             "System",
             "System.IO",
+            "System.IO.Packaging",
             "System.Linq",
             "System.Reflection",
             "System.Collections.Generic",
@@ -79,6 +80,9 @@ namespace Signum.Entities.Dynamic
             "Signum.Entities.Word",
             "Signum.Entities.Workflow",
             "Signum.Entities.Tree",
+            "DocumentFormat.OpenXml",
+            "DocumentFormat.OpenXml.Packaging",
+            "DocumentFormat.OpenXml.Spreadsheet",
         };
 
         public static HashSet<string> Assemblies = new HashSet<string>
