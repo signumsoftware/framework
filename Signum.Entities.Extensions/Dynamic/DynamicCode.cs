@@ -22,7 +22,6 @@ namespace Signum.Entities.Dynamic
         {
             "System",
             "System.IO",
-            "System.IO.Packaging",
             "System.Linq",
             "System.Reflection",
             "System.Collections.Generic",
@@ -96,8 +95,6 @@ namespace Signum.Entities.Dynamic
             "Newtonsoft.Json.dll",
             "Microsoft.CodeDom.Providers.DotNetCompilerPlatform.dll",
             "DocumentFormat.OpenXml.dll",
-            "WindowsBase.dll",
-
         };
 
         public static IEnumerable<string> GetAssemblies()
