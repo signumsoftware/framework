@@ -303,7 +303,7 @@ namespace Signum.Engine.Mailing
                 var columns = tokens.Distinct().Select(qt => new Column(qt, null)).ToList();
 
                 var filters = systemEmail != null ? systemEmail.GetFilters(qd) :
-                    new List<Filter> { new Filter(QueryUtils.Parse("Entity", qd, 0), FilterOperation.EqualTo, entity.ToLite()) };
+                    new List<Filter> { new FilterCondition(QueryUtils.Parse("Entity", qd, 0), FilterOperation.EqualTo, entity.ToLite()) };
 
                 this.table = QueryLogic.Queries.ExecuteQuery(new QueryRequest
                 {

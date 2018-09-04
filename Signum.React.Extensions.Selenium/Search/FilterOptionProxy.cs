@@ -5,11 +5,11 @@ using Signum.Utilities;
 
 namespace Signum.React.Selenium
 {
-    public class FilterOptionProxy
+    public class FilterConditionOptionProxy
     {
         public IWebElement Element;
 
-        public FilterOptionProxy(IWebElement element)
+        public FilterConditionOptionProxy(IWebElement element)
         {
             this.Element = element;
         }

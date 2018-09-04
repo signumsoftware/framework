@@ -90,7 +90,7 @@ export class DynamicViewTree extends React.Component<DynamicViewTreeProps, Dnami
         return (
             <ContextMenu position={cm.position} onHide={this.handleContextOnHide}>
                 {no.isContainer && <DropdownItem onClick={this.handleAddChildren}><FontAwesomeIcon icon="arrow-right" />&nbsp; {DynamicViewMessage.AddChild.niceToString()}</DropdownItem>}
-                {!isRoot && <DropdownItem onClick={this.handleAddSibling}><FontAwesomeIcon icon="arrow-down" />>&nbsp; {DynamicViewMessage.AddSibling.niceToString()}</DropdownItem>}
+                {!isRoot && <DropdownItem onClick={this.handleAddSibling}><FontAwesomeIcon icon="arrow-down" />&nbsp; {DynamicViewMessage.AddSibling.niceToString()}</DropdownItem>}
 
                 {no.isContainer && <DropdownItem divider={true} />}
 

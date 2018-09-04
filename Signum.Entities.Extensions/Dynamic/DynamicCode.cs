@@ -30,10 +30,13 @@ namespace Signum.Entities.Dynamic
             "System.Collections.Generic",
             "System.Linq.Expressions",
             "Signum.Utilities",
+            "DocumentFormat.OpenXml",
+            "DocumentFormat.OpenXml.Packaging",
+            "DocumentFormat.OpenXml.Spreadsheet",
         };
 
         public static HashSet<Type> AssemblyTypes = new HashSet<Type>
-        {   
+        {
             typeof(object),
             typeof(System.Attribute),
             typeof(System.Runtime.ConstrainedExecution.PrePrepareMethodAttribute), 

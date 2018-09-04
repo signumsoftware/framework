@@ -27,7 +27,7 @@ export function start(options: { routes: JSX.Element[], couldHaveNotes?: (typeNa
 
     QuickLinks.registerGlobalQuickLink(ctx => new QuickLinks.QuickLinkExplore({
         queryName: NoteEntity,
-        parentColumn: "Target",
+        parentToken: "Target",
         parentValue: ctx.lite
     }, { isVisible: couldHaveNotes(ctx.lite.EntityType), icon: "sticky-note", iconColor: "#337ab7" }));
 }

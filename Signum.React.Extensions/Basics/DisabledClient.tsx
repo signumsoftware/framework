@@ -10,13 +10,35 @@ import { Lite, Entity, EntityPack, ExecuteSymbol, DeleteSymbol, ConstructSymbol_
 import { EntityOperationSettings } from '@framework/Operations'
 import { PseudoType, QueryKey, GraphExplorer, OperationType, Type, getTypeName } from '@framework/Reflection'
 import * as Operations from '@framework/Operations'
-import { TimeSpanEmbedded, DateSpanEmbedded } from './Signum.Entities.Basics'
+import { TimeSpanEmbedded, DateSpanEmbedded, DisableOperation } from './Signum.Entities.Basics'
 import * as OmniboxClient from '../Omnibox/OmniboxClient'
 import * as AuthClient from '../Authorization/AuthClient'
 import * as QuickLinks from '@framework/QuickLinks'
 import { getAllTypes } from "@framework/Reflection";
 
 export function start(options: { routes: JSX.Element[] }) {
+
+    Operations.addSettings(new EntityOperationSettings(DisableOperation.Disable, {
+        contextual: {
+            icon: ["fas", "arrow-down"],
+            iconColor: "gray",
+        },
+        contextualFromMany: {
+            icon: ["fas", "arrow-down"],
+            iconColor: "gray",
+        },
+    }));
+
+    Operations.addSettings(new EntityOperationSettings(DisableOperation.Enabled, {
+        contextual: {
+            icon: ["fas", "arrow-up"],
+            iconColor: "black",
+        },
+        contextualFromMany: {
+            icon: ["fas", "arrow-up"],
+            iconColor: "black",
+        },
+    }));
 
     var typesToOverride = getAllTypes().filter(a => a.queryDefined && a.kind == "Entity" && a.members["[DisabledMixin].IsDisabled"]);
 
@@ -31,7 +53,7 @@ export function start(options: { routes: JSX.Element[] }) {
             }
 
             querySettings.hiddenColumns = [
-                { columnName: "Entity.IsDisabled" }
+                { token: "Entity.IsDisabled" }
             ];
 
             querySettings.rowAttributes = (row, columns) => {
@@ -52,7 +74,7 @@ export function start(options: { routes: JSX.Element[] }) {
             if (!entitySettings.findOptions) {
                 entitySettings.findOptions = {
                     queryName: ti.name,
-                    filterOptions: [{ columnName: "Entity.IsDisabled", operation: "EqualTo", value: false, frozen: true }]
+                    filterOptions: [{ token: "Entity.IsDisabled", operation: "EqualTo", value: false, frozen: true }]
                 };
             }
         }

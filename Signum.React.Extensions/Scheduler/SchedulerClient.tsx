@@ -37,7 +37,7 @@ export function start(options: { routes: JSX.Element[] }) {
     es.overrideView(vr => vr.insertAfterLine(a => a.exception, ctx => [
         <ValueSearchControlLine ctx={ctx} findOptions={{
             queryName: SchedulerTaskExceptionLineEntity,
-            parentColumn: "SchedulerTaskLog",
+            parentToken: "SchedulerTaskLog",
             parentValue: ctx.value,
         }} />
     ]))

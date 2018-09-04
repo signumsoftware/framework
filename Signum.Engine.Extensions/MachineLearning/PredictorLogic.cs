@@ -254,7 +254,7 @@ namespace Signum.Engine.MachineLearning
             return null;
         }
 
-        static List<QueryToken> GetParentKeys(PredictorMainQueryEmbedded mainQuery)
+        internal static List<QueryToken> GetParentKeys(PredictorMainQueryEmbedded mainQuery)
         {
             if (mainQuery.GroupResults)
                 return mainQuery.Columns.Select(a => a.Token.Token).Where(t => !(t is AggregateToken)).ToList();

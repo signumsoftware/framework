@@ -140,7 +140,7 @@ namespace Signum.Entities.Chart
             var allTokens = Columns.Select(a => a.Token?.Token).ToList();
 
             if (Filters != null)
-                allTokens.AddRange(Filters.Select(a => a.Token));
+                allTokens.AddRange(Filters.SelectMany(a=>a.GetFilterConditions()).Select(a => a.Token));
 
             if (Orders != null)
                 allTokens.AddRange(Orders.Select(a => a.Token));

@@ -13,6 +13,7 @@ using System.Threading.Tasks;
 namespace Signum.Entities.Dynamic
 {
     [Serializable, EntityKind(EntityKind.Shared, EntityData.Master)]
+    [Mixin(typeof(DisabledMixin))]
     public class DynamicValidationEntity : Entity
     {
         [UniqueIndex]

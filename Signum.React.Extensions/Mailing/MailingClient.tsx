@@ -97,7 +97,7 @@ export function start(options: {
     if (options.quickLinksFrom) {
         QuickLinks.registerGlobalQuickLink(ctx => {
             if (options.quickLinksFrom!.some(e => getTypeName(e) == ctx.lite.EntityType))
-                return new QuickLinks.QuickLinkExplore({ queryName: EmailMessageEntity, parentColumn: "Target", parentValue: ctx.lite });
+                return new QuickLinks.QuickLinkExplore({ queryName: EmailMessageEntity, parentToken: "Target", parentValue: ctx.lite });
 
             return undefined;
         });

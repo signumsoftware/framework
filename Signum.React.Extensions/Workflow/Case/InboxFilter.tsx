@@ -95,20 +95,20 @@ export default class InboxFilter extends React.Component<{ ctx: TypeContext<Inbo
             }
 
             if (fromDate && fromDate.length > 0)
-                result.push({ columnName: "StartDate", operation: "GreaterThanOrEqual", value: fromDate });
+                result.push({ token: "StartDate", operation: "GreaterThanOrEqual", value: fromDate });
 
             if (toDate && toDate.length > 0)
-                result.push({ columnName: "StartDate", operation: "LessThanOrEqual", value: toDate });
+                result.push({ token: "StartDate", operation: "LessThanOrEqual", value: toDate });
         }
 
         if (val.states)
-            result.push({ columnName: "State", operation: "IsIn", value: val.states.map(elm => elm.element) });
+            result.push({ token: "State", operation: "IsIn", value: val.states.map(elm => elm.element) });
 
         if (val.fromDate)
-            result.push({ columnName: "StartDate", value: val.fromDate, operation: "GreaterThanOrEqual" });
+            result.push({ token: "StartDate", value: val.fromDate, operation: "GreaterThanOrEqual" });
 
         if (val.toDate)
-            result.push({ columnName: "StartDate", value: val.toDate, operation: "LessThanOrEqual" });
+            result.push({ token: "StartDate", value: val.toDate, operation: "LessThanOrEqual" });
 
         return result;
     }

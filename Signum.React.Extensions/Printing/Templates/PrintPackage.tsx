@@ -16,7 +16,7 @@ export default class PrintPackage extends React.Component<{ ctx: TypeContext<Pri
                 <ValueLine ctx={e.subCtx(f => f.name)}  />
                 <fieldset>
                     <legend>{PrintLineEntity.nicePluralName()}</legend>
-                    <SearchControl findOptions={{ queryName: PrintLineEntity, parentColumn: "Package", parentValue : e.value}}  />
+                    <SearchControl findOptions={{ queryName: PrintLineEntity, parentToken: "Package", parentValue : e.value}}  />
                 </fieldset>
             </div>
         );

@@ -33,7 +33,7 @@ export function start(options: { routes: JSX.Element[], couldHaveAlerts?: (typeN
 
     QuickLinks.registerGlobalQuickLink(ctx => new QuickLinks.QuickLinkExplore({
         queryName: AlertEntity,
-        parentColumn: "Target",
+        parentToken: "Target",
         parentValue: ctx.lite
     }, { isVisible: couldHaveAlerts(ctx.lite.EntityType), icon: "bell", iconColor: "orange" }));
 

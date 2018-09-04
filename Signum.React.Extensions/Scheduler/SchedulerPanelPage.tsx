@@ -98,7 +98,7 @@ export default class SchedulerPanelPage extends React.Component<SchedulerPanelPr
                     <SearchControl 
                         findOptions={{
                             queryName: ScheduledTaskLogEntity,
-                            orderOptions: [{ columnName: "StartTime", orderType: "Descending" }],
+                            orderOptions: [{ token: "StartTime", orderType: "Descending" }],
                             pagination: { elementsPerPage: 10, mode: "Firsts" }
                         }}/>
                 </div>

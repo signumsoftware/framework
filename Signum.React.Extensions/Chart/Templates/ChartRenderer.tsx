@@ -14,6 +14,7 @@ import * as ChartClient from '../ChartClient'
 
 import "../Chart.css"
 import { QueryTokenEmbedded } from '../../UserAssets/Signum.Entities.UserAssets';
+import { toFilterOptions } from '@framework/Finder';
 
 declare global {
     interface Error {
@@ -158,13 +159,10 @@ export default class ChartRenderer extends React.Component<ChartRendererProps> {
                 window.open(Navigator.navigateRoute(lite));
 
             } else {
-
-
+                
                 const filters = cr.filterOptions.filter(a => !hasAggregate(a.token));
                 const columns: ColumnOption[] = [];
-
-             
-
+                
                 cr.columns.map((a, i) => {
 
                     const t = a.element.token;
@@ -184,19 +182,14 @@ export default class ChartRenderer extends React.Component<ChartRendererProps> {
 
                         if (col.parent)
                             columns.push({
-                                columnName: col.fullKey
+                                token: col.fullKey
                             });
                     }
                 });
 
                 window.open(Finder.findOptionsPath({
                     queryName: cr.queryKey,
-                    filterOptions: filters.map(fop => ({
-                        columnName: fop.token!.fullKey,
-                        operation: fop.operation,
-                        value: fop.value,
-                        frozen: fop.frozen,
-                    }) as FilterOption),
+                    filterOptions: toFilterOptions(filters),
                     columnOptions: columns,
                 }));
             }

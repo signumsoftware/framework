@@ -304,7 +304,7 @@ export class DynamicTypeDefinitionComponent extends React.Component<DynamicTypeD
                         <Tab eventKey="connections" title="Apply To">
                             <SearchControl findOptions={{
                                 queryName: DynamicMixinConnectionEntity,
-                                parentColumn: "DynamicMixin",
+                                parentToken: "DynamicMixin",
                                 parentValue: dt
                             }} />
                         </Tab>
@@ -315,7 +315,7 @@ export class DynamicTypeDefinitionComponent extends React.Component<DynamicTypeD
                             {this.state.typeEntity == false ? <p className="alert alert-warning">{DynamicTypeMessage.TheEntityShouldBeSynchronizedToApplyMixins.niceToString()}</p> :
                                 <SearchControl findOptions={{
                                     queryName: DynamicMixinConnectionEntity,
-                                    parentColumn: "EntityType",
+                                    parentToken: "EntityType",
                                     parentValue: this.state.typeEntity
                                 }} />
                             }

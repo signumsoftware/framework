@@ -157,7 +157,7 @@ namespace Signum.Engine.Templating
             if (Type == null)
                 return;
 
-            var result = FilterValueConverter.TryParse(valueString, Type, Operation.Value.IsList(), allowSmart: true);
+            var result = FilterValueConverter.TryParse(valueString, Type, Operation.Value.IsList());
 
             if (result is Result<object>.Error e)
                 addError(false, "Impossible to convert '{0}' to {1}: {2}".FormatWith(valueString, Type.TypeName(), e.ErrorText));
@@ -630,7 +630,7 @@ namespace Signum.Engine.Templating
         {
             try
             {
-                var obj = dateTimeExpression == null ? DateTime.Now: FilterValueConverter.Parse(dateTimeExpression, typeof(DateTime?), isList: false, allowSmart: true);
+                var obj = dateTimeExpression == null ? DateTime.Now: FilterValueConverter.Parse(dateTimeExpression, typeof(DateTime?), isList: false);
                 this.dateTimeExpression = dateTimeExpression;
             }
             catch (Exception e)
@@ -643,7 +643,7 @@ namespace Signum.Engine.Templating
 
         public override object GetValue(TemplateParameters p)
         {
-            return dateTimeExpression == null ? DateTime.Now : FilterValueConverter.Parse(this.dateTimeExpression, typeof(DateTime?), isList: false, allowSmart: true);
+            return dateTimeExpression == null ? DateTime.Now : FilterValueConverter.Parse(this.dateTimeExpression, typeof(DateTime?), isList: false);
         }
 
         public override void FillQueryTokens(List<QueryToken> list)

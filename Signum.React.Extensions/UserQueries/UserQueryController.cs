@@ -42,7 +42,7 @@ namespace Signum.React.UserQueries
         {
             var qr = request.queryRequest.ToQueryRequest();
             var qd = QueryLogic.Queries.QueryDescription(qr.QueryName);
-            return qr.ToUserQuery(qd, QueryLogic.GetQueryEntity(qd.QueryName), request.defaultPagination.ToPagination(), withoutFilters: false);
+            return qr.ToUserQuery(qd, QueryLogic.GetQueryEntity(qd.QueryName), request.defaultPagination.ToPagination());
         }
 
         public class CreateRequest

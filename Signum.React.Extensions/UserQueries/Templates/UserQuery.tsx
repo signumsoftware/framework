@@ -6,6 +6,9 @@ import { QueryDescription, SubTokensOptions } from '@framework/FindOptions'
 import { getQueryNiceName } from '@framework/Reflection'
 import { TypeContext, FormGroupStyle } from '@framework/TypeContext'
 import QueryTokenEntityBuilder from '../../UserAssets/Templates/QueryTokenEntityBuilder'
+import FilterBuilderEmbedded from '../../UserAssets/Templates/FilterBuilderEmbedded';
+import { MList } from '@framework/Signum.Entities';
+import { QueryEntity } from '@framework/Signum.Entities.Basics';
 
 const CurrentEntityKey = "[CurrentEntity]";
 export default class UserQuery extends React.Component<{ ctx: TypeContext<UserQueryEntity> }> {
@@ -58,18 +61,9 @@ export default class UserQuery extends React.Component<{ ctx: TypeContext<UserQu
                         <ValueLine ctx={ctx.subCtx(e => e.appendFilters)} />
                         <ValueLine ctx={ctx.subCtx(e => e.groupResults)} />
                         <div>
-                            <EntityTable ctx={ctxxs.subCtx(e => e.filters)} columns={EntityTable.typedColumns<QueryFilterEmbedded>([
-                                {
-                                    property: a => a.token,
-                                    template: ctx => <QueryTokenEntityBuilder
-                                        ctx={ctx.subCtx(a => a.token, { formGroupStyle: "SrOnly" })}
-                                        queryKey={this.props.ctx.value.query!.key}
-                                        subTokenOptions={SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement | canAggregate} />,
-                                    headerHtmlAttributes: { style: { width: "40%" } },
-                                },
-                                { property: a => a.operation },
-                                { property: a => a.valueString, headerHtmlAttributes: { style: { width: "40%" } } }
-                            ])} />
+                            <FilterBuilderEmbedded ctx={ctxxs.subCtx(e => e.filters)}
+                                subTokenOptions={SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement | canAggregate}
+                                queryKey={ctxxs.value.query!.key}  />
                             <ValueLine ctx={ctxxs.subCtx(e => e.columnsMode)} />
                             <EntityTable ctx={ctxxs.subCtx(e => e.columns)} columns={EntityTable.typedColumns<QueryColumnEmbedded>([
                                 {
@@ -106,4 +100,5 @@ export default class UserQuery extends React.Component<{ ctx: TypeContext<UserQu
         );
     }
 }
+
 

@@ -55,6 +55,8 @@ namespace Signum.Entities.UserAssets
         SelectTheXmlFileWithTheUserAssetsThatYouWantToImport,
         SelectTheEntitiesToOverride,
         SucessfullyImported,
+        SwitchToValue,
+        SwitchToExpression,
     }
 
     [AutoInit]

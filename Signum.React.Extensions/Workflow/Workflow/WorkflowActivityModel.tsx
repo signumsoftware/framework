@@ -143,7 +143,7 @@ class ScriptComponent extends React.Component<{ ctx: TypeContext<WorkflowScriptP
                 <legend>{ctx.niceName()}</legend>
                 <EntityLine ctx={ctx.subCtx(p => p.script)} findOptions={{
                     queryName: WorkflowScriptEntity,
-                    parentColumn: "Entity.MainEntityType",
+                    parentToken: "Entity.MainEntityType",
                     parentValue: this.props.mainEntityType
                 }} />
                 <EntityLine ctx={ctx.subCtx(s => s.retryStrategy)} />

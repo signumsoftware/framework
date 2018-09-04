@@ -20,7 +20,7 @@ export default class NewsletterDelivery extends React.Component<{ ctx: TypeConte
 	            <ValueLine ctx={nc.subCtx(n => n.sendDate)}  />
 	            <EntityLine ctx={nc.subCtx(n => n.recipient)}  />
 	            <EntityLine ctx={nc.subCtx(n => n.newsletter)}  />
-                <SearchControl findOptions={{queryName: ProcessExceptionLineEntity, parentColumn: "Line", parentValue: nc.value}}/>
+                <SearchControl findOptions={{queryName: ProcessExceptionLineEntity, parentToken: "Line", parentValue: nc.value}}/>
             </div>
         );
     }

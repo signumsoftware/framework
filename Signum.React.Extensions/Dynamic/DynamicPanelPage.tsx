@@ -8,7 +8,7 @@ import { ajaxPost } from '@framework/Services'
 import * as Finder from '@framework/Finder'
 import * as Navigator from '@framework/Navigator'
 import { WebApiHttpError } from '@framework/Services'
-import { ValueSearchControl, SearchControl, FindOptions } from '@framework/Search'
+import { ValueSearchControl, SearchControl, FindOptions, FindOptionsParsed } from '@framework/Search'
 import EntityLink from '@framework/SearchControl/EntityLink'
 import { QueryDescription, SubTokensOptions, QueryEntitiesRequest } from '@framework/FindOptions'
 import { getQueryNiceName, PropertyRoute, getTypeInfos, PseudoType, getTypeInfo, TypeInfo, getQueryKey } from '@framework/Reflection'
@@ -24,6 +24,7 @@ import * as QueryString from 'query-string';
 import "./DynamicPanelPage.css"
 import { Tab, Tabs } from '@framework/Components/Tabs';
 import { FormGroup } from '@framework/Lines';
+import { toFilterRequests } from '@framework/Finder';
 
 interface DynamicPanelProps extends RouteComponentProps<{}> {
 }
@@ -379,19 +380,24 @@ export class CheckEvalType extends React.Component<CheckEvalTypeProps, CheckEval
 
     loadData(props: CheckEvalTypeProps) {
         this.setState({ state: "loading" }, () => {
-            var fo = this.props.findOptions;
-            var request = {
-                queryKey: getQueryKey(fo.queryName),
-                filters: (fo.filterOptions || []).map(fo => ({ token: fo.columnName, operation: fo.operation!, value: fo.value })),
-                orders: [{ token: "Entity.Id", orderType: "Ascending" }],
-                count: 10000,
-            } as QueryEntitiesRequest;
-            API.getEvalErrors(request)
-                .then(errors => this.setState({ state: "success", errors: errors }),
-                    e => {
-                        this.setState({ state: "failed", errors: undefined });
-                        throw e;
-                    }).done();
+
+            const fo = this.props.findOptions;
+            Finder.getQueryDescription(fo.queryName)
+                .then(qd => Finder.parseFindOptions(fo, qd))
+                .then(fop => {
+                    var request = {
+                        queryKey: fop.queryKey,
+                        filters: toFilterRequests(fop.filterOptions || []),
+                        orders: [{ token: "Entity.Id", orderType: "Ascending" }],
+                        count: 10000,
+                    } as QueryEntitiesRequest;
+                    API.getEvalErrors(request)
+                        .then(errors => this.setState({ state: "success", errors: errors }),
+                            e => {
+                                this.setState({ state: "failed", errors: undefined });
+                                throw e;
+                            }).done();
+                });
         });
     }
 
