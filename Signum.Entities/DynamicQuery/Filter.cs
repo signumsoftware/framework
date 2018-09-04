@@ -11,58 +11,124 @@ using System.Collections;
 
 namespace Signum.Entities.DynamicQuery
 {
-    [Serializable]
-    public class Filter
+    [InTypeScript(true), DescriptionOptions(DescriptionOptions.Members | DescriptionOptions.Description)]
+    public enum FilterGroupOperation
     {
-        QueryToken token;
-        public QueryToken Token { get { return token; } }
+        And,
+        Or,
+    }
 
-        FilterOperation operation;
-        public FilterOperation Operation { get { return operation; } }
+    public abstract class Filter
+    {
+        public abstract Expression GetExpression(BuildExpressionContext ctx);
 
-        object value;
-        public object Value { get { return value; } }
+        public abstract IEnumerable<FilterCondition> GetFilterConditions();
+        
+        public abstract bool IsAggregate(); 
+    }
 
-        public Filter(QueryToken token, FilterOperation operation, object value)
+    [Serializable]
+    public class FilterGroup : Filter
+    {
+        public FilterGroupOperation GroupOperation { get; }
+        public QueryToken Token { get; }
+        public List<Filter> Filters { get; }
+
+        public FilterGroup(FilterGroupOperation groupOperation, QueryToken token, List<Filter> filters)
         {
-            this.token = token;
-            this.operation = operation;
-            this.value = ReflectionTools.ChangeType(value, operation.IsList() ? typeof(IEnumerable<>).MakeGenericType(Token.Type.Nullify()) : Token.Type);
+            this.GroupOperation = groupOperation;
+            this.Token = token;
+            this.Filters = filters;
+        }
+
+        public override IEnumerable<FilterCondition> GetFilterConditions()
+        {
+            return Filters.SelectMany(a => a.GetFilterConditions());
+        }
+        
+        public override Expression GetExpression(BuildExpressionContext ctx)
+        {
+            var anyAll = Token as CollectionAnyAllToken;
+            if(anyAll == null)
+            {
+                return this.GroupOperation == FilterGroupOperation.And ?
+                    Filters.Select(f => f.GetExpression(ctx)).AggregateAnd() :
+                    Filters.Select(f => f.GetExpression(ctx)).AggregateOr();
+            }
+            else
+            {
+                Expression collection = anyAll.Parent.BuildExpression(ctx);
+                Type elementType = collection.Type.ElementType();
+
+                var p = Expression.Parameter(elementType, elementType.Name.Substring(0, 1).ToLower());
+                ctx.Replacemens.Add(anyAll, p);
+
+                var body = this.GroupOperation == FilterGroupOperation.And ?
+                    Filters.Select(f => f.GetExpression(ctx)).AggregateAnd() :
+                    Filters.Select(f => f.GetExpression(ctx)).AggregateOr();
+
+                ctx.Replacemens.Remove(anyAll);
+
+                return anyAll.BuildAnyAll(collection, p, body);
+            }
+        }
+
+        public override string ToString()
+        {
+            return $@"{this.GroupOperation}{(this.Token != null ? $" ({this.Token})": null)}
+{Filters.ToString("\r\n").Indent(4)}";
+        }
+
+        public override bool IsAggregate()
+        {
+            return this.Filters.Any(f => f.IsAggregate());
+        }
+    }
+
+
+    [Serializable]
+    public class FilterCondition : Filter
+    {
+        public QueryToken Token { get; }
+        public FilterOperation Operation { get; }
+        public object Value { get; }
+
+        public FilterCondition(QueryToken token, FilterOperation operation, object value)
+        {
+            this.Token = token;
+            this.Operation = operation;
+            this.Value = ReflectionTools.ChangeType(value, operation.IsList() ? typeof(IEnumerable<>).MakeGenericType(Token.Type.Nullify()) : Token.Type);
+        }
+
+        public override IEnumerable<FilterCondition> GetFilterConditions()
+        {
+            yield return this;
         }
 
         static MethodInfo miContainsEnumerable = ReflectionTools.GetMethodInfo((IEnumerable<int> s) => s.Contains(2)).GetGenericMethodDefinition();
-     
-        public void GenerateCondition(FilterBuildExpressionContext filterContext)
+
+        public override Expression GetExpression(BuildExpressionContext ctx)
         {
-            List<CollectionElementToken> allAny = Token.Follow(a => a.Parent)
-                .OfType<CollectionElementToken>()
-                .Where(a => !a.CollectionElementType.IsElement())
-                .Reverse()
-                .ToList();
+            CollectionAnyAllToken anyAll = Token.Follow(a => a.Parent)
+                  .OfType<CollectionAnyAllToken>()
+                  .TakeWhile(c => !ctx.Replacemens.ContainsKey(c))
+                  .LastOrDefault();
 
-            List<IFilterExpression> filters = filterContext.Filters;
-            foreach (var ct in allAny)
-            {
-                var allAnyFilter = filterContext.AllAnyFilters.GetOrCreate(ct, () =>
-                {
-                    var newAllAnyFilter = new AnyAllFilter(ct);
+            if (anyAll == null)
+                return GetConditionExpressionBasic(ctx);
 
-                    filterContext.Replacemens.Add(ct, ct.CreateExpression(newAllAnyFilter.Parameter));
+            Expression collection = anyAll.Parent.BuildExpression(ctx);
+            Type elementType = collection.Type.ElementType();
 
-                    filters.Add(newAllAnyFilter);
+            var p = Expression.Parameter(elementType, elementType.Name.Substring(0, 1).ToLower());
+            ctx.Replacemens.Add(anyAll, p);
+            var body = GetExpression(ctx);
+            ctx.Replacemens.Remove(anyAll);
 
-                    return newAllAnyFilter;
-                });
-
-                filters = allAnyFilter.Filters;
-            }
-
-            var exp = GetConditionBasic(filterContext);
-
-            filters.Add(new FilterExpression(exp));
+            return anyAll.BuildAnyAll(collection, p, body);
         }
 
-        private Expression GetConditionBasic(BuildExpressionContext context)
+        private Expression GetConditionExpressionBasic(BuildExpressionContext context)
         {
             Expression left = Token.BuildExpression(context);
 
@@ -80,7 +146,7 @@ namespace Signum.Entities.DynamicQuery
                     hasNull = true;
                 }
 
-                if (token.Type == typeof(string))
+                if (Token.Type == typeof(string))
                 {
                     while (clone.Contains(""))
                     {
@@ -100,7 +166,7 @@ namespace Signum.Entities.DynamicQuery
                 var contains =  Expression.Call(miContainsEnumerable.MakeGenericMethod(Token.Type.Nullify()), right, left.Nullify());
 
 
-                var result = !hasNull || token.Type == typeof(string) ? (Expression)contains :
+                var result = !hasNull || Token.Type == typeof(string) ? (Expression)contains :
                         Expression.Or(Expression.Equal(left, Expression.Constant(null, Token.Type.Nullify())), contains);
 
 
@@ -115,7 +181,7 @@ namespace Signum.Entities.DynamicQuery
             else
             {
                 var val = Value;
-                if (token.Type == typeof(string) && (val == null || val is string && string.IsNullOrEmpty((string)val)))
+                if (Token.Type == typeof(string) && (val == null || val is string && string.IsNullOrEmpty((string)val)))
                 {
                     val = val ?? "";
                     left = Expression.Coalesce(left, Expression.Constant(""));
@@ -127,6 +193,10 @@ namespace Signum.Entities.DynamicQuery
             }
         }
 
+        public override bool IsAggregate()
+        {
+            return this.Token is AggregateToken;
+        }
 
         public override string ToString()
         {

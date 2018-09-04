@@ -134,6 +134,8 @@ Lose changes?")]
         CollectionsCanNotBeAddedAsColumns,
         [Description("Add filter")]
         AddFilter,
+        [Description("Add group")]
+        AddGroup,
         [Description("Add value")]
         AddValue,
         [Description("Delete filter")]

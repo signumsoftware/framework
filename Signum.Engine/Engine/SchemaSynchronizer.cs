@@ -250,7 +250,8 @@ namespace Signum.Engine
 
                                     createNew: (cn, tabCol) => SqlPreCommand.Combine(Spacing.Simple,
                                         tabCol.PrimaryKey && dif.PrimaryKeyName != null ? SqlBuilder.DropPrimaryKeyConstraint(tab.Name) : null,
-                                        AlterTableAddColumnDefault(tab, tabCol, replacements)),
+                                        AlterTableAddColumnDefault(tab, tabCol, replacements, 
+                                            cn.EndsWith("_HasValue") && dif.Columns.Values.Any(c=>c.Name.StartsWith(cn.Before("HasValue")) && c.Nullable == false) ? "1" : null)),
 
                                     removeOld: (cn, difCol) => SqlPreCommand.Combine(Spacing.Simple,
                                          difCol.DefaultConstraint != null ? SqlBuilder.AlterTableDropConstraint(tab.Name, difCol.DefaultConstraint.Name) : null,
@@ -444,12 +445,12 @@ namespace Signum.Engine
             return result;
         }
 
-        private static SqlPreCommand AlterTableAddColumnDefault(ITable table, IColumn column, Replacements rep)
+        private static SqlPreCommand AlterTableAddColumnDefault(ITable table, IColumn column, Replacements rep, string forceDefaultValue)
         {
             if (column.Nullable == IsNullable.Yes || column.Identity || column.Default != null)
                 return SqlBuilder.AlterTableAddColumn(table, column);
 
-                var defaultValue = GetDefaultValue(table, column, rep, forNewColumn: true);
+                var defaultValue = GetDefaultValue(table, column, rep, forNewColumn: true, forceDefaultValue: forceDefaultValue);
                 if (defaultValue == "force")
                     return SqlBuilder.AlterTableAddColumn(table, column);
 
@@ -502,7 +503,7 @@ FROM {oldTable.Name}");
             );
         }
 
-        public static string GetDefaultValue(ITable table, IColumn column, Replacements rep, bool forNewColumn)
+        public static string GetDefaultValue(ITable table, IColumn column, Replacements rep, bool forNewColumn, string forceDefaultValue = null)
         {
      		if(column is SystemVersionedInfo.Column svc)
             {
@@ -511,11 +512,12 @@ FROM {oldTable.Name}");
                 return $"CONVERT(datetime2, '{date:yyyy-MM-dd HH:mm:ss.fffffff}')";
             }
 
-            string typeDefault = SqlBuilder.IsNumber(column.SqlDbType) ? "0" :
-                                 SqlBuilder.IsString(column.SqlDbType) ? "''" :
-                                 SqlBuilder.IsDate(column.SqlDbType) ? "GetDate()" :
-                                 column.SqlDbType == SqlDbType.UniqueIdentifier ? "NEWID()" :
-                                 "?";
+            string typeDefault = forceDefaultValue ??
+                (SqlBuilder.IsNumber(column.SqlDbType) ? "0" :
+                SqlBuilder.IsString(column.SqlDbType) ? "''" :
+                SqlBuilder.IsDate(column.SqlDbType) ? "GetDate()" :
+                column.SqlDbType == SqlDbType.UniqueIdentifier ? "NEWID()" :
+                "?");
 
             string defaultValue = rep.Interactive ? SafeConsole.AskString($"Default value for '{table.Name.Name}.{column.Name}'? ([Enter] for {typeDefault} or 'force' if there are no {(forNewColumn ? "rows" : "nulls")}) ", stringValidator: str => null) : "";
             if (defaultValue == "force")

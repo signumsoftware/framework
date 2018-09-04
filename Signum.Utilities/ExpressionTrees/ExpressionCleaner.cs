@@ -168,11 +168,11 @@ namespace Signum.Utilities.ExpressionTrees
 
         static bool IsStatic(MemberInfo mi)
         {
-            if (mi is MethodInfo)
-                return ((MethodInfo)mi).IsStatic;
+            if (mi is MethodInfo mti)
+                return mti.IsStatic;
 
-            if (mi is PropertyInfo)
-                return (((PropertyInfo)mi).GetGetMethod() ?? ((PropertyInfo)mi).GetSetMethod()).IsStatic;
+            if (mi is PropertyInfo pi)
+                return (pi.GetGetMethod() ?? pi.GetSetMethod()).IsStatic;
 
             return false;
         }
@@ -221,16 +221,16 @@ namespace Signum.Utilities.ExpressionTrees
                 return null;
             }
 
-            if (mi is PropertyInfo)
+            if (mi is PropertyInfo pi)
             {
-                Type[] types = ((PropertyInfo)mi).GetIndexParameters().Select(a => a.ParameterType).ToArray();
+                Type[] types = pi.GetIndexParameters().Select(a => a.ParameterType).ToArray();
 
-                var result = decType.GetProperty(mi.Name, flags, null, ((PropertyInfo)mi).PropertyType, types, null) ;
+                var result = decType.GetProperty(mi.Name, flags, null, pi.PropertyType, types, null) ;
                 if (result != null)
                     return result; 
 
                 if(mi.DeclaringType.IsInterface)
-                    return decType.GetProperty(mi.DeclaringType.FullName + "." + mi.Name, flags, null, ((PropertyInfo)mi).PropertyType, types, null);
+                    return decType.GetProperty(mi.DeclaringType.FullName + "." + mi.Name, flags, null, pi.PropertyType, types, null);
 
                 return null;
             }
@@ -241,11 +241,11 @@ namespace Signum.Utilities.ExpressionTrees
         static MemberInfo BaseMember(MemberInfo mi)
         {
             MemberInfo result;
-            if (mi is MethodInfo)
-                result = ((MethodInfo)mi).GetBaseDefinition();
+            if (mi is MethodInfo mti)
+                result = mti.GetBaseDefinition();
 
-            else if (mi is PropertyInfo)
-                result = ((PropertyInfo)mi).GetBaseDefinition();
+            else if (mi is PropertyInfo pi)
+                result = pi.GetBaseDefinition();
             else
                 throw new InvalidOperationException("Invalid Member type");
 

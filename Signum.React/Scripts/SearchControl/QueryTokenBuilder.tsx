@@ -1,12 +1,9 @@
-﻿import * as React from 'react'
+﻿
+import * as React from 'react'
 import 'react-widgets/dist/css/react-widgets.css';
 import { areEqual, classes } from '../Globals'
 import * as Finder from '../Finder'
-import { openModal, IModalProps } from '../Modals';
-import { FilterOperation, FilterOption, QueryDescription, QueryToken, SubTokensOptions, getTokenParents } from '../FindOptions'
-import { SearchMessage, JavascriptMessage } from '../Signum.Entities'
-import * as Reflection from '../Reflection'
-import { default as SearchControl, SearchControlProps} from './SearchControl'
+import { QueryToken, SubTokensOptions, getTokenParents, isPrefix } from '../FindOptions'
 import * as PropTypes from "prop-types";
 
 
@@ -15,6 +12,7 @@ import * as DropdownList from 'react-widgets/lib/DropdownList'
 
 
 interface QueryTokenBuilderProps extends React.Props<QueryTokenBuilder> {
+    prefixQueryToken?: QueryToken | undefined; 
     queryToken: QueryToken | undefined | null;
     onTokenChange: (newToken: QueryToken | undefined) => void;
     queryKey: string;
@@ -23,21 +21,39 @@ interface QueryTokenBuilderProps extends React.Props<QueryTokenBuilder> {
     className?: string;
 }
 
-export default class QueryTokenBuilder extends React.Component<QueryTokenBuilderProps>{
+export default class QueryTokenBuilder extends React.Component<QueryTokenBuilderProps, { expanded: boolean }>{
 
     lastTokenChanged: string | undefined;
 
     static copiedToken: { fullKey: string, queryKey: string } | undefined; 
 
+    constructor(props: QueryTokenBuilderProps) {
+        super(props);
+        this.state = { expanded: false };
+    }
+
+    componentWillReceiveProps(newProps: QueryTokenBuilderProps) {
+        if (newProps.queryToken != this.props.queryToken || newProps.prefixQueryToken != this.props.prefixQueryToken)
+            this.setState({ expanded: false });
+    }
+
+    handleExpandButton = (e: React.MouseEvent<any>) => {
+        this.setState({ expanded: true });
+    }
+
     render() {
-        const tokenList: (QueryToken | undefined)[] = [...getTokenParents(this.props.queryToken)];
+        let tokenList: (QueryToken | undefined)[] = [...getTokenParents(this.props.queryToken)];
+
+        var initialIndex = !this.state.expanded && this.props.prefixQueryToken && this.props.queryToken && isPrefix(this.props.prefixQueryToken, this.props.queryToken) ?
+            tokenList.findIndex(a => a!.fullKey == this.props.prefixQueryToken!.fullKey) + 1 : 0;
 
         if (!this.props.readOnly)
             tokenList.push(undefined);
 
         return (
             <div className={classes("sf-query-token-builder", this.props.className)} onKeyDown={this.handleKeyDown}>
-                {tokenList.map((a, i) => <QueryTokenPart key={i == 0 ? "__first__" : tokenList[i - 1]!.fullKey }
+                {initialIndex != 0 && <button onClick={this.handleExpandButton} className="btn btn-sm sf-prefix-btn">…</button>}
+                {tokenList.map((a, i) => i < initialIndex  ? null : <QueryTokenPart key = { i == 0 ? "__first__" : tokenList[i - 1]!.fullKey }
                     queryKey={this.props.queryKey}
                     readOnly={this.props.readOnly}
                     onTokenSelected={qt => {

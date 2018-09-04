@@ -28,7 +28,7 @@ export function start() {
 
     QuickLinks.registerGlobalQuickLink(ctx => new QuickLinks.QuickLinkExplore({
         queryName: OperationLogEntity,
-        parentColumn: "Target",
+        parentToken: "Target",
         parentValue: ctx.lite
     },
         {

@@ -3,7 +3,7 @@ import * as React from 'react'
 import { classes, Dic } from '../Globals'
 import * as Finder from '../Finder'
 import { openModal, IModalProps } from '../Modals';
-import { FindOptionsParsed, QueryToken, getTokenParents, QueryTokenType } from '../FindOptions'
+import { FindOptionsParsed, QueryToken, QueryTokenType } from '../FindOptions'
 import { SearchMessage, JavascriptMessage, ValidationMessage, Lite, Entity, External } from '../Signum.Entities'
 import { Binding, IsByAll, getTypeInfos, TypeReference } from '../Reflection'
 import { TypeContext, FormGroupStyle } from '../TypeContext'

@@ -17,6 +17,7 @@ import { FormControlReadonly } from './FormControlReadonly'
 export interface EntityComboProps extends EntityBaseProps {
     ctx: TypeContext<ModifiableEntity | Lite<Entity> | null | undefined>;
     data?: Lite<Entity>[];
+    extraButtons?: (ec: EntityCombo) => React.ReactNode;
 }
 
 export class EntityCombo extends EntityBase<EntityComboProps, EntityComboProps> {
@@ -39,6 +40,7 @@ export class EntityCombo extends EntityBase<EntityComboProps, EntityComboProps> 
                 {!hasValue && this.renderFindButton(true)}
                 {hasValue && this.renderViewButton(true, this.state.ctx.value!)}
                 {hasValue && this.renderRemoveButton(true, this.state.ctx.value!)}
+                {this.props.extraButtons && this.props.extraButtons(this)}
             </span>
         );
 
