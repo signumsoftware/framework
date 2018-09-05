@@ -1,4 +1,4 @@
-﻿import * as React from 'react'
+import * as React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { RouteComponentProps } from 'react-router'
 import { Dic } from '../Globals'
@@ -92,7 +92,7 @@ export default class SearchPage extends React.Component<SearchPageProps, SearchP
                 <div id="divSearchPage">
                     <h3>
                         <span className="display-6 sf-query-title">{getQueryNiceName(fo.queryName)}</span>
-                        <small>Error: Query not allowed in full screen</small>
+                        <small>Error: Query not allowed {Finder.isFindable(fo.queryName, false) ? "in full screen" : ""}</small>
                     </h3>
                 </div>
             );
