@@ -1,18 +1,12 @@
-﻿import * as React from 'react'
-import { Route } from 'react-router'
-import { ajaxPost, ajaxGet } from '@framework/Services';
-import { EntitySettings, ViewPromise } from '@framework/Navigator'
-import { Entity, Lite } from '@framework/Signum.Entities'
+﻿import { ajaxPost, ajaxGet } from '@framework/Services';
+import { Lite } from '@framework/Signum.Entities'
 import * as Navigator from '@framework/Navigator'
 import * as Finder from '@framework/Finder'
-import { EntityOperationSettings } from '@framework/Operations'
-import * as Operations from '@framework/Operations'
 import { CultureInfoEntity } from '../Basics/Signum.Entities.Basics'
 import { reloadTypes } from '@framework/Reflection'
 import { toLite } from '@framework/Signum.Entities';
 
 export let currentCulture: CultureInfoEntity;
-
 
 export const onCultureLoaded: Array<(culture: CultureInfoEntity) => void> = [];
 export function loadCurrentCulture() : Promise<void> {
@@ -23,12 +17,8 @@ export function loadCurrentCulture() : Promise<void> {
         }); 
 }
 
-export function changeCurrentCulture(newCulture: Lite<CultureInfoEntity>) {
+export function changeCurrentCulture(newCulture: Lite<CultureInfoEntity>) {    
     API.setCurrentCulture(newCulture)
-        .then(c => {
-            //if (!document.cookie.contains("language="))
-                document.cookie = "language=" + c + ";path =" + Navigator.toAbsoluteUrl("~/");
-        })
         .then(() => reloadTypes())
         .then(() => Finder.clearQueryDescriptionCache())
         .then(() => loadCurrentCulture())
@@ -39,7 +29,6 @@ export function changeCurrentCulture(newCulture: Lite<CultureInfoEntity>) {
 let cachedCultures: Promise<CultureInfoEntity[]>;
 
 export function getCultures(withHidden: boolean): Promise<{ [name: string]: Lite<CultureInfoEntity> }> {
-
     if (cachedCultures == null)
         cachedCultures = API.fetchCultures();
     
@@ -50,7 +39,6 @@ export function getCultures(withHidden: boolean): Promise<{ [name: string]: Lite
     });
 }
 
-
 export module API {
     export function fetchCultures(): Promise<CultureInfoEntity[]> {
         return ajaxGet<CultureInfoEntity[]>({ url: "~/api/culture/cultures", cache: "no-cache" });
@@ -60,8 +48,8 @@ export module API {
         return ajaxGet<CultureInfoEntity>({ url: "~/api/culture/currentCulture", cache: "no-cache" });
     }
 
-    export function setCurrentCulture(culture: Lite<CultureInfoEntity>): Promise<string> {
-        return ajaxPost<string>({ url: "~/api/culture/currentCulture", cache: "no-cache", credentials: "include" }, culture);
+    export function setCurrentCulture(culture: Lite<CultureInfoEntity>): Promise<void> {
+        return ajaxPost<void>({ url: "~/api/culture/currentCulture", cache: "no-cache", credentials: "include" }, culture);
     }
 }
 
