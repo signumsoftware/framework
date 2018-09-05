@@ -49,8 +49,8 @@ export default class SystemTimeEditor extends React.Component<SystemTimeEditorPr
         else {
 
             Finder.parseColumnOptions([
-                { columnName: "Entity.SystemValidFrom" },
-                { columnName: "Entity.SystemValidTo" }
+                { token: "Entity.SystemValidFrom" },
+                { token: "Entity.SystemValidTo" }
             ], fop.groupResults, this.props.queryDescription).then(cops => {
                 fop.columnOptions = [...cops, ...fop.columnOptions];
                 this.props.onChanged();
@@ -88,9 +88,9 @@ export default class SystemTimeEditor extends React.Component<SystemTimeEditorPr
         else {
             
             Finder.parseColumnOptions([
-                { columnName: "Entity.PreviousOperationLog.Start" },
-                { columnName: "Entity.PreviousOperationLog.User" },
-                { columnName: "Entity.PreviousOperationLog.Operation" },
+                { token: "Entity.PreviousOperationLog.Start" },
+                { token: "Entity.PreviousOperationLog.User" },
+                { token: "Entity.PreviousOperationLog.Operation" },
             ], fop.groupResults, this.props.queryDescription).then(cops => {
                 fop.columnOptions = [...cops, ...fop.columnOptions];
                 this.props.onChanged();

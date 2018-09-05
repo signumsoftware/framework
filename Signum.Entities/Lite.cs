@@ -222,8 +222,8 @@ namespace Signum.Entities
 
             public int CompareTo(object obj)
             {
-                if (obj is Lite<Entity>)
-                    return CompareTo((Lite<Entity>)obj);
+                if (obj is Lite<Entity> lite)
+                    return CompareTo(lite);
 
                 throw new InvalidOperationException("obj is not a Lite");
             }

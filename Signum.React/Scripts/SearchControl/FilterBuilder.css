@@ -3,3 +3,16 @@
     margin-bottom: 0px;
     width: auto;
 }
+
+div.hidden > .sf-query-token-builder > .sf-query-token-part .rw-widget-input,
+div.hidden > label
+{
+    opacity: .5;
+}
+
+select.form-control.sf-group-selector {
+    display: inline;
+    width: auto;
+    font-weight: bold;
+    text-transform: uppercase;
+}

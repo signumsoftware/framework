@@ -383,10 +383,10 @@ namespace Signum.Entities.DynamicQuery
 
             if (token.HasAllOrAny())
                 return "Columns can not contain '{0}', '{1}', {2} or {3}".FormatWith(
-                    CollectionElementType.All.NiceToString(), 
-                    CollectionElementType.Any.NiceToString(),
-                    CollectionElementType.NoOne.NiceToString(),
-                    CollectionElementType.AnyNo.NiceToString());
+                    CollectionAnyAllType.All.NiceToString(),
+                    CollectionAnyAllType.Any.NiceToString(),
+                    CollectionAnyAllType.NoOne.NiceToString(),
+                    CollectionAnyAllType.AnyNo.NiceToString());
 
             return null; 
         }
@@ -416,10 +416,10 @@ namespace Signum.Entities.DynamicQuery
 
             if (token.HasAllOrAny())
                 return "'{0}', '{1}', '{2}' or '{3}' can not be ordered".FormatWith(
-                    CollectionElementType.All.NiceToString(),
-                    CollectionElementType.Any.NiceToString(),
-                    CollectionElementType.NoOne.NiceToString(),
-                    CollectionElementType.AnyNo.NiceToString());
+                    CollectionAnyAllType.All.NiceToString(),
+                    CollectionAnyAllType.Any.NiceToString(),
+                    CollectionAnyAllType.NoOne.NiceToString(),
+                    CollectionAnyAllType.AnyNo.NiceToString());
 
             return null;
         }

@@ -128,6 +128,14 @@ namespace Signum.Engine.SchemaInfoTables
             return ForeignKeysExpression.Evaluate(this);
         }
 
+        static Expression<Func<SysTables, IQueryable<SysForeignKeys>>> IncommingForeignKeysExpression =
+        t => Database.View<SysForeignKeys>().Where(fk => fk.referenced_object_id == t.object_id);
+        [ExpressionField]
+        public IQueryable<SysForeignKeys> IncommingForeignKeys()
+        {
+            return IncommingForeignKeysExpression.Evaluate(this);
+        }
+
         static Expression<Func<SysTables, IQueryable<SysKeyConstraints>>> KeyConstraintsExpression =
             t => Database.View<SysKeyConstraints>().Where(fk => fk.parent_object_id == t.object_id);
         [ExpressionField]
@@ -307,6 +315,22 @@ namespace Signum.Engine.SchemaInfoTables
         public SysSchemas Schema()
         {
             return SchemaExpression.Evaluate(this);
+        }
+
+        static Expression<Func<SysForeignKeys, SysTables>> ParentTableExpression =
+            i => Database.View<SysTables>().Single(a => a.object_id == i.parent_object_id);
+        [ExpressionField]
+        public SysTables ParentTable()
+        {
+            return ParentTableExpression.Evaluate(this);
+        }
+
+        static Expression<Func<SysForeignKeys, SysTables>> ReferencedTableExpression =
+            i => Database.View<SysTables>().Single(a => a.object_id == i.referenced_object_id);
+        [ExpressionField]
+        public SysTables ReferencedTable()
+        {
+            return ReferencedTableExpression.Evaluate(this);
         }
     }
 

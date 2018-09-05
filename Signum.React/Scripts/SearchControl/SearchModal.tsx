@@ -106,6 +106,7 @@ export default class SearchModal extends React.Component<SearchModalProps, { sho
                         ref={e => this.searchControl = e!}
                         findOptions={this.props.findOptions}
                         onSelectionChanged={this.handleSelectionChanged}
+                        showGroupButton={this.props.findMode == "Explore"}
                         largeToolbarButtons={true}
                         maxResultsHeight={"none"}
                         onHeighChanged={this.onResize}

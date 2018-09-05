@@ -2,11 +2,12 @@
 import { Tab } from '../Components/Tabs'
 import { Dic } from '../Globals'
 import * as Navigator from '../Navigator'
-import { ResultTable, FindOptions, FilterOption, QueryDescription } from '../FindOptions'
+import { ResultTable, FindOptions, FilterOption, QueryDescription, isFilterGroupOption, FilterGroupOption, FilterConditionOption } from '../FindOptions'
 import { Entity, Lite, is, toLite, LiteMessage, getToString, EntityPack, ModelState, ModifiableEntity } from '../Signum.Entities'
 import { TypeContext, StyleOptions, EntityFrame } from '../TypeContext'
 import { getTypeInfo, TypeInfo, PropertyRoute, ReadonlyBinding, getTypeInfos } from '../Reflection'
 import { ColumnOption, OrderOption, Pagination } from '../Search';
+import { func } from 'prop-types';
 
 
 export class ReactVisitor {
@@ -257,15 +258,31 @@ export class ViewReplacer<T extends ModifiableEntity> {
 
 export function cloneFindOptions(fo: FindOptions): FindOptions{
 
+    function cloneFilter(f: FilterOption): FilterOption {
+        if (isFilterGroupOption(f))
+            return ({
+                groupOperation: f.groupOperation,
+                token: f.token,
+                filters: f.filters.map(_ => cloneFilter(_))
+            } as FilterGroupOption);
+        else
+            return ({
+                token: f.token,
+                operation: f.operation,
+                value: f.value,
+                frozen: f.frozen,
+            } as FilterConditionOption)
+    }
+
     const pa = fo.pagination;
     return {
         queryName: fo.queryName,
         groupResults: fo.groupResults,
-        parentColumn: fo.parentColumn,
+        parentToken: fo.parentToken,
         parentValue: fo.parentValue,
-        filterOptions: fo.filterOptions && fo.filterOptions.map(f => ({ columnName: f.columnName, operation: f.operation, value: f.value, frozen: f.frozen } as FilterOption)),
-        orderOptions: fo.orderOptions && fo.orderOptions.map(o => ({ columnName: o.columnName, orderType: o.orderType } as OrderOption)),
-        columnOptions: fo.columnOptions && fo.columnOptions.map(m => ({ columnName: m.columnName, displayName: m.displayName } as ColumnOption)),
+        filterOptions: fo.filterOptions && fo.filterOptions.map(f => cloneFilter(f)),
+        orderOptions: fo.orderOptions && fo.orderOptions.map(o => ({ token: o.token, orderType: o.orderType } as OrderOption)),
+        columnOptions: fo.columnOptions && fo.columnOptions.map(c => ({ token: c.token, displayName: c.displayName } as ColumnOption)),
         columnOptionsMode: fo.columnOptionsMode,
         pagination: pa && { mode: pa.mode, elementsPerPage: pa.elementsPerPage, currentPage: pa.currentPage, } as Pagination,
     };
