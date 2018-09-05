@@ -21,6 +21,14 @@ namespace Signum.Utilities
             return (T)Enum.Parse(typeof(T), str, ignoreCase);
         }
 
+        public static T ToEnumStrict<T>(this string str, bool ignoreCase) where T : struct
+        {
+            if (str.ToInt().HasValue)
+                throw new InvalidOperationException("Number is not allowed in ToEnumStrict");
+
+            return (T)Enum.Parse(typeof(T), str, ignoreCase);
+        }
+
         public static T? TryToEnum<T>(this string str) where T : struct
         {
             return Enum.TryParse(str, out T result) ? result : (T?)null;
@@ -28,6 +36,14 @@ namespace Signum.Utilities
 
         public static T? TryToEnum<T>(this string str, bool ignoreCase) where T : struct
         {
+            return Enum.TryParse(str, ignoreCase, out T result) ? result : (T?)null;
+        }
+
+        public static T? TryToEnumStrict<T>(this string str, bool ignoreCase) where T : struct
+        {
+            if (str.ToInt().HasValue)
+                return null;
+
             return Enum.TryParse(str, ignoreCase, out T result) ? result : (T?)null;
         }
 

@@ -134,7 +134,19 @@ namespace Signum.Test.Environment
     public enum Sex : short
     {
         Male,
-        Female
+        Female,
+        Undefined
+    }
+
+    public static class SexExtensions
+    {
+        public static Expression<Func<Sex, bool>> IsDefinedExpression = s => s == Sex.Male || s == Sex.Female;
+        [ExpressionField()]
+
+        public static bool IsDefined(this Sex s)
+        {
+            return IsDefinedExpression.Evaluate(s);
+        }
     }
 
     public enum Status
