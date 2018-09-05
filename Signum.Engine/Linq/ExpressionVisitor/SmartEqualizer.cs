@@ -105,8 +105,8 @@ namespace Signum.Engine.Linq
 
         private static Expression EnumEquals(Expression exp1, Expression exp2)
         {
-            var exp1Clean = RemoveConvert(exp1);
-            var exp2Clean = RemoveConvert(exp2);
+            var exp1Clean = RemoveConvertChain(exp1);
+            var exp2Clean = RemoveConvertChain(exp2);
 
 
             if (exp1 != exp1Clean || exp2 != exp2Clean)
@@ -122,18 +122,21 @@ namespace Signum.Engine.Linq
 
         }
 
-        private static Expression RemoveConvert(Expression exp)
+        private static Expression RemoveConvertChain(Expression exp)
         {
-            if(exp is UnaryExpression ue && ue.NodeType == ExpressionType.Convert && ReflectionTools.IsIntegerNumber(ue.Type.UnNullify()))
+
+            while (true)
             {
-                var exp2 = ue.Operand;
-                if (exp2 is UnaryExpression ue2 && ue2.NodeType == ExpressionType.Convert && ue2.Type.UnNullify().IsEnum)
-                    return ue2.Operand;
+                var newExp = exp.TryRemoveConvert(t => t.UnNullify().IsEnum) ?? exp.TryRemoveConvert(t => ReflectionTools.IsIntegerNumber(t.UnNullify()));
+                if (newExp == null)
+                    return exp;
+
+                exp = newExp;
 
             }
-
-            return exp;
         }
+
+
 
         private static Expression ConstanToNewExpression(Expression exp)
         {
