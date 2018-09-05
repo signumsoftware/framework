@@ -34,7 +34,7 @@ namespace Signum.Test.Environment
                 var conf = new ConfigurationBuilder().SetBasePath(Directory.GetCurrentDirectory()).AddJsonFile("appsettings.json").Build();
                 var connectionString = conf.GetConnectionString("SignumTest");
 
-                Start(UserConnections.Replace(connectionString));
+                Start(connectionString);
 
                 Administrator.TotalGeneration();
 

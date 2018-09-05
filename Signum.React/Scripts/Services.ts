@@ -1,5 +1,4 @@
 ﻿import { ModelState } from './Signum.Entities'
-import { Dic } from './Globals'
 import { GraphExplorer } from './Reflection'
 
 var fetchWithAbortModule = require('./fetchWithAbort') as { fetch: typeof fetch };
@@ -123,7 +122,6 @@ export module VersionFilter {
     export let versionHasChanged: () => void = () => console.warn("New Server version detected, handle VersionFilter.versionHasChanged to inform user");
 
     export function onVersionFilter(makeCall: () => Promise<Response>): Promise<Response> {
-
         function changeVersion(response: Response) {
             var ver = response.headers.get("X-App-Version");
 
@@ -144,7 +142,6 @@ export module VersionFilter {
 
         return makeCall().then(resp => { changeVersion(resp); return resp; });
     }
-
 }
 
 export module NotifyPendingFilter {
@@ -161,9 +158,7 @@ export module NotifyPendingFilter {
 }
 
 export module ThrowErrorFilter { 
-
     export function throwError(makeCall: () => Promise<Response>): Promise<Response> {
-
         return makeCall().then(response => {
             if (response.status >= 200 && response.status < 300) {
                 return response;
