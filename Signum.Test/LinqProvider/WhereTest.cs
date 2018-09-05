@@ -44,8 +44,8 @@ namespace Signum.Test.LinqProvider
 
 
             var list = (from a in Database.Query<ArtistEntity>()
-                where a.Sex.IsDefined()
-                select a).ToList();
+                        where a.Sex.IsDefined()
+                        select a).ToList();
         }
 
         [TestMethod]
