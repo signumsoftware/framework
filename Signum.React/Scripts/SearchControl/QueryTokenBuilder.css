@@ -16,3 +16,11 @@
 .has-error .sf-query-token-part .rw-dropdownlist {
     border: 1px solid #a94442;
 }
+
+.sf-prefix-btn {
+    border: 1px solid #bbb;
+    padding: 3px 5px;
+    vertical-align: super;
+    display: inline;
+    margin-right: 2px;
+}

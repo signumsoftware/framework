@@ -63,10 +63,10 @@ namespace Signum.Entities
                     return;
                 }
 
-                if (o is Type)
+                if (o is Type type)
                 {
                     Sb.Append("typeof(");
-                    Sb.Append(CSharpRenderer.TypeName((Type)o));
+                    Sb.Append(CSharpRenderer.TypeName(type));
                     Sb.Append(")");
                     return;
                 }

@@ -141,6 +141,7 @@
     <Compile Include="Filters\SignumExceptionFilterAttribute.cs" />
     <Compile Include="Filters\ValidateModelFilterAttribute.cs" />
     <Compile Include="Filters\VersionFilterAttribute.cs" />
+    <Compile Include="JsonConverters\FilterJsonConverter.cs" />
     <Compile Include="JsonConverters\EntityJsonConverter.cs" />
     <Compile Include="JsonConverters\JsonSerializerExtensions.cs" />
     <Compile Include="JsonConverters\ArgsJsonConverter.cs" />
@@ -153,7 +154,6 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <TypeScriptCompile Include="Scripts\Components\Basic.tsx" />
     <TypeScriptCompile Include="Scripts\Components\Button.tsx" />
-    <TypeScriptCompile Include="Scripts\Components\Popper.tsx" />
     <TypeScriptCompile Include="Scripts\Components\Collapse.tsx" />
     <TypeScriptCompile Include="Scripts\Components\ErrorBoundary.tsx" />
     <TypeScriptCompile Include="Scripts\Components\index.tsx" />

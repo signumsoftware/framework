@@ -51,9 +51,9 @@ namespace Signum.Entities
 
         private IEnumerable<Type> Enumerate()
         {
-            if (arrayOrType is Type)
+            if (arrayOrType is Type t)
             {
-                yield return (Type)arrayOrType;
+                yield return t;
             }
             else
             {

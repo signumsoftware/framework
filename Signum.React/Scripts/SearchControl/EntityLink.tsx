@@ -11,6 +11,7 @@ export interface EntityLinkProps extends React.HTMLAttributes<HTMLAnchorElement>
     inSearch?: boolean;
     onNavigated?: (lite: Lite<Entity>) => void;
     getViewPromise?: (e: ModifiableEntity) => undefined | string | Navigator.ViewPromise<ModifiableEntity>;
+    innerRef?: (node: HTMLAnchorElement | null) => void;
 }
 
 
@@ -25,6 +26,7 @@ export default class EntityLink extends React.Component<EntityLinkProps>{
 
         return (
             <Link
+                innerRef={this.props.innerRef}
                 to={Navigator.navigateRoute(lite)}
                 title={this.props.title || getToString(lite)}
                 onClick={this.handleClick}

@@ -416,6 +416,7 @@ export module SearchMessage {
     export const AddColumn = new MessageKey("SearchMessage", "AddColumn");
     export const CollectionsCanNotBeAddedAsColumns = new MessageKey("SearchMessage", "CollectionsCanNotBeAddedAsColumns");
     export const AddFilter = new MessageKey("SearchMessage", "AddFilter");
+    export const AddGroup = new MessageKey("SearchMessage", "AddGroup");
     export const AddValue = new MessageKey("SearchMessage", "AddValue");
     export const DeleteFilter = new MessageKey("SearchMessage", "DeleteFilter");
     export const Filters = new MessageKey("SearchMessage", "Filters");

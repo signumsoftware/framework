@@ -478,18 +478,16 @@ namespace Signum.Engine.DynamicQuery
             if (filters == null || filters.Count == 0)
                 return null;
 
-            string str = filters.Select(f => QueryUtils.CanFilter(f.Token)).NotNull().ToString("\r\n");
+            string str = filters
+                .SelectMany(f => f.GetFilterConditions())
+                .Select(f => QueryUtils.CanFilter(f.Token))
+                .NotNull()
+                .ToString("\r\n");
+
             if (str == null)
                 throw new ApplicationException(str);
 
-            FilterBuildExpressionContext filterContext = new FilterBuildExpressionContext(context);
-
-            foreach (var f in filters)
-            {
-                f.GenerateCondition(filterContext);
-            }
-
-            Expression body = filterContext.Filters.Select(f => f.ToExpression(filterContext)).AggregateAnd();
+            Expression body = filters.Select(f => f.GetExpression(context)).AggregateAnd();
 
             return Expression.Lambda<Func<object, bool>>(body, context.Parameter);
         }
