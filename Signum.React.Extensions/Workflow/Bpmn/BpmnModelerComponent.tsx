@@ -67,7 +67,6 @@ export default class BpmnModelerComponent extends React.Component<BpmnModelerCom
         this.modeler.on('autoPlace.end', 1500, this.handleCreateEnded as (obj: BPMN.Event) => void);
         this.modeler.on('shape.add', 1500, this.handleAddShapeOrConnection as (obj: BPMN.Event) => void);
         this.modeler.on('commandStack.elements.delete.postExecuted', 1500, this.handleElementDeletePostExecuted as (obj: BPMN.Event) => void);
-        this.modeler.on('commandStack.elements.move.canExecute', 1500, this.handleElementMoveCanExecute as (obj: BPMN.Event) => void);
         this.modeler.on('connection.add', 1500, this.handleAddShapeOrConnection as (obj: BPMN.Event) => void);
         this.modeler.on('label.add', 1500, () => this.lastPasted = undefined); 
         this.modeler.importXML(this.props.diagramXML, this.handleOnModelError)
@@ -447,14 +446,6 @@ export default class BpmnModelerComponent extends React.Component<BpmnModelerCom
         });
     }
 
-    handleElementMoveCanExecute = (e: BPMN.CanMoveElementEvent) => {
-        // Exception on moving lanes, "Cannot read property 'source' of undefined"
-        // Lanes can not move, maybe it is a bpmn-js bug, maybe it is related to our current implemented events
-        // It is a temporal solution to investigate more later
-        if (!e.context.shapes.some(a => a.type != "bpmn:Lane"))
-            return false;
-    }
-
     handleAddShapeOrConnection = (e: BPMN.ElementEvent) => {
         if (this.lastPasted) {
             var model = this.props.entities[this.lastPasted.id];
@@ -516,7 +507,7 @@ export default class BpmnModelerComponent extends React.Component<BpmnModelerCom
     render() {
         return (
             <div>
-                <Button style={{ marginLeft: "20px" }} onClick={this.handleZoomClick}>{WorkflowMessage.ResetZoom.niceToString()}</Button>
+                <Button className="btn btn-sm btn-secondary" style={{ marginLeft: "20px" }} onClick={this.handleZoomClick}>{WorkflowMessage.ResetZoom.niceToString()}</Button>
                 <div ref={this.setDiv} />
             </div>
         );

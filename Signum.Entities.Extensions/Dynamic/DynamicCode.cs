@@ -79,6 +79,9 @@ namespace Signum.Entities.Dynamic
             "Signum.Entities.Word",
             "Signum.Entities.Workflow",
             "Signum.Entities.Tree",
+            "DocumentFormat.OpenXml",
+            "DocumentFormat.OpenXml.Packaging",
+            "DocumentFormat.OpenXml.Spreadsheet",
         };
 
         public static HashSet<string> Assemblies = new HashSet<string>
@@ -92,7 +95,6 @@ namespace Signum.Entities.Dynamic
             "Newtonsoft.Json.dll",
             "Microsoft.CodeDom.Providers.DotNetCompilerPlatform.dll",
             "DocumentFormat.OpenXml.dll",
-
         };
 
         public static IEnumerable<string> GetAssemblies()
