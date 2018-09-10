@@ -513,7 +513,7 @@ namespace Signum.Entities.DynamicQuery
         {
             switch (operation)
             {
-                case FilterOperation.EqualTo: return Expression.Equal(left.Nullify(), right.Nullify());
+                case FilterOperation.EqualTo: return Expression.Equal(left, right);
                 case FilterOperation.DistinctTo: 
                     {
                         var t = left.Type.UnNullify();
