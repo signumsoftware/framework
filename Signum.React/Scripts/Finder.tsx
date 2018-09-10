@@ -1006,7 +1006,7 @@ export module Decoder {
             return filters.groupWhen(a => a.identation == identation).map(gr => {
                 const parts = gr.key.value.split("~");
 
-                if (parts.length == 3) {
+                if (FilterOperation.isDefined(parts[1])) {
                     return ({
                         token: parts[0],
                         operation: FilterOperation.assertDefined(parts[1]),
