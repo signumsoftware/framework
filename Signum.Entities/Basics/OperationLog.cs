@@ -35,6 +35,7 @@ namespace Signum.Entities.Basics
             get { return End == null ? null : DurationExpression.Evaluate(this); }
         }
 
+        [AvoidForeignKey]
         public Lite<ExceptionEntity> Exception { get; set; }
 
         public override string ToString()
