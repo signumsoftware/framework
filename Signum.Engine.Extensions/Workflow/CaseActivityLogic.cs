@@ -838,7 +838,7 @@ namespace Signum.Engine.Workflow
                     ca.DoneBy = UserEntity.Current.ToLite();
                     ca.DoneDate = TimeZoneManager.Now;
                     ca.DoneType = doneType;
-                    ca.Case.Description = ca.Case.MainEntity.ToString().Trim();
+                    ca.Case.Description = ca.Case.MainEntity.ToString().Trim().Etc(100);
                     ca.Save();
 
                     ca.Notifications()
