@@ -39,7 +39,7 @@ export default class PredictorSubQuery extends React.Component<{ ctx: TypeContex
                     isGroup: f.isGroup,
                     operation: f.operation,
                     groupOperation: f.groupOperation,
-                    tokenString: f.token!.tokenString,
+                    tokenString: f.token && f.token.tokenString,
                     valueString: f.valueString,
                 }) as UserAssetsClient.API.ParseFilterRequest)
             }).then(filters => {

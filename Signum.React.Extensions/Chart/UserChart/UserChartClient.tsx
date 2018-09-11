@@ -91,7 +91,7 @@ export module Converter {
                 isGroup: f.isGroup,
                 operation: f.operation,
                 groupOperation: f.groupOperation,
-                tokenString: f.token!.tokenString,
+                tokenString: f.token && f.token.tokenString,
                 valueString: f.valueString,
             }) as UserAssetsClient.API.ParseFilterRequest)
         });
