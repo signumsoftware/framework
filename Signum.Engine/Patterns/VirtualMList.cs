@@ -241,7 +241,7 @@ namespace Signum.Engine
                     return null;
 
                 //You can do a VirtualMList to itself at the table level, but there should not be cycles inside the instances
-                var toDelete = Database.Query<L>().Where(se => query.Any(e => backReference.Evaluate(se).RefersTo(e)));
+                var toDelete = Database.Query<L>().Where(se => query.Any(e => backReference.Evaluate(se).Is(e)));
                 if (lazyDelete.Value)
                 {
                     if (toDelete.Any())

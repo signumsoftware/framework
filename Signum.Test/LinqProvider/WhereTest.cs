@@ -199,7 +199,7 @@ namespace Signum.Test.LinqProvider
         {
             var lite = (Lite<BandEntity>)null;
 
-            var first = Database.Query<BandEntity>().Where(b => lite.RefersTo(b)).FirstOrDefault();
+            var first = Database.Query<BandEntity>().Where(b => lite.Is(b)).FirstOrDefault();
 
             Assert.AreEqual(null, first);
         }
@@ -209,7 +209,7 @@ namespace Signum.Test.LinqProvider
         {
             var entity = (BandEntity)null;
 
-            var first = Database.Query<BandEntity>().Where(b => b.ToLite().RefersTo(entity)).FirstOrDefault();
+            var first = Database.Query<BandEntity>().Where(b => b.ToLite().Is(entity)).FirstOrDefault();
 
             Assert.AreEqual(null, first);
         }

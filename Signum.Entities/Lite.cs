@@ -398,25 +398,6 @@ namespace Signum.Entities
             else
                 return entity.ToLite(toStr);
         }
-       
-        [MethodExpander(typeof(RefersToExpander))]
-        public static bool RefersTo<T>(this Lite<T> lite, T entity)
-            where T : class, IEntity
-        {
-            if (lite == null && entity == null)
-                return true;
-
-            if (lite == null || entity == null)
-                return false;
-
-            if (lite.EntityType != entity.GetType())
-                return false;
-
-            if (lite.IdOrNull != null)
-                return lite.Id == entity.IdOrNull;
-            else
-                return object.ReferenceEquals(lite.Entity, entity);
-        }
 
         class RefersToExpander : IMethodExpander
         {
@@ -439,6 +420,35 @@ namespace Signum.Entities
             }
         }
 
+        class EqualToExpander : IMethodExpander
+        {
+            static MethodInfo miToLazy = ReflectionTools.GetMethodInfo((TypeEntity type) => type.ToLite()).GetGenericMethodDefinition();
+
+            public Expression Expand(Expression instance, Expression[] arguments, MethodInfo mi)
+            {
+                Expression entity = arguments[0];
+                Expression lite = arguments[1];
+
+                var evalEntity = ExpressionEvaluator.PartialEval(entity);
+
+                var type = mi.GetGenericArguments()[0];
+
+                var toLite = evalEntity is ConstantExpression c && c.Value == null ?
+                    (Expression)Expression.Constant(null, typeof(Lite<>).MakeGenericType(type)) :
+                    (Expression)Expression.Call(null, miToLazy.MakeGenericMethod(type), entity);
+
+                return Expression.Equal(toLite, lite);
+            }
+        }
+
+        class IsExpander : IMethodExpander
+        {
+            public Expression Expand(Expression instance, Expression[] arguments, MethodInfo mi)
+            {
+                return Expression.Equal(arguments[0], arguments[1]);
+            }
+        }
+
         [MethodExpander(typeof(IsExpander))]
         public static bool Is<T>(this T entity1, T entity2)
              where T : class, IEntity
@@ -458,12 +468,23 @@ namespace Signum.Entities
                 return object.ReferenceEquals(entity1, entity2);
         }
 
-        class IsExpander : IMethodExpander
+        [MethodExpander(typeof(EqualToExpander))]
+        public static bool Is<T>(this T entity1, Lite<T> lite2)
+             where T : class, IEntity
         {
-            public Expression Expand(Expression instance, Expression[] arguments, MethodInfo mi)
-            {
-                return Expression.Equal(arguments[0], arguments[1]);
-            }
+            if (entity1 == null && lite2 == null)
+                return true;
+
+            if (entity1 == null || lite2 == null)
+                return false;
+
+            if (entity1.GetType() != lite2.EntityType)
+                return false;
+
+            if (entity1.IdOrNull != null)
+                return entity1.Id == lite2.IdOrNull;
+            else
+                return object.ReferenceEquals(entity1, lite2.EntityOrNull);
         }
 
         [MethodExpander(typeof(IsExpander))]
@@ -479,10 +500,29 @@ namespace Signum.Entities
             if (lite1.EntityType != lite2.EntityType)
                 return false;
 
-            if (lite1.IdOrNull != null && lite2.IdOrNull != null)
-                return lite1.Id == lite2.Id;
+            if (lite1.IdOrNull != null)
+                return lite1.Id == lite2.IdOrNull;
             else
                 return object.ReferenceEquals(lite1.EntityOrNull, lite2.EntityOrNull);
+        }
+
+        [MethodExpander(typeof(RefersToExpander))]
+        public static bool Is<T>(this Lite<T> lite1, T entity2)
+            where T : class, IEntity
+        {
+            if (lite1 == null && entity2 == null)
+                return true;
+
+            if (lite1 == null || entity2 == null)
+                return false;
+
+            if (lite1.EntityType != entity2.GetType())
+                return false;
+
+            if (lite1.IdOrNull != null)
+                return lite1.Id == entity2.IdOrNull;
+            else
+                return object.ReferenceEquals(lite1.EntityOrNull, entity2);
         }
 
         public static XDocument EntityDGML(this Entity entity)

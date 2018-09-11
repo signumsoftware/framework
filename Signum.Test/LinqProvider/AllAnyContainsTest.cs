@@ -193,7 +193,7 @@ namespace Signum.Test.LinqProvider
         {
             List<Lite<ArtistEntity>> artists = Database.Query<ArtistEntity>().Where(a=>a.Sex == Sex.Male).Select(a => a.ToLite()).ToList();
 
-            var query = Database.Query<ArtistEntity>().Where(a => artists.Any(b => b.RefersTo(a)));
+            var query = Database.Query<ArtistEntity>().Where(a => artists.Any(b => b.Is(a)));
         }
     }
 }
