@@ -623,5 +623,15 @@ namespace Signum.Test.LinqProvider
 
 
         }
+
+        [TestMethod]
+        public void GroupByOr()
+        {
+            var b = (from a in Database.Query<ArtistEntity>()
+                group a by a.Sex.IsDefined()
+                into g
+                select new {g.Key, count = g.Count()}).ToList();
+        }
+
     }
 }

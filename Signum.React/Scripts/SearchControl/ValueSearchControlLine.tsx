@@ -102,7 +102,7 @@ export default class ValueSearchControlLine extends React.Component<ValueSearchC
 
         let value = this.valueSearchControl && this.valueSearchControl.state.value;
         let find = value != undefined && coallesce(this.props.findButton, isQuery) &&
-            <a href="#" className={classes("sf-line-button", "sf-find", isFormControl ? "btn btn-light" : undefined)}
+            <a href="#" className={classes("sf-line-button", "sf-find", isFormControl ? "btn input-group-text" : undefined)}
                 onClick={this.valueSearchControl!.handleClick}
                 title={EntityControlMessage.Find.niceToString()}>
                 <FontAwesomeIcon icon="search" />
@@ -110,7 +110,7 @@ export default class ValueSearchControlLine extends React.Component<ValueSearchC
 
 
         let view = value != undefined && coallesce(this.props.viewEntityButton, isLite(value) && Navigator.isViewable(value.EntityType)) &&
-            <a href="#" className={classes("sf-line-button", "sf-view", isFormControl ? "btn btn-light" : undefined)}
+            <a href="#" className={classes("sf-line-button", "sf-view", isFormControl ? "btn input-group-text" : undefined)}
                 onClick={this.handleViewEntityClick}
                 title={EntityControlMessage.View.niceToString()}>
                 <FontAwesomeIcon icon="arrow-right" />
@@ -123,7 +123,7 @@ export default class ValueSearchControlLine extends React.Component<ValueSearchC
                 labelText={this.props.labelText || (token ? token.niceName : getQueryNiceName(fo.queryName))}
                 labelHtmlAttributes={this.props.labelHtmlAttributes}
                 htmlAttributes={this.props.formGroupHtmlAttributes}>
-                <div className={isFormControl ? ((unit || view || extra || find) ? "input-group" : undefined) : this.props.ctx.formControlPlainTextClass}>
+                <div className={isFormControl ? ((unit || view || extra || find) ? this.props.ctx.inputGroupClass : undefined) : this.props.ctx.formControlPlainTextClass}>
                     <ValueSearchControl
                         ref={this.handleValueSearchControlLoaded}
                         findOptions={fo}

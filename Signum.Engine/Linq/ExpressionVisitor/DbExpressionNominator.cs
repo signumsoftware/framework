@@ -950,6 +950,9 @@ namespace Signum.Engine.Linq
                         (untu == typeof(double)))
                         return Add(new SqlCastExpression(u.Type, operand));
 
+                    if (ReflectionTools.IsIntegerNumber(optu) && ReflectionTools.IsIntegerNumber(untu))
+                        return Add(new SqlCastExpression(u.Type, operand));
+
                     if (isFullNominate || isGroupKey && optu == untu)
                         return Add(result);
 

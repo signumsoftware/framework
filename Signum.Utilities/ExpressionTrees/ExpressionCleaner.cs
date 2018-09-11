@@ -12,7 +12,7 @@ namespace Signum.Utilities.ExpressionTrees
     /// Implementation of SimpleExpressionVisitor that does the replacement
     /// * MethodExpanderAttribute
     /// * MemberXXXExpression static field
-    /// * ExpressionExtensions.Expand method
+    /// * ExpressionExtensions.Evaluate method
     /// 
     /// It also simplifies and skip evaluating short circuited subexpresions
     /// Evaluates constant subexpressions 
