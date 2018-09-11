@@ -23,7 +23,7 @@ namespace Signum.Engine.Mailing
     public static class EmailPackageLogic
     {
         static Expression<Func<EmailPackageEntity, IQueryable<EmailMessageEntity>>> MessagesExpression =
-            p => Database.Query<EmailMessageEntity>().Where(a => a.Package.RefersTo(p));
+            p => Database.Query<EmailMessageEntity>().Where(a => a.Package.Is(p));
         [ExpressionField]
         public static IQueryable<EmailMessageEntity> Messages(this EmailPackageEntity p)
         {

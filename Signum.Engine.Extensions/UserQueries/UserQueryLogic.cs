@@ -183,7 +183,7 @@ namespace Signum.Engine.UserQueries
             sb.Schema.Settings.AssertImplementedBy((UserQueryEntity uq) => uq.Owner, typeof(UserEntity));
 
             TypeConditionLogic.RegisterCompile<UserQueryEntity>(typeCondition,
-                uq => uq.Owner.RefersTo(UserEntity.Current));
+                uq => uq.Owner.Is(UserEntity.Current));
         }
 
         public static void RegisterRoleTypeCondition(SchemaBuilder sb, TypeConditionSymbol typeCondition)

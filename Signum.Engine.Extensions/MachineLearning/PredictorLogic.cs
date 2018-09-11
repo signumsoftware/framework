@@ -42,7 +42,7 @@ namespace Signum.Engine.MachineLearning
     public static class PredictorLogic
     {
         static Expression<Func<PredictorEntity, IQueryable<PredictSimpleResultEntity>>> SimpleResultsExpression =
-           e => Database.Query<PredictSimpleResultEntity>().Where(a => a.Predictor.RefersTo(e));
+           e => Database.Query<PredictSimpleResultEntity>().Where(a => a.Predictor.Is(e));
         [ExpressionField]
         public static IQueryable<PredictSimpleResultEntity> SimpleResults(this PredictorEntity e)
         {
@@ -50,7 +50,7 @@ namespace Signum.Engine.MachineLearning
         }
 
         static Expression<Func<PredictorEntity, IQueryable<PredictorCodificationEntity>>> CodificationsExpression =
-        e => Database.Query<PredictorCodificationEntity>().Where(a => a.Predictor.RefersTo(e));
+        e => Database.Query<PredictorCodificationEntity>().Where(a => a.Predictor.Is(e));
         [ExpressionField]
         public static IQueryable<PredictorCodificationEntity> Codifications(this PredictorEntity e)
         {
@@ -58,7 +58,7 @@ namespace Signum.Engine.MachineLearning
         }
         
         static Expression<Func<PredictorEntity, IQueryable<PredictorEpochProgressEntity>>> ProgressesExpression =
-        e => Database.Query<PredictorEpochProgressEntity>().Where(a => a.Predictor.RefersTo(e));
+        e => Database.Query<PredictorEpochProgressEntity>().Where(a => a.Predictor.Is(e));
         [ExpressionField]
         public static IQueryable<PredictorEpochProgressEntity> EpochProgresses(this PredictorEntity e)
         {

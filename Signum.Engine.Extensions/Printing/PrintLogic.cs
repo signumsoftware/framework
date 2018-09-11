@@ -29,7 +29,7 @@ namespace Signum.Engine.Printing
         public static Action<PrintLineEntity> Print;
          
         static Expression<Func<PrintPackageEntity, IQueryable<PrintLineEntity>>> LinesExpression =
-            e => Database.Query<PrintLineEntity>().Where(a => a.Package.RefersTo(e));
+            e => Database.Query<PrintLineEntity>().Where(a => a.Package.Is(e));
         
         [ExpressionField]
         public static IQueryable<PrintLineEntity> Lines(this PrintPackageEntity e)
@@ -189,7 +189,7 @@ namespace Signum.Engine.Printing
 
         public static IQueryable<PrintLineEntity> ReadyToPrint(Entity entity, FileTypeSymbol fileType)
         {
-            return Database.Query<PrintLineEntity>().Where(a => a.Referred.RefersTo(entity) && a.File.FileType == fileType && a.State == PrintLineState.ReadyToPrint);
+            return Database.Query<PrintLineEntity>().Where(a => a.Referred.Is(entity) && a.File.FileType == fileType && a.State == PrintLineState.ReadyToPrint);
         }
     }
     public class PrintStat
