@@ -166,7 +166,7 @@ namespace Signum.Engine.Workflow
         private static WorkflowEventEntity GetStartEvent(CaseEntity @case, Lite<CaseActivityEntity> firstActivity, WorkflowNodeGraph gr)
         {
             var wet = Database.Query<OperationLogEntity>()
-            .Where(l => l.Operation == CaseActivityOperation.CreateCaseFromWorkflowEventTask.Symbol && l.Target.RefersTo(@case))
+            .Where(l => l.Operation == CaseActivityOperation.CreateCaseFromWorkflowEventTask.Symbol && l.Target.Is(@case))
             .Select(l => new { l.Origin, l.User })
             .SingleOrDefaultEx();
 

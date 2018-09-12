@@ -30,7 +30,7 @@ namespace Signum.Engine.Disconnected
         public static LocalBackupManager LocalBackupManager = new LocalBackupManager();
 
         static Expression<Func<DisconnectedMachineEntity, IQueryable<DisconnectedImportEntity>>> ImportsExpression =
-                m => Database.Query<DisconnectedImportEntity>().Where(di => di.Machine.RefersTo(m));
+                m => Database.Query<DisconnectedImportEntity>().Where(di => di.Machine.Is(m));
         [ExpressionField]
         public static IQueryable<DisconnectedImportEntity> Imports(this DisconnectedMachineEntity m)
         {
@@ -38,7 +38,7 @@ namespace Signum.Engine.Disconnected
         }
 
         static Expression<Func<DisconnectedMachineEntity, IQueryable<DisconnectedImportEntity>>> ExportsExpression =
-               m => Database.Query<DisconnectedImportEntity>().Where(di => di.Machine.RefersTo(m));
+               m => Database.Query<DisconnectedImportEntity>().Where(di => di.Machine.Is(m));
         [ExpressionField]
         public static IQueryable<DisconnectedImportEntity> Exports(this DisconnectedMachineEntity m)
         {
@@ -196,8 +196,8 @@ namespace Signum.Engine.Disconnected
         {
             TypeEntity type = (TypeEntity)arg;
 
-            var ce = Administrator.UnsafeDeletePreCommandMList((DisconnectedExportEntity de) => de.Copies, Database.MListQuery((DisconnectedExportEntity de) => de.Copies).Where(mle => mle.Element.Type.RefersTo(type)));
-            var ci = Administrator.UnsafeDeletePreCommandMList((DisconnectedImportEntity di) => di.Copies, Database.MListQuery((DisconnectedImportEntity di) => di.Copies).Where(mle => mle.Element.Type.RefersTo(type)));
+            var ce = Administrator.UnsafeDeletePreCommandMList((DisconnectedExportEntity de) => de.Copies, Database.MListQuery((DisconnectedExportEntity de) => de.Copies).Where(mle => mle.Element.Type.Is(type)));
+            var ci = Administrator.UnsafeDeletePreCommandMList((DisconnectedImportEntity di) => di.Copies, Database.MListQuery((DisconnectedImportEntity di) => di.Copies).Where(mle => mle.Element.Type.Is(type)));
 
             return SqlPreCommand.Combine(Spacing.Simple, ce, ci);
         } 

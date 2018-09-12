@@ -29,7 +29,7 @@ namespace Signum.Engine.Workflow
     {
 
         static Expression<Func<WorkflowEventTaskEntity, IQueryable<WorkflowEventTaskConditionResultEntity>>> ConditionResultsExpression =
-        e => Database.Query<WorkflowEventTaskConditionResultEntity>().Where(a => a.WorkflowEventTask.RefersTo(e));
+        e => Database.Query<WorkflowEventTaskConditionResultEntity>().Where(a => a.WorkflowEventTask.Is(e));
         [ExpressionField]
         public static IQueryable<WorkflowEventTaskConditionResultEntity> ConditionResults(this WorkflowEventTaskEntity e)
         {
@@ -39,7 +39,7 @@ namespace Signum.Engine.Workflow
 
         static Expression<Func<WorkflowEventEntity, ScheduledTaskEntity>> ScheduledTaskExpression =
         e => Database.Query<ScheduledTaskEntity>()
-                        .SingleOrDefault(s => ((WorkflowEventTaskEntity)s.Task).Event.RefersTo(e));
+                        .SingleOrDefault(s => ((WorkflowEventTaskEntity)s.Task).Event.Is(e));
         [ExpressionField]
         public static ScheduledTaskEntity ScheduledTask(this WorkflowEventEntity e)
         {
@@ -48,7 +48,7 @@ namespace Signum.Engine.Workflow
 
         static Expression<Func<WorkflowEventEntity, WorkflowEventTaskEntity>> WorkflowEventTaskExpression =
         e => Database.Query<WorkflowEventTaskEntity>()
-                        .SingleOrDefault(et => et.Event.RefersTo(e));
+                        .SingleOrDefault(et => et.Event.Is(e));
         [ExpressionField]
         public static WorkflowEventTaskEntity WorkflowEventTask(this WorkflowEventEntity e)
         {
@@ -191,7 +191,7 @@ namespace Signum.Engine.Workflow
 
         internal static void CloneScheduledTasks(WorkflowEventEntity oldEvent, WorkflowEventEntity newEvent)
         {
-            var task = Database.Query<WorkflowEventTaskEntity>().SingleOrDefault(a => a.Event.RefersTo(oldEvent));
+            var task = Database.Query<WorkflowEventTaskEntity>().SingleOrDefault(a => a.Event.Is(oldEvent));
             if (task == null)
                 return;
 

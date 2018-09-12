@@ -26,7 +26,7 @@ namespace Signum.Engine.Mailing
     public static class NewsletterLogic
     {
         static Expression<Func<IEmailOwnerEntity, IQueryable<NewsletterDeliveryEntity>>> NewsletterDeliveriesExpression =
-            eo => Database.Query<NewsletterDeliveryEntity>().Where(d => d.Recipient.RefersTo(eo));
+            eo => Database.Query<NewsletterDeliveryEntity>().Where(d => d.Recipient.Is(eo));
         [ExpressionField]
         public static IQueryable<NewsletterDeliveryEntity> NewsletterDeliveries(this IEmailOwnerEntity eo)
         {
@@ -34,7 +34,7 @@ namespace Signum.Engine.Mailing
         }
 
         static Expression<Func<NewsletterEntity, IQueryable<NewsletterDeliveryEntity>>> DeliveriesExpression =
-            n => Database.Query<NewsletterDeliveryEntity>().Where(nd => nd.Newsletter.RefersTo(n));
+            n => Database.Query<NewsletterDeliveryEntity>().Where(nd => nd.Newsletter.Is(n));
         [ExpressionField]
         public static IQueryable<NewsletterDeliveryEntity> Deliveries(this NewsletterEntity n)
         {
@@ -162,7 +162,7 @@ namespace Signum.Engine.Mailing
                 Execute = (n, args) =>
                 {
                     var p = args.GetArg<List<Lite<IEmailOwnerEntity>>>();
-                    var existent = Database.Query<NewsletterDeliveryEntity>().Where(d => d.Newsletter.RefersTo(n)).Select(d => d.Recipient).ToList();
+                    var existent = Database.Query<NewsletterDeliveryEntity>().Where(d => d.Newsletter.Is(n)).Select(d => d.Recipient).ToList();
                     p.Except(existent).Select(ie => new NewsletterDeliveryEntity
                     {
                         Recipient = ie,
@@ -199,7 +199,7 @@ namespace Signum.Engine.Mailing
                     if (n.Text.IsNullOrEmpty())
                         return "Text must be set";
 
-                    if (!Database.Query<NewsletterDeliveryEntity>().Any(d => d.Newsletter.RefersTo(n)))
+                    if (!Database.Query<NewsletterDeliveryEntity>().Any(d => d.Newsletter.Is(n)))
                         return "There is not any delivery for this newsletter";
 
                     return null;
