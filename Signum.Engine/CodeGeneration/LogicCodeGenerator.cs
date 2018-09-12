@@ -357,7 +357,7 @@ namespace Signum.Engine.CodeGeneration
             if (varTo == varFrom)
                 varTo += "2";
 
-            string filter = info.Property.PropertyType.IsLite() ? "{t} => {t}.{prop}.RefersTo({f})" : "{t} => {t}.{prop} == {f}";
+            string filter = info.Property.PropertyType.IsLite() ? "{t} => {t}.{prop}.Is({f})" : "{t} => {t}.{prop} == {f}";
 
             string str =  info.IsUnique?
 @"static Expression<Func<{from}, {to}>> {MethodExpression} = 
