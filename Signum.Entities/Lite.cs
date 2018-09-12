@@ -399,47 +399,9 @@ namespace Signum.Entities
                 return entity.ToLite(toStr);
         }
 
-        class RefersToExpander : IMethodExpander
-        {
-            static MethodInfo miToLazy = ReflectionTools.GetMethodInfo((TypeEntity type) => type.ToLite()).GetGenericMethodDefinition();
+     
 
-            public Expression Expand(Expression instance, Expression[] arguments, MethodInfo mi)
-            {
-                Expression lite = arguments[0];
-                Expression entity = arguments[1];
-
-                var evalEntity = ExpressionEvaluator.PartialEval(entity);
-
-                var type = mi.GetGenericArguments()[0];
-
-                var toLite = evalEntity is ConstantExpression c && c.Value == null ?
-                    (Expression)Expression.Constant(null, typeof(Lite<>).MakeGenericType(type)) :
-                    (Expression)Expression.Call(null, miToLazy.MakeGenericMethod(type), entity);
-
-                return Expression.Equal(lite, toLite);
-            }
-        }
-
-        class EqualToExpander : IMethodExpander
-        {
-            static MethodInfo miToLazy = ReflectionTools.GetMethodInfo((TypeEntity type) => type.ToLite()).GetGenericMethodDefinition();
-
-            public Expression Expand(Expression instance, Expression[] arguments, MethodInfo mi)
-            {
-                Expression entity = arguments[0];
-                Expression lite = arguments[1];
-
-                var evalEntity = ExpressionEvaluator.PartialEval(entity);
-
-                var type = mi.GetGenericArguments()[0];
-
-                var toLite = evalEntity is ConstantExpression c && c.Value == null ?
-                    (Expression)Expression.Constant(null, typeof(Lite<>).MakeGenericType(type)) :
-                    (Expression)Expression.Call(null, miToLazy.MakeGenericMethod(type), entity);
-
-                return Expression.Equal(toLite, lite);
-            }
-        }
+     
 
         class IsExpander : IMethodExpander
         {
@@ -448,6 +410,7 @@ namespace Signum.Entities
                 return Expression.Equal(arguments[0], arguments[1]);
             }
         }
+
 
         [MethodExpander(typeof(IsExpander))]
         public static bool Is<T>(this T entity1, T entity2)
@@ -468,7 +431,47 @@ namespace Signum.Entities
                 return object.ReferenceEquals(entity1, entity2);
         }
 
-        [MethodExpander(typeof(EqualToExpander))]
+        [MethodExpander(typeof(IsExpander))]
+        public static bool Is<T>(this Lite<T> lite1, Lite<T> lite2)
+          where T : class, IEntity
+        {
+            if (lite1 == null && lite2 == null)
+                return true;
+
+            if (lite1 == null || lite2 == null)
+                return false;
+
+            if (lite1.EntityType != lite2.EntityType)
+                return false;
+
+            if (lite1.IdOrNull != null)
+                return lite1.Id == lite2.IdOrNull;
+            else
+                return object.ReferenceEquals(lite1.EntityOrNull, lite2.EntityOrNull);
+        }
+
+        class IsEntityLiteExpander : IMethodExpander
+        {
+            static MethodInfo miToLazy = ReflectionTools.GetMethodInfo((TypeEntity type) => type.ToLite()).GetGenericMethodDefinition();
+
+            public Expression Expand(Expression instance, Expression[] arguments, MethodInfo mi)
+            {
+                Expression entity = arguments[0];
+                Expression lite = arguments[1];
+
+                var evalEntity = ExpressionEvaluator.PartialEval(entity);
+
+                var type = mi.GetGenericArguments()[0];
+
+                var toLite = evalEntity is ConstantExpression c && c.Value == null ?
+                    (Expression)Expression.Constant(null, typeof(Lite<>).MakeGenericType(type)) :
+                    (Expression)Expression.Call(null, miToLazy.MakeGenericMethod(type), entity);
+
+                return Expression.Equal(toLite, lite);
+            }
+        }
+
+        [MethodExpander(typeof(IsEntityLiteExpander))]
         public static bool Is<T>(this T entity1, Lite<T> lite2)
              where T : class, IEntity
         {
@@ -487,26 +490,28 @@ namespace Signum.Entities
                 return object.ReferenceEquals(entity1, lite2.EntityOrNull);
         }
 
-        [MethodExpander(typeof(IsExpander))]
-        public static bool Is<T>(this Lite<T> lite1, Lite<T> lite2)
-            where T : class, IEntity
+        class IsLiteEntityExpander : IMethodExpander
         {
-            if (lite1 == null && lite2 == null)
-                return true;
+            static MethodInfo miToLazy = ReflectionTools.GetMethodInfo((TypeEntity type) => type.ToLite()).GetGenericMethodDefinition();
 
-            if (lite1 == null || lite2 == null)
-                return false;
+            public Expression Expand(Expression instance, Expression[] arguments, MethodInfo mi)
+            {
+                Expression lite = arguments[0];
+                Expression entity = arguments[1];
 
-            if (lite1.EntityType != lite2.EntityType)
-                return false;
+                var evalEntity = ExpressionEvaluator.PartialEval(entity);
 
-            if (lite1.IdOrNull != null)
-                return lite1.Id == lite2.IdOrNull;
-            else
-                return object.ReferenceEquals(lite1.EntityOrNull, lite2.EntityOrNull);
+                var type = mi.GetGenericArguments()[0];
+
+                var toLite = evalEntity is ConstantExpression c && c.Value == null ?
+                    (Expression)Expression.Constant(null, typeof(Lite<>).MakeGenericType(type)) :
+                    (Expression)Expression.Call(null, miToLazy.MakeGenericMethod(type), entity);
+
+                return Expression.Equal(lite, toLite);
+            }
         }
 
-        [MethodExpander(typeof(RefersToExpander))]
+        [MethodExpander(typeof(IsLiteEntityExpander))]
         public static bool Is<T>(this Lite<T> lite1, T entity2)
             where T : class, IEntity
         {
