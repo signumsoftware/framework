@@ -32,8 +32,6 @@ export class UncontrolledTabs extends React.Component<UncontrolledTabsProps, Unc
                 this.setState({ activeEventKey: newEventKey });
         } else {
 
-            console.log(newProps)
-
             var array = (React.Children.toArray(newProps.children) as React.ReactElement<TabProps>[]);
          
             if (this.state.activeEventKey != newProps.defaultEventKey) {
