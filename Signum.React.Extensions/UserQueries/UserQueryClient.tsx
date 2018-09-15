@@ -95,9 +95,7 @@ export module Converter {
                 valueString: f.valueString,
             }) as UserAssetsClient.API.ParseFilterRequest)
         });
-
-        debugger;
-
+        
         return convertedFilters.then(filters => {
 
             fo.filterOptions = filters.map(f => UserAssetsClient.Converter.toFilterOption(f));
