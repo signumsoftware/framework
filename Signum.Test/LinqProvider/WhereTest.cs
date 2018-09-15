@@ -39,6 +39,16 @@ namespace Signum.Test.LinqProvider
         }
 
         [TestMethod]
+        public void WhereWithExpressionOr()
+        {
+
+
+            var list = (from a in Database.Query<ArtistEntity>()
+                        where a.Sex.IsDefined()
+                        select a).ToList();
+        }
+
+        [TestMethod]
         public void WhereIndex()
         {
             var list = Database.Query<AlbumEntity>().Where((a, i) => i % 2 == 0).ToList();
@@ -199,7 +209,7 @@ namespace Signum.Test.LinqProvider
         {
             var lite = (Lite<BandEntity>)null;
 
-            var first = Database.Query<BandEntity>().Where(b => lite.RefersTo(b)).FirstOrDefault();
+            var first = Database.Query<BandEntity>().Where(b => lite.Is(b)).FirstOrDefault();
 
             Assert.AreEqual(null, first);
         }
@@ -209,7 +219,7 @@ namespace Signum.Test.LinqProvider
         {
             var entity = (BandEntity)null;
 
-            var first = Database.Query<BandEntity>().Where(b => b.ToLite().RefersTo(entity)).FirstOrDefault();
+            var first = Database.Query<BandEntity>().Where(b => b.ToLite().Is(entity)).FirstOrDefault();
 
             Assert.AreEqual(null, first);
         }

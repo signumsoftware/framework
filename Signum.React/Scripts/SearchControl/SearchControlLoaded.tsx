@@ -3,7 +3,7 @@ import * as moment from 'moment'
 import { Dropdown, DropdownItem, UncontrolledTooltip, DropdownMenu, DropdownToggle } from '../Components'
 import { Dic, DomUtils, classes } from '../Globals'
 import * as Finder from '../Finder'
-import { CellFormatter, EntityFormatter, toFilterRequest, toFilterRequests, toFindOptions, toFilterOptions } from '../Finder'
+import { CellFormatter, EntityFormatter, toFilterRequest, toFilterRequests, toFindOptions, toFilterOptions, isAggregate } from '../Finder'
 import * as OrderUtils from '../Frames/OrderUtils'
 import {
     ResultTable, ResultRow, FindOptionsParsed, FindOptions, FilterOption, FilterOptionParsed, QueryDescription, ColumnOption, ColumnOptionParsed, ColumnOptionsMode, ColumnDescription,
@@ -1042,7 +1042,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
                 .filter(a => a.col.token && a.col.token.queryTokenType != "Aggregate")
                 .map(a => ({ token: a.col.token!.fullKey, operation: "EqualTo", value: a.value }) as FilterOption);
 
-            var originalFilters = toFilterOptions(resFo.filterOptions);
+            var originalFilters = toFilterOptions(resFo.filterOptions.filter(f => !isAggregate(f)));
 
             var extraColumns = resFo.columnOptions.filter(a => a.token && a.token.queryTokenType == "Aggregate" && a.token.parent)
                 .map(a => ({ token: a.token!.parent!.fullKey }) as ColumnOption);

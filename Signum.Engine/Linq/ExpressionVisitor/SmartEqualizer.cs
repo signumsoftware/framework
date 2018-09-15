@@ -10,6 +10,7 @@ using Signum.Engine.Maps;
 using Signum.Utilities.ExpressionTrees;
 using Signum.Entities.Reflection;
 using System.Reflection;
+using Enum = System.Enum;
 
 namespace Signum.Engine.Linq
 {
@@ -94,8 +95,48 @@ namespace Signum.Engine.Linq
             if (result != null)
                 return result;
 
+
+            result = EnumEquals(exp1, exp2);
+            if (result != null)
+                return result;
+
             return EqualNullable(exp1, exp2);
         }
+
+        private static Expression EnumEquals(Expression exp1, Expression exp2)
+        {
+            var exp1Clean = RemoveConvertChain(exp1);
+            var exp2Clean = RemoveConvertChain(exp2);
+
+
+            if (exp1 != exp1Clean || exp2 != exp2Clean)
+            {
+                var type = exp2.Type.IsNullable() ? exp1.Type.Nullify(): exp1.Type;
+
+
+                return SmartEqualizer.EqualNullable(exp1Clean.TryConvert(type), exp2Clean.TryConvert(type));
+            }
+
+            return null;
+
+
+        }
+
+        private static Expression RemoveConvertChain(Expression exp)
+        {
+
+            while (true)
+            {
+                var newExp = exp.TryRemoveConvert(t => t.UnNullify().IsEnum) ?? exp.TryRemoveConvert(t => ReflectionTools.IsIntegerNumber(t.UnNullify()));
+                if (newExp == null)
+                    return exp;
+
+                exp = newExp;
+
+            }
+        }
+
+
 
         private static Expression ConstanToNewExpression(Expression exp)
         {

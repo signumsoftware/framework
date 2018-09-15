@@ -25,6 +25,16 @@ namespace Signum.Utilities.ExpressionTrees
         }
 
         [DebuggerStepThrough]
+        public static Expression TryRemoveConvert(this Expression expression, Func<Type, bool> isAllowed)
+        {
+
+            if (expression.NodeType == ExpressionType.Convert && isAllowed(expression.Type))
+                return ((UnaryExpression)expression).Operand;
+
+            return null;
+        }
+
+        [DebuggerStepThrough]
         public static Expression Nullify(this Expression expression)
         {
             Type type = expression.Type.Nullify();
