@@ -1,4 +1,4 @@
-﻿using Signum.Engine;
+using Signum.Engine;
 using Signum.Engine.Authorization;
 using Signum.Engine.Basics;
 using Signum.Engine.Operations;
@@ -50,22 +50,20 @@ namespace Signum.React.Translation
         {
             var ci = ExecutionMode.Global().Using(_ => culture.Retrieve().ToCultureInfo());
 
-            if (UserEntity.Current != null) //Won't be used till next refresh
+            if (UserEntity.Current != null && !UserEntity.Current.Is(AuthLogic.AnonymousUser)) //Won't be used till next refresh
             {
                 var user = UserEntity.Current.ToLite().Retrieve();
-
                 user.CultureInfo = culture.Retrieve();
+
                 using (AuthLogic.Disable())
                 using (OperationLogic.AllowSave<UserEntity>())
+                {
+                    UserEntity.Current = user;
                     user.Save();
+                }
             }
 
-            this.ActionContext.HttpContext.Response.Cookies.Append("language", ci.Name, new CookieOptions
-            {
-                Expires = DateTime.Now.AddMonths(6),
-                Domain = ActionContext.HttpContext.Request.Host.ToString(),
-                Path = _env.WebRootPath
-            });
+            this.ActionContext.HttpContext.Response.Cookies.Append("language", ci.Name);
         }
     }
 }
