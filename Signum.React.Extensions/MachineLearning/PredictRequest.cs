@@ -52,7 +52,7 @@ namespace Signum.React.MachineLearning
 
                 SubQueries = pctx.Predictor.SubQueries.Select(sq =>
                 {
-                    var sqt = request.subQueries.Single(a => a.subQuery.RefersTo(sq));
+                    var sqt = request.subQueries.Single(a => a.subQuery.Is(sq));
                     SplitColumns(sq, out var splitKeys, out var values);
 
                     return new PredictSubQueryDictionary(sq)
@@ -89,7 +89,7 @@ namespace Signum.React.MachineLearning
 
             foreach (var sq in request.subQueries)
             {
-                PredictSubQueryDictionary psq = predicted.SubQueries.Values.Single(a => sq.subQuery.RefersTo(a.SubQuery));
+                PredictSubQueryDictionary psq = predicted.SubQueries.Values.Single(a => sq.subQuery.Is(a.SubQuery));
 
                 if (psq.SubQueryGroups.Comparer != ObjectArrayComparer.Instance)
                     throw new InvalidOperationException("Unexpected comparer");

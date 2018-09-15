@@ -81,12 +81,12 @@ namespace Signum.Engine.Toolbar
             sb.Schema.Settings.AssertImplementedBy((ToolbarEntity t) => t.Owner, typeof(UserEntity));
 
             TypeConditionLogic.RegisterCompile<ToolbarEntity>(typeCondition,
-                t => t.Owner.RefersTo(UserEntity.Current));
+                t => t.Owner.Is(UserEntity.Current));
 
             sb.Schema.Settings.AssertImplementedBy((ToolbarMenuEntity t) => t.Owner, typeof(UserEntity));
 
             TypeConditionLogic.RegisterCompile<ToolbarMenuEntity>(typeCondition,
-                t => t.Owner.RefersTo(UserEntity.Current));
+                t => t.Owner.Is(UserEntity.Current));
         }
 
         public static void RegisterRoleTypeCondition(SchemaBuilder sb, TypeConditionSymbol typeCondition)

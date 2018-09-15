@@ -477,7 +477,7 @@ namespace Signum.Entities.UserAssets
 
         public Result<string> TryToStringValue(object value, Type type)
         {
-            if (value is Lite<Entity> lite && lite.RefersTo(currentEntityVariable.Value))
+            if (value is Lite<Entity> lite && lite.Is(currentEntityVariable.Value))
             {
                 return new Result<string>.Success(CurrentEntityKey);
             }

@@ -24,7 +24,7 @@ namespace Signum.Engine.Processes
     public static class PackageLogic
     {
         static Expression<Func<PackageEntity, IQueryable<PackageLineEntity>>> LinesExpression =
-            p => Database.Query<PackageLineEntity>().Where(pl => pl.Package.RefersTo(p));
+            p => Database.Query<PackageLineEntity>().Where(pl => pl.Package.Is(p));
         [ExpressionField]
         public static IQueryable<PackageLineEntity> Lines(this PackageEntity p)
         {
@@ -206,7 +206,7 @@ namespace Signum.Engine.Processes
         public static void RegisterUserTypeCondition(SchemaBuilder sb, TypeConditionSymbol typeCondition)
         {
             TypeConditionLogic.RegisterCompile<ProcessEntity>(typeCondition,
-                pe => pe.User.RefersTo(UserEntity.Current));
+                pe => pe.User.Is(UserEntity.Current));
 
             TypeConditionLogic.Register<PackageOperationEntity>(typeCondition,
                 po => Database.Query<ProcessEntity>().WhereCondition(typeCondition).Any(pe => pe.Data == po));

@@ -133,7 +133,7 @@ namespace Signum.Engine.Disconnected
                                 tuple.Strategy.Exporter.Export(tuple.Table, tuple.Strategy, newDatabaseName, machine);
                             }
 
-                            export.MListElementsLite(_ => _.Copies).Where(c => c.Element.Type.RefersTo(tuple.Type.ToTypeEntity())).UnsafeUpdateMList()
+                            export.MListElementsLite(_ => _.Copies).Where(c => c.Element.Type.Is(tuple.Type.ToTypeEntity())).UnsafeUpdateMList()
                             .Set(mle => mle.Element.CopyTable, mle => ms)
                             .Execute();
                         }
@@ -250,7 +250,7 @@ namespace Signum.Engine.Disconnected
                     "{0} locked in {1}".FormatWith(a.Id, a.Mixin<DisconnectedSubsetMixin>().DisconnectedMachine.Entity.MachineName)).ToString("\r\n");
 
                 if (result.HasText())
-                    stats.MListElementsLite(_ => _.Copies).Where(a => a.Element.Type.RefersTo(typeof(T).ToTypeEntity())).UnsafeUpdateMList()
+                    stats.MListElementsLite(_ => _.Copies).Where(a => a.Element.Type.Is(typeof(T).ToTypeEntity())).UnsafeUpdateMList()
                         .Set(mle => mle.Element.Errors, mle => result)
                         .Execute();
 

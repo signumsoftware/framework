@@ -240,7 +240,7 @@ namespace Signum.Engine.Workflow
 
             private XElement GetEventProcessElement(XmlEntity<WorkflowEventEntity> e)
             {
-                var activity = e.Entity.BoundaryOf?.Let(lite => this.activities.Values.SingleEx(a => lite.RefersTo(a.Entity))).Entity;
+                var activity = e.Entity.BoundaryOf?.Let(lite => this.activities.Values.SingleEx(a => lite.Is(a.Entity))).Entity;
                 
                 return new XElement(bpmn + WorkflowEventTypes.GetOrThrow(e.Entity.Type),
                     new XAttribute("id", e.bpmnElementId),

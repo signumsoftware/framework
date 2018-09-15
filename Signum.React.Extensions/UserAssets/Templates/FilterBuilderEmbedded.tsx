@@ -280,6 +280,8 @@ export class EntityLineOrExpression extends React.Component<EntityLineOrExpressi
         else if (this.props.filterType == "Embedded") {
             return <EntityLine ctx={ctx} type={type} create={false} autocomplete={null} onChange={handleChangeValue} extraButtons={() => this.getSwitchModelButton(true)} />;
         }
+        else
+            throw new Error("Unexpected Filter Type");
     }
 
     getSwitchModelButton(isValue: boolean): React.ReactElement<any> {

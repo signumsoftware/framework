@@ -250,7 +250,7 @@ namespace Signum.Engine.Dashboard
             sb.Schema.Settings.AssertImplementedBy((DashboardEntity uq) => uq.Owner, typeof(UserEntity));
 
             TypeConditionLogic.RegisterCompile<DashboardEntity>(typeCondition,
-                uq => uq.Owner.RefersTo(UserEntity.Current));
+                uq => uq.Owner.Is(UserEntity.Current));
 
             RegisterPartsTypeCondition(typeCondition);
         }

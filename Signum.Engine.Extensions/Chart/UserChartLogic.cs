@@ -167,7 +167,7 @@ namespace Signum.Engine.Chart
         {
             sb.Schema.Settings.AssertImplementedBy((UserChartEntity uq) => uq.Owner, typeof(UserEntity));
 
-            TypeConditionLogic.RegisterCompile<UserChartEntity>(typeCondition, uq => uq.Owner.RefersTo(UserEntity.Current));
+            TypeConditionLogic.RegisterCompile<UserChartEntity>(typeCondition, uq => uq.Owner.Is(UserEntity.Current));
         }
 
 

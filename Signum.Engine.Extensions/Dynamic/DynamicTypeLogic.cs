@@ -744,7 +744,7 @@ namespace Signum.Engine.Dynamic
 
             var mcui = this.Def.MultiColumnUniqueIndex;
             if (mcui != null)
-                sb.AppendLine($"    .WithUniqueIndex(e => new {{{ mcui.Fields.ToString(", ")}}}{(mcui.Where.HasText() ? ", " + mcui.Where : "")})");
+                sb.AppendLine($"    .WithUniqueIndex(e => new {{{ mcui.Fields.ToString(", ")}}}{(mcui.Where.HasText() ? ", e => " + mcui.Where : "")})");
 
             var queryFields = this.Def.QueryFields.EmptyIfNull();
 
