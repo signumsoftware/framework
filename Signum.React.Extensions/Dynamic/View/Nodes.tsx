@@ -622,7 +622,7 @@ NodeUtils.register<FileLineNode>({
         dragAndDropMessage={NodeUtils.evaluateAndValidate(parentCtx, dn.node, n => n.dragAndDropMessage, NodeUtils.isStringOrNull)}
         fileType={toFileTypeSymbol(NodeUtils.evaluateAndValidate(parentCtx, dn.node, n => n.fileType, NodeUtils.isStringOrNull))}
         accept={NodeUtils.evaluateAndValidate(parentCtx, dn.node, n => n.accept, NodeUtils.isStringOrNull)}
-        maxSizeInBytes={NodeUtils.evaluateAndValidate(parentCtx, dn.node, n => n.maxSizeInBytes, NodeUtils.isStringOrNull)}
+        maxSizeInBytes={NodeUtils.evaluateAndValidate(parentCtx, dn.node, n => n.maxSizeInBytes, NodeUtils.isNumberOrNull)}
         onChange={NodeUtils.evaluateAndValidate(parentCtx, dn.node, n => n.onChange, NodeUtils.isFunctionOrNull)}
     />),
     renderDesigner: dn => {
@@ -1012,6 +1012,7 @@ export interface SearchControlNode extends BaseNode {
     showExcelMenu?: ExpressionOrValue<boolean>;
     showUserQuery?: ExpressionOrValue<boolean>;
     showWordReport?: ExpressionOrValue<boolean>;
+    hideFullScreenButton?: ExpressionOrValue<boolean>;
     allowChangeColumns?: ExpressionOrValue<boolean>;
     create?: ExpressionOrValue<boolean>;
     onCreate?: Expression<() => void>;
@@ -1031,6 +1032,7 @@ NodeUtils.register<SearchControlNode>({
     renderCode: (node, cc) => cc.elementCode("SearchControl", {
         findOptions: node.findOptions,
         searchOnLoad: node.searchOnLoad,
+        showHeader: node.showHeader,
         showFilters: node.showFilters,
         showFilterButton: node.showFilterButton,
         showFooter: node.showFooter,
@@ -1040,6 +1042,7 @@ NodeUtils.register<SearchControlNode>({
         showExcelMenu: node.showExcelMenu,
         showUserQuery: node.showUserQuery,
         showWordReport: node.showWordReport, 
+        hideFullScreenButton: node.hideFullScreenButton,
         allowChangeColumns: node.allowChangeColumns,
         create: node.create,
         onCreate: node.onCreate,
@@ -1053,6 +1056,7 @@ NodeUtils.register<SearchControlNode>({
         findOptions={toFindOptions(ctx, dn.node.findOptions!)}
         getViewPromise={NodeUtils.toStringFunction(NodeUtils.evaluateAndValidate(ctx, dn.node, f => f.viewName, NodeUtils.isStringOrNull))}
         searchOnLoad={NodeUtils.evaluateAndValidate(ctx, dn.node, f => f.searchOnLoad, NodeUtils.isBooleanOrNull)}
+        showHeader={NodeUtils.evaluateAndValidate(ctx, dn.node, f => f.showHeader, NodeUtils.isBooleanOrNull)}
         showFilters={NodeUtils.evaluateAndValidate(ctx, dn.node, f => f.showFilters, NodeUtils.isBooleanOrNull)}
         showFilterButton={NodeUtils.evaluateAndValidate(ctx, dn.node, f => f.showFilterButton, NodeUtils.isBooleanOrNull)}
         showFooter={NodeUtils.evaluateAndValidate(ctx, dn.node, f => f.showFooter, NodeUtils.isBooleanOrNull)}
@@ -1064,6 +1068,7 @@ NodeUtils.register<SearchControlNode>({
             showUserQuery: NodeUtils.evaluateAndValidate(ctx, dn.node, f => f.showUserQuery, NodeUtils.isBooleanOrNull),
             showWordReport: NodeUtils.evaluateAndValidate(ctx, dn.node, f => f.showWordReport, NodeUtils.isBooleanOrNull),
         }}
+        hideFullScreenButton={NodeUtils.evaluateAndValidate(ctx, dn.node, f => f.hideFullScreenButton, NodeUtils.isBooleanOrNull)}
         allowChangeColumns={NodeUtils.evaluateAndValidate(ctx, dn.node, f => f.allowChangeColumns, NodeUtils.isBooleanOrNull)}
         create={NodeUtils.evaluateAndValidate(ctx, dn.node, f => f.create, NodeUtils.isBooleanOrNull)}
         onCreate={NodeUtils.evaluateAndValidate(ctx, dn.node, f => f.onCreate, NodeUtils.isFunctionOrNull)}
@@ -1090,6 +1095,7 @@ NodeUtils.register<SearchControlNode>({
         <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, f => f.showExcelMenu)} type="boolean" defaultValue={null} />
         <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, f => f.showUserQuery)} type="boolean" defaultValue={null} />
         <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, f => f.showWordReport)} type="boolean" defaultValue={null} />
+        <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, f => f.hideFullScreenButton)} type="boolean" defaultValue={null} />
         <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, f => f.allowChangeColumns)} type="boolean" defaultValue={null} />
         <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, f => f.create)} type="boolean" defaultValue={null} />
         <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, f => f.onCreate)} type={null} defaultValue={null} exampleExpression={`() => 
