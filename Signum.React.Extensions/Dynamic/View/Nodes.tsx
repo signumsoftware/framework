@@ -622,7 +622,7 @@ NodeUtils.register<FileLineNode>({
         dragAndDropMessage={NodeUtils.evaluateAndValidate(parentCtx, dn.node, n => n.dragAndDropMessage, NodeUtils.isStringOrNull)}
         fileType={toFileTypeSymbol(NodeUtils.evaluateAndValidate(parentCtx, dn.node, n => n.fileType, NodeUtils.isStringOrNull))}
         accept={NodeUtils.evaluateAndValidate(parentCtx, dn.node, n => n.accept, NodeUtils.isStringOrNull)}
-        maxSizeInBytes={NodeUtils.evaluateAndValidate(parentCtx, dn.node, n => n.maxSizeInBytes, NodeUtils.isStringOrNull)}
+        maxSizeInBytes={NodeUtils.evaluateAndValidate(parentCtx, dn.node, n => n.maxSizeInBytes, NodeUtils.isNumberOrNull)}
         onChange={NodeUtils.evaluateAndValidate(parentCtx, dn.node, n => n.onChange, NodeUtils.isFunctionOrNull)}
     />),
     renderDesigner: dn => {
