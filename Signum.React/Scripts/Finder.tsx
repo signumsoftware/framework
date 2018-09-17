@@ -35,6 +35,9 @@ import { SearchControl } from "./Search";
 
 export const querySettings: { [queryKey: string]: QuerySettings } = {};
 
+export function clearQuerySettings() {
+    Dic.clear(querySettings);
+}
 
 export function start(options: { routes: JSX.Element[] }) {
     options.routes.push(<ImportRoute path="~/find/:queryName" onImportModule={() => import("./SearchControl/SearchPage")} />);
