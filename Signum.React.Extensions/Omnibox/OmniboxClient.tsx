@@ -18,6 +18,11 @@ export function start(...params: OmniboxProvider<OmniboxResult>[]) {
 }
 
 export const providers: { [resultTypeName: string]: OmniboxProvider<OmniboxResult> } = {}; 
+
+export function clearProviders() {
+    Dic.clear(providers);
+}
+
 export function registerProvider(prov: OmniboxProvider<OmniboxResult>) {
     if (providers[prov.getProviderName()])
         throw new Error(`Provider '${prov.getProviderName()}' already registered`);
@@ -28,6 +33,11 @@ export function registerProvider(prov: OmniboxProvider<OmniboxResult>) {
 
 
 export const specialActions: { [resultTypeName: string]: SpecialOmniboxAction } = {};
+
+export function clearSpecialActions() {
+    Dic.clear(specialActions);
+}
+
 export function registerSpecialAction(action: SpecialOmniboxAction) {
     if (specialActions[action.key])
         throw new Error(`Action '${action.key}' already registered`);
