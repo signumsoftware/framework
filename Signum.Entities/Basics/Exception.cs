@@ -137,7 +137,7 @@ namespace Signum.Entities.Basics
 
         public DateTime? GetDateLimitDelete(TypeEntity type)
         {
-            var moreThan = DeleteLogs.SingleOrDefaultEx(a => a.Type.RefersTo(type))?.DeleteLogsWithMoreThan;
+            var moreThan = DeleteLogs.SingleOrDefaultEx(a => a.Type.Is(type))?.DeleteLogsWithMoreThan;
 
             if (moreThan == null)
                 return null;
@@ -147,7 +147,7 @@ namespace Signum.Entities.Basics
 
         public DateTime? GetDateLimitClean(TypeEntity type)
         {
-            var moreThan = DeleteLogs.SingleOrDefaultEx(a => a.Type.RefersTo(type))?.CleanLogsWithMoreThan;
+            var moreThan = DeleteLogs.SingleOrDefaultEx(a => a.Type.Is(type))?.CleanLogsWithMoreThan;
 
             if (moreThan == null)
                 return null;
