@@ -213,7 +213,7 @@ namespace Signum.Engine.Translation
                     let str = exp.Evaluate(e)
                     where str != null && str != "" &&
                     !Database.Query<TranslatedInstanceEntity>().Any(ti =>
-                        ti.Instance.RefersTo(e) &
+                        ti.Instance.Is(e) &
                         ti.PropertyRoute.IsPropertyRoute(pr) &&
                         ti.Culture == ci.ToCultureInfoEntity() &&
                         ti.OriginalText == str)
@@ -233,7 +233,7 @@ namespace Signum.Engine.Translation
                     let str = exp.Evaluate(mle.Element)
                     where str != null &&
                     !Database.Query<TranslatedInstanceEntity>().Any(ti =>
-                        ti.Instance.RefersTo(mle.Parent) &&
+                        ti.Instance.Is(mle.Parent) &&
                         ti.PropertyRoute.IsPropertyRoute(pr) &&
                         ti.RowId == mle.RowId.ToString() &&
                         ti.Culture == ci.ToCultureInfoEntity() &&

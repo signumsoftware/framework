@@ -24,7 +24,7 @@ namespace Signum.Engine.Alerts
     public static class AlertLogic
     {
         static Expression<Func<Entity, IQueryable<AlertEntity>>> AlertsExpression =
-            e => Database.Query<AlertEntity>().Where(a => a.Target.RefersTo(e));
+            e => Database.Query<AlertEntity>().Where(a => a.Target.Is(e));
         [ExpressionField]
         public static IQueryable<AlertEntity> Alerts(this Entity e)
         {
@@ -153,7 +153,7 @@ namespace Signum.Engine.Alerts
             sb.Schema.Settings.AssertImplementedBy((AlertEntity a) => a.CreatedBy, typeof(UserEntity));
 
             TypeConditionLogic.RegisterCompile<AlertEntity>(typeCondition,
-                a => a.CreatedBy.RefersTo(UserEntity.Current));
+                a => a.CreatedBy.Is(UserEntity.Current));
         }
 
         public static void RegisterRecipientTypeCondition(SchemaBuilder sb, TypeConditionSymbol typeCondition)
@@ -161,7 +161,7 @@ namespace Signum.Engine.Alerts
             sb.Schema.Settings.AssertImplementedBy((AlertEntity a) => a.Recipient, typeof(UserEntity));
 
             TypeConditionLogic.RegisterCompile<AlertEntity>(typeCondition,
-                a => a.Recipient.RefersTo(UserEntity.Current));
+                a => a.Recipient.Is(UserEntity.Current));
         }
     }
 

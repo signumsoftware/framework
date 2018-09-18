@@ -166,7 +166,7 @@ namespace Signum.Engine.Disconnected
                                     using (token.MeasureTime(l =>
                                     {
                                         if (result != null)
-                                            import.MListElementsLite(_ => _.Copies).Where(mle => mle.Element.Type.RefersTo(tuple.Type.ToTypeEntity())).UnsafeUpdateMList()
+                                            import.MListElementsLite(_ => _.Copies).Where(mle => mle.Element.Type.Is(tuple.Type.ToTypeEntity())).UnsafeUpdateMList()
                                                 .Set(mle => mle.Element.CopyTable, mle => l)
                                                 .Set(mle => mle.Element.DisableForeignKeys, mle => tuple.Strategy.DisableForeignKeys.Value)
                                                 .Set(mle => mle.Element.InsertedRows, mle => result.Inserted)
@@ -328,7 +328,7 @@ namespace Signum.Engine.Disconnected
 
         private IQueryable<MListElement<DisconnectedImportEntity, DisconnectedImportTableEmbedded>> ImportTableQuery(Lite<DisconnectedImportEntity> import, TypeEntity type)
         {
-            return Database.MListQuery((DisconnectedImportEntity s) => s.Copies).Where(dst => dst.Parent.ToLite() == import && dst.Element.Type.RefersTo(type));
+            return Database.MListQuery((DisconnectedImportEntity s) => s.Copies).Where(dst => dst.Parent.ToLite() == import && dst.Element.Type.Is(type));
         }
 
         public void UnlockTables(Lite<DisconnectedMachineEntity> machine)

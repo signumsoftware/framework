@@ -32,7 +32,7 @@ namespace Signum.Engine.Mailing.Pop3
     public static class Pop3ConfigurationLogic
     {
         static Expression<Func<Pop3ConfigurationEntity, IQueryable<Pop3ReceptionEntity>>> ReceptionsExpression =
-            c => Database.Query<Pop3ReceptionEntity>().Where(r => r.Pop3Configuration.RefersTo(c));
+            c => Database.Query<Pop3ReceptionEntity>().Where(r => r.Pop3Configuration.Is(c));
         [ExpressionField]
         public static IQueryable<Pop3ReceptionEntity> Receptions(this Pop3ConfigurationEntity c)
         {
@@ -40,7 +40,7 @@ namespace Signum.Engine.Mailing.Pop3
         }
 
         static Expression<Func<Pop3ReceptionEntity, IQueryable<EmailMessageEntity>>> EmailMessagesExpression =
-            r => Database.Query<EmailMessageEntity>().Where(m => m.Mixin<EmailReceptionMixin>().ReceptionInfo.Reception.RefersTo(r));
+            r => Database.Query<EmailMessageEntity>().Where(m => m.Mixin<EmailReceptionMixin>().ReceptionInfo.Reception.Is(r));
         [ExpressionField]
         public static IQueryable<EmailMessageEntity> EmailMessages(this Pop3ReceptionEntity r)
         {
@@ -48,7 +48,7 @@ namespace Signum.Engine.Mailing.Pop3
         }
 
         static Expression<Func<Pop3ReceptionEntity, IQueryable<ExceptionEntity>>> ExceptionsExpression =
-            e => Database.Query<Pop3ReceptionExceptionEntity>().Where(a => a.Reception.RefersTo(e)).Select(a => a.Exception.Entity);
+            e => Database.Query<Pop3ReceptionExceptionEntity>().Where(a => a.Reception.Is(e)).Select(a => a.Exception.Entity);
         [ExpressionField]
         public static IQueryable<ExceptionEntity> Exceptions(this Pop3ReceptionEntity e)
         {
@@ -57,7 +57,7 @@ namespace Signum.Engine.Mailing.Pop3
 
 
         static Expression<Func<ExceptionEntity, Pop3ReceptionEntity>> Pop3ReceptionExpression =
-            ex => Database.Query<Pop3ReceptionExceptionEntity>().Where(re => re.Exception.RefersTo(ex)).Select(re => re.Reception.Entity).SingleOrDefaultEx();
+            ex => Database.Query<Pop3ReceptionExceptionEntity>().Where(re => re.Exception.Is(ex)).Select(re => re.Reception.Entity).SingleOrDefaultEx();
         [ExpressionField]
         public static Pop3ReceptionEntity Pop3Reception(this ExceptionEntity entity)
         {
@@ -189,7 +189,7 @@ namespace Signum.Engine.Mailing.Pop3
 
 
                         var lastsEmails = Database.Query<EmailMessageEntity>()
-                            .Where(e => e.Mixin<EmailReceptionMixin>().ReceptionInfo.Reception.Entity.Pop3Configuration.RefersTo(config))
+                            .Where(e => e.Mixin<EmailReceptionMixin>().ReceptionInfo.Reception.Entity.Pop3Configuration.Is(config))
                             .Select(d => new { d.CreationDate, d.Mixin<EmailReceptionMixin>().ReceptionInfo.UniqueId })
                             .OrderByDescending(c => c.CreationDate).Take(10).ToDictionary(e => e.UniqueId);
 

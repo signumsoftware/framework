@@ -86,7 +86,7 @@ namespace Signum.Engine.Authorization
                 var sessionEnd = timeOut.HasValue ? TimeZoneManager.Now.Subtract(timeOut.Value).TrimToSeconds() : TimeZoneManager.Now.TrimToSeconds();
 
                 var rows = Database.Query<SessionLogEntity>()
-                    .Where(sl => sl.User.RefersTo(user))
+                    .Where(sl => sl.User.Is(user))
                     .OrderByDescending(sl => sl.SessionStart)
                     .Take(1)
                     .Where(sl => sl.SessionEnd == null)
