@@ -18,6 +18,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\..\..\github\Microsoft.SqlServer.Types\src\Microsoft.SqlServer.Types\Microsoft.SqlServer.Types.csproj" />
     <ProjectReference Include="..\..\Framework\Signum.Entities\Signum.Entities.csproj" />
     <ProjectReference Include="..\..\Framework\Signum.Utilities\Signum.Utilities.csproj" />
   </ItemGroup>
