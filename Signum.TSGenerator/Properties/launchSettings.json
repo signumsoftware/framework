@@ -2,8 +2,8 @@
   "profiles": {
     "Signum.TSGenerator": {
       "commandName": "Project",
-      "commandLineArgs": "\"obj\\Debug\\netcoreapp2.1\\Signum.React.Extensions.dll\" \"D:\\Signum\\Southwind\\Extensions\\Signum.React.Extensions\\obj\\SignumReferences.txt\" \"D:\\Signum\\Southwind\\Extensions\\Signum.React.Extensions\\obj\\SignumContent.txt\"",
-      "workingDirectory": "D:\\Signum\\Southwind\\Extensions\\Signum.React.Extensions\\"
+      "commandLineArgs": "\"obj\\Debug\\netcoreapp2.1\\Signum.React.Extensions.dll\" \"D:\\Signum\\SouthwindCore\\Extensions\\Signum.React.Extensions\\obj\\SignumReferences.txt\" \"D:\\Signum\\SouthwindCore\\Extensions\\Signum.React.Extensions\\obj\\SignumContent.txt\"",
+      "workingDirectory": "D:\\Signum\\SouthwindCore\\Extensions\\Signum.React.Extensions\\"
     }
   }
 }
