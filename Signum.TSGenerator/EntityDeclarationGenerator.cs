@@ -313,11 +313,6 @@ namespace Signum.TSGenerator
 
         private static string EntityInTypeScript(TypeDefinition type, Options options)
         {
-            if (type.Name.StartsWith("AllowedRuleCoerced"))
-            {
-
-            }
-
             StringBuilder sb = new StringBuilder();
             if (!type.IsAbstract)
                 sb.AppendLine($"export const {type.Name} = new Type<{type.Name}>(\"{CleanTypeName(type)}\");");
