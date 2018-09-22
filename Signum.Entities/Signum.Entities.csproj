@@ -6,6 +6,8 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Signum.MSBuildTask\Signum.MSBuildTask.csproj" />
+    <ProjectReference Include="..\Signum.TSGenerator\Signum.TSGenerator.csproj" />
     <ProjectReference Include="..\Signum.Utilities\Signum.Utilities.csproj" />
   </ItemGroup>
 
