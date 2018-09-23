@@ -72,6 +72,15 @@ namespace Signum.Test.Environment
                 sb.Settings.FieldAttributes((AlbumEntity a) => a.BonusTrack.Duration).Add(new Signum.Entities.IgnoreAttribute());
             }
 
+            if(sqlVersion > SqlServerVersion.SqlServer2008)
+            {
+                sb.Settings.UdtSqlName.Add(typeof(SqlHierarchyId), "HierarchyId");
+            }
+            else
+            {
+                sb.Settings.FieldAttributes((LabelEntity a) => a.Node).Add(new Signum.Entities.IgnoreAttribute());
+            }
+
             Validator.PropertyValidator((OperationLogEntity e) => e.User).Validators.Clear();
             
             TypeLogic.Start(sb);

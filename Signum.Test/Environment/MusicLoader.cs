@@ -1,4 +1,4 @@
-﻿//using Microsoft.SqlServer.Types;
+﻿using Microsoft.SqlServer.Types;
 using Signum.Engine;
 using Signum.Engine.Operations;
 using Signum.Entities;
@@ -15,15 +15,15 @@ namespace Signum.Test.Environment
     {
         public const string Japan = "Japan";
 
-        //public static SqlHierarchyId FirstChild(this SqlHierarchyId parent)
-        //{
-        //    return parent.GetDescendant(SqlHierarchyId.Null, SqlHierarchyId.Null);
-        //}
+        public static SqlHierarchyId FirstChild(this SqlHierarchyId parent)
+        {
+            return parent.GetDescendant(null, null);
+        }
 
-        //public static SqlHierarchyId NextSibling(this SqlHierarchyId sibling)
-        //{
-        //    return sibling.GetAncestor(1).GetDescendant(sibling, SqlHierarchyId.Null);
-        //}
+        public static SqlHierarchyId NextSibling(this SqlHierarchyId sibling)
+        {
+            return sibling.GetAncestor(1).GetDescendant(sibling, null);
+        }
 
         public static void Load()
         {
@@ -48,7 +48,7 @@ namespace Signum.Test.Environment
             new NoteWithDateEntity { CreationTime = DateTime.Now.AddHours(+8), Text = "American alternative rock band", Target = smashingPumpkins }
                 .Execute(NoteWithDateOperation.Save);
 
-            LabelEntity virgin = new LabelEntity { Name = "Virgin", Country = usa /*, Node = SqlHierarchyId.GetRoot().FirstChild()*/ }
+            LabelEntity virgin = new LabelEntity { Name = "Virgin", Country = usa, Node = SqlHierarchyId.GetRoot().FirstChild() }
                 .Execute(LabelOperation.Save);
 
             new AlbumEntity
@@ -78,7 +78,7 @@ namespace Signum.Test.Environment
             new NoteWithDateEntity { CreationTime = DateTime.Now.AddDays(-100).AddHours(-8), Text = "The blue one with the angel", Target = mellon }
                 .Execute(NoteWithDateOperation.Save);
 
-            LabelEntity wea = new LabelEntity { Name = "WEA International", Country = usa, Owner = virgin.ToLite(), /*Node = virgin.Node.FirstChild()*/ }
+            LabelEntity wea = new LabelEntity { Name = "WEA International", Country = usa, Owner = virgin.ToLite(), Node = virgin.Node.FirstChild() }
                 .Execute(LabelOperation.Save);
             
             new AlbumEntity
@@ -119,7 +119,7 @@ namespace Signum.Test.Environment
                 .Do(n => n.Mixin<ColaboratorsMixin>().Colaborators.Add(michael))
                 .Execute(NoteWithDateOperation.Save);
 
-            LabelEntity universal = new LabelEntity { Name = "UMG Recordings", Country = usa, /*Node = virgin.Node.NextSibling()*/ }
+            LabelEntity universal = new LabelEntity { Name = "UMG Recordings", Country = usa, Node = virgin.Node.NextSibling() }
                 .Execute(LabelOperation.Save);
 
             new AlbumEntity
@@ -132,7 +132,7 @@ namespace Signum.Test.Environment
                 Label = universal,
             }.Execute(AlbumOperation.Save);
 
-            LabelEntity sony = new LabelEntity { Name = "Sony", Country = japan, /*Node = universal.Node.NextSibling()*/ }
+            LabelEntity sony = new LabelEntity { Name = "Sony", Country = japan, Node = universal.Node.NextSibling() }
                 .Execute(LabelOperation.Save);
 
             new AlbumEntity
@@ -146,7 +146,7 @@ namespace Signum.Test.Environment
                 Label = sony
             }.Execute(AlbumOperation.Save);
 
-            LabelEntity mjj = new LabelEntity { Name = "MJJ", Country = usa, Owner = sony.ToLite(), /*Node = sony.Node.FirstChild()*/ }
+            LabelEntity mjj = new LabelEntity { Name = "MJJ", Country = usa, Owner = sony.ToLite(), Node = sony.Node.FirstChild() }
                 .Execute(LabelOperation.Save);
 
             new AlbumEntity
@@ -201,7 +201,7 @@ namespace Signum.Test.Environment
                 LastAward = ga,
             }.Execute(BandOperation.Save);
 
-            LabelEntity fatCat = new LabelEntity { Name = "FatCat Records", Country = usa, Owner = universal.ToLite(), /*Node = universal.Node.FirstChild()*/ }
+            LabelEntity fatCat = new LabelEntity { Name = "FatCat Records", Country = usa, Owner = universal.ToLite(), Node = universal.Node.FirstChild() }
                 .Execute(LabelOperation.Save);
 
             new AlbumEntity
@@ -215,7 +215,7 @@ namespace Signum.Test.Environment
                 Label = fatCat,
             }.Execute(AlbumOperation.Save);
 
-            LabelEntity emi = new LabelEntity { Name = "EMI", Country = usa, /*Node = sony.Node.NextSibling()*/ }.Execute(LabelOperation.Save);
+            LabelEntity emi = new LabelEntity { Name = "EMI", Country = usa, Node = sony.Node.NextSibling() }.Execute(LabelOperation.Save);
 
             new AlbumEntity
             {

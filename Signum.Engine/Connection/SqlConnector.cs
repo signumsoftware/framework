@@ -13,7 +13,6 @@ using System.Reflection;
 using Signum.Utilities.Reflection;
 using System.Linq.Expressions;
 using Signum.Utilities.ExpressionTrees;
-//using Microsoft.SqlServer.Types;
 using Microsoft.SqlServer.Server;
 using System.Threading;
 using System.Threading.Tasks;
@@ -101,15 +100,6 @@ namespace Signum.Engine
 
                 if (!s.TypeValues.ContainsKey(typeof(TimeSpan)))
                     schema.Settings.TypeValues.Add(typeof(TimeSpan), SqlDbType.Time);
-
-                //if (!s.UdtSqlName.ContainsKey(typeof(SqlHierarchyId)))
-                //    s.UdtSqlName.Add(typeof(SqlHierarchyId), "HierarchyId");
-
-                //if (!s.UdtSqlName.ContainsKey(typeof(SqlGeography)))
-                //    s.UdtSqlName.Add(typeof(SqlGeography), "Geography");
-
-                //if (!s.UdtSqlName.ContainsKey(typeof(SqlGeometry)))
-                //    s.UdtSqlName.Add(typeof(SqlGeometry), "Geometry");
             }
         }
 
