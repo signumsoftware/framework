@@ -88,7 +88,7 @@ namespace Signum.Entities.Authorization
         }
     }
 
-    [DescriptionOptions(DescriptionOptions.Members)]
+    [DescriptionOptions(DescriptionOptions.Members), InTypeScript(true)]
     public enum QueryAllowed
     {
         None = 0,
@@ -96,7 +96,7 @@ namespace Signum.Entities.Authorization
         Allow = 2,
     }
 
-    [DescriptionOptions(DescriptionOptions.Members)]
+    [DescriptionOptions(DescriptionOptions.Members), InTypeScript(true)]
     public enum OperationAllowed
     {
         None = 0,
@@ -104,7 +104,7 @@ namespace Signum.Entities.Authorization
         Allow = 2,
     }
 
-    [DescriptionOptions(DescriptionOptions.Members)]
+    [DescriptionOptions(DescriptionOptions.Members), InTypeScript(true)]
     public enum PropertyAllowed
     {
         None,
