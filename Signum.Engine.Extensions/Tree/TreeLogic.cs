@@ -94,44 +94,45 @@ namespace Signum.Engine.Tree
             tree.SetFullName(tree.Ascendants().Select(a => a.Name).ToString(" > "));
         }
 
-        static SqlHierarchyId LastChild<T>(SqlHierarchyId node)
+        static SqlHierarchyId? LastChild<T>(SqlHierarchyId node)
             where T : TreeEntity
         {
             using (ExecutionMode.Global())
                 return Database.Query<T>()
                     .Select(c => (SqlHierarchyId?)c.Route)
                     .Where(n => (bool)((SqlHierarchyId)n.Value.GetAncestor(1) == node))
-                    .OrderByDescending(n => n).FirstOrDefault() ?? SqlHierarchyId.Null;
+                    .OrderByDescending(n => n)
+                    .FirstOrDefault();
         }
 
-        static SqlHierarchyId FirstChild<T>(SqlHierarchyId node)
+        static SqlHierarchyId? FirstChild<T>(SqlHierarchyId node)
             where T : TreeEntity
         {
             using (ExecutionMode.Global())
                 return Database.Query<T>()
                     .Select(c => (SqlHierarchyId?)c.Route)
                     .Where(n => (bool)((SqlHierarchyId)n.Value.GetAncestor(1) == node))
-                    .OrderBy(n => n).FirstOrDefault() ?? SqlHierarchyId.Null;
+                    .OrderBy(n => n).FirstOrDefault();
         }
 
-        private static SqlHierarchyId Next<T>(SqlHierarchyId node)
+        private static SqlHierarchyId? Next<T>(SqlHierarchyId node)
             where T : TreeEntity
         {
             using (ExecutionMode.Global())
                 return Database.Query<T>()
                     .Select(t => (SqlHierarchyId?)t.Route)
                     .Where(n => (bool)(n.Value.GetAncestor(1) == node.GetAncestor(1)) && (bool)(n.Value > node))
-                    .OrderBy(n => n).FirstOrDefault() ?? SqlHierarchyId.Null;
+                    .OrderBy(n => n).FirstOrDefault();
         }
 
-        private static SqlHierarchyId Previous<T>(SqlHierarchyId node)
+        private static SqlHierarchyId? Previous<T>(SqlHierarchyId node)
         where T : TreeEntity
         {
             using (ExecutionMode.Global())
                 return Database.Query<T>()
                     .Select(t => (SqlHierarchyId?)t.Route)
                     .Where(n => (bool)(n.Value.GetAncestor(1) == node.GetAncestor(1)) && (bool)(n.Value < node))
-                    .OrderByDescending(n => n).FirstOrDefault() ?? SqlHierarchyId.Null;
+                    .OrderByDescending(n => n).FirstOrDefault();
         }
 
 
@@ -199,10 +200,10 @@ namespace Signum.Engine.Tree
                 throw new Exception(TreeMessage.ImpossibleToMove0InsideOf1.NiceToString(entity, model.NewParent));
 
             if (model.InsertPlace == InsertPlace.FirstNode)
-                return newParentRoute.GetDescendant(SqlHierarchyId.Null, FirstChild<T>(newParentRoute));
+                return newParentRoute.GetDescendant(null, FirstChild<T>(newParentRoute));
 
             if(model.InsertPlace == InsertPlace.LastNode)
-                return newParentRoute.GetDescendant(LastChild<T>(newParentRoute), SqlHierarchyId.Null);
+                return newParentRoute.GetDescendant(LastChild<T>(newParentRoute), null);
 
             var newSiblingRoute = model.Sibling.InDB(a => a.Route);
 
@@ -363,10 +364,10 @@ namespace Signum.Engine.Tree
             if (!t.IsSibling)
             {
                 if (t.ParentOrSibling == null)
-                    return SqlHierarchyId.GetRoot().GetDescendant(LastChild<T>(SqlHierarchyId.GetRoot()), SqlHierarchyId.Null);
+                    return SqlHierarchyId.GetRoot().GetDescendant(LastChild<T>(SqlHierarchyId.GetRoot()), null);
 
                 var parentRoute = t.ParentOrSibling.InDB(p => p.Route);
-                return parentRoute.GetDescendant(LastChild<T>(parentRoute), SqlHierarchyId.Null);
+                return parentRoute.GetDescendant(LastChild<T>(parentRoute), null);
             }
             else
             {

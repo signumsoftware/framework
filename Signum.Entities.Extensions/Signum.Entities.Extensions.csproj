@@ -15,10 +15,10 @@
     <PackageReference Include="Microsoft.CSharp" Version="4.5.0" />
     <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
     <PackageReference Include="System.Runtime.Loader" Version="4.3.0" />
+    <PackageReference Include="Unofficial.Microsoft.SqlServer.Types" Version="1.0.1" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\..\..\github\Microsoft.SqlServer.Types\src\Microsoft.SqlServer.Types\Microsoft.SqlServer.Types.csproj" />
     <ProjectReference Include="..\..\Framework\Signum.Entities\Signum.Entities.csproj" />
     <ProjectReference Include="..\..\Framework\Signum.Utilities\Signum.Utilities.csproj" />
   </ItemGroup>
