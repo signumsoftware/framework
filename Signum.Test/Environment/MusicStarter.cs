@@ -15,6 +15,7 @@ using Signum.Utilities;
 using Signum.Engine.Operations;
 using Signum.Engine.Basics;
 using Microsoft.Extensions.Configuration;
+using Microsoft.SqlServer.Types;
 
 namespace Signum.Test.Environment
 {
@@ -31,7 +32,11 @@ namespace Signum.Test.Environment
                 if (startedAndLoaded)
                     return;
 
-                var conf = new ConfigurationBuilder().SetBasePath(Directory.GetCurrentDirectory()).AddJsonFile("appsettings.json").Build();
+                var conf = new ConfigurationBuilder().SetBasePath(Directory.GetCurrentDirectory())
+                    .AddJsonFile("appsettings.json")
+                    .AddUserSecrets(typeof(MusicStarter).Assembly)
+                    .Build();
+
                 var connectionString = conf.GetConnectionString("SignumTest");
 
                 Start(connectionString);
