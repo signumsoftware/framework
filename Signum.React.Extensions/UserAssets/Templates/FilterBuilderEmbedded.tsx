@@ -360,7 +360,7 @@ export class ValueLineOrExpression extends React.Component<ValueLineOrExpression
                 onClick={e => {
                     e.preventDefault();
                     if (this.props.filterType == "DateTime")
-                        this.props.ctx.value = "YYYY/MM/DD hh:mm:ss";
+                        this.props.ctx.value = "yyyy/mm/dd hh:mm:ss";
 
                     if (this.props.filterType == "Lite")
                         this.props.ctx.value = "[CurrentEntity]";
@@ -388,9 +388,7 @@ function parseValue(str: string | null | undefined, filterType: FilterType | und
 
 function parseDate(str: string){
     const parsed = moment(str, serverFormat, true).format();
-
-    debugger;
-
+    
     return parsed == "Invalid date" ? undefined : parsed;
 }
 
