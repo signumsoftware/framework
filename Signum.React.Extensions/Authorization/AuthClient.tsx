@@ -337,6 +337,11 @@ export function logout() {
 function logoutInternal() {
     setAuthToken(undefined);
     setCurrentUser(undefined);
+    Navigator.clearEntitySettings();
+    Operations.clearOperationSettings();
+    OmniboxClient.clearSpecialActions();
+    OmniboxClient.clearProviders();
+    Finder.clearQuerySettings();
     Options.onLogout();
 }
 
