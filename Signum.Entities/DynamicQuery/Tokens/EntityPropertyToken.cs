@@ -129,7 +129,7 @@ namespace Signum.Entities.DynamicQuery
 
         public override string Unit
         {
-            get { return UnitAttribute.GetTranslation(PropertyInfo.GetCustomAttribute<UnitAttribute>()?.UnitName); }
+            get { return PropertyInfo.GetCustomAttribute<UnitAttribute>()?.UnitName; }
         }
 
         public override string IsAllowed()
