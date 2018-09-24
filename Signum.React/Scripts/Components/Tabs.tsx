@@ -31,15 +31,21 @@ export class UncontrolledTabs extends React.Component<UncontrolledTabsProps, Unc
             if (newEventKey != null)
                 this.setState({ activeEventKey: newEventKey });
         } else {
-            var array = (React.Children.toArray(newProps.children) as React.ReactElement<TabProps>[]);
 
-            if (!array.some(a => a.props.eventKey == this.state.activeEventKey)) {
-                const newEventKey = getFirstEventKey(newProps.children);
-                this.setState({ activeEventKey: newEventKey });
+            var array = (React.Children.toArray(newProps.children) as React.ReactElement<TabProps>[]);
+         
+            if (this.state.activeEventKey != newProps.defaultEventKey) {
+                let newEventKey = null;
+
+                if (!array.some(a => a.props.eventKey == newProps.defaultEventKey))
+                   newEventKey = getFirstEventKey(newProps.children);
+                else
+                   newEventKey = newProps.defaultEventKey;
+
+                this.setState({ activeEventKey: newEventKey })
             }
         }
     }
-
 
     handleToggle = (eventKey: string | number) => {
         if (this.state.activeEventKey !== eventKey) {
@@ -50,9 +56,8 @@ export class UncontrolledTabs extends React.Component<UncontrolledTabsProps, Unc
         }
     }
 
-    render() {
-
-        const { children, defaultEventKey, hideOnly , fill, pills } = this.props;
+    render() {     
+        const { children, defaultEventKey, hideOnly, fill, pills } = this.props;
 
         return (
             <Tabs activeEventKey={this.state.activeEventKey} toggle={this.handleToggle} fill={fill} pills={pills} hideOnly={hideOnly}>
