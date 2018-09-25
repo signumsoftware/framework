@@ -103,6 +103,10 @@ namespace Signum.Engine.Word
                     });
 
 
+                sb.Schema.Table<SystemWordTemplateEntity>().PreDeleteSqlSync += e =>
+                    Administrator.UnsafeDeletePreCommand(Database.Query<WordTemplateEntity>()
+                        .Where(a => a.SystemWordTemplate.Is(e)));
+
                 ToDataTableProviders.Add("Model", new ModelDataTableProvider());
                 ToDataTableProviders.Add("UserQuery", new UserQueryDataTableProvider());
                 ToDataTableProviders.Add("UserChart", new UserChartDataTableProvider());
@@ -127,6 +131,8 @@ namespace Signum.Engine.Word
 
                 WordTemplatesLazy = sb.GlobalLazy(() => Database.Query<WordTemplateEntity>()
                    .ToDictionary(et => et.ToLite()), new InvalidateWith(typeof(WordTemplateEntity)));
+
+                
 
                 TemplatesByQueryName = sb.GlobalLazy(() =>
                 {
