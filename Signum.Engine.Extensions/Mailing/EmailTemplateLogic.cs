@@ -112,6 +112,9 @@ namespace Signum.Engine.Mailing
                 
                 sb.Schema.EntityEvents<EmailTemplateEntity>().PreSaving += new PreSavingEventHandler<EmailTemplateEntity>(EmailTemplate_PreSaving);
                 sb.Schema.EntityEvents<EmailTemplateEntity>().Retrieved += EmailTemplateLogic_Retrieved;
+                sb.Schema.Table<SystemEmailEntity>().PreDeleteSqlSync += e =>
+                    Administrator.UnsafeDeletePreCommand(Database.Query<EmailTemplateEntity>()
+                        .Where(a => a.SystemEmail.Is(e)));
 
                 Validator.OverridePropertyValidator((EmailTemplateMessageEmbedded m) => m.Text).StaticPropertyValidation +=
                     EmailTemplateMessageText_StaticPropertyValidation;
