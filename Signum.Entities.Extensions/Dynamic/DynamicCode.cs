@@ -46,6 +46,7 @@ namespace Signum.Entities.Dynamic
             typeof(System.Linq.Expressions.Expression),
             typeof(Signum.Utilities.Csv), //  "Signum.Utilities.dll",
             typeof(Newtonsoft.Json.JsonConvert), //"Newtonsoft.Json.dll",
+            typeof(DocumentFormat.OpenXml.AlternateContent), //"DocumentFormat.OpenXml.dll",
         };
 
         public static IEnumerable<MetadataReference> GetMetadataReferences()

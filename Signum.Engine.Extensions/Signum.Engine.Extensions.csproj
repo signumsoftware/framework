@@ -29,6 +29,7 @@
     <PackageReference Include="System.DirectoryServices.AccountManagement" Version="4.5.0" />
     <PackageReference Include="System.Drawing.Common" Version="4.5.0" />
     <PackageReference Include="System.Runtime.Loader" Version="4.3.0" />
+    <PackageReference Include="Unofficial.Microsoft.SqlServer.Types" Version="1.0.1" />
   </ItemGroup>
 
   <ItemGroup>
