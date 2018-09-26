@@ -19,8 +19,7 @@ namespace Signum.Engine.Migrations
 {
     public class SqlMigrationRunner
     {
-        public static string MigrationsDirectory = @"..\..\Migrations";
-        public static string MigrationsDirectoryName = "Migrations";
+        public static string MigrationsDirectory = @"..\..\..\Migrations";
 
         public static void SqlMigrations()
         {
