@@ -10,7 +10,6 @@ using System.ComponentModel;
 using System.Resources;
 using System.Globalization;
 using System.Collections.Concurrent;
-//using Microsoft.SqlServer.Types;
 
 namespace Signum.Utilities.Reflection
 {
@@ -447,25 +446,19 @@ namespace Signum.Utilities.Reflection
             if (utype == typeof(Guid))
                 return Guid.Parse(value);
 
-            //if (utype.Namespace == "Microsoft.SqlServer.Types")
-            //    return ParseSqlServerType(utype, value); //Delay reference
+            if (CustomParsers.TryGetValue(utype, out var func))
+                return func(value); //Delay reference
 
             return Convert.ChangeType(value, utype);
         }
 
-        //private static object ParseSqlServerType(Type type, string value)
-        //{
-        //    if (type == typeof(SqlHierarchyId))
-        //        return SqlHierarchyId.Parse(value);
 
-        //    if (type == typeof(SqlGeography))
-        //        return SqlGeography.Parse(value);
-
-        //    if (type == typeof(SqlGeometry))
-        //        return SqlGeometry.Parse(value);
-
-        //    throw new InvalidOperationException("Unexpected {0}".FormatWith(type.Name));
-        //}
+        public static Dictionary<Type, Func<string, object>> CustomParsers = new Dictionary<Type, Func<string, object>>
+        {
+            //{ typeof(SqlHierarchyId), str => SqlHierarchyId.Parse(str) },
+            //{ typeof(SqlGeography), str => SqlGeography.Parse(str) },
+            //{ typeof(SqlGeometry), str => SqlGeometry.Parse(str) },
+        };
 
         public static T Parse<T>(string value, CultureInfo culture)
         {

@@ -37,7 +37,9 @@ namespace Signum.Engine.Maps
 
         public Dictionary<Type, string> UdtSqlName = new Dictionary<Type, string>()
         {
-
+            //{ typeof(SqlHierarchyId), "HierarchyId"},
+            //{ typeof(SqlGeography), "Geography"},
+            //{ typeof(SqlGeometry), "Geometry"},
         };
 
         public Dictionary<Type, SqlDbType> TypeValues = new Dictionary<Type, SqlDbType>

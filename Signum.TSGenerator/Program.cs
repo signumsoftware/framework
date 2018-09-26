@@ -62,7 +62,7 @@ namespace Signum.TSGenerator
         }
     }
 
-    public class ProxyGenerator: MarshalByRefObject
+    public class ProxyGenerator
     {
         public string Process(string templateFile, string[] referenceList, string projectFile)
         {
@@ -84,7 +84,9 @@ namespace Signum.TSGenerator
                 AllReferences = referenceList.ToDictionary(a => Path.GetFileNameWithoutExtension(a)),
             };
 
-            return EntityDeclarationGenerator.Process(options);
+            PreloadingAssemblyResolver resolver = new PreloadingAssemblyResolver(referenceList);
+
+            return EntityDeclarationGenerator.Process(options, resolver);
         }
 
         ConcurrentDictionary<string, List<string>> AllFilesCache = new ConcurrentDictionary<string, List<string>>();

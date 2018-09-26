@@ -69,7 +69,9 @@ namespace Signum.MSBuildTask
                     WriteSymbols = hasPdb,
                     SymbolWriterProvider = hasPdb ? new PdbWriterProvider() : null
                 });
-                
+
+                log.WriteLine("Signum.MSBuildTask finished: {0}", intermediateAssembly);
+
                 return 0;
             }
             catch (Exception e)

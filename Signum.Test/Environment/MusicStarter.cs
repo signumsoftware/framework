@@ -15,6 +15,7 @@ using Signum.Utilities;
 using Signum.Engine.Operations;
 using Signum.Engine.Basics;
 using Microsoft.Extensions.Configuration;
+using Microsoft.SqlServer.Types;
 
 namespace Signum.Test.Environment
 {
@@ -31,7 +32,11 @@ namespace Signum.Test.Environment
                 if (startedAndLoaded)
                     return;
 
-                var conf = new ConfigurationBuilder().SetBasePath(Directory.GetCurrentDirectory()).AddJsonFile("appsettings.json").Build();
+                var conf = new ConfigurationBuilder().SetBasePath(Directory.GetCurrentDirectory())
+                    .AddJsonFile("appsettings.json")
+                    .AddUserSecrets(typeof(MusicStarter).Assembly)
+                    .Build();
+
                 var connectionString = conf.GetConnectionString("SignumTest");
 
                 Start(connectionString);
@@ -70,6 +75,15 @@ namespace Signum.Test.Environment
             {
                 sb.Settings.FieldAttributes((AlbumEntity a) => a.Songs[0].Duration).Add(new Signum.Entities.IgnoreAttribute());
                 sb.Settings.FieldAttributes((AlbumEntity a) => a.BonusTrack.Duration).Add(new Signum.Entities.IgnoreAttribute());
+            }
+
+            if(sqlVersion > SqlServerVersion.SqlServer2008)
+            {
+                sb.Settings.UdtSqlName.Add(typeof(SqlHierarchyId), "HierarchyId");
+            }
+            else
+            {
+                sb.Settings.FieldAttributes((LabelEntity a) => a.Node).Add(new Signum.Entities.IgnoreAttribute());
             }
 
             Validator.PropertyValidator((OperationLogEntity e) => e.User).Validators.Clear();

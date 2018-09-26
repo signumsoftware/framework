@@ -5,6 +5,7 @@ using System.Text;
 using Signum.Entities;
 using System.Linq.Expressions;
 using Signum.Utilities;
+using Microsoft.SqlServer.Types;
 using Microsoft.SqlServer.Server;
 using Signum.Engine;
 using Signum.Engine.Maps;
@@ -250,8 +251,8 @@ namespace Signum.Test.Environment
 
         public Lite<LabelEntity> Owner { get; set; }
 
-        //[UniqueIndex]
-        //public SqlHierarchyId Node { get; set; }
+        [UniqueIndex]
+        public SqlHierarchyId Node { get; set; }
 
         static Expression<Func<LabelEntity, string>> ToStringExpression = a => a.Name;
         [ExpressionField]

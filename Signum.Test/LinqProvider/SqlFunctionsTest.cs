@@ -1,4 +1,4 @@
-﻿//using Microsoft.SqlServer.Types;
+﻿using Microsoft.SqlServer.Types;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Signum.Engine;
 using Signum.Engine.Maps;
@@ -164,24 +164,25 @@ namespace Signum.Test.LinqProvider
                              where d.Element.Duration != null
                              select (n.CreationTime - d.Element.Duration.Value).InSql()).ToString(", "));
         }
-        
-        //[TestMethod]
-        //public void SqlHierarchyIdFunction()
-        //{
-        //    if (!Schema.Current.Settings.UdtSqlName.ContainsKey(typeof(SqlHierarchyId)))
-        //        return;
-
-        //    var nodes = Database.Query<LabelEntity>().Select(a => a.Node);
-
-        //    Debug.WriteLine(nodes.Select(n => n.GetAncestor(0).InSql()).ToString(", "));
-        //    Debug.WriteLine(nodes.Select(n => n.GetAncestor(1).InSql()).ToString(", "));
-        //    Debug.WriteLine(nodes.Select(n => (int)(short)n.GetLevel().InSql()).ToString(", "));
-        //    Debug.WriteLine(nodes.Select(n => n.ToString().InSql()).ToString(", "));
 
 
-        //    Debug.WriteLine(nodes.Where(n => (bool)(n.GetDescendant(SqlHierarchyId.Null, SqlHierarchyId.Null) != SqlHierarchyId.Null)).ToString(", "));
-        //    Debug.WriteLine(nodes.Where(n => (bool)(n.GetReparentedValue(n.GetAncestor(0), SqlHierarchyId.GetRoot()) != SqlHierarchyId.Null)).ToString(", "));
-        //}
+        [TestMethod]
+        public void SqlHierarchyIdFunction()
+        {
+            if (!Schema.Current.Settings.UdtSqlName.ContainsKey(typeof(SqlHierarchyId)))
+                return;
+
+            var nodes = Database.Query<LabelEntity>().Select(a => a.Node);
+
+            Debug.WriteLine(nodes.Select(n => n.GetAncestor(0).InSql()).ToString(", "));
+            Debug.WriteLine(nodes.Select(n => n.GetAncestor(1).InSql()).ToString(", "));
+            Debug.WriteLine(nodes.Select(n => (int)(short)n.GetLevel().InSql()).ToString(", "));
+            Debug.WriteLine(nodes.Select(n => n.ToString().InSql()).ToString(", "));
+
+
+            Debug.WriteLine(nodes.Where(n => (bool)(n.GetDescendant(null, null) > SqlHierarchyId.GetRoot())).ToString(", "));
+            Debug.WriteLine(nodes.Where(n => (bool)(n.GetReparentedValue(n.GetAncestor(0), SqlHierarchyId.GetRoot()) > SqlHierarchyId.GetRoot())).ToString(", "));
+        }
 
         [TestMethod]
         public void MathFunctions()

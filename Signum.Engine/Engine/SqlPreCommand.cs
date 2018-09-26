@@ -11,8 +11,8 @@ using System.IO;
 using System.Threading;
 using System.Diagnostics;
 using System.Data.Common;
-//using Microsoft.SqlServer.Types;
 using System.Globalization;
+using Signum.Engine.Maps;
 
 namespace Signum.Engine
 {
@@ -184,8 +184,8 @@ namespace Signum.Engine
             if (value is bool b)
                 return (b ? 1 : 0).ToString();
 
-            //if (value is SqlHierarchyId sh)
-            //    return "CAST('{0}' AS hierarchyid)".FormatWith(sh);
+            if (Schema.Current.Settings.UdtSqlName.TryGetValue(value.GetType(), out var name))
+                return "CAST('{0}' AS {1})".FormatWith(value, name);
 
             if (value.GetType().IsEnum)
                 return Convert.ToInt32(value).ToString();
