@@ -15,7 +15,8 @@ namespace Signum.Utilities
 {
     public static class Csv
     {
-        public static Encoding DefaultEncoding = Encoding.GetEncoding(1252);
+        public static Encoding DefaultEncoding => Encoding.GetEncoding(1252);
+
         public static CultureInfo DefaultCulture = null;
 
         public static string ToCsvFile<T>(this IEnumerable<T> collection, string fileName, Encoding encoding = null, CultureInfo culture = null, bool writeHeaders = true, bool autoFlush = false, bool append = false,
