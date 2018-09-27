@@ -136,7 +136,7 @@ export function getEmailTemplates(ctx: ContextualItemsContext<Entity>): Promise<
     if (ctx.lites.length == 0)
         return undefined;
 
-    return API.getEmailTemplates(ctx.queryDescription.queryKey, ctx.lites.length > 1 ? "Multiple" : "Single")
+    return API.getEmailTemplates(ctx.queryDescription.queryKey, ctx.lites.length > 1 ? "Multiple" : "Single", ctx.lites.length == 1 ? ctx.lites[0] : null)
         .then(wts => {
             if (!wts.length)
                 return undefined;
@@ -205,8 +205,8 @@ export module API {
         return ajaxPost<string>({ url: "~/api/email/constructorType" }, systemEmailTemplate);
     }
 
-    export function getEmailTemplates(queryKey: string, visibleOn: EmailTemplateVisibleOn): Promise<Lite<EmailTemplateEntity>[]> {
-        return ajaxGet<Lite<EmailTemplateEntity>[]>({ url: `~/api/email/emailTemplates?queryKey=${queryKey}&visibleOn=${visibleOn}` });
+    export function getEmailTemplates(queryKey: string, visibleOn: EmailTemplateVisibleOn, lite: Lite<Entity> | null): Promise<Lite<EmailTemplateEntity>[]> {
+        return ajaxPost<Lite<EmailTemplateEntity>[]>({ url: `~/api/email/emailTemplates?queryKey=${queryKey}&visibleOn=${visibleOn}` }, lite);
     }
 }
 
