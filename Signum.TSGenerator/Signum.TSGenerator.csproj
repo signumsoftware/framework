@@ -6,11 +6,8 @@
     <OutputType>Exe</OutputType>
     <StartupObject>Signum.TSGenerator.Program</StartupObject>
     <TargetLatestRuntimePatch>true</TargetLatestRuntimePatch>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <LangVersion>latest</LangVersion>
     <OutputPath>Binaries\</OutputPath>
+    <LangVersion>latest</LangVersion>
   </PropertyGroup>
 
   <ItemGroup>

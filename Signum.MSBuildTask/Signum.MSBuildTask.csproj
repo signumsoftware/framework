@@ -7,14 +7,11 @@
     <StartupObject>Signum.MSBuildTask.Program</StartupObject>
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
     <TargetLatestRuntimePatch>true</TargetLatestRuntimePatch>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <LangVersion>latest</LangVersion>
     <OutputPath>Binaries\</OutputPath>
   </PropertyGroup>
 
-  <ItemGroup>
+ <ItemGroup>
     <PackageReference Include="Mono.Cecil" Version="0.10.1" />
   </ItemGroup>
 
