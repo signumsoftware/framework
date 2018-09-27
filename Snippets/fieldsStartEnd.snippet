@@ -1,16 +1,16 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <CodeSnippets  xmlns="http://schemas.microsoft.com/VisualStudio/2005/CodeSnippet">
-	<CodeSnippet Format="1.0.0">
-		<Header>
-			<Title>StartDate EndDate fields</Title>
-			<Shortcut>fieldsStartEnd</Shortcut>
-			<Description>StartDate EndDate properties for an Entity</Description>
-			<Author>Signum Software</Author>
-			<SnippetTypes>
-				<SnippetType>Expansion</SnippetType>
-			</SnippetTypes>
-		</Header>
-		<Snippet>
+  <CodeSnippet Format="1.0.0">
+    <Header>
+      <Title>StartDate EndDate fields</Title>
+      <Shortcut>fieldsStartEnd</Shortcut>
+      <Description>StartDate EndDate properties for an Entity</Description>
+      <Author>Signum Software</Author>
+      <SnippetTypes>
+        <SnippetType>Expansion</SnippetType>
+      </SnippetTypes>
+    </Header>
+    <Snippet>
       <Imports>
         <Import>
           <Namespace>Signum.Entities</Namespace>
@@ -19,10 +19,10 @@
           <Namespace>Signum.Utilities</Namespace>
         </Import>
       </Imports>
-			<Declarations>				
-			</Declarations>
-			<Code Language="csharp">
-				<![CDATA[//implement : ITemporaryEntityEntity
+      <Declarations>        
+      </Declarations>
+      <Code Language="csharp">
+        <![CDATA[//implement : ITemporaryEntityEntity
         
         DateTime? startDate;
         [SecondsPrecissionValidator]
@@ -40,7 +40,7 @@
             set { if (Set(ref endDate, value.ValidarPrecision())) Notify(() => StartDate); }
         }
      $end$]]>
-			</Code>
-		</Snippet>
-	</CodeSnippet>
+      </Code>
+    </Snippet>
+  </CodeSnippet>
 </CodeSnippets>

@@ -1,16 +1,16 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <CodeSnippets  xmlns="http://schemas.microsoft.com/VisualStudio/2005/CodeSnippet">
-	<CodeSnippet Format="1.0.0">
-		<Header>
-			<Title>Start</Title>
-			<Shortcut>start</Shortcut>
-			<Description>New start method</Description>
-			<Author>Signum Software</Author>
-			<SnippetTypes>
-				<SnippetType>Expansion</SnippetType>
-			</SnippetTypes>
-		</Header>
-		<Snippet>
+  <CodeSnippet Format="1.0.0">
+    <Header>
+      <Title>Start</Title>
+      <Shortcut>start</Shortcut>
+      <Description>New start method</Description>
+      <Author>Signum Software</Author>
+      <SnippetTypes>
+        <SnippetType>Expansion</SnippetType>
+      </SnippetTypes>
+    </Header>
+    <Snippet>
       <Imports>
         <Import>
           <Namespace>Signum.Engine</Namespace>
@@ -22,8 +22,8 @@
           <Namespace>Signum.Utilities</Namespace>
         </Import>
       </Imports>
-			<Code Language="csharp">
-				<![CDATA[
+      <Code Language="csharp">
+        <![CDATA[
         public static void Start(SchemaBuilder sb)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
@@ -31,7 +31,7 @@
                 
             }
         }]]>
-			</Code>
-		</Snippet>
-	</CodeSnippet>
+      </Code>
+    </Snippet>
+  </CodeSnippet>
 </CodeSnippets>

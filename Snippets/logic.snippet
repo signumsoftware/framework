@@ -1,16 +1,16 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <CodeSnippets  xmlns="http://schemas.microsoft.com/VisualStudio/2005/CodeSnippet">
-	<CodeSnippet Format="1.0.0">
-		<Header>
-			<Title>Logic</Title>
-			<Shortcut>logic</Shortcut>
-			<Description>New logic static class</Description>
-			<Author>Signum Software</Author>
-			<SnippetTypes>
-				<SnippetType>Expansion</SnippetType>
-			</SnippetTypes>
-		</Header>
-		<Snippet>
+  <CodeSnippet Format="1.0.0">
+    <Header>
+      <Title>Logic</Title>
+      <Shortcut>logic</Shortcut>
+      <Description>New logic static class</Description>
+      <Author>Signum Software</Author>
+      <SnippetTypes>
+        <SnippetType>Expansion</SnippetType>
+      </SnippetTypes>
+    </Header>
+    <Snippet>
       <Imports>
         <Import>
           <Namespace>Signum.Engine</Namespace>
@@ -34,7 +34,7 @@
           <Namespace>System.Reflection</Namespace>
         </Import>
       </Imports>
-			<Declarations>
+      <Declarations>
         <Literal>
           <ID>entityName</ID>
           <ToolTip>Name of the main entity</ToolTip>
@@ -45,9 +45,9 @@
           <ToolTip>Entity parameter</ToolTip>
           <Default>e</Default>
         </Literal>
-			</Declarations>
-			<Code Language="csharp">
-				<![CDATA[public static class $entityName$Logic
+      </Declarations>
+      <Code Language="csharp">
+        <![CDATA[public static class $entityName$Logic
     {
         public static void Start(SchemaBuilder sb)
         {
@@ -64,7 +64,7 @@
             }
         }
     }]]>
-			</Code>
-		</Snippet>
-	</CodeSnippet>
+      </Code>
+    </Snippet>
+  </CodeSnippet>
 </CodeSnippets>

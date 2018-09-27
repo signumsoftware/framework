@@ -1,16 +1,16 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <CodeSnippets  xmlns="http://schemas.microsoft.com/VisualStudio/2005/CodeSnippet">
-	<CodeSnippet Format="1.0.0">
-		<Header>
-			<Title>Field of type String</Title>
-			<Shortcut>fieldString</Shortcut>
-			<Description>New field of type string with max size</Description>
-			<Author>Signum Software</Author>
-			<SnippetTypes>
-				<SnippetType>Expansion</SnippetType>
-			</SnippetTypes>
-		</Header>
-		<Snippet>
+  <CodeSnippet Format="1.0.0">
+    <Header>
+      <Title>Field of type String</Title>
+      <Shortcut>fieldString</Shortcut>
+      <Description>New field of type string with max size</Description>
+      <Author>Signum Software</Author>
+      <SnippetTypes>
+        <SnippetType>Expansion</SnippetType>
+      </SnippetTypes>
+    </Header>
+    <Snippet>
       <Imports>
         <Import>
           <Namespace>Signum.Entities</Namespace>
@@ -19,24 +19,24 @@
           <Namespace>Signum.Utilities</Namespace>
         </Import>
       </Imports>
-			<Declarations>
-				<Literal>
-					<ID>property</ID>
-					<ToolTip>Property</ToolTip>
-					<Default>Bar</Default>
-					<Function></Function>
-				</Literal>
+      <Declarations>
+        <Literal>
+          <ID>property</ID>
+          <ToolTip>Property</ToolTip>
+          <Default>Bar</Default>
+          <Function></Function>
+        </Literal>
         <Literal>
           <ID>size</ID>
           <ToolTip>String Size</ToolTip>
           <Default>100</Default>
           <Function></Function>
         </Literal>
-			</Declarations>
-			<Code Language="csharp">
-				<![CDATA[[StringLengthValidator(AllowNulls=false, Max = $size$)]
+      </Declarations>
+      <Code Language="csharp">
+        <![CDATA[[StringLengthValidator(AllowNulls=false, Max = $size$)]
         public string $property$ { get; set; }$end$]]>
-			</Code>
-		</Snippet>
-	</CodeSnippet>
+      </Code>
+    </Snippet>
+  </CodeSnippet>
 </CodeSnippets>

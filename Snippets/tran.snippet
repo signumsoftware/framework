@@ -1,17 +1,17 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <CodeSnippets  xmlns="http://schemas.microsoft.com/VisualStudio/2005/CodeSnippet">
-	<CodeSnippet Format="1.0.0">
-		<Header>
-			<Title>Transaction</Title>
-			<Shortcut>tran</Shortcut>
-			<Description>New Transaction</Description>
-			<Author>Signum Framework</Author>
-			<SnippetTypes>
-				<SnippetType>Expansion</SnippetType>
-				<SnippetType>SurroundsWith</SnippetType>
-			</SnippetTypes>
-		</Header>
-		<Snippet>
+  <CodeSnippet Format="1.0.0">
+    <Header>
+      <Title>Transaction</Title>
+      <Shortcut>tran</Shortcut>
+      <Description>New Transaction</Description>
+      <Author>Signum Framework</Author>
+      <SnippetTypes>
+        <SnippetType>Expansion</SnippetType>
+        <SnippetType>SurroundsWith</SnippetType>
+      </SnippetTypes>
+    </Header>
+    <Snippet>
       <Imports>
         <Import>
           <Namespace>Signum.Engine</Namespace>
@@ -23,13 +23,13 @@
           <Namespace>Signum.Utilities</Namespace>
         </Import>
       </Imports>
-			<Code Language="csharp"><![CDATA[using (Transaction tr = new Transaction())
+      <Code Language="csharp"><![CDATA[using (Transaction tr = new Transaction())
 {
-	$selected$$end$
+  $selected$$end$
     tr.Commit();
 }
 ]]>
-			</Code>
-		</Snippet>
-	</CodeSnippet>
+      </Code>
+    </Snippet>
+  </CodeSnippet>
 </CodeSnippets>
