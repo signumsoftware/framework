@@ -5,6 +5,7 @@
     <TypeScriptToolsVersion>3.0</TypeScriptToolsVersion>
     <LangVersion>latest</LangVersion>
     <OutputType>Library</OutputType>
+    <TargetLatestRuntimePatch>true</TargetLatestRuntimePatch>
     <StartupObject></StartupObject>
   </PropertyGroup>
 
