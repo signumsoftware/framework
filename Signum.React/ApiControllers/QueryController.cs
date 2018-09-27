@@ -483,7 +483,7 @@ namespace Signum.React.ApiControllers
                 token.GetPropertyRoute() is PropertyRoute pr &&
                 typeof(Entity).IsAssignableFrom(pr.RootType) &&
                 Schema.Current.HasSomeIndex(pr);
-            this.unit = a.Unit;
+            this.unit = UnitAttribute.GetTranslation(a.Unit);
             this.format = a.Format;
             this.displayName = a.DisplayName;
             this.propertyRoute = token.GetPropertyRoute()?.ToString();

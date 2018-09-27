@@ -130,6 +130,10 @@ export function createRoute(type: PseudoType) {
 
 export const entitySettings: { [type: string]: EntitySettings<ModifiableEntity> } = {};
 
+export function clearEntitySettings() {
+    Dic.clear(entitySettings);
+}
+
 export function addSettings(...settings: EntitySettings<any>[]) {
     settings.forEach(s => Dic.addOrThrow(entitySettings, s.typeName, s));
 }

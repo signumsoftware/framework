@@ -40,6 +40,10 @@ export function start() {
 
 export const operationSettings: { [operationKey: string]: OperationSettings } = {};
 
+export function clearOperationSettings() {
+    Dic.clear(operationSettings);
+}
+
 export function addSettings(...settings: OperationSettings[]) {
     settings.forEach(s => Dic.addOrThrow(operationSettings, s.operationSymbol.key!, s));
 }
