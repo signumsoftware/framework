@@ -6,6 +6,7 @@ import * as Navigator from '../Navigator'
 import { ViewReplacer } from '../Frames/ReactVisitor'
 import { ValueLine, EntityLine, EntityCombo, EntityDetail, EntityStrip, TypeContext, EntityCheckboxList, EnumCheckboxList, EntityTable } from '../Lines'
 import { Type } from '../Reflection';
+import { EntityRepeater } from './EntityRepeater';
 
 export default class DynamicComponent extends React.Component<{ ctx: TypeContext<ModifiableEntity>, viewName?: string }> {
 
@@ -84,8 +85,11 @@ export default class DynamicComponent extends React.Component<{ ctx: TypeContext
                 if (tis.length == 1 && tis.first().kind == "Enum")
                     return <EnumCheckboxList ctx={ctx} />;
 
-                if (tis.every(t => t.entityKind == "Part" || t.entityKind == "SharedPart"))
+                if (tis.length == 1 && (tis.first().entityKind == "Part" || tis.first().entityKind == "SharedPart"))
                     return <EntityTable ctx={ctx} />;
+
+                if (tis.every(t => t.entityKind == "Part" || t.entityKind == "SharedPart"))
+                    return <EntityRepeater ctx={ctx} />;
 
                 if (tis.every(t => t.isLowPopulation == true))
                     return <EntityCheckboxList ctx={ctx} />;
