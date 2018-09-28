@@ -43,7 +43,7 @@ export function ajaxGetRaw(options: AjaxOptions) : Promise<Response> {
             } as any,
             mode: options.mode,
             credentials: options.credentials || "same-origin",
-            cache: options.cache,
+            cache: options.cache || "no-cache",
             abortController: options.abortController
         } as RequestInit));
 }
@@ -70,7 +70,7 @@ export function ajaxPostRaw(options: AjaxOptions, data: any): Promise<Response> 
                  ...options.headers
             } as any,
             mode: options.mode,
-            cache: options.cache,
+            cache: options.cache || "no-cache",
             body: JSON.stringify(data),
             abortController: options.abortController
         } as RequestInit));
