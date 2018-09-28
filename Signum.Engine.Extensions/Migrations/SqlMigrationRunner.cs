@@ -184,8 +184,6 @@ namespace Signum.Engine.Migrations
                     string fileName = version + (comment.HasText() ? "_" + FileNameValidatorAttribute.RemoveInvalidCharts(comment): null) + ".sql";
 
                     File.WriteAllText(Path.Combine(MigrationsDirectory, fileName), script.ToString());
-
-                    AddCsprojReference(fileName);
                 }
 
                 return true;
@@ -327,30 +325,6 @@ namespace Signum.Engine.Migrations
             }
 
             Console.WriteLine();
-        }
-
-        private static void AddCsprojReference(string fileName)
-        {
-            string csproj = Directory.EnumerateFiles(Path.Combine(MigrationsDirectory, ".."), "*Load.csproj").SingleEx(() => "Load.csproj");
-
-            var doc = XDocument.Load(csproj);
-            var xmlns = (XNamespace)doc.Document.Root.Attribute("xmlns").Value;
-
-            var element = new XElement(xmlns + "Content",
-               new XAttribute("Include", @"Migrations\" + fileName));
-
-            var itemGroups = doc.Document.Root.Elements(xmlns + "ItemGroup");
-
-            var lastContent = itemGroups
-                .SelectMany(e => e.Elements(xmlns + "Content").Where(a => a.Attribute("Include").Value.StartsWith(@"Migrations\")))
-                .LastOrDefault();
-
-            if (lastContent != null)
-                lastContent.AddAfterSelf(element);
-            else
-                itemGroups.Last().Add(element);
-
-            doc.Save(csproj);
         }
 
         public class MigrationInfo

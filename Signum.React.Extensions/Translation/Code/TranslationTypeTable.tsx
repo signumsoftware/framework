@@ -2,6 +2,7 @@
 import { TranslationMessage } from '../Signum.Entities.Translation'
 import { API, AssemblyResult, LocalizedType, LocalizableType, LocalizedMember } from '../TranslationClient'
 import { Dic } from '@framework/Globals'
+import TextArea from '@framework/Components/TextArea';
 
 export class TranslationTypeTable extends React.Component<{ type: LocalizableType, result: AssemblyResult, currentCulture: string }>{
     render() {
@@ -58,7 +59,7 @@ export class TranslationTypeTable extends React.Component<{ type: LocalizableTyp
     }
 }
 
-export class TranslationMember extends React.Component<{ type: LocalizableType, loc: LocalizedType; member: LocalizedMember; edit: boolean }, { avoidCombo?: boolean }>{
+export class TranslationMember extends React.Component<{ type: LocalizableType, loc: LocalizedType; member: LocalizedMember; edit: boolean }, { avoidCombo?: boolean}>{
 
 
     constructor(props: any) {
@@ -100,7 +101,8 @@ export class TranslationMember extends React.Component<{ type: LocalizableType, 
 
         const translatedMembers = Dic.getValues(this.props.type.cultures).map(lt => ({ culture: lt.culture, member: lt.members[member.name] })).filter(a => a.member != null && a.member.translatedDescription != null);
         if (!translatedMembers.length || this.state.avoidCombo)
-            return (<textarea style={{ height: "24px", width: "90%" }} value={member.description || ""} onChange={this.handleOnChange} ref={(ta) => ta && ta.focus()} />);
+            return (<TextArea style={{ height: "24px", width: "90%" }} value={member.description || ""} onChange={this.handleOnChange}
+                innerRef={(ta) => ta && this.state.avoidCombo && ta.focus() } />);
 
         return (
             <span>
@@ -122,7 +124,7 @@ function initialElementIf(condition: boolean) {
 
 
 
-export class TranslationTypeDescription extends React.Component<{ type: LocalizableType, loc: LocalizedType, edit: boolean, result: AssemblyResult }, { avoidCombo?: boolean }>{
+export class TranslationTypeDescription extends React.Component<{ type: LocalizableType, loc: LocalizedType, edit: boolean, result: AssemblyResult }, { avoidCombo?: boolean, hadComboBox?: boolean }>{
 
     constructor(props: any) {
         super(props);
@@ -161,7 +163,7 @@ export class TranslationTypeDescription extends React.Component<{ type: Localiza
                 <th className="monospaceCell">
                     {
                         type.hasPluralDescription && (edit ?
-                            <textarea style={{ height: "24px", width: "90%" }} value={td.pluralDescription || ""} onChange={e => { td.pluralDescription = e.currentTarget.value; this.forceUpdate(); }} /> :
+                            <TextArea style={{ height: "24px", width: "90%" }} value={td.pluralDescription || ""} onChange={e => { td.pluralDescription = e.currentTarget.value; this.forceUpdate(); }} /> :
                             td.pluralDescription)
                     }
                 </th>
@@ -194,13 +196,13 @@ export class TranslationTypeDescription extends React.Component<{ type: Localiza
     handleKeyDown = (e: React.KeyboardEvent<any>) => {
         if (e.keyCode == 32 || e.keyCode == 113) { //SPACE OR F2
             e.preventDefault();
-            this.setState({ avoidCombo: true });
+            this.setState({ avoidCombo: true});
         }
     }
 
     textArea?: HTMLTextAreaElement | null;
     handleRefTextArea = (ta: HTMLTextAreaElement | null) => {
-        if (this.textArea == null && ta != null)
+        if (this.textArea == null && ta != null && this.state.avoidCombo)
             ta.focus();
 
         this.textArea = ta;
@@ -212,7 +214,7 @@ export class TranslationTypeDescription extends React.Component<{ type: Localiza
 
         const translatedTypes = Dic.getValues(this.props.type.cultures).filter(a => a.typeDescription != null && a.typeDescription.translatedDescription != null);
         if (!translatedTypes.length || this.state.avoidCombo)
-            return (<textarea style={{ height: "24px", width: "90%" }} value={td.description || ""} onChange={this.handleOnChange} ref={this.handleRefTextArea} />);
+            return (<TextArea style={{ height: "24px", width: "90%" }} value={td.description || ""} onChange={this.handleOnChange} innerRef={this.handleRefTextArea} />);
 
         return (
             <span>
