@@ -33,7 +33,12 @@ export function ajaxGet<T>(options: AjaxOptions): Promise<T> {
         .then(text => text.length ? JSON.parse(text) : undefined);
 }
 
-export function ajaxGetRaw(options: AjaxOptions) : Promise<Response> {
+export function ajaxGetRaw(options: AjaxOptions): Promise<Response> {
+
+    if (window.navigator.userAgent.contains("Trident") && (options.cache || "no-cache" == "no-cache")) {
+        options.url += "?cacheTicks=" + new Date().getTime();
+    }
+
     return wrapRequest(options, () =>
         fetchWithAbortModule.fetch(baseUrl(options), {
             method: "GET",
