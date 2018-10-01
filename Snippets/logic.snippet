@@ -58,8 +58,8 @@
                     .WithQuery(() => $entityParam$ => new
                     {
                         Entity = $entityParam$,
-                        $entityParam$.Id
-                        //More fields
+                        $entityParam$.Id,
+                        $entityParam$.$end$
                     });
             }
         }

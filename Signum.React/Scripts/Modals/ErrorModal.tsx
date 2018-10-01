@@ -90,11 +90,11 @@ export default class ErrorModal extends React.Component<ErrorModalProps, { showD
         return (
             <span>
                 <FontAwesomeIcon icon={se.defaultIcon} />&nbsp; <span>{se.httpError.exceptionType}</span>
-                ({
+                {se.httpError.exceptionId && <span>({
                     Navigator.isViewable(ExceptionEntity) ?
                         <a href={Navigator.navigateRoute(ExceptionEntity, se.httpError.exceptionId!)}>{se.httpError.exceptionId}</a> :
                         <strong>{se.httpError.exceptionId}</strong>
-                })
+                })</span>}
             </span>
         );
     }

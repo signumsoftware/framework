@@ -13,7 +13,7 @@ namespace Signum.React.Filters
     public class VersionFilterAttribute : ActionFilterAttribute
     {
         //In Global.asax: VersionFilterAttribute.CurrentVersion = CustomAssembly.GetName().Version.ToString()
-        public static string CurrentVersion = Assembly.GetExecutingAssembly().GetName().Version.ToString();
+        public static string CurrentVersion = Assembly.GetEntryAssembly().GetName().Version.ToString();
 
         public override void OnActionExecuted(ActionExecutedContext context)
         {

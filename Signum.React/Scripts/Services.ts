@@ -167,13 +167,23 @@ export module ThrowErrorFilter {
         return makeCall().then(response => {
             if (response.status >= 200 && response.status < 300) {
                 return response;
-            } else if (response.status == 400) {
-                return response.json().then<Response>((modelState: ModelState) => {
-                    throw new ValidationError(modelState);
-                });
             } else {
-                return response.json().then<Response>((error: WebApiHttpError) => {
-                    throw new ServiceError(error);
+                return response.text().then<Response>(text => {
+                    if (text.length) {
+                        var obj = JSON.parse(text);
+                        if (response.status == 400 && !(obj as WebApiHttpError).exceptionType)
+                            throw new ValidationError(obj as ModelState);
+                        else
+                            throw new ServiceError(obj as WebApiHttpError);
+                    }  
+                    else
+                        throw new ServiceError({
+                            exceptionType: "Status " + response.status,
+                            exceptionMessage: response.statusText,
+                            exceptionId: null,
+                            innerException: null,
+                            stackTrace: null,
+                        });
                 });
             }
         });
