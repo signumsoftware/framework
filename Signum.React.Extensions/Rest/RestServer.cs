@@ -9,43 +9,41 @@ using System.Net.Http;
 using System.Security.Authentication;
 using Signum.Engine.Authorization;
 using Signum.Entities.Basics;
+using Microsoft.AspNetCore.Mvc.Filters;
+using Microsoft.AspNetCore.Builder;
+using System.Reflection;
 
 namespace Signum.React.Rest
 {
     public static class RestServer
     {
-        //public static void Start()
-        //{
-        //    SignumAuthenticationFilterAttribute.Authenticators.Insert(0, ApiKeyAuthenticator);
-        //}
+        public static void Start(IApplicationBuilder app)
+        {
+            SignumControllerFactory.RegisterArea(MethodInfo.GetCurrentMethod());
+            SignumAuthenticationFilter.Authenticators.Insert(0, ApiKeyAuthenticator);
+        }
 
-        //private static SignumAuthenticationResult ApiKeyAuthenticator(HttpActionContext ctx)
-        //{
-        //    var nvp = ctx.Request.RequestUri.ParseQueryString();
-        //    IEnumerable<string> queryKeys = ctx.Request.RequestUri
-        //        .ParseQueryString()
-        //        .GetValues(RestApiKeyLogic.ApiKeyQueryParameter)?
-        //        .Distinct() ?? Enumerable.Empty<string>();
+        private static SignumAuthenticationResult ApiKeyAuthenticator(FilterContext ctx)
+        {
+            ctx.HttpContext.Request.Query.TryGetValue(RestApiKeyLogic.ApiKeyQueryParameter, out var val);
+            ctx.HttpContext.Request.Headers.TryGetValue(RestApiKeyLogic.ApiKeyHeaderParameter, out var headerKeys);
 
-        //    IEnumerable<string> headerKeys;
-        //    ctx.Request.Headers.TryGetValues(RestApiKeyLogic.ApiKeyHeaderParameter, out headerKeys);
+            var keys = val.Distinct().Union(headerKeys.Distinct()).ToList();
 
-        //    var keys = queryKeys.Union(headerKeys ?? Enumerable.Empty<string>());
+            if (keys.Count() == 1)
+            {
+                using (AuthLogic.Disable())
+                {
+                    var user = RestApiKeyLogic.RestApiKeyCache.Value.GetOrThrow(keys.Single(), $"Could not authenticate with the API Key {keys.Single()}.").User.Retrieve();
+                    return new SignumAuthenticationResult { User = user };
+                }
+            }
+            else if (keys.Count() > 1)
+            {
+                throw new AuthenticationException("Request contains multiple API Keys. Please use a single API Key per request for authentication.");
+            }
 
-        //    if (keys.Count() == 1)
-        //    {
-        //        using (AuthLogic.Disable())
-        //        {
-        //            var user = RestApiKeyLogic.RestApiKeyCache.Value.GetOrThrow(keys.Single(), $"Could not authenticate with the API Key {keys.Single()}.").User.Retrieve();
-        //            return new SignumAuthenticationResult { User = user };
-        //        }
-        //    }
-        //    else if (keys.Count() > 1)
-        //    {
-        //        throw new AuthenticationException("Request contains multiple API Keys. Please use a single API Key per request for authentication.");
-        //    }
-
-        //    return null;
-        //}
+            return null;
+        }
     }
 }

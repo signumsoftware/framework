@@ -148,20 +148,23 @@ namespace Signum.Engine.Translation
             var appName = rootDir.AfterLast(@"\");
             rootDir = rootDir.BeforeLast(@"\");
 
-            var reactDir = new DirectoryInfo($@"{rootDir}\{appName}.React\Translations");
+            var reactDir = new DirectoryInfo($@"{rootDir}\{appName}.React\bin").GetDirectories("Translations", SearchOption.AllDirectories).SingleEx();
 
             foreach (var fi in reactDir.GetFiles("*.xml"))
             {
-                var targetDir =
+                var targetDirectory =
                     fi.Name.StartsWith(appName + ".Entities") ? $@"{rootDir}\{appName}.Entities\Translations" :
                     fi.Name.StartsWith("Signum.Entities.Extensions") ? $@"{rootDir}\Extensions\Signum.Entities.Extensions\Translations" :
                     fi.Name.StartsWith("Signum.Entities") ? $@"{rootDir}\Framework\Signum.Entities\Translations" :
                     fi.Name.StartsWith("Signum.Utilities") ? $@"{rootDir}\Framework\Signum.Utilities\Translations" :
                     throw new InvalidOperationException("Unexpected file with name " + fi.Name);
 
-                var targetPath = Path.Combine(targetDir, fi.Name);
-                Console.WriteLine(targetPath);
-                File.Copy(fi.FullName, targetPath, overwrite: true);
+                if (Directory.Exists(targetDirectory))
+                    Directory.CreateDirectory(targetDirectory);
+
+                var targetFilePath = Path.Combine(targetDirectory, fi.Name);
+                Console.WriteLine(targetFilePath);
+                File.Copy(fi.FullName, targetFilePath, overwrite: true);
             }
         }
     }
