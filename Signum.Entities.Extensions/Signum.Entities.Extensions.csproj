@@ -124,6 +124,7 @@
     <Compile Include="DiffLog\TimeMachine.cs" />
     <Compile Include="Dynamic\DynamicCode.cs" />
     <Compile Include="Dynamic\Dynamic.cs" />
+    <Compile Include="Dynamic\DynamicCSSOverride.cs" />
     <Compile Include="Dynamic\DynamicMixinConnection.cs" />
     <Compile Include="Files\FilePathUtils.cs" />
     <Compile Include="Files\FileTypeSymbol.cs" />

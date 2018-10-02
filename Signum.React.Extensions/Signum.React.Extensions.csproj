@@ -228,9 +228,12 @@
     <Compile Include="Dynamic\DynamicServer.cs" />
     <TypeScriptCompile Include="Basics\Templates\ScrollPanel.tsx" />
     <TypeScriptCompile Include="Chart\Templates\GoogleMapStyles.ts" />
+    <TypeScriptCompile Include="Codemirror\CSharpCodeMirror.tsx" />
     <TypeScriptCompile Include="DiffLog\Templates\DiffDocument.tsx" />
     <TypeScriptCompile Include="DiffLog\Templates\TimeMachinePage.tsx" />
+    <TypeScriptCompile Include="Dynamic\CSS\DynamicCSSOverride.tsx" />
     <TypeScriptCompile Include="Dynamic\DynamicClientOptions.tsx" />
+    <TypeScriptCompile Include="Dynamic\DynamicCSSOverrideClient.tsx" />
     <TypeScriptCompile Include="Files\FileImageLine.tsx" />
     <TypeScriptCompile Include="Files\FileImage.tsx" />
     <TypeScriptCompile Include="MachineLearning\Signum.Entities.MachineLearning.ts" />
@@ -330,7 +333,7 @@
     <TypeScriptCompile Include="Dynamic\View\NodeUtils.tsx" />
     <TypeScriptCompile Include="Dynamic\View\Nodes.tsx" />
     <TypeScriptCompile Include="Dynamic\DynamicValidationClient.tsx" />
-    <TypeScriptCompile Include="Codemirror\CSharpCodeMirror.tsx" />
+    <TypeScriptCompile Include="Codemirror\CSSCodeMirror.tsx" />
     <TypeScriptCompile Include="Dynamic\Validation\DynamicValidation.tsx" />
     <TypeScriptCompile Include="Dynamic\View\NodeSelectorModal.tsx" />
     <TypeScriptCompile Include="Files\FileUploader.tsx" />
