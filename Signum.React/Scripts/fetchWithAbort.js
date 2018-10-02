@@ -283,6 +283,7 @@
         if (options.headers || !this.headers) {
             this.headers = new Headers(options.headers)
         }
+        this.cache = options.cache;
         this.method = normalizeMethod(options.method || this.method || 'GET')
         this.mode = options.mode || this.mode || null
         this.referrer = null
@@ -436,6 +437,8 @@
             request.headers.forEach(function (value, name) {
                 xhr.setRequestHeader(name, value)
             })
+            
+            xhr.setRequestHeader("Cache-Control", request.cache);
 
             xhr.send(typeof request._bodyInit === 'undefined' ? null : request._bodyInit)
         })

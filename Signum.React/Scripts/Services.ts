@@ -33,7 +33,12 @@ export function ajaxGet<T>(options: AjaxOptions): Promise<T> {
         .then(text => text.length ? JSON.parse(text) : undefined);
 }
 
-export function ajaxGetRaw(options: AjaxOptions) : Promise<Response> {
+export function ajaxGetRaw(options: AjaxOptions): Promise<Response> {
+
+    if (window.navigator.userAgent.contains("Trident") && (options.cache || "no-cache" == "no-cache")) {
+        options.url += "?cacheTicks=" + new Date().getTime();
+    }
+
     return wrapRequest(options, () =>
         fetchWithAbortModule.fetch(baseUrl(options), {
             method: "GET",
@@ -43,7 +48,7 @@ export function ajaxGetRaw(options: AjaxOptions) : Promise<Response> {
             } as any,
             mode: options.mode,
             credentials: options.credentials || "same-origin",
-            cache: options.cache,
+            cache: options.cache || "no-cache",
             abortController: options.abortController
         } as RequestInit));
 }
@@ -70,7 +75,7 @@ export function ajaxPostRaw(options: AjaxOptions, data: any): Promise<Response> 
                  ...options.headers
             } as any,
             mode: options.mode,
-            cache: options.cache,
+            cache: options.cache || "no-cache",
             body: JSON.stringify(data),
             abortController: options.abortController
         } as RequestInit));
