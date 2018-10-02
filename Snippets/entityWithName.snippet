@@ -1,16 +1,16 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <CodeSnippets  xmlns="http://schemas.microsoft.com/VisualStudio/2005/CodeSnippet">
-	<CodeSnippet Format="1.0.0">
-		<Header>
-			<Title>Entity With Name</Title>
-			<Shortcut>entityWithName</Shortcut>
-			<Description>New Entity with a Name field</Description>
-			<Author>Signum Software</Author>
-			<SnippetTypes>
-				<SnippetType>Expansion</SnippetType>
-			</SnippetTypes>
-		</Header>
-		<Snippet>
+  <CodeSnippet Format="1.0.0">
+    <Header>
+      <Title>Entity With Name</Title>
+      <Shortcut>entityWithName</Shortcut>
+      <Description>New Entity with a Name field</Description>
+      <Author>Signum Software</Author>
+      <SnippetTypes>
+        <SnippetType>Expansion</SnippetType>
+      </SnippetTypes>
+    </Header>
+    <Snippet>
       <Imports>
         <Import>
           <Namespace>Signum.Entities</Namespace>
@@ -22,20 +22,20 @@
           <Namespace>System.Linq.Expressions</Namespace>
         </Import>
       </Imports>
-			<Declarations>
-				<Literal>
-					<ID>entityName</ID>
-					<ToolTip>Name of the Entity</ToolTip>
-					<Default>Foo</Default>
-				</Literal>
+      <Declarations>
+        <Literal>
+          <ID>entityName</ID>
+          <ToolTip>Name of the Entity</ToolTip>
+          <Default>Foo</Default>
+        </Literal>
         <Literal>
           <ID>Name</ID>
           <ToolTip>Name Property</ToolTip>
           <Default>Name</Default>
         </Literal>
-			</Declarations>
-			<Code Language="csharp">
-				<![CDATA[[Serializable, EntityKind(EntityKind.String, EntityData.Master)]
+      </Declarations>
+      <Code Language="csharp">
+        <![CDATA[[Serializable, EntityKind(EntityKind.String, EntityData.Master)]
     public class $entityName$Entity: Entity
     {
         [UniqueIndex]
@@ -58,7 +58,7 @@
     {
         public static readonly ExecuteSymbol<$entityName$Entity> Save;
     }]]>
-			</Code>
-		</Snippet>
-	</CodeSnippet>
+      </Code>
+    </Snippet>
+  </CodeSnippet>
 </CodeSnippets>
