@@ -37,11 +37,11 @@ namespace Signum.Entities.DynamicQuery
 
         public override string IsAllowed()
         {
-            var result = PropertyRoutes.Select(a => a.IsAllowed()).NotNull().CommaAnd();
-            if (string.IsNullOrEmpty(result))
+            var result = PropertyRoutes.Select(a => a.IsAllowed()).NotNull();
+            if (result.IsEmpty())
                 return null;
 
-            return result;
+            return result.CommaAnd();
         }
 
         public override string ToString()
@@ -66,11 +66,11 @@ namespace Signum.Entities.DynamicQuery
 
         public override string IsAllowed()
         {
-            var result = CleanMetas.Select(a => a.IsAllowed()).NotNull().CommaAnd();
-            if (string.IsNullOrEmpty(result))
+            var result = CleanMetas.Select(a => a.IsAllowed()).NotNull();
+            if (result.IsEmpty())
                 return null;
 
-            return result;
+            return result.CommaAnd();
         }
 
         public override string ToString()
