@@ -675,7 +675,7 @@ JOIN {3} {4} ON {2}.{0} = {4}.Id".FormatWith(tabCol.Name,
                                             Nullable = c.is_nullable,
                                             Collation = c.collation_name == sysDb.collation_name ? null : c.collation_name,
                                             Length = c.max_length,
-                                            Precission = c.precision,
+                                            Precision = c.precision,
                                             Scale = c.scale,
                                             Identity = c.is_identity,
                                             GeneratedAlwaysType = con.SupportsTemporalTables ? c.generated_always_type : GeneratedAlwaysType.None,
@@ -1090,7 +1090,7 @@ EXEC(@{1})".FormatWith(databaseName, variableName));
         public bool Nullable;
         public string Collation;
         public int Length;
-        public int Precission;
+        public int Precision;
         public int Scale;
         public bool Identity;
         public bool PrimaryKey;
@@ -1108,7 +1108,7 @@ EXEC(@{1})".FormatWith(databaseName, variableName));
                 && Collation == other.Collation
                 && StringComparer.InvariantCultureIgnoreCase.Equals(UserTypeName, other.UserDefinedTypeName)
                 && Nullable == (other.Nullable.ToBool())
-                && (other.Size == null || other.Size.Value == Precission || other.Size.Value == Length / BytesPerChar(other.SqlDbType) || other.Size.Value == int.MaxValue && Length == -1)
+                && (other.Size == null || other.Size.Value == Precision || other.Size.Value == Length / BytesPerChar(other.SqlDbType) || other.Size.Value == int.MaxValue && Length == -1)
                 && (other.Scale == null || other.Scale.Value == Scale)
                 && (ignoreIdentity || Identity == other.Identity)
                 && (ignorePrimaryKey || PrimaryKey == other.PrimaryKey)
@@ -1159,7 +1159,7 @@ EXEC(@{1})".FormatWith(databaseName, variableName));
                 Length = Length,
                 PrimaryKey = PrimaryKey,
                 Nullable = Nullable,
-                Precission = Precission,
+                Precision = Precision,
                 Scale = Scale,
                 SqlDbType = SqlDbType,
                 UserTypeName = UserTypeName,

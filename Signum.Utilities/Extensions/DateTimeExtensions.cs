@@ -231,7 +231,7 @@ namespace Signum.Utilities
                 case DateTimePrecision.Seconds: return TrimToSeconds(dateTime);
                 case DateTimePrecision.Milliseconds: return dateTime;
             }
-            throw new ArgumentException("precission");
+            throw new ArgumentException("precision");
         }
 
         public static DateTime TrimToSeconds(this DateTime dateTime)

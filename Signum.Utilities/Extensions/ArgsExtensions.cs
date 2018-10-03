@@ -46,7 +46,7 @@ namespace Signum.Utilities
                 {
                     if (ReflectionTools.IsDecimalNumber(obj.GetType()) &&
                         !ReflectionTools.IsDecimalNumber(typeof(T)))
-                        throw new InvalidOperationException($"Converting {obj} ({obj.GetType().TypeName()}) to {typeof(T).GetType().TypeName()} would lose precission");
+                        throw new InvalidOperationException($"Converting {obj} ({obj.GetType().TypeName()}) to {typeof(T).GetType().TypeName()} would lose precision");
 
                     yield return ReflectionTools.ChangeType<T>(obj);
                 }
