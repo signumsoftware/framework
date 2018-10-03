@@ -23,6 +23,7 @@
   
   <ItemGroup>
     <Analyzer Include="..\Signum.Analyzer\Binaries\Signum.Analyzer.dll" />
+    <ProjectReference Include="..\Signum.TSGenerator\Signum.TSGenerator.csproj" />
   </ItemGroup>
 
   <ItemGroup>
