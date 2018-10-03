@@ -1,16 +1,16 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <CodeSnippets  xmlns="http://schemas.microsoft.com/VisualStudio/2005/CodeSnippet">
-	<CodeSnippet Format="1.0.0">
-		<Header>
-			<Title>MixinEntity</Title>
-			<Shortcut>mixinEntity</Shortcut>
-			<Description>New Mixin Entity</Description>
-			<Author>Signum Software</Author>
-			<SnippetTypes>
-				<SnippetType>Expansion</SnippetType>
-			</SnippetTypes>
-		</Header>
-		<Snippet>
+  <CodeSnippet Format="1.0.0">
+    <Header>
+      <Title>MixinEntity</Title>
+      <Shortcut>mixinEntity</Shortcut>
+      <Description>New Mixin Entity</Description>
+      <Author>Signum Software</Author>
+      <SnippetTypes>
+        <SnippetType>Expansion</SnippetType>
+      </SnippetTypes>
+    </Header>
+    <Snippet>
       <Imports>
         <Import>
           <Namespace>Signum.Entities</Namespace>
@@ -19,15 +19,15 @@
           <Namespace>Signum.Utilities</Namespace>
         </Import>
       </Imports>
-			<Declarations>
-				<Literal>
-					<ID>entityName</ID>
-					<ToolTip>Name of the Entity</ToolTip>
-					<Default>Foo</Default>
-				</Literal>
-			</Declarations>
-			<Code Language="csharp">
-				<![CDATA[[Serializable]
+      <Declarations>
+        <Literal>
+          <ID>entityName</ID>
+          <ToolTip>Name of the Entity</ToolTip>
+          <Default>Foo</Default>
+        </Literal>
+      </Declarations>
+      <Code Language="csharp">
+        <![CDATA[[Serializable]
     public class $entityName$Mixin : MixinEntity
     {
         $entityName$Mixin(Entity mainEntity, MixinEntity next)
@@ -42,7 +42,7 @@
         //    this.AttachedField = (($entityName$Mixin)mixin).AttachedField;
         //}
     }]]>
-			</Code>
-		</Snippet>
-	</CodeSnippet>
+      </Code>
+    </Snippet>
+  </CodeSnippet>
 </CodeSnippets>

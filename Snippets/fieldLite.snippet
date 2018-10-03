@@ -1,16 +1,16 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <CodeSnippets  xmlns="http://schemas.microsoft.com/VisualStudio/2005/CodeSnippet">
-	<CodeSnippet Format="1.0.0">
-		<Header>
-			<Title>Field Lite</Title>
-			<Shortcut>fieldLite</Shortcut>
-			<Description>New Lite field for an Entity</Description>
-			<Author>Signum Software</Author>
-			<SnippetTypes>
-				<SnippetType>Expansion</SnippetType>
-			</SnippetTypes>
-		</Header>
-		<Snippet>
+  <CodeSnippet Format="1.0.0">
+    <Header>
+      <Title>Field Lite</Title>
+      <Shortcut>fieldLite</Shortcut>
+      <Description>New Lite field for an Entity</Description>
+      <Author>Signum Software</Author>
+      <SnippetTypes>
+        <SnippetType>Expansion</SnippetType>
+      </SnippetTypes>
+    </Header>
+    <Snippet>
       <Imports>
         <Import>
           <Namespace>Signum.Entities</Namespace>
@@ -19,23 +19,23 @@
           <Namespace>Signum.Utilities</Namespace>
         </Import>
       </Imports>
-			<Declarations>
-				<Literal>
-					<ID>type</ID>
-					<ToolTip>Field-Property type</ToolTip>
-					<Default>Entity</Default>
-				</Literal>
-				<Literal>
-					<ID>property</ID>
-					<ToolTip>Property</ToolTip>
-					<Default>Bar</Default>
-					<Function></Function>
-				</Literal>
-			</Declarations>
-			<Code Language="csharp">
-				<![CDATA[[NotNullValidator]
+      <Declarations>
+        <Literal>
+          <ID>type</ID>
+          <ToolTip>Field-Property type</ToolTip>
+          <Default>Entity</Default>
+        </Literal>
+        <Literal>
+          <ID>property</ID>
+          <ToolTip>Property</ToolTip>
+          <Default>Bar</Default>
+          <Function></Function>
+        </Literal>
+      </Declarations>
+      <Code Language="csharp">
+        <![CDATA[[NotNullValidator]
         public Lite<$type$> $property$ { get; set; }$end$]]>
-			</Code>
-		</Snippet>
-	</CodeSnippet>
+      </Code>
+    </Snippet>
+  </CodeSnippet>
 </CodeSnippets>

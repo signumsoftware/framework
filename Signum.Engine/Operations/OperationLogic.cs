@@ -170,12 +170,10 @@ namespace Signum.Engine.Operations
             try
             {
                 var types = Schema.Current.Tables.Keys
-                    .Where(t => EntityKindCache.GetAttribute(t) == null)
-                    .Select(a => "'" + a.TypeName() + "'")
-                    .CommaAnd();
+                    .Where(t => EntityKindCache.GetAttribute(t) == null);
 
-                if (types.HasText())
-                    throw new InvalidOperationException($"{0} has not EntityTypeAttribute".FormatWith(types));
+                if (types.Any())
+                    throw new InvalidOperationException($"{0} has not EntityTypeAttribute".FormatWith(types.Select(a => "'" + a.TypeName() + "'").CommaAnd()));
 
                 var errors = (from t in Schema.Current.Tables.Keys
                               let attr = EntityKindCache.GetAttribute(t)

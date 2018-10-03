@@ -54,7 +54,7 @@
       </Declarations>
       <Code Language="csharp">
         <![CDATA[static Expression<Func<$type$, IQueryable<$returnType$>>> $methodName$Expression = 
-            $paramName$ => Database.Query<$returnType$>().Where($paramName2$=>$paramName2$.$type$.RefersTo($paramName$));
+            $paramName$ => Database.Query<$returnType$>().Where($paramName2$=>$paramName2$.$type$.Is($paramName$));
         [ExpressionField]
         public static IQueryable<$returnType$> $methodName$(this $type$ $paramName$)
         {
