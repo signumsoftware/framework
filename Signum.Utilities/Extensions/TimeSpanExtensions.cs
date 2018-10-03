@@ -20,7 +20,7 @@ namespace Signum.Utilities
                 case DateTimePrecision.Seconds: return TrimToSeconds(time);
                 case DateTimePrecision.Milliseconds: return time;
             }
-            throw new ArgumentException("precission");
+            throw new ArgumentException("precision");
         }
 
         public static TimeSpan TrimToSeconds(this TimeSpan time)
@@ -64,17 +64,17 @@ namespace Signum.Utilities
             return timeSpan.NiceToString(DateTimePrecision.Milliseconds);
         }
 
-        public static string NiceToString(this TimeSpan timeSpan, DateTimePrecision precission)
+        public static string NiceToString(this TimeSpan timeSpan, DateTimePrecision precision)
         {
             StringBuilder sb = new StringBuilder();
             bool any = false;
-            if (timeSpan.Days != 0/* && precission >= DateTimePrecision.Days*/)
+            if (timeSpan.Days != 0/* && precision >= DateTimePrecision.Days*/)
             {
                 sb.AppendFormat("{0}d", timeSpan.Days);
                 any = true;
             }
 
-            if ((any || timeSpan.Hours != 0) && precission >= DateTimePrecision.Hours)
+            if ((any || timeSpan.Hours != 0) && precision >= DateTimePrecision.Hours)
             {
                 if (any)
                     sb.Append(" ");
@@ -83,7 +83,7 @@ namespace Signum.Utilities
                 any = true;
             }
 
-            if ((any || timeSpan.Minutes != 0) && precission >= DateTimePrecision.Minutes)
+            if ((any || timeSpan.Minutes != 0) && precision >= DateTimePrecision.Minutes)
             {
                 if (any)
                     sb.Append(" ");
@@ -92,7 +92,7 @@ namespace Signum.Utilities
                 any = true;
             }
 
-            if ((any || timeSpan.Seconds != 0) && precission >= DateTimePrecision.Seconds)
+            if ((any || timeSpan.Seconds != 0) && precision >= DateTimePrecision.Seconds)
             {
                 if (any)
                     sb.Append(" ");
@@ -101,7 +101,7 @@ namespace Signum.Utilities
                 any = true;
             }
 
-            if ((any || timeSpan.Milliseconds != 0) && precission >= DateTimePrecision.Milliseconds)
+            if ((any || timeSpan.Milliseconds != 0) && precision >= DateTimePrecision.Milliseconds)
             {
                 if (any)
                     sb.Append(" ");
