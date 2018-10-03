@@ -59,7 +59,7 @@ namespace Signum.Entities.Scheduler
     [Serializable]
     public class HolidayEmbedded : EmbeddedEntity
     {
-        [DaysPrecissionValidator]
+        [DaysPrecisionValidator]
         public DateTime Date { get; set; } = DateTime.Today;
 
         [StringLengthValidator(AllowNulls = true, Min = 3, Max = 100)]
