@@ -78,9 +78,9 @@ var result = entity is Lite<Entity>;
         {
             string test = Surround(code, withIncludes: withIncludes);
             if (expectedError == null)
-                VerifyDiagnostic(test, new DiagnosticResult[0]);
+                VerifyCSharpDiagnostic(test, new DiagnosticResult[0]);
             else
-                VerifyDiagnostic(test, new DiagnosticResult
+                VerifyCSharpDiagnostic(test, new DiagnosticResult
                 {
                     Id = LiteCastAnalyzer.DiagnosticId,
                     Message = expectedError,

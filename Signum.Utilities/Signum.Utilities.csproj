@@ -16,4 +16,8 @@
     <Folder Include="Properties\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <!--<PackageReference Include="SuperAnalyzer" Version="1.0.0" />-->
+  </ItemGroup>
+
 </Project>

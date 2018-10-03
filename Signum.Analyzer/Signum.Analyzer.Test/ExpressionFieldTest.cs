@@ -195,9 +195,9 @@ namespace Signum.Analyzer.Test
         {
             string test = Surround(code, withIncludes: withIncludes);
             if (expectedError == null)
-                VerifyDiagnostic(test, new DiagnosticResult[0]);
+                VerifyCSharpDiagnostic(test, new DiagnosticResult[0]);
             else
-                VerifyDiagnostic(test, new DiagnosticResult
+                VerifyCSharpDiagnostic(test, new DiagnosticResult
                 {
                     Id = ExpressionFieldAnalyzer.DiagnosticId,
                     Message = string.Format("'OperationLogs' should reference an static field of type Expression<T> with the same signature ({0})", expectedError),
@@ -304,7 +304,7 @@ namespace ConsoleApplication1
 
         private void TestCodeFix(string initial, string final)
         {
-            VerifyFix(Surround(initial), Surround(final, withIncludes:true));
+            VerifyCSharpFix(Surround(initial), Surround(final, withIncludes:true));
         }
     }
 }

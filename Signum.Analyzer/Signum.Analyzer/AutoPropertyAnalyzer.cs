@@ -13,7 +13,7 @@ namespace Signum.Analyzer
     [DiagnosticAnalyzer(LanguageNames.CSharp)]
     public class AutoPropertyAnalyzer : DiagnosticAnalyzer
     {
-        public static readonly string DiagnosticId = "SF0001";
+        public const string DiagnosticId = "SF0001";
 
         internal static DiagnosticDescriptor Rule = new DiagnosticDescriptor(DiagnosticId, 
             "Use auto-properties in entities",

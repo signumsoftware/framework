@@ -24,7 +24,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Analyzer Include="..\Signum.Analyzer\Binaries\Signum.Analyzer.dll" />
+    <PackageReference Include="Signum.Analyzer" Version="1.0.0" />
   </ItemGroup>
 
   <Target Name="SignumAfterCompile" AfterTargets="AfterCompile" Outputs="$(TargetPath)">

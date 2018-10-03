@@ -88,9 +88,9 @@ var condition = type == baseLite;  //Could be SpiderMan!
         {
             string test = Surround(code, withIncludes: withIncludes);
             if (expectedError == null)
-                VerifyDiagnostic(test, new DiagnosticResult[0]);
+                VerifyCSharpDiagnostic(test, new DiagnosticResult[0]);
             else
-                VerifyDiagnostic(test, new DiagnosticResult
+                VerifyCSharpDiagnostic(test, new DiagnosticResult
                 {
                     Id = LiteEqualityAnalyzer.DiagnosticId,
                     Message = expectedError,

@@ -7,12 +7,12 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Signum.MSBuildTask\Signum.MSBuildTask.csproj" />
-    <ProjectReference Include="..\Signum.Utilities\Signum.Utilities.csproj" />
+    <PackageReference Include="Signum.Analyzer" Version="1.0.0" />
   </ItemGroup>
 
   <ItemGroup>
-    <Analyzer Include="..\Signum.Analyzer\Binaries\Signum.Analyzer.dll" />
+    <ProjectReference Include="..\Signum.MSBuildTask\Signum.MSBuildTask.csproj" />
+    <ProjectReference Include="..\Signum.Utilities\Signum.Utilities.csproj" />
   </ItemGroup>
 
   <ItemGroup>

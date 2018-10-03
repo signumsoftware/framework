@@ -49,7 +49,7 @@ namespace ConsoleApplication1
     }
 }";
 
-            VerifyDiagnostic(test, new DiagnosticResult
+            VerifyCSharpDiagnostic(test, new DiagnosticResult
             {
                 Id = AutoPropertyAnalyzer.DiagnosticId,
                 Message = "Properties in 'MyEntity' could be transformed to auto-property",
@@ -74,7 +74,7 @@ namespace ConsoleApplication1
         public string Phone { get; set; }
     }
 }";
-            VerifyFix(test, fixtest);
+            VerifyCSharpFix(test, fixtest);
         }
 
 
@@ -163,7 +163,7 @@ namespace ConsoleApplication1
     }
 }";
 
-            VerifyDiagnostic(test, new DiagnosticResult
+            VerifyCSharpDiagnostic(test, new DiagnosticResult
             {
                 Id = AutoPropertyAnalyzer.DiagnosticId,
                 Message = "Properties in 'MyEntity' could be transformed to auto-property",
@@ -226,7 +226,7 @@ namespace ConsoleApplication1
         }
     }
 }";
-            VerifyFix(test, fixtest);
+            VerifyCSharpFix(test, fixtest);
         }
         
 
