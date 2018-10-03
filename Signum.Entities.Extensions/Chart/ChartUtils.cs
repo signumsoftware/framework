@@ -63,9 +63,9 @@ namespace Signum.Entities.Chart
 				var pp = Validator.TryGetPropertyValidator(route);
 				if (pp != null)
 				{
-					DateTimePrecissionValidatorAttribute datetimePrecission = pp.Validators.OfType<DateTimePrecissionValidatorAttribute>().SingleOrDefaultEx();
+					DateTimePrecisionValidatorAttribute datetimePrecision = pp.Validators.OfType<DateTimePrecisionValidatorAttribute>().SingleOrDefaultEx();
 
-					if (datetimePrecission != null && datetimePrecission.Precision == DateTimePrecision.Days)
+					if (datetimePrecision != null && datetimePrecision.Precision == DateTimePrecision.Days)
 						return true;
 
 				}

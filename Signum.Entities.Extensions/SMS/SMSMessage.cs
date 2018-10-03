@@ -23,7 +23,7 @@ namespace Signum.Entities.SMS
         [StringLengthValidator(AllowNulls = false, Max = 200)]
         public string From { get; set; }
 
-        [SecondsPrecissionValidator]
+        [SecondsPrecisionValidator]
         public DateTime? SendDate { get; set; }
 
         public SMSMessageState State { get; set; } = SMSMessageState.Created;
