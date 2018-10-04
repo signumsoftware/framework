@@ -5,6 +5,7 @@
     <RootNamespace>Signum.Engine</RootNamespace>
     <LangVersion>latest</LangVersion>
     <TargetLatestRuntimePatch>true</TargetLatestRuntimePatch>
+    <Platforms>AnyCPU;x64</Platforms>
   </PropertyGroup>
 
   <ItemGroup>
