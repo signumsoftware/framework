@@ -155,7 +155,7 @@ namespace Signum.Engine.Cache
 
             var args = base.Visit(node.Arguments);
 
-            LambdaExpression lambda = ExpressionCleaner.GetFieldExpansion(obj?.Type, CachedTableBase.ToStringMethod);
+            LambdaExpression lambda = ExpressionCleaner.GetFieldExpansion(obj?.Type, node.Method);
 
             if (lambda != null)
             {
@@ -164,11 +164,13 @@ namespace Signum.Engine.Cache
                 return this.Visit(replace);
             }
 
-            if (node.Method.Name == "ToString" && node.Arguments.IsEmpty() && obj is CachedEntityExpression)
+            if (node.Method.Name == "ToString" && node.Arguments.IsEmpty() && obj is CachedEntityExpression ce)
             {
-                var ce = (CachedEntityExpression)obj;
                 var table = (Table)ce.Constructor.table;
 
+                if (table.ToStrColumn == null)
+                    throw new InvalidOperationException("Impossible to get ToStrColumn from " + ce.ToString());
+                
                 return BindMember(ce, (FieldValue)table.ToStrColumn, null);
             }
 
