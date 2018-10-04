@@ -1,11 +1,13 @@
 ﻿import * as React from 'react'
-import { ValueLine, EntityLine, TypeContext, LiteAutocompleteConfig } from '@framework/Lines'
+import { ValueLine, EntityLine, TypeContext, LiteAutocompleteConfig, AutocompleteConfig } from '@framework/Lines'
 import { PropertyRoute } from '@framework/Reflection'
 import CSharpCodeMirror from '../../Codemirror/CSharpCodeMirror'
 import { WorkflowActionEntity } from '../Signum.Entities.Workflow'
 import { API, showWorkflowTransitionContextCodeHelp } from '../WorkflowClient'
 import TypeHelpComponent from "../../TypeHelp/TypeHelpComponent";
 import ValueLineModal from '@framework/ValueLineModal'
+import { TypeEntity } from '@framework/Signum.Entities.Basics';
+import { Lite } from '@framework/Signum.Entities';
 
 interface WorkflowConditionComponentProps {
     ctx: TypeContext<WorkflowActionEntity>;
@@ -33,7 +35,7 @@ export default class WorkflowConditionComponent extends React.Component<Workflow
                 <ValueLine ctx={ctx.subCtx(wc => wc.name)} />
                 <EntityLine ctx={ctx.subCtx(wc => wc.mainEntityType)}
                     onChange={this.handleMainEntityTypeChange}
-                    autocomplete={new LiteAutocompleteConfig((ac, str) => API.findMainEntityType({ subString: str, count: 5 }, ac), false, false)}
+                    autocomplete={new LiteAutocompleteConfig<TypeEntity>((signal, str) => API.findMainEntityType({ subString: str, count: 5 }, signal), false, false) as AutocompleteConfig<Lite<TypeEntity>>}
                     find={false} />
                 {ctx.value.mainEntityType &&
                     <div>
