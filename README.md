@@ -3,7 +3,7 @@
 
 [![Join the chat at https://gitter.im/signumsoftware/framework](https://badges.gitter.im/signumsoftware/framework.svg)](https://gitter.im/signumsoftware/framework?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
-Signum Framework is an Open Source framework from Signum Software for writing data-centric applications over the latest technologies from Microsoft (.Net 4.5.1, C# 6.0, WPF, ASP.Net Web.API and Typescript) and web standard libraries (React, Bootstrap and D3) . 
+Signum Framework is an Open Source framework from Signum Software for writing data-centric applications over the latest technologies from Microsoft (.Net Core 2.1, C# 7.3, ASP.Net Web.API and Typescript 3.0) and web standard libraries (React, Bootstrap and D3) . 
 
 The main focus of the framework is being able to write vertical modules (database tables, entities, logic and Win / Web user interface) that can be shared between projects.
 
