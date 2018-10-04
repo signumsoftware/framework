@@ -14,10 +14,10 @@ namespace Signum.Entities.Authorization
         [NotNullValidator]
         public Lite<UserEntity> User { get; set; }
 
-        [SecondsPrecissionValidator]
+        [SecondsPrecisionValidator]
         public DateTime SessionStart { get; set; }
 
-        [SecondsPrecissionValidator]
+        [SecondsPrecisionValidator]
         public DateTime? SessionEnd { get; set; }
 
         public bool SessionTimeOut { get; set; }

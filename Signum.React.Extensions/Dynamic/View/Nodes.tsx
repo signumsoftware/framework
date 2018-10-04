@@ -523,6 +523,7 @@ export interface EntityBaseNode extends LineBaseNode, ContainerNode {
 export interface EntityLineNode extends EntityBaseNode {
     kind: "EntityLine",
     autoComplete?: ExpressionOrValue<boolean>;
+    itemHtmlAttributes?: HtmlAttributesExpression;
 }
 
 NodeUtils.register<EntityLineNode>({
@@ -534,8 +535,8 @@ NodeUtils.register<EntityLineNode>({
     validate: (dn, ctx) => NodeUtils.validateEntityBase(dn, ctx),
     renderTreeNode: NodeUtils.treeNodeKindField,
     renderCode: (node, cc) => cc.elementCode("EntityLine", cc.getEntityBasePropsEx(node, { showAutoComplete: true })),
-    render: (dn, ctx) => (<EntityLine {...NodeUtils.getEntityBaseProps(dn, ctx, { showAutoComplete: true }) } />),
-    renderDesigner: dn => NodeUtils.designEntityBase(dn, { showAutoComplete: true }),
+    render: (dn, ctx) => (<EntityLine {...NodeUtils.getEntityBaseProps(dn, ctx, { showAutoComplete: true, isEntityLine: true })} />),
+    renderDesigner: dn => NodeUtils.designEntityBase(dn, { showAutoComplete: true, isEntityLine: true }),
 });
 
 

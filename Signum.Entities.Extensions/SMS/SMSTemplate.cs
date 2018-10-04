@@ -39,10 +39,10 @@ namespace Signum.Entities.SMS
 
         public bool Active { get; set; }
 
-        [MinutesPrecissionValidator]
+        [MinutesPrecisionValidator]
         public DateTime StartDate { get; set; } = TimeZoneManager.Now.TrimToMinutes();
 
-        [MinutesPrecissionValidator]
+        [MinutesPrecisionValidator]
         public DateTime? EndDate { get; set; }
 
         static Expression<Func<SMSTemplateEntity, bool>> IsActiveNowExpression =
