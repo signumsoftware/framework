@@ -5,15 +5,13 @@
 
 Signum Framework is an Open Source framework from Signum Software for writing data-centric applications over the latest technologies from Microsoft (.Net Core 2.1, C# 7.3, ASP.Net Web.API and Typescript 3.0) and web standard libraries (React, Bootstrap and D3) . 
 
-The main focus of the framework is being able to write vertical modules (database tables, entities, logic and Win / Web user interface) that can be shared between projects.
+The main focus of the framework is being able to write vertical modules (database tables, entities, logic and React UI components) that can be shared between projects.
 
 It provides a consistent model for N-layer architectures by moving the entities to the very center of your solution using Signum.Entities.
 
 Our cutting-edge ORM, Signum.Engine, has a full LINQ Providers that avoids N + 1 problem and lets you UPDATE / DELETE / INSERT entities without having to retrieve them first.
 
-Signum.Windows dramatically simplifies writing a WPF user interface for your entities. 
-
-Also Signum.React let's you write a Single-Page-Application using React / Bootstrap and TypeScript.
+Signum.React let's you write a Single-Page-Application using React, Bootstrap and TypeScript.
  
 
 ### Main Features ###
@@ -32,7 +30,7 @@ Also Signum.React let's you write a Single-Page-Application using React / Bootst
 * Create a solid foundation for the integration of application modules (on schema, BL and UI code).
 * Encourage a more functional way of programming.
 * Avoid code duplication.
-* Be a good citizen wherever we are (.Net, LINQ, WPF, React) following common practices and conventions.
+* Be a good citizen wherever we are (.Net, LINQ, React) following common practices and conventions.
 
 ## Getting Started
 
