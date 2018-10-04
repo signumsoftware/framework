@@ -63,17 +63,17 @@ namespace Signum.Entities.Processes
 
         public DateTime CreationDate { get; private set; } = TimeZoneManager.Now;
 
-        [DateTimePrecissionValidator(DateTimePrecision.Milliseconds)]
+        [DateTimePrecisionValidator(DateTimePrecision.Milliseconds)]
         public DateTime? PlannedDate { get; set; }
 
-        [DateTimePrecissionValidator(DateTimePrecision.Milliseconds)]
+        [DateTimePrecisionValidator(DateTimePrecision.Milliseconds)]
         public DateTime? CancelationDate { get; set; }
 
-        [DateTimePrecissionValidator(DateTimePrecision.Milliseconds)]
+        [DateTimePrecisionValidator(DateTimePrecision.Milliseconds)]
         public DateTime? QueuedDate { get; set; }
 
         DateTime? executionStart;
-        [DateTimePrecissionValidator(DateTimePrecision.Milliseconds)]
+        [DateTimePrecisionValidator(DateTimePrecision.Milliseconds)]
         public DateTime? ExecutionStart
         {
             get { return executionStart; }
@@ -81,7 +81,7 @@ namespace Signum.Entities.Processes
         }
 
         DateTime? executionEnd;
-        [DateTimePrecissionValidator(DateTimePrecision.Milliseconds)]
+        [DateTimePrecisionValidator(DateTimePrecision.Milliseconds)]
         public DateTime? ExecutionEnd
         {
             get { return executionEnd; }

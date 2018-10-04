@@ -70,7 +70,7 @@ namespace Signum.Entities.Mailing
     {
         public bool Sent { get; set; }
 
-        [DateTimePrecissionValidator(DateTimePrecision.Seconds)]
+        [DateTimePrecisionValidator(DateTimePrecision.Seconds)]
         public DateTime? SendDate { get; set; }
 
         public Lite<IEmailOwnerEntity> Recipient { get; set; }

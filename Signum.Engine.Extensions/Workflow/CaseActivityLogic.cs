@@ -576,7 +576,7 @@ namespace Signum.Engine.Workflow
                         var now = TimeZoneManager.Now;
                         var c = ca.Case;
                         c.StartDate = now;
-                        c.Description = ca.Case.MainEntity.ToString().Trim();
+                        c.Description = ca.Case.MainEntity.ToString().Trim().Etc(100);
                         c.Save();
 
                         var prevConn = ca.WorkflowActivity.PreviousConnectionsFromCache().SingleEx(a => a.From is WorkflowEventEntity && ((WorkflowEventEntity)a.From).Type == WorkflowEventType.Start);
@@ -881,7 +881,7 @@ namespace Signum.Engine.Workflow
             private static void FinishStep(CaseEntity @case, WorkflowExecuteStepContext ctx, CaseActivityEntity ca)
             {
                 
-                @case.Description = @case.MainEntity.ToString().Trim();
+                @case.Description = @case.MainEntity.ToString().Trim().Etc(100);
 
                 if (ctx.IsFinished)
                 {
@@ -960,7 +960,7 @@ namespace Signum.Engine.Workflow
 
                 SaveEntity(@case.MainEntity);
                 
-                @case.Description = @case.MainEntity.ToString().Trim();
+                @case.Description = @case.MainEntity.ToString().Trim().Etc(100);
                 @case.Save();
                 
                 var ctx = new WorkflowExecuteStepContext

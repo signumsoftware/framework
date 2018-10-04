@@ -45,8 +45,8 @@ namespace Signum.React.Translation
             return CultureInfo.CurrentCulture.TryGetCultureInfoEntity() ?? CultureInfoLogic.CultureInfoToEntity.Value.Values.FirstEx();
         }
 
-        [Route("api/culture/currentCulture"), HttpPost, AllowAnonymous]
-        public void SetCurrentCulture([FromBody]Lite<CultureInfoEntity> culture)
+        [Route("api/culture/setCurrentCulture"), HttpPost, AllowAnonymous]
+        public string SetCurrentCulture([FromBody]Lite<CultureInfoEntity> culture)
         {
             var ci = ExecutionMode.Global().Using(_ => culture.Retrieve().ToCultureInfo());
 
@@ -64,6 +64,7 @@ namespace Signum.React.Translation
             }
 
             this.ActionContext.HttpContext.Response.Cookies.Append("language", ci.Name);
+            return ci.Name;
         }
     }
 }

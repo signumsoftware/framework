@@ -20,9 +20,9 @@ namespace Signum.Entities.Chart
             if (token == null)
                 return false;
 
-            var type =  token.GetChartColumnType();
+            var type = token.GetChartColumnType();
 
-            if(type == null)
+            if (type == null)
                 return false;
 
             return Flag(ct, type.Value);
@@ -63,9 +63,9 @@ namespace Signum.Entities.Chart
                 var pp = Validator.TryGetPropertyValidator(route);
                 if (pp != null)
                 {
-                    DateTimePrecissionValidatorAttribute datetimePrecission = pp.Validators.OfType<DateTimePrecissionValidatorAttribute>().SingleOrDefaultEx();
+                    DateTimePrecisionValidatorAttribute datetimePrecision = pp.Validators.OfType<DateTimePrecisionValidatorAttribute>().SingleOrDefaultEx();
 
-                    if (datetimePrecission != null && datetimePrecission.Precision == DateTimePrecision.Days)
+                    if (datetimePrecision != null && datetimePrecision.Precision == DateTimePrecision.Days)
                         return true;
 
                 }
@@ -74,8 +74,8 @@ namespace Signum.Entities.Chart
             return false;
         }
 
-        
-        
+
+
         public static bool SynchronizeColumns(this ChartScriptEntity chartScript, IChartBase chart)
         {
             bool result = false;
@@ -96,7 +96,7 @@ namespace Signum.Entities.Chart
 
                 chart.Columns[i].parentChart = chart;
                 chart.Columns[i].ScriptColumn = chartScript.Columns[i];
-             
+
                 if (!result)
                     result = chart.Columns[i].IntegrityCheck() != null;
             }
@@ -238,7 +238,7 @@ namespace Signum.Entities.Chart
                 displayName = c.ScriptColumn.DisplayName,
                 title = c.GetTitle(),
                 token = c.Token?.Token.FullKey(),
-                type = c.Token?.Token.GetChartColumnType().ToString(),               
+                type = c.Token?.Token.GetChartColumnType().ToString(),
                 isGroupKey = c.IsGroupKey,
                 converter = c.Token == null ? null : c.Converter(index++)
             }).ToList();
@@ -257,7 +257,7 @@ namespace Signum.Entities.Chart
                 });
             }
 
-            var parameters = request.Parameters.ToDictionary(p=> p.Name, p => p.Value);
+            var parameters = request.Parameters.ToDictionary(p => p.Name, p => p.Value);
 
             return new
             {
@@ -350,7 +350,7 @@ namespace Signum.Entities.Chart
                         key = value,
                         toStr = value,
                     };
-                };;
+                }; ;
         }
 
         public static List<List<ChartScriptEntity>> PackInGroups(IEnumerable<ChartScriptEntity> scripts, int rowWidth)
@@ -362,7 +362,7 @@ namespace Signum.Entities.Chart
             var groups = scripts
                 .OrderBy(s => s.Name)
                 .GroupBy(s => s.ColumnsStructure)
-                .OrderBy(g => g.First().Columns.Count(s=>!s.IsOptional))
+                .OrderBy(g => g.First().Columns.Count(s => !s.IsOptional))
                 .ThenByDescending(g => g.Count())
                 .ThenBy(g => g.Key)
                 .ToList();
