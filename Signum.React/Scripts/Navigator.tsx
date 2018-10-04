@@ -532,11 +532,11 @@ export function getAutoComplete(type: TypeReference, findOptions: FindOptions | 
     }
 
     if(!config) {
-        config = new LiteAutocompleteConfig((ac, subStr: string) => Finder.API.findLiteLike({
+        config = new LiteAutocompleteConfig((signal, subStr: string) => Finder.API.findLiteLike({
             types: type.name,
             subString: subStr,
             count: 5
-        }, ac), false, showType == null ? type.name.contains(",") : showType);
+        }, signal), false, showType == null ? type.name.contains(",") : showType);
     }
 
     if (!config.getItemsDelay) {

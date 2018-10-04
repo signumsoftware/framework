@@ -21,12 +21,12 @@ export interface AutocompleteConfig<T> {
 export class LiteAutocompleteConfig<T extends Entity> implements AutocompleteConfig<Lite<T>>{
 
     constructor(
-        public getItemsFunction: (abortController: FetchAbortController, subStr: string) => Promise<Lite<T>[]>,
+        public getItemsFunction: (signal: AbortSignal, subStr: string) => Promise<Lite<T>[]>,
         public requiresInitialLoad: boolean,
         public showType: boolean) {
     }
 
-    abortableRequest = new AbortableRequest((abortController, subStr: string) => this.getItemsFunction(abortController, subStr));
+    abortableRequest = new AbortableRequest((signal, subStr: string) => this.getItemsFunction(signal, subStr));
 
     abort() {
         this.abortableRequest.abort();

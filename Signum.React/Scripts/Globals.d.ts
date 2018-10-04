@@ -101,10 +101,6 @@ interface String {
     repeat(this: string, n: number): string;
 }
 
-interface FetchAbortController { //Signum patch
-    abort?: () => void;
-}
-
 interface RequestInit {
-    abortController?: FetchAbortController;
+    abortSignal?: AbortSignal;
 }

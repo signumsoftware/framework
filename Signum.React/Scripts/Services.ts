@@ -1,7 +1,5 @@
-﻿import { ModelState } from './Signum.Entities'
+import { ModelState } from './Signum.Entities'
 import { GraphExplorer } from './Reflection'
-
-var fetchWithAbortModule = require('./fetchWithAbort') as { fetch: typeof fetch };
 
 export interface AjaxOptions {
     url: string;
@@ -15,8 +13,11 @@ export interface AjaxOptions {
     mode?: string;
     credentials?: RequestCredentials;
     cache?: string;
-    abortController?: FetchAbortController;
+    signal?: AbortSignal;
 }
+
+// use native browser implementation if it supports aborting
+const abortableFetch = ('signal' in new Request('')) ? window.fetch : fetch
 
 export function baseUrl(options: AjaxOptions): string {
     const baseUrl = window.__baseUrl;
@@ -40,7 +41,7 @@ export function ajaxGetRaw(options: AjaxOptions): Promise<Response> {
     }
 
     return wrapRequest(options, () =>
-        fetchWithAbortModule.fetch(baseUrl(options), {
+        abortableFetch(baseUrl(options), {
             method: "GET",
             headers: {
                 'Accept': 'application/json',
@@ -49,7 +50,7 @@ export function ajaxGetRaw(options: AjaxOptions): Promise<Response> {
             mode: options.mode,
             credentials: options.credentials || "same-origin",
             cache: options.cache || "no-cache",
-            abortController: options.abortController
+            signal: options.signal
         } as RequestInit));
 }
 
@@ -66,7 +67,7 @@ export function ajaxPostRaw(options: AjaxOptions, data: any): Promise<Response> 
     }
     
     return wrapRequest(options, () =>
-        fetchWithAbortModule.fetch(baseUrl(options), {
+        abortableFetch(baseUrl(options), {
             method: "POST",
             credentials: options.credentials || "same-origin",
             headers: {
@@ -77,7 +78,7 @@ export function ajaxPostRaw(options: AjaxOptions, data: any): Promise<Response> 
             mode: options.mode,
             cache: options.cache || "no-cache",
             body: JSON.stringify(data),
-            abortController: options.abortController
+            signal: options.signal
         } as RequestInit));
 }
 
@@ -340,9 +341,9 @@ export namespace SessionSharing {
 export class AbortableRequest<Q, A> {
 
     private requestIndex = 0;
-    private abortController?: FetchAbortController;
+    private abortController?: AbortController;
 
-    constructor(public makeCall: (abortController: FetchAbortController, query: Q) => Promise<A>)
+    constructor(public makeCall: (signal: AbortSignal, query: Q) => Promise<A>)
     {
     }
     
@@ -366,9 +367,9 @@ export class AbortableRequest<Q, A> {
 
         var myIndex = this.requestIndex;
 
-        this.abortController = {};
+        this.abortController = new AbortController();
 
-        return this.makeCall(this.abortController, query).then(result => {
+        return this.makeCall(this.abortController.signal, query).then(result => {
 
             if (this.abortController == undefined)
                 return new Promise<A>(resolve => { /*never*/ });
@@ -378,11 +379,11 @@ export class AbortableRequest<Q, A> {
 
             this.abortController = undefined;
             return result;
-        }, (error: TypeError) => {
-            if (error.message == "Aborted request")
+        }, (ex: TypeError) => {
+            if (ex.name === 'AbortError')
                 return new Promise<A>(resolve => { /*never*/ });
 
-            throw error
+            throw ex
         }) as Promise<A>;
     }
 }
