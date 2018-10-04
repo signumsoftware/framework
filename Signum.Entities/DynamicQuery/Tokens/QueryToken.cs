@@ -54,9 +54,9 @@ namespace Signum.Entities.DynamicQuery
                                 var pp = Validator.TryGetPropertyValidator(route);
                                 if (pp != null)
                                 {
-                                    DateTimePrecissionValidatorAttribute datetimePrecission = pp.Validators.OfType<DateTimePrecissionValidatorAttribute>().SingleOrDefaultEx();
+                                    DateTimePrecisionValidatorAttribute datetimePrecision = pp.Validators.OfType<DateTimePrecisionValidatorAttribute>().SingleOrDefaultEx();
 
-                                    if (datetimePrecission != null && datetimePrecission.Precision == DateTimePrecision.Days)
+                                    if (datetimePrecision != null && datetimePrecision.Precision == DateTimePrecision.Days)
                                         return true;
 
                                 }
@@ -230,7 +230,7 @@ namespace Signum.Entities.DynamicQuery
         public static Func<QueryToken, IEnumerable<QueryToken>> EntityExtensions;
 
 
-        public static List<QueryToken> DateTimeProperties(QueryToken parent, DateTimePrecision precission)
+        public static List<QueryToken> DateTimeProperties(QueryToken parent, DateTimePrecision precision)
         {
             string utc = TimeZoneManager.Mode == TimeZoneMode.Utc ? "Utc - " : "";
 
@@ -247,13 +247,13 @@ namespace Signum.Entities.DynamicQuery
                 new NetPropertyToken(parent, ReflectionTools.GetPropertyInfo((DateTime dt)=>dt.DayOfYear), () => utc + QueryTokenMessage.DayOfYear.NiceToString()),
                 new NetPropertyToken(parent, ReflectionTools.GetPropertyInfo((DateTime dt)=>dt.DayOfWeek), () => utc + QueryTokenMessage.DayOfWeek.NiceToString()),
                 new DateToken(parent),
-                precission < DateTimePrecision.Hours ? null: new NetPropertyToken(parent, ReflectionTools.GetPropertyInfo((DateTime dt)=>dt.Hour), () => utc + QueryTokenMessage.Hour.NiceToString()),
-                precission < DateTimePrecision.Hours ? null: new DatePartStartToken(parent, QueryTokenMessage.HourStart),
-                precission < DateTimePrecision.Minutes ? null: new NetPropertyToken(parent, ReflectionTools.GetPropertyInfo((DateTime dt)=>dt.Minute), () => utc + QueryTokenMessage.Minute.NiceToString()),
-                precission < DateTimePrecision.Minutes ? null: new DatePartStartToken(parent, QueryTokenMessage.MinuteStart),
-                precission < DateTimePrecision.Seconds ? null: new NetPropertyToken(parent, ReflectionTools.GetPropertyInfo((DateTime dt)=>dt.Second), () => utc + QueryTokenMessage.Second.NiceToString()),
-                precission < DateTimePrecision.Seconds ? null: new DatePartStartToken(parent, QueryTokenMessage.SecondStart),
-                precission < DateTimePrecision.Milliseconds? null: new NetPropertyToken(parent, ReflectionTools.GetPropertyInfo((DateTime dt)=>dt.Millisecond), () => utc + QueryTokenMessage.Millisecond.NiceToString()),
+                precision < DateTimePrecision.Hours ? null: new NetPropertyToken(parent, ReflectionTools.GetPropertyInfo((DateTime dt)=>dt.Hour), () => utc + QueryTokenMessage.Hour.NiceToString()),
+                precision < DateTimePrecision.Hours ? null: new DatePartStartToken(parent, QueryTokenMessage.HourStart),
+                precision < DateTimePrecision.Minutes ? null: new NetPropertyToken(parent, ReflectionTools.GetPropertyInfo((DateTime dt)=>dt.Minute), () => utc + QueryTokenMessage.Minute.NiceToString()),
+                precision < DateTimePrecision.Minutes ? null: new DatePartStartToken(parent, QueryTokenMessage.MinuteStart),
+                precision < DateTimePrecision.Seconds ? null: new NetPropertyToken(parent, ReflectionTools.GetPropertyInfo((DateTime dt)=>dt.Second), () => utc + QueryTokenMessage.Second.NiceToString()),
+                precision < DateTimePrecision.Seconds ? null: new DatePartStartToken(parent, QueryTokenMessage.SecondStart),
+                precision < DateTimePrecision.Milliseconds? null: new NetPropertyToken(parent, ReflectionTools.GetPropertyInfo((DateTime dt)=>dt.Millisecond), () => utc + QueryTokenMessage.Millisecond.NiceToString()),
             }.NotNull().ToList();
         }
 

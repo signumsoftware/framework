@@ -403,13 +403,13 @@ namespace Signum.Entities.Reflection
             var pp = Validator.TryGetPropertyValidator(simpleRoute);
             if (pp != null)
             {
-                DateTimePrecissionValidatorAttribute datetimePrecission = pp.Validators.OfType<DateTimePrecissionValidatorAttribute>().SingleOrDefaultEx();
-                if (datetimePrecission != null)
-                    return datetimePrecission.FormatString;
+                DateTimePrecisionValidatorAttribute datetimePrecision = pp.Validators.OfType<DateTimePrecisionValidatorAttribute>().SingleOrDefaultEx();
+                if (datetimePrecision != null)
+                    return datetimePrecision.FormatString;
 
-                TimeSpanPrecissionValidatorAttribute timeSpanPrecission = pp.Validators.OfType<TimeSpanPrecissionValidatorAttribute>().SingleOrDefaultEx();
-                if (timeSpanPrecission != null)
-                    return timeSpanPrecission.FormatString;
+                TimeSpanPrecisionValidatorAttribute timeSpanPrecision = pp.Validators.OfType<TimeSpanPrecisionValidatorAttribute>().SingleOrDefaultEx();
+                if (timeSpanPrecision != null)
+                    return timeSpanPrecision.FormatString;
 
                 DecimalsValidatorAttribute decimals = pp.Validators.OfType<DecimalsValidatorAttribute>().SingleOrDefaultEx();
                 if (decimals != null)

@@ -630,33 +630,33 @@ namespace Signum.Entities
         LessThanOrEqualTo,
     }
 
-    public class DaysPrecissionValidatorAttribute : DateTimePrecissionValidatorAttribute
+    public class DaysPrecisionValidatorAttribute : DateTimePrecisionValidatorAttribute
     {
-        public DaysPrecissionValidatorAttribute()
+        public DaysPrecisionValidatorAttribute()
             : base(DateTimePrecision.Days)
         { }
     }
 
-    public class SecondsPrecissionValidatorAttribute : DateTimePrecissionValidatorAttribute
+    public class SecondsPrecisionValidatorAttribute : DateTimePrecisionValidatorAttribute
     {
-        public SecondsPrecissionValidatorAttribute()
+        public SecondsPrecisionValidatorAttribute()
             : base(DateTimePrecision.Seconds)
         { }
     }
 
-    public class MinutesPrecissionValidatorAttribute : DateTimePrecissionValidatorAttribute
+    public class MinutesPrecisionValidatorAttribute : DateTimePrecisionValidatorAttribute
     {
-        public MinutesPrecissionValidatorAttribute()
+        public MinutesPrecisionValidatorAttribute()
             : base(DateTimePrecision.Minutes)
         { }
 
     }
 
-    public class DateTimePrecissionValidatorAttribute : ValidatorAttribute
+    public class DateTimePrecisionValidatorAttribute : ValidatorAttribute
     {
         public DateTimePrecision Precision { get; private set; }
 
-        public DateTimePrecissionValidatorAttribute(DateTimePrecision precision)
+        public DateTimePrecisionValidatorAttribute(DateTimePrecision precision)
         {
             this.Precision = precision;
         }
@@ -668,7 +668,7 @@ namespace Signum.Entities
 
             var prec = ((DateTime)value).GetPrecision();
             if (prec > Precision)
-                return ValidationMessage._0HasAPrecissionOf1InsteadOf2.NiceToString("{0}", prec, Precision);
+                return ValidationMessage._0HasAPrecisionOf1InsteadOf2.NiceToString("{0}", prec, Precision);
 
             return null;
         }
@@ -721,11 +721,11 @@ namespace Signum.Entities
         }
     }
 
-    public class TimeSpanPrecissionValidatorAttribute : ValidatorAttribute
+    public class TimeSpanPrecisionValidatorAttribute : ValidatorAttribute
     {
         public DateTimePrecision Precision { get; private set; }
 
-        public TimeSpanPrecissionValidatorAttribute(DateTimePrecision precision)
+        public TimeSpanPrecisionValidatorAttribute(DateTimePrecision precision)
         {
             this.Precision = precision;
         }
@@ -737,7 +737,7 @@ namespace Signum.Entities
 
             var prec = ((TimeSpan)value).GetPrecision();
             if (prec > Precision)
-                return "{0} has a precission of {1} instead of {2}".FormatWith("{0}", prec, Precision);
+                return "{0} has a precision of {1} instead of {2}".FormatWith("{0}", prec, Precision);
 
             if(((TimeSpan)value).Days != 0)
                 return "{0} has days";
@@ -1080,8 +1080,8 @@ namespace Signum.Entities
         _0ShouldBeLessThan1,
         [Description("{0} should be less than or equal {1}")]
         _0ShouldBeLessThanOrEqual1,
-        [Description("{0} has a precission of {1} instead of {2}")]
-        _0HasAPrecissionOf1InsteadOf2,
+        [Description("{0} has a precision of {1} instead of {2}")]
+        _0HasAPrecisionOf1InsteadOf2,
         [Description("{0} should be of type {1}")]
         _0ShouldBeOfType1,
         [Description("{0} should not be of type {1}")]
