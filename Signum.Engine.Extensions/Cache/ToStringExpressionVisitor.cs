@@ -58,9 +58,7 @@ namespace Signum.Engine.Cache
         private Expression BindMember(CachedEntityExpression n, Field field, Expression prevPrimaryKey)
         {
             Expression body = GetField(field, n.Constructor, prevPrimaryKey);
-
-            var lambda = Expression.Lambda(body, n.Constructor.origin);
-
+            
             ConstantExpression tab = Expression.Constant(n.Constructor.cachedTable, typeof(CachedTable<>).MakeGenericType(((Table)n.Constructor.table).Type));
             
             Expression origin = Expression.Convert(Expression.Property(Expression.Call(tab, "GetRows", null), "Item", n.PrimaryKey.UnNullify()), n.Constructor.tupleType);
@@ -187,11 +185,24 @@ namespace Signum.Engine.Cache
             var result = (BinaryExpression)base.VisitBinary(node);
             
             if (result.NodeType == ExpressionType.Equal || result.NodeType == ExpressionType.NotEqual)
-            { 
-                if (result.Left is CachedEntityExpression || result.Right is CachedEntityExpression)
+            {
+                if (result.Left is CachedEntityExpression ceLeft && ceLeft.FieldEmbedded?.HasValue == null || 
+                    result.Right is CachedEntityExpression ceRight && ceRight.FieldEmbedded?.HasValue == null)
                 {
                     var left = GetPrimaryKey(result.Left);
                     var right = GetPrimaryKey(result.Right);
+
+                    if (left.Type.IsNullable() || right.Type.IsNullable())
+                        return Expression.MakeBinary(node.NodeType, left.Nullify(), right.Nullify());
+                    else
+                        return Expression.MakeBinary(node.NodeType, left, right);
+                }
+
+                if (result.Left is CachedEntityExpression ceLeft2 && ceLeft2.FieldEmbedded?.HasValue != null ||
+                    result.Right is CachedEntityExpression ceRight2 && ceRight2.FieldEmbedded?.HasValue != null)
+                {
+                    var left = GetHasValue(result.Left);
+                    var right = GetHasValue(result.Right);
 
                     return Expression.MakeBinary(node.NodeType, left, right);
                 }
@@ -212,7 +223,10 @@ namespace Signum.Engine.Cache
             if (node.Type == typeof(string))
                 return node;
 
-            return Expression.Call(node, miToString);
+            return Expression.Condition(
+                Expression.Equal(node.Nullify(), Expression.Constant(null, node.Type.Nullify())), 
+                Expression.Constant(null, typeof(string)),
+                Expression.Call(node, miToString));
         }
 
         private Expression GetPrimaryKey(Expression exp)
@@ -220,8 +234,29 @@ namespace Signum.Engine.Cache
             if (exp is ConstantExpression && ((ConstantExpression)exp).Value == null)
                 return Expression.Constant(null, typeof(PrimaryKey?));
 
-            if (exp is CachedEntityExpression cee)
+            if (exp is CachedEntityExpression cee && cee.FieldEmbedded?.HasValue == null)
                 return cee.PrimaryKey;
+
+            throw new InvalidOperationException("");
+        }
+
+        private Expression GetHasValue(Expression exp)
+        {
+            if (exp is ConstantExpression && ((ConstantExpression)exp).Value == null)
+                return Expression.Constant(false, typeof(bool));
+
+            if (exp is CachedEntityExpression n && n.FieldEmbedded?.HasValue != null)
+            {
+                var body = n.Constructor.GetTupleProperty(n.FieldEmbedded.HasValue);
+
+                ConstantExpression tab = Expression.Constant(n.Constructor.cachedTable, typeof(CachedTable<>).MakeGenericType(((Table)n.Constructor.table).Type));
+
+                Expression origin = Expression.Convert(Expression.Property(Expression.Call(tab, "GetRows", null), "Item", n.PrimaryKey.UnNullify()), n.Constructor.tupleType);
+
+                var result = ExpressionReplacer.Replace(body, new Dictionary<ParameterExpression, Expression> { { n.Constructor.origin, origin } });
+
+                return result;
+            }
 
             throw new InvalidOperationException("");
         }
