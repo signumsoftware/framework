@@ -164,7 +164,7 @@ export class ValueLine extends LineBase<ValueLineProps, ValueLineProps> {
             (e.ctrlKey && c == 67) /*Ctrl + c*/);
     }
 
-    static isDecimal(e: React.KeyboardEvent<any>) {
+    static isDecimal(e: React.KeyboardEvent<any>): boolean {
         const c = e.keyCode;
         return (ValueLine.isNumber(e) ||
             (c == 110) /*NumPad Decimal*/ ||
@@ -172,7 +172,7 @@ export class ValueLine extends LineBase<ValueLineProps, ValueLineProps> {
             (c == 188) /*,*/);
     }
 
-    static isDuration(e: React.KeyboardEvent<any>) {
+    static isDuration(e: React.KeyboardEvent<any>): boolean {
         const c = e.keyCode;
         return (ValueLine.isNumber(e) ||
             (c == 186) /*Colon*/);
@@ -407,7 +407,7 @@ ValueLine.renderers["Decimal" as ValueLineType] = (vl) => {
     return numericTextBox(vl, ValueLine.isDecimal);
 };
 
-function numericTextBox(vl: ValueLine, validateKey: React.KeyboardEventHandler<any>) {
+function numericTextBox(vl: ValueLine, validateKey: (e: React.KeyboardEvent<any>) => boolean) {
     const s = vl.state
 
     const numbroFormat = toNumbroFormat(s.formatText);
@@ -450,7 +450,7 @@ function numericTextBox(vl: ValueLine, validateKey: React.KeyboardEventHandler<a
 export interface NumericTextBoxProps {
     value: number | null;
     onChange: (newValue: number | null) => void;
-    validateKey: React.KeyboardEventHandler<any>;
+    validateKey: (e: React.KeyboardEvent<any>) => boolean;
     format?: string;
     formControlClass?: string;
     htmlAttributes?: React.HTMLAttributes<HTMLInputElement>;
@@ -550,7 +550,7 @@ ValueLine.renderers["TimeSpan" as ValueLineType] = (vl) => {
     return durationTextBox(vl, ValueLine.isDuration);
 };
 
-function durationTextBox(vl: ValueLine, validateKey: React.KeyboardEventHandler<any>) {
+function durationTextBox(vl: ValueLine, validateKey: (e: React.KeyboardEvent<any>) => boolean) {
 
     const s = vl.state;
 
@@ -597,7 +597,7 @@ function durationTextBox(vl: ValueLine, validateKey: React.KeyboardEventHandler<
 export interface DurationTextBoxProps {
     value: number;
     onChange: (newValue: number | null) => void;
-    validateKey: React.KeyboardEventHandler<any>;
+    validateKey: (e: React.KeyboardEvent<any>) => boolean;
     formControlClass?: string;
     format?: string;
     htmlAttributes: React.HTMLAttributes<HTMLInputElement>;
