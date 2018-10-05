@@ -162,7 +162,7 @@ namespace Signum.React.Selenium
         }
         public static void AutoCompleteBasic(IWebElement autoCompleteElement, Lite<IEntity> lite)
         {
-            autoCompleteElement.SafeSendKeys(lite.Id.ToString());
+            autoCompleteElement.SafeSendKeys("id:" + lite.Id.ToString());
             //Selenium.FireEvent(autoCompleteLocator, "keyup");
 
             var listLocator = By.CssSelector(".typeahead.dropdown-menu");
