@@ -42,6 +42,8 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="Chart\Icons\" />
+    <Folder Include="Chart\Scripts\" />
     <Folder Include="Properties\" />
   </ItemGroup>
 

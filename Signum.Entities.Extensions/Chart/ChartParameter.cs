@@ -11,6 +11,7 @@ using System.Xml.Linq;
 
 namespace Signum.Entities.Chart
 {
+    
     [Serializable]
     public class ChartParameterEmbedded : EmbeddedEntity
     {

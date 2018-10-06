@@ -13,9 +13,32 @@ using Signum.Entities.Reflection;
 using Signum.Utilities.Reflection;
 using System.Reflection;
 using Signum.Utilities.ExpressionTrees;
+using Signum.Entities.Basics;
 
 namespace Signum.Entities.Chart
 {
+    [Serializable]
+    public class ChartType : Symbol
+    {
+        private ChartType() { }
+
+        public ChartType(Type declaringType, string fieldName) :
+            base(declaringType, fieldName)
+        {
+        }
+    }
+
+
+    public abstract class ChartScript
+    {
+        public string Name { get; set; }
+        public FileContent Icon { get; set; }
+        public GroupByChart GroupBy { get; set; }
+        public List<ChartScriptColumn> Columns { get; set; }
+        public List<ChartScriptParameter> Parameters { get; set; }
+        public string ColumnStructure { get; set; }
+    }
+
     [Serializable, EntityKind(EntityKind.Main, EntityData.Master)]
     public class ChartScriptEntity : Entity
     {
@@ -108,7 +131,7 @@ namespace Signum.Entities.Chart
             string from = Columns.Where(a => a.IsGroupKey).ToString(c => c.ColumnType.GetCode() + (c.IsOptional ? "?" : ""), ",");
             string to = Columns.Where(a => !a.IsGroupKey).ToString(c => c.ColumnType.GetCode() + (c.IsOptional ? "?" : ""), ",");
 
-            ColumnsStructure = "{0} -> {1}".FormatWith(from.HasText()? from:"n", to.HasText() ? to : "n");
+            ColumnsStructure = "{0} -> {1}".FormatWith(from.HasText() ? from : "n", to.HasText() ? to : "n");
 
             base.PreSaving(ctx);
         }
@@ -116,6 +139,56 @@ namespace Signum.Entities.Chart
         protected override void PostRetrieving()
         {
             base.PostRetrieving();
+        }
+
+        public string ToCode()
+        {
+            return $@"
+using Signum.Logic.Chart;
+using Signum.Entities.Chart;
+using Signum.Engine.Chart;
+using System.Collections.Generic;
+
+namespace Signum.Logic.Chart.Scripts 
+{{
+    public class {this.Name}ChartScript : ChartScript                
+    {{
+        public {this.Name}ChartScript()
+        {{
+            this.Name = ""{this.Name}"";
+            this.Icon = ChartScriptLogic.LoadIcon(""{this.Icon.Entity.FileName}"");
+            this.GroupBy = GroupByChart.{this.GroupBy};
+            this.Columns = new List<ChartScriptColumn>
+            {{
+{this.Columns.ToString(c => c.ToCode(), ",\r\n").Indent(16)}
+            }};
+            this.Parameters = new List<ChartScriptParameter>
+            {{
+{this.Parameters.ToString(c => c.ToCode(), ",\r\n").Indent(16)}
+            }};
+        }}      
+    }}                
+}}
+";
+        }
+        public string ToReactCode()
+        {
+            return $@"import * as React from 'react'
+import * as D3 from 'd3'
+import D3ChartScriptRendererBase from '../ChartRenderer';
+import * as ChartClient from '../ChartClient';
+import * as ChartUtils from '../Templates/ChartUtils';
+import {{ getClickKeys, translate, scale, rotate, skewX, skewY, matrix, scaleFor, rule, ellipsis }} from '../Templates/ChartUtils';
+
+
+export default class BarsChartScriptRendererBase extends D3ChartScriptRendererBase {{
+
+    drawChart(data: ChartClient.ChartTable, chart: D3.Selection<SVGElement, {{}}, HTMLDivElement, unknown >) {{
+        {this.Script.Lines().Skip(1).SkipLast(1).ToString("\r\n").Indent(4)}
+    }}
+}}
+";
+
         }
 
         public XDocument ExportXml()

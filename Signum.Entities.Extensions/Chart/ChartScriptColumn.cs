@@ -8,6 +8,20 @@ using System.Threading.Tasks;
 
 namespace Signum.Entities.Chart
 {
+    public class ChartScriptColumn
+    {
+        public ChartScriptColumn(string displayName, ChartColumnType columnType)
+        {
+            this.DisplayName = displayName;
+            this.ColumnType = columnType;
+        }
+
+        public string DisplayName { get; set; }
+        public bool IsOptional { get; set; }
+        public ChartColumnType ColumnType { get; set; }
+        public bool IsGroupKey { get; set; }
+    }
+
     [Serializable]
     public class ChartScriptColumnEmbedded : EmbeddedEntity
     {
@@ -29,6 +43,20 @@ namespace Signum.Entities.Chart
                 ColumnType = ColumnType,
                 IsOptional = IsOptional,
             };
+        }
+
+        public string ToCode()
+        {
+            var props = new List<string>();
+
+            if (IsGroupKey)
+                props.Add("IsGroupKey = true");
+
+            if (IsOptional)
+                props.Add("IsOptional = true");
+
+
+            return $@"new ChartScriptColumn(""{DisplayName}"", ChartColumnType.{ColumnType}) " + (props.Any() ? ("{ " + props.ToString(", ") + " }") : null);
         }
     }
 

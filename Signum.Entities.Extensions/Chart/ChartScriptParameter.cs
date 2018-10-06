@@ -12,6 +12,27 @@ using System.Globalization;
 
 namespace Signum.Entities.Chart
 {
+    public class ChartScriptParameter
+    {
+        public ChartScriptParameter(string name, ChartParameterType type)
+        {
+            Name = name;
+            Type = type;
+        }
+
+        public string Name { get; set; }
+        public int? ColumnIndex { get; set; }
+        public ChartParameterType Type { get; set; }
+        public IChartParameterValueDefinition ValueDefinition { get; set; }
+    }
+
+    public interface IChartParameterValueDefinition
+    {
+       
+
+    }
+
+
     [Serializable]
     public class ChartScriptParameterEmbedded : EmbeddedEntity
     {
@@ -48,6 +69,23 @@ namespace Signum.Entities.Chart
             }
         }
 
+
+
+        public string ToCode()
+        {
+            return $@"new ChartScriptParameter(""{Name}"", ChartParameterType.{Type}) {{ {(ColumnIndex == null ? "" :  ("ColumnIndex = " + ColumnIndex + ", "))} ValueDefinition = {GetValueDefinitionCode()} }}";
+        }
+
+        private string GetValueDefinitionCode()
+        {
+            switch (Type)
+            {
+                case ChartParameterType.Enum: return EnumValueList.TryParse(valueDefinition, out enumValues) == null ? enumValues.ToCode() : "error";
+                case ChartParameterType.Number: return NumberInterval.TryParse(valueDefinition, out numberInterval) == null ? numberInterval.ToCode() : "error" ;
+                case ChartParameterType.String: return "null";
+                default: throw new InvalidOperationException();
+            }
+        }
 
         protected override string PropertyValidation(PropertyInfo pi)
         {
@@ -135,147 +173,6 @@ namespace Signum.Entities.Chart
         }
 
 
-        public class NumberInterval
-        {
-            public decimal DefaultValue;
-            public decimal? MinValue;
-            public decimal? MaxValue;
-
-            public static string TryParse(string valueDefinition, out NumberInterval interval)
-            {
-                interval = null;
-                var m = Regex.Match(valueDefinition, @"^\s*(?<def>.+)\s*(\[(?<min>.+)?\s*,\s*(?<max>.+)?\s*\])?\s*$");
-
-                if (!m.Success)
-                    return "Invalid number interval, [min?, max?]";
-
-                interval = new NumberInterval();
-
-                if (!ReflectionTools.TryParse(m.Groups["def"].Value, CultureInfo.InvariantCulture, out interval.DefaultValue))
-                    return "Invalid default value";
-
-                if (!ReflectionTools.TryParse(m.Groups["min"].Value, CultureInfo.InvariantCulture, out interval.MinValue))
-                    return "Invalid min value";
-
-                if (!ReflectionTools.TryParse(m.Groups["max"].Value, CultureInfo.InvariantCulture, out interval.MaxValue))
-                    return "Invalid max value";
-
-                return null;
-            }
-
-            public override string ToString()
-            {
-                return "{0}[{1},{2}]".FormatWith(DefaultValue, MinValue, MaxValue);
-            }
-
-            public string Validate(string parameter)
-            {
-                if (!decimal.TryParse(parameter, NumberStyles.Float, CultureInfo.InvariantCulture,  out decimal value))
-                    return "{0} is not a valid number".FormatWith(parameter);
-
-                if (MinValue.HasValue && value < MinValue)
-                    return "{0} is lesser than the minimum {1}".FormatWith(value, MinValue);
-
-                if (MaxValue.HasValue && MaxValue < value)
-                    return "{0} is grater than the maximum {1}".FormatWith(value, MinValue);
-
-                return null;
-            }
-        }
-
-        public class EnumValueList : List<EnumValue>
-        {
-            public static string TryParse(string valueDefinition, out EnumValueList list)
-            {
-                list = new EnumValueList();
-                foreach (var item in valueDefinition.SplitNoEmpty('|'))
-                {
-                    string error = EnumValue.TryParse(item, out EnumValue val);
-                    if (error.HasText())
-                        return error;
-
-                    list.Add(val);
-                }
-
-                if (list.Count == 0)
-                    return "No parameter values set";
-
-                return null;
-            }
-
-            internal string Validate(string parameter, QueryToken token)
-            {
-                if (token == null)
-                    return null; //?
-
-                var enumValue = this.SingleOrDefault(a => a.Name == parameter);
-
-                if (enumValue == null)
-                    return "{0} is not in the list".FormatWith(parameter);
-
-                if (!enumValue.CompatibleWith(token))
-                    return "{0} is not compatible with {1}".FormatWith(parameter, token?.NiceName());
-
-                return null;
-            }
-
-            internal string DefaultValue(QueryToken token)
-            {
-                return this.Where(a => a.CompatibleWith(token)).FirstEx(() => "No default parameter value for {0} found".FormatWith(token.NiceName())).Name;
-            }
-        }
-
-        public class EnumValue
-        {
-            public string Name;
-            public ChartColumnType? TypeFilter;
-
-            public override string ToString()
-            {
-                if (TypeFilter == null)
-                    return Name;
-
-                return "{0} ({1})".FormatWith(Name, TypeFilter.Value.GetComposedCode());
-            }
-
-            public static string TryParse(string value, out EnumValue enumValue)
-            {
-                var m = Regex.Match(value, @"^\s*(?<name>[^\(]*)\s*(\((?<filter>.*?)\))?\s*$");
-
-                if (!m.Success)
-                {
-                    enumValue = null;
-                    return "Invalid EnumValue";
-                }
-
-                enumValue = new EnumValue()
-                {
-                    Name = m.Groups["name"].Value.Trim()
-                };
-
-                if (string.IsNullOrEmpty(enumValue.Name))
-                    return "Parameter has no name";
-
-                string composedCode = m.Groups["filter"].Value;
-                if (!composedCode.HasText())
-                    return null;
-
-
-                string error = ChartColumnTypeUtils.TryParseComposed(composedCode, out ChartColumnType filter);
-                if (error.HasText())
-                    return enumValue.Name + ": " + error;
-
-                enumValue.TypeFilter = filter;
-
-                return null;
-            }
-
-            public bool CompatibleWith(QueryToken token)
-            {
-                return TypeFilter == null || token != null && ChartUtils.IsChartColumnType(token, TypeFilter.Value);
-            }
-        }
-
         internal ChartScriptParameterEmbedded Clone()
         {
             return new ChartScriptParameterEmbedded
@@ -301,7 +198,184 @@ namespace Signum.Entities.Chart
         }
     }
 
+    public class NumberInterval : IChartParameterValueDefinition
+    {
+        public decimal DefaultValue;
+        public decimal? MinValue;
+        public decimal? MaxValue;
 
+        public static string TryParse(string valueDefinition, out NumberInterval interval)
+        {
+            interval = null;
+            var m = Regex.Match(valueDefinition, @"^\s*(?<def>.+)\s*(\[(?<min>.+)?\s*,\s*(?<max>.+)?\s*\])?\s*$");
+
+            if (!m.Success)
+                return "Invalid number interval, [min?, max?]";
+
+            interval = new NumberInterval();
+
+            if (!ReflectionTools.TryParse(m.Groups["def"].Value, CultureInfo.InvariantCulture, out interval.DefaultValue))
+                return "Invalid default value";
+
+            if (!ReflectionTools.TryParse(m.Groups["min"].Value, CultureInfo.InvariantCulture, out interval.MinValue))
+                return "Invalid min value";
+
+            if (!ReflectionTools.TryParse(m.Groups["max"].Value, CultureInfo.InvariantCulture, out interval.MaxValue))
+                return "Invalid max value";
+
+            return null;
+        }
+
+        public override string ToString()
+        {
+            return "{0}[{1},{2}]".FormatWith(DefaultValue, MinValue, MaxValue);
+        }
+
+        public string Validate(string parameter)
+        {
+            if (!decimal.TryParse(parameter, NumberStyles.Float, CultureInfo.InvariantCulture, out decimal value))
+                return "{0} is not a valid number".FormatWith(parameter);
+
+            if (MinValue.HasValue && value < MinValue)
+                return "{0} is lesser than the minimum {1}".FormatWith(value, MinValue);
+
+            if (MaxValue.HasValue && MaxValue < value)
+                return "{0} is grater than the maximum {1}".FormatWith(value, MinValue);
+
+            return null;
+        }
+
+        internal string ToCode()
+        {
+            if (MinValue != null || MaxValue != null)
+                return $@"new NumberInterval {{ DefaultValue = {ToDecimal(DefaultValue)}, MinValue = {ToDecimal(MinValue)}, MaxValue = {ToDecimal(MaxValue)} }}";
+            else
+                return $@"new NumberInterval {{ DefaultValue = {ToDecimal(DefaultValue)} }}";
+        }
+
+        private string ToDecimal(decimal? val)
+        {
+            if (val == null)
+                return "null";
+
+            return val.ToString() + "m";
+        }
+    }
+    
+    public class EnumValueList : List<EnumValue>, IChartParameterValueDefinition
+    {
+        public static string TryParse(string valueDefinition, out EnumValueList list)
+        {
+            list = new EnumValueList();
+            foreach (var item in valueDefinition.SplitNoEmpty('|'))
+            {
+                string error = EnumValue.TryParse(item, out EnumValue val);
+                if (error.HasText())
+                    return error;
+
+                list.Add(val);
+            }
+
+            if (list.Count == 0)
+                return "No parameter values set";
+
+            return null;
+        }
+
+        public static EnumValueList Parse(string valueDefinition)
+        {
+            var error = TryParse(valueDefinition, out var list);
+            if (error == null)
+                return list;
+
+            throw new Exception(error);
+        }
+
+        internal string Validate(string parameter, QueryToken token)
+        {
+            if (token == null)
+                return null; //?
+
+            var enumValue = this.SingleOrDefault(a => a.Name == parameter);
+
+            if (enumValue == null)
+                return "{0} is not in the list".FormatWith(parameter);
+
+            if (!enumValue.CompatibleWith(token))
+                return "{0} is not compatible with {1}".FormatWith(parameter, token?.NiceName());
+
+            return null;
+        }
+
+        internal string DefaultValue(QueryToken token)
+        {
+            return this.Where(a => a.CompatibleWith(token)).FirstEx(() => "No default parameter value for {0} found".FormatWith(token.NiceName())).Name;
+        }
+
+        internal string ToCode()
+        {
+            return $@"EnumValueList.Parse(""{this.ToString("|")}"")";
+        }
+    }
+
+    public class EnumValue
+    {
+        public string Name;
+        public ChartColumnType? TypeFilter;
+
+        public override string ToString()
+        {
+            if (TypeFilter == null)
+                return Name;
+
+            return "{0} ({1})".FormatWith(Name, TypeFilter.Value.GetComposedCode());
+        }
+
+        public static string TryParse(string value, out EnumValue enumValue)
+        {
+            var m = Regex.Match(value, @"^\s*(?<name>[^\(]*)\s*(\((?<filter>.*?)\))?\s*$");
+
+            if (!m.Success)
+            {
+                enumValue = null;
+                return "Invalid EnumValue";
+            }
+
+            enumValue = new EnumValue()
+            {
+                Name = m.Groups["name"].Value.Trim()
+            };
+
+            if (string.IsNullOrEmpty(enumValue.Name))
+                return "Parameter has no name";
+
+            string composedCode = m.Groups["filter"].Value;
+            if (!composedCode.HasText())
+                return null;
+
+
+            string error = ChartColumnTypeUtils.TryParseComposed(composedCode, out ChartColumnType filter);
+            if (error.HasText())
+                return enumValue.Name + ": " + error;
+
+            enumValue.TypeFilter = filter;
+
+            return null;
+        }
+
+        public bool CompatibleWith(QueryToken token)
+        {
+            return TypeFilter == null || token != null && ChartUtils.IsChartColumnType(token, TypeFilter.Value);
+        }
+
+        internal string ToCode()
+        {
+            if (this.TypeFilter.HasValue)
+                return $@"new EnumValue(""{ this.Name }"", ChartColumnType.{this.TypeFilter.Value})";
+            else
+                return $@"new EnumValue(""{ this.Name }"")";
+        }
+    }
 
     public enum ChartParameterType
     {

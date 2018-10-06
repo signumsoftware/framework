@@ -36,12 +36,17 @@
   </ItemGroup>
   
   <ItemGroup>
+    <Folder Include="Chart\Scripts\" />
     <Folder Include="Properties\" />
   </ItemGroup>
 
   <ItemGroup>
     <TypeScriptCompile Include="**\*.tsx" />
     <TypeScriptCompile Include="**\*.ts" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <TypeScriptCompile Remove="Chart\D3ChartScriptRendererBase.tsx" />
   </ItemGroup>
 
   <Target Name="GenerateSignumTS">

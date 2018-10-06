@@ -163,6 +163,11 @@ export interface ChartScriptParameterEmbedded extends Entities.EmbeddedEntity {
     valueDefinition?: string | null;
 }
 
+export const ChartType = new Type<ChartType>("ChartType");
+export interface ChartType extends Entities.Symbol {
+    Type: "ChartType";
+}
+
 export const GroupByChart = new EnumType<GroupByChart>("GroupByChart");
 export type GroupByChart =
     "Always" |
