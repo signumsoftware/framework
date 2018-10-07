@@ -1125,7 +1125,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
             return (
                 <tr key={i} data-row-index={i} data-entity={row.entity && liteKey(row.entity)}
-                    onDoubleClick={e => this.handleDoubleClick(e, row)}
+                    onDoubleClick={this.props.navigate ? e => this.handleDoubleClick(e, row) : undefined}
                     id={id}
                     {...ra}
                     className={classes(mark && mark.className, ra && ra.className)}>
