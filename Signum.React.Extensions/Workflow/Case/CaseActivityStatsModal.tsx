@@ -98,7 +98,7 @@ export class CaseActivityStatsComponent extends React.Component<CaseActivityStat
 
         return (
             <div>
-                <FormGroup ctx={ctx} labelText={CaseActivityEntity.niceName()}> <EntityLink lite={stats.CaseActivity} /></FormGroup>
+                <FormGroup ctx={ctx} labelText={CaseActivityEntity.niceName()}>{stats.CaseActivity.toStr}</FormGroup>
                 <FormGroup ctx={ctx} labelText={CaseActivityEntity.nicePropertyName(a => a.doneBy)}>{stats.DoneBy && <EntityLink lite={stats.DoneBy} />}</FormGroup>
                 <FormGroup ctx={ctx} labelText={CaseActivityEntity.nicePropertyName(a => a.startDate)}>{formatDate(stats.StartDate)}</FormGroup>
                 <FormGroup ctx={ctx} labelText={CaseActivityEntity.nicePropertyName(a => a.doneDate)}>{formatDate(stats.DoneDate)}</FormGroup>
