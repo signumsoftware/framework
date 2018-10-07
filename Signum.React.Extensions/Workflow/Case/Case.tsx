@@ -82,7 +82,7 @@ export default class CaseComponent extends React.Component<CaseComponentProps, C
                         <ValueLine ctx={ctx.subCtx(a => a.startDate)} />
                     </div>
                     <div className="col-sm-6">
-                        <EntityLine ctx={ctx.subCtx(a => a.mainEntity)} />
+                        <EntityLine ctx={ctx.subCtx(a => a.mainEntity)} view={false} />
                         <ValueLine ctx={ctx.subCtx(a => a.description)} />
                         <ValueLine ctx={ctx.subCtx(a => a.finishDate)} />
                     </div>
@@ -103,14 +103,25 @@ export default class CaseComponent extends React.Component<CaseComponentProps, C
                     </Tab>
                     <Tab eventKey={"CaseActivities" as CaseTab} title={WorkflowActivityEntity.nicePluralName()}>
                         <SearchControl
+                            showContextMenu="Basic"
+                            navigate={false}
                             findOptions={{
                                 queryName: CaseActivityEntity,
                                 parentColumn: "Case",
                                 parentValue: ctx.value,
+                                columnOptionsMode: "Replace",
+                                columnOptions: [
+                                    { columnName: "Id" },
+                                    { columnName: "WorkflowActivity" },
+                                    { columnName: "StartDate" },
+                                    { columnName: "DoneDate" },
+                                    { columnName: "DoneBy" },
+                                    { columnName: "Previous.ToString" },
+                                ],
                                 orderOptions: [{
                                     columnName: "StartDate",
                                     orderType: "Ascending",
-                                }]
+                                }],
                             }}
                             extraButtons={sc => [
                                 OrderUtils.setOrder(-1.1, <CaseActivityStatsButtonComponent sc={sc} caseFlowViewer={this.caseFlowViewerComponent!} />),
@@ -120,11 +131,24 @@ export default class CaseComponent extends React.Component<CaseComponentProps, C
                     </Tab>
                     <Tab eventKey={"InprogressCaseActivities" as CaseTab} title={WorkflowActivityMessage.InprogressWorkflowActivities.niceToString()}>
                         <SearchControl
+                            showContextMenu="Basic"
+                            navigate={false}
                             findOptions={{
                                 queryName: CaseActivityEntity,
                                 parentColumn: "Case",
                                 parentValue: ctx.value,
-                                filterOptions: [{ columnName: "DoneDate", operation: "EqualTo", value: null, frozen: true }],
+                                filterOptions: [
+                                    { columnName: "DoneDate", operation: "EqualTo", value: null, frozen: true },
+                                ],
+                                columnOptionsMode: "Replace",
+                                columnOptions: [
+                                    { columnName: "Id" },
+                                    { columnName: "WorkflowActivity" },
+                                    { columnName: "StartDate" },
+                                    { columnName: "DoneDate" },
+                                    { columnName: "DoneBy" },
+                                    { columnName: "Previous.ToString" },
+                                ],
                                 orderOptions: [{
                                     columnName: "StartDate",
                                     orderType: "Descending",
