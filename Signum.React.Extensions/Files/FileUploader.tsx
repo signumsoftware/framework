@@ -110,6 +110,11 @@ export default class FileUploader extends React.Component<FileUploaderProps, Fil
                 return resolve();
             }
 
+            if (file.name.contains("%")) {
+                this.setError(FileMessage.TheNameOfTheFileMustNotContainPercentSymbol.niceToString());
+                return resolve();
+            }
+
             const fileReader = new FileReader();
             fileReader.onerror = e => { setTimeout(() => { throw (e as any).error; }, 0); };
             fileReader.onload = e => {

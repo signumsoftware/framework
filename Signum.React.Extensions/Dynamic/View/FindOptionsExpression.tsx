@@ -18,8 +18,8 @@ import * as NodeUtils from './NodeUtils'
 
 export interface FindOptionsExpr {
     queryName?: string;
-    parentColumn?: string;
-    parentToken?: QueryToken;
+    parentToken?: string;
+    parsedParentToken?: QueryToken;
     parentValue?: ExpressionOrValue<any>;
 
     filterOptions?: FilterOptionExpr[];
@@ -32,8 +32,8 @@ export interface FindOptionsExpr {
 }
 
 export interface FilterOptionExpr {
-    columnName?: string;
-    token?: QueryToken;
+    token?: string;
+    parsedToken?: QueryToken;
     operation?: ExpressionOrValue<FilterOperation>;
     value: ExpressionOrValue<any>;
     frozen?: ExpressionOrValue<boolean>;
@@ -41,30 +41,30 @@ export interface FilterOptionExpr {
 }
 
 export interface OrderOptionExpr {
-    columnName?: string;
-    token?: QueryToken;
+    token?: string;
+    parsedToken?: QueryToken;
     orderType: ExpressionOrValue<OrderType>;
     applicable: ExpressionOrValue<boolean>;
 }
 
 export interface ColumnOptionExpr {
-    columnName?: string;
-    token?: QueryToken;
+    token?: string;
+    parsedToken?: QueryToken;
     displayName?: ExpressionOrValue<string>;
     applicable: ExpressionOrValue<boolean>;
 }
 
-export function toFindOptions(ctx: TypeContext<ModifiableEntity>, foe: FindOptionsExpr): FindOptions{
+export function toFindOptions(ctx: TypeContext<ModifiableEntity>, foe: FindOptionsExpr): FindOptions {
     return {
         queryName: foe.queryName!,
-        parentColumn: foe.parentColumn,
+        parentToken: foe.parentToken,
         parentValue: NodeUtils.evaluate(ctx, foe, f => f.parentValue),
 
         filterOptions: foe.filterOptions ?
             foe.filterOptions
                 .filter(fo => NodeUtils.evaluateAndValidate(ctx, fo, f => f.applicable, NodeUtils.isBooleanOrNull) != false)
                 .map(fo => ({
-                    columnName: fo.columnName,
+                    token: fo.token,
                     frozen: NodeUtils.evaluateAndValidate(ctx, fo, f => f.frozen, NodeUtils.isBooleanOrNull),
                     operation: NodeUtils.evaluateAndValidate(ctx, fo, f => f.operation, v => NodeUtils.isEnumOrNull(v, FilterOperation)),
                     value: NodeUtils.evaluate(ctx, fo, f => f.value)
@@ -74,7 +74,7 @@ export function toFindOptions(ctx: TypeContext<ModifiableEntity>, foe: FindOptio
             foe.orderOptions
                 .filter(oo => NodeUtils.evaluateAndValidate(ctx, oo, o => o.applicable, NodeUtils.isBooleanOrNull) != false)
                 .map(oo => ({
-                    columnName: oo.columnName,
+                    token: oo.token,
                     orderType: NodeUtils.evaluateAndValidate(ctx, oo, o => o.orderType, v => NodeUtils.isEnumOrNull(v, OrderType))
                 } as OrderOption)) : undefined,
 
@@ -84,7 +84,7 @@ export function toFindOptions(ctx: TypeContext<ModifiableEntity>, foe: FindOptio
             foe.columnOptions
                 .filter(co => NodeUtils.evaluateAndValidate(ctx, co, c => c.applicable, NodeUtils.isBooleanOrNull) != false)
                 .map(co => ({
-                    columnName: co.columnName,
+                    token: co.token,
                     displayName: NodeUtils.evaluateAndValidate(ctx, co, c => c.displayName, NodeUtils.isStringOrNull)
                 } as ColumnOption)) : undefined,
 

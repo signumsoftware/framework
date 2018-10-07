@@ -70,10 +70,10 @@ export function start(options: { routes: JSX.Element[] }) {
         <ImportRoute path="~/workflow/activityMonitor/:workflowId" onImportModule={() => import("./ActivityMonitor/WorkflowActivityMonitorPage")} />,
     );
 
-    DynamicClientOptions.Options.checkEvalFindOptions.push({ queryName: WorkflowLaneEntity, filterOptions: [{ columnName: "Entity.ActorsEval", operation: "DistinctTo", value: null }] });
+    DynamicClientOptions.Options.checkEvalFindOptions.push({ queryName: WorkflowLaneEntity, filterOptions: [{ token: "Entity.ActorsEval", operation: "DistinctTo", value: null }] });
     DynamicClientOptions.Options.checkEvalFindOptions.push({ queryName: WorkflowConditionEntity });
     DynamicClientOptions.Options.checkEvalFindOptions.push({ queryName: WorkflowScriptEntity });
-    DynamicClientOptions.Options.checkEvalFindOptions.push({ queryName: WorkflowActivityEntity, filterOptions: [{ columnName: "Entity.SubWorkflow", operation: "DistinctTo", value: null }] });
+    DynamicClientOptions.Options.checkEvalFindOptions.push({ queryName: WorkflowActivityEntity, filterOptions: [{ token: "Entity.SubWorkflow", operation: "DistinctTo", value: null }] });
     DynamicClientOptions.Options.checkEvalFindOptions.push({ queryName: WorkflowActionEntity });
     DynamicClientOptions.Options.checkEvalFindOptions.push({ queryName: WorkflowTimerConditionEntity });
 
@@ -87,7 +87,7 @@ export function start(options: { routes: JSX.Element[] }) {
     ]);
 
     QuickLinks.registerQuickLink(WorkflowEntity, ctx => [
-        new QuickLinks.QuickLinkExplore({ queryName: CaseEntity, parentColumn: "Workflow", parentValue: ctx.lite },
+        new QuickLinks.QuickLinkExplore({ queryName: CaseEntity, parentToken: "Workflow", parentValue: ctx.lite },
             { icon: "tasks", iconColor: "blue" })
     ]);
     
@@ -100,7 +100,7 @@ export function start(options: { routes: JSX.Element[] }) {
     Finder.addSettings({
         queryName: CaseActivityQuery.Inbox,
         hiddenColumns: [
-            { columnName: "State" },
+            { token: "State" },
         ],
         rowAttributes: (row, columns) => {
             var rowState = row.columns[columns.indexOf("State")] as CaseNotificationState;
@@ -305,7 +305,7 @@ export function getDefaultInboxUrl() {
     return Finder.findOptionsPath({
         queryName: CaseActivityQuery.Inbox,
         filterOptions: [{
-            columnName: "State",
+            token: "State",
             operation: "IsIn",
             value: ["New", "Opened", "InProgress"]
         }]

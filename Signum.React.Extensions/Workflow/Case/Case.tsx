@@ -107,7 +107,7 @@ export default class CaseComponent extends React.Component<CaseComponentProps, C
                             navigate={false}
                             findOptions={{
                                 queryName: CaseActivityEntity,
-                                parentColumn: "Case",
+                                parentToken: "Case",
                                 parentValue: ctx.value,
                                 columnOptionsMode: "Replace",
                                 columnOptions: [
@@ -119,7 +119,7 @@ export default class CaseComponent extends React.Component<CaseComponentProps, C
                                     { columnName: "Previous.ToString" },
                                 ],
                                 orderOptions: [{
-                                    columnName: "StartDate",
+                                    token: "StartDate",
                                     orderType: "Ascending",
                                 }],
                             }}
@@ -135,8 +135,8 @@ export default class CaseComponent extends React.Component<CaseComponentProps, C
                             navigate={false}
                             findOptions={{
                                 queryName: CaseActivityEntity,
-                                parentColumn: "Case",
-                                parentValue: ctx.value,
+                                parentToken: "Case",
+                                parentValue: ctx.value
                                 filterOptions: [
                                     { columnName: "DoneDate", operation: "EqualTo", value: null, frozen: true },
                                 ],
@@ -150,7 +150,7 @@ export default class CaseComponent extends React.Component<CaseComponentProps, C
                                     { columnName: "Previous.ToString" },
                                 ],
                                 orderOptions: [{
-                                    columnName: "StartDate",
+                                    token: "StartDate",
                                     orderType: "Descending",
                                 }]
                             }}

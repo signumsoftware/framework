@@ -104,12 +104,7 @@ namespace Signum.React.Word
                     var cr = (QueryModel)ctx.Entity;
 
                     ctx.JsonWriter.WritePropertyName(ctx.LowerCaseName);
-                    ctx.JsonSerializer.Serialize(ctx.JsonWriter, cr.Filters.Select(f => new FilterTS
-                    {
-                        token = f.Token.FullKey(),
-                        operation = f.Operation,
-                        value = f.Value
-                    }).ToList());
+                    ctx.JsonSerializer.Serialize(ctx.JsonWriter, cr.Filters.Select(f => FilterTS.FromFilter(f)).ToList());
                 }
             });
 

@@ -19,7 +19,7 @@ export function start(options: { routes: JSX.Element[] }) {
     Constructor.registerConstructor(DynamicValidationEntity, () => DynamicValidationEntity.New({ eval: DynamicValidationEval.New() }));
 
     DynamicClientOptions.Options.checkEvalFindOptions.push({ queryName: DynamicValidationEntity });
-    DynamicClientOptions.Options.onGetDynamicLineForType.push((ctx, type) => <ValueSearchControlLine ctx={ctx} findOptions={{ queryName: DynamicValidationEntity, parentColumn: "EntityType.CleanName", parentValue: type }} />);
+    DynamicClientOptions.Options.onGetDynamicLineForType.push((ctx, type) => <ValueSearchControlLine ctx={ctx} findOptions={{ queryName: DynamicValidationEntity, parentToken: "EntityType.CleanName", parentValue: type }} />);
 }
 
 export namespace API {

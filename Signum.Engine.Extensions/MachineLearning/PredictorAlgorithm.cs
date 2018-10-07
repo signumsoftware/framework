@@ -266,6 +266,7 @@ namespace Signum.Engine.MachineLearning
     public class PredictionOptions
     {
         public int? AlternativeCount;
+        public List<PredictorCodification> FilteredCodifications;
     }
 
     public class AlternativePrediction

@@ -33,7 +33,7 @@ namespace Signum.Engine.MachineLearning
                     if (obj is Lite<Entity> lite)
                         return lite.KeyLong().TryStart(limit);
 
-                    return FilterValueConverter.ToString(obj, token.Type, allowSmart: false).TryStart(limit);
+                    return FilterValueConverter.ToString(obj, token.Type).TryStart(limit);
                 }
 
 
@@ -79,12 +79,12 @@ namespace Signum.Engine.MachineLearning
 
             object ParseValue(string str, QueryToken token)
             {
-                return FilterValueConverter.Parse(str, token.Type, isList: false, allowSmart: false);
+                return FilterValueConverter.Parse(str, token.Type, isList: false);
             }
 
             object ParseKey(string str, PredictorSubQueryColumnEmbedded key)
             {
-                return FilterValueConverter.Parse(str, key.Token.Token.Type, isList: false, allowSmart: false);
+                return FilterValueConverter.Parse(str, key.Token.Token.Type, isList: false);
             }
 
             object[] GetKeys(PredictorCodificationEntity cod, List<PredictorSubQueryColumnEmbedded> keys)

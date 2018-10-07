@@ -1,19 +1,7 @@
 ﻿import * as React from 'react'
-import { classes } from '@framework/Globals'
-import { FormGroup, FormControlReadonly, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityList, EntityRepeater, EntityTable } from '@framework/Lines'
-import { SearchControl } from '@framework/Search'
-import { TypeContext, FormGroupStyle } from '@framework/TypeContext'
-import FileLine from '../../Files/FileLine'
+import { ValueLine } from '@framework/Lines'
+import { TypeContext } from '@framework/TypeContext'
 import { PredictorMetricsEmbedded, PredictorEntity } from '../Signum.Entities.MachineLearning'
-import * as Finder from '@framework/Finder'
-import { getQueryNiceName } from '@framework/Reflection'
-import QueryTokenEntityBuilder from '../../UserAssets/Templates/QueryTokenEntityBuilder'
-import { QueryTokenEmbedded } from '../../UserAssets/Signum.Entities.UserAssets'
-import { QueryFilterEmbedded } from '../../UserQueries/Signum.Entities.UserQueries'
-import { QueryDescription, SubTokensOptions } from '@framework/FindOptions'
-import { API } from '../PredictorClient';
-import FilterBuilderEmbedded from './FilterBuilderEmbedded';
-import { TypeReference } from '@framework/Reflection';
 
 export default class PredictorRegressionMetrics extends React.Component<{ ctx: TypeContext<PredictorEntity> }> {
 

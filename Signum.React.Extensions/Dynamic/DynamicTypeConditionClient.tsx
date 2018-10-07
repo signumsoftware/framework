@@ -24,7 +24,7 @@ export function start(options: { routes: JSX.Element[] }) {
 
     Constructor.registerConstructor(DynamicTypeConditionEntity, () => DynamicTypeConditionEntity.New({ eval: DynamicTypeConditionEval.New() }));
     DynamicClientOptions.Options.onGetDynamicLineForPanel.push(ctx => <ValueSearchControlLine ctx={ctx} findOptions={{ queryName: DynamicTypeConditionEntity }} />);
-    DynamicClientOptions.Options.onGetDynamicLineForType.push((ctx, type) => <ValueSearchControlLine ctx={ctx} findOptions={{ queryName: DynamicTypeConditionEntity, parentColumn: "EntityType.CleanName", parentValue: type }} />);
+    DynamicClientOptions.Options.onGetDynamicLineForType.push((ctx, type) => <ValueSearchControlLine ctx={ctx} findOptions={{ queryName: DynamicTypeConditionEntity, parentToken: "EntityType.CleanName", parentValue: type }} />);
 }
 
 export namespace API {

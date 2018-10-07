@@ -89,11 +89,13 @@ namespace Signum.Engine.MachineLearning.CNTK
 
         public object DecodeValue(PredictorColumnBase column, List<PredictorCodification> codifications, float[] outputValues, PredictionOptions options)
         {
+            var cods = options?.FilteredCodifications ?? codifications;
+
             if (options?.AlternativeCount == null)
             {
                 var max = float.MinValue;
                 PredictorCodification best = null;
-                foreach (var c in codifications)
+                foreach (var c in cods)
                 {
                     if (max < outputValues[c.Index])
                     {
@@ -106,9 +108,9 @@ namespace Signum.Engine.MachineLearning.CNTK
             else
             {
                 //Softmax
-                var sum = codifications.Sum(cod => Math.Exp(outputValues[cod.Index]));
+                var sum = cods.Sum(cod => Math.Exp(outputValues[cod.Index]));
 
-                return codifications.OrderByDescending(c => outputValues[c.Index]).Take(options.AlternativeCount.Value).Select(c => new AlternativePrediction
+                return cods.OrderByDescending(c => outputValues[c.Index]).Take(options.AlternativeCount.Value).Select(c => new AlternativePrediction
                 {
                     Value = c.IsValue,
                     Probability = (float)(Math.Exp(outputValues[c.Index]) / sum),

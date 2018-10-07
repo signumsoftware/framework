@@ -1,23 +1,11 @@
 ﻿import * as React from 'react'
 import * as OrderUtils from '@framework/Frames/OrderUtils'
-import { classes } from '@framework/Globals'
 import * as Navigator from '@framework/Navigator'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { FormGroup, FormControlReadonly, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityList, EntityRepeater, EntityTable, EntityDetail, IRenderButtons } from '@framework/Lines'
-import { SearchControl } from '@framework/Search'
-import { TypeContext, FormGroupStyle, ButtonsContext } from '@framework/TypeContext'
-import FileLine from '../../Files/FileLine'
+import { ValueLine, EntityLine, IRenderButtons } from '@framework/Lines'
+import { TypeContext, ButtonsContext } from '@framework/TypeContext'
 import { PredictSimpleResultEntity, PredictorMessage } from '../Signum.Entities.MachineLearning'
-import * as Finder from '@framework/Finder'
-import { getQueryNiceName } from '@framework/Reflection'
-import QueryTokenEntityBuilder from '../../UserAssets/Templates/QueryTokenEntityBuilder'
-import { QueryTokenEmbedded } from '../../UserAssets/Signum.Entities.UserAssets'
-import { QueryFilterEmbedded } from '../../UserQueries/Signum.Entities.UserQueries'
-import { QueryDescription, SubTokensOptions } from '@framework/FindOptions'
-import { API, predict } from '../PredictorClient';
-import FilterBuilderEmbedded from './FilterBuilderEmbedded';
-import { TypeReference } from '@framework/Reflection';
-import { toLite } from '@framework/Signum.Entities';
+import { predict } from '../PredictorClient';
 
 export default class PredictSimpleResult extends React.Component<{ ctx: TypeContext<PredictSimpleResultEntity> }> implements IRenderButtons {
 
