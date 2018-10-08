@@ -1059,27 +1059,28 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
             return;
         }
 
-        var lite = row.entity!;
+        if (this.props.navigate) {
+            var lite = row.entity!;
 
-        if (!Navigator.isNavigable(lite.EntityType, undefined, true))
-            return;
+            if (!Navigator.isNavigable(lite.EntityType, undefined, true))
+                return;
 
-        e.preventDefault();
+            e.preventDefault();
 
-        const s = Navigator.getSettings(lite.EntityType)
+            const s = Navigator.getSettings(lite.EntityType)
 
-        const avoidPopup = s != undefined && s.avoidPopup;
+            const avoidPopup = s != undefined && s.avoidPopup;
 
-        if (avoidPopup || e.ctrlKey || e.button == 1) {
-            window.open(Navigator.navigateRoute(lite));
+            if (avoidPopup || e.ctrlKey || e.button == 1) {
+                window.open(Navigator.navigateRoute(lite));
+            }
+            else {
+                Navigator.navigate(lite)
+                    .then(() => {
+                        this.handleOnNavigated(lite);
+                    }).done();
+            }
         }
-        else {
-            Navigator.navigate(lite)
-                .then(() => {
-                    this.handleOnNavigated(lite);
-                }).done();
-        }
-
     }
 
     renderRows(): React.ReactNode {
@@ -1125,7 +1126,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
             return (
                 <tr key={i} data-row-index={i} data-entity={row.entity && liteKey(row.entity)}
-                    onDoubleClick={this.props.navigate ? e => this.handleDoubleClick(e, row) : undefined}
+                    onDoubleClick={e => this.handleDoubleClick(e, row)}
                     id={id}
                     {...ra}
                     className={classes(mark && mark.className, ra && ra.className)}>
