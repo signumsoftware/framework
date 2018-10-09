@@ -72,6 +72,7 @@ namespace Signum.React.TypeHelp
             public int limit;
             public bool includeBasicTypes;
             public bool includeEntities;
+            public bool includeModelEntities;
             public bool includeEmbeddedEntities;
             public bool includeMList;
             public bool includeQueriable;
@@ -96,6 +97,11 @@ namespace Signum.React.TypeHelp
             if (request.includeEntities)
             {
                 result.AddRange(TypeLogic.TypeToEntity.Keys.Select(a => a.Name));
+            }
+
+            if (request.includeModelEntities)
+            {
+                result.AddRange(DynamicTypeLogic.AvailableModelEntities.Value.Select(a => a.Name));
             }
 
             if (request.includeEmbeddedEntities)
