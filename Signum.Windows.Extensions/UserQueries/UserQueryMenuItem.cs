@@ -52,7 +52,7 @@ namespace Signum.Windows.UserQueries
 
                 foreach (var item in miResult.Items.OfType<MenuItem>().Where(mi => mi.IsCheckable))
                 {
-                    item.IsChecked = ((Lite<UserQueryEntity>)item.Tag).RefersTo(current);
+                    item.IsChecked = ((Lite<UserQueryEntity>)item.Tag).Is(current);
                 }
 
                 bool isEnabled = current != null && !Navigator.IsReadOnly(current);

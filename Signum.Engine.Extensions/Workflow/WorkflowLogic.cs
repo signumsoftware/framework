@@ -730,11 +730,11 @@ namespace Signum.Engine.Workflow
         }
 
         public static Expression<Func<UserEntity, Lite<Entity>, bool>> IsUserConstantActor = (userConstant, actor) =>
-         actor.RefersTo(userConstant) ||
+         actor.Is(userConstant) ||
           (actor is Lite<RoleEntity> && AuthLogic.IndirectlyRelated(userConstant.Role).Contains((Lite<RoleEntity>)actor));
 
         public static Expression<Func<UserEntity, Lite<Entity>, bool>> IsUserActorConstant = (user, actorConstant) =>
-            actorConstant.RefersTo(user) ||
+            actorConstant.Is(user) ||
            (actorConstant is Lite<RoleEntity> && AuthLogic.InverseIndirectlyRelated((Lite<RoleEntity>)actorConstant).Contains(user.Role));
 
 

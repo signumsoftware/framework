@@ -20,7 +20,7 @@ namespace Signum.React.Profiler
         public string GetAPIKey()
         {
             using (ExecutionMode.Global())
-                return Database.Query<RestApiKeyEntity>().Where(a => a.User.RefersTo(UserEntity.Current)).Select(a => a.ApiKey).SingleOrDefault();
+                return Database.Query<RestApiKeyEntity>().Where(a => a.User.Is(UserEntity.Current)).Select(a => a.ApiKey).SingleOrDefault();
         }
     }
 }

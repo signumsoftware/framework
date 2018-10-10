@@ -13,7 +13,7 @@ import { Entity, Lite, liteKey, MList } from '@framework/Signum.Entities'
 import * as Constructor from '@framework/Constructor'
 import * as Operations from '@framework/Operations'
 import * as QuickLinks from '@framework/QuickLinks'
-import { PseudoType, QueryKey, getQueryKey } from '@framework/Reflection'
+import { PseudoType, QueryKey, getQueryKey, getEnumInfo } from '@framework/Reflection'
 import {
     FindOptions, FilterOption, FilterOptionParsed, FilterOperation, OrderOption, OrderOptionParsed, ColumnOption,
     FilterRequest, QueryRequest, Pagination, QueryTokenType, QueryToken, FilterType, SubTokensOptions, ResultTable, OrderRequest
@@ -488,9 +488,16 @@ export module API {
         if (token.filterType == "Enum")
             return v => {
                 var value = v as string | undefined;
+                var niceName: string | undefined;
+
+                if (value) {
+                    var ei = getEnumInfo(token.type.name, value as any as number);
+                    niceName = ei ? ei.niceName : value;
+                };
+                
                 return {
                     key: value,
-                    toStr: value,
+                    toStr: niceName,
                     color: value == null ? "#555" : null,
                 };
             };

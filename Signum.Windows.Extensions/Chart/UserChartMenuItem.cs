@@ -82,7 +82,7 @@ namespace Signum.Windows.Chart
 
             foreach (var item in this.Items.OfType<MenuItem>().Where(mi => mi.IsCheckable))
             {
-                item.IsChecked = ((Lite<UserChartEntity>)item.Tag).RefersTo(current);
+                item.IsChecked = ((Lite<UserChartEntity>)item.Tag).Is(current);
             }
         }
 

@@ -39,7 +39,7 @@ namespace Signum.Engine.Workflow
 
 
         static Expression<Func<CaseActivityEntity, IQueryable<CaseActivityEntity>>> NextActivitiesExpression =
-            ca => Database.Query<CaseActivityEntity>().Where(a => a.Previous.RefersTo(ca));
+            ca => Database.Query<CaseActivityEntity>().Where(a => a.Previous.Is(ca));
         [ExpressionField]
         public static IQueryable<CaseActivityEntity> NextActivities(this CaseActivityEntity e)
         {
@@ -109,7 +109,7 @@ namespace Signum.Engine.Workflow
 
 
         static Expression<Func<CaseEntity, IQueryable<CaseTagEntity>>> TagsExpression =
-        e => Database.Query<CaseTagEntity>().Where(a => a.Case.RefersTo(e));
+        e => Database.Query<CaseTagEntity>().Where(a => a.Case.Is(e));
         [ExpressionField]
         public static IQueryable<CaseTagEntity> Tags(this CaseEntity e)
         {
@@ -117,7 +117,7 @@ namespace Signum.Engine.Workflow
         }
 
         static Expression<Func<CaseActivityEntity, IQueryable<CaseNotificationEntity>>> NotificationsExpression =
-            e => Database.Query<CaseNotificationEntity>().Where(a => a.CaseActivity.RefersTo(e));
+            e => Database.Query<CaseNotificationEntity>().Where(a => a.CaseActivity.Is(e));
         [ExpressionField]
         public static IQueryable<CaseNotificationEntity> Notifications(this CaseActivityEntity e)
         {
@@ -126,7 +126,7 @@ namespace Signum.Engine.Workflow
 
 
         static Expression<Func<CaseActivityEntity, IQueryable<CaseActivityExecutedTimerEntity>>> ExecutedTimersExpression =
-        e => Database.Query<CaseActivityExecutedTimerEntity>().Where(a => a.CaseActivity.RefersTo(e));
+        e => Database.Query<CaseActivityExecutedTimerEntity>().Where(a => a.CaseActivity.Is(e));
         [ExpressionField]
         public static IQueryable<CaseActivityExecutedTimerEntity> ExecutedTimers(this CaseActivityEntity e)
         {
@@ -231,7 +231,7 @@ namespace Signum.Engine.Workflow
                      where ca.State == CaseActivityState.PendingDecision || ca.State == CaseActivityState.PendingNext
                      from we in ((WorkflowActivityEntity)ca.WorkflowActivity).BoundaryTimers
                      where we.Type == WorkflowEventType.BoundaryInterruptingTimer ? true :
-                     we.Type == WorkflowEventType.BoundaryForkTimer ? !ca.ExecutedTimers().Any(t => t.BoundaryEvent.RefersTo(we)) :
+                     we.Type == WorkflowEventType.BoundaryForkTimer ? !ca.ExecutedTimers().Any(t => t.BoundaryEvent.Is(we)) :
                      false
                      select new { Activity = ca, Event = we }).ToList();
 
@@ -576,7 +576,7 @@ namespace Signum.Engine.Workflow
                         var now = TimeZoneManager.Now;
                         var c = ca.Case;
                         c.StartDate = now;
-                        c.Description = ca.Case.MainEntity.ToString().Trim();
+                        c.Description = ca.Case.MainEntity.ToString().Trim().Etc(100);
                         c.Save();
 
                         var prevConn = ca.WorkflowActivity.PreviousConnectionsFromCache().SingleEx(a => a.From is WorkflowEventEntity && ((WorkflowEventEntity)a.From).Type == WorkflowEventType.Start);
@@ -662,7 +662,7 @@ namespace Signum.Engine.Workflow
                     {
                         CheckRequiresOpen(ca);
                         var to = args.GetArg<Lite<IWorkflowNodeEntity>>();
-                        var jump = ca.WorkflowActivity.NextConnectionsFromCache(ConnectionType.Jump).SingleEx(c => to.RefersTo(c.To));
+                        var jump = ca.WorkflowActivity.NextConnectionsFromCache(ConnectionType.Jump).SingleEx(c => to.Is(c.To));
                         ExecuteStep(ca, DoneType.Jump, jump);
                     },
                 }.Register();
@@ -712,12 +712,12 @@ namespace Signum.Engine.Workflow
                 {
                     FromStates = { CaseActivityState.PendingNext, CaseActivityState.PendingDecision },
                     ToStates = { CaseActivityState.PendingNext, CaseActivityState.PendingDecision },
-                    CanExecute = c=> c.Notifications().Any(a=>a.User.RefersTo(UserEntity.Current) && (a.State == CaseNotificationState.InProgress || a.State == CaseNotificationState.Opened)) ? null :
+                    CanExecute = c=> c.Notifications().Any(a=>a.User.Is(UserEntity.Current) && (a.State == CaseNotificationState.InProgress || a.State == CaseNotificationState.Opened)) ? null :
                         CaseActivityMessage.NoOpenedOrInProgressNotificationsFound.NiceToString(),
                     Execute = (ca, args) =>
                     {
                         ca.Notifications()
-                        .Where(cn => cn.User.RefersTo(UserEntity.Current) && (cn.State == CaseNotificationState.InProgress || cn.State == CaseNotificationState.Opened))
+                        .Where(cn => cn.User.Is(UserEntity.Current) && (cn.State == CaseNotificationState.InProgress || cn.State == CaseNotificationState.Opened))
                         .UnsafeUpdate()
                         .Set(cn => cn.State, cn => CaseNotificationState.New)
                         .Execute();
@@ -838,7 +838,7 @@ namespace Signum.Engine.Workflow
                     ca.DoneBy = UserEntity.Current.ToLite();
                     ca.DoneDate = TimeZoneManager.Now;
                     ca.DoneType = doneType;
-                    ca.Case.Description = ca.Case.MainEntity.ToString().Trim();
+                    ca.Case.Description = ca.Case.MainEntity.ToString().Trim().Etc(100);
                     ca.Save();
 
                     ca.Notifications()
@@ -881,7 +881,7 @@ namespace Signum.Engine.Workflow
             private static void FinishStep(CaseEntity @case, WorkflowExecuteStepContext ctx, CaseActivityEntity ca)
             {
                 
-                @case.Description = @case.MainEntity.ToString().Trim();
+                @case.Description = @case.MainEntity.ToString().Trim().Etc(100);
 
                 if (ctx.IsFinished)
                 {
@@ -960,7 +960,7 @@ namespace Signum.Engine.Workflow
 
                 SaveEntity(@case.MainEntity);
                 
-                @case.Description = @case.MainEntity.ToString().Trim();
+                @case.Description = @case.MainEntity.ToString().Trim().Etc(100);
                 @case.Save();
                 
                 var ctx = new WorkflowExecuteStepContext

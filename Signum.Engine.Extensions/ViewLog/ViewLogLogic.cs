@@ -26,7 +26,7 @@ namespace Signum.Engine.ViewLog
         public static Func<DynamicQueryContainer.ExecuteType, object, BaseQueryRequest, IDisposable> QueryExecutedLog;
 
         static Expression<Func<Entity, IQueryable<ViewLogEntity>>> ViewLogsExpression =
-            a => Database.Query<ViewLogEntity>().Where(log => log.Target.RefersTo(a));
+            a => Database.Query<ViewLogEntity>().Where(log => log.Target.Is(a));
         [ExpressionField]
         public static IQueryable<ViewLogEntity> ViewLogs(this Entity a)
         {
@@ -35,7 +35,7 @@ namespace Signum.Engine.ViewLog
         
         static Expression<Func<Entity, ViewLogEntity>> ViewLogMyLastExpression =
             e => Database.Query<ViewLogEntity>()
-            .Where(a => a.User.RefersTo(UserEntity.Current) && a.Target.RefersTo(e))
+            .Where(a => a.User.Is(UserEntity.Current) && a.Target.Is(e))
             .OrderBy(a => a.StartDate).FirstOrDefault();     
         [ExpressionField]
         public static ViewLogEntity ViewLogMyLast(this Entity e)
