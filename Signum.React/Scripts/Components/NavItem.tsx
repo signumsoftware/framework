@@ -1,4 +1,4 @@
-﻿import * as React from 'react';
+import * as React from 'react';
 import * as PropTypes from 'prop-types';
 import { classes } from '../Globals';
 
@@ -44,6 +44,7 @@ export interface NavLinkProps {
     className?: string;
     onClick?: (e: React.MouseEvent<any>) => void;
     href?: string;
+    style?: CSSProperties;
 }
 
 
