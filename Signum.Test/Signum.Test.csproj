@@ -5,7 +5,7 @@
     <LangVersion>latest</LangVersion>
     <UserSecretsId>SignumTest</UserSecretsId>
     <TargetLatestRuntimePatch>true</TargetLatestRuntimePatch>
-    <Platforms>AnyCPU;x64</Platforms>
+    <Platforms>x64</Platforms>
   </PropertyGroup>
 
   <ItemGroup>

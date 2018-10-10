@@ -8,7 +8,7 @@
     <TargetLatestRuntimePatch>true</TargetLatestRuntimePatch>
     <OutputPath>Binaries\</OutputPath>
     <LangVersion>latest</LangVersion>
-    <Platforms>AnyCPU;x64</Platforms>
+    <Platforms>x64</Platforms>
   </PropertyGroup>
 
   <ItemGroup>

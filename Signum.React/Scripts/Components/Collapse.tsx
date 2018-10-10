@@ -1,6 +1,6 @@
 ﻿import * as React from 'react';
 import * as PropTypes from 'prop-types';
-import Transition, { TransitionProps, EnterHandler, ExitHandler } from 'react-transition-group/Transition';
+import Transition, { TransitionProps, EnterHandler, ExitHandler, TransitionStatus } from 'react-transition-group/Transition';
 import { classes, Dic } from '../Globals';
 
 interface CollapseProps {
@@ -19,7 +19,7 @@ interface CollapseProps {
 
 }
 
-const transitionStatusToClassHash = {
+const transitionStatusToClassHash: { [key: string]: string } = {
     entering: 'collapsing',
     entered: 'collapse show',
     exiting: 'collapsing',
