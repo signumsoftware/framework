@@ -23,7 +23,7 @@ namespace Signum.Entities.Workflow
         [NotNullValidator]
         public TypeEntity MainEntityType { get; set; }
 
-        public WorkflowMainEntityStrategy MainEntityStrategy { get; set; }
+        public MList<WorkflowMainEntityStrategy> MainEntityStrategies { get; set; } = new MList<WorkflowMainEntityStrategy>();
 
         public DateTime? ExpirationDate { get; set; }
         /// <summary>
@@ -54,7 +54,7 @@ namespace Signum.Entities.Workflow
     {
         CreateNew,
         SelectByUser,
-        Both
+        Clone,
     }
 
     [InTypeScript(true), DescriptionOptions(DescriptionOptions.Members)]

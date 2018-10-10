@@ -47,7 +47,7 @@ export default class WorkflowDropdown extends React.Component<{}, { starts: Arra
                         (kvp.elements.length > 1 && <DropdownItem key={i} disabled>{kvp.elements[0].typeInfo.niceName}</DropdownItem>),
                         ...kvp.elements.map((val, j) =>
                             <LinkContainer key={i + "-" + j} to={`~/workflow/new/${val.workflow.id}/${val.mainEntityStrategy}`}>
-                                <DropdownItem>{val.workflow.toStr}{val.mainEntityStrategy == "SelectByUser" ? `(${WorkflowMainEntityStrategy.niceToString(val.mainEntityStrategy)})` : ""}</DropdownItem>
+                                <DropdownItem>{val.workflow.toStr}{val.mainEntityStrategy == "CreateNew" ? "" : `(${WorkflowMainEntityStrategy.niceToString(val.mainEntityStrategy)})`}</DropdownItem>
                             </LinkContainer>)
                     ])}
                 </DropdownMenu>
@@ -59,11 +59,7 @@ export default class WorkflowDropdown extends React.Component<{}, { starts: Arra
         return this.state.starts.flatMap(w => {
             const typeInfo = getTypeInfo(w.mainEntityType!.cleanName);
 
-            if (w.mainEntityStrategy != "Both")
-                return [({ workflow: w, typeInfo, mainEntityStrategy: w.mainEntityStrategy! })]
-            else
-                return [({ workflow: w, typeInfo, mainEntityStrategy: ("CreateNew" as WorkflowMainEntityStrategy) })]
-                    .concat([({ workflow: w, typeInfo, mainEntityStrategy: ("SelectByUser" as WorkflowMainEntityStrategy) })]);
+            return w.mainEntityStrategies.flatMap(ws => [({ workflow: w, typeInfo, mainEntityStrategy: ws.element! })]);
         }).filter(kvp => !!kvp.typeInfo)
             .groupBy(kvp => kvp.typeInfo.name);
     }
