@@ -9,7 +9,7 @@ import {
     newMListElement, liteKey, getMixin, Entity, ExecuteSymbol, isEntityPack, isEntity
 } from '@framework/Signum.Entities'
 import { TypeEntity, IUserEntity } from '@framework/Signum.Entities.Basics'
-import { Type, PropertyRoute } from '@framework/Reflection'
+import { Type, PropertyRoute, OperationInfo } from '@framework/Reflection'
 import { EntityFrame, TypeContext } from '@framework/TypeContext'
 import * as Navigator from '@framework/Navigator'
 import * as Finder from '@framework/Finder'
@@ -480,27 +480,31 @@ export function viewCase(entityOrPack: Lite<CaseActivityEntity> | CaseActivityEn
 export function createNewCase(workflowId: number | string, mainEntityStrategy: WorkflowMainEntityStrategy): Promise<CaseEntityPack | undefined> {
     return Navigator.API.fetchEntity(WorkflowEntity, workflowId)
         .then(wf => {
-            if (mainEntityStrategy == "SelectByUser" || mainEntityStrategy == "Clone")
-                return Finder.find({ queryName: wf.mainEntityType!.cleanName })
-                    .then(lite => {
-                        if (!lite)
-                            return Promise.resolve(undefined);
+            if (mainEntityStrategy == "CreateNew")
+                return Operations.API.constructFromEntity(wf, CaseActivityOperation.CreateCaseActivityFromWorkflow);
 
-                        return Navigator.API.fetchAndForget(lite!)
-                            .then(entity => {
-                                if (mainEntityStrategy == "Clone") {
-                                    var oi = Operations.getOperationInfo(`${wf.mainEntityType!.cleanName}Operation.Clone`, wf.mainEntityType!.cleanName);
-                                    assertOperationInfoAllowed(oi);
+            var coi: OperationInfo;
 
-                                    return Operations.API.constructFromEntity(entity, oi.key)
-                                        .then(pack => Operations.API.constructFromEntity(wf, CaseActivityOperation.CreateCaseActivityFromWorkflow, pack.entity));
-                                }
-                                else
-                                    return Operations.API.constructFromEntity(wf, CaseActivityOperation.CreateCaseActivityFromWorkflow, entity);
-                            });
-                    });
+            if (mainEntityStrategy == "Clone") {
+                coi = Operations.getOperationInfo(`${wf.mainEntityType!.cleanName}Operation.Clone`, wf.mainEntityType!.cleanName);
+                assertOperationInfoAllowed(coi);
+            }
 
-            return Operations.API.constructFromEntity(wf, CaseActivityOperation.CreateCaseActivityFromWorkflow);
+            return Finder.find({ queryName: wf.mainEntityType!.cleanName })
+                .then(lite => {
+                    if (!lite)
+                        return Promise.resolve(undefined);
+
+                    return Navigator.API.fetchAndForget(lite!)
+                        .then(entity => {
+                            if (mainEntityStrategy == "Clone") {
+                                return Operations.API.constructFromEntity(entity, coi.key)
+                                    .then(pack => Operations.API.constructFromEntity(wf, CaseActivityOperation.CreateCaseActivityFromWorkflow, pack.entity));
+                            }
+                            else
+                                return Operations.API.constructFromEntity(wf, CaseActivityOperation.CreateCaseActivityFromWorkflow, entity);
+                        });
+                });
         })
         .then(ep => ep && ({
             activity: ep.entity,
