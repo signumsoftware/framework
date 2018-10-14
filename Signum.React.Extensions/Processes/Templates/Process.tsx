@@ -74,7 +74,7 @@ export default class Process extends React.Component<{ ctx: TypeContext<ProcessE
                     ref={(vsc: ValueSearchControlLine) => this.processExceptionsCounter = vsc}
                     findOptions={{
                         queryName: ProcessExceptionLineEntity,
-                        parentColumn: "Process",
+                        parentToken: "Process",
                         parentValue: ctx3.value
                     }} />
             </div>

@@ -275,7 +275,6 @@ namespace Signum.Entities.UserQueries
         public QueryFilterEmbedded() { }
 
         QueryTokenEmbedded token;
-        [NotNullValidator]
         public QueryTokenEmbedded Token
         {
             get { return token; }
@@ -288,41 +287,71 @@ namespace Signum.Entities.UserQueries
                 }
             }
         }
+        
+        public bool IsGroup { get; set; }
 
-        public FilterOperation Operation { get; set; }
+        public FilterGroupOperation? GroupOperation { get; set; }
+
+        public FilterOperation? Operation { get; set; }
 
         [StringLengthValidator(AllowNulls = true, Max = 300)]
         public string ValueString { get; set; }
 
+        [NumberIsValidator(ComparisonType.GreaterThanOrEqualTo, 0)]
+        public int Indentation { get; set; }
+
         public void ParseData(ModifiableEntity context, QueryDescription description, SubTokensOptions options)
         {
-            token.ParseData(context, description, options);
+            token?.ParseData(context, description, options);
         }
 
         protected override string PropertyValidation(PropertyInfo pi)
         {
-            if (token != null && token.ParseException == null)
+            if (IsGroup)
             {
-                if (pi.Name == nameof(Token))
+                if (pi.Name == nameof(GroupOperation) && GroupOperation == null)
+                    return ValidationMessage._0IsNotSet.NiceToString(pi.NiceName());
+
+                
+                if(token != null && token.ParseException == null)
                 {
-                    return QueryUtils.CanFilter(token.Token);
+                    if (pi.Name == nameof(Token))
+                    {
+                        return QueryUtils.CanFilter(token.Token);
+                    }
                 }
+            }
+            else
+            {
+                if (pi.Name == nameof(Operation) && Operation == null)
+                    return ValidationMessage._0IsNotSet.NiceToString(pi.NiceName());
 
-                if (pi.Name == nameof(Operation))
+                if (pi.Name == nameof(Token) && Token == null)
+                    return ValidationMessage._0IsNotSet.NiceToString(pi.NiceName());
+
+                if (token != null && token.ParseException == null)
                 {
-                    FilterType? filterType = QueryUtils.TryGetFilterType(Token.Token.Type);
+                    if (pi.Name == nameof(Token))
+                    {
+                        return QueryUtils.CanFilter(token.Token);
+                    }
 
-                    if (filterType == null)
-                        return UserQueryMessage._0IsNotFilterable.NiceToString().FormatWith(token);
+                    if (pi.Name == nameof(Operation) && Operation != null)
+                    {
+                        FilterType? filterType = QueryUtils.TryGetFilterType(Token.Token.Type);
 
-                    if (!QueryUtils.GetFilterOperations(filterType.Value).Contains(Operation))
-                        return UserQueryMessage.TheFilterOperation0isNotCompatibleWith1.NiceToString().FormatWith(Operation, filterType);
-                }
+                        if (filterType == null)
+                            return UserQueryMessage._0IsNotFilterable.NiceToString().FormatWith(token);
 
-                if (pi.Name == nameof(ValueString))
-                {
-                    var result = FilterValueConverter.TryParse(ValueString, Token.Token.Type, Operation.IsList(), allowSmart: true);
-                    return result is Result<object>.Error e ? e.ErrorText : null;
+                        if (!QueryUtils.GetFilterOperations(filterType.Value).Contains(Operation.Value))
+                            return UserQueryMessage.TheFilterOperation0isNotCompatibleWith1.NiceToString().FormatWith(Operation, filterType);
+                    }
+
+                    if (pi.Name == nameof(ValueString))
+                    {
+                        var result = FilterValueConverter.TryParse(ValueString, Token.Token.Type, Operation.Value.IsList());
+                        return result is Result<object>.Error e ? e.ErrorText : null;
+                    }
                 }
             }
 
@@ -331,17 +360,32 @@ namespace Signum.Entities.UserQueries
 
         public XElement ToXml(IToXmlContext ctx)
         {
-            return new XElement("Filter",
-                new XAttribute("Token", Token.Token.FullKey()),
-                new XAttribute("Operation", Operation),
-                new XAttribute("Value", ValueString ?? ""));
+            if (this.GroupOperation.HasValue)
+            {
+                return new XElement("Filter",
+                   new XAttribute("Indentation", Indentation),
+                   new XAttribute("GroupOperation", GroupOperation),
+                   Token == null ? null : new XAttribute("Token", Token.Token.FullKey()));
+
+            }
+            else
+            {
+                return new XElement("Filter",
+                    new XAttribute("Indentation", Indentation),
+                    new XAttribute("Token", Token.Token.FullKey()),
+                    new XAttribute("Operation", Operation),
+                    new XAttribute("Value", ValueString ?? ""));
+            }
         }
 
         public void FromXml(XElement element, IFromXmlContext ctx)
         {
-            Token = new QueryTokenEmbedded(element.Attribute("Token").Value);
-            Operation = element.Attribute("Operation").Value.ToEnum<FilterOperation>();
-            ValueString = element.Attribute("Value").Value;
+            IsGroup = element.Attribute("GroupOperation") != null;
+            Indentation = element.Attribute("Indentation")?.Value.ToInt() ?? 0;
+            GroupOperation = element.Attribute("GroupOperation")?.Value.ToEnum<FilterGroupOperation>();
+            Operation = element.Attribute("Operation")?.Value.ToEnum<FilterOperation>();
+            Token = element.Attribute("Token")?.Let(t => new QueryTokenEmbedded(t.Value));
+            ValueString = element.Attribute("Value")?.Value;
         }
 
         public override string ToString()
@@ -357,11 +401,14 @@ namespace Signum.Entities.UserQueries
         };
     }
 
+
+
+
     public static class UserQueryUtils
     {
         public static Func<Lite<Entity>> DefaultOwner = () => (Lite<Entity>)UserHolder.Current?.ToLite();
 
-        public static UserQueryEntity ToUserQuery(this QueryRequest request, QueryDescription qd, QueryEntity query, Pagination defaultPagination, bool withoutFilters)
+        public static UserQueryEntity ToUserQuery(this QueryRequest request, QueryDescription qd, QueryEntity query, Pagination defaultPagination)
         {
             var tuple = SmartColumns(request.Columns, qd);
 
@@ -376,15 +423,9 @@ namespace Signum.Entities.UserQueries
             return new UserQueryEntity
             {
                 Query = query,
-                AppendFilters = withoutFilters,
                 Owner = DefaultOwner(),
                 GroupResults = request.GroupResults,
-                Filters = withoutFilters ? new MList<QueryFilterEmbedded>() : request.Filters.Select(f => new QueryFilterEmbedded
-                {
-                    Token = new QueryTokenEmbedded(f.Token),
-                    Operation = f.Operation,
-                    ValueString = FilterValueConverter.ToString(f.Value, f.Token.Type, allowSmart: true)
-                }).ToMList(),
+                Filters = request.Filters.SelectMany(f => f.ToQueryFiltersEmbedded()).ToMList(),
                 ColumnsMode = tuple.mode,
                 Columns = tuple.columns,
                 Orders = request.Orders.Select(oo => new QueryOrderEmbedded
@@ -395,6 +436,62 @@ namespace Signum.Entities.UserQueries
                 PaginationMode = isDefaultPaginate ? (PaginationMode?)null : mode,
                 ElementsPerPage = isDefaultPaginate ? (int?)null : elementsPerPage,
             };
+        }
+
+        public static IEnumerable<QueryFilterEmbedded> ToQueryFiltersEmbedded(this Filter filter, int ident = 0)
+        {
+            if(filter is FilterCondition fc)
+            {
+                yield return new QueryFilterEmbedded
+                {
+                    Token = new QueryTokenEmbedded(fc.Token),
+                    Operation = fc.Operation,
+                    ValueString = FilterValueConverter.ToString(fc.Value, fc.Token.Type),
+                    Indentation = ident,
+                };
+            }
+            else if(filter is FilterGroup fg)
+            {
+                yield return new QueryFilterEmbedded
+                {
+                    IsGroup = true,
+                    GroupOperation = fg.GroupOperation,
+                    Token = fg.Token == null ? null : new QueryTokenEmbedded(fg.Token),
+                    Indentation = ident,
+                };
+
+                foreach (var f in fg.Filters)
+                {
+                    foreach (var fe in ToQueryFiltersEmbedded(f, ident + 1))
+                    {
+                        yield return fe;
+                    }
+                }
+            }
+        }
+
+        public static List<Filter> ToFilterList(this IEnumerable<QueryFilterEmbedded> filters, int indent = 0)
+        {
+            return filters.GroupWhen(filter => filter.Indentation == indent).Select(gr =>
+            {
+                if (!gr.Key.IsGroup)
+                {
+                    if (gr.Count() != 0)
+                        throw new InvalidOperationException("Unexpected childrens of condition");
+
+                    var filter = gr.Key;
+                    
+                    var value = FilterValueConverter.Parse(filter.ValueString, filter.Token.Token.Type, filter.Operation.Value.IsList());
+
+                    return (Filter)new FilterCondition(filter.Token.Token, filter.Operation.Value, value);
+                }
+                else
+                {
+                    var group = gr.Key;
+                    
+                    return (Filter)new FilterGroup(group.GroupOperation.Value, group.Token?.Token, gr.ToFilterList(indent + 1).ToList());
+                }
+            }).ToList();
         }
 
         public static (ColumnOptionsMode mode, MList<QueryColumnEmbedded> columns) SmartColumns(List<Column> current, QueryDescription qd)

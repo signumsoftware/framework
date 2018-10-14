@@ -53,7 +53,7 @@ export function start(options: { routes: JSX.Element[] }) {
             }
 
             querySettings.hiddenColumns = [
-                { columnName: "Entity.IsDisabled" }
+                { token: "Entity.IsDisabled" }
             ];
 
             querySettings.rowAttributes = (row, columns) => {
@@ -74,7 +74,7 @@ export function start(options: { routes: JSX.Element[] }) {
             if (!entitySettings.findOptions) {
                 entitySettings.findOptions = {
                     queryName: ti.name,
-                    filterOptions: [{ columnName: "Entity.IsDisabled", operation: "EqualTo", value: false, frozen: true }]
+                    filterOptions: [{ token: "Entity.IsDisabled", operation: "EqualTo", value: false, frozen: true }]
                 };
             }
         }

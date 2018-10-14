@@ -17,7 +17,7 @@ export default class PackageOperation extends React.Component<{ ctx: TypeContext
                 <EntityLine ctx={e.subCtx(f => f.operation)} readOnly={true} />
                 <fieldset>
                     <legend>{ PackageLineEntity.nicePluralName() }</legend>
-                    <SearchControl findOptions={{ queryName: PackageQuery.PackageLineLastProcess, parentColumn: "Package", parentValue : e.value}}  />
+                    <SearchControl findOptions={{ queryName: PackageQuery.PackageLineLastProcess, parentToken: "Package", parentValue : e.value}}  />
                 </fieldset>
             </div>
         );

@@ -1,11 +1,7 @@
-﻿
+
 import * as React from 'react'
 import { Dic } from '@framework/Globals';
 import { openModal, IModalProps } from '@framework/Modals';
-import { SelectorMessage } from '@framework/Signum.Entities'
-import { TypeInfo } from '@framework/Reflection'
-import { TypeContext, StyleContext } from '@framework/TypeContext'
-import { DynamicViewMessage } from '../Signum.Entities.Dynamic'
 import * as NodeUtils from './NodeUtils'
 import { BaseNode } from './Nodes'
 import { Modal } from '@framework/Components';

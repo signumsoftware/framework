@@ -74,7 +74,7 @@ export default class DynamicQueryOmniboxProvider extends OmniboxProvider<Dynamic
 
         result.Filters.forEach(f => {
             fo.filterOptions!.push({
-                columnName: f.QueryToken.fullKey,
+                token: f.QueryToken.fullKey,
                 operation: f.Operation,
                 value: f.Value,
             });

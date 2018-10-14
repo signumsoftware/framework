@@ -24,7 +24,7 @@ export default class DynamicMixinConnectionComponent extends React.Component<Dyn
                     findOptions={{
                         queryName: DynamicTypeEntity,
                         filterOptions: [
-                            { columnName: "Entity.BaseType", operation: "EqualTo", value: "MixinEntity" },
+                            { token: "Entity.BaseType", operation: "EqualTo", value: "MixinEntity" },
                         ]
                     }} />
                 <EntityLine ctx={ctx.subCtx(dt => dt.entityType)} />

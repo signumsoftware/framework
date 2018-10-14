@@ -19,7 +19,7 @@ import * as PredictorClient from '../PredictorClient';
 import { toLite } from "@framework/Signum.Entities";
 import FilterBuilder from '@framework/SearchControl/FilterBuilder';
 import { MList, newMListElement } from '@framework/Signum.Entities';
-import FilterBuilderEmbedded from './FilterBuilderEmbedded';
+import FilterBuilderEmbedded from '../../UserAssets/Templates/FilterBuilderEmbedded';
 import PredictorSubQuery from './PredictorSubQuery';
 import { QueryTokenEmbedded } from '../../UserAssets/Signum.Entities.UserAssets';
 import { QueryEntity } from '@framework/Signum.Entities.Basics';
@@ -31,7 +31,7 @@ import { QueryToken } from '@framework/FindOptions';
 import PredictorMetrics from './PredictorMetrics';
 import PredictorClassificationMetrics from './PredictorClassificationMetrics';
 import PredictorRegressionMetrics from './PredictorRegressionMetrics';
-import { CellFormatter } from '@framework/Finder';
+import { CellFormatter, toFilterOptions } from '@framework/Finder';
 
 export default class Predictor extends React.Component<{ ctx: TypeContext<PredictorEntity> }, { queryDescription?: QueryDescription }> implements IRenderButtons {
 
@@ -44,7 +44,7 @@ export default class Predictor extends React.Component<{ ctx: TypeContext<Predic
             Finder.find({
                 queryName: this.state.queryDescription!.queryKey,
                 columnOptionsMode: "Add",
-                columnOptions: p.mainQuery.columns.map(mle => ({ columnName: mle.element.token && mle.element.token.token!.fullKey }) as ColumnOption)
+                columnOptions: p.mainQuery.columns.map(mle => ({ token: mle.element.token && mle.element.token.token!.fullKey }) as ColumnOption)
             })
                 .then(lite => PredictorClient.predict(p, lite && { "Entity": lite }))
                 .done();
@@ -57,7 +57,7 @@ export default class Predictor extends React.Component<{ ctx: TypeContext<Predic
                 queryName: this.state.queryDescription!.queryKey,
                 groupResults: p.mainQuery.groupResults,
                 columnOptionsMode: "Replace",
-                columnOptions: fullKeys.map(fk => ({ columnName: fk }) as ColumnOption)
+                columnOptions: fullKeys.map(fk => ({ token: fk }) as ColumnOption)
             }, { searchControlProps: { allowChangeColumns: false, showGroupButton: false } })
                 .then(row => PredictorClient.predict(p, row && fullKeys.map((fk, i) => ({ tokenString: fk, value: row!.columns[i] })).toObject(a => a.tokenString, a => a.value)))
                 .done();
@@ -170,13 +170,9 @@ export default class Predictor extends React.Component<{ ctx: TypeContext<Predic
                 var fo: FindOptions = {
                     queryName: mq.query!.key,
                     groupResults: mq.groupResults,
-                    filterOptions: filters.map(f => ({
-                        columnName: f.token!.fullKey,
-                        operation: f.operation,
-                        value: f.value
-                    }) as FilterOption),
+                    filterOptions: toFilterOptions(filters),
                     columnOptions: mq.columns.orderBy(mle => mle.element.usage == "Input" ? 0 : 1).map(mle => ({
-                        columnName: mle.element.token && mle.element.token.tokenString,
+                        token: mle.element.token && mle.element.token.tokenString,
                     } as ColumnOption)),
                     columnOptionsMode: "Replace",
                 };
@@ -260,13 +256,13 @@ export default class Predictor extends React.Component<{ ctx: TypeContext<Predic
                     </Tab>
                     {
                         ctx.value.state != "Draft" && <Tab eventKey="codifications" title={PredictorMessage.Codifications.niceToString()}>
-                            <SearchControl findOptions={{ queryName: PredictorCodificationEntity, parentColumn: "Predictor", parentValue: ctx.value }} />
+                            <SearchControl findOptions={{ queryName: PredictorCodificationEntity, parentToken: "Predictor", parentValue: ctx.value }} />
                         </Tab>
                     }
                     {
                         ctx.value.state != "Draft" && <Tab eventKey="progress" title={PredictorMessage.Progress.niceToString()}>
                             {ctx.value.state == "Trained" && <EpochProgressComponent ctx={ctx} />}
-                            <SearchControl findOptions={{ queryName: PredictorEpochProgressEntity, parentColumn: "Predictor", parentValue: ctx.value }} />
+                            <SearchControl findOptions={{ queryName: PredictorEpochProgressEntity, parentToken: "Predictor", parentValue: ctx.value }} />
                         </Tab>
                     }
                     {

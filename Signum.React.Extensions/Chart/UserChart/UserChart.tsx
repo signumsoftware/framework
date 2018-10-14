@@ -8,6 +8,7 @@ import { QueryDescription, SubTokensOptions } from '@framework/FindOptions'
 import { getQueryNiceName } from '@framework/Reflection'
 import { TypeContext, FormGroupStyle } from '@framework/TypeContext'
 import QueryTokenEntityBuilder from '../../UserAssets/Templates/QueryTokenEntityBuilder'
+import FilterBuilderEmbedded from '../../UserAssets/Templates/FilterBuilderEmbedded';
 
 import "../Chart.css"
 
@@ -40,18 +41,8 @@ export default class UserChart extends React.Component<{ ctx: TypeContext<UserCh
                         </p>
                     </div>
                 }
-                <EntityTable ctx={ctx.subCtx(e => e.filters)} columns={EntityTable.typedColumns<QueryFilterEmbedded>([
-                    {
-                        property: a => a.token,
-                        template: ctx => <QueryTokenEntityBuilder
-                            ctx={ctx.subCtx(a => a.token, { formGroupStyle: "SrOnly" })}
-                            queryKey={this.props.ctx.value.query!.key}
-                            subTokenOptions={SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement | SubTokensOptions.CanAggregate} />,
-                        headerHtmlAttributes: { style: { width: "40%" } },
-                    },
-                    { property: a => a.operation },
-                    { property: a => a.valueString, headerHtmlAttributes: { style: { width: "40%" } } }
-                ])} />
+                <FilterBuilderEmbedded ctx={ctx.subCtx(e => e.filters)} queryKey={this.props.ctx.value.query.key}
+                    subTokenOptions={SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement | SubTokensOptions.CanAggregate} />
                 <ChartBuilder queryKey={queryKey} onInvalidate={this.handleInvalidate} onTokenChange={this.handleTokenChange} onRedraw={this.handleInvalidate} ctx={this.props.ctx} />
                 <EntityTable ctx={ctx.subCtx(e => e.orders)} columns={EntityTable.typedColumns<QueryOrderEmbedded>([
                     {

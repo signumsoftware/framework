@@ -89,16 +89,16 @@ export default class ActivityWithRemarksComponent extends React.Component<Activi
         var fo: FindOptions = {
             queryName: AlertEntity,
             filterOptions: [
-                { columnName: "Target", value: this.props.data.caseActivity },
-                { columnName: "Entity.Recipient", value: Navigator.currentUser },
-                { columnName: "Entity.CurrentState", value: "Alerted" }
+                { token: "Target", value: this.props.data.caseActivity },
+                { token: "Entity.Recipient", value: Navigator.currentUser },
+                { token: "Entity.CurrentState", value: "Alerted" }
             ],
-            columnOptions: [{ columnName: "Target" }],
+            columnOptions: [{ token: "Target" }],
             columnOptionsMode: "Remove",
         }; 
 
         Finder.exploreOrNavigate(fo)
-            .then(() => Finder.getCount(fo.queryName, fo.filterOptions!))
+            .then(() => Finder.getQueryValue(fo.queryName, fo.filterOptions!))
             .then(alerts => this.setState({ alerts: alerts }))
             .done();
     }

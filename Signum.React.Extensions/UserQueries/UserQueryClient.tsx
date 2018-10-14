@@ -9,7 +9,7 @@ import { Entity, Lite, liteKey } from '@framework/Signum.Entities'
 import * as Constructor from '@framework/Constructor'
 import * as Operations from '@framework/Operations'
 import * as QuickLinks from '@framework/QuickLinks'
-import { FindOptionsParsed, FindOptions, FilterOption, FilterOperation, OrderOption, ColumnOption, FilterRequest, QueryRequest, Pagination } from '@framework/FindOptions'
+import { FindOptionsParsed, FindOptions, FilterOption, FilterOperation, OrderOption, ColumnOption, FilterRequest, QueryRequest, Pagination, isFilterGroupOption, isFilterGroupRequest, FilterGroupOptionParsed, FilterGroupOption, FilterConditionOption } from '@framework/FindOptions'
 import * as AuthClient  from '../Authorization/AuthClient'
 import { UserQueryEntity, UserQueryPermission, UserQueryMessage,
     QueryFilterEmbedded, QueryColumnEmbedded, QueryOrderEmbedded } from './Signum.Entities.UserQueries'
@@ -75,7 +75,7 @@ export function start(options: { routes: JSX.Element[] }) {
 
 
 export module Converter {
-
+    
     export function toFindOptions(uq: UserQueryEntity, entity: Lite<Entity> | undefined): Promise<FindOptions> {
 
         var query = uq.query!;
@@ -87,30 +87,30 @@ export module Converter {
             canAggregate: uq.groupResults || false,
             entity: entity,
             filters: uq.filters!.map(mle => mle.element).map(f => ({
-                tokenString: f.token!.tokenString,
+                indentation: f.indentation,
+                isGroup: f.isGroup,
                 operation: f.operation,
-                valueString: f.valueString
+                groupOperation: f.groupOperation,
+                tokenString: f.token && f.token.tokenString,
+                valueString: f.valueString,
             }) as UserAssetsClient.API.ParseFilterRequest)
         });
 
+        debugger;
+
         return convertedFilters.then(filters => {
 
-            fo.filterOptions = filters.map(f => ({
-                columnName: f.token,
-                operation: f.operation,
-                value: f.value,
-                frozen: false
-            }) as FilterOption);
+            fo.filterOptions = filters.map(f => UserAssetsClient.Converter.toFilterOption(f));
 
             fo.columnOptionsMode = uq.columnsMode;
 
             fo.columnOptions = (uq.columns || []).map(f => ({
-                columnName: f.element.token!.tokenString,
+                token: f.element.token!.tokenString,
                 displayName: f.element.displayName
             }) as ColumnOption);
 
             fo.orderOptions = (uq.orders || []).map(f => ({
-                columnName: f.element.token!.tokenString,
+                token: f.element.token!.tokenString,
                 orderType: f.element.orderType
             }) as OrderOption);
 

@@ -56,7 +56,7 @@ export default class ExcelMenu extends React.Component<ExcelMenuProps, { excelRe
     }
 
     handleAdmnister = () => {
-        Finder.explore({ queryName: ExcelReportEntity, parentColumn: "Query.Key", parentValue: this.props.searchControl.props.findOptions.queryKey })
+        Finder.explore({ queryName: ExcelReportEntity, parentToken: "Query.Key", parentValue: this.props.searchControl.props.findOptions.queryKey })
             .then(() => this.reloadList())
             .done();
     }

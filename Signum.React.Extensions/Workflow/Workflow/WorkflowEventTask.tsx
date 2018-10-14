@@ -48,11 +48,11 @@ export default class WorkflowEventTaskComponent extends React.Component<Workflow
                     <div>
                         <EntityCombo ctx={ctx.subCtx(wet => wet.event)} findOptions={{
                             queryName: WorkflowEventEntity,
-                            parentColumn: "Entity.Lane.Pool.Workflow",
+                            parentToken: "Entity.Lane.Pool.Workflow",
                             parentValue: ctx.value.workflow,
                             filterOptions: [
                                 {
-                                    columnName: "Type", operation: "EqualTo", value: WorkflowEventType.value("ScheduledStart")
+                                    token: "Type", operation: "EqualTo", value: WorkflowEventType.value("ScheduledStart")
                                 }
                             ]
                         }} />

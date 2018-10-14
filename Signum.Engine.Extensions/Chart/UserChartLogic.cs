@@ -11,6 +11,7 @@ using Signum.Entities.Basics;
 using Signum.Entities.Chart;
 using Signum.Entities.DynamicQuery;
 using Signum.Entities.UserAssets;
+using Signum.Entities.UserQueries;
 using Signum.Utilities;
 using System;
 using System.Collections.Generic;
@@ -147,9 +148,7 @@ namespace Signum.Engine.Chart
             var cr = new ChartRequest(userChart.Query.ToQueryName())
             {
                 ChartScript = userChart.ChartScript,
-                Filters = userChart.Filters.Select(qf =>
-                    new Filter(qf.Token.Token, qf.Operation, FilterValueConverter.Parse(qf.ValueString, qf.Token.Token.Type, qf.Operation.IsList(), allowSmart: true)))
-                .ToList(),
+                Filters = userChart.Filters.ToFilterList(),
                 GroupResults = userChart.GroupResults,
                 Orders = userChart.Orders.Select(qo => new Order(qo.Token.Token, qo.OrderType)).ToList(),
                 Parameters = userChart.Parameters.ToMList(),
@@ -220,14 +219,17 @@ namespace Signum.Engine.Chart
                                 foreach (var item in uc.Filters.ToList())
                                 {
                                     QueryTokenEmbedded token = item.Token;
-                                    switch (QueryTokenSynchronizer.FixToken(replacements, ref token, qd, SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement | canAggregate, "{0} {1}".FormatWith(item.Operation, item.ValueString), allowRemoveToken: true, allowReCreate: false))
+                                    if (item.Token != null)
                                     {
-                                        case FixTokenResult.Nothing: break;
-                                        case FixTokenResult.DeleteEntity: return table.DeleteSqlSync(uc, u => u.Guid == uc.Guid);
-                                        case FixTokenResult.RemoveToken: uc.Filters.Remove(item); break;
-                                        case FixTokenResult.SkipEntity: return null;
-                                        case FixTokenResult.Fix: item.Token = token; break;
-                                        default: break;
+                                        switch (QueryTokenSynchronizer.FixToken(replacements, ref token, qd, SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement | canAggregate, "{0} {1}".FormatWith(item.Operation, item.ValueString), allowRemoveToken: true, allowReCreate: false))
+                                        {
+                                            case FixTokenResult.Nothing: break;
+                                            case FixTokenResult.DeleteEntity: return table.DeleteSqlSync(uc, u => u.Guid == uc.Guid);
+                                            case FixTokenResult.RemoveToken: uc.Filters.Remove(item); break;
+                                            case FixTokenResult.SkipEntity: return null;
+                                            case FixTokenResult.Fix: item.Token = token; break;
+                                            default: break;
+                                        }
                                     }
                                 }
                             }
@@ -277,16 +279,17 @@ namespace Signum.Engine.Chart
                         }
                     }
 
-                    foreach (var item in uc.Filters.ToList())
+                    foreach (var item in uc.Filters.Where(f => !f.IsGroup).ToList())
                     {
+                        retry:
                         string val = item.ValueString;
-                        switch (QueryTokenSynchronizer.FixValue(replacements, item.Token.Token.Type, ref val, allowRemoveToken: true, isList: item.Operation.IsList()))
+                        switch (QueryTokenSynchronizer.FixValue(replacements, item.Token.Token.Type, ref val, allowRemoveToken: true, isList: item.Operation.Value.IsList()))
                         {
                             case FixTokenResult.Nothing: break;
                             case FixTokenResult.DeleteEntity: return table.DeleteSqlSync(uc, u => u.Guid == uc.Guid);
                             case FixTokenResult.RemoveToken: uc.Filters.Remove(item); break;
                             case FixTokenResult.SkipEntity: return null;
-                            case FixTokenResult.Fix: item.ValueString = val; break;
+                            case FixTokenResult.Fix: item.ValueString = val; goto retry;
                         }
                     }
 

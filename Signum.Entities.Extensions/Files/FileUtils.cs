@@ -57,6 +57,8 @@ namespace Signum.Entities.Files
         TheFile0IsNotA1,
         [Description("File '{0}' is too big, the maximum size is {1}")]
         File0IsTooBigTheMaximumSizeIs1,
+        [Description("The name of the file must not contain '%'")]
+        TheNameOfTheFileMustNotContainPercentSymbol,
     }
 
 

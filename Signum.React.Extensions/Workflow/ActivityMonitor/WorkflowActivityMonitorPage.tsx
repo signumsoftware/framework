@@ -18,6 +18,7 @@ import { newLite } from '@framework/Reflection';
 import * as WorkflowClient from '../WorkflowClient';
 import FilterBuilder from '@framework/SearchControl/FilterBuilder';
 import ColumnBuilder from '@framework/SearchControl/ColumnBuilder';
+import { toFilterRequests } from '@framework/Finder';
 
 export interface WorkflowActivityMonitorConfig {
     workflow: Lite<WorkflowEntity>;
@@ -122,11 +123,7 @@ export default class WorkflowActivityMonitorPage extends React.Component<Workflo
 function toRequest(conf: WorkflowActivityMonitorConfig): WorkflowActivityMonitorRequest {
     return {
         workflow: conf.workflow,
-        filters: conf.filters.filter(f => f.token != null && f.operation != undefined).map(f => ({
-            token: f.token!.fullKey,
-            operation: f.operation,
-            value: f.value,
-        }) as FilterRequest),
+        filters: toFilterRequests(conf.filters),
         columns: conf.columns.filter(c => c.token != null).map(c => ({
             token: c.token!.fullKey,
             displayName: c.token!.niceName

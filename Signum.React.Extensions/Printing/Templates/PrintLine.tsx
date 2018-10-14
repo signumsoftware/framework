@@ -22,7 +22,7 @@ export default class PrintLine extends React.Component<{ ctx: TypeContext<PrintL
                 {!e.value.isNew &&
                     <fieldset>
                         <legend>{ProcessExceptionLineEntity.nicePluralName()}</legend>
-                        <SearchControl findOptions={{ queryName: ProcessExceptionLineEntity, parentColumn: "Line", parentValue: e.value }} />
+                        <SearchControl findOptions={{ queryName: ProcessExceptionLineEntity, parentToken: "Line", parentValue: e.value }} />
                     </fieldset>
                 }
             </div>

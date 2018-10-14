@@ -179,7 +179,7 @@ namespace Signum.Engine.UserAssets
 
         public static FixTokenResult FixValue(Replacements replacements, Type type, ref string valueString, bool allowRemoveToken, bool isList)
         {
-            var res = FilterValueConverter.TryParse(valueString, type, isList, allowSmart: true);
+            var res = FilterValueConverter.TryParse(valueString, type, isList);
 
             if (res is Result<object>.Success)
                 return FixTokenResult.Nothing;
