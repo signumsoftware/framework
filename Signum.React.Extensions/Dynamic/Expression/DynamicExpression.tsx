@@ -94,8 +94,8 @@ export default class DynamicExpressionComponent extends React.Component<DynamicE
         );
     }
 
-    handleGetItems = (query: string) => {
-        return TypeHelpClient.API.autocompleteType({ query: query, limit: 5, includeBasicTypes: true, includeEntities: true, includeQueriable: true });
+    handleGetItems = (query: string, type: "ReturnType" | "FromType") => {
+        return TypeHelpClient.API.autocompleteType({ query: query, limit: 5, includeBasicTypes: true, includeEntities: true, includeModelEntities: type == "ReturnType", includeQueriable: type == "ReturnType" });
     }
 
     renderTypeAutocomplete(ctx: TypeContext<string | null | undefined>) {
@@ -107,7 +107,7 @@ export default class DynamicExpressionComponent extends React.Component<DynamicE
                         placeholder: ctx.niceName(),
                         size: ctx.value ? ctx.value.length : ctx.niceName().length
                     }}
-                    getItems={this.handleGetItems}
+                    getItems={query => this.handleGetItems(query, ctx.propertyRoute.member!.name == "ReturnType" ? "ReturnType" : "FromType")}
                     value={ctx.value || undefined}
                     onChange={txt => { ctx.value = txt; this.forceUpdate(); }} />
             </span>

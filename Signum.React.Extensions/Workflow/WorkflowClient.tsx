@@ -9,11 +9,11 @@ import {
     newMListElement, liteKey, getMixin, Entity, ExecuteSymbol, isEntityPack, isEntity
 } from '@framework/Signum.Entities'
 import { TypeEntity, IUserEntity } from '@framework/Signum.Entities.Basics'
-import { Type, PropertyRoute } from '@framework/Reflection'
+import { Type, PropertyRoute, OperationInfo } from '@framework/Reflection'
 import { EntityFrame, TypeContext } from '@framework/TypeContext'
 import * as Navigator from '@framework/Navigator'
 import * as Finder from '@framework/Finder'
-import { EntityOperationSettings, addSettings, EntityOperationContext } from '@framework/Operations'
+import { EntityOperationSettings, addSettings, EntityOperationContext, assertOperationAllowed, assertOperationInfoAllowed } from '@framework/Operations'
 import * as Operations from '@framework/Operations'
 import { confirmInNecessary, notifySuccess } from '@framework/Operations/EntityOperations'
 
@@ -198,7 +198,7 @@ export function start(options: { routes: JSX.Element[] }) {
     Navigator.addSettings(new EntitySettings(WorkflowEventModel, w => import('./Workflow/WorkflowEventModel')));
     Navigator.addSettings(new EntitySettings(WorkflowEventTaskEntity, w => import('./Workflow/WorkflowEventTask')));
 
-    Constructor.registerConstructor(WorkflowEntity, () => WorkflowEntity.New({ mainEntityStrategy: WorkflowMainEntityStrategy.value("CreateNew") }));
+    Constructor.registerConstructor(WorkflowEntity, () => WorkflowEntity.New({ mainEntityStrategies: [newMListElement(WorkflowMainEntityStrategy.value("CreateNew"))] }));
     Constructor.registerConstructor(WorkflowConditionEntity, () => WorkflowConditionEntity.New({ eval: WorkflowConditionEval.New() }));
     Constructor.registerConstructor(WorkflowTimerConditionEntity, () => WorkflowTimerConditionEntity.New({ eval: WorkflowTimerConditionEval.New() }));
     Constructor.registerConstructor(WorkflowActionEntity, () => WorkflowActionEntity.New({ eval: WorkflowActionEval.New() }));
@@ -480,17 +480,31 @@ export function viewCase(entityOrPack: Lite<CaseActivityEntity> | CaseActivityEn
 export function createNewCase(workflowId: number | string, mainEntityStrategy: WorkflowMainEntityStrategy): Promise<CaseEntityPack | undefined> {
     return Navigator.API.fetchEntity(WorkflowEntity, workflowId)
         .then(wf => {
-            if (mainEntityStrategy == "SelectByUser")
-                return Finder.find({ queryName: wf.mainEntityType!.cleanName })
-                    .then(lite => {
-                        if (!lite)
-                            return Promise.resolve(undefined);
+            if (mainEntityStrategy == "CreateNew")
+                return Operations.API.constructFromEntity(wf, CaseActivityOperation.CreateCaseActivityFromWorkflow);
 
-                        return Navigator.API.fetchAndForget(lite!)
-                            .then(entity => Operations.API.constructFromEntity(wf, CaseActivityOperation.CreateCaseActivityFromWorkflow, entity))
-                    });
+            var coi: OperationInfo;
 
-            return Operations.API.constructFromEntity(wf, CaseActivityOperation.CreateCaseActivityFromWorkflow);
+            if (mainEntityStrategy == "Clone") {
+                coi = Operations.getOperationInfo(`${wf.mainEntityType!.cleanName}Operation.Clone`, wf.mainEntityType!.cleanName);
+                assertOperationInfoAllowed(coi);
+            }
+
+            return Finder.find({ queryName: wf.mainEntityType!.cleanName })
+                .then(lite => {
+                    if (!lite)
+                        return Promise.resolve(undefined);
+
+                    return Navigator.API.fetchAndForget(lite!)
+                        .then(entity => {
+                            if (mainEntityStrategy == "Clone") {
+                                return Operations.API.constructFromEntity(entity, coi.key)
+                                    .then(pack => Operations.API.constructFromEntity(wf, CaseActivityOperation.CreateCaseActivityFromWorkflow, pack.entity));
+                            }
+                            else
+                                return Operations.API.constructFromEntity(wf, CaseActivityOperation.CreateCaseActivityFromWorkflow, entity);
+                        });
+                });
         })
         .then(ep => ep && ({
             activity: ep.entity,

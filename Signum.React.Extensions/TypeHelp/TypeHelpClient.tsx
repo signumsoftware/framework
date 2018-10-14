@@ -54,6 +54,7 @@ export interface AutocompleteTypeRequest {
     limit: number;
     includeBasicTypes: boolean;
     includeEntities?: boolean;
+    includeModelEntities?: boolean;
     includeEmbeddedEntities?: boolean;
     includeMList?: boolean;
     includeQueriable?: boolean;

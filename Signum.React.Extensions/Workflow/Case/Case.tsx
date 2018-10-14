@@ -111,12 +111,12 @@ export default class CaseComponent extends React.Component<CaseComponentProps, C
                                 parentValue: ctx.value,
                                 columnOptionsMode: "Replace",
                                 columnOptions: [
-                                    { columnName: "Id" },
-                                    { columnName: "WorkflowActivity" },
-                                    { columnName: "StartDate" },
-                                    { columnName: "DoneDate" },
-                                    { columnName: "DoneBy" },
-                                    { columnName: "Previous.ToString" },
+                                    { token: "Id" },
+                                    { token: "WorkflowActivity" },
+                                    { token: "StartDate" },
+                                    { token: "DoneDate" },
+                                    { token: "DoneBy" },
+                                    { token: "Previous.ToString" },
                                 ],
                                 orderOptions: [{
                                     token: "StartDate",
@@ -136,18 +136,18 @@ export default class CaseComponent extends React.Component<CaseComponentProps, C
                             findOptions={{
                                 queryName: CaseActivityEntity,
                                 parentToken: "Case",
-                                parentValue: ctx.value
+                                parentValue: ctx.value,
                                 filterOptions: [
-                                    { columnName: "DoneDate", operation: "EqualTo", value: null, frozen: true },
+                                    { token: "DoneDate", operation: "EqualTo", value: null, frozen: true },
                                 ],
                                 columnOptionsMode: "Replace",
                                 columnOptions: [
-                                    { columnName: "Id" },
-                                    { columnName: "WorkflowActivity" },
-                                    { columnName: "StartDate" },
-                                    { columnName: "DoneDate" },
-                                    { columnName: "DoneBy" },
-                                    { columnName: "Previous.ToString" },
+                                    { token: "Id" },
+                                    { token: "WorkflowActivity" },
+                                    { token: "StartDate" },
+                                    { token: "DoneDate" },
+                                    { token: "DoneBy" },
+                                    { token: "Previous.ToString" },
                                 ],
                                 orderOptions: [{
                                     token: "StartDate",

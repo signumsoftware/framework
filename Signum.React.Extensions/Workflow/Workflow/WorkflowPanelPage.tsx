@@ -115,27 +115,30 @@ export class WorkflowScriptRunnerTab extends React.Component<{}, { scriptRunerSt
                 </div>
                 <br />
                 <h4>Next activities to execute</h4>
-                <SearchControl findOptions={{
-                    queryName: CaseActivityEntity,
-                    filterOptions: [
-                        { token: "Entity.WorkflowActivity.(WorkflowActivity).Type", operation: "EqualTo", value: WorkflowActivityType.value("Script") },
-                        { token: "Entity.DoneDate", operation: "EqualTo", value: null }
-                    ],
-                    columnOptionsMode: "Replace",
-                    columnOptions: [
-                        { token: "Id" },
-                        { token: "StartDate" },
-                        { token: "WorkflowActivity.(WorkflowActivity).Lane.Pool.Workflow" },
-                        { token: "WorkflowActivity" },
-                        { token: "Case" },
-                        { token: "Entity.ScriptExecution.NextExecution" },
-                        { token: "Entity.ScriptExecution.RetryCount" },
-                    ],
-                    orderOptions: [
-                        { token: "Entity.ScriptExecution.NextExecution", orderType: "Ascending" }
-                    ],
-                    pagination: { elementsPerPage: 10, mode: "Firsts" }
-                }} />
+                <SearchControl
+                    showContextMenu="Basic"
+                    navigate={false}
+                    findOptions={{
+                        queryName: CaseActivityEntity,
+                        filterOptions: [
+                            { token: "Entity.WorkflowActivity.(WorkflowActivity).Type", operation: "EqualTo", value: WorkflowActivityType.value("Script") },
+                            { token: "Entity.DoneDate", operation: "EqualTo", value: null }
+                        ],
+                        columnOptionsMode: "Replace",
+                        columnOptions: [
+                            { token: "Id" },
+                            { token: "StartDate" },
+                            { token: "WorkflowActivity.(WorkflowActivity).Lane.Pool.Workflow" },
+                            { token: "WorkflowActivity" },
+                            { token: "Case" },
+                            { token: "Entity.ScriptExecution.NextExecution" },
+                            { token: "Entity.ScriptExecution.RetryCount" },
+                        ],
+                        orderOptions: [
+                            { token: "Entity.ScriptExecution.NextExecution", orderType: "Ascending" }
+                        ],
+                        pagination: { elementsPerPage: 10, mode: "Firsts" }
+                    }} />
                 <UncontrolledTabs>
                     <Tab title="Last operation logs" eventKey="logs">
                         <SearchControl findOptions={{
@@ -153,29 +156,32 @@ export class WorkflowScriptRunnerTab extends React.Component<{}, { scriptRunerSt
                         }} />
                     </Tab>
                     <Tab title="Last executed activities" eventKey="lastActivities">
-                        <SearchControl findOptions={{
-                            queryName: CaseActivityEntity,
-                            filterOptions: [
-                                { token: "Entity.WorkflowActivity.(WorkflowActivity).Type", operation: "EqualTo", value: WorkflowActivityType.value("Script") },
-                                { token: "Entity.DoneDate", operation: "DistinctTo", value: null }
-                            ],
-                            columnOptionsMode: "Replace",
-                            columnOptions: [
-                                { token: "Id" },
-                                { token: "StartDate" },
-                                { token: "WorkflowActivity.(WorkflowActivity).Lane.Pool.Workflow" },
-                                { token: "WorkflowActivity" },
-                                { token: "Case" },
-                                { token: "Entity.DoneDate" },
-                                { token: "Entity.DoneType" },
-                                { token: "Entity.ScriptExecution.NextExecution" },
-                                { token: "Entity.ScriptExecution.RetryCount" },
-                            ],
-                            orderOptions: [
-                                { token: "Entity.DoneDate", orderType: "Descending" }
-                            ],
-                            pagination: { elementsPerPage: 10, mode: "Firsts" }
-                        }} />
+                        <SearchControl
+                            showContextMenu="Basic"
+                            navigate={false}
+                            findOptions={{
+                                queryName: CaseActivityEntity,
+                                filterOptions: [
+                                    { token: "Entity.WorkflowActivity.(WorkflowActivity).Type", operation: "EqualTo", value: WorkflowActivityType.value("Script") },
+                                    { token: "Entity.DoneDate", operation: "DistinctTo", value: null }
+                                ],
+                                columnOptionsMode: "Replace",
+                                columnOptions: [
+                                    { token: "Id" },
+                                    { token: "StartDate" },
+                                    { token: "WorkflowActivity.(WorkflowActivity).Lane.Pool.Workflow" },
+                                    { token: "WorkflowActivity" },
+                                    { token: "Case" },
+                                    { token: "Entity.DoneDate" },
+                                    { token: "Entity.DoneType" },
+                                    { token: "Entity.ScriptExecution.NextExecution" },
+                                    { token: "Entity.ScriptExecution.RetryCount" },
+                                ],
+                                orderOptions: [
+                                    { token: "Entity.DoneDate", orderType: "Descending" }
+                                ],
+                                pagination: { elementsPerPage: 10, mode: "Firsts" }
+                            }} />
                     </Tab>
                 </UncontrolledTabs>
             </div>

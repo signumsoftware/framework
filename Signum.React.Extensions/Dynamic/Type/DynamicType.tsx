@@ -71,7 +71,8 @@ export default class DynamicTypeComponent extends React.Component<DynamicTypeCom
         const suffix =
             ctx.value.baseType == "MixinEntity" ? "Mixin" :
                 ctx.value.baseType == "EmbeddedEntity" ? "Embedded" :
-                    "Entity";
+                    ctx.value.baseType == "ModelEntity" ? "Model" :
+                        "Entity";
 
         return (
             <div>
