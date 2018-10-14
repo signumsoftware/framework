@@ -121,21 +121,21 @@ export class WorkflowScriptRunnerTab extends React.Component<{}, { scriptRunerSt
                     findOptions={{
                         queryName: CaseActivityEntity,
                         filterOptions: [
-                            { columnName: "Entity.WorkflowActivity.(WorkflowActivity).Type", operation: "EqualTo", value: WorkflowActivityType.value("Script") },
-                            { columnName: "Entity.DoneDate", operation: "EqualTo", value: null }
+                            { token: "Entity.WorkflowActivity.(WorkflowActivity).Type", operation: "EqualTo", value: WorkflowActivityType.value("Script") },
+                            { token: "Entity.DoneDate", operation: "EqualTo", value: null }
                         ],
                         columnOptionsMode: "Replace",
                         columnOptions: [
-                            { columnName: "Id" },
-                            { columnName: "StartDate" },
-                            { columnName: "WorkflowActivity.(WorkflowActivity).Lane.Pool.Workflow" },
-                            { columnName: "WorkflowActivity" },
-                            { columnName: "Case" },
-                            { columnName: "Entity.ScriptExecution.NextExecution" },
-                            { columnName: "Entity.ScriptExecution.RetryCount" },
+                            { token: "Id" },
+                            { token: "StartDate" },
+                            { token: "WorkflowActivity.(WorkflowActivity).Lane.Pool.Workflow" },
+                            { token: "WorkflowActivity" },
+                            { token: "Case" },
+                            { token: "Entity.ScriptExecution.NextExecution" },
+                            { token: "Entity.ScriptExecution.RetryCount" },
                         ],
                         orderOptions: [
-                            { columnName: "Entity.ScriptExecution.NextExecution", orderType: "Ascending" }
+                            { token: "Entity.ScriptExecution.NextExecution", orderType: "Ascending" }
                         ],
                         pagination: { elementsPerPage: 10, mode: "Firsts" }
                     }} />
@@ -145,7 +145,7 @@ export class WorkflowScriptRunnerTab extends React.Component<{}, { scriptRunerSt
                             queryName: OperationLogEntity,
                             filterOptions: [
                                 {
-                                    columnName: "Operation", operation: "IsIn", value: [
+                                    token: "Operation", operation: "IsIn", value: [
                                         CaseActivityOperation.ScriptExecute,
                                         CaseActivityOperation.ScriptScheduleRetry,
                                         CaseActivityOperation.ScriptFailureJump,
@@ -162,23 +162,23 @@ export class WorkflowScriptRunnerTab extends React.Component<{}, { scriptRunerSt
                             findOptions={{
                                 queryName: CaseActivityEntity,
                                 filterOptions: [
-                                    { columnName: "Entity.WorkflowActivity.(WorkflowActivity).Type", operation: "EqualTo", value: WorkflowActivityType.value("Script") },
-                                    { columnName: "Entity.DoneDate", operation: "DistinctTo", value: null }
+                                    { token: "Entity.WorkflowActivity.(WorkflowActivity).Type", operation: "EqualTo", value: WorkflowActivityType.value("Script") },
+                                    { token: "Entity.DoneDate", operation: "DistinctTo", value: null }
                                 ],
                                 columnOptionsMode: "Replace",
                                 columnOptions: [
-                                    { columnName: "Id" },
-                                    { columnName: "StartDate" },
-                                    { columnName: "WorkflowActivity.(WorkflowActivity).Lane.Pool.Workflow" },
-                                    { columnName: "WorkflowActivity" },
-                                    { columnName: "Case" },
-                                    { columnName: "Entity.DoneDate" },
-                                    { columnName: "Entity.DoneType" },
-                                    { columnName: "Entity.ScriptExecution.NextExecution" },
-                                    { columnName: "Entity.ScriptExecution.RetryCount" },
+                                    { token: "Id" },
+                                    { token: "StartDate" },
+                                    { token: "WorkflowActivity.(WorkflowActivity).Lane.Pool.Workflow" },
+                                    { token: "WorkflowActivity" },
+                                    { token: "Case" },
+                                    { token: "Entity.DoneDate" },
+                                    { token: "Entity.DoneType" },
+                                    { token: "Entity.ScriptExecution.NextExecution" },
+                                    { token: "Entity.ScriptExecution.RetryCount" },
                                 ],
                                 orderOptions: [
-                                    { columnName: "Entity.DoneDate", orderType: "Descending" }
+                                    { token: "Entity.DoneDate", orderType: "Descending" }
                                 ],
                                 pagination: { elementsPerPage: 10, mode: "Firsts" }
                             }} />
