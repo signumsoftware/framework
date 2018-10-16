@@ -41,12 +41,12 @@ namespace Signum.Entities.Tree
         [NotNullable, SqlDbType(Size = 255, SqlDbType = SqlDbType.VarChar)]
         public string ParentRoute { get; set; }
 
-        static Expression<Func<TreeEntity, int?>> LevelExpression = @this => (int?)@this.Route.GetLevel();
+        static Expression<Func<TreeEntity, short?>> LevelExpression = @this => (short?)@this.Route.GetLevel();
 
         [Ignore]
-        int? level; 
+        short? level; 
         [ExpressionField("LevelExpression"), InTypeScript(true)]
-        public int? Level
+        public short? Level
         {
             get { return level; }
             set { level = value; }
@@ -54,7 +54,7 @@ namespace Signum.Entities.Tree
 
         protected override void PostRetrieving()
         {
-            this.level = (int)this.Route.GetLevel();
+            this.level = (short)this.Route.GetLevel();
         }
 
         [Ignore, ImplementedByAll]

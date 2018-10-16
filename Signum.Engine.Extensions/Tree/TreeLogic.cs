@@ -257,7 +257,7 @@ namespace Signum.Engine.Tree
                 c.Construct = (t, _) => new T
                 {
                     ParentOrSibling = t.ToLite(),
-                    Level = t.Level + 1,
+                    Level = (short)(t.Level + 1),
                     IsSibling = false
                     //                    
                 };

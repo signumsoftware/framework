@@ -432,7 +432,7 @@ export interface WorkflowEntity extends Entities.Entity {
     Type: "Workflow";
     name?: string | null;
     mainEntityType?: Basics.TypeEntity | null;
-    mainEntityStrategy?: WorkflowMainEntityStrategy;
+    mainEntityStrategies: Entities.MList<WorkflowMainEntityStrategy>;
     expirationDate?: string | null;
 }
 
@@ -590,7 +590,7 @@ export const WorkflowMainEntityStrategy = new EnumType<WorkflowMainEntityStrateg
 export type WorkflowMainEntityStrategy =
     "CreateNew" |
     "SelectByUser" |
-    "Both";
+    "Clone";
 
 export module WorkflowMessage {
     export const _0BelongsToADifferentWorkflow = new MessageKey("WorkflowMessage", "_0BelongsToADifferentWorkflow");

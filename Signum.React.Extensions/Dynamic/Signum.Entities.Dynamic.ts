@@ -14,7 +14,8 @@ export const DynamicBaseType = new EnumType<DynamicBaseType>("DynamicBaseType");
 export type DynamicBaseType =
     "Entity" |
     "MixinEntity" |
-    "EmbeddedEntity";
+    "EmbeddedEntity" |
+    "ModelEntity";
 
 export const DynamicCSSOverrideEntity = new Type<DynamicCSSOverrideEntity>("DynamicCSSOverride");
 export interface DynamicCSSOverrideEntity extends Entities.Entity {

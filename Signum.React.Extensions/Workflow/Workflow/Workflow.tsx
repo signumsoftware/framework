@@ -1,7 +1,7 @@
 ﻿import * as React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { WorkflowEntity, WorkflowModel, WorkflowEntitiesDictionary, WorkflowMessage } from '../Signum.Entities.Workflow'
-import { TypeContext, ValueLine, EntityLine, LiteAutocompleteConfig } from '@framework/Lines'
+import { TypeContext, ValueLine, EntityLine, LiteAutocompleteConfig, EnumCheckboxList } from '@framework/Lines'
 import { is, JavascriptMessage, toLite, ModifiableEntity, Lite, Entity } from '@framework/Signum.Entities'
 import { API } from '../WorkflowClient'
 import BpmnModelerComponent from '../Bpmn/BpmnModelerComponent'
@@ -81,20 +81,20 @@ export default class Workflow extends React.Component<WorkflowProps, WorkflowSta
     }
 
     render() {
-        var ctx = this.props.ctx.subCtx({ labelColumns: 4 });
+        var ctx = this.props.ctx.subCtx({ labelColumns: 3 });
         return (
             <div>
                 <div className="row">
                     <div className="col-sm-6">
-                <ValueLine ctx={ctx.subCtx(d => d.name)} />
-                <EntityLine ctx={ctx.subCtx(d => d.mainEntityType)}
-                    autocomplete={new LiteAutocompleteConfig((signal, str) => API.findMainEntityType({ subString: str, count: 5 }), false, false)}
-                    find={false}
-                    onRemove={this.handleMainEntityTypeChange} />
+                        <ValueLine ctx={ctx.subCtx(d => d.name)} />
+                        <EntityLine ctx={ctx.subCtx(d => d.mainEntityType)}
+                            autocomplete={new LiteAutocompleteConfig((signal, str) => API.findMainEntityType({ subString: str, count: 5 }), false, false)}
+                            find={false}
+                            onRemove={this.handleMainEntityTypeChange} />
+                        <ValueLine ctx={ctx.subCtx(d => d.expirationDate)} />
                     </div>
                     <div className="col-sm-6">
-                        <ValueLine ctx={ctx.subCtx(d => d.mainEntityStrategy)} />
-                        <ValueLine ctx={ctx.subCtx(d => d.expirationDate)} />
+                        <EnumCheckboxList ctx={ctx.subCtx(d => d.mainEntityStrategies)} columnCount={1} formGroupHtmlAttributes={{ style: { marginTop: "-25px" } }} />
                     </div>
                 </div>
                 {this.renderIssues()}

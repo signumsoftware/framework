@@ -96,13 +96,13 @@ namespace Signum.Engine.Workflow
             if (Events.Count(a => a.Value.Type.IsStart()) == 0)
                 issues.AddError(null, WorkflowValidationMessage.SomeStartEventIsRequired.NiceToString());
 
-            if (Workflow.MainEntityStrategy != WorkflowMainEntityStrategy.CreateNew)
+            if (Workflow.MainEntityStrategies.Any(a => a == WorkflowMainEntityStrategy.SelectByUser || a == WorkflowMainEntityStrategy.Clone))
                 if (Events.Count(a => a.Value.Type == WorkflowEventType.Start) == 0)
                     issues.AddError(null,
                         WorkflowValidationMessage.NormalStartEventIsRequiredWhenThe0Are1Or2.NiceToString(
-                        Workflow.MainEntityStrategy.GetType().NiceName(),
+                        Workflow.MainEntityStrategies.GetType().NiceName(),
                         WorkflowMainEntityStrategy.SelectByUser.NiceToString(),
-                        WorkflowMainEntityStrategy.Both.NiceToString()));
+                        WorkflowMainEntityStrategy.Clone.NiceToString()));
 
             if (Events.Count(a => a.Value.Type == WorkflowEventType.Start) > 1)
                 foreach (var e in Events.Where(a => a.Value.Type == WorkflowEventType.Start))

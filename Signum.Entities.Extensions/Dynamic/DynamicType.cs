@@ -243,6 +243,7 @@ namespace Signum.Entities.Dynamic
         Entity,
         MixinEntity,
         EmbeddedEntity,
+        ModelEntity,
     }
 
     public class DynamicProperty

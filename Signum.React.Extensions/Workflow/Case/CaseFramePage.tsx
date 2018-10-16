@@ -63,7 +63,7 @@ export default class CaseFramePage extends React.Component<CaseFramePageProps, C
 
     load(props: CaseFramePageProps) {
         this.loadEntity(props)
-            .then(() => Navigator.setTitle(this.state.pack!.activity.case.toStr))
+            .then(() => this.state.pack && Navigator.setTitle(this.state.pack!.activity.case.toStr))
             .then(() => this.loadComponent())
             .done();
     }

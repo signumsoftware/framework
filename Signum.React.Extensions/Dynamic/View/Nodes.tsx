@@ -925,6 +925,7 @@ NodeUtils.register<EntityTabRepeaterNode>({
 export interface EntityTableNode extends EntityListBaseNode {
     kind: "EntityTable",
     avoidFieldSet?: ExpressionOrValue<boolean>;
+    scrollable?: ExpressionOrValue<boolean>;
     maxResultsHeight?: Expression<number | string>;
 }
 
@@ -941,6 +942,7 @@ NodeUtils.register<EntityTableNode>({
     renderCode: (node, cc) => cc.elementCode("EntityTable", {
         ...cc.getEntityBasePropsEx(node, { findMany: true, showMove: true, avoidGetComponent: true }),
         avoidFieldSet: node.avoidFieldSet,
+        scrollable: node.scrollable,
         maxResultsHeight: node.maxResultsHeight,
         columns: ({ __code__: "EntityTable.typedColumns<YourEntityHere>(" + cc.stringifyObject(node.children.map(col => ({ __code__: NodeUtils.renderCode(col as EntityTableColumnNode, cc) }))) + ")" })
     }),
@@ -948,13 +950,15 @@ NodeUtils.register<EntityTableNode>({
         columns={dn.node.children.length == 0 ? undefined : dn.node.children.filter(c => NodeUtils.validate(dn.createChild(c), ctx) == null).map(col => NodeUtils.render(dn.createChild(col as EntityTableColumnNode), ctx) as any)}
         {...NodeUtils.getEntityBaseProps(dn, ctx, { findMany: true, showMove: true, avoidGetComponent: true }) }
         avoidFieldSet={NodeUtils.evaluateAndValidate(ctx, dn.node, n => n.avoidFieldSet, NodeUtils.isBooleanOrNull)}
+        scrollable={NodeUtils.evaluateAndValidate(ctx, dn.node, n => n.scrollable, NodeUtils.isBooleanOrNull)}
         maxResultsHeight={NodeUtils.evaluateAndValidate(ctx, dn.node, n => n.maxResultsHeight, NodeUtils.isNumberOrStringOrNull)}
     />),
 
     renderDesigner: dn =>
         <div>
             {NodeUtils.designEntityBase(dn, { findMany: true, showMove: true })}
-            <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.avoidFieldSet)} type="boolean" defaultValue={false}  />
+            <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.avoidFieldSet)} type="boolean" defaultValue={false} />
+            <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.scrollable)} type="boolean" defaultValue={false} />
             <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.maxResultsHeight)} type={null} defaultValue={null}  />
         </div>
 });

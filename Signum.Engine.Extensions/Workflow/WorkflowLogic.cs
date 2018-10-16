@@ -280,7 +280,6 @@ namespace Signum.Engine.Workflow
                         e.Id,
                         e.Name,
                         e.MainEntityType,
-                        e.MainEntityStrategy,
                         HasExpired = e.HasExpired(),
                         e.ExpirationDate,
                     })
