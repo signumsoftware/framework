@@ -574,15 +574,15 @@ export namespace API {
         message: string;
     }
 
-    export function findMainEntityType(request: { subString: string, count: number }, abortController?: FetchAbortController): Promise<Lite<TypeEntity>[]> {
+    export function findMainEntityType(request: { subString: string, count: number }, signal?: AbortSignal): Promise<Lite<TypeEntity>[]> {
         return ajaxGet<Lite<TypeEntity>[]>({
             url: "~/api/workflow/findMainEntityType?" + QueryString.stringify(request),
-            abortController
+            signal
         });
     }
 
-    export function findNode(request: WorkflowFindNodeRequest, abortController?: FetchAbortController): Promise<Lite<IWorkflowNodeEntity>[]> {
-        return ajaxPost<Lite<IWorkflowNodeEntity>[]>({ url: "~/api/workflow/findNode", abortController }, request);
+    export function findNode(request: WorkflowFindNodeRequest, signal?: AbortSignal): Promise<Lite<IWorkflowNodeEntity>[]> {
+        return ajaxPost<Lite<IWorkflowNodeEntity>[]>({ url: "~/api/workflow/findNode", signal }, request);
     }
 
     export function conditionTest(request: WorkflowConditionTestRequest): Promise<WorkflowConditionTestResponse> {

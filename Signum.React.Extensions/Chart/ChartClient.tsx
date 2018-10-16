@@ -607,11 +607,11 @@ export module API {
         };
     }
 
-    export function executeChart(request: ChartRequest, abortController?: FetchAbortController): Promise<ExecuteChartResult> {
+    export function executeChart(request: ChartRequest, abortSignal?: AbortSignal): Promise<ExecuteChartResult> {
 
         const queryRequest = getRequest(request);
 
-        return Finder.API.executeQuery(queryRequest, abortController).then(rt => toChartResult(request, rt));
+        return Finder.API.executeQuery(queryRequest, abortSignal).then(rt => toChartResult(request, rt));
 
     }
     export interface ExecuteChartResult {
