@@ -78,18 +78,16 @@ export default class EmailMessage extends React.Component<{ ctx: TypeContext<Ema
             return null;
 
         const ri = this.props.ctx.subCtx(EmailReceptionMixin).subCtx(a => a.receptionInfo!);
-
+        
         return (
-            <Tab title={EmailReceptionMixin.niceName()} eventKey="receptionMixin">
+            <Tab title={ri.niceName()} eventKey="receptionMixin">
                 <fieldset>
                     <legend>Properties</legend>
-
                     <EntityLine ctx={ri.subCtx(f => f.reception)} />
                     <ValueLine ctx={ri.subCtx(f => f.uniqueId)} />
                     <ValueLine ctx={ri.subCtx(f => f.sentDate)} />
                     <ValueLine ctx={ri.subCtx(f => f.receivedDate)} />
                     <ValueLine ctx={ri.subCtx(f => f.deletionDate)} />
-
                 </fieldset>
 
                 <pre>{ri.value.rawContent}</pre>
