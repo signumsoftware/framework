@@ -18,6 +18,8 @@ interface UserQueryPageProps extends RouteComponentProps<{ userQueryId: string; 
 
 export default class UserQueryPage extends React.Component<UserQueryPageProps, { userQuery?: UserQueryEntity, findOptions?: FindOptions, }> {
 
+    static showFilters = true;
+
     constructor(props: UserQueryPageProps) {
         super(props);
         this.state = {};
@@ -70,7 +72,7 @@ export default class UserQueryPage extends React.Component<UserQueryPageProps, {
                     </a>
                 </h2>
                 <SearchControl ref={(e: SearchControl) => this.searchControl = e}
-                    showFilters={true}
+                    showFilters={showFilters}
                     hideFullScreenButton={true}
                     showBarExtension={true}
                     findOptions={fo} />
