@@ -30,9 +30,7 @@ namespace Signum.React.Selenium
                 dateTimePicker.Click();
                 dateTimePicker.SendKeys(value);
                 dateTimePicker.LoseFocus();
-                dateTimePicker.SendKeys(value);
-                dateTimePicker.LoseFocus();
-
+             
 //                var js = this.Element.GetDriver() as IJavaScriptExecutor;
 
 //                var script = 
