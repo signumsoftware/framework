@@ -10,6 +10,8 @@ import * as Navigator from '@framework/Navigator'
 import TypeHelpComponent from '../../TypeHelp/TypeHelpComponent'
 import ValueLineModal from '@framework/ValueLineModal'
 import MessageModal from '@framework/Modals/MessageModal'
+import { DropdownItem, Dropdown, DropdownMenu, DropdownToggle, UncontrolledDropdown } from '@framework/Components';
+
 
 
 
@@ -196,11 +198,36 @@ export default class DynamicViewSelectorComponent extends React.Component<Dynami
         return ["NEW", "STATIC", "CHOOSE"].concat(this.state.viewNames || []);
     }
 
+    handleViewNameClick = (viewName: string) => {
+        ValueLineModal.show({
+            type: { name: "string" },
+            initialValue: `"${viewName}"`,
+            valueLineType: "TextArea",
+            title: "View Name",
+            message: "Copy to clipboard: Ctrl+C, ESC",
+            initiallyFocused: true,
+        }).done();
+    }
+
+    renderViewNameButtons() {
+        return (
+            <UncontrolledDropdown>
+                <DropdownToggle color="success" caret>View Names</DropdownToggle>
+                <DropdownMenu>
+                    {this.allViewNames().map((vn, i) =>
+                        <DropdownItem key={i} onClick={e => this.handleViewNameClick(vn)}>{vn}</DropdownItem>)}
+                </DropdownMenu>
+            </UncontrolledDropdown>
+        );
+    }
+
     renderEditor() {
         const ctx = this.props.ctx;
         return (
             <div className="code-container">
-                <pre style={{ border: "0px", margin: "0px", color: "Green" }}>//Return {this.allViewNames().map(vn => '"' + vn + '"').joinComma(" or ")}</pre>
+                <div className="btn-toolbar btn-toolbar-small">
+                    {this.renderViewNameButtons()}
+                </div>
                 <pre style={{ border: "0px", margin: "0px" }}>{"(e: " + ctx.value.entityType!.className + ", modules) =>"}</pre>
                 <JavascriptCodeMirror code={ctx.value.script || ""} onChange={this.handleCodeChange} />
                 {this.state.syntaxError && <div className="alert alert-danger">{this.state.syntaxError}</div>}

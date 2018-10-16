@@ -275,7 +275,7 @@ export default class DynamicViewOverrideComponent extends React.Component<Dynami
         const ctx = this.props.ctx;
         return (
             <div className="code-container">
-                <div className="btn-toolbar">
+                <div className="btn-toolbar btn-toolbar-small">
                     {this.state.viewNames && this.renderViewNameButtons()}
                     {this.allExpressions().length > 0 && this.renderExpressionsButtons()}
                     <TypeHelpButtonBarComponent typeName={ctx.value.entityType!.cleanName} mode="TypeScript" ctx={ctx} />
