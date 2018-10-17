@@ -55,8 +55,10 @@ namespace Signum.Engine.Dynamic
                 AvailableModelEntities = sb.GlobalLazy(() =>
                 {
                     var namespaces = DynamicCode.GetNamespaces().ToHashSet();
-                    return DynamicCode.GetAssemblies()
-                    .SelectMany(a => Assembly.LoadFile(a).GetTypes())
+                    return DynamicCode.AssemblyTypes
+                    .Select(t => t.Assembly)
+                    .Distinct()
+                    .SelectMany(a => a.GetTypes())
                     .Where(t => typeof(ModelEntity).IsAssignableFrom(t) && namespaces.Contains(t.Namespace))
                     .ToHashSet();
 

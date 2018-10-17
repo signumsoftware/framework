@@ -50,6 +50,7 @@ namespace Signum.Entities.Workflow
         public static readonly ExecuteSymbol<WorkflowEntity> Deactivate;
     }
 
+    [InTypeScript(true)]
     public enum WorkflowMainEntityStrategy
     {
         CreateNew,
