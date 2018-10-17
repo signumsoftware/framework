@@ -1,5 +1,5 @@
 ﻿import * as React from 'react';
-import Transition, { TransitionState, TransitionProps, EnterHandler, EndHandler, ExitHandler } from 'react-transition-group/Transition';
+import Transition, { TransitionStatus, TransitionProps, EnterHandler, EndHandler, ExitHandler } from 'react-transition-group/Transition';
 import { classes } from '../Globals';
 
 export interface FadeProps {
@@ -21,8 +21,8 @@ export interface FadeProps {
 
 
 const fadeClass = {
-    ["entering" as TransitionState]: 'show',
-    ["entered" as TransitionState]: 'show',
+    ["entering" as TransitionStatus]: 'show',
+    ["entered" as TransitionStatus]: 'show',
 };
 
 export class ModalFade extends React.Component<FadeProps> {
@@ -37,13 +37,11 @@ export class ModalFade extends React.Component<FadeProps> {
 
     render() {
         const { children, ...props } = this.props;
-        
+
         return (
             <Transition {...props} >
-                {
-                    (state) => React.cloneElement(children, { className: classes(children.props.className, 'fade', fadeClass[state]) })
-                }
+                {(state) => React.cloneElement(children, { className: classes(children.props.className, 'fade', fadeClass[state]) })}
             </Transition>
         );
-  }
+    }
 }
