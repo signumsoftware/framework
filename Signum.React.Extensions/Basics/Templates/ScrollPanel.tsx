@@ -99,7 +99,7 @@ export function animateScroll(id: string, animate: AnimateScroll) {
         const increment = 20;
         const elapsed = elapsedTime + increment;
         const position = easing(elapsed, start, change, duration);
-        setScrollTop(parent, position);
+        setScrollTop(parent!, position);
         elapsed < duration &&
             setTimeout(function () {
                 animateFn(elapsed);
