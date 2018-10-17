@@ -466,7 +466,6 @@ namespace Signum.Engine.Workflow
         private static void StartWorkflowTimerConditions(SchemaBuilder sb)
         {
             sb.Include<WorkflowTimerConditionEntity>()
-               .WithSave(WorkflowTimerConditionOperation.Save)
                .WithQuery(() => e => new
                {
                    Entity = e,
@@ -476,11 +475,29 @@ namespace Signum.Engine.Workflow
                    e.Eval.Script
                });
 
+            new Graph<WorkflowTimerConditionEntity>.Execute(WorkflowTimerConditionOperation.Save)
+            {
+                CanBeNew = true,
+                CanBeModified = true,
+                Execute = (e, _) =>
+                {
+                    if (!e.IsNew)
+                    {
+
+                        var oldMainEntityType = e.InDBEntity(a => a.MainEntityType);
+                        if (!oldMainEntityType.Is(e.MainEntityType))
+                            ThrowConnectionError(Database.Query<WorkflowEventEntity>().Where(a => a.Timer.Condition == e.ToLite()), e, WorkflowTimerConditionOperation.Save);
+                    }
+
+                    e.Save();
+                },
+            }.Register();
+
             new Graph<WorkflowTimerConditionEntity>.Delete(WorkflowTimerConditionOperation.Delete)
             {
                 Delete = (e, _) =>
                 {
-                    ThrowConnectionError(Database.Query<WorkflowEventEntity>().Where(a => a.Timer.Condition == e.ToLite()), e);
+                    ThrowConnectionError(Database.Query<WorkflowEventEntity>().Where(a => a.Timer.Condition == e.ToLite()), e, WorkflowTimerConditionOperation.Delete);
                     e.Delete();
                 },
             }.Register();
@@ -506,7 +523,6 @@ namespace Signum.Engine.Workflow
         private static void StartWorkflowActions(SchemaBuilder sb)
         {
             sb.Include<WorkflowActionEntity>()
-               .WithSave(WorkflowActionOperation.Save)
                .WithQuery(() => e => new
                {
                    Entity = e,
@@ -516,11 +532,29 @@ namespace Signum.Engine.Workflow
                    e.Eval.Script
                });
 
+            new Graph<WorkflowActionEntity>.Execute(WorkflowActionOperation.Save)
+            {
+                CanBeNew = true,
+                CanBeModified = true,
+                Execute = (e, _) =>
+                {
+                    if (!e.IsNew)
+                    {
+
+                        var oldMainEntityType = e.InDBEntity(a => a.MainEntityType);
+                        if (!oldMainEntityType.Is(e.MainEntityType))
+                            ThrowConnectionError(Database.Query<WorkflowConnectionEntity>().Where(a => a.Action == e.ToLite()), e, WorkflowActionOperation.Save);
+                    }
+
+                    e.Save();
+                },
+            }.Register();
+
             new Graph<WorkflowActionEntity>.Delete(WorkflowActionOperation.Delete)
             {
                 Delete = (e, _) =>
                 {
-                    ThrowConnectionError(Database.Query<WorkflowConnectionEntity>().Where(a => a.Action == e.ToLite()), e);
+                    ThrowConnectionError(Database.Query<WorkflowConnectionEntity>().Where(a => a.Action == e.ToLite()), e, WorkflowActionOperation.Delete);
                     e.Delete();
                 },
             }.Register();
@@ -546,7 +580,6 @@ namespace Signum.Engine.Workflow
         private static void StartWorkflowConditions(SchemaBuilder sb)
         {
             sb.Include<WorkflowConditionEntity>()
-               .WithSave(WorkflowConditionOperation.Save)
                .WithQuery(() => e => new
                {
                    Entity = e,
@@ -556,11 +589,28 @@ namespace Signum.Engine.Workflow
                    e.Eval.Script
                });
 
+            new Graph<WorkflowConditionEntity>.Execute(WorkflowConditionOperation.Save)
+            {
+                CanBeNew = true,
+                CanBeModified = true,
+                Execute = (e, _) =>
+                {
+                    if (!e.IsNew) {
+
+                        var oldMainEntityType = e.InDBEntity(a => a.MainEntityType);
+                        if (!oldMainEntityType.Is(e.MainEntityType))
+                            ThrowConnectionError(Database.Query<WorkflowConnectionEntity>().Where(a => a.Condition == e.ToLite()), e, WorkflowConditionOperation.Save);
+                    }
+
+                    e.Save();
+                },
+            }.Register();
+
             new Graph<WorkflowConditionEntity>.Delete(WorkflowConditionOperation.Delete)
             {
                 Delete = (e, _) =>
                 {
-                    ThrowConnectionError(Database.Query<WorkflowConnectionEntity>().Where(a => a.Condition == e.ToLite()), e);
+                    ThrowConnectionError(Database.Query<WorkflowConnectionEntity>().Where(a => a.Condition == e.ToLite()), e, WorkflowConditionOperation.Delete);
                     e.Delete();
                 },
             }.Register();
@@ -587,7 +637,6 @@ namespace Signum.Engine.Workflow
         private static void StartWorkflowScript(SchemaBuilder sb)
         {
             sb.Include<WorkflowScriptEntity>()
-              .WithSave(WorkflowScriptOperation.Save)
               .WithQuery(() => s => new
               {
                   Entity = s,
@@ -595,6 +644,24 @@ namespace Signum.Engine.Workflow
                   s.Name,
                   s.MainEntityType,
               });
+
+            new Graph<WorkflowScriptEntity>.Execute(WorkflowScriptOperation.Save)
+            {
+                CanBeNew = true,
+                CanBeModified = true,
+                Execute = (e, _) =>
+                {
+                    if (!e.IsNew)
+                    {
+
+                        var oldMainEntityType = e.InDBEntity(a => a.MainEntityType);
+                        if (!oldMainEntityType.Is(e.MainEntityType))
+                            ThrowConnectionError(Database.Query<WorkflowActivityEntity>().Where(a => a.Script.Script == e.ToLite()), e, WorkflowScriptOperation.Save);
+                    }
+
+                    e.Save();
+                },
+            }.Register();
 
             new Graph<WorkflowScriptEntity>.ConstructFrom<WorkflowScriptEntity>(WorkflowScriptOperation.Clone)
             {
@@ -608,7 +675,7 @@ namespace Signum.Engine.Workflow
             {
                 Delete = (s, _) =>
                 {
-                    ThrowConnectionError(Database.Query<WorkflowActivityEntity>().Where(a => a.Script.Script == s.ToLite()), s);
+                    ThrowConnectionError(Database.Query<WorkflowActivityEntity>().Where(a => a.Script.Script == s.ToLite()), s, WorkflowScriptOperation.Delete);
                     s.Delete();
                 },
             }.Register();
@@ -627,7 +694,7 @@ namespace Signum.Engine.Workflow
                 });
         }
 
-        private static void ThrowConnectionError(IQueryable<WorkflowConnectionEntity> queryable, Entity toDelete)
+        private static void ThrowConnectionError(IQueryable<WorkflowConnectionEntity> queryable, Entity entity, IOperationSymbolContainer operation)
         {
             if (queryable.Count() == 0)
                 return;
@@ -638,10 +705,10 @@ namespace Signum.Engine.Workflow
                   gr.ToString(a => $"Connection {a.Connection.Id} ({a.Connection}): {a.From} -> {a.To}", "\r\n").Indent(4),
                 "\r\n\r\n").Indent(4);
 
-            throw new ApplicationException($"Impossible to delete '{toDelete}' because is used in some connections: \r\n" + formattedErrors);
+            throw new ApplicationException($"Impossible to {operation.Symbol.Key.After('.')} '{entity}' because is used in some connections: \r\n" + formattedErrors);
         }
 
-        private static void ThrowConnectionError<T>(IQueryable<T> queryable, Entity toDelete)
+        private static void ThrowConnectionError<T>(IQueryable<T> queryable, Entity entity, IOperationSymbolContainer operation)
             where T : Entity, IWorkflowNodeEntity
         {
             if (queryable.Count() == 0)
@@ -653,7 +720,7 @@ namespace Signum.Engine.Workflow
                   gr.ToString(a => $"{typeof(T).NiceName()} {a.Entity}", "\r\n").Indent(4),
                 "\r\n\r\n").Indent(4);
 
-            throw new ApplicationException($"Impossible to delete '{toDelete}' because is used in some {typeof(T).NicePluralName()}: \r\n" + formattedErrors);
+            throw new ApplicationException($"Impossible to {operation.Symbol.Key.After('.')} '{entity}' because is used in some {typeof(T).NicePluralName()}: \r\n" + formattedErrors);
         }
 
         public class WorkflowGraph : Graph<WorkflowEntity>
