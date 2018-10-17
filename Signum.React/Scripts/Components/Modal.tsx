@@ -195,7 +195,7 @@ export class Modal extends React.Component<ModalProps, ModalState> {
             this.props.container && ReactDOM.findDOMNode(this.props.container) as HTMLElement || document.body
         );
         const modalIsOverflowing =
-            dialogHeight > document.documentElement.clientHeight;
+            dialogHeight > document.documentElement!.clientHeight;
 
         this.setState({
             style: {
