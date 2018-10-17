@@ -22,6 +22,7 @@ export default class SearchPage extends React.Component<SearchPageProps, SearchP
 
     static marginDown = 130;
     static minHeight = 600;
+    static showFilters = true;
 
     constructor(props: SearchPageProps) {
         super(props);
@@ -114,7 +115,7 @@ export default class SearchPage extends React.Component<SearchPageProps, SearchP
                     showBarExtension={true}
                     hideFullScreenButton={true}
                     largeToolbarButtons={true}
-                    showFilters={true}
+                    showFilters={SearchPage.showFilters}
                     showGroupButton={true}
                     avoidChangeUrl={false}
                     maxResultsHeight={"none"}

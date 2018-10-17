@@ -514,7 +514,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
         var buttons = [
 
             p.showFilterButton && OrderUtils.setOrder(-5, <button
-                className={"sf-query-button sf-filters-header btn btn-light" + (s.showFilters ? " active" : "")}
+                className={classes("sf-query-button sf-filters-header btn", s.showFilters && "active", !s.showFilters && p.findOptions.filterOptions.length > 0 ? "btn-warning" : "btn-light")}
                 onClick={this.handleToggleFilters}
                 title={s.showFilters ? JavascriptMessage.hideFilters.niceToString() : JavascriptMessage.showFilters.niceToString()}>
                 <FontAwesomeIcon icon="filter" />
