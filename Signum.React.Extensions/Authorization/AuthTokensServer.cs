@@ -118,7 +118,7 @@ namespace Signum.React.Authorization
         static BinaryFormatter formatter = new BinaryFormatter();
 
 
-        static AuthToken DeserializeToken(string authHeader)
+        public static AuthToken DeserializeToken(string authHeader)
         {
             try
             {
