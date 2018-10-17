@@ -99,6 +99,11 @@ switch (operationString)
  * Enums do not require the type (infered from the expression on the left). Example: `@if[State==Cancelled]` is right but `@if[State==OrderState.Cancelled]` is wrong
  * Custom value providers can be used. `@if[User==[CurrentUser]]`
 
+ #### Complex conditions
+
+ * An `@if` (or `@any`) can contain ANDs and ORs in the conditions, using the operator `AND`, `OR`, `&&` or `||`. Example: `@if[FirstName=John AND LastName=Connor]`
+
+
 ### Foreach
 Allows to repeat some block of text for each element
 
