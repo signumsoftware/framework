@@ -14,6 +14,7 @@ using System.Data.Common;
 using Signum.Utilities.ExpressionTrees;
 using System.Data.SqlClient;
 using Microsoft.SqlServer.Server;
+using System.IO;
 
 namespace Signum.Engine
 {
@@ -527,7 +528,10 @@ namespace Signum.Engine
             {
                 return (T)(object)null;
             }
-            return (T)reader.GetValue(ordinal);
+
+            var udt = Activator.CreateInstance<T>();
+            ((IBinarySerialize)udt).Read(new BinaryReader(reader.GetStream(ordinal)));
+            return udt;
         }
 
         static Dictionary<Type, MethodInfo> methods =

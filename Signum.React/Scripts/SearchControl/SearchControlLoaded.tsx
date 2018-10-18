@@ -514,7 +514,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
         var buttons = [
 
             p.showFilterButton && OrderUtils.setOrder(-5, <button
-                className={"sf-query-button sf-filters-header btn btn-light" + (s.showFilters ? " active" : "")}
+                className={classes("sf-query-button sf-filters-header btn", s.showFilters && "active", !s.showFilters && p.findOptions.filterOptions.length > 0 ? "btn-warning" : "btn-light")}
                 onClick={this.handleToggleFilters}
                 title={s.showFilters ? JavascriptMessage.hideFilters.niceToString() : JavascriptMessage.showFilters.niceToString()}>
                 <FontAwesomeIcon icon="filter" />
@@ -1058,27 +1058,28 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
             return;
         }
 
-        var lite = row.entity!;
+        if (this.props.navigate) {
+            var lite = row.entity!;
 
-        if (!Navigator.isNavigable(lite.EntityType, undefined, true))
-            return;
+            if (!Navigator.isNavigable(lite.EntityType, undefined, true))
+                return;
 
-        e.preventDefault();
+            e.preventDefault();
 
-        const s = Navigator.getSettings(lite.EntityType)
+            const s = Navigator.getSettings(lite.EntityType)
 
-        const avoidPopup = s != undefined && s.avoidPopup;
+            const avoidPopup = s != undefined && s.avoidPopup;
 
-        if (avoidPopup || e.ctrlKey || e.button == 1) {
-            window.open(Navigator.navigateRoute(lite));
+            if (avoidPopup || e.ctrlKey || e.button == 1) {
+                window.open(Navigator.navigateRoute(lite));
+            }
+            else {
+                Navigator.navigate(lite)
+                    .then(() => {
+                        this.handleOnNavigated(lite);
+                    }).done();
+            }
         }
-        else {
-            Navigator.navigate(lite)
-                .then(() => {
-                    this.handleOnNavigated(lite);
-                }).done();
-        }
-
     }
 
     renderRows(): React.ReactNode {
