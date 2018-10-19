@@ -19,7 +19,7 @@ namespace Signum.React.ApiControllers
 {
     public class OperationController : Controller
     {
-        [Route("api/operation/construct"), HttpPost, ValidateModelFilter, ProfilerActionSplitter]
+        [HttpPost("api/operation/construct"), ValidateModelFilter, ProfilerActionSplitter]
         public EntityPackTS Construct([FromBody]ConstructOperationRequest request)
         {
             var entityType = TypeLogic.GetType(request.type);
@@ -29,7 +29,7 @@ namespace Signum.React.ApiControllers
             return entity == null ? null : SignumServer.GetEntityPack(entity);
         }
 
-        [Route("api/operation/constructFromEntity"), HttpPost, ValidateModelFilter, ProfilerActionSplitter]
+        [HttpPost("api/operation/constructFromEntity"), ValidateModelFilter, ProfilerActionSplitter]
         public EntityPackTS ConstructFromEntity([FromBody]EntityOperationRequest request)
         {
             var entity = OperationLogic.ServiceConstructFrom(request.entity, request.GetOperationSymbol(request.entity.GetType()), request.args);
@@ -37,7 +37,7 @@ namespace Signum.React.ApiControllers
             return entity == null ? null: SignumServer.GetEntityPack(entity);
         }
 
-        [Route("api/operation/constructFromLite"), HttpPost, ValidateModelFilter, ProfilerActionSplitter]
+        [HttpPost("api/operation/constructFromLite"), ValidateModelFilter, ProfilerActionSplitter]
         public EntityPackTS ConstructFromLite([FromBody]LiteOperationRequest request)
         {
             var entity = OperationLogic.ServiceConstructFromLite(request.lite, request.GetOperationSymbol(request.lite.EntityType), request.args);
@@ -45,7 +45,7 @@ namespace Signum.React.ApiControllers
         }
 
 
-        [Route("api/operation/executeEntity"), HttpPost, ValidateModelFilter, ProfilerActionSplitter]
+        [HttpPost("api/operation/executeEntity"), ValidateModelFilter, ProfilerActionSplitter]
         public ActionResult<EntityPackTS> ExecuteEntity([FromBody]EntityOperationRequest request)
         {
             Entity entity;
@@ -64,7 +64,7 @@ namespace Signum.React.ApiControllers
         }
 
 
-        [Route("api/operation/executeLite"), HttpPost, ValidateModelFilter, ProfilerActionSplitter]
+        [HttpPost("api/operation/executeLite"), ValidateModelFilter, ProfilerActionSplitter]
         public EntityPackTS ExecuteLite([FromBody]LiteOperationRequest request)
         {
             var entity = OperationLogic.ServiceExecuteLite(request.lite, request.GetOperationSymbol(request.lite.EntityType), request.args);
@@ -72,13 +72,13 @@ namespace Signum.React.ApiControllers
             return SignumServer.GetEntityPack(entity);
         }
 
-        [Route("api/operation/deleteEntity"), HttpPost, ValidateModelFilter, ProfilerActionSplitter]
+        [HttpPost("api/operation/deleteEntity"), ValidateModelFilter, ProfilerActionSplitter]
         public void DeleteEntity([FromBody]EntityOperationRequest request)
         {
             OperationLogic.ServiceDelete(request.entity, request.GetOperationSymbol(request.entity.GetType()), request.args);
         }
 
-        [Route("api/operation/deleteLite"), HttpPost, ValidateModelFilter, ProfilerActionSplitter]
+        [HttpPost("api/operation/deleteLite"), ValidateModelFilter, ProfilerActionSplitter]
         public void DeleteLite([FromBody]LiteOperationRequest request)
         {
             OperationLogic.ServiceDelete(request.lite, request.GetOperationSymbol(request.lite.EntityType), request.args);
@@ -127,7 +127,7 @@ namespace Signum.React.ApiControllers
             public override string ToString() => operationKey;
         }
 
-        [Route("api/operation/constructFromMany"), HttpPost, ValidateModelFilter, ProfilerActionSplitter]
+        [HttpPost("api/operation/constructFromMany"), ValidateModelFilter, ProfilerActionSplitter]
         public EntityPackTS ConstructFromMany([FromBody]MultiOperationRequest request)
         {
             var type = request.lites.Select(l => l.EntityType).Distinct().Only() ?? TypeLogic.GetType(request.type);
@@ -137,7 +137,7 @@ namespace Signum.React.ApiControllers
             return SignumServer.GetEntityPack(entity);
         }
 
-        [Route("api/operation/constructFromMultiple"), HttpPost, ValidateModelFilter, ProfilerActionSplitter]
+        [HttpPost("api/operation/constructFromMultiple"), ValidateModelFilter, ProfilerActionSplitter]
         public MultiOperationResponse ConstructFromMultiple([FromBody]MultiOperationRequest request)
         {
             var errors = ForeachMultiple(request.lites, lite =>
@@ -147,7 +147,7 @@ namespace Signum.React.ApiControllers
         }
 
 
-        [Route("api/operation/executeMultiple"), HttpPost, ValidateModelFilter, ProfilerActionSplitter]
+        [HttpPost("api/operation/executeMultiple"), ValidateModelFilter, ProfilerActionSplitter]
         public MultiOperationResponse ExecuteMultiple([FromBody]MultiOperationRequest request)
         {
             var errors = ForeachMultiple(request.lites, lite =>
@@ -156,7 +156,7 @@ namespace Signum.React.ApiControllers
             return new MultiOperationResponse { errors = errors };
         }
 
-        [Route("api/operation/deleteMultiple"), HttpPost, ValidateModelFilter, ProfilerActionSplitter]
+        [HttpPost("api/operation/deleteMultiple"), ValidateModelFilter, ProfilerActionSplitter]
         public MultiOperationResponse DeleteMultiple([FromBody]MultiOperationRequest request)
         {
             var errors = ForeachMultiple(request.lites, lite =>
@@ -198,7 +198,7 @@ namespace Signum.React.ApiControllers
             public Dictionary<string, string> errors { get; set; }
         }
 
-        [Route("api/operation/stateCanExecutes"), HttpPost, ValidateModelFilter]
+        [HttpPost("api/operation/stateCanExecutes"), ValidateModelFilter]
         public StateCanExecuteResponse StateCanExecutes([FromBody]StateCanExecuteRequest request)
         {
             var types = request.lites.Select(a => a.EntityType).ToHashSet();
