@@ -2,7 +2,7 @@
 using System.Text;
 using System.Collections.Generic;
 using System.Linq;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 using Signum.Engine;
 using Signum.Entities;
 using System.Diagnostics;
@@ -16,67 +16,60 @@ namespace Signum.Test.LinqProvider
     /// <summary>
     /// Summary description for LinqProvider
     /// </summary>
-    [TestClass]
     public class DistinctTest
     {
-        [ClassInitialize()]
-        public static void MyClassInitialize(TestContext testContext)
+        public DistinctTest()
         {
             MusicStarter.StartAndLoad();
-        }
-
-        [TestInitialize]
-        public void Initialize()
-        {
             Connector.CurrentLogger = new DebugTextWriter();
         }
 
-        [TestMethod]
+        [Fact]
         public void DistinctString()
         {
             var authors = Database.Query<AlbumEntity>().Select(a => a.Label.Name).Distinct().ToList();
         }
 
-        [TestMethod]
+        [Fact]
         public void DistinctPair()
         {
             var authors = Database.Query<ArtistEntity>().Select(a =>new {a.Sex, a.Dead}).Distinct().ToList();
         }
 
-        [TestMethod]
+        [Fact]
         public void DistinctFie()
         {
             var authors = Database.Query<AlbumEntity>().Select(a => a.Label).Distinct().ToList();
         }
 
-        [TestMethod]
+        [Fact]
         public void DistinctFieExpanded()
         {
             var authors = Database.Query<AlbumEntity>().Where(a => a.Year != 0).Select(a => a.Label).Distinct().ToList();
         }
 
-        [TestMethod]
+        [Fact]
         public void DistinctIb()
         {
             var authors = Database.Query<AlbumEntity>().Select(a => a.Author).Distinct().ToList();
         }
 
-        [TestMethod]
+        [Fact]
         public void DistinctCount()
         {
             var count1 = Database.Query<AlbumEntity>().Select(a => a.Name).Distinct().Select(a => a).Count();
             var count2 = Database.Query<AlbumEntity>().Select(a => a.Name).Distinct().ToList().Count();
-            Assert.AreEqual(count1, count2);
+            Assert.Equal(count1, count2);
         }
 
 
-        [TestMethod]
+        [Fact]
         public void DistinctTake()
         {
             var bla = Database.Query<BandEntity>().SelectMany(a => a.Members.SelectMany(m => m.Friends).Distinct()).Take(4).ToList();
         }
 
-        [TestMethod]
+        [Fact]
         public void GroupTake()
         {
             var bla = (from b in Database.Query<BandEntity>()

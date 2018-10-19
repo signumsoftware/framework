@@ -2,7 +2,7 @@
 using System.Text;
 using System.Collections.Generic;
 using System.Linq;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 using Signum.Utilities;
 using Signum.Engine;
 using Signum.Entities;
@@ -12,22 +12,15 @@ using Signum.Test.Environment;
 
 namespace Signum.Test
 {
-    [TestClass]
     public class SaveTest
     {
-        [ClassInitialize()]
-        public static void MyClassInitialize(TestContext testContext)
+        public SaveTest()
         {
             MusicStarter.StartAndLoad();
-        }
-
-        [TestInitialize]
-        public void Initialize()
-        {
             Connector.CurrentLogger = new DebugTextWriter();
         }
 
-        [TestMethod]
+        [Fact]
         public void SaveCycle()
         {
             using (Transaction tr = new Transaction())
@@ -42,15 +35,15 @@ namespace Signum.Test
 
                 var list = Database.Query<ArtistEntity>().Where(a => a == m || a == f).ToList();
 
-                Assert.IsTrue(list[0].Friends.Contains(list[1].ToLite()));
-                Assert.IsTrue(list[1].Friends.Contains(list[0].ToLite()));
+                Assert.True(list[0].Friends.Contains(list[1].ToLite()));
+                Assert.True(list[1].Friends.Contains(list[0].ToLite()));
 
                 //tr.Commit();
             }
 
         }
 
-        [TestMethod]
+        [Fact]
         public void SaveSelfCycle()
         {
             using (Transaction tr = new Transaction())
@@ -63,14 +56,14 @@ namespace Signum.Test
 
                 var m2 = m.ToLite().RetrieveAndForget();
 
-                Assert.IsTrue(m2.Friends.Contains(m2.ToLite()));
+                Assert.True(m2.Friends.Contains(m2.ToLite()));
 
                 //tr.Commit();
             }
 
         }
 
-        [TestMethod]
+        [Fact]
         public void SaveMany()
         {
             using (Transaction tr = new Transaction())
@@ -84,7 +77,7 @@ namespace Signum.Test
 
                 list.SaveList();
 
-                Assert.AreEqual(prev + types.Length, Database.Query<ArtistEntity>().Count());
+                Assert.Equal(prev + types.Length, Database.Query<ArtistEntity>().Count());
 
                 list.ForEach(a => a.Name += "Updated");
 
@@ -94,7 +87,7 @@ namespace Signum.Test
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void SaveMList()
         {
             using (Transaction tr = new Transaction())
@@ -114,9 +107,9 @@ namespace Signum.Test
                     State = AlbumState.Saved
                 }.Save();
 
-                Assert2.AssertAll(GraphExplorer.FromRoot(album), a => !a.IsGraphModified);
+                Assert.All(GraphExplorer.FromRoot(album), a => Assert.False(a.IsGraphModified));
 
-                Assert.AreEqual(prev + types.Length, Database.MListQuery((AlbumEntity a) => a.Songs).Count());
+                Assert.Equal(prev + types.Length, Database.MListQuery((AlbumEntity a) => a.Songs).Count());
 
                 album.Name += "Updated";
 
@@ -131,7 +124,7 @@ namespace Signum.Test
         }
 
 
-        [TestMethod]
+        [Fact]
         public void SmartSaveMList()
         {
             using (Transaction tr = new Transaction())
@@ -153,20 +146,20 @@ namespace Signum.Test
 
                 var innerList = ((IMListPrivate<SongEmbedded>)album.Songs).InnerList;
 
-                Assert.IsNull(innerList[0].RowId);
+                Assert.Null(innerList[0].RowId);
                 //Insert and row-id is set
                 album.Save();
-                Assert.IsNotNull(innerList[0].RowId);
-                Assert.IsTrue(innerList[0].RowId > maxRowId); 
+                Assert.NotNull(innerList[0].RowId);
+                Assert.True(innerList[0].RowId > maxRowId); 
 
 
                 album.Songs.Add(new SongEmbedded { Name = "Song 2" });
 
-                Assert.IsNull(innerList[1].RowId);
+                Assert.Null(innerList[1].RowId);
 
                 album.Save();
                 //Insert and row-id is set
-                Assert.IsNotNull(innerList[1].RowId);
+                Assert.NotNull(innerList[1].RowId);
 
                 var song = innerList[0];
 
@@ -177,9 +170,9 @@ namespace Signum.Test
                 {
                     var album2 = album.ToLite().Retrieve();
 
-                    Assert.IsTrue(album.Songs.Count == album2.Songs.Count);
-                    Assert.IsTrue(innerList[0].RowId == ((IMListPrivate<SongEmbedded>)album2.Songs).InnerList[0].RowId);
-                    Assert.IsTrue(!album.MListElements(a => a.Songs).Any(mle => mle.RowId == song.RowId));
+                    Assert.True(album.Songs.Count == album2.Songs.Count);
+                    Assert.True(innerList[0].RowId == ((IMListPrivate<SongEmbedded>)album2.Songs).InnerList[0].RowId);
+                    Assert.True(!album.MListElements(a => a.Songs).Any(mle => mle.RowId == song.RowId));
                 }
 
                 album.Songs[0].Name += "*";
@@ -189,17 +182,17 @@ namespace Signum.Test
                 {
                     var album2 = album.ToLite().Retrieve();
                     
-                    Assert.IsTrue(album.Songs.Count == album2.Songs.Count);
-                    Assert.IsTrue(innerList[0].RowId == ((IMListPrivate<SongEmbedded>)album2.Songs).InnerList[0].RowId);
-                    Assert.IsTrue(album.Songs[0].Name == album2.Songs[0].Name);
-                    Assert.IsTrue(!album.MListElements(a => a.Songs).Any(mle => mle.RowId == song.RowId));
+                    Assert.True(album.Songs.Count == album2.Songs.Count);
+                    Assert.True(innerList[0].RowId == ((IMListPrivate<SongEmbedded>)album2.Songs).InnerList[0].RowId);
+                    Assert.True(album.Songs[0].Name == album2.Songs[0].Name);
+                    Assert.True(!album.MListElements(a => a.Songs).Any(mle => mle.RowId == song.RowId));
                 }
 
                 //tr.Commit();
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void SmartSaveMListOrder()
         {
             using (Transaction tr = new Transaction())
@@ -256,10 +249,10 @@ namespace Signum.Test
 
         void AssertSequenceEquals<T>(IEnumerable<T> one, IEnumerable<T> two)
         {
-            Assert.IsTrue(one.SequenceEqual(two));
+            Assert.True(one.SequenceEqual(two));
         }
 
-        [TestMethod]
+        [Fact]
         public void SaveManyMList()
         {
             using (Transaction tr = new Transaction())
@@ -283,9 +276,9 @@ namespace Signum.Test
 
                 albums.SaveList();
 
-                Assert2.AssertAll(GraphExplorer.FromRoots(albums), a => !a.IsGraphModified);
+                Assert.All(GraphExplorer.FromRoots(albums), a => Assert.False(a.IsGraphModified));
 
-                Assert.AreEqual(prev + 16, Database.MListQuery((AlbumEntity a) => a.Songs).Count());
+                Assert.Equal(prev + 16, Database.MListQuery((AlbumEntity a) => a.Songs).Count());
 
                 albums.ForEach(a => a.Name += "Updated");
 
@@ -300,7 +293,7 @@ namespace Signum.Test
 
         }
         
-        [TestMethod]
+        [Fact]
         public void RetrieveSealed()
         {
             using (Transaction tr = new Transaction())
@@ -308,13 +301,13 @@ namespace Signum.Test
             {
                 var albums = Database.Query<AlbumEntity>().ToList();
 
-                Assert2.AssertAll(GraphExplorer.FromRoots(albums), a => a.Modified == ModifiedState.Sealed);
+                Assert.All(GraphExplorer.FromRoots(albums), a => Assert.Equal(a.Modified, ModifiedState.Sealed));
 
-                Assert2.Throws<InvalidOperationException>("sealed", () => albums.First().Name = "New name");
-
+                var e = Assert.Throws<InvalidOperationException>(() => albums.First().Name = "New name");
+                Assert.Contains("sealed", e.Message);
 
                 var notes = Database.Query<NoteWithDateEntity>().ToList();
-                Assert2.AssertAll(GraphExplorer.FromRoots(notes), a => a.Modified == ModifiedState.Sealed);
+                Assert.All(GraphExplorer.FromRoots(notes), a => Assert.Equal(a.Modified,  ModifiedState.Sealed));
 
                 //tr.Commit();
             }
@@ -322,7 +315,7 @@ namespace Signum.Test
 
 
 
-        [TestMethod]
+        [Fact]
         public void BulkInsertWithMList()
         {
             using (Transaction tr = new Transaction())
@@ -346,18 +339,18 @@ namespace Signum.Test
 
                 list.BulkInsertQueryIds(keySelector: a => a.Name, isNewPredicate: a => a.Id > max);
 
-                Assert.AreNotEqual(count, Database.MListQuery<AlbumEntity, SongEmbedded>(a => a.Songs).Count());
+                Assert.NotEqual(count, Database.MListQuery<AlbumEntity, SongEmbedded>(a => a.Songs).Count());
 
                 Database.Query<AlbumEntity>().Where(a => a.Id > max).UnsafeDelete();
 
-                Assert.AreEqual(count, Database.MListQuery<AlbumEntity, SongEmbedded>(a => a.Songs).Count());
+                Assert.Equal(count, Database.MListQuery<AlbumEntity, SongEmbedded>(a => a.Songs).Count());
 
                 tr.Commit();
             }
         }
 
 
-        [TestMethod]
+        [Fact]
         public void BulkInsertTable()
         {
             using (Transaction tr = new Transaction())
@@ -381,7 +374,7 @@ namespace Signum.Test
         }
 
 
-        [TestMethod]
+        [Fact]
         public void BulkInsertMList()
         {
             using (Transaction tr = new Transaction())

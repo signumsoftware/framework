@@ -2,7 +2,7 @@
 using System.Text;
 using System.Collections.Generic;
 using System.Linq;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 using Signum.Engine;
 using Signum.Entities;
 using System.Diagnostics;
@@ -17,19 +17,11 @@ namespace Signum.Test.LinqProviderUpdateDelete
     /// <summary>
     /// Summary description for LinqProvider
     /// </summary>
-    [TestClass]
     public class UpdateUpdateTest
     {
-        [ClassInitialize()]
-        public static void MyClassInitialize(TestContext testContext)
+        public UpdateUpdateTest()
         {
             MusicStarter.StartAndLoad();
-        }
-
-
-        [TestInitialize]
-        public void Initialize()
-        {
             Connector.CurrentLogger = new DebugTextWriter();
             Schema.Current.EntityEvents<LabelEntity>().PreUnsafeUpdate += (update, query) => null;
             Schema.Current.EntityEvents<AlbumEntity>().PreUnsafeUpdate += (update, query) => null;
@@ -37,7 +29,7 @@ namespace Signum.Test.LinqProviderUpdateDelete
             Schema.Current.EntityEvents<ArtistEntity>().PreUnsafeUpdate += (update, query) => null;
         }
 
-        [TestMethod]
+        [Fact]
         public void UpdateValue()
         {
             using (Transaction tr = new Transaction())
@@ -48,7 +40,7 @@ namespace Signum.Test.LinqProviderUpdateDelete
 
         }
 
-        [TestMethod]
+        [Fact]
         public void UpdateValueSqlFunction()
         {
             using (Transaction tr = new Transaction())
@@ -59,7 +51,7 @@ namespace Signum.Test.LinqProviderUpdateDelete
 
         }
 
-        [TestMethod]
+        [Fact]
         public void UpdateValueNull()
         {
             using (Transaction tr = new Transaction())
@@ -70,7 +62,7 @@ namespace Signum.Test.LinqProviderUpdateDelete
 
         }
 
-        [TestMethod]
+        [Fact]
         public void UpdateValueConstant()
         {
             using (Transaction tr = new Transaction())
@@ -82,7 +74,7 @@ namespace Signum.Test.LinqProviderUpdateDelete
 
         }
 
-        [TestMethod]
+        [Fact]
         public void UpdateEnumConstant()
         {
             using (Transaction tr = new Transaction())
@@ -94,7 +86,7 @@ namespace Signum.Test.LinqProviderUpdateDelete
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void UpdateEnum()
         {
             using (Transaction tr = new Transaction())
@@ -108,7 +100,7 @@ namespace Signum.Test.LinqProviderUpdateDelete
 
      
 
-        [TestMethod]
+        [Fact]
         public void UpdateEfie()
         {
             using (Transaction tr = new Transaction())
@@ -124,15 +116,15 @@ namespace Signum.Test.LinqProviderUpdateDelete
                 .Set(a => a.BonusTrack, a => song)
                 .Execute();
 
-                Assert.IsFalse(Database.Query<AlbumEntity>().Any(a => a.BonusTrack == null));
-                Assert.AreEqual(Database.Query<AlbumEntity>().Select(a => a.BonusTrack.Name).Distinct().SingleEx(), "Mana Mana");
+                Assert.False(Database.Query<AlbumEntity>().Any(a => a.BonusTrack == null));
+                Assert.Equal(Database.Query<AlbumEntity>().Select(a => a.BonusTrack.Name).Distinct().SingleEx(), "Mana Mana");
 
                 //tr.Commit();
             }
 
         }
 
-        [TestMethod]
+        [Fact]
         public void UpdateEfieNull()
         {
             using (Transaction tr = new Transaction())
@@ -141,13 +133,13 @@ namespace Signum.Test.LinqProviderUpdateDelete
                     .Set(a => a.BonusTrack, a => null)
                     .Execute();
 
-                Assert.IsTrue(Database.Query<AlbumEntity>().All(a => a.BonusTrack == null));
-                Assert.IsTrue(Database.Query<AlbumEntity>().All(a => a.BonusTrack.Name == null));
+                Assert.True(Database.Query<AlbumEntity>().All(a => a.BonusTrack == null));
+                Assert.True(Database.Query<AlbumEntity>().All(a => a.BonusTrack.Name == null));
                 //tr.Commit();
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void UpdateEfieConditional()
         {
             using (Transaction tr = new Transaction())
@@ -163,14 +155,14 @@ namespace Signum.Test.LinqProviderUpdateDelete
                     .Set(a => a.BonusTrack, a => (int)a.Id % 2 == 0 ? song : null)
                 .Execute();
 
-                Assert.IsTrue(Database.Query<AlbumEntity>().All(a => (int)a.Id % 2 == 0 ? a.BonusTrack.Name == "Mana Mana" : a.BonusTrack.Name == null));
+                Assert.True(Database.Query<AlbumEntity>().All(a => (int)a.Id % 2 == 0 ? a.BonusTrack.Name == "Mana Mana" : a.BonusTrack.Name == null));
 
                 //tr.Commit();
             }
         }
 
 
-        [TestMethod]
+        [Fact]
         public void UpdateFie()
         {
             using (Transaction tr = new Transaction())
@@ -186,7 +178,7 @@ namespace Signum.Test.LinqProviderUpdateDelete
         }
 
 
-        [TestMethod]
+        [Fact]
         public void UpdateFieConditional()
         {
             using (Transaction tr = new Transaction())
@@ -200,7 +192,7 @@ namespace Signum.Test.LinqProviderUpdateDelete
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void UpdateFieSetReadonly()
         {
             using (Transaction tr = new Transaction())
@@ -214,7 +206,7 @@ namespace Signum.Test.LinqProviderUpdateDelete
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void UpdateMixin()
         {
             using (Transaction tr = new Transaction())
@@ -226,7 +218,7 @@ namespace Signum.Test.LinqProviderUpdateDelete
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void UpdateFieToLite()
         {
             using (Transaction tr = new Transaction())
@@ -241,22 +233,25 @@ namespace Signum.Test.LinqProviderUpdateDelete
         }
 
 
-        [TestMethod, ExpectedException(typeof(InvalidOperationException), "The entity is New")]
+        [Fact]
         public void UpdateFieNew()
         {
-            using (Transaction tr = new Transaction())
-            {
-                LabelEntity label = new LabelEntity();
+            var e  = Assert.Throws<InvalidOperationException>(()=> {
+                using (Transaction tr = new Transaction())
+                {
+                    LabelEntity label = new LabelEntity();
 
-                int count = Database.Query<AlbumEntity>().UnsafeUpdate()
-                    .Set(a => a.Label, a => label)
-                    .Execute();
-                //tr.Commit();
-            }
+                    int count = Database.Query<AlbumEntity>().UnsafeUpdate()
+                        .Set(a => a.Label, a => label)
+                        .Execute();
+                    //tr.Commit();
+                }
+            });
 
+            Assert.Contains("is new and has no Id", e.Message);
         }
 
-        [TestMethod]
+        [Fact]
         public void UpdateFieNull()
         {
             using (Transaction tr = new Transaction())
@@ -269,7 +264,7 @@ namespace Signum.Test.LinqProviderUpdateDelete
 
         }
 
-        [TestMethod]
+        [Fact]
         public void UpdateIbFie()
         {
             using (Transaction tr = new Transaction())
@@ -285,7 +280,7 @@ namespace Signum.Test.LinqProviderUpdateDelete
         }
 
 
-        [TestMethod]
+        [Fact]
         public void UpdateIbFieConditional()
         {
             using (Transaction tr = new Transaction())
@@ -312,7 +307,7 @@ namespace Signum.Test.LinqProviderUpdateDelete
 
         }
 
-        [TestMethod]
+        [Fact]
         public void UpdateIbaFie()
         {
             using (Transaction tr = new Transaction())
@@ -326,7 +321,7 @@ namespace Signum.Test.LinqProviderUpdateDelete
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void UpdateIbaLiteFie()
         {
             using (Transaction tr = new Transaction())
@@ -340,7 +335,7 @@ namespace Signum.Test.LinqProviderUpdateDelete
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void UpdateIbaNull()
         {
             using (Transaction tr = new Transaction())
@@ -353,7 +348,7 @@ namespace Signum.Test.LinqProviderUpdateDelete
 
         }
 
-        [TestMethod]
+        [Fact]
         public void UpdateIbaLiteNull()
         {
             using (Transaction tr = new Transaction())
@@ -366,7 +361,7 @@ namespace Signum.Test.LinqProviderUpdateDelete
 
         }
 
-        [TestMethod]
+        [Fact]
         public void UpdateIbaConditional()
         {
             using (Transaction tr = new Transaction())
@@ -381,7 +376,7 @@ namespace Signum.Test.LinqProviderUpdateDelete
         }
 
 
-        [TestMethod]
+        [Fact]
         public void UpdateIbaLiteConditional()
         {
             using (Transaction tr = new Transaction())
@@ -395,7 +390,7 @@ namespace Signum.Test.LinqProviderUpdateDelete
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void UpdateIbaCoallesce()
         {
             using (Transaction tr = new Transaction())
@@ -410,7 +405,7 @@ namespace Signum.Test.LinqProviderUpdateDelete
         }
 
 
-        [TestMethod]
+        [Fact]
         public void UpdateIbaLiteCoallesce()
         {
             using (Transaction tr = new Transaction())
@@ -424,7 +419,7 @@ namespace Signum.Test.LinqProviderUpdateDelete
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void UpdateEmbeddedField()
         {
             using (Transaction tr = new Transaction())
@@ -437,7 +432,7 @@ namespace Signum.Test.LinqProviderUpdateDelete
 
         }
 
-        [TestMethod]
+        [Fact]
         public void UpdateEmbeddedNull()
         {
             using (Transaction tr = new Transaction())
@@ -450,7 +445,7 @@ namespace Signum.Test.LinqProviderUpdateDelete
         }
 
 
-        [TestMethod]
+        [Fact]
         public void UnsafeUpdatePart()
         {
             using (Transaction tr = new Transaction())
@@ -467,7 +462,7 @@ namespace Signum.Test.LinqProviderUpdateDelete
 
         }
 
-        [TestMethod]
+        [Fact]
         public void UpdateMListLite()
         {
             using (Transaction tr = new Transaction())
@@ -485,7 +480,7 @@ namespace Signum.Test.LinqProviderUpdateDelete
 
         }
 
-        [TestMethod]
+        [Fact]
         public void UpdateMListEntity()
         {
             using (Transaction tr = new Transaction())
@@ -500,7 +495,7 @@ namespace Signum.Test.LinqProviderUpdateDelete
 
         }
 
-        [TestMethod]
+        [Fact]
         public void UpdateMListEmbedded()
         {
             using (Transaction tr = new Transaction())
@@ -514,7 +509,7 @@ namespace Signum.Test.LinqProviderUpdateDelete
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void UpdateMListEmbeddedPart()
         {
             using (Transaction tr = new Transaction())
@@ -534,7 +529,7 @@ namespace Signum.Test.LinqProviderUpdateDelete
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void UpdateExplicitInterfaceImplementedField()
         {
             using (Transaction tr = new Transaction())
@@ -546,7 +541,7 @@ namespace Signum.Test.LinqProviderUpdateDelete
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void UnsafeUpdatePartExpand()
         {
             using (Transaction tr = new Transaction())
@@ -559,7 +554,7 @@ namespace Signum.Test.LinqProviderUpdateDelete
         }
 
 
-        [TestMethod]
+        [Fact]
         public void UnsafeUpdateNullableEmbeddedValue()
         {
             using (Transaction tr = new Transaction())
@@ -580,7 +575,7 @@ namespace Signum.Test.LinqProviderUpdateDelete
             public bool Used { get; set; }
         }
 
-        [TestMethod]
+        [Fact]
         public void UnsafeUpdateMyView()
         {
             using (Transaction tr = new Transaction())

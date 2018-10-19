@@ -2,7 +2,7 @@
 using System.Text;
 using System.Collections.Generic;
 using System.Linq;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 using Signum.Engine;
 using Signum.Utilities;
 using Signum.Entities;
@@ -11,22 +11,15 @@ using Signum.Test.Environment;
 
 namespace Signum.Test.LinqProvider
 {
-    [TestClass]
     public class SingleFirstTest
     {
-        [ClassInitialize()]
-        public static void MyClassInitialize(TestContext testContext)
+        public SingleFirstTest()
         {
             MusicStarter.StartAndLoad();
-        }
-
-        [TestInitialize]
-        public void Initialize()
-        {
             Connector.CurrentLogger = new DebugTextWriter();
         }
 
-        [TestMethod]
+        [Fact]
         public void SelectFirstOrDefault()
         {
             var bandsCount = Database.Query<BandEntity>().Select(b => new
@@ -47,7 +40,7 @@ namespace Signum.Test.LinqProvider
         }
        
 
-        [TestMethod]
+        [Fact]
         public void SelectSingleCellWhere()
         {
             var list = Database.Query<BandEntity>()
@@ -56,7 +49,7 @@ namespace Signum.Test.LinqProvider
                 .ToList();
         }
 
-        [TestMethod]
+        [Fact]
         public void SelectSingleCellSingle()
         {
             var list = Database.Query<BandEntity>().Select(b => new
@@ -68,7 +61,7 @@ namespace Signum.Test.LinqProvider
             }).ToList();
         }
 
-        [TestMethod]
+        [Fact]
         public void SelectDoubleSingle()
         {
             var query = Database.Query<BandEntity>().Select(b => new
@@ -80,10 +73,10 @@ namespace Signum.Test.LinqProvider
 
             query.ToList();
 
-            Assert.AreEqual(1, query.QueryText().CountRepetitions("APPLY"));
+            Assert.Equal(1, query.QueryText().CountRepetitions("APPLY"));
         }
 
-        [TestMethod]
+        [Fact]
         public void SelecteNestedFirstOrDefault()
         {
             var neasted = ((from b in Database.Query<BandEntity>()
@@ -91,14 +84,14 @@ namespace Signum.Test.LinqProvider
         }
 
 
-        [TestMethod]
+        [Fact]
         public void SelecteNestedFirstOrDefaultNullify()
         {
             var neasted = ((from b in Database.Query<BandEntity>()
                             select b.Members.Where(a => a.Name.StartsWith("a")).Select(a => (Sex?)a.Sex).FirstOrDefault())).ToList();
         }
 
-        [TestMethod]
+        [Fact]
         public void SelectGroupLast()
         {
             var result = (from lab in Database.Query<LabelEntity>()
@@ -114,7 +107,7 @@ namespace Signum.Test.LinqProvider
                           }).ToList();
         }
 
-        [TestMethod]
+        [Fact]
         public void SelectEmbeddedWithMList()
         {
             var config = Database.Query<ConfigEntity>().SingleEx();

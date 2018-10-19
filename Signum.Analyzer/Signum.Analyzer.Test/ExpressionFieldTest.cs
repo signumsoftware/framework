@@ -1,7 +1,7 @@
 ﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CodeFixes;
 using Microsoft.CodeAnalysis.Diagnostics;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 using System;
 using TestHelper;
 using Signum.Analyzer;
@@ -22,7 +22,7 @@ namespace Signum.Analyzer.Test
         }
 
         //Diagnostic and CodeFix both triggered and checked for
-        [TestMethod]
+        [Fact]
         public void ExpressionFieldNoReturnType()
         {
             TestDiagnostic("no return type", @"        
@@ -32,7 +32,7 @@ namespace Signum.Analyzer.Test
         }");
         }
 
-        [TestMethod]
+        [Fact]
         public void ExpressionComplexParameter()
         {
             TestDiagnostic("complex parameter 'e'", @"        
@@ -43,7 +43,7 @@ namespace Signum.Analyzer.Test
         }");
         }
 
-        [TestMethod]
+        [Fact]
         public void Expression2Statements()
         {
             TestDiagnostic("2 statements", @"        
@@ -55,7 +55,7 @@ namespace Signum.Analyzer.Test
         }");
         }
 
-        [TestMethod]
+        [Fact]
         public void ExpressionNoReturn()
         {
             TestDiagnostic("no return", @"        
@@ -66,7 +66,7 @@ namespace Signum.Analyzer.Test
         }");
         }
 
-        [TestMethod]
+        [Fact]
         public void ExpressionNoReturnExpression()
         {
             TestDiagnostic("no return expression", @"        
@@ -77,7 +77,7 @@ namespace Signum.Analyzer.Test
         }");
         }
 
-        [TestMethod]
+        [Fact]
         public void ExpressionNoGetter()
         {
             TestDiagnostic("no getter", @"        
@@ -85,7 +85,7 @@ namespace Signum.Analyzer.Test
         public static int OperationLogs { set; }");
         }
 
-        [TestMethod]
+        [Fact]
         public void ExpressionNoGetterBody()
         {
             TestDiagnostic("no getter body", @"        
@@ -93,7 +93,7 @@ namespace Signum.Analyzer.Test
         public static int OperationLogs { get; }");
         }
 
-        [TestMethod]
+        [Fact]
         public void ExpressionMethodExpressionBody()
         {
             TestDiagnostic("no invocation", @"        
@@ -101,7 +101,7 @@ namespace Signum.Analyzer.Test
         public static int OperationLogs => 1");
         }
 
-        [TestMethod]
+        [Fact]
         public void ExpressionGetterExpressionBody()
         {
             TestDiagnostic("no invocation", @"        
@@ -109,7 +109,7 @@ namespace Signum.Analyzer.Test
         public static int OperationLogs(this Entity e) => 1");
         }
 
-        [TestMethod]
+        [Fact]
         public void ExpressionNoEvaluate()
         {
             TestDiagnostic("no Evaluate", @"
@@ -118,7 +118,7 @@ namespace Signum.Analyzer.Test
         public static int OperationLogs(this Entity e) => MyExpression.Invoke(e)");
         }
 
-        [TestMethod]
+        [Fact]
         public void ExpressionNoStaticField()
         {
             TestDiagnostic("no static field", @"
@@ -127,7 +127,7 @@ namespace Signum.Analyzer.Test
         public static int OperationLogs(this Entity e) => MyExpression.Evaluate(e)");
         }
 
-        [TestMethod]
+        [Fact]
         public void ExpressionThis()
         {
             TestDiagnostic("first argument should be 'this'", @"
@@ -136,7 +136,7 @@ namespace Signum.Analyzer.Test
         public int OperationLogs(this Entity e) => MyExpression.Evaluate(e)");
         }
 
-        [TestMethod]
+        [Fact]
         public void ExpressionMissingArgument()
         {
             TestDiagnostic("missing argument 'e'", @"
@@ -145,7 +145,7 @@ namespace Signum.Analyzer.Test
         public int OperationLogs(this Entity e) => MyExpression.Evaluate(this)");
         }
 
-        [TestMethod]
+        [Fact]
         public void ExpressionExtra()
         {
             TestDiagnostic("extra parameters", @"
@@ -154,7 +154,7 @@ namespace Signum.Analyzer.Test
         public int OperationLogs(this Entity e) => MyExpression.Evaluate(this, e, e)");
         }
 
-        [TestMethod]
+        [Fact]
         public void ExpressionCorrect()
         {
             TestDiagnostic(null, @"
@@ -163,7 +163,7 @@ namespace Signum.Analyzer.Test
         public int OperationLogs(this Entity e) => MyExpression.Evaluate(this, e)");
         }
 
-        [TestMethod]
+        [Fact]
         public void ExpressionExplicitNotFound()
         {
             TestDiagnostic("field 'MyExpression' not found", @"
@@ -172,7 +172,7 @@ namespace Signum.Analyzer.Test
         public int OperationLogs(this Entity e) => 0");
         }
 
-        [TestMethod]
+        [Fact]
         public void ExpressionExplicitWrongType()
         {
             TestDiagnostic("type of 'MyExpression' should be 'Expression<Func<Bla, Entity, int>>'", @"
@@ -181,7 +181,7 @@ namespace Signum.Analyzer.Test
         public int OperationLogs(this Entity e) => 0", withIncludes: true);
         }
 
-        [TestMethod]
+        [Fact]
         public void ExpressionExplicitCorrect()
         {
             TestDiagnostic(null, @"
@@ -229,7 +229,7 @@ namespace ConsoleApplication1
 }";
         }
 
-        [TestMethod]
+        [Fact]
         public void ExpressionFixStatic()
         {
             TestCodeFix(@"
@@ -241,7 +241,7 @@ namespace ConsoleApplication1
         public static int GetId(Entity e) => GetIdExpression.Evaluate(e);");
         }
 
-        [TestMethod]
+        [Fact]
         public void ExpressionFixInstanceProperty()
         {
             TestCodeFix(@"
@@ -255,7 +255,7 @@ namespace ConsoleApplication1
         public string GetId => GetIdExpression.Evaluate(this);");
         }
 
-        [TestMethod]
+        [Fact]
         public void ExpressionFixInstancePropertyImplicitThis()
         {
             TestCodeFix(@"
@@ -271,7 +271,7 @@ namespace ConsoleApplication1
         public string GetId => GetIdExpression.Evaluate(this);");
         }
 
-        [TestMethod]
+        [Fact]
         public void ExpressionFixInstancePropertyStatementImplicitThis()
         {
             TestCodeFix(@"
@@ -286,7 +286,7 @@ namespace ConsoleApplication1
         }
         
 
-        [TestMethod]
+        [Fact]
         public void ExpressionFixDiagnosticStatic2()
         {
             TestCodeFix(@"

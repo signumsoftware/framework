@@ -2,7 +2,7 @@
 using System.Text;
 using System.Collections.Generic;
 using System.Linq;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 using Signum.Engine;
 using Signum.Entities;
 using System.Diagnostics;
@@ -13,137 +13,130 @@ using Signum.Utilities.ExpressionTrees;
 
 namespace Signum.Test.LinqProvider
 {
-    [TestClass]
     public class TakeSkipTest
     {
-        [ClassInitialize()]
-        public static void MyClassInitialize(TestContext testContext)
+        public TakeSkipTest()
         {
             MusicStarter.StartAndLoad();
-        }
-
-        [TestInitialize]
-        public void Initialize()
-        {
             Connector.CurrentLogger = new DebugTextWriter();
         }
 
-        [TestMethod]
+        [Fact]
         public void Take()
         {
             var takeArtist = Database.Query<ArtistEntity>().Take(2).ToList();
-            Assert.AreEqual(takeArtist.Count, 2);
+            Assert.Equal(takeArtist.Count, 2);
         }
 
-        [TestMethod]
+        [Fact]
         public void TakeOrder()
         {
             var takeArtist = Database.Query<ArtistEntity>().OrderBy(a => a.Name).Take(2).ToList();
-            Assert.AreEqual(takeArtist.Count, 2);
+            Assert.Equal(takeArtist.Count, 2);
         }
 
-        [TestMethod]
+        [Fact]
         public void TakeSql()
         {
             var takeAlbum = Database.Query<AlbumEntity>().Select(a => new { a.Name, TwoSongs = a.Songs.Take(2) }).ToList();
-            Assert.IsTrue(takeAlbum.All(a => a.TwoSongs.Count() <= 2));
+            Assert.True(takeAlbum.All(a => a.TwoSongs.Count() <= 2));
         }
 
-        [TestMethod]
+        [Fact]
         public void Skip()
         {
             var skipArtist = Database.Query<ArtistEntity>().Skip(2).ToList();
         }
 
 
-        [TestMethod]
+        [Fact]
         public void SkipAllAggregates()
         {
             var allAggregates = Database.Query<ArtistEntity>().GroupBy(a => new { }).Select(gr => new { Count = gr.Count(), MaxId = gr.Max(a=>a.Id) }).Skip(2).ToList();
 
         }
 
-        [TestMethod]
+        [Fact]
         public void AllAggregatesOrderByAndByKeys()
         {
             var allAggregates = Database.Query<ArtistEntity>().GroupBy(a => new { }).Select(gr => new { Count = gr.Count(), MaxId = gr.Max(a => a.Id) }).OrderBy(a => a.Count).OrderAlsoByKeys().ToList();
         }
 
-        [TestMethod]
+        [Fact]
         public void SkipAllAggregatesOrderBy()
         {
             var allAggregates = Database.Query<ArtistEntity>().GroupBy(a => new { }).Select(gr => new { Count = gr.Count(), MaxId = gr.Max(a => a.Id) }).OrderBy(a=>a.Count).Skip(2).ToList();
         }
 
-        [TestMethod]
+        [Fact]
         public void AllAggregatesCount()
         {
             var count = Database.Query<ArtistEntity>().GroupBy(a => new { }).Select(gr => new { Count = gr.Count(), MaxId = gr.Max(a => a.Id) }).OrderBy(a => a.Count).Count();
-            Assert.AreEqual(1, count);
+            Assert.Equal(1, count);
         }
 
-        [TestMethod]
+        [Fact]
         public void SkipOrder()
         {
             var skipArtist = Database.Query<ArtistEntity>().OrderBy(a => a.Name).Skip(2).ToList();
         }
 
-        [TestMethod]
+        [Fact]
         public void SkipSql()
         {
             var takeAlbum = Database.Query<AlbumEntity>().Select(a => new { a.Name, TwoSongs = a.Songs.Skip(2) }).ToList();
         }
 
-        [TestMethod]
+        [Fact]
         public void SkipTake()
         {
             var skipArtist = Database.Query<ArtistEntity>().Skip(2).Take(1).ToList();
         }
 
-        [TestMethod]
+        [Fact]
         public void SkipTakeOrder()
         {
             var skipArtist = Database.Query<ArtistEntity>().OrderBy(a => a.Name).Skip(2).Take(1).ToList();
         }
 
-        [TestMethod]
+        [Fact]
         public void InnerTake()
         {
             var result = Database.Query<AlbumEntity>().Where(dr => dr.Songs.OrderByDescending(a => a.Seconds).Take(1).Where(a => a.Name.Contains("1976")).Any()).Select(a => a.ToLite()).ToList();
-            Assert.AreEqual(0, result.Count); 
+            Assert.Equal(0, result.Count); 
         }
 
-        [TestMethod]
+        [Fact]
         public void OrderByCommonSelectPaginate()
         {
             TestPaginate(Database.Query<ArtistEntity>().OrderBy(a => a.Sex).Select(a => a.Name));
         }
 
-        [TestMethod]
+        [Fact]
         public void OrderBySelectPaginate()
         {
             TestPaginate(Database.Query<ArtistEntity>().OrderBy(a => a.Name).Select(a => a.Name));
         }
 
-        [TestMethod]
+        [Fact]
         public void OrderByDescendingSelectPaginate()
         {
             TestPaginate(Database.Query<ArtistEntity>().OrderByDescending(a => a.Name).Select(a => a.Name));
         }
 
-        [TestMethod]
+        [Fact]
         public void OrderByThenBySelectPaginate()
         {
             TestPaginate(Database.Query<ArtistEntity>().OrderBy(a => a.Name).ThenBy(a => a.Id).Select(a => a.Name));
         }
 
-        [TestMethod]
+        [Fact]
         public void SelectOrderByPaginate()
         {
             TestPaginate(Database.Query<ArtistEntity>().Select(a => a.Name).OrderBy(a => a));
         }
 
-        [TestMethod]
+        [Fact]
         public void SelectOrderByDescendingPaginate()
         {
             TestPaginate(Database.Query<ArtistEntity>().Select(a => a.Name).OrderByDescending(a => a));
@@ -158,7 +151,7 @@ namespace Signum.Test.LinqProvider
             var list2 = 0.To(((list.Count / pageSize) + 1)).SelectMany(page =>
                 query.OrderAlsoByKeys().Skip(pageSize * page).Take(pageSize).ToList()).ToList();
 
-            Assert.IsTrue(list.SequenceEqual(list2)); 
+            Assert.True(list.SequenceEqual(list2)); 
         }
     }
 }

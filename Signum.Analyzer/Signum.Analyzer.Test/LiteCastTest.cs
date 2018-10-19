@@ -1,7 +1,7 @@
 ﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CodeFixes;
 using Microsoft.CodeAnalysis.Diagnostics;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 using System;
 using TestHelper;
 using Signum.Analyzer;
@@ -17,7 +17,7 @@ namespace Signum.Analyzer.Test
         }
 
         //Diagnostic and CodeFix both triggered and checked for
-        [TestMethod]
+        [Fact]
         public void CastToEntity()
         {
             TestDiagnostic("Impossible to convert Lite<T> to T. Consider using Entity or Retrieve", @"
@@ -26,7 +26,7 @@ Entity entity = (Entity)lite;
             ");
         }
 
-        [TestMethod]
+        [Fact]
         public void CastToLite()
         {
          
@@ -36,7 +36,7 @@ Lite<Entity> lite = (Lite<Entity>)entity;
             ");
         }
 
-        [TestMethod]
+        [Fact]
         public void AsToEntity()
         {
             TestDiagnostic("Impossible to convert Lite<T> to T. Consider using Entity or Retrieve", @"
@@ -45,7 +45,7 @@ Entity entity = lite as Entity;
             ");
         }
 
-        [TestMethod]
+        [Fact]
         public void AsToLite()
         {
 
@@ -55,7 +55,7 @@ Lite<Entity> lite = entity as Lite<Entity>;
             ");
         }
 
-        [TestMethod]
+        [Fact]
         public void IsToEntity()
         {
             TestDiagnostic("Impossible to convert Lite<T> to T. Consider using Entity or Retrieve", @"
@@ -64,7 +64,7 @@ var result = lite is Entity;
             ");
         }
 
-        [TestMethod]
+        [Fact]
         public void IsToLite()
         {
 
