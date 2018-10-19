@@ -22,6 +22,8 @@ namespace Signum.React.RestLog
 {
     public class RestLogFilter : ActionFilterAttribute
     {
+        const string OriginalResponseStreamKey = "ORIGINAL_RESPONSE_STREAM";
+
         public RestLogFilter(bool allowReplay)
         {
             AllowReplay = allowReplay;
@@ -34,13 +36,15 @@ namespace Signum.React.RestLog
             try
             {
                 var request = context.HttpContext.Request;
+                context.HttpContext.Items[OriginalResponseStreamKey] = context.HttpContext.Response.Body;
+                context.HttpContext.Response.Body = new MemoryStream();
 
                 var connection = context.HttpContext.Features.Get<IHttpConnectionFeature>();
                 
                 var queryParams = context.HttpContext.Request.Query
                      .Select(a => new QueryStringValueEmbedded { Key = a.Key, Value = a.Value })
                      .ToMList();
-
+                
                 var restLog = new RestLogEntity
                 {
                     AllowReplay = this.AllowReplay,
@@ -61,7 +65,7 @@ namespace Signum.React.RestLog
                         //actionContext.Request.Properties[SignumAuthenticationFilterAttribute.SavedRequestKey] : null)
                 };
 
-                context.RouteData.Values.Add(typeof(RestLogEntity).FullName, restLog);
+                context.HttpContext.Items.Add(typeof(RestLogEntity).FullName, restLog);
 
             }
             catch (Exception e)
@@ -93,14 +97,20 @@ namespace Signum.React.RestLog
         {
             try
             {
-                var request =
-                (RestLogEntity)context.RouteData.Values.GetOrThrow(
-                    typeof(RestLogEntity).FullName);
+                var request =(RestLogEntity)context.HttpContext.Items.GetOrThrow(typeof(RestLogEntity).FullName);
+                var originalStream =(Stream)context.HttpContext.Items.GetOrThrow(OriginalResponseStreamKey);
                 request.EndDate = TimeZoneManager.Now;
+
+                var memoryStream = context.HttpContext.Response.Body;
+                memoryStream.Seek(0, System.IO.SeekOrigin.Begin);
+                memoryStream.CopyTo(originalStream);
+
+                context.HttpContext.Response.Body = originalStream;
 
                 if (context.Exception == null)
                 {
-                    request.ResponseBody = Encoding.UTF8.GetString(context.HttpContext.Response.Body.ReadAllBytes());
+                    memoryStream.Seek(0, System.IO.SeekOrigin.Begin);
+                    request.ResponseBody = Encoding.UTF8.GetString(memoryStream.ReadAllBytes());
                 }
 
                 if (context.Exception != null)
