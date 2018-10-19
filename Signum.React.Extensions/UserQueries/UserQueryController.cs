@@ -25,19 +25,19 @@ namespace Signum.React.UserQueries
 {
     public class UserQueryController : ApiController
     {
-        [Route("api/userQueries/forQuery/{queryKey}"), HttpGet]
+        [HttpGet("api/userQueries/forQuery/{queryKey}")]
         public IEnumerable<Lite<UserQueryEntity>> FromQuery(string queryKey)
         {
             return UserQueryLogic.GetUserQueries(QueryLogic.ToQueryName(queryKey));
         }
 
-        [Route("api/userQueries/forEntityType/{typeName}"), HttpGet]
+        [HttpGet("api/userQueries/forEntityType/{typeName}")]
         public IEnumerable<Lite<UserQueryEntity>> FromEntityType(string typeName)
         {
             return UserQueryLogic.GetUserQueriesEntity(TypeLogic.GetType(typeName));
         }
 
-        [Route("api/userQueries/fromQueryRequest"), HttpPost]
+        [HttpPost("api/userQueries/fromQueryRequest")]
         public UserQueryEntity FromQueryRequest([FromBody]CreateRequest request)
         {
             var qr = request.queryRequest.ToQueryRequest();

@@ -24,7 +24,7 @@ namespace Signum.React.Tree
 {
     public class TreeController : ApiController
     {
-        [Route("api/tree/findNodes/{typeName}"), HttpPost]
+        [HttpPost("api/tree/findNodes/{typeName}")]
         public List<TreeNode> FindNodes(string typeName, [FromBody]FindNodesRequest request) {
 
             Type type = TypeLogic.GetType(typeName);

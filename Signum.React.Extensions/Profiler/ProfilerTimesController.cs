@@ -25,7 +25,7 @@ namespace Signum.React.Profiler
 {
     public class ProfilerTimesController : ApiController
     {
-        [Route("api/profilerTimes/clear"), HttpPost]
+        [HttpPost("api/profilerTimes/clear")]
         public void Clear()
         {
             ProfilerPermission.ViewTimeTracker.AssertAuthorized();
@@ -33,7 +33,7 @@ namespace Signum.React.Profiler
             TimeTracker.IdentifiedElapseds.Clear();
         }
 
-        [Route("api/profilerTimes/times"), HttpGet]
+        [HttpGet("api/profilerTimes/times")]
         public List<TimeTrackerEntryTS> Times()
         {
             ProfilerPermission.ViewTimeTracker.AssertAuthorized();

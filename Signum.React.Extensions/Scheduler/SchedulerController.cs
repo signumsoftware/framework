@@ -27,7 +27,7 @@ namespace Signum.React.Scheduler
 {
     public class SchedulerController : ApiController
     {
-        [Route("api/scheduler/view"), HttpGet]
+        [HttpGet("api/scheduler/view")]
         public SchedulerState View()
         {
             var state = SchedulerLogic.GetSchedulerState();
@@ -35,7 +35,7 @@ namespace Signum.React.Scheduler
             return state;
         }
 
-        [Route("api/scheduler/start"), HttpPost]
+        [HttpPost("api/scheduler/start")]
         public void Start()
         {
             SchedulerPermission.ViewSchedulerPanel.AssertAuthorized();
@@ -45,7 +45,7 @@ namespace Signum.React.Scheduler
             Thread.Sleep(1000);
         }
 
-        [Route("api/scheduler/stop"), HttpPost]
+        [HttpPost("api/scheduler/stop")]
         public void Stop()
         {
             SchedulerPermission.ViewSchedulerPanel.AssertAuthorized();

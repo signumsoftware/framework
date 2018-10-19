@@ -15,13 +15,13 @@ namespace Signum.React.Processes
 {
     public class PrintController : ApiController
     {
-        [Route("api/printing/stats"), HttpGet]
+        [HttpGet("api/printing/stats")]
         public List<PrintStat> Stats()
         {
             return PrintingLogic.GetReadyToPrintStats();           
         }
 
-        [Route("api/printing/createProcess"), HttpPost]
+        [HttpPost("api/printing/createProcess")]
         public ProcessEntity Stats([FromBody]FileTypeSymbol fileType)
         {
             return PrintingLogic.CreateProcess(fileType);

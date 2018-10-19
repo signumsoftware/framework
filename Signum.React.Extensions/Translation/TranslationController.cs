@@ -30,7 +30,7 @@ namespace Signum.React.Translation
             return AppDomain.CurrentDomain.GetAssemblies().Where(a => a.HasAttribute<DefaultAssemblyCultureAttribute>());
         }
 
-        [Route("api/translation/state"), HttpGet]
+        [HttpGet("api/translation/state")]
         public List<TranslationFileStatus> GetState()
         {
             var cultures = TranslationLogic.CurrentCultureInfos(CultureInfo.GetCultureInfo("en"));
@@ -81,7 +81,7 @@ namespace Signum.React.Translation
         }
 
 
-        [Route("api/translation/retrieve"), HttpPost]
+        [HttpPost("api/translation/retrieve")]
         public AssemblyResultTS Retrieve(string assembly, string culture, string filter)
         {
             Assembly ass = AssembliesToLocalize().Where(a => a.GetName().Name == assembly).SingleEx(() => "Assembly {0}".FormatWith(assembly));
@@ -158,7 +158,7 @@ namespace Signum.React.Translation
         }
 
 
-        [Route("api/translation/sync"), HttpPost]
+        [HttpPost("api/translation/sync")]
         public AssemblyResultTS Sync(string assembly, string culture, string @namespace = null)
         {
             Assembly ass = AssembliesToLocalize().Where(a => a.GetName().Name == assembly).SingleEx(() => "Assembly {0}".FormatWith(assembly));
@@ -187,7 +187,7 @@ namespace Signum.React.Translation
             };
         }
         
-        [Route("api/translation/syncStats"), HttpGet]
+        [HttpGet("api/translation/syncStats")]
         public List<NamespaceSyncStats> SyncStats(string assembly, string culture)
         {
             Assembly ass = AssembliesToLocalize().Where(a => a.GetName().Name == assembly).SingleEx(() => "Assembly {0}".FormatWith(assembly));
@@ -310,7 +310,7 @@ namespace Signum.React.Translation
         }
 
 
-        [Route("api/translation/save"), HttpPost]
+        [HttpPost("api/translation/save")]
         public void SaveTypes(string assembly, string culture, [FromBody]AssemblyResultTS result)
         {
             var currentAssembly = AssembliesToLocalize().Single(a => a.GetName().Name == assembly);
@@ -348,13 +348,13 @@ namespace Signum.React.Translation
             }
         }
 
-        [Route("api/translation/pluralize"), HttpPost]
+        [HttpPost("api/translation/pluralize")]
         public string Pluralize(string culture, [FromBody]string text)
         {
             return NaturalLanguageTools.Pluralize(text, CultureInfo.GetCultureInfo(culture));
         }
 
-        [Route("api/translation/gender"), HttpPost]
+        [HttpPost("api/translation/gender")]
         public string Gender(string culture, [FromBody]string text)
         {
             return NaturalLanguageTools.GetGender(text, CultureInfo.GetCultureInfo(culture))?.ToString();

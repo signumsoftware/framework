@@ -23,7 +23,7 @@ namespace Signum.React.Cache
 {
     public class CacheController : ApiController
     {
-        [Route("api/cache/view"), HttpGet]
+        [HttpGet("api/cache/view")]
         public CacheStateTS View()
         {
             CachePermission.ViewCache.AssertAuthorized();
@@ -40,7 +40,7 @@ namespace Signum.React.Cache
             };
         }
 
-        [Route("api/cache/enable"), HttpPost]
+        [HttpPost("api/cache/enable")]
         public void Enable()
         {
             CachePermission.ViewCache.AssertAuthorized();
@@ -49,7 +49,7 @@ namespace Signum.React.Cache
             SystemEventLogLogic.Log("CacheLogic.Enable");
         }
 
-        [Route("api/cache/disable"), HttpPost]
+        [HttpPost("api/cache/disable")]
         public void Disable()
         {
             CachePermission.ViewCache.AssertAuthorized();
@@ -58,7 +58,7 @@ namespace Signum.React.Cache
             SystemEventLogLogic.Log("CacheLogic.Disable");
         }
 
-        [Route("api/cache/clear"), HttpPost]
+        [HttpPost("api/cache/clear")]
         public void Clear()
         {
             CachePermission.InvalidateCache.AssertAuthorized();

@@ -28,7 +28,7 @@ namespace Signum.React.UserAssets
 { 
     public class UserAssetController : ApiController
     {
-        [Route("api/userAssets/parseFilters"), HttpPost]
+        [HttpPost("api/userAssets/parseFilters")]
         public List<FilterResponse> ParseFilters([FromBody]ParseFiltersRequest request)
         {
             var queryName = QueryLogic.ToQueryName(request.queryKey);
@@ -118,7 +118,7 @@ namespace Signum.React.UserAssets
             public List<FilterResponse> filters;
         }
 
-        [Route("api/userAssets/export"), HttpPost]
+        [HttpPost("api/userAssets/export")]
         public FileStreamResult Export([FromBody]Lite<IUserAssetEntity> lite)
         {
             var bytes = UserAssetsExporter.ToXml(lite.Retrieve());
@@ -126,13 +126,13 @@ namespace Signum.React.UserAssets
             return FilesController.GetFileStreamResult(new MemoryStream(bytes), "{0}{1}.xml".FormatWith(lite.EntityType.Name, lite.Id));
         }
 
-        [Route("api/userAssets/importPreview"), HttpPost]
+        [HttpPost("api/userAssets/importPreview")]
         public UserAssetPreviewModel ImportPreview([FromBody]FileUpload file)
         {
             return UserAssetsImporter.Preview(file.content);
         }
 
-        [Route("api/userAssets/import"), HttpPost]
+        [HttpPost("api/userAssets/import")]
         public void Import([FromBody]FileUploadWithModel file)
         {
             UserAssetsImporter.Import(file.file.content, file.model);

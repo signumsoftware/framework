@@ -19,7 +19,7 @@ namespace Signum.React.Toolbar
 {
     public class ToolbarController : ApiController
     {
-        [Route("api/toolbar/current/{location}"), HttpGet]
+        [HttpGet("api/toolbar/current/{location}")]
         public ToolbarResponse Current(ToolbarLocation location)
         {
             return ToolbarLogic.GetCurrentToolbarResponse(location);

@@ -27,7 +27,7 @@ namespace Signum.React.Files
 {
     public class FilesController : ApiController
     {
-        [Route("api/files/downloadFile/{fileId}"), HttpGet]
+        [HttpGet("api/files/downloadFile/{fileId}")]
         public FileStreamResult DownloadFile(string fileId)
         {
             var file = Database.Retrieve<FileEntity>(PrimaryKey.Parse(fileId, typeof(FileEntity)));
@@ -36,7 +36,7 @@ namespace Signum.React.Files
 
         }
 
-        [Route("api/files/downloadFilePath/{filePathId}"), HttpGet]
+        [HttpGet("api/files/downloadFilePath/{filePathId}")]
         public FileStreamResult DownloadFilePath(string filePathId)
         {
             var filePath = Database.Retrieve<FilePathEntity>(PrimaryKey.Parse(filePathId, typeof(FilePathEntity)));
@@ -44,7 +44,7 @@ namespace Signum.React.Files
             return GetFileStreamResult(filePath.OpenRead(), filePath.FileName);
         }
 
-        [Route("api/files/downloadEmbeddedFilePath/{fileTypeKey}"), HttpGet]
+        [HttpGet("api/files/downloadEmbeddedFilePath/{fileTypeKey}")]
         public FileStreamResult DownloadFilePathEmbedded(string fileTypeKey, string suffix, string fileName)
         {
             var fileType = SymbolLogic<FileTypeSymbol>.ToSymbol(fileTypeKey);

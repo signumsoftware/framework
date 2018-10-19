@@ -26,19 +26,19 @@ namespace Signum.React.Chart
 {
     public class UserChartController : ApiController
     {
-        [Route("api/userChart/forQuery/{queryKey}"), HttpGet]
+        [HttpGet("api/userChart/forQuery/{queryKey}")]
         public IEnumerable<Lite<UserChartEntity>> FromQuery(string queryKey)
         {
             return UserChartLogic.GetUserCharts(QueryLogic.ToQueryName(queryKey));
         }
 
-        [Route("api/userChart/forEntityType/{typeName}"), HttpGet]
+        [HttpGet("api/userChart/forEntityType/{typeName}")]
         public IEnumerable<Lite<UserChartEntity>> FromEntityType(string typeName)
         {
             return UserChartLogic.GetUserChartsEntity(TypeLogic.GetType(typeName));
         }
 
-        [Route("api/userChart/fromChartRequest"), HttpPost, ValidateModelFilter]
+        [HttpPost("api/userChart/fromChartRequest"), ValidateModelFilter]
         public UserChartEntity FromQueryRequest([FromBody]ChartRequest request)
         {
             return request.ToUserChart();

@@ -11,13 +11,13 @@ namespace Signum.React.Profiler
 {
     public class RestApiKeyController : ApiController
     {
-        [Route("api/restApiKey/generate"), HttpGet]
+        [HttpGet("api/restApiKey/generate")]
         public string GenerateRestApiKey()
         {
             return RestApiKeyLogic.GenerateRestApiKey();
         }
 
-        [Route("api/restApiKey/current"), HttpGet]
+        [HttpGet("api/restApiKey/current")]
         public string GetAPIKey()
         {
             using (ExecutionMode.Global())

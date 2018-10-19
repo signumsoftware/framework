@@ -34,7 +34,7 @@ namespace Signum.React.Dynamic
             this.lifeTime = lifeTime;
         }
 
-        [Route("api/dynamic/compile"), HttpPost]
+        [HttpPost("api/dynamic/compile")]
         public List<CompilationErrorTS> Compile()
         {
             SystemEventLogLogic.Log("DynamicController.Compile");
@@ -63,14 +63,14 @@ namespace Signum.React.Dynamic
             public string fileContent;
         }
 
-        [Route("api/dynamic/restartServer"), HttpPost]
+        [HttpPost("api/dynamic/restartServer")]
         public void RestartServer()
         {
             SystemEventLogLogic.Log("DynamicController.RestartServer");
             lifeTime.StopApplication();
         }
 
-        [Route("api/dynamic/startErrors"), HttpGet]
+        [HttpGet("api/dynamic/startErrors")]
         public List<HttpError> GetStartErrors()
         {
             return new Sequence<Exception>
@@ -84,7 +84,7 @@ namespace Signum.React.Dynamic
             .ToList();
         }
 
-        [Route("api/dynamic/evalErrors"), HttpPost]
+        [HttpPost("api/dynamic/evalErrors")]
         public async Task<List<EvalEntityError>> GetEvalErrors([FromBody]QueryEntitiesRequestTS request)
         {
             var allEntities = await QueryLogic.Queries.GetEntities(request.ToQueryEntitiesRequest()).Select(a => a.Entity).ToListAsync();

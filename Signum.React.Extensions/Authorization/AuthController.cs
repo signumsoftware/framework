@@ -18,7 +18,7 @@ namespace Signum.React.Authorization
 {
     public class AuthController : ApiController
     {
-        [Route("api/auth/login"), HttpPost, AllowAnonymous]
+        [HttpPost("api/auth/login"), AllowAnonymous]
         public ActionResult<LoginResponse> Login([FromBody]LoginRequest data)
         {
             if (string.IsNullOrEmpty(data.userName))
@@ -75,7 +75,7 @@ namespace Signum.React.Authorization
             }
         }
 
-        [Route("api/auth/loginFromApiKey"), HttpGet]
+        [HttpGet("api/auth/loginFromApiKey")]
         public LoginResponse LoginFromApiKey(string apiKey)
         {
             string message = AuthLogic.OnLoginMessage();
@@ -85,7 +85,7 @@ namespace Signum.React.Authorization
             return new LoginResponse { message = message, userEntity = UserEntity.Current, token = token };
         }
 
-        [Route("api/auth/loginFromCookie"), HttpPost, AllowAnonymous]
+        [HttpPost("api/auth/loginFromCookie"), AllowAnonymous]
         public LoginResponse LoginFromCookie()
         {
             using (ScopeSessionFactory.OverrideSession())
@@ -101,14 +101,14 @@ namespace Signum.React.Authorization
             }
         }
 
-        [Route("api/auth/currentUser")]
+        [HttpGet("api/auth/currentUser")]
         public UserEntity GetCurrentUser()
         {
             var result = UserEntity.Current;
             return result.Is(AuthLogic.AnonymousUser) ? null : result;
         }
 
-        [Route("api/auth/logout"), HttpPost]
+        [HttpPost("api/auth/logout")]
         public void Logout()
         {
             AuthServer.UserLoggingOut?.Invoke();
@@ -116,7 +116,7 @@ namespace Signum.React.Authorization
             UserTicketServer.RemoveCookie(this.ActionContext);
         }
 
-        [Route("api/auth/ChangePassword"), HttpPost]
+        [HttpPost("api/auth/ChangePassword")]
         public ActionResult<LoginResponse> ChangePassword([FromBody]ChangePasswordRequest request)
         {
             if (string.IsNullOrEmpty(request.oldPassword))

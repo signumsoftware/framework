@@ -27,12 +27,12 @@ namespace Signum.React.Dashboard
 {
     public class DashboardController : ApiController
     {
-        [Route("api/dashboard/forEntityType/{typeName}"), HttpGet]
+        [HttpGet("api/dashboard/forEntityType/{typeName}")]
         public IEnumerable<Lite<DashboardEntity>> FromEntityType(string typeName)
         {
             return DashboardLogic.GetDashboardsEntity(TypeLogic.GetType(typeName));
         }
-        [Route("api/dashboard/home"), HttpGet]
+        [HttpGet("api/dashboard/home")]
         public Lite<DashboardEntity> Home()
         {
             if (TypeAuthLogic.GetAllowed(typeof(DashboardEntity)).MaxUI() == TypeAllowedBasic.None)

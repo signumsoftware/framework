@@ -12,7 +12,7 @@ namespace Signum.React.Processes
 {
     public class ProcessController : ApiController
     {
-        [Route("api/processes/constructFromMany"), HttpPost, ValidateModelFilter]
+        [HttpPost("api/processes/constructFromMany"), ValidateModelFilter]
         public EntityPackTS ConstructFromMany([FromBody]OperationController.MultiOperationRequest request)
         {
             var type = request.type == null ? null : TypeLogic.GetType(request.type);
@@ -22,7 +22,7 @@ namespace Signum.React.Processes
             return SignumServer.GetEntityPack(entity);
         }
 
-        [Route("api/processes/view"), HttpGet]
+        [HttpGet("api/processes/view")]
         public ProcessLogicState View()
         {
             ProcessLogicState state = ProcessRunnerLogic.ExecutionState();
@@ -30,7 +30,7 @@ namespace Signum.React.Processes
             return state;
         }
 
-        [Route("api/processes/start"), HttpPost]
+        [HttpPost("api/processes/start")]
         public void Start()
         {
             ProcessPermission.ViewProcessPanel.AssertAuthorized();
@@ -40,7 +40,7 @@ namespace Signum.React.Processes
             Thread.Sleep(1000);
         }
 
-        [Route("api/processes/stop"), HttpPost]
+        [HttpPost("api/processes/stop")]
         public void Stop()
         {
             ProcessPermission.ViewProcessPanel.AssertAuthorized();

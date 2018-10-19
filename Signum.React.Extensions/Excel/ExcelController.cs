@@ -36,7 +36,7 @@ namespace Signum.React.Excel
 {
     public class MachineLearningController : ApiController
     {
-        [Route("api/excel/plain"), HttpPost]
+        [HttpPost("api/excel/plain")]
         public async Task<FileStreamResult> ToPlainExcel([FromBody]QueryRequestTS request, CancellationToken token)
         {
             var queryRequest = request.ToQueryRequest();
@@ -49,13 +49,13 @@ namespace Signum.React.Excel
             return FilesController.GetFileStreamResult(new MemoryStream(binaryFile), fileName);            
         }
 
-        [Route("api/excel/reportsFor/{queryKey}"), HttpGet]
+        [HttpGet("api/excel/reportsFor/{queryKey}")]
         public IEnumerable<Lite<ExcelReportEntity>> GetExcelReports(string queryKey)
         {
             return ExcelLogic.GetExcelReports(QueryLogic.ToQueryName(queryKey));
         }
 
-        [Route("api/excel/excelReport"), HttpPost]
+        [HttpPost("api/excel/excelReport")]
         public FileStreamResult GenerateExcelReport([FromBody]ExcelReportRequest request)
         {
             byte[] file = ExcelLogic.ExecuteExcelReport(request.excelReport, request.queryRequest.ToQueryRequest());

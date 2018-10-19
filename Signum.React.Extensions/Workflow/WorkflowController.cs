@@ -27,7 +27,7 @@ namespace Signum.React.Workflow
 {
     public class WorkflowController : Controller
     {
-        [Route("api/workflow/fetchForViewing/{caseActivityId}"), HttpGet]
+        [HttpGet("api/workflow/fetchForViewing/{caseActivityId}")]
         public EntityPackWorkflow GetEntity(string caseActivityId)
         {
             var lite = Lite.ParsePrimaryKey<CaseActivityEntity>(caseActivityId);
@@ -47,7 +47,7 @@ namespace Signum.React.Workflow
             }
         }
 
-        [Route("api/workflow/tags/{caseId}"), HttpGet]
+        [HttpGet("api/workflow/tags/{caseId}")]
         public List<CaseTagTypeEntity> GetTags(string caseId)
         {
             var lite = Lite.ParsePrimaryKey<CaseEntity>(caseId);
@@ -65,13 +65,13 @@ namespace Signum.React.Workflow
             public Dictionary<string, object> Extension { get; set; } = new Dictionary<string, object>();
         }
 
-        [Route("api/workflow/starts"), HttpGet]
+        [HttpGet("api/workflow/starts")]
         public List<WorkflowEntity> Starts()
         {
             return WorkflowLogic.GetAllowedStarts();
         }
 
-        [Route("api/workflow/workflowModel/{workflowId}"), HttpGet]
+        [HttpGet("api/workflow/workflowModel/{workflowId}")]
         public WorkflowModelAndIssues GetWorkflowModel(string workflowId)
         {
             var id = PrimaryKey.Parse(workflowId, typeof(WorkflowEntity));
@@ -93,7 +93,7 @@ namespace Signum.React.Workflow
             public List<WorkflowIssue> issues;
         }
 
-        [Route("api/workflow/previewChanges/{workflowId}"), HttpPost]
+        [HttpPost("api/workflow/previewChanges/{workflowId}")]
         public PreviewResult PreviewChanges(string workflowId, [FromBody]WorkflowModel model)
         {
             var id = PrimaryKey.Parse(workflowId, typeof(WorkflowEntity));
@@ -102,7 +102,7 @@ namespace Signum.React.Workflow
         }
 
 
-        [Route("api/workflow/save"), HttpPost, ValidateModelFilter]
+        [HttpPost("api/workflow/save"), ValidateModelFilter]
         public ActionResult<EntityPackWithIssues> SaveWorkflow([FromBody]EntityOperationRequest request)
         {
             WorkflowEntity entity;
@@ -128,7 +128,7 @@ namespace Signum.React.Workflow
             public List<WorkflowIssue> issues;
         }
 
-        [Route("api/workflow/findMainEntityType"), HttpGet]
+        [HttpGet("api/workflow/findMainEntityType")]
         public List<Lite<TypeEntity>> FindMainEntityType(string subString, int count)
         {
             var list = TypeLogic.TypeToEntity
@@ -138,7 +138,7 @@ namespace Signum.React.Workflow
             return AutocompleteUtils.Autocomplete(list, subString, count);
         }
 
-        [Route("api/workflow/findNode"), HttpPost]
+        [HttpPost("api/workflow/findNode")]
         public List<Lite<IWorkflowNodeEntity>> FindNode([FromBody]WorkflowFindNodeRequest request)
         {
             var workflow = Lite.Create<WorkflowEntity>(request.workflowId);
@@ -154,7 +154,7 @@ namespace Signum.React.Workflow
             public List<Lite<IWorkflowNodeEntity>> excludes;
         }
 
-        [Route("api/workflow/condition/test"), HttpPost]
+        [HttpPost("api/workflow/condition/test")]
         public WorkflowConditionTestResponse Test([FromBody]WorkflowConditionTestRequest request)
         {
             IWorkflowConditionEvaluator evaluator;
@@ -199,7 +199,7 @@ namespace Signum.React.Workflow
             public bool validationResult;
         }
 
-        [Route("api/workflow/scriptRunner/view"), HttpGet]
+        [HttpGet("api/workflow/scriptRunner/view")]
         public WorkflowScriptRunnerState ViewScriptRunner()
         {
             WorkflowPanelPermission.ViewWorkflowPanel.AssertAuthorized();
@@ -209,7 +209,7 @@ namespace Signum.React.Workflow
             return state;
         }
 
-        [Route("api/workflow/scriptRunner/start"), HttpPost]
+        [HttpPost("api/workflow/scriptRunner/start")]
         public void StartScriptRunner()
         {
             WorkflowPanelPermission.ViewWorkflowPanel.AssertAuthorized();
@@ -219,7 +219,7 @@ namespace Signum.React.Workflow
             Thread.Sleep(1000);
         }
 
-        [Route("api/workflow/scriptRunner/stop"), HttpPost]
+        [HttpPost("api/workflow/scriptRunner/stop")]
         public void StopScriptRunner()
         {
             WorkflowPanelPermission.ViewWorkflowPanel.AssertAuthorized();
@@ -229,7 +229,7 @@ namespace Signum.React.Workflow
             Thread.Sleep(1000);
         }
 
-        [Route("api/workflow/caseflow/{caseId}"), HttpGet]
+        [HttpGet("api/workflow/caseflow/{caseId}")]
         public CaseFlow GetCaseFlow(string caseId)
         {
             var lite = Lite.ParsePrimaryKey<CaseEntity>(caseId);
@@ -237,13 +237,13 @@ namespace Signum.React.Workflow
             return CaseFlowLogic.GetCaseFlow(lite.Retrieve());
         }
 
-        [Route("api/workflow/activityMonitor"), HttpPost]
+        [HttpPost("api/workflow/activityMonitor")]
         public WorkflowActivityMonitor GetWorkflowActivityMonitor([FromBody]WorkflowActivityMonitorRequestTS request)
         {
             return WorkflowActivityMonitorLogic.GetWorkflowActivityMonitor(request.ToRequest());
         }
 
-        [Route("api/workflow/nextConnections"), HttpPost]
+        [HttpPost("api/workflow/nextConnections")]
         public List<Lite<IWorkflowNodeEntity>> GetNextJumps([FromBody]NextConnectionsRequest request)
         {
             return request.workflowActivity.RetrieveAndForget()

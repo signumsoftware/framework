@@ -32,7 +32,7 @@ namespace Signum.React.Profiler
 {
     public class ProfilerHeavyController : ApiController
     {
-        [Route("api/profilerHeavy/clear"), HttpPost]
+        [HttpPost("api/profilerHeavy/clear")]
         public void Clear()
         {
             ProfilerPermission.ViewHeavyProfiler.AssertAuthorized();
@@ -40,7 +40,7 @@ namespace Signum.React.Profiler
             HeavyProfiler.Clean();
         }
 
-        [Route("api/profilerHeavy/setEnabled/{isEnabled}"), HttpPost]
+        [HttpPost("api/profilerHeavy/setEnabled/{isEnabled}")]
         public void SetEnabled(bool isEnabled)
         {
             ProfilerPermission.ViewHeavyProfiler.AssertAuthorized();
@@ -48,7 +48,7 @@ namespace Signum.React.Profiler
             HeavyProfiler.Enabled = isEnabled;
         }
 
-        [Route("api/profilerHeavy/isEnabled"), HttpGet]
+        [HttpGet("api/profilerHeavy/isEnabled")]
         public bool IsEnabled()
         {
             ProfilerPermission.ViewHeavyProfiler.AssertAuthorized();
@@ -56,7 +56,7 @@ namespace Signum.React.Profiler
             return HeavyProfiler.Enabled;
         }
 
-        [Route("api/profilerHeavy/entries"), HttpGet]
+        [HttpGet("api/profilerHeavy/entries")]
         public List<HeavyProfofilerEntryTS> Entries()
         {
             ProfilerPermission.ViewHeavyProfiler.AssertAuthorized();
@@ -67,7 +67,7 @@ namespace Signum.React.Profiler
                 return HeavyProfiler.Entries.Select(e => new HeavyProfofilerEntryTS(e, false, now)).ToList();
         }
 
-        [Route("api/profilerHeavy/details/{fullIndex}"), HttpGet]
+        [HttpGet("api/profilerHeavy/details/{fullIndex}")]
         public List<HeavyProfofilerEntryTS> Details(string fullIndex)
         {
             ProfilerPermission.ViewHeavyProfiler.AssertAuthorized();
@@ -83,7 +83,7 @@ namespace Signum.React.Profiler
             return result;
         }
 
-        [Route("api/profilerHeavy/stackTrace/{fullIndex}"), HttpGet]
+        [HttpGet("api/profilerHeavy/stackTrace/{fullIndex}")]
         public List<StackTraceTS> StackTrace(string fullIndex)
         {
             ProfilerPermission.ViewHeavyProfiler.AssertAuthorized();
@@ -123,7 +123,7 @@ namespace Signum.React.Profiler
             return null;
         }
 
-        [Route("api/profilerHeavy/download"), HttpGet]
+        [HttpGet("api/profilerHeavy/download")]
         public FileStreamResult Download(string indices = null)
         {
             XDocument doc = indices == null ?
@@ -140,7 +140,7 @@ namespace Signum.React.Profiler
             }
         }
 
-        [Route("api/profilerHeavy/upload"), HttpPost]
+        [HttpPost("api/profilerHeavy/upload")]
         public void Upload([FromBody]FileUpload file)
         {
             using (MemoryStream sr = new MemoryStream(file.content))

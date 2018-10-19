@@ -29,7 +29,7 @@ namespace Signum.React.Mailing
 {
     public class MailingController : ApiController
     {
-        [Route("api/asyncEmailSender/view"), HttpGet]
+        [HttpGet("api/asyncEmailSender/view")]
         public AsyncEmailSenderState View()
         {
             AsyncEmailSenderPermission.ViewAsyncEmailSenderPanel.AssertAuthorized();
@@ -39,7 +39,7 @@ namespace Signum.React.Mailing
             return state;
         }
 
-        [Route("api/asyncEmailSender/start"), HttpPost]
+        [HttpPost("api/asyncEmailSender/start")]
         public void Start()
         {
             AsyncEmailSenderPermission.ViewAsyncEmailSenderPanel.AssertAuthorized();
@@ -49,7 +49,7 @@ namespace Signum.React.Mailing
             Thread.Sleep(1000);
         }
 
-        [Route("api/asyncEmailSender/stop"), HttpPost]
+        [HttpPost("api/asyncEmailSender/stop")]
         public void Stop()
         {
             AsyncEmailSenderPermission.ViewAsyncEmailSenderPanel.AssertAuthorized();
@@ -70,7 +70,7 @@ namespace Signum.React.Mailing
         }
 #pragma warning restore IDE1006 // Naming Styles
 
-        [Route("api/email/constructorType"), HttpPost]
+        [HttpPost("api/email/constructorType")]
         public string GetConstructorType([FromBody]SystemEmailEntity systemEmailTemplate)
         {
             var type = SystemEmailLogic.GetEntityType(systemEmailTemplate.ToType());
@@ -78,7 +78,7 @@ namespace Signum.React.Mailing
             return ReflectionServer.GetTypeName(type);
         }
 
-        [Route("api/email/emailTemplates"), HttpPost]
+        [HttpPost("api/email/emailTemplates")]
         public List<Lite<EmailTemplateEntity>> GetEmailTemplates(string queryKey, EmailTemplateVisibleOn visibleOn, [FromBody]Lite<Entity> lite)
         {
             object queryName = QueryLogic.ToQueryName(queryKey);

@@ -33,19 +33,19 @@ namespace Signum.React.Translation
             _env = env;
         }
 
-        [Route("api/culture/cultures"), HttpGet, AllowAnonymous]
+        [HttpGet("api/culture/cultures"), AllowAnonymous]
         public List<CultureInfoEntity> GetCultures()
         {
             return CultureInfoLogic.CultureInfoToEntity.Value.Values.ToList();
         }
 
-        [Route("api/culture/currentCulture"), HttpGet, AllowAnonymous]
+        [HttpGet("api/culture/currentCulture"), AllowAnonymous]
         public CultureInfoEntity CurrentCulture()
         {
             return CultureInfo.CurrentCulture.TryGetCultureInfoEntity() ?? CultureInfoLogic.CultureInfoToEntity.Value.Values.FirstEx();
         }
 
-        [Route("api/culture/setCurrentCulture"), HttpPost, AllowAnonymous]
+        [HttpPost("api/culture/setCurrentCulture"), AllowAnonymous]
         public string SetCurrentCulture([FromBody]Lite<CultureInfoEntity> culture)
         {
             var ci = ExecutionMode.Global().Using(_ => culture.Retrieve().ToCultureInfo());

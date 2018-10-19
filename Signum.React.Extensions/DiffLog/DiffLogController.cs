@@ -13,7 +13,7 @@ namespace Signum.React.DiffLog
 {
     public class DiffLogController : ApiController
     {
-        [Route("api/diffLog/{id}"), HttpGet]
+        [HttpGet("api/diffLog/{id}")]
         public DiffLogResult GetOperationDiffLog(string id)
         {
             var operationLog = Database.Retrieve<OperationLogEntity>(PrimaryKey.Parse(id, typeof(OperationLogEntity)));

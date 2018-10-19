@@ -19,7 +19,7 @@ namespace Signum.React.RestLog
 {
     public class RestLogController : ApiController
     {
-        [Route("api/restLog/"), HttpGet]
+        [HttpGet("api/restLog/")]
         public async Task<RestDiffResult> GetRestDiffLog(string id, string url)
         {
             var oldRequest = Database.Retrieve<RestLogEntity>(PrimaryKey.Parse(id, typeof(RestLogEntity)));

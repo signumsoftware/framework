@@ -25,7 +25,7 @@ namespace Signum.React.MachineLearning
 {
     public class PredictorController : ApiController
     {
-        [Route("api/predictor/availableDevices/{algorithmKey}"), HttpGet]
+        [HttpGet("api/predictor/availableDevices/{algorithmKey}")]
         public string[] AvailableDevices(string algorithmKey)
         {
             var key = SymbolLogic<PredictorAlgorithmSymbol>.ToSymbol(algorithmKey);
@@ -34,7 +34,7 @@ namespace Signum.React.MachineLearning
             return alg.GetAvailableDevices();
         }
 
-        [Route("api/predictor/trainingProgress/{id}"), HttpGet]
+        [HttpGet("api/predictor/trainingProgress/{id}")]
         public TrainingProgress GetTrainingState(int id)
         {
             var ptc = PredictorLogic.GetTrainingContext(Lite.Create<PredictorEntity>(id));
@@ -49,7 +49,7 @@ namespace Signum.React.MachineLearning
             };
         }
 
-        [Route("api/predictor/epochProgress/{id}"), HttpGet]
+        [HttpGet("api/predictor/epochProgress/{id}")]
         public List<object[]> GetProgressLosses(int id)
         {
             return Database.Query<PredictorEpochProgressEntity>().Where(a => a.Predictor.Id == id).Select(p => new EpochProgress
@@ -66,7 +66,7 @@ namespace Signum.React.MachineLearning
             .ToList();
         }
 
-        [Route("api/predict/get/{predictorId}"), HttpPost]
+        [HttpPost("api/predict/get/{predictorId}")]
         public PredictRequestTS GetPredict(string predictorId, [FromBody]Dictionary<string, object> mainKeys)
         {
             var p = Lite.ParsePrimaryKey<PredictorEntity>(predictorId);
@@ -84,7 +84,7 @@ namespace Signum.React.MachineLearning
             return pmodel;
         }
 
-        [Route("api/predict/update"), HttpPost]
+        [HttpPost("api/predict/update")]
         public PredictRequestTS UpdatePredict([FromBody]PredictRequestTS request)
         {
             PredictorPredictContext pctx = PredictorPredictLogic.GetPredictContext(request.predictor);
@@ -101,7 +101,7 @@ namespace Signum.React.MachineLearning
             return request;
         }
 
-        [Route("api/predict/publications/{queryKey}"), HttpGet]
+        [HttpGet("api/predict/publications/{queryKey}")]
         public List<PredictorPublicationSymbol> GetPublications(string queryKey)
         {
             object queryName = QueryLogic.ToQueryName(queryKey);

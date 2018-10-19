@@ -22,7 +22,7 @@ namespace Signum.React.Dynamic
 {
     public class DynamicViewController : ApiController
     {
-        [Route("api/dynamic/view/{typeName}"), HttpGet]
+        [HttpGet("api/dynamic/view/{typeName}")]
         public DynamicViewEntity GetDynamicView(string typeName, string viewName)
         {
             Type type = TypeLogic.GetType(typeName);
@@ -30,7 +30,7 @@ namespace Signum.React.Dynamic
             return res;
         }
 
-        [Route("api/dynamic/viewNames/{typeName}"), HttpGet]
+        [HttpGet("api/dynamic/viewNames/{typeName}")]
         public List<string> GetDynamicViewNames(string typeName)
         {
             Type type = TypeLogic.GetType(typeName);
@@ -38,7 +38,7 @@ namespace Signum.React.Dynamic
             return res;
         }
 
-        [Route("api/dynamic/suggestedFindOptions/{typeName}"), HttpGet]
+        [HttpGet("api/dynamic/suggestedFindOptions/{typeName}")]
         public List<SuggestedFindOptions> GetSuggestedFindOptions(string typeName)
         {
             Type type = TypeLogic.GetType(typeName);
@@ -46,14 +46,14 @@ namespace Signum.React.Dynamic
             return DynamicViewLogic.GetSuggestedFindOptions(type);
         }
 
-        [Route("api/dynamic/selector/{typeName}"), HttpGet]
+        [HttpGet("api/dynamic/selector/{typeName}")]
         public DynamicViewSelectorEntity GetDynamicViewSelector(string typeName)
         {
             Type type = TypeLogic.GetType(typeName);
             return DynamicViewLogic.DynamicViewSelectors.Value.TryGetC(type);
         }
 
-        [Route("api/dynamic/override/{typeName}"), HttpGet]
+        [HttpGet("api/dynamic/override/{typeName}")]
         public List<DynamicViewOverrideEntity> GetDynamicViewOverride(string typeName)
         {
             Type type = TypeLogic.GetType(typeName);

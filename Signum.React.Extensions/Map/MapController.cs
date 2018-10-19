@@ -19,7 +19,7 @@ namespace Signum.React.Map
 {
     public class MapController : ApiController
     {
-        [Route("api/map/types"), HttpGet]
+        [HttpGet("api/map/types")]
         public SchemaMapInfo Index()
         {
             MapPermission.ViewMap.AssertAuthorized();
@@ -28,7 +28,7 @@ namespace Signum.React.Map
             
         }
 
-        [Route("api/map/operations/{typeName}"), HttpGet]
+        [HttpGet("api/map/operations/{typeName}")]
         public OperationMapInfo Operation(string typeName)
         {
             MapPermission.ViewMap.AssertAuthorized();

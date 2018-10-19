@@ -28,13 +28,13 @@ namespace Signum.React.Chart
 {
     public class ChartController : ApiController
     {
-        [Route("api/chart/scripts"), HttpGet]
+        [HttpGet("api/chart/scripts")]
         public List<List<ChartScriptEntity>> ChartScripts()
         {
             return ChartUtils.PackInGroups(ChartScriptLogic.Scripts.Value.Values, 4);
         }
 
-        [Route("api/chart/colorPalettes"), HttpGet]
+        [HttpGet("api/chart/colorPalettes")]
         public List<string> ColorPelettes()
         {
             return ChartColorLogic.Colors.Value.Keys.Select(t => TypeLogic.GetCleanName(t)).ToList();

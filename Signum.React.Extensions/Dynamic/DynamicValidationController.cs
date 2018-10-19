@@ -22,13 +22,13 @@ namespace Signum.React.Dynamic
 {
     public class DynamicValidationController : ApiController
     {
-        [Route("api/dynamic/validation/routeTypeName"), HttpPost]
+        [HttpPost("api/dynamic/validation/routeTypeName")]
         public string RouteTypeName([FromBody]PropertyRouteEntity pr)
         {
             return pr.ToPropertyRoute().Type.Name;
         }
 
-        [Route("api/dynamic/validation/test"), HttpPost]
+        [HttpPost("api/dynamic/validation/test")]
         public DynamicValidationTestResponse Test([FromBody]DynamicValidationTestRequest request)
         {
             IDynamicValidationEvaluator evaluator;

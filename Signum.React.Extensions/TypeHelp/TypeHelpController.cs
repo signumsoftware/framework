@@ -25,7 +25,7 @@ namespace Signum.React.TypeHelp
     public class TypeHelpController : ApiController
     {
 
-        [Route("api/typeHelp/autocompleteEntityCleanType"), HttpPost]
+        [HttpPost("api/typeHelp/autocompleteEntityCleanType")]
         public List<string> AutocompleteEntityCleanType([FromBody]AutocompleteEntityCleanTypeRequest request)
         {
             Schema s = Schema.Current;
@@ -44,7 +44,7 @@ namespace Signum.React.TypeHelp
             public int limit;
         }
 
-        [Route("api/typeHelp/autocompleteType"), HttpPost]
+        [HttpPost("api/typeHelp/autocompleteType")]
         public List<string> AutocompleteType([FromBody]AutocompleteTypeRequest request) //Not comprehensive, just useful
         {
             var types = GetTypes(request);
@@ -133,7 +133,7 @@ namespace Signum.React.TypeHelp
         }
 
 
-        [Route("api/typeHelp/{typeName}/{mode}"), HttpGet]
+        [HttpGet("api/typeHelp/{typeName}/{mode}")]
         public TypeHelpTS GetTypeHelp(string typeName, TypeHelpMode mode)
         {
             Type type = TypeLogic.TryGetType(typeName);
