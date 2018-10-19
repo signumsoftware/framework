@@ -2,7 +2,7 @@
 using System.Text;
 using System.Collections.Generic;
 using System.Linq;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 using Signum.Engine;
 using Signum.Entities;
 using System.Diagnostics;
@@ -16,116 +16,109 @@ namespace Signum.Test.LinqProvider
     /// <summary>
     /// Summary description for LinqProvider
     /// </summary>
-    [TestClass]
     public class OrderByTest
     {
-        [ClassInitialize()]
-        public static void MyClassInitialize(TestContext testContext)
+        public OrderByTest()
         {
             MusicStarter.StartAndLoad();
-        }
-
-        [TestInitialize]
-        public void Initialize()
-        {
             Connector.CurrentLogger = new DebugTextWriter();
         }
 
-        [TestMethod]
+        [Fact]
         public void OrderByString()
         {
             var songsAlbum = Database.Query<AlbumEntity>().Select(a => a.Name).OrderBy(n => n).ToList();
         }
 
-        [TestMethod]
+        [Fact]
         public void OrderByIntDescending()
         {
             var songsAlbum = Database.Query<AlbumEntity>().OrderByDescending(a => a.Year).ToList();
         }
 
-        [TestMethod]
+        [Fact]
         public void OrderByGetType()
         {
             var songsAlbum = Database.Query<AlbumEntity>().OrderBy(a => a.Author.GetType()).ToList();
         }
 
-        [TestMethod]
+        [Fact]
         public void OrderByFirst()
         {
             var songsAlbum = Database.Query<ArtistEntity>().OrderBy(a => a.Dead).FirstEx();
         }
 
-        [TestMethod]
+        [Fact]
         public void OrderByReverse()
         {
             var artists = Database.Query<ArtistEntity>().OrderBy(a => a.Dead).Reverse().Select(a => a.Name);
         }
 
-        [TestMethod]
+        [Fact]
         public void OrderByLast()
         {
             var michael = Database.Query<ArtistEntity>().OrderBy(a => a.Dead).Last();
-            Assert.IsTrue(michael.Name.Contains("Michael"));
+            Assert.True(michael.Name.Contains("Michael"));
         }
 
-        [TestMethod]
+        [Fact]
         public void OrderByLastPredicate()
         {
             var michael = Database.Query<ArtistEntity>().OrderBy(a => a.Dead).Last(a => a.Name.Length > 1);
-            Assert.IsTrue(michael.Name.Contains("Michael"));
+            Assert.True(michael.Name.Contains("Michael"));
         }
 
-        [TestMethod]
+        [Fact]
         public void OrderByLastOrDefault()
         {
             var michael = Database.Query<ArtistEntity>().OrderBy(a => a.Dead).LastOrDefault();
-            Assert.IsTrue(michael.Name.Contains("Michael"));
+            Assert.True(michael.Name.Contains("Michael"));
         }
 
-        [TestMethod]
+        [Fact]
         public void OrderByLastOrDefaultPredicate()
         {
             var michael = Database.Query<ArtistEntity>().OrderBy(a => a.Dead).LastOrDefault(a => a.Name.Length > 1);
-            Assert.IsTrue(michael.Name.Contains("Michael"));
+            Assert.True(michael.Name.Contains("Michael"));
         }
 
-        [TestMethod]
+        [Fact]
         public void OrderByThenByReverseLast()
         {
             var michael = Database.Query<ArtistEntity>().OrderByDescending(a => a.Dead).ThenBy(a=>a.Name).Reverse().Last();
         }
 
-        [TestMethod]
+        [Fact]
         public void OrderByTakeReverse()
         {
             var michael = Database.Query<ArtistEntity>().OrderByDescending(a => a.Dead).Take(2).Reverse().FirstEx(); //reverse ignored
         }
 
-        [TestMethod]
+        [Fact]
         public void OrderByTakeOrderBy()
         {
             var michael = Database.Query<ArtistEntity>().OrderByDescending(a => a.Dead).Take(2).OrderBy(a=>a.Name).FirstEx();
         }
 
-        [TestMethod]
+        [Fact]
         public void OrderByTop()
         {
             var songsAlbum = Database.Query<ArtistEntity>().OrderBy(a => a.Dead).Take(3);
         }
 
-        [TestMethod]
+        [Fact]
         public void OrderByNotLast()
         {
             var songsAlbum = Database.Query<ArtistEntity>().OrderBy(a => a.Dead).Where(a => a.Id != 0).ToList();
         }
 
-        [TestMethod]
+        [Fact]
         public void OrderByDistinct()
         {
             var songsAlbum = Database.Query<ArtistEntity>().OrderBy(a => a.Dead).Distinct().ToList();
         }
 
-        [TestMethod]
+        [Fact]
         public void OrderByGroupBy()
         {
             var songsAlbum = Database.Query<ArtistEntity>().OrderBy(a => a.Dead)
@@ -133,7 +126,7 @@ namespace Signum.Test.LinqProvider
         }
 
 
-        [TestMethod]
+        [Fact]
         public void OrderByIgnore()
         {
             using (AsserNoQueryWith("ORDER"))
@@ -184,7 +177,7 @@ namespace Signum.Test.LinqProvider
                 sw.Dispose();
                 Debug.Write(str);
 
-                Assert.IsTrue(!str.Contains(text));
+                Assert.True(!str.Contains(text));
             }); 
         }
 

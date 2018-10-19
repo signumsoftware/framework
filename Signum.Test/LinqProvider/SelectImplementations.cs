@@ -1,4 +1,4 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Xunit;
 using Signum.Engine;
 using Signum.Entities;
 using Signum.Test.Environment;
@@ -10,44 +10,37 @@ using System.Linq;
 
 namespace Signum.Test.LinqProvider
 {
-    [TestClass]
     public class SelectImplementationsTest1
     {
-        [ClassInitialize()]
-        public static void MyClassInitialize(TestContext testContext)
+        public SelectImplementationsTest1()
         {
             MusicStarter.StartAndLoad();
-        }
-
-        [TestInitialize]
-        public void Initialize()
-        {
             Connector.CurrentLogger = new DebugTextWriter();
         }      
      
 
-        [TestMethod]
+        [Fact]
         public void SelectType()
         {
             var list = Database.Query<AlbumEntity>()
                 .Select(a => a.GetType()).ToList();
         }
 
-        [TestMethod]
+        [Fact]
         public void SelectTypeNull()
         {
             var list = Database.Query<LabelEntity>()
                 .Select(a => new { Label = a.ToLite(), Owner = a.Owner, OwnerType = a.Owner.Entity.GetType() }).ToList();
         }
 
-        [TestMethod]
+        [Fact]
         public void SelectLiteIB()
         {
             var list = Database.Query<AlbumEntity>()
                 .Select(a => a.Author.ToLite()).ToList();
         }
 
-        [TestMethod]
+        [Fact]
         public void SelectLiteIBDouble()
         {
             var query = Database.Query<AlbumEntity>()
@@ -57,60 +50,60 @@ namespace Signum.Test.LinqProvider
                     ToStr2 = a.Author.ToLite()
                 });
 
-            Assert.AreEqual(2, query.QueryText().CountRepetitions("LEFT OUTER JOIN"));
+            Assert.Equal(2, query.QueryText().CountRepetitions("LEFT OUTER JOIN"));
             query.ToList(); 
         }
 
 
-        [TestMethod]
+        [Fact]
         public void SelectLiteIBDoubleWhereUnion()
         {
             var query = Database.Query<AlbumEntity>()
                 .Where(a => a.Author.CombineUnion().ToLite().ToString().Length > 0)
                 .Select(a => a.Author.CombineUnion().ToLite());
 
-            Assert.AreEqual(3, query.QueryText().CountRepetitions("LEFT OUTER JOIN"));
+            Assert.Equal(3, query.QueryText().CountRepetitions("LEFT OUTER JOIN"));
             query.ToList();
         }
 
-        [TestMethod]
+        [Fact]
         public void SelectLiteIBDoubleWhereSwitch()
         {
             var query = Database.Query<AlbumEntity>()
                 .Where(a => a.Author.CombineCase().ToLite().ToString().Length > 0)
                 .Select(a => a.Author.CombineCase().ToLite());
 
-            Assert.AreEqual(2, query.QueryText().CountRepetitions("LEFT OUTER JOIN"));
+            Assert.Equal(2, query.QueryText().CountRepetitions("LEFT OUTER JOIN"));
             query.ToList();
         }
 
-        [TestMethod]
+        [Fact]
         public void SelectTypeIBA()
         {
             var list = Database.Query<NoteWithDateEntity>()
                 .Select(a => new { Type = a.Target.GetType(), Target = a.Target.ToLite() }).ToList();
         }
 
-        [TestMethod]
+        [Fact]
         public void SelectTypeLiteIB()
         {
             var list = Database.Query<AwardNominationEntity>()
                 .Select(a => a.Award.EntityType).ToList();
         }
 
-        [TestMethod]
+        [Fact]
         public void SelectEntityWithLiteIb()
         {
             var list = Database.Query<AwardNominationEntity>().Where(a => a.Award.Entity is GrammyAwardEntity).ToList();
         }
 
-        [TestMethod]
+        [Fact]
         public void SelectEntityWithLiteIbType()
         {
             var list = Database.Query<AwardNominationEntity>().Where(a => a.Award.Entity.GetType() == typeof(GrammyAwardEntity)).ToList();
         }
 
-        [TestMethod]
+        [Fact]
         public void SelectEntityWithLiteIbTypeContains()
         {
             Type[] types = new Type[] { typeof(GrammyAwardEntity) }; 
@@ -118,34 +111,34 @@ namespace Signum.Test.LinqProvider
             var list = Database.Query<AwardNominationEntity>().Where(a => types.Contains(a.Award.Entity.GetType())).ToList();
         }
 
-        [TestMethod]
+        [Fact]
         public void SelectEntityWithLiteIbRuntimeType()
         {
             var list = Database.Query<AwardNominationEntity>().Where(a => a.Award.EntityType == typeof(GrammyAwardEntity)).ToList();
         }
 
-        [TestMethod]
+        [Fact]
         public void SelectLiteUpcast()
         {
             var list = Database.Query<ArtistEntity>()
                 .Select(a => a.ToLite()).ToList();
         }
 
-        [TestMethod]
+        [Fact]
         public void SelectLiteCastUpcast()
         {
             var list = Database.Query<ArtistEntity>()
                 .SelectMany(a => a.Friends).Select(a=>(Lite<IAuthorEntity>)a).ToList();
         }
 
-        [TestMethod]
+        [Fact]
         public void SelectLiteCastNocast()
         {
             var list = Database.Query<ArtistEntity>()
                 .SelectMany(a => a.Friends).Select(a =>(Lite<ArtistEntity>)a).ToList();
         }
 
-        [TestMethod]
+        [Fact]
         public void SelectLiteCastDowncast()
         {
             var list = Database.Query<AlbumEntity>()
@@ -153,7 +146,7 @@ namespace Signum.Test.LinqProvider
         }
 
 
-        [TestMethod]
+        [Fact]
         public void SelectLiteGenericUpcast()
         {
             var list = SelectAuthorsLite<ArtistEntity, IAuthorEntity>();
@@ -166,27 +159,27 @@ namespace Signum.Test.LinqProvider
             return Database.Query<T>().Select(a => a.ToLite<LT>()).ToList(); //an explicit convert is injected in this scenario
         }
 
-        [TestMethod]
+        [Fact]
         public void SelectLiteIBRedundantUnion()
         {
             var list = (from a in Database.Query<AlbumEntity>()
                         let band = (BandEntity)a.Author
                         select new { Artist = band.ToString(), Author = a.Author.CombineUnion().ToString() }).ToList();
 
-            Assert.AreEqual(Database.Query<AlbumEntity>().Count(), list.Count);
+            Assert.Equal(Database.Query<AlbumEntity>().Count(), list.Count);
         }
 
-        [TestMethod]
+        [Fact]
         public void SelectLiteIBRedundantSwitch()
         {
             var list = (from a in Database.Query<AlbumEntity>()
                         let band = (BandEntity)a.Author
                         select new { Artist = band.ToString(), Author = a.Author.CombineCase().ToString() }).ToList();
 
-            Assert.AreEqual(Database.Query<AlbumEntity>().Count(), list.Count);
+            Assert.Equal(Database.Query<AlbumEntity>().Count(), list.Count);
         }
 
-        [TestMethod]
+        [Fact]
         public void SelectLiteIBWhereUnion()
         {
             var list = Database.Query<AlbumEntity>()
@@ -194,7 +187,7 @@ namespace Signum.Test.LinqProvider
                 .Where(a => a.ToString().StartsWith("Michael")).ToList();
         }
 
-        [TestMethod]
+        [Fact]
         public void SelectLiteIBWhereSwitch()
         {
             var list = Database.Query<AlbumEntity>()
@@ -202,37 +195,37 @@ namespace Signum.Test.LinqProvider
                 .Where(a => a.ToString().StartsWith("Michael")).ToList();
         }
 
-        [TestMethod]
+        [Fact]
         public void SelectLiteIBA()
         {
             var list = Database.Query<NoteWithDateEntity>().Select(a => a.Target.ToLite()).ToList();
         }
 
-        [TestMethod]
+        [Fact]
         public void SelectSimpleEntity()
         {
             var list3 = Database.Query<ArtistEntity>().ToList();
         }
 
-        [TestMethod]
+        [Fact]
         public void SelectEntity()
         {
             var list3 = Database.Query<AlbumEntity>().ToList();
         }
 
-        [TestMethod]
+        [Fact]
         public void SelectEntitySelect()
         {
             var list = Database.Query<AlbumEntity>().Select(a => a).ToList();
         }
 
-        [TestMethod]
+        [Fact]
         public void SelectEntityIB()
         {
             var list = Database.Query<AlbumEntity>().Select(a => a.Author).ToList();
         }
 
-        [TestMethod]
+        [Fact]
         public void SelectEntityIBRedundan()
         {
             var list = (from a in Database.Query<AlbumEntity>()
@@ -240,14 +233,14 @@ namespace Signum.Test.LinqProvider
                         select new { aut, a.Author }).ToList();
         }
 
-        [TestMethod]
+        [Fact]
         public void SelectEntityIBA()
         {
             var list = Database.Query<NoteWithDateEntity>().Select(a => a.Target).ToList();
         }
 
 
-        [TestMethod]
+        [Fact]
         public void SelectCastIB()
         {
             var list = (from a in Database.Query<AlbumEntity>()
@@ -255,42 +248,42 @@ namespace Signum.Test.LinqProvider
                                ((BandEntity)a.Author).Name).ToList();
         }
 
-        [TestMethod]
+        [Fact]
         public void SelectCastIBPolymorphicUnion()
         {
             var list = (from a in Database.Query<AlbumEntity>()
                         select a.Author.CombineUnion().Name).ToList();
         }
 
-        [TestMethod]
+        [Fact]
         public void SelectCastIBPolymorphicSwitch()
         {
             var list = (from a in Database.Query<AlbumEntity>()
                         select a.Author.CombineCase().Name).ToList();
         }
 
-       [TestMethod]
+       [Fact]
         public void SelectCastIBPolymorphicForceNullify()
         {
             var list = (from a in Database.Query<AwardNominationEntity>()
                         select (int?)a.Award.Entity.Year).ToList();
         }
 
-        [TestMethod]
+        [Fact]
         public void SelectCastIBPolymorphicIBUnion()
         {
             var list = (from a in Database.Query<AlbumEntity>()
                         select a.Author.CombineUnion().LastAward.ToLite()).ToList();
         }
 
-        [TestMethod]
+        [Fact]
         public void SelectCastIBPolymorphicIBSwitch()
         {
             var list = (from a in Database.Query<AlbumEntity>()
                         select a.Author.CombineCase().LastAward.ToLite()).ToList();
         }
 
-        [TestMethod]
+        [Fact]
         public void SelectCastIBA()
         {
             var list = (from n in Database.Query<NoteWithDateEntity>()
@@ -301,7 +294,7 @@ namespace Signum.Test.LinqProvider
 
         }
 
-        [TestMethod]
+        [Fact]
         public void SelectCastIBACastOperator()
         {
             var list = (from n in Database.Query<NoteWithDateEntity>()
@@ -309,14 +302,14 @@ namespace Signum.Test.LinqProvider
         }
 
 
-        [TestMethod]
+        [Fact]
         public void SelectCastIBAOfTypeOperator()
         {
             var list = (from n in Database.Query<NoteWithDateEntity>()
                         select n.Target).OfType<BandEntity>().ToList();
         }
 
-        [TestMethod]
+        [Fact]
         public void SelectCastIsIB()
         {
             var list = (from a in Database.Query<AlbumEntity>()
@@ -324,14 +317,14 @@ namespace Signum.Test.LinqProvider
                                                         ((BandEntity)a.Author).Name)).ToList();
         }
 
-        [TestMethod]
+        [Fact]
         public void SelectCastIsIBA()
         {
             var list = (from n in Database.Query<NoteWithDateEntity>()
                         select n.Target is ArtistEntity ? ((ArtistEntity)n.Target).Name : ((BandEntity)n.Target).Name).ToList();
         }
 
-        [TestMethod]
+        [Fact]
         public void SelectCastIsIBADouble()
         {
             var query = (from n in Database.Query<NoteWithDateEntity>()
@@ -341,24 +334,24 @@ namespace Signum.Test.LinqProvider
                              FullName = n.Target is ArtistEntity ? ((ArtistEntity)n.Target).FullName : ((BandEntity)n.Target).FullName
                          });
 
-            Assert.AreEqual(1, query.QueryText().CountRepetitions("Artist"));
+            Assert.Equal(1, query.QueryText().CountRepetitions("Artist"));
 
             query.ToList();
         }
 
-        [TestMethod]
+        [Fact]
         public void SelectCastIsIBADoubleWhere()
         {
             var query = (from n in Database.Query<NoteWithDateEntity>()
                          where (n.Target is ArtistEntity ? ((ArtistEntity)n.Target).Name : ((BandEntity)n.Target).Name).Length > 0
                          select n.Target is ArtistEntity ? ((ArtistEntity)n.Target).FullName : ((BandEntity)n.Target).FullName);
 
-            Assert.AreEqual(1, query.QueryText().CountRepetitions("Artist"));
+            Assert.Equal(1, query.QueryText().CountRepetitions("Artist"));
 
             query.ToList();
         }
 
-        [TestMethod]
+        [Fact]
         public void SelectIsIBLite()
         {
             var query = (from n in Database.Query<NoteWithDateEntity>()
@@ -367,7 +360,7 @@ namespace Signum.Test.LinqProvider
 
         }
 
-        [TestMethod]
+        [Fact]
         public void SelectIsIBALite()
         {
             var query = (from a in Database.Query<AwardNominationEntity>()
@@ -376,7 +369,7 @@ namespace Signum.Test.LinqProvider
 
         }
 
-        [TestMethod]
+        [Fact]
         public void SelectCastIBALite()
         {
             var query = (from n in Database.Query<NoteWithDateEntity>()
@@ -384,7 +377,7 @@ namespace Signum.Test.LinqProvider
 
         }
 
-        [TestMethod]
+        [Fact]
         public void SelectCastIBLite()
         {
             var query = (from a in Database.Query<AwardNominationEntity>()

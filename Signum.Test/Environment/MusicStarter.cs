@@ -7,7 +7,7 @@ using Signum.Engine.Maps;
 using Signum.Engine;
 using System.IO;
 using System.Diagnostics;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 using Signum.Entities.Basics;
 using Signum.Engine.DynamicQuery;
 using Signum.Utilities.ExpressionTrees;
