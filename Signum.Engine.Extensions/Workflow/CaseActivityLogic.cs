@@ -828,54 +828,54 @@ namespace Signum.Engine.Workflow
                 }
             }
 
-    
+
             private static void ExecuteStep(CaseActivityEntity ca, DoneType doneType, WorkflowConnectionEntity firstConnection)
             {
                 using (WorkflowActivityInfo.Scope(new WorkflowActivityInfo { CaseActivity = ca, Connection = firstConnection }))
                 {
                     SaveEntity(ca.Case.MainEntity);
-
-                    ca.DoneBy = UserEntity.Current.ToLite();
-                    ca.DoneDate = TimeZoneManager.Now;
-                    ca.DoneType = doneType;
-                    ca.Case.Description = ca.Case.MainEntity.ToString().Trim().Etc(100);
-                    ca.Save();
-
-                    ca.Notifications()
-                       .UnsafeUpdate()
-                       .Set(a => a.State, a => a.User == UserEntity.Current.ToLite() ? CaseNotificationState.Done : CaseNotificationState.DoneByOther)
-                       .Execute();
-
-                    var ctx = new WorkflowExecuteStepContext
-                    {
-                        Case = ca.Case,
-                        CaseActivity = ca,
-                    };
-
-                    if (firstConnection != null)
-                    {
-                        if (firstConnection.Condition != null)
-                        {
-                            var jumpCtx = new WorkflowTransitionContext(ca.Case, ca, firstConnection);
-                            var alg = firstConnection.Condition.RetrieveFromCache().Eval.Algorithm;
-                            var result = alg.EvaluateUntyped(ca.Case.MainEntity, jumpCtx);
-                            if (!result)
-                                throw new ApplicationException(WorkflowMessage.JumpTo0FailedBecause1.NiceToString(firstConnection.To, firstConnection.Condition));
-                        }
-
-                        ctx.ExecuteConnection(firstConnection);
-                        if (!FindNext(firstConnection.To, ctx))
-                            return;
-                    }
-                    else
-                    {
-                        var connection = ca.WorkflowActivity.NextConnectionsFromCache(ConnectionType.Normal).SingleEx();
-                        if (!FindNext(connection, ctx))
-                            return;
-                    }
-
-                    FinishStep(ca.Case, ctx, ca);
                 }
+
+                ca.DoneBy = UserEntity.Current.ToLite();
+                ca.DoneDate = TimeZoneManager.Now;
+                ca.DoneType = doneType;
+                ca.Case.Description = ca.Case.MainEntity.ToString().Trim().Etc(100);
+                ca.Save();
+
+                ca.Notifications()
+                   .UnsafeUpdate()
+                   .Set(a => a.State, a => a.User == UserEntity.Current.ToLite() ? CaseNotificationState.Done : CaseNotificationState.DoneByOther)
+                   .Execute();
+
+                var ctx = new WorkflowExecuteStepContext
+                {
+                    Case = ca.Case,
+                    CaseActivity = ca,
+                };
+
+                if (firstConnection != null)
+                {
+                    if (firstConnection.Condition != null)
+                    {
+                        var jumpCtx = new WorkflowTransitionContext(ca.Case, ca, firstConnection);
+                        var alg = firstConnection.Condition.RetrieveFromCache().Eval.Algorithm;
+                        var result = alg.EvaluateUntyped(ca.Case.MainEntity, jumpCtx);
+                        if (!result)
+                            throw new ApplicationException(WorkflowMessage.JumpTo0FailedBecause1.NiceToString(firstConnection.To, firstConnection.Condition));
+                    }
+
+                    ctx.ExecuteConnection(firstConnection);
+                    if (!FindNext(firstConnection.To, ctx))
+                        return;
+                }
+                else
+                {
+                    var connection = ca.WorkflowActivity.NextConnectionsFromCache(ConnectionType.Normal).SingleEx();
+                    if (!FindNext(connection, ctx))
+                        return;
+                }
+
+                FinishStep(ca.Case, ctx, ca);
             }
 
             private static void FinishStep(CaseEntity @case, WorkflowExecuteStepContext ctx, CaseActivityEntity ca)
@@ -932,27 +932,24 @@ namespace Signum.Engine.Workflow
             {
                 var connection = boundaryEvent.NextConnectionsFromCache(ConnectionType.Normal).SingleEx();
 
-                using (WorkflowActivityInfo.Scope(new WorkflowActivityInfo { CaseActivity = ca, Connection= connection }))
+                var @case = ca.Case;
+                var ctx = new WorkflowExecuteStepContext
                 {
-                    var @case = ca.Case;
-                    var ctx = new WorkflowExecuteStepContext
-                    {
-                        Case = @case,
-                        CaseActivity = ca,
-                    };
+                    Case = @case,
+                    CaseActivity = ca,
+                };
 
-                    ctx.ExecuteConnection(connection);
-                    if (!FindNext(connection.To, ctx))
-                        return;
+                ctx.ExecuteConnection(connection);
+                if (!FindNext(connection.To, ctx))
+                    return;
 
-                    CreateNextActivities(@case, ctx, ca);
+                CreateNextActivities(@case, ctx, ca);
 
-                    new CaseActivityExecutedTimerEntity
-                    {
-                        BoundaryEvent = boundaryEvent.ToLite(),
-                        CaseActivity = ca.ToLite(),
-                    }.Save();
-                }
+                new CaseActivityExecutedTimerEntity
+                {
+                    BoundaryEvent = boundaryEvent.ToLite(),
+                    CaseActivity = ca.ToLite(),
+                }.Save();
             }
 
             private static void ExecuteInitialStep(CaseEntity  @case, WorkflowEventEntity @event, WorkflowConnectionEntity transition)
