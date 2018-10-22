@@ -21,29 +21,19 @@ export class UncontrolledTabs extends React.Component<UncontrolledTabsProps, Unc
     constructor(props: UncontrolledTabsProps) {
         super(props);
         this.state = {
-            activeEventKey: props.defaultEventKey != null ? props.defaultEventKey : getFirstEventKey(props.children)
+            activeEventKey: getDefaultEventKey(props)
         };
     }
 
     componentWillReceiveProps(newProps: UncontrolledTabsProps) {
-        if (this.state.activeEventKey == undefined) {
-            const newEventKey = getFirstEventKey(newProps.children);
-            if (newEventKey != null)
-                this.setState({ activeEventKey: newEventKey });
-        } else {
+        if (this.props.defaultEventKey != newProps.defaultEventKey ||
+            this.state.activeEventKey == null ||
+            !(React.Children.toArray(newProps.children) as React.ReactElement<TabProps>[]).some(a => a.props.eventKey == this.state.activeEventKey)) {
 
-            var array = (React.Children.toArray(newProps.children) as React.ReactElement<TabProps>[]);
-         
-            if (this.state.activeEventKey != newProps.defaultEventKey) {
-                let newEventKey = null;
+            var newActiveKey = getDefaultEventKey(newProps);
 
-                if (!array.some(a => a.props.eventKey == newProps.defaultEventKey))
-                   newEventKey = getFirstEventKey(newProps.children);
-                else
-                   newEventKey = newProps.defaultEventKey;
-
-                this.setState({ activeEventKey: newEventKey })
-            }
+            if (newActiveKey != this.state.activeEventKey)
+                this.setState({ activeEventKey: newActiveKey });
         }
     }
 
@@ -56,7 +46,8 @@ export class UncontrolledTabs extends React.Component<UncontrolledTabsProps, Unc
         }
     }
 
-    render() {     
+    render() {
+
         const { children, defaultEventKey, hideOnly, fill, pills } = this.props;
 
         return (
@@ -68,6 +59,18 @@ export class UncontrolledTabs extends React.Component<UncontrolledTabsProps, Unc
 }
 
 
+function getDefaultEventKey(props: UncontrolledTabsProps) {
+    const array = React.Children.toArray(props.children) as React.ReactElement<TabProps>[];
+
+    if (array.some(a => a.props.eventKey == props.defaultEventKey))
+        return props.defaultEventKey;
+
+    if (array && array.length)
+        return array[0].props.eventKey;
+
+    return undefined;
+}
+
 
 interface TabsProps extends React.HTMLAttributes<HTMLDivElement> {
     activeEventKey: string | number | undefined;
@@ -75,15 +78,6 @@ interface TabsProps extends React.HTMLAttributes<HTMLDivElement> {
     hideOnly?: boolean;
     pills?: boolean;
     fill?: boolean;
-}
-
-function getFirstEventKey(children: React.ReactNode) {
-    const array = React.Children.toArray(children);
-
-    if (array && array.length)
-        return (array[0] as React.ReactElement<TabProps>).props.eventKey;
-
-    return undefined;
 }
 
 export class Tabs extends React.Component<TabsProps> {
@@ -114,8 +108,8 @@ export class Tabs extends React.Component<TabsProps> {
                 </ul>
                 {hideOnly ?
                     array.map(elem => React.cloneElement(elem, ({ style: elem.props.eventKey == this.props.activeEventKey ? undefined : { display: "none" } }) as React.HTMLAttributes<any>)) :
-                array.filter(elem => elem.props.eventKey == this.props.activeEventKey)
-            }
+                    array.filter(elem => elem.props.eventKey == this.props.activeEventKey)
+                }
             </div>
         );
     }
@@ -123,7 +117,7 @@ export class Tabs extends React.Component<TabsProps> {
 
 interface TabProps extends React.HTMLAttributes<any> {
     eventKey: string | number;
-    title?: string /*| React.ReactChild*/;
+    title?: string /* | React.ReactChild*/;
     anchorHtmlProps?: React.HTMLAttributes<HTMLAnchorElement>;
 }
 
