@@ -1,5 +1,5 @@
 ﻿using Microsoft.SqlServer.Types;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 using Signum.Engine;
 using Signum.Engine.Maps;
 using Signum.Entities;
@@ -16,33 +16,26 @@ namespace Signum.Test.LinqProvider
     /// <summary>
     /// Summary description for LinqProvider
     /// </summary>
-    [TestClass]
     public class SqlFunctionsTest
     {
-        [ClassInitialize()]
-        public static void MyClassInitialize(TestContext testContext)
+        public SqlFunctionsTest()
         {
             MusicStarter.StartAndLoad();
-        }
-
-        [TestInitialize]
-        public void Initialize()
-        {
             Connector.CurrentLogger = new DebugTextWriter();
         }
 
-        [TestMethod]
+        [Fact]
         public void StringFunctions()
         {
             var artists = Database.Query<ArtistEntity>();
-            Assert.IsTrue(artists.Any(a => a.Name.IndexOf('M') == 0));
-            Assert.IsTrue(artists.Any(a => a.Name.IndexOf("Mi") == 0));
-            Assert.IsTrue(artists.Any(a => a.Name.Contains("Jackson")));
-            Assert.IsTrue(artists.Any(a => a.Name.StartsWith("Billy")));
-            Assert.IsTrue(artists.Any(a => a.Name.EndsWith("Corgan")));
-            Assert.IsTrue(artists.Any(a => a.Name.Like("%Michael%")));
-            Assert.IsTrue(artists.Count(a => a.Name.EndsWith("Orri Páll Dýrason")) == 1);
-            Assert.IsTrue(artists.Count(a => a.Name.StartsWith("Orri Páll Dýrason")) == 1);
+            Assert.True(artists.Any(a => a.Name.IndexOf('M') == 0));
+            Assert.True(artists.Any(a => a.Name.IndexOf("Mi") == 0));
+            Assert.True(artists.Any(a => a.Name.Contains("Jackson")));
+            Assert.True(artists.Any(a => a.Name.StartsWith("Billy")));
+            Assert.True(artists.Any(a => a.Name.EndsWith("Corgan")));
+            Assert.True(artists.Any(a => a.Name.Like("%Michael%")));
+            Assert.True(artists.Count(a => a.Name.EndsWith("Orri Páll Dýrason")) == 1);
+            Assert.True(artists.Count(a => a.Name.StartsWith("Orri Páll Dýrason")) == 1);
 
             Dump((ArtistEntity a) => a.Name.Length);
             Dump((ArtistEntity a) => a.Name.ToLower());
@@ -58,19 +51,19 @@ namespace Signum.Test.LinqProvider
             Dump((ArtistEntity a) => a.Name.Replicate(2).InSql());
         }
 
-        [TestMethod]
+        [Fact]
         public void StringFunctionsPolymorphicUnion()
         {
-            Assert.IsTrue(Database.Query<AlbumEntity>().Any(a => a.Author.CombineUnion().Name.Contains("Jackson")));
+            Assert.True(Database.Query<AlbumEntity>().Any(a => a.Author.CombineUnion().Name.Contains("Jackson")));
         }
 
-        [TestMethod]
+        [Fact]
         public void StringFunctionsPolymorphicSwitch()
         {
-            Assert.IsTrue(Database.Query<AlbumEntity>().Any(a => a.Author.CombineCase().Name.Contains("Jackson")));
+            Assert.True(Database.Query<AlbumEntity>().Any(a => a.Author.CombineCase().Name.Contains("Jackson")));
         }
 
-        [TestMethod]
+        [Fact]
         public void CoalesceFirstOrDefault()
         {
             var list = Database.Query<BandEntity>()
@@ -78,19 +71,19 @@ namespace Signum.Test.LinqProvider
                .Select(a => a.ToLite()).ToList();
         }
 
-        [TestMethod]
+        [Fact]
         public void StringContainsUnion()
         {
             var list = Database.Query<AlbumEntity>().Where(a => !a.Author.CombineUnion().ToString().Contains("Hola")).ToList();
         }
 
-        [TestMethod]
+        [Fact]
         public void StringContainsSwitch()
         {
             var list = Database.Query<AlbumEntity>().Where(a => !a.Author.CombineCase().ToString().Contains("Hola")).ToList();
         }
 
-        [TestMethod]
+        [Fact]
         public void DateTimeFunctions()
         {
             Dump((NoteWithDateEntity n) => n.CreationTime.Year);
@@ -103,7 +96,7 @@ namespace Signum.Test.LinqProvider
             Dump((NoteWithDateEntity n) => n.CreationTime.Millisecond);
         }
 
-        [TestMethod]
+        [Fact]
         public void DateTimeDayOfWeek()
         {
             //var list = Database.Query<ArtistEntity>().GroupBy(a => a.Sex).Select(gr => new { gr.Key, Count = gr.Count() }).ToList();
@@ -112,7 +105,7 @@ namespace Signum.Test.LinqProvider
             var list2 = Database.Query<NoteWithDateEntity>().Where(a => a.CreationTime.DayOfWeek == DayOfWeek.Sunday).ToList();
         }
 
-        [TestMethod]
+        [Fact]
         public void DateDiffFunctions()
         {
             Dump((NoteWithDateEntity n) => (n.CreationTime - n.CreationTime).TotalDays.InSql());
@@ -122,7 +115,7 @@ namespace Signum.Test.LinqProvider
             Dump((NoteWithDateEntity n) => (n.CreationTime.AddDays(1) - n.CreationTime).TotalMilliseconds.InSql());
         }
 
-        [TestMethod]
+        [Fact]
         public void DateFunctions()
         {
             Dump((NoteWithDateEntity n) => n.CreationTime.Date);
@@ -133,14 +126,14 @@ namespace Signum.Test.LinqProvider
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void DayOfWeekFunction()
         {
             var list = Database.Query<NoteWithDateEntity>().Where(n => n.CreationTime.DayOfWeek != DayOfWeek.Sunday)
                 .Select(n => n.CreationTime.DayOfWeek).ToList();
         }
 
-        [TestMethod]
+        [Fact]
         public void TimeSpanFunction()
         {
             if (!Schema.Current.Settings.IsDbType(typeof(TimeSpan)))
@@ -166,7 +159,7 @@ namespace Signum.Test.LinqProvider
         }
 
 
-        [TestMethod]
+        [Fact]
         public void SqlHierarchyIdFunction()
         {
             if (!Schema.Current.Settings.UdtSqlName.ContainsKey(typeof(SqlHierarchyId)))
@@ -184,7 +177,7 @@ namespace Signum.Test.LinqProvider
             Debug.WriteLine(nodes.Where(n => (bool)(n.GetReparentedValue(n.GetAncestor(0), SqlHierarchyId.GetRoot()) > SqlHierarchyId.GetRoot())).ToString(", "));
         }
 
-        [TestMethod]
+        [Fact]
         public void MathFunctions()
         {
             Dump((AlbumEntity a) => Math.Sign(a.Year));
@@ -213,66 +206,66 @@ namespace Signum.Test.LinqProvider
             Debug.WriteLine(Database.Query<T>().Select(a => bla.Evaluate(a).InSql()).ToString(","));
         }
 
-        [TestMethod]
+        [Fact]
         public void ConcatenateNull()
         {
             var list = Database.Query<ArtistEntity>().Select(a => (a.Name + null).InSql()).ToList();
 
-            Assert.IsFalse(list.Any(string.IsNullOrEmpty));
+            Assert.False(list.Any(string.IsNullOrEmpty));
         }
 
-        [TestMethod]
+        [Fact]
         public void EnumToString()
         {
             var sexs = Database.Query<ArtistEntity>().Select(a => a.Sex.ToString()).ToList();
         }
 
-        [TestMethod]
+        [Fact]
         public void NullableEnumToString()
         {   
             var sexs = Database.Query<ArtistEntity>().Select(a => a.Status.ToString()).ToList();
         }
 
-        [TestMethod]
+        [Fact]
         public void ConcatenateStringNullableNominate()
         {
             var list2 = Database.Query<ArtistEntity>().Select(a => a.Name + " is " + a.Status).ToList();
         }
 
-        [TestMethod]
+        [Fact]
         public void ConcatenateStringNullableEntity()
         {
             var list1 = Database.Query<AlbumEntity>().Select(a => a.Name + " is published by " + a.Label).ToList();
         }
 
-        [TestMethod]
+        [Fact]
         public void ConcatenateStringFullNominate()
         {
             var list = Database.Query<ArtistEntity>().Where(a => (a + "").Contains("Michael")).ToList();
 
-            Assert.IsTrue(list.Count == 1);
+            Assert.True(list.Count == 1);
         }
 
-        [TestMethod]
+        [Fact]
         public void Etc()
         {
-            Assert.IsTrue(Enumerable.SequenceEqual(
+            Assert.True(Enumerable.SequenceEqual(
                 Database.Query<AlbumEntity>().Select(a => a.Name.Etc(10)).OrderBy().ToList(),
                 Database.Query<AlbumEntity>().Select(a => a.Name).ToList().Select(l => l.Etc(10)).OrderBy().ToList()));
 
-            Assert.AreEqual(
+            Assert.Equal(
                 Database.Query<AlbumEntity>().Count(a => a.Name.Etc(10).EndsWith("s")),
                 Database.Query<AlbumEntity>().Count(a => a.Name.EndsWith("s")));
         }
 
-        [TestMethod]
+        [Fact]
         public void TableValuedFunction()
         {
             var list = Database.Query<AlbumEntity>()
                 .Where(a => MinimumExtensions.MinimumTableValued((int)a.Id * 2, (int)a.Id).Select(m => m.MinValue).First() > 2).Select(a => a.Id).ToList();
         }
 
-        [TestMethod]
+        [Fact]
         public void TableValuedPerformanceTest()
         {
             var songs = Database.MListQuery((AlbumEntity a) => a.Songs).Select(a => a.Element);
@@ -310,11 +303,11 @@ namespace Signum.Test.LinqProvider
 
             var t4 = PerfCounter.Ticks;
 
-            Assert.IsTrue(PerfCounter.ToMilliseconds(t1, t2) < PerfCounter.ToMilliseconds(t3, t4));
-            Assert.IsTrue(PerfCounter.ToMilliseconds(t2, t3) < PerfCounter.ToMilliseconds(t3, t4));
+            Assert.True(PerfCounter.ToMilliseconds(t1, t2) < PerfCounter.ToMilliseconds(t3, t4));
+            Assert.True(PerfCounter.ToMilliseconds(t2, t3) < PerfCounter.ToMilliseconds(t3, t4));
         }
 
-        [TestMethod]
+        [Fact]
         public void SimplifyMinimumTableValued()
         {
             var result = (from b in Database.Query<BandEntity>()
@@ -322,7 +315,7 @@ namespace Signum.Test.LinqProvider
                           select b.Name).ToList();
         }
 
-        [TestMethod]
+        [Fact]
         public void NominateEnumSwitch()
         {
             var list = Database.Query<AlbumEntity>().Select(a =>

@@ -20,14 +20,19 @@ input[type=checkbox].form-control {
 }
 
 .form-control.readonly {
-    background-color: #e9ecef;
+    background-color: #ddd;
     opacity: 1;
 }
 
-    .form-control.readonly.readonly-textarea {
-        height: initial !important;
-        white-space: pre-wrap;
-    }
+.form-control:disabled, .form-control[readonly] {
+    background-color: #ddd;
+}
+
+.form-control.readonly.readonly-textarea {
+    height: initial !important;
+    white-space: pre-wrap;
+}
+
 
 .numeric {
     text-align: right;

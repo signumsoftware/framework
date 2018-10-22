@@ -2,7 +2,7 @@
 using System.Text;
 using System.Collections.Generic;
 using System.Linq;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 using Signum.Engine;
 using Signum.Entities.Basics;
 using Signum.Engine.DynamicQuery;
@@ -17,37 +17,35 @@ using System.Linq.Expressions;
 
 namespace Signum.Test
 {
-    [TestClass]
     public class MetaTest
     {
-        [ClassInitialize()]
-        public static void MyClassInitialize(TestContext testContext)
+        public MetaTest()
         {
             MusicStarter.StartAndLoad();
         }
 
 
-        [TestMethod]
+        [Fact]
         public void MetaNoMetadata()
         {
-            Assert.IsNull(DynamicQueryCore.QueryMetadata(Database.Query<NoteWithDateEntity>().Select(a => a.Target)));
+            Assert.Null(DynamicQueryCore.QueryMetadata(Database.Query<NoteWithDateEntity>().Select(a => a.Target)));
         }
 
-        [TestMethod]
+        [Fact]
         public void MetaRawEntity()
         {
             var dic = DynamicQueryCore.QueryMetadata(Database.Query<NoteWithDateEntity>());
-            Assert.IsNotNull(dic);
+            Assert.NotNull(dic);
         }
 
-        [TestMethod]
+        [Fact]
         public void MetaAnonymousType()
         {
             var dic = DynamicQueryCore.QueryMetadata(Database.Query<NoteWithDateEntity>().Select(a => new { a.Target, a.Text, a.ToString().Length, Sum = a.ToString() + a.ToString() }));
-            Assert.IsInstanceOfType(dic["Target"], typeof(CleanMeta));
-            Assert.IsInstanceOfType(dic["Text"], typeof(CleanMeta));
-            Assert.IsInstanceOfType(dic["Length"], typeof(DirtyMeta));
-            Assert.IsInstanceOfType(dic["Sum"], typeof(DirtyMeta));
+            Assert.IsType<CleanMeta>(dic["Target"]);
+            Assert.IsType<CleanMeta>(dic["Text"]);
+            Assert.IsType<DirtyMeta>(dic["Length"]);
+            Assert.IsType<DirtyMeta>(dic["Sum"]);
         }
 
         public class Bla
@@ -56,15 +54,15 @@ namespace Signum.Test
             public int Length { get; set; }
         }
 
-        [TestMethod]
+        [Fact]
         public void MetaNamedType()
         {
             var dic = DynamicQueryCore.QueryMetadata(Database.Query<NoteWithDateEntity>().Select(a => new Bla { ToStr = a.ToString(), Length = a.ToString().Length }));
-            Assert.IsInstanceOfType(dic["ToStr"], typeof(CleanMeta));
-            Assert.IsInstanceOfType(dic["Length"], typeof(DirtyMeta));
+            Assert.IsType<CleanMeta>(dic["ToStr"]);
+            Assert.IsType<DirtyMeta>(dic["Length"]);
         }
 
-        [TestMethod]
+        [Fact]
         public void MetaComplexJoin()
         {
             var dic = DynamicQueryCore.QueryMetadata(
@@ -72,15 +70,15 @@ namespace Signum.Test
                     join a in Database.Query<AlbumEntity>() on l equals a.Label
                     select new { Label = l.Name, Name = a.Name, Sum = l.Name.Length + a.Name });
 
-            Assert.IsInstanceOfType(dic["Label"], typeof(CleanMeta));
-            Assert.IsInstanceOfType(dic["Name"], typeof(CleanMeta));
-            Assert.IsInstanceOfType(dic["Sum"], typeof(DirtyMeta));
+            Assert.IsType<CleanMeta>(dic["Label"]);
+            Assert.IsType<CleanMeta>(dic["Name"]);
+            Assert.IsType<DirtyMeta>(dic["Sum"]);
 
             var metas = ((DirtyMeta)dic["Sum"]).CleanMetas;
-            Assert.AreEqual(metas.SelectMany(cm => cm.PropertyRoutes).Distinct().ToString(","), "(Album).Name,(Label).Name");
+            Assert.Equal(metas.SelectMany(cm => cm.PropertyRoutes).Distinct().ToString(","), "(Album).Name,(Label).Name");
         }
 
-        [TestMethod]
+        [Fact]
         public void MetaComplexJoinGroup()
         {
             var dic = DynamicQueryCore.QueryMetadata(
@@ -88,13 +86,13 @@ namespace Signum.Test
                       join a in Database.Query<AlbumEntity>() on l equals a.Label into g
                       select new { l.Name, Num = g.Count() });
 
-            Assert.IsInstanceOfType(dic["Name"], typeof(CleanMeta));
-            Assert.IsInstanceOfType(dic["Num"], typeof(DirtyMeta));
+            Assert.IsType<CleanMeta>(dic["Name"]);
+            Assert.IsType<DirtyMeta>(dic["Num"]);
 
-            Assert.IsTrue(((DirtyMeta)dic["Num"]).CleanMetas.Count == 0);
+            Assert.True(((DirtyMeta)dic["Num"]).CleanMetas.Count == 0);
         }
 
-        [TestMethod]
+        [Fact]
         public void MetaComplexGroup()
         {
             var dic = DynamicQueryCore.QueryMetadata(
@@ -102,13 +100,13 @@ namespace Signum.Test
                     group a by a.Label into g
                     select new { g.Key, Num = g.Count() });
 
-            Assert.IsInstanceOfType(dic["Key"], typeof(CleanMeta));
-            Assert.IsInstanceOfType(dic["Num"], typeof(DirtyMeta));
+            Assert.IsType<CleanMeta>(dic["Key"]);
+            Assert.IsType<DirtyMeta>(dic["Num"]);
 
-            Assert.IsTrue(((DirtyMeta)dic["Num"]).CleanMetas.Count == 0);
+            Assert.True(((DirtyMeta)dic["Num"]).CleanMetas.Count == 0);
         }
 
-        [TestMethod]
+        [Fact]
         public void MetaSelectMany()
         {
             var dic = DynamicQueryCore.QueryMetadata(
@@ -117,13 +115,13 @@ namespace Signum.Test
                     select new { a.Name, Song = s.Name }
                     );
 
-            Assert.IsInstanceOfType(dic["Name"], typeof(CleanMeta));
-            Assert.IsInstanceOfType(dic["Song"], typeof(CleanMeta));
+            Assert.IsType<CleanMeta>(dic["Name"]);
+            Assert.IsType<CleanMeta>(dic["Song"]);
 
-            Assert.IsNotNull(((CleanMeta)dic["Song"]).PropertyRoutes[0].ToString(), "(AlbumEntity).Songs/Name");
+            Assert.Equal(((CleanMeta)dic["Song"]).PropertyRoutes[0].ToString(), "(Album).Songs/Name");
         }
 
-        [TestMethod]
+        [Fact]
         public void MetaCoallesce()
         {
             var dic = DynamicQueryCore.QueryMetadata(
@@ -133,10 +131,10 @@ namespace Signum.Test
 
             DirtyMeta meta = (DirtyMeta)dic["Author"];
 
-            Assert.AreEqual(meta.Implementations, Implementations.By(typeof(ArtistEntity), typeof(BandEntity)));
+            Assert.Equal(meta.Implementations, Implementations.By(typeof(ArtistEntity), typeof(BandEntity)));
         }
 
-        [TestMethod]
+        [Fact]
         public void MetaConditional()
         {
             var dic = DynamicQueryCore.QueryMetadata(
@@ -146,7 +144,7 @@ namespace Signum.Test
 
             DirtyMeta meta = (DirtyMeta)dic["Author"];
 
-            Assert.AreEqual(meta.Implementations, Implementations.By(typeof(ArtistEntity), typeof(BandEntity)));
+            Assert.Equal(meta.Implementations, Implementations.By(typeof(ArtistEntity), typeof(BandEntity)));
         }
 
     }

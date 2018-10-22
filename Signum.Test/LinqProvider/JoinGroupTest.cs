@@ -2,7 +2,7 @@
 using System.Text;
 using System.Collections.Generic;
 using System.Linq;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 using Signum.Engine;
 using Signum.Entities;
 using System.Diagnostics;
@@ -15,22 +15,15 @@ namespace Signum.Test.LinqProvider
     /// <summary>
     /// Summary description for LinqProvider
     /// </summary>
-    [TestClass]
     public class JoinGroupTest
     {
-        [ClassInitialize()]
-        public static void MyClassInitialize(TestContext testContext)
+        public JoinGroupTest()
         {
             MusicStarter.StartAndLoad();
-        }
-
-        [TestInitialize]
-        public void Initialize()
-        {
             Connector.CurrentLogger = new DebugTextWriter();
         }
 
-        [TestMethod]
+        [Fact]
         public void Join()
         {
             var songsAlbum = (from a in Database.Query<AlbumEntity>()
@@ -38,7 +31,7 @@ namespace Signum.Test.LinqProvider
                               select new { a.Name, Label = a.Label.Name }).ToList();
         }
 
-        [TestMethod]
+        [Fact]
         public void JoinEntity()
         {
             var songsAlbum = (from a in Database.Query<ArtistEntity>()
@@ -47,7 +40,7 @@ namespace Signum.Test.LinqProvider
         }
 
 
-        [TestMethod]
+        [Fact]
         public void JoinEntityTwice()
         {
             var algums = (from a1 in Database.Query<AlbumEntity>()
@@ -56,7 +49,7 @@ namespace Signum.Test.LinqProvider
                           select new { Name1 = a1.Name, Name2 = a2.Name, Name3 = a3.Name  }).ToList();
         }
 
-        [TestMethod]
+        [Fact]
         public void JoinerExpansions()
         {
             var labels = Database.Query<AlbumEntity>().Join(
@@ -66,7 +59,7 @@ namespace Signum.Test.LinqProvider
         }
 
 
-        [TestMethod]
+        [Fact]
         public void LeftOuterJoinEntity()
         {
             var songsAlbum = (from a in Database.Query<ArtistEntity>().DefaultIfEmpty()
@@ -75,7 +68,7 @@ namespace Signum.Test.LinqProvider
         }
 
 
-        [TestMethod]
+        [Fact]
         public void LeftOuterJoinEntityNotNull()
         {
             var songsAlbum = (from a in Database.Query<ArtistEntity>().DefaultIfEmpty()
@@ -84,7 +77,7 @@ namespace Signum.Test.LinqProvider
         }
 
 
-        [TestMethod]
+        [Fact]
         public void RightOuterJoinEntity()
         {
             var songsAlbum = (from a in Database.Query<ArtistEntity>()
@@ -92,7 +85,7 @@ namespace Signum.Test.LinqProvider
                               select new { Artist = a.Name, Album = b.Name }).ToList();
         }
 
-        [TestMethod]
+        [Fact]
         public void RightOuterJoinEntityNotNull()
         {
             var songsAlbum = (from a in Database.Query<ArtistEntity>()
@@ -100,7 +93,7 @@ namespace Signum.Test.LinqProvider
                               select new { Artist = a.Name, Album = b.Name, HasArtist = b != null }).ToList();
         }
 
-        [TestMethod]
+        [Fact]
         public void FullOuterJoinEntity()
         {
             var songsAlbum = (from a in Database.Query<ArtistEntity>().DefaultIfEmpty()
@@ -108,7 +101,7 @@ namespace Signum.Test.LinqProvider
                               select new { Artist = a.Name, Album = b.Name }).ToList();
         }
 
-        [TestMethod]
+        [Fact]
         public void FullOuterJoinEntityNotNull()
         {
             var songsAlbum = (from a in Database.Query<ArtistEntity>().DefaultIfEmpty()
@@ -116,7 +109,7 @@ namespace Signum.Test.LinqProvider
                               select new { Artist = a.Name, Album = b.Name, HasArtist = a != null, HasAlbum = b != null }).ToList();
         }
 
-        [TestMethod]
+        [Fact]
         public void JoinGroup()
         {
             var songsAlbum = (from a in Database.Query<ArtistEntity>()
@@ -124,7 +117,7 @@ namespace Signum.Test.LinqProvider
                               select new { a.Name, Albums = (int?)g.Count() }).ToList();
         }
 
-        [TestMethod]
+        [Fact]
         public void LeftOuterJoinGroup()
         {
             var songsAlbum = (from a in Database.Query<ArtistEntity>()
@@ -139,7 +132,7 @@ namespace Signum.Test.LinqProvider
             public Lite<ArtistEntity> Artist { get; set; }
         }
 
-        [TestMethod]
+        [Fact]
         public void LeftOuterMyView()
         {
             using (Transaction tr = new Transaction())
@@ -152,11 +145,11 @@ namespace Signum.Test.LinqProvider
                              join b in Database.View<MyTempView>() on a.ToLite() equals b.Artist into g
                              select a.ToLite()).ToList();
 
-                Assert.IsTrue(artists.All(a => a.ToString().StartsWith("M")));
+                Assert.True(artists.All(a => a.ToString().StartsWith("M")));
 
                 var list1 = Database.View<MyTempView>().ToList();
                 var list2 = Database.Query<ArtistEntity>().Where(a => a.Name.StartsWith("M")).ToList();
-                Assert.AreEqual(list1.Count, list2.Count);
+                Assert.Equal(list1.Count, list2.Count);
 
                 tr.Commit();
             }

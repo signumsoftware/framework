@@ -2,7 +2,7 @@
 using System.Text;
 using System.Collections.Generic;
 using System.Linq;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 using Signum.Engine;
 using Signum.Utilities;
 using Signum.Entities;
@@ -13,23 +13,15 @@ using Signum.Engine.Maps;
 
 namespace Signum.Test.LinqProvider
 {
-    [TestClass]
     public class SystemTimeTest
     {
-        [ClassInitialize()]
-        public static void MyClassInitialize(TestContext testContext)
+        public SystemTimeTest()
         {
             MusicStarter.StartAndLoad();
-        }
-
-        [TestInitialize]
-        public void Initialize()
-        {
             Connector.CurrentLogger = new DebugTextWriter();
         }
-        
 
-        [TestMethod]
+        [Fact]
         public void TimePresent()
         {
             if (!Connector.Current.SupportsTemporalTables)
@@ -39,11 +31,11 @@ namespace Signum.Test.LinqProvider
                         where f.Parent != null
                         select new { f.Name, Parent = f.Parent.Entity.Name }).ToList();
 
-            Assert.AreEqual(0, list.Count);
+            Assert.Equal(0, list.Count);
         }
 
 
-        [TestMethod]
+        [Fact]
         public void TimeAll()
         {
             if (!Connector.Current.SupportsTemporalTables)
@@ -61,12 +53,12 @@ namespace Signum.Test.LinqProvider
                                 ParentPeriod = f.Parent.Entity.SystemPeriod()
                             }).ToList();
 
-                Assert.IsTrue(list.All(a => a.Period.Overlaps(a.ParentPeriod)));
+                Assert.True(list.All(a => a.Period.Overlaps(a.ParentPeriod)));
             }
         }
 
 
-        [TestMethod]
+        [Fact]
         public void TimeBetween()
         {
             if (!Connector.Current.SupportsTemporalTables)

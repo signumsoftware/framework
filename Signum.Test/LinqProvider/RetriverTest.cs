@@ -2,7 +2,7 @@
 using System.Text;
 using System.Collections.Generic;
 using System.Linq;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 using Signum.Engine;
 using Signum.Entities;
 using System.Diagnostics;
@@ -21,22 +21,15 @@ namespace Signum.Test.LinqProvider
     /// <summary>
     /// Summary description for LinqProvider
     /// </summary>
-    [TestClass]
     public class RetrieverTest
     {
-        [ClassInitialize()]
-        public static void MyClassInitialize(TestContext testContext)
+        public RetrieverTest()
         {
             MusicStarter.StartAndLoad();
-        }
-
-        [TestInitialize]
-        public void Initialize()
-        {
             Connector.CurrentLogger = new DebugTextWriter();
         }      
 
-        [TestMethod]
+        [Fact]
         public void RetrieveSimple()
         {
             var list = Database.Query<CountryEntity>().ToList();
@@ -44,7 +37,7 @@ namespace Signum.Test.LinqProvider
             AssertRetrieved(list);
         }
 
-        [TestMethod]
+        [Fact]
         public void RetrieveWithEnum()
         {
             var list = Database.Query<GrammyAwardEntity>().ToList();
@@ -53,7 +46,7 @@ namespace Signum.Test.LinqProvider
         }
 
 
-        [TestMethod]
+        [Fact]
         public void RetrieveWithRelatedEntityAndLite()
         {
             var list = Database.Query<LabelEntity>().ToList();
@@ -61,7 +54,7 @@ namespace Signum.Test.LinqProvider
             AssertRetrieved(list);
         }
 
-        [TestMethod]
+        [Fact]
         public void RetrieveWithIBA()
         {
             var list = Database.Query<NoteWithDateEntity>().ToList();
@@ -69,7 +62,7 @@ namespace Signum.Test.LinqProvider
             AssertRetrieved(list);
         }
 
-        [TestMethod]
+        [Fact]
         public void RetrieveWithMList()
         {
             var list = Database.Query<ArtistEntity>().ToList();
@@ -77,7 +70,7 @@ namespace Signum.Test.LinqProvider
             AssertRetrieved(list);
         }
 
-        [TestMethod]
+        [Fact]
         public void RetrieveWithMListEmbedded()
         {
             var list = Database.Query<AlbumEntity>().ToList();
@@ -94,16 +87,16 @@ namespace Signum.Test.LinqProvider
                 a is Entity && (((Entity)a).IdOrNull == null || ((Entity)a).IsNew));
 
             if (problematic.Any())
-                throw new AssertFailedException("Some non-retrived elements: {0}".FormatWith(problematic.ToString(", ")));  
+                Assert.True(false, "Some non-retrived elements: {0}".FormatWith(problematic.ToString(", ")));
         }
 
 
-        [TestMethod]
+        [Fact]
         public void RetrieveWithMListCount()
         {
             var artist = Database.Query<ArtistEntity>().OrderBy(a => a.Name).First();
 
-            Assert.AreEqual(artist.ToLite().Retrieve().Friends.Count, artist.Friends.Count);
+            Assert.Equal(artist.ToLite().Retrieve().Friends.Count, artist.Friends.Count);
         }
     }
 }
