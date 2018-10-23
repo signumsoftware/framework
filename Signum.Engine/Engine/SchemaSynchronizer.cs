@@ -447,12 +447,12 @@ namespace Signum.Engine
 
         private static SqlPreCommand AlterTableAddColumnDefault(ITable table, IColumn column, Replacements rep, string forceDefaultValue)
         {
-            if (column.Nullable == IsNullable.Yes || column.Identity || column.Default != null)
+            if (column.Nullable == IsNullable.Yes || column.Identity || column.Default != null || column is ImplementationColumn)
                 return SqlBuilder.AlterTableAddColumn(table, column);
 
-                var defaultValue = GetDefaultValue(table, column, rep, forNewColumn: true, forceDefaultValue: forceDefaultValue);
-                if (defaultValue == "force")
-                    return SqlBuilder.AlterTableAddColumn(table, column);
+            var defaultValue = GetDefaultValue(table, column, rep, forNewColumn: true, forceDefaultValue: forceDefaultValue);
+            if (defaultValue == "force")
+                return SqlBuilder.AlterTableAddColumn(table, column);
 
             if(column.Nullable == IsNullable.Forced)
             {
