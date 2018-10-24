@@ -809,7 +809,7 @@ namespace Signum.Engine.Workflow
             return (from w in Database.Query<WorkflowEntity>()
                     let s = w.WorkflowEvents().Single(a => a.Type == WorkflowEventType.Start)
                     let a = (WorkflowActivityEntity)s.NextConnections().Single().To
-                    where !w.HasExpired() && a.Lane.Actors.Any(a => IsUserConstantActor.Evaluate(UserEntity.Current, a))
+                    where !w.HasExpired() && a.Lane.Actors.Any(b => IsUserConstantActor.Evaluate(UserEntity.Current, b))
                     select w).ToList();
         }
 
