@@ -44,7 +44,7 @@
   <Target Name="GenerateSignumTS">
     <WriteLinesToFile File="$(BaseIntermediateOutputPath)SignumReferences.txt" Lines="@(ReferencePath)" Overwrite="true" Encoding="Unicode" />
     <WriteLinesToFile File="$(BaseIntermediateOutputPath)SignumContent.txt" Lines="@(Content);@(None)" Overwrite="true" Encoding="Unicode" />
-    <Exec Command="dotnet '../Signum.TSGenerator/Binaries/netcoreapp2.1/Signum.TSGenerator.dll' '@(IntermediateAssembly)' '$(BaseIntermediateOutputPath)SignumReferences.txt' '$(BaseIntermediateOutputPath)SignumContent.txt'" ConsoleToMSBuild="false">
+    <Exec Command="dotnet &quot;../Signum.TSGenerator/Binaries/netcoreapp2.1/Signum.TSGenerator.dll&quot; &quot;@(IntermediateAssembly)&quot; &quot;$(BaseIntermediateOutputPath)SignumReferences.txt&quot; &quot;$(BaseIntermediateOutputPath)SignumContent.txt&quot;" ConsoleToMSBuild="false">
       <Output TaskParameter="ConsoleOutput" PropertyName="OutputOfExec" />
     </Exec>
   </Target>
