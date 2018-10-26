@@ -337,21 +337,17 @@ export function logout() {
 function logoutInternal() {
     setAuthToken(undefined);
     setCurrentUser(undefined);
-    Navigator.clearEntitySettings();
-    Operations.clearOperationSettings();
-    OmniboxClient.clearSpecialActions();
-    OmniboxClient.clearProviders();
-    Finder.clearQuerySettings();
+   
     Options.onLogout();
 }
 
 export namespace Options {
-    export let onLogout = () => {
-        Navigator.history.push("~/");
+    export let onLogout: () => void = () => {
+        throw new Error("onLogout should be defined (check Main.tsx in Southwind)");
     }
 
-    export let onLogin = (url?: string) => {
-        Navigator.history.push(url || "~/");
+    export let onLogin: (url?: string) => void = (url?: string) => {
+        throw new Error("onLogin should be defined (check Main.tsx in Southwind)");
     }
 }
 
