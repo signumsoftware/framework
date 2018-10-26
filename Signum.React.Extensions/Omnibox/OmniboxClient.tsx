@@ -15,6 +15,9 @@ import { OmniboxMessage } from './Signum.Entities.Omnibox'
 
 export function start(...params: OmniboxProvider<OmniboxResult>[]) {
     params.forEach(op => registerProvider(op));
+
+    Navigator.clearSettingsActions.push(clearProviders);
+    Navigator.clearSettingsActions.push(clearSpecialActions);
 }
 
 export const providers: { [resultTypeName: string]: OmniboxProvider<OmniboxResult> } = {}; 
