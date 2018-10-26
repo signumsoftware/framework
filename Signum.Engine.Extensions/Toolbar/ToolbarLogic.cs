@@ -249,6 +249,9 @@ namespace Signum.Engine.Toolbar
         
         static bool InMemoryFilter<T>(T entity) where T : Entity
         {
+            if (Schema.Current.IsAllowed(typeof(T), inUserInterface: true) != null)
+                return false;
+
             var isAllowed = Schema.Current.GetInMemoryFilter<T>(userInterface: true);
             return isAllowed(entity);
         }
