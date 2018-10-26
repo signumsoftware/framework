@@ -128,12 +128,22 @@ export function createRoute(type: PseudoType) {
     return toAbsoluteUrl("~/create/" + getTypeName(type));
 }
 
-export const entitySettings: { [type: string]: EntitySettings<ModifiableEntity> } = {};
+
+export const clearSettingsActions: Array<() => void> = [
+    clearEntitySettings,
+    Finder.clearQuerySettings,
+    Operations.clearOperationSettings,
+];
+
+export function clearAllSettings() {
+    clearSettingsActions.forEach(a => a());
+} 
 
 export function clearEntitySettings() {
     Dic.clear(entitySettings);
 }
 
+export const entitySettings: { [type: string]: EntitySettings<ModifiableEntity> } = {};
 export function addSettings(...settings: EntitySettings<any>[]) {
     settings.forEach(s => Dic.addOrThrow(entitySettings, s.typeName, s));
 }
