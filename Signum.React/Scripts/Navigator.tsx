@@ -970,6 +970,10 @@ export function toAbsoluteUrl(appRelativeUrl: string): string {
     if (appRelativeUrl && appRelativeUrl.startsWith("~/"))
         return window.__baseUrl + appRelativeUrl.after("~/");
 
+    var relativeCrappyUrl = history.location.pathname.beforeLast("/") + "/~/"; //In Link render ~/ is considered a relative url
+    if (appRelativeUrl && appRelativeUrl.startsWith(relativeCrappyUrl)) 
+        return window.__baseUrl + appRelativeUrl.after(relativeCrappyUrl);
+
     if (appRelativeUrl.startsWith(window.__baseUrl) || appRelativeUrl.startsWith("http"))
         return appRelativeUrl;
 
