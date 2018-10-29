@@ -6,6 +6,8 @@ import { IBinding } from '@framework/Reflection';
 export interface HtmlEditorProps {
     binding: IBinding<string | null | undefined>;
     readonly?: boolean;
+    rootStyle?: React.CSSProperties;
+    editorStyle?: React.CSSProperties;
 }
 
 export default class HtmlEditor extends React.Component<HtmlEditorProps, { editorValue: EditorValue }>{
@@ -31,6 +33,8 @@ export default class HtmlEditor extends React.Component<HtmlEditorProps, { edito
                 readOnly={this.props.readonly}
                 onChange={ev => this.setState({ editorValue: ev })}
                 onBlur={() => this.saveHtml()}
+                rootStyle={this.props.rootStyle}
+                editorStyle={this.props.editorStyle}
                 />
         );
     }
