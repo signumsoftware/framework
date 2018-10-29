@@ -34,7 +34,7 @@ namespace Signum.TSGenerator
             {
                 try
                 {
-                    log.WriteLine($"Reading {file}");
+                    //log.WriteLine($"Reading {file}");
 
                     string result = obj.Process(file, references, projectFile);
 
@@ -52,6 +52,7 @@ namespace Signum.TSGenerator
                 catch (Exception ex)
                 {
                     hasErrors = true;
+                    log.WriteLine($"Error in {file}");
                     log.WriteLine(ex.Message);
                 }
             }
