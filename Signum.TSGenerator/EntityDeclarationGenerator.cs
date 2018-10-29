@@ -503,19 +503,22 @@ namespace Signum.TSGenerator
 
         public static TypeReference ElementType(this TypeReference type)
         {
-            if (type.FullName == typeof(string).FullName || type.FullName == typeof(byte[]).FullName)
+            if (!(type is GenericInstanceType gen))
                 return null;
 
+            if (type.FullName == typeof(string).FullName || type.FullName == typeof(byte[]).FullName)
+                return null;
+            
             var def = type.Resolve();
             if (def == null)
                 return null;
 
-            var ienum = AllInterfaces(def).SingleOrDefault(tr => tr is GenericInstanceType git && git.ElementType.Name == "IEnumerabe`1");
+            var ienum = AllInterfaces(def).SingleOrDefault(tr => tr is GenericInstanceType git && git.ElementType.Name == "IEnumerable`1");
 
             if (ienum == null)
                 return null;
 
-            return ((GenericInstanceType)ienum).GenericArguments.Single(); 
+            return gen.GenericArguments.Single(); 
         }
 
         static string TypeScriptName(TypeReference type, TypeDefinition current, Options options, string errorContext)
