@@ -16,6 +16,8 @@ declare module 'react-rte' {
         autoFocus?: boolean;
         placeholder?: string;
         readOnly?: boolean;
+        rootStyle?: React.CSSProperties;
+        editorStyle?: React.CSSProperties;
     }
 
 
