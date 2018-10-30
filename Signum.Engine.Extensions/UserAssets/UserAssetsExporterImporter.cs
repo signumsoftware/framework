@@ -163,9 +163,9 @@ namespace Signum.Engine.UserAssets
                 return TypeLogic.GetType(cleanName).ToTypeEntity().ToLite();
             }
 
-            public ChartScriptEntity ChartScript(string chartScriptName)
+            public ChartScriptSymbol ChartScript(string chartScriptName)
             {
-                return ChartScriptLogic.GetChartScript(chartScriptName);
+                return ChartScriptLogic.Scripts.Keys.SingleEx(cs => cs.Key == chartScriptName || cs.Key.After(".") == chartScriptName);
             }
 
             public QueryDescription GetQueryDescription(QueryEntity Query)
@@ -281,9 +281,9 @@ namespace Signum.Engine.UserAssets
                 return TypeLogic.GetType(cleanName).ToTypeEntity().ToLite();
             }
 
-            public ChartScriptEntity ChartScript(string chartScriptName)
+            public ChartScriptSymbol ChartScript(string chartScriptName)
             {
-                return ChartScriptLogic.GetChartScript(chartScriptName);
+                return ChartScriptLogic.Scripts.Keys.SingleEx(cs => cs.Key == chartScriptName || cs.Key.After(".") == chartScriptName);
             }
 
             public QueryDescription GetQueryDescription(QueryEntity Query)

@@ -51,19 +51,25 @@ namespace Signum.Entities.Chart
         [StringLengthValidator(AllowNulls = false, Min = 3, Max = 200)]
         public string DisplayName { get; set; }
 
-        ChartScriptEntity chartScript;
+        ChartScriptSymbol chartScript;
         [NotNullValidator]
-        public ChartScriptEntity ChartScript
+        public ChartScriptSymbol ChartScript
         {
             get { return chartScript; }
             set
             {
                 if (Set(ref chartScript, value))
                 {
-                    chartScript.SynchronizeColumns(this);
+                    this.GetChartScript().SynchronizeColumns(this);
                     NotifyAllColumns();
                 }
             }
+        }
+
+
+        public ChartScript GetChartScript()
+        {
+            return ChartRequest.GetChartScriptFunc(this.ChartScript);
         }
 
         [NotNullValidator, NoRepeatValidator]
@@ -137,7 +143,7 @@ namespace Signum.Entities.Chart
         {
             try
             {
-                chartScript.SynchronizeColumns(this);
+                this.GetChartScript().SynchronizeColumns(this);
             }
             catch (InvalidOperationException e) when (e.Message.Contains("sealed"))
             {
@@ -161,7 +167,7 @@ namespace Signum.Entities.Chart
                 EntityType == null ? null : new XAttribute("EntityType", ctx.TypeToName(EntityType)),
                 new XAttribute("HideQuickLink", HideQuickLink),
                 Owner == null ? null : new XAttribute("Owner", Owner.Key()),
-                new XAttribute("ChartScript", ChartScript.Name),
+                new XAttribute("ChartScript", this.ChartScript.Key),
                 new XAttribute("GroupResults", GroupResults),
                 Filters.IsNullOrEmpty() ? null : new XElement("Filters", Filters.Select(f => f.ToXml(ctx)).ToList()),
                 new XElement("Columns", Columns.Select(f => f.ToXml(ctx)).ToList()),
@@ -198,7 +204,7 @@ namespace Signum.Entities.Chart
                 {
                     EnumerableExtensions.JoinStrict(
                         Parameters,
-                        ChartScript.Parameters,
+                        this.GetChartScript().Parameters,
                         p => p.Name,
                         ps => ps.Name, 
                         (p, ps) => new { p, ps }, pi.NiceName());
@@ -211,6 +217,7 @@ namespace Signum.Entities.Chart
 
             return base.PropertyValidation(pi);
         }
+
     }
 
     [AutoInit]

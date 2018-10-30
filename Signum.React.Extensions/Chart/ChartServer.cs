@@ -31,31 +31,11 @@ namespace Signum.React.Chart
             SignumControllerFactory.RegisterArea(MethodInfo.GetCurrentMethod());
 
             CustomizeChartRequest();
-
-            PropertyConverter.GetPropertyConverters(typeof(ChartScriptParameterEmbedded)).Add("enumValues", new PropertyConverter()
-            {
-                CustomWriteJsonProperty = ctx =>
-                {
-                    var csp = (ChartScriptParameterEmbedded)ctx.Entity;
-
-                    if (csp.Type == ChartParameterType.Enum)
-                    {
-                        ctx.JsonWriter.WritePropertyName(ctx.LowerCaseName);
-                        ctx.JsonSerializer.Serialize(ctx.JsonWriter, csp.GetEnumValues().Select(a => new { name = a.Name, typeFilter = a.TypeFilter }).ToList());
-                    }
-                },
-                AvoidValidate = true,
-                CustomReadJsonProperty = ctx =>
-                {
-                    var list = ctx.JsonSerializer.Deserialize(ctx.JsonReader);
-                    //Discard
-                }
-            });
-
+            
             EntityJsonConverter.AfterDeserilization.Register((ChartRequest cr) =>
             {
                 if (cr.ChartScript != null)
-                    cr.ChartScript.SynchronizeColumns(cr);
+                    cr.GetChartScript().SynchronizeColumns(cr);
 
                 if (cr.QueryName != null)
                 {
@@ -70,7 +50,7 @@ namespace Signum.React.Chart
             EntityJsonConverter.AfterDeserilization.Register((UserChartEntity uc) =>
             {
                 if (uc.ChartScript != null)
-                    uc.ChartScript.SynchronizeColumns(uc);
+                    uc.GetChartScript().SynchronizeColumns(uc);
 
                 if (uc.Query != null)
                 {

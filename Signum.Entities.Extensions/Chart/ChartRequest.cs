@@ -17,7 +17,9 @@ namespace Signum.Entities.Chart
 {
     public interface IChartBase
     {
-        ChartScriptEntity ChartScript { get; set; }
+        ChartScriptSymbol ChartScript { get; set; }
+
+        ChartScript GetChartScript();
 
         bool GroupResults { get; set; }
 
@@ -51,21 +53,29 @@ namespace Signum.Entities.Chart
             set { queryName = value; }
         }
 
-        ChartScriptEntity chartScript;
+        ChartScriptSymbol chartScript;
         [NotNullValidator]
-        public ChartScriptEntity ChartScript
+        public ChartScriptSymbol ChartScript
         {
             get { return chartScript; }
             set
             {
                 if (Set(ref chartScript, value))
                 {
-                    var newQuery = chartScript.SynchronizeColumns(this);
+                    var newQuery = this.GetChartScript().SynchronizeColumns(this);
                     NotifyAllColumns();
                     InvalidateResults(newQuery);
                 }
             }
         }
+
+        public static Func<ChartScriptSymbol, ChartScript> GetChartScriptFunc;
+
+        public ChartScript GetChartScript()
+        {
+            return GetChartScriptFunc(this.ChartScript);
+        }
+
 
         bool groupResults = true;
         public bool GroupResults
@@ -73,12 +83,14 @@ namespace Signum.Entities.Chart
             get { return groupResults; }
             set
             {
-                if (chartScript != null)
+                var cs = GetChartScript();
+
+                if (cs != null)
                 {
-                    if (chartScript.GroupBy == GroupByChart.Always && value == false)
+                    if (cs.GroupBy == GroupByChart.Always && value == false)
                         return;
 
-                    if (chartScript.GroupBy == GroupByChart.Never && value == true)
+                    if (cs.GroupBy == GroupByChart.Never && value == true)
                         return;
                 }
 

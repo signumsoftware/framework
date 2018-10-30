@@ -6,11 +6,10 @@ using System.Collections.Generic;
 
 namespace Signum.Logic.Chart.Scripts 
 {
-    public class Force graphChartScript : ChartScript                
+    public class ForceGraphChartScript : ChartScript                
     {
-        public Force graphChartScript()
+        public ForceGraphChartScript() : base(D3ChartScript.ForceGraph)
         {
-            this.Name = "Force graph";
             this.Icon = ChartScriptLogic.LoadIcon("forcegraph.png");
             this.GroupBy = GroupByChart.Always;
             this.Columns = new List<ChartScriptColumn>

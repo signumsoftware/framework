@@ -8,9 +8,8 @@ namespace Signum.Logic.Chart.Scripts
 {
     public class HeatmapChartScript : ChartScript                
     {
-        public HeatmapChartScript()
+        public HeatmapChartScript() : base(GoogleMapsCharScript.Heatmap)
         {
-            this.Name = "Heatmap";
             this.Icon = ChartScriptLogic.LoadIcon("heatmap.png");
             this.GroupBy = GroupByChart.Never;
             this.Columns = new List<ChartScriptColumn>

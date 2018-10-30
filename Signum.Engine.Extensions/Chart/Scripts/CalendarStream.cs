@@ -8,9 +8,8 @@ namespace Signum.Logic.Chart.Scripts
 {
     public class CalendarStreamChartScript : ChartScript                
     {
-        public CalendarStreamChartScript()
+        public CalendarStreamChartScript() : base(D3ChartScript.CalendarStream)
         {
-            this.Name = "CalendarStream";
             this.Icon = ChartScriptLogic.LoadIcon("calendar.png");
             this.GroupBy = GroupByChart.Always;
             this.Columns = new List<ChartScriptColumn>

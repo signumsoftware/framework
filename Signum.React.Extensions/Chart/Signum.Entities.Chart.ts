@@ -6,7 +6,6 @@ import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from '../../../F
 import * as Entities from '../../../Framework/Signum.React/Scripts/Signum.Entities'
 import * as Basics from '../../../Framework/Signum.React/Scripts/Signum.Entities.Basics'
 import * as UserAssets from '../UserAssets/Signum.Entities.UserAssets'
-import * as Files from '../Files/Signum.Entities.Files'
 import * as UserQueries from '../UserQueries/Signum.Entities.UserQueries'
 import * as Authorization from '../Authorization/Signum.Entities.Authorization'
 
@@ -69,7 +68,6 @@ export module ChartMessage {
     export const Chart_Group = new MessageKey("ChartMessage", "Chart_Group");
     export const Chart_Query0IsNotAllowed = new MessageKey("ChartMessage", "Chart_Query0IsNotAllowed");
     export const Chart_ToggleInfo = new MessageKey("ChartMessage", "Chart_ToggleInfo");
-    export const EditScript = new MessageKey("ChartMessage", "EditScript");
     export const ColorsFor0 = new MessageKey("ChartMessage", "ColorsFor0");
     export const CreatePalette = new MessageKey("ChartMessage", "CreatePalette");
     export const MyCharts = new MessageKey("ChartMessage", "MyCharts");
@@ -120,52 +118,42 @@ export module ChartPermission {
 export const ChartRequest = new Type<ChartRequest>("ChartRequest");
 export interface ChartRequest extends Entities.ModelEntity {
     Type: "ChartRequest";
-    chartScript: ChartScriptEntity;
+    chartScript: ChartScriptSymbol;
     groupResults: boolean;
     columns: Entities.MList<ChartColumnEmbedded>;
     parameters: Entities.MList<ChartParameterEmbedded>;
     invalidator: boolean;
 }
 
-export const ChartScriptColumnEmbedded = new Type<ChartScriptColumnEmbedded>("ChartScriptColumnEmbedded");
-export interface ChartScriptColumnEmbedded extends Entities.EmbeddedEntity {
-    Type: "ChartScriptColumnEmbedded";
-    displayName?: string | null;
-    isOptional?: boolean;
-    columnType?: ChartColumnType;
-    isGroupKey?: boolean;
-}
-
-export const ChartScriptEntity = new Type<ChartScriptEntity>("ChartScript");
-export interface ChartScriptEntity extends Entities.Entity {
+export const ChartScriptSymbol = new Type<ChartScriptSymbol>("ChartScript");
+export interface ChartScriptSymbol extends Entities.Symbol {
     Type: "ChartScript";
-    name?: string | null;
-    icon?: Entities.Lite<Files.FileEntity> | null;
-    script?: string | null;
-    groupBy?: GroupByChart;
-    columns: Entities.MList<ChartScriptColumnEmbedded>;
-    parameters: Entities.MList<ChartScriptParameterEmbedded>;
-    columnsStructure?: string | null;
 }
 
-export module ChartScriptOperation {
-    export const Save : Entities.ExecuteSymbol<ChartScriptEntity> = registerSymbol("Operation", "ChartScriptOperation.Save");
-    export const Clone : Entities.ConstructSymbol_From<ChartScriptEntity, ChartScriptEntity> = registerSymbol("Operation", "ChartScriptOperation.Clone");
-    export const Delete : Entities.DeleteSymbol<ChartScriptEntity> = registerSymbol("Operation", "ChartScriptOperation.Delete");
+export module D3ChartScript {
+    export const Bars : ChartScriptSymbol = registerSymbol("ChartScript", "D3ChartScript.Bars");
+    export const Columns : ChartScriptSymbol = registerSymbol("ChartScript", "D3ChartScript.Columns");
+    export const Line : ChartScriptSymbol = registerSymbol("ChartScript", "D3ChartScript.Line");
+    export const MultiBars : ChartScriptSymbol = registerSymbol("ChartScript", "D3ChartScript.MultiBars");
+    export const MultiColumns : ChartScriptSymbol = registerSymbol("ChartScript", "D3ChartScript.MultiColumns");
+    export const MultiLines : ChartScriptSymbol = registerSymbol("ChartScript", "D3ChartScript.MultiLines");
+    export const StackedBars : ChartScriptSymbol = registerSymbol("ChartScript", "D3ChartScript.StackedBars");
+    export const StackedColumns : ChartScriptSymbol = registerSymbol("ChartScript", "D3ChartScript.StackedColumns");
+    export const StackedLines : ChartScriptSymbol = registerSymbol("ChartScript", "D3ChartScript.StackedLines");
+    export const Pie : ChartScriptSymbol = registerSymbol("ChartScript", "D3ChartScript.Pie");
+    export const BubblePack : ChartScriptSymbol = registerSymbol("ChartScript", "D3ChartScript.BubblePack");
+    export const Scatterplot : ChartScriptSymbol = registerSymbol("ChartScript", "D3ChartScript.Scatterplot");
+    export const Bubbleplot : ChartScriptSymbol = registerSymbol("ChartScript", "D3ChartScript.Bubbleplot");
+    export const ParallelCordinates : ChartScriptSymbol = registerSymbol("ChartScript", "D3ChartScript.ParallelCordinates");
+    export const Punchcard : ChartScriptSymbol = registerSymbol("ChartScript", "D3ChartScript.Punchcard");
+    export const CalendarStream : ChartScriptSymbol = registerSymbol("ChartScript", "D3ChartScript.CalendarStream");
+    export const ForceGraph : ChartScriptSymbol = registerSymbol("ChartScript", "D3ChartScript.ForceGraph");
+    export const Treemap : ChartScriptSymbol = registerSymbol("ChartScript", "D3ChartScript.Treemap");
 }
 
-export const ChartScriptParameterEmbedded = new Type<ChartScriptParameterEmbedded>("ChartScriptParameterEmbedded");
-export interface ChartScriptParameterEmbedded extends Entities.EmbeddedEntity {
-    Type: "ChartScriptParameterEmbedded";
-    name?: string | null;
-    type?: ChartParameterType;
-    columnIndex?: number | null;
-    valueDefinition?: string | null;
-}
-
-export const ChartType = new Type<ChartType>("ChartType");
-export interface ChartType extends Entities.Symbol {
-    Type: "ChartType";
+export module GoogleMapsCharScript {
+    export const Heatmap : ChartScriptSymbol = registerSymbol("ChartScript", "GoogleMapsCharScript.Heatmap");
+    export const Markermap : ChartScriptSymbol = registerSymbol("ChartScript", "GoogleMapsCharScript.Markermap");
 }
 
 export const GroupByChart = new EnumType<GroupByChart>("GroupByChart");
@@ -182,7 +170,7 @@ export interface UserChartEntity extends Entities.Entity, UserAssets.IUserAssetE
     hideQuickLink: boolean;
     owner: Entities.Lite<Entities.Entity> | null;
     displayName: string;
-    chartScript: ChartScriptEntity;
+    chartScript: ChartScriptSymbol;
     parameters: Entities.MList<ChartParameterEmbedded>;
     groupResults: boolean;
     columns: Entities.MList<ChartColumnEmbedded>;

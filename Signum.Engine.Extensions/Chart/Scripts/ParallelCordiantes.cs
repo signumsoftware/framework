@@ -8,9 +8,8 @@ namespace Signum.Logic.Chart.Scripts
 {
     public class ParallelCordiantesChartScript : ChartScript                
     {
-        public ParallelCordiantesChartScript()
+        public ParallelCordiantesChartScript(): base(D3ChartScript.ParallelCordinates)
         {
-            this.Name = "ParallelCordiantes";
             this.Icon = ChartScriptLogic.LoadIcon("parallelcoordinates.png");
             this.GroupBy = GroupByChart.Optional;
             this.Columns = new List<ChartScriptColumn>

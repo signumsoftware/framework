@@ -24,170 +24,6 @@ namespace Signum.Entities.Chart
         public int? ColumnIndex { get; set; }
         public ChartParameterType Type { get; set; }
         public IChartParameterValueDefinition ValueDefinition { get; set; }
-    }
-
-    public interface IChartParameterValueDefinition
-    {
-       
-
-    }
-
-
-    [Serializable]
-    public class ChartScriptParameterEmbedded : EmbeddedEntity
-    {
-        [StringLengthValidator(AllowNulls = false, Min = 3, Max = 50)]
-        public string Name { get; set; }
-
-        ChartParameterType type;
-        public ChartParameterType Type
-        {
-            get { return type; }
-            set
-            {
-                if (Set(ref type, value))
-                {
-                    ValueDefinition = null;
-                }
-            }
-        }
-
-        public int? ColumnIndex { get; set; }
-
-        string valueDefinition;
-        [StringLengthValidator(AllowNulls = true, Max = int.MaxValue)]
-        public string ValueDefinition
-        {
-            get { return valueDefinition; }
-            set
-            {
-                if (Set(ref valueDefinition, value))
-                {
-                    enumValues = null;
-                    numberInterval = null;
-                }
-            }
-        }
-
-
-
-        public string ToCode()
-        {
-            return $@"new ChartScriptParameter(""{Name}"", ChartParameterType.{Type}) {{ {(ColumnIndex == null ? "" :  ("ColumnIndex = " + ColumnIndex + ", "))} ValueDefinition = {GetValueDefinitionCode()} }}";
-        }
-
-        private string GetValueDefinitionCode()
-        {
-            switch (Type)
-            {
-                case ChartParameterType.Enum: return EnumValueList.TryParse(valueDefinition, out enumValues) == null ? enumValues.ToCode() : "error";
-                case ChartParameterType.Number: return NumberInterval.TryParse(valueDefinition, out numberInterval) == null ? numberInterval.ToCode() : "error" ;
-                case ChartParameterType.String: return "null";
-                default: throw new InvalidOperationException();
-            }
-        }
-
-        protected override string PropertyValidation(PropertyInfo pi)
-        {
-            if (pi.Name == nameof(ValueDefinition) && ValueDefinition != null)
-            {
-                switch (Type)
-                {
-                    case ChartParameterType.Enum: return EnumValueList.TryParse(valueDefinition, out enumValues);
-                    case ChartParameterType.Number: return NumberInterval.TryParse(valueDefinition, out numberInterval);
-                    case ChartParameterType.String: return null;
-                    default: throw new InvalidOperationException();
-                }
-            }
-
-            return base.PropertyValidation(pi);
-        }
-
-        public string DefaultValue(QueryToken token)
-        {
-            switch (Type)
-            {
-                case ChartParameterType.Enum: return GetEnumValues().DefaultValue(token);
-                case ChartParameterType.Number: return GetNumberInterval().DefaultValue.ToString(CultureInfo.InvariantCulture);
-                case ChartParameterType.String: return ValueDefinition;
-                default: throw new InvalidOperationException();
-            }
-        }
-
-
-        public string Valdidate(string parameter, QueryToken token)
-        {
-            switch (Type)
-            {
-                case ChartParameterType.Enum: return GetEnumValues().Validate(parameter, token);
-                case ChartParameterType.Number: return GetNumberInterval().Validate(parameter);
-                case ChartParameterType.String: return null;
-                default: throw new InvalidOperationException();
-            }
-        }
-
-        [Ignore, NonSerialized]
-        EnumValueList enumValues;
-        public EnumValueList GetEnumValues()
-        {
-            if (Type != ChartParameterType.Enum)
-                throw new InvalidOperationException("Type is not Enum");
-
-            if (enumValues != null)
-                return enumValues;
-
-            lock (this)
-            {
-                if (enumValues != null)
-                    return enumValues;
-
-                string error = EnumValueList.TryParse(valueDefinition, out enumValues);
-                if (error.HasText())
-                    throw new FormatException(error);
-            }
-
-            return enumValues;
-        }
-
-        [Ignore, NonSerialized]
-        NumberInterval numberInterval;
-        public NumberInterval GetNumberInterval()
-        {
-            if (Type != ChartParameterType.Number)
-                throw new InvalidOperationException("Type is not Number");
-
-            if (numberInterval != null)
-                return numberInterval;
-
-            lock (this)
-            {
-                if (numberInterval != null)
-                    return numberInterval;
-
-                string error = NumberInterval.TryParse(valueDefinition, out numberInterval);
-                if (error.HasText())
-                    throw new FormatException(error);
-            }
-
-            return numberInterval;
-        }
-
-
-        internal ChartScriptParameterEmbedded Clone()
-        {
-            return new ChartScriptParameterEmbedded
-            {
-                Name = Name,
-                Type = Type,
-                ValueDefinition = ValueDefinition,
-                ColumnIndex = ColumnIndex
-            };
-        }
-
-        internal bool ShouldHaveColumnIndex()
-        {
-            return Type == ChartParameterType.Enum && GetEnumValues().Any(a => a.TypeFilter.HasValue);
-        }
 
         public QueryToken GetToken(IChartBase chartBase)
         {
@@ -196,6 +32,22 @@ namespace Signum.Entities.Chart
 
             return chartBase.Columns[this.ColumnIndex.Value].Token?.Token;
         }
+
+        public string Validate(string value, QueryToken token)
+        {
+            return ValueDefinition?.Validate(value, token);
+        }
+
+        internal string DefaultValue(QueryToken token)
+        {
+            return this.ValueDefinition.DefaultValue(token);
+        }
+    }
+
+    public interface IChartParameterValueDefinition
+    {
+        string DefaultValue(QueryToken token);
+        string Validate(string parameter, QueryToken token);
     }
 
     public class NumberInterval : IChartParameterValueDefinition
@@ -231,7 +83,7 @@ namespace Signum.Entities.Chart
             return "{0}[{1},{2}]".FormatWith(DefaultValue, MinValue, MaxValue);
         }
 
-        public string Validate(string parameter)
+        public string Validate(string parameter, QueryToken token)
         {
             if (!decimal.TryParse(parameter, NumberStyles.Float, CultureInfo.InvariantCulture, out decimal value))
                 return "{0} is not a valid number".FormatWith(parameter);
@@ -245,12 +97,9 @@ namespace Signum.Entities.Chart
             return null;
         }
 
-        internal string ToCode()
+        string IChartParameterValueDefinition.DefaultValue(QueryToken token)
         {
-            if (MinValue != null || MaxValue != null)
-                return $@"new NumberInterval {{ DefaultValue = {ToDecimal(DefaultValue)}, MinValue = {ToDecimal(MinValue)}, MaxValue = {ToDecimal(MaxValue)} }}";
-            else
-                return $@"new NumberInterval {{ DefaultValue = {ToDecimal(DefaultValue)} }}";
+            return DefaultValue.ToString(CultureInfo.InvariantCulture);
         }
 
         private string ToDecimal(decimal? val)
@@ -291,7 +140,7 @@ namespace Signum.Entities.Chart
             throw new Exception(error);
         }
 
-        internal string Validate(string parameter, QueryToken token)
+        public string Validate(string parameter, QueryToken token)
         {
             if (token == null)
                 return null; //?
@@ -307,7 +156,7 @@ namespace Signum.Entities.Chart
             return null;
         }
 
-        internal string DefaultValue(QueryToken token)
+        public string DefaultValue(QueryToken token)
         {
             return this.Where(a => a.CompatibleWith(token)).FirstEx(() => "No default parameter value for {0} found".FormatWith(token.NiceName())).Name;
         }
@@ -377,6 +226,7 @@ namespace Signum.Entities.Chart
         }
     }
 
+    [InTypeScript(true)]
     public enum ChartParameterType
     {
         Enum,

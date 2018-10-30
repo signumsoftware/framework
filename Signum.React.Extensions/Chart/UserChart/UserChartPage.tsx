@@ -1,17 +1,10 @@
 ﻿import * as React from 'react'
-import { Dic, classes, ifError } from '@framework/Globals'
-import * as Finder from '@framework/Finder'
-import { Lite, toLite } from '@framework/Signum.Entities'
-import { ResultTable, FindOptions, FilterOption, QueryDescription, SubTokensOptions, QueryToken, QueryTokenType, ColumnOption } from '@framework/FindOptions'
-import { TypeContext, FormGroupStyle, StyleOptions, StyleContext, mlistItemContext } from '@framework/TypeContext'
-import { SearchMessage, JavascriptMessage, parseLite, is, liteKey } from '@framework/Signum.Entities'
-import { PropertyRoute, getQueryNiceName, getTypeInfo, Binding, GraphExplorer }  from '@framework/Reflection'
+import { toLite } from '@framework/Signum.Entities'
+import { JavascriptMessage, parseLite } from '@framework/Signum.Entities'
 import * as Navigator from '@framework/Navigator'
-import { ChartColumnEmbedded, ChartScriptColumnEmbedded, ChartScriptParameterEmbedded, ChartRequest, GroupByChart, ChartMessage,
-    ChartColorEntity, ChartScriptEntity, ChartParameterEmbedded, ChartParameterType, UserChartEntity } from '../Signum.Entities.Chart'
+import { UserChartEntity } from '../Signum.Entities.Chart'
 import * as ChartClient from '../ChartClient'
 import * as UserChartClient from './UserChartClient'
-import ChartRequestView from '../Templates/ChartRequestView'
 import { RouteComponentProps } from "react-router";
 
 
@@ -39,7 +32,7 @@ export default class UserChartPage extends React.Component<UserChartPageProps> {
 
     load(props: UserChartPageProps) {
 
-        const { userChartId, entity } = this.props.match.params;
+        const { userChartId, entity } = props.match.params;
 
         const lite = entity == undefined ? undefined : parseLite(entity);
 

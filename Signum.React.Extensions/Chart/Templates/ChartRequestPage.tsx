@@ -1,16 +1,9 @@
 ﻿import * as React from 'react'
 import * as QueryString from "query-string"
-import { Dic, classes, ifError } from '@framework/Globals'
-import * as Finder from '@framework/Finder'
-import { Lite, toLite } from '@framework/Signum.Entities'
-import { ResultTable, FindOptions, FilterOption, QueryDescription, SubTokensOptions, QueryToken, QueryTokenType, ColumnOption } from '@framework/FindOptions'
-import { TypeContext, FormGroupStyle, StyleOptions, StyleContext, mlistItemContext } from '@framework/TypeContext'
-import { SearchMessage, JavascriptMessage, parseLite, is, liteKey } from '@framework/Signum.Entities'
-import { PropertyRoute, getQueryNiceName, getTypeInfo, Binding, GraphExplorer }  from '@framework/Reflection'
+import { Lite } from '@framework/Signum.Entities'
+import { parseLite } from '@framework/Signum.Entities'
 import * as Navigator from '@framework/Navigator'
-import {
-    ChartColumnEmbedded, ChartScriptColumnEmbedded, ChartScriptParameterEmbedded, ChartRequest, GroupByChart, ChartMessage,
-    ChartColorEntity, ChartScriptEntity, ChartParameterEmbedded, ChartParameterType, UserChartEntity } from '../Signum.Entities.Chart'
+import { ChartRequest, UserChartEntity } from '../Signum.Entities.Chart'
 import * as ChartClient from '../ChartClient'
 import ChartRequestView from './ChartRequestView'
 import { RouteComponentProps } from "react-router";
@@ -56,7 +49,7 @@ export default class ChartRequestPage extends React.Component<ChartRequestPagePr
 
     render() {
         return <ChartRequestView
-            chartRequest={this.state.chartRequest!}
+            chartRequest={this.state.chartRequest}
             userChart={this.state.userChart}
             onChange={(cr, uc) => this.handleOnChange(cr, uc)} />;
     }

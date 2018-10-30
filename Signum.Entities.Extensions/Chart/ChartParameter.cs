@@ -22,9 +22,9 @@ namespace Signum.Entities.Chart
         public IChartBase ParentChart { get { return parentChart; } }
 
         [Ignore]
-        ChartScriptParameterEmbedded scriptParameter;
+        ChartScriptParameter scriptParameter;
         [InTypeScript(false)]
-        public ChartScriptParameterEmbedded ScriptParameter
+        public ChartScriptParameter ScriptParameter
         {
             get { return scriptParameter; }
             set { scriptParameter = value; Notify(() => ScriptParameter); }
@@ -51,7 +51,7 @@ namespace Signum.Entities.Chart
                 return ValidationMessage._0ShouldBe12.NiceToString(pi.NiceName(), ComparisonType.EqualTo.NiceToString(), scriptParameter.Name);
 
             if (pi.Name == nameof(Value))
-                return ScriptParameter.Valdidate(this.Value, this.ScriptParameter.GetToken(this.ParentChart));
+                return ScriptParameter.Validate(this.Value, this.ScriptParameter.GetToken(this.ParentChart));
 
             return base.PropertyValidation(pi);
         }

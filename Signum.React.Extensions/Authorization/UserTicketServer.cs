@@ -24,7 +24,7 @@ namespace Signum.React.Authorization
             {
                 try
                 {
-                    if (ac.HttpContext.Request.Cookies.TryGetValue(CookieName, out string ticketText) || !ticketText.HasText())
+                    if (!ac.HttpContext.Request.Cookies.TryGetValue(CookieName, out string ticketText) || !ticketText.HasText())
                         return false;   //there is no cookie
 
                     var httpConnection = ac.HttpContext.Features.Get<IHttpConnectionFeature>();
@@ -35,8 +35,8 @@ namespace Signum.React.Authorization
 
                     ac.HttpContext.Response.Cookies.Append(CookieName, ticketText, new CookieOptions
                     {
+                        Domain = ac.HttpContext.Request.Host.Host.ToString(),
                         Expires = DateTime.UtcNow.Add(UserTicketLogic.ExpirationInterval),
-                        Domain = ac.HttpContext.Request.Host.ToString(),
                     });
 
                     AuthServer.AddUserSession(ac, user);
@@ -65,7 +65,7 @@ namespace Signum.React.Authorization
 
             ac.HttpContext.Response.Cookies.Append(CookieName, ticketText, new CookieOptions
             {
-                Domain = ac.HttpContext.Request.Host.ToString(),
+                Domain = ac.HttpContext.Request.Host.Host.ToString(),
                 Expires = DateTime.UtcNow.Add(UserTicketLogic.ExpirationInterval),
             });
         }

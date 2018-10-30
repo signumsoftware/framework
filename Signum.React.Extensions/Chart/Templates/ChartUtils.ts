@@ -1,6 +1,6 @@
 ﻿import * as d3 from "d3"
 import * as d3sc from "d3-scale-chromatic";
-import { ChartValue, ChartTable, ChartColumn, ChartRow } from "../ChartClient"
+import { ChartTable, ChartColumn, ChartRow } from "../ChartClient"
 import googleMapStyles from "./GoogleMapStyles"
 import { parseLite } from "@framework/Signum.Entities"
 import * as Navigator from '@framework/Navigator'
@@ -36,52 +36,9 @@ export function getScript(source: string, onload?: () => void) {
 
 declare module "d3-selection" {
     interface Selection<GElement extends d3.BaseType, Datum, PElement extends d3.BaseType, PDatum> {
-        enterData<NElement extends d3.BaseType, NDatum>(data: NDatum[], tag: string, cssClass: string): Selection<NElement, Datum, GElement, Datum>;
-        enterData<NElement extends d3.BaseType, NDatum>(data: (data: Datum) => NDatum[], tag: string, cssClass: string): Selection<NElement, Datum, GElement, Datum>;
+        enterData<NElement extends d3.BaseType, NDatum = NDatum>(data: NDatum[], tag: string, cssClass: string): Selection<NElement, NDatum, GElement, Datum>;
+        enterData<NElement extends d3.BaseType, NDatum = NDatum>(data: (data: Datum) => NDatum[], tag: string, cssClass: string): Selection<NElement, NDatum, GElement, Datum>;
     }
-}
-
-
-export function fillAllTokenValueFuntions(data: ChartTable) {
-
-    for (let i = 0; ; i++) {
-        if (data.columns['c' + i] == undefined)
-            break;
-
-        for (let j = 0; j < data.rows.length; j++) {
-            makeItTokenValue(data.rows[j]['c' + i]);
-        }
-    }
-
-    for (let j = 0; j < data.rows.length; j++) {
-        makeItTokenValue(data.rows[j]['entity']);
-    }
-}
-
-export function makeItTokenValue(value: ChartValue) {
-
-    if (value == undefined)
-        return;
-
-    value.toString = function (this: ChartValue) {
-        const key = (this.key !== undefined ? this.key : this);
-
-        if (key == undefined)
-            return "null";
-
-        return key.toString();
-    };
-
-    value.valueOf = function (this: ChartValue) { return this.key as any; };
-
-    value.niceToString = function (this: ChartValue) {
-        const result = (this.toStr !== undefined ? this.toStr : this);
-
-        if (result == undefined)
-            return this.key != undefined ? "[ no text ]" : "[ null ]";
-
-        return result.toString();
-    };
 }
 
 export function ellipsis(elem: SVGTextElement, width: number, padding?: number, ellipsisSymbol?: string) {
@@ -152,46 +109,39 @@ export function matrix(a: number, b: number, c: number, d: number, e: number, f:
     return 'matrix(' + a + ',' + b + ',' + c + ',' + d + ',' + e + ',' + f + ')';
 }
 
-export function scaleFor(column: { type: string }, values: any[], minRange: number, maxRange: number, scaleName: string): { (x: any): any; } {
-
-    if (scaleName == "Elements")
-        return d3.scaleBand()
-            .domain(values)
-            .range([minRange, maxRange]);
-
+export function scaleFor(column: ChartColumn<any>, values: number[], minRange: number, maxRange: number, scaleName: string | null | undefined): d3.ScaleContinuousNumeric<number, number> {
+    
     if (scaleName == "ZeroMax")
         return d3.scaleLinear()
-            .domain([0, d3.max(values)])
+            .domain([0, d3.max(values)!])
             .range([minRange, maxRange]);
 
     if (scaleName == "MinMax") {
         if (column.type == "Date" || column.type == "DateTime") {
             const scale = d3.scaleTime()
-                .domain([new Date(<any>d3.min(values)), new Date(<any>d3.max(values))])
+                .domain(values)
                 .range([minRange, maxRange]);
 
-            const f = function (d: string) { return scale(new Date(d)); };
-            (<any>f).ticks = scale.ticks;
-            (<any>f).tickFormat = scale.tickFormat;
+            const f = function (d: string) { return scale(new Date(d)); } as any as d3.ScaleContinuousNumeric<number, number>;
+            f.ticks = scale.ticks as any;
+            f.tickFormat = scale.tickFormat as any;
             return f;
         }
         else {
             return d3.scaleLinear()
-                .domain([d3.min(values), d3.max(values)])
+                .domain([d3.min(values)!, d3.max(values)!])
                 .range([minRange, maxRange]);
         }
     }
 
     if (scaleName == "Log")
         return d3.scaleLog()
-            .domain([d3.min(values),
-            d3.max(values)])
+            .domain(values)
             .range([minRange, maxRange]);
 
     if (scaleName == "Sqrt")
         return d3.scalePow().exponent(.5)
-            .domain([d3.min(values),
-            d3.max(values)])
+            .domain(values)
             .range([minRange, maxRange]);
 
     throw Error("Unexpected scale: " + scaleName);
@@ -372,7 +322,7 @@ export function getCurveByName(curveName: string): d3.CurveFactoryLineOnly | und
     return undefined;
 }
 
-export function getColorInterpolation(interpolationName: string): ((value: number) => string) | undefined {
+export function getColorInterpolation(interpolationName: string | undefined | null): ((value: number) => string) | undefined {
     switch (interpolationName) {
         case "YlGn": return d3sc.interpolateYlGn;
         case "YlGnBu": return d3sc.interpolateYlGnBu;
@@ -406,7 +356,7 @@ export function getColorInterpolation(interpolationName: string): ((value: numbe
     return undefined;
 }
 
-export function getColorScheme(schemeName: string, k: number = 11): ReadonlyArray<string> | undefined {
+export function getColorScheme(schemeName: string | null | undefined, k: number | undefined = 11): ReadonlyArray<string> | undefined {
     switch (schemeName) {
         case "category10": return d3.schemeCategory10;
         case "accent": return d3sc.schemeAccent;
@@ -451,53 +401,57 @@ export function getColorScheme(schemeName: string, k: number = 11): ReadonlyArra
 
 export function stratifyTokens(
     data: ChartTable,
-    keyColumn: string, /*Employee*/
-    keyColumnParent: string, /*Employee.ReportsTo*/):
+    keyColumn: ChartColumn<unknown>, /*Employee*/
+    keyColumnParent: ChartColumn<unknown>, /*Employee.ReportsTo*/):
     d3.HierarchyNode<ChartRow | Folder | Root> {
+    
 
     const folders = data.rows
-        .filter(r => r[keyColumnParent] && r[keyColumnParent].key != null)
-        .map(r => ({ folder: r[keyColumnParent] }) as Folder)
-        .toObjectDistinct(r => r.folder.key!.toString());
+        .filter(r => keyColumnParent.getValue(r) != null)
+        .map(r => ({ folder: keyColumnParent.getValue(r) }) as Folder)
+        .toObjectDistinct(r => keyColumnParent.getKey(r.folder));
 
     const root: Root = { isRoot: true };
 
     const NullConst = "- Null -";
 
-    const dic = data.rows.filter(r => r[keyColumn].key != null).toObjectDistinct(r => r[keyColumn]!.key as string);
+
+    const dic = data.rows.filter(r => keyColumn.getValue(r) != null).toObjectDistinct(r => keyColumn.getValueKey(r));
 
     const getParent = (d: ChartRow | Folder | Root) => {
         if ((d as Root).isRoot)
             return null;
 
         if ((d as Folder).folder) {
-            const r = dic[(d as Folder).folder.key!];
+            const r = dic[keyColumnParent.getKey((d as Folder).folder)];
 
             if (!r)
                 return root;
 
-            const parentValue = r[keyColumnParent];
-            if (!parentValue || parentValue.key == null)
+            const parentValue = keyColumnParent.getValue(r);
+            if (parentValue == null)
                 return root;  //Either null
 
-            return folders[parentValue.key as string]; // Parent folder
+            return folders[keyColumnParent.getKey(parentValue)]; // Parent folder
         }
 
-        if ((d as ChartRow)[keyColumn]) {
-            const r = d as ChartRow;
+        var keyVal = keyColumn.getValue(d as ChartRow);
 
-            var fold = r[keyColumn] && r[keyColumn].key != null && folders[r[keyColumn].key as string];
+        if (keyVal) {
+            const r = d as ChartRow;
+            
+            var fold = folders[keyColumn.getKey(keyVal)];
             if (fold)
                 return fold; //My folder
 
-            const parentValue = r[keyColumnParent];
+            const parentValue = keyColumnParent.getValue(r);
 
-            const parentFolder = parentValue && parentValue.key != null && folders[parentValue.key as string];
+            const parentFolder = parentValue && folders[keyColumnParent.getKey(parentValue)];
 
             if (!parentFolder)
                 return root; //No key an no parent
 
-            return folders[parentFolder.folder!.key as string]; //only parent
+            return folders[keyColumnParent.getKey(parentFolder.folder)]; //only parent
         }
 
         throw new Error("Unexpected " + JSON.stringify(d))
@@ -509,12 +463,12 @@ export function stratifyTokens(
             return "#Root";
 
         if ((r as Folder).folder)
-            return "F#" + (r as Folder).folder.key;
+            return "F#" + keyColumnParent.getKey((r as Folder).folder);
 
         const cr = (r as ChartRow);
 
-        if (cr[keyColumn].key != null)
-            return cr[keyColumn].key as string;
+        if (keyColumn.getValue(cr) != null)
+            return keyColumn.getKey(cr);
 
         return NullConst;
     }
@@ -531,7 +485,7 @@ export function stratifyTokens(
 }
 
 interface Folder {
-    folder: ChartValue;
+    folder: unknown;
 }
 
 interface Root {
@@ -540,68 +494,63 @@ interface Root {
 
 
 export function toPivotTable(data: ChartTable,
-    col0: string, /*Employee*/
-    otherCols: string[]): PivotTable {
+    col0: ChartColumn<unknown>, /*Employee*/
+    otherCols: ChartColumn<unknown>[]): PivotTable {
 
     var usedCols = otherCols
-        .filter(function (cn) { return data.columns[cn].token != undefined; });
+        .filter(cn => cn.token != undefined);
 
     var rows = data.rows
-        .map(function (r) {
-            return {
-                rowValue: r[col0],
-                values: usedCols.toObject(cn => cn, (cn): PivotValue => ({
-                    rowClick: r,
-                    value: r[cn],
-                    valueTitle: `${r[col0].niceToString!()}, ${data.columns[cn].title}: ${r[cn].niceToString!()}`
-                }))
-            } as PivotRow;
-        });
+        .map((r) => ({
+            rowValue: col0.getValue(r),
+            values: usedCols.toObject(cn => cn.name, (cn): PivotValue => ({
+                rowClick: r,
+                value: cn.getValue(r),
+                valueTitle: `${col0.getValueNiceName(r)}, ${cn.title}: ${cn.getValueNiceName(r)}`
+            }))
+        } as PivotRow));
 
-    var title = otherCols
-        .filter(function (cn) { return data.columns[cn].token != undefined; })
-        .map(function (cn) { return data.columns[cn].title; })
-        .join(" | ");
+    var title = usedCols.map(c => c.title).join(" | ");
 
     return {
         title,
-        columns: d3.values(usedCols.toObject(c => c, c => ({
+        columns: d3.values(usedCols.toObject(c => c.name, c => ({
             color: null,
-            key: c,
-            niceName: data.columns[c].title,
+            key: c.name,
+            niceName: c.title,
         } as PivotColumn))),
         rows,
     };
 }
 
 export function groupedPivotTable(data: ChartTable,
-    col0: string, /*Employee*/
-    colSplit: string,
-    colValue: string): PivotTable {
+    col0: ChartColumn<undefined>, /*Employee*/
+    colSplit: ChartColumn<undefined>,
+    colValue: ChartColumn<undefined>): PivotTable {
 
-    var columns = d3.values(data.rows.toObjectDistinct(cr => cr[colSplit].key as string, cr => ({
-        niceName: cr[colSplit].niceToString!(),
-        color: cr[colSplit].color,
-        key: cr[colSplit].key,
+    var columns = d3.values(data.rows.map(r => colSplit.getValue(r)).toObjectDistinct(v => colSplit.getKey(v), v => ({
+        niceName: colSplit.getNiceName(v),
+        color: colSplit.getColor(v),
+        key: colSplit.getKey(v),
     }) as PivotColumn));
 
-    var rows = data.rows.groupBy(r => "k" + r[col0].key)
+    var rows = data.rows.groupBy(r => "k" + col0.getValueKey(r))
         .map(gr => {
 
-            var rowValue = gr.elements[0][col0];
+            var rowValue = col0.getValue(gr.elements[0]);
             return {
                 rowValue: rowValue,
                 values: gr.elements.toObject(
-                    r => r[colSplit].key as string,
-                    (r) : PivotValue => ({
-                        value: r[colValue],
+                    r => colSplit.getValueKey(r),
+                    (r): PivotValue => ({
+                        value: colValue.getValue(r),
                         rowClick: r,
-                        valueTitle: `${rowValue.niceToString!()}, ${r[colSplit].niceToString!()}: ${r[colValue].niceToString!()}`
+                        valueTitle: `${col0.getNiceName(rowValue)}, ${colSplit.getValueNiceName(r)}: ${colValue.getValueNiceName(r)}`
                     })),
             } as PivotRow;
         });
 
-    var title = data.columns.c2.title + " / " + data.columns.c1.title;
+    var title = data.columns.c2!.title + " / " + data.columns.c1!.title;
 
     return {
         title,
@@ -623,14 +572,13 @@ interface PivotColumn {
 }
 
 interface PivotRow {
-    rowValue: ChartValue;
+    rowValue: any;
     values: { [key: string /*| number*/]: PivotValue };
 }
 
-
 interface PivotValue {
     rowClick: ChartRow;
-    value: ChartValue;
+    value: any;
     valueTitle: string;
 }
 

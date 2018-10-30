@@ -8,9 +8,8 @@ namespace Signum.Logic.Chart.Scripts
 {
     public class TreeMapChartScript : ChartScript                
     {
-        public TreeMapChartScript()
+        public TreeMapChartScript() : base(D3ChartScript.Treemap)
         {
-            this.Name = "TreeMap";
             this.Icon = ChartScriptLogic.LoadIcon("treemap.png");
             this.GroupBy = GroupByChart.Optional;
             this.Columns = new List<ChartScriptColumn>

@@ -36,7 +36,6 @@
   </ItemGroup>
   
   <ItemGroup>
-    <Folder Include="Chart\Scripts\" />
     <Folder Include="Properties\" />
   </ItemGroup>
 
@@ -46,7 +45,30 @@
   </ItemGroup>
 
   <ItemGroup>
-    <TypeScriptCompile Remove="Chart\D3ChartScriptRendererBase.tsx" />
+    <None Remove="Chart\Scripts\Bubbleplot.tsx" />
+    <None Remove="Chart\Scripts\CalendarStream.tsx" />
+    <None Remove="Chart\Scripts\Force graph.tsx" />
+    <None Remove="Chart\Scripts\Heatmap.tsx" />
+    <None Remove="Chart\Scripts\Line.tsx" />
+    <None Remove="Chart\Scripts\Markermap.tsx" />
+    <None Remove="Chart\Scripts\MultiBars.tsx" />
+    <None Remove="Chart\Scripts\MultiColumns.tsx" />
+    <None Remove="Chart\Scripts\MultiLines.tsx" />
+    <None Remove="Chart\Scripts\ParallelCordiantes.tsx" />
+    <None Remove="Chart\Scripts\Punchcard.tsx" />
+    <None Remove="Chart\Scripts\Scatterplot.tsx" />
+    <None Remove="Chart\Scripts\StackedBars.tsx" />
+    <None Remove="Chart\Scripts\StackedColumns.tsx" />
+    <None Remove="Chart\Scripts\StackedLines.tsx" />
+    <None Remove="Chart\Scripts\TreeMap.tsx" />
+    <None Remove="Chart\Scripts\WorldMap.tsx" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <TypeScriptCompile Remove="Chart\D3ChartBase.tsx" />
+    <TypeScriptCompile Remove="Chart\Scripts\BubblePack.tsx" />
+    <TypeScriptCompile Remove="Chart\Scripts\Columns.tsx" />
+    <TypeScriptCompile Remove="Chart\Scripts\Pie.tsx" />
   </ItemGroup>
 
   <Target Name="GenerateSignumTS">

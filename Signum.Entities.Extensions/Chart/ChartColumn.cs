@@ -19,9 +19,9 @@ namespace Signum.Entities.Chart
     public class ChartColumnEmbedded : EmbeddedEntity
     {
         [Ignore]
-        ChartScriptColumnEmbedded scriptColumn;
+        ChartScriptColumn scriptColumn;
         [HiddenProperty]
-        public ChartScriptColumnEmbedded ScriptColumn
+        public ChartScriptColumn ScriptColumn
         {
             get { return scriptColumn; }
             set { scriptColumn = value; Notify(() => ScriptColumn); } 
@@ -75,10 +75,10 @@ namespace Signum.Entities.Chart
         public bool? IsGroupKey { get { return (!parentChart.GroupResults) ? (bool?)null: ScriptColumn.IsGroupKey; } }
 
         [HiddenProperty]
-        public bool GroupByVisible { get { return parentChart.ChartScript.GroupBy != GroupByChart.Never && ScriptColumn.IsGroupKey; } }
+        public bool GroupByVisible { get { return parentChart.GetChartScript().GroupBy != GroupByChart.Never && ScriptColumn.IsGroupKey; } }
 
         [HiddenProperty]
-        public bool GroupByEnabled { get { return parentChart.ChartScript.GroupBy != GroupByChart.Always; } }
+        public bool GroupByEnabled { get { return parentChart.GetChartScript().GroupBy != GroupByChart.Always; } }
 
         [HiddenProperty]
         public bool GroupByChecked

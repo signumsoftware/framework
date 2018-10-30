@@ -85,7 +85,7 @@ namespace Signum.Entities.UserAssets
 
         Lite<TypeEntity> GetType(string cleanName);
 
-        ChartScriptEntity ChartScript(string chartScriptName);
+        ChartScriptSymbol ChartScript(string chartScriptName);
 
         IUserAssetEntity GetEntity(Guid guid);
 

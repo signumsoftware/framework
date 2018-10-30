@@ -8,9 +8,8 @@ namespace Signum.Logic.Chart.Scripts
 {
     public class BubblePackChartScript : ChartScript                
     {
-        public BubblePackChartScript()
+        public BubblePackChartScript() : base(D3ChartScript.BubblePack)
         {
-            this.Name = "BubblePack";
             this.Icon = ChartScriptLogic.LoadIcon("bubblepack.png");
             this.GroupBy = GroupByChart.Optional;
             this.Columns = new List<ChartScriptColumn>

@@ -1,5 +1,4 @@
-﻿
-import * as React from 'react'
+﻿import * as React from 'react'
 import { Dic, classes } from '@framework/Globals'
 import * as Finder from '@framework/Finder'
 import { Lite, toLite } from '@framework/Signum.Entities'
@@ -9,13 +8,15 @@ import { SearchMessage, JavascriptMessage, parseLite, is } from '@framework/Sign
 import { getTypeInfos, TypeInfo, isTypeEnum } from '@framework/Reflection'
 import * as Navigator from '@framework/Navigator'
 import { ValueLine, FormGroup } from '@framework/Lines'
-import { ChartColumnEmbedded, ChartScriptColumnEmbedded, IChartBase, GroupByChart, ChartMessage, ChartColorEntity } from '../Signum.Entities.Chart'
+import { ChartColumnEmbedded, IChartBase, GroupByChart, ChartMessage, ChartColorEntity } from '../Signum.Entities.Chart'
 import * as ChartClient from '../ChartClient'
+import { ChartScriptColumn, ChartScript } from '../ChartClient'
 import QueryTokenEntityBuilder from '../../UserAssets/Templates/QueryTokenEntityBuilder'
 
 export interface ChartColumnProps {
     ctx: TypeContext<ChartColumnEmbedded>;
-    scriptColumn: ChartScriptColumnEmbedded;
+    scriptColumn: ChartScriptColumn;
+    chartScript: ChartScript;
     chartBase: IChartBase;
     queryKey: string;
     onToggleInfo: () => void;
@@ -37,7 +38,7 @@ export class ChartColumn extends React.Component<ChartColumnProps, {}> {
     handleGroupChecked = (e: React.FormEvent<any>) => {
 
         this.props.chartBase.groupResults = (e.currentTarget as HTMLInputElement).checked;
-        ChartClient.synchronizeColumns(this.props.chartBase);
+        ChartClient.synchronizeColumns(this.props.chartBase, this.props.chartScript);
 
         this.props.onGroupChange();
     }
@@ -47,7 +48,7 @@ export class ChartColumn extends React.Component<ChartColumnProps, {}> {
         const sc = this.props.scriptColumn;
         const cb = this.props.chartBase;
 
-        const groupVisible = this.props.chartBase.chartScript.groupBy != "Never" && sc.isGroupKey;
+        const groupVisible = this.props.chartScript.groupBy != "Never" && sc.isGroupKey;
 
         const groupResults = cb.groupResults == undefined ? true : cb.groupResults;
 
@@ -57,7 +58,7 @@ export class ChartColumn extends React.Component<ChartColumnProps, {}> {
             <tr className="sf-chart-token">
                 <th>{sc.displayName + (sc.isOptional ? "?" : "")}</th>
                 <td style={{ textAlign: "center" }}>
-                    {groupVisible && <input type="checkbox" checked={cb.groupResults} className="sf-chart-group-trigger" disabled={cb.chartScript.groupBy == "Always"} onChange={this.handleGroupChecked} />}
+                    {groupVisible && <input type="checkbox" checked={cb.groupResults} className="sf-chart-group-trigger" disabled={this.props.chartScript.groupBy == "Always"} onChange={this.handleGroupChecked} />}
                 </td>
                 <td>
                     <div className={classes("sf-query-token")}>

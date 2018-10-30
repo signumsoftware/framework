@@ -8,9 +8,8 @@ namespace Signum.Logic.Chart.Scripts
 {
     public class MarkermapChartScript : ChartScript                
     {
-        public MarkermapChartScript()
+        public MarkermapChartScript(): base(GoogleMapsCharScript.Markermap)
         {
-            this.Name = "Markermap";
             this.Icon = ChartScriptLogic.LoadIcon("markermap.png");
             this.GroupBy = GroupByChart.Never;
             this.Columns = new List<ChartScriptColumn>

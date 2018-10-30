@@ -1,14 +1,14 @@
 import * as React from 'react'
-import * as D3 from 'd3'
-import D3ChartScriptRendererBase from '../ChartRenderer';
+import * as d3 from 'd3'
+import D3ChartBase from '../ChartRenderer';
 import * as ChartClient from '../ChartClient';
 import * as ChartUtils from '../Templates/ChartUtils';
 import { getClickKeys, translate, scale, rotate, skewX, skewY, matrix, scaleFor, rule, ellipsis } from '../Templates/ChartUtils';
 
 
-export default class BarsChartScriptRendererBase extends D3ChartScriptRendererBase {
+export default class MarkermapChart extends D3ChartBase {
 
-    drawChart(data: ChartClient.ChartTable, chart: D3.Selection<SVGElement, {}, HTMLDivElement, unknown >) {
+    drawChart(data: ChartClient.ChartTable, chart: d3.Selection<SVGElement, {}, HTMLDivElement, unknown>, width: number, height: number) {
             
     		//var urlCdnClusterJs = "https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/markerclusterer.js";
     		var urlCdnClusterJs = "https://cdn.rawgit.com/googlemaps/js-marker-clusterer/gh-pages/src/markerclusterer.js";
@@ -51,15 +51,14 @@ export default class BarsChartScriptRendererBase extends D3ChartScriptRendererBa
     
     				var color = null;
     				if (data.columns.c6.token != null) {
-    						var scaleFunc = scaleFor(data.columns.c6, data.rows.map(function (r) { return r.c6; }), 0, 100, data.parameters["ColorScale"]);
+    						var scaleFunc = scaleFor(data.columns.c6, data.rows.map(r => r.c6), 0, 100, data.parameters["ColorScale"]);
     						var colorInterpolator = ChartUtils.getColorInterpolation(data.parameters["ColorSet"]);
-    						color = function (v) { return colorInterpolator(scaleFunc(v.c6)); }
+    						color = v => colorInterpolator(scaleFunc(v.c6))
     				}
     				else if (data.columns.c7.token != null) {
     						var scheme = ChartUtils.getColorScheme(data.parameters["ColorCategory"]);
-    						var categoryColor = d3.scaleOrdinal(scheme).domain(data.rows.map(function (v) { return v.c7; }));
-    						color = function (v) { return v.c7.color || categoryColor(v.c7); };
-    				}
+    						var categoryColor = d3.scaleOrdinal(scheme).domain(data.rows.map(v => v.c7));
+    						color = v => v.c7.color || categoryColor(v.c7); }
     
     
     				var parentDiv = chart._groups[0][0].parentElement;

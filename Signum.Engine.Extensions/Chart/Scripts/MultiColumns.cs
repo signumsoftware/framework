@@ -8,9 +8,8 @@ namespace Signum.Logic.Chart.Scripts
 {
     public class MultiColumnsChartScript : ChartScript                
     {
-        public MultiColumnsChartScript()
+        public MultiColumnsChartScript() : base(D3ChartScript.MultiColumns)
         {
-            this.Name = "MultiColumns";
             this.Icon = ChartScriptLogic.LoadIcon("multicolumns.png");
             this.GroupBy = GroupByChart.Always;
             this.Columns = new List<ChartScriptColumn>

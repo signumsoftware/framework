@@ -1,14 +1,14 @@
 import * as React from 'react'
-import * as D3 from 'd3'
-import D3ChartScriptRendererBase from '../ChartRenderer';
+import * as d3 from 'd3'
+import D3ChartBase from '../ChartRenderer';
 import * as ChartClient from '../ChartClient';
 import * as ChartUtils from '../Templates/ChartUtils';
 import { getClickKeys, translate, scale, rotate, skewX, skewY, matrix, scaleFor, rule, ellipsis } from '../Templates/ChartUtils';
 
 
-export default class BarsChartScriptRendererBase extends D3ChartScriptRendererBase {
+export default class ScatterplotChart extends D3ChartBase {
 
-    drawChart(data: ChartClient.ChartTable, chart: D3.Selection<SVGElement, {}, HTMLDivElement, unknown >) {
+    drawChart(data: ChartClient.ChartTable, chart: d3.Selection<SVGElement, {}, HTMLDivElement, unknown>, width: number, height: number) {
             
       var xRule = rule({
         _1 : 5,
@@ -34,9 +34,9 @@ export default class BarsChartScriptRendererBase extends D3ChartScriptRendererBa
       }, height);
       //yRule.debugY(chart);
       
-      var x = scaleFor(data.columns.c1, data.rows.map(function(r){return r.c1;}), 0, xRule.size('content'), data.parameters["HorizontalScale"]);
+      var x = scaleFor(data.columns.c1, data.rows.map(r => r.c1), 0, xRule.size('content'), data.parameters["HorizontalScale"]);
       
-      var y = scaleFor(data.columns.c2, data.rows.map(function(r){return r.c2;}), 0, yRule.size('content'), data.parameters["VerticalScale"]);
+      var y = scaleFor(data.columns.c2, data.rows.map(r => r.c2), 0, yRule.size('content'), data.parameters["VerticalScale"]);
       
       
       var pointSize = data.parameters["PointSize"];
@@ -48,8 +48,8 @@ export default class BarsChartScriptRendererBase extends D3ChartScriptRendererBa
       
       chart.append('svg:g').attr('class', 'x-lines').attr('transform', translate(xRule.start('content'), yRule.start('content')))
         .enterData(xTicks, 'line', 'y-lines')
-        .attr('x1', function(t) { return x(t); })
-        .attr('x2', function(t) { return x(t); })
+        .attr('x1', t => x(t))
+        .attr('x2', t => x(t))
         .attr('y1', yRule.size('content'))
       	.style('stroke', 'LightGray');
       
@@ -77,20 +77,20 @@ export default class BarsChartScriptRendererBase extends D3ChartScriptRendererBa
       chart.append('svg:g').attr('class', 'y-lines').attr('transform', translate(xRule.start('content'), yRule.end('content')))
         .enterData(yTicks, 'line', 'y-lines')
         .attr('x2', xRule.size('content'))
-        .attr('y1', function(t) { return -y(t); })
-        .attr('y2', function(t) { return -y(t); })
+        .attr('y1', t => -y(t))
+        .attr('y2', t => -y(t))
         .style('stroke', 'LightGray');
       
       chart.append('svg:g').attr('class', 'y-tick').attr('transform', translate(xRule.start('ticks'), yRule.end('content')))
         .enterData(yTicks, 'line', 'y-tick')
         .attr('x2', xRule.size('ticks'))
-        .attr('y1', function(t) { return -y(t); })
-        .attr('y2', function(t) { return -y(t); })
+        .attr('y1', t => -y(t))
+        .attr('y2', t => -y(t))
         .style('stroke', 'Black');
       
       chart.append('svg:g').attr('class', 'y-label').attr('transform', translate(xRule.end('labels'), yRule.end('content')))
         .enterData(yTicks, 'text', 'y-label')
-        .attr('y', function(t) { return -y(t); })
+        .attr('y', t => -y(t))
         .attr('dominant-baseline', 'middle')
         .attr('text-anchor', 'end')
         .text(yTickFormat);
@@ -103,12 +103,11 @@ export default class BarsChartScriptRendererBase extends D3ChartScriptRendererBa
       
       var color;
       if(data.parameters["ColorScale"] == "Ordinal"){
-        color = d3.scaleOrdinal(ChartUtils.getColorScheme(data.parameters["ColorScheme"], data.parameters["ColorSchemeSteps"])).domain( data.rows.map(function(v) { return v.c0; }));
-      }else{
-        var scaleFunc = scaleFor(data.columns.c0, data.rows.map(function(r){return r.c0;}), 0, 1, data.parameters["ColorScale"]);
+        color = d3.scaleOrdinal(ChartUtils.getColorScheme(data.parameters["ColorScheme"], data.parameters["ColorSchemeSteps"])).domain( data.rows.map(v => v.c0; }))else{
+        var scaleFunc = scaleFor(data.columns.c0, data.rows.map(r => r.c0), 0, 1, data.parameters["ColorScale"]);
         var colorInterpolate = data.parameters["ColorInterpolate"];
         var colorInterpolation = ChartUtils.getColorInterpolation(colorInterpolate); 
-        color = function(v){return colorInterpolation(scaleFunc(v)); }
+        color = v => colorInterpolation(scaleFunc(v))
       }
       
     
@@ -120,13 +119,13 @@ export default class BarsChartScriptRendererBase extends D3ChartScriptRendererBa
         //PAINT GRAPH
         chart.enterData(data.rows, 'g', 'shape-serie').attr('transform', translate(xRule.start('content'), yRule.end('content')))
           .append('svg:circle').attr('class', 'shape')
-          .attr('stroke', function(p) { return p.c0.color || color(p.c0); })
-          .attr('fill', function(p) { return p.c0.color || color(p.c0); })
+          .attr('stroke', p => p.c0.color || color(p.c0))
+          .attr('fill', p => p.c0.color || color(p.c0))
           .attr('shape-rendering', 'initial')
           .attr('r', pointSize)
-          .attr('cx', function(p) { return x(p.c1); })
-          .attr('cy', function(p) { return -y(p.c2); })
-          .attr('data-click', function(p) { return getClickKeys(p, data.columns); })
+          .attr('cx', p => x(p.c1))
+          .attr('cy', p => -y(p.c2))
+          .attr('data-click', p => getClickKeys(p, data.columns))
           .append('svg:title')
           .text(function(p) { return p.c0.niceToString() + 
             ("\n" + data.columns.c1.title +": " + p.c1.niceToString()) + 

@@ -8,9 +8,8 @@ namespace Signum.Logic.Chart.Scripts
 {
     public class BubbleplotChartScript : ChartScript                
     {
-        public BubbleplotChartScript()
+        public BubbleplotChartScript() : base(D3ChartScript.Bubbleplot)
         {
-            this.Name = "Bubbleplot";
             this.Icon = ChartScriptLogic.LoadIcon("bubbles.png");
             this.GroupBy = GroupByChart.Optional;
             this.Columns = new List<ChartScriptColumn>

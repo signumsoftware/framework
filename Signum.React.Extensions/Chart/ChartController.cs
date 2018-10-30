@@ -29,9 +29,9 @@ namespace Signum.React.Chart
     public class ChartController : ApiController
     {
         [Route("api/chart/scripts"), HttpGet]
-        public List<List<ChartScriptEntity>> ChartScripts()
+        public List<ChartScript> ChartScripts()
         {
-            return ChartUtils.PackInGroups(ChartScriptLogic.Scripts.Value.Values, 4);
+            return ChartScriptLogic.Scripts.Values.ToList();
         }
 
         [Route("api/chart/colorPalettes"), HttpGet]

@@ -8,9 +8,8 @@ namespace Signum.Logic.Chart.Scripts
 {
     public class PieChartScript : ChartScript                
     {
-        public PieChartScript()
+        public PieChartScript(): base(D3ChartScript.Pie)
         {
-            this.Name = "Pie";
             this.Icon = ChartScriptLogic.LoadIcon("doughnut.png");
             this.GroupBy = GroupByChart.Always;
             this.Columns = new List<ChartScriptColumn>

@@ -17,7 +17,7 @@ import * as UserChartClient from '../../Chart/UserChart/UserChartClient'
 import * as ChartClient from '../../Chart/ChartClient'
 import { ChartRequest } from '../../Chart/Signum.Entities.Chart'
 import ChartRenderer from '../../Chart/Templates/ChartRenderer'
-import ChartTable from '../../Chart/Templates/ChartTable'
+import ChartTableComponent from '../../Chart/Templates/ChartTable'
 import { UserChartPartEntity } from '../Signum.Entities.Dashboard'
 
 
@@ -62,7 +62,8 @@ export default class UserChartPart extends React.Component<UserChartPartProps, U
 
     makeQuery() {
         this.setState({ result: undefined, error: undefined }, () =>
-            ChartClient.API.executeChart(this.state.chartRequest!)
+            ChartClient.getChartScript(this.state.chartRequest!.chartScript)
+                .then(cs => ChartClient.API.executeChart(this.state.chartRequest!, cs))
                 .then(rt => this.setState({ result: rt }))
                 .catch(e => { this.setState({ error: e }); })
                 .done());
@@ -91,7 +92,7 @@ export default class UserChartPart extends React.Component<UserChartPartProps, U
                         {" "}{UserChartPartEntity.nicePropertyName(a => a.showData)}
                     </label>}
                 {this.state.showData ?
-                    <ChartTable chartRequest={s.chartRequest} lastChartRequest={s.chartRequest} resultTable={s.result.resultTable} onRedraw={() => this.makeQuery()} /> :
+                    <ChartTableComponent chartRequest={s.chartRequest} lastChartRequest={s.chartRequest} resultTable={s.result.resultTable} onRedraw={() => this.makeQuery()} /> :
                     <ChartRenderer chartRequest={s.chartRequest} lastChartRequest={s.chartRequest} data={s.result.chartTable} />
                 }
             </div>

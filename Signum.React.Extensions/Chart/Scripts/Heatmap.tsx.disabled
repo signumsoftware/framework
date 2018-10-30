@@ -1,14 +1,14 @@
 import * as React from 'react'
-import * as D3 from 'd3'
-import D3ChartScriptRendererBase from '../ChartRenderer';
+import * as d3 from 'd3'
+import D3ChartBase from '../D3ChartBase';
 import * as ChartClient from '../ChartClient';
 import * as ChartUtils from '../Templates/ChartUtils';
 import { getClickKeys, translate, scale, rotate, skewX, skewY, matrix, scaleFor, rule, ellipsis } from '../Templates/ChartUtils';
 
 
-export default class BarsChartScriptRendererBase extends D3ChartScriptRendererBase {
+export default class HeatmapChart extends D3ChartBase {
 
-    drawChart(data: ChartClient.ChartTable, chart: D3.Selection<SVGElement, {}, HTMLDivElement, unknown >) {
+    drawChart(data: ChartClient.ChartTable, chart: d3.Selection<SVGElement, {}, HTMLDivElement, unknown>, width: number, height: number) {
             
     
         if (!(typeof google === 'object' && typeof google.maps === 'object')) {

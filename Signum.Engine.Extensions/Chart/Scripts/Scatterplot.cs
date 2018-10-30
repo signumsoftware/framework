@@ -8,9 +8,8 @@ namespace Signum.Logic.Chart.Scripts
 {
     public class ScatterplotChartScript : ChartScript                
     {
-        public ScatterplotChartScript()
+        public ScatterplotChartScript() : base(D3ChartScript.Scatterplot)
         {
-            this.Name = "Scatterplot";
             this.Icon = ChartScriptLogic.LoadIcon("points.png");
             this.GroupBy = GroupByChart.Optional;
             this.Columns = new List<ChartScriptColumn>

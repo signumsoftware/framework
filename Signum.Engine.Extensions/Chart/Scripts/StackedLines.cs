@@ -8,9 +8,8 @@ namespace Signum.Logic.Chart.Scripts
 {
     public class StackedLinesChartScript : ChartScript                
     {
-        public StackedLinesChartScript()
+        public StackedLinesChartScript() : base(D3ChartScript.StackedLines)
         {
-            this.Name = "StackedLines";
             this.Icon = ChartScriptLogic.LoadIcon("stackedareas.png");
             this.GroupBy = GroupByChart.Always;
             this.Columns = new List<ChartScriptColumn>

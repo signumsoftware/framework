@@ -8,9 +8,8 @@ namespace Signum.Logic.Chart.Scripts
 {
     public class LineChartScript : ChartScript                
     {
-        public LineChartScript()
+        public LineChartScript() : base(D3ChartScript.Line)
         {
-            this.Name = "Line";
             this.Icon = ChartScriptLogic.LoadIcon("lines.png");
             this.GroupBy = GroupByChart.Always;
             this.Columns = new List<ChartScriptColumn>

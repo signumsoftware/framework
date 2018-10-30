@@ -22,45 +22,8 @@ namespace Signum.Entities.Chart
         public bool IsGroupKey { get; set; }
     }
 
-    [Serializable]
-    public class ChartScriptColumnEmbedded : EmbeddedEntity
-    {
-        [StringLengthValidator(AllowNulls = false, Min = 3, Max = 80)]
-        public string DisplayName { get; set; }
-
-        public bool IsOptional { get; set; }
-
-        public ChartColumnType ColumnType { get; set; }
-
-        public bool IsGroupKey { get; set; }
-
-        internal ChartScriptColumnEmbedded Clone()
-        {
-            return new ChartScriptColumnEmbedded
-            {
-                DisplayName = DisplayName,
-                IsGroupKey = IsGroupKey,
-                ColumnType = ColumnType,
-                IsOptional = IsOptional,
-            };
-        }
-
-        public string ToCode()
-        {
-            var props = new List<string>();
-
-            if (IsGroupKey)
-                props.Add("IsGroupKey = true");
-
-            if (IsOptional)
-                props.Add("IsOptional = true");
-
-
-            return $@"new ChartScriptColumn(""{DisplayName}"", ChartColumnType.{ColumnType}) " + (props.Any() ? ("{ " + props.ToString(", ") + " }") : null);
-        }
-    }
-
-    [Flags]
+   
+    [Flags, InTypeScript(true)]
     public enum ChartColumnType
     {
         [Code("i")]

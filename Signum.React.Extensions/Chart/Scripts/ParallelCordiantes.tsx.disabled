@@ -1,14 +1,14 @@
 import * as React from 'react'
-import * as D3 from 'd3'
-import D3ChartScriptRendererBase from '../ChartRenderer';
+import * as d3 from 'd3'
+import D3ChartBase from '../ChartRenderer';
 import * as ChartClient from '../ChartClient';
 import * as ChartUtils from '../Templates/ChartUtils';
 import { getClickKeys, translate, scale, rotate, skewX, skewY, matrix, scaleFor, rule, ellipsis } from '../Templates/ChartUtils';
 
 
-export default class BarsChartScriptRendererBase extends D3ChartScriptRendererBase {
+export default class ParallelCordinatesChart extends D3ChartBase {
 
-    drawChart(data: ChartClient.ChartTable, chart: D3.Selection<SVGElement, {}, HTMLDivElement, unknown >) {
+    drawChart(data: ChartClient.ChartTable, chart: d3.Selection<SVGElement, {}, HTMLDivElement, unknown>, width: number, height: number) {
               
       var yRule = rule({
         _1 : 5,
@@ -30,7 +30,7 @@ export default class BarsChartScriptRendererBase extends D3ChartScriptRendererBa
      var cords = d3.entries(data.columns)
         .filter(function(p, i){return p.key != "c0" && p.key != "entity" && p.value.token != undefined;})
         .map(function(p, i){
-          var values = data.rows.map(function(r){return r[p.key];});
+          var values = data.rows.map(r => r[p.key]);
           
           var scaleType = data.parameters["Scale" + p.key[1]];
           
@@ -49,59 +49,59 @@ export default class BarsChartScriptRendererBase extends D3ChartScriptRendererBa
     
       
        var x = d3.scaleBand()
-           .domain(cords.map(function(c){return c.key;}))
+           .domain(cords.map(c => c.key))
           .rangeRound([0, width]);
        
      
       chart.append('svg:g').attr('class', 'x-tick').attr('transform', translate(0, yRule.start('content')))
         .enterData(cords, 'line', 'x-tick')
-          .attr('y2',  function (d) { return yRule.size('content'); })
-          .attr('x1', function (d) { return x(d.key); })
-          .attr('x2', function (d) { return x(d.key); })
+          .attr('y2',  d => yRule.size('content'))
+          .attr('x1', d => x(d.key))
+          .attr('x2', d => x(d.key))
           .style('stroke', 'Black');
       
     
       chart.append('svg:g').attr('class', 'x-label').attr('transform', translate(0, yRule.middle('title')))
         .enterData(cords, 'text', 'x-label')
-          .attr('x', function (d) { return x(d.key); })
+          .attr('x', d => x(d.key))
           .attr('dominant-baseline', 'middle')
           .attr('text-anchor', 'middle')
           .attr("font-weight","bold")
-          .text(function (d) { return d.column.title; });
+          .text(d => d.column.title);
       
        chart.append('svg:g').attr('class', 'x-label-max').attr('transform', translate(0, yRule.middle('max')))
         .enterData(cords, 'text', 'x-label-max')
-          .attr('x', function (d) { return x(d.key); })
+          .attr('x', d => x(d.key))
           .attr('dominant-baseline', 'middle')
           .attr('text-anchor', 'middle')
           .text(function (d) { return d.column.type != "Date" && d.column.type != "DateTime" ?
             d.column.scale.domain()[1]:        
-            d3.max(data.rows, function(r){return r[d.key];}).niceToString(); });
+            d3.max(data.rows, r => r[d.key];}).niceToString());
       
       
       chart.append('svg:g').attr('class', 'x-label-min').attr('transform', translate(0, yRule.middle('min')))
         .enterData(cords, 'text', 'x-label-min')
-          .attr('x', function (d) { return x(d.key); })
+          .attr('x', d => x(d.key))
           .attr('dominant-baseline', 'middle')
           .attr('text-anchor', 'middle')
           .text(function (d) { return d.column.type != "Date" && d.column.type != "DateTime" ?
             d.column.scale.domain()[0]:  
-            d3.min(data.rows, function(r){return r[d.key];}).niceToString(); });
+            d3.min(data.rows, r => r[d.key];}).niceToString());
       
       
       var drawGradient = function(key)
       {    
          chart.selectAll("g.x-tick-box .x-tick-box")
-           .style('fill', function(d){ return d.key != key ? '#ccc': '#000'; } )
+           .style('fill', d => d.key != key ? '#ccc': '#000' )
     
           chart.selectAll("g.shape-serie .shape")
             .attr("stroke", data.columns[key].colorScale);
       };
       
        var line = d3.line()
-        .x(function(r) { return x(r.key); })
-        .y(function(r) { return  -data.columns[r.key].scale(r.value); })
-        .defined(function(r){return r.value != undefined;})
+        .x(r => x(r.key))
+        .y(r => -data.columns[r.key].scale(r.value))
+        .defined(r => r.value != undefined)
         .curve(ChartUtils.getCurveByName(data.parameters["Interpolate"]));//"linear"
       
       //paint graph - line
@@ -111,20 +111,19 @@ export default class BarsChartScriptRendererBase extends D3ChartScriptRendererBa
           .attr('stroke-width', 1)
           .attr('stroke', 'black')
           .attr('shape-rendering', 'initial')
-          .attr('data-click', function(r) {  return getClickKeys( r, data.columns);})
-        .attr('d', function(r){ return line(cords.map(function(c){return {key : c.key, value : r[c.key]};}));})
+          .attr('data-click', r => getClickKeys( r, data.columns))
+        .attr('d', r => line(cords.map(function(c){return {key : c.key, value : r[c.key]};})))
         .append("title")
         	.text(function(r) {         
               return r.c0.niceToString() + "\n" +
-                cords.map(function(c){return c.column.title + ": " + r[c.key].niceToString();}).join("\n");
-            });
+                cords.map(c => c.column.title + ": " + r[c.key].niceToString();}).join("\n"));
     
       var boxWidth = 10;
       chart.append('svg:g').attr('class', 'x-tick-box').attr('transform', translate(0, yRule.start('content')))
         .enterData(cords, 'rect', 'x-tick-box')
-          .attr('height',  function (d) { return yRule.size('content'); })
+          .attr('height',  d => yRule.size('content'))
           .attr('width', boxWidth)
-          .attr('x', function (d) { return x(d.key) - boxWidth/2; })
+          .attr('x', d => x(d.key) - boxWidth/2)
           .style('stroke', '#ccc')
           .style('fill', '#ccc')
           .style('fill-opacity', '.2')

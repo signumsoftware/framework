@@ -1,28 +1,25 @@
 ﻿import * as React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { Dic, classes, ifError } from '@framework/Globals'
+import { ifError } from '@framework/Globals'
 import * as Finder from '@framework/Finder'
 import { ValidationError, AbortableRequest } from '@framework/Services'
-import { Lite, toLite } from '@framework/Signum.Entities'
-import { ResultTable, FindOptions, FilterOption, QueryDescription, SubTokensOptions, QueryToken, QueryTokenType, ColumnOption } from '@framework/FindOptions'
-import { TypeContext, FormGroupStyle, StyleOptions, StyleContext, mlistItemContext } from '@framework/TypeContext'
-import { SearchMessage, JavascriptMessage, parseLite, is, liteKey } from '@framework/Signum.Entities'
+import { Lite } from '@framework/Signum.Entities'
+import { QueryDescription, SubTokensOptions, QueryToken } from '@framework/FindOptions'
+import { TypeContext } from '@framework/TypeContext'
+import { SearchMessage, JavascriptMessage } from '@framework/Signum.Entities'
 import { PropertyRoute, getQueryNiceName, getTypeInfo, ReadonlyBinding, GraphExplorer }  from '@framework/Reflection'
 import * as Navigator from '@framework/Navigator'
 import FilterBuilder from '@framework/SearchControl/FilterBuilder'
 import ValidationErrors from '@framework/Frames/ValidationErrors'
-import { ValueLine, FormGroup, ValueLineProps, ValueLineType } from '@framework/Lines'
-import { ChartColumnEmbedded, ChartScriptColumnEmbedded, ChartScriptParameterEmbedded, ChartRequest, GroupByChart, ChartMessage,
-    ChartColorEntity, ChartScriptEntity, ChartParameterEmbedded, ChartParameterType, UserChartEntity } from '../Signum.Entities.Chart'
+import { ChartRequest, ChartMessage, UserChartEntity } from '../Signum.Entities.Chart'
 import * as ChartClient from '../ChartClient'
-import QueryTokenEntityBuilder from '../../UserAssets/Templates/QueryTokenEntityBuilder'
-import { ChartColumn, ChartColumnInfo }from './ChartColumn'
 import ChartBuilder from './ChartBuilder'
-import ChartTable from './ChartTable'
+import ChartTableComponent from './ChartTable'
 import ChartRenderer from './ChartRenderer'
 import "../Chart.css"
 import "@framework/SearchControl/Search.css"
-import { Tab, Tabs, UncontrolledTabs } from '@framework/Components/Tabs';
+import { Tab, UncontrolledTabs } from '@framework/Components/Tabs';
+import { ChartScript } from '../ChartClient';
 
 
 interface ChartRequestViewProps {
@@ -101,7 +98,7 @@ export default class ChartRequestView extends React.Component<ChartRequestViewPr
         this.abortableQuery.abort();
     }
 
-    abortableQuery = new AbortableRequest<ChartRequest, ChartClient.API.ExecuteChartResult>((abortController, request) => ChartClient.API.executeChart(request, abortController))
+    abortableQuery = new AbortableRequest<{ cr: ChartRequest; cs: ChartScript }, ChartClient.API.ExecuteChartResult>((signal, request) => ChartClient.API.executeChart(request.cr, request.cs, signal))
 
     handleOnDrawClick = () => {
 
@@ -109,26 +106,23 @@ export default class ChartRequestView extends React.Component<ChartRequestViewPr
 
         var cr = this.props.chartRequest!;
 
-        this.abortableQuery.getData(cr)
+        ChartClient.getChartScript(cr.chartScript)
+            .then(cs => this.abortableQuery.getData({ cr, cs }))
             .then(
-            rt => {
-                this.setState({ chartResult: rt, lastChartRequest: JSON.parse(JSON.stringify(this.props.chartRequest)) });
-                this.props.onChange(cr, this.props.userChart);
-            },
-            ifError(ValidationError, e => {
-                GraphExplorer.setModelState(this.props.chartRequest!, e.modelState, "request");
-                this.forceUpdate();
-            }))
+                rt => {
+                    this.setState({ chartResult: rt, lastChartRequest: JSON.parse(JSON.stringify(this.props.chartRequest)) });
+                    this.props.onChange(cr, this.props.userChart);
+                },
+                ifError(ValidationError, e => {
+                    GraphExplorer.setModelState(this.props.chartRequest!, e.modelState, "request");
+                    this.forceUpdate();
+                }))
             .done();
     }
 
     handleOnFullScreen = (e: React.MouseEvent<any>) => {
         e.preventDefault();
         Navigator.history.push(ChartClient.Encoder.chartPath(this.props.chartRequest!));
-    }
-
-    handleEditScript = (e: React.MouseEvent<any>) => {
-        window.open(Navigator.navigateRoute(this.props.chartRequest!.chartScript));
     }
 
     render() {
@@ -166,7 +160,6 @@ export default class ChartRequestView extends React.Component<ChartRequestViewPr
                     </div >
                     <div className="sf-query-button-bar btn-toolbar">
                         <button type="submit" className="sf-query-button sf-chart-draw btn btn-primary" onClick={this.handleOnDrawClick}>{ChartMessage.DrawChart.niceToString()}</button>
-                        <button className="sf-query-button sf-chart-script-edit btn btn-light" onClick={this.handleEditScript}><FontAwesomeIcon icon="pencil"/> &nbsp; {ChartMessage.EditScript.niceToString()}</button>
                         {ChartClient.ButtonBarChart.getButtonBarElements({ chartRequest: cr, chartRequestView: this }).map((a, i) => React.cloneElement(a, { key: i }))}
                         <button className="btn btn-light" onMouseUp={this.handleExplore} ><FontAwesomeIcon icon="search" /> &nbsp; {SearchMessage.Explore.niceToString()}</button>
                     </div>
@@ -179,7 +172,7 @@ export default class ChartRequestView extends React.Component<ChartRequestViewPr
                                 </Tab>
 
                                 <Tab eventKey="data" title={<span>{ChartMessage.Data.niceToString()} ({(s.chartResult.resultTable.rows.length)})</span> as any}>
-                                    <ChartTable chartRequest={cr} lastChartRequest={s.lastChartRequest} resultTable={s.chartResult.resultTable} onRedraw={this.handleOnDrawClick} />
+                                    <ChartTableComponent chartRequest={cr} lastChartRequest={s.lastChartRequest} resultTable={s.chartResult.resultTable} onRedraw={this.handleOnDrawClick} />
                                 </Tab>
                             </UncontrolledTabs>
                         }

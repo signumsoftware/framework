@@ -76,7 +76,7 @@ namespace Signum.Entities.Chart
 
 
 
-        public static bool SynchronizeColumns(this ChartScriptEntity chartScript, IChartBase chart)
+        public static bool SynchronizeColumns(this ChartScript chartScript, IChartBase chart)
         {
             bool result = false;
 
@@ -146,7 +146,7 @@ namespace Signum.Entities.Chart
                                 ScriptParameter = sp,
                             };
 
-                            cp.Value = sp.DefaultValue(sp.GetToken(chart));
+                            cp.Value = sp.ValueDefinition.DefaultValue(sp.GetToken(chart));
                         }
 
                         chart.Parameters.Add(cp);
@@ -228,51 +228,7 @@ namespace Signum.Entities.Chart
 
         public static Func<Type, PrimaryKey, Color?> GetChartColor = (type, id) => null;
 
-        //Manual Json printer for performance and pretty print
-        public static object DataJson(ChartRequest request, ResultTable resultTable)
-        {
-            int index = 0;
-            var cols = request.Columns.Select((c, i) => new
-            {
-                name = "c" + i,
-                displayName = c.ScriptColumn.DisplayName,
-                title = c.GetTitle(),
-                token = c.Token?.Token.FullKey(),
-                type = c.Token?.Token.GetChartColumnType().ToString(),
-                isGroupKey = c.IsGroupKey,
-                converter = c.Token == null ? null : c.Converter(index++)
-            }).ToList();
-
-            if (!request.GroupResults)
-            {
-                cols.Insert(0, new
-                {
-                    name = "entity",
-                    displayName = "Entity",
-                    title = "",
-                    token = ChartColumnType.Lite.ToString(),
-                    type = "entity",
-                    isGroupKey = (bool?)true,
-                    converter = new Func<ResultRow, object>(r => r.Entity.Key())
-                });
-            }
-
-            var parameters = request.Parameters.ToDictionary(p => p.Name, p => p.Value);
-
-            return new
-            {
-                columns = cols.ToDictionary(a => a.name, a => new
-                {
-                    a.title,
-                    a.displayName,
-                    a.token,
-                    a.isGroupKey,
-                    a.type,
-                }),
-                parameters = request.ChartScript.Parameters.ToDictionary(a => a.Name, a => parameters.TryGetC(a.Name) ?? a.DefaultValue(a.GetToken(request))),
-                rows = resultTable.Rows.Select(r => cols.ToDictionary(a => a.name, a => a.converter == null ? null : a.converter(r))).ToList()
-            };
-        }
+        
 
         private static Func<ResultRow, object> Converter(this ChartColumnEmbedded ct, int columnIndex)
         {
@@ -353,48 +309,6 @@ namespace Signum.Entities.Chart
                 }; ;
         }
 
-        public static List<List<ChartScriptEntity>> PackInGroups(IEnumerable<ChartScriptEntity> scripts, int rowWidth)
-        {
-            var heigth = (scripts.Count() + rowWidth - 1) / rowWidth; //round-up division
-
-            var result = 0.To(heigth).Select(a => new List<ChartScriptEntity>()).ToList();
-
-            var groups = scripts
-                .OrderBy(s => s.Name)
-                .GroupBy(s => s.ColumnsStructure)
-                .OrderBy(g => g.First().Columns.Count(s => !s.IsOptional))
-                .ThenByDescending(g => g.Count())
-                .ThenBy(g => g.Key)
-                .ToList();
-
-            foreach (var gr in groups)
-            {
-                var count = gr.Count();
-                var list = result.FirstOrDefault(ls => ls.Count + count <= rowWidth);
-                if (list != null)
-                {
-                    list.AddRange(gr);
-                }
-                else
-                {
-                    var remaining = gr.ToList();
-                    foreach (var ls in result)
-                    {
-                        var available = Math.Min(rowWidth - ls.Count, remaining.Count);
-                        if (available > 0)
-                        {
-                            var range = remaining.GetRange(0, available);
-                            remaining.RemoveRange(0, available);
-                            ls.AddRange(range);
-                            if (remaining.IsEmpty())
-                                break;
-                        }
-                    }
-                }
-            }
-
-            return result;
-        }
 
         internal static void FixParameters(IChartBase chart, ChartColumnEmbedded chartColumn)
         {
@@ -428,8 +342,6 @@ namespace Signum.Entities.Chart
         Chart_Query0IsNotAllowed,
         [Description("Toggle info")]
         Chart_ToggleInfo,
-        [Description("Edit Script")]
-        EditScript,
         [Description("Colors for {0}")]
         ColorsFor0,
         CreatePalette,
