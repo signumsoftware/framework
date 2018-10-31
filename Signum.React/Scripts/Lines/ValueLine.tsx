@@ -217,12 +217,11 @@ function getPlaceholder(vl: ValueLine): string | undefined {
 }
 
 function getOptionsItems(vl: ValueLine): OptionItem[]{
-
     var ti = getTypeInfo(vl.state.type!.name);
     if (vl.state.comboBoxItems)
         return vl.state.comboBoxItems.map(a =>
-            typeof a == "string" ? toOptionItem(ti.members[a]) :
-                toOptionItem(a));
+            typeof a == "string" ? ti.members[a] && toOptionItem(ti.members[a]) :
+                toOptionItem(a)).filter(a => !!a);
 
     if (vl.state.type!.name == "boolean")
         return ([
