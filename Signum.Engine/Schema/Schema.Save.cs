@@ -77,12 +77,12 @@ namespace Signum.Engine.Maps
                 if (IdentityBehaviour)
                 {
                     InsertCacheIdentity ic = inserterIdentity.Value;
-                    list.SplitStatements(ls => ic.GetInserter(ls.Count)(ls, backEdges));
+                    list.SplitStatements(this.Columns.Count, ls => ic.GetInserter(ls.Count)(ls, backEdges));
                 }
                 else
                 {
                     InsertCacheDisableIdentity ic = inserterDisableIdentity.Value;
-                    list.SplitStatements(ls => ic.GetInserter(ls.Count)(ls, backEdges));
+                    list.SplitStatements(this.Columns.Count, ls => ic.GetInserter(ls.Count)(ls, backEdges));
                 }
             }
         }
@@ -362,7 +362,7 @@ namespace Signum.Engine.Maps
             using (HeavyProfiler.LogNoStackTrace("UpdateMany", () => this.Type.TypeName()))
             {
                 var uc = updater.Value;
-                list.SplitStatements(ls => uc.GetUpdater(ls.Count)(ls, backEdges));
+                list.SplitStatements(this.Columns.Count + 2, ls => uc.GetUpdater(ls.Count)(ls, backEdges));
             }
         }
 
@@ -919,7 +919,7 @@ namespace Signum.Engine.Maps
                     }
                 }
 
-                toInsert.SplitStatements(list => GetInsert(list.Count)(list));
+                toInsert.SplitStatements(this.table.Columns.Count,list => GetInsert(list.Count)(list));
             }
 
             public void RelationalUpdates(List<EntityForbidden> idents)
@@ -977,11 +977,11 @@ namespace Signum.Engine.Maps
                     }
                 }
 
-                toDelete.SplitStatements(list => GetDelete(list.Count)(list));
+                toDelete.SplitStatements(2, list => GetDelete(list.Count)(list));
 
                 toDeleteExcept.ForEach(e => GetDeleteExcept(e.ExceptRowIds.Length)(e)); 
-                toUpdate.SplitStatements(listPairs => GetUpdate(listPairs.Count)(listPairs));
-                toInsert.SplitStatements(listPairs => GetInsert(listPairs.Count)(listPairs));
+                toUpdate.SplitStatements(this.table.Columns.Count + 2, listPairs => GetUpdate(listPairs.Count)(listPairs));
+                toInsert.SplitStatements(this.table.Columns.Count, listPairs => GetInsert(listPairs.Count)(listPairs));
             }
 
             public SqlPreCommand RelationalUpdateSync(Entity parent, string suffix, bool replaceParameter)
@@ -1132,7 +1132,7 @@ namespace Signum.Engine.Maps
 
     internal static class SaveUtils
     {
-        public static void SplitStatements<T>(this IList<T> original, Action<List<T>> action)
+        public static void SplitStatements<T>(this IList<T> original, int numParametersPerElement, Action<List<T>> action)
         {
             if (!Connector.Current.AllowsMultipleQueries)
             {
@@ -1145,7 +1145,8 @@ namespace Signum.Engine.Maps
             }
             else
             {
-                int max = Schema.Current.Settings.MaxNumberOfStatementsInSaveQueries;
+                var s = Schema.Current.Settings;
+                int max = Math.Min(s.MaxNumberOfStatementsInSaveQueries, s.MaxNumberOfParameters / numParametersPerElement);
 
                 List<T> part = new List<T>(max);
                 int i = 0;
