@@ -450,6 +450,7 @@ export interface ValueLineNode extends LineBaseNode {
     autoTrim?: ExpressionOrValue<boolean>;
     inlineCheckbox?: ExpressionOrValue<boolean>;
     valueHtmlAttributes?: HtmlAttributesExpression;
+    comboBoxItems?: Expression<string[]>; 
 }
 
 NodeUtils.register<ValueLineNode>({
@@ -469,6 +470,7 @@ NodeUtils.register<ValueLineNode>({
         readOnly: node.readOnly,
         inlineCheckbox: node.inlineCheckbox,
         valueLineType: node.textArea && bindExpr(ta => ta ? "TextArea" : undefined, node.textArea),
+        comboBoxItems: node.comboBoxItems,
         autoTrim: node.autoTrim,
         onChange: node.onChange
     }),
@@ -483,6 +485,7 @@ NodeUtils.register<ValueLineNode>({
         readOnly={NodeUtils.evaluateAndValidate(ctx, dn.node, n => n.readOnly, NodeUtils.isBooleanOrNull)}
         inlineCheckbox={NodeUtils.evaluateAndValidate(ctx, dn.node, n => n.inlineCheckbox, NodeUtils.isBooleanOrNull)}
         valueLineType={NodeUtils.evaluateAndValidate(ctx, dn.node, n => n.textArea, NodeUtils.isBooleanOrNull) ? "TextArea" : undefined}
+        comboBoxItems={NodeUtils.evaluateAndValidate(ctx, dn.node, n => n.comboBoxItems, NodeUtils.isArrayOrNull)}
         autoFixString={NodeUtils.evaluateAndValidate(ctx, dn.node, n => n.autoTrim, NodeUtils.isBooleanOrNull)}
         onChange={NodeUtils.evaluateAndValidate(ctx, dn.node, n => n.onChange, NodeUtils.isFunctionOrNull)}
         />),
@@ -500,6 +503,7 @@ NodeUtils.register<ValueLineNode>({
             <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.readOnly)} type="boolean" defaultValue={null} />
             <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.inlineCheckbox)} type="boolean" defaultValue={false} />
             <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.textArea)} type="boolean" defaultValue={false} />
+            <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.comboBoxItems)} type={null} defaultValue={null} exampleExpression={`["item1", ...]`} />
             <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.autoTrim)} type="boolean" defaultValue={true} />
             <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.onChange)} type={null} defaultValue={false} exampleExpression={"() => this.forceUpdate()"} />
         </div>)

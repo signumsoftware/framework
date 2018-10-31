@@ -464,7 +464,6 @@ export function evaluateUntyped(parentCtx: TypeContext<ModifiableEntity>, expres
 }
 
 export function evaluateAndValidate<F, T>(parentCtx: TypeContext<ModifiableEntity>, object: F, fieldAccessor: (from: F) => ExpressionOrValue<T>, validate: (val: any) => string | null)   {
-
     var result = evaluate(parentCtx, object, fieldAccessor);
 
     var error = validate(result);
@@ -556,10 +555,13 @@ export function isFunctionOrStringOrNull(val: any) {
     return val == null || typeof val == "function" || typeof val == "string" ? null : `The returned value (${JSON.stringify(val)}) should be a function or string or null`;
 }
 
+export function isArrayOrNull(val: any) {
+    return val == null || Array.isArray(val) ? null : `The returned value (${JSON.stringify(val)}) should be an array or null`;
+}
+
 export function isFindOptionsOrNull(val: any) {
     return val == null || isFindOptions(val) == null ? null : `The returned value (${JSON.stringify(val)}) should be a findOptions or null`;
 }
-
 
 export function withChildrensSubCtx(dn: DesignerNode<ContainerNode>, parentCtx: TypeContext<ModifiableEntity>, element: React.ReactElement<any>) {
     var ctx = subCtx(parentCtx, (dn.node as any).field, (dn.node as any).styleOptions);
