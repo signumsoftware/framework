@@ -182,7 +182,7 @@ public class AdventureWorksEntityCodeGenerator : EntityCodeGenerator
 
 If we try to generate the entities now, using `[G]enerate` -> `[E]ntities` again, it will work, but the result could be improved a little bit. You could make the changes manually but we'll see how to teach the `EntityCodeGenerator` to follow your orders:
 
-1.  Some entities contain `SqlHierarchyId` or `SqlGeometry`. We need to include a reference to `Microsoft.SqlServer.Types` assembly and add the necessary namespace overriding `GetUsingNamespaces`.  
+1.  Some entities contain `SqlHierarchyId` or `SqlGeometry`. We need to include a reference to `dotMorten.Microsoft.SqlServer.Types` assembly and add the necessary namespace overriding `GetUsingNamespaces`.  
 
     ```C#
     protected override List<string> GetUsingNamespaces(string fileName, IEnumerable<DiffTable> tables)
