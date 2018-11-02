@@ -526,7 +526,7 @@ namespace Signum.Utilities.DataStructures
 
         HashSet<T> Sinks()
         {
-            return adjacency.Where(a => a.Value.Count == 0).Select(a => a.Key).ToHashSet();
+            return new HashSet<T>(adjacency.Where(a => a.Value.Count == 0).Select(a => a.Key));
         }
 
         public DirectedEdgedGraph<T, E> WhereEdges(Func<Edge<T, E>, bool> condition, bool keepAllNodes)

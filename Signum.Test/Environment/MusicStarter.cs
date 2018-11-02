@@ -7,15 +7,15 @@ using Signum.Engine.Maps;
 using Signum.Engine;
 using System.IO;
 using System.Diagnostics;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 using Signum.Entities.Basics;
 using Signum.Engine.DynamicQuery;
 using Signum.Utilities.ExpressionTrees;
 using Signum.Utilities;
-using Microsoft.SqlServer.Types;
 using Signum.Engine.Operations;
 using Signum.Engine.Basics;
-using Signum.Test.Properties;
+using Microsoft.Extensions.Configuration;
+using Microsoft.SqlServer.Types;
 
 namespace Signum.Test.Environment
 {
@@ -24,9 +24,22 @@ namespace Signum.Test.Environment
         static bool startedAndLoaded = false;
         public static void StartAndLoad()
         {
-            if (!startedAndLoaded)
+            if (startedAndLoaded)
+                return;
+
+            lock (typeof(MusicStarter))
             {
-                Start(UserConnections.Replace(Settings.Default.SignumTest));
+                if (startedAndLoaded)
+                    return;
+
+                var conf = new ConfigurationBuilder().SetBasePath(Directory.GetCurrentDirectory())
+                    .AddJsonFile("appsettings.json")
+                    .AddUserSecrets(typeof(MusicStarter).Assembly)
+                    .Build();
+
+                var connectionString = conf.GetConnectionString("SignumTest");
+
+                Start(connectionString);
 
                 Administrator.TotalGeneration();
 
@@ -62,6 +75,15 @@ namespace Signum.Test.Environment
             {
                 sb.Settings.FieldAttributes((AlbumEntity a) => a.Songs[0].Duration).Add(new Signum.Entities.IgnoreAttribute());
                 sb.Settings.FieldAttributes((AlbumEntity a) => a.BonusTrack.Duration).Add(new Signum.Entities.IgnoreAttribute());
+            }
+
+            if(sqlVersion > SqlServerVersion.SqlServer2008)
+            {
+                sb.Settings.UdtSqlName.Add(typeof(SqlHierarchyId), "HierarchyId");
+            }
+            else
+            {
+                sb.Settings.FieldAttributes((LabelEntity a) => a.Node).Add(new Signum.Entities.IgnoreAttribute());
             }
 
             Validator.PropertyValidator((OperationLogEntity e) => e.User).Validators.Clear();

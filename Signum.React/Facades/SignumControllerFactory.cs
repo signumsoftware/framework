@@ -4,50 +4,47 @@ using System.Linq;
 using System.Web;
 using Signum.React.Facades;
 using Signum.Utilities;
-using System.Web.Http.Dispatcher;
-using System.Web.Http.Controllers;
-using System.Net.Http;
-using System.Web.Http;
 using System.Reflection;
 using Signum.React.ApiControllers;
+using Microsoft.AspNetCore.Mvc.ApplicationModels;
+using Microsoft.AspNetCore.Mvc.ApplicationParts;
+using Microsoft.AspNetCore.Mvc.Controllers;
 
 namespace Signum.React
 {
-    public class SignumControllerFactory : DefaultHttpControllerSelector
+
+
+    public class SignumControllerFactory : IApplicationFeatureProvider<ControllerFeature>
     {
-        public static HashSet<Type> AllowedControllers { get; private set; } = new HashSet<Type>();
         public Assembly MainAssembly { get; set; }
 
-        public SignumControllerFactory(HttpConfiguration configuration, Assembly mainAssembly) : base(configuration)
+        public SignumControllerFactory(Assembly mainAssembly) : base()
         {
             this.MainAssembly = mainAssembly;
         }
 
+        public static HashSet<Type> AllowedControllers { get; private set; } = new HashSet<Type>();
         public static void RegisterController<T>()
         {
             AllowedControllers.Add(typeof(T));
         }
-
-        public static void RegisterArea(MethodBase mb)
-        {
-            RegisterArea(mb.DeclaringType);
-        }
-
+        
+        public static Dictionary<Assembly, HashSet<string>> AllowedAreas { get; private set; } = new Dictionary<Assembly, HashSet<string>>();
+        public static void RegisterArea(MethodBase mb) => RegisterArea(mb.DeclaringType);
         public static void RegisterArea(Type type)
         {
-            AllowedControllers.AddRange(type.Assembly.ExportedTypes
-                .Where(c => (c.Namespace ?? "").StartsWith(type.Namespace) && typeof(ApiController).IsAssignableFrom(c)));
+            AllowedAreas.GetOrCreate(type.Assembly).Add(type.Namespace);
         }
 
-        public override IDictionary<string, HttpControllerDescriptor> GetControllerMapping()
+        public void PopulateFeature(IEnumerable<ApplicationPart> parts, ControllerFeature feature)
         {
-            var dic = base.GetControllerMapping();
+            var allowed = feature.Controllers.Where(ti => ti.Assembly == MainAssembly ||
+            (AllowedAreas.TryGetC(ti.Assembly)?.Any(ns => ti.Namespace.StartsWith(ns)) ?? false) ||
+            AllowedControllers.Contains(ti.AsType()));
 
-            var result = dic.Where(a => a.Value.ControllerType.Assembly == MainAssembly || AllowedControllers.Contains(a.Value.ControllerType)).ToDictionary();
+            var toRemove = feature.Controllers.Where(ti => !allowed.Contains(ti));
 
-            var removedControllers = dic.Keys.Except(result.Keys);//Just for debugging
-
-            return result;
+            feature.Controllers.RemoveAll(ti => toRemove.Contains(ti));
         }
     }
 }

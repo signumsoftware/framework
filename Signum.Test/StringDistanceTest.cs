@@ -2,19 +2,18 @@
 using System.Text;
 using System.Collections.Generic;
 using System.Linq;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 using Signum.Utilities;
 using System.Diagnostics;
 using System.Threading;
 
 namespace Signum.Test
 {
-    [TestClass]
     public class StringDistanceTest
     {
         StringDistance d = new StringDistance();
 
-        [TestMethod]
+        [Fact]
         public void ResetLazy()
         {
             int i = 0;
@@ -26,57 +25,57 @@ namespace Signum.Test
 
             var str2 = val.Value;
 
-            Assert.AreNotEqual(str1, str2); 
+            Assert.NotEqual(str1, str2); 
         }
 
-        [TestMethod]
+        [Fact]
         public void LevenshteinDistance()
         {
-            Assert.AreEqual(1, d.LevenshteinDistance("hi", "ho"));
-            Assert.AreEqual(1, d.LevenshteinDistance("hi", "hil"));
-            Assert.AreEqual(1, d.LevenshteinDistance("hi", "h"));
+            Assert.Equal(1, d.LevenshteinDistance("hi", "ho"));
+            Assert.Equal(1, d.LevenshteinDistance("hi", "hil"));
+            Assert.Equal(1, d.LevenshteinDistance("hi", "h"));
         }
 
-        [TestMethod]
+        [Fact]
         public void LevenshteinDistanceWeight()
         {
             Func<StringDistance.Choice<char>, int> w = c => c.HasAdded && char.IsNumber(c.Added) || c.HasRemoved && char.IsNumber(c.Removed) ? 10 : 1;
 
-            Assert.AreEqual(10, d.LevenshteinDistance("hola", "ho5la", weight: w));
-            Assert.AreEqual(10, d.LevenshteinDistance("ho5la", "hola", weight: w));
-            Assert.AreEqual(10, d.LevenshteinDistance("ho5la", "hojla", weight: w));
-            Assert.AreEqual(10, d.LevenshteinDistance("hojla", "ho5la", weight: w));
-            Assert.AreEqual(10, d.LevenshteinDistance("ho5la", "ho6la", weight: w));
+            Assert.Equal(10, d.LevenshteinDistance("hola", "ho5la", weight: w));
+            Assert.Equal(10, d.LevenshteinDistance("ho5la", "hola", weight: w));
+            Assert.Equal(10, d.LevenshteinDistance("ho5la", "hojla", weight: w));
+            Assert.Equal(10, d.LevenshteinDistance("hojla", "ho5la", weight: w));
+            Assert.Equal(10, d.LevenshteinDistance("ho5la", "ho6la", weight: w));
         }
 
 
-        [TestMethod]
+        [Fact]
         public void LongestCommonSubsequence()
         {
-            Assert.AreEqual(4, d.LongestCommonSubsequence("hallo", "halo"));
-            Assert.AreEqual(7, d.LongestCommonSubsequence("SupeMan", "SuperMan"));
-            Assert.AreEqual(0, d.LongestCommonSubsequence("aoa", ""));
+            Assert.Equal(4, d.LongestCommonSubsequence("hallo", "halo"));
+            Assert.Equal(7, d.LongestCommonSubsequence("SupeMan", "SuperMan"));
+            Assert.Equal(0, d.LongestCommonSubsequence("aoa", ""));
         }
 
-        [TestMethod]
+        [Fact]
         public void LongestCommonSubstring()
         {
-            Assert.AreEqual(3, d.LongestCommonSubstring("hallo", "halo"));
-            Assert.AreEqual(4, d.LongestCommonSubstring("SupeMan", "SuperMan"));
-            Assert.AreEqual(0, d.LongestCommonSubstring("aoa", ""));
+            Assert.Equal(3, d.LongestCommonSubstring("hallo", "halo"));
+            Assert.Equal(4, d.LongestCommonSubstring("SupeMan", "SuperMan"));
+            Assert.Equal(0, d.LongestCommonSubstring("aoa", ""));
         }
 
-        [TestMethod]
+        [Fact]
         public void Diff()
         {
             var result = d.Diff("en un lugar de la mancha".ToCharArray(), "in un place de la mincha".ToCharArray());
 
             var str = result.ToString("");
 
-            Assert.AreEqual("-e+in un +pl-u-ga-r+c+e de la m-a+incha", str); 
+            Assert.Equal("-e+in un +pl-u-ga-r+c+e de la m-a+incha", str); 
         }
 
-        [TestMethod]
+        [Fact]
         public void DiffWords()
         {
             var result = d.DiffWords(
@@ -85,21 +84,21 @@ namespace Signum.Test
 
             var str = result.ToString("");
 
-            Assert.AreEqual("Soft drinks, coffees, teas-,- -beers-, and -ginger- -ales+beers", str);
+            Assert.Equal("Soft drinks, coffees, teas-,- -beers-, and -ginger- -ales+beers", str);
 
         }
 
-        [TestMethod]
+        [Fact]
         public void Choices()
         {
             var result = d.LevenshteinChoices("en un lugar de la mancha".ToCharArray(), "in un legarito de la mincha".ToCharArray());
 
             var str = result.ToString("");
 
-            Assert.AreEqual("[-e+i]n un l[-u+e]gar+i+t+o de la m[-a+i]ncha", str);
+            Assert.Equal("[-e+i]n un l[-u+e]gar+i+t+o de la m[-a+i]ncha", str);
         }
 
-        [TestMethod]
+        [Fact]
         public void DiffText()
         {
             var text1 = 
@@ -120,7 +119,7 @@ Adios Juani";
             var str = result.ToString(l => (l.Action == StringDistance.DiffAction.Added ? "[+]" :
                 l.Action == StringDistance.DiffAction.Removed ? "[-]" : "[=]") + l.Value.ToString(""), "\n");
 
-            Assert.AreEqual(
+            Assert.Equal(
 @"[=]  Hola -Pedro+Pedri
 [-]-Que tal
 [-]-Bien

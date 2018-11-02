@@ -1,8 +1,5 @@
-﻿import { ModelState } from './Signum.Entities'
-import { Dic } from './Globals'
+import { ModelState } from './Signum.Entities'
 import { GraphExplorer } from './Reflection'
-
-var fetchWithAbortModule = require('./fetchWithAbort') as { fetch: typeof fetch };
 
 export interface AjaxOptions {
     url: string;
@@ -16,8 +13,11 @@ export interface AjaxOptions {
     mode?: string;
     credentials?: RequestCredentials;
     cache?: string;
-    abortController?: FetchAbortController;
+    signal?: AbortSignal;
 }
+
+// use native browser implementation if it supports aborting
+const abortableFetch = ('signal' in new Request('')) ? window.fetch : fetch
 
 export function baseUrl(options: AjaxOptions): string {
     const baseUrl = window.__baseUrl;
@@ -30,12 +30,18 @@ export function baseUrl(options: AjaxOptions): string {
 
 export function ajaxGet<T>(options: AjaxOptions): Promise<T> {
     return ajaxGetRaw(options)
-        .then(a => a.status == 204 ? undefined as any : a.json().then(a => a as T));
+        .then(res => res.text())
+        .then(text => text.length ? JSON.parse(text) : undefined);
 }
 
-export function ajaxGetRaw(options: AjaxOptions) : Promise<Response> {
+export function ajaxGetRaw(options: AjaxOptions): Promise<Response> {
+
+    if (window.navigator.userAgent.contains("Trident") && (options.cache || "no-cache" == "no-cache")) {
+        options.url += "?cacheTicks=" + new Date().getTime();
+    }
+
     return wrapRequest(options, () =>
-        fetchWithAbortModule.fetch(baseUrl(options), {
+        abortableFetch(baseUrl(options), {
             method: "GET",
             headers: {
                 'Accept': 'application/json',
@@ -43,14 +49,15 @@ export function ajaxGetRaw(options: AjaxOptions) : Promise<Response> {
             } as any,
             mode: options.mode,
             credentials: options.credentials || "same-origin",
-            cache: options.cache,
-            abortController: options.abortController
+            cache: options.cache || "no-cache",
+            signal: options.signal
         } as RequestInit));
 }
 
 export function ajaxPost<T>(options: AjaxOptions, data: any): Promise<T> {
     return ajaxPostRaw(options, data)
-        .then(a => a.status == 204 ? undefined as any : a.json().then(a => a as T));
+        .then(res => res.text())
+        .then(text => text.length ? JSON.parse(text) : undefined);
 }
 
 
@@ -60,7 +67,7 @@ export function ajaxPostRaw(options: AjaxOptions, data: any): Promise<Response> 
     }
     
     return wrapRequest(options, () =>
-        fetchWithAbortModule.fetch(baseUrl(options), {
+        abortableFetch(baseUrl(options), {
             method: "POST",
             credentials: options.credentials || "same-origin",
             headers: {
@@ -69,9 +76,9 @@ export function ajaxPostRaw(options: AjaxOptions, data: any): Promise<Response> 
                  ...options.headers
             } as any,
             mode: options.mode,
-            cache: options.cache,
+            cache: options.cache || "no-cache",
             body: JSON.stringify(data),
-            abortController: options.abortController
+            signal: options.signal
         } as RequestInit));
 }
 
@@ -121,7 +128,6 @@ export module VersionFilter {
     export let versionHasChanged: () => void = () => console.warn("New Server version detected, handle VersionFilter.versionHasChanged to inform user");
 
     export function onVersionFilter(makeCall: () => Promise<Response>): Promise<Response> {
-
         function changeVersion(response: Response) {
             var ver = response.headers.get("X-App-Version");
 
@@ -142,7 +148,6 @@ export module VersionFilter {
 
         return makeCall().then(resp => { changeVersion(resp); return resp; });
     }
-
 }
 
 export module NotifyPendingFilter {
@@ -159,19 +164,28 @@ export module NotifyPendingFilter {
 }
 
 export module ThrowErrorFilter { 
-
     export function throwError(makeCall: () => Promise<Response>): Promise<Response> {
-
         return makeCall().then(response => {
             if (response.status >= 200 && response.status < 300) {
                 return response;
             } else {
-                return response.json().then((json: WebApiHttpError) => {
-                    if (json.ModelState)
-                        throw new ValidationError(response.statusText, json);
-                    else if (json.Message)
-                        throw new ServiceError(response.statusText, response.status, json);
-                }) as any;
+                return response.text().then<Response>(text => {
+                    if (text.length) {
+                        var obj = JSON.parse(text);
+                        if (response.status == 400 && !(obj as WebApiHttpError).exceptionType)
+                            throw new ValidationError(obj as ModelState);
+                        else
+                            throw new ServiceError(obj as WebApiHttpError);
+                    }  
+                    else
+                        throw new ServiceError({
+                            exceptionType: "Status " + response.status,
+                            exceptionMessage: response.statusText,
+                            exceptionId: null,
+                            innerException: null,
+                            stackTrace: null,
+                        });
+                });
             }
         });
     }
@@ -183,10 +197,9 @@ a.style.display = "none";
 
 
 export function saveFile(response: Response) {
-    let fileName = "file.dat";
-    let match = /attachment; filename=(.+)/.exec(response.headers.get("Content-Disposition")!);
-    if (match)
-        fileName = match[1].trimEnd("\"").trimStart("\"");
+    const contentDisposition = response.headers.get("Content-Disposition")!;
+    const fileNamePart = contentDisposition.split(";").filter(a => a.trim().startsWith("filename=")).singleOrNull();
+    const fileName = fileNamePart ? fileNamePart.trim().after("filename=") : "file.dat";
 
     response.blob().then(blob => {
         saveFileBlob(blob, fileName);
@@ -234,13 +247,11 @@ export function b64toBlob(b64Data: string, contentType: string = "", sliceSize =
 
 export class ServiceError {
     constructor(
-        public statusText: string,
-        public status: number,
         public httpError: WebApiHttpError) {
     }
 
     get defaultIcon() {
-        switch (this.httpError.ExceptionType) {
+        switch (this.httpError.exceptionType) {
             case "UnauthorizedAccessException": return "lock";
             case "EntityNotFoundException": return "trash";
             case "UniqueKeyException": return "clone";
@@ -249,31 +260,23 @@ export class ServiceError {
     }
 
     toString() {
-        return this.httpError.Message;
+        return this.httpError.exceptionMessage;
     }
 }
 
 export interface WebApiHttpError {
-    Message: string;
-    ModelState?: { [member: string]: string[] }
-    ExceptionMessage?: string;
-    ExceptionType: string;
-    StackTrace?: string;
-    MessageDetail?: string;
-    ExceptionID?: string;
+    exceptionType: string;
+    exceptionMessage: string | null;
+    stackTrace: string | null;
+    exceptionId: string | null;
+    innerException: WebApiHttpError | null;
 }
 
 export class ValidationError  {
     modelState: ModelState;
-    message: string;
 
-    constructor(public statusText: string, json: WebApiHttpError) {
-        this.message = json.Message || "";
-        this.modelState = json.ModelState!;
-    }
-
-    toString() {
-        return this.statusText + "\r\n" + this.message;
+    constructor(modelState: ModelState) {
+        this.modelState = modelState;
     }
 }
 
@@ -338,9 +341,9 @@ export namespace SessionSharing {
 export class AbortableRequest<Q, A> {
 
     private requestIndex = 0;
-    private abortController?: FetchAbortController;
+    private abortController?: AbortController;
 
-    constructor(public makeCall: (abortController: FetchAbortController, query: Q) => Promise<A>)
+    constructor(public makeCall: (signal: AbortSignal, query: Q) => Promise<A>)
     {
     }
     
@@ -364,9 +367,9 @@ export class AbortableRequest<Q, A> {
 
         var myIndex = this.requestIndex;
 
-        this.abortController = {};
+        this.abortController = new AbortController();
 
-        return this.makeCall(this.abortController, query).then(result => {
+        return this.makeCall(this.abortController.signal, query).then(result => {
 
             if (this.abortController == undefined)
                 return new Promise<A>(resolve => { /*never*/ });
@@ -376,11 +379,11 @@ export class AbortableRequest<Q, A> {
 
             this.abortController = undefined;
             return result;
-        }, (error: TypeError) => {
-            if (error.message == "Aborted request")
+        }, (ex: TypeError) => {
+            if (ex.name === 'AbortError')
                 return new Promise<A>(resolve => { /*never*/ });
 
-            throw error
+            throw ex
         }) as Promise<A>;
     }
 }

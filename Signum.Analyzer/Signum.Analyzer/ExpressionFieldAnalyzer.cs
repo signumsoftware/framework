@@ -13,7 +13,7 @@ namespace Signum.Analyzer
     [DiagnosticAnalyzer(LanguageNames.CSharp)]
     public class ExpressionFieldAnalyzer : DiagnosticAnalyzer
     {
-        public static readonly string DiagnosticId = "SF0002";
+        public const string DiagnosticId = "SF0002";
 
         internal static DiagnosticDescriptor Rule = new DiagnosticDescriptor(DiagnosticId,
             "Use ExpressionFieldAttribute in non-trivial method or property",

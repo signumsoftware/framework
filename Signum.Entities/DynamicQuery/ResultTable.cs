@@ -217,7 +217,7 @@ namespace Signum.Entities.DynamicQuery
     [Serializable]
     public class ResultTable
     {
-        public ResultColumn entityColumn;
+        internal ResultColumn entityColumn;
         public ColumnDescription EntityColumn
         {
             get { return entityColumn == null ? null : ((ColumnToken)entityColumn.Column.Token).Column; }
@@ -246,11 +246,11 @@ namespace Signum.Entities.DynamicQuery
             this.pagination = pagination;
         }
 
-        [OnDeserialized]
-        private void OnDeserialized(StreamingContext context)
-        {
-            CreateIndices(columns);
-        }
+        //[OnDeserialized]
+        //private void OnDeserialized(StreamingContext context)
+        //{
+        //    CreateIndices(columns);
+        //}
 
         void CreateIndices(ResultColumn[] columns)
         {

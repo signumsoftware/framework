@@ -1,4 +1,6 @@
-﻿using Signum.Engine;
+﻿using Microsoft.AspNetCore.Mvc.Controllers;
+using Microsoft.AspNetCore.Mvc.Filters;
+using Signum.Engine;
 using Signum.Engine.Basics;
 using Signum.Entities;
 using Signum.Entities.Basics;
@@ -14,14 +16,8 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Security.Authentication;
-using System.ServiceModel.Channels;
 using System.Text;
 using System.Web;
-using System.Web.Http;
-using System.Web.Http.Controllers;
-using System.Web.Http.Filters;
-using System.Web.Http.Routing;
-
 namespace Signum.React.Filters
 {
     [AttributeUsage(AttributeTargets.Method, Inherited = false, AllowMultiple = true)]
@@ -39,17 +35,18 @@ namespace Signum.React.Filters
             get { return requestKey; }
         }
 
-        public static string GetActionDescription(HttpActionContext actionContext)
+        public static string GetActionDescription(FilterContext actionContext)
         {
-            var action = actionContext.ActionDescriptor.ControllerDescriptor.ControllerName + "." + actionContext.ActionDescriptor.ActionName;
+            var cad = (ControllerActionDescriptor)actionContext.ActionDescriptor;
 
-            var rad = actionContext.ActionDescriptor as ReflectedHttpActionDescriptor;
-            if (rad == null)
+            var action = cad.ControllerName + "." + cad.ActionName;
+
+            if (cad == null)
             {
-                var attr = rad.MethodInfo.GetCustomAttributes(true).OfType<ProfilerActionSplitterAttribute>().FirstOrDefault();
+                var attr = cad.MethodInfo.GetCustomAttributes(true).OfType<ProfilerActionSplitterAttribute>().FirstOrDefault();
                 if (attr != null)
                 {
-                    var obj = attr.RequestKey == null ? actionContext.ActionArguments.Values.Single() : actionContext.ActionArguments.GetOrThrow(attr.RequestKey, "Argument '{0}' not found in: " + rad.MethodInfo.MethodSignature());
+                    var obj = attr.RequestKey == null ? null : actionContext.ActionDescriptor.RouteValues.GetOrThrow(attr.RequestKey, "Argument '{0}' not found in: " + cad.MethodInfo.MethodSignature());
 
                     if (obj != null)
                         action += " " + obj.ToString();

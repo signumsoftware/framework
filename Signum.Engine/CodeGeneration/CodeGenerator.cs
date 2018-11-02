@@ -5,7 +5,6 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using System.Windows.Forms;
 using Signum.Engine.Maps;
 using Signum.Entities.Reflection;
 using Signum.Utilities;
@@ -16,10 +15,7 @@ namespace Signum.Engine.CodeGeneration
     {
         public static EntityCodeGenerator Entities = new EntityCodeGenerator();
         public static LogicCodeGenerator Logic = new LogicCodeGenerator();
-        public static WebCodeGenerator Web = new WebCodeGenerator();
-        public static WindowsCodeGenerator Windows = new WindowsCodeGenerator();
         public static ReactCodeGenerator React = new ReactCodeGenerator();
-        public static ReactCodeConverter ReactTransformer = new ReactCodeConverter();
 
         public static void GenerateCodeConsole()
         {
@@ -29,10 +25,7 @@ namespace Signum.Engine.CodeGeneration
                 {
                     {"E", Entities.GenerateEntitiesFromDatabaseTables, "Entities (from Database tables)"},
                     {"L", Logic.GenerateLogicFromEntities, "Logic (from entites)"},
-                    {"Web", Web.GenerateWebFromEntities, "Web (from entites)"},
-                    {"Win", Windows.GenerateWindowsFromEntities, "Windows (from entites)"},
                     {"React", React.GenerateReactFromEntities, "React (from entites)"},
-                    {"WR", ReactTransformer.ToRazorInteractive, "React (from web)"},
                 }.Choose();
 
                 if (action == null)
@@ -74,17 +67,11 @@ namespace Signum.Engine.CodeGeneration
                 if (selected.IsNullOrEmpty())
                     yield break;
 
-                SafeConsole.WriteColor(ConsoleColor.Gray, "Module name? (Nothing to exit):");
-
                 string moduleName = GetDefaultModuleName(selected, solutionName);
-                if (moduleName.HasText())
-                    SendKeys.SendWait(moduleName);
-
-                moduleName = Console.ReadLine();
-
-                if (!moduleName.HasText())
-                    yield break;
-
+                SafeConsole.WriteColor(ConsoleColor.Gray, $"Module name? ([Enter] for '{moduleName}'):");
+                
+                moduleName = Console.ReadLine().DefaultText(moduleName);
+                
                 yield return new Module
                 {
                     ModuleName = moduleName,

@@ -33,7 +33,8 @@ export { EntityLine } from './Lines/EntityLine'
 
 export { EntityCombo } from  './Lines/EntityCombo'
 
-export { EntityDetail } from  './Lines/EntityDetail'
+export { EntityDetail } from './Lines/EntityDetail'
+
 
 import { EntityListBase, EntityListBaseProps } from  './Lines/EntityListBase'
 export { EntityListBase, EntityListBaseProps }
@@ -53,6 +54,10 @@ export { MultiValueLine } from  './Lines/MultiValueLine'
 
 
 import { EntityTable, EntityTableColumn, EntityTableRow } from './Lines/EntityTable'
+
+import DynamicComponent from './Lines/DynamicComponent';
+export { DynamicComponent }
+
 export { EntityTable, EntityTableColumn, EntityTableRow };
 
 tasks.push(taskSetNiceName);

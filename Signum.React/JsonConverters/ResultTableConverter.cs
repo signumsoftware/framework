@@ -77,11 +77,6 @@ namespace Signum.React.Json
         {
             throw new NotImplementedException();
         }
-
-        public override bool CanRead
-        {
-            get { return false; }
-        }
     }
 
 

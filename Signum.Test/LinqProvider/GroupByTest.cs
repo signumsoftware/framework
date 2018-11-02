@@ -1,4 +1,4 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Xunit;
 using Signum.Engine;
 using Signum.Entities;
 using Signum.Test.Environment;
@@ -12,29 +12,22 @@ namespace Signum.Test.LinqProvider
     /// <summary>
     /// Summary description for LinqProvider
     /// </summary>
-    [TestClass]
     public class GroupByTest
     {
-        [ClassInitialize()]
-        public static void MyClassInitialize(TestContext testContext)
+        public GroupByTest()
         {
             MusicStarter.StartAndLoad();
-        }
-
-        [TestInitialize]
-        public void Initialize()
-        {
             Connector.CurrentLogger = new DebugTextWriter();
         }
 
-        [TestMethod]
+        [Fact]
         public void GroupStringByEnum()
         {
             var list = Database.Query<ArtistEntity>().GroupBy(a => a.Sex, a => a.Name).ToList();
         }
 
 
-        [TestMethod]
+        [Fact]
         public void GroupStringByEnumSimilar()
         {
             var queryA = (from a in Database.Query<ArtistEntity>()
@@ -43,10 +36,10 @@ namespace Signum.Test.LinqProvider
 
             var queryN = Database.Query<ArtistEntity>().GroupBy(a => a.Sex, a => a.Name).QueryText();
 
-            Assert.AreEqual(queryN, queryA);
+            Assert.Equal(queryN, queryA);
         }
 
-        [TestMethod]
+        [Fact]
         public void GroupMultiAggregate()
         {
             var sexos = from a in Database.Query<ArtistEntity>()
@@ -63,7 +56,7 @@ namespace Signum.Test.LinqProvider
             sexos.ToList();
         }
 
-        [TestMethod]
+        [Fact]
         public void GroupCountNull()
         {
             var sexes = from a in Database.Query<ArtistEntity>()
@@ -81,7 +74,7 @@ namespace Signum.Test.LinqProvider
             sexes.ToList();
         }
 
-        [TestMethod]
+        [Fact]
         public void GroupCountDistinctFast()
         {
             var sexes = from a in Database.Query<ArtistEntity>()
@@ -97,14 +90,14 @@ namespace Signum.Test.LinqProvider
             sexes.ToList();
         }
 
-        [TestMethod]
+        [Fact]
         public void RootCountDistinct()
         {
             var count = Database.Query<ArtistEntity>().Select(a => a.Name).Where(a => a != null).Distinct().Count();
         }
 
 
-        [TestMethod]
+        [Fact]
         public void GroupCountDistinctSlow()
         {
             var sexes = from a in Database.Query<ArtistEntity>()
@@ -118,7 +111,7 @@ namespace Signum.Test.LinqProvider
             sexes.ToList();
         }
 
-        [TestMethod]
+        [Fact]
         public void GroupMultiAggregateNoKeys()
         {
             var sexos = from a in Database.Query<ArtistEntity>()
@@ -136,7 +129,7 @@ namespace Signum.Test.LinqProvider
         }
 
 
-        [TestMethod]
+        [Fact]
         public void GroupStdDev()
         {
             var sexos = from a in Database.Query<ArtistEntity>()
@@ -150,8 +143,8 @@ namespace Signum.Test.LinqProvider
                             StdDevPInMemory = GetStdDevP(g.ToList()),
                         };
             var list = sexos.ToList();
-            list.ForEach(a => Assert2.AreSimilar(a.StdDev, a.StdDevInMemory));
-            list.ForEach(a => Assert2.AreSimilar(a.StdDevP, a.StdDevPInMemory));
+            list.ForEach(a => ExtensionsTest.AssertSimilar(a.StdDev, a.StdDevInMemory));
+            list.ForEach(a => ExtensionsTest.AssertSimilar(a.StdDevP, a.StdDevPInMemory));
         }
 
         private double? GetStdDev(List<int> list)
@@ -164,33 +157,33 @@ namespace Signum.Test.LinqProvider
             return list.StdDevP();
         }
 
-        [TestMethod]
+        [Fact]
         public void GroupEntityByEnum()
         {
             var list = Database.Query<ArtistEntity>().GroupBy(a => a.Sex).ToList();
         }
 
 
-        //[TestMethod]
+        //[Fact]
         //public void GroupEntityByTypeFie()
         //{
         //    var list = Database.Query<AlbumEntity>().GroupBy(a => a.GetType()).ToList();
         //}
 
 
-        [TestMethod]
+        [Fact]
         public void GroupEntityByTypeIb()
         {
             var list = Database.Query<AwardNominationEntity>().GroupBy(a => a.Award.EntityType).ToList();
         }
 
-        [TestMethod]
+        [Fact]
         public void WhereGroup()
         {
             var list = Database.Query<ArtistEntity>().Where(a => a.Dead).GroupBy(a => a.Sex).ToList();
         }
 
-        [TestMethod]
+        [Fact]
         public void GroupWhere()
         {
             var list = (from a in Database.Query<ArtistEntity>()
@@ -198,7 +191,7 @@ namespace Signum.Test.LinqProvider
                         select new { Sex = g.Key, DeadArtists = g.Where(a => a.Dead).ToList() }).ToList();
         }
 
-        [TestMethod]
+        [Fact]
         public void GroupCount()
         {
             var songsAlbum = (from a in Database.Query<ArtistEntity>()
@@ -206,7 +199,7 @@ namespace Signum.Test.LinqProvider
                               select new { Sex = g.Key, Count = g.Count() }).ToList();
         }
 
-        [TestMethod]
+        [Fact]
         public void GroupCountInterval()
         {
             var songsAlbum = (from a in Database.Query<ArtistEntity>()
@@ -214,7 +207,7 @@ namespace Signum.Test.LinqProvider
                               select new { Id = g.Key, Count = g.Count() }).ToList();
         }
 
-        [TestMethod]
+        [Fact]
         public void GroupWhereCount()
         {
             var songsAlbum = (from a in Database.Query<ArtistEntity>()
@@ -222,20 +215,20 @@ namespace Signum.Test.LinqProvider
                               select new { Sex = g.Key, DeadArtists = (int?)g.Count(a => a.Dead) }).ToList();
         }
 
-        [TestMethod]
+        [Fact]
         public void GroupEntityByTypeFieCount()
         {
             var list = Database.Query<AlbumEntity>().GroupBy(a => a.GetType()).Select(gr => new { gr.Key, Count = gr.Count() }).ToList();
         }
 
 
-        [TestMethod]
+        [Fact]
         public void GroupEntityByTypeIbCount()
         {
             var list = Database.Query<AlbumEntity>().GroupBy(a => a.Author.GetType()).Select(gr => new { gr.Key, Count = gr.Count() }).ToList();
         }
 
-        [TestMethod]
+        [Fact]
         public void GroupExpandKey()
         {
             var songs = (from a in Database.Query<AlbumEntity>()
@@ -243,7 +236,7 @@ namespace Signum.Test.LinqProvider
                          select new { g.Key, Count = g.Count() }).ToList();
         }
 
-        [TestMethod]
+        [Fact]
         public void GroupExpandResult()
         {
             var songs = (from a in Database.Query<AlbumEntity>()
@@ -251,7 +244,7 @@ namespace Signum.Test.LinqProvider
                          select new { g.Key.Name, Count = g.Count() }).ToList();
         }
 
-        [TestMethod]
+        [Fact]
         public void GroupSum()
         {
             var songsAlbum = (from a in Database.Query<ArtistEntity>()
@@ -259,7 +252,7 @@ namespace Signum.Test.LinqProvider
                               select new { Sex = g.Key, Max = g.Sum(a => a.Name.Length) }).ToList();
         }
 
-        [TestMethod]
+        [Fact]
         public void GroupMax()
         {
             var songsAlbum = (from a in Database.Query<ArtistEntity>()
@@ -267,7 +260,7 @@ namespace Signum.Test.LinqProvider
                               select new { Sex = g.Key, Max = g.Max(a => a.Name.Length) }).ToList();
         }
 
-        [TestMethod]
+        [Fact]
         public void GroupMin()
         {
             var songsAlbum = (from a in Database.Query<ArtistEntity>()
@@ -275,7 +268,7 @@ namespace Signum.Test.LinqProvider
                               select new { Sex = g.Key, Min = g.Min(a => a.Name.Length) }).ToList();
         }
 
-        [TestMethod]
+        [Fact]
         public void GroupAverage()
         {
             var songsAlbum = (from a in Database.Query<ArtistEntity>()
@@ -283,93 +276,93 @@ namespace Signum.Test.LinqProvider
                               select new { Sex = g.Key, Avg = g.Average(a => a.Name.Length) }).ToList();
         }
 
-        [TestMethod]
+        [Fact]
         public void RootCount()
         {
             var songsAlbum = Database.Query<ArtistEntity>().Count();
         }
 
 
-        [TestMethod]
+        [Fact]
         public void RootCountWhere()
         {
             var songsAlbum = Database.Query<ArtistEntity>().Count(a => a.Name.StartsWith("M"));
         }
 
-        [TestMethod]
+        [Fact]
         public void RootCountWhereZero()
         {
-            Assert.AreEqual(0, Database.Query<ArtistEntity>().Count(a => false));
+            Assert.Equal(0, Database.Query<ArtistEntity>().Count(a => false));
         }
 
-        [TestMethod]
+        [Fact]
         public void RootSum()
         {
             var songsAlbum = Database.Query<ArtistEntity>().Sum(a => a.Name.Length);
         }
 
 
-        [TestMethod]
+        [Fact]
         public void RootSumNoArgs()
         {
             var songsAlbum = Database.Query<ArtistEntity>().Select(a => a.Name.Length).Sum();
         }
 
-        [TestMethod]
+        [Fact]
         public void SumWhere()
         {
             var songsAlbum = Database.Query<BandEntity>().Where(a => a.Members.Sum(m => m.Name.Length) > 0).ToList();
         }
 
-        [TestMethod]
+        [Fact]
         public void SumSimplification()
         {
             var songsAlbum = Database.Query<BandEntity>().Select(a => new { a.Name, Sum = a.Members.Sum(m => m.Name.Length) }).Select(a => a.Name).ToList();
         }
 
-        [TestMethod]
+        [Fact]
         public void RootSumZero()
         {
-            Assert.AreEqual(0, Database.Query<ArtistEntity>().Where(a => false).Sum(a => a.Name.Length));
+            Assert.Equal(0, Database.Query<ArtistEntity>().Where(a => false).Sum(a => a.Name.Length));
         }
 
-        [TestMethod]
+        [Fact]
         public void RootSumNull()
         {
-            Assert.IsNull(Database.Query<ArtistEntity>().Where(a => false).Sum(a => (int?)a.Name.Length));
+            Assert.Null(Database.Query<ArtistEntity>().Where(a => false).Sum(a => (int?)a.Name.Length));
         }
 
-        [TestMethod]
+        [Fact]
         public void RootSumSomeNull()
         {
-            Assert.IsTrue(Database.Query<AwardNominationEntity>().Sum(a => (int)a.Award.Id.Object) > 0);
+            Assert.True(Database.Query<AwardNominationEntity>().Sum(a => (int)a.Award.Id.Object) > 0);
         }
 
-        [TestMethod]
+        [Fact]
         public void RootMax()
         {
             var songsAlbum = Database.Query<ArtistEntity>().Max(a => a.Name.Length);
         }
 
-        [TestMethod]
+        [Fact]
         public void RootMaxNoArgs()
         {
             var songsAlbum = Database.Query<ArtistEntity>().Select(a => a.Name.Length).Max();
         }
 
-        [TestMethod]
+        [Fact]
         public void RootMaxException()
         {
-            Assert2.Throws<FieldReaderException>(() => Database.Query<ArtistEntity>().Where(a => false).Max(a => a.Name.Length));
+            Assert.Throws<FieldReaderException>(() => Database.Query<ArtistEntity>().Where(a => false).Max(a => a.Name.Length));
         }
 
-        [TestMethod]
+        [Fact]
         public void RootMin()
         {
             var songsAlbum = Database.Query<ArtistEntity>().Min(a => a.Name.Length);
         }
 
-        [TestMethod]
+        [Fact]
         public void MinEnum()
         {
             var list = Database.Query<ArtistEntity>().GroupBy(a => a.Sex).Select(gr => gr.Min(a => a.Status));
@@ -377,7 +370,7 @@ namespace Signum.Test.LinqProvider
             var minSex = Database.Query<ArtistEntity>().Min(a => a.Sex);
         }
 
-        [TestMethod]
+        [Fact]
         public void MinEnumNullable()
         {
             var minSex = Database.Query<ArtistEntity>().Where(a => false).Min(a => (Sex?)a.Sex);
@@ -385,25 +378,25 @@ namespace Signum.Test.LinqProvider
         }
 
 
-        [TestMethod]
+        [Fact]
         public void RootMinException()
         {
-            Assert2.Throws<FieldReaderException>(() => Database.Query<ArtistEntity>().Where(a => false).Min(a => a.Name.Length));
+            Assert.Throws<FieldReaderException>(() => Database.Query<ArtistEntity>().Where(a => false).Min(a => a.Name.Length));
         }
 
-        [TestMethod]
+        [Fact]
         public void RootMinNullable()
         {
             var min = Database.Query<ArtistEntity>().Where(a => false).Min(a => (int?)a.Name.Length);
         }
 
-        [TestMethod]
+        [Fact]
         public void RootAverage()
         {
             var songsAlbum = Database.Query<ArtistEntity>().Average(a => a.Name.Length);
         }
 
-        [TestMethod]
+        [Fact]
         public void GroupBySelectSelect()
         {
             var artistsBySex =
@@ -413,7 +406,7 @@ namespace Signum.Test.LinqProvider
                 .Select(g => new { Sex = g.Key, Count = g.Count() }).ToList();
         }
 
-        [TestMethod]
+        [Fact]
         public void JoinGroupPair()
         {
             var list = (from a in Database.Query<AlbumEntity>()
@@ -427,7 +420,7 @@ namespace Signum.Test.LinqProvider
         }
 
 
-        [TestMethod]
+        [Fact]
         public void GroupByEntity()
         {
             var list = (from a in Database.Query<AlbumEntity>()
@@ -435,7 +428,7 @@ namespace Signum.Test.LinqProvider
                         select g.Key.ToLite()).ToList();
         }
 
-        [TestMethod]
+        [Fact]
         public void GroupByEntityExpand()
         {
             var list = (from a in Database.Query<AlbumEntity>()
@@ -448,7 +441,7 @@ namespace Signum.Test.LinqProvider
                         }).ToList();
         }
 
-        [TestMethod]
+        [Fact]
         public void SelectExpansionCount()
         {
             var albums = (from b in Database.Query<BandEntity>()
@@ -461,19 +454,19 @@ namespace Signum.Test.LinqProvider
                           }).ToList();
         }
 
-        [TestMethod]
+        [Fact]
         public void GroupBySelectMany()
         {
             var songsAlbum = Database.Query<ArtistEntity>().GroupBy(a => a.Sex).SelectMany(a => a).ToList();
         }
 
-        [TestMethod]
+        [Fact]
         public void SumSum()
         {
             var first = Database.Query<BandEntity>().Sum(b => b.Members.Sum(m => (int)m.Id.Object));
         }
 
-        [TestMethod]
+        [Fact]
         public void SumGroupbySum()
         {
             var first = Database.Query<ArtistEntity>().GroupBy(a => a.Status).Select(gr => gr.Sum(b => b.Friends.Sum(m => (int)m.Id.Object)));
@@ -481,25 +474,25 @@ namespace Signum.Test.LinqProvider
 
 
 
-        [TestMethod]
+        [Fact]
         public void MinMax()
         {
             var first = Database.Query<BandEntity>().Min(b => b.Members.Max(m => m.Id));
         }
 
-        [TestMethod]
+        [Fact]
         public void MinGroupByMax()
         {
             var first = Database.Query<ArtistEntity>().GroupBy(a => a.Status).Select(gr => gr.Min(b => b.Friends.Max(m => m.Id)));
         }
 
-        [TestMethod]
+        [Fact]
         public void GroupbyAggregateImplicitJoin()
         {
             var first = Database.Query<AlbumEntity>().GroupBy(a => a.Year).Select(gr => gr.Max(a => a.Label.Name)).ToList();
         }
 
-        [TestMethod]
+        [Fact]
         public void GroupByTake()
         {
             var list = (from a in Database.Query<AlbumEntity>()
@@ -513,7 +506,7 @@ namespace Signum.Test.LinqProvider
         }
 
 
-        [TestMethod]
+        [Fact]
         public void GroupByTakeSomeKeys()
         {
             var list = (from a in Database.Query<AlbumEntity>()
@@ -526,7 +519,7 @@ namespace Signum.Test.LinqProvider
                         }).Take(10).ToList();
         }
 
-        [TestMethod]
+        [Fact]
         public void GroupByExpandGroupBy()
         {
             var list = (from a in Database.Query<ArtistEntity>()
@@ -538,7 +531,7 @@ namespace Signum.Test.LinqProvider
                         }).ToList();
         }
 
-        [TestMethod]
+        [Fact]
         public void LetTrick()
         {
             var list = (from a in Database.Query<ArtistEntity>()
@@ -551,7 +544,7 @@ namespace Signum.Test.LinqProvider
                         }).ToList();
         }
 
-        [TestMethod]
+        [Fact]
         public void DistinctGroupByForce()
         {
             var list = Database.Query<ArtistEntity>()
@@ -563,7 +556,7 @@ namespace Signum.Test.LinqProvider
         }
 
 
-        [TestMethod]
+        [Fact]
         public void GroupByCount()
         {
             var list = Database.Query<AlbumEntity>()
@@ -572,7 +565,7 @@ namespace Signum.Test.LinqProvider
                 .ToList();
         }
 
-        [TestMethod]
+        [Fact]
         public void FirstLastMList()
         {
             var list = (from a in Database.Query<AlbumEntity>()
@@ -584,10 +577,10 @@ namespace Signum.Test.LinqProvider
                             Last = a.Songs.OrderByDescending(s => s.Name).FirstOrDefault()
                         }).ToList();
 
-            Assert.IsTrue(list.All(a => a.FirstName != a.Last.Name));
+            Assert.True(list.All(a => a.FirstName != a.Last.Name));
         }
 
-        [TestMethod]
+        [Fact]
         public void FirstLastGroup()
         {
             var list = (from mle in Database.MListQuery((AlbumEntity a)=>a.Songs)
@@ -600,13 +593,13 @@ namespace Signum.Test.LinqProvider
                             Last = g.OrderByDescending(s => s.Name).FirstOrDefault()
                         }).ToList();
 
-            Assert.IsTrue(list.All(a => a.FirstName != a.Last.Name));
+            Assert.True(list.All(a => a.FirstName != a.Last.Name));
 
 
         }
 
 
-        [TestMethod]
+        [Fact]
         public void FirstLastList()
         {
             var list = (from a in Database.Query<AlbumEntity>()
@@ -619,12 +612,12 @@ namespace Signum.Test.LinqProvider
                             Last = songs.OrderByDescending(s => s.Name).FirstOrDefault()
                         }).ToList();
 
-            Assert.IsTrue(list.All(a => a.FirstName != a.Last.Name));
+            Assert.True(list.All(a => a.FirstName != a.Last.Name));
 
 
         }
 
-        [TestMethod]
+        [Fact]
         public void GroupByOr()
         {
             var b = (from a in Database.Query<ArtistEntity>()

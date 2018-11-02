@@ -13,7 +13,6 @@ using System.Reflection;
 using Signum.Utilities.Reflection;
 using System.Linq.Expressions;
 using Signum.Utilities.ExpressionTrees;
-using Microsoft.SqlServer.Types;
 using Microsoft.SqlServer.Server;
 using System.Threading;
 using System.Threading.Tasks;
@@ -59,11 +58,11 @@ namespace Signum.Engine
 
                     DataTable result = new DataTable();
                     da.Fill(result);
-
-                    if (result.Rows[0].Field<int>("EngineEdition") == (int)EngineEdition.Azure)
+                    
+                    if ((int)result.Rows[0]["EngineEdition"] == (int)EngineEdition.Azure)
                         return SqlServerVersion.AzureSQL;
 
-                    var version = result.Rows[0].Field<string>("ProductVersion");
+                    var version = (string)result.Rows[0]["ProductVersion"];
 
                     switch (version.Before("."))
                     {
@@ -101,15 +100,6 @@ namespace Signum.Engine
 
                 if (!s.TypeValues.ContainsKey(typeof(TimeSpan)))
                     schema.Settings.TypeValues.Add(typeof(TimeSpan), SqlDbType.Time);
-
-                if (!s.UdtSqlName.ContainsKey(typeof(SqlHierarchyId)))
-                    s.UdtSqlName.Add(typeof(SqlHierarchyId), "HierarchyId");
-
-                if (!s.UdtSqlName.ContainsKey(typeof(SqlGeography)))
-                    s.UdtSqlName.Add(typeof(SqlGeography), "Geography");
-
-                if (!s.UdtSqlName.ContainsKey(typeof(SqlGeometry)))
-                    s.UdtSqlName.Add(typeof(SqlGeometry), "Geometry");
             }
         }
 
@@ -282,13 +272,15 @@ namespace Signum.Engine
             }
         }
 
-        protected internal override DbDataReader UnsafeExecuteDataReader(SqlPreCommandSimple preCommand, CommandType commandType)
+        protected internal override DbDataReaderWithCommand UnsafeExecuteDataReader(SqlPreCommandSimple preCommand, CommandType commandType)
         {
             try
             {
-                SqlCommand cmd = NewCommand(preCommand, null, commandType);
+                var cmd = NewCommand(preCommand, null, commandType);
 
-                return cmd.ExecuteReader();
+                var reader =  cmd.ExecuteReader();
+
+                return new DbDataReaderWithCommand(cmd, reader);
             }
             catch (Exception ex)
             {
@@ -300,13 +292,15 @@ namespace Signum.Engine
             }
         }
 
-        protected internal override async Task<DbDataReader> UnsafeExecuteDataReaderAsync(SqlPreCommandSimple preCommand, CommandType commandType, CancellationToken token)
+        protected internal override async Task<DbDataReaderWithCommand> UnsafeExecuteDataReaderAsync(SqlPreCommandSimple preCommand, CommandType commandType, CancellationToken token)
         {
             try
             {
-                SqlCommand cmd = NewCommand(preCommand, null, commandType);
+                var cmd = NewCommand(preCommand, null, commandType);
 
-                return await cmd.ExecuteReaderAsync(token);
+                var reader =  await cmd.ExecuteReaderAsync(token);
+
+                return new DbDataReaderWithCommand(cmd, reader);
             }
             catch (Exception ex)
             {

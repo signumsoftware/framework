@@ -19,7 +19,7 @@ namespace Signum.Entities
             get { return inModelBinderVariable.Value; }
         }
 
-        internal static IDisposable ModelBinderScope()
+        public static IDisposable ModelBinderScope()
         {
             var old = inModelBinderVariable.Value;
             inModelBinderVariable.Value = true;

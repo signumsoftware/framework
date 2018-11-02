@@ -11,6 +11,7 @@ import { LineBase, LineBaseProps } from '../Lines/LineBase'
 import { FormGroup } from '../Lines/FormGroup'
 import { FormControlReadonly } from '../Lines/FormControlReadonly'
 import { BooleanEnum } from '../Signum.Entities'
+import TextArea from '../Components/TextArea';
 
 
 export interface ValueLineProps extends LineBaseProps, React.Props<ValueLine> {
@@ -133,10 +134,11 @@ export class ValueLine extends LineBase<ValueLineProps, ValueLineProps> {
             <div className={vl.state.ctx.inputGroupClass}>
                 {input}
                 {
-                    (vl.state.unitText != null || vl.state.extraButtons != null) && <div className="input-group-append">
-                    {vl.state.unitText && <span className="input-group-text">{vl.state.unitText}</span>}
-                    {vl.state.extraButtons && vl.state.extraButtons(vl)}
-                </div>
+                    (vl.state.unitText != null || vl.state.extraButtons != null) &&
+                    <div className="input-group-append">
+                        {vl.state.unitText && <span className="input-group-text">{vl.state.unitText}</span>}
+                        {vl.state.extraButtons && vl.state.extraButtons(vl)}
+                    </div>
                 }
             </div>
         );
@@ -361,8 +363,8 @@ ValueLine.renderers["TextArea" as ValueLineType] = (vl) => {
     if (s.ctx.readOnly)
         return (
             <FormGroup ctx={s.ctx} labelText={s.labelText} helpText={s.helpText} htmlAttributes={{ ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
-                <textarea {...vl.state.valueHtmlAttributes} className={addClass(vl.state.valueHtmlAttributes, s.ctx.formControlClass)} value={s.ctx.value || ""}
-                    disabled={true} />
+                <TextArea {...vl.state.valueHtmlAttributes} className={addClass(vl.state.valueHtmlAttributes, s.ctx.formControlClass)} value={s.ctx.value || ""}
+                    disabled/>
             </FormGroup>
         );
 
@@ -386,12 +388,12 @@ ValueLine.renderers["TextArea" as ValueLineType] = (vl) => {
 
     return (
         <FormGroup ctx={s.ctx} labelText={s.labelText} helpText={s.helpText} htmlAttributes={{ ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
-            <textarea {...vl.state.valueHtmlAttributes} className={addClass(vl.state.valueHtmlAttributes, s.ctx.formControlClass)} value={s.ctx.value || ""}
+            <TextArea {...vl.state.valueHtmlAttributes} className={addClass(vl.state.valueHtmlAttributes, s.ctx.formControlClass)} value={s.ctx.value || ""}
                 onChange={isIE11() ? undefined : handleTextOnChange} //https://github.com/facebook/react/issues/7211 && https://github.com/omcljs/om/issues/704
                 onInput={isIE11() ? handleTextOnChange : undefined}
                 onBlur={handleBlur}
                 placeholder={getPlaceholder(vl)}
-                ref={elment => vl.inputElement = elment} />
+                innerRef={elment => vl.inputElement = elment} />
         </FormGroup>
     );
 };

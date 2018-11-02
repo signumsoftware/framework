@@ -1,8 +1,0 @@
-﻿@using Signum.Entities.Basics
-@using (var e = Html.TypeContext<TypeEntity>())
-{
-  
-    @Html.ValueLine(e, f => f.CleanName)
-    @Html.ValueLine(e, f => f.FullClassName)
-    @Html.ValueLine(e, f => f.TableName)
-}

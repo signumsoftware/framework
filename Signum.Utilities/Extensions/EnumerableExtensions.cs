@@ -1091,17 +1091,6 @@ namespace Signum.Utilities
 
         #region Conversions
 
-
-        public static HashSet<T> ToHashSet<T>(this IEnumerable<T> source)
-        {
-            return new HashSet<T>(source);
-        }
-
-        public static HashSet<T> ToHashSet<T>(this IEnumerable<T> source, IEqualityComparer<T> comparer)
-        {
-            return new HashSet<T>(source, comparer);
-        }
-
         public static ReadOnlyCollection<T> ToReadOnly<T>(this IEnumerable<T> collection)
         {
             return collection == null ? EmptyReadOnlyCollection<T>.Instance :
@@ -1274,7 +1263,7 @@ Consider Synchronize.");
             var currentDictionary = currentCollection.ToDictionary(currentKeySelector);
             var newDictionary = shouldCollection.ToDictionary(shouldKeySelector);
 
-            HashSet<K> commonKeys = currentDictionary.Keys.ToHashSet();
+            HashSet<K> commonKeys = new HashSet<K>(currentDictionary.Keys);
             commonKeys.IntersectWith(newDictionary.Keys);
 
             return new JoinStrictResult<C, S, R>

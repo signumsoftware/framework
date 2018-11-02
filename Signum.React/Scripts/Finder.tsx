@@ -856,12 +856,12 @@ export module API {
         return ajaxGet<QueryEntity>({ url: "~/api/query/queryEntity/" + queryKey });
     }
 
-    export function executeQuery(request: QueryRequest, abortController?: FetchAbortController): Promise<ResultTable> {
-        return ajaxPost<ResultTable>({ url: "~/api/query/executeQuery", abortController }, request);
+    export function executeQuery(request: QueryRequest, signal?: AbortSignal): Promise<ResultTable> {
+        return ajaxPost<ResultTable>({ url: "~/api/query/executeQuery", signal }, request);
     }
 
-    export function queryValue(request: QueryValueRequest, avoidNotifyPendingRequest: boolean | undefined = undefined, abortController?: FetchAbortController): Promise<any> {
-        return ajaxPost<number>({ url: "~/api/query/queryValue", avoidNotifyPendingRequests: avoidNotifyPendingRequest, abortController }, request);
+    export function queryValue(request: QueryValueRequest, avoidNotifyPendingRequest: boolean | undefined = undefined, signal?: AbortSignal): Promise<any> {
+        return ajaxPost<number>({ url: "~/api/query/queryValue", avoidNotifyPendingRequests: avoidNotifyPendingRequest, signal }, request);
     }
 
     export function fetchEntitiesWithFilters(request: QueryEntitiesRequest): Promise<Lite<Entity>[]> {
@@ -880,8 +880,8 @@ export module API {
         });
     }
 
-    export function findLiteLike(request: AutocompleteRequest, abortController?: FetchAbortController): Promise<Lite<Entity>[]> {
-        return ajaxGet<Lite<Entity>[]>({ url: "~/api/query/findLiteLike?" + QueryString.stringify(request), abortController });
+    export function findLiteLike(request: AutocompleteRequest, signal?: AbortSignal): Promise<Lite<Entity>[]> {
+        return ajaxGet<Lite<Entity>[]>({ url: "~/api/query/findLiteLike?" + QueryString.stringify(request), signal });
     }
 
     export interface AutocompleteRequest {
@@ -890,8 +890,8 @@ export module API {
         count: number;
     }
 
-    export function FindRowsLike(request: AutocompleteQueryRequest, abortController?: FetchAbortController): Promise<ResultTable> {
-        return ajaxPost<ResultTable>({ url: "~/api/query/findRowsLike", abortController }, request);
+    export function FindRowsLike(request: AutocompleteQueryRequest, signal?: AbortSignal): Promise<ResultTable> {
+        return ajaxPost<ResultTable>({ url: "~/api/query/findRowsLike", signal }, request);
     }
 
     export function parseTokens(queryKey: string, tokens: { token: string, options: SubTokensOptions }[]): Promise<QueryToken[]> {

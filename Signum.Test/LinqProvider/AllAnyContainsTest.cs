@@ -2,7 +2,7 @@
 using System.Text;
 using System.Collections.Generic;
 using System.Linq;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 using Signum.Engine;
 using Signum.Entities;
 using System.Diagnostics;
@@ -15,22 +15,15 @@ namespace Signum.Test.LinqProvider
     /// <summary>
     /// Summary description for LinqProvider
     /// </summary>
-    [TestClass]
     public class AllAnyContainsTest
     {
-        [ClassInitialize()]
-        public static void MyClassInitialize(TestContext testContext)
+        public AllAnyContainsTest()
         {
             MusicStarter.StartAndLoad();
-        }
-
-        [TestInitialize]
-        public void Initialize()
-        {
             Connector.CurrentLogger = new DebugTextWriter();
-        }      
+        }
      
-        [TestMethod]
+        [Fact]
         public void ContainsIEnumerableId()
         {
             IEnumerable<PrimaryKey> ids = new PrimaryKey[] { 1, 2, 3 }.Select(a => a);
@@ -38,7 +31,7 @@ namespace Signum.Test.LinqProvider
             var artist = Database.Query<ArtistEntity>().Where(a => ids.Contains(a.Id)).ToList();
         }
 
-        [TestMethod]
+        [Fact]
         public void ContainsArrayId()
         {
             List<PrimaryKey> ids = new List<PrimaryKey> { 1, 2, 3 };
@@ -46,7 +39,7 @@ namespace Signum.Test.LinqProvider
             var artist = Database.Query<ArtistEntity>().Where(a => ids.Contains(a.Id)).ToList();
         }
 
-        [TestMethod]
+        [Fact]
         public void ContainsListId()
         {
             PrimaryKey[] ids = new PrimaryKey[] { 1, 2, 3 };
@@ -54,7 +47,7 @@ namespace Signum.Test.LinqProvider
             var artist = Database.Query<ArtistEntity>().Where(a => ids.Contains(a.Id)).ToList();
         }
 
-        [TestMethod]
+        [Fact]
         public void ContainsListLite()
         {
             var artistsInBands = Database.Query<BandEntity>().SelectMany(b => b.Members).Select(a => a.ToLite()).ToList();
@@ -62,7 +55,7 @@ namespace Signum.Test.LinqProvider
             var michael = Database.Query<ArtistEntity>().SingleEx(a => !artistsInBands.Contains(a.ToLite()));
         }
 
-        [TestMethod]
+        [Fact]
         public void ContainsListEntities()
         {
             var artistsInBands = Database.Query<BandEntity>().SelectMany(b => b.Members).Select(a => a).ToList();
@@ -70,7 +63,7 @@ namespace Signum.Test.LinqProvider
             var michael = Database.Query<ArtistEntity>().SingleEx(a => !artistsInBands.Contains(a));
         }
 
-        [TestMethod]
+        [Fact]
         public void ContainsListLiteIB()
         {
             var bands = new List<Lite<IAuthorEntity>>
@@ -84,7 +77,7 @@ namespace Signum.Test.LinqProvider
                           select a.ToLite()).ToList();
         }
 
-        [TestMethod]
+        [Fact]
         public void ContainsListEntityIB()
         {
             var bands = new List<IAuthorEntity>
@@ -98,7 +91,7 @@ namespace Signum.Test.LinqProvider
                           select a.ToLite()).ToList();
         }
 
-        [TestMethod]
+        [Fact]
         public void ContainsListLiteIBA()
         {
             var lites = Database.Query<ArtistEntity>().Where(a => a.Dead).Select(a => a.ToLite<IAuthorEntity>()).ToArray()
@@ -109,7 +102,7 @@ namespace Signum.Test.LinqProvider
                           select a.ToLite()).ToList();
         }
 
-        [TestMethod]
+        [Fact]
         public void ContainsListEntityIBA()
         {
             var entities = Database.Query<ArtistEntity>().Where(a => a.Dead).Select(a => (IEntity)a).ToArray()
@@ -120,7 +113,7 @@ namespace Signum.Test.LinqProvider
                           select a.ToLite()).ToList();
         }
 
-        [TestMethod]
+        [Fact]
         public void ContainsEnum()
         {
             var singles = new[] { Status.Single};
@@ -129,21 +122,21 @@ namespace Signum.Test.LinqProvider
         }
 
 
-        [TestMethod]
+        [Fact]
         public void Any()
         {
-            Assert.IsTrue(Database.Query<ArtistEntity>().Any(a => a.Sex == Sex.Female));
+            Assert.True(Database.Query<ArtistEntity>().Any(a => a.Sex == Sex.Female));
         }
 
 
-        [TestMethod]
+        [Fact]
         public void None()
         {
-            Assert.IsFalse(Database.Query<ArtistEntity>().None(a => a.Sex == Sex.Female));
+            Assert.False(Database.Query<ArtistEntity>().None(a => a.Sex == Sex.Female));
         }
 
 
-        [TestMethod]
+        [Fact]
         public void AnyCollection()
         {
             var years = new[] { 1992, 1993, 1995 };
@@ -151,44 +144,44 @@ namespace Signum.Test.LinqProvider
             var list = Database.Query<AlbumEntity>().Where(a => years.Any(y => a.Year == y)).Select(a => a.Name).ToList();
         }
 
-        [TestMethod]
+        [Fact]
         public void AnySql()
         {
             BandEntity smashing = Database.Query<BandEntity>().SingleEx(b => b.Members.Any(a => a.Sex == Sex.Female));
         }
 
 
-        [TestMethod]
+        [Fact]
         public void NoneSql()
         {
             BandEntity smashing = Database.Query<BandEntity>().SingleEx(b => b.Members.None(a => a.Sex == Sex.Female));
         }
 
-        [TestMethod]
+        [Fact]
         public void AnySqlNonPredicate()
         {
             var withFriends = Database.Query<ArtistEntity>().Where(b => b.Friends.Any()).Select(a => a.Name).ToList();
         }
 
-        [TestMethod]
+        [Fact]
         public void All()
         {
-            Assert.IsFalse(Database.Query<ArtistEntity>().All(a => a.Sex == Sex.Male));
+            Assert.False(Database.Query<ArtistEntity>().All(a => a.Sex == Sex.Male));
         }
 
-        [TestMethod]
+        [Fact]
         public void AllSql()
         {
             BandEntity sigur = Database.Query<BandEntity>().SingleEx(b => b.Members.All(a => a.Sex == Sex.Male));
         }
 
-        [TestMethod]
+        [Fact]
         public void RetrieveBand()
         {
             BandEntity sigur = Database.Query<BandEntity>().SingleEx(b => b.Name.StartsWith("Sigur"));
         }
 
-        [TestMethod]
+        [Fact]
         public void ArtistsAny()
         {
             List<Lite<ArtistEntity>> artists = Database.Query<ArtistEntity>().Where(a=>a.Sex == Sex.Male).Select(a => a.ToLite()).ToList();

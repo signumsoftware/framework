@@ -6,7 +6,6 @@ using Signum.Utilities;
 using Signum.Engine.Maps;
 using System.Linq;
 using System.IO;
-using System.Data.SqlClient;
 using Signum.Utilities.ExpressionTrees;
 using System.Text.RegularExpressions;
 using Signum.Engine.DynamicQuery;
@@ -15,29 +14,29 @@ using System.Linq.Expressions;
 using Signum.Entities;
 using Signum.Utilities.Reflection;
 using System.Reflection;
-using Microsoft.SqlServer.Server;
 using System.Threading.Tasks;
 using System.Threading;
+using System.Data.SqlClient;
 
 namespace Signum.Engine
 {
 
     public abstract class Connector
     {
-        static readonly Variable<Connector> currentConnection = Statics.ThreadVariable<Connector>("connection");
+        static readonly Variable<Connector> currentConnector = Statics.ThreadVariable<Connector>("connection");
 
-        public static IDisposable Override(Connector connection)
+        public static IDisposable Override(Connector connector)
         {
-            Connector oldConnection = currentConnection.Value;
+            Connector oldConnection = currentConnector.Value;
 
-            currentConnection.Value = connection;
+            currentConnector.Value = connector;
 
-            return new Disposable(() => currentConnection.Value = oldConnection);
+            return new Disposable(() => currentConnector.Value = oldConnection);
         }
 
         public static Connector Current
         {
-            get { return currentConnection.Value ?? Default; }
+            get { return currentConnector.Value ?? Default; }
         }
 
         static Connector @default;
@@ -82,7 +81,7 @@ namespace Signum.Engine
                         .ToString(p => "{0} {1}: {2}".FormatWith(
                             p.ParameterName,
                             Connector.Current.GetSqlDbType(p),
-                            p.Value?.Let(v => CSharpRenderer.Value(v, v.GetType(), null))), "\r\n"));
+                            p.Value?.Let(v => v.ToString())), "\r\n"));
                 log.WriteLine();
             }
         }
@@ -92,8 +91,8 @@ namespace Signum.Engine
         protected internal abstract object ExecuteScalar(SqlPreCommandSimple preCommand, CommandType commandType);
         protected internal abstract int ExecuteNonQuery(SqlPreCommandSimple preCommand, CommandType commandType);
         protected internal abstract DataTable ExecuteDataTable(SqlPreCommandSimple command, CommandType commandType);
-        protected internal abstract DbDataReader UnsafeExecuteDataReader(SqlPreCommandSimple sqlPreCommandSimple, CommandType commandType);
-        protected internal abstract Task<DbDataReader> UnsafeExecuteDataReaderAsync(SqlPreCommandSimple preCommand, CommandType commandType, CancellationToken token);
+        protected internal abstract DbDataReaderWithCommand UnsafeExecuteDataReader(SqlPreCommandSimple sqlPreCommandSimple, CommandType commandType);
+        protected internal abstract Task<DbDataReaderWithCommand> UnsafeExecuteDataReaderAsync(SqlPreCommandSimple preCommand, CommandType commandType, CancellationToken token);
         protected internal abstract DataSet ExecuteDataSet(SqlPreCommandSimple sqlPreCommandSimple, CommandType commandType);
         protected internal abstract void BulkCopy(DataTable dt, ObjectName destinationTable, SqlBulkCopyOptions options, int? timeout);
 
@@ -202,6 +201,23 @@ namespace Signum.Engine
                 throw new InvalidOperationException("Attempt to use a non-Utc date in the database");
 
             return dateTime;
+        }
+    }
+
+    public class DbDataReaderWithCommand : IDisposable
+    {
+        public DbDataReaderWithCommand(DbCommand command, DbDataReader reader)
+        {
+            Command = command;
+            Reader = reader;
+        }
+
+        public DbCommand Command { get; private set; }
+        public DbDataReader Reader { get; private set; }
+
+        public void Dispose()
+        {
+            Reader.Dispose();
         }
     }
 }

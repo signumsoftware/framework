@@ -2,7 +2,7 @@
 using System.Text;
 using System.Collections.Generic;
 using System.Linq;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 using Signum.Engine;
 using Signum.Entities;
 using System.Diagnostics;
@@ -19,79 +19,71 @@ namespace Signum.Test.LinqProvider
     /// <summary>
     /// Summary description for LinqProvider
     /// </summary>
-    [TestClass]
     public class SelectSortCircuitTest
     {
-        [ClassInitialize()]
-        public static void MyClassInitialize(TestContext testContext)
+        public SelectSortCircuitTest()
         {
             MusicStarter.StartAndLoad();
+            Connector.CurrentLogger = new DebugTextWriter();
         }
 
-        [TestInitialize]
-        public void Initialize()
-        {
-            Connector.CurrentLogger = new DebugTextWriter();
-        }      
-     
-
-        [TestMethod]
+        [Fact]
         public void SortCircuitCoallesce()
         {
             var list = Database.Query<AlbumEntity>().Where(a => ("Hola" ?? Throw<string>()) == null).Select(a => a.Year).ToList();
         }
 
-        [TestMethod]
+        [Fact]
         public void SortCircuitCoallesceNullable()
         {
             var list = Database.Query<AlbumEntity>().Where(a => (((DateTime?)DateTime.Now) ?? Throw<DateTime>()) == DateTime.Today).Select(a => a.Year).ToList();
         }
 
 
-        [TestMethod]
+        [Fact]
         public void SortCircuitConditionalIf()
         {
             var list = Database.Query<AlbumEntity>().Where(a => "Hola" == "Hola" ? true : Throw<bool>()).Select(a => a.Year).ToList();
         }
 
-        [TestMethod]
+        [Fact]
         public void NonSortCircuitCondicional()
         {
             var list = Database.Query<BandEntity>().Where(b => b.Name == "Olmo" ? b.Members.Any(a => a.Name == "A") : true).Select(b => b.ToLite()).ToList();
 
         }
 
-        [TestMethod]
+        [Fact]
         public void SortCircuitOr()
         {
             var list = Database.Query<AlbumEntity>().Where(a => true | Throw<bool>()).Select(a => a.Year).ToList();
         }
 
-        [TestMethod]
+        [Fact]
         public void SortCircuitOrElse()
         {
             var list = Database.Query<AlbumEntity>().Where(a => true || Throw<bool>() ).Select(a => a.Year).ToList();
         }
 
-        [TestMethod]
+        [Fact]
         public void SortCircuitAnd()
         {
             var list = Database.Query<AlbumEntity>().Where(a => false & Throw<bool>()).Select(a => a.Year).ToList();
         }
 
-        [TestMethod]
+        [Fact]
         public void SortCircuitAndAlso()
         {
             var list = Database.Query<AlbumEntity>().Where(a => false && Throw<bool>()).Select(a => a.Year).ToList();
         }
 
-        [TestMethod]
+        [Fact]
         public void SortEqualsTrue()
         {
             var list = Database.Query<AlbumEntity>().Where(a => true == (a.Year == 1900)).Select(a => a.Year).ToList();
         }
 
-        [TestMethod]
+        [Fact]
         public void SortEqualsFalse()
         {
             var list = Database.Query<AlbumEntity>().Where(a => false == (a.Year == 1900)).Select(a => a.Year).ToList();

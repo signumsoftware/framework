@@ -2,7 +2,7 @@
 using System.Text;
 using System.Collections.Generic;
 using System.Linq;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 using Signum.Engine;
 using Signum.Entities;
 using System.Diagnostics;
@@ -16,23 +16,15 @@ namespace Signum.Test.LinqProviderUpdateDelete
     /// <summary>
     /// Summary description for LinqProvider
     /// </summary>
-    [TestClass]
     public class UnsafeDeleteTest
     {
-        [ClassInitialize()]
-        public static void MyClassInitialize(TestContext testContext)
+        public UnsafeDeleteTest()
         {
             MusicStarter.StartAndLoad();
-        }
-
-
-        [TestInitialize]
-        public void Initialize()
-        {
             Connector.CurrentLogger = new DebugTextWriter();
         }
 
-        [TestMethod]
+        [Fact]
         public void DeleteAll()
         {
             using (Transaction tr = new Transaction())
@@ -44,7 +36,7 @@ namespace Signum.Test.LinqProviderUpdateDelete
 
         }
 
-        [TestMethod]
+        [Fact]
         public void Delete()
         {
             using (Transaction tr = new Transaction())
@@ -55,7 +47,7 @@ namespace Signum.Test.LinqProviderUpdateDelete
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void DeleteChunks()
         {
             using (Transaction tr = new Transaction())
@@ -66,7 +58,7 @@ namespace Signum.Test.LinqProviderUpdateDelete
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void DeleteJoin()
         {
             using (Transaction tr = new Transaction())
@@ -77,7 +69,7 @@ namespace Signum.Test.LinqProviderUpdateDelete
         }
 
 
-        [TestMethod]
+        [Fact]
         public void DeleteMListLite()
         {
             using (Transaction tr = new Transaction())
@@ -87,7 +79,7 @@ namespace Signum.Test.LinqProviderUpdateDelete
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void DeleteMListEntity()
         {
             using (Transaction tr = new Transaction())
@@ -98,7 +90,7 @@ namespace Signum.Test.LinqProviderUpdateDelete
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void DeleteMListEmbedded()
         {
             using (Transaction tr = new Transaction())
@@ -110,7 +102,7 @@ namespace Signum.Test.LinqProviderUpdateDelete
         }
 
 
-        [TestMethod]
+        [Fact]
         public void DeleteManual()
         {
             using (Transaction tr = new Transaction())
@@ -129,7 +121,7 @@ namespace Signum.Test.LinqProviderUpdateDelete
             public int MyId { get; set; }
         }
 
-        [TestMethod]
+        [Fact]
         public void UnsafeDeleteMyView()
         {
             using (Transaction tr = new Transaction())

@@ -1,177 +1,49 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>9.0.30729</ProductVersion>
-    <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{DE565EB3-EE44-469D-B6B9-C8F3CA0712EF}</ProjectGuid>
-    <OutputType>Library</OutputType>
-    <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Signum.Test</RootNamespace>
-    <AssemblyName>Signum.Test</AssemblyName>
-    <TargetFrameworkVersion>v4.6.2</TargetFrameworkVersion>
-    <FileAlignment>512</FileAlignment>
-    <ProjectTypeGuids>{3AC096D0-A1C2-E12C-1390-A8335801FDAB};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
-    <FileUpgradeFlags>
-    </FileUpgradeFlags>
-    <OldToolsVersion>3.5</OldToolsVersion>
-    <UpgradeBackupLocation />
-    <TypeScriptToolsVersion>2.4</TypeScriptToolsVersion>
-    <PublishUrl>publish\</PublishUrl>
-    <Install>true</Install>
-    <InstallFrom>Disk</InstallFrom>
-    <UpdateEnabled>false</UpdateEnabled>
-    <UpdateMode>Foreground</UpdateMode>
-    <UpdateInterval>7</UpdateInterval>
-    <UpdateIntervalUnits>Days</UpdateIntervalUnits>
-    <UpdatePeriodically>false</UpdatePeriodically>
-    <UpdateRequired>false</UpdateRequired>
-    <MapFileExtensions>true</MapFileExtensions>
-    <ApplicationRevision>0</ApplicationRevision>
-    <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
-    <IsWebBootstrapper>false</IsWebBootstrapper>
-    <UseApplicationTrust>false</UseApplicationTrust>
-    <BootstrapperEnabled>true</BootstrapperEnabled>
-    <TargetFrameworkProfile />
+    <TargetFramework>netcoreapp2.1</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <UserSecretsId>SignumTest</UserSecretsId>
+    <TargetLatestRuntimePatch>true</TargetLatestRuntimePatch>
+    <Platforms>x64</Platforms>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
-    <Prefer32Bit>false</Prefer32Bit>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
-    <Prefer32Bit>false</Prefer32Bit>
-  </PropertyGroup>
+
   <ItemGroup>
-    <Reference Include="Microsoft.SqlServer.Types, Version=14.0.0.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Microsoft.SqlServer.Types.14.0.314.76\lib\net40\Microsoft.SqlServer.Types.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Microsoft.VisualStudio.QualityTools.UnitTestFramework, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL" />
-    <Reference Include="System" />
-    <Reference Include="System.Core">
-      <RequiredTargetFramework>3.5</RequiredTargetFramework>
-    </Reference>
-    <Reference Include="System.Data" />
-    <Reference Include="System.ValueTuple, Version=4.0.3.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\System.ValueTuple.4.5.0\lib\net461\System.ValueTuple.dll</HintPath>
-    </Reference>
-    <Reference Include="System.Xml" />
-    <Reference Include="System.Xml.Linq" />
+    <PackageReference Include="dotMorten.Microsoft.SqlServer.Types" Version="1.1.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration" Version="2.1.1" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="2.1.1" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="2.1.1" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.9.0" />
+    <PackageReference Include="xunit" Version="2.2.0" /> 
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.2.0" />
   </ItemGroup>
+
   <ItemGroup>
-    <Compile Include="Environment\MusicLoader.cs" />
-    <Compile Include="Environment\MusicLogic.cs" />
-    <Compile Include="ExtensionsTest.cs" />
-    <Compile Include="Assert2.cs" />
-    <Compile Include="Environment\Entities.cs" />
-    <Compile Include="LinqProvider\AllAnyContainsTest.cs" />
-    <Compile Include="LinqProvider\AsyncTest.cs" />
-    <Compile Include="LinqProvider\ExpandTest.cs" />
-    <Compile Include="LinqProvider\SystemTimeTest.cs" />
-    <Compile Include="LinqProvider\UnsafeInsertTest.cs" />
-    <Compile Include="LinqProvider\ToStringTest.cs" />
-    <Compile Include="LinqProvider\InDBTest.cs" />
-    <Compile Include="LinqProvider\RetriverTest.cs" />
-    <Compile Include="LinqProvider\SelectSortCirtuitTest.cs" />
-    <Compile Include="LinqProvider\SelectNestedTest.cs" />
-    <Compile Include="LinqProvider\DistinctTest.cs" />
-    <Compile Include="LinqProvider\SelectManyTest.cs" />
-    <Compile Include="LinqProvider\SingleFirstTest.cs" />
-    <Compile Include="LinqProvider\SelectImplementations.cs" />
-    <Compile Include="LinqProvider\UnsafeDeleteTest.cs" />
-    <Compile Include="LinqProvider\UnsafeUpdateTest.cs" />
-    <Compile Include="LinqProvider\SqlFunctionsTest.cs" />
-    <Compile Include="LinqProvider\TakeSkipTest.cs" />
-    <Compile Include="LinqProvider\GroupByTest.cs" />
-    <Compile Include="LinqProvider\OrderByTest.cs" />
-    <Compile Include="LinqProvider\JoinGroupTest.cs" />
-    <Compile Include="LinqProvider\WhereTest.cs" />
-    <Compile Include="LinqProvider\SelectTest.cs" />
-    <Compile Include="MetaTest.cs" />
-    <Compile Include="ObjectNameTest.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="NiceToStringTest.cs" />
-    <Compile Include="Properties\Settings.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTimeSharedInput>True</DesignTimeSharedInput>
-      <DependentUpon>Settings.settings</DependentUpon>
-    </Compile>
-    <Compile Include="SaveTest.cs" />
-    <Compile Include="Environment\MusicStarter.cs" />
-    <Compile Include="StringDistanceTest.cs" />
+    <ProjectReference Include="..\Signum.Engine\Signum.Engine.csproj" />
+    <ProjectReference Include="..\Signum.Entities\Signum.Entities.csproj" />
+    <ProjectReference Include="..\Signum.Utilities\Signum.Utilities.csproj" />
   </ItemGroup>
+
   <ItemGroup>
-    <None Include="app.config" />
-    <None Include="packages.config" />
-    <None Include="Properties\Settings.settings">
-      <Generator>PublicSettingsSingleFileGenerator</Generator>
-      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    <PackageReference Include="Signum.Analyzer" Version="1.0.0" />
+  </ItemGroup>
+
+  <Target Name="SignumAfterCompile" AfterTargets="AfterCompile" Outputs="$(TargetPath)">
+    <WriteLinesToFile File="$(BaseIntermediateOutputPath)SignumReferences.txt" Lines="@(ReferencePath)" Overwrite="true" Encoding="Unicode" />
+    <Exec command="dotnet &quot;..\Signum.MSBuildTask\Binaries\netcoreapp2.1\Signum.MSBuildTask.dll&quot; &quot;@(IntermediateAssembly)&quot; &quot;$(BaseIntermediateOutputPath)SignumReferences.txt&quot;" ConsoleToMSBuild="false">
+      <Output TaskParameter="ConsoleOutput" PropertyName="OutputOfExec" />
+    </Exec>
+  </Target>
+  
+  <ItemGroup>
+    <None Update="appsettings.json">
+      <Generator></Generator>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
+  
   <ItemGroup>
-    <BootstrapperPackage Include=".NETFramework,Version=v4.0">
-      <Visible>False</Visible>
-      <ProductName>Microsoft .NET Framework 4 %28x86 and x64%29</ProductName>
-      <Install>true</Install>
-    </BootstrapperPackage>
-    <BootstrapperPackage Include="Microsoft.Net.Client.3.5">
-      <Visible>False</Visible>
-      <ProductName>.NET Framework 3.5 SP1 Client Profile</ProductName>
-      <Install>false</Install>
-    </BootstrapperPackage>
-    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
-      <Visible>False</Visible>
-      <ProductName>.NET Framework 3.5 SP1</ProductName>
-      <Install>false</Install>
-    </BootstrapperPackage>
-    <BootstrapperPackage Include="Microsoft.Windows.Installer.3.1">
-      <Visible>False</Visible>
-      <ProductName>Windows Installer 3.1</ProductName>
-      <Install>true</Install>
-    </BootstrapperPackage>
+    <Folder Include="Properties\" />
   </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\Signum.Engine\Signum.Engine.csproj">
-      <Project>{7f2db6fe-c109-4057-b207-c62a767f905d}</Project>
-      <Name>Signum.Engine</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Signum.Entities\Signum.Entities.csproj">
-      <Project>{f2b51d08-498d-4c9f-8112-9521a7762b02}</Project>
-      <Name>Signum.Entities</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Signum.Utilities\Signum.Utilities.csproj">
-      <Project>{f7d3f72d-741d-4f67-8cf8-cd41b9035fed}</Project>
-      <Name>Signum.Utilities</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <Analyzer Include="..\Signum.Analyzer\Binaries\Signum.Analyzer.dll" />
-  </ItemGroup>
-  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
-  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
-       Other similar extension points exist, see Microsoft.Common.targets.
-  <Target Name="BeforeBuild">
-  </Target>
-  <Target Name="AfterBuild">
-  </Target>
-  -->
-  <UsingTask TaskName="SignumTask" AssemblyFile="..\Signum.MSBuildTask\Binaries\Signum.MSBuildTask.dll" />
-  <Target Name="AfterCompile" DependsOnTargets="CoreCompile">
-    <SignumTask Assembly="@(IntermediateAssembly)" References="@(ReferencePath)" KeyFile="$(KeyOriginatorFile)" />
-  </Target>
+
 </Project>

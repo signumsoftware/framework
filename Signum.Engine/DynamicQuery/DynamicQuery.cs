@@ -48,10 +48,10 @@ namespace Signum.Engine.DynamicQuery
 
                 core.EntityColumnFactory().Implementations = entityImplementations;
 
-                var errors = core.StaticColumns.Where(sc => sc.Implementations == null && sc.Type.CleanType().IsIEntity()).CommaAnd(a => $"'{a.Name}'");
+                var errors = core.StaticColumns.Where(sc => sc.Implementations == null && sc.Type.CleanType().IsIEntity());
 
-                if (errors.HasText())
-                    throw new InvalidOperationException("Column {0} of query '{1}' do(es) not have implementations deffined. Use Column extension method".FormatWith(errors, QueryUtils.GetKey(QueryName)));
+                if (errors.Any())
+                    throw new InvalidOperationException("Column {0} of query '{1}' do(es) not have implementations deffined. Use Column extension method".FormatWith(errors.CommaAnd(a => $"'{a.Name}'"), QueryUtils.GetKey(QueryName)));
 
                 return core;
             });

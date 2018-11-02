@@ -1,4 +1,4 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Xunit;
 using Signum.Engine;
 using Signum.Entities;
 using Signum.Test.Environment;
@@ -16,52 +16,45 @@ namespace Signum.Test.LinqProvider
     /// <summary>
     /// Summary description for LinqProvider
     /// </summary>
-    [TestClass]
     public class SelectTest
     {
-        [ClassInitialize()]
-        public static void MyClassInitialize(TestContext testContext)
+        public SelectTest()
         {
             MusicStarter.StartAndLoad();
-        }
-
-        [TestInitialize]
-        public void Initialize()
-        {
             Connector.CurrentLogger = new DebugTextWriter();
         }
 
-        [TestMethod]
+        [Fact]
         public void Select()
         {
             var list = Database.Query<AlbumEntity>().Select(a => a.Name).ToList();
         }
 
-        [TestMethod]
+        [Fact]
         public void SelectIndex()
         {
             var list = Database.Query<AlbumEntity>().Select((a, i) => a.Name + i).ToList();
         }
 
-        [TestMethod]
+        [Fact]
         public void SelectIds()
         {
             var first = Database.Query<BandEntity>().Select(b => b.Id).ToList();
         }
 
-        [TestMethod]
+        [Fact]
         public void SelectFirstId()
         {
             var first = Database.Query<BandEntity>().Select(b => b.Id).First();
         }
 
-        [TestMethod]
+        [Fact]
         public void SelectExpansion()
         {
             var list = Database.Query<AlbumEntity>().Select(a => a.Label.Name).ToList();
         }
 
-        [TestMethod]
+        [Fact]
         public void SelectLetExpansion()
         {
             var list = (from a in Database.Query<AlbumEntity>()
@@ -69,7 +62,7 @@ namespace Signum.Test.LinqProvider
                         select l.Name).ToList();
         }
 
-        [TestMethod]
+        [Fact]
         public void SelectLetExpansionRedundant()
         {
             var list = (from a in Database.Query<AlbumEntity>()
@@ -80,40 +73,40 @@ namespace Signum.Test.LinqProvider
                             Author = a.Label.Name
                         }).ToList();
 
-            Assert.AreEqual(Database.Query<AlbumEntity>().Count(), list.Count);
+            Assert.Equal(Database.Query<AlbumEntity>().Count(), list.Count);
         }
 
-        [TestMethod]
+        [Fact]
         public void SelectWhereExpansion()
         {
             var list = Database.Query<AlbumEntity>().Where(a => a.Label != null).Select(a => a.Label.Name).ToList();
         }
 
-        [TestMethod]
+        [Fact]
         public void SelectAnonymous()
         {
             var list = Database.Query<AlbumEntity>().Select(a => new { a.Name, a.Year }).ToList();
         }
 
-        [TestMethod]
+        [Fact]
         public void SelectNoColumns()
         {
             var list = Database.Query<AlbumEntity>().Select(a => new { DateTime.Now, Album = (AlbumEntity)null, Artist = (Lite<ArtistEntity>)null }).ToList();
         }
 
-        [TestMethod]
+        [Fact]
         public void SelectCount()
         {
             var list = Database.Query<AlbumEntity>().Select(a => (int?)a.Songs.Count).ToList();
         }
 
-        [TestMethod]
+        [Fact]
         public void SelectLite()
         {
             var list = Database.Query<AlbumEntity>().Select(a => a.ToLite()).ToList();
         }
 
-        [TestMethod]
+        [Fact]
         public void SelectLiteToStr()
         {
             var list = Database.Query<AlbumEntity>().Select(a => a.ToLite(a.Label.Name)).ToList();
@@ -121,20 +114,20 @@ namespace Signum.Test.LinqProvider
 
 
 
-        [TestMethod]
+        [Fact]
         public void SelectBool()
         {
             var list = Database.Query<ArtistEntity>().Select(a => a.Dead).ToList();
         }
 
-        [TestMethod]
+        [Fact]
         public void SelectConditionToBool()
         {
             var list = Database.Query<AlbumEntity>().Select(a => a.Year < 1990).ToList();
         }
 
 
-        [TestMethod]
+        [Fact]
         public void SelectConditionalMember()
         {
             var list = (from l in Database.Query<LabelEntity>()
@@ -142,7 +135,7 @@ namespace Signum.Test.LinqProvider
 
         }
 
-        [TestMethod]
+        [Fact]
         public void SelectConditionalToLite()
         {
             var list = (from l in Database.Query<LabelEntity>()
@@ -150,7 +143,7 @@ namespace Signum.Test.LinqProvider
         }
 
 #pragma warning disable IDE0029 // Use coalesce expression
-        [TestMethod]
+        [Fact]
         public void SelectConditionalToLiteNull()
         {
             var list = (from l in Database.Query<LabelEntity>()
@@ -159,14 +152,14 @@ namespace Signum.Test.LinqProvider
         }
 #pragma warning restore IDE0029 // Use coalesce expression
 
-        [TestMethod]
+        [Fact]
         public void SelectConditionalGetType()
         {
             var list = (from l in Database.Query<LabelEntity>()
                         select (l.Owner == null ? l : l.Owner.Entity).GetType()).ToList();
         }
 
-        [TestMethod]
+        [Fact]
         public void SelectCoallesceMember()
         {
             var list = (from l in Database.Query<LabelEntity>()
@@ -174,7 +167,7 @@ namespace Signum.Test.LinqProvider
 
         }
 
-        [TestMethod]
+        [Fact]
         public void SelectCoallesceToLite()
         {
             var list = (from l in Database.Query<LabelEntity>()
@@ -182,7 +175,7 @@ namespace Signum.Test.LinqProvider
 
         }
 
-        [TestMethod]
+        [Fact]
         public void SelectCoallesceGetType()
         {
             var list = (from l in Database.Query<LabelEntity>()
@@ -190,14 +183,14 @@ namespace Signum.Test.LinqProvider
 
         }
 
-        [TestMethod]
+        [Fact]
         public void SelectUpCast()
         {
             var list = (from n in Database.Query<ArtistEntity>()
                         select (IAuthorEntity)n).ToList(); //Just to full-nominate
         }
 
-        [TestMethod]
+        [Fact]
         public void SelectEntityEquals()
         {
             ArtistEntity michael = Database.Query<ArtistEntity>().SingleEx(a => a.Dead);
@@ -205,7 +198,7 @@ namespace Signum.Test.LinqProvider
             var list = Database.Query<AlbumEntity>().Select(a => a.Author == michael).ToList();
         }
 
-        [TestMethod]
+        [Fact]
         public void SelectBoolExpression()
         {
             ArtistEntity michael = Database.Query<ArtistEntity>().SingleEx(a => a.Dead);
@@ -213,154 +206,156 @@ namespace Signum.Test.LinqProvider
             var list = Database.Query<AlbumEntity>().Select(a => a.Author == michael).ToList();
         }
 
-        [TestMethod]
+        [Fact]
         public void SelectExpressionProperty()
         {
             var list = Database.Query<ArtistEntity>().Where(a => a.IsMale).ToArray();
         }
 
-        [TestMethod]
+        [Fact]
         public void SelectExpressionMethod()
         {
             var list = Database.Query<ArtistEntity>().Select(a => new { a.Name, Count = a.AlbumCount() }).ToArray();
         }
 
-        [TestMethod]
+        [Fact]
         public void SelectPolyExpressionPropertyUnion()
         {
             var list = Database.Query<AlbumEntity>().Select(a => a.Author.CombineUnion().FullName).ToArray();
         }
 
-        [TestMethod]
+        [Fact]
         public void SelectPolyExpressionPropertySwitch()
         {
             var list = Database.Query<AlbumEntity>().Select(a => a.Author.CombineCase().FullName).ToArray();
         }
 
-        [TestMethod]
+        [Fact]
         public void SelectPolyExpressionMethodUnion()
         {
             var list = Database.Query<AlbumEntity>().Select(a => a.Author.CombineUnion().Lonely()).ToArray();
         }
 
-        [TestMethod]
+        [Fact]
         public void SelectPolyExpressionMethodSwitch()
         {
             var list = Database.Query<AlbumEntity>().Select(a => a.Author.CombineCase().Lonely()).ToArray();
         }
 
-        [TestMethod]
+        [Fact]
         public void SelectPolyExpressionMethodManual()
         {
             var list = Database.Query<AlbumEntity>().Select(a => a.Author is BandEntity ? ((BandEntity)a.Author).Lonely() : ((ArtistEntity)a.Author).Lonely()).ToArray();
         }
 
-        [TestMethod]
+        [Fact]
         public void SelectThrowIntNullable()
         {
-            Assert2.Throws<FieldReaderException>(() =>
+            Assert.Throws<FieldReaderException>(() =>
                 Database.Query<AlbumEntity>().Select(a => ((ArtistEntity)a.Author).Id).ToArray());
         }
 
-        [TestMethod]
+        [Fact]
         public void SelectThrowBoolNullable()
         {
-            Assert2.Throws<FieldReaderException>(() =>
+            Assert.Throws<FieldReaderException>(() =>
                 Database.Query<AlbumEntity>().Select(a => ((ArtistEntity)a.Author).Dead).ToArray());
         }
 
-        [TestMethod]
+        [Fact]
         public void SelectThrowEnumNullable()
         {
-            Assert2.Throws<FieldReaderException>(() =>
+            Assert.Throws<FieldReaderException>(() =>
                 Database.Query<AlbumEntity>().Select(a => ((ArtistEntity)a.Author).Sex).ToArray());
         }
 
-        [TestMethod]
+        [Fact]
         public void SelectIntNullable()
         {
             var list = Database.Query<AlbumEntity>().Select(a => (int?)((ArtistEntity)a.Author).Id).ToArray();
         }
 
-        [TestMethod]
+        [Fact]
         public void SelectBoolNullable()
         {
             var list = Database.Query<AlbumEntity>().Select(a => (bool?)((ArtistEntity)a.Author).Dead).ToArray();
         }
 
-        [TestMethod]
+        [Fact]
         public void SelectEnumNullable()
         {
             var list = Database.Query<ArtistEntity>().Select(a => a.Status).ToArray();
         }
 
-        [TestMethod]
+        [Fact]
         public void SelectEnumNullableNullable()
         {
             var list = Database.Query<AlbumEntity>().Select(a => ((ArtistEntity)a.Author).Status).ToArray();
         }
 
-        [TestMethod]
+        [Fact]
         public void SelectThrowsIntSumNullable()
         {
-            Assert2.Throws<FieldReaderException>(() =>
+            Assert.Throws<FieldReaderException>(() =>
                 Database.Query<AlbumEntity>().Select(a => (int)a.Id + (int)((ArtistEntity)a.Author).Id).ToArray());
         }
 
-        [TestMethod]
+        [Fact]
         public void SelectThrowaIntSumNullableCasting()
         {
-            Assert2.Throws<FieldReaderException>(() =>
+            Assert.Throws<FieldReaderException>(() =>
                 Database.Query<AlbumEntity>().Select(a => (int?)((int)a.Id + (int)((ArtistEntity)a.Author).Id)).ToArray());
         }
 
-        [TestMethod]
+        [Fact]
         public void SelectThrowaIntSumNullableCastingInSql()
         {
             var list = Database.Query<AlbumEntity>().Select(a => (int?)((int)a.Id + (int)((ArtistEntity)a.Author).Id).InSql()).ToArray();
         }
 
 
-        [TestMethod]
+        [Fact]
         public void SelectEnumNullableBullableCast()
         {
             var list = Database.Query<AlbumEntity>().Select(a => (Sex?)((ArtistEntity)a.Author).Sex).ToArray();
         }
 
-        [TestMethod]
+        [Fact]
         public void SelectEnumNullableValue()
         {
             var list = Database.Query<AlbumEntity>().Where(a => a.Author is ArtistEntity)
                 .Select(a => ((Sex?)((ArtistEntity)a.Author).Sex).Value).ToArray();
         }
 
-        [TestMethod]
+        [Fact]
         public void SelectEmbeddedNullable()
         {
             var bonusTracks = Database.Query<AlbumEntity>().Select(a => a.BonusTrack).ToArray();
         }
 
-        [TestMethod]
+        [Fact]
         public void SelectMixinThrows()
         {
-            Assert2.Throws<InvalidOperationException>("without their main entity", () =>
+            var e = Assert.Throws<InvalidOperationException>(() =>
                 Database.Query<NoteWithDateEntity>().Select(a => a.Mixin<CorruptMixin>()).ToArray());
+
+            Assert.Contains("without their main entity", e.Message);
         }
 
 
-        [TestMethod]
+        [Fact]
         public void SelectMixinField()
         {
             Database.Query<NoteWithDateEntity>().Select(a => a.Mixin<CorruptMixin>().Corrupt).ToArray();
         }
 
-        [TestMethod]
+        [Fact]
         public void SelectMixinWhere()
         {
             Database.Query<NoteWithDateEntity>().Where(a => a.Mixin<CorruptMixin>().Corrupt == true).ToArray();
         }
 
-        [TestMethod]
+        [Fact]
         public void SelectMixinCollection()
         {
             var result = (from n in Database.Query<NoteWithDateEntity>()
@@ -368,7 +363,7 @@ namespace Signum.Test.LinqProvider
                           select c).ToArray();
         }
 
-        [TestMethod]
+        [Fact]
         public void SelectNullable()
         {
             var durations = (from a in Database.Query<AlbumEntity>()
@@ -377,7 +372,7 @@ namespace Signum.Test.LinqProvider
                              select s.Seconds.Value).ToArray();
         }
 
-        [TestMethod]
+        [Fact]
         public void SelectIsNull()
         {
             var durations = (from a in Database.Query<AlbumEntity>()
@@ -386,7 +381,7 @@ namespace Signum.Test.LinqProvider
                              select s.Seconds == null).ToArray();
         }
 
-        [TestMethod]
+        [Fact]
         public void SelectAvoidNominate()
         {
             var durations =
@@ -398,7 +393,7 @@ namespace Signum.Test.LinqProvider
                  }).ToList();
         }
 
-        [TestMethod]
+        [Fact]
         public void SelectAvoidNominateEntity()
         {
             var durations =
@@ -411,7 +406,7 @@ namespace Signum.Test.LinqProvider
         }
 
 
-        [TestMethod]
+        [Fact]
         public void SelectSingleCellAggregate()
         {
             var list = Database.Query<BandEntity>()
@@ -427,7 +422,7 @@ namespace Signum.Test.LinqProvider
                 }).ToList();
         }
 
-        [TestMethod]
+        [Fact]
         public void SelectMemoryEntity()
         {
             var artist = Database.Query<ArtistEntity>().FirstEx();
@@ -439,7 +434,7 @@ namespace Signum.Test.LinqProvider
             }).ToList();
         }
 
-        [TestMethod]
+        [Fact]
         public void SelectMemoryLite()
         {
             var artist = Database.Query<ArtistEntity>().Select(a => a.ToLite()).FirstEx();
@@ -451,40 +446,40 @@ namespace Signum.Test.LinqProvider
             }).ToList();
         }
 
-        [TestMethod]
+        [Fact]
         public void SelectOutsideStringNull()
         {
             var awards = Database.Query<GrammyAwardEntity>().Select(a => ((AmericanMusicAwardEntity)(AwardEntity)a).Category).ToList();
         }
 
-        [TestMethod]
+        [Fact]
         public void SelectOutsideLiteNull()
         {
             var awards = Database.Query<GrammyAwardEntity>().Select(a => ((AmericanMusicAwardEntity)(AwardEntity)a).ToLite()).ToList();
         }
 
-        [TestMethod]
+        [Fact]
         public void SelectMListLite()
         {
             var lists = (from mle in Database.MListQuery((ArtistEntity a) => a.Friends)
                          select new { Artis = mle.Parent.Name, Friend = mle.Element.Entity.Name }).ToList();
         }
 
-        [TestMethod]
+        [Fact]
         public void SelectMListEntity()
         {
             var lists = (from mle in Database.MListQuery((BandEntity a) => a.Members)
                          select new { Band = mle.Parent.Name, Artis = mle.Element.Name }).ToList();
         }
 
-        [TestMethod]
+        [Fact]
         public void SelectMListEmbedded()
         {
             var lists = (from mle in Database.MListQuery((AlbumEntity a) => a.Songs)
                          select mle).ToList();
         }
 
-        [TestMethod]
+        [Fact]
         public void SelectMListEmbeddedToList()
         {
             var lists = (from a in Database.Query<AlbumEntity>()
@@ -496,7 +491,7 @@ namespace Signum.Test.LinqProvider
         }
 
 
-        [TestMethod]
+        [Fact]
         public void SelectMListPotentialDuplicates()
         {
             var sp = (from alb in Database.Query<AlbumEntity>()
@@ -506,35 +501,37 @@ namespace Signum.Test.LinqProvider
 
             var single = sp.Distinct(ReferenceEqualityComparer<ArtistEntity>.Default).SingleEx();
 
-            Assert.AreEqual(single.Friends.Distinct().Count(), single.Friends.Count);
+            Assert.Equal(single.Friends.Distinct().Count(), single.Friends.Count);
         }
 
-        [TestMethod]
+        [Fact]
         public void SelectIBAId()
         {
             var list = Database.Query<ArtistEntity>().Select(a => (PrimaryKey?)a.LastAward.Id).ToList();
         }
 
-        [TestMethod]
+        [Fact]
         public void SelectIBAIdObject()
         {
-            Assert2.Throws<InvalidOperationException>("translated", () =>
+            var e = Assert.Throws<InvalidOperationException>(() =>
                 Database.Query<ArtistEntity>().Select(a => ((int?)a.LastAward.Id).InSql()).ToList());
+
+            Assert.Contains("translated", e.Message);
         }
 
-        [TestMethod]
+        [Fact]
         public void SelectToStrField()
         {
             var list = Database.Query<NoteWithDateEntity>().Select(a => a.ToStringProperty).ToList();
         }
 
-        [TestMethod]
+        [Fact]
         public void SelectFakedToString()
         {
             var list = Database.Query<AlbumEntity>().Select(a => a.ToStringProperty).ToList();
         }
 
-        [TestMethod]
+        [Fact]
         public void SelectConditionFormat()
         {
             var list = Database.Query<AlbumEntity>().Select(a =>
@@ -550,19 +547,19 @@ namespace Signum.Test.LinqProvider
                 }).ToList();
         }
 
-        [TestMethod]
+        [Fact]
         public void SelectToString()
         {
             var list = Database.Query<AlbumEntity>().Select(a => a.ToString()).ToList();
         }
 
-        [TestMethod]
+        [Fact]
         public void SelectToStringLite()
         {
             var list = Database.Query<AlbumEntity>().Select(a => a.ToLite().ToString()).ToList();
         }
 
-        [TestMethod]
+        [Fact]
         public void SelectConditionEnum()
         {
             var results = from b in Database.Query<BandEntity>()
@@ -572,39 +569,39 @@ namespace Signum.Test.LinqProvider
             results.ToList();
         }
 
-        [TestMethod]
+        [Fact]
         public void SelectMListId()
         {
             var list = Database.Query<ArtistEntity>().SelectMany(a => a.Friends).Select(a => a.Id).ToList();
         }
 
-        [TestMethod]
+        [Fact]
         public void SelectMListIdCovariance()
         {
             var list = Database.Query<ArtistEntity>().SelectMany(a => a.FriendsCovariant()).Select(a => a.Id).ToList();
         }
 
-        [TestMethod]
+        [Fact]
         public void SelectEmbeddedListNotNullableNull()
         {
             var list = (from a in Database.Query<AlbumEntity>()
                         from s in a.Songs.Where(s => s.Seconds < 0).DefaultIfEmpty()
                         select new { a, s }).ToList();
 
-            Assert.IsTrue(list.All(p => p.s == null));
+            Assert.True(list.All(p => p.s == null));
         }
 
-        [TestMethod]
+        [Fact]
         public void SelectEmbeddedListElementNotNullableNull()
         {
             var list = (from a in Database.Query<AlbumEntity>()
                         from s in a.MListElements(_ => _.Songs).Where(s => s.Element.Seconds < 0).DefaultIfEmpty()
                         select new { a, s }).ToList();
 
-            Assert.IsTrue(list.All(p => p.s == null));
+            Assert.True(list.All(p => p.s == null));
         }
 
-        [TestMethod]
+        [Fact]
         public void SelectWhereExpressionInSelectMany()
         {
             var max = 0;
@@ -615,39 +612,39 @@ namespace Signum.Test.LinqProvider
                         select new { a, s }).ToList();
         }
 
-        [TestMethod]
+        [Fact]
         public void SelectExplicitInterfaceImplementedField()
         {
             var list = (from a in Database.Query<AlbumEntity>()
                         select ((ISecretContainer)a).Secret.InSql()).ToList();
         }
 
-        [TestMethod]
+        [Fact]
         public void SelectEmbedded()
         {
             var list = Database.Query<AlbumEntity>().SelectMany(a => a.Songs).ToList();
         }
 
-        [TestMethod]
+        [Fact]
         public void SelectView()
         {
             var list = Database.View<Signum.Engine.SchemaInfoTables.SysDatabases>().ToList();
         }
 
-        [TestMethod]
+        [Fact]
         public void SelectRetrieve()
         {
-            Assert2.Throws<InvalidOperationException>("not supported",
-                () => Database.Query<LabelEntity>().Select(l => l.Owner.Retrieve()).ToList());
+            var e = Assert.Throws<InvalidOperationException>(() => Database.Query<LabelEntity>().Select(l => l.Owner.Retrieve()).ToList());
+            Assert.Contains("not supported", e.Message);
         }
 
-        [TestMethod]
+        [Fact]
         public void SelectWithHint()
         {
             var list = Database.Query<AlbumEntity>().WithHint("INDEX(IX_LabelID)").Select(a => a.Label.Name).ToList();
         }
 
-        [TestMethod]
+        [Fact]
         public void SelectAverageBool()
         {
             Expression<Func<AlbumEntity, bool>> selector = a => a.Id > 10;
@@ -656,15 +653,15 @@ namespace Signum.Test.LinqProvider
             var list = Database.Query<AlbumEntity>().Average(selectorDouble);
         }
 
-        [TestMethod]
+        [Fact]
         public void SelectVirtualMListNoDistinct()
         {
             var list = Database.Query<ArtistEntity>().ToList();
 
-            Assert.IsTrue(!Database.Query<ArtistEntity>().QueryText().Contains("DISTINCT"));
+            Assert.True(!Database.Query<ArtistEntity>().QueryText().Contains("DISTINCT"));
         }
 
-        [TestMethod]
+        [Fact]
         public void AvoidDecimalCastinInSql()
         {
             var list = Database.Query<ArtistEntity>()
@@ -672,7 +669,7 @@ namespace Signum.Test.LinqProvider
                 .Select(a => ((decimal?)a).InSql()) //Avoid Cast( as decimal) in SQL because of https://stackoverflow.com/questions/4169520/casting-as-decimal-and-rounding
                 .ToList();
 
-            Assert.IsTrue(list.Any(a => a.Value != Math.Round(a.Value))); //Decimal places are preserved
+            Assert.True(list.Any(a => a.Value != Math.Round(a.Value))); //Decimal places are preserved
 
         }
     }

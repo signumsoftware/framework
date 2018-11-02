@@ -37,7 +37,7 @@ namespace Signum.Entities.DynamicQuery
 
         public List<CollectionElementToken> Multiplications()
         {
-            HashSet<QueryToken> allTokens = this.AllTokens().ToHashSet();
+            HashSet<QueryToken> allTokens = new HashSet<QueryToken>(this.AllTokens());
 
             return CollectionElementToken.GetElements(allTokens);
         }
@@ -232,7 +232,7 @@ namespace Signum.Entities.DynamicQuery
         {
             get
             {
-                HashSet<QueryToken> allTokens = Filters
+                var allTokens = Filters
                     .SelectMany(a => a.GetFilterConditions())
                     .Select(a => a.Token)
                     .Concat(Orders.Select(a => a.Token))
@@ -257,7 +257,7 @@ namespace Signum.Entities.DynamicQuery
         {
             get
             {
-                HashSet<QueryToken> allTokens = Filters.SelectMany(a=>a.GetFilterConditions()).Select(a => a.Token)
+                var allTokens = Filters.SelectMany(a=>a.GetFilterConditions()).Select(a => a.Token)
                     .Concat(Orders.Select(a => a.Token)).ToHashSet();
 
                 return CollectionElementToken.GetElements(allTokens);

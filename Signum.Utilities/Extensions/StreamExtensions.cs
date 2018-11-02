@@ -6,6 +6,7 @@ using System.IO;
 using System.Resources;
 using System.Reflection;
 using System.Diagnostics;
+using System.Threading.Tasks;
 
 namespace Signum.Utilities
 {
@@ -18,6 +19,15 @@ namespace Signum.Utilities
             using (MemoryStream ms = new MemoryStream())
             {
                 str.CopyTo(ms);
+                return ms.ToArray();
+            }
+        }
+
+        public static async Task<byte[]> ReadAllBytesAsync(this Stream str)
+        {
+            using (MemoryStream ms = new MemoryStream())
+            {
+                await str.CopyToAsync(ms);
                 return ms.ToArray();
             }
         }

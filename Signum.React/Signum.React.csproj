@@ -1,372 +1,61 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="..\..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.2.0.1\build\net46\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props" Condition="Exists('..\..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.2.0.1\build\net46\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props')" />
-  <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\TypeScript\Microsoft.TypeScript.Default.props" Condition="Exists('$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\TypeScript\Microsoft.TypeScript.Default.props')" />
-  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{C6FD211B-DB43-4338-AE80-CD5D6BE15922}</ProjectGuid>
-    <ProjectTypeGuids>{349c5851-65df-11da-9384-00065b846f21};{fae04ec0-301f-11d3-bf4b-00c04f79efbc}</ProjectTypeGuids>
-    <OutputType>Library</OutputType>
-    <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Signum.React</RootNamespace>
-    <AssemblyName>Signum.React</AssemblyName>
-    <TargetFrameworkVersion>v4.6.2</TargetFrameworkVersion>
-    <MvcBuildViews>false</MvcBuildViews>
-    <UseIISExpress>false</UseIISExpress>
-    <FileUpgradeFlags>
-    </FileUpgradeFlags>
-    <IISExpressSSLPort />
-    <IISExpressAnonymousAuthentication />
-    <IISExpressWindowsAuthentication />
-    <IISExpressUseClassicPipelineMode />
-    <MvcProjectUpgradeChecked>true</MvcProjectUpgradeChecked>
-    <TargetFrameworkProfile />
-    <UseGlobalApplicationHostFile />
-    <NuGetPackageImportStamp>
-    </NuGetPackageImportStamp>
+    <TargetFramework>netcoreapp2.1</TargetFramework>
     <TypeScriptToolsVersion>3.1</TypeScriptToolsVersion>
-    <Use64BitIISExpress />
-    <DockerComposeProjectPath>..\..\docker-compose.dcproj</DockerComposeProjectPath>
+    <LangVersion>latest</LangVersion>
+    <OutputType>Library</OutputType>
+    <TargetLatestRuntimePatch>true</TargetLatestRuntimePatch>
+    <StartupObject></StartupObject>
+    <Platforms>x64</Platforms>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <OutputPath>bin\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
-    <Prefer32Bit>false</Prefer32Bit>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
-    <Prefer32Bit>false</Prefer32Bit>
-  </PropertyGroup>
+
   <ItemGroup>
-    <Reference Include="Microsoft.CodeDom.Providers.DotNetCompilerPlatform, Version=2.0.1.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.2.0.1\lib\net45\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.dll</HintPath>
-    </Reference>
-    <Reference Include="Microsoft.SqlServer.Types, Version=14.0.0.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Microsoft.SqlServer.Types.14.0.314.76\lib\net40\Microsoft.SqlServer.Types.dll</HintPath>
-    </Reference>
-    <Reference Include="Microsoft.Web.Infrastructure, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <Private>True</Private>
-      <HintPath>..\..\packages\Microsoft.Web.Infrastructure.1.0.0.0\lib\net40\Microsoft.Web.Infrastructure.dll</HintPath>
-    </Reference>
-    <Reference Include="Newtonsoft.Json, Version=11.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Newtonsoft.Json.11.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
-    </Reference>
-    <Reference Include="System.Activities" />
-    <Reference Include="System.Data.DataSetExtensions" />
-    <Reference Include="System.IdentityModel" />
-    <Reference Include="System.Net.Http" />
-    <Reference Include="System.Net.Http.Formatting, Version=5.2.6.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Microsoft.AspNet.WebApi.Client.5.2.6\lib\net45\System.Net.Http.Formatting.dll</HintPath>
-    </Reference>
-    <Reference Include="System.Runtime.Serialization" />
-    <Reference Include="System.ServiceModel" />
-    <Reference Include="System.ServiceModel.Activation" />
-    <Reference Include="System.ServiceModel.Activities" />
-    <Reference Include="System.ServiceModel.Web" />
-    <Reference Include="Microsoft.CSharp" />
-    <Reference Include="System" />
-    <Reference Include="System.Data" />
-    <Reference Include="System.Drawing" />
-    <Reference Include="System.ValueTuple, Version=4.0.3.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\System.ValueTuple.4.5.0\lib\net461\System.ValueTuple.dll</HintPath>
-    </Reference>
-    <Reference Include="System.Web.DynamicData" />
-    <Reference Include="System.Web.Entity" />
-    <Reference Include="System.Web.ApplicationServices" />
-    <Reference Include="System.ComponentModel.DataAnnotations" />
-    <Reference Include="System.Web.Extensions" />
-    <Reference Include="System.Web.Helpers, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Microsoft.AspNet.WebPages.3.2.6\lib\net45\System.Web.Helpers.dll</HintPath>
-    </Reference>
-    <Reference Include="System.Web.Http, Version=5.2.6.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Microsoft.AspNet.WebApi.Core.5.2.6\lib\net45\System.Web.Http.dll</HintPath>
-    </Reference>
-    <Reference Include="System.Web.Http.WebHost, Version=5.2.6.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Microsoft.AspNet.WebApi.WebHost.5.2.6\lib\net45\System.Web.Http.WebHost.dll</HintPath>
-    </Reference>
-    <Reference Include="System.Web.Mvc, Version=5.2.6.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Microsoft.AspNet.Mvc.5.2.6\lib\net45\System.Web.Mvc.dll</HintPath>
-    </Reference>
-    <Reference Include="System.Web.Razor, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Microsoft.AspNet.Razor.3.2.6\lib\net45\System.Web.Razor.dll</HintPath>
-    </Reference>
-    <Reference Include="System.Web.WebPages, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Microsoft.AspNet.WebPages.3.2.6\lib\net45\System.Web.WebPages.dll</HintPath>
-    </Reference>
-    <Reference Include="System.Web.WebPages.Deployment, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Microsoft.AspNet.WebPages.3.2.6\lib\net45\System.Web.WebPages.Deployment.dll</HintPath>
-    </Reference>
-    <Reference Include="System.Web.WebPages.Razor, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Microsoft.AspNet.WebPages.3.2.6\lib\net45\System.Web.WebPages.Razor.dll</HintPath>
-    </Reference>
-    <Reference Include="System.WorkflowServices" />
-    <Reference Include="System.Web" />
-    <Reference Include="System.Web.Abstractions" />
-    <Reference Include="System.Web.Routing" />
-    <Reference Include="System.Xml" />
-    <Reference Include="System.Configuration" />
-    <Reference Include="System.Web.Services" />
-    <Reference Include="System.EnterpriseServices" />
-    <Reference Include="System.Xml.Linq" />
+    <PackageReference Include="Microsoft.AspNetCore.App" />
+    <PackageReference Include="Microsoft.TypeScript.MSBuild" Version="3.1.1">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
   </ItemGroup>
+
   <ItemGroup>
-    <Compile Include="..\Signum.Utilities\Properties\Version.cs">
-      <Link>Properties\Version.cs</Link>
-    </Compile>
-    <Compile Include="ApiControllers\OperationController.cs" />
-    <Compile Include="ApiControllers\EntityController.cs" />
-    <Compile Include="ApiControllers\QueryController.cs" />
-    <Compile Include="ApiControllers\ReflectionController.cs" />
-    <Compile Include="Facades\LambdaToJavascriptConverter.cs" />
-    <Compile Include="Filters\SignumAuthenticationAndProfilerAttribute.cs" />
-    <Compile Include="Filters\ProfilerFilterAttribute.cs" />
-    <Compile Include="Facades\SignumServer.cs" />
-    <Compile Include="Facades\ReflectionServer.cs" />
-    <Compile Include="Facades\SignumControllerFactory.cs" />
-    <Compile Include="Filters\SignumExceptionFilterAttribute.cs" />
-    <Compile Include="Filters\ValidateModelFilterAttribute.cs" />
-    <Compile Include="Filters\VersionFilterAttribute.cs" />
-    <Compile Include="JsonConverters\FilterJsonConverter.cs" />
-    <Compile Include="JsonConverters\EntityJsonConverter.cs" />
-    <Compile Include="JsonConverters\JsonSerializerExtensions.cs" />
-    <Compile Include="JsonConverters\ArgsJsonConverter.cs" />
-    <Compile Include="JsonConverters\TimeSpanConverter.cs" />
-    <Compile Include="JsonModelValidators\OriginalDefaultBodyModelValidator.cs" />
-    <Compile Include="JsonConverters\ResultTableConverter.cs" />
-    <Compile Include="JsonConverters\MListJsonConverter.cs" />
-    <Compile Include="JsonConverters\LiteJsonConverter.cs" />
-    <Compile Include="JsonModelValidators\SignumBodyModelValidator.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
-    <TypeScriptCompile Include="Scripts\Components\Basic.tsx" />
-    <TypeScriptCompile Include="Scripts\Components\Button.tsx" />
-    <TypeScriptCompile Include="Scripts\Components\Collapse.tsx" />
-    <TypeScriptCompile Include="Scripts\Components\ErrorBoundary.tsx" />
-    <TypeScriptCompile Include="Scripts\Components\index.tsx" />
-    <TypeScriptCompile Include="Scripts\Components\Dropdown.tsx" />
-    <TypeScriptCompile Include="Scripts\Components\DropdownItem.tsx" />
-    <TypeScriptCompile Include="Scripts\Components\DropdownToggle.tsx" />
-    <TypeScriptCompile Include="Scripts\Components\DropdownMenu.tsx" />
-    <TypeScriptCompile Include="Scripts\Components\Fade.tsx" />
-    <TypeScriptCompile Include="Scripts\Components\NavItem.tsx" />
-    <TypeScriptCompile Include="Scripts\Components\Popover.tsx" />
-    <TypeScriptCompile Include="Scripts\Components\PopperContent.tsx" />
-    <TypeScriptCompile Include="Scripts\Components\Tooltip.tsx" />
-    <TypeScriptCompile Include="Scripts\Lines\FormControlReadonly.tsx" />
-    <TypeScriptCompile Include="Scripts\Lines\FormGroup.tsx" />
-    <TypeScriptCompile Include="Scripts\Components\LinkContainer.tsx" />
-    <TypeScriptCompile Include="Scripts\Components\ModalFade.tsx" />
-    <TypeScriptCompile Include="Scripts\Components\Modal.tsx" />
-    <TypeScriptCompile Include="Scripts\Components\Tabs.tsx" />
-    <Content Include="Scripts\Frames\MenuIcons.css" />
-    <Content Include="Scripts\Frames\VersionChangedAlert.css" />
-    <Content Include="Scripts\SearchControl\ColumnBuilder.css" />
-    <Content Include="Scripts\SearchControl\QueryTokenBuilder.css" />
-    <Content Include="Scripts\SearchControl\FilterBuilder.css" />
-    <Content Include="Scripts\SearchControl\PaginationSelector.css" />
+    <None Remove="node_modules\**" />
   </ItemGroup>
+  
   <ItemGroup>
-    <Content Include="Scripts\Modals\Modals.css" />
-    <Content Include="Scripts\Lines\Lines.css" />
-    <Content Include="Scripts\Frames\Frames.css" />
-    <Content Include="Scripts\Frames\Notify.css" />
-    <Content Include="Scripts\SearchControl\Search.css" />
-    <Content Include="Scripts\Frames\Widgets.css" />
-    <Content Include="packages.config" />
+    <PackageReference Include="Signum.Analyzer" Version="1.0.0" />
+    <ProjectReference Include="..\Signum.TSGenerator\Signum.TSGenerator.csproj" />
   </ItemGroup>
+
   <ItemGroup>
-    <Content Include="Web.config">
-      <SubType>Designer</SubType>
-    </Content>
+    <DotNetCliToolReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Tools" Version="2.0.3" />
   </ItemGroup>
+
   <ItemGroup>
-    <ProjectReference Include="..\Signum.Engine\Signum.Engine.csproj">
-      <Project>{7f2db6fe-c109-4057-b207-c62a767f905d}</Project>
-      <Name>Signum.Engine</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Signum.Entities\Signum.Entities.csproj">
-      <Project>{f2b51d08-498d-4c9f-8112-9521a7762b02}</Project>
-      <Name>Signum.Entities</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Signum.Utilities\Signum.Utilities.csproj">
-      <Project>{f7d3f72d-741d-4f67-8cf8-cd41b9035fed}</Project>
-      <Name>Signum.Utilities</Name>
-    </ProjectReference>
+    <ProjectReference Include="..\Signum.Engine\Signum.Engine.csproj" />
+    <ProjectReference Include="..\Signum.Entities\Signum.Entities.csproj" />
+    <ProjectReference Include="..\Signum.Utilities\Signum.Utilities.csproj" />
   </ItemGroup>
+
   <ItemGroup>
-    <Service Include="{4A0DDDB5-7A95-4FBF-97CC-616D07737A77}" />
-    <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
+    <TypeScriptCompile Include="**\*.tsx" />
+    <TypeScriptCompile Include="**\*.ts" />
   </ItemGroup>
-  <ItemGroup />
-  <ItemGroup>
-    <Content Include="Scripts\Signum.Entities.Basics.t4s" />
-    <Content Include="Scripts\Signum.Entities.DynamicQuery.t4s" />
-    <Content Include="Scripts\Signum.Entities.Patterns.t4s" />
-    <None Include="Scripts\Signum.Entities.t4s" />
-    <Content Include="tsconfig.json" />
-    <TypeScriptCompile Include="Scripts\AppRelativeRoutes.tsx" />
-    <TypeScriptCompile Include="Scripts\ConfigureReactWidgets.ts" />
-    <TypeScriptCompile Include="Scripts\Exceptions\ExceptionClient.tsx" />
-    <Content Include="Scripts\fetchWithAbort.js" />
-    <TypeScriptCompile Include="Scripts\Frames\ContainerToggle.tsx" />
-    <TypeScriptCompile Include="Scripts\Frames\VersionChangedAlert.tsx" />
-    <TypeScriptCompile Include="Scripts\Frames\Notify.tsx" />
-    <TypeScriptCompile Include="Scripts\Frames\OrderUtils.tsx" />
-    <TypeScriptCompile Include="Scripts\Frames\ValidationErrors.tsx" />
-    <TypeScriptCompile Include="Scripts\Frames\ReactVisitor.tsx" />
-    <TypeScriptCompile Include="Scripts\Frames\Widgets.tsx" />
-    <TypeScriptCompile Include="Scripts\AsyncImport.tsx" />
-    <TypeScriptCompile Include="Scripts\Globals.d.ts" />
-    <TypeScriptCompile Include="Scripts\Lines\DynamicComponent.tsx" />
-    <TypeScriptCompile Include="Scripts\Lines\AutocompleteConfig.tsx" />
-    <TypeScriptCompile Include="Scripts\Lines\EntityTable.tsx" />
-    <TypeScriptCompile Include="Scripts\Lines\EnumCheckboxList.tsx" />
-    <TypeScriptCompile Include="Scripts\Lines\MultiValueLine.tsx" />
-    <TypeScriptCompile Include="Scripts\Modals\MessageModal.tsx" />
-    <TypeScriptCompile Include="Scripts\Retrieve.tsx" />
-    <TypeScriptCompile Include="Scripts\Search.tsx" />
-    <TypeScriptCompile Include="Scripts\Lines\EntityBase.tsx" />
-    <TypeScriptCompile Include="Scripts\Lines\EntityCombo.tsx" />
-    <TypeScriptCompile Include="Scripts\Lines\EntityCheckboxList.tsx" />
-    <TypeScriptCompile Include="Scripts\Lines\EntityTabRepeater.tsx" />
-    <TypeScriptCompile Include="Scripts\Lines\RenderEntity.tsx" />
-    <TypeScriptCompile Include="Scripts\Lines\EntityStrip.tsx" />
-    <TypeScriptCompile Include="Scripts\Lines\EntityRepeater.tsx" />
-    <TypeScriptCompile Include="Scripts\Lines\EntityDetail.tsx" />
-    <TypeScriptCompile Include="Scripts\Lines\EntityLine.tsx" />
-    <TypeScriptCompile Include="Scripts\Operations\ContextualOperations.tsx" />
-    <TypeScriptCompile Include="Scripts\QuickLinks.tsx" />
-    <TypeScriptCompile Include="Scripts\SearchControl\SystemTimeEditor.tsx" />
-    <TypeScriptCompile Include="Scripts\SearchControl\ContextMenu.tsx" />
-    <TypeScriptCompile Include="Scripts\SearchControl\ColumnBuilder.tsx" />
-    <TypeScriptCompile Include="Scripts\SearchControl\GroupByMessage.tsx" />
-    <TypeScriptCompile Include="Scripts\SearchControl\ValueSearchControlLine.tsx" />
-    <TypeScriptCompile Include="Scripts\SearchControl\EntityLink.tsx" />
-    <TypeScriptCompile Include="Scripts\Lines\EntityList.tsx" />
-    <TypeScriptCompile Include="Scripts\Lines\EntityListBase.tsx" />
-    <TypeScriptCompile Include="Scripts\Finder.tsx" />
-    <TypeScriptCompile Include="Scripts\FindOptions.ts" />
-    <TypeScriptCompile Include="Scripts\Components\Typeahead.tsx" />
-    <TypeScriptCompile Include="Scripts\Lines\LineBase.tsx" />
-    <TypeScriptCompile Include="Scripts\Modals.tsx" />
-    <TypeScriptCompile Include="Scripts\Constructor.tsx" />
-    <TypeScriptCompile Include="Scripts\Frames\ButtonBar.tsx" />
-    <TypeScriptCompile Include="Scripts\Operations.tsx" />
-    <TypeScriptCompile Include="Scripts\Navigator.tsx" />
-    <TypeScriptCompile Include="Scripts\Frames\FramePage.tsx" />
-    <TypeScriptCompile Include="Scripts\Frames\FrameModal.tsx" />
-    <TypeScriptCompile Include="Scripts\Operations\EntityOperations.tsx" />
-    <TypeScriptCompile Include="Scripts\SearchControl\ColumnEditor.tsx" />
-    <TypeScriptCompile Include="Scripts\SearchControl\ContextualItems.tsx" />
-    <TypeScriptCompile Include="Scripts\SearchControl\FilterBuilder.tsx" />
-    <TypeScriptCompile Include="Scripts\SearchControl\MultipliedMessage.tsx" />
-    <TypeScriptCompile Include="Scripts\SearchControl\ValueSearchControl.tsx" />
-    <TypeScriptCompile Include="Scripts\SearchControl\PaginationSelector.tsx" />
-    <TypeScriptCompile Include="Scripts\SearchControl\QueryTokenBuilder.tsx" />
-    <TypeScriptCompile Include="Scripts\SearchControl\SearchControlLoaded.tsx" />
-    <TypeScriptCompile Include="Scripts\SearchControl\SearchControl.tsx" />
-    <TypeScriptCompile Include="Scripts\SearchControl\SearchPage.tsx" />
-    <TypeScriptCompile Include="Scripts\Modals\ErrorModal.tsx" />
-    <TypeScriptCompile Include="Scripts\SearchControl\SearchModal.tsx" />
-    <TypeScriptCompile Include="Scripts\ValueLineModal.tsx" />
-    <TypeScriptCompile Include="Scripts\SelectorModal.tsx" />
-    <TypeScriptCompile Include="Scripts\Services.ts" />
-    <TypeScriptCompile Include="Scripts\Signum.Entities.Basics.ts">
-      <DependentUpon>Signum.Entities.Basics.t4s</DependentUpon>
-    </TypeScriptCompile>
-    <TypeScriptCompile Include="Scripts\Signum.Entities.DynamicQuery.ts">
-      <DependentUpon>Signum.Entities.DynamicQuery.t4s</DependentUpon>
-    </TypeScriptCompile>
-    <TypeScriptCompile Include="Scripts\Signum.Entities.Patterns.ts">
-      <DependentUpon>Signum.Entities.Patterns.t4s</DependentUpon>
-    </TypeScriptCompile>
-    <TypeScriptCompile Include="Scripts\Signum.Entities.ts">
-      <DependentUpon>Signum.Entities.t4s</DependentUpon>
-    </TypeScriptCompile>
-    <TypeScriptCompile Include="Scripts\Lines\ValueLine.tsx" />
-    <TypeScriptCompile Include="Scripts\Globals.ts" />
-    <TypeScriptCompile Include="Scripts\Exceptions\Exception.tsx" />
-    <TypeScriptCompile Include="Scripts\Lines.tsx" />
-    <TypeScriptCompile Include="Scripts\Reflection.ts" />
-    <TypeScriptCompile Include="Scripts\TypeContext.ts" />
-  </ItemGroup>
-  <PropertyGroup>
-    <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">15.0</VisualStudioVersion>
-    <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>
-  </PropertyGroup>
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
-    <TypeScriptTarget>ES5</TypeScriptTarget>
-    <TypeScriptJSXEmit>React</TypeScriptJSXEmit>
-    <TypeScriptCompileOnSaveEnabled>True</TypeScriptCompileOnSaveEnabled>
-    <TypeScriptNoImplicitAny>False</TypeScriptNoImplicitAny>
-    <TypeScriptModuleKind>CommonJS</TypeScriptModuleKind>
-    <TypeScriptRemoveComments>False</TypeScriptRemoveComments>
-    <TypeScriptOutFile />
-    <TypeScriptOutDir />
-    <TypeScriptGeneratesDeclarations>False</TypeScriptGeneratesDeclarations>
-    <TypeScriptNoEmitOnError>True</TypeScriptNoEmitOnError>
-    <TypeScriptSourceMap>True</TypeScriptSourceMap>
-    <TypeScriptMapRoot />
-    <TypeScriptSourceRoot />
-  </PropertyGroup>
-  <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\TypeScript\Microsoft.TypeScript.targets" Condition="Exists('$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\TypeScript\Microsoft.TypeScript.targets')" />
-  <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\WebApplications\Microsoft.WebApplication.targets" Condition="false" />
-  <Target Name="BeforeBuild">
-    <ItemGroup>
-      <EmbeddedResource Include="**\*.gif;**\*.png;**\*.jpg;**\*.css;**\*.ts;**\*.map;**\*.js;**\*.tsx" />
-    </ItemGroup>
-  </Target>
-  <Target Name="MvcBuildViews" AfterTargets="AfterBuild" Condition="'$(MvcBuildViews)'=='true'">
-    <AspNetCompiler VirtualPath="temp" PhysicalPath="$(WebProjectOutputDir)" />
-  </Target>
-  <ProjectExtensions>
-    <VisualStudio>
-      <FlavorProperties GUID="{349c5851-65df-11da-9384-00065b846f21}">
-        <WebProjectProperties>
-          <UseIIS>False</UseIIS>
-          <AutoAssignPort>True</AutoAssignPort>
-          <DevelopmentServerPort>7518</DevelopmentServerPort>
-          <DevelopmentServerVPath>/</DevelopmentServerVPath>
-          <IISUrl>
-          </IISUrl>
-          <NTLMAuthentication>False</NTLMAuthentication>
-          <UseCustomServer>False</UseCustomServer>
-          <CustomServerUrl>http://google.com</CustomServerUrl>
-          <SaveServerSettingsInUserFile>False</SaveServerSettingsInUserFile>
-        </WebProjectProperties>
-      </FlavorProperties>
-      <UserProperties tsconfig_1json__JSONSchema="http://json.schemastore.org/tsconfig" />
-    </VisualStudio>
-  </ProjectExtensions>
-  <UsingTask TaskName="SignumTSGenerator" AssemblyFile="..\Signum.TSGenerator\Binaries\Signum.TSGenerator.dll" />
+
   <Target Name="GenerateSignumTS">
-    <SignumTSGenerator References="@(ReferencePath)" Content="@(Content);@(None)" />
+    <WriteLinesToFile File="$(BaseIntermediateOutputPath)SignumReferences.txt" Lines="@(ReferencePath)" Overwrite="true" Encoding="Unicode" />
+    <WriteLinesToFile File="$(BaseIntermediateOutputPath)SignumContent.txt" Lines="@(Content);@(None)" Overwrite="true" Encoding="Unicode" />
+    <Exec command="dotnet &quot;..\Signum.TSGenerator\Binaries\netcoreapp2.1\Signum.TSGenerator.dll&quot; &quot;@(IntermediateAssembly)&quot; &quot;$(BaseIntermediateOutputPath)SignumReferences.txt&quot; &quot;$(BaseIntermediateOutputPath)SignumContent.txt&quot;" ConsoleToMSBuild="false">
+      <Output TaskParameter="ConsoleOutput" PropertyName="OutputOfExec" />
+    </Exec>
   </Target>
+
   <PropertyGroup>
     <CompileTypeScriptDependsOn>
       GenerateSignumTS;
       $(CompileTypeScriptDependsOn);
     </CompileTypeScriptDependsOn>
+    <ApplicationIcon />
   </PropertyGroup>
-  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
-    <PropertyGroup>
-      <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
-    </PropertyGroup>
-    <Error Condition="!Exists('..\..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.2.0.1\build\net46\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.2.0.1\build\net46\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props'))" />
-  </Target>
+
 </Project>

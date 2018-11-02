@@ -1,7 +1,7 @@
 ﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CodeFixes;
 using Microsoft.CodeAnalysis.Diagnostics;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 using System;
 using TestHelper;
 using Signum.Analyzer;
@@ -17,7 +17,7 @@ namespace Signum.Analyzer.Test
         }
 
         //Diagnostic and CodeFix both triggered and checked for
-        [TestMethod]
+        [Fact]
         public void CompareLiteAndEntity()
         {
             TestDiagnostic("Impossible to compare Lite<T> and T. Consider using RefersTo method", @"
@@ -27,7 +27,7 @@ var condition = lite == entity;
             ");
         }
 
-        [TestMethod]
+        [Fact]
         public void CompareIncompatibleTypes()
         {
          
@@ -38,7 +38,7 @@ var condition = apple == orange;
             ");
         }
 
-        [TestMethod]
+        [Fact]
         public void CompareIncompatibleAbstractTypes()
         {
 
@@ -49,7 +49,7 @@ var condition = banana == orange;
             ");
         }
 
-        [TestMethod]
+        [Fact]
         public void CompareBaseType()
         {
 
@@ -61,7 +61,7 @@ var condition = type == query;
         }
 
 
-        [TestMethod]
+        [Fact]
         public void CompareDifferentInterfaces()
         {
             TestDiagnostic(null, @"
@@ -71,7 +71,7 @@ var condition = type == baseLite;  //Could be SpiderMan!
             ");
         }
 
-        [TestMethod]
+        [Fact]
         public void CompareDifferentInterfaceEntity()
         {
             TestDiagnostic(null, @"
@@ -88,9 +88,9 @@ var condition = type == baseLite;  //Could be SpiderMan!
         {
             string test = Surround(code, withIncludes: withIncludes);
             if (expectedError == null)
-                VerifyDiagnostic(test, new DiagnosticResult[0]);
+                VerifyCSharpDiagnostic(test, new DiagnosticResult[0]);
             else
-                VerifyDiagnostic(test, new DiagnosticResult
+                VerifyCSharpDiagnostic(test, new DiagnosticResult
                 {
                     Id = LiteEqualityAnalyzer.DiagnosticId,
                     Message = expectedError,

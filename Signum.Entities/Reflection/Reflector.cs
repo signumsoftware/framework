@@ -54,17 +54,19 @@ namespace Signum.Entities.Reflection
 
         static ResetLazy<HashSet<Type>> EnumsInEntities = new ResetLazy<HashSet<Type>>(() =>
         {
-            return (from a in AppDomain.CurrentDomain.GetAssemblies()
-                    where a.GetName().Name != "Signum.Analyzer" && a.HasAttribute<DefaultAssemblyCultureAttribute>()
-                    from t in a.GetTypes()
-                    where typeof(IEntity).IsAssignableFrom(t) || typeof(ModifiableEntity).IsAssignableFrom(t)
-                    let da = t.GetCustomAttribute<DescriptionOptionsAttribute>(true)
-                    where da == null || da.Options.IsSet(DescriptionOptions.Members)
-                    from p in t.GetProperties(BindingFlags.Instance | BindingFlags.Public)
-                    where DescriptionManager.OnShouldLocalizeMember(p)
-                    let et = (p.PropertyType.ElementType() ?? p.PropertyType).UnNullify()
-                    where et.IsEnum && et.Assembly.HasAttribute<DefaultAssemblyCultureAttribute>()
-                    select et).ToHashSet();
+            return new HashSet<Type>(
+                from a in AppDomain.CurrentDomain.GetAssemblies()
+                where a.GetName().Name != "Signum.Analyzer" && a.HasAttribute<DefaultAssemblyCultureAttribute>()
+                from t in a.GetTypes()
+                where typeof(IEntity).IsAssignableFrom(t) || typeof(ModifiableEntity).IsAssignableFrom(t)
+                let da = t.GetCustomAttribute<DescriptionOptionsAttribute>(true)
+                where da == null || da.Options.IsSet(DescriptionOptions.Members)
+                from p in t.GetProperties(BindingFlags.Instance | BindingFlags.Public)
+                where DescriptionManager.OnShouldLocalizeMember(p)
+                let et = (p.PropertyType.ElementType() ?? p.PropertyType).UnNullify()
+                where et.IsEnum && et.Assembly.HasAttribute<DefaultAssemblyCultureAttribute>()
+                select et
+            );
         });
 
         static DescriptionOptions? DescriptionManager_IsEnumsInEntities(Type t)

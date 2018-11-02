@@ -64,10 +64,10 @@ export default class ErrorModal extends React.Component<ErrorModalProps, { showD
                             this.renderMessage(e)}
 
                     {
-                        se && se.httpError.StackTrace &&
+                        se && se.httpError.stackTrace &&
                         <div>
                             <a href="#" onClick={this.handleShowStackTrace}>StackTrace</a>
-                            {this.state.showDetails && <pre>{se.httpError.StackTrace}</pre>}
+                            {this.state.showDetails && <pre>{se.httpError.stackTrace}</pre>}
                         </div>
                     }
                 </div>
@@ -89,13 +89,12 @@ export default class ErrorModal extends React.Component<ErrorModalProps, { showD
     renderServiceTitle(se: ServiceError) {
         return (
             <span>
-
-                <FontAwesomeIcon icon={se.defaultIcon} />&nbsp; <span>{se.httpError.ExceptionType}</span>
-                ({
+                <FontAwesomeIcon icon={se.defaultIcon} />&nbsp; <span>{se.httpError.exceptionType}</span>
+                {se.httpError.exceptionId && <span>({
                     Navigator.isViewable(ExceptionEntity) ?
-                        <a href={Navigator.navigateRoute(ExceptionEntity, se.httpError.ExceptionID!)}>{se.httpError.ExceptionID}</a> :
-                        <strong>{se.httpError.ExceptionID}</strong>
-                })
+                        <a href={Navigator.navigateRoute(ExceptionEntity, se.httpError.exceptionId!)}>{se.httpError.exceptionId}</a> :
+                        <strong>{se.httpError.exceptionId}</strong>
+                })</span>}
             </span>
         );
     }
@@ -112,9 +111,7 @@ export default class ErrorModal extends React.Component<ErrorModalProps, { showD
     renderServiceMessage(se: ServiceError) {
         return (
             <div>
-                {textDanger(se.httpError.Message)}
-                {textDanger(se.httpError.ExceptionMessage)}
-                {textDanger(se.httpError.MessageDetail)}
+                {textDanger(se.httpError.exceptionMessage)}
             </div>
         );
     }

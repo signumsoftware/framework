@@ -1,7 +1,7 @@
 ﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CodeFixes;
 using Microsoft.CodeAnalysis.Diagnostics;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 using System;
 using TestHelper;
 using Signum.Analyzer;
@@ -22,7 +22,7 @@ namespace Signum.Analyzer.Test
         }
 
         //Diagnostic and CodeFix both triggered and checked for
-        [TestMethod]
+        [Fact]
         public void AutoPropTest1()
         {
             var test = @"
@@ -49,7 +49,7 @@ namespace ConsoleApplication1
     }
 }";
 
-            VerifyDiagnostic(test, new DiagnosticResult
+            VerifyCSharpDiagnostic(test, new DiagnosticResult
             {
                 Id = AutoPropertyAnalyzer.DiagnosticId,
                 Message = "Properties in 'MyEntity' could be transformed to auto-property",
@@ -74,11 +74,11 @@ namespace ConsoleApplication1
         public string Phone { get; set; }
     }
 }";
-            VerifyFix(test, fixtest);
+            VerifyCSharpFix(test, fixtest);
         }
 
 
-        [TestMethod]
+        [Fact]
         public void AutoPropTest2()
         {
             var test = @"
@@ -163,7 +163,7 @@ namespace ConsoleApplication1
     }
 }";
 
-            VerifyDiagnostic(test, new DiagnosticResult
+            VerifyCSharpDiagnostic(test, new DiagnosticResult
             {
                 Id = AutoPropertyAnalyzer.DiagnosticId,
                 Message = "Properties in 'MyEntity' could be transformed to auto-property",
@@ -226,7 +226,7 @@ namespace ConsoleApplication1
         }
     }
 }";
-            VerifyFix(test, fixtest);
+            VerifyCSharpFix(test, fixtest);
         }
         
 
