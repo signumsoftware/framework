@@ -262,14 +262,19 @@ namespace Signum.Engine.DynamicQuery
 
                 var result = new ExtensionRouteInfo();
 
-                if (me?.Meta is CleanMeta cm && cm.PropertyRoutes.Any())
+                if (me?.Meta is CleanMeta cleanMeta && cleanMeta.PropertyRoutes.Any())
                 {
-                    var cleanType = me.Type.CleanType();
-
-                    result.PropertyRoute = cm.PropertyRoutes.Only();
+                    result.PropertyRoute = cleanMeta.PropertyRoutes.Only();
                     result.Implementations = me.Meta.Implementations;
-                    result.Format = ColumnDescriptionFactory.GetFormat(cm.PropertyRoutes);
-                    result.Unit = ColumnDescriptionFactory.GetUnit(cm.PropertyRoutes);
+                    result.Format = ColumnDescriptionFactory.GetFormat(cleanMeta.PropertyRoutes);
+                    result.Unit = ColumnDescriptionFactory.GetUnit(cleanMeta.PropertyRoutes);
+                }
+                else if(me?.Meta is DirtyMeta dirtyMeta)
+                {
+                    result.PropertyRoute = dirtyMeta.CleanMetas.Select(cm => cm.PropertyRoutes.Only()).Distinct().Only();
+                    result.Implementations = dirtyMeta.CleanMetas.Select(cm => cm.Implementations).Distinct().Only();
+                    result.Format = dirtyMeta.CleanMetas.Select(cm => ColumnDescriptionFactory.GetFormat(cm.PropertyRoutes)).Distinct().Only();
+                    result.Unit = dirtyMeta.CleanMetas.Select(cm => ColumnDescriptionFactory.GetUnit(cm.PropertyRoutes)).Distinct().Only();
                 }
 
                 result.IsAllowed = () => (me == null || me.Meta == null) ? null : me.Meta.IsAllowed();
