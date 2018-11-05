@@ -927,7 +927,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
         return (
             <tr>
                 {this.props.allowSelection && <th className="sf-th-selection">
-                    <input type="checkbox" id="cbSelectAll" onClick={this.handleToggleAll} checked={this.allSelected()} />
+                    <input type="checkbox" id="cbSelectAll" onChange={this.handleToggleAll} checked={this.allSelected()} />
                 </th>
                 }
                 {this.props.navigate && !this.props.findOptions.groupResults && <th className="sf-th-entity" data-column-name="Entity"></th>}
