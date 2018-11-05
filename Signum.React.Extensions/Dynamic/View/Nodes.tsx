@@ -21,7 +21,7 @@ import { DynamicViewValidationMessage } from '../Signum.Entities.Dynamic'
 import { ExpressionOrValueComponent, FieldComponent } from './Designer'
 import { ExpressionOrValue, Expression, bindExpr, toCodeEx, withClassNameEx, DesignerNode} from './NodeUtils'
 import { FindOptionsLine, QueryTokenLine, ViewNameComponent, FetchQueryDescription } from './FindOptionsComponent'
-import { HtmlAttributesLine } from './HtmlAttributesComponent'
+import { HtmlAttributesLine, ExpressionOrValueStrip } from './HtmlAttributesComponent'
 import { StyleOptionsLine, StyleOptionsComponent } from './StyleOptionsComponent'
 import * as NodeUtils from './NodeUtils'
 import { registeredCustomContexts } from '../DynamicViewClient'
@@ -218,7 +218,7 @@ export interface FieldsetNode extends ContainerNode {
     styleOptions?: StyleOptionsExpression;
     htmlAttributes?: HtmlAttributesExpression;
     legendHtmlAttributes?: HtmlAttributesExpression;
-    legend: ExpressionOrValue<string>;
+    legend?: ExpressionOrValue<string>;
 }
 
 NodeUtils.register<FieldsetNode>({
@@ -229,16 +229,17 @@ NodeUtils.register<FieldsetNode>({
     initialize: dn => dn.legend = "My Fieldset",
     renderTreeNode: NodeUtils.treeNodeKind,
     renderCode: (node, cc) => cc.elementCode("fieldset", node.htmlAttributes,
-        cc.elementCode("legend", node.legendHtmlAttributes, toCodeEx(node.legend)),
+        node.legend && cc.elementCode("legend", node.legendHtmlAttributes, toCodeEx(node.legend)),
         cc.elementCodeWithChildrenSubCtx("div", null, node)
     ),
     render: (dn, parentCtx) => {
         return (
-            <fieldset {...toHtmlAttributes(parentCtx, dn.node.htmlAttributes) }>
-                <legend {...toHtmlAttributes(parentCtx, dn.node.legendHtmlAttributes) }>
-                        {NodeUtils.evaluateAndValidate(parentCtx, dn.node, n => n.legend, NodeUtils.isString)}
-                </legend>
-            {NodeUtils.withChildrensSubCtx(dn,  parentCtx, <div />)}
+            <fieldset {...toHtmlAttributes(parentCtx, dn.node.htmlAttributes)}>
+                {dn.node.legend &&
+                    <legend {...toHtmlAttributes(parentCtx, dn.node.legendHtmlAttributes)}>
+                        {NodeUtils.evaluateAndValidate(parentCtx, dn.node, n => n.legend, NodeUtils.isStringOrNull)}
+                    </legend>}
+            {NodeUtils.withChildrensSubCtx(dn, parentCtx, <div />)}
             </fieldset>
         )
     },
@@ -449,6 +450,7 @@ export interface ValueLineNode extends LineBaseNode {
     autoTrim?: ExpressionOrValue<boolean>;
     inlineCheckbox?: ExpressionOrValue<boolean>;
     valueHtmlAttributes?: HtmlAttributesExpression;
+    comboBoxItems?: Expression<string[]>; 
 }
 
 NodeUtils.register<ValueLineNode>({
@@ -468,6 +470,7 @@ NodeUtils.register<ValueLineNode>({
         readOnly: node.readOnly,
         inlineCheckbox: node.inlineCheckbox,
         valueLineType: node.textArea && bindExpr(ta => ta ? "TextArea" : undefined, node.textArea),
+        comboBoxItems: node.comboBoxItems,
         autoTrim: node.autoTrim,
         onChange: node.onChange
     }),
@@ -482,6 +485,7 @@ NodeUtils.register<ValueLineNode>({
         readOnly={NodeUtils.evaluateAndValidate(ctx, dn.node, n => n.readOnly, NodeUtils.isBooleanOrNull)}
         inlineCheckbox={NodeUtils.evaluateAndValidate(ctx, dn.node, n => n.inlineCheckbox, NodeUtils.isBooleanOrNull)}
         valueLineType={NodeUtils.evaluateAndValidate(ctx, dn.node, n => n.textArea, NodeUtils.isBooleanOrNull) ? "TextArea" : undefined}
+        comboBoxItems={NodeUtils.evaluateAndValidate(ctx, dn.node, n => n.comboBoxItems, NodeUtils.isArrayOrNull)}
         autoFixString={NodeUtils.evaluateAndValidate(ctx, dn.node, n => n.autoTrim, NodeUtils.isBooleanOrNull)}
         onChange={NodeUtils.evaluateAndValidate(ctx, dn.node, n => n.onChange, NodeUtils.isFunctionOrNull)}
         />),
@@ -499,6 +503,7 @@ NodeUtils.register<ValueLineNode>({
             <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.readOnly)} type="boolean" defaultValue={null} />
             <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.inlineCheckbox)} type="boolean" defaultValue={false} />
             <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.textArea)} type="boolean" defaultValue={false} />
+            <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.comboBoxItems)} type={null} defaultValue={null} exampleExpression={`["item1", ...]`} />
             <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.autoTrim)} type="boolean" defaultValue={true} />
             <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.onChange)} type={null} defaultValue={false} exampleExpression={"() => this.forceUpdate()"} />
         </div>)
