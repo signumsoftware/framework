@@ -52,7 +52,7 @@ export default class FileLine extends EntityBase<FileLineProps, FileLineProps> {
 
 
             if (state.accept == null && m.defaultFileTypeInfo.onlyImages)
-                state.accept = "images/*";
+                state.accept = "image/*";
 
             if (state.maxSizeInBytes == null && m.defaultFileTypeInfo.maxSizeInBytes)
                 state.maxSizeInBytes = m.defaultFileTypeInfo.maxSizeInBytes;
@@ -77,14 +77,14 @@ export default class FileLine extends EntityBase<FileLineProps, FileLineProps> {
             <FormGroup ctx={s.ctx} labelText={s.labelText}
                 labelHtmlAttributes={s.labelHtmlAttributes}
                 htmlAttributes={{ ...this.baseHtmlAttributes(), ...EntityBase.entityHtmlAttributes(s.ctx.value), ...s.formGroupHtmlAttributes }}
-                helpText={this.props.helpText}>
+                helpText={this.state.helpText}>
                 {hasValue ? this.renderFile() : s.ctx.readOnly ? undefined :
                     <FileUploader
                         accept={s.accept}
                         maxSizeInBytes={s.maxSizeInBytes}
-                        dragAndDrop={this.props.dragAndDrop}
-                        dragAndDropMessage={this.props.dragAndDropMessage}
-                        fileType={this.props.fileType}
+                        dragAndDrop={this.state.dragAndDrop}
+                        dragAndDropMessage={this.state.dragAndDropMessage}
+                        fileType={this.state.fileType}
                         onFileLoaded={this.handleFileLoaded}
                         typeName={s.ctx.propertyRoute.typeReference().name}
                         buttonCss={s.ctx.buttonClass}

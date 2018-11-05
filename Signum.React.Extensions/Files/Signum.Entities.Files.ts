@@ -9,6 +9,7 @@ import * as Patterns from '../../../Framework/Signum.React/Scripts/Signum.Entiti
 
 export interface IFile
 {
+	__isFile__ : true; //only for type-checking
     binaryFile?: string | null;
     fileName?: string | null;
     fullWebPath?: string | null; 
