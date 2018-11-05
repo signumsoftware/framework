@@ -25,7 +25,7 @@ import { StyleOptionsLine } from './StyleOptionsComponent'
 import TypeHelpComponent from '../../TypeHelp/TypeHelpComponent'
 import { registeredCustomContexts } from '../DynamicViewClient'
 import { findMany } from '@framework/Finder';
-
+import * as Lines from '@framework/Lines'
 
 export type ExpressionOrValue<T> = T | Expression<T>;
 
@@ -424,6 +424,9 @@ export function asFunction(thisObject: React.Component<any, any>, expression: Ex
 
 export function evalWithScope(code: string, modules: any) {
    
+    // Lines
+    var ValueLine = Lines.ValueLine;
+
     return eval(code);
 }
 

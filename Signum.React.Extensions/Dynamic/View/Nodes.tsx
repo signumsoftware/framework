@@ -1,7 +1,7 @@
 ﻿import * as React from 'react'
 import {
     FormGroup, FormControlReadonly, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityList, EntityRepeater, EntityTabRepeater, EntityTable,
-    EntityCheckboxList, EnumCheckboxList, EntityDetail, EntityStrip, RenderEntity
+    EntityCheckboxList, EnumCheckboxList, EntityDetail, EntityStrip, RenderEntity, MultiValueLine
 } from '@framework/Lines'
 
 import { ModifiableEntity, Entity, Lite, isEntity } from '@framework/Signum.Entities'
@@ -34,6 +34,7 @@ import { registerSymbol } from "@framework/Reflection";
 import { Tabs, Tab, UncontrolledTabs } from '@framework/Components/Tabs';
 import FileImageLine from '../../Files/FileImageLine';
 import { FileEntity, FilePathEntity, FileEmbedded, FilePathEmbedded } from '../../Files/Signum.Entities.Files';
+
 
 export interface BaseNode {
     kind: string;
@@ -456,7 +457,7 @@ export interface ValueLineNode extends LineBaseNode {
 NodeUtils.register<ValueLineNode>({
     kind: "ValueLine",
     group: "Property",
-    order: 0,
+    order: -1,
     validate: (dn) => NodeUtils.validateFieldMandatory(dn),
     renderTreeNode: NodeUtils.treeNodeKindField, 
     renderCode: (node, cc) => cc.elementCode("ValueLine", {
@@ -510,6 +511,61 @@ NodeUtils.register<ValueLineNode>({
     },
 });
 
+export interface MultiValueLineNode extends LineBaseNode {
+    kind: "MultiValueLine",
+    onRenderItem?: ExpressionOrValue<(ctx: TypeContext<any>) => React.ReactElement<any>>;
+    onCreate?: ExpressionOrValue<() => Promise<any[] | any | undefined>>;
+    addValueText?: ExpressionOrValue<string>;
+}
+
+NodeUtils.register<MultiValueLineNode>({
+    kind: "MultiValueLine",
+    group: "Property",
+    hasCollection: true,
+    hasEntity: false,
+    order: 0,
+    validate: (dn) => NodeUtils.validateFieldMandatory(dn),
+    renderTreeNode: NodeUtils.treeNodeKindField,
+    renderCode: (node, cc) => cc.elementCode("MultiValueLine", {
+        ctx: cc.subCtxCode(node.field, node.styleOptions),
+        onRenderItem: node.onRenderItem,
+        onCreate: node.onCreate,
+        addValueText: node.addValueText,
+        labelText: node.labelText,
+        labelHtmlAttributes: node.labelHtmlAttributes,
+        formGroupHtmlAttributes: node.formGroupHtmlAttributes,
+        readOnly: node.readOnly,
+        onChange: node.onChange,
+    }),
+    render: (dn, ctx) => (
+        <MultiValueLine
+            ctx={ctx.subCtx(dn.node.field, toStyleOptions(ctx, dn.node.styleOptions))}
+            onRenderItem={NodeUtils.evaluateAndValidate(ctx, dn.node, n => n.onRenderItem, NodeUtils.isFunctionOrNull)}
+            onCreate={NodeUtils.evaluateAndValidate(ctx, dn.node, n => n.onCreate, NodeUtils.isFunctionOrNull)}
+            addValueText={NodeUtils.evaluateAndValidate(ctx, dn.node, n => n.addValueText, NodeUtils.isStringOrNull)}
+            labelText={NodeUtils.evaluateAndValidate(ctx, dn.node, n => n.labelText, NodeUtils.isStringOrNull)}
+            labelHtmlAttributes={toHtmlAttributes(ctx, dn.node.labelHtmlAttributes)}
+            formGroupHtmlAttributes={toHtmlAttributes(ctx, dn.node.formGroupHtmlAttributes)}
+            readOnly={NodeUtils.evaluateAndValidate(ctx, dn.node, n => n.readOnly, NodeUtils.isBooleanOrNull)}
+            onChange={NodeUtils.evaluateAndValidate(ctx, dn.node, n => n.onChange, NodeUtils.isFunctionOrNull)}
+        />
+    ),
+    renderDesigner: (dn) => {
+        const m = dn.route && dn.route.member;
+        return (<div>
+            <FieldComponent dn={dn} binding={Binding.create(dn.node, n => n.field)} />
+            <StyleOptionsLine dn={dn} binding={Binding.create(dn.node, n => n.styleOptions)} />
+            <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.onRenderItem)} type={null} defaultValue={null} exampleExpression={"mctx => modules.React.createElement(ValueLine, {ctx: mctx})"} />
+            <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.onCreate)} type={null} defaultValue={null} exampleExpression={"() => Promise.resolve(null)"} />
+            <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.addValueText)} type="string" defaultValue={null} />
+            <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.labelText)} type="string" defaultValue={m && m.niceName || ""} />
+            <HtmlAttributesLine dn={dn} binding={Binding.create(dn.node, n => n.labelHtmlAttributes)} />
+            <HtmlAttributesLine dn={dn} binding={Binding.create(dn.node, n => n.formGroupHtmlAttributes)} />
+            <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.readOnly)} type="boolean" defaultValue={null} />
+            <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.onChange)} type={null} defaultValue={false} exampleExpression={"() => this.forceUpdate()"} />
+        </div>)
+    },
+});
 
 export interface EntityBaseNode extends LineBaseNode, ContainerNode {
     create?: ExpressionOrValue<boolean>;
@@ -848,6 +904,7 @@ NodeUtils.register<EntityListNode>({
 export interface EntityStripNode extends EntityListBaseNode {
     kind: "EntityStrip",
     autoComplete?: ExpressionOrValue<boolean>;
+    iconStart?: boolean;
     vertical?: boolean;
 }
 
@@ -862,15 +919,18 @@ NodeUtils.register<EntityStripNode>({
     renderTreeNode: NodeUtils.treeNodeKindField,
     renderCode: (node, cc) => cc.elementCode("EntityStrip", {
         ...cc.getEntityBasePropsEx(node, { showAutoComplete: true, findMany: true, showMove: true }),
+        iconStart: node.iconStart,
         vertical: node.vertical,
     }),
     render: (dn, ctx) => (<EntityStrip
-        {...NodeUtils.getEntityBaseProps(dn, ctx, { showAutoComplete: true, findMany: true, showMove: true }) }
+        {...NodeUtils.getEntityBaseProps(dn, ctx, { showAutoComplete: true, findMany: true, showMove: true })}
+        iconStart={NodeUtils.evaluateAndValidate(ctx, dn.node, n => n.iconStart, NodeUtils.isBooleanOrNull)}
         vertical={NodeUtils.evaluateAndValidate(ctx, dn.node, n => n.vertical, NodeUtils.isBooleanOrNull)}
         />),
     renderDesigner: dn =>
         <div>
             {NodeUtils.designEntityBase(dn, { showAutoComplete: true, findMany: true, showMove: true })}
+            <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.iconStart)} type="boolean" defaultValue={false} />
             <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.vertical)} type="boolean" defaultValue={false} />
         </div>
 });
@@ -1264,6 +1324,8 @@ export namespace NodeConstructor {
         if (tr.isCollection) {
             if (tr.name == "[ALL]")
                 return { kind: "EntityStrip", field, children: [] } as EntityStripNode;
+            else if (!ti && !tr.isEmbedded)
+                return { kind: "MultiValueLine", field, children: [] } as MultiValueLineNode;
             else if (tr.isEmbedded || ti!.entityKind == "Part" || ti!.entityKind == "SharedPart")
                 return { kind: "EntityTable", field, children: [] } as EntityTableNode;
             else if (ti!.isLowPopulation)
