@@ -173,7 +173,7 @@ namespace Signum.Test.LinqProvider
             Debug.WriteLine(nodes.Select(n => n.ToString().InSql()).ToString(", "));
 
 
-            Debug.WriteLine(nodes.Where(n => (bool)(n.GetDescendant(null, null) > SqlHierarchyId.GetRoot())).ToString(", "));
+            Debug.WriteLine(nodes.Where(n => (bool)(n.GetDescendant(SqlHierarchyId.Null, SqlHierarchyId.Null) > SqlHierarchyId.GetRoot())).ToString(", "));
             Debug.WriteLine(nodes.Where(n => (bool)(n.GetReparentedValue(n.GetAncestor(0), SqlHierarchyId.GetRoot()) > SqlHierarchyId.GetRoot())).ToString(", "));
         }
 

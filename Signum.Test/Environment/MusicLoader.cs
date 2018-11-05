@@ -17,12 +17,12 @@ namespace Signum.Test.Environment
 
         public static SqlHierarchyId FirstChild(this SqlHierarchyId parent)
         {
-            return parent.GetDescendant(null, null);
+            return parent.GetDescendant(SqlHierarchyId.Null, SqlHierarchyId.Null);
         }
 
         public static SqlHierarchyId NextSibling(this SqlHierarchyId sibling)
         {
-            return sibling.GetAncestor(1).GetDescendant(sibling, null);
+            return sibling.GetAncestor(1).GetDescendant(sibling, SqlHierarchyId.Null);
         }
 
         public static void Load()
