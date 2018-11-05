@@ -353,6 +353,7 @@ namespace Signum.Entities
             return giNewLite.GetInvoker(type)(id, toStr);
         }
 
+        [DebuggerStepThrough]
         public static Lite<T> ToLite<T>(this T entity)
           where T : class, IEntity
         {
@@ -362,6 +363,7 @@ namespace Signum.Entities
             return (Lite<T>)giNewLite.GetInvoker(entity.GetType())(entity.Id, entity.ToString());
         }
 
+        [DebuggerStepThrough]
         public static Lite<T> ToLite<T>(this T entity, string toStr)
             where T : class, IEntity
         {
@@ -371,18 +373,21 @@ namespace Signum.Entities
             return (Lite<T>)giNewLite.GetInvoker(entity.GetType())(entity.Id, toStr ?? entity.ToString());
         }
 
+        [DebuggerStepThrough]
         public static Lite<T> ToLiteFat<T>(this T entity)
          where T : class, IEntity
         {
             return (Lite<T>)giNewLiteFat.GetInvoker(entity.GetType())((Entity)(IEntity)entity, entity.ToString());
         }
 
+        [DebuggerStepThrough]
         public static Lite<T> ToLiteFat<T>(this T entity, string toStr)
           where T : class, IEntity
         {
             return (Lite<T>)giNewLiteFat.GetInvoker(entity.GetType())((Entity)(IEntity)entity, toStr ?? entity.ToString());
         }
 
+        [DebuggerStepThrough]
         public static Lite<T> ToLite<T>(this T entity, bool fat) where T : class, IEntity
         {
             if (fat)
@@ -391,6 +396,7 @@ namespace Signum.Entities
                 return entity.ToLite();
         }
 
+        [DebuggerStepThrough]
         public static Lite<T> ToLite<T>(this T entity, bool fat, string toStr) where T : class, IEntity
         {
             if (fat)
@@ -398,10 +404,6 @@ namespace Signum.Entities
             else
                 return entity.ToLite(toStr);
         }
-
-     
-
-     
 
         class IsExpander : IMethodExpander
         {
