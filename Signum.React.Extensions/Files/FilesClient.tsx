@@ -16,6 +16,7 @@ import FileLine from './FileLine'
 import CellFormatter = Finder.CellFormatter;
 import { Lite, Entity, ModifiableEntity } from "@framework/Signum.Entities";
 import FileImageLine from './FileImageLine';
+import { MultiFileLine } from './MultiFileLine';
 
 export function start(options: { routes: JSX.Element[] }) {
 
@@ -46,7 +47,7 @@ function registerAutoFileLine(type: Type<IFile & ModifiableEntity>) {
     DynamicComponent.customTypeComponent[type.typeName] = ctx => {
         const tr = ctx.propertyRoute.typeReference();
         if (tr.isCollection)
-            return "continue";
+            return <MultiFileLine ctx={ctx} />;
 
         var m = ctx.propertyRoute.member;
         if (m && m.defaultFileTypeInfo && m.defaultFileTypeInfo.onlyImages)
