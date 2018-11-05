@@ -13,6 +13,10 @@ export interface ButtonBarProps extends ButtonsContext {
 
 export default class ButtonBar extends React.Component<ButtonBarProps>{
 
+    static clearButtonBarRenderer() {
+        ButtonBar.onButtonBarRender.clear();
+    }
+
     static onButtonBarRender: Array<(ctx: ButtonsContext) => Array<React.ReactElement<any> | undefined> | undefined> = [];
 
     render() {
