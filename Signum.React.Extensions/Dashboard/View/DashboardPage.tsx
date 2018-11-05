@@ -65,6 +65,8 @@ export default class DashboardPage extends React.Component<DashboardPageProps, D
                 .done();
     }
 
+    rtl = document.body.classList.contains("rtl");
+
     render() {
 
         const dashboard = this.state.dashboard;
@@ -74,22 +76,6 @@ export default class DashboardPage extends React.Component<DashboardPageProps, D
 
         return (
             <div>
-                {entityKey &&
-                    <div className="row">
-                        <div style={{ float: "right", textAlign: "right" }}>
-                            {!entity ? <h3>{JavascriptMessage.loading.niceToString()}</h3> :
-                                <h3>
-                                    {Navigator.isNavigable({ entity: entity, canExecute: {} } as EntityPack<Entity>) ?
-                                        <Link className="display-6" to={Navigator.navigateRoute(entity)}>{getToString(entity)}</Link> :
-                                        <span className="display-6">{getToString(entity)}</span>
-                                    }
-                                    <br />
-                                    <small className="sf-type-nice-name">{Navigator.getTypeTitle(entity, undefined)}</small>
-                                </h3>
-                            }
-                        </div>
-                    </div>
-                }
 
                 {!dashboard ? <h2 className="display-5">{JavascriptMessage.loading.niceToString()}</h2> :
                     <div className="sf-show-hover">
@@ -98,6 +84,22 @@ export default class DashboardPage extends React.Component<DashboardPageProps, D
                         }
                         <h2 className="display-5">{getToString(dashboard)}</h2>
                     </div>}
+
+                {entityKey &&
+                    <div style={this.rtl ? { float: "right", textAlign: "right" } : undefined}>
+                        {!entity ? <h3>{JavascriptMessage.loading.niceToString()}</h3> :
+                            <h3>
+                                {Navigator.isNavigable({ entity: entity, canExecute: {} } as EntityPack<Entity>) ?
+                                    <Link className="display-6" to={Navigator.navigateRoute(entity)}>{getToString(entity)}</Link> :
+                                    <span className="display-6">{getToString(entity)}</span>
+                                }
+                                &nbsp;
+                                <small className="sf-type-nice-name">{Navigator.getTypeTitle(entity, undefined)}</small>
+                            </h3>
+                        }
+                    </div>
+                }
+
                 {dashboard && (!entityKey || entity) && <DashboardView dashboard={dashboard} entity={entity} />}
             </div>
         );
