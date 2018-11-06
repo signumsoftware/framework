@@ -29,14 +29,14 @@ namespace Signum.Engine.Dynamic
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
                 sb.Include<DynamicMixinConnectionEntity>()
-                    .WithUniqueIndex(e => new { e.EntityType, e.DynamicMixin })
+                    .WithUniqueIndex(e => new { e.EntityType, e.MixinName })
                     .WithSave(DynamicMixinConnectionOperation.Save)
                     .WithDelete(DynamicMixinConnectionOperation.Delete)
                     .WithQuery(() => e => new {
                         Entity = e,
                         e.Id,
                         e.EntityType,
-                        e.DynamicMixin,
+                        e.MixinName,
                     });
 
                 DynamicLogic.GetCodeFiles += GetCodeFiles;
@@ -104,7 +104,7 @@ namespace Signum.Engine.Dynamic
             sb.AppendLine($"        {{");
 
             if (this.Mixins != null && this.Mixins.Count > 0)
-                this.Mixins.ForEach(m => sb.AppendLine($"MixinDeclarations.Register<{m.EntityType}Entity, {m.DynamicMixin}Mixin>();".Indent(12)));
+                this.Mixins.ForEach(m => sb.AppendLine($"MixinDeclarations.Register<{m.EntityType}Entity, {m.MixinName}Mixin>();".Indent(12)));
 
             sb.AppendLine($"        }}");
             sb.AppendLine($"    }}");

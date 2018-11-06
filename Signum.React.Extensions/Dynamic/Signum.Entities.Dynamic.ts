@@ -57,7 +57,7 @@ export const DynamicMixinConnectionEntity = new Type<DynamicMixinConnectionEntit
 export interface DynamicMixinConnectionEntity extends Entities.Entity {
     Type: "DynamicMixinConnection";
     entityType?: Entities.Lite<Basics.TypeEntity> | null;
-    dynamicMixin?: Entities.Lite<DynamicTypeEntity> | null;
+    mixinName?: string | null;
 }
 
 export module DynamicMixinConnectionOperation {
