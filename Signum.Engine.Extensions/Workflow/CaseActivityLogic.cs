@@ -278,6 +278,7 @@ namespace Signum.Engine.Workflow
                 ProcessLogic.Register(CaseActivityProcessAlgorithm.Timeout, new PackageExecuteAlgorithm<CaseActivityEntity>(CaseActivityOperation.Timer));
 
                 QueryLogic.Expressions.Register((CaseEntity c) => c.DecompositionSurrogateActivity());
+                QueryLogic.Expressions.Register((ICaseMainEntity a) => a.LastCaseActivity(), () => CaseActivityMessage.LastCaseActivity.NiceToString());
 
                 sb.Include<CaseNotificationEntity>()
                     .WithExpressionFrom((CaseActivityEntity c) => c.Notifications())
@@ -346,23 +347,6 @@ namespace Signum.Engine.Workflow
 
                 CaseActivityGraph.Register();
             }
-        }
-
-        public static void RegisterLastCaseActivityExpression(SchemaBuilder sb)
-        {
-            var types = Schema.Current.Tables.Keys.Where(a => typeof(ICaseMainEntity).IsAssignableFrom(a));
-
-            foreach (var type in types)
-            {
-                giRegisterLastCaseActivityExpression.GetInvoker(type)(sb);
-            }
-        }
-
-        private static GenericInvoker<Action<SchemaBuilder>> giRegisterLastCaseActivityExpression = new GenericInvoker<Action<SchemaBuilder>>((sb) => RegisterLastCaseActivityExpression<ICaseMainEntity>(sb));
-        private static void RegisterLastCaseActivityExpression<T>(SchemaBuilder sb)
-            where T : ICaseMainEntity
-        {
-            QueryLogic.Expressions.Register((T a) => a.LastCaseActivity(), () => CaseActivityMessage.LastCaseActivity.NiceToString());
         }
 
         public static CaseActivityEntity CreateCaseActivity(this WorkflowEntity workflow, ICaseMainEntity mainEntity)

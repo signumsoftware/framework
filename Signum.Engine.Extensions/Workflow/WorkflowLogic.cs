@@ -851,10 +851,5 @@ namespace Signum.Engine.Workflow
             workflow.FullDiagramXml = new WorkflowXmlEmbedded { DiagramXml = wb.GetXDocument().ToString() };
             workflow.Save();
         }
-
-        public static void RegisterGlobalExpressions(SchemaBuilder sb)
-        {
-            CaseActivityLogic.RegisterLastCaseActivityExpression(sb);
-        }
     }
 }
