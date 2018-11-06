@@ -87,6 +87,7 @@ export module CaseActivityMessage {
     export const Pending = new MessageKey("CaseActivityMessage", "Pending");
     export const NoWorkflowActivity = new MessageKey("CaseActivityMessage", "NoWorkflowActivity");
     export const ImpossibleToDeleteCaseActivity0OnWorkflowActivity1BecauseHasNoPreviousActivity = new MessageKey("CaseActivityMessage", "ImpossibleToDeleteCaseActivity0OnWorkflowActivity1BecauseHasNoPreviousActivity");
+    export const LastCaseActivity = new MessageKey("CaseActivityMessage", "LastCaseActivity");
 }
 
 export module CaseActivityOperation {

@@ -192,7 +192,8 @@ namespace Signum.Entities.Workflow
         Pending,
         NoWorkflowActivity,
         [Description("Impossible to delete Case Activity {0} (on Workflow Activity '{1}') because has no previouos activity")]
-        ImpossibleToDeleteCaseActivity0OnWorkflowActivity1BecauseHasNoPreviousActivity
+        ImpossibleToDeleteCaseActivity0OnWorkflowActivity1BecauseHasNoPreviousActivity,
+        LastCaseActivity,
     }
 
 

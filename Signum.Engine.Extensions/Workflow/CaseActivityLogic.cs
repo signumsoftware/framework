@@ -29,6 +29,17 @@ namespace Signum.Engine.Workflow
 {
     public static class CaseActivityLogic
     {
+        static Expression<Func<ICaseMainEntity, CaseActivityEntity>> LastCaseActivityExpression =
+            e => Database.Query<CaseActivityEntity>()
+                    .Where(a => a.Case.MainEntity == e)
+                    .OrderByDescending(a => a.StartDate)
+                    .FirstOrDefault();
+        [ExpressionField]
+        public static CaseActivityEntity LastCaseActivity(this ICaseMainEntity e)
+        {
+            return LastCaseActivityExpression.Evaluate(e);
+        }
+
         static Expression<Func<WorkflowEntity, IQueryable<CaseEntity>>> CasesExpression =
             w => Database.Query<CaseEntity>().Where(a => a.Workflow == w);
         [ExpressionField]
@@ -335,6 +346,23 @@ namespace Signum.Engine.Workflow
 
                 CaseActivityGraph.Register();
             }
+        }
+
+        public static void RegisterLastCaseActivityExpression(SchemaBuilder sb)
+        {
+            var types = Schema.Current.Tables.Keys.Where(a => typeof(ICaseMainEntity).IsAssignableFrom(a));
+
+            foreach (var type in types)
+            {
+                giRegisterLastCaseActivityExpression.GetInvoker(type)(sb);
+            }
+        }
+
+        private static GenericInvoker<Action<SchemaBuilder>> giRegisterLastCaseActivityExpression = new GenericInvoker<Action<SchemaBuilder>>((sb) => RegisterLastCaseActivityExpression<ICaseMainEntity>(sb));
+        private static void RegisterLastCaseActivityExpression<T>(SchemaBuilder sb)
+            where T : ICaseMainEntity
+        {
+            QueryLogic.Expressions.Register((T a) => a.LastCaseActivity(), () => CaseActivityMessage.LastCaseActivity.NiceToString());
         }
 
         public static CaseActivityEntity CreateCaseActivity(this WorkflowEntity workflow, ICaseMainEntity mainEntity)
