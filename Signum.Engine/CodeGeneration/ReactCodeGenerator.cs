@@ -216,7 +216,7 @@ namespace Signum.Engine.CodeGeneration
         {
             StringBuilder sb = new StringBuilder();
             sb.AppendLine($"//[Route(\"api/{mod.ModuleName.ToLower()}/login\"), HttpPost]");
-            sb.AppendLine(@"//public MyResponse Login([FromBody]MyRequest data)");
+            sb.AppendLine(@"//public MyResponse Login([Required, FromBody]MyRequest data)");
             sb.AppendLine(@"//{");
             sb.AppendLine(@"//}");
             return sb.ToString();

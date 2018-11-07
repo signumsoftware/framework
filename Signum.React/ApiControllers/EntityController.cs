@@ -13,9 +13,11 @@ using Signum.Engine;
 using Signum.Engine.Operations;
 using Signum.React.Filters;
 using Microsoft.AspNetCore.Mvc;
+using System.ComponentModel.DataAnnotations;
 
 namespace Signum.React.ApiControllers
 {
+    [ValidateModelFilter]
     public class EntitiesController : ApiController
     {
         [HttpGet("api/entity/{type}/{id}"), ProfilerActionSplitter("type")]
@@ -41,13 +43,13 @@ namespace Signum.React.ApiControllers
         }
 
         [HttpPost("api/entityPackEntity")]
-        public EntityPackTS GetEntityPackEntity([FromBody]Entity entity)
+        public EntityPackTS GetEntityPackEntity([Required, FromBody]Entity entity)
         { 
             return SignumServer.GetEntityPack(entity);
         }
 
         [HttpPost("api/entityToStrings")]
-        public string[] EntityToStrings([FromBody]Lite<Entity>[] lites)
+        public string[] EntityToStrings([Required, FromBody]Lite<Entity>[] lites)
         {
             if (lites == null || lites.Length == 0)
                 throw new ArgumentNullException(nameof(lites));
@@ -69,7 +71,7 @@ namespace Signum.React.ApiControllers
         }
 
         [HttpPost("api/validateEntity"), ValidateModelFilter]
-        public void ValidateEntity([FromBody]ModifiableEntity entity)
+        public void ValidateEntity([Required, FromBody]ModifiableEntity entity)
         {
             return;
         }
