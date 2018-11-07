@@ -23,9 +23,11 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Hosting;
 using System.Threading.Tasks;
 using Signum.React.Filters;
+using System.ComponentModel.DataAnnotations;
 
 namespace Signum.React.Dynamic
 {
+    [ValidateModelFilter]
     public class DynamicController : ApiController
     {
         IApplicationLifetime lifeTime;
@@ -85,7 +87,7 @@ namespace Signum.React.Dynamic
         }
 
         [HttpPost("api/dynamic/evalErrors")]
-        public async Task<List<EvalEntityError>> GetEvalErrors([FromBody]QueryEntitiesRequestTS request)
+        public async Task<List<EvalEntityError>> GetEvalErrors([Required, FromBody]QueryEntitiesRequestTS request)
         {
             var allEntities = await QueryLogic.Queries.GetEntities(request.ToQueryEntitiesRequest()).Select(a => a.Entity).ToListAsync();
 

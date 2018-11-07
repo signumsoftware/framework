@@ -24,9 +24,11 @@ using Signum.Engine.Basics;
 using Signum.Entities.Mailing;
 using Signum.Engine.Mailing;
 using Signum.Engine.Maps;
+using Signum.React.Filters;
 
 namespace Signum.React.Mailing
 {
+    [ValidateModelFilter]
     public class MailingController : ApiController
     {
         [HttpGet("api/asyncEmailSender/view")]
@@ -71,7 +73,7 @@ namespace Signum.React.Mailing
 #pragma warning restore IDE1006 // Naming Styles
 
         [HttpPost("api/email/constructorType")]
-        public string GetConstructorType([FromBody]SystemEmailEntity systemEmailTemplate)
+        public string GetConstructorType([Required, FromBody]SystemEmailEntity systemEmailTemplate)
         {
             var type = SystemEmailLogic.GetEntityType(systemEmailTemplate.ToType());
 
@@ -79,7 +81,7 @@ namespace Signum.React.Mailing
         }
 
         [HttpPost("api/email/emailTemplates")]
-        public List<Lite<EmailTemplateEntity>> GetEmailTemplates(string queryKey, EmailTemplateVisibleOn visibleOn, [FromBody]Lite<Entity> lite)
+        public List<Lite<EmailTemplateEntity>> GetEmailTemplates(string queryKey, EmailTemplateVisibleOn visibleOn, [Required, FromBody]Lite<Entity> lite)
         {
             object queryName = QueryLogic.ToQueryName(queryKey);
 

@@ -20,9 +20,11 @@ using System.Net.Http.Headers;
 using System.Reflection;
 using Microsoft.AspNetCore.Mvc;
 using Signum.React.ApiControllers;
+using System.ComponentModel.DataAnnotations;
 
 namespace Signum.React.Translation
 {
+    [ValidateModelFilter]
     public class TranslationController : ApiController
     {
         public static IEnumerable<Assembly> AssembliesToLocalize()
@@ -311,7 +313,7 @@ namespace Signum.React.Translation
 
 
         [HttpPost("api/translation/save")]
-        public void SaveTypes(string assembly, string culture, [FromBody]AssemblyResultTS result)
+        public void SaveTypes(string assembly, string culture, [Required, FromBody]AssemblyResultTS result)
         {
             var currentAssembly = AssembliesToLocalize().Single(a => a.GetName().Name == assembly);
 
@@ -349,13 +351,13 @@ namespace Signum.React.Translation
         }
 
         [HttpPost("api/translation/pluralize")]
-        public string Pluralize(string culture, [FromBody]string text)
+        public string Pluralize(string culture, [Required, FromBody]string text)
         {
             return NaturalLanguageTools.Pluralize(text, CultureInfo.GetCultureInfo(culture));
         }
 
         [HttpPost("api/translation/gender")]
-        public string Gender(string culture, [FromBody]string text)
+        public string Gender(string culture, [Required, FromBody]string text)
         {
             return NaturalLanguageTools.GetGender(text, CultureInfo.GetCultureInfo(culture))?.ToString();
         }

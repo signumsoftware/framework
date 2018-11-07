@@ -23,6 +23,7 @@ using Signum.React.ApiControllers;
 
 namespace Signum.React.Authorization
 {
+    [ValidateModelFilter]
     public class AuthAdminController : ApiController
     {
         [HttpGet("api/authAdmin/permissionRules/{roleId}")]
@@ -34,8 +35,8 @@ namespace Signum.React.Authorization
             return rules;
         }
 
-        [HttpPost("api/authAdmin/permissionRules"), ValidateModelFilter]
-        public void SetPermissionRules([FromBody]PermissionRulePack rules)
+        [HttpPost("api/authAdmin/permissionRules")]
+        public void SetPermissionRules([Required, FromBody]PermissionRulePack rules)
         {
             BasicPermission.AdminRules.AssertAuthorized();
             PermissionAuthLogic.SetPermissionRules(rules);
@@ -52,8 +53,8 @@ namespace Signum.React.Authorization
             return rules;
         }
 
-        [HttpPost("api/authAdmin/typeRules"), ValidateModelFilter]
-        public void SetTypeRules([FromBody]TypeRulePack rules)
+        [HttpPost("api/authAdmin/typeRules")]
+        public void SetTypeRules([Required, FromBody]TypeRulePack rules)
         {
             BasicPermission.AdminRules.AssertAuthorized();
             TypeAuthLogic.SetTypeRules(rules);
@@ -70,8 +71,8 @@ namespace Signum.React.Authorization
             return rules;
         }
 
-        [HttpPost("api/authAdmin/operationRules"), ValidateModelFilter]
-        public void SetOperationRules([FromBody]OperationRulePack rules)
+        [HttpPost("api/authAdmin/operationRules")]
+        public void SetOperationRules([Required, FromBody]OperationRulePack rules)
         {
             BasicPermission.AdminRules.AssertAuthorized();
             OperationAuthLogic.SetOperationRules(rules);
@@ -88,8 +89,8 @@ namespace Signum.React.Authorization
             return rules;
         }
 
-        [HttpPost("api/authAdmin/propertyRules"), ValidateModelFilter]
-        public void SetPropertyRule([FromBody]PropertyRulePack rules)
+        [HttpPost("api/authAdmin/propertyRules")]
+        public void SetPropertyRule([Required, FromBody]PropertyRulePack rules)
         {
             BasicPermission.AdminRules.AssertAuthorized();
             PropertyAuthLogic.SetPropertyRules(rules);
@@ -106,8 +107,8 @@ namespace Signum.React.Authorization
             return rules;
         }
 
-        [HttpPost("api/authAdmin/queryRules"), ValidateModelFilter]
-        public void SetQueryRules([FromBody]QueryRulePack rules)
+        [HttpPost("api/authAdmin/queryRules")]
+        public void SetQueryRules([Required, FromBody]QueryRulePack rules)
         {
             BasicPermission.AdminRules.AssertAuthorized();
             QueryAuthLogic.SetQueryRules(rules);

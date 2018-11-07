@@ -19,13 +19,15 @@ using Signum.Engine.Tree;
 using Signum.Entities.DynamicQuery;
 using Signum.Entities.Basics;
 using Microsoft.AspNetCore.Mvc;
+using System.ComponentModel.DataAnnotations;
 
 namespace Signum.React.Tree
 {
+    [ValidateModelFilter]
     public class TreeController : ApiController
     {
         [HttpPost("api/tree/findNodes/{typeName}")]
-        public List<TreeNode> FindNodes(string typeName, [FromBody]FindNodesRequest request) {
+        public List<TreeNode> FindNodes(string typeName, [Required, FromBody]FindNodesRequest request) {
 
             Type type = TypeLogic.GetType(typeName);
 

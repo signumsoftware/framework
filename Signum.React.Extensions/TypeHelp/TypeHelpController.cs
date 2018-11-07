@@ -18,15 +18,17 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using Microsoft.AspNetCore.Mvc;
-
+using Signum.React.Filters;
+using System.ComponentModel.DataAnnotations;
 
 namespace Signum.React.TypeHelp
 {
+    [ValidateModelFilter]
     public class TypeHelpController : ApiController
     {
 
         [HttpPost("api/typeHelp/autocompleteEntityCleanType")]
-        public List<string> AutocompleteEntityCleanType([FromBody]AutocompleteEntityCleanTypeRequest request)
+        public List<string> AutocompleteEntityCleanType([Required, FromBody]AutocompleteEntityCleanTypeRequest request)
         {
             Schema s = Schema.Current;
             var types = TypeLogic.NameToType
@@ -45,7 +47,7 @@ namespace Signum.React.TypeHelp
         }
 
         [HttpPost("api/typeHelp/autocompleteType")]
-        public List<string> AutocompleteType([FromBody]AutocompleteTypeRequest request) //Not comprehensive, just useful
+        public List<string> AutocompleteType([Required, FromBody]AutocompleteTypeRequest request) //Not comprehensive, just useful
         {
             var types = GetTypes(request);
 

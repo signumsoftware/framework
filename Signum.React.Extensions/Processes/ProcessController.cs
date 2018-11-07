@@ -7,13 +7,15 @@ using Signum.React.Facades;
 using Signum.React.Filters;
 using System.Threading;
 using Microsoft.AspNetCore.Mvc;
+using System.ComponentModel.DataAnnotations;
 
 namespace Signum.React.Processes
 {
+    [ValidateModelFilter]
     public class ProcessController : ApiController
     {
-        [HttpPost("api/processes/constructFromMany"), ValidateModelFilter]
-        public EntityPackTS ConstructFromMany([FromBody]OperationController.MultiOperationRequest request)
+        [HttpPost("api/processes/constructFromMany")]
+        public EntityPackTS ConstructFromMany([Required, FromBody]OperationController.MultiOperationRequest request)
         {
             var type = request.type == null ? null : TypeLogic.GetType(request.type);
 

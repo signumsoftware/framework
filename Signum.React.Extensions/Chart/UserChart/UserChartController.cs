@@ -24,6 +24,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Signum.React.Chart
 {
+    [ValidateModelFilter]
     public class UserChartController : ApiController
     {
         [HttpGet("api/userChart/forQuery/{queryKey}")]
@@ -38,8 +39,8 @@ namespace Signum.React.Chart
             return UserChartLogic.GetUserChartsEntity(TypeLogic.GetType(typeName));
         }
 
-        [HttpPost("api/userChart/fromChartRequest"), ValidateModelFilter]
-        public UserChartEntity FromQueryRequest([FromBody]ChartRequest request)
+        [HttpPost("api/userChart/fromChartRequest")]
+        public UserChartEntity FromQueryRequest([Required, FromBody]ChartRequest request)
         {
             return request.ToUserChart();
         }

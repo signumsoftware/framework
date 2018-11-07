@@ -28,13 +28,15 @@ using System.IO;
 using Signum.Entities.Basics;
 using Signum.Engine.Maps;
 using Microsoft.AspNetCore.Mvc;
+using Signum.React.Filters;
 
 namespace Signum.React.Word
 {
+    [ValidateModelFilter]
     public class WordController : ApiController
     {
         [HttpPost("api/word/createReport")]
-        public FileStreamResult View([FromBody]CreateWordReportRequest request)
+        public FileStreamResult View([Required, FromBody]CreateWordReportRequest request)
         {
             var template = request.template.Retrieve();
             var model = request.entity ?? request.lite.Retrieve();
@@ -54,7 +56,7 @@ namespace Signum.React.Word
 #pragma warning restore IDE1006 // Naming Styles
 
         [HttpPost("api/word/constructorType")]
-        public string GetConstructorType([FromBody]SystemWordTemplateEntity systemWordTemplate)
+        public string GetConstructorType([Required, FromBody]SystemWordTemplateEntity systemWordTemplate)
         {
             var type = SystemWordTemplateLogic.GetEntityType(systemWordTemplate.ToType());
 
@@ -62,7 +64,7 @@ namespace Signum.React.Word
         }
 
         [HttpPost("api/word/wordTemplates")]
-        public List<Lite<WordTemplateEntity>> GetWordTemplates(string queryKey, WordTemplateVisibleOn visibleOn, [FromBody]Lite<Entity> lite)
+        public List<Lite<WordTemplateEntity>> GetWordTemplates(string queryKey, WordTemplateVisibleOn visibleOn, [Required, FromBody]Lite<Entity> lite)
         {
             object type = QueryLogic.ToQueryName(queryKey);
 

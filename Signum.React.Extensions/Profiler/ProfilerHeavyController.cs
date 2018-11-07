@@ -27,9 +27,11 @@ using System.IO;
 using Signum.React.Files;
 using System.Threading.Tasks;
 using Signum.Utilities.DataStructures;
+using Signum.React.Filters;
 
 namespace Signum.React.Profiler
 {
+    [ValidateModelFilter]
     public class ProfilerHeavyController : ApiController
     {
         [HttpPost("api/profilerHeavy/clear")]
@@ -141,7 +143,7 @@ namespace Signum.React.Profiler
         }
 
         [HttpPost("api/profilerHeavy/upload")]
-        public void Upload([FromBody]FileUpload file)
+        public void Upload([Required, FromBody]FileUpload file)
         {
             using (MemoryStream sr = new MemoryStream(file.content))
             {

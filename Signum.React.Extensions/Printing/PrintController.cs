@@ -10,9 +10,11 @@ using Signum.React.Filters;
 using System.Collections.Generic;
 using System.Threading;
 using Microsoft.AspNetCore.Mvc;
+using System.ComponentModel.DataAnnotations;
 
 namespace Signum.React.Processes
 {
+    [ValidateModelFilter]
     public class PrintController : ApiController
     {
         [HttpGet("api/printing/stats")]
@@ -22,7 +24,7 @@ namespace Signum.React.Processes
         }
 
         [HttpPost("api/printing/createProcess")]
-        public ProcessEntity Stats([FromBody]FileTypeSymbol fileType)
+        public ProcessEntity Stats([Required, FromBody]FileTypeSymbol fileType)
         {
             return PrintingLogic.CreateProcess(fileType);
         }

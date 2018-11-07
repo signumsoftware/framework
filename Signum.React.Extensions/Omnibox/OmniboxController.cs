@@ -14,13 +14,15 @@ using Signum.React.Facades;
 using Signum.React.Authorization;
 using Signum.Entities.Omnibox;
 using Signum.React.ApiControllers;
+using Signum.React.Filters;
 
 namespace Signum.React.Omnibox
 {
+    [ValidateModelFilter]
     public class OmniboxController : ApiController
     {
         [HttpPost("api/omnibox")]
-        public List<OmniboxResult> OmniboxResults([FromBody]OmniboxRequest request)
+        public List<OmniboxResult> OmniboxResults([Required, FromBody]OmniboxRequest request)
         {
             ReactSpecialOmniboxGenerator.ClientGenerator = new SpecialOmniboxGenerator<ReactSpecialOmniboxAction>()
             {

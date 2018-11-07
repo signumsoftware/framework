@@ -17,19 +17,22 @@ using System.Net.Http;
 using System.Reflection;
 using Microsoft.AspNetCore.Mvc;
 using Signum.React.ApiControllers;
+using Signum.React.Filters;
+using System.ComponentModel.DataAnnotations;
 
 namespace Signum.React.Dynamic
 {
+    [ValidateModelFilter]
     public class DynamicValidationController : ApiController
     {
         [HttpPost("api/dynamic/validation/routeTypeName")]
-        public string RouteTypeName([FromBody]PropertyRouteEntity pr)
+        public string RouteTypeName([Required, FromBody]PropertyRouteEntity pr)
         {
             return pr.ToPropertyRoute().Type.Name;
         }
 
         [HttpPost("api/dynamic/validation/test")]
-        public DynamicValidationTestResponse Test([FromBody]DynamicValidationTestRequest request)
+        public DynamicValidationTestResponse Test([Required, FromBody]DynamicValidationTestRequest request)
         {
             IDynamicValidationEvaluator evaluator;
             try
@@ -50,7 +53,7 @@ namespace Signum.React.Dynamic
                 .Where(a => a is ModifiableEntity me && pr.MatchesEntity(me) == true)
                 .Cast<ModifiableEntity>();
 
-            var properties = Validator.GetPropertyValidators(pr.Type).Values.Select(a => a.PropertyInfo).ToList();
+            var properties = Entities.Validator.GetPropertyValidators(pr.Type).Values.Select(a => a.PropertyInfo).ToList();
 
             try
             {

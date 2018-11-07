@@ -23,13 +23,15 @@ using Signum.React.Files;
 using Signum.Engine.UserAssets;
 using System.IO;
 using Microsoft.AspNetCore.Mvc;
+using Signum.React.Filters;
 
 namespace Signum.React.UserAssets
-{ 
+{
+    [ValidateModelFilter]
     public class UserAssetController : ApiController
     {
         [HttpPost("api/userAssets/parseFilters")]
-        public List<FilterResponse> ParseFilters([FromBody]ParseFiltersRequest request)
+        public List<FilterResponse> ParseFilters([Required, FromBody]ParseFiltersRequest request)
         {
             var queryName = QueryLogic.ToQueryName(request.queryKey);
             var qd = QueryLogic.Queries.QueryDescription(queryName);
@@ -119,7 +121,7 @@ namespace Signum.React.UserAssets
         }
 
         [HttpPost("api/userAssets/export")]
-        public FileStreamResult Export([FromBody]Lite<IUserAssetEntity> lite)
+        public FileStreamResult Export([Required, FromBody]Lite<IUserAssetEntity> lite)
         {
             var bytes = UserAssetsExporter.ToXml(lite.Retrieve());
             
@@ -127,13 +129,13 @@ namespace Signum.React.UserAssets
         }
 
         [HttpPost("api/userAssets/importPreview")]
-        public UserAssetPreviewModel ImportPreview([FromBody]FileUpload file)
+        public UserAssetPreviewModel ImportPreview([Required, FromBody]FileUpload file)
         {
             return UserAssetsImporter.Preview(file.content);
         }
 
         [HttpPost("api/userAssets/import")]
-        public void Import([FromBody]FileUploadWithModel file)
+        public void Import([Required, FromBody]FileUploadWithModel file)
         {
             UserAssetsImporter.Import(file.file.content, file.model);
         }

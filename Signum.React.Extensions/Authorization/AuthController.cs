@@ -13,13 +13,16 @@ using System.Net.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using Signum.React.ApiControllers;
+using Signum.React.Filters;
+using System.ComponentModel.DataAnnotations;
 
 namespace Signum.React.Authorization
 {
+    [ValidateModelFilter]
     public class AuthController : ApiController
     {
         [HttpPost("api/auth/login"), AllowAnonymous]
-        public ActionResult<LoginResponse> Login([FromBody]LoginRequest data)
+        public ActionResult<LoginResponse> Login([Required, FromBody]LoginRequest data)
         {
             if (string.IsNullOrEmpty(data.userName))
                 return ModelError("userName", AuthMessage.UserNameMustHaveAValue.NiceToString());
@@ -117,7 +120,7 @@ namespace Signum.React.Authorization
         }
 
         [HttpPost("api/auth/ChangePassword")]
-        public ActionResult<LoginResponse> ChangePassword([FromBody]ChangePasswordRequest request)
+        public ActionResult<LoginResponse> ChangePassword([Required, FromBody]ChangePasswordRequest request)
         {
             if (string.IsNullOrEmpty(request.oldPassword))
                 return ModelError("oldPassword", AuthMessage.PasswordMustHaveAValue.NiceToString());

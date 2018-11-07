@@ -17,13 +17,16 @@ using System.Net.Http;
 using System.Reflection;
 using Microsoft.AspNetCore.Mvc;
 using Signum.React.ApiControllers;
+using Signum.React.Filters;
+using System.ComponentModel.DataAnnotations;
 
 namespace Signum.React.Dynamic
 {
+    [ValidateModelFilter]
     public class DynamicTypeConditionController : ApiController
     {
         [HttpPost("api/dynamic/typeCondition/test")]
-        public DynamicTypeConditionTestResponse Test([FromBody]DynamicTypeConditionTestRequest request)
+        public DynamicTypeConditionTestResponse Test([Required, FromBody]DynamicTypeConditionTestRequest request)
         {
             IDynamicTypeConditionEvaluator evaluator;
             try

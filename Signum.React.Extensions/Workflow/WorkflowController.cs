@@ -22,9 +22,11 @@ using Microsoft.AspNetCore.Mvc;
 using Signum.React.Filters;
 using static Signum.React.ApiControllers.OperationController;
 using Signum.Entities.Reflection;
+using System.ComponentModel.DataAnnotations;
 
 namespace Signum.React.Workflow
 {
+    [ValidateModelFilter]
     public class WorkflowController : Controller
     {
         [HttpGet("api/workflow/fetchForViewing/{caseActivityId}")]
@@ -94,7 +96,7 @@ namespace Signum.React.Workflow
         }
 
         [HttpPost("api/workflow/previewChanges/{workflowId}")]
-        public PreviewResult PreviewChanges(string workflowId, [FromBody]WorkflowModel model)
+        public PreviewResult PreviewChanges(string workflowId, [Required, FromBody]WorkflowModel model)
         {
             var id = PrimaryKey.Parse(workflowId, typeof(WorkflowEntity));
             var wf = Database.Retrieve<WorkflowEntity>(id);
@@ -103,7 +105,7 @@ namespace Signum.React.Workflow
 
 
         [HttpPost("api/workflow/save"), ValidateModelFilter]
-        public ActionResult<EntityPackWithIssues> SaveWorkflow([FromBody]EntityOperationRequest request)
+        public ActionResult<EntityPackWithIssues> SaveWorkflow([Required, FromBody]EntityOperationRequest request)
         {
             WorkflowEntity entity;
             List<WorkflowIssue> issuesContainer = new List<WorkflowIssue>();
@@ -139,7 +141,7 @@ namespace Signum.React.Workflow
         }
 
         [HttpPost("api/workflow/findNode")]
-        public List<Lite<IWorkflowNodeEntity>> FindNode([FromBody]WorkflowFindNodeRequest request)
+        public List<Lite<IWorkflowNodeEntity>> FindNode([Required, FromBody]WorkflowFindNodeRequest request)
         {
             var workflow = Lite.Create<WorkflowEntity>(request.workflowId);
 
@@ -155,7 +157,7 @@ namespace Signum.React.Workflow
         }
 
         [HttpPost("api/workflow/condition/test")]
-        public WorkflowConditionTestResponse Test([FromBody]WorkflowConditionTestRequest request)
+        public WorkflowConditionTestResponse Test([Required, FromBody]WorkflowConditionTestRequest request)
         {
             IWorkflowConditionEvaluator evaluator;
             try
@@ -238,13 +240,13 @@ namespace Signum.React.Workflow
         }
 
         [HttpPost("api/workflow/activityMonitor")]
-        public WorkflowActivityMonitor GetWorkflowActivityMonitor([FromBody]WorkflowActivityMonitorRequestTS request)
+        public WorkflowActivityMonitor GetWorkflowActivityMonitor([Required, FromBody]WorkflowActivityMonitorRequestTS request)
         {
             return WorkflowActivityMonitorLogic.GetWorkflowActivityMonitor(request.ToRequest());
         }
 
         [HttpPost("api/workflow/nextConnections")]
-        public List<Lite<IWorkflowNodeEntity>> GetNextJumps([FromBody]NextConnectionsRequest request)
+        public List<Lite<IWorkflowNodeEntity>> GetNextJumps([Required, FromBody]NextConnectionsRequest request)
         {
             return request.workflowActivity.RetrieveAndForget()
                 .NextConnectionsFromCache(request.connectionType)

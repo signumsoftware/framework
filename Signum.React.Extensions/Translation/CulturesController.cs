@@ -22,9 +22,11 @@ using Microsoft.AspNetCore.Authorization;
 using Signum.React.ApiControllers;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
+using System.ComponentModel.DataAnnotations;
 
 namespace Signum.React.Translation
 {
+    [ValidateModelFilter]
     public class CultureController : ApiController
     {
         IHostingEnvironment _env;
@@ -46,7 +48,7 @@ namespace Signum.React.Translation
         }
 
         [HttpPost("api/culture/setCurrentCulture"), AllowAnonymous]
-        public string SetCurrentCulture([FromBody]Lite<CultureInfoEntity> culture)
+        public string SetCurrentCulture([Required, FromBody]Lite<CultureInfoEntity> culture)
         {
             var ci = ExecutionMode.Global().Using(_ => culture.Retrieve().ToCultureInfo());
 

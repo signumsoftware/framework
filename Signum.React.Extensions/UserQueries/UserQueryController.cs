@@ -38,7 +38,7 @@ namespace Signum.React.UserQueries
         }
 
         [HttpPost("api/userQueries/fromQueryRequest")]
-        public UserQueryEntity FromQueryRequest([FromBody]CreateRequest request)
+        public UserQueryEntity FromQueryRequest([Required, FromBody]CreateRequest request)
         {
             var qr = request.queryRequest.ToQueryRequest();
             var qd = QueryLogic.Queries.QueryDescription(qr.QueryName);

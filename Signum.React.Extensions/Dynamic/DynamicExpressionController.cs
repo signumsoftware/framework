@@ -22,13 +22,16 @@ using System.Net.Http;
 using System.Reflection;
 using Microsoft.AspNetCore.Mvc;
 using Signum.React.ApiControllers;
+using Signum.React.Filters;
+using System.ComponentModel.DataAnnotations;
 
 namespace Signum.React.Dynamic
 {
+    [ValidateModelFilter]
     public class DynamicExpressionController : ApiController
     {
         [HttpPost("api/dynamic/expression/test")]
-        public DynamicExpressionTestResponse Test([FromBody]DynamicExpressionTestRequest request)
+        public DynamicExpressionTestResponse Test([Required, FromBody]DynamicExpressionTestRequest request)
         {
             IDynamicExpressionEvaluator evaluator;
             var de = request.dynamicExpression;

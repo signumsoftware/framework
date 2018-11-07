@@ -20,9 +20,11 @@ using Signum.Entities.Reflection;
 using Signum.Utilities.Reflection;
 using Signum.Engine.DynamicQuery;
 using Signum.Engine.Basics;
+using Signum.React.Filters;
 
 namespace Signum.React.MachineLearning
 {
+    [ValidateModelFilter]
     public class PredictorController : ApiController
     {
         [HttpGet("api/predictor/availableDevices/{algorithmKey}")]
@@ -67,7 +69,7 @@ namespace Signum.React.MachineLearning
         }
 
         [HttpPost("api/predict/get/{predictorId}")]
-        public PredictRequestTS GetPredict(string predictorId, [FromBody]Dictionary<string, object> mainKeys)
+        public PredictRequestTS GetPredict(string predictorId, [Required, FromBody]Dictionary<string, object> mainKeys)
         {
             var p = Lite.ParsePrimaryKey<PredictorEntity>(predictorId);
 
@@ -85,7 +87,7 @@ namespace Signum.React.MachineLearning
         }
 
         [HttpPost("api/predict/update")]
-        public PredictRequestTS UpdatePredict([FromBody]PredictRequestTS request)
+        public PredictRequestTS UpdatePredict([Required, FromBody]PredictRequestTS request)
         {
             PredictorPredictContext pctx = PredictorPredictLogic.GetPredictContext(request.predictor);
 

@@ -31,13 +31,15 @@ using Signum.Entities.Excel;
 using Signum.Entities.Chart;
 using Signum.Engine.Chart;
 using System.Threading.Tasks;
+using Signum.React.Filters;
 
 namespace Signum.React.Excel
 {
+    [ValidateModelFilter]
     public class MachineLearningController : ApiController
     {
         [HttpPost("api/excel/plain")]
-        public async Task<FileStreamResult> ToPlainExcel([FromBody]QueryRequestTS request, CancellationToken token)
+        public async Task<FileStreamResult> ToPlainExcel([Required, FromBody]QueryRequestTS request, CancellationToken token)
         {
             var queryRequest = request.ToQueryRequest();
 
@@ -56,7 +58,7 @@ namespace Signum.React.Excel
         }
 
         [HttpPost("api/excel/excelReport")]
-        public FileStreamResult GenerateExcelReport([FromBody]ExcelReportRequest request)
+        public FileStreamResult GenerateExcelReport([Required, FromBody]ExcelReportRequest request)
         {
             byte[] file = ExcelLogic.ExecuteExcelReport(request.excelReport, request.queryRequest.ToQueryRequest());
 
