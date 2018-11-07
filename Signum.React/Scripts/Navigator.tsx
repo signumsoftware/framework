@@ -16,6 +16,7 @@ import { ImportRoute } from "./AsyncImport";
 import * as AppRelativeRoutes from "./AppRelativeRoutes";
 import { NormalWindowMessage } from "./Signum.Entities";
 import { BsSize } from "./Components/Basic";
+import ButtonBar from "./Frames/ButtonBar";
 
 
 Dic.skipClasses.push(React.Component);
@@ -128,12 +129,24 @@ export function createRoute(type: PseudoType) {
     return toAbsoluteUrl("~/create/" + getTypeName(type));
 }
 
-export const entitySettings: { [type: string]: EntitySettings<ModifiableEntity> } = {};
+
+export const clearSettingsActions: Array<() => void> = [
+    clearEntitySettings,
+    Finder.clearQuerySettings,
+    Finder.ButtonBarQuery.clearButtonBarElements,
+    ButtonBar.clearButtonBarRenderer,
+    Operations.clearOperationSettings,
+];
+
+export function clearAllSettings() {
+    clearSettingsActions.forEach(a => a());
+} 
 
 export function clearEntitySettings() {
     Dic.clear(entitySettings);
 }
 
+export const entitySettings: { [type: string]: EntitySettings<ModifiableEntity> } = {};
 export function addSettings(...settings: EntitySettings<any>[]) {
     settings.forEach(s => Dic.addOrThrow(entitySettings, s.typeName, s));
 }
@@ -969,6 +982,10 @@ Array.prototype.joinCommaHtml = function (this: any[], lastSeparator: string) {
 export function toAbsoluteUrl(appRelativeUrl: string): string {
     if (appRelativeUrl && appRelativeUrl.startsWith("~/"))
         return window.__baseUrl + appRelativeUrl.after("~/");
+
+    var relativeCrappyUrl = history.location.pathname.beforeLast("/") + "/~/"; //In Link render ~/ is considered a relative url
+    if (appRelativeUrl && appRelativeUrl.startsWith(relativeCrappyUrl)) 
+        return window.__baseUrl + appRelativeUrl.after(relativeCrappyUrl);
 
     if (appRelativeUrl.startsWith(window.__baseUrl) || appRelativeUrl.startsWith("http"))
         return appRelativeUrl;
