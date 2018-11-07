@@ -8,7 +8,7 @@ import { API, PredictRequest, PredictColumn, PredictOutputTuple, PredictSubQuery
 import { Lite, Entity, NormalControlMessage, EntityControlMessage } from "@framework/Signum.Entities";
 import { StyleContext, FormGroup, TypeContext, EntityLine, EntityCombo, ValueLine } from "@framework/Lines";
 import { QueryToken } from "@framework/FindOptions";
-import { getTypeInfos, ReadonlyBinding } from "@framework/Reflection";
+import { getTypeInfos, ReadonlyBinding, getTypeName, getTypeInfo } from "@framework/Reflection";
 import { IsByAll } from "@framework/Reflection";
 import { Dic } from "@framework/Globals";
 import { PropertyRoute } from "@framework/Reflection";
@@ -67,7 +67,7 @@ export class PredictModal extends React.Component<PredictModalProps, PredictModa
 
         const p = this.state.predict;
         var e = this.props.entity;
-   
+
         const hasChanged = this.state.hasChanged;
 
         var sctx = new StyleContext(undefined, {});
@@ -75,11 +75,9 @@ export class PredictModal extends React.Component<PredictModalProps, PredictModa
         return (
             <Modal onHide={this.handleOnClose} onExited={this.handleOnExited} show={this.state.show} className="message-modal" size="lg">
                 <ModalHeaderButtons onClose={this.handleOnClose}>
-                    <h4 className={"modal-title"}>
-                        {e && (<a href={Navigator.navigateRoute(e)} target="_blank" style={{ float: "right", marginRight: "20px" }}>{e.toStr}</a>)}
-                        {p.predictor.toStr}<br />
-                        <small>{PredictorEntity.niceName()}&nbsp;{p.predictor.id} (<a href={Navigator.navigateRoute(p.predictor)} target="_blank">{EntityControlMessage.View.niceToString()}</a>)</small>
-                    </h4>
+                    {p.predictor.toStr}<br />
+                    <small>{PredictorEntity.niceName()}&nbsp;{p.predictor.id} (<a href={Navigator.navigateRoute(p.predictor)} target="_blank">{EntityControlMessage.View.niceToString()}</a>)</small>
+                    {e && <span><br/>{getTypeInfo(e.EntityType).niceName}: <a href={Navigator.navigateRoute(e)} target="_blank">{e.toStr}</a></span>}
                 </ModalHeaderButtons>
                 <div className="modal-body">
                     <div>
@@ -103,7 +101,7 @@ export class PredictModal extends React.Component<PredictModalProps, PredictModa
 }
 
 
-export class AlternativesCheckBox extends React.Component<{ binding: Binding<number | null>, onChange : ()=> void }> {
+export class AlternativesCheckBox extends React.Component<{ binding: Binding<number | null>, onChange: () => void }> {
     render() {
         var val = this.props.binding.getValue();
         return (
@@ -148,7 +146,7 @@ export default class PredictLine extends React.Component<PredictLineProps> {
 
                 const octx = new TypeContext<any>(this.props.sctx, { readOnly: true }, undefined as any, Binding.create(tuple, a => a.original));
                 const pctx = new TypeContext<any>(this.props.sctx, { readOnly: true }, undefined as any, Binding.create(tuple, a => a.predicted));
-                
+
                 return (
                     <div>
                         <div style={{ opacity: this.props.hasChanged ? 0.5 : 1 }}>
@@ -165,29 +163,29 @@ export default class PredictLine extends React.Component<PredictLineProps> {
             }
         } else if (p.usage == "Input") {
             const ctx = new TypeContext<any>(this.props.sctx, undefined, undefined as any, p.binding);
-            return (<PredictValue token={p.token} ctx={ctx} onChange={this.props.onChange}/>);
+            return (<PredictValue token={p.token} ctx={ctx} onChange={this.props.onChange} />);
         } else throw new Error("unexpected Usage");
     }
 
     renderValueOrMultivalue(pctx: TypeContext<any>, originalValue: any) {
         if (!Array.isArray(pctx.value)) {
-            return <PredictValue token={this.props.token} ctx={pctx} label={<FontAwesomeIcon icon={["far", "lightbulb"]} color={this.getColor(pctx.value, originalValue)}/>} />
+            return <PredictValue token={this.props.token} ctx={pctx} label={<FontAwesomeIcon icon={["far", "lightbulb"]} color={this.getColor(pctx.value, originalValue)} />} />
         } else {
             const predictions = pctx.value as AlternativePrediction[];
 
             return (
                 <div>
                     {predictions.map((a, i) => <PredictValue key={i} token={this.props.token}
-                        ctx={new TypeContext<any>(this.props.sctx, { readOnly: true }, undefined as any, new ReadonlyBinding(a.Value, this.props.sctx + "_" + i))}
-                        label={<i style={{ color: this.getColor(a.Value, originalValue) }}>{numbro(a.Probability).format("0.00 %")}</i>}
-                        labelHtmlAttributes={{ style: { textAlign: "right" } }}
-                    />)}
+                        ctx={new TypeContext<any>(this.props.sctx, { readOnly: true }, undefined as any, new ReadonlyBinding(a.value, this.props.sctx + "_" + i))}
+                        label={<i style={{ color: this.getColor(a.value, originalValue) }}>{numbro(a.probability).format("0.00 %")}</i>}
+                        labelHtmlAttributes={{ style: { textAlign: "right", whiteSpace: "nowrap" } }}
+                />)}
                 </div>
             );
         }
     }
 
-    getColor(predicted: any, original : any) {
+    getColor(predicted: any, original: any) {
         return !this.props.hasOriginal ? undefined :
             predicted == original || isLite(predicted) && isLite(original) && is(predicted, original) ? "green" : "red";
     }
@@ -216,7 +214,7 @@ export class PredictTable extends React.Component<PredictTableProps> {
                             <tr >
                                 {
                                     columnHeaders.map((he, i) => <th key={i} className={"header-" + he.headerType.toLowerCase()} title={fullNiceName(he.token)}>
-                                        {he.headerType == "Key" && <FontAwesomeIcon icon="key" style={{ marginRight: "10px" }}/>}
+                                        {he.headerType == "Key" && <FontAwesomeIcon icon="key" style={{ marginRight: "10px" }} />}
                                         {he.token.niceName}
                                     </th>)
                                 }
@@ -293,11 +291,3 @@ export class PredictValue extends React.Component<PredictValueProps> {
         }
     }
 }
-
-
-
-
-
-
-
-

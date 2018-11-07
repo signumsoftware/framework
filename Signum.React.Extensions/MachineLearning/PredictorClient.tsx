@@ -253,8 +253,8 @@ export interface PredictColumn {
 }
 
 export interface AlternativePrediction {
-    Probability: number;
-    Value: any;
+    probability: number;
+    value: any;
 }
 
 export interface PredictSubQueryTable {
