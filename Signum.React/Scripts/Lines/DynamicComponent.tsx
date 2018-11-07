@@ -55,9 +55,9 @@ export default class DynamicComponent extends React.Component<{ ctx: TypeContext
     }
 
     static getAppropiateComponent(ctx: TypeContext<any>): React.ReactElement<any> | undefined {
-        const mi = ctx.propertyRoute.member!;
+        const mi = ctx.propertyRoute.member;
 
-        if (mi.name == "Id" || mi.notVisible == true)
+        if (mi && (mi.name == "Id" || mi.notVisible == true))
             return undefined;
 
         const ccProp = DynamicComponent.customPropertyComponent[ctx.propertyRoute.toString()];

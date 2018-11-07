@@ -1,16 +1,16 @@
 ﻿import * as React from "react";
 import { TypeContext, LineBaseProps, LineBase, FormGroup } from "../Lines";
 import { SearchMessage, MList, newMListElement } from "../Signum.Entities";
-import * as Constructor from "../Constructor";
-import { Binding, New } from "../Reflection";
 import { mlistItemContext } from "../TypeContext";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import DynamicComponent from "./DynamicComponent";
+import { ErrorBoundary } from "../Components";
 
 
 
 interface MultiValueLineProps extends LineBaseProps {
     ctx: TypeContext<MList<any>>;
-    onRenderItem: (ctx: TypeContext<any>) => React.ReactElement<any>;
+    onRenderItem?: (ctx: TypeContext<any>) => React.ReactElement<any>;
     onCreate?: () => Promise<any[] | any | undefined>;
     addValueText?: string;
 }
@@ -52,7 +52,7 @@ export class MultiValueLine extends LineBase<MultiValueLineProps, MultiValueLine
     }
 
     defaultCreate() {
-        return Constructor.construct(this.state.type!.name).then(a => a && a.entity);
+        return Promise.resolve(null);
     }
 
     renderInternal() {
@@ -69,19 +69,12 @@ export class MultiValueLine extends LineBase<MultiValueLineProps, MultiValueLine
                     <tbody>
                         {
                             mlistItemContext(s.ctx.subCtx({ formGroupStyle: "None" })).map((mlec, i) =>
-                                <tr key={i}>
-                                    <td>
-                                        {!s.ctx.readOnly &&
-                                            <a href="#" title={SearchMessage.DeleteFilter.niceToString()}
-                                                className="sf-line-button sf-remove"
-                                                onClick={e => { e.preventDefault(); this.handleDeleteValue(i); }}>
-                                                <FontAwesomeIcon icon="times" />
-                                            </a>}
-                                    </td>
-                                    <td>
-                                        {this.props.onRenderItem(mlec)}
-                                    </td>
-                                </tr>)
+                                (<ErrorBoundary>
+                                    <MultiValueLineElement key={i}
+                                    ctx={mlec}
+                                    onRemove={e => { e.preventDefault(); this.handleDeleteValue(i); }}
+                                    onRenderItem={this.props.onRenderItem} />
+                                </ErrorBoundary>))
                         }
                         <tr >
                             <td colSpan={4}>
@@ -99,5 +92,34 @@ export class MultiValueLine extends LineBase<MultiValueLineProps, MultiValueLine
         );
     }
 }
+
+export interface MultiValueLineElementProps {
+    ctx: TypeContext<any>;
+    onRemove: (event: React.MouseEvent<any>) => void;
+    onRenderItem?: (ctx: TypeContext<any>) => React.ReactElement<any>;
+}
+
+export class MultiValueLineElement extends React.Component<MultiValueLineElementProps> {
+    render() {
+        const ctx = this.props.ctx;
+
+        return (
+            <tr>
+                <td>
+                    {!ctx.readOnly &&
+                        <a href="#" title={SearchMessage.DeleteFilter.niceToString()}
+                        className="sf-line-button sf-remove"
+                        onClick={this.props.onRemove}>
+                            <FontAwesomeIcon icon="times" />
+                        </a>}
+                </td>
+                <td>
+                    {this.props.onRenderItem ? this.props.onRenderItem(ctx) : DynamicComponent.getAppropiateComponent(ctx)}
+                </td>
+            </tr>
+        );
+    }
+}
+
 
 

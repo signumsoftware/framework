@@ -31,6 +31,7 @@ import EntityLink from './SearchControl/EntityLink';
 import SearchControlLoaded from './SearchControl/SearchControlLoaded';
 import { ImportRoute } from "./AsyncImport";
 import { SearchControl } from "./Search";
+import ButtonBar from "./Frames/ButtonBar";
 
 
 export const querySettings: { [queryKey: string]: QuerySettings } = {};
@@ -38,6 +39,7 @@ export const querySettings: { [queryKey: string]: QuerySettings } = {};
 export function clearQuerySettings() {
     Dic.clear(querySettings);
 }
+
 
 export function start(options: { routes: JSX.Element[] }) {
     options.routes.push(<ImportRoute path="~/find/:queryName" onImportModule={() => import("./SearchControl/SearchPage")} />);
@@ -1072,6 +1074,11 @@ export module ButtonBarQuery {
     export function getButtonBarElements(ctx: ButtonBarQueryContext): React.ReactElement<any>[] {
         return onButtonBarElements.map(f => f(ctx)).filter(a => a != undefined).map(a => a!);
     }
+
+    export function clearButtonBarElements() {
+        ButtonBarQuery.onButtonBarElements.clear();
+    }
+
 }
 
 

@@ -16,6 +16,7 @@ import { ImportRoute } from "./AsyncImport";
 import * as AppRelativeRoutes from "./AppRelativeRoutes";
 import { NormalWindowMessage } from "./Signum.Entities";
 import { BsSize } from "./Components/Basic";
+import ButtonBar from "./Frames/ButtonBar";
 
 
 Dic.skipClasses.push(React.Component);
@@ -132,6 +133,8 @@ export function createRoute(type: PseudoType) {
 export const clearSettingsActions: Array<() => void> = [
     clearEntitySettings,
     Finder.clearQuerySettings,
+    Finder.ButtonBarQuery.clearButtonBarElements,
+    ButtonBar.clearButtonBarRenderer,
     Operations.clearOperationSettings,
 ];
 

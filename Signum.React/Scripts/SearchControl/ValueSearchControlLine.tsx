@@ -97,7 +97,7 @@ export default class ValueSearchControlLine extends React.Component<ValueSearchC
         let isBadge = coallesce(this.props.isBadge, this.props.valueToken == undefined ? "MoreThanZero" as "MoreThanZero" : false);
         let isFormControl = coallesce(this.props.isFormControl, this.props.valueToken != undefined);
 
-        let unit = isFormControl && token && token.unit && <span className="input-group-addon">{token.unit}</span>;
+        let unit = isFormControl && token && token.unit && <span className="input-group-text">{token.unit}</span>;
 
 
         let value = this.valueSearchControl && this.valueSearchControl.state.value;
@@ -139,13 +139,15 @@ export default class ValueSearchControlLine extends React.Component<ValueSearchC
                         searchControlProps={this.props.searchControlProps}
                         refreshKey={this.props.refreshKey}
                         />
-                    {unit}
-                    {(view || extra || find) && (isFormControl ?
+                    
+                    {(view || extra || find || unit) && (isFormControl ?
                         <div className="input-group-append">
+                            {unit}
                             {view}
                             {find}
                             {extra}
                         </div> : <span>
+                            {unit}
                             {view}
                             {find}
                             {extra}
