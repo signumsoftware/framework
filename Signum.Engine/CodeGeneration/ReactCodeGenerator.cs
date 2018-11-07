@@ -186,13 +186,10 @@ namespace Signum.Engine.CodeGeneration
 
         private static string AskModuleName(string solutionName, Type[] selected)
         {
-            SafeConsole.WriteColor(ConsoleColor.Gray, "Module name? (Nothing to exit):");
-
             string moduleName = CodeGenerator.GetDefaultModuleName(selected, solutionName);
-            if (moduleName.HasText())
-                SendKeys.SendWait(moduleName);
+            SafeConsole.WriteColor(ConsoleColor.Gray, $"Module name? ([Enter] for '{moduleName}'):");
 
-            moduleName = Console.ReadLine();
+            moduleName = Console.ReadLine().DefaultText(moduleName);
             return moduleName;
         }
 
