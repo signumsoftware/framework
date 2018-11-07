@@ -420,14 +420,6 @@ namespace Signum.Utilities
 
         }
 
-        public enum DiffTextAction
-        {
-            Equal,
-            Added,
-            Removed,
-            Changed,
-        }
-
         static readonly Regex WordsRegex = new Regex(@"([\w\d]+|\s+|.)");
         public List<DiffPair<string>> DiffWords(string strOld, string strNew)
         {
@@ -435,6 +427,31 @@ namespace Signum.Utilities
             var wordsNew = WordsRegex.Matches(strNew).Cast<Match>().Select(m => m.Value).ToArray();
 
             return Diff(wordsOld, wordsNew);
+        }
+
+
+        public string DiffTextToString(string textOld, string textNew, bool lineEndingDifferences = true)
+        {
+            List<DiffPair<List<DiffPair<string>>>> diff = this.DiffText(textOld, textNew, lineEndingDifferences);
+
+            return diff.ToString(b =>
+            {
+                if (b.Action == DiffAction.Equal)
+                {
+                    if (b.Value.Count == 1)
+                        return "    " + b.Value.Single().Value;
+
+                    return
+                    "--  " + b.Value.Where(a => a.Action == DiffAction.Removed || a.Action == DiffAction.Equal).ToString(a => a.Value, "") + "\n" +
+                    "++  " + b.Value.Where(a => a.Action == DiffAction.Added || a.Action == DiffAction.Equal).ToString(a => a.Value, "");
+                }
+                else if (b.Action == DiffAction.Removed)
+                    return "--  " + b.Value.Single().Value;
+                else if (b.Action == DiffAction.Added)
+                    return "++  " + b.Value.Single().Value;
+                else
+                    throw new UnexpectedValueException(b.Action);
+            }, "\n");
         }
 
         public List<DiffPair<T>> Diff<T>(T[] strOld, T[] strNew, IEqualityComparer<T> comparer = null)
