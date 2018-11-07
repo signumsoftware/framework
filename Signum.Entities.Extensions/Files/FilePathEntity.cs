@@ -117,7 +117,7 @@ namespace Signum.Entities.Files
             return FilePathUtils.SafeCombine(pp.PhysicalPrefix, Suffix);
         }
 
-        public static Func<string, string> ToAbsolute = str => throw new NotImplementedException("ToAbsolute not set"); 
+        public static Func<string, string> ToAbsolute = str => str; 
         
         public string FullWebPath()
         {
@@ -127,11 +127,8 @@ namespace Signum.Entities.Files
                 return null;
 
             var result = pp.WebPrefix + "/" + FilePathUtils.UrlPathEncode(Suffix.Replace("\\", "/"));
-
-            if (result.StartsWith("http"))
-                return result;
-
-            return ToAbsolute(result);
+            
+            return result;
         }
 
         public override string ToString()
