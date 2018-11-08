@@ -78,35 +78,38 @@ export function start(options: { routes: JSX.Element[] }) {
     registerRenderer(UserChartPartEntity, {
         component: () => import('./View/UserChartPart').then(a => a.default),
         defaultIcon: () => ({ icon: "chart-bar", iconColor: "violet" }),
-        handleEditClick: (p, e, ev) => {
-            ev.preventDefault();
-            Navigator.pushOrOpenInTab(Navigator.navigateRoute(p.userChart!), ev);
-        },
-        handleTitleClick: (p, e, ev) => {
-            ev.preventDefault();
-            ev.persist();
-            UserChartClient.Converter.toChartRequest(p.userChart!, e)
-                .then(cr => Navigator.pushOrOpenInTab(ChartClient.Encoder.chartPath(cr, toLite(p.userChart!)), ev))
-                .done();
-        },
-
+        handleEditClick: !Navigator.isViewable(UserChartPartEntity) || Navigator.isReadOnly(UserChartPartEntity) ? undefined :
+            (p, e, ev) => {
+                ev.preventDefault();
+                Navigator.pushOrOpenInTab(Navigator.navigateRoute(p.userChart!), ev);
+            },
+        handleTitleClick: !Navigator.isViewable(UserChartPartEntity) || Navigator.isReadOnly(UserChartPartEntity) ? undefined :
+            (p, e, ev) => {
+                ev.preventDefault();
+                ev.persist();
+                UserChartClient.Converter.toChartRequest(p.userChart!, e)
+                    .then(cr => Navigator.pushOrOpenInTab(ChartClient.Encoder.chartPath(cr, toLite(p.userChart!)), ev))
+                    .done();
+            },
     });
     
     registerRenderer(UserQueryPartEntity, {
         component: () => import('./View/UserQueryPart').then((a: any) => a.default),
         defaultIcon: () => ({ icon: ["far", "list-alt"], iconColor: "dodgerblue" }),
         withPanel: p => p.renderMode != "BigValue",
-        handleEditClick: (p, e, ev) => {
-            ev.preventDefault();
-            Navigator.pushOrOpenInTab(Navigator.navigateRoute(p.userQuery!), ev);
-        },
-        handleTitleClick: (p, e, ev) => {
-            ev.preventDefault();
-            ev.persist();
-            UserQueryClient.Converter.toFindOptions(p.userQuery!, e)
-                .then(cr => Navigator.pushOrOpenInTab(Finder.findOptionsPath(cr, { userQuery: liteKey(toLite(p.userQuery!)) }), ev))
-                .done()
-        }
+        handleEditClick: !Navigator.isViewable(UserQueryPartEntity) || Navigator.isReadOnly(UserQueryPartEntity) ? undefined :
+            (p, e, ev) => {
+                ev.preventDefault();
+                Navigator.pushOrOpenInTab(Navigator.navigateRoute(p.userQuery!), ev);
+            },
+        handleTitleClick: !Navigator.isViewable(UserQueryPartEntity) || Navigator.isReadOnly(UserQueryPartEntity) ? undefined :
+            (p, e, ev) => {
+                ev.preventDefault();
+                ev.persist();
+                UserQueryClient.Converter.toFindOptions(p.userQuery!, e)
+                    .then(cr => Navigator.pushOrOpenInTab(Finder.findOptionsPath(cr, { userQuery: liteKey(toLite(p.userQuery!)) }), ev))
+                    .done()
+            }
     });
 
     onEmbeddedWidgets.push(ctx => ctx.pack.embeddedDashboard &&

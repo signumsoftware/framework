@@ -145,7 +145,7 @@ export class CaseActivityStatsComponent extends React.Component<CaseActivityStat
 
         Finder.find<CaseEntity>({
             queryName: CaseEntity,
-            filterOptions: [{ token: "Entity.DecompositionSurrogateActivity", value: this.props.stats.CaseActivity, frozen: true }]
+            filterOptions: [{ token: "Entity.ParentCase", value: this.props.caseEntity, frozen: true }]
         }, { autoSelectIfOne: true })
             .then(c => c && Navigator.navigate(c))
             .done();

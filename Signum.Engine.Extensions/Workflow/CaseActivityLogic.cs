@@ -29,6 +29,30 @@ namespace Signum.Engine.Workflow
 {
     public static class CaseActivityLogic
     {
+        static Expression<Func<ICaseMainEntity, IQueryable<CaseActivityEntity>>> MainEntityCaseActivitiesExpression =
+            e => Database.Query<CaseActivityEntity>().Where(a => a.Case.MainEntity == e);
+        [ExpressionField]
+        public static IQueryable<CaseActivityEntity> CaseActivities(this ICaseMainEntity e)
+        {
+            return MainEntityCaseActivitiesExpression.Evaluate(e);
+        }
+
+        static Expression<Func<ICaseMainEntity, CaseActivityEntity>> LastCaseActivityExpression =
+            e => e.CaseActivities().OrderByDescending(a => a.StartDate).FirstOrDefault();
+        [ExpressionField]
+        public static CaseActivityEntity LastCaseActivity(this ICaseMainEntity e)
+        {
+            return LastCaseActivityExpression.Evaluate(e);
+        }
+
+        static Expression<Func<ICaseMainEntity, IQueryable<CaseEntity>>> MainEntityCasesExpression =
+            e => e.CaseActivities().Select(a => a.Case);
+        [ExpressionField]
+        public static IQueryable<CaseEntity> Cases(this ICaseMainEntity e)
+        {
+            return MainEntityCasesExpression.Evaluate(e);
+        }
+
         static Expression<Func<WorkflowEntity, IQueryable<CaseEntity>>> CasesExpression =
             w => Database.Query<CaseEntity>().Where(a => a.Workflow == w);
         [ExpressionField]
@@ -267,6 +291,9 @@ namespace Signum.Engine.Workflow
                 ProcessLogic.Register(CaseActivityProcessAlgorithm.Timeout, new PackageExecuteAlgorithm<CaseActivityEntity>(CaseActivityOperation.Timer));
 
                 QueryLogic.Expressions.Register((CaseEntity c) => c.DecompositionSurrogateActivity());
+                QueryLogic.Expressions.Register((ICaseMainEntity a) => a.CaseActivities(), () => typeof(CaseActivityEntity).NicePluralName());
+                QueryLogic.Expressions.Register((ICaseMainEntity a) => a.Cases(), () => typeof(CaseEntity).NicePluralName());
+                QueryLogic.Expressions.Register((ICaseMainEntity a) => a.LastCaseActivity(), () => CaseActivityMessage.LastCaseActivity.NiceToString());
 
                 sb.Include<CaseNotificationEntity>()
                     .WithExpressionFrom((CaseActivityEntity c) => c.Notifications())
