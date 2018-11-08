@@ -233,4 +233,24 @@ namespace Signum.Entities.Chart
         Number,
         String,
     }
+
+    public class StringValue : IChartParameterValueDefinition
+    {
+        public string DefaultValue;
+
+        public StringValue(string v)
+        {
+            this.DefaultValue = "#";
+        }
+
+        public string Validate(string parameter, QueryToken token)
+        {
+            return null;
+        }
+
+        string IChartParameterValueDefinition.DefaultValue(QueryToken token)
+        {
+            return DefaultValue;
+        }
+    }
 }

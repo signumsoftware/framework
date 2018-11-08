@@ -23,7 +23,7 @@ namespace Signum.Logic.Chart.Scripts
             this.Parameters = new List<ChartScriptParameter>
             {
                 new ChartScriptParameter("Scale", ChartParameterType.Enum) {  ValueDefinition = EnumValueList.Parse("ZeroMax|MinMax|Log") },
-                new ChartScriptParameter("StrokeColor", ChartParameterType.String) {  ValueDefinition = null },
+                new ChartScriptParameter("StrokeColor", ChartParameterType.String) {  ValueDefinition = new StringValue("#fff") },
                 new ChartScriptParameter("StrokeWidth", ChartParameterType.Number) {  ValueDefinition = new NumberInterval { DefaultValue = 2m } },
                 new ChartScriptParameter("FillOpacity", ChartParameterType.Number) {  ValueDefinition = new NumberInterval { DefaultValue = 0.8m } },
                 new ChartScriptParameter("ColorScale", ChartParameterType.Enum) {  ValueDefinition = EnumValueList.Parse("ZeroMax|MinMax|Sqrt|Log") },
@@ -32,7 +32,7 @@ namespace Signum.Logic.Chart.Scripts
                 new ChartScriptParameter("ColorSchemeSteps", ChartParameterType.Enum) {  ValueDefinition = EnumValueList.Parse("3|4|5|6|7|8|9|10|11") },
                 new ChartScriptParameter("NumberOpacity", ChartParameterType.Number) {  ValueDefinition = new NumberInterval { DefaultValue = 0.8m } },
                 new ChartScriptParameter("NumberSizeLimit", ChartParameterType.Number) {  ValueDefinition = new NumberInterval { DefaultValue = 18m } },
-                new ChartScriptParameter("NumberColor", ChartParameterType.String) {  ValueDefinition = null }
+                new ChartScriptParameter("NumberColor", ChartParameterType.String) {  ValueDefinition = new StringValue("#fff") }
             };
         }      
     }                

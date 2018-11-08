@@ -99,7 +99,7 @@ export interface ChartScriptParameter {
     name: string;
     columnIndex?: number;
     type: ChartParameterType;
-    valueDefinition: NumberInterval | EnumValueList | null;
+    valueDefinition: NumberInterval | EnumValueList | StringValue | null;
 }
 
 export interface NumberInterval {
@@ -115,6 +115,10 @@ export interface EnumValueList extends Array<EnumValue> {
 export interface EnumValue {
     name: string;
     typeFilter?: ChartColumnType;
+}
+
+export interface StringValue {
+    defaultValue: number;
 }
 
 
@@ -339,7 +343,7 @@ function defaultParameterValue(scriptParameter: ChartScriptParameter, relatedCol
     switch (scriptParameter.type) {
         case "Enum": return (scriptParameter.valueDefinition as EnumValueList).filter(a => a.typeFilter == undefined || relatedColumn == undefined || isChartColumnType(relatedColumn, a.typeFilter)).first().name;
         case "Number": return (scriptParameter.valueDefinition as NumberInterval).defaultValue.toString();
-        case "String": return null;
+        case "String": return (scriptParameter.valueDefinition as StringValue).defaultValue.toString();
         default: throw new Error("Unexpected parameter type");
     }
 
