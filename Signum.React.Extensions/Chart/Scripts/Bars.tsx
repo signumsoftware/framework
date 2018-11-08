@@ -9,12 +9,10 @@ import { ChartRow } from '../ChartClient';
 
 export default class BarsChart extends D3ChartBase {
 
-    drawChart(chartTable: ChartClient.ChartTable, chart: d3.Selection<SVGElement, {}, null, undefined>, width: number, height: number) {
-
-        var data = chartTable as ChartClient.ChartTable<string, number>;
+    drawChart(data: ChartClient.ChartTable, chart: d3.Selection<SVGElement, {}, null, undefined>, width: number, height: number) {
 
         var keyColumn = data.columns.c0!;
-        var valueColumn = data.columns.c1!;
+        var valueColumn = data.columns.c1! as ChartClient.ChartColumn<number>;
 
         var xRule = rule({
             _1: 5,

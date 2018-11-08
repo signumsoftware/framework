@@ -9,13 +9,10 @@ import { ChartRow, ChartTable } from '../ChartClient';
 
 export default class PieChart extends D3ChartBase {
 
-    drawChart(chartTable: ChartTable, chart: d3.Selection<SVGElement, {}, null, undefined>, width: number, height: number) {
-
-        var data = chartTable as ChartTable<object, number>;
-
+    drawChart(data: ChartTable, chart: d3.Selection<SVGElement, {}, null, undefined>, width: number, height: number) {
+        
         var keyColumn = data.columns.c0!;
-        var valueColumn = data.columns.c1!;
-
+        var valueColumn = data.columns.c1! as ChartClient.ChartColumn<number>;
 
         var pInnerRadius = data.parameters.InnerRadious || "0";
         var pSort = data.parameters.Sort;
@@ -30,12 +27,12 @@ export default class PieChart extends D3ChartBase {
             .domain(data.rows.map(r => keyColumn.getValueKey(r)));
 
 
-        var pie = d3.pie<ChartRow<object, number>>()
+        var pie = d3.pie<ChartRow>()
             .sort(pSort == "Ascending" ? ((a, b) => d3.descending(size(valueColumn.getValue(a)), size(valueColumn.getValue(b)))) :
                 pSort == "Descending" ? ((a, b) => d3.ascending(size(valueColumn.getValue(a)), size(valueColumn.getValue(b)))) : null)
-            .value(r => size(r.c1));
+            .value(r => size(valueColumn.getValue(r)));
 
-        var arc = d3.arc<ChartRow<object, number>>()
+        var arc = d3.arc<ChartRow>()
             .outerRadius(outerRadious)
             .innerRadius(rInner);
 

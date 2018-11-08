@@ -3,17 +3,15 @@ import * as d3 from 'd3'
 import D3ChartBase from '../D3ChartBase';
 import * as ChartUtils from '../Templates/ChartUtils';
 import { getClickKeys, translate, scale, rotate, skewX, skewY, matrix, scaleFor, rule, ellipsis } from '../Templates/ChartUtils';
-import { ChartTable } from '../ChartClient';
+import { ChartTable, ChartColumn } from '../ChartClient';
 
 
 export default class ColumnsChart extends D3ChartBase {
 
-    drawChart(chartTable: ChartTable, chart: d3.Selection<SVGElement, {}, null, undefined>, width: number, height: number) {
-
-        var data = chartTable as ChartTable<string, number>;
+    drawChart(data: ChartTable, chart: d3.Selection<SVGElement, {}, null, undefined>, width: number, height: number) {
 
         var keyColumn = data.columns.c0!;
-        var valueColumn = data.columns.c1!;
+        var valueColumn = data.columns.c1! as ChartColumn<number>;
 
         var xRule = rule({
             _1: 5,

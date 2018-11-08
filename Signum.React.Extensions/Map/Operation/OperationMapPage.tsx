@@ -213,7 +213,6 @@ export class OperationMapRenderer extends React.Component<OperationMapRendererPr
             m.fanIn = (fanIn[m.key] ? fanIn[m.key].reduce((acum, e) => acum + e.weight, 0) : 0);
 
             m.fanInOutFactor = (m.fanIn - m.fanOut) / (m.fanIn + m.fanOut); 
-
         });
     }
 

@@ -110,7 +110,7 @@ export interface NumberInterval {
 
 export interface EnumValueList extends Array<EnumValue> {
 
-};
+}
 
 export interface EnumValue {
     name: string;
@@ -662,6 +662,8 @@ export module API {
 
     export function executeChart(request: ChartRequest, chartScript: ChartScript, abortSignal?: AbortSignal): Promise<ExecuteChartResult> {
 
+
+
         const queryRequest = getRequest(request);
 
         return Finder.API.executeQuery(queryRequest, abortSignal)
@@ -670,7 +672,7 @@ export module API {
     }
     export interface ExecuteChartResult {
         resultTable: ResultTable;
-        chartTable: ChartTable<unknown, unknown, unknown, unknown, unknown, unknown, unknown, unknown>;
+        chartTable: ChartTable;
     }
 
     export function fetchScripts(): Promise<ChartScript[]> {
@@ -686,32 +688,32 @@ export module API {
     }
 }
 
-export interface ChartTable<V0 = unknown, V1 = unknown, V2 = unknown, V3 = unknown, V4 = unknown, V5 = unknown, V6 = unknown, V7 = unknown> {
+export interface ChartTable {
     columns: {
         entity?: ChartColumn<Lite<Entity>>;
-        c0?: ChartColumn<V0>;
-        c1?: ChartColumn<V1>;
-        c2?: ChartColumn<V2>;
-        c3?: ChartColumn<V3>;
-        c4?: ChartColumn<V4>;
-        c5?: ChartColumn<V5>;
-        c6?: ChartColumn<V6>;
-        c7?: ChartColumn<V7>;
+        c0?: ChartColumn<unknown>;
+        c1?: ChartColumn<unknown>;
+        c2?: ChartColumn<unknown>;
+        c3?: ChartColumn<unknown>;
+        c4?: ChartColumn<unknown>;
+        c5?: ChartColumn<unknown>;
+        c6?: ChartColumn<unknown>;
+        c7?: ChartColumn<unknown>;
     },
     parameters: { [name: string]: string | null | undefined },
-    rows: ChartRow<V0, V1, V2, V3, V4, V5, V6, V7>[]
+    rows: ChartRow[]
 }
 
-export interface ChartRow<V0 = unknown, V1 = unknown, V2 = unknown, V3 = unknown, V4 = unknown, V5 = unknown, V6 = unknown, V7 = unknown> {
+export interface ChartRow {
     entity?: Lite<Entity>;
-    c0: V0;
-    c1: V1;
-    c2: V2;
-    c3: V3;
-    c4: V4;
-    c5: V5;
-    c6: V6;
-    c7: V7;
+    c0: unknown;
+    c1: unknown;
+    c2: unknown;
+    c3: unknown;
+    c4: unknown;
+    c5: unknown;
+    c6: unknown;
+    c7: unknown;
 }
 
 
