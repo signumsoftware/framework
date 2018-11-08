@@ -45,11 +45,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Remove="Chart\Scripts\Bubbleplot.tsx" />
-    <None Remove="Chart\Scripts\CalendarStream.tsx" />
     <None Remove="Chart\Scripts\Force graph.tsx" />
     <None Remove="Chart\Scripts\Heatmap.tsx" />
-    <None Remove="Chart\Scripts\Line.tsx" />
     <None Remove="Chart\Scripts\Markermap.tsx" />
     <None Remove="Chart\Scripts\MultiBars.tsx" />
     <None Remove="Chart\Scripts\MultiColumns.tsx" />
@@ -60,15 +57,18 @@
     <None Remove="Chart\Scripts\StackedBars.tsx" />
     <None Remove="Chart\Scripts\StackedColumns.tsx" />
     <None Remove="Chart\Scripts\StackedLines.tsx" />
-    <None Remove="Chart\Scripts\TreeMap.tsx" />
     <None Remove="Chart\Scripts\WorldMap.tsx" />
   </ItemGroup>
 
   <ItemGroup>
     <TypeScriptCompile Remove="Chart\D3ChartBase.tsx" />
     <TypeScriptCompile Remove="Chart\Scripts\BubblePack.tsx" />
+    <TypeScriptCompile Remove="Chart\Scripts\Bubbleplot.tsx" />
+    <TypeScriptCompile Remove="Chart\Scripts\CalendarStream.tsx" />
     <TypeScriptCompile Remove="Chart\Scripts\Columns.tsx" />
+    <TypeScriptCompile Remove="Chart\Scripts\Line.tsx" />
     <TypeScriptCompile Remove="Chart\Scripts\Pie.tsx" />
+    <TypeScriptCompile Remove="Chart\Scripts\TreeMap.tsx" />
   </ItemGroup>
 
   <Target Name="GenerateSignumTS">
