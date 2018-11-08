@@ -3,7 +3,7 @@ import * as d3 from 'd3'
 import D3ChartBase from '../D3ChartBase';
 import * as ChartClient from '../ChartClient';
 import * as ChartUtils from '../Templates/ChartUtils';
-import { getClickKeys, translate, scale, rotate, skewX, skewY, matrix, scaleFor, rule, ellipsis } from '../Templates/ChartUtils';
+import { getClickKeys, translate, scale, rotate, skewX, skewY, matrix, scaleFor, rule, ellipsis, Folder, isFolder, Root, isRoot } from '../Templates/ChartUtils';
 import { ChartRow, ChartTable } from '../ChartClient';
 
 
@@ -37,7 +37,7 @@ export default class BubblePackChart extends D3ChartBase {
             color = r => keyColumn.getValueColor(r) || categoryColor(keyColumn.getValueKey(r));
         }
 
-        var folderColor: null | ((folder: object) => string | undefined) = null;
+        var folderColor: null | ((folder: unknown) => string) = null;
         if (parentColumn) {
             var scheme = ChartUtils.getColorScheme(data.parameters["ColorScheme"], parseInt(data.parameters["ColorSchemeSteps"] || "0"));
             var categoryColor = d3.scaleOrdinal(scheme).domain(data.rows.map(r => parentColumn!.getValueKey(r)));
@@ -48,20 +48,20 @@ export default class BubblePackChart extends D3ChartBase {
 
         var root = ChartUtils.stratifyTokens(data, keyColumn, parentColumn);
 
-        root.sum(d => d.value)
-            .sort(function (a, b) { return b.value - a.value; })
+        //root.sum(d => valueColumn.getValue(d as ChartRow))
+            //.sort(function (a, b) { return b.value - a.value; })
 
-        var size = scaleFor(data.columns.c1, data.rows.map(r => r.c1), 0, 1, data.parameters["Scale"]);
+        var size = scaleFor(valueColumn, data.rows.map(r => valueColumn.getValue(r)), 0, 1, data.parameters["Scale"]);
 
-        root.sum(r => r == null ? 0 : size(r.c1));
+        root.sum(r => r == null ? 0 : size(valueColumn.getValue(r as ChartRow)));
 
-        var bubble = d3.pack()
+        var bubble = d3.pack<ChartRow | Folder | Root>()
             .size([width, height])
             .padding(2);
 
-        bubble(root);
+        const circularRoot = bubble(root);
 
-        var nodes = root.descendants().filter(d => d.data.isRoot == null);
+        var nodes = circularRoot.descendants().filter(d => !isRoot(d.data)) as d3.HierarchyCircularNode<ChartRow | Folder>[];
 
         var node = chart.selectAll("g.node")
             .data(nodes)
@@ -73,45 +73,51 @@ export default class BubblePackChart extends D3ChartBase {
         node.append("circle")
             .attr('shape-rendering', 'initial')
             .attr("r", d => d.r)
-            .style("fill", d => d.data.folder ? folderColor(d.data.folder) : color(d.data))
-            .style("fill-opacity", d => data.parameters["FillOpacity"])
-            .style("stroke", d => data.parameters["StrokeColor"] || (d.data.folder ? folderColor(d.data.folder) : color(d.data)))
-            .style("stroke-width", data.parameters["StrokeWidth"])
+            .style("fill", d => isFolder(d.data) ? folderColor!(d.data.folder) : color(d.data)!)
+            .style("fill-opacity", d => data.parameters["FillOpacity"] || null)
+            .style("stroke", d => data.parameters["StrokeColor"] || (isFolder(d.data) ? folderColor!(d.data.folder) : (color(d.data) || null)))
+            .style("stroke-width", data.parameters["StrokeWidth"] || "0")
             .style("stroke-opacity", 1)
-            .attr('data-click', p => p.data.folder ? getClickKeys({ c2: p.data.folder }, data.columns) : getClickKeys(p.data, data.columns));
+            .attr('data-click', p => isFolder(p.data) ? getClickKeys({ c2: p.data.folder }, data.columns) : getClickKeys(p.data, data.columns));
 
-        var showNumber = data.parameters["NumberOpacity"] > 0;
-        var numberSizeLimit = data.parameters["NumberSizeLimit"];
+        var showNumber = parseFloat(data.parameters["NumberOpacity"] || "0") > 0;
+        var numberSizeLimit = parseInt(data.parameters["NumberSizeLimit"] || "0");
 
-        node.filter(d => !d.data.folder).append("text")
+        node.filter(d => !isFolder(d.data)).append("text")
             .attr('dominant-baseline', 'central')
             .attr('text-anchor', 'middle')
             .attr("dy", d => showNumber && d.r > numberSizeLimit ? "-0.5em" : null)
-            .text(d => d.data.folder ? d.data.folder.niceToString() : d.data.c0 ? (d.data.c0.niceToString()) : undefined)
-            .attr('data-click', p => p.data.folder ? getClickKeys({ c2: p.data.folder }, data.columns) : getClickKeys(p.data, data.columns))
-            .each(d => ellipsis(this, d.r * 2, 1, ""));
+            .text(d => keyColumn.getValueNiceName(d.data as ChartRow))
+            .attr('data-click', p => getClickKeys(p.data, data.columns))
+            .each(function (d) { return ellipsis(this as SVGTextElement, d.r * 2, 1, ""); });
 
         if (showNumber) {
-            node.filter(d => d.r > numberSizeLimit)
+            node.filter(d => d.r > numberSizeLimit && !isFolder(d.data))
                 .append("text")
-                .attr('fill', data.parameters["NumberColor"])
+                .attr('fill', data.parameters["NumberColor"] || "#000")
                 .attr('dominant-baseline', 'central')
                 .attr('text-anchor', 'middle')
                 .attr('font-weight', 'bold')
-                .attr('opacity', d => data.parameters["NumberOpacity"] * d.r / 30)
+                .attr('opacity', d => parseFloat(data.parameters["NumberOpacity"] || "0") * d.r / 30)
                 .attr("dy", ".5em")
-                .attr('data-click', p => p.data.folder ? getClickKeys({ c2: p.data.folder }, data.columns) : getClickKeys(p.data, data.columns))
-                .text(d => d.data.c1;
-        })
+                .attr('data-click', p => getClickKeys(p.data, data.columns))
+                .text(d => valueColumn.getValueNiceName(d.data as ChartRow));
+        }
 
         node.append('svg:title')
-            .text(function (d) {
-                var key = (d.data.folder ? d.data.folder.niceToString() :
-                    (d.data.c0.niceToString() + (data.columns.c2.token == null ? '' : (' (' + (d.data.c2 ? d.data.c2.niceToString() : null) + ')'))));
+            .text(d => {
+                var key = isFolder(d.data) ?
+                    parentColumn!.getNiceName(d.data.folder) :
+                    (keyColumn.getValueNiceName(d.data as ChartRow)
+                        + (parentColumn == null ? '' : (' (' + parentColumn.getValueNiceName(d.data as ChartRow) + ')')));
 
 
-                var value = (d.data.folder ? format(size.invert(d.value)) :
-                    (d.data.c1 + (data.columns.c3.token == null ? '' : (' (' + d.data.c3 + ')'))));
+                var value = isFolder(d.data) ?
+                    format(size.invert(d.value!)) :
+                    (valueColumn.getValueNiceName(d.data)
+                        + (colorScaleColumn == null ? '' : (' (' + colorScaleColumn.getValueNiceName(d.data) + ')'))
+                        + (colorSchemeColumn == null ? '' : (' (' + colorSchemeColumn.getValueNiceName(d.data) + ')'))
+                    );
 
                 return key + ': ' + value;
             });

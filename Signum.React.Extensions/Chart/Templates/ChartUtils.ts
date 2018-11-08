@@ -402,14 +402,14 @@ export function getColorScheme(schemeName: string | null | undefined, k: number 
 export function stratifyTokens(
     data: ChartTable,
     keyColumn: ChartColumn<unknown>, /*Employee*/
-    keyColumnParent: ChartColumn<unknown>, /*Employee.ReportsTo*/):
+    keyColumnParent?: ChartColumn<unknown>, /*Employee.ReportsTo*/):
     d3.HierarchyNode<ChartRow | Folder | Root> {
     
 
     const folders = data.rows
-        .filter(r => keyColumnParent.getValue(r) != null)
-        .map(r => ({ folder: keyColumnParent.getValue(r) }) as Folder)
-        .toObjectDistinct(r => keyColumnParent.getKey(r.folder));
+        .filter(r => keyColumnParent != null && keyColumnParent.getValue(r) != null)
+        .map(r => ({ folder: keyColumnParent!.getValue(r) }) as Folder)
+        .toObjectDistinct(r => keyColumnParent!.getKey(r.folder));
 
     const root: Root = { isRoot: true };
 
@@ -423,35 +423,38 @@ export function stratifyTokens(
             return null;
 
         if ((d as Folder).folder) {
-            const r = dic[keyColumnParent.getKey((d as Folder).folder)];
+            const r = dic[keyColumnParent!.getKey((d as Folder).folder)];
 
             if (!r)
                 return root;
 
-            const parentValue = keyColumnParent.getValue(r);
+            const parentValue = keyColumnParent!.getValue(r);
             if (parentValue == null)
                 return root;  //Either null
 
-            return folders[keyColumnParent.getKey(parentValue)]; // Parent folder
+            return folders[keyColumnParent!.getKey(parentValue)]; // Parent folder
         }
 
         var keyVal = keyColumn.getValue(d as ChartRow);
 
         if (keyVal) {
             const r = d as ChartRow;
-            
+
             var fold = folders[keyColumn.getKey(keyVal)];
             if (fold)
                 return fold; //My folder
 
-            const parentValue = keyColumnParent.getValue(r);
+            if (keyColumnParent) {
 
-            const parentFolder = parentValue && folders[keyColumnParent.getKey(parentValue)];
+                const parentValue = keyColumnParent.getValue(r);
 
-            if (!parentFolder)
-                return root; //No key an no parent
+                const parentFolder = parentValue && folders[keyColumnParent.getKey(parentValue)];
 
-            return folders[keyColumnParent.getKey(parentFolder.folder)]; //only parent
+                if (parentFolder)
+                    return folders[keyColumnParent.getKey(parentFolder.folder)]; //only parent
+            }
+
+            return root; //No key an no parent
         }
 
         throw new Error("Unexpected " + JSON.stringify(d))
@@ -463,7 +466,7 @@ export function stratifyTokens(
             return "#Root";
 
         if ((r as Folder).folder)
-            return "F#" + keyColumnParent.getKey((r as Folder).folder);
+            return "F#" + keyColumnParent!.getKey((r as Folder).folder);
 
         const cr = (r as ChartRow);
 
@@ -484,12 +487,20 @@ export function stratifyTokens(
 
 }
 
-interface Folder {
+export interface Folder {
     folder: unknown;
 }
 
-interface Root {
+export function isFolder(obj: any): obj is Folder {
+    return (obj as Folder).folder !== undefined;
+}
+
+export interface Root {
     isRoot: true;
+}
+
+export function isRoot(obj: any): obj is Root {
+    return (obj as Root).isRoot;
 }
 
 
