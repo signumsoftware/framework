@@ -1,322 +1,320 @@
 ﻿import * as React from 'react'
 import * as ReactDOM from 'react-dom'
-import { classes, Dic } from '../Globals'
+import { classes } from '../Globals'
 import { Popper, Manager, Target } from 'react-popper';
 
-
-
 export interface TypeaheadProps {
-    value?: string;
-    onChange?: (newValue: string) => void;
-    onBlur?: () => void;
-    getItems: (query: string) => Promise<unknown[]>;
-    getItemsDelay?: number;
-    minLength?: number;
-    renderList?: (typeAhead: Typeahead) => React.ReactNode;
-    renderItem?: (item: unknown, query: string) => React.ReactNode;
-    onSelect?: (item: unknown, e: React.KeyboardEvent<any> | React.MouseEvent<any>) => string | null;
-    scrollHeight?: number;
-    inputAttrs?: React.InputHTMLAttributes<HTMLInputElement>;
-    itemAttrs?: (item: unknown) => React.LiHTMLAttributes<HTMLButtonElement>;
-    noResultsMessage?: string;
+  value?: string;
+  onChange?: (newValue: string) => void;
+  onBlur?: () => void;
+  getItems: (query: string) => Promise<unknown[]>;
+  getItemsDelay?: number;
+  minLength?: number;
+  renderList?: (typeAhead: Typeahead) => React.ReactNode;
+  renderItem?: (item: unknown, query: string) => React.ReactNode;
+  onSelect?: (item: unknown, e: React.KeyboardEvent<any> | React.MouseEvent<any>) => string | null;
+  scrollHeight?: number;
+  inputAttrs?: React.InputHTMLAttributes<HTMLInputElement>;
+  itemAttrs?: (item: unknown) => React.LiHTMLAttributes<HTMLButtonElement>;
+  noResultsMessage?: string;
 }
 
 export interface TypeaheadState {
-    shown?: boolean;
-    items?: any[];
-    query?: string;
-    selectedIndex?: number;
+  shown?: boolean;
+  items?: any[];
+  query?: string;
+  selectedIndex?: number;
 }
 
 export class Typeahead extends React.Component<TypeaheadProps, TypeaheadState>
 {
-    constructor(props: TypeaheadProps) {
-        super(props);
-        this.state = {
-            shown: false,
-            items: undefined,
-            selectedIndex: undefined,
-        };
-    }
-
-    rtl = document.body.classList.contains("rtl");
-
-    static highlightedText = (val: string, query?: string): React.ReactNode => {
-
-        if (query == undefined)
-            return val;
-
-        const index = val.toLowerCase().indexOf(query.toLowerCase());
-        if (index == -1)
-            return val;
-
-        return [
-            val.substr(0, index),
-            <strong key={0}>{val.substr(index, query.length)}</strong>,
-            val.substr(index + query.length)
-        ];
-    }
-
-    static defaultProps: TypeaheadProps = {
-        getItems: undefined as any,
-        getItemsDelay: 200,
-        minLength: 1,
-        renderItem: (item, query) => Typeahead.highlightedText(item as string, query),
-        onSelect: (elem, event) => (elem as string),
-        scrollHeight: 0,
-        noResultsMessage: " - No results -",
+  constructor(props: TypeaheadProps) {
+    super(props);
+    this.state = {
+      shown: false,
+      items: undefined,
+      selectedIndex: undefined,
     };
+  }
 
-    handle: number | undefined;
+  rtl = document.body.classList.contains("rtl");
 
-    lookup() {
-        if (!this.props.getItemsDelay) {
-            this.populate();
-        }
-        else {
-            if (this.handle != undefined)
-                clearTimeout(this.handle);
+  static highlightedText = (val: string, query?: string): React.ReactNode => {
 
-            this.handle = setTimeout(() => this.populate(), this.props.getItemsDelay);
-        }
+    if (query == undefined)
+      return val;
+
+    const index = val.toLowerCase().indexOf(query.toLowerCase());
+    if (index == -1)
+      return val;
+
+    return [
+      val.substr(0, index),
+      <strong key={0}>{val.substr(index, query.length)}</strong>,
+      val.substr(index + query.length)
+    ];
+  }
+
+  static defaultProps: TypeaheadProps = {
+    getItems: undefined as any,
+    getItemsDelay: 200,
+    minLength: 1,
+    renderItem: (item, query) => Typeahead.highlightedText(item as string, query),
+    onSelect: (elem, event) => (elem as string),
+    scrollHeight: 0,
+    noResultsMessage: " - No results -",
+  };
+
+  handle: number | undefined;
+
+  lookup() {
+    if (!this.props.getItemsDelay) {
+      this.populate();
+    }
+    else {
+      if (this.handle != undefined)
+        clearTimeout(this.handle);
+
+      this.handle = setTimeout(() => this.populate(), this.props.getItemsDelay);
+    }
+  }
+
+  populate() {
+
+    if (this.props.minLength == null || this.input.value.length < this.props.minLength) {
+      this.setState({ shown: false, items: undefined, selectedIndex: undefined });
+      return;
     }
 
-    populate() {
+    //this.setState({ shown: true, items: undefined });
 
-        if (this.props.minLength == null || this.input.value.length < this.props.minLength) {
-            this.setState({ shown: false, items: undefined, selectedIndex: undefined });
-            return;
-        }
+    const query = Typeahead.normalizeString(this.input.value);
+    this.props.getItems(query).then(items => this.setState({
+      items: items,
+      shown: true,
+      query: query,
+      selectedIndex: 0,
+    })).done();
+  }
 
-        //this.setState({ shown: true, items: undefined });
+  static normalizeString(str: string): string {
+    return str;
+  }
 
-        const query = Typeahead.normalizeString(this.input.value);
-        this.props.getItems(query).then(items => this.setState({
-            items: items,
-            shown: true,
-            query: query,
-            selectedIndex: 0,
-        })).done();
-    }
+  select(e: React.KeyboardEvent<any> | React.MouseEvent<any>): boolean {
+    if (this.state.items!.length == 0)
+      return false;
 
-    static normalizeString(str: string): string {
-        return str;
-    }
+    const val = this.props.onSelect!(this.state.items![this.state.selectedIndex || 0], e);
 
-    select(e: React.KeyboardEvent<any> | React.MouseEvent<any>): boolean {
-        if (this.state.items!.length == 0)
-            return false;
+    this.input.value = val || "";
+    if (this.props.onChange)
+      this.props.onChange(this.input.value);
 
-        const val = this.props.onSelect!(this.state.items![this.state.selectedIndex || 0], e);
+    this.setState({ shown: false });
+    return val != null;
+  }
 
-        this.input.value = val || "";
-        if (this.props.onChange)
-            this.props.onChange(this.input.value);
+  //public
+  writeInInput(query: string) {
+    this.input.value = query;
+    this.input.focus();
+    this.lookup();
+  }
 
-        this.setState({ shown: false });
-        return val != null;
-    }
-
-    //public
-    writeInInput(query: string) {
-        this.input.value = query;
-        this.input.focus();
+  focused = false;
+  handleFocus = () => {
+    if (!this.focused) {
+      this.focused = true;
+      if (this.props.minLength == 0 && !this.input.value)
         this.lookup();
     }
+  }
 
-    focused = false;
-    handleFocus = () => {
-        if (!this.focused) {
-            this.focused = true;
-            if (this.props.minLength == 0 && !this.input.value)
-                this.lookup();
-        }
-    }
+  handleBlur = () => {
+    this.focused = false;
 
-    handleBlur = () => {
-        this.focused = false;
+    //if (!this.mouseover && this.state.shown)
+    //    this.setState({ shown: false });
 
-        //if (!this.mouseover && this.state.shown)
-        //    this.setState({ shown: false });
-
-        if (this.props.onBlur)
-            this.props.onBlur();
-    }
+    if (this.props.onBlur)
+      this.props.onBlur();
+  }
 
 
-    blur() {
-        this.input.blur();
-    }
+  blur() {
+    this.input.blur();
+  }
 
-    handleKeyDown = (e: React.KeyboardEvent<any>) => {
-        if (!this.state.shown)
-            return;
+  handleKeyDown = (e: React.KeyboardEvent<any>) => {
+    if (!this.state.shown)
+      return;
 
-        switch (e.keyCode) {
-            case 9: // tab
-            case 13: // enter
-            case 27: // escape
-                e.preventDefault();
-                break;
-
-            case 38: // up arrow
-                {
-                    e.preventDefault();
-                    const newIndex = ((this.state.selectedIndex || 0) - 1 + this.state.items!.length) % this.state.items!.length;
-                    this.setState({ selectedIndex: newIndex });
-                    break;
-                }
-            case 40: // down arrow
-                {
-                    e.preventDefault();
-                    const newIndex = ((this.state.selectedIndex || 0) + 1) % this.state.items!.length;
-                    this.setState({ selectedIndex: newIndex });
-                    break;
-                }
-        }
-
-        e.stopPropagation();
-    }
-
-    handleKeyUp = (e: React.KeyboardEvent<any>) => {
-        switch (e.keyCode) {
-            case 40: // down arrow
-            case 38: // up arrow
-            case 16: // shift
-            case 17: // ctrl
-            case 18: // alt
-                break;
-
-            case 9: // tab
-            case 13: // enter
-                if (this.state.selectedIndex == undefined || !this.state.shown)
-                    return;
-
-                if (this.state.query != this.input.value)
-                    return;
-
-                this.select(e);
-                break;
-
-            case 27: // escape
-                if (!this.state.shown)
-                    return;
-                this.setState({ shown: false });
-                break;
-
-            default:
-                this.lookup();
-        }
-    }
-
-
-    handleMenuMouseUp = (e: React.MouseEvent<any>, index: number) => {
+    switch (e.keyCode) {
+      case 9: // tab
+      case 13: // enter
+      case 27: // escape
         e.preventDefault();
-        e.persist();
-        this.setState({
-            selectedIndex: index
-        }, () => {
-            if (this.select(e))
-                this.input.focus()
-        });
-    }
+        break;
 
-    mouseover = true;
-    handleElementMouseEnter = (event: React.MouseEvent<any>, index: number) => {
-        this.mouseover = true;
-        this.setState({
-            selectedIndex: index
-        });
-    }
-
-    handleElementMouseLeave = (event: React.MouseEvent<any>, index: number) => {
-        this.mouseover = false;
-        this.setState({ selectedIndex: undefined });
-        if (!this.focused && this.state.shown)
-            this.setState({ shown: false });
-    }
-
-    input!: HTMLInputElement;
-
-    handleOnChange = () => {
-        if (this.props.onChange)
-            this.props.onChange(this.input.value);
-    }
-
-    render() {
-        return (
-            <Manager tag={false}>
-                <Target innerRef={inp => this.input = inp as HTMLInputElement}>
-                    {({ targetProps }) => <input type="text" autoComplete="off" {...this.props.inputAttrs} {...targetProps as any}
-                        value={this.props.value}
-                        onFocus={this.handleFocus}
-                        onBlur={this.handleBlur}
-                        onKeyUp={this.handleKeyUp}
-                        onKeyDown={this.handleKeyDown}
-                        onChange={this.handleOnChange}
-                    />
-                    }
-                </Target>
-                {this.state.shown && <Popper placement={this.rtl ? "bottom-end" : "bottom-start"} style={{ zIndex: 1000 }}>{this.props.renderList ? this.props.renderList(this) : this.renderDefaultList()}</Popper>}
-            </Manager>
-        );
-    }
-
-
-    toggleEvents(isOpen: boolean | undefined) {
-        if (isOpen) {
-            document.addEventListener('click', this.handleDocumentClick, true);
-            document.addEventListener('touchstart', this.handleDocumentClick, true);
-        } else {
-            document.removeEventListener('click', this.handleDocumentClick, true);
-            document.removeEventListener('touchstart', this.handleDocumentClick, true);
+      case 38: // up arrow
+        {
+          e.preventDefault();
+          const newIndex = ((this.state.selectedIndex || 0) - 1 + this.state.items!.length) % this.state.items!.length;
+          this.setState({ selectedIndex: newIndex });
+          break;
+        }
+      case 40: // down arrow
+        {
+          e.preventDefault();
+          const newIndex = ((this.state.selectedIndex || 0) + 1) % this.state.items!.length;
+          this.setState({ selectedIndex: newIndex });
+          break;
         }
     }
 
-    componentDidMount() {
-        this.toggleEvents(this.state.shown);
-    }
+    e.stopPropagation();
+  }
 
-    componentWillUnmount() {
-        if (this.handle != undefined)
-            clearTimeout(this.handle);
+  handleKeyUp = (e: React.KeyboardEvent<any>) => {
+    switch (e.keyCode) {
+      case 40: // down arrow
+      case 38: // up arrow
+      case 16: // shift
+      case 17: // ctrl
+      case 18: // alt
+        break;
 
-        this.toggleEvents(false);
-    }
+      case 9: // tab
+      case 13: // enter
+        if (this.state.selectedIndex == undefined || !this.state.shown)
+          return;
 
-    componentWillUpdate(nextProps: TypeaheadProps, nextState: TypeaheadState) {
-        if (nextState.shown != this.state.shown)
-            this.toggleEvents(nextState.shown);
-    }
+        if (this.state.query != this.input.value)
+          return;
 
-    handleDocumentClick = (e: MouseEvent | TouchEvent) => {
-        if ((e as MouseEvent).which === 3)
-            return;
+        this.select(e);
+        break;
 
-        const container = ReactDOM.findDOMNode(this) as HTMLElement;
-        if (container.contains(e.target as Node) &&
-            container !== e.target) {
-            return;
-        }
-
+      case 27: // escape
+        if (!this.state.shown)
+          return;
         this.setState({ shown: false });
+        break;
+
+      default:
+        this.lookup();
+    }
+  }
+
+
+  handleMenuMouseUp = (e: React.MouseEvent<any>, index: number) => {
+    e.preventDefault();
+    e.persist();
+    this.setState({
+      selectedIndex: index
+    }, () => {
+      if (this.select(e))
+        this.input.focus()
+    });
+  }
+
+  mouseover = true;
+  handleElementMouseEnter = (event: React.MouseEvent<any>, index: number) => {
+    this.mouseover = true;
+    this.setState({
+      selectedIndex: index
+    });
+  }
+
+  handleElementMouseLeave = (event: React.MouseEvent<any>, index: number) => {
+    this.mouseover = false;
+    this.setState({ selectedIndex: undefined });
+    if (!this.focused && this.state.shown)
+      this.setState({ shown: false });
+  }
+
+  input!: HTMLInputElement;
+
+  handleOnChange = () => {
+    if (this.props.onChange)
+      this.props.onChange(this.input.value);
+  }
+
+  render() {
+    return (
+      <Manager tag={false}>
+        <Target innerRef={inp => this.input = inp as HTMLInputElement}>
+          {({ targetProps }) => <input type="text" autoComplete="off" {...this.props.inputAttrs} {...targetProps as any}
+            value={this.props.value}
+            onFocus={this.handleFocus}
+            onBlur={this.handleBlur}
+            onKeyUp={this.handleKeyUp}
+            onKeyDown={this.handleKeyDown}
+            onChange={this.handleOnChange}
+          />
+          }
+        </Target>
+        {this.state.shown && <Popper placement={this.rtl ? "bottom-end" : "bottom-start"} style={{ zIndex: 1000 }}>{this.props.renderList ? this.props.renderList(this) : this.renderDefaultList()}</Popper>}
+      </Manager>
+    );
+  }
+
+
+  toggleEvents(isOpen: boolean | undefined) {
+    if (isOpen) {
+      document.addEventListener('click', this.handleDocumentClick, true);
+      document.addEventListener('touchstart', this.handleDocumentClick, true);
+    } else {
+      document.removeEventListener('click', this.handleDocumentClick, true);
+      document.removeEventListener('touchstart', this.handleDocumentClick, true);
+    }
+  }
+
+  componentDidMount() {
+    this.toggleEvents(this.state.shown);
+  }
+
+  componentWillUnmount() {
+    if (this.handle != undefined)
+      clearTimeout(this.handle);
+
+    this.toggleEvents(false);
+  }
+
+  componentWillUpdate(nextProps: TypeaheadProps, nextState: TypeaheadState) {
+    if (nextState.shown != this.state.shown)
+      this.toggleEvents(nextState.shown);
+  }
+
+  handleDocumentClick = (e: MouseEvent | TouchEvent) => {
+    if ((e as MouseEvent).which === 3)
+      return;
+
+    const container = ReactDOM.findDOMNode(this) as HTMLElement;
+    if (container.contains(e.target as Node) &&
+      container !== e.target) {
+      return;
     }
 
-    renderDefaultList() {
-        return (
-            <div className={classes("typeahead dropdown-menu show", this.rtl && "dropdown-menu-right")} >
-                {
-                    !this.state.items!.length ? <button className="no-results dropdown-item"><small>{this.props.noResultsMessage}</small></button> :
-                        this.state.items!.map((item, i) => <button key={i}
-                            className={classes("dropdown-item", i == this.state.selectedIndex ? "active" : undefined)}
-                            onMouseEnter={e => this.handleElementMouseEnter(e, i)}
-                            onMouseLeave={e => this.handleElementMouseLeave(e, i)}
-                            onMouseUp={e => this.handleMenuMouseUp(e, i)}
-                            {...this.props.itemAttrs && this.props.itemAttrs(item)}>                            
-                            {this.props.renderItem!(item, this.state.query!)}
-                        </button>)
-                }
-            </div>
-        );
-    }
+    this.setState({ shown: false });
+  }
+
+  renderDefaultList() {
+    return (
+      <div className={classes("typeahead dropdown-menu show", this.rtl && "dropdown-menu-right")} >
+        {
+          !this.state.items!.length ? <button className="no-results dropdown-item"><small>{this.props.noResultsMessage}</small></button> :
+            this.state.items!.map((item, i) => <button key={i}
+              className={classes("dropdown-item", i == this.state.selectedIndex ? "active" : undefined)}
+              onMouseEnter={e => this.handleElementMouseEnter(e, i)}
+              onMouseLeave={e => this.handleElementMouseLeave(e, i)}
+              onMouseUp={e => this.handleMenuMouseUp(e, i)}
+              {...this.props.itemAttrs && this.props.itemAttrs(item)}>
+              {this.props.renderItem!(item, this.state.query!)}
+            </button>)
+        }
+      </div>
+    );
+  }
 }

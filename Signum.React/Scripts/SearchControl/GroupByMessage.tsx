@@ -1,34 +1,29 @@
 ﻿
 import * as React from 'react'
-import { classes, Dic } from '../Globals'
-import * as Finder from '../Finder'
-import { openModal, IModalProps } from '../Modals';
-import { FindOptionsParsed, QueryToken, QueryTokenType } from '../FindOptions'
-import { SearchMessage, JavascriptMessage, ValidationMessage, Lite, Entity, External } from '../Signum.Entities'
-import { Binding, IsByAll, getTypeInfos, TypeReference } from '../Reflection'
-import { TypeContext, FormGroupStyle } from '../TypeContext'
+import { Dic } from '../Globals'
+import { FindOptionsParsed } from '../FindOptions'
+import { ValidationMessage, External } from '../Signum.Entities'
+import { TypeReference } from '../Reflection'
 
+export default class GroupByMessage extends React.Component<{ findOptions: FindOptionsParsed, mainType: TypeReference }>{
+  render() {
+    const fo = this.props.findOptions;
 
-export default class GroupByMessage extends React.Component<{ findOptions: FindOptionsParsed, mainType : TypeReference }>{
+    const tokensObj = fo.columnOptions.map(a => a.token)
+      .concat(fo.orderOptions.map(a => a.token))
+      .filter(a => a != undefined && a.queryTokenType != "Aggregate")
+      .toObjectDistinct(a => a!.fullKey, a => a!);
 
-    render() {
-        const fo = this.props.findOptions;
+    const tokens = Dic.getValues(tokensObj);
 
-        const tokensObj = fo.columnOptions.map(a=> a.token)
-            .concat(fo.orderOptions.map(a => a.token))
-            .filter(a => a != undefined && a.queryTokenType != "Aggregate")
-            .toObjectDistinct(a=> a!.fullKey, a => a!);
-
-        const tokens = Dic.getValues(tokensObj);
-
-        const message = ValidationMessage.TheRowsAreBeingGroupedBy0.niceToString().formatHtml(
-            tokens.map(a => <strong>{a.niceName}</strong>).joinCommaHtml(External.CollectionMessage.And.niceToString()));
-        return (
-            <div className="sf-search-message alert alert-info">
-                {"Ʃ"}&nbsp;{message}
-            </div>
-        );
-    }
+    const message = ValidationMessage.TheRowsAreBeingGroupedBy0.niceToString().formatHtml(
+      tokens.map(a => <strong>{a.niceName}</strong>).joinCommaHtml(External.CollectionMessage.And.niceToString()));
+    return (
+      <div className="sf-search-message alert alert-info">
+        {"Ʃ"}&nbsp;{message}
+      </div>
+    );
+  }
 
 }
 

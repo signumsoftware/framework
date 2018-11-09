@@ -3,101 +3,101 @@ import * as PropTypes from 'prop-types';
 import { classes } from '../Globals';
 
 export interface DropdownItemProps extends React.AnchorHTMLAttributes<any> {
-    active?: boolean;
-    disabled?: boolean;
-    divider?: boolean;
-    tag?: React.ReactType<any>;
-    header?: boolean;
-    onClick?: (e: React.MouseEvent<any>) => void;
-    className?: string;
-    toggle?: boolean;
-    innerRef?: (r: HTMLElement | null) => void;
+  active?: boolean;
+  disabled?: boolean;
+  divider?: boolean;
+  tag?: React.ReactType<any>;
+  header?: boolean;
+  onClick?: (e: React.MouseEvent<any>) => void;
+  className?: string;
+  toggle?: boolean;
+  innerRef?: (r: HTMLElement | null) => void;
 };
 
 export class DropdownItem extends React.Component<DropdownItemProps> {
 
-    static contextTypes = {
-        toggle: PropTypes.func
-    };
+  static contextTypes = {
+    toggle: PropTypes.func
+  };
 
-    static defaultProps = {
-        tag: 'button',
-        toggle: true
-    };
+  static defaultProps = {
+    tag: 'button',
+    toggle: true
+  };
 
-    constructor(props: DropdownItemProps) {
-        super(props);
+  constructor(props: DropdownItemProps) {
+    super(props);
 
-        this.onClick = this.onClick.bind(this);
-        this.getTabIndex = this.getTabIndex.bind(this);
+    this.onClick = this.onClick.bind(this);
+    this.getTabIndex = this.getTabIndex.bind(this);
+  }
+
+  onClick = (e: React.MouseEvent<any>) => {
+    if (this.props.disabled || this.props.header || this.props.divider) {
+      e.preventDefault();
+      return;
     }
 
-    onClick = (e: React.MouseEvent<any>) => {
-        if (this.props.disabled || this.props.header || this.props.divider) {
-            e.preventDefault();
-            return;
-        }
-
-        if (this.props.onClick) {
-            this.props.onClick(e);
-        }
-
-        if (this.props.toggle) {
-            this.context.toggle(e);
-        }
+    if (this.props.onClick) {
+      this.props.onClick(e);
     }
 
-    getTabIndex() {
-        if (this.props.disabled || this.props.header || this.props.divider) {
-            return '-1';
-        }
+    if (this.props.toggle) {
+      this.context.toggle(e);
+    }
+  }
 
-        return '0';
+  getTabIndex() {
+    if (this.props.disabled || this.props.header || this.props.divider) {
+      return '-1';
     }
 
-    render() {
-        const tabIndex = this.getTabIndex();
-        let {
-            className,
-            tag,
-            header,
-            active,
-            toggle,
-            divider,
-            innerRef,
-            disabled,
-            ...props } = this.props;
+    return '0';
+  }
 
-        const clss = classes(
-            className,
-            disabled && 'disabled',
-            !divider && !header && 'dropdown-item',
-            active && 'active',
-            header && 'dropdown-header',
-            divider && 'dropdown-divider'
-        );
+  render() {
+    const tabIndex = this.getTabIndex();
+    let {
+      className,
+      tag,
+      header,
+      active,
+      toggle,
+      divider,
+      innerRef,
+      disabled,
+      ...props } = this.props;
 
-        let Tag = tag!;
+    const clss = classes(
+      className,
+      disabled && 'disabled',
+      !divider && !header && 'dropdown-item',
+      active && 'active',
+      header && 'dropdown-header',
+      divider && 'dropdown-divider'
+    );
 
-        if (Tag === 'button') {
-            if (header) {
-                Tag = 'h6';
-            } else if (divider) {
-                Tag = 'div';
-            } else if (props.href) {
-                Tag = 'a';
-            }
-        }
+    let Tag = tag!;
 
-        return (
-            <Tag
-                ref={innerRef}
-                type={(Tag === 'button' && (props.onClick || this.props.toggle)) ? 'button' : undefined}
-                {...props}
-                tabIndex={tabIndex}
-                className={clss}
-                onClick={this.onClick}
-            />
-        );
+    if (Tag === 'button') {
+      if (header) {
+        Tag = 'h6';
+      } else if (divider) {
+        Tag = 'div';
+      } else if (props.href) {
+        Tag = 'a';
+      }
     }
+
+    return (
+      <Tag
+        ref={innerRef}
+        type={(Tag === 'button' && (props.onClick || this.props.toggle)) ? 'button' : undefined}
+        {...props}
+        tabIndex={tabIndex}
+        className={clss}
+        onClick={this.onClick}
+      />
+    );
+  }
 }

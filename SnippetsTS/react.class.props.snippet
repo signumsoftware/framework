@@ -25,22 +25,21 @@
     </Declarations>
     <Code Language="TypeScript">
       <![CDATA[
-      interface $ComponentName$Props {
-          ctx: TypeContext<$ComponentName$Entity>
-      }
-      
-      export default class $ComponentName$ extends React.Component<$ComponentName$Props> {
-          render() {
-              const ctx = this.props.ctx;
-              return (
-                  <div>
-                      <ValueLine ctx={ctx.subCtx(a => a.name)} />
-                      $end$
-                  </div>
-              );
-          }
-      }
-     ]]>
+interface $ComponentName$Props {
+  ctx: TypeContext<$ComponentName$Entity>
+}
+
+export default class $ComponentName$ extends React.Component<$ComponentName$Props> {
+  render() {
+    const ctx = this.props.ctx;
+    return (
+      <div>
+        <ValueLine ctx={ctx.subCtx(a => a.name)} />
+        $end$
+      </div>
+    );
+  }
+}]]>
     </Code>
   </Snippet>
 </CodeSnippet>
