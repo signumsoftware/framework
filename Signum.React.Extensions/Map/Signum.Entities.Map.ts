@@ -3,6 +3,7 @@
 //////////////////////////////////
 
 import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from '../../../Framework/Signum.React/Scripts/Reflection'
+import * as Entities from '../../../Framework/Signum.React/Scripts/Signum.Entities'
 import * as Authorization from '../Authorization/Signum.Entities.Authorization'
 
 
@@ -23,7 +24,7 @@ export module MapMessage {
 }
 
 export module MapPermission {
-  export const ViewMap: Authorization.PermissionSymbol = registerSymbol("Permission", "MapPermission.ViewMap");
+  export const ViewMap : Authorization.PermissionSymbol = registerSymbol("Permission", "MapPermission.ViewMap");
 }
 
 

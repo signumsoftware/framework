@@ -74,12 +74,12 @@ export module UserQueryMessage {
 }
 
 export module UserQueryOperation {
-  export const Save: Entities.ExecuteSymbol<UserQueryEntity> = registerSymbol("Operation", "UserQueryOperation.Save");
-  export const Delete: Entities.DeleteSymbol<UserQueryEntity> = registerSymbol("Operation", "UserQueryOperation.Delete");
+  export const Save : Entities.ExecuteSymbol<UserQueryEntity> = registerSymbol("Operation", "UserQueryOperation.Save");
+  export const Delete : Entities.DeleteSymbol<UserQueryEntity> = registerSymbol("Operation", "UserQueryOperation.Delete");
 }
 
 export module UserQueryPermission {
-  export const ViewUserQuery: Authorization.PermissionSymbol = registerSymbol("Permission", "UserQueryPermission.ViewUserQuery");
+  export const ViewUserQuery : Authorization.PermissionSymbol = registerSymbol("Permission", "UserQueryPermission.ViewUserQuery");
 }
 
 

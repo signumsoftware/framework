@@ -8,8 +8,8 @@ import * as Authorization from '../Authorization/Signum.Entities.Authorization'
 
 
 export module CachePermission {
-  export const ViewCache: Authorization.PermissionSymbol = registerSymbol("Permission", "CachePermission.ViewCache");
-  export const InvalidateCache: Authorization.PermissionSymbol = registerSymbol("Permission", "CachePermission.InvalidateCache");
+  export const ViewCache : Authorization.PermissionSymbol = registerSymbol("Permission", "CachePermission.ViewCache");
+  export const InvalidateCache : Authorization.PermissionSymbol = registerSymbol("Permission", "CachePermission.InvalidateCache");
 }
 
 

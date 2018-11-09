@@ -19,7 +19,7 @@ export interface AppendixHelpEntity extends Entities.Entity {
 }
 
 export module AppendixHelpOperation {
-  export const Save: Entities.ExecuteSymbol<AppendixHelpEntity> = registerSymbol("Operation", "AppendixHelpOperation.Save");
+  export const Save : Entities.ExecuteSymbol<AppendixHelpEntity> = registerSymbol("Operation", "AppendixHelpOperation.Save");
 }
 
 export const EntityHelpEntity = new Type<EntityHelpEntity>("EntityHelp");
@@ -35,7 +35,7 @@ export interface EntityHelpEntity extends Entities.Entity {
 }
 
 export module EntityHelpOperation {
-  export const Save: Entities.ExecuteSymbol<EntityHelpEntity> = registerSymbol("Operation", "EntityHelpOperation.Save");
+  export const Save : Entities.ExecuteSymbol<EntityHelpEntity> = registerSymbol("Operation", "EntityHelpOperation.Save");
 }
 
 export module HelpKindMessage {
@@ -93,7 +93,7 @@ export module HelpMessage {
 }
 
 export module HelpPermissions {
-  export const ViewHelp: Authorization.PermissionSymbol = registerSymbol("Permission", "HelpPermissions.ViewHelp");
+  export const ViewHelp : Authorization.PermissionSymbol = registerSymbol("Permission", "HelpPermissions.ViewHelp");
 }
 
 export module HelpSearchMessage {
@@ -142,7 +142,7 @@ export interface NamespaceHelpEntity extends Entities.Entity {
 }
 
 export module NamespaceHelpOperation {
-  export const Save: Entities.ExecuteSymbol<NamespaceHelpEntity> = registerSymbol("Operation", "NamespaceHelpOperation.Save");
+  export const Save : Entities.ExecuteSymbol<NamespaceHelpEntity> = registerSymbol("Operation", "NamespaceHelpOperation.Save");
 }
 
 export const OperationHelpEmbedded = new Type<OperationHelpEmbedded>("OperationHelpEmbedded");
@@ -177,7 +177,7 @@ export interface QueryHelpEntity extends Entities.Entity {
 }
 
 export module QueryHelpOperation {
-  export const Save: Entities.ExecuteSymbol<QueryHelpEntity> = registerSymbol("Operation", "QueryHelpOperation.Save");
+  export const Save : Entities.ExecuteSymbol<QueryHelpEntity> = registerSymbol("Operation", "QueryHelpOperation.Save");
 }
 
 

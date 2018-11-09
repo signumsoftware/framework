@@ -16,8 +16,8 @@ export interface HolidayCalendarEntity extends Entities.Entity {
 }
 
 export module HolidayCalendarOperation {
-  export const Save: Entities.ExecuteSymbol<HolidayCalendarEntity> = registerSymbol("Operation", "HolidayCalendarOperation.Save");
-  export const Delete: Entities.DeleteSymbol<HolidayCalendarEntity> = registerSymbol("Operation", "HolidayCalendarOperation.Delete");
+  export const Save : Entities.ExecuteSymbol<HolidayCalendarEntity> = registerSymbol("Operation", "HolidayCalendarOperation.Save");
+  export const Delete : Entities.DeleteSymbol<HolidayCalendarEntity> = registerSymbol("Operation", "HolidayCalendarOperation.Delete");
 }
 
 export const HolidayEmbedded = new Type<HolidayEmbedded>("HolidayEmbedded");
@@ -42,8 +42,8 @@ export module ITaskMessage {
 }
 
 export module ITaskOperation {
-  export const ExecuteSync: Entities.ConstructSymbol_From<ScheduledTaskLogEntity, ITaskEntity> = registerSymbol("Operation", "ITaskOperation.ExecuteSync");
-  export const ExecuteAsync: Entities.ExecuteSymbol<ITaskEntity> = registerSymbol("Operation", "ITaskOperation.ExecuteAsync");
+  export const ExecuteSync : Entities.ConstructSymbol_From<ScheduledTaskLogEntity, ITaskEntity> = registerSymbol("Operation", "ITaskOperation.ExecuteSync");
+  export const ExecuteAsync : Entities.ExecuteSymbol<ITaskEntity> = registerSymbol("Operation", "ITaskOperation.ExecuteAsync");
 }
 
 export const ScheduledTaskEntity = new Type<ScheduledTaskEntity>("ScheduledTask");
@@ -73,12 +73,12 @@ export interface ScheduledTaskLogEntity extends Entities.Entity {
 }
 
 export module ScheduledTaskLogOperation {
-  export const CancelRunningTask: Entities.ExecuteSymbol<ScheduledTaskLogEntity> = registerSymbol("Operation", "ScheduledTaskLogOperation.CancelRunningTask");
+  export const CancelRunningTask : Entities.ExecuteSymbol<ScheduledTaskLogEntity> = registerSymbol("Operation", "ScheduledTaskLogOperation.CancelRunningTask");
 }
 
 export module ScheduledTaskOperation {
-  export const Save: Entities.ExecuteSymbol<ScheduledTaskEntity> = registerSymbol("Operation", "ScheduledTaskOperation.Save");
-  export const Delete: Entities.DeleteSymbol<ScheduledTaskEntity> = registerSymbol("Operation", "ScheduledTaskOperation.Delete");
+  export const Save : Entities.ExecuteSymbol<ScheduledTaskEntity> = registerSymbol("Operation", "ScheduledTaskOperation.Save");
+  export const Delete : Entities.DeleteSymbol<ScheduledTaskEntity> = registerSymbol("Operation", "ScheduledTaskOperation.Delete");
 }
 
 export module SchedulerMessage {
@@ -116,7 +116,7 @@ export module SchedulerMessage {
 }
 
 export module SchedulerPermission {
-  export const ViewSchedulerPanel: Authorization.PermissionSymbol = registerSymbol("Permission", "SchedulerPermission.ViewSchedulerPanel");
+  export const ViewSchedulerPanel : Authorization.PermissionSymbol = registerSymbol("Permission", "SchedulerPermission.ViewSchedulerPanel");
 }
 
 export const SchedulerTaskExceptionLineEntity = new Type<SchedulerTaskExceptionLineEntity>("SchedulerTaskExceptionLine");
