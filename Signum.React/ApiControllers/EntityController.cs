@@ -17,7 +17,6 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Signum.React.ApiControllers
 {
-    [ValidateModelFilter]
     public class EntitiesController : ApiController
     {
         [HttpGet("api/entity/{type}/{id}"), ProfilerActionSplitter("type")]
@@ -42,7 +41,7 @@ namespace Signum.React.ApiControllers
             return SignumServer.GetEntityPack(entity);
         }
 
-        [HttpPost("api/entityPackEntity")]
+        [HttpPost("api/entityPackEntity")/*, ValidateModelFilter*/]
         public EntityPackTS GetEntityPackEntity([Required, FromBody]Entity entity)
         { 
             return SignumServer.GetEntityPack(entity);
