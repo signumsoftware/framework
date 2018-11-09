@@ -9,67 +9,66 @@ import { FilterOption } from "../../../Framework/Signum.React/Scripts/FindOption
 import * as QueryString from 'query-string'
 import { TreeOperation } from "./Signum.Entities.Tree";
 
-
 interface TreePageProps extends RouteComponentProps<{ typeName: string }> {
 
 }
 
 interface TreePageState {
-    filterOptions: FilterOption[];
+  filterOptions: FilterOption[];
 }
 
 export default class TreePage extends React.Component<TreePageProps, TreePageState> {
 
-    constructor(props: TreePageProps) {
-        super(props);
-        this.state = this.calculateState(props);
-    }
+  constructor(props: TreePageProps) {
+    super(props);
+    this.state = this.calculateState(props);
+  }
 
-    componentWillReceiveProps(nextProps: TreePageProps) {
-        this.setState(this.calculateState(nextProps));
-    }
+  componentWillReceiveProps(nextProps: TreePageProps) {
+    this.setState(this.calculateState(nextProps));
+  }
 
-    calculateState(props: TreePageProps): TreePageState {
-        var query = QueryString.parse(props.location.search);
-        return {
-            filterOptions: Finder.Decoder.decodeFilters(query)
-        };
-    }
+  calculateState(props: TreePageProps): TreePageState {
+    var query = QueryString.parse(props.location.search);
+    return {
+      filterOptions: Finder.Decoder.decodeFilters(query)
+    };
+  }
 
-    changeUrl() {
+  changeUrl() {
 
-        var newPath = this.treeView!.getCurrentUrl();
-        
-        var currentLocation = Navigator.history.location;
+    var newPath = this.treeView!.getCurrentUrl();
 
-        if (currentLocation.pathname + currentLocation.search != newPath)
-            Navigator.history.replace(newPath);
-    }
+    var currentLocation = Navigator.history.location;
 
-    treeView?: TreeViewer;
-    render() {
+    if (currentLocation.pathname + currentLocation.search != newPath)
+      Navigator.history.replace(newPath);
+  }
 
-        var ti = getTypeInfo(this.props.match.params.typeName);
+  treeView?: TreeViewer;
+  render() {
 
-        return (
-            <div id="divSearchPage">
-                <h2>
-                    <span className="sf-entity-title">{ti.nicePluralName}</span>
-                    &nbsp;
+    var ti = getTypeInfo(this.props.match.params.typeName);
+
+    return (
+      <div id="divSearchPage">
+        <h2>
+          <span className="sf-entity-title">{ti.nicePluralName}</span>
+          &nbsp;
                     <a className="sf-popup-fullscreen" href="#" onClick={(e) => this.treeView!.handleFullScreenClick(e)}>
-                        <span className="fa fa-external-link"></span>
-                    </a>
-                </h2>
-                <TreeViewer ref={tv => this.treeView = tv!}
-                    initialShowFilters={true}
-                    typeName={ti.name}
-                    allowMove={Operations.isOperationAllowed(TreeOperation.Move, ti.name)}
-                    filterOptions={this.state.filterOptions}
-                    key={ti.name}
-                    onSearch={() => this.changeUrl()} />
-            </div>
-        );
-    }
+            <span className="fa fa-external-link"></span>
+          </a>
+        </h2>
+        <TreeViewer ref={tv => this.treeView = tv!}
+          initialShowFilters={true}
+          typeName={ti.name}
+          allowMove={Operations.isOperationAllowed(TreeOperation.Move, ti.name)}
+          filterOptions={this.state.filterOptions}
+          key={ti.name}
+          onSearch={() => this.changeUrl()} />
+      </div>
+    );
+  }
 }
 
 
