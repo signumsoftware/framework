@@ -1,165 +1,154 @@
 ﻿import * as React from 'react'
-import { classes, Dic } from '../Globals'
-import { ModifiableEntity, Lite, Entity, EntityControlMessage, JavascriptMessage, toLite, is, liteKey, getToString } from '../Signum.Entities'
-import * as Navigator from '../Navigator'
-import * as Constructor from '../Constructor'
-import * as Finder from '../Finder'
-import { FindOptions } from '../FindOptions'
-import { TypeContext, StyleContext, StyleOptions, FormGroupStyle } from '../TypeContext'
-import { PropertyRoute, PropertyRouteType, MemberInfo, getTypeInfo, getTypeInfos, TypeInfo, IsByAll } from '../Reflection'
-import { LineBase, LineBaseProps, runTasks } from './LineBase'
+import { ModifiableEntity, Lite, Entity, is, getToString } from '../Signum.Entities'
 import { FormGroup } from './FormGroup'
-import { FormControlReadonly } from './FormControlReadonly'
-import { EntityListBase, EntityListBaseProps} from './EntityListBase'
-
+import { EntityListBase, EntityListBaseProps } from './EntityListBase'
 
 export interface EntityListProps extends EntityListBaseProps {
-    size?: number;
+  size?: number;
 }
-
 
 export abstract class EntityList extends EntityListBase<EntityListProps, EntityListProps>
 {
-    static defaultProps: EntityListProps = {
-        size: 5,
-        ctx: undefined as any,
-    };
+  static defaultProps: EntityListProps = {
+    size: 5,
+    ctx: undefined as any,
+  };
 
-    moveUp(index: number) {
-        super.moveUp(index);
-        this.forceUpdate();
-    }
+  moveUp(index: number) {
+    super.moveUp(index);
+    this.forceUpdate();
+  }
 
-    moveDown(index: number) {
-        super.moveDown(index);
-        this.forceUpdate();
-    }
+  moveDown(index: number) {
+    super.moveDown(index);
+    this.forceUpdate();
+  }
 
-    handleOnSelect = (e: React.FormEvent<HTMLSelectElement>) => {
-        this.forceUpdate();
-    }
-
-
-    selectElement?: HTMLSelectElement | null;
-    handleSelectLoad = (sel: HTMLSelectElement | null) => {
-        let refresh = this.selectElement == undefined && sel;
-
-        this.selectElement = sel;
-
-        if (refresh)
-            this.forceUpdate();
-    }
-
-    getSelectedIndex(): number | undefined {
-        if (this.selectElement == null || this.selectElement.selectedIndex == -1)
-            return undefined;
+  handleOnSelect = (e: React.FormEvent<HTMLSelectElement>) => {
+    this.forceUpdate();
+  }
 
 
-        var list = this.state.ctx.value;
-        if (list.length <= this.selectElement.selectedIndex)
-            return undefined;
+  selectElement?: HTMLSelectElement | null;
+  handleSelectLoad = (sel: HTMLSelectElement | null) => {
+    let refresh = this.selectElement == undefined && sel;
 
-        return this.selectElement.selectedIndex;
-    }
+    this.selectElement = sel;
 
-    renderInternal() {
+    if (refresh)
+      this.forceUpdate();
+  }
 
-        const s = this.state;
-        const list = this.state.ctx.value!;
+  getSelectedIndex(): number | undefined {
+    if (this.selectElement == null || this.selectElement.selectedIndex == -1)
+      return undefined;
 
-        const selectedIndex = this.getSelectedIndex();
 
-        return (
-            <FormGroup ctx={s.ctx} labelText={s.labelText}
-                htmlAttributes={{ ...this.baseHtmlAttributes(), ...this.state.formGroupHtmlAttributes }}
-                labelHtmlAttributes={s.labelHtmlAttributes}>
-                <div className="SF-entity-line">
-                    <div className={s.ctx.inputGroupClass}>
-                        <select className={s.ctx.formControlClass} size={this.props.size} onChange={this.handleOnSelect} ref={this.handleSelectLoad}>
-                            {list.map((e, i) => <option  key={i} title={this.getTitle(e.element)} {...EntityListBase.entityHtmlAttributes(e.element) }>{getToString(e.element)}</option>)}
-                        </select>
-                        <span className="input-group-append input-group-vertical">
-                            {this.renderCreateButton(true)}
-                            {this.renderFindButton(true)}
-                            {selectedIndex != undefined && this.renderViewButton(true, list[selectedIndex].element)}
-                            {selectedIndex != undefined && this.renderRemoveButton(true, list[selectedIndex].element)}
-                            {selectedIndex != undefined && this.state.move && selectedIndex != null && selectedIndex > 0 && this.renderMoveUp(true, selectedIndex!)}
-                            {selectedIndex != undefined && this.state.move && selectedIndex != null && selectedIndex < list.length - 1 && this.renderMoveDown(true, selectedIndex!)}
-                        </span>
-                    </div>
-                </div>
-            </FormGroup>
-        );
-    }
+    var list = this.state.ctx.value;
+    if (list.length <= this.selectElement.selectedIndex)
+      return undefined;
 
-    handleRemoveClick = (event: React.SyntheticEvent<any>) => {
+    return this.selectElement.selectedIndex;
+  }
 
-        event.preventDefault();
+  renderInternal() {
 
-        const s = this.state;
+    const s = this.state;
+    const list = this.state.ctx.value!;
 
-        var list = s.ctx.value!;
+    const selectedIndex = this.getSelectedIndex();
 
-        var selectedIndex = this.getSelectedIndex()!;
+    return (
+      <FormGroup ctx={s.ctx} labelText={s.labelText}
+        htmlAttributes={{ ...this.baseHtmlAttributes(), ...this.state.formGroupHtmlAttributes }}
+        labelHtmlAttributes={s.labelHtmlAttributes}>
+        <div className="SF-entity-line">
+          <div className={s.ctx.inputGroupClass}>
+            <select className={s.ctx.formControlClass} size={this.props.size} onChange={this.handleOnSelect} ref={this.handleSelectLoad}>
+              {list.map((e, i) => <option key={i} title={this.getTitle(e.element)} {...EntityListBase.entityHtmlAttributes(e.element)}>{getToString(e.element)}</option>)}
+            </select>
+            <span className="input-group-append input-group-vertical">
+              {this.renderCreateButton(true)}
+              {this.renderFindButton(true)}
+              {selectedIndex != undefined && this.renderViewButton(true, list[selectedIndex].element)}
+              {selectedIndex != undefined && this.renderRemoveButton(true, list[selectedIndex].element)}
+              {selectedIndex != undefined && this.state.move && selectedIndex != null && selectedIndex > 0 && this.renderMoveUp(true, selectedIndex!)}
+              {selectedIndex != undefined && this.state.move && selectedIndex != null && selectedIndex < list.length - 1 && this.renderMoveDown(true, selectedIndex!)}
+            </span>
+          </div>
+        </div>
+      </FormGroup>
+    );
+  }
 
-        (s.onRemove ? s.onRemove(list[selectedIndex].element) : Promise.resolve(true))
-            .then(result => {
-                if (result == false)
-                    return;
+  handleRemoveClick = (event: React.SyntheticEvent<any>) => {
 
-                list.removeAt(selectedIndex!);
+    event.preventDefault();
 
-                this.setValue(list);
-            })
-            .done();
-    };
+    const s = this.state;
 
-    handleViewClick = (event: React.MouseEvent<any>) => {
+    var list = s.ctx.value!;
 
-        event.preventDefault();
+    var selectedIndex = this.getSelectedIndex()!;
 
-        const ctx = this.state.ctx;
-        const selectedIndex = this.getSelectedIndex()!;
-        const list = ctx.value!;
-        const entity = list[selectedIndex].element;
+    (s.onRemove ? s.onRemove(list[selectedIndex].element) : Promise.resolve(true))
+      .then(result => {
+        if (result == false)
+          return;
 
-        const pr = ctx.propertyRoute.addLambda(a => a[0]);
+        list.removeAt(selectedIndex!);
 
-        const openWindow = (event.button == 1 || event.ctrlKey) && !this.state.type!.isEmbedded;
+        this.setValue(list);
+      })
+      .done();
+  };
 
-        const promise = this.state.onView ?
-            this.state.onView(entity, pr) :
-            this.defaultView(entity, pr);
+  handleViewClick = (event: React.MouseEvent<any>) => {
 
-        if (promise == null)
-            return;
+    event.preventDefault();
 
-        promise.then(e => {
-            if (e == undefined)
-                return;
+    const ctx = this.state.ctx;
+    const selectedIndex = this.getSelectedIndex()!;
+    const list = ctx.value!;
+    const entity = list[selectedIndex].element;
 
-            this.convert(e).then(m => {
-                if (is(list[selectedIndex].element as Entity, e as Entity)) {
-                    list[selectedIndex].element = m;
-                    if (e.modified)
-                        this.setValue(list);
-                }
-                else {
-                    list[selectedIndex] = { rowId: null, element: m };
-                    this.setValue(list);
-                }
-            }).done();
-        }).done();
-    }
+    const pr = ctx.propertyRoute.addLambda(a => a[0]);
 
-    getTitle(e: Lite<Entity> | ModifiableEntity) {
+    const openWindow = (event.button == 1 || event.ctrlKey) && !this.state.type!.isEmbedded;
 
-        const pr = this.props.ctx.propertyRoute;
+    const promise = this.state.onView ?
+      this.state.onView(entity, pr) :
+      this.defaultView(entity, pr);
 
-        const type = pr && pr.member && pr.member.typeNiceName || (e as Lite<Entity>).EntityType || (e as ModifiableEntity).Type;
+    if (promise == null)
+      return;
 
-        const id = (e as Lite<Entity>).id || (e as Entity).id;
+    promise.then(e => {
+      if (e == undefined)
+        return;
 
-        return type + (id ? " " + id : "");
-    }
+      this.convert(e).then(m => {
+        if (is(list[selectedIndex].element as Entity, e as Entity)) {
+          list[selectedIndex].element = m;
+          if (e.modified)
+            this.setValue(list);
+        }
+        else {
+          list[selectedIndex] = { rowId: null, element: m };
+          this.setValue(list);
+        }
+      }).done();
+    }).done();
+  }
+
+  getTitle(e: Lite<Entity> | ModifiableEntity) {
+
+    const pr = this.props.ctx.propertyRoute;
+
+    const type = pr && pr.member && pr.member.typeNiceName || (e as Lite<Entity>).EntityType || (e as ModifiableEntity).Type;
+
+    const id = (e as Lite<Entity>).id || (e as Entity).id;
+
+    return type + (id ? " " + id : "");
+  }
 }

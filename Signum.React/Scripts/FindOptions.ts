@@ -1,302 +1,300 @@
-﻿import { TypeReference, PropertyRoute, PseudoType, QueryKey } from './Reflection';
-import { Dic } from './Globals';
+﻿import { TypeReference, PseudoType, QueryKey } from './Reflection';
 import { Lite, Entity } from './Signum.Entities';
 import { PaginationMode, OrderType, FilterOperation, FilterType, ColumnOptionsMode, UniqueType, SystemTimeMode, FilterGroupOperation } from './Signum.Entities.DynamicQuery';
 import { SearchControlProps } from "./Search";
-import { func } from 'prop-types';
 
 export { PaginationMode, OrderType, FilterOperation, FilterType, ColumnOptionsMode, UniqueType };
 
 export interface ValueFindOptions {
-    queryName: PseudoType | QueryKey;
-    filterOptions?: FilterOption[];
+  queryName: PseudoType | QueryKey;
+  filterOptions?: FilterOption[];
 }
 
 export interface ValueFindOptionsParsed {
-    queryKey: string;
-    filterOptions: FilterOptionParsed; 
+  queryKey: string;
+  filterOptions: FilterOptionParsed;
 }
 
 export interface ModalFindOptions {
-    title?: string;
-    useDefaultBehaviour?: boolean;
-    autoSelectIfOne?: boolean;
-    searchControlProps?: Partial<SearchControlProps>;
+  title?: string;
+  useDefaultBehaviour?: boolean;
+  autoSelectIfOne?: boolean;
+  searchControlProps?: Partial<SearchControlProps>;
 }
 
 export interface FindOptions {
-    queryName: PseudoType | QueryKey;
-    groupResults?: boolean;
-    parentToken?: string;
-    parentValue?: any;
+  queryName: PseudoType | QueryKey;
+  groupResults?: boolean;
+  parentToken?: string;
+  parentValue?: any;
 
-    filterOptions?: FilterOption[];
-    orderOptions?: OrderOption[];
-    columnOptionsMode?: ColumnOptionsMode;
-    columnOptions?: ColumnOption[];
-    pagination?: Pagination;
-    systemTime?: SystemTime;
+  filterOptions?: FilterOption[];
+  orderOptions?: OrderOption[];
+  columnOptionsMode?: ColumnOptionsMode;
+  columnOptions?: ColumnOption[];
+  pagination?: Pagination;
+  systemTime?: SystemTime;
 }
 
 export interface FindOptionsParsed {
-    queryKey: string;
-    groupResults: boolean;
-    filterOptions: FilterOptionParsed[];
-    orderOptions: OrderOptionParsed[];
-    columnOptions: ColumnOptionParsed[];
-    pagination: Pagination;
-    systemTime?: SystemTime;
+  queryKey: string;
+  groupResults: boolean;
+  filterOptions: FilterOptionParsed[];
+  orderOptions: OrderOptionParsed[];
+  columnOptions: ColumnOptionParsed[];
+  pagination: Pagination;
+  systemTime?: SystemTime;
 }
 
 
 export type FilterOption = FilterConditionOption | FilterGroupOption;
 
-export function isFilterGroupOption(fo: FilterOption): fo is FilterGroupOption{
-    return (fo as FilterGroupOption).groupOperation != undefined;
+export function isFilterGroupOption(fo: FilterOption): fo is FilterGroupOption {
+  return (fo as FilterGroupOption).groupOperation != undefined;
 }
 
 export interface FilterConditionOption {
-    token: string;
-    frozen?: boolean;
-    operation?: FilterOperation;
-    value: any;
+  token: string;
+  frozen?: boolean;
+  operation?: FilterOperation;
+  value: any;
 }
 
 export interface FilterGroupOption {
-    token: string;
-    groupOperation: FilterGroupOperation;
-    filters: FilterOption[];
+  token: string;
+  groupOperation: FilterGroupOperation;
+  filters: FilterOption[];
 }
 
 export type FilterOptionParsed = FilterConditionOptionParsed | FilterGroupOptionParsed;
 
 export function isFilterGroupOptionParsed(fo: FilterOptionParsed): fo is FilterGroupOptionParsed {
-    return (fo as FilterGroupOptionParsed).groupOperation != undefined;
+  return (fo as FilterGroupOptionParsed).groupOperation != undefined;
 }
 
 export interface FilterConditionOptionParsed {
-    token?: QueryToken;
-    frozen: boolean;
-    operation?: FilterOperation;
-    value: any;
+  token?: QueryToken;
+  frozen: boolean;
+  operation?: FilterOperation;
+  value: any;
 }
 
 export interface FilterGroupOptionParsed {
-    groupOperation: FilterGroupOperation;
-    frozen: boolean;
-    token?: QueryToken;
-    filters: FilterOptionParsed[];
+  groupOperation: FilterGroupOperation;
+  frozen: boolean;
+  token?: QueryToken;
+  filters: FilterOptionParsed[];
 }
 
 export interface OrderOption {
-    token: string;
-    orderType: OrderType;
+  token: string;
+  orderType: OrderType;
 }
 
 export interface OrderOptionParsed {
-    token: QueryToken;
-    orderType: OrderType;
+  token: QueryToken;
+  orderType: OrderType;
 }
 
 export interface ColumnOption {
-    token: string;
-    displayName?: string;
+  token: string;
+  displayName?: string;
 }
 
 export interface ColumnOptionParsed {
-    token?: QueryToken;
-    displayName?: string;
+  token?: QueryToken;
+  displayName?: string;
 }
 
 export const DefaultPagination: Pagination = {
-    mode: "Paginate",
-    elementsPerPage: 20,
-    currentPage: 1
+  mode: "Paginate",
+  elementsPerPage: 20,
+  currentPage: 1
 };
 
 
-export type FindMode = "Find"  |"Explore";
+export type FindMode = "Find" | "Explore";
 
 export enum SubTokensOptions {
-    CanAggregate = 1,
-    CanAnyAll = 2,
-    CanElement = 4,
+  CanAggregate = 1,
+  CanAnyAll = 2,
+  CanElement = 4,
 }
 
 export interface QueryToken {
-    toString: string;
-    niceName: string;
-    key: string;
-    format?: string;
-    unit?: string;
-    type: TypeReference;
-    typeColor: string;
-    niceTypeName: string;
-    isGroupable: boolean;
-    hasOrderAdapter?: boolean;
-    preferEquals?: boolean;
-    filterType?: FilterType;
-    fullKey: string;
-    queryTokenType?: QueryTokenType;
-    parent?: QueryToken;
-    propertyRoute?: string;
+  toString: string;
+  niceName: string;
+  key: string;
+  format?: string;
+  unit?: string;
+  type: TypeReference;
+  typeColor: string;
+  niceTypeName: string;
+  isGroupable: boolean;
+  hasOrderAdapter?: boolean;
+  preferEquals?: boolean;
+  filterType?: FilterType;
+  fullKey: string;
+  queryTokenType?: QueryTokenType;
+  parent?: QueryToken;
+  propertyRoute?: string;
 }
 
 export type QueryTokenType = "Aggregate" | "Element" | "AnyOrAll";
 
-export function hasAnyOrAll(token: QueryToken | undefined) : boolean {
-    if(token == undefined)
-        return false;
+export function hasAnyOrAll(token: QueryToken | undefined): boolean {
+  if (token == undefined)
+    return false;
 
-    if(token.queryTokenType == "AnyOrAll")
-        return true;
+  if (token.queryTokenType == "AnyOrAll")
+    return true;
 
-    return hasAnyOrAll(token.parent);
+  return hasAnyOrAll(token.parent);
 }
 
 export function isPrefix(prefix: QueryToken, token: QueryToken): boolean {
-    return prefix.fullKey == token.fullKey || token.fullKey.startsWith(prefix.fullKey + ".");
+  return prefix.fullKey == token.fullKey || token.fullKey.startsWith(prefix.fullKey + ".");
 }
 
 export function hasAggregate(token: QueryToken | undefined): boolean {
-    if (token == undefined)
-        return false;
+  if (token == undefined)
+    return false;
 
-    if (token.queryTokenType == "Aggregate")
-        return true;
+  if (token.queryTokenType == "Aggregate")
+    return true;
 
-    return hasAggregate(token.parent);
+  return hasAggregate(token.parent);
 }
 
 export function getTokenParents(token: QueryToken | null | undefined): QueryToken[] {
-    const result: QueryToken[] = [];
-    while (token) {
-        result.insertAt(0, token);
-        token = token.parent;
-    }
-    return result;
+  const result: QueryToken[] = [];
+  while (token) {
+    result.insertAt(0, token);
+    token = token.parent;
+  }
+  return result;
 }
 
 export function toQueryToken(cd: ColumnDescription): QueryToken {
-    return {
-        toString: cd.displayName,
-        niceName: cd.displayName,
-        key: cd.name,
-        fullKey: cd.name,
-        unit: cd.unit,
-        format: cd.format,
-        type: cd.type,
-        typeColor: cd.typeColor,
-        niceTypeName: cd.niceTypeName,
-        filterType: cd.filterType,
-        isGroupable: cd.isGroupable,
-        hasOrderAdapter: cd.hasOrderAdapter,
-        preferEquals: cd.preferEquals,
-        propertyRoute: cd.propertyRoute
-    };
+  return {
+    toString: cd.displayName,
+    niceName: cd.displayName,
+    key: cd.name,
+    fullKey: cd.name,
+    unit: cd.unit,
+    format: cd.format,
+    type: cd.type,
+    typeColor: cd.typeColor,
+    niceTypeName: cd.niceTypeName,
+    filterType: cd.filterType,
+    isGroupable: cd.isGroupable,
+    hasOrderAdapter: cd.hasOrderAdapter,
+    preferEquals: cd.preferEquals,
+    propertyRoute: cd.propertyRoute
+  };
 }
 
-export type FilterRequest = FilterConditionRequest | FilterGroupRequest; 
+export type FilterRequest = FilterConditionRequest | FilterGroupRequest;
 
 export function isFilterGroupRequest(fr: FilterRequest): fr is FilterGroupRequest {
-    return (fr as FilterGroupRequest).groupOperation != null;
+  return (fr as FilterGroupRequest).groupOperation != null;
 }
 
 export interface FilterGroupRequest {
-    groupOperation: FilterGroupOperation;
-    token?: string;
-    filters: FilterRequest[];
+  groupOperation: FilterGroupOperation;
+  token?: string;
+  filters: FilterRequest[];
 }
 
 export interface FilterConditionRequest {
-    token: string;
-    operation: FilterOperation;
-    value: any;
+  token: string;
+  operation: FilterOperation;
+  value: any;
 }
 
 export interface OrderRequest {
-    token: string;
-    orderType: OrderType
+  token: string;
+  orderType: OrderType
 }
 
 export interface ColumnRequest {
-    token: string;
-    displayName: string;
+  token: string;
+  displayName: string;
 }
 
 export interface QueryEntitiesRequest {
-    queryKey: string;
-    filters: FilterRequest[];
-    orders: OrderRequest[];
-    count: number;
+  queryKey: string;
+  filters: FilterRequest[];
+  orders: OrderRequest[];
+  count: number;
 }
 
 export interface QueryRequest {
-    queryKey: string;
-    groupResults: boolean;
-    filters: FilterRequest[];
-    orders: OrderRequest[];
-    columns: ColumnRequest[];
-    pagination: Pagination;
-    systemTime?: SystemTime;
+  queryKey: string;
+  groupResults: boolean;
+  filters: FilterRequest[];
+  orders: OrderRequest[];
+  columns: ColumnRequest[];
+  pagination: Pagination;
+  systemTime?: SystemTime;
 }
 
 export type AggregateType = "Count" | "Average" | "Sum" | "Min" | "Max";
 
 export interface QueryValueRequest {
-    queryKey: string;
-    filters: FilterRequest[];
-    valueToken?: string;
+  queryKey: string;
+  filters: FilterRequest[];
+  valueToken?: string;
 }
 
 export interface ResultColumn {
-    displayName: string;
-    token: QueryToken;
+  displayName: string;
+  token: QueryToken;
 }
 
 export interface ResultTable {
-    queryKey: string;
-    entityColumn: string;
-    columns: string[];
-    rows: ResultRow[];
-    pagination: Pagination
-    totalElements: number;
+  queryKey: string;
+  entityColumn: string;
+  columns: string[];
+  rows: ResultRow[];
+  pagination: Pagination
+  totalElements: number;
 }
 
 
 export interface ResultRow {
-    entity?: Lite<Entity>;
-    columns: any[];
+  entity?: Lite<Entity>;
+  columns: any[];
 }
 
 export interface Pagination {
-    mode: PaginationMode;
-    elementsPerPage?: number;
-    currentPage?: number;
+  mode: PaginationMode;
+  elementsPerPage?: number;
+  currentPage?: number;
 }
 
 export interface SystemTime {
-    mode: SystemTimeMode;
-    startDate?: string;
-    endDate?: string;
+  mode: SystemTimeMode;
+  startDate?: string;
+  endDate?: string;
 }
 
 export module PaginateMath {
-    export function startElementIndex(p: Pagination) {
-        return (p.elementsPerPage! * (p.currentPage! - 1)) + 1;
-    }
+  export function startElementIndex(p: Pagination) {
+    return (p.elementsPerPage! * (p.currentPage! - 1)) + 1;
+  }
 
-    export function endElementIndex(p: Pagination, rows: number) {
-        return startElementIndex(p) + rows - 1;
-    }
+  export function endElementIndex(p: Pagination, rows: number) {
+    return startElementIndex(p) + rows - 1;
+  }
 
-    export function totalPages(p: Pagination, totalElements: number) {
-        return Math.max(1, Math.ceil(totalElements / p.elementsPerPage!)); //Round up
-    }
+  export function totalPages(p: Pagination, totalElements: number) {
+    return Math.max(1, Math.ceil(totalElements / p.elementsPerPage!)); //Round up
+  }
 
-    export function maxElementIndex(p: Pagination) {
-        return (p.elementsPerPage! * (p.currentPage! + 1)) - 1;
-    }
+  export function maxElementIndex(p: Pagination) {
+    return (p.elementsPerPage! * (p.currentPage! + 1)) - 1;
+  }
 }
 
 
@@ -304,111 +302,111 @@ export module PaginateMath {
 
 
 export interface QueryDescription {
-    queryKey: string;
-    columns: { [name: string]: ColumnDescription };
+  queryKey: string;
+  columns: { [name: string]: ColumnDescription };
 }
 
 export interface ColumnDescription {
-    name: string;
-    type: TypeReference;
-    filterType: FilterType;
-    typeColor: string;
-    niceTypeName: string;
-    unit?: string;
-    format?: string;
-    displayName: string;
-    isGroupable: boolean;
-    hasOrderAdapter?: boolean;
-    preferEquals?: boolean;
-    propertyRoute?: string;
+  name: string;
+  type: TypeReference;
+  filterType: FilterType;
+  typeColor: string;
+  niceTypeName: string;
+  unit?: string;
+  format?: string;
+  displayName: string;
+  isGroupable: boolean;
+  hasOrderAdapter?: boolean;
+  preferEquals?: boolean;
+  propertyRoute?: string;
 }
 
 export function isList(fo: FilterOperation) {
-    return fo == "IsIn" ||
-        fo == "IsNotIn";
+  return fo == "IsIn" ||
+    fo == "IsNotIn";
 }
 
 
 export const filterOperations: { [a: string /*FilterType*/]: FilterOperation[] } = {};
 filterOperations["String"] = [
-    "Contains",
-    "EqualTo",
-    "StartsWith",
-    "EndsWith",
-    "Like",
-    "NotContains",
-    "DistinctTo",
-    "NotStartsWith",
-    "NotEndsWith",
-    "NotLike",
-    "IsIn",
-    "IsNotIn"
+  "Contains",
+  "EqualTo",
+  "StartsWith",
+  "EndsWith",
+  "Like",
+  "NotContains",
+  "DistinctTo",
+  "NotStartsWith",
+  "NotEndsWith",
+  "NotLike",
+  "IsIn",
+  "IsNotIn"
 ];
 
 filterOperations["DateTime"] = [
-    "EqualTo",
-    "DistinctTo",
-    "GreaterThan",
-    "GreaterThanOrEqual",
-    "LessThan",
-    "LessThanOrEqual",
-    "IsIn",
-    "IsNotIn"
+  "EqualTo",
+  "DistinctTo",
+  "GreaterThan",
+  "GreaterThanOrEqual",
+  "LessThan",
+  "LessThanOrEqual",
+  "IsIn",
+  "IsNotIn"
 ];
 
 filterOperations["Integer"] = [
-    "EqualTo",
-    "DistinctTo",
-    "GreaterThan",
-    "GreaterThanOrEqual",
-    "LessThan",
-    "LessThanOrEqual",
-    "IsIn",
-    "IsNotIn"
+  "EqualTo",
+  "DistinctTo",
+  "GreaterThan",
+  "GreaterThanOrEqual",
+  "LessThan",
+  "LessThanOrEqual",
+  "IsIn",
+  "IsNotIn"
 ];
 
 filterOperations["Decimal"] = [
-    "EqualTo",
-    "DistinctTo",
-    "GreaterThan",
-    "GreaterThanOrEqual",
-    "LessThan",
-    "LessThanOrEqual",
-    "IsIn",
-    "IsNotIn"
+  "EqualTo",
+  "DistinctTo",
+  "GreaterThan",
+  "GreaterThanOrEqual",
+  "LessThan",
+  "LessThanOrEqual",
+  "IsIn",
+  "IsNotIn"
 ];
 
 filterOperations["Enum"] = [
-    "EqualTo",
-    "DistinctTo",
-    "GreaterThan",
-    "GreaterThanOrEqual",
-    "LessThan",
-    "LessThanOrEqual",
-    "IsIn",
-    "IsNotIn",
+  "EqualTo",
+  "DistinctTo",
+  "GreaterThan",
+  "GreaterThanOrEqual",
+  "LessThan",
+  "LessThanOrEqual",
+  "IsIn",
+  "IsNotIn",
 ];
 
 filterOperations["Guid"] = [
-    "EqualTo",
-    "DistinctTo",
-    "IsIn",
-    "IsNotIn"
+  "EqualTo",
+  "DistinctTo",
+  "IsIn",
+  "IsNotIn"
 ];
 
 filterOperations["Lite"] = [
-    "EqualTo",
-    "DistinctTo",
-    "IsIn",
-    "IsNotIn"
+  "EqualTo",
+  "DistinctTo",
+  "IsIn",
+  "IsNotIn"
 ];
 
 filterOperations["Embedded"] = [
-    "EqualTo",
-    "DistinctTo",
+  "EqualTo",
+  "DistinctTo",
 ];
 
 filterOperations["Boolean"] = [
-    "EqualTo",
-    "DistinctTo",
+  "EqualTo",
+  "DistinctTo",
 ];

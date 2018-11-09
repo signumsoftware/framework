@@ -49,7 +49,7 @@ namespace Signum.Engine.CodeGeneration
                         var lines = File.ReadAllLines(clientFile).ToList();
                         var index = lines.FindLastIndex(s => s.Contains("Navigator.addSettings(new EntitySettings")).NotFoundToNull() ??
                                lines.FindLastIndex(s => s.Contains("export function start")).NotFoundToNull() ?? 0;
-                        lines.Insert(index + 1, WritetEntitySettings(mod).Trim().Indent(4));
+                        lines.Insert(index + 1, WritetEntitySettings(mod).Trim().Indent(2));
                         File.WriteAllLines(clientFile, lines);
                     }
                     else
@@ -212,7 +212,7 @@ namespace Signum.Engine.CodeGeneration
             sb.AppendLine();
             sb.AppendLine("namespace " + GetServerNamespace(mod));
             sb.AppendLine("{");
-            sb.Append(WriteServerClass(mod).Indent(4));
+            sb.Append(WriteServerClass(mod).Indent(2));
             sb.AppendLine("}");
 
             return sb.ToString();
@@ -236,7 +236,7 @@ namespace Signum.Engine.CodeGeneration
 
             sb.AppendLine();
 
-            sb.Append(WriteServerStartMethod(mod).Indent(4));
+            sb.Append(WriteServerStartMethod(mod).Indent(2));
 
             sb.AppendLine("}");
             return sb.ToString();
@@ -265,7 +265,7 @@ namespace Signum.Engine.CodeGeneration
             sb.AppendLine();
             sb.AppendLine("namespace " + GetServerNamespace(mod));
             sb.AppendLine("{");
-            sb.Append(WriteControllerClass(mod).Indent(4));
+            sb.Append(WriteControllerClass(mod).Indent(2));
             sb.AppendLine("}");
 
             return sb.ToString();
@@ -284,7 +284,7 @@ namespace Signum.Engine.CodeGeneration
 
             sb.AppendLine();
 
-            sb.Append(WriteControllerExampleMethod(mod).Indent(4));
+            sb.Append(WriteControllerExampleMethod(mod).Indent(2));
 
             sb.AppendLine("}");
             return sb.ToString();
@@ -366,13 +366,13 @@ namespace Signum.Engine.CodeGeneration
 
             string entitySettings = WritetEntitySettings(mod);
             if (entitySettings != null)
-                sb.Append(entitySettings.Indent(4));
+                sb.Append(entitySettings.Indent(2));
 
             sb.AppendLine();
 
             string operationSettings = WriteOperationSettings(mod);
             if (operationSettings != null)
-                sb.Append(operationSettings.Indent(4));
+                sb.Append(operationSettings.Indent(2));
             
             sb.AppendLine("}");
 
