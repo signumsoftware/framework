@@ -19,7 +19,6 @@ interface WorkflowConditionComponentState {
 }
 
 export default class WorkflowConditionComponent extends React.Component<WorkflowConditionComponentProps, WorkflowConditionComponentState> {
-
     constructor(props: WorkflowConditionComponentProps) {
         super(props);
         this.state = {  };

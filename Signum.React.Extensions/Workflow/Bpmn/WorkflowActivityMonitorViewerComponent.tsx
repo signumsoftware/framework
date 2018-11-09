@@ -1,153 +1,142 @@
 ﻿import * as React from 'react'
-import {
-    WorkflowEntitiesDictionary, WorkflowActivityModel, WorkflowActivityType, WorkflowPoolModel,
-    WorkflowLaneModel, WorkflowConnectionModel, WorkflowEventModel, WorkflowEntity,
-    IWorkflowNodeEntity, WorkflowMessage, WorkflowActivityEntity, WorkflowActivityMessage, WorkflowModel, WorkflowActivityMonitorMessage
-} from '../Signum.Entities.Workflow'
-import { WorkflowActivityMonitor, API } from '../WorkflowClient'
-import { JavascriptMessage, toLite } from '@framework/Signum.Entities'
-import { Dic } from '@framework/Globals'
-import * as Navigator from '@framework/Navigator'
+import { WorkflowActivityModel, WorkflowModel, WorkflowActivityMonitorMessage } from '../Signum.Entities.Workflow'
+import { WorkflowActivityMonitor } from '../WorkflowClient'
 import NavigatedViewer from "bpmn-js/lib/NavigatedViewer"
 import searchPad from 'bpmn-js/lib/features/search'
 import * as WorkflowActivityMonitorRenderer from './WorkflowActivityMonitorRenderer'
 import * as BpmnUtils from './BpmnUtils'
 import WorkflowActivityStatsModal from '../ActivityMonitor/WorkflowActivityStatsModal';
-import SelectorModal from '@framework/SelectorModal';
-
+import { is } from '@framework/Signum.Entities';
+import { WorkflowActivityMonitorConfig } from '../ActivityMonitor/WorkflowActivityMonitorPage';
 import "bpmn-js/dist/assets/bpmn-font/css/bpmn-embedded.css"
 import "diagram-js/assets/diagram-js.css"
 import "./Bpmn.css"
-import { is } from '@framework/Signum.Entities';
-import { WorkflowActivityMonitorConfig } from '../ActivityMonitor/WorkflowActivityMonitorPage';
 
 export interface WorkflowActivityMonitorViewerComponentProps {
-    workflowModel: WorkflowModel;
-    workflowActivityMonitor: WorkflowActivityMonitor;
-    workflowConfig: WorkflowActivityMonitorConfig;
-    onDraw: () => void;
+  workflowModel: WorkflowModel;
+  workflowActivityMonitor: WorkflowActivityMonitor;
+  workflowConfig: WorkflowActivityMonitorConfig;
+  onDraw: () => void;
 }
 
 class CustomViewer extends NavigatedViewer {
 
 }
 
-CustomViewer.prototype._modules =
-    CustomViewer.prototype._modules.concat([WorkflowActivityMonitorRenderer]);
+CustomViewer.prototype._modules = CustomViewer.prototype._modules.concat([WorkflowActivityMonitorRenderer]);
 
 export default class WorkflowActivityMonitorViewerComponent extends React.Component<WorkflowActivityMonitorViewerComponentProps> {
+  viewer!: NavigatedViewer;
+  divArea!: HTMLDivElement;
 
-    viewer!: NavigatedViewer;
-    divArea!: HTMLDivElement;
+  handleOnModelError = (err: string) => {
+    if (err)
+      throw new Error('Error rendering the model ' + err);
+  }
 
-    handleOnModelError = (err: string) => {
-        if (err)
-            throw new Error('Error rendering the model ' + err);
+  componentDidMount() {
+    this.viewer = new CustomViewer({
+      container: this.divArea,
+      keyboard: {
+        bindTo: document
+      },
+      height: 1000,
+      additionalModules: [
+        searchPad,
+      ]
+    });
+    this.configureModules(this.props);
+    this.viewer.on('element.dblclick', 1500, this.handleElementDoubleClick as (obj: BPMN.Event) => void);
+    this.viewer.importXML(this.props.workflowModel.diagramXml, this.handleOnModelError);
+  }
+
+  handleElementDoubleClick = (obj: BPMN.DoubleClickEvent) => {
+
+    obj.preventDefault();
+    obj.stopPropagation();
+
+    var mle = this.props.workflowModel.entities.singleOrNull(mle => mle.element.bpmnElementId == obj.element.id);
+
+    if (mle && WorkflowActivityModel.isInstance(mle.element.model)) {
+      var actMod = mle.element.model;
+
+      const stats = this.props.workflowActivityMonitor.activities.singleOrNull(a => is(a.workflowActivity, actMod.workflowActivity));
+      if (stats) {
+        WorkflowActivityStatsModal.show(stats, this.props.workflowConfig, actMod);
+      }
     }
+  }
 
-    componentDidMount() {
-        this.viewer = new CustomViewer({
-            container: this.divArea,
-            keyboard: {
-                bindTo: document
-            },
-            height: 1000,
-            additionalModules: [
-                searchPad,
-            ]
+  componentWillUnmount() {
+    this.viewer.destroy();
+  }
+
+  componentWillReceiveProps(nextProps: WorkflowActivityMonitorViewerComponentProps) {
+
+    if (this.viewer) {
+
+      var redrawAll = () => {
+        this.configureModules(nextProps);
+
+        var reg = this.viewer.get<BPMN.ElementRegistry>("elementRegistry");
+        var gFactory = this.viewer.get<BPMN.GraphicsFactory>("graphicsFactory");
+        reg.getAll().forEach(a => {
+
+          const type = BpmnUtils.isConnection(a.type) ? "connection" : "shape";
+          const gfx = reg.getGraphics(a);
+          gFactory.update(type, a, gfx);
         });
-        this.configureModules(this.props);
-        this.viewer.on('element.dblclick', 1500, this.handleElementDoubleClick as (obj: BPMN.Event) => void);
-        this.viewer.importXML(this.props.workflowModel.diagramXml, this.handleOnModelError);
+      }
+
+      if (this.props.workflowModel.diagramXml !== nextProps.workflowModel.diagramXml) {
+        this.viewer.importXML(nextProps.workflowModel.diagramXml, (error, warnings) => {
+          this.handleOnModelError(error);
+
+          if (!error && this.props.workflowActivityMonitor != nextProps.workflowActivityMonitor)
+            redrawAll();
+
+        });
+      } else {
+        if (this.props.workflowActivityMonitor != nextProps.workflowActivityMonitor)
+          redrawAll();
+      }
     }
+  }
 
-    handleElementDoubleClick = (obj: BPMN.DoubleClickEvent) => {
+  configureModules(props: WorkflowActivityMonitorViewerComponentProps) {
+    var workflowActivityMonitorRenderer = this.viewer.get<WorkflowActivityMonitorRenderer.WorkflowActivityMonitorRenderer>('workflowActivityMonitorRenderer');
+    workflowActivityMonitorRenderer.viewer = this.viewer;
+    workflowActivityMonitorRenderer.workflowActivityMonitor = props.workflowActivityMonitor;
+    workflowActivityMonitorRenderer.workflowModel = props.workflowModel;
+    workflowActivityMonitorRenderer.workflowConfig = props.workflowConfig;
+  }
 
-        obj.preventDefault();
-        obj.stopPropagation();
+  handleSearchClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    var searchPad = this.viewer.get<any>("searchPad");
+    searchPad.toggle();
+  }
 
-        var mle = this.props.workflowModel.entities.singleOrNull(mle => mle.element.bpmnElementId == obj.element.id);
+  resetZoom() {
+    var zoomScroll = this.viewer.get<any>("zoomScroll");
+    zoomScroll.reset();
+  }
 
-        if (mle && WorkflowActivityModel.isInstance(mle.element.model)) {
-            var actMod = mle.element.model;
+  handleZoomClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    this.resetZoom();
+  }
 
-            const stats = this.props.workflowActivityMonitor.activities.singleOrNull(a => is(a.workflowActivity, actMod.workflowActivity));
-            if (stats) {
-                WorkflowActivityStatsModal.show(stats, this.props.workflowConfig, actMod);
-            }
-        }
-    }
-
-    componentWillUnmount() {
-        this.viewer.destroy();
-    }
-
-    componentWillReceiveProps(nextProps: WorkflowActivityMonitorViewerComponentProps) {
-        
-        if (this.viewer) {
-
-            var redrawAll = () => {
-                this.configureModules(nextProps);
-
-                var reg = this.viewer.get<BPMN.ElementRegistry>("elementRegistry");
-                var gFactory = this.viewer.get<BPMN.GraphicsFactory>("graphicsFactory");
-                reg.getAll().forEach(a => {
-
-                    const type = BpmnUtils.isConnection(a.type) ? "connection" : "shape";
-                    const gfx = reg.getGraphics(a);
-                    gFactory.update(type, a, gfx);
-                });
-            }
-
-            if (this.props.workflowModel.diagramXml !== nextProps.workflowModel.diagramXml) {
-                this.viewer.importXML(nextProps.workflowModel.diagramXml, (error, warnings) => {
-                    this.handleOnModelError(error);
-
-                    if (!error && this.props.workflowActivityMonitor != nextProps.workflowActivityMonitor)
-                        redrawAll();
-
-                });
-            } else {
-                if (this.props.workflowActivityMonitor != nextProps.workflowActivityMonitor)
-                    redrawAll();
-            }
-        }
-    }
-
-    configureModules(props: WorkflowActivityMonitorViewerComponentProps) {
-        var workflowActivityMonitorRenderer = this.viewer.get<WorkflowActivityMonitorRenderer.WorkflowActivityMonitorRenderer>('workflowActivityMonitorRenderer');
-        workflowActivityMonitorRenderer.viewer = this.viewer;
-        workflowActivityMonitorRenderer.workflowActivityMonitor = props.workflowActivityMonitor;
-        workflowActivityMonitorRenderer.workflowModel = props.workflowModel;
-        workflowActivityMonitorRenderer.workflowConfig = props.workflowConfig;
-    }
-
-    handleSearchClick = (e: React.MouseEvent<HTMLButtonElement>) => {
-        e.preventDefault();
-        var searchPad = this.viewer.get<any>("searchPad");
-        searchPad.toggle();
-    }
-
-    resetZoom() {
-        var zoomScroll = this.viewer.get<any>("zoomScroll");
-        zoomScroll.reset();
-    }
-
-    handleZoomClick = (e: React.MouseEvent<HTMLButtonElement>) => {
-        e.preventDefault();
-        this.resetZoom();
-    }
-
-    render() {
-        return (
-            <div>
-                <div className="btn-toolbar" style={{ marginBottom: "5px" }}>
-                    <button className="btn btn-primary" onClick={this.props.onDraw}>{WorkflowActivityMonitorMessage.Draw.niceToString()}</button>
-                    <button className="btn btn-default" onClick={this.handleZoomClick}>{WorkflowActivityMonitorMessage.ResetZoom.niceToString()}</button>
-                    <button className="btn btn-default" onClick={this.handleSearchClick}>{WorkflowActivityMonitorMessage.Find.niceToString()}</button>
-                </div>
-                <div style={{ border: "1px solid lightgray" }} ref={de => this.divArea = de!} />
-            </div>
-        );
-    }
+  render() {
+    return (
+      <div>
+        <div className="btn-toolbar" style={{ marginBottom: "5px" }}>
+          <button className="btn btn-primary" onClick={this.props.onDraw}>{WorkflowActivityMonitorMessage.Draw.niceToString()}</button>
+          <button className="btn btn-default" onClick={this.handleZoomClick}>{WorkflowActivityMonitorMessage.ResetZoom.niceToString()}</button>
+          <button className="btn btn-default" onClick={this.handleSearchClick}>{WorkflowActivityMonitorMessage.Find.niceToString()}</button>
+        </div>
+        <div style={{ border: "1px solid lightgray" }} ref={de => this.divArea = de!} />
+      </div>
+    );
+  }
 }

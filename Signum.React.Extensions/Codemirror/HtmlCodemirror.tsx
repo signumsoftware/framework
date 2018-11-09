@@ -1,7 +1,5 @@
 ﻿import * as React from 'react'
-import { getQueryNiceName } from '@framework/Reflection'
-import * as Navigator from '@framework/Navigator'
-import { TypeContext, FormGroupStyle } from '@framework/TypeContext'
+import { TypeContext } from '@framework/TypeContext'
 import CodeMirrorComponent from '../Codemirror/CodeMirrorComponent'
 import * as CodeMirror from 'codemirror'
 
@@ -9,8 +7,6 @@ import "codemirror/lib/codemirror.css"
 import "codemirror/addon/dialog/dialog.css"
 import "codemirror/addon/display/fullscreen.css"
 import "codemirror/addon/hint/show-hint.css"
-
-
 import "codemirror/lib/codemirror"
 import "codemirror/mode/htmlmixed/htmlmixed"
 import "codemirror/addon/comment/comment"
@@ -24,43 +20,43 @@ import "codemirror/addon/search/searchcursor"
 
 export default class HtmlCodemirror extends React.Component<{ ctx: TypeContext<string | null | undefined>, onChange?: (newValue: string) => void }> {
 
-    handleOnChange = (newValue: string) => {
-        const { ctx, onChange } = this.props;
+  handleOnChange = (newValue: string) => {
+    const { ctx, onChange } = this.props;
 
-        ctx.value = newValue;
-        if (onChange != undefined)
-            onChange(ctx.value);
-    };
-    
-    codeMirrorComponent!: CodeMirrorComponent;
-    
-    render() {
+    ctx.value = newValue;
+    if (onChange != undefined)
+      onChange(ctx.value);
+  };
 
-        const ctx = this.props.ctx;
+  codeMirrorComponent!: CodeMirrorComponent;
 
-        const options = {
-            lineNumbers: true,
-            mode: "htmlmixed",
-            extraKeys: {
-                "Ctrl-K": (cm : any) => cm.lineComment(cm.getCursor(true), cm.getCursor(false)),
-                "Ctrl-U": (cm: any) => cm.uncomment(cm.getCursor(true), cm.getCursor(false)),
-                "F11": (cm: any) => cm.setOption("fullScreen", !cm.getOption("fullScreen")),
-                "Esc": (cm: any) => {
-                    if (cm.getOption("fullScreen"))
-                        cm.setOption("fullScreen", false);
-                }
-            }
-        } as CodeMirror.EditorConfiguration;
+  render() {
 
-        (options as any).highlightSelectionMatches = true;
-        (options as any).matchBrackets = true;
-        
-        return (
-            <div>
-                <CodeMirrorComponent value={this.props.ctx.value} ref={cm => this.codeMirrorComponent = cm!}
-                    options={options}
-                    onChange={this.handleOnChange}/>
-            </div>
-        );
-    }
+    const ctx = this.props.ctx;
+
+    const options = {
+      lineNumbers: true,
+      mode: "htmlmixed",
+      extraKeys: {
+        "Ctrl-K": (cm: any) => cm.lineComment(cm.getCursor(true), cm.getCursor(false)),
+        "Ctrl-U": (cm: any) => cm.uncomment(cm.getCursor(true), cm.getCursor(false)),
+        "F11": (cm: any) => cm.setOption("fullScreen", !cm.getOption("fullScreen")),
+        "Esc": (cm: any) => {
+          if (cm.getOption("fullScreen"))
+            cm.setOption("fullScreen", false);
+        }
+      }
+    } as CodeMirror.EditorConfiguration;
+
+    (options as any).highlightSelectionMatches = true;
+    (options as any).matchBrackets = true;
+
+    return (
+      <div>
+        <CodeMirrorComponent value={this.props.ctx.value} ref={cm => this.codeMirrorComponent = cm!}
+          options={options}
+          onChange={this.handleOnChange} />
+      </div>
+    );
+  }
 }

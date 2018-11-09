@@ -1,5 +1,4 @@
-﻿
-export interface IFile
+﻿export interface IFile
 {
 	__isFile__ : true; //only for type-checking
     binaryFile?: string | null;

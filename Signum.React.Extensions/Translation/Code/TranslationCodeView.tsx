@@ -1,20 +1,14 @@
 ﻿import * as React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Dic } from '@framework/Globals'
-import * as Finder from '@framework/Finder'
 import { notifySuccess } from '@framework/Operations/EntityOperations'
-import { ValueSearchControl, SearchControl } from '@framework/Search'
-import EntityLink from '@framework/SearchControl/EntityLink'
-import { QueryDescription, SubTokensOptions } from '@framework/FindOptions'
-import { getQueryNiceName, PropertyRoute, getTypeInfos } from '@framework/Reflection'
-import { ModifiableEntity, EntityControlMessage, Entity, Lite, parseLite, getToString, JavascriptMessage } from '@framework/Signum.Entities'
+import { Lite } from '@framework/Signum.Entities'
 import * as CultureClient from '../CultureClient'
-import { API, AssemblyResult, LocalizedType, LocalizableType, LocalizedMember } from '../TranslationClient'
+import { API, AssemblyResult } from '../TranslationClient'
 import { CultureInfoEntity } from '../../Basics/Signum.Entities.Basics'
 import { TranslationMessage } from '../Signum.Entities.Translation'
 import { RouteComponentProps } from "react-router";
 import { TranslationTypeTable } from './TranslationTypeTable'
-
 import "../Translation.css"
 
 interface TranslationCodeViewProps extends RouteComponentProps<{ culture: string; assembly: string }> {
@@ -23,95 +17,95 @@ interface TranslationCodeViewProps extends RouteComponentProps<{ culture: string
 
 export default class TranslationCodeView extends React.Component<TranslationCodeViewProps, { result?: AssemblyResult; cultures?: { [name: string]: Lite<CultureInfoEntity> } }> {
 
-    constructor(props: TranslationCodeViewProps) {
-        super(props);
-        this.state = { };
-    }
+  constructor(props: TranslationCodeViewProps) {
+    super(props);
+    this.state = {};
+  }
 
-    componentWillMount() {
-        CultureClient.getCultures(true).then(cultures => this.setState({ cultures })).done();
-    }
+  componentWillMount() {
+    CultureClient.getCultures(true).then(cultures => this.setState({ cultures })).done();
+  }
 
-    render() {
+  render() {
 
-        const {assembly, culture } = this.props.match.params;
+    const { assembly, culture } = this.props.match.params;
 
-        const message = TranslationMessage.View0In1.niceToString(assembly,
-            culture == undefined ? TranslationMessage.AllLanguages.niceToString() :
-                this.state.cultures ? this.state.cultures[culture].toStr :
-                    culture);
+    const message = TranslationMessage.View0In1.niceToString(assembly,
+      culture == undefined ? TranslationMessage.AllLanguages.niceToString() :
+        this.state.cultures ? this.state.cultures[culture].toStr :
+          culture);
 
-        return (
-            <div>
-                <h2>{message}</h2>
-                <TranslateSearchBox search={this.handleSearch} />
-                <em> {TranslationMessage.PressSearchForResults.niceToString() }</em>
-                <br/>
-                { this.renderTable() }
-            </div>
-        );
-    }
+    return (
+      <div>
+        <h2>{message}</h2>
+        <TranslateSearchBox search={this.handleSearch} />
+        <em> {TranslationMessage.PressSearchForResults.niceToString()}</em>
+        <br />
+        {this.renderTable()}
+      </div>
+    );
+  }
 
-    handleSearch = (filter: string) => {
-        const {assembly, culture} = this.props.match.params;
+  handleSearch = (filter: string) => {
+    const { assembly, culture } = this.props.match.params;
 
-        return API.retrieve(assembly, culture || "", filter)
-            .then(result => this.setState({ result: result }))
-            .done();
-    }
+    return API.retrieve(assembly, culture || "", filter)
+      .then(result => this.setState({ result: result }))
+      .done();
+  }
 
-    renderTable() {
+  renderTable() {
 
-        if (this.state.result == undefined)
-            return undefined;
+    if (this.state.result == undefined)
+      return undefined;
 
 
-        const result = this.state.result;
+    const result = this.state.result;
 
-        if (Dic.getKeys(result).length == 0)
-            return <strong> {TranslationMessage.NoResultsFound.niceToString() }</strong>;
-        
-        return (
-            <div>
-                { Dic.getValues(this.state.result.types).map(type => <TranslationTypeTable key={type.type} type={type} result={result} currentCulture={this.props.match.params.culture} />) }
-                <input type="submit" value={ TranslationMessage.Save.niceToString() } className="btn btn-primary" onClick={this.handleSave}/>
-            </div>
-        );
-    }
+    if (Dic.getKeys(result).length == 0)
+      return <strong> {TranslationMessage.NoResultsFound.niceToString()}</strong>;
 
-    handleSave = (e: React.FormEvent<any>) => {
-        e.preventDefault();
-        const params = this.props.match.params;
-        API.save(params.assembly, params.culture || "", this.state.result!).then(() => notifySuccess()).done();
-    }
+    return (
+      <div>
+        {Dic.getValues(this.state.result.types).map(type => <TranslationTypeTable key={type.type} type={type} result={result} currentCulture={this.props.match.params.culture} />)}
+        <input type="submit" value={TranslationMessage.Save.niceToString()} className="btn btn-primary" onClick={this.handleSave} />
+      </div>
+    );
+  }
+
+  handleSave = (e: React.FormEvent<any>) => {
+    e.preventDefault();
+    const params = this.props.match.params;
+    API.save(params.assembly, params.culture || "", this.state.result!).then(() => notifySuccess()).done();
+  }
 }
 
 export class TranslateSearchBox extends React.Component<{ search: (newValue: string) => void }, { filter: string }>
 {
-    state = { filter: "" };
+  state = { filter: "" };
 
-    handleChange = (e: React.FormEvent<any>) => {
-        e.preventDefault();
-        this.setState({ filter: (e.currentTarget as HTMLInputElement).value });
-    }
+  handleChange = (e: React.FormEvent<any>) => {
+    e.preventDefault();
+    this.setState({ filter: (e.currentTarget as HTMLInputElement).value });
+  }
 
-    handleSearch = (e: React.FormEvent<any>) => {
-        e.preventDefault();
-        this.props.search(this.state.filter);
-    }
+  handleSearch = (e: React.FormEvent<any>) => {
+    e.preventDefault();
+    this.props.search(this.state.filter);
+  }
 
-    render() {
+  render() {
 
-        return (
-            <form onSubmit={this.handleSearch} className="input-group">
-                <input type="text" className="form-control"
-                    placeholder={ TranslationMessage.Search.niceToString() }  value={ this.state.filter} onChange={this.handleChange}/>
-                <div className="input-group-append">
-                    <button className="btn btn-light" type="submit" title={ TranslationMessage.Search.niceToString() }>
-                        <FontAwesomeIcon icon="search" />
-                    </button>
-                </div>
-            </form>
-        );
-    }
+    return (
+      <form onSubmit={this.handleSearch} className="input-group">
+        <input type="text" className="form-control"
+          placeholder={TranslationMessage.Search.niceToString()} value={this.state.filter} onChange={this.handleChange} />
+        <div className="input-group-append">
+          <button className="btn btn-light" type="submit" title={TranslationMessage.Search.niceToString()}>
+            <FontAwesomeIcon icon="search" />
+          </button>
+        </div>
+      </form>
+    );
+  }
 }
