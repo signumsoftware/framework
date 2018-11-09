@@ -22,9 +22,11 @@ using Signum.Utilities.ExpressionTrees;
 using Microsoft.AspNetCore.Mvc;
 using Signum.React.Json;
 using System.Linq.Expressions;
+using System.ComponentModel.DataAnnotations;
 
 namespace Signum.React.ApiControllers
 {
+    [ValidateModelFilter]
     public class QueryController : ApiController
     {
         [HttpGet("api/query/findLiteLike"), ProfilerActionSplitter("types")]
@@ -36,7 +38,7 @@ namespace Signum.React.ApiControllers
         }
 
         [HttpPost("api/query/findRowsLike"), ProfilerActionSplitter("types")]
-        public async Task<ResultTable> FindRowsLike([FromBody]AutocompleteQueryRequestTS request, CancellationToken token)
+        public async Task<ResultTable> FindRowsLike([Required, FromBody]AutocompleteQueryRequestTS request, CancellationToken token)
         {
             var qn = QueryLogic.ToQueryName(request.queryKey);
             var qd = QueryLogic.Queries.QueryDescription(qn);
@@ -90,7 +92,7 @@ namespace Signum.React.ApiControllers
         }
 
         [HttpPost("api/query/parseTokens")]
-        public List<QueryTokenTS> ParseTokens([FromBody]ParseTokensRequest request)
+        public List<QueryTokenTS> ParseTokens([Required, FromBody]ParseTokensRequest request)
         {
             var qn = QueryLogic.ToQueryName(request.queryKey);
             var qd = QueryLogic.Queries.QueryDescription(qn);
@@ -114,7 +116,7 @@ namespace Signum.React.ApiControllers
         }
 
         [HttpPost("api/query/subTokens")]
-        public List<QueryTokenTS> SubTokens([FromBody]SubTokensRequest request)
+        public List<QueryTokenTS> SubTokens([Required, FromBody]SubTokensRequest request)
         {
             var qn = QueryLogic.ToQueryName(request.queryKey);
             var qd = QueryLogic.Queries.QueryDescription(qn);
@@ -135,20 +137,20 @@ namespace Signum.React.ApiControllers
         }
 
         [HttpPost("api/query/executeQuery"), ProfilerActionSplitter]
-        public async Task<ResultTable> ExecuteQuery([FromBody]QueryRequestTS request, CancellationToken token)
+        public async Task<ResultTable> ExecuteQuery([Required, FromBody]QueryRequestTS request, CancellationToken token)
         {
             var result = await QueryLogic.Queries.ExecuteQueryAsync(request.ToQueryRequest(), token);
             return result;
         }
 
         [HttpPost("api/query/entitiesWithFilter"), ProfilerActionSplitter]
-        public async Task<List<Lite<Entity>>> GetEntitiesWithFilter([FromBody]QueryEntitiesRequestTS request, CancellationToken token)
+        public async Task<List<Lite<Entity>>> GetEntitiesWithFilter([Required, FromBody]QueryEntitiesRequestTS request, CancellationToken token)
         {
             return await QueryLogic.Queries.GetEntities(request.ToQueryEntitiesRequest()).ToListAsync();
         }
 
         [HttpPost("api/query/queryValue"), ProfilerActionSplitter]
-        public async Task<object> QueryValue([FromBody]QueryValueRequestTS request, CancellationToken token)
+        public async Task<object> QueryValue([Required, FromBody]QueryValueRequestTS request, CancellationToken token)
         {
             return await QueryLogic.Queries.ExecuteQueryValueAsync(request.ToQueryCountRequest(), token);
         }

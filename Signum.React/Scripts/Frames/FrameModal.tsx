@@ -11,7 +11,7 @@ import { TypeContext, StyleOptions, EntityFrame, IRenderButtons, IHasChanges } f
 import { Entity, Lite, ModifiableEntity, JavascriptMessage, NormalWindowMessage, toLite, getToString, EntityPack, ModelState, entityInfo, isEntityPack, isLite } from '../Signum.Entities'
 import { getTypeInfo, TypeInfo, PropertyRoute, ReadonlyBinding, GraphExplorer, isTypeModel, parseId } from '../Reflection'
 import ValidationErrors from './ValidationErrors'
-import { renderWidgets, WidgetContext } from './Widgets'
+import { renderWidgets, WidgetContext, renderEmbeddedWidgets } from './Widgets'
 import { EntityOperationContext } from '../Operations'
 
 import "./Frames.css"
@@ -252,16 +252,22 @@ export default class FrameModal extends React.Component<FrameModalProps, FrameMo
 
         const ctx = new TypeContext(undefined, styleOptions, this.state.propertyRoute!, new ReadonlyBinding(pack.entity, this.prefix!));
 
+        const wc: WidgetContext<ModifiableEntity> = { ctx: ctx, pack: pack };
+
+        const embeddedWidgets = renderEmbeddedWidgets(wc);
+
         return (
             <div className="modal-body">
                 {renderWidgets({ ctx: ctx, pack: pack })}
                 {this.entityComponent && <ButtonBar frame={frame} pack={pack} isOperationVisible={this.props.isOperationVisible} />}
                 <ValidationErrors entity={pack.entity} ref={ve => this.validationErrors = ve} />
+                {embeddedWidgets.top}
                 <div className="sf-main-control" data-test-ticks={new Date().valueOf()} data-main-entity={entityInfo(ctx.value)}>
                     <ErrorBoundary>
                         {this.state.getComponent && React.cloneElement(this.state.getComponent(ctx), { ref: (c: React.Component<any, any> | null) => this.setComponent(c) })}
                     </ErrorBoundary>
                 </div>
+                {embeddedWidgets.bottom}
             </div>
         );
     }
