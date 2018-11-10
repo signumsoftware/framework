@@ -88,6 +88,8 @@ export module CaseActivityMessage {
     export const NoWorkflowActivity = new MessageKey("CaseActivityMessage", "NoWorkflowActivity");
     export const ImpossibleToDeleteCaseActivity0OnWorkflowActivity1BecauseHasNoPreviousActivity = new MessageKey("CaseActivityMessage", "ImpossibleToDeleteCaseActivity0OnWorkflowActivity1BecauseHasNoPreviousActivity");
     export const LastCaseActivity = new MessageKey("CaseActivityMessage", "LastCaseActivity");
+    export const CurrentUserHasNotification = new MessageKey("CaseActivityMessage", "CurrentUserHasNotification");
+    export const NoNewOrOpenedOrInProgressNotificationsFound = new MessageKey("CaseActivityMessage", "NoNewOrOpenedOrInProgressNotificationsFound");
 }
 
 export module CaseActivityOperation {
