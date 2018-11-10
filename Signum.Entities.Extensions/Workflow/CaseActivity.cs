@@ -194,6 +194,8 @@ namespace Signum.Entities.Workflow
         [Description("Impossible to delete Case Activity {0} (on Workflow Activity '{1}') because has no previouos activity")]
         ImpossibleToDeleteCaseActivity0OnWorkflowActivity1BecauseHasNoPreviousActivity,
         LastCaseActivity,
+        CurrentUserHasNotification,
+        NoNewOrOpenedOrInProgressNotificationsFound,
     }
 
 
