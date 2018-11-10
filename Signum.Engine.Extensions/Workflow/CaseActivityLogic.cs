@@ -53,6 +53,14 @@ namespace Signum.Engine.Workflow
             return MainEntityCasesExpression.Evaluate(e);
         }
 
+        static Expression<Func<ICaseMainEntity, bool>> MainEntityCurrentUserHasNotificationExpression =
+            e => e.CaseActivities().SelectMany(a => a.Notifications()).Any(a => a.User.Is(UserEntity.Current));
+        [ExpressionField]
+        public static bool CurrentUserHasNotification(this ICaseMainEntity e)
+        {
+            return MainEntityCurrentUserHasNotificationExpression.Evaluate(e);
+        }
+
         static Expression<Func<WorkflowEntity, IQueryable<CaseEntity>>> CasesExpression =
             w => Database.Query<CaseEntity>().Where(a => a.Workflow == w);
         [ExpressionField]
@@ -62,9 +70,9 @@ namespace Signum.Engine.Workflow
         }
 
         static Expression<Func<CaseActivityEntity, bool>> CurrentUserHasNotificationExpression =
-            ca => ca.Notifications().Any(cn => cn.User.Is(UserEntity.Current) && 
-                                                (cn.State == CaseNotificationState.New || 
-                                                 cn.State == CaseNotificationState.Opened || 
+            ca => ca.Notifications().Any(cn => cn.User.Is(UserEntity.Current) &&
+                                                (cn.State == CaseNotificationState.New ||
+                                                 cn.State == CaseNotificationState.Opened ||
                                                  cn.State == CaseNotificationState.InProgress));
         [ExpressionField]
         public static bool CurrentUserHasNotification(this CaseActivityEntity e)
@@ -305,6 +313,7 @@ namespace Signum.Engine.Workflow
                 QueryLogic.Expressions.Register((ICaseMainEntity a) => a.CaseActivities(), () => typeof(CaseActivityEntity).NicePluralName());
                 QueryLogic.Expressions.Register((ICaseMainEntity a) => a.Cases(), () => typeof(CaseEntity).NicePluralName());
                 QueryLogic.Expressions.Register((ICaseMainEntity a) => a.LastCaseActivity(), () => CaseActivityMessage.LastCaseActivity.NiceToString());
+                QueryLogic.Expressions.Register((ICaseMainEntity a) => a.CurrentUserHasNotification(), () => CaseActivityMessage.CurrentUserHasNotification.NiceToString());
 
                 sb.Include<CaseNotificationEntity>()
                     .WithExpressionFrom((CaseActivityEntity c) => c.Notifications())
