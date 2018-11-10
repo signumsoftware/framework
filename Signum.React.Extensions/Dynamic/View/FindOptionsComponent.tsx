@@ -84,7 +84,7 @@ export class FindOptionsLine extends React.Component<FindOptionsLineProps>{
     }
 
     clean(fo: FindOptionsExpr) {
-        delete fo.parentToken;
+        delete fo.parsedParentToken;
         if (fo.filterOptions) fo.filterOptions.forEach(f => delete f.parsedToken);
         if (fo.orderOptions) fo.orderOptions.forEach(o => delete o.parsedToken);
         if (fo.columnOptions) fo.columnOptions.forEach(c => delete c.parsedToken);
