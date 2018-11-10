@@ -113,7 +113,7 @@ namespace Signum.Engine.Dynamic
                     select new SuggestedFindOptions
                     {
                         queryKey = QueryLogic.GetQueryEntity(t.Type).Key,
-                        parentColumn = parentColumn,
+                        parentToken = parentColumn,
                     }).ToList();
 
         }
@@ -159,7 +159,7 @@ namespace Signum.Engine.Dynamic
     public class SuggestedFindOptions
     {
         public string queryKey;
-        public string parentColumn;
+        public string parentToken;
     }
 
 }
