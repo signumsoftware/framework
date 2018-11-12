@@ -321,7 +321,7 @@ namespace Signum.Engine.Maps
                 if (fe.HasValue == null)
                     throw new NotSupportedException("{0} is not nullable".FormatWith(field));
 
-                return fe.HasValue.Name.SqlEscape() + " = TRUE";
+                return fe.HasValue.Name.SqlEscape() + " = 1";
             }
 
             throw new NotSupportedException(isNull.FormatWith(field.GetType())); 

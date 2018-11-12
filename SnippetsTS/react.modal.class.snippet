@@ -31,75 +31,71 @@
     </Declarations>
     <Code Language="TypeScript">
       <![CDATA[
-
-
 interface $ComponentName$ModalProps extends IModalProps {
-    question: string;
+  question: string;
 }
 
 interface $ComponentName$ModalState {
-    show: boolean;
+  show: boolean;
 }
 
 class $ComponentName$Modal extends React.Component<$ComponentName$ModalProps, $ComponentName$ModalState> {
 
-    constructor(props: $ComponentName$ModalProps) {
-        super(props);
-        this.state = { show: true };
-    }
+  constructor(props: $ComponentName$ModalProps) {
+    super(props);
+    this.state = { show: true };
+  }
 
-    answer?: $AnswerType$;
-    handleButtonClicked = (val: $AnswerType$) => {
-        this.answer = val;
-        this.setState({ show: false });
-    }
+  answer?: $AnswerType$;
+  handleButtonClicked = (val: $AnswerType$) => {
+    this.answer = val;
+    this.setState({ show: false });
+  }
 
-    handleClosedClicked = () => {
-        this.setState({ show: false });
-    }
+  handleClosedClicked = () => {
+    this.setState({ show: false });
+  }
 
-    handleOnExited = () => {
-        this.props.onExited!(this.answer);
-    }
+  handleOnExited = () => {
+    this.props.onExited!(this.answer);
+  }
 
-    render() {
-        return (
-            <Modal onHide={this.handleClosedClicked}
-                show={this.state.show} className="message-modal">
-                <Modal.Header closeButton={true}>
-                    <h4 className={"modal-title"}>
-                        Important Question
-                    </h4>
-                </Modal.Header>
-                <Modal.Body>
-                    {this.props.question}
-                </Modal.Body>
-                <Modal.Footer>
-                    <div>
-                        <button
-                            className="btn btn-primary sf-close-button sf-ok-button"
-                            onClick={() => this.handleButtonClicked(true)}
-                            name="accept">
-                            Yes
-                        </button>
-                        <button
-                            className="btn btn-default sf-close-button sf-button"
-                            onClick={() => this.handleButtonClicked(false)}
-                            name="cancel">
-                            No
-                        </button>
-                    </div>
-                </Modal.Footer>
-            </Modal>
-        );
-    }
+  render() {
+    return (
+      <Modal onHide={this.handleClosedClicked}
+        show={this.state.show} className="message-modal">
+        <Modal.Header closeButton={true}>
+          <h4 className={"modal-title"}>
+            Important Question
+                  </h4>
+        </Modal.Header>
+        <Modal.Body>
+          {this.props.question}
+        </Modal.Body>
+        <Modal.Footer>
+          <div>
+            <button
+              className="btn btn-primary sf-close-button sf-ok-button"
+              onClick={() => this.handleButtonClicked(true)}
+              name="accept">
+              Yes
+                      </button>
+            <button
+              className="btn btn-default sf-close-button sf-button"
+              onClick={() => this.handleButtonClicked(false)}
+              name="cancel">
+              No
+                      </button>
+          </div>
+        </Modal.Footer>
+      </Modal>
+    );
+  }
 
-    static show(question: string) : Promise<$AnswerType$ | undefined> {
-        return openModal<$AnswerType$ | undefined>(<$ComponentName$Modal question={question}/>);
-    }
-}
-
-     ]]>
+  static show(question: string): Promise<$AnswerType$ | undefined> {
+    return openModal<$AnswerType$ | undefined>(<$ComponentName$Modal question={question} />);
+  }
+}]]>
     </Code>
   </Snippet>
 </CodeSnippet>

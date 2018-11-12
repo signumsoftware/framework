@@ -184,7 +184,7 @@ namespace Signum.TSGenerator
                     foreach (var item in ns.OrderBy(a => a.type.Name))
                     {
                         foreach (var line in item.text.Split(new[] { "\r\n" }, StringSplitOptions.None))
-                            sb.AppendLine("    " + line);
+                            sb.AppendLine("  " + line);
                     }
 
                     sb.AppendLine("}");
@@ -248,7 +248,7 @@ namespace Signum.TSGenerator
             var fields = type.Fields.OrderBy(a => a.Constant as IComparable).Where(a => a.IsPublic && a.IsStatic).ToList();
             for (int i = 0; i < fields.Count; i++)
             {
-                sb.Append($"    \"{fields[i].Name}\"");
+                sb.Append($"  \"{fields[i].Name}\"");
                 if (i < fields.Count - 1)
                     sb.AppendLine(" |");
                 else
@@ -268,7 +268,7 @@ namespace Signum.TSGenerator
             foreach (var field in fields)
             {
                 string context = $"By type {type.Name} and field {field.Name}";
-                sb.AppendLine($"    export const {field.Name} = new MessageKey(\"{type.Name}\", \"{field.Name}\");");
+                sb.AppendLine($"  export const {field.Name} = new MessageKey(\"{type.Name}\", \"{field.Name}\");");
             }
             sb.AppendLine(@"}");
 
@@ -284,7 +284,7 @@ namespace Signum.TSGenerator
             foreach (var field in fields)
             {
                 string context = $"By type {type.Name} and field {field.Name}";
-                sb.AppendLine($"    export const {field.Name} = new QueryKey(\"{type.Name}\", \"{field.Name}\");");
+                sb.AppendLine($"  export const {field.Name} = new QueryKey(\"{type.Name}\", \"{field.Name}\");");
             }
             sb.AppendLine(@"}");
 
@@ -304,7 +304,7 @@ namespace Signum.TSGenerator
 
                 var fieldTypeDef = field.FieldType.Resolve();
                 var cleanType = fieldTypeDef.IsInterface && AllInterfaces(fieldTypeDef).Any(i => i.Name == "IOperationSymbolContainer") ? "Operation" : CleanTypeName(fieldTypeDef);
-                sb.AppendLine($"    export const {field.Name} : {propertyType} = registerSymbol(\"{cleanType}\", \"{type.Name}.{field.Name}\");");
+                sb.AppendLine($"  export const {field.Name} : {propertyType} = registerSymbol(\"{cleanType}\", \"{type.Name}.{field.Name}\");");
             }
             sb.AppendLine(@"}");
 
@@ -331,7 +331,7 @@ namespace Signum.TSGenerator
 
             sb.AppendLine($"export interface {TypeScriptName(type, type, options, "declaring " + type.Name)} extends {string.Join(", ", baseTypes.Distinct())} {{");
             if (!type.IsAbstract && Parents(type.BaseType?.Resolve()).All(a => a.IsAbstract))
-                sb.AppendLine($"    Type: \"{CleanTypeName(type)}\";");
+                sb.AppendLine($"  Type: \"{CleanTypeName(type)}\";");
 
             var properties = GetProperties(type);
 
@@ -342,7 +342,7 @@ namespace Signum.TSGenerator
 
                 var undefined = prop.GetTypescriptUndefined() ? "?" : "";
 
-                sb.AppendLine($"    {FirstLower(prop.Name)}{undefined}: {propertyType};");
+                sb.AppendLine($"  {FirstLower(prop.Name)}{undefined}: {propertyType};");
             }
             sb.AppendLine(@"}");
 
@@ -670,7 +670,7 @@ namespace Signum.TSGenerator
                 return result.Single();
 
             if (result.Count > 1)
-                throw new InvalidOperationException($"importing '{typeForError}' required but multiple '{fileTS}' were found inside '{assemblyReference.ReactDirectory}':\r\n{string.Join("\r\n", result.Select(a => "    " + a).ToArray())}");
+                throw new InvalidOperationException($"importing '{typeForError}' required but multiple '{fileTS}' were found inside '{assemblyReference.ReactDirectory}':\r\n{string.Join("\r\n", result.Select(a => "  " + a).ToArray())}");
 
             var fileT4S = @namespace + ".t4s";
 
@@ -680,7 +680,7 @@ namespace Signum.TSGenerator
                 return result.Single().RemoveSuffix(".t4s") + ".ts";
 
             if (result.Count > 1)
-                throw new InvalidOperationException($"importing '{typeForError}' required but multiple '{fileT4S}' were found inside '{assemblyReference.ReactDirectory}':\r\n{string.Join("\r\n", result.Select(a => "    " + a).ToArray())}");
+                throw new InvalidOperationException($"importing '{typeForError}' required but multiple '{fileT4S}' were found inside '{assemblyReference.ReactDirectory}':\r\n{string.Join("\r\n", result.Select(a => "  " + a).ToArray())}");
 
             throw new InvalidOperationException($"importing '{typeForError}' required but no '{fileTS}' or '{fileT4S}' found inside '{assemblyReference.ReactDirectory}'");
         }

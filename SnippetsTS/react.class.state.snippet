@@ -39,51 +39,51 @@
     </Declarations>
     <Code Language="TypeScript">
       <![CDATA[
-      interface $ComponentName$Props {
-          ctx: TypeContext<$ComponentName$Entity>
-      }
-      
-      interface $ComponentName$State {
-          $StateName$?: $StateType$
-      }
-      
-      export default class $ComponentName$ extends React.Component<$ComponentName$Props, $ComponentName$State> {
-      
-          constructor(props: $ComponentName$Props) {
-              super(props);
-              this.state = {};
-          }
-          
-          componentWillMount() {
-              this.loadData(this.props);
-          }
-          
-          componentWillReceiveProps(newProps: $ComponentName$Props) {
-              if(!is(newProps.ctx.value, this.props.ctx.value))
-                  this.loadData(newProps);    
-          }
-          
-          loadData(props: $ComponentName$Props) {
-              API.someQuery()
-              .then($StateName$ => this.setState({ $StateName$ }))
-              .done();
-          }
-          
-          render() {
-              const ctx = this.props.ctx;
-              return (
-                  <div>
-                      <ValueLine ctx={ctx.subCtx(a => a.name)} />
-                      {this.state.$StateName$ && this.renderData(this.state.$StateName$)}
-                      $end$
-                  </div>
-              );
-          }
-          
-          renderData($StateName$ : $StateType$){
-              return <div></div>;
-          }
-      }
+interface $ComponentName$Props {
+  ctx: TypeContext<$ComponentName$Entity>
+}
+
+interface $ComponentName$State {
+  $StateName$?: $StateType$
+}
+
+export default class $ComponentName$ extends React.Component<$ComponentName$Props, $ComponentName$State> {
+
+  constructor(props: $ComponentName$Props) {
+    super(props);
+    this.state = {};
+  }
+
+  componentWillMount() {
+    this.loadData(this.props);
+  }
+
+  componentWillReceiveProps(newProps: $ComponentName$Props) {
+    if (!is(newProps.ctx.value, this.props.ctx.value))
+      this.loadData(newProps);
+  }
+
+  loadData(props: $ComponentName$Props) {
+    API.someQuery()
+      .then($StateName$ => this.setState({ $StateName$ }))
+      .done();
+  }
+
+  render() {
+    const ctx = this.props.ctx;
+    return (
+      <div>
+        <ValueLine ctx={ctx.subCtx(a => a.name)} />
+        {this.state.$StateName$ && this.renderData(this.state.$StateName$)}
+        $end$
+      </div>
+    );
+  }
+
+  renderData($StateName$: $StateType$) {
+    return <div></div>;
+  }
+}
      ]]>
     </Code>
   </Snippet>
