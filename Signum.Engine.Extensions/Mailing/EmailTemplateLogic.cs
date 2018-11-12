@@ -13,7 +13,6 @@ using Signum.Entities.DynamicQuery;
 using Signum.Engine.Basics;
 using Signum.Entities.UserQueries;
 using System.Globalization;
-using System.Configuration;
 using Signum.Engine.UserQueries;
 using System.Linq.Expressions;
 using Signum.Entities.Translation;

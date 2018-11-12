@@ -55,25 +55,28 @@ namespace Signum.Engine.Rest
             var result = new RestDiffResult { previous = oldResponseBody };
 
             //create the new Request
-            var restClient = new HttpClient { BaseAddress = new Uri(url) };
-            restClient.DefaultRequestHeaders.Add("X-ApiKey", apiKey);
+            var restClient = new HttpClient
+            {
+                BaseAddress = new Uri(url),
+                DefaultRequestHeaders = { { "X-ApiKey", apiKey } }
+            };
+
             var request = new HttpRequestMessage(httpMethod, url);
+            var requestUriAbsoluteUri = request.RequestUri.AbsoluteUri;
+            if (requestUriAbsoluteUri.Contains("apiKey"))
+            {
+                request.RequestUri = requestUriAbsoluteUri.After("apiKey=").Contains("&")
+                    ? new Uri(requestUriAbsoluteUri.Before("apiKey=") + requestUriAbsoluteUri.After("apiKey=").After('&'))
+                    : new Uri(requestUriAbsoluteUri.Before("apiKey="));
+            }
 
             if (!string.IsNullOrWhiteSpace(oldRequestBody))
             {
-                var response = await restClient.PostAsync("",
-                    new StringContent(oldRequestBody, Encoding.UTF8, "application/json"));
+                var response = await restClient.PostAsync("", new StringContent(oldRequestBody, Encoding.UTF8, "application/json"));
                 result.current = await response.Content.ReadAsStringAsync();
             }
             else
-            {
-                var requestUriAbsoluteUri = request.RequestUri.AbsoluteUri;
-                if (requestUriAbsoluteUri.Contains("apiKey"))
-                {
-                    request.RequestUri = requestUriAbsoluteUri.After("apiKey=").Contains("&")
-                        ? new Uri(requestUriAbsoluteUri.Before("apiKey=") + requestUriAbsoluteUri.After("apiKey=").After('&'))
-                        : new Uri(requestUriAbsoluteUri.Before("apiKey="));
-                }
+            {  
                 result.current = await restClient.SendAsync(request).Result.Content.ReadAsStringAsync();
             }
 
