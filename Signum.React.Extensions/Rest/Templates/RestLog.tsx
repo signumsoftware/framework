@@ -82,7 +82,7 @@ export default class RestLog extends React.Component<{ ctx: TypeContext<RestLogE
                     <UncontrolledTabs defaultEventKey="prev">
                         <Tab title="prev" eventKey="prev" className="linkTab">{this.renderPre(ctx.subCtx(f => f.responseBody).value!)}</Tab>
                         {this.state.diff && <Tab title="diff" eventKey="diff" className="linkTab">{this.state.diff.diff && <DiffDocument diff={this.state.diff.diff} />}</Tab>}
-                        {this.state.diff && this.state.diff.current && <Tab title="curr" eventKey="curr" className="linkTab">{this.renderPre(this.state.diff.current)}</Tab>}
+                        {this.state.diff && <Tab title="curr" eventKey="curr" className="linkTab">{this.renderPre(this.state.diff.current)}</Tab>}
                     </UncontrolledTabs>
                 </fieldset>
             </div>
