@@ -24,7 +24,7 @@ namespace Signum.Utilities.DataStructures
 
         public override string ToString()
         {
-            return XInterval + " x " + YInterval; 
+            return XInterval + " x " + YInterval;
         }
     }
 }

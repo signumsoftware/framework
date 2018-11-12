@@ -31,7 +31,7 @@ namespace Signum.Engine
             {
                 Schema schema = Schema.Current;
                 DirectedGraph<Modifiable> modifiables = PreSaving(() => GraphExplorer.FromRoots(entities));
-                
+
                 HashSet<Entity> wasNew = modifiables.OfType<Entity>().Where(a=>a.IsNew).ToHashSet(ReferenceEqualityComparer<Entity>.Default);
                 HashSet<Entity> wasSelfModified = modifiables.OfType<Entity>().Where(a => a.Modified == ModifiedState.SelfModified).ToHashSet(ReferenceEqualityComparer<Entity>.Default);
 
@@ -120,8 +120,8 @@ namespace Signum.Engine
 
             if(group.Key.IsNew)
                 table.InsertMany(group.ToList(), backEdges);
-            else 
-                table.UpdateMany(group.ToList(), backEdges); 
+            else
+                table.UpdateMany(group.ToList(), backEdges);
         }
 
         struct TypeNew : IEquatable<TypeNew>

@@ -179,7 +179,7 @@ namespace Signum.Engine.Linq
         {
             Expression key = this.Visit(child.OuterKey);
             ProjectionExpression proj = (ProjectionExpression)UnusedColumnRemover.Remove(child.Projection);
-         
+
             if (proj != child.Projection || key != child.OuterKey)
             {
                 return new ChildProjectionExpression(proj, key, child.IsLazyMList, child.Type, child.Token);

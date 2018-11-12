@@ -57,5 +57,5 @@ namespace Signum.Entities.Basics
         IEntity TemporalTarget;
     }
 
- 
+
 }

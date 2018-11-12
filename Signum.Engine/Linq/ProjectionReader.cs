@@ -44,7 +44,7 @@ namespace Signum.Engine.Linq
         DbDataReader dataReader;
 
         T current;
-        Func<IProjectionRow, T> projector; 
+        Func<IProjectionRow, T> projector;
         Expression<Func<IProjectionRow, T>> projectorExpression;
 
         Dictionary<LookupToken, IEnumerable> lookups;

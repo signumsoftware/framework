@@ -43,7 +43,7 @@ namespace Signum.React.ApiControllers
 
         [HttpPost("api/entityPackEntity")/*, ValidateModelFilter*/]
         public EntityPackTS GetEntityPackEntity([Required, FromBody]Entity entity)
-        { 
+        {
             return SignumServer.GetEntityPack(entity);
         }
 

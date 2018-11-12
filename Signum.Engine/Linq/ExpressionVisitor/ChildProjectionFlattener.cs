@@ -54,7 +54,7 @@ namespace Signum.Engine.Linq
             Expression columnCleaned = UnusedColumnRemover.Remove(result);
             Expression subqueryCleaned = RedundantSubqueryRemover.Remove(columnCleaned);
 
-            return (ProjectionExpression)subqueryCleaned; 
+            return (ProjectionExpression)subqueryCleaned;
         }
 
         protected internal override Expression VisitProjection(ProjectionExpression proj)
@@ -198,7 +198,7 @@ namespace Signum.Engine.Linq
                 if (source is SelectExpression)
                     return KeysSelect((SelectExpression)source);
                 if (source is TableExpression)
-                    return KeysTable((TableExpression)source); 
+                    return KeysTable((TableExpression)source);
                 if(source is JoinExpression)
                     return KeysJoin((JoinExpression)source);
                 if (source is SetOperatorExpression)
@@ -225,11 +225,11 @@ namespace Signum.Engine.Linq
 
                             var onlyLeftKey = leftKeys.Only();
 
-                            if(onlyLeftKey != null && 
-                                join.Right is SelectExpression r && 
-                                r.Where is BinaryExpression b && 
+                            if(onlyLeftKey != null &&
+                                join.Right is SelectExpression r &&
+                                r.Where is BinaryExpression b &&
                                 b.NodeType == ExpressionType.Equal &&
-                                b.Left is ColumnExpression cLeft && 
+                                b.Left is ColumnExpression cLeft &&
                                 b.Right is ColumnExpression cRight)
                             {
                                 if(cLeft.Equals(onlyLeftKey) ^ cRight.Equals(onlyLeftKey))
@@ -295,7 +295,7 @@ namespace Signum.Engine.Linq
 
             public static Expression Replace(Expression expression, Dictionary<ColumnExpression, ColumnExpression> replacements)
             {
-                return new ColumnReplacer { Replacements = replacements }.Visit(expression); 
+                return new ColumnReplacer { Replacements = replacements }.Visit(expression);
             }
 
             protected internal override Expression VisitColumn(ColumnExpression column)

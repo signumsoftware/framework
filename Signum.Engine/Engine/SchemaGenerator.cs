@@ -27,7 +27,7 @@ namespace Signum.Engine
         {
             Schema s = Schema.Current;
             List<ITable> tables = s.GetDatabaseTables().Where(t => !s.IsExternalDatabase(t.Name.Schema.Database)).ToList();
-            
+
             SqlPreCommand createTables = tables.Select(SqlBuilder.CreateTableSql).Combine(Spacing.Double).PlainSqlCommand();
 
             SqlPreCommand foreignKeys = tables.Select(SqlBuilder.AlterTableForeignKeys).Combine(Spacing.Double).PlainSqlCommand();
@@ -58,7 +58,7 @@ namespace Signum.Engine
                     ).Combine(Spacing.Double).PlainSqlCommand();
         }
 
-      
+
         public static SqlPreCommand SnapshotIsolation()
         {
             if (!Connector.Current.AllowsSetSnapshotIsolation)
@@ -79,7 +79,7 @@ namespace Signum.Engine
                     SqlBuilder.SetSingleUser(a),
                     SqlBuilder.SetSnapshotIsolation(a, true),
                     SqlBuilder.MakeSnapshotIsolationDefault(a, true),
-                    SqlBuilder.SetMultiUser(a))                              
+                    SqlBuilder.SetMultiUser(a))
                 ).Combine(Spacing.Double);
 
             return cmd;

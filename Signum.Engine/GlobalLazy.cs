@@ -22,9 +22,9 @@ namespace Signum.Engine
         static readonly Type[] Empty = new Type[0];
 
         readonly Type[] types;
-        public Type[] Types 
+        public Type[] Types
         {
-            get { return types ?? Empty; } 
+            get { return types ?? Empty; }
         }
 
         public InvalidateWith(params Type[] types)
@@ -70,7 +70,7 @@ namespace Signum.Engine
 
                     return value;
                 }
-            }, mode, 
+            }, mode,
             declaringType: func.Method.DeclaringType);
 
             registeredLazyList.Add(result);
@@ -91,5 +91,5 @@ namespace Signum.Engine
         }
     }
 
-  
+
 }

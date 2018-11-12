@@ -14,7 +14,7 @@ namespace Signum.Entities
     /// <summary>
     /// Represents a PrimaryKey of type int, long, Guid or string, for example.
     /// Its a struct to avoid another object in heap
-    /// The default value represents an invalid state.  
+    /// The default value represents an invalid state.
     /// </summary>
     [Serializable, TypeConverter(typeof(PrimaryKeyTypeConverter))]
     public struct PrimaryKey : IEquatable<PrimaryKey>, IComparable, IComparable<PrimaryKey>, ISerializable

@@ -85,7 +85,7 @@ namespace Signum.React.ApiControllers
         {
             OperationLogic.ServiceDelete(request.lite, request.GetOperationSymbol(request.lite.EntityType), request.args);
         }
-        
+
 
         [JsonConverter(typeof(ArgsJsonConverter))]
         public class ConstructOperationRequest : BaseOperationRequest

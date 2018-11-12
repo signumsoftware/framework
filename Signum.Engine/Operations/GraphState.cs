@@ -91,7 +91,7 @@ namespace Signum.Engine.Operations
                 var graphName = typeof(Graph<T, S>).TypeName();
                 throw new InvalidOperationException($"{graphName}.GetState is not set. Consider writing something like 'GetState = a => a.State' at the beginning of your Register method.");
             }
-               
+
         }
 
         public class ConstructFrom<F> : Graph<T>.ConstructFrom<F>, IGraphToStateOperation

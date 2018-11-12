@@ -32,7 +32,7 @@ namespace Signum.Engine.Linq
             var select = delete.Source as SelectExpression;
 
             TableExpression table = select.From as TableExpression;
-            
+
             if (table == null || delete.Table != table.Table)
                 return delete;
 

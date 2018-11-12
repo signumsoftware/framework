@@ -71,7 +71,7 @@ namespace Signum.Entities
             if (!typeof(MixinEntity).IsAssignableFrom(mixinEntity))
                 throw new InvalidOperationException("{0} is not a {1}".FormatWith(mixinEntity.Name, typeof(MixinEntity).Name));
 
-            AssertNotIncluded(mainEntity); 
+            AssertNotIncluded(mainEntity);
 
             GetMixinDeclarations(mainEntity).Add(mixinEntity);
 
@@ -121,7 +121,7 @@ namespace Signum.Entities
                     foreach (var t in hs)
                         AddConstructor(t);
 
-                    return hs; 
+                    return hs;
                 });
         }
 
@@ -133,7 +133,7 @@ namespace Signum.Entities
         public static void AssertDeclared(Type mainEntity, Type mixinType)
         {
             if (!IsDeclared(mainEntity, mixinType))
-                throw new InvalidOperationException("Mixin {0} is not registered for {1}. Consider writing MixinDeclarations.Register<{1}, {0}>() at the beginning of Starter.Start".FormatWith(mixinType.TypeName(), mainEntity.TypeName())); 
+                throw new InvalidOperationException("Mixin {0} is not registered for {1}. Consider writing MixinDeclarations.Register<{1}, {0}>() at the beginning of Starter.Start".FormatWith(mixinType.TypeName(), mainEntity.TypeName()));
         }
 
         internal static MixinEntity CreateMixins(Entity mainEntity)

@@ -30,7 +30,7 @@ namespace Signum.Entities
 
 
         [Ignore, DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        protected internal string toStr; //for queries and lites on entities with non-expression ToString 
+        protected internal string toStr; //for queries and lites on entities with non-expression ToString
 
         [HiddenProperty, Description("Id")]
         public PrimaryKey Id
@@ -206,7 +206,7 @@ namespace Signum.Entities
         {
             GraphExplorer.SetValidationErrors(GraphExplorer.FromRoot(this), ex);
         }
-       
+
     }
 
     [InTypeScript(false)]

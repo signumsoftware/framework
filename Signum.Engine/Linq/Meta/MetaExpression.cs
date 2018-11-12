@@ -63,7 +63,7 @@ namespace Signum.Engine.Linq
         public override string ToString()
         {
             return "MetaProjector({0})".FormatWith(this.Projector.ToString());
-        }  
+        }
     }
 
     internal class MetaExpression : MetaBaseExpression
@@ -101,7 +101,7 @@ namespace Signum.Engine.Linq
             //throw new InvalidOperationException("Impossible to convert {0} to {1}".FormatWith(pr.Type.TypeName(), sourceType.TypeName()));
         }
 
-        static readonly MethodInfo miToLite = ReflectionTools.GetMethodInfo((Entity e) => e.ToLite()); 
+        static readonly MethodInfo miToLite = ReflectionTools.GetMethodInfo((Entity e) => e.ToLite());
     }
 
     internal class MetaMListExpression : MetaBaseExpression

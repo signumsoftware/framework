@@ -22,7 +22,7 @@ namespace Signum.Entities.Basics
 
         public override int GetHashCode()
         {
-            return this.Argb;  
+            return this.Argb;
         }
         public static ColorEmbedded FromARGB(byte a, byte r, byte g, byte b)
         {

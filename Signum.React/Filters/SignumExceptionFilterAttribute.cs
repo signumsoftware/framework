@@ -60,7 +60,7 @@ namespace Signum.React.Filters
                         e.Form = ReadAllBody(context.HttpContext);
                         e.Session = null;
                     });
-                    
+
                     if (ExpectsJsonResult(context))
                     {
                         var error = new HttpError(context.Exception);
@@ -77,7 +77,7 @@ namespace Signum.React.Filters
 
         private bool ExpectsJsonResult(ResourceExecutedContext context)
         {
-            return context.ActionDescriptor is ControllerActionDescriptor cad && 
+            return context.ActionDescriptor is ControllerActionDescriptor cad &&
                 !typeof(IActionResult).IsAssignableFrom(cad.MethodInfo.ReturnType);
         }
 
@@ -111,7 +111,7 @@ namespace Signum.React.Filters
             return HttpStatusCode.InternalServerError;
         }
 
-       
+
     }
 
     public class HttpError

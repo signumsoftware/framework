@@ -63,7 +63,7 @@ namespace Signum.Engine.Maps
 
         public enum ColumnType
         {
-            Start, 
+            Start,
             End,
         }
 
@@ -99,7 +99,7 @@ namespace Signum.Engine.Maps
     {
         ColumnExpression GetPrimaryOrder(Alias alias);
     }
-      
+
     public partial class Table : IFieldFinder, ITable, ITablePrivate
     {
         public Type Type { get; private set; }
@@ -114,9 +114,9 @@ namespace Signum.Engine.Maps
 
         public Dictionary<string, EntityField> Fields { get; set; }
         public Dictionary<Type, FieldMixin> Mixins { get; set; }
-        
+
         public Dictionary<string, IColumn> Columns { get; set; }
-        
+
 
         public List<Index> MultiColumnIndexes { get; set; }
 
@@ -257,9 +257,9 @@ namespace Signum.Engine.Maps
 
         public IEnumerable<TableMList> TablesMList()
         {
-            return this.AllFields().SelectMany(f => f.Field.TablesMList()); 
+            return this.AllFields().SelectMany(f => f.Field.TablesMList());
         }
-        
+
         public FieldTicks Ticks { get; internal set; }
         public FieldPrimaryKey PrimaryKey { get; internal set; }
 
@@ -325,10 +325,10 @@ namespace Signum.Engine.Maps
             if (attribute == null)
                 return null;
 
-            var result = new UniqueIndex(table, Index.GetColumnsFromFields(this)) 
-            { 
-                AvoidAttachToUniqueIndexes = attribute.AvoidAttachToUniqueIndexes 
-            }; 
+            var result = new UniqueIndex(table, Index.GetColumnsFromFields(this))
+            {
+                AvoidAttachToUniqueIndexes = attribute.AvoidAttachToUniqueIndexes
+            };
 
             if(attribute.AllowMultipleNulls)
                 result.Where = IndexWhereExpressionVisitor.IsNull(this, false);
@@ -602,7 +602,7 @@ namespace Signum.Engine.Maps
 
             return field.Field;
         }
-     
+
         public override IEnumerable<IColumn> Columns()
         {
             var result = new List<IColumn>();
@@ -633,7 +633,7 @@ namespace Signum.Engine.Maps
 
         internal override IEnumerable<TableMList> TablesMList()
         {
-            return EmbeddedFields.Values.SelectMany(e => e.Field.TablesMList()); 
+            return EmbeddedFields.Values.SelectMany(e => e.Field.TablesMList());
         }
     }
 
@@ -680,7 +680,7 @@ namespace Signum.Engine.Maps
 
             return field.Field;
         }
-     
+
         public override IEnumerable<IColumn> Columns()
         {
             var result = new List<IColumn>();
@@ -721,7 +721,7 @@ namespace Signum.Engine.Maps
     {
         public string Name { get; set; }
         public IsNullable Nullable { get; set; }
-    
+
         public bool PrimaryKey { get; set; } //For View
         bool IColumn.Identity { get { return false; } }
         bool IColumn.IdentityBehaviour { get { return false; } }
@@ -732,7 +732,7 @@ namespace Signum.Engine.Maps
         public string Collation { get { return ReferenceTable.PrimaryKey.Collation; } }
         public string UserDefinedTypeName { get { return ReferenceTable.PrimaryKey.UserDefinedTypeName; } }
         public virtual Type Type { get { return this.Nullable.ToBool() ? ReferenceTable.PrimaryKey.Type.Nullify() : ReferenceTable.PrimaryKey.Type; } }
-        
+
         public bool AvoidForeignKey { get; set; }
 
         public bool IsLite { get; internal set; }
@@ -762,7 +762,7 @@ namespace Signum.Engine.Maps
                  IsLite = IsLite,
                  IsCollection = false,
                  IsNullable = Nullable.ToBool()
-            }); 
+            });
         }
 
         public override IEnumerable<Index> GenerateIndexes(ITable table)
@@ -807,10 +807,10 @@ namespace Signum.Engine.Maps
 
                 return this.Nullable.ToBool() ? ut.Nullify() : ut;
             }
-        } 
+        }
 
         public FieldEnum(PropertyRoute route) : base(route) { }
-        
+
         public override string ToString()
         {
             return "{0} -> {1} {4} ({2})".FormatWith(
@@ -1092,10 +1092,10 @@ namespace Signum.Engine.Maps
 
         public void GenerateColumns()
         {
-            List<IColumn> cols = new List<IColumn> { PrimaryKey, BackReference }; 
+            List<IColumn> cols = new List<IColumn> { PrimaryKey, BackReference };
 
             if(Order != null)
-                cols.Add(Order); 
+                cols.Add(Order);
 
             cols.AddRange(Field.Columns());
 
@@ -1119,7 +1119,7 @@ namespace Signum.Engine.Maps
 
         public Field GetField(MemberInfo member)
         {
-            Field result = TryGetField(member); 
+            Field result = TryGetField(member);
 
             if(result  == null)
                 throw new InvalidOperationException("'{0}' not found".FormatWith(member.Name));

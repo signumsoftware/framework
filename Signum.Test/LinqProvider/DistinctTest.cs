@@ -74,7 +74,7 @@ namespace Signum.Test.LinqProvider
         {
             var bla = (from b in Database.Query<BandEntity>()
                       from g in b.Members.GroupBy(a=>a.Sex).Select(gr=> new {gr.Key, Count = gr.Count() })
-                      select new 
+                      select new
                       {
                           Band = b.ToLite(),
                           g.Key,

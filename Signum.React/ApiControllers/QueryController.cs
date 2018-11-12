@@ -50,7 +50,7 @@ namespace Signum.React.ApiControllers
                 Filters = request.filters.EmptyIfNull().Select(a => a.ToFilter(qd, false)).ToList(),
                 Orders = request.orders.EmptyIfNull().Select(a => a.ToOrder(qd, false)).ToList()
             };
-            
+
             var dqueryable = QueryLogic.Queries.GetDQueryable(dqRequest);
             var entityType = qd.Columns.Single(a => a.IsEntity).Implementations.Value.Types.SingleEx();
 
@@ -296,8 +296,8 @@ namespace Signum.React.ApiControllers
             var options = SubTokensOptions.CanElement | SubTokensOptions.CanAnyAll | (canAggregate ? SubTokensOptions.CanAggregate : 0);
             var parsedToken = QueryUtils.Parse(token, qd, options);
             var expectedValueType = operation.IsList() ? typeof(ObservableCollection<>).MakeGenericType(parsedToken.Type.Nullify()) : parsedToken.Type;
-            
-            
+
+
 
             var val = value is JToken ?
                  ((JToken)value).ToObject(expectedValueType, JsonSerializer.Create(SignumServer.JsonSerializerSettings)) :
@@ -313,7 +313,7 @@ namespace Signum.React.ApiControllers
     {
         public FilterGroupOperation groupOperation;
         public string token;
-        public List<FilterTS> filters; 
+        public List<FilterTS> filters;
 
         public override Filter ToFilter(QueryDescription qd, bool canAggregate)
         {
@@ -431,7 +431,7 @@ namespace Signum.React.ApiControllers
         }
     }
 
-    public class QueryDescriptionTS 
+    public class QueryDescriptionTS
     {
         public string queryKey;
         public Dictionary<string, ColumnDescriptionTS> columns;
@@ -457,8 +457,8 @@ namespace Signum.React.ApiControllers
     {
         public string name;
         public TypeReferenceTS type;
-        public string typeColor; 
-        public string niceTypeName; 
+        public string typeColor;
+        public string niceTypeName;
         public FilterType? filterType;
         public string unit;
         public string format;
@@ -481,7 +481,7 @@ namespace Signum.React.ApiControllers
             this.niceTypeName = token.NiceTypeName;
             this.isGroupable = token.IsGroupable;
             this.hasOrderAdapter = QueryUtils.OrderAdapters.ContainsKey(token.Type);
-            this.preferEquals = token.Type == typeof(string) && 
+            this.preferEquals = token.Type == typeof(string) &&
                 token.GetPropertyRoute() is PropertyRoute pr &&
                 typeof(Entity).IsAssignableFrom(pr.RootType) &&
                 Schema.Current.HasSomeIndex(pr);
@@ -491,7 +491,7 @@ namespace Signum.React.ApiControllers
             this.propertyRoute = token.GetPropertyRoute()?.ToString();
         }
     }
-    
+
     public class QueryTokenTS
     {
         public QueryTokenTS() { }
@@ -541,7 +541,7 @@ namespace Signum.React.ApiControllers
         public string fullKey;
         public string typeColor;
         public string niceTypeName;
-        public QueryTokenType? queryTokenType; 
+        public QueryTokenType? queryTokenType;
         public TypeReferenceTS type;
         public FilterType? filterType;
         public string format;
@@ -559,6 +559,6 @@ namespace Signum.React.ApiControllers
     {
         Aggregate,
         Element,
-        AnyOrAll, 
+        AnyOrAll,
     }
 }

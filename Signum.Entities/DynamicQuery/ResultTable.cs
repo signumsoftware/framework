@@ -110,7 +110,7 @@ namespace Signum.Entities.DynamicQuery
 
             if (column.Type == typeof(string))
                 return str => str == "&&" ? "&" :
-                    str == "&" ? "" : 
+                    str == "&" ? "" :
                     Decode(str);
 
             var uType = column.Type.UnNullify();
@@ -133,7 +133,7 @@ namespace Signum.Entities.DynamicQuery
                 case TypeCode.UInt16: return str => UInt16.Parse(str, CultureInfo.InvariantCulture);
                 case TypeCode.UInt32: return str => UInt32.Parse(str, CultureInfo.InvariantCulture);
                 case TypeCode.UInt64: return str => UInt32.Parse(str, CultureInfo.InvariantCulture);
-                case TypeCode.DateTime: return str => DateTime.ParseExact(str, "O", CultureInfo.InvariantCulture); 
+                case TypeCode.DateTime: return str => DateTime.ParseExact(str, "O", CultureInfo.InvariantCulture);
             }
 
             throw new InvalidOperationException("Impossible to deserialize a ResultColumn of {0}".FormatWith(column.Type));
@@ -146,7 +146,7 @@ namespace Signum.Entities.DynamicQuery
                 var type = column.Type.GetGenericArguments()[0];
                 return obj => Encode(SerializeLite(obj, type));
             }
-            
+
             if (column.Type == typeof(string))
                 return obj =>
                 {
@@ -158,7 +158,7 @@ namespace Signum.Entities.DynamicQuery
 
             if (column.Type.UnNullify().IsEnum)
                 return obj => Convert.ChangeType(obj, typeof(int)).ToString();
-            
+
             switch (Type.GetTypeCode(column.Type.UnNullify()))
             {
                 case TypeCode.Boolean: return obj => ((bool)obj) ? "1" : "0";
@@ -181,7 +181,7 @@ namespace Signum.Entities.DynamicQuery
 
         static string Encode(string p)
         {
-            return p.Replace("{%%}", "{%%%}").Replace("|", "{%%}"); 
+            return p.Replace("{%%}", "{%%%}").Replace("|", "{%%}");
         }
 
         static string Decode(string p)
@@ -198,7 +198,7 @@ namespace Signum.Entities.DynamicQuery
 
         static object DeserializeLite(string str, Type defaultEntityType)
         {
-            string idStr = str.Before(';'); 
+            string idStr = str.Before(';');
 
             string tmp = str.After(';');
 
@@ -283,7 +283,7 @@ namespace Signum.Entities.DynamicQuery
 
             string Null = "- NULL -";
 
-            Dictionary<object, Dictionary<object, object>> dictionary = 
+            Dictionary<object, Dictionary<object, object>> dictionary =
                 this.Rows
                 .AgGroupToDictionary(
                     row => row[rowColumnIndex] ?? Null,
@@ -318,12 +318,12 @@ namespace Signum.Entities.DynamicQuery
         int? totalElements;
         public int? TotalElements { get { return totalElements; } }
 
-        Pagination pagination; 
+        Pagination pagination;
         public Pagination Pagination { get { return pagination; } }
 
         public int? TotalPages
         {
-            get { return Pagination is Pagination.Paginate ? ((Pagination.Paginate)Pagination).TotalPages(TotalElements.Value) : (int?)null; } 
+            get { return Pagination is Pagination.Paginate ? ((Pagination.Paginate)Pagination).TotalPages(TotalElements.Value) : (int?)null; }
         }
 
         public int? StartElementIndex
@@ -354,7 +354,7 @@ namespace Signum.Entities.DynamicQuery
 
             if (type.UnNullify().IsEnum)
                 return typeof(string);
-            
+
             if (type.UnNullify() == typeof(DateTime) && column.Format != "g")
                 return typeof(string);
 
@@ -365,7 +365,7 @@ namespace Signum.Entities.DynamicQuery
         {
             if (value is Lite<Entity>)
                 return ((Lite<Entity>)value).ToString();
-            
+
             if (value is Enum)
                 return ((Enum)value).NiceToString();
 
@@ -401,7 +401,7 @@ namespace Signum.Entities.DynamicQuery
 
             if (value is Enum)
                 return ((Enum)value).ToString();
-            
+
             return value;
         }
     }
@@ -412,7 +412,7 @@ namespace Signum.Entities.DynamicQuery
         public readonly int Index;
         public readonly ResultTable Table;
 
-        bool isDirty; 
+        bool isDirty;
         public bool IsDirty
         {
             get { return isDirty; }

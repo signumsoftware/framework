@@ -60,7 +60,7 @@ namespace Signum.Test.Environment
             var sqlVersion = SqlServerVersionDetector.Detect(connectionString);
 
             Connector.Default = new SqlConnector(connectionString, sb.Schema, sqlVersion ?? SqlServerVersion.SqlServer2017);
-            
+
             sb.Schema.Version = typeof(MusicStarter).Assembly.GetName().Version;
 
             sb.Schema.Settings.FieldAttributes((OperationLogEntity ol) => ol.User).Add(new ImplementedByAttribute());
@@ -87,7 +87,7 @@ namespace Signum.Test.Environment
             }
 
             Validator.PropertyValidator((OperationLogEntity e) => e.User).Validators.Clear();
-            
+
             TypeLogic.Start(sb);
 
             OperationLogic.Start(sb);

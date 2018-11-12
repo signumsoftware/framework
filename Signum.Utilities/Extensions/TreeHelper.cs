@@ -160,7 +160,7 @@ namespace Signum.Utilities
 
         void Never()
         {
-            PropertyChanged(null, null); 
+            PropertyChanged(null, null);
         }
         public event PropertyChangedEventHandler PropertyChanged;
     }

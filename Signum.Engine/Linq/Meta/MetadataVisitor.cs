@@ -20,7 +20,7 @@ using Signum.Entities.DynamicQuery;
 namespace Signum.Engine.Linq
 {
     /// <summary>
-    /// QueryBinder is a visitor that converts method calls to LINQ operations into 
+    /// QueryBinder is a visitor that converts method calls to LINQ operations into
     /// custom DbExpression nodes and references to class members into references to columns
     /// </summary>
     internal class MetadataVisitor : ExpressionVisitor
@@ -394,15 +394,15 @@ namespace Signum.Engine.Linq
                 if (type.IsInstantiationOf(typeof(MListElement<,>)))
                 {
                     var parentType = type.GetGenericArguments()[0];
-                
+
                     ISignumTable st = (ISignumTable)c.Value;
                     TableMList rt = (TableMList)st.Table;
 
 
                     PropertyRoute element = rt.PropertyRoute.Add("Item");
 
-                    return new MetaProjectorExpression(c.Type, new MetaMListExpression(type, 
-                        new CleanMeta(Implementations.By(parentType), PropertyRoute.Root(rt.PropertyRoute.RootType)), 
+                    return new MetaProjectorExpression(c.Type, new MetaMListExpression(type,
+                        new CleanMeta(Implementations.By(parentType), PropertyRoute.Root(rt.PropertyRoute.RootType)),
                         new CleanMeta(element.TryGetImplementations(), element)));
                 }
             }
@@ -470,7 +470,7 @@ namespace Signum.Engine.Linq
                 {
                     var routes = meta.Meta.Implementations.Value.Types.Select(t=> PropertyRoute.Root(t).Add(pi)).ToArray();
 
-                    return new MetaExpression(memberType, new CleanMeta(GetImplementations(routes, memberType), routes)); 
+                    return new MetaExpression(memberType, new CleanMeta(GetImplementations(routes, memberType), routes));
                 }
 
                 if (meta.Meta is CleanMeta)
@@ -584,8 +584,8 @@ namespace Signum.Engine.Linq
             Implementations? imps =
                 mRight != null && mRight.Meta.Implementations != null &&
                 mLeft != null && mLeft.Meta.Implementations != null ?
-                AggregateImplementations(new[] { 
-                    mRight.Meta.Implementations.Value, 
+                AggregateImplementations(new[] {
+                    mRight.Meta.Implementations.Value,
                     mLeft.Meta.Implementations.Value }) :
                 (Implementations?)null;
 
@@ -601,10 +601,10 @@ namespace Signum.Engine.Linq
             var mIfFalse = ifFalse as MetaExpression;
 
             Implementations? imps =
-                mIfTrue != null && mIfTrue.Meta.Implementations != null && 
+                mIfTrue != null && mIfTrue.Meta.Implementations != null &&
                 mIfFalse != null && mIfFalse.Meta.Implementations != null ?
-                AggregateImplementations(new[] { 
-                    mIfTrue.Meta.Implementations.Value, 
+                AggregateImplementations(new[] {
+                    mIfTrue.Meta.Implementations.Value,
                     mIfFalse.Meta.Implementations.Value }) :
                 (Implementations?)null;
 

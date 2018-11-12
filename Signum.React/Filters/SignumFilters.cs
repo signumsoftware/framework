@@ -70,7 +70,7 @@ namespace Signum.React.Filters
             var result = Authenticate(context);
 
             if (result == null)
-                return null;            
+                return null;
 
             return result.User != null ? UserHolder.UserSession(result.User) : null;
         }

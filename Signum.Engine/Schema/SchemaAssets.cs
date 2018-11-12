@@ -31,7 +31,7 @@ namespace Signum.Engine.Maps
         {
             return command.Replace("\r", "").Trim(' ', '\n', ';');
         }
-        
+
         #region Views
         public class View
         {
@@ -46,7 +46,7 @@ namespace Signum.Engine.Maps
             public SqlPreCommandSimple AlterView()
             {
                 return new SqlPreCommandSimple("ALTER VIEW {0} ".FormatWith(Name) + Definition) { GoBefore = true, GoAfter = true };
-            } 
+            }
         }
 
         public View IncludeView(string viewName, string viewDefinition)

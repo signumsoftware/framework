@@ -74,7 +74,7 @@ namespace Signum.Engine
                         Symbol.SetSymbolIds<T>(current.ToDictionary(a => a.Key, a => a.Id));
                         return result.ToDictionary(a => a.Key);
                     }
-                }, 
+                },
                 new InvalidateWith(typeof(T)),
                 Schema.Current.InvalidateMetadata);
 
@@ -95,7 +95,7 @@ namespace Signum.Engine
                     StartParameters.IgnoredDatabaseMismatches.Add(e);
                 }
         }
-      
+
         static SqlPreCommand Schema_Generating()
         {
             Table table = Schema.Current.Table<T>();

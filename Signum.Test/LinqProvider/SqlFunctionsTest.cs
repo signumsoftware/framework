@@ -222,7 +222,7 @@ namespace Signum.Test.LinqProvider
 
         [Fact]
         public void NullableEnumToString()
-        {   
+        {
             var sexs = Database.Query<ArtistEntity>().Select(a => a.Status.ToString()).ToList();
         }
 

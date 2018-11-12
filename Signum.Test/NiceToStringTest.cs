@@ -22,7 +22,7 @@ namespace Signum.Test
         Test,
         [System.ComponentModel.Description("Test!")]
         Test2,
-        MyTest, 
+        MyTest,
         My_Test,
         TEST,
         YouAreFromONU,

@@ -101,7 +101,7 @@ namespace Signum.TSGenerator
         }
 
         ConcurrentDictionary<string, string> ReactDirectoryCache = new ConcurrentDictionary<string, string>();
-        
+
         private string FindReactDirectory(string absoluteFilePath)
         {
             var prefix = absoluteFilePath;
@@ -116,7 +116,7 @@ namespace Signum.TSGenerator
                     if (Directory.Exists(dir))
                         return dir;
                 }
-                
+
                 prefix = Path.GetDirectoryName(prefix);
             }
 
@@ -141,7 +141,7 @@ namespace Signum.TSGenerator
             if (!dictionary.TryGetValue(key, out value))
                 return null;
 
-            
+
             return value;
         }
 

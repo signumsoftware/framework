@@ -1,4 +1,4 @@
-﻿import * as React from 'react'
+import * as React from 'react'
 import * as ReactDOM from 'react-dom'
 import { classes } from '../Globals'
 import { Popper, Manager, Target } from 'react-popper';

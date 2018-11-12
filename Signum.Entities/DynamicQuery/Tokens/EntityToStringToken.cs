@@ -18,7 +18,7 @@ namespace Signum.Entities.DynamicQuery
             : base(parent)
         {
             Priority = 9;
-         
+
         }
 
         public override Type Type
@@ -43,7 +43,7 @@ namespace Signum.Entities.DynamicQuery
         {
             var baseExpression = Parent.BuildExpression(context);
 
-            return Expression.Call(baseExpression, miToString); 
+            return Expression.Call(baseExpression, miToString);
         }
 
         protected override List<QueryToken> SubTokensOverride(SubTokensOptions options)

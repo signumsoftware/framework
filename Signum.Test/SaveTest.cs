@@ -150,7 +150,7 @@ namespace Signum.Test
                 //Insert and row-id is set
                 album.Save();
                 Assert.NotNull(innerList[0].RowId);
-                Assert.True(innerList[0].RowId > maxRowId); 
+                Assert.True(innerList[0].RowId > maxRowId);
 
 
                 album.Songs.Add(new SongEmbedded { Name = "Song 2" });
@@ -181,7 +181,7 @@ namespace Signum.Test
 
                 {
                     var album2 = album.ToLite().Retrieve();
-                    
+
                     Assert.True(album.Songs.Count == album2.Songs.Count);
                     Assert.True(innerList[0].RowId == ((IMListPrivate<SongEmbedded>)album2.Songs).InnerList[0].RowId);
                     Assert.True(album.Songs[0].Name == album2.Songs[0].Name);
@@ -261,7 +261,7 @@ namespace Signum.Test
             {
                 var prev = Database.MListQuery((AlbumEntity a) => a.Songs).Count();
 
-                var authors = 
+                var authors =
                     Database.Query<BandEntity>().Take(6).ToList().Concat<IAuthorEntity>(
                     Database.Query<ArtistEntity>().Take(8).ToList()).ToList();
 
@@ -292,7 +292,7 @@ namespace Signum.Test
             }
 
         }
-        
+
         [Fact]
         public void RetrieveSealed()
         {
@@ -366,7 +366,7 @@ namespace Signum.Test
 
                 BulkInserter.BulkInsertTable(list);
 
-                Database.Query<NoteWithDateEntity>().Where(a => a.Id > max).UnsafeDelete(); 
+                Database.Query<NoteWithDateEntity>().Where(a => a.Id > max).UnsafeDelete();
 
                 tr.Commit();
             }

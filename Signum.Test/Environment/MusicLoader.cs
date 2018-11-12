@@ -65,22 +65,22 @@ namespace Signum.Test.Environment
                 Name = "Mellon Collie and the Infinite Sadness",
                 Year = 1995,
                 Author = smashingPumpkins,
-                Songs = 
-                { 
-                    new SongEmbedded { Name = "Zero", Duration = TimeSpan.FromSeconds(123) }, 
-                    new SongEmbedded { Name = "1976" }, 
-                    new SongEmbedded { Name = "Tonight, Tonight", Duration = TimeSpan.FromSeconds(376) } 
+                Songs =
+                {
+                    new SongEmbedded { Name = "Zero", Duration = TimeSpan.FromSeconds(123) },
+                    new SongEmbedded { Name = "1976" },
+                    new SongEmbedded { Name = "Tonight, Tonight", Duration = TimeSpan.FromSeconds(376) }
                 },
                 BonusTrack = new SongEmbedded { Name = "Jellybelly" },
                 Label = virgin
             }.Execute(AlbumOperation.Save);
-            
+
             new NoteWithDateEntity { CreationTime = DateTime.Now.AddDays(-100).AddHours(-8), Text = "The blue one with the angel", Target = mellon }
                 .Execute(NoteWithDateOperation.Save);
 
             LabelEntity wea = new LabelEntity { Name = "WEA International", Country = usa, Owner = virgin.ToLite(), Node = virgin.Node.FirstChild() }
                 .Execute(LabelOperation.Save);
-            
+
             new AlbumEntity
             {
                 Name = "Zeitgeist",

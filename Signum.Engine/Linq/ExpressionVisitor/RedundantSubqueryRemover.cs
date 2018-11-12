@@ -172,7 +172,7 @@ namespace Signum.Engine.Linq
                     // remove the redundant subquery
                     select = (SelectExpression)SubqueryRemover.Remove(select, new[] { fromSelect });
 
-                    // merge where expressions 
+                    // merge where expressions
                     Expression where = select.Where;
                     if (fromSelect.Where != null)
                     {
@@ -226,7 +226,7 @@ namespace Signum.Engine.Linq
                     return false;
                 bool selHasOrderBy = select.OrderBy.Count > 0;
                 bool selHasGroupBy = select.GroupBy.Count > 0;
-               
+
                 bool frmHasOrderBy = fromSelect.OrderBy.Count > 0;
                 bool frmHasGroupBy = fromSelect.GroupBy.Count > 0;
                 // both cannot have orderby
@@ -235,7 +235,7 @@ namespace Signum.Engine.Linq
                 // both cannot have groupby
                 if (selHasGroupBy && frmHasGroupBy)
                     return false;
-                // this are distinct operations 
+                // this are distinct operations
                 if (select.IsReverse || fromSelect.IsReverse)
                     return false;
 
@@ -307,7 +307,7 @@ namespace Signum.Engine.Linq
                 Visit(select.OrderBy, VisitOrderBy);
                 Visit(select.Columns, VisitColumnDeclaration);
                 return select;
-            } 
+            }
 
             // don't count aggregates in subqueries
             protected internal override Expression VisitIn(InExpression @in)

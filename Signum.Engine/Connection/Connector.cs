@@ -130,7 +130,7 @@ namespace Signum.Engine
             if (result == null)
                 return null;
 
-            connectionString = connectionString.Replace(toFind, ""); // Remove toFind 
+            connectionString = connectionString.Replace(toFind, ""); // Remove toFind
 
             return result + catalogPostfix;
         }
@@ -143,7 +143,7 @@ namespace Signum.Engine
             if (index == -1)
                 throw new InvalidOperationException("CatalogPostfix '{0}' not found in the connection string".FormatWith(toFind));
 
-            connectionString = connectionString.Substring(0, index) + connectionString.Substring(index + toFind.Length); // Remove toFind 
+            connectionString = connectionString.Substring(0, index) + connectionString.Substring(index + toFind.Length); // Remove toFind
 
             return catalogPostfix;
         }

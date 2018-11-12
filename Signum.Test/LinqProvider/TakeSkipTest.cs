@@ -103,7 +103,7 @@ namespace Signum.Test.LinqProvider
         public void InnerTake()
         {
             var result = Database.Query<AlbumEntity>().Where(dr => dr.Songs.OrderByDescending(a => a.Seconds).Take(1).Where(a => a.Name.Contains("1976")).Any()).Select(a => a.ToLite()).ToList();
-            Assert.Equal(0, result.Count); 
+            Assert.Equal(0, result.Count);
         }
 
         [Fact]
@@ -151,7 +151,7 @@ namespace Signum.Test.LinqProvider
             var list2 = 0.To(((list.Count / pageSize) + 1)).SelectMany(page =>
                 query.OrderAlsoByKeys().Skip(pageSize * page).Take(pageSize).ToList()).ToList();
 
-            Assert.True(list.SequenceEqual(list2)); 
+            Assert.True(list.SequenceEqual(list2));
         }
     }
 }

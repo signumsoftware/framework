@@ -55,13 +55,13 @@ namespace Signum.Utilities.NaturalLanguage
         Dictionary<string, char> terminations = new Dictionary<string, char>()
         {
             {"umbre", 'f' },
-           
+
             {"ión", 'f' },
             {"dad", 'f' },
             {"tad", 'f' },
-            
+
             {"ie", 'f' },
-            {"is", 'f' }, 
+            {"is", 'f' },
 
             {"pa", 'f'},
             //{"ta", Gender.Masculine}, Cuenta, Nota, Alerta... son femeninos
@@ -121,12 +121,12 @@ namespace Signum.Utilities.NaturalLanguage
 
             NumberOfDecimals = 2,
             OmitDecimalZeros = true
-        }; 
+        };
 
-      
+
         public string ToNumber(decimal number, NumberWriterSettings settings)
         {
-            bool? femenin = 
+            bool? femenin =
                 settings.UnitGender == 'f' ? (bool?)true :
                 settings.UnitGender == 'm' ? (bool?)false : null;
 

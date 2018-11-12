@@ -144,7 +144,7 @@ namespace Signum.Engine
         {
             if (lite == null)
                 return null;
-            
+
             ICacheController cc = Schema.Current.CacheController(lite.EntityType);
             if (cc != null && cc.Enabled)
             {
@@ -298,10 +298,10 @@ namespace Signum.Engine
                 goto retry;
             }
 
-       
+
         }
 
-        static readonly GenericInvoker<Func<List<PrimaryKey>, CancellationToken?, Task<Dictionary<PrimaryKey, string>>>> giGetStrings = 
+        static readonly GenericInvoker<Func<List<PrimaryKey>, CancellationToken?, Task<Dictionary<PrimaryKey, string>>>> giGetStrings =
             new GenericInvoker<Func<List<PrimaryKey>, CancellationToken?, Task<Dictionary<PrimaryKey, string>>>>((ids, token) => GetStrings<Entity>(ids, token));
         static async Task<Dictionary<PrimaryKey, string>> GetStrings<T>(List<PrimaryKey> ids, CancellationToken? token) where T : Entity
         {
@@ -330,7 +330,7 @@ namespace Signum.Engine
                     .ToDictionaryEx();
 
                 return dic;
-            }  
+            }
         }
 
         public void Dispose()

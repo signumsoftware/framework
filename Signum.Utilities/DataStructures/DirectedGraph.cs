@@ -192,7 +192,7 @@ namespace Signum.Utilities.DataStructures
                 set.Add(node);
             IndirectlyRelatedTo(node, set);
             return set;
-        } 
+        }
 
         void IndirectlyRelatedTo(T node, HashSet<T> set)
         {
@@ -316,12 +316,12 @@ namespace Signum.Utilities.DataStructures
 
         public void Expand(T node, Func<T, IEnumerable<T>> expandFunction)
         {
-            if (adjacency.ContainsKey(node)) 
+            if (adjacency.ContainsKey(node))
                 return;
 
             var hs = new HashSet<T>(Comparer);
             adjacency.Add(node, hs);
-            
+
             foreach (var item in expandFunction(node))
             {
                 Expand(item, expandFunction);
@@ -364,7 +364,7 @@ namespace Signum.Utilities.DataStructures
                 new XAttribute("Background", getColor(n))
             });
         }
-            
+
         public XDocument ToDGML(Func<T, XAttribute[]> attributes)
         {
             int num = 0;
@@ -422,13 +422,13 @@ namespace Signum.Utilities.DataStructures
 
         /// <summary>
         /// A simple but effective linear-time heuristic constructs a vertex ordering,
-        /// just as in the topological sort heuristic above, and deletes any arc going from right to left. 
-        /// 
-        /// This heuristic builds up the ordering from the outside in based on the in- and out-degrees of each vertex. 
-        /// - Any vertex of in-degree 0 is a source and can be placed first in the ordering. 
-        /// - Any vertex of out-degree 0 is a sink and can be placed last in the ordering, again without violating any constraints. 
-        /// - If not, we find the vertex with the maximum difference between in- and out-degree, 
-        /// and place it on the side of the permutation that will salvage the greatest number of constraints. 
+        /// just as in the topological sort heuristic above, and deletes any arc going from right to left.
+        ///
+        /// This heuristic builds up the ordering from the outside in based on the in- and out-degrees of each vertex.
+        /// - Any vertex of in-degree 0 is a source and can be placed first in the ordering.
+        /// - Any vertex of out-degree 0 is a sink and can be placed last in the ordering, again without violating any constraints.
+        /// - If not, we find the vertex with the maximum difference between in- and out-degree,
+        /// and place it on the side of the permutation that will salvage the greatest number of constraints.
         /// Delete any vertex from the DAG after positioning it and repeat until the graph is empty.
         /// </summary>
         /// <returns></returns>
@@ -558,5 +558,5 @@ namespace Signum.Utilities.DataStructures
         }
     };
 
-    
+
 }

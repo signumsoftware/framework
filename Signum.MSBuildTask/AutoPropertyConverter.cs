@@ -62,7 +62,7 @@ namespace Signum.MSBuildTask
                 return false;
 
             var baseType = t.BaseType.Resolve();
-            
+
             var result = InheritsFromModEntity(baseType);
 
             return result;
@@ -77,7 +77,7 @@ namespace Signum.MSBuildTask
                 FieldDefinition field;
                 if (fields.TryGetValue(BackingFieldName(prop), out field))
                 {
-                    var targetField = type.GenericParameters.Count == 0 ? field : 
+                    var targetField = type.GenericParameters.Count == 0 ? field :
                         field.MakeHostInstanceGeneric(type.GenericParameters.ToArray());
 
                     if (prop.GetMethod != null)
@@ -122,7 +122,7 @@ namespace Signum.MSBuildTask
             inst.Add(Instruction.Create(OpCodes.Ret));
         }
 
-    
+
 
         static string BackingFieldName(PropertyDefinition p)
         {

@@ -46,12 +46,12 @@ namespace Signum.Engine.Maps
         {
             get { return "IX_{0}".FormatWith(ColumnSignature()).TryStart(Connector.Current.MaxNameLength); }
         }
-        
+
         protected string ColumnSignature()
         {
             string columns = Columns.ToString(c => c.Name, "_");
             var includeColumns = IncludeColumns.HasItems() ? IncludeColumns.ToString(c => c.Name, "_") : null;
-            
+
             if (string.IsNullOrEmpty(Where)  && includeColumns == null)
                 return columns;
 
@@ -87,7 +87,7 @@ namespace Signum.Engine.Maps
     public class UniqueIndex : Index
     {
         public UniqueIndex(ITable table, IColumn[] columns) : base(table, columns) { }
-        
+
 
         public override string IndexName
         {
@@ -138,7 +138,7 @@ namespace Signum.Engine.Maps
             var members = Reflector.GetMemberListUntyped(field);
             if (members.Any(a => ignoreMembers.Contains(a.Name)))
                 members = members.Where(a => !ignoreMembers.Contains(a.Name)).ToArray();
-            
+
             Field f = Schema.FindField(finder, members);
 
             if (type != null)
@@ -324,7 +324,7 @@ namespace Signum.Engine.Maps
                 return fe.HasValue.Name.SqlEscape() + " = 1";
             }
 
-            throw new NotSupportedException(isNull.FormatWith(field.GetType())); 
+            throw new NotSupportedException(isNull.FormatWith(field.GetType()));
         }
 
         static string Equals(Field field, object value, bool equals)

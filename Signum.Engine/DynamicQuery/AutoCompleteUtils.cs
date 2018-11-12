@@ -75,7 +75,7 @@ namespace Signum.Engine.DynamicQuery
             types = types.Where(t => Schema.Current.IsAllowed(t, inUserInterface: true) == null);
 
             List<Lite<Entity>> results = new List<Lite<Entity>>();
-          
+
             foreach (var t in types)
             {
                 if (TryParsePrimaryKey(subString, t, out PrimaryKey id))
@@ -148,7 +148,7 @@ namespace Signum.Engine.DynamicQuery
 
             return results;
         }
-     
+
         static GenericInvoker<Func<PrimaryKey, Lite<Entity>>> giLiteById =
             new GenericInvoker<Func<PrimaryKey, Lite<Entity>>>(id => LiteById<TypeEntity>(id));
         static Lite<Entity> LiteById<T>(PrimaryKey id)

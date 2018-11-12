@@ -238,7 +238,7 @@ namespace Signum.Engine.Linq
             return aggExp.AggregateFunction == AggregateSqlFunction.Count ||
                 aggExp.AggregateFunction == AggregateSqlFunction.Sum ||
                 aggExp.AggregateFunction == AggregateSqlFunction.Average ||
-                aggExp.AggregateFunction == AggregateSqlFunction.StdDev || 
+                aggExp.AggregateFunction == AggregateSqlFunction.StdDev ||
                 aggExp.AggregateFunction == AggregateSqlFunction.StdDevP;
         }
 

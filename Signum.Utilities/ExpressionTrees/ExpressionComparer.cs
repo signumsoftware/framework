@@ -318,7 +318,7 @@ namespace Signum.Utilities.ExpressionTrees
 
         class ExpressionsEqualityComparer<E> : IEqualityComparer<E> where E : Expression
         {
-            bool checkParameterNames; 
+            bool checkParameterNames;
             public ExpressionsEqualityComparer(bool checkParameterNames)
             {
                 this.checkParameterNames = checkParameterNames;

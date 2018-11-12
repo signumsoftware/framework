@@ -23,7 +23,7 @@ namespace Signum.Engine.Linq
         {
             var oldInSelect = inSql;
             inSql = true;
-            return new Disposable(() => inSql = oldInSelect); 
+            return new Disposable(() => inSql = oldInSelect);
         }
 
         static BinaryExpression TrueCondition = Expression.Equal(new SqlConstantExpression(1), new SqlConstantExpression(1));
@@ -51,7 +51,7 @@ namespace Signum.Engine.Linq
 
             return exp.Type.IsNullable() ? result.Nullify() : result;
         }
- 
+
 
         Expression MakeSqlValue(Expression exp)
         {
@@ -223,10 +223,10 @@ namespace Signum.Engine.Linq
             if (nLeft.Type.IsNullable() || nRight.Type.IsNullable())
             {
                 nLeft = nLeft.Nullify();
-                nRight = nRight.Nullify(); 
+                nRight = nRight.Nullify();
             }
 
-            return combinator(nLeft, nRight); 
+            return combinator(nLeft, nRight);
         }
 
         protected override Expression VisitBinary(BinaryExpression b)

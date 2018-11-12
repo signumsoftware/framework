@@ -23,7 +23,7 @@ namespace Signum.Entities.Basics
 
         [StringLengthValidator(AllowNulls = false, Max = 200)]
         public string ClassName { get; set; }
-        
+
         static Expression<Func<TypeEntity, string>> FullClassNameExpression =
             t => t.Namespace + "." + t.ClassName;
         [ExpressionField]

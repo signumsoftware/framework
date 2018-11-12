@@ -84,7 +84,7 @@ namespace Signum.Entities.DynamicQuery
 
         public override bool HasAllOrAny()
         {
-            return 
+            return
                 CollectionElementType != CollectionElementType.Element &&
                 CollectionElementType != CollectionElementType.Element2 &&
                 CollectionElementType != CollectionElementType.Element3;
@@ -174,5 +174,5 @@ namespace Signum.Entities.DynamicQuery
         [Description("Element (3)")]
         Element3,
     }
-    
+
 }

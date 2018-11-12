@@ -11,7 +11,7 @@ using Signum.Utilities.ExpressionTrees;
 namespace Signum.Entities
 {
     /// <summary>
-    /// When used on a static class, auto-initializes its static fields of symbols or operations 
+    /// When used on a static class, auto-initializes its static fields of symbols or operations
     /// </summary>
     [AttributeUsage(AttributeTargets.Class, AllowMultiple = false)]
     public sealed class AutoInitAttribute : Attribute
@@ -27,8 +27,8 @@ namespace Signum.Entities
     {
         bool? inTypeScript = null;
         public bool? GetInTypeScript() => inTypeScript;
-        
-        
+
+
         bool? undefined = null;
         public bool? GetUndefined() => undefined;
         public bool Undefined
@@ -75,7 +75,7 @@ namespace Signum.Entities
         public string Name { get; private set; }
         public CleanTypeNameAttribute(string name)
         {
-            this.Name = name; 
+            this.Name = name;
         }
     }
 
@@ -119,7 +119,7 @@ namespace Signum.Entities
             {
                 if (!t.IsIEntity())
                     throw new InvalidOperationException("{0} should be a non-abstrat Entity".FormatWith(type.TypeName()));
-                
+
                 return t.GetCustomAttribute<EntityKindAttribute>(true);
             });
         }
@@ -144,8 +144,8 @@ namespace Signum.Entities
         public EntityData EntityData { get; private set; }
 
         public bool IsLowPopulation { get; set; }
-        
-        bool? overridenRequiresSaveOperation; 
+
+        bool? overridenRequiresSaveOperation;
         public bool RequiresSaveOperation
         {
             get { return overridenRequiresSaveOperation ?? CalculateRequiresSaveOperation(this.EntityKind) ; }
@@ -181,11 +181,11 @@ namespace Signum.Entities
         }
     }
 
-    
+
     public enum EntityKind
     {
         /// <summary>
-        /// Doesn't make sense to view it from other entity, since there's not to much to see. Not editable. 
+        /// Doesn't make sense to view it from other entity, since there's not to much to see. Not editable.
         /// Not RequiresSaveOperation
         /// ie: PermissionSymbol
         /// </summary>
@@ -200,21 +200,21 @@ namespace Signum.Entities
 
         /// <summary>
         /// An entity that connects two entitities to implement a N to N relationship in a symetric way (no MLists)
-        /// Not RequiresSaveOperation, not vieable, not creable (override on SearchControl) 
+        /// Not RequiresSaveOperation, not vieable, not creable (override on SearchControl)
         /// ie: DiscountProductEntity
         /// </summary>
         Relational,
 
 
         /// <summary>
-        /// Doesn't make sense to view it from other entity, since there's not to much to see. 
+        /// Doesn't make sense to view it from other entity, since there's not to much to see.
         /// RequiresSaveOperation
         /// ie: CountryEntity
         /// </summary>
         String,
 
         /// <summary>
-        /// Used and shared by other entities, can be created from other entity. 
+        /// Used and shared by other entities, can be created from other entity.
         /// RequiresSaveOperation
         /// ie: CustomerEntity (can create new while creating the order)
         /// </summary>
@@ -235,7 +235,7 @@ namespace Signum.Entities
         Part,
 
         /// <summary>
-        /// Entity that can be created on the fly and saved with the parent entity, but could also be shared with other entities to save space. 
+        /// Entity that can be created on the fly and saved with the parent entity, but could also be shared with other entities to save space.
         /// Not RequiresSaveOperation
         /// ie: AddressEntity
         /// </summary>
@@ -247,7 +247,7 @@ namespace Signum.Entities
         /// <summary>
         /// Entity created for business definition
         /// By default ordered by id Ascending
-        /// ie: ProductEntity, OperationEntity, PermissionEntity, CountryEntity...  
+        /// ie: ProductEntity, OperationEntity, PermissionEntity, CountryEntity...
         /// </summary>
         Master,
 

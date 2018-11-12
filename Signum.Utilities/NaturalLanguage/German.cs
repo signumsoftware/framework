@@ -12,36 +12,36 @@ namespace Signum.Utilities.NaturalLanguage
         //http://www.alemansencillo.com/el-plural-en-aleman#TOC-Reglas-generales-aplicables-a-todos
         Dictionary<string, string> terminationsFemenine = new Dictionary<string, string>
         {
-            {"itis", "itiden"}, 
-            {"sis", "sen"}, 
-            {"xis", "xien"}, 
-            {"in", "innen"},  
-            {"aus", "äuse"}, 
-            {"e", "en"}, 
-            {"a", "en"}, 
-            {"", "en"}, 
+            {"itis", "itiden"},
+            {"sis", "sen"},
+            {"xis", "xien"},
+            {"in", "innen"},
+            {"aus", "äuse"},
+            {"e", "en"},
+            {"a", "en"},
+            {"", "en"},
         };
 
         Dictionary<string, string> terminationsMasculine = new Dictionary<string, string>
         {
-            {"ant", "anten"}, 
-            {"ent", "enten"}, 
-            {"ist", "isten"}, 
-            {"at", "aten"}, 
-            {"us", "usse"}, 
-            {"e", "en"}, 
-            {"", "e"}, 
+            {"ant", "anten"},
+            {"ent", "enten"},
+            {"ist", "isten"},
+            {"at", "aten"},
+            {"us", "usse"},
+            {"e", "en"},
+            {"", "e"},
         };
 
         Dictionary<string, string> terminationsNeutro = new Dictionary<string, string>
         {
-            {"nis", "nisse"}, 
-            {"um", "a"}, 
-            {"o", "en"}, 
-            {"", "e"}, 
+            {"nis", "nisse"},
+            {"um", "a"},
+            {"o", "en"},
+            {"", "e"},
         };
 
-   
+
         public string MakePlural(string singularName)
         {
             if (string.IsNullOrEmpty(singularName))
@@ -150,5 +150,5 @@ namespace Signum.Utilities.NaturalLanguage
     }
 
 
-  
+
 }

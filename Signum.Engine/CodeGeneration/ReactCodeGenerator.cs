@@ -107,7 +107,7 @@ namespace Signum.Engine.CodeGeneration
         {
             return BaseFileName(m) + m.ModuleName + "Server.cs";
         }
-        
+
         protected virtual string GetViewFileName(Module m, Type t)
         {
             return BaseFileName(m)  + "Templates\\" + GetViewName(t) + ".tsx";
@@ -169,7 +169,7 @@ namespace Signum.Engine.CodeGeneration
                     else
                         moduleName = selectedName;
                 }
-            
+
                 if (!moduleName.HasText())
                     yield break;
 
@@ -299,7 +299,7 @@ namespace Signum.Engine.CodeGeneration
             sb.AppendLine(@"//}");
             return sb.ToString();
         }
-        
+
 
         protected virtual List<string> GetServerUsingNamespaces(Module mod)
         {
@@ -373,7 +373,7 @@ namespace Signum.Engine.CodeGeneration
             string operationSettings = WriteOperationSettings(mod);
             if (operationSettings != null)
                 sb.Append(operationSettings.Indent(2));
-            
+
             sb.AppendLine("}");
 
             return sb.ToString();
@@ -382,12 +382,12 @@ namespace Signum.Engine.CodeGeneration
         protected virtual string WritetEntitySettings(Module mod)
         {
             StringBuilder sb = new StringBuilder();
-            
+
             foreach (var t in mod.Types)
             {
                 string es = GetEntitySetting(t);
                 if (es != null)
-                    sb.AppendLine(es); 
+                    sb.AppendLine(es);
             }
             return sb.ToString();
         }
@@ -426,9 +426,9 @@ namespace Signum.Engine.CodeGeneration
             sb.AppendLine("import { "  + type.Name + " } from '../" + type.Namespace + "'");
             sb.AppendLine("import { TypeContext, ValueLine, EntityLine, EntityCombo, EntityList, EntityDetail, EntityStrip, EntityRepeater, EntityTable, FormGroup } from '@framework/Lines'");
             sb.AppendLine("import { SearchControl, ValueSearchControl, FilterOperation, OrderType, PaginationMode } from '@framework/Search'");
-            
+
             var v = GetVarName(type);
-            
+
             sb.AppendLine();
             sb.AppendLine("export default class {0} extends React.Component<{{ ctx: TypeContext<{1}> }}> {{".FormatWith(GetViewName(type), type.Name));
             sb.AppendLine("");

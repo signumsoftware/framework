@@ -18,7 +18,7 @@ namespace Signum.Entities.DynamicQuery
 
         public PropertyRoute PropertyRoute { get; private set; }
 
-        static readonly PropertyInfo piId = ReflectionTools.GetPropertyInfo((Entity e) => e.Id); 
+        static readonly PropertyInfo piId = ReflectionTools.GetPropertyInfo((Entity e) => e.Id);
 
         public static QueryToken IdProperty(QueryToken parent)
         {

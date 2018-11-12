@@ -178,9 +178,9 @@ namespace Signum.Test.LinqProvider
                 Debug.Write(str);
 
                 Assert.True(!str.Contains(text));
-            }); 
+            });
         }
 
-       
+
     }
 }

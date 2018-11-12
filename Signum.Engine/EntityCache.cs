@@ -18,7 +18,7 @@ namespace Signum.Engine
     public class EntityCache: IDisposable
     {
         internal class RealEntityCache
-        {   
+        {
             readonly Dictionary<(Type type, PrimaryKey id), Entity> dic = new Dictionary<(Type type, PrimaryKey id), Entity>();
 
             public void Add(Entity e)
@@ -86,7 +86,7 @@ namespace Signum.Engine
                 get{return retriever != null; }
             }
 
-           
+
 
             internal bool TryGetValue((Type type, PrimaryKey id) tuple, out Entity result)
             {
@@ -172,7 +172,7 @@ namespace Signum.Engine
 
         public static bool Contains(Type type, PrimaryKey id)
         {
-            return Current.Contains(type, id); 
+            return Current.Contains(type, id);
         }
 
         public static T Get<T>(PrimaryKey id) where T : Entity
@@ -194,7 +194,7 @@ namespace Signum.Engine
         {
             return Current.NewRetriever();
         }
-    
+
         public static T Construct<T>(PrimaryKey id) where T : Entity
         {
             var result = Constructor<T>.Call();

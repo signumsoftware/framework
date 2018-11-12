@@ -27,7 +27,7 @@ namespace Signum.Test.LinqProvider
         {
             MusicStarter.StartAndLoad();
             Connector.CurrentLogger = new DebugTextWriter();
-        }      
+        }
 
         [Fact]
         public void RetrieveSimple()

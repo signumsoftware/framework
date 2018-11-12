@@ -16,7 +16,7 @@ namespace Signum.Utilities
     {
         static ConcurrentDictionary<LambdaExpression, Delegate> cache = new ConcurrentDictionary<LambdaExpression, Delegate>();
 
-        static Dictionary<LambdaExpression, LambdaExpression> registeredExpressions = new Dictionary<LambdaExpression, LambdaExpression>(ExpressionComparer.GetComparer<LambdaExpression>(checkParameterNames: true)); 
+        static Dictionary<LambdaExpression, LambdaExpression> registeredExpressions = new Dictionary<LambdaExpression, LambdaExpression>(ExpressionComparer.GetComparer<LambdaExpression>(checkParameterNames: true));
 
         public static T CompileAndStore<T>(this Expression<T> expression)
         {
@@ -38,11 +38,11 @@ namespace Signum.Utilities
 
         private static string DuplicateMessage(LambdaExpression exp, LambdaExpression already)
         {
-            return @"Can not cache the compiled version of expression: 
+            return @"Can not cache the compiled version of expression:
 {0}
-Because a similar expression has already been cached: 
+Because a similar expression has already been cached:
 {1}
-This limitation tries to avoid running out of memory caching freshly generated expressions. 
+This limitation tries to avoid running out of memory caching freshly generated expressions.
 Use this method only with constant expressions stored in static fields.".FormatWith(exp.ToString(), already.ToString());
         }
 

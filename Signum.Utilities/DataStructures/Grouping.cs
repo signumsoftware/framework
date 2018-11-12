@@ -15,7 +15,7 @@ namespace Signum.Utilities.DataStructures
         K key;
         public Grouping(K key)
         {
-            this.key = key; 
+            this.key = key;
         }
 
         public Grouping(K key, IEnumerable<T> values)

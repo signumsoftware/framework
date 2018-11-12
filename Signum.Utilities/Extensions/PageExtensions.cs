@@ -8,7 +8,7 @@ namespace Signum.Utilities
     /// <summary>
     /// 1-based index
     /// </summary>
-    public class Page<T> 
+    public class Page<T>
     {
         public int StartElementIndex
         {

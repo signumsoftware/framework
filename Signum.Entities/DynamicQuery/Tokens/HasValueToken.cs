@@ -61,7 +61,7 @@ namespace Signum.Entities.DynamicQuery
         protected override Expression BuildExpressionInternal(BuildExpressionContext context)
         {
             Expression baseExpression = Parent.BuildExpression(context);
-            
+
             var result = Expression.NotEqual(baseExpression, Expression.Constant(null, baseExpression.Type.Nullify()));
 
             if (baseExpression.Type == typeof(string))
@@ -110,5 +110,5 @@ namespace Signum.Entities.DynamicQuery
             return new HasValueToken(Parent.Clone());
         }
     }
-    
+
 }

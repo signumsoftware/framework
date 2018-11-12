@@ -16,8 +16,8 @@ namespace Signum.Test.LinqProvider
         {
             MusicStarter.StartAndLoad();
             Connector.CurrentLogger = new DebugTextWriter();
-        }      
-     
+        }
+
 
         [Fact]
         public void SelectType()
@@ -51,7 +51,7 @@ namespace Signum.Test.LinqProvider
                 });
 
             Assert.Equal(2, query.QueryText().CountRepetitions("LEFT OUTER JOIN"));
-            query.ToList(); 
+            query.ToList();
         }
 
 
@@ -106,7 +106,7 @@ namespace Signum.Test.LinqProvider
         [Fact]
         public void SelectEntityWithLiteIbTypeContains()
         {
-            Type[] types = new Type[] { typeof(GrammyAwardEntity) }; 
+            Type[] types = new Type[] { typeof(GrammyAwardEntity) };
 
             var list = Database.Query<AwardNominationEntity>().Where(a => types.Contains(a.Award.Entity.GetType())).ToList();
         }

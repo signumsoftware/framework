@@ -14,10 +14,10 @@ using System.Threading.Tasks;
 
 namespace Signum.Engine.DynamicQuery
 {
-    public class AutoDynamicQueryCore<T> : DynamicQueryCore<T> 
+    public class AutoDynamicQueryCore<T> : DynamicQueryCore<T>
     {
         public IQueryable<T> Query { get; private set; }
-        
+
         Dictionary<string, Meta> metas;
 
         public AutoDynamicQueryCore(IQueryable<T> query)
@@ -132,7 +132,7 @@ namespace Signum.Engine.DynamicQuery
             var query = Query.ToDQueryable(GetQueryDescription())
                 .SelectMany(request.Multiplications)
                 .Where(request.Filters);
-            
+
             if (request.ValueToken == null)
                 return await query.Query.CountAsync(token);
 
@@ -175,7 +175,7 @@ namespace Signum.Engine.DynamicQuery
 
             return (Lite<Entity>)result;
         }
-        
+
         public override IQueryable<Lite<Entity>> GetEntities(QueryEntitiesRequest request)
         {
             var ex = new _EntityColumn(EntityColumnFactory().BuildColumnDescription(), QueryName);
@@ -186,7 +186,7 @@ namespace Signum.Engine.DynamicQuery
              .OrderBy(request.Orders)
              .Where(request.Filters)
              .Select(new List<Column> { ex });
-            
+
             var result = query.Query.Select(query.Context.GetEntitySelector());
 
             if (request.Multiplications.Any())
@@ -209,7 +209,7 @@ namespace Signum.Engine.DynamicQuery
 
             return new DQueryable<object>(query.Query, query.Context);
         }
-        
+
         public override Expression Expression
         {
             get { return Query.Expression; }

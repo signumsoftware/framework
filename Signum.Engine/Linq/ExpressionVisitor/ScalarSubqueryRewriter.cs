@@ -13,8 +13,8 @@ namespace Signum.Engine.Linq
     {
         SourceExpression currentFrom;
 
-        Connector connector = Connector.Current; 
-        
+        Connector connector = Connector.Current;
+
         bool inAggregate = false;
 
         public static Expression Rewrite(Expression expression)

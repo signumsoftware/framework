@@ -97,7 +97,7 @@ namespace Signum.Entities
 
         internal static string ConsiderMessage(PropertyRoute route, string targetTypes)
         {
-            return $@"Consider writing something like this in your Starter class: 
+            return $@"Consider writing something like this in your Starter class:
 sb.Schema.Settings.FieldAttributes(({route.RootType.TypeName()} a) => a.{route.PropertyString().Replace("/", ".First().")}).Replace(new ImplementedByAttribute({targetTypes}))";
         }
 
@@ -286,7 +286,7 @@ sb.Schema.Settings.FieldAttributes(({route.RootType.TypeName()} a) => a.{route.P
         {
             get { return scale.HasValue; }
         }
-        
+
         public string UserDefinedTypeName { get; set; }
 
         public string Default { get; set; }
@@ -353,7 +353,7 @@ sb.Schema.Settings.FieldAttributes(({route.RootType.TypeName()} a) => a.{route.P
 
     [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property)]
     public sealed class ViewPrimaryKeyAttribute : Attribute
-    { 
+    {
     }
 
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Enum | AttributeTargets.Field | AttributeTargets.Property /*MList fields*/, Inherited = true, AllowMultiple = false)]

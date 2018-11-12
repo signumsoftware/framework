@@ -24,7 +24,7 @@ namespace Signum.Engine.Linq
         object Execute();
         Task<object> ExecuteAsync(CancellationToken token);
 
-        LambdaExpression GetMainProjector(); 
+        LambdaExpression GetMainProjector();
     }
 
     interface IChildProjection
@@ -39,7 +39,7 @@ namespace Signum.Engine.Linq
         bool IsLazy { get; }
     }
 
-    
+
     class EagerChildProjection<K, V>: IChildProjection
     {
         public LookupToken Token { get; set; }
@@ -194,7 +194,7 @@ namespace Signum.Engine.Linq
             get { return true; }
         }
     }
-    
+
     class TranslateResult<T> : ITranslateResult
     {
         public UniqueFunction? Unique { get; set; }
@@ -250,7 +250,7 @@ namespace Signum.Engine.Linq
 
                     retriever.CompleteAll();
                 }
-            
+
                 return tr.Commit(result);
             }
         }
@@ -330,7 +330,7 @@ namespace Signum.Engine.Linq
                     eager == null && lazy == null ? null : new SqlPreCommandSimple("--------- MAIN QUERY ------------------------"),
                     MainCommand,
                     lazy == null ? null :  new SqlPreCommandSimple("--------- Lazy Client Joins (if needed) -----"),
-                    lazy).PlainSql(); 
+                    lazy).PlainSql();
 
             }
             catch

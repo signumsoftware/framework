@@ -17,7 +17,7 @@ namespace Signum.Entities.DynamicQuery
         public bool Distinct { get; private set; }
 
 
-        object queryName; 
+        object queryName;
         public override object QueryName
         {
             get { return  queryName ?? base.QueryName; }
@@ -32,7 +32,7 @@ namespace Signum.Entities.DynamicQuery
             this.queryName = queryName ?? throw new ArgumentNullException("queryName");
             this.AggregateFunction = function;
         }
-        
+
         public AggregateToken(AggregateFunction function, QueryToken parent, FilterOperation? filterOperation = null, object value = null, bool distinct = false)
             : base(parent)
         {
@@ -203,7 +203,7 @@ namespace Signum.Entities.DynamicQuery
             else
                 return new AggregateToken(AggregateFunction, Parent.Clone(), this.FilterOperation, this.Value, this.Distinct);
         }
-        
+
 
         public override string TypeColor
         {

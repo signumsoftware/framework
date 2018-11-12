@@ -16,9 +16,9 @@ namespace Signum.Engine
     /// Allows easy nesting of transaction by making use of 'using' statement
     /// Keeps an implicit stack of Transaction objects over the call stack of the current Thread
     /// and an explicit stack of RealTransaction objects on thread variable.
-    /// Usually, just the first Transaccion creates a RealTransaction, but you can create more using 
+    /// Usually, just the first Transaccion creates a RealTransaction, but you can create more using
     /// forceNew = true
-    /// All Transaction can cancel but only the one that created the RealTransaction can Commit 
+    /// All Transaction can cancel but only the one that created the RealTransaction can Commit
     /// </summary>
     public class Transaction : IDisposableException
     {
@@ -604,7 +604,7 @@ namespace Signum.Engine
             ((RealTransaction)tr.coreTransaction).OnPreRealCommit();
         }
 
-        Exception savedException; 
+        Exception savedException;
 
         public void OnException(Exception ex)
         {

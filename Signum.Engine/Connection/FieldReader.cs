@@ -172,7 +172,7 @@ namespace Signum.Engine
             {
                 return null;
             }
-            return GetByte(ordinal); 
+            return GetByte(ordinal);
         }
 
 
@@ -207,7 +207,7 @@ namespace Signum.Engine
             {
                 return null;
             }
-            return GetChar(ordinal); 
+            return GetChar(ordinal);
         }
 
 
@@ -437,7 +437,7 @@ namespace Signum.Engine
 
             if (Schema.Current.TimeZoneMode == TimeZoneMode.Utc)
                 return new DateTime(dt.Ticks, DateTimeKind.Utc);
-            return dt; 
+            return dt;
         }
 
         public DateTime? GetNullableDateTime(int ordinal)
@@ -519,7 +519,7 @@ namespace Signum.Engine
             return GetGuid(ordinal);
         }
 
-        static MethodInfo miGetUdt = ReflectionTools.GetMethodInfo((FieldReader r) => r.GetUdt<object>(0)).GetGenericMethodDefinition(); 
+        static MethodInfo miGetUdt = ReflectionTools.GetMethodInfo((FieldReader r) => r.GetUdt<object>(0)).GetGenericMethodDefinition();
 
         public T GetUdt<T>(int ordinal)
         {
@@ -558,7 +558,7 @@ namespace Signum.Engine
             throw new InvalidOperationException("Type {0} not supported".FormatWith(type));
         }
 
-        static MethodInfo miIsNull = ReflectionTools.GetMethodInfo((FieldReader r) => r.IsNull(0)); 
+        static MethodInfo miIsNull = ReflectionTools.GetMethodInfo((FieldReader r) => r.IsNull(0));
 
         public static Expression GetIsNull(Expression reader, int ordinal)
         {

@@ -11,7 +11,7 @@ using Signum.Utilities.ExpressionTrees;
 namespace Signum.Utilities.DataStructures
 {
     [Serializable]
-    public class IntervalDictionary<K,V>: IEnumerable<KeyValuePair<Interval<K>, V>> 
+    public class IntervalDictionary<K,V>: IEnumerable<KeyValuePair<Interval<K>, V>>
         where K: struct, IComparable<K>, IEquatable<K>
     {
         SortedList<Interval<K>, V> dic = new SortedList<Interval<K>, V>();
@@ -77,13 +77,13 @@ namespace Signum.Utilities.DataStructures
                 return;
 
             RemoveCutting(interval);
-            Add(interval, value); 
+            Add(interval, value);
         }
 
         public void RemoveCutting(Interval<K> interval)
         {
             if (interval.IsEmpty)
-                return; 
+                return;
 
             var overlapping = Overlapping(interval).ToArray();
 
@@ -94,7 +94,7 @@ namespace Signum.Utilities.DataStructures
 
                 Interval<K> last = overlapping[overlapping.Length-1];
                 V lastValue = dic[last];
-                
+
                 foreach (var item in overlapping)
                 {
                     Remove(item);
@@ -145,7 +145,7 @@ namespace Signum.Utilities.DataStructures
 
                 throw new KeyNotFoundException("No interval found in {0}".FormatWith(this.GetType().TypeName()));
             }
-            
+
         }
 
         public V TryGet(K key, V defaultValue)
@@ -183,7 +183,7 @@ namespace Signum.Utilities.DataStructures
 
         public bool Remove(Interval<K> interval)
         {
-            return dic.Remove(interval); 
+            return dic.Remove(interval);
         }
 
 
@@ -271,7 +271,7 @@ namespace Signum.Utilities.DataStructures
         {
             return dic.ToString(a => "[{0},{1}] -> {2}".FormatWith(a.Key.Min, a.Key.Max, a.Value), "\r\n");
         }
-    }    
+    }
 
     public struct IntervalValue<T>
     {
@@ -313,14 +313,14 @@ namespace Signum.Utilities.DataStructures
         public static IntervalDictionary<K, VR> Filter<K, V, VR>(this IntervalDictionary<K, V> me, Interval<K> filter, Func<Interval<K>, V, VR> mapper)
                  where K : struct, IComparable<K>, IEquatable<K>
         {
-            IntervalDictionary<K, VR> result  = new IntervalDictionary<K,VR>(); 
+            IntervalDictionary<K, VR> result  = new IntervalDictionary<K,VR>();
             foreach (var item in me)
 	        {
                 var intersection = item.Key.TryIntersection(filter);
                 if(intersection != null)
-                    result.Add(intersection.Value, mapper(intersection.Value, item.Value)); 
+                    result.Add(intersection.Value, mapper(intersection.Value, item.Value));
 	        }
-            return result; 
+            return result;
         }
 
 

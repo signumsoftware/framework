@@ -33,7 +33,7 @@ namespace Signum.Entities
                 throw new InvalidOperationException(string.Format("No field with name {0} found in {1}", fieldName, declaringType.Name));
 
             this.Key = declaringType.Name + "." + fieldName;
-            
+
             try
             {
                 Symbols.GetOrCreate(this.GetType()).Add(this.Key, this);

@@ -35,7 +35,7 @@ namespace Signum.Engine.DynamicQuery
 
             DEnumerableCount<T> manualResult = await Execute(request, GetQueryDescription(), cancellationToken);
 
-            return manualResult.ToResultTable(request); 
+            return manualResult.ToResultTable(request);
         }
 
         public override ResultTable ExecuteQueryGroup(QueryRequest request) => Task.Run(() => ExecuteQueryGroupAsync(request, CancellationToken.None)).Result;
@@ -104,7 +104,7 @@ namespace Signum.Engine.DynamicQuery
             }
         }
 
-    
+
 
         public override Lite<Entity> ExecuteUniqueEntity(UniqueEntityRequest request) => Task.Run(() => ExecuteUniqueEntityAsync(request, CancellationToken.None)).Result;
         public override async Task<Lite<Entity>> ExecuteUniqueEntityAsync(UniqueEntityRequest request, CancellationToken cancellationToken)
@@ -128,7 +128,7 @@ namespace Signum.Engine.DynamicQuery
             ParameterExpression pe = Expression.Parameter(typeof(object), "p");
             return  Expression.Lambda<Func<object, Lite<IEntity>>>(TupleReflection.TupleChainProperty(pe, 0), pe).Compile();
         }, true);
-        
+
         public override IQueryable<Lite<Entity>> GetEntities(QueryEntitiesRequest request)
         {
             throw new NotImplementedException();

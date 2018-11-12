@@ -11,9 +11,9 @@ namespace Signum.Entities.DynamicQuery
     public abstract class BaseQueryRequest
     {
         public object QueryName { get; set; }
-        
+
         public List<Filter> Filters { get; set; }
-        
+
         public string QueryUrl { get; set; }
 
         public override string ToString()
@@ -28,9 +28,9 @@ namespace Signum.Entities.DynamicQuery
         public bool GroupResults { get; set; }
 
         public List<Column> Columns { get; set; }
-        
+
         public List<Order> Orders { get; set; }
-        
+
         public Pagination Pagination { get; set; }
 
         public SystemTime SystemTime { get; set; }
@@ -81,7 +81,7 @@ namespace Signum.Entities.DynamicQuery
     }
 
     [Serializable]
-    public abstract class Pagination 
+    public abstract class Pagination
     {
         public abstract PaginationMode GetMode();
         public abstract int? GetElementsPerPage();
@@ -109,13 +109,13 @@ namespace Signum.Entities.DynamicQuery
         [Serializable]
         public class Firsts : Pagination
         {
-            public static int DefaultTopElements = 20; 
+            public static int DefaultTopElements = 20;
 
             public Firsts(int topElements)
             {
                 this.TopElements = topElements;
             }
-            
+
             public int TopElements { get; private set; }
 
             public override int? MaxElementIndex
@@ -150,9 +150,9 @@ namespace Signum.Entities.DynamicQuery
                 this.ElementsPerPage = elementsPerPage;
                 this.CurrentPage = currentPage;
             }
-            
-            public int ElementsPerPage { get; private set; }   
-            
+
+            public int ElementsPerPage { get; private set; }
+
             public int CurrentPage { get; private set; }
 
             public int StartElementIndex()

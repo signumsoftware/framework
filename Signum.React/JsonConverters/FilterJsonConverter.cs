@@ -12,7 +12,7 @@ using System.Linq;
 namespace Signum.React.Json
 {
     public class FilterJsonConverter : JsonConverter
-    { 
+    {
         public override bool CanConvert(Type objectType)
         {
             return typeof(FilterTS).IsAssignableFrom(objectType);

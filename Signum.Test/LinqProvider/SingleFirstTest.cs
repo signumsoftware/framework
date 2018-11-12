@@ -38,7 +38,7 @@ namespace Signum.Test.LinqProvider
             var bands3b = Database.Query<BandEntity>().Select(b => new { b.Name, Member = b.Members.SingleOrDefaultEx(a => a.Sex == Sex.Female).Name }).ToList();
             var bands4b = Database.Query<BandEntity>().Select(b => new { b.Name, Member = b.Members.SingleEx(a => a.Sex == Sex.Female).Name }).ToList();
         }
-       
+
 
         [Fact]
         public void SelectSingleCellWhere()

@@ -59,7 +59,7 @@ namespace Signum.Utilities.DataStructures
         {
             T minVal = min.CompareTo(other.min) > 0 ? min : other.min;
             T maxVal = max.CompareTo(other.max) < 0 ? max : other.max;
-            
+
             return new Interval<T>(minVal, maxVal);
         }
 
@@ -95,8 +95,8 @@ namespace Signum.Utilities.DataStructures
 
         public override string ToString()
         {
-            return "[" + min + " - " + max + ")"; 
-        }        
+            return "[" + min + " - " + max + ")";
+        }
 
         public bool Equals(Interval<T> other)
         {
@@ -108,7 +108,7 @@ namespace Signum.Utilities.DataStructures
             if (obj == null || !(obj is Interval<T>))
                 return false;
 
-            return Equals((Interval<T>)obj); 
+            return Equals((Interval<T>)obj);
         }
 
         public override int GetHashCode()
@@ -141,7 +141,7 @@ namespace Signum.Utilities.DataStructures
     {
         public Expression Expand(Expression instance, Expression[] arguments, MethodInfo mi)
         {
-            return Expression.And( //min <= value && value < max;                    
+            return Expression.And( //min <= value && value < max;
                 Expression.LessThanOrEqual(Expression.Property(instance, "Min"), arguments[0]),
                 Expression.LessThan(arguments[0], Expression.Property(instance, "Max")));
         }
@@ -220,7 +220,7 @@ namespace Signum.Utilities.DataStructures
         public bool Overlaps(NullableInterval<T> other)
         {
             return !(
-                (max.HasValue && other.min.HasValue && max.Value.CompareTo(other.min.Value) <= 0) || 
+                (max.HasValue && other.min.HasValue && max.Value.CompareTo(other.min.Value) <= 0) ||
                 (other.max.HasValue && min.HasValue && other.max.Value.CompareTo(min.Value) <= 0)
                 );
         }
@@ -383,7 +383,7 @@ namespace Signum.Utilities.DataStructures
         {
             return Expression.And(
                 Expression.And(Expression.Property(max, "HasValue"), Expression.Property(min, "HasValue")),
-                Expression.LessThanOrEqual(Expression.Property(max, "Value"), Expression.Property(min, "Value"))); 
+                Expression.LessThanOrEqual(Expression.Property(max, "Value"), Expression.Property(min, "Value")));
         }
     }
 
@@ -504,14 +504,14 @@ namespace Signum.Utilities.DataStructures
             return !first.Equals(second);
         }
 
-      
+
     }
 
     class ContainsWithEndMethodExpander : IMethodExpander
     {
         public Expression Expand(Expression instance, Expression[] arguments, MethodInfo mi)
         {
-            return Expression.And( //min <= value && value < max;                    
+            return Expression.And( //min <= value && value < max;
                 Expression.LessThanOrEqual(Expression.Property(instance, "Min"), arguments[0]),
                 Expression.LessThanOrEqual(arguments[0], Expression.Property(instance, "Max")));
         }

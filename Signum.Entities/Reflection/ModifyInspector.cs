@@ -66,7 +66,7 @@ namespace Signum.Entities.Reflection
                         if (item != null)
                             yield return item;
                 }
-            }           
+            }
             else
             {
                 foreach (Func<object, object> getter in ModifiableFieldGetters(obj.GetType()))

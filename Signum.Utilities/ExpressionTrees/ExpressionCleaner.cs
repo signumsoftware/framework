@@ -13,9 +13,9 @@ namespace Signum.Utilities.ExpressionTrees
     /// * MethodExpanderAttribute
     /// * MemberXXXExpression static field
     /// * ExpressionExtensions.Evaluate method
-    /// 
+    ///
     /// It also simplifies and skip evaluating short circuited subexpresions
-    /// Evaluates constant subexpressions 
+    /// Evaluates constant subexpressions
 	/// </summary>
     public class ExpressionCleaner : ExpressionVisitor
 	{
@@ -34,7 +34,7 @@ namespace Signum.Utilities.ExpressionTrees
             {
                 partialEval = partialEval,
                 shortCircuit = shortCircuit
-            }; 
+            };
             var result = ee.Visit(expr);
             return partialEval(result);
         }
@@ -78,7 +78,7 @@ namespace Signum.Utilities.ExpressionTrees
                 {
                     if (!typeof(GenericMethodExpander).IsAssignableFrom(attribute.ExpanderType))
                         throw new InvalidOperationException("Expansion failed, '{0}' does not implement IMethodExpander or GenericMethodExpander".FormatWith(attribute.ExpanderType.TypeName()));
-                    
+
                     Expression[] args = m.Object == null ? m.Arguments.ToArray() : m.Arguments.PreAnd(m.Object).ToArray();
 
                     var type = attribute.ExpanderType.MakeGenericType(m.Method.GetGenericArguments());
@@ -124,7 +124,7 @@ namespace Signum.Utilities.ExpressionTrees
 
             return exp;
         }
-        
+
         public static Expression BindMemberExpression(MemberExpression m, bool allowPolymorphics)
         {
             PropertyInfo pi = m.Member as PropertyInfo;
@@ -162,7 +162,7 @@ namespace Signum.Utilities.ExpressionTrees
                         return result;
                 }
 
-                return null; 
+                return null;
             }
         }
 
@@ -227,7 +227,7 @@ namespace Signum.Utilities.ExpressionTrees
 
                 var result = decType.GetProperty(mi.Name, flags, null, pi.PropertyType, types, null) ;
                 if (result != null)
-                    return result; 
+                    return result;
 
                 if(mi.DeclaringType.IsInterface)
                     return decType.GetProperty(mi.DeclaringType.FullName + "." + mi.Name, flags, null, pi.PropertyType, types, null);
@@ -235,7 +235,7 @@ namespace Signum.Utilities.ExpressionTrees
                 return null;
             }
 
-            throw new InvalidOperationException("Invalid Member type"); 
+            throw new InvalidOperationException("Invalid Member type");
         }
 
         static MemberInfo BaseMember(MemberInfo mi)
@@ -252,7 +252,7 @@ namespace Signum.Utilities.ExpressionTrees
             if (result == mi)
                 return null;
 
-            return result; 
+            return result;
         }
 
         #region Simplifier
@@ -265,7 +265,7 @@ namespace Signum.Utilities.ExpressionTrees
         protected override Expression VisitBinary(BinaryExpression b)
         {
             if (!shortCircuit)
-                return base.VisitBinary(b); 
+                return base.VisitBinary(b);
 
             if (b.NodeType == ExpressionType.Coalesce)
             {
@@ -351,7 +351,7 @@ namespace Signum.Utilities.ExpressionTrees
         protected override Expression VisitConditional(ConditionalExpression c)
         {
             if (!shortCircuit)
-                return base.VisitConditional(c); 
+                return base.VisitConditional(c);
 
             Expression test = partialEval(this.Visit(c.Test));
             if (test.NodeType == ExpressionType.Constant)
@@ -369,7 +369,7 @@ namespace Signum.Utilities.ExpressionTrees
                 return Expression.Condition(test, ifTrue, ifFalse);
             }
             return c;
-        } 
+        }
         #endregion
     }
 }

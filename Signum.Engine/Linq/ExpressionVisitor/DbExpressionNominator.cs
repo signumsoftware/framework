@@ -17,7 +17,7 @@ using System.Text.RegularExpressions;
 namespace Signum.Engine.Linq
 {
     /// <summary>
-    /// Nominator is a class that walks an expression tree bottom up, determining the set of 
+    /// Nominator is a class that walks an expression tree bottom up, determining the set of
     /// candidate expressions that are possible columns of a select expression
     /// </summary>
     internal class DbExpressionNominator : DbExpressionVisitor
@@ -96,7 +96,7 @@ namespace Signum.Engine.Linq
                 case DbExpressionType.Select:
                 case DbExpressionType.Projection:
                 case DbExpressionType.Join:
-                case DbExpressionType.AggregateRequest: //Not sure :S 
+                case DbExpressionType.AggregateRequest: //Not sure :S
                 case DbExpressionType.Update:
                 case DbExpressionType.Delete:
                 case DbExpressionType.CommandAggregate:
@@ -1361,9 +1361,9 @@ namespace Signum.Engine.Linq
      m.TryGetArgument("decimals") ?? m.TryGetArgument("digits") ?? new SqlConstantExpression(0));
                 case "Math.Truncate": return TrySqlFunction(null, SqlFunction.ROUND, m.Type, m.GetArgument("d"), new SqlConstantExpression(0), new SqlConstantExpression(1));
                 case "Math.Max":
-                case "Math.Min": return null; /* could be translates to something like 'case when a > b then a 
-                                               *                                             when a < b then b 
-                                               *                                             else null end 
+                case "Math.Min": return null; /* could be translates to something like 'case when a > b then a
+                                               *                                             when a < b then b
+                                               *                                             else null end
                                                * but looks too horrible */
                 case "LinqHints.InSql":
                     using (ForceFullNominate())

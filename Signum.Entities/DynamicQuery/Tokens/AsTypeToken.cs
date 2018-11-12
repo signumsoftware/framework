@@ -99,5 +99,5 @@ namespace Signum.Entities.DynamicQuery
             return new AsTypeToken(Parent.Clone(), entityType);
         }
     }
-    
+
 }

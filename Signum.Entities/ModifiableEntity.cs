@@ -44,7 +44,7 @@ namespace Signum.Entities
             return fieldValue;
         }
 
-      
+
         protected virtual bool Set<T>(ref T field, T value, [CallerMemberName]string automaticPropertyName = null)
         {
             if (EqualityComparer<T>.Default.Equals(field, value))
@@ -104,7 +104,7 @@ namespace Signum.Entities
             return true;
         }
 
-    
+
 
         struct PropertyKey : IEquatable<PropertyKey>
         {
@@ -155,7 +155,7 @@ namespace Signum.Entities
             {
                 if (notify == null)
                     continue;
-             
+
                 notify.CollectionChanged += ChildCollectionChanged;
             }
 
@@ -184,7 +184,7 @@ namespace Signum.Entities
         {
             string propertyName = AttributeManager<NotifyCollectionChangedAttribute>.FindPropertyName(this, sender);
             if (propertyName != null)
-                NotifyPrivate(propertyName); 
+                NotifyPrivate(propertyName);
 
             if (AttributeManager<NotifyChildPropertyAttribute>.FieldsWithAttribute(this).Contains(sender))
             {
@@ -266,7 +266,7 @@ namespace Signum.Entities
 
         }
 
-        
+
         #region Temporal ID
         [Ignore]
         internal Guid temporalId = Guid.NewGuid();
@@ -333,7 +333,7 @@ namespace Signum.Entities
             return PropertyCheck(ReflectionTools.GetPropertyInfo(property).Name);
         }
 
-        public string PropertyCheck(string propertyName) 
+        public string PropertyCheck(string propertyName)
         {
             IPropertyValidator pp = Validator.TryGetPropertyValidator(GetType(), propertyName);
 

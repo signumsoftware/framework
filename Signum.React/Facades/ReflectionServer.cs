@@ -298,7 +298,7 @@ namespace Signum.React.Facades
             object v = m.GetValue(null);
             if (v is IOperationSymbolContainer osc)
                 v = osc.Symbol;
-            
+
             if (v is Symbol s)
                 return (s.FieldInfo, s.IdOrNull);
 

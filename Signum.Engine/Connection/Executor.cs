@@ -43,7 +43,7 @@ namespace Signum.Engine
         {
             return Connector.Current.UnsafeExecuteDataReader(new SqlPreCommandSimple(sql, parameters), commandType);
         }
-        
+
         public static DbDataReaderWithCommand UnsafeExecuteDataReader(this SqlPreCommandSimple preCommand, CommandType commandType = CommandType.Text)
         {
             return Connector.Current.UnsafeExecuteDataReader(preCommand, commandType);
@@ -58,7 +58,7 @@ namespace Signum.Engine
         {
             return Connector.Current.UnsafeExecuteDataReaderAsync(preCommand, commandType, token);
         }
-        
+
         public static DataTable ExecuteDataTable(string sql, List<DbParameter> parameters = null, CommandType commandType = CommandType.Text)
         {
             return Connector.Current.ExecuteDataTable(new SqlPreCommandSimple(sql, parameters), commandType);

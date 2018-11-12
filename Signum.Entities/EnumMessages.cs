@@ -78,13 +78,13 @@ namespace Signum.Entities
         ImpossibleToSaveIntegrityCheckFailed,
         [Description("Loading {0}...")]
         Loading0,
-        [Description(@"There are changes that haven't been saved. 
+        [Description(@"There are changes that haven't been saved.
 Lose changes?")]
         LoseChanges,
         NoDirectErrors,
         Ok,
         Reload,
-        [Description(@"The {0} has errors: 
+        [Description(@"The {0} has errors:
 {1}")]
         The0HasErrors1,
         ThereAreChanges,

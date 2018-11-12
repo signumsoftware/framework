@@ -18,7 +18,7 @@ namespace Signum.Utilities.DataStructures
             get { return descending == -1; }
             set { descending = value ? -1 : 1; }
         }
-        
+
         public LambdaComparer(Func<T, S> func, IEqualityComparer<S> equalityComparer = null, IComparer<S> comparer = null)
         {
             if (func == null)
@@ -114,7 +114,7 @@ namespace Signum.Utilities.DataStructures
                 this.comparer1 = comparer1;
                 this.comparer2 = comparer2;
             }
-           
+
             public bool Equals(T x, T y)
             {
                 return comparer1.Equals(x, y) && comparer2.Equals(x,y);
@@ -128,7 +128,7 @@ namespace Signum.Utilities.DataStructures
             }
 
             public int GetHashCode(object obj) => this.GetHashCode((T)obj);
-            
+
         }
     }
 }

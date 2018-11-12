@@ -69,9 +69,9 @@ namespace Signum.Engine.CodeGeneration
 
                 string moduleName = GetDefaultModuleName(selected, solutionName);
                 SafeConsole.WriteColor(ConsoleColor.Gray, $"Module name? ([Enter] for '{moduleName}'):");
-                
+
                 moduleName = Console.ReadLine().DefaultText(moduleName);
-                
+
                 yield return new Module
                 {
                     ModuleName = moduleName,

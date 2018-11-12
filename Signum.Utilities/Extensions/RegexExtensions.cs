@@ -13,7 +13,7 @@ namespace Signum.Utilities
         {
             return m.Index + m.Length;
         }
-        
+
         public static bool Contains(this Capture larger, Capture smaller)
         {
             return
@@ -48,11 +48,11 @@ namespace Signum.Utilities
             StringDistance sd = new StringDistance();
             Dictionary<Tuple<T, S>, int> distances = (from o in outer
                                                       from i in inner
-                                                      select KVP.Create(Tuple.Create(o, i), 
+                                                      select KVP.Create(Tuple.Create(o, i),
                                                         sd.LevenshteinDistance(outerKeySelector(o), innerKeySelector(i)))).ToDictionary();
             while (distances.Count > 0)
             {
-                var kvp = distances.WithMin(a => a.Value); 
+                var kvp = distances.WithMin(a => a.Value);
                 var tuple = kvp.Key;
 
                 distances.RemoveRange(distances.Keys.Where(a => a.Item1.Equals(tuple.Item1) || a.Item2.Equals(tuple.Item2)).ToList());

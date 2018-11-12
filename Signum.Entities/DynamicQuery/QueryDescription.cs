@@ -136,7 +136,7 @@ namespace Signum.Entities.DynamicQuery
                 info.AddValue("displayName", displayName);
         }
 
-        
+
         ColumnDescription(SerializationInfo info, StreamingContext context)
         {
             foreach (SerializationEntry entry in info)
@@ -154,5 +154,5 @@ namespace Signum.Entities.DynamicQuery
                 }
             }
         }
-    }    
+    }
 }

@@ -25,7 +25,7 @@ namespace Signum.Engine.Linq
 {
 
     /// <summary>
-    /// Stateless query provider 
+    /// Stateless query provider
     /// </summary>
     public class DbQueryProvider : QueryProvider, IQueryProviderAsync
     {
@@ -34,7 +34,7 @@ namespace Signum.Engine.Linq
         private DbQueryProvider()
         {
         }
-    
+
         public override string GetQueryText(Expression expression)
         {
             return this.Translate(expression, tr => tr.CleanCommandText());
@@ -181,5 +181,5 @@ namespace Signum.Engine.Linq
         }
     }
 
-    
+
 }

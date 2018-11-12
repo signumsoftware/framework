@@ -68,7 +68,7 @@ namespace Signum.Utilities
         public static int MaxFlag(int value)
         {
             int result = (int.MaxValue >> 1) + 1; // because C2
-            while ((result & value) == 0 && result != 0) 
+            while ((result & value) == 0 && result != 0)
                 result >>= 1;
             return result;
         }

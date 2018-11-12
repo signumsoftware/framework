@@ -91,16 +91,16 @@ namespace Signum.Engine.Linq
         static MethodInfo miToStringSeparatorQ = ReflectionTools.GetMethodInfo(() => EnumerableExtensions.ToString((IQueryable<string>)null, a => a, " ")).GetGenericMethodDefinition();
 
 
-        static int i = 0; 
+        static int i = 0;
 
         public static Expression Simplify(Expression expression)
         {
-            return new OverloadingSimplifier().Visit(expression); 
+            return new OverloadingSimplifier().Visit(expression);
         }
 
         protected override Expression VisitMethodCall(MethodCallExpression m)
         {
-            Type decType = m.Method.DeclaringType; 
+            Type decType = m.Method.DeclaringType;
             if (m.Method.IsGenericMethod && (decType == typeof(Queryable) || decType == typeof(Enumerable)))
             {
                 bool query = decType == typeof(Queryable);
@@ -109,7 +109,7 @@ namespace Signum.Engine.Linq
                 MethodInfo mi = m.Method.GetGenericMethodDefinition();
 
                 //IE<IGrouping<K, S>> GroupBy<S, K>(this IE<S> source, Func<S, K> keySelector);
-                //    GroupBy(col, a=>func(a)) -> GroupBy(col, a=>func(a), a=>a) 
+                //    GroupBy(col, a=>func(a)) -> GroupBy(col, a=>func(a), a=>a)
 
                 if (ReflectionTools.MethodEqual(mi, miGroupBySE) || ReflectionTools.MethodEqual(mi, miGroupBySQ))
                 {
@@ -125,8 +125,8 @@ namespace Signum.Engine.Linq
                 }
 
                 //IE<R> GroupBy<S, K, R>(this IE<S> source, Func<S, K> keySelector, Func<K, IE<S>, R> resultSelector);
-                //    GroupBy(col, a=>f1(a), a=>f2(a), (a,B)=>f3(a,B)) -> GroupBy(col, a=>f1(a), a=>f2(a)).Select(g=>=>f3(g.Key,g))  
-                      
+                //    GroupBy(col, a=>f1(a), a=>f2(a), (a,B)=>f3(a,B)) -> GroupBy(col, a=>f1(a), a=>f2(a)).Select(g=>=>f3(g.Key,g))
+
                 if (ReflectionTools.MethodEqual(mi, miGroupBySRE) || ReflectionTools.MethodEqual(mi, miGroupBySRQ))
                 {
                     var source = Visit(m.GetArgument("source"));
@@ -194,9 +194,9 @@ namespace Signum.Engine.Linq
 
                 //IE<R> GroupJoin<O, I, K, R>(this IE<O> outer, IE<I> inner, Func<O, K> outerKeySelector, Func<I, K> innerKeySelector, Func<O, IE<I>, R> resultSelector)
                 //    GroupJoin(outer, inner, o=>f1(o), i=>f2
-                //(i), (o, gI)=>f3(o,gI)) --> 
+                //(i), (o, gI)=>f3(o,gI)) -->
 
-                //      Join(outer, GroupBy(inner, i=>f2(i), i=>i) , o=>f1(o), g=>g.Key, (o,g)=>f2(o, g))							
+                //      Join(outer, GroupBy(inner, i=>f2(i), i=>i) , o=>f1(o), g=>g.Key, (o,g)=>f2(o, g))
 
 
                 if (ReflectionTools.MethodEqual(mi, miGroupJoinE) || ReflectionTools.MethodEqual(mi, miGroupJoinQ))
@@ -206,7 +206,7 @@ namespace Signum.Engine.Linq
                     var outer = Visit(m.GetArgument("outer"));
                     var inner = Visit(m.GetArgument("inner"));
 
-                    bool hasDefaultIfEmpty = ExtractDefaultIfEmpty(ref inner); 
+                    bool hasDefaultIfEmpty = ExtractDefaultIfEmpty(ref inner);
 
                     var outerKeySelector = (LambdaExpression)Visit(m.GetArgument("outerKeySelector").StripQuotes());
                     var innerKeySelector = (LambdaExpression)Visit(m.GetArgument("innerKeySelector").StripQuotes());
@@ -223,8 +223,8 @@ namespace Signum.Engine.Linq
                     if (hasDefaultIfEmpty)
                     {
                         var method = (query ? miDefaultIfEmptyQ : miDefaultIfEmptyE)
-                            .MakeGenericMethod(groupingType); 
-                     
+                            .MakeGenericMethod(groupingType);
+
                         group = Expression.Call(method, group);
                     }
 
@@ -241,7 +241,7 @@ namespace Signum.Engine.Linq
 
 
                     return
-                        Expression.Call(mij, outer, group, outerKeySelector, 
+                        Expression.Call(mij, outer, group, outerKeySelector,
                             Expression.Lambda(Expression.MakeMemberAccess(g, groupingType.GetProperty("Key")), g),
                             newResult);
                 }
@@ -283,7 +283,7 @@ namespace Signum.Engine.Linq
                     var source = Visit(m.GetArgument("source"));
                     var predicate = (LambdaExpression)Visit(m.TryGetArgument("predicate").StripQuotes());
 
-                    Expression reverse = Expression.Call((query ? miReverseQ : miReverseE).MakeGenericMethod(paramTypes[0]), source); 
+                    Expression reverse = Expression.Call((query ? miReverseQ : miReverseE).MakeGenericMethod(paramTypes[0]), source);
 
                     if(predicate != null)
                         reverse = Expression.Call((query ? miWhereQ : miWhereE).MakeGenericMethod(paramTypes[0]), reverse, predicate);
@@ -304,7 +304,7 @@ namespace Signum.Engine.Linq
                     var source = Visit(m.GetArgument("source"));
                     var index = Visit(m.GetArgument("index"));
 
-                    MethodInfo first = (def ? (query ? miFirstOrDefaultQ : miFirstOrDefaultE) : 
+                    MethodInfo first = (def ? (query ? miFirstOrDefaultQ : miFirstOrDefaultE) :
                                        (query ? miFirstQ : miFirstE)).MakeGenericMethod(paramTypes[0]);
 
                     MethodInfo skip = (query ? miSkipQ : miSkipE).MakeGenericMethod(paramTypes[0]);
@@ -317,13 +317,13 @@ namespace Signum.Engine.Linq
                     var source = Visit(m.GetArgument("source"));
                     var count = Visit(m.GetArgument("count"));
 
-                    ParameterExpression pi = Expression.Parameter(typeof(int), "i"); 
-                    ParameterExpression pa = Expression.Parameter(paramTypes[0], "a"); 
+                    ParameterExpression pi = Expression.Parameter(typeof(int), "i");
+                    ParameterExpression pa = Expression.Parameter(paramTypes[0], "a");
                     Expression lambda = Expression.Lambda(Expression.LessThanOrEqual(count, pi), pa, pi);
 
                     MethodInfo miWhereIndex = (query ? miWhereIndexQ : miWhereIndexE).MakeGenericMethod(paramTypes[0]);
 
-                    return Expression.Call(miWhereIndex, source, lambda); 
+                    return Expression.Call(miWhereIndex, source, lambda);
                 }
 
 
@@ -412,8 +412,8 @@ namespace Signum.Engine.Linq
 
             if (m.Method.DeclaringType == typeof(StringExtensions) && m.Method.Name == nameof(StringExtensions.FormatWith))
                 return VisitFormat(m);
-            
-            return base.VisitMethodCall(m); 
+
+            return base.VisitMethodCall(m);
         }
 
 
@@ -472,7 +472,7 @@ namespace Signum.Engine.Linq
             return Expression.Condition(
                 Expression.Equal(expression, Expression.Constant(null, expression.Type.Nullify())),
                 Expression.Constant(null, typeof(string)),
-                Expression.Call(expression, miToString)); 
+                Expression.Call(expression, miToString));
         }
 
         public static bool ExtractDefaultIfEmpty(ref Expression expression)
@@ -496,8 +496,8 @@ namespace Signum.Engine.Linq
             Expression body = lambda.Body;
             if (ExtractDefaultIfEmpty(ref body))
             {
-                lambda = Expression.Lambda(body, lambda.Parameters); 
-                return true; 
+                lambda = Expression.Lambda(body, lambda.Parameters);
+                return true;
             }
             return false;
         }

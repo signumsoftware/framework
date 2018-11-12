@@ -6,7 +6,7 @@ using System.Collections;
 
 namespace Signum.Utilities.DataStructures
 {
-    public class RecentDictionary<K, V>: IEnumerable<KeyValuePair<K,V>> 
+    public class RecentDictionary<K, V>: IEnumerable<KeyValuePair<K,V>>
     {
         int capacity;
         LinkedList<V> orderList = new LinkedList<V>();
@@ -201,7 +201,7 @@ namespace Signum.Utilities.DataStructures
 
         IEnumerator IEnumerable.GetEnumerator()
         {
-            return this.GetEnumerator(); 
+            return this.GetEnumerator();
         }
 
         public void Clean()

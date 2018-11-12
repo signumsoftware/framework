@@ -135,7 +135,7 @@ namespace Signum.Entities.DynamicQuery
                 body = Expression.Not(body);
 
             var lambda = Expression.Lambda(body, param);
-            
+
             MethodInfo mi = typeof(IQueryable).IsAssignableFrom(collection.Type) ?
                  (this.CollectionAnyAllType == CollectionAnyAllType.All ? miAllQ : miAnyQ) :
                  (this.CollectionAnyAllType == CollectionAnyAllType.All ? miAllE : miAnyE);

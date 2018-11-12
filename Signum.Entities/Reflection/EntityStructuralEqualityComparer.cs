@@ -19,7 +19,7 @@ namespace Signum.Entities.Reflection
     public interface ICompletableComparer
     {
         void Complete(IEqualityComparerResolver resolver, PropertyInfo pi);
-    }  
+    }
 
     public class EntityStructuralEqualityComparer<T> : EqualityComparer<T>, ICompletableComparer
         where T : ModifiableEntity
@@ -32,7 +32,7 @@ namespace Signum.Entities.Reflection
         }
 
         public void Complete(IEqualityComparerResolver resolver, PropertyInfo pi)
-        { 
+        {
             Properties = MemberEntryFactory.GenerateList<T>(MemberOptions.Properties | MemberOptions.Typed | MemberOptions.Getter)
                 .Where(p => !((PropertyInfo)p.MemberInfo).HasAttribute<HiddenPropertyAttribute>())
                .ToDictionary(a => a.Name, a => new PropertyComparer<T>((PropertyInfo)a.MemberInfo, a.Getter)
@@ -172,7 +172,7 @@ namespace Signum.Entities.Reflection
         public SortedListEqualityComparer()
         {
         }
-        
+
         public void Complete(IEqualityComparerResolver resolver, PropertyInfo pi)
         {
             ElementComparer = (IEqualityComparer<T>)resolver.GetEqualityComparer(typeof(T), pi);
@@ -294,7 +294,7 @@ namespace Signum.Entities.Reflection
             {
                 return (IEqualityComparer)Activator.CreateInstance(typeof(EntityStructuralEqualityComparer<>).MakeGenericType(type));
             }
-            
+
             if (typeof(IList).IsAssignableFrom(type))
             {
                 if (pi?.HasAttribute<PreserveOrderAttribute>() == true)
@@ -305,7 +305,7 @@ namespace Signum.Entities.Reflection
 
             if (type.IsClass && type.GetMethod("Equals", BindingFlags.Instance | BindingFlags.Public | BindingFlags.DeclaredOnly, null, new[] { typeof(object) }, null) == null)
                 return (IEqualityComparer)Activator.CreateInstance(typeof(ClassStructuralEqualityComparer<>).MakeGenericType(type));
-            
+
             return (IEqualityComparer)typeof(EqualityComparer<>).MakeGenericType(type).GetProperty("Default").GetValue(null);
         }
     }

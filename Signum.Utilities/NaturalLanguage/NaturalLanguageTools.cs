@@ -43,7 +43,7 @@ namespace Signum.Utilities
 
             return detector.GetGender(name);
         }
-        
+
         public static bool HasGenders(CultureInfo cultureInfo)
         {
             IGenderDetector detector = GenderDetectors.TryGetC(cultureInfo.TwoLetterISOLanguageName);
@@ -296,10 +296,10 @@ namespace Signum.Utilities
         public char? UnitGender;
 
         public string DecimalUnit;
-        public string DecimalUnitPlural; 
+        public string DecimalUnitPlural;
         public char? DecimalUnitGender;
 
         public int NumberOfDecimals;
-        public bool OmitDecimalZeros; 
+        public bool OmitDecimalZeros;
     }
 }

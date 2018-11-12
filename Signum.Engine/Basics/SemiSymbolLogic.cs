@@ -56,7 +56,7 @@ namespace Signum.Engine.Extensions.Basics
                         SemiSymbol.SetFromDatabase<T>(current.ToDictionary(a => a.Key));
                         return result.ToDictionary(a => a.Key);
                     }
-                }, 
+                },
                 new InvalidateWith(typeof(T)),
                 Schema.Current.InvalidateMetadata);
 

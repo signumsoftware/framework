@@ -21,7 +21,7 @@ namespace Signum.React.Json
         {
             return typeof(IMListPrivate).IsAssignableFrom(objectType);
         }
-        
+
         public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
         {
             giWriteJsonInternal.GetInvoker(value.GetType().ElementType())(writer, (IMListPrivate)value, serializer);
@@ -42,7 +42,7 @@ namespace Signum.React.Json
                 foreach (var item in ((IMListPrivate<T>)value).InnerList)
                 {
                     writer.WriteStartObject();
-                    
+
                     writer.WritePropertyName("rowId");
                     writer.WriteValue(item.RowId?.Object);
 
@@ -77,7 +77,7 @@ namespace Signum.React.Json
             var elementPr = pr.Add("Item");
 
             var rowIdType = GetRowIdTypeFromAttribute(pr);
-               
+
 
             reader.Assert(JsonToken.StartArray);
 
@@ -102,9 +102,9 @@ namespace Signum.React.Json
 
                     reader.Read();
                     if (rowIdValue != null && !rowIdValue.Equals(GraphExplorer.DummyRowId.Object))
-                    { 
+                    {
                         var rowId = new PrimaryKey((IComparable)ReflectionTools.ChangeType(rowIdValue, rowIdType));
-                        
+
                         var oldValue = dic.TryGetS(rowId);
 
                         if (oldValue == null)
@@ -135,7 +135,7 @@ namespace Signum.React.Json
                     reader.Read();
                 }
             }
-            
+
             reader.Assert(JsonToken.EndArray);
 
             if (existingValue == null) //Strange case...

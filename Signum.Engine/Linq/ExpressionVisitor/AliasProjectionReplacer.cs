@@ -19,7 +19,7 @@ namespace Signum.Engine.Linq
                 root = proj as ProjectionExpression,
             };
             return apr.Visit(proj);
-        }       
+        }
 
         protected internal override Expression VisitProjection(ProjectionExpression proj)
         {

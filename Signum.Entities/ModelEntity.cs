@@ -12,12 +12,12 @@ namespace Signum.Entities
     {
         protected internal override void PreSaving(PreSavingContext ctx)
         {
-        
+
         }
 
         protected internal override void PostRetrieving()
         {
-            throw new InvalidOperationException("ModelEntities are not meant to be retrieved"); 
+            throw new InvalidOperationException("ModelEntities are not meant to be retrieved");
         }
 
         public override string ToString()
@@ -36,7 +36,7 @@ namespace Signum.Entities
 
             if (fieldRoute.PropertyRouteType == PropertyRouteType.MListItems)
                 fieldRoute = fieldRoute.Parent;
-            
+
             return Implementations.FromAttributes(
                 route.Type.CleanType(),
                 route,

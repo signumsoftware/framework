@@ -25,7 +25,7 @@ namespace Signum.Engine
     {
         public static StopOnExceptionDelegate StopOnException = (id, exception) => exception is StopProgressForeachException;
 
-        public static List<R> ProgressSelect<T, R>(this IEnumerable<T> collection, 
+        public static List<R> ProgressSelect<T, R>(this IEnumerable<T> collection,
             Func<T, R> selector,
             Func<T, string> elementID = null,
             LogWriter writer = null,
@@ -119,11 +119,11 @@ namespace Signum.Engine
                 collection.ProgressForeachSequential(elementID, writer, transactional, showProgress, action);
         }
 
-        private static void ProgressForeachSequential<T>(this IEnumerable<T> collection, 
+        private static void ProgressForeachSequential<T>(this IEnumerable<T> collection,
             Func<T, string> elementID,
-            LogWriter writer, 
-            bool transactional, 
-            bool showProgress, 
+            LogWriter writer,
+            bool transactional,
+            bool showProgress,
             Action<T> action)
         {
             var enumerator = collection.ToProgressEnumerator(out IProgressInfo pi);
@@ -239,8 +239,8 @@ namespace Signum.Engine
                     SafeConsole.ClearSameLine();
             }
         }
-    
-       
+
+
 
         public static string DefaultLogFolder = "Log";
 

@@ -204,8 +204,8 @@ namespace Signum.Engine
         {
             string fullType = GetColumnType(c);
 
-            var generatedAlways = c is SystemVersionedInfo.Column svc ? 
-                $"GENERATED ALWAYS AS ROW {(svc.SystemVersionColumnType == SystemVersionedInfo.ColumnType.Start ? "START" : "END")} HIDDEN" : 
+            var generatedAlways = c is SystemVersionedInfo.Column svc ?
+                $"GENERATED ALWAYS AS ROW {(svc.SystemVersionColumnType == SystemVersionedInfo.ColumnType.Start ? "START" : "END")} HIDDEN" :
                 null;
 
             var defaultConstraint = constraint != null ? $"CONSTRAINT {constraint.Name} DEFAULT " + constraint.QuotedDefinition : null;
@@ -254,7 +254,7 @@ namespace Signum.Engine
                 (c.ReferenceTable == null || c.AvoidForeignKey) ? null : SqlBuilder.AlterTableAddConstraintForeignKey(t, c.Name, c.ReferenceTable))
                 .Combine(Spacing.Simple);
         }
-        
+
 
         public static SqlPreCommand DropIndex(ObjectName tableName, DiffIndex index)
         {
@@ -304,11 +304,11 @@ namespace Signum.Engine
                 else
                 {
                     return SqlPreCommand.Combine(Spacing.Double,
-                        checkUnique != null ? RemoveDuplicatesIfNecessary(uIndex, checkUnique) : null, 
+                        checkUnique != null ? RemoveDuplicatesIfNecessary(uIndex, checkUnique) : null,
                         CreateIndexBasic(index, false));
                 }
             }
-            else 
+            else
             {
                 return CreateIndexBasic(index, forHistoryTable: false);
             }
@@ -330,7 +330,7 @@ namespace Signum.Engine
             var oldPrimaryKey = columnReplacement.TryGetC(primaryKey.Name) ?? primaryKey.Name;
 
             return (int)Executor.ExecuteScalar(
-$@"SELECT Count(*) FROM {oldTableName} 
+$@"SELECT Count(*) FROM {oldTableName}
 WHERE {oldPrimaryKey} NOT IN
 (
     SELECT MIN({oldPrimaryKey})
@@ -378,7 +378,7 @@ WHERE {oldPrimaryKey} NOT IN
 
         private static SqlPreCommand RemoveDuplicates(UniqueIndex uniqueIndex, IColumn primaryKey, string columns, bool commentedOut)
         {
-            return new SqlPreCommandSimple($@"DELETE {uniqueIndex.Table.Name} 
+            return new SqlPreCommandSimple($@"DELETE {uniqueIndex.Table.Name}
 WHERE {primaryKey.Name} NOT IN
 (
     SELECT MIN({primaryKey.Name})
@@ -395,7 +395,7 @@ WHERE {primaryKey.Name} NOT IN
             var where = index.Where.HasText() ? $" WHERE {index.Where}" : "";
 
             var tableName = forHistoryTable ? index.Table.SystemVersioned.TableName : index.Table.Name;
-            
+
             return new SqlPreCommandSimple($"CREATE {indexType} {index.IndexName} ON {tableName}({columns}){include}{where}");
         }
 
@@ -589,7 +589,7 @@ FROM {1} as [table]".FormatWith(
 
             string command = @"
 DECLARE @sql nvarchar(max)
-SELECT  @sql = 'ALTER TABLE {Table} DROP CONSTRAINT [' + kc.name  + '];' 
+SELECT  @sql = 'ALTER TABLE {Table} DROP CONSTRAINT [' + kc.name  + '];'
 FROM DB.sys.key_constraints kc
 WHERE kc.parent_object_id = OBJECT_ID('{FullTable}')
 EXEC DB.dbo.sp_executesql @sql"
@@ -610,7 +610,7 @@ EXEC DB.dbo.sp_executesql @sql"
             return new SqlPreCommandSimple("DROP STATISTICS " + list.ToString(s => tn.SqlEscape() + "." + s.StatsName.SqlEscape(), ",\r\n"));
         }
 
-     
+
         public static SqlPreCommand TruncateTable(ObjectName tableName) => new SqlPreCommandSimple($"TRUNCATE TABLE {tableName}");
     }
 }

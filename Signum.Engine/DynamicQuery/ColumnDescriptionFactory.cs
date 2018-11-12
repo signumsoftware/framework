@@ -126,7 +126,7 @@ namespace Signum.Engine.DynamicQuery
             if (IsEntity)
                 return this.Type.CleanType().NiceName();
 
-            if (propertyRoutes != null && 
+            if (propertyRoutes != null &&
                 propertyRoutes[0].PropertyRouteType == PropertyRouteType.FieldOrProperty &&
                 propertyRoutes[0].PropertyInfo.Name == Name)
             {
@@ -163,17 +163,17 @@ namespace Signum.Engine.DynamicQuery
         Type processedType;
         Type ProcessedType
         {
-            get 
+            get
             {
-                return processedType ?? 
+                return processedType ??
                     (processedType = (Reflector.IsIEntity(Type) ? Lite.Generate(Type) :
                     Type.UnNullify() == typeof(PrimaryKey) ? UnwrapFromPropertRoutes().Nullify() :
-                    Type.Nullify())); 
+                    Type.Nullify()));
             }
         }
 
         private Type UnwrapFromPropertRoutes()
-        { 
+        {
             if(propertyRoutes.IsNullOrEmpty())
                 throw new InvalidOperationException("Impossible to determine the underlying type of the PrimaryKey of column {0} if PropertyRoutes is not set"
                     .FormatWith(this.Name));

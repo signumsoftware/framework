@@ -16,7 +16,7 @@ namespace Signum.Utilities.DataStructures
         IntervalDictionary<K2, int> yDimension;
         IntervalDictionary<K3, int> zDimension;
         V[, ,] values;
-        bool[, ,] used; 
+        bool[, ,] used;
 
         public CubeDictionary(IEnumerable<(Cube<K1, K2, K3> cube, V value)> dic)
         {
@@ -85,7 +85,7 @@ namespace Signum.Utilities.DataStructures
         {
             if (!xDimension.TryGetValue(x, out int ix) ||
                 !yDimension.TryGetValue(y, out int iy) ||
-                !zDimension.TryGetValue(z, out int iz) || !used[ix, iy, iz]) 
+                !zDimension.TryGetValue(z, out int iz) || !used[ix, iy, iz])
             {
                 return new IntervalValue<V>();
             }

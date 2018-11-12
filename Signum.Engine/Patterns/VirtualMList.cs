@@ -78,8 +78,8 @@ namespace Signum.Engine
         }
 
         public static FluentInclude<T> WithVirtualMList<T, L>(this FluentInclude<T> fi,
-            Expression<Func<T, MList<L>>> mListField, 
-            Expression<Func<L, Lite<T>>> backReference, 
+            Expression<Func<T, MList<L>>> mListField,
+            Expression<Func<L, Lite<T>>> backReference,
             Action<L, T> onSave = null,
             Action<L, T> onRemove = null,
             bool? lazyRetrieve = null,
@@ -89,11 +89,11 @@ namespace Signum.Engine
         {
             var mListPropertRoute = PropertyRoute.Construct(mListField);
             RegisteredVirtualMLists.GetOrCreate(typeof(T)).Add(typeof(L), mListPropertRoute);
-            
+
             if (lazyRetrieve == null)
                 lazyRetrieve = (typeof(L) == typeof(T));
 
-            if (lazyDelete == null) 
+            if (lazyDelete == null)
                 lazyDelete = (typeof(L) == typeof(T));
 
             Func<T, MList<L>> getMList = GetAccessor(mListField);
@@ -104,7 +104,7 @@ namespace Signum.Engine
 
             if (preserveOrder && !typeof(ICanBeOrdered).IsAssignableFrom(typeof(L)))
                 throw new InvalidOperationException($"'{typeof(L).Name}' should implement '{nameof(ICanBeOrdered)}' because '{ReflectionTools.GetPropertyInfo(mListField).Name}' contains '[{nameof(PreserveOrderAttribute)}]'");
-            
+
             var sb = fi.SchemaBuilder;
 
             if (lazyRetrieve.Value)
@@ -135,7 +135,7 @@ namespace Signum.Engine
                 sb.Schema.EntityEvents<T>().RegisterBinding<MList<L>>(mListField,
                      shouldSet: () => !lazyRetrieve.Value && !VirtualMList.ShouldAvoidMListType(typeof(L)),
                      valueExpression: e => Database.Query<L>().Where(line => backReference.Evaluate(line) == e.ToLite()).ExpandLite(line => backReference.Evaluate(line), ExpandLite.ToStringLazy).ToVirtualMListWithOrder(),
-                     valueFunction: (e, retriever) => Schema.Current.CacheController<L>().Enabled ? 
+                     valueFunction: (e, retriever) => Schema.Current.CacheController<L>().Enabled ?
                      Schema.Current.CacheController<L>().RequestByBackReference<T>(retriever, backReference, e.ToLite()).ToVirtualMListWithOrder():
                      Database.Query<L>().Where(line => backReference.Evaluate(line) == e.ToLite()).ExpandLite(line => backReference.Evaluate(line), ExpandLite.ToStringLazy).ToVirtualMListWithOrder()
 
@@ -146,7 +146,7 @@ namespace Signum.Engine
                 sb.Schema.EntityEvents<T>().RegisterBinding(mListField,
                     shouldSet: () => !lazyRetrieve.Value && !VirtualMList.ShouldAvoidMListType(typeof(L)),
                     valueExpression: e => Database.Query<L>().Where(line => backReference.Evaluate(line) == e.ToLite()).ExpandLite(line => backReference.Evaluate(line), ExpandLite.ToStringLazy).ToVirtualMList(),
-                    valueFunction: (e, retriever) => Schema.Current.CacheController<L>().Enabled ? 
+                    valueFunction: (e, retriever) => Schema.Current.CacheController<L>().Enabled ?
                     Schema.Current.CacheController<L>().RequestByBackReference<T>(retriever, backReference, e.ToLite()).ToVirtualMList() :
                     Database.Query<L>().Where(line => backReference.Evaluate(line) == e.ToLite()).ExpandLite(line => backReference.Evaluate(line), ExpandLite.ToStringLazy).ToVirtualMList()
                 );
@@ -194,7 +194,7 @@ namespace Signum.Engine
                     return;
 
                 var mlist = getMList(e);
-              
+
                 if (mlist != null && !GraphExplorer.IsGraphModified(mlist))
                     return;
 
@@ -234,7 +234,7 @@ namespace Signum.Engine
                 }
             };
 
-            
+
             sb.Schema.EntityEvents<T>().PreUnsafeDelete += query =>
             {
                 if (VirtualMList.ShouldAvoidMListType(typeof(L)))
@@ -281,7 +281,7 @@ namespace Signum.Engine
                 var mlist = getMList(e);
                 if (mlist == null)
                     return;
-                
+
                 if (GraphExplorer.IsGraphModified(getMList(e)))
                     e.SetModified();
             };
@@ -348,7 +348,7 @@ namespace Signum.Engine
             var body = getBackReference.Body;
             if (body.NodeType == ExpressionType.Convert)
                 body = ((UnaryExpression)body).Operand;
-            
+
             return ReflectionTools.CreateSetter<L, Lite<T>>(((MemberExpression)body).Member);
         }
 

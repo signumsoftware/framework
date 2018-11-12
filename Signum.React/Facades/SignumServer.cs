@@ -21,7 +21,7 @@ namespace Signum.React.Facades
     public static class SignumServer
     {
         public static JsonSerializerSettings JsonSerializerSettings;
-        
+
         public static void AddSignumJsonConverters(this MvcJsonOptions jsonOptions)
         {
             //Signum converters
@@ -51,7 +51,7 @@ namespace Signum.React.Facades
             options.Filters.Add(new SignumCultureSelectorFilter());
             options.Filters.Add(new VersionFilterAttribute());
         }
-        
+
         public static void Start(IApplicationBuilder app, IHostingEnvironment hostingEnvironment, Assembly mainAsembly)
         {
             Schema.Current.ApplicationName = hostingEnvironment.ContentRootPath;
@@ -72,7 +72,7 @@ namespace Signum.React.Facades
 
             //app.Services.Replace(typeof(IBodyModelValidator), new SignumBodyModelValidator());
 
-            
+
             ReflectionServer.Start();
         }
 

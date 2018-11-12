@@ -8,7 +8,7 @@ using Signum.Utilities;
 using Signum.Utilities.Reflection;
 using System.Diagnostics;
 using Signum.Utilities.ExpressionTrees;
-using Signum.Utilities.DataStructures; 
+using Signum.Utilities.DataStructures;
 
 
 namespace Signum.Engine.Linq
@@ -23,7 +23,7 @@ namespace Signum.Engine.Linq
             var commands = VisitCommands(cea.Commands);
             if (cea.Commands != commands)
                 return new CommandAggregateExpression(commands);
-            return cea; 
+            return cea;
         }
 
         protected IEnumerable<CommandExpression> VisitCommands(ReadOnlyCollection<CommandExpression> commands)
@@ -42,7 +42,7 @@ namespace Signum.Engine.Linq
 
         protected internal virtual Expression VisitUpdate(UpdateExpression update)
         {
-            var source = VisitSource(update.Source); 
+            var source = VisitSource(update.Source);
             var where = Visit(update.Where);
             var assigments = Visit(update.Assigments, VisitColumnAssigment);
             if(source != update.Source || where != update.Where || assigments != update.Assigments)
@@ -178,7 +178,7 @@ namespace Signum.Engine.Linq
                 return new MListElementExpression(rowId, parent, order, element, period, mle.Table, mle.Alias);
             return mle;
         }
-        
+
         protected internal virtual Expression VisitAdditionalField(AdditionalFieldExpression ml)
         {
             var newBackID = (PrimaryKeyExpression)Visit(ml.BackID);
@@ -275,9 +275,9 @@ namespace Signum.Engine.Linq
             var r = Visit(fb.Binding);
 
             if(r == fb.Binding)
-                return fb; 
+                return fb;
 
-            return new FieldBinding(fb.FieldInfo, r); 
+            return new FieldBinding(fb.FieldInfo, r);
         }
 
         protected internal virtual Expression VisitLike(LikeExpression like)
@@ -431,7 +431,7 @@ namespace Signum.Engine.Linq
             Expression obj = Visit(sqlFunction.Object);
             ReadOnlyCollection<Expression> args = Visit(sqlFunction.Arguments);
             if (args != sqlFunction.Arguments || obj != sqlFunction.Object)
-                return new SqlFunctionExpression(sqlFunction.Type, obj, sqlFunction.SqlFunction, args); 
+                return new SqlFunctionExpression(sqlFunction.Type, obj, sqlFunction.SqlFunction, args);
             return sqlFunction;
         }
 

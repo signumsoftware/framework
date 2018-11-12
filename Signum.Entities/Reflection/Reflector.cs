@@ -21,7 +21,7 @@ namespace Signum.Entities.Reflection
      *      MList
      *      EmbeddedEntities
      *      IdentifiableEntities
-     *      
+     *
      * An identifiable can be accesed thought:
      *   Normal Reference
      *   Interface
@@ -453,10 +453,10 @@ namespace Signum.Entities.Reflection
             return null;
         }
 
-     
-       
 
- 
+
+
+
         public static PropertyInfo PropertyInfo<T>(this T entity, Expression<Func<T, object>> property) where T : ModifiableEntity
         {
             return ReflectionTools.GetPropertyInfo(property);

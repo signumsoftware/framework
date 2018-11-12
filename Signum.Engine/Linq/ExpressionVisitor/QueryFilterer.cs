@@ -93,11 +93,11 @@ namespace Signum.Engine.Linq
 
                 return result;
             }
-            else 
+            else
                 return base.VisitMethodCall(m);
         }
 
-        
+
         internal static Expression Filter(Expression expression, bool filter)
         {
             return new QueryFilterer { filter = filter }.Visit(expression);

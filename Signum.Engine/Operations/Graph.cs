@@ -11,7 +11,7 @@ using Signum.Utilities.ExpressionTrees;
 
 namespace Signum.Engine.Operations
 {
-    public delegate F Overrider<F>(F baseFunc); 
+    public delegate F Overrider<F>(F baseFunc);
 
     public class Graph<T>
          where T : class, IEntity
@@ -26,7 +26,7 @@ namespace Signum.Engine.Operations
             Type IOperation.ReturnType { get { return typeof(T); } }
             IEnumerable<Enum> IOperation.UntypedFromStates { get { return null; } }
             IEnumerable<Enum> IOperation.UntypedToStates { get { return Enumerable.Empty<Enum>(); } }
-            Type IOperation.StateType { get { return null; } } 
+            Type IOperation.StateType { get { return null; } }
 
             public bool LogAlsoIfNotSaved { get; set; }
 
@@ -73,7 +73,7 @@ namespace Signum.Engine.Operations
                     try
                     {
                         using (Transaction tr = new Transaction())
-                        { 
+                        {
                             T result = null;
                             using (OperationLogic.AllowSave<T>())
                                 OperationLogic.OnSuroundOperation(this, log, null, args).EndUsing(_ =>
@@ -123,7 +123,7 @@ namespace Signum.Engine.Operations
                 }
             }
 
-       
+
 
             protected virtual void AssertEntity(T entity)
             {

@@ -58,7 +58,7 @@ namespace Signum.Entities.DynamicQuery
         protected override Expression BuildExpressionInternal(BuildExpressionContext context)
         {
             var exp = Parent.BuildExpression(context);
-            
+
             return Expression.Property(exp.UnNullify(), miDate).Nullify();
         }
 

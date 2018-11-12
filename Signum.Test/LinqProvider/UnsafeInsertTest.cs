@@ -190,7 +190,7 @@ namespace Signum.Test.LinqProviderUpdateDelete
                 Administrator.CreateTemporaryTable<MyTempView>();
 
                 Database.Query<ArtistEntity>().Where(a => a.Name.StartsWith("M")).UnsafeInsertView(a => new MyTempView { Artist = a.ToLite() });
-                
+
                 tr.Commit();
             }
 
