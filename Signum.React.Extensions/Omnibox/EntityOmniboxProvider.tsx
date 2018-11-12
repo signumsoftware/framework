@@ -2,82 +2,78 @@
 import { Lite, Entity } from '@framework/Signum.Entities'
 import { OmniboxMessage } from './Signum.Entities.Omnibox'
 import { OmniboxResult, OmniboxMatch, OmniboxProvider } from './OmniboxClient'
-import { QueryToken, FilterOperation, FindOptions, FilterOption } from '@framework/FindOptions'
 import * as Navigator from '@framework/Navigator'
-import * as Finder from '@framework/Finder'
-
-
 
 export default class EntityOmniboxProvider extends OmniboxProvider<EntityOmniboxResult>
 {
-    getProviderName() {
-        return "EntityOmniboxResult";
-    }
+  getProviderName() {
+    return "EntityOmniboxResult";
+  }
 
-    icon() {
-        return this.coloredIcon("arrow-circle-right", "#BCDEFF");
-    }
+  icon() {
+    return this.coloredIcon("arrow-circle-right", "#BCDEFF");
+  }
 
-    renderItem(result: EntityOmniboxResult): React.ReactChild[] {
+  renderItem(result: EntityOmniboxResult): React.ReactChild[] {
 
-        const array: React.ReactChild[] = [];
+    const array: React.ReactChild[] = [];
 
-        array.push(this.icon());
+    array.push(this.icon());
 
-        this.renderMatch(result.typeMatch, array)
-        array.push(<span> </span>);
+    this.renderMatch(result.typeMatch, array)
+    array.push(<span> </span>);
 
-        if (result.id == undefined && result.toStr == undefined) {
-            throw Error("Invalid EntityOmniboxProvider result");
+    if (result.id == undefined && result.toStr == undefined) {
+      throw Error("Invalid EntityOmniboxProvider result");
+    } else {
+
+      if (result.id != undefined) {
+        array.push(`${result.id}: `);
+
+        if (result.lite == undefined) {
+          array.push(this.coloredSpan(OmniboxMessage.NotFound.niceToString(), "gray"));
         } else {
-
-            if (result.id != undefined) {
-                array.push(`${result.id}: `);
-
-                if (result.lite == undefined) {
-                    array.push(this.coloredSpan(OmniboxMessage.NotFound.niceToString(), "gray"));
-                } else {
-                    array.push(result.lite.toStr!);
-                }
-            } else {
-                if (result.lite == undefined) {
-                    array.push(`'${result.toStr}': `);
-                    array.push(this.coloredSpan(OmniboxMessage.NotFound.niceToString(), "gray"));
-                } else {
-                    array.push(`${result.lite.id}: `);
-                    this.renderMatch(result.toStrMatch, array);
-                }
-            }
+          array.push(result.lite.toStr!);
         }
-
-        return array;
-
+      } else {
+        if (result.lite == undefined) {
+          array.push(`'${result.toStr}': `);
+          array.push(this.coloredSpan(OmniboxMessage.NotFound.niceToString(), "gray"));
+        } else {
+          array.push(`${result.lite.id}: `);
+          this.renderMatch(result.toStrMatch, array);
+        }
+      }
     }
 
-    navigateTo(result: EntityOmniboxResult) {
+    return array;
 
-        if (result.lite == undefined)
-            return undefined;
+  }
 
-        return Promise.resolve(Navigator.navigateRoute(result.lite));
-    }
+  navigateTo(result: EntityOmniboxResult) {
 
-    toString(result: EntityOmniboxResult) {
-        if (result.id)
-            return `${result.typeMatch.text} ${result.id}`;
+    if (result.lite == undefined)
+      return undefined;
 
-        if (result.toStr)
-            return `${result.typeMatch.text} "${result.toStr}"`;
+    return Promise.resolve(Navigator.navigateRoute(result.lite));
+  }
 
-        return result.typeMatch.text;
-    }
+  toString(result: EntityOmniboxResult) {
+    if (result.id)
+      return `${result.typeMatch.text} ${result.id}`;
+
+    if (result.toStr)
+      return `${result.typeMatch.text} "${result.toStr}"`;
+
+    return result.typeMatch.text;
+  }
 }
 
 interface EntityOmniboxResult extends OmniboxResult {
-    typeMatch: OmniboxMatch;
-    id: any;
-    toStr: string;
-    toStrMatch: OmniboxMatch;
+  typeMatch: OmniboxMatch;
+  id: any;
+  toStr: string;
+  toStrMatch: OmniboxMatch;
 
-    lite: Lite<Entity>
+  lite: Lite<Entity>
 }

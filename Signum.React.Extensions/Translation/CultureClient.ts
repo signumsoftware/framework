@@ -9,50 +9,50 @@ import { toLite } from '@framework/Signum.Entities';
 export let currentCulture: CultureInfoEntity;
 
 export const onCultureLoaded: Array<(culture: CultureInfoEntity) => void> = [];
-export function loadCurrentCulture() : Promise<void> {
-    return API.fetchCurrentCulture()
-        .then(ci => {
-            currentCulture = ci;
-            onCultureLoaded.forEach(f => f(ci));
-        }); 
+export function loadCurrentCulture(): Promise<void> {
+  return API.fetchCurrentCulture()
+    .then(ci => {
+      currentCulture = ci;
+      onCultureLoaded.forEach(f => f(ci));
+    });
 }
 
-export function changeCurrentCulture(newCulture: Lite<CultureInfoEntity>) {    
-    API.setCurrentCulture(newCulture)
-        .then(c => {
-            document.cookie = "language=" + c + ";path =" + Navigator.toAbsoluteUrl("~/");
-        })
-        .then(() => reloadTypes())
-        .then(() => Finder.clearQueryDescriptionCache())
-        .then(() => loadCurrentCulture())
-        .then(() => Navigator.resetUI())
-        .done();
+export function changeCurrentCulture(newCulture: Lite<CultureInfoEntity>) {
+  API.setCurrentCulture(newCulture)
+    .then(c => {
+      document.cookie = "language=" + c + ";path =" + Navigator.toAbsoluteUrl("~/");
+    })
+    .then(() => reloadTypes())
+    .then(() => Finder.clearQueryDescriptionCache())
+    .then(() => loadCurrentCulture())
+    .then(() => Navigator.resetUI())
+    .done();
 }
 
 let cachedCultures: Promise<CultureInfoEntity[]>;
 
 export function getCultures(withHidden: boolean): Promise<{ [name: string]: Lite<CultureInfoEntity> }> {
-    if (cachedCultures == null)
-        cachedCultures = API.fetchCultures();
-    
-    return cachedCultures.then(list => {
-        return list
-            .filter(a => withHidden || !a.hidden)
-            .toObject(a => a.name, a => toLite(a, false, a.nativeName!));
-    });
+  if (cachedCultures == null)
+    cachedCultures = API.fetchCultures();
+
+  return cachedCultures.then(list => {
+    return list
+      .filter(a => withHidden || !a.hidden)
+      .toObject(a => a.name, a => toLite(a, false, a.nativeName!));
+  });
 }
 
 export module API {
-    export function fetchCultures(): Promise<CultureInfoEntity[]> {
-        return ajaxGet<CultureInfoEntity[]>({ url: "~/api/culture/cultures", cache: "no-cache" });
-    }
+  export function fetchCultures(): Promise<CultureInfoEntity[]> {
+    return ajaxGet<CultureInfoEntity[]>({ url: "~/api/culture/cultures", cache: "no-cache" });
+  }
 
-    export function fetchCurrentCulture(): Promise<CultureInfoEntity> {
-        return ajaxGet<CultureInfoEntity>({ url: "~/api/culture/currentCulture", cache: "no-cache" });
-    }
+  export function fetchCurrentCulture(): Promise<CultureInfoEntity> {
+    return ajaxGet<CultureInfoEntity>({ url: "~/api/culture/currentCulture", cache: "no-cache" });
+  }
 
-    export function setCurrentCulture(culture: Lite<CultureInfoEntity>): Promise<string> {
-        return ajaxPost<string>({ url: "~/api/culture/setCurrentCulture" }, culture);
-    }
+  export function setCurrentCulture(culture: Lite<CultureInfoEntity>): Promise<string> {
+    return ajaxPost<string>({ url: "~/api/culture/setCurrentCulture" }, culture);
+  }
 }
 

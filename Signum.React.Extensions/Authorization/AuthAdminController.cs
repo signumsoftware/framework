@@ -127,7 +127,7 @@ namespace Signum.React.Authorization
                 return FilesController.GetFileStreamResult(new MemoryStream(ms.ToArray()), "AuthRules.xml");
             }
         }
-        
+
         private static void CleanChanges(ModelEntity rules)
         {
             var graph = GraphExplorer.FromRoot(rules);

@@ -6,8 +6,6 @@ import "codemirror/lib/codemirror.css"
 import "codemirror/addon/dialog/dialog.css"
 import "codemirror/addon/display/fullscreen.css"
 import "codemirror/addon/hint/show-hint.css"
-
-
 import "codemirror/lib/codemirror"
 import "codemirror/mode/clike/clike"
 import "codemirror/addon/comment/comment"

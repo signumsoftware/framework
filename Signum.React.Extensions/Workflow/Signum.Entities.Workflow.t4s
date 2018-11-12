@@ -1,4 +1,3 @@
-
 interface IWorkflowTimerConditionEvaluator {}
 interface IWorkflowConditionEvaluator {}
 interface IWorkflowActionExecutor {}

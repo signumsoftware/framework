@@ -1,75 +1,69 @@
 ﻿import * as React from 'react'
-import { classes } from '@framework/Globals'
-import { FormGroup, FormControlReadonly, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityList, EntityRepeater, EntityTabRepeater} from '@framework/Lines'
-import { SearchControl }  from '@framework/Search'
-import { getToString }  from '@framework/Signum.Entities'
-import { TypeContext, FormGroupStyle } from '@framework/TypeContext'
+import { ValueLine, EntityCombo, EntityTabRepeater } from '@framework/Lines'
+import { TypeContext } from '@framework/TypeContext'
 import { EmailMasterTemplateEntity, EmailMasterTemplateMessageEmbedded, EmailTemplateViewMessage, EmailTemplateMessage } from '../Signum.Entities.Mailing'
-import TemplateControls from '../../Templating/TemplateControls'
 import HtmlCodemirror from '../../Codemirror/HtmlCodemirror'
 import IFrameRenderer from './IFrameRenderer'
 
 export default class EmailMasterTemplate extends React.Component<{ ctx: TypeContext<EmailMasterTemplateEntity> }> {
+  render() {
+    const e = this.props.ctx;
 
-    render() {
-
-        const e = this.props.ctx;
-
-        return (
-            <div>
-                <ValueLine ctx={e.subCtx(f => f.name)} />
-                <EntityTabRepeater ctx={e.subCtx(a => a.messages)} onChange={() => this.forceUpdate()} getComponent={(ctx: TypeContext<EmailMasterTemplateMessageEmbedded>) =>
-                    <EmailTemplateMessageComponent ctx={ctx} invalidate={() => this.forceUpdate() } /> } />
-            </div>
-        );
-    }
+    return (
+      <div>
+        <ValueLine ctx={e.subCtx(f => f.name)} />
+        <EntityTabRepeater ctx={e.subCtx(a => a.messages)} onChange={() => this.forceUpdate()} getComponent={(ctx: TypeContext<EmailMasterTemplateMessageEmbedded>) =>
+          <EmailTemplateMessageComponent ctx={ctx} invalidate={() => this.forceUpdate()} />} />
+      </div>
+    );
+  }
 }
 
 export interface EmailMasterTemplateMessageComponentProps {
-    ctx: TypeContext<EmailMasterTemplateMessageEmbedded>;
-    invalidate: () => void;
+  ctx: TypeContext<EmailMasterTemplateMessageEmbedded>;
+  invalidate: () => void;
 }
 
 export class EmailTemplateMessageComponent extends React.Component<EmailMasterTemplateMessageComponentProps, { showPreview: boolean }>{
-    constructor(props: EmailMasterTemplateMessageComponentProps) {
-        super(props);
-        this.state = { showPreview: false }
-    }
+  constructor(props: EmailMasterTemplateMessageComponentProps) {
+    super(props);
+    this.state = { showPreview: false }
+  }
 
-    handlePreviewClick = (e: React.FormEvent<any>) => {
-        e.preventDefault();
-        this.setState({
-            showPreview: !this.state.showPreview
-        });
-    }
+  handlePreviewClick = (e: React.FormEvent<any>) => {
+    e.preventDefault();
+    this.setState({
+      showPreview: !this.state.showPreview
+    });
+  }
 
-    handleCodeMirrorChange = () => {
-        if (this.state.showPreview)
-            this.forceUpdate();
-    }
+  handleCodeMirrorChange = () => {
+    if (this.state.showPreview)
+      this.forceUpdate();
+  }
 
 
-    render() {
+  render() {
 
-        const ec = this.props.ctx;
-        return (
-            <div className="sf-email-template-message">
-                <EntityCombo ctx={ec.subCtx(e => e.cultureInfo) } labelText={EmailTemplateViewMessage.Language.niceToString() } onChange={this.props.invalidate} />
-                <div>
-                    <div className="code-container">
-                        <HtmlCodemirror ctx={ec.subCtx(e => e.text)} onChange={this.handleCodeMirrorChange} />
-                    </div>
-                    <br/>
-                    <a href="#" onClick={this.handlePreviewClick}>
-                        {this.state.showPreview ?
-                            EmailTemplateMessage.HidePreview.niceToString() :
-                            EmailTemplateMessage.ShowPreview.niceToString() }
-                    </a>
-                    {this.state.showPreview && <IFrameRenderer style={{ width: "100%" }}  html={ec.value.text}/>}
-                </div>
-            </div>
-        );
-    }
+    const ec = this.props.ctx;
+    return (
+      <div className="sf-email-template-message">
+        <EntityCombo ctx={ec.subCtx(e => e.cultureInfo)} labelText={EmailTemplateViewMessage.Language.niceToString()} onChange={this.props.invalidate} />
+        <div>
+          <div className="code-container">
+            <HtmlCodemirror ctx={ec.subCtx(e => e.text)} onChange={this.handleCodeMirrorChange} />
+          </div>
+          <br />
+          <a href="#" onClick={this.handlePreviewClick}>
+            {this.state.showPreview ?
+              EmailTemplateMessage.HidePreview.niceToString() :
+              EmailTemplateMessage.ShowPreview.niceToString()}
+          </a>
+          {this.state.showPreview && <IFrameRenderer style={{ width: "100%" }} html={ec.value.text} />}
+        </div>
+      </div>
+    );
+  }
 }
 
 

@@ -1,78 +1,70 @@
 ﻿import * as React from 'react'
-import { UserQueryEntity, UserQueryMessage, QueryFilterEmbedded, QueryOrderEmbedded, QueryColumnEmbedded } from '../../UserQueries/Signum.Entities.UserQueries'
-import ChartBuilder from '../Templates/ChartBuilder'
-import { ChartScriptEntity, ChartScriptColumnEmbedded, ChartScriptParameterEmbedded } from '../Signum.Entities.Chart'
-import { FormGroup, FormControlReadonly, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityList, EntityRepeater} from '@framework/Lines'
-import * as Finder from '@framework/Finder'
-import { QueryDescription, SubTokensOptions } from '@framework/FindOptions'
-import { getQueryNiceName } from '@framework/Reflection'
-import * as Navigator from '@framework/Navigator'
-import { TypeContext, FormGroupStyle } from '@framework/TypeContext'
-import QueryTokenEntityBuilder from '../../UserAssets/Templates/QueryTokenEntityBuilder'
+import { ChartScriptEntity } from '../Signum.Entities.Chart'
+import { TypeContext } from '@framework/TypeContext'
 import JavascriptCodeMirror from '../../Codemirror/JavascriptCodeMirror'
 
 import "../Chart.css"
 
 export default class ChartScriptCode extends React.Component<{ ctx: TypeContext<ChartScriptEntity> }> {
 
-    get entity() {
-        return this.props.ctx.value;
+  get entity() {
+    return this.props.ctx.value;
+  }
+
+  changedHandler!: number;
+  exceptionHandler!: number;
+
+  handleOnChange = (newValue: string) => {
+    this.props.ctx.value.script = newValue;
+    this.props.ctx.value.modified = true;
+    this.forceUpdate();
+
+    if (opener != undefined) {
+      clearTimeout(this.changedHandler);
+      this.changedHandler = setTimeout(this.updatePreview, 150);
     }
+  };
 
-    changedHandler!: number;
-    exceptionHandler!: number;
-
-    handleOnChange = (newValue: string) => {
-        this.props.ctx.value.script = newValue;
-        this.props.ctx.value.modified = true;
-        this.forceUpdate();
-
-        if (opener != undefined) {
-            clearTimeout(this.changedHandler);
-            this.changedHandler = setTimeout(this.updatePreview, 150);
-        }
-    };
-
-    updatePreview = () => {
-        if (opener.changeScript) { //was rendered
-            opener.changeScript(this.props.ctx.value);
-            this.exceptionHandler = setTimeout(this.getException, 100);
-        }
+  updatePreview = () => {
+    if (opener.changeScript) { //was rendered
+      opener.changeScript(this.props.ctx.value);
+      this.exceptionHandler = setTimeout(this.getException, 100);
     }
+  }
 
-    jsCodeMirror!: JavascriptCodeMirror;
-    lineHandle?: CodeMirror.LineHandle;
+  jsCodeMirror!: JavascriptCodeMirror;
+  lineHandle?: CodeMirror.LineHandle;
 
-    getException = () => {
-        const number = opener.getExceptionNumber();
-        clearTimeout(this.exceptionHandler);
-        if (this.lineHandle != undefined)
-            this.jsCodeMirror.codeMirrorComponent.codeMirror.removeLineClass(this.lineHandle, undefined, undefined);
-        if (number != -1)
-            this.lineHandle = this.jsCodeMirror.codeMirrorComponent.codeMirror.addLineClass(number - 1, undefined, "exceptionLine");
+  getException = () => {
+    const number = opener.getExceptionNumber();
+    clearTimeout(this.exceptionHandler);
+    if (this.lineHandle != undefined)
+      this.jsCodeMirror.codeMirrorComponent.codeMirror.removeLineClass(this.lineHandle, undefined, undefined);
+    if (number != -1)
+      this.lineHandle = this.jsCodeMirror.codeMirrorComponent.codeMirror.addLineClass(number - 1, undefined, "exceptionLine");
 
-    }
+  }
 
-    render() {
+  render() {
 
-        const ctx = this.props.ctx;
-
-      
-
-        const css = ".exceptionLine { background: 'pink' }";
+    const ctx = this.props.ctx;
 
 
-        return (
-            <div className="code-container">
-                <pre style={{ color: "Green" }}>{ChartScriptCode.example}</pre>
-                <style>{css}</style>
-                <JavascriptCodeMirror code={this.props.ctx.value.script || ""} ref={jscm => this.jsCodeMirror = jscm!}
-                    onChange={this.handleOnChange}/>
-            </div>
-        );
-    }
 
-    static example = `//const chart = d3.select('#sfChartControl .sf-chart-container').append('svg:svg').attr('width', width).attr('height', height))
+    const css = ".exceptionLine { background: 'pink' }";
+
+
+    return (
+      <div className="code-container">
+        <pre style={{ color: "Green" }}>{ChartScriptCode.example}</pre>
+        <style>{css}</style>
+        <JavascriptCodeMirror code={this.props.ctx.value.script || ""} ref={jscm => this.jsCodeMirror = jscm!}
+          onChange={this.handleOnChange} />
+      </div>
+    );
+  }
+
+  static example = `//const chart = d3.select('#sfChartControl .sf-chart-container').append('svg:svg').attr('width', width).attr('height', height))
 //const data = { 
 //              "columns": { "c0": { "title":"Product", "token":"Product", "isGroupKey":true, ... }, 
                              "c1": { "title":"Count", "token":"Count", "isGroupKey":true, ...} 

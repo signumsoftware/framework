@@ -1,7 +1,7 @@
 ﻿import * as React from 'react'
 import * as moment from 'moment'
 import { RestLogEntity } from '../Signum.Entities.Rest'
-import { TypeContext, ValueLine, ValueLineType, EntityLine, EntityRepeater } from "@framework/Lines";
+import { TypeContext, ValueLine, EntityLine, EntityRepeater } from "@framework/Lines";
 import { } from "@framework/ConfigureReactWidgets";
 import { RestLogDiff, API } from '../RestClient'
 import { DiffDocument } from '../../DiffLog/Templates/DiffDocument';
@@ -33,7 +33,6 @@ export default class RestLog extends React.Component<{ ctx: TypeContext<RestLogE
             <div>
                 <ValueLine ctx={ctx.subCtx(f => f.startDate)} unitText={moment(ctx.value.startDate).toUserInterface().fromNow()} />
                 <ValueLine ctx={ctx.subCtx(f => f.endDate)} />
-
                 <EntityLine ctx={ctx.subCtx(f => f.user)} />
                 <ValueLine ctx={ctx.subCtx(f => f.url)} unitText={ctx.value.httpMethod!} />
                 <div className="row">
