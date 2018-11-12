@@ -86,7 +86,7 @@ export class Tabs extends React.Component<TabsProps> {
 
         var { activeEventKey, children, toggle, hideOnly, pills, fill, ...attrs } = this.props;
 
-        var array = (React.Children.toArray(this.props.children) as React.ReactElement<TabProps>[]);
+        var array = (React.Children.toArray(this.props.children).filter(a => typeof a == "object" && (a as React.ReactElement<any>).type == Tab) as React.ReactElement<TabProps>[]);
 
         return (
             <div {...attrs}>
