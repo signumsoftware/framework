@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
+using static Signum.Utilities.StringDistance;
 
 namespace Signum.Utilities
 {
@@ -429,31 +430,6 @@ namespace Signum.Utilities
             return Diff(wordsOld, wordsNew);
         }
 
-
-        public string DiffTextToString(string textOld, string textNew, bool lineEndingDifferences = true)
-        {
-            List<DiffPair<List<DiffPair<string>>>> diff = this.DiffText(textOld, textNew, lineEndingDifferences);
-
-            return diff.ToString(b =>
-            {
-                if (b.Action == DiffAction.Equal)
-                {
-                    if (b.Value.Count == 1)
-                        return "    " + b.Value.Single().Value;
-
-                    return
-                    "--  " + b.Value.Where(a => a.Action == DiffAction.Removed || a.Action == DiffAction.Equal).ToString(a => a.Value, "") + "\n" +
-                    "++  " + b.Value.Where(a => a.Action == DiffAction.Added || a.Action == DiffAction.Equal).ToString(a => a.Value, "");
-                }
-                else if (b.Action == DiffAction.Removed)
-                    return "--  " + b.Value.Single().Value;
-                else if (b.Action == DiffAction.Added)
-                    return "++  " + b.Value.Single().Value;
-                else
-                    throw new UnexpectedValueException(b.Action);
-            }, "\n");
-        }
-
         public List<DiffPair<T>> Diff<T>(T[] strOld, T[] strNew, IEqualityComparer<T> comparer = null)
         {
             var result = new List<DiffPair<T>>();
@@ -500,6 +476,31 @@ namespace Signum.Utilities
             {
                 AddResults(result, sliceNew, DiffAction.Added);
             }
+        }
+    }
+
+    public static class StringDistanceExtensions
+    {
+        public static string NiceToString(this List<DiffPair<List<DiffPair<string>>>> diff)
+        {
+            return diff.ToString(b =>
+            {
+                if (b.Action == DiffAction.Equal)
+                {
+                    if (b.Value.Count == 1)
+                        return "    " + b.Value.Single().Value;
+
+                    return
+                    "--  " + b.Value.Where(a => a.Action == DiffAction.Removed || a.Action == DiffAction.Equal).ToString(a => a.Value, "") + "\n" +
+                    "++  " + b.Value.Where(a => a.Action == DiffAction.Added || a.Action == DiffAction.Equal).ToString(a => a.Value, "");
+                }
+                else if (b.Action == DiffAction.Removed)
+                    return "--  " + b.Value.Single().Value;
+                else if (b.Action == DiffAction.Added)
+                    return "++  " + b.Value.Single().Value;
+                else
+                    throw new UnexpectedValueException(b.Action);
+            }, "\n");
         }
     }
 
