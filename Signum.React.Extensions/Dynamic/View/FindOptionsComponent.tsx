@@ -25,719 +25,719 @@ import { getTypeInfos } from '@framework/Reflection';
 import { TypeInfo } from '@framework/Reflection';
 
 interface FindOptionsLineProps {
-  binding: Binding<FindOptionsExpr | undefined>;
-  dn: DesignerNode<BaseNode>;
-  avoidSuggestion?: boolean;
+    binding: Binding<FindOptionsExpr | undefined>;
+    dn: DesignerNode<BaseNode>;
+    avoidSuggestion?: boolean;
 }
 
 export class FindOptionsLine extends React.Component<FindOptionsLineProps>{
 
-  renderMember(fo: FindOptionsExpr | undefined): React.ReactNode {
-    return (<span
-      className={fo === undefined ? "design-default" : "design-changed"}>
-      {this.props.binding.member}
-    </span>);
-  }
+    renderMember(fo: FindOptionsExpr | undefined): React.ReactNode {
+        return (<span
+            className={fo === undefined ? "design-default" : "design-changed"}>
+            {this.props.binding.member}
+        </span>);
+    }
 
-  handleRemove = (e: React.MouseEvent<any>) => {
-    e.preventDefault();
-    this.props.binding.deleteValue();
-    this.props.dn.context.refreshView();
-  }
+    handleRemove = (e: React.MouseEvent<any>) => {
+        e.preventDefault();
+        this.props.binding.deleteValue();
+        this.props.dn.context.refreshView();
+    }
 
-  handleCreate = (e: React.MouseEvent<any>) => {
+    handleCreate = (e: React.MouseEvent<any>) => {
 
-    e.preventDefault();
-    const route = this.props.dn.route;
-    const ti = route && route.typeReferenceInfo();
+        e.preventDefault();
+        const route = this.props.dn.route;
+        const ti = route && route.typeReferenceInfo();
 
-    const promise = this.props.avoidSuggestion == true || !ti || !isTypeEntity(ti) ? Promise.resolve({} as FindOptionsExpr) :
-      DynamicViewClient.API.getSuggestedFindOptions(ti.name)
-        .then(sfos => SelectorModal.chooseElement(sfos, {
-          title: DynamicViewMessage.SuggestedFindOptions.niceToString(),
-          message: DynamicViewMessage.TheFollowingQueriesReference0.niceToString().formatHtml(<strong>{ti.niceName}</strong>),
-          buttonDisplay: sfo => <div><strong>{sfo.queryKey}</strong><br /><small>(by <code>{sfo.parentToken}</code>)</small></div>
-        }))
-        .then(sfo => ({
-          queryName: sfo && sfo.queryKey,
-          parentToken: sfo && sfo.parentToken,
-          parentValue: sfo && { __code__: "ctx.value" } as Expression<ModifiableEntity>
-        } as FindOptionsExpr));
+        const promise = this.props.avoidSuggestion == true || !ti || !isTypeEntity(ti) ? Promise.resolve({} as FindOptionsExpr) :
+            DynamicViewClient.API.getSuggestedFindOptions(ti.name)
+                .then(sfos => SelectorModal.chooseElement(sfos, {
+                    title: DynamicViewMessage.SuggestedFindOptions.niceToString(),
+                    message: DynamicViewMessage.TheFollowingQueriesReference0.niceToString().formatHtml(<strong>{ti.niceName}</strong>),
+                    buttonDisplay: sfo => <div><strong>{sfo.queryKey}</strong><br /><small>(by <code>{sfo.parentToken}</code>)</small></div>
+                }))
+                .then(sfo => ({
+                    queryName: sfo && sfo.queryKey,
+                    parentToken: sfo && sfo.parentToken,
+                    parentValue: sfo && { __code__: "ctx.value" } as Expression<ModifiableEntity>
+                } as FindOptionsExpr));
 
-    promise.then(fo => this.modifyFindOptions(fo)).done();
-  }
+        promise.then(fo => this.modifyFindOptions(fo)).done();
+    }
 
-  handleView = (e: React.MouseEvent<any>) => {
-    e.preventDefault();
-    var fo = JSON.parse(JSON.stringify(this.props.binding.getValue())) as FindOptionsExpr;
-    this.modifyFindOptions(fo);
-  }
+    handleView = (e: React.MouseEvent<any>) => {
+        e.preventDefault();
+        var fo = JSON.parse(JSON.stringify(this.props.binding.getValue())) as FindOptionsExpr;
+        this.modifyFindOptions(fo);
+    }
 
-  modifyFindOptions(fo: FindOptionsExpr) {
-    DesignerModal.show("FindOptions", () => <FindOptionsComponent findOptions={fo} dn={this.props.dn} />).then(result => {
-      if (result)
-        this.props.binding.setValue(this.clean(fo));
+    modifyFindOptions(fo: FindOptionsExpr) {
+        DesignerModal.show("FindOptions", () => <FindOptionsComponent findOptions={fo} dn={this.props.dn} />).then(result => {
+            if (result)
+                this.props.binding.setValue(this.clean(fo));
 
-      this.props.dn.context.refreshView();
-    }).done();
-  }
+            this.props.dn.context.refreshView();
+        }).done();
+    }
 
-  clean(fo: FindOptionsExpr) {
-    delete fo.parentToken;
-    if (fo.filterOptions) fo.filterOptions.forEach(f => delete f.parsedToken);
-    if (fo.orderOptions) fo.orderOptions.forEach(o => delete o.parsedToken);
-    if (fo.columnOptions) fo.columnOptions.forEach(c => delete c.parsedToken);
-    return fo;
-  }
+    clean(fo: FindOptionsExpr) {
+        delete fo.parsedParentToken;
+        if (fo.filterOptions) fo.filterOptions.forEach(f => delete f.parsedToken);
+        if (fo.orderOptions) fo.orderOptions.forEach(o => delete o.parsedToken);
+        if (fo.columnOptions) fo.columnOptions.forEach(c => delete c.parsedToken);
+        return fo;
+    }
 
-  render() {
-    const fo = this.props.binding.getValue();
+    render() {
+        const fo = this.props.binding.getValue();
 
-    return (
-      <div className="form-group">
-        <label className="control-label">
-          {this.renderMember(fo)}
-        </label>
-        <div>
-          {fo ? <div>
-            <a href="#" onClick={this.handleView}>{this.getDescription(fo)}</a>
-            {" "}
-            <a href="#" className={classes("sf-line-button", "sf-remove")}
-              onClick={this.handleRemove}
-              title={EntityControlMessage.Remove.niceToString()}>
-              <FontAwesomeIcon icon="times" />
-            </a></div> :
-            <a href="#" title={EntityControlMessage.Create.niceToString()}
-              className="sf-line-button sf-create"
-              onClick={this.handleCreate}>
-              <FontAwesomeIcon icon="plus" className="sf-create sf-create-label" />{EntityControlMessage.Create.niceToString()}
-            </a>}
-        </div>
-      </div>
-    );
-  }
+        return (
+            <div className="form-group">
+                <label className="control-label">
+                    {this.renderMember(fo)}
+                </label>
+                <div>
+                    {fo ? <div>
+                        <a href="#" onClick={this.handleView}>{this.getDescription(fo)}</a>
+                        {" "}
+                        <a href="#" className={classes("sf-line-button", "sf-remove")}
+                            onClick={this.handleRemove}
+                            title={EntityControlMessage.Remove.niceToString()}>
+                            <FontAwesomeIcon icon="times" />
+                        </a></div> :
+                        <a href="#" title={EntityControlMessage.Create.niceToString()}
+                            className="sf-line-button sf-create"
+                            onClick={this.handleCreate}>
+                            <FontAwesomeIcon icon="plus" className="sf-create sf-create-label" />{EntityControlMessage.Create.niceToString()}
+                        </a>}
+                </div>
+            </div>
+        );
+    }
 
-  getDescription(fo: FindOptionsExpr) {
+    getDescription(fo: FindOptionsExpr) {
 
-    var filters = [
-      fo.parentToken,
-      fo.filterOptions && fo.filterOptions.length && fo.filterOptions.length + " filters"]
-      .filter(a => !!a).join(", ");
+        var filters = [
+            fo.parentToken,
+            fo.filterOptions && fo.filterOptions.length && fo.filterOptions.length + " filters"]
+            .filter(a => !!a).join(", ");
 
-    return `${fo.queryName} (${filters || "No filter"})`.trim();
-  }
+        return `${fo.queryName} (${filters || "No filter"})`.trim();
+    }
 }
 
 
 interface QueryTokenLineProps {
-  binding: Binding<string | undefined>;
-  dn: DesignerNode<BaseNode>;
-  subTokenOptions: SubTokensOptions;
-  queryKey: string;
+    binding: Binding<string | undefined>;
+    dn: DesignerNode<BaseNode>;
+    subTokenOptions: SubTokensOptions;
+    queryKey: string;
 }
 
 interface QueryTokenLineState {
-  parsedToken?: QueryToken;
+    parsedToken?: QueryToken;
 }
 
 export class QueryTokenLine extends React.Component<QueryTokenLineProps, QueryTokenLineState>{
 
-  state = {} as QueryTokenLineState;
+    state = {} as QueryTokenLineState;
 
-  renderMember(token: string | undefined): React.ReactNode {
-    return (
-      <span className={token === undefined ? "design-default" : "design-changed"}>
-        {this.props.binding.member}
-      </span>
-    );
-  }
+    renderMember(token: string| undefined): React.ReactNode {
+        return (
+            <span className={token === undefined ? "design-default" : "design-changed"}>
+                {this.props.binding.member}
+            </span>
+        );
+    }
 
-  handleChange = (qt: QueryToken | undefined) => {
-    this.setState({ parsedToken: qt });
-    if (qt)
-      this.props.binding.setValue(qt.fullKey);
-    else
-      this.props.binding.deleteValue();
+    handleChange = (qt: QueryToken | undefined) => {
+        this.setState({ parsedToken: qt });
+        if (qt)
+            this.props.binding.setValue(qt.fullKey);
+        else
+            this.props.binding.deleteValue();
 
-    this.props.dn.context.refreshView();
-  }
+        this.props.dn.context.refreshView();
+    }
 
-  componentWillReceiveProps(newProps: QueryTokenLineProps) {
-    if (this.props.queryKey != null && this.props.queryKey != newProps.queryKey)
-      this.handleChange(undefined);
-  }
+    componentWillReceiveProps(newProps: QueryTokenLineProps) {
+        if (this.props.queryKey != null && this.props.queryKey != newProps.queryKey)
+            this.handleChange(undefined);
+    }   
 
-  render() {
-    const token = this.props.binding.getValue();
+    render() {
+        const token = this.props.binding.getValue();
 
-    return (
-      <div className="form-group">
-        <label className="control-label">
-          {this.renderMember(token)} {this.props.queryKey && <small>({getQueryNiceName(this.props.queryKey)})</small>}
-        </label>
-        <div>
-          <QueryTokenBuilderString key={this.props.queryKey}
-            queryKey={this.props.queryKey}
-            token={token}
-            subTokenOptions={this.props.subTokenOptions}
-            parsedToken={this.state.parsedToken}
-            hideLabel={true}
-            onChange={this.handleChange}
-            label=""
-          />
-        </div>
-      </div>
-    );
-  }
+        return (
+            <div className="form-group">
+                <label className="control-label">
+                    {this.renderMember(token)} {this.props.queryKey && <small>({getQueryNiceName(this.props.queryKey)})</small>}
+                </label>
+                <div>
+                    <QueryTokenBuilderString key={this.props.queryKey}
+                        queryKey={this.props.queryKey}
+                        token={token}
+                        subTokenOptions={this.props.subTokenOptions}
+                        parsedToken={this.state.parsedToken}
+                        hideLabel={true}
+                        onChange={this.handleChange}
+                        label=""
+                        />
+                </div>
+            </div>
+        );
+    }
 
-  getDescription(fo: FindOptionsExpr) {
+    getDescription(fo: FindOptionsExpr) {
 
-    var filters = [
-      fo.parentToken,
-      fo.filterOptions && fo.filterOptions.length && fo.filterOptions.length + " filters"]
-      .filter(a => !!a).join(", ");
+        var filters = [
+            fo.parentToken,
+            fo.filterOptions && fo.filterOptions.length && fo.filterOptions.length + " filters"]
+            .filter(a => !!a).join(", ");
 
-    return `${fo.queryName} (${filters || "No filter"})`.trim();
-  }
+        return `${fo.queryName} (${filters || "No filter"})`.trim();
+    }
 }
 
 
 
 interface FetchQueryDescriptionProps {
-  queryName?: string;
-  children: (qd?: QueryDescription) => React.ReactElement<any>;
+    queryName?: string;
+    children: (qd?: QueryDescription) => React.ReactElement<any>;
 }
 
 interface FetchQueryDescriptionState {
-  queryDescription?: QueryDescription
+    queryDescription?: QueryDescription
 }
 
 export class FetchQueryDescription extends React.Component<FetchQueryDescriptionProps, FetchQueryDescriptionState> {
 
-  constructor(props: FetchQueryDescriptionProps) {
-    super(props);
-    this.state = { queryDescription: undefined };
-  }
+    constructor(props: FetchQueryDescriptionProps) {
+        super(props);
+        this.state = { queryDescription: undefined };
+    }
 
-  componentWillMount() {
-    this.loadData(this.props);
-  }
+    componentWillMount() {
+        this.loadData(this.props);
+    }
 
-  componentWillReceiveProps(newProps: FetchQueryDescriptionProps) {
-    if (newProps.queryName != this.props.queryName)
-      this.loadData(newProps);
-  }
+    componentWillReceiveProps(newProps: FetchQueryDescriptionProps) {
+        if (newProps.queryName != this.props.queryName)
+            this.loadData(newProps);
+    }
 
-  loadData(props: FetchQueryDescriptionProps) {
+    loadData(props: FetchQueryDescriptionProps) {
 
-    if (!props.queryName)
-      this.setState({ queryDescription: undefined });
-    else
-      Finder.getQueryDescription(props.queryName)
-        .then(qd => this.setState({ queryDescription: qd }))
-        .done();
-  }
+        if (!props.queryName)
+            this.setState({ queryDescription: undefined });
+        else
+            Finder.getQueryDescription(props.queryName)
+                .then(qd => this.setState({ queryDescription: qd }))
+                .done();
+    }
 
-  render() {
-    return this.props.children(this.state.queryDescription);
-  }
+    render() {
+        return this.props.children(this.state.queryDescription);
+    }
 }
 
 
 interface ViewNameComponentProps {
-  binding: Binding<any>;
-  dn: DesignerNode<BaseNode>;
-  typeName?: string;
+    binding: Binding<any>;
+    dn: DesignerNode<BaseNode>;
+    typeName?: string;
 }
 
 interface ViewNameComponentState {
-  viewNames?: string[];
+    viewNames?: string[];
 }
 
 export class ViewNameComponent extends React.Component<ViewNameComponentProps, ViewNameComponentState> {
 
-  constructor(props: ViewNameComponentProps) {
-    super(props);
-    this.state = { viewNames: [] };
-  }
+    constructor(props: ViewNameComponentProps) {
+        super(props);
+        this.state = { viewNames: [] };
+    }
 
-  componentWillMount() {
-    this.loadData(this.props);
-  }
+    componentWillMount() {
+        this.loadData(this.props);
+    }
 
-  componentWillReceiveProps(newProps: ViewNameComponentProps) {
-    if (newProps.typeName != this.props.typeName)
-      this.loadData(newProps);
-  }
+    componentWillReceiveProps(newProps: ViewNameComponentProps) {
+        if (newProps.typeName != this.props.typeName)
+            this.loadData(newProps);
+    }
 
-  loadData(props: ViewNameComponentProps) {
-    if (props.typeName && !props.typeName.contains(", ") && !isTypeEntity(props.typeName))
-      this.setState({ viewNames: [] });
-    else
-      Promise.all(getTypeInfos(props.typeName || "").map(ti => Navigator.viewDispatcher.getViewNames(ti.name).then(array => [...array, (hastStaticView(ti) ? "STATIC" : undefined)])))
-        .then(arrays => this.setState({
-          viewNames: [...(arrays.flatMap(a => a).filter(a => a != null) as string[]), "NEW"]
-        }))
-        .done();
-  }
+    loadData(props: ViewNameComponentProps) {
+        if (props.typeName && !props.typeName.contains(", ") && !isTypeEntity(props.typeName))
+            this.setState({ viewNames: [] });
+        else
+            Promise.all(getTypeInfos(props.typeName || "").map(ti => Navigator.viewDispatcher.getViewNames(ti.name).then(array => [...array, (hastStaticView(ti) ? "STATIC" : undefined)])))
+                .then(arrays => this.setState({
+                    viewNames: [...(arrays.flatMap(a => a).filter(a => a != null) as string[]), "NEW"]
+                }))
+                .done();
+    }
 
-  render() {
-    return <ExpressionOrValueComponent dn={this.props.dn} binding={this.props.binding} type="string" defaultValue={null} options={this.state.viewNames} exampleExpression={"e => \"MyStaticOrDynamicViewName\""} />;
-  }
+    render() {
+        return <ExpressionOrValueComponent dn={this.props.dn} binding={this.props.binding} type="string" defaultValue={null} options={this.state.viewNames} exampleExpression={"e => \"MyStaticOrDynamicViewName\""}/>;
+    }
 }
 
 function hastStaticView(t: TypeInfo) {
-  var es = Navigator.getSettings(t);
-  return es != null && es.getViewPromise != null;
+    var es = Navigator.getSettings(t);
+    return es != null && es.getViewPromise != null;
 }
 
 interface FindOptionsComponentProps {
-  dn: DesignerNode<BaseNode>;
-  findOptions: FindOptionsExpr;
+    dn: DesignerNode<BaseNode>;
+    findOptions: FindOptionsExpr;
 }
 
 export class FindOptionsComponent extends React.Component<FindOptionsComponentProps> {
 
 
-  handleChangeQueryKey = (queryKey: string | undefined) => {
-    const fo = this.props.findOptions;
-    fo.queryName = queryKey;
-    delete fo.parsedParentToken;
-    delete fo.parentToken;
-    delete fo.parentValue;
-    delete fo.filterOptions;
-    delete fo.columnOptions;
-    delete fo.orderOptions;
-    this.forceUpdate();
-  }
+    handleChangeQueryKey = (queryKey: string | undefined) => {
+        const fo = this.props.findOptions;
+        fo.queryName = queryKey;
+        delete fo.parsedParentToken;
+        delete fo.parentToken;
+        delete fo.parentValue;
+        delete fo.filterOptions;
+        delete fo.columnOptions;
+        delete fo.orderOptions;
+        this.forceUpdate();
+    }
 
-  handleChangeParentColumn = (newToken: QueryToken | undefined) => {
-    this.props.findOptions.parentToken = newToken && newToken.fullKey;
-    this.props.findOptions.parsedParentToken = newToken;
-    this.forceUpdate();
-  }
+    handleChangeParentColumn = (newToken: QueryToken | undefined) => {
+        this.props.findOptions.parentToken = newToken && newToken.fullKey;
+        this.props.findOptions.parsedParentToken = newToken;
+        this.forceUpdate();
+    }
+    
+    render() {
+        var dn = this.props.dn;
+        const fo = this.props.findOptions;
+        return (
+            <div className="form-sm filter-options code-container">
+                <QueryKeyLine queryKey={fo.queryName} label="queryKey" onChange={this.handleChangeQueryKey} />
 
-  render() {
-    var dn = this.props.dn;
-    const fo = this.props.findOptions;
-    return (
-      <div className="form-sm filter-options code-container">
-        <QueryKeyLine queryKey={fo.queryName} label="queryKey" onChange={this.handleChangeQueryKey} />
+                {fo.queryName &&
+                    <div>
+                        <div className="row">
+                        <div className="col-sm-6">
+                            <QueryTokenBuilderString label="parentToken" parsedToken={fo.parsedParentToken} token={fo.parentToken} 
+                                    onChange={this.handleChangeParentColumn} queryKey={fo.queryName} subTokenOptions={SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement} />
+                            </div>
+                            <div className="col-sm-6">
+                            {fo.parsedParentToken &&
+                                <ExpressionOrValueComponent dn={dn} binding={Binding.create(fo, f => f.parentValue)} refreshView={() => this.forceUpdate()}
+                                    type={FilterOptionsComponent.getValueType(fo.parsedParentToken)} defaultValue={null} />}
+                            </div>
+                        </div>
 
-        {fo.queryName &&
-          <div>
-            <div className="row">
-              <div className="col-sm-6">
-                <QueryTokenBuilderString label="parentToken" parsedToken={fo.parsedParentToken} token={fo.parentToken}
-                  onChange={this.handleChangeParentColumn} queryKey={fo.queryName} subTokenOptions={SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement} />
-              </div>
-              <div className="col-sm-6">
-                {fo.parsedParentToken &&
-                  <ExpressionOrValueComponent dn={dn} binding={Binding.create(fo, f => f.parentValue)} refreshView={() => this.forceUpdate()}
-                    type={FilterOptionsComponent.getValueType(fo.parsedParentToken)} defaultValue={null} />}
-              </div>
+
+                        <FilterOptionsComponent dn={dn} binding={Binding.create(fo, f => f.filterOptions)} queryKey={fo.queryName} refreshView={() => this.forceUpdate()} />
+
+                        <ExpressionOrValueComponent dn={dn} binding={Binding.create(fo, f => f.columnOptionsMode)} refreshView={() => this.forceUpdate()} type="string" options={ColumnOptionsMode.values()} defaultValue={"Add" as ColumnOptionsMode} />
+                        <ColumnOptionsComponent dn={dn} binding={Binding.create(fo, f => f.columnOptions)} queryKey={fo.queryName} refreshView={() => this.forceUpdate()} />
+
+                        <OrderOptionsComponent dn={dn} binding={Binding.create(fo, f => f.orderOptions)} queryKey={fo.queryName} refreshView={() => this.forceUpdate()} />
+                        <PaginationComponent dn={dn} findOptions={fo} refreshView={() => this.forceUpdate()} />
+
+                     
+                    </div>
+                }
             </div>
-
-
-            <FilterOptionsComponent dn={dn} binding={Binding.create(fo, f => f.filterOptions)} queryKey={fo.queryName} refreshView={() => this.forceUpdate()} />
-
-            <ExpressionOrValueComponent dn={dn} binding={Binding.create(fo, f => f.columnOptionsMode)} refreshView={() => this.forceUpdate()} type="string" options={ColumnOptionsMode.values()} defaultValue={"Add" as ColumnOptionsMode} />
-            <ColumnOptionsComponent dn={dn} binding={Binding.create(fo, f => f.columnOptions)} queryKey={fo.queryName} refreshView={() => this.forceUpdate()} />
-
-            <OrderOptionsComponent dn={dn} binding={Binding.create(fo, f => f.orderOptions)} queryKey={fo.queryName} refreshView={() => this.forceUpdate()} />
-            <PaginationComponent dn={dn} findOptions={fo} refreshView={() => this.forceUpdate()} />
-
-
-          </div>
-        }
-      </div>
-    );
-  }
+        );
+    }
 }
 
 export class QueryKeyLine extends React.Component<{ queryKey: string | undefined, label: string; onChange: (queryKey: string | undefined) => void }>{
 
-  handleGetItems = (query: string) => {
-    return Finder.API.findLiteLike({ types: QueryEntity.typeName, subString: query, count: 5 })
-      .then(lites => lites.map(a => a.toStr));
-  }
+    handleGetItems = (query: string) => {
+        return Finder.API.findLiteLike({ types: QueryEntity.typeName, subString: query, count: 5 })
+            .then(lites => lites.map(a => a.toStr));
+    }
 
-  render() {
-    return (
-      <div className="form-group">
-        <label className="control-label">
-          {this.props.label}
-        </label>
-        <div style={{ position: "relative" }}>
-          {
-            this.props.queryKey ? this.renderLink() :
-              <Typeahead
-                inputAttrs={{ className: "form-control sf-entity-autocomplete" }}
-                getItems={this.handleGetItems}
-                onSelect={item => { this.props.onChange(item as string); return ""; }} />
+    render() {
+        return (
+            <div className="form-group">
+                <label className="control-label">
+                    {this.props.label}
+                </label>
+                <div style={{ position: "relative" }}>
+                    {
+                        this.props.queryKey ? this.renderLink() :
+                            <Typeahead
+                                inputAttrs={{ className: "form-control sf-entity-autocomplete" }}
+                                getItems={this.handleGetItems}
+                                onSelect={item => { this.props.onChange(item as string); return ""; } } />
 
-          }
-        </div>
-      </div>
-    );
-  }
+                    }
+                </div>
+            </div>
+        );
+    }
 
-  renderLink() {
-    return (
-      <div className="input-group">
-        <span className="form-control btn-light sf-entity-line-entity">
-          {this.props.queryKey}
-        </span>
-        <span className="input-group-append">
-          <a href="#" className={classes("sf-line-button", "sf-remove btn btn-light")}
-            onClick={() => this.props.onChange(undefined)}
-            title={EntityControlMessage.Remove.niceToString()}>
-            <FontAwesomeIcon icon="times" />
-          </a>
-        </span>
-      </div>
-    );
-  }
+    renderLink() {
+        return (
+            <div className="input-group">
+                <span className="form-control btn-light sf-entity-line-entity">
+                    {this.props.queryKey}
+                </span>
+                <span className="input-group-append">
+                    <a href="#" className={classes("sf-line-button", "sf-remove btn btn-light")}
+                        onClick={() => this.props.onChange(undefined)}
+                        title={EntityControlMessage.Remove.niceToString()}>
+                        <FontAwesomeIcon icon="times" />
+                    </a>
+                </span>
+            </div>
+        );
+    }
 }
 
 interface QueryTokenBuilderStringProps {
-  queryKey: string;
-  token: string | undefined;
-  parsedToken: QueryToken | undefined;
-  label: string;
-  onChange: (newToken: QueryToken | undefined) => void;
-  subTokenOptions: SubTokensOptions;
-  hideLabel?: boolean;
+    queryKey: string;
+    token: string | undefined;
+    parsedToken: QueryToken | undefined;
+    label: string;
+    onChange: (newToken: QueryToken | undefined) => void;
+    subTokenOptions: SubTokensOptions;
+    hideLabel?: boolean;
 }
 
 class QueryTokenBuilderString extends React.Component<QueryTokenBuilderStringProps>{
 
-  componentWillMount() {
-    this.loadInitialToken(this.props);
-  }
-
-  componentWillReceiveProps(newProps: QueryTokenBuilderStringProps) {
-    this.loadInitialToken(newProps);
-  }
-
-  loadInitialToken(props: QueryTokenBuilderStringProps) {
-    if (props.token == undefined) {
-      if (this.props.token != props.token)
-        props.onChange(undefined);
+    componentWillMount() {
+        this.loadInitialToken(this.props);
     }
-    else if (!props.parsedToken || this.props.queryKey != props.queryKey || props.parsedToken.fullKey != props.token)
-      return Finder.parseSingleToken(props.queryKey, props.token, props.subTokenOptions)
-        .then(t => this.props.onChange(t))
-        .done();
-  }
 
-  render() {
+    componentWillReceiveProps(newProps: QueryTokenBuilderStringProps) {
+        this.loadInitialToken(newProps);
+    }
 
-    var qt = <QueryTokenBuilder
-      queryToken={this.props.parsedToken}
-      queryKey={this.props.queryKey}
-      onTokenChange={this.props.onChange}
-      readOnly={false}
-      subTokenOptions={this.props.subTokenOptions} />;
+    loadInitialToken(props: QueryTokenBuilderStringProps) {
+        if (props.token == undefined) {
+            if (this.props.token != props.token)
+                props.onChange(undefined);
+        }
+        else if (!props.parsedToken || this.props.queryKey != props.queryKey || props.parsedToken.fullKey != props.token)
+            return Finder.parseSingleToken(props.queryKey, props.token, props.subTokenOptions)
+                .then(t => this.props.onChange(t))
+                .done();
+    }
 
-    if (this.props.hideLabel)
-      return qt;
+    render() {
 
-    return (
-      <div className="form-group">
-        <label className="control-label">
-          {this.props.label}
-        </label>
-        <div>
-          {qt}
-        </div>
-      </div>
-    );
-  }
+        var qt = <QueryTokenBuilder
+            queryToken={this.props.parsedToken}
+            queryKey={this.props.queryKey}
+            onTokenChange={this.props.onChange}
+            readOnly={false}
+            subTokenOptions={this.props.subTokenOptions} />;
+
+        if (this.props.hideLabel)
+            return qt;
+
+        return (
+            <div className="form-group">
+                <label className="control-label">
+                    {this.props.label}
+                </label>
+                <div>
+                    {qt}
+                </div>
+            </div>
+        );
+    }
 }
 
 interface BaseOptionsComponentProps<T> {
-  binding: Binding<Array<T> | undefined>;
-  dn: DesignerNode<BaseNode>;
-  refreshView: () => void;
-  queryKey: string;
+    binding: Binding<Array<T> | undefined>;
+    dn: DesignerNode<BaseNode>;
+    refreshView: () => void;
+    queryKey: string;
 }
 
 abstract class BaseOptionsComponent<T> extends React.Component<BaseOptionsComponentProps<T>>{
 
 
-  handleOnRemove = (event: React.MouseEvent<any>, index: number) => {
-    event.preventDefault();
-    var array = this.props.binding.getValue()!;
-    array.removeAt(index);
-    if (array.length == 0)
-      this.props.binding.deleteValue();
+    handleOnRemove = (event: React.MouseEvent<any>, index: number) => {
+        event.preventDefault();
+        var array = this.props.binding.getValue()!;
+        array.removeAt(index);
+        if (array.length == 0)
+            this.props.binding.deleteValue();
 
-    this.props.refreshView();
-  }
-
-  handleOnMoveUp = (event: React.MouseEvent<any>, index: number) => {
-    event.preventDefault();
-    const list = this.props.binding.getValue()!;
-    list.moveUp(index);
-    this.props.refreshView();
-  }
-
-  handleOnMoveDown = (event: React.MouseEvent<any>, index: number) => {
-    event.preventDefault();
-    const list = this.props.binding.getValue()!;
-    list.moveDown(index);
-    this.props.refreshView();
-  }
-
-
-  handleCreateClick = (event: React.SyntheticEvent<any>) => {
-    var array = this.props.binding.getValue();
-    if (array == undefined) {
-      array = [];
-      this.props.binding.setValue(array);
+        this.props.refreshView();
     }
-    array!.push(this.newElement());
-    this.props.refreshView();
-  }
+
+    handleOnMoveUp = (event: React.MouseEvent<any>, index: number) => {
+        event.preventDefault();
+        const list = this.props.binding.getValue() !;
+        list.moveUp(index);
+        this.props.refreshView();
+    }
+
+    handleOnMoveDown = (event: React.MouseEvent<any>, index: number) => {
+        event.preventDefault();
+        const list = this.props.binding.getValue() !;
+        list.moveDown(index);
+        this.props.refreshView();
+    }
 
 
-  renderButtons(index: number) {
-    return (<div className="item-group">
-      <a href="#" className={classes("sf-line-button", "sf-remove")}
-        onClick={e => this.handleOnRemove(e, index)}
-        title={EntityControlMessage.Remove.niceToString()}>
-        <FontAwesomeIcon icon="times" />
-      </a>
-
-      <a href="#" className={classes("sf-line-button", "move-up")}
-        onClick={e => this.handleOnMoveUp(e, index)}
-        title={EntityControlMessage.MoveUp.niceToString()}>
-        <FontAwesomeIcon icon="chevron-up" />
-      </a>
-
-      <a href="#" className={classes("sf-line-button", "move-down")}
-        onClick={e => this.handleOnMoveDown(e, index)}
-        title={EntityControlMessage.MoveDown.niceToString()}>
-        <FontAwesomeIcon icon="chevron-down" />
-      </a>
-    </div>);
-  }
-
-  abstract renderTitle(): React.ReactNode;
-  abstract renderHeader(): React.ReactElement<any>;
-  abstract renderItem(item: T, index: number): React.ReactElement<any>;
-  abstract getNumColumns(): number;
-  abstract newElement(): T;
+    handleCreateClick = (event: React.SyntheticEvent<any>) => {
+        var array = this.props.binding.getValue();
+        if (array == undefined) {
+            array = [];
+            this.props.binding.setValue(array);
+        }
+        array!.push(this.newElement());
+        this.props.refreshView();
+    }
 
 
-  render() {
+    renderButtons(index: number) {
+        return (<div className="item-group">
+            <a href="#" className={classes("sf-line-button", "sf-remove")}
+                onClick={e => this.handleOnRemove(e, index)}
+                title={EntityControlMessage.Remove.niceToString()}>
+                <FontAwesomeIcon icon="times" />
+            </a>
 
-    const array = this.props.binding.getValue();
+            <a href="#" className={classes("sf-line-button", "move-up")}
+                onClick={e => this.handleOnMoveUp(e, index)}
+                title={EntityControlMessage.MoveUp.niceToString()}>
+                <FontAwesomeIcon icon="chevron-up" />
+            </a>
 
-    return (<fieldset className="SF-table-field">
-      <legend>
-        {this.renderTitle()}
-      </legend>
-      <table className="table table-sm code-container">
-        <thead>
-          {this.renderHeader()}
-        </thead>
-        <tbody>
-          {array && array.map((item, i) => this.renderItem(item, i))}
-          <tr>
-            <td colSpan={this.getNumColumns()}>
-              <a title={EntityControlMessage.Create.niceToString()}
-                className="sf-line-button sf-create"
-                onClick={this.handleCreateClick}>
-                <FontAwesomeIcon icon="plus" className="sf-create" />&nbsp;{EntityControlMessage.Create.niceToString()}
-              </a>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </fieldset>);
-  }
+            <a href="#" className={classes("sf-line-button", "move-down")}
+                onClick={e => this.handleOnMoveDown(e, index)}
+                title={EntityControlMessage.MoveDown.niceToString()}>
+                <FontAwesomeIcon icon="chevron-down" />
+            </a>
+        </div>);
+    }
+
+    abstract renderTitle(): React.ReactNode;
+    abstract renderHeader(): React.ReactElement<any>;
+    abstract renderItem(item: T, index: number): React.ReactElement<any>;
+    abstract getNumColumns(): number;
+    abstract newElement(): T;
+
+
+    render() {
+
+        const array = this.props.binding.getValue();
+
+        return (<fieldset className="SF-table-field">
+            <legend>
+                {this.renderTitle()}
+            </legend>
+            <table className="table table-sm code-container">
+                <thead>
+                    {this.renderHeader()}
+                </thead>
+                <tbody>
+                    {array && array.map((item, i) => this.renderItem(item, i))}
+                    <tr>
+                        <td colSpan={this.getNumColumns()}>
+                            <a title={EntityControlMessage.Create.niceToString()}
+                                className="sf-line-button sf-create"
+                                onClick={this.handleCreateClick}>
+                                <FontAwesomeIcon icon="plus" className="sf-create" />&nbsp;{EntityControlMessage.Create.niceToString()}
+                            </a>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </fieldset>);
+    }
 }
 
 class FilterOptionsComponent extends BaseOptionsComponent<FilterOptionExpr> {
 
-  renderTitle() {
-    return "Filters";
-  }
+    renderTitle() {
+        return "Filters";
+    }
 
-  renderHeader() {
-    return (
-      <tr>
-        <th></th>
-        <th>Column</th>
-        <th>Operation</th>
-        <th>Value</th>
-        <th>Frozen</th>
-        <th>Applicable</th>
-      </tr>
-    );
-  }
+    renderHeader() {
+        return (
+            <tr>
+                <th></th>
+                <th>Column</th>
+                <th>Operation</th>
+                <th>Value</th>
+                <th>Frozen</th>
+                <th>Applicable</th>
+            </tr>
+        );
+    }
 
-  handleColumnChange = (item: FilterOptionExpr, newToken: QueryToken | undefined) => {
-    item.token = newToken && newToken.fullKey;
-    item.parsedToken = newToken;
-    this.props.refreshView();
-  }
+    handleColumnChange = (item: FilterOptionExpr, newToken: QueryToken | undefined) => {
+        item.token = newToken && newToken.fullKey;
+        item.parsedToken = newToken;
+        this.props.refreshView();
+    }
 
-  renderItem(item: FilterOptionExpr, index: number) {
-    const dn = this.props.dn;
-    return (
-      <tr key={index}>
-        <td>{this.renderButtons(index)}</td>
-        <td> <QueryTokenBuilderString label="columnName" token={item.token} parsedToken={item.parsedToken} onChange={newToken => this.handleColumnChange(item, newToken)}
-          queryKey={this.props.queryKey} subTokenOptions={SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement} hideLabel={true} /></td>
-        <td> {item.parsedToken && <ExpressionOrValueComponent dn={dn} hideLabel={true} refreshView={() => this.forceUpdate()} binding={Binding.create(item, f => f.operation)} type="string" defaultValue={null} options={this.getOperations(item.parsedToken)} />}</td>
-        <td> {item.parsedToken && <ExpressionOrValueComponent dn={dn} hideLabel={true} refreshView={() => this.forceUpdate()} binding={Binding.create(item, f => f.value)} type={FilterOptionsComponent.getValueType(item.parsedToken)} defaultValue={null} />}</td>
-        <td> <ExpressionOrValueComponent dn={dn} hideLabel={true} refreshView={() => this.forceUpdate()} binding={Binding.create(item, f => f.frozen)} type="boolean" defaultValue={false} /></td>
-        <td> <ExpressionOrValueComponent dn={dn} hideLabel={true} refreshView={() => this.forceUpdate()} binding={Binding.create(item, f => f.applicable)} type="boolean" defaultValue={true} /></td>
-      </tr>
-    );
-  }
+    renderItem(item: FilterOptionExpr, index: number) {
+        const dn = this.props.dn;
+        return (
+            <tr key={index}>
+                <td>{this.renderButtons(index)}</td>
+                <td> <QueryTokenBuilderString label="columnName" token={item.token} parsedToken={item.parsedToken} onChange={newToken => this.handleColumnChange(item, newToken)}
+                    queryKey={this.props.queryKey} subTokenOptions={SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement} hideLabel={true} /></td>
+                <td> {item.parsedToken && <ExpressionOrValueComponent dn={dn} hideLabel={true} refreshView={() => this.forceUpdate()} binding={Binding.create(item, f => f.operation)} type="string" defaultValue={null} options={this.getOperations(item.parsedToken)} />}</td>
+                <td> {item.parsedToken && <ExpressionOrValueComponent dn={dn} hideLabel={true} refreshView={() => this.forceUpdate()} binding={Binding.create(item, f => f.value)} type={FilterOptionsComponent.getValueType(item.parsedToken)} defaultValue={null} />}</td>
+                <td> <ExpressionOrValueComponent dn={dn} hideLabel={true} refreshView={() => this.forceUpdate()} binding={Binding.create(item, f => f.frozen)} type="boolean" defaultValue={false} /></td>
+                <td> <ExpressionOrValueComponent dn={dn} hideLabel={true} refreshView={() => this.forceUpdate()} binding={Binding.create(item, f => f.applicable)} type="boolean" defaultValue={true} /></td>
+            </tr>
+        );
+    }
 
-  getOperations(token: QueryToken): FilterOperation[] {
-    var filterType = token.filterType;
+    getOperations(token: QueryToken): FilterOperation[] {
+        var filterType = token.filterType;
 
-    if (!filterType)
-      return [];
+        if (!filterType)
+            return [];
 
-    return filterOperations[filterType]
-  }
+        return filterOperations[filterType]
+    }
 
-  static getValueType(token: QueryToken): "string" | "boolean" | "number" | null {
-    var tr = token.type;
-    if (tr.isCollection || tr.isLite || tr.isEmbedded)
-      return null;
+    static getValueType(token: QueryToken): "string" | "boolean" | "number" | null {
+        var tr = token.type;
+        if (tr.isCollection || tr.isLite || tr.isEmbedded)
+            return null;
 
-    if (tr.name == "string" || tr.name == "Guid" || tr.name == "datetime")
-      return "string";
+        if (tr.name == "string" || tr.name == "Guid" || tr.name == "datetime")
+            return "string";
 
-    if (tr.name == "number")
-      return "number";
+        if (tr.name == "number")
+            return "number";
 
-    if (tr.name == "boolean")
-      return "boolean";
+        if (tr.name == "boolean")
+            return "boolean";
 
-    return null;
-  }
+        return null;
+    }
 
-  getNumColumns() { return 7; };
+    getNumColumns() { return 7; };
 
-  newElement() {
-    return {} as FilterOptionExpr;
-  }
+    newElement() {
+        return {} as FilterOptionExpr;
+    }
 }
 
 class OrderOptionsComponent extends BaseOptionsComponent<OrderOptionExpr> {
 
-  renderTitle() {
-    return "Orders";
-  }
+    renderTitle() {
+        return "Orders";
+    }
 
-  renderHeader() {
-    return (
-      <tr>
-        <th></th>
-        <th>Column</th>
-        <th>OrderType</th>
-        <th>Applicable</th>
-      </tr>
-    );
-  }
+    renderHeader() {
+        return (
+            <tr>
+                <th></th>
+                <th>Column</th>
+                <th>OrderType</th>
+                <th>Applicable</th>
+            </tr>
+        );
+    }
 
-  handleColumnChange = (item: OrderOptionExpr, newToken: QueryToken | undefined) => {
-    item.token = newToken && newToken.fullKey;;
-    item.parsedToken = newToken;
-    this.props.refreshView();
-  }
+    handleColumnChange = (item: OrderOptionExpr, newToken: QueryToken | undefined) => {
+        item.token = newToken && newToken.fullKey;;
+        item.parsedToken = newToken;
+        this.props.refreshView();
+    }
 
-  renderItem(item: OrderOptionExpr, index: number) {
-    const dn = this.props.dn;
-    return (
-      <tr key={index}>
-        <td>{this.renderButtons(index)}</td>
-        <td> <QueryTokenBuilderString label="columnName" parsedToken={item.parsedToken} token={item.token}
-          onChange={newToken => this.handleColumnChange(item, newToken)} queryKey={this.props.queryKey} subTokenOptions={SubTokensOptions.CanElement} hideLabel={true} /></td>
-        <td> {item.parsedToken && !item.parsedToken.type.isEmbedded && <ExpressionOrValueComponent dn={dn} hideLabel={true} refreshView={() => this.forceUpdate()} binding={Binding.create(item, f => f.orderType)} type="string" defaultValue={null} options={OrderType.values()} />}</td>
-        <td> <ExpressionOrValueComponent dn={dn} hideLabel={true} refreshView={() => this.forceUpdate()} binding={Binding.create(item, f => f.applicable)} type="boolean" defaultValue={true} /></td>
-      </tr>
-    );
-  }
+    renderItem(item: OrderOptionExpr, index: number) {
+        const dn = this.props.dn;
+        return (
+            <tr key={index}>
+                <td>{this.renderButtons(index)}</td>
+                <td> <QueryTokenBuilderString label="columnName" parsedToken={item.parsedToken} token={item.token}
+                    onChange={newToken => this.handleColumnChange(item, newToken)} queryKey={this.props.queryKey} subTokenOptions={SubTokensOptions.CanElement} hideLabel={true} /></td>
+                <td> {item.parsedToken && !item.parsedToken.type.isEmbedded && <ExpressionOrValueComponent dn={dn} hideLabel={true} refreshView={() => this.forceUpdate()} binding={Binding.create(item, f => f.orderType)} type="string" defaultValue={null} options={OrderType.values()} />}</td>
+                <td> <ExpressionOrValueComponent dn={dn} hideLabel={true} refreshView={() => this.forceUpdate()} binding={Binding.create(item, f => f.applicable)} type="boolean" defaultValue={true} /></td>
+            </tr>
+        );
+    }
 
-  getNumColumns() { return 4; };
+    getNumColumns() { return 4; };
 
-  newElement() {
-    return {} as OrderOptionExpr;
-  }
+    newElement() {
+        return {} as OrderOptionExpr;
+    }
 }
 
 class ColumnOptionsComponent extends BaseOptionsComponent<ColumnOptionExpr> {
 
-  renderTitle() {
-    return "Columns";
-  }
+    renderTitle() {
+        return "Columns";
+    }
 
-  renderHeader() {
-    return (
-      <tr>
-        <th></th>
-        <th>Column</th>
-        <th>DisplayName</th>
-        <th>Applicable</th>
-      </tr>
-    );
-  }
+    renderHeader() {
+        return (
+            <tr>
+                <th></th>
+                <th>Column</th>
+                <th>DisplayName</th>
+                <th>Applicable</th>
+            </tr>
+        );
+    }
 
-  handleColumnChange = (item: ColumnOptionExpr, newToken: QueryToken | undefined) => {
-    item.token = newToken && newToken.fullKey;
-    item.parsedToken = newToken;
-    this.props.refreshView();
-  }
+    handleColumnChange = (item: ColumnOptionExpr, newToken: QueryToken | undefined) => {
+        item.token = newToken && newToken.fullKey;
+        item.parsedToken = newToken;
+        this.props.refreshView();
+    }
+    
+    renderItem(item: ColumnOptionExpr, index: number) {
+        const dn = this.props.dn;
+        return (
+            <tr key={index}>
+                <td>{this.renderButtons(index)}</td>
+                <td>
+                    <QueryTokenBuilderString label="columnName" parsedToken={item.parsedToken} token={item.token}
+                    onChange={newToken => this.handleColumnChange(item, newToken)}
+                    queryKey={this.props.queryKey} subTokenOptions={SubTokensOptions.CanElement} hideLabel={true} />
+                </td>
+                <td> {item.parsedToken && <ExpressionOrValueComponent dn={dn} hideLabel={true} refreshView={() => this.forceUpdate()} binding={Binding.create(item, f => f.displayName)} type="string" defaultValue={null} />}</td>
+                <td> <ExpressionOrValueComponent dn={dn} hideLabel={true} refreshView={() => this.forceUpdate()} binding={Binding.create(item, f => f.applicable)} type="boolean" defaultValue={true} /></td>
+            </tr>
+        );
+    }
 
-  renderItem(item: ColumnOptionExpr, index: number) {
-    const dn = this.props.dn;
-    return (
-      <tr key={index}>
-        <td>{this.renderButtons(index)}</td>
-        <td>
-          <QueryTokenBuilderString label="columnName" parsedToken={item.parsedToken} token={item.token}
-            onChange={newToken => this.handleColumnChange(item, newToken)}
-            queryKey={this.props.queryKey} subTokenOptions={SubTokensOptions.CanElement} hideLabel={true} />
-        </td>
-        <td> {item.parsedToken && <ExpressionOrValueComponent dn={dn} hideLabel={true} refreshView={() => this.forceUpdate()} binding={Binding.create(item, f => f.displayName)} type="string" defaultValue={null} />}</td>
-        <td> <ExpressionOrValueComponent dn={dn} hideLabel={true} refreshView={() => this.forceUpdate()} binding={Binding.create(item, f => f.applicable)} type="boolean" defaultValue={true} /></td>
-      </tr>
-    );
-  }
+    getNumColumns() { return 4; };
 
-  getNumColumns() { return 4; };
-
-  newElement() {
-    return {} as ColumnOptionExpr;
-  }
+    newElement() {
+        return {} as ColumnOptionExpr;
+    }
 }
 
 class PaginationComponent extends React.Component<{ findOptions: FindOptionsExpr, dn: DesignerNode<BaseNode>; refreshView: () => void }> {
 
-  render() {
-    const fo = this.props.findOptions;
-    const dn = this.props.dn;
-    const mode = fo.paginationMode;
+    render() {
+        const fo = this.props.findOptions;
+        const dn = this.props.dn;
+        const mode = fo.paginationMode;
 
-    return (
-      <fieldset>
-        <legend>Pagination</legend>
-        <ExpressionOrValueComponent dn={dn} refreshView={this.props.refreshView} binding={Binding.create(fo, f => f.paginationMode)} type="string" options={PaginationMode.values()} defaultValue={null} allowsExpression={false} />
-        {(mode == "Firsts" || mode == "Paginate") &&
-          <ExpressionOrValueComponent dn={dn} refreshView={this.props.refreshView} binding={Binding.create(fo, f => f.elementsPerPage)} type="number" defaultValue={null} />}
-        {(mode == "Paginate") &&
-          <ExpressionOrValueComponent dn={dn} refreshView={this.props.refreshView} binding={Binding.create(fo, f => f.currentPage)} type="number" defaultValue={null} />}
-      </fieldset>
-    );
-  }
+        return (
+            <fieldset>
+                <legend>Pagination</legend>
+                <ExpressionOrValueComponent dn={dn} refreshView={this.props.refreshView} binding={Binding.create(fo, f => f.paginationMode)} type="string" options={PaginationMode.values()} defaultValue={null} allowsExpression={false} />
+                {(mode == "Firsts" || mode == "Paginate") &&
+                    <ExpressionOrValueComponent dn={dn} refreshView={this.props.refreshView} binding={Binding.create(fo, f => f.elementsPerPage)} type="number" defaultValue={null} />}
+                {(mode == "Paginate") &&
+                    <ExpressionOrValueComponent dn={dn} refreshView={this.props.refreshView} binding={Binding.create(fo, f => f.currentPage)}  type="number" defaultValue={null} />}
+            </fieldset>
+        );
+    }
 }

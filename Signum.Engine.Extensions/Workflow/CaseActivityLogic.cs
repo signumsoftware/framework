@@ -29,6 +29,38 @@ namespace Signum.Engine.Workflow
 {
     public static class CaseActivityLogic
     {
+        static Expression<Func<ICaseMainEntity, IQueryable<CaseActivityEntity>>> MainEntityCaseActivitiesExpression =
+            e => Database.Query<CaseActivityEntity>().Where(a => a.Case.MainEntity == e);
+        [ExpressionField]
+        public static IQueryable<CaseActivityEntity> CaseActivities(this ICaseMainEntity e)
+        {
+            return MainEntityCaseActivitiesExpression.Evaluate(e);
+        }
+
+        static Expression<Func<ICaseMainEntity, CaseActivityEntity>> LastCaseActivityExpression =
+            e => e.CaseActivities().OrderByDescending(a => a.StartDate).FirstOrDefault();
+        [ExpressionField]
+        public static CaseActivityEntity LastCaseActivity(this ICaseMainEntity e)
+        {
+            return LastCaseActivityExpression.Evaluate(e);
+        }
+
+        static Expression<Func<ICaseMainEntity, IQueryable<CaseEntity>>> MainEntityCasesExpression =
+            e => e.CaseActivities().Select(a => a.Case);
+        [ExpressionField]
+        public static IQueryable<CaseEntity> Cases(this ICaseMainEntity e)
+        {
+            return MainEntityCasesExpression.Evaluate(e);
+        }
+
+        static Expression<Func<ICaseMainEntity, bool>> MainEntityCurrentUserHasNotificationExpression =
+            e => e.CaseActivities().SelectMany(a => a.Notifications()).Any(a => a.User.Is(UserEntity.Current));
+        [ExpressionField]
+        public static bool CurrentUserHasNotification(this ICaseMainEntity e)
+        {
+            return MainEntityCurrentUserHasNotificationExpression.Evaluate(e);
+        }
+
         static Expression<Func<WorkflowEntity, IQueryable<CaseEntity>>> CasesExpression =
             w => Database.Query<CaseEntity>().Where(a => a.Workflow == w);
         [ExpressionField]
@@ -37,6 +69,16 @@ namespace Signum.Engine.Workflow
             return CasesExpression.Evaluate(e);
         }
 
+        static Expression<Func<CaseActivityEntity, bool>> CurrentUserHasNotificationExpression =
+            ca => ca.Notifications().Any(cn => cn.User.Is(UserEntity.Current) &&
+                                                (cn.State == CaseNotificationState.New ||
+                                                 cn.State == CaseNotificationState.Opened ||
+                                                 cn.State == CaseNotificationState.InProgress));
+        [ExpressionField]
+        public static bool CurrentUserHasNotification(this CaseActivityEntity e)
+        {
+            return CurrentUserHasNotificationExpression.Evaluate(e);
+        }
 
         static Expression<Func<CaseActivityEntity, IQueryable<CaseActivityEntity>>> NextActivitiesExpression =
             ca => Database.Query<CaseActivityEntity>().Where(a => a.Previous.Is(ca));
@@ -267,6 +309,11 @@ namespace Signum.Engine.Workflow
                 ProcessLogic.Register(CaseActivityProcessAlgorithm.Timeout, new PackageExecuteAlgorithm<CaseActivityEntity>(CaseActivityOperation.Timer));
 
                 QueryLogic.Expressions.Register((CaseEntity c) => c.DecompositionSurrogateActivity());
+                QueryLogic.Expressions.Register((CaseActivityEntity ca) => ca.CurrentUserHasNotification(), () => CaseActivityMessage.CurrentUserHasNotification.NiceToString());
+                QueryLogic.Expressions.Register((ICaseMainEntity a) => a.CaseActivities(), () => typeof(CaseActivityEntity).NicePluralName());
+                QueryLogic.Expressions.Register((ICaseMainEntity a) => a.Cases(), () => typeof(CaseEntity).NicePluralName());
+                QueryLogic.Expressions.Register((ICaseMainEntity a) => a.LastCaseActivity(), () => CaseActivityMessage.LastCaseActivity.NiceToString());
+                QueryLogic.Expressions.Register((ICaseMainEntity a) => a.CurrentUserHasNotification(), () => CaseActivityMessage.CurrentUserHasNotification.NiceToString());
 
                 sb.Include<CaseNotificationEntity>()
                     .WithExpressionFrom((CaseActivityEntity c) => c.Notifications())
@@ -598,8 +645,8 @@ namespace Signum.Engine.Workflow
                 {
                     FromStates = { CaseActivityState.PendingDecision, CaseActivityState.PendingNext },
                     CanDelete = ca => ca.Case.ParentCase != null ? CaseActivityMessage.CaseIsADecompositionOf0.NiceToString(ca.Case.ParentCase) :
-                    ca.Case.CaseActivities().Any(a => a != ca) ? CaseActivityMessage.CaseContainsOtherActivities.NiceToString() : 
-                    null,
+                    ca.Case.CaseActivities().Any(a => a != ca) ? CaseActivityMessage.CaseContainsOtherActivities.NiceToString() :
+                    !ca.CurrentUserHasNotification() ? CaseActivityMessage.NoNewOrOpenedOrInProgressNotificationsFound.NiceToString() : null,
                     Delete = (ca, _) =>
                     {
                         var c = ca.Case;
@@ -612,7 +659,8 @@ namespace Signum.Engine.Workflow
 
                 new Execute(CaseActivityOperation.Approve)
                 {
-                    CanExecute = ca => !(ca.WorkflowActivity is WorkflowActivityEntity) ? CaseActivityMessage.NoWorkflowActivity.NiceToString() : null,
+                    CanExecute = ca => !(ca.WorkflowActivity is WorkflowActivityEntity) ? CaseActivityMessage.NoWorkflowActivity.NiceToString() : 
+                    !ca.CurrentUserHasNotification() ? CaseActivityMessage.NoNewOrOpenedOrInProgressNotificationsFound.NiceToString() : null,
                     FromStates = {  CaseActivityState.PendingDecision },
                     ToStates = {  CaseActivityState.Done },
                     CanBeModified = true,
@@ -625,7 +673,8 @@ namespace Signum.Engine.Workflow
 
                 new Execute(CaseActivityOperation.Decline)
                 {
-                    CanExecute = ca => !(ca.WorkflowActivity is WorkflowActivityEntity) ? CaseActivityMessage.NoWorkflowActivity.NiceToString() : null,
+                    CanExecute = ca => !(ca.WorkflowActivity is WorkflowActivityEntity) ? CaseActivityMessage.NoWorkflowActivity.NiceToString() :
+                    !ca.CurrentUserHasNotification() ? CaseActivityMessage.NoNewOrOpenedOrInProgressNotificationsFound.NiceToString() : null,
                     FromStates = { CaseActivityState.PendingDecision },
                     ToStates = { CaseActivityState.Done },
                     CanBeModified = true,
@@ -638,7 +687,8 @@ namespace Signum.Engine.Workflow
 
                 new Execute(CaseActivityOperation.Next)
                 {
-                    CanExecute = ca => !(ca.WorkflowActivity is WorkflowActivityEntity) ? CaseActivityMessage.NoWorkflowActivity.NiceToString() : null,
+                    CanExecute = ca => !(ca.WorkflowActivity is WorkflowActivityEntity) ? CaseActivityMessage.NoWorkflowActivity.NiceToString() :
+                    !ca.CurrentUserHasNotification() ? CaseActivityMessage.NoNewOrOpenedOrInProgressNotificationsFound.NiceToString() : null,
                     FromStates = { CaseActivityState.PendingNext },
                     ToStates = { CaseActivityState.Done },
                     CanBeModified = true,
@@ -654,7 +704,8 @@ namespace Signum.Engine.Workflow
                 new Execute(CaseActivityOperation.Jump)
                 {
                     CanExecute = ca => !(ca.WorkflowActivity is WorkflowActivityEntity) ? CaseActivityMessage.NoWorkflowActivity.NiceToString() : 
-                    ca.WorkflowActivity.NextConnectionsFromCache(ConnectionType.Jump).IsEmpty() ? CaseActivityMessage.Activity0HasNoJumps.NiceToString(ca.WorkflowActivity) : null,
+                    ca.WorkflowActivity.NextConnectionsFromCache(ConnectionType.Jump).IsEmpty() ? CaseActivityMessage.Activity0HasNoJumps.NiceToString(ca.WorkflowActivity) :
+                    !ca.CurrentUserHasNotification() ? CaseActivityMessage.NoNewOrOpenedOrInProgressNotificationsFound.NiceToString() : null,
                     FromStates = { CaseActivityState.PendingNext, CaseActivityState.PendingDecision },
                     ToStates = { CaseActivityState.Done },
                     CanBeModified = true,
