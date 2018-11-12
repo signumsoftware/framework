@@ -34,7 +34,7 @@ namespace Signum.React.Selenium
         public bool AvoidClose { get; set; }
 
         public virtual void Dispose()
-        {            
+        {
             if (!MessageModalProxyExtensions.IsMessageModalPresent(this.Selenium))
                 if (!AvoidClose)
                 {

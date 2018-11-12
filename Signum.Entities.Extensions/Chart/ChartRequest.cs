@@ -42,7 +42,7 @@ namespace Signum.Entities.Chart
         {
             this.queryName = queryName;
         }
-        
+
         object queryName;
         [NotNullValidator, InTypeScript(false)]
         public object QueryName

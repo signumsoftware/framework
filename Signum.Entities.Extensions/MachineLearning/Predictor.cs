@@ -56,7 +56,7 @@ namespace Signum.Entities.MachineLearning
         [Ignore, QueryableProperty] //virtual Mlist
         [NotifyChildProperty, NotifyCollectionChanged]
         public MList<PredictorSubQueryEntity> SubQueries { get; set; } = new MList<PredictorSubQueryEntity>();
-        
+
         [PreserveOrder]
         [NotNullValidator, NoRepeatValidator]
         public MList<FilePathEmbedded> Files { get; set; } = new MList<FilePathEmbedded>();
@@ -77,7 +77,7 @@ namespace Signum.Entities.MachineLearning
         }
     }
 
-   
+
 
     [Serializable]
     public class PredictorMainQueryEmbedded : EmbeddedEntity
@@ -86,7 +86,7 @@ namespace Signum.Entities.MachineLearning
         {
             RebindEvents();
         }
-        
+
         [NotNullValidator]
         public QueryEntity Query { get; set; }
 
@@ -139,7 +139,7 @@ namespace Signum.Entities.MachineLearning
         public int MissCount { get; set; }
         [Format("p2")]
         public double? MissRate { get; private set; }
-        
+
         protected override void PreSaving(PreSavingContext ctx)
         {
             base.PreSaving(ctx);
@@ -244,10 +244,10 @@ namespace Signum.Entities.MachineLearning
         {
             return base.PropertyValidation(pi);
         }
-        
+
         internal PredictorColumnEmbedded Clone() => new PredictorColumnEmbedded
         {
-            Usage = Usage, 
+            Usage = Usage,
             Token = Token.Clone(),
             Encoding = Encoding,
             NullHandling = NullHandling
@@ -273,11 +273,11 @@ namespace Signum.Entities.MachineLearning
         Zero,
         Error,
         Average,
-        Min, 
+        Min,
         Max,
     }
 
-  
+
 
     [AutoInit]
     public static class DefaultColumnEncodings
@@ -301,7 +301,7 @@ namespace Signum.Entities.MachineLearning
     public enum PredictorState
     {
         Draft,
-        Training, 
+        Training,
         Trained,
         Error,
     }
@@ -332,7 +332,7 @@ namespace Signum.Entities.MachineLearning
 
         [NotNullValidator, PreserveOrder]
         public MList<QueryFilterEmbedded> Filters { get; set; } = new MList<QueryFilterEmbedded>();
-        
+
         [PreserveOrder]
         [NotNullValidator, NoRepeatValidator, NotifyChildProperty, NotifyCollectionChanged]
         public MList<PredictorSubQueryColumnEmbedded> Columns { get; set; } = new MList<PredictorSubQueryColumnEmbedded>();
@@ -344,7 +344,7 @@ namespace Signum.Entities.MachineLearning
             if (Filters != null)
                 foreach (var f in Filters)
                     f.ParseData(this, description, SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement | SubTokensOptions.CanAggregate);
-            
+
             if (Columns != null)
                 foreach (var a in Columns)
                     a.ParseData(this, description, SubTokensOptions.CanElement | SubTokensOptions.CanAggregate);
@@ -396,7 +396,7 @@ namespace Signum.Entities.MachineLearning
             return base.PropertyValidation(pi);
         }
 
-        public static StateValidator<PredictorSubQueryColumnEmbedded, PredictorSubQueryColumnUsage> stateValidator = 
+        public static StateValidator<PredictorSubQueryColumnEmbedded, PredictorSubQueryColumnUsage> stateValidator =
             new StateValidator<PredictorSubQueryColumnEmbedded, PredictorSubQueryColumnUsage>
             (a => a.Usage, a => a.Encoding, a => a.NullHandling)
         {

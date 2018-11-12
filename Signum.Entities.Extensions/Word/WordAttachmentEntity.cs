@@ -35,12 +35,12 @@ namespace Signum.Entities.Word
 
         [NotNullValidator]
         public Lite<WordTemplateEntity> WordTemplate { get; set; }
-        
+
         [ImplementedByAll]
         public Lite<Entity> OverrideModel { get; set; }
 
         public ModelConverterSymbol ModelConverter { get; set; }
-        
+
         static Expression<Func<WordAttachmentEntity, string>> ToStringExpression = @this => @this.FileName;
         [ExpressionField]
         public override string ToString()

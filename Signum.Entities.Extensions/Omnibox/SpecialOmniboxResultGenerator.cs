@@ -15,7 +15,7 @@ namespace Signum.Entities.Omnibox
 
         public override string ToString()
         {
-            return "!" + this.Key; 
+            return "!" + this.Key;
         }
     }
 

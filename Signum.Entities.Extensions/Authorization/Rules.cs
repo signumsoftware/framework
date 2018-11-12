@@ -116,7 +116,7 @@ namespace Signum.Entities.Authorization
     public enum TypeAllowed
     {
         None =             TypeAllowedBasic.None << 2 | TypeAllowedBasic.None,
-        
+
         DBReadUINone =     TypeAllowedBasic.Read << 2 | TypeAllowedBasic.None,
         Read =             TypeAllowedBasic.Read << 2 | TypeAllowedBasic.Read,
 

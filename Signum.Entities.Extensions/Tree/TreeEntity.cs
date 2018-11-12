@@ -44,7 +44,7 @@ namespace Signum.Entities.Tree
         static Expression<Func<TreeEntity, short?>> LevelExpression = @this => (short?)@this.Route.GetLevel();
 
         [Ignore]
-        short? level; 
+        short? level;
         [ExpressionField("LevelExpression"), InTypeScript(true)]
         public short? Level
         {
@@ -140,7 +140,7 @@ namespace Signum.Entities.Tree
 
         protected override string PropertyValidation(PropertyInfo pi)
         {
-            if(pi.Name == nameof(Sibling) && Sibling == null && 
+            if(pi.Name == nameof(Sibling) && Sibling == null &&
                 (InsertPlace == InsertPlace.After || InsertPlace == InsertPlace.Before))
             {
                 return ValidationMessage._0IsNotSet.NiceToString(pi.NiceName());

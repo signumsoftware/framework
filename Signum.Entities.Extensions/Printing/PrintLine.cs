@@ -45,7 +45,7 @@ namespace Signum.Entities.Printing
                 { PrintLineState.Printed,           true,  null  },
                 { PrintLineState.Error,             false, null  },
                 { PrintLineState.Cancelled,         false, null  },
-                { PrintLineState.PrintedAndDeleted, true,  null  }  
+                { PrintLineState.PrintedAndDeleted, true,  null  }
             };
         protected override string PropertyValidation(PropertyInfo pi)
         {
@@ -54,7 +54,7 @@ namespace Signum.Entities.Printing
     }
     public enum PrintLineState
     {
-        NewTest, 
+        NewTest,
         ReadyToPrint,
         Enqueued,
         Printed,

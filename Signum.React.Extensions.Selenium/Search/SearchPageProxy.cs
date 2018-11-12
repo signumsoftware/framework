@@ -35,7 +35,7 @@ namespace Signum.React.Selenium
         public FramePageProxy<T> CreateInTab<T>() where T : ModifiableEntity
         {
             var oldCount = Selenium.WindowHandles.Count;
-            
+
             SearchControl.CreateButton.Find().Click();
 
             Selenium.Wait(() => Selenium.WindowHandles.Count > oldCount);

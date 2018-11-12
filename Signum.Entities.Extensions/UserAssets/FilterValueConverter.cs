@@ -59,7 +59,7 @@ namespace Signum.Entities.UserAssets
                 }
             }
 
-            string result = 
+            string result =
                 value == null ? null :
                 value is IFormattable f ? f.ToString(null, CultureInfo.InvariantCulture) :
                 value.ToString();
@@ -225,7 +225,7 @@ namespace Signum.Entities.UserAssets
 
                 var span = new SmartDateTimeSpan();
 
-                string error = 
+                string error =
                     Assert(match, "year", "yyyy", 0, int.MaxValue, out span.Year) ??
                     Assert(match, "month", "mm", 1, 12, out span.Month) ??
                     Assert(match, "day", "dd", 1, 31,  out span.Day) ??
@@ -291,7 +291,7 @@ namespace Signum.Entities.UserAssets
                 minute += second.DivMod(60, out second);
                 hour += minute.DivMod(60, out minute);
                 day += hour.DivMod(24, out hour);
-                
+
                 DateDivMod(ref year, ref month, ref day);
 
                 return new DateTime(year, month, day, hour, minute, second);
@@ -309,7 +309,7 @@ namespace Signum.Entities.UserAssets
                     month++;
                     year += MonthDivMod(ref month);
                 }
-                
+
                 while (day <= 0)
                 {
                     month--;
@@ -403,7 +403,7 @@ namespace Signum.Entities.UserAssets
                 return "{0}/{1}/{2} {3}:{4}:{5}".FormatWith(Year, Month, Day, Hour, Minute, Second);
             }
 
-         
+
         }
 
         public Result<string> TryToStringValue(object value, Type type)
@@ -533,7 +533,7 @@ namespace Signum.Entities.UserAssets
             }
 
             return null;
-            
+
         }
 
         public Result<object> TryParseValue(string value, Type type)
@@ -542,7 +542,7 @@ namespace Signum.Entities.UserAssets
             {
                 return new Result<object>.Success(UserEntity.Current?.ToLite());
             }
-            
+
             return null;
         }
     }

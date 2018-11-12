@@ -67,7 +67,7 @@ namespace Signum.Engine.MachineLearning.CNTK
         {
             if (func.Output.Shape.TotalSize != 1 && func.Output.Shape.TotalSize != func.Output.Shape[0])
                 throw new InvalidOperationException("func should return a vector");
-            
+
             var value = func.Evaluate(inputs, device);
             var result = value.Average(a => a[0]);
             return result;
@@ -120,7 +120,7 @@ namespace Signum.Engine.MachineLearning.CNTK
                         s.LearningRate.ToTrainParam());
 
                 case NeuralNetworkLearner.AdaGrad:
-                    return CNTKLib.AdaGradLearner(vector, 
+                    return CNTKLib.AdaGradLearner(vector,
                         s.LearningRate.ToTrainParam());
 
                 case NeuralNetworkLearner.FSAdaGrad:

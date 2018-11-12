@@ -22,6 +22,6 @@ namespace Signum.Entities.Workflow
         public Lite<CaseActivityEntity> To { get; set; }
     }
 
-   
+
 
 }

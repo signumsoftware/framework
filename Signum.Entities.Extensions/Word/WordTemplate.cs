@@ -138,5 +138,5 @@ namespace Signum.Entities.Word
         Query = 4
     }
 
-    
+
 }

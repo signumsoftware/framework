@@ -82,7 +82,7 @@ namespace Signum.Engine.Alerts
                     });
 
                 SemiSymbolLogic<AlertTypeEntity>.Start(sb, () => SystemAlertTypes);
-                
+
                 if (registerExpressionsFor != null)
                 {
                     var alerts = Signum.Utilities.ExpressionTrees.Linq.Expr((Entity ident) => ident.Alerts());

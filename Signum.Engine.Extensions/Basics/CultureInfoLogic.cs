@@ -22,7 +22,7 @@ namespace Signum.Engine.Basics
         {
             if (ci == null)
                 return null;
-           
+
             return EntityToCultureInfo.Value.TryGetC(ci);
         }
 
@@ -50,15 +50,15 @@ namespace Signum.Engine.Basics
                         c.EnglishName,
                         c.NativeName,
                     });
-                
+
                 CultureInfoToEntity = sb.GlobalLazy(() => Database.Query<CultureInfoEntity>().ToDictionary(ci => ci.Name,
                     ci => ci),
                     invalidateWith: new InvalidateWith(typeof(CultureInfoEntity)));
 
-                EntityToCultureInfo = sb.GlobalLazy(() => Database.Query<CultureInfoEntity>().ToDictionary(ci => ci, 
+                EntityToCultureInfo = sb.GlobalLazy(() => Database.Query<CultureInfoEntity>().ToDictionary(ci => ci,
                     ci => CultureInfoModifier(CultureInfo.GetCultureInfo(ci.Name))),
                     invalidateWith: new InvalidateWith(typeof(CultureInfoEntity)));
-                
+
                 sb.Schema.Synchronizing += Schema_Synchronizing;
             }
         }

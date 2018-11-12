@@ -39,7 +39,7 @@ namespace Signum.Engine.Cache
 
     public static class CacheLogic
     {
-        public static ICacheMultiServerInvalidator CacheInvalidator; 
+        public static ICacheMultiServerInvalidator CacheInvalidator;
 
         public static bool WithSqlDependency { get; internal set; }
 
@@ -58,7 +58,7 @@ namespace Signum.Engine.Cache
         }
 
         /// <summary>
-        /// If you have invalidation problems look at exceptions in: select * from sys.transmission_queue 
+        /// If you have invalidation problems look at exceptions in: select * from sys.transmission_queue
         /// If there are exceptions like: 'Could not obtain information about Windows NT group/user'
         ///    Change login to a SqlServer authentication (i.e.: sa)
         ///    Change Server Authentication mode and enable SA: http://msdn.microsoft.com/en-us/library/ms188670.aspx
@@ -335,7 +335,7 @@ namespace Signum.Engine.Cache
                 started = true;
             }
         }
-        
+
         private static void TryDropService(string s)
         {
             try
@@ -545,7 +545,7 @@ namespace Signum.Engine.Cache
             {
                 Invalidated?.Invoke(this, CacheEventArgs.Invalidated);
             }
-            
+
             public override List<T> RequestByBackReference<R>(IRetriever retriever, Expression<Func<T, Lite<R>>> backReference, Lite<R> lite)
             {
                 var dic = this.cachedTable.GetBackReferenceDictionary(backReference);
@@ -600,7 +600,7 @@ namespace Signum.Engine.Cache
         {
             DisabledTypesDuringTransaction().Add(type);
 
-       
+
 
             controllers[type].NotifyDisabled();
         }
@@ -693,10 +693,10 @@ namespace Signum.Engine.Cache
                 if (controller != null)
                 {
                     if (controller.CachedTable == null)
-                        throw new InvalidOperationException($@"CacheTable for {stype.Name} is null. 
-This may be because SchemaCompleted is not yet called and you are accesing some ResetLazy in the Start method. 
+                        throw new InvalidOperationException($@"CacheTable for {stype.Name} is null.
+This may be because SchemaCompleted is not yet called and you are accesing some ResetLazy in the Start method.
 Remember that the Start could be called with an empty database!");
-                        
+
                     controller.CachedTable.LoadAll();
                 }
             }

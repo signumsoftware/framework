@@ -22,7 +22,7 @@ namespace Signum.React.Selenium
         {
             return container.Element.WithLocator(By.CssSelector("ul.sf-widgets"));
         }
-        
+
         public static IWebElement QuickLinkClick(this IWidgetContainer container, string name)
         {
             var ql = container.WidgetContainer().CombineCss("dropdown .sf-quicklinks").Find();

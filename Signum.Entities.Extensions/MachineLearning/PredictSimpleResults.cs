@@ -44,7 +44,7 @@ namespace Signum.Entities.MachineLearning
 
     public enum PredictionSet
     {
-        Validation, 
+        Validation,
         Training
     }
 }

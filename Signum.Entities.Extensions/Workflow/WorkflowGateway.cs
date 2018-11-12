@@ -14,7 +14,7 @@ namespace Signum.Entities.Workflow
     {
         [NotNullValidator]
         public WorkflowLaneEntity Lane{ get; set; }
-        
+
         [StringLengthValidator(AllowNulls = true, Min = 3, Max = 100)]
         public string Name { get; set; }
 

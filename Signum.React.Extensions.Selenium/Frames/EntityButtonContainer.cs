@@ -66,7 +66,7 @@ namespace Signum.React.Selenium
         {
             container.OperationButton(symbol).Find().ButtonClick();
         }
-        
+
         public static void OperationClick<T>(this IEntityButtonContainer<T> container, IEntityOperationSymbolContainer<T> symbol)
               where T : Entity
         {

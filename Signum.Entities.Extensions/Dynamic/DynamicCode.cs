@@ -39,7 +39,7 @@ namespace Signum.Entities.Dynamic
         {
             typeof(object),
             typeof(System.Attribute),
-            typeof(System.Runtime.ConstrainedExecution.PrePrepareMethodAttribute), 
+            typeof(System.Runtime.ConstrainedExecution.PrePrepareMethodAttribute),
             typeof(System.Linq.Enumerable),
             typeof(System.ComponentModel.IDataErrorInfo),
             typeof(System.ComponentModel.INotifyPropertyChanged),

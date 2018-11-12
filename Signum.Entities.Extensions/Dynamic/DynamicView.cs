@@ -43,7 +43,7 @@ namespace Signum.Entities.Dynamic
 
         [StringLengthValidator(AllowNulls = false, Min = 3, MultiLine = true)]
         public string Script { get; set; }
-        
+
         static Expression<Func<DynamicViewSelectorEntity, string>> ToStringExpression = @this => "ViewSelector " + @this.EntityType;
         [ExpressionField]
         public override string ToString()
@@ -80,7 +80,7 @@ namespace Signum.Entities.Dynamic
             return ToStringExpression.Evaluate(this);
         }
     }
-    
+
     [AutoInit]
     public static class DynamicViewOverrideOperation
     {

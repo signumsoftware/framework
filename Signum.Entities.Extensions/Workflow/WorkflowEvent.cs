@@ -25,7 +25,7 @@ namespace Signum.Entities.Workflow
 
         [NotNullValidator]
         public WorkflowLaneEntity Lane { get; set; }
-        
+
         public WorkflowEventType Type { get; set; }
 
         public WorkflowTimerEmbedded Timer { get; set; }
@@ -157,7 +157,7 @@ namespace Signum.Entities.Workflow
         public string Name { get; set; }
 
         public WorkflowEventType Type { get; set; }
-        
+
         public WorkflowEventTaskModel Task { get; set; }
 
         public WorkflowTimerEmbedded Timer { get; set; }

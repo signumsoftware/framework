@@ -46,7 +46,7 @@ namespace Signum.Entities.Authorization
 
         Func<R, K> ToKey;
         Func<K, R> ToEntity;
-        Expression<Func<R, R, bool>> IsEquals; 
+        Expression<Func<R, R, bool>> IsEquals;
         IMerger<K, A> merger;
         Coercer<A, K> coercer;
 
@@ -319,7 +319,7 @@ namespace Signum.Entities.Authorization
 
             Table table = Schema.Current.Table(typeof(RT));
 
-            return Synchronizer.SynchronizeScript(Spacing.Double, should, current, 
+            return Synchronizer.SynchronizeScript(Spacing.Double, should, current,
                 createNew: (role, x) =>
                 {
                     var dic = (from xr in x.Elements(elementName)

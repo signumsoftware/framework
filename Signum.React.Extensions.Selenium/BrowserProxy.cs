@@ -32,7 +32,7 @@ namespace Signum.React.Selenium
             throw new InvalidOperationException("Implement this method returing something like: http://localhost/MyApp/ + url");
         }
 
-      
+
         public SearchPageProxy SearchPage(object queryName)
         {
             var url = Url(FindRoute(queryName));
@@ -46,7 +46,7 @@ namespace Signum.React.Selenium
         {
             return "Find/" + GetWebQueryName(queryName);
         }
-        
+
         public string GetWebQueryName(object queryName)
         {
             if (queryName is Type)
@@ -74,7 +74,7 @@ namespace Signum.React.Selenium
         {
             if(lite != null && lite.EntityType != typeof(T))
                 throw new InvalidOperationException("Use NormalPage<{0}> instead".FormatWith(lite.EntityType.Name));
-            
+
             var url = Url(NavigateRoute(lite));
 
             return AsNormalPage<T>(url);
@@ -106,7 +106,7 @@ namespace Signum.React.Selenium
         public virtual string GetCurrentUser()
         {
             var element = Selenium.WaitElementPresent(By.CssSelector("#sfUserDropDown, .sf-login"));
-            
+
             if (element.HasClass("sf-login"))
                 return null;
 
@@ -143,15 +143,15 @@ namespace Signum.React.Selenium
             Selenium.FindElement(By.Id("login")).Click();
             Selenium.WaitElementNotPresent(By.Id("login"));
 
-            Selenium.WaitElementPresent(By.Id("sfUserDropDown"));  
-            
+            Selenium.WaitElementPresent(By.Id("sfUserDropDown"));
+
             SetCurrentCulture();
         }
 
         public virtual void SetCurrentCulture()
         {
             string culture = Selenium.WaitElementPresent(By.Id("cultureDropdown")).GetAttribute("data-culture");
-            
+
             Thread.CurrentThread.CurrentCulture = Thread.CurrentThread.CurrentUICulture = new CultureInfo(culture);
         }
     }

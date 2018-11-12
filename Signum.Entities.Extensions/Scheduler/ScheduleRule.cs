@@ -35,7 +35,7 @@ namespace Signum.Entities.Scheduler
 
             return candidate;
         }
-        
+
         [NumberIsValidator(ComparisonType.GreaterThan, 0)]
         public int EachMinutes { get; set; }
 
@@ -169,7 +169,7 @@ namespace Signum.Entities.Scheduler
         public bool October { get; set; }
         public bool November { get; set; }
         public bool December { get; set; }
-        
+
         public DateTime Next(DateTime now)
         {
             DateTime result = DateTimeExtensions.Max(now, StartingOn).MonthStart().AddDays(StartingOn.Day - 1).Add(StartingOn.TimeOfDay);

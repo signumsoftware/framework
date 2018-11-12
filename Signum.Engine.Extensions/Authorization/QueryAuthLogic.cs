@@ -53,9 +53,9 @@ namespace Signum.Engine.Authorization
                     return null;
                 };
 
-                AuthLogic.ExportToXml += exportAll => cache.ExportXml("Queries", "Query", QueryUtils.GetKey, b => b.ToString(), 
+                AuthLogic.ExportToXml += exportAll => cache.ExportXml("Queries", "Query", QueryUtils.GetKey, b => b.ToString(),
                     exportAll ? QueryLogic.QueryNames.Values.ToList(): null);
-                AuthLogic.ImportFromXml += (x, roles, replacements) => 
+                AuthLogic.ImportFromXml += (x, roles, replacements) =>
                 {
                     string replacementKey = "AuthRules:" + typeof(QueryEntity).Name;
 
@@ -143,7 +143,7 @@ namespace Signum.Engine.Authorization
 
         public static AuthThumbnail? GetAllowedThumbnail(Lite<RoleEntity> role, Type entityType)
         {
-            return QueryLogic.Queries.GetTypeQueries(entityType).Keys.Select(qn => cache.GetAllowed(role, qn)).Collapse(); 
+            return QueryLogic.Queries.GetTypeQueries(entityType).Keys.Select(qn => cache.GetAllowed(role, qn)).Collapse();
         }
 
         internal static bool AllCanRead(this Implementations implementations, Func<Type, TypeAllowedAndConditions> getAllowed)

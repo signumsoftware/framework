@@ -39,7 +39,7 @@ namespace Signum.Entities.Workflow
             return ToStringExpression.Evaluate(this);
         }
     }
-    
+
     [AutoInit]
     public static class WorkflowOperation
     {
@@ -162,7 +162,7 @@ namespace Signum.Entities.Workflow
         public Lite<IWorkflowNodeEntity> OldNode { get; set; }
 
         public Lite<WorkflowEntity> SubWorkflow { get; set; }
-       
+
         public string NewNode { get; set; }
     }
 
@@ -258,8 +258,8 @@ namespace Signum.Entities.Workflow
         WorkflowActivityMonitor,
         Draw,
         ResetZoom,
-        Find, 
-        Filters, 
+        Find,
+        Filters,
         Columns
     }
 

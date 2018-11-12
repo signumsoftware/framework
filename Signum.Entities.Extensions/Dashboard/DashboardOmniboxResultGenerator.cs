@@ -33,7 +33,7 @@ namespace Signum.Entities.Dashboard
             {
                 var match = OmniboxUtils.Contains(uq, uq.ToString(), ident);
 
-                yield return new DashboardOmniboxResult 
+                yield return new DashboardOmniboxResult
                 {
                     ToStr = ident,
                     ToStrMatch = match,

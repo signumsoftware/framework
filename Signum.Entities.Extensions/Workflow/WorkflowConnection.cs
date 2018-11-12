@@ -34,7 +34,7 @@ namespace Signum.Entities.Workflow
         public Lite<WorkflowConditionEntity> Condition { get; set; }
 
         public Lite<WorkflowActionEntity> Action { get; set; }
-        
+
         public int? Order { get; set; }
 
         [NotNullValidator]
@@ -81,7 +81,7 @@ namespace Signum.Entities.Workflow
         Jump,
         ScriptException,
     }
-    
+
     [AutoInit]
     public static class WorkflowConnectionOperation
     {

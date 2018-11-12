@@ -66,15 +66,15 @@ namespace Signum.Entities.Help
             var resultType = typeof(HelpModuleOmniboxResult);
             return new List<HelpOmniboxResult>
             {
-                new HelpOmniboxResult 
-                { 
-                    Text =  NiceName() + " " + typeof(TypeEntity).NiceName(), 
-                    ReferencedType = resultType 
+                new HelpOmniboxResult
+                {
+                    Text =  NiceName() + " " + typeof(TypeEntity).NiceName(),
+                    ReferencedType = resultType
                 },
-                new HelpOmniboxResult 
-                { 
-                    Text =  NiceName() + " '" + HelpMessage.SearchText.NiceToString()  + "'", 
-                    ReferencedType = resultType 
+                new HelpOmniboxResult
+                {
+                    Text =  NiceName() + " '" + HelpMessage.SearchText.NiceToString()  + "'",
+                    ReferencedType = resultType
                 },
             };
         }

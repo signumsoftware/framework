@@ -118,7 +118,7 @@ namespace Signum.Entities.MachineLearning
             HiddenLayers = HiddenLayers.Select(hl => hl.Clone()).ToMList(),
             OutputActivation = OutputActivation,
             OutputInitializer = OutputInitializer,
-            
+
 
             LossFunction = LossFunction,
             EvalErrorFunction = EvalErrorFunction,
@@ -128,7 +128,7 @@ namespace Signum.Entities.MachineLearning
             LearningUnitGain = LearningUnitGain,
             LearningVarianceMomentum = LearningVarianceMomentum,
 
-            MinibatchSize = MinibatchSize,  
+            MinibatchSize = MinibatchSize,
             NumMinibatches = NumMinibatches,
             BestResultFromLast = BestResultFromLast,
             SaveProgressEvery = SaveProgressEvery,
@@ -202,7 +202,7 @@ namespace Signum.Entities.MachineLearning
         MeanAbsoluteError,
         MeanAbsolutePercentageError,
     }
-    
+
     [Serializable, EntityKind(EntityKind.Part, EntityData.Transactional)]
     public class AutoconfigureNeuralNetworkEntity : Entity, IProcessDataEntity
     {

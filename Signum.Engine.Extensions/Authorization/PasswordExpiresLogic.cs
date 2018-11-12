@@ -38,7 +38,7 @@ namespace Signum.Engine.Authorization
                     var ivp = Database.Query<PasswordExpiresIntervalEntity>().Where(p => p.Enabled).FirstOrDefault();
                     if (ivp == null)
                         return;
-                    
+
                     if (TimeZoneManager.Now > u.PasswordSetDate.AddDays((double)ivp.Days))
                         throw new PasswordExpiredException(AuthMessage.ExpiredPassword.NiceToString());
                 });
@@ -53,7 +53,7 @@ namespace Signum.Engine.Authorization
                     PasswordExpiresIntervalEntity ivp = null;
                     using (AuthLogic.Disable())
                         ivp = Database.Query<PasswordExpiresIntervalEntity>().Where(p => p.Enabled).FirstOrDefault();
-                    
+
                     if (ivp == null)
                         return null;
 

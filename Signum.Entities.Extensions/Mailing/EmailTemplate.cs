@@ -74,7 +74,7 @@ namespace Signum.Entities.Mailing
 
         [NotifyChildProperty]
         public TemplateApplicableEval Applicable { get; set; }
-        
+
 
         protected override string PropertyValidation(System.Reflection.PropertyInfo pi)
         {
@@ -128,7 +128,7 @@ namespace Signum.Entities.Mailing
             {
                 throw new NotImplementedException("Attachments are not yet exportable");
             }
-            
+
             return new XElement("EmailTemplate",
                 new XAttribute("Name", Name),
                 new XAttribute("Guid", Guid),
@@ -162,7 +162,7 @@ namespace Signum.Entities.Mailing
         }
 
         public void FromXml(XElement element, IFromXmlContext ctx)
-        {  
+        {
             Guid = Guid.Parse(element.Attribute("Guid").Value);
             Name = element.Attribute("Name").Value;
             DisableAuthorization = element.Attribute("DisableAuthorization")?.Let(a => bool.Parse(a.Value)) ?? false;
@@ -200,7 +200,7 @@ namespace Signum.Entities.Mailing
             ParseData(ctx.GetQueryDescription(Query));
         }
 
-    } 
+    }
 
     [Serializable]
     public class EmailTemplateContactEmbedded : EmbeddedEntity
@@ -294,7 +294,7 @@ namespace Signum.Entities.Mailing
             return CultureInfo?.ToString() ?? EmailTemplateMessage.NewCulture.NiceToString();
         }
      }
-    
+
 
     public interface IAttachmentGeneratorEntity : IEntity
     {

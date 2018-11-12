@@ -90,12 +90,12 @@ namespace Signum.Engine.Authorization
                     return null;
                 };
 
-                RegisterPermissions(BasicPermission.AdminRules, 
+                RegisterPermissions(BasicPermission.AdminRules,
                     BasicPermission.AutomaticUpgradeOfProperties,
                     BasicPermission.AutomaticUpgradeOfOperations,
                     BasicPermission.AutomaticUpgradeOfQueries);
 
-                AuthLogic.ExportToXml += exportAll => cache.ExportXml("Permissions", "Permission", a => a.Key, b => b.ToString(), 
+                AuthLogic.ExportToXml += exportAll => cache.ExportXml("Permissions", "Permission", a => a.Key, b => b.ToString(),
                     exportAll ? PermissionAuthLogic.RegisteredPermission.ToList() : null);
                 AuthLogic.ImportFromXml += (x, roles, replacements) =>
                 {
@@ -142,7 +142,7 @@ namespace Signum.Engine.Authorization
 
             return cache.GetAllowed(RoleEntity.Current, permissionSymbol);
         }
-        
+
         public static bool IsAuthorized(this PermissionSymbol permissionSymbol, Lite<RoleEntity> role)
         {
             AssertRegistered(permissionSymbol);
@@ -155,7 +155,7 @@ namespace Signum.Engine.Authorization
             if (!permissions.Contains(permissionSymbol))
                 throw new InvalidOperationException($"The permission '{permissionSymbol}' has not been registered");
         }
-        
+
         public static DefaultDictionary<PermissionSymbol, bool> ServicePermissionRules()
         {
             return cache.GetDefaultDictionary();

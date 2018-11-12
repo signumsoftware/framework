@@ -63,7 +63,7 @@ namespace Signum.Entities.Dynamic
         {
             " + script + @"
         }
-    }                   
+    }
 }");
         }
     }

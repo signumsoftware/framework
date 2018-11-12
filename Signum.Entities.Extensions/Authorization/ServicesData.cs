@@ -93,7 +93,7 @@ namespace Signum.Entities.Authorization
 
         [HiddenProperty]
         public MergeStrategy MergeStrategy { get; set; }
-        
+
         [HiddenProperty]
         public MList<Lite<RoleEntity>> SubRoles { get; set; } = new MList<Lite<RoleEntity>>();
 
@@ -177,7 +177,7 @@ namespace Signum.Entities.Authorization
         public AuthThumbnail? Operations { get; set; }
 
         public AuthThumbnail? Queries { get; set; }
-        
+
         public ReadOnlyCollection<TypeConditionSymbol> AvailableConditions { get; set; }
     }
 
@@ -213,7 +213,7 @@ namespace Signum.Entities.Authorization
         {
             get { return this.fallback ?? TypeAllowed.None; }
         }
-        
+
         public MList<TypeConditionRuleEmbedded> Conditions { get; set; } = new MList<TypeConditionRuleEmbedded>();
 
         public bool Equals(TypeAllowedAndConditions other)
@@ -309,10 +309,10 @@ namespace Signum.Entities.Authorization
             this.TypeCondition = typeCondition;
             this.Allowed = allowed;
         }
-        
+
         [InTypeScript(Null = false)]
         public TypeConditionSymbol TypeCondition { get; set; }
-        
+
         public TypeAllowed Allowed { get; set; }
 
         public bool Equals(TypeConditionRuleEmbedded other)

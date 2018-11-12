@@ -33,7 +33,7 @@ namespace Signum.Entities.Rest
         public MList<QueryStringValueEmbedded> QueryString { get; set; } = new MList<QueryStringValueEmbedded>();
 
         public Lite<IUserEntity> User { get; set; }
-        
+
         [SqlDbType(Size = int.MaxValue)]
         public string UserHostAddress { get; set; }
 

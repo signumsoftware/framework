@@ -83,7 +83,7 @@ namespace Signum.Entities.Dynamic
                     try
                     {
                         var tree = SyntaxFactory.ParseSyntaxTree(code);
-                        
+
                         var compilation = CSharpCompilation.Create("EvalEmbeddedCode.dll")
                          .WithOptions(new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary))
                          .AddReferences(references)

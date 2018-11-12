@@ -65,7 +65,7 @@ namespace Signum.Entities.Files
         }
 
         public int FileLength { get; internal set; }
-        
+
         static Expression<Func<FilePathEmbedded, string>> FileLengthStringExpression =
           @this => ((long)@this.FileLength).ToComputerSize(true);
         [ExpressionField]
@@ -111,7 +111,7 @@ namespace Signum.Entities.Files
 
             return FilePathUtils.SafeCombine(pp.PhysicalPrefix, Suffix);
         }
-        
+
         public string FullWebPath()
         {
             var pp = this.GetPrefixPair();
@@ -120,7 +120,7 @@ namespace Signum.Entities.Files
                 return null;
 
             string url = pp.WebPrefix + "/" + FilePathUtils.UrlPathEncode(Suffix.Replace("\\", "/"));
-          
+
             return url;
         }
 
@@ -138,7 +138,7 @@ namespace Signum.Entities.Files
             OnPreSaving(this);
         }
 
-      
+
         protected override void PostRetrieving()
         {
             if (CalculatePrefixPair == null)

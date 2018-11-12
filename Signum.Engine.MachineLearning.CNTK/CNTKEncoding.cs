@@ -37,7 +37,7 @@ namespace Signum.Engine.MachineLearning.CNTK
         {
             return new List<PredictorCodification> { new PredictorCodification(column) };
         }
-        
+
         public void EncodeValue(object value, PredictorColumnBase column, List<PredictorCodification> codifications, float[] inputValues, int offset)
         {
             var c = codifications.SingleEx();

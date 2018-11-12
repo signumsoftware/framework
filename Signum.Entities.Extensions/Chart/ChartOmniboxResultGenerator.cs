@@ -61,10 +61,10 @@ namespace Signum.Entities.Chart
             var resultType = typeof(ChartOmniboxResult);
             return new List<HelpOmniboxResult>
             {
-                new HelpOmniboxResult 
-                { 
-                    Text =  ChartMessage.ChartToken.NiceToString() + " " + OmniboxMessage.Omnibox_Query.NiceToString(), 
-                    ReferencedType = resultType 
+                new HelpOmniboxResult
+                {
+                    Text =  ChartMessage.ChartToken.NiceToString() + " " + OmniboxMessage.Omnibox_Query.NiceToString(),
+                    ReferencedType = resultType
                 }
             };
         }

@@ -146,7 +146,7 @@ namespace Signum.Entities.Authorization
         public IncorrectPasswordException(string message) : base(message) { }
         protected IncorrectPasswordException(
           System.Runtime.Serialization.SerializationInfo info,
-          System.Runtime.Serialization.StreamingContext context)    
+          System.Runtime.Serialization.StreamingContext context)
             : base(info, context)
         { }
     }

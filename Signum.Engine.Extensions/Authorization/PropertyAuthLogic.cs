@@ -146,7 +146,7 @@ namespace Signum.Engine.Authorization
 
         public static void SetPropertyRules(PropertyRulePack rules)
         {
-            cache.SetRules(rules, r => r.RootType == rules.Type); 
+            cache.SetRules(rules, r => r.RootType == rules.Type);
         }
 
         public static void SetMaxAutomaticUpgrade(PropertyRoute property, PropertyAllowed allowed)
@@ -218,7 +218,7 @@ namespace Signum.Engine.Authorization
             PropertyAllowed best = AuthLogic.GetMergeStrategy(role) == MergeStrategy.Union ?
                 Max(baseValues.Select(a => a.Value)) :
                 Min(baseValues.Select(a => a.Value));
-            
+
             if (!BasicPermission.AutomaticUpgradeOfProperties.IsAuthorized(role))
                 return best;
 

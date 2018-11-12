@@ -53,7 +53,7 @@ namespace Signum.Entities.Excel
 
         [ImplementedByAll]
         public Lite<Entity> Related { get; set; }
-        
+
         static Expression<Func<ExcelAttachmentEntity, string>> ToStringExpression = @this => @this.FileName;
         [ExpressionField]
         public override string ToString()

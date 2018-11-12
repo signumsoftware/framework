@@ -24,9 +24,9 @@ namespace Signum.Entities.Chart
         public ChartScriptColumnEmbedded ScriptColumn
         {
             get { return scriptColumn; }
-            set { scriptColumn = value; Notify(() => ScriptColumn); } 
+            set { scriptColumn = value; Notify(() => ScriptColumn); }
         }
-        
+
         public ChartColumnEmbedded()
         {
         }
@@ -64,7 +64,7 @@ namespace Signum.Entities.Chart
                 Set(ref displayName, name);
             }
         }
-      
+
         [Ignore]
         internal IChartBase parentChart;
 
@@ -96,7 +96,7 @@ namespace Signum.Entities.Chart
         }
 
         [field: NonSerialized, Ignore]
-        public event Action Notified; 
+        public event Action Notified;
 
         internal void NotifyAll()
         {
@@ -163,7 +163,7 @@ namespace Signum.Entities.Chart
 
         internal Column CreateColumn()
         {
-            return new Column(Token.Token, DisplayName); 
+            return new Column(Token.Token, DisplayName);
         }
 
         internal XElement ToXml(IToXmlContext ctx)

@@ -200,7 +200,7 @@ namespace Signum.Entities.Chart
                         Parameters,
                         ChartScript.Parameters,
                         p => p.Name,
-                        ps => ps.Name, 
+                        ps => ps.Name,
                         (p, ps) => new { p, ps }, pi.NiceName());
                 }
                 catch (Exception e)

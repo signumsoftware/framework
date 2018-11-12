@@ -114,7 +114,7 @@ namespace Signum.Entities.Omnibox
         {
             return true;
         }
-        
+
         public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
         {
             writer.WriteValue(value == null ? null : ((PrimaryKey)value).Object);

@@ -74,7 +74,7 @@ namespace Signum.Entities.Workflow
                             }
                         }
 
-                        " + CustomTypes + @"                  
+                        " + CustomTypes + @"
                     }");
         }
     }

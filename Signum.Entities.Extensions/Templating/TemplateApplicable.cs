@@ -40,7 +40,7 @@ namespace Signum.Entities.Templating
         {
             " + script + @"
         }
-    }                   
+    }
 }");
         }
     }

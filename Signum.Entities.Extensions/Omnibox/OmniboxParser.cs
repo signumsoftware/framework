@@ -24,7 +24,7 @@ namespace Signum.Entities.Omnibox
         {
             get
             {
-                if (manager == null) 
+                if (manager == null)
                     throw new InvalidOperationException("OmniboxParse.Manager is not set");
                 return manager;
             }
@@ -33,7 +33,7 @@ namespace Signum.Entities.Omnibox
         }
 
         public static List<IOmniboxResultGenerator> Generators = new List<IOmniboxResultGenerator>();
-        
+
         static string ident = @"[_\p{Lu}\p{Ll}\p{Lt}\p{Lm}\p{Lo}\p{Nl}][\p{Lu}\p{Ll}\p{Lt}\p{Lm}\p{Lo}\p{Nl}\p{Mn}\p{Mc}\p{Nd}\p{Pc}\p{Cf}]*";
 
         static string guid = @"[A-F0-9]{8}(?:-[A-F0-9]{4}){3}-[A-F0-9]{12}";
@@ -49,7 +49,7 @@ $@"(?<entity>{ident};(\d+|{guid}))|
 (?<number>[+-]?\d+(\.\d+)?)|
 (?<string>("".*?(""|$)|\'.*?(\'|$)))|
 (?<comparer>({ FilterValueConverter.OperationRegex}))|
-(?<symbol>{symbol})", 
+(?<symbol>{symbol})",
   RegexOptions.ExplicitCapture | RegexOptions.IgnorePatternWhitespace | RegexOptions.IgnoreCase);
 
         public static int MaxResults = 20;
@@ -57,8 +57,8 @@ $@"(?<entity>{ident};(\d+|{guid}))|
         static bool IsHelp(string omniboxQuery)
         {
             var rawQuery = omniboxQuery.ToLower();
-            return rawQuery == "help" || 
-                rawQuery == OmniboxMessage.Omnibox_Help.NiceToString().ToLower() || 
+            return rawQuery == "help" ||
+                rawQuery == OmniboxMessage.Omnibox_Help.NiceToString().ToLower() ||
                 rawQuery == "?";
         }
 
@@ -183,7 +183,7 @@ $@"(?<entity>{ident};(\d+|{guid}))|
 
 
         protected abstract IEnumerable<object> GetAllQueryNames();
- 
+
         static ConcurrentDictionary<CultureInfo, Dictionary<string, object>> queries = new ConcurrentDictionary<CultureInfo, Dictionary<string, object>>();
 
         public Dictionary<string, object> GetQueries()
@@ -213,12 +213,12 @@ $@"(?<entity>{ident};(\d+|{guid}))|
     public class HelpOmniboxResult : OmniboxResult
     {
         public string Text { get; set; }
-        
+
         [JsonIgnore]
         public Type ReferencedType { get; set; }
-        
+
         public string ReferencedTypeName => this.ReferencedType?.Name;
-        
+
         public override string ToString()
         {
             return "";

@@ -53,7 +53,7 @@ namespace Signum.React.Selenium.ModalProxies
     public static class MessageModalProxyExtensions
     {
         public static bool IsMessageModalPresent(this RemoteWebDriver selenium)
-        {       
+        {
             var message = GetMessageModal(selenium);
 
             if (message == null)

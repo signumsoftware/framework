@@ -51,7 +51,7 @@ namespace Signum.Entities.Mailing
 
             return base.PropertyValidation(pi);
         }
-        
+
         public XElement ToXml(IToXmlContext ctx)
         {
 
@@ -95,7 +95,7 @@ namespace Signum.Entities.Mailing
         {
             this.CultureInfo = culture;
         }
-        
+
 
         [NotNullValidator]
         public CultureInfoEntity CultureInfo { get; set; }

@@ -89,7 +89,7 @@ namespace Signum.Entities.Workflow
                             {
                                 " + script + @"
                             }
-                        }                  
+                        }
                     }");
         }
 

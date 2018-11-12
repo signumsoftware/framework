@@ -43,7 +43,7 @@ namespace Signum.React.Selenium
         {
             return this.ItemsContainerElement.CombineCss(" > fieldset.sf-repeater-element§").FindElements().Count;
         }
-        
+
         public LineContainer<T> Details<T>(int index) where T : ModifiableEntity
         {
             return new LineContainer<T>(ItemElement(index).WaitPresent(), this.ItemRoute);

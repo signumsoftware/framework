@@ -53,14 +53,14 @@ namespace Signum.Entities.Basics
 
             return base.PropertyValidation(pi);
         }
-        
+
         protected override void PreSaving(PreSavingContext ctx)
         {
             try
             {
                 var ci = CultureInfo.GetCultureInfo(Name);
 
-                //To be more resilient with diferent versions of windows 
+                //To be more resilient with diferent versions of windows
                 if (this.IsGraphModified || EnglishName == null)
                     EnglishName = ci.EnglishName;
                 if (this.IsGraphModified || NativeName == null)

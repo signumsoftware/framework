@@ -13,7 +13,7 @@ namespace Signum.React.Selenium
             : base(element, route)
         {
         }
-        
+
 
         public void SetStringValue(string value)
         {
@@ -30,11 +30,11 @@ namespace Signum.React.Selenium
                 dateTimePicker.Click();
                 dateTimePicker.SendKeys(value);
                 dateTimePicker.LoseFocus();
-             
+
 //                var js = this.Element.GetDriver() as IJavaScriptExecutor;
 
-//                var script = 
-//$@"arguments[0].value = '{value}'; 
+//                var script =
+//$@"arguments[0].value = '{value}';
 //arguments[0].dispatchEvent(new Event('input', {{ bubbles: true }}));
 //arguments[0].dispatchEvent(new Event('blur'));";
 
@@ -112,7 +112,7 @@ namespace Signum.React.Selenium
         {
             return this.GetValue(Route.Type);
         }
-      
+
         public object GetValue(Type type)
         {
             return ReflectionTools.Parse(GetStringValue(), type);
@@ -120,7 +120,7 @@ namespace Signum.React.Selenium
 
         public T GetValue<T>()
         {
-            return ReflectionTools.Parse<T>(GetStringValue()); 
+            return ReflectionTools.Parse<T>(GetStringValue());
         }
 
         public void SetValue(object value)
@@ -140,5 +140,5 @@ namespace Signum.React.Selenium
     }
 
 
-   
+
 }

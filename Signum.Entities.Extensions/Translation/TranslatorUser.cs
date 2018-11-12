@@ -67,9 +67,9 @@ namespace Signum.Entities.Translation
         PressSearchForResults,
         NoResultsFound,
 
-        Namespace, 
-        NewTypes, 
-        NewTranslations, 
+        Namespace,
+        NewTypes,
+        NewTranslations,
 
         BackToTranslationStatus,
     }

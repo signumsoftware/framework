@@ -133,5 +133,5 @@ namespace Signum.Entities.UserAssets
                 entities.RemoveRange(xElements.Count, entities.Count - xElements.Count);
             }
         }
-    }     
+    }
 }

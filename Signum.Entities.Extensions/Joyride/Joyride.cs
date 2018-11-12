@@ -23,7 +23,7 @@ namespace Signum.Entities.Joyride
         [NotNullValidator, NoRepeatValidator]
         public MList<JoyrideStepEntity> Steps { get; set; } = new MList<JoyrideStepEntity>();
 
-        public bool ShowSkipButton { get; set; } 
+        public bool ShowSkipButton { get; set; }
 
         public bool ShowStepsProgress { get; set; }
 

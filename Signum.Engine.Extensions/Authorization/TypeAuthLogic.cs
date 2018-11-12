@@ -171,7 +171,7 @@ namespace Signum.Engine.Authorization
             return cache.GetDefaultDictionary();
         }
 
-        static readonly Variable<ImmutableStack<(Type type, TypeAllowed typeAllowed)>> tempAllowed = 
+        static readonly Variable<ImmutableStack<(Type type, TypeAllowed typeAllowed)>> tempAllowed =
             Statics.ThreadVariable<ImmutableStack<(Type type, TypeAllowed typeAllowed)>>("temporallyAllowed");
 
         public static IDisposable AllowTemporally<T>(TypeAllowed typeAllowed)
@@ -187,7 +187,7 @@ namespace Signum.Engine.Authorization
             var ta = tempAllowed.Value;
             if (ta == null || ta.IsEmpty)
                 return null;
-            
+
             var pair = ta.FirstOrDefault(a => a.type == type);
 
             if (pair.type == null)

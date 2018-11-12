@@ -48,10 +48,10 @@ namespace Signum.Entities.Chart
             var resultType = typeof(UserChartOmniboxResult);
             return new List<HelpOmniboxResult>
             {
-                new HelpOmniboxResult 
-                { 
-                    Text = "'{0}'".FormatWith(OmniboxMessage.Omnibox_UserChart.NiceToString()), 
-                    ReferencedType = resultType 
+                new HelpOmniboxResult
+                {
+                    Text = "'{0}'".FormatWith(OmniboxMessage.Omnibox_UserChart.NiceToString()),
+                    ReferencedType = resultType
                 }
             };
         }

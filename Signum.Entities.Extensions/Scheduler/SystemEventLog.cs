@@ -20,7 +20,7 @@ namespace Signum.Entities.Scheduler
 
         [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
         public string EventType { get; set; }
-        
+
         public Lite<ExceptionEntity> Exception { get; set; }
     }
 }

@@ -30,7 +30,7 @@ namespace Signum.Engine.Basics
         }
 
         public LambdaExpression Condition;
-        public Delegate InMemoryCondition; 
+        public Delegate InMemoryCondition;
     }
 
     public static class TypeConditionLogic
@@ -44,10 +44,10 @@ namespace Signum.Engine.Basics
         public static IDisposable ReplaceTemporally<T>(TypeConditionSymbol typeAllowed, Expression<Func<T, bool>> condition)
             where T : Entity
         {
-            var dic = tempConditions.Value ?? (tempConditions.Value = new Dictionary<Type, Dictionary<TypeConditionSymbol, LambdaExpression>>()); 
+            var dic = tempConditions.Value ?? (tempConditions.Value = new Dictionary<Type, Dictionary<TypeConditionSymbol, LambdaExpression>>());
 
             var subDic = dic.GetOrCreate(typeof(T));
-            
+
             subDic.Add(typeAllowed, condition);
 
             return new Disposable(() =>
@@ -133,7 +133,7 @@ namespace Signum.Engine.Basics
             static MethodInfo miWhere = ReflectionTools.GetMethodInfo(() => Queryable.Where<int>(null, i => i == 0)).GetGenericMethodDefinition();
 
             public Expression Expand(Expression instance, Expression[] arguments, MethodInfo mi)
-            {  
+            {
                 Type type = mi.GetGenericArguments()[0];
 
                 Expression query = arguments[0];

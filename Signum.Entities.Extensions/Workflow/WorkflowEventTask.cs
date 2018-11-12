@@ -27,7 +27,7 @@ namespace Signum.Entities.Workflow
         {
             return fullWorkflow ?? GetWorkflowEntity(this.Workflow);
         }
-        
+
         [NotNullValidator, UniqueIndex]
         public Lite<WorkflowEventEntity> Event { get; set; }
 
@@ -128,7 +128,7 @@ namespace Signum.Entities.Workflow
                             {
                                 " + script + @"
                             }
-                        }                  
+                        }
                     }");
         }
     }
@@ -156,7 +156,7 @@ namespace Signum.Entities.Workflow
                     {
                         class MyWorkflowEventTaskActionEvaluator : IWorkflowEventTaskActionEval
                         {
-                            class CreateCaseEvaluator 
+                            class CreateCaseEvaluator
                             {
                                 public List<ICaseMainEntity> cases = new List<ICaseMainEntity>();
                                 public void Evaluate()
@@ -176,7 +176,7 @@ namespace Signum.Entities.Workflow
                                 evaluator.Evaluate();
                                 return evaluator.cases;
                             }
-                        }                  
+                        }
                     }");
         }
     }

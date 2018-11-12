@@ -22,10 +22,10 @@ namespace Signum.Entities.Workflow
     {
         [NotNullValidator]
         public CaseEntity Case { get; set; }
-        
+
         [ImplementedBy(typeof(WorkflowActivityEntity), typeof(WorkflowEventEntity))]
         public IWorkflowNodeEntity WorkflowActivity { get; set; }
-        
+
         [StringLengthValidator(AllowNulls = false, Min = 3, Max = 255)]
         public string OriginalWorkflowActivityName { get; set; }
 
@@ -35,12 +35,12 @@ namespace Signum.Entities.Workflow
 
         [StringLengthValidator(AllowNulls = true, MultiLine = true)]
         public string Note { get; set; }
-        
+
         public DateTime? DoneDate { get; set; }
 
         [Unit("min")]
         public double? Duration { get; set; }
-        
+
         static Expression<Func<CaseActivityEntity, double?>> DurationRealTimeExpression =
         @this =>  @this.Duration ?? (double?)(TimeZoneManager.Now - @this.StartDate).TotalMinutes;
         [ExpressionField]
@@ -73,7 +73,7 @@ namespace Signum.Entities.Workflow
 
         static Expression<Func<CaseActivityEntity, CaseActivityState>> StateExpression =
         @this => @this.DoneDate.HasValue ? CaseActivityState.Done :
-        (@this.WorkflowActivity as WorkflowActivityEntity).Type == WorkflowActivityType.Decision ? CaseActivityState.PendingDecision : 
+        (@this.WorkflowActivity as WorkflowActivityEntity).Type == WorkflowActivityType.Decision ? CaseActivityState.PendingDecision :
         CaseActivityState.PendingNext;
         [ExpressionField("StateExpression")]
         public CaseActivityState State
@@ -95,7 +95,7 @@ namespace Signum.Entities.Workflow
         }
 
         protected override void PreSaving(PreSavingContext ctx)
-        { 
+        {
             base.PreSaving(ctx);
             this.Duration = this.DoneDate == null ? (double?)null :
                 (this.DoneDate.Value - this.StartDate).TotalMinutes;
@@ -109,7 +109,7 @@ namespace Signum.Entities.Workflow
         public int RetryCount { get; set; }
         public Guid? ProcessIdentifier { get; set; }
     }
-    
+
     public enum DoneType
     {
         Next,

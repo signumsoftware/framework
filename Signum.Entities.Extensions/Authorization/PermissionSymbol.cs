@@ -13,7 +13,7 @@ namespace Signum.Entities.Authorization
     public class PermissionSymbol : Symbol
     {
         private PermissionSymbol() { }
-        
+
         public PermissionSymbol(Type declaringType, string fieldName) :
             base(declaringType, fieldName)
         {

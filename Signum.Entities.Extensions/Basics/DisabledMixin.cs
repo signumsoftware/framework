@@ -19,7 +19,7 @@ namespace Signum.Entities.Basics
         }
 
         public bool IsDisabled { get; set; }
-        
+
         protected override void CopyFrom(MixinEntity mixin, object[] args)
         {
             this.IsDisabled = ((DisabledMixin)mixin).IsDisabled;

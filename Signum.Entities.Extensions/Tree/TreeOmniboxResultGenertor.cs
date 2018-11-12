@@ -17,7 +17,7 @@
 //        {
 //            if (tokenPattern != "I")
 //                yield break;
-            
+
 //            string pattern = tokens[0].Value;
 
 //            bool isPascalCase = OmniboxUtils.IsPascalCasePattern(pattern);

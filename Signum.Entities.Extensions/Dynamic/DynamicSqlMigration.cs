@@ -22,7 +22,7 @@ namespace Signum.Entities.Dynamic
         public Lite<IUserEntity> CreatedBy { get; set; }
 
         public DateTime? ExecutionDate { get; set; }
-        
+
         [ImplementedBy(typeof(UserEntity))]
         public Lite<IUserEntity> ExecutedBy { get; set; }
 

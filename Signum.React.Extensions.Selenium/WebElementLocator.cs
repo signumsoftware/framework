@@ -6,7 +6,7 @@ namespace Signum.React.Selenium
     public class WebElementLocator
     {
         public IWebElement ParentElement;
-        public By Locator; 
+        public By Locator;
 
         public WebElementLocator(IWebElement parentElement, By locator)
         {

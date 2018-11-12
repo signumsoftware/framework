@@ -35,7 +35,7 @@ namespace Signum.React.Selenium
 
             return base.ViewInternal<T>();
         }
-        
+
         public int ItemsCount()
         {
             return this.ListElement.Find().FindElements(By.CssSelector("option")).Count;
@@ -45,7 +45,7 @@ namespace Signum.React.Selenium
         {
             return EntityInfoInternal(index);
         }
-        
+
         public void DoubleClick(int index)
         {
             Select(index);

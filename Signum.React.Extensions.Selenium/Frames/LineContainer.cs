@@ -110,7 +110,7 @@ namespace Signum.React.Selenium
             lineContainer.LineLocator(property).ElementLocator.WaitNoPresent();
         }
 
-        public static LineContainer<S> SubContainer<T, S>(this ILineContainer<T> lineContainer, Expression<Func<T, S>> property) 
+        public static LineContainer<S> SubContainer<T, S>(this ILineContainer<T> lineContainer, Expression<Func<T, S>> property)
             where T : ModifiableEntity
             where S : ModifiableEntity
         {
@@ -130,7 +130,7 @@ namespace Signum.React.Selenium
         public static void ValueLineValue<T, V>(this ILineContainer<T> lineContainer, Expression<Func<T, V>> property, V value, bool loseFocus = false)
             where T : ModifiableEntity
         {
-            var valueLine = lineContainer.ValueLine(property);            
+            var valueLine = lineContainer.ValueLine(property);
 
             valueLine.SetValue(value);
 
@@ -278,7 +278,7 @@ namespace Signum.React.Selenium
         public static SearchControlProxy GetSearchControl(this ILineContainer lineContainer, object queryName)
         {
             string queryKey = QueryUtils.GetKey(queryName);
-            
+
             var element = lineContainer.Element.FindElement(By.CssSelector("div.sf-search-control[data-query-key={0}]".FormatWith(queryKey)));
 
             return new SearchControlProxy(element);
