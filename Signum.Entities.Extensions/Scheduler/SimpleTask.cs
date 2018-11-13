@@ -1,14 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using Signum.Entities.Basics;
-using Signum.Entities;
-using Signum.Entities.Processes;
-using Signum.Utilities;
-using Signum.Entities.Authorization;
-using System.Runtime.CompilerServices;
-using System.Diagnostics;
 
 namespace Signum.Entities.Scheduler
 {

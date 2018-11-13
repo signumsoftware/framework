@@ -1,22 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using Signum.Engine.Maps;
 using Signum.Entities.Authorization;
 using Signum.Entities.Basics;
-using Signum.Engine.DynamicQuery;
 using Signum.Engine.Basics;
-using System.Threading;
 using Signum.Entities;
 using Signum.Utilities;
 using System.Reflection;
-using System.Security.Authentication;
-using Signum.Entities.Reflection;
-using Signum.Entities.DynamicQuery;
 using Signum.Utilities.DataStructures;
 using Signum.Utilities.Reflection;
-using System.Data.SqlClient;
 
 namespace Signum.Engine.Authorization
 {

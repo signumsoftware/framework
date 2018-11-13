@@ -1,34 +1,23 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Xml.Linq;
 using System.Xml.Schema;
 using System.Reflection;
 using Signum.Entities;
 using Signum.Engine.DynamicQuery;
 using Signum.Engine.Operations;
-using Signum.Entities.Reflection;
-using Signum.Utilities.DataStructures;
 using Signum.Utilities;
 using System.Globalization;
 using Signum.Engine.Maps;
-using System.Linq.Expressions;
-using Signum.Engine.Linq;
 using System.IO;
 using System.Xml;
-using System.Resources;
-using Signum.Utilities.Reflection;
-using System.Diagnostics;
 using Signum.Entities.DynamicQuery;
 using Signum.Engine.Basics;
 using Signum.Entities.Basics;
 using System.Text.RegularExpressions;
 using System.Collections.Concurrent;
 using Signum.Entities.Help;
-using Signum.Entities.Translation;
-using Signum.Services;
-using Signum.Engine.WikiMarkup;
 using Signum.Engine.Authorization;
 
 

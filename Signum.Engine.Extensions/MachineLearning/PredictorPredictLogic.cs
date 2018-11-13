@@ -1,5 +1,4 @@
 ﻿using Signum.Engine.Basics;
-using Signum.Engine.DynamicQuery;
 using Signum.Entities;
 using Signum.Entities.DynamicQuery;
 using Signum.Entities.MachineLearning;
@@ -9,8 +8,6 @@ using Signum.Utilities.DataStructures;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Signum.Engine.MachineLearning
 {

@@ -1,17 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using Signum.Utilities;
 using Signum.Entities.DynamicQuery;
 using System.Text.RegularExpressions;
 using Signum.Utilities.Reflection;
-using Signum.Entities.Reflection;
 using Signum.Utilities.DataStructures;
-using Signum.Entities.Basics;
-using Signum.Entities.UserQueries;
-using System.Collections.Concurrent;
-using System.Globalization;
 using Signum.Entities.UserAssets;
 using Newtonsoft.Json;
 

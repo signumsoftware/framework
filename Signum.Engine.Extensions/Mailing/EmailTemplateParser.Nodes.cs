@@ -1,24 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Linq.Expressions;
-using System.Reflection;
 using System.Text;
 using System.Web;
-using Signum.Engine.DynamicQuery;
-using Signum.Engine.Mailing;
-using Signum.Engine.Translation;
-using Signum.Engine.UserQueries;
-using Signum.Entities;
 using Signum.Entities.DynamicQuery;
-using Signum.Entities.Mailing;
-using Signum.Entities.Reflection;
-using Signum.Entities.UserAssets;
-using Signum.Entities.UserQueries;
 using Signum.Utilities;
 using Signum.Utilities.DataStructures;
 using Signum.Engine.Templating;
-using System.Collections;
 using Microsoft.AspNetCore.Html;
 
 namespace Signum.Engine.Mailing

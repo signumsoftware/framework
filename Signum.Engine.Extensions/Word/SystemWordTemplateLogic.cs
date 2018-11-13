@@ -12,9 +12,6 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
-using System.Text;
-using Signum.Engine.Isolation;
-using Signum.Entities.Isolation;
 using Signum.Engine.Templating;
 using Signum.Entities.Templating;
 

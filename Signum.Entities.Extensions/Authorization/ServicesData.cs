@@ -1,12 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using Signum.Entities.Basics;
-using Signum.Entities;
 using Signum.Utilities;
 using System.Collections.ObjectModel;
-using System.Reflection;
 
 namespace Signum.Entities.Authorization
 {

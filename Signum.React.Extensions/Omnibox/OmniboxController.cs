@@ -1,19 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
-using System.Net;
-using System.Net.Http;
 using Microsoft.AspNetCore.Mvc;
-using Signum.Engine.Authorization;
-using Signum.Entities;
-using Signum.Entities.Authorization;
-using Signum.Services;
-using Signum.Utilities;
-using Signum.React.Facades;
-using Signum.React.Authorization;
 using Signum.Entities.Omnibox;
-using Signum.React.ApiControllers;
 using Signum.React.Filters;
 
 namespace Signum.React.Omnibox

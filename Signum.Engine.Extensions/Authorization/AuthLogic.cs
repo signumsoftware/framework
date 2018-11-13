@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using Signum.Engine.Maps;
 using Signum.Entities.Authorization;
 using Signum.Entities.Basics;
@@ -10,20 +9,11 @@ using Signum.Engine.Basics;
 using Signum.Entities;
 using Signum.Utilities;
 using Signum.Utilities.DataStructures;
-using System.Security.Principal;
-using System.Threading;
-using Signum.Services;
 using Signum.Utilities.Reflection;
 using System.Reflection;
-using Signum.Engine.Mailing;
 using Signum.Engine.Operations;
 using System.Xml.Linq;
-using System.Text.RegularExpressions;
-using Signum.Utilities.ExpressionTrees;
-using Signum.Engine.Cache;
 using System.IO;
-using Signum.Entities.Mailing;
-using Signum.Engine.Translation;
 using Signum.Engine.Scheduler;
 
 namespace Signum.Engine.Authorization

@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Text;
 using Signum.Engine.Basics;
 using Signum.Engine.DynamicQuery;
 using Signum.Engine.Maps;
@@ -13,7 +12,6 @@ using Signum.Entities.Mailing;
 using Signum.Utilities;
 using Signum.Utilities.ExpressionTrees;
 using Signum.Entities.Isolation;
-using Signum.Engine.Isolation;
 using Signum.Entities.Templating;
 using Signum.Engine.UserAssets;
 

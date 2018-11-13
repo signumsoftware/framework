@@ -1,12 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using Signum.Entities;
 using Signum.Utilities;
-using System.ComponentModel;
 using System.IO;
-using System.Web;
 using System.Linq.Expressions;
 
 namespace Signum.Entities.Files

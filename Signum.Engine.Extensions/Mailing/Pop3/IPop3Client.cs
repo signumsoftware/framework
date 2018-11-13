@@ -2,9 +2,6 @@
 using Signum.Entities.Mailing;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Signum.Engine.Extensions.Mailing.Pop3
 {

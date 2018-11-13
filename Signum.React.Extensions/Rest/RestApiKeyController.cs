@@ -5,7 +5,6 @@ using Signum.Engine.Rest;
 using Signum.Entities;
 using Signum.Entities.Authorization;
 using Signum.Entities.Rest;
-using Signum.React.ApiControllers;
 
 namespace Signum.React.Profiler
 {

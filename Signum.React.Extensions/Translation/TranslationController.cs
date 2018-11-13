@@ -1,12 +1,5 @@
 ﻿using Newtonsoft.Json;
-using Signum.Engine;
-using Signum.Engine.Authorization;
-using Signum.Engine.Basics;
-using Signum.Engine.Operations;
 using Signum.Engine.Translation;
-using Signum.Entities;
-using Signum.Entities.Authorization;
-using Signum.Entities.Basics;
 using Signum.React.Filters;
 using Signum.Utilities;
 using Signum.Utilities.DataStructures;
@@ -14,12 +7,8 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
-using System.Net;
-using System.Net.Http;
-using System.Net.Http.Headers;
 using System.Reflection;
 using Microsoft.AspNetCore.Mvc;
-using Signum.React.ApiControllers;
 using System.ComponentModel.DataAnnotations;
 
 namespace Signum.React.Translation

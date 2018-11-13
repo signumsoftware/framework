@@ -1,19 +1,6 @@
-﻿using Signum.Entities.Workflow;
-using Signum.Engine.Workflow;
-using Signum.Engine;
-using Signum.Engine.Operations;
-using Signum.Entities;
-using Signum.React.Facades;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net;
-using System.Net.Http;
-using Microsoft.AspNetCore.Mvc;
-using System.Xml.Linq;
+﻿using Microsoft.AspNetCore.Mvc;
 using Signum.Entities.Toolbar;
 using Signum.Engine.Toolbar;
-using Signum.React.ApiControllers;
 
 namespace Signum.React.Toolbar
 {

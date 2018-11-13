@@ -1,14 +1,7 @@
-﻿using Signum.Entities.UserAssets;
-using Signum.React.Json;
+﻿using Signum.React.Json;
 using Signum.Utilities;
-using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Web;
-using Microsoft.AspNetCore.Mvc;
-using Newtonsoft.Json;
-using Signum.Engine.DynamicQuery;
 using Signum.Entities.UserQueries;
 using Signum.Engine.Basics;
 using Signum.React.UserAssets;

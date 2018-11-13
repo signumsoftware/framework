@@ -6,19 +6,12 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Web;
 using Microsoft.AspNetCore.Mvc;
-using Newtonsoft.Json;
 using Signum.Entities;
 using Signum.Utilities.Reflection;
 using Signum.Services;
-using Signum.Entities.Reflection;
 using Signum.Engine.Authorization;
 using Signum.React.Maps;
-using Signum.Engine.Basics;
-using Signum.React.Map;
-using Signum.Engine.DynamicQuery;
-using Signum.Engine.Maps;
 using Microsoft.AspNetCore.Builder;
 
 namespace Signum.React.Authorization

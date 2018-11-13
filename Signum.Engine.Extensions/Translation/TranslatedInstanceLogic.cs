@@ -1,15 +1,12 @@
 ﻿using Signum.Engine.DynamicQuery;
 using Signum.Engine.Maps;
-using Signum.Engine.Operations;
 using Signum.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Text;
 using Signum.Entities.Translation;
 using Signum.Entities;
-using Signum.Entities.Reflection;
 using System.Globalization;
 using Signum.Engine.Basics;
 using System.Linq.Expressions;
@@ -19,7 +16,6 @@ using System.Collections.Concurrent;
 using Signum.Utilities.ExpressionTrees;
 using System.IO;
 using Signum.Engine.Excel;
-using Signum.Entities.Isolation;
 
 namespace Signum.Engine.Translation
 {

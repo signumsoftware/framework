@@ -2,13 +2,9 @@
 using Signum.React.Filters;
 using Signum.Engine;
 using Signum.Utilities;
-using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Net.Http;
 using System.Security.Authentication;
 using Signum.Engine.Authorization;
-using Signum.Entities.Basics;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.Builder;
 using System.Reflection;

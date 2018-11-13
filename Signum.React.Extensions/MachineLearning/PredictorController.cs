@@ -1,24 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
-using System.Net;
-using System.Net.Http;
 using Microsoft.AspNetCore.Mvc;
-using Signum.React.Files;
-using System.IO;
 using Signum.Entities.MachineLearning;
 using Signum.Engine.MachineLearning;
 using Signum.Engine;
 using Signum.Utilities;
 using Signum.Entities;
-using Signum.React.ApiControllers;
-using Newtonsoft.Json.Linq;
-using Signum.Entities.DynamicQuery;
-using Newtonsoft.Json;
-using Signum.Entities.Reflection;
-using Signum.Utilities.Reflection;
-using Signum.Engine.DynamicQuery;
 using Signum.Engine.Basics;
 using Signum.React.Filters;
 

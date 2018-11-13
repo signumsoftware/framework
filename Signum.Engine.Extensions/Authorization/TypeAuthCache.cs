@@ -1,22 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using Signum.Utilities;
 using Signum.Engine.Maps;
 using Signum.Engine.Authorization;
 using Signum.Engine;
-using System.Windows;
-using System.Linq.Expressions;
 using System.Xml.Linq;
-using System.IO;
-using System.Data.SqlClient;
-using System.Threading;
 using Signum.Engine.Basics;
 using Signum.Entities.Basics;
 using System.Reflection;
-using System.Data.Common;
-using Signum.Engine.Cache;
 using Signum.Entities.Reflection;
 
 namespace Signum.Entities.Authorization

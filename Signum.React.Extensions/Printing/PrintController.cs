@@ -1,14 +1,8 @@
-﻿using Signum.Engine.Authorization;
-using Signum.Engine.Basics;
-using Signum.Engine.Printing;
-using Signum.Engine.Processes;
+﻿using Signum.Engine.Printing;
 using Signum.Entities.Files;
 using Signum.Entities.Processes;
-using Signum.React.ApiControllers;
-using Signum.React.Facades;
 using Signum.React.Filters;
 using System.Collections.Generic;
-using System.Threading;
 using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel.DataAnnotations;
 
