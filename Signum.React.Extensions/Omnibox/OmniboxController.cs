@@ -19,7 +19,7 @@ using Signum.React.Filters;
 namespace Signum.React.Omnibox
 {
     [ValidateModelFilter]
-    public class OmniboxController : ApiController
+    public class OmniboxController : ControllerBase
     {
         [HttpPost("api/omnibox")]
         public List<OmniboxResult> OmniboxResults([Required, FromBody]OmniboxRequest request)

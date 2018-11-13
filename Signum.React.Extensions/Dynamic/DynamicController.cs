@@ -28,7 +28,7 @@ using System.ComponentModel.DataAnnotations;
 namespace Signum.React.Dynamic
 {
     [ValidateModelFilter]
-    public class DynamicController : ApiController
+    public class DynamicController : ControllerBase
     {
         IApplicationLifetime lifeTime;
         public DynamicController(IApplicationLifetime lifeTime)

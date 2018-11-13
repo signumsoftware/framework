@@ -24,7 +24,7 @@ using System.ComponentModel.DataAnnotations;
 namespace Signum.React.Tree
 {
     [ValidateModelFilter]
-    public class TreeController : ApiController
+    public class TreeController : ControllerBase
     {
         [HttpPost("api/tree/findNodes/{typeName}")]
         public List<TreeNode> FindNodes(string typeName, [Required, FromBody]FindNodesRequest request) {

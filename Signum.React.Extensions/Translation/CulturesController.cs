@@ -27,7 +27,7 @@ using System.ComponentModel.DataAnnotations;
 namespace Signum.React.Translation
 {
     [ValidateModelFilter]
-    public class CultureController : ApiController
+    public class CultureController : ControllerBase
     {
         IHostingEnvironment _env;
         public CultureController(IHostingEnvironment env)
@@ -65,7 +65,7 @@ namespace Signum.React.Translation
                 }
             }
 
-            this.ActionContext.HttpContext.Response.Cookies.Append("language", ci.Name);
+            ControllerContext.HttpContext.Response.Cookies.Append("language", ci.Name);
             return ci.Name;
         }
     }

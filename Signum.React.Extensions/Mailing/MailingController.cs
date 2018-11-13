@@ -29,7 +29,7 @@ using Signum.React.Filters;
 namespace Signum.React.Mailing
 {
     [ValidateModelFilter]
-    public class MailingController : ApiController
+    public class MailingController : ControllerBase
     {
         [HttpGet("api/asyncEmailSender/view")]
         public AsyncEmailSenderState View()

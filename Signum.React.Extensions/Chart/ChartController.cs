@@ -26,7 +26,7 @@ using System.Threading.Tasks;
 
 namespace Signum.React.Chart
 {
-    public class ChartController : ApiController
+    public class ChartController : ControllerBase
     {
         [HttpGet("api/chart/scripts")]
         public List<List<ChartScriptEntity>> ChartScripts()

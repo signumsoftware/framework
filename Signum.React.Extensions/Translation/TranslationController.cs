@@ -25,7 +25,7 @@ using System.ComponentModel.DataAnnotations;
 namespace Signum.React.Translation
 {
     [ValidateModelFilter]
-    public class TranslationController : ApiController
+    public class TranslationController : ControllerBase
     {
         public static IEnumerable<Assembly> AssembliesToLocalize()
         {

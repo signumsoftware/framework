@@ -24,7 +24,7 @@ using System.ComponentModel.DataAnnotations;
 namespace Signum.React.TypeHelp
 {
     [ValidateModelFilter]
-    public class TypeHelpController : ApiController
+    public class TypeHelpController : ControllerBase
     {
 
         [HttpPost("api/typeHelp/autocompleteEntityCleanType")]

@@ -11,7 +11,7 @@ using Signum.React.ApiControllers;
 
 namespace Signum.React.DiffLog
 {
-    public class DiffLogController : ApiController
+    public class DiffLogController : ControllerBase
     {
         [HttpGet("api/diffLog/{id}")]
         public DiffLogResult GetOperationDiffLog(string id)

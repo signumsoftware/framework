@@ -23,7 +23,7 @@ using Signum.Entities.Profiler;
 
 namespace Signum.React.Profiler
 {
-    public class ProfilerTimesController : ApiController
+    public class ProfilerTimesController : ControllerBase
     {
         [HttpPost("api/profilerTimes/clear")]
         public void Clear()

@@ -25,7 +25,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace Signum.React.Chart
 {
     [ValidateModelFilter]
-    public class UserChartController : ApiController
+    public class UserChartController : ControllerBase
     {
         [HttpGet("api/userChart/forQuery/{queryKey}")]
         public IEnumerable<Lite<UserChartEntity>> FromQuery(string queryKey)

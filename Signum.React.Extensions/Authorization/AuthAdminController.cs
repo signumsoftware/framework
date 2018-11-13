@@ -24,7 +24,7 @@ using Signum.React.ApiControllers;
 namespace Signum.React.Authorization
 {
     [ValidateModelFilter]
-    public class AuthAdminController : ApiController
+    public class AuthAdminController : ControllerBase
     {
         [HttpGet("api/authAdmin/permissionRules/{roleId}")]
         public PermissionRulePack GetPermissionRules(string roleId)

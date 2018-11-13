@@ -17,7 +17,7 @@ using Signum.React.ApiControllers;
 
 namespace Signum.React.Toolbar
 {
-    public class ToolbarController : ApiController
+    public class ToolbarController : ControllerBase
     {
         [HttpGet("api/toolbar/current/{location}")]
         public ToolbarResponse Current(ToolbarLocation location)

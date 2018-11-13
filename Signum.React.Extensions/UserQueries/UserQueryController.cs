@@ -23,7 +23,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Signum.React.UserQueries
 {
-    public class UserQueryController : ApiController
+    public class UserQueryController : ControllerBase
     {
         [HttpGet("api/userQueries/forQuery/{queryKey}")]
         public IEnumerable<Lite<UserQueryEntity>> FromQuery(string queryKey)

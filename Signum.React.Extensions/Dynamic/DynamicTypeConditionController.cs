@@ -23,7 +23,7 @@ using System.ComponentModel.DataAnnotations;
 namespace Signum.React.Dynamic
 {
     [ValidateModelFilter]
-    public class DynamicTypeConditionController : ApiController
+    public class DynamicTypeConditionController : ControllerBase
     {
         [HttpPost("api/dynamic/typeCondition/test")]
         public DynamicTypeConditionTestResponse Test([Required, FromBody]DynamicTypeConditionTestRequest request)

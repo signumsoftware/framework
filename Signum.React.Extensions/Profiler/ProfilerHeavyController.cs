@@ -32,7 +32,7 @@ using Signum.React.Filters;
 namespace Signum.React.Profiler
 {
     [ValidateModelFilter]
-    public class ProfilerHeavyController : ApiController
+    public class ProfilerHeavyController : ControllerBase
     {
         [HttpPost("api/profilerHeavy/clear")]
         public void Clear()

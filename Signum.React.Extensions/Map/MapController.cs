@@ -17,7 +17,7 @@ using Signum.React.ApiControllers;
 
 namespace Signum.React.Map
 {
-    public class MapController : ApiController
+    public class MapController : ControllerBase
     {
         [HttpGet("api/map/types")]
         public SchemaMapInfo Index()

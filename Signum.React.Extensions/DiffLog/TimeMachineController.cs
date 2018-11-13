@@ -14,7 +14,7 @@ using Signum.React.ApiControllers;
 
 namespace Signum.React.DiffLog
 {
-    public class TimeMachineController : ApiController
+    public class TimeMachineController : ControllerBase
     {
         [HttpGet("api/retrieveVersion/{typeName}/{id}")]
         public Entity RetrieveVersion(string typeName, string id, DateTime asOf)

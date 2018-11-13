@@ -28,7 +28,7 @@ using System.ComponentModel.DataAnnotations;
 namespace Signum.React.Dynamic
 {
     [ValidateModelFilter]
-    public class DynamicExpressionController : ApiController
+    public class DynamicExpressionController : ControllerBase
     {
         [HttpPost("api/dynamic/expression/test")]
         public DynamicExpressionTestResponse Test([Required, FromBody]DynamicExpressionTestRequest request)

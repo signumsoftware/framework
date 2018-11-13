@@ -25,7 +25,7 @@ using Signum.React.ApiControllers;
 
 namespace Signum.React.Scheduler
 {
-    public class SchedulerController : ApiController
+    public class SchedulerController : ControllerBase
     {
         [HttpGet("api/scheduler/view")]
         public SchedulerState View()

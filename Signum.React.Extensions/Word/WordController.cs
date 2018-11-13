@@ -33,7 +33,7 @@ using Signum.React.Filters;
 namespace Signum.React.Word
 {
     [ValidateModelFilter]
-    public class WordController : ApiController
+    public class WordController : ControllerBase
     {
         [HttpPost("api/word/createReport")]
         public FileStreamResult View([Required, FromBody]CreateWordReportRequest request)

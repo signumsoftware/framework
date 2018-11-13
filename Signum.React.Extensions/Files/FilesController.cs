@@ -25,7 +25,7 @@ using Signum.Engine.Mailing;
 
 namespace Signum.React.Files
 {
-    public class FilesController : ApiController
+    public class FilesController : ControllerBase
     {
         [HttpGet("api/files/downloadFile/{fileId}")]
         public FileStreamResult DownloadFile(string fileId)

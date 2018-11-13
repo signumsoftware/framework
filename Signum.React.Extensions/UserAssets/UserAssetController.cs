@@ -28,7 +28,7 @@ using Signum.React.Filters;
 namespace Signum.React.UserAssets
 {
     [ValidateModelFilter]
-    public class UserAssetController : ApiController
+    public class UserAssetController : ControllerBase
     {
         [HttpPost("api/userAssets/parseFilters")]
         public List<FilterResponse> ParseFilters([Required, FromBody]ParseFiltersRequest request)

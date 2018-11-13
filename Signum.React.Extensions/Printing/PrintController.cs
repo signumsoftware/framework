@@ -15,7 +15,7 @@ using System.ComponentModel.DataAnnotations;
 namespace Signum.React.Processes
 {
     [ValidateModelFilter]
-    public class PrintController : ApiController
+    public class PrintController : ControllerBase
     {
         [HttpGet("api/printing/stats")]
         public List<PrintStat> Stats()

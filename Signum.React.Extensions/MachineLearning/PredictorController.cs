@@ -25,7 +25,7 @@ using Signum.React.Filters;
 namespace Signum.React.MachineLearning
 {
     [ValidateModelFilter]
-    public class PredictorController : ApiController
+    public class PredictorController : ControllerBase
     {
         [HttpGet("api/predictor/availableDevices/{algorithmKey}")]
         public string[] AvailableDevices(string algorithmKey)

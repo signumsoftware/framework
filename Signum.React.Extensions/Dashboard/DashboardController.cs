@@ -25,7 +25,7 @@ using Signum.Engine.Dashboard;
 
 namespace Signum.React.Dashboard
 {
-    public class DashboardController : ApiController
+    public class DashboardController : ControllerBase
     {
         [HttpGet("api/dashboard/forEntityType/{typeName}")]
         public IEnumerable<Lite<DashboardEntity>> FromEntityType(string typeName)

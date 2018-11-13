@@ -9,7 +9,7 @@ using Signum.React.ApiControllers;
 
 namespace Signum.React.Profiler
 {
-    public class RestApiKeyController : ApiController
+    public class RestApiKeyController : ControllerBase
     {
         [HttpGet("api/restApiKey/generate")]
         public string GenerateRestApiKey()

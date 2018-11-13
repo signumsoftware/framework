@@ -19,7 +19,7 @@ using System.ComponentModel.DataAnnotations;
 namespace Signum.React.Authorization
 {
     [ValidateModelFilter]
-    public class AuthController : ApiController
+    public class AuthController : ControllerBase
     {
         [HttpPost("api/auth/login"), AllowAnonymous]
         public ActionResult<LoginResponse> Login([Required, FromBody]LoginRequest data)
@@ -63,12 +63,12 @@ namespace Signum.React.Authorization
             {
                 if (data.rememberMe == true)
                 {
-                    UserTicketServer.SaveCookie(this.ActionContext);
+                    UserTicketServer.SaveCookie(ControllerContext);
                 }
 
-                AuthServer.OnUserPreLogin(this.ActionContext, user);
+                AuthServer.OnUserPreLogin(ControllerContext, user);
 
-                AuthServer.AddUserSession(this.ActionContext, user);
+                AuthServer.AddUserSession(ControllerContext, user);
 
                 string message = AuthLogic.OnLoginMessage();
 
@@ -93,7 +93,7 @@ namespace Signum.React.Authorization
         {
             using (ScopeSessionFactory.OverrideSession())
             {
-                if (!UserTicketServer.LoginFromCookie(this.ActionContext))
+                if (!UserTicketServer.LoginFromCookie(ControllerContext))
                     return null;
 
                 string message = AuthLogic.OnLoginMessage();
@@ -116,7 +116,7 @@ namespace Signum.React.Authorization
         {
             AuthServer.UserLoggingOut?.Invoke();
 
-            UserTicketServer.RemoveCookie(this.ActionContext);
+            UserTicketServer.RemoveCookie(ControllerContext);
         }
 
         [HttpPost("api/auth/ChangePassword")]
@@ -142,8 +142,8 @@ namespace Signum.React.Authorization
 
         private BadRequestObjectResult ModelError(string field, string error)
         {
-            this.ActionContext.ModelState.AddModelError(field, error);
-            return new BadRequestObjectResult(ActionContext.ModelState);
+            ModelState.AddModelError(field, error);
+            return new BadRequestObjectResult(ModelState);
         }
 
 #pragma warning disable IDE1006 // Naming Styles

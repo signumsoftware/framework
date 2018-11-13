@@ -36,7 +36,7 @@ using Signum.React.Filters;
 namespace Signum.React.Excel
 {
     [ValidateModelFilter]
-    public class MachineLearningController : ApiController
+    public class MachineLearningController : ControllerBase
     {
         [HttpPost("api/excel/plain")]
         public async Task<FileStreamResult> ToPlainExcel([Required, FromBody]QueryRequestTS request, CancellationToken token)
