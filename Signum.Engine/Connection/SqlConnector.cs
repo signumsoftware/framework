@@ -1,19 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Data.SqlClient;
 using System.Data.Common;
 using System.Data;
 using Signum.Utilities;
 using Signum.Engine.Maps;
-using Signum.Engine.DynamicQuery;
 using System.Data.SqlTypes;
-using System.Reflection;
-using Signum.Utilities.Reflection;
 using System.Linq.Expressions;
-using Signum.Utilities.ExpressionTrees;
-using Microsoft.SqlServer.Server;
 using System.Threading;
 using System.Threading.Tasks;
 

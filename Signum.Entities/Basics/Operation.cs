@@ -1,13 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using Signum.Utilities;
-using Signum.Entities.Basics;
-using System.Runtime.CompilerServices;
-using System.Diagnostics;
-using Signum.Entities.Reflection;
-using Signum.Utilities.Reflection;
 using Signum.Utilities.ExpressionTrees;
 
 namespace Signum.Entities

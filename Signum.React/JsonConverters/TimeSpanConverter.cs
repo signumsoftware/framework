@@ -1,12 +1,6 @@
 ﻿using Newtonsoft.Json;
-using Signum.Engine.Basics;
-using Signum.Entities;
 using Signum.Utilities;
-using Signum.Utilities.Reflection;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
 
 namespace Signum.React.Json
 {

@@ -15,9 +15,7 @@ using Signum.Engine.DynamicQuery;
 using Signum.Entities.Reflection;
 using System.Linq.Expressions;
 using Signum.Entities.Basics;
-using System.Data.Common;
 using Signum.Engine.Operations.Internal;
-using Signum.Engine;
 
 namespace Signum.Engine.Operations
 {

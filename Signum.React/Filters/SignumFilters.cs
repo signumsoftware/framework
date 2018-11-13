@@ -1,19 +1,11 @@
-using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Extensions;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
-using Signum.Engine;
 using Signum.Entities.Basics;
 using Signum.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
-using System.Net.Http;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
-using System.Web;
 
 namespace Signum.React.Filters
 {
@@ -49,9 +41,7 @@ namespace Signum.React.Filters
 
     public class SignumAuthenticationFilter : SignumDisposableResourceFilter
     {
-        public const string UserKey = "Signum_User_Entity";
-
-        public SignumAuthenticationFilter() : base("Signum_UserSession") { }
+        public SignumAuthenticationFilter() : base("Signum_User"){ }
 
         public static readonly IList<Func<FilterContext, SignumAuthenticationResult>> Authenticators = new List<Func<FilterContext, SignumAuthenticationResult>>();
 
@@ -73,8 +63,6 @@ namespace Signum.React.Filters
 
             if (result == null)
                 return null;
-
-            context.HttpContext.Items[UserKey] = result.User;
 
             return result.User != null ? UserHolder.UserSession(result.User) : null;
         }

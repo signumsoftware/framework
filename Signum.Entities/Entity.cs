@@ -1,24 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using Signum.Utilities;
-using System.Runtime.Serialization;
 using System.Reflection;
-using System.Collections.Specialized;
-using Signum.Utilities.DataStructures;
 using Signum.Entities.Reflection;
 using System.ComponentModel;
 using System.Linq.Expressions;
 using Signum.Utilities.Reflection;
 using Signum.Utilities.ExpressionTrees;
-using Signum.Services;
 using System.Runtime.CompilerServices;
-using System.Data;
-using System.Globalization;
 using System.Diagnostics;
 using System.Collections.Concurrent;
-using Signum.Entities;
 
 namespace Signum.Entities
 {

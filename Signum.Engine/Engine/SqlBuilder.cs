@@ -1,15 +1,10 @@
 ﻿﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Data;
+ using System.Data;
 using Signum.Utilities;
-using System.Data.SqlClient;
-using Signum.Engine;
-using Signum.Entities;
-using Signum.Utilities.DataStructures;
-using Signum.Engine.Maps;
-using System.Globalization;
+ using Signum.Engine.Maps;
+
 //using Microsoft.SqlServer.Types;
 
 

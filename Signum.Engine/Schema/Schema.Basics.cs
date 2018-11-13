@@ -1,25 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Reflection;
 using System.Data;
-using System.IO;
 using Signum.Entities;
 using Signum.Utilities;
 using Signum.Utilities.ExpressionTrees;
-using Signum.Engine;
-using System.Linq.Expressions;
 using Signum.Entities.Reflection;
 using Signum.Utilities.Reflection;
 using System.Collections;
-using Signum.Utilities.DataStructures;
-using System.Diagnostics;
 using Signum.Engine.Linq;
-using System.Data.SqlClient;
-using Signum.Services;
 using System.Globalization;
-using System.Threading;
 
 namespace Signum.Engine.Maps
 {

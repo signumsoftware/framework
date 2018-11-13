@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Mvc;
@@ -16,11 +16,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
-using System.Net.Http;
 using System.Security.Authentication;
 using System.Text;
 using System.Threading.Tasks;
-using System.Web;
 
 namespace Signum.React.Filters
 {
@@ -55,7 +53,7 @@ namespace Signum.React.Filters
                         e.UrlReferer = req.Headers["Referer"].ToString();
                         e.UserHostAddress = connFeature.RemoteIpAddress.ToString();
                         e.UserHostName = Dns.GetHostEntry(connFeature.RemoteIpAddress).HostName;
-                        e.User = ((IUserEntity)context.HttpContext.Items[SignumAuthenticationFilter.UserKey] ?? UserHolder.Current)?.ToLite();
+                        e.User = UserHolder.Current?.ToLite();
                         e.QueryString = req.QueryString.ToString();
                         e.Form = ReadAllBody(context.HttpContext);
                         e.Session = null;

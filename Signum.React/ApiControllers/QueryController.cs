@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net;
-using System.Net.Http;
 using Signum.Engine.Basics;
 using Signum.Engine.DynamicQuery;
 using Signum.Entities.DynamicQuery;
@@ -12,7 +10,6 @@ using Signum.Entities;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json;
 using Signum.Entities.Basics;
-using Signum.Engine;
 using Signum.React.Filters;
 using System.Collections.ObjectModel;
 using Signum.Engine.Maps;

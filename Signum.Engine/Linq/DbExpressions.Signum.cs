@@ -1,19 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Linq.Expressions;
 using System.Collections.ObjectModel;
 using Signum.Utilities;
 using System.Reflection;
 using Signum.Entities;
 using Signum.Utilities.ExpressionTrees;
-using Signum.Engine;
-using Signum.Utilities.DataStructures;
 using Signum.Utilities.Reflection;
 using Signum.Engine.Maps;
 using Signum.Entities.Reflection;
-using System.Diagnostics;
 
 namespace Signum.Engine.Linq
 {

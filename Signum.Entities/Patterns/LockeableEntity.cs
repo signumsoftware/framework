@@ -1,12 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Linq.Expressions;
 using System.ComponentModel;
 using Signum.Utilities;
 using System.Runtime.CompilerServices;
-using Signum.Utilities.Reflection;
 
 namespace Signum.Entities.Patterns
 {

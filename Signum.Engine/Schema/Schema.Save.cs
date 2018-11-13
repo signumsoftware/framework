@@ -1,9 +1,7 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Signum.Entities;
-using Signum.Engine;
 using Signum.Utilities;
 using Signum.Entities.Reflection;
 using System.Linq.Expressions;
@@ -11,14 +9,11 @@ using System.Reflection;
 using Signum.Utilities.Reflection;
 using System.Data;
 using Signum.Utilities.ExpressionTrees;
-using System.Threading;
 using System.Text;
 using Signum.Utilities.DataStructures;
 using System.Data.Common;
 using System.Collections.Concurrent;
 using Signum.Engine.Basics;
-using System.Globalization;
-using System.Text.RegularExpressions;
 
 namespace Signum.Engine.Maps
 {
