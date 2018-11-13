@@ -1,4 +1,4 @@
-﻿using Signum.Engine.Basics;
+using Signum.Engine.Basics;
 using Signum.Engine.DynamicQuery;
 using Signum.Engine.Maps;
 using Signum.Engine.Operations;
@@ -180,7 +180,7 @@ namespace Signum.Engine.Word
                         swr => swr.FullClassName, 
                         type => type.FullName,
                         (swr, type) => KVP.Create(type, swr), 
-                        "caching WordTemplates").ToDictionary();
+                        "caching " + nameof(SystemWordTemplateEntity)).ToDictionary();
                 }, new InvalidateWith(typeof(SystemWordTemplateEntity)));
 
                 sb.Schema.Initializing += () => TypeToSystemWordTemplate.Load();
