@@ -1,4 +1,4 @@
-﻿import * as React from 'react'
+import * as React from 'react'
 import { WorkflowReplacementModel, WorkflowReplacementItemEmbedded, CaseActivityEntity, WorkflowOperation } from '../Signum.Entities.Workflow'
 import { TypeContext } from '@framework/Lines'
 import { ValueSearchControlLine } from '@framework/Search'

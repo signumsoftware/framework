@@ -1,4 +1,4 @@
-﻿import * as React from 'react'
+import * as React from 'react'
 import { ValueLine, TypeContext, EntityStrip, EntityDetail } from '@framework/Lines'
 import CSharpCodeMirror from '../../Codemirror/CSharpCodeMirror'
 import { WorkflowLaneModel, WorkflowLaneActorsEval, WorkflowMessage } from '../Signum.Entities.Workflow'

@@ -1,4 +1,4 @@
-﻿import * as React from 'react'
+import * as React from 'react'
 import { ValueLine, EntityLine } from '@framework/Lines'
 import { ValueSearchControlLine } from '@framework/Search'
 import { toLite } from '@framework/Signum.Entities'

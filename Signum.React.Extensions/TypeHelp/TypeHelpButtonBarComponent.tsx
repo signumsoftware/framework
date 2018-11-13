@@ -1,4 +1,4 @@
-﻿import * as React from 'react'
+import * as React from 'react'
 import { TypeHelpMode } from './TypeHelpClient';
 import { TypeContext } from '@framework/Lines';
 
