@@ -1,24 +1,14 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using Signum.Entities.Basics;
 using System.Linq.Expressions;
 using Signum.Utilities;
-using Signum.Entities.UserQueries;
 using Signum.Entities.DynamicQuery;
-using System.Globalization;
-using System.Text.RegularExpressions;
-using System.Collections.Specialized;
 using System.ComponentModel;
-using Signum.Entities.Translation;
 using System.Reflection;
 using Signum.Entities.UserAssets;
-using Signum.Utilities.ExpressionTrees;
-using Signum.Entities;
 using Signum.Entities.Templating;
 using System.Xml.Linq;
-using Signum.Entities.Mailing;
 
 namespace Signum.Entities.Mailing
 {
