@@ -12,7 +12,7 @@ using Signum.Engine.Scheduler;
 
 namespace Signum.React.Cache
 {
-    public class CacheController : ApiController
+    public class CacheController : ControllerBase
     {
         [HttpGet("api/cache/view")]
         public CacheStateTS View()
