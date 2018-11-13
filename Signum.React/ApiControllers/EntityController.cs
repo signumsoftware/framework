@@ -17,7 +17,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Signum.React.ApiControllers
 {
-    public class EntitiesController : ApiController
+    public class EntitiesController : ControllerBase
     {
         [HttpGet("api/entity/{type}/{id}"), ProfilerActionSplitter("type")]
         public Entity GetEntity(string type, string id)

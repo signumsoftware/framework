@@ -27,7 +27,7 @@ using System.ComponentModel.DataAnnotations;
 namespace Signum.React.ApiControllers
 {
     [ValidateModelFilter]
-    public class QueryController : ApiController
+    public class QueryController : ControllerBase
     {
         [HttpGet("api/query/findLiteLike"), ProfilerActionSplitter("types")]
         public async Task<List<Lite<Entity>>> FindLiteLike(string types, string subString, int count, CancellationToken token)

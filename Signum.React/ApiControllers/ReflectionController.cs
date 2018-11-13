@@ -18,7 +18,7 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace Signum.React.ApiControllers
 {
-    public class ReflectionController : ApiController
+    public class ReflectionController : ControllerBase
     {
         [HttpGet("api/reflection/types"), AllowAnonymous]
         public Dictionary<string, TypeInfoTS> Types()

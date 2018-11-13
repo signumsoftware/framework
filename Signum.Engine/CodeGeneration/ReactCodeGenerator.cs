@@ -279,7 +279,7 @@ namespace Signum.Engine.CodeGeneration
         protected virtual string WriteControllerClass(Module mod)
         {
             StringBuilder sb = new StringBuilder();
-            sb.AppendLine("public class " + mod.ModuleName + "Controller : ApiController");
+            sb.AppendLine("public class " + mod.ModuleName + "Controller : ControllerBase");
             sb.AppendLine("{");
 
             sb.AppendLine();
