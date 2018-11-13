@@ -1,15 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Reflection;
-using System.Data;
-using System.IO;
 using Signum.Utilities;
 using Signum.Entities;
-using Signum.Engine;
 using System.Linq.Expressions;
-using System.Diagnostics;
 using System.Collections.ObjectModel;
 using Signum.Engine.Linq;
 using Signum.Entities.Reflection;

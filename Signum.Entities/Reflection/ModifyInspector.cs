@@ -1,12 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Reflection;
 using System.Collections;
-using Signum.Entities;
 using Signum.Utilities;
 using System.Linq;
-using System.Security.Permissions;
 using Signum.Utilities.Reflection;
 
 namespace Signum.Entities.Reflection

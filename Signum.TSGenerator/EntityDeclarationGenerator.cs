@@ -4,7 +4,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Runtime.Loader;
 using System.Text;
 
 namespace Signum.TSGenerator

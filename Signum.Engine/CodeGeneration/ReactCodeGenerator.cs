@@ -1,20 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data;
 using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 using Signum.Engine.Maps;
 using Signum.Entities;
 using Signum.Entities.Basics;
 using Signum.Entities.Reflection;
 using Signum.Utilities;
-using Signum.Utilities.DataStructures;
 using Signum.Utilities.ExpressionTrees;
-using Signum.Utilities.Reflection;
 
 namespace Signum.Engine.CodeGeneration
 {
@@ -279,7 +274,7 @@ namespace Signum.Engine.CodeGeneration
         protected virtual string WriteControllerClass(Module mod)
         {
             StringBuilder sb = new StringBuilder();
-            sb.AppendLine("public class " + mod.ModuleName + "Controller : ApiController");
+            sb.AppendLine("public class " + mod.ModuleName + "Controller : ControllerBase");
             sb.AppendLine("{");
 
             sb.AppendLine();

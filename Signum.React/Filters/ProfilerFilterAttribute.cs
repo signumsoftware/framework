@@ -1,23 +1,10 @@
 ﻿using Microsoft.AspNetCore.Mvc.Controllers;
 using Microsoft.AspNetCore.Mvc.Filters;
-using Signum.Engine;
-using Signum.Engine.Basics;
-using Signum.Entities;
-using Signum.Entities.Basics;
-using Signum.Entities.Reflection;
 using Signum.Utilities;
 using Signum.Utilities.ExpressionTrees;
-using Signum.Utilities.Reflection;
 using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Net;
-using System.Net.Http;
-using System.Security.Authentication;
-using System.Text;
-using System.Web;
+
 namespace Signum.React.Filters
 {
     [AttributeUsage(AttributeTargets.Method, Inherited = false, AllowMultiple = true)]

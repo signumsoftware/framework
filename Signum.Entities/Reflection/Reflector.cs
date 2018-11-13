@@ -1,5 +1,4 @@
 ﻿using Signum.Utilities;
-using Signum.Utilities.DataStructures;
 using Signum.Utilities.ExpressionTrees;
 using Signum.Utilities.Reflection;
 using System;
@@ -11,7 +10,6 @@ using System.Globalization;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
-using System.Text.RegularExpressions;
 
 namespace Signum.Entities.Reflection
 {

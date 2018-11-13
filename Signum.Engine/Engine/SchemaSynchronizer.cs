@@ -1,14 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using Signum.Engine;
 using System.Data;
 using Signum.Engine.Maps;
 using Signum.Utilities;
 using Signum.Entities;
 using Signum.Engine.SchemaInfoTables;
-using System.Text.RegularExpressions;
 using Signum.Engine.Linq;
 using Signum.Entities.Reflection;
 

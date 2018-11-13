@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.ApplicationParts;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Signum.Engine.Maps;
@@ -15,7 +14,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Web;
+
 namespace Signum.React.Facades
 {
     public static class SignumServer

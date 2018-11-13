@@ -1,11 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using Signum.Utilities;
-using System.Collections.ObjectModel;
 using Signum.Utilities.DataStructures;
-using Signum.Entities.Reflection;
 using System.Diagnostics;
 
 namespace Signum.Entities

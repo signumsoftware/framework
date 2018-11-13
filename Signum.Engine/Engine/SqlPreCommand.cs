@@ -4,8 +4,6 @@ using System.Linq;
 using System.Text;
 using System.Data.SqlClient;
 using Signum.Utilities;
-using Signum.Utilities.DataStructures;
-using Signum.Entities;
 using System.Text.RegularExpressions;
 using System.IO;
 using System.Threading;

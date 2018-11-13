@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Linq.Expressions;
 using Signum.Utilities;
 using Signum.Entities;
@@ -10,7 +9,6 @@ using Signum.Engine.Maps;
 using Signum.Utilities.ExpressionTrees;
 using Signum.Entities.Reflection;
 using System.Reflection;
-using Enum = System.Enum;
 
 namespace Signum.Engine.Linq
 {

@@ -1,10 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Signum.Utilities;
 using System.Globalization;
-using System.Resources;
 using System.Text.RegularExpressions;
 using System.Collections.ObjectModel;
 using Signum.Utilities.NaturalLanguage;

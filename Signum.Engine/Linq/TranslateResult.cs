@@ -1,15 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Linq.Expressions;
-using System.Data;
 using Signum.Utilities;
 using System.Collections;
-using Signum.Engine.DynamicQuery;
-using System.Data.SqlTypes;
 using Signum.Entities;
-using System.Data.Common;
 using System.Threading;
 using System.Threading.Tasks;
 

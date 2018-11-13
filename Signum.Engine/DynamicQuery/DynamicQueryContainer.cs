@@ -1,21 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using Signum.Utilities;
-using System.Data;
 using System.Reflection;
 using Signum.Entities.DynamicQuery;
 using Signum.Entities;
-using System.Diagnostics;
-using Signum.Services;
-using Signum.Engine.Linq;
-using Signum.Entities.Reflection;
-using Signum.Utilities.ExpressionTrees;
-using Signum.Utilities.Reflection;
-using System.Collections.Concurrent;
 using System.Threading;
-using static Signum.Engine.Maps.SchemaBuilder;
 using System.Threading.Tasks;
 
 namespace Signum.Engine.DynamicQuery

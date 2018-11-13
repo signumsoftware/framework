@@ -1,17 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using Signum.Utilities;
-using Signum.Utilities.ExpressionTrees;
-using Signum.Utilities.Reflection;
-using System.Data;
-using System.Reflection;
-using System.Diagnostics;
-using Signum.Entities.Reflection;
-using Signum.Utilities.DataStructures;
-using System.Collections;
-using System.Linq.Expressions;
 using System.Runtime.Serialization;
 
 namespace Signum.Entities.DynamicQuery

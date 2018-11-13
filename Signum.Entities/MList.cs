@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using Signum.Entities;
 using System.Collections.ObjectModel;
 using Signum.Utilities;
 using Signum.Utilities.ExpressionTrees;

@@ -2,9 +2,7 @@
 using Signum.Entities;
 using Signum.Utilities;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Web;
 
 namespace Signum.React.Json
 {

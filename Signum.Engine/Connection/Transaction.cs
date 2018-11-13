@@ -1,12 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Data;
-using Signum.Utilities.DataStructures;
 using Signum.Utilities;
-using System.Diagnostics;
-using System.IO;
-using Signum.Entities;
 using System.Data.Common;
 using System.Linq;
 

@@ -1,13 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using Signum.Utilities;
-using System.Data.SqlClient;
 using Signum.Entities;
 using Signum.Utilities.DataStructures;
-using Signum.Engine;
-using System.Data;
 using Signum.Entities.Reflection;
 using Signum.Engine.Maps;
 

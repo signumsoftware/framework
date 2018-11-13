@@ -1,17 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using Signum.Entities;
 using Signum.Engine.Maps;
 using Signum.Engine;
 using System.IO;
-using System.Diagnostics;
-using Xunit;
 using Signum.Entities.Basics;
-using Signum.Engine.DynamicQuery;
-using Signum.Utilities.ExpressionTrees;
-using Signum.Utilities;
 using Signum.Engine.Operations;
 using Signum.Engine.Basics;
 using Microsoft.Extensions.Configuration;

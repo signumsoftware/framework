@@ -1,9 +1,6 @@
-﻿using System;
-using Mono.Cecil;
+﻿using Mono.Cecil;
 using System.Linq;
-using System.Collections.Generic;
 using Mono.Cecil.Cil;
-using System.Diagnostics;
 
 namespace Signum.MSBuildTask
 {
