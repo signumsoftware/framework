@@ -1,10 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Linq.Expressions;
-using System.Text;
 using Signum.Entities.Basics;
-using Signum.Entities.Mailing;
 using Signum.Entities.Scheduler;
 using Signum.Utilities;
 

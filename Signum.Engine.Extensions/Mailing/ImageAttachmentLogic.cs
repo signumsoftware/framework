@@ -1,5 +1,4 @@
 ﻿using Signum.Engine.DynamicQuery;
-using Signum.Engine.Files;
 using Signum.Engine.Maps;
 using Signum.Entities;
 using Signum.Entities.Files;
@@ -9,8 +8,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Signum.Engine.Mailing
 {

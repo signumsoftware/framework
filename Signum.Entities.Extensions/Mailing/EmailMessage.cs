@@ -1,22 +1,14 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using Signum.Entities.Authorization;
 using Signum.Entities.Processes;
 using Signum.Utilities;
-using Signum.Entities;
-using Signum.Entities.Mailing;
 using Signum.Entities.Basics;
-using System.Globalization;
 using System.ComponentModel;
-using Signum.Entities.DynamicQuery;
 using System.Net.Mail;
 using System.Linq.Expressions;
 using Signum.Entities.Files;
 using System.Security.Cryptography;
-using Signum.Entities.Scheduler;
-using Signum.Utilities.ExpressionTrees;
 using System.Reflection;
 
 namespace Signum.Entities.Mailing

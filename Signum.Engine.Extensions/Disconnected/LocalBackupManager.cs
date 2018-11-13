@@ -1,12 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.IO;
+﻿using System.IO;
 using Signum.Utilities;
 using System.Data.SqlClient;
-using Signum.Entities.Disconnected;
-using System.Data;
 using Signum.Engine.Maps;
 
 namespace Signum.Engine.Disconnected

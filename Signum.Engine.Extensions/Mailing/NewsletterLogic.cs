@@ -3,23 +3,18 @@ using System.Collections.Generic;
 using System.Linq;
 using Signum.Entities;
 using Signum.Utilities;
-using Signum.Engine.DynamicQuery;
 using Signum.Engine.Maps;
 using System.Reflection;
 using Signum.Engine.Operations;
 using Signum.Engine.Processes;
 using Signum.Entities.Processes;
 using Signum.Entities.Mailing;
-using System.Text.RegularExpressions;
 using Signum.Engine.Basics;
 using Signum.Entities.DynamicQuery;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
 using System.Net.Mail;
-using Signum.Entities.UserQueries;
 using Signum.Engine.Templating;
-using Signum.Utilities.ExpressionTrees;
-using System.Threading;
 
 namespace Signum.Engine.Mailing
 {

@@ -1,18 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using Signum.Entities;
 using Signum.Utilities;
-using Signum.Entities.Authorization;
-using Signum.Entities.Patterns;
 using Signum.Entities.Basics;
 using System.Linq.Expressions;
 using System.ComponentModel;
-using Signum.Services;
-using System.Runtime.CompilerServices;
-using System.Diagnostics;
-using Signum.Utilities.ExpressionTrees;
 
 namespace Signum.Entities.Alerts
 {

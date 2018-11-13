@@ -1,13 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Linq;
-using System.Linq.Expressions;
-using System.Reflection;
-using System.Text;
+﻿using System.ComponentModel;
 using Signum.Entities.Authorization;
-using Signum.Entities.Basics;
-using Signum.Utilities;
 
 namespace Signum.Entities.Translation
 {

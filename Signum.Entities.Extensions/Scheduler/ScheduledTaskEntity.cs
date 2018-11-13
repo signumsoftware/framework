@@ -1,11 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using Signum.Entities;
 using Signum.Utilities;
 using Signum.Utilities.Reflection;
-using Signum.Entities.Processes;
 using Signum.Entities.Authorization;
 using Signum.Entities.Basics;
 

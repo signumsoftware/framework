@@ -1,14 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Xml.Linq;
 using Signum.Entities.Authorization;
 using Signum.Entities.Basics;
 using Signum.Entities.Chart;
 using Signum.Entities.Dashboard;
 using Signum.Entities.Mailing;
-using Signum.Utilities;
 
 namespace Signum.Entities.UserAssets
 {

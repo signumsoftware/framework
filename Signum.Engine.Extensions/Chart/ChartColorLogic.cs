@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using Signum.Engine.Maps;
 using Signum.Engine.DynamicQuery;
 using System.Reflection;
@@ -11,8 +10,6 @@ using Signum.Utilities.Reflection;
 using Signum.Utilities;
 using System.Drawing;
 using Signum.Entities.Basics;
-using Signum.Engine.Basics;
-using Signum.Engine.Cache;
 
 namespace Signum.Engine.Chart
 {

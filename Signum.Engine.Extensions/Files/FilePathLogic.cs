@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using Signum.Engine.Maps;
 using Signum.Entities.Files;
 using Signum.Entities;
@@ -10,13 +8,9 @@ using Signum.Utilities;
 using System.IO;
 using Signum.Engine.DynamicQuery;
 using System.Reflection;
-using System.Diagnostics;
-using System.Web;
 using System.Linq.Expressions;
 using Signum.Engine.Operations;
 using Signum.Utilities.Reflection;
-using Signum.Entities.Isolation;
-using Signum.Utilities.ExpressionTrees;
 
 namespace Signum.Engine.Files
 {

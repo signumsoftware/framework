@@ -1,20 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Reflection;
 using Signum.Entities.Basics;
 using Signum.Entities;
 using Signum.Utilities;
 using Signum.Engine.Maps;
 using System.Linq.Expressions;
-using Signum.Entities.Reflection;
 using Signum.Utilities.ExpressionTrees;
 using Signum.Utilities.Reflection;
-using Signum.Utilities.DataStructures;
-using Signum.Engine.Linq;
-using Signum.Engine.Authorization;
-using Signum.Engine.DynamicQuery;
 
 namespace Signum.Engine.Basics
 {

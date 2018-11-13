@@ -2,17 +2,11 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
-using System.Text;
 using Signum.Engine.Basics;
-using Signum.Engine.DynamicQuery;
 using Signum.Entities;
 using Signum.Entities.DynamicQuery;
 using Signum.Entities.Mailing;
 using Signum.Utilities;
-using Signum.Entities.Translation;
-using Signum.Engine.Translation;
-using Signum.Engine.Mailing;
-using System.Threading;
 
 namespace Signum.Engine.Mailing
 {

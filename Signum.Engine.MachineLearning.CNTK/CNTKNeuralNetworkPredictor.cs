@@ -1,15 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Signum.Entities.MachineLearning;
 using CNTK;
 using Signum.Entities.DynamicQuery;
 using Signum.Utilities;
 using Signum.Entities;
-using Signum.Utilities.Reflection;
-using System.Reflection;
 using System.Diagnostics;
 using Signum.Engine.Files;
 using Signum.Engine.Operations;

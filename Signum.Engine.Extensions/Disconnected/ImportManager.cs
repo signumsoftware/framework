@@ -1,30 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using Signum.Entities.Disconnected;
 using Signum.Engine.Maps;
-using Signum.Engine.Disconnected;
-using Signum.Engine.DynamicQuery;
 using Signum.Entities;
-using Signum.Entities.Reflection;
 using Signum.Utilities;
 using System.IO;
 using System.Data.Common;
-using Signum.Engine.Linq;
-using Signum.Utilities.Reflection;
 using System.Threading.Tasks;
-using System.Windows;
-using System.Linq.Expressions;
-using Signum.Engine.Authorization;
 using System.Threading;
 using System.Reflection;
 using Signum.Utilities.DataStructures;
-using Signum.Engine.Operations;
 using Signum.Entities.Authorization;
 using Signum.Entities.Basics;
 using Signum.Engine.Basics;
-using Signum.Engine.Cache;
 
 namespace Signum.Engine.Disconnected
 {

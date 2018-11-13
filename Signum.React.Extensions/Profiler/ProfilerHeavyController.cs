@@ -2,37 +2,22 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
-using System.Net;
-using System.Net.Http;
 using Microsoft.AspNetCore.Mvc;
 using Signum.Engine.Authorization;
-using Signum.Entities;
-using Signum.Entities.Authorization;
-using Signum.Services;
 using Signum.Utilities;
-using Signum.React.Facades;
-using Signum.React.Authorization;
-using Signum.Engine.Cache;
-using Signum.Engine;
-using Signum.Entities.Cache;
 using Signum.Utilities.ExpressionTrees;
-using System.Threading;
-using Signum.React.ApiControllers;
-using Signum.Engine.Basics;
 using Signum.Entities.Profiler;
 using System.Drawing;
 using Signum.Entities.Reflection;
 using System.Xml.Linq;
 using System.IO;
 using Signum.React.Files;
-using System.Threading.Tasks;
-using Signum.Utilities.DataStructures;
 using Signum.React.Filters;
 
 namespace Signum.React.Profiler
 {
     [ValidateModelFilter]
-    public class ProfilerHeavyController : ApiController
+    public class ProfilerHeavyController : ControllerBase
     {
         [HttpPost("api/profilerHeavy/clear")]
         public void Clear()

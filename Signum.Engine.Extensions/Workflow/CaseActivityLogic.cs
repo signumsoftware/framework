@@ -1,6 +1,4 @@
 ﻿using Signum.Entities.Workflow;
-using Signum.Engine;
-using Signum.Engine.Dynamic;
 using Signum.Engine.DynamicQuery;
 using Signum.Engine.Maps;
 using Signum.Engine.Operations;
@@ -14,16 +12,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 using Signum.Entities.Dynamic;
 using Signum.Engine.Basics;
-using Signum.Entities.DynamicQuery;
 using Signum.Engine.Scheduler;
 using Signum.Engine.Processes;
 using Signum.Entities.Processes;
 using Signum.Engine.Alerts;
-using Signum.Engine.Authorization;
 
 namespace Signum.Engine.Workflow
 {

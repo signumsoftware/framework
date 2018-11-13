@@ -1,6 +1,4 @@
-﻿using Signum.Engine.Mailing;
-using Signum.Engine.Word;
-using Signum.Entities.DynamicQuery;
+﻿using Signum.Entities.DynamicQuery;
 using Signum.Entities.UserAssets;
 using Signum.Utilities.DataStructures;
 using System;
@@ -9,7 +7,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace Signum.Engine.Templating
 {

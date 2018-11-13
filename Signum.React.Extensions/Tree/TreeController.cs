@@ -1,18 +1,12 @@
-﻿using Signum.Engine;
-using Signum.Entities;
+﻿using Signum.Entities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net;
-using System.Net.Http;
-using System.Web.Http;
 using Signum.Engine.Basics;
 using Signum.Utilities.Reflection;
 using Signum.Utilities;
 using Microsoft.SqlServer.Types;
-using System.Data.SqlTypes;
 using Signum.React.Filters;
-using Signum.Engine.DynamicQuery;
 using Signum.React.ApiControllers;
 using Signum.Entities.Tree;
 using Signum.Engine.Tree;
@@ -24,7 +18,7 @@ using System.ComponentModel.DataAnnotations;
 namespace Signum.React.Tree
 {
     [ValidateModelFilter]
-    public class TreeController : ApiController
+    public class TreeController : ControllerBase
     {
         [HttpPost("api/tree/findNodes/{typeName}")]
         public List<TreeNode> FindNodes(string typeName, [Required, FromBody]FindNodesRequest request) {

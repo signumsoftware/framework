@@ -14,12 +14,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Web;
-using Microsoft.AspNetCore.Mvc;
-using Signum.Entities.Chart;
-using Signum.Entities.Dashboard;
-using Signum.Entities.Map;
-using Signum.Entities.UserQueries;
 using Microsoft.AspNetCore.Builder;
 
 namespace Signum.React.Omnibox

@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Signum.Engine.Processes;
 using Signum.Entities;
 using Signum.Entities.MachineLearning;

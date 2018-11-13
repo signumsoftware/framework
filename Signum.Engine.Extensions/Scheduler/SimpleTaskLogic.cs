@@ -1,19 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using Signum.Engine.Operations;
 using Signum.Entities.Scheduler;
-using Signum.Engine.Processes;
 using Signum.Engine.Maps;
-using Signum.Engine.Basics;
 using Signum.Utilities;
-using Signum.Entities.Processes;
 using Signum.Entities;
 using Signum.Engine.DynamicQuery;
 using System.Reflection;
-using Signum.Entities.Authorization;
-using System.Linq.Expressions;
 
 namespace Signum.Engine.Scheduler
 {

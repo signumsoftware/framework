@@ -8,15 +8,11 @@ using Signum.Engine.Basics;
 using Signum.Entities;
 using Signum.Entities.Basics;
 using Signum.Entities.Rest;
-using Signum.React.Filters;
 using Signum.Utilities;
 using System;
 using System.IO;
 using System.Linq;
-using System.Net.Http;
 using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace Signum.React.RestLog
 {

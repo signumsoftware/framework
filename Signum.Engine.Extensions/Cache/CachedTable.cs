@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using Signum.Entities;
 using System.Collections.Concurrent;
 using Signum.Engine.Maps;
@@ -10,10 +9,8 @@ using Signum.Engine.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using Signum.Utilities;
-using Signum.Entities.Cache;
 using System.Data.SqlClient;
 using Signum.Engine.Basics;
-using System.Diagnostics;
 using System.Threading;
 using Signum.Utilities.ExpressionTrees;
 using System.Data;
