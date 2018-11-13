@@ -1,8 +1,8 @@
-﻿import * as React from 'react'
+import * as React from 'react'
 import { FormGroup, ValueLine, EntityLine, EntityCombo, EntityDetail, EntityRepeater, EntityTabRepeater } from '@framework/Lines'
 import { SubTokensOptions } from '@framework/FindOptions'
 import { TypeContext } from '@framework/TypeContext'
-import { EmailTemplateEntity, EmailTemplateContactEmbedded, EmailTemplateRecipientEntity, EmailTemplateMessageEmbedded, EmailTemplateViewMessage, EmailTemplateMessage } from '../Signum.Entities.Mailing'
+import { EmailTemplateEntity, EmailTemplateContactEmbedded, EmailTemplateMessageEmbedded, EmailTemplateViewMessage, EmailTemplateMessage, EmailTemplateRecipientEmbedded } from '../Signum.Entities.Mailing'
 import { TemplateApplicableEval } from '../../Templating/Signum.Entities.Templating'
 import QueryTokenEntityBuilder from '../../UserAssets/Templates/QueryTokenEntityBuilder'
 import TemplateControls from '../../Templating/TemplateControls'
@@ -92,7 +92,7 @@ export default class EmailTemplate extends React.Component<{ ctx: TypeContext<Em
     );
   };
 
-  renderRecipient = (ec: TypeContext<EmailTemplateRecipientEntity>) => {
+  renderRecipient = (ec: TypeContext<EmailTemplateRecipientEmbedded>) => {
 
     const sc = ec.subCtx({ formGroupStyle: "Basic" });
 

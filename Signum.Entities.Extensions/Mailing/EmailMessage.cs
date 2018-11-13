@@ -31,7 +31,7 @@ namespace Signum.Entities.Mailing
 
         [NotNullValidator]
         [CountIsValidator(ComparisonType.GreaterThan, 0)]
-        public MList<EmailRecipientEntity> Recipients { get; set; } = new MList<EmailRecipientEntity>();
+        public MList<EmailRecipientEmbedded> Recipients { get; set; } = new MList<EmailRecipientEmbedded>();
 
         [ImplementedByAll]
         public Lite<Entity> Target { get; set; }
@@ -196,26 +196,26 @@ namespace Signum.Entities.Mailing
     }
 
     [Serializable]
-    public class EmailRecipientEntity : EmailAddressEmbedded, IEquatable<EmailRecipientEntity>
+    public class EmailRecipientEmbedded : EmailAddressEmbedded, IEquatable<EmailRecipientEmbedded>
     {
-        public EmailRecipientEntity() { }
+        public EmailRecipientEmbedded() { }
 
-        public EmailRecipientEntity(EmailOwnerData data)
+        public EmailRecipientEmbedded(EmailOwnerData data)
             : base(data)
         {
             Kind = EmailRecipientKind.To;
         }
 
-        public EmailRecipientEntity(MailAddress ma, EmailRecipientKind kind) : base(ma)
+        public EmailRecipientEmbedded(MailAddress ma, EmailRecipientKind kind) : base(ma)
         {
             this.Kind = kind;
         }
 
         public EmailRecipientKind Kind { get; set; }
 
-        public new EmailRecipientEntity Clone()
+        public new EmailRecipientEmbedded Clone()
         {
-            return new EmailRecipientEntity
+            return new EmailRecipientEmbedded
             {
                 DisplayName = DisplayName,
                 EmailAddress = EmailAddress,
@@ -224,7 +224,7 @@ namespace Signum.Entities.Mailing
             };
         }
 
-        public bool Equals(EmailRecipientEntity other)
+        public bool Equals(EmailRecipientEmbedded other)
         {
             return base.Equals((EmailAddressEmbedded)other) && Kind == other.Kind;
         }
