@@ -347,7 +347,7 @@ namespace Signum.Engine.Mailing.Pop3
 
                         if (email.Recipients.IsEmpty())
                         {
-                            email.Recipients.Add(new EmailRecipientEntity
+                            email.Recipients.Add(new EmailRecipientEmbedded
                             {
                                 EmailAddress = config.Username,
                                 Kind = EmailRecipientKind.To,
