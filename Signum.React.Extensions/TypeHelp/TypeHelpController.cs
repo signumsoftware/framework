@@ -1,15 +1,22 @@
-﻿
+
 using Signum.Engine.Basics;
 using Signum.Engine.Dynamic;
 using Signum.Engine.DynamicQuery;
 using Signum.Engine.Maps;
+using Signum.Engine.Scheduler;
 using Signum.Entities;
+using Signum.Entities.Dynamic;
+using Signum.React.ApiControllers;
 using Signum.React.Facades;
 using Signum.Utilities;
 using Signum.Utilities.ExpressionTrees;
 using System;
+using System.CodeDom.Compiler;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Net;
+using System.Net.Http;
 using Microsoft.AspNetCore.Mvc;
 using Signum.React.Filters;
 using System.ComponentModel.DataAnnotations;
@@ -17,7 +24,7 @@ using System.ComponentModel.DataAnnotations;
 namespace Signum.React.TypeHelp
 {
     [ValidateModelFilter]
-    public class TypeHelpController : ControllerBase
+    public class TypeHelpController : ApiController
     {
 
         [HttpPost("api/typeHelp/autocompleteEntityCleanType")]

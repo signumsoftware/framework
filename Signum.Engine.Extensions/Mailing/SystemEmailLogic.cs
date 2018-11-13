@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -175,7 +175,7 @@ namespace Signum.Engine.Mailing
                         systemEmail => systemEmail.FullClassName,
                         type => type.FullName,
                         (systemEmail, type) => KVP.Create(type, systemEmail),
-                        "caching EmailTemplates")
+                        "caching " + nameof(SystemEmailEntity))
                         .ToDictionary();
                 }, new InvalidateWith(typeof(SystemEmailEntity)));
 

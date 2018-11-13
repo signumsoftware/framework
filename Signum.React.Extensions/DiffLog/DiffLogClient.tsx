@@ -1,4 +1,4 @@
-﻿import * as React from 'react'
+import * as React from 'react'
 import { Link } from 'react-router-dom';
 import { ajaxGet } from '@framework/Services';
 import { EntitySettings } from '@framework/Navigator'

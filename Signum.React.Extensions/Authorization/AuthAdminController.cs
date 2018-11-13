@@ -1,9 +1,17 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
+using System.Net;
+using System.Net.Http;
 using Microsoft.AspNetCore.Mvc;
 using Signum.Engine.Authorization;
 using Signum.Entities;
 using Signum.Entities.Authorization;
+using Signum.Services;
+using Signum.Utilities;
+using Signum.React.Facades;
+using Signum.React.Authorization;
 using Signum.Engine;
 using Signum.Entities.Reflection;
 using Signum.Entities.Basics;
@@ -11,11 +19,12 @@ using Signum.Engine.Basics;
 using Signum.React.Files;
 using System.IO;
 using Signum.React.Filters;
+using Signum.React.ApiControllers;
 
 namespace Signum.React.Authorization
 {
     [ValidateModelFilter]
-    public class AuthAdminController : ControllerBase
+    public class AuthAdminController : ApiController
     {
         [HttpGet("api/authAdmin/permissionRules/{roleId}")]
         public PermissionRulePack GetPermissionRules(string roleId)

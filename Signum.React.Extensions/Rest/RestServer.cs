@@ -1,4 +1,4 @@
-﻿using Signum.Engine.Rest;
+using Signum.Engine.Rest;
 using Signum.React.Filters;
 using Signum.Engine;
 using Signum.Utilities;

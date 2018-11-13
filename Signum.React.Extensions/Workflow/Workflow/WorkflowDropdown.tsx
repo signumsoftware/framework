@@ -1,4 +1,4 @@
-﻿
+
 import * as React from 'react'
 import { getTypeInfo } from '@framework/Reflection'
 import { JavascriptMessage } from '@framework/Signum.Entities'

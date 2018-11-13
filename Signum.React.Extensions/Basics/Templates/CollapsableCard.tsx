@@ -1,4 +1,4 @@
-﻿import * as React from 'react'
+import * as React from 'react'
 import { classes } from '@framework/Globals'
 import { BsColor } from '@framework/Components/Basic';
 import { Collapse } from '@framework/Components';

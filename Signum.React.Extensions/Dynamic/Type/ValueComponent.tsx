@@ -1,4 +1,4 @@
-﻿import * as React from 'react'
+import * as React from 'react'
 import { Dic, classes } from '@framework/Globals'
 import { getTypeInfo, Binding, PropertyRoute } from '@framework/Reflection'
 import { DynamicTypeDesignContext } from './DynamicTypeDefinitionComponent'

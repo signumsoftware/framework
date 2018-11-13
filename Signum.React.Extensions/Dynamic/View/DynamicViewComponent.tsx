@@ -1,4 +1,4 @@
-﻿import * as React from 'react'
+import * as React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { ValueLine } from '@framework/Lines'
 import { ModifiableEntity, JavascriptMessage, NormalWindowMessage } from '@framework/Signum.Entities'

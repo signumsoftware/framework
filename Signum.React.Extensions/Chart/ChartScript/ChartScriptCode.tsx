@@ -1,4 +1,4 @@
-﻿import * as React from 'react'
+import * as React from 'react'
 import { ChartScriptEntity } from '../Signum.Entities.Chart'
 import { TypeContext } from '@framework/TypeContext'
 import JavascriptCodeMirror from '../../Codemirror/JavascriptCodeMirror'

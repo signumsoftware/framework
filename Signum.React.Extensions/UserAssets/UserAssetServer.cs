@@ -1,4 +1,4 @@
-﻿using Signum.Entities.UserAssets;
+using Signum.Entities.UserAssets;
 using Signum.React.Json;
 using Signum.Utilities;
 using System.Reflection;

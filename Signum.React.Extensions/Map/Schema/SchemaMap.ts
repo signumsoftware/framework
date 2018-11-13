@@ -1,4 +1,4 @@
-﻿import * as d3 from "d3"
+import * as d3 from "d3"
 import { EntityData, EntityKind } from '@framework/Reflection'
 import * as Finder from '@framework/Finder'
 import { Point, Rectangle, calculatePoint, wrap, forceBoundingBox } from '../Utils'
