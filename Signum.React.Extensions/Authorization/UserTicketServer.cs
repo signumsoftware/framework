@@ -24,7 +24,7 @@ namespace Signum.React.Authorization
             {
                 try
                 {
-                    if (ac.HttpContext.Request.Cookies.TryGetValue(CookieName, out string ticketText) || !ticketText.HasText())
+                    if (!ac.HttpContext.Request.Cookies.TryGetValue(CookieName, out string ticketText) || !ticketText.HasText())
                         return false;   //there is no cookie
 
                     var httpConnection = ac.HttpContext.Features.Get<IHttpConnectionFeature>();

@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Http.Internal;
 using Microsoft.AspNetCore.Mvc.Controllers;
@@ -31,7 +31,7 @@ namespace Signum.React.RestLog
 
         public bool AllowReplay { get; set; }
 
-        public override void OnResultExecuting(ResultExecutingContext context)
+        public override void OnActionExecuting(ActionExecutingContext context)
         {
             try
             {
@@ -82,6 +82,7 @@ namespace Signum.React.RestLog
             string result;
             // Arguments: Stream, Encoding, detect encoding, buffer size 
             // AND, the most important: keep stream opened
+            request.Body.Position = 0;
             using (StreamReader reader = new StreamReader(request.Body, Encoding.UTF8, true, 1024, true))
             {
                 result = reader.ReadToEnd();
@@ -93,19 +94,32 @@ namespace Signum.React.RestLog
             return result;
         }
 
+        public override void OnActionExecuted(ActionExecutedContext context)
+        {
+            if(context.Exception != null)
+            {
+                var request = (RestLogEntity)context.HttpContext.Items.GetOrThrow(typeof(RestLogEntity).FullName);
+                var originalStream = (Stream)context.HttpContext.Items.GetOrThrow(OriginalResponseStreamKey);
+                request.EndDate = TimeZoneManager.Now;
+                request.Exception = context.Exception.LogException()?.ToLite();
+
+                RestoreOriginalStream(context);
+
+                using (ExecutionMode.Global())
+                    request.Save();
+            }
+
+            base.OnActionExecuted(context);
+        }
+
         public override void OnResultExecuted(ResultExecutedContext context)
         {
             try
             {
-                var request =(RestLogEntity)context.HttpContext.Items.GetOrThrow(typeof(RestLogEntity).FullName);
-                var originalStream =(Stream)context.HttpContext.Items.GetOrThrow(OriginalResponseStreamKey);
+                var request = (RestLogEntity)context.HttpContext.Items.GetOrThrow(typeof(RestLogEntity).FullName);
                 request.EndDate = TimeZoneManager.Now;
 
-                var memoryStream = context.HttpContext.Response.Body;
-                memoryStream.Seek(0, System.IO.SeekOrigin.Begin);
-                memoryStream.CopyTo(originalStream);
-
-                context.HttpContext.Response.Body = originalStream;
+                Stream memoryStream = RestoreOriginalStream(context);
 
                 if (context.Exception == null)
                 {
@@ -121,10 +135,21 @@ namespace Signum.React.RestLog
                 using (ExecutionMode.Global())
                     request.Save();
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 e.LogException();
             }
+        }
+
+        private static Stream RestoreOriginalStream(FilterContext context)
+        {
+            var originalStream = (Stream)context.HttpContext.Items.GetOrThrow(OriginalResponseStreamKey);
+            var memoryStream = context.HttpContext.Response.Body;
+            memoryStream.Seek(0, System.IO.SeekOrigin.Begin);
+            memoryStream.CopyTo(originalStream);
+
+            context.HttpContext.Response.Body = originalStream;
+            return memoryStream;
         }
     }
 

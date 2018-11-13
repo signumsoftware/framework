@@ -37,7 +37,7 @@ namespace Signum.Entities.Mailing
 
         [NotNullValidator]
         [NoRepeatValidator]
-        public MList<EmailRecipientEntity> AdditionalRecipients { get; set; } = new MList<EmailRecipientEntity>();
+        public MList<EmailRecipientEmbedded> AdditionalRecipients { get; set; } = new MList<EmailRecipientEmbedded>();
 
         protected override string PropertyValidation(System.Reflection.PropertyInfo pi)
         {

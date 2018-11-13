@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -59,7 +59,7 @@ namespace Signum.Entities.Mailing
         public EmailTemplateContactEmbedded From { get; set; }
 
         [NotNullValidator, NoRepeatValidator]
-        public MList<EmailTemplateRecipientEntity> Recipients { get; set; } = new MList<EmailTemplateRecipientEntity>();
+        public MList<EmailTemplateRecipientEmbedded> Recipients { get; set; } = new MList<EmailTemplateRecipientEmbedded>();
 
         [PreserveOrder]
         [NotNullValidator, NoRepeatValidator, ImplementedBy(typeof(ImageAttachmentEntity)), NotifyChildProperty]
@@ -182,7 +182,7 @@ namespace Signum.Entities.Mailing
                 Token = from.Attribute("Token")?.Let(t => new QueryTokenEmbedded(t.Value)),
             });
 
-            Recipients = element.Element("Recipients").Elements("Recipient").Select(rep => new EmailTemplateRecipientEntity
+            Recipients = element.Element("Recipients").Elements("Recipient").Select(rep => new EmailTemplateRecipientEmbedded
             {
                 DisplayName = rep.Attribute("DisplayName").Value,
                 EmailAddress = rep.Attribute("EmailAddress").Value,
@@ -235,7 +235,7 @@ namespace Signum.Entities.Mailing
     }
 
     [Serializable]
-    public class EmailTemplateRecipientEntity : EmailTemplateContactEmbedded
+    public class EmailTemplateRecipientEmbedded : EmailTemplateContactEmbedded
     {
         public EmailRecipientKind Kind { get; set; }
 

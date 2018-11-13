@@ -95,7 +95,7 @@ export module EmailMasterTemplateOperation {
 export const EmailMessageEntity = new Type<EmailMessageEntity>("EmailMessage");
 export interface EmailMessageEntity extends Entities.Entity, Processes.IProcessLineDataEntity {
   Type: "EmailMessage";
-  recipients: Entities.MList<EmailRecipientEntity>;
+  recipients: Entities.MList<EmailRecipientEmbedded>;
   target?: Entities.Lite<Entities.Entity> | null;
   from?: EmailAddressEmbedded | null;
   template?: Entities.Lite<EmailTemplateEntity> | null;
@@ -180,8 +180,8 @@ export interface EmailReceptionMixin extends Entities.MixinEntity {
   receptionInfo?: EmailReceptionInfoEmbedded | null;
 }
 
-export const EmailRecipientEntity = new Type<EmailRecipientEntity>("EmailRecipientEntity");
-export interface EmailRecipientEntity extends EmailAddressEmbedded {
+export const EmailRecipientEmbedded = new Type<EmailRecipientEmbedded>("EmailRecipientEmbedded");
+export interface EmailRecipientEmbedded extends EmailAddressEmbedded {
   kind?: EmailRecipientKind;
 }
 
@@ -210,7 +210,7 @@ export interface EmailTemplateEntity extends Entities.Entity, UserAssets.IUserAs
   systemEmail?: SystemEmailEntity | null;
   sendDifferentMessages?: boolean;
   from?: EmailTemplateContactEmbedded | null;
-  recipients: Entities.MList<EmailTemplateRecipientEntity>;
+  recipients: Entities.MList<EmailTemplateRecipientEmbedded>;
   attachments: Entities.MList<IAttachmentGeneratorEntity>;
   masterTemplate?: Entities.Lite<EmailMasterTemplateEntity> | null;
   isBodyHtml?: boolean;
@@ -248,8 +248,8 @@ export module EmailTemplateOperation {
   export const Delete : Entities.DeleteSymbol<EmailTemplateEntity> = registerSymbol("Operation", "EmailTemplateOperation.Delete");
 }
 
-export const EmailTemplateRecipientEntity = new Type<EmailTemplateRecipientEntity>("EmailTemplateRecipientEntity");
-export interface EmailTemplateRecipientEntity extends EmailTemplateContactEmbedded {
+export const EmailTemplateRecipientEmbedded = new Type<EmailTemplateRecipientEmbedded>("EmailTemplateRecipientEmbedded");
+export interface EmailTemplateRecipientEmbedded extends EmailTemplateContactEmbedded {
   kind?: EmailRecipientKind;
 }
 
@@ -383,7 +383,7 @@ export interface SmtpConfigurationEntity extends Entities.Entity {
   network?: SmtpNetworkDeliveryEmbedded | null;
   pickupDirectoryLocation?: string | null;
   defaultFrom?: EmailAddressEmbedded | null;
-  additionalRecipients: Entities.MList<EmailRecipientEntity>;
+  additionalRecipients: Entities.MList<EmailRecipientEmbedded>;
 }
 
 export module SmtpConfigurationOperation {
