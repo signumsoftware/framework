@@ -1,4 +1,4 @@
-﻿import * as React from 'react'
+import * as React from 'react'
 import { QueryEntity } from '@framework/Signum.Entities.Basics';
 import { notifySuccess } from '@framework/Operations/EntityOperations'
 import { TypeContext, ButtonsContext, IRenderButtons } from '@framework/TypeContext'

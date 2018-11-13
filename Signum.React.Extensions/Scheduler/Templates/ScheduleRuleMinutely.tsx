@@ -1,4 +1,4 @@
-﻿import * as React from 'react'
+import * as React from 'react'
 import { ValueLine } from '@framework/Lines'
 import { TypeContext } from '@framework/TypeContext'
 import { ScheduleRuleMinutelyEntity } from '../Signum.Entities.Scheduler'

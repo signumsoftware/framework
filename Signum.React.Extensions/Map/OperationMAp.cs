@@ -1,4 +1,4 @@
-﻿using Signum.Engine;
+using Signum.Engine;
 using Signum.Engine.Operations;
 using Signum.Entities;
 using Signum.Entities.Basics;

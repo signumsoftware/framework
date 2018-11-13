@@ -1,4 +1,4 @@
-﻿import * as React from 'react'
+import * as React from 'react'
 import { getQueryNiceName } from '@framework/Reflection'
 import * as Finder from '@framework/Finder'
 import { QueryEntity } from '@framework/Signum.Entities.Basics'

@@ -1,4 +1,4 @@
-﻿import * as React from 'react'
+import * as React from 'react'
 import { RouteComponentProps } from 'react-router'
 import { StyleContext, RenderEntity, TypeContext } from '@framework/Lines'
 import * as Finder from '@framework/Finder'

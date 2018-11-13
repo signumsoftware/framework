@@ -1,4 +1,4 @@
-﻿import * as React from 'react'
+import * as React from 'react'
 import { ValueLine, EntityLine } from '@framework/Lines'
 import { TypeContext } from '@framework/TypeContext'
 import { EmailRecipientEntity } from '../Signum.Entities.Mailing'

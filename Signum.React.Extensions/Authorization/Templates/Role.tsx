@@ -1,4 +1,4 @@
-﻿import * as React from 'react'
+import * as React from 'react'
 import { RoleEntity, AuthAdminMessage } from '../Signum.Entities.Authorization'
 import { ValueLine, EntityList, TypeContext } from '@framework/Lines'
 

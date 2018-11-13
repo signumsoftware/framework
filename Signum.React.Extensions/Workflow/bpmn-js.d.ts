@@ -1,4 +1,4 @@
-﻿
+
 declare namespace BPMN {
 
   type ElementType =
