@@ -9,7 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Signum.React.Dynamic
 {
-    public class DynamicViewController : ApiController
+    public class DynamicViewController : ControllerBase
     {
         [HttpGet("api/dynamic/view/{typeName}")]
         public DynamicViewEntity GetDynamicView(string typeName, string viewName)

@@ -9,7 +9,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Signum.React.Dynamic
 {
-    public class DynamicTypeController : ApiController
+    public class DynamicTypeController : ControllerBase
     {
         [HttpPost("api/dynamic/type/propertyType")]
         public string CodePropertyType([Required, FromBody]DynamicProperty property)

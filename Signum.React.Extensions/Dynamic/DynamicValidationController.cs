@@ -13,7 +13,7 @@ using System.ComponentModel.DataAnnotations;
 namespace Signum.React.Dynamic
 {
     [ValidateModelFilter]
-    public class DynamicValidationController : ApiController
+    public class DynamicValidationController : ControllerBase
     {
         [HttpPost("api/dynamic/validation/routeTypeName")]
         public string RouteTypeName([Required, FromBody]PropertyRouteEntity pr)

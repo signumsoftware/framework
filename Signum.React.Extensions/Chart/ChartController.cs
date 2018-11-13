@@ -7,7 +7,7 @@ using Signum.Engine.Chart;
 
 namespace Signum.React.Chart
 {
-    public class ChartController : ApiController
+    public class ChartController : ControllerBase
     {
         [HttpGet("api/chart/scripts")]
         public List<List<ChartScriptEntity>> ChartScripts()

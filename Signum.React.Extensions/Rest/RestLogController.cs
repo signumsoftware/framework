@@ -10,7 +10,7 @@ using Signum.Engine.Rest;
 
 namespace Signum.React.RestLog
 {
-    public class RestLogController : ApiController
+    public class RestLogController : ControllerBase
     {
         [HttpGet("api/restLog/")]
         public async Task<RestDiffResult> GetRestDiffLog(string id, string url)
