@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Signum.Entities.Basics;
@@ -87,7 +87,7 @@ namespace Signum.Engine.Basics
                         q => q.Key,
                         kvp => kvp.Key,
                         (q, kvp) => KVP.Create(kvp.Value, q),
-                        "caching QueryEntity").ToDictionary(),
+                        "caching " + nameof(QueryEntity)).ToDictionary(),
                     new InvalidateWith(typeof(QueryEntity)),
                     Schema.Current.InvalidateMetadata);
             }
