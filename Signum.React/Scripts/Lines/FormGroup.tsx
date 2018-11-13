@@ -1,4 +1,4 @@
-﻿import * as React from 'react'
+import * as React from 'react'
 import { StyleContext, TypeContext } from '../Lines';
 import { classes, addClass } from '../Globals';
 import "./Lines.css"
@@ -54,7 +54,7 @@ export class FormGroup extends React.Component<FormGroupProps> {
           )
       }
       {ctx.formGroupStyle == "BasicDown" && label}
-      {this.props.helpText && ctx.formGroupStyle != "LabelColumns" && <span className="form-text text-muted">{this.props.helpText}</span>}
+      {this.props.helpText && ctx.formGroupStyle != "LabelColumns" && <small className="form-text text-muted">{this.props.helpText}</small>}
     </div>;
   }
 }
