@@ -553,7 +553,7 @@ export namespace External {
     export const No0Found = new MessageKey("CollectionMessage", "No0Found");
     export const MoreThanOne0Found = new MessageKey("CollectionMessage", "MoreThanOne0Found");
   }
-
+  
   export const DayOfWeek = new EnumType<DayOfWeek>("DayOfWeek");
   export type DayOfWeek =
     "Sunday" |
@@ -563,7 +563,7 @@ export namespace External {
     "Thursday" |
     "Friday" |
     "Saturday";
-
+  
 }
 
 
