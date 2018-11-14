@@ -1,4 +1,4 @@
-﻿import * as React from 'react'
+import * as React from 'react'
 import { classes } from '../Globals'
 import * as OrderUtils from '../Frames/OrderUtils'
 import { IRenderButtons, ButtonsContext } from '../TypeContext'

@@ -1,4 +1,4 @@
-﻿import * as React from "react";
+import * as React from "react";
 import { match, Route, RouterChildContext, matchPath, RouteProps, Switch } from "react-router";
 import * as H from "history";
 import * as Navigator from "./Navigator";
