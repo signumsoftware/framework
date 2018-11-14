@@ -7,7 +7,7 @@ namespace Signum.React.Workflow
     {
         public static void Start(IApplicationBuilder app)
         {
-            SignumControllerFactory.RegisterArea(MethodInfo.GetCurrentMethod());            
+            SignumControllerFactory.RegisterArea(MethodInfo.GetCurrentMethod());
         }
     }
 }

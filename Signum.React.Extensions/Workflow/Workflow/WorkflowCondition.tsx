@@ -1,4 +1,4 @@
-﻿import * as React from 'react'
+import * as React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { ValueLine, EntityLine, TypeContext, LiteAutocompleteConfig } from '@framework/Lines'
 import { PropertyRoute, Binding } from '@framework/Reflection'
@@ -123,7 +123,7 @@ export default class WorkflowConditionComponent extends React.Component<Workflow
                 type={{ name: typeName }} labelText="Example Entity" />
         );
     }
-    
+
     handleOnView = (exampleEntity: ICaseMainEntity) => {
         return Navigator.view(exampleEntity, { requiresSaveOperation: false });
     }
@@ -141,7 +141,7 @@ export default class WorkflowConditionComponent extends React.Component<Workflow
                     res.validationResult == true ?
                         <div className="alert alert-success">True</div> :
                         <div className="alert alert-warning">False</div>
-                        
+
                 }
             </div>
         );

@@ -1,6 +1,6 @@
 ﻿.sf-profiler-chart svg
 {
-    shape-rendering: crispEdges;         
+    shape-rendering: crispEdges;
 }
 .sf-profiler-chart .entry
 {
@@ -8,9 +8,9 @@
 }
 .sf-profiler-chart .shape-before
 {
-    opacity: 0.7;    
+    opacity: 0.7;
 }
 .sf-profiler-chart .label
 {
-    font-size: 12px;    
+    font-size: 12px;
 }

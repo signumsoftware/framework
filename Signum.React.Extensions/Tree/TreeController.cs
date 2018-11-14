@@ -25,7 +25,7 @@ namespace Signum.React.Tree
 
             Type type = TypeLogic.GetType(typeName);
 
-            var list =  giFindNodesGeneric.GetInvoker(type)(request);       
+            var list =  giFindNodesGeneric.GetInvoker(type)(request);
 
             return ToTreeNodes(list);
         }
@@ -83,7 +83,7 @@ namespace Signum.React.Tree
             return list.Concat(expandedChildren).ToList();
         }
 
-     
+
         static List<TreeNode> ToTreeNodes(List<TreeInfo> infos)
         {
             var dictionary = infos.Distinct(a => a.route).ToDictionary(a => a.route);

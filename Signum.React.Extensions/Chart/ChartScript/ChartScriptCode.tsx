@@ -65,16 +65,16 @@ export default class ChartScriptCode extends React.Component<{ ctx: TypeContext<
   }
 
   static example = `//const chart = d3.select('#sfChartControl .sf-chart-container').append('svg:svg').attr('width', width).attr('height', height))
-//const data = { 
-//              "columns": { "c0": { "title":"Product", "token":"Product", "isGroupKey":true, ... }, 
-                             "c1": { "title":"Count", "token":"Count", "isGroupKey":true, ...} 
+//const data = {
+//              "columns": { "c0": { "title":"Product", "token":"Product", "isGroupKey":true, ... },
+                             "c1": { "title":"Count", "token":"Count", "isGroupKey":true, ...}
                           },
 //              "rows": [ { "c0": { "key": "Product;1", "toStr": "Apple", "color": undefined }, "c1": { "key": "140", "toStr": "140" } },
 //                        { "c0": { "key": "Product;2", "toStr": "Orange", "color": undefined }, "c1": { "key": "179", "toStr": "179" } }, ...
 //                      ]
 //           }
 // DrawChart(chart, data);
-// 
+//
 // Visit: http://d3js.org/
 // Other functions defined in: \Chart\Scripts\ChartUtils.js
 // use 'debugger' keyword or just throw JSON.stringify(myVariable)

@@ -28,7 +28,7 @@ namespace Signum.React.Excel
 
             var fileName = request.queryKey + TimeZoneManager.Now.ToString("yyyyMMdd-HHmmss") + ".xlsx";
 
-            return FilesController.GetFileStreamResult(new MemoryStream(binaryFile), fileName);            
+            return FilesController.GetFileStreamResult(new MemoryStream(binaryFile), fileName);
         }
 
         [HttpGet("api/excel/reportsFor/{queryKey}")]

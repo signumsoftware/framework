@@ -101,6 +101,6 @@ namespace Signum.React.Dynamic
     public class EvalEntityError
     {
         public Lite<Entity> lite;
-        public string error; 
+        public string error;
     }
 }

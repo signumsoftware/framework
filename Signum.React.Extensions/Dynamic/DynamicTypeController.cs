@@ -15,7 +15,7 @@ namespace Signum.React.Dynamic
         public string CodePropertyType([Required, FromBody]DynamicProperty property)
         {
             return DynamicTypeLogic.GetPropertyType(property);
-          
+
         }
 
         [HttpGet("api/dynamic/type/expressionNames/{typeName}")]

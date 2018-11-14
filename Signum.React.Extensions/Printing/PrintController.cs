@@ -14,7 +14,7 @@ namespace Signum.React.Processes
         [HttpGet("api/printing/stats")]
         public List<PrintStat> Stats()
         {
-            return PrintingLogic.GetReadyToPrintStats();           
+            return PrintingLogic.GetReadyToPrintStats();
         }
 
         [HttpPost("api/printing/createProcess")]

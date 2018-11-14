@@ -1,4 +1,4 @@
-﻿using Signum.React.Json;
+using Signum.React.Json;
 using Signum.Utilities;
 using System.Collections.Generic;
 using System.Linq;
@@ -92,7 +92,7 @@ namespace Signum.React.Chart
         {
             var converters = PropertyConverter.GetPropertyConverters(typeof(ChartRequest));
             converters.Remove("queryName");
-            
+
             converters.Add("queryKey", new PropertyConverter()
             {
                 AvoidValidate = true,
@@ -108,7 +108,7 @@ namespace Signum.React.Chart
                     ctx.JsonWriter.WriteValue(QueryLogic.GetQueryEntity(cr.QueryName).Key);
                 }
             });
-            
+
             converters.Add("filters", new PropertyConverter()
             {
                 AvoidValidate = true,
@@ -130,7 +130,7 @@ namespace Signum.React.Chart
                     ctx.JsonSerializer.Serialize(ctx.JsonWriter, cr.Filters.Select(f => FilterTS.FromFilter(f)).ToList());
                 }
             });
-            
+
             converters.Add("orders", new PropertyConverter()
             {
                 AvoidValidate = true,

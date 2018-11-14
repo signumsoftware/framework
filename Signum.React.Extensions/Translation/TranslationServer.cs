@@ -38,7 +38,7 @@ namespace Signum.React.Translation
 
             return null;
         }
-        
+
 
         public static string ReadLanguageCookie(ActionContext ac)
         {

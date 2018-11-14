@@ -13,7 +13,7 @@
     color: #555;
     border: 2px dashed #555;
     border-radius: 7px;
-    cursor: default;    
+    cursor: default;
 }
 
 .sf-file-drop .sf-upload{
@@ -28,7 +28,7 @@
 }
 .sf-file-line-new
 {
-    overflow: hidden;    
+    overflow: hidden;
 }
 
 .form-control.file-control {

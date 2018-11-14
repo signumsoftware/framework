@@ -137,7 +137,7 @@ export default class DynamicTypeConditionComponent extends React.Component<Dynam
                     res.validationResult == true ?
                         <div className="alert alert-success">True</div> :
                         <div className="alert alert-warning">False</div>
-                        
+
                 }
             </div>
         );

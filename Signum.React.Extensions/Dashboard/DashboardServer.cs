@@ -25,7 +25,7 @@ namespace Signum.React.Dashboard
                 var dashboards = DashboardLogic.GetDashboardsEntity(ep.entity.GetType());
                 if (dashboards.Any())
                     ep.Extension.Add("dashboards", dashboards);
-          
+
                 var result = DashboardLogic.GetEmbeddedDashboard(ep.entity.GetType());
                 if (result != null)
                     ep.Extension.Add("embeddedDashboard", result);

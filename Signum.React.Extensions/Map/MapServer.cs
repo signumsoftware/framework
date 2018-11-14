@@ -61,7 +61,7 @@ namespace Signum.React.Map
                     NiceName = MapMessage.Rows.NiceToString(),
                 }
             };
-            
+
             if (Schema.Current.Tables.Any(a => a.Value.SystemVersioned != null))
             {
                 SchemaMap.GetColorProviders += () => new[]
@@ -84,7 +84,7 @@ namespace Signum.React.Map
             };
 
             if(Schema.Current.Tables.Any(a => a.Value.SystemVersioned != null))
-            { 
+            {
                 SchemaMap.GetColorProviders += () => new[]
                 {
                     new MapColorProvider

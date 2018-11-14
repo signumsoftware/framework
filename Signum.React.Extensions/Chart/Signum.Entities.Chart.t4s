@@ -1,4 +1,4 @@
-﻿import { FilterOptionParsed, OrderOptionParsed, FilterRequest, OrderRequest } from '@framework/FindOptions' 
+﻿import { FilterOptionParsed, OrderOptionParsed, FilterRequest, OrderRequest } from '@framework/FindOptions'
 
 //Partial
 export interface ChartRequest {

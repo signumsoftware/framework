@@ -1,4 +1,4 @@
-﻿import * as React from 'react'
+import * as React from 'react'
 import { ModifiableEntity } from '@framework/Signum.Entities'
 import { classes, Dic } from '@framework/Globals'
 import { TypeContext } from '@framework/TypeContext'

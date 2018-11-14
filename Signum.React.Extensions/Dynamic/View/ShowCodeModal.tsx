@@ -63,7 +63,7 @@ import * as React from 'react'
 import { Dic } from '@framework/Globals'
 import { getMixin } from '@framework/Signum.Entities'
 import { ${typeName}Entity } from '../[your namespace]'
-import { ValueLine, EntityLine, RenderEntity, EntityCombo, EntityList, EntityDetail, EntityStrip, 
+import { ValueLine, EntityLine, RenderEntity, EntityCombo, EntityList, EntityDetail, EntityStrip,
          EntityRepeater, EntityCheckboxList, EntityTabRepeater, TypeContext, EntityTable } from '@framework/Lines'
 import { SearchControl, ValueSearchControl } from '@framework/Search'
 ${Dic.getValues(cc.imports.toObjectDistinct(a => a)).join("\n")}

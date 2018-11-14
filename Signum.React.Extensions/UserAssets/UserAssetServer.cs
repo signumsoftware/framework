@@ -24,7 +24,7 @@ namespace Signum.React.UserAssets
 
             var pcs = PropertyConverter.GetPropertyConverters(typeof(QueryTokenEmbedded));
             pcs.Add("token", new PropertyConverter()
-            {   
+            {
                 CustomWriteJsonProperty = ctx =>
                 {
                     var qte = (QueryTokenEmbedded)ctx.Entity;

@@ -177,7 +177,7 @@ namespace Signum.React.Translation
                 }).ToDictionary(lt => lt.type),
             };
         }
-        
+
         [HttpGet("api/translation/syncStats")]
         public List<NamespaceSyncStats> SyncStats(string assembly, string culture)
         {
@@ -194,7 +194,7 @@ namespace Signum.React.Translation
         private LocalizedTypeTS GetLocalizedType(LocalizedTypeChanges t, CultureInfo ci, bool isTarget)
         {
             var tc = t.TypeConflict?.TryGetC(ci);
-            
+
             return new LocalizedTypeTS
             {
                 culture = ci.Name,
@@ -221,7 +221,7 @@ namespace Signum.React.Translation
             public Dictionary<string, CulturesTS> cultures;
             public Dictionary<string, LocalizableTypeTS> types;
         }
-        
+
         public class CulturesTS
         {
             public string name;

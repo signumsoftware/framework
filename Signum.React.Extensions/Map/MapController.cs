@@ -12,9 +12,9 @@ namespace Signum.React.Map
         public SchemaMapInfo Index()
         {
             MapPermission.ViewMap.AssertAuthorized();
-            
+
             return SchemaMap.GetMapInfo();
-            
+
         }
 
         [HttpGet("api/map/operations/{typeName}")]

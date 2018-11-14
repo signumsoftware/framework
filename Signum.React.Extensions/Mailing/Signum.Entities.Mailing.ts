@@ -414,13 +414,13 @@ export namespace External {
   export type SmtpDeliveryFormat =
     "SevenBit" |
     "International";
-  
+
   export const SmtpDeliveryMethod = new EnumType<SmtpDeliveryMethod>("SmtpDeliveryMethod");
   export type SmtpDeliveryMethod =
     "Network" |
     "SpecifiedPickupDirectory" |
     "PickupDirectoryFromIis";
-  
+
 }
 
 

@@ -1,4 +1,4 @@
-﻿import * as React from 'react'
+import * as React from 'react'
 import { openModal, IModalProps } from '../../../Framework/Signum.React/Scripts/Modals';
 import { Lite } from '../../../Framework/Signum.React/Scripts/Signum.Entities'
 import { getTypeInfo } from '../../../Framework/Signum.React/Scripts/Reflection'

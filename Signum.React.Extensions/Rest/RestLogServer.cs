@@ -9,7 +9,7 @@ namespace Signum.React.RestLog
         {
             SignumControllerFactory.RegisterArea(MethodInfo.GetCurrentMethod());
 
-            
+
         }
     }
 }

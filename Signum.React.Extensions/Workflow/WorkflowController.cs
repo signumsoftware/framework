@@ -1,4 +1,4 @@
-﻿using Signum.Entities.Workflow;
+using Signum.Entities.Workflow;
 using Signum.Engine.Workflow;
 using Signum.Engine;
 using Signum.Engine.Operations;

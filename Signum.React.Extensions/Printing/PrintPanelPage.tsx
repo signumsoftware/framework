@@ -1,4 +1,4 @@
-﻿import * as React from 'react'
+import * as React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { ValueSearchControl, SearchControl, ValueSearchControlLine } from '@framework/Search'
 import { StyleContext } from '@framework/Lines'

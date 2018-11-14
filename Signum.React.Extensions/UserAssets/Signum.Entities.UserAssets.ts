@@ -7,7 +7,7 @@ import * as Entities from '../../../Framework/Signum.React/Scripts/Signum.Entiti
 import * as Basics from '../../../Framework/Signum.React/Scripts/Signum.Entities.Basics'
 import * as Authorization from '../Authorization/Signum.Entities.Authorization'
 
-import { QueryToken } from '@framework/FindOptions' 
+import { QueryToken } from '@framework/FindOptions'
 
 export interface QueryTokenEmbedded {
     token?: QueryToken;

@@ -10,13 +10,13 @@ namespace Signum.React.Omnibox
         public string Key { get; set; }
 
         //filtered client-side to avoid duplication, at the end the action itself is server-side checked
-        public Func<bool> Allowed { get; } = () => true; 
+        public Func<bool> Allowed { get; } = () => true;
     }
 
     public class ReactSpecialOmniboxGenerator : OmniboxResultGenerator<SpecialOmniboxResult>
     {
         //Depends on client-side information
-        public static SpecialOmniboxGenerator<ReactSpecialOmniboxAction> ClientGenerator; 
+        public static SpecialOmniboxGenerator<ReactSpecialOmniboxAction> ClientGenerator;
 
         public override List<HelpOmniboxResult> GetHelp()
         {

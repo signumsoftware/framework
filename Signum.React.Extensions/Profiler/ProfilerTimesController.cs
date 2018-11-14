@@ -49,13 +49,13 @@ namespace Signum.React.Profiler
             public int count;
             public double averageTime;
             public double totalTime;
-            
+
             public long lastTime;
             public DateTime lastDate;
-            
+
             public long maxTime;
             public DateTime maxDate;
-            
+
             public long minTime;
             public DateTime minDate;
         }

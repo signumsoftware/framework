@@ -23,8 +23,8 @@ namespace Signum.React.Word
             var model = request.entity ?? request.lite.Retrieve();
 
             var bytes = template.CreateReport(model);
-            
-            return FilesController.GetFileStreamResult(new MemoryStream(bytes), template.FileName);            
+
+            return FilesController.GetFileStreamResult(new MemoryStream(bytes), template.FileName);
         }
 
 #pragma warning disable IDE1006 // Naming Styles
@@ -54,6 +54,6 @@ namespace Signum.React.Word
             return WordTemplateLogic.GetApplicableWordTemplates(type, entity, visibleOn);
         }
 
-    
+
     }
 }

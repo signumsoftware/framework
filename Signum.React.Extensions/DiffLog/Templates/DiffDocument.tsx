@@ -5,7 +5,7 @@ import { NumericTextBox, ValueLine } from '@framework/Lines/ValueLine';
 export class DiffDocument extends React.Component<{ diff: Array<DiffPair<Array<DiffPair<string>>>> }>
 {
   static marginLines: number | null = 4;
-  
+
   handleSetMargin = (newMargin: number | null) => {
     DiffDocument.marginLines = newMargin;
     this.forceUpdate();

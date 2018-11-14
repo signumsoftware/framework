@@ -35,7 +35,7 @@ namespace Signum.React.Authorization
 
         public static SignumAuthenticationResult InvalidAuthenticator(FilterContext actionContext)
         {
-            throw new AuthenticationException("No authentication information found!"); 
+            throw new AuthenticationException("No authentication information found!");
         }
 
         public static SignumAuthenticationResult AnonymousUserAuthenticator(FilterContext actionContext)
@@ -45,12 +45,12 @@ namespace Signum.React.Authorization
 
             return null;
         }
- 
+
 
         public static SignumAuthenticationResult AllowAnonymousAuthenticator(FilterContext actionContext)
         {
             var cad = actionContext.ActionDescriptor as ControllerActionDescriptor;
-            if (cad.MethodInfo.HasAttribute<AllowAnonymousAttribute>() || 
+            if (cad.MethodInfo.HasAttribute<AllowAnonymousAttribute>() ||
                 cad.ControllerTypeInfo.HasAttribute<AllowAnonymousAttribute>())
                 return new SignumAuthenticationResult();
 

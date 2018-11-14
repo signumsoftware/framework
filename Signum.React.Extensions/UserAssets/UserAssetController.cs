@@ -114,7 +114,7 @@ namespace Signum.React.UserAssets
         public FileStreamResult Export([Required, FromBody]Lite<IUserAssetEntity> lite)
         {
             var bytes = UserAssetsExporter.ToXml(lite.Retrieve());
-            
+
             return FilesController.GetFileStreamResult(new MemoryStream(bytes), "{0}{1}.xml".FormatWith(lite.EntityType.Name, lite.Id));
         }
 

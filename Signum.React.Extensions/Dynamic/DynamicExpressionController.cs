@@ -22,7 +22,7 @@ namespace Signum.React.Dynamic
                 var code = $@"
 {DynamicCode.GetUsingNamespaces()}
 
-namespace Signum.Entities.Dynamic 
+namespace Signum.Entities.Dynamic
 {{
     public class ExprEvaluator : Signum.Entities.Dynamic.IDynamicExpressionEvaluator
     {{
@@ -37,7 +37,7 @@ namespace Signum.Entities.Dynamic
         public object EvaluateUntyped(Entity e){{
             return ExprEvaluator.{de.Name}(({de.FromType})e);
         }}
-    }}                   
+    }}
 }}";
 
                 var res = EvalEmbedded<IDynamicExpressionEvaluator>.Compile(DynamicCode.GetMetadataReferences(), code);

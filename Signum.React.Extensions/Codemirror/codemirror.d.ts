@@ -492,7 +492,7 @@ declare module CodeMirror {
     or "anchor"(the fixed side of the selection).Omitting the argument is the same as passing "head".A { line , ch } object will be returned. */
     getCursor(start?: string): CodeMirror.Position;
 
-    /** Retrieves a list of all current selections. These will always be sorted, and never overlap (overlapping selections are merged). 
+    /** Retrieves a list of all current selections. These will always be sorted, and never overlap (overlapping selections are merged).
     Each object in the array contains anchor and head properties referring to {line, ch} objects. */
     listSelections(): { anchor: CodeMirror.Position; head: CodeMirror.Position }[];
 

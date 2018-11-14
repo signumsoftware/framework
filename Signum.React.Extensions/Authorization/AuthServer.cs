@@ -23,7 +23,7 @@ namespace Signum.React.Authorization
         public static Action<ActionContext, UserEntity> UserPreLogin;
         public static Action<ActionContext, UserEntity> UserLogged;
         public static Action UserLoggingOut;
-        
+
 
         public static void Start(IApplicationBuilder app, Func<AuthTokenConfigurationEmbedded> tokenConfig, string hashableEncryptionKey)
         {
@@ -38,7 +38,7 @@ namespace Signum.React.Authorization
             };
 
             AuthLogic.OnRulesChanged += () => ReflectionServer.cache.Clear();
-            
+
             if (TypeAuthLogic.IsStarted)
             {
                 ReflectionServer.AddTypeExtension += (ti, t) =>
@@ -54,7 +54,7 @@ namespace Signum.React.Authorization
 
 
                 EntityPackTS.AddExtension += ep =>
-                {                  
+                {
                     var typeAllowed =
                     UserEntity.Current == null ? TypeAllowedBasic.None :
                     ep.entity.IsNew ? TypeAuthLogic.GetAllowed(ep.entity.GetType()).MaxUI() :
@@ -79,7 +79,7 @@ namespace Signum.React.Authorization
                     if (fi.DeclaringType.Name.EndsWith("Query"))
                         mi.Extension.Add("queryAllowed", UserEntity.Current == null ? QueryAllowed.None : QueryAuthLogic.GetQueryAllowed(fi.GetValue(null)));
                 };
-                
+
             }
 
             if (PropertyAuthLogic.IsStarted)
@@ -88,7 +88,7 @@ namespace Signum.React.Authorization
                 {
                     mi.Extension.Add("propertyAllowed", UserEntity.Current == null ? PropertyAllowed.None : pr.GetPropertyAllowed());
                 };
-                
+
             }
 
             if (OperationAuthLogic.IsStarted)
@@ -99,7 +99,7 @@ namespace Signum.React.Authorization
                                UserEntity.Current == null ? false :
                                OperationAuthLogic.GetOperationAllowed(oi.OperationSymbol, type, inUserInterface: true));
                 };
-                
+
             }
 
             if (PermissionAuthLogic.IsStarted)
@@ -108,10 +108,10 @@ namespace Signum.React.Authorization
                 {
                     if (fi.FieldType == typeof(PermissionSymbol))
                         mi.Extension.Add("permissionAllowed",
-                            UserEntity.Current == null ? false : 
+                            UserEntity.Current == null ? false :
                             PermissionAuthLogic.IsAuthorized((PermissionSymbol) fi.GetValue(null)));
                 };
-                
+
             }
 
 
@@ -131,11 +131,11 @@ namespace Signum.React.Authorization
                     var error = UserEntity.OnValidatePassword(password);
                     if (error != null)
                         throw new ApplicationException(error);
-                    
+
                     ((UserEntity)ctx.Entity).PasswordHash = Security.EncodePassword(password);
                 }
             });
-            
+
             if (TypeAuthLogic.IsStarted)
                 Omnibox.OmniboxServer.IsNavigable += type => TypeAuthLogic.GetAllowed(type).MaxUI() >= TypeAllowedBasic.Read;
 
@@ -147,10 +147,10 @@ namespace Signum.React.Authorization
                         re.Host.ToString(),
                         re.Headers["User-Agent"].FirstOrDefault());
                 };
-            
+
             SchemaMap.GetColorProviders += GetMapColors;
         }
-        
+
         public static void OnUserPreLogin(ActionContext ac, UserEntity user)
         {
             AuthServer.UserPreLogin?.Invoke(ac, user);

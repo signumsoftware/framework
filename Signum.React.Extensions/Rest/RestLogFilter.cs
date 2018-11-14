@@ -36,11 +36,11 @@ namespace Signum.React.RestLog
                 context.HttpContext.Response.Body = new MemoryStream();
 
                 var connection = context.HttpContext.Features.Get<IHttpConnectionFeature>();
-                
+
                 var queryParams = context.HttpContext.Request.Query
                      .Select(a => new QueryStringValueEmbedded { Key = a.Key, Value = a.Value })
                      .ToMList();
-                
+
                 var restLog = new RestLogEntity
                 {
                     AllowReplay = this.AllowReplay,
@@ -76,7 +76,7 @@ namespace Signum.React.RestLog
             request.EnableRewind();
 
             string result;
-            // Arguments: Stream, Encoding, detect encoding, buffer size 
+            // Arguments: Stream, Encoding, detect encoding, buffer size
             // AND, the most important: keep stream opened
             request.Body.Position = 0;
             using (StreamReader reader = new StreamReader(request.Body, Encoding.UTF8, true, 1024, true))

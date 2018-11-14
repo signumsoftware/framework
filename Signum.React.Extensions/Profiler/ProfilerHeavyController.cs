@@ -66,7 +66,7 @@ namespace Signum.React.Profiler
             var now = PerfCounter.Ticks;
 
             HeavyProfofilerEntryTS.Fill(result, entry, 0, now);
-   
+
             return result;
         }
 
@@ -178,7 +178,7 @@ namespace Signum.React.Profiler
             public int AsyncDepth;
             public string AdditionalData;
             public string FullIndex;
-            public bool IsFinished; 
+            public bool IsFinished;
 
             public HeavyProfofilerEntryTS(HeavyProfilerEntry e, bool fullAditionalData, long now)
             {
@@ -200,8 +200,8 @@ namespace Signum.React.Profiler
 
                 if (entry.Entries == null)
                     return asyncDepth;
-                
-            
+
+
                 Dictionary<HeavyProfilerEntry, int> newDepths = new Dictionary<HeavyProfilerEntry, int>();
                 for (int i = 0; i < entry.Entries.Count; i++)
                 {

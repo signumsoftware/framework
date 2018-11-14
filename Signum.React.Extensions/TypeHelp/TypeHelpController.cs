@@ -191,7 +191,7 @@ namespace Signum.React.TypeHelp
     public class TypeMemberHelpTS
     {
         public string propertyString;
-        public string name; 
+        public string name;
         public string type;
         public string cleanTypeName;
         public bool isExpression;
@@ -203,14 +203,14 @@ namespace Signum.React.TypeHelp
         {
             var pr = node.Value;
             this.propertyString = pr.PropertyString();
-            this.name = mode == TypeHelpMode.Typescript ? 
-                pr.PropertyInfo?.Name.FirstLower() : 
+            this.name = mode == TypeHelpMode.Typescript ?
+                pr.PropertyInfo?.Name.FirstLower() :
                 pr.PropertyInfo?.Name;
 
-            this.type = mode ==  TypeHelpMode.Typescript && ReflectionServer.IsId(pr) ? 
+            this.type = mode ==  TypeHelpMode.Typescript && ReflectionServer.IsId(pr) ?
                 PrimaryKey.Type(pr.RootType).Nullify().TypeName():
                 pr.Type.TypeName();
-            
+
             this.isExpression = false;
             this.isEnum = pr.Type.UnNullify().IsEnum;
             this.cleanTypeName = GetCleanTypeName(pr.Type.UnNullify().IsEnum ? EnumEntity.Generate(pr.Type.UnNullify()) : pr.Type);

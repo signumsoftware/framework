@@ -10,7 +10,7 @@ import * as Files from '../Files/Signum.Entities.Files'
 import * as UserQueries from '../UserQueries/Signum.Entities.UserQueries'
 import * as Authorization from '../Authorization/Signum.Entities.Authorization'
 
-import { FilterOptionParsed, OrderOptionParsed, FilterRequest, OrderRequest } from '@framework/FindOptions' 
+import { FilterOptionParsed, OrderOptionParsed, FilterRequest, OrderRequest } from '@framework/FindOptions'
 
 //Partial
 export interface ChartRequest {
