@@ -119,6 +119,13 @@ namespace Signum.Entities.Reflection
             return identErrors.Concat(modErros).ToDictionaryOrNull(a => a.TemporalId, a => a);
         }
 
+        public static List<IntegrityCheckWithEntity> WithEntities(this Dictionary<Guid, IntegrityCheck> integrityChecks, DirectedGraph<Modifiable> graph)
+        {
+            var modifiableEntities = graph.OfType<ModifiableEntity>().ToDictionary(a => a.temporalId);
+
+            return integrityChecks.Values.Select(a => new IntegrityCheckWithEntity(a, modifiableEntities.GetOrThrow(a.TemporalId))).ToList();
+        }
+
         static void AssertCloneAttack(DirectedGraph<Modifiable> graph)
         {
             var problems = (from m in graph.OfType<Entity>()
@@ -357,11 +364,18 @@ namespace Signum.Entities.Reflection
             set { this.Data["integrityErrors"] = value; }
         }
 
+        public IntegrityCheckException(List<IntegrityCheckWithEntity> errors)
+            : base(errors.ToString("\r\n\r\n"))
+        {
+            this.Errors = errors.Select(a => a.IntegrityCheck).ToDictionary(a => a.TemporalId);
+        }
+
         public IntegrityCheckException(Dictionary<Guid, IntegrityCheck> errors)
             : base(errors.Values.ToString("\r\n\r\n"))
         {
             this.Errors = errors;
         }
+
         protected IntegrityCheckException(
           SerializationInfo info,
           StreamingContext context)

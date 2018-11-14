@@ -138,6 +138,7 @@ namespace Signum.Entities
         List<ValidatorAttribute> Validators { get; }
 
         string PropertyCheck(ModifiableEntity modifiableEntity);
+        object GetValueUntyped(ModifiableEntity entity);
     }
 
     public class PropertyValidator<T> : IPropertyValidator
@@ -245,6 +246,11 @@ namespace Signum.Entities
                 validator.IsApplicable = null;
             else
                 validator.IsApplicable = m => isApplicable((T)m);
+        }
+
+        public object GetValueUntyped(ModifiableEntity entity)
+        {
+            return GetValue((T)entity);
         }
     }
 }

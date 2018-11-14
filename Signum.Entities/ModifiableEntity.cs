@@ -436,4 +436,26 @@ namespace Signum.Entities
                   + Errors.ToString(kvp => "    {0}: {1}".FormatWith(kvp.Key, kvp.Value), "\r\n");
         }
     }
+
+    public class IntegrityCheckWithEntity
+    {
+        public IntegrityCheckWithEntity(IntegrityCheck integrityCheck, ModifiableEntity entity)
+        {
+            this.IntegrityCheck = integrityCheck;
+            this.Entity = entity;
+        }
+
+        public IntegrityCheck IntegrityCheck {get; private set;}
+        public ModifiableEntity Entity {get; set;}
+
+        public override string ToString()
+        {
+            return $"{IntegrityCheck.Errors.Count} errors in {" ".CombineIfNotEmpty(IntegrityCheck.Type.Name, IntegrityCheck.Id)}\r\n"
+                  + IntegrityCheck.Errors.ToString(kvp => "    {0} ({1}): {2}".FormatWith(
+                      kvp.Key, 
+                      Validator.TryGetPropertyValidator(Entity.GetType(), kvp.Key).GetValueUntyped(Entity), 
+                      kvp.Value), 
+                      "\r\n");
+        }
+    }
 }
