@@ -1,4 +1,4 @@
-﻿import { ajaxPost, ajaxGet } from '@framework/Services';
+import { ajaxPost, ajaxGet } from '@framework/Services';
 import { Lite } from '@framework/Signum.Entities'
 import * as Navigator from '@framework/Navigator'
 import * as Finder from '@framework/Finder'

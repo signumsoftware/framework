@@ -1,11 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Xml.Linq;
 using Signum.Entities.Basics;
-using Signum.Utilities;
 
 namespace Signum.Entities.Help
 {

@@ -1,21 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Data.SqlClient;
-using System.Diagnostics;
-using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
-using System.Xml.Linq;
 using Signum.Engine.DynamicQuery;
 using Signum.Engine.Maps;
-using Signum.Engine.Operations;
 using Signum.Entities;
 using Signum.Entities.Migrations;
 using Signum.Utilities;
-using Signum.Utilities.DataStructures;
 using Signum.Engine.SchemaInfoTables;
 using Signum.Engine.Basics;
 

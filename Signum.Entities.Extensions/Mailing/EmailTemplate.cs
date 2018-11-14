@@ -1,24 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
+using System;
 using System.Linq;
-using System.Text;
 using Signum.Entities.Basics;
 using System.Linq.Expressions;
 using Signum.Utilities;
-using Signum.Entities.UserQueries;
 using Signum.Entities.DynamicQuery;
-using System.Globalization;
-using System.Text.RegularExpressions;
-using System.Collections.Specialized;
 using System.ComponentModel;
-using Signum.Entities.Translation;
 using System.Reflection;
 using Signum.Entities.UserAssets;
-using Signum.Utilities.ExpressionTrees;
-using Signum.Entities;
 using Signum.Entities.Templating;
 using System.Xml.Linq;
-using Signum.Entities.Mailing;
 
 namespace Signum.Entities.Mailing
 {
@@ -59,7 +49,7 @@ namespace Signum.Entities.Mailing
         public EmailTemplateContactEmbedded From { get; set; }
 
         [NotNullValidator, NoRepeatValidator]
-        public MList<EmailTemplateRecipientEntity> Recipients { get; set; } = new MList<EmailTemplateRecipientEntity>();
+        public MList<EmailTemplateRecipientEmbedded> Recipients { get; set; } = new MList<EmailTemplateRecipientEmbedded>();
 
         [PreserveOrder]
         [NotNullValidator, NoRepeatValidator, ImplementedBy(typeof(ImageAttachmentEntity)), NotifyChildProperty]
@@ -182,7 +172,7 @@ namespace Signum.Entities.Mailing
                 Token = from.Attribute("Token")?.Let(t => new QueryTokenEmbedded(t.Value)),
             });
 
-            Recipients = element.Element("Recipients").Elements("Recipient").Select(rep => new EmailTemplateRecipientEntity
+            Recipients = element.Element("Recipients").Elements("Recipient").Select(rep => new EmailTemplateRecipientEmbedded
             {
                 DisplayName = rep.Attribute("DisplayName").Value,
                 EmailAddress = rep.Attribute("EmailAddress").Value,
@@ -235,7 +225,7 @@ namespace Signum.Entities.Mailing
     }
 
     [Serializable]
-    public class EmailTemplateRecipientEntity : EmailTemplateContactEmbedded
+    public class EmailTemplateRecipientEmbedded : EmailTemplateContactEmbedded
     {
         public EmailRecipientKind Kind { get; set; }
 

@@ -1,4 +1,4 @@
-﻿import * as React from 'react'
+import * as React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import * as Navigator from '@framework/Navigator'
 import { CaseActivityEntity, WorkflowActivityMessage } from '../Signum.Entities.Workflow'

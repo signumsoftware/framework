@@ -1,5 +1,4 @@
-﻿using System.Linq;
-using OpenQA.Selenium;
+﻿using OpenQA.Selenium;
 using Signum.Entities;
 using Signum.Utilities;
 

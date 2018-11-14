@@ -26,11 +26,11 @@ interface CSharpCodeMirrorProps {
     errorLineNumber?: number;
 }
 
-export default class CSharpCodeMirror extends React.Component<CSharpCodeMirrorProps> { 
+export default class CSharpCodeMirror extends React.Component<CSharpCodeMirrorProps> {
 
     codeMirrorComponent!: CodeMirrorComponent;
 
-    render() {        
+    render() {
 
         const options = {
             lineNumbers: true,
@@ -51,7 +51,7 @@ export default class CSharpCodeMirror extends React.Component<CSharpCodeMirrorPr
 
         (options as any).highlightSelectionMatches = true;
         (options as any).matchBrackets = true;
-        
+
         return (
             <CodeMirrorComponent value={this.props.script} ref={cm => this.codeMirrorComponent = cm!}
                 options={options}

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using Signum.Utilities;
 using Signum.Engine.Maps;
 using System.Data.Common;
@@ -9,7 +8,6 @@ using System.Data;
 using System.Data.SqlClient;
 using System.Text.RegularExpressions;
 using System.Threading;
-using System.IO;
 
 namespace Signum.Engine.Disconnected
 {

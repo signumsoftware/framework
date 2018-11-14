@@ -3,20 +3,13 @@ using Signum.Engine.Basics;
 using Signum.Engine.Dynamic;
 using Signum.Engine.DynamicQuery;
 using Signum.Engine.Maps;
-using Signum.Engine.Scheduler;
 using Signum.Entities;
-using Signum.Entities.Dynamic;
-using Signum.React.ApiControllers;
 using Signum.React.Facades;
 using Signum.Utilities;
 using Signum.Utilities.ExpressionTrees;
 using System;
-using System.CodeDom.Compiler;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Net;
-using System.Net.Http;
 using Microsoft.AspNetCore.Mvc;
 using Signum.React.Filters;
 using System.ComponentModel.DataAnnotations;
@@ -24,7 +17,7 @@ using System.ComponentModel.DataAnnotations;
 namespace Signum.React.TypeHelp
 {
     [ValidateModelFilter]
-    public class TypeHelpController : ApiController
+    public class TypeHelpController : ControllerBase
     {
 
         [HttpPost("api/typeHelp/autocompleteEntityCleanType")]
@@ -198,7 +191,7 @@ namespace Signum.React.TypeHelp
     public class TypeMemberHelpTS
     {
         public string propertyString;
-        public string name; 
+        public string name;
         public string type;
         public string cleanTypeName;
         public bool isExpression;
@@ -210,14 +203,14 @@ namespace Signum.React.TypeHelp
         {
             var pr = node.Value;
             this.propertyString = pr.PropertyString();
-            this.name = mode == TypeHelpMode.Typescript ? 
-                pr.PropertyInfo?.Name.FirstLower() : 
+            this.name = mode == TypeHelpMode.Typescript ?
+                pr.PropertyInfo?.Name.FirstLower() :
                 pr.PropertyInfo?.Name;
 
-            this.type = mode ==  TypeHelpMode.Typescript && ReflectionServer.IsId(pr) ? 
+            this.type = mode ==  TypeHelpMode.Typescript && ReflectionServer.IsId(pr) ?
                 PrimaryKey.Type(pr.RootType).Nullify().TypeName():
                 pr.Type.TypeName();
-            
+
             this.isExpression = false;
             this.isEnum = pr.Type.UnNullify().IsEnum;
             this.cleanTypeName = GetCleanTypeName(pr.Type.UnNullify().IsEnum ? EnumEntity.Generate(pr.Type.UnNullify()) : pr.Type);

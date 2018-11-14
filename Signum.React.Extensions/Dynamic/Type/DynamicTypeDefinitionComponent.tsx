@@ -1,4 +1,4 @@
-﻿import * as React from 'react'
+import * as React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import * as Combobox from 'react-widgets/lib/Combobox'
 import { FormGroup, FormControlReadonly, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityList, EntityRepeater } from '@framework/Lines'
@@ -520,7 +520,7 @@ export class CustomCodeTab extends React.Component<{ definition: DynamicTypeDefi
         if(this.YourProperty == "AAA")
             return "AAA is not a valid value";
     }
- 
+
     return base.PropertyValidation(pi);
 }`);
     }
@@ -531,7 +531,7 @@ export class CustomCodeTab extends React.Component<{ definition: DynamicTypeDefi
         var oc = this.props.definition.operationCreate;
 
         this.popupCodeSnippet(`fi.WithWorkflow(
-constructor: () => ${oc ? `{ ${oc.construct} }` : `new ${entityName}Entity()`}, 
+constructor: () => ${oc ? `{ ${oc.construct} }` : `new ${entityName}Entity()`},
 save: e => ${os ? `e.Execute(${entityName}Operation.Save)` : "e.Save()"}
 );`);
     }
@@ -594,11 +594,11 @@ public static bool IsDisabled(this ${entityName}Entity entity)
 
     handleEnumClick = () => {
 
-        this.popupCodeSnippet(`public enum EnumName 
-{ 
-    Item1, 
-    Item2, 
-    ....  
+        this.popupCodeSnippet(`public enum EnumName
+{
+    Item1,
+    Item2,
+    ....
 };`);
     }
 

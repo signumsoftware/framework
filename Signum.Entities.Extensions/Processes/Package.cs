@@ -1,11 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using Signum.Utilities;
-using Signum.Entities.Authorization;
-using Signum.Entities.Basics;
-using System.Linq.Expressions;
 
 namespace Signum.Entities.Processes
 {

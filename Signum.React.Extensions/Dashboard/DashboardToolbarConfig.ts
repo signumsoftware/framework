@@ -1,4 +1,4 @@
-﻿import { ToolbarConfig, ToolbarResponse } from '../Toolbar/ToolbarClient'
+import { ToolbarConfig, ToolbarResponse } from '../Toolbar/ToolbarClient'
 import * as DashboardClient from './DashboardClient'
 import { DashboardEntity } from './Signum.Entities.Dashboard'
 import { parseIcon } from './Admin/Dashboard';

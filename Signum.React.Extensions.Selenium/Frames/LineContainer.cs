@@ -1,20 +1,14 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Linq.Expressions;
-using System.Text;
 using OpenQA.Selenium.Remote;
 using Signum.Engine;
-using Signum.Engine.Basics;
 using Signum.Entities;
 using Signum.Entities.Reflection;
-using Signum.Entities.UserQueries;
 using Signum.Utilities;
 using System.Reflection;
 using Signum.Entities.DynamicQuery;
 using Signum.Entities.UserAssets;
 using OpenQA.Selenium;
-using Signum.React.Selenium;
 
 namespace Signum.React.Selenium
 {

@@ -1,13 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using Signum.Entities;
 using System.Linq.Expressions;
 using Signum.Utilities;
-using Signum.Entities.Files;
 using System.Net.Mail;
-using Signum.Utilities.ExpressionTrees;
 
 namespace Signum.Entities.Mailing
 {
@@ -37,7 +31,7 @@ namespace Signum.Entities.Mailing
 
         [NotNullValidator]
         [NoRepeatValidator]
-        public MList<EmailRecipientEntity> AdditionalRecipients { get; set; } = new MList<EmailRecipientEntity>();
+        public MList<EmailRecipientEmbedded> AdditionalRecipients { get; set; } = new MList<EmailRecipientEmbedded>();
 
         protected override string PropertyValidation(System.Reflection.PropertyInfo pi)
         {

@@ -1,29 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
 using System.Linq;
-using System.Net;
-using System.Net.Http;
 using Microsoft.AspNetCore.Mvc;
 using Signum.Engine.Authorization;
-using Signum.Entities;
-using Signum.Entities.Authorization;
-using Signum.Services;
 using Signum.Utilities;
-using Signum.React.Facades;
-using Signum.React.Authorization;
-using Signum.Engine.Cache;
-using Signum.Engine;
-using Signum.Entities.Cache;
-using Signum.Utilities.ExpressionTrees;
-using System.Threading;
-using Signum.React.ApiControllers;
-using Signum.Engine.Basics;
 using Signum.Entities.Profiler;
 
 namespace Signum.React.Profiler
 {
-    public class ProfilerTimesController : ApiController
+    public class ProfilerTimesController : ControllerBase
     {
         [HttpPost("api/profilerTimes/clear")]
         public void Clear()
@@ -64,13 +49,13 @@ namespace Signum.React.Profiler
             public int count;
             public double averageTime;
             public double totalTime;
-            
+
             public long lastTime;
             public DateTime lastDate;
-            
+
             public long maxTime;
             public DateTime maxDate;
-            
+
             public long minTime;
             public DateTime minDate;
         }

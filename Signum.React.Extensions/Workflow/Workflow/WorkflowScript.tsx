@@ -104,7 +104,7 @@ e.[Property Name] = lib;`,
     ValueLineModal.show({
       type: { name: "string" },
       initialValue: `// ${hint}
-CaseActivityEntity CaseActivity; 
+CaseActivityEntity CaseActivity;
 int RetryCount;`,
       valueLineType: "TextArea",
       title: hint,

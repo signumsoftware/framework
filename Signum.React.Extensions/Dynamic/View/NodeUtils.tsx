@@ -1,4 +1,4 @@
-﻿import * as React from 'react'
+import * as React from 'react'
 import { globalModules } from './GlobalModules'
 import { ModifiableEntity, External } from '@framework/Signum.Entities'
 import * as Navigator from '@framework/Navigator'

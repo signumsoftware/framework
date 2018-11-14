@@ -1,4 +1,4 @@
-﻿export const namedColors: { [colorName: string]: string } = {
+export const namedColors: { [colorName: string]: string } = {
   "aliceblue": "#f0f8ff",
   "antiquewhite": "#faebd7",
   "aqua": "#00ffff",

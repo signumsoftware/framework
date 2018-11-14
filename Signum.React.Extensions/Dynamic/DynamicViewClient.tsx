@@ -338,7 +338,7 @@ export function asOverrideFunction(dvo: DynamicViewOverrideEntity): (vr: ViewRep
   var ValueSearchControl = Search.ValueSearchControl;
   var ValueSearchControlLine = Search.ValueSearchControlLine;
 
-  // Components 
+  // Components
   var Button = Components.Button;
   var Dropdown = Components.Dropdown;
   var DropdownItem = Components.DropdownItem;

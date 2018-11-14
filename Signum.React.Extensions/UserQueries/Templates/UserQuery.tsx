@@ -1,4 +1,4 @@
-﻿import * as React from 'react'
+import * as React from 'react'
 import { UserQueryEntity, UserQueryMessage, QueryOrderEmbedded, QueryColumnEmbedded } from '../Signum.Entities.UserQueries'
 import { FormGroup, ValueLine, EntityLine, EntityTable } from '@framework/Lines'
 import * as Finder from '@framework/Finder'

@@ -1,8 +1,8 @@
-﻿import * as React from 'react'
+import * as React from 'react'
 import { FormGroup, ValueLine, EntityLine, EntityCombo, EntityDetail, EntityRepeater, EntityTabRepeater } from '@framework/Lines'
 import { SubTokensOptions } from '@framework/FindOptions'
 import { TypeContext } from '@framework/TypeContext'
-import { EmailTemplateEntity, EmailTemplateContactEmbedded, EmailTemplateRecipientEntity, EmailTemplateMessageEmbedded, EmailTemplateViewMessage, EmailTemplateMessage } from '../Signum.Entities.Mailing'
+import { EmailTemplateEntity, EmailTemplateContactEmbedded, EmailTemplateMessageEmbedded, EmailTemplateViewMessage, EmailTemplateMessage, EmailTemplateRecipientEmbedded } from '../Signum.Entities.Mailing'
 import { TemplateApplicableEval } from '../../Templating/Signum.Entities.Templating'
 import QueryTokenEntityBuilder from '../../UserAssets/Templates/QueryTokenEntityBuilder'
 import TemplateControls from '../../Templating/TemplateControls'
@@ -72,50 +72,52 @@ export default class EmailTemplate extends React.Component<{ ctx: TypeContext<Em
         <div className="row">
           <div className="col-sm-2" >
             <FormGroup labelText={EmailTemplateEntity.nicePropertyName(a => a.recipients![0].element.kind)} ctx={sc}>
-              <span className="form-control">{EmailTemplateEntity.nicePropertyName(a => a.from)} </span>
+              <span className={sc.formControlClass}>{EmailTemplateEntity.nicePropertyName(a => a.from)} </span>
             </FormGroup>
           </div>
-          <div className="col-sm-5">
-            <ValueLine ctx={sc.subCtx(c => c.emailAddress)} />
-          </div>
-          <div className="col-sm-5">
-            <ValueLine ctx={sc.subCtx(c => c.displayName)} />
+          <div className="col-sm-10">
+            {this.props.ctx.value.query &&
+              <QueryTokenEntityBuilder
+                ctx={sc.subCtx(a => a.token)}
+                queryKey={this.props.ctx.value.query.key}
+                subTokenOptions={SubTokensOptions.CanElement}
+                helpText="Expression pointing to an EmailOwnerData (recommended)" />
+            }
           </div>
         </div>
-        {this.props.ctx.value.query &&
-          <QueryTokenEntityBuilder
-            ctx={ec.subCtx(a => a.token)}
-            queryKey={this.props.ctx.value.query.key}
-            subTokenOptions={SubTokensOptions.CanElement} />
-        }
+        <div className="row">
+          <div className="col-sm-5 offset-sm-2">
+            <ValueLine ctx={sc.subCtx(c => c.emailAddress)} helpText="Hardcoded E-Mail address" />
+          </div>
+          <div className="col-sm-5">
+            <ValueLine ctx={sc.subCtx(c => c.displayName)} helpText="Hardcoded display name" />
+          </div>
+        </div>
       </div>
     );
   };
 
-  renderRecipient = (ec: TypeContext<EmailTemplateRecipientEntity>) => {
+  renderRecipient = (ec: TypeContext<EmailTemplateRecipientEmbedded>) => {
 
     const sc = ec.subCtx({ formGroupStyle: "Basic" });
 
     return (
       <div>
         <div className="row">
-          <div className="col-sm-2">
-            <label>
-              <ValueLine ctx={sc.subCtx(c => c.kind)} />
-            </label>
+          <div className="col-sm-2" >
+            <ValueLine ctx={sc.subCtx(a => a.kind)} />
           </div>
-          <div className="col-sm-10 ">
-            {this.props.ctx.value.query && <QueryTokenEntityBuilder
-              ctx={ec.subCtx(a => a.token)}
-              queryKey={this.props.ctx.value.query.key}
-              subTokenOptions={SubTokensOptions.CanElement} />
+          <div className="col-sm-10">
+            {this.props.ctx.value.query &&
+              <QueryTokenEntityBuilder
+                ctx={sc.subCtx(a => a.token)}
+                queryKey={this.props.ctx.value.query.key}
+                subTokenOptions={SubTokensOptions.CanElement}
+                helpText="Expression pointing to an EmailOwnerData (recommended)" />
             }
           </div>
         </div>
-
         <div className="row">
-          <div className="col-sm-2">
-          </div>
           <div className="col-sm-5 offset-sm-2">
             <ValueLine ctx={sc.subCtx(c => c.emailAddress)} helpText="Hardcoded E-Mail address" />
           </div>

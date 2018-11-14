@@ -1,4 +1,4 @@
-﻿/// <reference path="../bpmn-js.d.ts" />
+/// <reference path="../bpmn-js.d.ts" />
 import BpmnRenderer from "bpmn-js/lib/draw/BpmnRenderer"
 import { ConnectionType } from '../Signum.Entities.Workflow'
 import * as BpmnUtils from './BpmnUtils'

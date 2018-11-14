@@ -1,4 +1,4 @@
-﻿import * as React from 'react'
+import * as React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Lite, toLite, Entity, EntityPack } from '@framework/Signum.Entities'
 import * as Navigator from '@framework/Navigator'

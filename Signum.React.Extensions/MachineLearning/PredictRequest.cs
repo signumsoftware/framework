@@ -1,7 +1,6 @@
 ﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Signum.Engine.Basics;
-using Signum.Engine.DynamicQuery;
 using Signum.Engine.MachineLearning;
 using Signum.Entities;
 using Signum.Entities.DynamicQuery;
@@ -12,8 +11,6 @@ using Signum.Utilities.Reflection;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Web;
-using Microsoft.AspNetCore.Mvc;
 using Signum.React.Facades;
 
 namespace Signum.React.MachineLearning

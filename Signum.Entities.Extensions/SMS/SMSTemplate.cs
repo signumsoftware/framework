@@ -1,17 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using Signum.Entities;
 using System.Linq.Expressions;
 using Signum.Utilities;
 using Signum.Entities.Basics;
-using Signum.Entities.Translation;
-using System.Reflection;
 using System.ComponentModel;
 using System.Collections.Specialized;
-using System.Globalization;
-using Signum.Utilities.ExpressionTrees;
 
 namespace Signum.Entities.SMS
 {

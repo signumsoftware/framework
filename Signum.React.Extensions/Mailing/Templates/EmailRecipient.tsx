@@ -1,9 +1,9 @@
-﻿import * as React from 'react'
+import * as React from 'react'
 import { ValueLine, EntityLine } from '@framework/Lines'
 import { TypeContext } from '@framework/TypeContext'
-import { EmailRecipientEntity } from '../Signum.Entities.Mailing'
+import { EmailRecipientEmbedded } from '../Signum.Entities.Mailing'
 
-export default class EmailRecipient extends React.Component<{ ctx: TypeContext<EmailRecipientEntity> }> {
+export default class EmailRecipient extends React.Component<{ ctx: TypeContext<EmailRecipientEmbedded> }> {
   render() {
     const sc = this.props.ctx.subCtx({ placeholderLabels: true, formGroupStyle: "SrOnly" });
 

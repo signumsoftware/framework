@@ -1,24 +1,16 @@
-﻿using Signum.Engine;
-using Signum.Engine.Basics;
+﻿using Signum.Engine.Basics;
 using Signum.Engine.Dynamic;
-using Signum.Engine.DynamicQuery;
-using Signum.Engine.Maps;
 using Signum.Engine.Scheduler;
 using Signum.Entities;
-using Signum.Entities.Dynamic;
 using Signum.Entities.Reflection;
 using Signum.React.ApiControllers;
-using Signum.React.Facades;
 using Signum.Utilities;
 using Signum.Utilities.DataStructures;
 using Signum.Utilities.ExpressionTrees;
 using System;
-using System.CodeDom.Compiler;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Net;
-using System.Net.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Hosting;
 using System.Threading.Tasks;
@@ -28,7 +20,7 @@ using System.ComponentModel.DataAnnotations;
 namespace Signum.React.Dynamic
 {
     [ValidateModelFilter]
-    public class DynamicController : ApiController
+    public class DynamicController : ControllerBase
     {
         IApplicationLifetime lifeTime;
         public DynamicController(IApplicationLifetime lifeTime)
@@ -109,6 +101,6 @@ namespace Signum.React.Dynamic
     public class EvalEntityError
     {
         public Lite<Entity> lite;
-        public string error; 
+        public string error;
     }
 }

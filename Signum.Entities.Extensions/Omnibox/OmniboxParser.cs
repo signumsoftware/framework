@@ -1,13 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
 using Signum.Utilities;
 using Signum.Entities.DynamicQuery;
-using Signum.Entities.Reflection;
 using System.Threading;
-using Signum.Entities.UserQueries;
 using System.Collections.Concurrent;
 using System.Globalization;
 using Signum.Entities.Authorization;

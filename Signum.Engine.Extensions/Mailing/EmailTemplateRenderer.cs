@@ -2,17 +2,11 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
-using System.Text;
 using Signum.Engine.Basics;
-using Signum.Engine.DynamicQuery;
 using Signum.Entities;
 using Signum.Entities.DynamicQuery;
 using Signum.Entities.Mailing;
 using Signum.Utilities;
-using Signum.Entities.Translation;
-using Signum.Engine.Translation;
-using Signum.Engine.Mailing;
-using System.Threading;
 
 namespace Signum.Engine.Mailing
 {
@@ -54,7 +48,7 @@ namespace Signum.Engine.Mailing
                     EmailMessageEntity email = new EmailMessageEntity
                     {
                         Target = entity?.ToLite() ?? (this.systemEmail.UntypedEntity as Entity)?.ToLite(),
-                        Recipients = recipients.Select(r => new EmailRecipientEntity(r.OwnerData) { Kind = r.Kind }).ToMList(),
+                        Recipients = recipients.Select(r => new EmailRecipientEmbedded(r.OwnerData) { Kind = r.Kind }).ToMList(),
                         From = from,
                         IsBodyHtml = template.IsBodyHtml,
                         EditableMessage = template.EditableMessage,
@@ -210,7 +204,7 @@ namespace Signum.Engine.Mailing
             }
         }
 
-        private IEnumerable<List<EmailOwnerRecipientData>> TokenRecipients(List<EmailTemplateRecipientEntity> tokenRecipients)
+        private IEnumerable<List<EmailOwnerRecipientData>> TokenRecipients(List<EmailTemplateRecipientEmbedded> tokenRecipients)
         {
             if (!template.SendDifferentMessages)
             {
@@ -235,13 +229,13 @@ namespace Signum.Engine.Mailing
             }
         }
 
-        private IEnumerable<List<EmailOwnerRecipientData>> CrossProduct(List<EmailTemplateRecipientEntity> tokenRecipients, int pos)
+        private IEnumerable<List<EmailOwnerRecipientData>> CrossProduct(List<EmailTemplateRecipientEmbedded> tokenRecipients, int pos)
         {
             if (tokenRecipients.Count == pos)
                 yield return new List<EmailOwnerRecipientData>();
             else
             {
-                EmailTemplateRecipientEntity tr = tokenRecipients[pos];
+                EmailTemplateRecipientEmbedded tr = tokenRecipients[pos];
 
                 ResultColumn owner = dicTokenColumn.GetOrThrow(tr.Token.Token);
 

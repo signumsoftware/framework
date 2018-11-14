@@ -2,22 +2,15 @@
 using Signum.Engine.Authorization;
 using Signum.Entities;
 using Signum.Entities.Authorization;
-using Signum.Entities.Basics;
 using Signum.React.Filters;
 using Signum.Utilities;
 using System;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
-using System.Net;
-using System.Net.Http;
-using System.Runtime.Serialization;
 using System.Security.Authentication;
 using System.Security.Cryptography;
 using System.Text;
-using Microsoft.AspNetCore.Mvc;
-using System.Threading;
-using System.Threading.Tasks;
 using System.Runtime.Serialization.Formatters.Binary;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.Mvc.Controllers;
@@ -42,7 +35,7 @@ namespace Signum.React.Authorization
 
         public static SignumAuthenticationResult InvalidAuthenticator(FilterContext actionContext)
         {
-            throw new AuthenticationException("No authentication information found!"); 
+            throw new AuthenticationException("No authentication information found!");
         }
 
         public static SignumAuthenticationResult AnonymousUserAuthenticator(FilterContext actionContext)
@@ -52,12 +45,12 @@ namespace Signum.React.Authorization
 
             return null;
         }
- 
+
 
         public static SignumAuthenticationResult AllowAnonymousAuthenticator(FilterContext actionContext)
         {
             var cad = actionContext.ActionDescriptor as ControllerActionDescriptor;
-            if (cad.MethodInfo.HasAttribute<AllowAnonymousAttribute>() || 
+            if (cad.MethodInfo.HasAttribute<AllowAnonymousAttribute>() ||
                 cad.ControllerTypeInfo.HasAttribute<AllowAnonymousAttribute>())
                 return new SignumAuthenticationResult();
 

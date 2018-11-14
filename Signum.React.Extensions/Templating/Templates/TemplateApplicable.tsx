@@ -1,4 +1,4 @@
-﻿import * as React from 'react'
+import * as React from 'react'
 import { PropertyRoute } from '@framework/Reflection'
 import { TypeContext } from '@framework/Lines'
 import * as Finder from '@framework/Finder'

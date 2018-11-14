@@ -1,12 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using OpenQA.Selenium;
-using OpenQA.Selenium.Remote;
 using Signum.Entities;
 using Signum.Utilities;
-using Signum.React.Selenium;
 using Signum.React.Selenium.ModalProxies;
 
 namespace Signum.React.Selenium

@@ -1,4 +1,4 @@
-﻿export function isEvent(elementType: BPMN.ElementType): boolean {
+export function isEvent(elementType: BPMN.ElementType): boolean {
   return elementType == "bpmn:StartEvent" ||
     elementType == "bpmn:EndEvent";
 }

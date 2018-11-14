@@ -1,4 +1,4 @@
-﻿import * as React from 'react'
+import * as React from 'react'
 import { ColorTypeaheadLine } from '../../Basics/Templates/ColorTypeahead'
 import { CaseTagTypeEntity } from '../Signum.Entities.Workflow'
 import { ValueLine, TypeContext } from '@framework/Lines'

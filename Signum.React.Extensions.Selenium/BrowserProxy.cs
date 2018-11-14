@@ -1,19 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using OpenQA.Selenium.Remote;
-using System.Diagnostics;
 using System.Threading;
-using Signum.Engine;
 using Signum.Utilities;
 using Signum.Entities.Reflection;
 using Signum.Entities;
 using Signum.Engine.Basics;
-using Signum.Entities.DynamicQuery;
-using System.Linq.Expressions;
 using OpenQA.Selenium;
-using Signum.React.Selenium;
 using System.Globalization;
 
 namespace Signum.React.Selenium

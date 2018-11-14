@@ -1,4 +1,4 @@
-﻿import * as React from 'react'
+import * as React from 'react'
 import { Dic, classes } from '@framework/Globals'
 import { getTypeInfo, Binding, PropertyRoute } from '@framework/Reflection'
 import { DynamicTypeDesignContext } from './DynamicTypeDefinitionComponent'
@@ -56,7 +56,7 @@ export default class ValueComponent extends React.Component<ValueComponentProps>
         const value = p.binding.getValue();
 
 
-        var opacity = p.autoOpacity && value == null ? { opacity: 0.5 } as React.CSSProperties: undefined; 
+        var opacity = p.autoOpacity && value == null ? { opacity: 0.5 } as React.CSSProperties: undefined;
 
         if (this.props.hideLabel) {
             return (
@@ -81,7 +81,7 @@ export default class ValueComponent extends React.Component<ValueComponentProps>
     }
 
     renderValue(value: number | string | boolean | null | undefined) {
-        
+
         const val = value === undefined ? this.props.defaultValue : value;
 
         const style = this.props.hideLabel ? { display: "inline-block" } as React.CSSProperties : undefined;

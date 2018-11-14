@@ -1,4 +1,4 @@
-﻿
+
 import * as React from 'react'
 import { ServiceError } from '@framework/Services'
 import { Entity, Lite, is, JavascriptMessage } from '@framework/Signum.Entities'

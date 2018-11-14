@@ -1,4 +1,4 @@
-﻿import * as React from 'react'
+import * as React from 'react'
 import { WorkflowActivityModel, WorkflowModel, WorkflowActivityMonitorMessage } from '../Signum.Entities.Workflow'
 import { WorkflowActivityMonitor } from '../WorkflowClient'
 import NavigatedViewer from "bpmn-js/lib/NavigatedViewer"

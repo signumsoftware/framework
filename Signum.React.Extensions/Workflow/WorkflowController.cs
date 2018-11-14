@@ -1,4 +1,4 @@
-﻿using Signum.Entities.Workflow;
+using Signum.Entities.Workflow;
 using Signum.Engine.Workflow;
 using Signum.Engine;
 using Signum.Engine.Operations;
@@ -8,9 +8,6 @@ using System;
 using System.Threading;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net;
-using System.Net.Http;
-using System.Xml.Linq;
 using Signum.Entities.Basics;
 using Signum.Engine.DynamicQuery;
 using Signum.Engine.Basics;

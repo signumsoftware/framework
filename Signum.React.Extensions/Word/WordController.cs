@@ -1,39 +1,20 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Net;
-using System.Net.Http;
-using Signum.Engine.Authorization;
 using Signum.Entities;
-using Signum.Entities.Authorization;
-using Signum.Services;
-using Signum.Utilities;
 using Signum.React.Facades;
-using Signum.React.Authorization;
-using Signum.Engine.Cache;
 using Signum.Engine;
-using Signum.Entities.Cache;
-using Signum.Utilities.ExpressionTrees;
-using Signum.Entities.Processes;
-using Signum.Engine.Processes;
-using System.Threading;
-using Signum.React.ApiControllers;
 using Signum.Engine.Basics;
 using Signum.Entities.Word;
 using Signum.Engine.Word;
-using System.Web;
 using Signum.React.Files;
 using System.IO;
-using Signum.Entities.Basics;
-using Signum.Engine.Maps;
 using Microsoft.AspNetCore.Mvc;
 using Signum.React.Filters;
 
 namespace Signum.React.Word
 {
     [ValidateModelFilter]
-    public class WordController : ApiController
+    public class WordController : ControllerBase
     {
         [HttpPost("api/word/createReport")]
         public FileStreamResult View([Required, FromBody]CreateWordReportRequest request)
@@ -42,8 +23,8 @@ namespace Signum.React.Word
             var model = request.entity ?? request.lite.Retrieve();
 
             var bytes = template.CreateReport(model);
-            
-            return FilesController.GetFileStreamResult(new MemoryStream(bytes), template.FileName);            
+
+            return FilesController.GetFileStreamResult(new MemoryStream(bytes), template.FileName);
         }
 
 #pragma warning disable IDE1006 // Naming Styles
@@ -73,6 +54,6 @@ namespace Signum.React.Word
             return WordTemplateLogic.GetApplicableWordTemplates(type, entity, visibleOn);
         }
 
-    
+
     }
 }

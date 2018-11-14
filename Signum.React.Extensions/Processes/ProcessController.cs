@@ -12,7 +12,7 @@ using System.ComponentModel.DataAnnotations;
 namespace Signum.React.Processes
 {
     [ValidateModelFilter]
-    public class ProcessController : ApiController
+    public class ProcessController : ControllerBase
     {
         [HttpPost("api/processes/constructFromMany")]
         public EntityPackTS ConstructFromMany([Required, FromBody]OperationController.MultiOperationRequest request)

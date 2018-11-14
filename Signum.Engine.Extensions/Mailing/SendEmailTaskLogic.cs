@@ -1,5 +1,4 @@
-﻿using Signum.Engine;
-using Signum.Engine.Basics;
+﻿using Signum.Engine.Basics;
 using Signum.Engine.DynamicQuery;
 using Signum.Engine.Maps;
 using Signum.Engine.Operations;
@@ -10,16 +9,10 @@ using Signum.Entities.Mailing;
 using Signum.Utilities;
 using Signum.Utilities.Reflection;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
-using Signum.Entities.UserQueries;
 using Signum.Engine.UserQueries;
 using Signum.Entities.Processes;
-using Signum.Engine.Processes;
-using System.Threading;
 using Signum.Engine.Templating;
 
 namespace Signum.Engine.Mailing

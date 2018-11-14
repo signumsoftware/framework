@@ -1,4 +1,4 @@
-﻿import * as React from 'react'
+import * as React from 'react'
 import * as moment from 'moment'
 import { classes, Dic } from '@framework/Globals'
 import { ValueLine, EntityLine, EntityCombo } from '@framework/Lines'
@@ -144,7 +144,7 @@ export default class FilterBuilderEmbedded extends React.Component<FilterBuilder
 
     this.state.filterOptions!.forEach(fo => pushFilter(fo, 0))
 
-    ctx.binding.setValue(ctx.value); //force change 
+    ctx.binding.setValue(ctx.value); //force change
 
     if (this.props.onChanged)
       this.props.onChanged();

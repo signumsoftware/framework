@@ -1,15 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
+using System;
 using Signum.Engine.Authorization;
 using Signum.Entities.Authorization;
 using Signum.Utilities;
-using Signum.React.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Http;
-using Signum.React.ApiControllers;
 
 namespace Signum.React.Authorization
 {
@@ -24,7 +19,7 @@ namespace Signum.React.Authorization
             {
                 try
                 {
-                    if (ac.HttpContext.Request.Cookies.TryGetValue(CookieName, out string ticketText) || !ticketText.HasText())
+                    if (!ac.HttpContext.Request.Cookies.TryGetValue(CookieName, out string ticketText) || !ticketText.HasText())
                         return false;   //there is no cookie
 
                     var httpConnection = ac.HttpContext.Features.Get<IHttpConnectionFeature>();

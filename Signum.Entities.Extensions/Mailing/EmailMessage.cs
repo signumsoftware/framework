@@ -1,22 +1,14 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using Signum.Entities.Authorization;
 using Signum.Entities.Processes;
 using Signum.Utilities;
-using Signum.Entities;
-using Signum.Entities.Mailing;
 using Signum.Entities.Basics;
-using System.Globalization;
 using System.ComponentModel;
-using Signum.Entities.DynamicQuery;
 using System.Net.Mail;
 using System.Linq.Expressions;
 using Signum.Entities.Files;
 using System.Security.Cryptography;
-using Signum.Entities.Scheduler;
-using Signum.Utilities.ExpressionTrees;
 using System.Reflection;
 
 namespace Signum.Entities.Mailing
@@ -31,7 +23,7 @@ namespace Signum.Entities.Mailing
 
         [NotNullValidator]
         [CountIsValidator(ComparisonType.GreaterThan, 0)]
-        public MList<EmailRecipientEntity> Recipients { get; set; } = new MList<EmailRecipientEntity>();
+        public MList<EmailRecipientEmbedded> Recipients { get; set; } = new MList<EmailRecipientEmbedded>();
 
         [ImplementedByAll]
         public Lite<Entity> Target { get; set; }
@@ -196,26 +188,26 @@ namespace Signum.Entities.Mailing
     }
 
     [Serializable]
-    public class EmailRecipientEntity : EmailAddressEmbedded, IEquatable<EmailRecipientEntity>
+    public class EmailRecipientEmbedded : EmailAddressEmbedded, IEquatable<EmailRecipientEmbedded>
     {
-        public EmailRecipientEntity() { }
+        public EmailRecipientEmbedded() { }
 
-        public EmailRecipientEntity(EmailOwnerData data)
+        public EmailRecipientEmbedded(EmailOwnerData data)
             : base(data)
         {
             Kind = EmailRecipientKind.To;
         }
 
-        public EmailRecipientEntity(MailAddress ma, EmailRecipientKind kind) : base(ma)
+        public EmailRecipientEmbedded(MailAddress ma, EmailRecipientKind kind) : base(ma)
         {
             this.Kind = kind;
         }
 
         public EmailRecipientKind Kind { get; set; }
 
-        public new EmailRecipientEntity Clone()
+        public new EmailRecipientEmbedded Clone()
         {
-            return new EmailRecipientEntity
+            return new EmailRecipientEmbedded
             {
                 DisplayName = DisplayName,
                 EmailAddress = EmailAddress,
@@ -224,7 +216,7 @@ namespace Signum.Entities.Mailing
             };
         }
 
-        public bool Equals(EmailRecipientEntity other)
+        public bool Equals(EmailRecipientEmbedded other)
         {
             return base.Equals((EmailAddressEmbedded)other) && Kind == other.Kind;
         }

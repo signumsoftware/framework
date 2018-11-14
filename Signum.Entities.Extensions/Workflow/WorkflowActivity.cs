@@ -1,19 +1,12 @@
 ﻿using Signum.Entities.Dynamic;
-using Signum.Entities;
 using Signum.Entities.Basics;
 using Signum.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
-using System.Text;
-using System.Threading.Tasks;
-using System.Xml.Linq;
 using System.ComponentModel;
-using Signum.Entities.Workflow;
 using System.Reflection;
-using System.CodeDom.Compiler;
-using System.Text.RegularExpressions;
 
 namespace Signum.Entities.Workflow
 {

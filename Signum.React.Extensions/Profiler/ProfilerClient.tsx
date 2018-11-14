@@ -1,4 +1,4 @@
-﻿import * as React from 'react'
+import * as React from 'react'
 import { ajaxPost, ajaxGet, ajaxGetRaw, saveFile } from '@framework/Services';
 import { ProfilerPermission } from './Signum.Entities.Profiler'
 import * as OmniboxClient from '../Omnibox/OmniboxClient'

@@ -1,17 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using Signum.Entities.DynamicQuery;
-using System.Reflection;
 using Signum.Utilities;
-using System.Linq.Expressions;
-using Signum.Utilities.DataStructures;
-using System.ComponentModel;
-using Signum.Utilities.Reflection;
-using Signum.Entities.Basics;
-using Signum.Utilities.ExpressionTrees;
-using Signum.Entities.UserQueries;
 
 namespace Signum.Entities.Chart
 {

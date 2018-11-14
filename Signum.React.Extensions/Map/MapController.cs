@@ -1,31 +1,20 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using Signum.Entities;
-using Signum.Engine;
-using Signum.Entities.Basics;
-using Signum.Engine.Maps;
-using Signum.Utilities;
-using Signum.Engine.SchemaInfoTables;
-using Signum.Engine.Basics;
+﻿using Signum.Engine.Basics;
 using Signum.Entities.Map;
 using Signum.Engine.Authorization;
 using Signum.React.Maps;
 using Microsoft.AspNetCore.Mvc;
-using Signum.React.ApiControllers;
 
 namespace Signum.React.Map
 {
-    public class MapController : ApiController
+    public class MapController : ControllerBase
     {
         [HttpGet("api/map/types")]
         public SchemaMapInfo Index()
         {
             MapPermission.ViewMap.AssertAuthorized();
-            
+
             return SchemaMap.GetMapInfo();
-            
+
         }
 
         [HttpGet("api/map/operations/{typeName}")]

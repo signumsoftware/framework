@@ -1,15 +1,10 @@
 ﻿using Signum.Utilities;
 using System;
-using System.Collections.Generic;
-using System.Collections.Specialized;
-using System.Globalization;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
-using System.Text;
 using System.Text.RegularExpressions;
 using Signum.Entities.Basics;
-using Signum.Utilities.ExpressionTrees;
 using Signum.Entities.UserAssets;
 using System.Xml.Linq;
 

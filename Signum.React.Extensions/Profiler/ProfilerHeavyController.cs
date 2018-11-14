@@ -2,37 +2,22 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
-using System.Net;
-using System.Net.Http;
 using Microsoft.AspNetCore.Mvc;
 using Signum.Engine.Authorization;
-using Signum.Entities;
-using Signum.Entities.Authorization;
-using Signum.Services;
 using Signum.Utilities;
-using Signum.React.Facades;
-using Signum.React.Authorization;
-using Signum.Engine.Cache;
-using Signum.Engine;
-using Signum.Entities.Cache;
 using Signum.Utilities.ExpressionTrees;
-using System.Threading;
-using Signum.React.ApiControllers;
-using Signum.Engine.Basics;
 using Signum.Entities.Profiler;
 using System.Drawing;
 using Signum.Entities.Reflection;
 using System.Xml.Linq;
 using System.IO;
 using Signum.React.Files;
-using System.Threading.Tasks;
-using Signum.Utilities.DataStructures;
 using Signum.React.Filters;
 
 namespace Signum.React.Profiler
 {
     [ValidateModelFilter]
-    public class ProfilerHeavyController : ApiController
+    public class ProfilerHeavyController : ControllerBase
     {
         [HttpPost("api/profilerHeavy/clear")]
         public void Clear()
@@ -81,7 +66,7 @@ namespace Signum.React.Profiler
             var now = PerfCounter.Ticks;
 
             HeavyProfofilerEntryTS.Fill(result, entry, 0, now);
-   
+
             return result;
         }
 
@@ -193,7 +178,7 @@ namespace Signum.React.Profiler
             public int AsyncDepth;
             public string AdditionalData;
             public string FullIndex;
-            public bool IsFinished; 
+            public bool IsFinished;
 
             public HeavyProfofilerEntryTS(HeavyProfilerEntry e, bool fullAditionalData, long now)
             {
@@ -215,8 +200,8 @@ namespace Signum.React.Profiler
 
                 if (entry.Entries == null)
                     return asyncDepth;
-                
-            
+
+
                 Dictionary<HeavyProfilerEntry, int> newDepths = new Dictionary<HeavyProfilerEntry, int>();
                 for (int i = 0; i < entry.Entries.Count; i++)
                 {

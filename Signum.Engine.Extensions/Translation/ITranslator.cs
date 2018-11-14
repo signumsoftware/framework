@@ -1,18 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
-using System.IO;
 using System.Linq;
-using System.Net;
-using System.Runtime.Serialization;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Web;
-using Signum.Engine.Translation;
-using Signum.Entities.Translation;
 using Signum.Utilities;
 using System.Reflection;
-using System.Runtime.Serialization.Json;
 
 namespace Signum.Engine.Translation
 {
