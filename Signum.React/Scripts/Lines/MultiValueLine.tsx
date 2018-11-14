@@ -1,4 +1,4 @@
-﻿import * as React from "react";
+import * as React from "react";
 import { TypeContext, LineBaseProps, LineBase, FormGroup } from "../Lines";
 import { SearchMessage, MList, newMListElement } from "../Signum.Entities";
 import { mlistItemContext } from "../TypeContext";
