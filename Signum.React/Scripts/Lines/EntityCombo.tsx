@@ -78,7 +78,7 @@ export interface EntityComboSelectProps {
 
 }
 
-//Extracted to another component 
+//Extracted to another component
 class EntityComboSelect extends React.Component<EntityComboSelectProps, { data?: Lite<Entity>[] }>{
 
   constructor(props: EntityComboSelectProps) {

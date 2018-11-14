@@ -336,7 +336,7 @@ export namespace SessionSharing {
 }
 
 
-/// This class encapsulates a sequence of ajax request, making them abortable, and auto-aborting previous request when a new one is made 
+/// This class encapsulates a sequence of ajax request, making them abortable, and auto-aborting previous request when a new one is made
 export class AbortableRequest<Q, A> {
 
   private requestIndex = 0;

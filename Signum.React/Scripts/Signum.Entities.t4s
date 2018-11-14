@@ -1,6 +1,6 @@
 ﻿export interface ModifiableEntity {
     Type: string;
-    toStr: string;	
+    toStr: string;
     modified : boolean;
     isNew: boolean;
     error?: { [member: string]: string };
@@ -76,7 +76,7 @@ export function registerToString<T extends ModifiableEntity>(type: Type<T>, toSt
     toStringDictionary[type.typeName] = toStringFunc as ((e: ModifiableEntity) => string) | null;
 }
 
-import * as Reflection from './Reflection' 
+import * as Reflection from './Reflection'
 
 function getOrCreateToStringFunction(type: string) {
     let f = toStringDictionary[type];
@@ -150,7 +150,7 @@ export function toLite<T extends Entity>(entity: T | null | undefined, fat?: boo
 }
 
 export function toLiteFat<T extends Entity>(entity: T, toStr?:string) : Lite<T> {
-    
+
     return {
        entity : entity,
        EntityType  :entity.Type,
@@ -174,7 +174,7 @@ export function is<T extends Entity>(a: Lite<T> | T | null | undefined, b: Lite<
 
     if(a == undefined && b == undefined)
         return true;
-        
+
     if(a == undefined || b == undefined)
         return false;
 
@@ -192,7 +192,7 @@ export function is<T extends Entity>(a: Lite<T> | T | null | undefined, b: Lite<
 
     const aEntity = (a as T).Type ? a as T : (a as Lite<T>).entity;
     const bEntity = (b as T).Type ? b as T : (b as Lite<T>).entity;
-    
+
     return aEntity == bEntity;
 }
 

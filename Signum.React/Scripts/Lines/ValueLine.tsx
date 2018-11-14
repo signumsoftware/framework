@@ -478,7 +478,7 @@ export class NumericTextBox extends React.Component<NumericTextBoxProps, { text?
 
     let value = ValueLine.autoFixString(input.value, false);
 
-    if (numbro.languageData().delimiters.decimal == ',' && !value.contains(",") && value.trim().length > 0) //Numbro transforms 1.000 to 1,0 in spanish or german 
+    if (numbro.languageData().delimiters.decimal == ',' && !value.contains(",") && value.trim().length > 0) //Numbro transforms 1.000 to 1,0 in spanish or german
       value = value + ",00";
 
     if (this.props.format && this.props.format.endsWith("%")) {
