@@ -191,7 +191,13 @@ namespace Signum.Engine
                 var ic = e.FullIntegrityCheck();
 
                 if (ic != null)
+                {
+#if DEBUG
+                    throw new IntegrityCheckException(ic.WithEntities(GraphExplorer.FromRoots(entities)));
+#else
                     throw new IntegrityCheckException(ic);
+#endif
+                }
             }
         }
 

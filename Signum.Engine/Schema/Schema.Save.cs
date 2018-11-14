@@ -187,7 +187,7 @@ namespace Signum.Engine.Maps
                     foreach (var item in table.Fields.Values)
                         item.Field.CreateParameter(trios, assigments, Expression.Field(cast, item.FieldInfo), paramForbidden, paramSuffix);
 
-                    if(table.Mixins != null)
+                    if (table.Mixins != null)
                         foreach (var item in table.Mixins.Values)
                             item.CreateParameter(trios, assigments, cast, paramForbidden, paramSuffix);
 
@@ -676,8 +676,13 @@ namespace Signum.Engine.Maps
 
             var error = GraphExplorer.FullIntegrityCheck(modifiables);
             if (error != null)
+            {
+#if DEBUG
+                throw new IntegrityCheckException(error.WithEntities(modifiables));
+#else
                 throw new IntegrityCheckException(error);
-
+#endif
+            }
             GraphExplorer.PropagateModifications(modifiables.Inverse());
         }
 
@@ -768,7 +773,7 @@ namespace Signum.Engine.Maps
 
                     return delete =>
                     {
-                        new SqlPreCommandSimple(sql,  DeleteExceptParameter(delete)).ExecuteNonQuery();
+                        new SqlPreCommandSimple(sql, DeleteExceptParameter(delete)).ExecuteNonQuery();
                     };
                 });
             }
@@ -914,7 +919,7 @@ namespace Signum.Engine.Maps
                     }
                 }
 
-                toInsert.SplitStatements(this.table.Columns.Count,list => GetInsert(list.Count)(list));
+                toInsert.SplitStatements(this.table.Columns.Count, list => GetInsert(list.Count)(list));
             }
 
             public void RelationalUpdates(List<EntityForbidden> idents)
@@ -953,9 +958,9 @@ namespace Signum.Engine.Maps
                             {
                                 var row = innerList[i];
 
-                                if(row.RowId.HasValue)
+                                if (row.RowId.HasValue)
                                 {
-                                    if(hasOrder  && row.OldIndex != i ||
+                                    if (hasOrder && row.OldIndex != i ||
                                        isEmbeddedEntity && ((ModifiableEntity)(object)row.Element).IsGraphModified)
                                     {
                                         toUpdate.Add(new MListUpdate(ef, collection, i));

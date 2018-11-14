@@ -1,4 +1,4 @@
-﻿import * as React from "react"
+import * as React from "react"
 import { Lite, Entity, liteKey, ModifiableEntity, getToString } from '../Signum.Entities';
 import * as Navigator from '../Navigator';
 import { Link } from 'react-router-dom';

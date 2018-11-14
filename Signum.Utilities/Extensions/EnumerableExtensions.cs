@@ -1,4 +1,4 @@
-﻿using Signum.Utilities.DataStructures;
+using Signum.Utilities.DataStructures;
 using Signum.Utilities.ExpressionTrees;
 using Signum.Utilities.Reflection;
 using Signum.Utilities.Synchronization;
