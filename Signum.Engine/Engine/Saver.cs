@@ -13,7 +13,7 @@ namespace Signum.Engine
     {
         public static void Save(Entity entity)
         {
-            Save(new []{entity});
+            Save(new[] { entity });
         }
 
         static readonly Entity[] None = new Entity[0];
@@ -28,14 +28,20 @@ namespace Signum.Engine
                 Schema schema = Schema.Current;
                 DirectedGraph<Modifiable> modifiables = PreSaving(() => GraphExplorer.FromRoots(entities));
 
-                HashSet<Entity> wasNew = modifiables.OfType<Entity>().Where(a=>a.IsNew).ToHashSet(ReferenceEqualityComparer<Entity>.Default);
+                HashSet<Entity> wasNew = modifiables.OfType<Entity>().Where(a => a.IsNew).ToHashSet(ReferenceEqualityComparer<Entity>.Default);
                 HashSet<Entity> wasSelfModified = modifiables.OfType<Entity>().Where(a => a.Modified == ModifiedState.SelfModified).ToHashSet(ReferenceEqualityComparer<Entity>.Default);
 
                 log.Switch("Integrity");
 
                 var error = GraphExplorer.FullIntegrityCheck(modifiables);
                 if (error != null)
+                {
+#if DEBUG
+                    throw new IntegrityCheckException(error.WithEntities(modifiables));
+#else
                     throw new IntegrityCheckException(error);
+#endif
+                }
 
                 log.Switch("Graph");
 
@@ -114,7 +120,7 @@ namespace Signum.Engine
         {
             Table table = schema.Table(group.Key.Type);
 
-            if(group.Key.IsNew)
+            if (group.Key.IsNew)
                 table.InsertMany(group.ToList(), backEdges);
             else
                 table.UpdateMany(group.ToList(), backEdges);

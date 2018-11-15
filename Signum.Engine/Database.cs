@@ -1,4 +1,4 @@
-﻿using Signum.Engine.Linq;
+using Signum.Engine.Linq;
 using Signum.Engine.Maps;
 using Signum.Entities;
 using Signum.Entities.Basics;

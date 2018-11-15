@@ -1,4 +1,4 @@
-﻿using Signum.Utilities;
+using Signum.Utilities;
 using Signum.Utilities.ExpressionTrees;
 using Signum.Utilities.Reflection;
 using System;
