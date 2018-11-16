@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -358,6 +358,8 @@ namespace Signum.Entities
             var graph = GraphExplorer.FromRoot(this);
             return GraphExplorer.FullIntegrityCheck(graph);
         }
+
+        [ForceEagerEvaluation]
 
         protected static string NicePropertyName<R>(Expression<Func<R>> property)
         {
