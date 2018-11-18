@@ -1,9 +1,9 @@
 import * as React from 'react'
 import * as d3 from 'd3'
-import D3ChartBase from '../D3ChartBase';
+import D3ChartBase from './D3ChartBase';
 import * as ChartClient from '../ChartClient';
 import * as ChartUtils from '../Templates/ChartUtils';
-import { getClickKeys, translate, scale, rotate, skewX, skewY, matrix, scaleFor, rule, ellipsis } from '../Templates/ChartUtils';
+import { translate, scale, rotate, skewX, skewY, matrix, scaleFor, rule, ellipsis } from '../Templates/ChartUtils';
 import { ChartRow } from '../ChartClient';
 
 
@@ -20,7 +20,7 @@ export default class BubblePlotChart extends D3ChartBase {
             _1: 5,
             title: 15,
             _2: 5,
-            labels: parseInt(data.parameters["UnitMargin"] || "0"),
+            labels: parseInt(data.parameters["UnitMargin"]),
             _3: 5,
             ticks: 4,
             content: '*',
@@ -108,7 +108,7 @@ export default class BubblePlotChart extends D3ChartBase {
 
         var color: (r: ChartRow) => string;
         if (data.parameters["ColorScale"] == "Ordinal") {
-            var scheme = ChartUtils.getColorScheme(data.parameters["ColorScheme"], parseInt(data.parameters["ColorSchemeSteps"] || "0"));
+            var scheme = ChartUtils.getColorScheme(data.parameters["ColorScheme"], parseInt(data.parameters["ColorSchemeSteps"]));
             var categoryColor = d3.scaleOrdinal(scheme).domain(data.rows.map(r => colorKeyColumn.getValueKey(r)));
             color = r => colorKeyColumn.getValueColor(r) || categoryColor(colorKeyColumn.getValueKey(r));
         } else {
@@ -133,7 +133,7 @@ export default class BubblePlotChart extends D3ChartBase {
             .attr('stroke', r => colorKeyColumn.getValueColor(r) || color(r))
             .attr('stroke-width', 3)
             .attr('fill', r => colorKeyColumn.getValueColor(r) || color(r))
-            .attr('fill-opacity', parseFloat(data.parameters["FillOpacity"] || "0"))
+            .attr('fill-opacity', parseFloat(data.parameters["FillOpacity"]))
             .attr('shape-rendering', 'initial')
             .attr('r', r => Math.sqrt(sizeScale(sizeColumn.getValue(r)) / Math.PI))
             .attr('cx', r => x(horizontalColumn.getValue(r)))
@@ -152,7 +152,8 @@ export default class BubblePlotChart extends D3ChartBase {
                 .each(function (r) { ellipsis(this as SVGTextElement, Math.sqrt(sizeScale(sizeColumn.getValue(r)) / Math.PI) * 2, 0, ""); });
         }
 
-        gr.attr('data-click', p => getClickKeys(p, data.columns))
+        gr.style("cursor", "pointer")
+            .on('click', p => this.props.onDrillDown(p))
             .append('svg:title')
             .text(r => colorKeyColumn.getValueNiceName(r) +
                 ("\n" + horizontalColumn.title + ": " + horizontalColumn.getValueNiceName(r)) +

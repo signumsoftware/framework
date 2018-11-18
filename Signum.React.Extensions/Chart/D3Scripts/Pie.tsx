@@ -1,9 +1,9 @@
 import * as React from 'react'
 import * as d3 from 'd3'
-import D3ChartBase from '../D3ChartBase';
+import D3ChartBase from './D3ChartBase';
 import * as ChartClient from '../ChartClient';
 import * as ChartUtils from '../Templates/ChartUtils';
-import { getClickKeys, translate, scale, rotate, skewX, skewY, matrix, scaleFor, rule, ellipsis } from '../Templates/ChartUtils';
+import { translate, scale, rotate, skewX, skewY, matrix, scaleFor, rule, ellipsis } from '../Templates/ChartUtils';
 import { ChartRow, ChartTable } from '../ChartClient';
 
 
@@ -23,7 +23,7 @@ export default class PieChart extends D3ChartBase {
 
         var outerRadious = d3.min([width / 2, height])! / 3;
         var rInner = outerRadious * parseFloat(pInnerRadius);
-        var color = d3.scaleOrdinal(ChartUtils.getColorScheme(data.parameters["ColorScheme"], parseInt(data.parameters["ColorSchemeSteps"] || "0")))
+        var color = d3.scaleOrdinal(ChartUtils.getColorScheme(data.parameters["ColorScheme"], parseInt(data.parameters["ColorSchemeSteps"])))
             .domain(data.rows.map(r => keyColumn.getValueKey(r)));
 
 
@@ -42,7 +42,8 @@ export default class PieChart extends D3ChartBase {
             .attr('d', slice => arc(slice.data)!)
             .attr('fill', slice => keyColumn.getValueColor(slice.data) || color(keyColumn.getValueKey(slice.data)))
             .attr('shape-rendering', 'initial')
-            .attr('data-click', slice => getClickKeys(slice.data, data.columns))
+            .on('click', slice => this.props.onDrillDown(slice.data))
+            .style("cursor", "pointer")
             .append('svg:title')
             .text(slice => keyColumn.getValueNiceName(slice.data) + ': ' + valueColumn.getValueNiceName(slice.data));
 
@@ -61,8 +62,9 @@ export default class PieChart extends D3ChartBase {
                 var cuadr = Math.floor(12 * m / (2 * Math.PI));
                 return (1 <= cuadr && cuadr <= 4) ? 'start' : (7 <= cuadr && cuadr <= 10) ? 'end' : 'middle';
             })
-            .attr('fill', slice => { return keyColumn.getValueColor(slice.data) || color(keyColumn.getValueKey(slice.data)); })
-            .attr('data-click', slice => { return getClickKeys(slice.data, data.columns); })
-            .text(slice => { return ((slice.endAngle - slice.startAngle) >= (Math.PI / 16)) ? keyColumn.getValueNiceName(slice.data) : ''; });
+            .attr('fill', slice => keyColumn.getValueColor(slice.data) || color(keyColumn.getValueKey(slice.data)))
+            .on('click', slice => this.props.onDrillDown(slice.data))
+            .style("cursor", "pointer")
+            .text(slice => ((slice.endAngle - slice.startAngle) >= (Math.PI / 16)) ? keyColumn.getValueNiceName(slice.data) : '');
     }
 }

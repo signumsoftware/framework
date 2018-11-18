@@ -1,9 +1,9 @@
 import * as React from 'react'
 import * as d3 from 'd3'
-import D3ChartBase from '../D3ChartBase';
+import D3ChartBase from './D3ChartBase';
 import * as ChartClient from '../ChartClient';
 import * as ChartUtils from '../Templates/ChartUtils';
-import { getClickKeys, translate, scale, rotate, skewX, skewY, matrix, scaleFor, rule, ellipsis } from '../Templates/ChartUtils';
+import { translate, scale, rotate, skewX, skewY, matrix, scaleFor, rule, ellipsis } from '../Templates/ChartUtils';
 import { ChartRow } from '../ChartClient';
 
 
@@ -100,9 +100,10 @@ export default class CalendarStreamChart extends D3ChartBase {
             .attr("height", cellSize)
             .attr("x", d => (horizontal ? week(d) : day(d)) * cellSize)
             .attr("y", d => (horizontal ? (6 - day(d)) : week(d)) * cellSize)
-            .attr('data-click', d => {
+            .style("cursor", "pointer")
+            .on('click', d => {
                 var r = groups[cleanDate(d)];
-                return r == undefined ? null : getClickKeys(r, data.columns);
+                return r == undefined ? null : this.props.onDrillDown(r);
             })
             .append("title")
             .text(d => {

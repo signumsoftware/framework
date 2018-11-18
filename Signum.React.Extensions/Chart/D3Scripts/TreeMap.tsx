@@ -1,9 +1,9 @@
 import * as React from 'react'
 import * as d3 from 'd3'
-import D3ChartBase from '../D3ChartBase';
+import D3ChartBase from './D3ChartBase';
 import * as ChartClient from '../ChartClient';
 import * as ChartUtils from '../Templates/ChartUtils';
-import { getClickKeys, translate, scale, rotate, skewX, skewY, matrix, scaleFor, rule, ellipsis, Folder, Root, isFolder } from '../Templates/ChartUtils';
+import { translate, scale, rotate, skewX, skewY, matrix, scaleFor, rule, ellipsis, Folder, Root, isFolder } from '../Templates/ChartUtils';
 import { ChartRow } from '../ChartClient';
 
 
@@ -27,19 +27,19 @@ export default class TreeMapChart extends D3ChartBase {
             color = r => colorInterpolator && colorInterpolator(scaleFunc(colorScaleColumn!.getValue(r)));
         }
         else if (colorSchemeColumn) {
-            var scheme = ChartUtils.getColorScheme(data.parameters["ColorScheme"], parseInt(data.parameters["ColorSchemeSteps"] || "0"));
+            var scheme = ChartUtils.getColorScheme(data.parameters["ColorScheme"], parseInt(data.parameters["ColorSchemeSteps"]));
             var categoryColor = d3.scaleOrdinal(scheme).domain(data.rows.map(r => colorSchemeColumn!.getValueKey(r)));
             color = r => colorSchemeColumn!.getColor(r) || categoryColor(colorSchemeColumn!.getValueKey(r));
         }
         else {
-            var scheme = ChartUtils.getColorScheme(data.parameters["ColorScheme"], parseInt(data.parameters["ColorSchemeSteps"] || "0"));
+            var scheme = ChartUtils.getColorScheme(data.parameters["ColorScheme"], parseInt(data.parameters["ColorSchemeSteps"]));
             var categoryColor = d3.scaleOrdinal(scheme).domain(data.rows.map(r => keyColumn.getValueKey(r)));
             color = r => keyColumn.getValueColor(r) || categoryColor(keyColumn.getValueKey(r));
         }
 
         var folderColor: null | ((folder: unknown) => string) = null;
         if (parentColumn) {
-            var scheme = ChartUtils.getColorScheme(data.parameters["ColorScheme"], parseInt(data.parameters["ColorSchemeSteps"] || "0"));
+            var scheme = ChartUtils.getColorScheme(data.parameters["ColorScheme"], parseInt(data.parameters["ColorSchemeSteps"]));
             var categoryColor = d3.scaleOrdinal(scheme).domain(data.rows.map(r => parentColumn!.getValueKey(r)));
             folderColor = folder => parentColumn!.getColor(folder) || categoryColor(parentColumn!.getKey(folder));
         }
@@ -50,8 +50,8 @@ export default class TreeMapChart extends D3ChartBase {
 
         root.sum(r => r == null ? 0 : size(valueColumn.getValue(r as ChartRow)));
 
-        var opacity = parentColumn ? parseFloat(data.parameters["Opacity"] || "0") : 1;
-        var padding = parentColumn ? parseInt(data.parameters["Padding"] || "0") : 1;
+        var opacity = parentColumn ? parseFloat(data.parameters["Opacity"]) : 1;
+        var padding = parentColumn ? parseInt(data.parameters["Padding"]) : 1;
         var p2 = padding / 2;
 
         var bubble = d3.treemap<ChartRow | Folder | Root>()
@@ -77,7 +77,8 @@ export default class TreeMapChart extends D3ChartBase {
             .attr("width", d => nodeWidth(d))
             .attr("height", d => nodeHeight(d))
             .style("fill", d => parentColumn!.getColor((d.data as Folder).folder) || folderColor!((d.data as Folder).folder))
-            .attr('data-click', p => getClickKeys({ c2: (p.data as Folder).folder }, data.columns))
+            .on('click', p => this.props.onDrillDown({ c2: (p.data as Folder).folder }))
+            .style("cursor", "pointer")
             .append('svg:title')
             .text(d => folderColor!(((d.data as Folder).folder)));
 
@@ -87,11 +88,12 @@ export default class TreeMapChart extends D3ChartBase {
             .attr("width", d => nodeWidth(d))
             .attr("height", d => nodeHeight(d))
             .style("fill", d => color(d.data as ChartRow)!)
-            .attr('data-click', p => getClickKeys(p.data, data.columns))
+            .on('click', p => this.props.onDrillDown(p.data as ChartRow))
+            .style("cursor", "pointer")
             .append('svg:title')
             .text(d => keyColumn.getValueNiceName(d.data as ChartRow) + ': ' + valueColumn.getValueNiceName(d.data as ChartRow));
 
-        var showNumber = parseFloat(data.parameters["NumberOpacity"] || "0") > 0;
+        var showNumber = parseFloat(data.parameters["NumberOpacity"]) > 0;
 
         var nodeFilter = node.filter(d => !isFolder(d.data) && nodeWidth(d) > 10 && nodeHeight(d) > 25);
 
@@ -100,7 +102,8 @@ export default class TreeMapChart extends D3ChartBase {
             .attr('dominant-baseline', 'middle')
             .attr("dx", d => nodeWidth(d) / 2)
             .attr("dy", d => nodeHeight(d) / 2 + (showNumber ? -6 : 0))
-            .attr('data-click', p => getClickKeys(p.data, data.columns))
+            .on('click', p => this.props.onDrillDown(p.data as ChartRow))
+            .style("cursor", "pointer")
             .text(d => keyColumn.getValueNiceName(d.data as ChartRow))
             .each(function (d) { ellipsis(this as SVGTextElement, nodeWidth(d), 4, ""); })
             .append('svg:title')
@@ -111,12 +114,13 @@ export default class TreeMapChart extends D3ChartBase {
                 .attr('fill', data.parameters["NumberColor"] || "#fff")
                 .attr('opacity', ".5")
                 .attr('dominant-baseline', 'central')
-                .attr('opacity', parseFloat(data.parameters["NumberOpacity"] || "0"))
+                .attr('opacity', parseFloat(data.parameters["NumberOpacity"]))
                 .attr('text-anchor', 'middle')
                 .attr('font-weight', 'bold')
                 .attr("dx", d => nodeWidth(d) / 2)
                 .attr("dy", d => nodeHeight(d) / 2 + 6)
-                .attr('data-click', p => getClickKeys(p.data, data.columns))
+                .on('click', p => this.props.onDrillDown(p.data as ChartRow))
+                .style("cursor", "pointer")
                 .text(d => valueColumn.getValueNiceName(d.data as ChartRow))
                 .each(function (d) { ellipsis(this as SVGTextElement, nodeWidth(d), 1, "") });
         }

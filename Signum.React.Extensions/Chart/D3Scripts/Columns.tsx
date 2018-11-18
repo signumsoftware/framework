@@ -1,8 +1,8 @@
 import * as React from 'react'
 import * as d3 from 'd3'
-import D3ChartBase from '../D3ChartBase';
+import D3ChartBase from './D3ChartBase';
 import * as ChartUtils from '../Templates/ChartUtils';
-import { getClickKeys, translate, scale, rotate, skewX, skewY, matrix, scaleFor, rule, ellipsis } from '../Templates/ChartUtils';
+import { translate, scale, rotate, skewX, skewY, matrix, scaleFor, rule, ellipsis } from '../Templates/ChartUtils';
 import { ChartTable, ChartColumn } from '../ChartClient';
 
 
@@ -17,7 +17,7 @@ export default class ColumnsChart extends D3ChartBase {
             _1: 5,
             title: 15,
             _2: 10,
-            labels: parseInt(data.parameters["UnitMargin"] || "0"),
+            labels: parseInt(data.parameters["UnitMargin"]),
             _3: 5,
             ticks: 4,
             content: '*',
@@ -32,7 +32,7 @@ export default class ColumnsChart extends D3ChartBase {
             content: '*',
             ticks: 4,
             _3: data.parameters["Labels"] == "Margin" ? 5 : 0,
-            labels: data.parameters["Labels"] == "Margin" ? parseInt(data.parameters["LabelsMargin"] || "0") : 0,
+            labels: data.parameters["Labels"] == "Margin" ? parseInt(data.parameters["LabelsMargin"]) : 0,
             _4: 10,
             title: 15,
             _5: 5,
@@ -93,8 +93,9 @@ export default class ColumnsChart extends D3ChartBase {
             .attr('width', x.bandwidth)
             .attr('x', r => x(keyColumn.getValueKey(r))!)
             .attr('fill', r => keyColumn.getValueColor(r) || color(keyColumn.getValueKey(r)))
+            .style("cursor", "pointer")
             .attr('stroke', x.bandwidth() > 4 ? '#fff' : null)
-            .attr('data-click', r => getClickKeys(r, data.columns))
+            .on('click', r => this.props.onDrillDown(r))
             .append('svg:title')
             .text(r => keyColumn.getValueNiceName(r) + ': ' + valueColumn.getValueNiceName(r));
 
@@ -107,7 +108,8 @@ export default class ColumnsChart extends D3ChartBase {
                     .attr('font-weight', 'bold')
                     .attr('fill', r => (keyColumn.getValueColor(r) || color(keyColumn.getValueKey(r))))
                     .attr('text-anchor', "end")
-                    .attr('data-click', r => getClickKeys(r, data.columns))
+                    .style("cursor", "pointer")
+                    .on('click', r => this.props.onDrillDown(r))
                     .text(r => keyColumn.getValueNiceName(r))
                     .each(function (r) { ellipsis(this as SVGTextElement, yRule.size('labels'), labelMargin); });
             }
@@ -122,22 +124,24 @@ export default class ColumnsChart extends D3ChartBase {
                     .attr('fill', r => y(valueColumn.getValue(r)) >= size / 2 ? '#fff' : (keyColumn.getValueColor(r) || color(keyColumn.getValueKey(r))))
                     .attr('dx', r => y(valueColumn.getValue(r)) >= size / 2 ? -labelMargin : labelMargin)
                     .attr('text-anchor', r => y(valueColumn.getValue(r)) >= size / 2 ? 'end' : 'start')
-                    .attr('data-click', r => getClickKeys(r, data.columns))
+                    .on('click', r => this.props.onDrillDown(r))
+                    .style("cursor", "pointer")
                     .text(r => keyColumn.getValueNiceName(r))
                     .each(function (r) { var posy = y(valueColumn.getValue(r)); ellipsis(this as SVGTextElement, posy >= size / 2 ? posy : size - posy, labelMargin); });
             }
 
-            if (parseFloat(data.parameters["NumberOpacity"] || "0") > 0) {
+            if (parseFloat(data.parameters["NumberOpacity"]) > 0) {
                 chart.append('svg:g').attr('class', 'numbers-label').attr('transform', translate(xRule.start('content'), yRule.end('content')))
                     .enterData(data.rows, 'text', 'number-label')
                     .filter(r => y(valueColumn.getValue(r)) > 10)
                     .attr('transform', r => translate(x(keyColumn.getValueKey(r))! + x.bandwidth() / 2, -y(valueColumn.getValue(r)) / 2) + rotate(-90))
                     .attr('fill', data.parameters["NumberColor"]||"#000")
                     .attr('dominant-baseline', 'central')
-                    .attr('opacity', data.parameters["NumberOpacity"] || "0")
+                    .attr('opacity', data.parameters["NumberOpacity"])
                     .attr('text-anchor', 'middle')
                     .attr('font-weight', 'bold')
-                    .attr('data-click', r => getClickKeys(r, data.columns))
+                    .style("cursor", "pointer")
+                    .on('click', r => this.props.onDrillDown(r))
                     .text(r => valueColumn.getValueNiceName(r));
             }
         }

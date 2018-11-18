@@ -1,14 +1,15 @@
 ﻿import * as React from 'react'
 import * as ReactDOM from 'react-dom'
 import * as D3 from 'd3'
-import * as ChartClient from './ChartClient'
+import * as ChartClient from '../ChartClient'
 import * as Navigator from '@framework/Navigator';
 import { ColumnOption, FilterOptionParsed } from '@framework/Search';
 import { hasAggregate } from '@framework/FindOptions';
 import { DomUtils } from '@framework/Globals';
 import { parseLite, SearchMessage } from '@framework/Signum.Entities';
+import { ChartRow } from '../ChartClient';
 
-export default abstract class D3ChartBase extends React.Component<{ data: ChartClient.ChartTable, onClick: (e: MouseEvent) => void }> {
+export default abstract class D3ChartBase extends React.Component<{ data: ChartClient.ChartTable, onDrillDown: (e: ChartRow) => void }> {
 
     componentDidUpdate() {
         const node = ReactDOM.findDOMNode(this) as HTMLDivElement;
@@ -34,8 +35,6 @@ export default abstract class D3ChartBase extends React.Component<{ data: ChartC
             chart.append('svg:text').attr('class', 'sf-chart-error').attr("x", width / 4).attr("y", height / 2).attr("fill", "#0066ff").attr("dy", 5).attr("dx", 4).text(SearchMessage.NoResultsFound.niceToString());
 
         } else {
-            node.addEventListener("click", this.props.onClick);
-
             if (rect.width && rect.height)
                 this.drawChart(this.props.data, chart, rect.width, rect.height);
         }

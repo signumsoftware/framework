@@ -1,8 +1,8 @@
 import * as React from 'react'
 import * as d3 from 'd3'
-import D3ChartBase from '../D3ChartBase';
+import D3ChartBase from './D3ChartBase';
 import * as ChartUtils from '../Templates/ChartUtils';
-import { getClickKeys, translate, scale, rotate, skewX, skewY, matrix, scaleFor, rule, ellipsis } from '../Templates/ChartUtils';
+import { translate, scale, rotate, skewX, skewY, matrix, scaleFor, rule, ellipsis } from '../Templates/ChartUtils';
 import { ChartTable, ChartColumn, ChartRow } from '../ChartClient';
 import { KeyCodes } from '@framework/Components';
 
@@ -18,7 +18,7 @@ export default class LineChart extends D3ChartBase {
             _1: 5,
             title: 15,
             _2: 10,
-            labels: parseInt(data.parameters["UnitMargin"] || "0"),
+            labels: parseInt(data.parameters["UnitMargin"]),
             _3: 5,
             ticks: 4,
             content: '*',
@@ -27,7 +27,7 @@ export default class LineChart extends D3ChartBase {
         //xRule.debugX(chart)
 
         var yRule = rule({
-            _2: parseFloat(data.parameters["NumberOpacity"] || "0") > 0 ? 20 : 5,
+            _2: parseFloat(data.parameters["NumberOpacity"]) > 0 ? 20 : 5,
             content: '*',
             ticks: 4,
             _3: 5,
@@ -124,7 +124,8 @@ export default class LineChart extends D3ChartBase {
             .attr('fill', '#fff')
             .attr('fill-opacity', 0)
             .attr('stroke', 'none')
-            .attr('data-click', r => getClickKeys(r, data.columns))
+            .on('click', r => this.props.onDrillDown(r))
+            .style("cursor", "pointer")
             .append('svg:title')
             .text(r => keyColumn.getValueNiceName(r) + ': ' + valueColumn.getValueNiceName(r));
 
@@ -135,7 +136,8 @@ export default class LineChart extends D3ChartBase {
             .attr('r', 5)
             .attr('cx', r => x(keyColumn.getValueKey(r))!)
             .attr('cy', r => -y(valueColumn.getValue(r)))
-            .attr('data-click', v => getClickKeys(v, data.columns))
+            .on('click', r => this.props.onDrillDown(r))
+            .style("cursor", "pointer")
             .attr('shape-rendering', 'initial')
             .append('svg:title')
             .text(r => keyColumn.getValueNiceName(r) + ': ' + valueColumn.getValueNiceName(r));
@@ -150,7 +152,8 @@ export default class LineChart extends D3ChartBase {
                 .attr('y', r => -y(valueColumn.getValue(r)) - 10)
                 .attr('opacity', parseFloat(data.parameters["NumberOpacity"]!))
                 .attr('text-anchor', 'middle')
-                .attr('data-click', r => getClickKeys(r, data.columns))
+                .on('click', r => this.props.onDrillDown(r))
+                .style("cursor", "pointer")
                 .attr('shape-rendering', 'initial')
                 .text(r => valueColumn.getValueNiceName(r));
         }

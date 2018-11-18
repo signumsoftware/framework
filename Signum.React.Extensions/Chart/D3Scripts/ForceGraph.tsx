@@ -1,9 +1,9 @@
 import * as React from 'react'
 import * as d3 from 'd3'
-import D3ChartBase from '../D3ChartBase';
+import D3ChartBase from './D3ChartBase';
 import * as ChartClient from '../ChartClient';
 import * as ChartUtils from '../Templates/ChartUtils';
-import { getClickKeys, translate, scale, rotate, skewX, skewY, matrix, scaleFor, rule, ellipsis } from '../Templates/ChartUtils';
+import { translate, scale, rotate, skewX, skewY, matrix, scaleFor, rule, ellipsis } from '../Templates/ChartUtils';
 
 interface ForceGraphNode extends d3.SimulationNodeDatum{
     col: ChartClient.ChartColumn<unknown>;
@@ -13,8 +13,7 @@ interface ForceGraphNode extends d3.SimulationNodeDatum{
 export default class ForceGraphChart extends D3ChartBase {
 
     drawChart(data: ChartClient.ChartTable, chart: d3.Selection<SVGElement, {}, null, undefined>, width: number, height: number) {
-
-
+        
         var fromColumn = data.columns.c0! as ChartClient.ChartColumn<unknown>;
         var toColumn = data.columns.c1! as ChartClient.ChartColumn<unknown>;
         var linkWidthColumn = data.columns.c2 as ChartClient.ChartColumn<number> | undefined;
@@ -22,7 +21,7 @@ export default class ForceGraphChart extends D3ChartBase {
         var charge = parseInt(data.parameters["Charge"] || "150");
         var linkDistance = parseInt(data.parameters["LinkDistance"] || "10");
 
-        var size = linkWidthColumn == null ? null : scaleFor(linkWidthColumn, data.rows.map(linkWidthColumn.getValue), 1, parseFloat(data.parameters["MaxWidth"] || "0"), "ZeroMax");
+        var size = linkWidthColumn == null ? null : scaleFor(linkWidthColumn, data.rows.map(linkWidthColumn.getValue), 1, parseFloat(data.parameters["MaxWidth"]), "ZeroMax");
 
         chart.append("defs")
             .append("marker")
@@ -58,7 +57,7 @@ export default class ForceGraphChart extends D3ChartBase {
                 toValue: toColumn.getValue(r),
             }));
 
-        var color = d3.scaleOrdinal(ChartUtils.getColorScheme(data.parameters["ColorScheme"], parseInt(data.parameters["ColorSchemeSteps"] || "0")))
+        var color = d3.scaleOrdinal(ChartUtils.getColorScheme(data.parameters["ColorScheme"], parseInt(data.parameters["ColorSchemeSteps"])))
 
         var simulation = d3.forceSimulation()
             .force("link", d3.forceLink(links))

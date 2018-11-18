@@ -45,30 +45,37 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Remove="Chart\Scripts\Force graph.tsx" />
-    <None Remove="Chart\Scripts\Heatmap.tsx" />
-    <None Remove="Chart\Scripts\Markermap.tsx" />
-    <None Remove="Chart\Scripts\MultiBars.tsx" />
-    <None Remove="Chart\Scripts\MultiColumns.tsx" />
-    <None Remove="Chart\Scripts\MultiLines.tsx" />
-    <None Remove="Chart\Scripts\ParallelCordiantes.tsx" />
-    <None Remove="Chart\Scripts\Punchcard.tsx" />
-    <None Remove="Chart\Scripts\Scatterplot.tsx" />
-    <None Remove="Chart\Scripts\StackedBars.tsx" />
-    <None Remove="Chart\Scripts\StackedColumns.tsx" />
-    <None Remove="Chart\Scripts\StackedLines.tsx" />
-    <None Remove="Chart\Scripts\WorldMap.tsx" />
+    <None Remove="Chart\D3Scripts\Force graph.tsx" />
+    <None Remove="Chart\D3Scripts\Heatmap.tsx" />
+    <None Remove="Chart\D3Scripts\WorldMap.tsx" />
   </ItemGroup>
 
   <ItemGroup>
     <TypeScriptCompile Remove="Chart\D3ChartBase.tsx" />
-    <TypeScriptCompile Remove="Chart\Scripts\BubblePack.tsx" />
-    <TypeScriptCompile Remove="Chart\Scripts\Bubbleplot.tsx" />
-    <TypeScriptCompile Remove="Chart\Scripts\CalendarStream.tsx" />
-    <TypeScriptCompile Remove="Chart\Scripts\Columns.tsx" />
-    <TypeScriptCompile Remove="Chart\Scripts\Line.tsx" />
-    <TypeScriptCompile Remove="Chart\Scripts\Pie.tsx" />
-    <TypeScriptCompile Remove="Chart\Scripts\TreeMap.tsx" />
+    <TypeScriptCompile Remove="Chart\D3Scripts\BubblePack.tsx" />
+    <TypeScriptCompile Remove="Chart\D3Scripts\Bubbleplot.tsx" />
+    <TypeScriptCompile Remove="Chart\D3Scripts\CalendarStream.tsx" />
+    <TypeScriptCompile Remove="Chart\D3Scripts\Columns.tsx" />
+    <TypeScriptCompile Remove="Chart\D3Scripts\ForceGraph.tsx" />
+    <TypeScriptCompile Remove="Chart\D3Scripts\Line.tsx" />
+    <TypeScriptCompile Remove="Chart\D3Scripts\Markermap.tsx" />
+    <TypeScriptCompile Remove="Chart\D3Scripts\MultiBars.tsx" />
+    <TypeScriptCompile Remove="Chart\D3Scripts\MultiColumns.tsx" />
+    <TypeScriptCompile Remove="Chart\D3Scripts\MultiLines.tsx" />
+    <TypeScriptCompile Remove="Chart\D3Scripts\ParallelCordiantes.tsx" />
+    <TypeScriptCompile Remove="Chart\D3Scripts\Pie.tsx" />
+    <TypeScriptCompile Remove="Chart\D3Scripts\Punchcard.tsx" />
+    <TypeScriptCompile Remove="Chart\D3Scripts\Scatterplot.tsx" />
+    <TypeScriptCompile Remove="Chart\D3Scripts\StackedBars.tsx" />
+    <TypeScriptCompile Remove="Chart\D3Scripts\StackedColumns.tsx" />
+    <TypeScriptCompile Remove="Chart\D3Scripts\StackedLines.tsx" />
+    <TypeScriptCompile Remove="Chart\D3Scripts\TreeMap.tsx" />
+    <TypeScriptCompile Remove="Chart\GoogleMapScripts\GoogleMapsChartUtils.tsx" />
+    <TypeScriptCompile Remove="Chart\GoogleMapScripts\Heatmap.tsx" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="node_modules\%40types\googlemaps\index.d.ts" />
   </ItemGroup>
 
   <Target Name="GenerateSignumTS">

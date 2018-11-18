@@ -1,9 +1,9 @@
 import * as React from 'react'
 import * as d3 from 'd3'
-import D3ChartBase from '../D3ChartBase';
+import D3ChartBase from './D3ChartBase';
 import * as ChartClient from '../ChartClient';
 import * as ChartUtils from '../Templates/ChartUtils';
-import { getClickKeys, translate, scale, rotate, skewX, skewY, matrix, scaleFor, rule, ellipsis, Folder, isFolder, Root, isRoot } from '../Templates/ChartUtils';
+import { translate, scale, rotate, skewX, skewY, matrix, scaleFor, rule, ellipsis, Folder, isFolder, Root, isRoot } from '../Templates/ChartUtils';
 import { ChartRow, ChartTable } from '../ChartClient';
 
 
@@ -27,19 +27,19 @@ export default class BubblePackChart extends D3ChartBase {
             color = r => colorInterpolator && colorInterpolator(scaleFunc(colorScaleColumn!.getValue(r)));
         }
         else if (colorSchemeColumn) {
-            var scheme = ChartUtils.getColorScheme(data.parameters["ColorScheme"], parseInt(data.parameters["ColorSchemeSteps"] || "0"));
+            var scheme = ChartUtils.getColorScheme(data.parameters["ColorScheme"], parseInt(data.parameters["ColorSchemeSteps"]));
             var categoryColor = d3.scaleOrdinal(scheme).domain(data.rows.map(r => colorSchemeColumn!.getValueKey(r)));
             color = r => colorSchemeColumn!.getColor(r) || categoryColor(colorSchemeColumn!.getValueKey(r));
         }
         else {
-            var scheme = ChartUtils.getColorScheme(data.parameters["ColorScheme"], parseInt(data.parameters["ColorSchemeSteps"] || "0"));
+            var scheme = ChartUtils.getColorScheme(data.parameters["ColorScheme"], parseInt(data.parameters["ColorSchemeSteps"]));
             var categoryColor = d3.scaleOrdinal(scheme).domain(data.rows.map(r => keyColumn.getValueKey(r)));
             color = r => keyColumn.getValueColor(r) || categoryColor(keyColumn.getValueKey(r));
         }
 
         var folderColor: null | ((folder: unknown) => string) = null;
         if (parentColumn) {
-            var scheme = ChartUtils.getColorScheme(data.parameters["ColorScheme"], parseInt(data.parameters["ColorSchemeSteps"] || "0"));
+            var scheme = ChartUtils.getColorScheme(data.parameters["ColorScheme"], parseInt(data.parameters["ColorSchemeSteps"]));
             var categoryColor = d3.scaleOrdinal(scheme).domain(data.rows.map(r => parentColumn!.getValueKey(r)));
             folderColor = folder => parentColumn!.getColor(folder) || categoryColor(parentColumn!.getKey(folder));
         }
@@ -68,7 +68,10 @@ export default class BubblePackChart extends D3ChartBase {
             .enter().append("g")
             .attr("class", "node")
             .attr("transform", d => "translate(" + d.x + "," + d.y + ")")
-            .attr('data-click', p => getClickKeys(p, data.columns));
+            .style("cursor", "pointer")
+            .on('click', p => isFolder(p.data) ?
+                this.props.onDrillDown({ c2: p.data.folder }) :
+                this.props.onDrillDown(p.data));
 
         node.append("circle")
             .attr('shape-rendering', 'initial')
@@ -76,19 +79,17 @@ export default class BubblePackChart extends D3ChartBase {
             .style("fill", d => isFolder(d.data) ? folderColor!(d.data.folder) : color(d.data)!)
             .style("fill-opacity", d => data.parameters["FillOpacity"] || null)
             .style("stroke", d => data.parameters["StrokeColor"] || (isFolder(d.data) ? folderColor!(d.data.folder) : (color(d.data) || null)))
-            .style("stroke-width", data.parameters["StrokeWidth"] || "0")
-            .style("stroke-opacity", 1)
-            .attr('data-click', p => isFolder(p.data) ? getClickKeys({ c2: p.data.folder }, data.columns) : getClickKeys(p.data, data.columns));
+            .style("stroke-width", data.parameters["StrokeWidth"])
+            .style("stroke-opacity", 1);
 
-        var showNumber = parseFloat(data.parameters["NumberOpacity"] || "0") > 0;
-        var numberSizeLimit = parseInt(data.parameters["NumberSizeLimit"] || "0");
+        var showNumber = parseFloat(data.parameters["NumberOpacity"]) > 0;
+        var numberSizeLimit = parseInt(data.parameters["NumberSizeLimit"]);
 
         node.filter(d => !isFolder(d.data)).append("text")
             .attr('dominant-baseline', 'central')
             .attr('text-anchor', 'middle')
             .attr("dy", d => showNumber && d.r > numberSizeLimit ? "-0.5em" : null)
             .text(d => keyColumn.getValueNiceName(d.data as ChartRow))
-            .attr('data-click', p => getClickKeys(p.data, data.columns))
             .each(function (d) { return ellipsis(this as SVGTextElement, d.r * 2, 1, ""); });
 
         if (showNumber) {
@@ -98,9 +99,8 @@ export default class BubblePackChart extends D3ChartBase {
                 .attr('dominant-baseline', 'central')
                 .attr('text-anchor', 'middle')
                 .attr('font-weight', 'bold')
-                .attr('opacity', d => parseFloat(data.parameters["NumberOpacity"] || "0") * d.r / 30)
+                .attr('opacity', d => parseFloat(data.parameters["NumberOpacity"]) * d.r / 30)
                 .attr("dy", ".5em")
-                .attr('data-click', p => getClickKeys(p.data, data.columns))
                 .text(d => valueColumn.getValueNiceName(d.data as ChartRow));
         }
 

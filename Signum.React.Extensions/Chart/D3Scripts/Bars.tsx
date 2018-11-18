@@ -1,9 +1,9 @@
 import * as React from 'react'
 import * as d3 from 'd3'
-import D3ChartBase from '../D3ChartBase';
+import D3ChartBase from './D3ChartBase';
 import * as ChartClient from '../ChartClient';
 import * as ChartUtils from '../Templates/ChartUtils';
-import { getClickKeys, translate, scale, rotate, skewX, skewY, matrix, scaleFor, rule, ellipsis, } from '../Templates/ChartUtils';
+import { translate, scale, rotate, skewX, skewY, matrix, scaleFor, rule, ellipsis, } from '../Templates/ChartUtils';
 import { ChartRow } from '../ChartClient';
 
 
@@ -18,7 +18,7 @@ export default class BarsChart extends D3ChartBase {
             _1: 5,
             title: 15,
             _2: 10,
-            labels: data.parameters["Labels"] == "Margin" ? parseInt(data.parameters["LabelsMargin"] || "0") : 0,
+            labels: data.parameters["Labels"] == "Margin" ? parseInt(data.parameters["LabelsMargin"]) : 0,
             _3: data.parameters["Labels"] == "Margin" ? 5 : 0,
             ticks: 4,
             content: '*',
@@ -98,7 +98,8 @@ export default class BarsChart extends D3ChartBase {
             .attr('y', r => y(keyColumn.getValueKey(r))!)
             .attr('fill', r => keyColumn.getValueColor(r) || color(keyColumn.getValueKey(r)))
             .attr('stroke', y.bandwidth() > 4 ? '#fff' : null)
-            .attr('data-click', r => getClickKeys(r, data.columns))
+            .on('click', r => this.props.onDrillDown(r))
+            .style("cursor", "pointer")
             .append('svg:title')
             .text(r => keyColumn.getValueNiceName(r) + ': ' + valueColumn.getValueNiceName(r));
 
@@ -111,7 +112,8 @@ export default class BarsChart extends D3ChartBase {
                     .attr('dominant-baseline', 'central')
                     .attr('text-anchor', 'end')
                     .attr('font-weight', 'bold')
-                    .attr('data-click', r => getClickKeys(r, data.columns))
+                    .on('click', r => this.props.onDrillDown(r))
+                    .style("cursor", "pointer")
                     .text(r => keyColumn.getValueNiceName(r))
                     .each(function (r) { var posx = x(valueColumn.getValue(r)); ChartUtils.ellipsis(this as SVGTextElement, xRule.size('labels'), labelMargin); });
             }
@@ -125,13 +127,14 @@ export default class BarsChart extends D3ChartBase {
                     .attr('fill', r => x(valueColumn.getValue(r)) >= size / 2 ? '#fff' : (keyColumn.getValueColor(r) || color(keyColumn.getValueKey(r))))
                     .attr('dominant-baseline', 'central')
                     .attr('font-weight', 'bold')
-                    .attr('data-click', r => getClickKeys(r, data.columns))
+                    .on('click', r => this.props.onDrillDown(r))
+                    .style("cursor", "pointer")
                     .text(r => keyColumn.getValueNiceName(r))
                     .each(function (r) { var posx = x(valueColumn.getValue(r)); ChartUtils.ellipsis(this as SVGTextElement, posx >= size / 2 ? posx : size - posx, labelMargin); });
             }
 
 
-            if (parseFloat(data.parameters["NumberOpacity"] || "0") > 0) {
+            if (parseFloat(data.parameters["NumberOpacity"]) > 0) {
                 chart.append('svg:g').attr('class', 'numbers-label').attr('transform', translate(xRule.start('content'), yRule.start('content')))
                     .enterData(data.rows, 'text', 'number-label')
                     .filter(r => x(valueColumn.getValue(r)) > 20)
@@ -139,10 +142,11 @@ export default class BarsChart extends D3ChartBase {
                     .attr('x', r => x(valueColumn.getValue(r)) / 2)
                     .attr('fill', data.parameters["NumberColor"] || "#000")
                     .attr('dominant-baseline', 'central')
-                    .attr('opacity', data.parameters["NumberOpacity"] || "0")
+                    .attr('opacity', data.parameters["NumberOpacity"])
                     .attr('text-anchor', 'middle')
                     .attr('font-weight', 'bold')
-                    .attr('data-click', r => getClickKeys(r, data.columns))
+                    .on('click', r => this.props.onDrillDown(r))
+                    .style("cursor", "pointer")
                     .text(r => valueColumn.getValueNiceName(r))
                     .each(function (r) { var posx = x(valueColumn.getValue(r)); ChartUtils.ellipsis(this as SVGTextElement, posx >= size / 2 ? posx : size - posx, labelMargin); });
 
