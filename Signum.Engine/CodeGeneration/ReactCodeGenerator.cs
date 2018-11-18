@@ -40,16 +40,41 @@ namespace Signum.Engine.CodeGeneration
 
             foreach (var mod in GetModules())
             {
-                WriteFile(() => WriteClientFile(mod), ()=>GetClientFile(mod), ref overwriteFiles);
-                WriteFile(() => WriteTypingsFile(mod), ()=> GetTypingsFile(mod), ref overwriteFiles);
-
-                foreach (var t in mod.Types)
+                if (Directory.Exists(BaseFileName(mod)))
                 {
-                    WriteFile(() => WriteEntityComponentFile(t), () => GetViewFileName(mod, t), ref overwriteFiles);
-                }
+                    var clientFile = GetClientFile(mod);
 
-                WriteFile(() => WriteServerFile(mod), () => ServerFileName(mod), ref overwriteFiles);
-                WriteFile(() => WriteControllerFile(mod), () => ControllerFileName(mod), ref overwriteFiles);
+                    if(File.Exists(clientFile))
+                    {
+                        var lines = File.ReadAllLines(clientFile).ToList();
+                        var index = lines.FindLastIndex(s => s.Contains("Navigator.addSettings(new EntitySettings")).NotFoundToNull() ??
+                               lines.FindLastIndex(s => s.Contains("export function start")).NotFoundToNull() ?? 0;
+                        lines.Insert(index + 1, WritetEntitySettings(mod).Trim().Indent(2));
+                        File.WriteAllLines(clientFile, lines);
+                    }
+                    else
+                    {
+                        WriteFile(() => WriteClientFile(mod), () => GetClientFile(mod), ref overwriteFiles);
+                    }
+
+                    foreach (var t in mod.Types)
+                    {
+                        WriteFile(() => WriteEntityComponentFile(t), () => GetViewFileName(mod, t), ref overwriteFiles);
+                    }
+                }
+                else
+                {
+                    WriteFile(() => WriteClientFile(mod), () => GetClientFile(mod), ref overwriteFiles);
+                    WriteFile(() => WriteTypingsFile(mod), () => GetTypingsFile(mod), ref overwriteFiles);
+
+                    foreach (var t in mod.Types)
+                    {
+                        WriteFile(() => WriteEntityComponentFile(t), () => GetViewFileName(mod, t), ref overwriteFiles);
+                    }
+
+                    WriteFile(() => WriteServerFile(mod), () => ServerFileName(mod), ref overwriteFiles);
+                    WriteFile(() => WriteControllerFile(mod), () => ControllerFileName(mod), ref overwriteFiles);
+                }
             }
         }
 
@@ -112,7 +137,60 @@ namespace Signum.Engine.CodeGeneration
         {
             Dictionary<Type, bool> types = CandidateTypes().ToDictionary(a => a, Schema.Current.Tables.ContainsKey);
 
-            return CodeGenerator.GetModules(types, this.SolutionName);
+            return ReactGetModules(types, this.SolutionName);
+        }
+
+        public IEnumerable<Module> ReactGetModules(Dictionary<Type, bool> types, string solutionName)
+        {
+            while (true)
+            {
+                var typesToShow = types.Keys.OrderBy(a => types[a]).ThenBy(a => a.FullName).ToList();
+
+                var selectedTypes = new ConsoleSwitch<int, Type>("Chose types for a new Logic module:")
+                    .Load(typesToShow, t => (types[t] ? "-" : " ") + t.FullName)
+                    .ChooseMultiple();
+
+                if (selectedTypes.IsNullOrEmpty())
+                    yield break;
+
+                var directories = Directory.GetDirectories(GetProjectFolder(), "App\\").Select(a => Path.GetFileName(a));
+
+                string moduleName;
+                if (directories.IsEmpty())
+                {
+                    moduleName = AskModuleName(solutionName, selectedTypes);
+                }
+                else
+                {
+                    var selectedName = directories.And("[New Module]").ChooseConsole(message: "Select a Module");
+
+                    if (selectedName == "[New Module]")
+                        moduleName = AskModuleName(solutionName, selectedTypes);
+                    else
+                        moduleName = selectedName;
+                }
+            
+                if (!moduleName.HasText())
+                    yield break;
+
+                yield return new Module
+                {
+                    ModuleName = moduleName,
+                    Types = selectedTypes.ToList()
+                };
+
+                types.SetRange(selectedTypes, a => a, a => true);
+            }
+
+        }
+
+        private static string AskModuleName(string solutionName, Type[] selected)
+        {
+            string moduleName = CodeGenerator.GetDefaultModuleName(selected, solutionName);
+            SafeConsole.WriteColor(ConsoleColor.Gray, $"Module name? ([Enter] for '{moduleName}'):");
+
+            moduleName = Console.ReadLine().DefaultText(moduleName);
+            return moduleName;
         }
 
         protected virtual List<Type> CandidateTypes()
@@ -134,7 +212,7 @@ namespace Signum.Engine.CodeGeneration
             sb.AppendLine();
             sb.AppendLine("namespace " + GetServerNamespace(mod));
             sb.AppendLine("{");
-            sb.Append(WriteServerClass(mod).Indent(4));
+            sb.Append(WriteServerClass(mod).Indent(2));
             sb.AppendLine("}");
 
             return sb.ToString();
@@ -158,7 +236,7 @@ namespace Signum.Engine.CodeGeneration
 
             sb.AppendLine();
 
-            sb.Append(WriteServerStartMethod(mod).Indent(4));
+            sb.Append(WriteServerStartMethod(mod).Indent(2));
 
             sb.AppendLine("}");
             return sb.ToString();
@@ -187,7 +265,7 @@ namespace Signum.Engine.CodeGeneration
             sb.AppendLine();
             sb.AppendLine("namespace " + GetServerNamespace(mod));
             sb.AppendLine("{");
-            sb.Append(WriteControllerClass(mod).Indent(4));
+            sb.Append(WriteControllerClass(mod).Indent(2));
             sb.AppendLine("}");
 
             return sb.ToString();
@@ -206,7 +284,7 @@ namespace Signum.Engine.CodeGeneration
 
             sb.AppendLine();
 
-            sb.Append(WriteControllerExampleMethod(mod).Indent(4));
+            sb.Append(WriteControllerExampleMethod(mod).Indent(2));
 
             sb.AppendLine("}");
             return sb.ToString();
@@ -216,7 +294,7 @@ namespace Signum.Engine.CodeGeneration
         {
             StringBuilder sb = new StringBuilder();
             sb.AppendLine($"//[Route(\"api/{mod.ModuleName.ToLower()}/login\"), HttpPost]");
-            sb.AppendLine(@"//public MyResponse Login([FromBody]MyRequest data)");
+            sb.AppendLine(@"//public MyResponse Login([Required, FromBody]MyRequest data)");
             sb.AppendLine(@"//{");
             sb.AppendLine(@"//}");
             return sb.ToString();
@@ -248,16 +326,14 @@ namespace Signum.Engine.CodeGeneration
 
         protected virtual string WriteClientFile(Module mod)
         {
-            var fra = FrameworkRelativePath(false);
-
             StringBuilder sb = new StringBuilder();
             sb.AppendLine("import * as React from 'react'");
             sb.AppendLine("import { Route } from 'react-router'");
-            sb.AppendLine("import { ajaxPost, ajaxGet } from '" + fra + "Signum.React/Scripts/Services';");
-            sb.AppendLine("import { EntitySettings, ViewPromise } from '" + fra + "Signum.React/Scripts/Navigator'");
-            sb.AppendLine("import * as Navigator from '" + fra + "Signum.React/Scripts/Navigator'");
-            sb.AppendLine("import { EntityOperationSettings } from '" + fra + "Signum.React/Scripts/Operations'");
-            sb.AppendLine("import * as Operations from '" + fra + "Signum.React/Scripts/Operations'");
+            sb.AppendLine("import { ajaxPost, ajaxGet } from '@framework/Services';");
+            sb.AppendLine("import { EntitySettings, ViewPromise } from '@framework/Navigator'");
+            sb.AppendLine("import * as Navigator from '@framework/Navigator'");
+            sb.AppendLine("import { EntityOperationSettings } from '@framework/Operations'");
+            sb.AppendLine("import * as Operations from '@framework/Operations'");
 
             foreach (var gr in mod.Types.GroupBy(a => a.Namespace))
             {
@@ -282,20 +358,6 @@ namespace Signum.Engine.CodeGeneration
             return new[] { "Files", "Mailing", "SMS", "Processes", "Basics", "Scheduler" };
         }
 
-        protected virtual string FrameworkRelativePath(bool inView)
-        {
-            var result = "../../../Framework/";
-
-            return inView ? "../" + result : result;
-        }
-
-        protected virtual string ExtensonsRelativePath(bool inView)
-        {
-            var result = "../../../Extensions/";
-
-            return inView ? "../" + result : result;
-        }
-
         protected virtual string WriteClientStartMethod(Module mod)
         {
             StringBuilder sb = new StringBuilder();
@@ -304,13 +366,13 @@ namespace Signum.Engine.CodeGeneration
 
             string entitySettings = WritetEntitySettings(mod);
             if (entitySettings != null)
-                sb.Append(entitySettings.Indent(4));
+                sb.Append(entitySettings.Indent(2));
 
             sb.AppendLine();
 
             string operationSettings = WriteOperationSettings(mod);
             if (operationSettings != null)
-                sb.Append(operationSettings.Indent(4));
+                sb.Append(operationSettings.Indent(2));
             
             sb.AppendLine("}");
 
@@ -359,20 +421,14 @@ namespace Signum.Engine.CodeGeneration
 
         protected virtual string WriteEntityComponentFile(Type type)
         {
-            var frp = FrameworkRelativePath(true);
-
             StringBuilder sb = new StringBuilder();
             sb.AppendLine("import * as React from 'react'");
             sb.AppendLine("import { "  + type.Name + " } from '../" + type.Namespace + "'");
-            sb.AppendLine("import { TypeContext, ValueLine, EntityLine, EntityCombo, EntityList, EntityDetail, EntityStrip, EntityRepeater, FormGroup, FormGroupStyle, FormGroupSize } from '" + frp + "Signum.React/Scripts/Lines'");
-            sb.AppendLine("import { SearchControl, ValueSearchControl, FilterOperation, OrderType, PaginationMode } from '" + frp + "Signum.React/Scripts/Search'");
+            sb.AppendLine("import { TypeContext, ValueLine, EntityLine, EntityCombo, EntityList, EntityDetail, EntityStrip, EntityRepeater, EntityTable, FormGroup } from '@framework/Lines'");
+            sb.AppendLine("import { SearchControl, ValueSearchControl, FilterOperation, OrderType, PaginationMode } from '@framework/Search'");
             
             var v = GetVarName(type);
-
-
-            var getControlName = 
-
-
+            
             sb.AppendLine();
             sb.AppendLine("export default class {0} extends React.Component<{{ ctx: TypeContext<{1}> }}> {{".FormatWith(GetViewName(type), type.Name));
             sb.AppendLine("");
@@ -423,7 +479,10 @@ namespace Signum.Engine.CodeGeneration
             var eka = elementType.GetCustomAttribute<EntityKindAttribute>();
 
             if (elementType.IsEmbeddedEntity() || (eka.EntityKind == EntityKind.Part || eka.EntityKind == EntityKind.SharedPart))
-                return "<EntityRepeater ctx={{ctx.subCtx({0} => {0}.{1})}} />".FormatWith(v, pi.Name.FirstLower());
+                if (pi.GetCustomAttribute<ImplementedByAttribute>()?.ImplementedTypes.Length > 1)
+                    return "<EntityRepeater ctx={{ctx.subCtx({0} => {0}.{1})}} />".FormatWith(v, pi.Name.FirstLower());
+                else
+                    return "<EntityTable ctx={{ctx.subCtx({0} => {0}.{1})}} />".FormatWith(v, pi.Name.FirstLower());
 
             return "<EntityStrip ctx={{ctx.subCtx({0} => {0}.{1})}} />".FormatWith(v, pi.Name.FirstLower());
         }

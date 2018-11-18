@@ -1,163 +1,155 @@
 ﻿import * as React from 'react'
-import { classes, Dic } from '../Globals'
-import * as Navigator from '../Navigator'
-import * as Constructor from '../Constructor'
-import * as Finder from '../Finder'
-import { FindOptions } from '../FindOptions'
-import { TypeContext, StyleContext, StyleOptions, FormGroupStyle, mlistItemContext, EntityFrame } from '../TypeContext'
-import { PropertyRoute, PropertyRouteType, MemberInfo, getTypeInfo, getTypeInfos, TypeInfo, IsByAll, ReadonlyBinding, MemberType } from '../Reflection'
-import { LineBase, LineBaseProps } from '../Lines/LineBase'
-import { ModifiableEntity, Lite, Entity, MList, MListElement, EntityControlMessage, JavascriptMessage, toLite, is, liteKey, getToString } from '../Signum.Entities'
+import { classes } from '../Globals'
+import { TypeContext, mlistItemContext } from '../TypeContext'
+import { ModifiableEntity, Lite, Entity, MListElement, EntityControlMessage, getToString } from '../Signum.Entities'
 import { EntityListBase, EntityListBaseProps } from './EntityListBase'
 import { RenderEntity } from './RenderEntity'
-import { Tab, UncontrolledTabs, Tabs } from '../Components/Tabs';
+import { Tab, Tabs } from '../Components/Tabs';
 import { newMListElement } from '../Signum.Entities';
 import { isLite } from '../Signum.Entities';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 export interface EntityTabRepeaterProps extends EntityListBaseProps {
-    createAsLink?: boolean;
-    avoidFieldSet?: boolean;
-    selectedIndex?: number;
-    getTitle?: (mlec: TypeContext<any /*T*/>) => React.ReactChild;
-    
+  createAsLink?: boolean;
+  avoidFieldSet?: boolean;
+  selectedIndex?: number;
+  getTitle?: (mlec: TypeContext<any /*T*/>) => React.ReactChild;
+
 }
 
 export interface EntityTabRepeaterState extends EntityTabRepeaterProps {
-    selectedIndex?: number;
+  selectedIndex?: number;
 }
 
 export class EntityTabRepeater extends EntityListBase<EntityTabRepeaterProps, EntityTabRepeaterState> {
+  calculateDefaultState(state: EntityTabRepeaterProps) {
+    super.calculateDefaultState(state);
 
+    state.selectedIndex = this.state == null ? 0 :
+      coerce(this.state.selectedIndex, this.state.ctx.value.length);
 
-    calculateDefaultState(state: EntityTabRepeaterProps) {
-        super.calculateDefaultState(state);
+    state.viewOnCreate = false;
+  }
 
-        state.selectedIndex = this.state == null ? 0 :
-            coerce(this.state.selectedIndex, this.state.ctx.value.length);
+  renderInternal() {
 
-        state.viewOnCreate = false;
-    }
+    var ctx = this.state.ctx!;
 
-    renderInternal() {
+    if (this.props.avoidFieldSet == true)
+      return (
+        <div className={classes("SF-repeater-field SF-control-container", ctx.errorClass)}
+          {...this.baseHtmlAttributes()} {...this.state.formGroupHtmlAttributes}>
+          {this.renderButtons()}
+          {this.renderTabs()}
+        </div>
+      );
 
-        var ctx = this.state.ctx!;
+    return (
+      <fieldset className={classes("SF-repeater-field SF-control-container", ctx.errorClass)}
+        {...this.baseHtmlAttributes()} {...this.state.formGroupHtmlAttributes}>
+        <legend>
+          <div>
+            <span>{this.state.labelText}</span>
+            {this.renderButtons()}
+          </div>
+        </legend>
+        {this.renderTabs()}
+      </fieldset>
+    );
+  }
 
-        if (this.props.avoidFieldSet == true)
-            return (
-                <div className={classes("SF-repeater-field SF-control-container", ctx.errorClass)}
-                    {...this.baseHtmlAttributes() } {...this.state.formGroupHtmlAttributes}>
-                    {this.renderButtons()}
-                    {this.renderTabs()}
-                </div>
-            );
+  renderButtons() {
+    const buttons = (
+      <span className="float-right">
+        {this.renderCreateButton(false)}
+        {this.renderFindButton(false)}
+      </span>
+    );
 
-        return (
-            <fieldset className={classes("SF-repeater-field SF-control-container", ctx.errorClass)}
-                {...this.baseHtmlAttributes() } {...this.state.formGroupHtmlAttributes}>
-                <legend>
-                    <div>
-                        <span>{this.state.labelText}</span>
-                        {this.renderButtons()}
-                    </div>
-                </legend>
-                {this.renderTabs()}
-            </fieldset>
-        );
-    }
+    return React.Children.count(buttons) ? buttons : undefined;
+  }
 
-    renderButtons() {
-        const buttons = (
-            <span className="float-right">
-                {this.renderCreateButton(false)}
-                {this.renderFindButton(false)}
-            </span>
-        );
+  renderTabs() {
+    const ctx = this.state.ctx!;
+    const readOnly = ctx.readOnly;
 
-        return React.Children.count(buttons) ? buttons : undefined;
-    }
+    return (
+      <Tabs activeEventKey={this.state.selectedIndex || 0} toggle={(activeKey: any) => this.setState({ selectedIndex: activeKey })}>
+        {
+          mlistItemContext(ctx).map((mlec, i) => {
+            const drag = this.canMove(mlec.value) && !readOnly ? this.getDragConfig(i, "h") : undefined;
 
-    renderTabs() {
-        const ctx = this.state.ctx!;
-        const readOnly = ctx.readOnly;
-
-        return (
-            <Tabs activeEventKey={this.state.selectedIndex || 0} toggle={(activeKey: any) => this.setState({ selectedIndex: activeKey })}>
-                {
-                    mlistItemContext(ctx).map((mlec, i) => {
-                        const drag = this.canMove(mlec.value) && !readOnly ? this.getDragConfig(i, "h") : undefined;
-
-                        return <Tab eventKey={i} key={i}
-                            {...EntityListBase.entityHtmlAttributes(mlec.value) }
-                            className="sf-repeater-element"
-                            title={
-                                <div
-                                    className={classes("item-group", "sf-tab-dropable", drag && drag.dropClass)}
-                                    onDragEnter={drag && drag.onDragOver}
-                                    onDragOver={drag && drag.onDragOver}
-                                    onDrop={drag && drag.onDrop}>
-                                    {this.props.getTitle ? this.props.getTitle(mlec) : getToString(mlec.value)}
-                                    &nbsp;
+            return <Tab eventKey={i} key={i}
+              {...EntityListBase.entityHtmlAttributes(mlec.value)}
+              className="sf-repeater-element"
+              title={
+                <div
+                  className={classes("item-group", "sf-tab-dropable", drag && drag.dropClass)}
+                  onDragEnter={drag && drag.onDragOver}
+                  onDragOver={drag && drag.onDragOver}
+                  onDrop={drag && drag.onDrop}>
+                  {this.props.getTitle ? this.props.getTitle(mlec) : getToString(mlec.value)}
+                  &nbsp;
 										{this.canRemove(mlec.value) && !readOnly &&
-                                        <span className={classes("sf-line-button", "sf-create")}
-                                            onClick={e => { e.stopPropagation(); this.handleRemoveElementClick(e, i) } }
-                                            title={EntityControlMessage.Remove.niceToString()}>
-                                            <FontAwesomeIcon icon="times" />
-                                        </span>
-                                    }
-                                    &nbsp;
+                    <span className={classes("sf-line-button", "sf-create")}
+                      onClick={e => { e.stopPropagation(); this.handleRemoveElementClick(e, i) }}
+                      title={EntityControlMessage.Remove.niceToString()}>
+                      <FontAwesomeIcon icon="times" />
+                    </span>
+                  }
+                  &nbsp;
                                         {drag && <span className={classes("sf-line-button", "sf-move")}
-                                        draggable={true}
-                                        onDragStart={drag.onDragStart}
-                                        onDragEnd={drag.onDragEnd}
-                                        title={EntityControlMessage.Move.niceToString()}>
-                                        <FontAwesomeIcon icon="bars" />
-                                    </span>}
-                                </div> as any
-                            }>
-                            <RenderEntity ctx={mlec} getComponent={this.props.getComponent} getViewPromise={this.props.getViewPromise} />
-                        </Tab>
-                    })
-                }
-            </Tabs>
-        );
-    }
+                    draggable={true}
+                    onDragStart={drag.onDragStart}
+                    onDragEnd={drag.onDragEnd}
+                    title={EntityControlMessage.Move.niceToString()}>
+                    <FontAwesomeIcon icon="bars" />
+                  </span>}
+                </div> as any
+              }>
+              <RenderEntity ctx={mlec} getComponent={this.props.getComponent} getViewPromise={this.props.getViewPromise} />
+            </Tab>
+          })
+        }
+      </Tabs>
+    );
+  }
 
-    removeElement(mle: MListElement<ModifiableEntity | Lite<Entity>>) {
-        const list = this.props.ctx.value!;
-        let currentIndex = list.indexOf(mle);
-        if (this.state.selectedIndex != null && this.state.selectedIndex < currentIndex)
-            this.state.selectedIndex-- 
+  removeElement(mle: MListElement<ModifiableEntity | Lite<Entity>>) {
+    const list = this.props.ctx.value!;
+    let currentIndex = list.indexOf(mle);
+    if (this.state.selectedIndex != null && this.state.selectedIndex < currentIndex)
+      this.state.selectedIndex--
 
-        list.remove(mle);
+    list.remove(mle);
 
-        this.state.selectedIndex = coerce(this.state.selectedIndex, list.length);
-        
-        this.setValue(list);
-    }
+    this.state.selectedIndex = coerce(this.state.selectedIndex, list.length);
 
-    addElement(entityOrLite: Lite<Entity> | ModifiableEntity) {
+    this.setValue(list);
+  }
 
-        if (isLite(entityOrLite) != (this.state.type!.isLite || false))
-            throw new Error("entityOrLite should be already converted");
+  addElement(entityOrLite: Lite<Entity> | ModifiableEntity) {
 
-        const list = this.props.ctx.value!;
-        list.push(newMListElement(entityOrLite));
-        this.state.selectedIndex = list.length - 1;
-        this.setValue(list);
-    }
+    if (isLite(entityOrLite) != (this.state.type!.isLite || false))
+      throw new Error("entityOrLite should be already converted");
+
+    const list = this.props.ctx.value!;
+    list.push(newMListElement(entityOrLite));
+    this.state.selectedIndex = list.length - 1;
+    this.setValue(list);
+  }
 }
 
 function coerce(index: number | undefined, length: number): number | undefined {
-    if (index == undefined)
-        return undefined;
+  if (index == undefined)
+    return undefined;
 
-    if (length <= index)
-        index = length - 1;
+  if (length <= index)
+    index = length - 1;
 
-    if (index < 0)
-        return undefined;
+  if (index < 0)
+    return undefined;
 
-    return index;
+  return index;
 }
 

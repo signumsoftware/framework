@@ -36,6 +36,11 @@ namespace Signum.Utilities.ExpressionTrees
                 return m.Method.DeclaringType == typeof(Queryable) || m.Method.HasAttribute<AvoidEagerEvaluationAttribute>();
             }
 
+            //Query<UserEntity>().Select(u => new ComboBox()) expects N different ComboBoxes
+            //also solves problems with MemberInitExpression and CollectionInitExpressions
+            if (expression.NodeType == ExpressionType.New) 
+                return true;
+
             return expression.NodeType == ExpressionType.Parameter ||
                 expression.NodeType == ExpressionType.Lambda || // why? 
                 !EnumExtensions.IsDefined(expression.NodeType);
@@ -66,30 +71,6 @@ namespace Signum.Utilities.ExpressionTrees
                 this.hasDependencies |= saveHasDependencies;
             }
             return expression;
-        }
-
-        protected override Expression VisitMemberInit(MemberInitExpression node)
-        {
-            var bindings = Visit(node.Bindings, this.VisitMemberBinding);
-
-            if (this.hasDependencies)
-                return node; //Avoid nominate only the NewExpression
-
-            Visit(node.NewExpression); 
-
-            return node;
-        }
-
-        protected override Expression VisitListInit(ListInitExpression node)
-        {
-            var bindings = Visit(node.Initializers, this.VisitElementInit);
-
-            if (this.hasDependencies)
-                return node; //Avoid nominate only the NewExpression
-
-            Visit(node.NewExpression);
-
-            return node;
         }
 
         protected override Expression VisitMethodCall(MethodCallExpression node)

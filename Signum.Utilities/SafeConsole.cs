@@ -125,6 +125,10 @@ namespace Signum.Utilities
             do
             {
                 var userAnswer = Console.ReadLine().ToLower();
+
+                if (!userAnswer.HasText())
+                    return null;
+
                 var result = answers.FirstOrDefault(a => a.StartsWith(userAnswer, StringComparison.CurrentCultureIgnoreCase));
                 if (result != null)
                     return result;

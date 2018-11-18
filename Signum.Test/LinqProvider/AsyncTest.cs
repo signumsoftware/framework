@@ -2,7 +2,7 @@
 using System.Text;
 using System.Collections.Generic;
 using System.Linq;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 using Signum.Engine;
 using Signum.Entities;
 using Signum.Utilities;
@@ -15,41 +15,34 @@ namespace Signum.Test.LinqProvider
     /// <summary>
     /// Summary description for SelectManyTest
     /// </summary>
-    [TestClass]
     public class AsyncTest
     {
-        [ClassInitialize()]
-        public static void MyClassInitialize(TestContext testContext)
+        public AsyncTest()
         {
             MusicStarter.StartAndLoad();
-        }
-
-        [TestInitialize]
-        public void Initialize()
-        {
             Connector.CurrentLogger = new DebugTextWriter();
         }
 
-        [TestMethod]
+        [Fact]
         public void ToListAsync()
         {
             var artistsInBands = Database.Query<BandEntity>().ToListAsync().Result;
         }
 
-        [TestMethod]
+        [Fact]
         public void ToArrayAsync()
         {
             var artistsInBands = Database.Query<BandEntity>().ToArrayAsync().Result;
         }
 
-        [TestMethod]
+        [Fact]
         public void AverageAsync()
         {
             var artistsInBands = Database.Query<BandEntity>().AverageAsync(a=>a.Members.Count).Result;
         }
 
 
-        [TestMethod]
+        [Fact]
         public void MinAsync()
         {
             var artistsInBands = Database.Query<BandEntity>().MinAsync(a => a.Members.Count).Result;

@@ -7,11 +7,11 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Signum.Entities", "Signum.E
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Signum.Engine", "Signum.Engine\Signum.Engine.csproj", "{7F2DB6FE-C109-4057-B207-C62A767F905D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Signum.Windows", "Signum.Windows\Signum.Windows.csproj", "{76278145-7CCD-4411-9B8A-078708128571}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Signum.Web", "Signum.Web\Signum.Web.csproj", "{61898D02-521F-49AB-928B-F80615D55CA3}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Signum.Test", "Signum.Test\Signum.Test.csproj", "{DE565EB3-EE44-469D-B6B9-C8F3CA0712EF}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Signum.TSGenerator", "Signum.TSGenerator\Signum.TSGenerator.csproj", "{32990F1A-6A78-439E-8194-68F05AA1CCB1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Signum.MSBuildTask", "Signum.MSBuildTask\Signum.MSBuildTask.csproj", "{5D992EC2-1F54-4B7B-AF47-CB76E340B658}"
 EndProject
 Global
 	GlobalSection(TestCaseManagementSettings) = postSolution
@@ -34,18 +34,18 @@ Global
 		{7F2DB6FE-C109-4057-B207-C62A767F905D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7F2DB6FE-C109-4057-B207-C62A767F905D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7F2DB6FE-C109-4057-B207-C62A767F905D}.Release|Any CPU.Build.0 = Release|Any CPU
-		{76278145-7CCD-4411-9B8A-078708128571}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{76278145-7CCD-4411-9B8A-078708128571}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{76278145-7CCD-4411-9B8A-078708128571}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{76278145-7CCD-4411-9B8A-078708128571}.Release|Any CPU.Build.0 = Release|Any CPU
-		{61898D02-521F-49AB-928B-F80615D55CA3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{61898D02-521F-49AB-928B-F80615D55CA3}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{61898D02-521F-49AB-928B-F80615D55CA3}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{61898D02-521F-49AB-928B-F80615D55CA3}.Release|Any CPU.Build.0 = Release|Any CPU
 		{DE565EB3-EE44-469D-B6B9-C8F3CA0712EF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{DE565EB3-EE44-469D-B6B9-C8F3CA0712EF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DE565EB3-EE44-469D-B6B9-C8F3CA0712EF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DE565EB3-EE44-469D-B6B9-C8F3CA0712EF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{32990F1A-6A78-439E-8194-68F05AA1CCB1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{32990F1A-6A78-439E-8194-68F05AA1CCB1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{32990F1A-6A78-439E-8194-68F05AA1CCB1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{32990F1A-6A78-439E-8194-68F05AA1CCB1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5D992EC2-1F54-4B7B-AF47-CB76E340B658}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5D992EC2-1F54-4B7B-AF47-CB76E340B658}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5D992EC2-1F54-4B7B-AF47-CB76E340B658}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5D992EC2-1F54-4B7B-AF47-CB76E340B658}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

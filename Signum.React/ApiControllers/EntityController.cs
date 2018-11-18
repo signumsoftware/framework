@@ -13,12 +13,13 @@ using Signum.Engine;
 using Signum.Engine.Operations;
 using Signum.React.Filters;
 using Microsoft.AspNetCore.Mvc;
+using System.ComponentModel.DataAnnotations;
 
 namespace Signum.React.ApiControllers
 {
     public class EntitiesController : ApiController
     {
-        [Route("api/entity/{type}/{id}"), ProfilerActionSplitter("type")]
+        [HttpGet("api/entity/{type}/{id}"), ProfilerActionSplitter("type")]
         public Entity GetEntity(string type, string id)
         {
             var entityType = TypeLogic.GetType(type);
@@ -28,7 +29,7 @@ namespace Signum.React.ApiControllers
             return Database.Retrieve(entityType, primaryKey);
         }
 
-        [Route("api/entityPack/{type}/{id}"), ProfilerActionSplitter("type")]
+        [HttpGet("api/entityPack/{type}/{id}"), ProfilerActionSplitter("type")]
         public EntityPackTS GetEntityPack(string type, string id)
         {
             var entityType = TypeLogic.GetType(type);
@@ -40,14 +41,14 @@ namespace Signum.React.ApiControllers
             return SignumServer.GetEntityPack(entity);
         }
 
-        [Route("api/entityPackEntity"), HttpPost]
-        public EntityPackTS GetEntityPackEntity([FromBody]Entity entity)
+        [HttpPost("api/entityPackEntity")/*, ValidateModelFilter*/]
+        public EntityPackTS GetEntityPackEntity([Required, FromBody]Entity entity)
         { 
             return SignumServer.GetEntityPack(entity);
         }
 
-        [Route("api/entityToStrings"), HttpPost]
-        public string[] EntityToStrings([FromBody]Lite<Entity>[] lites)
+        [HttpPost("api/entityToStrings")]
+        public string[] EntityToStrings([Required, FromBody]Lite<Entity>[] lites)
         {
             if (lites == null || lites.Length == 0)
                 throw new ArgumentNullException(nameof(lites));
@@ -55,7 +56,7 @@ namespace Signum.React.ApiControllers
             return lites.Select(a => Database.GetToStr(a.EntityType, a.Id)).ToArray();
         }
 
-        [Route("api/fetchAll/{typeName}"), HttpGet, ProfilerActionSplitter("typeName")]
+        [HttpGet("api/fetchAll/{typeName}"), ProfilerActionSplitter("typeName")]
         public List<Entity> FetchAll(string typeName)
         {
             if (typeName == null)
@@ -68,8 +69,8 @@ namespace Signum.React.ApiControllers
             return Database.RetrieveAll(type);
         }
 
-        [Route("api/validateEntity"), HttpPost, ValidateModelFilter]
-        public void ValidateEntity([FromBody]ModifiableEntity entity)
+        [HttpPost("api/validateEntity"), ValidateModelFilter]
+        public void ValidateEntity([Required, FromBody]ModifiableEntity entity)
         {
             return;
         }

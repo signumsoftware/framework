@@ -2,7 +2,7 @@
 using System.Text;
 using System.Collections.Generic;
 using System.Linq;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 using Signum.Engine;
 using Signum.Entities;
 using System.Diagnostics;
@@ -17,23 +17,16 @@ namespace Signum.Test.LinqProviderUpdateDelete
     /// <summary>
     /// Summary description for LinqProvider
     /// </summary>
-    [TestClass]
     public class UpdateInsertTest
     {
-        [ClassInitialize()]
-        public static void MyClassInitialize(TestContext testContext)
+        public UpdateInsertTest()
         {
             MusicStarter.StartAndLoad();
             Schema.Current.EntityEvents<AlbumEntity>().PreUnsafeInsert += (query, constructor, entityQuery) => constructor;
-        }
-
-        [TestInitialize]
-        public void Initialize()
-        {
             Connector.CurrentLogger = new DebugTextWriter();
         }
 
-        [TestMethod]
+        [Fact]
         public void InsertSimple()
         {
             using (Transaction tr = new Transaction())
@@ -52,7 +45,7 @@ namespace Signum.Test.LinqProviderUpdateDelete
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void InsertSimpleParameter()
         {
             using (Transaction tr = new Transaction())
@@ -71,7 +64,7 @@ namespace Signum.Test.LinqProviderUpdateDelete
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void InsertSimpleId()
         {
             using (Transaction tr = new Transaction())
@@ -94,7 +87,7 @@ namespace Signum.Test.LinqProviderUpdateDelete
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void InsertMListSimple()
         {
             using (Transaction tr = new Transaction())
@@ -111,7 +104,7 @@ namespace Signum.Test.LinqProviderUpdateDelete
         }
 
 
-        [TestMethod]
+        [Fact]
         public void InsertMListParameter()
         {
             using (Transaction tr = new Transaction())
@@ -129,7 +122,7 @@ namespace Signum.Test.LinqProviderUpdateDelete
         }
 
 
-        [TestMethod]
+        [Fact]
         public void InsertMListId()
         {
             using (Transaction tr = new Transaction())
@@ -150,7 +143,7 @@ namespace Signum.Test.LinqProviderUpdateDelete
         }
 
 
-        [TestMethod]
+        [Fact]
         public void InsertSimpleSingle()
         {
             using (Transaction tr = new Transaction())
@@ -168,7 +161,7 @@ namespace Signum.Test.LinqProviderUpdateDelete
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void InsertDistinct()
         {
             using (Transaction tr = new Transaction())
@@ -189,7 +182,7 @@ namespace Signum.Test.LinqProviderUpdateDelete
             public Lite<ArtistEntity> Artist { get; set; }
         }
 
-        [TestMethod]
+        [Fact]
         public void UnsafeInsertMyView()
         {
             using (Transaction tr = new Transaction())

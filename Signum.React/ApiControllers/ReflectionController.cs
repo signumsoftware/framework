@@ -20,13 +20,13 @@ namespace Signum.React.ApiControllers
 {
     public class ReflectionController : ApiController
     {
-        [Route("api/reflection/types"), HttpGet, AllowAnonymous]
+        [HttpGet("api/reflection/types"), AllowAnonymous]
         public Dictionary<string, TypeInfoTS> Types()
         {
             return ReflectionServer.GetTypeInfoTS();
         }
 
-        [Route("api/reflection/typeEntity/{typeName}"), HttpGet]
+        [HttpGet("api/reflection/typeEntity/{typeName}")]
         public TypeEntity GetTypeEntity(string typeName)
         {
             return TypeLogic.TryGetType(typeName)?.ToTypeEntity();

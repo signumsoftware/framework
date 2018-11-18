@@ -2,7 +2,7 @@
 using System.Text;
 using System.Collections.Generic;
 using System.Linq;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 using Signum.Engine;
 using Signum.Utilities;
 using Signum.Entities;
@@ -11,39 +11,32 @@ using Signum.Test.Environment;
 
 namespace Signum.Test.LinqProvider
 {
-    [TestClass]
     public class ToStringTest
     {
-        [ClassInitialize()]
-        public static void MyClassInitialize(TestContext testContext)
+        public ToStringTest()
         {
             MusicStarter.StartAndLoad();
-        }
-
-        [TestInitialize]
-        public void Initialize()
-        {
             Connector.CurrentLogger = new DebugTextWriter();
         }
 
-        [TestMethod]
+        [Fact]
         public void ToStringMainQuery()
         {
-            Assert.AreEqual(
+            Assert.Equal(
                 Database.Query<ArtistEntity>().Select(a => a.Name).ToString(" | "),
                 Database.Query<ArtistEntity>().ToString(a => a.Name, " | "));
         }
 
-        [TestMethod]
+        [Fact]
         public void ToStringEntity()
         {
-            Assert.AreEqual(
+            Assert.Equal(
                 Database.Query<ArtistEntity>().Select(a => a.Name).ToString(" | "),
                 Database.Query<ArtistEntity>().ToString(" | "));
         }
 
 
-        [TestMethod]
+        [Fact]
         public void ToStringSubCollection()
         {
             var result1 = (from b in Database.Query<BandEntity>()
@@ -62,11 +55,11 @@ namespace Signum.Test.LinqProvider
                                MembersToString = b.Members.OrderBy(a => a.Name).Select(a => a.Name).ToList().ToString(" | "),
                            }).ToList();
 
-            Assert.IsTrue(Enumerable.SequenceEqual(result1, result2));
+            Assert.True(Enumerable.SequenceEqual(result1, result2));
 
         }
 
-        [TestMethod]
+        [Fact]
         public void ToStringSubQuery()
         {
             var result1 = (from b in Database.Query<BandEntity>()
@@ -85,11 +78,11 @@ namespace Signum.Test.LinqProvider
                                MembersToString = Database.Query<AlbumEntity>().Where(a => a.Author == b).OrderBy(a => a.Name).Select(a => a.Name).ToList().ToString(" | "),
                            }).ToList();
 
-            Assert.IsTrue(Enumerable.SequenceEqual(result1, result2));
+            Assert.True(Enumerable.SequenceEqual(result1, result2));
         }
 
 
-        [TestMethod]
+        [Fact]
         public void ToStringNumbers()
         {
             var result1 = (from b in Database.Query<BandEntity>()
@@ -119,8 +112,8 @@ namespace Signum.Test.LinqProvider
                            }).ToList();
 
 
-            Assert.IsTrue(Enumerable.SequenceEqual(result1, result2));
-            Assert.IsTrue(Enumerable.SequenceEqual(result2, result3));
+            Assert.True(Enumerable.SequenceEqual(result1, result2));
+            Assert.True(Enumerable.SequenceEqual(result2, result3));
 
         }
 
