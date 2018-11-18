@@ -11,7 +11,7 @@ import { PropertyRoute, getQueryNiceName, getTypeInfo, ReadonlyBinding, GraphExp
 import * as Navigator from '@framework/Navigator'
 import FilterBuilder from '@framework/SearchControl/FilterBuilder'
 import ValidationErrors from '@framework/Frames/ValidationErrors'
-import { ChartRequest, ChartMessage, UserChartEntity } from '../Signum.Entities.Chart'
+import { ChartRequestModel, ChartMessage, UserChartEntity } from '../Signum.Entities.Chart'
 import * as ChartClient from '../ChartClient'
 import ChartBuilder from './ChartBuilder'
 import ChartTableComponent from './ChartTable'
@@ -23,15 +23,15 @@ import { ChartScript } from '../ChartClient';
 
 
 interface ChartRequestViewProps {
-    chartRequest?: ChartRequest;
+    chartRequest?: ChartRequestModel;
     userChart?: Lite<UserChartEntity>;
-    onChange: (newChartRequest: ChartRequest, userChart?: Lite<UserChartEntity>) => void;
+    onChange: (newChartRequest: ChartRequestModel, userChart?: Lite<UserChartEntity>) => void;
     title?: string;
 }
 
 interface ChartRequestViewState {
     queryDescription?: QueryDescription;
-    lastChartRequest?: ChartRequest;
+    lastChartRequest?: ChartRequestModel;
     chartResult?: ChartClient.API.ExecuteChartResult;
 }
 
@@ -98,7 +98,7 @@ export default class ChartRequestView extends React.Component<ChartRequestViewPr
         this.abortableQuery.abort();
     }
 
-    abortableQuery = new AbortableRequest<{ cr: ChartRequest; cs: ChartScript }, ChartClient.API.ExecuteChartResult>((signal, request) => ChartClient.API.executeChart(request.cr, request.cs, signal))
+    abortableQuery = new AbortableRequest<{ cr: ChartRequestModel; cs: ChartScript }, ChartClient.API.ExecuteChartResult>((signal, request) => ChartClient.API.executeChart(request.cr, request.cs, signal))
 
     handleOnDrawClick = () => {
 
@@ -133,7 +133,7 @@ export default class ChartRequestView extends React.Component<ChartRequestViewPr
         if (cr == undefined || qd == undefined)
             return null;
 
-        const tc = new TypeContext<ChartRequest>(undefined, undefined, PropertyRoute.root(getTypeInfo(cr.Type)), new ReadonlyBinding(this.props.chartRequest!, ""));
+        const tc = new TypeContext<ChartRequestModel>(undefined, undefined, PropertyRoute.root(getTypeInfo(cr.Type)), new ReadonlyBinding(this.props.chartRequest!, ""));
 
         return (
             <div>

@@ -4,8 +4,9 @@ import * as Finder from '@framework/Finder'
 import * as Navigator from '@framework/Navigator'
 import { parseLite, is } from '@framework/Signum.Entities'
 import { FilterOptionParsed, ColumnOption, hasAggregate } from '@framework/FindOptions'
-import { ChartRequest } from '../Signum.Entities.Chart'
+import { ChartRequestModel } from '../Signum.Entities.Chart'
 import * as ChartClient from '../ChartClient'
+
 
 import "../Chart.css"
 import { toFilterOptions } from '@framework/Finder';
@@ -15,8 +16,8 @@ import { ErrorBoundary } from '@framework/Components';
 
 export interface ChartRendererProps {
     data: ChartClient.ChartTable;
-    chartRequest: ChartRequest;
-    lastChartRequest: ChartRequest;
+    chartRequest: ChartRequestModel;
+    lastChartRequest: ChartRequestModel;
 }
 
 export interface ChartRendererState {

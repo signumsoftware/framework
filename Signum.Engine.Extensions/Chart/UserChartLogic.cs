@@ -143,9 +143,9 @@ namespace Signum.Engine.Chart
             }
         }
 
-        internal static ChartRequest ToChartRequest(UserChartEntity userChart)
+        internal static ChartRequestModel ToChartRequest(UserChartEntity userChart)
         {
-            var cr = new ChartRequest(userChart.Query.ToQueryName())
+            var cr = new ChartRequestModel(userChart.Query.ToQueryName())
             {
                 ChartScript = userChart.ChartScript,
                 Filters = userChart.Filters.ToFilterList(),

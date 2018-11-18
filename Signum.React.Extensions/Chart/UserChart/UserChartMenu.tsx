@@ -7,7 +7,7 @@ import { ResultTable, FindOptions, FilterOption, QueryDescription } from '@frame
 import { SearchMessage, JavascriptMessage, parseLite, is } from '@framework/Signum.Entities'
 import * as Navigator from '@framework/Navigator'
 import SearchControl from '@framework/SearchControl/SearchControl'
-import { UserChartEntity, ChartRequest, ChartMessage } from '../Signum.Entities.Chart'
+import { UserChartEntity, ChartRequestModel, ChartMessage } from '../Signum.Entities.Chart'
 import * as UserChartClient from './UserChartClient'
 import ChartRequestView from '../Templates/ChartRequestView'
 import { Dropdown, DropdownToggle, DropdownMenu, DropdownItem } from '@framework/Components';

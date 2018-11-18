@@ -8,7 +8,7 @@ import { ResultTable, FindOptions, FilterOption, QueryDescription, FilterOptionP
 import { SearchMessage, JavascriptMessage, parseLite, is } from '@framework/Signum.Entities'
 import * as Navigator from '@framework/Navigator'
 import { default as SearchControlLoaded } from '@framework/SearchControl/SearchControlLoaded'
-import { ChartMessage, ChartRequest } from './Signum.Entities.Chart'
+import { ChartMessage, ChartRequestModel } from './Signum.Entities.Chart'
 import * as ChartClient from './ChartClient'
 import { Button } from '@framework/Components';
 
@@ -29,7 +29,7 @@ export default class ChartButton extends React.Component<ChartButtonProps> {
             ).filter(f => f != null) as FilterOptionParsed[];
         }
 
-        const path = ChartClient.Encoder.chartPath(ChartRequest.New({
+        const path = ChartClient.Encoder.chartPath(ChartRequestModel.New({
             queryKey : fo.queryKey,
             orderOptions: [],
             filterOptions: simplifyFilters(fo.filterOptions)

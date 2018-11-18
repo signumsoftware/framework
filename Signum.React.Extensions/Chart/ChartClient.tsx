@@ -12,7 +12,7 @@ import {
 } from '@framework/FindOptions'
 import * as AuthClient from '../Authorization/AuthClient'
 import {
-    UserChartEntity, ChartPermission, ChartColumnEmbedded, ChartParameterEmbedded, ChartRequest,
+    UserChartEntity, ChartPermission, ChartColumnEmbedded, ChartParameterEmbedded, ChartRequestModel,
     IChartBase, GroupByChart, ChartColumnType, ChartParameterType, ChartScriptSymbol, D3ChartScript, GoogleMapsCharScript
 } from './Signum.Entities.Chart'
 import { QueryTokenEmbedded } from '../UserAssets/Signum.Entities.UserAssets'
@@ -43,14 +43,30 @@ export function start(options: { routes: JSX.Element[], googleMapsApiKey?: strin
     UserChartClient.start({ routes: options.routes });
 
 
-    registerChartScrtiptComponent(D3ChartScript.Bars, () => import("./Scripts/Bars"));
-    registerChartScrtiptComponent(D3ChartScript.BubblePack, () => import("./Scripts/BubblePack"));
-    registerChartScrtiptComponent(D3ChartScript.CalendarStream, () => import("./Scripts/CalendarStream"));
-    registerChartScrtiptComponent(D3ChartScript.Columns, () => import("./Scripts/Columns"));
-    registerChartScrtiptComponent(D3ChartScript.ForceGraph, () => import("./Scripts/ForceGraph"));
-    registerChartScrtiptComponent(D3ChartScript.Line, () => import("./Scripts/Line"));
-    registerChartScrtiptComponent(D3ChartScript.Pie, () => import("./Scripts/Pie"));
-    registerChartScrtiptComponent(D3ChartScript.Treemap, () => import("./Scripts/Treemap"));
+    registerChartScrtiptComponent(D3ChartScript.Bars, () => import("./D3Scripts/Bars"));
+    registerChartScrtiptComponent(D3ChartScript.BubblePack, () => import("./D3Scripts/BubblePack"));
+    registerChartScrtiptComponent(D3ChartScript.Bubbleplot, () => import("./D3Scripts/Bubbleplot"));
+    registerChartScrtiptComponent(D3ChartScript.CalendarStream, () => import("./D3Scripts/CalendarStream"));
+    registerChartScrtiptComponent(D3ChartScript.Columns, () => import("./D3Scripts/Columns"));
+    registerChartScrtiptComponent(D3ChartScript.ForceGraph, () => import("./D3Scripts/ForceGraph"));
+    registerChartScrtiptComponent(D3ChartScript.Line, () => import("./D3Scripts/Line"));
+    registerChartScrtiptComponent(D3ChartScript.MultiBars, () => import("./D3Scripts/MultiBars"));
+    registerChartScrtiptComponent(D3ChartScript.MultiColumns, () => import("./D3Scripts/MultiColumns"));
+    registerChartScrtiptComponent(D3ChartScript.MultiLines, () => import("./D3Scripts/MultiLines"));
+    registerChartScrtiptComponent(D3ChartScript.ParallelCordinates, () => import("./D3Scripts/ParallelCordiantes"));
+    registerChartScrtiptComponent(D3ChartScript.Pie, () => import("./D3Scripts/Pie"));
+    registerChartScrtiptComponent(D3ChartScript.Punchcard, () => import("./D3Scripts/Punchcard"));
+    registerChartScrtiptComponent(D3ChartScript.Scatterplot, () => import("./D3Scripts/Scatterplot"));
+    registerChartScrtiptComponent(D3ChartScript.StackedBars, () => import("./D3Scripts/StackedBars"));
+    registerChartScrtiptComponent(D3ChartScript.StackedColumns, () => import("./D3Scripts/StackedColumns"));
+    registerChartScrtiptComponent(D3ChartScript.StackedLines, () => import("./D3Scripts/StackedLines"));
+    registerChartScrtiptComponent(D3ChartScript.Treemap, () => import("./D3Scripts/Treemap"));
+
+    if (options.googleMapsApiKey) {
+        window.__google_api_key = options.googleMapsApiKey;
+        registerChartScrtiptComponent(GoogleMapsCharScript.Heatmap, () => import("./GoogleMapScripts/Heatmap"));
+        registerChartScrtiptComponent(GoogleMapsCharScript.Markermap, () => import("./GoogleMapScripts/Markermap"));
+    }
 }
 
 interface ChartScriptModule {
@@ -76,7 +92,7 @@ export namespace ButtonBarChart {
 
     interface ButtonBarChartContext {
         chartRequestView: ChartRequestView;
-        chartRequest: ChartRequest;
+        chartRequest: ChartRequestModel;
     }
 
     export const onButtonBarElements: ((ctx: ButtonBarChartContext) => React.ReactElement<any> | undefined)[] = [];
@@ -320,8 +336,8 @@ export function synchronizeColumns(chart: IChartBase, chartScript: ChartScript) 
         }
     });
 
-    if (chart.Type == ChartRequest.typeName) {
-        const cr = chart as ChartRequest;
+    if (chart.Type == ChartRequestModel.typeName) {
+        const cr = chart as ChartRequestModel;
 
         const keys = chart.columns.filter((a, i) => a.element.token && chartScript.columns![i].isGroupKey).map(a => a.element.token!.tokenString);
 
@@ -379,7 +395,7 @@ export interface ChartParameterOption {
 
 export module Encoder {
 
-    export function toChartOptions(cr: ChartRequest): ChartOptions {
+    export function toChartOptions(cr: ChartRequestModel): ChartOptions {
         return {
             queryName: cr.queryKey,
             chartScript: cr.chartScript && cr.chartScript.key.after(".") || undefined,
@@ -391,9 +407,9 @@ export module Encoder {
         };
     }
 
-    export function chartPath(cr: ChartOptions | ChartRequest, userChart?: Lite<UserChartEntity>): string {
+    export function chartPath(cr: ChartOptions | ChartRequestModel, userChart?: Lite<UserChartEntity>): string {
 
-        var co = ChartRequest.isInstance(cr) ? toChartOptions(cr) : cr;
+        var co = ChartRequestModel.isInstance(cr) ? toChartOptions(cr) : cr;
 
         const query = {
             script: co.chartScript,
@@ -425,7 +441,7 @@ export module Encoder {
 
 export module Decoder {
 
-    export function parseChartRequest(queryName: string, query: any): Promise<ChartRequest> {
+    export function parseChartRequest(queryName: string, query: any): Promise<ChartRequestModel> {
 
         return getChartScripts().then(scripts => {
             return Finder.getQueryDescription(queryName).then(qd => {
@@ -445,7 +461,7 @@ export module Decoder {
 
                     cols.filter(a => a.element.token != null).forEach(a => a.element.token!.token = completer.get(a.element.token!.tokenString));
 
-                    const chartRequest = ChartRequest.New({
+                    const chartRequest = chartRequest.New({
                         chartScript: query.script == undefined ? scripts.first("ChartScript").symbol :
                             scripts
                                 .filter(cs => cs.symbol.key.after(".") == query.script)
@@ -500,7 +516,7 @@ export module Decoder {
 
 export module API {
 
-    export function getRequest(request: ChartRequest): QueryRequest {
+    export function getRequest(request: ChartRequestModel): QueryRequest {
 
         return {
             queryKey: request.queryKey,
@@ -575,7 +591,17 @@ export module API {
         return v => String(v);
     }
 
-    export function toChartResult(request: ChartRequest, rt: ResultTable, chartScript: ChartScript): ExecuteChartResult {
+    export function getParameterWithDefault(request: ChartRequestModel, chartScript: ChartScript): { [parameter: string]: string } {
+
+        var defaultValues = chartScript.parameters.toObject(a => a.name, a => {
+            var col = a.columnIndex == null ? null : request.columns[a.columnIndex];
+            return defaultParameterValue(a, col && col.element && col.element.token && col.element.token.token);
+        });
+
+        return request.parameters.toObject(a => a.element.name!, a => a.element.value || defaultValues[a.element.name!])
+    }
+
+    export function toChartResult(request: ChartRequestModel, rt: ResultTable, chartScript: ChartScript): ExecuteChartResult {
 
         var cols = request.columns.map((mle, i) => {
             const token = mle.element.token && mle.element.token.token;
@@ -633,8 +659,8 @@ export module API {
                 getNiceName: v => v ? (v as Lite<Entity>).toStr : undefined,
             } as ChartColumn<unknown>) as ChartColumn<unknown>);
         }
-
-        var params = request.parameters.toObject(a => a.element.name!, a => a.element.value)
+        
+        var params = getParameterWithDefault(request, chartScript);
 
         var rows = rt.rows.map(row => {
             var cr = request.columns.map((c, i) => {
@@ -667,9 +693,9 @@ export module API {
         };
     }
 
-    export function executeChart(request: ChartRequest, chartScript: ChartScript, abortSignal?: AbortSignal): Promise<ExecuteChartResult> {
+    export function executeChart(request: ChartRequestModel, chartScript: ChartScript, abortSignal?: AbortSignal): Promise<ExecuteChartResult> {
 
-
+        Navigator.API.validateEntity(cr)
 
         const queryRequest = getRequest(request);
 
@@ -706,21 +732,23 @@ export interface ChartTable {
         c5?: ChartColumn<unknown>;
         c6?: ChartColumn<unknown>;
         c7?: ChartColumn<unknown>;
+        c8?: ChartColumn<unknown>;
     },
-    parameters: { [name: string]: string | null | undefined },
+    parameters: { [name: string]: string },
     rows: ChartRow[]
 }
 
 export interface ChartRow {
     entity?: Lite<Entity>;
-    c0: unknown;
-    c1: unknown;
-    c2: unknown;
-    c3: unknown;
-    c4: unknown;
-    c5: unknown;
-    c6: unknown;
-    c7: unknown;
+    c0?: unknown;
+    c1?: unknown;
+    c2?: unknown;
+    c3?: unknown;
+    c4?: unknown;
+    c5?: unknown;
+    c6?: unknown;
+    c7?: unknown;
+    c8?: unknown;
 }
 
 

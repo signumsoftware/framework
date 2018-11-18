@@ -7,7 +7,7 @@ import { QueryToken, FilterOperation, FindOptions, FilterOption } from '@framewo
 import * as Navigator from '@framework/Navigator'
 import * as Finder from '@framework/Finder'
 import * as ChartClient from './ChartClient'
-import { ChartRequest} from './Signum.Entities.Chart'
+import { ChartRequestModel} from './Signum.Entities.Chart'
 
 
 
@@ -43,7 +43,7 @@ export default class ChartOmniboxProvider extends OmniboxProvider<ChartOmniboxRe
         if (result.queryNameMatch == undefined)
             return undefined;
 
-        var cr = ChartRequest.New({
+        var cr = ChartRequestModel.New({
             queryKey: getQueryKey(result.queryName),
             orderOptions: [],
             filterOptions: [],

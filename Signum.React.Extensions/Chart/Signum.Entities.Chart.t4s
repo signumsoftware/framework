@@ -3,7 +3,7 @@
 import { FilterOptionParsed, OrderOptionParsed, FilterRequest, OrderRequest } from '@framework/FindOptions' 
 
 //Partial
-export interface ChartRequest {
+export interface ChartRequestModel {
     queryKey: string;
 
 	filterOptions: FilterOptionParsed[];
@@ -17,4 +17,4 @@ export interface ChartScriptParameterEmbedded {
     enumValues: { name: string, typeFilter : ChartColumnType }[];
 }
 
-export type IChartBase = ChartRequest | UserChartEntity;
+export type IChartBase = ChartRequestModel | UserChartEntity;

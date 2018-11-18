@@ -168,7 +168,7 @@ namespace Signum.Entities.Chart
             return result;
         }
 
-        public static UserChartEntity ToUserChart(this ChartRequest request)
+        public static UserChartEntity ToUserChart(this ChartRequestModel request)
         {
             var result = new UserChartEntity
             {
@@ -202,9 +202,9 @@ namespace Signum.Entities.Chart
             return result;
         }
 
-        public static ChartRequest ToRequest(this UserChartEntity uq)
+        public static ChartRequestModel ToRequest(this UserChartEntity uq)
         {
-            var result = new ChartRequest(uq.QueryName)
+            var result = new ChartRequestModel(uq.QueryName)
             {
                 GroupResults = uq.GroupResults,
                 ChartScript = uq.ChartScript,

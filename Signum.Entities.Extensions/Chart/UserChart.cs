@@ -69,7 +69,7 @@ namespace Signum.Entities.Chart
 
         public ChartScript GetChartScript()
         {
-            return ChartRequest.GetChartScriptFunc(this.ChartScript);
+            return ChartRequestModel.GetChartScriptFunc(this.ChartScript);
         }
 
         [NotNullValidator, NoRepeatValidator]

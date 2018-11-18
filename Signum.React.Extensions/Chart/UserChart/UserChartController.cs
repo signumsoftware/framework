@@ -39,7 +39,7 @@ namespace Signum.React.Chart
         }
 
         [Route("api/userChart/fromChartRequest"), HttpPost, ValidateModelFilter]
-        public UserChartEntity FromQueryRequest([FromBody]ChartRequest request)
+        public UserChartEntity FromQueryRequest([FromBody]ChartRequestModel request)
         {
             return request.ToUserChart();
         }

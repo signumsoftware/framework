@@ -2,10 +2,10 @@
 import * as Finder from '@framework/Finder'
 import * as Navigator from '@framework/Navigator'
 import { ResultTable, ColumnOptionParsed, OrderOptionParsed, OrderType, ResultRow, hasAggregate, ColumnOption, FilterOptionParsed } from '@framework/FindOptions'
-import { ChartRequest } from '../Signum.Entities.Chart'
+import { ChartRequestModel } from '../Signum.Entities.Chart'
 import { toFilterOptions } from '@framework/Finder';
 
-export default class ChartTableComponent extends React.Component<{ resultTable: ResultTable; chartRequest: ChartRequest; lastChartRequest: ChartRequest; onRedraw: () => void }> {
+export default class ChartTableComponent extends React.Component<{ resultTable: ResultTable; chartRequest: ChartRequestModel; lastChartRequest: ChartRequestModel; onRedraw: () => void }> {
 
 
     handleHeaderClick = (e: React.MouseEvent<any>) => {

@@ -32,7 +32,7 @@ namespace Signum.React.Chart
 
             CustomizeChartRequest();
             
-            EntityJsonConverter.AfterDeserilization.Register((ChartRequest cr) =>
+            EntityJsonConverter.AfterDeserilization.Register((ChartRequestModel cr) =>
             {
                 if (cr.ChartScript != null)
                     cr.GetChartScript().SynchronizeColumns(cr);
@@ -77,7 +77,7 @@ namespace Signum.React.Chart
 
         private static void CustomizeChartRequest()
         {
-            var converters = PropertyConverter.GetPropertyConverters(typeof(ChartRequest));
+            var converters = PropertyConverter.GetPropertyConverters(typeof(ChartRequestModel));
             converters.Remove("queryName");
             
             converters.Add("queryKey", new PropertyConverter()
@@ -85,11 +85,11 @@ namespace Signum.React.Chart
                 AvoidValidate = true,
                 CustomReadJsonProperty = ctx =>
                 {
-                    ((ChartRequest)ctx.Entity).QueryName = QueryLogic.ToQueryName((string)ctx.JsonReader.Value);
+                    ((ChartRequestModel)ctx.Entity).QueryName = QueryLogic.ToQueryName((string)ctx.JsonReader.Value);
                 },
                 CustomWriteJsonProperty = ctx =>
                 {
-                    var cr = (ChartRequest)ctx.Entity;
+                    var cr = (ChartRequestModel)ctx.Entity;
 
                     ctx.JsonWriter.WritePropertyName(ctx.LowerCaseName);
                     ctx.JsonWriter.WriteValue(QueryLogic.GetQueryEntity(cr.QueryName).Key);
@@ -103,7 +103,7 @@ namespace Signum.React.Chart
                 {
                     var list = (List<FilterTS>)ctx.JsonSerializer.Deserialize(ctx.JsonReader, typeof(List<FilterTS>));
 
-                    var cr = (ChartRequest)ctx.Entity;
+                    var cr = (ChartRequestModel)ctx.Entity;
 
                     var qd = QueryLogic.Queries.QueryDescription(cr.QueryName);
 
@@ -111,7 +111,7 @@ namespace Signum.React.Chart
                 },
                 CustomWriteJsonProperty = ctx =>
                 {
-                    var cr = (ChartRequest)ctx.Entity;
+                    var cr = (ChartRequestModel)ctx.Entity;
 
                     ctx.JsonWriter.WritePropertyName(ctx.LowerCaseName);
                     ctx.JsonSerializer.Serialize(ctx.JsonWriter, cr.Filters.Select(f => FilterTS.FromFilter(f)).ToList());
@@ -125,7 +125,7 @@ namespace Signum.React.Chart
                 {
                     var list = (List<OrderTS>)ctx.JsonSerializer.Deserialize(ctx.JsonReader, typeof(List<OrderTS>));
 
-                    var cr = (ChartRequest)ctx.Entity;
+                    var cr = (ChartRequestModel)ctx.Entity;
 
                     var qd = QueryLogic.Queries.QueryDescription(cr.QueryName);
 
@@ -133,7 +133,7 @@ namespace Signum.React.Chart
                 },
                 CustomWriteJsonProperty = ctx =>
                 {
-                    var cr = (ChartRequest)ctx.Entity;
+                    var cr = (ChartRequestModel)ctx.Entity;
 
                     ctx.JsonWriter.WritePropertyName(ctx.LowerCaseName);
                     ctx.JsonSerializer.Serialize(ctx.JsonWriter, cr.Orders.Select(f => new OrderTS

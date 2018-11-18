@@ -15,7 +15,7 @@ import { TypeContext, FormGroupStyle, mlistItemContext } from '@framework/TypeCo
 import QueryTokenEntityBuilder from '../../UserAssets/Templates/QueryTokenEntityBuilder'
 import * as UserChartClient from '../../Chart/UserChart/UserChartClient'
 import * as ChartClient from '../../Chart/ChartClient'
-import { ChartRequest } from '../../Chart/Signum.Entities.Chart'
+import { ChartRequestModel } from '../../Chart/Signum.Entities.Chart'
 import ChartRenderer from '../../Chart/Templates/ChartRenderer'
 import ChartTableComponent from '../../Chart/Templates/ChartTable'
 import { UserChartPartEntity } from '../Signum.Entities.Dashboard'
@@ -28,7 +28,7 @@ export interface UserChartPartProps {
 
 
 export interface UserChartPartState {
-    chartRequest?: ChartRequest;
+    chartRequest?: ChartRequestModel;
     result?: ChartClient.API.ExecuteChartResult;
     error?: any;
     showData?: boolean;

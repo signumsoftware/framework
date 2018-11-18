@@ -34,13 +34,13 @@ namespace Signum.Entities.Chart
     }
 
     [Serializable, InTypeScript(Undefined = false)]
-    public class ChartRequest : ModelEntity, IChartBase
+    public class ChartRequestModel : ModelEntity, IChartBase
     {
-        private ChartRequest()
+        private ChartRequestModel()
         {
         }
 
-        public ChartRequest(object queryName)
+        public ChartRequestModel(object queryName)
         {
             this.queryName = queryName;
         }

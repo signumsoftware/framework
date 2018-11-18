@@ -14,7 +14,7 @@ import * as Authorization from '../Authorization/Signum.Entities.Authorization'
 import { FilterOptionParsed, OrderOptionParsed, FilterRequest, OrderRequest } from '@framework/FindOptions' 
 
 //Partial
-export interface ChartRequest {
+export interface ChartRequestModel {
     queryKey: string;
 
 	filterOptions: FilterOptionParsed[];
@@ -28,7 +28,7 @@ export interface ChartScriptParameterEmbedded {
     enumValues: { name: string, typeFilter : ChartColumnType }[];
 }
 
-export type IChartBase = ChartRequest | UserChartEntity;
+export type IChartBase = ChartRequestModel | UserChartEntity;
 export const ChartColorEntity = new Type<ChartColorEntity>("ChartColor");
 export interface ChartColorEntity extends Entities.Entity {
     Type: "ChartColor";
@@ -115,9 +115,9 @@ export module ChartPermission {
     export const ViewCharting : Authorization.PermissionSymbol = registerSymbol("Permission", "ChartPermission.ViewCharting");
 }
 
-export const ChartRequest = new Type<ChartRequest>("ChartRequest");
-export interface ChartRequest extends Entities.ModelEntity {
-    Type: "ChartRequest";
+export const ChartRequestModel = new Type<ChartRequestModel>("ChartRequestModel");
+export interface ChartRequestModel extends Entities.ModelEntity {
+    Type: "ChartRequestModel";
     chartScript: ChartScriptSymbol;
     groupResults: boolean;
     columns: Entities.MList<ChartColumnEmbedded>;

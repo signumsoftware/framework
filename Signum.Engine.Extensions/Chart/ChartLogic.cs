@@ -39,16 +39,16 @@ namespace Signum.Engine.Chart
             }
         }
 
-        public static Task<ResultTable> ExecuteChartAsync(ChartRequest request, CancellationToken token)
+        public static Task<ResultTable> ExecuteChartAsync(ChartRequestModel request, CancellationToken token)
         {
             IDynamicQueryCore core = QueryLogic.Queries.TryGetQuery(request.QueryName).Core.Value;
 
             return miExecuteChartAsync.GetInvoker(core.GetType().GetGenericArguments()[0])(request, core, token);
         }
 
-        static GenericInvoker<Func<ChartRequest, IDynamicQueryCore, CancellationToken, Task<ResultTable>>> miExecuteChartAsync =
-            new GenericInvoker<Func<ChartRequest, IDynamicQueryCore, CancellationToken, Task<ResultTable>>>((req, dq, token) => ExecuteChartAsync<int>(req, (DynamicQueryCore<int>)dq, token));
-        static async Task<ResultTable> ExecuteChartAsync<T>(ChartRequest request, DynamicQueryCore<T> dq, CancellationToken token)
+        static GenericInvoker<Func<ChartRequestModel, IDynamicQueryCore, CancellationToken, Task<ResultTable>>> miExecuteChartAsync =
+            new GenericInvoker<Func<ChartRequestModel, IDynamicQueryCore, CancellationToken, Task<ResultTable>>>((req, dq, token) => ExecuteChartAsync<int>(req, (DynamicQueryCore<int>)dq, token));
+        static async Task<ResultTable> ExecuteChartAsync<T>(ChartRequestModel request, DynamicQueryCore<T> dq, CancellationToken token)
         {
             List<Column> columns = request.Columns.Where(c => c.Token != null).Select(t => t.CreateColumn()).ToList();
 
@@ -67,16 +67,16 @@ namespace Signum.Engine.Chart
             }
         }
 
-        public static ResultTable ExecuteChart(ChartRequest request)
+        public static ResultTable ExecuteChart(ChartRequestModel request)
         {
             IDynamicQueryCore core = QueryLogic.Queries.TryGetQuery(request.QueryName).Core.Value;
 
             return miExecuteChart.GetInvoker(core.GetType().GetGenericArguments()[0])(request, core);
         }
 
-        static GenericInvoker<Func<ChartRequest, IDynamicQueryCore, ResultTable>> miExecuteChart =
-            new GenericInvoker<Func<ChartRequest, IDynamicQueryCore, ResultTable>>((req, dq) => ExecuteChart<int>(req, (DynamicQueryCore<int>)dq));
-        static ResultTable ExecuteChart<T>(ChartRequest request, DynamicQueryCore<T> dq)
+        static GenericInvoker<Func<ChartRequestModel, IDynamicQueryCore, ResultTable>> miExecuteChart =
+            new GenericInvoker<Func<ChartRequestModel, IDynamicQueryCore, ResultTable>>((req, dq) => ExecuteChart<int>(req, (DynamicQueryCore<int>)dq));
+        static ResultTable ExecuteChart<T>(ChartRequestModel request, DynamicQueryCore<T> dq)
         {
             List<Column> columns = request.Columns.Where(c => c.Token != null).Select(t => t.CreateColumn()).ToList();
 

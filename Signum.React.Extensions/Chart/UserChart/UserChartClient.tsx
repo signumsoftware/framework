@@ -12,7 +12,7 @@ import * as Operations from '@framework/Operations'
 import * as QuickLinks from '@framework/QuickLinks'
 import { FindOptions, QueryToken, FilterOption, FilterOptionParsed, FilterOperation, OrderOption, OrderOptionParsed, ColumnOption, FilterRequest, QueryRequest, Pagination, SubTokensOptions, FilterGroupOptionParsed, FilterConditionOptionParsed } from '@framework/FindOptions'
 import * as AuthClient from '../../Authorization/AuthClient'
-import { UserChartEntity, ChartPermission, ChartMessage, ChartRequest, ChartParameterEmbedded, ChartColumnEmbedded } from '../Signum.Entities.Chart'
+import { UserChartEntity, ChartPermission, ChartMessage, ChartRequestModel, ChartParameterEmbedded, ChartColumnEmbedded } from '../Signum.Entities.Chart'
 import { QueryFilterEmbedded, QueryOrderEmbedded } from '../../UserQueries/Signum.Entities.UserQueries'
 import { QueryTokenEmbedded } from '../../UserAssets/Signum.Entities.UserAssets'
 import UserChartMenu from './UserChartMenu'
@@ -78,7 +78,7 @@ export function start(options: { routes: JSX.Element[] }) {
 export module Converter {
 
    
-    export function applyUserChart(cr: ChartRequest, uq: UserChartEntity, entity?: Lite<Entity>): Promise<ChartRequest> {
+    export function applyUserChart(cr: ChartRequestModel, uq: UserChartEntity, entity?: Lite<Entity>): Promise<ChartRequestModel> {
 
         cr.chartScript = uq.chartScript;
 
@@ -139,8 +139,8 @@ export module Converter {
     }
 
 
-    export function toChartRequest(uq: UserChartEntity, entity?: Lite<Entity>): Promise<ChartRequest> {
-        const cs = ChartRequest.New({ queryKey: uq.query!.key }); 
+    export function toChartRequest(uq: UserChartEntity, entity?: Lite<Entity>): Promise<ChartRequestModel> {
+        const cs = ChartRequestModel.New({ queryKey: uq.query!.key }); 
         return applyUserChart(cs, uq, entity);
     }
 }
@@ -155,7 +155,7 @@ export module API {
         return ajaxGet<Lite<UserChartEntity>[]>({ url: "~/api/userChart/forQuery/" + queryKey });
     }
 
-    export function cleanedChartRequest(request: ChartRequest) {
+    export function cleanedChartRequest(request: ChartRequestModel): ChartRequestModel {
         const clone = { ...request };
         clone.orders = clone.orderOptions!
             .map(oo => ({ token: oo.token.fullKey, orderType: oo.orderType }) as OrderRequest);
@@ -167,7 +167,7 @@ export module API {
         return clone;
     }
 
-    export function fromChartRequest(chartRequest: ChartRequest): Promise<UserChartEntity> {
+    export function fromChartRequest(chartRequest: ChartRequestModel): Promise<UserChartEntity> {
 
         const clone = cleanedChartRequest(chartRequest);
 

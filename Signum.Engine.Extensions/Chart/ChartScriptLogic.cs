@@ -29,7 +29,7 @@ namespace Signum.Engine.Chart
 
                 SymbolLogic<ChartScriptSymbol>.Start(sb, () => Scripts.Keys);
 
-                ChartRequest.GetChartScriptFunc = s => Scripts.GetOrThrow(s);
+                ChartRequestModel.GetChartScriptFunc = s => Scripts.GetOrThrow(s);
 
                 RegisterScript(new BarsChartScript());
                 RegisterScript(new ColumnsChartScript());
