@@ -143,7 +143,7 @@ export module D3ChartScript {
   export const BubblePack : ChartScriptSymbol = registerSymbol("ChartScript", "D3ChartScript.BubblePack");
   export const Scatterplot : ChartScriptSymbol = registerSymbol("ChartScript", "D3ChartScript.Scatterplot");
   export const Bubbleplot : ChartScriptSymbol = registerSymbol("ChartScript", "D3ChartScript.Bubbleplot");
-  export const ParallelCordinates : ChartScriptSymbol = registerSymbol("ChartScript", "D3ChartScript.ParallelCordinates");
+  export const ParallelCoordinates : ChartScriptSymbol = registerSymbol("ChartScript", "D3ChartScript.ParallelCoordinates");
   export const Punchcard : ChartScriptSymbol = registerSymbol("ChartScript", "D3ChartScript.Punchcard");
   export const CalendarStream : ChartScriptSymbol = registerSymbol("ChartScript", "D3ChartScript.CalendarStream");
   export const ForceGraph : ChartScriptSymbol = registerSymbol("ChartScript", "D3ChartScript.ForceGraph");

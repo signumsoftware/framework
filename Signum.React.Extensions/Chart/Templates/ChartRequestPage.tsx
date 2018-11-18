@@ -30,9 +30,8 @@ export default class ChartRequestPage extends React.Component<ChartRequestPagePr
   load(props: ChartRequestPageProps) {
     
     var newPath = props.location.pathname + props.location.search;
-    var oldPathPromise : Promise<string | undefined> = this.state.chartRequest ? ChartClient.Encoder.chartPath(this.state.chartRequest, this.state.userChart) : Promise.resolve(undefined);
+    var oldPathPromise: Promise<string | undefined> = this.state.chartRequest ? ChartClient.Encoder.chartPathPromise(this.state.chartRequest, this.state.userChart) : Promise.resolve(undefined);
     oldPathPromise.then(oldPath => {
-      debugger;
       if (oldPath != newPath) {
         var query = QueryString.parse(props.location.search);
         var uc = query.userChart == null ? undefined : (parseLite(query.userChart) as Lite<UserChartEntity>);
@@ -44,7 +43,7 @@ export default class ChartRequestPage extends React.Component<ChartRequestPagePr
   }
 
   handleOnChange = (cr: ChartRequestModel, uc?: Lite<UserChartEntity>) => {
-    ChartClient.Encoder.chartPath(cr, uc)
+    ChartClient.Encoder.chartPathPromise(cr, uc)
       .then(path => Navigator.history.replace(path))
       .done();
   }

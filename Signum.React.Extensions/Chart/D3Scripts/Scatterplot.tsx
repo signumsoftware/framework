@@ -106,6 +106,7 @@ export default class ScatterplotChart extends D3ChartBase {
       .attr('dominant-baseline', 'middle')
       .text(verticalColumn.title);
 
+    debugger;
     var color: (val: ChartRow) => string;
     if (data.parameters["ColorScale"] == "Ordinal") {
       var scheme = ChartUtils.getColorScheme(data.parameters["ColorScheme"], parseInt(data.parameters["ColorSchemeSteps"]));

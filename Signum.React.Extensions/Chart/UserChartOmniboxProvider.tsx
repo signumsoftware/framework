@@ -34,7 +34,7 @@ export default class UserChartOmniboxProvider extends OmniboxProvider<UserChartO
 
     return Navigator.API.fetchAndForget(result.userChart)
       .then(a => UserChartClient.Converter.toChartRequest(a, undefined))
-      .then(cr => ChartClient.Encoder.chartPath(cr, result.userChart));
+      .then(cr => ChartClient.Encoder.chartPathPromise(cr, result.userChart));
   }
 
   toString(result: UserChartOmniboxResult) {

@@ -75,7 +75,8 @@ export function start(options: { routes: JSX.Element[] }) {
         ev.preventDefault();
         ev.persist();
         UserChartClient.Converter.toChartRequest(p.userChart!, e)
-          .then(cr => Navigator.pushOrOpenInTab(ChartClient.Encoder.chartPath(cr, toLite(p.userChart!)), ev))
+          .then(cr => ChartClient.Encoder.chartPathPromise(cr, toLite(p.userChart!)))
+          .then(path => Navigator.pushOrOpenInTab(path, ev))
           .done();
       },
   });

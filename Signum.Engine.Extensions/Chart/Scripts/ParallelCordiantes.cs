@@ -6,9 +6,9 @@ using System.Collections.Generic;
 
 namespace Signum.Logic.Chart.Scripts 
 {
-    public class ParallelCordiantesChartScript : ChartScript                
+    public class ParallelCoordiantesChartScript : ChartScript                
     {
-        public ParallelCordiantesChartScript(): base(D3ChartScript.ParallelCordinates)
+        public ParallelCoordiantesChartScript(): base(D3ChartScript.ParallelCoordinates)
         {
             this.Icon = ChartScriptLogic.LoadIcon("parallelcoordinates.png");
             this.GroupBy = GroupByChart.Optional;

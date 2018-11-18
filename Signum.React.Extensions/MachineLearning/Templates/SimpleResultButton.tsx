@@ -1,4 +1,4 @@
-﻿import * as React from 'react'
+import * as React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { PredictorEntity, PredictSimpleResultEntity, DefaultColumnEncodings } from '../Signum.Entities.MachineLearning';
 import * as ChartClient from '../../Chart/ChartClient'
@@ -40,7 +40,7 @@ export default class SimpleResultButton extends React.Component<SimpleResultButt
 
 
     if (is(outCol.encoding, DefaultColumnEncodings.OneHot))
-      return ChartClient.Encoder.chartPath({
+      return await ChartClient.Encoder.chartPath({
         queryName: PredictSimpleResultEntity,
         filterOptions: [{ token: "Predictor", value: predictor }],
         chartScript: "Punchcard",
@@ -51,7 +51,7 @@ export default class SimpleResultButton extends React.Component<SimpleResultButt
         ],
       });
     else
-      return ChartClient.Encoder.chartPath({
+      return await  ChartClient.Encoder.chartPath({
         queryName: PredictSimpleResultEntity,
         filterOptions: [{ token: "Predictor", value: predictor }],
         chartScript: "Scatterplot",

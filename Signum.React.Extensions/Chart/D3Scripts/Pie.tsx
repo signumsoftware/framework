@@ -32,14 +32,14 @@ export default class PieChart extends D3ChartBase {
         pSort == "Descending" ? ((a, b) => d3.ascending(size(valueColumn.getValue(a)), size(valueColumn.getValue(b)))) : null)
       .value(r => size(valueColumn.getValue(r)));
 
-    var arc = d3.arc<ChartRow>()
+    var arc = d3.arc<d3.PieArcDatum<ChartRow>>()
       .outerRadius(outerRadious)
       .innerRadius(rInner);
 
     chart.append('svg:g').attr('class', 'shape').attr('transform', translate(width / 2, height / 2))
       .enterData(pie(data.rows), 'g', 'slice')
       .append('svg:path').attr('class', 'shape')
-      .attr('d', slice => arc(slice.data)!)
+      .attr('d', slice => arc(slice)!)
       .attr('fill', slice => keyColumn.getValueColor(slice.data) || color(keyColumn.getValueKey(slice.data)))
       .attr('shape-rendering', 'initial')
       .on('click', slice => this.props.onDrillDown(slice.data))

@@ -13,7 +13,7 @@ interface ColumnWithScales {
   colorScale: (r: ChartRow) => string;
 }
 
-export default class ParallelCordinatesChart extends D3ChartBase {
+export default class ParallelCoordinatesChart extends D3ChartBase {
 
   drawChart(data: ChartTable, chart: d3.Selection<SVGElement, {}, null, undefined>, width: number, height: number) {
 
@@ -30,8 +30,13 @@ export default class ParallelCordinatesChart extends D3ChartBase {
       min: 12,
       _5: 5,
     }, height);
-    //yRule.debugY(chart);
 
+    var xRule = rule({
+      _1: 20,
+      content: '*',
+      _2: 20,
+    }, width);
+    //xRule.debugX(chart);
 
     var colorInterpolate = data.parameters["ColorInterpolate"];
     var colorInterpolation = ChartUtils.getColorInterpolation(colorInterpolate)!;
@@ -55,17 +60,17 @@ export default class ParallelCordinatesChart extends D3ChartBase {
 
     var x = d3.scaleBand()
       .domain(cords.map(d => d.column.name))
-      .rangeRound([0, width]);
+      .rangeRound([0, xRule.size('content')]);
 
-    chart.append('svg:g').attr('class', 'x-tick').attr('transform', translate(0, yRule.start('content')))
+    chart.append('svg:g').attr('class', 'x-tick').attr('transform', translate(xRule.start('content') + x.bandwidth() / 2, yRule.start('content')))
       .enterData(cords, 'line', 'x-tick')
       .attr('y2', d => yRule.size('content'))
       .attr('x1', d => x(d.column.name)!)
       .attr('x2', d => x(d.column.name)!)
-      .style('stroke', 'Black');
+      .style('stroke', 'black');
 
 
-    chart.append('svg:g').attr('class', 'x-label').attr('transform', translate(0, yRule.middle('title')))
+    chart.append('svg:g').attr('class', 'x-label').attr('transform', translate(xRule.start('content') + x.bandwidth() / 2, yRule.middle('title')))
       .enterData(cords, 'text', 'x-label')
       .attr('x', d => x(d.column.name)!)
       .attr('dominant-baseline', 'middle')
@@ -73,7 +78,7 @@ export default class ParallelCordinatesChart extends D3ChartBase {
       .attr("font-weight", "bold")
       .text(d => d.column.title);
 
-    chart.append('svg:g').attr('class', 'x-label-max').attr('transform', translate(0, yRule.middle('max')))
+    chart.append('svg:g').attr('class', 'x-label-max').attr('transform', translate(xRule.start('content') + x.bandwidth() / 2, yRule.middle('max')))
       .enterData(cords, 'text', 'x-label-max')
       .attr('x', d => x(d.column.name)!)
       .attr('dominant-baseline', 'middle')
@@ -84,7 +89,7 @@ export default class ParallelCordinatesChart extends D3ChartBase {
       );
 
 
-    chart.append('svg:g').attr('class', 'x-label-min').attr('transform', translate(0, yRule.middle('min')))
+    chart.append('svg:g').attr('class', 'x-label-min').attr('transform', translate(xRule.start('content') + x.bandwidth() / 2, yRule.middle('min')))
       .enterData(cords, 'text', 'x-label-min')
       .attr('x', d => x(d.column.name)!)
       .attr('dominant-baseline', 'middle')
@@ -100,7 +105,7 @@ export default class ParallelCordinatesChart extends D3ChartBase {
       .curve(ChartUtils.getCurveByName(data.parameters["Interpolate"])!);//"linear"
 
     //paint graph - line
-    var lines = chart.enterData(data.rows, 'g', 'shape-serie').attr('transform', translate(0, yRule.end('content')))
+    var lines = chart.enterData(data.rows, 'g', 'shape-serie').attr('transform', translate(xRule.start('content') + x.bandwidth() / 2, yRule.end('content')))
       .append('svg:path').attr('class', 'shape')
       .attr('fill', 'none')
       .attr('stroke-width', 1)
@@ -108,14 +113,16 @@ export default class ParallelCordinatesChart extends D3ChartBase {
       .attr('shape-rendering', 'initial')
       .on('click', r => this.props.onDrillDown(r))
       .style("cursor", "pointer")
-      .attr('d', r => line(cords.map(c => ({ col: c, row: r })))!)
+      .attr('d', r => line(cords.map(c => ({ col: c, row: r })))!);
+
+    lines
       .append("title")
       .text(r => keyColumn.getValueNiceName(r) + "\n" +
         cords.map(c => c.column.title + ": " + c.column.getValueNiceName(r)).join("\n")
       );
 
     var boxWidth = 10;
-    var box = chart.append('svg:g').attr('class', 'x-tick-box').attr('transform', translate(0, yRule.start('content')))
+    var box = chart.append('svg:g').attr('class', 'x-tick-box').attr('transform', translate(xRule.start('content') + x.bandwidth() / 2, yRule.start('content')))
       .enterData(cords, 'rect', 'x-tick-box')
       .attr('height', d => yRule.size('content'))
       .attr('width', boxWidth)
@@ -130,7 +137,7 @@ export default class ParallelCordinatesChart extends D3ChartBase {
       box.style('fill', d => col.column.name != d.column.name ? '#ccc' : '#000');
       lines.attr("stroke", r => col.colorScale(r));
     };
-
+    
     drawGradient(cords.first());
   }
 }

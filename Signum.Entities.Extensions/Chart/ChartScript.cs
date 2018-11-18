@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
@@ -44,7 +44,7 @@ namespace Signum.Entities.Chart
         public static readonly ChartScriptSymbol Scatterplot;
         public static readonly ChartScriptSymbol Bubbleplot;
 
-        public static readonly ChartScriptSymbol ParallelCordinates;
+        public static readonly ChartScriptSymbol ParallelCoordinates;
         public static readonly ChartScriptSymbol Punchcard;
         public static readonly ChartScriptSymbol CalendarStream;
         public static readonly ChartScriptSymbol ForceGraph;

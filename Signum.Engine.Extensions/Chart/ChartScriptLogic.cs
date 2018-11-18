@@ -46,7 +46,7 @@ namespace Signum.Engine.Chart
                 RegisterScript(new ScatterplotChartScript());
                 RegisterScript(new BubbleplotChartScript());
 
-                RegisterScript(new ParallelCordiantesChartScript());
+                RegisterScript(new ParallelCoordiantesChartScript());
                 RegisterScript(new PunchcardChartScript());
                 RegisterScript(new CalendarStreamChartScript());
                 RegisterScript(new ForceGraphChartScript());

@@ -37,7 +37,8 @@ export default class UserChartPage extends React.Component<UserChartPageProps> {
     Navigator.API.fillToStrings(lite)
       .then(() => Navigator.API.fetchEntity(UserChartEntity, userChartId))
       .then(uc => UserChartClient.Converter.toChartRequest(uc, lite)
-        .then(cr => Navigator.history.replace(ChartClient.Encoder.chartPath(cr, toLite(uc)))))
+        .then(cr => ChartClient.Encoder.chartPathPromise(cr, toLite(uc))))
+      .then(path => Navigator.history.replace(path))
       .done();
   }
 

@@ -54,7 +54,7 @@ export function start(options: { routes: JSX.Element[], googleMapsApiKey?: strin
   registerChartScrtiptComponent(D3ChartScript.MultiBars, () => import("./D3Scripts/MultiBars"));
   registerChartScrtiptComponent(D3ChartScript.MultiColumns, () => import("./D3Scripts/MultiColumns"));
   registerChartScrtiptComponent(D3ChartScript.MultiLines, () => import("./D3Scripts/MultiLines"));
-  registerChartScrtiptComponent(D3ChartScript.ParallelCordinates, () => import("./D3Scripts/ParallelCordiantes"));
+  registerChartScrtiptComponent(D3ChartScript.ParallelCoordinates, () => import("./D3Scripts/ParallelCoordiantes"));
   registerChartScrtiptComponent(D3ChartScript.Pie, () => import("./D3Scripts/Pie"));
   registerChartScrtiptComponent(D3ChartScript.Punchcard, () => import("./D3Scripts/Punchcard"));
   registerChartScrtiptComponent(D3ChartScript.Scatterplot, () => import("./D3Scripts/Scatterplot"));
@@ -408,9 +408,9 @@ export interface ChartParameterOption {
 
 export module Encoder {
 
-  export function toChartOptions(cr: ChartRequestModel, cs: ChartScript): ChartOptions {
+  export function toChartOptions(cr: ChartRequestModel, cs: ChartScript | null): ChartOptions {
 
-    var params = cs.parameters.toObject(a => a.name);
+    var params = cs && cs.parameters.toObject(a => a.name);
 
     return {
       queryName: cr.queryKey,
@@ -421,7 +421,10 @@ export module Encoder {
       columnOptions: cr.columns.map(co => ({ token: co.element.token && co.element.token.tokenString, displayName: co.element.displayName }) as ChartColumnOption),
       parameters: cr.parameters
         .filter(p => {
-          var scriptParam = params[p.element.name!];
+          if (params == null)
+            return true;
+
+          var scriptParam = params![p.element.name!];
 
           var c = scriptParam.columnIndex != null ? cr.columns[scriptParam.columnIndex].element : null;
 
@@ -431,27 +434,28 @@ export module Encoder {
     };
   }
 
-  export function chartPath(cr: ChartOptions | ChartRequestModel, userChart?: Lite<UserChartEntity>): Promise<string> {
-    
-    var coPromise = !ChartRequestModel.isInstance(cr) ?
-      Promise.resolve(cr) :
-      getChartScript(cr.chartScript).then(cs => toChartOptions(cr, cs));
+  export function chartPathPromise(cr: ChartRequestModel, userChart?: Lite<UserChartEntity>): Promise<string> {
+    var csPromise: Promise<null | ChartScript> = cr.chartScript == null ? Promise.resolve(null) : getChartScript(cr.chartScript);
 
-    return coPromise.then(co => {
-      const query = {
-        script: co.chartScript,
-        groupResults: co.groupResults,
-        userChart: userChart && liteKey(userChart)
-      };
+    return csPromise.then(cs => chartPath(toChartOptions(cr, cs), userChart));
+  }
+  
+  export function chartPath(co: ChartOptions, userChart?: Lite<UserChartEntity>): string {
 
-      Finder.Encoder.encodeFilters(query, co.filterOptions);
-      Finder.Encoder.encodeOrders(query, co.orderOptions);
-      encodeParameters(query, co.parameters);
+    const query = {
+      script: co.chartScript,
+      groupResults: co.groupResults,
+      userChart: userChart && liteKey(userChart)
+    };
 
-      encodeColumn(query, co.columnOptions);
+    Finder.Encoder.encodeFilters(query, co.filterOptions);
+    Finder.Encoder.encodeOrders(query, co.orderOptions);
+    encodeParameters(query, co.parameters);
 
-      return Navigator.toAbsoluteUrl(`~/chart/${getQueryKey(co.queryName)}?` + QueryString.stringify(query));
-    });
+    encodeColumn(query, co.columnOptions);
+
+    return Navigator.toAbsoluteUrl(`~/chart/${getQueryKey(co.queryName)}?` + QueryString.stringify(query));
+
   }
 
   const scapeTilde = Finder.Encoder.scapeTilde;

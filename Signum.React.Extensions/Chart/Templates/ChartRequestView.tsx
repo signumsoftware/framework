@@ -51,8 +51,8 @@ export default class ChartRequestView extends React.Component<ChartRequestViewPr
 
   componentWillReceiveProps(nextProps: ChartRequestViewProps) {
 
-    var oldPath = this.props.chartRequest && ChartClient.Encoder.chartPath(this.props.chartRequest, this.props.userChart);
-    var newPath = nextProps.chartRequest && ChartClient.Encoder.chartPath(nextProps.chartRequest, nextProps.userChart);
+    var oldPath = this.props.chartRequest && ChartClient.Encoder.chartPath(ChartClient.Encoder.toChartOptions(this.props.chartRequest, null), this.props.userChart);
+    var newPath = nextProps.chartRequest && ChartClient.Encoder.chartPath(ChartClient.Encoder.toChartOptions(nextProps.chartRequest, null), nextProps.userChart);
 
     if (oldPath == newPath)
       return;
@@ -106,6 +106,8 @@ export default class ChartRequestView extends React.Component<ChartRequestViewPr
 
     var cr = this.props.chartRequest!;
 
+    GraphExplorer.setModelState(cr, undefined, "");
+
     ChartClient.getChartScript(cr.chartScript)
       .then(cs => this.abortableQuery.getData({ cr, cs }))
       .then(rt => {
@@ -119,7 +121,9 @@ export default class ChartRequestView extends React.Component<ChartRequestViewPr
 
   handleOnFullScreen = (e: React.MouseEvent<any>) => {
     e.preventDefault();
-    Navigator.history.push(ChartClient.Encoder.chartPath(this.props.chartRequest!));
+    ChartClient.Encoder.chartPathPromise(this.props.chartRequest!)
+      .then(path => Navigator.history.push(path))
+      .done();
   }
 
   render() {

@@ -36,17 +36,6 @@ export default class ChartRenderer extends React.Component<ChartRendererProps, C
     this.requestAndRedraw().done();
   }
 
-  lastChartRequestPath: string | undefined;
-  shouldComponentUpdate(newProps: ChartRendererProps) {
-    if (this.props.data != newProps.data)
-      return true;
-
-    if (this.lastChartRequestPath != ChartClient.Encoder.chartPath(newProps.chartRequest))
-      return true;
-
-    return false;
-  }
-
   componentWillReceiveProps(newProps: ChartRendererProps) {
     this.requestAndRedraw().done();
   }
@@ -62,12 +51,7 @@ export default class ChartRenderer extends React.Component<ChartRendererProps, C
 
     const data = this.props.data;
     data.parameters = ChartClient.API.getParameterWithDefault(this.props.chartRequest, chartScript);
-
-    chartScript.columns.map((cc, i) => {
-      if (!(data.columns as any)["c" + i])
-        (data.columns as any)["c" + i] = { name: "c" + 1 };
-    });
-
+    
     this.setState({ chartComponent: chartComponentModule.default, chartScript });
   }
 

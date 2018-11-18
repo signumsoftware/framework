@@ -20,7 +20,7 @@ export default class PunchcardChart extends D3ChartBase {
     var orderingColumn = data.columns.c6! as ChartColumn<number> | undefined;
 
     function groupAndSort(rows: ChartRow[], shortType: string, column: ChartColumn<unknown>): unknown[] {
-      var array = rows.groupBy(r => "k" + horizontalColumn.getValueKey(r));
+      var array = rows.groupBy(r => "k" + column.getValueKey(r));
 
       switch (shortType) {
         case "AscendingToStr": array = array.orderBy(g => column.getValueNiceName(g.elements[0]) || "");
