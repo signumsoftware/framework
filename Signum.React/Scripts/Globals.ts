@@ -1,4 +1,4 @@
-﻿
+
 Array.prototype.clear = function (): void {
   this.length = 0;
 };

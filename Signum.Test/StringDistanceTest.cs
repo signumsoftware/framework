@@ -1,11 +1,6 @@
 ﻿using System;
-using System.Text;
-using System.Collections.Generic;
-using System.Linq;
 using Xunit;
 using Signum.Utilities;
-using System.Diagnostics;
-using System.Threading;
 
 namespace Signum.Test
 {
@@ -25,7 +20,7 @@ namespace Signum.Test
 
             var str2 = val.Value;
 
-            Assert.NotEqual(str1, str2); 
+            Assert.NotEqual(str1, str2);
         }
 
         [Fact]
@@ -72,14 +67,14 @@ namespace Signum.Test
 
             var str = result.ToString("");
 
-            Assert.Equal("-e+in un +pl-u-ga-r+c+e de la m-a+incha", str); 
+            Assert.Equal("-e+in un +pl-u-ga-r+c+e de la m-a+incha", str);
         }
 
         [Fact]
         public void DiffWords()
         {
             var result = d.DiffWords(
-                "Soft drinks, coffees, teas, beers, and ginger ales", 
+                "Soft drinks, coffees, teas, beers, and ginger ales",
                 "Soft drinks, coffees, teas and beers");
 
             var str = result.ToString("");
@@ -101,7 +96,7 @@ namespace Signum.Test
         [Fact]
         public void DiffText()
         {
-            var text1 = 
+            var text1 =
 @"  Hola Pedro
 Que tal
 Bien

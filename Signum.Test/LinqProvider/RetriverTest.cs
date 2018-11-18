@@ -1,18 +1,9 @@
-﻿using System;
-using System.Text;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using Xunit;
 using Signum.Engine;
 using Signum.Entities;
-using System.Diagnostics;
-using System.IO;
-using Signum.Engine.Linq;
 using Signum.Utilities;
-using System.Linq.Expressions;
-using System.Data.SqlTypes;
-using System.Reflection;
-using Signum.Utilities.ExpressionTrees;
 using Signum.Entities.Reflection;
 using Signum.Test.Environment;
 
@@ -27,7 +18,7 @@ namespace Signum.Test.LinqProvider
         {
             MusicStarter.StartAndLoad();
             Connector.CurrentLogger = new DebugTextWriter();
-        }      
+        }
 
         [Fact]
         public void RetrieveSimple()

@@ -1,13 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using Signum.Utilities;
-using Signum.Entities.Basics;
-using System.Runtime.CompilerServices;
-using System.Diagnostics;
-using Signum.Entities.Reflection;
-using Signum.Utilities.Reflection;
 using Signum.Utilities.ExpressionTrees;
 
 namespace Signum.Entities
@@ -15,7 +7,7 @@ namespace Signum.Entities
     [Serializable]
     public class OperationSymbol : Symbol
     {
-        private OperationSymbol() { } 
+        private OperationSymbol() { }
 
         private OperationSymbol(Type declaringType, string fieldName)
             : base(declaringType, fieldName)
@@ -29,13 +21,13 @@ namespace Signum.Entities
             {
                 return new SimpleImp { Symbol = new OperationSymbol(declaringType, fieldName) };
             }
-            
+
             public static ConstructSymbol<T>.From<F> From<F>(Type declaringType, string fieldName)
                 where F : class,  IEntity
             {
                 return new FromImp<F> { Symbol = new OperationSymbol(declaringType, fieldName) };
             }
-            
+
             public static ConstructSymbol<T>.FromMany<F>  FromMany<F>(Type declaringType, string fieldName)
                 where F : class, IEntity
             {
@@ -102,19 +94,19 @@ namespace Signum.Entities
                 }
             }
         }
-        
+
         public static ExecuteSymbol<T> Execute<T>(Type declaringType, string fieldName)
             where T : class,  IEntity
         {
             return new ExecuteSymbolImp<T> { Symbol = new OperationSymbol(declaringType, fieldName) };
         }
-        
+
         public static DeleteSymbol<T> Delete<T>(Type declaringType, string fieldName)
             where T : class, IEntity
         {
             return new DeleteSymbolImp<T> { Symbol = new OperationSymbol(declaringType, fieldName) };
         }
-        
+
         [Serializable]
         class ExecuteSymbolImp<T> : ExecuteSymbol<T>
           where T : class, IEntity

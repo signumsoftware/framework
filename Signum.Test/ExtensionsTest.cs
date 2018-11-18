@@ -48,7 +48,7 @@ namespace Signum.Test
             Assert.True(ExpressionComparer.AreEqual(f1, f3, checkParameterNames: false));
 
             f1.Evaluate(1);
-            
+
             var e = Assert.Throws<InvalidOperationException>(() => f2.Evaluate(2));
             Assert.Contains("cache", e.Message);
         }
@@ -94,14 +94,14 @@ namespace Signum.Test
             AssertSimilar(Math.Sqrt(2), (double?)new decimal?[] { 1, null, 3 }.StdDev());
         }
 
-        public static void AssertSimilar(double? a, double? b, double epsilon = 0.0001) 
-        { 
-            if (a == null && b == null) 
-                return; 
- 
-            if (b == null || Math.Abs(a.Value - b.Value) > epsilon) 
-                Assert.True(false, "Values {0} and {1} are too different".FormatWith(a, b)); 
-        } 
+        public static void AssertSimilar(double? a, double? b, double epsilon = 0.0001)
+        {
+            if (a == null && b == null)
+                return;
+
+            if (b == null || Math.Abs(a.Value - b.Value) > epsilon)
+                Assert.True(false, "Values {0} and {1} are too different".FormatWith(a, b));
+        }
 
         [Fact]
         public void StdDevP()

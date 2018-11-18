@@ -1,19 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Data.SqlClient;
 using System.Data.Common;
 using System.Data;
 using Signum.Utilities;
 using Signum.Engine.Maps;
-using Signum.Engine.DynamicQuery;
 using System.Data.SqlTypes;
-using System.Reflection;
-using Signum.Utilities.Reflection;
 using System.Linq.Expressions;
-using Signum.Utilities.ExpressionTrees;
-using Microsoft.SqlServer.Server;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -46,10 +40,10 @@ namespace Signum.Engine
             using(SqlConnection con = new SqlConnection(connectionString))
             {
                 var sql =
-@"SELECT 
+@"SELECT
     SERVERPROPERTY ('ProductVersion') as ProductVersion,
-    SERVERPROPERTY('ProductLevel') as ProductLevel, 
-    SERVERPROPERTY('Edition') as Edition, 
+    SERVERPROPERTY('ProductLevel') as ProductLevel,
+    SERVERPROPERTY('Edition') as Edition,
     SERVERPROPERTY('EngineEdition') as EngineEdition";
 
                 using (SqlCommand cmd = new SqlCommand(sql, con))
@@ -58,7 +52,7 @@ namespace Signum.Engine
 
                     DataTable result = new DataTable();
                     da.Fill(result);
-                    
+
                     if ((int)result.Rows[0]["EngineEdition"] == (int)EngineEdition.Azure)
                         return SqlServerVersion.AzureSQL;
 
@@ -209,7 +203,7 @@ namespace Signum.Engine
 
         public void ExecuteDataReaderDependency(SqlPreCommandSimple preCommand, OnChangeEventHandler change, Action reconect, Action<FieldReader> forEach, CommandType commandType)
         {
-            bool reconected = false; 
+            bool reconected = false;
             retry:
             try
             {
@@ -495,7 +489,7 @@ namespace Signum.Engine
         {
             return new[]
             {
-                this.Version == SqlServerVersion.SqlServer2005 ?  
+                this.Version == SqlServerVersion.SqlServer2005 ?
                     new SqlPreCommandSimple("BACKUP LOG {0} WITH TRUNCATE_ONLY".FormatWith(schemaName)):
                     new []
                     {
@@ -505,7 +499,7 @@ namespace Signum.Engine
                             new SqlPreCommandSimple("SET @fileID = (SELECT FILE_IDEX((SELECT TOP(1)name FROM sys.database_files WHERE type = 1)))"),
                             new SqlPreCommandSimple("DBCC SHRINKFILE(@fileID, 1)"),
                         }.Combine(Spacing.Simple).PlainSqlCommand(),
-                        new SqlPreCommandSimple("ALTER DATABASE {0} SET RECOVERY FULL WITH NO_WAIT".FormatWith(schemaName)),                  
+                        new SqlPreCommandSimple("ALTER DATABASE {0} SET RECOVERY FULL WITH NO_WAIT".FormatWith(schemaName)),
                     }.Combine(Spacing.Simple),
                 new SqlPreCommandSimple("DBCC SHRINKDATABASE ( {0} , TRUNCATEONLY )".FormatWith(schemaName))
             }.Combine(Spacing.Simple);
@@ -588,114 +582,114 @@ namespace Signum.Engine
     public static class SqlConnectorScripts
     {
         public static readonly string RemoveAllConstraintsScript =
-@"declare @schema nvarchar(128), @tbl nvarchar(128), @constraint nvarchar(128) 
-DECLARE @sql nvarchar(255) 
+@"declare @schema nvarchar(128), @tbl nvarchar(128), @constraint nvarchar(128)
+DECLARE @sql nvarchar(255)
 
-declare cur cursor fast_forward for 
-select distinct cu.constraint_schema, cu.table_name, cu.constraint_name 
-from information_schema.table_constraints tc 
-join information_schema.referential_constraints rc on rc.unique_constraint_name = tc.constraint_name 
-join information_schema.constraint_column_usage cu on cu.constraint_name = rc.constraint_name 
-open cur 
-    fetch next from cur into @schema, @tbl, @constraint 
-    while @@fetch_status <> -1 
-    begin 
+declare cur cursor fast_forward for
+select distinct cu.constraint_schema, cu.table_name, cu.constraint_name
+from information_schema.table_constraints tc
+join information_schema.referential_constraints rc on rc.unique_constraint_name = tc.constraint_name
+join information_schema.constraint_column_usage cu on cu.constraint_name = rc.constraint_name
+open cur
+    fetch next from cur into @schema, @tbl, @constraint
+    while @@fetch_status <> -1
+    begin
         select @sql = 'ALTER TABLE [' + @schema + '].[' + @tbl + '] DROP CONSTRAINT [' + @constraint + '];'
-        exec sp_executesql @sql 
-        fetch next from cur into @schema, @tbl, @constraint 
-    end 
-close cur 
+        exec sp_executesql @sql
+        fetch next from cur into @schema, @tbl, @constraint
+    end
+close cur
 deallocate cur";
 
         public static readonly string RemoveAllTablesScript =
 @"declare @schema nvarchar(128), @tbl nvarchar(128)
 DECLARE @sql nvarchar(255)
- 
-declare cur cursor fast_forward for 
+
+declare cur cursor fast_forward for
 select distinct table_schema, table_name
 from information_schema.tables where table_type = 'BASE TABLE'
-open cur 
+open cur
     fetch next from cur into @schema, @tbl
-    while @@fetch_status <> -1 
-    begin 
+    while @@fetch_status <> -1
+    begin
         select @sql = 'DROP TABLE [' + @schema + '].[' + @tbl + '];'
-        exec sp_executesql @sql 
+        exec sp_executesql @sql
         fetch next from cur into @schema, @tbl
-    end 
-close cur 
+    end
+close cur
 deallocate cur";
 
         public static readonly string RemoveAllViewsScript =
 @"declare @schema nvarchar(128), @view nvarchar(128)
-DECLARE @sql nvarchar(255) 
+DECLARE @sql nvarchar(255)
 
-declare cur cursor fast_forward for 
+declare cur cursor fast_forward for
 select distinct table_schema, table_name
 from information_schema.tables where table_type = 'VIEW'
-open cur 
+open cur
     fetch next from cur into @schema, @view
-    while @@fetch_status <> -1 
-    begin 
+    while @@fetch_status <> -1
+    begin
         select @sql = 'DROP VIEW [' + @schema + '].[' + @view + '];'
-        exec sp_executesql @sql 
+        exec sp_executesql @sql
         fetch next from cur into @schema, @view
-    end 
-close cur 
+    end
+close cur
 deallocate cur";
 
         public static readonly string RemoveAllProceduresScript =
 @"declare @schema nvarchar(128), @proc nvarchar(128), @type nvarchar(128)
-DECLARE @sql nvarchar(255) 
+DECLARE @sql nvarchar(255)
 
-declare cur cursor fast_forward for 
+declare cur cursor fast_forward for
 select routine_schema, routine_name, routine_type
 from information_schema.routines
-open cur 
+open cur
     fetch next from cur into @schema, @proc, @type
-    while @@fetch_status <> -1 
-    begin 
+    while @@fetch_status <> -1
+    begin
         select @sql = 'DROP '+ @type +' [' + @schema + '].[' + @proc + '];'
-        exec sp_executesql @sql 
+        exec sp_executesql @sql
         fetch next from cur into @schema, @proc, @type
-    end 
-close cur 
+    end
+close cur
 deallocate cur";
 
         public static readonly string RemoveAllSchemasScript =
 @"declare @schema nvarchar(128)
-DECLARE @sql nvarchar(255) 
+DECLARE @sql nvarchar(255)
 
-declare cur cursor fast_forward for 
+declare cur cursor fast_forward for
 select schema_name
-from information_schema.schemata 
+from information_schema.schemata
 where schema_name not in ({0})
-open cur 
+open cur
     fetch next from cur into @schema
-    while @@fetch_status <> -1 
-    begin 
+    while @@fetch_status <> -1
+    begin
         select @sql = 'DROP SCHEMA [' + @schema + '];'
-        exec sp_executesql @sql 
+        exec sp_executesql @sql
         fetch next from cur into @schema
-    end 
-close cur 
+    end
+close cur
 deallocate cur";
 
         public static readonly string StopSystemVersioning = @"declare @schema nvarchar(128), @tbl nvarchar(128)
 DECLARE @sql nvarchar(255)
- 
-declare cur cursor fast_forward for 
+
+declare cur cursor fast_forward for
 select distinct s.name, t.name
 from sys.tables t
 join sys.schemas s on t.schema_id = s.schema_id where history_table_id is not null
-open cur 
+open cur
     fetch next from cur into @schema, @tbl
-    while @@fetch_status <> -1 
-    begin 
+    while @@fetch_status <> -1
+    begin
         select @sql = 'ALTER TABLE [' + @schema + '].[' + @tbl + '] SET (SYSTEM_VERSIONING = OFF);'
-        exec sp_executesql @sql 
+        exec sp_executesql @sql
         fetch next from cur into @schema, @tbl
-    end 
-close cur 
+    end
+close cur
 deallocate cur";
 
         public static SqlPreCommand RemoveAllScript(DatabaseName databaseName)
@@ -717,7 +711,7 @@ deallocate cur";
             if (databaseName == null)
                 return script;
 
-            return "use " + databaseName + "\r\n" + script; 
+            return "use " + databaseName + "\r\n" + script;
         }
 
         internal static SqlPreCommand ShrinkDatabase(string schemaName)

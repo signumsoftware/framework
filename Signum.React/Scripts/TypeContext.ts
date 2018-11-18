@@ -5,7 +5,7 @@ import { EntityOperationContext } from './Operations'
 import { MListElementBinding } from "./Reflection";
 
 export type FormGroupStyle =
-  "None" |  /// Only the value is rendered. Unaffected by FormGroupSize     
+  "None" |  /// Only the value is rendered. Unaffected by FormGroupSize
   "Basic" |   /// Label on top, value below. Requires form-vertical container
   "BasicDown" |  /// Value on top, label below. Requires form-vertical container
   "SrOnly" |    /// Label visible only for Screen-Readers. Requires form-vertical / form-inline container

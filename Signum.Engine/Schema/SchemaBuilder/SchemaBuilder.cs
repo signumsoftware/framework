@@ -1,15 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Reflection;
-using System.Text.RegularExpressions;
-using System.Data;
 using Signum.Entities;
 using Signum.Utilities;
 using Signum.Utilities.Reflection;
 using Signum.Utilities.ExpressionTrees;
-using System.Diagnostics;
 using Signum.Entities.Reflection;
 using System.Linq.Expressions;
 using Signum.Engine.Linq;
@@ -17,8 +13,6 @@ using Signum.Entities.Basics;
 using Signum.Engine.Basics;
 using Signum.Utilities.DataStructures;
 using System.Threading;
-using Signum.Engine.DynamicQuery;
-using Signum.Engine.Operations;
 
 namespace Signum.Engine.Maps
 {
@@ -55,7 +49,7 @@ namespace Signum.Engine.Maps
             };
         }
 
-     
+
         protected SchemaBuilder(Schema schema)
         {
             this.schema = schema;
@@ -96,7 +90,7 @@ namespace Signum.Engine.Maps
             IColumn[] columns = IndexKeyColumns.Split(table, fields);
 
             var index = new Index(table, columns);
-            
+
             if (where != null)
                 index.Where = IndexWhereExpressionVisitor.GetIndexWhere(where, table);
 
@@ -107,9 +101,9 @@ namespace Signum.Engine.Maps
 
             return index;
         }
-        
-        public UniqueIndex AddUniqueIndexMList<T, V>(Expression<Func<T, MList<V>>> toMList, 
-            Expression<Func<MListElement<T, V>, object>> fields, 
+
+        public UniqueIndex AddUniqueIndexMList<T, V>(Expression<Func<T, MList<V>>> toMList,
+            Expression<Func<MListElement<T, V>, object>> fields,
             Expression<Func<MListElement<T, V>, bool>> where = null,
             Expression<Func<MListElement<T, V>, object>> includeFields = null)
             where T : Entity
@@ -128,9 +122,9 @@ namespace Signum.Engine.Maps
 
             return index;
         }
-        
-        public Index AddIndexMList<T, V>(Expression<Func<T, MList<V>>> toMList, 
-            Expression<Func<MListElement<T, V>, object>> fields, 
+
+        public Index AddIndexMList<T, V>(Expression<Func<T, MList<V>>> toMList,
+            Expression<Func<MListElement<T, V>, object>> fields,
             Expression<Func<MListElement<T, V>, bool>> where = null,
              Expression<Func<MListElement<T, V>, object>> includeFields = null)
             where T : Entity
@@ -218,7 +212,7 @@ namespace Signum.Engine.Maps
                 foreach (var t in type.Follow(a => a.BaseType))
                     if (!t.IsSerializable)
                         throw new InvalidOperationException("Type {0} is not marked as serializable".FormatWith(t.TypeName()));
-                
+
                 string name = schema.Settings.desambiguatedNames?.TryGetC(type) ?? Reflector.CleanTypeName(EnumEntity.Extract(type) ?? type);
 
                 if (schema.NameToType.ContainsKey(name))
@@ -276,8 +270,8 @@ namespace Signum.Engine.Maps
 
             return new SystemVersionedInfo
             {
-                TableName = att.TemporalTableName != null ? 
-                    ObjectName.Parse(att.TemporalTableName) : 
+                TableName = att.TemporalTableName != null ?
+                    ObjectName.Parse(att.TemporalTableName) :
                     new ObjectName(tableName.Schema, tableName.Name + "_History"),
 
                 StartColumnName = att.StartDateColumnName,
@@ -418,7 +412,7 @@ namespace Signum.Engine.Maps
                 if (kof == KindOfField.MList && inMList)
                     throw new InvalidOperationException("Field {0} of type {1} can not be nested in another MList".FormatWith(route, route.Type.TypeName(), kof));
 
-                //field name generation 
+                //field name generation
                 NameSequence name;
                 ColumnNameAttribute vc = Settings.FieldAttribute<ColumnNameAttribute>(route);
                 if (vc != null && vc.Name.HasText())
@@ -619,7 +613,7 @@ namespace Signum.Engine.Maps
                 throw new InvalidOperationException("Type {0} do not implement {1}".FormatWith(errors, cleanType));
 
             var nullable = Settings.GetIsNullable(route, forceNull);
-            
+
             if (types.Count() > 1 && nullable == IsNullable.No)
                 nullable = IsNullable.Forced;
 
@@ -735,7 +729,7 @@ namespace Signum.Engine.Maps
             relationalTable.SystemVersioned = ToSystemVersionedInfo(sysAttribute, relationalTable.Name);
 
             relationalTable.GenerateColumns();
-            
+
             return new FieldMList(route)
             {
                 TableMList = relationalTable,
@@ -825,7 +819,7 @@ namespace Signum.Engine.Maps
 
         public virtual string GenerateFieldName(PropertyRoute route, KindOfField kindOfField)
         {
-            string name = route.PropertyInfo != null ? (route.PropertyInfo.Name.TryAfterLast('.') ?? route.PropertyInfo.Name) 
+            string name = route.PropertyInfo != null ? (route.PropertyInfo.Name.TryAfterLast('.') ?? route.PropertyInfo.Name)
                 : route.FieldInfo.Name.FirstUpper();
 
             switch (kindOfField)
@@ -834,7 +828,7 @@ namespace Signum.Engine.Maps
                 case KindOfField.Ticks:
                 case KindOfField.Value:
                 case KindOfField.Embedded:
-                case KindOfField.MList:  //se usa solo para el nombre de la tabla 
+                case KindOfField.MList:  //se usa solo para el nombre de la tabla
                     return name;
                 case KindOfField.Reference:
                 case KindOfField.Enum:

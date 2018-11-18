@@ -1,13 +1,11 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using Signum.Entities.Reflection;
 using System.Linq.Expressions;
 using Signum.Utilities.Reflection;
 using System.Reflection;
 using Signum.Utilities;
-using Signum.Utilities.ExpressionTrees;
 
 namespace Signum.Entities.DynamicQuery
 {
@@ -18,7 +16,7 @@ namespace Signum.Entities.DynamicQuery
 
         public PropertyRoute PropertyRoute { get; private set; }
 
-        static readonly PropertyInfo piId = ReflectionTools.GetPropertyInfo((Entity e) => e.Id); 
+        static readonly PropertyInfo piId = ReflectionTools.GetPropertyInfo((Entity e) => e.Id);
 
         public static QueryToken IdProperty(QueryToken parent)
         {

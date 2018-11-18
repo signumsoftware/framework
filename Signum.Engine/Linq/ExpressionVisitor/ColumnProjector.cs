@@ -1,14 +1,9 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Linq;
 using System.Linq.Expressions;
-using System.Text;
 using Signum.Utilities;
 using Signum.Utilities.ExpressionTrees;
-using Signum.Utilities.DataStructures;
-using Signum.Utilities.Reflection;
 
 namespace Signum.Engine.Linq
 {
@@ -25,7 +20,7 @@ namespace Signum.Engine.Linq
     }
 
     /// <summary>
-    /// ColumnProjection is a visitor that splits an expression representing the result of a query into 
+    /// ColumnProjection is a visitor that splits an expression representing the result of a query into
     /// two parts, a list of column declarations of expressions that must be evaluated on the server
     /// and a projector expression that describes how to combine the columns back into the result object
     /// </summary>
@@ -108,7 +103,7 @@ namespace Signum.Engine.Linq
         Dictionary<ColumnExpression, ColumnExpression> map = new Dictionary<ColumnExpression, ColumnExpression>();
         HashSet<Expression> candidates;
         UnionAllRequest request;
-        Type implementation; 
+        Type implementation;
 
         private ColumnUnionProjector() { }
 
@@ -178,7 +173,7 @@ namespace Signum.Engine.Linq
 
         Dictionary<string, ColumnDeclaration> columns = new Dictionary<string, ColumnDeclaration>(StringComparer.InvariantCultureIgnoreCase);
         int iColumn;
-        
+
         public string GetUniqueColumnName(string name)
         {
             string baseName = name;
@@ -198,7 +193,7 @@ namespace Signum.Engine.Linq
             string columnName = GetUniqueColumnName(ce.Name);
             var result = new ColumnDeclaration(columnName, ce);
             columns.Add(result.Name, result);
-            return result; 
+            return result;
         }
 
         public ColumnDeclaration NewColumn(Expression exp)
@@ -206,7 +201,7 @@ namespace Signum.Engine.Linq
             string columnName = GetNextColumnName();
             var result = new ColumnDeclaration(columnName, exp);
             columns.Add(result.Name, result);
-            return result; 
+            return result;
         }
 
         public void AddUsedName(string name)

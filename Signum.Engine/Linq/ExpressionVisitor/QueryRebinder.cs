@@ -1,14 +1,10 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Linq.Expressions;
-using System.Reflection;
-using System.Text;
 using Signum.Utilities;
 using Signum.Utilities.ExpressionTrees;
-using System.Diagnostics;
 using Signum.Utilities.DataStructures;
 
 namespace Signum.Engine.Linq
@@ -26,7 +22,7 @@ namespace Signum.Engine.Linq
         {
             internal Alias[] knownAliases;
             internal Dictionary<ColumnExpression, ColumnExpression> currentScope;
-            
+
             protected internal override Expression VisitColumn(ColumnExpression column)
             {
                 if (knownAliases.Contains(column.Alias))
@@ -109,7 +105,7 @@ namespace Signum.Engine.Linq
                 GetColumnCollector(join.KnownAliases).Visit(join.Condition);
             else if (join.JoinType == JoinType.CrossApply || join.JoinType == JoinType.OuterApply)
                 GetColumnCollector(join.Left.KnownAliases).Visit(join.Right);
-            
+
             SourceExpression left = this.VisitSource(join.Left);
             SourceExpression right = this.VisitSource(join.Right);
             Expression condition = this.Visit(join.Condition);
@@ -163,7 +159,7 @@ namespace Signum.Engine.Linq
             coll.Visit(update.Where);
             foreach (var ca in update.Assigments)
                 coll.Visit(ca.Expression);
-            
+
             var source = Visit(update.Source);
             var where = Visit(update.Where);
             var assigments = Visit(update.Assigments, VisitColumnAssigment);
@@ -217,7 +213,7 @@ namespace Signum.Engine.Linq
             ReadOnlyCollection<ColumnDeclaration> columns = Visit(select.Columns, VisitColumnDeclaration); ;
             columns = AnswerAndExpand(columns, select.Alias, askedColumns);
             var externals = CurrentScope.Where(kvp => !select.KnownAliases.Contains(kvp.Key.Alias) && kvp.Value == null).ToDictionary();
-            disposable.Dispose(); ////SCOPE END 
+            disposable.Dispose(); ////SCOPE END
 
             CurrentScope.SetRange(externals);
             CurrentScope.SetRange(askedColumns);
@@ -317,5 +313,5 @@ namespace Signum.Engine.Linq
         }
     }
 
-   
+
 }

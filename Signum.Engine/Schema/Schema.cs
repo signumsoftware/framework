@@ -1,5 +1,4 @@
-﻿using Signum.Engine.Basics;
-using Signum.Engine.DynamicQuery;
+using Signum.Engine.Basics;
 using Signum.Engine.Linq;
 using Signum.Entities;
 using Signum.Entities.DynamicQuery;
@@ -193,7 +192,7 @@ namespace Signum.Engine.Maps
 
             return ee.OnPreUnsafeMListDelete(mlistQuery, entityQuery);
         }
-        
+
         internal IDisposable OnPreUnsafeUpdate(IUpdateable update)
         {
             var type = update.EntityType;
@@ -734,7 +733,7 @@ namespace Signum.Engine.Maps
 
             if (cols.Any(c => c.ReferenceTable != null))
                 return true;
-            
+
             var mlistPr = route.GetMListItemsRoute();
 
             ITable table = mlistPr == null ?

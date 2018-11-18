@@ -1,10 +1,8 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using Signum.Entities;
 using Signum.Utilities;
-using Signum.Utilities.Reflection;
 using System.Reflection;
 using System.Linq.Expressions;
 using System.Data;
@@ -20,7 +18,7 @@ namespace Signum.Engine.Maps
     public class SchemaSettings
     {
         public SchemaSettings()
-        { 
+        {
 
         }
 
@@ -68,18 +66,18 @@ namespace Signum.Engine.Maps
 
         Dictionary<SqlDbType, int> defaultSize = new Dictionary<SqlDbType, int>()
         {
-            {SqlDbType.NVarChar, 200}, 
-            {SqlDbType.VarChar, 200}, 
-            {SqlDbType.VarBinary, int.MaxValue}, 
-            {SqlDbType.Binary, 8000}, 
-            {SqlDbType.Char, 1}, 
-            {SqlDbType.NChar, 1}, 
-            {SqlDbType.Decimal, 18}, 
+            {SqlDbType.NVarChar, 200},
+            {SqlDbType.VarChar, 200},
+            {SqlDbType.VarBinary, int.MaxValue},
+            {SqlDbType.Binary, 8000},
+            {SqlDbType.Char, 1},
+            {SqlDbType.NChar, 1},
+            {SqlDbType.Decimal, 18},
         };
 
         Dictionary<SqlDbType, int> defaultScale = new Dictionary<SqlDbType, int>()
         {
-            {SqlDbType.Decimal, 2}, 
+            {SqlDbType.Decimal, 2},
         };
 
         public AttributeCollection FieldAttributes<T, S>(Expression<Func<T, S>> propertyRoute)
@@ -242,7 +240,7 @@ namespace Signum.Engine.Maps
 
             if (imp.IsByAll || !imp.Types.Contains(typeToImplement))
                 throw new InvalidOperationException("Route {0} is not ImplementedBy {1}".FormatWith(route, typeToImplement.Name) +
-                    "\r\n" + 
+                    "\r\n" +
                     Implementations.ConsiderMessage(route, imp.Types.And(typeToImplement).ToString(t => $"typeof({t.TypeName()})", ", ")));
         }
 
@@ -253,7 +251,7 @@ namespace Signum.Engine.Maps
 
         public Implementations GetImplementations(PropertyRoute propertyRoute)
         {
-            var cleanType = propertyRoute.Type.CleanType();  
+            var cleanType = propertyRoute.Type.CleanType();
             if (!propertyRoute.Type.CleanType().IsIEntity())
                 throw new InvalidOperationException("{0} is not a {1}".FormatWith(propertyRoute, typeof(IEntity).Name));
 
@@ -366,11 +364,11 @@ namespace Signum.Engine.Maps
     {
         AttributeTargets Targets;
 
-        Action assertNotIncluded; 
+        Action assertNotIncluded;
 
         public AttributeCollection(AttributeTargets targets, IList<Attribute> attributes, Action assertNotIncluded):base(attributes)
         {
-            this.Targets = targets; 
+            this.Targets = targets;
             this.assertNotIncluded = assertNotIncluded;
         }
 

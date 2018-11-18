@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using Signum.Utilities.ExpressionTrees;
 using System.Linq.Expressions;
-using System.Reflection;
 using Signum.Utilities.Reflection;
 using Signum.Utilities;
 
@@ -56,7 +54,7 @@ namespace Signum.Engine.Linq
         static GenericInvoker<Func<ConstantExpression>> miConstant = new GenericInvoker<Func<ConstantExpression>>(() => Constant<int>());
         static ConstantExpression Constant<T>()
         {
-            return Expression.Constant(default(T), typeof(T)); 
+            return Expression.Constant(default(T), typeof(T));
         }
     }
 }

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using Signum.Entities;
 using System.Linq.Expressions;
 using Signum.Utilities;
@@ -9,11 +8,10 @@ using Microsoft.SqlServer.Types;
 using Microsoft.SqlServer.Server;
 using Signum.Engine;
 using Signum.Engine.Maps;
-using Signum.Utilities.ExpressionTrees;
 
 namespace Signum.Test.Environment
 {
-    [Serializable, EntityKind(EntityKind.Shared, EntityData.Transactional), Mixin(typeof(CorruptMixin)), 
+    [Serializable, EntityKind(EntityKind.Shared, EntityData.Transactional), Mixin(typeof(CorruptMixin)),
         Mixin(typeof(ColaboratorsMixin)), PrimaryKey(typeof(Guid))]
     public class NoteWithDateEntity : Entity
     {
@@ -432,7 +430,7 @@ namespace Signum.Test.Environment
         {
             assets.IncludeUserDefinedFunction("MinimumTableValued", @"(@Param1 Integer, @Param2 Integer)
 RETURNS Table As
-RETURN (SELECT Case When @Param1 < @Param2 Then @Param1 
+RETURN (SELECT Case When @Param1 < @Param2 Then @Param1
                Else COALESCE(@Param2, @Param1) End MinValue)");
 
 
@@ -440,7 +438,7 @@ RETURN (SELECT Case When @Param1 < @Param2 Then @Param1
 RETURNS Integer
 AS
 BEGIN
-   RETURN (Case When @Param1 < @Param2 Then @Param1 
+   RETURN (Case When @Param1 < @Param2 Then @Param1
            Else COALESCE(@Param2, @Param1) End);
 END");
         }

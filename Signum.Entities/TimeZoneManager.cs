@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Globalization;
 using Signum.Utilities;
 
 namespace Signum.Entities
@@ -11,7 +7,7 @@ namespace Signum.Entities
     {
         public static TimeZoneMode Mode { get; set; }
 
-        //TimeZoneInfo.Local is read-only. For ASP.Net or other server providers where local time is needed. 
+        //TimeZoneInfo.Local is read-only. For ASP.Net or other server providers where local time is needed.
         public static readonly SessionVariable<TimeZoneInfo> OverrideTimeZoneVariable = Statics.SessionVariable<TimeZoneInfo>("timeZone");
         public static TimeZoneInfo OverrideTimeZone
         {
@@ -35,7 +31,7 @@ namespace Signum.Entities
 
             OverrideNowVariable.Value += ts;
         }
-  
+
 
         public static DateTime Now
         {
@@ -86,7 +82,7 @@ namespace Signum.Entities
     }
 
     public enum TimeZoneMode
-    {   
+    {
         Local,
         Utc,
     }

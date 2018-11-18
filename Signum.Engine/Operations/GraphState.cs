@@ -1,20 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using Signum.Utilities;
 using Signum.Utilities.ExpressionTrees;
-using Signum.Engine.Maps;
-using System.Threading;
 using Signum.Entities;
-using System.Diagnostics;
-using Signum.Engine.SchemaInfoTables;
-using Signum.Utilities.Reflection;
 using Signum.Utilities.DataStructures;
 using System.Xml.Linq;
-using System.ComponentModel;
 using System.Linq.Expressions;
-using Signum.Entities.Basics;
 
 namespace Signum.Engine.Operations
 {
@@ -91,7 +83,7 @@ namespace Signum.Engine.Operations
                 var graphName = typeof(Graph<T, S>).TypeName();
                 throw new InvalidOperationException($"{graphName}.GetState is not set. Consider writing something like 'GetState = a => a.State' at the beginning of your Register method.");
             }
-               
+
         }
 
         public class ConstructFrom<F> : Graph<T>.ConstructFrom<F>, IGraphToStateOperation

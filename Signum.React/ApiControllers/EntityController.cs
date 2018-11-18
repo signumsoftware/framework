@@ -1,23 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net;
-using System.Net.Http;
 using Signum.Engine.Basics;
-using Signum.Engine.DynamicQuery;
-using Signum.Entities.DynamicQuery;
 using Signum.React.Facades;
-using Signum.Utilities;
 using Signum.Entities;
 using Signum.Engine;
-using Signum.Engine.Operations;
 using Signum.React.Filters;
 using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel.DataAnnotations;
 
 namespace Signum.React.ApiControllers
 {
-    public class EntitiesController : ApiController
+    public class EntitiesController : ControllerBase
     {
         [HttpGet("api/entity/{type}/{id}"), ProfilerActionSplitter("type")]
         public Entity GetEntity(string type, string id)
@@ -43,7 +37,7 @@ namespace Signum.React.ApiControllers
 
         [HttpPost("api/entityPackEntity")/*, ValidateModelFilter*/]
         public EntityPackTS GetEntityPackEntity([Required, FromBody]Entity entity)
-        { 
+        {
             return SignumServer.GetEntityPack(entity);
         }
 

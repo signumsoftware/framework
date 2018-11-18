@@ -1,10 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Signum.Utilities;
 using System.Globalization;
-using System.Resources;
 using System.Text.RegularExpressions;
 using System.Collections.ObjectModel;
 using Signum.Utilities.NaturalLanguage;
@@ -43,7 +40,7 @@ namespace Signum.Utilities
 
             return detector.GetGender(name);
         }
-        
+
         public static bool HasGenders(CultureInfo cultureInfo)
         {
             IGenderDetector detector = GenderDetectors.TryGetC(cultureInfo.TwoLetterISOLanguageName);
@@ -296,10 +293,10 @@ namespace Signum.Utilities
         public char? UnitGender;
 
         public string DecimalUnit;
-        public string DecimalUnitPlural; 
+        public string DecimalUnitPlural;
         public char? DecimalUnitGender;
 
         public int NumberOfDecimals;
-        public bool OmitDecimalZeros; 
+        public bool OmitDecimalZeros;
     }
 }

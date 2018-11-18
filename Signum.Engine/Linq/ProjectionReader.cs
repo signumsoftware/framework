@@ -1,15 +1,11 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Data;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading;
-using Signum.Engine.Maps;
 using Signum.Entities;
 using Signum.Utilities;
-using Signum.Utilities.Reflection;
-using Signum.Utilities.ExpressionTrees;
 using System.Data.Common;
 
 namespace Signum.Engine.Linq
@@ -44,7 +40,7 @@ namespace Signum.Engine.Linq
         DbDataReader dataReader;
 
         T current;
-        Func<IProjectionRow, T> projector; 
+        Func<IProjectionRow, T> projector;
         Expression<Func<IProjectionRow, T>> projectorExpression;
 
         Dictionary<LookupToken, IEnumerable> lookups;

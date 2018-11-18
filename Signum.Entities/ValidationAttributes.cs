@@ -1,14 +1,11 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
-using System.Resources;
-using System.Text;
 using System.Text.RegularExpressions;
-using Signum.Entities.Reflection;
 using Signum.Utilities;
 using Signum.Utilities.ExpressionTrees;
 using Signum.Utilities.Reflection;
@@ -21,7 +18,7 @@ namespace Signum.Entities
     [AttributeUsage(AttributeTargets.Property, Inherited = true, AllowMultiple = true)]
     public abstract class ValidatorAttribute : Attribute
     {
-        public Func<ModifiableEntity, bool> IsApplicable; 
+        public Func<ModifiableEntity, bool> IsApplicable;
         public Func<string> ErrorMessage { get; set; }
 
         public string UnlocalizableErrorMessage
@@ -55,7 +52,7 @@ namespace Signum.Entities
             if (error != null)
                 error = error.FormatWith(property.NiceName());
 
-            return error; 
+            return error;
         }
 
 
@@ -271,9 +268,9 @@ namespace Signum.Entities
         public IdentifierType type;
         public IdentifierValidatorAttribute(IdentifierType type)
                : base(
-                     type == IdentifierType.PascalAscii ? PascalAscii : 
-                     type == IdentifierType.Ascii ? Ascii: 
-                     type == IdentifierType.International ? International : 
+                     type == IdentifierType.PascalAscii ? PascalAscii :
+                     type == IdentifierType.Ascii ? Ascii:
+                     type == IdentifierType.International ? International :
                      null
                      )
         {
@@ -309,14 +306,14 @@ namespace Signum.Entities
     {
         public static Regex AbsoluteUrlRegex = new Regex(
               "^(https?://)"
-            + "?(([0-9a-z_!~*'().&=+$%-]+: )?[0-9a-z_!~*'().&=+$%-]+@)?" //user@ 
-            + @"(([0-9]{1,3}\.){3}[0-9]{1,3}" // IP- 199.194.52.184 
-            + "|" // allows either IP or domain 
-            + @"([0-9a-z_!~*'()-]+\.)*" // tertiary domain(s)- www. 
-            + @"([0-9a-z][0-9a-z-]{0,61})?[0-9a-z]" // second level domain 
-            + @"(\.[a-z]{2,6})?)" // first level domain- .com or .museum 
-            + "(:[0-9]{1,4})?" // port number- :80 
-            + "((/?)|" // a slash isn't required if there is no file name 
+            + "?(([0-9a-z_!~*'().&=+$%-]+: )?[0-9a-z_!~*'().&=+$%-]+@)?" //user@
+            + @"(([0-9]{1,3}\.){3}[0-9]{1,3}" // IP- 199.194.52.184
+            + "|" // allows either IP or domain
+            + @"([0-9a-z_!~*'()-]+\.)*" // tertiary domain(s)- www.
+            + @"([0-9a-z][0-9a-z-]{0,61})?[0-9a-z]" // second level domain
+            + @"(\.[a-z]{2,6})?)" // first level domain- .com or .museum
+            + "(:[0-9]{1,4})?" // port number- :80
+            + "((/?)|" // a slash isn't required if there is no file name
             + "(/[0-9a-z_!~*'().;?:@&=+$,%#-]+)+/?)$", RegexOptions.IgnoreCase);
 
         public static Regex SiteRelativeRegex = new Regex(
@@ -539,7 +536,7 @@ namespace Signum.Entities
 
             if (min.GetType() != value.GetType())
             {
-                min = (IComparable)Convert.ChangeType(min, val.GetType()); // asi se hace solo una vez 
+                min = (IComparable)Convert.ChangeType(min, val.GetType()); // asi se hace solo una vez
                 max = (IComparable)Convert.ChangeType(max, val.GetType());
             }
 
@@ -810,8 +807,8 @@ namespace Signum.Entities
         Uppercase,
         Lowercase
     }
-    
-   
+
+
 
     public class IsAssignableToValidatorAttribute : ValidatorAttribute
     {
@@ -899,7 +896,7 @@ namespace Signum.Entities
             return Necessary(state, index);
         }
 
-      
+
 
         public string Validate(E entity, PropertyInfo pi, bool showState)
         {

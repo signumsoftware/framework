@@ -1,9 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Collections;
-using System.Diagnostics;
 
 namespace Signum.Utilities
 {
@@ -17,15 +14,15 @@ namespace Signum.Utilities
         int lastCurrent;
 
         long lastLastTick;
-        int lastLastCurrent; 
+        int lastLastCurrent;
 
         int countStep;
 
         int count;
-        int current = 0; 
+        int current = 0;
 
         IEnumerator<T> enumerator;
-     
+
         public ProgressEnumerator(IEnumerable<T> source, int count)
         {
             enumerator = source.GetEnumerator();
@@ -45,12 +42,12 @@ namespace Signum.Utilities
 
         public IEnumerator<T> GetEnumerator()
         {
-            return this; 
+            return this;
         }
-        
+
         IEnumerator IEnumerable.GetEnumerator()
         {
-            return this; 
+            return this;
         }
 
         public T Current
@@ -149,7 +146,7 @@ namespace Signum.Utilities
             TimeSpan rem = me.Remaining;
             TimeSpan ela = me.Elapsed;
             return "{0:0.00}% | {1}/{2} | Elap: {3} + Rem: {4} = Total: {5} -> Finish: {6:u}".FormatWith(
-                me.Percentage, current, count,  
+                me.Percentage, current, count,
                 ela.NiceToString(DateTimePrecision.Seconds),
                 rem.NiceToString(DateTimePrecision.Seconds),
                 (ela + rem).NiceToString(DateTimePrecision.Seconds),

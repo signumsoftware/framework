@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System.Collections.Generic;
 using System.Linq.Expressions;
 
 namespace Signum.Utilities.ExpressionTrees
@@ -18,7 +15,7 @@ namespace Signum.Utilities.ExpressionTrees
                 replacements = 0.To(lambda.Parameters.Count).ToDictionaryEx(i => lambda.Parameters[i], i => invocation.Arguments[i])
             };
 
-            return replacer.Visit(lambda.Body); 
+            return replacer.Visit(lambda.Body);
         }
 
         public static Expression Replace(Expression expression, Dictionary<ParameterExpression, Expression> replacements)

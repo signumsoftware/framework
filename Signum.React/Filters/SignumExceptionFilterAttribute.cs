@@ -16,11 +16,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
-using System.Net.Http;
 using System.Security.Authentication;
 using System.Text;
 using System.Threading.Tasks;
-using System.Web;
 
 namespace Signum.React.Filters
 {
@@ -60,7 +58,7 @@ namespace Signum.React.Filters
                         e.Form = ReadAllBody(context.HttpContext);
                         e.Session = null;
                     });
-                    
+
                     if (ExpectsJsonResult(context))
                     {
                         var error = new HttpError(context.Exception);
@@ -77,7 +75,7 @@ namespace Signum.React.Filters
 
         private bool ExpectsJsonResult(ResourceExecutedContext context)
         {
-            return context.ActionDescriptor is ControllerActionDescriptor cad && 
+            return context.ActionDescriptor is ControllerActionDescriptor cad &&
                 !typeof(IActionResult).IsAssignableFrom(cad.MethodInfo.ReturnType);
         }
 
@@ -111,7 +109,7 @@ namespace Signum.React.Filters
             return HttpStatusCode.InternalServerError;
         }
 
-       
+
     }
 
     public class HttpError

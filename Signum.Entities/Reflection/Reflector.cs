@@ -1,5 +1,4 @@
-﻿using Signum.Utilities;
-using Signum.Utilities.DataStructures;
+using Signum.Utilities;
 using Signum.Utilities.ExpressionTrees;
 using Signum.Utilities.Reflection;
 using System;
@@ -11,7 +10,6 @@ using System.Globalization;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
-using System.Text.RegularExpressions;
 
 namespace Signum.Entities.Reflection
 {
@@ -21,7 +19,7 @@ namespace Signum.Entities.Reflection
      *      MList
      *      EmbeddedEntities
      *      IdentifiableEntities
-     *      
+     *
      * An identifiable can be accesed thought:
      *   Normal Reference
      *   Interface
@@ -453,10 +451,10 @@ namespace Signum.Entities.Reflection
             return null;
         }
 
-     
-       
 
- 
+
+
+
         public static PropertyInfo PropertyInfo<T>(this T entity, Expression<Func<T, object>> property) where T : ModifiableEntity
         {
             return ReflectionTools.GetPropertyInfo(property);

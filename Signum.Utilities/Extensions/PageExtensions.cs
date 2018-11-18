@@ -1,14 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
 namespace Signum.Utilities
 {
     /// <summary>
     /// 1-based index
     /// </summary>
-    public class Page<T> 
+    public class Page<T>
     {
         public int StartElementIndex
         {

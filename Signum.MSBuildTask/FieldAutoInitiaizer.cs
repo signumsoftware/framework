@@ -1,7 +1,5 @@
-﻿using System;
-using Mono.Cecil;
+﻿using Mono.Cecil;
 using System.Linq;
-using System.Collections.Generic;
 using Mono.Cecil.Cil;
 using Mono.Cecil.Rocks;
 using System.IO;
@@ -49,7 +47,7 @@ namespace Signum.MSBuildTask
                                where t.HasCustomAttributes && t.CustomAttributes.Any(a=>a.AttributeType.FullName == AutoInit.FullName)
                                select t).ToList();
 
-           
+
             foreach (var type in entityTypes)
             {
                 AutoInitFields(type);

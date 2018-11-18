@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.ApplicationParts;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Signum.Engine.Maps;
@@ -15,13 +14,13 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Web;
+
 namespace Signum.React.Facades
 {
     public static class SignumServer
     {
         public static JsonSerializerSettings JsonSerializerSettings;
-        
+
         public static void AddSignumJsonConverters(this MvcJsonOptions jsonOptions)
         {
             //Signum converters
@@ -51,7 +50,7 @@ namespace Signum.React.Facades
             options.Filters.Add(new SignumCultureSelectorFilter());
             options.Filters.Add(new VersionFilterAttribute());
         }
-        
+
         public static void Start(IApplicationBuilder app, IHostingEnvironment hostingEnvironment, Assembly mainAsembly)
         {
             Schema.Current.ApplicationName = hostingEnvironment.ContentRootPath;
@@ -72,7 +71,7 @@ namespace Signum.React.Facades
 
             //app.Services.Replace(typeof(IBodyModelValidator), new SignumBodyModelValidator());
 
-            
+
             ReflectionServer.Start();
         }
 

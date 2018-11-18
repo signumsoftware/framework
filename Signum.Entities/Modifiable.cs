@@ -1,21 +1,16 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using Signum.Utilities;
-using System.Collections.ObjectModel;
 using Signum.Utilities.DataStructures;
-using Signum.Entities.Reflection;
 using System.Diagnostics;
 
 namespace Signum.Entities
 {
     [Serializable]
-    public abstract class Modifiable 
+    public abstract class Modifiable
     {
         [Ignore, DebuggerBrowsable(DebuggerBrowsableState.Never)]
         ModifiedState modified;
-       
+
         [HiddenProperty]
         public ModifiedState Modified
         {
@@ -83,6 +78,6 @@ namespace Signum.Entities
         /// Recursively Modified (only valid during saving)
         /// </summary>
         Modified,
-        Sealed, 
+        Sealed,
     }
 }

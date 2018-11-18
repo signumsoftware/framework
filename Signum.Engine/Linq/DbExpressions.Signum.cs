@@ -1,19 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Linq.Expressions;
 using System.Collections.ObjectModel;
 using Signum.Utilities;
 using System.Reflection;
 using Signum.Entities;
 using Signum.Utilities.ExpressionTrees;
-using Signum.Engine;
-using Signum.Utilities.DataStructures;
 using Signum.Utilities.Reflection;
 using Signum.Engine.Maps;
 using Signum.Entities.Reflection;
-using System.Diagnostics;
 
 namespace Signum.Engine.Linq
 {
@@ -41,7 +37,7 @@ namespace Signum.Engine.Linq
         public EntityExpression(Type type, PrimaryKeyExpression externalId, NewExpression externalPeriod, Alias tableAlias, IEnumerable<FieldBinding> bindings, IEnumerable<MixinEntityExpression> mixins, NewExpression tablePeriod, bool avoidExpandOnRetrieving)
             : base(DbExpressionType.Entity, type)
         {
-            if (type == null) 
+            if (type == null)
                 throw new ArgumentNullException("type");
 
             if (!type.IsEntity())
@@ -75,7 +71,7 @@ namespace Signum.Engine.Linq
                 throw new InvalidOperationException("EntityInitiExpression not completed");
 
             FieldBinding binding = Bindings.Where(fb => ReflectionTools.FieldEquals(fi, fb.FieldInfo)).SingleEx(() => "field '{0}' in {1} (field Ignored?)".FormatWith(fi.Name, this.Type.TypeName()));
-            
+
             return binding.Binding;
         }
 
@@ -83,7 +79,7 @@ namespace Signum.Engine.Linq
         {
             return visitor.VisitEntity(this);
         }
-        
+
         internal EntityExpression WithExpandEntity(ExpandEntity expandEntity)
         {
             switch (expandEntity)
@@ -98,10 +94,10 @@ namespace Signum.Engine.Linq
         }
     }
 
-  
+
     internal class EmbeddedEntityExpression : DbExpression
     {
-        public readonly Expression HasValue; 
+        public readonly Expression HasValue;
 
         public readonly ReadOnlyCollection<FieldBinding> Bindings;
 
@@ -121,7 +117,7 @@ namespace Signum.Engine.Linq
 
             Bindings = bindings.ToReadOnly();
 
-            FieldEmbedded = fieldEmbedded; 
+            FieldEmbedded = fieldEmbedded;
             ViewTable = viewTable;
         }
 
@@ -136,8 +132,8 @@ namespace Signum.Engine.Linq
 
             string bindings = Bindings?.Let(b => b.ToString(",\r\n ")) ?? "";
 
-            return bindings.HasText() ? 
-                constructor + "\r\n{" + bindings.Indent(4) + "\r\n}" : 
+            return bindings.HasText() ?
+                constructor + "\r\n{" + bindings.Indent(4) + "\r\n}" :
                 constructor;
         }
 
@@ -197,7 +193,7 @@ namespace Signum.Engine.Linq
         }
     }
 
-   
+
 
     internal class FieldBinding
     {
@@ -212,7 +208,7 @@ namespace Signum.Engine.Linq
 
             if (!ft.IsAssignableFrom(binding.Type))
                 throw new ArgumentException("Type of expression is {0} but type of field is {1}".FormatWith(binding.Type.TypeName(), fieldInfo.FieldType.TypeName()));
-            
+
             this.FieldInfo = fieldInfo;
             this.Binding = binding;
         }
@@ -254,7 +250,7 @@ namespace Signum.Engine.Linq
         public readonly Expression Id;
         public readonly TypeImplementedByAllExpression TypeId;
         public readonly NewExpression ExternalPeriod;
-        
+
 
         public ImplementedByAllExpression(Type type, Expression id, TypeImplementedByAllExpression typeId, NewExpression externalPeriod)
             : base(DbExpressionType.ImplementedByAll, type)
@@ -527,9 +523,9 @@ namespace Signum.Engine.Linq
         public override string ToString()
         {
             return "MListElement({0})\r\n{{\r\nParent={1},\r\nOrder={2},\r\nElement={3}}})".FormatWith(
-                RowId.ToString(), 
-                Parent.ToString(), 
-                Order == null ? Order.ToString() : null, 
+                RowId.ToString(),
+                Parent.ToString(),
+                Order == null ? Order.ToString() : null,
                 Element.ToString());
         }
 

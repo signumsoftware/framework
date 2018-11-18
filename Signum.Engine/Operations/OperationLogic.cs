@@ -15,9 +15,7 @@ using Signum.Engine.DynamicQuery;
 using Signum.Entities.Reflection;
 using System.Linq.Expressions;
 using Signum.Entities.Basics;
-using System.Data.Common;
 using Signum.Engine.Operations.Internal;
-using Signum.Engine;
 
 namespace Signum.Engine.Operations
 {
@@ -63,7 +61,7 @@ namespace Signum.Engine.Operations
         {
             get { return operations.OverridenValues.SelectMany(a => a.Keys).ToHashSet(); }
         }
-        
+
         static readonly Variable<ImmutableStack<Type>> allowedTypes = Statics.ThreadVariable<ImmutableStack<Type>>("saveOperationsAllowedTypes");
 
         public static bool AllowSaveGlobally { get; set; }
@@ -73,7 +71,7 @@ namespace Signum.Engine.Operations
             var stack = allowedTypes.Value;
             return (stack != null && stack.Contains(type));
         }
-        
+
         public static IDisposable AllowSave<T>() where T : class, IEntity
         {
             return AllowSave(typeof(T));
@@ -120,7 +118,7 @@ namespace Signum.Engine.Operations
 
                 QueryLogic.Expressions.Register((OperationSymbol o) => o.Logs(), () => OperationMessage.Logs.NiceToString());
                 QueryLogic.Expressions.Register((Entity o) => o.OperationLogs(), () => typeof(OperationLogEntity).NicePluralName());
-             
+
 
                 sb.Schema.EntityEventsGlobal.Saving += EntityEventsGlobal_Saving;
 
@@ -129,7 +127,7 @@ namespace Signum.Engine.Operations
 
                 sb.Schema.SchemaCompleted += OperationLogic_Initializing;
                 sb.Schema.SchemaCompleted += () => RegisterCurrentLogs(sb.Schema);
-                
+
                 ExceptionLogic.DeleteLogs += ExceptionLogic_DeleteLogs;
             }
         }
@@ -186,7 +184,7 @@ namespace Signum.Engine.Operations
                     throw new InvalidOperationException(errors.ToString("\r\n") + @"
 Consider the following options:
     * Implement an operation for saving using 'save' snippet or .WithSave() method.
-    * Change the EntityKind to a more appropiated one. 
+    * Change the EntityKind to a more appropiated one.
     * Exceptionally, override the property EntityTypeAttribute.RequiresSaveOperation for your particular entity.");
             }
             catch (Exception e) when (StartParameters.IgnoredCodeErrors != null)
@@ -209,7 +207,7 @@ Consider the following options:
 
         static void EntityEventsGlobal_Saving(Entity ident)
         {
-            if (ident.IsGraphModified && 
+            if (ident.IsGraphModified &&
                 EntityKindCache.RequiresSaveOperation(ident.GetType()) && !AllowSaveGlobally && !IsSaveAllowedInContext(ident.GetType()))
                 throw new InvalidOperationException("Saving '{0}' is controlled by the operations. Use OperationLogic.AllowSave<{0}>() or execute {1}".FormatWith(
                     ident.GetType().Name,
@@ -523,13 +521,13 @@ Consider the following options:
             return operations.TryGetValue(type.CleanType())?.TryGetC(operationSymbol);
         }
 
-        public static Graph<T>.Construct FindConstruct<T>(ConstructSymbol<T>.Simple symbol) 
+        public static Graph<T>.Construct FindConstruct<T>(ConstructSymbol<T>.Simple symbol)
             where T : class, IEntity
         {
             return (Graph<T>.Construct)FindOperation(typeof(T), symbol.Symbol);
         }
 
-        public static Graph<T>.ConstructFrom<F> FindConstructFrom<F, T>(ConstructSymbol<T>.From<F> symbol) 
+        public static Graph<T>.ConstructFrom<F> FindConstructFrom<F, T>(ConstructSymbol<T>.From<F> symbol)
             where T : class, IEntity
             where F : class, IEntity
         {
@@ -597,7 +595,7 @@ Consider the following options:
 
             var returnTypeOperations = from kvp in operationsFromKey.Value
                                        select FindOperation(kvp.Value.FirstEx(), kvp.Key) into op
-                                       where op.OperationType == Entities.OperationType.ConstructorFrom && 
+                                       where op.OperationType == Entities.OperationType.ConstructorFrom &&
                                        op.OperationType == Entities.OperationType.ConstructorFromMany
                                        where op.ReturnType == type
                                        select op;
@@ -675,7 +673,7 @@ Consider the following options:
             where T : E
         {
             var getState = Graph<E, S>.GetState;
-            
+
             var states = lites.GroupsOf(200).SelectMany(list =>
                 Database.Query<T>().Where(e => list.Contains(e.ToLite())).Select(getState).Distinct()).Distinct().ToList();
 
@@ -700,7 +698,7 @@ Consider the following options:
                 log.Save();
         }
     }
-    
+
     public static class FluentOperationInclude
     {
         public static FluentInclude<T> WithSave<T>(this FluentInclude<T> fi, ExecuteSymbol<T> saveOperation)

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using Signum.Utilities;
 using Signum.Entities.Reflection;
 using System.Reflection;
@@ -25,7 +24,7 @@ namespace Signum.Entities.DynamicQuery
 
         public static string GetNiceName(object queryName)
         {
-            return GetNiceName(queryName, null); 
+            return GetNiceName(queryName, null);
         }
 
         public static string GetNiceName(object queryName, CultureInfo ci)
@@ -106,16 +105,16 @@ namespace Signum.Entities.DynamicQuery
 
         static Dictionary<FilterType, List<FilterOperation>> FilterOperations = new Dictionary<FilterType, List<FilterOperation>>
         {
-            { 
+            {
                 FilterType.String, new List<FilterOperation>
                 {
                     FilterOperation.Contains,
                     FilterOperation.EqualTo,
                     FilterOperation.StartsWith,
-                    FilterOperation.EndsWith,                    
-                    FilterOperation.Like,                    
+                    FilterOperation.EndsWith,
+                    FilterOperation.Like,
                     FilterOperation.NotContains,
-                    FilterOperation.DistinctTo, 
+                    FilterOperation.DistinctTo,
                     FilterOperation.NotStartsWith,
                     FilterOperation.NotEndsWith,
                     FilterOperation.NotLike,
@@ -123,11 +122,11 @@ namespace Signum.Entities.DynamicQuery
                     FilterOperation.IsNotIn
                 }
             },
-            { 
+            {
                 FilterType.DateTime, new List<FilterOperation>
                 {
                     FilterOperation.EqualTo,
-                    FilterOperation.DistinctTo, 
+                    FilterOperation.DistinctTo,
                     FilterOperation.GreaterThan,
                     FilterOperation.GreaterThanOrEqual,
                     FilterOperation.LessThan,
@@ -136,11 +135,11 @@ namespace Signum.Entities.DynamicQuery
                     FilterOperation.IsNotIn,
                 }
             },
-            { 
+            {
                 FilterType.Integer, new List<FilterOperation>
                 {
                     FilterOperation.EqualTo,
-                    FilterOperation.DistinctTo, 
+                    FilterOperation.DistinctTo,
                     FilterOperation.GreaterThan,
                     FilterOperation.GreaterThanOrEqual,
                     FilterOperation.LessThan,
@@ -149,11 +148,11 @@ namespace Signum.Entities.DynamicQuery
                     FilterOperation.IsNotIn,
                 }
             },
-            { 
+            {
                 FilterType.Decimal, new List<FilterOperation>
                 {
                     FilterOperation.EqualTo,
-                    FilterOperation.DistinctTo, 
+                    FilterOperation.DistinctTo,
                     FilterOperation.GreaterThan,
                     FilterOperation.GreaterThanOrEqual,
                     FilterOperation.LessThan,
@@ -162,7 +161,7 @@ namespace Signum.Entities.DynamicQuery
                     FilterOperation.IsNotIn,
                 }
             },
-            { 
+            {
                 FilterType.Enum, new List<FilterOperation>
                 {
                     FilterOperation.EqualTo,
@@ -175,16 +174,16 @@ namespace Signum.Entities.DynamicQuery
                     FilterOperation.LessThanOrEqual,
                 }
             },
-            { 
+            {
                 FilterType.Guid, new List<FilterOperation>
                 {
                     FilterOperation.EqualTo,
-                    FilterOperation.DistinctTo, 
+                    FilterOperation.DistinctTo,
                     FilterOperation.IsIn,
                     FilterOperation.IsNotIn,
                 }
             },
-            { 
+            {
                 FilterType.Lite, new List<FilterOperation>
                 {
                     FilterOperation.EqualTo,
@@ -193,18 +192,18 @@ namespace Signum.Entities.DynamicQuery
                     FilterOperation.IsNotIn,
                 }
             },
-            { 
+            {
                 FilterType.Embedded, new List<FilterOperation>
                 {
                     FilterOperation.EqualTo,
                     FilterOperation.DistinctTo,
                 }
             },
-            { 
+            {
                 FilterType.Boolean, new List<FilterOperation>
                 {
                     FilterOperation.EqualTo,
-                    FilterOperation.DistinctTo,   
+                    FilterOperation.DistinctTo,
                 }
             },
         };
@@ -335,7 +334,7 @@ namespace Signum.Entities.DynamicQuery
 
         public static bool IsColumnToken(string tokenString)
         {
-            return tokenString.IndexOf('.') == -1 && tokenString != "Entity"; 
+            return tokenString.IndexOf('.') == -1 && tokenString != "Entity";
         }
 
         public static QueryToken Parse(string tokenString, QueryDescription qd, SubTokensOptions options)
@@ -344,7 +343,7 @@ namespace Signum.Entities.DynamicQuery
                 throw new ArgumentNullException("tokenString");
 
             //https://stackoverflow.com/questions/35418597/split-string-on-the-dot-characters-that-are-not-inside-of-brackets
-            string[] parts = Regex.Split(tokenString, @"\.(?!([^[]*\]|[^(]*\)))"); 
+            string[] parts = Regex.Split(tokenString, @"\.(?!([^[]*\]|[^(]*\)))");
 
             string firstPart = parts.FirstEx();
 
@@ -369,14 +368,14 @@ namespace Signum.Entities.DynamicQuery
 
             if (token.Type != typeof(string) && token.Type.ElementType() != null)
                 return "You can not filter by collections, continue the sequence";
-            
+
             return null;
         }
 
         public static string CanColumn(QueryToken token)
         {
             if (token == null)
-                return "No column selected"; 
+                return "No column selected";
 
             if (token.Type != typeof(string) && token.Type != typeof(byte[]) && token.Type.ElementType() != null)
                 return "You can not add collections as columns";
@@ -388,7 +387,7 @@ namespace Signum.Entities.DynamicQuery
                     CollectionAnyAllType.NoOne.NiceToString(),
                     CollectionAnyAllType.AnyNo.NiceToString());
 
-            return null; 
+            return null;
         }
 
         public static Dictionary<Type, Func<Expression, Expression>> OrderAdapters = new Dictionary<Type, Func<Expression, Expression>>();
@@ -406,7 +405,7 @@ namespace Signum.Entities.DynamicQuery
         public static string CanOrder(QueryToken token)
         {
             if (token == null)
-                return "No column selected"; 
+                return "No column selected";
 
             if (token.Type.IsEmbeddedEntity() && !OrderAdapters.ContainsKey(token.Type))
                 return "{0} can not be ordered".FormatWith(token.Type.NicePluralName());
@@ -514,7 +513,7 @@ namespace Signum.Entities.DynamicQuery
             switch (operation)
             {
                 case FilterOperation.EqualTo: return Expression.Equal(left, right);
-                case FilterOperation.DistinctTo: 
+                case FilterOperation.DistinctTo:
                     {
                         var t = left.Type.UnNullify();
                         var mi = t.IsValueType ? miDistinctNullable : miDistinct;

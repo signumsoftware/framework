@@ -1,4 +1,4 @@
-﻿import { TypeReference, PseudoType, QueryKey } from './Reflection';
+import { TypeReference, PseudoType, QueryKey } from './Reflection';
 import { Lite, Entity } from './Signum.Entities';
 import { PaginationMode, OrderType, FilterOperation, FilterType, ColumnOptionsMode, UniqueType, SystemTimeMode, FilterGroupOperation } from './Signum.Entities.DynamicQuery';
 import { SearchControlProps } from "./Search";

@@ -1,13 +1,9 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Linq.Expressions;
-using System.Reflection;
-using System.Text;
 using Signum.Utilities;
-using Signum.Utilities.ExpressionTrees;
 
 namespace Signum.Engine.Linq
 {
@@ -179,7 +175,7 @@ namespace Signum.Engine.Linq
         {
             Expression key = this.Visit(child.OuterKey);
             ProjectionExpression proj = (ProjectionExpression)UnusedColumnRemover.Remove(child.Projection);
-         
+
             if (proj != child.Projection || key != child.OuterKey)
             {
                 return new ChildProjectionExpression(proj, key, child.IsLazyMList, child.Type, child.Token);

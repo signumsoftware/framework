@@ -4,20 +4,16 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
-using System.Web;
 using Newtonsoft.Json;
 using Signum.Engine.Basics;
 using Signum.Engine.Maps;
 using Signum.Entities;
 using Signum.Entities.Reflection;
-using Signum.React.ApiControllers;
 using Signum.Utilities;
 using Signum.Entities.DynamicQuery;
 using Signum.Utilities.ExpressionTrees;
-using System.Linq.Expressions;
 using Signum.Utilities.Reflection;
 using Signum.Engine.Operations;
-using Signum.Engine.DynamicQuery;
 using Signum.Engine;
 using Signum.Entities.Basics;
 
@@ -298,7 +294,7 @@ namespace Signum.React.Facades
             object v = m.GetValue(null);
             if (v is IOperationSymbolContainer osc)
                 v = osc.Symbol;
-            
+
             if (v is Symbol s)
                 return (s.FieldInfo, s.IdOrNull);
 

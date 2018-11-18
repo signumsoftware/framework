@@ -1,9 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Linq.Expressions;
-using Signum.Entities.Reflection;
 using Signum.Utilities;
 using Signum.Utilities.ExpressionTrees;
 
@@ -13,7 +10,7 @@ namespace Signum.Entities.DynamicQuery
     public class ExtensionDictionaryToken<T, K, V> : QueryToken
     {
         public ExtensionDictionaryToken(QueryToken parent, K key,
-            string unit, string format, 
+            string unit, string format,
             Implementations? implementations,
             PropertyRoute propertyRoute)
             : base(parent)
@@ -37,7 +34,7 @@ namespace Signum.Entities.DynamicQuery
         {
             return ((object)keyValue) is Enum e ? e.NiceToString() : keyValue.ToString();
         }
-        
+
         public override Type Type { get { return typeof(V).BuildLiteNullifyUnwrapPrimaryKey(new[] { this.GetPropertyRoute() }); } }
 
         K keyValue;
@@ -51,7 +48,7 @@ namespace Signum.Entities.DynamicQuery
 
         protected override List<QueryToken> SubTokensOverride(SubTokensOptions options)
         {
-            return base.SubTokensBase(typeof(V), options, implementations);  
+            return base.SubTokensBase(typeof(V), options, implementations);
         }
 
         public Expression<Func<T, V>> Lambda;
@@ -92,7 +89,7 @@ namespace Signum.Entities.DynamicQuery
             return new ExtensionDictionaryToken<T, K, V>(this.Parent.Clone(), keyValue, unit, format, implementations, propertyRoute)
             {
                 Lambda = Lambda
-            }; 
+            };
         }
     }
 }

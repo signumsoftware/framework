@@ -1,8 +1,6 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using Signum.Entities;
 using System.ComponentModel;
 using System.Reflection;
 using System.Linq.Expressions;
@@ -11,12 +9,8 @@ using System.Runtime.Serialization.Formatters.Binary;
 using System.IO;
 using System.Collections.Specialized;
 using Signum.Utilities.Reflection;
-using System.Runtime.Serialization;
-using System.Collections.ObjectModel;
 using Signum.Entities.Reflection;
-using System.Threading;
 using System.Collections;
-using System.Diagnostics;
 using Signum.Utilities.ExpressionTrees;
 using System.Runtime.CompilerServices;
 using System.Collections.Concurrent;
@@ -44,7 +38,7 @@ namespace Signum.Entities
             return fieldValue;
         }
 
-      
+
         protected virtual bool Set<T>(ref T field, T value, [CallerMemberName]string automaticPropertyName = null)
         {
             if (EqualityComparer<T>.Default.Equals(field, value))
@@ -104,7 +98,7 @@ namespace Signum.Entities
             return true;
         }
 
-    
+
 
         struct PropertyKey : IEquatable<PropertyKey>
         {
@@ -155,7 +149,7 @@ namespace Signum.Entities
             {
                 if (notify == null)
                     continue;
-             
+
                 notify.CollectionChanged += ChildCollectionChanged;
             }
 
@@ -184,7 +178,7 @@ namespace Signum.Entities
         {
             string propertyName = AttributeManager<NotifyCollectionChangedAttribute>.FindPropertyName(this, sender);
             if (propertyName != null)
-                NotifyPrivate(propertyName); 
+                NotifyPrivate(propertyName);
 
             if (AttributeManager<NotifyChildPropertyAttribute>.FieldsWithAttribute(this).Contains(sender))
             {
@@ -266,7 +260,7 @@ namespace Signum.Entities
 
         }
 
-        
+
         #region Temporal ID
         [Ignore]
         internal Guid temporalId = Guid.NewGuid();
@@ -333,7 +327,7 @@ namespace Signum.Entities
             return PropertyCheck(ReflectionTools.GetPropertyInfo(property).Name);
         }
 
-        public string PropertyCheck(string propertyName) 
+        public string PropertyCheck(string propertyName)
         {
             IPropertyValidator pp = Validator.TryGetPropertyValidator(GetType(), propertyName);
 
@@ -358,6 +352,8 @@ namespace Signum.Entities
             var graph = GraphExplorer.FromRoot(this);
             return GraphExplorer.FullIntegrityCheck(graph);
         }
+
+        [ForceEagerEvaluation]
 
         protected static string NicePropertyName<R>(Expression<Func<R>> property)
         {
@@ -440,6 +436,28 @@ namespace Signum.Entities
         {
             return $"{Errors.Count} errors in {" ".CombineIfNotEmpty(Type.Name, Id)}\r\n"
                   + Errors.ToString(kvp => "    {0}: {1}".FormatWith(kvp.Key, kvp.Value), "\r\n");
+        }
+    }
+
+    public class IntegrityCheckWithEntity
+    {
+        public IntegrityCheckWithEntity(IntegrityCheck integrityCheck, ModifiableEntity entity)
+        {
+            this.IntegrityCheck = integrityCheck;
+            this.Entity = entity;
+        }
+
+        public IntegrityCheck IntegrityCheck {get; private set;}
+        public ModifiableEntity Entity {get; set;}
+
+        public override string ToString()
+        {
+            return $"{IntegrityCheck.Errors.Count} errors in {" ".CombineIfNotEmpty(IntegrityCheck.Type.Name, IntegrityCheck.Id)}\r\n"
+                  + IntegrityCheck.Errors.ToString(kvp => "    {0} ({1}): {2}".FormatWith(
+                      kvp.Key, 
+                      Validator.TryGetPropertyValidator(Entity.GetType(), kvp.Key).GetValueUntyped(Entity), 
+                      kvp.Value), 
+                      "\r\n");
         }
     }
 }

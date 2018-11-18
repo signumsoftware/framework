@@ -1,9 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Linq.Expressions;
-using Signum.Entities.Reflection;
 using Signum.Utilities;
 using Signum.Utilities.ExpressionTrees;
 
@@ -13,7 +10,7 @@ namespace Signum.Entities.DynamicQuery
     public class ExtensionToken : QueryToken
     {
         public ExtensionToken(QueryToken parent, string key, Type type, bool isProjection,
-            string unit, string format, 
+            string unit, string format,
             Implementations? implementations,
             string isAllowed, PropertyRoute propertyRoute)
             : base(parent)
@@ -21,7 +18,7 @@ namespace Signum.Entities.DynamicQuery
             var shouldHaveImplementations = typeof(IEntity).IsAssignableFrom((isProjection ? type.ElementType() : type).CleanType());
 
             if (shouldHaveImplementations && implementations == null)
-                throw new ArgumentException(@"Impossible to determine automatically the implementations for extension token '{0}' (of type {1}) registered on type {2}.  
+                throw new ArgumentException(@"Impossible to determine automatically the implementations for extension token '{0}' (of type {1}) registered on type {2}.
 Consider using QueryLogic.Expressions.Register(({2} e) => e.{0}).ForceImplementations = Implementations.By(typeof({1}));".FormatWith(key, type.TypeName(), parent.Type.CleanType().TypeName()));
 
             this.key= key;
@@ -65,7 +62,7 @@ Consider using QueryLogic.Expressions.Register(({2} e) => e.{0}).ForceImplementa
 
         protected override List<QueryToken> SubTokensOverride(SubTokensOptions options)
         {
-            return base.SubTokensBase(type, options, implementations);  
+            return base.SubTokensBase(type, options, implementations);
         }
 
         public static Func<Type, string, Expression, Expression> BuildExtension;
@@ -101,10 +98,10 @@ Consider using QueryLogic.Expressions.Register(({2} e) => e.{0}).ForceImplementa
 
         protected internal override Implementations? GetElementImplementations()
         {
-            return isProjection ? implementations : null; 
+            return isProjection ? implementations : null;
         }
 
-        string isAllowed; 
+        string isAllowed;
         public override string IsAllowed()
         {
             string parent = Parent.IsAllowed();
@@ -117,7 +114,7 @@ Consider using QueryLogic.Expressions.Register(({2} e) => e.{0}).ForceImplementa
 
         public override QueryToken Clone()
         {
-            return new ExtensionToken(this.Parent.Clone(), key, type, isProjection, unit, format, implementations, isAllowed, propertyRoute); 
+            return new ExtensionToken(this.Parent.Clone(), key, type, isProjection, unit, format, implementations, isAllowed, propertyRoute);
         }
     }
 }

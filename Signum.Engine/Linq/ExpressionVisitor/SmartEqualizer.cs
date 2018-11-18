@@ -1,7 +1,6 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Linq.Expressions;
 using Signum.Utilities;
 using Signum.Entities;
@@ -10,7 +9,6 @@ using Signum.Engine.Maps;
 using Signum.Utilities.ExpressionTrees;
 using Signum.Entities.Reflection;
 using System.Reflection;
-using Enum = System.Enum;
 
 namespace Signum.Engine.Linq
 {
@@ -66,7 +64,7 @@ namespace Signum.Engine.Linq
             result = PrimaryKeyEquals(exp1, exp2);
             if (result != null)
                 return result;
-            
+
             result = ObjectEquals(exp1, exp2);
             if (result != null)
                 return result;
@@ -82,7 +80,7 @@ namespace Signum.Engine.Linq
             result = LiteEquals(exp1, exp2);
             if (result != null)
                 return result;
-            
+
             result = EntityEquals(exp1, exp2);
             if (result != null)
                 return result;
@@ -281,7 +279,7 @@ namespace Signum.Engine.Linq
             }
         }
 
-        
+
 
         public static Expression UnwrapPrimaryKey(Expression unary)
         {
@@ -362,7 +360,7 @@ namespace Signum.Engine.Linq
             if (e1 == False || e2 == False)
                 return False;
 
-            return Expression.And(e1, e2); 
+            return Expression.And(e1, e2);
         }
 
         private static Expression SmartNot(Expression e)
@@ -427,7 +425,7 @@ namespace Signum.Engine.Linq
             throw new InvalidOperationException("Impossible to resolve '{0}' equals '{1}'".FormatWith(exp1.ToString(), exp2.ToString()));
         }
 
-      
+
 
         private static Expression TypeConstantEntityEquals(ConstantExpression ce, TypeEntityExpression typeEntity)
         {
@@ -600,7 +598,7 @@ namespace Signum.Engine.Linq
 
             Dictionary<Type, PrimaryKey[]> entityIDs = collection.Where(a => a.IdOrNull.HasValue).AgGroupToDictionary(a => a.EntityType, gr => gr.Select(a => a.Id).ToArray());
 
-            return EntityIn(liteReference.Reference, entityIDs); 
+            return EntityIn(liteReference.Reference, entityIDs);
         }
 
         static Expression EntityIn(Expression newItem, Dictionary<Type, PrimaryKey[]> entityIDs)
@@ -621,7 +619,7 @@ namespace Signum.Engine.Linq
             throw new InvalidOperationException("EntityIn not defined for newItem of type {0}".FormatWith(newItem.Type.Name));
         }
 
-      
+
 
         public static Expression LiteEquals(Expression e1, Expression e2)
         {
@@ -671,7 +669,7 @@ namespace Signum.Engine.Linq
         public static Expression EntityEquals(Expression e1, Expression e2)
         {
             e1 = ConstantToEntity(e1) ?? e1;
-            e2 = ConstantToEntity(e2) ?? e2; 
+            e2 = ConstantToEntity(e2) ?? e2;
 
             if (e1 is EmbeddedEntityExpression && e2.IsNull())
                 return EmbeddedNullEquals((EmbeddedEntityExpression)e1);
@@ -733,7 +731,7 @@ namespace Signum.Engine.Linq
             if (imp == null)
                 return False;
 
-            return EntityEntityEquals(imp, ee); 
+            return EntityEntityEquals(imp, ee);
         }
 
         static Expression EntityIbaEquals(EntityExpression ee, ImplementedByAllExpression iba)
@@ -764,7 +762,7 @@ namespace Signum.Engine.Linq
 
         static Expression IbaIbaEquals(ImplementedByAllExpression iba, ImplementedByAllExpression iba2)
         {
-            return Expression.And(EqualNullable(iba.Id, iba2.Id), EqualNullable(iba.TypeId.TypeColumn.Value, iba2.TypeId.TypeColumn.Value)); 
+            return Expression.And(EqualNullable(iba.Id, iba2.Id), EqualNullable(iba.TypeId.TypeColumn.Value, iba2.TypeId.TypeColumn.Value));
         }
 
         static Expression EqualsToNull(PrimaryKeyExpression exp)
@@ -795,11 +793,11 @@ namespace Signum.Engine.Linq
                 return new EntityExpression(ei.GetType(),
                     new PrimaryKeyExpression(id), null, null, null, null, null, avoidExpandOnRetrieving: true);
             }
-            
+
             return null;
         }
 
-        
+
 
         public static Expression ConstantToLite(Expression expression)
         {

@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using Signum.Entities;
 using Signum.Engine.Maps;
-using System.Linq.Expressions;
 using Signum.Utilities;
 using Signum.Utilities.Reflection;
 using Signum.Engine.Basics;
@@ -144,7 +142,7 @@ namespace Signum.Engine
         {
             if (lite == null)
                 return null;
-            
+
             ICacheController cc = Schema.Current.CacheController(lite.EntityType);
             if (cc != null && cc.Enabled)
             {
@@ -298,10 +296,10 @@ namespace Signum.Engine
                 goto retry;
             }
 
-       
+
         }
 
-        static readonly GenericInvoker<Func<List<PrimaryKey>, CancellationToken?, Task<Dictionary<PrimaryKey, string>>>> giGetStrings = 
+        static readonly GenericInvoker<Func<List<PrimaryKey>, CancellationToken?, Task<Dictionary<PrimaryKey, string>>>> giGetStrings =
             new GenericInvoker<Func<List<PrimaryKey>, CancellationToken?, Task<Dictionary<PrimaryKey, string>>>>((ids, token) => GetStrings<Entity>(ids, token));
         static async Task<Dictionary<PrimaryKey, string>> GetStrings<T>(List<PrimaryKey> ids, CancellationToken? token) where T : Entity
         {
@@ -330,7 +328,7 @@ namespace Signum.Engine
                     .ToDictionaryEx();
 
                 return dic;
-            }  
+            }
         }
 
         public void Dispose()

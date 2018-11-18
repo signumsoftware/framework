@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Signum.Engine.Maps;
@@ -32,14 +31,14 @@ namespace Signum.Engine.Basics
                         e.StackTraceHash,
                     });
 
-				DefaultEnvironment = "Default"; 
+				DefaultEnvironment = "Default";
 			}
 		}
 
 		public static ExceptionEntity LogException(this Exception ex, Action<ExceptionEntity> completeContext)
 		{
 			var entity = GetEntity(ex);
-			
+
 			completeContext(entity);
 
 			return entity.SaveForceNew();
@@ -67,7 +66,7 @@ namespace Signum.Engine.Basics
 			var exceptions= ex.Follow(e => e.InnerException);
 			string messages = exceptions.ToString(e => e.Message, "\r\n\r\n");
 			string stacktraces = exceptions.ToString(e => e.StackTrace, "\r\n\r\n");
-		   
+
 			entity.ExceptionMessage = messages.DefaultText("- No message - ");
 			entity.StackTrace = stacktraces.DefaultText("- No stacktrace -");
 			entity.ThreadId = Thread.CurrentThread.ManagedThreadId;
@@ -118,7 +117,7 @@ namespace Signum.Engine.Basics
 
 		public static event Action<DeleteLogParametersEmbedded, StringBuilder, CancellationToken> DeleteLogs;
 
-		public static int DeleteLogsTimeOut = 10 * 60 * 1000; 
+		public static int DeleteLogsTimeOut = 10 * 60 * 1000;
 
 		public static void DeleteLogsAndExceptions(DeleteLogParametersEmbedded parameters, StringBuilder sb, CancellationToken token)
 		{
@@ -184,8 +183,8 @@ namespace Signum.Engine.Basics
             where T : Entity
         {
             WriteRows(sb, "Deleting " + typeof(T).Name, () => sources.UnsafeDeleteChunks(
-                parameters.ChunkSize, 
-                parameters.MaxChunks, 
+                parameters.ChunkSize,
+                parameters.MaxChunks,
                 pauseMilliseconds: parameters.PauseTime,
                 cancellationToken: cancellationToken));
         }

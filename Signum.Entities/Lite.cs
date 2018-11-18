@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using Signum.Utilities;
 using Signum.Entities.Reflection;
 using System.Reflection;
@@ -31,8 +28,8 @@ namespace Signum.Entities
         bool IsNew { get;  }
         PrimaryKey? IdOrNull { get; }
         Type EntityType { get; }
-        
-        void ClearEntity();      
+
+        void ClearEntity();
         void SetEntity(Entity ei);
         void SetToString(string toStr);
         void RefreshId();
@@ -40,7 +37,7 @@ namespace Signum.Entities
         string Key();
         string KeyLong();
 
-        Lite<T> Clone(); 
+        Lite<T> Clone();
     }
 
     namespace Internal
@@ -162,7 +159,7 @@ namespace Signum.Entities
             {
                 id = entityOrNull.Id;
             }
-            
+
             protected internal override void PreSaving(PreSavingContext ctx)
             {
                 if (entityOrNull != null)
@@ -534,7 +531,7 @@ namespace Signum.Entities
 
         public static XDocument EntityDGML(this Entity entity)
         {
-            return GraphExplorer.FromRootVirtual(entity).EntityDGML(); 
+            return GraphExplorer.FromRootVirtual(entity).EntityDGML();
         }
 
 
@@ -551,7 +548,7 @@ namespace Signum.Entities
 
         public static Lite<T> Create<T>(PrimaryKey id) where T : Entity
         {
-            return new LiteImp<T>(id, null);          
+            return new LiteImp<T>(id, null);
         }
 
         public static Lite<T> Create<T>(PrimaryKey id, string toStr) where T : Entity

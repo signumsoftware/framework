@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using Signum.Utilities;
 using Signum.Entities.Reflection;
 using System.Linq.Expressions;
@@ -82,8 +81,8 @@ namespace Signum.Entities.DynamicQuery
                     return DateTimeProperties(this, DateTimePrecision.Days).AndHasValue(this);
             }
 
-            if (Column.Type.UnNullify() == typeof(double) || 
-                Column.Type.UnNullify() == typeof(float) || 
+            if (Column.Type.UnNullify() == typeof(double) ||
+                Column.Type.UnNullify() == typeof(float) ||
                 Column.Type.UnNullify() == typeof(decimal))
             {
                 if (Column.PropertyRoutes != null)
@@ -119,7 +118,7 @@ namespace Signum.Entities.DynamicQuery
             if (Column.PropertyRoutes != null)
                 return Column.PropertyRoutes[0]; //HACK: compatibility with IU entitiy elements
 
-            Type type = Lite.Extract(Type); // Useful? 
+            Type type = Lite.Extract(Type); // Useful?
             if (type != null && type.IsIEntity())
             {
                 var implementations = Column.Implementations;
@@ -132,7 +131,7 @@ namespace Signum.Entities.DynamicQuery
                     return PropertyRoute.Root(imp);
                 }
             }
-                
+
             return null;
         }
 

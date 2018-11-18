@@ -1,4 +1,4 @@
-﻿using Microsoft.SqlServer.Server;
+using Microsoft.SqlServer.Server;
 using Signum.Engine.Basics;
 using Signum.Engine.Maps;
 using Signum.Entities;
@@ -21,7 +21,7 @@ using System.Reflection;
 namespace Signum.Engine.Linq
 {
     /// <summary>
-    /// QueryBinder is a visitor that converts method calls to LINQ operations into 
+    /// QueryBinder is a visitor that converts method calls to LINQ operations into
     /// custom DbExpression nodes and references to class members into references to columns
     /// </summary>
     internal class QueryBinder : ExpressionVisitor
@@ -207,7 +207,7 @@ namespace Signum.Engine.Linq
 
             var members = Reflector.GetMemberListUntyped(entitySelector);
 
-            var newProjector = ChangeProjector(0, members, projection.Projector, 
+            var newProjector = ChangeProjector(0, members, projection.Projector,
                 e =>
                 {
                     if (e is EntityExpression ee)
@@ -236,13 +236,13 @@ namespace Signum.Engine.Linq
             return new ProjectionExpression(projection.Select, newProjector, projection.UniqueFunction, projection.Type);
         }
 
-        
+
 
         private Expression ChangeProjector(int index, MemberInfo[] members, Expression projector, Func<Expression, Expression> changeExpression)
         {
             if (members.Length == index)
                 return changeExpression(projector);
-        
+
             var m = members[index];
 
             if (m is Type t)
@@ -438,7 +438,7 @@ namespace Signum.Engine.Linq
                 NewExpression nex = (NewExpression)expression;
                 return (ProjectionExpression)nex.Arguments[1];
             }
-            
+
             throw new InvalidOperationException("Impossible to convert in ProjectionExpression: \r\n" + expression.ToString());
         }
 
@@ -580,7 +580,7 @@ namespace Signum.Engine.Linq
 
         static MethodInfo miStringConcat = ReflectionTools.GetMethodInfo(() => string.Concat("", ""));
 
-        
+
         (Expression newSource, LambdaExpression selector, bool distinct) DisassembleAggregate(AggregateSqlFunction aggregate, Expression source, LambdaExpression selectorOrPredicate, bool isRoot)
         {
             if(aggregate == AggregateSqlFunction.Count)
@@ -594,7 +594,7 @@ namespace Signum.Engine.Linq
                     source = Expression.Call(miWhere.MakeGenericMethod(source.Type.ElementType()), source, selectorOrPredicate);
                     selectorOrPredicate = null;
                 }
-                
+
                 //Select Distinct NotNull
                 {
                     if (ExtractWhere(source, out var inner, out var predicate) &&
@@ -618,17 +618,17 @@ namespace Signum.Engine.Linq
                     if (ExtractDistinct(source, out var inner) &&
                         ExtractSelect(inner, out var inner2, out var selector) &&
                         ExtractWhere(inner2, out var inner3, out var predicate) &&
-                        IsNotNull(predicate.Body, out var p) && ExpressionComparer.AreEqual(p, selector.Body, 
+                        IsNotNull(predicate.Body, out var p) && ExpressionComparer.AreEqual(p, selector.Body,
                         new ScopedDictionary<ParameterExpression, ParameterExpression>(null) { { predicate.Parameters.Single(), selector.Parameters.Single() } }))
                         return (inner3, selector, true);
                 }
-                
+
                 if(!isRoot)
                 {
-                    //Preferring Count(predicate) 
+                    //Preferring Count(predicate)
                     //instead of Count (*) Where predicate
                     //is tricky
-                    if (ExtractWhere(source, out var inner, out var predicate) && 
+                    if (ExtractWhere(source, out var inner, out var predicate) &&
                         inner is ParameterExpression p && p.Type.IsInstantiationOf(typeof(IGrouping<,>)) &&
                         SimplePredicateVisitor.IsSimple(predicate))
                         return (inner, predicate, false);
@@ -743,11 +743,11 @@ namespace Signum.Engine.Linq
         private Expression BindAggregate(Type resultType, AggregateSqlFunction aggregateFunction, Expression source, LambdaExpression selectorOrPredicate, bool isRoot)
         {
             var (newSource, selector, distinct) = DisassembleAggregate(aggregateFunction, source, selectorOrPredicate, isRoot);
-            
+
             ProjectionExpression projection = VisitCastProjection(newSource);
-            
+
             GroupByInfo info = groupByMap.TryGetC(projection.Select.Alias);
-            if (info != null) 
+            if (info != null)
             {
                 Expression exp = aggregateFunction == AggregateSqlFunction.Count && selector == null ? null : //Count(*)
                     aggregateFunction == AggregateSqlFunction.Count && !distinct ? MapVisitExpand(ToNotNullPredicate(selector), info.Projector, info.Source) :
@@ -760,8 +760,8 @@ namespace Signum.Engine.Linq
                     DbExpressionNominator.FullNominate(exp);
 
                 var result = new AggregateRequestsExpression(info.GroupAlias,
-                    new AggregateExpression(aggregateFunction == AggregateSqlFunction.Count ? typeof(int) : GetBasicType(nominated), 
-                    nominated, aggregateFunction, 
+                    new AggregateExpression(aggregateFunction == AggregateSqlFunction.Count ? typeof(int) : GetBasicType(nominated),
+                    nominated, aggregateFunction,
                     distinct));
 
                 return RestoreWrappedType(result, resultType);
@@ -789,8 +789,8 @@ namespace Signum.Engine.Linq
                     var nominated = aggregateFunction == AggregateSqlFunction.Count ? DbExpressionNominator.FullNominateNotNullable(exp) :
                         DbExpressionNominator.FullNominate(exp);
 
-                    aggregate = new AggregateExpression(aggregateFunction == AggregateSqlFunction.Count ? typeof(int) : GetBasicType(nominated), 
-                        nominated, 
+                    aggregate = new AggregateExpression(aggregateFunction == AggregateSqlFunction.Count ? typeof(int) : GetBasicType(nominated),
+                        nominated,
                         aggregateFunction,
                         distinct);
                 }
@@ -1462,7 +1462,7 @@ namespace Signum.Engine.Linq
 
                     if (table != null)
                     {
-                        var ee = new EntityExpression(EnumEntity.Generate(source.Type.UnNullify()), 
+                        var ee = new EntityExpression(EnumEntity.Generate(source.Type.UnNullify()),
                             new PrimaryKeyExpression(((UnaryExpression)source).Operand.Nullify()), null, null, null, null, null, false);
 
                         return Completed(ee).GetBinding(EntityExpression.ToStrField);
@@ -2169,7 +2169,7 @@ namespace Signum.Engine.Linq
                 {
                     //if (left is ProjectionExpression && !((ProjectionExpression)left).IsOneCell  ||
                     //    right is ProjectionExpression && !((ProjectionExpression)right).IsOneCell)
-                    //    throw new InvalidOperationException("Comparing {0} and {1} is not valid in SQL".FormatWith(b.Left.ToString(), b.Right.ToString())); 
+                    //    throw new InvalidOperationException("Comparing {0} and {1} is not valid in SQL".FormatWith(b.Left.ToString(), b.Right.ToString()));
 
                     if (left.Type.IsNullable() == right.Type.IsNullable())
                         return Expression.MakeBinary(b.NodeType, left, right, b.IsLiftedToNull, b.Method);
@@ -2234,10 +2234,10 @@ namespace Signum.Engine.Linq
                 entity = MapVisitExpand(cleanedSelector, pr);
             }
 
-            ITable table = 
+            ITable table =
                 entity is EntityExpression entEx ? (ITable)entEx.Table :
                 entity is EmbeddedEntityExpression eeEx ? (ITable)eeEx.ViewTable:
-                entity is MListElementExpression mlistEx ? (ITable)mlistEx.Table : 
+                entity is MListElementExpression mlistEx ? (ITable)mlistEx.Table :
                 throw new InvalidOperationException();
 
             Alias alias = aliasGenerator.Table(table.Name);
@@ -2275,7 +2275,7 @@ namespace Signum.Engine.Linq
                     assignments.AddRange(AdaptAssign(colExpression, valExpression));
                 }
             }
-            
+
             var isHistory = this.systemTime is SystemTime.HistoryTable;
             Expression condition;
 
@@ -2637,7 +2637,7 @@ namespace Signum.Engine.Linq
         {
             if (entity.TableAlias != null)
                 return entity;
-            
+
             EntityExpression completed = entityReplacements.GetOrCreate(entity, () =>
             {
                 var table = entity.Table;
@@ -2649,7 +2649,7 @@ namespace Signum.Engine.Linq
                 var mixins = table.GenerateMixins(newAlias, this, id, period);
 
                 var result = new EntityExpression(entity.Type, entity.ExternalId, entity.ExternalPeriod, newAlias, bindings, mixins, period, avoidExpandOnRetrieving: false);
-                
+
                 AddRequest(new TableRequest
                 {
                     CompleteEntity = result,
@@ -2826,7 +2826,7 @@ namespace Signum.Engine.Linq
             TableMList relationalTable = mle.TableMList;
 
             Alias tableAlias = NextTableAlias(mle.TableMList.Name);
-            TableExpression tableExpression = new TableExpression(tableAlias, relationalTable, 
+            TableExpression tableExpression = new TableExpression(tableAlias, relationalTable,
                 relationalTable.SystemVersioned != null ? this.systemTime : null, null);
 
             Expression projector = relationalTable.FieldExpression(tableAlias, this, mle.ExternalPeriod, withRowId);
@@ -3118,7 +3118,7 @@ namespace Signum.Engine.Linq
 
             //if (nonConsumed.Any())
             //    throw new InvalidOperationException("All the expansiosn should be consumed at this stage");
-            
+
             if (cleanRequests)
                 binder.requests.Clear();
 

@@ -32,7 +32,7 @@ namespace Signum.Engine
                 var table = Schema.Current.Table(typeof(T));
 
                 if (!disableIdentity && table.IdentityBehaviour && table.TablesMList().Any())
-                    throw new InvalidOperationException($@"Table {typeof(T)} contains MList but the entities have no IDs. Consider: 
+                    throw new InvalidOperationException($@"Table {typeof(T)} contains MList but the entities have no IDs. Consider:
 * Using BulkInsertQueryIds, that queries the inserted rows and uses the IDs to insert the MList elements.
 * Set {nameof(disableIdentity)} = true, and set manually the Ids of the entities before inseting using {nameof(UnsafeEntityExtensions.SetId)}.
 * If you know what you doing, call ${nameof(BulkInsertTable)} manually (MList wont be saved)."
@@ -191,7 +191,13 @@ namespace Signum.Engine
                 var ic = e.FullIntegrityCheck();
 
                 if (ic != null)
+                {
+#if DEBUG
+                    throw new IntegrityCheckException(ic.WithEntities(GraphExplorer.FromRoots(entities)));
+#else
                     throw new IntegrityCheckException(ic);
+#endif
+                }
             }
         }
 
@@ -267,7 +273,7 @@ namespace Signum.Engine
                 var maxRowId = updateParentTicks.Value ? Database.MListQuery(mListProperty).Max(a => (PrimaryKey?)a.RowId) : null;
 
                 DataTable dt = new DataTable();
-             
+
                 foreach (var c in mlistTable.Columns.Values.Where(c => !(c is SystemVersionedInfo.Column) && !c.IdentityBehaviour))
                     dt.Columns.Add(new DataColumn(c.Name, c.Type.UnNullify()));
 

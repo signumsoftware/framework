@@ -1,7 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Linq.Expressions;
 using Signum.Utilities;
 using Signum.Utilities.Reflection;
@@ -62,7 +60,7 @@ namespace Signum.Entities.DynamicQuery
         public static MethodInfo miInSql = ReflectionTools.GetMethodInfo(() => (1).InSql()).GetGenericMethodDefinition();
 
         protected override Expression BuildExpressionInternal(BuildExpressionContext context)
-        {   
+        {
             var result = Parent.BuildExpression(context);
 
             var prop =

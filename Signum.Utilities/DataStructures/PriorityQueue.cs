@@ -1,11 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 namespace Signum.Utilities.DataStructures
 {
-    [Serializable] 
+    [Serializable]
     public class PriorityQueue<T>
     {
         List<T> list = new List<T>();
@@ -103,7 +101,7 @@ namespace Signum.Utilities.DataStructures
             return list[0];
         }
 
- 
+
 
         public void Clear()
         {
