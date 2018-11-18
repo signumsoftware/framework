@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Signum.Utilities;
@@ -236,9 +236,9 @@ namespace Signum.Entities.Chart
     {
         public string DefaultValue;
 
-        public StringValue(string v)
+        public StringValue(string defaultValue)
         {
-            this.DefaultValue = "#";
+            this.DefaultValue = defaultValue;
         }
 
         public string Validate(string parameter, QueryToken token)

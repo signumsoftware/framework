@@ -1,64 +1,64 @@
-﻿import * as React from 'react'
+import * as React from 'react'
 import { getQueryKey } from '@framework/Reflection'
 import { OmniboxMessage } from '../Omnibox/Signum.Entities.Omnibox'
 import { OmniboxResult, OmniboxMatch, OmniboxProvider } from '../Omnibox/OmniboxClient'
 import * as ChartClient from './ChartClient'
-import { ChartRequestModel} from './Signum.Entities.Chart'
+import { ChartRequestModel } from './Signum.Entities.Chart'
 
 export default class ChartOmniboxProvider extends OmniboxProvider<ChartOmniboxResult>
 {
-    getProviderName() {
-        return "ChartOmniboxResult";
-    }
+  getProviderName() {
+    return "ChartOmniboxResult";
+  }
 
-    icon() {
-        return this.coloredIcon("chart-bar", "violet");
-    }
+  icon() {
+    return this.coloredIcon("chart-bar", "violet");
+  }
 
-    renderItem(result: ChartOmniboxResult): React.ReactChild[] {
+  renderItem(result: ChartOmniboxResult): React.ReactChild[] {
 
-        const array: React.ReactChild[] = [];
+    const array: React.ReactChild[] = [];
 
-        array.push(this.icon());
+    array.push(this.icon());
 
-        this.renderMatch(result.keywordMatch, array);
-        array.push("\u0020");
+    this.renderMatch(result.keywordMatch, array);
+    array.push("\u0020");
 
-        if (result.queryNameMatch != undefined)
-            this.renderMatch(result.queryNameMatch, array);
-        else
-            array.push(this.coloredSpan(OmniboxMessage.Omnibox_Query.niceToString() + "...", "lightgray"));
+    if (result.queryNameMatch != undefined)
+      this.renderMatch(result.queryNameMatch, array);
+    else
+      array.push(this.coloredSpan(OmniboxMessage.Omnibox_Query.niceToString() + "...", "lightgray"));
 
-        return array;
-    }
+    return array;
+  }
 
-    navigateTo(result: ChartOmniboxResult) {
+  navigateTo(result: ChartOmniboxResult) {
 
-        if (result.queryNameMatch == undefined)
-            return undefined;
+    if (result.queryNameMatch == undefined)
+      return undefined;
 
-        var cr = ChartRequestModel.New({
-            queryKey: getQueryKey(result.queryName),
-            orderOptions: [],
-            filterOptions: [],
-        });
+    var cr = ChartRequestModel.New({
+      queryKey: getQueryKey(result.queryName),
+      orderOptions: [],
+      filterOptions: [],
+    });
 
-        const path = ChartClient.Encoder.chartPath(cr);
+    const path = ChartClient.Encoder.chartPath(cr);
 
-        return Promise.resolve(path);
-    }
+    return Promise.resolve(path);
+  }
 
-    toString(result: ChartOmniboxResult) {
-        if (result.queryNameMatch == undefined)
-            return result.keywordMatch.text;
+  toString(result: ChartOmniboxResult) {
+    if (result.queryNameMatch == undefined)
+      return result.keywordMatch.text;
 
-        return "{0} {1}".formatWith(result.keywordMatch.text, result.queryNameMatch.text);
-    }
+    return "{0} {1}".formatWith(result.keywordMatch.text, result.queryNameMatch.text);
+  }
 }
 
 interface ChartOmniboxResult extends OmniboxResult {
-    keywordMatch: OmniboxMatch;
+  keywordMatch: OmniboxMatch;
 
-    queryName: string;
-    queryNameMatch: OmniboxMatch;
+  queryName: string;
+  queryNameMatch: OmniboxMatch;
 }

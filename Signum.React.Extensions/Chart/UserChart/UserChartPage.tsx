@@ -1,4 +1,4 @@
-﻿import * as React from 'react'
+import * as React from 'react'
 import { toLite } from '@framework/Signum.Entities'
 import { JavascriptMessage, parseLite } from '@framework/Signum.Entities'
 import * as Navigator from '@framework/Navigator'
@@ -13,37 +13,37 @@ interface UserChartPageProps extends RouteComponentProps<{ userChartId: string; 
 
 export default class UserChartPage extends React.Component<UserChartPageProps> {
 
-    constructor(props: UserChartPageProps) {
-        super(props);
-        this.state = {};
-    }
+  constructor(props: UserChartPageProps) {
+    super(props);
+    this.state = {};
+  }
 
-    componentWillMount() {
-        this.load(this.props);
-    }
+  componentWillMount() {
+    this.load(this.props);
+  }
 
-    componentWillReceiveProps(nextProps: UserChartPageProps) {
-        this.state = {};
-        this.forceUpdate();
-        this.load(nextProps);
-    }
+  componentWillReceiveProps(nextProps: UserChartPageProps) {
+    this.state = {};
+    this.forceUpdate();
+    this.load(nextProps);
+  }
 
-    load(props: UserChartPageProps) {
+  load(props: UserChartPageProps) {
 
-        const { userChartId, entity } = props.match.params;
+    const { userChartId, entity } = props.match.params;
 
-        const lite = entity == undefined ? undefined : parseLite(entity);
+    const lite = entity == undefined ? undefined : parseLite(entity);
 
-        Navigator.API.fillToStrings(lite)
-            .then(() => Navigator.API.fetchEntity(UserChartEntity, userChartId))
-            .then(uc => UserChartClient.Converter.toChartRequest(uc, lite)
-                .then(cr => Navigator.history.replace(ChartClient.Encoder.chartPath(cr, toLite(uc)))))
-            .done();
-    }
+    Navigator.API.fillToStrings(lite)
+      .then(() => Navigator.API.fetchEntity(UserChartEntity, userChartId))
+      .then(uc => UserChartClient.Converter.toChartRequest(uc, lite)
+        .then(cr => Navigator.history.replace(ChartClient.Encoder.chartPath(cr, toLite(uc)))))
+      .done();
+  }
 
-    render() {
-        return <span>{JavascriptMessage.loading.niceToString()}</span>;
-    }
+  render() {
+    return <span>{JavascriptMessage.loading.niceToString()}</span>;
+  }
 }
 
 

@@ -21,7 +21,7 @@ namespace Signum.Logic.Chart.Scripts
             {
                 new ChartScriptParameter("UnitMargin", ChartParameterType.Number) {  ValueDefinition = new NumberInterval { DefaultValue = 20m } },
                 new ChartScriptParameter("Scale", ChartParameterType.Enum) { ColumnIndex = 1,  ValueDefinition = EnumValueList.Parse("ZeroMax (M)|MinMax|Log (M)") },
-                new ChartScriptParameter("Color", ChartParameterType.String) {  ValueDefinition = new StringValue("#fff") },
+                new ChartScriptParameter("Color", ChartParameterType.String) {  ValueDefinition = new StringValue("steelblue") },
                 new ChartScriptParameter("Interpolate", ChartParameterType.Enum) {  ValueDefinition = EnumValueList.Parse("linear|step-before|step-after|cardinal|monotone|basis|bundle|catmull-rom") },
                 new ChartScriptParameter("NumberOpacity", ChartParameterType.Number) {  ValueDefinition = new NumberInterval { DefaultValue = 0.8m } }
             };
