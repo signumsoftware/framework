@@ -106,18 +106,19 @@ export default class ChartRequestView extends React.Component<ChartRequestViewPr
 
         var cr = this.props.chartRequest!;
 
-        ChartClient.getChartScript(cr.chartScript)
-            .then(cs => this.abortableQuery.getData({ cr, cs }))
-            .then(
-                rt => {
-                    this.setState({ chartResult: rt, lastChartRequest: JSON.parse(JSON.stringify(this.props.chartRequest)) });
-                    this.props.onChange(cr, this.props.userChart);
-                },
-                ifError(ValidationError, e => {
-                    GraphExplorer.setModelState(this.props.chartRequest!, e.modelState, "request");
-                    this.forceUpdate();
-                }))
-            .done();
+        Navigator.API.validateEntity(cr)
+            .then(() => {
+                ChartClient.getChartScript(cr.chartScript)
+                    .then(cs => this.abortableQuery.getData({ cr, cs }))
+                    .then(
+                        rt => {
+                            this.setState({ chartResult: rt, lastChartRequest: JSON.parse(JSON.stringify(this.props.chartRequest)) });
+                            this.props.onChange(cr, this.props.userChart);
+                        }).done();
+            }, ifError(ValidationError, e => {
+                GraphExplorer.setModelState(cr, e.modelState, "entity");
+                this.forceUpdate();
+            })).done();
     }
 
     handleOnFullScreen = (e: React.MouseEvent<any>) => {

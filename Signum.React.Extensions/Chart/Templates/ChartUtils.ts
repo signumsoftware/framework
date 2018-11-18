@@ -1,7 +1,6 @@
 ﻿import * as d3 from "d3"
 import * as d3sc from "d3-scale-chromatic";
 import { ChartTable, ChartColumn, ChartRow } from "../ChartClient"
-import googleMapStyles from "./GoogleMapStyles"
 import { parseLite } from "@framework/Signum.Entities"
 import * as Navigator from '@framework/Navigator'
 
@@ -13,19 +12,6 @@ export function getNavigateRoute(liteData: string) {
 export function navigateEntity(liteData: string) {
     var lite = parseLite(liteData);
     window.open(Navigator.navigateRoute(lite));
-}
-
-export function getMapStyles() {
-    return googleMapStyles;
-}
-
-export function getScript(source: string, onload?: () => void) {
-    var script = document.createElement('script');
-    var prior = document.getElementsByTagName('script')[0];
-    script.async = true;
-    script.src = source;
-    script.onload = onload || null;
-    prior.parentNode!.insertBefore(script, prior);
 }
 
 ((d3.select(document) as any).__proto__ as d3.Selection<any, any, any, any>).enterData = function (this: d3.Selection<any, any, any, any>, data: any, tag: string, cssClass: string) {
@@ -59,21 +45,6 @@ export function ellipsis(elem: SVGTextElement, width: number, padding?: number, 
         self.text(text + ellipsisSymbol);
         textLength = (<any>self.node()).getComputedTextLength();
     }
-}
-
-export function getClickKeys(row: any, columns: any) {
-    let options = "";
-    for (const k in columns) {
-        const col = columns[k];
-        if (col.isGroupKey == true) {
-            const tokenValue = row[k];
-            if (tokenValue != undefined) {
-                options += "&" + k + "=" + (tokenValue.keyForFilter || tokenValue.toString());
-            }
-        }
-    }
-
-    return options;
 }
 
 export function translate(x: number, y: number) {
@@ -506,10 +477,7 @@ export function isRoot(obj: any): obj is Root {
 
 export function toPivotTable(data: ChartTable,
     col0: ChartColumn<unknown>, /*Employee*/
-    otherCols: ChartColumn<unknown>[]): PivotTable {
-
-    var usedCols = otherCols
-        .filter(cn => cn.token != undefined);
+    usedCols: ChartColumn<number>[]): PivotTable { 
 
     var rows = data.rows
         .map((r) => ({
@@ -535,9 +503,9 @@ export function toPivotTable(data: ChartTable,
 }
 
 export function groupedPivotTable(data: ChartTable,
-    col0: ChartColumn<undefined>, /*Employee*/
-    colSplit: ChartColumn<undefined>,
-    colValue: ChartColumn<undefined>): PivotTable {
+    col0: ChartColumn<unknown>, /*Employee*/
+    colSplit: ChartColumn<unknown>,
+    colValue: ChartColumn<number>): PivotTable {
 
     var columns = d3.values(data.rows.map(r => colSplit.getValue(r)).toObjectDistinct(v => colSplit.getKey(v), v => ({
         niceName: colSplit.getNiceName(v),
@@ -570,26 +538,25 @@ export function groupedPivotTable(data: ChartTable,
     } as PivotTable;
 }
 
-interface PivotTable {
+export interface PivotTable {
     title: string;
     columns: PivotColumn[];
     rows: PivotRow[];
 }
 
-interface PivotColumn {
+export interface PivotColumn {
     key: string;
     color?: string | null;
     niceName?: string | null;
 }
 
-interface PivotRow {
-    rowValue: any;
+export interface PivotRow {
+    rowValue: unknown;
     values: { [key: string /*| number*/]: PivotValue };
 }
 
-interface PivotValue {
+export interface PivotValue {
     rowClick: ChartRow;
-    value: any;
+    value: number;
     valueTitle: string;
 }
-
