@@ -82,9 +82,9 @@
 //            if (OperationLogic.TryFindOperation(typeof(T), DisableOperation.Enabled.Symbol) == null)
 //                new Graph<T>.Execute(DisableOperation.Enabled)
 //                {
-//                    CanExecute = e => 
-//                    !e.Mixin<DisabledMixin>().IsDisabled ? DisabledIsNotSetMessage() :  
-//                    e.InDBEntity(_ => (bool?)_.Parent().Mixin<DisabledMixin>().IsDisabled) == true ? DisabledMessage.ParentIsDisabled.NiceToString() : 
+//                    CanExecute = e =>
+//                    !e.Mixin<DisabledMixin>().IsDisabled ? DisabledIsNotSetMessage() :
+//                    e.InDBEntity(_ => (bool?)_.Parent().Mixin<DisabledMixin>().IsDisabled) == true ? DisabledMessage.ParentIsDisabled.NiceToString() :
 //                    null,
 //                    Execute = (e, _) =>
 //                    {

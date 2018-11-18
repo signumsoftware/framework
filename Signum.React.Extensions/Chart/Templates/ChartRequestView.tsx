@@ -16,8 +16,8 @@ import * as ChartClient from '../ChartClient'
 import ChartBuilder from './ChartBuilder'
 import ChartTableComponent from './ChartTable'
 import ChartRenderer from './ChartRenderer'
-import "../Chart.css"
 import "@framework/SearchControl/Search.css"
+import "../Chart.css"
 import { Tab, UncontrolledTabs } from '@framework/Components/Tabs';
 import { ChartScript } from '../ChartClient';
 
@@ -110,10 +110,10 @@ export default class ChartRequestView extends React.Component<ChartRequestViewPr
             .then(() => {
                 ChartClient.getChartScript(cr.chartScript)
                     .then(cs => this.abortableQuery.getData({ cr, cs }))
-                    .then(
-                        rt => {
-                            this.setState({ chartResult: rt, lastChartRequest: JSON.parse(JSON.stringify(this.props.chartRequest)) });
-                            this.props.onChange(cr, this.props.userChart);
+            .then(
+            rt => {
+                this.setState({ chartResult: rt, lastChartRequest: JSON.parse(JSON.stringify(this.props.chartRequest)) });
+                this.props.onChange(cr, this.props.userChart);
                         }).done();
             }, ifError(ValidationError, e => {
                 GraphExplorer.setModelState(cr, e.modelState, "entity");

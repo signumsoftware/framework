@@ -1,15 +1,9 @@
-﻿using Signum.Entities;
-using Signum.Entities.Authorization;
+﻿using Signum.Entities.Authorization;
 using Signum.Entities.Basics;
 using Signum.Utilities;
 using System;
-using System.Collections.Generic;
 using System.ComponentModel;
-using System.Linq;
 using System.Linq.Expressions;
-using System.Text;
-using System.Threading.Tasks;
-using System.Xml.Linq;
 
 namespace Signum.Entities.Workflow
 {
@@ -23,7 +17,7 @@ namespace Signum.Entities.Workflow
         [NotNullValidator]
         public TypeEntity MainEntityType { get; set; }
 
-        public WorkflowMainEntityStrategy MainEntityStrategy { get; set; }
+        public MList<WorkflowMainEntityStrategy> MainEntityStrategies { get; set; } = new MList<WorkflowMainEntityStrategy>();
 
         public DateTime? ExpirationDate { get; set; }
         /// <summary>
@@ -39,7 +33,7 @@ namespace Signum.Entities.Workflow
             return ToStringExpression.Evaluate(this);
         }
     }
-    
+
     [AutoInit]
     public static class WorkflowOperation
     {
@@ -50,11 +44,12 @@ namespace Signum.Entities.Workflow
         public static readonly ExecuteSymbol<WorkflowEntity> Deactivate;
     }
 
+    [InTypeScript(true)]
     public enum WorkflowMainEntityStrategy
     {
         CreateNew,
         SelectByUser,
-        Both
+        Clone,
     }
 
     [InTypeScript(true), DescriptionOptions(DescriptionOptions.Members)]
@@ -161,7 +156,7 @@ namespace Signum.Entities.Workflow
         public Lite<IWorkflowNodeEntity> OldNode { get; set; }
 
         public Lite<WorkflowEntity> SubWorkflow { get; set; }
-       
+
         public string NewNode { get; set; }
     }
 
@@ -257,8 +252,8 @@ namespace Signum.Entities.Workflow
         WorkflowActivityMonitor,
         Draw,
         ResetZoom,
-        Find, 
-        Filters, 
+        Find,
+        Filters,
         Columns
     }
 

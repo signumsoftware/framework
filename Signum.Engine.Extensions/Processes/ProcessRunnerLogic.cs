@@ -1,9 +1,6 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Data;
 using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Signum.Engine.Authorization;
@@ -14,7 +11,6 @@ using Signum.Entities;
 using Signum.Entities.Authorization;
 using Signum.Entities.Processes;
 using Signum.Utilities;
-using Signum.Utilities.ExpressionTrees;
 using System.Data.SqlClient;
 using Signum.Engine.Maps;
 using System.Linq.Expressions;

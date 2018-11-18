@@ -1,14 +1,8 @@
-﻿using Signum.Entities;
-using Signum.Entities.Basics;
+﻿using Signum.Entities.Basics;
 using Signum.Utilities;
 using System;
-using System.Collections.Generic;
 using System.ComponentModel;
-using System.Linq;
 using System.Linq.Expressions;
-using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Signum.Entities.Dynamic
 {
@@ -43,7 +37,7 @@ namespace Signum.Entities.Dynamic
 
         [StringLengthValidator(AllowNulls = false, Min = 3, MultiLine = true)]
         public string Script { get; set; }
-        
+
         static Expression<Func<DynamicViewSelectorEntity, string>> ToStringExpression = @this => "ViewSelector " + @this.EntityType;
         [ExpressionField]
         public override string ToString()
@@ -80,7 +74,7 @@ namespace Signum.Entities.Dynamic
             return ToStringExpression.Evaluate(this);
         }
     }
-    
+
     [AutoInit]
     public static class DynamicViewOverrideOperation
     {

@@ -1,28 +1,24 @@
-﻿using Signum.Engine.Authorization;
-using Signum.Engine.Basics;
-using Signum.Engine.Printing;
-using Signum.Engine.Processes;
+﻿using Signum.Engine.Printing;
 using Signum.Entities.Files;
 using Signum.Entities.Processes;
-using Signum.React.ApiControllers;
-using Signum.React.Facades;
 using Signum.React.Filters;
 using System.Collections.Generic;
-using System.Threading;
 using Microsoft.AspNetCore.Mvc;
+using System.ComponentModel.DataAnnotations;
 
 namespace Signum.React.Processes
 {
-    public class PrintController : ApiController
+    [ValidateModelFilter]
+    public class PrintController : ControllerBase
     {
-        [Route("api/printing/stats"), HttpGet]
+        [HttpGet("api/printing/stats")]
         public List<PrintStat> Stats()
         {
-            return PrintingLogic.GetReadyToPrintStats();           
+            return PrintingLogic.GetReadyToPrintStats();
         }
 
-        [Route("api/printing/createProcess"), HttpPost]
-        public ProcessEntity Stats([FromBody]FileTypeSymbol fileType)
+        [HttpPost("api/printing/createProcess")]
+        public ProcessEntity Stats([Required, FromBody]FileTypeSymbol fileType)
         {
             return PrintingLogic.CreateProcess(fileType);
         }

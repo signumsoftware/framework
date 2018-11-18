@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using Signum.Utilities;
 using System.Reflection;
 using System.Linq.Expressions;
@@ -10,12 +8,9 @@ using System.Collections.Specialized;
 using Signum.Entities.Basics;
 using Signum.Entities.Reflection;
 using Signum.Entities.Chart;
-using Signum.Utilities.Reflection;
 using Signum.Entities.UserAssets;
 using System.Xml.Linq;
 using Signum.Entities.Authorization;
-using Signum.Utilities.ExpressionTrees;
-using Signum.Entities;
 
 namespace Signum.Entities.Dashboard
 {

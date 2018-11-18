@@ -1,59 +1,50 @@
 ﻿import * as React from 'react'
-import { Lite, Entity } from '@framework/Signum.Entities'
-import { getQueryKey, getQueryNiceName } from '@framework/Reflection'
-import { OmniboxMessage } from '../Omnibox/Signum.Entities.Omnibox'
 import { OmniboxResult, OmniboxMatch, OmniboxProvider } from '../Omnibox/OmniboxClient'
-import { QueryToken, FilterOperation, FindOptions, FilterOption } from '@framework/FindOptions'
-import * as Navigator from '@framework/Navigator'
-import * as Finder from '@framework/Finder'
-import { MapMessage } from './Signum.Entities.Map'
-
-
 
 export default class MapOmniboxProvider extends OmniboxProvider<MapOmniboxResult>
 {
-    getProviderName() {
-        return "MapOmniboxResult";
-    }
+  getProviderName() {
+    return "MapOmniboxResult";
+  }
 
-    icon() {
-        return this.coloredIcon("map", "green");
-    }
+  icon() {
+    return this.coloredIcon("map", "green");
+  }
 
-    renderItem(result: MapOmniboxResult): React.ReactChild[] {
+  renderItem(result: MapOmniboxResult): React.ReactChild[] {
 
-        const array: React.ReactChild[] = [];
+    const array: React.ReactChild[] = [];
 
-        array.push(this.icon());
+    array.push(this.icon());
 
-        this.renderMatch(result.keywordMatch, array);
-        array.push("\u0020");
+    this.renderMatch(result.keywordMatch, array);
+    array.push("\u0020");
 
-        if (result.typeMatch != undefined)
-            this.renderMatch(result.typeMatch, array);
-        
-        return array;
-    }
+    if (result.typeMatch != undefined)
+      this.renderMatch(result.typeMatch, array);
 
-    navigateTo(result: MapOmniboxResult) {
+    return array;
+  }
 
-        if (result.keywordMatch == undefined)
-            return undefined;
+  navigateTo(result: MapOmniboxResult) {
 
-        return Promise.resolve("~/Map" + (result.typeName ? "/" + result.typeName : ""));
-    }
+    if (result.keywordMatch == undefined)
+      return undefined;
 
-    toString(result: MapOmniboxResult) {
-        if (result.typeMatch == undefined)
-            return result.keywordMatch.text;
+    return Promise.resolve("~/Map" + (result.typeName ? "/" + result.typeName : ""));
+  }
 
-        return "{0} {1}".formatWith(result.keywordMatch.text, result.typeMatch.text);
-    }
+  toString(result: MapOmniboxResult) {
+    if (result.typeMatch == undefined)
+      return result.keywordMatch.text;
+
+    return "{0} {1}".formatWith(result.keywordMatch.text, result.typeMatch.text);
+  }
 }
 
 interface MapOmniboxResult extends OmniboxResult {
-    keywordMatch: OmniboxMatch;
+  keywordMatch: OmniboxMatch;
 
-    typeName: string;
-    typeMatch: OmniboxMatch;
+  typeName: string;
+  typeMatch: OmniboxMatch;
 }

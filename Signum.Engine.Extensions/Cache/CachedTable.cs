@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using Signum.Entities;
 using System.Collections.Concurrent;
 using Signum.Engine.Maps;
@@ -10,10 +9,8 @@ using Signum.Engine.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using Signum.Utilities;
-using Signum.Entities.Cache;
 using System.Data.SqlClient;
 using Signum.Engine.Basics;
-using System.Diagnostics;
 using System.Threading;
 using Signum.Utilities.ExpressionTrees;
 using System.Data;
@@ -54,7 +51,7 @@ namespace Signum.Engine.Cache
                         FormatWith(Table, subTables?.Select(e=>e.Table).ToString(","))) { Data = { { "query", query.PlainSql() } } };
 
                 if (CacheLogic.LogWriter != null)
-                    CacheLogic.LogWriter.WriteLine("Change {0}".FormatWith(GetType().TypeName())); 
+                    CacheLogic.LogWriter.WriteLine("Change {0}".FormatWith(GetType().TypeName()));
 
                 Reset();
 
@@ -142,13 +139,13 @@ namespace Signum.Engine.Cache
         internal abstract bool Contains(PrimaryKey primaryKey);
     }
 
-  
+
 
 
     class CachedTable<T> : CachedTableBase where T : Entity
     {
         Table table;
-        
+
         ResetLazy<Dictionary<PrimaryKey, object>> rows;
 
         public Dictionary<PrimaryKey, object> GetRows()
@@ -189,7 +186,7 @@ namespace Signum.Engine.Cache
 
                 query = new SqlPreCommandSimple(select);
             }
-            
+
 
             //Reader
             {
@@ -344,7 +341,7 @@ namespace Signum.Engine.Cache
             return this.GetRows().ContainsKey(primaryKey);
         }
 
-        ConcurrentDictionary<LambdaExpression, ResetLazy<Dictionary<PrimaryKey, List<PrimaryKey>>>> BackReferenceDictionaries = 
+        ConcurrentDictionary<LambdaExpression, ResetLazy<Dictionary<PrimaryKey, List<PrimaryKey>>>> BackReferenceDictionaries =
             new ConcurrentDictionary<LambdaExpression, ResetLazy<Dictionary<PrimaryKey, List<PrimaryKey>>>>(ExpressionComparer.GetComparer<LambdaExpression>(false));
 
         internal Dictionary<PrimaryKey, List<PrimaryKey>> GetBackReferenceDictionary<R>(Expression<Func<T, Lite<R>>> backReference)
@@ -381,7 +378,7 @@ namespace Signum.Engine.Cache
             return lazy.Value;
         }
 
-        private IColumn GetColumn(MemberInfo[] members) 
+        private IColumn GetColumn(MemberInfo[] members)
         {
             IFieldFinder current = (Table)this.Table;
             Field field = null;
@@ -458,7 +455,7 @@ namespace Signum.Engine.Cache
                 };
                 var ci = typeof(MList<T>.RowIdElement).GetConstructor(new []{typeof(T), typeof(PrimaryKey), typeof(int?)});
 
-                var order = table.Order == null ? Expression.Constant(null, typeof(int?)) : 
+                var order = table.Order == null ? Expression.Constant(null, typeof(int?)) :
                      ctr.GetTupleProperty(table.Order).Nullify();
 
                 instructions.Add(Expression.New(ci, result, CachedTableConstructor.NewPrimaryKey(ctr.GetTupleProperty(table.PrimaryKey)), order));
@@ -538,7 +535,7 @@ namespace Signum.Engine.Cache
                     innerList.Add(activator(obj, retriever));
                 }
                 ((IMListPrivate)result).ExecutePostRetrieving();
-                
+
             }
 
             CachedTableConstructor.resetModifiedAction(retriever, result);
@@ -583,7 +580,7 @@ namespace Signum.Engine.Cache
 
         Alias currentAlias;
         string lastPartialJoin;
-        string remainingJoins; 
+        string remainingJoins;
 
         Func<FieldReader, KeyValuePair<PrimaryKey, string>> rowReader;
         ResetLazy<Dictionary<PrimaryKey, string>> toStrings;
@@ -725,7 +722,7 @@ namespace Signum.Engine.Cache
                 if (lambda == null)
                 {
                     columns.Add(table.ToStrColumn);
-                    
+
                     return FieldReader.GetExpression(reader, columns.Count - 1, typeof(string));
                 }
 

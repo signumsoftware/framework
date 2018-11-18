@@ -1,19 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using Signum.Engine.Maps;
 using Signum.Entities.Authorization;
 using Signum.Entities.Basics;
-using Signum.Engine.DynamicQuery;
 using Signum.Engine.Basics;
 using Signum.Utilities;
 using Signum.Utilities.DataStructures;
-using System.Threading;
 using Signum.Entities;
 using Signum.Engine.Operations;
 using System.Reflection;
-using Signum.Entities.DynamicQuery;
 using System.Xml.Linq;
 
 namespace Signum.Engine.Authorization
@@ -156,7 +152,7 @@ namespace Signum.Engine.Authorization
                 var operationType = (operation: r.Resource.Operation, type: r.Resource.Type.ToType());
                 r.CoercedValues = EnumExtensions.GetValues<OperationAllowed>().Where(a => !coercer(operationType, a).Equals(a)).ToArray();
             });
-            
+
             return result;
         }
 
@@ -267,8 +263,8 @@ namespace Signum.Engine.Authorization
     class OperationMerger : IMerger<(OperationSymbol operation, Type type), OperationAllowed>
     {
         public OperationAllowed Merge((OperationSymbol operation, Type type) operationType, Lite<RoleEntity> role, IEnumerable<KeyValuePair<Lite<RoleEntity>, OperationAllowed>> baseValues)
-        {   
-            OperationAllowed best = AuthLogic.GetMergeStrategy(role) == MergeStrategy.Union ? 
+        {
+            OperationAllowed best = AuthLogic.GetMergeStrategy(role) == MergeStrategy.Union ?
                 Max(baseValues.Select(a => a.Value)):
                 Min(baseValues.Select(a => a.Value));
 
@@ -287,7 +283,7 @@ namespace Signum.Engine.Authorization
                 return maxUp.HasValue && maxUp <= def ? maxUp.Value : def;
             }
 
-            return best; 
+            return best;
         }
 
         static OperationAllowed GetDefault((OperationSymbol operation, Type type) operationType, Lite<RoleEntity> role)
@@ -310,7 +306,7 @@ namespace Signum.Engine.Authorization
             }
             return result;
         }
-   
+
         static OperationAllowed Min(IEnumerable<OperationAllowed> baseValues)
         {
             OperationAllowed result = OperationAllowed.Allow;
@@ -329,11 +325,11 @@ namespace Signum.Engine.Authorization
 
         public Func<(OperationSymbol operation, Type type), OperationAllowed> MergeDefault(Lite<RoleEntity> role)
         {
-            return key => 
+            return key =>
             {
                 if (!BasicPermission.AutomaticUpgradeOfOperations.IsAuthorized(role))
                     return AuthLogic.GetDefaultAllowed(role) ? OperationAllowed.Allow : OperationAllowed.None;
-                
+
                 var maxUp = OperationAuthLogic.MaxAutomaticUpgrade.TryGetS(key.operation);
 
                 var def = GetDefault(key, role);

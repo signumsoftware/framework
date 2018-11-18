@@ -10,13 +10,13 @@
 }
 .sf-auth-rules td
 {
-    vertical-align: top;    
+    vertical-align: top;
 }
 .sf-auth-rules .sf-auth-overriden
 {
     text-align:center;
 }
-.sf-auth-rules a:hover 
+.sf-auth-rules a:hover
 {
 	cursor:pointer;
 }
@@ -30,22 +30,22 @@
 }
 .sf-auth-rules span
 {
-    line-height: 22px;    
+    line-height: 22px;
 }
 .sf-auth-rules .sf-auth-condition .sf-auth-label
 {
     font-style: italic;
 }
-.sf-auth-rules .sf-auth-condition-button 
+.sf-auth-rules .sf-auth-condition-button
 {
-    margin: 5px 0 5px 3px;    
+    margin: 5px 0 5px 3px;
     width: 1.2em;
     background: none repeat scroll 0px 0px transparent !important;
     border: 0px none !important;
 }
 .sf-auth-rules .sf-auth-label
 {
-    margin-left: 3px;    
+    margin-left: 3px;
     vertical-align: top;
 }
 

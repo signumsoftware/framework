@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
-using System.Text;
 using Signum.Entities.DynamicQuery;
 using Signum.Utilities;
 
@@ -30,7 +27,7 @@ namespace Signum.Entities.UserAssets
 
             this.TokenString = tokenString;
         }
-        
+
         [StringLengthValidator(AllowNulls = false, Min = 1, Max = 200), InTypeScript(Undefined = false, Null = false)]
         public string TokenString { get; set; }
 

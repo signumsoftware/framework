@@ -1,8 +1,6 @@
 ﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
-using Signum.Entities;
-using Signum.Entities.Basics;
 using Signum.Utilities;
 using Signum.Utilities.ExpressionTrees;
 using System;
@@ -11,8 +9,6 @@ using System.ComponentModel;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Signum.Entities.Dynamic
 {
@@ -39,7 +35,7 @@ namespace Signum.Entities.Dynamic
         }
 
         [Ignore]
-        DynamicTypeDefinition definition; 
+        DynamicTypeDefinition definition;
         public DynamicTypeDefinition GetDefinition()
         {
             return definition ?? JsonConvert.DeserializeObject<DynamicTypeDefinition>(this.TypeDefinition);
@@ -62,7 +58,7 @@ namespace Signum.Entities.Dynamic
             }
             return base.PropertyValidation(pi);
         }
-        
+
 
         static Expression<Func<DynamicTypeEntity, string>> ToStringExpression = @this => @this.TypeName;
         [ExpressionField]
@@ -171,7 +167,7 @@ namespace Signum.Entities.Dynamic
 
         [JsonProperty(PropertyName = "customInheritance")]
         public DynamicTypeCustomCode CustomInheritance;
-        
+
         [JsonProperty(PropertyName = "customEntityMembers")]
         public DynamicTypeCustomCode CustomEntityMembers;
 
@@ -180,7 +176,7 @@ namespace Signum.Entities.Dynamic
 
         [JsonProperty(PropertyName = "customLogicMembers")]
         public DynamicTypeCustomCode CustomLogicMembers;
-        
+
         [JsonProperty(PropertyName = "customTypes")]
         public DynamicTypeCustomCode CustomTypes;
 
@@ -192,7 +188,7 @@ namespace Signum.Entities.Dynamic
 
         [JsonProperty(PropertyName = "multiColumnUniqueIndex")]
         public MultiColumnUniqueIndex MultiColumnUniqueIndex;
-        
+
         [JsonProperty(PropertyName = "toStringExpression", NullValueHandling = NullValueHandling.Ignore)]
         public string ToStringExpression;
     }
@@ -236,13 +232,14 @@ namespace Signum.Entities.Dynamic
         [JsonProperty(PropertyName = "code")]
         public string Code;
     }
- 
+
 
     public enum DynamicBaseType
     {
         Entity,
         MixinEntity,
         EmbeddedEntity,
+        ModelEntity,
     }
 
     public class DynamicProperty
@@ -345,7 +342,7 @@ namespace Signum.Entities.Dynamic
     {
         [JsonProperty(PropertyName = "type")]
         public string Type;
-    
+
         public static Type GetDynamicValidatorType(string type)
         {
             switch (type)

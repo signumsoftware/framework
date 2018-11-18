@@ -1,32 +1,26 @@
-﻿using Signum.Engine;
-using Signum.Engine.Basics;
+﻿using Signum.Engine.Basics;
 using Signum.Engine.Dynamic;
-using Signum.Engine.DynamicQuery;
-using Signum.Engine.Maps;
 using Signum.Engine.Scheduler;
 using Signum.Entities;
-using Signum.Entities.Dynamic;
 using Signum.Entities.Reflection;
 using Signum.React.ApiControllers;
-using Signum.React.Facades;
 using Signum.Utilities;
 using Signum.Utilities.DataStructures;
 using Signum.Utilities.ExpressionTrees;
 using System;
-using System.CodeDom.Compiler;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Net;
-using System.Net.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Hosting;
 using System.Threading.Tasks;
 using Signum.React.Filters;
+using System.ComponentModel.DataAnnotations;
 
 namespace Signum.React.Dynamic
 {
-    public class DynamicController : ApiController
+    [ValidateModelFilter]
+    public class DynamicController : ControllerBase
     {
         IApplicationLifetime lifeTime;
         public DynamicController(IApplicationLifetime lifeTime)
@@ -34,7 +28,7 @@ namespace Signum.React.Dynamic
             this.lifeTime = lifeTime;
         }
 
-        [Route("api/dynamic/compile"), HttpPost]
+        [HttpPost("api/dynamic/compile")]
         public List<CompilationErrorTS> Compile()
         {
             SystemEventLogLogic.Log("DynamicController.Compile");
@@ -63,14 +57,14 @@ namespace Signum.React.Dynamic
             public string fileContent;
         }
 
-        [Route("api/dynamic/restartServer"), HttpPost]
+        [HttpPost("api/dynamic/restartServer")]
         public void RestartServer()
         {
             SystemEventLogLogic.Log("DynamicController.RestartServer");
             lifeTime.StopApplication();
         }
 
-        [Route("api/dynamic/startErrors"), HttpGet]
+        [HttpGet("api/dynamic/startErrors")]
         public List<HttpError> GetStartErrors()
         {
             return new Sequence<Exception>
@@ -84,8 +78,8 @@ namespace Signum.React.Dynamic
             .ToList();
         }
 
-        [Route("api/dynamic/evalErrors"), HttpPost]
-        public async Task<List<EvalEntityError>> GetEvalErrors([FromBody]QueryEntitiesRequestTS request)
+        [HttpPost("api/dynamic/evalErrors")]
+        public async Task<List<EvalEntityError>> GetEvalErrors([Required, FromBody]QueryEntitiesRequestTS request)
         {
             var allEntities = await QueryLogic.Queries.GetEntities(request.ToQueryEntitiesRequest()).Select(a => a.Entity).ToListAsync();
 
@@ -107,6 +101,6 @@ namespace Signum.React.Dynamic
     public class EvalEntityError
     {
         public Lite<Entity> lite;
-        public string error; 
+        public string error;
     }
 }

@@ -5,19 +5,18 @@ using Signum.Engine.Rest;
 using Signum.Entities;
 using Signum.Entities.Authorization;
 using Signum.Entities.Rest;
-using Signum.React.ApiControllers;
 
 namespace Signum.React.Profiler
 {
-    public class RestApiKeyController : ApiController
+    public class RestApiKeyController : ControllerBase
     {
-        [Route("api/restApiKey/generate"), HttpGet]
+        [HttpGet("api/restApiKey/generate")]
         public string GenerateRestApiKey()
         {
             return RestApiKeyLogic.GenerateRestApiKey();
         }
 
-        [Route("api/restApiKey/current"), HttpGet]
+        [HttpGet("api/restApiKey/current")]
         public string GetAPIKey()
         {
             using (ExecutionMode.Global())

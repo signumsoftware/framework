@@ -8,7 +8,7 @@ namespace Signum.React.Selenium
         public FileLineProxy(IWebElement element, PropertyRoute route)
             : base(element, route)
         {
-            
+
         }
 
         public void SetPath(string path)

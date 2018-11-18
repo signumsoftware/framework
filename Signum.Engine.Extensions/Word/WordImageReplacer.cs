@@ -26,9 +26,12 @@ namespace Signum.Engine.Word
             {
                 var part = doc.MainDocumentPart.GetPartById(blip.Embed);
 
-                Bitmap oldBmp = (Bitmap)Bitmap.FromStream(part.GetStream());
+                using (var stream = part.GetStream())
+                {
+                    Bitmap oldBmp = (Bitmap)Bitmap.FromStream(stream);
 
-                bitmap = ImageResizer.Resize(bitmap, oldBmp.Width, oldBmp.Height);
+                    bitmap = ImageResizer.Resize(bitmap, oldBmp.Width, oldBmp.Height);
+                }
             }
 
             doc.MainDocumentPart.DeletePart(blip.Embed);

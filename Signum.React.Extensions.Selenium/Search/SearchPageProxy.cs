@@ -1,10 +1,7 @@
 ﻿using System;
-using System.Linq;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Remote;
 using Signum.Entities;
-using Signum.Utilities;
-using Signum.React.Selenium;
 
 namespace Signum.React.Selenium
 {
@@ -35,7 +32,7 @@ namespace Signum.React.Selenium
         public FramePageProxy<T> CreateInTab<T>() where T : ModifiableEntity
         {
             var oldCount = Selenium.WindowHandles.Count;
-            
+
             SearchControl.CreateButton.Find().Click();
 
             Selenium.Wait(() => Selenium.WindowHandles.Count > oldCount);

@@ -1,18 +1,13 @@
-﻿using Signum.Entities;
-using Signum.Entities.Authorization;
+﻿using Signum.Entities.Authorization;
 using Signum.Entities.Basics;
 using Signum.Entities.Chart;
 using Signum.Entities.Dashboard;
-using Signum.Entities.Files;
 using Signum.Entities.UserAssets;
 using Signum.Entities.UserQueries;
 using Signum.Utilities;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
-using System.Text;
-using System.Threading.Tasks;
 using System.Xml.Linq;
 using System.Reflection;
 using Signum.Utilities.Reflection;
@@ -31,7 +26,7 @@ namespace Signum.Entities.Toolbar
         public ToolbarLocation Location { get; set; }
 
         public int? Priority { get; set; }
-        
+
         [PreserveOrder]
         [NotNullValidator, NoRepeatValidator]
         public MList<ToolbarElementEmbedded> Elements { get; set; } = new MList<ToolbarElementEmbedded>();
@@ -49,7 +44,7 @@ namespace Signum.Entities.Toolbar
                 Priority == null ? null : new XAttribute("Priority", Priority.Value.ToString()),
                 new XElement("Elements", Elements.Select(p => p.ToXml(ctx))));
         }
-        
+
         public void FromXml(XElement element, IFromXmlContext ctx)
         {
             Name = element.Attribute("Name").Value;
@@ -94,7 +89,7 @@ namespace Signum.Entities.Toolbar
 
         [StringLengthValidator(AllowNulls = true, Min = 3, Max = 100)]
         public string IconColor { get; set; }
-        
+
         [ImplementedBy(typeof(ToolbarMenuEntity), typeof(UserQueryEntity), typeof(UserChartEntity), typeof(QueryEntity), typeof(DashboardEntity), typeof(PermissionSymbol))]
         public Lite<Entity> Content { get; set; }
 
@@ -116,8 +111,8 @@ namespace Signum.Entities.Toolbar
                 string.IsNullOrEmpty(IconColor) ? null :  new XAttribute("IconColor", IconColor),
                 OpenInPopup ? new XAttribute("OpenInPopup", OpenInPopup) : null,
                 AutoRefreshPeriod == null ? null : new XAttribute("AutoRefreshPeriod", AutoRefreshPeriod),
-                this.Content == null ? null : new XAttribute("Content", 
-                this.Content is Lite<QueryEntity> ?  ctx.QueryToName((Lite<QueryEntity>)this.Content) : 
+                this.Content == null ? null : new XAttribute("Content",
+                this.Content is Lite<QueryEntity> ?  ctx.QueryToName((Lite<QueryEntity>)this.Content) :
                 this.Content is Lite<PermissionSymbol> ?  ctx.PermissionToName((Lite<PermissionSymbol>)this.Content) :
                 (object)ctx.Include((Lite<IUserAssetEntity>)this.Content)),
                 string.IsNullOrEmpty(this.Url) ? null : new XAttribute("Url", this.Url));
@@ -170,7 +165,7 @@ namespace Signum.Entities.Toolbar
                         return ValidationMessage._0ShouldBeOfType1.NiceToString(pi.NiceName(), typeof(ToolbarMenuEntity));
                 }
             }
-            
+
             if (pi.Name == nameof(this.Label) && (this.Type == ToolbarElementType.Menu || this.Type == ToolbarElementType.Link))
             {
                 if (string.IsNullOrEmpty(this.Label) && this.Content == null)

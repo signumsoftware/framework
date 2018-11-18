@@ -1,5 +1,4 @@
-﻿using System.Linq;
-using OpenQA.Selenium;
+﻿using OpenQA.Selenium;
 using Signum.Entities;
 using Signum.Utilities;
 
@@ -43,7 +42,7 @@ namespace Signum.React.Selenium
         {
             return this.ItemsContainerElement.CombineCss(" > fieldset.sf-repeater-element§").FindElements().Count;
         }
-        
+
         public LineContainer<T> Details<T>(int index) where T : ModifiableEntity
         {
             return new LineContainer<T>(ItemElement(index).WaitPresent(), this.ItemRoute);

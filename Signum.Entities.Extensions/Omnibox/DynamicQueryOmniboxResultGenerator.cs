@@ -1,17 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using Signum.Utilities;
 using Signum.Entities.DynamicQuery;
 using System.Text.RegularExpressions;
 using Signum.Utilities.Reflection;
-using Signum.Entities.Reflection;
 using Signum.Utilities.DataStructures;
-using Signum.Entities.Basics;
-using Signum.Entities.UserQueries;
-using System.Collections.Concurrent;
-using System.Globalization;
 using Signum.Entities.UserAssets;
 using Newtonsoft.Json;
 
@@ -30,11 +24,11 @@ namespace Signum.Entities.Omnibox
                              m.Groups["op"].Captures().Any(filter.Contains) ? FilterSyntaxCompletion.Operation : FilterSyntaxCompletion.Token,
             }).ToList();
         }
-         
+
         Regex regex = new Regex(@"^I(?<filter>(?<token>I(\.I)*)(\.|((?<op>=)(?<val>[ENSIG])?))?)*$", RegexOptions.ExplicitCapture);
-       
+
         public override IEnumerable<DynamicQueryOmniboxResult> GetResults(string rawQuery, List<OmniboxToken> tokens, string tokenPattern)
-        {   
+        {
             Match m = regex.Match(tokenPattern);
 
             if (!m.Success)
@@ -108,7 +102,7 @@ namespace Signum.Entities.Omnibox
 
             int operatorIndex = syntax.Index + syntax.TokenLength;
 
-            List<(QueryToken token, ImmutableStack<OmniboxMatch> stack)> ambiguousTokens = GetAmbiguousTokens(null, ImmutableStack<OmniboxMatch>.Empty, 
+            List<(QueryToken token, ImmutableStack<OmniboxMatch> stack)> ambiguousTokens = GetAmbiguousTokens(null, ImmutableStack<OmniboxMatch>.Empty,
                 queryDescription, tokens, syntax.Index, operatorIndex).ToList();
 
             foreach ((QueryToken token, ImmutableStack<OmniboxMatch> stack) pair in ambiguousTokens)
@@ -254,13 +248,13 @@ namespace Signum.Entities.Omnibox
 
                         var result = OmniboxParser.Manager.Autocomplete(queryToken.GetImplementations().Value, patten, AutoCompleteLimit);
 
-                        return result.Select(lite => new ValueTuple { Value = lite, Match = OmniboxUtils.Contains(lite, lite.ToString(), patten) }).ToArray();  
+                        return result.Select(lite => new ValueTuple { Value = lite, Match = OmniboxUtils.Contains(lite, lite.ToString(), patten) }).ToArray();
                     }
                     else if (omniboxToken.Type == OmniboxTokenType.Entity)
                     {
                         var error = Lite.TryParseLite(omniboxToken.Value, out Lite<Entity> lite);
                         if (string.IsNullOrEmpty(error))
-                            return new []{new ValueTuple { Value = lite }}; 
+                            return new []{new ValueTuple { Value = lite }};
                     }
                     else if (omniboxToken.Type == OmniboxTokenType.Number)
                     {
@@ -436,7 +430,7 @@ namespace Signum.Entities.Omnibox
 
         public float Distance { get; set; }
         public FilterSyntax Syntax  {get; set;}
-        
+
         [JsonConverter(typeof(QueryTokenJsonConverter))]
         public QueryToken QueryToken { get; set; }
         public string QueryTokenOmniboxPascal => QueryToken?.Follow(a => a.Parent).Reverse().ToString(a => a.ToString().ToOmniboxPascal(), ".");
@@ -472,7 +466,7 @@ namespace Signum.Entities.Omnibox
     public class FilterSyntax
     {
         public int Index;
-        public int TokenLength; 
+        public int TokenLength;
         public int Length;
         public FilterSyntaxCompletion Completion;
     }

@@ -1,20 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Linq.Expressions;
-using Signum.Utilities.Reflection;
-using Signum.Entities.Reflection;
 using System.Reflection;
 using Signum.Utilities;
-using Signum.Utilities.ExpressionTrees;
 using System.ComponentModel;
 using Signum.Entities.Basics;
-using Signum.Entities.Scheduler;
 using Signum.Entities.Authorization;
-using System.Diagnostics;
-using System.Runtime.CompilerServices;
-using Signum.Entities;
 
 namespace Signum.Entities.Processes
 {

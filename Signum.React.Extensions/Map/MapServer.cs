@@ -1,19 +1,7 @@
-﻿using Signum.Entities.UserAssets;
-using Signum.React.Json;
-using Signum.Utilities;
-using System;
-using System.Collections.Generic;
+﻿using Signum.Utilities;
 using System.Linq;
 using System.Reflection;
-using System.Web;
-using Microsoft.AspNetCore.Mvc;
-using Newtonsoft.Json;
-using Signum.Engine.DynamicQuery;
-using Signum.Engine.Basics;
-using Signum.React.UserAssets;
 using Signum.Entities;
-using Signum.React.ApiControllers;
-using Signum.Entities.DynamicQuery;
 using Signum.React.Maps;
 using Signum.Entities.Map;
 using Signum.React.Facades;
@@ -73,7 +61,7 @@ namespace Signum.React.Map
                     NiceName = MapMessage.Rows.NiceToString(),
                 }
             };
-            
+
             if (Schema.Current.Tables.Any(a => a.Value.SystemVersioned != null))
             {
                 SchemaMap.GetColorProviders += () => new[]
@@ -96,7 +84,7 @@ namespace Signum.React.Map
             };
 
             if(Schema.Current.Tables.Any(a => a.Value.SystemVersioned != null))
-            { 
+            {
                 SchemaMap.GetColorProviders += () => new[]
                 {
                     new MapColorProvider

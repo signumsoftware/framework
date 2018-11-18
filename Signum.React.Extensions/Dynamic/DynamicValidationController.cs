@@ -1,35 +1,28 @@
-﻿using Signum.Engine;
-using Signum.Engine.Basics;
-using Signum.Engine.Dynamic;
-using Signum.Engine.DynamicQuery;
-using Signum.Engine.Maps;
+﻿using Signum.Engine.Basics;
 using Signum.Entities;
 using Signum.Entities.Basics;
 using Signum.Entities.Dynamic;
 using Signum.Entities.Reflection;
-using Signum.React.Json;
 using Signum.Utilities;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Net;
-using System.Net.Http;
-using System.Reflection;
 using Microsoft.AspNetCore.Mvc;
-using Signum.React.ApiControllers;
+using Signum.React.Filters;
+using System.ComponentModel.DataAnnotations;
 
 namespace Signum.React.Dynamic
 {
-    public class DynamicValidationController : ApiController
+    [ValidateModelFilter]
+    public class DynamicValidationController : ControllerBase
     {
-        [Route("api/dynamic/validation/routeTypeName"), HttpPost]
-        public string RouteTypeName([FromBody]PropertyRouteEntity pr)
+        [HttpPost("api/dynamic/validation/routeTypeName")]
+        public string RouteTypeName([Required, FromBody]PropertyRouteEntity pr)
         {
             return pr.ToPropertyRoute().Type.Name;
         }
 
-        [Route("api/dynamic/validation/test"), HttpPost]
-        public DynamicValidationTestResponse Test([FromBody]DynamicValidationTestRequest request)
+        [HttpPost("api/dynamic/validation/test")]
+        public DynamicValidationTestResponse Test([Required, FromBody]DynamicValidationTestRequest request)
         {
             IDynamicValidationEvaluator evaluator;
             try
@@ -50,7 +43,7 @@ namespace Signum.React.Dynamic
                 .Where(a => a is ModifiableEntity me && pr.MatchesEntity(me) == true)
                 .Cast<ModifiableEntity>();
 
-            var properties = Validator.GetPropertyValidators(pr.Type).Values.Select(a => a.PropertyInfo).ToList();
+            var properties = Entities.Validator.GetPropertyValidators(pr.Type).Values.Select(a => a.PropertyInfo).ToList();
 
             try
             {

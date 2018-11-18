@@ -1,17 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
-using System.Linq.Expressions;
-using System.Text;
-using System.Text.RegularExpressions;
 using System.Threading;
 using OpenQA.Selenium;
-using OpenQA.Selenium.Chrome;
 using OpenQA.Selenium.Interactions;
 using OpenQA.Selenium.Internal;
 using OpenQA.Selenium.Remote;
-using OpenQA.Selenium.Support;
 using OpenQA.Selenium.Support.UI;
 using Signum.Utilities;
 using Signum.React.Selenium.ModalProxies;
@@ -34,7 +28,7 @@ namespace Signum.React.Selenium
                 };
 
                 wait.IgnoreExceptionTypes(typeof(NoSuchElementException), typeof(NoAlertPresentException), typeof(StaleElementReferenceException));
-                
+
                 return wait.Until(_ => condition());
             }
             catch (WebDriverTimeoutException ex)
@@ -45,7 +39,7 @@ namespace Signum.React.Selenium
                     selenium.Url));
             }
         }
-        
+
         public static void WaitEquals<T>(this RemoteWebDriver selenium, T expectedValue, Func<T> value, TimeSpan? timeout = null)
         {
             T lastValue = default(T);
@@ -61,7 +55,7 @@ namespace Signum.React.Selenium
         {
             return element.FindElements(locator).FirstOrDefault();
         }
-        
+
         public static IWebElement WaitElementPresent(this RemoteWebDriver selenium, By locator, Func<string> actionDescription = null, TimeSpan? timeout = null)
         {
             return selenium.Wait(() => selenium.FindElements(locator).FirstOrDefault(),
@@ -241,7 +235,7 @@ namespace Signum.React.Selenium
             var alertPresent = selenium.Wait(() => MessageModalProxyExtensions.IsMessageModalPresent(selenium));
 
             var alert = selenium.Wait(() => selenium.SwitchTo().Alert());
-            
+
             alert.Accept();
         }
 

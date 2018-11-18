@@ -1,18 +1,7 @@
-﻿
+
 import * as React from 'react'
-import {
-    FormGroup, FormControlReadonly, ValueLine, ValueLineType,
-    EntityLine, EntityCombo, EntityList, EntityRepeater, RenderEntity
-} from '@framework/Lines'
-import * as Finder from '@framework/Finder'
 import { ServiceError } from '@framework/Services'
-import { getQueryNiceName, PropertyRoute, getTypeInfos } from '@framework/Reflection'
-import { ModifiableEntity, EntityControlMessage, Entity, parseLite, getToString, Lite, is, JavascriptMessage } from '@framework/Signum.Entities'
-import * as Navigator from '@framework/Navigator'
-import * as Constructor from '@framework/Constructor'
-import { SearchControl } from '@framework/Search'
-import { TypeContext, FormGroupStyle, mlistItemContext } from '@framework/TypeContext'
-import QueryTokenEntityBuilder from '../../UserAssets/Templates/QueryTokenEntityBuilder'
+import { Entity, Lite, is, JavascriptMessage } from '@framework/Signum.Entities'
 import * as UserChartClient from '../../Chart/UserChart/UserChartClient'
 import * as ChartClient from '../../Chart/ChartClient'
 import { ChartRequestModel } from '../../Chart/Signum.Entities.Chart'
@@ -20,12 +9,10 @@ import ChartRenderer from '../../Chart/Templates/ChartRenderer'
 import ChartTableComponent from '../../Chart/Templates/ChartTable'
 import { UserChartPartEntity } from '../Signum.Entities.Dashboard'
 
-
 export interface UserChartPartProps {
     part: UserChartPartEntity
     entity?: Lite<Entity>;
 }
-
 
 export interface UserChartPartState {
     chartRequest?: ChartRequestModel;

@@ -1,11 +1,4 @@
-﻿using Signum.Entities;
-using Signum.Utilities;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Linq.Expressions;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System;
 
 namespace Signum.Entities.Basics
 {
@@ -19,7 +12,7 @@ namespace Signum.Entities.Basics
         }
 
         public bool IsDisabled { get; set; }
-        
+
         protected override void CopyFrom(MixinEntity mixin, object[] args)
         {
             this.IsDisabled = ((DisabledMixin)mixin).IsDisabled;

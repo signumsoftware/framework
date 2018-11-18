@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using Signum.Engine.Maps;
 using Signum.Engine.DynamicQuery;
 using System.Reflection;
@@ -16,11 +15,8 @@ using System.Linq.Expressions;
 using Signum.Entities.Basics;
 using System.Text.RegularExpressions;
 using Signum.Engine.Basics;
-using Signum.Utilities.ExpressionTrees;
 using System.Threading.Tasks;
 using System.Globalization;
-using Signum.Entities.Translation;
-using Signum.Engine.Translation;
 
 namespace Signum.Engine.SMS
 {

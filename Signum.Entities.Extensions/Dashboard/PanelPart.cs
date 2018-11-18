@@ -1,16 +1,12 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using Signum.Utilities;
 using Signum.Entities.UserAssets;
 using Signum.Entities.Chart;
 using System.Reflection;
-using System.Linq.Expressions;
 using System.Xml.Linq;
 using Signum.Utilities.DataStructures;
 using Signum.Entities.UserQueries;
-using Signum.Entities.Omnibox;
 
 namespace Signum.Entities.Dashboard
 {

@@ -1,15 +1,9 @@
 ﻿import * as React from 'react'
-import { Lite, Entity } from '@framework/Signum.Entities'
-import { getQueryKey, getQueryNiceName } from '@framework/Reflection'
+import { getQueryKey } from '@framework/Reflection'
 import { OmniboxMessage } from '../Omnibox/Signum.Entities.Omnibox'
 import { OmniboxResult, OmniboxMatch, OmniboxProvider } from '../Omnibox/OmniboxClient'
-import { QueryToken, FilterOperation, FindOptions, FilterOption } from '@framework/FindOptions'
-import * as Navigator from '@framework/Navigator'
-import * as Finder from '@framework/Finder'
 import * as ChartClient from './ChartClient'
 import { ChartRequestModel} from './Signum.Entities.Chart'
-
-
 
 export default class ChartOmniboxProvider extends OmniboxProvider<ChartOmniboxResult>
 {

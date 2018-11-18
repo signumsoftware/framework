@@ -1,17 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using Signum.Entities;
 using Signum.Entities.Processes;
-using Signum.Entities.Mailing;
 using Signum.Utilities;
 using Signum.Entities.Basics;
 using System.Linq.Expressions;
 using System.Reflection;
-using Signum.Entities.DynamicQuery;
-using Signum.Entities.UserQueries;
-using Signum.Utilities.ExpressionTrees;
 
 namespace Signum.Entities.Mailing
 {

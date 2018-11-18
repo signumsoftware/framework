@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Signum.Entities.DynamicQuery;
 using Signum.Entities.MachineLearning;
 using Signum.Entities.UserAssets;
@@ -37,7 +35,7 @@ namespace Signum.Engine.MachineLearning.CNTK
         {
             return new List<PredictorCodification> { new PredictorCodification(column) };
         }
-        
+
         public void EncodeValue(object value, PredictorColumnBase column, List<PredictorCodification> codifications, float[] inputValues, int offset)
         {
             var c = codifications.SingleEx();

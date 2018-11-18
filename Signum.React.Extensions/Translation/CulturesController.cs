@@ -2,30 +2,23 @@ using Signum.Engine;
 using Signum.Engine.Authorization;
 using Signum.Engine.Basics;
 using Signum.Engine.Operations;
-using Signum.Engine.Translation;
 using Signum.Entities;
 using Signum.Entities.Authorization;
 using Signum.Entities.Basics;
 using Signum.React.Filters;
 using Signum.Utilities;
-using Signum.Utilities.DataStructures;
-using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
-using System.Net;
-using System.Net.Http;
-using System.Net.Http.Headers;
-using System.Reflection;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
-using Signum.React.ApiControllers;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
+using System.ComponentModel.DataAnnotations;
 
 namespace Signum.React.Translation
 {
-    public class CultureController : ApiController
+    [ValidateModelFilter]
+    public class CultureController : ControllerBase
     {
         IHostingEnvironment _env;
         public CultureController(IHostingEnvironment env)
@@ -33,20 +26,20 @@ namespace Signum.React.Translation
             _env = env;
         }
 
-        [Route("api/culture/cultures"), HttpGet, AllowAnonymous]
+        [HttpGet("api/culture/cultures"), AllowAnonymous]
         public List<CultureInfoEntity> GetCultures()
         {
             return CultureInfoLogic.CultureInfoToEntity.Value.Values.ToList();
         }
 
-        [Route("api/culture/currentCulture"), HttpGet, AllowAnonymous]
+        [HttpGet("api/culture/currentCulture"), AllowAnonymous]
         public CultureInfoEntity CurrentCulture()
         {
             return CultureInfo.CurrentCulture.TryGetCultureInfoEntity() ?? CultureInfoLogic.CultureInfoToEntity.Value.Values.FirstEx();
         }
 
-        [Route("api/culture/setCurrentCulture"), HttpPost, AllowAnonymous]
-        public string SetCurrentCulture([FromBody]Lite<CultureInfoEntity> culture)
+        [HttpPost("api/culture/setCurrentCulture"), AllowAnonymous]
+        public string SetCurrentCulture([Required, FromBody]Lite<CultureInfoEntity> culture)
         {
             var ci = ExecutionMode.Global().Using(_ => culture.Retrieve().ToCultureInfo());
 
@@ -63,7 +56,7 @@ namespace Signum.React.Translation
                 }
             }
 
-            this.ActionContext.HttpContext.Response.Cookies.Append("language", ci.Name);
+            ControllerContext.HttpContext.Response.Cookies.Append("language", ci.Name);
             return ci.Name;
         }
     }

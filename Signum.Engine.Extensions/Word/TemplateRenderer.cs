@@ -1,6 +1,5 @@
 ﻿using DocumentFormat.OpenXml.Packaging;
 using D = DocumentFormat.OpenXml.Drawing;
-using Signum.Engine.DynamicQuery;
 using Signum.Entities;
 using Signum.Entities.DynamicQuery;
 using Signum.Utilities;
@@ -8,12 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Data;
 using Signum.Entities.Word;
-using DocumentFormat.OpenXml;
-using System.Threading;
 using Signum.Engine.Basics;
 
 namespace Signum.Engine.Word

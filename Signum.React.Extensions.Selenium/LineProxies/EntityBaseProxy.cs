@@ -4,7 +4,6 @@ using OpenQA.Selenium;
 using Signum.Engine.Basics;
 using Signum.Entities;
 using Signum.Utilities;
-using Signum.React.Selenium;
 
 namespace Signum.React.Selenium
 {
@@ -22,7 +21,7 @@ namespace Signum.React.Selenium
             get { return this.Element.WithLocator(By.CssSelector("a.sf-create")); }
         }
 
-        
+
 
         protected void CreateEmbedded<T>()
         {
@@ -43,7 +42,7 @@ namespace Signum.React.Selenium
 
         public FrameModalProxy<T> CreatePopup<T>() where T : ModifiableEntity
         {
-         
+
             string changes = GetChanges();
 
             var popup = this.CreateButton.Find().CaptureOnClick();
@@ -60,12 +59,12 @@ namespace Signum.React.Selenium
         {
             get { return this.Element.WithLocator(By.CssSelector("a.sf-view")); }
         }
-        
+
         protected FrameModalProxy<T> ViewInternal<T>() where T : ModifiableEntity
         {
             var newElement = this.ViewButton.Find().CaptureOnClick();
             string changes = GetChanges();
-            
+
             return new FrameModalProxy<T>(newElement, this.ItemRoute)
             {
                 Disposing = okPressed => WaitNewChanges(changes, "create dialog closed")
@@ -86,7 +85,7 @@ namespace Signum.React.Selenium
         {
             WaitChanges(() => this.RemoveButton.Find().Click(), "removing");
         }
-      
+
         public SearchModalProxy Find(Type selectType = null)
         {
             string changes = GetChanges();
@@ -162,14 +161,14 @@ namespace Signum.React.Selenium
         }
         public static void AutoCompleteBasic(IWebElement autoCompleteElement, Lite<IEntity> lite)
         {
-            autoCompleteElement.SafeSendKeys(lite.Id.ToString());
+            autoCompleteElement.SafeSendKeys("id:" + lite.Id.ToString());
             //Selenium.FireEvent(autoCompleteLocator, "keyup");
 
             var listLocator = By.CssSelector(".typeahead.dropdown-menu");
 
             var list = autoCompleteElement.GetParent().WaitElementVisible(By.TagName("div")).WaitElementVisible(listLocator);
             IWebElement itemElement = list.FindElement(By.CssSelector("[data-entity-key='{0}']".FormatWith(lite.Key())));
-            
+
             itemElement.Click();
         }
     }

@@ -1,19 +1,12 @@
 ﻿using Signum.Entities.Dynamic;
-using Signum.Entities;
 using Signum.Entities.Basics;
 using Signum.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
-using System.Text;
-using System.Threading.Tasks;
-using System.Xml.Linq;
 using System.ComponentModel;
-using Signum.Entities.Workflow;
 using System.Reflection;
-using System.CodeDom.Compiler;
-using System.Text.RegularExpressions;
 
 namespace Signum.Entities.Workflow
 {
@@ -35,23 +28,23 @@ namespace Signum.Entities.Workflow
         public WorkflowActivityType Type { get; set; }
 
         public bool RequiresOpen { get; set; }
-        
+
         [Ignore, QueryableProperty]
         [NotNullValidator, NoRepeatValidator]
         public MList<WorkflowEventEntity> BoundaryTimers { get; set; } = new MList<WorkflowEventEntity>();
-        
+
         [Unit("min")]
         public double? EstimatedDuration { get; set; }
 
         [StringLengthValidator(AllowNulls = true, Min = 3, Max = 255)]
         public string ViewName { get; set; }
-        
+
         [NotifyChildProperty]
         public WorkflowScriptPartEmbedded Script { get; set; }
 
         [NotNullValidator]
         public WorkflowXmlEmbedded Xml { get; set; }
-        
+
         [NotifyChildProperty]
         public SubWorkflowEmbedded SubWorkflow { get; set; }
 
@@ -88,7 +81,7 @@ namespace Signum.Entities.Workflow
                 if (Script == null && requiresScript)
                     return ValidationMessage._0IsNotSet.NiceToString(pi.NiceName());
             }
-            
+
             return base.PropertyValidation(pi);
         }
 
@@ -127,7 +120,7 @@ namespace Signum.Entities.Workflow
             this.Type = wModel.Type;
             this.RequiresOpen = wModel.RequiresOpen;
             // We can not set boundary timers in model
-            //this.BoundaryTimers.AssignMList(wModel.BoundaryTimers); 
+            //this.BoundaryTimers.AssignMList(wModel.BoundaryTimers);
             this.EstimatedDuration = wModel.EstimatedDuration;
             this.Script = wModel.Script;
             this.ViewName = wModel.ViewName;
@@ -160,7 +153,7 @@ namespace Signum.Entities.Workflow
             return this.WorkflowActivity != null && this.WorkflowActivity.Name == activityName && this.WorkflowActivity.Lane.Pool.Workflow.Name == workflowName;
         }
     }
-    
+
     [Serializable]
     public class WorkflowScriptPartEmbedded : EmbeddedEntity
     {
@@ -193,7 +186,7 @@ namespace Signum.Entities.Workflow
         public static readonly ExecuteSymbol<WorkflowActivityEntity> Save;
         public static readonly DeleteSymbol<WorkflowActivityEntity> Delete;
     }
-    
+
     [Serializable]
     public class SubWorkflowEmbedded : EmbeddedEntity
     {
@@ -242,7 +235,7 @@ namespace Signum.Entities.Workflow
                             {
                                 " + script + @"
                             }
-                        }                  
+                        }
                     }");
         }
 
@@ -269,21 +262,21 @@ namespace Signum.Entities.Workflow
 
         [NotNullValidator, InTypeScript(Undefined = false, Null = false)]
         public TypeEntity MainEntityType { get; set; }
-        
+
         [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
         public string Name { get; set; }
 
         public WorkflowActivityType Type { get; set; }
 
         public bool RequiresOpen { get; set; }
-        
+
         [PreserveOrder]
         [NotNullValidator, NoRepeatValidator]
         public MList<WorkflowEventModel> BoundaryTimers { get; set; } = new MList<WorkflowEventModel>();
 
         [Unit("min")]
         public double? EstimatedDuration { get; set; }
-        
+
         public WorkflowScriptPartEmbedded Script { get; set; }
 
         [StringLengthValidator(AllowNulls = true, Min = 3, Max = 255)]

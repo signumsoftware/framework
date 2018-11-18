@@ -1,20 +1,14 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Linq.Expressions;
-using System.Text;
 using OpenQA.Selenium.Remote;
 using Signum.Engine;
-using Signum.Engine.Basics;
 using Signum.Entities;
 using Signum.Entities.Reflection;
-using Signum.Entities.UserQueries;
 using Signum.Utilities;
 using System.Reflection;
 using Signum.Entities.DynamicQuery;
 using Signum.Entities.UserAssets;
 using OpenQA.Selenium;
-using Signum.React.Selenium;
 
 namespace Signum.React.Selenium
 {
@@ -110,7 +104,7 @@ namespace Signum.React.Selenium
             lineContainer.LineLocator(property).ElementLocator.WaitNoPresent();
         }
 
-        public static LineContainer<S> SubContainer<T, S>(this ILineContainer<T> lineContainer, Expression<Func<T, S>> property) 
+        public static LineContainer<S> SubContainer<T, S>(this ILineContainer<T> lineContainer, Expression<Func<T, S>> property)
             where T : ModifiableEntity
             where S : ModifiableEntity
         {
@@ -130,7 +124,7 @@ namespace Signum.React.Selenium
         public static void ValueLineValue<T, V>(this ILineContainer<T> lineContainer, Expression<Func<T, V>> property, V value, bool loseFocus = false)
             where T : ModifiableEntity
         {
-            var valueLine = lineContainer.ValueLine(property);            
+            var valueLine = lineContainer.ValueLine(property);
 
             valueLine.SetValue(value);
 
@@ -278,7 +272,7 @@ namespace Signum.React.Selenium
         public static SearchControlProxy GetSearchControl(this ILineContainer lineContainer, object queryName)
         {
             string queryKey = QueryUtils.GetKey(queryName);
-            
+
             var element = lineContainer.Element.FindElement(By.CssSelector("div.sf-search-control[data-query-key={0}]".FormatWith(queryKey)));
 
             return new SearchControlProxy(element);

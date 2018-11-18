@@ -8,7 +8,6 @@ using Signum.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Web;
 
 namespace Signum.React.Maps
 {
@@ -50,7 +49,7 @@ namespace Signum.React.Maps
 
 
             var providers = GetColorProviders.GetInvocationListTyped().SelectMany(f => f()).OrderBy(a => a.Order).ToList();
-            
+
             var extraActions = providers.Select(a => a.AddExtra).NotNull().ToList();
 
             if (extraActions.Any())
@@ -136,7 +135,7 @@ namespace Signum.React.Maps
             public int total_size_kb;
         }
 
-      
+
     }
 
     public class MapColorProvider

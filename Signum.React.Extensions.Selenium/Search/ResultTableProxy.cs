@@ -297,7 +297,7 @@ namespace Signum.React.Selenium
         }
 
         public void WaitNoVisible(Lite<IEntity> lite) => WaitNoVisible(new List<Lite<IEntity>> { lite });
-  
+
         public void WaitNoVisible(List<Lite<IEntity>> lites)
         {
             lites.ForEach(lite => RowElement(lite).WaitNoVisible());

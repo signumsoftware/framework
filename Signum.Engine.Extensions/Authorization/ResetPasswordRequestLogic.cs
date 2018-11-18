@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using Signum.Entities.Authorization;
 using System.Reflection;
 using Signum.Engine.DynamicQuery;
@@ -11,8 +10,6 @@ using Signum.Engine.Mailing;
 using Signum.Utilities;
 using Signum.Entities.Mailing;
 using Signum.Engine.Basics;
-using System.Globalization;
-using Signum.Engine.Translation;
 
 
 namespace Signum.Engine.Authorization

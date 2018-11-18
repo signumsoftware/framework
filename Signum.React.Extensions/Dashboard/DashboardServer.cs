@@ -1,15 +1,5 @@
-﻿using Signum.Entities.UserAssets;
-using Signum.React.Json;
-using Signum.Utilities;
-using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
 using System.Reflection;
-using System.Web;
-using Microsoft.AspNetCore.Mvc;
-using Newtonsoft.Json;
-using Signum.Engine.DynamicQuery;
-using Signum.Engine.Basics;
 using Signum.React.UserAssets;
 using Signum.React.Facades;
 using Signum.Engine.Dashboard;
@@ -35,7 +25,7 @@ namespace Signum.React.Dashboard
                 var dashboards = DashboardLogic.GetDashboardsEntity(ep.entity.GetType());
                 if (dashboards.Any())
                     ep.Extension.Add("dashboards", dashboards);
-          
+
                 var result = DashboardLogic.GetEmbeddedDashboard(ep.entity.GetType());
                 if (result != null)
                     ep.Extension.Add("embeddedDashboard", result);

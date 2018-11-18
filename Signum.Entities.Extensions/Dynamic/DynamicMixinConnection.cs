@@ -1,17 +1,7 @@
-﻿using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-using Signum.Entities;
-using Signum.Entities.Basics;
+﻿using Signum.Entities.Basics;
 using Signum.Utilities;
-using Signum.Utilities.ExpressionTrees;
 using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Linq;
 using System.Linq.Expressions;
-using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Signum.Entities.Dynamic
 {
@@ -21,10 +11,10 @@ namespace Signum.Entities.Dynamic
         [NotNullValidator]
         public Lite<TypeEntity> EntityType { get; set; }
 
-        [NotNullValidator]
-        public Lite<DynamicTypeEntity> DynamicMixin { get; set; }
+        [StringLengthValidator(AllowNulls = false, Max = 100)]
+        public string MixinName { get; set; }
 
-        static Expression<Func<DynamicMixinConnectionEntity, string>> ToStringExpression = @this => @this.EntityType + " - " + @this.DynamicMixin;
+        static Expression<Func<DynamicMixinConnectionEntity, string>> ToStringExpression = @this => @this.EntityType + " - " + @this.MixinName;
         [ExpressionField]
         public override string ToString()
         {

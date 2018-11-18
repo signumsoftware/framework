@@ -1,15 +1,11 @@
-﻿using Newtonsoft.Json;
-using Signum.Engine;
-using Signum.Engine.Basics;
+﻿using Signum.Engine.Basics;
 using Signum.Engine.Cache;
 using Signum.Engine.DynamicQuery;
 using Signum.Engine.Maps;
 using Signum.Engine.Operations;
 using Signum.Entities;
-using Signum.Entities.Authorization;
 using Signum.Entities.Basics;
 using Signum.Entities.Dynamic;
-using Signum.Entities.Reflection;
 using Signum.Utilities;
 using Signum.Utilities.ExpressionTrees;
 using System;
@@ -18,13 +14,13 @@ using System.Data;
 using System.Linq;
 using System.Reflection;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace Signum.Engine.Dynamic
 {
     public static class DynamicTypeLogic
     {
         public static ResetLazy<HashSet<Type>> AvailableEmbeddedEntities;
+        public static ResetLazy<HashSet<Type>> AvailableModelEntities;
 
         public static void Start(SchemaBuilder sb)
         {
@@ -47,6 +43,18 @@ namespace Signum.Engine.Dynamic
                     .Distinct()
                     .SelectMany(a => a.GetTypes())
                     .Where(t => typeof(EmbeddedEntity).IsAssignableFrom(t) && namespaces.Contains(t.Namespace))
+                    .ToHashSet();
+
+                }, new InvalidateWith(typeof(TypeEntity)));
+
+                AvailableModelEntities = sb.GlobalLazy(() =>
+                {
+                    var namespaces = DynamicCode.GetNamespaces().ToHashSet();
+                    return DynamicCode.AssemblyTypes
+                    .Select(t => t.Assembly)
+                    .Distinct()
+                    .SelectMany(a => a.GetTypes())
+                    .Where(t => typeof(ModelEntity).IsAssignableFrom(t) && namespaces.Contains(t.Namespace))
                     .ToHashSet();
 
                 }, new InvalidateWith(typeof(TypeEntity)));
@@ -88,6 +96,10 @@ namespace Signum.Engine.Dynamic
                             var old = e.ToLite().Retrieve();
                             if (e.TypeName != old.TypeName)
                                 DynamicSqlMigrationLogic.AddDynamicRename(TypeNameKey, old.TypeName, e.TypeName);
+
+
+                            if (e.BaseType == DynamicBaseType.ModelEntity)
+                                return;
 
                             var newDef = e.GetDefinition();
                             var oldDef = old.GetDefinition();
@@ -375,7 +387,8 @@ namespace Signum.Engine.Dynamic
         public virtual string GetTypeNameWithSuffix()
         {
             return this.TypeName + (this.BaseType == DynamicBaseType.MixinEntity ? "Mixin" :
-                this.BaseType == DynamicBaseType.EmbeddedEntity ? "Embedded":  "Entity");
+                this.BaseType == DynamicBaseType.EmbeddedEntity ? "Embedded": 
+                this.BaseType == DynamicBaseType.ModelEntity ? "Model" : "Entity");
         }
 
         private List<string> GetEntityAttributes()

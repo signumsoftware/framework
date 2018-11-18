@@ -1,24 +1,15 @@
-﻿using Newtonsoft.Json;
-using Signum.Engine;
-using Signum.Engine.Basics;
-using Signum.Engine.Cache;
+﻿using Signum.Engine.Cache;
 using Signum.Engine.DynamicQuery;
 using Signum.Engine.Maps;
 using Signum.Engine.Operations;
 using Signum.Entities;
-using Signum.Entities.Authorization;
 using Signum.Entities.Basics;
 using Signum.Entities.Dynamic;
-using Signum.Entities.Reflection;
 using Signum.Utilities;
-using Signum.Utilities.ExpressionTrees;
-using System;
 using System.Collections.Generic;
-using System.Data;
 using System.Linq;
 using System.Reflection;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace Signum.Engine.Dynamic
 {
@@ -29,14 +20,14 @@ namespace Signum.Engine.Dynamic
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
                 sb.Include<DynamicMixinConnectionEntity>()
-                    .WithUniqueIndex(e => new { e.EntityType, e.DynamicMixin })
+                    .WithUniqueIndex(e => new { e.EntityType, e.MixinName })
                     .WithSave(DynamicMixinConnectionOperation.Save)
                     .WithDelete(DynamicMixinConnectionOperation.Delete)
                     .WithQuery(() => e => new {
                         Entity = e,
                         e.Id,
                         e.EntityType,
-                        e.DynamicMixin,
+                        e.MixinName,
                     });
 
                 DynamicLogic.GetCodeFiles += GetCodeFiles;
@@ -104,7 +95,7 @@ namespace Signum.Engine.Dynamic
             sb.AppendLine($"        {{");
 
             if (this.Mixins != null && this.Mixins.Count > 0)
-                this.Mixins.ForEach(m => sb.AppendLine($"MixinDeclarations.Register<{m.EntityType}Entity, {m.DynamicMixin}Mixin>();".Indent(12)));
+                this.Mixins.ForEach(m => sb.AppendLine($"MixinDeclarations.Register<{m.EntityType}Entity, {m.MixinName}Mixin>();".Indent(12)));
 
             sb.AppendLine($"        }}");
             sb.AppendLine($"    }}");

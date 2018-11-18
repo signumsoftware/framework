@@ -1,11 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using Signum.Entities.Basics;
 using System.Linq.Expressions;
 using Signum.Utilities;
-using Signum.Utilities.ExpressionTrees;
 
 namespace Signum.Entities.ViewLog
 {

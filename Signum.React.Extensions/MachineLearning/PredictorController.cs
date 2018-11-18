@@ -1,31 +1,21 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
-using System.Net;
-using System.Net.Http;
 using Microsoft.AspNetCore.Mvc;
-using Signum.React.Files;
-using System.IO;
 using Signum.Entities.MachineLearning;
 using Signum.Engine.MachineLearning;
 using Signum.Engine;
 using Signum.Utilities;
 using Signum.Entities;
-using Signum.React.ApiControllers;
-using Newtonsoft.Json.Linq;
-using Signum.Entities.DynamicQuery;
-using Newtonsoft.Json;
-using Signum.Entities.Reflection;
-using Signum.Utilities.Reflection;
-using Signum.Engine.DynamicQuery;
 using Signum.Engine.Basics;
+using Signum.React.Filters;
 
 namespace Signum.React.MachineLearning
 {
-    public class PredictorController : ApiController
+    [ValidateModelFilter]
+    public class PredictorController : ControllerBase
     {
-        [Route("api/predictor/availableDevices/{algorithmKey}"), HttpGet]
+        [HttpGet("api/predictor/availableDevices/{algorithmKey}")]
         public string[] AvailableDevices(string algorithmKey)
         {
             var key = SymbolLogic<PredictorAlgorithmSymbol>.ToSymbol(algorithmKey);
@@ -34,7 +24,7 @@ namespace Signum.React.MachineLearning
             return alg.GetAvailableDevices();
         }
 
-        [Route("api/predictor/trainingProgress/{id}"), HttpGet]
+        [HttpGet("api/predictor/trainingProgress/{id}")]
         public TrainingProgress GetTrainingState(int id)
         {
             var ptc = PredictorLogic.GetTrainingContext(Lite.Create<PredictorEntity>(id));
@@ -49,7 +39,7 @@ namespace Signum.React.MachineLearning
             };
         }
 
-        [Route("api/predictor/epochProgress/{id}"), HttpGet]
+        [HttpGet("api/predictor/epochProgress/{id}")]
         public List<object[]> GetProgressLosses(int id)
         {
             return Database.Query<PredictorEpochProgressEntity>().Where(a => a.Predictor.Id == id).Select(p => new EpochProgress
@@ -66,8 +56,8 @@ namespace Signum.React.MachineLearning
             .ToList();
         }
 
-        [Route("api/predict/get/{predictorId}"), HttpPost]
-        public PredictRequestTS GetPredict(string predictorId, [FromBody]Dictionary<string, object> mainKeys)
+        [HttpPost("api/predict/get/{predictorId}")]
+        public PredictRequestTS GetPredict(string predictorId, [Required, FromBody]Dictionary<string, object> mainKeys)
         {
             var p = Lite.ParsePrimaryKey<PredictorEntity>(predictorId);
 
@@ -84,8 +74,8 @@ namespace Signum.React.MachineLearning
             return pmodel;
         }
 
-        [Route("api/predict/update"), HttpPost]
-        public PredictRequestTS UpdatePredict([FromBody]PredictRequestTS request)
+        [HttpPost("api/predict/update")]
+        public PredictRequestTS UpdatePredict([Required, FromBody]PredictRequestTS request)
         {
             PredictorPredictContext pctx = PredictorPredictLogic.GetPredictContext(request.predictor);
 
@@ -101,7 +91,7 @@ namespace Signum.React.MachineLearning
             return request;
         }
 
-        [Route("api/predict/publications/{queryKey}"), HttpGet]
+        [HttpGet("api/predict/publications/{queryKey}")]
         public List<PredictorPublicationSymbol> GetPublications(string queryKey)
         {
             object queryName = QueryLogic.ToQueryName(queryKey);

@@ -1,15 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using Signum.Engine.Maps;
 using Signum.Entities.Authorization;
 using Signum.Entities.Basics;
-using Signum.Engine.DynamicQuery;
 using Signum.Engine.Basics;
 using Signum.Utilities;
-using Signum.Utilities.DataStructures;
-using System.Threading;
 using Signum.Entities;
 using System.Reflection;
 using Signum.Entities.DynamicQuery;
@@ -53,9 +49,9 @@ namespace Signum.Engine.Authorization
                     return null;
                 };
 
-                AuthLogic.ExportToXml += exportAll => cache.ExportXml("Queries", "Query", QueryUtils.GetKey, b => b.ToString(), 
+                AuthLogic.ExportToXml += exportAll => cache.ExportXml("Queries", "Query", QueryUtils.GetKey, b => b.ToString(),
                     exportAll ? QueryLogic.QueryNames.Values.ToList(): null);
-                AuthLogic.ImportFromXml += (x, roles, replacements) => 
+                AuthLogic.ImportFromXml += (x, roles, replacements) =>
                 {
                     string replacementKey = "AuthRules:" + typeof(QueryEntity).Name;
 
@@ -143,7 +139,7 @@ namespace Signum.Engine.Authorization
 
         public static AuthThumbnail? GetAllowedThumbnail(Lite<RoleEntity> role, Type entityType)
         {
-            return QueryLogic.Queries.GetTypeQueries(entityType).Keys.Select(qn => cache.GetAllowed(role, qn)).Collapse(); 
+            return QueryLogic.Queries.GetTypeQueries(entityType).Keys.Select(qn => cache.GetAllowed(role, qn)).Collapse();
         }
 
         internal static bool AllCanRead(this Implementations implementations, Func<Type, TypeAllowedAndConditions> getAllowed)

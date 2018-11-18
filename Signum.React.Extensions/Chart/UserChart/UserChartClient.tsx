@@ -1,16 +1,11 @@
 ﻿import * as React from 'react'
-import { Route } from 'react-router'
 import { ajaxPost, ajaxGet } from '@framework/Services';
-import { EntitySettings, ViewPromise } from '@framework/Navigator'
+import { EntitySettings } from '@framework/Navigator'
 import * as Navigator from '@framework/Navigator'
 import * as Finder from '@framework/Finder'
-import { getQueryKey } from '@framework/Reflection'
-import { EntityOperationSettings } from '@framework/Operations'
 import { Entity, Lite, liteKey } from '@framework/Signum.Entities'
-import * as Constructor from '@framework/Constructor'
-import * as Operations from '@framework/Operations'
 import * as QuickLinks from '@framework/QuickLinks'
-import { FindOptions, QueryToken, FilterOption, FilterOptionParsed, FilterOperation, OrderOption, OrderOptionParsed, ColumnOption, FilterRequest, QueryRequest, Pagination, SubTokensOptions, FilterGroupOptionParsed, FilterConditionOptionParsed } from '@framework/FindOptions'
+import { OrderOptionParsed } from '@framework/FindOptions'
 import * as AuthClient from '../../Authorization/AuthClient'
 import { UserChartEntity, ChartPermission, ChartMessage, ChartRequestModel, ChartParameterEmbedded, ChartColumnEmbedded } from '../Signum.Entities.Chart'
 import { QueryFilterEmbedded, QueryOrderEmbedded } from '../../UserQueries/Signum.Entities.UserQueries'
@@ -20,8 +15,7 @@ import * as ChartClient from '../ChartClient'
 import * as UserAssetsClient from '../../UserAssets/UserAssetClient'
 import { ImportRoute } from "@framework/AsyncImport";
 import { OrderRequest } from '@framework/FindOptions';
-import { toFilterRequests, TokenCompleter } from '@framework/Finder';
-
+import { toFilterRequests } from '@framework/Finder';
 
 export function start(options: { routes: JSX.Element[] }) {
 

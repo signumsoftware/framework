@@ -1,6 +1,4 @@
-﻿using Signum.Entities;
-using Signum.Utilities;
-using System;
+﻿using Signum.Utilities;
 using System.Runtime.CompilerServices;
 
 [assembly: DefaultAssemblyCulture("en")]

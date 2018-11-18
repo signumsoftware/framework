@@ -6,7 +6,7 @@ import * as Navigator from '@framework/Navigator'
 import { ChartRequestModel, UserChartEntity } from '../Signum.Entities.Chart'
 import * as ChartClient from '../ChartClient'
 import ChartRequestView from './ChartRequestView'
-import { RouteComponentProps } from "react-router";
+import { RouteComponentProps } from 'react-router'
 
 interface ChartRequestPageProps extends RouteComponentProps<{ queryName: string; }> {
 

@@ -1,13 +1,7 @@
-﻿using Signum.Entities;
-using Signum.Entities.Basics;
+﻿using Signum.Entities.Basics;
 using Signum.Utilities;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Linq.Expressions;
-using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Signum.Entities.Workflow
 {
@@ -34,7 +28,7 @@ namespace Signum.Entities.Workflow
         public Lite<WorkflowConditionEntity> Condition { get; set; }
 
         public Lite<WorkflowActionEntity> Action { get; set; }
-        
+
         public int? Order { get; set; }
 
         [NotNullValidator]
@@ -81,7 +75,7 @@ namespace Signum.Entities.Workflow
         Jump,
         ScriptException,
     }
-    
+
     [AutoInit]
     public static class WorkflowConnectionOperation
     {

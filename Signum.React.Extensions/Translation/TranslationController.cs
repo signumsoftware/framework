@@ -1,12 +1,5 @@
 ﻿using Newtonsoft.Json;
-using Signum.Engine;
-using Signum.Engine.Authorization;
-using Signum.Engine.Basics;
-using Signum.Engine.Operations;
 using Signum.Engine.Translation;
-using Signum.Entities;
-using Signum.Entities.Authorization;
-using Signum.Entities.Basics;
 using Signum.React.Filters;
 using Signum.Utilities;
 using Signum.Utilities.DataStructures;
@@ -14,23 +7,21 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
-using System.Net;
-using System.Net.Http;
-using System.Net.Http.Headers;
 using System.Reflection;
 using Microsoft.AspNetCore.Mvc;
-using Signum.React.ApiControllers;
+using System.ComponentModel.DataAnnotations;
 
 namespace Signum.React.Translation
 {
-    public class TranslationController : ApiController
+    [ValidateModelFilter]
+    public class TranslationController : ControllerBase
     {
         public static IEnumerable<Assembly> AssembliesToLocalize()
         {
             return AppDomain.CurrentDomain.GetAssemblies().Where(a => a.HasAttribute<DefaultAssemblyCultureAttribute>());
         }
 
-        [Route("api/translation/state"), HttpGet]
+        [HttpGet("api/translation/state")]
         public List<TranslationFileStatus> GetState()
         {
             var cultures = TranslationLogic.CurrentCultureInfos(CultureInfo.GetCultureInfo("en"));
@@ -81,7 +72,7 @@ namespace Signum.React.Translation
         }
 
 
-        [Route("api/translation/retrieve"), HttpPost]
+        [HttpPost("api/translation/retrieve")]
         public AssemblyResultTS Retrieve(string assembly, string culture, string filter)
         {
             Assembly ass = AssembliesToLocalize().Where(a => a.GetName().Name == assembly).SingleEx(() => "Assembly {0}".FormatWith(assembly));
@@ -158,7 +149,7 @@ namespace Signum.React.Translation
         }
 
 
-        [Route("api/translation/sync"), HttpPost]
+        [HttpPost("api/translation/sync")]
         public AssemblyResultTS Sync(string assembly, string culture, string @namespace = null)
         {
             Assembly ass = AssembliesToLocalize().Where(a => a.GetName().Name == assembly).SingleEx(() => "Assembly {0}".FormatWith(assembly));
@@ -186,8 +177,8 @@ namespace Signum.React.Translation
                 }).ToDictionary(lt => lt.type),
             };
         }
-        
-        [Route("api/translation/syncStats"), HttpGet]
+
+        [HttpGet("api/translation/syncStats")]
         public List<NamespaceSyncStats> SyncStats(string assembly, string culture)
         {
             Assembly ass = AssembliesToLocalize().Where(a => a.GetName().Name == assembly).SingleEx(() => "Assembly {0}".FormatWith(assembly));
@@ -203,7 +194,7 @@ namespace Signum.React.Translation
         private LocalizedTypeTS GetLocalizedType(LocalizedTypeChanges t, CultureInfo ci, bool isTarget)
         {
             var tc = t.TypeConflict?.TryGetC(ci);
-            
+
             return new LocalizedTypeTS
             {
                 culture = ci.Name,
@@ -230,7 +221,7 @@ namespace Signum.React.Translation
             public Dictionary<string, CulturesTS> cultures;
             public Dictionary<string, LocalizableTypeTS> types;
         }
-        
+
         public class CulturesTS
         {
             public string name;
@@ -310,8 +301,8 @@ namespace Signum.React.Translation
         }
 
 
-        [Route("api/translation/save"), HttpPost]
-        public void SaveTypes(string assembly, string culture, [FromBody]AssemblyResultTS result)
+        [HttpPost("api/translation/save")]
+        public void SaveTypes(string assembly, string culture, [Required, FromBody]AssemblyResultTS result)
         {
             var currentAssembly = AssembliesToLocalize().Single(a => a.GetName().Name == assembly);
 
@@ -348,14 +339,14 @@ namespace Signum.React.Translation
             }
         }
 
-        [Route("api/translation/pluralize"), HttpPost]
-        public string Pluralize(string culture, [FromBody]string text)
+        [HttpPost("api/translation/pluralize")]
+        public string Pluralize(string culture, [Required, FromBody]string text)
         {
             return NaturalLanguageTools.Pluralize(text, CultureInfo.GetCultureInfo(culture));
         }
 
-        [Route("api/translation/gender"), HttpPost]
-        public string Gender(string culture, [FromBody]string text)
+        [HttpPost("api/translation/gender")]
+        public string Gender(string culture, [Required, FromBody]string text)
         {
             return NaturalLanguageTools.GetGender(text, CultureInfo.GetCultureInfo(culture))?.ToString();
         }

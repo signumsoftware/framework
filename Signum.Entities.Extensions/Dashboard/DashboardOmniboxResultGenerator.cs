@@ -1,10 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using Signum.Utilities;
-using Signum.Entities.Reflection;
-using System.Text.RegularExpressions;
 using Signum.Entities.Omnibox;
 
 namespace Signum.Entities.Dashboard
@@ -33,7 +29,7 @@ namespace Signum.Entities.Dashboard
             {
                 var match = OmniboxUtils.Contains(uq, uq.ToString(), ident);
 
-                yield return new DashboardOmniboxResult 
+                yield return new DashboardOmniboxResult
                 {
                     ToStr = ident,
                     ToStrMatch = match,

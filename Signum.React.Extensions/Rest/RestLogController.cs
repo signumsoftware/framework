@@ -1,25 +1,18 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Net;
 using System.Net.Http;
-using System.Net.Http.Headers;
-using System.Text;
 using System.Threading.Tasks;
-using System.Web;
 using Microsoft.AspNetCore.Mvc;
 using Signum.Engine;
 using Signum.Entities;
 using Signum.Entities.Rest;
-using Signum.Utilities;
 using Signum.Engine.Rest;
-using Signum.React.ApiControllers;
 
 namespace Signum.React.RestLog
 {
-    public class RestLogController : ApiController
+    public class RestLogController : ControllerBase
     {
-        [Route("api/restLog/"), HttpGet]
+        [HttpGet("api/restLog/")]
         public async Task<RestDiffResult> GetRestDiffLog(string id, string url)
         {
             var oldRequest = Database.Retrieve<RestLogEntity>(PrimaryKey.Parse(id, typeof(RestLogEntity)));

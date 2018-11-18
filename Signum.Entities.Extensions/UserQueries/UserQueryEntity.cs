@@ -1,10 +1,8 @@
-﻿using Signum.Entities;
-using Signum.Entities.Authorization;
+﻿using Signum.Entities.Authorization;
 using Signum.Entities.Basics;
 using Signum.Entities.DynamicQuery;
 using Signum.Entities.UserAssets;
 using Signum.Utilities;
-using Signum.Utilities.Reflection;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -42,7 +40,7 @@ namespace Signum.Entities.UserQueries
         public string DisplayName { get; set; }
 
         public bool AppendFilters { get; set; }
-        
+
         [NotNullValidator, PreserveOrder]
         public MList<QueryFilterEmbedded> Filters { get; set; } = new MList<QueryFilterEmbedded>();
 
@@ -53,11 +51,11 @@ namespace Signum.Entities.UserQueries
 
         [NotNullValidator, PreserveOrder]
         public MList<QueryColumnEmbedded> Columns { get; set; } = new MList<QueryColumnEmbedded>();
-        
+
         public bool SearchOnLoad { get; set; } = true;
 
         public bool ShowFilterButton { get; set; } = true;
-        
+
         PaginationMode? paginationMode;
         public PaginationMode? PaginationMode
         {
@@ -88,7 +86,7 @@ namespace Signum.Entities.UserQueries
                 if (ElementsPerPage == null && ShouldHaveElements)
                     return UserQueryMessage._0ShouldBeSetIf1Is2.NiceToString().FormatWith(pi.NiceName(), NicePropertyName(() => PaginationMode), PaginationMode.NiceToString());
             }
-           
+
             return base.PropertyValidation(pi);
         }
 
@@ -287,7 +285,7 @@ namespace Signum.Entities.UserQueries
                 }
             }
         }
-        
+
         public bool IsGroup { get; set; }
 
         public FilterGroupOperation? GroupOperation { get; set; }
@@ -312,7 +310,7 @@ namespace Signum.Entities.UserQueries
                 if (pi.Name == nameof(GroupOperation) && GroupOperation == null)
                     return ValidationMessage._0IsNotSet.NiceToString(pi.NiceName());
 
-                
+
                 if(token != null && token.ParseException == null)
                 {
                     if (pi.Name == nameof(Token))
@@ -480,7 +478,7 @@ namespace Signum.Entities.UserQueries
                         throw new InvalidOperationException("Unexpected childrens of condition");
 
                     var filter = gr.Key;
-                    
+
                     var value = FilterValueConverter.Parse(filter.ValueString, filter.Token.Token.Type, filter.Operation.Value.IsList());
 
                     return (Filter)new FilterCondition(filter.Token.Token, filter.Operation.Value, value);
@@ -488,7 +486,7 @@ namespace Signum.Entities.UserQueries
                 else
                 {
                     var group = gr.Key;
-                    
+
                     return (Filter)new FilterGroup(group.GroupOperation.Value, group.Token?.Token, gr.ToFilterList(indent + 1).ToList());
                 }
             }).ToList();

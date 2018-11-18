@@ -1,13 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System.Linq;
 using Signum.Engine.Processes;
 using Signum.Entities.SMS;
-using Signum.Entities;
 using Signum.Engine.Operations;
-using Signum.Engine;
-using Signum.Entities.Processes;
 
 namespace Signum.Engine.SMS
 {

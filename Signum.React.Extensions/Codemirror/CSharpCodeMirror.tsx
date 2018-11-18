@@ -6,8 +6,6 @@ import "codemirror/lib/codemirror.css"
 import "codemirror/addon/dialog/dialog.css"
 import "codemirror/addon/display/fullscreen.css"
 import "codemirror/addon/hint/show-hint.css"
-
-
 import "codemirror/lib/codemirror"
 import "codemirror/mode/clike/clike"
 import "codemirror/addon/comment/comment"
@@ -28,11 +26,11 @@ interface CSharpCodeMirrorProps {
     errorLineNumber?: number;
 }
 
-export default class CSharpCodeMirror extends React.Component<CSharpCodeMirrorProps> { 
+export default class CSharpCodeMirror extends React.Component<CSharpCodeMirrorProps> {
 
     codeMirrorComponent!: CodeMirrorComponent;
 
-    render() {        
+    render() {
 
         const options = {
             lineNumbers: true,
@@ -53,7 +51,7 @@ export default class CSharpCodeMirror extends React.Component<CSharpCodeMirrorPr
 
         (options as any).highlightSelectionMatches = true;
         (options as any).matchBrackets = true;
-        
+
         return (
             <CodeMirrorComponent value={this.props.script} ref={cm => this.codeMirrorComponent = cm!}
                 options={options}

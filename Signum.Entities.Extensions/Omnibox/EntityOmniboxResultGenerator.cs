@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using Signum.Utilities;
-using Signum.Entities.Reflection;
 using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 
@@ -114,7 +112,7 @@ namespace Signum.Entities.Omnibox
         {
             return true;
         }
-        
+
         public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
         {
             writer.WriteValue(value == null ? null : ((PrimaryKey)value).Object);

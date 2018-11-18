@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using Signum.Entities.Mailing;
 using Signum.Engine.Processes;
 using Signum.Engine.Operations;
@@ -12,9 +11,7 @@ using System.Reflection;
 using Signum.Entities;
 using System.Linq.Expressions;
 using Signum.Utilities;
-using Signum.Engine.Scheduler;
 using Signum.Engine.Authorization;
-using Signum.Utilities.ExpressionTrees;
 using Signum.Entities.Templating;
 using Signum.Engine.Basics;
 

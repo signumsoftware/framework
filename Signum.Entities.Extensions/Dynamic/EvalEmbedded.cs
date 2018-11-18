@@ -1,19 +1,13 @@
 ﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CSharp;
-using Signum.Entities;
 using Signum.Utilities;
 using System;
-using System.CodeDom.Compiler;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Reflection.Metadata;
 using System.Runtime.Loader;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Signum.Entities.Dynamic
 {
@@ -83,7 +77,7 @@ namespace Signum.Entities.Dynamic
                     try
                     {
                         var tree = SyntaxFactory.ParseSyntaxTree(code);
-                        
+
                         var compilation = CSharpCompilation.Create("EvalEmbeddedCode.dll")
                          .WithOptions(new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary))
                          .AddReferences(references)

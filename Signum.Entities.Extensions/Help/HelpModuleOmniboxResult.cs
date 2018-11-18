@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Signum.Entities.Omnibox;
 using System.Text.RegularExpressions;
 using Signum.Utilities;
@@ -66,15 +64,15 @@ namespace Signum.Entities.Help
             var resultType = typeof(HelpModuleOmniboxResult);
             return new List<HelpOmniboxResult>
             {
-                new HelpOmniboxResult 
-                { 
-                    Text =  NiceName() + " " + typeof(TypeEntity).NiceName(), 
-                    ReferencedType = resultType 
+                new HelpOmniboxResult
+                {
+                    Text =  NiceName() + " " + typeof(TypeEntity).NiceName(),
+                    ReferencedType = resultType
                 },
-                new HelpOmniboxResult 
-                { 
-                    Text =  NiceName() + " '" + HelpMessage.SearchText.NiceToString()  + "'", 
-                    ReferencedType = resultType 
+                new HelpOmniboxResult
+                {
+                    Text =  NiceName() + " '" + HelpMessage.SearchText.NiceToString()  + "'",
+                    ReferencedType = resultType
                 },
             };
         }

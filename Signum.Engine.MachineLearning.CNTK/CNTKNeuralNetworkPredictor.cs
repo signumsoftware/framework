@@ -1,15 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Signum.Entities.MachineLearning;
 using CNTK;
 using Signum.Entities.DynamicQuery;
 using Signum.Utilities;
 using Signum.Entities;
-using Signum.Utilities.Reflection;
-using System.Reflection;
 using System.Diagnostics;
 using Signum.Engine.Files;
 using Signum.Engine.Operations;
@@ -30,13 +26,13 @@ namespace Signum.Engine.MachineLearning.CNTK
             { DefaultColumnEncodings.NormalizeLog, new NormalizeLogCNTKEncoding() },
             { DefaultColumnEncodings.SplitWords, new SplitWordsCNTKEncoding() },
         };
-        
+
         public void InitialSetup()
         {
             if (!Environment.Is64BitProcess)
                 throw new InvalidOperationException("CNTK only works with starting projects compiled for x64");
-            
-            
+
+
             /// This is a workaround to load unmanaged CNTK dlls from the applications \bin directory.
             var dir = AppDomain.CurrentDomain.BaseDirectory;
 
@@ -209,7 +205,7 @@ namespace Signum.Engine.MachineLearning.CNTK
 
             p.ResultTraining = best.ResultTraining;
             p.ResultValidation = best.ResultValidation;
-            
+
             var fp = new Entities.Files.FilePathEmbedded(PredictorFileType.PredictorFile, "Model.cntk", best.Model);
 
             p.Files.Add(fp);
@@ -217,14 +213,14 @@ namespace Signum.Engine.MachineLearning.CNTK
             using (OperationLogic.AllowSave<PredictorEntity>())
                 p.Save();
         }
-   
+
         public class FinalCandidate
         {
             public byte[] Model;
             public PredictorMetricsEmbedded ResultTraining;
             public PredictorMetricsEmbedded ResultValidation;
         }
- 
+
         Value CreateValue(PredictorTrainingContext ctx, List<ResultRow> rows, int codificationCount, Dictionary<PredictorColumnBase, List<PredictorCodification>> codificationByColumn, DeviceDescriptor device)
         {
             using (HeavyProfiler.Log("CreateValue", () => $"Rows {rows.Count} Codifications {codificationCount}"))
@@ -366,7 +362,7 @@ namespace Signum.Engine.MachineLearning.CNTK
                         }
                     }
                 }
-                
+
                 using (HeavyProfiler.LogNoStackTrace("CreateBatch"))
                     return Value.CreateBatch<float>(new int[] { ctx.InputCodifications.Count }, inputValues, device);
             }

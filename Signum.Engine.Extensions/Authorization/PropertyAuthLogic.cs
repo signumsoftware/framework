@@ -1,16 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using Signum.Engine.Maps;
 using Signum.Entities.Authorization;
 using Signum.Entities.Basics;
-using Signum.Engine.DynamicQuery;
 using Signum.Engine.Basics;
 using Signum.Entities;
-using Signum.Utilities.DataStructures;
 using Signum.Utilities;
-using Signum.Entities.DynamicQuery;
 using System.Reflection;
 
 namespace Signum.Engine.Authorization
@@ -146,7 +142,7 @@ namespace Signum.Engine.Authorization
 
         public static void SetPropertyRules(PropertyRulePack rules)
         {
-            cache.SetRules(rules, r => r.RootType == rules.Type); 
+            cache.SetRules(rules, r => r.RootType == rules.Type);
         }
 
         public static void SetMaxAutomaticUpgrade(PropertyRoute property, PropertyAllowed allowed)
@@ -218,7 +214,7 @@ namespace Signum.Engine.Authorization
             PropertyAllowed best = AuthLogic.GetMergeStrategy(role) == MergeStrategy.Union ?
                 Max(baseValues.Select(a => a.Value)) :
                 Min(baseValues.Select(a => a.Value));
-            
+
             if (!BasicPermission.AutomaticUpgradeOfProperties.IsAuthorized(role))
                 return best;
 

@@ -1,11 +1,7 @@
-﻿using Signum.Entities;
-using Signum.Utilities;
+﻿using Signum.Utilities;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Linq.Expressions;
-using System.Text;
-using System.Threading.Tasks;
 using Signum.Entities.Basics;
 using static System.Int32;
 
@@ -33,7 +29,7 @@ namespace Signum.Entities.Rest
         public MList<QueryStringValueEmbedded> QueryString { get; set; } = new MList<QueryStringValueEmbedded>();
 
         public Lite<IUserEntity> User { get; set; }
-        
+
         [SqlDbType(Size = int.MaxValue)]
         public string UserHostAddress { get; set; }
 

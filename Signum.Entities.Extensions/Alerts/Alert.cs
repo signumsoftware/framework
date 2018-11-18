@@ -1,18 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using Signum.Entities;
 using Signum.Utilities;
-using Signum.Entities.Authorization;
-using Signum.Entities.Patterns;
 using Signum.Entities.Basics;
 using System.Linq.Expressions;
 using System.ComponentModel;
-using Signum.Services;
-using System.Runtime.CompilerServices;
-using System.Diagnostics;
-using Signum.Utilities.ExpressionTrees;
 
 namespace Signum.Entities.Alerts
 {
@@ -40,7 +30,7 @@ namespace Signum.Entities.Alerts
         public Lite<IUserEntity> Recipient { get; set; }
 
         public Lite<IUserEntity> AttendedBy { get; set; }
-        
+
         public AlertTypeEntity AlertType { get; set; }
 
         public AlertState State { get; set; }
@@ -124,11 +114,11 @@ namespace Signum.Entities.Alerts
     {
         _5Mins,
         _15Mins,
-        _30Mins, 
+        _30Mins,
         _1Hour,
         _2Hours,
         _1Day,
-        Custom 
+        Custom
     }
 
     [Serializable, EntityKind(EntityKind.String, EntityData.Master)]

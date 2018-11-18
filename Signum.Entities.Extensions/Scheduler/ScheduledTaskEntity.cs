@@ -1,11 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using Signum.Entities;
 using Signum.Utilities;
 using Signum.Utilities.Reflection;
-using Signum.Entities.Processes;
 using Signum.Entities.Authorization;
 using Signum.Entities.Basics;
 
@@ -15,8 +10,8 @@ namespace Signum.Entities.Scheduler
     public class ScheduledTaskEntity : Entity
     {
         [ImplementedBy(
-            typeof(ScheduleRuleMinutelyEntity), 
-            typeof(ScheduleRuleWeekDaysEntity), 
+            typeof(ScheduleRuleMinutelyEntity),
+            typeof(ScheduleRuleWeekDaysEntity),
             typeof(ScheduleRuleMonthsEntity))]
         [NotNullValidator]
         public IScheduleRuleEntity Rule { get; set; }
@@ -26,7 +21,7 @@ namespace Signum.Entities.Scheduler
         public ITaskEntity Task { get; set; }
 
         public bool Suspended { get; set; }
-        
+
         [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
         public string MachineName { get; set; } = None;
 

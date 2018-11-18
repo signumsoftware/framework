@@ -1,13 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.ComponentModel;
-using System.Linq.Expressions;
-using Signum.Utilities;
 using Signum.Entities.Processes;
-using Signum.Entities.Basics;
-using Signum.Entities;
 using Signum.Entities.Files;
 using System.Reflection;
 using Signum.Entities.Authorization;
@@ -45,7 +37,7 @@ namespace Signum.Entities.Printing
                 { PrintLineState.Printed,           true,  null  },
                 { PrintLineState.Error,             false, null  },
                 { PrintLineState.Cancelled,         false, null  },
-                { PrintLineState.PrintedAndDeleted, true,  null  }  
+                { PrintLineState.PrintedAndDeleted, true,  null  }
             };
         protected override string PropertyValidation(PropertyInfo pi)
         {
@@ -54,7 +46,7 @@ namespace Signum.Entities.Printing
     }
     public enum PrintLineState
     {
-        NewTest, 
+        NewTest,
         ReadyToPrint,
         Enqueued,
         Printed,

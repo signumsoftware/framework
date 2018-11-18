@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using Signum.Entities.Mailing;
 using Signum.Engine.Operations;
 using Signum.Utilities;
@@ -11,18 +10,10 @@ using System.Reflection;
 using Signum.Entities;
 using Signum.Entities.DynamicQuery;
 using Signum.Engine.Basics;
-using Signum.Entities.UserQueries;
 using System.Globalization;
-using System.Configuration;
-using Signum.Engine.UserQueries;
 using System.Linq.Expressions;
-using Signum.Entities.Translation;
-using Signum.Engine.Translation;
-using System.Text.RegularExpressions;
 using Signum.Entities.Basics;
 using Signum.Engine.Templating;
-using System.Net.Mail;
-using Signum.Utilities.ExpressionTrees;
 using Signum.Entities.Templating;
 using Signum.Entities.Reflection;
 

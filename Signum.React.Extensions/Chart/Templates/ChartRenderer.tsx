@@ -5,11 +5,11 @@ import * as Navigator from '@framework/Navigator'
 import { parseLite, is } from '@framework/Signum.Entities'
 import { FilterOptionParsed, ColumnOption, hasAggregate } from '@framework/FindOptions'
 import { ChartRequestModel } from '../Signum.Entities.Chart'
+import { ChartRequest, ChartScriptEntity } from '../Signum.Entities.Chart'
 import * as ChartClient from '../ChartClient'
-
+import { toFilterOptions } from '@framework/Finder';
 
 import "../Chart.css"
-import { toFilterOptions } from '@framework/Finder';
 import { ChartScript, chartScripts, ChartRow } from '../ChartClient';
 import { ErrorBoundary } from '@framework/Components';
 
@@ -36,7 +36,7 @@ export default class ChartRenderer extends React.Component<ChartRendererProps, C
     componentWillMount() {
         this.requestAndRedraw().done();
     }
-
+    
     lastChartRequestPath: string | undefined;
     shouldComponentUpdate(newProps: ChartRendererProps) {
         if (this.props.data != newProps.data)
@@ -51,7 +51,7 @@ export default class ChartRenderer extends React.Component<ChartRendererProps, C
     componentWillReceiveProps(newProps: ChartRendererProps) {
             this.requestAndRedraw().done();
     }
-
+ 
     async requestAndRedraw() {
 
         const chartScriptPromise = ChartClient.getChartScript(this.props.chartRequest.chartScript);
@@ -67,54 +67,54 @@ export default class ChartRenderer extends React.Component<ChartRendererProps, C
         chartScript.columns.map((cc, i) => {
             if (!(data.columns as any)["c" + i])
                 (data.columns as any)["c" + i] = { name: "c" + 1 };
-        });
+        }); 
 
         this.setState({ chartComponent: chartComponentModule.default, chartScript });
-    }
+        }
 
-   
+
     handleDrillDown = (r: ChartRow) => {
 
-        const cr = this.props.lastChartRequest!;
+            const cr = this.props.lastChartRequest!;
 
-        if (cr.groupResults == false) {
+            if (cr.groupResults == false) {
             window.open(Navigator.navigateRoute(r.entity!));
-        } else {
+            } else {
             const filters = cr.filterOptions.filter(a => !hasAggregate(a.token));
+                
+                const columns: ColumnOption[] = [];
+                
+                cr.columns.map((a, i) => {
 
-            const columns: ColumnOption[] = [];
-
-            cr.columns.map((a, i) => {
-
-                const t = a.element.token;
+                    const t = a.element.token;
 
                 if (t && t.token && !hasAggregate(t!.token!) && r.hasOwnProperty("c" + i)) {
-                    filters.push({
-                        token: t!.token!,
-                        operation: "EqualTo",
+                        filters.push({
+                            token: t!.token!,
+                            operation: "EqualTo",
                         value: (r as any)["c" + i],
-                        frozen: false
-                    } as FilterOptionParsed);
-                }
+                            frozen: false
+                        } as FilterOptionParsed);
+                    }
 
-                if (t && t.token && t.token.parent != undefined) //Avoid Count and simple Columns that are already added
-                {
-                    var col = t.token.queryTokenType == "Aggregate" ? t.token.parent : t.token
+                    if (t && t.token && t.token.parent != undefined) //Avoid Count and simple Columns that are already added
+                    {
+                        var col = t.token.queryTokenType == "Aggregate" ? t.token.parent : t.token
 
-                    if (col.parent)
-                        columns.push({
-                            token: col.fullKey
-                        });
-                }
-            });
+                        if (col.parent)
+                            columns.push({
+                                token: col.fullKey
+                            });
+                    }
+                });
 
-            window.open(Finder.findOptionsPath({
-                queryName: cr.queryKey,
-                filterOptions: toFilterOptions(filters),
-                columnOptions: columns,
-            }));
+                window.open(Finder.findOptionsPath({
+                    queryName: cr.queryKey,
+                    filterOptions: toFilterOptions(filters),
+                    columnOptions: columns,
+                }));
+            }
         }
-    }
 
     render() {
         return (

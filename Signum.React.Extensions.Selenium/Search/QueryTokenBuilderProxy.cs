@@ -36,7 +36,7 @@ namespace Signum.React.Selenium
             //    var tokenLocator = TokenElement(parts.Length, token, isEnd: false);
             //    if (Selenium.IsElementPresent(tokenLocator))
             //    {
-            //        new 
+            //        new
             //        Selenium.FindElement(tokenLocator).SelectElement().SelectByValue("");
             //        return true;
             //    }

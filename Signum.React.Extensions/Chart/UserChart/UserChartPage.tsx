@@ -7,11 +7,9 @@ import * as ChartClient from '../ChartClient'
 import * as UserChartClient from './UserChartClient'
 import { RouteComponentProps } from "react-router";
 
-
 interface UserChartPageProps extends RouteComponentProps<{ userChartId: string; entity?: string }> {
 
 }
-
 
 export default class UserChartPage extends React.Component<UserChartPageProps> {
 

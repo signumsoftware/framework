@@ -1,34 +1,19 @@
-﻿using Signum.Engine;
-using Signum.Engine.Basics;
-using Signum.Engine.Dynamic;
-using Signum.Engine.DynamicQuery;
-using Signum.Engine.Maps;
-using Signum.Entities;
-using Signum.Entities.Basics;
+﻿using Signum.Entities;
 using Signum.Entities.Dynamic;
-using Signum.Entities.Reflection;
-using Signum.React.Json;
 using Signum.Utilities;
-using Signum.Utilities.ExpressionTrees;
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using System.Globalization;
-using System.IO;
-using System.Linq;
-using System.Linq.Expressions;
-using System.Net;
-using System.Net.Http;
-using System.Reflection;
 using Microsoft.AspNetCore.Mvc;
-using Signum.React.ApiControllers;
+using Signum.React.Filters;
+using System.ComponentModel.DataAnnotations;
 
 namespace Signum.React.Dynamic
 {
-    public class DynamicExpressionController : ApiController
+    [ValidateModelFilter]
+    public class DynamicExpressionController : ControllerBase
     {
-        [Route("api/dynamic/expression/test"), HttpPost]
-        public DynamicExpressionTestResponse Test([FromBody]DynamicExpressionTestRequest request)
+        [HttpPost("api/dynamic/expression/test")]
+        public DynamicExpressionTestResponse Test([Required, FromBody]DynamicExpressionTestRequest request)
         {
             IDynamicExpressionEvaluator evaluator;
             var de = request.dynamicExpression;
@@ -37,7 +22,7 @@ namespace Signum.React.Dynamic
                 var code = $@"
 {DynamicCode.GetUsingNamespaces()}
 
-namespace Signum.Entities.Dynamic 
+namespace Signum.Entities.Dynamic
 {{
     public class ExprEvaluator : Signum.Entities.Dynamic.IDynamicExpressionEvaluator
     {{
@@ -52,7 +37,7 @@ namespace Signum.Entities.Dynamic
         public object EvaluateUntyped(Entity e){{
             return ExprEvaluator.{de.Name}(({de.FromType})e);
         }}
-    }}                   
+    }}
 }}";
 
                 var res = EvalEmbedded<IDynamicExpressionEvaluator>.Compile(DynamicCode.GetMetadataReferences(), code);

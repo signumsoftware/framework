@@ -2,37 +2,24 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
-using System.Net;
-using System.Net.Http;
 using Microsoft.AspNetCore.Mvc;
 using Signum.Engine.Authorization;
-using Signum.Entities;
-using Signum.Entities.Authorization;
-using Signum.Services;
 using Signum.Utilities;
-using Signum.React.Facades;
-using Signum.React.Authorization;
-using Signum.Engine.Cache;
-using Signum.Engine;
-using Signum.Entities.Cache;
 using Signum.Utilities.ExpressionTrees;
-using System.Threading;
-using Signum.React.ApiControllers;
-using Signum.Engine.Basics;
 using Signum.Entities.Profiler;
 using System.Drawing;
 using Signum.Entities.Reflection;
 using System.Xml.Linq;
 using System.IO;
 using Signum.React.Files;
-using System.Threading.Tasks;
-using Signum.Utilities.DataStructures;
+using Signum.React.Filters;
 
 namespace Signum.React.Profiler
 {
-    public class ProfilerHeavyController : ApiController
+    [ValidateModelFilter]
+    public class ProfilerHeavyController : ControllerBase
     {
-        [Route("api/profilerHeavy/clear"), HttpPost]
+        [HttpPost("api/profilerHeavy/clear")]
         public void Clear()
         {
             ProfilerPermission.ViewHeavyProfiler.AssertAuthorized();
@@ -40,7 +27,7 @@ namespace Signum.React.Profiler
             HeavyProfiler.Clean();
         }
 
-        [Route("api/profilerHeavy/setEnabled/{isEnabled}"), HttpPost]
+        [HttpPost("api/profilerHeavy/setEnabled/{isEnabled}")]
         public void SetEnabled(bool isEnabled)
         {
             ProfilerPermission.ViewHeavyProfiler.AssertAuthorized();
@@ -48,7 +35,7 @@ namespace Signum.React.Profiler
             HeavyProfiler.Enabled = isEnabled;
         }
 
-        [Route("api/profilerHeavy/isEnabled"), HttpGet]
+        [HttpGet("api/profilerHeavy/isEnabled")]
         public bool IsEnabled()
         {
             ProfilerPermission.ViewHeavyProfiler.AssertAuthorized();
@@ -56,7 +43,7 @@ namespace Signum.React.Profiler
             return HeavyProfiler.Enabled;
         }
 
-        [Route("api/profilerHeavy/entries"), HttpGet]
+        [HttpGet("api/profilerHeavy/entries")]
         public List<HeavyProfofilerEntryTS> Entries()
         {
             ProfilerPermission.ViewHeavyProfiler.AssertAuthorized();
@@ -67,7 +54,7 @@ namespace Signum.React.Profiler
                 return HeavyProfiler.Entries.Select(e => new HeavyProfofilerEntryTS(e, false, now)).ToList();
         }
 
-        [Route("api/profilerHeavy/details/{fullIndex}"), HttpGet]
+        [HttpGet("api/profilerHeavy/details/{fullIndex}")]
         public List<HeavyProfofilerEntryTS> Details(string fullIndex)
         {
             ProfilerPermission.ViewHeavyProfiler.AssertAuthorized();
@@ -79,11 +66,11 @@ namespace Signum.React.Profiler
             var now = PerfCounter.Ticks;
 
             HeavyProfofilerEntryTS.Fill(result, entry, 0, now);
-   
+
             return result;
         }
 
-        [Route("api/profilerHeavy/stackTrace/{fullIndex}"), HttpGet]
+        [HttpGet("api/profilerHeavy/stackTrace/{fullIndex}")]
         public List<StackTraceTS> StackTrace(string fullIndex)
         {
             ProfilerPermission.ViewHeavyProfiler.AssertAuthorized();
@@ -123,7 +110,7 @@ namespace Signum.React.Profiler
             return null;
         }
 
-        [Route("api/profilerHeavy/download"), HttpGet]
+        [HttpGet("api/profilerHeavy/download")]
         public FileStreamResult Download(string indices = null)
         {
             XDocument doc = indices == null ?
@@ -140,8 +127,8 @@ namespace Signum.React.Profiler
             }
         }
 
-        [Route("api/profilerHeavy/upload"), HttpPost]
-        public void Upload([FromBody]FileUpload file)
+        [HttpPost("api/profilerHeavy/upload")]
+        public void Upload([Required, FromBody]FileUpload file)
         {
             using (MemoryStream sr = new MemoryStream(file.content))
             {
@@ -191,7 +178,7 @@ namespace Signum.React.Profiler
             public int AsyncDepth;
             public string AdditionalData;
             public string FullIndex;
-            public bool IsFinished; 
+            public bool IsFinished;
 
             public HeavyProfofilerEntryTS(HeavyProfilerEntry e, bool fullAditionalData, long now)
             {
@@ -213,8 +200,8 @@ namespace Signum.React.Profiler
 
                 if (entry.Entries == null)
                     return asyncDepth;
-                
-            
+
+
                 Dictionary<HeavyProfilerEntry, int> newDepths = new Dictionary<HeavyProfilerEntry, int>();
                 for (int i = 0; i < entry.Entries.Count; i++)
                 {

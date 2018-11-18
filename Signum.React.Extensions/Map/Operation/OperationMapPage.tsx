@@ -1,18 +1,13 @@
 ﻿import * as React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import * as ReactDOM from 'react-dom'
-import * as d3 from 'd3'
 import * as QueryString from "query-string"
 import { RouteComponentProps } from 'react-router'
-import { DomUtils, Dic } from '@framework/Globals'
-import * as Finder from '@framework/Finder'
+import { Dic } from '@framework/Globals'
 import * as Navigator from '@framework/Navigator'
-import { is, JavascriptMessage } from '@framework/Signum.Entities'
-import { ResultTable, FindOptions, FilterOption, QueryDescription, SubTokensOptions, QueryToken, QueryTokenType, ColumnOption } from '@framework/FindOptions'
+import { JavascriptMessage } from '@framework/Signum.Entities'
 import { MapMessage } from '../Signum.Entities.Map'
 import * as MapClient from '../MapClient'
 import { OperationMapInfo, OperationMapD3, ForceNode, ForceLink, Transition} from './OperationMap'
-
 import "./operationMap.css"
 
 interface OperationMapPageProps extends RouteComponentProps<{ type: string}> {

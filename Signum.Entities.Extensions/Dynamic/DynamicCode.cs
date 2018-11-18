@@ -1,14 +1,8 @@
 ﻿using System;
 using Signum.Utilities;
-using System.CodeDom.Compiler;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Reflection;
-using Signum.Entities.Authorization;
-using Newtonsoft.Json;
 using Microsoft.CodeAnalysis;
 
 namespace Signum.Entities.Dynamic
@@ -39,7 +33,7 @@ namespace Signum.Entities.Dynamic
         {
             typeof(object),
             typeof(System.Attribute),
-            typeof(System.Runtime.ConstrainedExecution.PrePrepareMethodAttribute), 
+            typeof(System.Runtime.ConstrainedExecution.PrePrepareMethodAttribute),
             typeof(System.Linq.Enumerable),
             typeof(System.ComponentModel.IDataErrorInfo),
             typeof(System.ComponentModel.INotifyPropertyChanged),

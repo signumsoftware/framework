@@ -1,18 +1,11 @@
-﻿using Signum.Entities.UserAssets;
 using Signum.React.Json;
 using Signum.Utilities;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Web;
-using Microsoft.AspNetCore.Mvc;
-using Newtonsoft.Json;
-using Signum.Engine.DynamicQuery;
 using Signum.Engine.Basics;
 using Signum.React.UserAssets;
 using Signum.Entities.Chart;
-using Signum.Entities;
 using Signum.React.ApiControllers;
 using Signum.Entities.DynamicQuery;
 using Signum.React.Facades;
@@ -79,7 +72,7 @@ namespace Signum.React.Chart
         {
             var converters = PropertyConverter.GetPropertyConverters(typeof(ChartRequestModel));
             converters.Remove("queryName");
-            
+
             converters.Add("queryKey", new PropertyConverter()
             {
                 AvoidValidate = true,
@@ -95,7 +88,7 @@ namespace Signum.React.Chart
                     ctx.JsonWriter.WriteValue(QueryLogic.GetQueryEntity(cr.QueryName).Key);
                 }
             });
-            
+
             converters.Add("filters", new PropertyConverter()
             {
                 AvoidValidate = true,
@@ -117,7 +110,7 @@ namespace Signum.React.Chart
                     ctx.JsonSerializer.Serialize(ctx.JsonWriter, cr.Filters.Select(f => FilterTS.FromFilter(f)).ToList());
                 }
             });
-            
+
             converters.Add("orders", new PropertyConverter()
             {
                 AvoidValidate = true,

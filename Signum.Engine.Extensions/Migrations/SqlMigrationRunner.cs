@@ -1,19 +1,14 @@
-﻿using Signum.Engine.Cache;
-using Signum.Engine.Maps;
+﻿using Signum.Engine.Maps;
 using Signum.Engine.SchemaInfoTables;
 using Signum.Entities;
 using Signum.Entities.Migrations;
 using Signum.Utilities;
-using Signum.Utilities.DataStructures;
 using System;
 using System.Collections.Generic;
 using System.Data.SqlClient;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
-using System.Xml.Linq;
 
 namespace Signum.Engine.Migrations
 {

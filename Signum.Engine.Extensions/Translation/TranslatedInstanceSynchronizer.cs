@@ -2,10 +2,7 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
-using System.Text;
-using Signum.Entities;
 using Signum.Utilities;
-using Signum.Entities.Translation;
 
 namespace Signum.Engine.Translation
 {

@@ -1,7 +1,7 @@
 ﻿import * as React from 'react'
 import * as moment from 'moment'
 import { RestLogEntity } from '../Signum.Entities.Rest'
-import { TypeContext, ValueLine, ValueLineType, EntityLine, EntityRepeater } from "@framework/Lines";
+import { TypeContext, ValueLine, EntityLine, EntityRepeater } from "@framework/Lines";
 import { } from "@framework/ConfigureReactWidgets";
 import { RestLogDiff, API } from '../RestClient'
 import { DiffDocument } from '../../DiffLog/Templates/DiffDocument';
@@ -28,12 +28,11 @@ export default class RestLog extends React.Component<{ ctx: TypeContext<RestLogE
     render() {
         const ctx = this.props.ctx;
         const ctx4 = ctx.subCtx({ labelColumns: 4 });
-        
+
         return (
             <div>
                 <ValueLine ctx={ctx.subCtx(f => f.startDate)} unitText={moment(ctx.value.startDate).toUserInterface().fromNow()} />
                 <ValueLine ctx={ctx.subCtx(f => f.endDate)} />
-
                 <EntityLine ctx={ctx.subCtx(f => f.user)} />
                 <ValueLine ctx={ctx.subCtx(f => f.url)} unitText={ctx.value.httpMethod!} />
                 <div className="row">
@@ -60,7 +59,7 @@ export default class RestLog extends React.Component<{ ctx: TypeContext<RestLogE
                         <ValueLine ctx={ctx4.subCtx(f => f.userHostName)} />
                     </div>
                 </div>
-                
+
                 <ValueLine ctx={ctx.subCtx(f => f.referrer)} />
 
                 <EntityLine ctx={ctx.subCtx(f => f.exception)} />
@@ -82,7 +81,7 @@ export default class RestLog extends React.Component<{ ctx: TypeContext<RestLogE
                     <UncontrolledTabs defaultEventKey="prev">
                         <Tab title="prev" eventKey="prev" className="linkTab">{this.renderPre(ctx.subCtx(f => f.responseBody).value!)}</Tab>
                         {this.state.diff && <Tab title="diff" eventKey="diff" className="linkTab">{this.state.diff.diff && <DiffDocument diff={this.state.diff.diff} />}</Tab>}
-                        {this.state.diff && this.state.diff.current && <Tab title="curr" eventKey="curr" className="linkTab">{this.renderPre(this.state.diff.current)}</Tab>}
+                        {this.state.diff && <Tab title="curr" eventKey="curr" className="linkTab">{this.renderPre(this.state.diff.current)}</Tab>}
                     </UncontrolledTabs>
                 </fieldset>
             </div>

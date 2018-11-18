@@ -1,11 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using Signum.Utilities;
-using Signum.Entities.Reflection;
 using System.Text.RegularExpressions;
-using Signum.Entities.Chart;
 using Signum.Entities.Omnibox;
 using Signum.Entities.DynamicQuery;
 using Newtonsoft.Json;
@@ -61,10 +58,10 @@ namespace Signum.Entities.Chart
             var resultType = typeof(ChartOmniboxResult);
             return new List<HelpOmniboxResult>
             {
-                new HelpOmniboxResult 
-                { 
-                    Text =  ChartMessage.ChartToken.NiceToString() + " " + OmniboxMessage.Omnibox_Query.NiceToString(), 
-                    ReferencedType = resultType 
+                new HelpOmniboxResult
+                {
+                    Text =  ChartMessage.ChartToken.NiceToString() + " " + OmniboxMessage.Omnibox_Query.NiceToString(),
+                    ReferencedType = resultType
                 }
             };
         }

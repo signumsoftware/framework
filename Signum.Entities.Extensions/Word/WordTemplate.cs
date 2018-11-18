@@ -3,20 +3,8 @@ using Signum.Entities.Basics;
 using Signum.Entities.Files;
 using Signum.Utilities;
 using System;
-using System.Collections.Generic;
 using System.ComponentModel;
-using System.Diagnostics;
-using System.Linq;
 using System.Linq.Expressions;
-using System.Reflection;
-using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
-using Signum.Utilities.ExpressionTrees;
-using Signum.Entities;
-using Signum.Entities.UserQueries;
-using Signum.Entities.Chart;
-using Signum.Entities.Dynamic;
 using Signum.Entities.Templating;
 
 namespace Signum.Entities.Word
@@ -138,5 +126,5 @@ namespace Signum.Entities.Word
         Query = 4
     }
 
-    
+
 }

@@ -1,14 +1,9 @@
 ﻿using Microsoft.SqlServer.Types;
-using Signum.Entities;
 using Signum.Utilities;
 using System;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
-using System.Linq;
 using System.Linq.Expressions;
-using System.Text;
-using System.Threading.Tasks;
 using System.Reflection;
 
 namespace Signum.Entities.Tree
@@ -41,12 +36,12 @@ namespace Signum.Entities.Tree
         [NotNullable, SqlDbType(Size = 255, SqlDbType = SqlDbType.VarChar)]
         public string ParentRoute { get; set; }
 
-        static Expression<Func<TreeEntity, int?>> LevelExpression = @this => (int?)@this.Route.GetLevel();
+        static Expression<Func<TreeEntity, short?>> LevelExpression = @this => (short?)@this.Route.GetLevel();
 
         [Ignore]
-        int? level; 
+        short? level;
         [ExpressionField("LevelExpression"), InTypeScript(true)]
-        public int? Level
+        public short? Level
         {
             get { return level; }
             set { level = value; }
@@ -54,7 +49,7 @@ namespace Signum.Entities.Tree
 
         protected override void PostRetrieving()
         {
-            this.level = (int)this.Route.GetLevel();
+            this.level = (short)this.Route.GetLevel();
         }
 
         [Ignore, ImplementedByAll]
@@ -140,7 +135,7 @@ namespace Signum.Entities.Tree
 
         protected override string PropertyValidation(PropertyInfo pi)
         {
-            if(pi.Name == nameof(Sibling) && Sibling == null && 
+            if(pi.Name == nameof(Sibling) && Sibling == null &&
                 (InsertPlace == InsertPlace.After || InsertPlace == InsertPlace.Before))
             {
                 return ValidationMessage._0IsNotSet.NiceToString(pi.NiceName());

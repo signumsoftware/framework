@@ -1,14 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Security.Principal;
 using Signum.Utilities;
-using System.Threading;
-using System.Security.Cryptography;
-using System.ComponentModel;
-using System.Reflection;
-using Signum.Utilities.DataStructures;
 using System.Text.RegularExpressions;
 
 namespace Signum.Entities.Authorization

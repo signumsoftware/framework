@@ -1,79 +1,71 @@
-
 import * as React from 'react'
-import { Route } from 'react-router'
-
-import { Dic } from '@framework/Globals';
-import { ajaxPost, ajaxGet } from '@framework/Services';
-import { EntitySettings, ViewPromise } from '@framework/Navigator'
-import * as Navigator from '@framework/Navigator'
 import * as Finder from '@framework/Finder'
-import { EntityOperationSettings } from '@framework/Operations'
-import * as Operations from '@framework/Operations'
 import { Type } from '@framework/Reflection'
 import DynamicComponent from '@framework/Lines/DynamicComponent'
 import { FileEntity, FilePathEntity, FileEmbedded, FilePathEmbedded, IFile } from './Signum.Entities.Files'
 import FileLine from './FileLine'
 import CellFormatter = Finder.CellFormatter;
-import { Lite, Entity, ModifiableEntity } from "@framework/Signum.Entities";
+import { ModifiableEntity } from "@framework/Signum.Entities";
 import FileImageLine from './FileImageLine';
+import { MultiFileLine } from './MultiFileLine';
 
 export function start(options: { routes: JSX.Element[] }) {
 
-    registerAutoFileLine(FileEntity);
-    registerAutoFileLine(FileEmbedded);
+  registerAutoFileLine(FileEntity);
+  registerAutoFileLine(FileEmbedded);
 
-    registerAutoFileLine(FilePathEntity);
-    registerAutoFileLine(FilePathEmbedded);
+  registerAutoFileLine(FilePathEntity);
+  registerAutoFileLine(FilePathEmbedded);
 
 
-    Finder.formatRules.push({
-        name: "WebDownload",
-        isApplicable: col => col.token!.type.name === "WebDownload",
-        formatter: col => new CellFormatter((cell: WebDownload) =>
-            !cell ? undefined : <a href={cell.fullWebPath} download={cell.fileName}>{cell.fileName}</a>)
-    });
+  Finder.formatRules.push({
+    name: "WebDownload",
+    isApplicable: col => col.token!.type.name === "WebDownload",
+    formatter: col => new CellFormatter((cell: WebDownload) =>
+      !cell ? undefined : <a href={cell.fullWebPath} download={cell.fileName}>{cell.fileName}</a>)
+  });
 
-    Finder.formatRules.push({
-        name: "WebImage",
-        isApplicable: col => col.token!.type.name === "WebImage",
-        formatter: col => new CellFormatter((cell: WebImage) =>
-            !cell ? undefined : <img src={cell.fullWebPath}/>)
-    });
+  Finder.formatRules.push({
+    name: "WebImage",
+    isApplicable: col => col.token!.type.name === "WebImage",
+    formatter: col => new CellFormatter((cell: WebImage) =>
+      !cell ? undefined : <img src={cell.fullWebPath} />)
+  });
 }
 
 
 function registerAutoFileLine(type: Type<IFile & ModifiableEntity>) {
-    DynamicComponent.customTypeComponent[type.typeName] = ctx => {
-        const tr = ctx.propertyRoute.typeReference();
-        if (tr.isCollection)
-            return "continue";
+  DynamicComponent.customTypeComponent[type.typeName] = ctx => {
+    const tr = ctx.propertyRoute.typeReference();
+    if (tr.isCollection)
+      return <MultiFileLine ctx={ctx} />;
 
-        var m = ctx.propertyRoute.member;
-        if (m && m.defaultFileTypeInfo && m.defaultFileTypeInfo.onlyImages)
-            return <FileImageLine ctx={ctx} />;
+    var m = ctx.propertyRoute.member;
+    if (m && m.defaultFileTypeInfo && m.defaultFileTypeInfo.onlyImages)
+      return <FileImageLine ctx={ctx} />;
 
-        return <FileLine ctx={ctx}/>;
-    };
+    return <FileLine ctx={ctx} />;
+  };
 }
 
 
 export interface WebDownload {
-    fileName: string;
-    fullWebPath: string;
+  fileName: string;
+  fullWebPath: string;
 }
 
 export interface WebImage {
-    fullWebPath: string;
+  fullWebPath: string;
 }
 
 
 declare module '@framework/Reflection' {
 
-    export interface MemberInfo {
-        defaultFileTypeInfo?: {
-            key: string,
-            onlyImages: boolean,
-            maxSizeInBytes: number | null,
-        };
-    }
+  export interface MemberInfo {
+    defaultFileTypeInfo?: {
+      key: string,
+      onlyImages: boolean,
+      maxSizeInBytes: number | null,
+    };
+  }
 }

@@ -1,5 +1,4 @@
 ﻿using Newtonsoft.Json;
-using Signum.Engine;
 using Signum.Engine.Authorization;
 using Signum.Engine.Basics;
 using Signum.Engine.Chart;
@@ -21,8 +20,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Signum.Engine.Toolbar
 {
@@ -249,6 +246,9 @@ namespace Signum.Engine.Toolbar
         
         static bool InMemoryFilter<T>(T entity) where T : Entity
         {
+            if (Schema.Current.IsAllowed(typeof(T), inUserInterface: true) != null)
+                return false;
+
             var isAllowed = Schema.Current.GetInMemoryFilter<T>(userInterface: true);
             return isAllowed(entity);
         }

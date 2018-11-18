@@ -1,38 +1,22 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Net;
-using System.Net.Http;
+﻿using System.Collections.Generic;
 using Microsoft.AspNetCore.Mvc;
 using Signum.Engine.Authorization;
 using Signum.Entities;
 using Signum.Entities.Authorization;
-using Signum.Services;
-using Signum.Utilities;
-using Signum.React.Facades;
-using Signum.React.Authorization;
-using Signum.React.ApiControllers;
-using Signum.Entities.UserQueries;
-using Signum.Engine.UserQueries;
 using Signum.Engine.Basics;
-using Signum.Entities.UserAssets;
-using Signum.Entities.DynamicQuery;
-using Signum.Engine.DynamicQuery;
-using Signum.Engine;
 using Signum.Entities.Dashboard;
 using Signum.Engine.Dashboard;
 
 namespace Signum.React.Dashboard
 {
-    public class DashboardController : ApiController
+    public class DashboardController : ControllerBase
     {
-        [Route("api/dashboard/forEntityType/{typeName}"), HttpGet]
+        [HttpGet("api/dashboard/forEntityType/{typeName}")]
         public IEnumerable<Lite<DashboardEntity>> FromEntityType(string typeName)
         {
             return DashboardLogic.GetDashboardsEntity(TypeLogic.GetType(typeName));
         }
-        [Route("api/dashboard/home"), HttpGet]
+        [HttpGet("api/dashboard/home")]
         public Lite<DashboardEntity> Home()
         {
             if (TypeAuthLogic.GetAllowed(typeof(DashboardEntity)).MaxUI() == TypeAllowedBasic.None)

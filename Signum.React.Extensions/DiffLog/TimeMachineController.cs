@@ -1,22 +1,17 @@
 ﻿using Signum.Engine;
 using Signum.Engine.Basics;
-using Signum.Engine.DiffLog;
 using Signum.Engine.Maps;
 using Signum.Entities;
-using Signum.Entities.Basics;
-using Signum.Entities.DiffLog;
 using Signum.Utilities;
 using System;
 using System.Collections.Generic;
-using System.Text;
 using Microsoft.AspNetCore.Mvc;
-using Signum.React.ApiControllers;
 
 namespace Signum.React.DiffLog
 {
-    public class TimeMachineController : ApiController
+    public class TimeMachineController : ControllerBase
     {
-        [Route("api/retrieveVersion/{typeName}/{id}"), HttpGet]
+        [HttpGet("api/retrieveVersion/{typeName}/{id}")]
         public Entity RetrieveVersion(string typeName, string id, DateTime asOf)
         {
             var type = TypeLogic.GetType(typeName);
@@ -27,7 +22,7 @@ namespace Signum.React.DiffLog
                 return Database.Retrieve(type, pk);
         }
 
-        [Route("api/diffVersions/{typeName}/{id}"), HttpGet]
+        [HttpGet("api/diffVersions/{typeName}/{id}")]
         public List<StringDistance.DiffPair<List<StringDistance.DiffPair<string>>>> DiffVersiones(string typeName, string id, DateTime from, DateTime to)
         {
             var type = TypeLogic.GetType(typeName);

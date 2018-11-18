@@ -11,7 +11,7 @@
     }
 }
 
-.sf-chart-type 
+.sf-chart-type
 {
     margin-bottom: 4px;
 }
@@ -76,27 +76,27 @@
 }
 .sf-chart-img-equiv
 {
-    background-color: #dfefff;    
+    background-color: #dfefff;
 }
 .sf-chart-img-curr
 {
-    background-color: #81bffc;    
+    background-color: #81bffc;
 }
 
 .sf-chart-img-curr.edited
 {
-    background-color: #FF7F00;    
+    background-color: #FF7F00;
 }
 
 
 
 .sf-chart-token-config td
 {
-    border-top: 1px dashed #ddd !important;     
+    border-top: 1px dashed #ddd !important;
 }
 .sf-chart-token-config-trigger
 {
-    cursor: pointer;    
+    cursor: pointer;
 }
 
 body:not(.rtl) .sf-chart-token-config-trigger {
@@ -122,12 +122,12 @@ body.rtl .sf-chart-token .sf-query-token {
 .sf-chart-container
 {
     width: 100%;
-    min-height: 400px;    
+    min-height: 400px;
     position:relative;
 }
 .sf-chart-container svg
 {
-    shape-rendering: crispEdges;         
+    shape-rendering: crispEdges;
 }
 
 .sf-chart-color-table

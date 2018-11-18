@@ -9,8 +9,6 @@ import * as UserAssets from '../UserAssets/Signum.Entities.UserAssets'
 import * as UserQueries from '../UserQueries/Signum.Entities.UserQueries'
 import * as Authorization from '../Authorization/Signum.Entities.Authorization'
 
-
-
 import { FilterOptionParsed, OrderOptionParsed, FilterRequest, OrderRequest } from '@framework/FindOptions' 
 
 //Partial

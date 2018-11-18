@@ -9,17 +9,17 @@ import * as Basics from '../../../Framework/Signum.React/Scripts/Signum.Entities
 
 export const ViewLogEntity = new Type<ViewLogEntity>("ViewLog");
 export interface ViewLogEntity extends Entities.Entity {
-    Type: "ViewLog";
-    target?: Entities.Lite<Entities.Entity> | null;
-    user?: Entities.Lite<Basics.IUserEntity> | null;
-    viewAction?: string | null;
-    startDate?: string;
-    endDate?: string;
-    data?: string | null;
+  Type: "ViewLog";
+  target?: Entities.Lite<Entities.Entity> | null;
+  user?: Entities.Lite<Basics.IUserEntity> | null;
+  viewAction?: string | null;
+  startDate?: string;
+  endDate?: string;
+  data?: string | null;
 }
 
 export module ViewLogMessage {
-    export const ViewLogMyLast = new MessageKey("ViewLogMessage", "ViewLogMyLast");
+  export const ViewLogMyLast = new MessageKey("ViewLogMessage", "ViewLogMyLast");
 }
 
 

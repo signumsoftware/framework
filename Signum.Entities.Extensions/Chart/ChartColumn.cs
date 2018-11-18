@@ -1,15 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using Signum.Entities.DynamicQuery;
 using Signum.Utilities;
-using System.Linq.Expressions;
 using System.Reflection;
-using Signum.Utilities.ExpressionTrees;
-using System.ComponentModel;
-using Signum.Entities.UserQueries;
-using Signum.Entities.Reflection;
 using System.Xml.Linq;
 using Signum.Entities.UserAssets;
 
@@ -24,9 +16,9 @@ namespace Signum.Entities.Chart
         public ChartScriptColumn ScriptColumn
         {
             get { return scriptColumn; }
-            set { scriptColumn = value; Notify(() => ScriptColumn); } 
+            set { scriptColumn = value; Notify(() => ScriptColumn); }
         }
-        
+
         public ChartColumnEmbedded()
         {
         }
@@ -64,7 +56,7 @@ namespace Signum.Entities.Chart
                 Set(ref displayName, name);
             }
         }
-      
+
         [Ignore]
         internal IChartBase parentChart;
 
@@ -96,7 +88,7 @@ namespace Signum.Entities.Chart
         }
 
         [field: NonSerialized, Ignore]
-        public event Action Notified; 
+        public event Action Notified;
 
         internal void NotifyAll()
         {
@@ -163,7 +155,7 @@ namespace Signum.Entities.Chart
 
         internal Column CreateColumn()
         {
-            return new Column(Token.Token, DisplayName); 
+            return new Column(Token.Token, DisplayName);
         }
 
         internal XElement ToXml(IToXmlContext ctx)

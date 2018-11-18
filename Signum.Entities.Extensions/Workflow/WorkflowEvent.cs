@@ -1,16 +1,8 @@
-﻿using Signum.Entities;
-using Signum.Entities.Basics;
-using Signum.Entities.Dynamic;
-using Signum.Entities.Scheduler;
+﻿using Signum.Entities.Basics;
 using Signum.Utilities;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Linq.Expressions;
-using System.Text;
-using System.Threading.Tasks;
 using System.Reflection;
-using System.ComponentModel;
 
 namespace Signum.Entities.Workflow
 {
@@ -25,7 +17,7 @@ namespace Signum.Entities.Workflow
 
         [NotNullValidator]
         public WorkflowLaneEntity Lane { get; set; }
-        
+
         public WorkflowEventType Type { get; set; }
 
         public WorkflowTimerEmbedded Timer { get; set; }
@@ -157,7 +149,7 @@ namespace Signum.Entities.Workflow
         public string Name { get; set; }
 
         public WorkflowEventType Type { get; set; }
-        
+
         public WorkflowEventTaskModel Task { get; set; }
 
         public WorkflowTimerEmbedded Timer { get; set; }

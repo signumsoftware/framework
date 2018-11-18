@@ -13,9 +13,6 @@ using Signum.Engine.Basics;
 using Signum.Entities.ViewLog;
 using Signum.Entities.DynamicQuery;
 using System.IO;
-using Signum.Utilities.ExpressionTrees;
-using System.Data.Common;
-using Signum.Engine;
 using Signum.Entities.Authorization;
 using System.Threading;
 

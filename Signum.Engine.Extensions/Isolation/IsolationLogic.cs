@@ -3,24 +3,17 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
-using System.Text;
 using Signum.Engine.DynamicQuery;
-using Signum.Engine.Linq;
 using Signum.Engine.Maps;
 using Signum.Engine.Operations;
 using Signum.Entities;
 using Signum.Entities.Basics;
 using Signum.Entities.Isolation;
 using Signum.Utilities;
-using Signum.Utilities.ExpressionTrees;
 using Signum.Utilities.Reflection;
 using Signum.Engine.Processes;
 using Signum.Entities.Processes;
-using System.ServiceModel;
-using Signum.Engine.Scheduler;
 using Signum.Entities.Scheduler;
-using Signum.Engine.Authorization;
-using Signum.Entities.Authorization;
 
 namespace Signum.Engine.Isolation
 {

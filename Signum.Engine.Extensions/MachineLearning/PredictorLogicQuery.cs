@@ -1,10 +1,7 @@
 ﻿using Signum.Engine.Basics;
-using Signum.Engine.DynamicQuery;
 using Signum.Entities;
-using Signum.Entities.Basics;
 using Signum.Entities.DynamicQuery;
 using Signum.Entities.MachineLearning;
-using Signum.Entities.UserAssets;
 using Signum.Entities.UserQueries;
 using Signum.Utilities;
 using System;

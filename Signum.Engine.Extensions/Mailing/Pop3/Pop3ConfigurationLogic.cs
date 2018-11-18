@@ -1,31 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Linq.Expressions;
-using System.Net.Mail;
 using System.Reflection;
-using System.Text;
-using System.Text.RegularExpressions;
 using Signum.Engine.Basics;
 using Signum.Engine.DynamicQuery;
-using Signum.Entities.DynamicQuery;
-using Signum.Engine.Files;
-using Signum.Engine.Mailing.Pop3;
 using Signum.Engine.Maps;
 using Signum.Engine.Operations;
 using Signum.Engine.Scheduler;
 using Signum.Entities;
-using Signum.Entities.Files;
 using Signum.Entities.Mailing;
 using Signum.Utilities;
-using Signum.Utilities.DataStructures;
 using Signum.Entities.Basics;
-using System.Net.Mime;
-using System.Threading;
 using Signum.Engine.Extensions.Mailing.Pop3;
-using Signum.Utilities.ExpressionTrees;
-using Signum.Engine;
 
 namespace Signum.Engine.Mailing.Pop3
 {
@@ -360,7 +347,7 @@ namespace Signum.Engine.Mailing.Pop3
 
                         if (email.Recipients.IsEmpty())
                         {
-                            email.Recipients.Add(new EmailRecipientEntity
+                            email.Recipients.Add(new EmailRecipientEmbedded
                             {
                                 EmailAddress = config.Username,
                                 Kind = EmailRecipientKind.To,

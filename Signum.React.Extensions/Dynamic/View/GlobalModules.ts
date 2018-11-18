@@ -13,16 +13,16 @@ import * as AuthClient from '../../Authorization/AuthClient'
 
 
 export const globalModules: any = {
-    numbro,
-    moment,
-    React,
-    Components,
-    Globals,
-    Navigator,
-    Finder,
-    Reflection,
-    Entities,
-    AuthClient,
-    Operations,
-    Constructor
+  numbro,
+  moment,
+  React,
+  Components,
+  Globals,
+  Navigator,
+  Finder,
+  Reflection,
+  Entities,
+  AuthClient,
+  Operations,
+  Constructor
 };

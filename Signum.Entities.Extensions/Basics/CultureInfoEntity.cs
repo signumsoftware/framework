@@ -1,14 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Linq.Expressions;
 using System.Globalization;
 using Signum.Utilities;
 using System.Reflection;
-using Signum.Entities.Authorization;
-using Signum.Utilities.ExpressionTrees;
-using Signum.Entities;
 
 namespace Signum.Entities.Basics
 {
@@ -53,14 +47,14 @@ namespace Signum.Entities.Basics
 
             return base.PropertyValidation(pi);
         }
-        
+
         protected override void PreSaving(PreSavingContext ctx)
         {
             try
             {
                 var ci = CultureInfo.GetCultureInfo(Name);
 
-                //To be more resilient with diferent versions of windows 
+                //To be more resilient with diferent versions of windows
                 if (this.IsGraphModified || EnglishName == null)
                     EnglishName = ci.EnglishName;
                 if (this.IsGraphModified || NativeName == null)

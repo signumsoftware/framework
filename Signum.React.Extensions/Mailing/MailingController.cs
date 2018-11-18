@@ -1,35 +1,22 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Net;
-using System.Net.Http;
 using Microsoft.AspNetCore.Mvc;
 using Signum.Engine.Authorization;
 using Signum.Entities;
-using Signum.Entities.Authorization;
-using Signum.Services;
-using Signum.Utilities;
 using Signum.React.Facades;
-using Signum.React.Authorization;
-using Signum.Engine.Cache;
 using Signum.Engine;
-using Signum.Entities.Cache;
-using Signum.Utilities.ExpressionTrees;
-using Signum.Entities.Processes;
-using Signum.Engine.Processes;
 using System.Threading;
-using Signum.React.ApiControllers;
 using Signum.Engine.Basics;
 using Signum.Entities.Mailing;
 using Signum.Engine.Mailing;
-using Signum.Engine.Maps;
+using Signum.React.Filters;
 
 namespace Signum.React.Mailing
 {
-    public class MailingController : ApiController
+    [ValidateModelFilter]
+    public class MailingController : ControllerBase
     {
-        [Route("api/asyncEmailSender/view"), HttpGet]
+        [HttpGet("api/asyncEmailSender/view")]
         public AsyncEmailSenderState View()
         {
             AsyncEmailSenderPermission.ViewAsyncEmailSenderPanel.AssertAuthorized();
@@ -39,7 +26,7 @@ namespace Signum.React.Mailing
             return state;
         }
 
-        [Route("api/asyncEmailSender/start"), HttpPost]
+        [HttpPost("api/asyncEmailSender/start")]
         public void Start()
         {
             AsyncEmailSenderPermission.ViewAsyncEmailSenderPanel.AssertAuthorized();
@@ -49,7 +36,7 @@ namespace Signum.React.Mailing
             Thread.Sleep(1000);
         }
 
-        [Route("api/asyncEmailSender/stop"), HttpPost]
+        [HttpPost("api/asyncEmailSender/stop")]
         public void Stop()
         {
             AsyncEmailSenderPermission.ViewAsyncEmailSenderPanel.AssertAuthorized();
@@ -70,16 +57,16 @@ namespace Signum.React.Mailing
         }
 #pragma warning restore IDE1006 // Naming Styles
 
-        [Route("api/email/constructorType"), HttpPost]
-        public string GetConstructorType([FromBody]SystemEmailEntity systemEmailTemplate)
+        [HttpPost("api/email/constructorType")]
+        public string GetConstructorType([Required, FromBody]SystemEmailEntity systemEmailTemplate)
         {
             var type = SystemEmailLogic.GetEntityType(systemEmailTemplate.ToType());
 
             return ReflectionServer.GetTypeName(type);
         }
 
-        [Route("api/email/emailTemplates"), HttpPost]
-        public List<Lite<EmailTemplateEntity>> GetEmailTemplates(string queryKey, EmailTemplateVisibleOn visibleOn, [FromBody]Lite<Entity> lite)
+        [HttpPost("api/email/emailTemplates")]
+        public List<Lite<EmailTemplateEntity>> GetEmailTemplates(string queryKey, EmailTemplateVisibleOn visibleOn, [Required, FromBody]Lite<Entity> lite)
         {
             object queryName = QueryLogic.ToQueryName(queryKey);
 

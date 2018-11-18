@@ -1,29 +1,20 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
 using System.Linq;
-using System.Net;
-using System.Net.Http;
 using Microsoft.AspNetCore.Mvc;
 using Signum.Engine.Authorization;
-using Signum.Entities;
-using Signum.Entities.Authorization;
-using Signum.Services;
 using Signum.Utilities;
-using Signum.React.Facades;
-using Signum.React.Authorization;
 using Signum.Engine.Cache;
 using Signum.Engine;
 using Signum.Entities.Cache;
 using Signum.Utilities.ExpressionTrees;
 using Signum.Engine.Scheduler;
-using Signum.React.ApiControllers;
 
 namespace Signum.React.Cache
 {
-    public class CacheController : ApiController
+    public class CacheController : ControllerBase
     {
-        [Route("api/cache/view"), HttpGet]
+        [HttpGet("api/cache/view")]
         public CacheStateTS View()
         {
             CachePermission.ViewCache.AssertAuthorized();
@@ -40,7 +31,7 @@ namespace Signum.React.Cache
             };
         }
 
-        [Route("api/cache/enable"), HttpPost]
+        [HttpPost("api/cache/enable")]
         public void Enable()
         {
             CachePermission.ViewCache.AssertAuthorized();
@@ -49,7 +40,7 @@ namespace Signum.React.Cache
             SystemEventLogLogic.Log("CacheLogic.Enable");
         }
 
-        [Route("api/cache/disable"), HttpPost]
+        [HttpPost("api/cache/disable")]
         public void Disable()
         {
             CachePermission.ViewCache.AssertAuthorized();
@@ -58,7 +49,7 @@ namespace Signum.React.Cache
             SystemEventLogLogic.Log("CacheLogic.Disable");
         }
 
-        [Route("api/cache/clear"), HttpPost]
+        [HttpPost("api/cache/clear")]
         public void Clear()
         {
             CachePermission.InvalidateCache.AssertAuthorized();

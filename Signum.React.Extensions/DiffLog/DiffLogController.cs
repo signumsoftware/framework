@@ -7,13 +7,12 @@ using Signum.Entities.DiffLog;
 using Signum.Utilities;
 using System.Collections.Generic;
 using Microsoft.AspNetCore.Mvc;
-using Signum.React.ApiControllers;
 
 namespace Signum.React.DiffLog
 {
-    public class DiffLogController : ApiController
+    public class DiffLogController : ControllerBase
     {
-        [Route("api/diffLog/{id}"), HttpGet]
+        [HttpGet("api/diffLog/{id}")]
         public DiffLogResult GetOperationDiffLog(string id)
         {
             var operationLog = Database.Retrieve<OperationLogEntity>(PrimaryKey.Parse(id, typeof(OperationLogEntity)));

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using Signum.Engine.DynamicQuery;
 using Signum.Engine.Maps;
 using System.Reflection;
@@ -11,8 +10,6 @@ using Signum.Entities;
 using Signum.Utilities;
 using System.IO;
 using System.Xml.Linq;
-using Signum.Engine.Authorization;
-using Signum.Engine.Cache;
 using Signum.Entities.Basics;
 using Signum.Logic.Chart.Scripts;
 

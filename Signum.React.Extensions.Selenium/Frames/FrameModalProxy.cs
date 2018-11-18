@@ -20,8 +20,8 @@ namespace Signum.React.Selenium
         public IWebElement ContainerElement()
         {
             return this.Element;
-        }                               
- 
+        }
+
         //public void CloseDiscardChanges()   not in use
         //{
         //    this.CloseButton.Find().Click();
@@ -51,7 +51,7 @@ namespace Signum.React.Selenium
                     }
 
                     return false;
-                 
+
                 }, () => "popup {0} to disapear with or without confirmation".FormatWith());
 
                 if (confirmationMessage != null)

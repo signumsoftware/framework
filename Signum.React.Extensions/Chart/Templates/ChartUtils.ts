@@ -24,7 +24,7 @@ declare module "d3-selection" {
     interface Selection<GElement extends d3.BaseType, Datum, PElement extends d3.BaseType, PDatum> {
         enterData<NElement extends d3.BaseType, NDatum = NDatum>(data: NDatum[], tag: string, cssClass: string): Selection<NElement, NDatum, GElement, Datum>;
         enterData<NElement extends d3.BaseType, NDatum = NDatum>(data: (data: Datum) => NDatum[], tag: string, cssClass: string): Selection<NElement, NDatum, GElement, Datum>;
-    }
+}
 }
 
 export function ellipsis(elem: SVGTextElement, width: number, padding?: number, ellipsisSymbol?: string) {
@@ -81,7 +81,7 @@ export function matrix(a: number, b: number, c: number, d: number, e: number, f:
 }
 
 export function scaleFor(column: ChartColumn<any>, values: number[], minRange: number, maxRange: number, scaleName: string | null | undefined): d3.ScaleContinuousNumeric<number, number> {
-    
+
     if (scaleName == "ZeroMax")
         return d3.scaleLinear()
             .domain([0, d3.max(values)!])
@@ -375,7 +375,7 @@ export function stratifyTokens(
     keyColumn: ChartColumn<unknown>, /*Employee*/
     keyColumnParent?: ChartColumn<unknown>, /*Employee.ReportsTo*/):
     d3.HierarchyNode<ChartRow | Folder | Root> {
-    
+
 
     const folders = data.rows
         .filter(r => keyColumnParent != null && keyColumnParent.getValue(r) != null)
@@ -425,7 +425,7 @@ export function stratifyTokens(
                     return folders[keyColumnParent.getKey(parentFolder.folder)]; //only parent
             }
 
-            return root; //No key an no parent
+                return root; //No key an no parent
         }
 
         throw new Error("Unexpected " + JSON.stringify(d))
@@ -483,10 +483,10 @@ export function toPivotTable(data: ChartTable,
         .map((r) => ({
             rowValue: col0.getValue(r),
             values: usedCols.toObject(cn => cn.name, (cn): PivotValue => ({
-                rowClick: r,
+                    rowClick: r,
                 value: cn.getValue(r),
                 valueTitle: `${col0.getValueNiceName(r)}, ${cn.title}: ${cn.getValueNiceName(r)}`
-            }))
+                }))
         } as PivotRow));
 
     var title = usedCols.map(c => c.title).join(" | ");
@@ -521,7 +521,7 @@ export function groupedPivotTable(data: ChartTable,
                 rowValue: rowValue,
                 values: gr.elements.toObject(
                     r => colSplit.getValueKey(r),
-                    (r): PivotValue => ({
+                    (r) : PivotValue => ({
                         value: colValue.getValue(r),
                         rowClick: r,
                         valueTitle: `${col0.getNiceName(rowValue)}, ${colSplit.getValueNiceName(r)}: ${colValue.getValueNiceName(r)}`

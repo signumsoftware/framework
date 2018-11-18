@@ -1,9 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using Signum.Entities;
-using Signum.Entities.Basics;
 using System.IO;
 using Signum.Utilities;
 using Signum.Services;
@@ -44,7 +39,7 @@ namespace Signum.Entities.Files
 
         public string FullWebPath()
         {
-            return null; 
+            return null;
         }
     }
 }

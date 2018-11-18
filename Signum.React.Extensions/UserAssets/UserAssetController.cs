@@ -2,34 +2,26 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
-using System.Net;
-using System.Net.Http;
-using Signum.Engine.Authorization;
 using Signum.Entities;
-using Signum.Entities.Authorization;
-using Signum.Services;
 using Signum.Utilities;
-using Signum.React.Facades;
-using Signum.React.Authorization;
 using Signum.React.ApiControllers;
-using Signum.Entities.UserQueries;
-using Signum.Engine.UserQueries;
 using Signum.Engine.Basics;
 using Signum.Entities.UserAssets;
 using Signum.Entities.DynamicQuery;
-using Signum.Engine.DynamicQuery;
 using Signum.Engine;
 using Signum.React.Files;
 using Signum.Engine.UserAssets;
 using System.IO;
 using Microsoft.AspNetCore.Mvc;
+using Signum.React.Filters;
 
 namespace Signum.React.UserAssets
-{ 
-    public class UserAssetController : ApiController
+{
+    [ValidateModelFilter]
+    public class UserAssetController : ControllerBase
     {
-        [Route("api/userAssets/parseFilters"), HttpPost]
-        public List<FilterResponse> ParseFilters([FromBody]ParseFiltersRequest request)
+        [HttpPost("api/userAssets/parseFilters")]
+        public List<FilterResponse> ParseFilters([Required, FromBody]ParseFiltersRequest request)
         {
             var queryName = QueryLogic.ToQueryName(request.queryKey);
             var qd = QueryLogic.Queries.QueryDescription(queryName);
@@ -118,22 +110,22 @@ namespace Signum.React.UserAssets
             public List<FilterResponse> filters;
         }
 
-        [Route("api/userAssets/export"), HttpPost]
-        public FileStreamResult Export([FromBody]Lite<IUserAssetEntity> lite)
+        [HttpPost("api/userAssets/export")]
+        public FileStreamResult Export([Required, FromBody]Lite<IUserAssetEntity> lite)
         {
             var bytes = UserAssetsExporter.ToXml(lite.Retrieve());
-            
+
             return FilesController.GetFileStreamResult(new MemoryStream(bytes), "{0}{1}.xml".FormatWith(lite.EntityType.Name, lite.Id));
         }
 
-        [Route("api/userAssets/importPreview"), HttpPost]
-        public UserAssetPreviewModel ImportPreview([FromBody]FileUpload file)
+        [HttpPost("api/userAssets/importPreview")]
+        public UserAssetPreviewModel ImportPreview([Required, FromBody]FileUpload file)
         {
             return UserAssetsImporter.Preview(file.content);
         }
 
-        [Route("api/userAssets/import"), HttpPost]
-        public void Import([FromBody]FileUploadWithModel file)
+        [HttpPost("api/userAssets/import")]
+        public void Import([Required, FromBody]FileUploadWithModel file)
         {
             UserAssetsImporter.Import(file.file.content, file.model);
         }

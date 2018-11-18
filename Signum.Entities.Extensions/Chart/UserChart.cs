@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using Signum.Entities.Basics;
 using Signum.Entities.DynamicQuery;
 using System.Linq.Expressions;
@@ -10,8 +8,6 @@ using Signum.Utilities;
 using System.Xml.Linq;
 using Signum.Entities.UserAssets;
 using System.Reflection;
-using Signum.Utilities.ExpressionTrees;
-using Signum.Entities;
 
 namespace Signum.Entities.Chart
 {
@@ -206,7 +202,7 @@ namespace Signum.Entities.Chart
                         Parameters,
                         this.GetChartScript().Parameters,
                         p => p.Name,
-                        ps => ps.Name, 
+                        ps => ps.Name,
                         (p, ps) => new { p, ps }, pi.NiceName());
                 }
                 catch (Exception e)

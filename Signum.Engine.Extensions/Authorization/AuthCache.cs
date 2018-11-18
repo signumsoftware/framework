@@ -1,20 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using Signum.Utilities;
 using Signum.Engine.Maps;
 using Signum.Engine.Authorization;
 using Signum.Engine;
-using System.Windows;
 using System.Linq.Expressions;
 using System.Xml.Linq;
-using System.IO;
-using System.Data.SqlClient;
-using System.Threading;
-using System.Data.Common;
-using Signum.Engine.Cache;
-using Signum.Utilities.ExpressionTrees;
 
 namespace Signum.Entities.Authorization
 {
@@ -46,7 +38,7 @@ namespace Signum.Entities.Authorization
 
         Func<R, K> ToKey;
         Func<K, R> ToEntity;
-        Expression<Func<R, R, bool>> IsEquals; 
+        Expression<Func<R, R, bool>> IsEquals;
         IMerger<K, A> merger;
         Coercer<A, K> coercer;
 
@@ -319,7 +311,7 @@ namespace Signum.Entities.Authorization
 
             Table table = Schema.Current.Table(typeof(RT));
 
-            return Synchronizer.SynchronizeScript(Spacing.Double, should, current, 
+            return Synchronizer.SynchronizeScript(Spacing.Double, should, current,
                 createNew: (role, x) =>
                 {
                     var dic = (from xr in x.Elements(elementName)

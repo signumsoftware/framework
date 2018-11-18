@@ -3,6 +3,9 @@ import * as moment from 'moment'
 import * as numbro from 'numbro'
 import * as QueryString from 'query-string'
 import { ajaxGet } from '@framework/Services';
+import { ajaxPost, ajaxGet } from '@framework/Services';
+import { EntitySettings, ViewPromise } from '@framework/Navigator'
+import { EntitySettings } from '@framework/Navigator'
 import * as Navigator from '@framework/Navigator'
 import * as Finder from '@framework/Finder'
 import { Entity, Lite, liteKey, MList } from '@framework/Signum.Entities'
@@ -555,7 +558,7 @@ export module API {
     }
 
     export function getKey(token: QueryToken): ((val: unknown) => string) {
-        
+
         if (token.type.isLite)
             return v => String(v && liteKey(v as Lite<Entity>));
         
@@ -582,23 +585,23 @@ export module API {
                 if (!value)
                     return String(null);
 
-                var ei = getEnumInfo(token.type.name, value as any as number);
+                    var ei = getEnumInfo(token.type.name, value as any as number);
                 return ei ? ei.niceName : value;
-            };
-
+                };
+                
         if (token.filterType == "DateTime")
             return v => {
                 var date = v as string | null;
                 var format = token.format && toMomentFormat(token.format);
                 return date == null ? String(null) : moment(date).format(format);
-            };
+                };
 
         if (token.format && (token.filterType == "Decimal" || token.filterType == "Integer"))
             return v => {
                 var number = v as number | null;
                 var format = token.format && toNumbroFormat(token.format);
                 return number == null ? String(null) : numbro(number).format(format);
-            };
+                };
 
         return v => String(v);
     }
@@ -671,7 +674,7 @@ export module API {
                 getNiceName: v => v ? (v as Lite<Entity>).toStr : undefined,
             } as ChartColumn<unknown>) as ChartColumn<unknown>);
         }
-        
+
         var params = getParameterWithDefault(request, chartScript);
 
         var rows = rt.rows.map(row => {
@@ -705,14 +708,14 @@ export module API {
         };
     }
 
-    
+
 
 
     export function executeChart(request: ChartRequestModel, chartScript: ChartScript, abortSignal?: AbortSignal): Promise<ExecuteChartResult> {
 
         return Navigator.API.validateEntity(cleanedChartRequest(request)).then(cr => {
 
-            const queryRequest = getRequest(request);
+        const queryRequest = getRequest(request);
 
             return Finder.API.executeQuery(queryRequest, abortSignal)
                 .then(rt => toChartResult(request, rt, chartScript));

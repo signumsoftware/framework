@@ -1,14 +1,6 @@
 ﻿using Signum.Utilities;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Linq.Expressions;
-using System.Text;
-using System.Threading.Tasks;
-using Signum.Utilities.ExpressionTrees;
-using Signum.Entities;
-using Signum.Entities.DynamicQuery;
-using System.ComponentModel;
 
 namespace Signum.Entities.Word
 {

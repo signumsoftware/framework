@@ -1,12 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using Signum.Entities;
 using Signum.Utilities;
-using System.ComponentModel;
 using System.IO;
-using System.Web;
 using System.Linq.Expressions;
 
 namespace Signum.Entities.Files
@@ -65,7 +59,7 @@ namespace Signum.Entities.Files
         }
 
         public int FileLength { get; internal set; }
-        
+
         static Expression<Func<FilePathEmbedded, string>> FileLengthStringExpression =
           @this => ((long)@this.FileLength).ToComputerSize(true);
         [ExpressionField]
@@ -112,8 +106,6 @@ namespace Signum.Entities.Files
             return FilePathUtils.SafeCombine(pp.PhysicalPrefix, Suffix);
         }
 
-        public static Func<string, string> ToAbsolute = str => throw new NotImplementedException("ToAbsolute not set");
-
         public string FullWebPath()
         {
             var pp = this.GetPrefixPair();
@@ -122,10 +114,8 @@ namespace Signum.Entities.Files
                 return null;
 
             string url = pp.WebPrefix + "/" + FilePathUtils.UrlPathEncode(Suffix.Replace("\\", "/"));
-            if (url.StartsWith("http"))
-                return url;
 
-            return ToAbsolute(url);
+            return url;
         }
 
         public override string ToString()
@@ -142,7 +132,7 @@ namespace Signum.Entities.Files
             OnPreSaving(this);
         }
 
-      
+
         protected override void PostRetrieving()
         {
             if (CalculatePrefixPair == null)

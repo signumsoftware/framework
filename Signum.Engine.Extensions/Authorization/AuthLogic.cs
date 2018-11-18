@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using Signum.Engine.Maps;
 using Signum.Entities.Authorization;
 using Signum.Entities.Basics;
@@ -10,20 +9,11 @@ using Signum.Engine.Basics;
 using Signum.Entities;
 using Signum.Utilities;
 using Signum.Utilities.DataStructures;
-using System.Security.Principal;
-using System.Threading;
-using Signum.Services;
 using Signum.Utilities.Reflection;
 using System.Reflection;
-using Signum.Engine.Mailing;
 using Signum.Engine.Operations;
 using System.Xml.Linq;
-using System.Text.RegularExpressions;
-using Signum.Utilities.ExpressionTrees;
-using Signum.Engine.Cache;
 using System.IO;
-using Signum.Entities.Mailing;
-using Signum.Engine.Translation;
 using Signum.Engine.Scheduler;
 
 namespace Signum.Engine.Authorization
@@ -75,7 +65,7 @@ namespace Signum.Engine.Authorization
                 SystemUserName = systemUserName;
                 AnonymousUserName = anonymousUserName;
 
-                CultureInfoLogic.AssertStarted(sb); 
+                CultureInfoLogic.AssertStarted(sb);
 
                 sb.Include<UserEntity>();
 
@@ -108,14 +98,14 @@ namespace Signum.Engine.Authorization
                         {
                             MergeStrategy = strat,
                             DefaultAllowed = strat == MergeStrategy.Union ? baseValues.Any(a => a) : baseValues.All(a => a)
-                        }); 
+                        });
                     }
 
                     return result;
                 }, new InvalidateWith(typeof(RoleEntity)), AuthLogic.NotifyRulesChanged);
 
                 sb.Schema.EntityEvents<RoleEntity>().Saving += Schema_Saving;
-                
+
                 QueryLogic.Queries.Register(RoleQuery.RolesReferedBy, () =>
                     from r in Database.Query<RoleEntity>()
                     from rc in r.Roles
@@ -136,8 +126,8 @@ namespace Signum.Engine.Authorization
                         e.Role,
                         e.State,
                     });
-                
-                UserGraph.Register();             
+
+                UserGraph.Register();
             }
         }
 
@@ -410,7 +400,7 @@ namespace Signum.Engine.Authorization
             }
             catch (InvalidOperationException ex)
             {
-                throw new InvalidRoleGraphException("The role graph does not match:\r\n" + ex.Message); 
+                throw new InvalidRoleGraphException("The role graph does not match:\r\n" + ex.Message);
             }
 
             var dbOnlyWarnings = rolesDic.Keys.Except(rolesXml.Keys).Select(n =>
@@ -426,7 +416,7 @@ namespace Signum.Engine.Authorization
             if (result == null && dbOnlyWarnings == null)
                 return null;
 
-       
+
             return SqlPreCommand.Combine(Spacing.Triple,
                 new SqlPreCommandSimple("-- BEGIN AUTH SYNC SCRIPT"),
                 new SqlPreCommandSimple("use {0}".FormatWith(Connector.Current.DatabaseName())),
@@ -510,7 +500,7 @@ namespace Signum.Engine.Authorization
                 Console.WriteLine("Part 2: Syncronize roles relationships");
                 Dictionary<string, RoleEntity> rolesDic = Database.Query<RoleEntity>().ToDictionary(a => a.ToString());
 
-                var roleRelationships = Synchronizer.SynchronizeScript(Spacing.Double, rolesXml, rolesDic, 
+                var roleRelationships = Synchronizer.SynchronizeScript(Spacing.Double, rolesXml, rolesDic,
                  createNew: (name, xelement) => { throw new InvalidOperationException("No new roles should be at this stage. Did you execute the script?"); },
                  removeOld: (name, role) => { throw new InvalidOperationException("No old roles should be at this stage. Did you execute the script?"); },
                  mergeBoth: (name, xElement, role) =>

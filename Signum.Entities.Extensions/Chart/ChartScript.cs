@@ -1,18 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Linq.Expressions;
 using Signum.Utilities;
 using Signum.Entities.DynamicQuery;
 using Signum.Entities.Files;
 using System.Xml.Linq;
-using System.Collections;
 using System.Text.RegularExpressions;
 using Signum.Entities.Reflection;
-using Signum.Utilities.Reflection;
-using System.Reflection;
-using Signum.Utilities.ExpressionTrees;
 using Signum.Entities.Basics;
 
 namespace Signum.Entities.Chart

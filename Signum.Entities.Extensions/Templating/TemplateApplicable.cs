@@ -2,11 +2,6 @@
 using Signum.Entities.Dynamic;
 using Signum.Entities.Word;
 using Signum.Utilities;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Signum.Entities.Mailing;
 
 namespace Signum.Entities.Templating
@@ -40,7 +35,7 @@ namespace Signum.Entities.Templating
         {
             " + script + @"
         }
-    }                   
+    }
 }");
         }
     }

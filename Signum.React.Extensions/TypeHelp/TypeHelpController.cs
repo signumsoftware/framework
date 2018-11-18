@@ -3,30 +3,25 @@ using Signum.Engine.Basics;
 using Signum.Engine.Dynamic;
 using Signum.Engine.DynamicQuery;
 using Signum.Engine.Maps;
-using Signum.Engine.Scheduler;
 using Signum.Entities;
-using Signum.Entities.Dynamic;
-using Signum.React.ApiControllers;
 using Signum.React.Facades;
 using Signum.Utilities;
 using Signum.Utilities.ExpressionTrees;
 using System;
-using System.CodeDom.Compiler;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Net;
-using System.Net.Http;
 using Microsoft.AspNetCore.Mvc;
-
+using Signum.React.Filters;
+using System.ComponentModel.DataAnnotations;
 
 namespace Signum.React.TypeHelp
 {
-    public class TypeHelpController : ApiController
+    [ValidateModelFilter]
+    public class TypeHelpController : ControllerBase
     {
 
-        [Route("api/typeHelp/autocompleteEntityCleanType"), HttpPost]
-        public List<string> AutocompleteEntityCleanType([FromBody]AutocompleteEntityCleanTypeRequest request)
+        [HttpPost("api/typeHelp/autocompleteEntityCleanType")]
+        public List<string> AutocompleteEntityCleanType([Required, FromBody]AutocompleteEntityCleanTypeRequest request)
         {
             Schema s = Schema.Current;
             var types = TypeLogic.NameToType
@@ -44,8 +39,8 @@ namespace Signum.React.TypeHelp
             public int limit;
         }
 
-        [Route("api/typeHelp/autocompleteType"), HttpPost]
-        public List<string> AutocompleteType([FromBody]AutocompleteTypeRequest request) //Not comprehensive, just useful
+        [HttpPost("api/typeHelp/autocompleteType")]
+        public List<string> AutocompleteType([Required, FromBody]AutocompleteTypeRequest request) //Not comprehensive, just useful
         {
             var types = GetTypes(request);
 
@@ -75,6 +70,7 @@ namespace Signum.React.TypeHelp
             public int limit;
             public bool includeBasicTypes;
             public bool includeEntities;
+            public bool includeModelEntities;
             public bool includeEmbeddedEntities;
             public bool includeMList;
             public bool includeQueriable;
@@ -99,6 +95,11 @@ namespace Signum.React.TypeHelp
             if (request.includeEntities)
             {
                 result.AddRange(TypeLogic.TypeToEntity.Keys.Select(a => a.Name));
+            }
+
+            if (request.includeModelEntities)
+            {
+                result.AddRange(DynamicTypeLogic.AvailableModelEntities.Value.Select(a => a.Name));
             }
 
             if (request.includeEmbeddedEntities)
@@ -127,7 +128,7 @@ namespace Signum.React.TypeHelp
         }
 
 
-        [Route("api/typeHelp/{typeName}/{mode}"), HttpGet]
+        [HttpGet("api/typeHelp/{typeName}/{mode}")]
         public TypeHelpTS GetTypeHelp(string typeName, TypeHelpMode mode)
         {
             Type type = TypeLogic.TryGetType(typeName);
@@ -190,7 +191,7 @@ namespace Signum.React.TypeHelp
     public class TypeMemberHelpTS
     {
         public string propertyString;
-        public string name; 
+        public string name;
         public string type;
         public string cleanTypeName;
         public bool isExpression;
@@ -202,14 +203,14 @@ namespace Signum.React.TypeHelp
         {
             var pr = node.Value;
             this.propertyString = pr.PropertyString();
-            this.name = mode == TypeHelpMode.Typescript ? 
-                pr.PropertyInfo?.Name.FirstLower() : 
+            this.name = mode == TypeHelpMode.Typescript ?
+                pr.PropertyInfo?.Name.FirstLower() :
                 pr.PropertyInfo?.Name;
 
-            this.type = mode ==  TypeHelpMode.Typescript && ReflectionServer.IsId(pr) ? 
+            this.type = mode ==  TypeHelpMode.Typescript && ReflectionServer.IsId(pr) ?
                 PrimaryKey.Type(pr.RootType).Nullify().TypeName():
                 pr.Type.TypeName();
-            
+
             this.isExpression = false;
             this.isEnum = pr.Type.UnNullify().IsEnum;
             this.cleanTypeName = GetCleanTypeName(pr.Type.UnNullify().IsEnum ? EnumEntity.Generate(pr.Type.UnNullify()) : pr.Type);

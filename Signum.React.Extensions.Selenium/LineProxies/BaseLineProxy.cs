@@ -1,8 +1,4 @@
-﻿using System.Text;
-using System.Threading;
-using OpenQA.Selenium;
-using OpenQA.Selenium.Remote;
-using Signum.Engine.Basics;
+﻿using OpenQA.Selenium;
 using Signum.Entities;
 
 namespace Signum.React.Selenium

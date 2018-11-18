@@ -1,11 +1,6 @@
-﻿using Signum.Entities;
-using Signum.Utilities;
+﻿using Signum.Utilities;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Linq.Expressions;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Signum.Entities.Workflow
 {
@@ -14,7 +9,7 @@ namespace Signum.Entities.Workflow
     {
         [NotNullValidator]
         public WorkflowLaneEntity Lane{ get; set; }
-        
+
         [StringLengthValidator(AllowNulls = true, Min = 3, Max = 100)]
         public string Name { get; set; }
 

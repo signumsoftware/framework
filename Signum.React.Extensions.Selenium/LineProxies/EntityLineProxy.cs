@@ -10,7 +10,7 @@ namespace Signum.React.Selenium
             : base(element, route)
         {
         }
-      
+
         public void SetLite(Lite<IEntity> value)
         {
             if (this.EntityInfo() != null)
@@ -57,6 +57,6 @@ namespace Signum.React.Selenium
             return EntityInfoInternal(null);
         }
 
-      
+
     }
 }

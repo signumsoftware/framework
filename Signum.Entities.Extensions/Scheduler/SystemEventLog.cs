@@ -1,10 +1,5 @@
-﻿using Signum.Entities;
-using Signum.Entities.Basics;
-using Signum.Utilities;
+﻿using Signum.Entities.Basics;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 namespace Signum.Entities.Scheduler
 {
@@ -20,7 +15,7 @@ namespace Signum.Entities.Scheduler
 
         [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
         public string EventType { get; set; }
-        
+
         public Lite<ExceptionEntity> Exception { get; set; }
     }
 }

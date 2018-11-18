@@ -1,13 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System.Linq;
 using Signum.Entities.Authorization;
 using System.Reflection;
 using Signum.Engine.DynamicQuery;
 using Signum.Engine.Maps;
 using Signum.Entities;
-using Signum.Engine.Mailing;
 using Signum.Engine.Operations;
 using Signum.Utilities;
 
@@ -38,7 +34,7 @@ namespace Signum.Engine.Authorization
                     var ivp = Database.Query<PasswordExpiresIntervalEntity>().Where(p => p.Enabled).FirstOrDefault();
                     if (ivp == null)
                         return;
-                    
+
                     if (TimeZoneManager.Now > u.PasswordSetDate.AddDays((double)ivp.Days))
                         throw new PasswordExpiredException(AuthMessage.ExpiredPassword.NiceToString());
                 });
@@ -53,7 +49,7 @@ namespace Signum.Engine.Authorization
                     PasswordExpiresIntervalEntity ivp = null;
                     using (AuthLogic.Disable())
                         ivp = Database.Query<PasswordExpiresIntervalEntity>().Where(p => p.Enabled).FirstOrDefault();
-                    
+
                     if (ivp == null)
                         return null;
 

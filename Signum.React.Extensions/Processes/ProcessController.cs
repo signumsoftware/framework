@@ -7,13 +7,15 @@ using Signum.React.Facades;
 using Signum.React.Filters;
 using System.Threading;
 using Microsoft.AspNetCore.Mvc;
+using System.ComponentModel.DataAnnotations;
 
 namespace Signum.React.Processes
 {
-    public class ProcessController : ApiController
+    [ValidateModelFilter]
+    public class ProcessController : ControllerBase
     {
-        [Route("api/processes/constructFromMany"), HttpPost, ValidateModelFilter]
-        public EntityPackTS ConstructFromMany([FromBody]OperationController.MultiOperationRequest request)
+        [HttpPost("api/processes/constructFromMany")]
+        public EntityPackTS ConstructFromMany([Required, FromBody]OperationController.MultiOperationRequest request)
         {
             var type = request.type == null ? null : TypeLogic.GetType(request.type);
 
@@ -22,7 +24,7 @@ namespace Signum.React.Processes
             return SignumServer.GetEntityPack(entity);
         }
 
-        [Route("api/processes/view"), HttpGet]
+        [HttpGet("api/processes/view")]
         public ProcessLogicState View()
         {
             ProcessLogicState state = ProcessRunnerLogic.ExecutionState();
@@ -30,7 +32,7 @@ namespace Signum.React.Processes
             return state;
         }
 
-        [Route("api/processes/start"), HttpPost]
+        [HttpPost("api/processes/start")]
         public void Start()
         {
             ProcessPermission.ViewProcessPanel.AssertAuthorized();
@@ -40,7 +42,7 @@ namespace Signum.React.Processes
             Thread.Sleep(1000);
         }
 
-        [Route("api/processes/stop"), HttpPost]
+        [HttpPost("api/processes/stop")]
         public void Stop()
         {
             ProcessPermission.ViewProcessPanel.AssertAuthorized();

@@ -1,18 +1,10 @@
-﻿using Signum.Entities;
-using Signum.Entities.MachineLearning;
-using Signum.Entities.Processes;
+﻿using Signum.Entities.Processes;
 using Signum.Entities.Reflection;
 using Signum.Utilities;
-using Signum.Utilities.ExpressionTrees;
 using Signum.Utilities.Reflection;
 using System;
-using System.Collections.Generic;
-using System.ComponentModel;
 using System.Linq;
-using System.Linq.Expressions;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Signum.Entities.MachineLearning
 {
@@ -118,7 +110,7 @@ namespace Signum.Entities.MachineLearning
             HiddenLayers = HiddenLayers.Select(hl => hl.Clone()).ToMList(),
             OutputActivation = OutputActivation,
             OutputInitializer = OutputInitializer,
-            
+
 
             LossFunction = LossFunction,
             EvalErrorFunction = EvalErrorFunction,
@@ -128,7 +120,7 @@ namespace Signum.Entities.MachineLearning
             LearningUnitGain = LearningUnitGain,
             LearningVarianceMomentum = LearningVarianceMomentum,
 
-            MinibatchSize = MinibatchSize,  
+            MinibatchSize = MinibatchSize,
             NumMinibatches = NumMinibatches,
             BestResultFromLast = BestResultFromLast,
             SaveProgressEvery = SaveProgressEvery,
@@ -202,7 +194,7 @@ namespace Signum.Entities.MachineLearning
         MeanAbsoluteError,
         MeanAbsolutePercentageError,
     }
-    
+
     [Serializable, EntityKind(EntityKind.Part, EntityData.Transactional)]
     public class AutoconfigureNeuralNetworkEntity : Entity, IProcessDataEntity
     {

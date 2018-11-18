@@ -1,22 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using Signum.Utilities;
 using Signum.Engine.Maps;
 using Signum.Engine.Authorization;
 using Signum.Engine;
-using System.Windows;
-using System.Linq.Expressions;
 using System.Xml.Linq;
-using System.IO;
-using System.Data.SqlClient;
-using System.Threading;
 using Signum.Engine.Basics;
 using Signum.Entities.Basics;
 using System.Reflection;
-using System.Data.Common;
-using Signum.Engine.Cache;
 using Signum.Entities.Reflection;
 
 namespace Signum.Entities.Authorization
@@ -72,8 +64,8 @@ namespace Signum.Entities.Authorization
             catch (Exception ex) when (StartParameters.IgnoredDatabaseMismatches != null)
             {
                 //This try { throw } catch is here to alert developers.
-                //In production, in some cases its OK to attempt starting an application with a slightly different schema (dynamic entities, green-blue deployments).  
-                //In development, consider synchronize.  
+                //In production, in some cases its OK to attempt starting an application with a slightly different schema (dynamic entities, green-blue deployments).
+                //In development, consider synchronize.
                 StartParameters.IgnoredDatabaseMismatches.Add(ex);
                 return null;
             }
@@ -383,7 +375,7 @@ namespace Signum.Entities.Authorization
             };
 
 
-            return Synchronizer.SynchronizeScript(Spacing.Double, should, current, 
+            return Synchronizer.SynchronizeScript(Spacing.Double, should, current,
                 createNew: (role, x) =>
                 {
                     var dic = (from xr in x.Elements("Type")
