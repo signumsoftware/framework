@@ -372,6 +372,18 @@ function defaultParameterValue(scriptParameter: ChartScriptParameter, relatedCol
 
 }
 
+export function cleanedChartRequest(request: ChartRequestModel): ChartRequestModel {
+    const clone = { ...request };
+    clone.orders = clone.orderOptions!
+        .map(oo => ({ token: oo.token.fullKey, orderType: oo.orderType }) as OrderRequest);
+    delete clone.orderOptions;
+
+    clone.filters = toFilterRequests(clone.filterOptions);
+    delete clone.filterOptions;
+
+    return clone;
+}
+
 
 export interface ChartOptions {
     queryName: any,
@@ -461,7 +473,7 @@ export module Decoder {
 
                     cols.filter(a => a.element.token != null).forEach(a => a.element.token!.token = completer.get(a.element.token!.tokenString));
 
-                    const chartRequest = chartRequest.New({
+                    const chartRequest = ChartRequestModel.New({
                         chartScript: query.script == undefined ? scripts.first("ChartScript").symbol :
                             scripts
                                 .filter(cs => cs.symbol.key.after(".") == query.script)
@@ -693,15 +705,18 @@ export module API {
         };
     }
 
+    
+
+
     export function executeChart(request: ChartRequestModel, chartScript: ChartScript, abortSignal?: AbortSignal): Promise<ExecuteChartResult> {
 
-        Navigator.API.validateEntity(cr)
+        return Navigator.API.validateEntity(cleanedChartRequest(request)).then(cr => {
 
-        const queryRequest = getRequest(request);
+            const queryRequest = getRequest(request);
 
-        return Finder.API.executeQuery(queryRequest, abortSignal)
-            .then(rt => toChartResult(request, rt, chartScript));
-
+            return Finder.API.executeQuery(queryRequest, abortSignal)
+                .then(rt => toChartResult(request, rt, chartScript));
+        });
     }
     export interface ExecuteChartResult {
         resultTable: ResultTable;

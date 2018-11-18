@@ -155,21 +155,9 @@ export module API {
         return ajaxGet<Lite<UserChartEntity>[]>({ url: "~/api/userChart/forQuery/" + queryKey });
     }
 
-    export function cleanedChartRequest(request: ChartRequestModel): ChartRequestModel {
-        const clone = { ...request };
-        clone.orders = clone.orderOptions!
-            .map(oo => ({ token: oo.token.fullKey, orderType: oo.orderType }) as OrderRequest);
-        delete clone.orderOptions;
-
-        clone.filters = toFilterRequests(clone.filterOptions);
-        delete clone.filterOptions;
-
-        return clone;
-    }
-
     export function fromChartRequest(chartRequest: ChartRequestModel): Promise<UserChartEntity> {
 
-        const clone = cleanedChartRequest(chartRequest);
+        const clone = ChartClient.cleanedChartRequest(chartRequest);
 
         return ajaxPost<UserChartEntity>({ url: "~/api/userChart/fromChartRequest/" }, clone);
     }
