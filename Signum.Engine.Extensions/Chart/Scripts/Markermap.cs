@@ -11,11 +11,11 @@ namespace Signum.Logic.Chart.Scripts
         public MarkermapChartScript(): base(GoogleMapsCharScript.Markermap)
         {
             this.Icon = ChartScriptLogic.LoadIcon("markermap.png");
-            this.GroupBy = GroupByChart.Never;
+            this.GroupBy = GroupByChart.Optional;
             this.Columns = new List<ChartScriptColumn>
             {
-                new ChartScriptColumn("Latitude", ChartColumnType.Magnitude) ,
-                new ChartScriptColumn("Longitude", ChartColumnType.Magnitude) ,
+                new ChartScriptColumn("Latitude", ChartColumnType.Magnitude) { IsGroupKey = true } ,
+                new ChartScriptColumn("Longitude", ChartColumnType.Magnitude) { IsGroupKey = true } ,
                 new ChartScriptColumn("Label", ChartColumnType.String) { IsOptional = true },
                 new ChartScriptColumn("Icon", ChartColumnType.String) { IsOptional = true },
                 new ChartScriptColumn("Title", ChartColumnType.String) { IsOptional = true },
