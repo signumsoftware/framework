@@ -49,7 +49,7 @@ export default class CalendarStreamChart extends D3ChartBase {
     var cellSizeY = (height - 20) / (horizontal ? numDaysY : numDaysX);
     var cellSize = Math.min(cellSizeX, cellSizeY);
 
-    var cleanDate = (d: Date) => d.toJSON().afterLast(".");
+    var cleanDate = (d: Date) => d.toJSON().beforeLast(".");
 
     var yRule = rule({
       _1: '*',
