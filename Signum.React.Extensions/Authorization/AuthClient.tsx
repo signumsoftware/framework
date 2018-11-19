@@ -1,4 +1,4 @@
-﻿import * as React from 'react'
+import * as React from 'react'
 import { ModifiableEntity, EntityPack, is } from '@framework/Signum.Entities';
 import { ifError } from '@framework/Globals';
 import { ajaxPost, ajaxGet, ajaxGetRaw, saveFile, ServiceError } from '@framework/Services';
@@ -154,7 +154,7 @@ export function taskAuthorizeProperties(lineBase: LineBase<LineBaseProps, LineBa
 
     const member = state.ctx.propertyRoute.member;
 
-    switch ((member as any).propertyAllowed as PropertyAllowed) {
+    switch (member!.propertyAllowed) {
       case "None":
         state.visible = false;
         break;
