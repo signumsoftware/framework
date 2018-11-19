@@ -1,5 +1,6 @@
-﻿using Signum.Entities.DynamicQuery;
+using Signum.Entities.DynamicQuery;
 using Signum.Entities.UserAssets;
+using Signum.Utilities;
 using Signum.Utilities.DataStructures;
 using System;
 using System.Collections;
@@ -248,7 +249,7 @@ namespace Signum.Engine.Templating
             sb.Append("[");
             this.ToStringInternal(sb, variables);
             sb.Append("]");
-            if (this.ValueProvider.Variable != null)
+            if (this.ValueProvider.Variable.HasText())
                 sb.Append(" as " + this.ValueProvider.Variable);
         }
         public override IEnumerable<object> GetFilteredRows(TemplateParameters p)
