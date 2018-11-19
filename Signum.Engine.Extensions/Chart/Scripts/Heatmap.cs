@@ -11,11 +11,11 @@ namespace Signum.Logic.Chart.Scripts
         public HeatmapChartScript() : base(GoogleMapsCharScript.Heatmap)
         {
             this.Icon = ChartScriptLogic.LoadIcon("heatmap.png");
-            this.GroupBy = GroupByChart.Never;
+            this.GroupBy = GroupByChart.Optional;
             this.Columns = new List<ChartScriptColumn>
             {
-                new ChartScriptColumn("Latitude", ChartColumnType.Magnitude) ,
-                new ChartScriptColumn("Longitude", ChartColumnType.Magnitude) ,
+                new ChartScriptColumn("Latitude", ChartColumnType.Magnitude) { IsGroupKey = true },
+                new ChartScriptColumn("Longitude", ChartColumnType.Magnitude) { IsGroupKey = true },
                 new ChartScriptColumn("Weight", ChartColumnType.Magnitude) { IsOptional = true }
             };
             this.Parameters = new List<ChartScriptParameter>
