@@ -643,10 +643,10 @@ export module API {
 
       const scriptCol = chartScript.columns[i];
 
-      var value: (r: ChartRow) => undefined = function (r: ChartRow) { return (r as any)["c" + i]; };
-      var key = getKey(token);
-      var niceName = getNiceName(token);
-      var color = getColor(token);
+      const value: (r: ChartRow) => undefined = function (r: ChartRow) { return (r as any)["c" + i]; };
+      const key = getKey(token);
+      const niceName = getNiceName(token);
+      const color = getColor(token);
 
 
       return {
@@ -679,17 +679,25 @@ export module API {
     });
 
     if (!request.groupResults) {
-      cols.insertAt(0, Object.assign(function (r: ChartRow) { return r.entity; }, {
+      const value = (r: ChartRow) => r.entity;
+      const color = (v: Lite<Entity> | undefined) => !v ? "#555" : null;
+      const niceName = (v: Lite<Entity> | undefined) => v && v.toStr;
+      const key = (v: Lite<Entity> | undefined) => v ? liteKey(v) : String(v);
+      cols.insertAt(0, ({
         name: "entity",
         displayName: "Entity",
         title: "",
         token: "Lite",
         type: "entity",
         isGroupKey: true,
-        getColor: v => v ? "#555" : null,
-        getKey: v => v ? liteKey(v as Lite<Entity>) : undefined,
-        getNiceName: v => v ? (v as Lite<Entity>).toStr : undefined,
-      } as ChartColumn<unknown>) as ChartColumn<unknown>);
+        getKey: key,
+        getNiceName: niceName,
+        getColor: color,
+        getValue: value,
+        getValueKey: row => key(value(row)),
+        getValueNiceName: row => niceName(value(row)),
+        getValueColor: row => color(value(row)),
+      } as ChartColumn<Lite<Entity> | undefined>) as ChartColumn<unknown>);
     }
 
     var params = getParameterWithDefault(request, chartScript);
