@@ -1,4 +1,4 @@
-﻿using Signum.Entities.Basics;
+using Signum.Entities.Basics;
 using Signum.Entities.Reflection;
 using Signum.Utilities;
 using Signum.Utilities.ExpressionTrees;
@@ -38,11 +38,13 @@ namespace Signum.Entities
             get { return this.Follow(a => a.Parent).Select(a => a.PropertyInfo).Reverse().Skip(1).ToArray(); }
         }
 
+        [ForceEagerEvaluation]
         public static PropertyRoute Construct<T, S>(Expression<Func<T, S>> propertyRoute)
             where T : IRootEntity
         {
             return Root(typeof(T)).Continue(propertyRoute);
         }
+                                
 
         public PropertyRoute Continue<T, S>(Expression<Func<T, S>> propertyRoute)
         {
