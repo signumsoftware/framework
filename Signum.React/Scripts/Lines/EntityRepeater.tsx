@@ -1,4 +1,4 @@
-﻿import * as React from 'react'
+import * as React from 'react'
 import { classes } from '../Globals'
 import * as Navigator from '../Navigator'
 import { TypeContext, mlistItemContext } from '../TypeContext'
@@ -7,6 +7,7 @@ import { EntityBase } from './EntityBase'
 import { EntityListBase, EntityListBaseProps, DragConfig } from './EntityListBase'
 import { RenderEntity } from './RenderEntity'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { getTypeInfos, getTypeInfo } from '../Reflection';
 
 export interface EntityRepeaterProps extends EntityListBaseProps {
   createAsLink?: boolean | ((er: EntityRepeater) => React.ReactElement<any>);
@@ -62,6 +63,7 @@ export class EntityRepeater extends EntityListBase<EntityRepeaterProps, EntityRe
   renderElements() {
     const ctx = this.state.ctx;
     const readOnly = ctx.readOnly;
+    const showType = getTypeInfos(ctx.propertyRoute.typeReference().name).length > 1;
     return (
       <div className="sf-repater-elements">
         {
@@ -71,8 +73,9 @@ export class EntityRepeater extends EntityListBase<EntityRepeaterProps, EntityRe
               ctx={mlec}
               draggable={this.canMove(mlec.value) && !readOnly ? this.getDragConfig(i, "v") : undefined}
               getComponent={this.props.getComponent}
-              getViewPromise={this.props.getViewPromise} />))
-        }
+              getViewPromise={this.props.getViewPromise}
+              title={showType ? <span className="sf-type-badge">{getTypeInfo(mlec.value.Type || mlec.value.EntityType).niceName}</span> : undefined} />))
+}
         {
           this.state.createAsLink && this.state.create && !readOnly &&
           (typeof this.state.createAsLink == "function" ? this.state.createAsLink(this) :
@@ -94,7 +97,7 @@ export interface EntityRepeaterElementProps {
   getViewPromise?: (entity: ModifiableEntity) => undefined | string | Navigator.ViewPromise<ModifiableEntity>;
   onRemove?: (event: React.MouseEvent<any>) => void;
   draggable?: DragConfig;
-
+  title?: React.ReactElement<any>;
 }
 
 export class EntityRepeaterElement extends React.Component<EntityRepeaterElementProps>
@@ -117,13 +120,15 @@ export class EntityRepeaterElement extends React.Component<EntityRepeaterElement
                 <FontAwesomeIcon icon="times" />
               </a>}
               &nbsp;
-                        {drag && <a href="#" className={classes("sf-line-button", "sf-move")}
+            {drag && <a href="#" className={classes("sf-line-button", "sf-move")}
                 draggable={true}
                 onDragStart={drag.onDragStart}
                 onDragEnd={drag.onDragEnd}
                 title={EntityControlMessage.Move.niceToString()}>
                 <FontAwesomeIcon icon="bars" />
               </a>}
+              {this.props.title && '\xa0'}
+              {this.props.title}
             </div>
           </legend>
           <div className="sf-line-entity">

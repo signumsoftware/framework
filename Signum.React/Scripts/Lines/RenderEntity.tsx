@@ -1,4 +1,4 @@
-﻿import * as React from 'react'
+import * as React from 'react'
 import * as Navigator from '../Navigator'
 import { TypeContext, EntityFrame } from '../TypeContext'
 import { PropertyRoute, getTypeInfo, ReadonlyBinding } from '../Reflection'
@@ -28,18 +28,23 @@ export class RenderEntity extends React.Component<RenderEntityProps, RenderEntit
     this.state = { getComponent: undefined, lastLoadedType: undefined };
   }
 
+  isDead = false;
+  componentWillUnmount() {
+    this.isDead = true;
+  }
+
 
   componentWillMount() {
     this.loadEntity(this.props)
-      .then(() => this.loadComponent(this.props))
-      .then(() => this.forceUpdate())
+      .then(() => this.isDead ? undefined : this.loadComponent(this.props))
+      .then(() => this.isDead ? undefined : this.forceUpdate())
       .done();
   }
 
   componentWillReceiveProps(nextProps: RenderEntityProps) {
     this.loadEntity(nextProps)
-      .then(() => this.loadComponent(nextProps))
-      .then(() => this.forceUpdate())
+      .then(() => this.isDead ? undefined : this.loadComponent(nextProps))
+      .then(() => this.isDead ? undefined : this.forceUpdate())
       .done();
   }
 
