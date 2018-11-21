@@ -251,6 +251,7 @@ namespace Signum.Engine.Linq
                 if (c.Type == typeof(object) && (c.IsNull() || (Schema.Current.Settings.IsDbType(c.Value.GetType()))))
                     return Add(c);
             }
+            
             return c;
         }
 
@@ -477,17 +478,29 @@ namespace Signum.Engine.Linq
             if (innerProjection || !Has(expr))
                 return null;
 
-            var number = Expression.Subtract(
-                    TrySqlFunction(null, SqlFunction.DATEPART, typeof(int), new SqlEnumExpression(SqlEnums.weekday), expr),
-                    new SqlConstantExpression(1));
+            var number = TrySqlFunction(null, SqlFunction.DATEPART, typeof(int), new SqlEnumExpression(SqlEnums.weekday), expr);
 
             Add(number);
 
-            Expression result = Expression.Convert(number, typeof(DayOfWeek));
             if (isFullNominate)
-                Add(result);
+                return number; //Risky, type changes
+
+            Expression result = Expression.Call(miToDayOfWeek, number);
 
             return result;
+        }
+
+        public static ResetLazy<Tuple<int>> DateFirst = new ResetLazy<Tuple<int>>(() => Tuple.Create((int)Executor.ExecuteScalar("SELECT @@DATEFIRST")));
+
+        static MethodInfo miToDayOfWeek = ReflectionTools.GetMethodInfo(() => ToDayOfWeek(1));
+        public static DayOfWeek ToDayOfWeek(int sqlServerWeekDay)
+        {
+            return (DayOfWeek)((DateFirst.Value.Item1 + sqlServerWeekDay - 1) % 7);
+        }
+        
+        public static int ToSqlWeekDay(DayOfWeek dayOfWeek)
+        {
+            return (((int)dayOfWeek - DateFirst.Value.Item1 + 7) % 7) + 1;
         }
 
         private Expression TrySqlStartOf(Expression expression, SqlEnums part)

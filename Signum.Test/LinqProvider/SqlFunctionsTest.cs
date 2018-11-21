@@ -97,12 +97,29 @@ namespace Signum.Test.LinqProvider
         }
 
         [Fact]
-        public void DateTimeDayOfWeek()
+        public void DayOfWeekWhere()
         {
-            //var list = Database.Query<ArtistEntity>().GroupBy(a => a.Sex).Select(gr => new { gr.Key, Count = gr.Count() }).ToList();
-            var list = Database.Query<NoteWithDateEntity>().GroupBy(a => a.CreationTime.DayOfWeek).Select(gr => new { gr.Key, Count = gr.Count() }).ToList();
+            var list3 = Database.Query<NoteWithDateEntity>().Where(a => a.CreationTime.DayOfWeek == a.CreationTime.DayOfWeek).Count();
+        }
 
-            var list2 = Database.Query<NoteWithDateEntity>().Where(a => a.CreationTime.DayOfWeek == DayOfWeek.Sunday).ToList();
+        [Fact]
+        public void DayOfWeekWhereConstant()
+        {
+            var list4 = Database.Query<NoteWithDateEntity>().Where(a => a.CreationTime.DayOfWeek == DayOfWeek.Sunday).Count();
+        }
+
+        [Fact]
+        public void DayOfWeekContains()
+        {
+            var dows  = new[] { DayOfWeek.Monday, DayOfWeek.Sunday };
+
+            var list2 = Database.Query<NoteWithDateEntity>().Where(a => dows.Contains(a.CreationTime.DayOfWeek)).Count();
+        }
+
+        [Fact]
+        public void DayOfWeekGroupBy()
+        {
+            var list = Database.Query<NoteWithDateEntity>().GroupBy(a => a.CreationTime.DayOfWeek).Select(gr => new { gr.Key, Count = gr.Count() }).ToList();
         }
 
         [Fact]

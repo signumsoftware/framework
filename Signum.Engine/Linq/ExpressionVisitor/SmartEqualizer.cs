@@ -106,20 +106,38 @@ namespace Signum.Engine.Linq
             var exp1Clean = RemoveConvertChain(exp1);
             var exp2Clean = RemoveConvertChain(exp2);
 
+            if (exp1Clean.Type.UnNullify() == typeof(DayOfWeek) ||
+               exp2Clean.Type.UnNullify() == typeof(DayOfWeek))
+            {
+                return SmartEqualizer.EqualNullable(
+                    ConstantToDayOfWeek(exp1Clean),
+                    ConstantToDayOfWeek(exp2Clean));
+            }
 
             if (exp1 != exp1Clean || exp2 != exp2Clean)
             {
                 var type = exp2.Type.IsNullable() ? exp1.Type.Nullify(): exp1.Type;
 
-
                 return SmartEqualizer.EqualNullable(exp1Clean.TryConvert(type), exp2Clean.TryConvert(type));
             }
 
             return null;
-
-
         }
+        
+        private static Expression ConstantToDayOfWeek(Expression exp)
+        {
+            /*
+            if(exp is ConstantExpression c)
+            {
+                if (c.Value == null)
+                    return Expression.Constant(null, typeof(DayOfWeek?));
 
+                return Expression.Constant((DayOfWeek)(int)c.Value, exp.Type.IsNullable() ? typeof(DayOfWeek?) : typeof(DayOfWeek));
+            }
+            */
+            return null;
+        }
+        
         private static Expression RemoveConvertChain(Expression exp)
         {
 
