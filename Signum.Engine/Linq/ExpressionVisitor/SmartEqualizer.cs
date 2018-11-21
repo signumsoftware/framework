@@ -110,8 +110,8 @@ namespace Signum.Engine.Linq
                exp2Clean.Type.UnNullify() == typeof(DayOfWeek))
             {
                 return SmartEqualizer.EqualNullable(
-                    ConstantToDayOfWeek(exp1Clean),
-                    ConstantToDayOfWeek(exp2Clean));
+                    ConstantToDayOfWeek(exp1Clean) ?? exp1Clean,
+                    ConstantToDayOfWeek(exp2Clean) ?? exp2Clean);
             }
 
             if (exp1 != exp1Clean || exp2 != exp2Clean)
@@ -126,15 +126,14 @@ namespace Signum.Engine.Linq
         
         private static Expression ConstantToDayOfWeek(Expression exp)
         {
-            /*
-            if(exp is ConstantExpression c)
+            if (exp is ConstantExpression c)
             {
                 if (c.Value == null)
                     return Expression.Constant(null, typeof(DayOfWeek?));
 
                 return Expression.Constant((DayOfWeek)(int)c.Value, exp.Type.IsNullable() ? typeof(DayOfWeek?) : typeof(DayOfWeek));
             }
-            */
+
             return null;
         }
         
