@@ -1,4 +1,4 @@
-﻿import * as React from 'react'
+import * as React from 'react'
 import { openModal, IModalProps } from '../Modals';
 import { classes } from '../Globals';
 import { JavascriptMessage, BooleanEnum } from '../Signum.Entities'
