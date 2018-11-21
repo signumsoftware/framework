@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Signum.Entities;
 using Signum.Engine.Maps;
 using Signum.Engine;
@@ -25,7 +25,7 @@ namespace Signum.Test.Environment
                     return;
 
                 var conf = new ConfigurationBuilder().SetBasePath(Directory.GetCurrentDirectory())
-                    .AddJsonFile("appsettings.json")
+                    //.AddJsonFile("appsettings.json")
                     .AddUserSecrets(typeof(MusicStarter).Assembly)
                     .Build();
 
