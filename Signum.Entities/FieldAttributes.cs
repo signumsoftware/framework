@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Data;
@@ -118,7 +118,7 @@ sb.Schema.Settings.FieldAttributes(({route.RootType.TypeName()} a) => a.{route.P
             if (error.HasText())
                 throw new InvalidOperationException(error);
 
-            return new Implementations { arrayOrType = types };
+            return new Implementations { arrayOrType = types.OrderBy(a => a.FullName).ToArray() };
         }
 
         static string Error(Type type)
