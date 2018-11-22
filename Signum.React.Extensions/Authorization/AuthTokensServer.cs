@@ -65,7 +65,7 @@ namespace Signum.React.Authorization
                 return null;
             }
 
-            var token = DeserializeToken(authHeader);
+            var token = DeserializeAuthHeaderToken(authHeader);
 
             var c = Configuration();
 
