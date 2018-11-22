@@ -1,4 +1,4 @@
-﻿using Signum.Engine;
+using Signum.Engine;
 using Signum.Engine.Authorization;
 using Signum.Entities;
 using Signum.Entities.Authorization;
@@ -59,13 +59,13 @@ namespace Signum.React.Authorization
 
         static SignumAuthenticationResult TokenAuthenticator(FilterContext ctx)
         {
-            var tokenString = ctx.HttpContext.Request.Headers["Authorization"].FirstOrDefault();
-            if (tokenString == null)
+            var authHeader = ctx.HttpContext.Request.Headers["Authorization"].FirstOrDefault();
+            if (authHeader == null)
             {
                 return null;
             }
 
-            var token = DeserializeToken(tokenString.After("Bearer "));
+            var token = DeserializeToken(authHeader);
 
             var c = Configuration();
 
@@ -110,22 +110,19 @@ namespace Signum.React.Authorization
 
         static BinaryFormatter formatter = new BinaryFormatter();
 
+        public static Func<string, AuthToken> DeserializeAuthHeaderToken = (string authHeader) => DeserializeToken(authHeader.After("Bearer "));
 
-        public static AuthToken DeserializeToken(string authHeader)
+        public static AuthToken DeserializeToken(string token)
         {
             try
             {
+                var array = Convert.FromBase64String(token);
 
-                //using (HeavyProfiler.LogNoStackTrace("DeserializeToken"))
-                {
-                    var array = Convert.FromBase64String(authHeader);
+                array = Decrypt(array);
 
-                    array = Decrypt(array);
-
-                    using (var ms = new MemoryStream(array))
-                    using (DeflateStream ds = new DeflateStream(ms, CompressionMode.Decompress))
-                        return (AuthToken)formatter.Deserialize(ds);
-                }
+                using (var ms = new MemoryStream(array))
+                using (DeflateStream ds = new DeflateStream(ms, CompressionMode.Decompress))
+                    return (AuthToken)formatter.Deserialize(ds);
             }
             catch (Exception)
             {
