@@ -1,5 +1,6 @@
 import * as React from 'react'
 import * as Finder from '@framework/Finder'
+import * as Navigator from '@framework/Navigator'
 import { Type } from '@framework/Reflection'
 import DynamicComponent from '@framework/Lines/DynamicComponent'
 import { FileEntity, FilePathEntity, FileEmbedded, FilePathEmbedded, IFile } from './Signum.Entities.Files'
@@ -16,20 +17,20 @@ export function start(options: { routes: JSX.Element[] }) {
 
   registerAutoFileLine(FilePathEntity);
   registerAutoFileLine(FilePathEmbedded);
-
-
+  
+  
   Finder.formatRules.push({
     name: "WebDownload",
     isApplicable: col => col.token!.type.name === "WebDownload",
     formatter: col => new CellFormatter((cell: WebDownload) =>
-      !cell ? undefined : <a href={cell.fullWebPath} download={cell.fileName}>{cell.fileName}</a>)
+      !cell ? undefined : <a href={Navigator.toAbsoluteUrl(cell.fullWebPath)} download={cell.fileName}>{cell.fileName}</a>)
   });
 
   Finder.formatRules.push({
     name: "WebImage",
     isApplicable: col => col.token!.type.name === "WebImage",
     formatter: col => new CellFormatter((cell: WebImage) =>
-      !cell ? undefined : <img src={cell.fullWebPath} />)
+      !cell ? undefined : <img src={Navigator.toAbsoluteUrl(cell.fullWebPath)} />)
   });
 }
 
