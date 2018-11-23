@@ -46,7 +46,7 @@ namespace Signum.Engine.DynamicQuery
                 var errors = core.StaticColumns.Where(sc => sc.Implementations == null && sc.Type.CleanType().IsIEntity());
 
                 if (errors.Any())
-                    throw new InvalidOperationException("Column {0} of query '{1}' do(es) not have implementations deffined. Use Column extension method".FormatWith(errors.CommaAnd(a => $"'{a.Name}'"), QueryUtils.GetKey(QueryName)));
+                    throw new InvalidOperationException("Column {0} of query '{1}' do(es) not have implementations defined. Use Column extension method".FormatWith(errors.CommaAnd(a => $"'{a.Name}'"), QueryUtils.GetKey(QueryName)));
 
                 return core;
             });
