@@ -1,4 +1,4 @@
-﻿import * as React from 'react'
+import * as React from 'react'
 import * as Services from '@framework/Services'
 import * as Navigator from '@framework/Navigator'
 import { ModifiableEntity, Lite, Entity, JavascriptMessage } from '@framework/Signum.Entities'
@@ -58,6 +58,7 @@ export default class FileDownloader extends React.Component<FileDownloaderProps>
       <a
         href="#"
         onClick={e => {
+          e.preventDefault();
           if (this.props.download == "SaveAs") {
             if (entity.binaryFile)
               downloadBase64(e, entity.binaryFile, entity.fileName!);
