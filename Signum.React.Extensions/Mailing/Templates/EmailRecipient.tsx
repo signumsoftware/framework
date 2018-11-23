@@ -12,13 +12,13 @@ export default class EmailRecipient extends React.Component<{ ctx: TypeContext<E
         <div className="col-sm-1">
           <ValueLine ctx={sc.subCtx(c => c.kind)} />
         </div>
-        <div className="col-sm-4">
+        <div className="col-sm-11">
           <EntityLine ctx={sc.subCtx(ea => ea.emailOwner)} />
         </div>
-        <div className="col-sm-3">
+        <div className="col-sm-5 offset-sm-1">
           <ValueLine ctx={sc.subCtx(c => c.emailAddress)} />
         </div>
-        <div className="col-sm-3">
+        <div className="col-sm-6">
           <ValueLine ctx={sc.subCtx(c => c.displayName)} />
         </div>
       </div>
