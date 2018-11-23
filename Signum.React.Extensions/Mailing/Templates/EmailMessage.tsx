@@ -29,12 +29,22 @@ export default class EmailMessage extends React.Component<{ ctx: TypeContext<Ema
                 <ValueLine ctx={ctx4.subCtx(f => f.state)} />
                 <ValueLine ctx={ctx4.subCtx(f => f.sent)} />
                 <ValueLine ctx={ctx4.subCtx(f => f.bodyHash)} />
+                <ValueLine ctx={ctx4.subCtx(f => f.creationDate)} />
               </div>
               <div className="col-sm-8">
-                <EntityLine ctx={ctx.subCtx(f => f.target)} />
+                <EntityLine ctx={ctx.subCtx(f => f.target, { labelColumns: 2 })} />
                 <EntityLine ctx={ctx.subCtx(f => f.template)} />
                 <EntityLine ctx={ctx.subCtx(f => f.package)} />
                 <EntityLine ctx={ctx.subCtx(f => f.exception)} />
+              </div>
+            </div>
+            <hr/>
+            <div className="row">
+              <div className="col-sm-4">
+                <ValueLine ctx={ctx4.subCtx(f => f.receptionNotified)} />
+              </div>
+              <div className="col-sm-8">
+                <ValueLine ctx={ctx.subCtx(f => f.uniqueIdentifier)} />
               </div>
             </div>
           </fieldset>
@@ -45,8 +55,7 @@ export default class EmailMessage extends React.Component<{ ctx: TypeContext<Ema
 
           <ValueLine ctx={ctx.subCtx(f => f.subject, { labelColumns: 1 })} />
           <ValueLine ctx={ctx.subCtx(f => f.isBodyHtml)} inlineCheckbox={true} onChange={() => this.forceUpdate()} />
-          {ctx.value.state != "Created" ? <IFrameRenderer style={{ width: "100%" }} html={ctx.value.body} /> :
-            ctx.value.isBodyHtml ? <div className="code-container"><HtmlCodemirror ctx={ctx.subCtx(f => f.body)} /></div> :
+          {ctx.value.isBodyHtml ? <div className="code-container"><HtmlCodemirror ctx={ctx.subCtx(f => f.body)} /></div> :
               <div>
                 <ValueLine ctx={ctx.subCtx(f => f.body)} valueLineType="TextArea" valueHtmlAttributes={{ style: { height: "180px" } }} formGroupStyle="SrOnly" />
               </div>
@@ -103,7 +112,7 @@ export interface EmailMessageComponentProps {
 export class EmailMessageComponent extends React.Component<EmailMessageComponentProps, { showPreview: boolean }>{
   constructor(props: EmailMessageComponentProps) {
     super(props);
-    this.state = { showPreview: false }
+    this.state = { showPreview: true }
   }
 
   handlePreviewClick = (e: React.FormEvent<any>) => {
