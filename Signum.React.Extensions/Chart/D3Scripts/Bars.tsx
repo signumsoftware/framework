@@ -87,7 +87,7 @@ export default class BarsChart extends D3ChartBase {
       .attr('dominant-baseline', 'central')
       .text(keyColumn.title || "");
 
-    var color = d3.scaleOrdinal(ChartUtils.getColorScheme(data.parameters["ColorScheme"], parseInt(data.parameters["ColorSchemeSteps"]!)))
+    var color = d3.scaleOrdinal(ChartUtils.getColorScheme(data.parameters["ColorCategory"], parseInt(data.parameters["ColorCategorySteps"]!)))
       .domain(data.rows.map(r => keyColumn.getValueKey(r)));
 
     //PAINT GRAPH

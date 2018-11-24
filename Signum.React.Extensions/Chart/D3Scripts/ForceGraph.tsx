@@ -57,7 +57,7 @@ export default class ForceGraphChart extends D3ChartBase {
         toValue: toColumn.getValue(r),
       }));
 
-    var color = d3.scaleOrdinal(ChartUtils.getColorScheme(data.parameters["ColorScheme"], parseInt(data.parameters["ColorSchemeSteps"])))
+    var color = d3.scaleOrdinal(ChartUtils.getColorScheme(data.parameters["ColorCategory"], parseInt(data.parameters["ColorCategorySteps"])))
 
     var simulation = d3.forceSimulation()
       .force("link", d3.forceLink(links))

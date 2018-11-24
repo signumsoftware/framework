@@ -81,7 +81,7 @@ export default class ColumnsChart extends D3ChartBase {
       .attr('dominant-baseline', 'middle')
       .text(valueColumn.title);
 
-    var color = d3.scaleOrdinal(ChartUtils.getColorScheme(data.parameters["ColorScheme"], parseInt(data.parameters["ColorSchemeSteps"]!)))
+    var color = d3.scaleOrdinal(ChartUtils.getColorScheme(data.parameters["ColorCategory"], parseInt(data.parameters["ColorCategorySteps"]!)))
       .domain(data.rows.map(r => keyColumn.getValueKey(r)!));
 
 

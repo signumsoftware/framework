@@ -20,7 +20,7 @@ namespace Signum.Entities.Chart
     }
 
    
-    [Flags, InTypeScript(true)]
+    [Flags, InTypeScript(true), DescriptionOptions(DescriptionOptions.Members)]
     public enum ChartColumnType
     {
         [Code("i")]
@@ -45,7 +45,7 @@ namespace Signum.Entities.Chart
         [Code("M")]
         Magnitude = ChartColumnTypeUtils.GroupMargin | Integer | Real | RealGroupable,
         [Code("P")]
-        Positionable = ChartColumnTypeUtils.GroupMargin | Integer | Real | RealGroupable | Date | DateTime | Enum
+        Positionable = ChartColumnTypeUtils.GroupMargin | Integer | Real | RealGroupable | Date | DateTime
     }
 
 

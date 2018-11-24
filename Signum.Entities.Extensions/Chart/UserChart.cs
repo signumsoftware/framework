@@ -203,7 +203,7 @@ namespace Signum.Entities.Chart
                 {
                     EnumerableExtensions.JoinStrict(
                         Parameters,
-                        this.GetChartScript().Parameters,
+                        this.GetChartScript().AllParameters(),
                         p => p.Name,
                         ps => ps.Name,
                         (p, ps) => new { p, ps }, pi.NiceName());

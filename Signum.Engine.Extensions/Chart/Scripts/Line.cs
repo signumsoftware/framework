@@ -16,13 +16,29 @@ namespace Signum.Logic.Chart.Scripts
                 new ChartScriptColumn("Horizontal Axis", ChartColumnType.Groupable),
                 new ChartScriptColumn("Height", ChartColumnType.Positionable) 
             };
-            this.Parameters = new List<ChartScriptParameter>
+            this.ParameterGroups = new List<ChartScriptParameterGroup>
             {
-                new ChartScriptParameter("UnitMargin", ChartParameterType.Number) {  ValueDefinition = new NumberInterval { DefaultValue = 20m } },
-                new ChartScriptParameter("Scale", ChartParameterType.Enum) { ColumnIndex = 1,  ValueDefinition = EnumValueList.Parse("ZeroMax (M)|MinMax|Log (M)") },
-                new ChartScriptParameter("Color", ChartParameterType.String) {  ValueDefinition = new StringValue("steelblue") },
-                new ChartScriptParameter("Interpolate", ChartParameterType.Enum) {  ValueDefinition = EnumValueList.Parse("linear|step-before|step-after|cardinal|monotone|basis|bundle|catmull-rom") },
-                new ChartScriptParameter("NumberOpacity", ChartParameterType.Number) {  ValueDefinition = new NumberInterval { DefaultValue = 0.8m } }
+                new ChartScriptParameterGroup("Scale")
+                {
+                    new ChartScriptParameter("Scale", ChartParameterType.Enum) { ColumnIndex = 1,  ValueDefinition = EnumValueList.Parse("ZeroMax (M)|MinMax|Log (M)") },
+
+                },
+                new ChartScriptParameterGroup("Margins")
+                {
+                    new ChartScriptParameter("UnitMargin", ChartParameterType.Number) {  ValueDefinition = new NumberInterval { DefaultValue = 20m } },
+                },
+                new ChartScriptParameterGroup("Number")
+                {
+                    new ChartScriptParameter("NumberOpacity", ChartParameterType.Number) {  ValueDefinition = new NumberInterval { DefaultValue = 0.8m } }
+                },
+                new ChartScriptParameterGroup("Color")
+                {
+                    new ChartScriptParameter("Color", ChartParameterType.String) {  ValueDefinition = new StringValue("steelblue") },
+                },
+                new ChartScriptParameterGroup("Form")
+                {
+                    new ChartScriptParameter("Interpolate", ChartParameterType.Enum) {  ValueDefinition = EnumValueList.Parse("linear|step-before|step-after|cardinal|monotone|basis|bundle|catmull-rom") },
+                } 
             };
         }      
     }                

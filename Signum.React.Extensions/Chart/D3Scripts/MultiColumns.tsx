@@ -113,7 +113,7 @@ export default class MultiColumnsChart extends D3ChartBase {
       .domain(pivot.columns.map(s => s.key))
       .range([interMagin, x.bandwidth() - interMagin]);
 
-    var color = d3.scaleOrdinal(ChartUtils.getColorScheme(data.parameters["ColorScheme"], parseInt(data.parameters["ColorSchemeSteps"]))).domain(pivot.columns.map(s => s.key));
+    var color = d3.scaleOrdinal(ChartUtils.getColorScheme(data.parameters["ColorCategory"], parseInt(data.parameters["ColorCategorySteps"]))).domain(pivot.columns.map(s => s.key));
 
     const me = this;
 

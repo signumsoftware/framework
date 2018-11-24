@@ -106,11 +106,13 @@ namespace Signum.Entities.Chart
 
             if (chart.Parameters.Modified != ModifiedState.Sealed)
             {
-                if (chart.Parameters.Select(a => a.Name).OrderBy().SequenceEqual(chartScript.Parameters.Select(a => a.Name).OrderBy()))
+                var chartScriptParameters = chartScript.AllParameters().ToList();
+
+                if (chart.Parameters.Select(a => a.Name).OrderBy().SequenceEqual(chartScriptParameters.Select(a => a.Name).OrderBy()))
                 {
                     foreach (var cp in chart.Parameters)
                     {
-                        var sp = chartScript.Parameters.FirstEx(a => a.Name == cp.Name);
+                        var sp = chartScriptParameters.FirstEx(a => a.Name == cp.Name);
 
                         cp.parentChart = chart;
                         cp.ScriptParameter = sp;
@@ -122,7 +124,7 @@ namespace Signum.Entities.Chart
                 {
                     var byName = chart.Parameters.ToDictionary(a => a.Name);
                     chart.Parameters.Clear();
-                    foreach (var sp in chartScript.Parameters)
+                    foreach (var sp in chartScriptParameters)
                     {
                         var cp = byName.TryGetC(sp.Name);
 

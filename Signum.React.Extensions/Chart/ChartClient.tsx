@@ -107,14 +107,18 @@ export interface ChartScript {
   symbol: ChartScriptSymbol;
   icon: { fileName: string; bytes: string };
   columns: ChartScriptColumn[];
-  parameters: ChartScriptParameter[];
-  columnStructure: string;
+  parameterGroups: ChartScriptParameterGroup[];
 }
 
 export interface ChartScriptColumn {
   displayName: string;
   isOptional: boolean;
   columnType: ChartColumnType;
+}
+
+export interface ChartScriptParameterGroup {
+  name: string;
+  parameters: ChartScriptParameter[];
 }
 
 export interface ChartScriptParameter {
@@ -239,8 +243,7 @@ export function isChartColumnType(token: QueryToken | undefined, ct: ChartColumn
       "Real",
       "RealGroupable",
       "Date",
-      "DateTime",
-      "Enum"].contains(type);
+      "DateTime"].contains(type);
   }
 
 
@@ -264,8 +267,6 @@ export function getChartColumnType(token: QueryToken): ChartColumnType | undefin
 }
 
 
-
-
 export function synchronizeColumns(chart: IChartBase, chartScript: ChartScript) {
 
   if (chart.columns == null ||
@@ -282,14 +283,15 @@ export function synchronizeColumns(chart: IChartBase, chartScript: ChartScript) 
     chart.columns.splice(chartScript.columns.length, chart.columns.length - chartScript.columns.length);
   }
 
+  var allChartScriptParameters = chartScript.parameterGroups.flatMap(a => a.parameters);
 
   if (chart.parameters.map(a => a.element.name!).orderBy(n => n).join(" ") !=
-    chartScript.parameters.map(a => a.name!).orderBy(n => n).join(" ")) {
+    allChartScriptParameters.map(a => a.name!).orderBy(n => n).join(" ")) {
 
     const byName = chart.parameters.map(a => a.element).toObject(a => a.name!);
     chart.parameters.clear();
 
-    chartScript.parameters.forEach(sp => {
+    allChartScriptParameters.forEach(sp => {
       let cp = byName[sp.name!];
 
       if (cp == undefined) {
@@ -427,7 +429,7 @@ export module Encoder {
 
   export function toChartOptions(cr: ChartRequestModel, cs: ChartScript | null): ChartOptions {
 
-    var params = cs && cs.parameters.toObject(a => a.name);
+    var params = cs && cs.parameterGroups.flatMap(a => a.parameters).toObject(a => a.name);
 
     return {
       queryName: cr.queryKey,
@@ -656,7 +658,7 @@ export module API {
 
   export function getParameterWithDefault(request: ChartRequestModel, chartScript: ChartScript): { [parameter: string]: string } {
 
-    var defaultValues = chartScript.parameters.toObject(a => a.name, a => {
+    var defaultValues = chartScript.parameterGroups.flatMap(g => g.parameters).toObject(a => a.name, a => {
       var col = a.columnIndex == null ? null : request.columns[a.columnIndex];
       return defaultParameterValue(a, col && col.element && col.element.token && col.element.token.token);
     });

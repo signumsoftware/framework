@@ -117,7 +117,7 @@ export default class StackedBarsChart extends D3ChartBase {
       .attr('dominant-baseline', 'middle')
       .text(keyColumn.title);
 
-    var color = d3.scaleOrdinal(ChartUtils.getColorScheme(data.parameters["ColorScheme"], parseInt(data.parameters["ColorSchemeSteps"]))).domain(pivot.columns.map(s => s.key));
+    var color = d3.scaleOrdinal(ChartUtils.getColorScheme(data.parameters["ColorCategory"], parseInt(data.parameters["ColorCategorySteps"]))).domain(pivot.columns.map(s => s.key));
 
     var me = this;
     //PAINT GRAPH

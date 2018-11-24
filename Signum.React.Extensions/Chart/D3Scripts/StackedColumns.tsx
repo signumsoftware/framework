@@ -111,7 +111,7 @@ export default class StackedColumnsChart extends D3ChartBase {
       .attr('dominant-baseline', 'middle')
       .text(pivot.title);
 
-    var color = d3.scaleOrdinal(ChartUtils.getColorScheme(data.parameters["ColorScheme"], parseInt(data.parameters["ColorSchemeSteps"])))
+    var color = d3.scaleOrdinal(ChartUtils.getColorScheme(data.parameters["ColorCategory"], parseInt(data.parameters["ColorCategorySteps"])))
       .domain(pivot.columns.map(c => c.key));
 
     const me = this;

@@ -109,7 +109,7 @@ export default class MultiBarsChart extends D3ChartBase {
 
     var interMagin = 2;
 
-    var color = d3.scaleOrdinal(ChartUtils.getColorScheme(data.parameters["ColorScheme"], parseInt(data.parameters["ColorSchemeSteps"]))).domain(pivot.columns.map(s => s.key));
+    var color = d3.scaleOrdinal(ChartUtils.getColorScheme(data.parameters["ColorCategory"], parseInt(data.parameters["ColorCategorySteps"]))).domain(pivot.columns.map(s => s.key));
 
     var ySubscale = d3.scaleBand()
       .domain(pivot.columns.map(s => s.key))

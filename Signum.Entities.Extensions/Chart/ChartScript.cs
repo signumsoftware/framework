@@ -70,7 +70,7 @@ namespace Signum.Entities.Chart
         public ChartScriptSymbol Symbol { get; set; }
         public FileContent Icon { get; set; }
         public List<ChartScriptColumn> Columns { get; set; }
-        public List<ChartScriptParameter> Parameters { get; set; }
-        public string ColumnStructure { get; set; }
+        public List<ChartScriptParameterGroup> ParameterGroups { get; set; }
+        public IEnumerable<ChartScriptParameter> AllParameters() => ParameterGroups.SelectMany(a => a);
     }
 }

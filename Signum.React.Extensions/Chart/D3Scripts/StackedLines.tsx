@@ -128,7 +128,7 @@ export default class StackedLinesChart extends D3ChartBase {
       .attr('dominant-baseline', 'middle')
       .text(pivot.title);
 
-    var color = d3.scaleOrdinal(ChartUtils.getColorScheme(data.parameters["ColorScheme"], parseInt(data.parameters["ColorSchemeSteps"]))).domain(pivot.columns.map(s => s.key));
+    var color = d3.scaleOrdinal(ChartUtils.getColorScheme(data.parameters["ColorCategory"], parseInt(data.parameters["ColorCategorySteps"]))).domain(pivot.columns.map(s => s.key));
 
     var pInterpolate = data.parameters["Interpolate"];
 
