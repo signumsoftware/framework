@@ -7,7 +7,7 @@ import * as Finder from '@framework/Finder'
 import { SubTokensOptions } from '@framework/FindOptions'
 import { getQueryNiceName } from '@framework/Reflection'
 import { TypeContext } from '@framework/TypeContext'
-import QueryTokenEntityBuilder from '../../UserAssets/Templates/QueryTokenEntityBuilder'
+import QueryTokenEmbeddedBuilder from '../../UserAssets/Templates/QueryTokenEmbeddedBuilder'
 import FilterBuilderEmbedded from '../../UserAssets/Templates/FilterBuilderEmbedded';
 import "../Chart.css"
 

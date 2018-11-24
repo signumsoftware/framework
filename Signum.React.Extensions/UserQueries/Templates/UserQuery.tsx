@@ -5,7 +5,7 @@ import * as Finder from '@framework/Finder'
 import { SubTokensOptions } from '@framework/FindOptions'
 import { getQueryNiceName } from '@framework/Reflection'
 import { TypeContext } from '@framework/TypeContext'
-import QueryTokenEntityBuilder from '../../UserAssets/Templates/QueryTokenEntityBuilder'
+import QueryTokenEmbeddedBuilder from '../../UserAssets/Templates/QueryTokenEmbeddedBuilder'
 import FilterBuilderEmbedded from '../../UserAssets/Templates/FilterBuilderEmbedded';
 
 const CurrentEntityKey = "[CurrentEntity]";
@@ -64,7 +64,7 @@ export default class UserQuery extends React.Component<{ ctx: TypeContext<UserQu
               <EntityTable ctx={ctxxs.subCtx(e => e.columns)} columns={EntityTable.typedColumns<QueryColumnEmbedded>([
                 {
                   property: a => a.token,
-                  template: ctx => <QueryTokenEntityBuilder
+                  template: ctx => <QueryTokenEmbeddedBuilder
                     ctx={ctx.subCtx(a => a.token, { formGroupStyle: "SrOnly" })}
                     queryKey={this.props.ctx.value.query!.key}
                     subTokenOptions={SubTokensOptions.CanElement | canAggregate} />
@@ -74,7 +74,7 @@ export default class UserQuery extends React.Component<{ ctx: TypeContext<UserQu
               <EntityTable ctx={ctxxs.subCtx(e => e.orders)} columns={EntityTable.typedColumns<QueryOrderEmbedded>([
                 {
                   property: a => a.token,
-                  template: ctx => <QueryTokenEntityBuilder
+                  template: ctx => <QueryTokenEmbeddedBuilder
                     ctx={ctx.subCtx(a => a.token, { formGroupStyle: "SrOnly" })}
                     queryKey={this.props.ctx.value.query!.key}
                     subTokenOptions={SubTokensOptions.CanElement | canAggregate} />

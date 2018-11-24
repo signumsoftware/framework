@@ -9,7 +9,7 @@ import FileLine from '../../Files/FileLine'
 import { PredictorEntity, PredictorColumnEmbedded, PredictorMessage, PredictorSubQueryEntity, PredictorFileType, PredictorCodificationEntity, PredictorSubQueryColumnEmbedded, PredictorEpochProgressEntity, NeuralNetworkSettingsEntity, DefaultColumnEncodings } from '../Signum.Entities.MachineLearning'
 import * as Finder from '@framework/Finder'
 import * as Navigator from '@framework/Navigator'
-import QueryTokenEntityBuilder from '../../UserAssets/Templates/QueryTokenEntityBuilder'
+import QueryTokenEmbeddedBuilder from '../../UserAssets/Templates/QueryTokenEmbeddedBuilder'
 import { QueryDescription, SubTokensOptions } from '@framework/FindOptions'
 import * as PredictorClient from '../PredictorClient';
 import { toLite } from "@framework/Signum.Entities";
@@ -219,7 +219,7 @@ export default class Predictor extends React.Component<{ ctx: TypeContext<Predic
                     { property: a => a.usage },
                     {
                       property: a => a.token,
-                      template: (cctx, row) => <QueryTokenEntityBuilder
+                      template: (cctx, row) => <QueryTokenEmbeddedBuilder
                         ctx={cctx.subCtx(a => a.token)}
                         queryKey={this.props.ctx.value.mainQuery.query!.key}
                         subTokenOptions={SubTokensOptions.CanElement | canAggregate}

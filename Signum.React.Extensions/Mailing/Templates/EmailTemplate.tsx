@@ -4,7 +4,7 @@ import { SubTokensOptions } from '@framework/FindOptions'
 import { TypeContext } from '@framework/TypeContext'
 import { EmailTemplateEntity, EmailTemplateContactEmbedded, EmailTemplateMessageEmbedded, EmailTemplateViewMessage, EmailTemplateMessage, EmailTemplateRecipientEmbedded } from '../Signum.Entities.Mailing'
 import { TemplateApplicableEval } from '../../Templating/Signum.Entities.Templating'
-import QueryTokenEntityBuilder from '../../UserAssets/Templates/QueryTokenEntityBuilder'
+import QueryTokenEmbeddedBuilder from '../../UserAssets/Templates/QueryTokenEmbeddedBuilder'
 import TemplateControls from '../../Templating/TemplateControls'
 import HtmlCodemirror from '../../Codemirror/HtmlCodemirror'
 import IFrameRenderer from './IFrameRenderer'
@@ -77,7 +77,7 @@ export default class EmailTemplate extends React.Component<{ ctx: TypeContext<Em
           </div>
           <div className="col-sm-10">
             {this.props.ctx.value.query &&
-              <QueryTokenEntityBuilder
+              <QueryTokenEmbeddedBuilder
                 ctx={sc.subCtx(a => a.token)}
                 queryKey={this.props.ctx.value.query.key}
                 subTokenOptions={SubTokensOptions.CanElement}
@@ -109,7 +109,7 @@ export default class EmailTemplate extends React.Component<{ ctx: TypeContext<Em
           </div>
           <div className="col-sm-10">
             {this.props.ctx.value.query &&
-              <QueryTokenEntityBuilder
+              <QueryTokenEmbeddedBuilder
                 ctx={sc.subCtx(a => a.token)}
                 queryKey={this.props.ctx.value.query.key}
                 subTokenOptions={SubTokensOptions.CanElement}

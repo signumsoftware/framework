@@ -8,7 +8,7 @@ import { ValueLine, FormGroup } from '@framework/Lines'
 import { ChartColumnEmbedded, IChartBase, ChartMessage, ChartColorEntity } from '../Signum.Entities.Chart'
 import * as ChartClient from '../ChartClient'
 import { ChartScriptColumn, ChartScript } from '../ChartClient'
-import QueryTokenEntityBuilder from '../../UserAssets/Templates/QueryTokenEntityBuilder'
+import QueryTokenEntityBuilder from '../../UserAssets/Templates/QueryTokenEmbeddedBuilder'
 
 export interface ChartColumnProps {
   ctx: TypeContext<ChartColumnEmbedded>;
