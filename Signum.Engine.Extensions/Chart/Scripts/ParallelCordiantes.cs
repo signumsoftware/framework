@@ -11,10 +11,9 @@ namespace Signum.Logic.Chart.Scripts
         public ParallelCoordiantesChartScript(): base(D3ChartScript.ParallelCoordinates)
         {
             this.Icon = ChartScriptLogic.LoadIcon("parallelcoordinates.png");
-            this.GroupBy = GroupByChart.Optional;
             this.Columns = new List<ChartScriptColumn>
             {
-                new ChartScriptColumn("Line", ChartColumnType.Groupable) { IsGroupKey = true },
+                new ChartScriptColumn("Line", ChartColumnType.Groupable),
                 new ChartScriptColumn("Dimension1", ChartColumnType.Positionable) ,
                 new ChartScriptColumn("Dimension2", ChartColumnType.Positionable) ,
                 new ChartScriptColumn("Dimension3", ChartColumnType.Positionable) { IsOptional = true },

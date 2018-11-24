@@ -11,11 +11,10 @@ namespace Signum.Logic.Chart.Scripts
         public ForceGraphChartScript() : base(D3ChartScript.ForceGraph)
         {
             this.Icon = ChartScriptLogic.LoadIcon("forcegraph.png");
-            this.GroupBy = GroupByChart.Always;
             this.Columns = new List<ChartScriptColumn>
             {
-                new ChartScriptColumn("From Node", ChartColumnType.Groupable) { IsGroupKey = true },
-                new ChartScriptColumn("To Node", ChartColumnType.Groupable) { IsGroupKey = true },
+                new ChartScriptColumn("From Node", ChartColumnType.Groupable),
+                new ChartScriptColumn("To Node", ChartColumnType.Groupable),
                 new ChartScriptColumn("Link width", ChartColumnType.Magnitude) { IsOptional = true }
             };
             this.Parameters = new List<ChartScriptParameter>

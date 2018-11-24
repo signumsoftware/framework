@@ -1,4 +1,4 @@
-﻿using Drawing = DocumentFormat.OpenXml.Drawing;
+using Drawing = DocumentFormat.OpenXml.Drawing;
 using Presentation = DocumentFormat.OpenXml.Presentation;
 using Charts = DocumentFormat.OpenXml.Drawing.Charts;
 using Signum.Utilities;
@@ -324,11 +324,12 @@ namespace Signum.Engine.Word
                 ResultTable result = ChartLogic.ExecuteChartAsync(chartRequest, CancellationToken.None).Result;
                 var tokens = chartRequest.Columns.Where(a => a.Token != null).ToList();
 
-                if (chartRequest.GroupResults && tokens.Count(a => a.IsGroupKey.Value) == 2 && tokens.Count(a => !a.IsGroupKey.Value) == 1)
+                //TODO: Too specific. Will be better if controlled by some parameters. 
+                if (chartRequest.HasAggregates() && tokens.Count(a => !(a.Token.Token is AggregateToken)) == 2 && tokens.Count(a => a.Token.Token is AggregateToken) == 1)
                 {
-                    var firstKeyIndex = tokens.FindIndex(a => a.IsGroupKey.Value);
-                    var secondKeyIndex = tokens.FindIndex(firstKeyIndex + 1, a => a.IsGroupKey.Value);
-                    var valueIndex = tokens.FindIndex(a => !a.IsGroupKey.Value);
+                    var firstKeyIndex = tokens.FindIndex(a => !(a.Token.Token is AggregateToken));
+                    var secondKeyIndex = tokens.FindIndex(firstKeyIndex + 1, a => !(a.Token.Token is AggregateToken));
+                    var valueIndex = tokens.FindIndex(a => a.Token.Token is AggregateToken);
                     return result.ToDataTablePivot(secondKeyIndex, firstKeyIndex, valueIndex);
                 }
                 else

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 using Signum.Entities.Basics;
 using Signum.Entities.DynamicQuery;
@@ -97,10 +97,7 @@ namespace Signum.Entities.Chart
 
         [NotNullValidator, PreserveOrder]
         public MList<QueryFilterEmbedded> Filters { get; set; } = new MList<QueryFilterEmbedded>();
-
-        [NotNullValidator, PreserveOrder]
-        public MList<QueryOrderEmbedded> Orders { get; set; } = new MList<QueryOrderEmbedded>();
-
+        
         [UniqueIndex]
         public Guid Guid { get; set; } = Guid.NewGuid();
 
@@ -119,11 +116,7 @@ namespace Signum.Entities.Chart
 
             if (Columns != null)
                 foreach (var c in Columns)
-                    c.ParseData(this, description, SubTokensOptions.CanElement | (c.IsGroupKey == false ? SubTokensOptions.CanAggregate : 0));
-
-            if (Orders != null)
-                foreach (var o in Orders)
-                    o.ParseData(this, description, SubTokensOptions.CanElement | (this.GroupResults ? SubTokensOptions.CanAggregate : 0));
+                    c.ParseData(this, description, SubTokensOptions.CanElement | SubTokensOptions.CanAggregate);
         }
 
         static Func<QueryEntity, object> ToQueryName;
@@ -167,7 +160,6 @@ namespace Signum.Entities.Chart
                 new XAttribute("GroupResults", GroupResults),
                 Filters.IsNullOrEmpty() ? null : new XElement("Filters", Filters.Select(f => f.ToXml(ctx)).ToList()),
                 new XElement("Columns", Columns.Select(f => f.ToXml(ctx)).ToList()),
-                Orders.IsNullOrEmpty() ? null : new XElement("Orders", Orders.Select(f => f.ToXml(ctx)).ToList()),
                 Parameters.IsNullOrEmpty() ? null : new XElement("Parameters", Parameters.Select(f => f.ToXml(ctx)).ToList()));
         }
 
@@ -181,7 +173,6 @@ namespace Signum.Entities.Chart
             GroupResults = bool.Parse(element.Attribute("GroupResults").Value);
             Filters.Synchronize(element.Element("Filters")?.Elements().ToList(), (f, x) => f.FromXml(x, ctx));
             Columns.Synchronize(element.Element("Columns")?.Elements().ToList(), (c, x) => c.FromXml(x, ctx));
-            Orders.Synchronize(element.Element("Orders")?.Elements().ToList(), (o, x) => o.FromXml(x, ctx));
             Parameters.Synchronize(element.Element("Parameters")?.Elements().ToList(), (p, x) => p.FromXml(x, ctx));
             ChartScript = ctx.ChartScript(element.Attribute("ChartScript").Value);
             ParseData(ctx.GetQueryDescription(Query));
@@ -190,6 +181,18 @@ namespace Signum.Entities.Chart
         public void FixParameters(ChartColumnEmbedded chartColumn)
         {
             ChartUtils.FixParameters(this, chartColumn);
+        }
+
+        protected override void PreSaving(PreSavingContext ctx)
+        {
+            Columns.ForEach(c =>
+            {
+                if(c.Token == null)
+                {
+                    c.OrderByIndex = null;
+                    c.OrderByType = null;
+                }
+            });
         }
 
         protected override string PropertyValidation(PropertyInfo pi)

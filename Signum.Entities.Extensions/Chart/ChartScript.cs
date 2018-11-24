@@ -69,17 +69,8 @@ namespace Signum.Entities.Chart
 
         public ChartScriptSymbol Symbol { get; set; }
         public FileContent Icon { get; set; }
-        public GroupByChart GroupBy { get; set; }
         public List<ChartScriptColumn> Columns { get; set; }
         public List<ChartScriptParameter> Parameters { get; set; }
         public string ColumnStructure { get; set; }
-    }
-    
-    [InTypeScript(true)]
-    public enum GroupByChart
-    {
-        Always,
-        Optional,
-        Never
     }
 }

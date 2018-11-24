@@ -11,11 +11,10 @@ namespace Signum.Logic.Chart.Scripts
         public StackedBarsChartScript() : base(D3ChartScript.StackedBars)
         {
             this.Icon = ChartScriptLogic.LoadIcon("stackedbars.png");
-            this.GroupBy = GroupByChart.Always;
             this.Columns = new List<ChartScriptColumn>
             {
-                new ChartScriptColumn("Vertical Axis", ChartColumnType.Groupable) { IsGroupKey = true },
-                new ChartScriptColumn("Split Bars", ChartColumnType.Groupable) { IsGroupKey = true, IsOptional = true },
+                new ChartScriptColumn("Vertical Axis", ChartColumnType.Groupable),
+                new ChartScriptColumn("Split Bars", ChartColumnType.Groupable) { IsOptional = true },
                 new ChartScriptColumn("Width", ChartColumnType.Magnitude) ,
                 new ChartScriptColumn("Width 2", ChartColumnType.Magnitude) { IsOptional = true },
                 new ChartScriptColumn("Width 3", ChartColumnType.Magnitude) { IsOptional = true },

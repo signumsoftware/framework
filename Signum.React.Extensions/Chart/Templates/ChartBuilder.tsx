@@ -3,10 +3,10 @@ import * as React from 'react'
 import { TypeContext, mlistItemContext } from '@framework/TypeContext'
 import { is } from '@framework/Signum.Entities'
 import { ValueLine, ValueLineProps, OptionItem } from '@framework/Lines'
-import { ChartColumnEmbedded, IChartBase, ChartMessage, ChartParameterEmbedded } from '../Signum.Entities.Chart'
+import { ChartColumnEmbedded, IChartBase, ChartMessage, ChartParameterEmbedded, ChartRequestModel } from '../Signum.Entities.Chart'
 import * as ChartClient from '../ChartClient'
 import { ChartScript, ChartScriptParameter, EnumValueList } from '../ChartClient'
-import { ChartColumn, ChartColumnInfo } from './ChartColumn'
+import { ChartColumn } from './ChartColumn'
 
 export interface ChartBuilderProps {
   ctx: TypeContext<IChartBase>; /*IChart*/
@@ -14,11 +14,12 @@ export interface ChartBuilderProps {
   onInvalidate: () => void;
   onTokenChange: () => void;
   onRedraw: () => void;
+  onOrderChanged: () => void;
+  
 }
 
 export interface ChartBuilderState {
   chartScripts?: ChartScript[],
-  expanded?: boolean[];
   colorPalettes?: string[];
 }
 
@@ -27,11 +28,11 @@ export default class ChartBuilder extends React.Component<ChartBuilderProps, Cha
 
   constructor(props: ChartBuilderProps) {
     super(props);
-
-    this.state = { expanded: undefined };
+    this.state = {};
   }
 
   componentWillMount() {
+    const ctx = this.props.ctx;
 
     ChartClient.getChartScripts().then(scripts => {
       this.setState({ chartScripts: scripts });
@@ -41,10 +42,6 @@ export default class ChartBuilder extends React.Component<ChartBuilderProps, Cha
     ChartClient.getColorPalettes().then(colorPalettes =>
       this.setState({ colorPalettes: colorPalettes }))
       .done();
-
-    const ctx = this.props.ctx;
-
-    this.setState({ expanded: Array.repeat(ctx.value.columns.length, false) });
   }
 
   chartTypeImgClass(script: ChartScript): string {
@@ -61,19 +58,9 @@ export default class ChartBuilder extends React.Component<ChartBuilderProps, Cha
     return css;
   }
 
-  handleOnToggleInfo = (index: number) => {
-    this.state.expanded![index] = !this.state.expanded![index];
-    this.forceUpdate();
-  }
-
   handleOnRedraw = () => {
     this.forceUpdate();
     this.props.onRedraw();
-  }
-
-  handleOnInvalidate = () => {
-    this.forceUpdate();
-    this.props.onInvalidate();
   }
 
   handleTokenChange = (cc: ChartColumnEmbedded) => {
@@ -96,6 +83,11 @@ export default class ChartBuilder extends React.Component<ChartBuilderProps, Cha
       this.props.onRedraw();
   }
 
+  handleOrderChart = (c: ChartColumnEmbedded, e: React.MouseEvent<any>) => {
+    ChartClient.handleOrderColumn(this.props.ctx.value, c, e.shiftKey);
+    this.props.onOrderChanged();
+  }
+
   render() {
 
     const chart = this.props.ctx.value;
@@ -110,7 +102,7 @@ export default class ChartBuilder extends React.Component<ChartBuilderProps, Cha
               <h6 className="card-title mb-0">{ChartMessage.Chart.niceToString()}</h6>
             </div>
             <div className="card-body">
-              {this.state.chartScripts && this.state.expanded && this.state.chartScripts.map((cs, i) =>
+              {this.state.chartScripts && this.state.chartScripts.map((cs, i) =>
                 <div key={i} className={this.chartTypeImgClass(cs)} title={cs.symbol.key.after(".") + "\r\n" + cs.columnStructure} onClick={() => this.handleChartScriptOnClick(cs)}>
                   <img src={"data:image/jpeg;base64," + (cs.icon && cs.icon.bytes)} />
                 </div>)}
@@ -129,27 +121,25 @@ export default class ChartBuilder extends React.Component<ChartBuilderProps, Cha
                     <th className="sf-chart-token-narrow">
                       {ChartMessage.Chart_Dimension.niceToString()}
                     </th>
-                    <th className="">
-                      {ChartMessage.Chart_Group.niceToString()}
-                    </th>
                     <th className="sf-chart-token-wide">
                       Token
-                                        </th>
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
-                  {this.state.expanded && chartScript && mlistItemContext(this.props.ctx.subCtx(c => c.columns, { formSize: "ExtraSmall" })).flatMap((ctx, i) => [
-                    <ChartColumn chartBase={chart} chartScript={chartScript} ctx={ctx} key={"C" + i} scriptColumn={chartScript!.columns[i]} queryKey={this.props.queryKey}
-                      onToggleInfo={() => this.handleOnToggleInfo(i)} onGroupChange={this.handleOnInvalidate} onTokenChange={() => this.handleTokenChange(ctx.value)} />,
-                    this.state.expanded![i] && this.state.colorPalettes && <ChartColumnInfo ctx={ctx} key={"CI" + i} colorPalettes={this.state.colorPalettes} onRedraw={this.handleOnRedraw} />
-                  ])}
+                  {chartScript && this.state.colorPalettes && mlistItemContext(this.props.ctx.subCtx(c => c.columns, { formSize: "ExtraSmall" })).map((ctx, i) =>
+                    <ChartColumn chartBase={chart} chartScript={chartScript} ctx={ctx} key={"C" + i} scriptColumn={chartScript!.columns[i]}
+                      queryKey={this.props.queryKey} onTokenChange={() => this.handleTokenChange(ctx.value)}
+                      onRedraw={this.handleOnRedraw}
+                      onOrderChanged={this.handleOrderChart} colorPalettes={this.state.colorPalettes!} />)
+                  }
                 </tbody>
               </table>
             </div>
           </div>
           <fieldset className="sf-chart-parameters">
             {
-              this.state.expanded && chartScript && mlistItemContext(this.props.ctx.subCtx(c => c.parameters, { formSize: "ExtraSmall", formGroupStyle: "Basic" }))
+              chartScript && mlistItemContext(this.props.ctx.subCtx(c => c.parameters, { formSize: "ExtraSmall", formGroupStyle: "Basic" }))
                 .map((ctx, i) => this.getParameterValueLine(ctx, chartScript.parameters[i]))
                 .groupsOf(6).map((gr, j) =>
                   <div className="row" key={j}>
@@ -160,9 +150,7 @@ export default class ChartBuilder extends React.Component<ChartBuilderProps, Cha
         </div>
       </div >);
   }
-
-
-
+  
   getParameterValueLine(ctx: TypeContext<ChartParameterEmbedded>, scriptParameter: ChartScriptParameter) {
 
     const chart = this.props.ctx.value;
@@ -197,3 +185,5 @@ export default class ChartBuilder extends React.Component<ChartBuilderProps, Cha
   }
 
 }
+
+

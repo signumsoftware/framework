@@ -5,7 +5,7 @@ import { TypeContext, StyleContext } from '@framework/TypeContext'
 import { getTypeInfos, TypeInfo, isTypeEnum } from '@framework/Reflection'
 import * as Navigator from '@framework/Navigator'
 import { ValueLine, FormGroup } from '@framework/Lines'
-import { ChartColumnEmbedded, IChartBase, GroupByChart, ChartMessage, ChartColorEntity } from '../Signum.Entities.Chart'
+import { ChartColumnEmbedded, IChartBase, ChartMessage, ChartColorEntity } from '../Signum.Entities.Chart'
 import * as ChartClient from '../ChartClient'
 import { ChartScriptColumn, ChartScript } from '../ChartClient'
 import QueryTokenEntityBuilder from '../../UserAssets/Templates/QueryTokenEntityBuilder'
@@ -16,28 +16,22 @@ export interface ChartColumnProps {
   chartScript: ChartScript;
   chartBase: IChartBase;
   queryKey: string;
-  onToggleInfo: () => void;
+  colorPalettes: string[];
+  onRedraw: () => void;
+  onOrderChanged: (chartColumn: ChartColumnEmbedded, e: React.MouseEvent<any>) => void;
   onTokenChange: () => void;
-  onGroupChange: () => void;
 }
 
 
-export class ChartColumn extends React.Component<ChartColumnProps, {}> {
+export class ChartColumn extends React.Component<ChartColumnProps, { expanded: boolean }> {
 
   constructor(props: ChartColumnProps) {
     super(props);
+    this.state = { expanded: false };
   }
 
   handleExpanded = () => {
-    this.props.onToggleInfo();
-  }
-
-  handleGroupChecked = (e: React.FormEvent<any>) => {
-
-    this.props.chartBase.groupResults = (e.currentTarget as HTMLInputElement).checked;
-    ChartClient.synchronizeColumns(this.props.chartBase, this.props.chartScript);
-
-    this.props.onGroupChange();
+    this.setState({ expanded: !this.state.expanded });
   }
 
   render() {
@@ -45,40 +39,49 @@ export class ChartColumn extends React.Component<ChartColumnProps, {}> {
     const sc = this.props.scriptColumn;
     const cb = this.props.chartBase;
 
-    const groupVisible = this.props.chartScript.groupBy != "Never" && sc.isGroupKey;
+    const subTokenOptions = SubTokensOptions.CanElement | SubTokensOptions.CanAggregate;
 
-    const groupResults = cb.groupResults == undefined ? true : cb.groupResults;
-
-    const subTokenOptions = SubTokensOptions.CanElement | (groupResults && !sc.isGroupKey ? SubTokensOptions.CanAggregate : 0)
+    const ctx = this.props.ctx;
 
     return (
-      <tr className="sf-chart-token">
-        <th>{sc.displayName + (sc.isOptional ? "?" : "")}</th>
-        <td style={{ textAlign: "center" }}>
-          {groupVisible && <input type="checkbox" checked={cb.groupResults} className="sf-chart-group-trigger" disabled={this.props.chartScript.groupBy == "Always"} onChange={this.handleGroupChecked} />}
-        </td>
-        <td>
-          <div className={classes("sf-query-token")}>
-            <QueryTokenEntityBuilder
-              ctx={this.props.ctx.subCtx(a => a.token, { formGroupStyle: "None" })}
-              queryKey={this.props.queryKey}
-              subTokenOptions={subTokenOptions} onTokenChanged={() => this.props.onTokenChange()} />
-          </div>
-          <a className="sf-chart-token-config-trigger" onClick={this.handleExpanded}>{ChartMessage.Chart_ToggleInfo.niceToString()} </a>
-        </td>
-      </tr>
+      <>
+        <tr className="sf-chart-token">
+          <th onClick={e => ctx.value.token && this.props.onOrderChanged(ctx.value, e)}
+            style={{ whiteSpace: "nowrap", cursor: ctx.value.token ? "pointer" : undefined, userSelect: "none" }}>
+            <span className={"sf-header-sort " + this.orderClassName(ctx.value)} />
+            {sc.displayName + (sc.isOptional ? "?" : "")}
+          </th>
+          <td>
+            <div className={classes("sf-query-token")}>
+              <QueryTokenEntityBuilder
+                ctx={ctx.subCtx(a => a.token, { formGroupStyle: "None" })}
+                queryKey={this.props.queryKey}
+                subTokenOptions={subTokenOptions} onTokenChanged={() => this.props.onTokenChange()} />
+            </div>
+            <a className="sf-chart-token-config-trigger" onClick={this.handleExpanded}>{ChartMessage.Chart_ToggleInfo.niceToString()} </a>
+          </td>
+        </tr>
+        {this.state.expanded && <tr className="sf-chart-token-config">
+          <td></td>
+          <td colSpan={1}>
+            <div>
+              <div className="row">
+                <div className="col-sm-4">
+                  <ValueLine ctx={ctx.subCtx(a => a.displayName, { formSize: "Small", formGroupStyle: "Basic" })} onTextboxBlur={this.props.onRedraw} />
+                </div>
+                {this.getColorPalettes().map((t, i) =>
+                  <div className="col-sm-4" key={i}>
+                    <ChartPaletteLink ctx={ctx} type={t} currentPalettes={this.props.colorPalettes} />
+                  </div>)
+                }
+              </div>
+            </div>
+          </td>
+        </tr>
+        }
+      </>
     );
   }
-}
-
-
-export interface ChartColumnInfoProps {
-  ctx: TypeContext<ChartColumnEmbedded>;
-  onRedraw: () => void;
-  colorPalettes: string[];
-}
-
-export class ChartColumnInfo extends React.Component<ChartColumnInfoProps> {
 
   getColorPalettes() {
     const token = this.props.ctx.value.token;
@@ -94,45 +97,22 @@ export class ChartColumnInfo extends React.Component<ChartColumnInfoProps> {
     return getTypeInfos(t);
   }
 
-  render() {
+  orderClassName(c: ChartColumnEmbedded) {
 
-    const ctx = this.props.ctx.subCtx({ formSize: "Small", formGroupStyle: "Basic" });
+    if (c.orderByType == null || c.orderByIndex == null)
+      return "";
 
-
-
-    return (
-      <tr className="sf-chart-token-config">
-        <td></td>
-        <td></td>
-        <td colSpan={1}>
-          <div>
-            <div className="row">
-              <div className="col-sm-4">
-                <ValueLine ctx={ctx.subCtx(a => a.displayName)} onTextboxBlur={this.props.onRedraw} />
-              </div>
-              {this.getColorPalettes().map((t, i) =>
-                <div className="col-sm-4" key={i}>
-                  <ChartLink ctx={this.props.ctx} type={t} currentPalettes={this.props.colorPalettes} />
-                </div>)
-              }
-            </div>
-          </div>
-        </td>
-      </tr>
-    );
+    return (c.orderByType == "Ascending" ? "asc" : "desc") + (" l" + c.orderByIndex);
   }
-
-
 }
 
-
-export interface ChartLinkProps {
+export interface ChartPaletteLinkProps {
   type: TypeInfo;
   currentPalettes: string[];
   ctx: StyleContext;
 }
 
-export const ChartLink = (props: ChartLinkProps) =>
+export const ChartPaletteLink = (props: ChartPaletteLinkProps) =>
   <FormGroup ctx={props.ctx as any}
     labelText={ChartMessage.ColorsFor0.niceToString(props.type.niceName)}>
     <a href={"/chartColors/" + props.type.name} className="form-control">

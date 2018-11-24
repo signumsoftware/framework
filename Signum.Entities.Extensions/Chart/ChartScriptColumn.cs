@@ -1,4 +1,4 @@
-﻿using Signum.Utilities;
+using Signum.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,7 +17,6 @@ namespace Signum.Entities.Chart
         public string DisplayName { get; set; }
         public bool IsOptional { get; set; }
         public ChartColumnType ColumnType { get; set; }
-        public bool IsGroupKey { get; set; }
     }
 
    

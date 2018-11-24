@@ -9,12 +9,12 @@ import * as Finder from '@framework/Finder'
 import { Entity, Lite, liteKey, MList } from '@framework/Signum.Entities'
 import { getQueryKey, getEnumInfo } from '@framework/Reflection'
 import {
-  FilterOption, OrderOption, OrderOptionParsed, QueryRequest, QueryToken, SubTokensOptions, ResultTable, OrderRequest
+  FilterOption, OrderOption, OrderOptionParsed, QueryRequest, QueryToken, SubTokensOptions, ResultTable, OrderRequest, OrderType, FilterOptionParsed, hasAggregate, ColumnOption
 } from '@framework/FindOptions'
 import * as AuthClient from '../Authorization/AuthClient'
 import {
   UserChartEntity, ChartPermission, ChartColumnEmbedded, ChartParameterEmbedded, ChartRequestModel,
-  IChartBase, GroupByChart, ChartColumnType, ChartParameterType, ChartScriptSymbol, D3ChartScript, GoogleMapsCharScript
+  IChartBase, ChartColumnType, ChartParameterType, ChartScriptSymbol, D3ChartScript, GoogleMapsCharScript
 } from './Signum.Entities.Chart'
 import { QueryTokenEmbedded } from '../UserAssets/Signum.Entities.UserAssets'
 import ChartButton from './ChartButton'
@@ -106,7 +106,6 @@ export namespace ButtonBarChart {
 export interface ChartScript {
   symbol: ChartScriptSymbol;
   icon: { fileName: string; bytes: string };
-  groupBy: GroupByChart;
   columns: ChartScriptColumn[];
   parameters: ChartScriptParameter[];
   columnStructure: string;
@@ -116,7 +115,6 @@ export interface ChartScriptColumn {
   displayName: string;
   isOptional: boolean;
   columnType: ChartColumnType;
-  isGroupKey: boolean;
 }
 
 export interface ChartScriptParameter {
@@ -166,14 +164,17 @@ export function getColorPalettes(): Promise<string[]> {
   return API.fetchColorPalettes().then(cs => colorPalettes = cs);
 }
 
+export function hasAggregates(chartBase: IChartBase): boolean {
+  if (chartBase.columns.map(c => c.element.token).some(t => t != null && t.token != null && t.token.queryTokenType == "Aggregate"))
+    return true;
 
+  if (UserChartEntity.isInstance(chartBase))
+    return chartBase.filters.map(f => f.element && f.element.token).some(t => t != null && t.token != null && t.token.queryTokenType == "Aggregate");
+  else
+    return chartBase.filterOptions.some(fo => Finder.isAggregate(fo));
+}
 
 export function isCompatibleWith(chartScript: ChartScript, chartBase: IChartBase): boolean {
-  if (chartScript.groupBy == "Always" && !chartBase.groupResults)
-    return false;
-
-  if (chartScript.groupBy == "Never" && chartBase.groupResults)
-    return false;
 
   return zipOrDefault(
     chartScript.columns,
@@ -188,10 +189,7 @@ export function isCompatibleWith(chartScript: ChartScript, chartBase: IChartBase
       if (!isChartColumnType(c.token.token, s.columnType!))
         return false;
 
-      if (c.token.token!.queryTokenType == "Aggregate")
-        return !s.isGroupKey;
-      else
-        return s.isGroupKey || !chartBase.groupResults;
+      return true;
     }).every(b => b);
 }
 
@@ -310,45 +308,6 @@ export function synchronizeColumns(chart: IChartBase, chartScript: ChartScript) 
       chart.parameters!.push({ rowId: null, element: cp });
     });
   }
-
-  if (chart.groupResults == undefined) {
-    chart.groupResults = true;
-  }
-
-  if (chartScript.groupBy == "Always" && chart.groupResults == false) {
-    chart.groupResults = true;
-  }
-  else if (chartScript.groupBy == "Never" && chart.groupResults == true) {
-    chart.groupResults = false;
-  }
-
-  chart.columns.map(mle => mle.element).forEach((cc, i) => {
-    if (cc.token && cc.token.token!.queryTokenType == "Aggregate") {
-
-      const sc = chartScript.columns[i]
-      if (chart.groupResults == false || sc && sc.isGroupKey) {
-        const parentToken = cc.token.token!.parent;
-        cc.token = parentToken == undefined ? undefined : QueryTokenEmbedded.New({
-          tokenString: parentToken && parentToken.fullKey,
-          token: parentToken
-        });
-        cc.modified = true;
-      }
-    }
-  });
-
-  if (chart.Type == ChartRequestModel.typeName) {
-    const cr = chart as ChartRequestModel;
-
-    const keys = chart.columns.filter((a, i) => a.element.token && chartScript.columns![i].isGroupKey).map(a => a.element.token!.tokenString);
-
-    cr.orderOptions = cr.orderOptions!.filter(o => {
-      if (chart.groupResults)
-        return o.token!.queryTokenType == "Aggregate" || keys.contains(o.token!.fullKey);
-      else
-        return o.token!.queryTokenType != "Aggregate";
-    });
-  }
 }
 
 function isValidParameterValue(value: string | null | undefined, scriptParameter: ChartScriptParameter, relatedColumn: QueryToken | null | undefined) {
@@ -375,10 +334,7 @@ function defaultParameterValue(scriptParameter: ChartScriptParameter, relatedCol
 
 export function cleanedChartRequest(request: ChartRequestModel): ChartRequestModel {
   const clone = { ...request };
-  clone.orders = clone.orderOptions!
-    .map(oo => ({ token: oo.token.fullKey, orderType: oo.orderType }) as OrderRequest);
-  delete clone.orderOptions;
-
+  
   clone.filters = toFilterRequests(clone.filterOptions);
   delete clone.filterOptions;
 
@@ -399,11 +355,73 @@ export interface ChartOptions {
 export interface ChartColumnOption {
   token?: string;
   displayName?: string;
+  orderByIndex?: number;
+  orderByType?: OrderType;
 }
 
 export interface ChartParameterOption {
   name: string;
   value: string;
+}
+
+export function handleDrillDown(r: ChartRow, lastChartRequest: ChartRequestModel) {
+  if (r.entity) {
+    window.open(Navigator.navigateRoute(r.entity!));
+  } else {
+    const filters = lastChartRequest.filterOptions.filter(a => !hasAggregate(a.token));
+
+    const columns: ColumnOption[] = [];
+
+    lastChartRequest.columns.map((a, i) => {
+
+      const t = a.element.token;
+
+      if (t && t.token && !hasAggregate(t!.token!) && r.hasOwnProperty("c" + i)) {
+        filters.push({
+          token: t!.token!,
+          operation: "EqualTo",
+          value: (r as any)["c" + i],
+          frozen: false
+        } as FilterOptionParsed);
+      }
+
+      if (t && t.token && t.token.parent != undefined) //Avoid Count and simple Columns that are already added
+      {
+        var col = t.token.queryTokenType == "Aggregate" ? t.token.parent : t.token
+
+        if (col.parent)
+          columns.push({
+            token: col.fullKey
+          });
+      }
+    });
+
+    window.open(Finder.findOptionsPath({
+      queryName: lastChartRequest.queryKey,
+      filterOptions: toFilterOptions(filters),
+      columnOptions: columns,
+    }));
+  }
+}
+
+export function handleOrderColumn(cr: IChartBase, col: ChartColumnEmbedded, isShift: boolean) {
+
+  var newOrder = col.orderByType == "Ascending" ? "Descending" : "Ascending" as OrderType;
+
+  if (!isShift) {
+    cr.columns.forEach(a => {
+      a.element.orderByType = null;
+      a.element.orderByIndex = null;
+    });
+
+    col.orderByType = newOrder;
+    col.orderByIndex = 1;
+  } else {
+
+    col.orderByType = newOrder;
+    if (col.orderByIndex == null)
+      col.orderByIndex = (cr.columns.max(a => a.element.orderByIndex) || 0) + 1;
+  }
 }
 
 export module Encoder {
@@ -415,10 +433,13 @@ export module Encoder {
     return {
       queryName: cr.queryKey,
       chartScript: cr.chartScript && cr.chartScript.key.after(".") || undefined,
-      groupResults: cr.groupResults,
       filterOptions: toFilterOptions(cr.filterOptions),
-      orderOptions: cr.orderOptions.map(oo => ({ token: oo.token!.fullKey, orderType: oo.orderType } as OrderOption)),
-      columnOptions: cr.columns.map(co => ({ token: co.element.token && co.element.token.tokenString, displayName: co.element.displayName }) as ChartColumnOption),
+      columnOptions: cr.columns.map(co => ({
+        token: co.element.token && co.element.token.tokenString,
+        displayName: co.element.displayName,
+        orderByIndex: co.element.orderByIndex,
+        orderByType: co.element.orderByType,
+      }) as ChartColumnOption),
       parameters: cr.parameters
         .filter(p => {
           if (params == null)
@@ -462,7 +483,10 @@ export module Encoder {
 
   export function encodeColumn(query: any, columns: ChartColumnOption[] | undefined) {
     if (columns)
-      columns.forEach((co, i) => query["column" + i] = (co.token || "") + (co.displayName ? ("~" + scapeTilde(co.displayName)) : ""));
+      columns.forEach((co, i) => query["column" + i] =
+        (co.orderByIndex != null ? (co.orderByIndex! + (co.orderByType == "Ascending" ? "A" : "D") + "~") : "") +
+        (co.token || "") +
+        (co.displayName ? ("~" + scapeTilde(co.displayName)) : ""));
   }
 
   export function encodeParameters(query: any, parameters: ChartParameterOption[] | undefined) {
@@ -500,9 +524,7 @@ export module Decoder {
                 .single(`ChartScript '${query.queryKey}'`)
                 .symbol,
             queryKey: getQueryKey(queryName),
-            groupResults: query.groupResults == "true",
             filterOptions: fos.map(fo => completer.toFilterOptionParsed(fo)),
-            orderOptions: oos.map(oo => ({ token: completer.get(oo.token), orderType: oo.orderType }) as OrderOptionParsed),
             columns: cols,
             parameters: Decoder.decodeParameters(query),
           });
@@ -520,15 +542,25 @@ export module Decoder {
 
   export function decodeColumns(query: any): MList<ChartColumnEmbedded> {
     return valuesInOrder(query, "column").map(val => {
-      const ts = (val.contains("~") ? val.before("~") : val).trim();
 
+      var parts = val.split("~");
+
+      let order, token, displayName: string | null;
+
+      if (parts.length == 3 || parts.length == 2 && /\d+[AD]/.test(parts[0]))
+        [order, token, displayName] = parts;
+      else
+        [token, displayName] = parts;
+ 
       return ({
         rowId: null,
         element: ChartColumnEmbedded.New({
-          token: !!ts ? QueryTokenEmbedded.New({
-            tokenString: ts,
+          token: Boolean(token) ? QueryTokenEmbedded.New({
+            tokenString: token,
           }) : undefined,
-          displayName: unscapeTildes(val.tryAfter("~")),
+          orderByType: order == null ? null : (order.charAt(order.length -1) == "A" ? "Ascending" : "Descending"),
+          orderByIndex: order == null ? null : (parseInt(order.substr(0, order.length - 1))),
+          displayName: unscapeTildes(displayName),
         })
       });
     });
@@ -552,10 +584,10 @@ export module API {
 
     return {
       queryKey: request.queryKey,
-      groupResults: request.groupResults,
+      groupResults: hasAggregates(request),
       filters: toFilterRequests(request.filterOptions),
       columns: request.columns.map(mle => mle.element).filter(cce => cce.token != null).map(co => ({ token: co.token!.token!.fullKey }) as ColumnRequest),
-      orders: request.orderOptions.map(oo => ({ token: oo.token.fullKey, orderType: oo.orderType }) as OrderRequest),
+      orders: request.columns.filter(mle => mle.element.orderByType != null && mle.element.token != null).orderBy(mle => mle.element.orderByIndex).map(mle => ({ token: mle.element.token!.token!.fullKey, orderType: mle.element.orderByType! }) as OrderRequest),
       pagination: { mode: "All" }
     };
   }
@@ -655,7 +687,6 @@ export module API {
         title: (mle.element.displayName || token && token.niceName) + (token && token.unit ? ` (${token.unit})` : ""),
         token: token && token.fullKey,
         type: token && toChartColumnType(token),
-        isGroupKey: !request.groupResults ? undefined : scriptCol.isGroupKey,
         getKey: key,
         getNiceName: niceName,
         getColor: color,
@@ -678,7 +709,7 @@ export module API {
       }
     });
 
-    if (!request.groupResults) {
+    if (!hasAggregates(request)) {
       const value = (r: ChartRow) => r.entity;
       const color = (v: Lite<Entity> | undefined) => !v ? "#555" : null;
       const niceName = (v: Lite<Entity> | undefined) => v && v.toStr;
@@ -689,7 +720,6 @@ export module API {
         title: "",
         token: "Lite",
         type: "entity",
-        isGroupKey: true,
         getKey: key,
         getNiceName: niceName,
         getColor: color,
@@ -714,9 +744,7 @@ export module API {
         return { colName: "c" + i, cValue: val };
       }).filter(a => a != null).toObject(a => a!.colName, a => a!.cValue) as ChartRow;
 
-      if (!request.groupResults) {
-        cr.entity = row.entity;
-      }
+      cr.entity = row.entity;
 
       return cr;
     });
@@ -798,7 +826,6 @@ export interface ChartColumn<V> {
   title: string;
   displayName: string;
   token: string;
-  isGroupKey?: boolean;
   type: string;
 
   getKey: (v: V | null) => string;

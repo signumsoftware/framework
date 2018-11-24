@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Signum.Entities.DynamicQuery;
@@ -11,9 +11,7 @@ namespace Signum.Entities.Chart
         ChartScriptSymbol ChartScript { get; set; }
 
         ChartScript GetChartScript();
-
-        bool GroupResults { get; set; }
-
+        
         MList<ChartColumnEmbedded> Columns { get; }
         MList<ChartParameterEmbedded> Parameters { get; }
 
@@ -67,37 +65,26 @@ namespace Signum.Entities.Chart
             return GetChartScriptFunc(this.ChartScript);
         }
 
-
-        bool groupResults = true;
-        public bool GroupResults
-        {
-            get { return groupResults; }
-            set
-            {
-                var cs = GetChartScript();
-
-                if (cs != null)
-                {
-                    if (cs.GroupBy == GroupByChart.Always && value == false)
-                        return;
-
-                    if (cs.GroupBy == GroupByChart.Never && value == true)
-                        return;
-                }
-
-                if (Set(ref groupResults, value))
-                {
-                    NotifyAllColumns();
-                    InvalidateResults(true);
-                }
-            }
-        }
-
         [NotifyCollectionChanged, NotifyChildProperty, NotNullValidator]
         public MList<ChartColumnEmbedded> Columns { get; set; } = new MList<ChartColumnEmbedded>();
 
         [NotNullValidator, NoRepeatValidator]
         public MList<ChartParameterEmbedded> Parameters { get; set; } = new MList<ChartParameterEmbedded>();
+
+        public List<Column> GetQueryColumns()
+        {
+            return Columns.Where(c => c.Token != null).Select(t => t.CreateColumn()).ToList();
+        }
+
+        public List<Order> GetQueryOrders()
+        {
+            var result = Columns
+                .Where(a => a.OrderByIndex != null && a.Token != null)
+                .OrderBy(a => a.OrderByType.Value)
+                .Select(o => new Order(o.Token.Token, o.OrderByType.Value)).ToList();
+
+            return result;
+        }
 
         void NotifyAllColumns()
         {
@@ -134,20 +121,14 @@ namespace Signum.Entities.Chart
 
         [InTypeScript(false)]
         public List<Filter> Filters { get; set; } = new List<Filter>();
-
-        [InTypeScript(false)]
-        public List<Order> Orders { get; set; } = new List<Order>();
-
+        
         public List<QueryToken> AllTokens()
         {
             var allTokens = Columns.Select(a => a.Token?.Token).ToList();
 
             if (Filters != null)
-                allTokens.AddRange(Filters.SelectMany(a=>a.GetFilterConditions()).Select(a => a.Token));
-
-            if (Orders != null)
-                allTokens.AddRange(Orders.Select(a => a.Token));
-
+                allTokens.AddRange(Filters.SelectMany(a => a.GetFilterConditions()).Select(a => a.Token));
+            
             return allTokens;
         }
 
@@ -156,25 +137,15 @@ namespace Signum.Entities.Chart
         {
             get { return  CollectionElementToken.GetElements(new HashSet<QueryToken>(AllTokens())); }
         }
-
-        public void CleanOrderColumns()
-        {
-            if (GroupResults)
-            {
-                var keys = this.Columns.Where(a => a.IsGroupKey.Value).Select(a => a.Token).NotNull().Select(a => a.Token).ToList();
-
-                Orders.RemoveAll(o => !(o.Token is AggregateToken) && !keys.Contains(o.Token));
-            }
-            else
-            {
-                Orders.RemoveAll(o => o.Token is AggregateToken);
-            }
-        }
-
-
+        
         public void FixParameters(ChartColumnEmbedded chartColumn)
         {
             ChartUtils.FixParameters(this, chartColumn);
+        }
+
+        public bool HasAggregates()
+        {
+            return Filters.Any(a=>a.IsAggregate()) || Columns.Any(a=>a.Token?.Token is AggregateToken);
         }
     }
 }

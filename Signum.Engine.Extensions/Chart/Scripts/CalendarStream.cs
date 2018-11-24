@@ -11,10 +11,9 @@ namespace Signum.Logic.Chart.Scripts
         public CalendarStreamChartScript() : base(D3ChartScript.CalendarStream)
         {
             this.Icon = ChartScriptLogic.LoadIcon("calendar.png");
-            this.GroupBy = GroupByChart.Always;
             this.Columns = new List<ChartScriptColumn>
             {
-                new ChartScriptColumn("Date", ChartColumnType.Date) { IsGroupKey = true },
+                new ChartScriptColumn("Date", ChartColumnType.Date),
                 new ChartScriptColumn("Color", ChartColumnType.Magnitude) 
             };
             this.Parameters = new List<ChartScriptParameter>

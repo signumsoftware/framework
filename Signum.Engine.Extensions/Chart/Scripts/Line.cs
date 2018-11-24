@@ -11,10 +11,9 @@ namespace Signum.Logic.Chart.Scripts
         public LineChartScript() : base(D3ChartScript.Line)
         {
             this.Icon = ChartScriptLogic.LoadIcon("lines.png");
-            this.GroupBy = GroupByChart.Always;
             this.Columns = new List<ChartScriptColumn>
             {
-                new ChartScriptColumn("Horizontal Axis", ChartColumnType.Groupable) { IsGroupKey = true },
+                new ChartScriptColumn("Horizontal Axis", ChartColumnType.Groupable),
                 new ChartScriptColumn("Height", ChartColumnType.Positionable) 
             };
             this.Parameters = new List<ChartScriptParameter>

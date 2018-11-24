@@ -11,11 +11,10 @@ namespace Signum.Logic.Chart.Scripts
         public MultiBarsChartScript() : base(D3ChartScript.MultiBars)
         {
             this.Icon = ChartScriptLogic.LoadIcon("multibars.png");
-            this.GroupBy = GroupByChart.Always;
             this.Columns = new List<ChartScriptColumn>
             {
-                new ChartScriptColumn("Vertical Axis", ChartColumnType.Groupable) { IsGroupKey = true },
-                new ChartScriptColumn("Sub-bars", ChartColumnType.Groupable) { IsGroupKey = true, IsOptional = true },
+                new ChartScriptColumn("Vertical Axis", ChartColumnType.Groupable),
+                new ChartScriptColumn("Sub-bars", ChartColumnType.Groupable) { IsOptional = true },
                 new ChartScriptColumn("Width", ChartColumnType.Positionable) ,
                 new ChartScriptColumn("Width 2", ChartColumnType.Positionable) { IsOptional = true },
                 new ChartScriptColumn("Width 3", ChartColumnType.Positionable) { IsOptional = true },

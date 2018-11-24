@@ -11,10 +11,9 @@ namespace Signum.Logic.Chart.Scripts
         public PieChartScript(): base(D3ChartScript.Pie)
         {
             this.Icon = ChartScriptLogic.LoadIcon("doughnut.png");
-            this.GroupBy = GroupByChart.Always;
             this.Columns = new List<ChartScriptColumn>
             {
-                new ChartScriptColumn("Sections", ChartColumnType.Groupable) { IsGroupKey = true },
+                new ChartScriptColumn("Sections", ChartColumnType.Groupable),
                 new ChartScriptColumn("Angle", ChartColumnType.Magnitude) 
             };
             this.Parameters = new List<ChartScriptParameter>

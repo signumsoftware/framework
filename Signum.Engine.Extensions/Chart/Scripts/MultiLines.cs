@@ -11,11 +11,10 @@ namespace Signum.Logic.Chart.Scripts
         public MultiLinesChartScript(): base(D3ChartScript.MultiLines)
         {
             this.Icon = ChartScriptLogic.LoadIcon("multilines.png");
-            this.GroupBy = GroupByChart.Always;
             this.Columns = new List<ChartScriptColumn>
             {
-                new ChartScriptColumn("Horizontal Axis", ChartColumnType.Groupable) { IsGroupKey = true },
-                new ChartScriptColumn("Split Lines", ChartColumnType.Groupable) { IsGroupKey = true, IsOptional = true },
+                new ChartScriptColumn("Horizontal Axis", ChartColumnType.Groupable),
+                new ChartScriptColumn("Split Lines", ChartColumnType.Groupable) { IsOptional = true },
                 new ChartScriptColumn("Height", ChartColumnType.Positionable) ,
                 new ChartScriptColumn("Height 2", ChartColumnType.Positionable) { IsOptional = true },
                 new ChartScriptColumn("Height 3", ChartColumnType.Positionable) { IsOptional = true },

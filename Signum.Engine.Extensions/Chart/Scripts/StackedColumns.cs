@@ -11,11 +11,10 @@ namespace Signum.Logic.Chart.Scripts
         public StackedColumnsChartScript() : base(D3ChartScript.StackedColumns)
         {
             this.Icon = ChartScriptLogic.LoadIcon("stackedcolumns.png");
-            this.GroupBy = GroupByChart.Always;
             this.Columns = new List<ChartScriptColumn>
             {
-                new ChartScriptColumn("Horizontal Axis", ChartColumnType.Groupable) { IsGroupKey = true },
-                new ChartScriptColumn("Split Columns", ChartColumnType.Groupable) { IsGroupKey = true, IsOptional = true },
+                new ChartScriptColumn("Horizontal Axis", ChartColumnType.Groupable),
+                new ChartScriptColumn("Split Columns", ChartColumnType.Groupable) { IsOptional = true },
                 new ChartScriptColumn("Height", ChartColumnType.Magnitude) ,
                 new ChartScriptColumn("Height 2", ChartColumnType.Magnitude) { IsOptional = true },
                 new ChartScriptColumn("Height 3", ChartColumnType.Magnitude) { IsOptional = true },

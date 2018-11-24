@@ -11,11 +11,10 @@ namespace Signum.Logic.Chart.Scripts
         public PunchcardChartScript() : base(D3ChartScript.Punchcard)
         {
             this.Icon = ChartScriptLogic.LoadIcon("punchcard.png");
-            this.GroupBy = GroupByChart.Always;
             this.Columns = new List<ChartScriptColumn>
             {
-                new ChartScriptColumn("Horizontal Axis", ChartColumnType.Groupable) { IsGroupKey = true },
-                new ChartScriptColumn("Vertical Axis", ChartColumnType.Groupable) { IsGroupKey = true },
+                new ChartScriptColumn("Horizontal Axis", ChartColumnType.Groupable),
+                new ChartScriptColumn("Vertical Axis", ChartColumnType.Groupable),
                 new ChartScriptColumn("Size", ChartColumnType.Magnitude) { IsOptional = true },
                 new ChartScriptColumn("Color", ChartColumnType.Magnitude) { IsOptional = true },
                 new ChartScriptColumn("Opacity", ChartColumnType.Magnitude) { IsOptional = true },

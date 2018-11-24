@@ -11,14 +11,13 @@ namespace Signum.Logic.Chart.Scripts
         public TreeMapChartScript() : base(D3ChartScript.Treemap)
         {
             this.Icon = ChartScriptLogic.LoadIcon("treemap.png");
-            this.GroupBy = GroupByChart.Optional;
             this.Columns = new List<ChartScriptColumn>
             {
-                new ChartScriptColumn("Square", ChartColumnType.Groupable) { IsGroupKey = true },
+                new ChartScriptColumn("Square", ChartColumnType.Groupable),
                 new ChartScriptColumn("Size", ChartColumnType.Magnitude) ,
-                new ChartScriptColumn("Parent", ChartColumnType.Groupable) { IsGroupKey = true, IsOptional = true },
+                new ChartScriptColumn("Parent", ChartColumnType.Groupable) { IsOptional = true },
                 new ChartScriptColumn("ColorScale", ChartColumnType.Magnitude) { IsOptional = true },
-                new ChartScriptColumn("ColorScheme", ChartColumnType.Groupable) { IsGroupKey = true, IsOptional = true }
+                new ChartScriptColumn("ColorScheme", ChartColumnType.Groupable) { IsOptional = true }
             };
             this.Parameters = new List<ChartScriptParameter>
             {

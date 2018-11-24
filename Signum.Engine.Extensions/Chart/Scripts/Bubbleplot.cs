@@ -11,10 +11,9 @@ namespace Signum.Logic.Chart.Scripts
         public BubbleplotChartScript() : base(D3ChartScript.Bubbleplot)
         {
             this.Icon = ChartScriptLogic.LoadIcon("bubbles.png");
-            this.GroupBy = GroupByChart.Optional;
             this.Columns = new List<ChartScriptColumn>
             {
-                new ChartScriptColumn("Color", ChartColumnType.Groupable) { IsGroupKey = true },
+                new ChartScriptColumn("Color", ChartColumnType.Groupable),
                 new ChartScriptColumn("Horizontal Axis", ChartColumnType.Positionable) ,
                 new ChartScriptColumn("Vertical Axis", ChartColumnType.Positionable) ,
                 new ChartScriptColumn("Size", ChartColumnType.Magnitude) 

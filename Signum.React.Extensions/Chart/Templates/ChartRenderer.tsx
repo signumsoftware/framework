@@ -60,7 +60,7 @@ export default class ChartRenderer extends React.Component<ChartRendererProps, C
 
     const cr = this.props.lastChartRequest!;
 
-    if (cr.groupResults == false) {
+    if (r.entity) {
       window.open(Navigator.navigateRoute(r.entity!));
     } else {
       const filters = cr.filterOptions.filter(a => !hasAggregate(a.token));

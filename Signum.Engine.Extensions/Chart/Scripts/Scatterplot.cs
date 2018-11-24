@@ -11,10 +11,9 @@ namespace Signum.Logic.Chart.Scripts
         public ScatterplotChartScript() : base(D3ChartScript.Scatterplot)
         {
             this.Icon = ChartScriptLogic.LoadIcon("points.png");
-            this.GroupBy = GroupByChart.Optional;
             this.Columns = new List<ChartScriptColumn>
             {
-                new ChartScriptColumn("Color", ChartColumnType.Groupable) { IsGroupKey = true },
+                new ChartScriptColumn("Color", ChartColumnType.Groupable),
                 new ChartScriptColumn("Horizontal Axis", ChartColumnType.Positionable) ,
                 new ChartScriptColumn("Vertical Axis", ChartColumnType.Positionable) 
             };
