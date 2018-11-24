@@ -5,10 +5,11 @@ import { TypeContext, StyleContext } from '@framework/TypeContext'
 import { getTypeInfos, TypeInfo, isTypeEnum } from '@framework/Reflection'
 import * as Navigator from '@framework/Navigator'
 import { ValueLine, FormGroup } from '@framework/Lines'
-import { ChartColumnEmbedded, IChartBase, ChartMessage, ChartColorEntity } from '../Signum.Entities.Chart'
+import { ChartColumnEmbedded, IChartBase, ChartMessage, ChartColorEntity, ChartColumnType } from '../Signum.Entities.Chart'
 import * as ChartClient from '../ChartClient'
 import { ChartScriptColumn, ChartScript } from '../ChartClient'
 import QueryTokenEntityBuilder from '../../UserAssets/Templates/QueryTokenEmbeddedBuilder'
+import { External } from '@framework/Signum.Entities';
 
 export interface ChartColumnProps {
   ctx: TypeContext<ChartColumnEmbedded>;
@@ -58,6 +59,13 @@ export class ChartColumn extends React.Component<ChartColumnProps, { expanded: b
                 queryKey={this.props.queryKey}
                 subTokenOptions={subTokenOptions} onTokenChanged={() => this.props.onTokenChange()} />
             </div>
+            <span style={{
+              color: ctx.value.token == null ? "#ddd" :
+                ChartClient.isChartColumnType(ctx.value.token.token, sc.columnType) ? "#52b980" : "#ff7575",
+              marginLeft: "10px"
+            }}>
+              {ChartColumnType.niceToString(sc.columnType)}
+            </span>
             <a className="sf-chart-token-config-trigger" onClick={this.handleExpanded}>{ChartMessage.Chart_ToggleInfo.niceToString()} </a>
           </td>
         </tr>
