@@ -15,7 +15,6 @@ export interface ChartBuilderProps {
   onTokenChange: () => void;
   onRedraw: () => void;
   onOrderChanged: () => void;
-  
 }
 
 export interface ChartBuilderState {
@@ -103,7 +102,7 @@ export default class ChartBuilder extends React.Component<ChartBuilderProps, Cha
             </div>
             <div className="card-body">
               {this.state.chartScripts && this.state.chartScripts.map((cs, i) =>
-                <div key={i} className={this.chartTypeImgClass(cs)} title={cs.symbol.key.after(".") + "\r\n" + cs.columnStructure} onClick={() => this.handleChartScriptOnClick(cs)}>
+                <div key={i} className={this.chartTypeImgClass(cs)} title={cs.symbol.key.after(".")} onClick={() => this.handleChartScriptOnClick(cs)}>
                   <img src={"data:image/jpeg;base64," + (cs.icon && cs.icon.bytes)} />
                 </div>)}
             </div>
@@ -137,21 +136,32 @@ export default class ChartBuilder extends React.Component<ChartBuilderProps, Cha
               </table>
             </div>
           </div>
-          <fieldset className="sf-chart-parameters">
-            {
-              chartScript && mlistItemContext(this.props.ctx.subCtx(c => c.parameters, { formSize: "ExtraSmall", formGroupStyle: "Basic" }))
-                .map((ctx, i) => this.getParameterValueLine(ctx, chartScript.parameters[i]))
-                .groupsOf(6).map((gr, j) =>
-                  <div className="row" key={j}>
-                    {gr.map((vl, i) => <div className="col-sm-2" key={i}>{vl}</div>)}
-                  </div>)
-            }
-          </fieldset>
+          { chartScript && this.renderParameters(chartScript) }
         </div>
       </div >);
   }
-  
-  getParameterValueLine(ctx: TypeContext<ChartParameterEmbedded>, scriptParameter: ChartScriptParameter) {
+
+  renderParameters(chartScript: ChartScript) {
+
+    var parameterDic = mlistItemContext(this.props.ctx.subCtx(c => c.parameters, { formSize: "ExtraSmall", formGroupStyle: "Basic" })).toObject(a => a.value.name!);
+
+    return (
+      <fieldset className="sf-chart-parameters">
+        <div className="row">
+          {
+            chartScript.parameterGroups.map((gr, i) =>
+              <div className="col-sm-2" key={i}>
+                <span style={{ color: "gray", textDecoration: "underline"}}>{gr.name}</span>
+                {gr.parameters.map((p, j) => parameterDic[p.name] && this.getParameterValueLine(parameterDic[p.name], p, j))}
+              </div>
+            )
+          }
+        </div>
+      </fieldset>
+    );
+  }
+
+  getParameterValueLine(ctx: TypeContext<ChartParameterEmbedded>, scriptParameter: ChartScriptParameter, j: number) {
 
     const chart = this.props.ctx.value;
 
@@ -181,7 +191,7 @@ export default class ChartBuilder extends React.Component<ChartBuilderProps, Cha
     }
     vl.onChange = this.handleOnRedraw;
 
-    return <ValueLine {...vl} />;
+    return <ValueLine key={j} {...vl} />;
   }
 
 }
