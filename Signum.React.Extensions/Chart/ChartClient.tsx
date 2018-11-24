@@ -322,7 +322,6 @@ function isValidParameterValue(value: string | null | undefined, scriptParameter
 }
 
 function defaultParameterValue(scriptParameter: ChartScriptParameter, relatedColumn: QueryToken | null | undefined) {
-
   switch (scriptParameter.type) {
     case "Enum": return (scriptParameter.valueDefinition as EnumValueList).filter(a => a.typeFilter == undefined || relatedColumn == undefined || isChartColumnType(relatedColumn, a.typeFilter)).first().name;
     case "Number": return (scriptParameter.valueDefinition as NumberInterval).defaultValue.toString();
