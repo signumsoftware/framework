@@ -43,11 +43,7 @@
     <TypeScriptCompile Include="**\*.tsx" />
     <TypeScriptCompile Include="**\*.ts" />
   </ItemGroup>
-
-  <ItemGroup>
-    <TypeScriptCompile Remove="Chart\D3Scripts\ParallelCoordiantes.tsx" />
-  </ItemGroup>
-
+  
   <Target Name="GenerateSignumTS">
     <WriteLinesToFile File="$(BaseIntermediateOutputPath)SignumReferences.txt" Lines="@(ReferencePath)" Overwrite="true" Encoding="Unicode" />
     <WriteLinesToFile File="$(BaseIntermediateOutputPath)SignumContent.txt" Lines="@(Content);@(None)" Overwrite="true" Encoding="Unicode" />
