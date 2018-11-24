@@ -1,4 +1,4 @@
-﻿using Microsoft.SqlServer.Server;
+using Microsoft.SqlServer.Server;
 using Signum.Engine.Maps;
 using Signum.Entities;
 using Signum.Utilities;
@@ -235,7 +235,8 @@ namespace Signum.Engine.Linq
 
         protected override Expression VisitConstant(ConstantExpression c)
         {
-            if (c.Type.UnNullify() == typeof(PrimaryKey) && isFullNominate)
+            Type ut = c.Type.UnNullify();
+            if (ut == typeof(PrimaryKey) && isFullNominate)
             {
                 if (c.Value == null)
                     return Add(Expression.Constant(null, typeof(object)));
@@ -245,12 +246,20 @@ namespace Signum.Engine.Linq
 
             if (!innerProjection && IsFullNominateOrAggresive)
             {
-                if (Schema.Current.Settings.IsDbType(c.Type.UnNullify()))
+                if (ut == typeof(DayOfWeek))
+                {
+                    var dayNumber = c.Value == null ? (int?)null : ToSqlWeekDay((DayOfWeek)c.Value, DateFirst.Value.Item1);
+
+                    return Add(Expression.Constant(dayNumber, c.Type.IsNullable() ? typeof(int?) : typeof(int)));
+                }
+
+                if (Schema.Current.Settings.IsDbType(ut))
                     return Add(c);
 
                 if (c.Type == typeof(object) && (c.IsNull() || (Schema.Current.Settings.IsDbType(c.Value.GetType()))))
                     return Add(c);
             }
+
             return c;
         }
 
@@ -477,17 +486,29 @@ namespace Signum.Engine.Linq
             if (innerProjection || !Has(expr))
                 return null;
 
-            var number = Expression.Subtract(
-                    TrySqlFunction(null, SqlFunction.DATEPART, typeof(int), new SqlEnumExpression(SqlEnums.weekday), expr),
-                    new SqlConstantExpression(1));
+            var number = TrySqlFunction(null, SqlFunction.DATEPART, typeof(int), new SqlEnumExpression(SqlEnums.weekday), expr);
 
             Add(number);
 
-            Expression result = Expression.Convert(number, typeof(DayOfWeek));
             if (isFullNominate)
-                Add(result);
+                return number; //Risky, type changes
+
+            Expression result = Expression.Call(miToDayOfWeek, number, Expression.Constant(DateFirst.Value.Item1, typeof(byte)));
 
             return result;
+        }
+
+        public static ResetLazy<Tuple<byte>> DateFirst = new ResetLazy<Tuple<byte>>(() => Tuple.Create((byte)Executor.ExecuteScalar("SELECT @@DATEFIRST")));
+
+        static MethodInfo miToDayOfWeek = ReflectionTools.GetMethodInfo(() => ToDayOfWeek(1, 1));
+        public static DayOfWeek ToDayOfWeek(int sqlServerWeekDay, byte dateFirst)
+        {
+            return (DayOfWeek)((dateFirst + sqlServerWeekDay - 1) % 7);
+        }
+        
+        public static int ToSqlWeekDay(DayOfWeek dayOfWeek, byte dateFirst)
+        {
+            return (((int)dayOfWeek - dateFirst + 7) % 7) + 1;
         }
 
         private Expression TrySqlStartOf(Expression expression, SqlEnums part)
