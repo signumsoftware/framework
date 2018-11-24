@@ -117,7 +117,7 @@ export default class ChartRequestView extends React.Component<ChartRequestViewPr
         this.setState({ chartResult: rt, lastChartRequest: JSON.parse(JSON.stringify(this.props.chartRequest)) });
         this.props.onChange(cr, this.props.userChart);
       }, ifError(ValidationError, e => {
-        GraphExplorer.setModelState(cr, e.modelState, "entity");
+        GraphExplorer.setModelState(cr, e.modelState, "");
         this.forceUpdate();
       })).done();
   }
