@@ -24,7 +24,7 @@ export interface ChartColumnProps {
 }
 
 
-export class ChartColumn extends React.Component<ChartColumnProps, { expanded: boolean }> {
+export class ChartColumn extends React.Component<ChartColumnProps, { expanded: boolean}> {
 
   constructor(props: ChartColumnProps) {
     super(props);
@@ -33,6 +33,44 @@ export class ChartColumn extends React.Component<ChartColumnProps, { expanded: b
 
   handleExpanded = () => {
     this.setState({ expanded: !this.state.expanded });
+  }
+
+  handleDragOver = (de: React.DragEvent<any>, ) => {
+    de.preventDefault();
+    var txt = de.dataTransfer.getData("text");
+    const cols = this.props.chartBase.columns;
+    if (txt.startsWith("chartColumn_")) {
+      var dropIndex = cols.findIndex(a => a.element == this.props.ctx.value);
+      var dragIndex = parseInt(txt.after("chartColumn_"));
+      if (dropIndex == dragIndex)
+        de.dataTransfer.dropEffect = "none";
+    }
+  }
+
+  handleOnDrop = (de: React.DragEvent<any>, ) => {
+    de.preventDefault();
+
+    const cols = this.props.chartBase.columns;
+    var txt = de.dataTransfer.getData("text");
+    if (txt.startsWith("chartColumn_")) {
+
+      var dropIndex = cols.findIndex(a => a.element == this.props.ctx.value);
+      var dragIndex = parseInt(txt.after("chartColumn_"));
+
+      if (dropIndex != dragIndex) {
+        var temp = cols[dropIndex].element.token;
+        cols[dropIndex].element.token = cols[dragIndex].element.token;
+        cols[dragIndex].element.token = temp;
+        this.props.onTokenChange();
+      }
+
+    }
+  }
+
+  handleDragStart = (de: React.DragEvent<any>, ) => {
+    const dragIndex = this.props.chartBase.columns.findIndex(a => a.element == this.props.ctx.value);
+    de.dataTransfer.setData('text', "chartColumn_" + dragIndex); //cannot be empty string
+    de.dataTransfer.effectAllowed = "move";
   }
 
   render() {
@@ -47,7 +85,14 @@ export class ChartColumn extends React.Component<ChartColumnProps, { expanded: b
     return (
       <>
         <tr className="sf-chart-token">
-          <th onClick={e => ctx.value.token && this.props.onOrderChanged(ctx.value, e)}
+          <th
+            draggable={true}
+            onDragEnter={this.handleDragOver}
+            onDragOver={this.handleDragOver}
+            onDrop={this.handleOnDrop}
+            onDragStart={this.handleDragStart}
+
+            onClick={e => ctx.value.token && this.props.onOrderChanged(ctx.value, e)}
             style={{ whiteSpace: "nowrap", cursor: ctx.value.token ? "pointer" : undefined, userSelect: "none" }}>
             <span className={"sf-header-sort " + this.orderClassName(ctx.value)} />
             {sc.displayName + (sc.isOptional ? "?" : "")}
@@ -62,8 +107,9 @@ export class ChartColumn extends React.Component<ChartColumnProps, { expanded: b
             <span style={{
               color: ctx.value.token == null ? "#ddd" :
                 ChartClient.isChartColumnType(ctx.value.token.token, sc.columnType) ? "#52b980" : "#ff7575",
-              marginLeft: "10px"
-            }}>
+              marginLeft: "10px",
+              cursor: "default"
+            }} title={getTitle(sc.columnType).map(a => ChartColumnType.niceToString(a)).join("\n")}>
               {ChartColumnType.niceToString(sc.columnType)}
             </span>
             <a className="sf-chart-token-config-trigger" onClick={this.handleExpanded}>{ChartMessage.Chart_ToggleInfo.niceToString()} </a>
@@ -111,6 +157,15 @@ export class ChartColumn extends React.Component<ChartColumnProps, { expanded: b
       return "";
 
     return (c.orderByType == "Ascending" ? "asc" : "desc") + (" l" + c.orderByIndex);
+  }
+}
+
+function getTitle(ct: ChartColumnType): ChartColumnType[] {
+  switch (ct) {
+    case "Groupable": return ["String", "Lite", "Enum", "Date", "Integer", "RealGroupable"];
+    case "Magnitude": return ["Integer", "Real", "RealGroupable"];
+    case "Positionable": return ["Integer", "Real", "RealGroupable", "Date", "DateTime"];
+    default: return [];
   }
 }
 
