@@ -47,8 +47,10 @@ export default class StackedLinesChart extends D3ChartBase {
     }, height);
     //yRule.debugY(chart);
 
+    var keyValues = ChartUtils.completeValues(keyColumn, pivot.rows.map(r => r.rowValue), data.parameters['CompleteValues'], ChartUtils.insertPoint(keyColumn, valueColumn0));
+
     var x = d3.scaleBand()
-      .domain(pivot.rows.map(d => keyColumn.getKey(d.rowValue)))
+      .domain(keyValues.map(v => keyColumn.getKey(v)))
       .range([0, xRule.size('content')]);
 
     var pStack = data.parameters["Stack"];

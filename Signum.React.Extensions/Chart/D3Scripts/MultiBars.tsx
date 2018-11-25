@@ -46,13 +46,13 @@ export default class MultiBarsChart extends D3ChartBase {
     //yRule.debugY(chart);
 
     var allValues = pivot.rows.flatMap(r => pivot.columns.map(function (c) { return r.values[c.key] && r.values[c.key].value; }));
-
-
-
+    
     var x = scaleFor(valueColumn0, allValues, 0, xRule.size('content'), data.parameters["Scale"]);
 
+    var keyValues = ChartUtils.completeValues(keyColumn, pivot.rows.map(r => r.rowValue), data.parameters['CompleteValues'], ChartUtils.insertPoint(keyColumn, valueColumn0));
+    
     var y = d3.scaleBand()
-      .domain(pivot.rows.map(r => keyColumn.getKey(r.rowValue)))
+      .domain(keyValues.map(v => keyColumn.getKey(v)))
       .range([0, yRule.size('content')]);
 
     var xTicks = x.ticks(width / 50);

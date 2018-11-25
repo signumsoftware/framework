@@ -45,10 +45,12 @@ export default class StackedBarsChart extends D3ChartBase {
     }, height);
     //yRule.debugY(chart);
 
+    var keyValues = ChartUtils.completeValues(keyColumn, pivot.rows.map(r => r.rowValue), data.parameters['CompleteValues'], ChartUtils.insertPoint(keyColumn, valueColumn0));
 
     var y = d3.scaleBand()
-      .domain(pivot.rows.map(r => keyColumn.getKey(r.rowValue)))
+      .domain(keyValues.map(v => keyColumn.getKey(v)))
       .range([0, yRule.size('content')]);
+
     var pStack = data.parameters["Stack"];
 
     var stack = d3.stack<PivotRow>()
@@ -62,8 +64,8 @@ export default class StackedBarsChart extends D3ChartBase {
 
     var stackedSeries = stack(pivot.rows);
 
-    var max = d3.max(stackedSeries, s => d3.max(s, function (v) { return v[1]; }))!;
-    var min = d3.min(stackedSeries, s => d3.min(s, function (v) { return v[0]; }))!;
+    var max = d3.max(stackedSeries, s => d3.max(s, v => v[1]))!;
+    var min = d3.min(stackedSeries, s => d3.min(s, v => v[0]))!;
 
     var x = d3.scaleLinear()
       .domain([min, max])

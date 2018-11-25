@@ -39,14 +39,14 @@ export default class LineChart extends D3ChartBase {
     }, height);
     //yRule.debugY(chart);
 
+    var keyValues = ChartUtils.completeValues(keyColumn, data.rows.map(r => keyColumn.getValue(r)), data.parameters['CompleteValues'], ChartUtils.insertPoint(keyColumn, valueColumn));
 
     var x = d3.scaleBand()
-      .domain(data.rows.map(r => keyColumn.getValueKey(r)))
+      .domain(keyValues.map(v => keyColumn.getKey(v)))
       .range([0, xRule.size('content')]);
 
     var y = scaleFor(valueColumn, data.rows.map(r => valueColumn.getValue(r)), 0, yRule.size('content'), data.parameters["Scale"]);
-
-
+    
     chart.append('svg:g').attr('class', 'x-tick').attr('transform', translate(xRule.start('content') + (x.bandwidth() / 2), yRule.start('ticks')))
       .enterData(data.rows, 'line', 'x-tick')
       .attr('y2', (r, i) => yRule.start('labels' + (i % 2)) - yRule.start('ticks'))

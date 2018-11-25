@@ -21,7 +21,7 @@ namespace Signum.Logic.Chart.Scripts
                 new ChartScriptParameterGroup("Scale")
                 {
                     new ChartScriptParameter("Scale", ChartParameterType.Enum) { ColumnIndex = 1,  ValueDefinition = EnumValueList.Parse("ZeroMax (M)|MinMax|Log (M)") },
-
+                    new ChartScriptParameter("CompleteValues", ChartParameterType.Enum) { ColumnIndex = 1,  ValueDefinition = EnumValueList.Parse("Auto|Yes|No") },
                 },
                 new ChartScriptParameterGroup("Margins")
                 {

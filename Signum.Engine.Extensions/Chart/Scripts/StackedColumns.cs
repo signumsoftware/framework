@@ -23,6 +23,10 @@ namespace Signum.Logic.Chart.Scripts
             };
             this.ParameterGroups = new List<ChartScriptParameterGroup>
             {
+                new ChartScriptParameterGroup("Scale")
+                {
+                    new ChartScriptParameter("CompleteValues", ChartParameterType.Enum) { ColumnIndex = 1,  ValueDefinition = EnumValueList.Parse("Auto|Yes|No") },
+                },
                 new ChartScriptParameterGroup("Margin")
                 {
                     new ChartScriptParameter("UnitMargin", ChartParameterType.Number) {  ValueDefinition = new NumberInterval { DefaultValue = 20m } },

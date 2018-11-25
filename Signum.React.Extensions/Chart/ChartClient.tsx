@@ -686,8 +686,10 @@ export module API {
         name: "c" + i,
         displayName: scriptCol.displayName,
         title: (mle.element.displayName || token && token.niceName) + (token && token.unit ? ` (${token.unit})` : ""),
-        token: token && token.fullKey,
+        token: token,
         type: token && toChartColumnType(token),
+        orderByIndex: mle.element.orderByIndex,
+        orderByType: mle.element.orderByType,
         getKey: key,
         getNiceName: niceName,
         getColor: color,
@@ -719,8 +721,8 @@ export module API {
         name: "entity",
         displayName: "Entity",
         title: "",
-        token: "Lite",
-        type: "entity",
+        token: undefined,
+        type: "Lite",
         getKey: key,
         getNiceName: niceName,
         getColor: color,
@@ -826,8 +828,10 @@ export interface ChartColumn<V> {
   name: string;
   title: string;
   displayName: string;
-  token: string;
-  type: string;
+  token?: QueryToken; //Null for QueryToken
+  type: ChartColumnType;
+  orderByIndex?: number | null;
+  orderByType?: OrderType | null;
 
   getKey: (v: V | null) => string;
   getNiceName: (v: V | null) => string;

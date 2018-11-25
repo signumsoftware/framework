@@ -3,7 +3,7 @@ import * as d3 from 'd3'
 import D3ChartBase from './D3ChartBase';
 import * as ChartClient from '../ChartClient';
 import * as ChartUtils from '../Templates/ChartUtils';
-import { translate, scale, rotate, skewX, skewY, matrix, scaleFor, rule, ellipsis, } from '../Templates/ChartUtils';
+import { translate, scale, rotate, skewX, skewY, matrix, scaleFor, rule, ellipsis } from '../Templates/ChartUtils';
 import { ChartRow } from '../ChartClient';
 
 
@@ -41,8 +41,10 @@ export default class BarsChart extends D3ChartBase {
 
     var x = scaleFor(valueColumn, data.rows.map(r => valueColumn.getValue(r)), 0, xRule.size('content'), data.parameters['Scale']);
 
+    var keyValues = ChartUtils.completeValues(keyColumn, data.rows.map(r => keyColumn.getValue(r)), data.parameters['CompleteValues'], ChartUtils.insertPoint(keyColumn, valueColumn));
+
     var y = d3.scaleBand()
-      .domain(data.rows.map(r => keyColumn.getValueKey(r)))
+      .domain(keyValues.map(v => keyColumn.getKey(v)))
       .range([0, yRule.size('content')]);
 
     var xTicks = x.ticks(width / 50);

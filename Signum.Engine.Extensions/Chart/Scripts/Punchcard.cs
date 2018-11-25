@@ -23,6 +23,11 @@ namespace Signum.Logic.Chart.Scripts
             };
             this.ParameterGroups = new List<ChartScriptParameterGroup>
             {
+                new ChartScriptParameterGroup("Scale")
+                {
+                    new ChartScriptParameter("CompleteHorizontalValues", ChartParameterType.Enum) { ColumnIndex = 1,  ValueDefinition = EnumValueList.Parse("Auto|Yes|No") },
+                    new ChartScriptParameter("CompleteVerticalValues", ChartParameterType.Enum) { ColumnIndex = 1,  ValueDefinition = EnumValueList.Parse("Auto|Yes|No") },
+                },
                 new ChartScriptParameterGroup("Size")
                 {
                     new ChartScriptParameter("SizeScale", ChartParameterType.Enum) {  ValueDefinition = EnumValueList.Parse("ZeroMax|MinMax|Log|Sqrt") },
@@ -41,8 +46,8 @@ namespace Signum.Logic.Chart.Scripts
                 },
                 new ChartScriptParameterGroup("Arrange")
                 {
-                    new ChartScriptParameter("XSort", ChartParameterType.Enum) {  ValueDefinition = EnumValueList.Parse("AscendingKey|AscendingToStr|AscendingSumOrder|DescendingKey|DescendingToStr|DescendingSumOrder|None") },
-                    new ChartScriptParameter("YSort", ChartParameterType.Enum) {  ValueDefinition = EnumValueList.Parse("AscendingKey|AscendingToStr|AscendingSumOrder|DescendingKey|DescendingToStr|DescendingSumOrder|None") },
+                    new ChartScriptParameter("XSort", ChartParameterType.Enum) {  ValueDefinition = EnumValueList.Parse("Ascending|AscendingKey|AscendingToStr|AscendingSumOrder|Descending|DescendingKey|DescendingToStr|DescendingSumOrder|None") },
+                    new ChartScriptParameter("YSort", ChartParameterType.Enum) {  ValueDefinition = EnumValueList.Parse("Ascending|AscendingKey|AscendingToStr|AscendingSumOrder|Descending|DescendingKey|DescendingToStr|DescendingSumOrder|None") },
                 },
                 new ChartScriptParameterGroup("Opacity")
                 {
