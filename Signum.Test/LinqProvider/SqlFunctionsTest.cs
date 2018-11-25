@@ -1,4 +1,4 @@
-﻿using Microsoft.SqlServer.Types;
+using Microsoft.SqlServer.Types;
 using Xunit;
 using Signum.Engine;
 using Signum.Engine.Maps;
@@ -166,6 +166,11 @@ namespace Signum.Test.LinqProvider
                 return;
 
             var nodes = Database.Query<LabelEntity>().Select(a => a.Node);
+            
+            Assert.Equal(
+                nodes.ToList().Select(a => a.ToString()).ToString(", "),
+                nodes.Select(a => a.ToString().InSql()).ToList().ToString(", ")
+                );
 
             Debug.WriteLine(nodes.Select(n => n.GetAncestor(0).InSql()).ToString(", "));
             Debug.WriteLine(nodes.Select(n => n.GetAncestor(1).InSql()).ToString(", "));
@@ -175,6 +180,8 @@ namespace Signum.Test.LinqProvider
 
             Debug.WriteLine(nodes.Where(n => (bool)(n.GetDescendant(SqlHierarchyId.Null, SqlHierarchyId.Null) > SqlHierarchyId.GetRoot())).ToString(", "));
             Debug.WriteLine(nodes.Where(n => (bool)(n.GetReparentedValue(n.GetAncestor(0), SqlHierarchyId.GetRoot()) > SqlHierarchyId.GetRoot())).ToString(", "));
+
+
         }
 
         [Fact]

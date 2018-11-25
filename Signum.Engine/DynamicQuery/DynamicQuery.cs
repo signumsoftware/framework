@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -972,7 +972,7 @@ namespace Signum.Engine.DynamicQuery
 
             var task = func();
 
-            return giCastObject.GetInvoker(task.GetType().GenericTypeArguments)(task);
+            return giCastObject.GetInvoker(task.GetType().BaseType.GetGenericArguments())(task);
         }
 
         static GenericInvoker<Func<object, Task<object>>> giCastObject =
