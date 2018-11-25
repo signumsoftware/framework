@@ -1,4 +1,4 @@
-﻿using Signum.Entities;
+using Signum.Entities;
 using Signum.Entities.Authorization;
 using Signum.Entities.Basics;
 using Signum.Entities.Dynamic;
@@ -73,8 +73,8 @@ namespace Signum.Entities.Workflow
             script = script.Contains(';') ? script : ("return " + script + ";");
             var WorkflowEntityTypeName = parent.Pool.Workflow.MainEntityType.ToType().FullName;
 
-            return Compile(DynamicCode.GetMetadataReferences(),
-                DynamicCode.GetUsingNamespaces() +
+            return Compile(DynamicCode.GetCoreMetadataReferences()
+                .Concat(DynamicCode.GetMetadataReferences()), DynamicCode.GetUsingNamespaces() +
                     @"
                     namespace Signum.Entities.Workflow
                     {

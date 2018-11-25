@@ -1,4 +1,4 @@
-﻿using Signum.Entities;
+using Signum.Entities;
 using Signum.Entities.Basics;
 using Signum.Utilities;
 using System;
@@ -54,8 +54,8 @@ namespace Signum.Entities.Dynamic
             script = script.Contains(';') ? script : ("return " + script + ";");
             var entityTypeName = DynamicValidationEntity.GetMainType((DynamicValidationEntity)this.GetParentEntity()).FullName;
 
-            return Compile(DynamicCode.GetMetadataReferences(),
-                DynamicCode.GetUsingNamespaces() +
+            return Compile(DynamicCode.GetCoreMetadataReferences()
+                .Concat(DynamicCode.GetMetadataReferences()), DynamicCode.GetUsingNamespaces() +
 @"
 namespace Signum.Entities.Dynamic
 {

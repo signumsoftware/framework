@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Signum.Utilities;
 using System.CodeDom.Compiler;
 using System.Collections.Generic;
@@ -18,15 +18,19 @@ namespace Signum.Entities.Dynamic
         public static string AssemblyDirectory = Path.GetDirectoryName(new Uri(typeof(Entity).Assembly.CodeBase).LocalPath);
         public static string CodeGenEntitiesNamespace = "Signum.Entities.CodeGen";
         public static string CodeGenDirectory = "CodeGen";
-        public static string CodeGenAssembly = "CodeGenAssymbly.dll";
+        public static string CodeGenAssembly = "CodeGenAssembly.dll";
         public static string CodeGenAssemblyPath;
 
         public static HashSet<string> Namespaces = new HashSet<string>
         {
             "System",
             "System.IO",
+            "System.Globalization",
+            "System.Net",
+            "System.Text",
             "System.Linq",
             "System.Reflection",
+            "System.Collections",
             "System.Collections.Generic",
             "System.Linq.Expressions",
             "Signum.Utilities",
@@ -39,22 +43,45 @@ namespace Signum.Entities.Dynamic
         {
             typeof(object),
             typeof(System.Attribute),
-            typeof(System.Runtime.ConstrainedExecution.PrePrepareMethodAttribute), 
+            typeof(System.Runtime.ConstrainedExecution.PrePrepareMethodAttribute),
             typeof(System.Linq.Enumerable),
+            typeof(System.Linq.Queryable),
+            typeof(System.Collections.Generic.List<>),
+            typeof(System.ComponentModel.Component),
             typeof(System.ComponentModel.IDataErrorInfo),
             typeof(System.ComponentModel.INotifyPropertyChanged),
             typeof(System.Linq.Expressions.Expression),
             typeof(Signum.Utilities.Csv), //  "Signum.Utilities.dll",
             typeof(Newtonsoft.Json.JsonConvert), //"Newtonsoft.Json.dll",
             typeof(DocumentFormat.OpenXml.AlternateContent), //"DocumentFormat.OpenXml.dll",
+            typeof(System.Text.RegularExpressions.Regex),
         };
 
-        public static IEnumerable<MetadataReference> GetMetadataReferences()
+        public static IEnumerable<MetadataReference> GetMetadataReferences(bool needsCodeGenAssembly = true)
         {
-            return DynamicCode.AssemblyTypes
+            var result = DynamicCode.AssemblyTypes
                 .Select(type => MetadataReference.CreateFromFile(type.Assembly.Location))
-                .And(DynamicCode.CodeGenAssemblyPath?.Let(s => MetadataReference.CreateFromFile(s)))
-                .NotNull();
+                .And(needsCodeGenAssembly ? DynamicCode.CodeGenAssemblyPath?.Let(s => MetadataReference.CreateFromFile(s)) : null)
+                .NotNull().ToList();
+
+            return result;
+        }
+
+
+        public static HashSet<string> CoreAssemblyNames = new HashSet<string>
+        {
+            "mscorlib.dll",
+            "System.Runtime.dll",
+            "System.Collections.dll",
+            "System.IO.dll",
+        };
+
+        public static IEnumerable<MetadataReference> GetCoreMetadataReferences()
+        {
+            var dd = typeof(Enumerable).GetTypeInfo().Assembly.Location;
+            var coreDir = Directory.GetParent(dd);
+
+            return CoreAssemblyNames.Select(name => MetadataReference.CreateFromFile(Path.Combine(coreDir.FullName, name))).ToArray();
         }
 
         public static string GetUsingNamespaces()

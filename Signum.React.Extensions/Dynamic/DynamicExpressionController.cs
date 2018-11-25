@@ -1,4 +1,4 @@
-﻿using Signum.Engine;
+using Signum.Engine;
 using Signum.Engine.Basics;
 using Signum.Engine.Dynamic;
 using Signum.Engine.DynamicQuery;
@@ -58,7 +58,8 @@ namespace Signum.Entities.Dynamic
     }}                   
 }}";
 
-                var res = EvalEmbedded<IDynamicExpressionEvaluator>.Compile(DynamicCode.GetMetadataReferences(), code);
+                var res = EvalEmbedded<IDynamicExpressionEvaluator>.Compile(DynamicCode.GetCoreMetadataReferences()
+                    .Concat(DynamicCode.GetMetadataReferences()), code);
 
                 if (res.CompilationErrors.HasText())
                     throw new InvalidOperationException(res.CompilationErrors);

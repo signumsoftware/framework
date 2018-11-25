@@ -1,4 +1,4 @@
-﻿using Signum.Entities.Dynamic;
+using Signum.Entities.Dynamic;
 using Signum.Entities;
 using Signum.Entities.Basics;
 using Signum.Utilities;
@@ -226,8 +226,8 @@ namespace Signum.Entities.Workflow
             var MainEntityTypeName = activity.Lane.Pool.Workflow.MainEntityType.ToType().FullName;
             var SubEntityTypeName = decomposition.Workflow.MainEntityType.ToType().FullName;
 
-            return Compile(DynamicCode.GetMetadataReferences(),
-                DynamicCode.GetUsingNamespaces() +
+            return Compile(DynamicCode.GetCoreMetadataReferences()
+                .Concat(DynamicCode.GetMetadataReferences()), DynamicCode.GetUsingNamespaces() +
                     @"
                     namespace Signum.Entities.Workflow
                     {
