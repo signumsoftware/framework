@@ -15,7 +15,7 @@ namespace Signum.React.Files
         {
             var file = Database.Retrieve<FileEntity>(PrimaryKey.Parse(fileId, typeof(FileEntity)));
 
-            return GetFileStreamResult(new System.IO.MemoryStream(file.BinaryFile), file.FileName);
+            return GetFileStreamResult(new MemoryStream(file.BinaryFile), file.FileName);
 
         }
 
@@ -40,7 +40,6 @@ namespace Signum.React.Files
 
             return GetFileStreamResult(virtualFile.OpenRead(), virtualFile.FileName);
         }
-
 
         /// <param name="stream">No need to close</param
         public static FileStreamResult GetFileStreamResult(Stream stream, string fileName, bool forDownload = true)

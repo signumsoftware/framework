@@ -73,6 +73,11 @@ export function start(options: {
     }
   }));
 
+  Operations.addSettings(new EntityOperationSettings(EmailMessageOperation.ReadyToSend, {
+    contextual: { isVisible: em => true },
+    contextualFromMany: { isVisible: em => true }
+  }));
+
   if (options.smtpConfig) {
     Navigator.addSettings(new EntitySettings(SmtpConfigurationEntity, e => import('./Templates/SmtpConfiguration')));
   }

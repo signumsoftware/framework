@@ -1,4 +1,4 @@
-﻿import * as React from 'react'
+import * as React from 'react'
 import { ValueLine, EntityLine, EntityDetail, EntityRepeater } from '@framework/Lines'
 import { TypeContext } from '@framework/TypeContext'
 import { EmailMessageEntity, EmailAttachmentEmbedded, EmailReceptionMixin, EmailFileType } from '../Signum.Entities.Mailing'
@@ -8,16 +8,16 @@ import IFrameRenderer from './IFrameRenderer'
 import HtmlCodemirror from '../../Codemirror/HtmlCodemirror'
 import { tryGetMixin } from "@framework/Signum.Entities";
 import { UncontrolledTabs, Tab } from '@framework/Components';
+import { LabelWithHelp } from '../../MachineLearning/Templates/NeuralNetworkSettings';
 
 export default class EmailMessage extends React.Component<{ ctx: TypeContext<EmailMessageEntity> }> {
   render() {
-    let e = this.props.ctx;
+    let ctx = this.props.ctx;
 
-    if (e.value.state != "Created")
-      e = e.subCtx({ readOnly: true });
+    if (ctx.value.state != "Created")
+      ctx = ctx.subCtx({ readOnly: true });
 
-    const sc4 = e.subCtx({ labelColumns: { sm: 4 } });
-    const sc1 = e.subCtx({ labelColumns: { sm: 1 } });
+    const ctx4 = ctx.subCtx({ labelColumns: 4 });
 
     return (
       <UncontrolledTabs id="emailTabs">
@@ -25,36 +25,42 @@ export default class EmailMessage extends React.Component<{ ctx: TypeContext<Ema
           <fieldset>
             <legend>Properties</legend>
             <div className="row">
-              <div className="col-sm-5">
-                <ValueLine ctx={sc4.subCtx(f => f.state)} />
-                <ValueLine ctx={sc4.subCtx(f => f.sent)} />
-                <ValueLine ctx={sc4.subCtx(f => f.bodyHash)} />
+              <div className="col-sm-4">
+                <ValueLine ctx={ctx4.subCtx(f => f.state)} />
+                <ValueLine ctx={ctx4.subCtx(f => f.sent)} />
+                <ValueLine ctx={ctx4.subCtx(f => f.bodyHash)} />
+                <ValueLine ctx={ctx4.subCtx(f => f.creationDate)} />
               </div>
-              <div className="col-sm-7">
-                <EntityLine ctx={e.subCtx(f => f.template)} />
-                <EntityLine ctx={e.subCtx(f => f.package)} />
-                <EntityLine ctx={e.subCtx(f => f.exception)} />
+              <div className="col-sm-8">
+                <EntityLine ctx={ctx.subCtx(f => f.target, { labelColumns: 2 })} />
+                <EntityLine ctx={ctx.subCtx(f => f.template)} />
+                <EntityLine ctx={ctx.subCtx(f => f.package)} />
+                <EntityLine ctx={ctx.subCtx(f => f.exception)} />
+              </div>
+            </div>
+            <hr/>
+            <div className="row">
+              <div className="col-sm-4">
+                <ValueLine ctx={ctx4.subCtx(f => f.receptionNotified)} />
+              </div>
+              <div className="col-sm-8">
+                <ValueLine ctx={ctx.subCtx(f => f.uniqueIdentifier)} />
               </div>
             </div>
           </fieldset>
 
+          <EntityDetail ctx={ctx.subCtx(f => f.from)} />
+          <EntityRepeater ctx={ctx.subCtx(f => f.recipients)} />
+          <EntityRepeater ctx={ctx.subCtx(f => f.attachments)} getComponent={this.renderAttachment} />
 
-          <div className="form-inline">
-            <EntityDetail ctx={e.subCtx(f => f.from)} />
-            <EntityRepeater ctx={e.subCtx(f => f.recipients)} />
-            <EntityRepeater ctx={e.subCtx(f => f.attachments)} getComponent={this.renderAttachment} />
-          </div>
-
-          <EntityLine ctx={sc1.subCtx(f => f.target)} />
-          <ValueLine ctx={sc1.subCtx(f => f.subject)} />
-          <ValueLine ctx={sc1.subCtx(f => f.isBodyHtml)} inlineCheckbox={true} onChange={() => this.forceUpdate()} />
-          {sc1.value.state != "Created" ? <IFrameRenderer style={{ width: "100%" }} html={e.value.body} /> :
-            sc1.value.isBodyHtml ? <div className="code-container"><HtmlCodemirror ctx={e.subCtx(f => f.body)} /></div> :
+          <ValueLine ctx={ctx.subCtx(f => f.subject, { labelColumns: 1 })} />
+          <ValueLine ctx={ctx.subCtx(f => f.isBodyHtml)} inlineCheckbox={true} onChange={() => this.forceUpdate()} />
+          {ctx.value.isBodyHtml ? <div className="code-container"><HtmlCodemirror ctx={ctx.subCtx(f => f.body)} /></div> :
               <div>
-                <ValueLine ctx={e.subCtx(f => f.body)} valueLineType="TextArea" valueHtmlAttributes={{ style: { height: "180px" } }} formGroupStyle="SrOnly" />
+                <ValueLine ctx={ctx.subCtx(f => f.body)} valueLineType="TextArea" valueHtmlAttributes={{ style: { height: "180px" } }} formGroupStyle="SrOnly" />
               </div>
           }
-          <EmailMessageComponent ctx={e} invalidate={() => this.forceUpdate()} />
+          <EmailMessageComponent ctx={ctx} invalidate={() => this.forceUpdate()} />
         </Tab>
         {this.renderEmailReceptionMixin()}
       </UncontrolledTabs>
@@ -106,7 +112,7 @@ export interface EmailMessageComponentProps {
 export class EmailMessageComponent extends React.Component<EmailMessageComponentProps, { showPreview: boolean }>{
   constructor(props: EmailMessageComponentProps) {
     super(props);
-    this.state = { showPreview: false }
+    this.state = { showPreview: true }
   }
 
   handlePreviewClick = (e: React.FormEvent<any>) => {
