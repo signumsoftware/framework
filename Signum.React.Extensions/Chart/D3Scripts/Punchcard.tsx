@@ -255,7 +255,7 @@ export default class PunchcardChart extends D3ChartBase {
         .attr('y', r => -y(verticalColumn.getValueKey(r))!)
         .attr('fill', data.parameters["NumberColor"])
         .attr('dominant-baseline', 'central')
-        .attr('opacity', r => parseFloat(data.parameters["NumberOpacity"]) * extra.numberOpacity!(sizeColumn!.getValue(r)))
+        .attr('opacity', r => parseFloat(data.parameters["NumberOpacity"]) * extra.numberOpacity!(sizeColumn && sizeColumn!.getValue(r)))
         .attr('text-anchor', 'middle')
         .attr('font-weight', 'bold')
         .text(r => sizeColumn ? sizeColumn.getValueNiceName(r) :
