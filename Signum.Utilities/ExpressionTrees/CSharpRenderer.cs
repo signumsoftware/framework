@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -142,6 +142,9 @@ namespace Signum.Utilities.ExpressionTrees
 
             if (obj is string s)
                 return ToSrtringLiteral(s);
+
+            if (obj.GetType().IsEnum)
+                return $"{obj.GetType().FullName}.{obj.ToString()}";
 
             return obj.ToString();
         }

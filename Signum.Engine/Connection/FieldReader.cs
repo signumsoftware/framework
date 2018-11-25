@@ -517,10 +517,11 @@ namespace Signum.Engine
             }
             return GetGuid(ordinal);
         }
-
-        static MethodInfo miGetUdt = ReflectionTools.GetMethodInfo((FieldReader r) => r.GetUdt<object>(0)).GetGenericMethodDefinition();
+      
+        static MethodInfo miGetUdt = ReflectionTools.GetMethodInfo((FieldReader r) => r.GetUdt<IBinarySerialize>(0)).GetGenericMethodDefinition(); 
 
         public T GetUdt<T>(int ordinal)
+            where T : IBinarySerialize
         {
             LastOrdinal = ordinal;
             if (reader.IsDBNull(ordinal))
@@ -529,7 +530,7 @@ namespace Signum.Engine
             }
 
             var udt = Activator.CreateInstance<T>();
-            ((IBinarySerialize)udt).Read(new BinaryReader(reader.GetStream(ordinal)));
+            udt.Read(new BinaryReader(reader.GetStream(ordinal)));
             return udt;
         }
 
