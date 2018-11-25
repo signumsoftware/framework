@@ -1,16 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
-using System.Runtime.CompilerServices;
-using System.Runtime.Serialization;
-using System.Text;
-using Signum.Entities.Basics;
 using Signum.Utilities;
-using Signum.Utilities.ExpressionTrees;
-using Signum.Utilities.Reflection;
 
 namespace Signum.Entities
 {
@@ -33,7 +25,7 @@ namespace Signum.Entities
                 throw new InvalidOperationException(string.Format("No field with name {0} found in {1}", fieldName, declaringType.Name));
 
             this.Key = declaringType.Name + "." + fieldName;
-            
+
             try
             {
                 Symbols.GetOrCreate(this.GetType()).Add(this.Key, this);

@@ -1,4 +1,3 @@
-﻿
 import * as React from 'react'
 import { ColumnOptionParsed, QueryDescription, QueryToken, SubTokensOptions } from '../FindOptions'
 import { SearchMessage, JavascriptMessage } from '../Signum.Entities'

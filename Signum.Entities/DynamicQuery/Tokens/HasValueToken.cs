@@ -1,12 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using Signum.Utilities;
 using System.Linq.Expressions;
-using Signum.Entities.Basics;
-using System.Reflection;
-using Signum.Utilities.Reflection;
 
 namespace Signum.Entities.DynamicQuery
 {
@@ -61,7 +56,7 @@ namespace Signum.Entities.DynamicQuery
         protected override Expression BuildExpressionInternal(BuildExpressionContext context)
         {
             Expression baseExpression = Parent.BuildExpression(context);
-            
+
             var result = Expression.NotEqual(baseExpression, Expression.Constant(null, baseExpression.Type.Nullify()));
 
             if (baseExpression.Type == typeof(string))
@@ -110,5 +105,5 @@ namespace Signum.Entities.DynamicQuery
             return new HasValueToken(Parent.Clone());
         }
     }
-    
+
 }

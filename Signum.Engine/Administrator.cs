@@ -1,17 +1,12 @@
-﻿using Signum.Engine;
-using Signum.Engine.Linq;
+﻿using Signum.Engine.Linq;
 using Signum.Engine.Maps;
 using Signum.Engine.SchemaInfoTables;
 using Signum.Entities;
-using Signum.Entities.Reflection;
 using Signum.Utilities;
 using Signum.Utilities.ExpressionTrees;
-using Signum.Utilities.Reflection;
 using System;
-using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Data;
 using System.Data.Common;
 using System.Linq;
 using System.Linq.Expressions;
@@ -183,7 +178,7 @@ namespace Signum.Engine
                 return new List<Entity>();
             }
         }
-        
+
         public static IDisposable DisableIdentity<T>()
             where T : Entity
         {
@@ -435,7 +430,7 @@ namespace Signum.Engine
         public static void TruncateTable(Type type)
         {
             var table = Schema.Current.Table(type);
-            table.TablesMList().ToList().ForEach(mlist => {    
+            table.TablesMList().ToList().ForEach(mlist => {
                 SqlBuilder.TruncateTable(mlist.Name).ExecuteLeaves();
             });
 
@@ -532,7 +527,7 @@ namespace Signum.Engine
             public SqlPreCommandSimple UpdateScript;
         }
 
-        static List<ColumnTableScript> MoveAllForeignKeysPrivate<T>(Lite<T> fromEntity, Lite<T> toEntity, Func<ITable, IColumn, bool> shouldMove)  
+        static List<ColumnTableScript> MoveAllForeignKeysPrivate<T>(Lite<T> fromEntity, Lite<T> toEntity, Func<ITable, IColumn, bool> shouldMove)
         where T : Entity
         {
             if (fromEntity.GetType() != toEntity.GetType())
@@ -594,10 +589,10 @@ namespace Signum.Engine
         {
             if (table.TablesMList().Any())
                 throw new InvalidOperationException($"DeleteWhereScript can not be used for {table.Type.Name} because contains MLists");
-            
+
             if(id.VariableName.HasText())
                 return new SqlPreCommandSimple("DELETE FROM {0} WHERE {1} = {2}".FormatWith(table.Name, column.Name, id.VariableName));
-            
+
             var param = Connector.Current.ParameterBuilder.CreateReferenceParameter("@id", id, column);
             return new SqlPreCommandSimple("DELETE FROM {0} WHERE {1} = {2}".FormatWith(table.Name, column.Name, param.ParameterName), new List<DbParameter> { param });
         }

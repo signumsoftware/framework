@@ -198,7 +198,7 @@ a.style.display = "none";
 export function saveFile(response: Response) {
   const contentDisposition = response.headers.get("Content-Disposition")!;
   const fileNamePart = contentDisposition.split(";").filter(a => a.trim().startsWith("filename=")).singleOrNull();
-  const fileName = fileNamePart ? fileNamePart.trim().after("filename=") : "file.dat";
+  const fileName = fileNamePart ? fileNamePart.trim().after("filename=").trimStart("\"").trimEnd("\"") : "file.dat";
 
   response.blob().then(blob => {
     saveFileBlob(blob, fileName);
@@ -336,7 +336,7 @@ export namespace SessionSharing {
 }
 
 
-/// This class encapsulates a sequence of ajax request, making them abortable, and auto-aborting previous request when a new one is made 
+/// This class encapsulates a sequence of ajax request, making them abortable, and auto-aborting previous request when a new one is made
 export class AbortableRequest<Q, A> {
 
   private requestIndex = 0;

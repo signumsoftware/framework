@@ -1,10 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using Signum.Utilities.ExpressionTrees;
 using System.Linq.Expressions;
-using System.Diagnostics;
 using Signum.Engine.Maps;
 using Signum.Entities;
 using System.Reflection;
@@ -93,11 +90,11 @@ namespace Signum.Engine.Linq
 
                 return result;
             }
-            else 
+            else
                 return base.VisitMethodCall(m);
         }
 
-        
+
         internal static Expression Filter(Expression expression, bool filter)
         {
             return new QueryFilterer { filter = filter }.Visit(expression);

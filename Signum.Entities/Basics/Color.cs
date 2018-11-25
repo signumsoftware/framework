@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Linq.Expressions;
 using System.Drawing;
 using Signum.Utilities;
 
@@ -22,7 +18,7 @@ namespace Signum.Entities.Basics
 
         public override int GetHashCode()
         {
-            return this.Argb;  
+            return this.Argb;
         }
         public static ColorEmbedded FromARGB(byte a, byte r, byte g, byte b)
         {

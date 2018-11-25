@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
-using System.Reflection;
 using System.Xml.Linq;
 using System.Text.RegularExpressions;
 using Signum.Utilities.DataStructures;

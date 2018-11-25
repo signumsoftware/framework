@@ -1,20 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Reflection;
 using System.Linq.Expressions;
 using Signum.Utilities;
 using Signum.Utilities.Reflection;
 using Signum.Utilities.ExpressionTrees;
-using System.Data;
-using Signum.Entities.DynamicQuery;
 using Signum.Entities;
-using Signum.Engine.Linq;
-using System.Collections;
 using Signum.Engine.Maps;
 using Signum.Entities.Basics;
-using System.Globalization;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Text.RegularExpressions;
@@ -75,7 +68,7 @@ namespace Signum.Engine.DynamicQuery
             types = types.Where(t => Schema.Current.IsAllowed(t, inUserInterface: true) == null);
 
             List<Lite<Entity>> results = new List<Lite<Entity>>();
-          
+
             foreach (var t in types)
             {
                 if (TryParsePrimaryKey(subString, t, out PrimaryKey id))
@@ -148,7 +141,7 @@ namespace Signum.Engine.DynamicQuery
 
             return results;
         }
-     
+
         static GenericInvoker<Func<PrimaryKey, Lite<Entity>>> giLiteById =
             new GenericInvoker<Func<PrimaryKey, Lite<Entity>>>(id => LiteById<TypeEntity>(id));
         static Lite<Entity> LiteById<T>(PrimaryKey id)

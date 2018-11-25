@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Linq.Expressions;
 using System.Reflection;
 using Signum.Utilities;
@@ -23,8 +22,8 @@ namespace Signum.Entities.DynamicQuery
         public abstract Expression GetExpression(BuildExpressionContext ctx);
 
         public abstract IEnumerable<FilterCondition> GetFilterConditions();
-        
-        public abstract bool IsAggregate(); 
+
+        public abstract bool IsAggregate();
     }
 
     [Serializable]
@@ -45,7 +44,7 @@ namespace Signum.Entities.DynamicQuery
         {
             return Filters.SelectMany(a => a.GetFilterConditions());
         }
-        
+
         public override Expression GetExpression(BuildExpressionContext ctx)
         {
             var anyAll = Token as CollectionAnyAllToken;
@@ -230,11 +229,11 @@ namespace Signum.Entities.DynamicQuery
     {
         Integer,
         Decimal,
-        String, 
+        String,
         DateTime,
         Lite,
         Embedded,
-        Boolean, 
+        Boolean,
         Enum,
         Guid,
     }
@@ -246,7 +245,7 @@ namespace Signum.Entities.DynamicQuery
         FirstOrDefault,
         Single,
         SingleOrDefault,
-        SingleOrMany, 
+        SingleOrMany,
         Only
     }
 }

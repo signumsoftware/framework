@@ -1,4 +1,4 @@
-﻿using Signum.Engine.Linq;
+using Signum.Engine.Linq;
 using Signum.Engine.Maps;
 using Signum.Entities;
 using Signum.Entities.Basics;
@@ -154,7 +154,7 @@ namespace Signum.Engine
                         return result;
                     }
                 }
-                
+
                 T retrieved = Database.Query<T>().SingleOrDefaultEx(a => a.Id == id);
 
                 if (retrieved == null)
@@ -226,7 +226,7 @@ namespace Signum.Engine
 
         static FilterQueryResult<T> GetFilterQuery<T>() where T : Entity
         {
-            if (EntityCache.HasRetriever) //Filtering is not necessary when retrieving IBA? 
+            if (EntityCache.HasRetriever) //Filtering is not necessary when retrieving IBA?
                 return null;
 
             return Schema.Current.OnFilterQuery<T>();
@@ -283,7 +283,7 @@ namespace Signum.Engine
             }
         }
 
-        static GenericInvoker<Func<PrimaryKey, CancellationToken, Task<Lite<Entity>>>> giRetrieveLiteAsync = 
+        static GenericInvoker<Func<PrimaryKey, CancellationToken, Task<Lite<Entity>>>> giRetrieveLiteAsync =
             new GenericInvoker<Func<PrimaryKey, CancellationToken, Task<Lite<Entity>>>>((id, token) => RetrieveLiteAsync<Entity>(id, token));
         public static async Task<Lite<T>> RetrieveLiteAsync<T>(PrimaryKey id, CancellationToken token)
             where T : Entity
@@ -361,7 +361,7 @@ namespace Signum.Engine
 
 
         public static Task<string> GetToStrAsync(Type type, PrimaryKey id, CancellationToken token) => giGetToStrAsync.GetInvoker(type)(id, token);
-        static GenericInvoker<Func<PrimaryKey, CancellationToken, Task<string>>> giGetToStrAsync = 
+        static GenericInvoker<Func<PrimaryKey, CancellationToken, Task<string>>> giGetToStrAsync =
             new GenericInvoker<Func<PrimaryKey, CancellationToken, Task<string>>>((id, token) => GetToStrAsync<Entity>(id, token));
         public static async Task<string> GetToStrAsync<T>(PrimaryKey id, CancellationToken token)
             where T : Entity
@@ -419,7 +419,7 @@ namespace Signum.Engine
         }
 
         public static bool Exists(Type type, PrimaryKey id) => giExist.GetInvoker(type)(id);
-        static GenericInvoker<Func<PrimaryKey, bool>> giExist = 
+        static GenericInvoker<Func<PrimaryKey, bool>> giExist =
             new GenericInvoker<Func<PrimaryKey, bool>>(id => Exists<Entity>(id));
         public static bool Exists<T>(PrimaryKey id)
             where T : Entity
@@ -437,7 +437,7 @@ namespace Signum.Engine
         }
 
         public static Task<bool> ExistsAsync(Type type, PrimaryKey id, CancellationToken token) => giExistAsync.GetInvoker(type)(id, token);
-        static GenericInvoker<Func<PrimaryKey, CancellationToken, Task<bool>>> giExistAsync = 
+        static GenericInvoker<Func<PrimaryKey, CancellationToken, Task<bool>>> giExistAsync =
             new GenericInvoker<Func<PrimaryKey, CancellationToken, Task<bool>>>((id, token) => ExistsAsync<Entity>(id, token));
         public static async Task<bool> ExistsAsync<T>(PrimaryKey id, CancellationToken token)
             where T : Entity
@@ -535,7 +535,7 @@ namespace Signum.Engine
             }
         }
 
-        
+
 
         static readonly GenericInvoker<Func<IList>> giRetrieveAll = new GenericInvoker<Func<IList>>(() => RetrieveAll<TypeEntity>());
         public static List<Entity> RetrieveAll(Type type)
@@ -548,7 +548,7 @@ namespace Signum.Engine
         }
 
         static Task<IList> RetrieveAllAsyncIList<T>(CancellationToken token) where T : Entity => RetrieveAllAsync<T>(token).ContinueWith(t => (IList)t.Result);
-        static readonly GenericInvoker<Func<CancellationToken, Task<IList>>> giRetrieveAllAsyncIList = 
+        static readonly GenericInvoker<Func<CancellationToken, Task<IList>>> giRetrieveAllAsyncIList =
             new GenericInvoker<Func<CancellationToken, Task<IList>>>(token => RetrieveAllAsyncIList<TypeEntity>(token));
         public static async Task<List<Entity>> RetrieveAllAsync(Type type, CancellationToken token)
         {
@@ -584,7 +584,7 @@ namespace Signum.Engine
             }
         }
 
-        static readonly GenericInvoker<Func<CancellationToken, Task<IList>>> giRetrieveAllLiteAsync = 
+        static readonly GenericInvoker<Func<CancellationToken, Task<IList>>> giRetrieveAllLiteAsync =
             new GenericInvoker<Func<CancellationToken, Task<IList>>>(token => Database.RetrieveAllLiteAsyncIList<TypeEntity>(token));
         static Task<IList> RetrieveAllLiteAsyncIList<T>(CancellationToken token) where T : Entity => RetrieveAllLiteAsync<T>(token).ContinueWith(r => (IList)r.Result);
         public static async Task<List<Lite<T>>> RetrieveAllLiteAsync<T>(CancellationToken token)
@@ -721,7 +721,7 @@ namespace Signum.Engine
             }
         }
 
-        static GenericInvoker<Func<List<PrimaryKey>, CancellationToken, Task<IList>>> giRetrieveListAsync = 
+        static GenericInvoker<Func<List<PrimaryKey>, CancellationToken, Task<IList>>> giRetrieveListAsync =
             new GenericInvoker<Func<List<PrimaryKey>, CancellationToken, Task<IList>>>((ids, token) => RetrieveListAsyncIList<Entity>(ids, token));
         static Task<IList> RetrieveListAsyncIList<T>(List<PrimaryKey> ids, CancellationToken token) where T : Entity =>
             RetrieveListAsync<T>(ids, token).ContinueWith(p => (IList)p.Result);
@@ -822,8 +822,8 @@ namespace Signum.Engine
             IList list = await giRetrieveListAsync.GetInvoker(type)(ids, token);
             return list.Cast<Entity>().ToList();
         }
-        
-        static GenericInvoker<Func<List<PrimaryKey>, IList>> giRetrieveListLite = 
+
+        static GenericInvoker<Func<List<PrimaryKey>, IList>> giRetrieveListLite =
             new GenericInvoker<Func<List<PrimaryKey>, IList>>(ids => RetrieveListLite<Entity>(ids));
         public static List<Lite<T>> RetrieveListLite<T>(List<PrimaryKey> ids)
             where T : Entity
@@ -1643,7 +1643,7 @@ namespace Signum.Engine
 
     //E -> E
     //A -> E
-    //MLE<E, M> -> MLE<E, M> 
+    //MLE<E, M> -> MLE<E, M>
     //A -> MLE<E, M>
 
     public interface IUpdateablePart<A, T> : IUpdateable

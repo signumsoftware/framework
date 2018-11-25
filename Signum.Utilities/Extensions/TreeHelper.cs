@@ -1,7 +1,6 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 
@@ -160,7 +159,7 @@ namespace Signum.Utilities
 
         void Never()
         {
-            PropertyChanged(null, null); 
+            PropertyChanged(null, null);
         }
         public event PropertyChangedEventHandler PropertyChanged;
     }

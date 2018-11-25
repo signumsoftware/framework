@@ -1,11 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
-using Signum.Engine.Maps;
 using Signum.Entities.Reflection;
 using Signum.Utilities;
 
@@ -69,9 +65,9 @@ namespace Signum.Engine.CodeGeneration
 
                 string moduleName = GetDefaultModuleName(selected, solutionName);
                 SafeConsole.WriteColor(ConsoleColor.Gray, $"Module name? ([Enter] for '{moduleName}'):");
-                
+
                 moduleName = Console.ReadLine().DefaultText(moduleName);
-                
+
                 yield return new Module
                 {
                     ModuleName = moduleName,

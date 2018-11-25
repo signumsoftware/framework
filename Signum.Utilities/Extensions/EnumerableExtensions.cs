@@ -1,4 +1,4 @@
-﻿using Signum.Utilities.DataStructures;
+using Signum.Utilities.DataStructures;
 using Signum.Utilities.ExpressionTrees;
 using Signum.Utilities.Reflection;
 using Signum.Utilities.Synchronization;
@@ -1224,8 +1224,8 @@ Consider Synchronize.");
                 catch (Exception e) when (StartParameters.IgnoredDatabaseMismatches != null)
                 {
                     //This try { throw } catch is here to alert developers.
-                    //In production, in some cases its OK to attempt starting an application with a slightly different schema (dynamic entities, green-blue deployments).  
-                    //In development, consider synchronize.  
+                    //In production, in some cases its OK to attempt starting an application with a slightly different schema (dynamic entities, green-blue deployments).
+                    //In development, consider synchronize.
                     StartParameters.IgnoredDatabaseMismatches.Add(e);
                 }
             }

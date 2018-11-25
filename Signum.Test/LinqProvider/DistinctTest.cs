@@ -1,14 +1,8 @@
-﻿using System;
-using System.Text;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
 using Xunit;
 using Signum.Engine;
 using Signum.Entities;
-using System.Diagnostics;
-using System.IO;
 using Signum.Utilities;
-using Signum.Engine.Linq;
 using Signum.Test.Environment;
 
 namespace Signum.Test.LinqProvider
@@ -74,7 +68,7 @@ namespace Signum.Test.LinqProvider
         {
             var bla = (from b in Database.Query<BandEntity>()
                       from g in b.Members.GroupBy(a=>a.Sex).Select(gr=> new {gr.Key, Count = gr.Count() })
-                      select new 
+                      select new
                       {
                           Band = b.ToLite(),
                           g.Key,

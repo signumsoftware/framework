@@ -354,7 +354,7 @@ namespace Signum.Utilities
 
             return str.Substring(index + separator.Length);
         }
-        
+
         public static string Between(this string str, string firstSeparator, string secondSeparator = null)
         {
             if (secondSeparator == null)
@@ -517,7 +517,7 @@ namespace Signum.Utilities
 
             return result;
         }
-        
+
         public static string PadChopRight(this string str, int length)
         {
             str = str ?? "";
@@ -551,7 +551,7 @@ namespace Signum.Utilities
                 index = newIndex + 1;
             }
 
-            return ""; 
+            return "";
         }
 
         public static string Etc(this string str, int max, string etcString)
@@ -670,7 +670,7 @@ namespace Signum.Utilities
 
             return result;
         }
-        
+
         public static string FirstUpper(this string str)
         {
             if (str.HasText() && char.IsLower(str[0]))

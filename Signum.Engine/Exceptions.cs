@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Runtime.Serialization;
-using System.Data.SqlClient;
 using System.Text.RegularExpressions;
 using Signum.Utilities;
 using Signum.Engine.Maps;
@@ -29,12 +27,12 @@ namespace Signum.Engine
         protected UniqueKeyException(SerializationInfo info, StreamingContext context) : base(info, context) { }
 
         static Regex[] regexes = new []
-        {   
+        {
             new Regex(@"Cannot insert duplicate key row in object '(?<table>.*)' with unique index '(?<index>.*)'\. The duplicate key value is \((?<value>.*)\)"),
             new Regex(@"Eine Zeile mit doppeltem Schlüssel kann in das Objekt ""(?<table>.*)"" mit dem eindeutigen Index ""(?<index>.*)"" nicht eingefügt werden. Der doppelte Schlüsselwert ist \((?<value>.*)\)")
         };
 
-        public UniqueKeyException(Exception inner) : base(null, inner) 
+        public UniqueKeyException(Exception inner) : base(null, inner)
         {
             foreach (var rx in regexes)
             {
@@ -64,9 +62,9 @@ namespace Signum.Engine
                             if (properties.IsEmpty())
                                 return null;
 
-                            return (index, properties); 
+                            return (index, properties);
                         });
- 
+
                         if(tuple != null)
                         {
                             Index = tuple.Value.index;
@@ -78,7 +76,7 @@ namespace Signum.Engine
         }
 
         static ConcurrentDictionary<string, Table> cachedTables = new ConcurrentDictionary<string, Table>();
-        static ConcurrentDictionary<(Table table, string indexName), (UniqueIndex index, List<PropertyInfo> properties)?> cachedLookups = 
+        static ConcurrentDictionary<(Table table, string indexName), (UniqueIndex index, List<PropertyInfo> properties)?> cachedLookups =
             new ConcurrentDictionary<(Table table, string indexName), (UniqueIndex index, List<PropertyInfo> properties)?>();
 
         public override string Message
@@ -91,14 +89,14 @@ namespace Signum.Engine
                 return EngineMessage.TheresAlreadyA0With1EqualsTo2_G.NiceToString().ForGenderAndNumber(Table?.Type.GetGender()).FormatWith(
                     Table == null ? TableName : Table.Type.NiceName(),
                     Index == null ? IndexName :
-                    Properties.IsNullOrEmpty() ? Index.Columns.CommaAnd(c => c.Name) : 
+                    Properties.IsNullOrEmpty() ? Index.Columns.CommaAnd(c => c.Name) :
                     Properties.CommaAnd(p=>p.NiceName()),
                     Values);
             }
         }
     }
 
-  
+
     [Serializable]
     public class ForeignKeyException : ApplicationException
     {
@@ -116,11 +114,11 @@ namespace Signum.Engine
         static Regex referedTable = new Regex(@"table ""(?<referedTable>.+?)""");
 
         protected ForeignKeyException(SerializationInfo info, StreamingContext context) : base(info, context) { }
-       
-        public ForeignKeyException(Exception inner) : base(null, inner) 
+
+        public ForeignKeyException(Exception inner) : base(null, inner)
         {
             Match m = indexRegex.Match(inner.Message);
-            
+
             if (m.Success)
             {
                 TableName = m.Groups["table"].Value;
@@ -144,7 +142,7 @@ namespace Signum.Engine
                                     .Select(p => p.Key)
                                     .SingleOrDefaultEx();
 
-                    ReferedTableType = EnumEntity.Extract(ReferedTableType) ?? ReferedTableType; 
+                    ReferedTableType = EnumEntity.Extract(ReferedTableType) ?? ReferedTableType;
                 }
             }
         }

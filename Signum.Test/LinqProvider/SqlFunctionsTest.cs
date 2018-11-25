@@ -97,12 +97,48 @@ namespace Signum.Test.LinqProvider
         }
 
         [Fact]
-        public void DateTimeDayOfWeek()
+        public void DayOfWeekWhere()
         {
-            //var list = Database.Query<ArtistEntity>().GroupBy(a => a.Sex).Select(gr => new { gr.Key, Count = gr.Count() }).ToList();
-            var list = Database.Query<NoteWithDateEntity>().GroupBy(a => a.CreationTime.DayOfWeek).Select(gr => new { gr.Key, Count = gr.Count() }).ToList();
+            var memCount = Database.Query<NoteWithDateEntity>().ToList().Where(a => a.CreationTime.DayOfWeek == a.CreationTime.DayOfWeek).Count();
+            var dbCount = Database.Query<NoteWithDateEntity>().Where(a => a.CreationTime.DayOfWeek == a.CreationTime.DayOfWeek).Count();
+            Assert.Equal(memCount, dbCount);
+        }
 
-            var list2 = Database.Query<NoteWithDateEntity>().Where(a => a.CreationTime.DayOfWeek == DayOfWeek.Sunday).ToList();
+        [Fact]
+        public void DayOfWeekWhereConstant()
+        {
+            var memCount = Database.Query<NoteWithDateEntity>().ToList().Where(a => a.CreationTime.DayOfWeek == DayOfWeek.Sunday).Count();
+            var dbCount = Database.Query<NoteWithDateEntity>().Where(a => a.CreationTime.DayOfWeek == DayOfWeek.Sunday).Count();
+            Assert.Equal(memCount, dbCount);
+        }
+
+        [Fact]
+        public void DayOfWeekSelectConstant()
+        {
+            var memCount = Database.Query<NoteWithDateEntity>().ToList().Select(a => a.CreationTime.DayOfWeek == DayOfWeek.Sunday).ToList();
+            var dbCount = Database.Query<NoteWithDateEntity>().Select(a => a.CreationTime.DayOfWeek == DayOfWeek.Sunday).ToList();
+            Assert.Equal(memCount, dbCount);
+        }
+
+        [Fact]
+        public void DayOfWeekContains()
+        {
+            var dows  = new[] { DayOfWeek.Monday, DayOfWeek.Sunday };
+
+            var memCount = Database.Query<NoteWithDateEntity>().ToList().Where(a => dows.Contains(a.CreationTime.DayOfWeek)).Count();
+            var dbCount = Database.Query<NoteWithDateEntity>().Where(a => dows.Contains(a.CreationTime.DayOfWeek)).Count();
+            Assert.Equal(memCount, dbCount);
+        }
+
+        [Fact]
+        public void DayOfWeekGroupBy()
+        {
+            var listA = Database.Query<NoteWithDateEntity>().GroupBy(a => a.CreationTime.DayOfWeek).Select(gr => new { gr.Key, Count = gr.Count() }).ToList();
+            var listB = Database.Query<NoteWithDateEntity>().ToList().GroupBy(a => a.CreationTime.DayOfWeek).Select(gr => new { gr.Key, Count = gr.Count() });
+            
+            Assert.Equal(
+                listA.OrderBy(a => a.Key).ToString(a => $"{a.Key} {a.Count}", ","), 
+                listB.OrderBy(a => a.Key).ToString(a => $"{a.Key} {a.Count}", ","));
         }
 
         [Fact]
@@ -229,7 +265,7 @@ namespace Signum.Test.LinqProvider
 
         [Fact]
         public void NullableEnumToString()
-        {   
+        {
             var sexs = Database.Query<ArtistEntity>().Select(a => a.Status.ToString()).ToList();
         }
 

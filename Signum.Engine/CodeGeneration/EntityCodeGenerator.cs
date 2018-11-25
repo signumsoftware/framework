@@ -1,18 +1,16 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 using Signum.Engine.Maps;
 using Signum.Entities;
 using Signum.Entities.Reflection;
 using Signum.Utilities;
 using Signum.Utilities.DataStructures;
 using Signum.Utilities.ExpressionTrees;
-using Signum.Utilities.Reflection;
 
 namespace Signum.Engine.CodeGeneration
 {
@@ -24,7 +22,7 @@ namespace Signum.Engine.CodeGeneration
         public Dictionary<ObjectName, DiffTable> Tables;
         public DirectedGraph<DiffTable> InverseGraph;
 
-        public Schema CurrentSchema; 
+        public Schema CurrentSchema;
 
         public virtual void GenerateEntitiesFromDatabaseTables()
         {
@@ -64,7 +62,7 @@ namespace Signum.Engine.CodeGeneration
             }
         }
 
-      
+
 
         protected virtual string GetProjectFolder()
         {
@@ -75,7 +73,7 @@ namespace Signum.Engine.CodeGeneration
         {
             return SchemaSynchronizer.DefaultGetDatabaseDescription(Schema.Current.DatabaseNames()).Values.ToList();
         }
-        
+
         protected virtual void GetSolutionInfo(out string solutionFolder, out string solutionName)
         {
             CodeGenerator.GetSolutionInfo(out solutionFolder, out solutionName);
@@ -125,7 +123,7 @@ namespace Signum.Engine.CodeGeneration
 
         protected virtual List<string> GetUsingNamespaces(string fileName, IEnumerable<DiffTable> tables)
         {
-            var result = new List<string> 
+            var result = new List<string>
             {
                 "System",
                 "System.Collections.Generic",
@@ -140,14 +138,14 @@ namespace Signum.Engine.CodeGeneration
 
             var currentNamespace = GetNamespace(fileName);
 
-            var fkNamespaces = 
+            var fkNamespaces =
                 (from t in tables
                  from c in t.Columns.Values
                  where c.ForeignKey != null
                  let targetTable = Tables.GetOrThrow(c.ForeignKey.TargetTable)
                  select GetNamespace(GetFileName(targetTable)));
 
-            var mListNamespaces = 
+            var mListNamespaces =
                 (from t in tables
                  from kvp in GetMListFields(t)
                  let tec = kvp.Value.TrivialElementColumn
@@ -506,11 +504,11 @@ namespace Signum.Engine.CodeGeneration
                 return null;
 
             var def = CurrentSchema.Settings.DefaultPrimaryKeyAttribute;
-            
+
             Type type = GetValueType(primaryKey);
 
             List<string> parts = new List<string>();
-          
+
             if (primaryKey.Name != def.Name)
                 parts.Add("Name = \"" + primaryKey.Name + "\"");
 
@@ -565,7 +563,7 @@ namespace Signum.Engine.CodeGeneration
         protected virtual EntityKind GetEntityKind(DiffTable table)
         {
             return EntityKind.Main;
-        } 
+        }
 
         protected virtual string GetEntityName(ObjectName objectName)
         {
@@ -723,7 +721,7 @@ namespace Signum.Engine.CodeGeneration
         {
             Type type = GetValueType(col);
             List<string> parts = GetSqlDbTypeParts(col, type);
-            
+
             if (parts.Any() && SqlTypeAttributeNecessary(parts, table, col))
                 return "SqlDbType(" + parts.ToString(", ") + ")";
 
@@ -871,13 +869,13 @@ namespace Signum.Engine.CodeGeneration
                 string relatedEntity = GetRelatedEntity(relatedTable, mListInfo.TrivialElementColumn);
                 type = GetFieldType(relatedTable, mListInfo.TrivialElementColumn, relatedEntity);
 
-                fieldAttributes = GetFieldAttributes(relatedTable, mListInfo.TrivialElementColumn, relatedEntity, isMList: true).ToList(); 
+                fieldAttributes = GetFieldAttributes(relatedTable, mListInfo.TrivialElementColumn, relatedEntity, isMList: true).ToList();
             }
 
             var preserveOrder = GetPreserveOrderAttribute(mListInfo);
             if (preserveOrder != null)
                 fieldAttributes.Add(preserveOrder);
-       
+
             string primaryKey = GetPrimaryKeyAttribute(relatedTable);
             if (primaryKey != null)
                 fieldAttributes.Add(primaryKey);

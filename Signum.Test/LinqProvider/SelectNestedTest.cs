@@ -1,17 +1,8 @@
-﻿using System;
-using System.Text;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
 using Xunit;
 using Signum.Engine;
 using Signum.Entities;
-using System.Diagnostics;
-using System.IO;
-using Signum.Engine.Linq;
 using Signum.Utilities;
-using System.Linq.Expressions;
-using System.Data.SqlTypes;
-using System.Reflection;
 using Signum.Test.Environment;
 
 namespace Signum.Test.LinqProvider
@@ -56,8 +47,8 @@ namespace Signum.Test.LinqProvider
                                Owner = g.Key,
                                List = g.ToList(),
                                Count = g.Count()
-                           }).ToList(); 
-                          
+                           }).ToList();
+
         }
 
         [Fact]
@@ -168,7 +159,7 @@ namespace Signum.Test.LinqProvider
         [Fact]
         public void SelecteNestedInnerOrder()
         {
-            var neasted = (from l in Database.Query<LabelEntity>()                           
+            var neasted = (from l in Database.Query<LabelEntity>()
                            select new
                            {
                                Label = l.ToLite(),
@@ -182,7 +173,7 @@ namespace Signum.Test.LinqProvider
         [Fact]
         public void SelecteNestedInnerOrderTake()
         {
-            var neasted = (from l in Database.Query<LabelEntity>()                           
+            var neasted = (from l in Database.Query<LabelEntity>()
                            select new
                            {
                                Label = l.ToLite(),
@@ -264,6 +255,6 @@ namespace Signum.Test.LinqProvider
         //                           select a.ToLite())} ).ToList();
         //}
 
-      
+
     }
 }

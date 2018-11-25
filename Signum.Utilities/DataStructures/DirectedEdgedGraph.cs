@@ -1,8 +1,6 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using Signum.Utilities;
 using System.Collections;
 using System.Xml.Linq;
 
@@ -203,7 +201,7 @@ namespace Signum.Utilities.DataStructures
                 set.Add(node);
             IndirectlyRelatedTo(node, set);
             return set;
-        } 
+        }
 
         void IndirectlyRelatedTo(T node, HashSet<T> set)
         {
@@ -401,7 +399,7 @@ namespace Signum.Utilities.DataStructures
                 new XAttribute("Label", getEdgeLabel(e))
             });
         }
-            
+
         public XDocument ToDGML(Func<T, XAttribute[]> getNodeAttributes, Func<E, XAttribute[]> getEdgeAttributes)
         {
             int num = 0;
@@ -455,13 +453,13 @@ namespace Signum.Utilities.DataStructures
 
         /// <summary>
         /// A simple but effective linear-time heuristic constructs a vertex ordering,
-        /// just as in the topological sort heuristic above, and deletes any arc going from right to left. 
-        /// 
-        /// This heuristic builds up the ordering from the outside in based on the in- and out-degrees of each vertex. 
-        /// - Any vertex of in-degree 0 is a source and can be placed first in the ordering. 
-        /// - Any vertex of out-degree 0 is a sink and can be placed last in the ordering, again without violating any constraints. 
-        /// - If not, we find the vertex with the maximum difference between in- and out-degree, 
-        /// and place it on the side of the permutation that will salvage the greatest number of constraints. 
+        /// just as in the topological sort heuristic above, and deletes any arc going from right to left.
+        ///
+        /// This heuristic builds up the ordering from the outside in based on the in- and out-degrees of each vertex.
+        /// - Any vertex of in-degree 0 is a source and can be placed first in the ordering.
+        /// - Any vertex of out-degree 0 is a sink and can be placed last in the ordering, again without violating any constraints.
+        /// - If not, we find the vertex with the maximum difference between in- and out-degree,
+        /// and place it on the side of the permutation that will salvage the greatest number of constraints.
         /// Delete any vertex from the DAG after positioning it and repeat until the graph is empty.
         /// </summary>
         /// <returns></returns>
@@ -507,7 +505,7 @@ namespace Signum.Utilities.DataStructures
                     T node = mm.Max;
                     foreach (var n in inv.RelatedTo(node))
                         result.Add(n.Key, node, n.Value);
-                    
+
                     DirectedEdgedGraph<T, E>.RemoveFullNodeSymetric(clone, inv, node);
                     head.Add(node);
                 }
@@ -616,7 +614,7 @@ namespace Signum.Utilities.DataStructures
 
             if (dic != null)
                 return dic.GetOrCreate(to);
-            
+
             E newEdge = new E();
             graph.Add(from, to, newEdge);
             return newEdge;

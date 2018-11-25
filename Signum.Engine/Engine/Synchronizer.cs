@@ -1,5 +1,4 @@
-﻿using Signum.Engine.Maps;
-using Signum.Entities;
+using Signum.Engine.Maps;
 using Signum.Utilities;
 using System;
 using System.Collections.Generic;
@@ -68,8 +67,8 @@ namespace Signum.Engine
                     else
                         throw new InvalidOperationException("Unexpected key: " + key);
                 }
-            }, 
-            showProgress: showProgress, 
+            },
+            showProgress: showProgress,
             transactional: transactional);
         }
 
@@ -242,7 +241,7 @@ namespace Signum.Engine
                 {
                     oldOnly.Remove(kvp.Key);
                     newOnly.Remove(kvp.Value);
-                }                
+                }
             }
 
 

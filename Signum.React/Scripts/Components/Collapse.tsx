@@ -1,4 +1,4 @@
-﻿import * as React from 'react';
+import * as React from 'react';
 import Transition, { EnterHandler, ExitHandler } from 'react-transition-group/Transition';
 import { classes } from '../Globals';
 

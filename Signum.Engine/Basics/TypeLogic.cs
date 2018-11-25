@@ -1,21 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using Signum.Entities;
 using Signum.Engine.Maps;
 using Signum.Entities.Reflection;
 using Signum.Utilities;
 using System.Reflection;
-using System.Text.RegularExpressions;
-using Signum.Entities.DynamicQuery;
 using Signum.Entities.Basics;
 using Signum.Engine.DynamicQuery;
 using Signum.Utilities.Reflection;
 
 namespace Signum.Engine.Basics
 {
-   
+
     public static class TypeLogic
     {
         public static Dictionary<PrimaryKey, Type> IdToType
@@ -78,7 +75,7 @@ namespace Signum.Engine.Basics
                         t.ClassName,
                         t.Namespace,
                     });
-                
+
                 TypeEntity.SetTypeEntityCallbacks(
                     t => TypeToEntity.GetOrThrow(t),
                     t => EntityToType.GetOrThrow(t));
@@ -149,7 +146,7 @@ namespace Signum.Engine.Basics
                                 c.TableName = ps.ToString();
                             }
                         }
-                          
+
                         c.CleanName = s.CleanName;
                         c.Namespace = s.Namespace;
                         c.ClassName = s.ClassName;
@@ -157,7 +154,7 @@ namespace Signum.Engine.Basics
                     });
         }
 
-        static bool EqualsIgnoringDatabasePrefix(ObjectName pc, ObjectName ps) => 
+        static bool EqualsIgnoringDatabasePrefix(ObjectName pc, ObjectName ps) =>
             ps.Name == pc.Name &&
             pc.Schema.Name  == ps.Schema.Name &&
             Suffix(pc.Schema.Database?.Name) == Suffix(ps.Schema.Database?.Name);

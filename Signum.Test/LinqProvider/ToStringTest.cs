@@ -1,12 +1,10 @@
 ﻿using System;
-using System.Text;
 using System.Collections.Generic;
 using System.Linq;
 using Xunit;
 using Signum.Engine;
 using Signum.Utilities;
 using Signum.Entities;
-using Signum.Utilities.ExpressionTrees;
 using Signum.Test.Environment;
 
 namespace Signum.Test.LinqProvider

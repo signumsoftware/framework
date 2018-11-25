@@ -1,16 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Linq.Expressions;
 using System.Reflection;
-using System.Collections.ObjectModel;
 using Signum.Entities;
 using Signum.Utilities;
-using Signum.Engine.DynamicQuery;
 using Signum.Entities.DynamicQuery;
 using Signum.Utilities.Reflection;
-using Signum.Utilities.ExpressionTrees;
 
 namespace Signum.Engine.Linq
 {
@@ -63,7 +57,7 @@ namespace Signum.Engine.Linq
         public override string ToString()
         {
             return "MetaProjector({0})".FormatWith(this.Projector.ToString());
-        }  
+        }
     }
 
     internal class MetaExpression : MetaBaseExpression
@@ -101,7 +95,7 @@ namespace Signum.Engine.Linq
             //throw new InvalidOperationException("Impossible to convert {0} to {1}".FormatWith(pr.Type.TypeName(), sourceType.TypeName()));
         }
 
-        static readonly MethodInfo miToLite = ReflectionTools.GetMethodInfo((Entity e) => e.ToLite()); 
+        static readonly MethodInfo miToLite = ReflectionTools.GetMethodInfo((Entity e) => e.ToLite());
     }
 
     internal class MetaMListExpression : MetaBaseExpression

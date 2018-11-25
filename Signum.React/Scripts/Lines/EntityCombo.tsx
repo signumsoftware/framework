@@ -1,4 +1,4 @@
-﻿import * as React from 'react'
+import * as React from 'react'
 import { ModifiableEntity, Lite, Entity, toLite, is, liteKey, getToString } from '../Signum.Entities'
 import * as Finder from '../Finder'
 import { FindOptions } from '../FindOptions'
@@ -78,7 +78,7 @@ export interface EntityComboSelectProps {
 
 }
 
-//Extracted to another component 
+//Extracted to another component
 class EntityComboSelect extends React.Component<EntityComboSelectProps, { data?: Lite<Entity>[] }>{
 
   constructor(props: EntityComboSelectProps) {

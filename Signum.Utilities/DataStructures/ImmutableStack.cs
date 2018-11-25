@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Collections;
 using System.Threading;
 
@@ -49,7 +47,7 @@ namespace Signum.Utilities.DataStructures
         public virtual IEnumerator<T> GetEnumerator() { yield break; }
         public override string ToString() { return "[]"; }
 
-        IEnumerator IEnumerable.GetEnumerator() { return this.GetEnumerator(); }      
+        IEnumerator IEnumerable.GetEnumerator() { return this.GetEnumerator(); }
     }
 
     public static class ImmutableStackExtensions

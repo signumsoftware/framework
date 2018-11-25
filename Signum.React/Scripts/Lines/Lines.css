@@ -299,10 +299,12 @@ select.form-control-xs:not([size]):not([multiple]),
 .input-group-xs > .input-group-append > .input-group-text,
 .input-group-xs > .input-group-prepend > .btn,
 .input-group-xs > .input-group-append > .btn {
+    height: 24px;
     padding: 1px 5px;
     font-size: 0.875rem;
     line-height: 1.5;
     border-radius: 0.2rem;
+    height: 24px;
 }
 
 .col-form-label-xs {
@@ -321,53 +323,6 @@ select.form-control-xs:not([size]):not([multiple]),
     font-size: 0.875rem;
     margin-bottom: 0px;
 }
-
-/*.form-xs .form-control,
-.form-xs .form-control-static {
-    padding: 0px 3px;
-}
-
-
-    .form-xs .form-control:not(textarea) {
-        height: 20px;
-        min-height: inherit;
-    }
-
-    .form-xs .form-control.readonly.readonly-textarea {
-        min-height: 20px;
-    }
-
-.form-xs .input-group-btn .btn {
-    height: 20px;
-}
-
-
-.form-xs .form-control-static {
-    min-height: inherit;
-}
-
-.form-xs .sf-query-token-builder {
-    height: 20px;
-    margin-bottom: -3px;
-}
-
-.form-xs select[multiple],
-.form-xs select[size] {
-    height: auto;
-}
-
-.form-xs input[type=checkbox].form-control {
-    height: 16px;
-    margin-top: 2px;
-    padding: 2px;
-}
-
-.form-xs .input-group .btn,
-.form-xs .input-group .input-group-addon {
-    padding: 0px 3px;
-    height: 20px;
-}*/
-
 .rw-widget-xs .rw-input {
     padding: 0px 3px;
     height: 22px;
@@ -387,67 +342,6 @@ select.form-control-xs:not([size]):not([multiple]),
 }
 
 
-/*.form-xs .sf-strip {
-    margin-bottom: 0px;
-}
-
-    .form-xs .sf-strip.sf-strip-vertical {
-        margin-top: 0px; //sf-strip-vertical
-    }*/
-
-/*
-
-.form-xs fieldset > legend {
-    padding: 0px 4px 0 4px;
-    font-size: 16px;
-}*/
-
-
-/*form sm*/
-
-/*.form-sm .form-control,
-.form-sm .form-control-static {
-    padding: 2px 6px;
-}
-
-    .form-sm .form-control:not(textarea) {
-        height: 26px;
-        min-height: inherit;
-    }
-
-    .form-sm .form-control.readonly.readonly-textarea {
-        min-height: 26px;
-    }
-
-.form-sm .input-group-btn .btn {
-    height: 26px;
-}
-
-.form-sm .form-control-static {
-    min-height: inherit;
-}
-
-.form-sm .sf-query-token-builder {
-    height: 26px;
-}
-
-.form-sm select[multiple],
-.form-sm select[size] {
-    height: auto;
-}
-
-
-.form-sm input[type=checkbox].form-control {
-    height: 16px;
-    padding: 0px;
-    margin-top: 4px;
-}
-
-.form-sm .input-group .btn,
-.form-sm .input-group .input-group-addon {
-    padding: 2px 4px;
-}
-*/
 
 .rw-widget-sm .rw-input {
     padding: 3px 6px;
@@ -461,25 +355,7 @@ select.form-control-xs:not([size]):not([multiple]),
 .input-group > .form-control-plaintext {
     padding-right: 5px;
 }
-/*
-.form-sm .sf-strip {
-    margin-bottom: 4px;
-}
 
-    .form-sm .sf-strip.sf-strip-vertical {
-        margin-top: 6px; //sf-strip-vertical
-    }
-
-.form-group.form-sm {
-    margin-bottom: 5px;
-}
-
-
-.form-sm fieldset > legend {
-    padding: 2px 5px 0 5px;
-    font-size: 18px;
-}
-*/
 .form-group.form-group-sm {
     margin-bottom: 6px;
 }

@@ -2,8 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
-using System.Reflection;
-using System.Text;
 using Signum.Entities;
 using Signum.Entities.Reflection;
 using Signum.Utilities;
@@ -34,7 +32,7 @@ namespace Signum.Engine.Maps
         public event BulkInsetHandler<T> PreBulkInsert;
 
         public Dictionary<PropertyRoute, IAdditionalBinding> AdditionalBindings { get; private set; }
-        
+
         /// <param name="valueFunction">For Caching scenarios</param>
         public void RegisterBinding<M>(Expression<Func<T, M>> field, Func<bool> shouldSet, Expression<Func<T, M>> valueExpression, Func<T, IRetriever, M> valueFunction = null)
         {
@@ -54,7 +52,7 @@ namespace Signum.Engine.Maps
             });
         }
 
-       
+
 
         internal IEnumerable<FilterQueryResult<T>> OnFilterQuery()
         {

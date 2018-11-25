@@ -1,11 +1,5 @@
-﻿using Signum.Utilities;
-using Signum.Utilities.ExpressionTrees;
-using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
+﻿using System.Collections.ObjectModel;
 using System.Linq.Expressions;
-using System.Text;
 
 namespace Signum.Engine.Linq
 {
@@ -13,8 +7,8 @@ namespace Signum.Engine.Linq
     {
         SourceExpression currentFrom;
 
-        Connector connector = Connector.Current; 
-        
+        Connector connector = Connector.Current;
+
         bool inAggregate = false;
 
         public static Expression Rewrite(Expression expression)

@@ -1,8 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using Signum.Utilities.DataStructures;
 
 namespace Signum.Utilities
 {
@@ -53,15 +50,15 @@ namespace Signum.Utilities
         {
             foreach (var item in elements)
             {
-                list.Add(item); 
+                list.Add(item);
             }
         }
-        
+
         public static void AddRange<T>(this IList<T> list, params T[] elements)
         {
             foreach (var item in elements)
             {
-                list.Add(item); 
+                list.Add(item);
             }
         }
     }

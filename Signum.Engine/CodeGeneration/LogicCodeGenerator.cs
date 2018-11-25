@@ -1,19 +1,15 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 using Signum.Engine.Maps;
 using Signum.Entities;
 using Signum.Entities.Reflection;
 using Signum.Utilities;
-using Signum.Utilities.DataStructures;
 using Signum.Utilities.ExpressionTrees;
-using Signum.Utilities.Reflection;
 
 namespace Signum.Engine.CodeGeneration
 {
@@ -36,7 +32,7 @@ namespace Signum.Engine.CodeGeneration
 
             if (!Directory.Exists(projectFolder))
                 throw new InvalidOperationException("{0} not found. Override GetProjectFolder".FormatWith(projectFolder));
-            
+
             foreach (var mod in GetModules())
             {
                 string str = WriteFile(mod);
@@ -183,7 +179,7 @@ namespace Signum.Engine.CodeGeneration
                     sb.AppendLine();
                 }
             }
-            
+
             if (allExpressions.Any())
             {
                 foreach (var ei in allExpressions)
@@ -195,7 +191,7 @@ namespace Signum.Engine.CodeGeneration
 
                 sb.AppendLine();
             }
-            
+
 
             sb.AppendLine("    }");
             sb.AppendLine("}");
@@ -359,7 +355,7 @@ namespace Signum.Engine.CodeGeneration
             string filter = info.Property.PropertyType.IsLite() ? "{t} => {t}.{prop}.Is({f})" : "{t} => {t}.{prop} == {f}";
 
             string str =  info.IsUnique?
-@"static Expression<Func<{from}, {to}>> {MethodExpression} = 
+@"static Expression<Func<{from}, {to}>> {MethodExpression} =
     {f} => Database.Query<{to}>().SingleOrDefaultEx({filter});
 [ExpressionField]
 public static {to} {Method}(this {from} e)
@@ -367,7 +363,7 @@ public static {to} {Method}(this {from} e)
     return {MethodExpression}.Evaluate(e);
 }
 " :
-@"static Expression<Func<{from}, IQueryable<{to}>>> {MethodExpression} = 
+@"static Expression<Func<{from}, IQueryable<{to}>>> {MethodExpression} =
     {f} => Database.Query<{to}>().Where({filter});
 [ExpressionField]
 public static IQueryable<{to}> {Method}(this {from} e)
@@ -440,7 +436,7 @@ public static IQueryable<{to}> {Method}(this {from} e)
 
             if (pi.PropertyType.CleanType() == targetType)
                 return true;
-            
+
             if (pi.GetCustomAttribute<ImplementedByAttribute>()?.ImplementedTypes.Contains(targetType) == true)
                 return true;
 
@@ -514,7 +510,7 @@ public static IQueryable<{to}> {Method}(this {from} e)
         }
 
         protected virtual string WriteExecuteOperation(IOperationSymbolContainer oper)
-        {   
+        {
             Type type = oper.GetType().GetGenericArguments().Single();
 
             var v = GetVariableName(type);

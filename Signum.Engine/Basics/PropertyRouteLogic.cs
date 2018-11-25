@@ -1,22 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using Signum.Entities.Basics;
 using Signum.Entities;
-using Signum.Entities.Reflection;
 using System.Reflection;
 using Signum.Utilities;
 using Signum.Engine.Maps;
-using Signum.Utilities.Reflection;
 using System.Linq.Expressions;
-using Signum.Utilities.ExpressionTrees;
 
 namespace Signum.Engine.Basics
 {
     public static class PropertyRouteLogic
     {
-        static Expression<Func<PropertyRouteEntity, PropertyRoute, bool>> IsPropertyRouteExpression = 
+        static Expression<Func<PropertyRouteEntity, PropertyRoute, bool>> IsPropertyRouteExpression =
             (prdn, pr) => prdn.RootType == pr.RootType.ToTypeEntity() && prdn.Path == pr.PropertyString() ;
         [ExpressionField]
         public static bool IsPropertyRoute(this PropertyRouteEntity prdn, PropertyRoute pr)
@@ -24,14 +20,14 @@ namespace Signum.Engine.Basics
             return IsPropertyRouteExpression.Evaluate(prdn, pr);
         }
 
-        public static ResetLazy<Dictionary<TypeEntity, Dictionary<string, PropertyRouteEntity>>> Properties; 
+        public static ResetLazy<Dictionary<TypeEntity, Dictionary<string, PropertyRouteEntity>>> Properties;
 
         public static void Start(SchemaBuilder sb)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
                 sb.Include<PropertyRouteEntity>()
-                    .WithUniqueIndex(p => new { p.Path, p.RootType }); 
+                    .WithUniqueIndex(p => new { p.Path, p.RootType });
 
                 sb.Schema.Synchronizing += SynchronizeProperties;
 

@@ -1,12 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Linq.Expressions;
 using Signum.Utilities;
-using System.Reflection;
 using Signum.Utilities.ExpressionTrees;
-using Signum.Utilities.Reflection;
 using Signum.Entities.Reflection;
 using System.ComponentModel;
 
@@ -84,7 +81,7 @@ namespace Signum.Entities.DynamicQuery
 
         public override bool HasAllOrAny()
         {
-            return 
+            return
                 CollectionElementType != CollectionElementType.Element &&
                 CollectionElementType != CollectionElementType.Element2 &&
                 CollectionElementType != CollectionElementType.Element3;
@@ -174,5 +171,5 @@ namespace Signum.Entities.DynamicQuery
         [Description("Element (3)")]
         Element3,
     }
-    
+
 }

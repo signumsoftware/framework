@@ -1,11 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using Signum.Utilities;
 using System.Linq.Expressions;
-using Signum.Utilities.ExpressionTrees;
-using Signum.Entities;
 
 namespace Signum.Entities.Basics
 {
@@ -23,7 +18,7 @@ namespace Signum.Entities.Basics
 
         [StringLengthValidator(AllowNulls = false, Max = 200)]
         public string ClassName { get; set; }
-        
+
         static Expression<Func<TypeEntity, string>> FullClassNameExpression =
             t => t.Namespace + "." + t.ClassName;
         [ExpressionField]

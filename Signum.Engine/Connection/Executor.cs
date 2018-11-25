@@ -1,12 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Data;
-using System.Linq;
-using Signum.Engine;
-using System.IO;
-using Signum.Utilities;
-using Signum.Utilities.ExpressionTrees;
-using Signum.Utilities.DataStructures;
-using System;
 using System.Data.Common;
 using System.Data.SqlClient;
 using Signum.Engine.Maps;
@@ -43,7 +36,7 @@ namespace Signum.Engine
         {
             return Connector.Current.UnsafeExecuteDataReader(new SqlPreCommandSimple(sql, parameters), commandType);
         }
-        
+
         public static DbDataReaderWithCommand UnsafeExecuteDataReader(this SqlPreCommandSimple preCommand, CommandType commandType = CommandType.Text)
         {
             return Connector.Current.UnsafeExecuteDataReader(preCommand, commandType);
@@ -58,7 +51,7 @@ namespace Signum.Engine
         {
             return Connector.Current.UnsafeExecuteDataReaderAsync(preCommand, commandType, token);
         }
-        
+
         public static DataTable ExecuteDataTable(string sql, List<DbParameter> parameters = null, CommandType commandType = CommandType.Text)
         {
             return Connector.Current.ExecuteDataTable(new SqlPreCommandSimple(sql, parameters), commandType);

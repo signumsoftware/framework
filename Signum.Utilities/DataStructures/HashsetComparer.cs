@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Collections;
 
 namespace Signum.Utilities.DataStructures
@@ -27,7 +26,7 @@ namespace Signum.Utilities.DataStructures
 
         int IEqualityComparer.GetHashCode(object obj)
         {
-            return GetHashCode((HashSet<T>)obj); 
+            return GetHashCode((HashSet<T>)obj);
         }
     }
 }

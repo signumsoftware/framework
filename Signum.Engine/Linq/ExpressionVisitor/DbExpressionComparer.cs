@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using Signum.Utilities.ExpressionTrees;
 using Signum.Utilities.DataStructures;
 using System.Linq.Expressions;
@@ -144,7 +143,7 @@ namespace Signum.Engine.Linq
                     return ComparePrimaryKey((PrimaryKeyExpression)a, (PrimaryKeyExpression)b);
                 default:
                     throw new InvalidOperationException("Unexpected " + ((DbExpression)a).DbNodeType);
-                 
+
             }
         }
 
@@ -258,7 +257,7 @@ namespace Signum.Engine.Linq
 
             if (!CompareAlias(a.Alias, b.Alias))
                 return false;
-            
+
             if (!Compare(a.Left, b.Left))
                 return false;
 
@@ -272,7 +271,7 @@ namespace Signum.Engine.Linq
         protected virtual bool CompareProjection(ProjectionExpression a, ProjectionExpression b)
         {
             if (a.UniqueFunction != b.UniqueFunction)
-                return false; 
+                return false;
 
             if (!Compare(a.Select, b.Select))
                 return false;
@@ -287,8 +286,8 @@ namespace Signum.Engine.Linq
 
         private bool CompareChildProjection(ChildProjectionExpression a, ChildProjectionExpression b)
         {
-            return Compare(a.Projection, b.Projection) 
-                && Compare(a.OuterKey, b.OuterKey) 
+            return Compare(a.Projection, b.Projection)
+                && Compare(a.OuterKey, b.OuterKey)
                 && a.IsLazyMList == b.IsLazyMList;
         }
 
@@ -339,7 +338,7 @@ namespace Signum.Engine.Linq
         protected virtual bool CompareWhen(When a, When b)
         {
             return Compare(a.Condition, b.Condition)
-                && Compare(a.Value, b.Value); 
+                && Compare(a.Value, b.Value);
         }
 
         protected virtual bool CompareRowNumber(RowNumberExpression a, RowNumberExpression b)
@@ -350,7 +349,7 @@ namespace Signum.Engine.Linq
         protected virtual bool CompareLike(LikeExpression a, LikeExpression b)
         {
             return Compare(a.Expression, b.Expression)
-                && Compare(a.Pattern, b.Pattern); 
+                && Compare(a.Pattern, b.Pattern);
         }
 
         protected virtual bool CompareSubquery(SubqueryExpression a, SubqueryExpression b)
@@ -383,7 +382,7 @@ namespace Signum.Engine.Linq
         {
             return Compare(a.Expression, b.Expression)
                 && Compare(a.Select, b.Select)
-                && CompareValues(a.Values , b.Values); 
+                && CompareValues(a.Values , b.Values);
         }
 
         protected virtual bool CompareValues(object[] a, object[] b)
@@ -394,7 +393,7 @@ namespace Signum.Engine.Linq
             if (a == null || b == null)
                 return false;
 
-            return a.SequenceEqual(b); 
+            return a.SequenceEqual(b);
         }
 
         protected virtual bool CompareIsNull(IsNullExpression a, IsNullExpression b)
@@ -409,7 +408,7 @@ namespace Signum.Engine.Linq
 
         protected virtual bool CompareDelete(DeleteExpression a, DeleteExpression b)
         {
-            return a.Table == b.Table 
+            return a.Table == b.Table
                 && a.UseHistoryTable == b.UseHistoryTable
                 && Compare(a.Source, b.Source)
                 && Compare(a.Where, b.Where);
@@ -460,7 +459,7 @@ namespace Signum.Engine.Linq
         {
             return Compare(a.HasValue, b.HasValue)
                 && a.FieldEmbedded == b.FieldEmbedded
-                && CompareList(a.Bindings, b.Bindings, CompareFieldBinding); 
+                && CompareList(a.Bindings, b.Bindings, CompareFieldBinding);
         }
 
         protected virtual bool CompareMixinFieldInit(MixinEntityExpression a, MixinEntityExpression b)

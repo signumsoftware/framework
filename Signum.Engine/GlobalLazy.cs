@@ -1,18 +1,9 @@
-﻿
-using Signum.Engine.Maps;
-using Signum.Entities;
-using Signum.Utilities;
-using Signum.Utilities.DataStructures;
+﻿using Signum.Utilities;
 using Signum.Utilities.ExpressionTrees;
-using Signum.Utilities.Reflection;
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Data.SqlClient;
 using System.Linq;
-using System.Text;
 using System.Threading;
-using Signum.Engine;
 using Signum.Entities.Reflection;
 
 namespace Signum.Engine
@@ -22,9 +13,9 @@ namespace Signum.Engine
         static readonly Type[] Empty = new Type[0];
 
         readonly Type[] types;
-        public Type[] Types 
+        public Type[] Types
         {
-            get { return types ?? Empty; } 
+            get { return types ?? Empty; }
         }
 
         public InvalidateWith(params Type[] types)
@@ -70,7 +61,7 @@ namespace Signum.Engine
 
                     return value;
                 }
-            }, mode, 
+            }, mode,
             declaringType: func.Method.DeclaringType);
 
             registeredLazyList.Add(result);
@@ -91,5 +82,5 @@ namespace Signum.Engine
         }
     }
 
-  
+
 }

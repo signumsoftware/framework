@@ -3,13 +3,11 @@ using Microsoft.AspNetCore.Mvc.Internal;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
 using Signum.Entities;
-using Signum.React.Json;
 using Signum.Utilities;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Web;
 
 namespace Signum.React.Json
 {
@@ -115,20 +113,20 @@ namespace Signum.React.Json
                 validationState);
         }
     }
-    
+
     public class SignumValidationVisitor : Signum.React.ValidationVisitor
     {
         public SignumValidationVisitor(
-            ActionContext actionContext, 
-            IModelValidatorProvider validatorProvider, 
-            ValidatorCache validatorCache, 
-            IModelMetadataProvider metadataProvider, 
-            ValidationStateDictionary validationState) : 
+            ActionContext actionContext,
+            IModelValidatorProvider validatorProvider,
+            ValidatorCache validatorCache,
+            IModelMetadataProvider metadataProvider,
+            ValidationStateDictionary validationState) :
             base(
-                actionContext, 
-                validatorProvider, 
-                validatorCache, 
-                metadataProvider, 
+                actionContext,
+                validatorProvider,
+                validatorCache,
+                metadataProvider,
                 validationState)
         {
         }
@@ -142,7 +140,7 @@ namespace Signum.React.Json
 
             return base.VisitComplexType(defaultStrategy);
         }
-        
+
         private bool? SignumValidate()
         {
             if (this.Model is Lite<Entity> lite)
@@ -175,7 +173,7 @@ namespace Signum.React.Json
         {
             bool isValid = true;
             Type elementType = mlist.GetType().ElementType();
-            
+
             int i = 0;
             foreach (object element in (IEnumerable)mlist)
             {

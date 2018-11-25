@@ -1,14 +1,9 @@
 ﻿using System;
-using System.Collections;
-using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using Signum.Entities;
 using Signum.Utilities;
-using System.Diagnostics;
-using Signum.Entities.Reflection;
 using Signum.Engine.Maps;
-using Signum.Utilities.ExpressionTrees;
 using Signum.Utilities.DataStructures;
 using System.Collections.ObjectModel;
 
@@ -17,12 +12,12 @@ namespace Signum.Engine.Linq
     internal class EntityCompleter : DbExpressionVisitor
     {
         QueryBinder binder;
-        ImmutableStack<Type> previousTypes = ImmutableStack<Type>.Empty; 
+        ImmutableStack<Type> previousTypes = ImmutableStack<Type>.Empty;
 
         public static Expression Complete(Expression source, QueryBinder binder)
         {
             EntityCompleter pc = new EntityCompleter() { binder = binder };
-            
+
             var result = pc.Visit(source);
 
             var expandedResul = QueryJoinExpander.ExpandJoins(result, binder, cleanRequests: true);
@@ -35,7 +30,7 @@ namespace Signum.Engine.Linq
             if (lite.EagerEntity)
                 return base.VisitLiteReference(lite);
 
-            var id = lite.Reference is ImplementedByAllExpression || 
+            var id = lite.Reference is ImplementedByAllExpression ||
                 lite.Reference is ImplementedByExpression && ((ImplementedByExpression)lite.Reference).Implementations.Select(imp=>imp.Value.ExternalId.ValueType.Nullify()).Distinct().Count() > 1 ?
                 (Expression)binder.GetIdString(lite.Reference) :
                 (Expression)binder.GetId(lite.Reference);
@@ -156,7 +151,7 @@ namespace Signum.Engine.Linq
         }
 
         private bool IsCached(Type type)
-        { 
+        {
             var cc = Schema.Current.CacheController(type);
             if (cc != null && cc.Enabled)
             {

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Signum.Entities.Basics;
@@ -15,7 +15,7 @@ namespace Signum.Engine.Basics
     public static class QueryLogic
     {
         static ResetLazy<Dictionary<string, object>> queryNamesLazy;
-        public static Dictionary<string, object> QueryNames => queryNamesLazy.Value; 
+        public static Dictionary<string, object> QueryNames => queryNamesLazy.Value;
 
         static ResetLazy<Dictionary<object, QueryEntity>> queryNameToEntityLazy;
         public static Dictionary<object, QueryEntity> QueryNameToEntity => queryNameToEntityLazy.Value;
@@ -57,7 +57,7 @@ namespace Signum.Engine.Basics
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
                 QueryEntity.GetEntityImplementations = query => Queries.GetEntityImplementations(query.ToQueryName());
-                
+
                 // QueryManagers = queryManagers;
                 sb.Schema.Initializing += () =>
                 {
@@ -87,7 +87,7 @@ namespace Signum.Engine.Basics
                         q => q.Key,
                         kvp => kvp.Key,
                         (q, kvp) => KVP.Create(kvp.Value, q),
-                        "caching QueryEntity").ToDictionary(),
+                        "caching " + nameof(QueryEntity)).ToDictionary(),
                     new InvalidateWith(typeof(QueryEntity)),
                     Schema.Current.InvalidateMetadata);
             }
@@ -167,7 +167,7 @@ namespace Signum.Engine.Basics
 
         public static QueryEntity GetQueryEntity(object queryName)
         {
-            return QueryNameToEntity.GetOrThrow(queryName, "QueryName {0} not found on the database"); 
+            return QueryNameToEntity.GetOrThrow(queryName, "QueryName {0} not found on the database");
         }
     }
 }

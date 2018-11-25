@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Signum.Utilities.DataStructures
 {
@@ -24,7 +22,7 @@ namespace Signum.Utilities.DataStructures
 
         public override string ToString()
         {
-            return XInterval + " x " + YInterval; 
+            return XInterval + " x " + YInterval;
         }
     }
 }

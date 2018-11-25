@@ -1,17 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using System;
 using Signum.Entities;
 using Signum.Engine.Maps;
 using Signum.Engine;
 using System.IO;
-using System.Diagnostics;
-using Xunit;
 using Signum.Entities.Basics;
-using Signum.Engine.DynamicQuery;
-using Signum.Utilities.ExpressionTrees;
-using Signum.Utilities;
 using Signum.Engine.Operations;
 using Signum.Engine.Basics;
 using Microsoft.Extensions.Configuration;
@@ -33,7 +25,7 @@ namespace Signum.Test.Environment
                     return;
 
                 var conf = new ConfigurationBuilder().SetBasePath(Directory.GetCurrentDirectory())
-                    .AddJsonFile("appsettings.json")
+                    //.AddJsonFile("appsettings.json")
                     .AddUserSecrets(typeof(MusicStarter).Assembly)
                     .Build();
 
@@ -60,7 +52,7 @@ namespace Signum.Test.Environment
             var sqlVersion = SqlServerVersionDetector.Detect(connectionString);
 
             Connector.Default = new SqlConnector(connectionString, sb.Schema, sqlVersion ?? SqlServerVersion.SqlServer2017);
-            
+
             sb.Schema.Version = typeof(MusicStarter).Assembly.GetName().Version;
 
             sb.Schema.Settings.FieldAttributes((OperationLogEntity ol) => ol.User).Add(new ImplementedByAttribute());
@@ -87,7 +79,7 @@ namespace Signum.Test.Environment
             }
 
             Validator.PropertyValidator((OperationLogEntity e) => e.User).Validators.Clear();
-            
+
             TypeLogic.Start(sb);
 
             OperationLogic.Start(sb);

@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Linq.Expressions;
+﻿using System.Linq.Expressions;
 
 namespace Signum.Engine.Linq
 {
@@ -19,7 +15,7 @@ namespace Signum.Engine.Linq
                 root = proj as ProjectionExpression,
             };
             return apr.Visit(proj);
-        }       
+        }
 
         protected internal override Expression VisitProjection(ProjectionExpression proj)
         {

@@ -1,11 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Linq.Expressions;
 using System.Reflection;
-using Signum.Utilities.Reflection;
-using Signum.Utilities.ExpressionTrees;
 
 namespace Signum.Utilities.ExpressionTrees
 {
@@ -38,11 +35,11 @@ namespace Signum.Utilities.ExpressionTrees
 
             //Query<UserEntity>().Select(u => new ComboBox()) expects N different ComboBoxes
             //also solves problems with MemberInitExpression and CollectionInitExpressions
-            if (expression.NodeType == ExpressionType.New) 
+            if (expression.NodeType == ExpressionType.New)
                 return true;
 
             return expression.NodeType == ExpressionType.Parameter ||
-                expression.NodeType == ExpressionType.Lambda || // why? 
+                expression.NodeType == ExpressionType.Lambda || // why?
                 !EnumExtensions.IsDefined(expression.NodeType);
         }
 

@@ -1,4 +1,4 @@
-﻿import * as React from 'react'
+import * as React from 'react'
 import { classes } from '../Globals'
 import * as Finder from '../Finder'
 import { FindOptions } from '../FindOptions'

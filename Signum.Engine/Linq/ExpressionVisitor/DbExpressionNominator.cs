@@ -1,4 +1,4 @@
-﻿using Microsoft.SqlServer.Server;
+using Microsoft.SqlServer.Server;
 using Signum.Engine.Maps;
 using Signum.Entities;
 using Signum.Utilities;
@@ -17,7 +17,7 @@ using System.Text.RegularExpressions;
 namespace Signum.Engine.Linq
 {
     /// <summary>
-    /// Nominator is a class that walks an expression tree bottom up, determining the set of 
+    /// Nominator is a class that walks an expression tree bottom up, determining the set of
     /// candidate expressions that are possible columns of a select expression
     /// </summary>
     internal class DbExpressionNominator : DbExpressionVisitor
@@ -96,7 +96,7 @@ namespace Signum.Engine.Linq
                 case DbExpressionType.Select:
                 case DbExpressionType.Projection:
                 case DbExpressionType.Join:
-                case DbExpressionType.AggregateRequest: //Not sure :S 
+                case DbExpressionType.AggregateRequest: //Not sure :S
                 case DbExpressionType.Update:
                 case DbExpressionType.Delete:
                 case DbExpressionType.CommandAggregate:
@@ -235,7 +235,8 @@ namespace Signum.Engine.Linq
 
         protected override Expression VisitConstant(ConstantExpression c)
         {
-            if (c.Type.UnNullify() == typeof(PrimaryKey) && isFullNominate)
+            Type ut = c.Type.UnNullify();
+            if (ut == typeof(PrimaryKey) && isFullNominate)
             {
                 if (c.Value == null)
                     return Add(Expression.Constant(null, typeof(object)));
@@ -245,12 +246,20 @@ namespace Signum.Engine.Linq
 
             if (!innerProjection && IsFullNominateOrAggresive)
             {
-                if (Schema.Current.Settings.IsDbType(c.Type.UnNullify()))
+                if (ut == typeof(DayOfWeek))
+                {
+                    var dayNumber = c.Value == null ? (int?)null : ToSqlWeekDay((DayOfWeek)c.Value, DateFirst.Value.Item1);
+
+                    return Add(Expression.Constant(dayNumber, c.Type.IsNullable() ? typeof(int?) : typeof(int)));
+                }
+
+                if (Schema.Current.Settings.IsDbType(ut))
                     return Add(c);
 
                 if (c.Type == typeof(object) && (c.IsNull() || (Schema.Current.Settings.IsDbType(c.Value.GetType()))))
                     return Add(c);
             }
+
             return c;
         }
 
@@ -477,17 +486,29 @@ namespace Signum.Engine.Linq
             if (innerProjection || !Has(expr))
                 return null;
 
-            var number = Expression.Subtract(
-                    TrySqlFunction(null, SqlFunction.DATEPART, typeof(int), new SqlEnumExpression(SqlEnums.weekday), expr),
-                    new SqlConstantExpression(1));
+            var number = TrySqlFunction(null, SqlFunction.DATEPART, typeof(int), new SqlEnumExpression(SqlEnums.weekday), expr);
 
             Add(number);
 
-            Expression result = Expression.Convert(number, typeof(DayOfWeek));
             if (isFullNominate)
-                Add(result);
+                return number; //Risky, type changes
+
+            Expression result = Expression.Call(miToDayOfWeek, number, Expression.Constant(DateFirst.Value.Item1, typeof(byte)));
 
             return result;
+        }
+
+        public static ResetLazy<Tuple<byte>> DateFirst = new ResetLazy<Tuple<byte>>(() => Tuple.Create((byte)Executor.ExecuteScalar("SELECT @@DATEFIRST")));
+
+        static MethodInfo miToDayOfWeek = ReflectionTools.GetMethodInfo(() => ToDayOfWeek(1, 1));
+        public static DayOfWeek ToDayOfWeek(int sqlServerWeekDay, byte dateFirst)
+        {
+            return (DayOfWeek)((dateFirst + sqlServerWeekDay - 1) % 7);
+        }
+        
+        public static int ToSqlWeekDay(DayOfWeek dayOfWeek, byte dateFirst)
+        {
+            return (((int)dayOfWeek - dateFirst + 7) % 7) + 1;
         }
 
         private Expression TrySqlStartOf(Expression expression, SqlEnums part)
@@ -1361,9 +1382,9 @@ namespace Signum.Engine.Linq
      m.TryGetArgument("decimals") ?? m.TryGetArgument("digits") ?? new SqlConstantExpression(0));
                 case "Math.Truncate": return TrySqlFunction(null, SqlFunction.ROUND, m.Type, m.GetArgument("d"), new SqlConstantExpression(0), new SqlConstantExpression(1));
                 case "Math.Max":
-                case "Math.Min": return null; /* could be translates to something like 'case when a > b then a 
-                                               *                                             when a < b then b 
-                                               *                                             else null end 
+                case "Math.Min": return null; /* could be translates to something like 'case when a > b then a
+                                               *                                             when a < b then b
+                                               *                                             else null end
                                                * but looks too horrible */
                 case "LinqHints.InSql":
                     using (ForceFullNominate())

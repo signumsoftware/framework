@@ -46,9 +46,13 @@ export default class FramePage extends React.Component<FramePageProps, FramePage
   }
 
   componentWillReceiveProps(newProps: FramePageProps) {
-    this.setState(this.calculateState(newProps), () => {
-      this.load(newProps);
-    });
+    const newParams = newProps.match.params;
+    const oldParams = this.props.match.params;
+    if(newParams.type != oldParams.type || newParams.id != oldParams.id) {
+      this.setState(this.calculateState(newProps), () => {
+        this.load(newProps);
+      }); 
+    }
   }
 
   componentWillUnmount() {

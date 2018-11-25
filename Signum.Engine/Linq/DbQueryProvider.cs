@@ -1,22 +1,8 @@
 ﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Data.Common;
-using System.IO;
 using System.Linq;
 using System.Linq.Expressions;
-using System.Reflection;
-using System.Text;
-using System.Data.SqlClient;
-using System.Diagnostics;
-using Signum.Utilities.Reflection;
-using Signum.Utilities.DataStructures;
 using Signum.Utilities;
 using Signum.Utilities.ExpressionTrees;
-using Signum.Engine;
-using System.Data;
-using Signum.Entities;
 using Signum.Engine.Maps;
 using System.Threading.Tasks;
 using System.Threading;
@@ -25,7 +11,7 @@ namespace Signum.Engine.Linq
 {
 
     /// <summary>
-    /// Stateless query provider 
+    /// Stateless query provider
     /// </summary>
     public class DbQueryProvider : QueryProvider, IQueryProviderAsync
     {
@@ -34,7 +20,7 @@ namespace Signum.Engine.Linq
         private DbQueryProvider()
         {
         }
-    
+
         public override string GetQueryText(Expression expression)
         {
             return this.Translate(expression, tr => tr.CleanCommandText());
@@ -181,5 +167,5 @@ namespace Signum.Engine.Linq
         }
     }
 
-    
+
 }

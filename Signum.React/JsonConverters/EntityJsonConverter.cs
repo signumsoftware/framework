@@ -9,10 +9,8 @@ using Signum.Utilities;
 using Signum.Utilities.ExpressionTrees;
 using Signum.Utilities.Reflection;
 using System;
-using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
@@ -196,7 +194,7 @@ namespace Signum.React.Json
             if (pr == null)
             {
                 var embedded = (EmbeddedEntity)value;
-                pr = DefaultPropertyRoutes.TryGetC(embedded.GetType()) ?? 
+                pr = DefaultPropertyRoutes.TryGetC(embedded.GetType()) ??
                     throw new InvalidOperationException($"Impossible to determine PropertyRoute for {value.GetType().Name}. Consider adding a new value to {nameof(EntityJsonConverter)}.{nameof(EntityJsonConverter.DefaultPropertyRoutes)}.");
             }
             else if (pr.Type.ElementType() == value.GetType())
@@ -440,7 +438,7 @@ namespace Signum.React.Json
             }
         }
 
- 
+
         public IdentityInfo ReadIdentityInfo(JsonReader reader)
         {
             IdentityInfo info = new IdentityInfo();
@@ -471,7 +469,7 @@ namespace Signum.React.Json
         {
             public string Id;
             public bool? IsNew;
-            public bool? Modified; 
+            public bool? Modified;
             public string Type;
             public string ToStr;
             public long? Ticks;
@@ -513,7 +511,7 @@ namespace Signum.React.Json
         public static bool Compare(byte[] b1, byte[] b2)
         {
             // Validate buffers are the same length.
-            // This also ensures that the count does not exceed the length of either buffer.  
+            // This also ensures that the count does not exceed the length of either buffer.
             return b1.Length == b2.Length && memcmp(b1, b2, b1.Length) == 0;
         }
     }

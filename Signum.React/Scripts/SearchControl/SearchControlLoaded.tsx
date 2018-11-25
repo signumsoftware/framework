@@ -1,4 +1,4 @@
-﻿import * as React from 'react'
+import * as React from 'react'
 import * as moment from 'moment'
 import { Dropdown, DropdownItem, UncontrolledTooltip, DropdownMenu, DropdownToggle } from '../Components'
 import { DomUtils, classes } from '../Globals'
@@ -1178,7 +1178,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
       if (m == "")
         return { className: "sf-entity-ctxmenu-success", message: undefined };
       else
-        return { className: "danger", message: m };
+        return { className: "table-danger", message: m };
     }
     else {
       return m;

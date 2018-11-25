@@ -1,11 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using Signum.Entities.Basics;
 using Signum.Engine.Maps;
 using Signum.Utilities;
-using System.Reflection;
 using Signum.Utilities.ExpressionTrees;
 using Signum.Entities;
 using Signum.Engine.DynamicQuery;
@@ -74,7 +71,7 @@ namespace Signum.Engine
                         Symbol.SetSymbolIds<T>(current.ToDictionary(a => a.Key, a => a.Id));
                         return result.ToDictionary(a => a.Key);
                     }
-                }, 
+                },
                 new InvalidateWith(typeof(T)),
                 Schema.Current.InvalidateMetadata);
 
@@ -95,7 +92,7 @@ namespace Signum.Engine
                     StartParameters.IgnoredDatabaseMismatches.Add(e);
                 }
         }
-      
+
         static SqlPreCommand Schema_Generating()
         {
             Table table = Schema.Current.Table<T>();

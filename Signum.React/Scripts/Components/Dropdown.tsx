@@ -1,4 +1,4 @@
-﻿/* eslint react/no-find-dom-node: 0 */
+/* eslint react/no-find-dom-node: 0 */
 // https://github.com/yannickcr/eslint-plugin-react/blob/master/docs/rules/no-find-dom-node.md
 
 import * as React from 'react';

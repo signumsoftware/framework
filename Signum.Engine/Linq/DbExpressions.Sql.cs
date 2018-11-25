@@ -1,4 +1,4 @@
-﻿using Signum.Engine.Maps;
+using Signum.Engine.Maps;
 using Signum.Entities;
 using Signum.Entities.DynamicQuery;
 using Signum.Utilities;
@@ -294,7 +294,7 @@ namespace Signum.Engine.Linq
     internal class AggregateExpression : DbExpression
     {
         public readonly Expression Expression;
-        public readonly bool Distinct; 
+        public readonly bool Distinct;
         public readonly AggregateSqlFunction AggregateFunction;
         public AggregateExpression(Type type, Expression expression, AggregateSqlFunction aggregateFunction, bool distinct)
             : base(DbExpressionType.Aggregate, type)
@@ -729,7 +729,7 @@ namespace Signum.Engine.Linq
     internal class SqlVariableExpression : DbExpression
     {
         public readonly string VariableName;
-        
+
         public SqlVariableExpression(string variableName, Type type)
             : base(DbExpressionType.SqlConstant, type)
         {
@@ -1075,9 +1075,9 @@ namespace Signum.Engine.Linq
     }
 
     /// <summary>
-    /// A custom expression representing the construction of one or more result objects from a 
+    /// A custom expression representing the construction of one or more result objects from a
     /// SQL select expression
-    /// </summary> 
+    /// </summary>
     internal class ProjectionExpression : DbExpression
     {
         public readonly SelectExpression Select;

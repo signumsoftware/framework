@@ -1,19 +1,4 @@
-﻿using System;
-using System.Text;
-using System.Collections.Generic;
-using System.Linq;
-using Signum.Utilities.Reflection;
-using Signum.Utilities;
-using System.ComponentModel;
-using Xunit;
-
-using System.Reflection;
-using Signum.Entities;
-using Signum.Entities.DynamicQuery;
-using System.Globalization;
-using System.Threading;
-using System.Linq.Expressions;
-using Signum.Utilities.ExpressionTrees;
+﻿using Xunit;
 using Signum.Engine.Maps;
 
 namespace Signum.Test

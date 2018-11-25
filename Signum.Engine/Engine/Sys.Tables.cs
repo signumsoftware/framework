@@ -1,11 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Linq.Expressions;
 using Signum.Utilities;
 using Signum.Entities;
-using Signum.Utilities.ExpressionTrees;
 
 namespace Signum.Engine.SchemaInfoTables
 {
@@ -84,7 +81,7 @@ namespace Signum.Engine.SchemaInfoTables
     public enum SysTableTemporalType
     {
         None = 0,
-        HistoryTable = 1, 
+        HistoryTable = 1,
         SystemVersionTemporalTable = 2
     }
 
@@ -299,7 +296,7 @@ namespace Signum.Engine.SchemaInfoTables
         public int parent_object_id;
         public int referenced_object_id;
         public bool is_disabled;
-        public bool is_not_trusted; 
+        public bool is_not_trusted;
 
         static Expression<Func<SysForeignKeys, IQueryable<SysForeignKeyColumns>>> ForeignKeyColumnsExpression =
             fk => Database.View<SysForeignKeyColumns>().Where(fkc => fkc.constraint_object_id == fk.object_id);
@@ -366,8 +363,8 @@ namespace Signum.Engine.SchemaInfoTables
         }
 
         static Expression<Func<SysIndexes, SysTables>> TableExpression =
-            i => Database.View<SysTables>().Single(a => a.object_id == i.object_id); 
-        [ExpressionField] 
+            i => Database.View<SysTables>().Single(a => a.object_id == i.object_id);
+        [ExpressionField]
         public SysTables Table()
         {
             return TableExpression.Evaluate(this);
@@ -389,7 +386,7 @@ namespace Signum.Engine.SchemaInfoTables
         public int index_id;
         public int column_id;
         public int index_column_id;
-        public int key_ordinal; 
+        public int key_ordinal;
         public bool is_included_column;
         public bool is_descending_key;
     }
@@ -435,7 +432,7 @@ namespace Signum.Engine.SchemaInfoTables
     {
         [ViewPrimaryKey]
         public int object_id;
-        public string definition; 
+        public string definition;
     }
 
     [TableName("sys.procedures")]

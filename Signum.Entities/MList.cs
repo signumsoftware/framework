@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using Signum.Entities;
 using System.Collections.ObjectModel;
 using Signum.Utilities;
 using Signum.Utilities.ExpressionTrees;
@@ -10,7 +8,7 @@ using System.Collections;
 using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Diagnostics;
-using System.Runtime.Serialization; 
+using System.Runtime.Serialization;
 
 namespace Signum.Entities
 {
@@ -27,7 +25,7 @@ namespace Signum.Entities
         {
             public readonly PrimaryKey? RowId;
             public readonly T Element;
-            public readonly int? OldIndex; 
+            public readonly int? OldIndex;
 
             public RowIdElement(T value)
             {
@@ -49,7 +47,7 @@ namespace Signum.Entities
                     return true;
 
                 if (other.Element == null || this.Element == null)
-                    return false; 
+                    return false;
 
                 return other.Element.Equals(this.Element);
             }
@@ -80,7 +78,7 @@ namespace Signum.Entities
 
             public override string ToString()
             {
-                var pre = RowId == null ? "New" : RowId.Value.ToString(); 
+                var pre = RowId == null ? "New" : RowId.Value.ToString();
 
                 if(this.OldIndex != null)
                     pre += " Ix: " + this.OldIndex;
@@ -205,7 +203,7 @@ namespace Signum.Entities
         public void Add(T item)
         {
             AssertNotSealed();
-            innerList.Add(new RowIdElement(item)); 
+            innerList.Add(new RowIdElement(item));
             SetSelfModified();
             OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, item));
         }
@@ -261,9 +259,9 @@ namespace Signum.Entities
             if (orderMatters)
                 AssertNotSealed();
             innerList.Sort((a, b) => element(b.Element).CompareTo(element(a.Element)));
-            if (orderMatters) 
+            if (orderMatters)
                 this.SetSelfModified();
-            OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset)); 
+            OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
         }
 
         public void Sort(Comparison<T> comparison)
@@ -272,9 +270,9 @@ namespace Signum.Entities
             if (orderMatters)
                 AssertNotSealed();
             innerList.Sort((a, b) => comparison(a.Element, b.Element));
-            if (orderMatters) 
+            if (orderMatters)
                 this.SetSelfModified();
-            OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset)); 
+            OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
         }
 
         public void Sort(IComparer<T> comparer)
@@ -283,9 +281,9 @@ namespace Signum.Entities
             if (orderMatters)
                 AssertNotSealed();
             innerList.Sort((a, b) => comparer.Compare(a.Element, b.Element));
-            if (orderMatters) 
-                this.SetSelfModified(); 
-            OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset)); 
+            if (orderMatters)
+                this.SetSelfModified();
+            OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
         }
 
         private bool OrderMatters()
@@ -358,11 +356,11 @@ namespace Signum.Entities
             innerList.Clear();
 
             foreach (var item in oldItems)
-                OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, item.Element)); 
+                OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, item.Element));
         }
 
         public void CopyTo(T[] array)
-        {   
+        {
             for (int i = 0; i < this.Count; i++)
             {
                 array[i] = this.innerList[i].Element;
@@ -391,7 +389,7 @@ namespace Signum.Entities
             int index = innerList.IndexOf(new RowIdElement(item));
             if (index == -1)
                 return false;
-         
+
             innerList.RemoveAt(index);
             SetSelfModified();
             OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, item, index));
@@ -400,7 +398,7 @@ namespace Signum.Entities
 
         public int RemoveAll(Predicate<T> predicate)
         {
-            List<T> removed = new List<T>(); 
+            List<T> removed = new List<T>();
             for (int i = 0; i < this.innerList.Count; )
             {
                 var val = innerList[i].Element;
@@ -419,10 +417,10 @@ namespace Signum.Entities
             {
                 SetSelfModified();
                 foreach (var item in removed)
-                    OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, item));             
+                    OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, item));
             }
 
-            return removed.Count; 
+            return removed.Count;
         }
 
 
@@ -465,7 +463,7 @@ namespace Signum.Entities
         public void RemoveRange(int index, int count)
         {
             for (int i = 0; i < count; i++)
-                RemoveAt(index); 
+                RemoveAt(index);
         }
 
         public int IndexOf(T item)
@@ -490,7 +488,7 @@ namespace Signum.Entities
 
         public int LastIndexOf(T item, int index)
         {
-            return innerList.LastIndexOf(new RowIdElement(item), index); 
+            return innerList.LastIndexOf(new RowIdElement(item), index);
         }
 
         public int LastIndexOf(T item, int index, int count)
@@ -585,22 +583,22 @@ namespace Signum.Entities
         int IList.Add(object value)
         {
             this.Add((T)value);
-            return this.Count; 
-        } 
+            return this.Count;
+        }
 
         bool IList.Contains(object value)
         {
-            return this.Contains((T)value); 
+            return this.Contains((T)value);
         }
 
         int IList.IndexOf(object value)
         {
-            return this.IndexOf((T)value); 
+            return this.IndexOf((T)value);
         }
 
         void IList.Insert(int index, object value)
         {
-            this.Insert(index, (T)value); 
+            this.Insert(index, (T)value);
         }
 
         bool IList.IsFixedSize
@@ -610,7 +608,7 @@ namespace Signum.Entities
 
         void IList.Remove(object value)
         {
-            this.Remove((T)value); 
+            this.Remove((T)value);
         }
 
         object IList.this[int index]
@@ -621,7 +619,7 @@ namespace Signum.Entities
 
         void ICollection.CopyTo(Array array, int index)
         {
-            ((ICollection)innerList).CopyTo(array, index); 
+            ((ICollection)innerList).CopyTo(array, index);
         }
 
         bool ICollection.IsSynchronized
@@ -634,7 +632,7 @@ namespace Signum.Entities
             get { return ((ICollection)innerList).SyncRoot; }
         }
 
-        #endregion 
+        #endregion
 
         List<RowIdElement> IMListPrivate<T>.InnerList
         {
@@ -656,7 +654,7 @@ namespace Signum.Entities
 
         void IMListPrivate.SetRowId(int index, PrimaryKey rowId)
         {
-            var prev = this.innerList[index]; 
+            var prev = this.innerList[index];
 
             if(prev.RowId.HasValue)
                 throw new InvalidOperationException("Index {0} already as RowId".FormatWith(index));
@@ -687,7 +685,7 @@ namespace Signum.Entities
 
         void IMListPrivate.ExecutePostRetrieving()
         {
-            this.PostRetrieving(); 
+            this.PostRetrieving();
         }
 
         protected internal override void PostRetrieving()
@@ -696,7 +694,7 @@ namespace Signum.Entities
                 return; //The MList was changed in the entity PostRetriever, like UserChart Columns
 
             if (this.innerList.Select(a => a.RowId.Value).Duplicates().Any())
-                throw new InvalidOperationException("Duplicated RowId found, possible problem in LINQ provider"); 
+                throw new InvalidOperationException("Duplicated RowId found, possible problem in LINQ provider");
 
             if (this.innerList.Any(a => a.OldIndex.HasValue))
                 this.innerList.Sort(a => a.OldIndex.Value);
@@ -711,10 +709,10 @@ namespace Signum.Entities
         {
             if (((IMListPrivate<T>)this).IsEqualTo(newList, orderMatters: true))
                 return false;
-            
+
             //Even if the entities are Equals, we need to call SetParentEntity
             var added = newList.Select(a => a.Element).ToList();
-            var removed = innerList.Select(a => a.Element).ToList(); 
+            var removed = innerList.Select(a => a.Element).ToList();
 
             innerList.Clear();
             innerList.AddRange(newList);
@@ -798,7 +796,7 @@ namespace Signum.Entities
     public interface IMListPrivate
     {
         bool IsNew { get; }
-        
+
         int Count { get; }
 
         void ExecutePostRetrieving();
@@ -845,7 +843,7 @@ namespace Signum.Entities
     {
         public static MList<T> ToMList<T>(this IEnumerable<T> collection)
         {
-            return new MList<T>(collection); 
+            return new MList<T>(collection);
         }
     }
 

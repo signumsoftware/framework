@@ -4,7 +4,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Runtime.Loader;
 using System.Text;
 
 namespace Signum.TSGenerator
@@ -456,7 +455,7 @@ namespace Signum.TSGenerator
 
             if (b != null)
                 return b.Value;
-            
+
             if (IsCollection(p.PropertyType))
                 return false;
 
@@ -477,7 +476,7 @@ namespace Signum.TSGenerator
             var b = attr == null ? null : (bool?)attr.Properties.SingleOrDefault(a => a.Name == "Null").Argument.Value;
             if (b != null)
                 return b.Value;
-            
+
             if (IsCollection(p.PropertyType))
                 return false;
 
@@ -508,7 +507,7 @@ namespace Signum.TSGenerator
 
             if (type.FullName == typeof(string).FullName || type.FullName == typeof(byte[]).FullName)
                 return null;
-            
+
             var def = type.Resolve();
             if (def == null)
                 return null;
@@ -518,7 +517,7 @@ namespace Signum.TSGenerator
             if (ienum == null)
                 return null;
 
-            return gen.GenericArguments.Single(); 
+            return gen.GenericArguments.Single();
         }
 
         static string TypeScriptName(TypeReference type, TypeDefinition current, Options options, string errorContext)
@@ -527,7 +526,7 @@ namespace Signum.TSGenerator
             if (ut != type)
                 return TypeScriptNameInternal(ut, current, options, errorContext) + " | null";
 
-            return TypeScriptNameInternal(type, current, options, errorContext);            
+            return TypeScriptNameInternal(type, current, options, errorContext);
         }
 
         private static string TypeScriptNameInternal(TypeReference type, TypeDefinition current, Options options, string errorContext)

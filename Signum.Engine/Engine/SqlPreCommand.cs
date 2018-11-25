@@ -4,8 +4,6 @@ using System.Linq;
 using System.Text;
 using System.Data.SqlClient;
 using Signum.Utilities;
-using Signum.Utilities.DataStructures;
-using Signum.Entities;
 using System.Text.RegularExpressions;
 using System.IO;
 using System.Threading;
@@ -41,10 +39,10 @@ namespace Signum.Engine
         {
             StringBuilder sb = new StringBuilder();
             this.PlainSql(sb);
-            return sb.ToString(); 
+            return sb.ToString();
         }
 
-        
+
 
 
         protected internal abstract void PlainSql(StringBuilder sb);
@@ -89,7 +87,7 @@ namespace Signum.Engine
         }
 
         public static bool AvoidOpenOpenSqlFileRetry = true;
-     
+
         public static void OpenSqlFileRetry(this SqlPreCommand command)
         {
             SafeConsole.WriteLineColor(ConsoleColor.Yellow, "There are changes!");
@@ -163,7 +161,7 @@ namespace Signum.Engine
         }
 
         static readonly Regex regex = new Regex(@"@[_\p{Ll}\p{Lu}\p{Lt}\p{Lo}\p{Nl}][_\p{Ll}\p{Lu}\p{Lt}\p{Lo}\p{Nl}\p{Nd}]*");
-      
+
         internal static string Encode(object value)
         {
             if (value == null || value == DBNull.Value)
@@ -307,7 +305,7 @@ namespace Signum.Engine
 
         public override SqlPreCommand Clone()
         {
-            return new SqlPreCommandConcat(Spacing, Commands.Select(c => c.Clone()).ToArray());  
+            return new SqlPreCommandConcat(Spacing, Commands.Select(c => c.Clone()).ToArray());
         }
     }
 

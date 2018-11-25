@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Mvc;
@@ -16,11 +16,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
-using System.Net.Http;
 using System.Security.Authentication;
 using System.Text;
 using System.Threading.Tasks;
-using System.Web;
 
 namespace Signum.React.Filters
 {
@@ -41,26 +39,25 @@ namespace Signum.React.Filters
                 {
                     var statusCode = GetStatus(context.Exception.GetType());
 
-
                     var req = context.HttpContext.Request;
 
                     var connFeature = context.HttpContext.Features.Get<IHttpConnectionFeature>();
 
                     var exLog = context.Exception.LogException(e =>
                     {
-                        e.ActionName = (context.ActionDescriptor as ControllerActionDescriptor)?.ActionName;
-                        e.ControllerName = (context.ActionDescriptor as ControllerActionDescriptor)?.ControllerName;
-                        e.UserAgent = req.Headers["User-Agent"].FirstOrDefault();
-                        e.RequestUrl = req.GetDisplayUrl();
-                        e.UrlReferer = req.Headers["Referer"].ToString();
-                        e.UserHostAddress = connFeature.RemoteIpAddress.ToString();
-                        e.UserHostName = Dns.GetHostEntry(connFeature.RemoteIpAddress).HostName;
+                        e.ActionName = Try(100, ()=>(context.ActionDescriptor as ControllerActionDescriptor)?.ActionName);
+                        e.ControllerName = Try(100, () => (context.ActionDescriptor as ControllerActionDescriptor)?.ControllerName);
+                        e.UserAgent = Try(300, () => req.Headers["User-Agent"].FirstOrDefault());
+                        e.RequestUrl = Try(int.MaxValue, () => req.GetDisplayUrl());
+                        e.UrlReferer = Try(int.MaxValue, () => req.Headers["Referer"].ToString());
+                        e.UserHostAddress = Try(100, () => connFeature.RemoteIpAddress.ToString());
+                        e.UserHostName = Try(100, () => Dns.GetHostEntry(connFeature.RemoteIpAddress).HostName);
                         e.User = UserHolder.Current?.ToLite();
-                        e.QueryString = req.QueryString.ToString();
-                        e.Form = ReadAllBody(context.HttpContext);
+                        e.QueryString = Try(int.MaxValue, () => req.QueryString.ToString());
+                        e.Form = Try(int.MaxValue, () => ReadAllBody(context.HttpContext));
                         e.Session = null;
                     });
-                    
+
                     if (ExpectsJsonResult(context))
                     {
                         var error = new HttpError(context.Exception);
@@ -75,9 +72,21 @@ namespace Signum.React.Filters
             }
         }
 
+        private string Try(int size, Func<string> getValue)
+        {
+            try
+            {
+                return getValue().TryStart(size);
+            }
+            catch(Exception e)
+            {
+                return (e.GetType().Name + ":"  + e.Message).TryStart(size);
+            }
+        }
+
         private bool ExpectsJsonResult(ResourceExecutedContext context)
         {
-            return context.ActionDescriptor is ControllerActionDescriptor cad && 
+            return context.ActionDescriptor is ControllerActionDescriptor cad &&
                 !typeof(IActionResult).IsAssignableFrom(cad.MethodInfo.ReturnType);
         }
 
@@ -111,7 +120,7 @@ namespace Signum.React.Filters
             return HttpStatusCode.InternalServerError;
         }
 
-       
+
     }
 
     public class HttpError

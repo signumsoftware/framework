@@ -1,4 +1,4 @@
-﻿import * as React from "react"
+import * as React from "react"
 import * as H from "history"
 import { Route, Switch } from "react-router"
 import { Dic, } from './Globals';

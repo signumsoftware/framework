@@ -1,17 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Linq.Expressions;
 using System.Reflection;
 using Signum.Utilities.Reflection;
-using Signum.Utilities.DataStructures;
 
 namespace Signum.Utilities.ExpressionTrees
 {
-    
+
     public static class ExpressionHelper
     {
         static MethodInfo miAsQueryable = ReflectionTools.GetMethodInfo(() => Queryable.AsQueryable<int>(null)).GetGenericMethodDefinition();
@@ -133,7 +130,7 @@ namespace Signum.Utilities.ExpressionTrees
 
             return -1;
         }
-      
+
 
         [DebuggerStepThrough]
         public static LambdaExpression StripQuotes(this Expression e)
@@ -155,7 +152,7 @@ namespace Signum.Utilities.ExpressionTrees
         public static bool IsBase(this IQueryable query)
         {
             ConstantExpression ce = query.Expression as ConstantExpression;
-            return ce != null && ce.Value == query; 
+            return ce != null && ce.Value == query;
         }
 
         public static string QueryText<T>(this IQueryable<T> query)

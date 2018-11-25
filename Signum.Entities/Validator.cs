@@ -1,13 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using Signum.Utilities;
 using Signum.Utilities.Reflection;
 using System.Reflection;
 using System.Linq.Expressions;
 using Signum.Utilities.ExpressionTrees;
-using Signum.Entities.Reflection;
 
 namespace Signum.Entities
 {
@@ -140,6 +138,7 @@ namespace Signum.Entities
         List<ValidatorAttribute> Validators { get; }
 
         string PropertyCheck(ModifiableEntity modifiableEntity);
+        object GetValueUntyped(ModifiableEntity entity);
     }
 
     public class PropertyValidator<T> : IPropertyValidator
@@ -247,6 +246,11 @@ namespace Signum.Entities
                 validator.IsApplicable = null;
             else
                 validator.IsApplicable = m => isApplicable((T)m);
+        }
+
+        public object GetValueUntyped(ModifiableEntity entity)
+        {
+            return GetValue((T)entity);
         }
     }
 }

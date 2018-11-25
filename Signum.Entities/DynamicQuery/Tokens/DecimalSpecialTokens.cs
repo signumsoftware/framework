@@ -1,13 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Reflection;
 using System.Linq.Expressions;
 using Signum.Utilities.Reflection;
 using Signum.Utilities;
 using Signum.Utilities.ExpressionTrees;
-using Signum.Entities.Reflection;
 using System.Globalization;
 
 namespace Signum.Entities.DynamicQuery
@@ -20,7 +17,7 @@ namespace Signum.Entities.DynamicQuery
             : base(parent)
         {
             this.StepSize = stepSize;
-            this.Priority = 1; 
+            this.Priority = 1;
         }
 
         public override string ToString()
@@ -106,7 +103,7 @@ namespace Signum.Entities.DynamicQuery
     public class StepMultiplierToken : QueryToken
     {
         public decimal Multiplier;
-    
+
         public StepMultiplierToken(StepToken parent, decimal multiplier) : base(parent)
         {
             this.Multiplier = multiplier;
@@ -336,7 +333,7 @@ namespace Signum.Entities.DynamicQuery
     public enum RoundingType
     {
         Floor,
-        Ceil, 
+        Ceil,
         Round,
         RoundMiddle,
     }

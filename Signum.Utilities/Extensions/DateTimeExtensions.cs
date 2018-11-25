@@ -420,7 +420,7 @@ namespace Signum.Utilities
         {
             return new DateTime(dateTime.Year, dateTime.Month, dateTime.Day, dateTime.Hour, dateTime.Minute, dateTime.Second, dateTime.Kind);
         }
-        
+
         public static string ToMonthName(this DateTime dateTime)
         {
             return CultureInfo.CurrentCulture.DateTimeFormat.GetMonthName(dateTime.Month);

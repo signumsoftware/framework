@@ -1,15 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Reflection;
-using System.Data;
-using System.IO;
 using Signum.Utilities;
 using Signum.Entities;
-using Signum.Engine;
 using System.Linq.Expressions;
-using System.Diagnostics;
 using System.Collections.ObjectModel;
 using Signum.Engine.Linq;
 using Signum.Entities.Reflection;
@@ -112,7 +107,7 @@ namespace Signum.Engine.Maps
         {
             var res = GetIdExpression(alias);
 
-            return res is PrimaryKeyExpression ? 
+            return res is PrimaryKeyExpression ?
                 (ColumnExpression)((PrimaryKeyExpression)res).Value:
                 (ColumnExpression)res;
         }
@@ -240,8 +235,8 @@ namespace Signum.Engine.Maps
 
             if(this.IsLite)
                 return binder.MakeLite(result, null);
-            else 
-                return result; 
+            else
+                return result;
         }
     }
 
@@ -257,7 +252,7 @@ namespace Signum.Engine.Maps
     {
         internal override Expression GetExpression(Alias tableAlias, QueryBinder binder, Expression id, NewExpression period)
         {
-            return new MListExpression(FieldType, (PrimaryKeyExpression)id, period, TableMList); // keep back id empty for some seconds 
+            return new MListExpression(FieldType, (PrimaryKeyExpression)id, period, TableMList); // keep back id empty for some seconds
         }
     }
 
@@ -275,7 +270,7 @@ namespace Signum.Engine.Maps
                 id is PrimaryKeyExpression ? QueryBinder.NullId(((PrimaryKeyExpression)id).ValueType) : (Expression)Expression.Constant(null, id.Type.Nullify())) :
                 new ColumnExpression(((IColumn)HasValue).Type, tableAlias, HasValue.Name);
 
-            return new EmbeddedEntityExpression(this.FieldType, hasValue, bindings, this, null); 
+            return new EmbeddedEntityExpression(this.FieldType, hasValue, bindings, this, null);
         }
     }
 
@@ -305,7 +300,7 @@ namespace Signum.Engine.Maps
             if (this.IsLite)
                 return binder.MakeLite(result, null);
             else
-                return result; 
+                return result;
         }
     }
 

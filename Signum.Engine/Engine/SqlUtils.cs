@@ -1,7 +1,5 @@
-﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using Signum.Utilities;
 using System.Text.RegularExpressions;
 using Signum.Engine.SchemaInfoTables;
@@ -214,7 +212,7 @@ WRITETEXT".Lines().Select(a => a.Trim().ToUpperInvariant()).ToHashSet();
 
         public static string SqlEscape(this string ident)
         {
-            if (Keywords.Contains(ident.ToUpperInvariant()) || Regex.IsMatch(ident, @"-\d|[áéíóúàèìòùÁÉÍÓÚÀÈÌÒÙ/\\. ]"))
+            if (Keywords.Contains(ident.ToUpperInvariant()) || Regex.IsMatch(ident, @"-\d|[áéíóúàèìòùÁÉÍÓÚÀÈÌÒÙ/\\. -]"))
                 return "[" + ident + "]";
 
             return ident;

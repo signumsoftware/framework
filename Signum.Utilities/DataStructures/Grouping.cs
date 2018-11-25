@@ -1,7 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Diagnostics;
 using System.Collections;
 using System.Reflection;
@@ -15,7 +13,7 @@ namespace Signum.Utilities.DataStructures
         K key;
         public Grouping(K key)
         {
-            this.key = key; 
+            this.key = key;
         }
 
         public Grouping(K key, IEnumerable<T> values)

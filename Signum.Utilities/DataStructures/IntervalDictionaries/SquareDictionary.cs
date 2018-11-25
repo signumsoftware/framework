@@ -1,8 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
-using System.Collections;
-using System.Reflection;
 using System.Linq;
 
 namespace Signum.Utilities.DataStructures
@@ -14,7 +11,7 @@ namespace Signum.Utilities.DataStructures
         IntervalDictionary<K1, int> xDimension;
         IntervalDictionary<K2, int> yDimension;
         V[,] values;
-        bool[,] used;  
+        bool[,] used;
 
 
         public SquareDictionary(IEnumerable<(Square<K1, K2> square, V value)> dictionary)
@@ -25,7 +22,7 @@ namespace Signum.Utilities.DataStructures
             yDimension = squares.ToIndexIntervalDictinary(s => s.YInterval.Elements());
 
             values = new V[xDimension.Count, yDimension.Count];
-            used = new bool[xDimension.Count, yDimension.Count]; 
+            used = new bool[xDimension.Count, yDimension.Count];
 
             foreach (var item in dictionary)
                 Add(item.square, item.value);
@@ -54,7 +51,7 @@ namespace Signum.Utilities.DataStructures
             {
                 if (!xDimension.TryGetValue(x, out int ix) ||
                     !yDimension.TryGetValue(y, out int iy) || !used[ix, iy])
-                    throw new KeyNotFoundException("Square not found"); 
+                    throw new KeyNotFoundException("Square not found");
 
                 return values[ix, iy];
             }
@@ -65,12 +62,12 @@ namespace Signum.Utilities.DataStructures
             if (!xDimension.TryGetValue(x, out int ix) ||
                 !yDimension.TryGetValue(y, out int iy) || !used[ix,iy])
             {
-                value = default(V); 
+                value = default(V);
                 return false;
             }
 
             value = values[ix, iy];
-            return true; 
+            return true;
         }
 
         public IntervalValue<V> TryGetValue(K1 x, K2 y)
@@ -81,12 +78,12 @@ namespace Signum.Utilities.DataStructures
                 return new IntervalValue<V>();
             }
 
-            return new IntervalValue<V>(values[ix, iy]); 
+            return new IntervalValue<V>(values[ix, iy]);
         }
 
         public string Counts()
         {
-            return this.xDimension.Count + " x " + this.yDimension.Count; 
+            return this.xDimension.Count + " x " + this.yDimension.Count;
         }
     }
 }

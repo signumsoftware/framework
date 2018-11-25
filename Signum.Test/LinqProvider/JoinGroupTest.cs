@@ -1,12 +1,7 @@
-﻿using System;
-using System.Text;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
 using Xunit;
 using Signum.Engine;
 using Signum.Entities;
-using System.Diagnostics;
-using System.IO;
 using Signum.Utilities;
 using Signum.Test.Environment;
 
@@ -53,8 +48,8 @@ namespace Signum.Test.LinqProvider
         public void JoinerExpansions()
         {
             var labels = Database.Query<AlbumEntity>().Join(
-                Database.Query<AlbumEntity>(), 
-                a => a.Year, a => a.Year, 
+                Database.Query<AlbumEntity>(),
+                a => a.Year, a => a.Year,
                 (a1, a2) => a1.Label.Name + " " + a2.Label.Name).ToList();
         }
 
@@ -140,7 +135,7 @@ namespace Signum.Test.LinqProvider
                 Administrator.CreateTemporaryTable<MyTempView>();
 
                 Database.Query<ArtistEntity>().Where(a => a.Name.StartsWith("M")).UnsafeInsertView(a => new MyTempView { Artist = a.ToLite() });
-                
+
                 var artists = (from a in Database.Query<ArtistEntity>()
                              join b in Database.View<MyTempView>() on a.ToLite() equals b.Artist into g
                              select a.ToLite()).ToList();

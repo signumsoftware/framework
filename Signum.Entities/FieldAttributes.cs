@@ -1,18 +1,10 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Runtime.CompilerServices;
 using System.Data;
-using System.Collections.Specialized;
 using System.Runtime.Serialization;
-using Signum.Utilities.DataStructures;
 using Signum.Utilities;
-using Signum.Utilities.Reflection;
-using System.Reflection;
 using Signum.Entities.Reflection;
-using System.ComponentModel;
-using System.Collections;
 using Signum.Utilities.ExpressionTrees;
 using Signum.Entities.Basics;
 
@@ -97,7 +89,7 @@ namespace Signum.Entities
 
         internal static string ConsiderMessage(PropertyRoute route, string targetTypes)
         {
-            return $@"Consider writing something like this in your Starter class: 
+            return $@"Consider writing something like this in your Starter class:
 sb.Schema.Settings.FieldAttributes(({route.RootType.TypeName()} a) => a.{route.PropertyString().Replace("/", ".First().")}).Replace(new ImplementedByAttribute({targetTypes}))";
         }
 
@@ -126,7 +118,7 @@ sb.Schema.Settings.FieldAttributes(({route.RootType.TypeName()} a) => a.{route.P
             if (error.HasText())
                 throw new InvalidOperationException(error);
 
-            return new Implementations { arrayOrType = types };
+            return new Implementations { arrayOrType = types.OrderBy(a => a.FullName).ToArray() };
         }
 
         static string Error(Type type)
@@ -286,7 +278,7 @@ sb.Schema.Settings.FieldAttributes(({route.RootType.TypeName()} a) => a.{route.P
         {
             get { return scale.HasValue; }
         }
-        
+
         public string UserDefinedTypeName { get; set; }
 
         public string Default { get; set; }
@@ -353,7 +345,7 @@ sb.Schema.Settings.FieldAttributes(({route.RootType.TypeName()} a) => a.{route.P
 
     [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property)]
     public sealed class ViewPrimaryKeyAttribute : Attribute
-    { 
+    {
     }
 
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Enum | AttributeTargets.Field | AttributeTargets.Property /*MList fields*/, Inherited = true, AllowMultiple = false)]
