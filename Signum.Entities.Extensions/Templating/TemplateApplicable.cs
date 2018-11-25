@@ -1,4 +1,4 @@
-﻿using Signum.Entities.Basics;
+using Signum.Entities.Basics;
 using Signum.Entities.Dynamic;
 using Signum.Entities.Word;
 using Signum.Utilities;
@@ -19,8 +19,8 @@ namespace Signum.Entities.Templating
 
             var entityTypeName = (QueryEntity.GetEntityImplementations(query).Types.Only() ?? typeof(Entity)).Name;
 
-            return Compile(DynamicCode.GetMetadataReferences(),
-                DynamicCode.GetUsingNamespaces() +
+            return Compile(DynamicCode.GetCoreMetadataReferences()
+                .Concat(DynamicCode.GetMetadataReferences()), DynamicCode.GetUsingNamespaces() +
 @"
 namespace Signum.Entities.Templating
 {

@@ -1,4 +1,5 @@
-﻿using Signum.Entities.Basics;
+using Signum.Entities;
+using Signum.Entities.Basics;
 using Signum.Utilities;
 using System;
 using System.Linq.Expressions;
@@ -40,8 +41,8 @@ namespace Signum.Entities.Dynamic
             script = script.Contains(';') ? script : ("return " + script + ";");
             var entityTypeName = ((DynamicTypeConditionEntity)this.GetParentEntity()).EntityType.ToType().FullName;
 
-            return Compile(DynamicCode.GetMetadataReferences(),
-                DynamicCode.GetUsingNamespaces() +
+            return Compile(DynamicCode.GetCoreMetadataReferences()
+                .Concat(DynamicCode.GetMetadataReferences()), DynamicCode.GetUsingNamespaces() +
 @"
 namespace Signum.Entities.Dynamic
 {
@@ -56,7 +57,7 @@ namespace Signum.Entities.Dynamic
         {
             " + script + @"
         }
-    }
+    }                   
 }");
         }
     }

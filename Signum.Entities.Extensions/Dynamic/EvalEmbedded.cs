@@ -1,4 +1,4 @@
-﻿using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Signum.Utilities;
 using System;
@@ -77,8 +77,8 @@ namespace Signum.Entities.Dynamic
                     try
                     {
                         var tree = SyntaxFactory.ParseSyntaxTree(code);
-
-                        var compilation = CSharpCompilation.Create("EvalEmbeddedCode.dll")
+                        
+                        var compilation = CSharpCompilation.Create($"{Guid.NewGuid()}.dll")
                          .WithOptions(new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary))
                          .AddReferences(references)
                          .AddSyntaxTrees(tree);

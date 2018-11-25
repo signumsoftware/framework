@@ -1,4 +1,4 @@
-﻿using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Signum.Engine.Authorization;
 using Signum.Engine.Basics;
@@ -166,9 +166,12 @@ namespace Signum.Engine.Dynamic
 
                 codeFiles.Values.ToList().ForEach(a => File.WriteAllText(Path.Combine(DynamicCode.CodeGenDirectory, a.FileName), a.FileContent, utf8));
 
-                var compilation = CSharpCompilation.Create(DynamicCode.CodeGenAssembly)
+                var references = DynamicCode.GetCoreMetadataReferences()
+                    .Concat(DynamicCode.GetMetadataReferences(needsCodeGenAssembly: false));
+
+                var compilation = CSharpCompilation.Create(Path.GetFileNameWithoutExtension(DynamicCode.CodeGenAssembly))
                       .WithOptions(new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary))
-                      .AddReferences(DynamicCode.GetMetadataReferences())
+                      .AddReferences(references)
                       .AddSyntaxTrees(codeFiles.Values.Select(v => CSharpSyntaxTree.ParseText(v.FileContent, path: Path.Combine(DynamicCode.CodeGenDirectory, v.FileName))));
 
                 var outputAssembly = inMemory ? null : Path.Combine(DynamicCode.CodeGenDirectory, DynamicCode.CodeGenAssembly);

@@ -1,4 +1,4 @@
-﻿import * as React from 'react'
+import * as React from 'react'
 import { OmniboxResult, OmniboxMatch, OmniboxProvider } from '../Omnibox/OmniboxClient'
 
 
@@ -18,21 +18,21 @@ export default class TreeOmniboxProvider extends OmniboxProvider<TreeOmniboxResu
 
     array.push(this.icon());
 
-    this.renderMatch(result.TypeMatch, array);
+    this.renderMatch(result.typeMatch, array);
 
     return array;
   }
 
   navigateTo(result: TreeOmniboxResult) {
-    return Promise.resolve("~/tree/" + result.Type);
+    return Promise.resolve("~/tree/" + result.type);
   }
 
   toString(result: TreeOmniboxResult) {
-    return result.TypeMatch.text;
+    return result.typeMatch.text;
   }
 }
 
 interface TreeOmniboxResult extends OmniboxResult {
-  Type: string;
-  TypeMatch: OmniboxMatch;
+  type: string;
+  typeMatch: OmniboxMatch;
 }

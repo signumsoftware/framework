@@ -1,4 +1,6 @@
-﻿using Signum.Entities.Basics;
+using Signum.Entities;
+using Signum.Entities.Authorization;
+using Signum.Entities.Basics;
 using Signum.Entities.Dynamic;
 using Signum.Utilities;
 using System;
@@ -49,8 +51,8 @@ namespace Signum.Entities.Workflow
             var script = this.Script.Trim();
             var WorkflowEntityTypeName = parent.MainEntityType.ToType().FullName;
 
-            return Compile(DynamicCode.GetMetadataReferences(),
-                DynamicCode.GetUsingNamespaces() +
+            return Compile(DynamicCode.GetCoreMetadataReferences()
+                .Concat(DynamicCode.GetMetadataReferences()), DynamicCode.GetUsingNamespaces() +
                     @"
                     namespace Signum.Entities.Workflow
                     {
