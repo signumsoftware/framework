@@ -109,7 +109,7 @@ export default class ScatterplotChart extends D3ChartBase {
     debugger;
     var color: (val: ChartRow) => string;
     if (data.parameters["ColorScale"] == "Ordinal") {
-      var scheme = ChartUtils.getColorScheme(data.parameters["ColorScheme"], parseInt(data.parameters["ColorSchemeSteps"]));
+      var scheme = ChartUtils.getColorScheme(data.parameters["ColorCategory"], parseInt(data.parameters["ColorCategorySteps"]));
       var categoryColor = d3.scaleOrdinal(scheme).domain(data.rows.map(colorKeyColumn.getValueKey));
       color = r => colorKeyColumn.getValueColor(r) || categoryColor(colorKeyColumn.getValueKey(r));
 

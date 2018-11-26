@@ -1,4 +1,5 @@
-﻿using Signum.Entities.Basics;
+using Signum.Entities;
+using Signum.Entities.Basics;
 using Signum.Utilities;
 using System;
 using System.Linq.Expressions;
@@ -19,7 +20,7 @@ namespace Signum.Entities.Dynamic
 
         public PropertyRouteEntity SubEntity { get; set; }
 
-        public static Func<DynamicValidationEntity, Type> GetMainType;
+        public static Func<DynamicValidationEntity, Type> GetMainType; 
 
         [NotNullValidator, NotifyChildProperty, InTypeScript(Undefined = false, Null = false)]
         public DynamicValidationEval Eval { get; set; }
@@ -48,8 +49,8 @@ namespace Signum.Entities.Dynamic
             script = script.Contains(';') ? script : ("return " + script + ";");
             var entityTypeName = DynamicValidationEntity.GetMainType((DynamicValidationEntity)this.GetParentEntity()).FullName;
 
-            return Compile(DynamicCode.GetMetadataReferences(),
-                DynamicCode.GetUsingNamespaces() +
+            return Compile(DynamicCode.GetCoreMetadataReferences()
+                .Concat(DynamicCode.GetMetadataReferences()), DynamicCode.GetUsingNamespaces() +
 @"
 namespace Signum.Entities.Dynamic
 {
@@ -64,7 +65,7 @@ namespace Signum.Entities.Dynamic
         {
             " + script + @"
         }
-    }
+    }                   
 }");
         }
     }

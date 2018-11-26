@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Signum.Entities.Chart;
@@ -41,18 +41,15 @@ namespace Signum.Engine.Chart
             new GenericInvoker<Func<ChartRequestModel, IDynamicQueryCore, CancellationToken, Task<ResultTable>>>((req, dq, token) => ExecuteChartAsync<int>(req, (DynamicQueryCore<int>)dq, token));
         static async Task<ResultTable> ExecuteChartAsync<T>(ChartRequestModel request, DynamicQueryCore<T> dq, CancellationToken token)
         {
-            List<Column> columns = request.Columns.Where(c => c.Token != null).Select(t => t.CreateColumn()).ToList();
-
-            var multiplications = request.Multiplications;;
             using (ExecutionMode.UserInterface())
             {
                 return await dq.ExecuteQueryAsync(new QueryRequest
                 {
-                    GroupResults = request.GroupResults,
+                    GroupResults = request.HasAggregates(),
                     QueryName = request.QueryName,
-                    Columns = columns,
+                    Columns =  request.GetQueryColumns(),
                     Filters = request.Filters,
-                    Orders = request.Orders,
+                    Orders = request.GetQueryOrders(),
                     Pagination = new Pagination.All(),
                 }, token);
             }
@@ -69,18 +66,15 @@ namespace Signum.Engine.Chart
             new GenericInvoker<Func<ChartRequestModel, IDynamicQueryCore, ResultTable>>((req, dq) => ExecuteChart<int>(req, (DynamicQueryCore<int>)dq));
         static ResultTable ExecuteChart<T>(ChartRequestModel request, DynamicQueryCore<T> dq)
         {
-            List<Column> columns = request.Columns.Where(c => c.Token != null).Select(t => t.CreateColumn()).ToList();
-
-            var multiplications = request.Multiplications; ;
             using (ExecutionMode.UserInterface())
             {
                 return dq.ExecuteQuery(new QueryRequest
                 {
-                    GroupResults = request.GroupResults,
+                    GroupResults = request.HasAggregates(),
                     QueryName = request.QueryName,
-                    Columns = columns,
+                    Columns = request.GetQueryColumns(),
                     Filters = request.Filters,
-                    Orders = request.Orders,
+                    Orders = request.GetQueryOrders(),
                     Pagination = new Pagination.All(),
                 });
             }

@@ -4,7 +4,7 @@ import { FindOptions, ColumnOption } from '@framework/Search'
 import { TypeContext } from '@framework/TypeContext'
 import { PredictorSubQueryEntity, PredictorSubQueryColumnEmbedded, PredictorEntity, PredictorMainQueryEmbedded, PredictorMessage, PredictorSubQueryColumnUsage } from '../Signum.Entities.MachineLearning'
 import * as Finder from '@framework/Finder'
-import QueryTokenEntityBuilder from '../../UserAssets/Templates/QueryTokenEntityBuilder'
+import QueryTokenEmbeddedBuilder from '../../UserAssets/Templates/QueryTokenEmbeddedBuilder'
 import FilterBuilderEmbedded from '../../UserAssets/Templates/FilterBuilderEmbedded';
 import { QueryTokenEmbedded } from '../../UserAssets/Signum.Entities.UserAssets'
 import { QueryFilterEmbedded } from '../../UserQueries/Signum.Entities.UserQueries'
@@ -137,7 +137,7 @@ export default class PredictorSubQuery extends React.Component<{ ctx: TypeContex
               },
               {
                 property: a => a.token,
-                template: colCtx => <QueryTokenEntityBuilder
+                template: colCtx => <QueryTokenEmbeddedBuilder
                   ctx={colCtx.subCtx(a => a.token)}
                   queryKey={this.props.ctx.value.query!.key}
                   subTokenOptions={SubTokensOptions.CanElement | SubTokensOptions.CanAggregate}

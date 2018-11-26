@@ -12,6 +12,8 @@ import "../Chart.css"
 import { ChartScript, chartScripts, ChartRow } from '../ChartClient';
 import { ErrorBoundary } from '@framework/Components';
 
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+
 
 export interface ChartRendererProps {
   data: ChartClient.ChartTable;
@@ -51,7 +53,7 @@ export default class ChartRenderer extends React.Component<ChartRendererProps, C
 
     const data = this.props.data;
     data.parameters = ChartClient.API.getParameterWithDefault(this.props.chartRequest, chartScript);
-    
+
     this.setState({ chartComponent: chartComponentModule.default, chartScript });
   }
 
@@ -60,7 +62,7 @@ export default class ChartRenderer extends React.Component<ChartRendererProps, C
 
     const cr = this.props.lastChartRequest!;
 
-    if (cr.groupResults == false) {
+    if (r.entity) {
       window.open(Navigator.navigateRoute(r.entity!));
     } else {
       const filters = cr.filterOptions.filter(a => !hasAggregate(a.token));
@@ -101,9 +103,67 @@ export default class ChartRenderer extends React.Component<ChartRendererProps, C
 
   render() {
     return (
-      <ErrorBoundary>
-        {this.state.chartComponent && React.createElement(this.state.chartComponent, { data: this.props.data, onDrillDown: this.handleDrillDown })}
-      </ErrorBoundary>
+      <FullscreenComponent>
+        <ErrorBoundary>
+          {this.state.chartComponent && React.createElement(this.state.chartComponent, { data: this.props.data, onDrillDown: this.handleDrillDown })}
+        </ErrorBoundary>
+      </FullscreenComponent>
     );
   }
 }
+
+
+interface FullscreenComponentProps {
+
+}
+
+interface FullscreenComponentState {
+  isFullScreen?: boolean;
+}
+
+export class FullscreenComponent extends React.Component<FullscreenComponentProps, FullscreenComponentState> {
+
+  constructor(props: FullscreenComponentProps) {
+    super(props);
+    this.state = {};
+  }
+
+  componentWillMount() {
+    this.loadData(this.props);
+  }
+
+  componentWillReceiveProps(newProps: FullscreenComponentProps) {
+  }
+
+  loadData(props: FullscreenComponentProps) {
+  }
+
+  handleExpandToggle = (e: React.MouseEvent<any>) => {
+    e.preventDefault();
+    this.setState({ isFullScreen: !this.state.isFullScreen });
+  }
+
+  render() {
+    return (
+      <div style={!this.state.isFullScreen ? { display: "flex" } : ({
+        display: "flex",
+        position: "fixed",
+        background: "white",
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        height: "auto",
+        zIndex: 9,
+      })}>
+        <a onClick={this.handleExpandToggle} style={{ color: "gray", order: 2, cursor: "pointer" }} >
+          <FontAwesomeIcon icon={this.state.isFullScreen ? "compress" : "expand"} />
+        </a>
+        <div key={this.state.isFullScreen ? "A" : "B"} style={{ width: "100%", display: "flex" }}> 
+          {this.props.children}
+        </div>
+      </div>
+    );
+  }
+}
+

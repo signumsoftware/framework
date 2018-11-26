@@ -1,9 +1,10 @@
-﻿using System;
+using System;
 using Signum.Entities.DynamicQuery;
 using Signum.Utilities;
 using System.Reflection;
 using System.Xml.Linq;
 using Signum.Entities.UserAssets;
+using Signum.Entities;
 
 namespace Signum.Entities.Chart
 {
@@ -57,28 +58,17 @@ namespace Signum.Entities.Chart
             }
         }
 
+        [NumberIsValidator(ComparisonType.GreaterThan, 0)]
+        public int? OrderByIndex { get; set; }
+
+        public OrderType? OrderByType { get; set; }
+
         [Ignore]
         internal IChartBase parentChart;
 
         [HiddenProperty]
         public IChartBase ParentChart { get { return parentChart; } }
-
-        [HiddenProperty]
-        public bool? IsGroupKey { get { return (!parentChart.GroupResults) ? (bool?)null: ScriptColumn.IsGroupKey; } }
-
-        [HiddenProperty]
-        public bool GroupByVisible { get { return parentChart.GetChartScript().GroupBy != GroupByChart.Never && ScriptColumn.IsGroupKey; } }
-
-        [HiddenProperty]
-        public bool GroupByEnabled { get { return parentChart.GetChartScript().GroupBy != GroupByChart.Always; } }
-
-        [HiddenProperty]
-        public bool GroupByChecked
-        {
-            get { return parentChart.GroupResults; }
-            set { parentChart.GroupResults = value; }
-        }
-
+        
         [HiddenProperty]
         public string PropertyLabel { get { return ScriptColumn.DisplayName; } }
 
@@ -93,10 +83,6 @@ namespace Signum.Entities.Chart
         internal void NotifyAll()
         {
             Notify(() => Token);
-            Notify(() => IsGroupKey);
-            Notify(() => GroupByEnabled);
-            Notify(() => GroupByChecked);
-            Notify(() => GroupByVisible);
             Notify(() => PropertyLabel);
 
             Notified?.Invoke();
@@ -108,25 +94,6 @@ namespace Signum.Entities.Chart
             {
                 if (Token == null)
                     return !scriptColumn.IsOptional ? ChartMessage._0IsNotOptional.NiceToString().FormatWith(scriptColumn.DisplayName) : null;
-
-                if (parentChart.GroupResults)
-                {
-                    if (scriptColumn.IsGroupKey)
-                    {
-                        if (Token.Token is AggregateToken)
-                            return ChartMessage._0IsKeyBut1IsAnAggregate.NiceToString().FormatWith(scriptColumn.DisplayName, DisplayName);
-                    }
-                    else
-                    {
-                        if (!(Token.Token is AggregateToken))
-                            return ChartMessage._0ShouldBeAnAggregate.NiceToString().FormatWith(scriptColumn.DisplayName, DisplayName);
-                    }
-                }
-                else
-                {
-                    if (Token.Token is AggregateToken)
-                        return ChartMessage._0IsAnAggregateButTheChartIsNotGrouping.NiceToString().FormatWith(DisplayName);
-                }
 
                 if (!ChartUtils.IsChartColumnType(token.Token, ScriptColumn.ColumnType))
                     return ChartMessage._0IsNot1.NiceToString().FormatWith(DisplayName, ScriptColumn.ColumnType);
@@ -161,14 +128,19 @@ namespace Signum.Entities.Chart
         internal XElement ToXml(IToXmlContext ctx)
         {
             return new XElement("Column",
-              Token ==  null ? null : new XAttribute("Token", this.Token.Token.FullKey()),
-              DisplayName == null ? null : new XAttribute("DisplayName", this.DisplayName));
+              Token == null ? null : new XAttribute("Token", this.Token.Token.FullKey()),
+              DisplayName == null ? null : new XAttribute("DisplayName", this.DisplayName),
+              OrderByIndex == null ? null : new XAttribute("OrderByIndex", this.OrderByIndex),
+              OrderByType == null ? null : new XAttribute("OrderByType", this.OrderByType)
+              );
         }
 
         internal void FromXml(XElement element, IFromXmlContext ctx)
         {
             Token = element.Attribute("Token")?.Let(a => new QueryTokenEmbedded(a.Value));
             DisplayName = element.Attribute("DisplayName")?.Value;
+            OrderByIndex = element.Attribute("OrderByIndex")?.Value.Let(int.Parse);
+            OrderByType = element.Attribute("OrderByType")?.Value.Let(EnumExtensions.ToEnum<OrderType>);
         }
 
         public override string ToString()

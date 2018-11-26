@@ -1,8 +1,11 @@
 import * as d3 from "d3"
+import * as moment from "moment"
 import * as d3sc from "d3-scale-chromatic";
 import { ChartTable, ChartColumn, ChartRow } from "../ChartClient"
 import { parseLite } from "@framework/Signum.Entities"
 import * as Navigator from '@framework/Navigator'
+import { coalesce, Dic } from "../../../../Framework/Signum.React/Scripts/Globals";
+import { getTypeInfo } from "@framework/Reflection";
 
 export function getNavigateRoute(liteData: string) {
   var lite = parseLite(liteData);
@@ -116,6 +119,139 @@ export function scaleFor(column: ChartColumn<any>, values: number[], minRange: n
       .range([minRange, maxRange]);
 
   throw Error("Unexpected scale: " + scaleName);
+}
+
+export function insertPoint(column: ChartColumn<any>, valueColumn: ChartColumn<any>) : "Middle" | "Before" | "After" {
+
+  if ((valueColumn.orderByIndex || 0) > (column.orderByIndex || 0)) {
+    if (valueColumn.orderByType == "Ascending")
+      return "Before";
+    else
+      return "After";
+  } else {
+    return "Middle"; 
+  }
+}
+
+export function completeValues(column: ChartColumn<any>, values: any[], completeValues: string | null | undefined, insertPoint: "Middle" | "Before" | "After"): any[] {
+  
+  if (completeValues == null || completeValues == "No")
+    return values;
+
+  if (column.type == "Lite" || column.type == "String")
+    return values;
+
+  const isAuto = completeValues == "Auto"
+
+  if (column.type == "Date" || column.type == "DateTime") {
+
+    const min = d3.min(values);
+    const max = d3.max(values);
+
+    if (min == undefined || max == undefined)
+      return values; 
+
+    const minMoment = moment(min);
+    const maxMoment = moment(max);
+
+    const lastPart = column.token!.fullKey.tryAfterLast('.');
+
+    const unit: moment.unitOfTime.Base | null =
+      lastPart == "SecondStart" ? "s" :
+        lastPart == "MinuteStart" ? "m" :
+          lastPart == "HourStart" ? "h" :
+            lastPart == "Date" ? "d" :
+              lastPart == "WeekStart" ? "w" :
+                lastPart == "MonthStart" ? "M" :
+                  null;
+
+    if (unit == null)
+      return values;
+
+    const allValues: string[] = [];
+    const limit = isAuto ? values.length * 2 : null;
+    while (minMoment <= maxMoment) {
+
+      if (limit != null && allValues.length > limit)
+        return values;
+
+      allValues.push(minMoment.toJSON());
+      minMoment.add(unit, 1);
+    }
+
+    return complete(values, allValues, column, insertPoint, (a, b) => a == b);
+  }
+
+  if (column.type == "Enum") {
+
+    var allValues = Dic.getValues(getTypeInfo(column.token!.type.name).members).map(a => a.name);
+
+    return complete(values, allValues, column, insertPoint, (a, b) => a == b);
+  }
+
+  if (column.type == "Integer" || column.type == "Real" || column.type == "RealGroupable") {
+
+    const min = d3.min(values) as number | undefined;
+    const max = d3.max(values) as number | undefined;
+
+    if (min == undefined || max == undefined)
+      return values;
+
+    const lastPart = column.token!.fullKey.tryAfterLast('.');
+    
+    const step: number | null = lastPart != null && lastPart.startsWith("Step") ? parseFloat(lastPart.after("Step").replace("_", ".")) : 
+        (column.type == "Integer" ? 1 : null);
+
+    if (step == null)
+      return values;
+
+    const allValues: number[] = [];
+    const limit = isAuto ? values.length * 2 : null;
+    if (step < 1) {
+      var inv = 1 / step;
+      var v = min;
+      while (v <= max) {
+
+        if (limit != null && allValues.length > limit)
+          return values;
+
+        allValues.push(v);
+        v = Math.round((v + step) * inv) / inv;
+      }
+    } else {
+      var v = min;
+      while (v <= max) {
+        if (limit != null && allValues.length > limit)
+          return values;
+
+        allValues.push(v);
+        v += step;
+      }
+    }
+    return complete(values, allValues, column, insertPoint, (a, b) => a == b);
+  }
+
+  return values;
+}
+
+function complete(values: any[], allValues: any[], column: ChartColumn<any>, insertPoint: "Middle" | "Before" | "After", isEqual: (a: any, b: any) => boolean): any[] {
+  
+  if (insertPoint == "Middle") {
+    var oldValues = values.filter(a => !allValues.some(b => isEqual(a, b)));
+
+    return [...allValues, ...oldValues];
+  }
+  else
+  {
+    var newValues = allValues.filter(a => !values.some(b => isEqual(a, b)));
+
+    if (insertPoint == "Before")
+      return [...newValues, ...values];
+    else if (insertPoint == "After") //Descending
+      return [...values, ...newValues];
+  } 
+
+  throw new Error();
 }
 
 export function rule(object: any, totalSize?: number): Rule {

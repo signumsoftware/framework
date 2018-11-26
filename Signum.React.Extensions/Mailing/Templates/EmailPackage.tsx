@@ -1,4 +1,4 @@
-﻿import * as React from 'react'
+import * as React from 'react'
 import { ValueLine } from '@framework/Lines'
 import { SearchControl } from '@framework/Search'
 import { TypeContext } from '@framework/TypeContext'
@@ -15,7 +15,7 @@ export default class EmailPackage extends React.Component<{ ctx: TypeContext<Ema
           <legend>{EmailMessageEntity.nicePluralName()}</legend>
           <SearchControl findOptions={{
             queryName: EmailMessageEntity,
-            parentToken: "package",
+            parentToken: "Package",
             parentValue: e.value
           }} />
         </fieldset>

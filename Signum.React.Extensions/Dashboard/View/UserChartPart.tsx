@@ -10,97 +10,95 @@ import ChartTableComponent from '../../Chart/Templates/ChartTable'
 import { UserChartPartEntity } from '../Signum.Entities.Dashboard'
 
 export interface UserChartPartProps {
-    part: UserChartPartEntity
-    entity?: Lite<Entity>;
+  part: UserChartPartEntity
+  entity?: Lite<Entity>;
 }
 
 export interface UserChartPartState {
-    chartRequest?: ChartRequestModel;
-    result?: ChartClient.API.ExecuteChartResult;
-    error?: any;
-    showData?: boolean;
+  chartRequest?: ChartRequestModel;
+  result?: ChartClient.API.ExecuteChartResult;
+  error?: any;
+  showData?: boolean;
 }
 
 export default class UserChartPart extends React.Component<UserChartPartProps, UserChartPartState> {
-    constructor(props: UserChartPartProps) {
-        super(props);
-        this.state = { showData: props.part.showData };
+  constructor(props: UserChartPartProps) {
+    super(props);
+    this.state = { showData: props.part.showData };
+  }
+
+  componentWillMount() {
+    this.loadChartRequest(this.props);
+  }
+
+  componentWillReceiveProps(newProps: UserChartPartProps) {
+
+    if (is(this.props.part.userChart, newProps.part.userChart) &&
+      is(this.props.entity, newProps.entity))
+      return;
+
+    this.loadChartRequest(newProps);
+  }
+
+  loadChartRequest(props: UserChartPartProps) {
+    this.setState({ chartRequest: undefined, result: undefined, error: undefined }, () =>
+      UserChartClient.Converter.toChartRequest(props.part.userChart!, props.entity)
+        .then(cr => this.setState({ chartRequest: cr, result: undefined }, () => this.makeQuery()))
+        .done());
+  }
+
+  makeQuery() {
+    this.setState({ result: undefined, error: undefined }, () =>
+      ChartClient.getChartScript(this.state.chartRequest!.chartScript)
+        .then(cs => ChartClient.API.executeChart(this.state.chartRequest!, cs))
+        .then(rt => this.setState({ result: rt }))
+        .catch(e => { this.setState({ error: e }); })
+        .done());
+  }
+
+  render() {
+
+    const s = this.state;
+    if (s.error) {
+      return (
+        <div>
+          <h4>Error!</h4>
+          {this.renderError(s.error)}
+        </div>
+      );
     }
 
-    componentWillMount() {
-        this.loadChartRequest(this.props);
-    }
+    if (!s.chartRequest || !s.result)
+      return <span>{JavascriptMessage.loading.niceToString()}</span>;
 
-    componentWillReceiveProps(newProps: UserChartPartProps) {
-
-        if (is(this.props.part.userChart, newProps.part.userChart) &&
-            is(this.props.entity, newProps.entity))
-            return;
-
-        this.loadChartRequest(newProps);
-    }
-
-    loadChartRequest(props: UserChartPartProps) {
-        this.setState({ chartRequest: undefined, result: undefined, error: undefined }, () =>
-            UserChartClient.Converter.toChartRequest(props.part.userChart!, props.entity)
-                .then(cr => this.setState({ chartRequest: cr, result: undefined }, () => this.makeQuery()))
-                .done());
-    }
-
-    makeQuery() {
-        this.setState({ result: undefined, error: undefined }, () =>
-            ChartClient.getChartScript(this.state.chartRequest!.chartScript)
-                .then(cs => ChartClient.API.executeChart(this.state.chartRequest!, cs))
-                .then(rt => this.setState({ result: rt }))
-                .catch(e => { this.setState({ error: e }); })
-                .done());
-    }
-
-    render() {
-
-        const s = this.state;
-        if (s.error) {
-            return (
-                <div>
-                    <h4>Error!</h4>
-                    {this.renderError(s.error)}
-                </div>
-            );
+    return (
+      <div>
+        {this.props.part.allowChangeShowData &&
+          <label>
+            <input type="checkbox" checked={this.state.showData} onChange={e => this.setState({ showData: e.currentTarget.checked })} />
+            {" "}{UserChartPartEntity.nicePropertyName(a => a.showData)}
+          </label>}
+        {this.state.showData ?
+          <ChartTableComponent chartRequest={s.chartRequest} lastChartRequest={s.chartRequest}
+            resultTable={s.result.resultTable} onOrderChanged={() => this.makeQuery()} /> :
+          <ChartRenderer chartRequest={s.chartRequest} lastChartRequest={s.chartRequest} data={s.result.chartTable} />
         }
+      </div>
+    );
+  }
 
-        if (!s.chartRequest || !s.result)
-            return <span>{JavascriptMessage.loading.niceToString()}</span>;
+  renderError(e: any) {
 
-        return (
-            <div>
-                {this.props.part.allowChangeShowData &&
-                    <label>
-                        <input type="checkbox" checked={this.state.showData} onChange={e => this.setState({ showData: e.currentTarget.checked })} />
-                        {" "}{UserChartPartEntity.nicePropertyName(a => a.showData)}
-                    </label>}
-                {this.state.showData ?
-                    <ChartTableComponent chartRequest={s.chartRequest} lastChartRequest={s.chartRequest} resultTable={s.result.resultTable} onRedraw={() => this.makeQuery()} /> :
-                    <ChartRenderer chartRequest={s.chartRequest} lastChartRequest={s.chartRequest} data={s.result.chartTable} />
-                }
-            </div>
-        );
-    }
+    const se = e instanceof ServiceError ? (e as ServiceError) : undefined;
 
-    renderError(e: any) {
+    if (se == undefined)
+      return <p className="text-danger"> {e.message ? e.message : e}</p>;
 
-        const se = e instanceof ServiceError ? (e as ServiceError) : undefined;
+    return (
+      <div>
+        {se.httpError.exceptionMessage && <p className="text-danger">{se.httpError.exceptionMessage}</p>}
+      </div>
+    );
 
-        if (se == undefined)
-            return <p className="text-danger"> {e.message ? e.message : e}</p>;
-
-        return (
-            <div>
-                {se.httpError.exceptionMessage && <p className="text-danger">{se.httpError.exceptionMessage}</p>}
-            </div>
-        );
-
-    }
+  }
 }
-
-
-

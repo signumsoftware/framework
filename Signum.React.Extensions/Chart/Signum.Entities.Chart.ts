@@ -5,6 +5,7 @@
 import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from '../../../Framework/Signum.React/Scripts/Reflection'
 import * as Entities from '../../../Framework/Signum.React/Scripts/Signum.Entities'
 import * as Basics from '../../../Framework/Signum.React/Scripts/Signum.Entities.Basics'
+import * as DynamicQuery from '../../../Framework/Signum.React/Scripts/Signum.Entities.DynamicQuery'
 import * as UserAssets from '../UserAssets/Signum.Entities.UserAssets'
 import * as UserQueries from '../UserQueries/Signum.Entities.UserQueries'
 import * as Authorization from '../Authorization/Signum.Entities.Authorization'
@@ -13,17 +14,15 @@ import { FilterOptionParsed, OrderOptionParsed, FilterRequest, OrderRequest } fr
 
 //Partial
 export interface ChartRequestModel {
-    queryKey: string;
+  queryKey: string;
+  
+  filterOptions: FilterOptionParsed[];
 
-	filterOptions: FilterOptionParsed[];
-    orderOptions: OrderOptionParsed[];
-
-    filters: FilterRequest[];
-    orders: OrderRequest[];
+  filters: FilterRequest[];
 }
 
 export interface ChartScriptParameterEmbedded {
-    enumValues: { name: string, typeFilter : ChartColumnType }[];
+  enumValues: { name: string, typeFilter : ChartColumnType }[];
 }
 
 export type IChartBase = ChartRequestModel | UserChartEntity;
@@ -40,6 +39,8 @@ export interface ChartColumnEmbedded extends Entities.EmbeddedEntity {
   Type: "ChartColumnEmbedded";
   token?: UserAssets.QueryTokenEmbedded | null;
   displayName?: string | null;
+  orderByIndex?: number | null;
+  orderByType?: DynamicQuery.OrderType | null;
 }
 
 export const ChartColumnType = new EnumType<ChartColumnType>("ChartColumnType");
@@ -118,7 +119,6 @@ export const ChartRequestModel = new Type<ChartRequestModel>("ChartRequestModel"
 export interface ChartRequestModel extends Entities.ModelEntity {
   Type: "ChartRequestModel";
   chartScript: ChartScriptSymbol;
-  groupResults: boolean;
   columns: Entities.MList<ChartColumnEmbedded>;
   parameters: Entities.MList<ChartParameterEmbedded>;
   invalidator: boolean;
@@ -155,12 +155,6 @@ export module GoogleMapsCharScript {
   export const Markermap : ChartScriptSymbol = registerSymbol("ChartScript", "GoogleMapsCharScript.Markermap");
 }
 
-export const GroupByChart = new EnumType<GroupByChart>("GroupByChart");
-export type GroupByChart =
-  "Always" |
-  "Optional" |
-  "Never";
-
 export const UserChartEntity = new Type<UserChartEntity>("UserChart");
 export interface UserChartEntity extends Entities.Entity, UserAssets.IUserAssetEntity {
   Type: "UserChart";
@@ -174,7 +168,6 @@ export interface UserChartEntity extends Entities.Entity, UserAssets.IUserAssetE
   groupResults: boolean;
   columns: Entities.MList<ChartColumnEmbedded>;
   filters: Entities.MList<UserQueries.QueryFilterEmbedded>;
-  orders: Entities.MList<UserQueries.QueryOrderEmbedded>;
   guid: string;
   invalidator: boolean;
 }

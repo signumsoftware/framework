@@ -1,4 +1,4 @@
-﻿using Signum.Utilities;
+using Signum.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,11 +17,10 @@ namespace Signum.Entities.Chart
         public string DisplayName { get; set; }
         public bool IsOptional { get; set; }
         public ChartColumnType ColumnType { get; set; }
-        public bool IsGroupKey { get; set; }
     }
 
    
-    [Flags, InTypeScript(true)]
+    [Flags, InTypeScript(true), DescriptionOptions(DescriptionOptions.Members)]
     public enum ChartColumnType
     {
         [Code("i")]
@@ -46,7 +45,7 @@ namespace Signum.Entities.Chart
         [Code("M")]
         Magnitude = ChartColumnTypeUtils.GroupMargin | Integer | Real | RealGroupable,
         [Code("P")]
-        Positionable = ChartColumnTypeUtils.GroupMargin | Integer | Real | RealGroupable | Date | DateTime | Enum
+        Positionable = ChartColumnTypeUtils.GroupMargin | Integer | Real | RealGroupable | Date | DateTime
     }
 
 

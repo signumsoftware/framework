@@ -5,6 +5,7 @@ import * as ChartClient from '../ChartClient';
 import * as ChartUtils from '../Templates/ChartUtils';
 import { translate, scale, rotate, skewX, skewY, matrix, scaleFor, rule, ellipsis } from '../Templates/ChartUtils';
 import { ChartColumn, ChartRow } from '../ChartClient';
+import { Dic } from '../../../../Framework/Signum.React/Scripts/Globals';
 
 
 export default class PunchcardChart extends D3ChartBase {
@@ -19,35 +20,41 @@ export default class PunchcardChart extends D3ChartBase {
     var innerSizeColumn = data.columns.c5! as ChartColumn<number> | undefined;
     var orderingColumn = data.columns.c6! as ChartColumn<number> | undefined;
 
-    function groupAndSort(rows: ChartRow[], shortType: string, column: ChartColumn<unknown>): unknown[] {
-      var array = rows.groupBy(r => "k" + column.getValueKey(r));
+    function groupAndSort(rows: ChartRow[], shortType: string, column: ChartColumn<unknown>, completeValues: string | null | undefined): unknown[] {
+      var dictionary = rows.groupToObject(r => "k" + column.getValueKey(r));
 
+      var values = Dic.getValues(dictionary).map(array => column.getValue(array[0]));
+
+      var extendedValues = ChartUtils.completeValues(column, values, completeValues, "After");
       switch (shortType) {
-        case "AscendingToStr": array = array.orderBy(g => column.getValueNiceName(g.elements[0]) || "");
-        case "AscendingKey": array = array.orderBy(g => column.getValueKey(g.elements[0]) || "");
-        case "AscendingSumOrder": array = array.orderBy(g => getSum(g));
-        case "DescendingToStr": array = array.orderByDescending(g => column.getValueNiceName(g.elements[0]) || "");
-        case "DescendingKey": array = array.orderByDescending(g => column.getValueKey(g.elements[0]) || "");
-        case "DescendingSumOrder": array = array.orderByDescending(g => getSum(g));
-        default: array = array;
+        case "Ascending": return extendedValues.orderBy(a => a);
+        case "AscendingToStr": return extendedValues.orderBy(a => column.getNiceName(a));
+        case "AscendingKey": return extendedValues.orderBy(a => column.getKey(a));
+        case "AscendingSumOrder": return extendedValues.orderBy(a => getSum(dictionary["k" + column.getKey(a)]));
+        case "Descending": return extendedValues.orderByDescending(a => a);
+        case "DescendingToStr": return extendedValues.orderByDescending(a => column.getNiceName(a));
+        case "DescendingKey": return extendedValues.orderByDescending(a => column.getKey(a));
+        case "DescendingSumOrder": return extendedValues.orderByDescending(a => getSum(dictionary["k" + column.getKey(a)]));
+        default: return extendedValues;
       }
-
-      return array.map(g => column.getValue(g.elements[0]));
     }
 
-    function getSum(group: { key: string; elements: ChartRow[], sum?: number }) {
+    function getSum(elements: ChartRow[] | undefined): number {
+
+      if (elements == undefined)
+        return 0;
 
       if (orderingColumn == null)
         return 0;
 
-      if (group.sum !== undefined)
-        return group.sum;
+      if ((elements as any).__sum__ !== undefined)
+        return (elements as any).__sum__;
 
-      return group.sum = group.elements.reduce<number>((acum, r) => acum + orderingColumn!.getValue(r) || 0, 0);
+      return (elements as any).__sum__ = elements.reduce<number>((acum, r) => acum + orderingColumn!.getValue(r) || 0, 0);
     }
 
-    var dim0 = groupAndSort(data.rows, data.parameters["XSort"]!, horizontalColumn);
-    var dim1 = groupAndSort(data.rows, data.parameters["YSort"]!, verticalColumn);
+    var dim0 = groupAndSort(data.rows, data.parameters["XSort"]!, horizontalColumn, data.parameters['CompleteHorizontalValues']);
+    var dim1 = groupAndSort(data.rows, data.parameters["YSort"]!, verticalColumn, data.parameters['CompleteVerticalValues']);
 
     var xRule = rule({
       _1: 5,
@@ -255,7 +262,7 @@ export default class PunchcardChart extends D3ChartBase {
         .attr('y', r => -y(verticalColumn.getValueKey(r))!)
         .attr('fill', data.parameters["NumberColor"])
         .attr('dominant-baseline', 'central')
-        .attr('opacity', r => parseFloat(data.parameters["NumberOpacity"]) * extra.numberOpacity!(sizeColumn!.getValue(r)))
+        .attr('opacity', r => parseFloat(data.parameters["NumberOpacity"]) * extra.numberOpacity!(sizeColumn ? 0 : sizeColumn!.getValue(r)))
         .attr('text-anchor', 'middle')
         .attr('font-weight', 'bold')
         .text(r => sizeColumn ? sizeColumn.getValueNiceName(r) :

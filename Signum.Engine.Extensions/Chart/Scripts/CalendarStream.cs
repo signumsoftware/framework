@@ -11,17 +11,22 @@ namespace Signum.Logic.Chart.Scripts
         public CalendarStreamChartScript() : base(D3ChartScript.CalendarStream)
         {
             this.Icon = ChartScriptLogic.LoadIcon("calendar.png");
-            this.GroupBy = GroupByChart.Always;
             this.Columns = new List<ChartScriptColumn>
             {
-                new ChartScriptColumn("Date", ChartColumnType.Date) { IsGroupKey = true },
-                new ChartScriptColumn("Color", ChartColumnType.Magnitude) 
+                new ChartScriptColumn("Date", ChartColumnType.Date),
+                new ChartScriptColumn("Color Scale", ChartColumnType.Magnitude) 
             };
-            this.Parameters = new List<ChartScriptParameter>
+            this.ParameterGroups = new List<ChartScriptParameterGroup>
             {
-                new ChartScriptParameter("StartDate", ChartParameterType.Enum) {  ValueDefinition = EnumValueList.Parse("Sunday|Monday") },
-                new ChartScriptParameter("ColorInterpolate", ChartParameterType.Enum) {  ValueDefinition = EnumValueList.Parse("YlGn|YlGnBu|GnBu|BuGn|PuBuGn|PuBu|BuPu|RdPu|PuRd|OrRd|YlOrRd|YlOrBr|Purples|Blues|Greens|Oranges|Reds|Greys|PuOr|BrBG|PRGn|PiYG|RdBu|RdGy|RdYlBu|Spectral|RdYlGn") },
-                new ChartScriptParameter("ColorScale", ChartParameterType.Enum) {  ValueDefinition = EnumValueList.Parse("ZeroMax|MinMax|Sqrt|Log") }
+                new ChartScriptParameterGroup("Form")
+                {
+                    new ChartScriptParameter("StartDate", ChartParameterType.Enum) {  ValueDefinition = EnumValueList.Parse("Sunday|Monday") },
+                },
+                new ChartScriptParameterGroup("Color Scale")
+                {
+                    new ChartScriptParameter("ColorScale", ChartParameterType.Enum) {  ValueDefinition = EnumValueList.Parse("ZeroMax|MinMax|Sqrt|Log") },
+                    new ChartScriptParameter("ColorInterpolate", ChartParameterType.Enum) {  ValueDefinition = EnumValueList.Parse("YlGn|YlGnBu|GnBu|BuGn|PuBuGn|PuBu|BuPu|RdPu|PuRd|OrRd|YlOrRd|YlOrBr|Purples|Blues|Greens|Oranges|Reds|Greys|PuOr|BrBG|PRGn|PiYG|RdBu|RdGy|RdYlBu|Spectral|RdYlGn") },
+                }
             };
         }      
     }                

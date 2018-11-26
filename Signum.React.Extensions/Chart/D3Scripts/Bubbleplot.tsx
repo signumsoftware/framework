@@ -108,7 +108,7 @@ export default class BubblePlotChart extends D3ChartBase {
 
     var color: (r: ChartRow) => string;
     if (data.parameters["ColorScale"] == "Ordinal") {
-      var scheme = ChartUtils.getColorScheme(data.parameters["ColorScheme"], parseInt(data.parameters["ColorSchemeSteps"]));
+      var scheme = ChartUtils.getColorScheme(data.parameters["ColorCategory"], parseInt(data.parameters["ColorCategorySteps"]));
       var categoryColor = d3.scaleOrdinal(scheme).domain(data.rows.map(r => colorKeyColumn.getValueKey(r)));
       color = r => colorKeyColumn.getValueColor(r) || categoryColor(colorKeyColumn.getValueKey(r));
     } else {

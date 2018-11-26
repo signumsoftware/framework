@@ -23,7 +23,7 @@ export default class PieChart extends D3ChartBase {
 
     var outerRadious = d3.min([width / 2, height])! / 3;
     var rInner = outerRadious * parseFloat(pInnerRadius);
-    var color = d3.scaleOrdinal(ChartUtils.getColorScheme(data.parameters["ColorScheme"], parseInt(data.parameters["ColorSchemeSteps"])))
+    var color = d3.scaleOrdinal(ChartUtils.getColorScheme(data.parameters["ColorCategory"], parseInt(data.parameters["ColorCategorySteps"])))
       .domain(data.rows.map(r => keyColumn.getValueKey(r)));
 
 

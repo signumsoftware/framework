@@ -1,4 +1,5 @@
-﻿using Microsoft.SqlServer.Types;
+using Microsoft.SqlServer.Types;
+using Signum.Engine;
 using Signum.Engine.Basics;
 using Signum.Engine.Maps;
 using Signum.Engine.Operations;
@@ -271,7 +272,7 @@ namespace Signum.Engine.Tree
             new Graph<T>.Execute(TreeOperation.Save)
             {
                 CanBeNew = true,
-                CanBeModified = false,
+                CanBeModified = true,
                 Execute = (t, _) =>
                 {
                     if (t.IsNew)

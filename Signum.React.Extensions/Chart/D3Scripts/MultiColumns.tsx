@@ -46,8 +46,10 @@ export default class MultiColumnsChart extends D3ChartBase {
     }, height);
     //yRule.debugY(chart);
 
+    var keyValues = ChartUtils.completeValues(keyColumn, pivot.rows.map(v => v.rowValue), data.parameters['CompleteValues'], ChartUtils.insertPoint(keyColumn, valueColumn0));
+    
     var x = d3.scaleBand()
-      .domain(pivot.rows.map(v => keyColumn.getKey(v.rowValue)))
+      .domain(keyValues.map(v => keyColumn.getKey(v)))
       .range([0, xRule.size('content')]);
 
     var allValues = pivot.rows.flatMap(r => pivot.columns.map(function (c) { return r.values[c.key] && r.values[c.key].value; }));
@@ -113,7 +115,7 @@ export default class MultiColumnsChart extends D3ChartBase {
       .domain(pivot.columns.map(s => s.key))
       .range([interMagin, x.bandwidth() - interMagin]);
 
-    var color = d3.scaleOrdinal(ChartUtils.getColorScheme(data.parameters["ColorScheme"], parseInt(data.parameters["ColorSchemeSteps"]))).domain(pivot.columns.map(s => s.key));
+    var color = d3.scaleOrdinal(ChartUtils.getColorScheme(data.parameters["ColorCategory"], parseInt(data.parameters["ColorCategorySteps"]))).domain(pivot.columns.map(s => s.key));
 
     const me = this;
 

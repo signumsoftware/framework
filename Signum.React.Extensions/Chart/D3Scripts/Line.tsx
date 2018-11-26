@@ -11,7 +11,7 @@ export default class LineChart extends D3ChartBase {
 
   drawChart(data: ChartTable, chart: d3.Selection<SVGElement, {}, null, undefined>, width: number, height: number) {
 
-    var keyColumn = data.columns.c0!;
+    var keyColumn = data.columns.c0! as ChartColumn<string>;
     var valueColumn = data.columns.c1! as ChartColumn<number>;
 
     var xRule = rule({
@@ -39,25 +39,25 @@ export default class LineChart extends D3ChartBase {
     }, height);
     //yRule.debugY(chart);
 
+    var keyValues = ChartUtils.completeValues(keyColumn, data.rows.map(r => keyColumn.getValue(r)), data.parameters['CompleteValues'], ChartUtils.insertPoint(keyColumn, valueColumn));
 
     var x = d3.scaleBand()
-      .domain(data.rows.map(r => keyColumn.getValueKey(r)))
+      .domain(keyValues.map(v => keyColumn.getKey(v)))
       .range([0, xRule.size('content')]);
 
     var y = scaleFor(valueColumn, data.rows.map(r => valueColumn.getValue(r)), 0, yRule.size('content'), data.parameters["Scale"]);
-
-
+    
     chart.append('svg:g').attr('class', 'x-tick').attr('transform', translate(xRule.start('content') + (x.bandwidth() / 2), yRule.start('ticks')))
       .enterData(data.rows, 'line', 'x-tick')
       .attr('y2', (r, i) => yRule.start('labels' + (i % 2)) - yRule.start('ticks'))
-      .attr('x1', r => x(keyColumn.getKey(r))!)
-      .attr('x2', r => x(keyColumn.getKey(r))!)
+      .attr('x1', r => x(keyColumn.getValueKey(r))!)
+      .attr('x2', r => x(keyColumn.getValueKey(r))!)
       .style('stroke', 'Black');
 
     if ((x.bandwidth() * 2) > 60) {
       chart.append('svg:g').attr('class', 'x-label').attr('transform', translate(xRule.start('content') + (x.bandwidth() / 2), yRule.middle('labels0')))
         .enterData(data.rows, 'text', 'x-label')
-        .attr('x', r => x(keyColumn.getKey(r))!)
+        .attr('x', r => x(keyColumn.getValueKey(r))!)
         .attr('y', (r, i) => yRule.middle('labels' + (i % 2)) - yRule.middle('labels0'))
         .attr('dominant-baseline', 'middle')
         .attr('text-anchor', 'middle')

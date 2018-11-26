@@ -74,18 +74,16 @@ export default class ChartRequestView extends React.Component<ChartRequestViewPr
   }
 
   handleInvalidate = () => {
-    this.removeObsoleteOrders();
     this.setState({ chartResult: undefined, lastChartRequest: undefined });
   }
 
   removeObsoleteOrders() {
     var cr = this.props.chartRequest;
-    if (cr && cr.groupResults) {
-      var oldOrders = cr.orderOptions.filter(o =>
-        o.token.queryTokenType != "Aggregate" &&
-        !cr!.columns.some(mle2 => !!mle2.element.token && !!mle2.element.token.token && mle2.element.token.token.fullKey == o.token.fullKey));
-
-      oldOrders.forEach(o => cr!.orderOptions.remove(o));
+    if (cr) {
+      cr.columns.filter(a => a.element.token == null).forEach(a => {
+        a.element.orderByIndex = null;
+        a.element.orderByType = null;
+      })
     }
   }
 
@@ -106,6 +104,11 @@ export default class ChartRequestView extends React.Component<ChartRequestViewPr
 
     var cr = this.props.chartRequest!;
 
+    cr.columns.filter(a => a.element.token == null).forEach(a => {
+      a.element.orderByIndex = null;
+      a.element.orderByType = null;
+    });
+
     GraphExplorer.setModelState(cr, undefined, "");
 
     ChartClient.getChartScript(cr.chartScript)
@@ -114,7 +117,7 @@ export default class ChartRequestView extends React.Component<ChartRequestViewPr
         this.setState({ chartResult: rt, lastChartRequest: JSON.parse(JSON.stringify(this.props.chartRequest)) });
         this.props.onChange(cr, this.props.userChart);
       }, ifError(ValidationError, e => {
-        GraphExplorer.setModelState(cr, e.modelState, "entity");
+        GraphExplorer.setModelState(cr, e.modelState, "");
         this.forceUpdate();
       })).done();
   }
@@ -157,6 +160,12 @@ export default class ChartRequestView extends React.Component<ChartRequestViewPr
               onInvalidate={this.handleInvalidate}
               onRedraw={this.handleOnRedraw}
               onTokenChange={this.handleTokenChange}
+              onOrderChanged={() => {
+                if (this.state.lastChartRequest)
+                  this.handleOnDrawClick();
+                else
+                  this.forceUpdate();
+              }}
             />
           </div >
           <div className="sf-query-button-bar btn-toolbar">
@@ -173,7 +182,8 @@ export default class ChartRequestView extends React.Component<ChartRequestViewPr
                 </Tab>
 
                 <Tab eventKey="data" title={<span>{ChartMessage.Data.niceToString()} ({(s.chartResult.resultTable.rows.length)})</span> as any}>
-                  <ChartTableComponent chartRequest={cr} lastChartRequest={s.lastChartRequest} resultTable={s.chartResult.resultTable} onRedraw={this.handleOnDrawClick} />
+                  <ChartTableComponent chartRequest={cr} lastChartRequest={s.lastChartRequest} resultTable={s.chartResult.resultTable}
+                    onOrderChanged={() => this.handleOnDrawClick()} />
                 </Tab>
               </UncontrolledTabs>
             }

@@ -24,7 +24,7 @@ namespace Signum.React.Chart
             SignumControllerFactory.RegisterArea(MethodInfo.GetCurrentMethod());
 
             CustomizeChartRequest();
-            
+
             EntityJsonConverter.AfterDeserilization.Register((ChartRequestModel cr) =>
             {
                 if (cr.ChartScript != null)
@@ -36,7 +36,7 @@ namespace Signum.React.Chart
 
                     if (cr.Columns != null)
                         foreach (var c in cr.Columns)
-                            c.ParseData(cr, qd, SubTokensOptions.CanElement | (c.IsGroupKey == false ? SubTokensOptions.CanAggregate : 0));
+                            c.ParseData(cr, qd, SubTokensOptions.CanElement | SubTokensOptions.CanAggregate);
                 }
             });
 
@@ -108,32 +108,6 @@ namespace Signum.React.Chart
 
                     ctx.JsonWriter.WritePropertyName(ctx.LowerCaseName);
                     ctx.JsonSerializer.Serialize(ctx.JsonWriter, cr.Filters.Select(f => FilterTS.FromFilter(f)).ToList());
-                }
-            });
-
-            converters.Add("orders", new PropertyConverter()
-            {
-                AvoidValidate = true,
-                CustomReadJsonProperty = ctx =>
-                {
-                    var list = (List<OrderTS>)ctx.JsonSerializer.Deserialize(ctx.JsonReader, typeof(List<OrderTS>));
-
-                    var cr = (ChartRequestModel)ctx.Entity;
-
-                    var qd = QueryLogic.Queries.QueryDescription(cr.QueryName);
-
-                    cr.Orders = list.Select(l => l.ToOrder(qd, canAggregate: true)).ToList();
-                },
-                CustomWriteJsonProperty = ctx =>
-                {
-                    var cr = (ChartRequestModel)ctx.Entity;
-
-                    ctx.JsonWriter.WritePropertyName(ctx.LowerCaseName);
-                    ctx.JsonSerializer.Serialize(ctx.JsonWriter, cr.Orders.Select(f => new OrderTS
-                    {
-                        token = f.Token.FullKey(),
-                        orderType = f.OrderType
-                    }));
                 }
             });
         }

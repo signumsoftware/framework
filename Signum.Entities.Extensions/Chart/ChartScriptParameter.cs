@@ -7,9 +7,53 @@ using System.Text.RegularExpressions;
 using Signum.Entities.DynamicQuery;
 using System.Reflection;
 using System.Globalization;
+using System.Collections;
+using Newtonsoft.Json;
 
 namespace Signum.Entities.Chart
 {
+    [JsonConverter(typeof(ChartScriptParameterGroupJsonConverter))]
+    public class ChartScriptParameterGroup : IEnumerable<ChartScriptParameter>
+    {
+        public string Name { get; }
+
+        public ChartScriptParameterGroup(string name)
+        {
+            this.Name = name;
+        }
+
+        public void Add(ChartScriptParameter p)
+        {
+            this.Parameters.Add(p);
+        }
+
+        public IEnumerator<ChartScriptParameter> GetEnumerator() => Parameters.GetEnumerator();
+        IEnumerator IEnumerable.GetEnumerator() => Parameters.GetEnumerator();
+
+        public List<ChartScriptParameter> Parameters = new List<ChartScriptParameter>();
+
+        class ChartScriptParameterGroupJsonConverter : JsonConverter
+        {
+            public override bool CanWrite => true;
+            public override bool CanRead => false;
+
+            public override bool CanConvert(Type objectType) => typeof(ChartScriptParameterGroup) == objectType;
+
+            public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer) =>throw new NotImplementedException();
+
+            public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
+            {
+                var group = (ChartScriptParameterGroup)value;
+                writer.WriteStartObject();
+                writer.WritePropertyName("name");
+                writer.WriteValue(group.Name);
+                writer.WritePropertyName("parameters");
+                serializer.Serialize(writer, group.Parameters);
+                writer.WriteEndObject();
+            }
+        }
+    }
+    
     public class ChartScriptParameter
     {
         public ChartScriptParameter(string name, ChartParameterType type)

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Signum.Entities.DynamicQuery;
@@ -106,11 +106,13 @@ namespace Signum.Entities.Chart
 
             if (chart.Parameters.Modified != ModifiedState.Sealed)
             {
-                if (chart.Parameters.Select(a => a.Name).OrderBy().SequenceEqual(chartScript.Parameters.Select(a => a.Name).OrderBy()))
+                var chartScriptParameters = chartScript.AllParameters().ToList();
+
+                if (chart.Parameters.Select(a => a.Name).OrderBy().SequenceEqual(chartScriptParameters.Select(a => a.Name).OrderBy()))
                 {
                     foreach (var cp in chart.Parameters)
                     {
-                        var sp = chartScript.Parameters.FirstEx(a => a.Name == cp.Name);
+                        var sp = chartScriptParameters.FirstEx(a => a.Name == cp.Name);
 
                         cp.parentChart = chart;
                         cp.ScriptParameter = sp;
@@ -122,7 +124,7 @@ namespace Signum.Entities.Chart
                 {
                     var byName = chart.Parameters.ToDictionary(a => a.Name);
                     chart.Parameters.Clear();
-                    foreach (var sp in chartScript.Parameters)
+                    foreach (var sp in chartScriptParameters)
                     {
                         var cp = byName.TryGetC(sp.Name);
 
@@ -151,17 +153,6 @@ namespace Signum.Entities.Chart
                 }
             }
 
-            if (chartScript.GroupBy == GroupByChart.Always && chart.GroupResults == false)
-            {
-                chart.GroupResults = true;
-                result = true;
-            }
-            else if (chartScript.GroupBy == GroupByChart.Never && chart.GroupResults == true)
-            {
-                chart.GroupResults = false;
-                result = true;
-            }
-
             return result;
         }
 
@@ -173,22 +164,17 @@ namespace Signum.Entities.Chart
 
                 QueryName = request.QueryName,
 
-                GroupResults = request.GroupResults,
                 ChartScript = request.ChartScript,
 
                 Filters = request.Filters.SelectMany(f => f.ToQueryFiltersEmbedded()).ToMList(),
-
-                Orders = request.Orders.Select(o => new QueryOrderEmbedded
-                {
-                    Token = new QueryTokenEmbedded(o.Token),
-                    OrderType = o.OrderType
-                }).ToMList()
             };
 
             result.Columns.ZipForeach(request.Columns, (u, r) =>
             {
                 u.Token = r.Token;
                 u.DisplayName = r.DisplayName;
+                u.OrderByIndex = r.OrderByIndex;
+                u.OrderByType = r.OrderByType;
             });
 
             result.Parameters.ForEach(u =>
@@ -203,16 +189,16 @@ namespace Signum.Entities.Chart
         {
             var result = new ChartRequestModel(uq.QueryName)
             {
-                GroupResults = uq.GroupResults,
                 ChartScript = uq.ChartScript,
                 Filters = uq.Filters.ToFilterList(),
-                Orders = uq.Orders.Select(o => new Order(o.Token.Token, o.OrderType)).ToList(),
             };
 
             result.Columns.ZipForeach(uq.Columns, (r, u) =>
             {
                 r.Token = u.Token;
                 r.DisplayName = u.DisplayName;
+                r.OrderByIndex = u.OrderByIndex;
+                r.OrderByType = u.OrderByType;
             });
 
             result.Parameters.ForEach(r =>

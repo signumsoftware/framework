@@ -2,38 +2,30 @@ import * as React from 'react'
 import * as Finder from '@framework/Finder'
 import * as Navigator from '@framework/Navigator'
 import { ResultTable, ColumnOptionParsed, OrderOptionParsed, OrderType, ResultRow, hasAggregate, ColumnOption, FilterOptionParsed } from '@framework/FindOptions'
-import { ChartRequestModel } from '../Signum.Entities.Chart'
+import { ChartRequestModel, ChartColumnEmbedded } from '../Signum.Entities.Chart'
+import * as ChartClient from '../ChartClient'
 import { toFilterOptions } from '@framework/Finder';
+import { ChartRow } from '../ChartClient';
+import { ChartColumn } from './ChartColumn';
 
-export default class ChartTableComponent extends React.Component<{ resultTable: ResultTable; chartRequest: ChartRequestModel; lastChartRequest: ChartRequestModel; onRedraw: () => void }> {
+interface ChartTableProps {
+  resultTable: ResultTable;
+  chartRequest: ChartRequestModel;
+  lastChartRequest: ChartRequestModel;
+  onOrderChanged: () => void;
+}
 
+export default class ChartTableComponent extends React.Component<ChartTableProps> {
 
-  handleHeaderClick = (e: React.MouseEvent<any>) => {
+  handleHeaderClick = (e: React.MouseEvent<any>, col: ColumnOptionParsed) => {
 
-    const tokenStr = (e.currentTarget as HTMLElement).getAttribute("data-column-name");
+    var chartCol = this.props.chartRequest.columns.map(mle => mle.element)
+      .firstOrNull(a => a.token != null && a.token.token != null && a.token.token.fullKey == col.token!.fullKey);
 
-    const cr = this.props.chartRequest;
-
-    const prev = cr.orderOptions.filter(a => a.token.fullKey == tokenStr).firstOrNull();
-
-    if (prev != undefined) {
-      prev.orderType = (prev.orderType == "Ascending" as OrderType) ? "Descending" : "Ascending";
-      if (!e.shiftKey)
-        cr.orderOptions = [prev];
-
-    } else {
-
-      const token = cr.columns.map(mle => mle.element.token!).filter(t => t && t.token!.fullKey == tokenStr).first("Column");
-
-      const newOrder: OrderOptionParsed = { token: token.token!, orderType: "Ascending" };
-
-      if (e.shiftKey)
-        cr.orderOptions.push(newOrder);
-      else
-        cr.orderOptions = [newOrder];
+    if (chartCol) {
+      ChartClient.handleOrderColumn(this.props.chartRequest, chartCol, e.shiftKey);
+      this.props.onOrderChanged();
     }
-
-    this.props.onRedraw();
   }
 
   render() {
@@ -57,14 +49,16 @@ export default class ChartTableComponent extends React.Component<{ resultTable: 
       refresh: undefined
     }
 
+    var hasEntity = ChartClient.hasAggregates(chartRequest);
+
     return (
       <table className="sf-search-results table table-hover table-sm">
         <thead>
           <tr>
-            {!chartRequest.groupResults && <th></th>}
+            {hasEntity && <th></th>}
             {columns.map((col, i) =>
               <th key={i} data-column-name={col.column.token!.fullKey}
-                onClick={this.handleHeaderClick}>
+                onClick={e=>this.handleHeaderClick(e, col.column)}>
                 <span className={"sf-header-sort " + this.orderClassName(col.column)} />
                 <span> {col.column.displayName || col.column.token!.niceName}</span>
               </th>)}
@@ -74,7 +68,7 @@ export default class ChartTableComponent extends React.Component<{ resultTable: 
           {
             resultTable.rows.map((row, i) =>
               <tr key={i} onDoubleClick={e => this.handleOnDoubleClick(e, row)}>
-                {!chartRequest.groupResults && <td>{((qs && qs.entityFormatter) || Finder.entityFormatRules.filter(a => a.isApplicable(row, undefined)).last("EntityFormatRules").formatter)(row, resultTable.columns, undefined)}</td>}
+                {hasEntity && <td>{((qs && qs.entityFormatter) || Finder.entityFormatRules.filter(a => a.isApplicable(row, undefined)).last("EntityFormatRules").formatter)(row, resultTable.columns, undefined)}</td>}
                 {columns.map((c, j) =>
                   <td key={j} className={c.cellFormatter && c.cellFormatter.cellClass}>
                     {c.resultIndex == -1 || c.cellFormatter == undefined ? undefined : c.cellFormatter.formatter(row.columns[c.resultIndex], ctx)}
@@ -94,7 +88,7 @@ export default class ChartTableComponent extends React.Component<{ resultTable: 
 
     const lcr = this.props.lastChartRequest!;
 
-    if (lcr.groupResults == false) {
+    if (row.entity) {
 
       window.open(Navigator.navigateRoute(row.entity!));
 
@@ -140,18 +134,13 @@ export default class ChartTableComponent extends React.Component<{ resultTable: 
     if (column.token == undefined)
       return "";
 
-    const orders = this.props.chartRequest.orderOptions;
+    const columns = this.props.chartRequest.columns;
 
-    const o = orders.filter(a => a.token.fullKey == column.token!.fullKey).firstOrNull();
-    if (o == undefined)
+    const c = columns.filter(a => a.element.token != null && a.element.token!.token!.fullKey == column.token!.fullKey).firstOrNull();
+    if (c == undefined || c.element.orderByType == null)
       return "";
 
-    let asc = (o.orderType == "Ascending" as OrderType) ? "asc" : "desc";
-
-    if (orders.indexOf(o))
-      asc += " l" + orders.indexOf(o);
-
-    return asc;
+    return (c.element.orderByType == "Ascending" ? "asc" : "desc") + (" l" + c.element.orderByIndex);
   }
 }
 

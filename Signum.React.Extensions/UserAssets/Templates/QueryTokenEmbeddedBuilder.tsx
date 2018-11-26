@@ -1,11 +1,11 @@
-﻿import * as React from 'react'
+import * as React from 'react'
 import { QueryTokenEmbedded } from '../Signum.Entities.UserAssets'
 import { FormGroup } from '@framework/Lines'
 import { TypeContext } from '@framework/TypeContext'
 import { QueryToken, SubTokensOptions } from '@framework/FindOptions'
 import QueryTokenBuilder from '@framework/SearchControl/QueryTokenBuilder'
 
-interface QueryTokenEntityBuilderProps {
+interface QueryTokenEmbeddedBuilderProps {
   ctx: TypeContext<QueryTokenEmbedded | null | undefined>;
   queryKey: string;
   subTokenOptions: SubTokensOptions;
@@ -13,7 +13,7 @@ interface QueryTokenEntityBuilderProps {
   helpText?: React.ReactChild;
 }
 
-export default class QueryTokenEntityBuilder extends React.Component<QueryTokenEntityBuilderProps> {
+export default class QueryTokenEntityBuilder extends React.Component<QueryTokenEmbeddedBuilderProps> {
 
   handleTokenChanged = (newToken: QueryToken | undefined) => {
     if (newToken == undefined)

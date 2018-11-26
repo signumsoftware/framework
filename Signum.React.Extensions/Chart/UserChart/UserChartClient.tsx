@@ -93,8 +93,6 @@ export module Converter {
 
     return promise.then(filters => {
 
-      cr.groupResults = uq.groupResults;
-
       cr.filterOptions = (cr.filterOptions || []).filter(f => f.frozen);
 
       cr.filterOptions.push(...filters.map(f => UserAssetsClient.Converter.toFilterOptionParsed(f)));
@@ -118,16 +116,14 @@ export module Converter {
             token: t && QueryTokenEmbedded.New({
               token: UserAssetsClient.getToken(t),
               tokenString: t.tokenString
-            })
+            }),
+
+            orderByIndex: mle.element.orderByIndex,
+            orderByType: mle.element.orderByType,
           })
         })
       });
-
-      cr.orderOptions = (uq.orders || []).map(f => ({
-        token: f.element.token!.token,
-        orderType: f.element.orderType
-      }) as OrderOptionParsed);
-
+      
       return cr;
     });
   }

@@ -39,11 +39,12 @@ export default class ColumnsChart extends D3ChartBase {
     }, height);
     //yRule.debugY(chart);
 
+    var keyValues = ChartUtils.completeValues(keyColumn, data.rows.map(r => keyColumn.getValue(r)), data.parameters['CompleteValues'], ChartUtils.insertPoint(keyColumn, valueColumn));
 
     var x = d3.scaleBand()
-      .domain(data.rows.map(r => keyColumn.getValueKey(r)))
+      .domain(keyValues.map(v => keyColumn.getKey(v)))
       .range([0, xRule.size('content')]);
-
+    
     var y = scaleFor(valueColumn, data.rows.map(r => valueColumn.getValue(r)), 0, yRule.size('content'), data.parameters["Scale"]);
 
     chart.append('svg:g').attr('class', 'x-title').attr('transform', translate(xRule.middle('content'), yRule.middle('title')))
@@ -81,7 +82,7 @@ export default class ColumnsChart extends D3ChartBase {
       .attr('dominant-baseline', 'middle')
       .text(valueColumn.title);
 
-    var color = d3.scaleOrdinal(ChartUtils.getColorScheme(data.parameters["ColorScheme"], parseInt(data.parameters["ColorSchemeSteps"]!)))
+    var color = d3.scaleOrdinal(ChartUtils.getColorScheme(data.parameters["ColorCategory"], parseInt(data.parameters["ColorCategorySteps"]!)))
       .domain(data.rows.map(r => keyColumn.getValueKey(r)!));
 
 

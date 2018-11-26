@@ -1,4 +1,10 @@
-﻿using Signum.Entities;
+using Signum.Engine;
+using Signum.Engine.Basics;
+using Signum.Engine.Dynamic;
+using Signum.Engine.DynamicQuery;
+using Signum.Engine.Maps;
+using Signum.Entities;
+using Signum.Entities.Basics;
 using Signum.Entities.Dynamic;
 using Signum.Utilities;
 using System;
@@ -40,7 +46,8 @@ namespace Signum.Entities.Dynamic
     }}
 }}";
 
-                var res = EvalEmbedded<IDynamicExpressionEvaluator>.Compile(DynamicCode.GetMetadataReferences(), code);
+                var res = EvalEmbedded<IDynamicExpressionEvaluator>.Compile(DynamicCode.GetCoreMetadataReferences()
+                    .Concat(DynamicCode.GetMetadataReferences()), code);
 
                 if (res.CompilationErrors.HasText())
                     throw new InvalidOperationException(res.CompilationErrors);

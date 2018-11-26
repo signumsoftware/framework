@@ -2,17 +2,15 @@
 
 //Partial
 export interface ChartRequestModel {
-    queryKey: string;
+  queryKey: string;
+  
+  filterOptions: FilterOptionParsed[];
 
-	filterOptions: FilterOptionParsed[];
-    orderOptions: OrderOptionParsed[];
-
-    filters: FilterRequest[];
-    orders: OrderRequest[];
+  filters: FilterRequest[];
 }
 
 export interface ChartScriptParameterEmbedded {
-    enumValues: { name: string, typeFilter : ChartColumnType }[];
+  enumValues: { name: string, typeFilter : ChartColumnType }[];
 }
 
 export type IChartBase = ChartRequestModel | UserChartEntity;

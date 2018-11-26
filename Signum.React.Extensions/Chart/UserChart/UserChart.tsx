@@ -7,7 +7,7 @@ import * as Finder from '@framework/Finder'
 import { SubTokensOptions } from '@framework/FindOptions'
 import { getQueryNiceName } from '@framework/Reflection'
 import { TypeContext } from '@framework/TypeContext'
-import QueryTokenEntityBuilder from '../../UserAssets/Templates/QueryTokenEntityBuilder'
+import QueryTokenEmbeddedBuilder from '../../UserAssets/Templates/QueryTokenEmbeddedBuilder'
 import FilterBuilderEmbedded from '../../UserAssets/Templates/FilterBuilderEmbedded';
 import "../Chart.css"
 
@@ -42,42 +42,10 @@ export default class UserChart extends React.Component<{ ctx: TypeContext<UserCh
         }
         <FilterBuilderEmbedded ctx={ctx.subCtx(e => e.filters)} queryKey={this.props.ctx.value.query.key}
           subTokenOptions={SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement | SubTokensOptions.CanAggregate} />
-        <ChartBuilder queryKey={queryKey} onInvalidate={this.handleInvalidate} onTokenChange={this.handleTokenChange} onRedraw={this.handleInvalidate} ctx={this.props.ctx} />
-        <EntityTable ctx={ctx.subCtx(e => e.orders)} columns={EntityTable.typedColumns<QueryOrderEmbedded>([
-          {
-            property: a => a.token,
-            template: ctx => <QueryTokenEntityBuilder
-              ctx={ctx.subCtx(a => a.token, { formGroupStyle: "SrOnly" })}
-              queryKey={this.props.ctx.value.query!.key}
-              subTokenOptions={SubTokensOptions.CanElement | SubTokensOptions.CanAggregate} />
-          },
-          { property: a => a.orderType }
-        ])} />
+        <ChartBuilder queryKey={queryKey} ctx={this.props.ctx}
+          onInvalidate={() => { }} onTokenChange={() => { }} onRedraw={() => { }} onOrderChanged={() => { }} />
       </div>
     );
-  }
-
-  handleInvalidate = () => {
-    this.fixOrders();
-  };
-
-
-  handleTokenChange = () => {
-    this.fixOrders();
-  };
-
-  fixOrders() {
-    var uc = this.props.ctx.value;
-
-    if (uc.groupResults) {
-      var oldOrders = uc.orders.filter(mle =>
-        mle.element.token && mle.element.token.token && mle.element.token.token.queryTokenType != "Aggregate" &&
-        !uc.columns.some(mle2 => !!mle2.element.token && !!mle2.element.token.token && mle2.element.token.token.fullKey == mle.element.token!.token!.fullKey));
-
-      oldOrders.forEach(o => this.props.ctx.value.orders.remove(o));
-    }
-
-    this.forceUpdate();
   }
 }
 

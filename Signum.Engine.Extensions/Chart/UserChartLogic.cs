@@ -1,4 +1,4 @@
-﻿using Signum.Engine.Authorization;
+using Signum.Engine.Authorization;
 using Signum.Engine.Basics;
 using Signum.Engine.DynamicQuery;
 using Signum.Engine.Maps;
@@ -149,8 +149,6 @@ namespace Signum.Engine.Chart
             {
                 ChartScript = userChart.ChartScript,
                 Filters = userChart.Filters.ToFilterList(),
-                GroupResults = userChart.GroupResults,
-                Orders = userChart.Orders.Select(qo => new Order(qo.Token.Token, qo.OrderType)).ToList(),
                 Parameters = userChart.Parameters.ToMList(),
             };
             
@@ -158,6 +156,8 @@ namespace Signum.Engine.Chart
             {
                 a.Token = b.Token == null ? null : new QueryTokenEmbedded(b.Token.Token);
                 a.DisplayName = b.DisplayName;
+                a.OrderByIndex = b.OrderByIndex;
+                a.OrderByType = b.OrderByType;
             });
 
             return cr;
@@ -205,8 +205,7 @@ namespace Signum.Engine.Chart
                 try
                 {
                     if (uc.Filters.Any(a => a.Token.ParseException != null) ||
-                       uc.Columns.Any(a => a.Token != null && a.Token.ParseException != null) ||
-                       uc.Orders.Any(a => a.Token.ParseException != null))
+                       uc.Columns.Any(a => a.Token != null && a.Token.ParseException != null))
                     {
                         QueryDescription qd = QueryLogic.Queries.QueryDescription(uc.Query.ToQueryName());
 
@@ -250,26 +249,6 @@ namespace Signum.Engine.Chart
                                         case FixTokenResult.Nothing: break;
                                         case FixTokenResult.DeleteEntity: return table.DeleteSqlSync(uc, u => u.Guid == uc.Guid);
                                         case FixTokenResult.RemoveToken: item.Token = null; break;
-                                        case FixTokenResult.SkipEntity: return null;
-                                        case FixTokenResult.Fix: item.Token = token; break;
-                                        default: break;
-                                    }
-                                }
-                            }
-                        }
-
-                        if (uc.Orders.Any())
-                        {
-                            using (DelayedConsole.Delay(() => Console.WriteLine(" Orders:")))
-                            {
-                                foreach (var item in uc.Orders.ToList())
-                                {
-                                    QueryTokenEmbedded token = item.Token;
-                                    switch (QueryTokenSynchronizer.FixToken(replacements, ref token, qd, SubTokensOptions.CanElement | canAggregate, item.OrderType.ToString(), allowRemoveToken: true, allowReCreate: false))
-                                    {
-                                        case FixTokenResult.Nothing: break;
-                                        case FixTokenResult.DeleteEntity: return table.DeleteSqlSync(uc, u => u.Guid == uc.Guid);
-                                        case FixTokenResult.RemoveToken: uc.Orders.Remove(item); break;
                                         case FixTokenResult.SkipEntity: return null;
                                         case FixTokenResult.Fix: item.Token = token; break;
                                         default: break;
