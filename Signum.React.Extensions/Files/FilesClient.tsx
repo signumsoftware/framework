@@ -43,7 +43,7 @@ function registerAutoFileLine(type: Type<IFile & ModifiableEntity>) {
 
     var m = ctx.propertyRoute.member;
     if (m && m.defaultFileTypeInfo && m.defaultFileTypeInfo.onlyImages)
-      return <FileImageLine ctx={ctx} />;
+      return <FileImageLine ctx={ctx} imageHtmlAttributes={{style: { maxWidth: '100%', maxHeight: '100%'}}}/>;
 
     return <FileLine ctx={ctx} />;
   };
