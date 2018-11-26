@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Microsoft.CodeAnalysis;
+using System.Reflection;
 
 namespace Signum.Entities.Dynamic
 {
@@ -72,7 +73,7 @@ namespace Signum.Entities.Dynamic
 
         public static IEnumerable<MetadataReference> GetCoreMetadataReferences()
         {
-            var dd = typeof(Enumerable).GetTypeInfo().Assembly.Location;
+            string dd = typeof(Enumerable).GetType().Assembly.Location;
             var coreDir = Directory.GetParent(dd);
 
             return CoreAssemblyNames.Select(name => MetadataReference.CreateFromFile(Path.Combine(coreDir.FullName, name))).ToArray();
