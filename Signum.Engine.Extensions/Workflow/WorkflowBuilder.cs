@@ -1,4 +1,4 @@
-﻿using Signum.Entities.Workflow;
+using Signum.Entities.Workflow;
 using Signum.Engine.Operations;
 using Signum.Entities;
 using Signum.Entities.Reflection;
@@ -295,6 +295,7 @@ namespace Signum.Engine.Workflow
                 Name = newName,
                 MainEntityType = this.workflow.MainEntityType,
             }.Save();
+            newWorkflow.MainEntityStrategies.AddRange(this.workflow.MainEntityStrategies);
 
             Dictionary<IWorkflowNodeEntity, IWorkflowNodeEntity> nodes = new Dictionary<IWorkflowNodeEntity, IWorkflowNodeEntity>();
 
