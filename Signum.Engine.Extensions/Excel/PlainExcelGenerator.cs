@@ -124,10 +124,11 @@ namespace Signum.Engine.Excel
                         ss.NumberingFormats.AppendChild(numberingFormat);
                         var cellFormat = (CellFormat)decimalCellFormat.CloneNode(false);
                         cellFormat.NumberFormatId = numberingFormat.NumberFormatId;
-                        ss.CellStyles.AppendChild(cellFormat);
-                        if (ss.CellStyles.Count != key)
+                        ss.CellFormats.AppendChild(cellFormat);
+                        ss.CellFormats.Count = (uint)ss.CellFormats.ChildElements.Count;
+                        if (ss.CellFormats.Count != styleIndex+1)
                         {
-                            throw new InvalidOperationException("Unexpected CellStyle count");
+                            throw new InvalidOperationException("Unexpected CellFormats count");
                         }
                     }
                 }

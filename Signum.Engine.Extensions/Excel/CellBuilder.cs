@@ -159,7 +159,7 @@ namespace Signum.Engine.Excel
         {
             var excelUnitPrefix = columnUnit== "$" ? "[$$-409]":columnUnit == "£" ? "[$£-809]" : columnUnit == "¥" ? "[$¥-804]" : "";
 
-            var excelUnitSuffix = excelUnitPrefix == "" && !string.IsNullOrEmpty(columnUnit) ? $" {columnUnit}" : "";
+            var excelUnitSuffix = excelUnitPrefix == "" && !string.IsNullOrEmpty(columnUnit) ? $"\" {columnUnit}\"" : "";
 
             var excelFormat = GetExcelFormat(columnFormat);
 
