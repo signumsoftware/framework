@@ -1,15 +1,18 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using spreadsheet = DocumentFormat.OpenXml.Spreadsheet;
 using DocumentFormat.OpenXml.Spreadsheet;
 using DocumentFormat.OpenXml;
 using Signum.Entities.DynamicQuery;
 using Signum.Utilities;
 using Signum.Entities;
+using Signum.Entities.Reflection;
+using Signum.Utilities.Reflection;
 
 namespace Signum.Engine.Excel
 {
-    public enum TemplateCells
+    public enum DefaultStyle
     {
         Title,
         Header,
@@ -21,78 +24,74 @@ namespace Signum.Engine.Excel
         Enum,
         Number,
         Decimal,
-        DecimalEuro,
-        DecimalDollar,
-        DecimalPound,
-        DecimalYuan,
     }
 
     public class CellBuilder
     {
-        public Dictionary<TypeCode, TemplateCells> DefaultTemplateCells = new Dictionary<TypeCode, TemplateCells> 
+        public Dictionary<TypeCode, DefaultStyle> DefaultTemplateCells = new Dictionary<TypeCode, DefaultStyle> 
         {
-            {TypeCode.Boolean, TemplateCells.Boolean},
-            {TypeCode.Byte, TemplateCells.Number},
-            {TypeCode.Char, TemplateCells.Text},
-            {TypeCode.DateTime, TemplateCells.DateTime},
-            {TypeCode.DBNull, TemplateCells.General},
-            {TypeCode.Decimal, TemplateCells.Decimal},
-            {TypeCode.Double, TemplateCells.Decimal},
-            {TypeCode.Empty, TemplateCells.General},
-            {TypeCode.Int16, TemplateCells.Number},
-            {TypeCode.Int32, TemplateCells.Number},
-            {TypeCode.Int64, TemplateCells.Number},
-            {TypeCode.Object, TemplateCells.General},
-            {TypeCode.SByte, TemplateCells.Number},
-            {TypeCode.Single, TemplateCells.Number},
-            {TypeCode.String, TemplateCells.Text},
-            {TypeCode.UInt16, TemplateCells.Number},
-            {TypeCode.UInt32, TemplateCells.Number},
-            {TypeCode.UInt64, TemplateCells.Number}
+            {TypeCode.Boolean, DefaultStyle.Boolean},
+            {TypeCode.Byte, DefaultStyle.Number},
+            {TypeCode.Char, DefaultStyle.Text},
+            {TypeCode.DateTime, DefaultStyle.DateTime},
+            {TypeCode.DBNull, DefaultStyle.General},
+            {TypeCode.Decimal, DefaultStyle.Decimal},
+            {TypeCode.Double, DefaultStyle.Decimal},
+            {TypeCode.Empty, DefaultStyle.General},
+            {TypeCode.Int16, DefaultStyle.Number},
+            {TypeCode.Int32, DefaultStyle.Number},
+            {TypeCode.Int64, DefaultStyle.Number},
+            {TypeCode.Object, DefaultStyle.General},
+            {TypeCode.SByte, DefaultStyle.Number},
+            {TypeCode.Single, DefaultStyle.Number},
+            {TypeCode.String, DefaultStyle.Text},
+            {TypeCode.UInt16, DefaultStyle.Number},
+            {TypeCode.UInt32, DefaultStyle.Number},
+            {TypeCode.UInt64, DefaultStyle.Number}
         };
 
-        public TemplateCells GetTemplateCell(Type type)
+        public DefaultStyle GetDefaultStyle(Type type)
         {
             var uType = type.UnNullify();
             if (uType.IsEnum)
-                return TemplateCells.Enum;
+                return DefaultStyle.Enum;
 
             TypeCode tc = Type.GetTypeCode(uType);
-            return DefaultTemplateCells.TryGetS(tc) ?? TemplateCells.General;
+            return DefaultTemplateCells.TryGetS(tc) ?? DefaultStyle.General;
         }
 
-        public Dictionary<TemplateCells, UInt32Value> DefaultStyles;
+        public Dictionary<DefaultStyle, UInt32Value> DefaultStyles;
 
         public Cell Cell<T>(T value)
         {
-            TemplateCells template = GetTemplateCell(typeof(T));
+            DefaultStyle template = GetDefaultStyle(typeof(T));
             return Cell(value, template);
         }
 
         public Cell Cell<T>(T value, UInt32Value styleIndex)
         {
-            TemplateCells template = GetTemplateCell(typeof(T));
+            DefaultStyle template = GetDefaultStyle(typeof(T));
             return Cell(value, template, styleIndex);
         }
 
         public Cell Cell(object value, Type type)
         {
-            TemplateCells template = GetTemplateCell(type);
+            DefaultStyle template = GetDefaultStyle(type);
             return Cell(value, template);
         }
 
-        public Cell Cell(object value, TemplateCells template)
+        public Cell Cell(object value, DefaultStyle template)
         {
             return Cell(value, template, DefaultStyles[template]);
         }
 
-        public Cell Cell(object value, TemplateCells template, UInt32Value styleIndex)
+        public Cell Cell(object value, DefaultStyle template, UInt32Value styleIndex)
         {
             string excelValue = value == null ? "" :
-                        (template == TemplateCells.Date || template == TemplateCells.DateTime) ? ExcelExtensions.ToExcelDate(((DateTime)value)) :
+                        (template == DefaultStyle.Date || template == DefaultStyle.DateTime) ? ExcelExtensions.ToExcelDate(((DateTime)value)) :
                         (template.ToString().StartsWith("Decimal")) ? ExcelExtensions.ToExcelNumber(Convert.ToDecimal(value)) :
-                        (template == TemplateCells.Boolean) ? ToYesNo((bool)value) :
-                        (template == TemplateCells.Enum) ? ((Enum)value)?.NiceToString() :
+                        (template == DefaultStyle.Boolean) ? ToYesNo((bool)value) :
+                        (template == DefaultStyle.Enum) ? ((Enum)value)?.NiceToString() :
                         value.ToString();
 
             Cell cell = IsInlineString(template)? 
@@ -105,26 +104,22 @@ namespace Signum.Engine.Excel
         }
 
 
-        private bool IsInlineString(TemplateCells template)
+        private bool IsInlineString(DefaultStyle template)
         {
             switch (template)
             {
-                case TemplateCells.Title: 
-                case TemplateCells.Header:
-                case TemplateCells.Text: 
-                case TemplateCells.General: 
-                case TemplateCells.Boolean: 
-                case TemplateCells.Enum:
+                case DefaultStyle.Title: 
+                case DefaultStyle.Header:
+                case DefaultStyle.Text: 
+                case DefaultStyle.General: 
+                case DefaultStyle.Boolean: 
+                case DefaultStyle.Enum:
                     return true;
 
-                case TemplateCells.Date: 
-                case TemplateCells.DateTime: 
-                case TemplateCells.Number: 
-                case TemplateCells.Decimal:
-                case TemplateCells.DecimalDollar:
-                case TemplateCells.DecimalEuro:
-                case TemplateCells.DecimalPound:
-                case TemplateCells.DecimalYuan:
+                case DefaultStyle.Date: 
+                case DefaultStyle.DateTime: 
+                case DefaultStyle.Number: 
+                case DefaultStyle.Decimal:
                     return false;
 
                 default:
@@ -132,23 +127,37 @@ namespace Signum.Engine.Excel
             }
         }
 
-        internal TemplateCells GetTemplateCell(ResultColumn c)
-        {
-            if (c.Column.Type.UnNullify() == typeof(DateTime) && c.Column.Format == "d")
-                return TemplateCells.Date;
+        public Dictionary<string, UInt32Value> CustomDecimalStyles = new Dictionary<string, UInt32Value>();
 
-            if (c.Column.Type.UnNullify() == typeof(decimal))
+        internal (DefaultStyle defaultStyle, UInt32Value styleIndex) GetDefaultStyleAndIndex(ResultColumn c)
+        {
+
+            if (ReflectionTools.IsNumber(c.Column.Type))
             {
-                switch (c.Column.Unit)
+                if (c.Column.Unit.HasText() || c.Column.Format != Reflector.FormatString(c.Column.Type))
                 {
-                    case "€": return TemplateCells.DecimalEuro;
-                    case "$": return TemplateCells.DecimalDollar;
-                    case "£": return TemplateCells.DecimalPound;
-                    case "¥": return TemplateCells.DecimalYuan;
+                    string formatExpression = GetCustomFormatExpression(c.Column.Unit, c.Column.Format);
+                    var styleIndex = CustomDecimalStyles.GetOrCreate(formatExpression, () => Math.Max(
+                                                                         this.DefaultStyles.Values.Max(v => (uint) v),
+                                                                         this.CustomDecimalStyles.Values.Max(v => (uint) v)) +
+                                                                     1
+                    );
+                    return (ReflectionTools.IsIntegerNumber(c.Column.Type) ? DefaultStyle.Number : DefaultStyle.Decimal,
+                        styleIndex);
+
                 }
             }
 
-            return GetTemplateCell(c.Column.Type);
+            var defaultStyle = c.Column.Type.UnNullify() == typeof(DateTime) && c.Column.Format == "d"
+                ? DefaultStyle.Date
+                : GetDefaultStyle(c.Column.Type);
+
+            return (defaultStyle, DefaultStyles.GetOrThrow(defaultStyle));
+        }
+
+        private string GetCustomFormatExpression(string columnUnit, string columnFormat)
+        {
+            throw new NotImplementedException();
         }
 
         private string ToYesNo(bool value)
@@ -158,7 +167,7 @@ namespace Signum.Engine.Excel
 
         public Cell Cell(Type type, object value, UInt32Value styleIndex)
         {
-            TemplateCells template = GetTemplateCell(type);
+            DefaultStyle template = GetDefaultStyle(type);
             return Cell(value, template, styleIndex);
         }
     }

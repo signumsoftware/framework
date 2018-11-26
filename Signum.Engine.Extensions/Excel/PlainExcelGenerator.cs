@@ -45,22 +45,18 @@ namespace Signum.Engine.Excel
 
                 CellBuilder = new CellBuilder()
                 {
-                    DefaultStyles = new Dictionary<TemplateCells, UInt32Value>
+                    DefaultStyles = new Dictionary<DefaultStyle, UInt32Value>
                     {
-                        { TemplateCells.Title, worksheet.FindCell("A1").StyleIndex },
-                        { TemplateCells.Header, worksheet.FindCell("A2").StyleIndex },
-                        { TemplateCells.Date, worksheet.FindCell("B3").StyleIndex },
-                        { TemplateCells.DateTime, worksheet.FindCell("C3").StyleIndex },
-                        { TemplateCells.Text, worksheet.FindCell("D3").StyleIndex },
-                        { TemplateCells.General, worksheet.FindCell("E3").StyleIndex },
-                        { TemplateCells.Boolean, worksheet.FindCell("E3").StyleIndex },
-                        { TemplateCells.Enum, worksheet.FindCell("E3").StyleIndex },
-                        { TemplateCells.Number, worksheet.FindCell("F3").StyleIndex },
-                        { TemplateCells.Decimal, worksheet.FindCell("G3").StyleIndex },
-                        { TemplateCells.DecimalEuro, worksheet.FindCell("H3").StyleIndex },
-                        { TemplateCells.DecimalDollar, worksheet.FindCell("I3").StyleIndex },
-                        { TemplateCells.DecimalPound, worksheet.FindCell("J3").StyleIndex },
-                        { TemplateCells.DecimalYuan, worksheet.FindCell("K3").StyleIndex },
+                        { DefaultStyle.Title, worksheet.FindCell("A1").StyleIndex },
+                        { DefaultStyle.Header, worksheet.FindCell("A2").StyleIndex },
+                        { DefaultStyle.Date, worksheet.FindCell("B3").StyleIndex },
+                        { DefaultStyle.DateTime, worksheet.FindCell("C3").StyleIndex },
+                        { DefaultStyle.Text, worksheet.FindCell("D3").StyleIndex },
+                        { DefaultStyle.General, worksheet.FindCell("E3").StyleIndex },
+                        { DefaultStyle.Boolean, worksheet.FindCell("E3").StyleIndex },
+                        { DefaultStyle.Enum, worksheet.FindCell("E3").StyleIndex },
+                        { DefaultStyle.Number, worksheet.FindCell("F3").StyleIndex },
+                        { DefaultStyle.Decimal, worksheet.FindCell("G3").StyleIndex },
                     }
                 };
             }
@@ -107,17 +103,21 @@ namespace Signum.Engine.Excel
                         BestFit = true,
                         CustomWidth = true
                     }).ToArray()));
-               
+
+                Dictionary<ResultColumn, (DefaultStyle defaultStyle, int styleIndex)> indexes =
+                    results.Columns.ToDictionary(c => c, c => CellBuilder.GetDefaultStyleAndIndex(c));
+
+
                 worksheetPart.Worksheet.Append(new Sequence<Row>()
                 {
-                   new [] { CellBuilder.Cell(title,TemplateCells.Title) }.ToRow(),
+                   new [] { CellBuilder.Cell(title,DefaultStyle.Title) }.ToRow(),
 
                     (from c in results.Columns
-                    select CellBuilder.Cell(c.Column.DisplayName, TemplateCells.Header)).ToRow(),
+                    select CellBuilder.Cell(c.Column.DisplayName, DefaultStyle.Header)).ToRow(),
 
                     from r in results.Rows
                     select (from c in results.Columns
-                            let template = CellBuilder.GetTemplateCell(c)
+                            let template = CellBuilder.GetDefaultStyleAndIndex(c)
                             select CellBuilder.Cell(r[c], template)).ToRow()
                 }.ToSheetData());
 
@@ -174,11 +174,11 @@ namespace Signum.Engine.Excel
                 worksheetPart.Worksheet.Append(new Sequence<Row>()
                 {
                     (from c in members
-                    select CellBuilder.Cell(c.Name, TemplateCells.Header)).ToRow(),
+                    select CellBuilder.Cell(c.Name, DefaultStyle.Header)).ToRow(),
 
                     from r in results
                     select (from c in members
-                            let template = formats.TryGetC(c.Name) == "d" ? TemplateCells.Date : CellBuilder.GetTemplateCell(c.MemberInfo.ReturningType())
+                            let template = formats.TryGetC(c.Name) == "d" ? DefaultStyle.Date : CellBuilder.GetDefaultStyle(c.MemberInfo.ReturningType())
                             select CellBuilder.Cell(c.Getter(r), template)).ToRow()
                 }.ToSheetData());
 
