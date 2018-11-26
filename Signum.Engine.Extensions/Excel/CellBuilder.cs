@@ -175,12 +175,20 @@ namespace Signum.Engine.Excel
             }
             var f = columnFormat.ToUpper();
 
-           return f.StartsWith("C") ? "#,##0." + "0".Replicate(f.After("C").ToInt() ??2)
-                : f.StartsWith("N") ? "#,##0." + "0".Replicate(f.After("N").ToInt() ?? 2)
+            string DecimalPlaces(int places)
+            {
+                if (places == 0)
+                    return "";
+
+                return "." + "0".Replicate(places);
+            }
+
+           return f.StartsWith("C") ? "#,##0" + DecimalPlaces(f.After("C").ToInt() ?? 2)
+                : f.StartsWith("N") ? "#,##0" + DecimalPlaces(f.After("N").ToInt() ?? 2)
                 : f.StartsWith("D") ? "0".Replicate(f.After("D").ToInt() ?? 1)
-                : f.StartsWith("F") ? "0." + "0".Replicate(f.After("F").ToInt() ?? 2)
-                : f.StartsWith("E") ? "0." + "0".Replicate(f.After("E").ToInt() ?? 2)
-                : f.StartsWith("P") ? "0." + "0".Replicate(f.After("P").ToInt() ?? 2) + "%"
+                : f.StartsWith("F") ? "0" + DecimalPlaces(f.After("F").ToInt() ?? 2)
+                : f.StartsWith("E") ? "0" + DecimalPlaces(f.After("E").ToInt() ?? 2)
+                : f.StartsWith("P") ? "0" + DecimalPlaces(f.After("P").ToInt() ?? 2) + "%"
                 : columnFormat;
         }
 
