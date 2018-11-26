@@ -198,7 +198,7 @@ a.style.display = "none";
 export function saveFile(response: Response) {
   const contentDisposition = response.headers.get("Content-Disposition")!;
   const fileNamePart = contentDisposition.split(";").filter(a => a.trim().startsWith("filename=")).singleOrNull();
-  const fileName = fileNamePart ? fileNamePart.trim().after("filename=") : "file.dat";
+  const fileName = fileNamePart ? fileNamePart.trim().after("filename=").trimStart("\"").trimEnd("\"") : "file.dat";
 
   response.blob().then(blob => {
     saveFileBlob(blob, fileName);

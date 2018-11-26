@@ -1,4 +1,4 @@
-﻿import * as Navigator from './Navigator';
+import * as Navigator from './Navigator';
 
 import * as React from 'react'
 
