@@ -39,12 +39,13 @@ namespace Signum.Engine.Excel
                 document.PackageProperties.LastModifiedBy = "";
 
                 WorkbookPart workbookPart = document.WorkbookPart;
-
+                                            
                 WorksheetPart worksheetPart = document.GetWorksheetPartById("rId1");
                 Worksheet worksheet = worksheetPart.Worksheet;
 
                 CellBuilder = new CellBuilder()
                 {
+                    CellFormatCount = document.WorkbookPart.WorkbookStylesPart.Stylesheet.CellFormats.Count,
                     DefaultStyles = new Dictionary<DefaultStyle, UInt32Value>
                     {
                         { DefaultStyle.Title, worksheet.FindCell("A1").StyleIndex },
@@ -57,6 +58,7 @@ namespace Signum.Engine.Excel
                         { DefaultStyle.Enum, worksheet.FindCell("E3").StyleIndex },
                         { DefaultStyle.Number, worksheet.FindCell("F3").StyleIndex },
                         { DefaultStyle.Decimal, worksheet.FindCell("G3").StyleIndex },
+                        { DefaultStyle.Percentage, worksheet.FindCell("H3").StyleIndex },
                     }
                 };
             }
@@ -104,8 +106,31 @@ namespace Signum.Engine.Excel
                         CustomWidth = true
                     }).ToArray()));
 
-                Dictionary<ResultColumn, (DefaultStyle defaultStyle, int styleIndex)> indexes =
+                Dictionary<ResultColumn, (DefaultStyle defaultStyle, UInt32Value styleIndex)> indexes =
                     results.Columns.ToDictionary(c => c, c => CellBuilder.GetDefaultStyleAndIndex(c));
+                var ss = document.WorkbookPart.WorkbookStylesPart.Stylesheet;
+                {
+                    var maxIndex = ss.NumberingFormats.ChildElements.Cast<NumberingFormat>()
+                        .Max(f => (uint) f.NumberFormatId)+1;
+
+                    var decimalCellFormat = ss.CellFormats.ElementAt((int)(uint)CellBuilder.DefaultStyles[DefaultStyle.Decimal]);
+                    foreach (var (key, styleIndex) in CellBuilder.CustomDecimalStyles)
+                    {
+                        var numberingFormat = new NumberingFormat
+                        {
+                            NumberFormatId = maxIndex++,
+                            FormatCode = key
+                        };
+                        ss.NumberingFormats.AppendChild(numberingFormat);
+                        var cellFormat = (CellFormat)decimalCellFormat.CloneNode(false);
+                        cellFormat.NumberFormatId = numberingFormat.NumberFormatId;
+                        ss.CellStyles.AppendChild(cellFormat);
+                        if (ss.CellStyles.Count != key)
+                        {
+                            throw new InvalidOperationException("Unexpected CellStyle count");
+                        }
+                    }
+                }
 
 
                 worksheetPart.Worksheet.Append(new Sequence<Row>()
@@ -117,8 +142,8 @@ namespace Signum.Engine.Excel
 
                     from r in results.Rows
                     select (from c in results.Columns
-                            let template = CellBuilder.GetDefaultStyleAndIndex(c)
-                            select CellBuilder.Cell(r[c], template)).ToRow()
+                            let t = indexes.GetOrThrow(c)
+                            select CellBuilder.Cell(r[c], t.defaultStyle,t.styleIndex)).ToRow()
                 }.ToSheetData());
 
                 workbookPart.Workbook.Save();

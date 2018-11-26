@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using spreadsheet = DocumentFormat.OpenXml.Spreadsheet;
 using DocumentFormat.OpenXml.Spreadsheet;
@@ -24,6 +25,7 @@ namespace Signum.Engine.Excel
         Enum,
         Number,
         Decimal,
+        Percentage
     }
 
     public class CellBuilder
@@ -128,6 +130,8 @@ namespace Signum.Engine.Excel
         }
 
         public Dictionary<string, UInt32Value> CustomDecimalStyles = new Dictionary<string, UInt32Value>();
+        public UInt32Value CellFormatCount;
+            
 
         internal (DefaultStyle defaultStyle, UInt32Value styleIndex) GetDefaultStyleAndIndex(ResultColumn c)
         {
@@ -137,27 +141,47 @@ namespace Signum.Engine.Excel
                 if (c.Column.Unit.HasText() || c.Column.Format != Reflector.FormatString(c.Column.Type))
                 {
                     string formatExpression = GetCustomFormatExpression(c.Column.Unit, c.Column.Format);
-                    var styleIndex = CustomDecimalStyles.GetOrCreate(formatExpression, () => Math.Max(
-                                                                         this.DefaultStyles.Values.Max(v => (uint) v),
-                                                                         this.CustomDecimalStyles.Values.Max(v => (uint) v)) +
-                                                                     1
-                    );
+                    var styleIndex = CustomDecimalStyles.GetOrCreate(formatExpression, () => CellFormatCount++);
                     return (ReflectionTools.IsIntegerNumber(c.Column.Type) ? DefaultStyle.Number : DefaultStyle.Decimal,
                         styleIndex);
 
                 }
             }
 
-            var defaultStyle = c.Column.Type.UnNullify() == typeof(DateTime) && c.Column.Format == "d"
-                ? DefaultStyle.Date
-                : GetDefaultStyle(c.Column.Type);
+            var defaultStyle = c.Column.Type.UnNullify() == typeof(DateTime) && c.Column.Format == "d" ? DefaultStyle.Date :
+                ReflectionTools.IsDecimalNumber(c.Column.Type) && c.Column.Format?.ToLower()== "p"? DefaultStyle.Percentage :
+                GetDefaultStyle(c.Column.Type);
 
             return (defaultStyle, DefaultStyles.GetOrThrow(defaultStyle));
         }
 
         private string GetCustomFormatExpression(string columnUnit, string columnFormat)
         {
-            throw new NotImplementedException();
+            var excelUnitPrefix = columnUnit== "$" ? "[$$-409]":columnUnit == "£" ? "[$£-809]" : columnUnit == "¥" ? "[$¥-804]" : "";
+
+            var excelUnitSuffix = excelUnitPrefix == "" && !string.IsNullOrEmpty(columnUnit) ? $" {columnUnit}" : "";
+
+            var excelFormat = GetExcelFormat(columnFormat);
+
+            return excelUnitPrefix + excelFormat + excelUnitSuffix;
+
+        }
+
+        private string GetExcelFormat(string columnFormat)
+        {
+            if (columnFormat == null)
+            {
+                return "#,##0.00";
+            }
+            var f = columnFormat.ToUpper();
+
+           return f.StartsWith("C") ? "#,##0." + "0".Replicate(f.After("C").ToInt() ??2)
+                : f.StartsWith("N") ? "#,##0." + "0".Replicate(f.After("N").ToInt() ?? 2)
+                : f.StartsWith("D") ? "0".Replicate(f.After("D").ToInt() ?? 1)
+                : f.StartsWith("F") ? "0." + "0".Replicate(f.After("F").ToInt() ?? 2)
+                : f.StartsWith("E") ? "0." + "0".Replicate(f.After("E").ToInt() ?? 2)
+                : f.StartsWith("P") ? "0." + "0".Replicate(f.After("P").ToInt() ?? 2) + "%"
+                : columnFormat;
         }
 
         private string ToYesNo(bool value)
