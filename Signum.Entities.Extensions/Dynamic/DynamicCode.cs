@@ -45,6 +45,7 @@ namespace Signum.Entities.Dynamic
             typeof(System.ComponentModel.Component),
             typeof(System.ComponentModel.IDataErrorInfo),
             typeof(System.ComponentModel.INotifyPropertyChanged),
+            typeof(System.Net.HttpWebRequest),
             typeof(System.Linq.Expressions.Expression),
             typeof(Signum.Utilities.Csv), //  "Signum.Utilities.dll",
             typeof(Newtonsoft.Json.JsonConvert), //"Newtonsoft.Json.dll",

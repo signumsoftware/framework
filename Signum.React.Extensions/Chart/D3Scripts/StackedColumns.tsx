@@ -179,9 +179,9 @@ export default class StackedColumnsChart extends D3ChartBase {
           .attr('font-weight', 'bold')
           .attr('fill', (r, i) => y(maxValue(i)) >= size / 2 ? '#fff' : '#000')
           .attr('dx', (r, i) => labelMargin)
-          .attr('text-anchor', r => { throw new Error(""); /* y(r.max) >= size / 2 ? 'end' : 'start'*/ })
+          .attr('text-anchor', (r, i) =>  'start')
           .text(r => keyColumn.getNiceName(r.rowValue))
-          .each(function (r) { throw new Error(""); /*var posy = y(r.max); ellipsis(this as SVGTextElement, posy >= size / 2 ? posy : size - posy, labelMargin);*/ });
+          .each(function (r, i) { var posy = y(maxValue(i)); ellipsis(this as SVGTextElement, posy >= size / 2 ? posy : size - posy, labelMargin); });
       }
     }
 

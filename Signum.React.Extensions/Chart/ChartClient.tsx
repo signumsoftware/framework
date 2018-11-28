@@ -423,6 +423,8 @@ export function handleOrderColumn(cr: IChartBase, col: ChartColumnEmbedded, isSh
     if (col.orderByIndex == null)
       col.orderByIndex = (cr.columns.max(a => a.element.orderByIndex) || 0) + 1;
   }
+  
+  col.modified = true;
 }
 
 export module Encoder {

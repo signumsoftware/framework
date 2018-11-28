@@ -175,18 +175,18 @@ export function completeValues(column: ChartColumn<any>, values: any[], complete
       if (limit != null && allValues.length > limit)
         return values;
 
-      allValues.push(minMoment.toJSON());
+      allValues.push(minMoment.format("YYYY-MM-DDTHH:mm:ss"));
       minMoment.add(unit, 1);
     }
 
-    return complete(values, allValues, column, insertPoint, (a, b) => a == b);
+    return complete(values, allValues, column, insertPoint);
   }
 
   if (column.type == "Enum") {
 
     var allValues = Dic.getValues(getTypeInfo(column.token!.type.name).members).map(a => a.name);
 
-    return complete(values, allValues, column, insertPoint, (a, b) => a == b);
+    return complete(values, allValues, column, insertPoint);
   }
 
   if (column.type == "Integer" || column.type == "Real" || column.type == "RealGroupable") {
@@ -228,22 +228,26 @@ export function completeValues(column: ChartColumn<any>, values: any[], complete
         v += step;
       }
     }
-    return complete(values, allValues, column, insertPoint, (a, b) => a == b);
+    return complete(values, allValues, column, insertPoint);
   }
 
   return values;
 }
 
-function complete(values: any[], allValues: any[], column: ChartColumn<any>, insertPoint: "Middle" | "Before" | "After", isEqual: (a: any, b: any) => boolean): any[] {
+function complete(values: any[], allValues: any[], column: ChartColumn<any>, insertPoint: "Middle" | "Before" | "After"): any[] {
   
   if (insertPoint == "Middle") {
-    var oldValues = values.filter(a => !allValues.some(b => isEqual(a, b)));
+    
+    const allValuesDic = allValues.toObject(column.getKey);
+    
+    var oldValues = values.filter(a => !allValuesDic.hasOwnProperty(column.getKey(a)));
 
     return [...allValues, ...oldValues];
   }
-  else
-  {
-    var newValues = allValues.filter(a => !values.some(b => isEqual(a, b)));
+  else {
+    const valuesDic = values.toObject(column.getKey);
+    
+    var newValues = allValues.filter(a => !valuesDic.hasOwnProperty(column.getKey(a)));
 
     if (insertPoint == "Before")
       return [...newValues, ...values];
