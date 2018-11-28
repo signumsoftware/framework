@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 using System.Text;
 using Signum.Engine.Maps;
@@ -57,35 +57,45 @@ namespace Signum.Engine.Basics
 			return exEntity;
 		}
 
-		static ExceptionEntity GetEntity(Exception ex)
-		{
-			ExceptionEntity entity = ex.GetExceptionEntity() ?? new ExceptionEntity(ex);
+        static ExceptionEntity GetEntity(Exception ex)
+        {
+            ExceptionEntity entity = ex.GetExceptionEntity() ?? new ExceptionEntity(ex);
 
-			entity.ExceptionType = ex.GetType().Name;
+            entity.ExceptionType = ex.GetType().Name;
 
-			var exceptions= ex.Follow(e => e.InnerException);
-			string messages = exceptions.ToString(e => e.Message, "\r\n\r\n");
-			string stacktraces = exceptions.ToString(e => e.StackTrace, "\r\n\r\n");
+            var exceptions = ex.Follow(e => e.InnerException);
+            string messages = exceptions.ToString(e => e.Message, "\r\n\r\n");
+            string stacktraces = exceptions.ToString(e => e.StackTrace, "\r\n\r\n");
 
-			entity.ExceptionMessage = messages.DefaultText("- No message - ");
-			entity.StackTrace = stacktraces.DefaultText("- No stacktrace -");
-			entity.ThreadId = Thread.CurrentThread.ManagedThreadId;
-			entity.ApplicationName = Schema.Current.ApplicationName;
+            entity.ExceptionMessage = messages.DefaultText("- No message - ");
+            entity.StackTrace = stacktraces.DefaultText("- No stacktrace -");
+            entity.ThreadId = Thread.CurrentThread.ManagedThreadId;
+            entity.ApplicationName = Schema.Current.ApplicationName;
             entity.HResult = ex.HResult;
 
 
             entity.Environment = CurrentEnvironment;
-			try
-			{
-				entity.User = UserHolder.Current?.ToLite(); //Session special situations
-			}
-			catch { }
+            try
+            {
+                entity.User = UserHolder.Current?.ToLite(); //Session special situations
+            }
+            catch { }
 
-			entity.Data = ex.Data.Dump();
-			entity.Version = Schema.Current.Version.ToString();
+            try
+            {
+                entity.Data = ex.Data.Dump();
+            }
+            catch (Exception e)
+            {
+                entity.Data = $@"Error Dumping Data!
+{e.GetType().Name}: {e.Message}
+{e.StackTrace}";
+            }
 
-			return entity;
-		}
+            entity.Version = Schema.Current.Version.ToString();
+
+            return entity;
+        }
 
 		static ExceptionEntity SaveForceNew(this ExceptionEntity entity)
 		{

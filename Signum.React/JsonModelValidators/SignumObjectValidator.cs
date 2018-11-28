@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Internal;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
@@ -161,12 +161,14 @@ namespace Signum.React.Json
                 return true;
 
             if (this.CurrentPath.Push(lite.EntityOrNull))
-                return true;
-
-            using (StateManager.Recurse(this, this.Key + ".entity", null, lite.EntityOrNull, null))
             {
-                return this.ValidateModifiableEntity(lite.EntityOrNull);
+                using (StateManager.Recurse(this, this.Key + ".entity", null, lite.EntityOrNull, null))
+                {
+                    return this.ValidateModifiableEntity(lite.EntityOrNull);
+                }
             }
+
+            return true;
         }
 
         private bool ValidateMList(IMListPrivate mlist)

@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using Signum.Engine;
 using Signum.Engine.Basics;
@@ -57,6 +57,8 @@ namespace Signum.React.ApiControllers
             {
                 GraphExplorer.SetValidationErrors(GraphExplorer.FromRoot(request.entity), ex);
                 this.TryValidateModel(request, "request");
+                if (this.ModelState.IsValid)
+                    throw ex;
                 return BadRequest(this.ModelState);
             }
 
