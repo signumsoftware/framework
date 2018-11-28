@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
 using Signum.Utilities;
@@ -55,9 +55,7 @@ namespace Signum.Entities.DynamicQuery
 
         protected override Expression BuildExpressionInternal(BuildExpressionContext context)
         {
-            var liteParent = Parent.Follow(a => a.Parent).FirstEx(p => p.Type.IsLite());
-
-            var parentExpression = liteParent.BuildExpression(context).ExtractEntity(false).UnNullify();
+            var parentExpression = Parent.BuildExpression(context).ExtractEntity(false).UnNullify();
 
             var result = Expression.Invoke(Lambda, parentExpression);
 
