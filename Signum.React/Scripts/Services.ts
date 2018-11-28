@@ -35,11 +35,6 @@ export function ajaxGet<T>(options: AjaxOptions): Promise<T> {
 }
 
 export function ajaxGetRaw(options: AjaxOptions): Promise<Response> {
-
-  if (window.navigator.userAgent.contains("Trident") && (options.cache || "no-cache" == "no-cache")) {
-    options.url += "?cacheTicks=" + new Date().getTime();
-  }
-
   return wrapRequest(options, () =>
     abortableFetch(baseUrl(options), {
       method: "GET",
