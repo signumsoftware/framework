@@ -1,4 +1,4 @@
-﻿using Signum.Engine.Linq;
+using Signum.Engine.Linq;
 using Signum.Entities;
 using Signum.Entities.DynamicQuery;
 using Signum.Entities.Reflection;
@@ -106,7 +106,6 @@ namespace Signum.Engine.DynamicQuery
             Expression<Func<T, IEnumerable<KVP>>> collectionSelector,
             Expression<Func<KVP, K>> keySelector,
             Expression<Func<KVP, V>> valueSelector,
-            Expression<Func<T, EmbeddedEntity>> forEmbedded = null,
             ResetLazy<HashSet<K>> allKeys = null)
             where T : Entity
         {
@@ -119,13 +118,42 @@ namespace Signum.Engine.DynamicQuery
                 AllKeys = allKeys ?? GetAllKeysLazy<T, KVP, K>(collectionSelector, keySelector)
             };
 
-            var route = forEmbedded == null ?
-                PropertyRoute.Root(typeof(T)) :
-                PropertyRoute.Construct(forEmbedded);
-
-            RegisteredExtensionsDictionaries.Add(route, mei);
+            RegisteredExtensionsDictionaries.Add(PropertyRoute.Root(typeof(T)), mei);
 
             return mei;
+        }
+
+        public ExtensionDictionaryInfo<M, KVP, K, V> RegisterDictionaryInEmbedded<T, M, KVP, K, V>(
+                Expression<Func<T, M>> embeddedSelector,
+                Expression<Func<M, IEnumerable<KVP>>> collectionSelector,
+                Expression<Func<KVP, K>> keySelector,
+                Expression<Func<KVP, V>> valueSelector,
+                ResetLazy<HashSet<K>> allKeys = null)
+            where T : Entity
+            where M : ModifiableEntity
+        
+        {
+            var mei = new ExtensionDictionaryInfo<M, KVP, K, V>
+            {
+                CollectionSelector = collectionSelector,
+                KeySelector = keySelector,
+                ValueSelector = valueSelector,
+
+                AllKeys = allKeys ?? GetAllKeysLazy<T, KVP, K>(CombineSelectors(embeddedSelector, collectionSelector) , keySelector)
+            };
+
+            RegisteredExtensionsDictionaries.Add(PropertyRoute.Construct(embeddedSelector), mei);
+
+            return mei;
+        }
+
+        private Expression<Func<T, IEnumerable<KVP>>> CombineSelectors<T, M, KVP>(Expression<Func<T, M>> embeddedSelector, Expression<Func<M, IEnumerable<KVP>>> collectionSelector)
+            where T : Entity
+            where M : ModifiableEntity
+        {
+            Expression<Func<T, IEnumerable<KVP>>> result = e => collectionSelector.Evaluate(embeddedSelector.Evaluate(e));
+
+            return (Expression<Func<T, IEnumerable<KVP>>>)ExpressionCleaner.Clean(result);
         }
 
         private ResetLazy<HashSet<K>> GetAllKeysLazy<T, KVP, K>(Expression<Func<T, IEnumerable<KVP>>> collectionSelector, Expression<Func<KVP, K>> keySelector)
