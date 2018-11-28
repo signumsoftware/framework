@@ -294,8 +294,10 @@ namespace Signum.Engine.Workflow
             {
                 Name = newName,
                 MainEntityType = this.workflow.MainEntityType,
-            }.Save();
+                ExpirationDate = this.workflow.ExpirationDate,
+            };
             newWorkflow.MainEntityStrategies.AddRange(this.workflow.MainEntityStrategies);
+            newWorkflow.Save();
 
             Dictionary<IWorkflowNodeEntity, IWorkflowNodeEntity> nodes = new Dictionary<IWorkflowNodeEntity, IWorkflowNodeEntity>();
 
