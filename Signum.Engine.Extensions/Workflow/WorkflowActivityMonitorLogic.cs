@@ -1,4 +1,4 @@
-﻿using Signum.Engine.Basics;
+using Signum.Engine.Basics;
 using Signum.Entities;
 using Signum.Entities.DynamicQuery;
 using Signum.Entities.Workflow;
@@ -49,7 +49,7 @@ namespace Signum.Engine.Workflow
                 CustomColumns = request.Columns.Select(a => a.Token.FullKey()).ToList(),
                 Activities = rt.Rows.Select(row => new WorkflowActivityStats
                 {
-                    WorkflowActivity = (Lite<WorkflowActivityEntity>)row[0],
+                    WorkflowActivity = (Lite<IWorkflowNodeEntity>)row[0],
                     CaseActivityCount = (int)row[1],
                     CustomValues = row.GetValues(customCols),
                 }).ToList(),
@@ -66,7 +66,7 @@ namespace Signum.Engine.Workflow
 
     public class WorkflowActivityStats
     {
-        public Lite<WorkflowActivityEntity> WorkflowActivity;
+        public Lite<IWorkflowNodeEntity> WorkflowActivity;
         public int CaseActivityCount;
         public object[] CustomValues;
     }
