@@ -43,7 +43,10 @@ export default class UserChart extends React.Component<{ ctx: TypeContext<UserCh
         <FilterBuilderEmbedded ctx={ctx.subCtx(e => e.filters)} queryKey={this.props.ctx.value.query.key}
           subTokenOptions={SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement | SubTokensOptions.CanAggregate} />
         <ChartBuilder queryKey={queryKey} ctx={this.props.ctx}
-          onInvalidate={() => { }} onTokenChange={() => { }} onRedraw={() => { }} onOrderChanged={() => { }} />
+            onInvalidate={() => this.forceUpdate()} 
+            onTokenChange={() =>  this.forceUpdate()} 
+            onRedraw={() => this.forceUpdate()} 
+            onOrderChanged={() => this.forceUpdate()} />
       </div>
     );
   }

@@ -4,6 +4,7 @@ using Signum.Entities.Basics;
 using Signum.Entities.Dynamic;
 using Signum.Utilities;
 using System;
+using System.Linq;
 using System.Linq.Expressions;
 
 namespace Signum.Entities.Workflow

@@ -3,6 +3,7 @@ using Signum.Entities.Dynamic;
 using Signum.Entities.Word;
 using Signum.Utilities;
 using Signum.Entities.Mailing;
+using System.Linq;
 
 namespace Signum.Entities.Templating
 {

@@ -12,6 +12,7 @@ using System.Globalization;
 using Microsoft.AspNetCore.Mvc;
 using Signum.React.Filters;
 using System.ComponentModel.DataAnnotations;
+using System.Linq;
 
 namespace Signum.React.Dynamic
 {
