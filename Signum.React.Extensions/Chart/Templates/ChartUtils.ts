@@ -133,7 +133,7 @@ export function insertPoint(column: ChartColumn<any>, valueColumn: ChartColumn<a
   }
 }
 
-export function completeValues(column: ChartColumn<any>, values: any[], completeValues: string | null | undefined, insertPoint: "Middle" | "Before" | "After"): any[] {
+export function completeValues(column: ChartColumn<unknown>, values: unknown[], completeValues: string | null | undefined, insertPoint: "Middle" | "Before" | "After"): unknown[] {
   
   if (completeValues == null || completeValues == "No")
     return values;
@@ -145,8 +145,8 @@ export function completeValues(column: ChartColumn<any>, values: any[], complete
 
   if (column.type == "Date" || column.type == "DateTime") {
 
-    const min = d3.min(values);
-    const max = d3.max(values);
+    const min = d3.min(values as string[]);
+    const max = d3.max(values as string[]);
 
     if (min == undefined || max == undefined)
       return values; 
@@ -191,8 +191,8 @@ export function completeValues(column: ChartColumn<any>, values: any[], complete
 
   if (column.type == "Integer" || column.type == "Real" || column.type == "RealGroupable") {
 
-    const min = d3.min(values) as number | undefined;
-    const max = d3.max(values) as number | undefined;
+    const min = d3.min(values as number[]) as number | undefined;
+    const max = d3.max(values as number[]) as number | undefined;
 
     if (min == undefined || max == undefined)
       return values;
@@ -234,7 +234,7 @@ export function completeValues(column: ChartColumn<any>, values: any[], complete
   return values;
 }
 
-function complete(values: any[], allValues: any[], column: ChartColumn<any>, insertPoint: "Middle" | "Before" | "After", isEqual: (a: any, b: any) => boolean): any[] {
+function complete(values: unknown[], allValues: unknown[], column: ChartColumn<unknown>, insertPoint: "Middle" | "Before" | "After", isEqual: (a: unknown, b: unknown) => boolean): any[] {
   
   if (insertPoint == "Middle") {
     var oldValues = values.filter(a => !allValues.some(b => isEqual(a, b)));

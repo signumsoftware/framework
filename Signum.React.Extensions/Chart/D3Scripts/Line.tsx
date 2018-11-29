@@ -5,13 +5,14 @@ import * as ChartUtils from '../Templates/ChartUtils';
 import { translate, scale, rotate, skewX, skewY, matrix, scaleFor, rule, ellipsis } from '../Templates/ChartUtils';
 import { ChartTable, ChartColumn, ChartRow } from '../ChartClient';
 import { KeyCodes } from '@framework/Components';
+import ReactChartBase from './ReactChartBase';
 
 
-export default class LineChart extends D3ChartBase {
+export default class LineChart extends ReactChartBase {
 
-  drawChart(data: ChartTable, chart: d3.Selection<SVGElement, {}, null, undefined>, width: number, height: number) {
+  renderChart(data: ChartTable, width: number, height: number): React.ReactElement<any> {
 
-    var keyColumn = data.columns.c0! as ChartColumn<string>;
+    var keyColumn = data.columns.c0! as ChartColumn<unknown>;
     var valueColumn = data.columns.c1! as ChartColumn<number>;
 
     var xRule = rule({
@@ -46,128 +47,178 @@ export default class LineChart extends D3ChartBase {
       .range([0, xRule.size('content')]);
 
     var y = scaleFor(valueColumn, data.rows.map(r => valueColumn.getValue(r)), 0, yRule.size('content'), data.parameters["Scale"]);
-    
-    chart.append('svg:g').attr('class', 'x-tick').attr('transform', translate(xRule.start('content') + (x.bandwidth() / 2), yRule.start('ticks')))
-      .enterData(data.rows, 'line', 'x-tick')
-      .attr('y2', (r, i) => yRule.start('labels' + (i % 2)) - yRule.start('ticks'))
-      .attr('x1', r => x(keyColumn.getValueKey(r))!)
-      .attr('x2', r => x(keyColumn.getValueKey(r))!)
-      .style('stroke', 'Black');
 
-    if ((x.bandwidth() * 2) > 60) {
-      chart.append('svg:g').attr('class', 'x-label').attr('transform', translate(xRule.start('content') + (x.bandwidth() / 2), yRule.middle('labels0')))
-        .enterData(data.rows, 'text', 'x-label')
-        .attr('x', r => x(keyColumn.getValueKey(r))!)
-        .attr('y', (r, i) => yRule.middle('labels' + (i % 2)) - yRule.middle('labels0'))
-        .attr('dominant-baseline', 'middle')
-        .attr('text-anchor', 'middle')
-        .text(r => keyColumn.getValueNiceName(r))
-        .each(function (v) { ellipsis(this as SVGTextElement, x.bandwidth() * 2); });
-    }
-
-    chart.append('svg:g').attr('class', 'x-title').attr('transform', translate(xRule.middle('content'), yRule.middle('title')))
-      .append('svg:text').attr('class', 'x-title')
-      .attr('text-anchor', 'middle')
-      .attr('dominant-baseline', 'middle')
-      .text(keyColumn.title);
+    var rowByKey = data.rows.toObject(r => keyColumn.getValueKey(r));
 
     var yTicks = y.ticks(height / 50);
     var yTickFormat = y.tickFormat(height / 50);
-    chart.append('svg:g').attr('class', 'y-line').attr('transform', translate(xRule.start('content'), yRule.end('content')))
-      .enterData(yTicks, 'line', 'y-line')
-      .attr('x2', xRule.size('content'))
-      .attr('y1', t => -y(t))
-      .attr('y2', t => -y(t))
-      .style('stroke', 'LightGray');
 
-    chart.append('svg:g').attr('class', 'y-tick').attr('transform', translate(xRule.start('ticks'), yRule.end('content')))
-      .enterData(yTicks, 'line', 'y-tick')
-      .attr('x2', xRule.size('ticks'))
-      .attr('y1', t => -y(t))
-      .attr('y2', t => -y(t))
-      .style('stroke', 'Black');
-
-    chart.append('svg:g').attr('class', 'y-label').attr('transform', translate(xRule.end('labels'), yRule.end('content')))
-      .enterData(yTicks, 'text', 'y-label')
-      .attr('y', t => -y(t))
-      .attr('dominant-baseline', 'middle')
-      .attr('text-anchor', 'end')
-      .text(yTickFormat);
-
-    chart.append('svg:g').attr('class', 'y-label').attr('transform', translate(xRule.middle('title'), yRule.middle('content')) + rotate(270))
-      .append('svg:text').attr('class', 'y-label')
-      .attr('text-anchor', 'middle')
-      .attr('dominant-baseline', 'middle')
-      .text(valueColumn.title);
-
-    var line = d3.line<ChartRow>()
-      .x(r => x(keyColumn.getValueKey(r))!)
-      .y(r => -y(valueColumn.getValue(r)))
+    var line = d3.line<unknown>()
+      .defined(key => rowByKey[keyColumn.getKey(key)] != null)
+      .x(key => x(keyColumn.getKey(key))!)
+      .y(key => rowByKey[keyColumn.getKey(key)] && -y(valueColumn.getValue(rowByKey[keyColumn.getKey(key)])))
       .curve(ChartUtils.getCurveByName(data.parameters["Interpolate"]!)!);//"linear"
 
     var color = data.parameters["Color"]!;// 'steelblue'
-    //PAINT CHART
-    chart.append('svg:g').attr('class', 'shape').attr('transform', translate(xRule.start('content') + (x.bandwidth() / 2), yRule.end('content')))
-      .append('svg:path').attr('class', 'shape')
-      .attr('stroke', color)
-      .attr('fill', 'none')
-      .attr('stroke-width', 3)
-      .attr('shape-rendering', 'initial')
-      .attr('d', line(data.rows))
 
-    //paint graph - hover area trigger
-    chart.append('svg:g').attr('class', 'hover-trigger').attr('transform', translate(xRule.start('content') + (x.bandwidth() / 2), yRule.end('content')))
-      .enterData(data.rows, 'circle', 'hover-trigger')
-      .attr('cx', r => x(keyColumn.getValueKey(r))!)
-      .attr('cy', r => -y(valueColumn.getValue(r)))
-      .attr('r', 15)
-      .attr('fill', '#fff')
-      .attr('fill-opacity', 0)
-      .attr('stroke', 'none')
-      .on('click', r => this.props.onDrillDown(r))
-      .style("cursor", "pointer")
-      .append('svg:title')
-      .text(r => keyColumn.getValueNiceName(r) + ': ' + valueColumn.getValueNiceName(r));
+    return (
+      <svg direction="rtl" width={width} height={height}>
+        <g className="x-tick" transform={translate(xRule.start('content') + (x.bandwidth() / 2), yRule.start('ticks'))}>
+          {keyValues.map((r, i) => <line className="x-tick"
+            y2={yRule.start('labels' + (i % 2)) - yRule.start('ticks')}
+            x1={x(keyColumn.getKey(r))!}
+            x2={x(keyColumn.getKey(r))!}
+            stroke="Black" />)}
+        </g>
+        {(x.bandwidth() * 2) > 60 &&
+          <g className="x-label" transform={translate(xRule.start('content') + (x.bandwidth() / 2), yRule.middle('labels0'))}>
+            {keyValues.map((r, i) => <TextEllipsis maxWidth={x.bandwidth() * 2} className="x-label"
+              x={x(keyColumn.getKey(r))!}
+              y={yRule.middle('labels' + (i % 2)) - yRule.middle('labels0')}
+              dominant-baseline="middle"
+              text-anchor="middle">
+              {keyColumn.getNiceName(r)}
+            </TextEllipsis>)}
+          </g>
+        }
+        <g className="x-title" transform={translate(xRule.middle('content'), yRule.middle('title'))}>
+          <text className="x-title" text-anchor="middle" dominant-baseline="middle">
+            {keyColumn.title}
+          </text>
+        </g>
 
-    //paint graph - points
-    chart.append('svg:g').attr('class', 'point').attr('transform', translate(xRule.start('content') + (x.bandwidth() / 2), yRule.end('content')))
-      .enterData(data.rows, 'circle', 'point')
-      .attr('fill', color)
-      .attr('r', 5)
-      .attr('cx', r => x(keyColumn.getValueKey(r))!)
-      .attr('cy', r => -y(valueColumn.getValue(r)))
-      .on('click', r => this.props.onDrillDown(r))
-      .style("cursor", "pointer")
-      .attr('shape-rendering', 'initial')
-      .append('svg:title')
-      .text(r => keyColumn.getValueNiceName(r) + ': ' + valueColumn.getValueNiceName(r));
+        <g className="y-line" transform={translate(xRule.start('content'), yRule.end('content'))}>
+          {yTicks.map(t => <line className="y-line"
+            x2={xRule.size('content')}
+            y1={-y(t)}
+            y2={-y(t)}
+            stroke="LightGray" />)}
+        </g>
 
-    if (parseFloat(data.parameters["NumberOpacity"]!) > 0) {
+        <g className="y-tick" transform={translate(xRule.start('ticks'), yRule.end('content'))}>
+          {yTicks.map(t => <line className="y-tick"
+            x2={xRule.size('ticks')}
+            y1={-y(t)}
+            y2={-y(t)}
+            stroke="Black" />)}
+        </g>
 
-      //paint graph - point-labels
-      chart.append('svg:g').attr('class', 'point-label').attr('transform', translate(xRule.start('content') + (x.bandwidth() / 2), yRule.end('content')))
-        .enterData(data.rows, 'text', 'point-label')
-        .attr('r', 5)
-        .attr('x', r => x(keyColumn.getValueKey(r))!)
-        .attr('y', r => -y(valueColumn.getValue(r)) - 10)
-        .attr('opacity', parseFloat(data.parameters["NumberOpacity"]!))
-        .attr('text-anchor', 'middle')
-        .on('click', r => this.props.onDrillDown(r))
-        .style("cursor", "pointer")
-        .attr('shape-rendering', 'initial')
-        .text(r => valueColumn.getValueNiceName(r));
+        <g className="y-label" transform={translate(xRule.end('labels'), yRule.end('content'))}>
+          {yTicks.map(t => <text className="y-label"
+            y={-y(t)}
+            dominant-baseline="middle"
+            text-anchor="end">
+            {yTickFormat}
+          </text>)}
+        </g>
+
+        <g className="y-label" transform={translate(xRule.middle('title'), yRule.middle('content')) + rotate(270)}>
+          <text className="y-label" text-anchor="middle" dominant-baseline="middle">
+            {valueColumn.title}
+          </text>
+        </g>
+
+        {/*PAINT CHART'*/}
+        <g className="shape" transform={translate(xRule.start('content') + (x.bandwidth() / 2), yRule.end('content'))}>
+          <path className="shape" stroke={color} fill="none" stroke-width={3} shape-rendering="initial" d={line(keyValues)!} />
+        </g>
+
+        {/*paint graph - hover area trigger*/}
+        <g className="hover-trigger" transform={translate(xRule.start('content') + (x.bandwidth() / 2), yRule.end('content'))}>
+          {keyValues
+            .filter(key => rowByKey[keyColumn.getKey(key)] != null)
+            .map(key => <circle className="hover-trigger" fill="#fff" fillOpacity={0} stroke="none" cursor="pointer" r={15}
+              cx={x(keyColumn.getKey(key))!}
+              cy={-y(valueColumn.getValue(rowByKey[keyColumn.getKey(key)]))}
+              onClick={e => this.props.onDrillDown(rowByKey[keyColumn.getKey(key)])}>
+              <title>
+                {keyColumn.getNiceName(key) + ': ' + valueColumn.getValueNiceName(rowByKey[keyColumn.getKey(key)])}
+              </title>
+            </circle>)}
+        </g>
+
+        {/*paint graph - points*/}
+        <g className="point" transform={translate(xRule.start('content') + (x.bandwidth() / 2), yRule.end('content'))}>
+          {keyValues
+            .filter(key => rowByKey[keyColumn.getKey(key)] != null)
+            .map(key => <circle className="point"
+              fill={color}
+              r={5}
+              cx={x(keyColumn.getKey(key))!}
+              cy={-y(valueColumn.getValue(rowByKey[keyColumn.getKey(key)]))}
+              onClick={e => this.props.onDrillDown(rowByKey[keyColumn.getKey(key)])}
+              cursor="pointer"
+              shapeRendering="initial">
+              <title>
+                {keyColumn.getNiceName(key) + ': ' + valueColumn.getValueNiceName(rowByKey[keyColumn.getKey(key)])}
+              </title>
+            </circle>)}
+        </g>
+
+        { /*Point labels*/
+          parseFloat(data.parameters["NumberOpacity"]!) > 0 &&
+          <g className="point-label" transform={translate(xRule.start('content') + (x.bandwidth() / 2), yRule.end('content'))}>
+            {keyValues
+              .filter(key => rowByKey[keyColumn.getKey(key)] != null)
+              .map(key => <text className="point-label"
+                r={5}
+                x={x(keyColumn.getKey(key))!}
+                y={-y(valueColumn.getValue(rowByKey[keyColumn.getKey(key)])) - 10}
+                opacity={parseFloat(data.parameters["NumberOpacity"]!)}
+                textAnchor="middle"
+                onClick={e => this.props.onDrillDown(rowByKey[keyColumn.getKey(key)])}
+                cursor="pointer"
+                shapeRendering="initial">
+                {valueColumn.getValueNiceName(rowByKey[keyColumn.getKey(key)])}
+              </text>)}
+          </g>
+        }
+
+
+        <g className="x-axis" transform={translate(xRule.start('content'), yRule.end('content'))}>
+          <line className="x-axis" x2={xRule.size('content')} stroke="Black" />
+        </g>
+
+        <g className="y-axis" transform={translate(xRule.start('content'), yRule.start('content'))}>
+          <line className="y-axis" y2={yRule.size('content')} stroke="Black" />
+        </g>
+      </svg>
+    );
+  }
+}
+
+
+export class TextEllipsis extends React.Component<{ maxWidth: number, padding?: number } & React.SVGProps<SVGTextElement>> {
+
+  txt?: SVGTextElement | null;
+
+  render() {
+
+    var { maxWidth, padding, children, ...atts } = this.props;
+
+    return (
+      <text ref={t => this.txt = t} {...atts} >
+        {children || ""}
+      </text>
+    );
+  }
+
+
+  componentDidMount() {
+
+    var width = this.props.maxWidth;
+    if (this.props.padding)
+      width -= this.props.padding * 2;
+
+    let txtElement = this.txt!;
+    let textLength = txtElement.getComputedTextLength();
+    let text = txtElement.textContent!;
+    while (textLength > width && text.length > 0) {
+      text = text.slice(0, -1);
+      while (text[text.length - 1] == ' ' && text.length > 0)
+        text = text.slice(0, -1);
+      txtElement.textContent = text + '…';
+      textLength = txtElement.getComputedTextLength();
     }
-
-    chart.append('svg:g').attr('class', 'x-axis').attr('transform', translate(xRule.start('content'), yRule.end('content')))
-      .append('svg:line')
-      .attr('class', 'x-axis')
-      .attr('x2', xRule.size('content'))
-      .style('stroke', 'Black');
-
-    chart.append('svg:g').attr('class', 'y-axis').attr('transform', translate(xRule.start('content'), yRule.start('content')))
-      .append('svg:line')
-      .attr('class', 'y-axis')
-      .attr('y2', yRule.size('content'))
-      .style('stroke', 'Black');
   }
 }

@@ -43,6 +43,10 @@
     <TypeScriptCompile Include="**\*.tsx" />
     <TypeScriptCompile Include="**\*.ts" />
   </ItemGroup>
+
+  <ItemGroup>
+    <TypeScriptCompile Remove="Chart\D3Scripts\ReactChartBase.tsx" />
+  </ItemGroup>
   
   <Target Name="GenerateSignumTS">
     <WriteLinesToFile File="$(BaseIntermediateOutputPath)SignumReferences.txt" Lines="@(ReferencePath)" Overwrite="true" Encoding="Unicode" />
