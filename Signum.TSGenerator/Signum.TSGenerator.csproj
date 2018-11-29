@@ -6,7 +6,6 @@
     <OutputType>Exe</OutputType>
     <StartupObject>Signum.TSGenerator.Program</StartupObject>
     <TargetLatestRuntimePatch>true</TargetLatestRuntimePatch>
-    <OutputPath>Binaries\</OutputPath>
     <LangVersion>latest</LangVersion>
     <Platforms>x64</Platforms>
   </PropertyGroup>

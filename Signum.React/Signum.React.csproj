@@ -24,7 +24,7 @@
   
   <ItemGroup>
     <PackageReference Include="Signum.Analyzer" Version="1.0.0" />
-    <ProjectReference Include="..\Signum.TSGenerator\Signum.TSGenerator.csproj" />
+    <PackageReference Include="Signum.TSGenerator" Version="1.0.0" />
   </ItemGroup>
 
   <ItemGroup>
@@ -41,21 +41,5 @@
     <TypeScriptCompile Include="**\*.tsx" />
     <TypeScriptCompile Include="**\*.ts" />
   </ItemGroup>
-
-  <Target Name="GenerateSignumTS">
-    <WriteLinesToFile File="$(BaseIntermediateOutputPath)SignumReferences.txt" Lines="@(ReferencePath)" Overwrite="true" Encoding="Unicode" />
-    <WriteLinesToFile File="$(BaseIntermediateOutputPath)SignumContent.txt" Lines="@(Content);@(None)" Overwrite="true" Encoding="Unicode" />
-    <Exec command="dotnet &quot;..\Signum.TSGenerator\Binaries\netcoreapp2.1\Signum.TSGenerator.dll&quot; &quot;@(IntermediateAssembly)&quot; &quot;$(BaseIntermediateOutputPath)SignumReferences.txt&quot; &quot;$(BaseIntermediateOutputPath)SignumContent.txt&quot;" ConsoleToMSBuild="false">
-      <Output TaskParameter="ConsoleOutput" PropertyName="OutputOfExec" />
-    </Exec>
-  </Target>
-
-  <PropertyGroup>
-    <CompileTypeScriptDependsOn>
-      GenerateSignumTS;
-      $(CompileTypeScriptDependsOn);
-    </CompileTypeScriptDependsOn>
-    <ApplicationIcon />
-  </PropertyGroup>
-
+  
 </Project>

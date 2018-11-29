@@ -14,9 +14,10 @@
     <RepositoryUrl>https://github.com/signumsoftware/framework</RepositoryUrl>
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
     <Description>Signum.Analyzer</Description>
-    <Copyright>LGPL</Copyright>
+    <Copyright></Copyright>
     <PackageTags>Signum.Analyzer, analyzers</PackageTags>
     <NoPackageAnalysis>true</NoPackageAnalysis>
+    <PackageLicenseUrl>https://opensource.org/licenses/MIT</PackageLicenseUrl>
   </PropertyGroup>
 
   <ItemGroup>
