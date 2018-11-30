@@ -104,7 +104,7 @@ function getOrCreateToStringFunction(type: string) {
   return f;
 }
 
-export function getToString(entityOrLite: ModifiableEntity | Lite<Entity> | undefined): string {
+export function getToString(entityOrLite: ModifiableEntity | Lite<Entity> | undefined | null): string {
   if (entityOrLite == null)
     return "";
 
