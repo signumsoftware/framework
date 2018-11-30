@@ -1,17 +1,17 @@
 <?xml version="1.0"?>
 <package >
   <metadata>
-    <id>$id$</id>
-    <version>$version$</version>
-    <title>Typescript generator for Signum Framework applications</title>
+    <id>Signum.TSGenerator</id>
+    <version>1.0.1</version>
+    <title>TypeScript generator for Signum Framework applications</title>
     <authors>Olmo del Corral</authors>
     <licenseUrl>https://opensource.org/licenses/MIT</licenseUrl>
     <projectUrl>http://www.signumframework.com</projectUrl>
-    <iconUrl>http://www.signumsoftware.com/Images/Framework/LogoFramework.png</iconUrl>
+    <iconUrl>https://raw.githubusercontent.com/signumsoftware/framework/master/SignumLogo.png</iconUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <description>For every SomeEntitiesNamespace.t4s files in your React project generates a SomeEntitiesNamespace.ts with defined Entities, Queries, Messages, Operations, etc..</description>
+    <description>For every file 'SomeEntitiesNamespace.t4s' in your React project generates a 'SomeEntitiesNamespace.ts' with the Entities, Queries, Messages, Operations, etc..</description>
     <copyright>Copyright 2018</copyright>
-    <tags>signum msbuild linq react</tags>
+    <tags>signum msbuild typescript csharp linq react</tags>
   </metadata>
   <files>
     <file src="bin\**\*.*" target="lib" exclude="bin\**\*.*" />
