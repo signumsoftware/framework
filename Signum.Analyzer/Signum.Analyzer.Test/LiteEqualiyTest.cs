@@ -1,7 +1,7 @@
 ﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CodeFixes;
 using Microsoft.CodeAnalysis.Diagnostics;
-using Xunit;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using TestHelper;
 using Signum.Analyzer;
@@ -17,7 +17,7 @@ namespace Signum.Analyzer.Test
         }
 
         //Diagnostic and CodeFix both triggered and checked for
-        [Fact]
+        [TestMethod]
         public void CompareLiteAndEntity()
         {
             TestDiagnostic("Impossible to compare Lite<T> and T. Consider using RefersTo method", @"
@@ -27,7 +27,7 @@ var condition = lite == entity;
             ");
         }
 
-        [Fact]
+        [TestMethod]
         public void CompareIncompatibleTypes()
         {
          
@@ -38,7 +38,7 @@ var condition = apple == orange;
             ");
         }
 
-        [Fact]
+        [TestMethod]
         public void CompareIncompatibleAbstractTypes()
         {
 
@@ -49,7 +49,7 @@ var condition = banana == orange;
             ");
         }
 
-        [Fact]
+        [TestMethod]
         public void CompareBaseType()
         {
 
@@ -61,7 +61,7 @@ var condition = type == query;
         }
 
 
-        [Fact]
+        [TestMethod]
         public void CompareDifferentInterfaces()
         {
             TestDiagnostic(null, @"
@@ -71,7 +71,7 @@ var condition = type == baseLite;  //Could be SpiderMan!
             ");
         }
 
-        [Fact]
+        [TestMethod]
         public void CompareDifferentInterfaceEntity()
         {
             TestDiagnostic(null, @"
