@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
@@ -467,10 +467,13 @@ namespace Signum.Engine.Linq
             if (expression is ConstantExpression c && c.Value != null)
                 return Expression.Call(expression, miToString);
 
+            var toStrExp = ExpressionCleaner.Clean(Expression.Call(expression, miToString));
+            var visitedToStrExp = Visit(toStrExp);
+
             return Expression.Condition(
                 Expression.Equal(expression, Expression.Constant(null, expression.Type.Nullify())),
                 Expression.Constant(null, typeof(string)),
-                Expression.Call(expression, miToString));
+                Visit(visitedToStrExp));
         }
 
         public static bool ExtractDefaultIfEmpty(ref Expression expression)
