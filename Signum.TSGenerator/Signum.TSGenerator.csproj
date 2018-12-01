@@ -9,6 +9,7 @@
     <TargetLatestRuntimePatch>true</TargetLatestRuntimePatch>
     <LangVersion>latest</LangVersion>
     <Platforms>x64</Platforms>
+    <Version>1.0.3</Version>
   </PropertyGroup>
 
   <ItemGroup>
