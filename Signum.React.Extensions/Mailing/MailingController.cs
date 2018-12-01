@@ -66,13 +66,18 @@ namespace Signum.React.Mailing
         }
 
         [HttpPost("api/email/emailTemplates")]
-        public List<Lite<EmailTemplateEntity>> GetEmailTemplates(string queryKey, EmailTemplateVisibleOn visibleOn, [Required, FromBody]Lite<Entity> lite)
+        public List<Lite<EmailTemplateEntity>> GetEmailTemplates(string queryKey, EmailTemplateVisibleOn visibleOn, [Required, FromBody]GetEmailTemplatesRequest request)
         {
             object queryName = QueryLogic.ToQueryName(queryKey);
 
-            var entity = lite?.RetrieveAndForget();
+            var entity = request.lite?.RetrieveAndForget();
 
             return EmailTemplateLogic.GetApplicableEmailTemplates(queryName, entity, visibleOn);
+        }
+
+        public class GetEmailTemplatesRequest
+        {
+            public Lite<Entity> lite { get; set; }
         }
     }
 }
