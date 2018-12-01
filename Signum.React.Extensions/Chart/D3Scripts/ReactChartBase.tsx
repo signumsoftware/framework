@@ -36,7 +36,7 @@ export default abstract class ReactChartBase extends React.Component<ReactChartB
 
   render() {
     return (
-      <div className="sf-chart-container" ref={d => this.divElement = d}>
+      <div className="sf-chart-container" ref={d => this.setDivElement(d)}>
         {this.state.width != null && this.state.height != null && this.renderChartOrMessage(this.state.width, this.state.height)}
       </div>
     );
