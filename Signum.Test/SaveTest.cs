@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Xunit;
@@ -34,8 +34,8 @@ namespace Signum.Test
 
                 var list = Database.Query<ArtistEntity>().Where(a => a == m || a == f).ToList();
 
-                Assert.True(list[0].Friends.Contains(list[1].ToLite()));
-                Assert.True(list[1].Friends.Contains(list[0].ToLite()));
+                Assert.Contains(list[1].ToLite(), list[0].Friends);
+                Assert.Contains(list[0].ToLite(), list[1].Friends);
 
                 //tr.Commit();
             }
@@ -55,7 +55,7 @@ namespace Signum.Test
 
                 var m2 = m.ToLite().RetrieveAndForget();
 
-                Assert.True(m2.Friends.Contains(m2.ToLite()));
+                Assert.Contains(m2.ToLite(), m2.Friends);
 
                 //tr.Commit();
             }
@@ -300,13 +300,13 @@ namespace Signum.Test
             {
                 var albums = Database.Query<AlbumEntity>().ToList();
 
-                Assert.All(GraphExplorer.FromRoots(albums), a => Assert.Equal(a.Modified, ModifiedState.Sealed));
+                Assert.All(GraphExplorer.FromRoots(albums), a => Assert.Equal(ModifiedState.Sealed, a.Modified));
 
                 var e = Assert.Throws<InvalidOperationException>(() => albums.First().Name = "New name");
                 Assert.Contains("sealed", e.Message);
 
                 var notes = Database.Query<NoteWithDateEntity>().ToList();
-                Assert.All(GraphExplorer.FromRoots(notes), a => Assert.Equal(a.Modified,  ModifiedState.Sealed));
+                Assert.All(GraphExplorer.FromRoots(notes), a => Assert.Equal(ModifiedState.Sealed,  a.Modified));
 
                 //tr.Commit();
             }

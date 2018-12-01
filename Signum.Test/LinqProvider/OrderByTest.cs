@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 using Xunit;
 using Signum.Engine;
@@ -54,28 +54,28 @@ namespace Signum.Test.LinqProvider
         public void OrderByLast()
         {
             var michael = Database.Query<ArtistEntity>().OrderBy(a => a.Dead).Last();
-            Assert.True(michael.Name.Contains("Michael"));
+            Assert.Contains(michael.Name, "Michael");
         }
 
         [Fact]
         public void OrderByLastPredicate()
         {
             var michael = Database.Query<ArtistEntity>().OrderBy(a => a.Dead).Last(a => a.Name.Length > 1);
-            Assert.True(michael.Name.Contains("Michael"));
+            Assert.Contains(michael.Name, "Michael");
         }
 
         [Fact]
         public void OrderByLastOrDefault()
         {
             var michael = Database.Query<ArtistEntity>().OrderBy(a => a.Dead).LastOrDefault();
-            Assert.True(michael.Name.Contains("Michael"));
+            Assert.Contains(michael.Name, "Michael");
         }
 
         [Fact]
         public void OrderByLastOrDefaultPredicate()
         {
             var michael = Database.Query<ArtistEntity>().OrderBy(a => a.Dead).LastOrDefault(a => a.Name.Length > 1);
-            Assert.True(michael.Name.Contains("Michael"));
+            Assert.Contains(michael.Name, "Michael");
         }
 
         [Fact]

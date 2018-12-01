@@ -1,4 +1,4 @@
-﻿using Xunit;
+using Xunit;
 using Signum.Engine;
 using Signum.Entities;
 using Signum.Test.Environment;
@@ -668,7 +668,7 @@ namespace Signum.Test.LinqProvider
                 .Select(a => ((decimal?)a).InSql()) //Avoid Cast( as decimal) in SQL because of https://stackoverflow.com/questions/4169520/casting-as-decimal-and-rounding
                 .ToList();
 
-            Assert.True(list.Any(a => a.Value != Math.Round(a.Value))); //Decimal places are preserved
+            Assert.Contains(list, a => a.Value != Math.Round(a.Value)); //Decimal places are preserved
 
         }
     }

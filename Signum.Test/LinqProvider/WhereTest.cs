@@ -205,7 +205,7 @@ namespace Signum.Test.LinqProvider
 
             var first = Database.Query<BandEntity>().Where(b => lite.Is(b)).FirstOrDefault();
 
-            Assert.Equal(null, first);
+            Assert.Null(first);
         }
 
         [Fact]
@@ -215,7 +215,7 @@ namespace Signum.Test.LinqProvider
 
             var first = Database.Query<BandEntity>().Where(b => b.ToLite().Is(entity)).FirstOrDefault();
 
-            Assert.Equal(null, first);
+            Assert.Null(first);
         }
 
         [Fact]
@@ -276,7 +276,7 @@ namespace Signum.Test.LinqProvider
             Assert.Equal(females, females2);
 
             var bla = Database.Query<ArtistEntity>().Count(a => a.Sex.ToString() == a.Name);
-            Assert.Equal(bla, 0);
+            Assert.Equal(0, bla);
         }
 
         [Fact]

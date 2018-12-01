@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Signum.Utilities;
 using Xunit;
 using System.Linq.Expressions;
@@ -38,7 +38,7 @@ namespace Signum.Test
         public void ExpressionToStr()
         {
             string str = Expression.Add(Expression.Constant(2), new MyExpression()).ToString();
-            Assert.True(str.Contains("$$"));
+            Assert.Contains("$$", str);
         }
 
         class MyExpression: Expression

@@ -67,7 +67,7 @@ namespace Signum.Test
             Assert.IsType<DirtyMeta>(dic["Sum"]);
 
             var metas = ((DirtyMeta)dic["Sum"]).CleanMetas;
-            Assert.Equal(metas.SelectMany(cm => cm.PropertyRoutes).Distinct().ToString(","), "(Album).Name,(Label).Name");
+            Assert.Equal("(Album).Name,(Label).Name", metas.SelectMany(cm => cm.PropertyRoutes).Distinct().ToString(","));
         }
 
         [Fact]
@@ -110,7 +110,7 @@ namespace Signum.Test
             Assert.IsType<CleanMeta>(dic["Name"]);
             Assert.IsType<CleanMeta>(dic["Song"]);
 
-            Assert.Equal(((CleanMeta)dic["Song"]).PropertyRoutes[0].ToString(), "(Album).Songs/Name");
+            Assert.Equal("(Album).Songs/Name", ((CleanMeta)dic["Song"]).PropertyRoutes[0].ToString());
         }
 
         [Fact]
