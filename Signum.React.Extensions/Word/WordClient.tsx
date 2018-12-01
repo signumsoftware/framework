@@ -121,7 +121,7 @@ export function getWordTemplates(ctx: ContextualItemsContext<Entity>): Promise<M
   if (ctx.lites.length == 0)
     return undefined;
 
-  return API.getWordTemplates(ctx.queryDescription.queryKey, ctx.lites.length > 1 ? "Multiple" : "Single", ctx.lites.length == 1 ? ctx.lites[0] : null)
+  return API.getWordTemplates(ctx.queryDescription.queryKey, ctx.lites.length > 1 ? "Multiple" : "Single", { lite: (ctx.lites.length == 1 ? ctx.lites[0] : null) })
     .then(wts => {
       if (!wts.length)
         return undefined;
@@ -168,6 +168,10 @@ export namespace API {
     entity?: ModifiableEntity;
   }
 
+  export interface GetWordTemplatesRequest {
+    lite: Lite<Entity> | null;
+  }
+
   export function createAndDownloadReport(request: CreateWordReportRequest): Promise<Response> {
     return ajaxPostRaw({ url: "~/api/word/createReport" }, request);
   }
@@ -176,8 +180,9 @@ export namespace API {
     return ajaxPost<string>({ url: "~/api/word/constructorType" }, systemWordTemplate);
   }
 
-  export function getWordTemplates(queryKey: string, visibleOn: WordTemplateVisibleOn, lite: Lite<Entity> | null): Promise<Lite<WordTemplateEntity>[]> {
-    return ajaxPost<Lite<WordTemplateEntity>[]>({ url: `~/api/word/wordTemplates?queryKey=${queryKey}&visibleOn=${visibleOn}` }, lite);
+  export function getWordTemplates(queryKey: string, visibleOn: WordTemplateVisibleOn, request: GetWordTemplatesRequest): Promise<Lite<WordTemplateEntity>[]> {
+    debugger;
+    return ajaxPost<Lite<WordTemplateEntity>[]>({ url: `~/api/word/wordTemplates?queryKey=${queryKey}&visibleOn=${visibleOn}` }, request);
   }
 }
 
