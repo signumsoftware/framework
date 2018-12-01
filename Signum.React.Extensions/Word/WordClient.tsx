@@ -181,7 +181,6 @@ export namespace API {
   }
 
   export function getWordTemplates(queryKey: string, visibleOn: WordTemplateVisibleOn, request: GetWordTemplatesRequest): Promise<Lite<WordTemplateEntity>[]> {
-    debugger;
     return ajaxPost<Lite<WordTemplateEntity>[]>({ url: `~/api/word/wordTemplates?queryKey=${queryKey}&visibleOn=${visibleOn}` }, request);
   }
 }
