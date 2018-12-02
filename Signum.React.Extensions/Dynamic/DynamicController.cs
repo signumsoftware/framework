@@ -1,4 +1,4 @@
-﻿using Signum.Engine.Basics;
+using Signum.Engine.Basics;
 using Signum.Engine.Dynamic;
 using Signum.Engine.Scheduler;
 using Signum.Entities;
@@ -16,6 +16,7 @@ using Microsoft.AspNetCore.Hosting;
 using System.Threading.Tasks;
 using Signum.React.Filters;
 using System.ComponentModel.DataAnnotations;
+using Signum.Entities.Dynamic;
 
 namespace Signum.React.Dynamic
 {
@@ -62,6 +63,9 @@ namespace Signum.React.Dynamic
         {
             SystemEventLogLogic.Log("DynamicController.RestartServer");
             lifeTime.StopApplication();
+
+            if (DynamicCode.OnApplicationServerRestarted != null)
+                DynamicCode.OnApplicationServerRestarted.Invoke();
         }
 
         [HttpGet("api/dynamic/startErrors")]
