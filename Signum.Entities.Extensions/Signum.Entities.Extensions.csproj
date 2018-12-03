@@ -10,15 +10,15 @@
 
   <ItemGroup>
     <PackageReference Include="dotMorten.Microsoft.SqlServer.Types" Version="1.1.0" />
-    <PackageReference Include="Signum.Analyzer" Version="1.0.0" />
-    <PackageReference Include="Signum.MSBuildTask" Version="1.0.0" />
+    <PackageReference Include="Signum.Analyzer" Version="1.0.1" />
+    <PackageReference Include="Signum.MSBuildTask" Version="1.0.3" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="DocumentFormat.OpenXml" Version="2.8.1" />
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="2.10.0" />
     <PackageReference Include="Microsoft.CSharp" Version="4.5.0" />
-    <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
+    <PackageReference Include="Newtonsoft.Json" Version="12.0.1" />
     <PackageReference Include="System.Runtime.Loader" Version="4.3.0" />
   </ItemGroup>
 

@@ -45,15 +45,18 @@ namespace Signum.React.Word
         }
 
         [HttpPost("api/word/wordTemplates")]
-        public List<Lite<WordTemplateEntity>> GetWordTemplates(string queryKey, WordTemplateVisibleOn visibleOn, [Required, FromBody]Lite<Entity> lite)
+        public List<Lite<WordTemplateEntity>> GetWordTemplates(string queryKey, WordTemplateVisibleOn visibleOn, [Required, FromBody]GetWordTemplatesRequest request)
         {
             object type = QueryLogic.ToQueryName(queryKey);
 
-            var entity = lite?.RetrieveAndForget();
+            var entity = request.lite?.RetrieveAndForget();
 
             return WordTemplateLogic.GetApplicableWordTemplates(type, entity, visibleOn);
         }
 
-
+        public class GetWordTemplatesRequest
+        {
+            public Lite<Entity> lite { get; set; }
+        }
     }
 }

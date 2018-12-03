@@ -47,7 +47,7 @@ export default class StackedLinesChart extends D3ChartBase {
     }, height);
     //yRule.debugY(chart);
 
-    var keyValues = ChartUtils.completeValues(keyColumn, pivot.rows.map(r => r.rowValue), data.parameters['CompleteValues'], ChartUtils.insertPoint(keyColumn, valueColumn0));
+    var keyValues: unknown[] = ChartUtils.completeValues(keyColumn, pivot.rows.map(r => r.rowValue), data.parameters['CompleteValues'], ChartUtils.insertPoint(keyColumn, valueColumn0));
 
     var x = d3.scaleBand()
       .domain(keyValues.map(v => keyColumn.getKey(v)))
@@ -55,16 +55,25 @@ export default class StackedLinesChart extends D3ChartBase {
 
     var pStack = data.parameters["Stack"];
 
-    var stack = d3.stack<PivotRow>()
+    var rowsByKey = pivot.rows.toObject(r => keyColumn.getKey(r.rowValue));
+
+    var stack = d3.stack<unknown>()
       .offset(ChartUtils.getStackOffset(pStack)!)
       .order(ChartUtils.getStackOrder(data.parameters["Order"])!)
       .keys(pivot.columns.map(d => d.key))
-      .value(function (r, k) {
-        var v = r.values[k];
+      .value((r, k) => {
+
+        var row = rowsByKey[keyColumn.getKey(r)];
+        if (row == null)
+          return 0;
+
+        var v = row.values[k];
         return v && v.value || 0;
       });
 
-    var stackedSeries = stack(pivot.rows);
+    var stackedSeries = stack(keyValues);
+
+    debugger;
 
     var max = d3.max(stackedSeries, s => d3.max(s, v => v[1]))!;
     var min = d3.min(stackedSeries, s => d3.min(s, v => v[0]))!;
@@ -74,21 +83,21 @@ export default class StackedLinesChart extends D3ChartBase {
       .range([0, yRule.size('content')]);
 
     chart.append('svg:g').attr('class', 'x-tick').attr('transform', translate(xRule.start('content') + (x.bandwidth() / 2), yRule.start('ticks')))
-      .enterData(pivot.rows, 'line', 'x-tick')
-      .attr('y2', (d, i) => yRule.start('labels' + (i % 2)) - yRule.start('ticks'))
-      .attr('x1', d => x(keyColumn.getKey(d.rowValue))!)
-      .attr('x2', d => x(keyColumn.getKey(d.rowValue))!)
+      .enterData(keyValues, 'line', 'x-tick')
+      .attr('y2', (k, i) => yRule.start('labels' + (i % 2)) - yRule.start('ticks'))
+      .attr('x1', k => x(keyColumn.getKey(k))!)
+      .attr('x2', k => x(keyColumn.getKey(k))!)
       .style('stroke', 'Black');
 
     if ((x.bandwidth() * 2) > 60) {
       chart.append('svg:g').attr('class', 'x-label').attr('transform', translate(xRule.start('content') + (x.bandwidth() / 2), yRule.middle('labels0')))
-        .enterData(pivot.rows, 'text', 'x-label')
-        .attr('x', d => x(keyColumn.getKey(d.rowValue))!)
-        .attr('y', (d, i) => yRule.middle('labels' + (i % 2)) - yRule.middle('labels0'))
+        .enterData(keyValues, 'text', 'x-label')
+        .attr('x', k => x(keyColumn.getKey(k))!)
+        .attr('y', (k, i) => yRule.middle('labels' + (i % 2)) - yRule.middle('labels0'))
         .attr('dominant-baseline', 'middle')
         .attr('text-anchor', 'middle')
-        .text(r => keyColumn.getNiceName(r.rowValue))
-        .each(function (v) { ellipsis(this as SVGTextElement, x.bandwidth() * 2); });
+        .text(k => keyColumn.getNiceName(k))
+        .each(function (k) { ellipsis(this as SVGTextElement, x.bandwidth() * 2); });
     }
 
     chart.append('svg:g').attr('class', 'x-title').attr('transform', translate(xRule.middle('content'), yRule.middle('title')))
@@ -134,8 +143,8 @@ export default class StackedLinesChart extends D3ChartBase {
 
     var pInterpolate = data.parameters["Interpolate"];
 
-    var area = d3.area<d3.SeriesPoint<PivotRow>>()
-      .x(v => x(keyColumn.getKey(v.data.rowValue))!)
+    var area = d3.area<d3.SeriesPoint<unknown>>()
+      .x(v => x(keyColumn.getKey(v.data))!)
       .y0(v => -y(v[0]))
       .y1(v => -y(v[1]))
       .curve(ChartUtils.getCurveByName(pInterpolate) as d3.CurveFactory);
@@ -159,34 +168,34 @@ export default class StackedLinesChart extends D3ChartBase {
       .each(function (s) {
 
         d3.select(this).enterData(s, 'rect', 'point')
-          .filter(v => v.data.values[s.key] != undefined)
-          .attr('x', v => x(keyColumn.getKey(v.data.rowValue))! - rectRadious)
+          .filter(v => rowsByKey[keyColumn.getKey(v.data)] && rowsByKey[keyColumn.getKey(v.data)].values[s.key] != undefined)
+          .attr('x', v => x(keyColumn.getKey(v.data))! - rectRadious)
           .attr('y', v => -y(v[1]))
           .attr('width', 2 * rectRadious)
           .attr('height', v => y(v[1]) - y(v[0]))
           .attr('fill', '#fff')
           .attr('fill-opacity', .1)
           .attr('stroke', 'none')
-          .on('click', v => me.props.onDrillDown(v.data.values[s.key].rowClick))
+          .on('click', v => me.props.onDrillDown(rowsByKey[keyColumn.getKey(v.data)].values[s.key].rowClick))
           .style("cursor", "pointer")
           .append('svg:title')
-          .text(v => v.data.values[s.key].valueTitle);
+          .text(v => rowsByKey[keyColumn.getKey(v.data)].values[s.key].valueTitle);
 
         if (x.bandwidth() > 15 && parseFloat(data.parameters["NumberOpacity"]) > 0) {
           d3.select(this).enterData(s, 'text', 'number-label')
-            .filter(v => v.data.values[s.key] != undefined && (y(v[1]) - y(v[0])) > 10)
-            .attr('x', v => x(keyColumn.getKey(v.data.rowValue))!)
+            .filter(v => rowsByKey[keyColumn.getKey(v.data)] && rowsByKey[keyColumn.getKey(v.data)].values[s.key] != undefined && (y(v[1]) - y(v[0])) > 10)
+            .attr('x', v => x(keyColumn.getKey(v.data))!)
             .attr('y', v => -y(v[1]) * 0.5 - y(v[0]) * 0.5)
             .attr('fill', data.parameters["NumberColor"])
             .attr('dominant-baseline', 'central')
             .attr('opacity', data.parameters["NumberOpacity"])
             .attr('text-anchor', 'middle')
             .attr('font-weight', 'bold')
-            .text(v => v.data.values[s.key].value)
-            .on('click', v => me.props.onDrillDown(v.data.values[s.key].rowClick))
+            .text(v => rowsByKey[keyColumn.getKey(v.data)].values[s.key].value)
+            .on('click', v => me.props.onDrillDown(rowsByKey[keyColumn.getKey(v.data)].values[s.key].rowClick))
             .style("cursor", "pointer")
             .append('svg:title')
-            .text(v => v.data.values[s.key].valueTitle)
+            .text(v => rowsByKey[keyColumn.getKey(v.data)].values[s.key].valueTitle)
         }
 
 
