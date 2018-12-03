@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 using Xunit;
 using Signum.Engine;
@@ -112,7 +112,7 @@ namespace Signum.Test.LinqProviderUpdateDelete
                 .Execute();
 
                 Assert.False(Database.Query<AlbumEntity>().Any(a => a.BonusTrack == null));
-                Assert.Equal(Database.Query<AlbumEntity>().Select(a => a.BonusTrack.Name).Distinct().SingleEx(), "Mana Mana");
+                Assert.Equal("Mana Mana", Database.Query<AlbumEntity>().Select(a => a.BonusTrack.Name).Distinct().SingleEx());
 
                 //tr.Commit();
             }
@@ -289,7 +289,7 @@ namespace Signum.Test.LinqProviderUpdateDelete
             }
         }
 
-
+        [Fact]
         public void UpdateIbNull()
         {
             using (Transaction tr = new Transaction())

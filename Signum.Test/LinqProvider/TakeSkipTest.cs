@@ -1,4 +1,4 @@
-﻿using System.Linq;
+using System.Linq;
 using Xunit;
 using Signum.Engine;
 using Signum.Entities;
@@ -20,14 +20,14 @@ namespace Signum.Test.LinqProvider
         public void Take()
         {
             var takeArtist = Database.Query<ArtistEntity>().Take(2).ToList();
-            Assert.Equal(takeArtist.Count, 2);
+            Assert.Equal(2, takeArtist.Count);
         }
 
         [Fact]
         public void TakeOrder()
         {
             var takeArtist = Database.Query<ArtistEntity>().OrderBy(a => a.Name).Take(2).ToList();
-            Assert.Equal(takeArtist.Count, 2);
+            Assert.Equal(2, takeArtist.Count);
         }
 
         [Fact]
@@ -98,7 +98,7 @@ namespace Signum.Test.LinqProvider
         public void InnerTake()
         {
             var result = Database.Query<AlbumEntity>().Where(dr => dr.Songs.OrderByDescending(a => a.Seconds).Take(1).Where(a => a.Name.Contains("1976")).Any()).Select(a => a.ToLite()).ToList();
-            Assert.Equal(0, result.Count);
+            Assert.Empty(result);
         }
 
         [Fact]

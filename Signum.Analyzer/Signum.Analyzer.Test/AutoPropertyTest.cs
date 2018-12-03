@@ -1,7 +1,7 @@
 ﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CodeFixes;
 using Microsoft.CodeAnalysis.Diagnostics;
-using Xunit;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using TestHelper;
 using Signum.Analyzer;
@@ -22,7 +22,7 @@ namespace Signum.Analyzer.Test
         }
 
         //Diagnostic and CodeFix both triggered and checked for
-        [Fact]
+        [TestMethod]
         public void AutoPropTest1()
         {
             var test = @"
@@ -78,7 +78,7 @@ namespace ConsoleApplication1
         }
 
 
-        [Fact]
+        [TestMethod]
         public void AutoPropTest2()
         {
             var test = @"

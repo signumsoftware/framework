@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 using Xunit;
 using Signum.Engine;
@@ -27,7 +27,7 @@ namespace Signum.Test.LinqProvider
                         where f.Parent != null
                         select new { f.Name, Parent = f.Parent.Entity.Name }).ToList();
 
-            Assert.Equal(0, list.Count);
+            Assert.Empty(list);
         }
 
 

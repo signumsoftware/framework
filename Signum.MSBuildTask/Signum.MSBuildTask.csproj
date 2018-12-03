@@ -10,6 +10,7 @@
     <LangVersion>latest</LangVersion>
     <Platforms>x64</Platforms>
 	<NuSpecFile>Signum.MSBuildTask.nuspec</NuSpecFile>
+	<Version>1.0.3</Version>
   </PropertyGroup>
 
   <ItemGroup>

@@ -5,9 +5,11 @@
     <ApplicationIcon />
     <OutputType>Exe</OutputType>
     <StartupObject>Signum.TSGenerator.Program</StartupObject>
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
     <TargetLatestRuntimePatch>true</TargetLatestRuntimePatch>
     <LangVersion>latest</LangVersion>
     <Platforms>x64</Platforms>
+    <Version>1.0.3</Version>
   </PropertyGroup>
 
   <ItemGroup>

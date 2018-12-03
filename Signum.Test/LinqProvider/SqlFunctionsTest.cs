@@ -243,7 +243,7 @@ namespace Signum.Test.LinqProvider
             Dump((AlbumEntity a) => Math.Truncate(a.Year + 0.5).InSql());
         }
 
-        public void Dump<T, S>(Expression<Func<T, S>> bla)
+        internal void Dump<T, S>(Expression<Func<T, S>> bla)
             where T : Entity
         {
             Debug.WriteLine(Database.Query<T>().Select(a => bla.Evaluate(a).InSql()).ToString(","));
@@ -254,7 +254,7 @@ namespace Signum.Test.LinqProvider
         {
             var list = Database.Query<ArtistEntity>().Select(a => (a.Name + null).InSql()).ToList();
 
-            Assert.False(list.Any(string.IsNullOrEmpty));
+            Assert.DoesNotContain(list, string.IsNullOrEmpty);
         }
 
         [Fact]
