@@ -63,9 +63,7 @@ namespace Signum.React.Dynamic
         {
             SystemEventLogLogic.Log("DynamicController.RestartServer");
             lifeTime.StopApplication();
-
-            if (DynamicCode.OnApplicationServerRestarted != null)
-                DynamicCode.OnApplicationServerRestarted.Invoke();
+            DynamicCode.OnApplicationServerRestarted?.Invoke();
         }
 
         [HttpGet("api/dynamic/startErrors")]
