@@ -906,7 +906,7 @@ function monkeyPatchComponent<T extends ModifiableEntity>(component: React.Compo
   if (component.prototype.render.withViewOverrides)
     return;
 
-  const baseRender = component.prototype.render as () => void;
+  const baseRender = component.prototype.render as (this: React.Component<any>) => React.ReactElement<any>;
 
   component.prototype.render = function (this: React.Component<any, any>) {
 
